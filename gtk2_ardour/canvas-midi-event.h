@@ -43,8 +43,8 @@ namespace Canvas {
  */
 class CanvasMidiEvent {
 public:
-	CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::Note* note = NULL);
-	virtual ~CanvasMidiEvent() {} 
+	CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::Note* note=NULL, bool copy_note=false);
+	virtual ~CanvasMidiEvent();
 
 	bool on_event(GdkEvent* ev);
 
@@ -71,6 +71,7 @@ protected:
 	Item* const         _item;
 	State               _state;
 	const ARDOUR::Note* _note;
+	bool                _own_note;
 	bool                _selected;
 };
 

@@ -148,7 +148,7 @@ struct MidiEvent {
 	inline uint8_t     cc_number()   const { return (_buffer[1]); }
 	inline uint8_t     cc_value()    const { return (_buffer[2]); }
 	inline const Byte* buffer()      const { return _buffer; }
-	inline Byte*&      buffer()           { return _buffer; }
+	inline Byte*&      buffer()            { return _buffer; }
 
 private:
 	double   _time;   /**< Sample index (or beat time) at which event is valid */

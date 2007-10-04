@@ -45,6 +45,8 @@ Note::Note(const Note& copy)
 	: _on_event(copy._on_event, true)
 	, _off_event(copy._off_event, true)
 {
+	assert(_on_event.buffer());
+	assert(_off_event.buffer());
 	/*
 	assert(copy._on_event.size == 3);
 	_on_event.buffer = _on_event_buffer;

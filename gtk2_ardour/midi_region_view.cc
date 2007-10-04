@@ -406,7 +406,7 @@ MidiRegionView::redisplay_model()
 		_model->read_lock();
 
 		for (size_t i=0; i < _model->n_notes(); ++i)
-			add_note(_model->note_at(i));
+			add_note(_model->note_at(i), false);
 
 		end_write();
 
@@ -495,8 +495,23 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 {
 	RegionView::set_y_position_and_height(y, h - 1);
 
-	if (_enable_display)
-		redisplay_model();
+	if (_enable_display) {
+		
+		_model->read_lock();
+
+		for (std::vector<CanvasMidiEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i) {
+			CanvasNote* note = dynamic_cast<CanvasNote*>(*i);
+			if (note && note->note()) {
+				const double y1 = midi_stream_view()->note_to_y(note->note()->note());
+				const double y2 = y1 + floor(midi_stream_view()->note_height());
+
+				note->property_y1() = y1;
+				note->property_y2() = y2;
+			}
+		}
+		
+		_model->read_unlock();
+	}
 
 	if (name_text) {
 		name_text->raise_to_top();
@@ -544,68 +559,18 @@ MidiRegionView::end_write()
 }
 
 
-/** Add a MIDI event.
- *
- * This is used while recording, and handles displaying still-unresolved notes.
- * Displaying an existing model is simpler, and done with add_note.
+/** Resolve an active MIDI note (while recording).
  */
 void
-MidiRegionView::add_event (const MidiEvent& ev)
+MidiRegionView::resolve_note(uint8_t note, double end_time)
 {
-	/*printf("MRV add Event, time = %f, size = %u, data = ", ev.time(), ev.size());
-	for (size_t i=0; i < ev.size(); ++i) {
-		printf("%X ", ev.buffer()[i]);
-	}
-	printf("\n\n");*/
+	if (midi_view()->note_mode() != Sustained)
+		return;
 
-	//ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
-	ArdourCanvas::Group* const group = _note_group;
-	
-	if (midi_view()->note_mode() == Sustained) {
-		if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_ON) {
-			const Byte& note = ev.buffer()[1];
-			const double y1 = midi_stream_view()->note_to_y(note);
-
-			CanvasNote* ev_rect = new CanvasNote(*this, *group);
-			ev_rect->property_x1() = trackview.editor.frame_to_pixel (
-					(nframes_t)ev.time());
-			ev_rect->property_y1() = y1;
-			ev_rect->property_x2() = trackview.editor.frame_to_pixel (
-					_region->length());
-			ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
-			ev_rect->property_fill_color_rgba() = note_fill_color(ev.velocity());
-			ev_rect->property_outline_color_rgba() = note_outline_color(ev.velocity());
-			/* outline all but right edge */
-			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
-
-			ev_rect->raise_to_top();
-
-			_events.push_back(ev_rect);
-			if (_active_notes)
-				_active_notes[note] = ev_rect;
-
-		} else if ((ev.buffer()[0] & 0xF0) == MIDI_CMD_NOTE_OFF) {
-			const Byte& note = ev.buffer()[1];
-			if (_active_notes && _active_notes[note]) {
-				_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel((nframes_t)ev.time());
-				_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
-				_active_notes[note] = NULL;
-			}
-		}
-	
-	} else if (midi_view()->note_mode() == Percussive) {
-		const Byte& note = ev.buffer()[1];
-		const double diamond_size = midi_stream_view()->note_height() / 2.0;
-		const double x = trackview.editor.frame_to_pixel((nframes_t)ev.time());
-		const double y = midi_stream_view()->note_to_y(note) + ((diamond_size-2) / 4.0);
-
-		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
-		ev_diamond->move(x, y);
-		ev_diamond->show();
-		ev_diamond->property_fill_color_rgba() = note_fill_color(ev.velocity());
-		ev_diamond->property_outline_color_rgba() = note_outline_color(ev.velocity());
-		
-		_events.push_back(ev_diamond);
+	if (_active_notes && _active_notes[note]) {
+		_active_notes[note]->property_x2() = trackview.editor.frame_to_pixel((nframes_t)end_time);
+		_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
+		_active_notes[note] = NULL;
 	}
 }
 
@@ -626,11 +591,12 @@ MidiRegionView::extend_active_notes()
 
 /** Add a MIDI note to the view (with duration).
  *
- * This does no 'realtime' note resolution, notes from a MidiModel have a
- * duration so they can be drawn in full immediately.
+ * If in sustained mode, notes with duration 0 will be considered active
+ * notes, and resolve_note should be called when the corresponding note off
+ * event arrives, to properly display the note.
  */
 void
-MidiRegionView::add_note (const Note& note)
+MidiRegionView::add_note (const Note& note, bool copy_note)
 {
 	assert(note.time() >= 0);
 	//assert(note.time() < _region->length());
@@ -640,16 +606,27 @@ MidiRegionView::add_note (const Note& note)
 	if (midi_view()->note_mode() == Sustained) {
 		const double y1 = midi_stream_view()->note_to_y(note.note());
 
-		CanvasNote* ev_rect = new CanvasNote(*this, *group, &note);
+		CanvasNote* ev_rect = new CanvasNote(*this, *group, &note, copy_note);
 		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note.time());
 		ev_rect->property_y1() = y1;
-		ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
+		if (note.duration() > 0)
+			ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note.end_time()));
+		else
+			ev_rect->property_x2() = trackview.editor.frame_to_pixel(_region->length());
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 		ev_rect->property_fill_color_rgba() = note_fill_color(note.velocity());
 		ev_rect->property_outline_color_rgba() = note_outline_color(note.velocity());
-		ev_rect->property_outline_what() = (guint32) 0xF; // all edges
 
+		if (note.duration() == 0) {
+			_active_notes[note.note()] = ev_rect;
+			/* outline all but right edge */
+			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
+		} else {
+			/* outline all edges */
+			ev_rect->property_outline_what() = (guint32) 0xF;
+		}
+		
 		ev_rect->show();
 		_events.push_back(ev_rect);
 

@@ -76,8 +76,8 @@ class MidiRegionView : public RegionView
 
     GhostRegion* add_ghost (AutomationTimeAxisView&);
 
-	void add_event(const ARDOUR::MidiEvent& ev);
-	void add_note(const ARDOUR::Note& note);
+	void add_note(const ARDOUR::Note& note, bool copy_note);
+	void resolve_note(uint8_t note_num, double end_time);
 
 	void begin_write();
 	void end_write();

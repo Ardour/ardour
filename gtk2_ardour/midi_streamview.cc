@@ -417,6 +417,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 	if (use_rec_regions) {
 
 		uint32_t n = 0;
+		bool     update_range = false;
 
 		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
 
@@ -474,14 +475,18 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 								break;
 
 							if (note.time() >= start)
-								if (data->note_mode() == Percussive || note.duration() > 0)
-									mrv->add_note(note);
-								else
-									mrv->add_event(note.on_event());
-
+								mrv->add_note(note, true);
+							
 							if (note.duration() > 0 && note.end_time() >= start)
-								mrv->add_event(note.off_event());
+								mrv->resolve_note(note.note(), note.end_time());
 
+							if (note.note() < _lowest_note) {
+								_lowest_note = note.note();
+								update_range = true;
+							} else if (note.note() > _highest_note) {
+								_highest_note = note.note();
+								update_range = true;
+							}
 						}
 						
 						mrv->extend_active_notes();
@@ -517,6 +522,9 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 			iter = tmp;
 		}
+
+		if (update_range)
+			update_contents_y_position_and_height();
 	}
 }
 

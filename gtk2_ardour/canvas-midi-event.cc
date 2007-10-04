@@ -31,14 +31,23 @@ namespace Gnome {
 namespace Canvas {
 
 
-CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::Note* note)
+CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item, const ARDOUR::Note* note, bool copy_note)
 	: _region(region)
 	, _item(item)
 	, _state(None)
-	, _note(note)
+	, _note((copy_note && note) ? new ARDOUR::Note(*note) : note)
+	, _own_note(copy_note)
 	, _selected(false)
 {	
 }
+
+
+CanvasMidiEvent::~CanvasMidiEvent()
+{
+	if (_own_note)
+		delete _note;
+}
+
 	
 void
 CanvasMidiEvent::selected(bool yn)
