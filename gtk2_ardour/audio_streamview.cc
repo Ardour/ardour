@@ -398,7 +398,6 @@ AudioStreamView::redisplay_diskstream ()
 			region_views.erase (i);
 		} else {
 			(*i)->enable_display(true);
-			(*i)->set_y_position_and_height(0, height);
 		}
 
 		i = tmp;

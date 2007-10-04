@@ -215,7 +215,6 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	if (ds->playlist()) {
 		layers = ds->playlist()->top_layer() + 1;
 		update_contents_y_position_and_height ();
-
 		redisplay_diskstream ();
 	}
 }
@@ -235,17 +234,16 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	playlist_connections.clear();
 	undisplay_diskstream ();
 
+	/* update layers count and the y positions and heights of our regions */
+	layers = ds->playlist()->top_layer() + 1;
+	update_contents_y_position_and_height ();
+	
 	/* draw it */
-
 	redisplay_diskstream ();
 
 	/* catch changes */
 
 	playlist_connections.push_back (ds->playlist()->Modified.connect (bind (mem_fun (*this, &StreamView::playlist_modified_weak), ds)));
-
-	/* update layers count and the y positions and heights of our regions */
-	layers = ds->playlist()->top_layer() + 1;
-	update_contents_y_position_and_height ();
 }
 
 void

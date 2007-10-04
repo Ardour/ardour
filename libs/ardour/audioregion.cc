@@ -128,9 +128,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
 	/* return to default fades if the existing ones are too long */
-	_fade_in_disabled = 0;
-	_fade_out_disabled = 0;
-
+	init ();
 
 	if (_flags & LeftOfSplit) {
 		if (_fade_in->back()->when >= _length) {
@@ -154,8 +152,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 	_scale_amplitude = other->_scale_amplitude;
 
-	listen_to_my_curves ();
-	
 	assert(_type == DataType::AUDIO);
 }
 
@@ -168,8 +164,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	_scale_amplitude = other->_scale_amplitude;
 	_envelope = other->_envelope;
 
-	_fade_in_disabled = 0;
-	_fade_out_disabled = 0;
+	set_default_fades ();
 	
 	listen_to_my_curves ();
 
@@ -187,13 +182,11 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 		afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
 	}
 
-	set_default_fades ();
+	init ();
 
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-
-	listen_to_my_curves ();
 
 	assert(_type == DataType::AUDIO);
 }
@@ -204,14 +197,11 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
-	set_default_fades ();
-	_scale_amplitude = 1.0;
+	init ();
 
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-
-	listen_to_my_curves ();
 
 	assert(_type == DataType::AUDIO);
 }
@@ -551,7 +541,7 @@ AudioRegion::state (bool full)
 				default_env = true;
 			}
 		} 
-		
+
 		if (default_env) {
 			child->add_property ("default", "yes");
 		} else {
@@ -616,7 +606,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 		child = (*niter);
 		
 		if (child->name() == "Envelope") {
-			
+
 			_envelope->clear ();
 
 			if ((prop = child->property ("default")) != 0 || _envelope->set_state (*child)) {
