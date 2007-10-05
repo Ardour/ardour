@@ -279,6 +279,7 @@ class Diskstream : public PBD::StatefulDestructible
 
 	uint64_t                  last_phase;
 	uint64_t                  phi;
+	uint64_t                  target_phi;
 	
 	nframes_t            file_frame;		
 	nframes_t            playback_sample;

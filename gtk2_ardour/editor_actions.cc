@@ -251,7 +251,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region"), mem_fun(*this, &Editor::normalize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "crop", _("crop"), mem_fun(*this, &Editor::crop_region_to_selection));
+	act = ActionManager::register_action (editor_actions, "crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-chunk", _("Insert Chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
 	ActionManager::session_sensitive_actions.push_back (act);

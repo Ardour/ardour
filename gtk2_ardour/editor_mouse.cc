@@ -776,7 +776,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	if (drag_info.item) {
 		if (end_grab (item, event)) {
 			/* grab dragged, so do nothing else */
-			cerr << "return from drag+grab\n";
 			return true;
 		}
 	}
@@ -1476,7 +1475,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 
 				last_scrub_frame = (nframes64_t) drag_info.current_pointer_frame;
 				gettimeofday (&tmnow, 0);
-				last_scrub_time = tmnow.tv_sec * 1000000 + tmnow.tv_usec;
+				last_scrub_time = tmnow.tv_sec * 1000000.0 + tmnow.tv_usec;
 				session->request_locate (last_scrub_frame, true);
 
 			} else {
@@ -1506,11 +1505,10 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 #endif
 
 				gettimeofday (&tmnow, 0);
-				time = (tmnow.tv_sec * 1000000 + tmnow.tv_usec) - last_scrub_time;
+				time = (tmnow.tv_sec * 1000000.0 + tmnow.tv_usec) - last_scrub_time;
 				last_scrub_frame = drag_info.current_pointer_frame;
-				last_scrub_time = (tmnow.tv_sec * 1000000) + tmnow.tv_usec;
-				speed = (distance * 1000000.0) / time; // frames/sec
-				speed /= session->frame_rate();
+				last_scrub_time = (tmnow.tv_sec * 1000000.0) + tmnow.tv_usec;
+				speed = ((double)distance/session->frame_rate()) / (time/1000000.0); // frames/sec
 
 				add_mouse_speed (speed, dir);
 
@@ -5005,7 +5003,6 @@ Editor::add_mouse_speed (double speed, double dir)
 	}
 	
 	mouse_speed[index] = speed;
-
 	mouse_speed_entries = index;
 }
 
@@ -5013,7 +5010,6 @@ double
 Editor::compute_mouse_speed ()
 {
 	double total = 0;
-
 
 	if (!have_full_mouse_speed) {
 
@@ -5037,6 +5033,7 @@ Editor::compute_mouse_speed ()
 	for (size_t n = 0; n < mouse_speed_size; ++n) {
 		total += mouse_speed[n];
 	}
+
 
 	return mouse_direction * total/mouse_speed_size;
 }
@@ -5073,7 +5070,7 @@ Editor::update_mouse_speed ()
  			add_mouse_speed (fabs (speed * 0.6), mouse_direction);
 		}
 	} 
-	
+
 	session->request_transport_speed (speed);
 	return _scrubbing;
 }

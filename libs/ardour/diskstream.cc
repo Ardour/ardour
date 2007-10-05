@@ -109,6 +109,7 @@ Diskstream::init (Flag f)
 	speed_buffer_size = 0;
 	last_phase = 0;
 	phi = (uint64_t) (0x1000000);
+	target_phi = phi;
 	file_frame = 0;
 	playback_sample = 0;
 	playback_distance = 0;
@@ -151,8 +152,7 @@ Diskstream::handle_input_change (IOChange change, void *src)
 void
 Diskstream::non_realtime_set_speed ()
 {
-	if (_buffer_reallocation_required)
-	{
+	if (_buffer_reallocation_required) {
 		Glib::Mutex::Lock lm (state_lock);
 		allocate_temporary_buffers ();
 
@@ -192,7 +192,7 @@ Diskstream::realtime_set_speed (double sp, bool global)
 		}
 		
 		_actual_speed = new_speed;
-		phi = (uint64_t) (0x1000000 * fabs(_actual_speed));
+		target_phi = (uint64_t) (0x1000000 * fabs(_actual_speed));
 	}
 
 	if (changed) {
