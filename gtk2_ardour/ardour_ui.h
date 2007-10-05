@@ -738,6 +738,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Label status_bar_label;
 	Gtk::ToggleButton error_log_button;
 	Gtk::MessageDialog* loading_dialog;
+
+	void platform_specific ();
 };
 
 #endif /* __ardour_gui_h__ */

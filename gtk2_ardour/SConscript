@@ -85,6 +85,11 @@ au_pluginui.cc
 
 gtkosx_files=Split("""
 sync-menu.c
+cocoacarbon.c
+""")
+
+x11_files=Split("""
+x11.cc
 """)
 
 gtkardour_files=Split("""
@@ -257,7 +262,9 @@ if env['VST']:
 if gtkardour['GTKOSX']:
    extra_sources += gtkosx_files
    gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
-
+else:
+   extra_sources += x11_files
+	
 if gtkardour['AUDIOUNITS']:
     extra_sources += audiounit_files
     gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
@@ -439,6 +446,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      skipped_files +
 				      audiounit_files + 
 				      gtkosx_files +
+				      x11_files +
 				      fft_analysis_files +
 				      glob.glob('po/*.po') + glob.glob('*.h')))
 

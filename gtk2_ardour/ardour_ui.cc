@@ -243,6 +243,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
+
+	platform_specific ();
 }
 
 int
