@@ -18,7 +18,7 @@ using namespace sigc;
 static const char* mode_strings[] = { "duplex", "output", "input",  (char*) 0 };
 
 MidiPortDialog::MidiPortDialog ()
-	: ArdourDialog ("midi_port_dialog"),
+	: ArdourDialog ("Add MIDI port"),
 	  port_label (_("Port name"))
 	
 {

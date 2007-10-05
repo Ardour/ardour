@@ -387,6 +387,7 @@ OptionEditor::setup_midi_options ()
 	hbox->pack_start (midi_port_table, true, false);
 
 	midi_packer.pack_start (*hbox, false, false);
+	add_midi_port_button.set_label ("Add MIDI port");
 	midi_packer.pack_start (add_midi_port_button, false, false);
 
 	hbox = manage (new HBox);
