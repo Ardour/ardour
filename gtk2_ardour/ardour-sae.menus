@@ -188,6 +188,7 @@
    	       <separator/>
 	       <menuitem action='show-editor-mixer'/>
 	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
+	       <menuitem action='ToggleLogoVisibility'/>
          </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>

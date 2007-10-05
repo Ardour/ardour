@@ -295,6 +295,7 @@ class Editor : public PublicEditor
 	void toggle_waveform_visibility ();
 	void toggle_waveforms_while_recording ();
 	void toggle_measure_visibility ();
+	void toggle_logo_visibility ();
 
 	/* SMPTE timecode & video sync */
 
