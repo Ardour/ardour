@@ -779,7 +779,8 @@ void
 ARDOUR_UI::use_menubar_as_top_menubar ()
 {
 #ifdef GTKOSX
-	sync_menu_takeover_menu ((GtkMenuShell*) menu_bar->gobj());
+	ige_mac_menu_set_menu_bar ((GtkMenuShell*) menu_bar->gobj());
+	// ige_mac_menu_set_quit_menu_item (some_item->gobj());
 #endif
 }
 
