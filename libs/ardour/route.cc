@@ -1991,7 +1991,7 @@ Route::set_control_outs (const vector<string>& ports)
 	/* now connect to the named ports */
 
 	for (uint32_t n = 0; n < limit; ++n) {
-		if (_control_outs->connect_output (_control_outs->output (n), ports[n], this)) {
+		if (_control_outs->connect_output (_control_outs->output (n), ports[n % ports.size()], this)) {
 			error << string_compose (_("could not connect %1 to %2"), _control_outs->output(n)->name(), ports[n]) << endmsg;
 			return -1;
 		}
