@@ -34,7 +34,7 @@
 
 using namespace PBD;
 
-#define KBD_DEBUG 1
+#define KBD_DEBUG 0
 bool debug_keyboard = false;
 
 guint Keyboard::edit_but = 3;

@@ -334,6 +334,12 @@ set_color (Gdk::Color& c, int rgb)
 	c.set_rgb((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
 }
 
+#ifdef GTKOSX
+extern "C" {
+	gboolean gdk_quartz_possibly_forward (GdkEvent*);
+}
+#endif
+
 bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
@@ -345,7 +351,6 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #ifdef  DEBUG_ACCELERATOR_HANDLING
 	bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
 #endif
-
 	if (focus) {
 		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
 			special_handling_of_unmodified_accelerators = true;
@@ -441,6 +446,11 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			cerr << "\tactivate, then propagate\n";
 		}
 #endif
+#ifdef GTKOSX
+		if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
+			return true;
+		}
+#endif
 		if (!gtk_window_activate_key (win, ev)) {
 			return gtk_window_propagate_key_event (win, ev);
 		} else {
@@ -464,6 +474,11 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #ifdef DEBUG_ACCELERATOR_HANDLING
 		if (debug) {
 			cerr << "\tpropagation didn't handle, so activate\n";
+		}
+#endif
+#ifdef GTKOSX
+		if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
+			return true;
 		}
 #endif
 		return gtk_window_activate_key (win, ev);

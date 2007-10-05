@@ -7,6 +7,7 @@ GTKQUARTZ_ROOT=/opt/gtk
 SAE=
 WITH_JACK=1
 WITH_LADSPA=1
+STRIP=1
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -14,6 +15,7 @@ while [ $# -gt 0 ] ; do
 	--sae) SAE=1 ; shift ;;
 	--nojack) WITH_JACK= ; shift ;;
 	--noladpsa) WITH_LADSPA= ; shift ;;
+	--nostrip) STRIP= ; shift ;;
     esac
 done
 
@@ -66,7 +68,9 @@ cp -R Resources $APPROOT
 
 echo "Copying ardour executable ...."
 cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
-strip $APPROOT/MacOS/Ardour2
+if test x$STRIP != x ; then
+    strip $APPROOT/MacOS/Ardour2
+fi
 if test x$WITH_JACK != x ; then
     cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
     cp /usr/local/bin/jackd $APPROOT/MacOS

@@ -547,7 +547,7 @@ menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
 	  /* This is called when an item is selected (what is the
 	   * GTK+ term? prelight?)
 	   */
-	  //g_print ("kEventClassMenu/kEventMenuTargetItem\n");
+    	  //g_print ("kEventClassMenu/kEventMenuTargetItem\n");
 	  break;
 
 	case kEventMenuOpening:
