@@ -284,18 +284,47 @@ Editor::get_relevant_audio_tracks (set<AudioTimeAxisView*>& relevant_tracks)
 	}
 }
 
+
+/**
+ *  Call a slot for a given `basis' track and also for any track that is in the same
+ *  active edit group.
+ *  @param sl Slot to call.
+ *  @param basis Basis track.
+ */
+
 void
-Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl)
+Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl, TimeAxisView* basis)
 {
-	set<AudioTimeAxisView*> relevant_tracks;
-
-	get_relevant_audio_tracks (relevant_tracks);
-
-	uint32_t sz = relevant_tracks.size();
-
-	for (set<AudioTimeAxisView*>::iterator ati = relevant_tracks.begin(); ati != relevant_tracks.end(); ++ati) {
-		sl (**ati, sz);
+	AudioTimeAxisView* audio_basis = dynamic_cast<AudioTimeAxisView*> (basis);
+	if (audio_basis == 0) {
+		return;
 	}
+
+	/* work out the tracks that we will call the slot for; use
+	   a set here as it will disallow possible duplicates of the
+	   basis track */
+	set<AudioTimeAxisView*> tracks;
+
+	/* always call for the basis */
+	tracks.insert (audio_basis);
+
+	RouteGroup* group = audio_basis->route()->edit_group();
+	if (group && group->is_active()) {
+
+		/* the basis is a member of an active edit group; find other members */
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*> (*i);
+			if (v && v->route()->edit_group() == group) {
+				tracks.insert (v);
+			}
+		}
+	}
+
+	/* call the slots */
+	uint32_t const sz = tracks.size ();
+	for (set<AudioTimeAxisView*>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		sl (**i, sz);
+ 	}
 }
 
 void
@@ -330,7 +359,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, 
 void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions)
 {
-	mapover_audio_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions));
+	mapover_audio_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview());
 	
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 	
@@ -387,11 +416,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 				if (press) {
 
-					if (selection->selected (clicked_audio_trackview)) {
-						get_equivalent_regions (clicked_regionview, all_equivalent_regions);
-					} else {
-						all_equivalent_regions.push_back (clicked_regionview);
-					}
+                                       if (selection->selected (clicked_audio_trackview)) {
+                                               get_equivalent_regions (clicked_regionview, all_equivalent_regions);
+                                       } else {
+                                               all_equivalent_regions.push_back (clicked_regionview);
+                                       }
 
 					/* add all the equivalent regions, but only on button press */
 					
@@ -409,12 +438,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		case Selection::Set:
 			if (!clicked_regionview->get_selected()) {
 
-				if (selection->selected (clicked_audio_trackview)) {
-					get_equivalent_regions (clicked_regionview, all_equivalent_regions);
-				} else {
-					all_equivalent_regions.push_back (clicked_regionview);
-				}
-
+				get_equivalent_regions (clicked_regionview, all_equivalent_regions);
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {

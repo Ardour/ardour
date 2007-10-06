@@ -262,9 +262,9 @@ class Editor : public PublicEditor
 	nframes_t leftmost_frame;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
-	void new_playlists ();
-	void copy_playlists ();
-	void clear_playlists ();
+	void new_playlists (TimeAxisView*);
+	void copy_playlists (TimeAxisView*);
+	void clear_playlists (TimeAxisView*);
 
 	TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0);
 
@@ -433,7 +433,7 @@ class Editor : public PublicEditor
 
 	void get_relevant_audio_tracks (std::set<AudioTimeAxisView*>& relevant_tracks);
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&);
-	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl);
+	void mapover_audio_tracks (sigc::slot<void,AudioTimeAxisView&,uint32_t> sl, TimeAxisView*);
 
 	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
 

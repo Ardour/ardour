@@ -1304,10 +1304,10 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem (_("New"), mem_fun(editor, &PublicEditor::new_playlists)));
-	playlist_items.push_back (MenuElem (_("New Copy"), mem_fun(editor, &PublicEditor::copy_playlists)));
+	playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(editor, &PublicEditor::new_playlists), this)));
+	playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(editor, &PublicEditor::copy_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), mem_fun(editor, &PublicEditor::clear_playlists)));
+	playlist_items.push_back (MenuElem (_("Clear Current"), bind(mem_fun(editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
 
 	playlist_items.push_back (MenuElem(_("Select from all ..."), mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
