@@ -29,6 +29,10 @@ using std::set;
 
 class RegionView;
 
+/**
+ *  Class to represent list of selected regions.
+ */
+
 class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 {
   public:
@@ -65,10 +69,10 @@ class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 
 	void add_to_layer (RegionView *);
 	
-	nframes_t _current_start;
-	nframes_t _current_end;
+	nframes_t _current_start; ///< start position for the selection
+	nframes_t _current_end; ///< end position for the selection
 
-	list<RegionView *> _bylayer;
+	list<RegionView *> _bylayer; ///< list of regions sorted by layer
 };
 
 #endif /* __ardour_gtk_region_selection_h__ */

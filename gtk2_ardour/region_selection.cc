@@ -28,6 +28,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 
+/**
+ *  Construct an empty RegionSelection.
+ */
 
 RegionSelection::RegionSelection ()
 {
@@ -36,6 +39,11 @@ RegionSelection::RegionSelection ()
 	_current_start = 0;
 	_current_end = 0;
 }
+
+/**
+ *  Copy constructor.
+ *  @param other RegionSelection to copy.
+ */
 
 RegionSelection::RegionSelection (const RegionSelection& other)
 {
@@ -47,6 +55,11 @@ RegionSelection::RegionSelection (const RegionSelection& other)
 	_current_start = other._current_start;
 	_current_end = other._current_end;
 }
+
+/**
+ *  operator= to set a RegionSelection to be the same as another.
+ *  @param other Other RegionSelection.
+ */
 
 RegionSelection&
 RegionSelection::operator= (const RegionSelection& other)
@@ -66,6 +79,10 @@ RegionSelection::operator= (const RegionSelection& other)
 	return *this;
 }
 
+/**
+ *  Empty this RegionSelection.
+ */
+
 void
 RegionSelection::clear_all()
 {
@@ -75,10 +92,21 @@ RegionSelection::clear_all()
 	_current_end = 0;
 }
 
+/**
+ *  @param rv RegionView.
+ *  @return true if this selection contains rv.
+ */
+
 bool RegionSelection::contains (RegionView* rv) const
 {
 	return find (begin(), end(), rv) != end();
 }
+
+/**
+ *  Add a region to the selection.
+ *  @param rv Region to add.
+ *  @return false if we already had the region, otherwise true.
+ */
 
 bool
 RegionSelection::add (RegionView* rv)
@@ -98,18 +126,29 @@ RegionSelection::add (RegionView* rv)
 	
 	push_back (rv);
 
-	// add to layer sorted list
+	/* add to layer sorted list */
 
 	add_to_layer (rv);
 
 	return true;
 }
 
+/**
+ *  Remove a region from the selection.
+ *  @param rv Region to remove.
+ */
+
 void
 RegionSelection::remove_it (RegionView *rv)
 {
 	remove (rv);
 }
+
+/**
+ *  Remove a region from the selection.
+ *  @param rv Region to remove.
+ *  @return true if the region was in the selection, false if not.
+ */
 
 bool
 RegionSelection::remove (RegionView* rv)
@@ -174,6 +213,11 @@ RegionSelection::remove (RegionView* rv)
 	return false;
 }
 
+/**
+ *  Add a region to the list sorted by layer.
+ *  @param rv Region to add.
+ */
+
 void
 RegionSelection::add_to_layer (RegionView * rv)
 {
@@ -199,6 +243,11 @@ struct RegionSortByTime {
     }
 };
 
+
+/**
+ *  @param foo List which will be filled with the selection's regions
+ *  sorted by position.
+ */
 
 void
 RegionSelection::by_position (list<RegionView*>& foo) const
@@ -226,7 +275,13 @@ struct RegionSortByTrack {
 	    }
     }
 };
-	
+
+
+/**
+ *  @param List which will be filled with the selection's regions
+ *  sorted by track and position.
+ */
+
 void
 RegionSelection::by_track (list<RegionView*>& foo) const
 {
@@ -241,12 +296,21 @@ RegionSelection::by_track (list<RegionView*>& foo) const
 	return;
 }
 
+/**
+ *  @param Sort the selection by position and track.
+ */
+
 void
 RegionSelection::sort_by_position_and_track ()
 {
 	RegionSortByTrack sorter;
 	sort (sorter);
 }
+
+/**
+ *  @param tv Track.
+ *  @return true if any of the selection's regions are on tv.
+ */
 
 bool
 RegionSelection::involves (const TimeAxisView& tv) const
