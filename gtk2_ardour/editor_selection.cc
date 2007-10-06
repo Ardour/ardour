@@ -782,6 +782,26 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 		return false;
 	}
 
+	/* `touched' may contain some regions; if so, we need to add equivalent
+	   regions from any edit groups */
+
+	list<Selectable*> to_add;
+
+	for (list<Selectable*>::iterator i = touched.begin(); i != touched.end(); ++i) {
+		RegionView* r = dynamic_cast<RegionView*> (*i);
+		if (r) {
+			vector<RegionView*> e;
+			get_equivalent_regions (r, e);
+			for (vector<RegionView*>::iterator j = e.begin(); j != e.end(); ++j) {
+				to_add.push_back (*j);
+			}
+		}
+	}
+
+	for (list<Selectable*>::iterator i = to_add.begin(); i != to_add.end(); ++i) {
+		touched.push_back (*i);
+	}
+
 	if (!touched_tracks.empty()) {
 
 		switch (op) {
