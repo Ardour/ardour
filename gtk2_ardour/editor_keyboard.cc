@@ -85,7 +85,14 @@ Editor::kbd_do_split (GdkEvent* ev)
 			split_regions_at (where, selection->regions);
 		} else {
 			RegionSelection s;
-			s.add (entered_regionview);
+
+			/* add equivalent regions to the selection that we'll split */
+			vector<RegionView*> eq;
+			get_equivalent_regions (entered_regionview, eq);
+			for (vector<RegionView*>::iterator i = eq.begin(); i != eq.end(); ++i) {
+				s.add (*i);
+			}
+			
 			split_regions_at (where, s);
 		}
 	}
