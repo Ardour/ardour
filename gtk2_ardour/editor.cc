@@ -3615,27 +3615,45 @@ Editor::restore_editing_space ()
 	);
 }
 
+/**
+ *  Make new playlists for a given track and also any others that belong
+ *  to the same active edit group.
+ *  @param v Track.
+ */
+
 void 
-Editor::new_playlists ()
+Editor::new_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("new playlists"));
-	mapover_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist), v);
 	commit_reversible_command ();
 }
+
+/**
+ *  Use a copy of the current playlist for a given track and also any others that belong
+ *  to the same active edit group.
+ *  @param v Track.
+ */
 
 void
-Editor::copy_playlists ()
+Editor::copy_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("copy playlists"));
-	mapover_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist), v);
 	commit_reversible_command ();
 }
 
+/**
+ *  Clear the current playlist for a given track and also any others that belong
+ *  to the same active edit group.
+ *  @param v Track.
+ */
+
 void 
-Editor::clear_playlists ()
+Editor::clear_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("clear playlists"));
-	mapover_tracks (mem_fun (*this, &Editor::mapped_clear_playlist));
+	mapover_tracks (mem_fun (*this, &Editor::mapped_clear_playlist), v);
 	commit_reversible_command ();
 }
 
