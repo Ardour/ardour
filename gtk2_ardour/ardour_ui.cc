@@ -243,8 +243,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
-
-	platform_specific ();
 }
 
 int
@@ -335,6 +333,8 @@ ARDOUR_UI::post_engine ()
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
+
+	platform_specific ();
 
 	/* now start and maybe save state */
 

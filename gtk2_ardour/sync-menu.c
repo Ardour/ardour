@@ -27,7 +27,7 @@
 
 #include <Carbon/Carbon.h>
 
-#include "ige-mac-menu.h"
+#include "sync-menu.h"
 
 
 /* TODO

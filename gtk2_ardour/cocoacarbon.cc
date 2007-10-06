@@ -17,18 +17,22 @@
 */
 
 #include <Carbon/Carbon.h>
+#undef check // stupid, stupid carbon
+
 #include "ardour_ui.h"
+#include "actions.h"
+#include "sync-menu.h"
 
 /* Called for clicks on the dock icon. Can be used to unminimize or
  * create a new window for example.
  */
+
 static OSErr
 handle_reopen_application (const AppleEvent *inAppleEvent, 
                            AppleEvent       *outAppleEvent, 
                            long              inHandlerRefcon)
 {
-        g_print ("AEReopenApplication\n");
-
+	cerr << "reopen app\n";
         return noErr;
 }
 
@@ -37,19 +41,25 @@ handle_quit_application (const AppleEvent *inAppleEvent,
                          AppleEvent       *outAppleEvent, 
                          long              inHandlerRefcon)
 {
-        g_print ("AEQuitApplication\n");
-	
+	cerr << "quit app\n";
 	ARDOUR_UI::instance()->quit ();
 
         return noErr;
 }
 
 void
-ARDOUR_UI::platform_specific () (void)
+ARDOUR_UI::platform_specific ()
 {
         AEInstallEventHandler (kCoreEventClass, kAEReopenApplication, 
                                handle_reopen_application, 0, true);
 
         AEInstallEventHandler (kCoreEventClass, kAEQuitApplication, 
                                handle_quit_application, 0, true);
+
+	Gtk::Widget* widget = ActionManager::get_widget ("/ui/Main/Session/Quit");
+	if (widget) {
+		ige_mac_menu_set_quit_menu_item ((GtkMenuItem*) widget->gobj());
+	}
+
 }
+
