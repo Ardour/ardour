@@ -54,11 +54,12 @@ class MidiSource : public Source
 	virtual void append_event_unlocked(const MidiEvent& ev) = 0;
 
 	virtual void mark_for_remove() = 0;
-	virtual void mark_streaming_midi_write_started (NoteMode mode);
+	virtual void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
 	
-	void set_timeline_position (nframes_t when) { _timeline_position = when; }
+	uint64_t timeline_position ()                   { return _timeline_position; }
+	void     set_timeline_position (nframes_t when) { _timeline_position = when; }
 	
 	virtual void session_saved();
 

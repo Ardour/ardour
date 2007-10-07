@@ -450,30 +450,6 @@ MidiModel::end_write(bool delete_stuck)
 }
 
 
-/** Append contents of \a buf to model.  NOT realtime safe.
- *
- * Timestamps of events in \a buf are expected to be relative to
- * the start of this model (t=0) and MUST be monotonically increasing
- * and MUST be >= the latest event currently in the model.
- *
- * Events in buf are deep copied.
- */
-void
-MidiModel::append(const MidiBuffer& buf)
-{ 
-	write_lock();
-
-	assert(_writing);
-
-	for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-		assert(_notes.empty() || (*i).time() >= _notes.back().time());
-		append(*i);
-	}
-	
-	write_unlock();
-}
-
-
 /** Append \a in_event to model.  NOT realtime safe.
  *
  * Timestamps of events in \a buf are expected to be relative to

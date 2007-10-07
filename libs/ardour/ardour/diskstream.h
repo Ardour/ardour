@@ -101,6 +101,7 @@ class Diskstream : public SessionObject
 
 	void set_speed (double);
 	void non_realtime_set_speed ();
+	virtual void non_realtime_locate (nframes_t location) {};
 	virtual void playlist_modified ();
 
 	boost::shared_ptr<Playlist> playlist () { return _playlist; }

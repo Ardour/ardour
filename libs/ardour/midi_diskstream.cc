@@ -137,6 +137,14 @@ MidiDiskstream::~MidiDiskstream ()
 	Glib::Mutex::Lock lm (state_lock);
 }
 
+	
+void
+MidiDiskstream::non_realtime_locate (nframes_t position)
+{
+	_write_source->set_timeline_position (position);
+}
+
+
 void
 MidiDiskstream::non_realtime_input_change ()
 {
@@ -1195,7 +1203,7 @@ MidiDiskstream::engage_record_enable ()
 		_source_port->request_monitor_input (!(Config->get_auto_input() && rolling));
 	}
 
-	_write_source->mark_streaming_midi_write_started (_note_mode);
+	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
 	RecordEnableChanged (); /* EMIT SIGNAL */
 }

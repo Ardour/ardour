@@ -238,8 +238,12 @@ Session::butler_transport_work ()
 			}
 		}
 	}
+	
+	if (post_transport_work & PostTransportLocate) {
+		non_realtime_locate ();
+	}
 
-	if (post_transport_work & (PostTransportStop|PostTransportLocate)) {
+	if (post_transport_work & PostTransportStop) {
 		non_realtime_stop (post_transport_work & PostTransportAbort, on_entry, finished);
 		if (!finished) {
 			g_atomic_int_dec_and_test (&butler_should_do_transport_work);
@@ -287,6 +291,18 @@ Session::non_realtime_overwrite (int on_entry, bool& finished)
 		}
 	}
 }
+
+	
+void
+Session::non_realtime_locate ()
+{
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		(*i)->non_realtime_locate (_transport_frame);
+	}
+}
+
 
 void
 Session::non_realtime_stop (bool abort, int on_entry, bool& finished)

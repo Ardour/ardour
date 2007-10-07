@@ -1385,6 +1385,7 @@ class Session : public PBD::StatefulDestructible
 	void realtime_stop (bool abort);
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
+	void non_realtime_locate ();
 	void non_realtime_stop (bool abort, int entry_request_count, bool& finished);
 	void non_realtime_overwrite (int entry_request_count, bool& finished);
 	void butler_transport_work ();

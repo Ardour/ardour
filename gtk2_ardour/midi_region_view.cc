@@ -90,8 +90,8 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 	if (wfd)
 		midi_region()->midi_source(0)->load_model();
 	
-	const Meter& m = trackview.session().tempo_map().meter_at(_region->start());
-	const Tempo& t = trackview.session().tempo_map().tempo_at(_region->start());
+	const Meter& m = trackview.session().tempo_map().meter_at(_region->position());
+	const Tempo& t = trackview.session().tempo_map().tempo_at(_region->position());
 	_default_note_length = m.frames_per_bar(t, trackview.session().frame_rate())
 			/ m.beats_per_bar();
 
@@ -596,7 +596,7 @@ MidiRegionView::extend_active_notes()
  * event arrives, to properly display the note.
  */
 void
-MidiRegionView::add_note (const Note& note, bool copy_note)
+MidiRegionView::add_note(const Note& note, bool copy_note)
 {
 	assert(note.time() >= 0);
 	//assert(note.time() < _region->length());

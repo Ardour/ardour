@@ -70,9 +70,6 @@ public:
 	size_t read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const;
 
 	/** Resizes vector if necessary (NOT realtime safe) */
-	void append(const MidiBuffer& data);
-	
-	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const MidiEvent& ev);
 	
 	inline const Note& note_at(unsigned i) const { return _notes[i]; }

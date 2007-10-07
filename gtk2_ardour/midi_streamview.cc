@@ -304,7 +304,7 @@ MidiStreamView::setup_rec_box ()
 				
 				jack_nframes_t start = 0;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back().first->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
+					start = rec_regions.back().first->position() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 				
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
@@ -439,22 +439,19 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 			nframes_t origlen = region->length();
 			
-			//cerr << "MIDI URR: " << start << " * " << dur
-			//	<< " (origlen " << origlen << ")" << endl;
-
 			if (region == rec_regions.back().first && rec_active) {
 
-				if (start >= region->start()) {
-
-					nframes_t nlen = start + dur - region->start();
+				if (start >= region->midi_source(0)->timeline_position()) {
+				
+					nframes_t nlen = start + dur - region->position();
 
 					if (nlen != region->length()) {
-
+					
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
-						region->set_length (nlen, this);
+						region->set_length (start + dur - region->position(), this);
 						region->thaw ("updated");
-
+						
 						if (origlen == 1) {
 							/* our special initial length */
 							iter->second = add_region_view_internal (region, false);
@@ -468,14 +465,17 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 						/* draw events */
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
-						// FIXME: slow
 						for (size_t i=0; i < data->n_notes(); ++i) {
+
 							const Note& note = data->note_at(i);
-							if (note.time() > start + dur)
+
+							if (note.time() + region->position() < start)
+								continue;
+
+							if (note.time() + region->position() > start + dur)
 								break;
 
-							if (note.time() >= start)
-								mrv->add_note(note, true);
+							mrv->add_note(note, true);
 							
 							if (note.duration() > 0 && note.end_time() >= start)
 								mrv->resolve_note(note.note(), note.end_time());
@@ -490,17 +490,16 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						}
 						
 						mrv->extend_active_notes();
-
 					}
 				}
 
 			} else {
-
+				
 				nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
 
 				if (nlen != region->length()) {
 
-					if (region->source(0)->length() >= region->start() + nlen) {
+					if (region->source(0)->length() >= region->position() + nlen) {
 
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
@@ -536,9 +535,6 @@ MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur, 
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), start, dur, weak_src));
 	
 	boost::shared_ptr<SMFSource> src (boost::dynamic_pointer_cast<SMFSource>(weak_src.lock()));
-	
-	//cerr << src.get() << " MIDI READY: " << start << " * " << dur
-	//	<< " -- " << data->size() << " events!" << endl;
 	
 	this->update_rec_regions (src->model(), start, dur);
 }

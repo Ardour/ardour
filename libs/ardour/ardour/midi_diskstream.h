@@ -79,7 +79,6 @@ class MidiDiskstream : public Diskstream
 	int use_copy_playlist ();
 
 	/* stateful */
-
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
 
@@ -107,6 +106,7 @@ class MidiDiskstream : public Diskstream
 	int  rename_write_sources ();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
+	void non_realtime_locate (nframes_t location);
 
   protected:
 	int seek (nframes_t which_sample, bool complete_refill = false);

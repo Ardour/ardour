@@ -159,7 +159,6 @@ SMFSource::open()
 		_track_size = 4;
 
 		// Write a tentative header just to pad things out so writing happens in the right spot
-		set_timeline_position(0);
 		flush_header();
 		write_footer();
 		seek_to_end();
@@ -403,7 +402,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 
 	while (true) {
 		bool ret = src.full_peek(sizeof(double), (Byte*)&time);
-		if (!ret || time > _length + cnt)
+		if (!ret || time - _timeline_position > _length + cnt)
 			break;
 
 		ret = src.read_prefix(&time, &size);
@@ -423,10 +422,9 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		
 		assert(time >= _timeline_position);
 		time -= _timeline_position;
-		assert(time >= _last_ev_time);
 
 		const MidiEvent ev(time, size, buf);
-		append_event_unlocked(MidiEvent(ev));
+		append_event_unlocked(ev);
 
 		if (_model)
 			_model->append(ev);
@@ -438,7 +436,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	const nframes_t oldlen = _length;
 	update_length(oldlen, cnt);
 
-	ViewDataRangeReady (oldlen, cnt); /* EMIT SIGNAL */
+	ViewDataRangeReady (_timeline_position + oldlen, cnt); /* EMIT SIGNAL */
 	
 	return cnt;
 }
@@ -452,6 +450,8 @@ SMFSource::append_event_unlocked(const MidiEvent& ev)
 		printf("%X ", ev.buffer()[i]);
 	}
 	printf("\n");*/
+
+	assert(ev.time() >= 0);
 
 	assert(ev.time() >= _last_ev_time);
 	
@@ -514,6 +514,13 @@ SMFSource::mark_for_remove ()
 		return;
 	}
 	_flags = Flag (_flags | RemoveAtDestroy);
+}
+
+void
+SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
+{
+	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
+	_last_ev_time = 0;
 }
 
 void

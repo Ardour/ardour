@@ -131,8 +131,10 @@ MidiSource::file_changed (string path)
 }
 
 void
-MidiSource::mark_streaming_midi_write_started (NoteMode mode)
+MidiSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
 {
+	set_timeline_position(start_frame); // why do I have a feeling this can break somehow...
+
 	if (_model) {
 		_model->set_note_mode(mode);
 		_model->start_write();
