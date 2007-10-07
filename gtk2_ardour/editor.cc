@@ -233,8 +233,8 @@ Editor::Editor ()
 
 	session = 0;
 
-	selection = new Selection;
-	cut_buffer = new Selection;
+	selection = new Selection (this);
+	cut_buffer = new Selection (this);
 
 	selection->TimeChanged.connect (mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (mem_fun(*this, &Editor::track_selection_changed));
@@ -2766,9 +2766,9 @@ Editor::map_transport_state ()
 
 /* UNDO/REDO */
 
-Editor::State::State ()
+Editor::State::State (PublicEditor const * e)
 {
-	selection = new Selection;
+	selection = new Selection (e);
 }
 
 Editor::State::~State ()
@@ -2779,7 +2779,7 @@ Editor::State::~State ()
 UndoAction
 Editor::get_memento () const
 {
-	State *state = new State;
+	State *state = new State (this);
 
 	store_state (*state);
 	return bind (mem_fun (*(const_cast<Editor*>(this)), &Editor::restore_state), state);

@@ -437,12 +437,12 @@ class Editor : public PublicEditor
 	void sort_track_selection ();
 
 	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks);
-	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&);
-	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*);
+	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&) const;
+	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*) const;
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
-	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
+	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*) const;
 	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t);
 	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
@@ -1681,10 +1681,10 @@ class Editor : public PublicEditor
 
 	struct State {
 	    Selection* selection;
-	    double     frames_per_unit;
+	    double frames_per_unit;
 
-	    State();
-	    ~State();
+	    State (PublicEditor const * e);
+	    ~State ();
 	};
 
 	void store_state (State&) const;

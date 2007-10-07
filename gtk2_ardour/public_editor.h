@@ -262,6 +262,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
 #endif
 
+	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&) const = 0;
+
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Resized;

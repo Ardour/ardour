@@ -293,7 +293,7 @@ Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks)
  */
 
 void
-Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis)
+Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis) const
 {
 	RouteTimeAxisView* route_basis = dynamic_cast<RouteTimeAxisView*> (basis);
 	if (route_basis == 0) {
@@ -312,7 +312,7 @@ Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisVie
 	if (group && group->is_active()) {
 
 		/* the basis is a member of an active edit group; find other members */
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
 			if (v && v->route()->edit_group() == group) {
 				tracks.insert (v);
@@ -328,7 +328,7 @@ Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisVie
 }
 
 void
-Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, RegionView* basis, vector<RegionView*>* all_equivs)
+Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, RegionView* basis, vector<RegionView*>* all_equivs) const
 {
 	boost::shared_ptr<Playlist> pl;
 	vector<boost::shared_ptr<Region> > results;
@@ -357,7 +357,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t ignored, 
 }
 
 void
-Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions)
+Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions) const
 {
 	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview());
 	
@@ -437,9 +437,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			
 		case Selection::Set:
 			if (!clicked_regionview->get_selected()) {
-
-				get_equivalent_regions (clicked_regionview, all_equivalent_regions);
-				selection->set (all_equivalent_regions);
+				selection->set (clicked_regionview);
 				commit = true;
 			} else {
 				/* no commit necessary: clicked on an already selected region */
@@ -780,26 +778,6 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 
 	if (touched.empty()) {
 		return false;
-	}
-
-	/* `touched' may contain some regions; if so, we need to add equivalent
-	   regions from any edit groups */
-
-	list<Selectable*> to_add;
-
-	for (list<Selectable*>::iterator i = touched.begin(); i != touched.end(); ++i) {
-		RegionView* r = dynamic_cast<RegionView*> (*i);
-		if (r) {
-			vector<RegionView*> e;
-			get_equivalent_regions (r, e);
-			for (vector<RegionView*>::iterator j = e.begin(); j != e.end(); ++j) {
-				to_add.push_back (*j);
-			}
-		}
-	}
-
-	for (list<Selectable*>::iterator i = to_add.begin(); i != to_add.end(); ++i) {
-		touched.push_back (*i);
 	}
 
 	if (!touched_tracks.empty()) {

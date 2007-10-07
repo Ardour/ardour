@@ -36,6 +36,7 @@
 class TimeAxisView;
 class RegionView;
 class Selectable;
+class PublicEditor;
 
 namespace ARDOUR {
 	class Region;
@@ -71,8 +72,7 @@ class Selection : public sigc::trackable
 	PlaylistSelection    playlists;
 	PointSelection       points;
 
-	Selection() {
-		next_time_id = 0;
+	Selection (PublicEditor const * e) : editor (e), next_time_id (0) {
 		clear();
 	}
 
@@ -149,7 +149,10 @@ class Selection : public sigc::trackable
 	void foreach_regionview (void (RegionView::*method)(void));
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
+	void select_edit_group_regions ();
+
   private:
+	PublicEditor const * editor;
 	uint32_t next_time_id;
 
 	void add (std::vector<AutomationSelectable*>&);
