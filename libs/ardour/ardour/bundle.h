@@ -121,6 +121,12 @@ class InputBundle : public Bundle {
   
 class OutputBundle : public Bundle {
   public:
+	/**
+	 *  OutputBundle constructor.
+	 *  \param name Name.
+	 *  \param dy true if this Bundle is `dynamic'; ie it is created on-the-fly
+	 *  and should not be written to the session file.
+	 */  
         OutputBundle (string name, bool dy = false) : Bundle (name, dy) {}
 	OutputBundle (const XMLNode&);
 };

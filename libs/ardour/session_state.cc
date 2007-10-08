@@ -1881,9 +1881,9 @@ Session::load_bundles (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "InputConnection") {
-			add_bundle (new ARDOUR::InputBundle (**niter));
+			add_bundle (boost::shared_ptr<Bundle> (new InputBundle (**niter)));
 		} else if ((*niter)->name() == "OutputConnection") {
-			add_bundle (new ARDOUR::OutputBundle (**niter));
+			add_bundle (boost::shared_ptr<Bundle> (new OutputBundle (**niter)));
 		} else {
 			error << string_compose(_("Unknown node \"%1\" found in Connections list from state file"), (*niter)->name()) << endmsg;
 			return -1;

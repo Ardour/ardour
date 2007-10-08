@@ -135,7 +135,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 	}
 
 	if ((prop = node.property ("input-connection")) != 0) {
-		Bundle* c = _session.bundle_by_name (prop->value());
+		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
 		  	error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
@@ -150,7 +150,7 @@ AudioTrack::deprecated_use_diskstream_connections ()
 			}
 		}
 
-		use_input_bundle(*c, this);
+		connect_input_ports_to_bundle (c, this);
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {

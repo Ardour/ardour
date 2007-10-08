@@ -126,8 +126,6 @@ IO::IO (Session& s, const string& name,
 
 	_gain = 1.0;
 	_desired_gain = 1.0;
-	_input_bundle = 0;
-	_output_bundle = 0;
 	pending_state_node = 0;
 	no_panner_reset = false;
 	_phase_invert = false;
@@ -154,6 +152,8 @@ IO::IO (Session& s, const string& name,
 	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
 
 	_session.add_controllable (_gain_control);
+
+	create_bundles ();
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
@@ -168,8 +168,6 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	no_panner_reset = false;
 	_desired_gain = 1.0;
 	_gain = 1.0;
-	_input_bundle = 0;
-	_output_bundle = 0;
 
 	apply_gain_automation = false;
 	
@@ -194,6 +192,8 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
 
 	_session.add_controllable (_gain_control);
+
+	create_bundles ();
 }
 
 IO::~IO ()
@@ -335,7 +335,7 @@ IO::just_meter_input (nframes_t start_frame, nframes_t end_frame,
 void
 IO::drop_input_bundle ()
 {
-	_input_bundle = 0;
+	_input_bundle.reset ();
 	input_bundle_configuration_connection.disconnect();
 	input_bundle_connection_connection.disconnect();
 	_session.set_dirty ();
@@ -344,7 +344,7 @@ IO::drop_input_bundle ()
 void
 IO::drop_output_bundle ()
 {
-	_output_bundle = 0;
+	_output_bundle.reset ();
 	output_bundle_configuration_connection.disconnect();
 	output_bundle_connection_connection.disconnect();
 	_session.set_dirty ();
@@ -550,6 +550,10 @@ IO::remove_output_port (Port* port, void* src)
 		}
 	}
 
+	if (change == ConnectionsChanged) {
+		setup_bundles ();
+	}
+
 	if (change != NoChange) {
 		output_changed (change, src);
 		_session.set_dirty ();
@@ -616,6 +620,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 	
 	// pan_changed (src); /* EMIT SIGNAL */
 	output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+	setup_bundles ();
 	_session.set_dirty ();
 	
 	return 0;
@@ -652,6 +657,10 @@ IO::remove_input_port (Port* port, void* src)
 				reset_panner ();
 			}
 		}
+	}
+
+	if (change == ConfigurationChanged) {
+		setup_bundles ();
 	}
 
 	if (change != NoChange) {
@@ -697,7 +706,7 @@ IO::add_input_port (string source, void* src, DataType type)
 			} else {
 				snprintf (name, sizeof (name), _("%s/in %u"), _name.c_str(), find_input_port_hole());
 			}
-			
+
 			if ((our_port = _session.engine().register_input_port (type, name)) == 0) {
 				error << string_compose(_("IO: cannot register input port %1"), name) << endmsg;
 				return -1;
@@ -721,6 +730,7 @@ IO::add_input_port (string source, void* src, DataType type)
 
 	// pan_changed (src); /* EMIT SIGNAL */
 	input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+	setup_bundles ();
 	_session.set_dirty ();
 	
 	return 0;
@@ -1003,6 +1013,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 
 	if (in_changed || out_changed) {
 		MoreChannels (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
+		setup_bundles ();
 		_session.set_dirty ();
 	}
 
@@ -1030,6 +1041,7 @@ IO::ensure_inputs (ChanCount count, bool clear, bool lockit, void* src)
 
 	if (changed) {
 		input_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+		setup_bundles ();
 		_session.set_dirty ();
 	}
 	return 0;
@@ -1127,6 +1139,7 @@ IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 
 	if (changed) {
 		 output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+		 setup_bundles ();
 	}
 
 	return 0;
@@ -1201,12 +1214,12 @@ IO::state (bool full_state)
 
 	str = "";
 
-	if (_input_bundle) {
+	if (_input_bundle && !_input_bundle->dynamic()) {
 		node->add_property ("input-connection", _input_bundle->name());
 		need_ins = false;
 	}
 
-	if (_output_bundle) {
+	if (_output_bundle && !_output_bundle->dynamic()) {
 		node->add_property ("output-connection", _output_bundle->name());
 		need_outs = false;
 	}
@@ -1540,7 +1553,7 @@ IO::create_ports (const XMLNode& node)
 	 */
 	if ((prop = node.property ("input-connection")) != 0) {
 
-		Bundle* c = _session.bundle_by_name (prop->value());
+		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
 			error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
@@ -1563,7 +1576,7 @@ IO::create_ports (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("output-connection")) != 0) {
-		Bundle* c = _session.bundle_by_name (prop->value());
+		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
 
 		if (c == 0) {
 			error << string_compose(_("Unknown bundle \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
@@ -1607,7 +1620,7 @@ IO::make_connections (const XMLNode& node)
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("input-connection")) != 0) {
-		Bundle* c = _session.bundle_by_name (prop->value());
+		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
 			error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
@@ -1622,7 +1635,7 @@ IO::make_connections (const XMLNode& node)
 			}
 		} 
 
-		use_input_bundle (*c, this);
+		connect_input_ports_to_bundle (c, this);
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {
@@ -1632,7 +1645,7 @@ IO::make_connections (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("output-bundle")) != 0) {
-		Bundle* c = _session.bundle_by_name (prop->value());
+		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
 		
 		if (c == 0) {
 			error << string_compose(_("Unknown bundle \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
@@ -1647,7 +1660,7 @@ IO::make_connections (const XMLNode& node)
 			}
 		} 
 
-		use_output_bundle (*c, this);
+		connect_output_ports_to_bundle (c, this);
 		
 	} else if ((prop = node.property ("outputs")) != 0) {
 		if (set_outputs (prop->value())) {
@@ -1834,7 +1847,11 @@ IO::set_name (const string& str)
 		i->set_name (current_name);
 	}
 
-	return SessionObject::set_name(name);
+	bool const r = SessionObject::set_name(name);
+
+	setup_bundles ();
+
+	return r;
 }
 
 void
@@ -1910,7 +1927,7 @@ IO::input_latency () const
 }
 
 int
-IO::use_input_bundle (Bundle& c, void* src)
+IO::connect_input_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
 	uint32_t limit;
 
@@ -1918,7 +1935,7 @@ IO::use_input_bundle (Bundle& c, void* src)
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 		
-		limit = c.nchannels();
+		limit = c->nchannels();
 		
 		drop_input_bundle ();
 		
@@ -1932,7 +1949,7 @@ IO::use_input_bundle (Bundle& c, void* src)
 		*/
 		
 		for (uint32_t n = 0; n < limit; ++n) {
-			const Bundle::PortList& pl = c.channel_ports (n);
+			const Bundle::PortList& pl = c->channel_ports (n);
 			
 			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 				
@@ -1962,7 +1979,7 @@ IO::use_input_bundle (Bundle& c, void* src)
 		/* second pass: connect all requested ports where necessary */
 		
 		for (uint32_t n = 0; n < limit; ++n) {
-			const Bundle::PortList& pl = c.channel_ports (n);
+			const Bundle::PortList& pl = c->channel_ports (n);
 			
 			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 				
@@ -1976,11 +1993,11 @@ IO::use_input_bundle (Bundle& c, void* src)
 			}
 		}
 		
-		_input_bundle = &c;
+		_input_bundle = c;
 		
-		input_bundle_configuration_connection = c.ConfigurationChanged.connect
+		input_bundle_configuration_connection = c->ConfigurationChanged.connect
 			(mem_fun (*this, &IO::input_bundle_configuration_changed));
-		input_bundle_connection_connection = c.PortsChanged.connect
+		input_bundle_connection_connection = c->PortsChanged.connect
 			(mem_fun (*this, &IO::input_bundle_connection_changed));
 	}
 
@@ -1989,7 +2006,7 @@ IO::use_input_bundle (Bundle& c, void* src)
 }
 
 int
-IO::use_output_bundle (Bundle& c, void* src)
+IO::connect_output_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
 	uint32_t limit;	
 
@@ -1997,7 +2014,7 @@ IO::use_output_bundle (Bundle& c, void* src)
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
-		limit = c.nchannels();
+		limit = c->nchannels();
 			
 		drop_output_bundle ();
 
@@ -2012,7 +2029,7 @@ IO::use_output_bundle (Bundle& c, void* src)
 			
 		for (uint32_t n = 0; n < limit; ++n) {
 
-			const Bundle::PortList& pl = c.channel_ports (n);
+			const Bundle::PortList& pl = c->channel_ports (n);
 				
 			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 					
@@ -2042,7 +2059,7 @@ IO::use_output_bundle (Bundle& c, void* src)
 
 		for (uint32_t n = 0; n < limit; ++n) {
 
-			const Bundle::PortList& pl = c.channel_ports (n);
+			const Bundle::PortList& pl = c->channel_ports (n);
 				
 			for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 					
@@ -2055,11 +2072,11 @@ IO::use_output_bundle (Bundle& c, void* src)
 			}
 		}
 
-		_output_bundle = &c;
+		_output_bundle = c;
 
-		output_bundle_configuration_connection = c.ConfigurationChanged.connect
+		output_bundle_configuration_connection = c->ConfigurationChanged.connect
 			(mem_fun (*this, &IO::output_bundle_configuration_changed));
-		output_bundle_connection_connection = c.PortsChanged.connect
+		output_bundle_connection_connection = c->PortsChanged.connect
 			(mem_fun (*this, &IO::output_bundle_connection_changed));
 	}
 
@@ -2113,25 +2130,25 @@ IO::reset_panners ()
 void
 IO::input_bundle_connection_changed (int ignored)
 {
-	use_input_bundle (*_input_bundle, this);
+	connect_input_ports_to_bundle (_input_bundle, this);
 }
 
 void
 IO::input_bundle_configuration_changed ()
 {
-	use_input_bundle (*_input_bundle, this);
+	connect_input_ports_to_bundle (_input_bundle, this);
 }
 
 void
 IO::output_bundle_connection_changed (int ignored)
 {
-	use_output_bundle (*_output_bundle, this);
+	connect_output_ports_to_bundle (_output_bundle, this);
 }
 
 void
 IO::output_bundle_configuration_changed ()
 {
-	use_output_bundle (*_output_bundle, this);
+	connect_output_ports_to_bundle (_output_bundle, this);
 }
 
 void
@@ -2427,4 +2444,101 @@ IO::update_port_total_latencies ()
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		_session.engine().update_total_latency (*i);
 	}
+}
+
+
+/**
+ *  Setup bundles that describe our inputs and outputs.
+ */
+
+void
+IO::setup_bundles ()
+{
+        char buf[32];
+
+        snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
+        _bundle_for_inputs->set_name (buf, 0);
+        int const ins = n_inputs().n_total();
+        _bundle_for_inputs->set_nchannels (ins);
+        
+        for (int i = 0; i < ins; ++i) {
+                _bundle_for_inputs->add_port_to_channel (i, _inputs.port(i)->name ());
+        }
+
+        snprintf(buf, sizeof (buf), _("%s out"), _name.c_str());
+        _bundle_for_outputs->set_name (buf, 0);
+        int const outs = n_outputs().n_total();
+        _bundle_for_outputs->set_nchannels (outs);
+        
+        for (int i = 0; i < outs; ++i) {
+                _bundle_for_outputs->add_port_to_channel (i, _outputs.port(i)->name ());
+        }
+}
+
+
+/**
+ *  Create and setup bundles that describe our inputs and outputs.
+ */
+
+void
+IO::create_bundles ()
+{
+        _bundle_for_inputs = boost::shared_ptr<Bundle> (
+                new InputBundle ("", true)
+                );
+        
+        _bundle_for_outputs = boost::shared_ptr<Bundle> (
+                new OutputBundle ("", true)
+                );
+
+        setup_bundles ();
+}
+
+boost::shared_ptr<Bundle>
+IO::input_bundle()
+{
+	if (_input_bundle) {
+		return _input_bundle;
+	}
+
+	/* XXX: will only report the first bundle found; should really return a list, I think */
+	   
+	/* check that _input_bundle is right wrt the connections that are currently made */
+
+	/* make a vector of the first output connected to each of our inputs */
+	std::vector<std::string> connected;
+        for (uint32_t i = 0; i < _inputs.num_ports(); ++i) {
+		const char** c = _inputs.port(i)->get_connections ();
+		if (c) {
+			connected.push_back (c[0]);
+		}
+	}
+
+	_input_bundle = _session.bundle_by_ports (connected);
+	return _input_bundle;
+}
+
+
+boost::shared_ptr<Bundle>
+IO::output_bundle()
+{
+	if (_output_bundle) {
+		return _output_bundle;
+	}
+	
+	/* XXX: will only report the first bundle found; should really return a list, I think */
+	   
+	/* check that _output_bundle is right wrt the connections that are currently made */
+
+	/* make a vector of the first input connected to each of our outputs */
+	std::vector<std::string> connected;
+        for (uint32_t i = 0; i < _outputs.num_ports(); ++i) {
+		const char** c = _outputs.port(i)->get_connections ();
+		if (c) {
+			connected.push_back (c[0]);
+		}
+	}
+
+	_output_bundle = _session.bundle_by_ports (connected);
+	return _output_bundle;
 }

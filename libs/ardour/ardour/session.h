@@ -710,13 +710,14 @@ class Session : public PBD::StatefulDestructible
 
 	/* I/O bundles */
 
-	template<class T> void foreach_bundle (T *obj, void (T::*func)(Bundle *));
-	void add_bundle (Bundle *);
-	void remove_bundle (Bundle *);
-	Bundle *bundle_by_name (string) const;
+	void foreach_bundle (sigc::slot<void, boost::shared_ptr<Bundle> >);
+	void add_bundle (boost::shared_ptr<Bundle>);
+	void remove_bundle (boost::shared_ptr<Bundle>);
+	boost::shared_ptr<Bundle> bundle_by_name (string) const;
+	boost::shared_ptr<Bundle> bundle_by_ports (vector<string> const &) const;
 
-	sigc::signal<void,Bundle *> BundleAdded;
-	sigc::signal<void,Bundle *> BundleRemoved;
+	sigc::signal<void,boost::shared_ptr<Bundle> > BundleAdded;
+	sigc::signal<void,boost::shared_ptr<Bundle> > BundleRemoved;
 
 	/* MIDI */
 
@@ -1558,9 +1559,9 @@ class Session : public PBD::StatefulDestructible
 
 	/* I/O bundles */
 
-	typedef list<Bundle *> BundleList;
+	typedef list<boost::shared_ptr<Bundle> > BundleList;
 	mutable Glib::Mutex bundle_lock;
-	BundleList  _bundles;
+	BundleList _bundles;
 	int load_bundles (const XMLNode&);
 
 	void reverse_diskstream_buffers ();

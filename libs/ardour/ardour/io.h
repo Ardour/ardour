@@ -120,11 +120,11 @@ class IO : public Automatable, public Latent
 	
 	int ensure_io (ChanCount in, ChanCount out, bool clear, void *src);
 
-	int use_input_bundle (Bundle&, void *src);
-	int use_output_bundle (Bundle&, void *src);
+	int connect_input_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
+	int connect_output_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
 
-	Bundle *input_bundle() const { return _input_bundle; }
-	Bundle *output_bundle() const { return _output_bundle; }
+	boost::shared_ptr<Bundle> input_bundle();
+	boost::shared_ptr<Bundle> output_bundle();
 
 	int add_input_port (string source, void *src, DataType type = DataType::NIL);
 	int add_output_port (string destination, void *src, DataType type = DataType::NIL);
@@ -178,6 +178,9 @@ class IO : public Automatable, public Latent
 	const ChanCount& n_outputs () const { return _outputs.count(); }
 
 	void attach_buffers(ChanCount ignored);
+
+        boost::shared_ptr<Bundle> bundle_for_inputs () const { return _bundle_for_inputs; }
+        boost::shared_ptr<Bundle> bundle_for_outputs () const { return _bundle_for_outputs; }
 
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
@@ -268,8 +271,8 @@ class IO : public Automatable, public Latent
 	PortSet             _outputs;
 	PortSet             _inputs;
 	PeakMeter*          _meter;
-	Bundle*             _input_bundle;
-	Bundle*             _output_bundle;
+	boost::shared_ptr<Bundle> _input_bundle; ///< bundle connected to our inputs
+	boost::shared_ptr<Bundle> _output_bundle; ///< bundle connected to our outputs
 	bool                 no_panner_reset;
 	bool                _phase_invert;
 	bool                _denormal_protection;
@@ -326,6 +329,8 @@ class IO : public Automatable, public Latent
 	ChanCount _output_minimum;
 	ChanCount _output_maximum;
 
+	boost::shared_ptr<Bundle> _bundle_for_inputs;
+	boost::shared_ptr<Bundle> _bundle_for_outputs;
 
 	static int parse_io_string (const string&, vector<string>& chns);
 
@@ -356,6 +361,9 @@ class IO : public Automatable, public Latent
 
 	int32_t find_input_port_hole ();
 	int32_t find_output_port_hole ();
+
+	void create_bundles ();
+	void setup_bundles ();
 };
 
 } // namespace ARDOUR

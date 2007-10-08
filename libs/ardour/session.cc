@@ -487,20 +487,6 @@ Session::destroy ()
 		i = tmp;
 	}
 	
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete bundles\n";
-#endif /* TRACK_DESTRUCTION */
-	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ) {
-		BundleList::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		delete *i;
-
-		i = tmp;
-	}
-
 	if (butler_mixdown_buffer) {
 		delete [] butler_mixdown_buffer;
 	}
@@ -615,7 +601,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
-		Bundle* c = new OutputBundle (buf, true);
+		shared_ptr<Bundle> c (new OutputBundle (buf, true));
 		c->set_nchannels (1);
 		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
@@ -626,7 +612,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
-		Bundle* c = new InputBundle (buf, true);
+		shared_ptr<Bundle> c (new InputBundle (buf, true));
 		c->set_nchannels (1);
 		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
@@ -639,7 +625,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		Bundle* c = new OutputBundle (buf, true);
+		shared_ptr<Bundle> c (new OutputBundle (buf, true));
 		c->set_nchannels (2);
 		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 		c->add_port_to_channel (1, _engine.get_nth_physical_output (DataType::AUDIO, np+1));
@@ -651,7 +637,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		Bundle* c = new InputBundle (buf, true);
+		shared_ptr<Bundle> c (new InputBundle (buf, true));
 		c->set_nchannels (2);
 		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 		c->add_port_to_channel (1, _engine.get_nth_physical_input (DataType::AUDIO, np+1));
@@ -701,7 +687,7 @@ Session::when_engine_running ()
 			
 		}
 
-		Bundle* c = new OutputBundle (_("Master Out"), true);
+		shared_ptr<Bundle> c (new OutputBundle (_("Master Out"), true));
 
 		c->set_nchannels (_master_out->n_inputs().n_total());
 		for (uint32_t n = 0; n < _master_out->n_inputs ().n_total(); ++n) {
@@ -1902,7 +1888,10 @@ Session::add_routes (RouteList& new_routes, bool save)
 		
 		if ((*x)->is_control()) {
 			_control_out = (*x);
-		} 
+		}
+
+		add_bundle ((*x)->bundle_for_inputs());
+		add_bundle ((*x)->bundle_for_outputs());
 	}
 
 	if (_control_out && IO::connecting_legal) {
@@ -3609,7 +3598,7 @@ Session::available_capture_duration ()
 }
 
 void
-Session::add_bundle (ARDOUR::Bundle* bundle)
+Session::add_bundle (shared_ptr<Bundle> bundle)
 {
 	{
 		Glib::Mutex::Lock guard (bundle_lock);
@@ -3622,7 +3611,7 @@ Session::add_bundle (ARDOUR::Bundle* bundle)
 }
 
 void
-Session::remove_bundle (ARDOUR::Bundle* bundle)
+Session::remove_bundle (shared_ptr<Bundle> bundle)
 {
 	bool removed = false;
 
@@ -3643,7 +3632,7 @@ Session::remove_bundle (ARDOUR::Bundle* bundle)
 	set_dirty();
 }
 
-ARDOUR::Bundle *
+shared_ptr<Bundle>
 Session::bundle_by_name (string name) const
 {
 	Glib::Mutex::Lock lm (bundle_lock);
@@ -3654,7 +3643,36 @@ Session::bundle_by_name (string name) const
 		}
 	}
 
-	return 0;
+	return boost::shared_ptr<Bundle> ();
+}
+
+boost::shared_ptr<Bundle>
+Session::bundle_by_ports (std::vector<std::string> const & wanted_ports) const
+{
+	Glib::Mutex::Lock lm (bundle_lock);
+
+	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+		if ((*i)->nchannels() != wanted_ports.size()) {
+			continue;
+		}
+
+		bool match = true;
+		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
+			Bundle::PortList const p = (*i)->channel_ports (j);
+			if (p.empty() || p[0] != wanted_ports[j]) {
+				/* not this bundle */
+				match = false;
+				break;
+			}
+		}
+
+		if (match) {
+			/* matched bundle */
+			return *i;
+		}
+	}
+
+	return boost::shared_ptr<Bundle> ();
 }
 
 void
@@ -4105,3 +4123,11 @@ Session::compute_initial_length ()
 	return _engine.frame_rate() * 60 * 5;
 }
 
+void
+Session::foreach_bundle (sigc::slot<void, boost::shared_ptr<Bundle> > sl)
+{
+	Glib::Mutex::Lock lm (bundle_lock);
+	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+		sl (*i);
+	}
+}

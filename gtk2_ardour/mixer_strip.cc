@@ -43,7 +43,6 @@
 #include <ardour/processor.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/bundle.h>
-#include <ardour/session_bundle.h>
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
@@ -549,7 +548,9 @@ MixerStrip::output_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 		citems.push_back (SeparatorElem());
 		
-		_session.foreach_bundle (this, &MixerStrip::add_bundle_to_output_menu);
+		_session.foreach_bundle (
+			bind (mem_fun (*this, &MixerStrip::add_bundle_to_output_menu), _route->output_bundle ())
+			);
 
 		output_menu.popup (1, ev->time);
 		break;
@@ -611,7 +612,9 @@ MixerStrip::input_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
 		
-		_session.foreach_bundle (this, &MixerStrip::add_bundle_to_input_menu);
+		_session.foreach_bundle (
+			bind (mem_fun (*this, &MixerStrip::add_bundle_to_input_menu), _route->input_bundle ())
+			);
 
 		input_menu.popup (1, ev->time);
 		break;
@@ -623,12 +626,12 @@ MixerStrip::input_press (GdkEventButton *ev)
 }
 
 void
-MixerStrip::bundle_input_chosen (ARDOUR::Bundle *c)
+MixerStrip::bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 {
 	if (!ignore_toggle) {
 
 		try { 
-			_route->use_input_bundle (*c, this);
+			_route->connect_input_ports_to_bundle (c, this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
@@ -639,12 +642,12 @@ MixerStrip::bundle_input_chosen (ARDOUR::Bundle *c)
 }
 
 void
-MixerStrip::bundle_output_chosen (ARDOUR::Bundle *c)
+MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 {
 	if (!ignore_toggle) {
 
 		try { 
-			_route->use_output_bundle (*c, this);
+			_route->connect_output_ports_to_bundle (c, this);
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
@@ -655,23 +658,23 @@ MixerStrip::bundle_output_chosen (ARDOUR::Bundle *c)
 }
 
 void
-MixerStrip::add_bundle_to_input_menu (ARDOUR::Bundle* c)
+MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, boost::shared_ptr<Bundle> current)
 {
 	using namespace Menu_Helpers;
 
-	if (dynamic_cast<InputBundle *> (c) == 0) {
+	/* the input menu needs to contain only output bundles (that we
+	   can connect inputs to */
+	if (boost::dynamic_pointer_cast<OutputBundle, Bundle> (b) == 0) {
 		return;
 	}
 
 	MenuList& citems = input_menu.items();
 	
-	if (c->nchannels() == _route->n_inputs().n_total()) {
+	if (b->nchannels() == _route->n_inputs().n_total()) {
 
-		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_chosen), c)));
+		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_chosen), b)));
 		
-		ARDOUR::Bundle *current = _route->input_bundle();
-		
-		if (current == c) {
+		if (current == b) {
 			ignore_toggle = true;
 			dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
 			ignore_toggle = false;
@@ -680,22 +683,23 @@ MixerStrip::add_bundle_to_input_menu (ARDOUR::Bundle* c)
 }
 
 void
-MixerStrip::add_bundle_to_output_menu (ARDOUR::Bundle* c)
+MixerStrip::add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, boost::shared_ptr<Bundle> current)
 {
 	using namespace Menu_Helpers;
 
-	if (dynamic_cast<OutputBundle *> (c) == 0) {
+	/* the output menu needs to contain only input bundles (that we
+	   can connect outputs to */
+	if (boost::dynamic_pointer_cast<InputBundle, Bundle> (b) == 0) {
 		return;
 	}
 
-	if (c->nchannels() == _route->n_outputs().n_total()) {
+
+	if (b->nchannels() == _route->n_outputs().n_total()) {
 
 		MenuList& citems = output_menu.items();
-		citems.push_back (CheckMenuElem (c->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_chosen), c)));
+		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));
 		
-		ARDOUR::Bundle *current = _route->output_bundle();
-		
-		if (current == c) {
+		if (current == b) {
 			ignore_toggle = true;
 			dynamic_cast<CheckMenuItem *> (&citems.back())->set_active (true);
 			ignore_toggle = false;
@@ -748,7 +752,7 @@ MixerStrip::connect_to_pan ()
 void
 MixerStrip::update_input_display ()
 {
-	ARDOUR::Bundle *c;
+	boost::shared_ptr<ARDOUR::Bundle> c;
 
 	if ((c = _route->input_bundle()) != 0) {
 		input_label.set_text (c->name());
@@ -768,7 +772,7 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-	ARDOUR::Bundle *c;
+	boost::shared_ptr<ARDOUR::Bundle> c;
 
 	if ((c = _route->output_bundle()) != 0) {
 		output_label.set_text (c->name());
