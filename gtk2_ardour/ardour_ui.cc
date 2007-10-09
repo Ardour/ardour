@@ -187,6 +187,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	route_params = 0;
 	option_editor = 0;
 	location_ui = 0;
+	key_editor = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
 	have_disk_speed_dialog_displayed = false;

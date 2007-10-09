@@ -3039,7 +3039,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		
  		playlist = (*i)->region()->playlist();
                 XMLNode &before = playlist->get_state();
-		playlist->duplicate (r, r->last_frame(), times);
+		playlist->duplicate (r, r->last_frame() + 1, times);
 		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 
 		c.disconnect ();

@@ -5034,7 +5034,6 @@ Editor::compute_mouse_speed ()
 		total += mouse_speed[n];
 	}
 
-
 	return mouse_direction * total/mouse_speed_size;
 }
 
@@ -5063,6 +5062,8 @@ Editor::update_mouse_speed ()
 		if (fabs (speed) < 0.1) {
 			/* don't asymptotically approach zero */
 			memset (mouse_speed, 0, sizeof (double) * mouse_speed_size);
+			have_full_mouse_speed = 0;
+			mouse_speed_entries = 0;
 			speed = 0.0;
 		} else if (fabs (speed) < 0.25) {
  			add_mouse_speed (fabs (speed * 0.2), mouse_direction);

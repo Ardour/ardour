@@ -27,6 +27,8 @@
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/accelkey.h>
 
+#include <ardour/configuration.h>
+
 namespace Gtk {
 	class UIManager;
 }
@@ -92,7 +94,7 @@ class ActionManager
 
 	static bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
 
-	static void get_all_actions (std::vector<std::string>& names, 
+	static void get_all_actions (std::vector<std::string>& labels, 
 				     std::vector<std::string>& paths, 
 				     std::vector<std::string>& keys, 
 				     std::vector<Gtk::AccelKey>& bindings);

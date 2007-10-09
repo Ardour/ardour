@@ -25,6 +25,7 @@
 
 #include <sigc++/signal.h>
 #include <gtk/gtk.h>
+#include <gtkmm/window.h>
 
 #include <ardour/types.h>
 #include <pbd/stateful.h>

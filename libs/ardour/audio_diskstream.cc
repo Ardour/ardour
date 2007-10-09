@@ -760,14 +760,14 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 		if (rec_nframes == 0 && _actual_speed != 1.0f && _actual_speed != -1.0f) {
 			
 			uint64_t phase = last_phase;
-			uint64_t phi_delta;
+			int64_t phi_delta;
 			nframes_t i = 0;
 
 			// Linearly interpolate into the alt buffer
 			// using 40.24 fixp maths (swh)
 
 			if (phi != target_phi) {
-				phi_delta = (target_phi - phi) / nframes;
+				phi_delta = ((int64_t)(target_phi - phi)) / nframes;
 			} else {
 				phi_delta = 0;
 			}
@@ -792,7 +792,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				chaninfo->current_playback_buffer = chaninfo->speed_buffer;
 			}
 
-			playback_distance = i + 1;
+			playback_distance = i;
 			last_phase = (phase & 0xFFFFFF);
 
 		} else {

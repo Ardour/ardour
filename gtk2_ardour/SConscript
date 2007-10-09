@@ -168,6 +168,7 @@ imageframe_time_axis_view.cc
 imageframe_view.cc
 io_selector.cc
 keyboard.cc
+keyeditor.cc
 ladspa_pluginui.cc
 location_ui.cc
 main.cc

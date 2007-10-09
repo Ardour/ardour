@@ -35,6 +35,7 @@
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
 #include "theme_manager.h"
+#include "keyeditor.h"
 
 #include "i18n.h"
 
@@ -324,6 +325,27 @@ ARDOUR_UI::toggle_location_window ()
 			location_ui->present ();
 		} else {
 			location_ui->hide ();
+		} 
+	}
+}
+
+void
+ARDOUR_UI::toggle_key_editor ()
+{
+	if (key_editor == 0) {
+		key_editor = new KeyEditor;
+		key_editor->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleKeyEditor")));	
+	}
+
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleKeyEditor"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	
+		if (tact->get_active()) {
+			key_editor->show_all ();
+			key_editor->present ();
+		} else {
+			key_editor->hide ();
 		} 
 	}
 }

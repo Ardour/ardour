@@ -715,8 +715,8 @@ def prep_libcheck(topenv, libinfo):
 	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
 	#            All libraries needed should be built against this location
 	if topenv['GTKOSX']:
-		libinfo.Append(CCFLAGS="-I/opt/gtk/include", LINKFLAGS="-L/opt/gtk/lib")
-	libinfo.Append(CCFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+		libinfo.Append(CPPPATH="/opt/gtk/include", LIBPATH="/opt/gtk/lib")
+	libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
 
 prep_libcheck(env, env)
 
@@ -745,7 +745,7 @@ libraries['usb'] = conf.Finish ()
 
 libraries['flac'] = LibraryInfo ()
 prep_libcheck(env, libraries['flac'])
-libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
+libraries['flac'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
 
 #
 # june 1st 2007: look for a function that is in FLAC 1.1.2 and not in later versions
@@ -769,7 +769,7 @@ libraries['flac'] = conf.Finish ()
 
 libraries['boost'] = LibraryInfo ()
 prep_libcheck(env, libraries['boost'])
-libraries['boost'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
+libraries['boost'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
 conf = Configure (libraries['boost'])
 if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         print "Boost header files do not appear to be installed."
