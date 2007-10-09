@@ -324,10 +324,10 @@ class IO : public Automatable, public Latent
 	sigc::connection port_legal_c;
 	sigc::connection panner_legal_c;
 
-	ChanCount _input_minimum;
-	ChanCount _input_maximum;
-	ChanCount _output_minimum;
-	ChanCount _output_maximum;
+	ChanCount _input_minimum; ///< minimum number of input channels (0 for no minimum)
+	ChanCount _input_maximum; ///< maximum number of input channels (ChanCount::INFINITE for no maximum)
+	ChanCount _output_minimum; ///< minimum number of output channels (0 for no minimum)
+	ChanCount _output_maximum; ///< maximum number of output channels (ChanCount::INFINITE for no maximum)
 
 	boost::shared_ptr<Bundle> _bundle_for_inputs;
 	boost::shared_ptr<Bundle> _bundle_for_outputs;

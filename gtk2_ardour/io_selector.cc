@@ -194,14 +194,14 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 	const ARDOUR::DataType t = io->default_type();
 
 	if (for_input) {
-		if (io->input_maximum().get(t) < 0 || io->input_maximum().get(t) > (size_t) io->n_inputs().get(t)) {
+		if (io->input_maximum().get(t) > (uint32_t) io->n_inputs().get(t)) {
 			add_port_button.set_sensitive (true);
 		} else {
 			add_port_button.set_sensitive (false);
 		}
 
 	} else {
-		if (io->output_maximum().get(t) < 0 || io->output_maximum().get(t) > (size_t) io->n_outputs().get(t)) {
+		if (io->output_maximum().get(t) > (uint32_t) io->n_outputs().get(t)) {
 			add_port_button.set_sensitive (true);
 		} else {
 			add_port_button.set_sensitive (false);
@@ -212,14 +212,14 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 	port_button_box.pack_start (remove_port_button, false, false);
 
 	if (for_input) {
-		if (io->input_minimum().get(t) < 0 || io->input_minimum().get(t) < (size_t) io->n_inputs().get(t)) {
+		if (io->input_minimum().get(t) < (uint32_t) io->n_inputs().get(t)) {
 			remove_port_button.set_sensitive (true);
 		} else {
 			remove_port_button.set_sensitive (false);
 		}
 			
 	} else {
-		if (io->output_minimum().get(t) < 0 || io->output_minimum().get(t) < (size_t) io->n_outputs().get(t)) {
+		if (io->output_minimum().get(t) < (uint32_t) io->n_outputs().get(t)) {
 			remove_port_button.set_sensitive (true);
 		} else {
 			remove_port_button.set_sensitive (false);

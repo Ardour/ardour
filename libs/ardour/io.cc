@@ -1296,13 +1296,14 @@ IO::state (bool full_state)
 	snprintf (buf, sizeof(buf), "%2.12f", gain());
 	node->add_property ("gain", buf);
 
-	// FIXME: this is NOT sufficient!
-	const int in_min  = (_input_minimum == ChanCount::ZERO) ? -1 : _input_minimum.get(_default_type);
-	const int in_max  = (_input_maximum == ChanCount::INFINITE) ? -1 : _input_maximum.get(_default_type);
-	const int out_min = (_output_minimum == ChanCount::ZERO) ? -1 : _output_minimum.get(_default_type);
-	const int out_max = (_output_maximum == ChanCount::INFINITE) ? -1 : _output_maximum.get(_default_type);
+	/* To make backwards compatibility a bit easier, write ChanCount::INFINITE to the session file
+	   as -1.
+	*/
 
-	snprintf (buf, sizeof(buf)-1, "%d,%d,%d,%d", in_min, in_max, out_min, out_max);
+	int const in_max = _input_maximum == ChanCount::INFINITE ? -1 : _input_maximum.get(_default_type);
+	int const out_max = _output_maximum == ChanCount::INFINITE ? -1 : _output_maximum.get(_default_type);
+
+	snprintf (buf, sizeof(buf)-1, "%zd,%d,%zd,%d", _input_minimum.get(_default_type), in_max, _output_minimum.get(_default_type), out_max);
 
 	node->add_property ("iolimits", buf);
 
@@ -1339,18 +1340,42 @@ IO::set_state (const XMLNode& node)
 		_id = prop->value ();
 	}
 
-	size_t in_min =  -1;
-	size_t in_max  = -1;
-	size_t out_min = -1;
-	size_t out_max = -1;
+	int in_min = -1;
+	int in_max = -1;
+	int out_min = -1;
+	int out_max = -1;
 
 	if ((prop = node.property ("iolimits")) != 0) {
-		sscanf (prop->value().c_str(), "%zd,%zd,%zd,%zd",
+		sscanf (prop->value().c_str(), "%d,%d,%d,%d",
 			&in_min, &in_max, &out_min, &out_max);
-		_input_minimum = ChanCount(_default_type, in_min);
-		_input_maximum = ChanCount(_default_type, in_max);
-		_output_minimum = ChanCount(_default_type, out_min);
-		_output_maximum = ChanCount(_default_type, out_max);
+
+		/* Correct for the difference between the way we write things to session files and the
+		   way things are described by ChanCount; see comments in io.h about what the different
+		   ChanCount values mean. */
+
+		if (in_min < 0) {
+			_input_minimum = ChanCount::ZERO;
+		} else {
+			_input_minimum = ChanCount (_default_type, in_min);
+		}
+
+		if (in_max < 0) {
+			_input_maximum = ChanCount::INFINITE;
+		} else {
+			_input_maximum = ChanCount (_default_type, in_max);
+		}
+
+		if (out_min < 0) {
+			_output_minimum = ChanCount::ZERO;
+		} else {
+			_output_minimum = ChanCount (_default_type, out_min);
+		}
+		
+		if (out_max < 0) {
+			_output_maximum = ChanCount::INFINITE;
+		} else {
+			_output_maximum = ChanCount (_default_type, out_max);
+		}
 	}
 	
 	if ((prop = node.property ("gain")) != 0) {
