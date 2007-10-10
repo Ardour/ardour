@@ -51,7 +51,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_actions, X_("Tools"), _("Tools"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
-	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("ZoomFocus"));
+	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
 	ActionManager::register_action (editor_actions, X_("Solo"), _("Solo"));
@@ -124,7 +124,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "edit-cursor-to-range-end", _("Edit Cursor to Range End"), bind (mem_fun(*this, &Editor::cursor_to_selection_end), edit_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "select-all", _("select all"), bind (mem_fun(*this, &Editor::select_all), Selection::Set));
+	act = ActionManager::register_action (editor_actions, "select-all", _("Select All"), bind (mem_fun(*this, &Editor::select_all), Selection::Set));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -256,7 +256,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "quantize-region", _("Quantize Regions"), mem_fun(*this, &Editor::quantize_regions));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "crop", _("crop"), mem_fun(*this, &Editor::crop_region_to_selection));
+	act = ActionManager::register_action (editor_actions, "crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-chunk", _("Insert Chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));
 	ActionManager::session_sensitive_actions.push_back (act);
