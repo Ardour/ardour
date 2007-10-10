@@ -204,7 +204,8 @@ class IO : public Automatable, public Latent
 	static sigc::signal<int>            PortsLegal;
 	static sigc::signal<int>            PannersLegal;
 	static sigc::signal<int>            ConnectingLegal;
-	static sigc::signal<void,ChanCount> MoreChannels;
+	/// raised when the number of input or output ports changes
+	static sigc::signal<void,ChanCount> PortCountChanged;
 	static sigc::signal<int>            PortsCreated;
 
     static void update_meters();

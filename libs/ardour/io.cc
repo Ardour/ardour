@@ -70,7 +70,7 @@ sigc::signal<void>           IO::Meter;
 sigc::signal<int>            IO::ConnectingLegal;
 sigc::signal<int>            IO::PortsLegal;
 sigc::signal<int>            IO::PannersLegal;
-sigc::signal<void,ChanCount> IO::MoreChannels;
+sigc::signal<void,ChanCount> IO::PortCountChanged;
 sigc::signal<int>            IO::PortsCreated;
 
 Glib::StaticMutex IO::m_meter_signal_lock = GLIBMM_STATIC_MUTEX_INIT;
@@ -148,8 +148,8 @@ IO::IO (Session& s, const string& name,
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 	
-	// Connect to our own MoreChannels signal to connect output buffers
-	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
+	// Connect to our own PortCountChanged signal to connect output buffers
+	IO::PortCountChanged.connect (mem_fun (*this, &IO::attach_buffers));
 
 	_session.add_controllable (_gain_control);
 
@@ -188,8 +188,8 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 		m_meter_connection = Meter.connect (mem_fun (*this, &IO::meter));
 	}
 	
-	// Connect to our own MoreChannels signal to connect output buffers
-	IO::MoreChannels.connect (mem_fun (*this, &IO::attach_buffers));
+	// Connect to our own PortCountChanged signal to connect output buffers
+	IO::PortCountChanged.connect (mem_fun (*this, &IO::attach_buffers));
 
 	_session.add_controllable (_gain_control);
 
@@ -548,6 +548,8 @@ IO::remove_output_port (Port* port, void* src)
 				reset_panner ();
 			}
 		}
+
+		PortCountChanged (n_outputs()); /* EMIT SIGNAL */
 	}
 
 	if (change == ConnectionsChanged) {
@@ -558,8 +560,8 @@ IO::remove_output_port (Port* port, void* src)
 		output_changed (change, src);
 		_session.set_dirty ();
 		return 0;
-	} 
-	
+	}
+
 	return -1;
 }
 
@@ -609,7 +611,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 			reset_panner ();
 		}
 
-		MoreChannels (n_outputs()); /* EMIT SIGNAL */
+		PortCountChanged (n_outputs()); /* EMIT SIGNAL */
 	}
 
 	if (destination.length()) {
@@ -622,7 +624,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 	output_changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	setup_bundles ();
 	_session.set_dirty ();
-	
+
 	return 0;
 }
 
@@ -657,6 +659,8 @@ IO::remove_input_port (Port* port, void* src)
 				reset_panner ();
 			}
 		}
+		
+		PortCountChanged (n_inputs ()); /* EMIT SIGNAL */
 	}
 
 	if (change == ConfigurationChanged) {
@@ -718,7 +722,7 @@ IO::add_input_port (string source, void* src, DataType type)
 			reset_panner ();
 		}
 
-		MoreChannels (n_inputs()); /* EMIT SIGNAL */
+		PortCountChanged (n_inputs()); /* EMIT SIGNAL */
 	}
 
 	if (source.length()) {
@@ -838,7 +842,7 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 		drop_input_bundle ();
 		setup_peak_meters ();
 		reset_panner ();
-		MoreChannels (n_inputs()); /* EMIT SIGNAL */
+		PortCountChanged (n_inputs()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	
@@ -854,7 +858,7 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 
 /** Attach output_buffers to port buffers.
  * 
- * Connected to IO's own MoreChannels signal.
+ * Connected to IO's own PortCountChanged signal.
  */
 void
 IO::attach_buffers(ChanCount ignored)
@@ -1012,7 +1016,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 	}
 
 	if (in_changed || out_changed) {
-		MoreChannels (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
+		PortCountChanged (max (n_outputs(), n_inputs())); /* EMIT SIGNAL */
 		setup_bundles ();
 		_session.set_dirty ();
 	}
@@ -1101,7 +1105,7 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 	
 	if (changed) {
 		drop_output_bundle ();
-		MoreChannels (n_outputs()); /* EMIT SIGNAL */
+		PortCountChanged (n_outputs()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	

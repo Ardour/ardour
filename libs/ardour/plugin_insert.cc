@@ -63,7 +63,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreChannels (max(input_streams(), output_streams()));
+		IO::PortCountChanged (max(input_streams(), output_streams()));
 	}
 
 	ProcessorCreated (this); /* EMIT SIGNAL */
@@ -80,7 +80,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreChannels (max(input_streams(), output_streams()));
+		IO::PortCountChanged (max(input_streams(), output_streams()));
 	}
 }
 

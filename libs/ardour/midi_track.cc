@@ -73,7 +73,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	set_output_minimum(ChanCount(DataType::MIDI, 1));
 	set_output_maximum(ChanCount(DataType::MIDI, 1));
 
-	MoreChannels(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
+	PortCountChanged(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
@@ -87,7 +87,7 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	set_output_minimum(ChanCount(DataType::MIDI, 1));
 	set_output_maximum(ChanCount(DataType::MIDI, 1));
 	
-	MoreChannels(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
+	PortCountChanged(ChanCount(DataType::MIDI, 2)); /* EMIT SIGNAL */
 }
 
 MidiTrack::~MidiTrack ()

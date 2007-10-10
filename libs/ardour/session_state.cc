@@ -266,7 +266,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	Controllable::Destroyed.connect (mem_fun (*this, &Session::remove_controllable));
 
-	IO::MoreChannels.connect (mem_fun (*this, &Session::ensure_buffers));
+	IO::PortCountChanged.connect (mem_fun (*this, &Session::ensure_buffers));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
