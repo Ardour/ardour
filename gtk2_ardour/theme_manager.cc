@@ -24,6 +24,7 @@
 
 #include <gtkmm/stock.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/window_title.h>
 #include <gtkmm/settings.h>
 
 #include <pbd/file_utils.h>
@@ -51,6 +52,10 @@ ThemeManager::ThemeManager()
 	dark_button ("Dark Theme"),
 	light_button ("Light Theme")
 {
+	Gtkmm2ext::WindowTitle title (Glib::get_application_name ());
+	title += _("Theme Manager");
+	set_title (title.get_string ());
+  
 	color_list = ListStore::create (columns);
 	color_display.set_model (color_list);
 	color_display.append_column (_("Object"), columns.name);
