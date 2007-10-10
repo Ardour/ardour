@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,39 +20,57 @@
 #ifndef __ardour_ui_io_selector_h__
 #define __ardour_ui_io_selector_h__
 
-#if __GNUC__ >= 3
-#include <ext/slist>
-using __gnu_cxx::slist;
-#else
-#include <slist.h>
-#endif
-
-#include <string>
-
-#include <glibmm/thread.h>
-
 #include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/table.h>
 #include <gtkmm/frame.h>
-#include <gtkmm/button.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/liststore.h>
 
-#include <ardour_dialog.h>
-
+#include "ardour_dialog.h"
 
 namespace ARDOUR {
-	class IO;
 	class Session;
+	class IO;
 	class PortInsert;
-	class Port;
-	class IOProcessor;
 }
+
+class RotatedLabelSet : public Gtk::Widget {
+  public:
+	RotatedLabelSet ();
+	virtual ~RotatedLabelSet ();
+
+	void set_angle (int);
+	void set_n_labels (int);
+	void set_label (int, std::string const &);
+	std::string get_label (int) const;
+	void set_base_dimensions (int, int);
+
+  protected:
+	virtual void on_size_request (Gtk::Requisition*);
+	virtual void on_size_allocate (Gtk::Allocation&);
+	virtual void on_realize ();
+	virtual void on_unrealize ();
+	virtual bool on_expose_event (GdkEventExpose*);
+
+	Glib::RefPtr<Gdk::Window> _gdk_window;
+
+  private:
+	std::pair<int, int> setup_layout (std::string const &);
+	
+	std::vector<std::string> _labels; ///< text for our labels
+	int _angle_degrees; ///< label rotation angle in degrees
+	double _angle_radians; ///< label rotation angle in radians
+	int _base_start; ///< offset to start of labels; see set_base_dimensions() for more details
+	int _base_width; ///< width of labels; see set_base_dimensions() for more details
+	Glib::RefPtr<Pango::Context> _pango_context;
+	Glib::RefPtr<Pango::Layout> _pango_layout;
+	Glib::RefPtr<Gdk::GC> _gc;
+	Gdk::Color _fg_colour;
+	Gdk::Color _bg_colour;
+};
 
 class IOSelector : public Gtk::VBox {
   public:
-	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool for_input);
+	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
 	~IOSelector ();
 
 	void redisplay ();
@@ -62,79 +80,46 @@ class IOSelector : public Gtk::VBox {
 		Accepted
 	};
 
-	sigc::signal<void,Result> Finished;
+	sigc::signal<void, Result> Finished;
 
   protected:
-	ARDOUR::Session& session;
-	
+	ARDOUR::Session& _session;
+
   private:
-	boost::shared_ptr<ARDOUR::IO> io;
-	bool for_input;
-	ARDOUR::Port *selected_port;
-	sigc::connection page_selection_connection;
-
-	Gtk::VBox main_box;
-	Gtk::HBox port_and_selector_box;
-
-	/* column model */
-
-	struct PortDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-
-	    PortDisplayModelColumns() { 
-		    add (displayed_name);
-		    add (full_name);
-	    }
-
-	    Gtk::TreeModelColumn<Glib::ustring>       displayed_name;
-	    Gtk::TreeModelColumn<Glib::ustring>       full_name;
-	};
-
-	PortDisplayModelColumns port_display_columns;
-
-	/* client/port selection */
-
-	Gtk::Notebook notebook;
-	Gtk::Frame selector_frame;
-	Gtk::VBox selector_box;
-	Gtk::HBox selector_button_box;
-
-	/* ports */
-
-	Gtk::VBox port_box;
-	Gtk::HBox port_button_box;
-	Gtk::VBox port_and_button_box;
-	Gtk::Frame port_frame;
-	Gtk::Button add_port_button;
-	Gtk::Button remove_port_button;
-	Gtk::Button clear_connections_button;
-	Gtk::ScrolledWindow port_display_scroller;
-
-	Glib::Mutex port_display_lock;
-	slist<Gtk::TreeView *> port_displays;
-	void display_ports ();
-
-	void rescan ();
-	void clear_connections ();
-
-	bool port_selection_changed(GdkEventButton *, Gtk::TreeView*);
-
-	void ports_changed (ARDOUR::IOChange, void *);
-	void name_changed ();
-
-	void add_port ();
-	void remove_port ();
+	void setup_table_size ();
+	void setup_row_labels ();
+	void setup_column_labels ();
+	void setup_check_button_states ();
+	void check_button_toggled (int, int);
+	void add_port_button_clicked ();
+	void remove_port_button_clicked ();
 	void set_button_sensitivity ();
-
-	gint connection_button_release (GdkEventButton *, Gtk::TreeView*);
+	void ports_changed (ARDOUR::IOChange, void *);
+	void update_column_label_dimensions ();
 	
-	void select_treeview(Gtk::TreeView*);
-	void select_next_treeview ();
+	boost::shared_ptr<ARDOUR::IO> _io;
+	bool _for_input;
+	int _width;
+	int _height;
+	std::vector<Gtk::Label*> _row_labels;
+	RotatedLabelSet _column_labels;
+	std::vector<std::vector<Gtk::CheckButton*> > _check_buttons;
+	bool _ignore_check_button_toggle; ///< check button toggle events are ignored when this is true
+	Gtk::Button _add_port_button;
+	Gtk::Button _remove_port_button;
+	Gtk::VBox _add_remove_box;
+	Gtk::HBox _table_hbox;
+	Gtk::Label _dummy;
+	bool _add_remove_box_added;
+
+	Gtk::Table _table;
 };
+
 
 class IOSelectorWindow : public ArdourDialog
 {
   public:
-	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool for_input, bool can_cancel=false);
+	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool for_input, bool can_cancel = false);
 	~IOSelectorWindow ();
 
 	IOSelector& selector() { return _selector; }
@@ -150,7 +135,6 @@ class IOSelectorWindow : public ArdourDialog
 	Gtk::Button ok_button;
 	Gtk::Button cancel_button;
 	Gtk::Button rescan_button;
-	Gtk::HBox button_box;
 
 	void rescan ();
 	void cancel ();
@@ -167,23 +151,20 @@ class PortInsertUI : public Gtk::VBox
 	void finished (IOSelector::Result);
 
   private:
-	
-	Gtk::HBox  hbox;
+	Gtk::HBox hbox;
 	IOSelector input_selector;
 	IOSelector output_selector;
-	
 };
 
 class PortInsertWindow : public ArdourDialog
 {
   public: 
-	PortInsertWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>, bool can_cancel=false);
+	PortInsertWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>, bool can_cancel = false);
 	
   protected:
 	void on_map ();
 	
   private:
-	
 	PortInsertUI _portinsertui;
 	Gtk::VBox vbox;
 	
@@ -191,7 +172,6 @@ class PortInsertWindow : public ArdourDialog
 	Gtk::Button cancel_button;
 	Gtk::Button rescan_button;
 	Gtk::Frame button_frame;
-	Gtk::HBox button_box;
 	
 	void rescan ();
 	void cancel ();
@@ -202,4 +182,4 @@ class PortInsertWindow : public ArdourDialog
 };
 
 
-#endif /* __ardour_ui_io_selector_h__ */
+#endif

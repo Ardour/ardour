@@ -17,98 +17,654 @@
 
 */
 
-#include <map>
-#include <vector>
-
-#include <sigc++/bind.h>
-
+#include <gtkmm/label.h>
+#include <gtkmm/enums.h>
+#include <gtkmm/image.h>
+#include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
-
-#include <glibmm/thread.h>
-
-#include <ardour/io.h>
-#include <ardour/route.h>
-#include <ardour/audioengine.h>
-#include <ardour/port.h>
-#include <ardour/port_insert.h>
-#include <ardour/session.h>
-#include <ardour/audio_diskstream.h>
-
+#include <glibmm/objectbase.h>
 #include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/utils.h>
-
-#include "utils.h"
+#include <ardour/port_insert.h>
+#include "ardour/session.h"
+#include "ardour/io.h"
+#include "ardour/audioengine.h"
 #include "io_selector.h"
-#include "keyboard.h"
+#include "utils.h"
 #include "gui_thread.h"
-
 #include "i18n.h"
 
-using namespace std;
-using namespace Gtk;
-using namespace Glib;
-using namespace sigc;
-using namespace ARDOUR;
-using namespace PBD;
-using namespace Gtkmm2ext;
+RotatedLabelSet::RotatedLabelSet ()
+	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _base_start (64), _base_width (128)
+{
+	set_flags (Gtk::NO_WINDOW);
+	set_angle (30);
+}
 
-IOSelectorWindow::IOSelectorWindow (Session& sess, boost::shared_ptr<IO> ior, bool input, bool can_cancel)
-	: ArdourDialog ("i/o selector"),
-	  _selector (sess, ior, input),
+RotatedLabelSet::~RotatedLabelSet ()
+{
+	
+}
+
+void
+RotatedLabelSet::set_angle (int degrees)
+{
+	_angle_degrees = degrees;
+	_angle_radians = M_PI * _angle_degrees / 180;
+
+	queue_resize ();
+}
+
+void
+RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
+{
+	*requisition = Gtk::Requisition ();
+
+	if (_pango_layout == 0) {
+		return;
+	}
+
+	/* Our height is the highest label */
+	requisition->height = 0;
+	for (std::vector<std::string>::const_iterator i = _labels.begin(); i != _labels.end(); ++i) {
+		std::pair<int, int> const d = setup_layout (*i);
+		if (d.second > requisition->height) {
+			requisition->height = d.second;
+		}
+	}
+
+	/* And our width is the base plus the width of the last label */
+	requisition->width = _base_start + _base_width;
+	if (_labels.empty() == false) {
+		std::pair<int, int> const d = setup_layout (_labels.back());
+		requisition->width += d.first;
+	}
+}
+
+void
+RotatedLabelSet::on_size_allocate (Gtk::Allocation& allocation)
+{
+	set_allocation (allocation);
+
+	if (_gdk_window) {
+		_gdk_window->move_resize (
+			allocation.get_x(), allocation.get_y(), allocation.get_width(), allocation.get_height()
+			);
+	}
+}
+
+void
+RotatedLabelSet::on_realize ()
+{
+	Gtk::Widget::on_realize ();
+
+	Glib::RefPtr<Gtk::Style> style = get_style ();
+
+	if (!_gdk_window) {
+		GdkWindowAttr attributes;
+		memset (&attributes, 0, sizeof (attributes));
+
+		Gtk::Allocation allocation = get_allocation ();
+		attributes.x = allocation.get_x ();
+		attributes.y = allocation.get_y ();
+		attributes.width = allocation.get_width ();
+		attributes.height = allocation.get_height ();
+
+		attributes.event_mask = get_events () | Gdk::EXPOSURE_MASK; 
+		attributes.window_type = GDK_WINDOW_CHILD;
+		attributes.wclass = GDK_INPUT_OUTPUT;
+
+		_gdk_window = Gdk::Window::create (get_window (), &attributes, GDK_WA_X | GDK_WA_Y);
+		unset_flags (Gtk::NO_WINDOW);
+		set_window (_gdk_window);
+
+		_bg_colour = style->get_bg (Gtk::STATE_NORMAL );
+		modify_bg (Gtk::STATE_NORMAL, _bg_colour);
+		_fg_colour = style->get_fg (Gtk::STATE_NORMAL);
+;
+		_gdk_window->set_user_data (gobj ());
+
+		/* Set up Pango stuff */
+		_pango_context = create_pango_context ();
+
+		Pango::Matrix matrix = PANGO_MATRIX_INIT;
+		pango_matrix_rotate (&matrix, _angle_degrees);
+		_pango_context->set_matrix (matrix);
+
+		_pango_layout = Pango::Layout::create (_pango_context);
+		_gc = Gdk::GC::create (get_window ());
+	}
+}
+
+void
+RotatedLabelSet::on_unrealize()
+{
+	_gdk_window.clear ();
+
+	Gtk::Widget::on_unrealize ();
+}
+
+
+/**
+ *    Set up our Pango layout to plot a given string, and compute its dimensions once it has been rotated.
+ *    @param s String to use.
+ *    @return width and height of the rotated string, in pixels.
+ */
+
+std::pair<int, int>
+RotatedLabelSet::setup_layout (std::string const & s)
+{
+	_pango_layout->set_text (s);
+
+	/* Here's the unrotated size */
+	int w;
+	int h;
+	_pango_layout->get_pixel_size (w, h);
+
+	/* Rotate the width and height as appropriate.  I thought Pango might be able to do this for us,
+	   but I can't find out how... */
+	std::pair<int, int> d;
+	d.first = int (w * cos (_angle_radians) - h * sin (_angle_radians));
+	d.second = int (w * sin (_angle_radians) + h * cos (_angle_radians));
+
+	return d;
+}
+
+bool RotatedLabelSet::on_expose_event (GdkEventExpose* event)
+{
+	if (!_gdk_window) {
+		return true;
+	}
+
+	int const height = get_allocation().get_height ();
+	double const spacing = double (_base_width) / _labels.size();
+
+	/* Plot all the labels; really we should clip for efficiency */
+	for (uint32_t i = 0; i < _labels.size(); ++i) {
+		std::pair<int, int> const d = setup_layout (_labels[i]);
+		get_window()->draw_layout (_gc, _base_start + int ((i + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
+	}
+
+	return true;
+}
+
+void
+RotatedLabelSet::set_n_labels (int n)
+{
+	_labels.resize (n);
+	queue_resize ();
+}
+
+void
+RotatedLabelSet::set_label (int n, std::string const & l)
+{
+	_labels[n] = l;
+	queue_resize ();
+}
+
+std::string
+RotatedLabelSet::get_label (int n) const
+{
+	return _labels[n];
+}
+
+/**
+ *  Set the `base dimensions'.  These are the dimensions of the area at which the labels start, and
+ *  have to be set up to match whatever they are labelling.
+ *
+ *  Roughly speaking, we have
+ *
+ *             L L L L
+ *            E E E E
+ *           B B B B
+ *          A A A A
+ *         L L L L
+ * <--s--><--w--->
+ */
+    
+void
+RotatedLabelSet::set_base_dimensions (int s, int w)
+{
+	_base_start = s;
+	_base_width = w;
+	queue_resize ();
+}
+
+
+/**
+ *  Construct an IOSelector.
+ *  @param session Session to operate on.
+ *  @param io IO to operate on.
+ *  @param for_input true if the selector is for an input, otherwise false.
+ */
+ 
+IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
+	: _session (session), _io (io), _for_input (for_input), _width (0), _height (0),
+	  _ignore_check_button_toggle (false), _add_remove_box_added (false)
+{
+	/* Column labels */
+	pack_start (_column_labels, true, true);
+
+	/* Buttons for adding and removing ports */
+	_add_port_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_MENU)));
+	_add_port_button.set_label (_("Add port"));
+	_add_port_button.signal_clicked().connect (mem_fun (*this, &IOSelector::add_port_button_clicked));
+	_add_remove_box.pack_start (_add_port_button);
+	_remove_port_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REMOVE, Gtk::ICON_SIZE_MENU)));
+	_remove_port_button.set_label (_("Remove port"));
+	_remove_port_button.signal_clicked().connect (mem_fun (*this, &IOSelector::remove_port_button_clicked));
+	_add_remove_box.pack_start (_remove_port_button);
+	set_button_sensitivity ();
+
+	/* Table.  We need to put in a HBox, with a dummy label to its right,
+	   so that the rotated column labels can overhang the right hand side of the table. */
+	setup_table_size ();
+	setup_row_labels ();
+	setup_column_labels ();
+	setup_check_button_states ();
+	_table_hbox.pack_start (_table, false, false);
+	_table_hbox.pack_start (_dummy);
+	_table.set_col_spacings (4);
+	pack_start (_table_hbox);
+
+	show_all ();
+
+	update_column_label_dimensions ();
+
+	/* Listen for ports changing on the IO */
+	if (_for_input) {
+		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+	} else {
+		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+	}
+	
+}
+
+IOSelector::~IOSelector ()
+{
+	for (std::vector<Gtk::Label*>::iterator i = _row_labels.begin(); i != _row_labels.end(); ++i) {
+		delete *i;
+	}
+
+	for (uint32_t x = 0; x < _check_buttons.size(); ++x) {
+		for (uint32_t y = 0; y < _check_buttons[x].size(); ++y) {
+			delete _check_buttons[x][y];
+		}
+	}
+}
+
+
+/**
+ *    Sets up the sizing of the column label widget to match the table that's underneath it.
+ */
+
+void
+IOSelector::update_column_label_dimensions ()
+{
+	if (_row_labels.empty() || _check_buttons.empty() || _check_buttons[0].empty()) {
+		return;
+	}
+	
+	_column_labels.set_base_dimensions (
+		/* width of the row label + a column spacing */
+		_row_labels.front()->get_width() + _table.get_col_spacing (0),
+		/* width of a check button + a column spacing for each column */
+		_check_buttons.size() * ( _check_buttons[0][0]->get_width() + _table.get_col_spacing(1))
+		);
+}
+
+void
+IOSelector::setup_table_size ()
+{
+	if (_add_remove_box_added) {
+		_table.remove (_add_remove_box);
+	}
+	
+	/* New width */
+	
+	int const old_width = _width;
+	_width = 0;
+	
+	const char **ports = _session.engine().get_ports (
+		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
+		);
+
+	if (ports) {
+		while (ports[_width]) {
+			++_width;
+		}
+	}
+
+	/* New height */
+
+	int const old_height = _height;
+
+	ARDOUR::DataType const t = _io->default_type();
+	
+	if (_for_input) {
+		_height = _io->n_inputs().get(t);
+	} else {
+		_height = _io->n_outputs().get(t);
+	}
+
+	_table.resize (_width + 1, _height + 1);
+
+	/* Add checkboxes where required, and remove those that aren't */
+	for (int x = _width; x < old_width; ++x) {
+		for (int y = 0; y < old_height; ++y) {
+			delete _check_buttons[x][y];
+		}
+	}
+	_check_buttons.resize (_width);
+	
+	for (int x = 0; x < _width; x++) {
+
+		for (int y = _height; y < old_height; ++y) {
+			delete _check_buttons[x][y];
+		}
+		_check_buttons[x].resize (_height);
+		
+		for (int y = 0; y < _height; y++) {
+
+			if (x >= old_width || y >= old_height) {
+				Gtk::CheckButton* button = new Gtk::CheckButton;
+				button->signal_toggled().connect (
+					sigc::bind (sigc::mem_fun (*this, &IOSelector::check_button_toggled), x, y)
+					);
+				_check_buttons[x][y] = button;
+				_table.attach (*button, x + 1, x + 2, y, y + 1);
+			}
+		}
+	}
+
+	/* Add more row labels where required, and remove those that aren't */
+	for (int y = _height; y < old_height; ++y) {
+		delete _row_labels[y];
+	}
+	_row_labels.resize (_height);
+	for (int y = old_height; y < _height; ++y) {
+		Gtk::Label* label = new Gtk::Label;
+		_row_labels[y] = label;
+		_table.attach (*label, 0, 1, y, y + 1);
+	}
+
+	_table.attach (_add_remove_box, 0, 1, _height, _height + 1);
+	_add_remove_box_added = true;
+
+	show_all ();
+}
+
+
+/**
+ *  Write the correct text to the row labels.
+ */
+
+void
+IOSelector::setup_row_labels ()
+{
+	for (int y = 0; y < _height; y++) {
+		_row_labels[y]->set_text (_for_input ? _io->input(y)->name() : _io->output(y)->name());
+	}
+}
+
+/**
+ *  Write the correct text to the column labels.
+ */
+
+void
+IOSelector::setup_column_labels ()
+{
+	/* Find the ports that we can connect to */
+	const char **ports = _session.engine().get_ports (
+		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
+		);
+
+	if (ports == 0) {
+		return;
+	}
+
+	int n = 0;
+	while (ports[n]) {
+		++n;
+	}
+			
+	_column_labels.set_n_labels (n);
+
+	for (int i = 0; i < n; ++i) {
+		_column_labels.set_label (i, ports[i]);
+	}
+}
+
+
+/**
+ *  Set up the state of each check button according to what connections are made.
+ */
+
+void
+IOSelector::setup_check_button_states ()
+{
+	_ignore_check_button_toggle = true;
+
+	/* Set the state of the check boxes according to current connections */
+	for (int i = 0; i < _height; ++i) {
+		const char **connections = _for_input ? _io->input(i)->get_connections() : _io->output(i)->get_connections();
+		for (int j = 0; j < _width; ++j) {
+
+			std::string const t = _column_labels.get_label (j);
+			int k = 0;
+			bool required_state = false;
+
+			while (connections && connections[k]) {
+				if (std::string(connections[k]) == t) {
+					required_state = true;
+					break;
+				}
+				++k;
+			}
+
+			_check_buttons[j][i]->set_active (required_state);
+		}
+	}
+
+	_ignore_check_button_toggle = false;
+}
+
+
+/**
+ *  Handle a toggle of a check button.
+ */
+
+void
+IOSelector::check_button_toggled (int x, int y)
+{
+	if (_ignore_check_button_toggle) {
+		return;
+	}
+	
+	bool const new_state = _check_buttons[x][y]->get_active ();
+	std::string const port = _column_labels.get_label (x);
+
+	if (new_state) {
+		if (_for_input) {
+			_io->connect_input (_io->input(y), port, 0);
+		} else {
+			_io->connect_output (_io->output(y), port, 0);
+		}
+	} else {
+		if (_for_input) {
+			_io->disconnect_input (_io->input(y), port, 0);
+		} else {
+			_io->disconnect_output (_io->output(y), port, 0);
+		}
+	}
+}
+
+void
+IOSelector::add_port_button_clicked ()
+{
+	/* add a new port, then hide the button if we're up to the maximum allowed */
+
+	// The IO selector only works for single typed IOs
+	const ARDOUR::DataType t = _io->default_type();
+
+	if (_for_input) {
+
+		try {
+			_io->add_input_port ("", this);
+		}
+
+		catch (ARDOUR::AudioEngine::PortRegistrationFailure& err) {
+			Gtk::MessageDialog msg (0,  _("There are no more JACK ports available."));
+			msg.run ();
+		}
+
+	} else {
+
+		try {
+			_io->add_output_port ("", this);
+		}
+
+		catch (ARDOUR::AudioEngine::PortRegistrationFailure& err) {
+			Gtk::MessageDialog msg (0, _("There are no more JACK ports available."));
+			msg.run ();
+		}
+	}
+		
+	set_button_sensitivity ();
+}
+
+
+void
+IOSelector::remove_port_button_clicked ()
+{
+	uint32_t nports;
+
+	// The IO selector only works for single typed IOs
+	const ARDOUR::DataType t = _io->default_type();
+	
+	// always remove last port
+	
+	if (_for_input) {
+		if ((nports = _io->n_inputs().get(t)) > 0) {
+			_io->remove_input_port (_io->input(nports - 1), this);
+		}
+	} else {
+		if ((nports = _io->n_outputs().get(t)) > 0) {
+			_io->remove_output_port (_io->output(nports - 1), this);
+		}
+	}
+	
+	set_button_sensitivity ();
+}
+
+
+void 
+IOSelector::set_button_sensitivity ()
+{
+	ARDOUR::DataType const t = _io->default_type();
+
+	if (_for_input) {
+
+		_add_port_button.set_sensitive (
+			_io->input_maximum().get(t) > _io->n_inputs().get(t)
+			);
+	} else {
+
+		_add_port_button.set_sensitive (
+			_io->output_maximum().get(t) > _io->n_outputs().get(t)
+			);
+	}
+
+	if (_for_input) {
+		
+		_remove_port_button.set_sensitive (
+			_io->n_inputs().get(t) && _io->input_minimum().get(t) < _io->n_inputs().get(t)
+			);
+	} else {
+
+		_remove_port_button.set_sensitive (
+			_io->n_outputs().get(t) && _io->output_minimum().get(t) < _io->n_outputs().get(t)
+			);
+	}
+}
+
+void
+IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &IOSelector::ports_changed), change, src));
+
+	redisplay ();
+}
+
+
+void
+IOSelector::redisplay ()
+{
+	setup_table_size ();
+	setup_column_labels ();
+	setup_row_labels ();
+	setup_check_button_states ();
+	update_column_label_dimensions ();
+}
+
+
+
+IOSelectorWindow::IOSelectorWindow (
+	ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel
+	)
+	: ArdourDialog ("I/O selector"),
+	  _selector (session, io, for_input),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
 	  cancel_button (_("Cancel")),
 	  rescan_button (_("Rescan"))
 
 {
-	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-	set_name ("IOSelectorWindow");
+	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+	set_name ("IOSelectorWindow2");
 
 	string title;
-	if (input) {
-		title = string_compose(_("%1 input"), ior->name());
+	if (for_input) {
+		title = string_compose(_("%1 input"), io->name());
 	} else {
-		title = string_compose(_("%1 output"), ior->name());
+		title = string_compose(_("%1 output"), io->name());
 	}
 
 	ok_button.set_name ("IOSelectorButton");
+	if (!can_cancel) {
+		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
+	}
 	cancel_button.set_name ("IOSelectorButton");
 	rescan_button.set_name ("IOSelectorButton");
+	rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
 
-	button_box.set_spacing (5);
-	button_box.set_border_width (5);
-	button_box.set_homogeneous (true);
-	button_box.pack_start (rescan_button);
+	get_action_area()->pack_start (rescan_button, false, false);
 
 	if (can_cancel) {
-		button_box.pack_start (cancel_button);
+		cancel_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CANCEL, Gtk::ICON_SIZE_BUTTON)));
+		get_action_area()->pack_start (cancel_button, false, false);
 	} else {
 		cancel_button.hide();
 	}
 		
-	button_box.pack_start (ok_button);
+	get_action_area()->pack_start (ok_button, false, false);
 
+	get_vbox()->set_spacing (8);
 	get_vbox()->pack_start (_selector);
-	get_vbox()->pack_start (button_box, false, false);
 
 	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
 	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
 	rescan_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::rescan));
 
 	set_title (title);
-	set_position (WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_MOUSE);
 
-	ok_button.show();
-	cancel_button.show();
-	rescan_button.show();
-	button_box.show();
-	get_vbox()->show();
+	show_all ();
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 
 IOSelectorWindow::~IOSelectorWindow()
 {
+	
 }
 
 void
@@ -120,14 +676,14 @@ IOSelectorWindow::rescan ()
 void
 IOSelectorWindow::cancel ()
 {
-	_selector.Finished(IOSelector::Cancelled);
+	_selector.Finished (IOSelector::Cancelled);
 	hide ();
 }
 
 void
 IOSelectorWindow::accept ()
 {
-	_selector.Finished(IOSelector::Accepted);
+	_selector.Finished (IOSelector::Accepted);
 	hide ();
 }
 
@@ -138,684 +694,33 @@ IOSelectorWindow::on_map ()
 	Window::on_map ();
 }
 
-/*************************
-  The IO Selector "widget"
- *************************/  
 
-IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
-	: session (sess),
-	  io (ior),
-	  for_input (input),
-	  port_frame (for_input? _("Inputs") : _("Outputs")),
-	  add_port_button (for_input? _("Add Input") : _("Add Output")),
-	  remove_port_button (for_input? _("Remove Input") : _("Remove Output")),
-	  clear_connections_button (_("Disconnect All"))
-{
-	selected_port = 0;
-
-	notebook.set_name ("IOSelectorNotebook");
-	notebook.set_size_request (-1, 125);
-
-	clear_connections_button.set_name ("IOSelectorButton");
-	add_port_button.set_name ("IOSelectorButton");
-	remove_port_button.set_name ("IOSelectorButton");
-
-	selector_frame.set_name ("IOSelectorFrame");
-	port_frame.set_name ("IOSelectorFrame");
-
-	selector_frame.set_label (_("Available connections"));
-	
-	selector_button_box.set_spacing (5);
-	selector_button_box.set_border_width (5);
-
-	selector_box.set_spacing (5);
-	selector_box.set_border_width (5);
-	selector_box.pack_start (notebook);
-	selector_box.pack_start (selector_button_box, false, false);
-
-	selector_frame.add (selector_box);
-
-	port_box.set_spacing (5);
-	port_box.set_border_width (5);
-
-	port_display_scroller.set_name ("IOSelectorNotebook");
-	port_display_scroller.set_border_width (0);
-	port_display_scroller.set_size_request (-1, 170);
-	port_display_scroller.add (port_box);
-	port_display_scroller.set_policy (POLICY_NEVER,
-					  POLICY_AUTOMATIC);
-
-	port_button_box.set_spacing (5);
-	port_button_box.set_border_width (5);
-
-	port_button_box.pack_start (add_port_button, false, false);
-
-	// The IO selector only works for single typed IOs
-	const ARDOUR::DataType t = io->default_type();
-
-	if (for_input) {
-		if (io->input_maximum().get(t) > (uint32_t) io->n_inputs().get(t)) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-
-	} else {
-		if (io->output_maximum().get(t) > (uint32_t) io->n_outputs().get(t)) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-			
-	}
-
-	port_button_box.pack_start (remove_port_button, false, false);
-
-	if (for_input) {
-		if (io->input_minimum().get(t) < (uint32_t) io->n_inputs().get(t)) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-			
-	} else {
-		if (io->output_minimum().get(t) < (uint32_t) io->n_outputs().get(t)) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-	}
-
-	port_button_box.pack_start (clear_connections_button, false, false);
-
-	port_and_button_box.set_border_width (5);
-	port_and_button_box.pack_start (port_button_box, false, false);
-	port_and_button_box.pack_start (port_display_scroller);
-
-	port_frame.add (port_and_button_box);
-
-	port_and_selector_box.set_spacing (5);
-	port_and_selector_box.pack_start (port_frame);
-	port_and_selector_box.pack_start (selector_frame);
-
-	set_spacing (5);
-	set_border_width (5);
-	pack_start (port_and_selector_box);
-
-	rescan();
-	display_ports ();
-
-	clear_connections_button.signal_clicked().connect (mem_fun(*this, &IOSelector::clear_connections));
-
-	add_port_button.signal_clicked().connect (mem_fun(*this, &IOSelector::add_port));
-	remove_port_button.signal_clicked().connect (mem_fun(*this, &IOSelector::remove_port));
-
-	if (for_input) {
-		io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
-	} else {
-		io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
-	}
-
-	io->NameChanged.connect (mem_fun(*this, &IOSelector::name_changed));
-
-	main_box.show();
-	port_and_selector_box.show();
-	notebook.show();
-	selector_frame.show();
-	selector_box.show();
-	selector_button_box.show();
-	port_box.show();
-	port_button_box.show();
-	port_and_button_box.show();
-	port_frame.show();
-	add_port_button.show();
-	remove_port_button.show();
-	clear_connections_button.show();
-	port_display_scroller.show();
-
-	show();
-	
-}
-
-IOSelector::~IOSelector ()
-{
-}
-
-void 
-IOSelector::set_button_sensitivity ()
-{
-	DataType t = io->default_type();
-
-	if (for_input) {
-
-		if (io->input_maximum().get(t) < 0 || io->input_maximum().get(t) > io->n_inputs().get(t)) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-
-	} else {
-
-		if (io->output_maximum().get(t) < 0 || io->output_maximum().get(t) > io->n_outputs().get(t)) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-			
-	}
-
-	if (for_input) {
-		if (io->n_inputs().get(t) && (io->input_minimum().get(t) < 0 || io->input_minimum().get(t) < io->n_inputs().get(t))) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-			
-	} else {
-		if (io->n_outputs().get(t) && (io->output_minimum().get(t) < 0 || io->output_minimum().get(t) < io->n_outputs().get(t))) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-	}
-}
-
-
-void
-IOSelector::name_changed ()
-{
-	ENSURE_GUI_THREAD(mem_fun(*this, &IOSelector::name_changed));
-	
-	display_ports ();
-}
-
-void
-IOSelector::clear_connections ()
-{
-	if (for_input) {
-		io->disconnect_inputs (this);
-	} else {
-		io->disconnect_outputs (this);
-	}
-}
-
-void
-IOSelector::rescan ()
-{
-	using namespace Notebook_Helpers;
-
-	typedef std::map<string,vector<pair<string,string> > > PortMap;
-	PortMap portmap;
-	const char **ports;
-	PageList& pages = notebook.pages();
-	gint current_page;
-	vector<string> rowdata;
-
-	page_selection_connection.disconnect ();
-
-	current_page = notebook.get_current_page ();
-
-	pages.clear ();
-
-	/* get relevant current JACK ports */
-
-	ports = session.engine().get_ports ("", io->default_type().to_jack_type(), for_input ? JackPortIsOutput : JackPortIsInput);
-
-	if (ports == 0) {
-		return;
-	}
-
-	/* find all the client names and group their ports into a list-by-client */
-	
-	for (int n = 0; ports[n]; ++n) {
-
-		pair<string,vector<pair<string,string> > > newpair;
-		pair<string,string> strpair;
-		pair<PortMap::iterator,bool> result;
-
-		string str = ports[n];
-		string::size_type pos;
-		string portname;
-
-		pos = str.find (':');
-
-		newpair.first = str.substr (0, pos);
-		portname = str.substr (pos+1);
-
-		result = portmap.insert (newpair);
-
-		strpair.first = portname;
-		strpair.second = str;
-
-		result.first->second.push_back (strpair);
-	}
-
-	PortMap::iterator i;
-
-	for (i = portmap.begin(); i != portmap.end(); ++i) {
-		
-		Box *client_box = manage (new VBox);
-		TreeView *display = manage (new TreeView);
-		RefPtr<ListStore> model = ListStore::create (port_display_columns);
-		ScrolledWindow *scroller = manage (new ScrolledWindow);
-
-		display->set_model (model);
-		display->append_column (X_("notvisible"), port_display_columns.displayed_name);
-		display->set_headers_visible (false);
-		display->get_selection()->set_mode (SELECTION_SINGLE);
-		display->set_name ("IOSelectorList");
-
-		for (vector<pair<string,string> >::iterator s = i->second.begin(); s != i->second.end(); ++s) {
-			
-			TreeModel::Row row = *(model->append ());
-
-			row[port_display_columns.displayed_name] = s->first;
-			row[port_display_columns.full_name] = s->second;
-		}
-
-		display->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::port_selection_changed), display));
-		Label *tab_label = manage (new Label);
-
-		tab_label->set_name ("IOSelectorNotebookTab");
-		tab_label->set_text ((*i).first);
-
-		scroller->add (*display);
-		scroller->set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
-
-		client_box->pack_start (*scroller);
-
-		pages.push_back (TabElem (*client_box, *tab_label));
-	}
-
-	notebook.set_current_page (current_page);
-	page_selection_connection = notebook.signal_show().connect (bind (mem_fun (notebook, &Notebook::set_current_page), current_page));
-	selector_box.show_all ();
-}	
-
-void
-IOSelector::display_ports ()
-{
-	TreeView *firsttview = 0;
-	TreeView *selected_port_tview = 0;
-	{
-		Glib::Mutex::Lock lm  (port_display_lock);
-		Port *port;
-		uint32_t limit;
-		
-		// The IO selector only works for single typed IOs
-		const ARDOUR::DataType t = io->default_type();
-
-		if (for_input) {
-			limit = io->n_inputs().get(t);
-		} else {
-			limit = io->n_outputs().get(t);
-		}
-		
-		for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ) {
-			
-			slist<TreeView *>::iterator tmp;
-			
-			tmp = i;
-			++tmp;
-			
-			port_box.remove (**i);
-			delete *i;
-			port_displays.erase (i);
-			
-			i = tmp;
-		} 
-		
-		for (uint32_t n = 0; n < limit; ++n) {
-			
-			TreeView* tview;
-			//ScrolledWindow *scroller;
-			string really_short_name;
-			
-			if (for_input) {
-				port = io->input (n);
-			} else {
-				port = io->output (n);
-			}
-			
-			/* we know there is '/' because we put it there */
-			
-			really_short_name = port->short_name();
-			really_short_name = really_short_name.substr (really_short_name.find ('/') + 1);
-
-			tview = manage (new TreeView());
-			RefPtr<ListStore> port_model = ListStore::create (port_display_columns);
-			
-			if (!firsttview) {
-				firsttview = tview;
-			}
-			
-			tview->set_model (port_model);
-			tview->append_column (really_short_name, port_display_columns.displayed_name);
-			tview->get_selection()->set_mode (SELECTION_SINGLE);
-			tview->set_data (X_("port"), port);
-			tview->set_headers_visible (true);
-			tview->set_name (X_("IOSelectorPortList"));
-			
-			port_box.pack_start (*tview);
-			port_displays.insert (port_displays.end(), tview);
-			
-			/* now fill the clist with the current connections */
-			
-			const char **connections = port->get_connections ();
-			
-			if (connections) {
-				for (uint32_t c = 0; connections[c]; ++c) {
-					TreeModel::Row row = *(port_model->append());
-					row[port_display_columns.displayed_name] = connections[c];
-					row[port_display_columns.full_name] = connections[c];
-				}
-			} 
-			
-			if (for_input) {
-				
-				if (io->input_maximum().get(io->default_type()) == 1) {
-					selected_port = port;
-					selected_port_tview = tview;
-				} else {
-					if (port == selected_port) {
-						selected_port_tview = tview;
-					}
-				}
-				
-			} else {
-				
-				if (io->output_maximum().get(t) == 1) {
-					selected_port = port;
-					selected_port_tview = tview;
-				} else {
-					if (port == selected_port) {
-						selected_port_tview = tview;
-					}
-				}
-			}
-			
-			TreeViewColumn* col = tview->get_column (0);
-			
-			col->set_clickable (true);
-			
-			/* handle button events on the column header ... */
-			col->signal_clicked().connect (bind (mem_fun(*this, &IOSelector::select_treeview), tview));
-
-			/* ... and within the treeview itself */
-			tview->signal_button_release_event().connect (bind (mem_fun(*this, &IOSelector::connection_button_release), tview));
-		}
-		
-		port_box.show_all ();
-	}
-	
-	if (!selected_port_tview) {
-		selected_port_tview = firsttview;
-	}
-
-	if (selected_port_tview) {
-		select_treeview (selected_port_tview);
-	}
-}
-
-bool
-IOSelector::port_selection_changed (GdkEventButton *ev, TreeView* treeview)
-{
-	TreeModel::iterator i = treeview->get_selection()->get_selected();
-	int status;
-
-	if (!i) {
-		return 0;
-	}
-
-	if (selected_port == 0) {
-		return 0;
-	}
-
-	ustring other_port_name = (*i)[port_display_columns.full_name];
-	
-	if (for_input) {
-		if ((status = io->connect_input (selected_port, other_port_name, this)) == 0) {
-			Port *p = session.engine().get_port_by_name (other_port_name);
-			if (p) {
-				p->enable_metering();
-			}
-		}
-	} else {
-		status = io->connect_output (selected_port, other_port_name, this);
-	}
-
-	if (status == 0) {
-		select_next_treeview ();
-	}
-	
-	treeview->get_selection()->unselect_all();
-	return 0;
-}
-
-void
-IOSelector::ports_changed (IOChange change, void *src)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelector::ports_changed), change, src));
-	
-	display_ports ();
-}
-
-void
-IOSelector::add_port ()
-{
-	/* add a new port, then hide the button if we're up to the maximum allowed */
-
-	// The IO selector only works for single typed IOs
-	const ARDOUR::DataType t = io->default_type();
-
-	if (for_input) {
-
-		try {
-			io->add_input_port ("", this);
-		}
-
-		catch (AudioEngine::PortRegistrationFailure& err) {
-			MessageDialog msg (0,  _("There are no more JACK ports available."));
-			msg.run ();
-		}
-
-	} else {
-
-		try {
-			io->add_output_port ("", this);
-		}
-
-		catch (AudioEngine::PortRegistrationFailure& err) {
-			MessageDialog msg (0, _("There are no more JACK ports available."));
-			msg.run ();
-		}
-	}
-		
-	set_button_sensitivity ();
-}
-
-void
-IOSelector::remove_port ()
-{
-	uint32_t nports;
-
-	// The IO selector only works for single typed IOs
-	const ARDOUR::DataType t = io->default_type();
-	
-	// always remove last port
-	
-	if (for_input) {
-		if ((nports = io->n_inputs().get(t)) > 0) {
-			io->remove_input_port (io->input(nports-1), this);
-		}
-	} else {
-		if ((nports = io->n_outputs().get(t)) > 0) {
-			io->remove_output_port (io->output(nports-1), this);
-		}
-	}
-	
-	set_button_sensitivity ();
-}
-
-gint
-IOSelector::connection_button_release (GdkEventButton *ev, TreeView *treeview)
-{
-	/* this handles button release on a port name row: i.e. a connection
-	   between the named port and the port represented by the treeview.
-	*/
-
-	Gtk::TreeModel::iterator iter;
-	TreeModel::Path path;
-	TreeViewColumn* column;
-	int cellx;
-	int celly;
-
-	/* only handle button1 events here */
-
-	if (ev->button != 1) {
-		return false;
-	}
-	
-	if (!treeview->get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		return false;
-	}
-
-	if ((iter = treeview->get_model()->get_iter (path.to_string()))) {
-
-		/* path is valid */
-		ustring connected_port_name = (*iter)[port_display_columns.full_name];
-		Port *port = reinterpret_cast<Port *> (treeview->get_data (X_("port")));
-		
-		if (for_input) {
-			Port *p = session.engine().get_port_by_name (connected_port_name);
-			if (p) {
-				p->disable_metering();
-			}
-			io->disconnect_input (port, connected_port_name, this);
-		} else {
-			io->disconnect_output (port, connected_port_name, this);
-		}
-	}
-
-	return true;
-}
-
-void
-IOSelector::select_next_treeview ()
-{
-	slist<TreeView*>::iterator next;
-
-	if (port_displays.empty() || port_displays.size() == 1) {
-		return;
-	}
-
-	for (slist<TreeView *>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
-
-		if ((*i)->get_name() == "IOSelectorPortListSelected") {
-
-			++i;
-
-			if (i == port_displays.end()) {
-				select_treeview (port_displays.front());
-			} else {
-				select_treeview (*i);
-			}
-			
-			break;
-		}
-	}
-}
-
-void
-IOSelector::select_treeview (TreeView* tview)
-{
-	/* Gack. TreeView's don't respond visually to a change
-	   in their state, so rename them to force a style
-	   switch.
-	*/
-
-	Glib::Mutex::Lock lm  (port_display_lock);
- 	Port* port = reinterpret_cast<Port *> (tview->get_data (X_("port")));
-
-	selected_port = port;
-
-	tview->set_name ("IOSelectorPortListSelected");
-	tview->queue_draw ();
-
-	/* ugly hack to force the column header button to change as well */
-
-	TreeViewColumn* col = tview->get_column (0);
-	GtkTreeViewColumn* ccol = col->gobj();
-	
-	if (ccol->button) {
-		gtk_widget_set_name (ccol->button, "IOSelectorPortListSelected");	
-		gtk_widget_queue_draw (ccol->button);
-	}
-
-	for (slist<TreeView*>::iterator i = port_displays.begin(); i != port_displays.end(); ++i) {
-		if (*i == tview) {
-			continue;
-		}
-		
-		col = (*i)->get_column (0);
-		ccol = col->gobj();
-		
-		if (ccol->button) {
-			gtk_widget_set_name (ccol->button, "IOSelectorPortList");
-			gtk_widget_queue_draw (ccol->button);
-		}
-		
-		(*i)->set_name ("IOSelectorPortList");
-		(*i)->queue_draw ();
-	}
-
-	selector_box.show_all ();
-}
-
-void
-IOSelector::redisplay ()
-{
-	display_ports ();
-
-	if (for_input) {
-		if (io->input_maximum().get(io->default_type()) != 0) {
-			rescan ();
-		}
-	} else {
-		if (io->output_maximum().get(io->default_type()) != 0) {
-			rescan();
-		}
-	}
-}
-
-PortInsertUI::PortInsertUI (Session& sess, boost::shared_ptr<PortInsert> pi)
+PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
 	: input_selector (sess, pi->io(), true),
 	  output_selector (sess, pi->io(), false)
 {
 	hbox.pack_start (output_selector, true, true);
 	hbox.pack_start (input_selector, true, true);
 
-
 	pack_start (hbox);
 }
 
 void
-PortInsertUI::redisplay()
+PortInsertUI::redisplay ()
 {
-
 	input_selector.redisplay();
 	output_selector.redisplay();
 }
 
 void
-PortInsertUI::finished(IOSelector::Result r)
+PortInsertUI::finished (IOSelector::Result r)
 {
 	input_selector.Finished (r);
 	output_selector.Finished (r);
 }
 
 
-PortInsertWindow::PortInsertWindow (Session& sess, boost::shared_ptr<PortInsert> pi, bool can_cancel)
+PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi, bool can_cancel)
 	: ArdourDialog ("port insert dialog"),
 	  _portinsertui (sess, pi),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
@@ -829,37 +734,38 @@ PortInsertWindow::PortInsertWindow (Session& sess, boost::shared_ptr<PortInsert>
 	set_title (title);
 	
 	ok_button.set_name ("IOSelectorButton");
+	if (!can_cancel) {
+		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
+	}
 	cancel_button.set_name ("IOSelectorButton");
 	rescan_button.set_name ("IOSelectorButton");
+	rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
 
-	button_box.set_spacing (5);
-	button_box.set_border_width (5);
-	button_box.set_homogeneous (true);
-	button_box.pack_start (rescan_button);
+	get_action_area()->pack_start (rescan_button, false, false);
 	if (can_cancel) {
-		button_box.pack_start (cancel_button);
-	}
-	else {
+		cancel_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CANCEL, Gtk::ICON_SIZE_BUTTON)));
+		get_action_area()->pack_start (cancel_button, false, false);
+	} else {
 		cancel_button.hide();
 	}
-	button_box.pack_start (ok_button);
+	get_action_area()->pack_start (ok_button, false, false);
 
 	get_vbox()->pack_start (_portinsertui);
-	get_vbox()->pack_start (button_box, false, false);
 
-	ok_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::accept));
-	cancel_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::cancel));
-	rescan_button.signal_clicked().connect (mem_fun(*this, &PortInsertWindow::rescan));
+	ok_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::accept));
+	cancel_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::cancel));
+	rescan_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::rescan));
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));	
 
-	going_away_connection = pi->GoingAway.connect (mem_fun(*this, &PortInsertWindow::plugin_going_away));
+	going_away_connection = pi->GoingAway.connect (mem_fun (*this, &PortInsertWindow::plugin_going_away));
 }
 
 void
 PortInsertWindow::plugin_going_away ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &PortInsertWindow::plugin_going_away));
+	ENSURE_GUI_THREAD (mem_fun (*this, &PortInsertWindow::plugin_going_away));
+	
 	going_away_connection.disconnect ();
 	delete_when_idle (this);
 }
@@ -875,19 +781,19 @@ PortInsertWindow::on_map ()
 void
 PortInsertWindow::rescan ()
 {
-	_portinsertui.redisplay();
+	_portinsertui.redisplay ();
 }
 
 void
 PortInsertWindow::cancel ()
 {
-	_portinsertui.finished(IOSelector::Cancelled);
+	_portinsertui.finished (IOSelector::Cancelled);
 	hide ();
 }
 
 void
 PortInsertWindow::accept ()
 {
-	_portinsertui.finished(IOSelector::Accepted);
+	_portinsertui.finished (IOSelector::Accepted);
 	hide ();
 }

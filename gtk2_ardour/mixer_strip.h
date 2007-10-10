@@ -215,7 +215,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	bool select_mix_group (GdkEventButton *);
 	void mix_group_changed (void *);
 
-
 	IOSelectorWindow *input_selector;
 	IOSelectorWindow *output_selector;
 
