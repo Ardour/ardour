@@ -26,11 +26,13 @@
 #include "audio_region_view.h"
 #include "selection.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 
 void
-Editor::set_route_loop_selection ()
+Editor::set_loop_from_selection (bool play)
 {
 	if (session == 0 || selection->time.empty()) {
 		return;
@@ -38,18 +40,26 @@ Editor::set_route_loop_selection ()
 
 	nframes_t start = selection->time[clicked_selection].start;
 	nframes_t end = selection->time[clicked_selection].end;
+	
+	set_loop_range (start, end,  _("set loop range from selection"));
 
-	Location* loc = transport_loop_location();
-
-	if (loc) {
-		
-		loc->set (start, end);
-
-		// enable looping, reposition and start rolling
+	if (play) {
 		session->request_play_loop (true);
-		session->request_locate (loc->start(), true);
+		session->request_locate (start, true);
+	}
+}
+
+void
+Editor::set_punch_from_selection ()
+{
+	if (session == 0 || selection->time.empty()) {
+		return;
 	}
 
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
+	
+	set_punch_range (start, end,  _("set punch range from selection"));
 }
 
 void

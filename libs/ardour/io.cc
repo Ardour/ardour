@@ -1307,7 +1307,7 @@ IO::state (bool full_state)
 	int const in_max = _input_maximum == ChanCount::INFINITE ? -1 : _input_maximum.get(_default_type);
 	int const out_max = _output_maximum == ChanCount::INFINITE ? -1 : _output_maximum.get(_default_type);
 
-	snprintf (buf, sizeof(buf)-1, "%zd,%d,%zd,%d", _input_minimum.get(_default_type), in_max, _output_minimum.get(_default_type), out_max);
+	snprintf (buf, sizeof(buf)-1, "%d,%d,%d,%d", _input_minimum.get(_default_type), in_max, _output_minimum.get(_default_type), out_max);
 
 	node->add_property ("iolimits", buf);
 
@@ -2335,7 +2335,7 @@ IO::automation_snapshot (nframes_t now)
 {
 	Automatable::automation_snapshot (now);
 
-	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _session.automation_interval()) {
+	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
 		_panner->snapshot (now);
 	}
 }

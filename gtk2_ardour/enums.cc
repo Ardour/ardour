@@ -20,11 +20,13 @@
 #include <pbd/enumwriter.h>
 
 #include "audio_clock.h"
+#include "editing.h"
 #include "enums.h"
 
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Editing;
 
 void
 setup_gtk_ardour_enums ()
@@ -35,6 +37,7 @@ setup_gtk_ardour_enums ()
 
 	AudioClock::Mode clock_mode;
 	Width width;
+	ImportMode import_mode;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -51,4 +54,10 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (Wide);
 	REGISTER_ENUM (Narrow);
 	REGISTER (width);
+
+	REGISTER_ENUM (ImportAsTrack);
+	REGISTER_ENUM (ImportToTrack);
+	REGISTER_ENUM (ImportAsRegion);
+	REGISTER_ENUM (ImportAsTapeTrack);
+	REGISTER (import_mode);
 }

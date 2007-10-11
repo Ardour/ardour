@@ -47,7 +47,7 @@
 #include "i18n.h"
 
 using namespace Gtk;
-using namespace GTK_ARDOUR;
+using namespace ARDOUR_COMMAND_LINE;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
@@ -57,6 +57,7 @@ TextReceiver text_receiver ("ardour");
 extern int curvetest (string);
 
 static ARDOUR_UI  *ui = 0;
+static char* localedir = LOCALEDIR;
 
 gint
 show_ui_callback (void *arg)
@@ -98,64 +99,128 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.run ();
 }
 
-static bool
-maybe_load_session ()
+
+#ifdef __APPLE__
+
+#include <mach-o/dyld.h>
+#include <sys/param.h>
+#include <fstream>
+
+void
+fixup_bundle_environment ()
 {
-	/* If no session name is given: we're not loading a session yet, nor creating a new one */
-	if (!session_name.length()) {
-		ui->hide_splash ();
-		if (!Config->get_no_new_session_dialog()) {
-			if (!ui->new_session ()) {
-				return false;
-			}
-		}
-
-		return true;
+	if (!getenv ("ARDOUR_BUNDLED")) {
+		return;
 	}
 
-	/* Load session or start the new session dialog */
-	string name, path;
+	char execpath[MAXPATHLEN+1];
+	uint32_t pathsz = sizeof (execpath);
 
-	bool isnew;
+	_NSGetExecutablePath (execpath, &pathsz);
 
-	if (find_session (session_name, path, name, isnew)) {
-		error << string_compose(_("could not load command line session \"%1\""), session_name) << endmsg;
-		return false;
+	Glib::ustring exec_path (execpath);
+	Glib::ustring dir_path = Glib::path_get_dirname (exec_path);
+	Glib::ustring path;
+	const char *cstr = getenv ("PATH");
+
+	/* ensure that we find any bundled executables (e.g. JACK) */
+
+	path = dir_path;
+	if (cstr) {
+		path += ':';
+		path += cstr;
 	}
+	setenv ("PATH", path.c_str(), 1);
 
-	if (!new_session) {
-			
-		/* Loading a session, but the session doesn't exist */
-		if (isnew) {
-			error << string_compose (_("\n\nNo session named \"%1\" exists.\n"
-						   "To create it from the command line, start ardour as \"ardour --new %1"), path) 
-			      << endmsg;
-			return false;
-		}
+	path = dir_path;
+	path += "/../Resources";
+	path += dir_path;
+	path += "/../Resources/Surfaces";
+	path += dir_path;
+	path += "/../Resources/Panners";
 
-		if (ui->load_session (path, name)) {
-			/* it failed */
-			return false;
-		}
+	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
+	path = dir_path;
+	path += "/../Resources/icons:";
+	path += dir_path;
+	path += "/../Resources/pixmaps:";
+	path += dir_path;
+	path += "/../Resources/share:";
+	path += dir_path;
+	path += "/../Resources";
+
+	setenv ("ARDOUR_PATH", path.c_str(), 1);
+	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
+	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
+
+	cstr = getenv ("LADSPA_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	}
+	path = dir_path;
+	path += "/../Plugins";
+	
+	setenv ("LADSPA_PATH", path.c_str(), 1);
+
+	path = dir_path;
+	path += "/../Frameworks/clearlooks";
+
+	setenv ("GTK_PATH", path.c_str(), 1);
+
+	path = dir_path;
+	path += "/../Resources/locale";
+	
+	localedir = strdup (path.c_str());
+
+	/* write a pango.rc file and tell pango to use it */
+
+	path = dir_path;
+	path += "/../Resources/pango.rc";
+
+	std::ofstream pangorc (path.c_str());
+	if (!pangorc) {
+		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
 	} else {
-
-		/*  TODO: This bit of code doesn't work properly yet
-		    Glib::signal_idle().connect (bind (mem_fun (*ui, &ARDOUR_UI::cmdline_new_session), path));
-		    ui->set_will_create_new_session_automatically (true); 
-		*/
+		pangorc << "[Pango]\nModuleFiles=";
+		Glib::ustring mpath = dir_path;
+		mpath += "/../Resources/pango.modules";
+		pangorc << mpath << endl;
 		
-		/* Show the NSD */
-		ui->hide_splash ();
-		if (!Config->get_no_new_session_dialog()) {
-			if (!ui->new_session ()) {
-				return false;
-			}
-		}
+		pangorc.close ();
+		setenv ("PANGO_RC_FILE", path.c_str(), 1);
 	}
 
-	return true;
+	// gettext charset aliases
+
+	setenv ("CHARSETALIASDIR", path.c_str(), 1);
+
+	// font config
+	
+	path = dir_path;
+	path += "/../Resources/fonts.conf";
+
+	setenv ("FONTCONFIG_FILE", path.c_str(), 1);
+
+	// GDK Pixbuf loader module file
+
+	path = dir_path;
+	path += "/../Resources/gdk-pixbuf.loaders";
+
+	setenv ("GDK_PIXBUF_MODULE_FILE", path.c_str(), 1);
+
+	if (getenv ("ARDOUR_WITH_JACK")) {
+		// JACK driver dir
+		
+		path = dir_path;
+		path += "/../Frameworks";
+		
+		setenv ("JACK_DRIVER_DIR", path.c_str(), 1);
+	}
 }
+
+#endif
 
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
@@ -167,15 +232,17 @@ int ardour_main (int argc, char *argv[])
 #else
 int main (int argc, char *argv[])
 #endif
-
 {
-	ARDOUR::AudioEngine *engine = NULL;
 	vector<Glib::ustring> null_file_list;
 
-	Glib::thread_init();
+#ifdef __APPLE__
+	fixup_bundle_environment ();
+#endif
+
+        Glib::thread_init();
 	gtk_set_locale ();
 
-	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure
 	   that even if the user locale doesn't specify UTF-8,
 	   we use that when handling them.
@@ -229,15 +296,11 @@ int main (int argc, char *argv[])
 
 	PBD::ID::init ();
 
-	try { 
+        try { 
 		ui = new ARDOUR_UI (&argc, &argv);
 	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;
 		exit (1);
-	}
-
-	if (!keybindings_path.empty()) {
-		ui->set_keybindings_path (keybindings_path);
 	}
 
 	if (!no_splash) {
@@ -247,50 +310,17 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    try {
-		ARDOUR::init (use_vst, try_hw_optimization);
-		setup_gtk_ardour_enums ();
-		Config->set_current_owner (ConfigVariableBase::Interface);
-		ui->setup_profile ();
-
-		try { 
-			engine = new ARDOUR::AudioEngine (jack_client_name);
-		} catch (AudioEngine::NoBackendAvailable& err) {
-			gui_jack_error ();
-			error << string_compose (_("Could not connect to JACK server as  \"%1\""), jack_client_name) <<  endmsg;
-			return -1;
-		}
-
-		ARDOUR::setup_midi(*engine);
-		
-		ui->set_engine (*engine);
-
-	} catch (failed_constructor& err) {
-		error << _("could not initialize Ardour.") << endmsg;
-		return -1;
-	} 
-
-	ui->start_engine ();
-
-	if (maybe_load_session ()) {
-		ui->run (text_receiver);
-		ui = 0;
+	if (!keybindings_path.empty()) {
+		ui->set_keybindings_path (keybindings_path);
 	}
 
-	delete engine;
+	ui->run (text_receiver);
+	ui = 0;
+
 	ARDOUR::cleanup ();
-
-	if (ui) {
-		ui->kill();
-	}
-		
 	pthread_cancel_all ();
-
-	exit (0);
-
 	return 0;
 }
 #ifdef VST_SUPPORT
 } // end of extern C block
 #endif
-

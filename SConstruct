@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '2.1pre'
+ardour_version = '3.0'
 
 subst_dict = { }
 
@@ -30,6 +30,7 @@ opts.AddOptions(
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('CMT', 'Compile with support for CMT Additions', 1),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
+    BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 1),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
@@ -711,8 +712,13 @@ if env['LIBLO']:
 
 def prep_libcheck(topenv, libinfo):
     if topenv['DIST_TARGET'] == 'panther' or topenv['DIST_TARGET'] == 'tiger':
+        #
+        # rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
+        #            All libraries needed should be built against this location
+        if topenv['GTKOSX']:
+            libinfo.Append(CCFLAGS="-I/opt/gtk/include", LINKFLAGS="-L/opt/gtk/lib")
         libinfo.Append(CCFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
-
+            
 prep_libcheck(env, env)
 
 #
@@ -803,10 +809,18 @@ else:
 libraries['dmalloc'] = conf.Finish ()
 
 #
-# Audio/MIDI library (needed for MIDI, since audio is all handled via JACK)
+# Audio/MIDI library (needed for MIDI, since audio is all handled via JACK. Note, however, that
+#                     we still need ALSA & CoreAudio to discover audio devices for the engine
+#                     dialog, regardless of what MIDI subsystem is being used)
 #
 
 conf = Configure(env)
+
+if conf.CheckCHeader('alsa/asoundlib.h'):
+    libraries['sysaudio'] = LibraryInfo (LIBS='asound')
+elif conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/Headers/CoreAudio.h'):
+    libraries['sysaudio'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load')
+
 if conf.CheckCHeader('jack/midiport.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='jack')
     env['SYSMIDI'] = 'JACK MIDI'
@@ -821,7 +835,13 @@ elif conf.CheckCHeader('alsa/asoundlib.h'):
     print "Using ALSA MIDI"
 elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
     # this line is needed because scons can't handle -framework in ParseConfig() yet.
-    libraries['sysmidi'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load')
+    if env['GTKOSX']:
+        # We need Carbon as well as the rest
+        libraries['sysmidi'] = LibraryInfo (
+               LINKFLAGS = ' -framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -framework Carbon -bind_at_load' )
+    else:
+        libraries['sysmidi'] = LibraryInfo (
+		LINKFLAGS = ' -framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load' )
     env['SYSMIDI'] = 'CoreMIDI'
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
@@ -1148,9 +1168,14 @@ if os.path.exists('.svn'):
 # specbuild = env.SubstInFile ('ardour.spec','ardour.spec.in', SUBST_DICT = subst_dict)
 
 the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
+remove_ardour = env.Command ('frobnicatory_decoy2', [],
+                             [ Delete ('$PREFIX/etc/ardour2'),
+                               Delete ('$PREFIX/lib/ardour2'),
+                               Delete ('$PREFIX/bin/ardour2')])
 
 env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))
+env.Alias('uninstall', remove_ardour)
 
 Default (sysrcbuild)
 

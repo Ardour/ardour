@@ -23,13 +23,12 @@
 #include <string>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 
 namespace MIDI {
 
 class PortFactory {
   public:
-	Port *create_port (PortRequest &req, void* data);
+	Port *create_port (const XMLNode&, void* data);
 
 	static bool ignore_duplicate_devices (Port::Type);
 	static int get_known_ports (std::vector<PortSet>&);

@@ -76,9 +76,6 @@ class SndFileSource : public AudioFileSource {
 	SF_INFO _info;
 	SF_BROADCAST_INFO *_broadcast_info;
 
-	mutable float *interleave_buf;
-	mutable nframes_t interleave_bufsize;
-
 	void init ();
 	int open();
 	void close();
@@ -105,6 +102,7 @@ class SndFileSource : public AudioFileSource {
 	void handle_header_position_change ();
 
 	static int64_t get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& exists);
+	static Sample* get_interleave_buffer (nframes_t size);
 };
 
 } // namespace ARDOUR

@@ -34,6 +34,15 @@ ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 }
 
+ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
+	: Dialog (title, parent, modal, use_seperator)
+{
+	session = 0;
+
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
+	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
+}
+
 ArdourDialog::~ArdourDialog ()
 {
 }

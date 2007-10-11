@@ -119,7 +119,22 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 {
 	begin_reversible_command (_("split"));
 
-	snap_to (where);
+	// if splitting a single region, and snap-to is using
+	// region boundaries, don't pay attention to them
+
+	if (regions.size() == 1) {
+		switch (snap_type) {
+		case SnapToRegionStart:
+		case SnapToRegionSync:
+		case SnapToRegionEnd:
+			break;
+		default:
+			snap_to (where);
+		}
+	} else {
+		snap_to (where);
+	}
+
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
 		RegionSelection::iterator tmp;
@@ -178,16 +193,17 @@ Editor::remove_selected_regions ()
 	/* XXX: should be called remove regions if we're removing more than one */
 	begin_reversible_command (_("remove region"));
 	
+
 	while (!selection->regions.empty()) {
 		boost::shared_ptr<Region> region = selection->regions.front()->region ();
 		boost::shared_ptr<Playlist> playlist = region->playlist ();
-	
+
 		XMLNode &before = playlist->get_state();
 		playlist->remove_region (region);
 		XMLNode &after = playlist->get_state();
 		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
 	}
-	
+
 	commit_reversible_command ();
 }
 
@@ -497,12 +513,13 @@ Editor::build_region_boundary_cache ()
 		for (vector<RegionPoint>::iterator p = interesting_points.begin(); p != interesting_points.end(); ++p) {
 
 			if ((r = find_next_region (pos, *p, 1, tlist, &ontrack)) == 0) {
-				at_end = true;
+				if (*p == interesting_points.back()) {
+					at_end = true;
+				}
 				/* move to next point type */
 				continue;
 			}
 
-			
 			switch (*p) {
 			case Start:
 				rpos = r->first_frame();
@@ -3423,46 +3440,31 @@ Editor::reset_region_gain_envelopes ()
 	session->commit_reversible_command ();
 }
 
-/** Set whether or not gain envelopes are visible for the selected regions.
- * @param yn true to make visible, false to make invisible.
- */
 void
-Editor::set_gain_envelope_visibility (bool yn)
+Editor::toggle_gain_envelope_visibility ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			if (arv->envelope_visible() != yn) {
-				arv->set_envelope_visible (yn);
+			bool x = region_envelope_visible_item->get_active();
+			if (x != arv->envelope_visible()) {
+				arv->set_envelope_visible (x);
 			}
 		}
 	}
 }
 
-/** Set whether or not gain envelopes are active for the selected regions.
- * @param yn true to make active, false to make inactive.
- */
 void
-Editor::set_gain_envelope_active (bool yn)
+Editor::toggle_gain_envelope_active ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			if (arv->audio_region()->envelope_active() != yn) {
-				arv->audio_region()->set_envelope_active (yn);
+			bool x = region_envelope_active_item->get_active();
+			if (x != arv->audio_region()->envelope_active()) {
+				arv->audio_region()->set_envelope_active (x);
 			}
 		}
-	}
-}
-
-/** Set the locked state of all selected regions to a particular value.
- * @param yn true to make locked, false to make unlocked.
- */
-void
-Editor::set_region_lock (bool yn)
-{
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		(*i)->region()->set_locked (yn);
 	}
 }
 
@@ -3470,26 +3472,62 @@ Editor::set_region_lock (bool yn)
  * @param yn true to make locked, false to make unlocked.
  */
 void
-Editor::set_region_position_lock (bool yn)
+Editor::toggle_region_position_lock ()
 {
+	bool x = region_lock_position_item->get_active();
+
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		(*i)->region()->set_position_locked (yn);
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			if (x != arv->audio_region()->locked()) {
+				arv->audio_region()->set_position_locked (x);
+			}
+		}
 	}
 }
 
 void
-Editor::set_region_mute (bool yn)
+Editor::toggle_region_lock ()
 {
+	bool x = region_lock_item->get_active();
+
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		(*i)->region()->set_muted (yn);
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			if (x != arv->audio_region()->locked()) {
+				arv->audio_region()->set_locked (x);
+			}
+		}
 	}
 }
 
 void
-Editor::set_region_opaque (bool yn)
+Editor::toggle_region_mute ()
 {
+	bool x = region_mute_item->get_active();
+
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		(*i)->region()->set_opaque (yn);
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			if (x != arv->audio_region()->muted()) {
+				arv->audio_region()->set_muted (x);
+			}
+		}
+	}
+}
+
+void
+Editor::toggle_region_opaque ()
+{
+	bool x = region_opaque_item->get_active();
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			if (x != arv->audio_region()->opaque()) {
+				arv->audio_region()->set_opaque (x);
+			}
+		}
 	}
 }
 

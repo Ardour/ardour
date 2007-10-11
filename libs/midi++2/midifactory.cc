@@ -24,7 +24,6 @@
 
 #include <midi++/types.h>
 #include <midi++/factory.h>
-#include <midi++/nullmidi.h>
 #include <midi++/fifomidi.h>
 
 #ifdef WITH_JACK_MIDI
@@ -33,7 +32,6 @@
 std::string MIDI::JACK_MidiPort::typestring = "jack";
 #endif // WITH_JACK_MIDI
 
-std::string MIDI::Null_MidiPort::typestring = "null";
 std::string MIDI::FIFO_MidiPort::typestring = "fifo";
 
 #ifdef WITH_ALSA
@@ -58,49 +56,43 @@ using namespace PBD;
 
 // FIXME: void* data pointer, filthy
 Port *
-PortFactory::create_port (PortRequest &req, void* data)
+PortFactory::create_port (const XMLNode& node, void* data)
 
 {
+	Port::Descriptor desc (node);
 	Port *port;
 	
-	switch (req.type) {
+	switch (desc.type) {
 #ifdef WITH_JACK_MIDI
 	case Port::JACK_Midi:
 		assert(data != NULL);
-		port = new JACK_MidiPort (req, (jack_client_t*)data);
+		port = new JACK_MidiPort (node, (jack_client_t*) data);
 		break;
 #endif // WITH_JACK_MIDI
 	
 #ifdef WITH_ALSA
 	case Port::ALSA_RawMidi:
-		port = new ALSA_RawMidiPort (req);
+		port = new ALSA_RawMidiPort (node);
 		break;
 
 	case Port::ALSA_Sequencer:
-		port = new ALSA_SequencerMidiPort (req);
+		port = new ALSA_SequencerMidiPort (node);
 		break;
 #endif // WITH_ALSA
 
 #if WITH_COREMIDI
 	case Port::CoreMidi_MidiPort:
-		port = new CoreMidi_MidiPort (req);
+		port = new CoreMidi_MidiPort (node);
 		break;
 #endif // WITH_COREMIDI
 
-	case Port::Null:
-		port = new Null_MidiPort (req);
-		break;
-
 	case Port::FIFO:
-		port = new FIFO_MidiPort (req);
+		port = new FIFO_MidiPort (node);
 		break;
 
 	default:
-		req.status = PortRequest::TypeUnsupported;
 		return 0;
 	}
-
-	req.status = PortRequest::OK;
 
 	return port;
 }
@@ -179,8 +171,6 @@ PortFactory::string_to_type (const string& xtype)
 	} else if (strings_equal_ignore_case (xtype, CoreMidi_MidiPort::typestring)) {
 		return Port::CoreMidi_MidiPort;
 #endif
-	} else if (strings_equal_ignore_case (xtype, Null_MidiPort::typestring)) {
-		return Port::Null;
 	} else if (strings_equal_ignore_case (xtype, FIFO_MidiPort::typestring)) {
 		return Port::FIFO;
 #ifdef WITH_JACK_MIDI

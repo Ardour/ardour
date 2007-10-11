@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 2007 Paul Davis 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -16,37 +17,34 @@
 
 */
 
-#ifndef __fifomidi_h__
-#define __fifomidi_h__
+#ifndef __ardour_resampled_source_h__
+#define __ardour_resampled_source_h__
 
-#include <fcntl.h>
-#include <vector>
-#include <string>
-#include <unistd.h>
+#include <samplerate.h>
 
-#include <midi++/port.h>
-#include <midi++/fd_midiport.h>
+#include <ardour/types.h>
+#include <ardour/importable_source.h>
 
-namespace MIDI {
+namespace ARDOUR {
 
-class FIFO_MidiPort : public MIDI::FD_MidiPort 
-
+class ResampledImportableSource : public ImportableSource 
 {
   public:
-	FIFO_MidiPort (const XMLNode&);
-	~FIFO_MidiPort () {};
-
-	static std::string typestring;
-
-  protected:
-	std::string get_typestring () const {
-		return typestring;
-	}
-
-  private:
-	void open (const Port::Descriptor&);
+	ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate, SrcQuality);
+	~ResampledImportableSource ();
+	
+	nframes_t read (Sample* buffer, nframes_t nframes);
+		
+	float ratio() const { return src_data.src_ratio; }
+	
+	static const uint32_t blocksize;
+	
+   private:
+        float* input;
+	SRC_STATE*	src_state;
+	SRC_DATA	src_data;
 };
 
-} // namespace MIDI
+}
 
-#endif // __fifomidi_h__
+#endif /* __ardour_resampled_source_h__ */

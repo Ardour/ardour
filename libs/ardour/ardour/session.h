@@ -261,6 +261,8 @@ class Session : public PBD::StatefulDestructible
 
 	std::string automation_dir () const;
 
+	Glib::ustring peak_path (Glib::ustring) const;
+
 	static string change_audio_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	static string change_midi_path_by_name (string oldpath, string oldname, string newname, bool destructive);
 	
@@ -422,6 +424,7 @@ class Session : public PBD::StatefulDestructible
 	int restore_history (string snapshot_name);
 	void remove_state (string snapshot_name);
 	void rename_state (string old_name, string new_name);
+	void remove_pending_capture_state ();
 	
 	sigc::signal<void,string> StateSaved;
 	sigc::signal<void> StateReady;
@@ -568,13 +571,14 @@ class Session : public PBD::StatefulDestructible
 	    string doing_what;
 	    
 	    /* control info */
-	    bool multichan;
 	    bool sample_convert;
+	    SrcQuality quality;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;
 	    
 	    /* result */
-	    std::vector<boost::shared_ptr<Region> > new_regions;
+	    SourceList sources;
+	    
 	};
 
 	int import_audiofile (import_status&);
@@ -650,8 +654,6 @@ class Session : public PBD::StatefulDestructible
 	void add_curve(Curve*);
 	void add_automation_list(AutomationList*);
 	
-	nframes_t automation_interval () const { return _automation_interval; }
-
 	/* fade curves */
 
 	float get_default_fade_length () const { return default_fade_msecs; }
@@ -1650,8 +1652,6 @@ class Session : public PBD::StatefulDestructible
 	void allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force);
 	uint32_t _npan_buffers;
 
-	nframes_t _automation_interval;
-
 	/* VST support */
 
 	long _vst_callback (VSTPlugin*,
@@ -1668,7 +1668,6 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_physical_outputs;
 	uint32_t n_physical_inputs;
 
-	void remove_pending_capture_state ();
 
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
@@ -1688,6 +1687,8 @@ class Session : public PBD::StatefulDestructible
 
 	XMLNode& get_control_protocol_state ();
 	
+	void set_history_depth (uint32_t depth);
+	void sync_order_keys ();
 };
 
 } // namespace ARDOUR

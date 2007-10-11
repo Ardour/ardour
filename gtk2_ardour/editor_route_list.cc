@@ -53,6 +53,10 @@ Editor::handle_new_route (Session::RouteList& routes)
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
+	ignore_route_list_reorder = true;
+	ignore_route_order_sync = true;
+	no_route_list_redisplay = true;
+
 	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
@@ -100,6 +104,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		row[route_display_columns.text] = route->name();
 		row[route_display_columns.visible] = tv->marked_for_display();
 		row[route_display_columns.tv] = tv;
+		row[route_display_columns.route] = route;
 		
 		track_views.push_back (tv);
 		
@@ -114,10 +119,17 @@ Editor::handle_new_route (Session::RouteList& routes)
 		
 		ignore_route_list_reorder = false;
 		
+		tv->set_old_order_key (route_display_model->children().size() - 1);
 		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
 		
 		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
+
+	ignore_route_list_reorder = false;
+	ignore_route_order_sync = false;
+	no_route_list_redisplay = false;
+
+	redisplay_route_list ();
 
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);
@@ -234,6 +246,33 @@ Editor::route_list_reordered (const TreeModel::Path& path,const TreeModel::itera
 	redisplay_route_list ();
 }
 
+
+void
+Editor::sync_order_keys ()
+{
+	vector<int> neworder;
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator ri;
+
+	if (ignore_route_order_sync || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+		return;
+	}
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		neworder.push_back (0);
+	}
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		TimeAxisView* tv = (*ri)[route_display_columns.tv];
+		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
+		neworder[route->order_key (X_("editor"))] = tv->old_order_key ();
+	}
+
+	ignore_route_list_reorder = true;
+	route_display_model->reorder (neworder);
+	ignore_route_list_reorder = false;
+}
+
 void
 Editor::redisplay_route_list ()
 {
@@ -288,6 +327,13 @@ Editor::redisplay_route_list ()
 	cursor_group->raise_to_top ();
 
 	reset_scrolling_region ();
+
+	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {
+		ignore_route_order_sync = true;
+		Route::SyncOrderKeys (); // EMIT SIGNAL
+		ignore_route_order_sync = false;
+	}
+
 }
 
 void
@@ -520,6 +566,13 @@ Editor::initial_route_list_display ()
 
 	no_route_list_redisplay = false;
 
+	redisplay_route_list ();
+}
+
+void
+Editor::track_list_reorder (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter, int* new_order)
+{
+	session->set_remote_control_ids();
 	redisplay_route_list ();
 }
 

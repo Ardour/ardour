@@ -338,7 +338,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 		show_processor_menu(ev->time);
 		ret = true;
 
-	} else if (processor && (ev->button == 2) && (ev->state == Gdk::BUTTON2_MASK)) {
+	} else if (processor && (ev->button == 2) && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))) {
 		
 		processor->set_active (!processor->active());
 		ret = true;
@@ -394,13 +394,13 @@ ProcessorBox::processor_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 
 		boost::shared_ptr<Processor> processor (new PluginInsert (_session, plugin, _placement));
 		
-		processor->ActiveChanged.connect (bind (mem_fun (*this, &ProcessorBox::show_processor_active), boost::weak_ptr<Processor>(processor)));
-
 		Route::ProcessorStreams err;
 
 		if (_route->add_processor (processor, &err)) {
 			weird_plugin_dialog (*plugin, err, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care? 
+		} else {
+			processor->ActiveChanged.connect (bind (mem_fun (*this, &ProcessorBox::show_processor_active), boost::weak_ptr<Processor>(processor)));
 		}
 	}
 }
@@ -482,36 +482,39 @@ ProcessorBox::choose_send ()
 	boost::shared_ptr<Send> send (new Send (_session, _placement));
 	//send->set_default_type(_route->default_type());
 
-	/* XXX need redirect lock on route */
+	ChanCount outs;
 
-	// This will be set properly in route->add_processor
-	send->configure_io (_route->max_processor_outs(), _route->max_processor_outs());
-	
-	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->io(), false, true);
-	
-	ios->show_all ();
+	/* make an educated guess at the initial number of outputs for the send */
 
-	ios->selector().Finished.connect (bind (mem_fun(*this, &ProcessorBox::send_io_finished), send, ios));
+	if (_session.master_out()) {
+		outs = _session.master_out()->n_outputs();
+	} else {
+		outs = _route->n_outputs();
+	}
+
+	send->io()->ensure_io (ChanCount::ZERO, outs, false, this);
+
+	SendUIWindow* gui = new SendUIWindow (send, _session);
+	
+	/* let the user adjust the output setup (number and connections) before passing
+	   it along to the Route
+	*/
+	
+	gui->show_all ();
+	gui->present ();
+
+	/* pass shared_ptr, it will go out of scope when the GUI is deleted */
+	/* also, connect it *before* existing handlers so that its definitely executed */
+
+	gui->signal_delete_event().connect (bind (mem_fun(*this, &ProcessorBox::send_io_finished), send, gui), false);
 }
 
-void
-ProcessorBox::send_io_finished (IOSelector::Result r, boost::shared_ptr<Send> send, IOSelectorWindow* ios)
+bool
+ProcessorBox::send_io_finished (GdkEventAny* ev, boost::shared_ptr<Send> send, SendUIWindow* sui)
 {
-	if (!send) {
-		return;
-	}
-
-	switch (r) {
-	case IOSelector::Cancelled:
-		// send will go away when all shared_ptrs to it vanish
-		break;
-
-	case IOSelector::Accepted:
-		_route->add_processor (send);
-		break;
-	}
-
-	delete_when_idle (ios);
+	_route->add_processor (send);
+	delete sui;
+	return false;
 }
 
 void

@@ -28,6 +28,8 @@
 #include <ardour/audioregion.h>
 #include <ardour/audiosource.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/profile.h>
+
 #include <pbd/memento_command.h>
 #include <pbd/stacktrace.h>
 
@@ -177,7 +179,9 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	line_name += ':';
 	line_name += "gain";
 
-	gain_line = new AudioRegionGainLine (line_name, trackview.session(), *this, *group, audio_region()->envelope());
+	if (!Profile->get_sae()) {
+		gain_line = new AudioRegionGainLine (line_name, trackview.session(), *this, *group, audio_region()->envelope());
+	}
 
 	if (!(_flags & EnvelopeVisible)) {
 		gain_line->hide ();
@@ -814,6 +818,8 @@ AudioRegionView::create_waves ()
 			if (audio_region()->audio_source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				create_one_wave (n, true);
 			} else {
+				// we'll get a PeaksReady signal from the source in the future
+				// and will call create_one_wave(n) then.
 			}
 		} else {
 			create_one_wave (n, true);

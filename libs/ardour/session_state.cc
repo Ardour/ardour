@@ -138,9 +138,13 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	_name = _current_snapshot_name = snapshot_name;
 
+	set_history_depth (Config->get_history_depth());
+
 	_current_frame_rate = _engine.frame_rate ();
 	_tempo_map = new TempoMap (_current_frame_rate);
 	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
+
+
 
 	g_atomic_int_set (&processing_prohibited, 0);
 	insert_cnt = 0;
@@ -501,7 +505,7 @@ void
 Session::remove_pending_capture_state ()
 {
 	sys::path pending_state_file_path(_session_dir->root_path());
-
+	
 	pending_state_file_path /= _current_snapshot_name + pending_suffix;
 
 	try
@@ -2668,8 +2672,6 @@ Session::save_history (string snapshot_name)
 {
 	XMLTree tree;
 	
- 	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
-
  	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
 	}
@@ -2690,6 +2692,13 @@ Session::save_history (string snapshot_name)
 			return -1;
 		}
  	}
+
+
+	if (!Config->get_save_history() || Config->get_saved_history_depth() < 0) {
+		return 0;
+	}
+
+ 	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
 	if (!tree.write (xml_path.to_string()))
 	{
@@ -2977,10 +2986,20 @@ Session::config_changed (const char* parameter_name)
 		set_remote_control_ids ();
 	}  else if (PARAM_IS ("denormal-model")) {
 		setup_fpu ();
+	} else if (PARAM_IS ("history-depth")) {
+		set_history_depth (Config->get_history_depth());
+	} else if (PARAM_IS ("sync-all-route-ordering")) {
+		sync_order_keys ();
 	}
 
 	set_dirty ();
 		   
 #undef PARAM_IS
 
+}
+
+void
+Session::set_history_depth (uint32_t d)
+{
+	_history.set_depth (d);
 }

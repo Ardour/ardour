@@ -50,6 +50,7 @@ class MotionController;
 class PluginSelector;
 class PluginUIWindow;
 class RouteRedirectSelection;
+class SendUIWindow;
 
 namespace ARDOUR {
 	class Bundle;
@@ -142,7 +143,7 @@ class ProcessorBox : public Gtk::HBox
 	void show_processor_menu (gint arg);
 
 	void choose_send ();
-	void send_io_finished (IOSelector::Result, boost::shared_ptr<ARDOUR::Send>, IOSelectorWindow*);
+	bool send_io_finished (GdkEventAny*,boost::shared_ptr<ARDOUR::Send>, SendUIWindow*);
 	void choose_processor ();
 	void choose_plugin ();
 	void processor_plugin_chosen (boost::shared_ptr<ARDOUR::Plugin>);

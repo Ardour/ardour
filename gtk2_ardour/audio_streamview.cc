@@ -74,6 +74,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
 
+
 }
 
 AudioStreamView::~AudioStreamView ()

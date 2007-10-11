@@ -80,20 +80,24 @@ class UndoHistory : public sigc::trackable
 	unsigned long undo_depth() const { return UndoList.size(); }
 	unsigned long redo_depth() const { return RedoList.size(); }
 	
-	std::string next_undo() const { return (UndoList.empty() ? std::string("") : UndoList.back()->name()); }
-	std::string next_redo() const { return (RedoList.empty() ? std::string("") : RedoList.back()->name()); }
+	std::string next_undo() const { return (UndoList.empty() ? std::string() : UndoList.back()->name()); }
+	std::string next_redo() const { return (RedoList.empty() ? std::string() : RedoList.back()->name()); }
 
 	void clear ();
 	void clear_undo ();
 	void clear_redo ();
 
-	XMLNode &get_state(uint32_t depth = 0);
-	void save_state();
+        XMLNode &get_state(int32_t depth = 0);
+        void save_state();
+
+	void set_depth (int32_t);
+	int32_t get_depth() const { return _depth; }
 
 	sigc::signal<void> Changed;
-
+	
   private:
 	bool _clearing;
+	int32_t _depth;
 	std::list<UndoTransaction*> UndoList;
 	std::list<UndoTransaction*> RedoList;
 

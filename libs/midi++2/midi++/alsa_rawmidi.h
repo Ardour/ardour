@@ -34,8 +34,8 @@ class ALSA_RawMidiPort : public MIDI::FD_MidiPort
 
 {
   public:
-	ALSA_RawMidiPort (MIDI::PortRequest &req) 
-		: FD_MidiPort (req, "/dev/snd", "midi") {}
+	ALSA_RawMidiPort (const XMLNode& node)
+		: FD_MidiPort (node, "/dev/snd", "midi") {}
 	virtual ~ALSA_RawMidiPort () {}
 
 	static std::string typestring;
@@ -46,7 +46,7 @@ class ALSA_RawMidiPort : public MIDI::FD_MidiPort
 	}
 };
 
-} // namespace MIDI
+}
 
 #endif // __alsa_rawmidi_h__
 

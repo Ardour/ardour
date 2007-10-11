@@ -13,13 +13,7 @@
            <separator/>
            <menuitem action='AddTrackBus'/>	
            <separator/>
-           <menu action='addExistingAudioFiles'>
-	       <menuitem action='addExternalAudioAsRegion'/>	       
-	       <menuitem action='addExternalAudioToTrack'/>	       
-               <separator/>
-	       <menuitem action='addExternalAudioAsTrack'/>	       
-	       <menuitem action='addExternalAudioAsTapeTrack'/>	       
-           </menu>
+           <menuitem action='addExistingAudioFiles'/>
            <separator/>
            <menu name='Export' action='Export'>
                <menuitem action='ExportSession'/>
@@ -140,7 +134,6 @@
 			<menuitem action='set-mouse-mode-gain'/>
 			<menuitem action='set-mouse-mode-zoom'/>
 			<menuitem action='set-mouse-mode-timefx'/>
-			<menuitem action='set-mouse-mode-note'/>
           </menu>
         </menu>         
         <menu name='View' action = 'View'>
@@ -215,7 +208,7 @@
                <menuitem action='ToggleMeasureVisibility'/>
 	       <separator/>
 	       <menuitem action='show-editor-mixer'/>
-	       <menuitem action='show-editor-list'/>
+	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
          </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>
@@ -304,10 +297,6 @@
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
-	           <menu action='Plugins'>
-		        <menuitem action='DisableAllPlugins'/>
-		        <menuitem action='ABAllPlugins'/>
-               </menu>
 	       <menu action='Metering'>
                    <menu action='MeteringFallOffRate'>
 		        <menuitem action='MeterFalloffOff'/>
@@ -370,13 +359,15 @@
                <menuitem action='GainReduceFastTransport'/>
 	       <menuitem action='PrimaryClockDeltaEditCursor'/>
 	       <menuitem action='SecondaryClockDeltaEditCursor'/>
+	       <menuitem action='OnlyCopyImportedFiles'/>
+	       <separator/>
          </menu>
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>
 	</menu>
      </menubar>
 
-     <popup name='processormenu'>
+     <popup name='redirectmenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
@@ -398,9 +389,6 @@
 	  <separator/>
 	 <menuitem action='activate_all'/>
 	 <menuitem action='deactivate_all'/>
-	  <separator/>
-	 <menuitem action='deactivate_plugins'/>
-	 <menuitem action='a_b_plugins'/>
 	  <separator/>
 	 <menuitem action='edit'/>
       </popup>

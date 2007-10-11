@@ -370,6 +370,15 @@ namespace ARDOUR {
 	};
 
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
+
+	enum SrcQuality {
+		SrcBest,
+		SrcGood,
+		SrcQuick,
+		SrcFast,
+		SrcFastest
+	};
+
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

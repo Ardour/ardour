@@ -27,7 +27,6 @@
 #include <ardour/crossfade.h>
 #include <midi++/manager.h>
 #include <midi++/factory.h>
-#include <midi++/port_request.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
@@ -43,6 +42,7 @@
 #include "editing.h"
 #include "option_editor.h"
 #include "midi_port_dialog.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -56,7 +56,7 @@ using namespace std;
 static vector<string> positional_sync_strings;
 
 OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
-	: Dialog ("options editor"),
+	: ArdourDialog ("options editor", false),
 	  ui (uip),
 	  editor (ed),
 	  mixer (mixui),
@@ -64,24 +64,33 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  /* Paths */
 	  path_table (11, 2),
 
-	  /* Fades */
+	  /* misc */
 
 	  short_xfade_adjustment (0, 1.0, 500.0, 5.0, 100.0),
 	  short_xfade_slider (short_xfade_adjustment),
 	  destructo_xfade_adjustment (1.0, 1.0, 500.0, 1.0, 100.0),
 	  destructo_xfade_slider (destructo_xfade_adjustment),
+	  history_depth (20, -1, 100, 1.0, 10.0),
+	  saved_history_depth (20, 0, 100, 1.0, 10.0),
+	  history_depth_spinner (history_depth),
+	  saved_history_depth_spinner (saved_history_depth),
+	  limit_history_button (_("Limit undo history")),
+	  save_history_button (_("Save undo history")),
 
 	  /* Sync */
 
 	  smpte_offset_clock (X_("smpteoffset"), false, X_("SMPTEOffsetClock"), true, true),
 	  smpte_offset_negative_button (_("SMPTE offset is negative")),
+	  synced_timecode_button (_("Timecode source is sample-clock synced")),
 
 	  /* MIDI */
 
+	  midi_port_table (4, 11),
 	  mmc_receive_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
 	  mmc_receive_device_id_spinner (mmc_receive_device_id_adjustment),
 	  mmc_send_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
 	  mmc_send_device_id_spinner (mmc_send_device_id_adjustment),
+	  add_midi_port_button (_("Add new MIDI port")),
 
 	  /* Click */
 
@@ -105,13 +114,13 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	session = 0;
 	
 	WindowTitle title(Glib::get_application_name());
-	title += _("Options Editor");
+	title += _("Preferences");
 	set_title(title.get_string());
 
 	set_default_size (300, 300);
-	set_wmclass (X_("ardour_option_editor"), "Ardour");
+	set_wmclass (X_("ardour_preferences"), "Ardour");
 
-	set_name ("OptionsWindow");
+	set_name ("Preferences");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	
 	VBox *vbox = get_vbox();
@@ -128,7 +137,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	setup_sync_options();
 	setup_path_options();
-	setup_fade_options ();
+	setup_misc_options ();
 	setup_keyboard_options ();
 	setup_auditioner_editor ();
 
@@ -137,15 +146,16 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	notebook.pages().push_back (TabElem (keyboard_mouse_table, _("Kbd/Mouse")));
 	notebook.pages().push_back (TabElem (click_packer, _("Click")));
 	notebook.pages().push_back (TabElem (audition_packer, _("Audition")));
-	notebook.pages().push_back (TabElem (fade_packer, _("Layers & Fades")));
+	notebook.pages().push_back (TabElem (misc_packer, _("Misc")));
 
-	if (!MIDI::Manager::instance()->get_midi_ports().empty()) {
-		setup_midi_options ();
-		notebook.pages().push_back (TabElem (midi_packer, _("MIDI")));
-	}
+	setup_midi_options ();
+	notebook.pages().push_back (TabElem (midi_packer, _("MIDI")));
 
 	set_session (0);
 	show_all_children();
+
+	Config->map_parameters (mem_fun (*this, &OptionEditor::parameter_changed));
+	Config->ParameterChanged.connect (mem_fun (*this, &OptionEditor::parameter_changed));
 }
 
 void
@@ -182,27 +192,7 @@ OptionEditor::set_session (Session *s)
 
 	smpte_offset_negative_button.set_active (session->smpte_offset_negative());
 
-	/* set up port assignments */
-
-	std::map<MIDI::Port*,vector<RadioButton*> >::iterator res;
-
-	if (session->mtc_port()) {
-		if ((res = port_toggle_buttons.find (session->mtc_port())) != port_toggle_buttons.end()) {
-			(*res).second[MtcIndex]->set_active (true);
-		}
-	} 
-
-	if (session->mmc_port ()) {
-		if ((res = port_toggle_buttons.find (session->mmc_port())) != port_toggle_buttons.end()) {
-			(*res).second[MmcIndex]->set_active (true);
-		} 
-	}
-
-	if (session->midi_port()) {
-		if ((res = port_toggle_buttons.find (session->midi_port())) != port_toggle_buttons.end()) {
-			(*res).second[MidiIndex]->set_active (true);
-		}
-	}
+	redisplay_midi_ports ();
 
 	setup_click_editor ();
 	connect_audition_editor ();
@@ -260,7 +250,7 @@ OptionEditor::add_session_paths ()
 }
 
 void
-OptionEditor::setup_fade_options ()
+OptionEditor::setup_misc_options ()
 {
 	Gtk::HBox* hbox;
 	
@@ -272,7 +262,7 @@ OptionEditor::setup_fade_options ()
 	hbox->set_spacing (10);
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (short_xfade_slider, true, true);
-	fade_packer.pack_start (*hbox, false, false);
+	misc_packer.pack_start (*hbox, false, false);
 
 	short_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::short_xfade_adjustment_changed));
 
@@ -284,16 +274,94 @@ OptionEditor::setup_fade_options ()
 	hbox->set_spacing (10);
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (destructo_xfade_slider, true, true);
-	fade_packer.pack_start (*hbox, false, false);
+	misc_packer.pack_start (*hbox, false, false);
 	
+
 	destructo_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::destructo_xfade_adjustment_changed));
 
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (limit_history_button, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+
+	label = manage (new Label (_("History depth (commands)")));
+	label->set_name ("OptionsLabel");
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (history_depth_spinner, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+
+	history_depth.signal_value_changed().connect (mem_fun (*this, &OptionEditor::history_depth_changed));
+	saved_history_depth.signal_value_changed().connect (mem_fun (*this, &OptionEditor::saved_history_depth_changed));
+	save_history_button.signal_toggled().connect (mem_fun (*this, &OptionEditor::save_history_toggled));
+	limit_history_button.signal_toggled().connect (mem_fun (*this, &OptionEditor::limit_history_toggled));
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (save_history_button, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+
+	label = manage (new Label (_("Saved history depth (commands)")));
+	label->set_name ("OptionsLabel");
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (saved_history_depth_spinner, false, false);
+	misc_packer.pack_start (*hbox, false, false);
+	
 	short_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
 	destructo_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
 
 	destructo_xfade_adjustment.set_value (Config->get_destructive_xfade_msecs());
 
-	fade_packer.show_all ();
+	misc_packer.show_all ();
+}
+
+void
+OptionEditor::limit_history_toggled ()
+{
+	bool x = limit_history_button.get_active();
+	
+	if (!x) {
+		Config->set_history_depth (0);
+		history_depth_spinner.set_sensitive (false);
+	} else {
+		if (Config->get_history_depth() == 0) {
+			/* get back to a sane default */
+			Config->set_history_depth (20);
+		}
+		history_depth_spinner.set_sensitive (true);
+	}
+}
+
+void
+OptionEditor::save_history_toggled ()
+{
+	bool x = save_history_button.get_active();
+
+	if (x != Config->get_save_history()) {
+		Config->set_save_history (x);
+		saved_history_depth_spinner.set_sensitive (x);
+	}
+}
+
+void
+OptionEditor::history_depth_changed()
+{
+	Config->set_history_depth ((int32_t) floor (history_depth.get_value()));
+}
+
+void
+OptionEditor::saved_history_depth_changed()
+{
+	Config->set_saved_history_depth ((int32_t) floor (saved_history_depth.get_value()));
 }
 
 void
@@ -347,8 +415,10 @@ OptionEditor::setup_sync_options ()
 	hbox->pack_start (smpte_offset_negative_button, false, false);
 
 	sync_packer.pack_start (*hbox, false, false);
+	sync_packer.pack_start (synced_timecode_button, false, false);
 
 	smpte_offset_negative_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::smpte_offset_negative_clicked));
+	synced_timecode_button.signal_toggled().connect (mem_fun(*this, &OptionEditor::synced_timecode_toggled));
 }
 
 void
@@ -356,6 +426,17 @@ OptionEditor::smpte_offset_negative_clicked ()
 {
 	if (session) {
 		session->set_smpte_offset_negative (smpte_offset_negative_button.get_active());
+	}
+}
+
+void
+OptionEditor::synced_timecode_toggled ()
+{
+	bool x;
+
+	if ((x = synced_timecode_button.get_active()) != Config->get_timecode_source_is_synced()) {
+		Config->set_timecode_source_is_synced (x);
+		Config->save_state();
 	}
 }
 
@@ -368,6 +449,7 @@ OptionEditor::smpte_offset_chosen()
 	}
 }
 
+
 void
 OptionEditor::setup_midi_options ()
 {
@@ -378,6 +460,9 @@ OptionEditor::setup_midi_options ()
 	midi_port_table.set_col_spacings (10);
 
 	redisplay_midi_ports ();
+
+	mmc_receive_device_id_adjustment.set_value (Config->get_mmc_receive_device_id());
+	mmc_send_device_id_adjustment.set_value (Config->get_mmc_send_device_id());
 
 	mmc_receive_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_receive_device_id_adjusted));
 	mmc_send_device_id_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::mmc_send_device_id_adjusted));
@@ -396,7 +481,9 @@ OptionEditor::setup_midi_options ()
 	label = (manage (new Label (_("Inbound MMC Device ID")))); 
 	hbox->pack_start (mmc_receive_device_id_spinner, false, false);
 	hbox->pack_start (*label, false, false);
-	midi_packer.pack_start (*hbox, false, false);
+	midi_packer.pack_start (*hbox, false, false); 
+
+	mmc_receive_device_id_spinner.set_value(Config->get_mmc_receive_device_id ());
 
 	hbox = manage (new HBox);
 	hbox->set_border_width (6);
@@ -405,6 +492,8 @@ OptionEditor::setup_midi_options ()
 	hbox->pack_start (mmc_send_device_id_spinner, false, false);
 	hbox->pack_start (*label, false, false);
 	midi_packer.pack_start (*hbox, false, false);
+
+	mmc_send_device_id_spinner.set_value(Config->get_mmc_send_device_id ());
 
 	add_midi_port_button.signal_clicked().connect (mem_fun (*this, &OptionEditor::add_midi_port));
 }
@@ -624,12 +713,15 @@ OptionEditor::add_midi_port ()
 		smod = "duplex";
 	}
 
-	MIDI::PortRequest req (X_("ardour"),
-			       dialog.port_name.get_text(),
-			       smod,
-			       MIDI::PortFactory::default_port_type());
 
-	if (MIDI::Manager::instance()->add_port (req) != 0) {
+	XMLNode node (X_("MIDI-port"));
+
+	node.add_property ("tag", dialog.port_name.get_text());
+	node.add_property ("device", X_("ardour")); // XXX this can't be right for all types
+	node.add_property ("type", MIDI::PortFactory::default_port_type());
+	node.add_property ("mode", smod);
+
+	if (MIDI::Manager::instance()->add_port (node) != 0) {
 		redisplay_midi_ports ();
 	}
 }
@@ -696,23 +788,27 @@ OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool wanted = tb->get_active();
 
-	if (wanted != port->input()->offline()) {
-		port->input()->set_offline (wanted);
-	} 
+	if (port->input()) {
+		if (wanted != port->input()->offline()) {
+			port->input()->set_offline (wanted);
+		} 
+	}
 }
 
 void
 OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 {
 	bool bstate = tb->get_active ();
-
-	if (bstate != port->input()->offline()) {
-		if (port->input()->offline()) {
-			tb->set_label (_("offline"));
-			tb->set_active (false);
-		} else {
-			tb->set_label (_("online"));
-			tb->set_active (true);
+	
+	if (port->input()) {
+		if (bstate != port->input()->offline()) {
+			if (port->input()->offline()) {
+				tb->set_label (_("offline"));
+				tb->set_active (false);
+			} else {
+				tb->set_label (_("online"));
+				tb->set_active (true);
+			}
 		}
 	}
 }
@@ -721,20 +817,14 @@ void
 OptionEditor::mmc_receive_device_id_adjusted ()
 {
 	uint8_t id = (uint8_t) mmc_receive_device_id_spinner.get_value();
-
-	if (id != Config->get_mmc_receive_device_id()) {
-		Config->set_mmc_receive_device_id (id);
-	}
+	Config->set_mmc_receive_device_id (id);
 }
 
 void
 OptionEditor::mmc_send_device_id_adjusted ()
 {
 	uint8_t id = (uint8_t) mmc_send_device_id_spinner.get_value();
-
-	if (id != Config->get_mmc_send_device_id()) {
-		Config->set_mmc_send_device_id (id);
-	}
+	Config->set_mmc_send_device_id (id);
 }
 
 void
@@ -742,8 +832,10 @@ OptionEditor::port_trace_in_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool trace = tb->get_active();
 
-	if (port->input()->tracing() != trace) {
-		port->input()->trace (trace, &cerr, string (port->name()) + string (" input: "));
+	if (port->input()) {
+		if (port->input()->tracing() != trace) {
+			port->input()->trace (trace, &cerr, string (port->name()) + string (" input: "));
+		}
 	}
 }
 
@@ -752,8 +844,10 @@ OptionEditor::port_trace_out_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool trace = tb->get_active();
 
-	if (port->output()->tracing() != trace) {
-		port->output()->trace (trace, &cerr, string (port->name()) + string (" output: "));
+	if (port->output()) {
+		if (port->output()->tracing() != trace) {
+			port->output()->trace (trace, &cerr, string (port->name()) + string (" output: "));
+		}
 	}
 }
 
@@ -784,10 +878,13 @@ OptionEditor::raid_path_changed ()
 void
 OptionEditor::click_browse_clicked ()
 {
-	SoundFileChooser sfdb (_("Choose Click"), session);
+	SoundFileChooser sfdb (*this, _("Choose Click"), session);
 	
-	int result = sfdb.run ();
+	sfdb.show_all ();
+	sfdb.present ();
 
+	int result = sfdb.run ();
+ 
 	if (result == Gtk::RESPONSE_OK) {
 		click_chosen(sfdb.get_filename());
 	}
@@ -803,7 +900,10 @@ OptionEditor::click_chosen (const string & path)
 void
 OptionEditor::click_emphasis_browse_clicked ()
 {
-	SoundFileChooser sfdb (_("Choose Click Emphasis"), session);
+	SoundFileChooser sfdb (*this, _("Choose Click Emphasis"), session);
+
+	sfdb.show_all ();
+	sfdb.present ();
 
 	int result = sfdb.run ();
 
@@ -1167,3 +1267,31 @@ OptionEditor::fixup_combo_size (Gtk::ComboBoxText& combo, vector<string>& string
 	set_size_request_to_display_given_text (combo, maxstring.c_str(), 10 + FUDGE, 10);
 }
 
+void
+OptionEditor::parameter_changed (const char* parameter_name)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &OptionEditor::parameter_changed), parameter_name));
+
+#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
+	
+	if (PARAM_IS ("timecode-source-is-synced")) {
+		synced_timecode_button.set_active (Config->get_timecode_source_is_synced());
+	} else if (PARAM_IS ("history-depth")) {
+		int32_t depth = Config->get_history_depth();
+		
+		history_depth.set_value (depth);
+		history_depth_spinner.set_sensitive (depth != 0);
+		limit_history_button.set_active (depth != 0);
+
+	} else if (PARAM_IS ("saved-history-depth")) {
+
+		saved_history_depth.set_value (Config->get_saved_history_depth());
+
+	} else if (PARAM_IS ("save-history")) {
+
+		bool x = Config->get_save_history();
+
+		save_history_button.set_active (x);
+		saved_history_depth_spinner.set_sensitive (x);
+	}
+}

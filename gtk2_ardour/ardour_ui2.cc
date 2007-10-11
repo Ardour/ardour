@@ -78,12 +78,52 @@ ARDOUR_UI::setup_windows ()
 
 	theme_manager->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
 
-	top_packer.pack_start (menu_bar_base, false, false);
-	top_packer.pack_start (transport_frame, false, false);
+ 	top_packer.pack_start (transport_frame, false, false);
+
+#ifdef TOP_MENUBAR
+	HBox* status_bar_packer = manage (new HBox);
+	
+	status_bar_label.set_size_request (300, -1);
+	status_bar_packer->pack_start (status_bar_label, true, true, 6);
+	status_bar_packer->pack_start (error_log_button, false, false);
+	
+	error_log_button.signal_clicked().connect (mem_fun (*this, &UI::toggle_errors));
+
+	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
+	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
+#else
+ 	top_packer.pack_start (menu_bar_base, false, false);
+#endif 
 
 	editor->add_toplevel_controls (top_packer);
 
 	return 0;
+}
+
+ void
+ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
+{
+	ustring text;
+
+	UI::display_message (prefix, prefix_len, ptag, mtag, msg);
+#ifdef TOP_MENUBAR
+
+	if (strcmp (prefix, _("[ERROR]: ")) == 0) {
+		text = "<span color=\"red\" weight=\"bold\">";
+	} else if (strcmp (prefix, _("[WARNING]: ")) == 0) {
+		text = "<span color=\"yellow\" weight=\"bold\">";
+	} else if (strcmp (prefix, _("[INFO]: ")) == 0) {
+		text = "<span color=\"green\" weight=\"bold\">";
+	} else {
+		text = "<span color=\"blue\" weight=\"bold\">???";
+	}
+
+	text += prefix;
+	text += "</span>";
+	text += msg;
+
+	status_bar_label.set_markup (text);
+#endif
 }
 
 void

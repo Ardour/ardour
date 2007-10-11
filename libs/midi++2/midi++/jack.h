@@ -39,7 +39,7 @@ namespace MIDI
 class JACK_MidiPort : public Port
 {
 public:
-	JACK_MidiPort (PortRequest &req, jack_client_t* jack_client);
+	JACK_MidiPort (const XMLNode& node, jack_client_t* jack_client);
 	virtual ~JACK_MidiPort ();
 
 	/* No select(2)/poll(2)-based I/O */
@@ -48,6 +48,9 @@ public:
 	virtual void cycle_start(nframes_t nframes);
 
 	static std::string typestring;
+
+	virtual XMLNode& get_state () const;
+	virtual void set_state (const XMLNode&);
 
   protected:
 	std::string get_typestring () const {
@@ -60,7 +63,7 @@ protected:
 	int read(byte *buf, size_t max, timestamp_t timestamp);
 
 private:
-	int create_ports(PortRequest &req);
+	int create_ports(const XMLNode&);
 
 	jack_client_t* _jack_client;
 	jack_port_t*   _jack_input_port;

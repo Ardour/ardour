@@ -48,13 +48,13 @@ uint32_t Keyboard::Shift = GDK_SHIFT_MASK;
 uint32_t Keyboard::Alt = GDK_MOD1_MASK;
 uint32_t Keyboard::Meta;
 
-Keyboard* Keyboard::_the_keyboard = 0;
+Keyboard*    Keyboard::_the_keyboard = 0;
+Gtk::Window* Keyboard::current_window = 0;
+bool         Keyboard::_some_magic_widget_has_focus = false;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 
 GdkModifierType Keyboard::RelevantModifierKeyMask;
-
-bool Keyboard::_some_magic_widget_has_focus = false;
 
 void
 Keyboard::magic_widget_grab_focus () 
@@ -199,6 +199,13 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 
 	}
 
+	if (event->type == GDK_KEY_RELEASE && event->keyval == GDK_w && modifier_state_equals (event->state, Control)) {
+		if (current_window) {
+			current_window->hide ();
+			current_window = 0;
+		}
+	}
+
 	return false;
 }
 
@@ -211,6 +218,7 @@ Keyboard::key_is_down (uint32_t keyval)
 bool
 Keyboard::enter_window (GdkEventCrossing *ev, Gtk::Window* win)
 {
+	current_window = win;
 	return false;
 }
 
@@ -236,6 +244,7 @@ Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* win)
 			cerr << "clearing current target\n";
 		}
 		state.clear ();
+		current_window = 0;
 	}
 
 	return false;

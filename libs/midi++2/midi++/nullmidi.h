@@ -24,7 +24,6 @@
 #include <string>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 
 namespace MIDI {
 

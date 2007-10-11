@@ -23,6 +23,8 @@
 #include <ardour/recent_sessions.h>
 #include <ardour/session_state_utils.h>
 #include <ardour/template_utils.h>
+#include <ardour/session.h>
+#include <ardour/profile.h>
 
 #include <gtkmm/entry.h>
 #include <gtkmm/filechooserbutton.h>
@@ -44,9 +46,10 @@ using namespace PBD;
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
 {
+	in_destructor = false;
 	session_name_label = Gtk::manage(new class Gtk::Label(_("Name :")));
 	m_name = Gtk::manage(new class Gtk::Entry());
-	m_name->set_text(GTK_ARDOUR::session_name);
+	m_name->set_text(ARDOUR_COMMAND_LINE::session_name);
 
 	chan_count_label_1 = Gtk::manage(new class Gtk::Label(_("channels")));
 	chan_count_label_2 = Gtk::manage(new class Gtk::Label(_("channels")));
@@ -308,8 +311,11 @@ NewSessionDialog::NewSessionDialog()
 	new_session_table->attach(*m_folder, 1, 2, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::FILL, 0, 0);
 	new_session_table->attach(*session_template_label, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL, 0, 0);
 	new_session_table->attach(*m_template, 1, 2, 2, 3, Gtk::EXPAND|Gtk::FILL, Gtk::FILL, 0, 0);
-	new_session_table->attach(*advanced_expander, 0, 2, 3, 4, Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 6);
 
+	if (!ARDOUR::Profile->get_sae()) {
+		new_session_table->attach(*advanced_expander, 0, 2, 3, 4, Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 6);
+	}
+       
 	open_session_hbox->pack_start(*open_session_file_label, false, false, 12);
 	open_session_hbox->pack_start(*m_open_filechooser, true, true, 12);
 	m_treeview->set_flags(Gtk::CAN_FOCUS);
@@ -358,7 +364,7 @@ NewSessionDialog::NewSessionDialog()
 	// add_button(Gtk::Stock::HELP, Gtk::RESPONSE_HELP);
 	add_button(Gtk::Stock::QUIT, Gtk::RESPONSE_CANCEL);
 	add_button(Gtk::Stock::CLEAR, Gtk::RESPONSE_NONE);
-	m_okbutton = add_button(Gtk::Stock::NEW, Gtk::RESPONSE_OK);
+	m_okbutton = add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 
 	recent_model = Gtk::TreeStore::create (recent_columns);
 	m_treeview->set_model (recent_model);
@@ -401,7 +407,7 @@ NewSessionDialog::NewSessionDialog()
 
 
 	set_default_response (Gtk::RESPONSE_OK);
-	if (!GTK_ARDOUR::session_name.length()) {
+	if (!ARDOUR_COMMAND_LINE::session_name.length()) {
 		set_response_sensitive (Gtk::RESPONSE_OK, false);
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 	} else {
@@ -426,10 +432,37 @@ NewSessionDialog::NewSessionDialog()
 	m_name->grab_focus();
 }
 
+NewSessionDialog::~NewSessionDialog()
+{
+       in_destructor = true;
+}
+
+void
+NewSessionDialog::set_have_engine (bool yn)
+{
+       if (yn) {
+               m_notebook->remove_page (engine_control);
+       } else {
+               // XXX this is a bit of crude hack. if we ever add or remove
+               // pages from the notebook, this is going to break.
+               if (m_notebook->get_n_pages () != 3) {
+                       m_notebook->append_page (engine_control, _("Audio Setup"));
+                       m_notebook->show_all_children();
+               }
+       }
+}
+
+
 void
 NewSessionDialog::set_session_name(const Glib::ustring& name)
 {
 	m_name->set_text(name);
+}
+
+void
+NewSessionDialog::set_session_folder(const Glib::ustring& dir)
+{
+	// XXX DO SOMETHING
 }
 
 std::string
@@ -450,7 +483,7 @@ NewSessionDialog::session_name() const
 	}	  
 	*/
 
-	if (on_new_session_page ()) {
+	if (on_newable_page()) {
 	        return Glib::filename_from_utf8(m_name->get_text());
 	} else {
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
@@ -464,10 +497,9 @@ NewSessionDialog::session_name() const
 std::string
 NewSessionDialog::session_folder() const
 {
-	if (on_new_session_page ()) {
+	if (on_newable_page()) {
 		return Glib::filename_from_utf8(m_folder->get_filename());
 	} else {
-	       
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
 			std::string str = Glib::filename_from_utf8(m_open_filechooser->get_filename());
 			return Glib::path_get_dirname(str);
@@ -563,9 +595,16 @@ NewSessionDialog::connect_outs_to_physical() const
 }
 
 bool
-NewSessionDialog::on_new_session_page() const
+NewSessionDialog::on_newable_page() const
 {
-	return (m_notebook->get_current_page() == 0);
+	return (m_notebook->get_current_page() == 0 ||
+		m_notebook->get_current_page() == 2);
+}
+
+int
+NewSessionDialog::get_current_page() const
+{
+	return m_notebook->get_current_page();
 }
 
 void
@@ -595,7 +634,11 @@ NewSessionDialog::on_new_session_name_entry_changed ()
 void
 NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 {
-	if (!on_new_session_page ()) {
+	if (in_destructor) {
+		return;
+	}
+
+	if (!on_newable_page ()) {
 		m_okbutton->set_label(_("Open"));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
@@ -635,7 +678,7 @@ NewSessionDialog::treeview_selection_changed ()
 void
 NewSessionDialog::file_chosen ()
 {
-	if (on_new_session_page ()) return;
+	if (on_newable_page ()) return;
 
 	m_treeview->get_selection()->unselect_all();
 

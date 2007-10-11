@@ -17,6 +17,9 @@ clearlooks = env.Copy()
 clearlooks.Replace(CCFLAGS = ' `pkg-config --cflags gtk+-2.0` ',
                    LINKFLAGS = ' `pkg-config --libs gtk+-2.0` ')
 
+if env['GTKOSX']:
+    clearlooks.Append (CCFLAGS = '-DGTKOSX')
+
 libclearlooks = clearlooks.SharedLibrary('clearlooks', libclearlooks_files) 
 
 usable_libclearlooks = clearlooks.Install ('engines', libclearlooks)

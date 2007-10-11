@@ -22,6 +22,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -32,45 +33,47 @@
 
 namespace MIDI {
 
-namespace PortRequest;
+    class CoreMidi_MidiPort:public Port {
+      public:
+	CoreMidi_MidiPort(const XMLNode& node);
+	virtual ~ CoreMidi_MidiPort();
 
-class CoreMidi_MidiPort:public Port 
-{
-  public:
-       CoreMidi_MidiPort(PortRequest & req);
-       virtual ~ CoreMidi_MidiPort();
-    
-       virtual int selectable() const {
-	       return -1;
-       }
-       static std::string typestring;
+	virtual int selectable() const {
+	    return -1;
+	}
 
-  protected:
+	static int discover (std::vector<PortSet>&);
+	static std::string typestring;
+
+      protected:
+	/* Direct I/O */
+	int write (byte * msg, size_t msglen, timestamp_t timestamp);
+
+	int read (byte * buf, size_t max, timestamp_t timestamp) {
+	    return 0;
+	} 
+
+        /* CoreMidi callback */
+	static void read_proc(const MIDIPacketList * pktlist,
+			      void *refCon, void *connRefCon);
+	
 	std::string get_typestring () const {
 		return typestring;
 	}
 
-	protected:
-		/* Direct I/O */
-		int write (byte *msg, size_t msglen, timestamp_t timestamp);	
-		int read (byte *buf, size_t max, timestamp_t timestamp);
+      private:
+	byte midi_buffer[1024];
+	MIDIClientRef midi_client;
+	MIDIEndpointRef midi_destination;
+	MIDIEndpointRef midi_source;
 
-		/* CoreMidi callback */
-		static void read_proc(const MIDIPacketList * pktlist,
-				void *refCon, void *connRefCon);
+	int Open(const Port::Descriptor&);
+	void Close();
+	static MIDITimeStamp MIDIGetCurrentHostTime();
 
-	private:
-		byte midi_buffer[1024];
-		MIDIClientRef midi_client;
-		MIDIEndpointRef midi_destination;
-		MIDIEndpointRef midi_source;
-
-		int Open(PortRequest & req);
-		void Close();
-		static MIDITimeStamp MIDIGetCurrentHostTime();
-
-		bool firstrecv;
-};
+	bool firstrecv;
+	
+    };
 
 } // namespace MIDI
 

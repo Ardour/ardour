@@ -152,14 +152,14 @@ Editor::ruler_button_press (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
-		// Since we are about to move the playhead, cancel any running
+		// Since we will locate the playhead on button release, cancel any running
 		// auditions.
 		if (session->is_auditioning()) {
 			session->cancel_audition ();
 		}
-		/* transport playhead */
+		/* playhead cursor */
 		snap_to (where);
-		session->request_locate (where);
+		playhead_cursor->set_position (where);
 		_dragging_playhead = true;
 		break;
 

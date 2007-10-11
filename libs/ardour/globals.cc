@@ -39,7 +39,6 @@
 #include <pbd/fpu.h>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 #include <midi++/manager.h>
 #include <midi++/mmc.h>
 
@@ -51,6 +50,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/utils.h>
 #include <ardour/session.h>
+#include <ardour/source_factory.h>
 #include <ardour/control_protocol_manager.h>
 #include <ardour/audioengine.h>
 
@@ -114,47 +114,25 @@ setup_osc ()
 #endif
 
 int 
-ARDOUR::setup_midi (AudioEngine& engine)
+setup_midi ()
 {
-	std::map<string,Configuration::MidiPortDescriptor*>::iterator i;
-	int nports;
-
-	if ((nports = Config->midi_ports.size()) == 0) {
+	if (Config->midi_ports.size() == 0) {
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
 
-	MIDI::Manager::instance()->set_api_data(engine.jack());
-
-	for (i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
-		Configuration::MidiPortDescriptor* port_descriptor;
-
-		port_descriptor = (*i).second;
-
-		MIDI::PortRequest request (port_descriptor->device, 
-					   port_descriptor->tag, 
-					   port_descriptor->mode, 
-					   port_descriptor->type);
-
-		if (request.status != MIDI::PortRequest::OK) {
-			error << string_compose(_("MIDI port specifications for \"%1\" are not understandable."), port_descriptor->tag) << endmsg;
-			continue;
-		}
-		
-		MIDI::Manager::instance()->add_port (request);
-
-		nports++;
+	for (std::map<string,XMLNode>::iterator i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
+		MIDI::Manager::instance()->add_port (i->second);
 	}
 
 	MIDI::Port* first;
 	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
-	first = ports.begin()->second;
 
-	if (nports > 1) {
+	if (ports.size() > 1) {
+
+		first = ports.begin()->second;
 
 		/* More than one port, so try using specific names for each port */
-
-		map<string,Configuration::MidiPortDescriptor *>::iterator i;
 
 		if (Config->get_mmc_port_name() != N_("default")) {
 			default_mmc_port =  MIDI::Manager::instance()->port (Config->get_mmc_port_name());
@@ -182,11 +160,13 @@ ARDOUR::setup_midi (AudioEngine& engine)
 			default_midi_port = first;
 		}
 		
-	} else {
+	} else if (ports.size() == 1) {
+
+		first = ports.begin()->second;
 
 		/* Only one port described, so use it for both MTC and MMC */
 
-		default_mmc_port = MIDI::Manager::instance()->port ("");
+		default_mmc_port = first;
 		default_mtc_port = default_mmc_port;
 		default_midi_port = default_mmc_port;
 	}
@@ -209,14 +189,15 @@ ARDOUR::setup_midi (AudioEngine& engine)
 
 	return 0;
 }
-	
+
 void
 setup_hardware_optimization (bool try_optimization)
 {
         bool generic_mix_functions = true;
-	FPU fpu;
 
 	if (try_optimization) {
+
+		FPU fpu;
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 		
@@ -253,6 +234,10 @@ setup_hardware_optimization (bool try_optimization)
                         info << "Apple VecLib H/W specific optimizations in use" << endmsg;
                 }
 #endif
+		
+		/* consider FPU denormal handling to be "h/w optimization" */
+		
+		setup_fpu ();
         }
 
         if (generic_mix_functions) {
@@ -265,9 +250,6 @@ setup_hardware_optimization (bool try_optimization)
 		
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
-
-	setup_fpu ();
-
 }
 
 int
@@ -305,6 +287,8 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 #endif
 
 	setup_hardware_optimization (try_optimization);
+
+	SourceFactory::init ();
 
 	/* singleton - first object is "it" */
 	new PluginManager ();
@@ -387,6 +371,13 @@ ARDOUR::LocaleGuard::~LocaleGuard ()
 void
 ARDOUR::setup_fpu ()
 {
+
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		// valgrind doesn't understand this assembler stuff
+		// September 10th, 2007
+		return;
+	}
+
 #if defined(ARCH_X86) && defined(USE_XMMINTRIN)
 
 	int MXCSR;

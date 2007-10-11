@@ -124,8 +124,7 @@ Session::Session (AudioEngine &eng,
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
 	  _click_io ((IO*) 0),
-	  main_outs (0),
-	  _automation_interval (0)
+	  main_outs (0)
 {
 	if (!eng.connected()) {
 		throw failed_constructor();
@@ -224,8 +223,7 @@ Session::Session (AudioEngine &eng,
 	  _send_smpte_update (false),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
-	  main_outs (0),
-	  _automation_interval (0)
+	  main_outs (0)
 
 {
 	if (!eng.connected()) {
@@ -1257,8 +1255,10 @@ Session::set_frame_rate (nframes_t frames_per_second)
 
 	sync_time_vars();
 
-	_automation_interval = ((nframes_t) ceil ((double) frames_per_second * 0.25));
+	Automatable::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * (0.001 * Config->get_automation_interval())));
 
+	clear_clicks ();
+	
 	// XXX we need some equivalent to this, somehow
 	// SndFileSource::setup_standard_crossfades (frames_per_second);
 
@@ -2755,13 +2755,11 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 	return boost::shared_ptr<Source>();
 }
 
-string
-Session::peak_path_from_audio_path (string audio_path) const
+Glib::ustring
+Session::peak_path (Glib::ustring base) const
 {
 	sys::path peakfile_path(_session_dir->peak_path());
-
-	peakfile_path /= basename_nosuffix (audio_path) + peakfile_suffix;
-
+	peakfile_path /= basename_nosuffix (base) + peakfile_suffix;
 	return peakfile_path.to_string();
 }
 
@@ -3387,8 +3385,8 @@ Session::remove_empty_sounds ()
 			try
 			{
 				sys::remove (audio_file_path);
-				const string peak_path = peak_path_from_audio_path (audio_file_path.to_string());
-				sys::remove (peak_path);
+				const string peakfile = peak_path (audio_file_path.to_string());
+				sys::remove (peakfile);
 			}
 			catch (const sys::filesystem_error& err)
 			{
@@ -4121,6 +4119,23 @@ nframes_t
 Session::compute_initial_length ()
 {
 	return _engine.frame_rate() * 60 * 5;
+}
+
+void
+Session::sync_order_keys ()
+{
+	if (!Config->get_sync_all_route_ordering()) {
+		/* leave order keys as they are */
+		return;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->sync_order_keys ();
+	}
+
+	Route::SyncOrderKeys (); // EMIT SIGNAL
 }
 
 void

@@ -379,7 +379,9 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 			bottom = region;
 		}
 
-
+		if (!top->opaque()) {
+			continue;
+		}
 
 		OverlapType c = top->coverage (bottom->position(), bottom->last_frame());
 

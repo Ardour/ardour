@@ -219,7 +219,7 @@ class IO : public Automatable, public Latent
   public:
 
 	/* automation */
-	
+
 	struct GainControl : public AutomationControl {
 	    GainControl (std::string name, IO& i, boost::shared_ptr<AutomationList> al)
 			: AutomationControl (i._session, al, name)

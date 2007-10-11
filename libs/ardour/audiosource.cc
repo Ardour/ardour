@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <float.h>
 #include <utime.h>
 #include <cerrno>
@@ -29,18 +30,21 @@
 #include <algorithm>
 #include <vector>
 
+#include <glibmm/fileutils.h>
+
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
 
 #include <ardour/audiosource.h>
 #include <ardour/cycle_timer.h>
-#include <ardour/runtime_functions.h>
+#include <ardour/session.h>
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using Glib::ustring;
 
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
@@ -126,12 +130,12 @@ bool
 AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) const
 {
 	bool ret;
-	Glib::Mutex::Lock lm (_lock);
+	Glib::Mutex::Lock lm (_peaks_ready_lock);
 
 	/* check to see if the peak data is ready. if not
 	   connect the slot while still holding the lock.
 	*/
-
+	
 	if (!(ret = _peaks_built)) {
 		conn = PeaksReady.connect (the_slot);
 	}
@@ -182,15 +186,10 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 
 	peakpath = peak_path (audio_path);
 
-	/* Nasty band-aid for older sessions that were created before we
-	   used libsndfile for all audio files.
-	*/
+	/* if the peak file should be there, but isn't .... */
 	
-	if (!newfile && access (peakpath.c_str(), R_OK) != 0) {
-		ustring str = old_peak_path (audio_path);
-		if (access (str.c_str(), R_OK) == 0) {
-			peakpath = str;
-		}
+	if (!newfile && !Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
+		peakpath = find_broken_peakfile (peakpath, audio_path);
 	}
 
 	if (newfile) {
@@ -332,7 +331,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		/* open, read, close */
 
 		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
-			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			error << string_compose(_("AudioSource: cannot open peakpath (a) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return -1;
 		}
 
@@ -406,7 +405,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		/* open ... close during out: handling */
 
 		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
-			error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			error << string_compose(_("AudioSource: cannot open peakpath (b) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 			return 0;
 		}
 
@@ -581,9 +580,11 @@ AudioSource::build_peaks_from_scratch ()
 {
 	nframes_t current_frame;
 	nframes_t cnt;
-	Sample buf[frames_per_peak];
+	Sample* buf = 0;
 	nframes_t frames_read;
 	nframes_t frames_to_read;
+	const nframes_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
+
 	int ret = -1;
 
 	{
@@ -598,44 +599,50 @@ AudioSource::build_peaks_from_scratch ()
 		current_frame = 0;
 		cnt = _length;
 		_peaks_built = false;
+		buf = new Sample[bufsize];
 		
 		while (cnt) {
 			
-			frames_to_read = min (frames_per_peak, cnt);
+			frames_to_read = min (bufsize, cnt);
 
 			if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
-				done_with_peakfile_writes ();
+				done_with_peakfile_writes (false);
 				goto out;
 			}
 
-			if (compute_and_write_peaks (buf, current_frame, frames_read, true)) {
+			if (compute_and_write_peaks (buf, current_frame, frames_read, true, false)) {
 				break;
 			}
 			
 			current_frame += frames_read;
 			cnt -= frames_read;
 		}
-		
+
 		if (cnt == 0) {
 			/* success */
 			truncate_peakfile();
-			_peaks_built = true;
 		} 
 
-		done_with_peakfile_writes ();
+		done_with_peakfile_writes ((cnt == 0));
 	}
-
-	/* lock no longer held, safe to signal */
-
-	if (_peaks_built) {
-		PeaksReady (); /* EMIT SIGNAL */
-		ret = 0;
+	
+	{
+		Glib::Mutex::Lock lm (_peaks_ready_lock);
+		
+		if (_peaks_built) {
+			PeaksReady (); /* EMIT SIGNAL */
+			ret = 0;
+		}
 	}
 
   out:
 	if (ret) {
 		unlink (peakpath.c_str());
+	}
+
+	if (buf) {
+		delete [] buf;
 	}
 
 	return ret;
@@ -645,17 +652,21 @@ int
 AudioSource::prepare_for_peakfile_writes ()
 {
 	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
-		error << string_compose(_("AudioSource: cannot open peakpath \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+		error << string_compose(_("AudioSource: cannot open peakpath (c) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 	return 0;
 }
 
 void
-AudioSource::done_with_peakfile_writes ()
+AudioSource::done_with_peakfile_writes (bool done)
 {
 	if (peak_leftover_cnt) {
-		compute_and_write_peaks (0, 0, 0, true);
+		compute_and_write_peaks (0, 0, 0, true, false);
+	}
+	
+	if (done) {
+		_peaks_built = true;
 	}
 
 	if (peakfile >= 0) {
@@ -665,7 +676,7 @@ AudioSource::done_with_peakfile_writes ()
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force)
+AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready)
 {
 	Sample* buf2 = 0;
 	nframes_t to_do;
@@ -695,7 +706,8 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 			
 			x.min = peak_leftovers[0];
 			x.max = peak_leftovers[0];
-			find_peaks (peak_leftovers + 1, peak_leftover_cnt - 1, &x.min, &x.max);
+
+			ARDOUR::find_peaks (peak_leftovers + 1, peak_leftover_cnt - 1, &x.min, &x.max);
 
 			off_t byte = (peak_leftover_frame / frames_per_peak) * sizeof (PeakData);
 
@@ -706,8 +718,13 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 
 			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
 
-			PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
-			PeaksReady (); /* EMIT SIGNAL */
+			{ 
+				Glib::Mutex::Lock lm (_peaks_ready_lock);
+				PeakRangeReady (peak_leftover_frame, peak_leftover_cnt); /* EMIT SIGNAL */
+				if (intermediate_peaks_ready) {
+					PeaksReady (); /* EMIT SIGNAL */
+				} 
+			}
 
 			/* left overs are done */
 
@@ -778,7 +795,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		peakbuf[peaks_computed].max = buf[0];
 		peakbuf[peaks_computed].min = buf[0];
 
-		find_peaks (buf+1, this_time-1, &peakbuf[peaks_computed].min, &peakbuf[peaks_computed].max);
+		ARDOUR::find_peaks (buf+1, this_time-1, &peakbuf[peaks_computed].min, &peakbuf[peaks_computed].max);
 
 		peaks_computed++;
 		buf += this_time;
@@ -814,8 +831,11 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaks_computed));	
 
 	if (frames_done) {
+		Glib::Mutex::Lock lm (_peaks_ready_lock);
 		PeakRangeReady (first_frame, frames_done); /* EMIT SIGNAL */
-		PeaksReady (); /* EMIT SIGNAL */
+		if (intermediate_peaks_ready) {
+			PeaksReady (); /* EMIT SIGNAL */
+		}
 	}
 
 	ret = 0;
@@ -880,5 +900,13 @@ AudioSource::available_peaks (double zoom_factor) const
 	end = _peak_byte_max;
 
 	return (end/sizeof(PeakData)) * frames_per_peak;
+}
+
+void
+AudioSource::update_length (nframes_t pos, nframes_t cnt)
+{
+	if (pos + cnt > _length) {
+		_length = pos+cnt;
+	}
 }
 

@@ -102,14 +102,6 @@ find_file_in_search_path(const SearchPath& search_path,
 
 	if (tmp.size() == 0)
 	{
-		info << string_compose
-			(
-			 "Found no file named %1 in search path %2",
-			 filename,
-			 search_path.to_string ()
-			)
-			<< endmsg;
-
 		return false;
 	}
 

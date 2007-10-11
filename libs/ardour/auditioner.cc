@@ -137,7 +137,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	boost::shared_ptr<AudioRegion> the_region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region)));
 	the_region->set_position (0, this);
 
-	_diskstream->playlist()->clear ();
+	_diskstream->playlist()->drop_regions ();
 	_diskstream->playlist()->add_region (the_region, 0, 1);
 
 	if (_diskstream->n_channels().n_audio() < the_region->n_channels()) {

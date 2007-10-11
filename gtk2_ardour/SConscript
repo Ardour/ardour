@@ -13,7 +13,7 @@ gtkmmtests = env.Copy()
 # this defines the version number of the GTK interface to ardour
 #
 
-domain = 'gtk_ardour'
+domain = 'gtk2_ardour'
 
 gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CCFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
@@ -23,6 +23,9 @@ gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 #gtkardour.Append(CXXFLAGS="-DFLOWCANVAS_AA")
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
+
+if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
+       gtkardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
 
 gtkardour.Merge ([
     libraries['ardour'],
@@ -48,7 +51,8 @@ gtkardour.Merge ([
     libraries['xslt'],
     libraries['soundtouch'],
     libraries['samplerate'],
-    libraries['jack']
+    libraries['jack'],
+    libraries['sysaudio']
 ])
 
 gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
@@ -78,6 +82,15 @@ connection_editor.cc
 
 audiounit_files=Split("""
 au_pluginui.cc
+""")
+
+gtkosx_files=Split("""
+sync-menu.c
+cocoacarbon.c
+""")
+
+x11_files=Split("""
+x11.cc
 """)
 
 gtkardour_files=Split("""
@@ -143,6 +156,7 @@ editor_selection.cc
 editor_selection_list.cc
 editor_tempodisplay.cc
 editor_timefx.cc
+engine_dialog.cc
 export_dialog.cc
 export_session_dialog.cc
 export_region_dialog.cc
@@ -258,6 +272,12 @@ if env['CMT']:
     extra_sources += cmt_files
     gtkardour.Append (CCFLAGS="-DWITH_CMT")
 
+if gtkardour['GTKOSX']:
+   extra_sources += gtkosx_files
+   gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
+else:
+   extra_sources += x11_files
+	
 if gtkardour['AUDIOUNITS']:
     extra_sources += audiounit_files
     gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
@@ -292,41 +312,43 @@ if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
 	#
 	# OS X font rendering is different even with X11
 	#
-	my_font_dict['%FONT_TINY%'] = 'sans 7'
-	my_font_dict['%FONT_SMALLER%'] = 'sans 9'
-	my_font_dict['%FONT_SMALL%'] = 'sans 10'
-	my_font_dict['%FONT_NORMAL%'] = 'sans 11'
-	my_font_dict['%FONT_BIG%'] = 'sans 15'
-	my_font_dict['%FONT_BIGGER%'] = 'sans 16'
-	my_font_dict['%FONT_LARGE%'] = 'sans 20'
-	my_font_dict['%FONT_LARGER%'] = 'sans 28'
-	my_font_dict['%FONT_HUGER%'] = 'sans 36'
-	my_font_dict['%FONT_MASSIVE%'] = 'sans 60'
-	my_font_dict['%FONT_BOLD_TINY%'] = 'sans bold 7'
-	my_font_dict['%FONT_BOLD_SMALLER%'] = 'sans bold 9'
-	my_font_dict['%FONT_BOLD_SMALL%'] = 'sans bold 10'
-	my_font_dict['%FONT_BOLD_NORMAL%'] = 'sans bold 11'
-	my_font_dict['%FONT_BOLD_BIG%'] = 'sans bold 15'
-	my_font_dict['%FONT_BOLD_BIGGER%'] = 'sans bold 16'
-	my_font_dict['%FONT_BOLD_LARGE%'] = 'sans bold 20'
-	my_font_dict['%FONT_BOLD_LARGER%'] = 'sans bold 28'
-	my_font_dict['%FONT_BOLD_HUGER%'] = 'sans bold 36'
-	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'sans bold 60'
-	my_font_dict['%FONT_ITALIC_TINY%'] = 'sans italic 7'
-	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'sans italic 9'
-	my_font_dict['%FONT_ITALIC_SMALL%'] = 'sans italic 10'
-	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'sans italic 11'
-	my_font_dict['%FONT_ITALIC_BIG%'] = 'sans italic 15'
-	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'sans italic 16'
-	my_font_dict['%FONT_ITALIC_LARGE%'] = 'sans italic 20'
-	my_font_dict['%FONT_ITALIC_LARGER%'] = 'sans italic 28'
-	my_font_dict['%FONT_ITALIC_HUGER%'] = 'sans italic 36'
-	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'sans italic 60'
+	my_font_dict['%FONT_TINY%'] = 'Lucida Grande 7'
+	my_font_dict['%FONT_SMALLERER%'] = 'Lucida Grande 8'
+	my_font_dict['%FONT_SMALLER%'] = 'Lucida Grande 9'
+	my_font_dict['%FONT_SMALL%'] = 'Lucida Grande 10'
+	my_font_dict['%FONT_NORMAL%'] = 'Lucida Grande 11'
+	my_font_dict['%FONT_BIG%'] = 'Lucida Grande 12'
+	my_font_dict['%FONT_BIGGER%'] = 'Lucida Grande 14'
+	my_font_dict['%FONT_LARGE%'] = 'Lucida Grande 18'
+	my_font_dict['%FONT_LARGER%'] = 'Lucida Grande 28'
+	my_font_dict['%FONT_HUGER%'] = 'Lucida Grande 36'
+	my_font_dict['%FONT_MASSIVE%'] = 'Lucida Grande 60'
+	my_font_dict['%FONT_BOLD_TINY%'] = 'Lucida Grande bold 7'
+	my_font_dict['%FONT_BOLD_SMALLER%'] = 'Lucida Grande bold 9'
+	my_font_dict['%FONT_BOLD_SMALL%'] = 'Lucida Grande bold 10'
+	my_font_dict['%FONT_BOLD_NORMAL%'] = 'Lucida Grande bold 11'
+	my_font_dict['%FONT_BOLD_BIG%'] = 'Lucida Grande bold 13'
+	my_font_dict['%FONT_BOLD_BIGGER%'] = 'Lucida Grande bold 14'
+	my_font_dict['%FONT_BOLD_LARGE%'] = 'Lucida Grande bold 20'
+	my_font_dict['%FONT_BOLD_LARGER%'] = 'Lucida Grande bold 25'
+	my_font_dict['%FONT_BOLD_HUGER%'] = 'Lucida Grande bold 36'
+	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'Lucida Grande bold 60'
+	my_font_dict['%FONT_ITALIC_TINY%'] = 'Lucida Grande italic 7'
+	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'Lucida Grande italic 9'
+	my_font_dict['%FONT_ITALIC_SMALL%'] = 'Lucida Grande italic 10'
+	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'Lucida Grande italic 11'
+	my_font_dict['%FONT_ITALIC_BIG%'] = 'Lucida Grande italic 15'
+	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'Lucida Grande italic 16'
+	my_font_dict['%FONT_ITALIC_LARGE%'] = 'Lucida Grande italic 20'
+	my_font_dict['%FONT_ITALIC_LARGER%'] = 'Lucida Grande italic 28'
+	my_font_dict['%FONT_ITALIC_HUGER%'] = 'Lucida Grande italic 36'
+	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'Lucida Grande italic 60'
 else:
 	#
 	# Linux/X11 font rendering
 	#
 	my_font_dict['%FONT_TINY%'] = 'sans 4'
+	my_font_dict['%FONT_SMALLERER%'] = 'sans 6'
 	my_font_dict['%FONT_SMALLER%'] = 'sans 6'
 	my_font_dict['%FONT_SMALL%'] = 'sans 7'
 	my_font_dict['%FONT_NORMAL%'] = 'sans 8'
@@ -411,6 +433,7 @@ if env['NLS']:
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_dark_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_light_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_default.conf'))
 # data files
@@ -428,7 +451,9 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
                                         'ardour2_ui_dark.rc', 'ardour2_ui_light.rc', 'splash.png',
-                                        'ardour.menus', 'ardour.bindings.in', 'ardour2_ui_default.conf',
+                                        'ardour.menus',
+                                        'ardour-sae.menus',
+					'ardour.bindings.in', 'ardour2_ui_default.conf',
 					'editor_xpms'
                                         ] +
                                       gtkardour_files +
@@ -437,6 +462,8 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      icon_files +
 				      skipped_files +
 				      audiounit_files + 
+				      gtkosx_files +
+				      x11_files +
 				      fft_analysis_files +
 				      glob.glob('po/*.po') + glob.glob('*.h')))
 

@@ -17,24 +17,29 @@
 
     $Id$
 */
-
+#include <iostream>
 #include <cstdio>
 #include <fcntl.h>
+
+#include <pbd/xml++.h>
+#include <pbd/failed_constructor.h>
 
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <midi++/channel.h>
-#include <midi++/port_request.h>
+#include <midi++/factory.h>
 
-using namespace Select;
 using namespace MIDI;
+using namespace std;
 
 size_t Port::nports = 0;
 
-Port::Port (PortRequest &req)
+Port::Port (const XMLNode& node)
 	: _currently_in_cycle(false)
 	, _nframes_this_cycle(0)
 {
+	Descriptor desc (node);
+
 	_ok = false;  /* derived class must set to true if constructor
 			 succeeds.
 		      */
@@ -45,10 +50,9 @@ Port::Port (PortRequest &req)
 	output_parser = 0;
 	slowdown = 0;
 
-	_devname = req.devname;
-	_tagname = req.tagname;
-	_mode = req.mode;
-	_number = nports++;
+	_devname = desc.device;
+	_tagname = desc.tag;
+	_mode = desc.mode;
 
 	if (_mode == O_RDONLY || _mode == O_RDWR) {
 		input_parser = new Parser (*this);
@@ -77,7 +81,6 @@ Port::Port (PortRequest &req)
 
 
 Port::~Port ()
-	
 {
 	for (int i = 0; i < 16; i++) {
 		delete _channel[i];
@@ -111,5 +114,89 @@ Port::cycle_end ()
 {
 	_currently_in_cycle = false;
 	_nframes_this_cycle = 0;
+}
+
+XMLNode&
+Port::get_state () const
+{
+	XMLNode* node = new XMLNode ("MIDI-port");
+	node->add_property ("tag", _tagname);
+	node->add_property ("device", _devname);
+	node->add_property ("mode", PortFactory::mode_to_string (_mode));
+	node->add_property ("type", get_typestring());
+
+	return *node;
+}
+
+void
+Port::set_state (const XMLNode& node)
+{
+	// relax
+}
+
+void
+Port::gtk_read_callback (void *ptr, int fd, int cond)
+{
+	byte buf[64];
+	
+	((Port *)ptr)->read (buf, sizeof (buf), 0);
+}
+
+void
+Port::write_callback (byte *msg, unsigned int len, void *ptr)
+	
+{
+	((Port *)ptr)->write (msg, len, 0);
+}
+
+std::ostream & MIDI::operator << ( std::ostream & os, const MIDI::Port & port )
+{
+	using namespace std;
+	os << "MIDI::Port { ";
+	os << "device: " << port.device();
+	os << "; ";
+	os << "name: " << port.name();
+	os << "; ";
+	os << "type: " << port.type();
+	os << "; ";
+	os << "mode: " << port.mode();
+	os << "; ";
+	os << "ok: " << port.ok();
+	os << "; ";
+	os << " }";
+	return os;
+}
+
+Port::Descriptor::Descriptor (const XMLNode& node)
+{
+	const XMLProperty *prop;
+	bool have_tag = false;
+	bool have_device = false;
+	bool have_type = false;
+	bool have_mode = false;
+
+	if ((prop = node.property ("tag")) != 0) {
+		tag = prop->value();
+		have_tag = true;
+	}
+
+	if ((prop = node.property ("device")) != 0) {
+		device = prop->value();
+		have_device = true;
+	}
+
+	if ((prop = node.property ("type")) != 0) {
+		type = PortFactory::string_to_type (prop->value());
+		have_type = true;
+	}
+
+	if ((prop = node.property ("mode")) != 0) {
+		mode = PortFactory::string_to_mode (prop->value());
+		have_mode = true;
+	}
+
+	if (!have_tag || !have_device || !have_type || !have_mode) {
+		throw failed_constructor();
+	}
 }
 

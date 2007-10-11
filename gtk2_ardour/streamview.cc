@@ -153,6 +153,8 @@ StreamView::set_samples_per_unit (gdouble spp)
 void
 StreamView::add_region_view (boost::shared_ptr<Region> r)
 {
+	// ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_region_view), r));
+
 	add_region_view_internal (r, true);
 }
 

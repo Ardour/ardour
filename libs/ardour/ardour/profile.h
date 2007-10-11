@@ -29,6 +29,8 @@ class RuntimeProfile {
   public:
     enum Element {
 	    SmallScreen,
+	    SAE,
+	    SinglePackage,
 	    LastElement
     };
     
@@ -37,6 +39,12 @@ class RuntimeProfile {
 
     void set_small_screen() { bits[SmallScreen] = true; }
     bool get_small_screen() const { return bits[SmallScreen]; }
+
+    void set_sae () { bits[SAE] = true; }
+    bool get_sae () const { return bits[SAE]; }
+
+    void set_single_package () { bits[SinglePackage] = true; }
+    bool get_single_package () const { return bits[SinglePackage]; }
 
   private:
     boost::dynamic_bitset<uint64_t> bits;

@@ -54,7 +54,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 
 	_send->set_metering (true);
 
-	_send->io()->output_changed.connect (mem_fun (*this, &SendUI::ins_changed));
+	_send->io()->input_changed.connect (mem_fun (*this, &SendUI::ins_changed));
 	_send->io()->output_changed.connect (mem_fun (*this, &SendUI::outs_changed));
 	
 	panners.set_width (Wide);

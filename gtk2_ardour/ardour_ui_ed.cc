@@ -34,8 +34,10 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
+#include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
+#include "sync-menu.h"
 
 #include <ardour/session.h>
 #include <ardour/profile.h>
@@ -80,6 +82,8 @@ ARDOUR_UI::install_actions ()
 	/* menus + submenus that need action items */
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
+	ActionManager::register_action (main_actions, X_("Files"), _("Files"));
+	ActionManager::register_action (main_actions, X_("Regions"), _("Regions"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
@@ -98,7 +102,7 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::new_session), string ())));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::get_session_parameters), string (), true, true)));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
@@ -191,7 +195,7 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_action (common_actions, X_("goto-editor"), _("Show Editor"),  mem_fun(*this, &ARDOUR_UI::goto_editor_window));
 	ActionManager::register_action (common_actions, X_("goto-mixer"), _("Show Mixer"),  mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Options Editor"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleOptionsEditor"), _("Preferences"), mem_fun(*this, &ARDOUR_UI::toggle_options_window));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleConnections"), _("Connections"), mem_fun(*this, &ARDOUR_UI::toggle_connection_editor));
@@ -200,7 +204,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal, 1));
@@ -215,6 +218,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("RemoveLastCapture"), _("Remove Last Capture"), mem_fun(*this, &ARDOUR_UI::remove_last_capture));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
 
 	Glib::RefPtr<ActionGroup> transport_actions = ActionGroup::create (X_("Transport"));
 
@@ -402,6 +407,7 @@ ARDOUR_UI::install_actions ()
 	act->set_sensitive (false);
 #endif
 
+	ActionManager::register_toggle_action (option_actions, X_("SyncEditorAndMixerTrackOrder"), _("Sync Editor and Mixer track order"), mem_fun (*this, &ARDOUR_UI::toggle_sync_order_keys));
 	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
 	ActionManager::register_toggle_action (option_actions, X_("VerifyRemoveLastCapture"), _("Verify remove last capture"), mem_fun (*this, &ARDOUR_UI::toggle_VerifyRemoveLastCapture));
 	ActionManager::register_toggle_action (option_actions, X_("PeriodicSafetyBackups"), _("Make periodic safety backups"), mem_fun (*this, &ARDOUR_UI::toggle_PeriodicSafetyBackups));
@@ -412,26 +418,45 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region equivalents overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
 	ActionManager::register_toggle_action (option_actions, X_("PrimaryClockDeltaEditCursor"), _("Primary Clock delta to edit cursor"), mem_fun (*this, &ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor));
 	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock delta to edit cursor"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));	
+	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));	
 
 	RadioAction::Group denormal_group;
 
 	ActionManager::register_toggle_action (option_actions, X_("DenormalProtection"), _("Use DC bias"), mem_fun (*this, &ARDOUR_UI::toggle_denormal_protection));
-	
-	FPU fpu;
-
 	ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalNone"), _("No processor handling"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalNone));
 
-	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
-	if (!fpu.has_flush_to_zero()) {
+	// as of September 10th 2007, Valgrind cannot handle various FPU flag setting instructions
+	// so avoid them
+
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+
+		/* we still need these actions to exist, but make them all insensitive */
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
 		act->set_sensitive (false);
-	}
-	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
-	if (!fpu.has_denormals_are_zero()) {
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
 		act->set_sensitive (false);
-	}
-	act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
-	if (!fpu.has_flush_to_zero() || !fpu.has_denormals_are_zero()) {
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
 		act->set_sensitive (false);
+
+	} else {
+
+		FPU fpu;
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZ"), _("Use FlushToZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZ));
+		if (!fpu.has_flush_to_zero()) {
+			act->set_sensitive (false);
+		}
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalDAZ"), _("Use DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalDAZ));
+		if (!fpu.has_denormals_are_zero()) {
+			act->set_sensitive (false);
+		}
+
+		act = ActionManager::register_radio_action (option_actions, denormal_group, X_("DenormalFTZDAZ"), _("Use FlushToZero & DenormalsAreZero"), bind (mem_fun (*this, &ARDOUR_UI::set_denormal_model), DenormalFTZDAZ));
+		if (!fpu.has_flush_to_zero() || !fpu.has_denormals_are_zero()) {
+			act->set_sensitive (false);
+		}
 	}
 
 	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
@@ -696,7 +721,9 @@ ARDOUR_UI::build_control_surface_menu ()
 void
 ARDOUR_UI::build_menu_bar ()
 {
-	build_control_surface_menu ();
+	if (!Profile->get_sae()) {
+		build_control_surface_menu ();
+	}
 
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
 	menu_bar->set_name ("MainMenuBar");
@@ -731,11 +758,20 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
 
-	menu_hbox.pack_start (*menu_bar, true, true);
-	if (!Profile->get_small_screen()) {
-		menu_hbox.pack_end (wall_clock_box, false, false, 2);
-		menu_hbox.pack_end (disk_space_box, false, false, 4);
+#ifndef TOP_MENUBAR
+ 	menu_hbox.pack_start (*menu_bar, true, true);
+#else
+	use_menubar_as_top_menubar ();
+#endif
+
+ 	if (!Profile->get_small_screen()) {
+#ifndef GTKOSX		
+		// OSX provides its own wallclock, thank you very much
+ 		menu_hbox.pack_end (wall_clock_box, false, false, 2);
+#endif
+ 		menu_hbox.pack_end (disk_space_box, false, false, 4);
 	}
+
 	menu_hbox.pack_end (cpu_load_box, false, false, 4);
 	menu_hbox.pack_end (buffer_load_box, false, false, 4);
 	menu_hbox.pack_end (sample_rate_box, false, false, 4);
@@ -745,12 +781,23 @@ ARDOUR_UI::build_menu_bar ()
 }
 
 void
+ARDOUR_UI::use_menubar_as_top_menubar ()
+{
+#ifdef GTKOSX
+	ige_mac_menu_set_menu_bar ((GtkMenuShell*) menu_bar->gobj());
+	// ige_mac_menu_set_quit_menu_item (some_item->gobj());
+#endif
+}
+
+
+void
 ARDOUR_UI::setup_clock ()
 {
 	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
 	
 	big_clock_window = new Window (WINDOW_TOPLEVEL);
 	
+	big_clock_window->set_keep_above (true);
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);
 
@@ -760,10 +807,6 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_MENU);
 	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
-
-	if (editor) {
-		editor->ensure_float (*big_clock_window);
-	}
 
 	manage_window (*big_clock_window);
 }

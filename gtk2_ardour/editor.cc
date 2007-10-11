@@ -25,6 +25,8 @@
 #include <string>
 #include <algorithm>
 
+#include <boost/none.hpp>
+
 #include <sigc++/bind.h>
 
 #include <pbd/convert.h>
@@ -56,6 +58,7 @@
 #include <ardour/session_state_utils.h>
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
+#include <ardour/profile.h>
 
 #include <control_protocol/control_protocol.h>
 
@@ -77,6 +80,7 @@
 #include "crossfade_edit.h"
 #include "canvas_impl.h"
 #include "actions.h"
+#include "sfdb_ui.h"
 #include "gui_thread.h"
 
 #ifdef FFT_ANALYSIS
@@ -139,8 +143,8 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Left"),
 	N_("Right"),
 	N_("Center"),
-	N_("Play"),
- 	N_("Edit"),
+	N_("Playhead"),
+ 	N_("Edit Cursor"),
 	0
 };
 
@@ -267,6 +271,7 @@ Editor::Editor ()
 	autoscroll_active = false;
 	autoscroll_timeout_tag = -1;
 	interthread_progress_window = 0;
+	logo_item = 0;
 
 #ifdef FFT_ANALYSIS
 	analysis_window = 0;
@@ -278,6 +283,7 @@ Editor::Editor ()
 	_show_waveforms_recording = true;
 	first_action_message = 0;
 	export_dialog = 0;
+	export_range_markers_dialog = 0;
 	show_gain_after_trim = false;
 	ignore_route_list_reorder = false;
 	no_route_list_redisplay = false;
@@ -302,6 +308,8 @@ Editor::Editor ()
 	new_transport_marker_menu = 0;
 	editor_mixer_strip_width = Wide;
 	show_editor_mixer_when_tracks_arrive = false;
+	region_edit_menu_split_multichannel_item = 0;
+	region_edit_menu_split_item = 0;
 	temp_location = 0;
 	leftmost_frame = 0;
 	ignore_mouse_mode_toggle = false;
@@ -320,6 +328,17 @@ Editor::Editor ()
 	canvas_idle_queued = false;
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
+
+	_scrubbing = false;
+	mouse_direction = 1;
+	mouse_speed_update = -1;
+	mouse_speed_size = 16;
+	mouse_speed = new double[mouse_speed_size];
+	memset (mouse_speed, 0, sizeof(double) * mouse_speed_size);
+	mouse_speed_entries = 0;
+
+	sfbrowser = 0;
+	ignore_route_order_sync = false;
 
 	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
 	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();
@@ -345,7 +364,7 @@ Editor::Editor ()
 
 	edit_controls_vbox.set_spacing (0);
 	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled));
-	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling));
+	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	
 	track_canvas.set_hadjustment (horizontal_adjustment);
 	track_canvas.set_vadjustment (vertical_adjustment);
@@ -688,6 +707,9 @@ Editor::Editor ()
 	set_name ("EditorWindow");
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
+	status_bar_hpacker.show ();
+
+	vpacker.pack_end (status_bar_hpacker, false, false);
 	vpacker.pack_end (global_hpacker, true, true);
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
@@ -756,6 +778,7 @@ Editor::Editor ()
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
 
 	Config->ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed));
+	Route::SyncOrderKeys.connect (mem_fun (*this, &Editor::sync_order_keys));
 
 	constructed = true;
 	instant_save ();
@@ -854,9 +877,27 @@ void
 Editor::tie_vertical_scrolling ()
 {
 	double y1 = vertical_adjustment.get_value();
+
+	playhead_cursor->set_y_axis (y1);
+	edit_cursor->set_y_axis (y1);
+	if (logo_item) {
+		logo_item->property_y() = y1;
+	}
+
 	controls_layout.get_vadjustment()->set_value (y1);
-	playhead_cursor->set_y_axis(y1);
-	edit_cursor->set_y_axis(y1);
+
+#ifdef GTKOSX
+	/* the way idle updates and immediate window flushing work on GTK-Quartz
+	   requires that we force an immediate redraw right here. The controls
+	   layout will do the same all by itself, as does the canvas widget, but
+	   most of the time, the canvas itself hasn't updated itself because its
+	   idle handler hasn't run. consequently, the call that its layout makes
+	   to gdk_window_process_updates() finds nothing to do. here, we force
+	   the update to happen, then request a flush of the new window state.
+	*/
+	track_canvas.update_now ();
+	gdk_window_process_updates (GTK_LAYOUT(track_canvas.gobj())->bin_window, true);
+#endif
 }
 
 void
@@ -912,40 +953,65 @@ Editor::control_scroll (float fraction)
 	}
 
 	double step = fraction * current_page_frames();
-	nframes_t target;
 
-	if ((fraction < 0.0f) && (session->transport_frame() < (nframes_t) fabs(step))) {
-		target = 0;
-	} else if ((fraction > 0.0f) && (max_frames - session->transport_frame() < step)) {
-		target = (max_frames - (current_page_frames()*2)); // allow room for slop in where the PH is on the screen
+	/*
+		_control_scroll_target is an optional<T>
+	
+		it acts like a pointer to an nframes_t, with
+		a operator conversion to boolean to check
+		that it has a value could possibly use
+		playhead_cursor->current_frame to store the
+		value and a boolean in the class to know
+		when it's out of date
+	*/
+
+	if (!_control_scroll_target) {
+		_control_scroll_target = session->transport_frame();
+		_dragging_playhead = true;
+	}
+
+	if ((fraction < 0.0f) && (*_control_scroll_target < (nframes_t) fabs(step))) {
+		*_control_scroll_target = 0;
+	} else if ((fraction > 0.0f) && (max_frames - *_control_scroll_target < step)) {
+		*_control_scroll_target = max_frames - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
 	} else {
-		target = (session->transport_frame() + (nframes_t) floor ((fraction * current_page_frames())));
+		*_control_scroll_target += (nframes_t) floor (step);
 	}
 
 	/* move visuals, we'll catch up with it later */
 
-	playhead_cursor->set_position (target);
-
-	if (target > (current_page_frames() / 2)) {
+	playhead_cursor->set_position (*_control_scroll_target);
+	UpdateAllTransportClocks (*_control_scroll_target);
+	
+	if (*_control_scroll_target > (current_page_frames() / 2)) {
 		/* try to center PH in window */
-		reset_x_origin (target - (current_page_frames()/2));
+		reset_x_origin (*_control_scroll_target - (current_page_frames()/2));
 	} else {
 		reset_x_origin (0);
 	}
 
-	/* cancel the existing */
+	/*
+		Now we do a timeout to actually bring the session to the right place
+		according to the playhead. This is to avoid reading disk buffers on every
+		call to control_scroll, which is driven by ScrollTimeline and therefore
+		probably by a control surface wheel which can generate lots of events.
+	*/
+	/* cancel the existing timeout */
 
 	control_scroll_connection.disconnect ();
 
-	/* add the next one */
+	/* add the next timeout */
 
-	control_scroll_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::deferred_control_scroll), target), 50);
+	control_scroll_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::deferred_control_scroll), *_control_scroll_target), 250);
 }
 
 bool
 Editor::deferred_control_scroll (nframes_t target)
 {
-	session->request_locate (target);
+	session->request_locate (*_control_scroll_target, session->transport_rolling());
+	// reset for next stream
+	_control_scroll_target = boost::none;
+	_dragging_playhead = false;
 	return false;
 }
 
@@ -1153,6 +1219,10 @@ Editor::connect_to_session (Session *t)
 	session->locations()->StateChanged.connect (mem_fun(*this, &Editor::refresh_location_display_s));
 	session->locations()->end_location()->changed.connect (mem_fun(*this, &Editor::end_location_changed));
 
+	if (sfbrowser) {
+		sfbrowser->set_session (session);
+	}
+
 	handle_new_duration ();
 
 	redisplay_regions ();
@@ -1271,12 +1341,18 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		}
 		
 		items.push_back (SeparatorElem());
-		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Slow)));
+
+		if (Profile->get_sae()) {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+		} else {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+			items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
+			items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogA)));
+			items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Slow)));
+		}
+
 		break;
 
 	case FadeOutItem:
@@ -1289,11 +1365,16 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		
 		items.push_back (SeparatorElem());
 		
-		items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
-		items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
-		items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
-		items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
-		items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
+		if (Profile->get_sae()) {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+		} else {
+			items.push_back (MenuElem (_("Linear"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
+			items.push_back (MenuElem (_("Slowest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+			items.push_back (MenuElem (_("Slow"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
+			items.push_back (MenuElem (_("Fast"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
+			items.push_back (MenuElem (_("Fastest"), bind (mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
+		}
 
 		break;
 
@@ -1486,6 +1567,7 @@ void
 Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
+	sigc::connection fooc;
 	Menu *region_menu = manage (new Menu);
 	MenuList& items = region_menu->items();
 	region_menu->set_name ("ArdourContextMenu");
@@ -1515,14 +1597,52 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Lock"), bind (mem_fun (*this, &Editor::set_region_lock), true)));
-	items.push_back (MenuElem (_("Unlock"), bind (mem_fun (*this, &Editor::set_region_lock), false)));
-	items.push_back (MenuElem (_("Lock Position"), bind (mem_fun (*this, &Editor::set_region_position_lock), true)));
-	items.push_back (MenuElem (_("Unlock Position"), bind (mem_fun (*this, &Editor::set_region_position_lock), false)));
-	items.push_back (MenuElem (_("Mute"), bind (mem_fun (*this, &Editor::set_region_mute), true)));
-	items.push_back (MenuElem (_("Unmute"), bind (mem_fun (*this, &Editor::set_region_mute), false)));
-	items.push_back (MenuElem (_("Opaque"), bind (mem_fun (*this, &Editor::set_region_opaque), true)));
-	items.push_back (MenuElem (_("Transparent"), bind (mem_fun (*this, &Editor::set_region_opaque), false)));
+	items.push_back (CheckMenuElem (_("Lock")));
+	region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
+
+#if FIXUP_REGION_MENU
+	if (region->locked()) {
+		fooc.block (true);
+		region_lock_item->set_active();
+		fooc.block (false);
+	}
+#endif
+
+	items.push_back (CheckMenuElem (_("Lock Position")));
+	region_lock_position_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_position_lock));
+#if FIXUP_REGION_MENU
+	if (region->locked()) {
+		fooc.block (true);
+		region_lock_position_item->set_active();
+		fooc.block (false);
+	}
+#endif
+
+	items.push_back (CheckMenuElem (_("Mute")));
+	region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
+#if FIXUP_REGION_MENU
+	if (region->muted()) {
+		fooc.block (true);
+		region_mute_item->set_active();
+		fooc.block (false);
+	}
+#endif
+	
+	if (!Profile->get_sae()) {
+		items.push_back (CheckMenuElem (_("Opaque")));
+		region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+		fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
+#if FIXUP_REGION_MENU
+		if (region->opaque()) {
+			fooc.block (true);
+			region_opaque_item->set_active();
+			fooc.block (false);
+		}
+#endif
+	}
 
 	/* We allow "Original position" if at least one region is not at its
 	   natural position 
@@ -1549,16 +1669,48 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 		MenuList& envelopes_items = envelopes_menu->items();
 		envelopes_menu->set_name ("ArdourContextMenu");
 
- 		envelopes_items.push_back (MenuElem (_("Reset"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
-		envelopes_items.push_back (MenuElem (_("Visible"), bind (mem_fun (*this, &Editor::set_gain_envelope_visibility), true)));
-		envelopes_items.push_back (MenuElem (_("Invisible"), bind (mem_fun (*this, &Editor::set_gain_envelope_visibility), false)));
-		envelopes_items.push_back (MenuElem (_("Active"), bind (mem_fun (*this, &Editor::set_gain_envelope_active), true)));
-		envelopes_items.push_back (MenuElem (_("Inactive"), bind (mem_fun (*this, &Editor::set_gain_envelope_active), false)));
+#if FIXUP_REGION_MENU
+
+   XXX NEED TO RESOLVE ONE v. MANY REGION ISSUE		
+
+		RegionView* rv = sv->find_view (ar);
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
+
+		if (!Profile->get_sae()) {
+			envelopes_items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
+
+			envelopes_items.push_back (CheckMenuElem (_("Envelope Visible")));
+			region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
+			fooc = region_envelope_visible_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
+			if (arv->envelope_visible()) {
+				fooc.block (true);
+				region_envelope_visible_item->set_active (true);
+				fooc.block (false);
+			}
+		
+			envelopes_items.push_back (CheckMenuElem (_("Envelope Active")));
+			region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
+			fooc = region_envelope_active_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_active));
+			
+			if (ar->envelope_active()) {
+				fooc.block (true);
+				region_envelope_active_item->set_active (true);
+				fooc.block (false);
+			}
+
+			items.push_back (SeparatorElem());
+		}
+#endif
 
 		items.push_back (MenuElem (_("Envelopes"), *envelopes_menu));
 		
-		items.push_back (MenuElem (_("Denormalize"), mem_fun (*this, &Editor::denormalize_regions)));
-		items.push_back (MenuElem (_("Normalize"), mem_fun (*this, &Editor::normalize_regions)));
+#if FIXUP_REGION_MENU
+		if (ar->scale_amplitude() != 1.0f) {
+			items.push_back (MenuElem (_("DeNormalize"), mem_fun(*this, &Editor::denormalize_regions)));
+		} else {
+			items.push_back (MenuElem (_("Normalize"), mem_fun(*this, &Editor::normalize_regions)));
+		}
+#endif
 	}
 	
 	/* Find out if we have a selected MIDI region */
@@ -1631,7 +1783,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	selection_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
-	items.push_back (MenuElem (_("Loop range"), mem_fun(*this, &Editor::set_route_loop_selection)));
+	items.push_back (MenuElem (_("Loop range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
 
 #ifdef FFT_ANALYSIS
 	items.push_back (SeparatorElem());
@@ -1639,15 +1791,22 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 #endif
 	
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Separate range to track"), mem_fun(*this, &Editor::separate_region_from_selection)));
-	items.push_back (MenuElem (_("Separate range to region list"), mem_fun(*this, &Editor::new_region_from_selection)));
+	items.push_back (MenuElem (_("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));
+	items.push_back (MenuElem (_("Extend Range to Start of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_start_of_region), false)));
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Convert to region in-place"), mem_fun(*this, &Editor::separate_region_from_selection)));
+	items.push_back (MenuElem (_("Convert to region in region list"), mem_fun(*this, &Editor::new_region_from_selection)));
 	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
+
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Add range markers"), mem_fun (*this, &Editor::add_location_from_selection)));
-	items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
-	items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
+	items.push_back (MenuElem (_("Set loop from selection"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
+	items.push_back (MenuElem (_("Set punch from selection"), mem_fun(*this, &Editor::set_punch_from_selection)));
+	
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_selection)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Crop region to range"), mem_fun(*this, &Editor::crop_region_to_selection)));
 	items.push_back (MenuElem (_("Fill range with region"), mem_fun(*this, &Editor::region_fill_selection)));
@@ -1656,9 +1815,6 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Bounce range"), mem_fun(*this, &Editor::bounce_range_selection)));
 	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_selection)));
-
-	edit_items.push_back (MenuElem (_("Range"), *selection_menu));
-	edit_items.push_back (SeparatorElem());
 }
 
 /** Add context menu items relevant to busses or audio tracks.
@@ -2685,8 +2841,10 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 
 	vector<ustring> uris = data.get_uris();
 
+	cerr << "there were " << uris.size() << " in that drag data\n";
+
 	if (uris.empty()) {
-		
+
 		/* This is seriously fucked up. Nautilus doesn't say that its URI lists
 		   are actually URI lists. So do it by hand.
 		*/
@@ -2736,10 +2894,34 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 	}
 	
 	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
+
 		if ((*i).substr (0,7) == "file://") {
-			string p = *i;
+			
+			ustring p = *i;
                         PBD::url_decode (p);
-			paths.push_back (p.substr (7));
+
+			// scan forward past three slashes
+			
+			ustring::size_type slashcnt = 0;
+			ustring::size_type n = 0;
+			ustring::iterator x = p.begin();
+
+			while (slashcnt < 3 && x != p.end()) {
+				if ((*x) == '/') {
+					slashcnt++;
+				} else if (slashcnt == 3) {
+					break;
+				}
+				++n;
+				++x;
+			}
+
+			if (slashcnt != 3 || x == p.end()) {
+				error << _("malformed URL passed to drag-n-drop code") << endmsg;
+				continue;
+			}
+
+			paths.push_back (p.substr (n - 1));
 		}
 	}
 
@@ -3836,5 +4018,62 @@ Editor::edit_cursor_position(bool sync)
 	}
 
 	return edit_cursor->current_frame;
+}
+
+
+void
+Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
+{
+	if (!session) return;
+
+	begin_reversible_command (cmd);
+	
+	Location* tll;
+
+	if ((tll = transport_loop_location()) == 0) {
+		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoLoop);
+                XMLNode &before = session->locations()->get_state();
+		session->locations()->add (loc, true);
+		session->set_auto_loop_location (loc);
+                XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	}
+	else {
+                XMLNode &before = tll->get_state();
+		tll->set_hidden (false, this);
+		tll->set (start, end);
+                XMLNode &after = tll->get_state();
+                session->add_command (new MementoCommand<Location>(*tll, &before, &after));
+	}
+	
+	commit_reversible_command ();
+}
+
+void
+Editor::set_punch_range (nframes_t start, nframes_t end, string cmd)
+{
+	if (!session) return;
+
+	begin_reversible_command (cmd);
+	
+	Location* tpl;
+
+	if ((tpl = transport_punch_location()) == 0) {
+		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoPunch);
+                XMLNode &before = session->locations()->get_state();
+		session->locations()->add (loc, true);
+		session->set_auto_loop_location (loc);
+                XMLNode &after = session->locations()->get_state();
+		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	}
+	else {
+                XMLNode &before = tpl->get_state();
+		tpl->set_hidden (false, this);
+		tpl->set (start, end);
+                XMLNode &after = tpl->get_state();
+                session->add_command (new MementoCommand<Location>(*tpl, &before, &after));
+	}
+	
+	commit_reversible_command ();
 }
 

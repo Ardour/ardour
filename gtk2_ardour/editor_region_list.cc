@@ -626,8 +626,8 @@ Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& 
 	vector<ustring> paths;
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
-		nframes_t pos = 0;
-		do_embed (paths, false, ImportAsRegion, 0, pos, true);
+		nframes64_t pos = 0;
+		do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
 		context->drag_finish (true, false, time);
 	}
 }

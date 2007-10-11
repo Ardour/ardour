@@ -83,6 +83,14 @@ public:
 	
 	Glib::Mutex& automation_lock() const { return _automation_lock; }
 
+	static void set_automation_interval (jack_nframes_t frames) {
+		_automation_interval = frames;
+	}
+
+	static jack_nframes_t automation_interval() { 
+		return _automation_interval;
+	}
+
 protected:
 
 	void can_automate(Parameter);
@@ -102,6 +110,7 @@ protected:
 	std::set<Parameter> _can_automate_list;
 	
 	nframes_t _last_automation_snapshot;
+	static nframes_t _automation_interval;
 };
 
 } // namespace ARDOUR

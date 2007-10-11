@@ -26,9 +26,14 @@
 #include <string>
 #include <sys/time.h>
 
+#include <glibmm/ustring.h>
+
+#include <boost/optional.hpp>
+
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/group.h>
 #include <libgnomecanvasmm/line.h>
+#include <libgnomecanvasmm/pixbuf.h>
 
 #include <cmath>
 
@@ -100,6 +105,7 @@ class MixerStrip;
 class StreamView;
 class AudioStreamView;
 class ControlPoint;
+class SoundFileOmega;
 #ifdef FFT_ANALYSIS
 class AnalysisWindow;
 #endif
@@ -249,6 +255,7 @@ class Editor : public PublicEditor
 
 
 	void add_toplevel_controls (Gtk::Container&);
+	Gtk::HBox& get_status_bar_packer()  { return status_bar_hpacker; }
 
 	void      set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
@@ -298,6 +305,7 @@ class Editor : public PublicEditor
 	void toggle_waveform_visibility ();
 	void toggle_waveforms_while_recording ();
 	void toggle_measure_visibility ();
+	void toggle_logo_visibility ();
 
 	/* SMPTE timecode & video sync */
 
@@ -346,6 +354,8 @@ class Editor : public PublicEditor
 	void reposition_and_zoom (nframes_t, double);
 
 	nframes_t edit_cursor_position(bool);
+	bool update_mouse_speed ();
+	bool decelerate_mouse_speed ();
 
   protected:
 	void map_transport_state ();
@@ -360,6 +370,9 @@ class Editor : public PublicEditor
 	ARDOUR::Session     *session;
 	bool                 constructed;
 
+	// to keep track of the playhead position for control_scroll
+	boost::optional<nframes_t> _control_scroll_target;
+ 
 	PlaylistSelector* _playlist_selector;
 
 	void          set_frames_per_unit (double);
@@ -464,6 +477,9 @@ class Editor : public PublicEditor
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 	void collect_new_region_view (RegionView *);
 
+	Gtk::MenuItem* region_edit_menu_split_item;
+	Gtk::MenuItem* region_edit_menu_split_multichannel_item;
+
 	void popup_track_context_menu (int, int, nframes_t);
 	Gtk::Menu* build_track_context_menu (nframes_t);
 	void add_bus_or_audio_track_context_items (Gtk::Menu_Helpers::MenuList&);
@@ -507,6 +523,7 @@ class Editor : public PublicEditor
 	Gtk::Frame         time_button_frame;
 
 	ArdourCanvas::Group      *minsec_group;
+	ArdourCanvas::Pixbuf     *logo_item;
 	ArdourCanvas::Group      *bbt_group;
 	ArdourCanvas::Group      *smpte_group;
 	ArdourCanvas::Group      *frame_group;
@@ -671,6 +688,7 @@ class Editor : public PublicEditor
 	Gtk::VBox           track_canvas_vbox;
 	Gtk::VBox           time_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
+	Gtk::HBox           edit_controls_hbox;
 
 	void control_scroll (float);
 	bool deferred_control_scroll (nframes_t);
@@ -728,6 +746,7 @@ class Editor : public PublicEditor
 
 	Gtk::Menu          *region_list_menu;
 	Gtk::ScrolledWindow region_list_scroller;
+	Gtk::Frame          region_list_frame;
 
 	bool region_list_display_key_press (GdkEventKey *);
 	bool region_list_display_key_release (GdkEventKey *);
@@ -868,10 +887,10 @@ class Editor : public PublicEditor
 	/* EDITING OPERATIONS */
 	
 	void reset_point_selection ();
-	void set_region_mute (bool);
-	void set_region_lock (bool);
-	void set_region_position_lock (bool);
-	void set_region_opaque (bool);
+	void toggle_region_mute ();
+	void toggle_region_lock ();
+	void toggle_region_opaque ();
+	void toggle_region_position_lock ();
 	void raise_region_to_top ();
 	void lower_region_to_bottom ();
 	void split_region ();
@@ -951,15 +970,32 @@ class Editor : public PublicEditor
 	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
 	void insert_region_list_selection (float times);
 
+	/* import & embed */
+	
 	void add_external_audio_action (Editing::ImportMode);
+	void external_audio_dialog ();
+	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
-	void bring_in_external_audio (Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t& pos, bool prompt);
-	void do_import (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
-	void do_embed (vector<Glib::ustring> paths, bool split, Editing::ImportMode mode, ARDOUR::AudioTrack*, nframes_t&, bool);
-	int  import_sndfile (vector<Glib::ustring> paths, Editing::ImportMode mode, ARDOUR::AudioTrack* track, nframes_t& pos);
-	int  embed_sndfile (vector<Glib::ustring> paths, bool split, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
-			    ARDOUR::AudioTrack* track, nframes_t& pos, bool prompt);
-	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t, ARDOUR::AudioTrack* track, nframes_t& pos, Editing::ImportMode mode);
+	SoundFileOmega* sfbrowser;
+	
+	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
+	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+
+	void _do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+	void do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+
+	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
+			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
+	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
+			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
+
+	int add_sources (vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
+			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool add_channel_suffix);
+	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
+				      boost::shared_ptr<ARDOUR::AudioTrack>& existing_track);
+
+	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 
 	/* generic interthread progress window */
 	
@@ -1030,7 +1066,11 @@ class Editor : public PublicEditor
 
 	void add_location_from_audio_region ();
 	void add_location_from_selection ();
-	void set_route_loop_selection ();
+	void set_loop_from_selection (bool play);
+	void set_punch_from_selection ();
+	
+	void set_loop_range (nframes_t start, nframes_t end, std::string cmd);
+	void set_punch_range (nframes_t start, nframes_t end, std::string cmd);
 
 	void add_location_from_playhead_cursor ();
 
@@ -1039,6 +1079,18 @@ class Editor : public PublicEditor
 
 	void start_scrolling ();
 	void stop_scrolling ();
+
+	bool _scrubbing;
+	bool have_full_mouse_speed;
+	nframes64_t last_scrub_frame;
+	double last_scrub_time;
+	int mouse_speed_update;
+	double mouse_direction;
+	double compute_mouse_speed ();
+	void add_mouse_speed (double, double);
+	double* mouse_speed;
+	size_t mouse_speed_entries;
+	size_t mouse_speed_size;
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
@@ -1488,10 +1540,12 @@ class Editor : public PublicEditor
 		    add (text);
 		    add (visible);
 		    add (tv);
+		    add (route);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring>  text;
 	    Gtk::TreeModelColumn<bool>           visible;
 	    Gtk::TreeModelColumn<TimeAxisView*>  tv;
+	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 	};
 
 	RouteDisplayModelColumns         route_display_columns;
@@ -1502,11 +1556,16 @@ class Editor : public PublicEditor
 	Gtk::ScrolledWindow                   route_list_scroller;
 	Gtk::Menu*                            route_list_menu;
 
+	void sync_order_keys ();
+	bool ignore_route_order_sync;
+
 	bool route_list_display_button_press (GdkEventButton*);
 	bool route_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	void route_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void route_list_delete (const Gtk::TreeModel::Path&);
+	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
+
 	void initial_route_list_display ();
 	void redisplay_route_list();
 	void route_list_reordered (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* what);
@@ -1858,14 +1917,15 @@ class Editor : public PublicEditor
 
 	bool _new_regionviews_show_envelope;
 
-	void set_gain_envelope_visibility (bool);
-	void set_gain_envelope_active (bool);
+	void toggle_gain_envelope_visibility ();
+	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();
 
 	Gtk::CheckMenuItem* region_envelope_visible_item;
 	Gtk::CheckMenuItem* region_envelope_active_item;
 	Gtk::CheckMenuItem* region_mute_item;
 	Gtk::CheckMenuItem* region_lock_item;
+	Gtk::CheckMenuItem* region_lock_position_item;
 	Gtk::CheckMenuItem* region_opaque_item;
 	
 	bool on_key_press_event (GdkEventKey*);
@@ -1876,6 +1936,8 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::Action>              redo_action;
 
 	void history_changed ();
+
+	Gtk::HBox      status_bar_hpacker;
 };
 
 #endif /* __ardour_editor_h__ */

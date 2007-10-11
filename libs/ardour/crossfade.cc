@@ -294,6 +294,13 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 
 	offset = start - _position;
 
+	/* Prevent data from piling up inthe crossfade buffers when reading a transparent region */
+	if (!(_out->opaque())) {
+		memset (crossfade_buffer_out, 0, sizeof (Sample) * to_write);
+	} else if (!(_in->opaque())) {
+		memset (crossfade_buffer_in, 0, sizeof (Sample) * to_write);
+	}
+	
 	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n);
 	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n);
 
@@ -355,6 +362,13 @@ Crossfade::refresh ()
 	
 	if (_out->muted() || _in->muted()) {
 		Invalidated (shared_from_this ());
+		return false;
+	}
+
+	/* Top layer shouldn't be transparent */
+	
+	if (!((layer_relation > 0 ? _in : _out)->opaque())) {
+		Invalidated (shared_from_this());
 		return false;
 	}
 

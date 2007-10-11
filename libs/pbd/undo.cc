@@ -148,12 +148,28 @@ XMLNode &UndoTransaction::get_state()
 UndoHistory::UndoHistory ()
 {
 	_clearing = false;
+	_depth = 0;
+}
+
+void
+UndoHistory::set_depth (int32_t d)
+{
+	_depth = d;
+
+	while (_depth > 0 && UndoList.size() > (uint32_t) _depth) {
+		UndoList.pop_front ();
+	}
 }
 
 void
 UndoHistory::add (UndoTransaction* const ut)
 {
 	ut->GoingAway.connect (bind (mem_fun (*this, &UndoHistory::remove), ut));
+
+	while (_depth > 0 && UndoList.size() > (uint32_t) _depth) {
+		UndoList.pop_front ();
+	}
+
 	UndoList.push_back (ut);
 
 	/* we are now owners of the transaction */
@@ -240,17 +256,22 @@ UndoHistory::clear ()
 }
 
 XMLNode& 
-UndoHistory::get_state (uint32_t depth)
+UndoHistory::get_state (int32_t depth)
 {
     XMLNode *node = new XMLNode ("UndoHistory");
 
     if (depth == 0) {
+
+	    return (*node);
+
+    } else if (depth < 0) {
+
 	    /* everything */
 
 	    for (list<UndoTransaction*>::iterator it = UndoList.begin(); it != UndoList.end(); ++it) {
 		    node->add_child_nocopy((*it)->get_state());
 	    }
-	    
+
     } else {
 
 	    /* just the last "depth" transactions */
@@ -268,3 +289,5 @@ UndoHistory::get_state (uint32_t depth)
 
     return *node;
 }
+
+

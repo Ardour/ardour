@@ -25,6 +25,9 @@
 #include <pbd/filesystem.h>
 #include <pbd/file_utils.h>
 
+#include <midi++/manager.h>
+
+#include <ardour/ardour.h>
 #include <ardour/configuration.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/control_protocol_manager.h>
@@ -195,9 +198,12 @@ Configuration::get_state ()
 	LocaleGuard lg (X_("POSIX"));
 
 	root = new XMLNode("Ardour");
-	typedef map<string, MidiPortDescriptor*>::const_iterator CI;
-	for(CI m = midi_ports.begin(); m != midi_ports.end(); ++m){
-		root->add_child_nocopy(m->second->get_state());
+
+	MIDI::Manager::PortMap::const_iterator i;
+	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
+	
+	for (i = ports.begin(); i != ports.end(); ++i) {
+		root->add_child_nocopy(i->second->get_state());
 	}
 	
 	root->add_child_nocopy (get_variables (sigc::mem_fun (*this, &Configuration::save_config_options_predicate), "Config"));
@@ -250,10 +256,13 @@ Configuration::set_state (const XMLNode& root)
 		if (node->name() == "MIDI-port") {
 
 			try {
-				pair<string,MidiPortDescriptor*> newpair;
-				newpair.second = new MidiPortDescriptor (*node);
-				newpair.first = newpair.second->tag;
-				midi_ports.insert (newpair);
+
+				MIDI::Port::Descriptor desc (*node);
+				map<string,XMLNode>::iterator x;
+				if ((x = midi_ports.find (desc.tag)) != midi_ports.end()) {
+					midi_ports.erase (x);
+				}
+				midi_ports.insert (pair<string,XMLNode>(desc.tag,*node));
 			}
 
 			catch (failed_constructor& err) {
@@ -296,53 +305,6 @@ Configuration::set_variables (const XMLNode& node, ConfigVariableBase::Owner own
 #undef  CONFIG_VARIABLE_SPECIAL
 	
 }
-
-Configuration::MidiPortDescriptor::MidiPortDescriptor (const XMLNode& node)
-{
-	const XMLProperty *prop;
-	bool have_tag = false;
-	bool have_device = false;
-	bool have_type = false;
-	bool have_mode = false;
-
-	if ((prop = node.property ("tag")) != 0) {
-		tag = prop->value();
-		have_tag = true;
-	}
-
-	if ((prop = node.property ("device")) != 0) {
-		device = prop->value();
-		have_device = true;
-	}
-
-	if ((prop = node.property ("type")) != 0) {
-		type = prop->value();
-		have_type = true;
-	}
-
-	if ((prop = node.property ("mode")) != 0) {
-		mode = prop->value();
-		have_mode = true;
-	}
-
-	if (!have_tag || !have_device || !have_type || !have_mode) {
-		throw failed_constructor();
-	}
-}
-
-XMLNode&
-Configuration::MidiPortDescriptor::get_state()
-{
-	XMLNode* root = new XMLNode("MIDI-port");
-
-	root->add_property("tag", tag);
-	root->add_property("device", device);
-	root->add_property("type", type);
-	root->add_property("mode", mode);
-
-	return *root;
-}
-
 void
 Configuration::map_parameters (sigc::slot<void,const char*> theSlot)
 {

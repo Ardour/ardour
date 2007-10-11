@@ -22,6 +22,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include <ardour/audioregion.h>
+#include <ardour/profile.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -143,11 +144,21 @@ Editor::initialize_canvas ()
 
 	verbose_cursor_visible = false;
 	
-	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
+	if (Profile->get_sae()) {
+		Image img (::get_icon (X_("saelogo")));
+		logo_item = new ArdourCanvas::Pixbuf (*track_canvas.root(), 0.0, 0.0, img.get_pixbuf());
+		// logo_item->property_height_in_pixels() = true;
+		// logo_item->property_width_in_pixels() = true;
+		// logo_item->property_height_set() = true;
+		// logo_item->property_width_set() = true;
+		logo_item->show ();
+	}
+	
+	/* a group to hold time (measure) lines */
 	
 	time_line_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
 	tempo_lines = new TempoLines(track_canvas, time_line_group);
-
+	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
 	time_canvas.set_name ("EditorTimeCanvas");
 	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
 	time_canvas.set_flags (CAN_FOCUS);
@@ -257,6 +268,10 @@ Editor::initialize_canvas ()
 	initial_ruler_update_required = true;
 	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 
+	if (logo_item) {
+		logo_item->lower_to_bottom ();
+	}
+
 	ColorsChanged.connect (mem_fun (*this, &Editor::color_handler));
 	color_handler();
 
@@ -348,6 +363,11 @@ Editor::track_canvas_size_allocated ()
 		
 	update_fixed_rulers();
 	redisplay_tempo (true);
+
+	if (logo_item) {
+		// logo_item->property_height() = canvas_height;
+		// logo_item->property_width() = canvas_width;
+	}
 	
 	Resized (); /* EMIT_SIGNAL */
 
@@ -455,7 +475,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	vector<ustring> paths;
 	string spath;
 	GdkEvent ev;
-	nframes_t frame;
+	nframes64_t frame;
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time)) {
 		goto out;
@@ -483,15 +503,18 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 		/* drop onto canvas background: create new tracks */
 
-		nframes_t pos = 0;
-		do_embed (paths, false, ImportAsTrack, 0, pos, false);
+		do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
 		
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*>(tvp)) != 0) {
 
 		/* check that its an audio track, not a bus */
 		
+		/* check that its an audio track, not a bus */
+		
 		if (tv->get_diskstream()) {
-			do_embed (paths, false, ImportToTrack, tv->audio_track().get(), frame, true);
+			/* select the track, then embed */
+			selection->set (tv);
+			do_embed (paths, Editing::ImportDistinctFiles, ImportToTrack, frame);
 		}
 	}
 
@@ -697,6 +720,10 @@ Editor::canvas_horizontally_scrolled ()
 		reset_scrolling_region ();
 	}
 	
+	if (logo_item) {
+		logo_item->property_x() = horizontal_adjustment.get_value ();
+	}
+
 	update_fixed_rulers ();
 
 	redisplay_tempo (!_dragging_hscrollbar);

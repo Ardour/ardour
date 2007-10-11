@@ -34,6 +34,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+nframes_t Automatable::_automation_interval = 0;
+
 Automatable::Automatable(Session& _session, const string& name)
 	: SessionObject(_session, name)
 	, _last_automation_snapshot(0)
@@ -422,7 +424,7 @@ Automatable::protect_automation ()
 void
 Automatable::automation_snapshot (nframes_t now)
 {
-	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _session.automation_interval()) {
+	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
 
 		for (Controls::iterator i = _controls.begin(); i != _controls.end(); ++i) {
 			if (i->second->list()->automation_write()) {

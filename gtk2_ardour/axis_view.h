@@ -62,6 +62,9 @@ class AxisView : public virtual Selectable
 	sigc::signal<void> Hiding;
 	sigc::signal<void> GoingAway;
 
+	void set_old_order_key (uint32_t ok) { _old_order_key = ok; }
+	uint32_t old_order_key() const { return _old_order_key; }
+
   protected:
 
 	AxisView (ARDOUR::Session& sess);
@@ -84,7 +87,8 @@ class AxisView : public virtual Selectable
 	Gtk::Label name_label;
 
 	bool _marked_for_display;
-	
+	uint32_t _old_order_key;
+
 }; /* class AxisView */
 
 #endif /* __ardour_gtk_axis_view_h__ */

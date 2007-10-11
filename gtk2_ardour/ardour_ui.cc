@@ -36,6 +36,7 @@
 #include <gtkmm/accelmap.h>
 
 #include <pbd/error.h>
+#include <pbd/misc.h>
 #include <pbd/compose.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
@@ -50,8 +51,7 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/window_title.h>
 
-#include <midi++/port.h>
-#include <midi++/mmc.h>
+#include <midi++/manager.h>
 
 #include <ardour/ardour.h>
 #include <ardour/profile.h>
@@ -157,12 +157,18 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
-	  shown_flag (false)
+	  shown_flag (false),
+	  error_log_button (_("Errors"))
+
 {
 	using namespace Gtk::Menu_Helpers;
 
 	Gtkmm2ext::init();
 	
+
+#ifdef TOP_MENUBAR
+	_auto_display_errors = false;
+#endif
 	about = 0;
 
 	if (theArdourUI == 0) {
@@ -180,6 +186,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	session_selector_window = 0;
 	last_key_press_time = 0;
 	connection_editor = 0;
+	_will_create_new_session_automatically = false;
+	new_session_dialog = 0;
+	loading_dialog = 0;
 	add_route_dialog = 0;
 	route_params = 0;
 	option_editor = 0;
@@ -190,7 +199,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 	ab_direction = true;
-
+	
 	sys::path key_bindings_file;
 
 	find_file_in_search_path (ardour_search_path() + system_config_search_path(),
@@ -225,31 +234,80 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
-	/* have to wait for AudioEngine and Configuration before proceeding */
+	/* lets get this party started */
+
+    	try {
+		ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization);
+		setup_gtk_ardour_enums ();
+		Config->set_current_owner (ConfigVariableBase::Interface);
+		setup_profile ();
+
+	} catch (failed_constructor& err) {
+		error << _("could not initialize Ardour.") << endmsg;
+		// pass it on up
+		throw err;
+	} 
+
+	/* we like keyboards */
+
+	keyboard = new Keyboard;
+
+	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
+	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
+
+	platform_specific ();
 }
 
-void
-ARDOUR_UI::set_engine (AudioEngine& e)
+int
+ARDOUR_UI::create_engine ()
 {
-	engine = &e;
+	// this gets called every time by new_session()
+
+	if (engine) {
+		return 0;
+	}
+
+	try { 
+		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::jack_client_name);
+
+	} catch (...) {
+
+		return -1;
+	}
 
 	engine->Stopped.connect (mem_fun(*this, &ARDOUR_UI::engine_stopped));
 	engine->Running.connect (mem_fun(*this, &ARDOUR_UI::engine_running));
 	engine->Halted.connect (mem_fun(*this, &ARDOUR_UI::engine_halted));
 	engine->SampleRateChanged.connect (mem_fun(*this, &ARDOUR_UI::update_sample_rate));
 
-	ActionManager::init ();
-	new_session_dialog = new NewSessionDialog();
+	post_engine ();
 
+	return 0;
+}
+
+void
+ARDOUR_UI::post_engine ()
+{
+	extern int setup_midi ();
+
+	/* Things to be done once we create the AudioEngine
+	 */
+
+	MIDI::Manager::instance()->set_api_data (engine->jack());
+	setup_midi ();
+
+	check_memory_locking();
+
+       	ActionManager::init ();
 	_tooltips.enable();
-
-	keyboard = new Keyboard;
 
 	if (setup_windows ()) {
 		throw failed_constructor ();
 	}
 
-	if (GTK_ARDOUR::show_key_actions) {
+	/* this is the first point at which all the keybindings are available */
+
+	if (ARDOUR_COMMAND_LINE::show_key_actions) {
 		vector<string> names;
 		vector<string> paths;
 		vector<string> keys;
@@ -266,9 +324,6 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 		exit (0);
 	}
 
-	/* start with timecode, metering enabled
-	*/
-	
 	blink_timeout_tag = -1;
 
 	/* the global configuration object is now valid */
@@ -287,15 +342,26 @@ ARDOUR_UI::set_engine (AudioEngine& e)
 
 	/* start the time-of-day-clock */
 	
+#ifndef GTKOSX
+	/* OS X provides an always visible wallclock, so don't be stupid */
 	update_wall_clock ();
 	Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
+#endif
 
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
 
-	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
-	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
+	/* now start and maybe save state */
+
+	if (do_engine_start () == 0) {
+		if (session && _session_is_new) {
+			/* we need to retain initial visual 
+			   settings for a new session 
+			*/
+			session->save_state ("");
+		}
+	}
 }
 
 ARDOUR_UI::~ARDOUR_UI ()
@@ -316,6 +382,11 @@ ARDOUR_UI::~ARDOUR_UI ()
 
 	if (add_route_dialog) {
 		delete add_route_dialog;
+	}
+
+
+	if (new_session_dialog) {
+		delete new_session_dialog;
 	}
 }
 
@@ -436,7 +507,7 @@ ARDOUR_UI::save_ardour_state ()
 
 	if (session) {
 		session->add_instant_xml (enode);
-		session->add_instant_xml (mnode);
+	session->add_instant_xml (mnode);
 	} else {
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
@@ -479,9 +550,151 @@ ARDOUR_UI::update_autosave ()
 }
 
 void
+ARDOUR_UI::backend_audio_error (bool we_set_params, Gtk::Window* toplevel)
+{
+	string title;
+	if (we_set_params) {
+		title = _("Ardour could not start JACK");
+	} else {
+		title = _("Ardour could not connect to JACK.");
+	}
+
+	MessageDialog win (title,
+			   false,
+			   Gtk::MESSAGE_INFO,
+			   Gtk::BUTTONS_NONE);
+	
+	if (we_set_params) {
+		win.set_secondary_text(_("There are several possible reasons:\n\
+\n\
+1) You requested audio parameters that are not supported..\n\
+2) JACK is running as another user.\n\
+\n\
+Please consider the possibilities, and perhaps try different parameters."));
+	} else {
+		win.set_secondary_text(_("There are several possible reasons:\n\
+\n\
+1) JACK is not running.\n\
+2) JACK is running as another user, perhaps root.\n\
+3) There is already another client called \"ardour\".\n\
+\n\
+Please consider the possibilities, and perhaps (re)start JACK."));
+	}
+
+	if (toplevel) {
+		win.set_transient_for (*toplevel);
+	}
+
+	if (we_set_params) {
+		win.add_button (Stock::OK, RESPONSE_CLOSE);
+	} else {
+		win.add_button (Stock::QUIT, RESPONSE_CLOSE);
+ 	}
+
+	win.set_default_response (RESPONSE_CLOSE);
+	
+	win.show_all ();
+	win.set_position (Gtk::WIN_POS_CENTER);
+
+	if (!ARDOUR_COMMAND_LINE::no_splash) {
+		hide_splash ();
+	}
+
+	/* we just don't care about the result, but we want to block */
+
+	win.run ();
+}
+
+void
 ARDOUR_UI::startup ()
 {
-	check_memory_locking();
+	string name, path;
+	bool isnew;
+
+	new_session_dialog = new NewSessionDialog();
+	
+	/* If no session name is given: we're not loading a session yet, nor creating a new one */
+	
+	if (ARDOUR_COMMAND_LINE::session_name.length()) {
+	
+		/* Load session or start the new session dialog */
+		
+		if (find_session (ARDOUR_COMMAND_LINE::session_name, path, name, isnew)) {
+			error << string_compose(_("could not load command line session \"%1\""), 
+						ARDOUR_COMMAND_LINE::session_name) << endmsg;
+			return;
+		}
+
+		if (!ARDOUR_COMMAND_LINE::new_session) {
+			
+			/* Supposed to be loading an existing session, but the session doesn't exist */
+			
+			if (isnew) {
+				error << string_compose (_("\n\nNo session named \"%1\" exists.\n"
+							   "To create it from the command line, start ardour as \"ardour --new %1"), path) 
+				      << endmsg;
+				return;
+			}
+		}
+		
+		new_session_dialog->set_session_name (name);
+		new_session_dialog->set_session_folder (Glib::path_get_basename (path));
+		_session_is_new = isnew;
+	}
+
+	hide_splash ();
+
+	bool have_backend = EngineControl::engine_running();
+	bool need_nsd;
+	bool load_needed = false;
+
+	if (have_backend) {
+
+		/* backend audio is working */
+
+		if (ARDOUR_COMMAND_LINE::session_name.empty() || ARDOUR_COMMAND_LINE::new_session) {
+			/* need NSD to get session name and other info */
+			need_nsd = true;
+		} else {
+			need_nsd = false;
+		}
+		
+	} else {
+
+		XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
+		
+		if (audio_setup) {
+			new_session_dialog->engine_control.set_state (*audio_setup);
+		}
+
+		/* no backend audio, must bring up NSD to check configuration */
+		
+		need_nsd = true;
+	}
+
+	if (need_nsd) {
+
+		if (!get_session_parameters (ARDOUR_COMMAND_LINE::session_name, have_backend, ARDOUR_COMMAND_LINE::new_session)) {
+			return;
+		}
+
+	} else {
+
+		if (create_engine ()) {
+			backend_audio_error (false);
+			exit (1);
+		}
+
+		load_needed = true;
+	}
+	
+	if (load_needed) {
+		if (load_session (ARDOUR_COMMAND_LINE::session_name, name)) {
+			return;
+		}
+	}
+
+	show ();
 }
 
 void
@@ -679,6 +892,8 @@ ARDOUR_UI::every_point_one_seconds ()
 gint
 ARDOUR_UI::every_point_zero_one_seconds ()
 {
+	// august 2007: actual update frequency: 40Hz, not 100Hz
+
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
 }
@@ -1001,6 +1216,7 @@ ARDOUR_UI::open_session ()
 		open_session_selector = new Gtk::FileChooserDialog (_("open session"), FILE_CHOOSER_ACTION_OPEN);
 		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+		open_session_selector->set_default_response(Gtk::RESPONSE_ACCEPT);
 
 		FileFilter session_filter;
 		session_filter.add_pattern ("*.ardour");
@@ -1524,21 +1740,6 @@ ARDOUR_UI::setup_theme ()
 	theme_manager->setup_theme();
 }
 
-gint
-ARDOUR_UI::start_engine ()
-{
-	if (do_engine_start () == 0) {
-		if (session && _session_is_new) {
-			/* we need to retain initial visual 
-			   settings for a new session 
-			*/
-			session->save_state ("");
-		}
-	}
-
-	return FALSE;
-}
-
 void
 ARDOUR_UI::update_clocks ()
 {
@@ -1832,30 +2033,34 @@ ARDOUR_UI::save_template ()
 }
 
 bool
-ARDOUR_UI::new_session (std::string predetermined_path)
+ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_engine, bool should_be_new)
 {
 	string session_name;
 	string session_path;
+	string template_name;
 
-	if (!check_audioengine()) {
-		return false;
+	if (!loading_dialog) {
+		loading_dialog = new MessageDialog (*new_session_dialog, 
+						    "",
+						    false,
+						    Gtk::MESSAGE_INFO,
+						    Gtk::BUTTONS_NONE);
 	}
-
+		
 	int response = Gtk::RESPONSE_NONE;
 
 	new_session_dialog->set_modal(true);
 	new_session_dialog->set_name (predetermined_path);
 	new_session_dialog->reset_recent();
-	new_session_dialog->show();
+	new_session_dialog->set_position (WIN_POS_CENTER);
 	new_session_dialog->set_current_page (0);
 
 	do {
-		response = new_session_dialog->run ();
+		new_session_dialog->set_have_engine (have_engine);
 
-		if (!check_audioengine()) {
-			new_session_dialog->hide ();
-			return false;
-		}
+		new_session_dialog->show();
+		new_session_dialog->present ();
+	        response = new_session_dialog->run ();
 
 		_session_is_new = false;
 
@@ -1869,65 +2074,119 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 
 		} else if (response == Gtk::RESPONSE_NONE) {
 
-			/* Clear was pressed */
-			new_session_dialog->reset();
+		        /* Clear was pressed */
+		        new_session_dialog->reset();
+			continue;
+		}
 
-		} else if (response == Gtk::RESPONSE_YES) {
+		/* first things first ... if we're here to help set up audio parameters
+		   this is where want to do that.
+		*/
 
-			/* YES  == OPEN, but there's no enum for that */
+		if (!have_engine) {
+			if (new_session_dialog->engine_control.setup_engine ()) {
+				new_session_dialog->hide ();
+				return false;
+			} 
+		}
 
-			session_name = new_session_dialog->session_name();
+#ifdef GTKOSX
+		/* X11 users will always have fontconfig info around, but new GTK-OSX users 
+		   may not and it can take a while to build it. Warn them.
+		*/
 
+		Glib::ustring fontconfig = Glib::build_filename (Glib::get_home_dir(), ".fontconfig");
+		
+		if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+			MessageDialog msg (*new_session_dialog,
+					   _("Welcome to Ardour.\n\n"
+					     "The program will take a bit longer to start up\n"
+					     "while the system fonts are checked.\n\n"
+					     "This will only be done once, and you will\n"
+					     "not see this message again\n"),
+					   true,
+					   Gtk::MESSAGE_INFO,
+					   Gtk::BUTTONS_OK);
+			msg.show_all ();
+			msg.present ();
+			msg.run ();
+		}
+#endif
+		loading_dialog->set_message (_("Starting audio engine"));
+		loading_dialog->show_all ();
+		flush_pending ();
+		
+		if (create_engine ()) {
+			backend_audio_error (!have_engine, new_session_dialog);
+			loading_dialog->hide ();
+			flush_pending ();
+			/* audio setup page */
+			new_session_dialog->set_current_page (2);
+			/* try again */
+			response = Gtk::RESPONSE_NONE;
+			continue;
+		}
+
+		have_engine = true;		
+			
+		/* now handle possible affirmative responses */
+
+		if (response == Gtk::RESPONSE_YES) {
+
+		        /* YES == OPEN from the session selector */
+
+		        session_name = new_session_dialog->session_name();
+			
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
 				continue;
 			} 
 
 			if (session_name[0] == '/' || 
-					(session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-					(session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
 				load_session (Glib::path_get_dirname (session_name), session_name);
 			} else {
 				session_path = new_session_dialog->session_folder();
 				load_session (session_path, session_name);
 			}
-
+			
 		} else if (response == Gtk::RESPONSE_OK) {
 
+			/* OK == OPEN button */
+
 			session_name = new_session_dialog->session_name();
-
-			if (!new_session_dialog->on_new_session_page ()) {
-
-				/* XXX this is a bit of a hack.. 
-				   i really want the new sesion dialog to return RESPONSE_YES
-				   if we're on page 1 (the load page)
-				   Unfortunately i can't see how atm.. 
-				*/
-
-				if (session_name.empty()) {
-					response = Gtk::RESPONSE_NONE;
-					continue;
-				} 
+		
+			if (session_name.empty()) {
+				response = Gtk::RESPONSE_NONE;
+				continue;
+			} 
+				
+			switch (new_session_dialog->get_current_page()) {
+			case 1: /* recent session selector */
+			case 2: /* audio engine control */
 
 				if (session_name[0] == '/' || 
-						(session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-						(session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
 					load_session (Glib::path_get_dirname (session_name), session_name);
 				} else {
 					session_path = new_session_dialog->session_folder();
 					load_session (session_path, session_name);
 				}
+				break;
 
-			} else {
+			case 0: /* nominally the "new" session creator, but could be in use for an old session */
 
-				if (session_name.empty()) {
-					response = Gtk::RESPONSE_NONE;
-					continue;
-				} 
+				if (new_session_dialog->get_current_page() == 0 && ARDOUR_COMMAND_LINE::session_name.empty()) {
+					should_be_new = true;
+				}
+
+				/* handle what appear to be paths rather than just a name */
 
 				if (session_name[0] == '/' || 
-						(session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-						(session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
+				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
 
 					session_path = Glib::path_get_dirname (session_name);
 					session_name = Glib::path_get_basename (session_name);
@@ -1937,108 +2196,144 @@ ARDOUR_UI::new_session (std::string predetermined_path)
 					session_path = new_session_dialog->session_folder();
 
 				}
-
+				
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
-
+				
 				session_path = Glib::build_filename (session_path, session_name);
+				
+				if (!should_be_new) {
 
-				if (g_file_test (session_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+					load_session (session_path, session_name);
+					continue; /* leaves while() loop because response != NONE */
+
+				} else if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
 					Glib::ustring str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
 					MessageDialog msg (str,
-							false,
-							Gtk::MESSAGE_WARNING,
-							Gtk::BUTTONS_YES_NO,
-							true);
+							   false,
+							   Gtk::MESSAGE_WARNING,
+							   Gtk::BUTTONS_YES_NO,
+							   true);
 
 
 					msg.set_name (X_("CleanupDialog"));
 					msg.set_wmclass (X_("existing_session"), "Ardour");
 					msg.set_position (Gtk::WIN_POS_MOUSE);
-
+					
 					switch (msg.run()) {
-						case RESPONSE_YES:
-							load_session (session_path, session_name);
-							goto done;
-							break;
-						default:
-							response = RESPONSE_NONE;
-							new_session_dialog->reset ();
-							continue;
+					case RESPONSE_YES:
+						new_session_dialog->hide ();
+						goto_editor_window ();
+						flush_pending ();
+						load_session (session_path, session_name);
+						goto done;
+						break;
+					default:
+						response = RESPONSE_NONE;
+						new_session_dialog->reset ();
+						continue;
 					}
-				}
+				} 
 
-				_session_is_new = true;
-
-				std::string template_name = new_session_dialog->session_template_name();
-
+			        _session_is_new = true;
+						
 				if (new_session_dialog->use_session_template()) {
 
-					load_session (session_path, session_name, &template_name);
+					template_name = new_session_dialog->session_template_name();
 
+					new_session_dialog->hide ();
+					goto_editor_window ();
+					flush_pending ();
+
+					load_session (session_path, session_name, &template_name);
+			  
 				} else {
 
 					uint32_t cchns;
 					uint32_t mchns;
 					AutoConnectOption iconnect;
 					AutoConnectOption oconnect;
+					uint32_t nphysin;
+					uint32_t nphysout;
+					
+					if (Profile->get_sae()) {
 
-					if (new_session_dialog->create_control_bus()) {
-						cchns = (uint32_t) new_session_dialog->control_channel_count();
-					} else {
 						cchns = 0;
-					}
-
-					if (new_session_dialog->create_master_bus()) {
-						mchns = (uint32_t) new_session_dialog->master_channel_count();
-					} else {
-						mchns = 0;
-					}
-
-					if (new_session_dialog->connect_inputs()) {
+						mchns = 2;
 						iconnect = AutoConnectPhysical;
+						oconnect = AutoConnectMaster;
+						nphysin = 0; // use all available
+						nphysout = 0; // use all available
+
 					} else {
-						iconnect = AutoConnectOption (0);
+
+						/* get settings from advanced section of NSD */
+						
+						if (new_session_dialog->create_control_bus()) {
+							cchns = (uint32_t) new_session_dialog->control_channel_count();
+						} else {
+							cchns = 0;
+						}
+						
+						if (new_session_dialog->create_master_bus()) {
+							mchns = (uint32_t) new_session_dialog->master_channel_count();
+						} else {
+							mchns = 0;
+						}
+						
+						if (new_session_dialog->connect_inputs()) {
+							iconnect = AutoConnectPhysical;
+						} else {
+							iconnect = AutoConnectOption (0);
+						}
+						
+						/// @todo some minor tweaks.
+						
+						if (new_session_dialog->connect_outs_to_master()) {
+							oconnect = AutoConnectMaster;
+						} else if (new_session_dialog->connect_outs_to_physical()) {
+							oconnect = AutoConnectPhysical;
+						} else {
+							oconnect = AutoConnectOption (0);
+						} 
+						
+						nphysin = (uint32_t) new_session_dialog->input_limit_count();
+						nphysout = (uint32_t) new_session_dialog->output_limit_count();
 					}
 
-					/// @todo some minor tweaks.
+					new_session_dialog->hide ();
+					goto_editor_window ();
+					flush_pending ();
 
-					if (new_session_dialog->connect_outs_to_master()) {
-						oconnect = AutoConnectMaster;
-					} else if (new_session_dialog->connect_outs_to_physical()) {
-						oconnect = AutoConnectPhysical;
-					} else {
-						oconnect = AutoConnectOption (0);
-					} 
-
-					uint32_t nphysin = (uint32_t) new_session_dialog->input_limit_count();
-					uint32_t nphysout = (uint32_t) new_session_dialog->output_limit_count();
-
-					if (!build_session (session_path,
-								session_name,
-								cchns,
-								mchns,
-								iconnect,
-								oconnect,
-								nphysin,
-								nphysout, 
-								engine->frame_rate() * 60 * 5)) {
-
+					if (build_session (session_path,
+							   session_name,
+							   cchns,
+							   mchns,
+							   iconnect,
+							   oconnect,
+							   nphysin,
+							   nphysout, 
+							   engine->frame_rate() * 60 * 5)) {
+						
 						response = Gtk::RESPONSE_NONE;
 						new_session_dialog->reset ();
 						continue;
 					}
 				}
+				break;
+
+			default:
+				break;
 			}
 		}
-
+		
 	} while (response == Gtk::RESPONSE_NONE);
 
   done:
 	show();
-	new_session_dialog->get_window()->set_cursor();
+	loading_dialog->hide ();
 	new_session_dialog->hide();
 	return true;
 }
@@ -2050,21 +2345,32 @@ ARDOUR_UI::close_session()
 		return;
 	}
 
-	unload_session();
-	new_session ();
+	unload_session (true);
+
+	get_session_parameters ("", true, false);
 }
 
 int
 ARDOUR_UI::load_session (const string & path, const string & snap_name, string* mix_template)
 {
 	Session *new_session;
+	int unload_status;
+	int retval = -1;
+
 	session_loaded = false;
-	
+
 	if (!check_audioengine()) {
 		return -1;
 	}
 
-	if(!unload_session ()) return -1;
+	unload_status = unload_session ();
+
+	if (unload_status < 0) {
+		goto out;
+	} else if (unload_status > 0) {
+		retval = 0;
+		goto out;
+	}
 
 	/* if it already exists, we must have write access */
 
@@ -2072,17 +2378,23 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
 					      "This prevents the session from being loaded."));
 		msg.run ();
-		return -1;
+		goto out;
 	}
+
+	if (loading_dialog) {
+		loading_dialog->set_markup (_("Please wait while Ardour loads your session"));
+		flush_pending ();
+	}
+
+	disable_screen_updates ();
 
 	try {
 		new_session = new Session (*engine, path, snap_name, mix_template);
 	}
 
 	catch (...) {
-
 		error << string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
-		return -1;
+		goto out;
 	}
 
 	connect_to_session (new_session);
@@ -2098,10 +2410,15 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	}
 
 	editor->edit_cursor_position (true);
-	return 0;
+	enable_screen_updates ();
+	flush_pending ();
+	retval = 0;
+
+  out:
+	return retval;
 }
 
-bool
+int
 ARDOUR_UI::build_session (const string & path, const string & snap_name, 
 			  uint32_t control_channels,
 			  uint32_t master_channels, 
@@ -2112,14 +2429,21 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 			  nframes_t initial_length)
 {
 	Session *new_session;
+	int x;
 
 	if (!check_audioengine()) {
-		return false;
+		return -1;
 	}
 
 	session_loaded = false;
 
-	if (!unload_session ()) return false;
+	x = unload_session ();
+
+	if (x < 0) {
+		return -1;
+	} else if (x > 0) {
+		return 0;
+	}
 	
 	_session_is_new = true;
 
@@ -2132,13 +2456,13 @@ ARDOUR_UI::build_session (const string & path, const string & snap_name,
 
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
 		msg.run ();
-		return false;
+		return -1;
 	}
 
 	connect_to_session (new_session);
 
 	session_loaded = true;
-	return true;
+	return 0;
 }
 
 void
@@ -2616,8 +2940,10 @@ ARDOUR_UI::cmdline_new_session (string path)
 		path = str;
 	}
 
-	new_session (path);
-	
+	get_session_parameters (path, false, true);
+
+	_will_create_new_session_automatically = false; /* done it */
+
 	return FALSE; /* don't call it again */
 }
 
@@ -2867,6 +3193,12 @@ ARDOUR_UI::setup_profile ()
 {
 	if (gdk_screen_width() < 1200) {
 		Profile->set_small_screen ();
+	}
+
+
+	if (getenv ("ARDOUR_SAE")) {
+		Profile->set_sae ();
+		Profile->set_single_package ();
 	}
 }
 

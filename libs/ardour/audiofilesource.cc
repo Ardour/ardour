@@ -21,10 +21,13 @@
 
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <stdio.h> // for rename(), sigh
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
+#include <pbd/convert.h>
+#include <pbd/basename.h>
 #include <pbd/mountpoint.h>
 #include <pbd/stl_delete.h>
 #include <pbd/strsplit.h>
@@ -40,6 +43,7 @@
 #include <ardour/sndfile_helpers.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/session.h>
+#include <ardour/session_directory.h>
 #include <ardour/source_factory.h>
 #include <ardour/filename_extensions.h>
 
@@ -153,7 +157,60 @@ AudioFileSource::init (ustring pathstr, bool must_exist)
 ustring
 AudioFileSource::peak_path (ustring audio_path)
 {
-	return _session.peak_path_from_audio_path (audio_path);
+	ustring base;
+
+	base = PBD::basename_nosuffix (audio_path);
+	base += '%';
+	base += (char) ('A' + _channel);
+
+	return _session.peak_path (base);
+}
+
+ustring
+AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
+{
+	ustring str;
+
+	/* check for the broken location in use by 2.0 for several months */
+	
+	str = broken_peak_path (audio_path);
+	
+	if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
+		
+		if (is_embedded()) {
+			
+			/* it would be nice to rename it but the nature of 
+			   the bug means that we can't reliably use it.
+			*/
+			
+			peak_path = str;
+			
+		} else {
+			/* all native files are mono, so we can just rename
+			   it.
+			*/
+			::rename (str.c_str(), peak_path.c_str());
+		}
+		
+	} else {
+		/* Nasty band-aid for older sessions that were created before we
+		   used libsndfile for all audio files.
+		*/
+		
+		
+		str = old_peak_path (audio_path);	
+		if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
+			peak_path = str;
+		}
+	}
+
+	return peak_path;
+}
+
+ustring
+AudioFileSource::broken_peak_path (ustring audio_path)
+{
+	return _session.peak_path (audio_path);
 }
 
 ustring
@@ -171,9 +228,9 @@ AudioFileSource::old_peak_path (ustring audio_path)
 
 	char buf[32];
 #ifdef __APPLE__
-	snprintf (buf, sizeof (buf), "%u-%u-%d", stat_mount.st_ino, stat_file.st_ino, _channel);
+	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
 #else
-	snprintf (buf, sizeof (buf), "%ld-%ld-%d", stat_mount.st_ino, stat_file.st_ino, _channel);
+	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
 #endif
 
 	ustring res = peak_dir;
@@ -227,7 +284,7 @@ AudioFileSource::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property (X_("channel"))) != 0) {
-		_channel = atoi (prop->value().c_str());
+		_channel = atoi (prop->value());
 	} else {
 		_channel = 0;
 	}
@@ -265,6 +322,10 @@ AudioFileSource::mark_streaming_write_completed ()
 	if (!writable()) {
 		return;
 	}
+	
+	/* XXX notice that we're readers of _peaks_built
+	   but we must hold a solid lock on PeaksReady.
+	*/
 
 	Glib::Mutex::Lock lm (_lock);
 
@@ -432,7 +493,7 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 						fullpath += shorter;
 
 						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-							chan = atoi (pathstr.substr (pos+1).c_str());
+							chan = atoi (pathstr.substr (pos+1));
 							pathstr = shorter;
 							keeppath = fullpath;
 							++cnt;
@@ -484,7 +545,7 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 			ustring shorter = pathstr.substr (0, pos);
 
 			if (Glib::file_test (shorter, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-				chan = atoi (pathstr.substr (pos+1).c_str());
+				chan = atoi (pathstr.substr (pos+1));
 				pathstr = shorter;
 			}
 		}
@@ -542,15 +603,6 @@ AudioFileSource::set_header_position_offset (nframes_t offset)
 	HeaderPositionOffsetChanged ();
 }
 
-void 
-AudioFileSource::handle_header_position_change ()
-{
-	if (writable()) {
-		set_header_timeline_position ();
-		flush_header ();
-	}
-}
-
 void
 AudioFileSource::set_timeline_position (int64_t pos)
 {
@@ -603,15 +655,15 @@ AudioFileSource::set_source_name (ustring newname, bool destructive)
 bool
 AudioFileSource::is_empty (Session& s, ustring path)
 {
-	bool ret = false;
+	SoundFileInfo info;
+	string err;
 	
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable (DataType::AUDIO, s, path, 0, NoPeakFile, false));
-
-	if (afs) {
-		ret = (afs->length() == 0);
+	if (!get_soundfile_info (path, info, err)) {
+		/* dangerous: we can't get info, so assume that its not empty */
+		return false; 
 	}
 
-	return ret;
+	return info.length == 0;
 }
 
 int

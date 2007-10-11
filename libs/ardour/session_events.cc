@@ -410,6 +410,8 @@ Session::process_event (Event* ev)
 
 	case Event::Audition:
 		set_audition (ev->region);
+		// drop reference to region
+		ev->region.reset ();
 		break;
 
 	case Event::InputConfigurationChange:

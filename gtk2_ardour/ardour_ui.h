@@ -50,6 +50,7 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/menubar.h>
+#include <gtkmm/textbuffer.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/click_box.h>
@@ -111,8 +112,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	
 	int load_session (const string & path, const string & snapshot, string* mix_template = 0);
 	bool session_loaded;
-	/// @return true if building the session was successful
-	bool build_session (const string & path, const string & snapshot, 
+	/// @return zero if building the session was successful
+	int build_session (const string & path, const string & snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
 			   ARDOUR::AutoConnectOption input_connect,
@@ -124,11 +125,20 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	ARDOUR::Session* the_session() { return session; }
 
-	bool new_session(std::string path = string());
+	bool will_create_new_session_automatically() const {
+		return _will_create_new_session_automatically;
+	}
+
+	void set_will_create_new_session_automatically (bool yn) {
+		_will_create_new_session_automatically = yn;
+	}
+
+	bool get_session_parameters (Glib::ustring path, bool have_engine = false, bool should_be_new = false);
+
 	gint cmdline_new_session (string path);
 	
 	/// @return true if session was successfully unloaded.
-	bool unload_session ();
+	int unload_session (bool hide_stuff = false);
 	void close_session(); 
 
 	int  save_state_canfail (string state_name = "");
@@ -204,8 +214,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		session_add_midi_route (false);
 	}*/
 
-	void set_engine (ARDOUR::AudioEngine&);
-	gint start_engine ();
+	int  create_engine ();
+	void post_engine ();
 
 	gint exit_on_main_window_close (GdkEventAny *);
 
@@ -220,6 +230,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void setup_profile ();
 	void setup_theme ();
+
+	void set_shuttle_fract (double);
 
   protected:
 	friend class PublicEditor;
@@ -293,6 +305,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static ARDOUR_UI *theArdourUI;
 
+	void backend_audio_error (bool we_set_params, Gtk::Window* toplevel = 0);
 	void startup ();
 	void shutdown ();
 
@@ -438,7 +451,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	gint shuttle_box_expose (GdkEventExpose*);
 	gint mouse_shuttle (double x, bool force);
 	void use_shuttle_fract (bool force);
-	void set_shuttle_fract (double);
 
 	bool   shuttle_grabbed;
 	double shuttle_fract;
@@ -507,6 +519,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::EventBox menu_bar_base;
 	Gtk::HBox     menu_hbox;
 
+	void use_menubar_as_top_menubar ();
 	void build_menu_bar ();
 	void build_control_surface_menu ();
 
@@ -540,6 +553,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	sigc::connection point_zero_one_second_connection;
 
 	gint session_menu (GdkEventButton *);
+
+	bool _will_create_new_session_automatically;
 
 	NewSessionDialog* new_session_dialog;
 	
@@ -683,6 +698,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_remote_model (ARDOUR::RemoteModel);
 	void set_denormal_model (ARDOUR::DenormalModel);
 
+	void toggle_sync_order_keys ();
 	void toggle_StopPluginsWithTransport();
 	void toggle_DoNotRunPluginsWhileRecording();
 	void toggle_VerifyRemoveLastCapture();
@@ -696,16 +712,19 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_RegionEquivalentsOverlap ();
 	void toggle_PrimaryClockDeltaEditCursor ();
 	void toggle_SecondaryClockDeltaEditCursor ();
+	void toggle_only_copy_imported_files ();
 
 	void mtc_port_changed ();
 	void map_solo_model ();
 	void map_monitor_model ();
 	void map_denormal_model ();
+	void map_denormal_protection ();
 	void map_remote_model ();
 	void map_file_header_format ();
 	void map_file_data_format ();
 	void map_input_auto_connect ();
 	void map_output_auto_connect ();
+	void map_only_copy_imported_files ();
 	void parameter_changed (const char*);
 
 	void set_meter_hold (ARDOUR::MeterHold);
@@ -725,6 +744,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool ab_direction;
 	void disable_all_plugins ();
 	void ab_all_plugins ();
+
+	void audioengine_setup ();
+
+	void display_message (const char *prefix, gint prefix_len, 
+			      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, const char *msg);
+	Gtk::Label status_bar_label;
+	Gtk::ToggleButton error_log_button;
+	Gtk::MessageDialog* loading_dialog;
+
+	void platform_specific ();
 };
 
 #endif /* __ardour_gui_h__ */

@@ -162,21 +162,26 @@ ARDOUR_UI::connect_to_session (Session *s)
 	point_zero_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
 }
 
-bool
-ARDOUR_UI::unload_session ()
+int
+ARDOUR_UI::unload_session (bool hide_stuff)
 {
 	if (session && session->dirty()) {
 		switch (ask_about_saving_session (_("close"))) {
 		case -1:
 			// cancel
-			return false;
+			return 1;
 			
 		case 1:
 			session->save_state ("");
 			break;
 		}
 	}
-	editor->hide ();
+
+	if (hide_stuff) {
+		editor->hide ();
+		mixer->hide ();
+	}
+
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_oh_five_second_connection.disconnect ();
@@ -204,16 +209,12 @@ ARDOUR_UI::unload_session ()
 		option_editor->set_session (0);
 	}
 
-	if (mixer) {
-		mixer->hide ();
-	}
-
 	delete session;
 	session = 0;
 
 	update_buffer_load ();
 
-	return true;
+	return 0;
 }
 
 int

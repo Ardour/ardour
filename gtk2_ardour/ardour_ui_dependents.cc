@@ -47,7 +47,8 @@ void
 ARDOUR_UI::shutdown ()
 {
 	if (session) {
-		delete session;
+		/* we're exiting cleanly, so remove any auto-save data */
+		session->remove_pending_capture_state ();
 		session = 0;
 	}
 
@@ -109,11 +110,13 @@ void
 ARDOUR_UI::goto_editor_window ()
 {
 	editor->show_window ();
+	editor->present ();
 }
 void
 ARDOUR_UI::goto_mixer_window ()
 {
 	mixer->show_window ();
+	mixer->present ();
 }
 
 gint

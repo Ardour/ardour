@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 
 #include <glibmm/miscutils.h>
-
+#include <glibmm/thread.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/utils.h>
@@ -44,6 +44,21 @@ const AudioFileSource::Flag SndFileSource::default_writable_flags = AudioFileSou
 											   AudioFileSource::Removable|
 											   AudioFileSource::RemovableIfEmpty|
 											   AudioFileSource::CanRename);
+
+struct SizedSampleBuffer {
+    nframes_t size;
+    Sample* buf;
+
+    SizedSampleBuffer (nframes_t sz) : size (sz) { 
+	    buf = new Sample[size];
+    }
+
+    ~SizedSampleBuffer() {
+	    delete [] buf;
+    }
+};
+
+Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	: AudioFileSource (s, node)
@@ -186,8 +201,6 @@ SndFileSource::init ()
 
 	// lets try to keep the object initalizations here at the top
 	xfade_buf = 0;
-	interleave_buf = 0;
-	interleave_bufsize = 0;
 	sf = 0;
 	_broadcast_info = 0;
 
@@ -272,10 +285,6 @@ SndFileSource::~SndFileSource ()
 		touch_peakfile ();
 	}
 
-	if (interleave_buf) {
-		delete [] interleave_buf;
-	}
-
 	if (_broadcast_info) {
 		delete _broadcast_info;
 	}
@@ -341,14 +350,7 @@ SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 
 	real_cnt = cnt * _info.channels;
 
-	if (interleave_bufsize < real_cnt) {
-		
-		if (interleave_buf) {
-			delete [] interleave_buf;
-		}
-		interleave_bufsize = real_cnt;
-		interleave_buf = new float[interleave_bufsize];
-	}
+	Sample* interleave_buf = get_interleave_buffer (real_cnt);
 	
 	nread = sf_read_float (sf, interleave_buf, real_cnt);
 	ptr = interleave_buf + _channel;
@@ -401,7 +403,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 	update_length (oldlen, cnt);
 
 	if (_build_peakfiles) {
-		compute_and_write_peaks (data, frame_pos, cnt, false);
+		compute_and_write_peaks (data, frame_pos, cnt, false, true);
 	}
 
 	_write_data_count = cnt;
@@ -493,7 +495,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 	update_length (file_pos, cnt);
 
 	if (_build_peakfiles) {
-		compute_and_write_peaks (data, file_pos, cnt, false);
+		compute_and_write_peaks (data, file_pos, cnt, false, true);
 	}
 
 	file_pos += cnt;
@@ -903,4 +905,22 @@ bool
 SndFileSource::one_of_several_channels () const
 {
 	return _info.channels > 1;
+}
+
+Sample*
+SndFileSource::get_interleave_buffer (nframes_t size)
+{
+	SizedSampleBuffer* ssb;
+
+	if ((ssb = thread_interleave_buffer.get()) == 0) {
+		ssb = new SizedSampleBuffer (size);
+		thread_interleave_buffer.set (ssb);
+	}
+
+	if (ssb->size < size) {
+		ssb = new SizedSampleBuffer (size);
+		thread_interleave_buffer.set (ssb);
+	}
+
+	return ssb->buf;
 }

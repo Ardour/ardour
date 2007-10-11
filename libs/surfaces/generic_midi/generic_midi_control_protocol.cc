@@ -27,7 +27,6 @@
 
 #include <midi++/port.h>
 #include <midi++/manager.h>
-#include <midi++/port_request.h>
 
 #include <ardour/route.h>
 #include <ardour/session.h>

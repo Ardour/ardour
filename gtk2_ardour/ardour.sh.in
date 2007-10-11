@@ -15,6 +15,6 @@ fi
 
 ulimit -c unlimited
 
-exec %INSTALL_PREFIX%/%LIBDIR%/ardour2/ardour-%VERSION% $*
+exec %INSTALL_PREFIX%/%LIBDIR%/ardour2/ardour-%VERSION% "$@"
 
 

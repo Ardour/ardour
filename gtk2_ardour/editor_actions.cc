@@ -66,7 +66,6 @@ Editor::register_actions ()
 
 	/* add named actions for the editor */
 
-
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), mem_fun (*this, &Editor::editor_list_button_toggled));
@@ -385,19 +384,17 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Add External Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsRegion"), _("as Region(s)"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsTrack"), _("as Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTrack));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioAsTapeTrack"), _("as Tape Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsTapeTrack));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToTrack"), _("to Tracks"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack));
-	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 	
+	/* if there is a logo in the editor canvas, its always visible at startup */
+
+	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleLogoVisibility"), _("Show Logo"), mem_fun (*this, &Editor::toggle_logo_visibility));
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	tact->set_active (true);
+
 	RadioAction::Group layer_model_group;
 
 	ActionManager::register_radio_action (editor_actions, layer_model_group,  X_("LayerLaterHigher"), _("Later is Higher"), bind (mem_fun (*this, &Editor::set_layer_model), LaterHigher));
@@ -470,6 +467,23 @@ Editor::toggle_measure_visibility ()
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_measures (tact->get_active());
+	}
+}
+
+void
+Editor::toggle_logo_visibility ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleLogoVisibility"));
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		if (logo_item) {
+			if (tact->get_active()) {
+				logo_item->show ();
+			} else {
+				logo_item->hide ();
+			}
+		}
 	}
 }
 

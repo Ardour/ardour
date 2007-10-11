@@ -32,9 +32,9 @@
 #include <glibmm.h>
 
 #include <pbd/basename.h>
+#include <pbd/convert.h>
 
 #include <ardour/ardour.h>
-#include <ardour/types.h>
 #include <ardour/session.h>
 #include <ardour/session_directory.h>
 #include <ardour/audio_diskstream.h>
@@ -43,82 +43,22 @@
 #include <ardour/audioregion.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
-
+#include <ardour/resampled_source.h>
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 
-#define BLOCKSIZE 4096U
-
-class ImportableSource {
-   public:
-    ImportableSource (SNDFILE* sf, SF_INFO* info) : in (sf), sf_info (info) {}
-    virtual ~ImportableSource() {}
-
-    virtual nframes_t read (Sample* buffer, nframes_t nframes) {
-	    nframes_t per_channel = nframes / sf_info->channels;
-	    per_channel = sf_readf_float (in, buffer, per_channel);
-	    return per_channel * sf_info->channels;
-    }
-
-    virtual float ratio() const { return 1.0f; }
-
-protected:
-       SNDFILE* in;
-       SF_INFO* sf_info;
-};
-
-class ResampledImportableSource : public ImportableSource {
-   public:
-    ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate) : ImportableSource (sf, info) {
-	    int err;
-
-	    sf_seek (in, 0, SEEK_SET) ;
-	    
-	    /* Initialize the sample rate converter. */
-	    
-	    if ((src_state = src_new (SRC_SINC_BEST_QUALITY, sf_info->channels, &err)) == 0) {	
-		    error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
-		    throw failed_constructor ();
-	    }
-	    
-	    src_data.end_of_input = 0 ; /* Set this later. */
-	    
-	    /* Start with zero to force load in while loop. */
-	    
-	    src_data.input_frames = 0 ;
-	    src_data.data_in = input ;
-	    
-	    src_data.src_ratio = ((float) rate) / sf_info->samplerate ;
-
-    }
-
-    ~ResampledImportableSource () { 
-	src_state = src_delete (src_state) ;
-    }
-
-    nframes_t read (Sample* buffer, nframes_t nframes);
-    
-    float ratio() const { return src_data.src_ratio; }
-
-   private:
-	float input[BLOCKSIZE];
-	SRC_STATE*	src_state;
-	SRC_DATA	src_data;
-};
-
 int
 Session::import_audiofile (import_status& status)
 {
 	SNDFILE *in;
 	vector<boost::shared_ptr<AudioFileSource> > newfiles;
-	SourceList sources;
 	SF_INFO info;
 	float *data = 0;
 	Sample **channel_data = 0;
-	long nfiles = 0;
+	int nfiles = 0;
 	string basepath;
 	string sounds_dir;
 	nframes_t so_far;
@@ -127,178 +67,166 @@ Session::import_audiofile (import_status& status)
 	vector<string> new_paths;
 	struct tm* now;
 	ImportableSource* importable = 0;
-	const nframes_t nframes = BLOCKSIZE;
+	const nframes_t nframes = ResampledImportableSource::blocksize;
+	uint32_t cnt = 1;
 
-	status.new_regions.clear ();
+	status.sources.clear ();
+	
+	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p, ++cnt) {
 
-	if ((in = sf_open (status.paths.front().c_str(), SFM_READ, &info)) == 0) {
-		error << string_compose(_("Import: cannot open input sound file \"%1\""), status.paths.front()) << endmsg;
-		status.done = 1;
-		status.cancel = 1;
-		return -1;
-	}
+		if ((in = sf_open ((*p).c_str(), SFM_READ, &info)) == 0) {
+			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
+			status.done = 1;
+			status.cancel = 1;
+			return -1;
+		}
+		
+		if ((nframes_t) info.samplerate != frame_rate()) {
+			importable = new ResampledImportableSource (in, &info, frame_rate(), status.quality);
+		} else {
+			importable = new ImportableSource (in, &info);
+		}
+		
+		newfiles.clear ();
 
-	if ((nframes_t) info.samplerate != frame_rate()) {
-		importable = new ResampledImportableSource (in, &info, frame_rate());
-	} else {
-		importable = new ImportableSource (in, &info);
-	}
+		for (int n = 0; n < info.channels; ++n) {
+			newfiles.push_back (boost::shared_ptr<AudioFileSource>());
+		}
+		
+		SessionDirectory sdir(get_best_session_directory_for_new_source ());
+		sounds_dir = sdir.sound_path().to_string();
 
-	for (int n = 0; n < info.channels; ++n) {
-		newfiles.push_back (boost::shared_ptr<AudioFileSource>());
-	}
-
-	SessionDirectory sdir(get_best_session_directory_for_new_source ());
-	sounds_dir = sdir.sound_path().to_string();
-
-	basepath = PBD::basename_nosuffix (status.paths.front());
-
-	for (int n = 0; n < info.channels; ++n) {
-
-		bool goodfile = false;
-
-		do {
-			if (info.channels == 2) {
-				if (n == 0) {
-					snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
+		basepath = PBD::basename_nosuffix ((*p));
+		
+		for (int n = 0; n < info.channels; ++n) {
+			
+			bool goodfile = false;
+			
+			do {
+				if (info.channels == 2) {
+					if (n == 0) {
+						snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
+					} else {
+						snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
+					}
+				} else if (info.channels > 1) {
+					snprintf (buf, sizeof(buf), "%s/%s-c%d.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
 				} else {
-					snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
+					snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
 				}
-			} else if (info.channels > 1) {
-				snprintf (buf, sizeof(buf), "%s/%s-c%d.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
-			} else {
-				snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
-			}
 
-			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+				if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 
-				/* if the file already exists, we must come up with
-				 *  a new name for it.  for now we just keep appending
-				 *  _ to basepath
-				 */
+					/* if the file already exists, we must come up with
+					 *  a new name for it.  for now we just keep appending
+					 *  _ to basepath
+					 */
 				
-				basepath += "_";
+					basepath += "_";
 
-			} else {
+				} else {
 
-				goodfile = true;
+					goodfile = true;
+				}
+
+			} while ( !goodfile);
+
+			try { 
+				newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
 			}
 
-		} while ( !goodfile);
+			catch (failed_constructor& err) {
+				error << string_compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
+				goto out;
+			}
 
-		try { 
-			newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
+			new_paths.push_back (buf);
+			newfiles[n]->prepare_for_peakfile_writes ();
+			nfiles++;
+		}
+	
+		data = new float[nframes * info.channels];
+		channel_data = new Sample * [ info.channels ];
+	
+		for (int n = 0; n < info.channels; ++n) {
+			channel_data[n] = new Sample[nframes];
 		}
 
-		catch (failed_constructor& err) {
-			error << string_compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
+		so_far = 0;
+
+		if ((nframes_t) info.samplerate != frame_rate()) {
+			status.doing_what = string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
+							    basepath,
+							    info.samplerate/1000.0f,
+							    frame_rate()/1000.0f,
+							    cnt, status.paths.size());
+							    
+		} else {
+			status.doing_what = string_compose (_("converting %1\n(%2 of %3)"), 
+							    basepath,
+							    cnt, status.paths.size());
+
+		}
+
+		status.progress = 0.0;
+
+		while (!status.cancel) {
+
+			nframes_t nread, nfread;
+			long x;
+			long chn;
+		
+			if ((nread = importable->read (data, nframes)) == 0) {
+				break;
+			}
+			nfread = nread / info.channels;
+
+			/* de-interleave */
+				
+			for (chn = 0; chn < info.channels; ++chn) {
+
+				nframes_t n;
+				for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
+					channel_data[chn][n] = (Sample) data[x];
+				}
+			}
+
+			/* flush to disk */
+
+			for (chn = 0; chn < info.channels; ++chn) {
+				newfiles[chn]->write (channel_data[chn], nfread);
+			}
+
+			so_far += nread;
+			status.progress = so_far / (importable->ratio () * info.frames * info.channels);
+		}
+
+		if (status.cancel) {
 			goto out;
 		}
-
-		new_paths.push_back (buf);
-		nfiles++;
-	}
-	
-	data = new float[nframes * info.channels];
-	channel_data = new Sample * [ info.channels ];
-	
-	for (int n = 0; n < info.channels; ++n) {
-		channel_data[n] = new Sample[nframes];
-	}
-
-	so_far = 0;
-
-	status.doing_what = _("converting audio");
-	status.progress = 0.0;
-
-	while (!status.cancel) {
-
-		nframes_t nread, nfread;
-		long x;
-		long chn;
 		
-		if ((nread = importable->read (data, nframes)) == 0) {
-			break;
-		}
-		nfread = nread / info.channels;
-
-		/* de-interleave */
-				
-		for (chn = 0; chn < info.channels; ++chn) {
-
-			nframes_t n;
-			for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
-				channel_data[chn][n] = (Sample) data[x];
-			}
+		for (int n = 0; n < info.channels; ++n) {
+			status.sources.push_back (newfiles[n]);
 		}
 
-		/* flush to disk */
-
-		for (chn = 0; chn < info.channels; ++chn) {
-			newfiles[chn]->write (channel_data[chn], nfread);
+		if (status.cancel) {
+			goto out;
 		}
-
-		so_far += nread;
-		status.progress = so_far / (importable->ratio () * info.frames * info.channels);
 	}
-
-	if (status.cancel) {
-		goto out;
-	}
-
-	if (status.multichan) {
-		status.doing_what = _("building region");
-	} else {
-		status.doing_what = _("building regions");
-	}
-
+	
 	status.freeze = true;
 
 	time_t xnow;
 	time (&xnow);
 	now = localtime (&xnow);
 
-	if (status.multichan) {
-		/* all sources are used in a single multichannel region */
+	/* flush the final length(s) to the header(s) */
 
-		for (int n = 0; n < nfiles && !status.cancel; ++n) {
-			/* flush the final length to the header */
-			newfiles[n]->update_header(0, *now, xnow);
-			sources.push_back(newfiles[n]);
-		}
-
-		bool strip_paired_suffixes = (newfiles.size() > 1);
-
-		boost::shared_ptr<AudioRegion> r (boost::dynamic_pointer_cast<AudioRegion> 
-						  (RegionFactory::create (sources, 0, 
-									  newfiles[0]->length(), 
-									  region_name_from_path (basepath, strip_paired_suffixes),
-									  0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile))));
-		
-		status.new_regions.push_back (r);
-
-	} else {
-		for (int n = 0; n < nfiles && !status.cancel; ++n) {
-
-			/* flush the final length to the header */
-
-			newfiles[n]->update_header(0, *now, xnow);
-
-			/* The sources had zero-length when created, which means that the Session
-			   did not bother to create whole-file AudioRegions for them. Do it now.
-
-			   Note: leave any trailing paired indicators from the file names as part
-			   of the region name.
-			*/
-		
-			status.new_regions.push_back (boost::dynamic_pointer_cast<AudioRegion> 
-						      (RegionFactory::create (boost::static_pointer_cast<Source> (newfiles[n]), 0, newfiles[n]->length(), 
-									      region_name_from_path (newfiles[n]->name(), false),
-									      0, AudioRegion::Flag (AudioRegion::DefaultFlags | AudioRegion::WholeFile | AudioRegion::Import))));
-		}
+	for (SourceList::iterator x = status.sources.begin(); x != status.sources.end() && !status.cancel; ++x) {
+		boost::dynamic_pointer_cast<AudioFileSource>(*x)->update_header(0, *now, xnow);
+		boost::dynamic_pointer_cast<AudioSource>(*x)->done_with_peakfile_writes ();
 	}
-	
+
 	/* save state so that we don't lose these new Sources */
 
 	if (!status.cancel) {
@@ -321,7 +249,8 @@ Session::import_audiofile (import_status& status)
 	}
 
 	if (status.cancel) {
-		status.new_regions.clear ();
+
+		status.sources.clear ();
 
 		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
 			unlink ((*i).c_str());
@@ -337,50 +266,3 @@ Session::import_audiofile (import_status& status)
 
 	return ret;
 }
-
-nframes_t 
-ResampledImportableSource::read (Sample* output, nframes_t nframes)
-{
-	int err;
-
-	/* If the input buffer is empty, refill it. */
-	
-	if (src_data.input_frames == 0) {	
-
-		src_data.input_frames = ImportableSource::read (input, BLOCKSIZE);
-
-		/* The last read will not be a full buffer, so set end_of_input. */
-
-		if ((nframes_t) src_data.input_frames < BLOCKSIZE) {
-			src_data.end_of_input = SF_TRUE ;
-		}		
-
-		src_data.input_frames /= sf_info->channels;
-		src_data.data_in = input ;
-	} 
-	
-	src_data.data_out = output;
-
-	if (!src_data.end_of_input) {
-		src_data.output_frames = nframes / sf_info->channels ;
-	} else {
-		src_data.output_frames = src_data.input_frames;
-	}
-
-	if ((err = src_process (src_state, &src_data))) {
-		error << string_compose(_("Import: %1"), src_strerror (err)) << endmsg ;
-		return 0 ;
-	} 
-	
-	/* Terminate if at end */
-	
-	if (src_data.end_of_input && src_data.output_frames_gen == 0) {
-		return 0;
-	}
-	
-	src_data.data_in += src_data.input_frames_used * sf_info->channels ;
-	src_data.input_frames -= src_data.input_frames_used ;
-
-	return src_data.output_frames_gen * sf_info->channels;
-}
-

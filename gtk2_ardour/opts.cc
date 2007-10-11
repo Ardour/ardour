@@ -27,18 +27,19 @@
 
 using namespace std;
 
-string GTK_ARDOUR::session_name = "";
-string GTK_ARDOUR::jack_client_name = "ardour";
-bool  GTK_ARDOUR::show_key_actions = false;
-bool GTK_ARDOUR::no_splash = true;
-bool GTK_ARDOUR::just_version = false;
-bool GTK_ARDOUR::use_vst = true;
-bool GTK_ARDOUR::new_session = false;
-char* GTK_ARDOUR::curvetest_file = 0;
-bool GTK_ARDOUR::try_hw_optimization = true;
-string GTK_ARDOUR::keybindings_path = ""; /* empty means use builtin default */
+string ARDOUR_COMMAND_LINE::session_name = "";
+string ARDOUR_COMMAND_LINE::jack_client_name = "ardour";
+bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
+bool ARDOUR_COMMAND_LINE::no_splash = true;
+bool ARDOUR_COMMAND_LINE::just_version = false;
+bool ARDOUR_COMMAND_LINE::use_vst = true;
+bool ARDOUR_COMMAND_LINE::new_session = false;
+char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
+bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
+string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
+Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 
-using namespace GTK_ARDOUR;
+using namespace ARDOUR_COMMAND_LINE;
 
 int
 print_help (const char *execname)
@@ -49,9 +50,10 @@ print_help (const char *execname)
 	     << _("  -b, --bindings                   Print all possible keyboard binding names\n")
 	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -c, --name  name                 Use a specific jack client name, default is ardour\n")
+	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")                       
 	     << _("  -N, --new session-name           Create a new session from the command line\n")                       
 	     << _("  -O, --no-hw-optimizations        Disable h/w specific optimizations\n")
-	     << _("  -S, --sync	                   Draw the gui synchronously \n")
+	     << _("  -S, --sync	                      Draw the gui synchronously \n")
 #ifdef VST_SUPPORT
 	     << _("  -V, --novst                      Do not use VST support\n")
 #endif
@@ -64,11 +66,15 @@ print_help (const char *execname)
 }
 
 int
-GTK_ARDOUR::parse_opts (int argc, char *argv[])
+ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 {
-	const char *optstring = "U:hSbvVnOc:C:N:k:";
+	const char *optstring = "U:hSbvVnOc:C:m:N:k:";
 	const char *execname = strrchr (argv[0], '/');
+
+	if (getenv ("ARDOUR_SAE")) {
+		menus_file = "ardour-sae.menus";
+	}
 
 	if (execname == 0) {
 		execname = argv[0];
@@ -81,11 +87,12 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 		{ "help", 0, 0, 'h' },
 		{ "bindings", 0, 0, 'b' },
 		{ "show-splash", 0, 0, 'n' },
+		{ "menus", 1, 0, 'm' },
 		{ "name", 1, 0, 'c' },
 		{ "novst", 0, 0, 'V' },
 		{ "new", 1, 0, 'N' },
 		{ "no-hw-optimizations", 0, 0, 'O' },
-		{ "sync", 0, 0, 'O' },
+		{ "sync", 0, 0, 'S' },
 		{ "curvetest", 1, 0, 'C' },
 		{ 0, 0, 0, 0 }
 	};
@@ -116,6 +123,11 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 			show_key_actions = true;
 			break;
 
+ 
+                case 'm':
+                        menus_file = optarg;
+                        break;
+
 		case 'n':
 			no_splash = false;
 			break;
@@ -133,6 +145,11 @@ GTK_ARDOUR::parse_opts (int argc, char *argv[])
 			try_hw_optimization = false;
 			break;
 
+
+		case 'p':
+			//undocumented OS X finder -psn_XXXXX argument
+			break;
+ 		
 		case 'V':
 #ifdef VST_SUPPORT
 			use_vst = false;

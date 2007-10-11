@@ -4,17 +4,17 @@
 
 style "very_small_text"
 {
- 	font_name = "%FONT_SMALL%"
+ 	font_name = "%FONT_SMALLER%"
 }
 
 style "small_text"
 {
- 	font_name = "%FONT_NORMAL%"
+ 	font_name = "%FONT_SMALL%"
 }
 
 style "small_bold_text"
 {
- 	font_name = "%FONT_BOLD_NORMAL%"
+ 	font_name = "%FONT_BOLD_SMALL%"
 }
 
 style "medium_bold_text"
@@ -162,7 +162,7 @@ style "default_buttons_menus"
 
 style "very_small_button" = "default_buttons_menus"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	ythickness = 0
 	xthickness = 0
 }
@@ -223,21 +223,21 @@ style "track_rec_enable_button_alternate" = "small_button"
 
 style "mixer_track_rec_enable_button" = "track_rec_enable_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_alternate" = "track_rec_enable_button_alternate"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -275,20 +275,20 @@ style "solo_button_active" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_solo_button_alternate" = "solo_button_alternate"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 style "mixer_solo_button_active" = "solo_button_active"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -326,21 +326,21 @@ style "mute_button_active" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_alternate" = "mute_button_alternate"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_active" = "mute_button_active"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -354,7 +354,7 @@ style "multiline_combo" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLERER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -457,7 +457,7 @@ style "ardour_progressbars" = "default_buttons_menus"
   bg[PRELIGHT] = { 0.00, 0.36, 0.40 }
 }
 
-style "options_window"  = "default_base"
+style "preferences"  = "default_base"
 {
 	font_name = "%FONT_NORMAL%"
 	fg[PRELIGHT] = { 0.80, 0.80, 0.80 }
@@ -672,7 +672,7 @@ style "transport_clock_display_delta" = "transport_clock_display"
 
 style "tempo_meter_clock_display"
 {
-	font_name = "%FONT_SMALL%"
+	font_name = "%FONT_SMALLER%"
 	fg[NORMAL] = { 1.0, 1.0, 1.0 }
 	fg[ACTIVE] = { 1.0, 1.0, 0.0 }
 	fg[SELECTED] = { 1.0, 0, 0 }
@@ -735,6 +735,38 @@ style "midi_track_base" = "default_base"
   bg[PRELIGHT] = { 0.70, 0.70, 0.80 }
   bg[INSENSITIVE] = { 0.70, 0.70, 0.80 }
   bg[SELECTED] = { 0.70, 0.70, 0.80 } 
+}
+
+style "track_controls_inactive" 
+{
+	bg[NORMAL] =      { 0.60, 0.60, 0.66 }
+	bg[ACTIVE] =      { 0.60, 0.60, 0.66 }
+	bg[INSENSITIVE] = { 0.60, 0.60, 0.66 }
+	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
+	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
+
+	#font_name = "sans 18"
+	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+}
+
+style "audio_track_metrics" = "audio_track_base"
+{
+	font_name = "%FONT_TINY%"
+}
+
+style "audio_bus_metrics" = "audio_bus_base"
+{
+	font_name = "%FONT_TINY%"
+}
+
+style "audio_track_metrics_inactive" = "track_controls_inactive"
+{
+	font_name = "%FONT_TINY%"
+}
+
+style "audio_bus_metrics_inactive" = "track_controls_inactive"
+{
+	font_name = "%FONT_TINY%"
 }
 
 style "track_name_display"
@@ -1102,15 +1134,9 @@ style "tearoff_arrow" = "medium_bold_entry"
 	bg[PRELIGHT] = { 0.30, 0.30, 0.30 }
 }
 
-style "meter_metrics_strip" = "default_base"
-{
-	font_name = "%FONT_TINY%"
-	fg[NORMAL] = { 1.0, 0.8, 0.2 }
-}
-
 style "location_row_button" = "default_buttons_menus"
 {
-	font_name = "%FONT_BIG%"
+	font_name = "%FONT_SMALL%"
 }
 
 style "location_rows_clock" = "default_clock_display"
@@ -1213,15 +1239,15 @@ widget "*MixerMonitorInputButton.*" style:highest "very_small_button"
 widget "*MixerIOButton" style:highest "very_small_button"
 widget "*MixerIOButtonLabel" style:highest "very_small_button"
 widget "*AddRouteDialogSpinner" style:highest "ardour_adjusters"
-widget "*AddRouteDialogRadioButton*" style:highest "options_window"
-widget "*OptionsNotebook" style:highest "options_window"
-widget "*OptionEditorToggleButton*" style:highest "options_window"
-widget "*OptionsLabel" style:highest "options_window"
-widget "*OptionEditorAuditionerLabel" style:highest "options_window"
+widget "*AddRouteDialogRadioButton*" style:highest "preferences"
+widget "*OptionsNotebook" style:highest "preferences"
+widget "*OptionEditorToggleButton*" style:highest "preferences"
+widget "*OptionsLabel" style:highest "preferences"
+widget "*OptionEditorAuditionerLabel" style:highest "preferences"
 widget "*OptionsEntry" style:highest "option_entry"
-widget "*InspectorNotebook" style:highest "options_window"
-widget "*NewSessionDialog" style:highest "options_window"
-widget "*NewSessionDialogButton*" style:highest "options_window"
+widget "*InspectorNotebook" style:highest "preferences"
+widget "*NewSessionDialog" style:highest "preferences"
+widget "*NewSessionDialogButton*" style:highest "preferences"
 widget "*MixerSendSwitch*" style:highest "very_small_red_active_and_selected_button"
 widget "*OptionEditorToggleButton" style:highest "small_red_active_and_selected_button"
 widget "*NewSessionDialogButton" style:highest "small_red_active_and_selected_button"
@@ -1325,11 +1351,24 @@ widget "*BBTRuler" style:highest "editor_time_ruler"
 widget "*FramesRuler" style:highest "editor_time_ruler"
 widget "*MinSecRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
-widget "*AudioTrackStripBase*" style:highest "audio_track_base"
+
+widget "*AudioTrackStripBase" style:highest "audio_track_base"
+widget "*AudioBusStripBase" style:highest "audio_bus_base"
+widget "*MidiTrackStripBase" style:highest "midi_track_base"
+widget "*AudioTrackStripBaseInactive" style:highest "track_controls_inactive"
+widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
+widget "*MidiTrackStripBaseInactive" style:highest "track_controls_inactive"
+widget "*FaderMetricsStrip" style:highest "audio_track_metrics"
+widget "*AudioTrackMetrics" style:highest "audio_track_metrics"
+widget "*AudioBusMetrics" style:highest "audio_bus_metrics"
+widget "*AudioTrackMetricsInactive" style:highest "audio_track_metrics_inactive"
+widget "*AudioBusMetricsInactive" style:highest "audio_bus_metrics_inactive"
+
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
 widget "*AudioTrackControlsBaseUnselected" style:highest "audio_track_base"
+widget "*MidiTrackControlsBaseUnselected" style:highest "midi_track_base"
 widget "*AudioTrackFader" style:highest "gain_fader"
-widget "*AudioBusStripBase" style:highest "audio_bus_base"
+
 widget "*BusControlsBaseUnselected" style:highest "audio_bus_base"
 widget "*AudioBusFader" style:highest "gain_fader"
 widget "*TrackSeparator" style:highest "track_separator"
@@ -1361,9 +1400,8 @@ widget "*AutomationTrackName" style:highest "automation_track_name"
 widget "*AudioTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*BusControlsBaseInactiveSelected" style:highest "track_controls_inactive"
 widget "*AutomationTrackControlsBaseInactiveSelected" style:highest "track_controls_inactive"
-widget "*AudioTrackStripBaseInactive" style:highest "track_controls_inactive"
-widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
 widget "*AudioTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
+widget "*MidiTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
@@ -1458,8 +1496,7 @@ widget "*PluginSaveButton" style:highest "small_button"
 widget "*PluginSaveButton*" style:highest "small_button"
 widget "*PluginLoadButton" style:highest "small_button"
 widget "*PluginLoadButton*" style:highest "small_button"
-widget "*FaderMetricsStrip" style:highest "meter_metrics_strip"
-widget "*MeterMetricsStrip" style:highest "meter_metrics_strip"
+
 widget "*MetricDialogFrame" style:highest "base_frame"
 widget "*MetricEntry" style:highest "medium_bold_entry"
 widget "*MetricButton" style:highest "default_buttons_menus"

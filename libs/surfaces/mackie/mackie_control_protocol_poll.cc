@@ -9,7 +9,6 @@
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <midi++/manager.h>
-#include <midi++/port_request.h>
 #include "i18n.h"
 
 #include <unistd.h>

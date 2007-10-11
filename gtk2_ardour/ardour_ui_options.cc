@@ -82,6 +82,13 @@ ARDOUR_UI::toggle_denormal_protection ()
 }
 
 void
+ARDOUR_UI::toggle_only_copy_imported_files ()
+{
+	ActionManager::toggle_config_state ("options", "OnlyCopyImportedFiles", &Configuration::set_only_copy_imported_files, &Configuration::get_only_copy_imported_files);
+}
+
+
+void
 ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 {
 	const char *action = 0;
@@ -459,6 +466,12 @@ ARDOUR_UI::toggle_StopRecordingOnXrun()
 }
 
 void
+ARDOUR_UI::toggle_sync_order_keys ()
+{
+	ActionManager::toggle_config_state ("options", "SyncEditorAndMixerTrackOrder", &Configuration::set_sync_all_route_ordering, &Configuration::get_sync_all_route_ordering);
+}
+
+void
 ARDOUR_UI::toggle_StopTransportAtEndOfSession()
 {
 	ActionManager::toggle_config_state ("options", "StopTransportAtEndOfSession", &Configuration::set_stop_at_session_end, &Configuration::get_stop_at_session_end);
@@ -572,6 +585,19 @@ ARDOUR_UI::map_monitor_model ()
 
 		if (tact && !tact->get_active()) {
 			tact->set_active (true);
+		}
+	}
+}
+
+void
+ARDOUR_UI::map_denormal_protection ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", X_("DenormalProtection"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (Config->get_denormal_protection());
 		}
 	}
 }
@@ -760,6 +786,21 @@ ARDOUR_UI::map_output_auto_connect ()
 		}
 	}
 }
+
+void
+ARDOUR_UI::map_only_copy_imported_files ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("options", X_("OnlyCopyImportedFiles"));
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact && !tact->get_active()) {
+			tact->set_active (Config->get_only_copy_imported_files());
+		}
+	}
+
+}
+
 
 void
 ARDOUR_UI::map_meter_falloff ()
@@ -995,12 +1036,16 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "PeriodicSafetyBackups", &Configuration::get_periodic_safety_backups);
 	} else if (PARAM_IS ("stop-recording-on-xrun")) {
 		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun);
+	} else if (PARAM_IS ("sync-all-route-ordering")) {
+		ActionManager::map_some_state ("options",  "SyncEditorAndMixerTrackOrder", &Configuration::get_sync_all_route_ordering);
 	} else if (PARAM_IS ("stop-at-session-end")) {
 		ActionManager::map_some_state ("options",  "StopTransportAtEndOfSession", &Configuration::get_stop_at_session_end);
 	} else if (PARAM_IS ("monitoring-model")) {
 		map_monitor_model ();
 	} else if (PARAM_IS ("denormal-model")) {
 		map_denormal_model ();
+	} else if (PARAM_IS ("denormal-protection")) {
+		map_denormal_protection ();
 	} else if (PARAM_IS ("remote-model")) {
 		map_remote_model ();
 	} else if (PARAM_IS ("use-video-sync")) {
@@ -1062,8 +1107,9 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "PrimaryClockDeltaEditCursor", &Configuration::get_primary_clock_delta_edit_cursor);
 	} else if (PARAM_IS ("secondary-clock-delta-edit-cursor")) {
 		ActionManager::map_some_state ("options",  "SecondaryClockDeltaEditCursor", &Configuration::get_secondary_clock_delta_edit_cursor);
-	} 
-			   
+	} else if (PARAM_IS ("only-copy-imported-files")) {
+		map_only_copy_imported_files ();
+	}
 
 #undef PARAM_IS
 }

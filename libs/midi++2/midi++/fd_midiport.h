@@ -29,7 +29,6 @@
 #include <unistd.h>
 
 #include <midi++/port.h>
-#include <midi++/port_request.h>
 
 namespace MIDI {
 
@@ -37,7 +36,7 @@ class FD_MidiPort : public Port
 
 {
   public:
-	FD_MidiPort (PortRequest &req, 
+	FD_MidiPort (const XMLNode& node,
 		     const std::string &dirpath,
 		     const std::string &pattern);
 
@@ -46,23 +45,14 @@ class FD_MidiPort : public Port
 	}
 
 	virtual int selectable() const;
+
 	static std::vector<std::string *> *list_devices ();
-
-	static std::string typestring;
-
-  protected:
-	std::string get_typestring () const {
-		return typestring;
-	}
 
   protected:
 	int _fd;
-	virtual void open (PortRequest &req);
+	virtual void open (const Port::Descriptor&);
 
-	/* Direct I/O */
-	
-	virtual int write (byte *msg, size_t msglen,
-	                   timestamp_t timestamp) {
+	virtual int write (byte *msg, size_t msglen, timestamp_t ignored) {
 		int nwritten;
 		
 		if ((_mode & O_ACCMODE) == O_RDONLY) {
@@ -89,8 +79,7 @@ class FD_MidiPort : public Port
 		return nwritten;
 	}
 
-	virtual int read (byte *buf, size_t max,
-	                  timestamp_t timestamp);
+	virtual int read (byte *buf, size_t max, timestamp_t ignored);
 
   private:
 	static std::string *midi_dirpath;

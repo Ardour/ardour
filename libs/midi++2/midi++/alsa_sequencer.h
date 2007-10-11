@@ -30,39 +30,45 @@
 
 namespace MIDI {
 
-class PortRequest;
-
 class ALSA_SequencerMidiPort : public Port
+
 {
   public:
-	ALSA_SequencerMidiPort (PortRequest &req);
+	ALSA_SequencerMidiPort (const XMLNode&);
 	virtual ~ALSA_SequencerMidiPort ();
 
 	/* select(2)/poll(2)-based I/O */
 
 	virtual int selectable() const;
-
+	
+	static int discover (std::vector<PortSet>&);
 	static std::string typestring;
 
-  protected:
-	std::string get_typestring () const {
-		return typestring;
-	}
+	XMLNode& get_state() const;
+	void set_state (const XMLNode&);
 
   protected:
 	/* Direct I/O */
+	
 	int write (byte *msg, size_t msglen, timestamp_t timestamp);	
 	int read (byte *buf, size_t max, timestamp_t timestamp);
+
+	std::string get_typestring () const {
+		return typestring;
+	}
 
   private:
 	snd_midi_event_t *decoder, *encoder;
 	int port_id;
 	snd_seq_event_t SEv;
 
-	int CreatePorts(PortRequest &req);
+	int create_ports (const Port::Descriptor&);
 
 	static int init_client (std::string name);
 	static snd_seq_t* seq;
+
+	typedef std::pair<int,int> SequencerPortAddress;
+	void get_connections (std::vector<SequencerPortAddress>&, int dir) const;
 };
 
 }; /* namespace MIDI */
