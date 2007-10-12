@@ -91,7 +91,7 @@ style "default_base" = "medium_text"
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
   GtkTreeView::even-row-color = { 0, 0, 0 }
-  GtkTreeView::odd-row-color = { 0.06, 0.06, 0.10 }
+  GtkTreeView::odd-row-color = {  0.10, 0.10, 0.15 }
   
   fg[NORMAL] = { 0.80, 0.80, 0.80 }	
   fg[ACTIVE] = { 0.80, 0.80, 0.80 }	

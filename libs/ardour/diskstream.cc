@@ -108,6 +108,7 @@ Diskstream::init (Flag f)
 	speed_buffer_size = 0;
 	last_phase = 0;
 	phi = (uint64_t) (0x1000000);
+	target_phi = phi;
 	file_frame = 0;
 	playback_sample = 0;
 	playback_distance = 0;
@@ -189,7 +190,7 @@ Diskstream::realtime_set_speed (double sp, bool global)
 		}
 		
 		_actual_speed = new_speed;
-		phi = (uint64_t) (0x1000000 * fabs(_actual_speed));
+		target_phi = (uint64_t) (0x1000000 * fabs(_actual_speed));
 	}
 
 	if (changed) {
