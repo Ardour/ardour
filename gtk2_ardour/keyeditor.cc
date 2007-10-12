@@ -72,6 +72,7 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 {
 	can_bind = true;
 	last_state = ev->state;
+	return false;
 }
 
 bool
