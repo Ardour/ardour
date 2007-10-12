@@ -46,7 +46,7 @@ class SourceFactory {
 	static boost::shared_ptr<Source> createReadable (DataType type, Session&, std::string path, int chn, AudioFileSource::Flag flags,
 							 bool announce = true, bool async = false);
 	static boost::shared_ptr<Source> createWritable (DataType type, Session&, std::string name, bool destructive, nframes_t rate, 
-							 bool announce = true, bool async = true);
+							 bool announce = true, bool async = false);
 
 	static Glib::Cond*                              PeaksToBuild;
 	static Glib::StaticMutex                        peak_building_lock;
