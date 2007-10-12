@@ -27,6 +27,8 @@
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/accelkey.h>
 
+#include <ardour/configuration.h>
+
 namespace Gtk {
 	class UIManager;
 }

@@ -49,7 +49,7 @@ split (string str, vector<string>& result, char splitchar)
 
 	remaining = str;
 
-	while ((pos = remaining.find_first_of (':')) != string::npos) {
+	while ((pos = remaining.find_first_of (splitchar)) != string::npos) {
 		result.push_back (remaining.substr (0, pos));
 		remaining = remaining.substr (pos+1);
 	}
@@ -87,7 +87,7 @@ split (ustring str, vector<ustring>& result, char splitchar)
 
 	remaining = str;
 
-	while ((pos = remaining.find_first_of (':')) != ustring::npos) {
+	while ((pos = remaining.find_first_of (splitchar)) != ustring::npos) {
 		result.push_back (remaining.substr (0, pos));
 		remaining = remaining.substr (pos+1);
 	}

@@ -167,6 +167,7 @@ gtk-custom-hruler.c
 gtk-custom-ruler.c
 io_selector.cc
 keyboard.cc
+keyeditor.cc
 ladspa_pluginui.cc
 latency_gui.cc
 location_ui.cc

@@ -78,8 +78,6 @@ ARDOUR_UI::setup_windows ()
 
 	theme_manager->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
 
- 	top_packer.pack_start (transport_frame, false, false);
-
 #ifdef TOP_MENUBAR
 	HBox* status_bar_packer = manage (new HBox);
 	
@@ -94,6 +92,8 @@ ARDOUR_UI::setup_windows ()
 #else
  	top_packer.pack_start (menu_bar_base, false, false);
 #endif 
+
+ 	top_packer.pack_start (transport_frame, false, false);
 
 	editor->add_toplevel_controls (top_packer);
 

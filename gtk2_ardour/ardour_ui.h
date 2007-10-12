@@ -69,6 +69,7 @@ class AudioClock;
 class PublicEditor;
 class Keyboard;
 class OptionEditor;
+class KeyEditor;
 class Mixer_UI;
 class ConnectionEditor;
 class RouteParams_UI;
@@ -154,6 +155,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 	
+	void toggle_key_editor ();
 	void toggle_location_window ();
 	void toggle_theme_manager ();
 	void toggle_big_clock_window ();
@@ -619,6 +621,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	static UIConfiguration *ui_config;
 	ThemeManager *theme_manager;
+
+	/* Key bindings editor */
+
+	KeyEditor *key_editor;
 
 	/* Options window */
 	

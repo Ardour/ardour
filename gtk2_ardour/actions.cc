@@ -153,19 +153,28 @@ ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 void
 ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
 {
-	ListHandle<RefPtr<ActionGroup> > uim_groups = ui_manager->get_action_groups ();
-	
-	for (ListHandle<RefPtr<ActionGroup> >::iterator g = uim_groups.begin(); g != uim_groups.end(); ++g) {
-		
-		ListHandle<RefPtr<Action> > group_actions = (*g)->get_actions();
-		
-		for (ListHandle<RefPtr<Action> >::iterator a = group_actions.begin(); a != group_actions.end(); ++a) {
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
+	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
+	GList* node;
+	GList* acts;
+
+	for (node = list; node; node = g_list_next (node)) {
+
+		GtkActionGroup* group = (GtkActionGroup*) node->data;
+
+		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
+
+			GtkAction* action = (GtkAction*) acts->data;
+
+			Glib::RefPtr<Action> act = Glib::wrap (action, true);
+
+			string accel_path = act->get_accel_path ();
+			ustring label = act->property_label();
 			
-			ustring accel_path;
-			
-			accel_path = (*a)->get_accel_path();
-			
-			names.push_back ((*a)->get_name());
+			names.push_back (label);
 			paths.push_back (accel_path);
 			
 			AccelKey key;

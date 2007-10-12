@@ -233,6 +233,7 @@
                <menuitem action='ToggleOptionsEditor'/>
                <menuitem action='ToggleInspector'/>
                <menuitem action='ToggleLocations'/>
+               <menuitem action='ToggleKeyEditor'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
    	       <separator/>
