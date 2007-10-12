@@ -33,15 +33,38 @@ namespace ARDOUR {
 	class PortInsert;
 }
 
+struct PortGroup
+{
+	PortGroup (std::string const & n, std::string const & p) : name (n), prefix (p) {}
+
+	std::string name;
+	std::string prefix;
+	std::vector<std::string> ports;
+};
+
+class GroupedPortList : public std::list<PortGroup>
+{
+  public:
+	GroupedPortList (ARDOUR::Session &, boost::shared_ptr<ARDOUR::IO>, bool);
+
+	void refresh ();
+	int n_ports () const;
+	std::string get_port_by_index (int, bool with_prefix = true) const;
+
+  private:
+	ARDOUR::Session& _session;
+	boost::shared_ptr<ARDOUR::IO> _io;
+	bool _for_input;
+};
+
+
+/// A widget which provides a set of rotated text labels
 class RotatedLabelSet : public Gtk::Widget {
   public:
-	RotatedLabelSet ();
+	RotatedLabelSet (GroupedPortList&);
 	virtual ~RotatedLabelSet ();
 
 	void set_angle (int);
-	void set_n_labels (int);
-	void set_label (int, std::string const &);
-	std::string get_label (int) const;
 	void set_base_dimensions (int, int);
 
   protected:
@@ -55,8 +78,8 @@ class RotatedLabelSet : public Gtk::Widget {
 
   private:
 	std::pair<int, int> setup_layout (std::string const &);
-	
-	std::vector<std::string> _labels; ///< text for our labels
+
+	GroupedPortList& _port_list; ///< list of ports to display
 	int _angle_degrees; ///< label rotation angle in degrees
 	double _angle_radians; ///< label rotation angle in radians
 	int _base_start; ///< offset to start of labels; see set_base_dimensions() for more details
@@ -68,6 +91,9 @@ class RotatedLabelSet : public Gtk::Widget {
 	Gdk::Color _bg_colour;
 };
 
+
+
+/// Widget for selecting what an IO is connected to
 class IOSelector : public Gtk::VBox {
   public:
 	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
@@ -86,9 +112,8 @@ class IOSelector : public Gtk::VBox {
 	ARDOUR::Session& _session;
 
   private:
-	void setup_table_size ();
+	void setup_table ();
 	void setup_row_labels ();
-	void setup_column_labels ();
 	void setup_check_button_states ();
 	void check_button_toggled (int, int);
 	void add_port_button_clicked ();
@@ -96,12 +121,14 @@ class IOSelector : public Gtk::VBox {
 	void set_button_sensitivity ();
 	void ports_changed (ARDOUR::IOChange, void *);
 	void update_column_label_dimensions ();
-	
+
+	GroupedPortList _port_list;
 	boost::shared_ptr<ARDOUR::IO> _io;
 	bool _for_input;
 	int _width;
 	int _height;
 	std::vector<Gtk::Label*> _row_labels;
+	std::vector<Gtk::EventBox*> _group_labels;
 	RotatedLabelSet _column_labels;
 	std::vector<std::vector<Gtk::CheckButton*> > _check_buttons;
 	bool _ignore_check_button_toggle; ///< check button toggle events are ignored when this is true
@@ -111,7 +138,6 @@ class IOSelector : public Gtk::VBox {
 	Gtk::HBox _table_hbox;
 	Gtk::Label _dummy;
 	bool _add_remove_box_added;
-
 	Gtk::Table _table;
 };
 

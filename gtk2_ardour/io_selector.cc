@@ -28,13 +28,14 @@
 #include "ardour/session.h"
 #include "ardour/io.h"
 #include "ardour/audioengine.h"
+#include "ardour/track.h"
 #include "io_selector.h"
 #include "utils.h"
 #include "gui_thread.h"
 #include "i18n.h"
 
-RotatedLabelSet::RotatedLabelSet ()
-	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _base_start (64), _base_width (128)
+RotatedLabelSet::RotatedLabelSet (GroupedPortList& g)
+	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _port_list (g), _base_start (64), _base_width (128)
 {
 	set_flags (Gtk::NO_WINDOW);
 	set_angle (30);
@@ -44,6 +45,11 @@ RotatedLabelSet::~RotatedLabelSet ()
 {
 	
 }
+
+
+/** Set the angle that the labels are drawn at.
+ * @param degrees New angle in degrees.
+ */
 
 void
 RotatedLabelSet::set_angle (int degrees)
@@ -65,17 +71,20 @@ RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
 
 	/* Our height is the highest label */
 	requisition->height = 0;
-	for (std::vector<std::string>::const_iterator i = _labels.begin(); i != _labels.end(); ++i) {
-		std::pair<int, int> const d = setup_layout (*i);
-		if (d.second > requisition->height) {
-			requisition->height = d.second;
+	for (GroupedPortList::const_iterator i = _port_list.begin(); i != _port_list.end(); ++i) {
+		for (std::vector<std::string>::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+			std::pair<int, int> const d = setup_layout (*j);
+			if (d.second > requisition->height) {
+				requisition->height = d.second;
+			}
 		}
 	}
 
 	/* And our width is the base plus the width of the last label */
 	requisition->width = _base_start + _base_width;
-	if (_labels.empty() == false) {
-		std::pair<int, int> const d = setup_layout (_labels.back());
+	int const n = _port_list.n_ports ();
+	if (n > 0) {
+		std::pair<int, int> const d = setup_layout (_port_list.get_port_by_index (n - 1, false));
 		requisition->width += d.first;
 	}
 }
@@ -169,42 +178,27 @@ RotatedLabelSet::setup_layout (std::string const & s)
 	return d;
 }
 
-bool RotatedLabelSet::on_expose_event (GdkEventExpose* event)
+bool
+RotatedLabelSet::on_expose_event (GdkEventExpose* event)
 {
 	if (!_gdk_window) {
 		return true;
 	}
 
 	int const height = get_allocation().get_height ();
-	double const spacing = double (_base_width) / _labels.size();
+	double const spacing = double (_base_width) / _port_list.n_ports();
 
 	/* Plot all the labels; really we should clip for efficiency */
-	for (uint32_t i = 0; i < _labels.size(); ++i) {
-		std::pair<int, int> const d = setup_layout (_labels[i]);
-		get_window()->draw_layout (_gc, _base_start + int ((i + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
+	int n = 0;
+	for (GroupedPortList::const_iterator i = _port_list.begin(); i != _port_list.end(); ++i) {
+		for (uint32_t j = 0; j < i->ports.size(); ++j) {
+			std::pair<int, int> const d = setup_layout (i->ports[j]);
+			get_window()->draw_layout (_gc, _base_start + int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
+			++n;
+		}
 	}
 
 	return true;
-}
-
-void
-RotatedLabelSet::set_n_labels (int n)
-{
-	_labels.resize (n);
-	queue_resize ();
-}
-
-void
-RotatedLabelSet::set_label (int n, std::string const & l)
-{
-	_labels[n] = l;
-	queue_resize ();
-}
-
-std::string
-RotatedLabelSet::get_label (int n) const
-{
-	return _labels[n];
 }
 
 /**
@@ -238,7 +232,8 @@ RotatedLabelSet::set_base_dimensions (int s, int w)
  */
  
 IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
-	: _session (session), _io (io), _for_input (for_input), _width (0), _height (0),
+	: _session (session), _port_list (session, io, for_input), _io (io), _for_input (for_input),
+	  _width (0), _height (0), _column_labels (_port_list),
 	  _ignore_check_button_toggle (false), _add_remove_box_added (false)
 {
 	/* Column labels */
@@ -257,9 +252,9 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 
 	/* Table.  We need to put in a HBox, with a dummy label to its right,
 	   so that the rotated column labels can overhang the right hand side of the table. */
-	setup_table_size ();
+
+	setup_table ();
 	setup_row_labels ();
-	setup_column_labels ();
 	setup_check_button_states ();
 	_table_hbox.pack_start (_table, false, false);
 	_table_hbox.pack_start (_dummy);
@@ -313,26 +308,23 @@ IOSelector::update_column_label_dimensions ()
 }
 
 void
-IOSelector::setup_table_size ()
+IOSelector::setup_table ()
 {
 	if (_add_remove_box_added) {
 		_table.remove (_add_remove_box);
 	}
+
+	for (std::vector<Gtk::EventBox*>::iterator i = _group_labels.begin(); i != _group_labels.end(); ++i) {
+		_table.remove (**i);
+		delete *i;
+	}
+
+	_group_labels.clear ();
 	
 	/* New width */
 	
 	int const old_width = _width;
-	_width = 0;
-	
-	const char **ports = _session.engine().get_ports (
-		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
-		);
-
-	if (ports) {
-		while (ports[_width]) {
-			++_width;
-		}
-	}
+	_width = _port_list.n_ports ();
 
 	/* New height */
 
@@ -348,7 +340,7 @@ IOSelector::setup_table_size ()
 
 	_table.resize (_width + 1, _height + 1);
 
-	/* Add checkboxes where required, and remove those that aren't */
+	/* Add checkbuttons where required, and remove those that aren't */
 	for (int x = _width; x < old_width; ++x) {
 		for (int y = 0; y < old_height; ++y) {
 			delete _check_buttons[x][y];
@@ -390,6 +382,29 @@ IOSelector::setup_table_size ()
 	_table.attach (_add_remove_box, 0, 1, _height, _height + 1);
 	_add_remove_box_added = true;
 
+	/* Add group labels */
+	int n = 1;
+	int m = 0;
+
+	/* XXX: this is a bit of a hack; should probably use a configurable colour here */
+	Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
+	alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
+	for (GroupedPortList::iterator i = _port_list.begin(); i != _port_list.end(); ++i) {
+		if (i->ports.empty() == false) {
+			Gtk::Label* label = new Gtk::Label ("<b>" + i->name + "</b>");
+			label->set_use_markup (true);
+			Gtk::EventBox* box = new Gtk::EventBox ();
+			box->add (*Gtk::manage (label));
+			if (m % 2 == 0) {
+				box->modify_bg (Gtk::STATE_NORMAL, alt_bg);
+			}
+			_group_labels.push_back (box);
+			_table.attach (*box, n, n + i->ports.size(), _height, _height + 1);
+			n += i->ports.size();
+			++m;
+		}
+	}
+
 	show_all ();
 }
 
@@ -403,34 +418,6 @@ IOSelector::setup_row_labels ()
 {
 	for (int y = 0; y < _height; y++) {
 		_row_labels[y]->set_text (_for_input ? _io->input(y)->name() : _io->output(y)->name());
-	}
-}
-
-/**
- *  Write the correct text to the column labels.
- */
-
-void
-IOSelector::setup_column_labels ()
-{
-	/* Find the ports that we can connect to */
-	const char **ports = _session.engine().get_ports (
-		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
-		);
-
-	if (ports == 0) {
-		return;
-	}
-
-	int n = 0;
-	while (ports[n]) {
-		++n;
-	}
-			
-	_column_labels.set_n_labels (n);
-
-	for (int i = 0; i < n; ++i) {
-		_column_labels.set_label (i, ports[i]);
 	}
 }
 
@@ -449,7 +436,7 @@ IOSelector::setup_check_button_states ()
 		const char **connections = _for_input ? _io->input(i)->get_connections() : _io->output(i)->get_connections();
 		for (int j = 0; j < _width; ++j) {
 
-			std::string const t = _column_labels.get_label (j);
+			std::string const t = _port_list.get_port_by_index (j);
 			int k = 0;
 			bool required_state = false;
 
@@ -481,7 +468,7 @@ IOSelector::check_button_toggled (int x, int y)
 	}
 	
 	bool const new_state = _check_buttons[x][y]->get_active ();
-	std::string const port = _column_labels.get_label (x);
+	std::string const port = _port_list.get_port_by_index (x);
 
 	if (new_state) {
 		if (_for_input) {
@@ -599,13 +586,123 @@ IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
 void
 IOSelector::redisplay ()
 {
-	setup_table_size ();
-	setup_column_labels ();
+	_port_list.refresh ();
+	setup_table ();
 	setup_row_labels ();
 	setup_check_button_states ();
 	update_column_label_dimensions ();
 }
 
+
+
+
+GroupedPortList::GroupedPortList (ARDOUR::Session & session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
+	: _session (session), _io (io), _for_input (for_input)
+{
+	refresh ();
+}
+
+void
+GroupedPortList::refresh ()
+{
+	clear ();
+
+	/* Find the ports provided by ardour; we can't derive their type just from their
+	   names, so we'll have to be more devious. */
+
+	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
+
+	PortGroup buss (_("Buss"), "ardour:");
+	PortGroup track (_("Track"), "ardour:");
+
+	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+
+		PortGroup& g = dynamic_cast<ARDOUR::Track*> ((*i).get()) == 0 ? buss : track;
+		
+		ARDOUR::PortSet const & p = _for_input ? ((*i)->outputs()) : ((*i)->inputs());
+		for (uint32_t j = 0; j < p.num_ports(); ++j) {
+			std::string const n = p.port(j)->name ();
+			g.ports.push_back (n.substr(strlen ("ardour:")));
+		}
+
+		std::sort (g.ports.begin(), g.ports.end());
+	}
+	
+
+	/* XXX: inserts, sends, plugin inserts? */
+	
+	/* Now we need to find the non-ardour ports; we do this by first
+	   finding all the ports that we can connect to. */
+	const char **ports = _session.engine().get_ports (
+		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
+		);
+
+	PortGroup system (_("System"), "system:");
+	PortGroup other (_("Other"), "");
+	
+	if (ports) {
+
+		/* Count them */
+		int n = 0;
+		while (ports[n]) {
+			++n;
+		}
+		
+		for (int i = 0; i < n; ++i) {
+			std::string const p = ports[i];
+
+			if (p.substr(0, strlen ("system:")) == "system:") {
+				/* system: prefix */
+				system.ports.push_back (p.substr (strlen ("system:")));
+			} else {
+				if (p.substr(0, strlen("ardour:")) != "ardour:") {
+					/* other (non-ardour) prefix */
+					other.ports.push_back (p);
+				}
+			}
+		}
+	}
+
+	push_back (buss);
+	push_back (track);
+	push_back (system);
+	push_back (other);
+}
+
+int
+GroupedPortList::n_ports () const
+{
+	int n = 0;
+	
+	for (const_iterator i = begin(); i != end(); ++i) {
+		for (std::vector<std::string>::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+			++n;
+		}
+	}
+
+	return n;
+}
+
+std::string
+GroupedPortList::get_port_by_index (int n, bool with_prefix) const
+{
+	/* XXX: slightly inefficient algorithm */
+
+	for (const_iterator i = begin(); i != end(); ++i) {
+		for (std::vector<std::string>::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+			if (n == 0) {
+				if (with_prefix) {
+					return i->prefix + *j;
+				} else {
+					return *j;
+				}
+			}
+			--n;
+		}
+	}
+
+	return "";
+}
 
 
 IOSelectorWindow::IOSelectorWindow (
