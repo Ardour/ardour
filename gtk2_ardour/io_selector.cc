@@ -29,10 +29,23 @@
 #include "ardour/io.h"
 #include "ardour/audioengine.h"
 #include "ardour/track.h"
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
+#include "ardour/data_type.h"
 #include "io_selector.h"
 #include "utils.h"
 #include "gui_thread.h"
 #include "i18n.h"
+
+void
+PortGroup::add (std::string const & p)
+{
+	if (prefix.empty() == false && p.substr (0, prefix.length()) == prefix) {
+		ports.push_back (p.substr (prefix.length()));
+	} else {
+		ports.push_back (p);
+	}
+}
 
 RotatedLabelSet::RotatedLabelSet (GroupedPortList& g)
 	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _port_list (g), _base_start (64), _base_width (128)
@@ -617,15 +630,26 @@ GroupedPortList::refresh ()
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
-		PortGroup& g = dynamic_cast<ARDOUR::Track*> ((*i).get()) == 0 ? buss : track;
-		
-		ARDOUR::PortSet const & p = _for_input ? ((*i)->outputs()) : ((*i)->inputs());
-		for (uint32_t j = 0; j < p.num_ports(); ++j) {
-			std::string const n = p.port(j)->name ();
-			g.ports.push_back (n.substr(strlen ("ardour:")));
+		PortGroup* g = 0;
+		if (_io->default_type() == ARDOUR::DataType::AUDIO && dynamic_cast<ARDOUR::AudioTrack*> ((*i).get())) {
+			/* Audio track for an audio IO */
+			g = &track;
+		} else if (_io->default_type() == ARDOUR::DataType::MIDI && dynamic_cast<ARDOUR::MidiTrack*> ((*i).get())) {
+			/* Midi track for a MIDI IO */
+			g = &track;
+		} else if (_io->default_type() == ARDOUR::DataType::AUDIO && dynamic_cast<ARDOUR::MidiTrack*> ((*i).get()) == 0) {
+			/* Non-MIDI track for an Audio IO; must be an audio buss */
+			g = &buss;
 		}
 
-		std::sort (g.ports.begin(), g.ports.end());
+		if (g) {
+			ARDOUR::PortSet const & p = _for_input ? ((*i)->outputs()) : ((*i)->inputs());
+			for (uint32_t j = 0; j < p.num_ports(); ++j) {
+				g->add (p.port(j)->name ());
+			}
+
+			std::sort (g->ports.begin(), g->ports.end());
+		}
 	}
 	
 
@@ -642,24 +666,21 @@ GroupedPortList::refresh ()
 	
 	if (ports) {
 
-		/* Count them */
 		int n = 0;
 		while (ports[n]) {
-			++n;
-		}
-		
-		for (int i = 0; i < n; ++i) {
-			std::string const p = ports[i];
+			std::string const p = ports[n];
 
 			if (p.substr(0, strlen ("system:")) == "system:") {
 				/* system: prefix */
-				system.ports.push_back (p.substr (strlen ("system:")));
+				system.add (p);
 			} else {
 				if (p.substr(0, strlen("ardour:")) != "ardour:") {
 					/* other (non-ardour) prefix */
-					other.ports.push_back (p);
+					other.add (p);
 				}
 			}
+
+			++n;
 		}
 	}
 

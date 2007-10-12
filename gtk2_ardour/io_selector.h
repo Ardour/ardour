@@ -33,9 +33,12 @@ namespace ARDOUR {
 	class PortInsert;
 }
 
-struct PortGroup
+class PortGroup
 {
+  public:
 	PortGroup (std::string const & n, std::string const & p) : name (n), prefix (p) {}
+
+	void add (std::string const & p);
 
 	std::string name;
 	std::string prefix;
