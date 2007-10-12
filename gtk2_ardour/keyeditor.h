@@ -18,6 +18,7 @@ class KeyEditor : public ArdourDialog
   protected:
 	void on_show ();
 	void on_unmap ();
+	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
   private:
@@ -26,16 +27,21 @@ class KeyEditor : public ArdourDialog
 		    add (action);
 		    add (binding);
 		    add (path);
+		    add (bindable);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring> action;
 	    Gtk::TreeModelColumn<std::string> binding;
 	    Gtk::TreeModelColumn<std::string> path;
+	    Gtk::TreeModelColumn<bool> bindable;
 	};
 
 	Gtk::ScrolledWindow scroller;
 	Gtk::TreeView view;
 	Glib::RefPtr<Gtk::TreeStore> model;
 	KeyEditorColumns columns;
+
+	bool can_bind;
+	guint last_state;
 
 	void action_selected ();
 	void populate ();

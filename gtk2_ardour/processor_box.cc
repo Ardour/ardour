@@ -120,6 +120,7 @@ ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, boost::shared_ptr<Ro
 	processor_display.set_size_request (-1, 40);
 	processor_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	processor_display.get_column(0)->set_fixed_width(48);
+	processor_display.set_enable_search (false);
 	processor_display.add_object_drag (columns.processor.index(), "redirects");
 	processor_display.signal_object_drop.connect (mem_fun (*this, &ProcessorBox::object_drop));
 

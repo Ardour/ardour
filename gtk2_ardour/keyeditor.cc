@@ -20,6 +20,9 @@ using namespace Gdk;
 KeyEditor::KeyEditor ()
 	: ArdourDialog (_("Keybinding Editor"), false)
 {
+	can_bind = false;
+	last_state = 0;
+
 	model = TreeStore::create(columns);
 
 	view.set_model (model);
@@ -37,7 +40,9 @@ KeyEditor::KeyEditor ()
 	
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
 	get_vbox()->pack_start (scroller);
+	get_vbox()->set_border_width (12);
 
 	scroller.show ();
 	view.show ();
@@ -63,13 +68,28 @@ KeyEditor::action_selected ()
 }
 
 bool
+KeyEditor::on_key_press_event (GdkEventKey* ev)
+{
+	can_bind = true;
+	last_state = ev->state;
+}
+
+bool
 KeyEditor::on_key_release_event (GdkEventKey* ev)
 {
+	if (!can_bind || ev->state != last_state) {
+		return false;
+	}
+
 	TreeModel::iterator i = view.get_selection()->get_selected();
 
 	if (i != model->children().end()) {
 		string path = (*i)[columns.path];
 		
+		if (!(*i)[columns.bindable]) {
+			goto out;
+		} 
+
 		bool result = AccelMap::change_entry (path,
 						      ev->keyval,
 						      (ModifierType) ev->state,
@@ -91,6 +111,8 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 		
 	}
 
+  out:
+	can_bind = false;
 	return true;
 }
 
@@ -136,6 +158,7 @@ KeyEditor::populate ()
 			nodes[parts[1]] = rowp;
 			parent = *(rowp);
 			parent[columns.action] = parts[1];
+			parent[columns.bindable] = false;
 
 			row = *(model->append (parent.children()));
 
@@ -149,6 +172,7 @@ KeyEditor::populate ()
 
 		row[columns.action] = (*l);
 		row[columns.path] = (*p);
+		row[columns.bindable] = true;
 		
 		if (*k == ActionManager::unbound_string) {
 			row[columns.binding] = string();

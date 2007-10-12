@@ -298,6 +298,10 @@
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
+               <menu action='Plugins'>
+	           <menuitem action='DisableAllPlugins'/>
+                   <menuitem action='ABAllPlugins'/>
+               </menu>
 	       <menu action='Metering'>
                    <menu action='MeteringFallOffRate'>
 		        <menuitem action='MeterFalloffOff'/>
@@ -368,7 +372,7 @@
 	</menu>
      </menubar>
 
-     <popup name='redirectmenu'>
+     <popup name='processormenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
