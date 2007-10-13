@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2003 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,10 @@
 #include <gtkmm/image.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menu_elems.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/menushell.h>
 #include <glibmm/objectbase.h>
 #include <gtkmm2ext/doi.h>
 #include <ardour/port_insert.h>
@@ -37,6 +41,10 @@
 #include "gui_thread.h"
 #include "i18n.h"
 
+/** Add a port to a group.
+ *  @param p Port name, with or without prefix.
+ */
+
 void
 PortGroup::add (std::string const & p)
 {
@@ -47,8 +55,122 @@ PortGroup::add (std::string const & p)
 	}
 }
 
-RotatedLabelSet::RotatedLabelSet (GroupedPortList& g)
-	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _port_list (g), _base_start (64), _base_width (128)
+
+PortGroupTable::PortGroupTable (
+	PortGroup& g, boost::shared_ptr<ARDOUR::IO> io, bool for_input
+	)
+	: _port_group (g), _ignore_check_button_toggle (false),
+	  _io (io), _for_input (for_input)
+{
+	ARDOUR::DataType const t = _io->default_type();
+
+	int rows;
+	if (_for_input) {
+		rows = _io->n_inputs().get(t);
+	} else {
+		rows = _io->n_outputs().get(t);
+	}	
+	
+	int const ports = _port_group.ports.size();
+
+	if (rows == 0 || ports == 0) {
+		return;
+	}
+
+	/* Sort out the table and the checkbuttons inside it */
+	
+	_table.resize (rows, ports);
+	_check_buttons.resize (rows);
+	for (int i = 0; i < rows; ++i) {
+		_check_buttons[i].resize (ports);
+	}
+
+	for (int i = 0; i < rows; ++i) {
+		for (uint32_t j = 0; j < _port_group.ports.size(); ++j) {
+			Gtk::CheckButton* b = new Gtk::CheckButton;
+			b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortGroupTable::check_button_toggled), b, i, _port_group.prefix + _port_group.ports[j]));
+			_check_buttons[i][j] = b;
+			_table.attach (*b, j, j + 1, i, i + 1);
+		}
+	}
+
+	_box.add (_table);
+
+ 	_ignore_check_button_toggle = true;
+
+ 	/* Set the state of the check boxes according to current connections */
+ 	for (int i = 0; i < rows; ++i) {
+ 		const char **connections = _for_input ? _io->input(i)->get_connections() : _io->output(i)->get_connections();
+ 		for (uint32_t j = 0; j < _port_group.ports.size(); ++j) {
+
+ 			std::string const t = _port_group.prefix + _port_group.ports[j];
+ 			int k = 0;
+ 			bool required_state = false;
+
+ 			while (connections && connections[k]) {
+ 				if (std::string(connections[k]) == t) {
+ 					required_state = true;
+ 					break;
+ 				}
+ 				++k;
+ 			}
+
+ 			_check_buttons[i][j]->set_active (required_state);
+ 		}
+ 	}
+
+ 	_ignore_check_button_toggle = false;
+}
+
+/** @return Width and height of a single check button in a port group table */
+std::pair<int, int>
+PortGroupTable::unit_size () const
+{
+	if (_check_buttons.empty() || _check_buttons[0].empty()) {
+		return std::pair<int, int> (0, 0);
+	}
+
+	return std::make_pair (
+		_check_buttons[0][0]->get_width() + _table.get_col_spacing (0),
+		_check_buttons[0][0]->get_height() + _table.get_row_spacing (0)
+		);
+}
+
+Gtk::Widget&
+PortGroupTable::get_widget ()
+{
+	return _box;
+}
+
+
+/** Handle a toggle of a check button */
+void
+PortGroupTable::check_button_toggled (Gtk::CheckButton* b, int r, std::string const & p)
+{
+ 	if (_ignore_check_button_toggle) {
+ 		return;
+ 	}
+	
+ 	bool const new_state = b->get_active ();
+
+ 	if (new_state) {
+ 		if (_for_input) {
+ 			_io->connect_input (_io->input(r), p, 0);
+ 		} else {
+ 			_io->connect_output (_io->output(r), p, 0);
+ 		}
+ 	} else {
+ 		if (_for_input) {
+ 			_io->disconnect_input (_io->input(r), p, 0);
+ 		} else {
+ 			_io->disconnect_output (_io->output(r), p, 0);
+ 		}
+ 	}
+}
+
+
+RotatedLabelSet::RotatedLabelSet (PortGroupList& g)
+	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _port_group_list (g), _base_width (128)
 {
 	set_flags (Gtk::NO_WINDOW);
 	set_angle (30);
@@ -84,7 +206,7 @@ RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
 
 	/* Our height is the highest label */
 	requisition->height = 0;
-	for (GroupedPortList::const_iterator i = _port_list.begin(); i != _port_list.end(); ++i) {
+	for (PortGroupList::const_iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
 		for (std::vector<std::string>::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
 			std::pair<int, int> const d = setup_layout (*j);
 			if (d.second > requisition->height) {
@@ -94,10 +216,10 @@ RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
 	}
 
 	/* And our width is the base plus the width of the last label */
-	requisition->width = _base_start + _base_width;
-	int const n = _port_list.n_ports ();
+	requisition->width = _base_width;
+	int const n = _port_group_list.n_ports ();
 	if (n > 0) {
-		std::pair<int, int> const d = setup_layout (_port_list.get_port_by_index (n - 1, false));
+		std::pair<int, int> const d = setup_layout (_port_group_list.get_port_by_index (n - 1, false));
 		requisition->width += d.first;
 	}
 }
@@ -166,10 +288,10 @@ RotatedLabelSet::on_unrealize()
 }
 
 
-/**
- *    Set up our Pango layout to plot a given string, and compute its dimensions once it has been rotated.
- *    @param s String to use.
- *    @return width and height of the rotated string, in pixels.
+/** Set up our Pango layout to plot a given string, and compute its dimensions once
+ *  it has been rotated.
+ *  @param s String to use.
+ *  @return width and height of the rotated string, in pixels.
  */
 
 std::pair<int, int>
@@ -182,8 +304,8 @@ RotatedLabelSet::setup_layout (std::string const & s)
 	int h;
 	_pango_layout->get_pixel_size (w, h);
 
-	/* Rotate the width and height as appropriate.  I thought Pango might be able to do this for us,
-	   but I can't find out how... */
+	/* Rotate the width and height as appropriate.  I thought Pango might be able
+	   to do this for us, but I can't find out how... */
 	std::pair<int, int> d;
 	d.first = int (w * cos (_angle_radians) - h * sin (_angle_radians));
 	d.second = int (w * sin (_angle_radians) + h * cos (_angle_radians));
@@ -199,14 +321,14 @@ RotatedLabelSet::on_expose_event (GdkEventExpose* event)
 	}
 
 	int const height = get_allocation().get_height ();
-	double const spacing = double (_base_width) / _port_list.n_ports();
+	double const spacing = double (_base_width) / _port_group_list.n_ports();
 
 	/* Plot all the labels; really we should clip for efficiency */
 	int n = 0;
-	for (GroupedPortList::const_iterator i = _port_list.begin(); i != _port_list.end(); ++i) {
+	for (PortGroupList::const_iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
 		for (uint32_t j = 0; j < i->ports.size(); ++j) {
 			std::pair<int, int> const d = setup_layout (i->ports[j]);
-			get_window()->draw_layout (_gc, _base_start + int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
+			get_window()->draw_layout (_gc, int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
 			++n;
 		}
 	}
@@ -214,69 +336,48 @@ RotatedLabelSet::on_expose_event (GdkEventExpose* event)
 	return true;
 }
 
-/**
- *  Set the `base dimensions'.  These are the dimensions of the area at which the labels start, and
- *  have to be set up to match whatever they are labelling.
+/** Set the `base width'.  This is the width of the base of the label set, ie:
  *
- *  Roughly speaking, we have
- *
- *             L L L L
- *            E E E E
- *           B B B B
- *          A A A A
- *         L L L L
- * <--s--><--w--->
+ *     L L L L
+ *    E E E E
+ *   B B B B
+ *  A A A A
+ * L L L L
+ * <--w-->
  */
     
 void
-RotatedLabelSet::set_base_dimensions (int s, int w)
+RotatedLabelSet::set_base_width (int w)
 {
-	_base_start = s;
 	_base_width = w;
 	queue_resize ();
 }
 
 
-/**
- *  Construct an IOSelector.
+/** Construct an IOSelector.
  *  @param session Session to operate on.
  *  @param io IO to operate on.
  *  @param for_input true if the selector is for an input, otherwise false.
  */
  
 IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
-	: _session (session), _port_list (session, io, for_input), _io (io), _for_input (for_input),
-	  _width (0), _height (0), _column_labels (_port_list),
-	  _ignore_check_button_toggle (false), _add_remove_box_added (false)
+	: _port_group_list (session, io, for_input), _io (io), _for_input (for_input),
+	  _row_labels_vbox (0), _column_labels (_port_group_list), _left_vbox_pad (0)
 {
-	/* Column labels */
-	pack_start (_column_labels, true, true);
+	_left_vbox.pack_start (*Gtk::manage (new Gtk::Label ("")));
+	_overall_hbox.pack_start (_left_vbox, false, false);
+	_scrolled_window.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_NEVER);
+	_scrolled_window.set_shadow_type (Gtk::SHADOW_NONE);
+	Gtk::VBox* b = new Gtk::VBox;
+	b->pack_start (_column_labels, false, false);
+	b->pack_start (_port_group_hbox, false, false);
+	Gtk::Alignment* a = new Gtk::Alignment (0, 1, 0, 0);
+	a->add (*Gtk::manage (b));
+	_scrolled_window.add (*Gtk::manage (a));
+	_overall_hbox.pack_start (_scrolled_window);
+	pack_start (_overall_hbox);
 
-	/* Buttons for adding and removing ports */
-	_add_port_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_MENU)));
-	_add_port_button.set_label (_("Add port"));
-	_add_port_button.signal_clicked().connect (mem_fun (*this, &IOSelector::add_port_button_clicked));
-	_add_remove_box.pack_start (_add_port_button);
-	_remove_port_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REMOVE, Gtk::ICON_SIZE_MENU)));
-	_remove_port_button.set_label (_("Remove port"));
-	_remove_port_button.signal_clicked().connect (mem_fun (*this, &IOSelector::remove_port_button_clicked));
-	_add_remove_box.pack_start (_remove_port_button);
-	set_button_sensitivity ();
-
-	/* Table.  We need to put in a HBox, with a dummy label to its right,
-	   so that the rotated column labels can overhang the right hand side of the table. */
-
-	setup_table ();
-	setup_row_labels ();
-	setup_check_button_states ();
-	_table_hbox.pack_start (_table, false, false);
-	_table_hbox.pack_start (_dummy);
-	_table.set_col_spacings (4);
-	pack_start (_table_hbox);
-
-	show_all ();
-
-	update_column_label_dimensions ();
+	_port_group_hbox.signal_size_allocate().connect (sigc::hide (sigc::mem_fun (*this, &IOSelector::setup_dimensions)));
 
 	/* Listen for ports changing on the IO */
 	if (_for_input) {
@@ -289,222 +390,199 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 
 IOSelector::~IOSelector ()
 {
-	for (std::vector<Gtk::Label*>::iterator i = _row_labels.begin(); i != _row_labels.end(); ++i) {
+	clear ();
+}
+
+/** Clear out the things that change when the number of source or destination ports changes */
+void
+IOSelector::clear ()
+{
+	for (std::vector<Gtk::EventBox*>::iterator i = _row_labels.begin(); i != _row_labels.end(); ++i) {
+		delete *i;
+	}
+	_row_labels.clear ();
+	
+	if (_row_labels_vbox) {
+		_left_vbox.remove (*_row_labels_vbox);
+	}
+	delete _row_labels_vbox;
+	_row_labels_vbox = 0;
+
+	if (_left_vbox_pad) {
+		_left_vbox.remove (*_left_vbox_pad);
+	}
+	delete _left_vbox_pad;
+	_left_vbox_pad = 0;
+	
+	for (std::vector<PortGroupTable*>::iterator i = _port_group_tables.begin(); i != _port_group_tables.end(); ++i) {
+		_port_group_hbox.remove ((*i)->get_widget());
 		delete *i;
 	}
 
-	for (uint32_t x = 0; x < _check_buttons.size(); ++x) {
-		for (uint32_t y = 0; y < _check_buttons[x].size(); ++y) {
-			delete _check_buttons[x][y];
-		}
-	}
+	_port_group_tables.clear ();
 }
 
 
-/**
- *    Sets up the sizing of the column label widget to match the table that's underneath it.
+/** Set up dimensions of some of our widgets which depend on other dimensions
+ *  within the dialogue.
  */
-
 void
-IOSelector::update_column_label_dimensions ()
+IOSelector::setup_dimensions ()
 {
-	if (_row_labels.empty() || _check_buttons.empty() || _check_buttons[0].empty()) {
-		return;
+	/* Get some dimensions from various places */
+	int const scrollbar_height = _scrolled_window.get_hscrollbar()->get_height();
+
+	std::pair<int, int> unit_size (0, 0);
+	int port_group_tables_height = 0;
+	for (std::vector<PortGroupTable*>::iterator i = _port_group_tables.begin(); i != _port_group_tables.end(); ++i) {
+		std::pair<int, int> const u = (*i)->unit_size ();
+		unit_size.first = std::max (unit_size.first, u.first);
+		unit_size.second = std::max (unit_size.second, u.second);
+		port_group_tables_height = std::max (
+			port_group_tables_height, (*i)->get_widget().get_height()
+			);
 	}
-	
-	_column_labels.set_base_dimensions (
-		/* width of the row label + a column spacing */
-		_row_labels.front()->get_width() + _table.get_col_spacing (0),
-		/* width of a check button + a column spacing for each column */
-		_check_buttons.size() * ( _check_buttons[0][0]->get_width() + _table.get_col_spacing(1))
+
+	/* Column labels */
+	_column_labels.set_base_width (_port_group_list.n_ports () * unit_size.first);
+
+	/* Scrolled window */
+	/* XXX: really shouldn't set a minimum horizontal size here, but if we don't
+	   the window starts up very small */
+	_scrolled_window.set_size_request (
+		std::min (_column_labels.get_width(), 640),
+		_column_labels.get_height() + port_group_tables_height + scrollbar_height + 16
 		);
+	
+	/* Row labels */
+	for (std::vector<Gtk::EventBox*>::iterator i = _row_labels.begin(); i != _row_labels.end(); ++i) {
+		(*i)->get_child()->set_size_request (-1, unit_size.second);
+	}
+
+
+	if (_left_vbox_pad) {
+		_left_vbox_pad->set_size_request (-1, scrollbar_height + unit_size.second / 4);
+	}
 }
 
+
+/** Set up the dialogue */
 void
-IOSelector::setup_table ()
+IOSelector::setup ()
 {
-	if (_add_remove_box_added) {
-		_table.remove (_add_remove_box);
-	}
+	clear ();
 
-	for (std::vector<Gtk::EventBox*>::iterator i = _group_labels.begin(); i != _group_labels.end(); ++i) {
-		_table.remove (**i);
-		delete *i;
-	}
+ 	/* Work out how many rows we have */
+ 	ARDOUR::DataType const t = _io->default_type();
 
-	_group_labels.clear ();
+ 	int rows;
+ 	if (_for_input) {
+ 		rows = _io->n_inputs().get(t);
+ 	} else {
+ 		rows = _io->n_outputs().get(t);
+ 	}	
 	
-	/* New width */
-	
-	int const old_width = _width;
-	_width = _port_list.n_ports ();
+ 	/* Row labels */
+ 	_row_labels_vbox = new Gtk::VBox;
+ 	for (int i = 0; i < rows; ++i) {
+ 		Gtk::Label* label = new Gtk::Label (_for_input ? _io->input(i)->name() : _io->output(i)->name());
+		Gtk::EventBox* b = new Gtk::EventBox;
+		b->set_events (Gdk::BUTTON_PRESS_MASK);
+		b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), i));
+		b->add (*Gtk::manage (label));
+		_row_labels.push_back (b);
+ 		_row_labels_vbox->pack_start (*b, false, false);
+ 	}
+ 	_left_vbox.pack_start (*_row_labels_vbox, false, false);
+	_left_vbox_pad = new Gtk::Label ("");
+	_left_vbox.pack_start (*_left_vbox_pad, false, false);
 
-	/* New height */
+ 	/* Checkbutton tables */
+ 	int n = 0;
+ 	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
+ 		PortGroupTable* t = new PortGroupTable (*i, _io, _for_input);
 
-	int const old_height = _height;
+ 		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
+ 		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
+ 		alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
+ 		if ((n % 2) == 0) {
+ 			t->get_widget().modify_bg (Gtk::STATE_NORMAL, alt_bg);
+ 		}
 
-	ARDOUR::DataType const t = _io->default_type();
-	
-	if (_for_input) {
-		_height = _io->n_inputs().get(t);
-	} else {
-		_height = _io->n_outputs().get(t);
-	}
-
-	_table.resize (_width + 1, _height + 1);
-
-	/* Add checkbuttons where required, and remove those that aren't */
-	for (int x = _width; x < old_width; ++x) {
-		for (int y = 0; y < old_height; ++y) {
-			delete _check_buttons[x][y];
-		}
-	}
-	_check_buttons.resize (_width);
-	
-	for (int x = 0; x < _width; x++) {
-
-		for (int y = _height; y < old_height; ++y) {
-			delete _check_buttons[x][y];
-		}
-		_check_buttons[x].resize (_height);
-		
-		for (int y = 0; y < _height; y++) {
-
-			if (x >= old_width || y >= old_height) {
-				Gtk::CheckButton* button = new Gtk::CheckButton;
-				button->signal_toggled().connect (
-					sigc::bind (sigc::mem_fun (*this, &IOSelector::check_button_toggled), x, y)
-					);
-				_check_buttons[x][y] = button;
-				_table.attach (*button, x + 1, x + 2, y, y + 1);
-			}
-		}
-	}
-
-	/* Add more row labels where required, and remove those that aren't */
-	for (int y = _height; y < old_height; ++y) {
-		delete _row_labels[y];
-	}
-	_row_labels.resize (_height);
-	for (int y = old_height; y < _height; ++y) {
-		Gtk::Label* label = new Gtk::Label;
-		_row_labels[y] = label;
-		_table.attach (*label, 0, 1, y, y + 1);
-	}
-
-	_table.attach (_add_remove_box, 0, 1, _height, _height + 1);
-	_add_remove_box_added = true;
-
-	/* Add group labels */
-	int n = 1;
-	int m = 0;
-
-	/* XXX: this is a bit of a hack; should probably use a configurable colour here */
-	Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
-	alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
-	for (GroupedPortList::iterator i = _port_list.begin(); i != _port_list.end(); ++i) {
-		if (i->ports.empty() == false) {
-			Gtk::Label* label = new Gtk::Label ("<b>" + i->name + "</b>");
-			label->set_use_markup (true);
-			Gtk::EventBox* box = new Gtk::EventBox ();
-			box->add (*Gtk::manage (label));
-			if (m % 2 == 0) {
-				box->modify_bg (Gtk::STATE_NORMAL, alt_bg);
-			}
-			_group_labels.push_back (box);
-			_table.attach (*box, n, n + i->ports.size(), _height, _height + 1);
-			n += i->ports.size();
-			++m;
-		}
-	}
+ 		_port_group_tables.push_back (t);
+ 		_port_group_hbox.pack_start (t->get_widget(), false, false);
+ 		++n;
+ 	}
 
 	show_all ();
 }
 
-
-/**
- *  Write the correct text to the row labels.
- */
-
 void
-IOSelector::setup_row_labels ()
+IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
 {
-	for (int y = 0; y < _height; y++) {
-		_row_labels[y]->set_text (_for_input ? _io->input(y)->name() : _io->output(y)->name());
-	}
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &IOSelector::ports_changed), change, src));
+
+	redisplay ();
 }
 
 
-/**
- *  Set up the state of each check button according to what connections are made.
- */
-
 void
-IOSelector::setup_check_button_states ()
+IOSelector::redisplay ()
 {
-	_ignore_check_button_toggle = true;
-
-	/* Set the state of the check boxes according to current connections */
-	for (int i = 0; i < _height; ++i) {
-		const char **connections = _for_input ? _io->input(i)->get_connections() : _io->output(i)->get_connections();
-		for (int j = 0; j < _width; ++j) {
-
-			std::string const t = _port_list.get_port_by_index (j);
-			int k = 0;
-			bool required_state = false;
-
-			while (connections && connections[k]) {
-				if (std::string(connections[k]) == t) {
-					required_state = true;
-					break;
-				}
-				++k;
-			}
-
-			_check_buttons[j][i]->set_active (required_state);
-		}
-	}
-
-	_ignore_check_button_toggle = false;
+	_port_group_list.refresh ();
+	setup ();
 }
 
 
-/**
- *  Handle a toggle of a check button.
- */
-
-void
-IOSelector::check_button_toggled (int x, int y)
+/** Handle a button press on a row label */
+bool
+IOSelector::row_label_button_pressed (GdkEventButton* e, int r)
 {
-	if (_ignore_check_button_toggle) {
-		return;
+	if (e->type != GDK_BUTTON_PRESS || e->button != 3) {
+		return false;
+	}
+
+	Gtk::Menu* menu = Gtk::manage (new Gtk::Menu);
+	Gtk::Menu_Helpers::MenuList& items = menu->items ();
+	menu->set_name ("ArdourContextMenu");
+
+	bool can_add;
+	bool can_remove;
+	std::string name;
+	ARDOUR::DataType const t = _io->default_type();
+
+	if (_for_input) {
+		can_add = _io->input_maximum().get(t) > _io->n_inputs().get(t);
+		can_remove = _io->input_minimum().get(t) < _io->n_inputs().get(t);
+		name = _io->input(r)->name();
+	} else {
+		can_add = _io->output_maximum().get(t) > _io->n_outputs().get(t);
+		can_remove = _io->output_minimum().get(t) < _io->n_outputs().get(t);
+		name = _io->output(r)->name();
 	}
 	
-	bool const new_state = _check_buttons[x][y]->get_active ();
-	std::string const port = _port_list.get_port_by_index (x);
+	items.push_back (
+		Gtk::Menu_Helpers::MenuElem (_("Add port"), sigc::mem_fun (*this, &IOSelector::add_port))
+		);
 
-	if (new_state) {
-		if (_for_input) {
-			_io->connect_input (_io->input(y), port, 0);
-		} else {
-			_io->connect_output (_io->output(y), port, 0);
-		}
-	} else {
-		if (_for_input) {
-			_io->disconnect_input (_io->input(y), port, 0);
-		} else {
-			_io->disconnect_output (_io->output(y), port, 0);
-		}
-	}
+	items.back().set_sensitive (can_add);
+
+	items.push_back (
+		Gtk::Menu_Helpers::MenuElem (_("Remove port '") + name + _("'"), sigc::bind (sigc::mem_fun (*this, &IOSelector::remove_port), r))
+		);
+
+	items.back().set_sensitive (can_remove);
+
+	menu->popup (e->button, e->time);
+	
+	return true;
 }
 
 void
-IOSelector::add_port_button_clicked ()
+IOSelector::add_port ()
 {
-	/* add a new port, then hide the button if we're up to the maximum allowed */
-
 	// The IO selector only works for single typed IOs
-	const ARDOUR::DataType t = _io->default_type();
+	const ARDOUR::DataType t = _io->default_type ();
 
 	if (_for_input) {
 
@@ -528,95 +606,30 @@ IOSelector::add_port_button_clicked ()
 			msg.run ();
 		}
 	}
-		
-	set_button_sensitivity ();
 }
 
-
 void
-IOSelector::remove_port_button_clicked ()
+IOSelector::remove_port (int r)
 {
-	uint32_t nports;
-
 	// The IO selector only works for single typed IOs
-	const ARDOUR::DataType t = _io->default_type();
-	
-	// always remove last port
+	const ARDOUR::DataType t = _io->default_type ();
 	
 	if (_for_input) {
-		if ((nports = _io->n_inputs().get(t)) > 0) {
-			_io->remove_input_port (_io->input(nports - 1), this);
-		}
+		_io->remove_input_port (_io->input (r), this);
 	} else {
-		if ((nports = _io->n_outputs().get(t)) > 0) {
-			_io->remove_output_port (_io->output(nports - 1), this);
-		}
-	}
-	
-	set_button_sensitivity ();
-}
-
-
-void 
-IOSelector::set_button_sensitivity ()
-{
-	ARDOUR::DataType const t = _io->default_type();
-
-	if (_for_input) {
-
-		_add_port_button.set_sensitive (
-			_io->input_maximum().get(t) > _io->n_inputs().get(t)
-			);
-	} else {
-
-		_add_port_button.set_sensitive (
-			_io->output_maximum().get(t) > _io->n_outputs().get(t)
-			);
-	}
-
-	if (_for_input) {
-		
-		_remove_port_button.set_sensitive (
-			_io->n_inputs().get(t) && _io->input_minimum().get(t) < _io->n_inputs().get(t)
-			);
-	} else {
-
-		_remove_port_button.set_sensitive (
-			_io->n_outputs().get(t) && _io->output_minimum().get(t) < _io->n_outputs().get(t)
-			);
+		_io->remove_output_port (_io->output (r), this);
 	}
 }
 
-void
-IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
-{
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &IOSelector::ports_changed), change, src));
 
-	redisplay ();
-}
-
-
-void
-IOSelector::redisplay ()
-{
-	_port_list.refresh ();
-	setup_table ();
-	setup_row_labels ();
-	setup_check_button_states ();
-	update_column_label_dimensions ();
-}
-
-
-
-
-GroupedPortList::GroupedPortList (ARDOUR::Session & session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
+PortGroupList::PortGroupList (ARDOUR::Session & session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
 	: _session (session), _io (io), _for_input (for_input)
 {
 	refresh ();
 }
 
 void
-GroupedPortList::refresh ()
+PortGroupList::refresh ()
 {
 	clear ();
 
@@ -625,8 +638,8 @@ GroupedPortList::refresh ()
 
 	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
 
-	PortGroup buss (_("Buss"), "ardour:");
-	PortGroup track (_("Track"), "ardour:");
+	PortGroup buss ("ardour:");
+	PortGroup track ("ardour:");
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
@@ -661,8 +674,8 @@ GroupedPortList::refresh ()
 		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
 		);
 
-	PortGroup system (_("System"), "system:");
-	PortGroup other (_("Other"), "");
+	PortGroup system ("system:");
+	PortGroup other ("");
 	
 	if (ports) {
 
@@ -691,7 +704,7 @@ GroupedPortList::refresh ()
 }
 
 int
-GroupedPortList::n_ports () const
+PortGroupList::n_ports () const
 {
 	int n = 0;
 	
@@ -705,7 +718,7 @@ GroupedPortList::n_ports () const
 }
 
 std::string
-GroupedPortList::get_port_by_index (int n, bool with_prefix) const
+PortGroupList::get_port_by_index (int n, bool with_prefix) const
 {
 	/* XXX: slightly inefficient algorithm */
 

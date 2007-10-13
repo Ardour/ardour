@@ -33,22 +33,44 @@ namespace ARDOUR {
 	class PortInsert;
 }
 
+/// A group of port names
 class PortGroup
 {
   public:
-	PortGroup (std::string const & n, std::string const & p) : name (n), prefix (p) {}
+	PortGroup (std::string const & p) : prefix (p) {}
 
 	void add (std::string const & p);
 
-	std::string name;
-	std::string prefix;
-	std::vector<std::string> ports;
+	std::string prefix; ///< prefix (before colon) e.g. "ardour:"
+	std::vector<std::string> ports; ///< port names
 };
 
-class GroupedPortList : public std::list<PortGroup>
+/// A table of checkbuttons to provide the GUI for connecting to a PortGroup
+class PortGroupTable
 {
   public:
-	GroupedPortList (ARDOUR::Session &, boost::shared_ptr<ARDOUR::IO>, bool);
+	PortGroupTable (PortGroup&, boost::shared_ptr<ARDOUR::IO>, bool);
+
+	Gtk::Widget& get_widget ();
+	std::pair<int, int> unit_size () const;
+
+  private:
+	void check_button_toggled (Gtk::CheckButton*, int, std::string const &);
+	
+	Gtk::Table _table;
+	Gtk::EventBox _box;
+	PortGroup& _port_group;
+	std::vector<std::vector<Gtk::CheckButton* > > _check_buttons;
+	bool _ignore_check_button_toggle;
+	boost::shared_ptr<ARDOUR::IO> _io;
+	bool _for_input;
+};
+
+/// A list of PortGroups
+class PortGroupList : public std::list<PortGroup>
+{
+  public:
+	PortGroupList (ARDOUR::Session &, boost::shared_ptr<ARDOUR::IO>, bool);
 
 	void refresh ();
 	int n_ports () const;
@@ -64,11 +86,11 @@ class GroupedPortList : public std::list<PortGroup>
 /// A widget which provides a set of rotated text labels
 class RotatedLabelSet : public Gtk::Widget {
   public:
-	RotatedLabelSet (GroupedPortList&);
+	RotatedLabelSet (PortGroupList&);
 	virtual ~RotatedLabelSet ();
 
 	void set_angle (int);
-	void set_base_dimensions (int, int);
+	void set_base_width (int);
 
   protected:
 	virtual void on_size_request (Gtk::Requisition*);
@@ -82,11 +104,10 @@ class RotatedLabelSet : public Gtk::Widget {
   private:
 	std::pair<int, int> setup_layout (std::string const &);
 
-	GroupedPortList& _port_list; ///< list of ports to display
+	PortGroupList& _port_group_list; ///< list of ports to display
 	int _angle_degrees; ///< label rotation angle in degrees
 	double _angle_radians; ///< label rotation angle in radians
-	int _base_start; ///< offset to start of labels; see set_base_dimensions() for more details
-	int _base_width; ///< width of labels; see set_base_dimensions() for more details
+	int _base_width; ///< width of labels; see set_base_width() for more details
 	Glib::RefPtr<Pango::Context> _pango_context;
 	Glib::RefPtr<Pango::Layout> _pango_layout;
 	Glib::RefPtr<Gdk::GC> _gc;
@@ -111,37 +132,27 @@ class IOSelector : public Gtk::VBox {
 
 	sigc::signal<void, Result> Finished;
 
-  protected:
-	ARDOUR::Session& _session;
-
   private:
-	void setup_table ();
-	void setup_row_labels ();
-	void setup_check_button_states ();
-	void check_button_toggled (int, int);
-	void add_port_button_clicked ();
-	void remove_port_button_clicked ();
-	void set_button_sensitivity ();
-	void ports_changed (ARDOUR::IOChange, void *);
-	void update_column_label_dimensions ();
+	void setup ();
+	void clear ();
+	void setup_dimensions ();
+	void ports_changed (ARDOUR::IOChange, void*);
+	bool row_label_button_pressed (GdkEventButton*, int);
+	void add_port ();
+	void remove_port (int);
 
-	GroupedPortList _port_list;
+	PortGroupList _port_group_list;
 	boost::shared_ptr<ARDOUR::IO> _io;
 	bool _for_input;
-	int _width;
-	int _height;
-	std::vector<Gtk::Label*> _row_labels;
-	std::vector<Gtk::EventBox*> _group_labels;
+	std::vector<PortGroupTable*> _port_group_tables;
+	std::vector<Gtk::EventBox*> _row_labels;
+	Gtk::VBox* _row_labels_vbox;
 	RotatedLabelSet _column_labels;
-	std::vector<std::vector<Gtk::CheckButton*> > _check_buttons;
-	bool _ignore_check_button_toggle; ///< check button toggle events are ignored when this is true
-	Gtk::Button _add_port_button;
-	Gtk::Button _remove_port_button;
-	Gtk::VBox _add_remove_box;
-	Gtk::HBox _table_hbox;
-	Gtk::Label _dummy;
-	bool _add_remove_box_added;
-	Gtk::Table _table;
+	Gtk::HBox _overall_hbox;
+	Gtk::VBox _left_vbox;
+	Gtk::HBox _port_group_hbox;
+	Gtk::ScrolledWindow _scrolled_window;
+	Gtk::Label* _left_vbox_pad;
 };
 
 
