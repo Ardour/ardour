@@ -217,7 +217,7 @@ RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
 
 	/* And our width is the base plus the width of the last label */
 	requisition->width = _base_width;
-	int const n = _port_group_list.n_ports ();
+	int const n = _port_group_list.n_visible_ports ();
 	if (n > 0) {
 		std::pair<int, int> const d = setup_layout (_port_group_list.get_port_by_index (n - 1, false));
 		requisition->width += d.first;
@@ -321,15 +321,17 @@ RotatedLabelSet::on_expose_event (GdkEventExpose* event)
 	}
 
 	int const height = get_allocation().get_height ();
-	double const spacing = double (_base_width) / _port_group_list.n_ports();
+	double const spacing = double (_base_width) / _port_group_list.n_visible_ports();
 
-	/* Plot all the labels; really we should clip for efficiency */
+	/* Plot all the visible labels; really we should clip for efficiency */
 	int n = 0;
 	for (PortGroupList::const_iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		for (uint32_t j = 0; j < i->ports.size(); ++j) {
-			std::pair<int, int> const d = setup_layout (i->ports[j]);
-			get_window()->draw_layout (_gc, int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
-			++n;
+		if (i->visible) {
+			for (uint32_t j = 0; j < i->ports.size(); ++j) {
+				std::pair<int, int> const d = setup_layout (i->ports[j]);
+				get_window()->draw_layout (_gc, int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
+				++n;
+			}
 		}
 	}
 
@@ -364,6 +366,15 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	: _port_group_list (session, io, for_input), _io (io), _for_input (for_input),
 	  _row_labels_vbox (0), _column_labels (_port_group_list), _left_vbox_pad (0)
 {
+	Gtk::HBox* c = new Gtk::HBox;
+	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
+		Gtk::CheckButton* b = new Gtk::CheckButton (i->name);
+		b->set_active (true);
+		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::group_visible_toggled), b, i->name));
+		c->pack_start (*Gtk::manage (b));
+	}
+	pack_start (*Gtk::manage (c));
+	
 	_left_vbox.pack_start (*Gtk::manage (new Gtk::Label ("")));
 	_overall_hbox.pack_start (_left_vbox, false, false);
 	_scrolled_window.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_NEVER);
@@ -444,7 +455,7 @@ IOSelector::setup_dimensions ()
 	}
 
 	/* Column labels */
-	_column_labels.set_base_width (_port_group_list.n_ports () * unit_size.first);
+	_column_labels.set_base_width (_port_group_list.n_visible_ports () * unit_size.first);
 
 	/* Scrolled window */
 	/* XXX: really shouldn't set a minimum horizontal size here, but if we don't
@@ -621,6 +632,33 @@ IOSelector::remove_port (int r)
 	}
 }
 
+void
+IOSelector::group_visible_toggled (Gtk::CheckButton* b, std::string const & n)
+{
+	PortGroupList::iterator i = _port_group_list.begin();
+	while (i != _port_group_list.end() & i->name != n) {
+		++i;
+	}
+
+	if (i == _port_group_list.end()) {
+		return;
+	}
+
+	i->visible = b->get_active ();
+
+	/* Update PortGroupTable visibility */
+
+	for (std::vector<PortGroupTable*>::iterator j = _port_group_tables.begin(); j != _port_group_tables.end(); ++j) {
+		if ((*j)->port_group().visible) {
+			(*j)->get_widget().show();
+		} else {
+			(*j)->get_widget().hide();
+		}
+	}
+
+	_column_labels.queue_draw ();
+}
+
 
 PortGroupList::PortGroupList (ARDOUR::Session & session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
 	: _session (session), _io (io), _for_input (for_input)
@@ -638,8 +676,8 @@ PortGroupList::refresh ()
 
 	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
 
-	PortGroup buss ("ardour:");
-	PortGroup track ("ardour:");
+	PortGroup buss (_("Buss"), "ardour:");
+	PortGroup track (_("Track"), "ardour:");
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
@@ -674,8 +712,8 @@ PortGroupList::refresh ()
 		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
 		);
 
-	PortGroup system ("system:");
-	PortGroup other ("");
+	PortGroup system (_("System"), "system:");
+	PortGroup other (_("Other"), "");
 	
 	if (ports) {
 
@@ -704,13 +742,13 @@ PortGroupList::refresh ()
 }
 
 int
-PortGroupList::n_ports () const
+PortGroupList::n_visible_ports () const
 {
 	int n = 0;
 	
 	for (const_iterator i = begin(); i != end(); ++i) {
-		for (std::vector<std::string>::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
-			++n;
+		if (i->visible) {
+			n += i->ports.size();
 		}
 	}
 

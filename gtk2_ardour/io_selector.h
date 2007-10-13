@@ -37,12 +37,14 @@ namespace ARDOUR {
 class PortGroup
 {
   public:
-	PortGroup (std::string const & p) : prefix (p) {}
+	PortGroup (std::string const & n, std::string const & p) : name (n), prefix (p), visible (true) {}
 
 	void add (std::string const & p);
 
+	std::string name;
 	std::string prefix; ///< prefix (before colon) e.g. "ardour:"
 	std::vector<std::string> ports; ///< port names
+	bool visible;
 };
 
 /// A table of checkbuttons to provide the GUI for connecting to a PortGroup
@@ -53,6 +55,7 @@ class PortGroupTable
 
 	Gtk::Widget& get_widget ();
 	std::pair<int, int> unit_size () const;
+	PortGroup& port_group () { return _port_group; }
 
   private:
 	void check_button_toggled (Gtk::CheckButton*, int, std::string const &);
@@ -73,7 +76,7 @@ class PortGroupList : public std::list<PortGroup>
 	PortGroupList (ARDOUR::Session &, boost::shared_ptr<ARDOUR::IO>, bool);
 
 	void refresh ();
-	int n_ports () const;
+	int n_visible_ports () const;
 	std::string get_port_by_index (int, bool with_prefix = true) const;
 
   private:
@@ -91,7 +94,8 @@ class RotatedLabelSet : public Gtk::Widget {
 
 	void set_angle (int);
 	void set_base_width (int);
-
+	void update_visibility ();
+	
   protected:
 	virtual void on_size_request (Gtk::Requisition*);
 	virtual void on_size_allocate (Gtk::Allocation&);
@@ -140,6 +144,7 @@ class IOSelector : public Gtk::VBox {
 	bool row_label_button_pressed (GdkEventButton*, int);
 	void add_port ();
 	void remove_port (int);
+	void group_visible_toggled (Gtk::CheckButton*, std::string const &);
 
 	PortGroupList _port_group_list;
 	boost::shared_ptr<ARDOUR::IO> _io;
