@@ -150,14 +150,14 @@ class IOSelector : public Gtk::VBox {
 	boost::shared_ptr<ARDOUR::IO> _io;
 	bool _for_input;
 	std::vector<PortGroupTable*> _port_group_tables;
-	std::vector<Gtk::EventBox*> _row_labels;
-	Gtk::VBox* _row_labels_vbox;
+	std::vector<Gtk::EventBox*> _row_labels[2];
+	Gtk::VBox* _row_labels_vbox[2];
 	RotatedLabelSet _column_labels;
 	Gtk::HBox _overall_hbox;
-	Gtk::VBox _left_vbox;
+	Gtk::VBox _side_vbox[2];
 	Gtk::HBox _port_group_hbox;
 	Gtk::ScrolledWindow _scrolled_window;
-	Gtk::Label* _left_vbox_pad;
+	Gtk::Label* _side_vbox_pad[2];
 };
 
 

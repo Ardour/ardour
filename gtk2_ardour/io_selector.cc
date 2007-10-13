@@ -364,8 +364,11 @@ RotatedLabelSet::set_base_width (int w)
  
 IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
 	: _port_group_list (session, io, for_input), _io (io), _for_input (for_input),
-	  _row_labels_vbox (0), _column_labels (_port_group_list), _left_vbox_pad (0)
+	  _column_labels (_port_group_list)
 {
+	_row_labels_vbox[0] = _row_labels_vbox[1] = 0;
+	_side_vbox_pad[0] = _side_vbox_pad[1] = 0;
+	
 	Gtk::HBox* c = new Gtk::HBox;
 	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
 		Gtk::CheckButton* b = new Gtk::CheckButton (i->name);
@@ -375,8 +378,8 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	}
 	pack_start (*Gtk::manage (c));
 	
-	_left_vbox.pack_start (*Gtk::manage (new Gtk::Label ("")));
-	_overall_hbox.pack_start (_left_vbox, false, false);
+	_side_vbox[0].pack_start (*Gtk::manage (new Gtk::Label ("")));
+	_overall_hbox.pack_start (_side_vbox[0], false, false);
 	_scrolled_window.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_NEVER);
 	_scrolled_window.set_shadow_type (Gtk::SHADOW_NONE);
 	Gtk::VBox* b = new Gtk::VBox;
@@ -386,6 +389,8 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	a->add (*Gtk::manage (b));
 	_scrolled_window.add (*Gtk::manage (a));
 	_overall_hbox.pack_start (_scrolled_window);
+	_side_vbox[1].pack_start (*Gtk::manage (new Gtk::Label ("")));
+	_overall_hbox.pack_start (_side_vbox[1]);
 	pack_start (_overall_hbox);
 
 	_port_group_hbox.signal_size_allocate().connect (sigc::hide (sigc::mem_fun (*this, &IOSelector::setup_dimensions)));
@@ -408,23 +413,26 @@ IOSelector::~IOSelector ()
 void
 IOSelector::clear ()
 {
-	for (std::vector<Gtk::EventBox*>::iterator i = _row_labels.begin(); i != _row_labels.end(); ++i) {
-		delete *i;
-	}
-	_row_labels.clear ();
-	
-	if (_row_labels_vbox) {
-		_left_vbox.remove (*_row_labels_vbox);
-	}
-	delete _row_labels_vbox;
-	_row_labels_vbox = 0;
+	for (int i = 0; i < 2; ++i) {
 
-	if (_left_vbox_pad) {
-		_left_vbox.remove (*_left_vbox_pad);
+		for (std::vector<Gtk::EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
+			delete *j;
+		}
+		_row_labels[i].clear ();
+		
+		if (_row_labels_vbox[i]) {
+			_side_vbox[i].remove (*_row_labels_vbox[i]);
+		}
+		delete _row_labels_vbox[i];
+		_row_labels_vbox[i] = 0;
+		
+		if (_side_vbox_pad[i]) {
+			_side_vbox[i].remove (*_side_vbox_pad[i]);
+		}
+		delete _side_vbox_pad[i];
+		_side_vbox_pad[i] = 0;
 	}
-	delete _left_vbox_pad;
-	_left_vbox_pad = 0;
-	
+
 	for (std::vector<PortGroupTable*>::iterator i = _port_group_tables.begin(); i != _port_group_tables.end(); ++i) {
 		_port_group_hbox.remove ((*i)->get_widget());
 		delete *i;
@@ -466,13 +474,14 @@ IOSelector::setup_dimensions ()
 		);
 	
 	/* Row labels */
-	for (std::vector<Gtk::EventBox*>::iterator i = _row_labels.begin(); i != _row_labels.end(); ++i) {
-		(*i)->get_child()->set_size_request (-1, unit_size.second);
-	}
+	for (int i = 0; i < 2; ++i) {
+		for (std::vector<Gtk::EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
+			(*j)->get_child()->set_size_request (-1, unit_size.second);
+		}
 
-
-	if (_left_vbox_pad) {
-		_left_vbox_pad->set_size_request (-1, scrollbar_height + unit_size.second / 4);
+		if (_side_vbox_pad[i]) {
+			_side_vbox_pad[i]->set_size_request (-1, scrollbar_height + unit_size.second / 4);
+		}
 	}
 }
 
@@ -494,19 +503,22 @@ IOSelector::setup ()
  	}	
 	
  	/* Row labels */
- 	_row_labels_vbox = new Gtk::VBox;
- 	for (int i = 0; i < rows; ++i) {
- 		Gtk::Label* label = new Gtk::Label (_for_input ? _io->input(i)->name() : _io->output(i)->name());
-		Gtk::EventBox* b = new Gtk::EventBox;
-		b->set_events (Gdk::BUTTON_PRESS_MASK);
-		b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), i));
-		b->add (*Gtk::manage (label));
-		_row_labels.push_back (b);
- 		_row_labels_vbox->pack_start (*b, false, false);
- 	}
- 	_left_vbox.pack_start (*_row_labels_vbox, false, false);
-	_left_vbox_pad = new Gtk::Label ("");
-	_left_vbox.pack_start (*_left_vbox_pad, false, false);
+	for (int i = 0; i < 2; ++i) {
+		_row_labels_vbox[i] = new Gtk::VBox;
+		for (int j = 0; j < rows; ++j) {
+			Gtk::Label* label = new Gtk::Label (_for_input ? _io->input(j)->name() : _io->output(j)->name());
+			Gtk::EventBox* b = new Gtk::EventBox;
+			b->set_events (Gdk::BUTTON_PRESS_MASK);
+			b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), j));
+			b->add (*Gtk::manage (label));
+			_row_labels[i].push_back (b);
+			_row_labels_vbox[i]->pack_start (*b, false, false);
+		}
+
+		_side_vbox[i].pack_start (*_row_labels_vbox[i], false, false);
+		_side_vbox_pad[i] = new Gtk::Label ("");
+		_side_vbox[i].pack_start (*_side_vbox_pad[i], false, false);
+	}
 
  	/* Checkbutton tables */
  	int n = 0;
