@@ -599,7 +599,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
-		shared_ptr<Bundle> c (new OutputBundle (buf, true));
+		shared_ptr<Bundle> c (new InputBundle (buf, true));
 		c->set_nchannels (1);
 		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
@@ -610,7 +610,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
-		shared_ptr<Bundle> c (new InputBundle (buf, true));
+		shared_ptr<Bundle> c (new OutputBundle (buf, true));
 		c->set_nchannels (1);
 		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
@@ -623,7 +623,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		shared_ptr<Bundle> c (new OutputBundle (buf, true));
+		shared_ptr<Bundle> c (new InputBundle (buf, true));
 		c->set_nchannels (2);
 		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 		c->add_port_to_channel (1, _engine.get_nth_physical_output (DataType::AUDIO, np+1));
@@ -635,7 +635,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		shared_ptr<Bundle> c (new InputBundle (buf, true));
+		shared_ptr<Bundle> c (new OutputBundle (buf, true));
 		c->set_nchannels (2);
 		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 		c->add_port_to_channel (1, _engine.get_nth_physical_input (DataType::AUDIO, np+1));
