@@ -207,7 +207,7 @@ RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
 	/* Our height is the highest label */
 	requisition->height = 0;
 	for (PortGroupList::const_iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		for (std::vector<std::string>::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+		for (std::vector<std::string>::const_iterator j = (*i)->ports.begin(); j != (*i)->ports.end(); ++j) {
 			std::pair<int, int> const d = setup_layout (*j);
 			if (d.second > requisition->height) {
 				requisition->height = d.second;
@@ -326,9 +326,9 @@ RotatedLabelSet::on_expose_event (GdkEventExpose* event)
 	/* Plot all the visible labels; really we should clip for efficiency */
 	int n = 0;
 	for (PortGroupList::const_iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		if (i->visible) {
-			for (uint32_t j = 0; j < i->ports.size(); ++j) {
-				std::pair<int, int> const d = setup_layout (i->ports[j]);
+		if ((*i)->visible) {
+			for (uint32_t j = 0; j < (*i)->ports.size(); ++j) {
+				std::pair<int, int> const d = setup_layout ((*i)->ports[j]);
 				get_window()->draw_layout (_gc, int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
 				++n;
 			}
@@ -371,10 +371,10 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	
 	Gtk::HBox* c = new Gtk::HBox;
 	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		Gtk::CheckButton* b = new Gtk::CheckButton (i->name);
+		Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
 		b->set_active (true);
-		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::group_visible_toggled), b, i->name));
-		c->pack_start (*Gtk::manage (b));
+		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::group_visible_toggled), b, (*i)->name));
+		c->pack_start (*Gtk::manage (b), false, false);
 	}
 	pack_start (*Gtk::manage (c));
 	
@@ -523,7 +523,7 @@ IOSelector::setup ()
  	/* Checkbutton tables */
  	int n = 0;
  	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
- 		PortGroupTable* t = new PortGroupTable (*i, _io, _for_input);
+ 		PortGroupTable* t = new PortGroupTable (**i, _io, _for_input);
 
  		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
  		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
@@ -538,6 +538,8 @@ IOSelector::setup ()
  	}
 
 	show_all ();
+	
+	set_port_group_table_visibility ();
 }
 
 void
@@ -648,7 +650,7 @@ void
 IOSelector::group_visible_toggled (Gtk::CheckButton* b, std::string const & n)
 {
 	PortGroupList::iterator i = _port_group_list.begin();
-	while (i != _port_group_list.end() & i->name != n) {
+	while (i != _port_group_list.end() & (*i)->name != n) {
 		++i;
 	}
 
@@ -656,10 +658,16 @@ IOSelector::group_visible_toggled (Gtk::CheckButton* b, std::string const & n)
 		return;
 	}
 
-	i->visible = b->get_active ();
+	(*i)->visible = b->get_active ();
 
-	/* Update PortGroupTable visibility */
+	set_port_group_table_visibility ();
 
+	_column_labels.queue_draw ();
+}
+
+void
+IOSelector::set_port_group_table_visibility ()
+{
 	for (std::vector<PortGroupTable*>::iterator j = _port_group_tables.begin(); j != _port_group_tables.end(); ++j) {
 		if ((*j)->port_group().visible) {
 			(*j)->get_widget().show();
@@ -667,13 +675,15 @@ IOSelector::group_visible_toggled (Gtk::CheckButton* b, std::string const & n)
 			(*j)->get_widget().hide();
 		}
 	}
-
-	_column_labels.queue_draw ();
 }
 
 
 PortGroupList::PortGroupList (ARDOUR::Session & session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
-	: _session (session), _io (io), _for_input (for_input)
+	: _session (session), _io (io), _for_input (for_input),
+	  buss (_("Buss"), "ardour:"),
+	  track (_("Track"), "ardour:"),
+	  system (_("System"), "system:"),
+	  other (_("Other"), "")
 {
 	refresh ();
 }
@@ -682,14 +692,16 @@ void
 PortGroupList::refresh ()
 {
 	clear ();
+	
+	buss.ports.clear ();
+	track.ports.clear ();
+	system.ports.clear ();
+	other.ports.clear ();
 
 	/* Find the ports provided by ardour; we can't derive their type just from their
 	   names, so we'll have to be more devious. */
 
 	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
-
-	PortGroup buss (_("Buss"), "ardour:");
-	PortGroup track (_("Track"), "ardour:");
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
@@ -724,9 +736,6 @@ PortGroupList::refresh ()
 		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
 		);
 
-	PortGroup system (_("System"), "system:");
-	PortGroup other (_("Other"), "");
-	
 	if (ports) {
 
 		int n = 0;
@@ -747,10 +756,10 @@ PortGroupList::refresh ()
 		}
 	}
 
-	push_back (buss);
-	push_back (track);
-	push_back (system);
-	push_back (other);
+	push_back (&buss);
+	push_back (&track);
+	push_back (&system);
+	push_back (&other);
 }
 
 int
@@ -759,8 +768,8 @@ PortGroupList::n_visible_ports () const
 	int n = 0;
 	
 	for (const_iterator i = begin(); i != end(); ++i) {
-		if (i->visible) {
-			n += i->ports.size();
+		if ((*i)->visible) {
+			n += (*i)->ports.size();
 		}
 	}
 
@@ -773,10 +782,10 @@ PortGroupList::get_port_by_index (int n, bool with_prefix) const
 	/* XXX: slightly inefficient algorithm */
 
 	for (const_iterator i = begin(); i != end(); ++i) {
-		for (std::vector<std::string>::const_iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
+		for (std::vector<std::string>::const_iterator j = (*i)->ports.begin(); j != (*i)->ports.end(); ++j) {
 			if (n == 0) {
 				if (with_prefix) {
-					return i->prefix + *j;
+					return (*i)->prefix + *j;
 				} else {
 					return *j;
 				}

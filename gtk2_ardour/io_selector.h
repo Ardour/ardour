@@ -70,7 +70,7 @@ class PortGroupTable
 };
 
 /// A list of PortGroups
-class PortGroupList : public std::list<PortGroup>
+class PortGroupList : public std::list<PortGroup*>
 {
   public:
 	PortGroupList (ARDOUR::Session &, boost::shared_ptr<ARDOUR::IO>, bool);
@@ -83,6 +83,11 @@ class PortGroupList : public std::list<PortGroup>
 	ARDOUR::Session& _session;
 	boost::shared_ptr<ARDOUR::IO> _io;
 	bool _for_input;
+
+	PortGroup buss;
+	PortGroup track;
+	PortGroup system;
+	PortGroup other;
 };
 
 
@@ -145,6 +150,7 @@ class IOSelector : public Gtk::VBox {
 	void add_port ();
 	void remove_port (int);
 	void group_visible_toggled (Gtk::CheckButton*, std::string const &);
+	void set_port_group_table_visibility ();
 
 	PortGroupList _port_group_list;
 	boost::shared_ptr<ARDOUR::IO> _io;
