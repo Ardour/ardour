@@ -354,13 +354,11 @@ MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fram
 		     bool session_state_changing, bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().n_midi() == 0) {
-		//return 0;
-		throw; // FIXME
+		return 0;
 	}
 
 	if (!_active) {
 		silence (nframes, offset);
-		//return 0; // FIXME
 	}
 
 	if (session_state_changing) {

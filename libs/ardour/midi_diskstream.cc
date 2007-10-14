@@ -141,7 +141,10 @@ MidiDiskstream::~MidiDiskstream ()
 void
 MidiDiskstream::non_realtime_locate (nframes_t position)
 {
+	//cerr << "MDS: non_realtime_locate: " << position << endl;
+	assert(_write_source);
 	_write_source->set_timeline_position (position);
+	seek(position, true); // correct?
 }
 
 
@@ -204,25 +207,7 @@ MidiDiskstream::get_input_sources ()
 
 	_source_port = _io->midi_input(0);
 
-	/* I don't get it....
-	const char **connections = _io->input(0)->get_connections ();
-
-	if (connections == 0 || connections[0] == 0) {
-
-		if (_source_port) {
-			// _source_port->disable_metering ();
-		}
-
-		_source_port = 0;
-
-	} else {
-		_source_port = dynamic_cast<MidiPort*>(
-			_session.engine().get_port_by_name (connections[0]) );
-	}
-
-	if (connections) {
-		free (connections);
-	}*/
+	// do... stuff?
 }		
 
 int
@@ -685,6 +670,7 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 int
 MidiDiskstream::overwrite_existing_buffers ()
 {
+	cerr << "MDS: overwrite_existing_buffers() (does nothing)" << endl;
 	return 0;
 }
 
@@ -693,6 +679,8 @@ MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 {
 	Glib::Mutex::Lock lm (state_lock);
 	int ret = -1;
+	
+	//cerr << "MDS: seek: " << frame << endl;
 
 	_playback_buf->reset();
 	_capture_buf->reset();
@@ -722,6 +710,8 @@ MidiDiskstream::can_internal_playback_seek (nframes_t distance)
 int
 MidiDiskstream::internal_playback_seek (nframes_t distance)
 {
+	cerr << "MDS: internal_playback_seek " << distance << endl;
+
 	first_recordable_frame += distance;
 	playback_sample += distance;
 
@@ -1203,6 +1193,10 @@ MidiDiskstream::engage_record_enable ()
 		_source_port->request_monitor_input (!(Config->get_auto_input() && rolling));
 	}
 
+	// FIXME: Why is this necessary?  Isn't needed for AudioDiskstream...
+	if (!_write_source)
+		use_new_write_source();
+
 	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
 	RecordEnableChanged (); /* EMIT SIGNAL */
@@ -1405,6 +1399,7 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool force)
 	if (_write_source && mark_write_complete) {
 		_write_source->mark_streaming_write_completed ();
 	}
+
 	use_new_write_source (0);
 			
 	if (record_enabled()) {

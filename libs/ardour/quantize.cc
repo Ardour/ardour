@@ -70,13 +70,13 @@ Quantize::run (boost::shared_ptr<Region> r)
 	double q_frames = _q * (m.frames_per_bar(t, session.frame_rate()) / (double)m.beats_per_bar());
 
 	for (MidiModel::Notes::iterator i = model->notes().begin(); i != model->notes().end(); ++i) {
-		const double new_time = lrint(i->time() / q_frames) * q_frames;
-		const double new_dur = ((i->time() != 0 && new_dur < (q_frames * 1.5))
+		const double new_time = lrint((*i)->time() / q_frames) * q_frames;
+		const double new_dur = (((*i)->time() != 0 && new_dur < (q_frames * 1.5))
 			? q_frames
-			: lrint(i->duration() / q_frames) * q_frames);
+			: lrint((*i)->duration() / q_frames) * q_frames);
 		
-		i->set_time(new_time);
-		i->set_duration(new_dur);
+		(*i)->set_time(new_time);
+		(*i)->set_duration(new_dur);
 	}
 
 	model->set_edited(true);

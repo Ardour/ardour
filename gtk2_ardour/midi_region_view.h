@@ -76,7 +76,7 @@ class MidiRegionView : public RegionView
 
     GhostRegion* add_ghost (AutomationTimeAxisView&);
 
-	void add_note(const ARDOUR::Note& note, bool copy_note);
+	void add_note(const boost::shared_ptr<ARDOUR::Note> note);
 	void resolve_note(uint8_t note_num, double end_time);
 
 	void begin_write();
@@ -99,14 +99,14 @@ class MidiRegionView : public RegionView
 			_delta_command = _model->new_delta_command();
 	}
 	
-	void command_add_note(ARDOUR::Note& note) {
+	void command_add_note(const boost::shared_ptr<ARDOUR::Note> note) {
 		if (_delta_command)
 			_delta_command->add(note);
 	}
 
 	void command_remove_note(ArdourCanvas::CanvasMidiEvent* ev) {
 		if (_delta_command && ev->note()) {
-			_delta_command->remove(*ev->note());
+			_delta_command->remove(ev->note());
 			ev->selected(true);
 		}
 	}

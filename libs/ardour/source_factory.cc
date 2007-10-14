@@ -169,8 +169,10 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 #endif
 	
        } else if (type == DataType::MIDI) {
-
-               boost::shared_ptr<Source> ret (new SMFSource (s, node));
+		   boost::shared_ptr<Source> ret (new SMFSource (s, node));
+		       
+		   SourceCreated (ret);
+		   return ret;
        }
 
 	return boost::shared_ptr<Source>();

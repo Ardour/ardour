@@ -146,13 +146,10 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	if (load_model)
 		source->load_model();
 
-	if (source->model()) {
-		// Find our note range
-		for (size_t i=0; i < source->model()->n_notes(); ++i) {
-			const Note& note = source->model()->note_at(i);
-			update_bounds(note.note());
-		}
-	}
+	// Find our note range
+	if (source->model())
+		for (size_t i=0; i < source->model()->n_notes(); ++i)
+			update_bounds(source->model()->note_at(i)->note());
 	
 	// Display region contents
 	region_view->display_model(source->model());
@@ -467,24 +464,26 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
 						for (size_t i=0; i < data->n_notes(); ++i) {
 
-							const Note& note = data->note_at(i);
+							// FIXME: slooooooooow!
 
-							if (note.time() + region->position() < start)
+							const boost::shared_ptr<Note> note = data->note_at(i);
+							
+							if (note->duration() > 0 && note->end_time() + region->position() > start)
+								mrv->resolve_note(note->note(), note->end_time());
+
+							if (note->time() + region->position() < start)
 								continue;
 
-							if (note.time() + region->position() > start + dur)
+							if (note->time() + region->position() > start + dur)
 								break;
 
-							mrv->add_note(note, true);
-							
-							if (note.duration() > 0 && note.end_time() >= start)
-								mrv->resolve_note(note.note(), note.end_time());
+							mrv->add_note(note);
 
-							if (note.note() < _lowest_note) {
-								_lowest_note = note.note();
+							if (note->note() < _lowest_note) {
+								_lowest_note = note->note();
 								update_range = true;
-							} else if (note.note() > _highest_note) {
-								_highest_note = note.note();
+							} else if (note->note() > _highest_note) {
+								_highest_note = note->note();
 								update_range = true;
 							}
 						}

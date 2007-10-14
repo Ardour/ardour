@@ -296,14 +296,14 @@ ARDOUR_UI::post_engine ()
 	MIDI::Manager::instance()->set_api_data (engine->jack());
 	setup_midi ();
 
-	check_memory_locking();
-
-       	ActionManager::init ();
+	ActionManager::init ();
 	_tooltips.enable();
 
 	if (setup_windows ()) {
 		throw failed_constructor ();
 	}
+	
+	check_memory_locking();
 
 	/* this is the first point at which all the keybindings are available */
 

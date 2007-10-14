@@ -28,6 +28,7 @@
 #include <pbd/error.h>
 #include <gtkmm2ext/utils.h>
 #include <pbd/memento_command.h>
+#include <pbd/basename.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -52,6 +53,7 @@
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/midi_diskstream.h>
 #include <ardour/playlist.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/audioregion.h>
@@ -59,6 +61,7 @@
 #include <ardour/dB.h>
 #include <ardour/utils.h>
 #include <ardour/region_factory.h>
+#include <ardour/source_factory.h>
 
 #include <bitset>
 
@@ -318,22 +321,19 @@ Editor::midi_edit_mode_toggled (MidiEditMode m)
 	}
 
 	switch (m) {
-	case MidiEditSelect:
-		if (midi_tool_select_button.get_active()) {
-			set_midi_edit_mode (m);
-		}
-		break;
-	
 	case MidiEditPencil:
-		if (midi_tool_pencil_button.get_active()) {
+		if (midi_tool_pencil_button.get_active())
 			set_midi_edit_mode (m);
-		}
 		break;
-	
-	case MidiEditErase:
-		if (midi_tool_erase_button.get_active()) {
+
+	case MidiEditSelect:
+		if (midi_tool_select_button.get_active())
 			set_midi_edit_mode (m);
-		}
+		break;
+
+	case MidiEditErase:
+		if (midi_tool_erase_button.get_active())
+			set_midi_edit_mode (m);
 		break;
 
 	default:
@@ -362,14 +362,14 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 	ignore_midi_edit_mode_toggle = true;
 
 	switch (midi_edit_mode) {
-	case MidiEditSelect:
-		midi_tool_select_button.set_active (true);
-		break;
-	
 	case MidiEditPencil:
 		midi_tool_pencil_button.set_active (true);
 		break;
-	
+
+	case MidiEditSelect:
+		midi_tool_select_button.set_active (true);
+		break;
+
 	case MidiEditErase:
 		midi_tool_erase_button.set_active (true);
 		break;
@@ -388,12 +388,14 @@ void
 Editor::set_midi_edit_cursor (MidiEditMode m)
 {
 	switch (midi_edit_mode) {
-	case MidiEditSelect:
-		current_canvas_cursor = midi_select_cursor;
-		break;
 	case MidiEditPencil:
 		current_canvas_cursor = midi_pencil_cursor;
 		break;
+
+	case MidiEditSelect:
+		current_canvas_cursor = midi_select_cursor;
+		break;
+
 	case MidiEditErase:
 		current_canvas_cursor = midi_erase_cursor;
 		break;
@@ -777,6 +779,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			/* rest handled in motion & release */
 			break;
 
+		case MouseNote:
+			start_create_region_grab (item, event);
+			break;
+		
 		default:
 			break;
 		}
@@ -1117,7 +1123,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				session->request_transport_speed (0.0);
  			}
 			break;
-
+			
 		default:
 			break;
 
@@ -1621,6 +1627,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case MouseRange:
 	case MouseZoom:
 	case MouseTimeFX:
+	case MouseNote:
 		if (drag_info.item && (event->motion.state & GDK_BUTTON1_MASK ||
 				       (event->motion.state & GDK_BUTTON2_MASK))) {
 			if (!from_autoscroll) {
@@ -2793,6 +2800,19 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 }
 
 void
+Editor::start_create_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	drag_info.copy = false;
+	drag_info.item = item;
+	drag_info.data = clicked_axisview;
+	drag_info.last_trackview = clicked_axisview;
+	drag_info.motion_callback = &Editor::create_region_drag_motion_callback;
+	drag_info.finished_callback = &Editor::create_region_drag_finished_callback;
+
+	start_grab (event);
+}
+
+void
 Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	if (selection->regions.empty() || clicked_regionview == 0) {
@@ -3602,6 +3622,59 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	for (vector<RegionView*>::iterator x = copies.begin(); x != copies.end(); ++x) {
 		delete *x;
+	}
+}
+
+	
+void
+Editor::create_region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	if (drag_info.move_threshold_passed) {
+		if (drag_info.first_move) {
+			// TODO: create region-create-drag region view here
+			drag_info.first_move = false;
+		}
+
+		// TODO: resize region-create-drag region view here
+	}
+} 
+
+void
+Editor::create_region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (drag_info.last_trackview);
+	if (!mtv)
+		return;
+
+	const boost::shared_ptr<MidiDiskstream> diskstream =
+		boost::dynamic_pointer_cast<MidiDiskstream>(mtv->view()->trackview().track()->diskstream());
+	
+	if (!diskstream) {
+		warning << "Cannot create non-MIDI region" << endl;
+		return;
+	}
+
+	if (drag_info.first_move) {
+		begin_reversible_command (_("create region"));
+		XMLNode &before = mtv->playlist()->get_state();
+
+		nframes_t start = drag_info.grab_frame;
+		snap_to (start, -1);
+		const Meter& m = session->tempo_map().meter_at(start);
+		const Tempo& t = session->tempo_map().tempo_at(start);
+		double length = m.frames_per_bar(t, session->frame_rate());
+
+		boost::shared_ptr<Source> src = session->create_midi_source_for_session(*diskstream.get());
+				
+		mtv->playlist()->add_region (boost::dynamic_pointer_cast<MidiRegion>(RegionFactory::create(
+				src, 0, length, PBD::basename_nosuffix(src->name()))), start);
+		XMLNode &after = mtv->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*mtv->playlist().get(), &before, &after));
+		commit_reversible_command();
+
+	} else {
+		create_region_drag_motion_callback (item, event);
+		// TODO: create region-create-drag region here
 	}
 }
 

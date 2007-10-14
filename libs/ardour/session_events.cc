@@ -397,7 +397,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::Overwrite:
-		overwrite_some_buffers (static_cast<AudioDiskstream*>(ev->ptr));
+		overwrite_some_buffers (static_cast<Diskstream*>(ev->ptr));
 		break;
 
 	case Event::SetDiskstreamSpeed:

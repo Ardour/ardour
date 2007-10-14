@@ -83,16 +83,19 @@ struct MidiEvent {
 
 	inline const MidiEvent& operator=(const MidiEvent& copy) {
 		_time = copy._time;
-		if (!_owns_buffer) {
-			_buffer = copy._buffer;
-		} else if (copy._buffer) {
-			if (!_buffer || _size < copy._size)
-				_buffer = (Byte*)realloc(_buffer, copy._size);
-			memcpy(_buffer, copy._buffer, copy._size);
+		if (_owns_buffer) {
+			if (copy._buffer) {
+				if (!_buffer || _size < copy._size)
+					_buffer = (Byte*)realloc(_buffer, copy._size);
+				memcpy(_buffer, copy._buffer, copy._size);
+			} else {
+				free(_buffer);
+				_buffer = NULL;
+			}
 		} else {
-			free(_buffer);
-			_buffer = NULL;
+			_buffer = copy._buffer;
 		}
+
 		_size = copy._size;
 		return *this;
 	}

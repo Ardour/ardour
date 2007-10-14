@@ -30,8 +30,12 @@ namespace Canvas {
 
 class CanvasNote : public SimpleRect, public CanvasMidiEvent {
 public:
-	CanvasNote(MidiRegionView& region, Group& group, const ARDOUR::Note* note=NULL, bool copy_note=false)
-		: SimpleRect(group), CanvasMidiEvent(region, this, note, copy_note)
+	CanvasNote(
+			MidiRegionView&                       region,
+			Group&                                group,
+			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
+
+		: SimpleRect(group), CanvasMidiEvent(region, this, note)
 	{
 	}
 	

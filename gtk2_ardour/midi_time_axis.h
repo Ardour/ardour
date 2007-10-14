@@ -42,7 +42,6 @@
 
 namespace ARDOUR {
 	class Session;
-	class MidiDiskstream;
 	class RouteGroup;
 	class Processor;
 	class Location;

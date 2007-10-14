@@ -193,8 +193,8 @@ void
 MidiBuffer::silence(nframes_t dur, nframes_t offset)
 {
 	// FIXME use parameters
-	assert(offset == 0);
-	//assert(dur == _capacity);
+	if (offset != 0)
+		cerr << "WARNING: MidiBuffer::silence w/ offset != 0 (not implemented)" << endl;
 
 	memset(_events, 0, sizeof(MidiEvent) * _capacity);
 	memset(_data, 0, sizeof(Byte) * _capacity * MAX_EVENT_SIZE);

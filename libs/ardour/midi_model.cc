@@ -42,7 +42,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	, _is_end( (t == DBL_MAX) || model.empty())
 	, _locked( ! _is_end)
 {
-	//cerr << "Created MIDI iterator @ " << t << "(is end: " << _is_end << ")" << endl;
+	//cerr << "Created MIDI iterator @ " << t << " (is end: " << _is_end << ")" << endl;
 	
 	if (_is_end)
 		return;
@@ -52,7 +52,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	_note_iter = model.notes().end();
 
 	for (MidiModel::Notes::const_iterator i = model.notes().begin(); i != model.notes().end(); ++i) {
-		if ((*i).time() >= t) {
+		if ((*i)->time() >= t) {
 			_note_iter = i;
 			break;
 		}
@@ -70,8 +70,8 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y);
 		if (!ret) {
-			cerr << "MIDI Iterator: CC " << i->first.id() << " (size " << i->second->list()->size()
-				<< ") has no events past " << t << endl;
+			/*cerr << "MIDI Iterator: CC " << i->first.id() << " (size " << i->second->list()->size()
+				<< ") has no events past " << t << endl;*/
 			continue;
 		} 
 
@@ -92,7 +92,8 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	}
 
 	if (_note_iter != model.notes().end()) {
-		_event = MidiEvent(_note_iter->on_event(), false);
+		_event = MidiEvent((*_note_iter)->on_event(), false);
+		_active_notes.push(*_note_iter);
 		++_note_iter;
 	}
 
@@ -106,9 +107,9 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		_is_end = true;
 		_model->read_unlock();
 		_locked = false;
-	//} else {
-	//	printf("MIDI Iterator = %X @ %lf\n", _event.type(), _event.time());
-	}
+	} /*else {
+		printf("MIDI Iterator = %X @ %lf\n", _event.type(), _event.time());
+	}*/
 }
 
 
@@ -155,29 +156,50 @@ MidiModel::const_iterator::operator++()
 		}
 	}
 	
-	enum Type { NIL, NOTE, CC };
-	Type type = NIL;
-
-	if (_note_iter != _model->notes().end())
-		type = NOTE;
+	enum Type { NIL, NOTE_ON, NOTE_OFF, CC };
 	
+	Type   type = NIL;
+	double t    = 0;
+
+	// Next earliest note on
+	if (_note_iter != _model->notes().end()) {
+		type = NOTE_ON;
+		t = (*_note_iter)->time();
+	}
+	
+	// Use the next earliest note off iff it's earlier than the note on
+	if (_model->note_mode() == Sustained && (! _active_notes.empty())) {
+		if (type == NIL || _active_notes.top()->end_time() <= (*_note_iter)->time()) {
+			type = NOTE_OFF;
+			t = _active_notes.top()->end_time();
+		}
+	}
+	
+	// Use the next earliest controller iff it's earlier than the note event
 	if (_control_iter != _control_iters.end() && _control_iter->second.first != DBL_MAX)
-		if (_note_iter == _model->notes().end() || _control_iter->second.first < _note_iter->time())
+		if (type == NIL || _control_iter->second.first < t)
 			type = CC;
 
-	if (type == NOTE) {
-		//cerr << "MIDI Iterator = note" << endl;
-		_event = MidiEvent(_note_iter->on_event(), false);
+	if (type == NOTE_ON) {
+		//cerr << "********** MIDI Iterator = note on" << endl;
+		_event = MidiEvent((*_note_iter)->on_event(), false);
+		_active_notes.push(*_note_iter);
 		++_note_iter;
+	} else if (type == NOTE_OFF) {
+		//cerr << "********** MIDI Iterator = note off" << endl;
+		_event = MidiEvent(_active_notes.top()->off_event(), false);
+		_active_notes.pop();
 	} else if (type == CC) {
-		//cerr << "MIDI Iterator = CC" << endl;
+		//cerr << "********** MIDI Iterator = CC" << endl;
 		_model->control_to_midi_event(_event, *_control_iter);
 	} else {
-		//cerr << "MIDI Iterator = NIL" << endl;
+		//cerr << "********** MIDI Iterator = END" << endl;
 		_is_end = true;
 		_model->read_unlock();
 		_locked = false;
 	}
+
+	assert(_is_end || _event.size() > 0);
 
 	return *this;
 }
@@ -186,13 +208,35 @@ MidiModel::const_iterator::operator++()
 bool
 MidiModel::const_iterator::operator==(const const_iterator& other) const
 {
-	if (_is_end)
-		if (other._is_end)
-			return true;
-		else
-			return false;
+	if (_is_end || other._is_end)
+		return (_is_end == other._is_end);
 	else
 		return (_event == other._event);
+}
+		
+
+MidiModel::const_iterator&
+MidiModel::const_iterator::operator=(const const_iterator& other)
+{
+	if (_locked && _model != other._model)
+		_model->read_unlock();
+
+	assert( ! other._event.owns_buffer());
+
+	_model = other._model;
+	_event = other._event;
+	_is_end = other._is_end;
+	_locked = other._locked;
+	_note_iter = other._note_iter;
+	_control_iters = other._control_iters;
+	_control_iter = other._control_iter;
+	
+	assert( ! _event.owns_buffer());
+	
+	if (_locked)
+		_model->read_lock();
+
+	return *this;
 }
 
 	
@@ -204,11 +248,12 @@ MidiModel::MidiModel(Session& s, size_t size)
 	, _note_mode(Sustained)
 	, _writing(false)
 	, _edited(false)
-	//, _active_notes(LaterNoteEndComparator())
 	, _end_iter(*this, DBL_MAX)
 	, _next_read(UINT32_MAX)
 	, _read_iter(*this, DBL_MAX)
 {
+	assert(_end_iter._is_end);
+	assert( ! _end_iter._locked);
 }
 
 
@@ -219,84 +264,34 @@ MidiModel::MidiModel(Session& s, size_t size)
 size_t
 MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const
 {
+	//cerr << this << " MM::read @ " << start << " * " << nframes << " + " << stamp_offset << endl;
+	//cerr << this << " MM # notes: " << n_notes() << endl;
+
 	size_t read_events = 0;
 
 	if (start != _next_read) {
 		_read_iter = const_iterator(*this, (double)start);
-	//	cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
-	//} else {
-	//	cerr << "Using cached iterator at " << _next_read << endl;
+		//cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
+	} else {
+		//cerr << "Using cached iterator at " << _next_read << endl;
+	}
+
+	if (_read_iter == end()) {
+		//cerr << this << " MM::read: at end @ " << _read_iter->time() << endl;
+	} else {
+		//cerr << this << " MM::read: at " << _read_iter->time() << endl;
 	}
 
 	_next_read = start + nframes;
 
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
+		assert(_read_iter->size() > 0);
 		dst.write(_read_iter->time() + stamp_offset, _read_iter->size(), _read_iter->buffer());
+		//cerr << this << " MM::read event @ " << _read_iter->time() << endl;
 		++_read_iter;
 		++read_events;
 	}
 
-#if 0
-	/* FIXME: cache last lookup value to avoid O(n) search every time */
-
-	if (_note_mode == Sustained) {
-
-		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-
-			while ( ! _active_notes.empty() ) {
-				const Note* const earliest_off = _active_notes.top();
-				const MidiEvent&  off_ev       = earliest_off->off_event();
-				if (off_ev.time() < start + nframes && off_ev.time() <= n->time()) {
-					dst.write(off_ev.time() + stamp_offset, off_ev.size(), off_ev.buffer());
-					_active_notes.pop();
-					++read_events;
-				} else {
-					break;
-				}
-			}
-
-			if (n->time() >= start + nframes)
-				break;
-
-			// Note on
-			if (n->time() >= start) {
-				const MidiEvent& on_ev = n->on_event();
-				dst.write(on_ev.time() + stamp_offset, on_ev.size(), on_ev.buffer());
-				_active_notes.push(&(*n));
-				++read_events;
-			}
-
-		}
-			
-		// Write any trailing note offs
-		while ( ! _active_notes.empty() ) {
-			const Note* const earliest_off = _active_notes.top();
-			const MidiEvent&  off_ev       = earliest_off->off_event();
-			if (off_ev.time() < start + nframes) {
-				dst.write(off_ev.time() + stamp_offset, off_ev.size(), off_ev.buffer());
-				_active_notes.pop();
-				++read_events;
-			} else {
-				break;
-			}
-		}
-
-	// Percussive
-	} else {
-		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-			// Note on
-			if (n->time() >= start) {
-				if (n->time() < start + nframes) {
-					const MidiEvent& ev = n->on_event();
-					dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
-					++read_events;
-				} else {
-					break;
-				}
-			}
-		}
-	}
-#endif
 	return read_events;
 }
 	
@@ -323,83 +318,6 @@ MidiModel::control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter)
 }
 
 	
-/** Return the earliest MIDI event in the given range.
- *
- * \return true if \a output has been set to the earliest event in the given range.
- */
-#if 0
-bool
-MidiModel::earliest_note_event(MidiEvent& output, nframes_t start, nframes_t nframes) const
-{
-	/* FIXME: cache last lookup value to avoid O(n) search every time */
-		
-	const Note*      const earliest_on  = NULL;
-	const Note*      const earliest_off = NULL;
-	const MidiEvent* const earliest_cc = NULL;
-
-	/* Notes */
-
-	if (_note_mode == Sustained) {
-				
-		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-
-			if ( ! _active_notes.empty() ) {
-				const Note* const earliest_off = _active_notes.top();
-				const MidiEvent&  off_ev       = earliest_off->off_event();
-				if (off_ev.time() < start + nframes && off_ev.time() <= n->time()) {
-					output = off_ev;
-					//dst.write(off_ev.time() + stamp_offset, off_ev.size(), off_ev.buffer());
-					_active_notes.pop();
-					return true;
-				}
-			}
-
-			if (n->time() >= start + nframes)
-				break;
-
-			// Note on
-			if (n->time() >= start) {
-				earliest_on = &n->on_event();
-				//dst.write(on_ev.time() + stamp_offset, on_ev.size(), on_ev.buffer());
-				_active_notes.push(&(*n));
-				return true;
-			}
-
-		}
-			
-		// Write any trailing note offs
-		while ( ! _active_notes.empty() ) {
-			const Note* const earliest_off = _active_notes.top();
-			const MidiEvent&  off_ev       = earliest_off->off_event();
-			if (off_ev.time() < start + nframes) {
-				dst.write(off_ev.time() + stamp_offset, off_ev.size(), off_ev.buffer());
-				_active_notes.pop();
-				++read_events;
-			} else {
-				break;
-			}
-		}
-
-	// Percussive
-	} else {
-		for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-			// Note on
-			if (n->time() >= start) {
-				if (n->time() < start + nframes) {
-					const MidiEvent& ev = n->on_event();
-					dst.write(ev.time() + stamp_offset, ev.size(), ev.buffer());
-					++read_events;
-				} else {
-					break;
-				}
-			}
-		}
-	}
-
-	return read_events;
-}
-#endif
-
 /** Begin a write of events to the model.
  *
  * If \a mode is Sustained, complete notes with duration are constructed as note
@@ -435,8 +353,8 @@ MidiModel::end_write(bool delete_stuck)
 
 	if (_note_mode == Sustained && delete_stuck) {
 		for (Notes::iterator n = _notes.begin(); n != _notes.end() ; ) {
-			if (n->duration() == 0) {
-				cerr << "WARNING: Stuck note lost: " << n->note() << endl;
+			if ((*n)->duration() == 0) {
+				cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
 				n = _notes.erase(n);
 			} else {
 				++n;
@@ -461,7 +379,7 @@ MidiModel::append(const MidiEvent& ev)
 {
 	write_lock();
 
-	assert(_notes.empty() || ev.time() >= _notes.back().time());
+	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
 
 	if (ev.is_note_on())
@@ -483,7 +401,7 @@ MidiModel::append_note_on_unlocked(double time, uint8_t note_num, uint8_t veloci
 	//cerr << "MidiModel " << this << " note " << (int)note_num << " on @ " << time << endl;
 
 	assert(_writing);
-	_notes.push_back(Note(time, 0, note_num, velocity));
+	_notes.push_back(boost::shared_ptr<Note>(new Note(time, 0, note_num, velocity)));
 	if (_note_mode == Sustained) {
 		//cerr << "MM Sustained: Appending active note on " << (unsigned)(uint8_t)note_num << endl;
 		_write_notes.push_back(_notes.size() - 1);
@@ -512,7 +430,7 @@ MidiModel::append_note_off_unlocked(double time, uint8_t note_num)
 	 * keys that send it */
 
 	for (WriteNotes::iterator n = _write_notes.begin(); n != _write_notes.end(); ++n) {
-		Note& note = _notes[*n];
+		Note& note = *_notes[*n].get();
 		//cerr << (unsigned)(uint8_t)note.note() << " ? " << (unsigned)note_num << endl;
 		if (note.note() == note_num) {
 			assert(time > note.time());
@@ -538,7 +456,7 @@ MidiModel::append_cc_unlocked(double time, uint8_t number, uint8_t value)
 
 
 void
-MidiModel::add_note_unlocked(const Note& note)
+MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note)
 {
 	//cerr << "MidiModel " << this << " add note " << (int)note.note() << " @ " << note.time() << endl;
 	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note, note_time_comparator);
@@ -547,7 +465,7 @@ MidiModel::add_note_unlocked(const Note& note)
 
 
 void
-MidiModel::remove_note_unlocked(const Note& note)
+MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 {
 	//cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
 	Notes::iterator n = find(_notes.begin(), _notes.end(), note);
@@ -562,10 +480,10 @@ MidiModel::is_sorted() const
 {
 	bool t = 0;
 	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n)
-		if (n->time() < t)
+		if ((*n)->time() < t)
 			return false;
 		else
-			t = n->time();
+			t = (*n)->time();
 
 	return true;
 }
@@ -605,7 +523,7 @@ MidiModel::apply_command(Command* cmd)
 
 
 void
-MidiModel::DeltaCommand::add(const Note& note)
+MidiModel::DeltaCommand::add(const boost::shared_ptr<Note> note)
 {
 	//cerr << "MEC: apply" << endl;
 
@@ -615,7 +533,7 @@ MidiModel::DeltaCommand::add(const Note& note)
 
 
 void
-MidiModel::DeltaCommand::remove(const Note& note)
+MidiModel::DeltaCommand::remove(const boost::shared_ptr<Note> note)
 {
 	//cerr << "MEC: remove" << endl;
 
@@ -630,15 +548,27 @@ MidiModel::DeltaCommand::operator()()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 	
+	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
+	const bool   reset_iter = (_model._read_iter.locked());
+	const double iter_time  = _model._read_iter->time();
+
+	if (reset_iter)
+		_model._read_iter = _model.end(); // drop read lock
+
+	assert( ! _model._read_iter.locked());
+
 	_model.write_lock();
 	
-	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
+	for (std::list< boost::shared_ptr<Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model.add_note_unlocked(*i);
 	
-	for (std::list<Note>::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
+	for (std::list< boost::shared_ptr<Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
 		_model.remove_note_unlocked(*i);
 	
 	_model.write_unlock();
+
+	if (reset_iter)
+		_model._read_iter = const_iterator(_model, iter_time);
 	
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -650,15 +580,27 @@ MidiModel::DeltaCommand::undo()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 	
+	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
+	const bool   reset_iter = (_model._read_iter.locked());
+	const double iter_time  = _model._read_iter->time();
+
+	if (reset_iter)
+		_model._read_iter = _model.end(); // drop read lock
+	
+	assert( ! _model._read_iter.locked());
+
 	_model.write_lock();
 
-	for (std::list<Note>::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
+	for (std::list< boost::shared_ptr<Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model.remove_note_unlocked(*i);
 	
-	for (std::list<Note>::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
+	for (std::list< boost::shared_ptr<Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
 		_model.add_note_unlocked(*i);
 	
 	_model.write_unlock();
+	
+	if (reset_iter)
+		_model._read_iter = const_iterator(_model, iter_time);
 	
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -697,9 +639,9 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 
 		// Write any pending note offs earlier than this note on
 		while ( ! active_notes.empty() ) {
-			const Note* const earliest_off = active_notes.top();
-			const MidiEvent&  off_ev       = earliest_off->off_event();
-			if (off_ev.time() <= n->time()) {
+			const boost::shared_ptr<const Note> earliest_off = active_notes.top();
+			const MidiEvent& off_ev = earliest_off->off_event();
+			if (off_ev.time() <= (*n)->time()) {
 				source->append_event_unlocked(off_ev);
 				active_notes.pop();
 			} else {
@@ -708,9 +650,9 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 		}
 
 		// Write this note on
-		source->append_event_unlocked(n->on_event());
-		if (n->duration() > 0)
-			active_notes.push(&(*n));
+		source->append_event_unlocked((*n)->on_event());
+		if ((*n)->duration() > 0)
+			active_notes.push(*n);
 	}
 		
 	// Write any trailing note offs

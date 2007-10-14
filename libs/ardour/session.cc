@@ -1482,11 +1482,13 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 	char track_name[32];
 	uint32_t track_id = 0;
 	uint32_t n = 0;
-	uint32_t channels_used = 0;
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
+	//uint32_t control_id;
 
+	// FIXME: need physical I/O and autoconnect stuff for MIDI
+	
 	/* count existing midi tracks */
 
 	{
@@ -1496,18 +1498,29 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 			if (dynamic_cast<MidiTrack*>((*i).get()) != 0) {
 				if (!(*i)->is_hidden()) {
 					n++;
-					channels_used += (*i)->n_inputs().n_midi();
+					//channels_used += (*i)->n_inputs().n_midi();
 				}
 			}
 		}
 	}
 
+	/*
+	vector<string> physinputs;
+	vector<string> physoutputs;
+	uint32_t nphysical_in;
+	uint32_t nphysical_out;
+
+	_engine.get_physical_outputs (physoutputs);
+	_engine.get_physical_inputs (physinputs);
+	control_id = ntracks() + nbusses() + 1;
+	*/
+
 	while (how_many) {
 
 		/* check for duplicate route names, since we might have pre-existing
-		   routes with this name (e.g. create Midi1, Midi2, delete Midi1,
+		   routes with this name (e.g. create Audio1, Audio2, delete Audio1,
 		   save, close,restart,add new route - first named route is now
-		   Midi2)
+		   Audio2)
 		*/
 		
 
@@ -1522,17 +1535,71 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 			
 		} while (track_id < (UINT_MAX-1));
 
+		/*
+		if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
+		} else {
+			nphysical_in = 0;
+		}
+		
+		if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
+		} else {
+			nphysical_out = 0;
+		}
+		*/
+
+		shared_ptr<MidiTrack> track;
+		
 		try {
-			shared_ptr<MidiTrack> track (new MidiTrack (*this, track_name, Route::Flag (0), mode));
+			track = boost::shared_ptr<MidiTrack>((new MidiTrack (*this, track_name, Route::Flag (0), mode)));
 			
-			if (track->ensure_io (ChanCount(DataType::MIDI, 1), ChanCount(DataType::MIDI, 1), false, this)) {
+			if (track->ensure_io (ChanCount(DataType::MIDI, 1), ChanCount(DataType::AUDIO, 1), false, this)) {
 				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+				goto failed;
+			}
+
+			/*
+			if (nphysical_in) {
+				for (uint32_t x = 0; x < track->n_inputs().n_midi() && x < nphysical_in; ++x) {
+					
+					port = "";
+					
+					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+						port = physinputs[(channels_used+x)%nphysical_in];
+					} 
+					
+					if (port.length() && track->connect_input (track->input (x), port, this)) {
+						break;
+					}
+				}
+			}
+			
+			for (uint32_t x = 0; x < track->n_outputs().n_midi(); ++x) {
+				
+				port = "";
+				
+				if (nphysical_out && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
+					port = physoutputs[(channels_used+x)%nphysical_out];
+				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
+					if (_master_out) {
+						port = _master_out->input (x%_master_out->n_inputs().n_midi())->name();
+					}
+				}
+				
+				if (port.length() && track->connect_output (track->output (x), port, this)) {
+					break;
+				}
 			}
 			
 			channels_used += track->n_inputs ().n_midi();
 
+			*/
+
+			track->midi_diskstream()->non_realtime_input_change();
+			
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
-			track->set_remote_control_id (ntracks());
+			//track->set_remote_control_id (control_id);
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -1540,14 +1607,43 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 
 		catch (failed_constructor &err) {
 			error << _("Session: could not create new midi track.") << endmsg;
-			// XXX should we delete the tracks already created? 
-			ret.clear ();
-			return ret;
+
+			if (track) {
+				/* we need to get rid of this, since the track failed to be created */
+				/* XXX arguably, AudioTrack::AudioTrack should not do the Session::add_diskstream() */
+
+				{ 
+					RCUWriter<DiskstreamList> writer (diskstreams);
+					boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+					ds->remove (track->midi_diskstream());
+				}
+			}
+
+			goto failed;
 		}
-		
+
+		catch (AudioEngine::PortRegistrationFailure& pfe) {
+
+			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+
+			if (track) {
+				/* we need to get rid of this, since the track failed to be created */
+				/* XXX arguably, MidiTrack::MidiTrack should not do the Session::add_diskstream() */
+
+				{ 
+					RCUWriter<DiskstreamList> writer (diskstreams);
+					boost::shared_ptr<DiskstreamList> ds = writer.get_copy();
+					ds->remove (track->midi_diskstream());
+				}
+			}
+
+			goto failed;
+		}
+
 		--how_many;
 	}
 
+  failed:
 	if (!new_routes.empty()) {
 		add_routes (new_routes, false);
 		save_state (_current_snapshot_name);
@@ -2732,8 +2828,6 @@ Session::source_by_id (const PBD::ID& id)
 		source = i->second;
 	}
 
-	/* XXX search MIDI or other searches here */
-	
 	return source;
 }
 

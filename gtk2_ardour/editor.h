@@ -833,8 +833,8 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* time_fx_cursor;
 	static Gdk::Cursor* fader_cursor;
 	static Gdk::Cursor* speaker_cursor;
-	static Gdk::Cursor* midi_select_cursor;
 	static Gdk::Cursor* midi_pencil_cursor;
+	static Gdk::Cursor* midi_select_cursor;
 	static Gdk::Cursor* midi_erase_cursor;
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
@@ -1137,6 +1137,8 @@ class Editor : public PublicEditor
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+	void create_region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
+	void create_region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	bool _dragging_playhead;
 
@@ -1157,6 +1159,7 @@ class Editor : public PublicEditor
 	gint mouse_rename_region (ArdourCanvas::Item*, GdkEvent*);
 
 	void start_region_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_create_region_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_region_copy_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_region_brush_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*);
@@ -1439,8 +1442,8 @@ class Editor : public PublicEditor
 
 	Gtk::HBox                midi_tool_button_box;
 	Gtkmm2ext::TearOff*      midi_tool_tearoff;
-	Gtk::ToggleButton        midi_tool_select_button;
 	Gtk::ToggleButton        midi_tool_pencil_button;
+	Gtk::ToggleButton        midi_tool_select_button;
 	Gtk::ToggleButton        midi_tool_erase_button;
 	GroupedButtons          *midi_tool_button_set;
 	void                     midi_edit_mode_toggled (Editing::MidiEditMode m);

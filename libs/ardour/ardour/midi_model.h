@@ -22,6 +22,7 @@
 #define __ardour_midi_model_h__
 
 #include <queue>
+#include <deque>
 #include <utility>
 #include <boost/utility.hpp>
 #include <glibmm/thread.h>
@@ -72,20 +73,24 @@ public:
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const MidiEvent& ev);
 	
-	inline const Note& note_at(unsigned i) const { return _notes[i]; }
+	inline const boost::shared_ptr<const Note> note_at(unsigned i) const { return _notes[i]; }
+	inline const boost::shared_ptr<Note>       note_at(unsigned i)       { return _notes[i]; }
 
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && _controls.size() == 0; }
 
-	typedef std::vector<Note> Notes;
+	/* FIXME: use better data structure */
+	typedef std::vector< boost::shared_ptr<Note> > Notes;
 	
-	inline static bool note_time_comparator (const Note& a, const Note& b) { 
-		return a.time() < b.time();
+	inline static bool note_time_comparator (const boost::shared_ptr<const Note> a,
+	                                         const boost::shared_ptr<const Note> b) { 
+		return a->time() < b->time();
 	}
 
 	struct LaterNoteEndComparator {
 		typedef const Note* value_type;
-		inline bool operator()(const Note* const a, const Note* const b) { 
+		inline bool operator()(const boost::shared_ptr<const Note> a,
+		                       const boost::shared_ptr<const Note> b) const { 
 			return a->end_time() > b->end_time();
 		}
 	};
@@ -111,14 +116,14 @@ public:
 		/*int set_state (const XMLNode&);
 		XMLNode& get_state ();*/
 
-		void add(const Note& note);
-		void remove(const Note& note);
+		void add(const boost::shared_ptr<Note> note);
+		void remove(const boost::shared_ptr<Note> note);
 
 	private:
-		MidiModel&      _model;
-		std::string     _name;
-		std::list<Note> _added_notes;
-		std::list<Note> _removed_notes;
+		MidiModel&                           _model;
+		const std::string                    _name;
+		std::list< boost::shared_ptr<Note> > _added_notes;
+		std::list< boost::shared_ptr<Note> > _removed_notes;
 	};
 
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
@@ -140,19 +145,28 @@ public:
 		const_iterator(const MidiModel& model, double t);
 		~const_iterator();
 
+		inline bool locked() const { return _locked; }
+
 		const MidiEvent& operator*()  const { return _event; }
 		const MidiEvent* operator->() const { return &_event; }
 
 		const const_iterator& operator++(); // prefix only
 		bool operator==(const const_iterator& other) const;
 		bool operator!=(const const_iterator& other) const { return ! operator==(other); }
+		
+		const_iterator& operator=(const const_iterator& other);
 
 	private:
+		friend class MidiModel;
+
 		const MidiModel* _model;
 		MidiEvent        _event;
 
-		typedef std::priority_queue<const Note*,std::vector<const Note*>, LaterNoteEndComparator>
-				ActiveNotes;
+		typedef std::priority_queue<
+				boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,
+				LaterNoteEndComparator>
+			ActiveNotes;
+		
 		mutable ActiveNotes _active_notes;
 
 		bool                                       _is_end;
@@ -167,8 +181,8 @@ public:
 	
 private:
 	friend class DeltaCommand;
-	void add_note_unlocked(const Note& note);
-	void remove_note_unlocked(const Note& note);
+	void add_note_unlocked(const boost::shared_ptr<Note> note);
+	void remove_note_unlocked(const boost::shared_ptr<const Note> note);
 
 	friend class const_iterator;
 	bool control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter) const;
@@ -193,16 +207,13 @@ private:
 
 	const const_iterator _end_iter;
 
-	mutable nframes_t     _next_read;
+	mutable nframes_t      _next_read;
 	mutable const_iterator _read_iter;
 
-	// note state for read():
-	// (TODO: Remove and replace with iterator)
-	
-	typedef std::priority_queue<const Note*,std::vector<const Note*>,
-			LaterNoteEndComparator> ActiveNotes;
-
-	//mutable ActiveNotes _active_notes;
+	typedef std::priority_queue<
+			boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,
+			LaterNoteEndComparator>
+		ActiveNotes;
 };
 
 } /* namespace ARDOUR */

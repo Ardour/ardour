@@ -57,7 +57,7 @@ TextReceiver text_receiver ("ardour");
 extern int curvetest (string);
 
 static ARDOUR_UI  *ui = 0;
-static char* localedir = LOCALEDIR;
+static const char* localedir = LOCALEDIR;
 
 gint
 show_ui_callback (void *arg)

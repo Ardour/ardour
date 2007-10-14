@@ -146,7 +146,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	 */
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
 	
-	/** Set the midi edit mode (select, pencil, eraser, etc.)
+	/** Set the midi edit mode (pencil, select, eraser, etc.)
 	 * @param m Midi edit mode (defined in editing_syms.h)
 	 * @param force Perform the effects of the change even if no change is required
 	 * (ie even if the current midi edit mode is equal to \ref m)

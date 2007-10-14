@@ -171,6 +171,7 @@
 ; (gtk_accel_path "<Actions>/Transport/TogglePunchOut" "")
 (gtk_accel_path "<Actions>/Editor/select-all-in-loop-range" "<Control>l")
 (gtk_accel_path "<Actions>/Editor/show-editor-mixer" "<Shift>e")
+(gtk_accel_path "<Actions>/Editor/show-editor-list" "<Shift>l")
 ; (gtk_accel_path "<Actions>/options/SoloInPlace" "")
 ; (gtk_accel_path "<Actions>/Main/Options" "")
 ; (gtk_accel_path "<Actions>/options/MeterFalloffMedium" "")

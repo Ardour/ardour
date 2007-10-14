@@ -29,8 +29,15 @@ namespace Canvas {
 
 class CanvasHit : public Diamond, public CanvasMidiEvent {
 public:
-	CanvasHit(MidiRegionView& region, Group& group, double size, const ARDOUR::Note* note=NULL)
-		: Diamond(group, size), CanvasMidiEvent(region, this, note) {}
+	CanvasHit(
+			MidiRegionView&                       region,
+			Group&                                group,
+			double                                size,
+			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
+
+		: Diamond(group, size), CanvasMidiEvent(region, this, note)
+	{
+	}
 	
 	// FIXME
 	double x1() { return 0.0; }

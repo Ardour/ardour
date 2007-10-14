@@ -326,7 +326,7 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 nframes_t
 SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
 {
-	//cerr << "SMF - read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
+	//cerr << "SMF " << name() << " read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
 	// 64 bits ought to be enough for anybody
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
