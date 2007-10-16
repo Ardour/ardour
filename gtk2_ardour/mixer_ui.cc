@@ -340,7 +340,7 @@ void
 Mixer_UI::remove_strip (MixerStrip* strip)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
-	
+
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 	list<MixerStrip *>::iterator i;

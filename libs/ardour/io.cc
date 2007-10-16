@@ -198,6 +198,8 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 
 IO::~IO ()
 {
+	cerr << "Deleting IO called " << _name << endl;
+
 	Glib::Mutex::Lock guard (m_meter_signal_lock);
 	
 	Glib::Mutex::Lock lm (io_lock);

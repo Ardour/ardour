@@ -20,10 +20,95 @@
 #ifndef __libpbd_stacktrace_h__
 #define __libpbd_stacktrace_h__
 
+#include <iostream>
 #include <ostream>
+#include <glibmm/thread.h>
+#include <list>
 
 namespace PBD {
 	void stacktrace (std::ostream& out, int levels = 0);
-}
+	void trace_twb();
+
+#ifdef HAVE_EXECINFO
+#include <execinfo.h>
+#include <stdlib.h>
+#endif
+
+template<typename T>
+class thing_with_backtrace 
+{
+  public:
+    thing_with_backtrace () {
+	    trace_twb();
+#ifdef HAVE_EXECINFO
+	    allocation_backtrace = new void*[50];
+	    allocation_backtrace_size = backtrace (allocation_backtrace, 50);
+#else 
+	    allocation_backtrace_size = 0;
+#endif
+	    Glib::Mutex::Lock lm (all_mutex);
+	    all.push_back (this);
+    }
+
+    thing_with_backtrace (const thing_with_backtrace<T>& other) {
+	    trace_twb();
+#ifdef HAVE_EXECINFO
+	    allocation_backtrace = new void*[50];
+	    allocation_backtrace_size = backtrace (allocation_backtrace, 50);
+#else 
+	    allocation_backtrace_size = 0;
+#endif
+	    Glib::Mutex::Lock lm (all_mutex);
+	    all.push_back (this);
+    }
+
+    ~thing_with_backtrace() { 
+	    if (allocation_backtrace_size) {
+		    delete [] allocation_backtrace;
+	    }
+	    Glib::Mutex::Lock lm (all_mutex);
+	    all.remove (this);
+    }
+
+    thing_with_backtrace<T>& operator= (const thing_with_backtrace<T>& other) {
+	    /* no copyable members */
+	    return *this;
+    }
+
+    static void peek_a_boo (std::ostream& stream) {
+#ifdef HAVE_EXECINFO
+	    typename std::list<thing_with_backtrace<T>*>::iterator x;
+	    for (x = all.begin(); x != all.end(); ++x) {
+		    char **strings;
+		    size_t i;
+		    
+		    strings = backtrace_symbols ((*x)->allocation_backtrace, (*x)->allocation_backtrace_size);
+		    
+		    if (strings) {
+			    stream << "--- ALLOCATED SHARED_PTR @ " << (*x) << std::endl;
+			    for (i = 0; i < (*x)->allocation_backtrace_size && i < 50U; i++) {
+				    stream << strings[i] << std::endl;
+			    }
+			    free (strings);
+		    }
+	    }
+#else
+	    stream << "execinfo not defined for this platform" << std::endl;
+#endif
+    }
+
+private:
+    void** allocation_backtrace;
+    int allocation_backtrace_size;
+    static std::list<thing_with_backtrace<T>* > all;
+    static Glib::StaticMutex all_mutex;
+};
+
+template<typename T> std::list<PBD::thing_with_backtrace<T> *> PBD::thing_with_backtrace<T>::all;
+template<typename T> Glib::StaticMutex PBD::thing_with_backtrace<T>::all_mutex = GLIBMM_STATIC_MUTEX_INIT;
+
+} // namespace PBD
+
+
 
 #endif /* __libpbd_stacktrace_h__ */

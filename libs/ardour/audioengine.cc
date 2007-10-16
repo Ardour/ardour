@@ -31,8 +31,8 @@
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
 #include <ardour/port.h>
-#include <ardour/audio_port.h>
-#include <ardour/midi_port.h>
+#include <ardour/jack_audio_port.h>
+#include <ardour/jack_midi_port.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
@@ -83,6 +83,7 @@ AudioEngine::AudioEngine (string client_name)
 
 	start_metering_thread();
 
+	JackPort::set_engine (this);
 }
 
 AudioEngine::~AudioEngine ()
@@ -97,6 +98,12 @@ AudioEngine::~AudioEngine ()
 		
 		stop_metering_thread ();
 	}
+}
+
+jack_client_t*
+AudioEngine::jack() const
+{
+	return _jack;
 }
 
 void
@@ -501,88 +508,44 @@ AudioEngine::remove_session ()
 }
 
 Port *
-AudioEngine::register_input_port (DataType type, const string& portname)
+AudioEngine::register_port (DataType type, const string& portname, bool input)
 {
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("register input port called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} else {
-			return 0;
-		}
-	}
+	Port* newport = 0;
 
-	jack_port_t *p = jack_port_register (_jack, portname.c_str(), type.to_jack_type(), JackPortIsInput, 0);
-
-	if (p) {
-
-		Port* newport = 0;
-		
+	try {
 		if (type == DataType::AUDIO)
-			newport = new AudioPort (p);
+			newport = new JackAudioPort (portname, (input ? Port::IsInput : Port::IsOutput));
 		else if (type == DataType::MIDI)
-			newport = new MidiPort (p);
+			newport = new JackMidiPort (portname, (input ? Port::IsInput : Port::IsOutput));
 		else
 			throw unknown_type();
-
+	
 		if (newport != 0) {
 			RCUWriter<Ports> writer (ports);
 			boost::shared_ptr<Ports> ps = writer.get_copy ();
 			ps->insert (ps->begin(), newport);
 			/* writer goes out of scope, forces update */
 		}
-
+	
 		return newport;
-
-	} else {
-		throw PortRegistrationFailure();
 	}
 
-	return 0;
+	catch (...) {
+		throw PortRegistrationFailure();
+	}
+}
+
+Port *
+AudioEngine::register_input_port (DataType type, const string& portname)
+{
+	return register_port (type, portname, true);
 }
 
 Port *
 AudioEngine::register_output_port (DataType type, const string& portname)
 {
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("register output port called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} else {
-			return 0;
-		}
-	}
-
-	jack_port_t* p = 0;
-	
-	if ((p = jack_port_register (_jack, portname.c_str(),
-			type.to_jack_type(), JackPortIsOutput, 0)) != 0) {
-		
-		Port* newport = 0;
-		
-		if (type == DataType::AUDIO)
-			newport = new AudioPort (p);
-		else if (type == DataType::MIDI)
-			newport = new MidiPort (p);
-		else
-			throw unknown_type ();
-
-		if (newport != 0) {
-			RCUWriter<Ports> writer (ports);
-			boost::shared_ptr<Ports> ps = writer.get_copy ();
-			ps->insert (ps->begin(), newport);
-			/* writer goes out of scope, forces update */
-		}
-		
-		return newport;
-		
-	} else {
-		throw PortRegistrationFailure ();
-	}
-
-	return 0;
+	return register_port (type, portname, false);
 }
-
 
 int          
 AudioEngine::unregister_port (Port& port)
@@ -594,29 +557,25 @@ AudioEngine::unregister_port (Port& port)
 		return 0;
 	}
 
-	int ret = jack_port_unregister (_jack, port._port);
-
-	if (ret == 0) {
-
-		{
-
-			RCUWriter<Ports> writer (ports);
-			boost::shared_ptr<Ports> ps = writer.get_copy ();
-
-			for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
-				if ((*i) == &port) {
-					ps->erase (i);
-					break;
-				}
+	{
+		
+		RCUWriter<Ports> writer (ports);
+		boost::shared_ptr<Ports> ps = writer.get_copy ();
+		
+		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
+			if ((*i) == &port) {
+				remove_connections_for (port);
+				cerr << "eraseing " << (*i)->name() << endl;
+				delete *i;
+				ps->erase (i);
+				break;
 			}
-
-			/* writer goes out of scope, forces update */
 		}
-
-		remove_connections_for (port);
+		
+		/* writer goes out of scope, forces update */
 	}
 
-	return ret;
+	return 0;
 }
 
 int 
@@ -693,7 +652,7 @@ AudioEngine::disconnect (Port& port)
 		}
 	}
 
-	int ret = jack_port_disconnect (_jack, port._port);
+	int ret = port.disconnect ();
 
 	if (ret == 0) {
 		remove_connections_for (port);
@@ -916,21 +875,8 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 ARDOUR::nframes_t
 AudioEngine::get_port_total_latency (const Port& port)
 {
-	if (!_jack) {
-		fatal << _("get_port_total_latency() called with no JACK client connection") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("get_port_total_latency() called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} 
-	}
-
-	return jack_port_get_total_latency (_jack, port._port);
+	return port.total_latency ();
 }
-
 
 void
 AudioEngine::update_total_latency (const Port& port)
@@ -947,9 +893,7 @@ AudioEngine::update_total_latency (const Port& port)
 		} 
 	}
 
-#ifdef HAVE_JACK_RECOMPUTE_LATENCY
-	jack_recompute_total_latency (_jack, port._port);
-#endif
+	port.recompute_total_latency ();
 }
 
 void
@@ -1024,14 +968,6 @@ void
 AudioEngine::remove_all_ports ()
 {
 	/* process lock MUST be held */
-
-	if (_jack) {
-		boost::shared_ptr<Ports> p = ports.reader();
-
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			jack_port_unregister (_jack, (*i)->_port);
-		}
-	}
 
 	{
 		RCUWriter<Ports> writer (ports);
@@ -1152,31 +1088,14 @@ AudioEngine::reconnect_to_jack ()
 
 	for (i = p->begin(); i != p->end(); ++i) {
 
-		/* XXX hack hack hack */
-
-		string long_name = (*i)->name();
-		string short_name;
-		
-		short_name = long_name.substr (long_name.find_last_of (':') + 1);
-
-		if (((*i)->_port = jack_port_register (_jack, short_name.c_str(), (*i)->type().to_jack_type(), (*i)->flags(), 0)) == 0) {
-			error << string_compose (_("could not reregister %1"), (*i)->name()) << endmsg;
+		if ((*i)->reestablish ()) {
 			break;
-		} else {
-		}
-
-		(*i)->reset ();
-
-		if ((*i)->flags() & JackPortIsOutput) {
-			(*i)->get_buffer().silence (jack_get_buffer_size (_jack), 0);
-		}
+		} 
 	}
 
 	if (i != p->end()) {
 		/* failed */
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			jack_port_unregister (_jack, (*i)->_port);
-		}
+		remove_all_ports ();
 		return -1;
 	} 
 

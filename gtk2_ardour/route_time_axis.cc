@@ -223,6 +223,12 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 		delete _view;
 		_view = 0;
 	}
+
+	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		delete i->second;
+	}
+	
+	_automation_tracks.clear ();
 }
 
 void

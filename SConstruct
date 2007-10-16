@@ -722,6 +722,15 @@ def prep_libcheck(topenv, libinfo):
 prep_libcheck(env, env)
 
 #
+# glibc backtrace API, needed everywhere if we want to do shared_ptr<T> debugging
+#
+
+conf = Configure (env)
+if conf.CheckCHeader('execinfo.h'):
+    conf.env.Append(CXXFLAGS="-DHAVE_EXECINFO")
+env = conf.Finish ()
+
+#
 # Check for libusb
 
 libraries['usb'] = LibraryInfo ()

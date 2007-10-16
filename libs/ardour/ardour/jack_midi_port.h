@@ -18,46 +18,36 @@
     $Id: port.h 712 2006-07-28 01:08:57Z drobilla $
 */
 
-#ifndef __ardour_midi_port_h__
-#define __ardour_midi_port_h__
+#ifndef __ardour_jack_midi_port_h__
+#define __ardour_jack_midi_port_h__
 
 #include <sigc++/signal.h>
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>
+#include <jack/jack.h>
+#include <jack/midiport.h>
 #include <ardour/port.h>
+#include <ardour/jack_port.h>
+#include <ardour/midi_port.h>
 #include <ardour/midi_buffer.h>
 
 namespace ARDOUR {
 
 class MidiEngine;
 
-class MidiPort : public virtual Port {
+class JackMidiPort : public JackPort, public MidiPort {
    public:
-	virtual ~MidiPort();
-	
-	DataType type() const { return DataType::MIDI; }
-
-	Buffer& get_buffer() {
-		return _buffer;
-	}
-
-	MidiBuffer& get_midi_buffer() {
-		return _buffer;
-	}
-	
-	size_t capacity() { return _buffer.capacity(); }
-	size_t size()     { return _buffer.size(); }
+	void cycle_start(nframes_t nframes);
+	void cycle_end();
 
   protected:
 	friend class AudioEngine;
 
-	MidiPort (nframes_t bufsize);
-	
-	/* engine isn't supposed to access below here */
+	JackMidiPort (const std::string&, Flags);
 
-	MidiBuffer     _buffer;
+	nframes_t _nframes_this_cycle;
 };
  
 } // namespace ARDOUR
 
-#endif /* __ardour_midi_port_h__ */
+#endif /* __ardour_jack_midi_port_h__ */

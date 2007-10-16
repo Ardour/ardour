@@ -20,6 +20,11 @@
 #include <pbd/stacktrace.h>
 #include <iostream>
 
+void
+PBD::trace_twb ()
+{
+}
+
 /* Obtain a backtrace and print it to stdout. */
 
 #ifdef HAVE_EXECINFO

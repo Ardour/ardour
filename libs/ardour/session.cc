@@ -2089,13 +2089,14 @@ Session::remove_route (shared_ptr<Route> route)
 
 	find_current_end ();
 	
+	// We need to disconnect the routes inputs and outputs 
+
+	route->disconnect_inputs (0);
+	route->disconnect_outputs (0);
+	
 	update_latency_compensation (false, false);
 	set_dirty();
 
-	// We need to disconnect the routes inputs and outputs 
-	route->disconnect_inputs(NULL);
-	route->disconnect_outputs(NULL);
-	
 	/* get rid of it from the dead wood collection in the route list manager */
 
 	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
@@ -4240,3 +4241,4 @@ Session::foreach_bundle (sigc::slot<void, boost::shared_ptr<Bundle> > sl)
 		sl (*i);
 	}
 }
+

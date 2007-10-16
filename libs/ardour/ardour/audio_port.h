@@ -24,7 +24,6 @@
 #include <sigc++/signal.h>
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>
-#include <jack/jack.h>
 #include <ardour/port.h>
 #include <ardour/audio_buffer.h>
 
@@ -32,19 +31,9 @@ namespace ARDOUR {
 
 class AudioEngine;
 
-class AudioPort : public Port {
+class AudioPort : public virtual Port {
    public:
-	virtual ~AudioPort() { 
-		free (_port);
-	}
-
-	void cycle_start(nframes_t nframes) {
-		_buffer.set_data ((Sample*) jack_port_get_buffer (_port, nframes), nframes);
-	}
-
-	void cycle_end() {}
-
-	DataType type() const { return DataType(DataType::AUDIO); }
+	DataType type() const { return DataType::AUDIO; }
 
 	Buffer& get_buffer () {
 		return _buffer;
@@ -69,8 +58,8 @@ class AudioPort : public Port {
 		reset_overs ();
 	}
 
-	float                       peak_db() const { return _peak_db; }
-	jack_default_audio_sample_t peak()    const { return _peak; }
+	float  peak_db() const { return _peak_db; }
+	Sample peak()    const { return _peak; }
 
 	uint32_t short_overs () const { return _short_overs; }
 	uint32_t long_overs ()  const { return _long_overs; }
@@ -81,21 +70,21 @@ class AudioPort : public Port {
   protected:
 	friend class AudioEngine;
 
-	AudioPort (jack_port_t *port);
+	AudioPort ();
 	void reset ();
 	
 	/* engine isn't supposed to access below here */
 
 	AudioBuffer _buffer;
 
-	nframes_t               _overlen;
-	jack_default_audio_sample_t  _peak;
-	float                        _peak_db;
-	uint32_t                     _short_overs;
-	uint32_t                     _long_overs;
+	nframes_t _overlen;
+	Sample    _peak;
+	float     _peak_db;
+	uint32_t  _short_overs;
+	uint32_t  _long_overs;
 	
-	static nframes_t        _long_over_length;
-	static nframes_t        _short_over_length;
+	static nframes_t _long_over_length;
+	static nframes_t _short_over_length;
 };
  
 } // namespace ARDOUR

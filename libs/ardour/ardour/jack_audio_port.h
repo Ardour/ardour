@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2002 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,38 +14,36 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+    $Id: port.h 712 2006-07-28 01:08:57Z drobilla $
 */
 
-#include <cassert>
+#ifndef __ardour_jack_audio_port_h__
+#define __ardour_jack_audio_port_h__
+
+#include <sigc++/signal.h>
+#include <pbd/failed_constructor.h>
+#include <ardour/ardour.h>
+#include <ardour/jack_port.h>
 #include <ardour/audio_port.h>
-#include <ardour/data_type.h>
 
-using namespace ARDOUR;
-using namespace std;
+namespace ARDOUR {
 
-nframes_t AudioPort::_short_over_length = 2;
-nframes_t AudioPort::_long_over_length = 10;
-
-AudioPort::AudioPort()
-	: _buffer (0)
-{
-	_type = DataType::AUDIO;
-	reset();
-}
-
-void
-AudioPort::reset()
-{
-	Port::reset();
-	if (_flags & IsOutput) {
-		if (_buffer.capacity() > 0) {
-			_buffer.clear();
-		}
-		assert(_buffer.silent());
+class AudioEngine;
+class JackAudioPort : public AudioPort, public JackPort {
+   public:
+	void cycle_start(nframes_t nframes) {
+		_buffer.set_data ((Sample*) jack_port_get_buffer (_port, nframes), nframes);
 	}
-	
-	_metering = 0;
-	reset_meters ();
-}
 
+	int reestablish ();
 
+  protected:
+	friend class AudioEngine;
+
+	JackAudioPort (const std::string& name, Flags flags);
+};
+ 
+} // namespace ARDOUR
+
+#endif /* __ardour_jack_audio_port_h__ */

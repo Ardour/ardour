@@ -17,35 +17,25 @@
 */
 
 #include <cassert>
-#include <ardour/audio_port.h>
-#include <ardour/data_type.h>
+#include <ardour/audioengine.h>
+#include <ardour/jack_audio_port.h>
 
 using namespace ARDOUR;
-using namespace std;
 
-nframes_t AudioPort::_short_over_length = 2;
-nframes_t AudioPort::_long_over_length = 10;
-
-AudioPort::AudioPort()
-	: _buffer (0)
+JackAudioPort::JackAudioPort(const std::string& name, Flags flgs)
+	: JackPort (name, DataType::AUDIO, flgs)
 {
-	_type = DataType::AUDIO;
-	reset();
+
 }
 
-void
-AudioPort::reset()
+int
+JackAudioPort::reestablish ()
 {
-	Port::reset();
-	if (_flags & IsOutput) {
-		if (_buffer.capacity() > 0) {
-			_buffer.clear();
-		}
-		assert(_buffer.silent());
-	}
+	int ret = JackPort::reestablish ();
 	
-	_metering = 0;
-	reset_meters ();
+	if (ret == 0 && _flags & IsOutput) {
+		_buffer.silence (jack_get_buffer_size (engine->jack()));
+	}
+
+	return ret;
 }
-
-

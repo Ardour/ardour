@@ -51,7 +51,7 @@ class AudioEngine : public sigc::trackable
 	AudioEngine (std::string client_name);
 	virtual ~AudioEngine ();
 	
-	jack_client_t* jack() const { return _jack; }
+	jack_client_t* jack() const;
 	bool connected() const { return _jack != 0; }
 
 	bool is_realtime () const;
@@ -218,6 +218,8 @@ class AudioEngine : public sigc::trackable
 	int _usecs_per_cycle;
 
 	SerializedRCUManager<Ports> ports;
+
+	Port *register_port (DataType type, const std::string& portname, bool input);
 
 	int    process_callback (nframes_t nframes);
 	void   remove_all_ports ();

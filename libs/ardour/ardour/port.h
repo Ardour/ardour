@@ -31,65 +31,39 @@ namespace ARDOUR {
 class AudioEngine;
 class Buffer;
 
-/** Abstract base for all outside ports (eg Jack ports)
+/** Abstract base for ports
  */
-class Port : public sigc::trackable {
+class Port : public virtual sigc::trackable {
    public:
-	virtual ~Port() { 
-		free (_port);
-	}
+	enum Flags {
+		IsInput = JackPortIsInput,
+		IsOutput = JackPortIsOutput,
+		IsPhysical = JackPortIsPhysical,
+		IsTerminal = JackPortIsTerminal,
+		CanMonitor = JackPortCanMonitor
+	};
 
-	virtual DataType type() const = 0;
+	virtual ~Port() {}
 
-	virtual void cycle_start(nframes_t nframes) {}
-	virtual void cycle_end() {}
-
-	virtual Buffer& get_buffer() = 0;
-	
 	std::string name() const { 
 		return _name;
 	}
 
-	std::string short_name() { 
-		return jack_port_short_name (_port);
-	}
-	
-	int set_name (std::string str);
 
-	JackPortFlags flags() const {
+	Flags flags() const {
 		return _flags;
 	}
 
-	bool is_mine (jack_client_t *client) { 
-		return jack_port_is_mine (client, _port);
-	}
-
-	int connected () const {
-		return jack_port_connected (_port);
-	}
-	
-	bool connected_to (const std::string& portname) const {
-		return jack_port_connected_to (_port, portname.c_str());
-	}
-
-	const char ** get_connections () const {
-		return jack_port_get_connections (_port);
-	}
-
 	bool receives_input() const {
-		return _flags & JackPortIsInput;
+		return _flags & IsInput;
 	}
 
 	bool sends_output () const {
 		return _flags & JackPortIsOutput;
 	}
-	
-	bool monitoring_input () const {
-		return jack_port_monitoring_input (_port);
-	}
 
 	bool can_monitor () const {
-		return _flags & JackPortCanMonitor;
+		return _flags & CanMonitor;
 	}
 
 	void enable_metering() {
@@ -100,28 +74,23 @@ class Port : public sigc::trackable {
 		if (_metering) { _metering--; }
 	}
 	
-	void ensure_monitor_input (bool yn) {
-
-#ifdef HAVE_JACK_PORT_ENSURE_MONITOR
-		jack_port_ensure_monitor (_port, yn);
-#else
-		jack_port_request_monitor(_port, yn);
-#endif
-
-	}
-
-	/*XXX completely bloody useless imho*/
-	void request_monitor_input (bool yn) {
-		jack_port_request_monitor (_port, yn);
-	}
-
-	nframes_t latency () const {
-		return jack_port_get_latency (_port);
-	}
-
-	void set_latency (nframes_t nframes) {
-		jack_port_set_latency (_port, nframes);
-	}
+	virtual DataType type() const = 0;
+	virtual void cycle_start(nframes_t nframes) {}
+	virtual void cycle_end() {}
+	virtual Buffer& get_buffer() = 0;
+	virtual std::string short_name() = 0;
+	virtual int set_name (std::string str) = 0;
+	virtual bool is_mine (jack_client_t *client) = 0;
+	virtual int reestablish () = 0;
+	virtual int connected () const = 0;
+	virtual bool connected_to (const std::string& portname) const = 0;
+	virtual const char ** get_connections () const = 0;
+	virtual bool monitoring_input () const = 0;
+	virtual void ensure_monitor_input (bool yn) = 0;
+	virtual void request_monitor_input (bool yn) = 0;
+	virtual nframes_t latency () const = 0;
+	virtual nframes_t total_latency () const = 0;
+	virtual void set_latency (nframes_t nframes) = 0;
 
 	sigc::signal<void,bool> MonitorInputChanged;
 	sigc::signal<void,bool> ClockSyncChanged;
@@ -129,22 +98,19 @@ class Port : public sigc::trackable {
   protected:
 	friend class AudioEngine;
 
-	Port (jack_port_t *port);
-	
+	Port ();
+
+	virtual int disconnect () = 0;
+	virtual void recompute_total_latency() const = 0;
 	virtual void reset ();
 	
 	/* engine isn't supposed to access below here */
 
-	/* cache these 3 from JACK so we can access them for reconnecting */
-	JackPortFlags _flags;
-	std::string   _type;
-	std::string   _name;
-
-	jack_port_t*  _port;
-
+	Flags _flags;
+	std::string    _type;
+	std::string    _name;
 	unsigned short _metering;
-
-	bool          _last_monitor : 1;
+	bool           _last_monitor;
 };
  
 } // namespace ARDOUR
