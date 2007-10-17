@@ -42,9 +42,7 @@ class JackPort : public virtual Port {
 	}
 	
 	int set_name (std::string str);
-
-	bool is_mine () const;
-
+	
 	int connected () const {
 		return jack_port_connected (_port);
 	}

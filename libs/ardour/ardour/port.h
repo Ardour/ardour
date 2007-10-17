@@ -80,7 +80,6 @@ class Port : public virtual sigc::trackable {
 	virtual Buffer& get_buffer() = 0;
 	virtual std::string short_name() = 0;
 	virtual int set_name (std::string str) = 0;
-	virtual bool is_mine (jack_client_t *client) = 0;
 	virtual int reestablish () = 0;
 	virtual int connected () const = 0;
 	virtual bool connected_to (const std::string& portname) const = 0;
