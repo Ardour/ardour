@@ -65,6 +65,8 @@ gain.cc
 gdither.cc
 globals.cc
 import.cc
+internal_port.cc
+internal_audio_port.cc
 io.cc
 io_processor.cc
 jack_port.cc

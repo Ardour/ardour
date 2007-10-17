@@ -1694,7 +1694,7 @@ static string
 legalize_for_xml_node (string str)
 {
 	string::size_type pos;
-	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=:";
+	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=:";
 	string legal;
 
 	legal = str;

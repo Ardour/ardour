@@ -102,6 +102,12 @@ public:
 		_silent = false;
 	}
 
+	/** Reallocate the buffer used internally to handle at least @nframes of data
+	 * 
+	 * Constructor MUST have been passed capacity!=0 or this will die (to prevent mem leaks).
+	 */
+	void resize (size_t nframes);
+
 	const Sample* data () const { return _data; }
 	Sample* data () { return _data; }
 

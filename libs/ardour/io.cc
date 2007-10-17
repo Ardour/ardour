@@ -602,7 +602,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 				snprintf (name, sizeof (name), _("%s/out %u"), _name.c_str(), find_output_port_hole());
 			}
 			
-			if ((our_port = _session.engine().register_output_port (type, name)) == 0) {
+			if ((our_port = _session.engine().register_output_port (Jack, type, name)) == 0) {
 				error << string_compose(_("IO: cannot register output port %1"), name) << endmsg;
 				return -1;
 			}
@@ -713,7 +713,7 @@ IO::add_input_port (string source, void* src, DataType type)
 				snprintf (name, sizeof (name), _("%s/in %u"), _name.c_str(), find_input_port_hole());
 			}
 
-			if ((our_port = _session.engine().register_input_port (type, name)) == 0) {
+			if ((our_port = _session.engine().register_input_port (Jack, type, name)) == 0) {
 				error << string_compose(_("IO: cannot register input port %1"), name) << endmsg;
 				return -1;
 			}
@@ -822,7 +822,7 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 
 			try {
 
-				if ((input_port = _session.engine().register_input_port (*t, buf)) == 0) {
+				if ((input_port = _session.engine().register_input_port (Jack, *t, buf)) == 0) {
 					error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 					return -1;
 				}
@@ -938,7 +938,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 				}
 
 				try {
-					if ((port = _session.engine().register_input_port (*t, buf)) == 0) {
+					if ((port = _session.engine().register_input_port (Jack, *t, buf)) == 0) {
 						error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 						return -1;
 					}
@@ -970,7 +970,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 				}
 
 				try { 
-					if ((port = _session.engine().register_output_port (*t, buf)) == 0) {
+					if ((port = _session.engine().register_output_port (Jack, *t, buf)) == 0) {
 						error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 						return -1;
 					}
@@ -1090,7 +1090,7 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 				snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
 			}
 
-			if ((output_port = _session.engine().register_output_port (*t, buf)) == 0) {
+			if ((output_port = _session.engine().register_output_port (Jack, *t, buf)) == 0) {
 				error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 				return -1;
 			}

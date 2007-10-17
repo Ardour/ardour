@@ -38,20 +38,31 @@ MidiBuffer::MidiBuffer(size_t capacity)
 	, _events(NULL)
 	, _data(NULL)
 {
-	assert(capacity > 0);
+	_data = 0;
+	resize (_capacity);
+	silence(_capacity);
+}
+
+void
+MidiBuffer::resize (size_t size)
+{
+	assert(size > 0);
+
+	if (_data) {
+		free (_data);
+	}
 
 	_size = 0;
-
+	_capacity = size;
 #ifdef NO_POSIX_MEMALIGN
-	_events = (MidiEvent *) malloc(sizeof(MidiEvent) * capacity);
-	_data = (Byte *) malloc(sizeof(Byte) * capacity * MAX_EVENT_SIZE);
+	_events = (MidiEvent *) malloc(sizeof(MidiEvent) * _capacity);
+	_data = (Byte *) malloc(sizeof(Byte) * _capacity * MAX_EVENT_SIZE);
 #else
-	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(MidiEvent) * capacity);
-	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Byte) * capacity * MAX_EVENT_SIZE);
+	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(MidiEvent) * _capacity);
+	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Byte) * _capacity * MAX_EVENT_SIZE);
 #endif	
 	assert(_data);
 	assert(_events);
-	silence(_capacity);
 }
 
 void

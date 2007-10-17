@@ -42,6 +42,7 @@ namespace ARDOUR {
 
 class Session;
 class Port;
+class InternalPort;
 
 class AudioEngine : public sigc::trackable
 {
@@ -113,8 +114,8 @@ class AudioEngine : public sigc::trackable
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }
 	};
 
-	Port *register_input_port (DataType type, const std::string& portname);
-	Port *register_output_port (DataType type, const std::string& portname);
+	Port *register_input_port (PortType, DataType, const std::string& portname);
+	Port *register_output_port (PortType, DataType, const std::string& portname);
 	int   unregister_port (Port &);
 	
 	int connect (const std::string& source, const std::string& destination);
@@ -219,10 +220,12 @@ class AudioEngine : public sigc::trackable
 
 	SerializedRCUManager<Ports> ports;
 
-	Port *register_port (DataType type, const std::string& portname, bool input);
+	Port *register_port (PortType ptype, DataType type, const std::string& portname, bool input);
 
 	int    process_callback (nframes_t nframes);
 	void   remove_all_ports ();
+
+	InternalPort* get_internal_port (const std::string& short_name);
 
 	typedef std::pair<std::string,std::string> PortConnection;
 	typedef std::list<PortConnection> PortConnections;

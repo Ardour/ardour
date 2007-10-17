@@ -29,19 +29,13 @@ namespace ARDOUR {
 
 AudioBuffer::AudioBuffer(size_t capacity)
 	: Buffer(DataType::AUDIO, capacity)
-	, _owns_data(false)
-	, _data(NULL)
+	, _owns_data (false)
+	, _data (0)
 {
-	_size = capacity; // For audio buffers, size = capacity (always)
-	if (capacity > 0) {
-#ifdef NO_POSIX_MEMALIGN
-		_data =  (Sample *) malloc(sizeof(Sample) * capacity);
-#else
-		posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Sample) * capacity);
-#endif	
-		assert(_data);
-		_owns_data = true;
-		clear();
+	if (_capacity) {
+		_owns_data = true; // prevent resize() from gagging
+		resize (_capacity);
+		silence (_capacity);
 	}
 }
 
@@ -51,6 +45,31 @@ AudioBuffer::~AudioBuffer()
 		free(_data);
 }
 
+void
+AudioBuffer::resize (size_t size)
+{
+	assert (_owns_data);
+
+	if (size < _capacity) {
+		return;
+	}
+
+	if (_data) {
+		free (_data);
+	}
+
+	_capacity = size;
+	_size = size;
+	_silent = false;
+
+#ifdef NO_POSIX_MEMALIGN
+	_data =  (Sample *) malloc(sizeof(Sample) * _capacity);
+#else
+	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Sample) * _capacity);
+#endif	
+	
+	_owns_data = true;
+}
 
 } // namespace ARDOUR
 

@@ -33,6 +33,13 @@ AudioPort::AudioPort()
 	reset();
 }
 
+AudioPort::AudioPort(nframes_t nframes)
+	: _buffer (nframes)
+{
+	_type = DataType::AUDIO;
+	reset();
+}
+
 void
 AudioPort::reset()
 {

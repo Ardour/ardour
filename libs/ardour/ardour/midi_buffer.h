@@ -42,6 +42,8 @@ public:
 	bool  push_back(const ARDOUR::MidiEvent& event);
 	bool  push_back(const jack_midi_event_t& event);
 	Byte* reserve(double time, size_t size);
+
+	void resize(size_t);
 	
 	bool merge(const MidiBuffer& a, const MidiBuffer& b);
 	

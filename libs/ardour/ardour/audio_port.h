@@ -35,11 +35,11 @@ class AudioPort : public virtual Port {
    public:
 	DataType type() const { return DataType::AUDIO; }
 
-	Buffer& get_buffer () {
+	virtual Buffer& get_buffer () {
 		return _buffer;
 	}
 	
-	AudioBuffer& get_audio_buffer() {
+	virtual AudioBuffer& get_audio_buffer() {
 		return _buffer;
 	}
 
@@ -70,7 +70,8 @@ class AudioPort : public virtual Port {
   protected:
 	friend class AudioEngine;
 
-	AudioPort ();
+	AudioPort ();          // data buffer comes from elsewhere (e.g. JACK)
+	AudioPort (nframes_t); // data buffer owned by ardour
 	void reset ();
 	
 	/* engine isn't supposed to access below here */

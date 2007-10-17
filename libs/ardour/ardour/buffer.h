@@ -59,6 +59,13 @@ public:
 	DataType type() const { return _type; }
 
 	bool silent() const { return _silent; }
+	
+	/** Reallocate the buffer used internally to handle at least @a size_t units of data.
+	 *
+	 * The buffer is not silent after this operation. the @a capacity argument
+	 * passed to the constructor must have been non-zero.
+	 */
+	virtual void resize(size_t) = 0;
 
 	/** Clear (eg zero, or empty) buffer starting at TIME @a offset */
 	virtual void silence(nframes_t len, nframes_t offset=0) = 0;
