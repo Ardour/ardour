@@ -716,7 +716,9 @@ def prep_libcheck(topenv, libinfo):
 	#            All libraries needed should be built against this location
 	if topenv['GTKOSX']:
 		libinfo.Append(CPPPATH="/opt/gtk/include", LIBPATH="/opt/gtk/lib")
+		libinfo.Append(CXXFLAGS="-I/opt/gtk/include", LINKFLAGS="-L/opt/gtk/lib")
 	libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
+	libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
 prep_libcheck(env, env)
 
