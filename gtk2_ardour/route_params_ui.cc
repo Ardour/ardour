@@ -87,7 +87,7 @@ RouteParams_UI::RouteParams_UI ()
 
 	// setup the treeview
 	route_display.set_model(route_display_model);
-	route_display.append_column(_("Tracks/Buses"), route_display_columns.text);
+	route_display.append_column(_("Tracks/Busses"), route_display_columns.text);
 	route_display.set_name(X_("RouteParamsListDisplay"));
 	route_display.get_selection()->set_mode(Gtk::SELECTION_SINGLE); // default
 	route_display.set_reorderable(false);
