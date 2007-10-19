@@ -115,6 +115,7 @@ automation_time_axis.cc
 automation_streamview.cc
 automation_controller.cc
 automation_region_view.cc
+bundle_manager.cc
 midi_port_dialog.cc
 midi_time_axis.cc
 midi_streamview.cc
@@ -166,6 +167,7 @@ ghostregion.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
 io_selector.cc
+port_matrix.cc
 keyboard.cc
 keyeditor.cc
 ladspa_pluginui.cc

@@ -85,7 +85,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "theme_manager.h"
-
+#include "bundle_manager.h"
 
 #include "i18n.h"
 

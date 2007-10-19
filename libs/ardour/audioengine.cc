@@ -763,7 +763,7 @@ AudioEngine::frames_per_cycle ()
  * Note this can return NULL, it will NOT create a port if it is not found (any more).
  */
 Port *
-AudioEngine::get_port_by_name (const string& portname, bool keep)
+AudioEngine::get_port_by_name (const string& portname, bool keep) const
 {
 	Glib::Mutex::Lock lm (_process_lock);
 

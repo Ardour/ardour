@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,118 +20,54 @@
 #ifndef __ardour_bundle_h__
 #define __ardour_bundle_h__
 
-#include <vector>
 #include <string>
 #include <sigc++/signal.h>
-#include <glibmm/thread.h>
-#include <pbd/stateful.h> 
-
-using std::vector;
-using std::string;
+#include "ardour/data_type.h"
 
 namespace ARDOUR {
 
+typedef std::vector<std::string> PortList;
+  
 /**
- *  A set of `channels', each of which is associated with 0 or more
- *  JACK ports.
+ *  A set of `channels', each of which is associated with 0 or more JACK ports.
  */
 
-class Bundle : public PBD::Stateful, public sigc::trackable {
+class Bundle {
   public:
-	/**
-	 *  Bundle constructor.
-	 *  @param name Name for this Bundle.
-	 *  @param dy true if this Bundle is `dynamic', ie it is created on-the-fly
-	 *  and should not be written to the session file.
-	 */
-	Bundle (string name, bool dy = false) : _name (name), _dynamic(dy) {}
-	~Bundle() {}
-
-	/// A vector of JACK port names
-	typedef vector<string> PortList;
-
-	void set_name (string name, void *src);
-
-	/**
-	 *  @return name of this Bundle.
-	 */
-	string name() const { return _name; }
-
-	/**
-	 *  @return true if this Bundle is marked as `dynamic', meaning
-	 *  that it won't be written to the session file.
-	 */
-	bool dynamic() const { return _dynamic; }
+	Bundle () : _type (DataType::AUDIO) {}
+	Bundle (bool i) : _type (DataType::AUDIO), _ports_are_inputs (i) {}
+	Bundle (std::string const & n, bool i = true) : _name (n), _type (DataType::AUDIO), _ports_are_inputs (i) {}
+	virtual ~Bundle() {}
 
 	/**
 	 *  @return Number of channels that this Bundle has.
 	 */
-	uint32_t nchannels () const { return _channels.size(); }
-	const PortList& channel_ports (int ch) const;
+	virtual uint32_t nchannels () const = 0;
+	virtual const PortList& channel_ports (uint32_t) const = 0;
 
-	void set_nchannels (int n);
+	void set_name (std::string const & n) {
+		_name = n;
+		NameChanged ();
+	}
+	
+	std::string name () const { return _name; }
 
-	void add_port_to_channel (int ch, string portname);
-	void remove_port_from_channel (int ch, string portname);
+	sigc::signal<void> NameChanged;
 
-	/// Our name changed
-	sigc::signal<void, void*> NameChanged;
-	/// The number of channels changed
-	sigc::signal<void> ConfigurationChanged;
-	/// The ports associated with one of our channels changed
-	sigc::signal<void, int> PortsChanged;
+	void set_type (DataType t) { _type = t; }
+	DataType type () const { return _type; }
 
-	bool operator==(const Bundle& other) const;
-
-	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
-
-  protected:
-	Bundle (const XMLNode&);
+	void set_ports_are_inputs () { _ports_are_inputs = true; }
+	void set_ports_are_outputs () { _ports_are_inputs = false; }
+	bool ports_are_inputs () const { return _ports_are_inputs; }
+	bool ports_are_outputs () const { return !_ports_are_inputs; }
 
   private:
-	mutable Glib::Mutex channels_lock; ///< mutex for _channels
-	vector<PortList> _channels; ///< list of JACK ports associated with each of our channels
-	string _name; ///< name
-	bool _dynamic; ///< true if `dynamic', ie not to be written to the session file
-
-	int set_channels (const string& str);
-	int parse_io_string (const string& str, vector<string>& ports);
-};
-
-/**
- *  Bundle in which the JACK ports are inputs.
- */
-  
-class InputBundle : public Bundle {
-  public:
-	/**
-	 *  InputBundle constructor.
-	 *  \param name Name.
-	 *  \param dy true if this Bundle is `dynamic'; ie it is created on-the-fly
-	 *  and should not be written to the session file.
-	 */
-	InputBundle (string name, bool dy = false) : Bundle (name, dy) {}
-	InputBundle (const XMLNode&);
-};
-
-/**
- *  Bundle in which the JACK ports are outputs.
- */
-  
-class OutputBundle : public Bundle {
-  public:
-	/**
-	 *  OutputBundle constructor.
-	 *  \param name Name.
-	 *  \param dy true if this Bundle is `dynamic'; ie it is created on-the-fly
-	 *  and should not be written to the session file.
-	 */  
-        OutputBundle (string name, bool dy = false) : Bundle (name, dy) {}
-	OutputBundle (const XMLNode&);
+	std::string _name;
+	ARDOUR::DataType _type;
+	bool _ports_are_inputs;
 };
 
 }
 
 #endif /* __ardour_bundle_h__ */
-

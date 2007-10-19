@@ -489,7 +489,8 @@ class Session : public PBD::StatefulDestructible
 	
 	void   set_remote_control_ids();
 
-	AudioEngine &engine() { return _engine; };
+	AudioEngine & engine() { return _engine; }
+	AudioEngine const & engine () const { return _engine; }
 
 	int32_t  max_level;
 	int32_t  min_level;
@@ -716,7 +717,6 @@ class Session : public PBD::StatefulDestructible
 	void add_bundle (boost::shared_ptr<Bundle>);
 	void remove_bundle (boost::shared_ptr<Bundle>);
 	boost::shared_ptr<Bundle> bundle_by_name (string) const;
-	boost::shared_ptr<Bundle> bundle_by_ports (vector<string> const &) const;
 
 	sigc::signal<void,boost::shared_ptr<Bundle> > BundleAdded;
 	sigc::signal<void,boost::shared_ptr<Bundle> > BundleRemoved;
@@ -1564,7 +1564,8 @@ class Session : public PBD::StatefulDestructible
 	typedef list<boost::shared_ptr<Bundle> > BundleList;
 	mutable Glib::Mutex bundle_lock;
 	BundleList _bundles;
-	int load_bundles (const XMLNode&);
+	XMLNode* _bundle_xml_node;
+	int load_bundles (XMLNode const &);
 
 	void reverse_diskstream_buffers ();
 

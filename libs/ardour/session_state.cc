@@ -953,12 +953,13 @@ Session::state(bool full_state)
 		node->add_child_nocopy (loc.get_state());
 	}
 	
-	child = node->add_child ("Connections");
+	child = node->add_child ("Bundles");
 	{
 		Glib::Mutex::Lock lm (bundle_lock);
 		for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-			if (!(*i)->dynamic()) {
-				child->add_child_nocopy ((*i)->get_state());
+			boost::shared_ptr<UserBundle> b = boost::dynamic_pointer_cast<UserBundle> (*i);
+			if (b) {
+				child->add_child_nocopy (b->get_state());
 			}
 		}
 	}
@@ -1197,13 +1198,16 @@ Session::set_state (const XMLNode& node)
 		goto out;
 	}
 
-	if ((child = find_named_node (node, "Connections")) == 0) {
-		error << _("Session: XML state has no connections section") << endmsg;
+	if ((child = find_named_node (node, "Bundles")) == 0) {
+		error << _("Session: XML state has no bundles section") << endmsg;
 		goto out;
-	} else if (load_bundles (*child)) {
-		goto out;
+	} else {
+		/* We can't load Bundles yet as they need to be able
+		   to convert from port names to Port objects, which can't happen until
+		   later */
+		_bundle_xml_node = new XMLNode (*child);
 	}
-
+	
 	if ((child = find_named_node (node, "EditGroups")) == 0) {
 		error << _("Session: XML state has no edit groups section") << endmsg;
 		goto out;
@@ -1237,7 +1241,7 @@ Session::set_state (const XMLNode& node)
 	} else if (_click_io) {
 		_click_io->set_state (*child);
 	}
-	
+
 	if ((child = find_named_node (node, "ControlProtocols")) != 0) {
 		ControlProtocolManager::instance().set_protocol_states (*child);
 	}
@@ -1876,23 +1880,23 @@ Session::automation_dir () const
 }
 
 int
-Session::load_bundles (const XMLNode& node)
+Session::load_bundles (XMLNode const & node)
 {
-	XMLNodeList nlist = node.children();
-	XMLNodeConstIterator niter;
+ 	XMLNodeList nlist = node.children();
+ 	XMLNodeConstIterator niter;
 
-	set_dirty();
+ 	set_dirty();
 
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "InputConnection") {
-			add_bundle (boost::shared_ptr<Bundle> (new InputBundle (**niter)));
-		} else if ((*niter)->name() == "OutputConnection") {
-			add_bundle (boost::shared_ptr<Bundle> (new OutputBundle (**niter)));
-		} else {
-			error << string_compose(_("Unknown node \"%1\" found in Connections list from state file"), (*niter)->name()) << endmsg;
-			return -1;
-		}
-	}
+ 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+ 		if ((*niter)->name() == "InputBundle") {
+			add_bundle (boost::shared_ptr<UserBundle> (new UserBundle (**niter, true)));
+ 		} else if ((*niter)->name() == "OutputBundle") {
+ 			add_bundle (boost::shared_ptr<UserBundle> (new UserBundle (**niter, false)));
+ 		} else {
+ 			error << string_compose(_("Unknown node \"%1\" found in Bundles list from state file"), (*niter)->name()) << endmsg;
+ 			return -1;
+ 		}
+ 	}
 
 	return 0;
 }				

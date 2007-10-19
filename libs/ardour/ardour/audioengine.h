@@ -144,7 +144,7 @@ class AudioEngine : public sigc::trackable
 
 	/** Caller may not delete the object pointed to by the return value
 	*/
-	Port *get_port_by_name (const std::string& name, bool keep = true);
+	Port *get_port_by_name (const std::string& name, bool keep = true) const;
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,
@@ -199,7 +199,7 @@ class AudioEngine : public sigc::trackable
 	ARDOUR::Session *session;
 	jack_client_t *_jack;
 	std::string jack_client_name;
-	Glib::Mutex _process_lock;
+	mutable Glib::Mutex _process_lock;
 	Glib::Cond session_removed;
 	bool session_remove_pending;
 	bool _running;

@@ -43,6 +43,7 @@
 #include <ardour/chan_count.h>
 #include <ardour/latent.h>
 #include <ardour/automation_control.h>
+#include <ardour/user_bundle.h>
 
 using std::string;
 using std::vector;
@@ -54,6 +55,7 @@ namespace ARDOUR {
 class Session;
 class AudioEngine;
 class Bundle;
+class AutoBundle;
 class Panner;
 class PeakMeter;
 class Port;
@@ -123,9 +125,12 @@ class IO : public Automatable, public Latent
 	int connect_input_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
 	int connect_output_ports_to_bundle (boost::shared_ptr<Bundle>, void *src);
 
-	boost::shared_ptr<Bundle> input_bundle();
-	boost::shared_ptr<Bundle> output_bundle();
+	std::vector<boost::shared_ptr<Bundle> > bundles_connected_to_inputs ();
+	std::vector<boost::shared_ptr<Bundle> > bundles_connected_to_outputs ();
 
+        boost::shared_ptr<AutoBundle> bundle_for_inputs () { return _bundle_for_inputs; }
+        boost::shared_ptr<AutoBundle> bundle_for_outputs () { return _bundle_for_outputs; }
+	
 	int add_input_port (string source, void *src, DataType type = DataType::NIL);
 	int add_output_port (string destination, void *src, DataType type = DataType::NIL);
 
@@ -178,9 +183,6 @@ class IO : public Automatable, public Latent
 	const ChanCount& n_outputs () const { return _outputs.count(); }
 
 	void attach_buffers(ChanCount ignored);
-
-        boost::shared_ptr<Bundle> bundle_for_inputs () const { return _bundle_for_inputs; }
-        boost::shared_ptr<Bundle> bundle_for_outputs () const { return _bundle_for_outputs; }
 
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
@@ -272,8 +274,6 @@ class IO : public Automatable, public Latent
 	PortSet             _outputs;
 	PortSet             _inputs;
 	PeakMeter*          _meter;
-	boost::shared_ptr<Bundle> _input_bundle; ///< bundle connected to our inputs
-	boost::shared_ptr<Bundle> _output_bundle; ///< bundle connected to our outputs
 	bool                 no_panner_reset;
 	bool                _phase_invert;
 	bool                _denormal_protection;
@@ -310,13 +310,6 @@ class IO : public Automatable, public Latent
 
 	friend class Send;
 
-	/* are these the best variable names ever, or what? */
-
-	sigc::connection input_bundle_configuration_connection;
-	sigc::connection output_bundle_configuration_connection;
-	sigc::connection input_bundle_connection_connection;
-	sigc::connection output_bundle_connection_connection;
-
 	static bool panners_legal;
 	
 	int connecting_became_legal ();
@@ -330,8 +323,21 @@ class IO : public Automatable, public Latent
 	ChanCount _output_minimum; ///< minimum number of output channels (0 for no minimum)
 	ChanCount _output_maximum; ///< maximum number of output channels (ChanCount::INFINITE for no maximum)
 
-	boost::shared_ptr<Bundle> _bundle_for_inputs;
-	boost::shared_ptr<Bundle> _bundle_for_outputs;
+	boost::shared_ptr<AutoBundle> _bundle_for_inputs; ///< a bundle representing our inputs
+	boost::shared_ptr<AutoBundle> _bundle_for_outputs; ///< a bundle representing our outputs
+
+	struct UserBundleInfo {
+		UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
+		
+		boost::shared_ptr<UserBundle> bundle;
+		sigc::connection configuration_will_change;
+		sigc::connection configuration_has_changed;
+		sigc::connection ports_will_change;
+		sigc::connection ports_have_changed;
+	};
+	
+	std::vector<UserBundleInfo> _bundles_connected_to_outputs; ///< user bundles connected to our outputs
+	std::vector<UserBundleInfo> _bundles_connected_to_inputs; ///< user bundles connected to our inputs
 
 	static int parse_io_string (const string&, vector<string>& chns);
 
@@ -343,13 +349,14 @@ class IO : public Automatable, public Latent
 	int ensure_inputs (ChanCount, bool clear, bool lockit, void *src);
 	int ensure_outputs (ChanCount, bool clear, bool lockit, void *src);
 
-	void drop_input_bundle ();
-	void drop_output_bundle ();
+	void check_bundles_connected_to_inputs ();
+	void check_bundles_connected_to_outputs ();
+	void check_bundles (std::vector<UserBundleInfo>&, const PortSet&);
 
-	void input_bundle_configuration_changed ();
-	void input_bundle_connection_changed (int);
-	void output_bundle_configuration_changed ();
-	void output_bundle_connection_changed (int);
+	void bundle_configuration_will_change ();
+	void bundle_configuration_has_changed ();
+	void bundle_ports_will_change (int);
+	void bundle_ports_have_changed (int);
 
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
@@ -363,8 +370,11 @@ class IO : public Automatable, public Latent
 	int32_t find_input_port_hole ();
 	int32_t find_output_port_hole ();
 
-	void create_bundles ();
-	void setup_bundles ();
+	void create_bundles_for_inputs_and_outputs ();
+	void setup_bundles_for_inputs_and_outputs ();
+
+	void maybe_add_input_bundle_to_list (boost::shared_ptr<Bundle>, std::vector<boost::shared_ptr<Bundle> >*);
+	void maybe_add_output_bundle_to_list (boost::shared_ptr<Bundle>, std::vector<boost::shared_ptr<Bundle> >*);
 };
 
 } // namespace ARDOUR

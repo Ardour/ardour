@@ -62,7 +62,7 @@
 #include <ardour/processor.h>
 #include <ardour/plugin_insert.h>
 #include <ardour/port_insert.h>
-#include <ardour/bundle.h>
+#include <ardour/auto_bundle.h>
 #include <ardour/slave.h>
 #include <ardour/tempo.h>
 #include <ardour/audio_track.h>
@@ -123,6 +123,7 @@ Session::Session (AudioEngine &eng,
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
+	  _bundle_xml_node (0),
 	  _click_io ((IO*) 0),
 	  main_outs (0)
 {
@@ -223,6 +224,7 @@ Session::Session (AudioEngine &eng,
 	  _send_smpte_update (false),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
+	  _bundle_xml_node (0),
 	  main_outs (0)
 
 {
@@ -599,22 +601,22 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
-		shared_ptr<Bundle> c (new InputBundle (buf, true));
-		c->set_nchannels (1);
-		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+ 		shared_ptr<AutoBundle> c (new AutoBundle (buf, true));
+ 		c->set_channels (1);
+ 		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
-		add_bundle (c);
+ 		add_bundle (c);
 	}
 
 	for (uint32_t np = 0; np < n_physical_inputs; ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
-		shared_ptr<Bundle> c (new OutputBundle (buf, true));
-		c->set_nchannels (1);
-		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+ 		shared_ptr<AutoBundle> c (new AutoBundle (buf, false));
+ 		c->set_channels (1);
+ 		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
-		add_bundle (c);
+ 		add_bundle (c);
 	}
 
 	/* TWO: STEREO */
@@ -623,24 +625,24 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		shared_ptr<Bundle> c (new InputBundle (buf, true));
-		c->set_nchannels (2);
-		c->add_port_to_channel (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
-		c->add_port_to_channel (1, _engine.get_nth_physical_output (DataType::AUDIO, np+1));
+ 		shared_ptr<AutoBundle> c (new AutoBundle (buf, true));
+ 		c->set_channels (2);
+ 		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+ 		c->set_port (1, _engine.get_nth_physical_output (DataType::AUDIO, np + 1));
 
-		add_bundle (c);
+ 		add_bundle (c);
 	}
 
 	for (uint32_t np = 0; np < n_physical_inputs; np +=2) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32 "+%" PRIu32), np+1, np+2);
 
-		shared_ptr<Bundle> c (new OutputBundle (buf, true));
-		c->set_nchannels (2);
-		c->add_port_to_channel (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
-		c->add_port_to_channel (1, _engine.get_nth_physical_input (DataType::AUDIO, np+1));
+ 		shared_ptr<AutoBundle> c (new AutoBundle (buf, false));
+ 		c->set_channels (2);
+ 		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+ 		c->set_port (1, _engine.get_nth_physical_input (DataType::AUDIO, np + 1));
 
-		add_bundle (c);
+ 		add_bundle (c);
 	}
 
 	/* THREE MASTER */
@@ -685,13 +687,13 @@ Session::when_engine_running ()
 			
 		}
 
-		shared_ptr<Bundle> c (new OutputBundle (_("Master Out"), true));
+ 		shared_ptr<AutoBundle> c (new AutoBundle (_("Master Out"), true));
 
-		c->set_nchannels (_master_out->n_inputs().n_total());
-		for (uint32_t n = 0; n < _master_out->n_inputs ().n_total(); ++n) {
-			c->add_port_to_channel ((int) n, _master_out->input(n)->name());
-		}
-		add_bundle (c);
+ 		c->set_channels (_master_out->n_inputs().n_total());
+ 		for (uint32_t n = 0; n < _master_out->n_inputs ().n_total(); ++n) {
+ 			c->set_port (n, _master_out->input(n)->name());
+ 		}
+ 		add_bundle (c);
 	} 
 
 	hookup_io ();
@@ -802,7 +804,13 @@ Session::hookup_io ()
 		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
 			(*x)->set_control_outs (cports);
 		}
-	} 
+	}
+
+	/* load bundles, which we may have postponed earlier on */
+	if (_bundle_xml_node) {
+		load_bundles (*_bundle_xml_node);
+		delete _bundle_xml_node;
+	}	
 
 	/* Tell all IO objects to connect themselves together */
 
@@ -3733,35 +3741,6 @@ Session::bundle_by_name (string name) const
 	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
-		}
-	}
-
-	return boost::shared_ptr<Bundle> ();
-}
-
-boost::shared_ptr<Bundle>
-Session::bundle_by_ports (std::vector<std::string> const & wanted_ports) const
-{
-	Glib::Mutex::Lock lm (bundle_lock);
-
-	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-		if ((*i)->nchannels() != wanted_ports.size()) {
-			continue;
-		}
-
-		bool match = true;
-		for (uint32_t j = 0; j < (*i)->nchannels(); ++j) {
-			Bundle::PortList const p = (*i)->channel_ports (j);
-			if (p.empty() || p[0] != wanted_ports[j]) {
-				/* not this bundle */
-				match = false;
-				break;
-			}
-		}
-
-		if (match) {
-			/* matched bundle */
-			return *i;
 		}
 	}
 

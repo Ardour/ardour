@@ -17,15 +17,6 @@
 
 */
 
-#include <gtkmm/label.h>
-#include <gtkmm/enums.h>
-#include <gtkmm/image.h>
-#include <gtkmm/stock.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menu_elems.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm/menushell.h>
 #include <glibmm/objectbase.h>
 #include <gtkmm2ext/doi.h>
 #include <ardour/port_insert.h>
@@ -41,506 +32,21 @@
 #include "gui_thread.h"
 #include "i18n.h"
 
-/** Add a port to a group.
- *  @param p Port name, with or without prefix.
- */
-
-void
-PortGroup::add (std::string const & p)
+IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool offer_inputs)
+	: PortMatrix (
+		session, io->default_type(), offer_inputs,
+		PortGroupList::Mask (PortGroupList::BUSS | PortGroupList::SYSTEM | PortGroupList::OTHER)
+		),
+	  _io (io)
 {
-	if (prefix.empty() == false && p.substr (0, prefix.length()) == prefix) {
-		ports.push_back (p.substr (prefix.length()));
-	} else {
-		ports.push_back (p);
-	}
-}
-
-
-PortGroupTable::PortGroupTable (
-	PortGroup& g, boost::shared_ptr<ARDOUR::IO> io, bool for_input
-	)
-	: _port_group (g), _ignore_check_button_toggle (false),
-	  _io (io), _for_input (for_input)
-{
-	ARDOUR::DataType const t = _io->default_type();
-
-	int rows;
-	if (_for_input) {
-		rows = _io->n_inputs().get(t);
-	} else {
-		rows = _io->n_outputs().get(t);
-	}	
-	
-	int const ports = _port_group.ports.size();
-
-	if (rows == 0 || ports == 0) {
-		return;
-	}
-
-	/* Sort out the table and the checkbuttons inside it */
-	
-	_table.resize (rows, ports);
-	_check_buttons.resize (rows);
-	for (int i = 0; i < rows; ++i) {
-		_check_buttons[i].resize (ports);
-	}
-
-	for (int i = 0; i < rows; ++i) {
-		for (uint32_t j = 0; j < _port_group.ports.size(); ++j) {
-			Gtk::CheckButton* b = new Gtk::CheckButton;
-			b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &PortGroupTable::check_button_toggled), b, i, _port_group.prefix + _port_group.ports[j]));
-			_check_buttons[i][j] = b;
-			_table.attach (*b, j, j + 1, i, i + 1);
-		}
-	}
-
-	_box.add (_table);
-
- 	_ignore_check_button_toggle = true;
-
- 	/* Set the state of the check boxes according to current connections */
- 	for (int i = 0; i < rows; ++i) {
- 		const char **connections = _for_input ? _io->input(i)->get_connections() : _io->output(i)->get_connections();
- 		for (uint32_t j = 0; j < _port_group.ports.size(); ++j) {
-
- 			std::string const t = _port_group.prefix + _port_group.ports[j];
- 			int k = 0;
- 			bool required_state = false;
-
- 			while (connections && connections[k]) {
- 				if (std::string(connections[k]) == t) {
- 					required_state = true;
- 					break;
- 				}
- 				++k;
- 			}
-
- 			_check_buttons[i][j]->set_active (required_state);
- 		}
- 	}
-
- 	_ignore_check_button_toggle = false;
-}
-
-/** @return Width and height of a single check button in a port group table */
-std::pair<int, int>
-PortGroupTable::unit_size () const
-{
-	if (_check_buttons.empty() || _check_buttons[0].empty()) {
-		return std::pair<int, int> (0, 0);
-	}
-
-	return std::make_pair (
-		_check_buttons[0][0]->get_width() + _table.get_col_spacing (0),
-		_check_buttons[0][0]->get_height() + _table.get_row_spacing (0)
-		);
-}
-
-Gtk::Widget&
-PortGroupTable::get_widget ()
-{
-	return _box;
-}
-
-
-/** Handle a toggle of a check button */
-void
-PortGroupTable::check_button_toggled (Gtk::CheckButton* b, int r, std::string const & p)
-{
- 	if (_ignore_check_button_toggle) {
- 		return;
- 	}
-	
- 	bool const new_state = b->get_active ();
-
- 	if (new_state) {
- 		if (_for_input) {
- 			_io->connect_input (_io->input(r), p, 0);
- 		} else {
- 			_io->connect_output (_io->output(r), p, 0);
- 		}
- 	} else {
- 		if (_for_input) {
- 			_io->disconnect_input (_io->input(r), p, 0);
- 		} else {
- 			_io->disconnect_output (_io->output(r), p, 0);
- 		}
- 	}
-}
-
-
-RotatedLabelSet::RotatedLabelSet (PortGroupList& g)
-	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _port_group_list (g), _base_width (128)
-{
-	set_flags (Gtk::NO_WINDOW);
-	set_angle (30);
-}
-
-RotatedLabelSet::~RotatedLabelSet ()
-{
-	
-}
-
-
-/** Set the angle that the labels are drawn at.
- * @param degrees New angle in degrees.
- */
-
-void
-RotatedLabelSet::set_angle (int degrees)
-{
-	_angle_degrees = degrees;
-	_angle_radians = M_PI * _angle_degrees / 180;
-
-	queue_resize ();
-}
-
-void
-RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
-{
-	*requisition = Gtk::Requisition ();
-
-	if (_pango_layout == 0) {
-		return;
-	}
-
-	/* Our height is the highest label */
-	requisition->height = 0;
-	for (PortGroupList::const_iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		for (std::vector<std::string>::const_iterator j = (*i)->ports.begin(); j != (*i)->ports.end(); ++j) {
-			std::pair<int, int> const d = setup_layout (*j);
-			if (d.second > requisition->height) {
-				requisition->height = d.second;
-			}
-		}
-	}
-
-	/* And our width is the base plus the width of the last label */
-	requisition->width = _base_width;
-	int const n = _port_group_list.n_visible_ports ();
-	if (n > 0) {
-		std::pair<int, int> const d = setup_layout (_port_group_list.get_port_by_index (n - 1, false));
-		requisition->width += d.first;
-	}
-}
-
-void
-RotatedLabelSet::on_size_allocate (Gtk::Allocation& allocation)
-{
-	set_allocation (allocation);
-
-	if (_gdk_window) {
-		_gdk_window->move_resize (
-			allocation.get_x(), allocation.get_y(), allocation.get_width(), allocation.get_height()
-			);
-	}
-}
-
-void
-RotatedLabelSet::on_realize ()
-{
-	Gtk::Widget::on_realize ();
-
-	Glib::RefPtr<Gtk::Style> style = get_style ();
-
-	if (!_gdk_window) {
-		GdkWindowAttr attributes;
-		memset (&attributes, 0, sizeof (attributes));
-
-		Gtk::Allocation allocation = get_allocation ();
-		attributes.x = allocation.get_x ();
-		attributes.y = allocation.get_y ();
-		attributes.width = allocation.get_width ();
-		attributes.height = allocation.get_height ();
-
-		attributes.event_mask = get_events () | Gdk::EXPOSURE_MASK; 
-		attributes.window_type = GDK_WINDOW_CHILD;
-		attributes.wclass = GDK_INPUT_OUTPUT;
-
-		_gdk_window = Gdk::Window::create (get_window (), &attributes, GDK_WA_X | GDK_WA_Y);
-		unset_flags (Gtk::NO_WINDOW);
-		set_window (_gdk_window);
-
-		_bg_colour = style->get_bg (Gtk::STATE_NORMAL );
-		modify_bg (Gtk::STATE_NORMAL, _bg_colour);
-		_fg_colour = style->get_fg (Gtk::STATE_NORMAL);
-;
-		_gdk_window->set_user_data (gobj ());
-
-		/* Set up Pango stuff */
-		_pango_context = create_pango_context ();
-
-		Pango::Matrix matrix = PANGO_MATRIX_INIT;
-		pango_matrix_rotate (&matrix, _angle_degrees);
-		_pango_context->set_matrix (matrix);
-
-		_pango_layout = Pango::Layout::create (_pango_context);
-		_gc = Gdk::GC::create (get_window ());
-	}
-}
-
-void
-RotatedLabelSet::on_unrealize()
-{
-	_gdk_window.clear ();
-
-	Gtk::Widget::on_unrealize ();
-}
-
-
-/** Set up our Pango layout to plot a given string, and compute its dimensions once
- *  it has been rotated.
- *  @param s String to use.
- *  @return width and height of the rotated string, in pixels.
- */
-
-std::pair<int, int>
-RotatedLabelSet::setup_layout (std::string const & s)
-{
-	_pango_layout->set_text (s);
-
-	/* Here's the unrotated size */
-	int w;
-	int h;
-	_pango_layout->get_pixel_size (w, h);
-
-	/* Rotate the width and height as appropriate.  I thought Pango might be able
-	   to do this for us, but I can't find out how... */
-	std::pair<int, int> d;
-	d.first = int (w * cos (_angle_radians) - h * sin (_angle_radians));
-	d.second = int (w * sin (_angle_radians) + h * cos (_angle_radians));
-
-	return d;
-}
-
-bool
-RotatedLabelSet::on_expose_event (GdkEventExpose* event)
-{
-	if (!_gdk_window) {
-		return true;
-	}
-
-	int const height = get_allocation().get_height ();
-	double const spacing = double (_base_width) / _port_group_list.n_visible_ports();
-
-	/* Plot all the visible labels; really we should clip for efficiency */
-	int n = 0;
-	for (PortGroupList::const_iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		if ((*i)->visible) {
-			for (uint32_t j = 0; j < (*i)->ports.size(); ++j) {
-				std::pair<int, int> const d = setup_layout ((*i)->ports[j]);
-				get_window()->draw_layout (_gc, int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
-				++n;
-			}
-		}
-	}
-
-	return true;
-}
-
-/** Set the `base width'.  This is the width of the base of the label set, ie:
- *
- *     L L L L
- *    E E E E
- *   B B B B
- *  A A A A
- * L L L L
- * <--w-->
- */
-    
-void
-RotatedLabelSet::set_base_width (int w)
-{
-	_base_width = w;
-	queue_resize ();
-}
-
-
-/** Construct an IOSelector.
- *  @param session Session to operate on.
- *  @param io IO to operate on.
- *  @param for_input true if the selector is for an input, otherwise false.
- */
- 
-IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
-	: _port_group_list (session, io, for_input), _io (io), _for_input (for_input),
-	  _column_labels (_port_group_list)
-{
-	_row_labels_vbox[0] = _row_labels_vbox[1] = 0;
-	_side_vbox_pad[0] = _side_vbox_pad[1] = 0;
-	
-	Gtk::HBox* c = new Gtk::HBox;
-	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		Gtk::CheckButton* b = new Gtk::CheckButton ((*i)->name);
-		b->set_active (true);
-		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::group_visible_toggled), b, (*i)->name));
-		c->pack_start (*Gtk::manage (b), false, false);
-	}
-	pack_start (*Gtk::manage (c));
-	
-	_side_vbox[0].pack_start (*Gtk::manage (new Gtk::Label ("")));
-	_overall_hbox.pack_start (_side_vbox[0], false, false);
-	_scrolled_window.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_NEVER);
-	_scrolled_window.set_shadow_type (Gtk::SHADOW_NONE);
-	Gtk::VBox* b = new Gtk::VBox;
-	b->pack_start (_column_labels, false, false);
-	b->pack_start (_port_group_hbox, false, false);
-	Gtk::Alignment* a = new Gtk::Alignment (0, 1, 0, 0);
-	a->add (*Gtk::manage (b));
-	_scrolled_window.add (*Gtk::manage (a));
-	_overall_hbox.pack_start (_scrolled_window);
-	_side_vbox[1].pack_start (*Gtk::manage (new Gtk::Label ("")));
-	_overall_hbox.pack_start (_side_vbox[1]);
-	pack_start (_overall_hbox);
-
-	_port_group_hbox.signal_size_allocate().connect (sigc::hide (sigc::mem_fun (*this, &IOSelector::setup_dimensions)));
-
 	/* Listen for ports changing on the IO */
-	if (_for_input) {
+	if (!offer_inputs) {
 		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	} else {
 		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
-	
 }
 
-IOSelector::~IOSelector ()
-{
-	clear ();
-}
-
-/** Clear out the things that change when the number of source or destination ports changes */
-void
-IOSelector::clear ()
-{
-	for (int i = 0; i < 2; ++i) {
-
-		for (std::vector<Gtk::EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
-			delete *j;
-		}
-		_row_labels[i].clear ();
-		
-		if (_row_labels_vbox[i]) {
-			_side_vbox[i].remove (*_row_labels_vbox[i]);
-		}
-		delete _row_labels_vbox[i];
-		_row_labels_vbox[i] = 0;
-		
-		if (_side_vbox_pad[i]) {
-			_side_vbox[i].remove (*_side_vbox_pad[i]);
-		}
-		delete _side_vbox_pad[i];
-		_side_vbox_pad[i] = 0;
-	}
-
-	for (std::vector<PortGroupTable*>::iterator i = _port_group_tables.begin(); i != _port_group_tables.end(); ++i) {
-		_port_group_hbox.remove ((*i)->get_widget());
-		delete *i;
-	}
-
-	_port_group_tables.clear ();
-}
-
-
-/** Set up dimensions of some of our widgets which depend on other dimensions
- *  within the dialogue.
- */
-void
-IOSelector::setup_dimensions ()
-{
-	/* Get some dimensions from various places */
-	int const scrollbar_height = _scrolled_window.get_hscrollbar()->get_height();
-
-	std::pair<int, int> unit_size (0, 0);
-	int port_group_tables_height = 0;
-	for (std::vector<PortGroupTable*>::iterator i = _port_group_tables.begin(); i != _port_group_tables.end(); ++i) {
-		std::pair<int, int> const u = (*i)->unit_size ();
-		unit_size.first = std::max (unit_size.first, u.first);
-		unit_size.second = std::max (unit_size.second, u.second);
-		port_group_tables_height = std::max (
-			port_group_tables_height, (*i)->get_widget().get_height()
-			);
-	}
-
-	/* Column labels */
-	_column_labels.set_base_width (_port_group_list.n_visible_ports () * unit_size.first);
-
-	/* Scrolled window */
-	/* XXX: really shouldn't set a minimum horizontal size here, but if we don't
-	   the window starts up very small */
-	_scrolled_window.set_size_request (
-		std::min (_column_labels.get_width(), 640),
-		_column_labels.get_height() + port_group_tables_height + scrollbar_height + 16
-		);
-	
-	/* Row labels */
-	for (int i = 0; i < 2; ++i) {
-		for (std::vector<Gtk::EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
-			(*j)->get_child()->set_size_request (-1, unit_size.second);
-		}
-
-		if (_side_vbox_pad[i]) {
-			_side_vbox_pad[i]->set_size_request (-1, scrollbar_height + unit_size.second / 4);
-		}
-	}
-}
-
-
-/** Set up the dialogue */
-void
-IOSelector::setup ()
-{
-	clear ();
-
- 	/* Work out how many rows we have */
- 	ARDOUR::DataType const t = _io->default_type();
-
- 	int rows;
- 	if (_for_input) {
- 		rows = _io->n_inputs().get(t);
- 	} else {
- 		rows = _io->n_outputs().get(t);
- 	}	
-	
- 	/* Row labels */
-	for (int i = 0; i < 2; ++i) {
-		_row_labels_vbox[i] = new Gtk::VBox;
-		for (int j = 0; j < rows; ++j) {
-			Gtk::Label* label = new Gtk::Label (_for_input ? _io->input(j)->name() : _io->output(j)->name());
-			Gtk::EventBox* b = new Gtk::EventBox;
-			b->set_events (Gdk::BUTTON_PRESS_MASK);
-			b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), j));
-			b->add (*Gtk::manage (label));
-			_row_labels[i].push_back (b);
-			_row_labels_vbox[i]->pack_start (*b, false, false);
-		}
-
-		_side_vbox[i].pack_start (*_row_labels_vbox[i], false, false);
-		_side_vbox_pad[i] = new Gtk::Label ("");
-		_side_vbox[i].pack_start (*_side_vbox_pad[i], false, false);
-	}
-
- 	/* Checkbutton tables */
- 	int n = 0;
- 	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
- 		PortGroupTable* t = new PortGroupTable (**i, _io, _for_input);
-
- 		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
- 		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
- 		alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
- 		if ((n % 2) == 0) {
- 			t->get_widget().modify_bg (Gtk::STATE_NORMAL, alt_bg);
- 		}
-
- 		_port_group_tables.push_back (t);
- 		_port_group_hbox.pack_start (t->get_widget(), false, false);
- 		++n;
- 	}
-
-	show_all ();
-	
-	set_port_group_table_visibility ();
-}
 
 void
 IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
@@ -551,65 +57,91 @@ IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
 }
 
 
+
 void
-IOSelector::redisplay ()
+IOSelector::set_state (int r, std::string const & p, bool s)
 {
-	_port_group_list.refresh ();
-	setup ();
+	if (s) {
+		if (!_offer_inputs) {
+			_io->connect_input (_io->input(r), p, 0);
+		} else {
+			_io->connect_output (_io->output(r), p, 0);
+  		}
+  	} else {
+  		if (!_offer_inputs) {
+  			_io->disconnect_input (_io->input(r), p, 0);
+  		} else {
+  			_io->disconnect_output (_io->output(r), p, 0);
+  		}
+  	}
 }
 
-
-/** Handle a button press on a row label */
 bool
-IOSelector::row_label_button_pressed (GdkEventButton* e, int r)
+IOSelector::get_state (int r, std::string const & p) const
 {
-	if (e->type != GDK_BUTTON_PRESS || e->button != 3) {
-		return false;
+	const char **connections = _offer_inputs ? _io->output(r)->get_connections() : _io->input(r)->get_connections();
+
+	int k = 0;
+	while (connections && connections[k]) {
+		if (std::string (connections[k]) == p) {
+			return true;
+		}
+
+		++k;
 	}
 
-	Gtk::Menu* menu = Gtk::manage (new Gtk::Menu);
-	Gtk::Menu_Helpers::MenuList& items = menu->items ();
-	menu->set_name ("ArdourContextMenu");
+	return false;
+}
 
-	bool can_add;
-	bool can_remove;
-	std::string name;
-	ARDOUR::DataType const t = _io->default_type();
-
-	if (_for_input) {
-		can_add = _io->input_maximum().get(t) > _io->n_inputs().get(t);
-		can_remove = _io->input_minimum().get(t) < _io->n_inputs().get(t);
-		name = _io->input(r)->name();
+uint32_t
+IOSelector::n_rows () const
+{
+	if (!_offer_inputs) {
+		return _io->inputs().num_ports (_io->default_type());
 	} else {
-		can_add = _io->output_maximum().get(t) > _io->n_outputs().get(t);
-		can_remove = _io->output_minimum().get(t) < _io->n_outputs().get(t);
-		name = _io->output(r)->name();
+		return _io->outputs().num_ports (_io->default_type());
 	}
-	
-	items.push_back (
-		Gtk::Menu_Helpers::MenuElem (_("Add port"), sigc::mem_fun (*this, &IOSelector::add_port))
-		);
+}
 
-	items.back().set_sensitive (can_add);
+uint32_t
+IOSelector::maximum_rows () const
+{
+	if (!_offer_inputs) {
+		return _io->input_maximum ().get (_io->default_type());
+	} else {
+		return _io->output_maximum ().get (_io->default_type());
+	}
+}
 
-	items.push_back (
-		Gtk::Menu_Helpers::MenuElem (_("Remove port '") + name + _("'"), sigc::bind (sigc::mem_fun (*this, &IOSelector::remove_port), r))
-		);
 
-	items.back().set_sensitive (can_remove);
+uint32_t
+IOSelector::minimum_rows () const
+{
+	if (!_offer_inputs) {
+		return _io->input_minimum ().get (_io->default_type());
+	} else {
+		return _io->output_minimum ().get (_io->default_type());
+	}
+}
 
-	menu->popup (e->button, e->time);
-	
-	return true;
+std::string
+IOSelector::row_name (int r) const
+{
+	if (!_offer_inputs) {
+		return _io->input(r)->name();
+	} else {
+		return _io->output(r)->name();
+	}
+		
 }
 
 void
-IOSelector::add_port ()
+IOSelector::add_row ()
 {
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 
-	if (_for_input) {
+	if (!_offer_inputs) {
 
 		try {
 			_io->add_input_port ("", this);
@@ -633,176 +165,33 @@ IOSelector::add_port ()
 	}
 }
 
+
 void
-IOSelector::remove_port (int r)
+IOSelector::remove_row (int r)
 {
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 	
-	if (_for_input) {
+	if (!_offer_inputs) {
 		_io->remove_input_port (_io->input (r), this);
 	} else {
 		_io->remove_output_port (_io->output (r), this);
 	}
 }
 
-void
-IOSelector::group_visible_toggled (Gtk::CheckButton* b, std::string const & n)
-{
-	PortGroupList::iterator i = _port_group_list.begin();
-	while (i != _port_group_list.end() & (*i)->name != n) {
-		++i;
-	}
-
-	if (i == _port_group_list.end()) {
-		return;
-	}
-
-	(*i)->visible = b->get_active ();
-
-	set_port_group_table_visibility ();
-
-	_column_labels.queue_draw ();
-}
-
-void
-IOSelector::set_port_group_table_visibility ()
-{
-	for (std::vector<PortGroupTable*>::iterator j = _port_group_tables.begin(); j != _port_group_tables.end(); ++j) {
-		if ((*j)->port_group().visible) {
-			(*j)->get_widget().show();
-		} else {
-			(*j)->get_widget().hide();
-		}
-	}
-}
-
-
-PortGroupList::PortGroupList (ARDOUR::Session & session, boost::shared_ptr<ARDOUR::IO> io, bool for_input)
-	: _session (session), _io (io), _for_input (for_input),
-	  buss (_("Buss"), "ardour:"),
-	  track (_("Track"), "ardour:"),
-	  system (_("System"), "system:"),
-	  other (_("Other"), "")
-{
-	refresh ();
-}
-
-void
-PortGroupList::refresh ()
-{
-	clear ();
-	
-	buss.ports.clear ();
-	track.ports.clear ();
-	system.ports.clear ();
-	other.ports.clear ();
-
-	/* Find the ports provided by ardour; we can't derive their type just from their
-	   names, so we'll have to be more devious. */
-
-	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
-
-	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
-
-		PortGroup* g = 0;
-		if (_io->default_type() == ARDOUR::DataType::AUDIO && dynamic_cast<ARDOUR::AudioTrack*> ((*i).get())) {
-			/* Audio track for an audio IO */
-			g = &track;
-		} else if (_io->default_type() == ARDOUR::DataType::MIDI && dynamic_cast<ARDOUR::MidiTrack*> ((*i).get())) {
-			/* Midi track for a MIDI IO */
-			g = &track;
-		} else if (_io->default_type() == ARDOUR::DataType::AUDIO && dynamic_cast<ARDOUR::MidiTrack*> ((*i).get()) == 0) {
-			/* Non-MIDI track for an Audio IO; must be an audio buss */
-			g = &buss;
-		}
-
-		if (g) {
-			ARDOUR::PortSet const & p = _for_input ? ((*i)->outputs()) : ((*i)->inputs());
-			for (uint32_t j = 0; j < p.num_ports(); ++j) {
-				g->add (p.port(j)->name ());
-			}
-
-			std::sort (g->ports.begin(), g->ports.end());
-		}
-	}
-	
-
-	/* XXX: inserts, sends, plugin inserts? */
-	
-	/* Now we need to find the non-ardour ports; we do this by first
-	   finding all the ports that we can connect to. */
-	const char **ports = _session.engine().get_ports (
-		"", _io->default_type().to_jack_type(), _for_input ? JackPortIsOutput : JackPortIsInput
-		);
-
-	if (ports) {
-
-		int n = 0;
-		while (ports[n]) {
-			std::string const p = ports[n];
-
-			if (p.substr(0, strlen ("system:")) == "system:") {
-				/* system: prefix */
-				system.add (p);
-			} else {
-				if (p.substr(0, strlen("ardour:")) != "ardour:") {
-					/* other (non-ardour) prefix */
-					other.add (p);
-				}
-			}
-
-			++n;
-		}
-	}
-
-	push_back (&buss);
-	push_back (&track);
-	push_back (&system);
-	push_back (&other);
-}
-
-int
-PortGroupList::n_visible_ports () const
-{
-	int n = 0;
-	
-	for (const_iterator i = begin(); i != end(); ++i) {
-		if ((*i)->visible) {
-			n += (*i)->ports.size();
-		}
-	}
-
-	return n;
-}
-
 std::string
-PortGroupList::get_port_by_index (int n, bool with_prefix) const
+IOSelector::row_descriptor () const
 {
-	/* XXX: slightly inefficient algorithm */
-
-	for (const_iterator i = begin(); i != end(); ++i) {
-		for (std::vector<std::string>::const_iterator j = (*i)->ports.begin(); j != (*i)->ports.end(); ++j) {
-			if (n == 0) {
-				if (with_prefix) {
-					return (*i)->prefix + *j;
-				} else {
-					return *j;
-				}
-			}
-			--n;
-		}
-	}
-
-	return "";
+	return _("port");
 }
+
 
 
 IOSelectorWindow::IOSelectorWindow (
 	ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel
 	)
 	: ArdourDialog ("I/O selector"),
-	  _selector (session, io, for_input),
+	  _selector (session, io, !for_input),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
 	  cancel_button (_("Cancel")),
 	  rescan_button (_("Rescan"))

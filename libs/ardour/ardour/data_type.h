@@ -21,7 +21,6 @@
 #define __ardour_data_type_h__
 
 #include <string>
-#include <ardour/data_type.h>
 #include <jack/jack.h>
 
 namespace ARDOUR {

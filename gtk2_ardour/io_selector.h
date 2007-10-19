@@ -20,152 +20,29 @@
 #ifndef __ardour_ui_io_selector_h__
 #define __ardour_ui_io_selector_h__
 
-#include <gtkmm/box.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/table.h>
-#include <gtkmm/frame.h>
-
 #include "ardour_dialog.h"
+#include "port_matrix.h"
 
-namespace ARDOUR {
-	class Session;
-	class IO;
-	class PortInsert;
-}
-
-/// A group of port names
-class PortGroup
-{
-  public:
-	PortGroup (std::string const & n, std::string const & p) : name (n), prefix (p), visible (true) {}
-
-	void add (std::string const & p);
-
-	std::string name;
-	std::string prefix; ///< prefix (before colon) e.g. "ardour:"
-	std::vector<std::string> ports; ///< port names
-	bool visible;
-};
-
-/// A table of checkbuttons to provide the GUI for connecting to a PortGroup
-class PortGroupTable
-{
-  public:
-	PortGroupTable (PortGroup&, boost::shared_ptr<ARDOUR::IO>, bool);
-
-	Gtk::Widget& get_widget ();
-	std::pair<int, int> unit_size () const;
-	PortGroup& port_group () { return _port_group; }
-
-  private:
-	void check_button_toggled (Gtk::CheckButton*, int, std::string const &);
-	
-	Gtk::Table _table;
-	Gtk::EventBox _box;
-	PortGroup& _port_group;
-	std::vector<std::vector<Gtk::CheckButton* > > _check_buttons;
-	bool _ignore_check_button_toggle;
-	boost::shared_ptr<ARDOUR::IO> _io;
-	bool _for_input;
-};
-
-/// A list of PortGroups
-class PortGroupList : public std::list<PortGroup*>
-{
-  public:
-	PortGroupList (ARDOUR::Session &, boost::shared_ptr<ARDOUR::IO>, bool);
-
-	void refresh ();
-	int n_visible_ports () const;
-	std::string get_port_by_index (int, bool with_prefix = true) const;
-
-  private:
-	ARDOUR::Session& _session;
-	boost::shared_ptr<ARDOUR::IO> _io;
-	bool _for_input;
-
-	PortGroup buss;
-	PortGroup track;
-	PortGroup system;
-	PortGroup other;
-};
-
-
-/// A widget which provides a set of rotated text labels
-class RotatedLabelSet : public Gtk::Widget {
-  public:
-	RotatedLabelSet (PortGroupList&);
-	virtual ~RotatedLabelSet ();
-
-	void set_angle (int);
-	void set_base_width (int);
-	void update_visibility ();
-	
-  protected:
-	virtual void on_size_request (Gtk::Requisition*);
-	virtual void on_size_allocate (Gtk::Allocation&);
-	virtual void on_realize ();
-	virtual void on_unrealize ();
-	virtual bool on_expose_event (GdkEventExpose*);
-
-	Glib::RefPtr<Gdk::Window> _gdk_window;
-
-  private:
-	std::pair<int, int> setup_layout (std::string const &);
-
-	PortGroupList& _port_group_list; ///< list of ports to display
-	int _angle_degrees; ///< label rotation angle in degrees
-	double _angle_radians; ///< label rotation angle in radians
-	int _base_width; ///< width of labels; see set_base_width() for more details
-	Glib::RefPtr<Pango::Context> _pango_context;
-	Glib::RefPtr<Pango::Layout> _pango_layout;
-	Glib::RefPtr<Gdk::GC> _gc;
-	Gdk::Color _fg_colour;
-	Gdk::Color _bg_colour;
-};
-
-
-
-/// Widget for selecting what an IO is connected to
-class IOSelector : public Gtk::VBox {
+class IOSelector : public PortMatrix {
   public:
 	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
-	~IOSelector ();
 
-	void redisplay ();
-
-	enum Result {
-		Cancelled,
-		Accepted
-	};
-
-	sigc::signal<void, Result> Finished;
+	void set_state (int, std::string const &, bool);
+	bool get_state (int, std::string const &) const;
+	uint32_t n_rows () const;
+	uint32_t maximum_rows () const;
+	uint32_t minimum_rows () const;
+	std::string row_name (int) const;
+	void add_row ();
+	void remove_row (int);
+	std::string row_descriptor () const;
 
   private:
-	void setup ();
-	void clear ();
-	void setup_dimensions ();
+	
 	void ports_changed (ARDOUR::IOChange, void*);
-	bool row_label_button_pressed (GdkEventButton*, int);
-	void add_port ();
-	void remove_port (int);
-	void group_visible_toggled (Gtk::CheckButton*, std::string const &);
-	void set_port_group_table_visibility ();
-
-	PortGroupList _port_group_list;
+	
 	boost::shared_ptr<ARDOUR::IO> _io;
-	bool _for_input;
-	std::vector<PortGroupTable*> _port_group_tables;
-	std::vector<Gtk::EventBox*> _row_labels[2];
-	Gtk::VBox* _row_labels_vbox[2];
-	RotatedLabelSet _column_labels;
-	Gtk::HBox _overall_hbox;
-	Gtk::VBox _side_vbox[2];
-	Gtk::HBox _port_group_hbox;
-	Gtk::ScrolledWindow _scrolled_window;
-	Gtk::Label* _side_vbox_pad[2];
 };
-
 
 class IOSelectorWindow : public ArdourDialog
 {

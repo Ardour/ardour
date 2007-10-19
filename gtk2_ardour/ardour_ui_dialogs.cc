@@ -35,6 +35,7 @@
 #include "route_params_ui.h"
 #include "sfdb_ui.h"
 #include "theme_manager.h"
+#include "bundle_manager.h"
 #include "keyeditor.h"
 
 #include "i18n.h"
@@ -359,6 +360,33 @@ ARDOUR_UI::toggle_theme_manager ()
 			theme_manager->present ();
 		} else {
 			theme_manager->hide ();
+		} 
+	}
+}
+
+void
+ARDOUR_UI::create_bundle_manager ()
+{
+	if (bundle_manager == 0) {
+		bundle_manager = new BundleManager (*session);
+		bundle_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBundleManager")));
+	}
+}
+
+void
+ARDOUR_UI::toggle_bundle_manager ()
+{
+	create_bundle_manager ();
+	
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBundleManager"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+	
+		if (tact->get_active()) {
+			bundle_manager->show_all ();
+			bundle_manager->present ();
+		} else {
+			bundle_manager->hide ();
 		} 
 	}
 }

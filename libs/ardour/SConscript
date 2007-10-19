@@ -12,7 +12,7 @@ ardour = env.Copy()
 # this defines the version number of libardour
 # 
 
-domain = 'libardour2'
+domain = 'libardour'
 
 ardour.Append(DOMAIN = domain, MAJOR = 2, MINOR = 0, MICRO = 0)
 ardour.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
@@ -29,6 +29,8 @@ ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 ardour_files=Split("""
 amp.cc
 audio_buffer.cc
+auto_bundle.cc
+user_bundle.cc
 audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
@@ -45,7 +47,6 @@ automation_control.cc
 automation_event.cc
 buffer.cc
 buffer_set.cc
-bundle.cc
 chan_count.cc
 configuration.cc
 control_protocol_manager.cc

@@ -237,6 +237,7 @@
                <menuitem action='ToggleKeyEditor'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
+               <menuitem action='ToggleBundleManager'/>
    	       <separator/>
         </menu>
         <menu name='Options' action='Options'>

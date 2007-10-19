@@ -78,6 +78,7 @@ class AddRouteDialog;
 class NewSessionDialog;
 class LocationUI;
 class ThemeManager;
+class BundleManager;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -158,6 +159,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_key_editor ();
 	void toggle_location_window ();
 	void toggle_theme_manager ();
+	void toggle_bundle_manager ();
 	void toggle_big_clock_window ();
 	void toggle_connection_editor ();
 	void toggle_route_params_window ();
@@ -611,6 +613,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	RouteParams_UI *route_params;
 	int             create_route_params ();
+
+	BundleManager *bundle_manager;
+	void create_bundle_manager ();
 
 	ConnectionEditor *connection_editor;
 	int               create_connection_editor ();
