@@ -91,6 +91,7 @@ class EngineControl : public Gtk::VBox {
 	std::vector<std::string> enumerate_alsa_devices ();
 	std::vector<std::string> enumerate_oss_devices ();
 	std::vector<std::string> enumerate_netjack_devices ();
+	std::vector<std::string> enumerate_freebob_devices ();
 	std::vector<std::string> enumerate_ffado_devices ();
 	std::vector<std::string> enumerate_dummy_devices ();
 #endif	

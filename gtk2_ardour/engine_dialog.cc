@@ -113,6 +113,7 @@ EngineControl::EngineControl ()
 	strings.push_back (X_("ALSA"));
 	strings.push_back (X_("OSS"));
 	strings.push_back (X_("FFADO"));
+	strings.push_back (X_("FreeBoB"));
 #endif
 	strings.push_back (X_("NetJACK"));
 	strings.push_back (X_("Dummy"));
@@ -363,6 +364,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	bool using_coreaudio = false;
 	bool using_netjack = false;
 	bool using_ffado = false;
+	bool using_freebob = false;
 
 	/* first, path to jackd */
 
@@ -424,7 +426,10 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("netjack");
 	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
-		cmd.push_back ("ffado");
+		cmd.push_back ("firewire");
+	} else if (driver == X_("FreeBoB")) {
+		using_freebob = true;
+		cmd.push_back ("freebob");
 	}
 
 	/* driver arguments */
@@ -567,6 +572,7 @@ EngineControl::enumerate_devices ()
 #else
 	devices["ALSA"] = enumerate_alsa_devices ();
 	devices["FFADO"] = enumerate_ffado_devices ();
+	devices["FreeBoB"] = enumerate_freebob_devices ();
 	devices["OSS"] = enumerate_oss_devices ();
 	devices["Dummy"] = enumerate_dummy_devices ();
 	devices["NetJACK"] = enumerate_netjack_devices ();
@@ -707,6 +713,12 @@ EngineControl::enumerate_alsa_devices ()
 
 vector<string>
 EngineControl::enumerate_ffado_devices ()
+{
+	vector<string> devs;
+	return devs;
+}
+vector<string>
+EngineControl::enumerate_freebob_devices ()
 {
 	vector<string> devs;
 	return devs;
