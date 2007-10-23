@@ -97,7 +97,7 @@ class Port : public virtual sigc::trackable {
   protected:
 	friend class AudioEngine;
 
-	Port ();
+	Port (Flags);
 
 	virtual int disconnect () = 0;
 	virtual void recompute_total_latency() const = 0;

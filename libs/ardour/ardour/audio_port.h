@@ -70,8 +70,8 @@ class AudioPort : public virtual Port {
   protected:
 	friend class AudioEngine;
 
-	AudioPort ();          // data buffer comes from elsewhere (e.g. JACK)
-	AudioPort (nframes_t); // data buffer owned by ardour
+	AudioPort (Flags);            // data buffer comes from elsewhere (e.g. JACK)
+	AudioPort (Flags, nframes_t); // data buffer owned by ardour
 	void reset ();
 	
 	/* engine isn't supposed to access below here */

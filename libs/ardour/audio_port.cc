@@ -26,15 +26,15 @@ using namespace std;
 nframes_t AudioPort::_short_over_length = 2;
 nframes_t AudioPort::_long_over_length = 10;
 
-AudioPort::AudioPort()
-	: _buffer (0)
+AudioPort::AudioPort(Flags flags)
+	: Port (flags), _buffer (0)
 {
 	_type = DataType::AUDIO;
 	reset();
 }
 
-AudioPort::AudioPort(nframes_t nframes)
-	: _buffer (nframes)
+AudioPort::AudioPort(Flags flags, nframes_t nframes)
+	: Port (flags), _buffer (nframes)
 {
 	_type = DataType::AUDIO;
 	reset();

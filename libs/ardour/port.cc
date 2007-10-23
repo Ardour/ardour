@@ -22,8 +22,9 @@
 using namespace ARDOUR;
 using namespace std;
 
-Port::Port ()
-	: _metering (0)
+Port::Port (Flags flags)
+	: _flags (flags)
+	, _metering (0)
 	, _last_monitor (false)
 {
 }

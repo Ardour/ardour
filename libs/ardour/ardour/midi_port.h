@@ -51,7 +51,7 @@ class MidiPort : public virtual Port {
   protected:
 	friend class AudioEngine;
 
-	MidiPort (nframes_t bufsize);
+	MidiPort (Flags, nframes_t bufsize);
 	
 	/* engine isn't supposed to access below here */
 

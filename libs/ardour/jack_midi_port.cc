@@ -21,8 +21,9 @@
 
 using namespace ARDOUR;
 JackMidiPort::JackMidiPort (const std::string& name, Flags flgs)
-	: JackPort (name, DataType::MIDI, flgs)
-	, MidiPort (4096) // FIXME FIXME FIXME Jack needs to tell us this
+	: Port (flgs)
+	, JackPort (name, DataType::MIDI, flgs)
+	, MidiPort (flgs, 4096) // FIXME FIXME FIXME Jack needs to tell us this
 	, _nframes_this_cycle(0)
 {
 }
