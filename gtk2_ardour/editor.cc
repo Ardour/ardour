@@ -1928,9 +1928,8 @@ Editor::add_bus_or_audio_track_context_items (Menu_Helpers::MenuList& edit_items
 		
 		/* Adding new material */
 	
-		add_item_with_sensitivity (track_items, MenuElem (_("Insert selected region"), bind (mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)), n_audio_tracks == 1);
-		
-		add_item_with_sensitivity (track_items, MenuElem (_("Insert existing audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)), n_audio_tracks == 1);
+		edit_items.push_back (MenuElem (_("Insert Selected Region"), bind (mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)));
+		edit_items.push_back (MenuElem (_("Insert Existing Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
 		
 		/* Nudge */
 
