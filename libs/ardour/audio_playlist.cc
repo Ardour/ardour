@@ -271,11 +271,12 @@ AudioPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
 
 		if ((*x)->involves (ar)) {
 
-			if (find (updated.begin(), updated.end(), *x) == updated.end()) {
-				try { 
-					if ((*x)->refresh ()) {
-						updated.insert (*x);
-					}
+			pair<set<boost::shared_ptr<Crossfade> >::iterator, bool> const u = updated.insert (*x);
+			
+			if (u.second) {
+				/* x was successfully inserted into the set, so it has not already been updated */
+				try {
+					(*x)->refresh ();
 				}
 
 				catch (Crossfade::NoCrossfadeHere& err) {
