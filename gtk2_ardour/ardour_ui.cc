@@ -181,6 +181,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	editor = 0;
 	mixer = 0;
 	session = 0;
+	editor = 0;
 	_session_is_new = false;
 	big_clock_window = 0;
 	session_selector_window = 0;
