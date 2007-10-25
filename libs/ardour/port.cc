@@ -22,8 +22,9 @@
 using namespace ARDOUR;
 using namespace std;
 
-Port::Port (Flags flags)
+Port::Port (DataType type, Flags flags)
 	: _flags (flags)
+	, _type (type)
 	, _metering (0)
 	, _last_monitor (false)
 {

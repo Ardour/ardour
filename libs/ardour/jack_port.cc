@@ -31,7 +31,7 @@ using namespace std;
 AudioEngine* JackPort::engine = 0;
 
 JackPort::JackPort (const std::string& name, DataType type, Flags flgs) 
-	: Port (flgs), _port (0)
+	: Port (type, flgs), _port (0)
 {
 	_port = jack_port_register (engine->jack(), name.c_str(), type.to_jack_type(), flgs, 0);
 
@@ -39,8 +39,6 @@ JackPort::JackPort (const std::string& name, DataType type, Flags flgs)
 		throw failed_constructor();
 	}
 	
-	_flags = flgs;
-	_type  = type;
 	_name = jack_port_name (_port);
 }
 

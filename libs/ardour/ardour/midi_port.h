@@ -35,8 +35,6 @@ class MidiPort : public virtual Port {
    public:
 	virtual ~MidiPort();
 	
-	DataType type() const { return DataType::MIDI; }
-
 	Buffer& get_buffer() {
 		return _buffer;
 	}

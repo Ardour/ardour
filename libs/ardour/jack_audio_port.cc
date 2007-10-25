@@ -23,7 +23,7 @@
 using namespace ARDOUR;
 
 JackAudioPort::JackAudioPort(const std::string& name, Flags flgs)
-	: Port (flgs), AudioPort (flgs), JackPort (name, DataType::AUDIO, flgs)
+	: Port (DataType::AUDIO, flgs), AudioPort (flgs), JackPort (name, DataType::AUDIO, flgs)
 {
 
 }

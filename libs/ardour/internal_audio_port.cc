@@ -35,10 +35,10 @@ InternalAudioPort::default_mixdown (const list<InternalPort*>& ports, AudioBuffe
 	}
 }
 
-InternalAudioPort::InternalAudioPort(const string& name, Flags flgs)
-	: Port (flgs)
-	, AudioPort (flgs, engine->frames_per_cycle())
-	, InternalPort (name, DataType::AUDIO, flgs)
+InternalAudioPort::InternalAudioPort(const string& name, Flags flags)
+	: Port (DataType::AUDIO, flags)
+	, AudioPort (flags, engine->frames_per_cycle())
+	, InternalPort (name, DataType::AUDIO, flags)
 {
 	_mixdown = default_mixdown;
 }

@@ -74,7 +74,8 @@ class Port : public virtual sigc::trackable {
 		if (_metering) { _metering--; }
 	}
 	
-	virtual DataType type() const = 0;
+	DataType type() const { return _type; }
+
 	virtual void cycle_start(nframes_t nframes) {}
 	virtual void cycle_end() {}
 	virtual Buffer& get_buffer() = 0;
@@ -97,7 +98,7 @@ class Port : public virtual sigc::trackable {
   protected:
 	friend class AudioEngine;
 
-	Port (Flags);
+	Port (DataType, Flags);
 
 	virtual int disconnect () = 0;
 	virtual void recompute_total_latency() const = 0;
@@ -105,8 +106,8 @@ class Port : public virtual sigc::trackable {
 	
 	/* engine isn't supposed to access below here */
 
-	Flags _flags;
-	std::string    _type;
+	Flags          _flags;
+	const DataType _type;
 	std::string    _name;
 	unsigned short _metering;
 	bool           _last_monitor;

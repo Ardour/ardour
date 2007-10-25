@@ -33,8 +33,6 @@ class AudioEngine;
 
 class AudioPort : public virtual Port {
    public:
-	DataType type() const { return DataType::AUDIO; }
-
 	virtual Buffer& get_buffer () {
 		return _buffer;
 	}

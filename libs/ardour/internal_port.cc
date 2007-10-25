@@ -35,10 +35,9 @@ InternalPort::set_engine (AudioEngine* e)
 }
 
 InternalPort::InternalPort (const string& str, DataType type, Flags flags)
-	: Port (flags)
+	: Port (type, flags)
 {
 	set_name (str);
-	_type = type;
 }
 
 InternalPort::~InternalPort ()

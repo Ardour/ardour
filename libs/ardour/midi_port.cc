@@ -26,12 +26,10 @@ using namespace ARDOUR;
 using namespace std;
 
 MidiPort::MidiPort (Flags flags, nframes_t bufsize)
-	: Port (flags), _buffer (bufsize) 
+	: Port (DataType::MIDI, flags)
+	, _buffer (bufsize) 
 {
-	_type = DataType::MIDI;
 	reset();
-
-
 }
 
 MidiPort::~MidiPort()
