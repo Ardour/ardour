@@ -63,9 +63,7 @@ public:
 		Sample*       const dst_raw = _data + offset;
 		const Sample* const src_raw = src.data();
 
-		for (nframes_t n = 0; n < len; ++n) {
-			dst_raw[n] += src_raw[n];
-		}
+		mix_buffers_no_gain(dst_raw, src_raw, len);
 
 		_silent = (src.silent() && _silent);
 	}
