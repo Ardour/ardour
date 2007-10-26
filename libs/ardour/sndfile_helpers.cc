@@ -63,11 +63,11 @@ int sndfile_header_formats[SNDFILE_HEADER_FORMATS] = {
 };
 
 const char * const sndfile_bitdepth_formats_strings[SNDFILE_BITDEPTH_FORMATS+1] = {
-	N_("16 bit"),
-	N_("24 bit"),
-	N_("32 bit"),
-	N_("8 bit"),
-	N_("float"),
+	N_("Signed 16 bit PCM"),
+	N_("Signed 24 bit PCM"),
+	N_("Signed 32 bit PCM"),
+	N_("Signed 8 bit PCM"),
+	N_("32 bit float"),
 	0
 };
 

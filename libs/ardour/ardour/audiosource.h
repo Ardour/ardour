@@ -61,10 +61,6 @@ const nframes_t frames_per_peak = 256;
 	
 	/* returns the number of items in this `audio_source' */
 
-	virtual nframes_t length() const {
-		return _length;
-	}
-
 	virtual nframes_t available_peaks (double zoom) const;
 
 	virtual nframes_t read (Sample *dst, nframes_t start, nframes_t cnt) const;
@@ -120,7 +116,6 @@ const nframes_t frames_per_peak = 256;
 	bool                 _peaks_built;
 	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
-	nframes_t            _length;
 	Glib::ustring               peakpath;
 	Glib::ustring              _captured_for;
 

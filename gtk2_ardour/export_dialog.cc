@@ -37,6 +37,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/audioregion.h>
 #include <ardour/audioengine.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/gdither.h>
 #include <ardour/utils.h>
 
@@ -86,8 +87,8 @@ static const gchar *dither_types[] = {
 };
 
 static const gchar* channel_strings[] = {
-	N_("stereo"), 
-	N_("mono"), 
+	N_("Stereo"), 
+	N_("Mono"), 
 	0
 };
 
@@ -112,7 +113,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	  src_quality_label (_("Conversion Quality"), 1.0, 0.5),
 	  dither_type_label (_("Dither Type"), 1.0, 0.5),
 	  cuefile_only_checkbox (_("Export CD Marker File Only")),
-	  file_browse_button (_("Browse")),
+	  file_chooser (FILE_CHOOSER_ACTION_SAVE),
 	  track_selector_button (_("Specific tracks ..."))
 {
 	guint32 n;
@@ -123,6 +124,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	track_and_master_selection_allowed = true;
 	channel_count_selection_allowed = true;
 	export_cd_markers_allowed = true;
+	set_resizable (false);	
 
 	WindowTitle title(Glib::get_application_name());
 	title += _("Export");
@@ -133,8 +135,6 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	spec.running = false;
-
-	file_entry.set_name ("ExportFileNameEntry");
 
 	master_list = ListStore::create (exp_cols);
 	master_selector.set_model (master_list);
@@ -176,11 +176,11 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	track_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	master_scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	get_vbox()->pack_start (file_frame, false, false);
+	get_vbox()->pack_start (file_frame, PACK_EXPAND_WIDGET);
 
 	hpacker.set_spacing (5);
 	hpacker.set_border_width (5);
-	hpacker.pack_start (format_frame, false, false);
+	hpacker.pack_start (format_frame, PACK_SHRINK );
 
 	master_scroll.add (master_selector);
 	track_scroll.add (track_selector);
@@ -195,19 +195,36 @@ ExportDialog::ExportDialog(PublicEditor& e)
 
 	hpacker.pack_start (track_vpacker);
 
-	get_vbox()->pack_start (hpacker);
+	get_vbox()->pack_start (hpacker, PACK_SHRINK);
 	
 	track_selector_button.set_name ("EditorGTKButton");
 	track_selector_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::track_selector_button_click));
 
-	get_vbox()->pack_start (progress_bar, false, false);
+	Gtk::FileFilter filter_wav;
+	filter_wav.set_name("Wav files");
+	filter_wav.add_mime_type("audio/wav");
+	file_chooser.add_filter(filter_wav);
+	
+	Gtk::FileFilter filter_aiff;
+	filter_aiff.set_name("Aiff files");
+	filter_aiff.add_mime_type("audio/aiff");
+	filter_aiff.add_pattern("*.aif");
+	filter_aiff.add_pattern("*.aiff");
+	file_chooser.add_filter(filter_aiff);
+	
+	Gtk::FileFilter filter_any;
+	filter_any.set_name("All files");
+	filter_any.add_pattern("*");
+	file_chooser.add_filter(filter_any);
+	file_chooser.set_no_show_all();
 
-	Gtkmm2ext::set_size_request_to_display_given_text (file_entry, X_("Kg/quite/a/reasonable/size/for/files/i/think"), 5, 8);
+	get_vbox()->pack_start (progress_bar, false, false, 5);
+	progress_bar.set_no_show_all();
+	progress_bar.hide();
 
 	file_hbox.set_spacing (5);
 	file_hbox.set_border_width (5);
-	file_hbox.pack_start (file_entry, true, true);
-	file_hbox.pack_start (file_browse_button, false, false);
+	file_hbox.pack_start (file_chooser, PACK_EXPAND_WIDGET);
 
 	file_frame.add (file_hbox);
 	file_frame.set_border_width (5);
@@ -316,37 +333,35 @@ ExportDialog::ExportDialog(PublicEditor& e)
 
 	cuefile_only_checkbox.set_name ("ExportCheckbox");
 
-	format_table.set_homogeneous (false);
+	format_table.set_homogeneous (true);
 	format_table.set_border_width (5);
 	format_table.set_col_spacings (5);
 	format_table.set_row_spacings (5);
 
-	format_table.attach (channel_count_label, 0, 1, 0, 1);
-	format_table.attach (channel_count_combo, 1, 2, 0, 1);
+	format_table.attach (channel_count_label, 0, 1, 0, 1, FILL, FILL);
+	format_table.attach (channel_count_combo, 1, 2, 0, 1, FILL, FILL);
 	
-	format_table.attach (header_format_label, 0, 1, 1, 2);
-	format_table.attach (header_format_combo, 1, 2, 1, 2);
+	format_table.attach (header_format_label, 0, 1, 1, 2, FILL, FILL);
+	format_table.attach (header_format_combo, 1, 2, 1, 2, FILL, FILL);
 
-	format_table.attach (bitdepth_format_label, 0, 1, 2, 3);
-	format_table.attach (bitdepth_format_combo, 1, 2, 2, 3);
+	format_table.attach (bitdepth_format_label, 0, 1, 2, 3, FILL, FILL);
+	format_table.attach (bitdepth_format_combo, 1, 2, 2, 3, FILL, FILL);
 
-	format_table.attach (endian_format_label, 0, 1, 3, 4);
-	format_table.attach (endian_format_combo, 1, 2, 3, 4);
+	format_table.attach (endian_format_label, 0, 1, 3, 4, FILL, FILL);
+	format_table.attach (endian_format_combo, 1, 2, 3, 4, FILL, FILL);
 
-	format_table.attach (sample_rate_label, 0, 1, 4, 5);
-	format_table.attach (sample_rate_combo, 1, 2, 4, 5);
+	format_table.attach (sample_rate_label, 0, 1, 4, 5, FILL, FILL);
+	format_table.attach (sample_rate_combo, 1, 2, 4, 5, FILL, FILL);
 
-	format_table.attach (src_quality_label, 0, 1, 5, 6);
-	format_table.attach (src_quality_combo, 1, 2, 5, 6);
+	format_table.attach (src_quality_label, 0, 1, 5, 6, FILL, FILL);
+	format_table.attach (src_quality_combo, 1, 2, 5, 6, FILL, FILL);
 
-	format_table.attach (dither_type_label, 0, 1, 6, 7);
-	format_table.attach (dither_type_combo, 1, 2, 6, 7);
+	format_table.attach (dither_type_label, 0, 1, 6, 7, FILL, FILL);
+	format_table.attach (dither_type_combo, 1, 2, 6, 7, FILL, FILL);
 
-	format_table.attach (cue_file_label, 0, 1, 7, 8);
-	format_table.attach (cue_file_combo, 1, 2, 7, 8);
-	format_table.attach (cuefile_only_checkbox, 0, 2, 8, 9);
-
-	file_entry.set_name ("ExportFileDisplay");
+	format_table.attach (cue_file_label, 0, 1, 7, 8, FILL, FILL);
+	format_table.attach (cue_file_combo, 1, 2, 7, 8, FILL, FILL);
+	format_table.attach (cuefile_only_checkbox, 0, 2, 8, 9, FILL, FILL);
 
 	signal_delete_event().connect (mem_fun(*this, &ExportDialog::window_closed));
 
@@ -354,15 +369,14 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	cancel_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
 	ok_button = add_button (_("Export"), RESPONSE_ACCEPT);
 	ok_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
-	
-	file_browse_button.set_name ("EditorGTKButton");
-	file_browse_button.signal_clicked().connect (mem_fun(*this, &ExportDialog::browse));
-
 	channel_count_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::channels_chosen));
 	bitdepth_format_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::bitdepth_chosen));
 	header_format_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::header_chosen));
 	sample_rate_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::sample_rate_chosen));
 	cue_file_combo.signal_changed().connect (mem_fun(*this, &ExportDialog::cue_file_type_chosen));
+
+	file_chooser.signal_update_preview().connect (mem_fun(*this, &ExportDialog::file_chooser_selection_changed));
+
 }
 
 ExportDialog::~ExportDialog()
@@ -373,24 +387,18 @@ void
 ExportDialog::do_not_allow_track_and_master_selection()
 {
 	track_and_master_selection_allowed = false;
-	track_vpacker.set_no_show_all();
 }
 
 void
 ExportDialog::do_not_allow_channel_count_selection()
 {
 	channel_count_selection_allowed = false;
-	channel_count_combo.set_no_show_all();
-	channel_count_label.set_no_show_all();
 }
 
 void
 ExportDialog::do_not_allow_export_cd_markers()
 {
 	export_cd_markers_allowed = false;
-	cue_file_label.set_no_show_all();
-	cue_file_combo.set_no_show_all();
-	cuefile_only_checkbox.set_no_show_all();
 }
 
 void
@@ -433,7 +441,7 @@ ExportDialog::set_state()
 {
 	XMLNode* node = session->instant_xml(X_("ExportDialog"));
 	XMLProperty* prop;
-
+	bool fc_location_requested = false;
 	if (node) {
 
 		if ((prop = node->property (X_("sample_rate"))) != 0) {
@@ -458,11 +466,26 @@ ExportDialog::set_state()
 			endian_format_combo.set_active_text(prop->value());
 		}
 		if ((prop = node->property (X_("filename"))) != 0) {
-			file_entry.set_text(prop->value());
+			file_chooser.set_filename(prop->value());
+			fc_location_requested = true;
+			file_chooser.set_current_folder(Glib::path_get_basename(prop->value()));
 		}
+		  
 		if ((prop = node->property (X_("cue_file_type"))) != 0) {
 		        cue_file_combo.set_active_text(prop->value());
 		}
+	}
+
+	if (!fc_location_requested) {
+
+		/*
+		  If the filename hasn't been set before, use the
+		  current session's export directory as a default
+		  location for the export.  
+		*/
+
+		file_chooser.set_current_folder (session->session_directory().export_path().to_string());
+		file_chooser.set_current_name (_("export.wav"));
 	}
 
 	header_chosen ();
@@ -488,7 +511,7 @@ ExportDialog::set_state()
 		if (!master) {
 			
 			/* default is to use all */
-			if (channel_count_combo.get_active_text() == _("mono")) {
+			if (channel_count_combo.get_active_text() == _("Mono")) {
 				nchns = 1;
 			} else {
 				nchns = 2;
@@ -564,7 +587,7 @@ ExportDialog::save_state()
 	node->add_property(X_("header_format"), header_format_combo.get_active_text());
 	node->add_property(X_("bitdepth_format"), bitdepth_format_combo.get_active_text());
 	node->add_property(X_("endian_format"), endian_format_combo.get_active_text());
-	node->add_property(X_("filename"), file_entry.get_text());
+	node->add_property(X_("filename"), file_chooser.get_filename());
 	node->add_property(X_("cue_file_type"), cue_file_combo.get_active_text());
 
 	XMLNode* tracks = new XMLNode(X_("Tracks"));
@@ -888,7 +911,7 @@ ExportDialog::do_export_cd_markers (const string& path,const string& cuefile_typ
 void
 ExportDialog::do_export ()
 {
-	string filepath = file_entry.get_text();
+	string filepath = file_chooser.get_filename();
  	
 	if(!is_filepath_valid(filepath)){
 		return;
@@ -896,7 +919,7 @@ ExportDialog::do_export ()
 
 	if (export_cd_markers_allowed) {
 		if (cue_file_combo.get_active_text () != _("None")) {
-			do_export_cd_markers (file_entry.get_text(), cue_file_combo.get_active_text ());
+			do_export_cd_markers (file_chooser.get_filename(), cue_file_combo.get_active_text ());
 		}
 
 		if (cuefile_only_checkbox.get_active()) {
@@ -913,12 +936,15 @@ ExportDialog::do_export ()
 	// read user input into spec
 	initSpec(filepath);
 	
+	progress_bar.show();
 	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
 	cancel_label.set_text (_("Stop Export"));
 
 	export_audio_data();
 	
   	progress_connection.disconnect ();
+	session->engine().freewheel (false);
+	progress_bar.hide();
 	end_dialog ();
 }
 	
@@ -937,9 +963,9 @@ ExportDialog::end_dialog ()
 		}
 	}
 
-	session->finalize_audio_export ();
+	hide ();
 
-	hide_all ();
+	session->finalize_audio_export ();
 
 	set_modal (false);
 	ok_button->set_sensitive(true);
@@ -967,11 +993,39 @@ ExportDialog::start_export ()
 		
 		file_entry.set_text (export_file_path.to_string());
 	}
-	
+
 	progress_bar.set_fraction (0);
+	progress_bar.hide();
+	progress_bar.set_no_show_all();
 	cancel_label.set_text (_("Cancel"));
 
-	show_all ();
+	show_all();
+
+	if (track_and_master_selection_allowed) {
+		track_vpacker.show();
+	} else {
+		track_vpacker.hide();
+	}
+
+	file_chooser.show();
+
+	if (channel_count_selection_allowed) {
+		channel_count_combo.show();
+		channel_count_label.show();
+	} else {
+		channel_count_combo.hide();
+		channel_count_label.hide();
+	}
+
+	if (export_cd_markers_allowed) {
+		cue_file_label.show();
+		cue_file_combo.show();
+		cuefile_only_checkbox.show();
+	} else {
+		cue_file_label.hide();
+		cue_file_combo.hide();
+		cuefile_only_checkbox.hide();
+	}
 
 	if (session->master_out()) {
 		track_scroll.hide ();
@@ -979,15 +1033,21 @@ ExportDialog::start_export ()
 		master_scroll.hide ();
 		track_selector_button.hide ();
 	}
+
+	track_and_master_selection_allowed = true;
+	channel_count_selection_allowed =  true;
+	export_cd_markers_allowed = true;
 }
 
 void
 ExportDialog::header_chosen ()
 {
 	if (sndfile_header_format_from_string (header_format_combo.get_active_text ()) == SF_FORMAT_WAV) {
+		endian_format_combo.set_active_text (N_("Little-endian (Intel)"));
 		endian_format_combo.set_sensitive (false);
 	} else {
 		endian_format_combo.set_sensitive (true);
+		endian_format_combo.set_active_text (N_("Big-endian (Mac)"));
 	}
 }
 
@@ -1017,6 +1077,65 @@ ExportDialog::cue_file_type_chosen ()
 		cuefile_only_checkbox.set_active (false);
 		cuefile_only_checkbox.set_sensitive (false);
 	}
+}
+
+void
+ExportDialog::file_chooser_selection_changed ()
+{
+
+  /*
+    if the user selects an existing file from the 'browse for other folders' tab,
+    change the format settings to match the file.
+  */
+	if (file_chooser.get_filename().length() == 0) {
+		return;
+	}
+	if (Glib::file_test(file_chooser.get_preview_filename(),Glib::FILE_TEST_IS_DIR)){
+		file_chooser.set_current_name (_(""));
+		return;
+	}
+	if (!Glib::file_test(file_chooser.get_preview_filename(),Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
+
+	SoundFileInfo finfo;
+	string error_msg, format_str;
+	
+	if (!AudioFileSource::get_soundfile_info (file_chooser.get_preview_filename(), finfo, error_msg)) {
+		error << string_compose(_("Export: cannot open file \"%1\"."), error_msg ) << endmsg;
+		return;
+	}
+
+	if (finfo.samplerate == 22050) {
+		sample_rate_combo.set_active_text (N_("22.05kHz"));
+	} else if (finfo.samplerate == 44100) {
+		sample_rate_combo.set_active_text (N_("44.1kHz"));
+	} else if (finfo.samplerate == 48000) {
+		sample_rate_combo.set_active_text (N_("48kHz"));
+	} else if (finfo.samplerate == 88200) {
+		sample_rate_combo.set_active_text (N_("88.2kHz"));
+	} else if (finfo.samplerate == 96000) {
+		sample_rate_combo.set_active_text (N_("96kHz"));
+	} else if (finfo.samplerate == 192000) {
+		sample_rate_combo.set_active_text (N_("192kHz"));
+	} 
+
+	if (finfo.channels == 1) {
+		channel_count_combo.set_active_text(N_("Mono"));
+	} else {
+		channel_count_combo.set_active_text(N_("Stereo"));
+	}
+
+	string::size_type pos;
+
+	pos = finfo.format_name.find_first_of (" ");
+	format_str = finfo.format_name.substr(pos + 1, 255);
+	pos = format_str.find_first_of (" ");
+	header_format_combo.set_active_text(format_str.substr(0, pos));
+
+	format_str = finfo.format_name;
+	pos = format_str.find_first_of (",");
+	bitdepth_format_combo.set_active_text(format_str.substr(pos + 2, 255));
 }
 
 void
@@ -1053,7 +1172,7 @@ ExportDialog::channels_chosen ()
 {
 	bool mono;
 
-	mono = (channel_count_combo.get_active_text() == _("mono"));
+	mono = (channel_count_combo.get_active_text() == _("Mono"));
 
 	if (mono) {
 		track_selector.get_column(2)->set_visible(false);
@@ -1145,7 +1264,7 @@ ExportDialog::is_filepath_valid(string &filepath)
  			return false;
  		}
  		else {
- 			string txt = _("File already exists, do you want to overwrite it?");
+			string txt = _("File ") + filepath + _(" already exists, do you want to overwrite it?");
 			MessageDialog msg (*this, txt, false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
  			if ((ResponseType) msg.run() == Gtk::RESPONSE_NO) {
  				return false;
@@ -1175,7 +1294,7 @@ ExportDialog::initSpec(string &filepath)
 	spec.stop = false;
 	spec.port_map.clear();
 	
-	if (channel_count_combo.get_active_text() == _("mono")) {
+	if (channel_count_combo.get_active_text() == _("Mono")) {
 		spec.channels = 1;
 	} else {
 		spec.channels = 2;
@@ -1303,27 +1422,6 @@ ExportDialog::window_closed (GdkEventAny *ignored)
 {
 	end_dialog ();
 	return TRUE;
-}
-
-void
-ExportDialog::browse ()
-{
-	FileChooserDialog dialog("Export to file", browse_action());
-	dialog.set_transient_for(*this);
-	dialog.set_filename (file_entry.get_text());
-
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
-  
-	int result = dialog.run();
-
-	if (result == Gtk::RESPONSE_OK) {
-		string filename = dialog.get_filename();
-	
-		if (filename.length()) {
-			file_entry.set_text (filename);
-		}
-	}
 }
 
 void

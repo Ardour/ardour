@@ -279,7 +279,7 @@ namespace ARDOUR {
 	enum MonitorModel {
 		HardwareMonitoring,
 		SoftwareMonitoring,
-		ExternalMonitoring,
+		ExternalMonitoring
 	};
 
 	enum DenormalModel {
@@ -292,7 +292,7 @@ namespace ARDOUR {
 	enum RemoteModel {
 		UserOrdered,
 		MixerOrdered,
-		EditorOrdered,
+		EditorOrdered
 	};
 
 	enum CrossfadeModel {

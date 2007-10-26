@@ -360,7 +360,7 @@ Editor::track_canvas_size_allocated ()
 		transport_punchout_line->property_y1() = 0.0;
 		transport_punchout_line->property_y2() = canvas_height;
 	}
-		
+	compute_fixed_ruler_scale ();
 	update_fixed_rulers();
 	redisplay_tempo (true);
 

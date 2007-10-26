@@ -62,13 +62,7 @@ class JackPort : public virtual Port {
 	}
 
 	void ensure_monitor_input (bool yn) {
-
-#ifdef HAVE_JACK_PORT_ENSURE_MONITOR
 		jack_port_ensure_monitor (_port, yn);
-#else
-		jack_port_request_monitor(_port, yn);
-#endif
-
 	}
 
 	/*XXX completely bloody useless imho*/

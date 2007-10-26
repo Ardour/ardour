@@ -202,6 +202,8 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	fade_in_active_changed ();
 	fade_out_active_changed ();
 
+	reset_width_dependent_items (_pixel_width);
+
 	fade_in_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
 	fade_in_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
 	fade_out_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));

@@ -486,7 +486,7 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
             "B overlaps the end of A"				   
 
 	*/
-	if ((sb >= sa) && (sb <= ea)) {
+	if ((sb > sa) && (sb <= ea)) {
 		return OverlapEnd;
 	}
 	/*

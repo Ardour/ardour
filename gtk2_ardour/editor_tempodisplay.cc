@@ -99,18 +99,44 @@ Editor::tempo_map_changed (Change ignored)
 		return;
 	}
 
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored));
-	
-	redisplay_tempo (false); // redraw rulers and measures
+        ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored));
+
+	compute_current_bbt_points(leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
+	update_tempo_based_rulers ();
+	if (tempo_map_change_idle_handler_id  < 0) {
+			tempo_map_change_idle_handler_id = Glib::signal_idle().connect (mem_fun (*this, &Editor::redraw_measures));
+	}
 }
 
-/**
- * This code was originally in tempo_map_changed, but this is called every time the canvas scrolls horizontally. 
- * That's why this is moved in here. The new tempo_map_changed is called when the ARDOUR::TempoMap actually changed.
- */
 void
 Editor::redisplay_tempo (bool immediate_redraw)
+{
+	if (!session) {
+		return;
+	}
+	
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit)); // redraw rulers and measures
+
+	if (immediate_redraw) {
+
+		hide_measures ();
+
+		if (current_bbt_points) {
+			draw_measures ();
+		}
+
+	} else if (tempo_map_change_idle_handler_id  < 0) {
+
+		tempo_map_change_idle_handler_id = Glib::signal_idle().connect (mem_fun (*this, &Editor::redraw_measures));
+
+	}
+
+	update_tempo_based_rulers ();
+}
+
+void
+Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
 {
 	if (!session) {
 		return;
@@ -118,8 +144,8 @@ Editor::redisplay_tempo (bool immediate_redraw)
 
 	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
 
-	session->bbt_time(leftmost_frame, previous_beat);
-	session->bbt_time(leftmost_frame + current_page_frames(), next_beat);
+	session->bbt_time(leftmost, previous_beat);
+	session->bbt_time(rightmost, next_beat);
 
 	if (previous_beat.beats > 1) {
 	        previous_beat.beats -= 1;
@@ -129,7 +155,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	}
 	previous_beat.ticks = 0;
 
-	if (session->tempo_map().meter_at(leftmost_frame + current_page_frames()).beats_per_bar () > next_beat.beats + 1) {
+	if (session->tempo_map().meter_at(rightmost).beats_per_bar () > next_beat.beats + 1) {
 		next_beat.beats += 1;
 	} else {
 		next_beat.bars += 1;
@@ -142,29 +168,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 		current_bbt_points = 0;
 	}
 
-	if (session) {
-		current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat));
-		update_tempo_based_rulers ();
-	} else {
-		current_bbt_points = 0;
-	}
-
-	if (immediate_redraw) {
-
-		hide_measures ();
-
-		if (session && current_bbt_points) {
-			draw_measures ();
-		}
-
-	} else {
-
-		if (session && current_bbt_points) {
-			Glib::signal_idle().connect (mem_fun (*this, &Editor::redraw_measures));
-		} else {
-			hide_measures ();
-		}
-	}
+	current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat) + 1);
 }
 
 void
@@ -179,6 +183,7 @@ Editor::redraw_measures ()
 {
 	hide_measures ();
 	draw_measures ();
+	tempo_map_change_idle_handler_id = -1;
 	return false;
 }
 

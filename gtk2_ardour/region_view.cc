@@ -141,7 +141,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	sync_mark->property_fill_color_rgba() = fill_color;
 	sync_mark->hide();
 
-	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
+	//reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	if (wfd)
 		_enable_display = true;
@@ -214,9 +214,14 @@ RegionView::region_changed (Change what_changed)
 	if (what_changed & Region::SyncOffsetChanged) {
 		region_sync_changed ();
 	}
+	/* 
+	   this should not be needed now that only playlist can change layering
+	*/
+	/*
 	if (what_changed & Region::LayerChanged) {
 		region_layered ();
 	}
+	*/
 	if (what_changed & Region::LockChanged) {
 		region_locked ();
 	}

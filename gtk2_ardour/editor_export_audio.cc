@@ -82,9 +82,9 @@ Editor::export_range (nframes_t start, nframes_t end)
 	if (session) {
 		if (export_dialog == 0) {
 			export_dialog = new ExportSessionDialog (*this);
+			export_dialog->connect_to_session (session);
 		}
 		
-		export_dialog->connect_to_session (session);
 		export_dialog->set_range (start, end);
 		export_dialog->start_export();
 	}
@@ -121,9 +121,9 @@ Editor::export_range_markers ()
 
 		if (export_range_markers_dialog == 0) {
 			export_range_markers_dialog = new ExportRangeMarkersDialog(*this);
+			export_range_markers_dialog->connect_to_session (session);
 		}
-		
-		export_range_markers_dialog->connect_to_session (session);
+
 		export_range_markers_dialog->start_export();
 	}
 }	

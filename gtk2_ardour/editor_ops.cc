@@ -117,6 +117,8 @@ Editor::split_region_at (nframes_t where)
 void
 Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 {
+	list <boost::shared_ptr<Playlist > > used_playlists;
+
 	begin_reversible_command (_("split"));
 
 	// if splitting a single region, and snap-to is using
@@ -135,14 +137,18 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 		snap_to (where);
 	}
 
-	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
-		RegionSelection::iterator tmp;
-		
-		tmp = a;
-		++tmp;
+	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ++a) {
 
 		boost::shared_ptr<Playlist> pl = (*a)->region()->playlist();
+
+		if (! pl->frozen()) {
+			/* we haven't seen this playlist before */
+
+			/* remember used playlists so we can thaw them later */	
+			used_playlists.push_back(pl);
+			pl->freeze();
+		}
 
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*a);
 		if (arv)
@@ -155,9 +161,13 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
                         session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 		}
 
-		a = tmp;
-    }
+	}
+	while (used_playlists.size() > 0) {
 
+		list <boost::shared_ptr<Playlist > >::iterator i = used_playlists.begin();
+		(*i)->thaw();
+		used_playlists.pop_front();
+	}
 	commit_reversible_command ();
 	_new_regionviews_show_envelope = false;
 }

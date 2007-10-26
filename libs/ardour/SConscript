@@ -232,33 +232,11 @@ def CheckJackRecomputeLatency(context):
         context.Result(result)
         return result
 
-#
-# See if JACK supports jack_port_ensure_monitor_input()
-#
-jack_ensure_monitor_input_test = """
-#include <jack/jack.h>
-int main(int argc, char** argv)
-{
-	    jack_port_t **port;
-
-	    jack_port_ensure_monitor (*port, 1);
-	    return 0;
-
-}
-"""
-
-def CheckJackEnsureMonitorInput(context):
-        context.Message('Checking for jack_port_ensure_monitor_input()...')
-        result = context.TryLink(jack_ensure_monitor_input_test, '.c')
-        context.Result(result)
-        return result
-
 conf = Configure(ardour, custom_tests = {
 	'CheckJackClientOpen' : CheckJackClientOpen,
 	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies,
 	'CheckJackRecomputeLatency' : CheckJackRecomputeLatency,
-	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset,
-	'CheckJackEnsureMonitorInput' : CheckJackEnsureMonitorInput
+	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset
 })
 
 if conf.CheckJackClientOpen():
@@ -272,11 +250,6 @@ if conf.CheckJackRecomputeLatency():
 
 if conf.CheckJackVideoFrameOffset():
 	ardour.Append(CXXFLAGS="-DHAVE_JACK_VIDEO_SUPPORT")
-	
-if conf.CheckJackEnsureMonitorInput():
-	ardour.Append(CXXFLAGS='-DHAVE_JACK_PORT_ENSURE_MONITOR')
-else:
-    print '\nWARNING: You need at least svn revision 985 of jack for hardware monitoring to work correctly.\n'
 
 #
 # Optional header files

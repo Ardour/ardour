@@ -311,6 +311,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 
 	for (list<CrossfadeView *>::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		if ((*i)->crossfade == crossfade) {
+
 			if (!crossfades_visible || layer_display == Stacked) {
 				(*i)->hide();
 			} else {
@@ -340,10 +341,9 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 					       _samples_per_unit,
 					       region_color,
 					       *lview, *rview);
-
+	cv->set_valid (true);
 	crossfade->Invalidated.connect (mem_fun (*this, &AudioStreamView::remove_crossfade));
 	crossfade_views.push_back (cv);
-
 	if (!Config->get_xfades_visible() || !crossfades_visible || layer_display == Stacked) {
 		cv->hide ();
 	}
@@ -390,6 +390,8 @@ AudioStreamView::redisplay_diskstream ()
 			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
 	}
 
+	RegionViewList  copy;
+
 	for (i = region_views.begin(); i != region_views.end(); ) {
 		tmp = i;
 		tmp++;
@@ -397,11 +399,47 @@ AudioStreamView::redisplay_diskstream ()
 		if (!(*i)->is_valid()) {
 			delete *i;
 			region_views.erase (i);
+			i = tmp;
+			continue;
 		} else {
 			(*i)->enable_display(true);
 		}
 
+		/* 
+		   sort regionviews by layer so that when we call region_layered ()
+		   the canvas layering works out (in non-stacked mode).
+		*/
+
+		if (copy.size() == 0) {
+			copy.push_front((*i));
+			i = tmp;
+			continue;
+		}
+
+		RegionViewList::iterator k = copy.begin();
+		RegionViewList::iterator l = copy.end();
+		l--;
+
+		if ((*i)->region()->layer() <= (*k)->region()->layer()) {
+			copy.push_front((*i));
+			i = tmp;
+			continue;
+		} else if ((*i)->region()->layer() >= (*l)->region()->layer()) {
+			copy.push_back((*i));
+			i = tmp;
+			continue;
+		}
+
+		for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
+		  
+			if ((*j)->region()->layer() >= (*i)->region()->layer()) {
+				copy.insert(j, (*i));
+				break;
+			}
+		}
+
 		i = tmp;
+
 	}
 
 	for (xi = crossfade_views.begin(); xi != crossfade_views.end();) {
@@ -416,10 +454,12 @@ AudioStreamView::redisplay_diskstream ()
 		xi = tmpx;
 	}
 
-	/* now fix layering */
-
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		region_layered (*i);
+	/* now fix canvas layering */
+	
+	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
+			(*j)->enable_display(true);
+			(*j)->set_y_position_and_height(0, height);
+			region_layered (*j);
 	}
 }
 

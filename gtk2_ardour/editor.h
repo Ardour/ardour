@@ -476,6 +476,7 @@ class Editor : public PublicEditor
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 	void collect_new_region_view (RegionView *);
+	void collect_and_select_new_region_view (RegionView *);
 
 	Gtk::MenuItem* region_edit_menu_split_item;
 	Gtk::MenuItem* region_edit_menu_split_multichannel_item;
@@ -559,6 +560,7 @@ class Editor : public PublicEditor
 	
 	void initialize_rulers ();
 	void update_just_smpte ();
+	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
 	void update_tempo_based_rulers (); 
 	void popup_ruler_menu (nframes_t where = 0, ItemType type = RegionItem);
@@ -573,6 +575,55 @@ class Editor : public PublicEditor
 	static gint _metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	
+	enum MinsecRulerScale {
+		minsec_show_seconds,
+		minsec_show_minutes,
+		minsec_show_hours,
+		minsec_show_frames
+	};
+
+	MinsecRulerScale minsec_ruler_scale;
+
+	nframes_t minsec_mark_interval;
+	gint minsec_mark_modulo;
+	gint minsec_nmarks;
+	void set_minsec_ruler_scale (gdouble lower, gdouble upper);
+
+	enum SMPTERulerScale {
+		smpte_show_bits,
+		smpte_show_frames,
+		smpte_show_seconds,
+		smpte_show_minutes,
+		smpte_show_hours
+	};
+
+	SMPTERulerScale smpte_ruler_scale;
+
+	nframes_t smpte_mark_interval;
+	gint smpte_mark_modulo;
+	gint smpte_nmarks;
+	void set_smpte_ruler_scale (gdouble lower, gdouble upper);
+
+	enum BBTRulerScale {
+		bbt_over,
+		bbt_show_64,
+		bbt_show_16,
+		bbt_show_4,
+		bbt_show_1,
+		bbt_show_beats,
+		bbt_show_ticks,
+		bbt_show_ticks_detail,
+		bbt_show_ticks_super_detail
+	};
+
+	BBTRulerScale bbt_ruler_scale;
+
+        uint32_t bbt_bars;
+	gint bbt_nmarks;
+	uint32_t bbt_bar_helper_on;
+	uint32_t bbt_accent_modulo;
+	void compute_bbt_ruler_scale (nframes_t lower, nframes_t upper);
+
 	gint metric_get_smpte (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
@@ -696,6 +747,8 @@ class Editor : public PublicEditor
 
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
+	static int _idle_canvas_horizontally_scrolled (void *arg);
+	bool idle_canvas_horizontally_scrolled ();
 
 	struct VisualChange {
 	    enum Type { 
@@ -1261,6 +1314,8 @@ class Editor : public PublicEditor
 
 	void handle_new_duration ();
 	void initialize_canvas ();
+	int canvas_hroizontally_scrolled_handler_id;
+	void reset_horizontally_scrolling_region (Gtk::Allocation* alloc = 0);
 	void reset_scrolling_region (Gtk::Allocation* alloc = 0);
 
 	/* display control */
@@ -1341,6 +1396,8 @@ class Editor : public PublicEditor
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
+	void compute_current_bbt_points (nframes_t left, nframes_t right);
+	int tempo_map_change_idle_handler_id;
 	void tempo_map_changed (ARDOUR::Change);
 	void redisplay_tempo (bool immediate_redraw);
 	

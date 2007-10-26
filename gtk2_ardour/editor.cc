@@ -348,7 +348,8 @@ Editor::Editor ()
 
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
-	
+	tempo_map_change_idle_handler_id = -1;
+	canvas_hroizontally_scrolled_handler_id = -1;
 	set_midi_edit_mode (MidiEditPencil, true);
 	set_mouse_mode (MouseObject, true);
 
@@ -1983,7 +1984,9 @@ Editor::set_snap_to (SnapType st)
 	case SnapToAEighthBeat:
 	case SnapToAQuarterBeat:
 	case SnapToAThirdBeat:
+                compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
                 update_tempo_based_rulers ();
+		break;
 	default:
 		/* relax */
 		break;
@@ -2638,7 +2641,7 @@ Editor::setup_toolbar ()
 	/* Zoom */
 	
 	zoom_box.set_spacing (1);
-	zoom_box.set_border_width (2);
+	zoom_box.set_border_width (0);
 
 	zoom_in_button.set_name ("EditorTimeButton");
 	zoom_in_button.set_size_request(-1,16);
@@ -3918,10 +3921,6 @@ Editor::set_frames_per_unit (double fpu)
 
 	frames_per_unit = fpu;
 
-	if (frames != zoom_range_clock.current_duration()) {
-		zoom_range_clock.set (frames);
-	}
-
 	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
 		if (!selection->tracks.empty()) {
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
@@ -3963,8 +3962,9 @@ Editor::queue_visual_change (double fpu)
 	pending_visual_change.frames_per_unit = fpu;
 
 	if (pending_visual_change.idle_handler_id < 0) {
-		pending_visual_change.idle_handler_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE, _idle_visual_changer, this, 0);
+		pending_visual_change.idle_handler_id = g_idle_add ( _idle_visual_changer, this);
 	}
+	
 }
 
 int
@@ -3979,12 +3979,15 @@ Editor::idle_visual_changer ()
 	VisualChange::Type p = pending_visual_change.pending;
 
 	pending_visual_change.pending = (VisualChange::Type) 0;
-	pending_visual_change.idle_handler_id = -1;
 	
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
-	}
 
+	        compute_fixed_ruler_scale ();
+	        compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
+	        compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
+		update_tempo_based_rulers ();
+	}
 	if (p & VisualChange::TimeOrigin) {
 		if (pending_visual_change.time_origin != leftmost_frame) {
 			horizontal_adjustment.set_value (pending_visual_change.time_origin/frames_per_unit);
@@ -3994,6 +3997,7 @@ Editor::idle_visual_changer ()
 			redisplay_tempo (true);
 		}
 	}
+	pending_visual_change.idle_handler_id = -1;
 
 	return 0; /* this is always a one-shot call */
 }

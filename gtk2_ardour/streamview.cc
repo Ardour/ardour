@@ -285,17 +285,18 @@ StreamView::apply_color (Gdk::Color& color, ColorTarget target)
 void
 StreamView::region_layered (RegionView* rv)
 {
-	rv->get_canvas_group()->lower_to_bottom();
 
-	/* don't ever leave it at the bottom, since then it doesn't
-	   get events - the  parent group does instead ...
-	*/
-	
-	/* this used to be + 1, but regions to the left ended up below
-	  ..something.. and couldn't receive events.  why?  good question.
-	*/
-	/* and now it's + 3 for midi note separator lines */
-	rv->get_canvas_group()->raise (rv->region()->layer() + 3);
+	 /* 
+	    Currently 'layer' has nothing to do with the desired canvas layer.
+            For now, ensure that multiple regionviews passed here in groups are 
+	    ordered by 'layer' (lowest to highest). 
+
+	    (see AudioStreamView::redisplay_diskstream ()).
+ 
+	    We move them to the top layer as they arrive. 
+	 */
+
+	rv->get_canvas_group()->raise_to_top();
 }
 
 void

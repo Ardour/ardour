@@ -337,6 +337,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 	boost::shared_ptr<AudioRegion> top;
 	boost::shared_ptr<AudioRegion> bottom;
 	boost::shared_ptr<Crossfade>   xfade;
+	RegionList*  touched_regions;
 
 	if (in_set_state || in_partition) {
 		return;
@@ -398,7 +399,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				break;
 
 			case OverlapExternal:
-
+ 
 				/*     [ -------- top ------- ]
 				 * {=========== bottom =============}
 				 */
@@ -411,11 +412,15 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				*/
 				
 				xfade_length = min ((nframes_t) 720, top->length());
-				
-				xfade = boost::shared_ptr<Crossfade> (new Crossfade (top, bottom, xfade_length, top->first_frame(), StartOfIn));
-				add_crossfade (xfade);
+
+				if (top_region_at (top->first_frame()) == top) {
+ 
+					xfade = boost::shared_ptr<Crossfade> (new Crossfade (top, bottom, xfade_length, top->first_frame(), StartOfIn));
+					add_crossfade (xfade);
+				}
 
 				if (top_region_at (top->last_frame() - 1) == top) {
+
 					/* 
 					   only add a fade out if there is no region on top of the end of 'top' (which 
 					   would cover it).
@@ -425,9 +430,58 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 					add_crossfade (xfade);
 				}
 				break;
-				
+			case OverlapStart:
+
+				/*                   { ==== top ============ } 
+				 *   [---- bottom -------------------] 
+				 */
+
+				if (Config->get_xfade_model() == FullCrossfade) {
+					touched_regions = regions_touched (top->first_frame(), bottom->last_frame());
+					if (touched_regions->size() <= 2) {
+						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, Config->get_xfade_model(), Config->get_xfades_active()));
+						add_crossfade (xfade);
+					}
+				} else {
+
+					touched_regions = regions_touched (top->first_frame(), 
+									   top->first_frame() + min ((nframes_t)Config->get_short_xfade_seconds() * _session.frame_rate(), 
+												     top->length()));
+					if (touched_regions->size() <= 2) {
+						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, Config->get_xfade_model(), Config->get_xfades_active()));
+						add_crossfade (xfade);
+					}
+				}
+				break;
+			case OverlapEnd:
+
+
+				/* [---- top ------------------------] 
+				 *                { ==== bottom ============ } 
+				 */ 
+
+				if (Config->get_xfade_model() == FullCrossfade) {
+
+					touched_regions = regions_touched (bottom->first_frame(), top->last_frame());
+					if (touched_regions->size() <= 2) {
+						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, 
+												     Config->get_xfade_model(), Config->get_xfades_active()));
+						add_crossfade (xfade);
+					}
+
+				} else {
+					touched_regions = regions_touched (bottom->first_frame(), 
+									   bottom->first_frame() + min ((nframes_t)Config->get_short_xfade_seconds() * _session.frame_rate(), 
+													bottom->length()));
+					if (touched_regions->size() <= 2) {
+						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, Config->get_xfade_model(), Config->get_xfades_active()));
+						add_crossfade (xfade);
+					}
+				}
+				break;
 			default:
-				xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, Config->get_xfade_model(), Config->get_xfades_active()));
+				xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, 
+										     Config->get_xfade_model(), Config->get_xfades_active()));
 				add_crossfade (xfade);
 			}
 		}
@@ -471,6 +525,7 @@ void AudioPlaylist::notify_crossfade_added (boost::shared_ptr<Crossfade> x)
 	if (g_atomic_int_get(&block_notifications)) {
 		_pending_xfade_adds.insert (_pending_xfade_adds.end(), x);
 	} else {
+
 		NewCrossfade (x); /* EMIT SIGNAL */
 	}
 }
