@@ -79,14 +79,22 @@ IOSelector::set_state (int r, std::string const & p, bool s)
 bool
 IOSelector::get_state (int r, std::string const & p) const
 {
-	const char **connections = _offer_inputs ? _io->output(r)->get_connections() : _io->input(r)->get_connections();
+	vector<string> connections;
+
+	if (_offer_inputs) {
+		_io->output(r)->get_connections (connections);
+	} else {
+		_io->input(r)->get_connections (connections);
+	}
 
 	int k = 0;
-	while (connections && connections[k]) {
-		if (std::string (connections[k]) == p) {
+
+	for (vector<string>::iterator i = connections.begin(); i != connections.end(); ++i) {
+
+		if ((*i)== p) {
 			return true;
 		}
-
+		
 		++k;
 	}
 

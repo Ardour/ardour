@@ -32,8 +32,8 @@
 #include <ardour/buffer.h>
 #include <ardour/port.h>
 #include <ardour/jack_audio_port.h>
-#include <ardour/internal_audio_port.h>
 #include <ardour/jack_midi_port.h>
+#include <ardour/audio_port.h>
 #include <ardour/session.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/utils.h>
@@ -84,7 +84,7 @@ AudioEngine::AudioEngine (string client_name)
 
 	start_metering_thread();
 
-	JackPort::set_engine (this);
+	Port::set_engine (this);
 }
 
 AudioEngine::~AudioEngine ()
@@ -330,7 +330,7 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	// Prepare ports (ie read data if necessary)
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->cycle_start (nframes);
+		(*i)->cycle_start (nframes, 0);
 	}
 	
 	if (session) {
@@ -343,8 +343,9 @@ AudioEngine::process_callback (nframes_t nframes)
 	}
 	
 	// Finalize ports (ie write data if necessary)
+
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->cycle_end ();
+		(*i)->cycle_end (nframes, 0);
 	}
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
@@ -471,8 +472,9 @@ AudioEngine::set_session (Session *s)
 		
 		boost::shared_ptr<Ports> p = ports.reader();
 
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i)
-			(*i)->cycle_start (blocksize);
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+			(*i)->cycle_start (blocksize, 0);
+		}
 
 		s->process (blocksize);
 		s->process (blocksize);
@@ -483,9 +485,9 @@ AudioEngine::set_session (Session *s)
 		s->process (blocksize);
 		s->process (blocksize);
 
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i)
-			(*i)->cycle_end ();
-
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+			(*i)->cycle_end (blocksize, 0);
+		}
 	}
 }
 
@@ -509,41 +511,24 @@ AudioEngine::remove_session ()
 }
 
 Port *
-AudioEngine::register_port (PortType ptype, DataType dtype, const string& portname, bool input)
+AudioEngine::register_port (DataType dtype, const string& portname, bool input, bool publish)
 {
 	Port* newport = 0;
 
 	try {
-		switch (ptype) {
-		case Jack:
-			if (dtype == DataType::AUDIO) {
-				newport = new JackAudioPort (portname, (input ? Port::IsInput : Port::IsOutput));
-			} else if (dtype == DataType::MIDI) {
-				newport = new JackMidiPort (portname, (input ? Port::IsInput : Port::IsOutput));
-			} else {
-				throw unknown_type();
-			}
-			break;
+		if (dtype == DataType::AUDIO) {
+			newport = new AudioPort (portname, (input ? Port::IsInput : Port::IsOutput), publish, frames_per_cycle());
+		} else if (dtype == DataType::MIDI) {
+			newport = new MidiPort (portname, (input ? Port::IsInput : Port::IsOutput), publish, frames_per_cycle());
+		} else {
+			throw unknown_type();
+		}
 
-		case Internal:
-			if (dtype == DataType::AUDIO) {
-				newport = new InternalAudioPort (portname, (input ? Port::IsInput : Port::IsOutput));
-			} else if (dtype == DataType::MIDI) {
-				error << _("Internal MIDI ports are not implemented yet!") << endmsg;
-				throw unknown_type();
-			} else {
-				throw unknown_type();
-			}
-			break;
-		}
-	
-		if (newport != 0) {
-			RCUWriter<Ports> writer (ports);
-			boost::shared_ptr<Ports> ps = writer.get_copy ();
-			ps->insert (ps->begin(), newport);
-			/* writer goes out of scope, forces update */
-		}
-	
+		RCUWriter<Ports> writer (ports);
+		boost::shared_ptr<Ports> ps = writer.get_copy ();
+		ps->insert (ps->begin(), newport);
+		/* writer goes out of scope, forces update */
+
 		return newport;
 	}
 
@@ -552,14 +537,14 @@ AudioEngine::register_port (PortType ptype, DataType dtype, const string& portna
 	}
 }
 
-InternalPort*
-AudioEngine::get_internal_port (const std::string& short_name)
+Port*
+AudioEngine::get_port (const std::string& full_name)
 {
 	boost::shared_ptr<Ports> p = ports.reader();
 	
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		if ((*i)->short_name() == short_name) {
-			return dynamic_cast<InternalPort*> (*i);
+		if ((*i)->name() == full_name) {
+			return *i;
 		}
 	}
 	return 0;
@@ -567,15 +552,15 @@ AudioEngine::get_internal_port (const std::string& short_name)
 
 
 Port *
-AudioEngine::register_input_port (PortType ptype, DataType type, const string& portname)
+AudioEngine::register_input_port (DataType type, const string& portname, bool publish)
 {
-	return register_port (ptype, type, portname, true);
+	return register_port (type, portname, true, publish);
 }
 
 Port *
-AudioEngine::register_output_port (PortType ptype, DataType type, const string& portname)
+AudioEngine::register_output_port (DataType type, const string& portname, bool publish)
 {
-	return register_port (ptype, type, portname, false);
+	return register_port (type, portname, false, publish);
 }
 
 int          
@@ -595,7 +580,6 @@ AudioEngine::unregister_port (Port& port)
 		
 		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
 			if ((*i) == &port) {
-				remove_connections_for (port);
 				delete *i;
 				ps->erase (i);
 				break;
@@ -625,33 +609,53 @@ AudioEngine::connect (const string& source, const string& destination)
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 		
-	if (source.substr (0, 9) == "internal:") {
-		if (destination.substr (0, 9) == "internal:") {
-			InternalPort* src = get_internal_port (source);
-			InternalPort* dst = get_internal_port (destination);
+	Port* src = get_port (s);
+	Port* dst = get_port (d);
 
-			InternalPort::connect (*src, *dst);
-			ret = 0;
+	if (src && dst) {
 
+		/* both ports are known to us, so do the internal connect stuff */
+
+		if ((ret = src->connect (*dst)) == 0) {
+			ret = dst->connect (*src);
+		}
+
+	} else if (src || dst) {
+
+		/* one port is known to us, try to connect it to something external */
+
+		PortConnectableByName* pcn;
+		string other;
+
+		if (src) {
+			pcn = dynamic_cast<PortConnectableByName*>(src);
+			other = d;
+		} else {
+			pcn = dynamic_cast<PortConnectableByName*>(dst);
+			other = s;
+		}
+
+		if (pcn) {
+			ret = pcn->connect (other);
 		} else {
 			ret = -1;
 		}
 
 	} else {
-	
-		ret = jack_connect (_jack, s.c_str(), d.c_str());
-	}
 
-	if (ret == 0) {
-		pair<string,string> c (s, d);
-		port_connections.push_back (c);
-	} else if (ret == EEXIST) {
+		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
+
+		ret = -1;
+		
+	}
+	
+	if (ret > 0) {
 		error << string_compose(_("AudioEngine: connection already exists: %1 (%2) to %3 (%4)"), 
-				 source, s, destination, d) 
+					source, s, destination, d) 
 		      << endmsg;
-	} else {
+	} else if (ret < 0) {
 		error << string_compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"), 
-				 source, s, destination, d) 
+					source, s, destination, d) 
 		      << endmsg;
 	}
 
@@ -675,31 +679,47 @@ AudioEngine::disconnect (const string& source, const string& destination)
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
-	if (source.substr (0, 9) == "internal:") {
-		if (destination.substr (0, 9) == "internal:") {
-			InternalPort* src = get_internal_port (source);
-			InternalPort* dst = get_internal_port (destination);
+	Port* src = get_port (s);
+	Port* dst = get_port (d);
 
-			InternalPort::disconnect (*src, *dst);
-			ret = 0;
+	if (src && dst) {
+
+		/* both ports are known to us, so do the internal connect stuff */
+		
+		if ((ret = src->disconnect (*dst)) == 0) {
+			ret = dst->disconnect (*src);
+		}
+
+	} else if (src || dst) {
+
+		/* one port is known to us, try to connect it to something external */
+
+
+		PortConnectableByName* pcn;
+		string other;
+
+		if (src) {
+			pcn = dynamic_cast<PortConnectableByName*>(src);
+			other = d;
+		} else {
+			pcn = dynamic_cast<PortConnectableByName*>(dst);
+			other = s;
+		}
+
+		if (pcn) {
+			ret = pcn->disconnect (other);
 		} else {
 			ret = -1;
 		}
 
 	} else {
-	
-		ret = jack_disconnect (_jack, s.c_str(), d.c_str());
-	}
 
-	if (ret == 0) {
-		pair<string,string> c (s, d);
-		PortConnections::iterator i;
+		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
 		
-		if ((i = find (port_connections.begin(), port_connections.end(), c)) != port_connections.end()) {
-			port_connections.erase (i);
-		}
+		ret = -1;
+		
 	}
-	 
+	
 	return ret;
 }
 
@@ -715,14 +735,7 @@ AudioEngine::disconnect (Port& port)
 		}
 	}
 
-	int ret = port.disconnect ();
-
-	if (ret == 0) {
-		remove_connections_for (port);
-	}
-
-	return ret;
-
+	return port.disconnect_all ();
 }
 
 ARDOUR::nframes_t
@@ -1037,26 +1050,8 @@ AudioEngine::remove_all_ports ()
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		ps->clear ();
 	}
-
-	port_connections.clear ();
 }
 
-void
-AudioEngine::remove_connections_for (Port& port)
-{
-	for (PortConnections::iterator i = port_connections.begin(); i != port_connections.end(); ) {
-		PortConnections::iterator tmp;
-		
-		tmp = i;
-		++tmp;
-		
-		if ((*i).first == port.name()) {
-			port_connections.erase (i);
-		}
-
-		i = tmp;
-	}
-}
 
 #ifdef HAVE_JACK_CLIENT_OPEN
 
@@ -1150,7 +1145,6 @@ AudioEngine::reconnect_to_jack ()
 	boost::shared_ptr<Ports> p = ports.reader ();
 
 	for (i = p->begin(); i != p->end(); ++i) {
-
 		if ((*i)->reestablish ()) {
 			break;
 		} 
@@ -1195,17 +1189,8 @@ AudioEngine::reconnect_to_jack ()
 
 	/* re-establish connections */
 	
-	for (PortConnections::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
-		
-		int err;
-		
-		if ((err = jack_connect (_jack, (*i).first.c_str(), (*i).second.c_str())) != 0) {
-			if (err != EEXIST) {
-				error << string_compose (_("could not reconnect %1 and %2 (err = %3)"),
-						  (*i).first, (*i).second, err)
-				      << endmsg;
-			}
-		}
+	for (i = p->begin(); i != p->end(); ++i) {
+		(*i)->reconnect ();
 	}
 
 	Running (); /* EMIT SIGNAL*/

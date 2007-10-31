@@ -28,24 +28,23 @@
 #include <jack/midiport.h>
 #include <ardour/port.h>
 #include <ardour/jack_port.h>
-#include <ardour/midi_port.h>
+#include <ardour/base_midi_port.h>
 #include <ardour/midi_buffer.h>
 
 namespace ARDOUR {
 
 class MidiEngine;
 
-class JackMidiPort : public JackPort, public MidiPort {
+class JackMidiPort : public JackPort, public BaseMidiPort {
    public:
-	void cycle_start(nframes_t nframes);
-	void cycle_end();
+	void cycle_start (nframes_t nframes, nframes_t offset);
+	void cycle_end (nframes_t nframes, nframes_t offset);
+	void set_buffer (MidiBuffer& buf);
 
   protected:
-	friend class AudioEngine;
+	friend class MidiPort;
 
-	JackMidiPort (const std::string&, Flags);
-
-	nframes_t _nframes_this_cycle;
+	JackMidiPort (const std::string&, Flags, MidiBuffer*);
 };
  
 } // namespace ARDOUR

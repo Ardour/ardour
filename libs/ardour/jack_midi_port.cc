@@ -20,76 +20,76 @@
 #include <ardour/jack_midi_port.h>
 
 using namespace ARDOUR;
-JackMidiPort::JackMidiPort (const std::string& name, Flags flgs)
-	: Port (DataType::MIDI, flgs)
+JackMidiPort::JackMidiPort (const std::string& name, Flags flgs, MidiBuffer* buf)
+	: Port (name, flgs)
 	, JackPort (name, DataType::MIDI, flgs)
-	, MidiPort (flgs, 4096) // FIXME FIXME FIXME Jack needs to tell us this
-	, _nframes_this_cycle(0)
+	, BaseMidiPort (name, flgs) 
 {
+	if (buf) {
+
+		_buffer = buf;
+		_own_buffer = false;
+
+	} else {
+
+		/* data space will be provided by JACK */
+
+		_buffer = new MidiBuffer (0);
+		_own_buffer = true;
+	}
 }
 
 void
-JackMidiPort::cycle_start (nframes_t nframes)
+JackMidiPort::cycle_start (nframes_t nframes, nframes_t offset_ignored_but_probably_should_not_be)
 {
-	_buffer.clear();
-	assert(_buffer.size() == 0);
+	_buffer->clear();
+	assert(_buffer->size() == 0);
 
-	_nframes_this_cycle = nframes;
-
-	if (_flags & JackPortIsOutput) {
-		_buffer.silence(nframes);
-		assert(_buffer.size() == 0);
+	if (_flags & IsOutput) {
+		// no buffer, nothing to do
 		return;
 	}
 
 	// We're an input - copy Jack events to internal buffer
 	
 	void* jack_buffer = jack_port_get_buffer(_port, nframes);
-	const nframes_t event_count
-		= jack_midi_get_event_count(jack_buffer);
+	const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
 
-	assert(event_count < _buffer.capacity());
+	assert(event_count < _buffer->capacity());
 
 	jack_midi_event_t ev;
 
 	for (nframes_t i=0; i < event_count; ++i) {
 
-		jack_midi_event_get(&ev, jack_buffer, i);
+		jack_midi_event_get (&ev, jack_buffer, i);
 
-		_buffer.push_back(ev);
+		_buffer->push_back (ev);
 	}
 
-	assert(_buffer.size() == event_count);
+	assert(_buffer->size() == event_count);
 
-	//if (_buffer.size() > 0)
+	//if (_buffer->size() > 0)
 	//	cerr << "MIDIPort got " << event_count << " events." << endl;
 }
 
 void
-JackMidiPort::cycle_end()
+JackMidiPort::cycle_end (nframes_t nframes, nframes_t offset_ignored_but_probably_should_not_be)
 {
-	if (_flags & JackPortIsInput) {
-		_nframes_this_cycle = 0;
+	if (_flags & IsInput) {
 		return;
 	}
 
-	// We're an output - copy events from internal buffer to Jack buffer
+	// We're an output - copy events from source buffer to Jack buffer
 	
-	void* jack_buffer = jack_port_get_buffer(_port, _nframes_this_cycle);
+	void* jack_buffer = jack_port_get_buffer (_port, nframes);
 
-	//const nframes_t event_count = _buffer.size();
-	//if (event_count > 0)
-	//	cerr << "MIDIPort writing " << event_count << " events." << endl;
+	jack_midi_clear_buffer (jack_buffer);
 
-	jack_midi_clear_buffer(jack_buffer);
-
-	for (MidiBuffer::iterator i = _buffer.begin(); i != _buffer.end(); ++i) {
+	for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 		const MidiEvent& ev = *i;
 		// event times should be frames, relative to cycle start
 		assert(ev.time() >= 0);
-		assert(ev.time() < _nframes_this_cycle);
-		jack_midi_event_write(jack_buffer, (jack_nframes_t)ev.time(), ev.buffer(), ev.size());
+		assert(ev.time() < nframes);
+		jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
 	}
-	
-	_nframes_this_cycle = 0;
 }

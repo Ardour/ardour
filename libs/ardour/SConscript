@@ -45,6 +45,8 @@ automatable.cc
 automation.cc
 automation_control.cc
 automation_event.cc
+base_audio_port.cc
+base_midi_port.cc
 buffer.cc
 buffer_set.cc
 chan_count.cc
@@ -66,8 +68,6 @@ gain.cc
 gdither.cc
 globals.cc
 import.cc
-internal_port.cc
-internal_audio_port.cc
 io.cc
 io_processor.cc
 jack_port.cc

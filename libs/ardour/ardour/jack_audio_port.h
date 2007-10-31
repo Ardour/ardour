@@ -30,18 +30,20 @@
 namespace ARDOUR {
 
 class AudioEngine;
-class JackAudioPort : public AudioPort, public JackPort {
+class JackAudioPort : public JackPort, public BaseAudioPort {
    public:
-	void cycle_start(nframes_t nframes) {
-		_buffer.set_data ((Sample*) jack_port_get_buffer (_port, nframes), nframes);
+	void cycle_start (nframes_t nframes, nframes_t offset) {
+		_buffer->set_data ((Sample*) jack_port_get_buffer (_port, nframes) + offset, nframes);
 	}
 
 	int reestablish ();
 
   protected:
-	friend class AudioEngine;
+	friend class AudioPort;
 
-	JackAudioPort (const std::string& name, Flags flags);
+	JackAudioPort (const std::string& name, Flags flags, AudioBuffer* buf);
+
+	AudioBuffer* _source_buffer;
 };
  
 } // namespace ARDOUR

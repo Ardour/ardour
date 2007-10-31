@@ -212,13 +212,14 @@ AudioDiskstream::get_input_sources ()
 	uint32_t n;
 	ChannelList::iterator chan;
 	uint32_t ni = _io->n_inputs().n_audio();
+	vector<string> connections;
 
 	for (n = 0, chan = c->begin(); chan != c->end() && n < ni; ++chan, ++n) {
 		
-		const char **connections = _io->input(n)->get_connections ();
+		connections.clear ();
+
+		if (_io->input(n)->get_connections (connections) == 0) {
 		
-		if (connections == 0 || connections[0] == 0) {
-			
 			if ((*chan)->source) {
 				// _source->disable_metering ();
 			}
@@ -226,12 +227,7 @@ AudioDiskstream::get_input_sources ()
 			(*chan)->source = 0;
 			
 		} else {
-			(*chan)->source = dynamic_cast<AudioPort*>(
-				_session.engine().get_port_by_name (connections[0]) );
-		}
-		
-		if (connections) {
-			free (connections);
+			(*chan)->source = dynamic_cast<AudioPort*>(_session.engine().get_port_by_name (connections[0]) );
 		}
 	}
 }		

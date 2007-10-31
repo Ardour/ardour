@@ -20,19 +20,76 @@
 #include <iostream>
 
 #include <ardour/midi_port.h>
+#include <ardour/jack_midi_port.h>
 #include <ardour/data_type.h>
 
 using namespace ARDOUR;
 using namespace std;
 
-MidiPort::MidiPort (Flags flags, nframes_t bufsize)
-	: Port (DataType::MIDI, flags)
-	, _buffer (bufsize) 
+MidiPort::MidiPort (const std::string& name, Flags flags, bool publish, nframes_t bufsize)
+	: Port (name, flags)
+	, BaseMidiPort (name, flags)
+	, PortFacade (name, flags)
 {
-	reset();
+	set_name (name);
+
+	_buffer = new MidiBuffer (bufsize);
+
+	if (!publish) {
+		_ext_port = 0;
+	} else {
+		_ext_port = new JackMidiPort (name, flags, _buffer);
+	}
+
+	reset ();
 }
 
 MidiPort::~MidiPort()
 {
+	if (_ext_port) {
+		delete _ext_port;
+		_ext_port = 0;
+	}
 }
 
+void
+MidiPort::reset()
+{
+	BaseMidiPort::reset();
+
+	if (_ext_port) {
+		_ext_port->reset ();
+	}
+}
+
+void
+MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
+{
+	/* caller must hold process lock */
+	
+	if (_ext_port) {
+		_ext_port->cycle_start (nframes, offset);
+	}
+
+	if (_flags & IsInput) {
+
+		if (_ext_port) {
+			_buffer->read_from (dynamic_cast<BaseMidiPort*>(_ext_port)->get_midi_buffer(), nframes, offset);
+			if (!_connections.empty()) {
+				(*_mixdown) (_connections, _buffer, nframes, offset, false);
+			}
+
+		} else {
+		
+			if (_connections.empty()) {
+				_buffer->silence (nframes, offset);
+			} else {
+				(*_mixdown) (_connections, _buffer, nframes, offset, true);
+			}
+		}
+
+	} else {
+		
+		_buffer->silence (nframes, offset);
+	}
+}

@@ -22,10 +22,23 @@
 
 using namespace ARDOUR;
 
-JackAudioPort::JackAudioPort(const std::string& name, Flags flgs)
-	: Port (DataType::AUDIO, flgs), AudioPort (flgs), JackPort (name, DataType::AUDIO, flgs)
+JackAudioPort::JackAudioPort (const std::string& name, Flags flgs, AudioBuffer* buf)
+	: Port (name, flgs)
+	, JackPort (name, DataType::AUDIO, flgs)
+	, BaseAudioPort (name, flgs)
 {
+	if (buf) {
 
+		_buffer = buf;
+		_own_buffer = false;
+
+	} else {
+
+		/* data space will be provided by JACK */
+
+		_buffer = new AudioBuffer (0);
+		_own_buffer = true;
+	}
 }
 
 int
@@ -34,8 +47,9 @@ JackAudioPort::reestablish ()
 	int ret = JackPort::reestablish ();
 	
 	if (ret == 0 && _flags & IsOutput) {
-		_buffer.silence (jack_get_buffer_size (engine->jack()));
+		_buffer->clear ();
 	}
 
 	return ret;
 }
+

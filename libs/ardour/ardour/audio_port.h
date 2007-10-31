@@ -21,69 +21,24 @@
 #ifndef __ardour_audio_port_h__
 #define __ardour_audio_port_h__
 
-#include <sigc++/signal.h>
-#include <pbd/failed_constructor.h>
-#include <ardour/ardour.h>
-#include <ardour/port.h>
-#include <ardour/audio_buffer.h>
+#include <ardour/base_audio_port.h>
 
 namespace ARDOUR {
 
-class AudioEngine;
+class AudioPort : public BaseAudioPort, public PortFacade {
 
-class AudioPort : public virtual Port {
    public:
-	virtual Buffer& get_buffer () {
-		return _buffer;
-	}
+	~AudioPort();
+
+	void reset ();
+
+	void cycle_start (nframes_t nframes, nframes_t offset);
+	void cycle_end (nframes_t nframes, nframes_t offset);
 	
-	virtual AudioBuffer& get_audio_buffer() {
-		return _buffer;
-	}
-
-	void reset_overs () {
-		_short_overs = 0;
-		_long_overs = 0;
-		_overlen = 0;
-	}
-
-	void reset_peak_meter () {
-		_peak = 0;
-	}
-	
-	void reset_meters () {
-		reset_peak_meter ();
-		reset_overs ();
-	}
-
-	float  peak_db() const { return _peak_db; }
-	Sample peak()    const { return _peak; }
-
-	uint32_t short_overs () const { return _short_overs; }
-	uint32_t long_overs ()  const { return _long_overs; }
-	
-	static void set_short_over_length (nframes_t);
-	static void set_long_over_length (nframes_t);
-
   protected:
 	friend class AudioEngine;
 
-	AudioPort (Flags);            // data buffer comes from elsewhere (e.g. JACK)
-	AudioPort (Flags, nframes_t); // data buffer owned by ardour
-	void reset ();
-	
-	/* engine isn't supposed to access below here */
-
-	AudioBuffer _buffer;
-
-	nframes_t _overlen;
-	Sample    _peak;
-	float     _peak_db;
-	uint32_t  _short_overs;
-	uint32_t  _long_overs;
-	
-	static nframes_t _long_over_length;
-	static nframes_t _short_over_length;
+	AudioPort (const std::string&, Flags, bool external, nframes_t); 
 };
  
 } // namespace ARDOUR

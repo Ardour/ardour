@@ -27,20 +27,30 @@ static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it mat
 #endif
 
 using namespace std;
-
-namespace ARDOUR {
+using namespace ARDOUR;
 
 
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
 	: Buffer(DataType::MIDI, capacity)
-//	, _owns_data(true)
-	, _events(NULL)
-	, _data(NULL)
+	, _events(0)
+	, _data(0)
+//	, _owns_data(false)
 {
-	_data = 0;
-	resize (_capacity);
-	silence(_capacity);
+	if (capacity) {
+		resize (_capacity);
+		silence(_capacity);
+	}
+}
+	
+MidiBuffer::~MidiBuffer()
+{
+	if (_events) {
+		free(_events);
+	}
+	if (_data) {
+		free(_data);
+	}
 }
 
 void
@@ -48,12 +58,21 @@ MidiBuffer::resize (size_t size)
 {
 	assert(size > 0);
 
+	if (size < _capacity) {
+		return;
+	}
+
 	if (_data) {
 		free (_data);
 	}
 
+	if (_events) {
+		free (_events);
+	}
+
 	_size = 0;
 	_capacity = size;
+
 #ifdef NO_POSIX_MEMALIGN
 	_events = (MidiEvent *) malloc(sizeof(MidiEvent) * _capacity);
 	_data = (Byte *) malloc(sizeof(Byte) * _capacity * MAX_EVENT_SIZE);
@@ -71,14 +90,8 @@ MidiBuffer::copy(const MidiBuffer& copy)
 	assert(_capacity >= copy._capacity);
 	_size = 0;
 
-	for (size_t i=0; i < copy.size(); ++i)
+	for (size_t i = 0; i < copy.size(); ++i)
 		push_back(copy[i]);
-}
-
-MidiBuffer::~MidiBuffer()
-{
-	free(_events);
-	free(_data);
 }
 
 
@@ -173,7 +186,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 /** Reserve space for a new event in the buffer.
  *
  * This call is for copying MIDI directly into the buffer, the data location
- * (of sufficient size to write \a size bytes) is returned, or NULL on failure.
+ * (of sufficient size to write \a size bytes) is returned, or 0 on failure.
  * This call MUST be immediately followed by a write to the returned data
  * location, or the buffer will be corrupted and very nasty things will happen.
  */
@@ -183,7 +196,7 @@ MidiBuffer::reserve(double time, size_t size)
 	assert(size <= MAX_EVENT_SIZE);
 
 	if (_size == _capacity)
-		return NULL;
+		return 0;
 
 	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
@@ -263,7 +276,4 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 
 	return true;
 }
-
-
-} // namespace ARDOUR
 

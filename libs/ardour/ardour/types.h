@@ -379,11 +379,6 @@ namespace ARDOUR {
 		SrcFastest
 	};
 
-	enum PortType {
-		Jack,
-		Internal
-	};
-
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);

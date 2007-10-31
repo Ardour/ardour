@@ -194,29 +194,27 @@ Auditioner::output_changed (IOChange change, void* src)
 	string phys;
 
 	if (change & ConnectionsChanged) {
-		const char ** connections;
-		connections =  output (0)->get_connections ();
-		if (connections) {
+		vector<string> connections;
+		if (output (0)->get_connections (connections)) {
 			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
 			if (phys != connections[0]) {
 				Config->set_auditioner_output_left (connections[0]);
 			} else {
 				Config->set_auditioner_output_left ("default");
 			}
-			free (connections);
 		} else {
 			Config->set_auditioner_output_left ("");
 		}
 		
-		connections = output (1)->get_connections ();
-		if (connections) {
+		connections.clear ();
+
+		if (output (1)->get_connections (connections)) {
 			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
 			if (phys != connections[0]) {
 				Config->set_auditioner_output_right (connections[0]);
 			} else {
 				Config->set_auditioner_output_right ("default");
 			}
-			free (connections);
 		} else {
 			Config->set_auditioner_output_right ("");
 		}

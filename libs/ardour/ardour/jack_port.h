@@ -32,30 +32,44 @@ class Buffer;
 
 /** Abstract class representing JACK ports
  */
-class JackPort : public virtual Port {
+class JackPort : public virtual Port, public PortConnectableByName {
    public:
 
 	~JackPort();
 
-	std::string short_name() { 
+	std::string short_name() const { 
 		return jack_port_short_name (_port);
 	}
 	
-	int set_name (std::string str);
+	int set_name (const std::string& str);
 	
-	int connected () const {
+	bool connected () const {
 		return jack_port_connected (_port);
 	}
 	
 	int reestablish ();
-	
+	int reconnect ();
+
+	int connect (Port& other) {
+		return connect (other.name());
+	}
+
+	int disconnect (Port& other) {
+		return disconnect (other.name());
+	}
+
+	int disconnect_all ();
+
+	// connect-by-name API
+
+	int connect (const std::string& other_name);
+	int disconnect (const std::string& other_name);
+
 	bool connected_to (const std::string& portname) const {
 		return jack_port_connected_to (_port, portname.c_str());
 	}
 
-	const char ** get_connections () const {
-		return jack_port_get_connections (_port);
-	}
+	int get_connections (std::vector<std::string>& names) const;
 	
 	bool monitoring_input () const {
 		return jack_port_monitoring_input (_port);
@@ -90,8 +104,7 @@ class JackPort : public virtual Port {
  	int disconnect ();
 	void recompute_total_latency() const;
 
-	static void set_engine (AudioEngine*);
-	static AudioEngine* engine;
+	std::set<std::string> _named_connections;
 };
  
 } // namespace ARDOUR

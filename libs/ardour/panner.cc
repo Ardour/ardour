@@ -269,7 +269,7 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 		
 		pan = left * gain_coeff;
 
-		mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
+		mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
 		
 	} else {
 		

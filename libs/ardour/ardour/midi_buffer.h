@@ -44,7 +44,7 @@ public:
 	Byte* reserve(double time, size_t size);
 
 	void resize(size_t);
-	
+
 	bool merge(const MidiBuffer& a, const MidiBuffer& b);
 	
 	struct iterator {

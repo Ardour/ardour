@@ -48,9 +48,7 @@ AudioBuffer::~AudioBuffer()
 void
 AudioBuffer::resize (size_t size)
 {
-	assert (_owns_data);
-
-	if (size < _capacity) {
+	if (!_owns_data || (size < _capacity)) {
 		return;
 	}
 

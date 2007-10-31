@@ -99,10 +99,11 @@ static double direct_gain_to_control (gain_t gain) {
  */
 IO::IO (Session& s, const string& name,
 	int input_min, int input_max, int output_min, int output_max,
-	DataType default_type)
+	DataType default_type, bool public_ports)
 	: Automatable (s, name),
-      _output_buffers (new BufferSet()),
+  	  _output_buffers (new BufferSet()),
 	  _default_type (default_type),
+ 	  _public_ports (public_ports),
 	  _input_minimum (ChanCount::ZERO),
 	  _input_maximum (ChanCount::INFINITE),
 	  _output_minimum (ChanCount::ZERO),
@@ -162,7 +163,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	  _default_type (dt)
 {
 	_meter = new PeakMeter (_session);
-
+	_public_ports = true; // XXX get this from node
 	_panner = 0;
 	deferred_state = 0;
 	no_panner_reset = false;
@@ -229,7 +230,7 @@ IO::silence (nframes_t nframes, nframes_t offset)
 	}
 }
 
-/** Deliver bufs to the IO's Jack outputs.
+/** Deliver bufs to the IO's output ports
  *
  * This function should automatically do whatever it necessary to correctly deliver bufs
  * to the outputs, eg applying gain or pan or whatever else needs to be done.
@@ -636,7 +637,7 @@ IO::add_output_port (string destination, void* src, DataType type)
 				snprintf (name, sizeof (name), _("%s/out %u"), _name.c_str(), find_output_port_hole());
 			}
 			
-			if ((our_port = _session.engine().register_output_port (Jack, type, name)) == 0) {
+			if ((our_port = _session.engine().register_output_port (type, name, _public_ports)) == 0) {
 				error << string_compose(_("IO: cannot register output port %1"), name) << endmsg;
 				return -1;
 			}
@@ -714,7 +715,7 @@ IO::remove_input_port (Port* port, void* src)
 
 /** Add an input port.
  *
- * @param type Data type of port.  The appropriate Jack port type, and @ref Port will be created.
+ * @param type Data type of port.  The appropriate port type, and @ref Port will be created.
  * @param destination Name of input port to connect new port to.
  * @param src Source for emitted ConfigurationChanged signal.
  */
@@ -746,7 +747,7 @@ IO::add_input_port (string source, void* src, DataType type)
 				snprintf (name, sizeof (name), _("%s/in %u"), _name.c_str(), find_input_port_hole());
 			}
 
-			if ((our_port = _session.engine().register_input_port (Jack, type, name)) == 0) {
+			if ((our_port = _session.engine().register_input_port (type, name, _public_ports)) == 0) {
 				error << string_compose(_("IO: cannot register input port %1"), name) << endmsg;
 				return -1;
 			}
@@ -854,7 +855,7 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 
 			try {
 
-				if ((input_port = _session.engine().register_input_port (Jack, *t, buf)) == 0) {
+				if ((input_port = _session.engine().register_input_port (*t, buf, _public_ports)) == 0) {
 					error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 					return -1;
 				}
@@ -970,7 +971,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 				}
 
 				try {
-					if ((port = _session.engine().register_input_port (Jack, *t, buf)) == 0) {
+					if ((port = _session.engine().register_input_port (*t, buf, _public_ports)) == 0) {
 						error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
 						return -1;
 					}
@@ -1002,7 +1003,7 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 				}
 
 				try { 
-					if ((port = _session.engine().register_output_port (Jack, *t, buf)) == 0) {
+					if ((port = _session.engine().register_output_port (*t, buf, _public_ports)) == 0) {
 						error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 						return -1;
 					}
@@ -1122,7 +1123,7 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 				snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
 			}
 
-			if ((output_port = _session.engine().register_output_port (Jack, *t, buf)) == 0) {
+			if ((output_port = _session.engine().register_output_port (*t, buf, _public_ports)) == 0) {
 				error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
 				return -1;
 			}
@@ -1241,6 +1242,8 @@ IO::state (bool full_state)
 	XMLNode* node = new XMLNode (state_node_name);
 	char buf[64];
 	string str;
+	vector<string>::iterator ci;
+	int n;
 	LocaleGuard lg (X_("POSIX"));
 	Glib::Mutex::Lock lm (io_lock);
 
@@ -1274,12 +1277,13 @@ IO::state (bool full_state)
 
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 			
-		const char **connections = i->get_connections();
-		
-		if (connections && connections[0]) {
+		vector<string> connections;
+
+		if (i->get_connections (connections)) {
+
 			str += '{';
 			
-			for (int n = 0; connections && connections[n]; ++n) {
+			for (n = 0, ci = connections.begin(); ci != connections.end(); ++ci, ++n) {
 				if (n) {
 					str += ',';
 				}
@@ -1291,14 +1295,12 @@ IO::state (bool full_state)
 				   client name is different.
 				*/
 				
-				str += _session.engine().make_port_name_relative (connections[n]);
+				str += _session.engine().make_port_name_relative (*ci);
 			}	
 			
 			str += '}';
-			
-			free (connections);
-		}
-		else {
+
+		} else {
 			str += "{}";
 		}
 	}
@@ -1309,25 +1311,23 @@ IO::state (bool full_state)
 	
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 		
-		const char **connections = i->get_connections();
-		
-		if (connections && connections[0]) {
+		vector<string> connections;
+
+		if (i->get_connections (connections)) {
 			
 			str += '{';
 			
-			for (int n = 0; connections[n]; ++n) {
+			for (n = 0, ci = connections.begin(); ci != connections.end(); ++ci, ++n) {
 				if (n) {
 					str += ',';
 				}
 				
-				str += _session.engine().make_port_name_relative (connections[n]);
+				str += _session.engine().make_port_name_relative (*ci);
 			}
 			
 			str += '}';
-			
-			free (connections);
-		}
-		else {
+
+		} else {
 			str += "{}";
 		}
 	}

@@ -1815,6 +1815,8 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 			  IO& io,
 			  bool in)
 {
+	vector<string> connections;
+
 	if (in) {
 		if (io.n_inputs().n_total() == 0) {
 			buf = _("none");
@@ -1823,15 +1825,11 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 		
 		/* XXX we're not handling multiple ports yet. */
 
-		const char **connections = io.input(0)->get_connections();
-		
-		if (connections == 0 || connections[0] == '\0') {
+		if (io.input(0)->get_connections(connections) == 0) {
 			buf = _("off");
 		} else {
-			buf = connections[0];
+			buf = connections.front();
 		}
-
-		free (connections);
 
 	} else {
 
@@ -1842,15 +1840,11 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 		
 		/* XXX we're not handling multiple ports yet. */
 
-		const char **connections = io.output(0)->get_connections();
-		
-		if (connections == 0 || connections[0] == '\0') {
+		if (io.output(0)->get_connections(connections) == 0) {
 			buf = _("off");
 		} else {
-			buf = connections[0];
+			buf = connections.front();
 		}
-
-		free (connections);
 	}
 }
 

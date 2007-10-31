@@ -78,7 +78,8 @@ class IO : public Automatable, public Latent
 	IO (Session&, const string& name, 
 	    int input_min = -1, int input_max = -1, 
 	    int output_min = -1, int output_max = -1,
-	    DataType default_type = DataType::AUDIO);
+	    DataType default_type = DataType::AUDIO,
+	    bool public_ports = true);
 	
 	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	
@@ -270,7 +271,7 @@ class IO : public Automatable, public Latent
 	gain_t              _gain;
 	gain_t              _effective_gain;
 	gain_t              _desired_gain;
-	Glib::Mutex         declick_lock;
+	Glib::Mutex          declick_lock;
 	PortSet             _outputs;
 	PortSet             _inputs;
 	PeakMeter*          _meter;
@@ -279,7 +280,8 @@ class IO : public Automatable, public Latent
 	bool                _denormal_protection;
 	XMLNode*             deferred_state;
 	DataType            _default_type;
-	
+	bool                _public_ports;
+
 	virtual void set_deferred_state() {}
 
 	void reset_panner ();

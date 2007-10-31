@@ -250,7 +250,7 @@ SourceFactory::createWritable (DataType type, Session& s, std::string path, bool
 						(destructive ? AudioFileSource::Flag (SndFileSource::default_writable_flags | AudioFileSource::Destructive) :
 						 SndFileSource::default_writable_flags)));	
 
-		if (setup_peakfile (ret, false)) {
+		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();
 		}
 

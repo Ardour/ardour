@@ -21,39 +21,24 @@
 #ifndef __ardour_midi_port_h__
 #define __ardour_midi_port_h__
 
-#include <sigc++/signal.h>
-#include <pbd/failed_constructor.h>
-#include <ardour/ardour.h>
-#include <ardour/port.h>
-#include <ardour/midi_buffer.h>
+#include <ardour/base_midi_port.h>
 
 namespace ARDOUR {
 
 class MidiEngine;
 
-class MidiPort : public virtual Port {
+class MidiPort : public BaseMidiPort, public PortFacade {
    public:
-	virtual ~MidiPort();
-	
-	Buffer& get_buffer() {
-		return _buffer;
-	}
+	~MidiPort();
 
-	MidiBuffer& get_midi_buffer() {
-		return _buffer;
-	}
-	
-	size_t capacity() { return _buffer.capacity(); }
-	size_t size()     { return _buffer.size(); }
+	void reset ();
+
+	void cycle_start (nframes_t nframes, nframes_t offset);
 
   protected:
 	friend class AudioEngine;
 
-	MidiPort (Flags, nframes_t bufsize);
-	
-	/* engine isn't supposed to access below here */
-
-	MidiBuffer     _buffer;
+	MidiPort (const std::string& name, Flags, bool external, nframes_t bufsize);
 };
  
 } // namespace ARDOUR

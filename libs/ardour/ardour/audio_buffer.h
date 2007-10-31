@@ -23,8 +23,6 @@
 
 namespace ARDOUR {
 
-
-/** Buffer containing 32-bit floating point (audio) data. */
 class AudioBuffer : public Buffer
 {
 public:
@@ -32,8 +30,7 @@ public:
 	
 	~AudioBuffer();
 
-	void silence(nframes_t len, nframes_t offset=0)
-	{
+	void silence(nframes_t len, nframes_t offset = 0) {
 		if (!_silent) {
 			assert(_capacity > 0);
 			assert(offset + len <= _capacity);
@@ -45,8 +42,7 @@ public:
 	}
 	
 	/** Read @a len frames FROM THE START OF @a src into self at @a offset */
-	void read_from(const Buffer& src, nframes_t len, nframes_t offset)
-	{
+	void read_from(const Buffer& src, nframes_t len, nframes_t offset) {
 		assert(_capacity > 0);
 		assert(src.type() == DataType::AUDIO);
 		assert(offset + len <= _capacity);
@@ -55,8 +51,7 @@ public:
 	}
 	
 	/** Accumulate (add)@a len frames FROM THE START OF @a src into self at @a offset */
-	void accumulate_from(const AudioBuffer& src, nframes_t len, nframes_t offset)
-	{
+	void accumulate_from(const AudioBuffer& src, nframes_t len, nframes_t offset) {
 		assert(_capacity > 0);
 		assert(offset + len <= _capacity);
 
@@ -70,8 +65,7 @@ public:
 	
 	/** Accumulate (add) @a len frames FROM THE START OF @a src into self at @a offset
 	 * scaling by @a gain_coeff */
-	void accumulate_with_gain_from(const AudioBuffer& src, nframes_t len, nframes_t offset, gain_t gain_coeff)
-	{
+	void accumulate_with_gain_from(const AudioBuffer& src, nframes_t len, nframes_t offset, gain_t gain_coeff) {
 		assert(_capacity > 0);
 		assert(offset + len <= _capacity);
 
@@ -91,8 +85,7 @@ public:
 	 * 
 	 * Constructor MUST have been passed capacity=0 or this will die (to prevent mem leaks).
 	 */
-	void set_data(Sample* data, size_t size)
-	{
+	void set_data (Sample* data, size_t size) {
 		assert(!_owns_data); // prevent leaks
 		_capacity = size;
 		_size = size;

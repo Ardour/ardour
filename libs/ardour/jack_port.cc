@@ -28,10 +28,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-AudioEngine* JackPort::engine = 0;
-
 JackPort::JackPort (const std::string& name, DataType type, Flags flgs) 
-	: Port (type, flgs), _port (0)
+	: Port (name, flgs), _port (0)
 {
 	_port = jack_port_register (engine->jack(), name.c_str(), type.to_jack_type(), flgs, 0);
 
@@ -39,6 +37,8 @@ JackPort::JackPort (const std::string& name, DataType type, Flags flgs)
 		throw failed_constructor();
 	}
 	
+	_flags = flgs;
+	_type  = type;
 	_name = jack_port_name (_port);
 }
 
@@ -50,7 +50,7 @@ JackPort::~JackPort ()
 }
 
 int 
-JackPort::set_name (string str)
+JackPort::set_name (const string& str)
 {
 	int ret;
 
@@ -66,12 +66,6 @@ JackPort::disconnect ()
 {
 	return jack_port_disconnect (engine->jack(), _port);
 }	
-
-void
-JackPort::set_engine (AudioEngine* e)
-{
-	engine = e;
-}
 
 nframes_t
 JackPort::total_latency () const
@@ -107,4 +101,79 @@ JackPort::recompute_total_latency () const
 #endif
 }
 
+int
+JackPort::reconnect ()
+{
+	/* caller must hold process lock; intended to be used only after reestablish() */
 
+	for (set<string>::iterator i = _named_connections.begin(); i != _named_connections.end(); ++i) {
+		if (connect (*i)) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+int
+JackPort::connect (const std::string& other)
+{
+	int ret;
+
+	if (_flags & IsOutput) {
+		/* this is the source */
+		ret = jack_connect (engine->jack(), _name.c_str(), other.c_str());
+	} else {
+		ret = jack_connect (engine->jack(), other.c_str(), _name.c_str());
+	}
+
+	if (ret == 0) {
+		_named_connections.insert (other);
+	}
+	
+	return ret;
+}
+
+int
+JackPort::disconnect (const std::string& other)
+{
+	int ret;
+
+	if (_flags & IsInput) {
+		ret = jack_disconnect (engine->jack(), _name.c_str(), other.c_str());
+	} else {
+		ret = jack_disconnect (engine->jack(), other.c_str(), _name.c_str());
+	}
+
+	set<string>::iterator i = _named_connections.find (other);
+
+	if (i != _named_connections.end()) {
+		_named_connections.erase (i);
+	}
+
+	return ret;
+}
+
+int
+JackPort::disconnect_all ()
+{
+	_named_connections.clear ();
+	return jack_port_disconnect (engine->jack(), _port);
+}
+
+int
+JackPort::get_connections (vector<string>& names) const
+{
+	const char** cstrs =  jack_port_get_connections (_port);
+	int i;
+	
+	if (!cstrs) {
+		return 0;
+	}
+	
+	for (i = 0; cstrs[i]; ++i) {
+		names.push_back (string (cstrs[i]));
+	}
+
+	return i;
+}
