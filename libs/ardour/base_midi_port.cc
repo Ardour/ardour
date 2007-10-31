@@ -18,7 +18,7 @@
 
 #include <cassert>
 #include <iostream>
-
+#include <glib.h>
 #include <ardour/base_midi_port.h>
 #include <ardour/data_type.h>
 
@@ -61,9 +61,5 @@ BaseMidiPort::default_mixdown (const set<Port*>& ports, MidiBuffer* dest, nframe
 void 
 BaseMidiPort::set_mixdown_function (void (*func)(const set<Port*>&, MidiBuffer*, nframes_t, nframes_t, bool))
 {
-	/* caller should (but not must) hold process lock since this is an atomic operation on most platforms
-	   and even if its not, it doesn't really matter.
-	*/
-
-	_mixdown = func;
+	g_atomic_pointer_set(&_mixdown, func);
 }
