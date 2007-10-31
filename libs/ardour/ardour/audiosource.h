@@ -52,13 +52,6 @@ const nframes_t frames_per_peak = 256;
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
-	/* one could argue that this should belong to Source, but other data types
-	   generally do not come with a model of "offset along an audio timeline"
-	   so its here in AudioSource for now.
-	*/
-
-	virtual nframes_t natural_position() const { return 0; }
-	
 	/* returns the number of items in this `audio_source' */
 
 	virtual nframes_t available_peaks (double zoom) const;
@@ -116,8 +109,8 @@ const nframes_t frames_per_peak = 256;
 	bool                 _peaks_built;
 	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
-	Glib::ustring               peakpath;
-	Glib::ustring              _captured_for;
+	Glib::ustring         peakpath;
+	Glib::ustring        _captured_for;
 
 	mutable uint32_t _read_data_count;  // modified in read()
 	mutable uint32_t _write_data_count; // modified in write()

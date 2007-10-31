@@ -17,6 +17,7 @@
 */
 
 #include <cassert>
+#include <glib.h>
 #include <ardour/base_audio_port.h>
 #include <ardour/audioengine.h>
 #include <ardour/data_type.h>
@@ -75,11 +76,7 @@ BaseAudioPort::default_mixdown (const set<Port*>& ports, AudioBuffer* dest, nfra
 void 
 BaseAudioPort::set_mixdown_function (void (*func)(const set<Port*>&, AudioBuffer*, nframes_t, nframes_t, bool))
 {
-	/* caller should (but not must) hold process lock since this is an atomic operation on most platforms
-	   and even if its not, it doesn't really matter.
-	*/
-
-	_mixdown = func;
+	g_atomic_pointer_set(&_mixdown, func);
 }
 
 
