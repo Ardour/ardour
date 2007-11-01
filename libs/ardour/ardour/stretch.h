@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,34 +17,35 @@
 
 */
 
-#ifndef __ardour_audiofilter_h__
-#define __ardour_audiofilter_h__
+#ifndef __ardour_stretch_h__
+#define __ardour_stretch_h__
 
-#include <vector>
-#include <ardour/audioregion.h>
+#include <ardour/audiofilter.h>
+#include <soundtouch/SoundTouch.h>
 
 namespace ARDOUR {
 
 class AudioRegion;
-class Session;
 
-class AudioFilter {
+struct TimeStretchRequest : public InterThreadInfo {
+    float                fraction;   
+    bool                 quick_seek; 
+    bool                 antialias;  
+};
 
+class Stretch : public AudioFilter {
   public:
-	AudioFilter (ARDOUR::Session& s)
-		: session (s){}
-	virtual ~AudioFilter() {}
+	Stretch (ARDOUR::Session&, TimeStretchRequest&);
+	~Stretch ();
 
-	virtual int run (boost::shared_ptr<ARDOUR::AudioRegion>) = 0;
-	std::vector<boost::shared_ptr<ARDOUR::AudioRegion> > results;
+	int run (boost::shared_ptr<ARDOUR::AudioRegion>);
 
-  protected:
-	ARDOUR::Session& session;
+  private:
+	TimeStretchRequest& tsr;
+	soundtouch::SoundTouch st;
 
-	int make_new_sources (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::SourceList&, std::string suffix = "");
-	int finish (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::SourceList&, std::string region_name = "");
 };
 
 } /* namespace */
 
-#endif /* __ardour_audiofilter_h__ */
+#endif /* __ardour_stretch_h__ */

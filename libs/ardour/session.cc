@@ -2097,14 +2097,14 @@ Session::remove_route (shared_ptr<Route> route)
 
 	find_current_end ();
 	
-	update_latency_compensation (false, false);
-	set_dirty();
-
 	// We need to disconnect the routes inputs and outputs 
 
 	route->disconnect_inputs (0);
 	route->disconnect_outputs (0);
 	
+	update_latency_compensation (false, false);
+	set_dirty();
+
 	/* get rid of it from the dead wood collection in the route list manager */
 
 	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
@@ -2113,7 +2113,12 @@ Session::remove_route (shared_ptr<Route> route)
 
 	/* try to cause everyone to drop their references */
 
+	cerr << "pre drop, Route now has " << route.use_count() << " refs\n";
+	cerr << "sig has " << route->GoingAway.size() << endl;
+
 	route->drop_references ();
+
+	cerr << "route dangling refs = " << route.use_count() << endl;
 
 	/* save the new state of the world */
 

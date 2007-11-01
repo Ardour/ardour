@@ -32,6 +32,7 @@
 #include <pbd/xml++.h>
 #include <pbd/stacktrace.h>
 #include <pbd/enumwriter.h>
+#include <pbd/convert.h>
 
 #include <ardour/audioregion.h>
 #include <ardour/session.h>
@@ -47,6 +48,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
@@ -92,7 +94,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	/* basic AudioRegion constructor */
 
 	sources.push_back (src);
-	master_sources.push_back (src);
+	master_sources.push_back (src);	
 	src->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
@@ -167,6 +169,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 			(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
 		}
 		master_sources.push_back (*i);
+
 	}
 
 	/* return to default fades if the existing ones are too long */
@@ -678,6 +681,12 @@ AudioRegion::state (bool full)
 		child->add_property ("default", "yes");
 	}
 
+	for (uint32_t n=0; n < master_sources.size(); ++n) {
+		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
+		master_sources[n]->id().print (buf, sizeof (buf));
+		node.add_property (buf2, buf);
+	}
+
 	if (full && _extra_xml) {
 		node.add_child_copy (*_extra_xml);
 	}
@@ -1111,6 +1120,12 @@ AudioRegion::master_source_names ()
 	}
 
 	return names;
+}
+
+void
+AudioRegion::set_master_sources (SourceList& srcs)
+{
+	master_sources = srcs;
 }
 
 bool

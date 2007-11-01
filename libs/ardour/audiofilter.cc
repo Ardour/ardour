@@ -34,13 +34,26 @@ using namespace ARDOUR;
 using namespace PBD;
 
 int
-AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs)
+AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs, string suffix)
 {
 	vector<string> names = region->master_source_names();
 
 	for (uint32_t i = 0; i < region->n_channels(); ++i) {
 
-		string path = session.path_from_region_name (PBD::basename_nosuffix (names[i]), string (""));
+		string name = PBD::basename_nosuffix (names[i]);
+
+		/* remove any existing version of suffix by assuming it starts
+		   with some kind of "special" character.
+		*/
+
+		if (!suffix.empty()) {
+			string::size_type pos = name.find (suffix[0]);
+			if (pos != string::npos && pos > 2) {
+				name = name.substr (0, pos - 1);
+			}
+		}
+
+		string path = session.path_from_region_name (name, suffix);
 
 		if (path.length() == 0) {
 			error << string_compose (_("audiofilter: error creating name for new audio file based on %1"), region->name()) 
@@ -63,10 +76,8 @@ AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList
 }
 
 int
-AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs)
+AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs, string region_name)
 {
-	string region_name;
-
 	/* update headers on new sources */
 
 	time_t xnow;
@@ -91,9 +102,11 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs)
 
 	/* create a new region */
 
-	region_name = session.new_region_name (region->name());
+	if (region_name.empty()) {
+		region_name = session.new_region_name (region->name());
+	}
 	results.clear ();
-	results.push_back (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (nsrcs, 0, region->length(), region_name, 0, 
+	results.push_back (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (nsrcs, 0, nsrcs.front()->length(), region_name, 0, 
 											    Region::Flag (Region::WholeFile|Region::DefaultFlags))));
 	
 	return 0;

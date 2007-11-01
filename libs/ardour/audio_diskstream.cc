@@ -792,7 +792,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				chaninfo->current_playback_buffer = chaninfo->speed_buffer;
 			}
 
-			playback_distance = i;
+			playback_distance = i; // + 1;
 			last_phase = (phase & 0xFFFFFF);
 
 		} else {

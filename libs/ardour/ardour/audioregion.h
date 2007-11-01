@@ -67,7 +67,8 @@ class AudioRegion : public Region
 
 	uint32_t n_channels() const { return sources.size(); }
 	vector<string> master_source_names();
-	
+	void set_master_sources (SourceList&);
+
 	bool envelope_active () const { return _flags & Region::EnvelopeActive; }
 	bool fade_in_active ()  const { return _flags & Region::FadeIn; }
 	bool fade_out_active () const { return _flags & Region::FadeOut; }

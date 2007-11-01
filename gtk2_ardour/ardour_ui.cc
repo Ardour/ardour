@@ -3126,8 +3126,4 @@ ARDOUR_UI::setup_profile ()
 	}
 }
 
-void
-ARDOUR_UI::audioengine_setup ()
-{
-}
 

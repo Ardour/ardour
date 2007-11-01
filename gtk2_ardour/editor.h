@@ -45,6 +45,7 @@
 
 #include <pbd/stateful.h>
 #include <ardour/session.h>
+#include <ardour/stretch.h>
 #include <ardour/tempo.h>
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
@@ -1744,7 +1745,7 @@ class Editor : public PublicEditor
 	void end_time_fx (ArdourCanvas::Item*, GdkEvent*);
 
 	struct TimeStretchDialog : public ArdourDialog {
-	    ARDOUR::Session::TimeStretchRequest request;
+	    ARDOUR::TimeStretchRequest request;
 	    Editor&               editor;
 	    RegionSelection       regions;
 	    Gtk::ProgressBar      progress_bar;

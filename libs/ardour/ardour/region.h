@@ -88,8 +88,14 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	nframes_t position () const { return _position; }
 	nframes_t start ()    const { return _start; }
 	nframes_t length()    const { return _length; }
-	layer_t        layer ()    const { return _layer; }
-	
+	layer_t   layer ()    const { return _layer; }
+
+	nframes64_t ancestral_start () const { return _ancestral_start; }
+	nframes64_t ancestral_length () const { return _ancestral_length; }
+	float stretch() const { return _stretch; }
+
+	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch);
+
 	nframes_t sync_offset(int& dir) const;
 	nframes_t sync_position() const;
 
@@ -205,11 +211,11 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	virtual void recompute_at_end () = 0;
 	
 	
-	nframes_t          _start;
-	nframes_t          _length;
-	nframes_t          _position;
-	Flag                     _flags;
-	nframes_t          _sync_position;
+	nframes_t               _start;
+	nframes_t               _length;
+	nframes_t               _position;
+	Flag                    _flags;
+	nframes_t               _sync_position;
 	layer_t                 _layer;
 	string                  _name;        
 	mutable RegionEditState _first_edit;
@@ -219,6 +225,9 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	mutable uint32_t        _read_data_count; // modified in read()
 	Change                   pending_changed;
 	uint64_t                _last_layer_op; // timestamp
+	nframes64_t             _ancestral_start;
+	nframes64_t             _ancestral_length;
+	float                   _stretch;
 };
 
 } /* namespace ARDOUR */
