@@ -651,16 +651,10 @@ Editor::track_selection_changed ()
 	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_selected (false);
-		if (mouse_mode == MouseRange) {
-			(*i)->hide_selection ();
-		}
-	}
-
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		(*i)->set_selected (true);
-		if (mouse_mode == MouseRange) {
-			(*i)->show_selection (selection->time);
+		if (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end()) {
+				(*i)->set_selected (true);
+		} else {
+			(*i)->set_selected (false);
 		}
 	}
 }
@@ -687,6 +681,7 @@ Editor::time_selection_changed ()
 	} else {
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
+
 }
 
 void

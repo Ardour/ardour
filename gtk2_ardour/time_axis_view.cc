@@ -546,12 +546,16 @@ TimeAxisView::popup_size_menu (guint32 when)
 void
 TimeAxisView::set_selected (bool yn)
 {
-	AxisView::set_selected (yn);
+	if (yn == _selected) {
+		return;
+	}
+
+	Selectable::set_selected (yn);
 
 	if (_selected) {
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_frame.set_name (controls_base_selected_name);
-
+		
 		/* propagate any existing selection, if the mode is right */
 
 		if (editor.current_mouse_mode() == Editing::MouseRange && !editor.get_selection().time.empty()) {
@@ -572,8 +576,6 @@ TimeAxisView::set_selected (bool yn)
 		for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 			(*i)->set_selected (false);
 		}
-
-		
 	}
 }
 
