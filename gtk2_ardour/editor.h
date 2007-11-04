@@ -789,11 +789,13 @@ class Editor : public PublicEditor
 	    
 	RegionListDisplayModelColumns          region_list_columns;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > region_list_display;
+	std::list<sigc::connection> region_state_changed_connections;
 
 	Glib::RefPtr<Gtk::TreeStore>           region_list_model;
 	Glib::RefPtr<Gtk::ToggleAction>        toggle_full_region_list_action;
 	Glib::RefPtr<Gtk::ToggleAction>        toggle_show_auto_regions_action;
 
+	void region_list_region_changed (ARDOUR::Change, boost::weak_ptr<ARDOUR::Region>);
 	void region_list_selection_changed ();
 	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 

@@ -89,6 +89,10 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 	Gdk::Color c;
 	bool missing_source;
 
+	region_state_changed_connections.push_back (
+		region->StateChanged.connect (bind (mem_fun (*this, &Editor::region_list_region_changed), boost::weak_ptr<Region> (region)))
+		);
+
 	missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
 
 	if (!show_automatic_regions_in_region_list && region->automatic()) {
@@ -217,6 +221,44 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 	}
 }
 
+
+void
+Editor::region_list_region_changed (Change what_changed, boost::weak_ptr<Region> region)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::region_list_region_changed), what_changed, region));
+	
+	boost::shared_ptr<Region> r = region.lock ();
+	
+	if (!r) {
+		return;
+	}
+	
+	if (what_changed & ARDOUR::NameChanged) {
+		/* find the region in our model and change its name */
+		TreeModel::Children rows = region_list_model->children ();
+		TreeModel::iterator i = rows.begin ();
+		while (i != rows.end ()) {
+			TreeModel::Children children = (*i)->children ();
+			TreeModel::iterator j = children.begin ();
+			while (j != children.end()) {
+				boost::shared_ptr<Region> c = (*j)[region_list_columns.region];
+				if (c == r) {
+					break;
+				}
+				++j;
+			}
+
+			if (j != children.end()) {
+				(*j)[region_list_columns.name] = r->name ();
+				break;
+			}
+			
+			++i;
+		}
+
+	}
+}
+
 void
 Editor::region_list_selection_changed() 
 {
@@ -266,6 +308,13 @@ void
 Editor::redisplay_regions ()
 {
 	if (session) {
+
+		for (std::list<connection>::iterator i = region_state_changed_connections.begin();
+		     i != region_state_changed_connections.end();
+		     ++i)
+		{
+			i->disconnect ();
+		}
 
 		region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 		region_list_model->clear ();
