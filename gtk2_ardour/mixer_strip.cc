@@ -362,7 +362,11 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	gain_meter_alignment->show();
 
 	pre_processor_box.show();
-	hide_button.show();
+
+	if (!route()->is_master() && !route()->is_control()) {
+		/* we don't allow master or control routes to be hidden */
+		hide_button.show();
+	}
 	width_button.show();
 	width_hide_box.show();
 	global_frame.show();
