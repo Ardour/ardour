@@ -1877,6 +1877,7 @@ class Editor : public PublicEditor
 	MixerStrip *current_mixer_strip;
 	bool show_editor_mixer_when_tracks_arrive;
 	Gtk::VBox current_mixer_strip_vbox;
+	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void cms_deleted ();
 	void current_mixer_strip_hidden ();
 	void current_mixer_strip_removed ();

@@ -155,13 +155,40 @@ Editor::remove_route (TimeAxisView *tv)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::remove_route), tv));
 
-	
-	TrackViewList::iterator i;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 
-	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
+	/* find the track view that's being deleted */
+	TrackViewList::iterator i = find (track_views.begin(), track_views.end(), tv);
+
+	/* set up `nearby' to be a suitable nearby track to select once
+	   this one has gong */
+	TrackViewList::iterator nearby = track_views.end ();
+	if (i != track_views.end()) {
+
+		nearby = i;
+
+		if (nearby != track_views.begin()) {
+			/* go to the previous track if there is one */
+			nearby--;
+		} else {
+			/* otherwise the next track */
+			nearby++;
+		}
+
+		/* and remove the track view that's going */
 		track_views.erase (i);
+
+		if (nearby != track_views.end()) {
+			/* we've got another track to select, so select it */
+			set_selected_track (**nearby, Selection::Set);
+		} else {
+			/* we've got no other track, so the editor mixer will disappear */
+			editor_mixer_button.set_active (false);
+			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+			editor_mixer_button.set_sensitive (false);
+			editor_list_button.set_sensitive (false);
+		}
 	}
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
@@ -169,21 +196,6 @@ Editor::remove_route (TimeAxisView *tv)
 			route_display_model->erase (ri);
 			break;
 		}
-	}
-	/* since the editor mixer goes away when you remove a route, set the
-	 * button to inactive and untick the menu option
-	 */
-	editor_mixer_button.set_active(false);
-	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
-
-	/* and disable if all tracks and/or routes are gone */
-
-	if (track_views.size() == 0) {
-		editor_mixer_button.set_sensitive(false);
-		
-		editor_list_button.set_active(false);
-		ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-list");
-		editor_list_button.set_sensitive(false);
 	}
 }
 
