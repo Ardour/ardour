@@ -86,7 +86,7 @@ RegionView::RegionView (const RegionView& other)
 	/* derived concrete type will call init () */
 
 	_region = other._region;
-	editor = other.editor;
+	editor = 0;
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_enable_display = false;
