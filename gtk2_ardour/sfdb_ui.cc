@@ -934,7 +934,6 @@ SoundFileOmega::check_link_status (const Session& s, const vector<ustring>& path
 SoundFileChooser::SoundFileChooser (Gtk::Window& parent, string title, ARDOUR::Session* s)
 	: SoundFileBrowser (parent, title, s, false)
 {
-	set_size_request (780, 300);
 	chooser.set_select_multiple (false);
 	found_list_view.get_selection()->set_mode (SELECTION_SINGLE);
 }
