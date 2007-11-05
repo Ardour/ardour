@@ -2871,7 +2871,7 @@ ARDOUR_UI::pending_state_dialog ()
 {
  	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
-	ArdourDialog dialog ("pending state dialog");
+	ArdourDialog dialog (_("Crash recovery"), true);
 	Label  message (_("\
 This session appears to have been in\n\
 middle of recording when ardour or\n\
