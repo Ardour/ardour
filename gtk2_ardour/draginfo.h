@@ -49,6 +49,8 @@ struct DragInfo {
     double cumulative_y_drag;
     double current_pointer_x;
     double current_pointer_y;
+    double last_pointer_x;
+    double last_pointer_y;
     void (Editor::*motion_callback)(ArdourCanvas::Item*, GdkEvent*);
     void (Editor::*finished_callback)(ArdourCanvas::Item*, GdkEvent*);
     TimeAxisView* last_trackview;
