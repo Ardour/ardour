@@ -1500,6 +1500,8 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	}
 
 	drag_info.item_type = item_type;
+	drag_info.last_pointer_x = drag_info.current_pointer_x;
+	drag_info.last_pointer_y = drag_info.current_pointer_y;
 	drag_info.current_pointer_frame = event_frame (event, &drag_info.current_pointer_x,
 						       &drag_info.current_pointer_y);
 
@@ -1685,6 +1687,8 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	drag_info.current_pointer_frame = drag_info.grab_frame;
 	drag_info.current_pointer_x = drag_info.grab_x;
 	drag_info.current_pointer_y = drag_info.grab_y;
+	drag_info.last_pointer_x = drag_info.current_pointer_x;
+	drag_info.last_pointer_y = drag_info.current_pointer_y;
 	drag_info.cumulative_x_drag = 0;
 	drag_info.cumulative_y_drag = 0;
 	drag_info.first_move = true;
@@ -1743,6 +1747,8 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.item->ungrab (event->button.time);
 
 	if (drag_info.finished_callback) {
+		drag_info.last_pointer_x = drag_info.current_pointer_x;
+		drag_info.last_pointer_y = drag_info.current_pointer_y;
 		(this->*(drag_info.finished_callback)) (item, event);
 	}
 
@@ -2607,11 +2613,16 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 {
 	ControlPoint* cp = reinterpret_cast<ControlPoint *> (drag_info.data);
 
-	double cx = drag_info.current_pointer_x;
-	double cy = drag_info.current_pointer_y;
+	double dx = drag_info.current_pointer_x - drag_info.last_pointer_x;
+	double dy = drag_info.current_pointer_y - drag_info.last_pointer_y;
 
-	drag_info.cumulative_x_drag = cx - drag_info.grab_x ;
-	drag_info.cumulative_y_drag = cy - drag_info.grab_y ;
+	if (event->button.state & Keyboard::Alt) {
+		dx *= 0.1;
+		dy *= 0.1;
+	}
+
+	double cx = drag_info.grab_x + drag_info.cumulative_x_drag + dx;
+	double cy = drag_info.grab_y + drag_info.cumulative_y_drag + dy;
 
 	if (drag_info.x_constrained) {
 		cx = drag_info.grab_x;
@@ -2619,6 +2630,9 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 	if (drag_info.y_constrained) {
 		cy = drag_info.grab_y;
 	}
+
+	drag_info.cumulative_x_drag = cx - drag_info.grab_x;
+	drag_info.cumulative_y_drag = cy - drag_info.grab_y;
 
 	cp->line().parent_group().w2i (cx, cy);
 
@@ -2737,11 +2751,23 @@ void
 Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	AutomationLine* line = reinterpret_cast<AutomationLine *> (drag_info.data);
+
+	double dy = drag_info.current_pointer_y - drag_info.last_pointer_y;
+
+	if (event->button.state & Keyboard::Alt) {
+		dy *= 0.1;
+	}
+
 	double cx = drag_info.current_pointer_x;
-	double cy = drag_info.current_pointer_y;
+	double cy = drag_info.grab_y + drag_info.cumulative_y_drag + dy;
+
+	drag_info.cumulative_y_drag = cy - drag_info.grab_y;
 
 	line->parent_group().w2i (cx, cy);
-	
+
+	cy = max (0.0, cy);
+	cy = min ((double) line->height(), cy);
+
 	const double fraction = 1.0 - ((cy - line->y_position()) / (double)line->height());
 
 	bool push;
