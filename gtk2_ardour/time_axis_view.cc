@@ -549,7 +549,7 @@ TimeAxisView::set_selected (bool yn)
 	if (yn == _selected) {
 		return;
 	}
-
+	
 	Selectable::set_selected (yn);
 
 	if (_selected) {

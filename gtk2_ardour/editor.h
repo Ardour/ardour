@@ -195,7 +195,7 @@ class Editor : public PublicEditor
 	   xscroll_adjustment.  
 	*/
 
-	nframes_t pixel_to_frame (double pixel) {
+	nframes64_t pixel_to_frame (double pixel) {
 		
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -210,7 +210,7 @@ class Editor : public PublicEditor
 		}
 	}
 
-	gulong frame_to_pixel (nframes_t frame) {
+	gulong frame_to_pixel (nframes64_t frame) {
 		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
 	}
 
@@ -1077,16 +1077,8 @@ class Editor : public PublicEditor
 	void stop_scrolling ();
 
 	bool _scrubbing;
-	bool have_full_mouse_speed;
-	nframes64_t last_scrub_frame;
-	double last_scrub_time;
-	int mouse_speed_update;
-	double mouse_direction;
-	double compute_mouse_speed ();
-	void add_mouse_speed (double, double);
-	double* mouse_speed;
-	size_t mouse_speed_entries;
-	size_t mouse_speed_size;
+	double last_scrub_x;
+	int scrubbing_direction;
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
@@ -1738,7 +1730,11 @@ class Editor : public PublicEditor
 
 	void duplicate_dialog (bool for_region);
 	
-	nframes_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
+	nframes64_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
+
+	/* returns false if mouse pointer is not in track or marker canvas
+	 */
+	bool mouse_frame (nframes64_t&, bool& in_track_canvas);
 
 	void time_fx_motion (ArdourCanvas::Item*, GdkEvent*);
 	void start_time_fx (ArdourCanvas::Item*, GdkEvent*);

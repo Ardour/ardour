@@ -66,6 +66,7 @@ ZOOMFOCUS(ZoomFocusLeft)
 ZOOMFOCUS(ZoomFocusRight)
 ZOOMFOCUS(ZoomFocusCenter)
 ZOOMFOCUS(ZoomFocusPlayhead)
+ZOOMFOCUS(ZoomFocusMouse)
 ZOOMFOCUS(ZoomFocusEdit)
 
 DISPLAYCONTROL(FollowPlayhead)

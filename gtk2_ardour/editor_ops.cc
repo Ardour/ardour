@@ -1101,12 +1101,14 @@ Editor::temporal_zoom (gdouble fpu)
 {
 	if (!session) return;
 	
-	nframes_t current_page = current_page_frames();
-	nframes_t current_leftmost = leftmost_frame;
-	nframes_t current_rightmost;
-	nframes_t current_center;
-	nframes_t new_page;
-	nframes_t leftmost_after_zoom = 0;
+	nframes64_t current_page = current_page_frames();
+	nframes64_t current_leftmost = leftmost_frame;
+	nframes64_t current_rightmost;
+	nframes64_t current_center;
+	nframes64_t new_page;
+	nframes64_t leftmost_after_zoom = 0;
+	nframes64_t where;
+	bool in_track_canvas;
 	double nfpu;
 
 	nfpu = fpu;
@@ -1145,6 +1147,34 @@ Editor::temporal_zoom (gdouble fpu)
 		}
 		break;
 
+	case ZoomFocusMouse:
+		/* try to keep the mouse over the same point in the display */
+
+		if (!mouse_frame (where, in_track_canvas)) {
+			/* use playhead instead */
+			where = playhead_cursor->current_frame;
+
+			if (where > new_page/2) {
+				leftmost_after_zoom = where - (new_page/2);
+			} else {
+				leftmost_after_zoom = 0;
+			}
+
+		} else {
+
+			double l = - ((new_page * ((where - current_leftmost)/(double)current_page)) - where);
+
+			if (l < 0) {
+				leftmost_after_zoom = 0;
+			} else if (l > max_frames) { 
+				leftmost_after_zoom = max_frames - new_page;
+			} else {
+				leftmost_after_zoom = (nframes64_t) l;
+			}
+		}
+
+		break;
+
 	case ZoomFocusEdit:
 		/* try to keep the edit cursor in the center */
 		if (edit_cursor->current_frame > new_page/2) {
@@ -1162,6 +1192,8 @@ Editor::temporal_zoom (gdouble fpu)
 //	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), current_leftmost, frames_per_unit));
 //	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_after_zoom, nfpu));
 //	commit_reversible_command ();
+	
+	cerr << "repos & zoom to " << leftmost_after_zoom << " @ " << nfpu << endl;
 
 	reposition_and_zoom (leftmost_after_zoom, nfpu);
 }	
@@ -2909,20 +2941,13 @@ Editor::paste (float times)
 void
 Editor::mouse_paste ()
 {
-	int x, y;
-	double wx, wy;
+	nframes64_t where;
+	bool ignored;
 
-	track_canvas.get_pointer (x, y);
-	track_canvas.window_to_world (x, y, wx, wy);
-	wx += horizontal_adjustment.get_value();
-	wy += vertical_adjustment.get_value();
+	if (!mouse_frame (where, ignored)) {
+		return;
+	}
 
-	GdkEvent event;
-	event.type = GDK_BUTTON_RELEASE;
-	event.button.x = wx;
-	event.button.y = wy;
-	
-	nframes_t where = event_frame (&event, 0, 0);
 	snap_to (where);
 	paste_internal (where, 1);
 }

@@ -140,6 +140,7 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Right"),
 	N_("Center"),
 	N_("Playhead"),
+ 	N_("Mouse"),
  	N_("Edit Cursor"),
 	0
 };
@@ -318,12 +319,7 @@ Editor::Editor ()
 	_dragging_hscrollbar = false;
 
 	_scrubbing = false;
-	mouse_direction = 1;
-	mouse_speed_update = -1;
-	mouse_speed_size = 16;
-	mouse_speed = new double[mouse_speed_size];
-	memset (mouse_speed, 0, sizeof(double) * mouse_speed_size);
-	mouse_speed_entries = 0;
+	scrubbing_direction = 0;
 
 	sfbrowser = 0;
 	ignore_route_order_sync = false;
@@ -3153,6 +3149,8 @@ Editor::zoom_focus_selection_done ()
 		focus_type = ZoomFocusCenter;
 	} else if (choice == _("Playhead")) {
 		focus_type = ZoomFocusPlayhead;
+	} else if (choice == _("Mouse")) {
+		focus_type = ZoomFocusMouse;
 	} else if (choice == _("Edit Cursor")) {
 		focus_type = ZoomFocusEdit;
 	} 

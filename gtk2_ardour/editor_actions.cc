@@ -287,6 +287,8 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-playhead", _("Zoom Focus Playhead"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusPlayhead));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-mouse", _("Zoom Focus Mouse"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusMouse));
+	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_radio_action (zoom_actions, zoom_group, "zoom-focus-edit", _("Zoom Focus Edit"), bind (mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusEdit));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -843,6 +845,9 @@ Editor::zoom_focus_action (ZoomFocus focus)
 		break;
 	case ZoomFocusPlayhead:
 		action = X_("zoom-focus-playhead");
+		break;
+	case ZoomFocusMouse:
+		action = X_("zoom-focus-mouse");
 		break;
 	case ZoomFocusEdit:
 		action = X_("zoom-focus-edit");
