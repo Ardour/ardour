@@ -1745,6 +1745,9 @@ AudioDiskstream::finish_capture (bool rec_monitors_input, boost::shared_ptr<Chan
 
 	capture_info.push_back (ci);
 	capture_captured = 0;
+
+	/* now we've finished a capture, reset first_recordable_frame for next time */
+	first_recordable_frame = max_frames;
 }
 
 void
