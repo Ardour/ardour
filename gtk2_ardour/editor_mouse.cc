@@ -74,6 +74,8 @@ using namespace sigc;
 using namespace Gtk;
 using namespace Editing;
 
+const static double ZERO_GAIN_FRACTION = gain_to_slider_position(dB_to_coefficient(0.0));
+
 nframes_t
 Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
 {
@@ -2599,6 +2601,16 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event, fader_cursor);
 
+	// start the grab at the center of the control point so
+	// the point doesn't 'jump' to the mouse after the first drag
+	drag_info.grab_x = control_point->get_x();
+	drag_info.grab_y = control_point->get_y();
+	control_point->line().parent_group().i2w(drag_info.grab_x, drag_info.grab_y);
+	track_canvas.w2c(drag_info.grab_x, drag_info.grab_y,
+									 drag_info.grab_x, drag_info.grab_y);
+
+	drag_info.grab_frame = pixel_to_frame(drag_info.grab_x);
+
 	control_point->line().start_drag (control_point, drag_info.grab_frame, 0);
 
 	double fraction = 1.0 - ((control_point->get_y() - control_point->line().y_position()) / (double)control_point->line().height());
@@ -2623,6 +2635,18 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 
 	double cx = drag_info.grab_x + drag_info.cumulative_x_drag + dx;
 	double cy = drag_info.grab_y + drag_info.cumulative_y_drag + dy;
+
+	// calculate zero crossing point. back off by .01 to stay on the
+	// positive side of zero
+	double _unused = 0;
+	double zero_gain_y = (1.0 - ZERO_GAIN_FRACTION) * cp->line().height() - .01;
+	cp->line().parent_group().i2w(_unused, zero_gain_y);
+
+	// make sure we hit zero when passing through
+	if ((cy < zero_gain_y and (cy - dy) > zero_gain_y)
+			or (cy > zero_gain_y and (cy - dy) < zero_gain_y)) {
+		cy = zero_gain_y;
+	}
 
 	if (drag_info.x_constrained) {
 		cx = drag_info.grab_x;
@@ -2760,6 +2784,18 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	double cx = drag_info.current_pointer_x;
 	double cy = drag_info.grab_y + drag_info.cumulative_y_drag + dy;
+
+	// calculate zero crossing point. back off by .01 to stay on the
+	// positive side of zero
+	double _unused = 0;
+	double zero_gain_y = (1.0 - ZERO_GAIN_FRACTION) * line->height() - .01;
+	line->parent_group().i2w(_unused, zero_gain_y);
+
+	// make sure we hit zero when passing through
+	if ((cy < zero_gain_y and (cy - dy) > zero_gain_y)
+			or (cy > zero_gain_y and (cy - dy) < zero_gain_y)) {
+		cy = zero_gain_y;
+	}
 
 	drag_info.cumulative_y_drag = cy - drag_info.grab_y;
 
