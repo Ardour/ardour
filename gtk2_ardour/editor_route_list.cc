@@ -118,7 +118,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		}
 		
 		ignore_route_list_reorder = false;
-		
+
 		tv->set_old_order_key (route_display_model->children().size() - 1);
 		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
 		
@@ -162,7 +162,7 @@ Editor::remove_route (TimeAxisView *tv)
 	TrackViewList::iterator i = find (track_views.begin(), track_views.end(), tv);
 
 	/* set up `nearby' to be a suitable nearby track to select once
-	   this one has gong */
+	   this one has gone */
 	TrackViewList::iterator nearby = track_views.end ();
 	if (i != track_views.end()) {
 
@@ -188,6 +188,14 @@ Editor::remove_route (TimeAxisView *tv)
 			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
 			editor_mixer_button.set_sensitive (false);
 			editor_list_button.set_sensitive (false);
+		}
+	}
+
+	/* Decrement old order keys for tracks `above' the one that is being removed */
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		TimeAxisView* v = (*ri)[route_display_columns.tv];
+		if (v->old_order_key() > tv->old_order_key()) {
+			v->set_old_order_key (v->old_order_key() - 1);
 		}
 	}
 
