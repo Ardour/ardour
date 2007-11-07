@@ -92,3 +92,6 @@ IMPORTDISPOSITION(ImportMergeFiles=1)
 IMPORTDISPOSITION(ImportSerializeFiles=2)
 IMPORTDISPOSITION(ImportDistinctChannels=3)
 
+EDITPOINT(EditAtPlayhead)
+EDITPOINT(EditAtSelectedMarker)
+EDITPOINT(EditAtMouse)

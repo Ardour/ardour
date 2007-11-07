@@ -70,14 +70,14 @@ using namespace Gtk;
 using namespace Editing;
 
 bool
-Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas)
+Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
 {
 	int x, y;
 	double wx, wy;
 	Gdk::ModifierType mask;
-	Glib::RefPtr<Gdk::Window> canvas_window = track_canvas.get_window();
-	Glib::RefPtr<Gdk::Window> pointer_window;
-
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas.get_window();
+	Glib::RefPtr<const Gdk::Window> pointer_window;
+	
 	pointer_window = canvas_window->get_pointer (x, y, mask);
 
 	if (pointer_window == track_canvas.get_bin_window()) {
@@ -108,7 +108,7 @@ Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas)
 }
 
 nframes64_t
-Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
+Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 {
 	double cx, cy;
 
@@ -3676,17 +3676,22 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 			speed = atv->get_diskstream()->speed();
 		}
 
-		if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
+		nframes64_t where = get_preferred_edit_position();
 
-			align_region (rv.region(), SyncPoint, (nframes_t) (edit_cursor->current_frame * speed));
+		if (where >= 0) {
 
-		} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
-
-			align_region (rv.region(), End, (nframes_t) (edit_cursor->current_frame * speed));
-
-		} else {
-
-			align_region (rv.region(), Start, (nframes_t) (edit_cursor->current_frame * speed));
+			if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
+				
+				align_region (rv.region(), SyncPoint, (nframes_t) (where * speed));
+				
+			} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+				
+				align_region (rv.region(), End, (nframes_t) (where * speed));
+				
+			} else {
+				
+				align_region (rv.region(), Start, (nframes_t) (where * speed));
+			}
 		}
 	}
 }

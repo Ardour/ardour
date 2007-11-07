@@ -153,6 +153,15 @@ Selection::clear_lines ()
 }
 
 void
+Selection::clear_markers ()
+{
+	if (!markers.empty()) {
+		markers.clear ();
+		MarkersChanged();
+	}
+}
+
+void
 Selection::toggle (boost::shared_ptr<Redirect> r)
 {
 	RedirectSelection::iterator i;
@@ -624,7 +633,8 @@ Selection::empty ()
 		lines.empty () &&
 		time.empty () &&
 		playlists.empty () &&
-		redirects.empty ()
+		redirects.empty () &&
+		markers.empty()
 		;
 }
 
@@ -730,4 +740,44 @@ Selection::add (vector<AutomationSelectable*>& autos)
 	}
 
 	PointsChanged ();
+}
+
+void
+Selection::set (Marker* m)
+{
+	clear_markers ();
+	add (m);
+}
+
+void
+Selection::toggle (Marker* m)
+{
+	MarkerSelection::iterator i;
+	
+	if ((i = find (markers.begin(), markers.end(), m)) == markers.end()) {
+		add (m);
+	} else {
+		remove (m);
+	}
+}
+
+void
+Selection::remove (Marker* m)
+{
+	MarkerSelection::iterator i;
+
+	if ((i = find (markers.begin(), markers.end(), m)) != markers.end()) {
+		markers.erase (i);
+		MarkersChanged();
+	}
+}
+
+
+void
+Selection::add (Marker* m)
+{
+	if (find (markers.begin(), markers.end(), m) == markers.end()) {
+		markers.push_back (m);
+		MarkersChanged();
+	}
 }

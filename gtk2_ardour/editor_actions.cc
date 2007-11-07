@@ -301,6 +301,11 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseZoom, false));
 	ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::set_mouse_mode), Editing::MouseTimeFX, false));
 
+	RadioAction::Group edit_point_group;
+	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
+	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
+	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-selected-marker"), _("Marker"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
+
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap To"));
 	ActionManager::register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
 
@@ -823,6 +828,54 @@ Editor::snap_mode_chosen (SnapMode mode)
 
 	if (ract && ract->get_active()) {
 		set_snap_mode (mode);
+	}
+}
+
+RefPtr<RadioAction>
+Editor::edit_point_action (EditPoint ep)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+	
+	switch (ep) {
+	case Editing::EditAtPlayhead:
+		action = X_("edit-at-playhead");
+		break;
+	case Editing::EditAtSelectedMarker:
+		action = X_("edit-at-selected-marker");
+		break;
+	case Editing::EditAtMouse:
+		action = X_("edit-at-mouse");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible edit point type", (int) ep) << endmsg;
+		/*NOTREACHED*/
+	}
+	
+	act = ActionManager::get_action (X_("Editor"), action);
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+		
+	} else  {
+		error << string_compose (_("programming error: %1: %2"), "Editor::edit_point_action could not find action to match edit point.", action) << endmsg;
+		return RefPtr<RadioAction> ();
+	}
+}
+
+void
+Editor::edit_point_chosen (EditPoint ep)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = edit_point_action (ep);
+
+	if (ract && ract->get_active()) {
+		set_edit_point (ep);
 	}
 }
 

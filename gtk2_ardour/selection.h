@@ -32,6 +32,7 @@
 #include "playlist_selection.h"
 #include "redirect_selection.h"
 #include "point_selection.h"
+#include "marker_selection.h"
 
 class TimeAxisView;
 class RegionView;
@@ -67,6 +68,7 @@ class Selection : public sigc::trackable
 	PlaylistSelection    playlists;
 	RedirectSelection    redirects;
 	PointSelection       points;
+	MarkerSelection      markers;
 
 	Selection() {
 		next_time_id = 0;
@@ -82,6 +84,7 @@ class Selection : public sigc::trackable
 	sigc::signal<void> PlaylistsChanged;
 	sigc::signal<void> RedirectsChanged;
 	sigc::signal<void> PointsChanged;
+	sigc::signal<void> MarkersChanged;
 
 	void clear ();
 	bool empty();
@@ -105,6 +108,7 @@ class Selection : public sigc::trackable
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void set (boost::shared_ptr<ARDOUR::Redirect>);
 	void set (AutomationSelectable*);
+	void set (Marker*);
 
 	void toggle (TimeAxisView*);
 	void toggle (const std::list<TimeAxisView*>&);
@@ -116,6 +120,7 @@ class Selection : public sigc::trackable
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void toggle (boost::shared_ptr<ARDOUR::Redirect>);
 	void toggle (const std::vector<AutomationSelectable*>&);
+	void toggle (Marker*);
 
 	void add (TimeAxisView*);
 	void add (const std::list<TimeAxisView*>&);
@@ -126,7 +131,8 @@ class Selection : public sigc::trackable
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void add (boost::shared_ptr<ARDOUR::Redirect>);
-	
+	void add (Marker*);
+
 	void remove (TimeAxisView*);
 	void remove (const std::list<TimeAxisView*>&);
 	void remove (RegionView*);
@@ -137,6 +143,7 @@ class Selection : public sigc::trackable
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (boost::shared_ptr<ARDOUR::Redirect>);
 	void remove (const list<Selectable*>&);
+	void remove (Marker*);
 
 	void replace (uint32_t time_index, nframes_t start, nframes_t end);
 	
@@ -147,6 +154,7 @@ class Selection : public sigc::trackable
 	void clear_playlists ();
 	void clear_redirects ();
 	void clear_points ();
+	void clear_markers ();
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);

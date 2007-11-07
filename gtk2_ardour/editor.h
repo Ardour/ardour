@@ -176,15 +176,15 @@ class Editor : public PublicEditor
 
 	/* undo related */
 
-	nframes_t unit_to_frame (double unit) {
+	nframes_t unit_to_frame (double unit) const {
 		return (nframes_t) rint (unit * frames_per_unit);
 	}
 	
-	double frame_to_unit (nframes_t frame) {
+	double frame_to_unit (nframes_t frame) const {
 		return rint ((double) frame / (double) frames_per_unit);
 	}
 
-	double frame_to_unit (double frame) {
+	double frame_to_unit (double frame) const {
 		return rint (frame / frames_per_unit);
 	}
 
@@ -195,7 +195,7 @@ class Editor : public PublicEditor
 	   xscroll_adjustment.  
 	*/
 
-	nframes64_t pixel_to_frame (double pixel) {
+	nframes64_t pixel_to_frame (double pixel) const {
 		
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -210,7 +210,7 @@ class Editor : public PublicEditor
 		}
 	}
 
-	gulong frame_to_pixel (nframes64_t frame) {
+	gulong frame_to_pixel (nframes64_t frame) const {
 		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
 	}
 
@@ -345,6 +345,8 @@ class Editor : public PublicEditor
 	void reposition_and_zoom (nframes_t, double);
 
 	nframes_t edit_cursor_position(bool);
+	nframes64_t get_preferred_edit_position () const;
+
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
 
@@ -412,8 +414,8 @@ class Editor : public PublicEditor
 	    void set_color_rgba (uint32_t);
 	};
 
-	LocationMarkers  *find_location_markers (ARDOUR::Location *);
-	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start);
+	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
+	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start) const;
 
 	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
@@ -1730,11 +1732,11 @@ class Editor : public PublicEditor
 
 	void duplicate_dialog (bool for_region);
 	
-	nframes64_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
+	nframes64_t event_frame (GdkEvent*, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */
-	bool mouse_frame (nframes64_t&, bool& in_track_canvas);
+	bool mouse_frame (nframes64_t&, bool& in_track_canvas) const;
 
 	void time_fx_motion (ArdourCanvas::Item*, GdkEvent*);
 	void start_time_fx (ArdourCanvas::Item*, GdkEvent*);
@@ -1900,6 +1902,16 @@ class Editor : public PublicEditor
 	void color_handler ();
 	
 	Gtk::HBox      status_bar_hpacker;
+
+	Editing::EditPoint _edit_point;
+
+	Gtk::ComboBoxText edit_point_selector;
+
+	void set_edit_point (Editing::EditPoint ep);
+	void edit_point_selection_done ();
+	void edit_point_chosen (Editing::EditPoint);
+	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
+	std::vector<std::string> edit_point_strings;
 };
 
 #endif /* __ardour_editor_h__ */
