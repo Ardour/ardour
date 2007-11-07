@@ -314,6 +314,8 @@ int main (int argc, char *argv[])
 		ui->set_keybindings_path (keybindings_path);
 	}
 
+	gdk_window_set_debug_updates (true);
+
 	ui->run (text_receiver);
 	ui = 0;
 

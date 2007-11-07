@@ -256,6 +256,13 @@ LocationEditRow::set_location (Location *loc)
 
 		cd_check_button.set_active (location->is_cd_marker());
 		cd_check_button.show();
+
+		if (location->start() == session->current_start_frame()) {
+			cd_check_button.set_sensitive (false);
+		} else {
+			cd_check_button.set_sensitive (true);
+		}
+
 		hide_check_button.show();
 	}
 
@@ -277,12 +284,14 @@ LocationEditRow::set_location (Location *loc)
 		end_go_button.show();
 		end_clock.show();
 		length_clock.show();
-	}
-	else {
+
+	} else {
+
 		end_set_button.hide();
 		end_go_button.hide();
 		end_clock.hide();
 		length_clock.hide();
+
 	}
 
 	start_changed_connection = location->start_changed.connect (mem_fun(*this, &LocationEditRow::start_changed));
@@ -290,7 +299,6 @@ LocationEditRow::set_location (Location *loc)
 	name_changed_connection = location->name_changed.connect (mem_fun(*this, &LocationEditRow::name_changed));
 	changed_connection = location->changed.connect (mem_fun(*this, &LocationEditRow::location_changed));
 	flags_changed_connection = location->FlagsChanged.connect (mem_fun(*this, &LocationEditRow::flags_changed));
-	
 }
 
 void
@@ -405,43 +413,55 @@ LocationEditRow::clock_changed (LocationPart part)
 void
 LocationEditRow::cd_toggled ()
 {
+	if (i_am_the_modifier || !location) {
+		return;
+	}
+	
+	if (cd_check_button.get_active() == location->is_cd_marker()) {
+		return;
+	}
 
-	if (i_am_the_modifier || !location) return;
+	if (cd_check_button.get_active()) {
+		if (location->start() <= session->current_start_frame()) {
+			error << _("You cannot put a CD marker at the start of the session") << endmsg;
+			cd_check_button.set_active (false);
+			return;
+		}
+	}
+
 	location->set_cd (cd_check_button.get_active(), this);
 
 	if (location->is_cd_marker() && !(location->is_mark())) {
 
-	  if (location->cd_info.find("isrc") != location->cd_info.end()) {
-	    isrc_entry.set_text(location->cd_info["isrc"]);
-	  }
-	  if (location->cd_info.find("performer") != location->cd_info.end()) {
-	    performer_entry.set_text(location->cd_info["performer"]);
-	  }
-	  if (location->cd_info.find("composer") != location->cd_info.end()) {
-	    composer_entry.set_text(location->cd_info["composer"]);
-	  }
-	  if (location->cd_info.find("scms") != location->cd_info.end()) {
-	    scms_check_button.set_active(true);
-	  }
-	  if (location->cd_info.find("preemph") != location->cd_info.end()) {
-	    preemph_check_button.set_active(true);
-	  }
-	  
-	  if(!cd_track_details_hbox.get_parent()) {
-	    item_table.attach (cd_track_details_hbox, 1, 8, 1, 2, FILL | EXPAND, FILL, 4, 0);
-	  }
-	  // item_table.resize(2, 7);
-	  cd_track_details_hbox.show_all();
-
+		if (location->cd_info.find("isrc") != location->cd_info.end()) {
+			isrc_entry.set_text(location->cd_info["isrc"]);
+		}
+		if (location->cd_info.find("performer") != location->cd_info.end()) {
+			performer_entry.set_text(location->cd_info["performer"]);
+		}
+		if (location->cd_info.find("composer") != location->cd_info.end()) {
+			composer_entry.set_text(location->cd_info["composer"]);
+		}
+		if (location->cd_info.find("scms") != location->cd_info.end()) {
+			scms_check_button.set_active(true);
+		}
+		if (location->cd_info.find("preemph") != location->cd_info.end()) {
+			preemph_check_button.set_active(true);
+		}
+		
+		if (!cd_track_details_hbox.get_parent()) {
+			item_table.attach (cd_track_details_hbox, 1, 8, 1, 2, FILL | EXPAND, FILL, 4, 0);
+		}
+		// item_table.resize(2, 7);
+		cd_track_details_hbox.show_all();
+		
 	} else if (cd_track_details_hbox.get_parent()){
-
-	    item_table.remove (cd_track_details_hbox);	
-	    //	  item_table.resize(1, 7);
-	    redraw_ranges(); /* 	EMIT_SIGNAL */
+		
+		item_table.remove (cd_track_details_hbox);	
+		//	  item_table.resize(1, 7);
+		redraw_ranges(); /* 	EMIT_SIGNAL */
 	}
-
 }
-
 
 void
 LocationEditRow::hide_toggled ()
@@ -506,13 +526,19 @@ void
 LocationEditRow::start_changed (ARDOUR::Location *loc)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LocationEditRow::start_changed), loc));
-	
+
 	if (!location) return;
 	
 	// update end and length
 	i_am_the_modifier++;
 
 	start_clock.set (location->start());
+
+	if (location->start() == session->current_start_frame()) {
+		cd_check_button.set_sensitive (false);
+	} else {
+		cd_check_button.set_sensitive (true);
+	}
 	
 	i_am_the_modifier--;
 }

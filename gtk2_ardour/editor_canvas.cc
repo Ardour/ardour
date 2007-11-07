@@ -706,6 +706,8 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 void 
 Editor::canvas_horizontally_scrolled ()
 {
+	cerr << "chs\n";
+
 	/* this is the core function that controls horizontal scrolling of the canvas. it is called
 	   whenever the horizontal_adjustment emits its "value_changed" signal. it typically executes in an
 	   idle handler, which is important because tempo_map_changed() should issue redraws immediately

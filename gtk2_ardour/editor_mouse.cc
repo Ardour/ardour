@@ -549,8 +549,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return true;
 
 			case MarkerItem:
-				if (Keyboard::modifier_state_equals (event->button.state, 
-								     Keyboard::ModifierMask(Keyboard::Control|Keyboard::Shift))) {
+				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::Control|Keyboard::Shift))) {
 					hide_marker (item, event);
 				} else {
 					start_marker_grab (item, event);
@@ -2162,14 +2161,16 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	if (location->is_mark()) {
 		marker_drag_line->show();
 		marker_drag_line->raise_to_top();
-	}
-	else {
+	} else {
 		range_marker_drag_rect->show();
 		range_marker_drag_rect->raise_to_top();
 	}
-	
-	if (is_start) show_verbose_time_cursor (location->start(), 10);
-	else show_verbose_time_cursor (location->end(), 10);
+
+	if (is_start) {
+		show_verbose_time_cursor (location->start(), 10);
+	} else {
+		show_verbose_time_cursor (location->end(), 10);
+	}
 }
 
 void
