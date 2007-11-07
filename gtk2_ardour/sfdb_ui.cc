@@ -552,10 +552,10 @@ SoundFileBrowser::on_custom (const FileFilter::Info& filter_info)
 void
 SoundFileBrowser::update_preview ()
 {
-	preview.setup_labels (chooser.get_filename());
-
-	if (preview.autoplay()) {
-		Glib::signal_idle().connect (mem_fun (preview, &SoundFileBox::audition_oneshot));
+	if (preview.setup_labels (chooser.get_filename())) {
+		if (preview.autoplay()) {
+			Glib::signal_idle().connect (mem_fun (preview, &SoundFileBox::audition_oneshot));
+		}
 	}
 }
 
