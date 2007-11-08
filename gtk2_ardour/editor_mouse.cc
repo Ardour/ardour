@@ -1557,8 +1557,8 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		*/
 		if (!drag_info.move_threshold_passed) {
 
-			bool x_threshold_passed =  (abs ((nframes64_t) (drag_info.current_pointer_x - drag_info.grab_x)) > 4LL);
-			bool y_threshold_passed =  (abs ((nframes64_t) (drag_info.current_pointer_y - drag_info.grab_y)) > 4LL);
+			bool x_threshold_passed =  (llabs ((nframes64_t) (drag_info.current_pointer_x - drag_info.grab_x)) > 4LL);
+			bool y_threshold_passed =  (llabs ((nframes64_t) (drag_info.current_pointer_y - drag_info.grab_y)) > 4LL);
 			
 			drag_info.move_threshold_passed = (x_threshold_passed || y_threshold_passed);
 			
@@ -2147,8 +2147,8 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	update_marker_drag_item (location);
 
 	if (location->is_mark()) {
-		marker_drag_line->show();
-		marker_drag_line->raise_to_top();
+		// marker_drag_line->show();
+		// marker_drag_line->raise_to_top();
 	} else {
 		range_marker_drag_rect->show();
 		range_marker_drag_rect->raise_to_top();
@@ -2158,6 +2158,23 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		show_verbose_time_cursor (location->start(), 10);
 	} else {
 		show_verbose_time_cursor (location->end(), 10);
+	}
+
+	Selection::Operation op = Keyboard::selection_type (event->button.state);
+
+	switch (op) {
+	case Selection::Toggle:
+		selection->toggle (marker);
+		break;
+	case Selection::Set:
+		selection->set (marker);
+		break;
+	case Selection::Extend:
+		selection->add (marker);
+		break;
+	case Selection::Add:
+		selection->add (marker);
+		break;
 	}
 }
 

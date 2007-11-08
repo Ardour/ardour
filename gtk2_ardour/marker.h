@@ -57,6 +57,10 @@ class Marker : public sigc::trackable
 
 	ArdourCanvas::Item& the_item() const;
 
+	void add_line (ArdourCanvas::Group*, double initial_height);
+	void show_line ();
+	void hide_line ();
+
 	void set_position (nframes_t);
 	void set_name (const string&);
 	void set_color_rgba (uint32_t rgba);
@@ -73,6 +77,8 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Polygon *mark;
 	ArdourCanvas::Text *text;
 	ArdourCanvas::Points *points;
+	ArdourCanvas::Line *line;
+	ArdourCanvas::Points *line_points;
 
 	double    unit_position;
 	nframes_t frame_position;

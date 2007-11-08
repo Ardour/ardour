@@ -1424,6 +1424,7 @@ class Editor : public PublicEditor
 	void track_selection_changed ();
 	void region_selection_changed ();
 	void point_selection_changed ();
+	void marker_selection_changed ();
 
 	enum SelectionOp {
 		CreateSelection,

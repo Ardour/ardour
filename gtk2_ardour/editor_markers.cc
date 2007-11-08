@@ -994,3 +994,24 @@ Editor::update_punch_range_view (bool visibility)
 // 		gnome_canvas_item_hide (transport_punchout_line);
 // 	}
 }
+
+void
+Editor::marker_selection_changed ()
+{
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		LocationMarkers* lam = i->second;
+
+		if (lam->start) {
+			lam->start->hide_line();
+		} 
+
+		if (lam->end) {
+			lam->end->hide_line();
+		}
+	}
+
+	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+		(*x)->add_line (track_canvas.root(), canvas_height);
+		(*x)->show_line ();
+	}
+}

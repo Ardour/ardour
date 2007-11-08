@@ -227,6 +227,7 @@ Editor::Editor ()
 	selection->TracksChanged.connect (mem_fun(*this, &Editor::track_selection_changed));
 	selection->RegionsChanged.connect (mem_fun(*this, &Editor::region_selection_changed));
 	selection->PointsChanged.connect (mem_fun(*this, &Editor::point_selection_changed));
+	selection->MarkersChanged.connect (mem_fun(*this, &Editor::marker_selection_changed));
 
 	clicked_regionview = 0;
 	clicked_trackview = 0;
