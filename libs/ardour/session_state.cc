@@ -1373,6 +1373,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 	boost::shared_ptr<Source> source;
 	boost::shared_ptr<AudioSource> as;
 	SourceList sources;
+	SourceList master_sources;
 	uint32_t nchans = 1;
 	char buf[128];
 	
@@ -1432,7 +1433,27 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 			sources.push_back (as);
 		}
 	}
-	
+
+	for (uint32_t n=1; n < nchans; ++n) {
+		snprintf (buf, sizeof(buf), X_("master-source-%d"), n);
+		if ((prop = node.property (buf)) != 0) {
+			
+			PBD::ID id2 (prop->value());
+			
+			if ((source = source_by_id (id2)) == 0) {
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
+				return boost::shared_ptr<AudioRegion>();
+			}
+			
+			as = boost::dynamic_pointer_cast<AudioSource>(source);
+			if (!as) {
+				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
+				return boost::shared_ptr<AudioRegion>();
+			}
+			master_sources.push_back (as);
+		}
+	}
+
 	try {
 		boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (sources, node)));
 
@@ -1444,6 +1465,14 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool full)
 				if (sfp) {
 					sfp->set_length (region->length());
 				}
+			}
+		}
+
+		if (!master_sources.empty()) {
+			if (master_sources.size() == nchans) {
+				error << _("Session: XMLNode describing an AudioRegion is missing some master sources; ignored") << endmsg;
+			} else {
+				region->set_master_sources (master_sources);
 			}
 		}
 

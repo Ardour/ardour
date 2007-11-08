@@ -144,7 +144,7 @@ Editor::external_audio_dialog ()
 
 	switch (pos) {
 	case ImportAtEditCursor:
-		where = edit_cursor->current_frame;
+		where = get_preferred_edit_position ();
 		break;
 	case ImportAtTimestamp:
 		where = -1;
@@ -155,6 +155,10 @@ Editor::external_audio_dialog ()
 	case ImportAtStart:
 		where = session->current_start_frame();
 		break;
+	}
+
+	if (where < 0) {
+		return;
 	}
 
 	SrcQuality quality = sfbrowser->get_src_quality();
@@ -591,7 +595,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 			pos = sources[0]->natural_position();
 		} else {
 			// XXX is this the best alternative ?
-			pos = edit_cursor->current_frame;
+			pos = get_preferred_edit_position ();
 		}
 	}
 

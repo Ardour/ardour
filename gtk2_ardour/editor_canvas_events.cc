@@ -202,7 +202,6 @@ Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 	default:
 		break;
 	}
-			
 	return ret;
 }
 

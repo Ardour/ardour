@@ -32,6 +32,7 @@
 #include "playlist_selection.h"
 #include "processor_selection.h"
 #include "point_selection.h"
+#include "marker_selection.h"
 
 class TimeAxisView;
 class RegionView;
@@ -71,6 +72,7 @@ class Selection : public sigc::trackable
 	AutomationSelection  lines;
 	PlaylistSelection    playlists;
 	PointSelection       points;
+	MarkerSelection      markers;
 
 	Selection (PublicEditor const * e) : editor (e), next_time_id (0) {
 		clear();
@@ -84,6 +86,7 @@ class Selection : public sigc::trackable
 	sigc::signal<void> LinesChanged;
 	sigc::signal<void> PlaylistsChanged;
 	sigc::signal<void> PointsChanged;
+	sigc::signal<void> MarkersChanged;
 
 	void clear ();
 	bool empty();
@@ -106,6 +109,7 @@ class Selection : public sigc::trackable
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void set (AutomationSelectable*);
+	void set (Marker*);
 
 	void toggle (TimeAxisView*);
 	void toggle (const std::list<TimeAxisView*>&);
@@ -116,6 +120,7 @@ class Selection : public sigc::trackable
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void toggle (const std::vector<AutomationSelectable*>&);
+	void toggle (Marker*);
 
 	void add (TimeAxisView*);
 	void add (const std::list<TimeAxisView*>&);
@@ -125,7 +130,8 @@ class Selection : public sigc::trackable
 	void add (ARDOUR::AutomationList*);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	
+	void add (Marker*);
+
 	void remove (TimeAxisView*);
 	void remove (const std::list<TimeAxisView*>&);
 	void remove (RegionView*);
@@ -135,6 +141,7 @@ class Selection : public sigc::trackable
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (const list<Selectable*>&);
+	void remove (Marker*);
 
 	void replace (uint32_t time_index, nframes_t start, nframes_t end);
 	
@@ -144,6 +151,7 @@ class Selection : public sigc::trackable
 	void clear_lines ();
 	void clear_playlists ();
 	void clear_points ();
+	void clear_markers ();
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	void foreach_regionview (void (RegionView::*method)(void));

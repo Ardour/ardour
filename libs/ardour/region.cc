@@ -83,6 +83,9 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	, _layer(layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
+	, _ancestral_start (start)
+	, _ancestral_length (length)
+	, _stretch (1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
@@ -142,6 +145,9 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	, _layer(layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
+	, _ancestral_start (other->_ancestral_start + offset)
+	, _ancestral_length (length)
+	, _stretch (1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
@@ -183,6 +189,9 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _layer(other->_layer)
 	, _first_edit(EditChangesID)
 	, _frozen(0)
+	, _ancestral_start (_start)
+	, _ancestral_length (_length)
+	, _stretch (1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(other->_last_layer_op)
@@ -515,6 +524,14 @@ Region::nudge_position (long n, void *src)
 	}
 
 	send_change (PositionChanged);
+}
+
+void
+Region::set_ancestral_data (nframes64_t s, nframes64_t l, float st)
+{
+	_ancestral_length = l;
+	_ancestral_start = s;
+	_stretch = st;
 }
 
 void
@@ -922,6 +939,12 @@ Region::state (bool full_state)
 	node->add_property ("length", buf);
 	snprintf (buf, sizeof (buf), "%u", _position);
 	node->add_property ("position", buf);
+	snprintf (buf, sizeof (buf), "%lu", _ancestral_start);
+	node->add_property ("ancestral-start", buf);
+	snprintf (buf, sizeof (buf), "%lu", _ancestral_length);
+	node->add_property ("ancestral-length", buf);
+	snprintf (buf, sizeof (buf), "%.12g", _stretch);
+	node->add_property ("stretch", buf);
 	
 	switch (_first_edit) {
 	case EditChangesNothing:
@@ -1033,6 +1056,26 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 
 	/* XXX FIRST EDIT !!! */
 	
+	/* these 3 properties never change as a result of any editing */
+
+	if ((prop = node.property ("ancestral-start")) != 0) {
+		_ancestral_start = atoi (prop->value());
+	} else {
+		_ancestral_start = _start;
+	}
+
+	if ((prop = node.property ("ancestral-length")) != 0) {
+		_ancestral_length = atoi (prop->value());
+	} else {
+		_ancestral_length = _length;
+	}
+
+	if ((prop = node.property ("stretch")) != 0) {
+		_stretch = atof (prop->value());
+	} else {
+		_stretch = 1.0;
+	}
+
 	/* note: derived classes set flags */
 
 	if (_extra_xml) {
@@ -1183,6 +1226,12 @@ Region::master_source_names ()
 	}
 
 	return names;
+}
+
+void
+Region::set_master_sources (SourceList& srcs)
+{
+	_master_sources = srcs;
 }
 
 bool

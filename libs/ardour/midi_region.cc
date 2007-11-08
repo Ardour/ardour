@@ -189,10 +189,18 @@ MidiRegion::state (bool full)
 	LocaleGuard lg (X_("POSIX"));
 	
 	node.add_property ("flags", enum_2_string (_flags));
+
+	// XXX these should move into Region
 	
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
 		_sources[n]->id().print (buf, sizeof(buf));
+		node.add_property (buf2, buf);
+	}
+
+	for (uint32_t n=0; n < _master_sources.size(); ++n) {
+		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
+		_master_sources[n]->id().print (buf, sizeof (buf));
 		node.add_property (buf2, buf);
 	}
 

@@ -38,6 +38,7 @@ setup_gtk_ardour_enums ()
 	AudioClock::Mode clock_mode;
 	Width width;
 	ImportMode import_mode;
+	EditPoint edit_point;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -60,4 +61,9 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ImportAsRegion);
 	REGISTER_ENUM (ImportAsTapeTrack);
 	REGISTER (import_mode);
+
+	REGISTER_ENUM (EditAtPlayhead);
+	REGISTER_ENUM (EditAtMouse);
+	REGISTER_ENUM (EditAtSelectedMarker);
+	REGISTER (edit_point);
 }

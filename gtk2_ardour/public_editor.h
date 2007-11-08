@@ -185,11 +185,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	virtual void toggle_playback (bool with_abort) = 0;
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual nframes_t unit_to_frame (double unit) = 0;
-	virtual double frame_to_unit (nframes_t frame) = 0;
-	virtual double frame_to_unit (double frame) = 0;
-	virtual nframes_t pixel_to_frame (double pixel) = 0;
-	virtual gulong frame_to_pixel (nframes_t frame) = 0;
+	virtual nframes_t unit_to_frame (double unit) const = 0;
+	virtual double frame_to_unit (nframes_t frame) const = 0;
+	virtual double frame_to_unit (double frame) const = 0;
+	virtual nframes64_t pixel_to_frame (double pixel) const = 0;
+	virtual gulong frame_to_pixel (nframes64_t frame) const = 0;
 	virtual Selection& get_selection () const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;

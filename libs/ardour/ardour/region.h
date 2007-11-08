@@ -95,7 +95,13 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	nframes_t start ()    const { return _start; }
 	nframes_t length()    const { return _length; }
 	layer_t   layer ()    const { return _layer; }
-	
+
+	nframes64_t ancestral_start () const { return _ancestral_start; }
+	nframes64_t ancestral_length () const { return _ancestral_length; }
+	float stretch() const { return _stretch; }
+
+	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch);
+
 	nframes_t sync_offset(int& dir) const;
 	nframes_t sync_position() const;
 
@@ -177,11 +183,12 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
 	uint32_t                  n_channels()          const { return _sources.size(); }
 
-	std::vector<string> master_source_names();
-	
 	const SourceList& sources() const { return _sources; }
 	const SourceList& master_sources() const { return _master_sources; }
 
+	std::vector<string> master_source_names();
+	void set_master_sources (SourceList&);
+	
 	/* serialization */
 	
 	XMLNode&         get_state ();
@@ -241,6 +248,9 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	layer_t                 _layer;
 	mutable RegionEditState _first_edit;
 	int                     _frozen;
+	nframes64_t             _ancestral_start;
+	nframes64_t             _ancestral_length;
+	float                   _stretch;
 	mutable uint32_t        _read_data_count;  ///< modified in read()
 	Change                  _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp

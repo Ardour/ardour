@@ -39,6 +39,7 @@
 #include <ardour/audio_track.h>
 #include <ardour/audioregion.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/stretch.h>
 
 #include "i18n.h"
 
@@ -87,29 +88,29 @@ gint
 Editor::TimeStretchDialog::update_progress ()
 {
 	progress_bar.set_fraction (request.progress);
-	return request.running;
+	return !request.done;
 }
 
 void
 Editor::TimeStretchDialog::cancel_timestretch_in_progress ()
 {
 	status = -2;
-	request.running = false;
+	request.cancel = true;
+	first_cancel.disconnect();
 }
 
 gint
 Editor::TimeStretchDialog::delete_timestretch_in_progress (GdkEventAny* ev)
 {
 	status = -2;
-	request.running = false;
+	request.cancel = true;
+	first_delete.disconnect();
 	return TRUE;
 }
 
 int
 Editor::run_timestretch (RegionSelection& regions, float fraction)
 {
-	pthread_t thread;
-
 	if (current_timestretch == 0) {
 		current_timestretch = new TimeStretchDialog (*this);
 	}
@@ -130,27 +131,30 @@ Editor::run_timestretch (RegionSelection& regions, float fraction)
 	current_timestretch->request.quick_seek = current_timestretch->quick_button.get_active();
 	current_timestretch->request.antialias = !current_timestretch->antialias_button.get_active();
 	current_timestretch->request.progress = 0.0f;
-	current_timestretch->request.running = true;
+	current_timestretch->request.done = false;
+	current_timestretch->request.cancel = false;
 	
 	/* re-connect the cancel button and delete events */
 	
 	current_timestretch->first_cancel.disconnect();
 	current_timestretch->first_delete.disconnect();
 	
-	current_timestretch->cancel_button->signal_clicked().connect (mem_fun (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
-	current_timestretch->signal_delete_event().connect (mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
+	current_timestretch->first_cancel = current_timestretch->cancel_button->signal_clicked().connect 
+		(mem_fun (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
+	current_timestretch->first_delete = current_timestretch->signal_delete_event().connect 
+		(mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
 
-	if (pthread_create_and_store ("timestretch", &thread, 0, timestretch_thread, current_timestretch)) {
+	if (pthread_create_and_store ("timestretch", &current_timestretch->request.thread, 0, timestretch_thread, current_timestretch)) {
 		current_timestretch->hide ();
 		error << _("timestretch cannot be started - thread creation error") << endmsg;
 		return -1;
 	}
 
-	pthread_detach (thread);
+	pthread_detach (current_timestretch->request.thread);
 
 	sigc::connection c = Glib::signal_timeout().connect (mem_fun (current_timestretch, &TimeStretchDialog::update_progress), 100);
 
-	while (current_timestretch->request.running) {
+	while (!current_timestretch->request.done) {
 		gtk_main_iteration ();
 	}
 
@@ -195,31 +199,34 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			continue;
 		}
 
-		dialog.request.region = region;
-
-		if (!dialog.request.running) {
+		if (dialog.request.cancel) {
 			/* we were cancelled */
 			dialog.status = 1;
 			return;
 		}
 
-		if ((new_region = session->tempoize_region (dialog.request)) == 0) {
+		Stretch stretch (*session, dialog.request);
+
+		if (stretch.run (region)) {
 			dialog.status = -1;
-			dialog.request.running = false;
+			dialog.request.done = true;
 			return;
 		}
 
-		XMLNode &before = playlist->get_state();
-		playlist->replace_region (region, new_region, region->position());
-		XMLNode &after = playlist->get_state();
-		session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+		if (!stretch.results.empty()) {
+			new_region = stretch.results.front();
+
+			XMLNode &before = playlist->get_state();
+			playlist->replace_region (region, new_region, region->position());
+			XMLNode &after = playlist->get_state();
+			session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+		}
 
 		i = tmp;
 	}
 
 	dialog.status = 0;
-	dialog.request.running = false;
-	dialog.request.region.reset ();
+	dialog.request.done = true;
 }
 
 void*

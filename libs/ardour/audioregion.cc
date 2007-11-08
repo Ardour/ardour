@@ -32,6 +32,7 @@
 #include <pbd/xml++.h>
 #include <pbd/stacktrace.h>
 #include <pbd/enumwriter.h>
+#include <pbd/convert.h>
 
 #include <ardour/audioregion.h>
 #include <ardour/session.h>
@@ -47,6 +48,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
@@ -127,6 +129,23 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
 {
+	set<boost::shared_ptr<Source> > unique_srcs;
+
+	for (SourceList::const_iterator i= other->_sources.begin(); i != other->_sources.end(); ++i) {
+		_sources.push_back (*i);
+
+		pair<set<boost::shared_ptr<Source> >::iterator,bool> result;
+
+		result = unique_srcs.insert (*i);
+		
+		if (result.second) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
+			if (afs) {
+				afs->HeaderPositionOffsetChanged.connect (mem_fun (*this, &AudioRegion::source_offset_changed));
+			}
+		}
+	}
+
 	/* return to default fades if the existing ones are too long */
 	init ();
 
@@ -494,9 +513,17 @@ AudioRegion::state (bool full)
 	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);
 	node.add_property ("scale-gain", buf);
 
+	// XXX these should move into Region
+
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
 		_sources[n]->id().print (buf, sizeof (buf));
+		node.add_property (buf2, buf);
+	}
+
+	for (uint32_t n=0; n < _master_sources.size(); ++n) {
+		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
+		_master_sources[n]->id().print (buf, sizeof (buf));
 		node.add_property (buf2, buf);
 	}
 
@@ -972,6 +999,7 @@ AudioRegion::read_raw_internal (Sample* buf, nframes_t pos, nframes_t cnt) const
 {
 	return audio_source()->read  (buf, pos, cnt);
 }
+
 
 int
 AudioRegion::exportme (Session& session, AudioExportSpecification& spec)

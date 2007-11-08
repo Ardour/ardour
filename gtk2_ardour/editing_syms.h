@@ -71,6 +71,7 @@ ZOOMFOCUS(ZoomFocusLeft)
 ZOOMFOCUS(ZoomFocusRight)
 ZOOMFOCUS(ZoomFocusCenter)
 ZOOMFOCUS(ZoomFocusPlayhead)
+ZOOMFOCUS(ZoomFocusMouse)
 ZOOMFOCUS(ZoomFocusEdit)
 
 DISPLAYCONTROL(FollowPlayhead)
@@ -95,3 +96,8 @@ IMPORTDISPOSITION(ImportDistinctFiles=0)
 IMPORTDISPOSITION(ImportMergeFiles=1)
 IMPORTDISPOSITION(ImportSerializeFiles=2)
 IMPORTDISPOSITION(ImportDistinctChannels=3)
+
+
+EDITPOINT(EditAtPlayhead)
+EDITPOINT(EditAtSelectedMarker)
+EDITPOINT(EditAtMouse)

@@ -188,9 +188,9 @@ Editor::LocationMarkers::~LocationMarkers ()
 }
 
 Editor::LocationMarkers *
-Editor::find_location_markers (Location *location)
+Editor::find_location_markers (Location *location) const
 {
-	LocationMarkerMap::iterator i;
+	LocationMarkerMap::const_iterator i;
 
 	for (i = location_markers.begin(); i != location_markers.end(); ++i) {
 		if ((*i).first == location) {
@@ -202,9 +202,9 @@ Editor::find_location_markers (Location *location)
 }
 
 Location *
-Editor::find_location_from_marker (Marker *marker, bool& is_start)
+Editor::find_location_from_marker (Marker *marker, bool& is_start) const
 {
-	LocationMarkerMap::iterator i;
+	LocationMarkerMap::const_iterator i;
 
 	for (i = location_markers.begin(); i != location_markers.end(); ++i) {
 		LocationMarkers *lm = (*i).second;

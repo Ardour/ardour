@@ -860,21 +860,6 @@ class Session : public PBD::StatefulDestructible
 
 	boost::shared_ptr<IO>  click_io() { return _click_io; }
 		
-	/* tempo FX */
-
-	struct TimeStretchRequest {
-		boost::shared_ptr<ARDOUR::AudioRegion> region;
-		float fraction; /* session: read ; GUI: write */
-		float progress; /* session: write ; GUI: read */
-		bool  running;  /* read/write */
-		bool  quick_seek; /* GUI: write */
-		bool  antialias;  /* GUI: write */
-
-		TimeStretchRequest () {} 
-	};
-
-	boost::shared_ptr<AudioRegion> tempoize_region (TimeStretchRequest&);
-
 	/* disk, buffer loads */
 
 	uint32_t playback_load ();

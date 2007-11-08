@@ -144,6 +144,15 @@ Selection::clear_lines ()
 }
 
 void
+Selection::clear_markers ()
+{
+	if (!markers.empty()) {
+		markers.clear ();
+		MarkersChanged();
+	}
+}
+
+void
 Selection::toggle (boost::shared_ptr<Playlist> pl)
 {
 	PlaylistSelection::iterator i;
@@ -575,7 +584,8 @@ Selection::empty ()
 		playlists.empty () && 
 		lines.empty () &&
 		time.empty () &&
-		playlists.empty ()
+		playlists.empty () &&
+		markers.empty()
 		;
 }
 
@@ -698,5 +708,45 @@ Selection::select_edit_group_regions ()
 
 	for (std::set<RegionView*>::iterator i = regions_to_add.begin(); i != regions_to_add.end(); ++i) {
 		add (*i);
+	}
+}
+
+void
+Selection::set (Marker* m)
+{
+	clear_markers ();
+	add (m);
+}
+
+void
+Selection::toggle (Marker* m)
+{
+	MarkerSelection::iterator i;
+	
+	if ((i = find (markers.begin(), markers.end(), m)) == markers.end()) {
+		add (m);
+	} else {
+		remove (m);
+	}
+}
+
+void
+Selection::remove (Marker* m)
+{
+	MarkerSelection::iterator i;
+
+	if ((i = find (markers.begin(), markers.end(), m)) != markers.end()) {
+		markers.erase (i);
+		MarkersChanged();
+	}
+}
+
+
+void
+Selection::add (Marker* m)
+{
+	if (find (markers.begin(), markers.end(), m) == markers.end()) {
+		markers.push_back (m);
+		MarkersChanged();
 	}
 }

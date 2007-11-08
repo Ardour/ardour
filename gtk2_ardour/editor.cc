@@ -139,11 +139,19 @@ static const gchar *_snap_mode_strings[] = {
 	0
 };
 
+static const gchar *_edit_point_strings[] = {
+	N_("Playhead"),
+	N_("Marker"),
+	N_("Mouse"),
+	0
+};
+
 static const gchar *_zoom_focus_strings[] = {
 	N_("Left"),
 	N_("Right"),
 	N_("Center"),
 	N_("Playhead"),
+ 	N_("Mouse"),
  	N_("Edit Cursor"),
 	0
 };
@@ -168,20 +176,6 @@ void
 show_me_the_size (Requisition* r, const char* what)
 {
 	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
-}
-
-void 
-check_adjustment (Gtk::Adjustment* adj)
-{
-	cerr << "CHANGE adj  = " 
-	     << adj->get_lower () <<  ' '
-	     << adj->get_upper () <<  ' '
-	     << adj->get_value () <<  ' '
-	     << adj->get_step_increment () <<  ' '
-	     << adj->get_page_increment () <<  ' '
-	     << adj->get_page_size () <<  ' '
-	     << endl;
-
 }
 
 Editor::Editor ()
@@ -256,14 +250,20 @@ Editor::Editor ()
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
 
-	snap_type_strings = I18N (_snap_type_strings);
-	snap_mode_strings = I18N (_snap_mode_strings);
-	zoom_focus_strings = I18N(_zoom_focus_strings);
+	snap_type_strings =  I18N (_snap_type_strings);
+	snap_mode_strings =  I18N (_snap_mode_strings);
+	zoom_focus_strings = I18N (_zoom_focus_strings);
+	edit_point_strings = I18N (_edit_point_strings);
 
 	snap_type = SnapToFrame;
 	set_snap_to (snap_type);
+
 	snap_mode = SnapNormal;
 	set_snap_mode (snap_mode);
+
+	_edit_point = EditAtMouse;
+	set_edit_point (_edit_point);
+
 	snap_threshold = 5.0;
 	bbt_beat_subdivision = 4;
 	canvas_width = 0;
@@ -329,13 +329,7 @@ Editor::Editor ()
 	_dragging_playhead = false;
 	_dragging_hscrollbar = false;
 
-	_scrubbing = false;
-	mouse_direction = 1;
-	mouse_speed_update = -1;
-	mouse_speed_size = 16;
-	mouse_speed = new double[mouse_speed_size];
-	memset (mouse_speed, 0, sizeof(double) * mouse_speed_size);
-	mouse_speed_entries = 0;
+	scrubbing_direction = 0;
 
 	sfbrowser = 0;
 	ignore_route_order_sync = false;
@@ -2005,6 +1999,18 @@ Editor::set_snap_mode (SnapMode mode)
 
 	instant_save ();
 }
+void
+Editor::set_edit_point (EditPoint ep)
+{
+	_edit_point = ep;
+	string str = edit_point_strings[(int)ep];
+
+	if (str != edit_point_selector.get_active_text ()) {
+		edit_point_selector.set_active_text (str);
+	}
+
+	instant_save ();
+}
 
 int
 Editor::set_state (const XMLNode& node)
@@ -2080,6 +2086,10 @@ Editor::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("snap-mode"))) {
 		set_snap_mode ((SnapMode) atoi (prop->value()));
+	}
+
+	if ((prop = node.property ("edit-point"))) {
+		set_edit_point ((EditPoint) string_2_enum (prop->value(), _edit_point));
 	}
 
 	if ((prop = node.property ("mouse-mode"))) {
@@ -2232,6 +2242,8 @@ Editor::get_state ()
 	node->add_property ("snap-to", buf);
 	snprintf (buf, sizeof(buf), "%d", (int) snap_mode);
 	node->add_property ("snap-mode", buf);
+
+	node->add_property ("edit-point", enum_2_string (_edit_point));
 
 	snprintf (buf, sizeof (buf), "%" PRIu32, playhead_cursor->current_frame);
 	node->add_property ("playhead", buf);
@@ -2400,7 +2412,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 
 	case SnapToEditCursor:
-		start = edit_cursor->current_frame;
+		start = get_preferred_edit_position ();
 		break;
 
 	case SnapToMark:
@@ -2681,17 +2693,24 @@ Editor::setup_toolbar ()
 	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
 	set_popdown_strings (snap_type_selector, snap_type_strings);
 	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
-	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Unit to snap cursors and ranges to"));
+	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Snap/Grid Units"));
 
 	snap_mode_selector.set_name ("SnapModeSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "Magnetic Snap", 2+FUDGE, 10);
 	set_popdown_strings (snap_mode_selector, snap_mode_strings);
 	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
+	ARDOUR_UI::instance()->tooltips().set_tip (snap_mode_selector, _("Snap/Grid Mode"));
+
+	edit_point_selector.set_name ("SnapModeSelector");
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_point_selector, "Playhead", 2+FUDGE, 10);
+	set_popdown_strings (edit_point_selector, edit_point_strings);
+	edit_point_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_point_selection_done));
+	ARDOUR_UI::instance()->tooltips().set_tip (edit_point_selector, _("Edit point"));
 
 	snap_box.pack_start (edit_cursor_clock, false, false);
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
-
+	snap_box.pack_start (edit_point_selector, false, false);
 
 	/* Nudge */
 
@@ -2844,8 +2863,6 @@ Editor::convert_drop_to_paths (vector<ustring>& paths,
 	}
 
 	vector<ustring> uris = data.get_uris();
-
-	cerr << "there were " << uris.size() << " in that drag data\n";
 
 	if (uris.empty()) {
 
@@ -3229,6 +3246,27 @@ Editor::snap_mode_selection_done ()
 }
 
 void
+Editor::edit_point_selection_done ()
+{
+	string choice = edit_point_selector.get_active_text();
+	EditPoint ep = EditAtSelectedMarker;
+
+	if (choice == _("Marker")) {
+		_edit_point = EditAtSelectedMarker;
+	} else if (choice == _("Playhead")) {
+		_edit_point = EditAtPlayhead;
+	} else {
+		_edit_point = EditAtMouse;
+	}
+
+	RefPtr<RadioAction> ract = edit_point_action (ep);
+
+	if (ract) {
+		ract->set_active (true);
+	}
+}
+
+void
 Editor::zoom_focus_selection_done ()
 {
 	string choice = zoom_focus_selector.get_active_text();
@@ -3244,6 +3282,8 @@ Editor::zoom_focus_selection_done ()
 		focus_type = ZoomFocusPlayhead;
 	} else if (choice == _("Edit")) {
 		focus_type = ZoomFocusEdit;
+	} else {
+		focus_type = ZoomFocusMouse;
 	} 
 	
 	RefPtr<RadioAction> ract = zoom_focus_action (focus_type);
@@ -4025,6 +4065,35 @@ Editor::edit_cursor_position(bool sync)
 	return edit_cursor->current_frame;
 }
 
+nframes64_t
+Editor::get_preferred_edit_position() const
+{
+	bool ignored;
+	nframes64_t where;
+
+	switch (_edit_point) {
+	case EditAtPlayhead:
+		return playhead_cursor->current_frame;
+		
+	case EditAtSelectedMarker:
+		if (!selection->markers.empty()) {
+			bool whocares;
+			Location* loc = find_location_from_marker (selection->markers.front(), whocares);
+			if (loc) {
+				return loc->start();
+			}
+		} 
+		/* fallthru */
+		
+	default:
+	case EditAtMouse:
+		if (mouse_frame (where, ignored)) {
+			return where;
+		} 
+	}
+
+	return -1;
+}
 
 void
 Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)

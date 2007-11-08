@@ -76,8 +76,46 @@ using namespace Editing;
 
 const static double ZERO_GAIN_FRACTION = gain_to_slider_position(dB_to_coefficient(0.0));
 
-nframes_t
-Editor::event_frame (GdkEvent* event, double* pcx, double* pcy)
+bool
+Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
+{
+	int x, y;
+	double wx, wy;
+	Gdk::ModifierType mask;
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas.get_window();
+	Glib::RefPtr<const Gdk::Window> pointer_window;
+	
+	pointer_window = canvas_window->get_pointer (x, y, mask);
+
+	if (pointer_window == track_canvas.get_bin_window()) {
+
+		track_canvas.window_to_world (x, y, wx, wy);
+		in_track_canvas = true;
+
+	} else {
+		in_track_canvas = false;
+
+		if (pointer_window == time_canvas.get_bin_window()) {
+			time_canvas.window_to_world (x, y, wx, wy);
+		} else {
+			return false;
+		}
+	}
+
+	wx += horizontal_adjustment.get_value();
+	wy += vertical_adjustment.get_value();
+
+	GdkEvent event;
+	event.type = GDK_BUTTON_RELEASE;
+	event.button.x = wx;
+	event.button.y = wy;
+	
+	where = event_frame (&event, 0, 0);
+	return true;
+}
+
+nframes64_t
+Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 {
 	double cx, cy;
 
@@ -773,10 +811,8 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		case MouseAudition:
 			_scrubbing = true;
-			last_scrub_frame = 0;
-			last_scrub_time = 0;
-			have_full_mouse_speed = false;
-			memset (mouse_speed, 0, sizeof (double) * mouse_speed_size);
+			last_scrub_x = event->button.x;
+			scrubbing_direction = 0;
 			/* rest handled in motion & release */
 			break;
 
@@ -1110,7 +1146,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			
 		case MouseAudition:
 			_scrubbing = false;
-			if (last_scrub_frame == 0) {
+			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
 				switch (item_type) {
 				case RegionItem:
@@ -1467,12 +1503,6 @@ Editor::left_automation_track ()
 	return false;
 }
 
-static gboolean
-_update_mouse_speed (void *arg)
-{
-	return static_cast<Editor*>(arg)->update_mouse_speed ();
-}
-
 bool
 Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type, bool from_autoscroll)
 {
@@ -1509,56 +1539,53 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	switch (mouse_mode) {
 	case MouseAudition:
 		if (_scrubbing) {
-			struct timeval tmnow;
 
-			if (last_scrub_frame == 0) {
+			double delta;
 
-				/* first motion, just set up the variables */
-
-				last_scrub_frame = (nframes64_t) drag_info.current_pointer_frame;
-				gettimeofday (&tmnow, 0);
-				last_scrub_time = tmnow.tv_sec * 1000000.0 + tmnow.tv_usec;
-				session->request_locate (last_scrub_frame, true);
+			if (scrubbing_direction == 0) {
+				/* first move */
+				session->request_locate (drag_info.current_pointer_frame, false);
+				session->request_transport_speed (0.1);
+				scrubbing_direction = 1;
 
 			} else {
-				/* how fast is the mouse moving ? */
 
-				double speed;
-				nframes_t distance;
-				double time;
-				double dir;
-
-#if 1
-				if (last_scrub_frame < (nframes64_t) drag_info.current_pointer_frame) {
-					distance = (nframes64_t) drag_info.current_pointer_frame - last_scrub_frame;
-					dir = 1.0;
+				
+				if (last_scrub_x > drag_info.current_pointer_x) {
+					/* move to the left */
+					
+					if (scrubbing_direction > 0) {
+						/* we reversed direction to go backwards */
+						
+						session->request_transport_speed (-0.1);
+						
+					} else {
+						/* still moving to the left (backwards) */
+						
+						delta = 0.005 * (last_scrub_x - drag_info.current_pointer_x);
+						session->request_transport_speed (session->transport_speed() - delta);
+					}
+					
+					scrubbing_direction = -1;
+					
 				} else {
-					distance = last_scrub_frame - (nframes64_t) drag_info.current_pointer_frame;
-					dir = -1.0;
-				}
-#else
-				if (drag_info.grab_x < drag_info.current_pointer_x) {
-					distance = drag_info.current_pointer_x - drag_info.grab_x;
-					dir = -1.0;
-				} else {
-					distance = drag_info.grab_x - drag_info.current_pointer_x;
-					dir = 1.0;
-				}
-#endif
-
-				gettimeofday (&tmnow, 0);
-				time = (tmnow.tv_sec * 1000000.0 + tmnow.tv_usec) - last_scrub_time;
-				last_scrub_frame = drag_info.current_pointer_frame;
-				last_scrub_time = (tmnow.tv_sec * 1000000.0) + tmnow.tv_usec;
-				speed = ((double)distance/session->frame_rate()) / (time/1000000.0); // frames/sec
-
-				add_mouse_speed (speed, dir);
-
-				if (mouse_speed_update < 0) {
-					mouse_speed_update = g_timeout_add (10, _update_mouse_speed, this);
-					update_mouse_speed ();
+					/* move to the right */
+					if (scrubbing_direction < 0) {
+						/* we reversed direction to go forward */
+						
+						session->request_transport_speed (0.1);
+					} else {
+						/* still moving to the right */
+						
+						delta = 0.005 * (drag_info.current_pointer_x - last_scrub_x);
+						session->request_transport_speed (session->transport_speed() + delta);
+					}
+					
+					scrubbing_direction = 1;
 				}
 			}
+
+			last_scrub_x = drag_info.current_pointer_x;
 		}
 
 	default:
@@ -2607,8 +2634,7 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.grab_x = control_point->get_x();
 	drag_info.grab_y = control_point->get_y();
 	control_point->line().parent_group().i2w(drag_info.grab_x, drag_info.grab_y);
-	track_canvas.w2c(drag_info.grab_x, drag_info.grab_y,
-									 drag_info.grab_x, drag_info.grab_y);
+	track_canvas.w2c(drag_info.grab_x, drag_info.grab_y, drag_info.grab_x, drag_info.grab_y);
 
 	drag_info.grab_frame = pixel_to_frame(drag_info.grab_x);
 
@@ -3757,12 +3783,13 @@ Editor::create_region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent
 		snap_to (start, -1);
 		const Meter& m = session->tempo_map().meter_at(start);
 		const Tempo& t = session->tempo_map().tempo_at(start);
-		double length = m.frames_per_bar(t, session->frame_rate());
+		double length = floor (m.frames_per_bar(t, session->frame_rate()));
 
 		boost::shared_ptr<Source> src = session->create_midi_source_for_session(*diskstream.get());
 				
-		mtv->playlist()->add_region (boost::dynamic_pointer_cast<MidiRegion>(RegionFactory::create(
-				src, 0, length, PBD::basename_nosuffix(src->name()))), start);
+		mtv->playlist()->add_region (boost::dynamic_pointer_cast<MidiRegion>
+					     (RegionFactory::create(src, 0, (nframes_t) length, 
+								    PBD::basename_nosuffix(src->name()))), start);
 		XMLNode &after = mtv->playlist()->get_state();
 		session->add_command(new MementoCommand<Playlist>(*mtv->playlist().get(), &before, &after));
 		commit_reversible_command();
@@ -3788,17 +3815,22 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 			speed = rtv->get_diskstream()->speed();
 		}
 
-		if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
+		nframes64_t where = get_preferred_edit_position();
 
-			align_region (rv.region(), SyncPoint, (nframes_t) (edit_cursor->current_frame * speed));
+		if (where >= 0) {
 
-		} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
-
-			align_region (rv.region(), End, (nframes_t) (edit_cursor->current_frame * speed));
-
-		} else {
-
-			align_region (rv.region(), Start, (nframes_t) (edit_cursor->current_frame * speed));
+			if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
+				
+				align_region (rv.region(), SyncPoint, (nframes_t) (where * speed));
+				
+			} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+				
+				align_region (rv.region(), End, (nframes_t) (where * speed));
+				
+			} else {
+				
+				align_region (rv.region(), Start, (nframes_t) (where * speed));
+			}
 		}
 	}
 }
@@ -5197,90 +5229,3 @@ Editor::track_height_step_timeout ()
 	return true;
 }
 
-
-void
-Editor::add_mouse_speed (double speed, double dir)
-{
-	size_t index;
-
-	mouse_direction = dir;
-
-	index = mouse_speed_entries;
-
-	if (++index >= mouse_speed_size) {
-		index = 0;
-		have_full_mouse_speed = true;
-	}
-	
-	mouse_speed[index] = speed;
-	mouse_speed_entries = index;
-}
-
-double
-Editor::compute_mouse_speed ()
-{
-	double total = 0;
-
-	if (!have_full_mouse_speed) {
-
-		/* partial speed buffer, just use whatever we have so far */
-
-		if (mouse_speed_entries == 0 ) {
-			return 0.0;
-		}
-
-		for (size_t n = 0; n < mouse_speed_entries; ++n) {
-			total += mouse_speed[n];
-		}
-		
-		return mouse_direction * total/mouse_speed_entries;
-	}
-
-	/* compute the average (effectively low-pass filtering) mouse speed
-	   across the entire buffer.
-	*/
-
-	for (size_t n = 0; n < mouse_speed_size; ++n) {
-		total += mouse_speed[n];
-	}
-
-
-	return mouse_direction * total/mouse_speed_size;
-}
-
-bool
-Editor::update_mouse_speed ()
-{
-	double speed;
-
-	if (!_scrubbing) {
-		session->request_transport_speed (0.0);
-		mouse_speed_update = -1;
-		return false;
-	}
-
-	speed = compute_mouse_speed ();
-
-	struct timeval tmnow;
-	
-	gettimeofday (&tmnow, 0);
-	double now = (tmnow.tv_sec * 1000000.0) + tmnow.tv_usec;
-
-	if (now - last_scrub_time > 250000) {
-	    
-		// 0.25 seconds since last mouse motion, start to brake
-
-		if (fabs (speed) < 0.1) {
-			/* don't asymptotically approach zero */
-			memset (mouse_speed, 0, sizeof (double) * mouse_speed_size);
-			speed = 0.0;
-		} else if (fabs (speed) < 0.25) {
- 			add_mouse_speed (fabs (speed * 0.2), mouse_direction);
-		} else {
- 			add_mouse_speed (fabs (speed * 0.6), mouse_direction);
-		}
-	} 
-
-	session->request_transport_speed (speed);
-	return _scrubbing;
-}

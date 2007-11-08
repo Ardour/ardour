@@ -36,6 +36,7 @@
 #define IMPORTMODE(a) /*empty*/
 #define IMPORTPOSITION(a)
 #define IMPORTDISPOSITION(a)
+#define EDITPOINT(a) /*empty*/
 
 namespace Editing {
 
@@ -167,6 +168,16 @@ enum ImportDisposition {
 
 #undef IMPORTDISPOSITION
 #define IMPORTDISPOSITION(a) /*empty*/
+
+// EDITPOINT
+#undef EDITPOINT
+#define EDITPOINT(a) a,
+enum EditPoint {
+	#include "editing_syms.h"
+};
+
+#undef EDITPOINT
+#define EDITPOINT(a) /*empty*/
 
 /////////////////////
 // These don't need their state saved. yet...

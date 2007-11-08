@@ -46,6 +46,7 @@
 
 #include <pbd/stateful.h>
 #include <ardour/session.h>
+#include <ardour/stretch.h>
 #include <ardour/tempo.h>
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
@@ -183,15 +184,15 @@ class Editor : public PublicEditor
 
 	/* undo related */
 
-	nframes_t unit_to_frame (double unit) {
+	nframes_t unit_to_frame (double unit) const {
 		return (nframes_t) rint (unit * frames_per_unit);
 	}
 	
-	double frame_to_unit (nframes_t frame) {
+	double frame_to_unit (nframes_t frame) const {
 		return rint ((double) frame / (double) frames_per_unit);
 	}
 
-	double frame_to_unit (double frame) {
+	double frame_to_unit (double frame) const {
 		return rint (frame / frames_per_unit);
 	}
 
@@ -202,7 +203,7 @@ class Editor : public PublicEditor
 	   xscroll_adjustment.  
 	*/
 
-	nframes_t pixel_to_frame (double pixel) {
+	nframes64_t pixel_to_frame (double pixel) const {
 		
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -217,7 +218,7 @@ class Editor : public PublicEditor
 		}
 	}
 
-	gulong frame_to_pixel (nframes_t frame) {
+	gulong frame_to_pixel (nframes64_t frame) const {
 		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
 	}
 
@@ -354,6 +355,8 @@ class Editor : public PublicEditor
 	void reposition_and_zoom (nframes_t, double);
 
 	nframes_t edit_cursor_position(bool);
+	nframes64_t get_preferred_edit_position () const;
+
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
 
@@ -424,8 +427,8 @@ class Editor : public PublicEditor
 	    void set_color_rgba (uint32_t);
 	};
 
-	LocationMarkers  *find_location_markers (ARDOUR::Location *);
-	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start);
+	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
+	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start) const;
 
 	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
@@ -1136,16 +1139,8 @@ class Editor : public PublicEditor
 	void stop_scrolling ();
 
 	bool _scrubbing;
-	bool have_full_mouse_speed;
-	nframes64_t last_scrub_frame;
-	double last_scrub_time;
-	int mouse_speed_update;
-	double mouse_direction;
-	double compute_mouse_speed ();
-	void add_mouse_speed (double, double);
-	double* mouse_speed;
-	size_t mouse_speed_entries;
-	size_t mouse_speed_size;
+	double last_scrub_x;
+	int scrubbing_direction;
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
@@ -1834,14 +1829,18 @@ class Editor : public PublicEditor
 
 	void duplicate_dialog (bool for_region);
 	
-	nframes_t event_frame (GdkEvent*, double* px = 0, double* py = 0);
+	nframes64_t event_frame (GdkEvent*, double* px = 0, double* py = 0) const;
+
+	/* returns false if mouse pointer is not in track or marker canvas
+	 */
+	bool mouse_frame (nframes64_t&, bool& in_track_canvas) const;
 
 	void time_fx_motion (ArdourCanvas::Item*, GdkEvent*);
 	void start_time_fx (ArdourCanvas::Item*, GdkEvent*);
 	void end_time_fx (ArdourCanvas::Item*, GdkEvent*);
 
 	struct TimeStretchDialog : public ArdourDialog {
-	    ARDOUR::Session::TimeStretchRequest request;
+	    ARDOUR::TimeStretchRequest request;
 	    Editor&               editor;
 	    RegionSelection       regions;
 	    Gtk::ProgressBar      progress_bar;
@@ -2001,6 +2000,16 @@ class Editor : public PublicEditor
 	void history_changed ();
 
 	Gtk::HBox      status_bar_hpacker;
+
+	Editing::EditPoint _edit_point;
+
+	Gtk::ComboBoxText edit_point_selector;
+
+	void set_edit_point (Editing::EditPoint ep);
+	void edit_point_selection_done ();
+	void edit_point_chosen (Editing::EditPoint);
+	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
+	std::vector<std::string> edit_point_strings;
 };
 
 #endif /* __ardour_editor_h__ */

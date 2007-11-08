@@ -121,7 +121,6 @@ session_process.cc
 session_state.cc
 session_state_utils.cc
 session_time.cc
-session_timefx.cc
 session_transport.cc
 session_utils.cc
 silentfilesource.cc
@@ -130,6 +129,7 @@ sndfile_helpers.cc
 sndfilesource.cc
 source.cc
 source_factory.cc
+stretch.cc
 tape_file_matcher.cc
 template_utils.cc
 tempo.cc

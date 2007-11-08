@@ -35,11 +35,24 @@ using namespace ARDOUR;
 using namespace PBD;
 
 int
-Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs)
+Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, string suffix)
 {
 	vector<string> names = region->master_source_names();
 
 	for (uint32_t i = 0; i < region->n_channels(); ++i) {
+
+		string name = PBD::basename_nosuffix (names[i]);
+
+		/* remove any existing version of suffix by assuming it starts
+		   with some kind of "special" character.
+		*/
+
+		if (!suffix.empty()) {
+			string::size_type pos = name.find (suffix[0]);
+			if (pos != string::npos && pos > 2) {
+				name = name.substr (0, pos - 1);
+			}
+		}
 
 		string path = session.path_from_region_name (region->data_type(),
 				PBD::basename_nosuffix (names[i]), string (""));
@@ -65,10 +78,8 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs)
 }
 
 int
-Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs)
+Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string region_name)
 {
-	string region_name;
-
 	/* update headers on new sources */
 
 	time_t xnow;
@@ -94,7 +105,9 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs)
 
 	/* create a new region */
 
-	region_name = session.new_region_name (region->name());
+	if (region_name.empty()) {
+		region_name = session.new_region_name (region->name());
+	}
 	results.clear ();
 	results.push_back (RegionFactory::create (nsrcs, 0, region->length(), region_name, 0, 
 			Region::Flag (Region::WholeFile|Region::DefaultFlags)));

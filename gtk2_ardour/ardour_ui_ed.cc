@@ -155,7 +155,7 @@ ARDOUR_UI::install_actions ()
 	Glib::RefPtr<ActionGroup> jack_actions = ActionGroup::create (X_("JACK"));
 	ActionManager::register_action (jack_actions, X_("JACK"), _("JACK"));
 	ActionManager::register_action (jack_actions, X_("Latency"), _("Latency"));
-	
+
 	act = ActionManager::register_action (jack_actions, X_("JACKReconnect"), _("Reconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::reconnect_to_jack));
 	ActionManager::jack_opposite_sensitive_actions.push_back (act);
 

@@ -95,17 +95,10 @@ Editor::redo (uint32_t n)
 	}
 }
 
-int
-Editor::ensure_cursor (nframes_t *pos)
-{
-	*pos = edit_cursor->current_frame;
-	return 0;
-}
-
 void
 Editor::split_region ()
 {
-	split_region_at (edit_cursor->current_frame);
+	split_region_at (get_preferred_edit_position());
 }
 
 void
@@ -137,8 +130,21 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 		snap_to (where);
 	}
 
+	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
-	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ++a) {
+		RegionSelection::iterator tmp;
+
+		/* XXX this test needs to be more complicated, to make sure we really
+		   have something to split.
+		*/
+		
+		if (!(*a)->region()->covers (where)) {
+			++a;
+			continue;
+		}
+
+		tmp = a;
+		++tmp;
 
 		boost::shared_ptr<Playlist> pl = (*a)->region()->playlist();
 
@@ -161,6 +167,7 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
                         session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 		}
 
+		a = tmp;
 	}
 	while (used_playlists.size() > 0) {
 
@@ -883,7 +890,7 @@ Editor::cursor_align (bool playhead_to_edit)
 {
 	if (playhead_to_edit) {
 		if (session) {
-			session->request_locate (edit_cursor->current_frame);
+			session->request_locate (get_preferred_edit_position());
 		}
 	} else {
 		edit_cursor->set_position (playhead_cursor->current_frame);
@@ -893,8 +900,8 @@ Editor::cursor_align (bool playhead_to_edit)
 void
 Editor::edit_cursor_backward ()
 {
-	nframes_t pos;
-	nframes_t cnt;
+	nframes64_t pos;
+	nframes64_t cnt;
 	float prefix;
 	bool was_floating;
 
@@ -908,9 +915,11 @@ Editor::edit_cursor_backward ()
 		}
 	}
 
-	pos = edit_cursor->current_frame;
+	if ((pos = get_preferred_edit_position()) < 0) {
+		return;
+	}
 
-	if ((nframes_t) pos < cnt) {
+	if (pos < cnt) {
 		pos = 0;
 	} else {
 		pos -= cnt;
@@ -1099,12 +1108,14 @@ Editor::temporal_zoom (gdouble fpu)
 {
 	if (!session) return;
 	
-	nframes_t current_page = current_page_frames();
-	nframes_t current_leftmost = leftmost_frame;
-	nframes_t current_rightmost;
-	nframes_t current_center;
-	nframes_t new_page;
-	nframes_t leftmost_after_zoom = 0;
+	nframes64_t current_page = current_page_frames();
+	nframes64_t current_leftmost = leftmost_frame;
+	nframes64_t current_rightmost;
+	nframes64_t current_center;
+	nframes64_t new_page;
+	nframes64_t leftmost_after_zoom = 0;
+	nframes64_t where;
+	bool in_track_canvas;
 	double nfpu;
 
 	nfpu = fpu;
@@ -1143,10 +1154,38 @@ Editor::temporal_zoom (gdouble fpu)
 		}
 		break;
 
+	case ZoomFocusMouse:
+		/* try to keep the mouse over the same point in the display */
+
+		if (!mouse_frame (where, in_track_canvas)) {
+			/* use playhead instead */
+			where = playhead_cursor->current_frame;
+
+			if (where > new_page/2) {
+				leftmost_after_zoom = where - (new_page/2);
+			} else {
+				leftmost_after_zoom = 0;
+			}
+
+		} else {
+
+			double l = - ((new_page * ((where - current_leftmost)/(double)current_page)) - where);
+
+			if (l < 0) {
+				leftmost_after_zoom = 0;
+			} else if (l > max_frames) { 
+				leftmost_after_zoom = max_frames - new_page;
+			} else {
+				leftmost_after_zoom = (nframes64_t) l;
+			}
+		}
+
+		break;
+
 	case ZoomFocusEdit:
 		/* try to keep the edit cursor in the center */
-		if (edit_cursor->current_frame > new_page/2) {
-			leftmost_after_zoom = edit_cursor->current_frame - (new_page/2);
+		if (get_preferred_edit_position() > new_page/2) {
+			leftmost_after_zoom = get_preferred_edit_position() - (new_page/2);
 		} else {
 			leftmost_after_zoom = 0;
 		}
@@ -1160,6 +1199,8 @@ Editor::temporal_zoom (gdouble fpu)
 //	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), current_leftmost, frames_per_unit));
 //	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_after_zoom, nfpu));
 //	commit_reversible_command ();
+	
+	// cerr << "repos & zoom to " << leftmost_after_zoom << " @ " << nfpu << endl;
 
 	reposition_and_zoom (leftmost_after_zoom, nfpu);
 }	
@@ -1579,7 +1620,7 @@ Editor::insert_region_list_selection (float times)
 		
 		begin_reversible_command (_("insert region"));
 		XMLNode &before = playlist->get_state();
-		playlist->add_region ((RegionFactory::create (region)), edit_cursor->current_frame, times);
+		playlist->add_region ((RegionFactory::create (region)), get_preferred_edit_position(), times);
 		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 		commit_reversible_command ();
 	} 
@@ -1666,7 +1707,7 @@ Editor::play_from_start ()
 void
 Editor::play_from_edit_cursor ()
 {
-       session->request_locate (edit_cursor->current_frame, true);
+	session->request_locate (get_preferred_edit_position(), true);
 }
 
 void
@@ -2275,7 +2316,8 @@ Editor::set_region_sync_from_edit_cursor ()
 {
 	/* Check that at the edit cursor is in at least one of the selected regions */
 	RegionSelection::const_iterator i = selection->regions.begin();
-	while (i != selection->regions.end() && !(*i)->region()->covers (edit_cursor->current_frame)) {
+
+	while (i != selection->regions.end() && !(*i)->region()->covers (get_preferred_edit_position())) {
 		++i;
 	}
 
@@ -2290,11 +2332,11 @@ Editor::set_region_sync_from_edit_cursor ()
 	for (RegionSelection::iterator j = selection->regions.begin(); j != selection->regions.end(); ++j) {
 		boost::shared_ptr<Region> r = (*j)->region();
 		XMLNode &before = r->playlist()->get_state();
-		r->set_sync_position (edit_cursor->current_frame);
+		r->set_sync_position (get_preferred_edit_position());
 		XMLNode &after = r->playlist()->get_state();
 		session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
 	}
-	
+
 	commit_reversible_command ();
 }
 
@@ -2334,13 +2376,13 @@ Editor::naturalize ()
 void
 Editor::align (RegionPoint what)
 {
-	align_selection (what, edit_cursor->current_frame);
+	align_selection (what, get_preferred_edit_position());
 }
 
 void
 Editor::align_relative (RegionPoint what)
 {
-	align_selection_relative (what, edit_cursor->current_frame);
+	align_selection_relative (what, get_preferred_edit_position());
 }
 
 struct RegionSortByTime {
@@ -2481,7 +2523,7 @@ Editor::trim_region_to_edit_cursor ()
 		}
 		
 		XMLNode &before = region->playlist()->get_state();
-		region->trim_end( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
+		region->trim_end( session_frame_to_track_frame(get_preferred_edit_position(), speed), this);
 		XMLNode &after = region->playlist()->get_state();
 		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
 	}
@@ -2513,12 +2555,10 @@ Editor::trim_region_from_edit_cursor ()
 		}
 
 		XMLNode &before = region->playlist()->get_state();
-		region->trim_front ( session_frame_to_track_frame(edit_cursor->current_frame, speed), this);
+		region->trim_front ( session_frame_to_track_frame(get_preferred_edit_position(), speed), this);
 		XMLNode &after = region->playlist()->get_state();
 		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
 	}
-	
-	commit_reversible_command ();
 }
 
 /** Unfreeze selected routes */
@@ -2945,26 +2985,19 @@ Editor::cut_copy_ranges (CutCopyOp op)
 void
 Editor::paste (float times)
 {
-	paste_internal (edit_cursor->current_frame, times);
+	paste_internal (get_preferred_edit_position(), times);
 }
 
 void
 Editor::mouse_paste ()
 {
-	int x, y;
-	double wx, wy;
+	nframes64_t where;
+	bool ignored;
 
-	track_canvas.get_pointer (x, y);
-	track_canvas.window_to_world (x, y, wx, wy);
-	wx += horizontal_adjustment.get_value();
-	wy += vertical_adjustment.get_value();
+	if (!mouse_frame (where, ignored)) {
+		return;
+	}
 
-	GdkEvent event;
-	event.type = GDK_BUTTON_RELEASE;
-	event.button.x = wx;
-	event.button.y = wy;
-	
-	nframes_t where = event_frame (&event, 0, 0);
 	snap_to (where);
 	paste_internal (where, 1);
 }
@@ -2979,7 +3012,7 @@ Editor::paste_internal (nframes_t position, float times)
 	}
 
 	if (position == max_frames) {
-		position = edit_cursor->current_frame;
+		position = get_preferred_edit_position();
 	}
 
 	begin_reversible_command (_("paste"));
@@ -3050,7 +3083,7 @@ Editor::paste_named_selection (float times)
 		++tmp;
 
 		XMLNode &before = apl->get_state();
-		apl->paste (*chunk, edit_cursor->current_frame, times);
+		apl->paste (*chunk, get_preferred_edit_position(), times);
 		session->add_command(new MementoCommand<AudioPlaylist>(*apl, &before, &apl->get_state()));
 
 		if (tmp != ns->playlists.end()) {
@@ -3162,7 +3195,7 @@ Editor::center_edit_cursor ()
 {
 	float page = canvas_width * frames_per_unit;
 
-	center_screen_internal (edit_cursor->current_frame, page);
+	center_screen_internal (get_preferred_edit_position(), page);
 }
 
 void
@@ -3185,7 +3218,7 @@ Editor::nudge_selected_tracks (bool use_edit_cursor, bool forwards)
 	nframes_t start;
 
 	if (use_edit_cursor) {
-		start = edit_cursor->current_frame;
+		start = get_preferred_edit_position();
 	} else {
 		start = 0;
 	}
