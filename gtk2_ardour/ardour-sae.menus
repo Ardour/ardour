@@ -142,6 +142,7 @@
                    <menuitem action='zoom-focus-center'/>
                    <menuitem action='zoom-focus-playhead'/>
                    <menuitem action='zoom-focus-edit'/>
+                   <menuitem action='zoom-focus-mouse'/>
                </menu>
 	       <menu name='SnapMode' action='SnapMode'>
 		   <menuitem action='snap-normal'/>
