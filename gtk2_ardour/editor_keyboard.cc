@@ -24,6 +24,7 @@
 #include "editor.h"
 #include "region_view.h"
 #include "selection.h"
+#include "keyboard.h"
 
 #include "i18n.h"
 
@@ -71,6 +72,24 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 }
 
 void
+Editor::set_playhead_cursor (GdkEvent* event)
+{
+	if (entered_marker) {
+		session->request_locate (entered_marker->position(), session->transport_rolling());
+	} else {
+		nframes_t pointer_frame = event_frame (event);
+		
+		if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+			snap_to (pointer_frame);
+		}
+		
+		if (session) {
+			session->request_locate (pointer_frame, session->transport_rolling());
+		}
+	}
+}
+
+void
 Editor::kbd_set_playhead_cursor ()
 {
 	kbd_driver (mem_fun(*this, &Editor::set_playhead_cursor), true, true, false);
@@ -82,19 +101,30 @@ Editor::kbd_set_edit_cursor ()
 	kbd_driver (mem_fun(*this, &Editor::set_edit_cursor), true, true, false);
 }
 
-
 void
 Editor::kbd_do_split (GdkEvent* ev)
 {
-	nframes_t where = event_frame (ev);
-
 	if (entered_regionview) {
+
+		nframes_t where = event_frame (ev);
+		snap_to (where);
+
 		if (selection->regions.contains (entered_regionview)) {
 			split_regions_at (where, selection->regions);
 		} else {
 			RegionSelection s;
 			s.add (entered_regionview);
 			split_regions_at (where, s);
+		}
+
+	} else if (entered_marker) {
+
+		if (!selection->regions.empty()) {
+			split_regions_at (entered_marker->position(), selection->regions);
+		} else {
+			RegionSelection rs;
+			rs = get_regions_at (entered_marker->position(), selection->tracks);
+			split_regions_at (entered_marker->position(), rs);
 		}
 	}
 }
@@ -129,30 +159,80 @@ Editor::kbd_set_sync_position ()
 void
 Editor::kbd_do_set_sync_position (GdkEvent* ev)
 {
-    nframes_t where = event_frame (ev);
-	snap_to (where);
-
 	if (entered_regionview) {
-	  set_a_regions_sync_position (entered_regionview->region(), where);
+		nframes64_t where = event_frame (ev);
+		snap_to (where);
+
+		set_a_regions_sync_position (entered_regionview->region(), where);
+
+	} else if (entered_marker) {
+
+		if (!selection->regions.empty()) {
+			set_a_regions_sync_position (selection->regions.front()->region(), entered_marker->position());
+		}
 	}
 }
 
 void
 Editor::kbd_do_align (GdkEvent* ev, ARDOUR::RegionPoint what)
 {
-	align (what);
+	if (entered_regionview) {
+
+		nframes_t where = event_frame (ev);
+		snap_to (where);
+
+		if (selection->regions.contains (entered_regionview)) {
+			align_selection (what, where, selection->regions);
+		} else {
+			RegionSelection s;
+			s.add (entered_regionview);
+			align_selection (what, where, s);
+		}
+
+	} else if (entered_marker) {
+
+		if (!selection->regions.empty()) {
+			align_selection (what, entered_marker->position(), selection->regions);
+		} else {
+			RegionSelection rs;
+			rs = get_regions_at (entered_marker->position(), selection->tracks);
+			align_selection (what, entered_marker->position(), rs);
+		}
+	}
+}
+
+void
+Editor::kbd_do_align_relative (GdkEvent* ev, ARDOUR::RegionPoint what)
+{
+	if (entered_regionview) {
+
+		nframes_t where = event_frame (ev);
+		snap_to (where);
+
+		if (selection->regions.contains (entered_regionview)) {
+			align_selection_relative (what, where, selection->regions);
+		} else {
+			RegionSelection s;
+			s.add (entered_regionview);
+			align_selection_relative (what, where, s);
+		}
+
+	} else if (entered_marker) {
+
+		if (!selection->regions.empty()) {
+			align_selection_relative (what, entered_marker->position(), selection->regions);
+		} else {
+			RegionSelection rs;
+			rs = get_regions_at (entered_marker->position(), selection->tracks);
+			align_selection_relative (what, entered_marker->position(), rs);
+		}
+	}
 }
 
 void
 Editor::kbd_align (ARDOUR::RegionPoint what)
 {
 	kbd_driver (bind (mem_fun(*this, &Editor::kbd_do_align), what));
-}
-
-void
-Editor::kbd_do_align_relative (GdkEvent* ev, ARDOUR::RegionPoint what)
-{
-	align (what);
 }
 
 void

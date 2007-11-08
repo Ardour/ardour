@@ -134,6 +134,13 @@
         	   <menuitem action="nudge-next-backward"/>
         	   <menuitem action='split-region'/>
 	       	   <menuitem action='set-region-sync-position'/>
+                   <separator/>       
+		   <menuitem action='align-regions-start'/>
+		   <menuitem action='align-regions-start-relative'/>
+		   <menuitem action='align-regions-end'/>
+		   <menuitem action='align-regions-end-relative'/>
+		   <menuitem action='align-regions-sync'/>
+		   <menuitem action='align-regions-sync-relative'/>
 	</menu>
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>

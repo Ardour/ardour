@@ -416,6 +416,7 @@ class Editor : public PublicEditor
 
 	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
 	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start) const;
+	Marker* entered_marker;
 
 	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
@@ -901,8 +902,8 @@ class Editor : public PublicEditor
 	void set_a_regions_sync_position (boost::shared_ptr<ARDOUR::Region>, nframes_t);
 	void set_region_sync_from_edit_cursor ();
 	void remove_region_sync();
-	void align_selection (ARDOUR::RegionPoint, nframes_t position);
-	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position);
+	void align_selection (ARDOUR::RegionPoint, nframes_t position, const RegionSelection&);
+	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position, const RegionSelection&);
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
 	void remove_clicked_region ();
@@ -1913,6 +1914,9 @@ class Editor : public PublicEditor
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
 	std::vector<std::string> edit_point_strings;
+
+	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
+
 };
 
 #endif /* __ardour_editor_h__ */

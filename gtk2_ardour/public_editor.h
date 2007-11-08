@@ -78,7 +78,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	PublicEditor();
 	virtual ~PublicEditor();
 
-	typedef list<TimeAxisView *> TrackViewList;
+	typedef TrackSelection TrackViewList;
 
 	static PublicEditor& instance() { return *_instance; }
 

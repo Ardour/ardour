@@ -64,6 +64,8 @@ class Marker : public sigc::trackable
 	void set_position (nframes_t);
 	void set_name (const string&);
 	void set_color_rgba (uint32_t rgba);
+	
+	nframes64_t position() const { return frame_position; }
 
 	void hide ();
 	void show ();
@@ -80,10 +82,10 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Line *line;
 	ArdourCanvas::Points *line_points;
 
-	double    unit_position;
-	nframes_t frame_position;
-	unsigned char      shift; /* should be double, but its always small and integral */
-	Type      _type;
+	double        unit_position;
+	nframes64_t   frame_position;
+	unsigned char shift; /* should be double, but its always small and integral */
+	Type         _type;
 	
 	void reposition ();
 };

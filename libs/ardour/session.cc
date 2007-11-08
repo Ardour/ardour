@@ -2113,12 +2113,7 @@ Session::remove_route (shared_ptr<Route> route)
 
 	/* try to cause everyone to drop their references */
 
-	cerr << "pre drop, Route now has " << route.use_count() << " refs\n";
-	cerr << "sig has " << route->GoingAway.size() << endl;
-
 	route->drop_references ();
-
-	cerr << "route dangling refs = " << route.use_count() << endl;
 
 	/* save the new state of the world */
 

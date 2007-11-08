@@ -1280,6 +1280,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
+		entered_marker = marker;
 		marker->set_color_rgba (ARDOUR_UI::config()->canvasvar_EnteredMarker.get());
 		// fall through
 	case MeterMarkerItem:
@@ -1414,8 +1415,10 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
-		loc = find_location_from_marker (marker, is_start);
-		if (loc) location_flags_changed (loc, this);
+		entered_marker = 0;
+		if ((loc = find_location_from_marker (marker, is_start)) != 0) {
+			location_flags_changed (loc, this);
+		}
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
@@ -1777,20 +1780,6 @@ Editor::set_edit_cursor (GdkEvent* event)
 
 	edit_cursor->set_position (pointer_frame);
 	edit_cursor_clock.set (pointer_frame);
-}
-
-void
-Editor::set_playhead_cursor (GdkEvent* event)
-{
-	nframes_t pointer_frame = event_frame (event);
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		snap_to (pointer_frame);
-	}
-
-	if (session) {
-		session->request_locate (pointer_frame, session->transport_rolling());
-	}
 }
 
 void

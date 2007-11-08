@@ -119,6 +119,13 @@
          	   <menuitem action="nudge-next-forward"/>
 	           <menuitem action="nudge-backward"/>
         	   <menuitem action="nudge-next-backward"/>
+                   <separator/>       
+		   <menuitem action='align-regions-start'/>
+		   <menuitem action='align-regions-start-relative'/>
+		   <menuitem action='align-regions-end'/>
+		   <menuitem action='align-regions-end-relative'/>
+		   <menuitem action='align-regions-sync'/>
+		   <menuitem action='align-regions-sync-relative'/>
 	       </menu>
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
 	       		<menuitem action='audition-at-mouse'/>

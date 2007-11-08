@@ -239,7 +239,7 @@ Editor::Editor ()
 	drag_info.item = 0;
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
-
+	
 	snap_type_strings =  I18N (_snap_type_strings);
 	snap_mode_strings =  I18N (_snap_mode_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
@@ -306,6 +306,7 @@ Editor::Editor ()
 	current_stepping_trackview = 0;
 	entered_track = 0;
 	entered_regionview = 0;
+	entered_marker = 0;
 	clear_entered_track = false;
 	_new_regionviews_show_envelope = false;
 	current_timestretch = 0;
@@ -4067,3 +4068,43 @@ Editor::set_punch_range (nframes_t start, nframes_t end, string cmd)
 	commit_reversible_command ();
 }
 
+RegionSelection
+Editor::get_regions_at (nframes64_t where, const TrackSelection& ts) const
+{
+	RegionSelection rs;
+	const TrackSelection* tracks;
+
+	if (ts.empty()) {
+		tracks = &track_views;
+	} else {
+		tracks = &ts;
+	}
+
+	for (TrackSelection::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
+	
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*t);
+
+		if (atv) {
+			boost::shared_ptr<Diskstream> ds;
+			boost::shared_ptr<Playlist> pl;
+			
+			if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
+
+				Playlist::RegionList* regions = pl->regions_at ((nframes_t) floor ( (double)where * ds->speed()));
+
+				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+
+					RegionView* rv = atv->audio_view()->find_view (*i);
+
+					if (rv) {
+						rs.push_back (rv);
+					}
+				}
+
+				delete regions;
+			}
+		}
+	}
+
+	return rs;
+}

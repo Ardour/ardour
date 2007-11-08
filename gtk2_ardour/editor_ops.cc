@@ -144,8 +144,10 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 		boost::shared_ptr<Playlist> pl = (*a)->region()->playlist();
 
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*a);
-		if (arv)
+
+		if (arv) {
 			_new_regionviews_show_envelope = arv->envelope_visible();
+		}
 		
 		if (pl) {
                         XMLNode &before = pl->get_state();
@@ -890,7 +892,23 @@ Editor::cursor_align (bool playhead_to_edit)
 			session->request_locate (get_preferred_edit_position());
 		}
 	} else {
-		edit_cursor->set_position (playhead_cursor->current_frame);
+		if (_edit_point == EditAtSelectedMarker) {
+
+			/* move selected markers to playhead */
+
+			for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
+				bool ignored;
+
+				Location* loc = find_location_from_marker (*i, ignored);
+
+				if (loc->is_mark()) {
+					loc->set_start (playhead_cursor->current_frame);
+				} else {
+					loc->set (playhead_cursor->current_frame,
+						  playhead_cursor->current_frame + loc->length());
+				}
+			}
+		}
 	}
 }
 
@@ -2384,13 +2402,13 @@ Editor::naturalize ()
 void
 Editor::align (RegionPoint what)
 {
-	align_selection (what, get_preferred_edit_position());
+	align_selection (what, get_preferred_edit_position(), selection->regions);
 }
 
 void
 Editor::align_relative (RegionPoint what)
 {
-	align_selection_relative (what, get_preferred_edit_position());
+	align_selection_relative (what, get_preferred_edit_position(), selection->regions);
 }
 
 struct RegionSortByTime {
@@ -2400,9 +2418,9 @@ struct RegionSortByTime {
 };
 
 void
-Editor::align_selection_relative (RegionPoint point, nframes_t position)
+Editor::align_selection_relative (RegionPoint point, nframes_t position, const RegionSelection& rs)
 {
-	if (selection->regions.empty()) {
+	if (rs.empty()) {
 		return;
 	}
 
@@ -2411,7 +2429,7 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position)
 	int dir;
 
 	list<RegionView*> sorted;
-	selection->regions.by_position (sorted);
+	rs.by_position (sorted);
 	boost::shared_ptr<Region> r ((*sorted.begin())->region());
 
 	switch (point) {
@@ -2438,7 +2456,7 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position)
 
 	begin_reversible_command (_("align selection (relative)"));
 
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 
 		boost::shared_ptr<Region> region ((*i)->region());
 
@@ -2459,15 +2477,15 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position)
 }
 
 void
-Editor::align_selection (RegionPoint point, nframes_t position)
+Editor::align_selection (RegionPoint point, nframes_t position, const RegionSelection& rs)
 {
-	if (selection->regions.empty()) {
+	if (rs.empty()) {
 		return;
 	}
 
 	begin_reversible_command (_("align selection"));
 
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 		align_region_internal ((*i)->region(), point, position);
 	}
 

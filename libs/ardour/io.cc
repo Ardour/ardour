@@ -179,12 +179,16 @@ IO::~IO ()
 	Glib::Mutex::Lock lm (io_lock);
 	vector<Port *>::iterator i;
 
-	for (i = _inputs.begin(); i != _inputs.end(); ++i) {
-		_session.engine().unregister_port (*i);
-	}
-
-	for (i = _outputs.begin(); i != _outputs.end(); ++i) {
-		_session.engine().unregister_port (*i);
+	{
+		BLOCK_PROCESS_CALLBACK ();
+		
+		for (i = _inputs.begin(); i != _inputs.end(); ++i) {
+			_session.engine().unregister_port (*i);
+		}
+		
+		for (i = _outputs.begin(); i != _outputs.end(); ++i) {
+			_session.engine().unregister_port (*i);
+		}
 	}
 
 	m_meter_connection.disconnect();

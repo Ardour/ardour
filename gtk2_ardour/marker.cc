@@ -290,8 +290,8 @@ Marker::add_line (ArdourCanvas::Group* group, double initial_height)
 	if (!line) {
 
 		line_points = new ArdourCanvas::Points ();
-		line_points->push_back (Gnome::Art::Point (unit_position, 0.0));
-		line_points->push_back (Gnome::Art::Point (unit_position, initial_height));			
+		line_points->push_back (Gnome::Art::Point (unit_position + shift, 0.0));
+		line_points->push_back (Gnome::Art::Point (unit_position + shift, initial_height));			
 		
 		line = new ArdourCanvas::Line (*group);
 		line->property_width_pixels() = 1;
@@ -344,8 +344,8 @@ Marker::set_position (nframes_t frame)
 	unit_position = new_unit_position;
 
 	if (line) {
-		(*line_points)[0].set_x (unit_position);
-		(*line_points)[1].set_x (unit_position);
+		(*line_points)[0].set_x (unit_position + shift);
+		(*line_points)[1].set_x (unit_position + shift);
 		line->property_points() = *line_points;
 	}
 }

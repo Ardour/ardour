@@ -550,6 +550,8 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 					
 					return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 				} 
+
+				delete rl;
 			}
 		}
 	}
