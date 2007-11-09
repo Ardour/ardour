@@ -344,7 +344,6 @@ class Editor : public PublicEditor
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes_t, double);
 
-	nframes_t edit_cursor_position(bool);
 	nframes64_t get_preferred_edit_position () const;
 
 	bool update_mouse_speed ();
@@ -638,7 +637,6 @@ class Editor : public PublicEditor
 			      */
 
 	Cursor* playhead_cursor;
-	Cursor* edit_cursor;
 	ArdourCanvas::Group* cursor_group;
 
 	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
@@ -646,8 +644,16 @@ class Editor : public PublicEditor
 	void    cursor_to_region_point (Cursor*, ARDOUR::RegionPoint, int32_t dir);
 	void    cursor_to_selection_start (Cursor *);
 	void    cursor_to_selection_end   (Cursor *);
+
+	void    edit_point_to_next_region_point (ARDOUR::RegionPoint);
+	void    edit_point_to_previous_region_point (ARDOUR::RegionPoint);
+	void    edit_point_to_region_point (ARDOUR::RegionPoint, int32_t dir);
+	void    edit_point_to_selection_start ();
+	void    edit_point_to_selection_end   ();
+
 	void    select_all_selectables_using_cursor (Cursor *, bool);
-	void    select_all_selectables_between_cursors (Cursor *, Cursor *);
+	void    select_all_selectables_using_edit (bool);
+	void    select_all_selectables_between ();
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 
@@ -900,7 +906,7 @@ class Editor : public PublicEditor
 	void split_regions_at (nframes_t, RegionSelection&);
 	void crop_region_to_selection ();
 	void set_a_regions_sync_position (boost::shared_ptr<ARDOUR::Region>, nframes_t);
-	void set_region_sync_from_edit_cursor ();
+	void set_region_sync_from_edit_point ();
 	void remove_region_sync();
 	void align_selection (ARDOUR::RegionPoint, nframes_t position, const RegionSelection&);
 	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position, const RegionSelection&);
@@ -950,7 +956,7 @@ class Editor : public PublicEditor
 	void rename_region_finished (bool);
 
 	void play_from_start ();
-	void play_from_edit_cursor ();
+	void play_from_edit_point ();
 	void play_selected_region ();
 	void audition_selected_region ();
 	void loop_selected_region ();
@@ -1029,7 +1035,7 @@ class Editor : public PublicEditor
 	void move_to_end ();
 	void goto_frame ();
 	void center_playhead ();
-	void center_edit_cursor ();
+	void center_edit_point ();
 	void edit_cursor_backward ();
 	void edit_cursor_forward ();
 	void playhead_backward ();
@@ -1211,7 +1217,6 @@ class Editor : public PublicEditor
 	/* non-public event handlers */
 
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_edit_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
 
 	bool track_canvas_scroll_event (GdkEventScroll* event);
@@ -1224,12 +1229,11 @@ class Editor : public PublicEditor
 	void track_canvas_allocate (Gtk::Allocation alloc);
 	bool track_canvas_size_allocated ();
 
-	void set_edit_cursor (GdkEvent* event);
 	void set_playhead_cursor (GdkEvent* event);
 
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
 	void kbd_set_playhead_cursor ();
-	void kbd_set_edit_cursor ();
+	void kbd_set_edit_point ();
 	void kbd_mute_unmute_region ();
 	void kbd_split ();
 	void kbd_set_sync_position ();
@@ -1286,6 +1290,7 @@ class Editor : public PublicEditor
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
+	void marker_menu_lock (bool yn);
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
 	void marker_menu_select_all_selectables_using_range ();
@@ -1619,8 +1624,8 @@ class Editor : public PublicEditor
 	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void thaw_region_after_trim (RegionView& rv);
 	
-	void trim_region_to_edit_cursor ();
-	void trim_region_from_edit_cursor ();
+	void trim_region_to_edit_point ();
+	void trim_region_from_edit_point ();
 
 	bool show_gain_after_trim;
 
@@ -1790,7 +1795,7 @@ class Editor : public PublicEditor
 
 	/* nudging tracks */
 
-	void nudge_track (bool use_edit_cursor, bool forwards);
+	void nudge_track (bool use_edit_point, bool forwards);
 
 	/* xfades */
 
@@ -1909,7 +1914,8 @@ class Editor : public PublicEditor
 
 	Gtk::ComboBoxText edit_point_selector;
 
-	void set_edit_point (Editing::EditPoint ep);
+	void set_edit_point_preference (Editing::EditPoint ep);
+	void set_edit_point (GdkEvent* ev);
 	void edit_point_selection_done ();
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);

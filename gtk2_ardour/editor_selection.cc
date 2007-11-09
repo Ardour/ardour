@@ -1003,26 +1003,61 @@ Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 }
 
 void
-Editor::select_all_selectables_between_cursors (Cursor *cursor, Cursor *other_cursor)
+Editor::select_all_selectables_using_edit (bool after)
 {
         nframes_t start;
 	nframes_t end;
 	list<Selectable *> touched;
-	bool  other_cursor_is_first = cursor->current_frame > other_cursor->current_frame;
 
-	if (cursor->current_frame == other_cursor->current_frame) {
+	if (after) {
+		begin_reversible_command (_("select all after edit"));
+		start = get_preferred_edit_position();
+		end = session->current_end_frame();
+	} else {
+		if ((end = get_preferred_edit_position()) > 1) {
+			begin_reversible_command (_("select all before edit"));
+			start = 0;
+			end -= 1;
+		} else {
+			return;
+		}
+	}
+
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
+	}
+	selection->set (touched);
+	commit_reversible_command ();
+}
+
+void
+Editor::select_all_selectables_between ()
+{
+        nframes64_t start;
+	nframes64_t end;
+	list<Selectable *> touched;
+
+	if (_edit_point == EditAtPlayhead) {
+		return;
+	}
+	
+	start = get_preferred_edit_position();
+	end = playhead_cursor->current_frame;
+
+	if (start == end) {
 		return;
 	}
 
-	begin_reversible_command (_("select all between cursors"));
-	if (other_cursor_is_first) {
-		start = other_cursor->current_frame;
-		end = cursor->current_frame - 1;
-		
-	} else {
-		start = cursor->current_frame;
-		end = other_cursor->current_frame - 1;
+	if (start > end) {
+		swap (start, end);
 	}
+
+	begin_reversible_command (_("select all between cursors"));
+
+	end -= 1;
 	
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {

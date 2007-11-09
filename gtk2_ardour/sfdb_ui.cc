@@ -987,7 +987,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 
 	str.clear ();
 	str.push_back (_("use file timestamp"));
-	str.push_back (_("at edit cursor"));
+	str.push_back (_("at edit point"));
 	str.push_back (_("at playhead"));
 	str.push_back (_("at session start"));
 	set_popdown_strings (where_combo, str);
@@ -1123,8 +1123,8 @@ SoundFileOmega::get_position() const
 
 	if (str == _("use file timestamp")) {
 		return ImportAtTimestamp;
-	} else if (str == _("at edit cursor")) {
-		return ImportAtEditCursor;
+	} else if (str == _("at edit point")) {
+		return ImportAtEditPoint;
 	} else if (str == _("at playhead")) {
 		return ImportAtPlayhead;
 	} else {

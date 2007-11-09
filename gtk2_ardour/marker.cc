@@ -296,7 +296,7 @@ Marker::add_line (ArdourCanvas::Group* group, double initial_height)
 		line = new ArdourCanvas::Line (*group);
 		line->property_width_pixels() = 1;
 		line->property_points() = *line_points;
-		line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditCursor.get();
+		line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
 	}
 
 	show_line ();

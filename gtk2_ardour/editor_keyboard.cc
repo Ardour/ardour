@@ -19,6 +19,8 @@
 
 #include <ardour/audioregion.h>
 #include <ardour/playlist.h>
+#include <ardour/location.h>
+
 #include <pbd/memento_command.h>
 
 #include "editor.h"
@@ -27,6 +29,8 @@
 #include "keyboard.h"
 
 #include "i18n.h"
+
+using namespace ARDOUR;
 
 void
 Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, bool use_time_canvas, bool can_select)
@@ -72,6 +76,28 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 }
 
 void
+Editor::set_edit_point (GdkEvent* event)
+{
+	if (selection->markers.empty()) {
+		nframes64_t where = event_frame (event);
+
+		snap_to (where);
+		mouse_add_new_marker (where);
+
+	} else {
+		bool ignored;
+
+		Location* loc = find_location_from_marker (selection->markers.front(), ignored);
+
+		if (loc) {
+			nframes64_t where = event_frame (event);
+			snap_to (where);
+			loc->move_to (where);
+		}
+	}
+}
+
+void
 Editor::set_playhead_cursor (GdkEvent* event)
 {
 	if (entered_marker) {
@@ -90,15 +116,15 @@ Editor::set_playhead_cursor (GdkEvent* event)
 }
 
 void
+Editor::kbd_set_edit_point ()
+{
+	kbd_driver (mem_fun(*this, &Editor::set_edit_point), true, true, false);
+}	
+
+void
 Editor::kbd_set_playhead_cursor ()
 {
 	kbd_driver (mem_fun(*this, &Editor::set_playhead_cursor), true, true, false);
-}
-
-void
-Editor::kbd_set_edit_cursor ()
-{
-	kbd_driver (mem_fun(*this, &Editor::set_edit_cursor), true, true, false);
 }
 
 void

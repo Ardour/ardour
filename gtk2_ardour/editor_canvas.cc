@@ -245,7 +245,6 @@ Editor::initialize_canvas ()
 	double time_width = FLT_MAX/frames_per_unit;
 	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
 
-	edit_cursor = new Cursor (*this, &Editor::canvas_edit_cursor_event);
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
 
 	initial_ruler_update_required = true;
@@ -305,19 +304,14 @@ Editor::track_canvas_size_allocated ()
 	}
 
 	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
-	edit_cursor->set_position (edit_cursor->current_frame);
 	playhead_cursor->set_position (playhead_cursor->current_frame);
 
 	reset_hscrollbar_stepping ();
 	reset_scrolling_region ();
 
-	if (edit_cursor) edit_cursor->set_length (canvas_height);
 	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
 
-	if (marker_drag_line) {
-		marker_drag_line_points.back().set_y(canvas_height);
-		marker_drag_line->property_points() = marker_drag_line_points;
-	}
+	// EDIT CURSOR XXX set line height for selected markers here
 
 	if (range_marker_drag_rect) {
 		range_marker_drag_rect->property_y1() = 0.0;
@@ -718,7 +712,6 @@ Editor::canvas_horizontally_scrolled ()
 void
 Editor::color_handler()
 {
-	edit_cursor->canvas_item.property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditCursor.get();
 	playhead_cursor->canvas_item.property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_PlayHead.get();
 	verbose_canvas_cursor->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_VerboseCanvasCursor.get();
 

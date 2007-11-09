@@ -463,7 +463,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			*/
 			
 			switch (item_type) {
-			case EditCursorItem:
 			case PlayheadCursorItem:
 				start_cursor_grab (item, event);
 				return true;
@@ -977,7 +976,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		switch (item_type) {
 		/* see comments in button_press_handler */
-		case EditCursorItem:
 		case PlayheadCursorItem:
 		case MarkerItem:
 		case GainLineItem:
@@ -1222,7 +1220,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
-	case EditCursorItem:
 	case PlayheadCursorItem:
 		if (is_drawable()) {
 			track_canvas.get_window()->set_cursor (*grabber_cursor);
@@ -1364,7 +1361,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case RegionViewNameHighlight:
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
-	case EditCursorItem:
 	case PlayheadCursorItem:
 	/* <CMT Additions> */
 	case ImageFrameHandleStartItem:
@@ -1579,7 +1575,6 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 
 	switch (item_type) {
 	case PlayheadCursorItem:
-	case EditCursorItem:
 	case MarkerItem:
 	case GainControlPointItem:
 	case RedirectAutomationControlPointItem:
@@ -1765,21 +1760,6 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	return did_drag;
-}
-
-void
-Editor::set_edit_cursor (GdkEvent* event)
-{
-	nframes_t pointer_frame = event_frame (event);
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		if (snap_type != SnapToEditCursor) {
-			snap_to (pointer_frame);
-		}
-	}
-
-	edit_cursor->set_position (pointer_frame);
-	edit_cursor_clock.set (pointer_frame);
 }
 
 void
@@ -2052,7 +2032,7 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		if (cursor != edit_cursor || snap_type != SnapToEditCursor) {
+		if (cursor == playhead_cursor && snap_type != SnapToEditPoint) {
 			snap_to (adjusted_frame);
 		}
 	}
@@ -2061,11 +2041,7 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	cursor->set_position (adjusted_frame);
 	
-	if (cursor == edit_cursor) {
-		edit_cursor_clock.set (cursor->current_frame);
-	} else {
-		UpdateAllTransportClocks (cursor->current_frame);
-	}
+	UpdateAllTransportClocks (cursor->current_frame);
 
 	show_verbose_time_cursor (cursor->current_frame, 10);
 
@@ -2086,9 +2062,6 @@ Editor::cursor_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		if (session) {
 			session->request_locate (playhead_cursor->current_frame, drag_info.was_rolling);
 		}
-	} else if (item == &edit_cursor->canvas_item) {
-		edit_cursor->set_position (edit_cursor->current_frame);
-		edit_cursor_clock.set (edit_cursor->current_frame);
 	} 
 }
 
@@ -2197,7 +2170,13 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	/* call this to find out if its the start or end */
 	
-	real_location = find_location_from_marker (marker, is_start);
+	if ((real_location = find_location_from_marker (marker, is_start)) == 0) {
+		return;
+	}
+
+	if (real_location->locked()) {
+		return;
+	}
 
 	/* use the copy that we're "dragging" around */
 	
@@ -2267,13 +2246,17 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	Marker* marker = (Marker *) drag_info.data;
 	bool is_start;
 
-
 	begin_reversible_command ( _("move marker") );
 	XMLNode &before = session->locations()->get_state();
 	
 	Location * location = find_location_from_marker (marker, is_start);
-	
+
 	if (location) {
+
+		if (location->locked()) {
+			return;
+		}
+
 		if (location->is_mark()) {
 			location->set_start (drag_info.copied_location->start());
 		} else {
@@ -5040,7 +5023,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 	switch (snap_type) {
 	case SnapToFrame:
 	case SnapToMark:
-	case SnapToEditCursor:
+	case SnapToEditPoint:
 		return;
 
 	default:

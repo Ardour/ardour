@@ -130,7 +130,7 @@
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
 	       		<menuitem action='audition-at-mouse'/>
                		<menuitem action='brush-at-mouse'/>
-               		<menuitem action='set-edit-cursor'/>
+               		<menuitem action='set-edit-point'/>
                		<menuitem action='mute-unmute-region'/>
               	 	<menuitem action='set-playhead'/>
 	       		<menuitem action='split-region'/>

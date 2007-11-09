@@ -299,6 +299,14 @@ Editor::mouse_add_new_marker (nframes_t where)
                 XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 		session->commit_reversible_command ();
+
+		/* find the marker we just added */
+
+		LocationMarkers *lam = find_location_markers (location);
+		if (lam) {
+			/* make it the selected marker */
+			selection->set (lam->start);
+		}
 	}
 }
 
@@ -464,17 +472,21 @@ Editor::build_marker_menu (bool start_or_end)
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Locate to Mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from Mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Set Mark from Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Locate to here"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from here"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Move Mark to Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Hide Mark"), mem_fun(*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
 	if (start_or_end) return;
-	items.push_back (MenuElem (_("Rename Mark"), mem_fun(*this, &Editor::marker_menu_rename)));
-	items.push_back (MenuElem (_("Remove Mark"), mem_fun(*this, &Editor::marker_menu_remove)));
+	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
+	items.push_back (MenuElem (_("Lock"), bind (mem_fun(*this, &Editor::marker_menu_lock), true)));
+	items.push_back (MenuElem (_("Unlock"), bind (mem_fun(*this, &Editor::marker_menu_lock), false)));
 
+	items.push_back (SeparatorElem());
+
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
 }
 
 void
@@ -834,6 +846,31 @@ Editor::marker_menu_remove ()
 		remove_tempo_marker (marker_menu_item);
 	} else {
 		remove_marker (*marker_menu_item, (GdkEvent*) 0);
+	}
+}
+
+void
+Editor::marker_menu_lock (bool yn)
+{
+
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* loc;
+	bool ignored;
+
+	loc = find_location_from_marker (marker, ignored);
+
+	if (!loc) return;
+
+	if (yn) {
+		loc->lock();
+	} else {
+		loc->unlock ();
 	}
 }
 

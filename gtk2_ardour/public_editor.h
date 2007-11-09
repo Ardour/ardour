@@ -155,7 +155,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space() = 0;
 	virtual void restore_editing_space() = 0;
-	virtual nframes_t edit_cursor_position(bool sync) = 0;
+	virtual nframes64_t get_preferred_edit_position () const = 0;
 
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;

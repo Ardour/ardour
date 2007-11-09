@@ -1693,7 +1693,7 @@ void
 ARDOUR_UI::update_clocks ()
 {
 	if (!editor || !editor->dragging_playhead()) {
-		Clock (session->audible_frame(), false, editor->edit_cursor_position(false)); /* EMIT_SIGNAL */
+		Clock (session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
 	}
 }
 
@@ -2358,7 +2358,6 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 		session->set_clean ();
 	}
 
-	editor->edit_cursor_position (true);
 	enable_screen_updates ();
 	flush_pending ();
 	retval = 0;
@@ -2933,13 +2932,13 @@ void
 ARDOUR_UI::update_transport_clocks (nframes_t pos)
 {
 	if (Config->get_primary_clock_delta_edit_cursor()) {
-		primary_clock.set (pos, false, editor->edit_cursor_position(false), 1);
+		primary_clock.set (pos, false, editor->get_preferred_edit_position(), 1);
 	} else {
 		primary_clock.set (pos, 0, true);
 	}
 
 	if (Config->get_secondary_clock_delta_edit_cursor()) {
-		secondary_clock.set (pos, false, editor->edit_cursor_position(false), 2);
+		secondary_clock.set (pos, false, editor->get_preferred_edit_position(), 2);
 	} else {
 		secondary_clock.set (pos);
 	}

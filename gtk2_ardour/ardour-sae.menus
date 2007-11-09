@@ -76,7 +76,7 @@
                <menuitem action='editor-delete'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
-               <menuitem action='set-edit-cursor'/>
+               <menuitem action='set-edit-point'/>
 	       <menuitem action='remove-last-capture'/>
                <separator/>       
                <menu action="EditSelectRangeOptions">

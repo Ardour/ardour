@@ -24,7 +24,6 @@ enum ItemType {
 	RegionItem,
 	StreamItem,
 	PlayheadCursorItem,
-	EditCursorItem,
 	MarkerItem,
 	MarkerBarItem,
 	RangeMarkerBarItem,

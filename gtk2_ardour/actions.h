@@ -56,7 +56,7 @@ class ActionManager
 	static std::vector<Glib::RefPtr<Gtk::Action> > transport_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_sensitive_actions;
 	static std::vector<Glib::RefPtr<Gtk::Action> > jack_opposite_sensitive_actions;
-	static std::vector<Glib::RefPtr<Gtk::Action> > edit_cursor_in_region_sensitive_actions;
+	static std::vector<Glib::RefPtr<Gtk::Action> > edit_point_in_region_sensitive_actions;
 
 	static void map_some_state (const char* group, const char* action, bool (ARDOUR::Configuration::*get)() const);
 	static void toggle_config_state (const char* group, const char* action, bool (ARDOUR::Configuration::*set)(bool), bool (ARDOUR::Configuration::*get)(void) const);

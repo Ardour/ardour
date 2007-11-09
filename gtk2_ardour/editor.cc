@@ -121,7 +121,7 @@ static const gchar *_snap_type_strings[] = {
 	N_("Beats"),
 	N_("Bars"),
 	N_("Marks"),
-	N_("Edit Cursor"),
+	N_("Edit Point"),
 	N_("Region starts"),
 	N_("Region ends"),
 	N_("Region syncs"),
@@ -148,7 +148,7 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Center"),
 	N_("Playhead"),
  	N_("Mouse"),
- 	N_("Edit Cursor"),
+ 	N_("Marker"),
 	0
 };
 
@@ -252,7 +252,7 @@ Editor::Editor ()
 	set_snap_mode (snap_mode);
 
 	_edit_point = EditAtMouse;
-	set_edit_point (_edit_point);
+	set_edit_point_preference (_edit_point);
 
 	snap_threshold = 5.0;
 	bbt_beat_subdivision = 4;
@@ -312,7 +312,6 @@ Editor::Editor ()
 	current_timestretch = 0;
 	in_edit_group_row_change = false;
 	last_canvas_frame = 0;
-	edit_cursor = 0;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
 	canvas_idle_queued = false;
@@ -848,7 +847,6 @@ Editor::tie_vertical_scrolling ()
 	double y1 = vertical_adjustment.get_value();
 
 	playhead_cursor->set_y_axis (y1);
-	edit_cursor->set_y_axis (y1);
 	if (logo_item) {
 		logo_item->property_y() = y1;
 	}
@@ -886,11 +884,7 @@ Editor::instant_save ()
 void
 Editor::edit_cursor_clock_changed()
 {
-	if (edit_cursor->current_frame != edit_cursor_clock.current_time()) {
-		edit_cursor->set_position (edit_cursor_clock.current_time());
-	}
 }
-
 
 void
 Editor::zoom_adjustment_changed ()
@@ -1406,9 +1400,9 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		if (!with_selection) {
 			if (region_edit_menu_split_item) {
 				if (clicked_regionview && clicked_regionview->region()->covers (get_preferred_edit_position())) {
-					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, true);
+					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, true);
 				} else {
-					ActionManager::set_sensitive (ActionManager::edit_cursor_in_region_sensitive_actions, false);
+					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, false);
 				}
 			}
 			/*
@@ -1692,7 +1686,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
 	items.push_back (MenuElem (_("Lower to bottom layer"), mem_fun  (*this, &Editor::lower_region_to_bottom)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Define sync point"), mem_fun(*this, &Editor::set_region_sync_from_edit_cursor)));
+	items.push_back (MenuElem (_("Define sync point"), mem_fun(*this, &Editor::set_region_sync_from_edit_point)));
 	items.push_back (MenuElem (_("Remove sync point"), mem_fun(*this, &Editor::remove_region_sync)));
 	items.push_back (SeparatorElem());
 
@@ -1807,8 +1801,8 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	MenuList& trim_items = trim_menu->items();
 	trim_menu->set_name ("ArdourContextMenu");
 	
-	trim_items.push_back (MenuElem (_("Start to edit cursor"), mem_fun(*this, &Editor::trim_region_from_edit_cursor)));
-	trim_items.push_back (MenuElem (_("Edit cursor to end"), mem_fun(*this, &Editor::trim_region_to_edit_cursor)));
+	trim_items.push_back (MenuElem (_("Start to edit point"), mem_fun(*this, &Editor::trim_region_from_edit_point)));
+	trim_items.push_back (MenuElem (_("Edit point to end"), mem_fun(*this, &Editor::trim_region_to_edit_point)));
 			     
 	items.push_back (MenuElem (_("Trim"), *trim_menu));
 	items.push_back (SeparatorElem());
@@ -1895,7 +1889,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 	
-	play_items.push_back (MenuElem (_("Play from edit cursor"), mem_fun(*this, &Editor::play_from_edit_cursor)));
+	play_items.push_back (MenuElem (_("Play from edit point"), mem_fun(*this, &Editor::play_from_edit_point)));
 	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
 	play_items.push_back (MenuElem (_("Play region"), mem_fun(*this, &Editor::play_selected_region)));
 	play_items.push_back (SeparatorElem());
@@ -1917,11 +1911,11 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
 	select_items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
 	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true)));
-	select_items.push_back (MenuElem (_("Select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, false)));
+	select_items.push_back (MenuElem (_("Select all after edit point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
+	select_items.push_back (MenuElem (_("Select all before edit point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
 	select_items.push_back (MenuElem (_("Select all after playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
 	select_items.push_back (MenuElem (_("Select all before playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
-	select_items.push_back (MenuElem (_("Select all between cursors"), bind (mem_fun(*this, &Editor::select_all_selectables_between_cursors), playhead_cursor, edit_cursor)));
+	select_items.push_back (MenuElem (_("Select all between cursors"), mem_fun(*this, &Editor::select_all_selectables_between)));
 	select_items.push_back (SeparatorElem());
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
@@ -1934,8 +1928,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	
 	cutnpaste_items.push_back (MenuElem (_("Cut"), mem_fun(*this, &Editor::cut)));
 	cutnpaste_items.push_back (MenuElem (_("Copy"), mem_fun(*this, &Editor::copy)));
-	cutnpaste_items.push_back (MenuElem (_("Paste at edit cursor"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
-	cutnpaste_items.push_back (MenuElem (_("Paste at mouse"), mem_fun(*this, &Editor::mouse_paste)));
+	cutnpaste_items.push_back (MenuElem (_("Paste"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
 
 	cutnpaste_items.push_back (SeparatorElem());
 
@@ -1962,9 +1955,9 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	
 	edit_items.push_back (SeparatorElem());
 	nudge_items.push_back (MenuElem (_("Nudge entire track fwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit cursor fwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point fwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, true))));
 	nudge_items.push_back (MenuElem (_("Nudge entire track bwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit cursor bwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, false))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point bwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, false))));
 
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
@@ -1980,7 +1973,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 	
-	play_items.push_back (MenuElem (_("Play from edit cursor"), mem_fun(*this, &Editor::play_from_edit_cursor)));
+	play_items.push_back (MenuElem (_("Play from edit point"), mem_fun(*this, &Editor::play_from_edit_point)));
 	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
 	edit_items.push_back (MenuElem (_("Play"), *play_menu));
 
@@ -1995,8 +1988,8 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (MenuElem (_("Invert selection in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
 	select_items.push_back (MenuElem (_("Invert selection"), mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Select all after edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, true)));
-	select_items.push_back (MenuElem (_("Select all before edit cursor"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), edit_cursor, false)));
+	select_items.push_back (MenuElem (_("Select all after edit point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
+	select_items.push_back (MenuElem (_("Select all before edit point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
 	select_items.push_back (MenuElem (_("Select all after playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
 	select_items.push_back (MenuElem (_("Select all before playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
 
@@ -2018,9 +2011,9 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	
 	edit_items.push_back (SeparatorElem());
 	nudge_items.push_back (MenuElem (_("Nudge entire track fwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit cursor fwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point fwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, true))));
 	nudge_items.push_back (MenuElem (_("Nudge entire track bwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit cursor bwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, false))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point bwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, false))));
 
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
@@ -2065,7 +2058,7 @@ Editor::set_snap_mode (SnapMode mode)
 	instant_save ();
 }
 void
-Editor::set_edit_point (EditPoint ep)
+Editor::set_edit_point_preference (EditPoint ep)
 {
 	_edit_point = ep;
 	string str = edit_point_strings[(int)ep];
@@ -2126,13 +2119,6 @@ Editor::set_state (const XMLNode& node)
 		horizontal_adjustment.set_value (0);
 	}
 
-	if (session && (prop = node.property ("edit-cursor"))) {
-		nframes_t pos = atol (prop->value().c_str());
-		edit_cursor->set_position (pos);
-	} else {
-		edit_cursor->set_position (0);
-	}
-
 	if ((prop = node.property ("mixer-width"))) {
 		editor_mixer_strip_width = Width (string_2_enum (prop->value(), editor_mixer_strip_width));
 	}
@@ -2154,7 +2140,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("edit-point"))) {
-		set_edit_point ((EditPoint) string_2_enum (prop->value(), _edit_point));
+		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point));
 	}
 
 	if ((prop = node.property ("mouse-mode"))) {
@@ -2296,8 +2282,6 @@ Editor::get_state ()
 
 	snprintf (buf, sizeof (buf), "%" PRIu32, playhead_cursor->current_frame);
 	node->add_property ("playhead", buf);
-	snprintf (buf, sizeof (buf), "%" PRIu32, edit_cursor->current_frame);
-	node->add_property ("edit-cursor", buf);
 
 	node->add_property ("show-waveforms", _show_waveforms ? "yes" : "no");
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
@@ -2454,7 +2438,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
                 start = session->tempo_map().round_to_beat_subdivision (start, 3);
                 break;
 
-	case SnapToEditCursor:
+	case SnapToEditPoint:
 		start = get_preferred_edit_position ();
 		break;
 
@@ -2669,7 +2653,7 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Edit Cursor", FUDGE, 0);
+	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Playhead", FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
@@ -2678,8 +2662,6 @@ Editor::setup_toolbar ()
 	zoom_box.pack_start (zoom_out_button, false, false);
 	zoom_box.pack_start (zoom_in_button, false, false);
 	zoom_box.pack_start (zoom_out_full_button, false, false);
-
-	/* Edit Cursor / Snap */
 
 	snap_box.set_spacing (1);
 	snap_box.set_border_width (2);
@@ -3107,8 +3089,8 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToBar;
 	} else if (choice == _("Marks")) {
 		snaptype = SnapToMark;
-	} else if (choice == _("Edit Cursor")) {
-		snaptype = SnapToEditCursor;
+	} else if (choice == _("Edit Point")) {
+		snaptype = SnapToEditPoint;
 	} else if (choice == _("Region starts")) {
 		snaptype = SnapToRegionStart;
 	} else if (choice == _("Region ends")) {
@@ -3195,7 +3177,7 @@ Editor::zoom_focus_selection_done ()
 		focus_type = ZoomFocusPlayhead;
 	} else if (choice == _("Mouse")) {
 		focus_type = ZoomFocusMouse;
-	} else if (choice == _("Edit Cursor")) {
+	} else if (choice == _("Edit Point")) {
 		focus_type = ZoomFocusEdit;
 	} 
 	
@@ -3900,7 +3882,6 @@ Editor::set_frames_per_unit (double fpu)
 	reset_hscrollbar_stepping ();
 	reset_scrolling_region ();
 	
-	if (edit_cursor) edit_cursor->set_position (edit_cursor->current_frame);
 	if (playhead_cursor) playhead_cursor->set_position (playhead_cursor->current_frame);
 
 	instant_save ();
@@ -3972,21 +3953,13 @@ Editor::sort_track_selection ()
 	selection->tracks.sort (cmp);
 }
 
-nframes_t
-Editor::edit_cursor_position(bool sync)
-{
-	if (sync && edit_cursor->current_frame != edit_cursor_clock.current_time()) {
-		edit_cursor_clock.set(edit_cursor->current_frame, true);
-	}
-
-	return edit_cursor->current_frame;
-}
-
 nframes64_t
 Editor::get_preferred_edit_position() const
 {
 	bool ignored;
 	nframes64_t where;
+
+	// XXX EDIT CURSOR used to sync with edit cursor clock
 
 	switch (_edit_point) {
 	case EditAtPlayhead:

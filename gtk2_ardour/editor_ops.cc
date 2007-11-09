@@ -790,6 +790,160 @@ Editor::cursor_to_selection_end (Cursor *cursor)
 }
 
 void
+Editor::edit_point_to_region_point (RegionPoint point, int32_t dir)
+{
+	boost::shared_ptr<Region> r;
+	nframes_t pos;
+	Location* loc;
+	bool ignored;
+
+	if (!session || _edit_point != EditAtSelectedMarker || selection->markers.empty()) {
+		return;
+	}
+
+	if ((loc = find_location_from_marker (selection->markers.front(), ignored)) == 0) {
+		return;
+	}
+
+	TimeAxisView *ontrack = 0;
+
+	pos = loc->start();
+
+	// so we don't find the current region again..
+	if (dir>0 || pos>0)
+		pos+=dir;
+
+	if (!selection->tracks.empty()) {
+		
+		r = find_next_region (pos, point, dir, selection->tracks, &ontrack);
+		
+	} else if (clicked_trackview) {
+		
+		TrackViewList t;
+		t.push_back (clicked_trackview);
+		
+		r = find_next_region (pos, point, dir, t, &ontrack);
+		
+	} else {
+		
+		r = find_next_region (pos, point, dir, track_views, &ontrack);
+	}
+
+	if (r == 0) {
+		return;
+	}
+	
+	switch (point){
+	case Start:
+		pos = r->first_frame ();
+		break;
+
+	case End:
+		pos = r->last_frame ();
+		break;
+
+	case SyncPoint:
+		pos = r->adjust_to_sync (r->first_frame());
+		break;	
+	}
+	
+	float speed = 1.0f;
+	AudioTimeAxisView *atav;
+
+	if ( ontrack != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(ontrack)) != 0 ) {
+		if (atav->get_diskstream() != 0) {
+			speed = atav->get_diskstream()->speed();
+		}
+	}
+
+	pos = track_frame_to_session_frame(pos, speed);
+
+	loc->move_to (pos);
+}
+
+void
+Editor::edit_point_to_next_region_point (RegionPoint point)
+{
+	edit_point_to_region_point (point, 1);
+}
+
+void
+Editor::edit_point_to_previous_region_point (RegionPoint point)
+{
+	edit_point_to_region_point (point, -1);
+}
+
+void
+Editor::edit_point_to_selection_start ()
+{
+	nframes_t pos = 0;
+	Location* loc;
+	bool ignored;
+
+	if (!session || _edit_point != EditAtSelectedMarker || selection->markers.empty()) {
+		return;
+	}
+
+	if ((loc = find_location_from_marker (selection->markers.front(), ignored)) == 0) {
+		return;
+	}
+
+	switch (mouse_mode) {
+	case MouseObject:
+		if (!selection->regions.empty()) {
+			pos = selection->regions.start();
+		}
+		break;
+
+	case MouseRange:
+		if (!selection->time.empty()) {
+			pos = selection->time.start ();
+		}
+		break;
+
+	default:
+		return;
+	}
+
+	loc->move_to (pos);
+}
+
+void
+Editor::edit_point_to_selection_end ()
+{
+	nframes_t pos = 0;
+	Location* loc;
+	bool ignored;
+
+	if (!session || _edit_point != EditAtSelectedMarker || selection->markers.empty()) {
+		return;
+	}
+
+	if ((loc = find_location_from_marker (selection->markers.front(), ignored)) == 0) {
+		return;
+	}
+
+	switch (mouse_mode) {
+	case MouseObject:
+		if (!selection->regions.empty()) {
+			pos = selection->regions.end_frame();
+		}
+		break;
+
+	case MouseRange:
+		if (!selection->time.empty()) {
+			pos = selection->time.end_frame ();
+		}
+		break;
+
+	default:
+		return;
+	}
+
+	loc->move_to (pos);
+}
+
+void
 Editor::scroll_playhead (bool forward)
 {
 	nframes_t pos = playhead_cursor->current_frame;
@@ -940,7 +1094,7 @@ Editor::edit_cursor_backward ()
 		pos -= cnt;
 	}
 	
-	edit_cursor->set_position (pos);
+	// EDIT CURSOR edit_cursor->set_position (pos);
 }
 
 void
@@ -961,8 +1115,8 @@ Editor::edit_cursor_forward ()
 		}
 	}
 
-	pos = edit_cursor->current_frame;
-	edit_cursor->set_position (pos+cnt);
+	// pos = edit_cursor->current_frame;
+	// EDIT CURSOR edit_cursor->set_position (pos+cnt);
 }
 
 void
@@ -1198,7 +1352,7 @@ Editor::temporal_zoom (gdouble fpu)
 		break;
 
 	case ZoomFocusEdit:
-		/* try to keep the edit cursor in the center */
+		/* try to keep the edit point in the center */
 		if (get_preferred_edit_position() > new_page/2) {
 			leftmost_after_zoom = get_preferred_edit_position() - (new_page/2);
 		} else {
@@ -1722,7 +1876,7 @@ Editor::play_from_start ()
 }
 
 void
-Editor::play_from_edit_cursor ()
+Editor::play_from_edit_point ()
 {
 	session->request_locate (get_preferred_edit_position(), true);
 }
@@ -2349,19 +2503,19 @@ Editor::set_a_regions_sync_position (boost::shared_ptr<Region> region, nframes_t
 }
 
 void
-Editor::set_region_sync_from_edit_cursor ()
+Editor::set_region_sync_from_edit_point ()
 {
 	if (clicked_regionview == 0) {
 		return;
 	}
 
 	if (!clicked_regionview->region()->covers (get_preferred_edit_position())) {
-		error << _("Place the edit cursor at the desired sync point") << endmsg;
+		error << _("Place the edit point at the desired sync point") << endmsg;
 		return;
 	}
 
 	boost::shared_ptr<Region> region (clicked_regionview->region());
-	begin_reversible_command (_("set sync from edit cursor"));
+	begin_reversible_command (_("set sync from edit point"));
         XMLNode &before = region->playlist()->get_state();
 	region->set_sync_position (get_preferred_edit_position());
         XMLNode &after = region->playlist()->get_state();
@@ -2526,7 +2680,7 @@ Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint poi
 }	
 
 void
-Editor::trim_region_to_edit_cursor ()
+Editor::trim_region_to_edit_point ()
 {
 	if (clicked_regionview == 0) {
 		return;
@@ -2552,7 +2706,7 @@ Editor::trim_region_to_edit_cursor ()
 }
 
 void
-Editor::trim_region_from_edit_cursor ()
+Editor::trim_region_from_edit_point ()
 {
 	if (clicked_regionview == 0) {
 		return;
@@ -3158,15 +3312,13 @@ void
 Editor::center_playhead ()
 {
 	float page = canvas_width * frames_per_unit;
-
 	center_screen_internal (playhead_cursor->current_frame, page);
 }
 
 void
-Editor::center_edit_cursor ()
+Editor::center_edit_point ()
 {
 	float page = canvas_width * frames_per_unit;
-
 	center_screen_internal (get_preferred_edit_position(), page);
 }
 
@@ -3182,14 +3334,14 @@ Editor::clear_playlist (boost::shared_ptr<Playlist> playlist)
 }
 
 void
-Editor::nudge_track (bool use_edit_cursor, bool forwards)
+Editor::nudge_track (bool use_edit, bool forwards)
 {
 	boost::shared_ptr<Playlist> playlist; 
 	nframes_t distance;
 	nframes_t next_distance;
 	nframes_t start;
 
-	if (use_edit_cursor) {
+	if (use_edit) {
 		start = get_preferred_edit_position();
 	} else {
 		start = 0;

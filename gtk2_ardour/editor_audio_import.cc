@@ -142,7 +142,7 @@ Editor::external_audio_dialog ()
 	nframes64_t where;
 
 	switch (pos) {
-	case ImportAtEditCursor:
+	case ImportAtEditPoint:
 		where = get_preferred_edit_position ();
 		break;
 	case ImportAtTimestamp:

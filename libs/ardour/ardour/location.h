@@ -74,6 +74,10 @@ class Location : public PBD::StatefulDestructible
 	Location (const XMLNode&);
 	Location* operator= (const Location& other);
 
+	bool locked() const { return _locked; }
+	void lock() { _locked = true; changed (this); }
+	void unlock() { _locked = false; changed (this); }
+	
 	nframes_t start() { return _start; }
 	nframes_t end() { return _end; }
 	nframes_t length() { return _end - _start; }
@@ -81,6 +85,8 @@ class Location : public PBD::StatefulDestructible
 	int set_start (nframes_t s);
 	int set_end (nframes_t e);
 	int set (nframes_t start, nframes_t end);
+
+	int move_to (nframes_t pos);
 
 	const string& name() { return _name; }
 	void set_name (const string &str) { _name = str; name_changed(this); }
@@ -124,6 +130,7 @@ class Location : public PBD::StatefulDestructible
 	nframes_t     _start;
 	nframes_t     _end;
 	Flags         _flags;
+	bool          _locked;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
@@ -136,7 +143,7 @@ class Locations : public PBD::StatefulDestructible
 
 	Locations ();
 	~Locations ();
-
+	
 	void add (Location *, bool make_current = false);
 	void remove (Location *);
 	void clear ();
@@ -182,8 +189,8 @@ class Locations : public PBD::StatefulDestructible
 
   private:
 
-	LocationList       locations;
-	Location          *current_location;
+	LocationList         locations;
+	Location            *current_location;
 	mutable Glib::Mutex  lock;
 
 	int set_current_unlocked (Location *);
