@@ -132,7 +132,12 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "select-all-before-playhead", _("Select All Before Playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-between-cursors", _("Select All Between Cursors"), mem_fun(*this, &Editor::select_all_selectables_between));
+	act = ActionManager::register_action (editor_actions, "select-all-between-cursors", _("Select All Between Playhead & Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_between), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "select-all-within-cursors", _("Select All Between Playhead & Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_between), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "select-range-between-cursors", _("Select Range Between Playhead & Edit Point"), mem_fun(*this, &Editor::select_range_between));
 	ActionManager::session_sensitive_actions.push_back (act);
 
        	act = ActionManager::register_action (editor_actions, "select-all-in-punch-range", _("Select All in Punch Range"), mem_fun(*this, &Editor::select_all_selectables_using_punch));

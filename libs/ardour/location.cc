@@ -73,6 +73,9 @@ Location::operator= (const Location& other)
 	_start = other._start;
 	_end = other._end;
 	_flags = other._flags;
+
+	/* copy is not locked even if original was */
+
 	_locked = false;
 
 	/* "changed" not emitted on purpose */

@@ -2889,6 +2889,20 @@ Editor::cut_copy (CutCopyOp op)
 	
 	cut_buffer->clear ();
 
+	if (entered_marker) {
+
+		/* cut/delete op while pointing at a marker */
+
+		bool ignored;
+		Location* loc = find_location_from_marker (entered_marker, ignored);
+
+		if (session && loc) {
+			Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
+		}
+
+		return;
+	}
+
 	switch (current_mouse_mode()) {
 	case MouseObject: 
 		if (!selection->regions.empty() || !selection->points.empty()) {
@@ -3103,7 +3117,15 @@ Editor::cut_copy_regions (CutCopyOp op)
 void
 Editor::cut_copy_ranges (CutCopyOp op)
 {
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	TrackSelection* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackSelection::iterator i = ts->begin(); i != ts->end(); ++i) {
 		(*i)->cut_copy_clear (*selection, op);
 	}
 }

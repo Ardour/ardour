@@ -81,6 +81,7 @@
 	       <menuitem action='remove-last-capture'/>
                <separator/>       
                <menu action="EditSelectRangeOptions">
+                   <menuitem action='select-range-between-cursors'/>
                    <menuitem action='extend-range-to-start-of-region'/>
                    <menuitem action='extend-range-to-end-of-region'/>
                    <menuitem action='start-range'/>
@@ -94,6 +95,7 @@
                    <menuitem action='select-all-after-playhead'/>
                    <menuitem action='select-all-before-playhead'/>
                    <menuitem action='select-all-between-cursors'/>
+                   <menuitem action='select-all-within-cursors'/>
                    <menuitem action='select-all-in-punch-range'/>
                    <menuitem action='select-all-in-loop-range'/>
                </menu>

@@ -23,7 +23,7 @@
 #include <string>
 #include <glib.h>
 #include <ardour/ardour.h>
-#include <sigc++/signal.h>
+#include <pbd/destructible.h>
 
 #include "canvas.h"
 
@@ -34,7 +34,7 @@ namespace ARDOUR {
 
 class PublicEditor;
 
-class Marker : public sigc::trackable
+class Marker : public PBD::Destructible
 {
   public:
 	enum Type {

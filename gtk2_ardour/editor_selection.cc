@@ -1034,7 +1034,7 @@ Editor::select_all_selectables_using_edit (bool after)
 }
 
 void
-Editor::select_all_selectables_between ()
+Editor::select_all_selectables_between (bool within)
 {
         nframes64_t start;
 	nframes64_t end;
@@ -1055,8 +1055,6 @@ Editor::select_all_selectables_between ()
 		swap (start, end);
 	}
 
-	begin_reversible_command (_("select all between cursors"));
-
 	end -= 1;
 	
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
@@ -1066,6 +1064,32 @@ Editor::select_all_selectables_between ()
 		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
 	}
 	selection->set (touched);
-	commit_reversible_command ();
 }
 
+void
+Editor::select_range_between ()
+{
+        nframes64_t start;
+	nframes64_t end;
+	list<Selectable *> touched;
+
+	if (_edit_point == EditAtPlayhead) {
+		return;
+	}
+	
+	start = get_preferred_edit_position();
+	end = playhead_cursor->current_frame;
+
+	if (start == end) {
+		return;
+	}
+
+	if (start > end) {
+		swap (start, end);
+	}
+
+	end -= 1;
+
+	set_mouse_mode (MouseRange);
+	selection->set (0, start, end);
+}

@@ -273,6 +273,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 Marker::~Marker ()
 {
+	drop_references ();
+
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete text;
 	delete mark;

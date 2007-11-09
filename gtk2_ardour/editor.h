@@ -653,7 +653,8 @@ class Editor : public PublicEditor
 
 	void    select_all_selectables_using_cursor (Cursor *, bool);
 	void    select_all_selectables_using_edit (bool);
-	void    select_all_selectables_between ();
+	void    select_all_selectables_between (bool within);
+	void    select_range_between ();
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 

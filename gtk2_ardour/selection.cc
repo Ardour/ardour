@@ -772,11 +772,17 @@ Selection::remove (Marker* m)
 	}
 }
 
-
 void
 Selection::add (Marker* m)
 {
 	if (find (markers.begin(), markers.end(), m) == markers.end()) {
+
+		/* disambiguate which remove() for the compiler */
+		
+		void (Selection::*pmf)(Marker*) = &Selection::remove;
+
+		m->GoingAway.connect (bind (mem_fun (*this, pmf), m));
+
 		markers.push_back (m);
 		MarkersChanged();
 	}
