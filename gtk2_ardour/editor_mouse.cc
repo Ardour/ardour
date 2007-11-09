@@ -1556,8 +1556,8 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		*/
 		if (!drag_info.move_threshold_passed) {
 
-			bool x_threshold_passed =  (llabs ((nframes64_t) (drag_info.current_pointer_x - drag_info.grab_x)) > 4LL);
-			bool y_threshold_passed =  (llabs ((nframes64_t) (drag_info.current_pointer_y - drag_info.grab_y)) > 4LL);
+			bool x_threshold_passed =  (::llabs ((nframes64_t) (drag_info.current_pointer_x - drag_info.grab_x)) > 4LL);
+			bool y_threshold_passed =  (::llabs ((nframes64_t) (drag_info.current_pointer_y - drag_info.grab_y)) > 4LL);
 			
 			drag_info.move_threshold_passed = (x_threshold_passed || y_threshold_passed);
 			
