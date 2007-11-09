@@ -1353,7 +1353,7 @@ class Editor : public PublicEditor
 
 	void editor_mixer_button_toggled ();
 
-	AudioClock               edit_cursor_clock;
+	AudioClock               edit_point_clock;
 	AudioClock               zoom_range_clock;
 	Gtk::Button              zoom_in_button;
 	Gtk::Button              zoom_out_button;
@@ -1417,7 +1417,7 @@ class Editor : public PublicEditor
 
 	void                zoom_adjustment_changed();
 
-	void                edit_cursor_clock_changed();
+	void                edit_point_clock_changed();
 	
 	void setup_toolbar ();
 
@@ -1925,6 +1925,10 @@ class Editor : public PublicEditor
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
 	std::vector<std::string> edit_point_strings;
+
+	void selected_marker_moved (ARDOUR::Location*);
+	sigc::connection edit_point_clock_connection_a;
+	sigc::connection edit_point_clock_connection_b;
 
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 

@@ -167,8 +167,6 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		if (snap_type != Editing::SnapToEditPoint) {
 			snap_to (where);
 		}
-		// EDIT CURSOR XXX what to do here edit_cursor->set_position (where);
-		// EDIT CURSOR XXX what to do here edit_cursor_clock.set (where);
 		break;
 
 	default:
@@ -210,8 +208,6 @@ Editor::ruler_button_release (GdkEventButton* ev)
 		if (snap_type != Editing::SnapToEditPoint) {
 			snap_to (where);
 		}
-		// EDIT CURSOR XXX what to do here edit_cursor->set_position (where);
-		// ditto XXX edit_cursor_clock.set (where);
 		break;
 
 	case 3:

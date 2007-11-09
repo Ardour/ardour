@@ -1079,8 +1079,32 @@ Editor::marker_selection_changed ()
 		}
 	}
 
+	edit_point_clock_connection_a.disconnect();
+	edit_point_clock_connection_b.disconnect();
+
+	if (selection->markers.empty()) {
+		edit_point_clock.set (0);
+		return;
+	}
+
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 		(*x)->add_line (cursor_group, canvas_height);
 		(*x)->show_line ();
 	}
+
+	edit_point_clock.set (selection->markers.front()->position());
+
+	bool ignored;
+	Location* loc = find_location_from_marker (selection->markers.front(), ignored);
+
+	if (loc) {
+		edit_point_clock_connection_a = loc->changed.connect (mem_fun (*this, &Editor::selected_marker_moved));
+		edit_point_clock_connection_b = loc->start_changed.connect (mem_fun (*this, &Editor::selected_marker_moved));
+	}
+}
+
+void
+Editor::selected_marker_moved (Location* loc)
+{
+	edit_point_clock.set (loc->start());
 }

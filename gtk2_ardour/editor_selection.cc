@@ -1099,9 +1099,15 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 
 		switch (_edit_point) {
 		case EditAtPlayhead:
-			/* use mouse + playhead */
-			start = m;
-			end = session->audible_frame();
+			if (selection->markers.empty()) {
+				/* use mouse + playhead */
+				start = m;
+				end = session->audible_frame();
+			} else {
+				/* use playhead + selected marker */
+				start = session->audible_frame();
+				end = selection->markers.front()->position();
+			}
 			break;
 			
 		case EditAtMouse:

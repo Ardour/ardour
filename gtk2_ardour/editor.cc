@@ -195,7 +195,7 @@ Editor::Editor ()
 
 	  /* tool bar related */
 
-	  edit_cursor_clock (X_("editcursor"), false, X_("EditCursorClock"), true),
+	  edit_point_clock (X_("editpoint"), false, X_("EditPointClock"), true),
 	  zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, true),
 	  
 	  toolbar_selection_clock_table (2,3),
@@ -376,7 +376,7 @@ Editor::Editor ()
 	build_cursors ();
 	setup_toolbar ();
 
- 	edit_cursor_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_cursor_clock_changed));
+ 	edit_point_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_point_clock_changed));
 	
 	time_canvas_vbox.pack_start (*_ruler_separator, false, false);
 	time_canvas_vbox.pack_start (*minsec_ruler, false, false);
@@ -882,8 +882,20 @@ Editor::instant_save ()
 }
 
 void
-Editor::edit_cursor_clock_changed()
+Editor::edit_point_clock_changed()
 {
+	if (selection->markers.empty()) {
+		return;
+	}
+
+	bool ignored;
+	Location* loc = find_location_from_marker (selection->markers.front(), ignored);
+
+	if (!loc) {
+		return;
+	}
+
+	loc->move_to (edit_point_clock.current_time());
 }
 
 void
@@ -1135,7 +1147,7 @@ Editor::connect_to_session (Session *t)
 
 	edit_groups_changed ();
 
-	edit_cursor_clock.set_session (session);
+	edit_point_clock.set_session (session);
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
@@ -2688,7 +2700,7 @@ Editor::setup_toolbar ()
 	edit_point_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_point_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (edit_point_selector, _("Edit point"));
 
-	snap_box.pack_start (edit_cursor_clock, false, false);
+	snap_box.pack_start (edit_point_clock, false, false);
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
 	snap_box.pack_start (edit_point_selector, false, false);
