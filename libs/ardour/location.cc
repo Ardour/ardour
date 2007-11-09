@@ -52,6 +52,9 @@ Location::Location (const Location& other)
 
 	_flags = Flags (_flags & ~IsStart);
 	_flags = Flags (_flags & ~IsEnd);
+
+	/* copy is not locked even if original was */
+
 	_locked = false;
 }
 

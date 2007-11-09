@@ -62,12 +62,14 @@ class Location : public PBD::StatefulDestructible
 		: _name (name),
 		_start (sample_start),
 		_end (sample_end),
-		_flags (bits) { }
+		_flags (bits),
+		_locked (false) { }
 	
 	Location () {
 		_start = 0;
 		_end = 0;
 		_flags = Flags (0);
+		_locked = false;
 	}
 
 	Location (const Location& other);
