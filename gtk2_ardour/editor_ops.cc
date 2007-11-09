@@ -2323,16 +2323,37 @@ Editor::separate_regions_using_location (Location& loc)
 void
 Editor::crop_region_to_selection ()
 {
-	if (selection->time.empty() || selection->tracks.empty()) {
-		return;
-	}
+	if (!selection->time.empty()) {
 
+		crop_region_to (selection->time.start(), selection->time.end_frame());
+
+	} else if (_edit_point != EditAtPlayhead) {
+
+		nframes64_t start;
+		nframes64_t end;
+
+		if (get_edit_op_range (start, end)) {
+			crop_region_to (start, end);
+		}
+	}
+		
+}		
+
+void
+Editor::crop_region_to (nframes_t start, nframes_t end)
+{
 	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Playlist> playlist;
+	TrackSelection* ts;
 
-	sort_track_selection ();
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		sort_track_selection ();
+		ts = &selection->tracks;
+	}
 	
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	for (TrackSelection::iterator i = ts->begin(); i != ts->end(); ++i) {
 		
 		AudioTimeAxisView* atv;
 		
@@ -2357,8 +2378,8 @@ Editor::crop_region_to_selection ()
 		return;
 	}
 		
-	nframes_t start;
-	nframes_t end;
+	nframes_t the_start;
+	nframes_t the_end;
 	nframes_t cnt;
 	
 	begin_reversible_command (_("trim to selection"));
@@ -2366,10 +2387,10 @@ Editor::crop_region_to_selection ()
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		
 		boost::shared_ptr<Region> region;
-		
-		start = selection->time.start();
-		
-		if ((region = (*i)->top_region_at(start)) == 0) {
+	
+		the_start = start;
+	
+		if ((region = (*i)->top_region_at(the_start)) == 0) {
 			continue;
 		}
 		
@@ -2377,17 +2398,17 @@ Editor::crop_region_to_selection ()
 		   if the selection extends beyond the region
 		*/
 		
-		start = max (start, region->position());
-		if (max_frames - start < region->length()) {
-			end = start + region->length() - 1;
+		the_start = max (the_start, region->position());
+		if (max_frames - the_start < region->length()) {
+			the_end = the_start + region->length() - 1;
 		} else {
-			end = max_frames;
+			the_end = max_frames;
 		}
-		end = min (selection->time.end_frame(), end);
-		cnt = end - start + 1;
+		the_end = min (end, the_end);
+		cnt = the_end - the_start + 1;
 		
 		XMLNode &before = (*i)->get_state();
-		region->trim_to (start, cnt, this);
+		region->trim_to (the_start, cnt, this);
 		XMLNode &after = (*i)->get_state();
 		session->add_command (new MementoCommand<Playlist>(*(*i), &before, &after));
 	}
@@ -2927,21 +2948,31 @@ Editor::cut_copy (CutCopyOp op)
 			}
 
 			commit_reversible_command ();	
+			break; // terminate case statement here
+		} 
+		if (!selection->time.empty()) {
+			/* don't cause suprises */
+			break;
 		}
-		break;
+		// fall thru if there was nothing selected
 		
 	case MouseRange:
-		if (!selection->time.empty()) {
-
-			begin_reversible_command (opname + _(" range"));
-			cut_copy_ranges (op);
-			commit_reversible_command ();
-
-			if (op == Cut) {
-				selection->clear_time ();
+		if (selection->time.empty()) {
+			nframes64_t start, end;
+			if (!get_edit_op_range (start, end)) {
+				return;
 			}
-			
+			selection->set (0, start, end);
 		}
+			
+		begin_reversible_command (opname + _(" range"));
+		cut_copy_ranges (op);
+		commit_reversible_command ();
+		
+		if (op == Cut) {
+			selection->clear_time ();
+		}
+
 		break;
 		
 	default:

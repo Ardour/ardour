@@ -1040,22 +1040,9 @@ Editor::select_all_selectables_between (bool within)
 	nframes64_t end;
 	list<Selectable *> touched;
 
-	if (_edit_point == EditAtPlayhead) {
+	if (!get_edit_op_range (start, end)) {
 		return;
 	}
-	
-	start = get_preferred_edit_position();
-	end = playhead_cursor->current_frame;
-
-	if (start == end) {
-		return;
-	}
-
-	if (start > end) {
-		swap (start, end);
-	}
-
-	end -= 1;
 	
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
@@ -1063,6 +1050,7 @@ Editor::select_all_selectables_between (bool within)
 		}
 		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
 	}
+
 	selection->set (touched);
 }
 
@@ -1071,25 +1059,70 @@ Editor::select_range_between ()
 {
         nframes64_t start;
 	nframes64_t end;
-	list<Selectable *> touched;
-
-	if (_edit_point == EditAtPlayhead) {
+	
+	if (!get_edit_op_range (start, end)) {
 		return;
 	}
-	
-	start = get_preferred_edit_position();
-	end = playhead_cursor->current_frame;
+
+	set_mouse_mode (MouseRange);
+	selection->set (0, start, end);
+}
+
+bool
+Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
+{
+	nframes64_t m;
+	bool ignored;
+
+	/* in range mode, use any existing selection */
+
+	if (mouse_mode == MouseRange && !selection->time.empty()) {
+		/* we know that these are ordered */
+		start = selection->time.start();
+		end = selection->time.end_frame();
+		return true;
+	}
+
+	if (!mouse_frame (m, ignored)) {
+		/* mouse is not in a canvas, try playhead+selected marker.
+		   this is probably most true when using menus.
+		 */
+
+		if (selection->markers.empty()) {
+			return false;
+		}
+
+		start = selection->markers.front()->position();
+		end = session->audible_frame();
+
+	} else {
+
+		switch (_edit_point) {
+		case EditAtPlayhead:
+			/* use mouse + playhead */
+			start = m;
+			end = session->audible_frame();
+			break;
+			
+		case EditAtMouse:
+		case EditAtSelectedMarker:
+			/* use mouse + selected marker */
+			if (selection->markers.empty()) {
+				return false;
+			}
+			start = selection->markers.front()->position();
+			end = m;
+			break;
+		}
+	}
 
 	if (start == end) {
-		return;
+		return false;
 	}
 
 	if (start > end) {
 		swap (start, end);
 	}
 
-	end -= 1;
-
-	set_mouse_mode (MouseRange);
-	selection->set (0, start, end);
+	return true;
 }

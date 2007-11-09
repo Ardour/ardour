@@ -45,6 +45,7 @@ Editor::register_actions ()
 	/* non-operative menu items for menu bar */
 
 	ActionManager::register_action (editor_actions, X_("Edit"), _("Edit"));
+	ActionManager::register_action (editor_actions, X_("Select"), _("Select"));
 	ActionManager::register_action (editor_actions, X_("EditSelectRegionOptions"), _("Select Regions"));
 	ActionManager::register_action (editor_actions, X_("EditSelectRangeOptions"), _("Select Range Operations"));
 	ActionManager::register_action (editor_actions, X_("EditCursorMovementOptions"), _("Move Selected Marker"));

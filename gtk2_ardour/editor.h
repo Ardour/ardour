@@ -403,7 +403,10 @@ class Editor : public PublicEditor
 	struct LocationMarkers {
 	    Marker* start;
 	    Marker* end;
+	    bool    valid;
 
+	    LocationMarkers () : start(0), end(0), valid (true) {}
+	    
 	    ~LocationMarkers ();
 
 	    void hide();
@@ -906,6 +909,7 @@ class Editor : public PublicEditor
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
 	void crop_region_to_selection ();
+	void crop_region_to (nframes_t start, nframes_t end);
 	void set_a_regions_sync_position (boost::shared_ptr<ARDOUR::Region>, nframes_t);
 	void set_region_sync_from_edit_point ();
 	void remove_region_sync();
@@ -1921,6 +1925,8 @@ class Editor : public PublicEditor
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
 	std::vector<std::string> edit_point_strings;
+
+	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 
 	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
 

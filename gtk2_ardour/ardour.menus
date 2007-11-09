@@ -80,25 +80,6 @@
                <menuitem action='editor-paste'/>
 	       <menuitem action='remove-last-capture'/>
                <separator/>       
-               <menu action="EditSelectRangeOptions">
-                   <menuitem action='select-range-between-cursors'/>
-                   <menuitem action='extend-range-to-start-of-region'/>
-                   <menuitem action='extend-range-to-end-of-region'/>
-                   <menuitem action='start-range'/>
-                   <menuitem action='finish-range'/>
-                   <menuitem action='finish-add-range'/>
-               </menu>
-               <menu action="EditSelectRegionOptions">
-                   <menuitem action='select-all'/>
-                   <menuitem action='select-all-after-edit-cursor'/>
-                   <menuitem action='select-all-before-edit-cursor'/>
-                   <menuitem action='select-all-after-playhead'/>
-                   <menuitem action='select-all-before-playhead'/>
-                   <menuitem action='select-all-between-cursors'/>
-                   <menuitem action='select-all-within-cursors'/>
-                   <menuitem action='select-all-in-punch-range'/>
-                   <menuitem action='select-all-in-loop-range'/>
-               </menu>
 	       <menu action='EditCursorMovementOptions'>
                    <menuitem action='edit-cursor-to-next-region-start'/>
     	           <menuitem action='edit-cursor-to-next-region-end'/>
@@ -110,24 +91,6 @@
             	   <menuitem action='edit-to-playhead'/>
     	           <menuitem action='edit-cursor-to-range-start'/>
 	           <menuitem action='edit-cursor-to-range-end'/>
-	       </menu>
-	       <menu action='RegionEditOps'>
-                   <menuitem action='crop'/>
-                   <menuitem action='duplicate-region'/>
-                   <menuitem action='insert-region'/>
-               	   <menuitem action='normalize-region'/>
-                   <separator/>       
-	           <menuitem action="nudge-forward"/>
-         	   <menuitem action="nudge-next-forward"/>
-	           <menuitem action="nudge-backward"/>
-        	   <menuitem action="nudge-next-backward"/>
-                   <separator/>       
-		   <menuitem action='align-regions-start'/>
-		   <menuitem action='align-regions-start-relative'/>
-		   <menuitem action='align-regions-end'/>
-		   <menuitem action='align-regions-end-relative'/>
-		   <menuitem action='align-regions-sync'/>
-		   <menuitem action='align-regions-sync-relative'/>
 	       </menu>
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
 	       		<menuitem action='audition-at-mouse'/>
@@ -145,6 +108,44 @@
 			<menuitem action='set-mouse-mode-timefx'/>
           </menu>
         </menu>         
+	<menu name='Select' action='Select'>
+                   <menuitem action='select-range-between-cursors'/>
+                   <menuitem action='extend-range-to-start-of-region'/>
+                   <menuitem action='extend-range-to-end-of-region'/>
+                   <menuitem action='start-range'/>
+                   <menuitem action='finish-range'/>
+                   <menuitem action='finish-add-range'/>
+		   <separator/>
+                   <menuitem action='select-all'/>
+                   <menuitem action='select-all-after-edit-cursor'/>
+                   <menuitem action='select-all-before-edit-cursor'/>
+                   <menuitem action='select-all-after-playhead'/>
+                   <menuitem action='select-all-before-playhead'/>
+                   <menuitem action='select-all-between-cursors'/>
+                   <menuitem action='select-all-within-cursors'/>
+                   <menuitem action='select-all-in-punch-range'/>
+                   <menuitem action='select-all-in-loop-range'/>
+	</menu>
+	<menu name='Regions' action='Regions'>
+                   <menuitem action='crop'/>
+                   <menuitem action='duplicate-region'/>
+                   <menuitem action='insert-region'/>
+               	   <menuitem action='normalize-region'/>
+                   <separator/>       
+	           <menuitem action="nudge-forward"/>
+         	   <menuitem action="nudge-next-forward"/>
+	           <menuitem action="nudge-backward"/>
+        	   <menuitem action="nudge-next-backward"/>
+        	   <menuitem action='split-region'/>
+	       	   <menuitem action='set-region-sync-position'/>
+                   <separator/>       
+		   <menuitem action='align-regions-start'/>
+		   <menuitem action='align-regions-start-relative'/>
+		   <menuitem action='align-regions-end'/>
+		   <menuitem action='align-regions-end-relative'/>
+		   <menuitem action='align-regions-sync'/>
+		   <menuitem action='align-regions-sync-relative'/>
+	</menu>
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>
                    <menuitem action='zoom-focus-left'/>

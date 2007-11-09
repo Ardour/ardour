@@ -223,11 +223,43 @@ Editor::find_location_from_marker (Marker *marker, bool& is_start) const
 void
 Editor::refresh_location_display_internal (Locations::LocationList& locations)
 {
-	clear_marker_display ();
+	/* invalidate all */
+
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		i->second->valid = false;
+	}
 	
+	/* add new ones */
+
 	for (Locations::LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+
+		LocationMarkerMap::iterator x;
+
+		if ((x = location_markers.find (*i)) != location_markers.end()) {
+			x->second->valid = true;
+			continue;
+		}
+
 		add_new_location (*i);
 	}
+
+	/* remove dead ones */
+
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ) {
+
+		LocationMarkerMap::iterator tmp;
+
+		tmp = i;
+		++tmp;
+
+		if (!i->second->valid) {
+			delete i->second;
+			location_markers.erase (i);
+		} 
+
+		i = tmp;
+	}
+	
 }
 
 void
