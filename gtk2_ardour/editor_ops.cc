@@ -1041,26 +1041,32 @@ Editor::playhead_forward ()
 void
 Editor::cursor_align (bool playhead_to_edit)
 {
+	if (!session) {
+		return;
+	}
+
 	if (playhead_to_edit) {
-		if (session) {
-			session->request_locate (get_preferred_edit_position());
+
+		if (selection->markers.empty()) {
+			return;
 		}
+		
+		session->request_locate (selection->markers.front()->position(), session->transport_rolling());
+	
 	} else {
-		if (_edit_point == EditAtSelectedMarker) {
 
-			/* move selected markers to playhead */
-
-			for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
-				bool ignored;
-
-				Location* loc = find_location_from_marker (*i, ignored);
-
-				if (loc->is_mark()) {
-					loc->set_start (playhead_cursor->current_frame);
-				} else {
-					loc->set (playhead_cursor->current_frame,
-						  playhead_cursor->current_frame + loc->length());
-				}
+		/* move selected markers to playhead */
+		
+		for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
+			bool ignored;
+			
+			Location* loc = find_location_from_marker (*i, ignored);
+			
+			if (loc->is_mark()) {
+				loc->set_start (playhead_cursor->current_frame);
+			} else {
+				loc->set (playhead_cursor->current_frame,
+					  playhead_cursor->current_frame + loc->length());
 			}
 		}
 	}
