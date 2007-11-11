@@ -3973,32 +3973,36 @@ nframes64_t
 Editor::get_preferred_edit_position() const
 {
 	bool ignored;
-	nframes64_t where;
+	nframes64_t where = 0;
 
 	// XXX EDIT CURSOR used to sync with edit cursor clock
 
 	switch (_edit_point) {
 	case EditAtPlayhead:
-		return playhead_cursor->current_frame;
+		where = session->audible_frame();
+		break;
 		
 	case EditAtSelectedMarker:
 		if (!selection->markers.empty()) {
 			bool whocares;
 			Location* loc = find_location_from_marker (selection->markers.front(), whocares);
 			if (loc) {
-				return loc->start();
+				where =  loc->start();
 			}
 		} 
 		/* fallthru */
 		
 	default:
 	case EditAtMouse:
-		if (mouse_frame (where, ignored)) {
-			return where;
-		} 
+		if (!mouse_frame (where, ignored)) {
+			/* XXX not right */
+			return 0;
+		}
 	}
 
-	return -1;
+	// XXX MAKE ME SNAP
+	// snap_to (where);
+	return where;
 }
 
 void

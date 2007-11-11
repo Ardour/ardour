@@ -132,8 +132,7 @@ Editor::kbd_do_split (GdkEvent* ev)
 {
 	if (entered_regionview) {
 
-		nframes_t where = event_frame (ev);
-		snap_to (where);
+		nframes_t where = get_preferred_edit_position();
 
 		if (selection->regions.contains (entered_regionview)) {
 			split_regions_at (where, selection->regions);
