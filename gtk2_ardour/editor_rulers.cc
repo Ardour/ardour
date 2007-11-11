@@ -659,20 +659,6 @@ Editor::update_ruler_visibility ()
 		tempo_group->hide();
 	}
 	
-	if (ruler_shown[ruler_time_marker]) {
-		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
-		old_unit_pos = marker_group->property_y();
-		if (tbpos != old_unit_pos) {
-			marker_group->move ( 0.0, tbpos - old_unit_pos);
-		}
-		marker_group->show();
-		tbpos += timebar_height;
-		visible_timebars++;
-	}
-	else {
-		marker_group->hide();
-	}
-	
 	if (ruler_shown[ruler_time_range_marker]) {
 		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = range_marker_group->property_y();
@@ -699,6 +685,20 @@ Editor::update_ruler_visibility ()
 	}
 	else {
 		transport_marker_group->hide();
+	}
+	
+	if (ruler_shown[ruler_time_marker]) {
+		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
+		old_unit_pos = marker_group->property_y();
+		if (tbpos != old_unit_pos) {
+			marker_group->move ( 0.0, tbpos - old_unit_pos);
+		}
+		marker_group->show();
+		tbpos += timebar_height;
+		visible_timebars++;
+	}
+	else {
+		marker_group->hide();
 	}
 	
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
