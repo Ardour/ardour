@@ -344,7 +344,7 @@ class Editor : public PublicEditor
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes_t, double);
 
-	nframes64_t get_preferred_edit_position () const;
+	nframes64_t get_preferred_edit_position ();
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
@@ -942,6 +942,8 @@ class Editor : public PublicEditor
 
 	void reset_focus ();
 
+	void split ();
+
 	void cut ();
 	void copy ();
 	void paste (float times);
@@ -1139,6 +1141,7 @@ class Editor : public PublicEditor
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	bool _dragging_playhead;
+	bool _dragging_edit_point;
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -1234,23 +1237,15 @@ class Editor : public PublicEditor
 	void track_canvas_allocate (Gtk::Allocation alloc);
 	bool track_canvas_size_allocated ();
 
-	void set_playhead_cursor (GdkEvent* event);
+	void set_playhead_cursor ();
 
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
-	void kbd_set_playhead_cursor ();
-	void kbd_set_edit_point ();
 	void kbd_mute_unmute_region ();
-	void kbd_split ();
 	void kbd_set_sync_position ();
-	void kbd_align (ARDOUR::RegionPoint);
-	void kbd_align_relative (ARDOUR::RegionPoint);
 	void kbd_brush ();
 	void kbd_audition ();
 
-	void kbd_do_split (GdkEvent*);
 	void kbd_do_set_sync_position (GdkEvent* ev);
-	void kbd_do_align (GdkEvent*, ARDOUR::RegionPoint);
-	void kbd_do_align_relative (GdkEvent*, ARDOUR::RegionPoint);
 	void kbd_do_brush (GdkEvent*);
 	void kbd_do_audition (GdkEvent*);
 
@@ -1920,7 +1915,7 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText edit_point_selector;
 
 	void set_edit_point_preference (Editing::EditPoint ep);
-	void set_edit_point (GdkEvent* ev);
+	void set_edit_point ();
 	void edit_point_selection_done ();
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);

@@ -2583,13 +2583,31 @@ Editor::naturalize ()
 void
 Editor::align (RegionPoint what)
 {
-	align_selection (what, get_preferred_edit_position(), selection->regions);
+	nframes64_t where = get_preferred_edit_position();
+
+	if (!selection->regions.empty()) {
+		align_selection (what, where, selection->regions);
+	} else {
+
+		RegionSelection rs;
+		rs = get_regions_at (where, selection->tracks);
+		align_selection (what, where, rs);
+	}
 }
 
 void
 Editor::align_relative (RegionPoint what)
 {
-	align_selection_relative (what, get_preferred_edit_position(), selection->regions);
+	nframes64_t where = get_preferred_edit_position();
+
+	if (!selection->regions.empty()) {
+		align_selection_relative (what, where, selection->regions);
+	} else {
+
+		RegionSelection rs;
+		rs = get_regions_at (where, selection->tracks);
+		align_selection_relative (what, where, rs);
+	}
 }
 
 struct RegionSortByTime {
@@ -3833,5 +3851,70 @@ Editor::update_xfade_visibility ()
 				v->hide_all_xfades ();
 			}
 		}
+	}
+}
+
+void
+Editor::set_edit_point ()
+{
+	nframes64_t where;
+	bool ignored;
+
+	if (!mouse_frame (where, ignored)) {
+		return;
+	}
+	
+	snap_to (where);
+
+	if (selection->markers.empty()) {
+		
+		mouse_add_new_marker (where);
+
+	} else {
+		bool ignored;
+
+		Location* loc = find_location_from_marker (selection->markers.front(), ignored);
+
+		if (loc) {
+			loc->move_to (where);
+		}
+	}
+}
+
+void
+Editor::set_playhead_cursor ()
+{
+	if (entered_marker) {
+		session->request_locate (entered_marker->position(), session->transport_rolling());
+	} else {
+		nframes64_t where;
+		bool ignored;
+
+		if (!mouse_frame (where, ignored)) {
+			return;
+		}
+			
+		snap_to (where);
+		
+		if (session) {
+			session->request_locate (where, session->transport_rolling());
+		}
+	}
+}
+
+void
+Editor::split ()
+{
+	nframes64_t where = get_preferred_edit_position();
+
+	if (!selection->regions.empty()) {
+		
+		split_regions_at (where, selection->regions);
+
+	} else {
+		
+		RegionSelection rs;
+		rs = get_regions_at (where, selection->tracks);
+		split_regions_at (where, rs);
 	}
 }

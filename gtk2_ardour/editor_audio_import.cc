@@ -156,10 +156,6 @@ Editor::external_audio_dialog ()
 		break;
 	}
 
-	if (where < 0) {
-		return;
-	}
-
 	SrcQuality quality = sfbrowser->get_src_quality();
 
 	if (sfbrowser->copy_files_btn.get_active()) {
@@ -594,7 +590,6 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		if (sources[0]->natural_position() != 0) {
 			pos = sources[0]->natural_position();
 		} else {
-			// XXX is this the best alternative ?
 			pos = get_preferred_edit_position ();
 		}
 	}

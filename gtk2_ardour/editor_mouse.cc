@@ -2103,6 +2103,8 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event);
 
+	_dragging_edit_point = true;
+
 	drag_info.copied_location = new Location (*location);
 	drag_info.pointer_frame_offset = drag_info.grab_frame - (is_start ? location->start() : location->end());	
 
@@ -2149,7 +2151,6 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	Location  *copy_location;
 	bool is_start;
 	bool move_both = false;
-
 
 	nframes_t newframe;
 	if (drag_info.pointer_frame_offset <= drag_info.current_pointer_frame) {
@@ -2231,7 +2232,8 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	LocationMarkers* lm = find_location_markers (real_location);
 	lm->set_position (copy_location->start(), copy_location->end());
-	
+	edit_point_clock.set (copy_location->start());
+
 	show_verbose_time_cursor (newframe, 10);
 }
 
@@ -2242,6 +2244,8 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		marker_drag_motion_callback (item, event);
 
 	}
+
+	_dragging_edit_point = false;
 	
 	Marker* marker = (Marker *) drag_info.data;
 	bool is_start;

@@ -316,6 +316,7 @@ Editor::Editor ()
 	button_release_can_deselect = true;
 	canvas_idle_queued = false;
 	_dragging_playhead = false;
+	_dragging_edit_point = false;
 	_dragging_hscrollbar = false;
 
 	scrubbing_direction = 0;
@@ -884,6 +885,10 @@ Editor::instant_save ()
 void
 Editor::edit_point_clock_changed()
 {
+	if (_dragging_edit_point) {
+		return;
+	}
+
 	if (selection->markers.empty()) {
 		return;
 	}
@@ -3970,12 +3975,10 @@ Editor::sort_track_selection ()
 }
 
 nframes64_t
-Editor::get_preferred_edit_position() const
+Editor::get_preferred_edit_position()
 {
 	bool ignored;
 	nframes64_t where = 0;
-
-	// XXX EDIT CURSOR used to sync with edit cursor clock
 
 	switch (_edit_point) {
 	case EditAtPlayhead:
@@ -3988,6 +3991,7 @@ Editor::get_preferred_edit_position() const
 			Location* loc = find_location_from_marker (selection->markers.front(), whocares);
 			if (loc) {
 				where =  loc->start();
+				break;
 			}
 		} 
 		/* fallthru */
@@ -3995,13 +3999,13 @@ Editor::get_preferred_edit_position() const
 	default:
 	case EditAtMouse:
 		if (!mouse_frame (where, ignored)) {
-			/* XXX not right */
+			/* XXX not right but what can we do ? */
 			return 0;
 		}
+		snap_to (where);
+		break;
 	}
 
-	// XXX MAKE ME SNAP
-	// snap_to (where);
 	return where;
 }
 
