@@ -3,6 +3,7 @@
 #ifndef _GTKMM_RADIOACTION_H
 #define _GTKMM_RADIOACTION_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -99,35 +100,67 @@ public:
   static Glib::RefPtr<RadioAction> create(Group& group, const Glib::ustring& name, const Gtk::StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip =  Glib::ustring());
 
   
-  /** Returns the list representing the radio group for this object
+  /** Returns the list representing the radio group for this object.
+   * Note that the returned list is only valid until the next change
+   * to the group. 
+   * 
+   * A common way to set up a group of radio group is the following:
+   * @code
+   * GSList *group = <tt>0</tt>;
+   * GtkRadioAction *action;
+   * 
+   * while (/&lt;!-- --&gt;* more actions to add *&lt;!-- --&gt;/)
+   * {
+   * action = gtk_radio_action_new (...);
+   * 
+   * gtk_radio_action_set_group (action, group);
+   * group = gtk_radio_action_get_group (action);
+   * }
+   * @endcode
    * @return The list representing the radio group for this object
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Group get_group();
    void set_group(Group& group);
   
   
-  /** Obtains the value property of the the currently active member of 
+  /** Obtains the value property of the currently active member of 
    * the group to which @a action  belongs.
    * @return The value of the currently active group member
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   int get_current_value() const;
-
   
+  void set_current_value(int current_value);
+
+  /** The changed signal is emitted on every member of a radio group when the
+   * active member is changed. The signal is emitted after the activate signals
+   * for the previous and current active members.
+   *
+   * @param current the member of this action's group which has just been activated.
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %changed(const Glib::RefPtr<RadioAction>& current)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<RadioAction>& > signal_changed();
 
 
-  /** The value returned by gtk_radio_action_get_current_value when this action is the current action of its group.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The value returned by gtk_radio_action_get_current_value when this action is the current action of its group.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_value() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The value returned by gtk_radio_action_get_current_value when this action is the current action of its group.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -135,18 +168,45 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_value() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The value property of the currently active member of the group to which this action belongs.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<int> property_current_value() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** The value property of the currently active member of the group to which this action belongs.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<int> property_current_value() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_changed(const Glib::RefPtr<RadioAction>& current);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_FONTDESCRIPTION_H
 #define _PANGOMM_FONTDESCRIPTION_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -145,6 +146,7 @@ enum Weight
   WEIGHT_ULTRALIGHT = 200,
   WEIGHT_LIGHT = 300,
   WEIGHT_NORMAL = 400,
+  WEIGHT_SEMIBOLD = 600,
   WEIGHT_BOLD = 700,
   WEIGHT_ULTRABOLD = 800,
   WEIGHT_HEAVY = 900
@@ -414,6 +416,26 @@ public:
    */
   int get_size() const;
   
+  /** Sets the size field of a font description, in device units. This is mutually
+   * exclusive with pango_font_description_set_size().
+   * 
+   * Since: 1.8
+   * @param size The new size, in pango units. There are Pango::SCALE Pango units in one
+   * device unit. For an output backend where a device unit is a pixel, a @a size 
+   * value of 10 * PANGO_SCALE gives a 10 pixel font.
+   */
+  void set_absolute_size(double size);
+  
+  /** Determines whether the size of the font is in points or device units.
+   * See pango_font_description_set_size() and pango_font_description_set_absolute_size().
+   * @return Whether the the size for the font description is in
+   * points or device units.  Use pango_font_description_get_set_fields() to
+   * find out if the size field of the font description was explicitely set or not.
+   * 
+   * Since: 1.8.
+   */
+  bool get_size_is_absolute() const;
+  
   /** Determines which fields in a font description have been set.
    * @return A bitmask with bits set corresponding to the
    * fields in @a desc  that have been set.
@@ -524,6 +546,7 @@ class Value<Pango::FontDescription> : public Glib::Value_Boxed<Pango::FontDescri
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _PANGOMM_FONTDESCRIPTION_H */
 

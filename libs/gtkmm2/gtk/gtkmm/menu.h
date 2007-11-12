@@ -3,6 +3,7 @@
 #ifndef _GTKMM_MENU_H
 #define _GTKMM_MENU_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -96,11 +97,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -218,7 +225,7 @@ public:
   
   /** Sets the Gdk::Screen on which the menu will be displayed.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param screen A Gdk::Screen, or <tt>0</tt> if the screen should be
    * determined by the widget the menu is attached to.
    */
@@ -233,7 +240,7 @@ public:
    * 
    * Note that this function is not related to detach().
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param child A Gtk::MenuItem.
    * @param left_attach The column number to attach the left side of the item to.
    * @param right_attach The column number to attach the right side of the item to.
@@ -252,7 +259,7 @@ public:
    * by a Gtk::MenuPositionFunc, since, for very long menus, these coordinates 
    * may extend beyond the monitor boundaries or even the screen boundaries. 
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param monitor_num The number of the monitor on which the menu should
    * be popped up.
    */
@@ -261,14 +268,17 @@ public:
   void reorder_child(const MenuItem& child, int position);
   
 
-  /** A title that may be displayed by the window manager when this menu is torn-off.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A title that may be displayed by the window manager when this menu is torn-off.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_tearoff_title() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A title that may be displayed by the window manager when this menu is torn-off.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -276,6 +286,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_tearoff_title() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -283,7 +294,16 @@ protected:
   //We can not wrap this as a slot because there is no data parameter, and no destroy callback to destroy that data.
   typedef void (*GtkMenuDetachFunc)   (GtkWidget *attach_widget, GtkMenu   *menu);
   
-  void attach_to_widget(Widget& widget, GtkMenuDetachFunc detacher);
+  void attach_to_widget(Widget& attach_widget, GtkMenuDetachFunc detacher);
+
+  //TODO: What does "attach" actually mean here? murrayc
+  /** Attaches the menu to the widget.
+   * 
+   * param @attach_widget: the Widget that the menu will be attached to.
+   *
+   * @newin2p10
+   */
+  void attach_to_widget(Widget& attach_widget);
 
 
 };
@@ -299,6 +319,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Menu* wrap(GtkMenu* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_MENU_H */
 

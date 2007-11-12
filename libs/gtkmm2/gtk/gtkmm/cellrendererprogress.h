@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CELLRENDERERPROGRESS_H
 #define _GTKMM_CELLRENDERERPROGRESS_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -86,11 +87,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -98,14 +105,17 @@ private:
 public:
   CellRendererProgress();
 
-  /** Value of the progress bar.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Value of the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_value() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Value of the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -113,15 +123,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_value() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Text on the progress bar.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Text on the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_text() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Text on the progress bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -129,9 +143,14 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_text() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  
-  virtual Glib::PropertyProxy_Base _property_renderable(); //override
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable();
+#else
+  virtual Glib::ustring _property_renderable();
+#endif
 
 
 };
@@ -147,6 +166,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::CellRendererProgress* wrap(GtkCellRendererProgress* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_CELLRENDERERPROGRESS_H */
 

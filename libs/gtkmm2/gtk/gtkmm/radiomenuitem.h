@@ -3,6 +3,7 @@
 #ifndef _GTKMM_RADIOMENUITEM_H
 #define _GTKMM_RADIOMENUITEM_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -92,12 +93,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_group_changed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -119,7 +126,19 @@ public:
   void set_group(Group& group);
   void reset_group();
 
+  /** Emitted when the group of radio menu items that a radio menu item belongs
+   * to changes. This is emitted when a radio menu item switches from
+   * being alone to being part of a group of 2 or more menu items, or
+   * vice-versa, and when a buttton is moved from one group of 2 or
+   * more menu items to a different one, but not when the composition
+   * of the group that a menu item belongs to changes.
+   */
   
+/**
+   * @par Prototype:
+   * <tt>void %group_changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_group_changed();
 
 
@@ -140,6 +159,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::RadioMenuItem* wrap(GtkRadioMenuItem* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_RADIOMENUITEM_H */
 

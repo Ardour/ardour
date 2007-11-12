@@ -3,6 +3,7 @@
 #ifndef _ATKMM_TEXT_P_H
 #define _ATKMM_TEXT_P_H
 
+
 #include <glibmm/private/interface_p.h>
 
 namespace Atk
@@ -26,6 +27,7 @@ public:
 
 protected:
 
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   //Callbacks (default signal handlers):
   //These will call the *_impl member methods, which will then call the existing default signal callbacks, if any.
   //You could prevent the original default signal handlers being called by overriding the *_impl method.
@@ -33,8 +35,10 @@ protected:
   static void text_caret_moved_callback(AtkText* self, gint p0);
   static void text_selection_changed_callback(AtkText* self);
   static void text_attributes_changed_callback(AtkText* self);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
   //Callbacks (virtual functions):
+#ifdef GLIBMM_VFUNCS_ENABLED
   static gchar* get_text_vfunc_callback(AtkText* self, gint start_offset, gint end_offset);
   static gunichar get_character_at_offset_vfunc_callback(AtkText* self, gint offset);
   static gchar* get_text_after_offset_vfunc_callback(AtkText* self, gint offset, AtkTextBoundary boundary_type, gint* start_offset, gint* end_offset);
@@ -52,10 +56,12 @@ protected:
   static gboolean remove_selection_vfunc_callback(AtkText* self, gint selection_num);
   static gboolean set_selection_vfunc_callback(AtkText* self, gint selection_num, gint start_offset, gint end_offset);
   static gboolean set_caret_offset_vfunc_callback(AtkText* self, gint offset);
+#endif //GLIBMM_VFUNCS_ENABLED
 };
 
 
 } // namespace Atk
+
 
 #endif /* _ATKMM_TEXT_P_H */
 

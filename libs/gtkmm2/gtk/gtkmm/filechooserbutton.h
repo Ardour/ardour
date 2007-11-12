@@ -3,6 +3,7 @@
 #ifndef _GTKMM_FILECHOOSERBUTTON_H
 #define _GTKMM_FILECHOOSERBUTTON_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -101,11 +102,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -146,13 +153,13 @@ public:
    * should not be modified or freed.
    * @return A pointer to the browse dialog's title.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Glib::ustring get_title() const;
   
   /** Modifies the @a title  of the browse dialog used by @a button .
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param title The new browse dialog title.
    */
   void set_title(const Glib::ustring& title);
@@ -161,35 +168,64 @@ public:
   /** Retrieves the width in characters of the @a button  widget's entry and/or label.
    * @return An integer width (in characters) that the button will use to size itself.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   int get_width_chars() const;
   
   /** Sets the width (in characters) that @a button  will use to @a n_chars .
    * 
-   * Since: 2.6
-   * @param n_chars The new width, in chracters.
+   * @newin2p6
+   * @param n_chars The new width, in characters.
    */
   void set_width_chars(int n_chars);
 
+  
+  bool get_focus_on_click() const;
+  
+  void set_focus_on_click(gboolean focus_on_click = true);   
 
-  /** The file chooser dialog to use.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The file chooser dialog to use.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<FileChooserDialog*> property_dialog() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** The title of the file chooser dialog.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the button grabs focus when it is clicked with the mouse.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_focus_on_click() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the button grabs focus when it is clicked with the mouse.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_focus_on_click() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The title of the file chooser dialog.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_title() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The title of the file chooser dialog.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -197,15 +233,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_title() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
                                           
-  /** The desired width of the button widget
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The desired width of the button widget
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_width_chars() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The desired width of the button widget
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -213,6 +253,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_width_chars() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
     
 
 };
@@ -229,6 +270,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::FileChooserButton* wrap(GtkFileChooserButton* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_FILECHOOSERBUTTON_H */
 

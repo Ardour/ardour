@@ -18,7 +18,7 @@ domain = 'gtk2_ardour'
 gtkardour.Append(DOMAIN=domain, MAJOR=1,MINOR=0,MICRO=2)
 gtkardour.Append(CCFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
 gtkardour.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
-gtkardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkardour.Append(CXXFLAGS=["-DLIBSIGC_DISABLE_DEPRECATED", "-DGLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED", "-DGLIBMM_EXCEPTIONS_ENABLED", "-DGLIBMM_PROPERTIES_ENABLED"])
 gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 #gtkardour.Append(CXXFLAGS="-DFLOWCANVAS_AA")
 gtkardour.Append(PACKAGE=domain)
@@ -53,7 +53,8 @@ gtkardour.Merge ([
     libraries['rubberband'],
     libraries['samplerate'],
     libraries['jack'],
-    libraries['sysaudio']
+    libraries['sysaudio'],
+    libraries['cairomm']
 ])
 
 gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")

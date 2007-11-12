@@ -3,6 +3,7 @@
 #ifndef _GTKMM_SETTINGS_H
 #define _GTKMM_SETTINGS_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -92,6 +93,12 @@ protected:
 
 public:
 
+  
+  /** Gets the Gtk::Settings object for the default GDK screen, creating
+   * it if necessary. See get_for_screen().
+   * @return A Gtk::Settings object. If there is no default
+   * screen, then returns <tt>0</tt>.
+   */
   static Glib::RefPtr<Settings> get_default();
 
   
@@ -99,18 +106,21 @@ public:
    * @param screen A Gdk::Screen.
    * @return A Gtk::Settings object.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   static Glib::RefPtr<Settings> get_for_screen(const Glib::RefPtr<Gdk::Screen>& screen);
 
-  /** Maximum time allowed between two clicks for them to be considered a double click (in milliseconds).
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Maximum time allowed between two clicks for them to be considered a double click (in milliseconds).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_gtk_double_click_time() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Maximum time allowed between two clicks for them to be considered a double click (in milliseconds).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -118,15 +128,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_gtk_double_click_time() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Maximum distance allowed between two clicks for them to be considered a double click (in pixels).
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Maximum distance allowed between two clicks for them to be considered a double click (in pixels).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_gtk_double_click_distance() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Maximum distance allowed between two clicks for them to be considered a double click (in pixels).
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -134,15 +148,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_gtk_double_click_distance() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the cursor should blink.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the cursor should blink.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_gtk_cursor_blink() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the cursor should blink.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -150,15 +168,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_gtk_cursor_blink() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Length of the cursor blink cycle
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Length of the cursor blink cycle
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_gtk_cursor_blink_time() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Length of the cursor blink cycle
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -166,15 +188,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_gtk_cursor_blink_time() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether two cursors should be displayed for mixed left-to-right and right-to-left text.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether two cursors should be displayed for mixed left-to-right and right-to-left text.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_gtk_split_cursor() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether two cursors should be displayed for mixed left-to-right and right-to-left text.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -182,15 +208,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_gtk_split_cursor() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Name of theme RC file to load.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Name of theme RC file to load.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_theme_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Name of theme RC file to load.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -198,15 +228,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_theme_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Name of key theme RC file to load.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Name of key theme RC file to load.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_key_theme_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Name of key theme RC file to load.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -214,15 +248,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_key_theme_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Keybinding to activate the menu bar.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Keybinding to activate the menu bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_menu_bar_accel() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Keybinding to activate the menu bar.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -230,15 +268,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_menu_bar_accel() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Number of pixels the cursor can move before dragging.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Number of pixels the cursor can move before dragging.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_gtk_dnd_drag_threshold() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Number of pixels the cursor can move before dragging.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -246,15 +288,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_gtk_dnd_drag_threshold() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Name of default font to use.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Name of default font to use.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_font_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Name of default font to use.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -262,15 +308,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_font_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether to antialias Xft fonts; 0=no
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to antialias Xft fonts; 0=no
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_gtk_xft_antialias() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to antialias Xft fonts; 0=no
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -278,15 +328,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_gtk_xft_antialias() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether to hint Xft fonts; 0=no
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to hint Xft fonts; 0=no
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_gtk_xft_hinting() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to hint Xft fonts; 0=no
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -294,31 +348,39 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_gtk_xft_hinting() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** What degree of hinting to use; none
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** What degree of hinting to use; hintnone
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_xft_hintstyle() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-/** What degree of hinting to use; none
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** What degree of hinting to use; hintnone
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_xft_hintstyle() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Type of subpixel antialiasing; none
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Type of subpixel antialiasing; none
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_xft_rgba() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Type of subpixel antialiasing; none
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -326,15 +388,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_xft_rgba() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Resolution for Xft
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Resolution for Xft
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_gtk_xft_dpi() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Resolution for Xft
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -342,17 +408,21 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_gtk_xft_dpi() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   // from GtkToolbar
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<ToolbarStyle> property_gtk_toolbar_style() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -360,15 +430,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ToolbarStyle> property_gtk_toolbar_style() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<IconSize> property_gtk_toolbar_icon_size() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -376,17 +450,21 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<IconSize> property_gtk_toolbar_icon_size() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   // from GtkMenu
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_gtk_can_change_accels() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -394,17 +472,21 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_gtk_can_change_accels() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   // from GtkEntry
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_gtk_entry_select_on_focus() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -412,17 +494,21 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_gtk_entry_select_on_focus() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   // from GtkColorSelection
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_color_palette() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -430,17 +516,21 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_color_palette() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   // from GtkButton
-  /** 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_gtk_button_images() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** 
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -448,17 +538,21 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_gtk_button_images() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
   // from GtkIconTheme
-  /** Name of icon theme to use.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Name of icon theme to use.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_icon_theme_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Name of icon theme to use.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -466,33 +560,44 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_icon_theme_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** List of icon sizes gtk-menu=16
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** List of icon sizes: gtk-menu=16
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_gtk_icon_sizes() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-/** List of icon sizes gtk-menu=16
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** List of icon sizes: gtk-menu=16
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_gtk_icon_sizes() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

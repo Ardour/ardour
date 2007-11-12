@@ -15,7 +15,8 @@ gtkmm2ext.Merge ([
     libraries['pangomm'],
     libraries['atkmm'],
     libraries['gdkmm2'],
-    libraries['gtkmm2']
+    libraries['gtkmm2'],
+    libraries['cairomm']
     ])
 
 #
@@ -26,7 +27,7 @@ domain = 'libgtkmm2ext'
 
 gtkmm2ext.Append(DOMAIN=domain,MAJOR=0,MINOR=8,MICRO=3)
 gtkmm2ext.Append(CXXFLAGS="-DPACKAGE=\\\"" + domain + "\\\"")
-gtkmm2ext.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+gtkmm2ext.Append(CXXFLAGS=["-DLIBSIGC_DISABLE_DEPRECATED", "-DGLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED", "-DGLIBMM_PROPERTIES_ENABLED"])
 #gtkmm2ext.Append(CPPPATH='#libs/surfaces/control_protocol')
 gtkmm2ext.Append(PACKAGE=domain)
 gtkmm2ext.Append(POTFILE=domain + '.pot')

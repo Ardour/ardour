@@ -3,6 +3,7 @@
 #ifndef _GDKMM_IMAGE_H
 #define _GDKMM_IMAGE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -150,12 +151,12 @@ public:
   static Glib::RefPtr<Image> create(ImageType type, const Glib::RefPtr<Visual>& visual, int width, int height);
 
 
-  //We ignore gdk_image_new_bitmap() because the documentation says that it is incredibly broken.
+  //We ignore gdk_image_new_bitmap() because the documentation says that it is deprecated.
   
 
   void put_pixel(int x, int y, guint32 pixel);
   
-  guint32 get_pixel(int	x, int	y) const;
+  guint32 get_pixel(int x, int y) const;
   
   /** Sets the colormap for the image to the given colormap.  Normally
    * there's no need to use this function, images are created with the
@@ -182,33 +183,39 @@ public:
    */
   Glib::RefPtr<const Colormap> get_colormap() const;
   
-  ImageType get_image_type() const;
-  Glib::RefPtr<Visual> get_visual();
+   ImageType get_image_type() const;
+    Glib::RefPtr<Visual> get_visual();
   Glib::RefPtr<const Visual> get_visual() const;
-  ByteOrder get_byte_order() const;
-  int get_width() const;
-  int get_height() const;
-  guint16 get_bpp() const;
-  guint16 get_bpl() const;
-  guint16 get_bits_per_pixel() const;
-
+    ByteOrder get_byte_order() const;
+    int get_width() const;
+    int get_height() const;
+    guint16 get_bpp() const;
+    guint16 get_bpl() const;
+    guint16 get_bits_per_pixel() const;
+ 
   //This memory block is not read-only, apparently:
-  void* get_mem();
+   void* get_mem();
   const void* get_mem() const;
-
+ 
   //TODO: This should be const really.
-  void* get_windowing_data() const;
-
+   void* get_windowing_data() const;
+ 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

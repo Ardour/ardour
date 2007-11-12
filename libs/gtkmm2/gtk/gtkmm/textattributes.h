@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TEXTATTRIBUTES_H
 #define _GTKMM_TEXTATTRIBUTES_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -109,6 +110,7 @@ class Value<Gtk::TextAttributes> : public Glib::Value_Boxed<Gtk::TextAttributes>
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_TEXTATTRIBUTES_H */
 

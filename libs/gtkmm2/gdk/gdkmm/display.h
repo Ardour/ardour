@@ -3,6 +3,7 @@
 #ifndef _GDKMM_DISPLAY_H
 #define _GDKMM_DISPLAY_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -106,7 +107,7 @@ public:
   
   /** Opens a display.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param display_name The name of the display to open.
    * @return A Gdk::Display, or <tt>0</tt> if the display
    * could not be opened.
@@ -118,7 +119,7 @@ public:
    * @return A string representing the display name. This string is owned
    * by GDK and should not be modified or freed.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::ustring get_name() const;
 
@@ -126,7 +127,7 @@ public:
   /** Gets the number of screen managed by the @a display .
    * @return Number of screens.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   int get_n_screens() const;
   
@@ -134,7 +135,7 @@ public:
    * @param screen_num The screen number.
    * @return The Gdk::Screen object
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Screen> get_screen(int screen_num);
   
@@ -142,7 +143,7 @@ public:
    * @param screen_num The screen number.
    * @return The Gdk::Screen object
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Screen> get_screen(int screen_num) const;
   
@@ -150,28 +151,28 @@ public:
   /** Get the default Gdk::Screen for @a display .
    * @return The default Gdk::Screen object for @a display 
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Screen> get_default_screen();
   
   /** Get the default Gdk::Screen for @a display .
    * @return The default Gdk::Screen object for @a display 
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Screen> get_default_screen() const;
   
   
   /** Release any pointer grab.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param timestamp A timestap (e.g. GDK_CURRENT_TIME).
    */
   void pointer_ungrab(guint32 timestamp);
   
   /** Release any keyboard grab
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param timestamp A timestap (e.g Gdk::CURRENT_TIME).
    */
   void keyboard_ungrab(guint32 timestamp);
@@ -179,13 +180,13 @@ public:
   /** Test if the pointer is grabbed.
    * @return <tt>true</tt> if an active X pointer grab is in effect
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   bool pointer_is_grabbed() const;
   
   /** Emits a short beep on @a display 
    * 
-   * Since: 2.2
+   * @newin2p2
    */
   void beep();
   
@@ -199,14 +200,14 @@ public:
    * This is most useful for X11. On windowing systems where requests are
    * handled synchronously, this function will do nothing.
    * 
-   * Since: 2.2
+   * @newin2p2
    */
   void sync();
   
   /** Closes the connection to the windowing system for the given display,
    * and cleans up associated resources.
    * 
-   * Since: 2.2
+   * @newin2p2
    */
   void	close();
 
@@ -215,7 +216,7 @@ public:
    * The list is statically allocated and should not be freed.
    * @return A list of Gdk::Device
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::ListHandle< Glib::RefPtr<Device> > list_devices();
   
@@ -223,7 +224,7 @@ public:
    * The list is statically allocated and should not be freed.
    * @return A list of Gdk::Device
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::ListHandle< Glib::RefPtr<const Device> > list_devices() const;
   
@@ -235,7 +236,7 @@ public:
    * @return The next Gdk::Event to be processed, or <tt>0</tt> if no events
    * are pending. The returned Gdk::Event should be freed with gdk_event_free().
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   GdkEvent* get_event();
   
@@ -244,7 +245,7 @@ public:
    * @return The next Gdk::Event to be processed, or <tt>0</tt> if no events
    * are pending. The returned Gdk::Event should be freed with gdk_event_free().
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   const GdkEvent* get_event() const;
   
@@ -257,7 +258,7 @@ public:
    * if no events are in the queue. The returned Gdk::Event should be freed with
    * gdk_event_free().
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   GdkEvent* peek_event();
   
@@ -269,14 +270,14 @@ public:
    * if no events are in the queue. The returned Gdk::Event should be freed with
    * gdk_event_free().
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   GdkEvent* peek_event() const;
   
   /** Appends a copy of the given event onto the front of the event
    * queue for @a display .
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param event A Gdk::Event.
    */
   void put_event(GdkEvent* event);
@@ -286,7 +287,7 @@ public:
   
   /** Adds a filter to be called when X ClientMessage events are received.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param message_type The type of ClientMessage events to receive.
    * This will be checked against the @a message_type  field 
    * of the XClientMessage event struct.
@@ -301,7 +302,7 @@ public:
    * Applications should <em>not</em> set this, it is a global 
    * user-configured setting.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param msec Double click time in milliseconds (thousandths of a second).
    */
   void set_double_click_time(guint msec);
@@ -312,7 +313,7 @@ public:
    * Applications should <em>not</em> set this, it is a global 
    * user-configured setting.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param distance Distance in pixels.
    */
   void set_double_click_distance(guint distance);
@@ -326,7 +327,7 @@ public:
    * @return A Gdk::Display, or <tt>0</tt> if there is no default
    * display.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   static Glib::RefPtr<Display> get_default();
 
@@ -335,7 +336,7 @@ public:
    * @return The core pointer device; this is owned by the
    * display and should not be freed.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Device> get_core_pointer();
   
@@ -343,7 +344,7 @@ public:
    * @return The core pointer device; this is owned by the
    * display and should not be freed.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Device> get_core_pointer() const;
 
@@ -379,7 +380,7 @@ public:
    * @param win_y Return location for origin of the window under the pointer.
    * @return The window under the mouse pointer, or <tt>0</tt>
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Window> get_window_at_pointer(int& win_x, int& win_y);
   
@@ -391,7 +392,7 @@ public:
    * @param win_y Return location for origin of the window under the pointer.
    * @return The window under the mouse pointer, or <tt>0</tt>
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Window> get_window_at_pointer(int& win_x, int& win_y) const;
 
@@ -408,6 +409,26 @@ public:
    * @result The window underneath the mouse pointer.
    */
   Glib::RefPtr<const Window> get_window_at_pointer() const;
+  
+  
+  /** Warps the pointer of @a display  to the point @a x , @a y  on 
+   * the screen @a screen , unless the pointer is confined
+   * to a window by a grab, in which case it will be moved
+   * as far as allowed by the grab. Warping the pointer 
+   * creates events as if the user had moved the mouse 
+   * instantaneously to the destination.
+   * 
+   * Note that the pointer should normally be under the
+   * control of the user. This function was added to cover
+   * some rare use cases like keyboard navigation support
+   * for the color picker in the Gtk::ColorSelectionDialog.
+   * 
+   * @newin2p8
+   * @param screen The screen of @a display  to warp the pointer to.
+   * @param x The x coordinate of the destination.
+   * @param y The y coordinate of the destination.
+   */
+  void warp_pointer(const Glib::RefPtr<Screen>& screen, int x, int y);
 
   
   /** This function allows for hooking into the operation
@@ -415,11 +436,11 @@ public:
    * display. This is only useful for such low-level tools as an
    * event recorder. Applications should never have any
    * reason to use this facility.
+   * 
+   *  @a newin2p2 
    * @param new_hooks A table of pointers to functions for getting
    * quantities related to the current pointer position.
-   * @return The previous pointer hook table
-   * 
-   * Since: 2.2.
+   * @return The previous pointer hook table.
    */
   GdkDisplayPointerHooks* set_pointer_hooks(const GdkDisplayPointerHooks* new_hooks);
   GdkDisplayPointerHooks* unset_pointer_hooks();
@@ -438,7 +459,7 @@ public:
   
   /** Finds out the DND protocol supported by a window.
    * 
-   * Since: 2.2
+   * @newin2p2
    * @param xid The X id of the destination window.
    * @param protocol Location where the supported DND protocol is returned.
    * @return The X id of the window where the drop should happen. This 
@@ -452,7 +473,7 @@ public:
    * @return The Gdk::Keymap attached to @a display .
    * the Gdk::Keymap attached to @a display .
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   GdkKeymap* get_keymap();
   
@@ -460,7 +481,7 @@ public:
    * @return The Gdk::Keymap attached to @a display .
    * the Gdk::Keymap attached to @a display .
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   const GdkKeymap* get_keymap() const;
 
@@ -477,7 +498,7 @@ public:
    * @return The Gdk::Pixmap wrapper for the native pixmap,
    * or <tt>0</tt> if there is none.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<Pixmap> lookup_pixmap(NativeWindow anid);
   
@@ -489,7 +510,7 @@ public:
    * @return The Gdk::Pixmap wrapper for the native pixmap,
    * or <tt>0</tt> if there is none.
    * 
-   * Since: 2.2.
+   * @newin2p2.
    */
   Glib::RefPtr<const Pixmap> lookup_pixmap(NativeWindow anid) const;
 
@@ -504,7 +525,7 @@ public:
    * This is most useful for X11. On windowing systems where requests are
    * handled synchronously, this function will do nothing.
    * 
-   * Since: 2.4
+   * @newin2p4
    */
   void flush();
   
@@ -513,7 +534,7 @@ public:
    * alpha (i.e. a mask).
    * @return Whether cursors can have alpha channels.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool supports_cursor_alpha() const;
   
@@ -522,20 +543,20 @@ public:
    * and a background color.
    * @return Whether cursors can have multiple colors.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool supports_cursor_color() const;
   
   /** Returns the default size to use for cursors on @a display .
    * @return The default cursor size.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   guint get_default_cursor_size() const;
   
   /** Gets the maximal size to use for cursors on @a display .
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param width The return location for the maximal cursor width.
    * @param height The return location for the maximal cursor height.
    */
@@ -547,7 +568,7 @@ public:
    * See gdk_window_set_group().
    * @return The default group leader window for @a display 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<Window> get_default_group(); 
   
@@ -556,7 +577,7 @@ public:
    * See gdk_window_set_group().
    * @return The default group leader window for @a display 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::RefPtr<const Window> get_default_group() const;              
       
@@ -568,7 +589,7 @@ public:
    * @return Whether Gdk::EventOwnerChange events will 
    * be sent.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   bool supports_selection_notification() const;
   
@@ -579,7 +600,7 @@ public:
    * @return Whether Gdk::EventOwnerChange events will 
    * be sent.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   bool request_selection_notification(const Glib::ustring& selection);
 
@@ -590,7 +611,7 @@ public:
    * running.
    * @return <tt>true</tt> if the display supports clipboard persistance.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   bool supports_clipboard_persistence() const;
 
@@ -600,6 +621,17 @@ public:
   void store_clipboard(const Glib::RefPtr<Gdk::Window>& clipboard_window, guint32 time_, const Glib::StringArrayHandle& targets);
                                                      
   
+  /** The closed signal is emitted when the connection to the windowing
+   * system for this display is closed.
+   *
+   * @param is_error true if the display was closed due to an error
+   */  
+  
+/**
+   * @par Prototype:
+   * <tt>void %closed(bool is_error)</tt>
+   */
+
   Glib::SignalProxy1< void,bool > signal_closed();
 
 
@@ -607,12 +639,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_closed(bool is_error);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

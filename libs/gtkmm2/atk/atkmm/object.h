@@ -3,6 +3,7 @@
 #ifndef _ATKMM_OBJECT_H
 #define _ATKMM_OBJECT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -320,32 +321,65 @@ public:
   bool remove_relationship(RelationType relationship, const Glib::RefPtr<Object>& target);
 
   
+/**
+   * @par Prototype:
+   * <tt>void %children_changed(guint change_index, gpointer changed_child)</tt>
+   */
+
   Glib::SignalProxy2< void,guint,gpointer > signal_children_changed();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %focus_event(bool focus_in)</tt>
+   */
+
   Glib::SignalProxy1< void,bool > signal_focus_event();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %property_change(AtkPropertyValues* values)</tt>
+   */
+
   Glib::SignalProxy1< void,AtkPropertyValues* > signal_property_change();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %state_change(const Glib::ustring& name, bool state_set)</tt>
+   */
+
   Glib::SignalProxy2< void,const Glib::ustring&,bool > signal_state_change();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %visible_data_changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_visible_data_changed();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %active_descendant_changed(void** child)</tt>
+   */
+
   Glib::SignalProxy1< void,void** > signal_active_descendant_changed();
 
 
-  /** Object instance's name formatted for assistive technology access.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Object instance's name formatted for assistive technology access.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_accessible_name() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Object instance's name formatted for assistive technology access.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -353,15 +387,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_accessible_name() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Description of an object
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Description of an object
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_accessible_description() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Description of an object
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -369,15 +407,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_accessible_description() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Is used to notify that the parent has changed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the parent has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Atk::Object> > property_accessible_parent() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the parent has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -385,15 +427,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Atk::Object> > property_accessible_parent() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Is used to notify that the value has changed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the value has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_accessible_value() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the value has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -401,15 +447,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_accessible_value() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The accessible role of this object.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The accessible role of this object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_accessible_role() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The accessible role of this object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -417,33 +467,41 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_accessible_role() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The accessible layer of this object.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The accessible layer of this object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_accessible_component_layer() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** The accessible MDI value of this object.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The accessible MDI value of this object.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_accessible_component_mdi_zorder() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** Is used to notify that the table caption has changed; this property should not be used. accessible-table-caption-object should be used instead.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the table caption has changed; this property should not be used. accessible-table-caption-object should be used instead.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_accessible_table_caption() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the table caption has changed; this property should not be used. accessible-table-caption-object should be used instead.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -451,15 +509,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_accessible_table_caption() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Is used to notify that the table column description has changed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the table column description has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_accessible_table_column_description() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the table column description has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -467,15 +529,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_accessible_table_column_description() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Is used to notify that the table column header has changed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the table column header has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Atk::Object> > property_accessible_table_column_header() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the table column header has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -483,15 +549,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Atk::Object> > property_accessible_table_column_header() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Is used to notify that the table row description has changed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the table row description has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_accessible_table_row_description() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the table row description has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -499,15 +569,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_accessible_table_row_description() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Is used to notify that the table row header has changed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the table row header has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Atk::Object> > property_accessible_table_row_header() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the table row header has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -515,15 +589,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Atk::Object> > property_accessible_table_row_header() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Is used to notify that the table summary has changed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Is used to notify that the table summary has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Atk::Object> > property_accessible_table_summary() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Is used to notify that the table summary has changed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -531,23 +609,30 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Atk::Object> > property_accessible_table_summary() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_children_changed(guint change_index, gpointer changed_child);
   virtual void on_focus_event(bool focus_in);
   virtual void on_property_change(AtkPropertyValues* values);
   virtual void on_state_change(const Glib::ustring& name, bool state_set);
   virtual void on_visible_data_changed();
   virtual void on_active_descendant_changed(void** child);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

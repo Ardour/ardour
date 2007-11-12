@@ -3,6 +3,7 @@
 #ifndef _GTKMM_SOCKET_H
 #define _GTKMM_SOCKET_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -129,13 +130,19 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_plug_added();
   virtual bool on_plug_removed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -176,9 +183,19 @@ public:
   Gdk::NativeWindow get_id() const;
 
   
+/**
+   * @par Prototype:
+   * <tt>void %plug_added()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_plug_added();
 
   
+/**
+   * @par Prototype:
+   * <tt>bool %plug_removed()</tt>
+   */
+
   Glib::SignalProxy0< bool > signal_plug_removed();
 
 
@@ -195,6 +212,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Socket* wrap(GtkSocket* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_SOCKET_H */
 

@@ -3,6 +3,7 @@
 #ifndef _GTKMM_EDITABLE_H
 #define _GTKMM_EDITABLE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -134,40 +135,72 @@ public:
   Glib::SignalProxy2< void,const Glib::ustring&,int* > signal_insert_text();
 
     
+/**
+   * @par Prototype:
+   * <tt>void %delete_text(int start_pos, int end_pos)</tt>
+   */
+
   Glib::SignalProxy2< void,int,int > signal_delete_text();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %changed()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_changed();
 
 
 protected:
 
 
-    virtual void delete_text_vfunc(int start_pos, int end_pos);
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void delete_text_vfunc(int start_pos, int end_pos);
+#endif //GLIBMM_VFUNCS_ENABLED
 
 
-    virtual Glib::ustring get_chars_vfunc(int start_pos, int end_pos) const;
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual Glib::ustring get_chars_vfunc(int start_pos, int end_pos) const;
+#endif //GLIBMM_VFUNCS_ENABLED
 
-    virtual void select_region_vfunc(int start_pos, int end_pos);
-    virtual bool get_selection_bounds_vfunc(int& start_pos, int& end_pos) const;
-    virtual void set_position_vfunc(int position);
-    virtual int get_position_vfunc() const;
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void select_region_vfunc(int start_pos, int end_pos);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual bool get_selection_bounds_vfunc(int& start_pos, int& end_pos) const;
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void set_position_vfunc(int position);
+#endif //GLIBMM_VFUNCS_ENABLED
+
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual int get_position_vfunc() const;
+#endif //GLIBMM_VFUNCS_ENABLED
 
 
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
 virtual void insert_text_vfunc(const Glib::ustring& text, int& position);
 
- 
+#endif //GLIBMM_VFUNCS_ENABLED
+
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_insert_text(const Glib::ustring& text, int* position);
   virtual void on_delete_text(int start_pos, int end_pos);
   virtual void on_changed();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };
@@ -185,6 +218,7 @@ namespace Glib
   Glib::RefPtr<Gtk::Editable> wrap(GtkEditable* object, bool take_copy = false);
 
 } // namespace Glib
+
 
 #endif /* _GTKMM_EDITABLE_H */
 

@@ -3,6 +3,7 @@
 #ifndef _GTKMM_FILEFILTER_H
 #define _GTKMM_FILEFILTER_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -158,11 +159,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -175,7 +182,7 @@ public:
    * that will be displayed in the file selector user interface if
    * there is a selectable list of filters.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param name The human-readable-name for the filter, or <tt>0</tt>
    * to remove any existing name.
    */
@@ -186,21 +193,21 @@ public:
    * or <tt>0</tt>. This value is owned by GTK+ and must not
    * be modified or freed.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Glib::ustring get_name() const;
 
   
   /** Adds a rule allowing a given mime type to @a filter .
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param mime_type Name of a MIME type.
    */
   void add_mime_type(const Glib::ustring& mime_type);
   
   /** Adds a rule allowing a shell style glob to a filter.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param pattern A shell style glob.
    */
   void add_pattern(const Glib::ustring& pattern);
@@ -208,7 +215,7 @@ public:
   /** Adds a rule allowing image files in the formats supported
    * by GdkPixbuf.
    * 
-   * Since: 2.6
+   * @newin2p6
    */
   void add_pixbuf_formats();
 
@@ -237,7 +244,7 @@ public:
    * @return Bitfield of flags indicating needed fields when
    * calling gtk_file_filter_filter()
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   FileFilterFlags get_needed() const;
 
@@ -259,6 +266,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::FileFilter* wrap(GtkFileFilter* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_FILEFILTER_H */
 

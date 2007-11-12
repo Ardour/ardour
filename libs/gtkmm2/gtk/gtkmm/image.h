@@ -3,6 +3,7 @@
 #ifndef _GTKMM_IMAGE_H
 #define _GTKMM_IMAGE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -142,11 +143,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -159,11 +166,20 @@ public:
   explicit Image(const Glib::RefPtr<Gdk::Image>& image, const Glib::RefPtr<Gdk::Bitmap>& mask);
   explicit Image(const std::string& file);
   explicit Image(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
+
+  /** Creates am Image displaying a stock icon.
+   * Sample stock icon identifiers are Gtk::Stock::OPEN, Gtk::Stock::EXIT. Sample stock sizes are Gtk::ICON_SIZE_MENU, Gtk::ICON_SIZE_SMALL_TOOLBAR.
+   * If the stock icon name isn't known, a "broken image" icon will be displayed instead.
+   * You can register your own stock icon names - see Gtk::IconFactory::add().
+   * @param stock_id A stock icon.
+   * @param size A stock icon size.
+   */
   Image(const Gtk::StockID& stock_id, IconSize size);
+
   Image(IconSet& icon_set, IconSize size);
   Image(const Glib::RefPtr<Gdk::PixbufAnimation>& animation);
-  
 
+  
   /** See new_from_pixmap() for details.
    * @param pixmap A Gdk::Pixmap or <tt>0</tt>.
    * @param mask A Gdk::Bitmap or <tt>0</tt>.
@@ -186,7 +202,7 @@ public:
    */
   void set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
   
-  /** See new_from_stock() for details.
+  /** See the Image::Image(const Gtk::StockID& stock_id, IconSize size) constructor for details.
    * @param stock_id A stock icon name.
    * @param size A stock icon size.
    */
@@ -206,12 +222,17 @@ public:
   
   /** See new_from_icon_name() for details.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param icon_name An icon name.
    * @param size An icon size.
    */
   void set_from_icon_name(const Glib::ustring& icon_name, IconSize size);
 
+  
+  /** Resets the image to be empty.
+   * 
+   * @newin2p8
+   */
   void clear();
 
   
@@ -262,7 +283,7 @@ public:
    * @return The displayed animation, or <tt>0</tt> if the image is empty.
    */
   Glib::RefPtr<const Gdk::PixbufAnimation> get_animation() const;
-  
+
   Glib::ustring get_icon_name() const;
   Glib::ustring get_icon_name(IconSize& size);
   
@@ -270,7 +291,7 @@ public:
   /** Gets the pixel size used for named icons.
    * @return The pixel size used for named icons.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   int get_pixel_size() const;
  
@@ -278,19 +299,22 @@ public:
    * to a value != -1, it is used instead of the icon size set by
    * set_from_icon_name().
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param pixel_size The new pixel size.
    */
   void set_pixel_size(int pixel_size);
- 
-  /** A GdkPixbuf to display.
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A GdkPixbuf to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A GdkPixbuf to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -298,15 +322,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Pixbuf> > property_pixbuf() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** A GdkPixmap to display.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A GdkPixmap to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixmap> > property_pixmap() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A GdkPixmap to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -314,15 +342,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Pixmap> > property_pixmap() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** A GdkImage to display.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A GdkImage to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Image> > property_image() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A GdkImage to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -330,15 +362,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Image> > property_image() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Mask bitmap to use with GdkImage or GdkPixmap.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Mask bitmap to use with GdkImage or GdkPixmap.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::Pixmap> > property_mask() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Mask bitmap to use with GdkImage or GdkPixmap.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -346,15 +382,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::Pixmap> > property_mask() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Filename to load and display.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Filename to load and display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
-  Glib::PropertyProxy_WriteOnly<Glib::ustring> property_file() ;
+  Glib::PropertyProxy<Glib::ustring> property_file() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Filename to load and display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -362,15 +402,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_file() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Stock ID for a stock image to display.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Stock ID for a stock image to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_stock() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Stock ID for a stock image to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -378,15 +422,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_stock() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Icon set to display.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Icon set to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Gtk::IconSet> property_icon_set() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Icon set to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -394,15 +442,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Gtk::IconSet> property_icon_set() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Symbolic size to use for stock icon
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Symbolic size to use for stock icon
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_icon_size() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Symbolic size to use for stock icon
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -410,15 +462,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_icon_size() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** GdkPixbufAnimation to display.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** GdkPixbufAnimation to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy< Glib::RefPtr<Gdk::PixbufAnimation> > property_pixbuf_animation() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** GdkPixbufAnimation to display.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -426,14 +482,17 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly< Glib::RefPtr<Gdk::PixbufAnimation> > property_pixbuf_animation() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The representation being used for image data.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The representation being used for image data.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<ImageType> property_storage_type() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -449,6 +508,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Image* wrap(GtkImage* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_IMAGE_H */
 

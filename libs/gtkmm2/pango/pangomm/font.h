@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_FONT_H
 #define _PANGOMM_FONT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -57,6 +58,9 @@ const double SCALE_LARGE    = 1.2;
 const double SCALE_X_LARGE  = 1.4399999999999;
 const double SCALE_XX_LARGE = 1.728;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+class FontMap;
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /** A Pango::Font is used to represent a font in a rendering-system-independent matter.
  */
@@ -114,6 +118,8 @@ public:
    */
   FontDescription describe() const;
   
+  FontDescription describe_with_absolute_size() const;
+  
   /** Computes the coverage map for a given font and language tag.
    * @param language The language tag.
    * @return A newly-allocated Pango::Coverage object.
@@ -150,6 +156,17 @@ public:
    */
   void get_glyph_extents(Glyph glyph, Rectangle& ink_rect, Rectangle& logical_rect) const;
 
+  
+  /** Gets the font map for which the font was created.
+   * @return The Pango::FontMap for the font.
+   */
+  Glib::RefPtr<FontMap> get_font_map();
+  
+  /** Gets the font map for which the font was created.
+   * @return The Pango::FontMap for the font.
+   */
+  Glib::RefPtr<const FontMap> get_font_map() const;
+
   /** Get the ink extents of a glyph within the font.
    * @param glyph The glyph index.
    * @return The extents of the glyph as drawn.
@@ -167,11 +184,17 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

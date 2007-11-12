@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CELLRENDERERTOGGLE_H
 #define _GTKMM_CELLRENDERERTOGGLE_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -90,12 +91,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_toggled(const Glib::ustring& path);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -105,7 +112,7 @@ public:
   CellRendererToggle();
   
 
-  /** Returns wether we're rendering radio toggles rather than checkboxes.
+  /** Returns whether we're rendering radio toggles rather than checkboxes.
    * @return <tt>true</tt> if we're rendering radio toggles rather than checkboxes.
    */
   bool get_radio() const;
@@ -132,18 +139,31 @@ public:
    */
   void set_active(bool setting = true);
 
+   //TODO: Maybe the parameter should be a TreePath.
+  /** The toggled signal is emitted when the cell is toggled.
+   *
+   * @param path string representation of TreePath describing the event location
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %toggled(const Glib::ustring& path)</tt>
+   */
 
   Glib::SignalProxy1< void,const Glib::ustring& > signal_toggled();
 
 
-  /** The toggle button can be activated.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The toggle button can be activated.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_activatable() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The toggle button can be activated.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -151,15 +171,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_activatable() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The toggle state of the button.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The toggle state of the button.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_active() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The toggle state of the button.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -167,15 +191,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_active() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Draw the toggle button as a radio button.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Draw the toggle button as a radio button.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_radio() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Draw the toggle button as a radio button.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -183,9 +211,34 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_radio() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Size of check or radio indicator.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<int> property_indicator_size() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Size of check or radio indicator.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<int> property_indicator_size() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  virtual Glib::PropertyProxy_Base _property_renderable(); //override
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable();
+#else
+  virtual Glib::ustring _property_renderable();
+#endif
 
 
 };
@@ -201,6 +254,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::CellRendererToggle* wrap(GtkCellRendererToggle* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_CELLRENDERERTOGGLE_H */
 

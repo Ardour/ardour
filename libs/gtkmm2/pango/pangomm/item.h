@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_ITEM_H
 #define _PANGOMM_ITEM_H
 
+
 #include <glibmm.h>
 
 /* Copyright (C) 2002 The gtkmm Development Team
@@ -64,19 +65,19 @@ public:
   /** Gets the font used to render this segment.
    * @return The font used to render this segment.
    */
-  Glib::RefPtr<Font> get_font();
+   Glib::RefPtr<Font> get_font();
   Glib::RefPtr<const Font> get_font() const;
-
+ 
   /** Gets the bidrectional level for this segment.
    * @return The bidirectional level for this segment.
    */
-  guint8 get_level() const;
-
+   guint8 get_level() const;
+ 
   /** Gets the language of this segment.
    * @return The language of this segment.
    */
-  Language get_language() const;
-
+   Language get_language() const;
+ 
   /** Gets a list of non-font attributes for this segment.
    * @return A list of non-font attributes for this segment.
    */
@@ -149,18 +150,18 @@ public:
   /** Gets the offset of the segment from the beginning of the string in bytes.
    * @return The offset of the segment from the beginning of the string in bytes.
    */
-  int get_offset() const;
-
+   int get_offset() const;
+ 
   /** Gets the length of the segment in bytes.
    * @return The length of the segment in bytes.
    */
-  int get_length() const;
-
+   int get_length() const;
+ 
   /** Gets the length of the segment in characters.
    * @return The length of the semgment in characters.
    */
-  int get_num_chars() const;
-
+   int get_num_chars() const;
+ 
   /** Gets the properties of the segment.
    * @return The properties of the segment.
    */

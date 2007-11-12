@@ -15,7 +15,10 @@ gnomecanvasmm.Merge([libraries['glibmm2'],
                      libraries['atkmm'],
                      libraries['gdkmm2'],
                      libraries['gtkmm2'],
-                     libraries['libgnomecanvas2'] ])
+                     libraries['libgnomecanvas2'],
+                     libraries['cairomm']])
+
+gnomecanvasmm.Append(CXXFLAGS = ["-DGLIBMM_PROPERTIES_ENABLED", "-DGLIBMM_EXCEPTIONS_ENABLED"])
 
 libgnomecanvasmm = gnomecanvasmm.SharedLibrary('libgnomecanvasmm', gnomecanvasmm_files)
 Default(libgnomecanvasmm)

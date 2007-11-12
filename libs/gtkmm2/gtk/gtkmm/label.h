@@ -3,6 +3,7 @@
 #ifndef _GTKMM_LABEL_H
 #define _GTKMM_LABEL_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -91,12 +92,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_populate_popup(Menu* menu);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -193,7 +200,7 @@ public:
    * @code
    * char *markup;
    * &lt;!-- --&gt;
-   * markup = g_markup_printf_escaped ("&lt;span style=\"italic\"&gt;%s&lt;/span&gt;", str);
+   * markup = g_markup_printf_escaped ("&lt;span style=\"italic\"&gt;&percnt;s&lt;/span&gt;", str);
    * gtk_label_set_markup (GTK_LABEL (label), markup);
    * g_free (markup);
    * @endcode
@@ -306,7 +313,7 @@ public:
   /** Sets the mode used to ellipsize (add an ellipsis: "...") to the text if there
    * is not enough space to render the entire string.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param mode A Pango::EllipsizeMode.
    */
   void set_ellipsize(Pango::EllipsizeMode mode);
@@ -314,14 +321,14 @@ public:
   /** Returns the ellipsizing position of the label. See set_ellipsize().
    * @return Pango::EllipsizeMode
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   Pango::EllipsizeMode get_ellipsize() const;
 
   
   /** Sets the desired width in characters of @a label  to @a n_chars .
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param n_chars The new desired width, in characters.
    */
   void set_width_chars(int n_chars);
@@ -330,14 +337,14 @@ public:
    * set_width_chars().
    * @return The width of the label in characters.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   int get_width_chars() const;
 
   
   /** Sets the desired maximum width in characters of @a label  to @a n_chars .
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param n_chars The new desired maximum width, in characters.
    */
   void set_max_width_chars(int n_chars);
@@ -346,7 +353,7 @@ public:
    * set_width_chars().
    * @return The maximum width of the label in characters.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   int get_max_width_chars() const;
 
@@ -365,6 +372,10 @@ public:
    */
   bool get_line_wrap() const;
   
+  void set_line_wrap_mode(Pango::WrapMode wrap_mode);
+  
+  Pango::WrapMode get_line_wrap_mode() const;
+  
   /** Selectable labels allow the user to select text from the label, for
    * copy-and-paste.
    * @param setting <tt>true</tt> to allow selecting text in the label.
@@ -381,7 +392,7 @@ public:
    * setting for the label is ignored if the label is selectable,
    * wrapped, or ellipsized.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param angle The angle that the baseline of the label makes with
    * the horizontal, in degrees, measured counterclockwise.
    */
@@ -391,7 +402,7 @@ public:
    * gtk_label_set_angle.
    * @return The angle of rotation for the label
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   double get_angle() const;
   
@@ -453,7 +464,7 @@ public:
   
   /** Sets whether the label is in single line mode.
    * 
-   * Since: 2.6
+   * @newin2p6
    * @param single_line_mode <tt>true</tt> if the label should be in single line mode.
    */
   void set_single_line_mode(bool single_line_mode = true);
@@ -461,25 +472,33 @@ public:
   /** Returns whether the label is in single line mode.
    * @return <tt>true</tt> when the label is in single line mode.
    * 
-   * Since: 2.6.
+   * @newin2p6.
    */
   bool get_single_line_mode() const;
 
   
+/**
+   * @par Prototype:
+   * <tt>void %populate_popup(Menu* menu)</tt>
+   */
+
   Glib::SignalProxy1< void,Menu* > signal_populate_popup();
 
 
   //Keybinding signals:
   
   
-  /** The text of the label.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The text of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Glib::ustring> property_label() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The text of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -487,15 +506,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Glib::ustring> property_label() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** A list of style attributes to apply to the text of the label.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** A list of style attributes to apply to the text of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Pango::AttrList> property_attributes() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** A list of style attributes to apply to the text of the label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -503,15 +526,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Pango::AttrList> property_attributes() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The text of the label includes XML markup. See pango_parse_markup.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The text of the label includes XML markup. See pango_parse_markup.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_use_markup() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The text of the label includes XML markup. See pango_parse_markup.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -519,15 +546,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_use_markup() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** If set
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_use_underline() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -535,15 +566,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_use_underline() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The alignment of the lines in the text of the label relative to each other. This does NOT affect the alignment of the label within its allocation. See GtkMisc::xalign for that.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The alignment of the lines in the text of the label relative to each other. This does NOT affect the alignment of the label within its allocation. See GtkMisc::xalign for that.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Justification> property_justify() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The alignment of the lines in the text of the label relative to each other. This does NOT affect the alignment of the label within its allocation. See GtkMisc::xalign for that.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -551,31 +586,30 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Justification> property_justify() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** A string with _ characters in positions correspond to characters in the text to underline.
-   *
-   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
-   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
-   * the value of the property changes.
-   */
-  Glib::PropertyProxy_WriteOnly<Glib::ustring> property_pattern() ;
-
+  #ifdef GLIBMM_PROPERTIES_ENABLED
 /** A string with _ characters in positions correspond to characters in the text to underline.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
-  Glib::PropertyProxy_ReadOnly<Glib::ustring> property_pattern() const;
+  Glib::PropertyProxy_WriteOnly<Glib::ustring> property_pattern() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** If set
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_wrap() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** If set
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -583,15 +617,39 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_wrap() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the label text can be selected with the mouse.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** If wrap is set
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<Pango::WrapMode> property_wrap_mode() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** If wrap is set
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<Pango::WrapMode> property_wrap_mode() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the label text can be selected with the mouse.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_selectable() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the label text can be selected with the mouse.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -599,24 +657,30 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_selectable() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The mnemonic accelerator key for this label.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The mnemonic accelerator key for this label.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<guint> property_mnemonic_keyval() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** The widget to be activated when the label's mnemonic key is pressed.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The widget to be activated when the label's mnemonic key is pressed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Widget*> property_mnemonic_widget() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The widget to be activated when the label's mnemonic key is pressed.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -624,33 +688,41 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Widget*> property_mnemonic_widget() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The current position of the insertion cursor in chars.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The current position of the insertion cursor in chars.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_cursor_position() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** The position of the opposite end of the selection from the cursor in chars.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The position of the opposite end of the selection from the cursor in chars.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_selection_bound() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-  /** The preferred place to ellipsize the string
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The preferred place to ellipsize the string
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<Pango::EllipsizeMode> property_ellipsize() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The preferred place to ellipsize the string
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -658,15 +730,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<Pango::EllipsizeMode> property_ellipsize() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The desired width of the label
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The desired width of the label
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_width_chars() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The desired width of the label
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -674,15 +750,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_width_chars() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
     
-  /** Whether the label is in single line mode.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the label is in single line mode.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_single_line_mode() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the label is in single line mode.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -690,15 +770,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_single_line_mode() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Angle at which the label is rotated.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Angle at which the label is rotated.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<double> property_angle() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Angle at which the label is rotated.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -706,15 +790,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<double> property_angle() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** The desired maximum width of the label
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The desired maximum width of the label
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<int> property_max_width_chars() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** The desired maximum width of the label
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -722,6 +810,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<int> property_max_width_chars() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -737,6 +826,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Label* wrap(GtkLabel* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_LABEL_H */
 

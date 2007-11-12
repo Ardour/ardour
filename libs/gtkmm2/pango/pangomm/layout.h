@@ -3,6 +3,7 @@
 #ifndef _PANGOMM_LAYOUT_H
 #define _PANGOMM_LAYOUT_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -208,6 +209,32 @@ public:
   static Glib::RefPtr<Layout> create(const Glib::RefPtr<Context>& context);
 
 
+ /** Creates a layout object set up to match the current transformation
+  * and target surface of the Cairo context.  This layout can then be
+  * used for text measurement with functions like
+  * get_size() or drawing with methods like show_in_cairo_contet(). 
+  * If you change the transformation or target surface for @a context, 
+  * you need to call update_from_cairo_context()
+  *
+  * This is the most convenient way to use Cairo with Pango. 
+  * However it is slightly inefficient since it creates a separate
+  * Pango Context object for each layout. This might matter in an
+  * application that is laying out large amounts of text.
+  * 
+  * @param context A Cairo context.
+  * @result The newly created Pango Layout.
+  */
+  static Glib::RefPtr<Layout> create(const Cairo::RefPtr<Cairo::Context>& context);
+
+  /** Updates the private Pango Context of a Pango Layout created with
+   * create(const Cairo::RefPtr<Cairo::Context>&) to match the current transformation
+   * and target surface of a Cairo Context.
+   *
+   * @param context A Cairo context.
+   */
+  void update_from_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
+
+
   /** Does a deep copy-by-value of the @a src  layout. The attribute list,
    * tab array, and text from the original layout are all copied by
    * value.
@@ -273,6 +300,15 @@ public:
    */
   void set_font_description(const FontDescription& desc);
   void unset_font_description();
+
+  
+  /** Gets the font description for the layout, if any.
+   * @return A pointer to the layout's font description,
+   * or <tt>0</tt> if the font description from the layout's
+   * context is inherited. This value is owned by the layout
+   * and must not be modified or freed.
+   */
+  FontDescription get_font_description() const;
 
   
   /** Sets the width to which the lines of the Pango::Layout should be wrapped.
@@ -456,6 +492,20 @@ public:
    * @return The position of the grapheme.
    */
   Rectangle index_to_pos(int index) const;
+  
+
+  /** Converts from byte @a index  within the @a layout  to line and X position.
+   * (X position is measured from the left edge of the line)
+   * @param index The byte index of a grapheme within the layout.
+   * @param trailing An integer indicating the edge of the grapheme to retrieve the 
+   * position of. If 0, the trailing edge of the grapheme, if &gt; 0, 
+   * the leading of the grapheme.
+   * @param line Location to store resulting line index. (which will
+   * between 0 and pango_layout_get_line_count(layout) - 1).
+   * @param x_pos Location to store resulting position within line
+   * (in thousandths of a device unit).
+   */
+  void index_to_line_x(int index_, bool trailing, int& line, int& x_pos) const;
 
   
   /** Given an index within a layout, determines the positions that of the
@@ -656,15 +706,30 @@ public:
   void get_iter(LayoutIter& iter);
 
 
+  /** Adds the text in this LayoutLine to the current path in the
+   * specified Cairo @a context. The origin of the glyphs (the left edge
+   * of the line) will be at the current point of the cairo context.
+   *
+   * @param context A Cairo context.
+   */
+  void add_to_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
+
+
 public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 };

@@ -53,17 +53,38 @@ protected:
 
 public:
   ComboBoxEntryText();
-  
+
+  /** Add an item to the end of the drop-down list.
+   * @param text The text for the item.
+   */
   void append_text(const Glib::ustring& text);
-  
+
   void insert_text(int position, const Glib::ustring& text);
-  
+
+  /** Add an item to the beginning of the drop-down list.
+   * @param text The text for the item.
+   */
   void prepend_text(const Glib::ustring& text);
 
+  //@deprecated Use get_entry()->get_text() to get the actual entered text.
   Glib::ustring get_active_text() const;
+
+  //@deprecated Use get_entry()->set_text() to set the actual entered text.
   void set_active_text(const Glib::ustring& text);
 
+  //There is a clear() method in the CellLayout base class, so this would cause confusion.
+  //TODO: Remove this when we can break API.
+  /// @deprecated See clear_items(). Since 2.8.
   void clear();
+
+  /** Remove all items from the drop-down menu.
+   */
+  void clear_items();
+
+  /** Remove the specified item if it is in the drop-down menu.
+   * @text The text of the item that should be removed.
+   */
+  void remove_text(const Glib::ustring& text);
 
 protected:
 

@@ -515,6 +515,12 @@ libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
 libraries['pango'] = LibraryInfo()
 libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
 
+libraries['cairo'] = LibraryInfo()
+libraries['cairo'].ParseConfig ('pkg-config --cflags --libs cairo')
+
+libraries['gtk2-unix-print'] = LibraryInfo()
+libraries['gtk2-unix-print'].ParseConfig ('pkg-config --cflags --libs gtk+-unix-print-2.0')
+
 libraries['libgnomecanvas2'] = LibraryInfo()
 libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomecanvas-2.0')
 
@@ -905,6 +911,8 @@ if env['SYSLIBS']:
     libraries['atkmm'].ParseConfig ('pkg-config --cflags --libs atkmm-1.6')
     libraries['pangomm'] = LibraryInfo()
     libraries['pangomm'].ParseConfig ('pkg-config --cflags --libs pangomm-1.4')
+    libraries['cairomm'] = LibraryInfo()
+    libraries['cairomm'].ParseConfig ('pkg-config --cflags --libs cairomm-1.0')
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
 
@@ -963,7 +971,10 @@ else:
                                     CPPPATH='#libs/sigc++2')
     libraries['glibmm2'] = LibraryInfo(LIBS='glibmm2',
                                     LIBPATH='#libs/glibmm2',
-                                    CPPPATH='#libs/glibmm2')
+                                    CPPPATH=['#libs/glibmm2/glib', '#libs/glibmm2'])
+    libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
+                                       LIBPATH="#libs/cairomm",
+                                       CPPPATH='#libs/cairomm')
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')
@@ -1022,6 +1033,7 @@ else:
 	'libs/gtkmm2/atk',
 	'libs/gtkmm2/gdk',
 	'libs/gtkmm2/gtk',
+        'libs/cairomm',
 	'libs/libgnomecanvasmm',
 #	'libs/flowcanvas',
         'libs/gtkmm2ext',

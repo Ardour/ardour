@@ -3,6 +3,7 @@
 #ifndef _GTKMM_STATUSBAR_H
 #define _GTKMM_STATUSBAR_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -95,13 +96,19 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_text_pushed(guint context_id, const Glib::ustring& text);
   virtual void on_text_popped(guint context_id, const Glib::ustring& text);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -122,20 +129,33 @@ public:
   bool get_has_resize_grip() const;
 
   
+/**
+   * @par Prototype:
+   * <tt>void %text_pushed(guint context_id, const Glib::ustring& text)</tt>
+   */
+
   Glib::SignalProxy2< void,guint,const Glib::ustring& > signal_text_pushed();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %text_popped(guint context_id, const Glib::ustring& text)</tt>
+   */
+
   Glib::SignalProxy2< void,guint,const Glib::ustring& > signal_text_popped();
 
 
-  /** Whether the statusbar has a grip for resizing the toplevel.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the statusbar has a grip for resizing the toplevel.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_has_resize_grip() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the statusbar has a grip for resizing the toplevel.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -143,6 +163,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_resize_grip() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -158,6 +179,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::Statusbar* wrap(GtkStatusbar* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_STATUSBAR_H */
 

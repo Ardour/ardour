@@ -3,6 +3,7 @@
 #ifndef _GTKMM_TOOLITEM_H
 #define _GTKMM_TOOLITEM_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -89,13 +90,19 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual bool on_create_menu_proxy();
   virtual void on_toolbar_reconfigured();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -108,7 +115,7 @@ public:
    * homogeneous items. The effect is that all homogeneous items will have
    * the same width as the widest of the items.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param homogeneous Whether @a tool_item  is the same size as other homogeneous items.
    */
   void set_homogeneous(bool homogeneous = true);
@@ -118,7 +125,7 @@ public:
    * @return <tt>true</tt> if the item is the same size as other homogeneous
    * item.s
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_homogeneous() const;
 
@@ -128,7 +135,7 @@ public:
    * effect is that the item gets bigger when the toolbar gets bigger
    * and smaller when the toolbar gets smaller.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param expand Whether @a tool_item  is allocated extra space.
    */
   void set_expand(bool expand = true);
@@ -137,7 +144,7 @@ public:
    * See set_expand().
    * @return <tt>true</tt> if @a tool_item  is allocated extra space.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_expand() const;
 
@@ -146,7 +153,7 @@ public:
    * text to be displayed as tooltip on the item and the private text
    * to be used. See Gtk::Tooltips::set_tip().
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param tooltips The Gtk::Tooltips object to be used.
    * @param tip_text Text to be used as tooltip text for @a tool_item .
    * @param tip_private Text to be used as private tooltip text.
@@ -159,7 +166,7 @@ public:
    * When @a toolitem  has a drag window it will intercept all events,
    * even those that would otherwise be sent to a child of @a toolitem .
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param use_drag_window Whether @a toolitem  has a drag window.
    */
   void set_use_drag_window(bool use_drag_window = true);
@@ -168,14 +175,14 @@ public:
    * set_use_drag_window().
    * @return <tt>true</tt> if @a toolitem  uses a drag window.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_use_drag_window() const;
 
   
   /** Sets whether @a toolitem  is visible when the toolbar is docked horizontally.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param visible_horizontal Whether @a toolitem  is visible when in horizontal mode.
    */
   void set_visible_horizontal(bool visible_horizontal = true);
@@ -185,7 +192,7 @@ public:
    * @return <tt>true</tt> if @a toolitem  is visible on toolbars that are
    * docked horizontally.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_visible_horizontal() const;
 
@@ -195,7 +202,7 @@ public:
    * useful on a vertically docked toolbar. If @a visible_vertical  is <tt>false</tt>
    *  @a toolitem  will not appear on toolbars that are docked vertically.
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param visible_vertical Whether @a toolitem  is visible when the toolbar
    * is in vertical mode.
    */
@@ -205,7 +212,7 @@ public:
    * See set_visible_vertical().
    * @return Whether @a toolitem  is visible when the toolbar is docked vertically
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_visible_vertical() const;
 
@@ -214,7 +221,7 @@ public:
    * set_is_important()
    * @return <tt>true</tt> if @a tool_item  is considered important.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_is_important() const;
   
@@ -224,7 +231,7 @@ public:
    * only tool buttons with the "is_important" property set have labels, an
    * effect known as "priority text"
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param is_important Whether the tool item should be considered important.
    */
   void set_is_important(bool is_important = true);
@@ -235,7 +242,7 @@ public:
    * they should use.
    * @return A Gtk::IconSize indicating the icon size used for @a tool_item 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   IconSize get_icon_size () const;
   
@@ -245,7 +252,7 @@ public:
    * @return A Gtk::Orientation indicating the orientation
    * used for @a tool_item 
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Orientation get_orientation() const;
   
@@ -271,7 +278,7 @@ public:
    * @return A Gtk::ToolbarStyle indicating the toolbar style used
    * for @a tool_item .
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   ToolbarStyle get_toolbar_style() const;
   
@@ -282,7 +289,7 @@ public:
    * @return A Gtk::ReliefStyle indicating the relief style used
    * for @a tool_item .
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   ReliefStyle get_relief_style() const;
 
@@ -293,7 +300,7 @@ public:
    * @return The Gtk::MenuItem that is going to appear in the
    * overflow menu for @a tool_item .
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Widget* retrieve_proxy_menu_item();
   
@@ -303,7 +310,7 @@ public:
    * @return The Gtk::MenuItem that is going to appear in the
    * overflow menu for @a tool_item .
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   const Widget* retrieve_proxy_menu_item() const;
   
@@ -318,7 +325,7 @@ public:
    * @return The Gtk::MenuItem passed to
    * set_proxy_menu_item(), if the @a menu_item_id &lt;!-- --&gt;s match.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   Widget* get_proxy_menu_item(const Glib::ustring& menu_item_id);
   
@@ -333,7 +340,7 @@ public:
    * @return The Gtk::MenuItem passed to
    * set_proxy_menu_item(), if the @a menu_item_id &lt;!-- --&gt;s match.
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   const Widget* get_proxy_menu_item(const Glib::ustring& menu_item_id) const;
   
@@ -341,7 +348,7 @@ public:
    *  @a menu_item_id  is used to identify the caller of this function and
    * should also be used with get_proxy_menu_item().
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param menu_item_id A string used to identify @a menu_item .
    * @param menu_item A Gtk::MenuItem to be used in the overflow menu.
    */
@@ -357,32 +364,97 @@ public:
    * changes what it will do in response to the "create_menu_proxy"
    * signal.
    * 
-   * Since: 2.6
+   * @newin2p6
    */
   void rebuild_menu();
   
+  //TODO: This suggests calling set_proxy_menu_item() with NULL. but the function asserts against that.
+  /** This signal is emitted when the toolbar needs information from @tool_item
+   * about whether the item should appear in the toolbar overflow menu. In
+   * response the tool item should either
+   * <itemizedlist>
+   * <listitem> call set_proxy_menu_item() with a NULL
+   * pointer and return true to indicate that the item should not appear
+   * in the overflow menu
+   * </listitem>
+   * <listitem> call set_proxy_menu_item() with a new menu
+   * item and return true, or 
+   * </listitem>
+   * <listitem> return false to indicate that the signal was not
+   * handled by the item. This means that
+   * the item will not appear in the overflow menu unless a later handler
+   * installs a menu item.
+   * </listitem>
+   * </itemizedlist>
+   *
+   * The toolbar may cache the result of this signal. When the tool item changes
+   * how it will respond to this signal it must call rebuild_menu()
+   * to invalidate the cache and ensure that the toolbar rebuilds its overflow
+   * menu.
+   *
+   * @result true if the signal was handled, false if not
+   */
   
+/**
+   * @par Prototype:
+   * <tt>bool %create_menu_proxy()</tt>
+   */
+
   Glib::SignalProxy0< bool > signal_create_menu_proxy();
 
   
+  /** This signal is emitted when some property of the toolbar that the
+   * item is a child of changes. For custom subclasses of ToolItem,
+   * the default handler of this signal use the functions
+   * <itemizedlist>
+   * <listitem>Toolbar::get_orientation()</listitem>
+   * <listitem>Toolbar::get_style()</listitem>
+   * <listitem>Toolbar::get_icon_size()</listitem>
+   * <listitem>Toolbar::get_relief_style()</listitem>
+   * </itemizedlist>
+   * to find out what the toolbar should look like and change
+   * themselves accordingly.
+   */
+  
+/**
+   * @par Prototype:
+   * <tt>void %toolbar_reconfigured()</tt>
+   */
+
   Glib::SignalProxy0< void > signal_toolbar_reconfigured();
 
 
   //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
   //TODO: Remove no_default_handler when we do an ABI-break-with-parallel-install.
+  /** This signal is emitted when the toolitem's tooltip changes.
+   * Application developers can use gtk_tool_item_set_tooltip() to
+   * set the item's tooltip.
+   *
+   * @param tooltips the Tooltips
+   * @param tip_text the tooltip text
+   * @param tip_private the tooltip private text
+   * @result true if the signal was handled, false if not.
+   */
   
+/**
+   * @par Prototype:
+   * <tt>bool %set_tooltip(Tooltips* tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private)</tt>
+   */
 
   Glib::SignalProxy3< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& > signal_set_tooltip();
 
   
-  /** Whether the toolbar item is visible when the toolbar is in a horizontal orientation.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the toolbar item is visible when the toolbar is in a horizontal orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible_horizontal() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the toolbar item is visible when the toolbar is in a horizontal orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -390,15 +462,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible_horizontal() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the toolbar item is visible when the toolbar is in a vertical orientation.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the toolbar item is visible when the toolbar is in a vertical orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_visible_vertical() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the toolbar item is visible when the toolbar is in a vertical orientation.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -406,15 +482,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_visible_vertical() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the toolbar item is considered important. When TRUE
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the toolbar item is considered important. When TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_is_important() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the toolbar item is considered important. When TRUE
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -422,6 +502,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_is_important() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 };
@@ -437,6 +518,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::ToolItem* wrap(GtkToolItem* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_TOOLITEM_H */
 

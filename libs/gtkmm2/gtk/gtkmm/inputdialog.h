@@ -3,6 +3,7 @@
 #ifndef _GTKMM_INPUTDIALOG_H
 #define _GTKMM_INPUTDIALOG_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -42,7 +43,13 @@ namespace Gtk
 
 class Button;
 class Table;
+
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 class OptionMenu;
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
 class ScrolledWindow;
 
 // Don't list this in the documentation's Dialogs group because it isn't really useful
@@ -91,13 +98,19 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_enable_device(const Glib::RefPtr<Gdk::Device>& device);
   virtual void on_disable_device(const Glib::RefPtr<Gdk::Device>& device);
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -108,32 +121,44 @@ public:
   InputDialog();
   
 
-  Table* get_axis_list();
+   Table* get_axis_list();
   const Table* get_axis_list() const;
-  ScrolledWindow* get_axis_box();
+    ScrolledWindow* get_axis_box();
   const ScrolledWindow* get_axis_box() const;
-  OptionMenu* get_mode_optionmenu();
+   #ifndef GTKMM_DISABLE_DEPRECATED
+   OptionMenu* get_mode_optionmenu();
   const OptionMenu* get_mode_optionmenu() const;
-
-  Button* get_close_button();
+#endif // GTKMM_DISABLE_DEPRECATED
+   
+   Button* get_close_button();
   const Button* get_close_button() const;
-  Button* get_save_button();
+    Button* get_save_button();
   const Button* get_save_button() const;
-
+ 
   //GtkWidget *axis_items[GDK_AXIS_LAST];
 
-  Glib::RefPtr<Gdk::Device> get_current_device();
+   Glib::RefPtr<Gdk::Device> get_current_device();
   Glib::RefPtr<const Gdk::Device> get_current_device() const;
-
-  Table* get_keys_list();
+ 
+   Table* get_keys_list();
   const Table* get_keys_list() const;
-  ScrolledWindow* get_keys_box();
+    ScrolledWindow* get_keys_box();
   const ScrolledWindow* get_keys_box() const;
-
+ 
   
+/**
+   * @par Prototype:
+   * <tt>void %enable_device(const Glib::RefPtr<Gdk::Device>& device)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<Gdk::Device>& > signal_enable_device();
 
   
+/**
+   * @par Prototype:
+   * <tt>void %disable_device(const Glib::RefPtr<Gdk::Device>& device)</tt>
+   */
+
   Glib::SignalProxy1< void,const Glib::RefPtr<Gdk::Device>& > signal_disable_device();
 
 
@@ -150,6 +175,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::InputDialog* wrap(GtkInputDialog* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_INPUTDIALOG_H */
 

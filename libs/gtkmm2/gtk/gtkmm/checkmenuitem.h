@@ -3,6 +3,7 @@
 #ifndef _GTKMM_CHECKMENUITEM_H
 #define _GTKMM_CHECKMENUITEM_H
 
+
 #include <glibmm.h>
 
 /* $Id$ */
@@ -90,12 +91,18 @@ public:
 
 public:
   //C++ methods used to invoke GTK+ virtual functions:
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
 protected:
   //GTK+ Virtual Functions (override these to change behaviour):
+#ifdef GLIBMM_VFUNCS_ENABLED
+#endif //GLIBMM_VFUNCS_ENABLED
 
   //Default Signal Handlers::
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   virtual void on_toggled();
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
 private:
@@ -139,7 +146,7 @@ public:
   
   /** Sets whether @a check_menu_item  is drawn like a Gtk::RadioMenuItem
    * 
-   * Since: 2.4
+   * @newin2p4
    * @param draw_as_radio Whether @a check_menu_item  is drawn like a Gtk::RadioMenuItem.
    */
   void set_draw_as_radio(bool draw_as_radio = true);
@@ -147,7 +154,7 @@ public:
   /** Returns whether @a check_menu_item  looks like a Gtk::RadioMenuItem
    * @return Whether @a check_menu_item  looks like a Gtk::RadioMenuItem
    * 
-   * Since: 2.4.
+   * @newin2p4.
    */
   bool get_draw_as_radio() const;
   
@@ -156,18 +163,25 @@ public:
    * this signal)
    */
   
+/**
+   * @par Prototype:
+   * <tt>void %toggled()</tt>
+   */
 
   Glib::SignalProxy0< void > signal_toggled();
 
 
-  /** Whether the menu item is checked.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the menu item is checked.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_active() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the menu item is checked.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -175,15 +189,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_active() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether to display an inconsistent state.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to display an inconsistent state.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_inconsistent() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether to display an inconsistent state.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -191,15 +209,19 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_inconsistent() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
-  /** Whether the menu item looks like a radio menu item.
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether the menu item looks like a radio menu item.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
    * the value of the property changes.
    */
   Glib::PropertyProxy<bool> property_draw_as_radio() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
+#ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the menu item looks like a radio menu item.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -207,6 +229,7 @@ public:
    * the value of the property changes.
    */
   Glib::PropertyProxy_ReadOnly<bool> property_draw_as_radio() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
 
 
 protected:
@@ -216,7 +239,9 @@ protected:
    * The GdkRectangle specifies the area of the widget which will get
    * redrawn.
    */
-    virtual void draw_indicator_vfunc(GdkRectangle* area);
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual void draw_indicator_vfunc(GdkRectangle* area);
+#endif //GLIBMM_VFUNCS_ENABLED
 
 
 };
@@ -232,6 +257,8 @@ namespace Glib
    * @result A C++ instance that wraps this C instance.
    */
   Gtk::CheckMenuItem* wrap(GtkCheckMenuItem* object, bool take_copy = false);
-}
+} //namespace Glib
+
+
 #endif /* _GTKMM_CHECKMENUITEM_H */
 
