@@ -41,6 +41,8 @@ using namespace sigc;
 void
 Editor::keyboard_selection_finish (bool add)
 {
+	cerr << "here\n";
+
 	if (session && have_pending_keyboard_selection) {
 
 		nframes64_t end;

@@ -880,7 +880,7 @@ Editor::edit_point_to_selection_start ()
 	Location* loc;
 	bool ignored;
 
-	if (!session || _edit_point != EditAtSelectedMarker || selection->markers.empty()) {
+	if (!session || selection->markers.empty()) {
 		return;
 	}
 
@@ -915,7 +915,7 @@ Editor::edit_point_to_selection_end ()
 	Location* loc;
 	bool ignored;
 
-	if (!session || _edit_point != EditAtSelectedMarker || selection->markers.empty()) {
+	if (!session || selection->markers.empty()) {
 		return;
 	}
 
