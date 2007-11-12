@@ -496,7 +496,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	} else {
 		handle_center = 3.0;
 	}
-	
+
 	fade_in_handle->property_x1() =  handle_center - 3.0;
 	fade_in_handle->property_x2() =  handle_center + 3.0;
 	

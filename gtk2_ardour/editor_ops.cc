@@ -797,7 +797,7 @@ Editor::edit_point_to_region_point (RegionPoint point, int32_t dir)
 	Location* loc;
 	bool ignored;
 
-	if (!session || _edit_point != EditAtSelectedMarker || selection->markers.empty()) {
+	if (!session || selection->markers.empty()) {
 		return;
 	}
 
@@ -3861,11 +3861,11 @@ Editor::set_fade_length (bool in)
 	char* cmd;
 
 	if (in) {
-		if (pos <= rv->region()->start()) {
+		if (pos <= rv->region()->position()) {
 			/* can't do it */
 			return;
 		}
-		len = pos - rv->region()->start();
+		len = pos - rv->region()->position();
 		cmd = _("set fade in length");
 	} else {
 		if (pos >= rv->region()->last_frame()) {
@@ -3877,8 +3877,6 @@ Editor::set_fade_length (bool in)
 	}
 
 	begin_reversible_command (cmd);
-
-	cerr << "start " << cmd << " with len = " << len << endl;
 
 	RegionSelection& rs (get_regions_for_action());
 
