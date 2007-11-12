@@ -920,6 +920,10 @@ AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 void
 AudioRegion::set_fade_in_length (nframes_t len)
 {
+	if (len > _length) {
+		len = _length - 1;
+	}
+
 	bool changed = _fade_in.extend_to (len);
 
 	if (changed) {
@@ -931,13 +935,16 @@ AudioRegion::set_fade_in_length (nframes_t len)
 void
 AudioRegion::set_fade_out_length (nframes_t len)
 {
+	if (len > _length) {
+		len = _length - 1;
+	}
+
 	bool changed =	_fade_out.extend_to (len);
 
 	if (changed) {
 		_flags = Flag (_flags & ~DefaultFadeOut);
+		send_change (FadeOutChanged);
 	}
-
-	send_change (FadeOutChanged);
 }
 
 void

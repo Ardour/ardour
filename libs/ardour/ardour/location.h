@@ -80,9 +80,9 @@ class Location : public PBD::StatefulDestructible
 	void lock() { _locked = true; changed (this); }
 	void unlock() { _locked = false; changed (this); }
 	
-	nframes_t start() { return _start; }
-	nframes_t end() { return _end; }
-	nframes_t length() { return _end - _start; }
+	nframes_t start() const  { return _start; }
+	nframes_t end() const { return _end; }
+	nframes_t length() const { return _end - _start; }
 
 	int set_start (nframes_t s);
 	int set_end (nframes_t e);
