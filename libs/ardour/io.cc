@@ -199,11 +199,10 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 
 IO::~IO ()
 {
-	cerr << "Deleting IO called " << _name << endl;
-
 	Glib::Mutex::Lock guard (m_meter_signal_lock);
-	
 	Glib::Mutex::Lock lm (io_lock);
+
+	BLOCK_PROCESS_CALLBACK ();
 
 	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
 		_session.engine().unregister_port (*i);

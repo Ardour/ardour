@@ -52,6 +52,10 @@ Location::Location (const Location& other)
 
 	_flags = Flags (_flags & ~IsStart);
 	_flags = Flags (_flags & ~IsEnd);
+
+	/* copy is not locked even if original was */
+
+	_locked = false;
 }
 
 Location::Location (const XMLNode& node)
@@ -73,6 +77,10 @@ Location::operator= (const Location& other)
 	_end = other._end;
 	_flags = other._flags;
 
+	/* copy is not locked even if original was */
+
+	_locked = false;
+
 	/* "changed" not emitted on purpose */
 	
 	return this;
@@ -81,6 +89,10 @@ Location::operator= (const Location& other)
 int
 Location::set_start (nframes_t s)
 {
+	if (_locked) {
+		return -1;
+	}
+
 	if (is_mark()) {
 		if (_start != s) {
 
@@ -117,6 +129,10 @@ Location::set_start (nframes_t s)
 int
 Location::set_end (nframes_t e)
 {
+	if (_locked) {
+		return -1;
+	}
+
 	if (is_mark()) {
 		if (_start != e) {
 			_start = e;
@@ -140,6 +156,10 @@ Location::set_end (nframes_t e)
 int
 Location::set (nframes_t start, nframes_t end)
 {
+	if (_locked) {
+		return -1;
+	}
+
 	if (is_mark() && start != end) {
 		return -1;
 	} else if (((is_auto_punch() || is_auto_loop()) && start >= end) || (start > end)) {
@@ -155,6 +175,23 @@ Location::set (nframes_t start, nframes_t end)
 		_end = end;
 		end_changed(this); /* EMIT SIGNAL */
 	}
+	return 0;
+}
+
+int
+Location::move_to (nframes_t pos) 
+{
+	if (_locked) {
+		return -1;
+	}
+
+	if (_start != pos) {
+		_start = pos;
+		_end = _start + length();
+		
+		changed (this); /* EMIT SIGNAL */
+	}
+	
 	return 0;
 }
 
@@ -284,6 +321,7 @@ Location::get_state (void)
 	snprintf (buf, sizeof (buf), "%u", end());
 	node->add_property ("end", buf);
 	node->add_property ("flags", enum_2_string (_flags));
+	node->add_property ("locked", (_locked ? "yes" : "no"));
 
 	return *node;
 }
@@ -342,6 +380,12 @@ Location::set_state (const XMLNode& node)
 	}
 		
 	_flags = Flags (string_2_enum (prop->value(), _flags));
+
+	if ((prop = node.property ("locked")) != 0) {
+		_locked = (prop->value() == "yes");
+	} else {
+		_locked = false;
+	}
 
 	for (cd_iter = cd_list.begin(); cd_iter != cd_list.end(); ++cd_iter) {
 		  

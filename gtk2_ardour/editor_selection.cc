@@ -969,27 +969,26 @@ Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 }
 
 void
-Editor::select_all_selectables_between_cursors (Cursor *cursor, Cursor *other_cursor)
+Editor::select_all_selectables_using_edit (bool after)
 {
         nframes_t start;
 	nframes_t end;
 	list<Selectable *> touched;
-	bool  other_cursor_is_first = cursor->current_frame > other_cursor->current_frame;
 
-	if (cursor->current_frame == other_cursor->current_frame) {
-		return;
-	}
-
-	begin_reversible_command (_("select all between cursors"));
-	if (other_cursor_is_first) {
-		start = other_cursor->current_frame;
-		end = cursor->current_frame - 1;
-		
+	if (after) {
+		begin_reversible_command (_("select all after edit"));
+		start = get_preferred_edit_position();
+		end = session->current_end_frame();
 	} else {
-		start = cursor->current_frame;
-		end = other_cursor->current_frame - 1;
+		if ((end = get_preferred_edit_position()) > 1) {
+			begin_reversible_command (_("select all before edit"));
+			start = 0;
+			end -= 1;
+		} else {
+			return;
+		}
 	}
-	
+
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
@@ -1000,3 +999,102 @@ Editor::select_all_selectables_between_cursors (Cursor *cursor, Cursor *other_cu
 	commit_reversible_command ();
 }
 
+void
+Editor::select_all_selectables_between (bool within)
+{
+        nframes64_t start;
+	nframes64_t end;
+	list<Selectable *> touched;
+
+	if (!get_edit_op_range (start, end)) {
+		return;
+	}
+	
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
+	}
+
+	selection->set (touched);
+}
+
+void
+Editor::select_range_between ()
+{
+        nframes64_t start;
+	nframes64_t end;
+	
+	if (!get_edit_op_range (start, end)) {
+		return;
+	}
+
+	set_mouse_mode (MouseRange);
+	selection->set (0, start, end);
+}
+
+bool
+Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
+{
+	nframes64_t m;
+	bool ignored;
+
+	/* in range mode, use any existing selection */
+
+	if (mouse_mode == MouseRange && !selection->time.empty()) {
+		/* we know that these are ordered */
+		start = selection->time.start();
+		end = selection->time.end_frame();
+		return true;
+	}
+
+	if (!mouse_frame (m, ignored)) {
+		/* mouse is not in a canvas, try playhead+selected marker.
+		   this is probably most true when using menus.
+		 */
+
+		if (selection->markers.empty()) {
+			return false;
+		}
+
+		start = selection->markers.front()->position();
+		end = session->audible_frame();
+
+	} else {
+
+		switch (_edit_point) {
+		case EditAtPlayhead:
+			if (selection->markers.empty()) {
+				/* use mouse + playhead */
+				start = m;
+				end = session->audible_frame();
+			} else {
+				/* use playhead + selected marker */
+				start = session->audible_frame();
+				end = selection->markers.front()->position();
+			}
+			break;
+			
+		case EditAtMouse:
+		case EditAtSelectedMarker:
+			/* use mouse + selected marker */
+			if (selection->markers.empty()) {
+				return false;
+			}
+			start = selection->markers.front()->position();
+			end = m;
+			break;
+		}
+	}
+
+	if (start == end) {
+		return false;
+	}
+
+	if (start > end) {
+		swap (start, end);
+	}
+
+	return true;
+}

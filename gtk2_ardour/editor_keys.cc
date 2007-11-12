@@ -41,14 +41,27 @@ using namespace sigc;
 void
 Editor::keyboard_selection_finish (bool add)
 {
+	cerr << "here\n";
+
 	if (session && have_pending_keyboard_selection) {
-		begin_reversible_command (_("keyboard selection"));
-		if (add) {
-			selection->add (pending_keyboard_selection_start, session->audible_frame());
+
+		nframes64_t end;
+		bool ignored;
+
+		if (session->transport_rolling()) {
+			end = session->audible_frame();
 		} else {
-			selection->set (0, pending_keyboard_selection_start, session->audible_frame());
+			if (!mouse_frame (end, ignored)) {
+				return;
+			}
 		}
-		commit_reversible_command ();
+
+		if (add) {
+			selection->add (pending_keyboard_selection_start, end);
+		} else {
+			selection->set (0, pending_keyboard_selection_start, end);
+		}
+
 		have_pending_keyboard_selection = false;
 	}
 }
@@ -57,8 +70,19 @@ void
 Editor::keyboard_selection_begin ()
 {
 	if (session) {
-		pending_keyboard_selection_start = session->audible_frame();
-		have_pending_keyboard_selection = true;
+		if (session->transport_rolling()) {
+			pending_keyboard_selection_start = session->audible_frame();
+			have_pending_keyboard_selection = true;
+		} else {
+			bool ignored;
+			nframes64_t where; // XXX fix me
+
+			if (mouse_frame (where, ignored)) {
+				pending_keyboard_selection_start = where;
+				have_pending_keyboard_selection = true;
+			}
+				
+		}
 	}
 }
 

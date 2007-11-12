@@ -473,6 +473,16 @@ libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
+libraries['rubberband'] = LibraryInfo()
+#
+# chris cannam's rubberband has not yet been released
+# 
+if os.path.exists ('libs/rubberband'):
+    libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
+                                           LIBPATH='#libs/rubberband/lib',
+                                           CPPPATH='#libs/rubberband/src',
+                                           CXXFLAGS='-DUSE_RUBBERBAND')
+
 if env['FFT_ANALYSIS']:
 	libraries['fftw3f'] = LibraryInfo()
 	libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')

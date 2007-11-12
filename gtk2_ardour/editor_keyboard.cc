@@ -19,13 +19,18 @@
 
 #include <ardour/audioregion.h>
 #include <ardour/playlist.h>
+#include <ardour/location.h>
+
 #include <pbd/memento_command.h>
 
 #include "editor.h"
 #include "region_view.h"
 #include "selection.h"
+#include "keyboard.h"
 
 #include "i18n.h"
+
+using namespace ARDOUR;
 
 void
 Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, bool use_time_canvas, bool can_select)
@@ -71,48 +76,6 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 }
 
 void
-Editor::kbd_set_playhead_cursor ()
-{
-	kbd_driver (mem_fun(*this, &Editor::set_playhead_cursor), true, true, false);
-}
-
-void
-Editor::kbd_set_edit_cursor ()
-{
-	kbd_driver (mem_fun(*this, &Editor::set_edit_cursor), true, true, false);
-}
-
-
-void
-Editor::kbd_do_split (GdkEvent* ev)
-{
-	nframes_t where = event_frame (ev);
-
-	if (entered_regionview) {
-		if (selection->regions.contains (entered_regionview)) {
-			split_regions_at (where, selection->regions);
-		} else {
-			RegionSelection s;
-
-			/* add equivalent regions to the selection that we'll split */
-			vector<RegionView*> eq;
-			get_equivalent_regions (entered_regionview, eq);
-			for (vector<RegionView*>::iterator i = eq.begin(); i != eq.end(); ++i) {
-				s.add (*i);
-			}
-			
-			split_regions_at (where, s);
-		}
-	}
-}
-
-void
-Editor::kbd_split ()
-{
-	kbd_driver (mem_fun(*this, &Editor::kbd_do_split), true, true, false);
-}
-
-void
 Editor::kbd_mute_unmute_region ()
 {
 	if (entered_regionview) {
@@ -136,36 +99,18 @@ Editor::kbd_set_sync_position ()
 void
 Editor::kbd_do_set_sync_position (GdkEvent* ev)
 {
-    nframes_t where = event_frame (ev);
-	snap_to (where);
-
 	if (entered_regionview) {
-	  set_a_regions_sync_position (entered_regionview->region(), where);
+		nframes64_t where = event_frame (ev);
+		snap_to (where);
+
+		set_a_regions_sync_position (entered_regionview->region(), where);
+
+	} else if (entered_marker) {
+
+		if (!selection->regions.empty()) {
+			set_a_regions_sync_position (selection->regions.front()->region(), entered_marker->position());
+		}
 	}
-}
-
-void
-Editor::kbd_do_align (GdkEvent* ev, ARDOUR::RegionPoint what)
-{
-	align (what);
-}
-
-void
-Editor::kbd_align (ARDOUR::RegionPoint what)
-{
-	kbd_driver (bind (mem_fun(*this, &Editor::kbd_do_align), what));
-}
-
-void
-Editor::kbd_do_align_relative (GdkEvent* ev, ARDOUR::RegionPoint what)
-{
-	align (what);
-}
-
-void
-Editor::kbd_align_relative (ARDOUR::RegionPoint what)
-{
-	kbd_driver (bind (mem_fun(*this, &Editor::kbd_do_align), what), true, true, false);
 }
 
 void

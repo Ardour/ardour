@@ -85,7 +85,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	PublicEditor ();
 	virtual ~PublicEditor ();
 
-	typedef list<TimeAxisView *> TrackViewList;
+	typedef TrackSelection TrackViewList;
 
 	/** @return Singleton PublicEditor instance */
 	static PublicEditor& instance () { return *_instance; }
@@ -252,7 +252,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual nframes_t edit_cursor_position (bool sync) = 0;
+	virtual nframes64_t get_preferred_edit_position () = 0;
 
 #ifdef WITH_CMT
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;

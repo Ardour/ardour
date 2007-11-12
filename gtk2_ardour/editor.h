@@ -354,8 +354,7 @@ class Editor : public PublicEditor
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes_t, double);
 
-	nframes_t edit_cursor_position(bool);
-	nframes64_t get_preferred_edit_position () const;
+	nframes64_t get_preferred_edit_position ();
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
@@ -417,7 +416,10 @@ class Editor : public PublicEditor
 	struct LocationMarkers {
 	    Marker* start;
 	    Marker* end;
+	    bool    valid;
 
+	    LocationMarkers () : start(0), end(0), valid (true) {}
+	    
 	    ~LocationMarkers ();
 
 	    void hide();
@@ -429,6 +431,7 @@ class Editor : public PublicEditor
 
 	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
 	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start) const;
+	Marker* entered_marker;
 
 	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
@@ -687,7 +690,6 @@ class Editor : public PublicEditor
 			      */
 
 	Cursor* playhead_cursor;
-	Cursor* edit_cursor;
 	ArdourCanvas::Group* cursor_group;
 
 	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
@@ -695,8 +697,17 @@ class Editor : public PublicEditor
 	void    cursor_to_region_point (Cursor*, ARDOUR::RegionPoint, int32_t dir);
 	void    cursor_to_selection_start (Cursor *);
 	void    cursor_to_selection_end   (Cursor *);
+
+	void    edit_point_to_next_region_point (ARDOUR::RegionPoint);
+	void    edit_point_to_previous_region_point (ARDOUR::RegionPoint);
+	void    edit_point_to_region_point (ARDOUR::RegionPoint, int32_t dir);
+	void    edit_point_to_selection_start ();
+	void    edit_point_to_selection_end   ();
+
 	void    select_all_selectables_using_cursor (Cursor *, bool);
-	void    select_all_selectables_between_cursors (Cursor *, Cursor *);
+	void    select_all_selectables_using_edit (bool);
+	void    select_all_selectables_between (bool within);
+	void    select_range_between ();
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 
@@ -955,11 +966,12 @@ class Editor : public PublicEditor
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
 	void crop_region_to_selection ();
+	void crop_region_to (nframes_t start, nframes_t end);
 	void set_a_regions_sync_position (boost::shared_ptr<ARDOUR::Region>, nframes_t);
-	void set_region_sync_from_edit_cursor ();
+	void set_region_sync_from_edit_point ();
 	void remove_region_sync();
-	void align_selection (ARDOUR::RegionPoint, nframes_t position);
-	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position);
+	void align_selection (ARDOUR::RegionPoint, nframes_t position, const RegionSelection&);
+	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position, const RegionSelection&);
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
 	void remove_selected_regions ();
@@ -988,6 +1000,8 @@ class Editor : public PublicEditor
 
 	void reset_focus ();
 
+	void split ();
+
 	void cut ();
 	void copy ();
 	void paste (float times);
@@ -1007,7 +1021,7 @@ class Editor : public PublicEditor
 	void rename_region_finished (bool);
 
 	void play_from_start ();
-	void play_from_edit_cursor ();
+	void play_from_edit_point ();
 	void play_selected_region ();
 	void audition_selected_region ();
 	void loop_selected_region ();
@@ -1088,7 +1102,7 @@ class Editor : public PublicEditor
 	void move_to_end ();
 	void goto_frame ();
 	void center_playhead ();
-	void center_edit_cursor ();
+	void center_edit_point ();
 	void edit_cursor_backward ();
 	void edit_cursor_forward ();
 	void playhead_backward ();
@@ -1180,6 +1194,8 @@ class Editor : public PublicEditor
 
 	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
 	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
+	
+	void set_fade_length (bool in);
 
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
@@ -1191,6 +1207,7 @@ class Editor : public PublicEditor
 	void create_region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	bool _dragging_playhead;
+	bool _dragging_edit_point;
 
 	void cursor_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void cursor_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
@@ -1275,7 +1292,6 @@ class Editor : public PublicEditor
 	/* non-public event handlers */
 
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_edit_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
 
 	bool track_canvas_scroll_event (GdkEventScroll* event);
@@ -1288,24 +1304,15 @@ class Editor : public PublicEditor
 	void track_canvas_allocate (Gtk::Allocation alloc);
 	bool track_canvas_size_allocated ();
 
-	void set_edit_cursor (GdkEvent* event);
-	void set_playhead_cursor (GdkEvent* event);
+	void set_playhead_cursor ();
 
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
-	void kbd_set_playhead_cursor ();
-	void kbd_set_edit_cursor ();
 	void kbd_mute_unmute_region ();
-	void kbd_split ();
 	void kbd_set_sync_position ();
-	void kbd_align (ARDOUR::RegionPoint);
-	void kbd_align_relative (ARDOUR::RegionPoint);
 	void kbd_brush ();
 	void kbd_audition ();
 
-	void kbd_do_split (GdkEvent*);
 	void kbd_do_set_sync_position (GdkEvent* ev);
-	void kbd_do_align (GdkEvent*, ARDOUR::RegionPoint);
-	void kbd_do_align_relative (GdkEvent*, ARDOUR::RegionPoint);
 	void kbd_do_brush (GdkEvent*);
 	void kbd_do_audition (GdkEvent*);
 
@@ -1355,6 +1362,7 @@ class Editor : public PublicEditor
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
+	void marker_menu_lock (bool yn);
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
 	void marker_menu_select_all_selectables_using_range ();
@@ -1418,7 +1426,7 @@ class Editor : public PublicEditor
 	void editor_mixer_button_toggled ();
 	void editor_list_button_toggled ();
 
-	AudioClock               edit_cursor_clock;
+	AudioClock               edit_point_clock;
 	AudioClock               zoom_range_clock;
 	Gtk::Button              zoom_in_button;
 	Gtk::Button              zoom_out_button;
@@ -1483,7 +1491,7 @@ class Editor : public PublicEditor
 
 	void                zoom_adjustment_changed();
 
-	void                edit_cursor_clock_changed();
+	void                edit_point_clock_changed();
 	
 	void setup_toolbar ();
 
@@ -1519,6 +1527,7 @@ class Editor : public PublicEditor
 	void track_selection_changed ();
 	void region_selection_changed ();
 	void point_selection_changed ();
+	void marker_selection_changed ();
 
 	enum SelectionOp {
 		CreateSelection,
@@ -1713,8 +1722,11 @@ class Editor : public PublicEditor
 	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void thaw_region_after_trim (RegionView& rv);
 	
-	void trim_region_to_edit_cursor ();
-	void trim_region_from_edit_cursor ();
+	void trim_region_to_edit_point ();
+	void trim_region_from_edit_point ();
+	void trim_region_to_loop ();
+	void trim_region_to_punch ();
+	void trim_region_to_location (const ARDOUR::Location&, const char* cmd);
 
 	bool show_gain_after_trim;
 
@@ -2005,11 +2017,24 @@ class Editor : public PublicEditor
 
 	Gtk::ComboBoxText edit_point_selector;
 
-	void set_edit_point (Editing::EditPoint ep);
+	void set_edit_point_preference (Editing::EditPoint ep);
+	void set_edit_point ();
 	void edit_point_selection_done ();
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
 	std::vector<std::string> edit_point_strings;
+
+	void selected_marker_moved (ARDOUR::Location*);
+	sigc::connection edit_point_clock_connection_a;
+	sigc::connection edit_point_clock_connection_b;
+
+	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
+
+	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
+	
+	RegionSelection tmp_regions;
+	
+	RegionSelection& get_regions_for_action ();
 };
 
 #endif /* __ardour_editor_h__ */

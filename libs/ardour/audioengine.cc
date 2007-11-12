@@ -566,6 +566,8 @@ AudioEngine::register_output_port (DataType type, const string& portname, bool p
 int          
 AudioEngine::unregister_port (Port& port)
 {
+	/* caller must hold process lock */
+
 	if (!_running) { 
 		/* probably happening when the engine has been halted by JACK,
 		   in which case, there is nothing we can do here.

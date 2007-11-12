@@ -294,6 +294,10 @@ LocationEditRow::set_location (Location *loc)
 
 	}
 
+	start_clock.set_sensitive (!location->locked());
+	end_clock.set_sensitive (!location->locked());
+	length_clock.set_sensitive (!location->locked());
+
 	start_changed_connection = location->start_changed.connect (mem_fun(*this, &LocationEditRow::start_changed));
 	end_changed_connection = location->end_changed.connect (mem_fun(*this, &LocationEditRow::end_changed));
 	name_changed_connection = location->name_changed.connect (mem_fun(*this, &LocationEditRow::name_changed));
@@ -572,6 +576,10 @@ LocationEditRow::location_changed (ARDOUR::Location *loc)
 	start_clock.set (location->start());
 	end_clock.set (location->end());
 	length_clock.set (location->length());
+
+	start_clock.set_sensitive (!location->locked());
+	end_clock.set_sensitive (!location->locked());
+	length_clock.set_sensitive (!location->locked());
 
 	i_am_the_modifier--;
 

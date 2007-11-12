@@ -223,11 +223,43 @@ Editor::find_location_from_marker (Marker *marker, bool& is_start) const
 void
 Editor::refresh_location_display_internal (Locations::LocationList& locations)
 {
-	clear_marker_display ();
+	/* invalidate all */
+
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		i->second->valid = false;
+	}
 	
+	/* add new ones */
+
 	for (Locations::LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+
+		LocationMarkerMap::iterator x;
+
+		if ((x = location_markers.find (*i)) != location_markers.end()) {
+			x->second->valid = true;
+			continue;
+		}
+
 		add_new_location (*i);
 	}
+
+	/* remove dead ones */
+
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ) {
+
+		LocationMarkerMap::iterator tmp;
+
+		tmp = i;
+		++tmp;
+
+		if (!i->second->valid) {
+			delete i->second;
+			location_markers.erase (i);
+		} 
+
+		i = tmp;
+	}
+	
 }
 
 void
@@ -299,6 +331,14 @@ Editor::mouse_add_new_marker (nframes_t where)
                 XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 		session->commit_reversible_command ();
+
+		/* find the marker we just added */
+
+		LocationMarkers *lam = find_location_markers (location);
+		if (lam) {
+			/* make it the selected marker */
+			selection->set (lam->start);
+		}
 	}
 }
 
@@ -464,17 +504,21 @@ Editor::build_marker_menu (bool start_or_end)
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Locate to Mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from Mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Set Mark from Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Locate to here"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from here"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Move Mark to Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Hide Mark"), mem_fun(*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
 	if (start_or_end) return;
-	items.push_back (MenuElem (_("Rename Mark"), mem_fun(*this, &Editor::marker_menu_rename)));
-	items.push_back (MenuElem (_("Remove Mark"), mem_fun(*this, &Editor::marker_menu_remove)));
+	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
+	items.push_back (MenuElem (_("Lock"), bind (mem_fun(*this, &Editor::marker_menu_lock), true)));
+	items.push_back (MenuElem (_("Unlock"), bind (mem_fun(*this, &Editor::marker_menu_lock), false)));
 
+	items.push_back (SeparatorElem());
+
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
 }
 
 void
@@ -838,6 +882,31 @@ Editor::marker_menu_remove ()
 }
 
 void
+Editor::marker_menu_lock (bool yn)
+{
+
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* loc;
+	bool ignored;
+
+	loc = find_location_from_marker (marker, ignored);
+
+	if (!loc) return;
+
+	if (yn) {
+		loc->lock();
+	} else {
+		loc->unlock ();
+	}
+}
+
+void
 Editor::marker_menu_rename ()
 {
 	Marker* marker;
@@ -993,4 +1062,49 @@ Editor::update_punch_range_view (bool visibility)
 // 	else if (visibility) {
 // 		gnome_canvas_item_hide (transport_punchout_line);
 // 	}
+}
+
+void
+Editor::marker_selection_changed ()
+{
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		LocationMarkers* lam = i->second;
+
+		if (lam->start) {
+			lam->start->hide_line();
+		} 
+
+		if (lam->end) {
+			lam->end->hide_line();
+		}
+	}
+
+	edit_point_clock_connection_a.disconnect();
+	edit_point_clock_connection_b.disconnect();
+
+	if (selection->markers.empty()) {
+		edit_point_clock.set (0);
+		return;
+	}
+
+	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+		(*x)->add_line (cursor_group, canvas_height);
+		(*x)->show_line ();
+	}
+
+	edit_point_clock.set (selection->markers.front()->position());
+
+	bool ignored;
+	Location* loc = find_location_from_marker (selection->markers.front(), ignored);
+
+	if (loc) {
+		edit_point_clock_connection_a = loc->changed.connect (mem_fun (*this, &Editor::selected_marker_moved));
+		edit_point_clock_connection_b = loc->start_changed.connect (mem_fun (*this, &Editor::selected_marker_moved));
+	}
+}
+
+void
+Editor::selected_marker_moved (Location* loc)
+{
+	edit_point_clock.set (loc->start());
 }

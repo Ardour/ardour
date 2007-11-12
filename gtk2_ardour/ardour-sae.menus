@@ -76,26 +76,9 @@
                <menuitem action='editor-delete'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
-               <menuitem action='set-edit-cursor'/>
+               <menuitem action='set-edit-point'/>
 	       <menuitem action='remove-last-capture'/>
                <separator/>       
-               <menu action="EditSelectRangeOptions">
-                   <menuitem action='extend-range-to-start-of-region'/>
-                   <menuitem action='extend-range-to-end-of-region'/>
-                   <menuitem action='start-range'/>
-                   <menuitem action='finish-range'/>
-                   <menuitem action='finish-add-range'/>
-               </menu>
-               <menu action="EditSelectRegionOptions">
-                   <menuitem action='select-all'/>
-                   <menuitem action='select-all-after-edit-cursor'/>
-                   <menuitem action='select-all-before-edit-cursor'/>
-                   <menuitem action='select-all-after-playhead'/>
-                   <menuitem action='select-all-before-playhead'/>
-                   <menuitem action='select-all-between-cursors'/>
-                   <menuitem action='select-all-in-punch-range'/>
-                   <menuitem action='select-all-in-loop-range'/>
-               </menu>
 	       <menu action='EditCursorMovementOptions'>
                    <menuitem action='edit-cursor-to-next-region-start'/>
     	           <menuitem action='edit-cursor-to-next-region-end'/>
@@ -122,6 +105,24 @@
                 <separator/>       
                 <menuitem action='ToggleOptionsEditor'/>
         </menu>         
+	<menu name='Select' action='Select'>
+                   <menuitem action='select-range-between-cursors'/>
+                   <menuitem action='extend-range-to-start-of-region'/>
+                   <menuitem action='extend-range-to-end-of-region'/>
+                   <menuitem action='start-range'/>
+                   <menuitem action='finish-range'/>
+                   <menuitem action='finish-add-range'/>
+		   <separator/>
+                   <menuitem action='select-all'/>
+                   <menuitem action='select-all-after-edit-cursor'/>
+                   <menuitem action='select-all-before-edit-cursor'/>
+                   <menuitem action='select-all-after-playhead'/>
+                   <menuitem action='select-all-before-playhead'/>
+                   <menuitem action='select-all-between-cursors'/>
+                   <menuitem action='select-all-within-cursors'/>
+                   <menuitem action='select-all-in-punch-range'/>
+                   <menuitem action='select-all-in-loop-range'/>
+	</menu>
 	<menu name='Regions' action='Regions'>
                    <menuitem action='crop'/>
                    <menuitem action='duplicate-region'/>
@@ -134,6 +135,21 @@
         	   <menuitem action="nudge-next-backward"/>
         	   <menuitem action='split-region'/>
 	       	   <menuitem action='set-region-sync-position'/>
+                   <separator/>       
+		   <menuitem action='align-regions-start'/>
+		   <menuitem action='align-regions-start-relative'/>
+		   <menuitem action='align-regions-end'/>
+		   <menuitem action='align-regions-end-relative'/>
+		   <menuitem action='align-regions-sync'/>
+		   <menuitem action='align-regions-sync-relative'/>
+                   <separator/>       
+		   <menuitem action='set-fade-in-length'/>
+		   <menuitem action='set-fade-out-length'/>
+                   <separator/>       
+		   <menuitem action='trim-from-start'/>
+		   <menuitem action='trim-to-end'/>
+		   <menuitem action='trim-region-to-loop'/>
+		   <menuitem action='trim-region-to-punch'/>
 	</menu>
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>
@@ -142,6 +158,7 @@
                    <menuitem action='zoom-focus-center'/>
                    <menuitem action='zoom-focus-playhead'/>
                    <menuitem action='zoom-focus-edit'/>
+                   <menuitem action='zoom-focus-mouse'/>
                </menu>
 	       <menu name='SnapMode' action='SnapMode'>
 		   <menuitem action='snap-normal'/>

@@ -164,12 +164,10 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		break;
 
 	case 2:
-		/* edit cursor */
-		if (snap_type != Editing::SnapToEditCursor) {
+		/* edit point */
+		if (snap_type != Editing::SnapToEditPoint) {
 			snap_to (where);
 		}
-		edit_cursor->set_position (where);
-		edit_cursor_clock.set (where);
 		break;
 
 	default:
@@ -207,12 +205,10 @@ Editor::ruler_button_release (GdkEventButton* ev)
 		break;
 
 	case 2:
-		/* edit cursor */
-		if (snap_type != Editing::SnapToEditCursor) {
+		/* edit point */
+		if (snap_type != Editing::SnapToEditPoint) {
 			snap_to (where);
 		}
-		edit_cursor->set_position (where);
-		edit_cursor_clock.set (where);
 		break;
 
 	case 3:
@@ -301,8 +297,8 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 		break;
 
 	case 2:
-		/* edit cursor */
-		cursor = edit_cursor;
+		/* edit point */
+		// EDIT CURSOR XXX do something useful
 		break;
 
 	default:
@@ -312,9 +308,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	if (cursor) {
 		cursor->set_position (where);
 		
-		if (cursor == edit_cursor) {
-			edit_cursor_clock.set (where);
-		} else if (cursor == playhead_cursor) {
+		if (cursor == playhead_cursor) {
 			UpdateAllTransportClocks (cursor->current_frame);
 		}
 	}
@@ -668,20 +662,6 @@ Editor::update_ruler_visibility ()
 		tempo_group->hide();
 	}
 	
-	if (ruler_shown[ruler_time_marker]) {
-		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
-		old_unit_pos = marker_group->property_y();
-		if (tbpos != old_unit_pos) {
-			marker_group->move ( 0.0, tbpos - old_unit_pos);
-		}
-		marker_group->show();
-		tbpos += timebar_height;
-		visible_timebars++;
-	}
-	else {
-		marker_group->hide();
-	}
-	
 	if (ruler_shown[ruler_time_range_marker]) {
 		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = range_marker_group->property_y();
@@ -708,6 +688,20 @@ Editor::update_ruler_visibility ()
 	}
 	else {
 		transport_marker_group->hide();
+	}
+	
+	if (ruler_shown[ruler_time_marker]) {
+		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
+		old_unit_pos = marker_group->property_y();
+		if (tbpos != old_unit_pos) {
+			marker_group->move ( 0.0, tbpos - old_unit_pos);
+		}
+		marker_group->show();
+		tbpos += timebar_height;
+		visible_timebars++;
+	}
+	else {
+		marker_group->hide();
 	}
 	
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));

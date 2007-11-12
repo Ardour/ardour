@@ -33,7 +33,7 @@ SNAPTYPE(SnapToAThirdBeat)
 SNAPTYPE(SnapToBeat)
 SNAPTYPE(SnapToBar)
 SNAPTYPE(SnapToMark)
-SNAPTYPE(SnapToEditCursor)
+SNAPTYPE(SnapToEditPoint)
 SNAPTYPE(SnapToRegionStart)
 SNAPTYPE(SnapToRegionEnd)
 SNAPTYPE(SnapToRegionSync)
@@ -87,7 +87,7 @@ IMPORTMODE(ImportAsTapeTrack=3)
 
 // if this is changed, remember to update the string table in sfdb_ui.cc
 IMPORTPOSITION(ImportAtTimestamp=0)
-IMPORTPOSITION(ImportAtEditCursor=1)
+IMPORTPOSITION(ImportAtEditPoint=1)
 IMPORTPOSITION(ImportAtPlayhead=2)
 IMPORTPOSITION(ImportAtStart=3)
 

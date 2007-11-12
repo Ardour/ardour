@@ -252,9 +252,9 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	delete font;
 	
 	if (annotate_left) {
-	  text->property_x() = -(text->property_text_width());
+		text->property_x() = -(text->property_text_width());
 	} else {
-	  text->property_x() = label_offset;
+		text->property_x() = label_offset;
 	}
 	text->property_y() = 0.0;
 	text->property_anchor() = Gtk::ANCHOR_NW;
@@ -268,14 +268,66 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 		group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 	}
 
+	line = 0;
+	line_points = 0;
+
 }
 
 Marker::~Marker ()
 {
+	drop_references ();
+
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete text;
 	delete mark;
 	delete points;
+
+	if (line) {
+		delete line;
+		delete line_points;
+	}
+}
+
+void
+Marker::add_line (ArdourCanvas::Group* group, double initial_height)
+{
+	if (!line) {
+
+		line_points = new ArdourCanvas::Points ();
+		line_points->push_back (Gnome::Art::Point (unit_position + shift, 0.0));
+		line_points->push_back (Gnome::Art::Point (unit_position + shift, initial_height));			
+		
+		line = new ArdourCanvas::Line (*group);
+		line->property_width_pixels() = 1;
+		line->property_points() = *line_points;
+		line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
+		line->property_first_arrowhead() = TRUE;
+		line->property_last_arrowhead() = TRUE;
+		line->property_arrow_shape_a() = 11.0;
+		line->property_arrow_shape_b() = 0.0;
+		line->property_arrow_shape_c() = 9.0;
+
+		line->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
+	}
+
+	show_line ();
+}
+
+void
+Marker::show_line ()
+{
+	if (line) {
+		line->raise_to_top();
+		line->show ();
+	}
+}
+
+void 
+Marker::hide_line ()
+{
+	if (line) {
+		line->hide ();
+	}
 }
 
 ArdourCanvas::Item&
@@ -301,6 +353,12 @@ Marker::set_position (nframes_t frame)
 	group->move (new_unit_position - unit_position, 0.0);
 	frame_position = frame;
 	unit_position = new_unit_position;
+
+	if (line) {
+		(*line_points)[0].set_x (unit_position + shift);
+		(*line_points)[1].set_x (unit_position + shift);
+		line->property_points() = *line_points;
+	}
 }
 
 void

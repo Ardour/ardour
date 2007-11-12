@@ -581,7 +581,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			*/
 			
 			switch (item_type) {
-			case EditCursorItem:
 			case PlayheadCursorItem:
 				start_cursor_grab (item, event);
 				return true;
@@ -1072,7 +1071,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		switch (item_type) {
 		/* see comments in button_press_handler */
-		case EditCursorItem:
 		case PlayheadCursorItem:
 		case MarkerItem:
 		case GainLineItem:
@@ -1270,7 +1268,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
-	case EditCursorItem:
 	case PlayheadCursorItem:
 		if (is_drawable()) {
 			track_canvas.get_window()->set_cursor (*grabber_cursor);
@@ -1328,6 +1325,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
+		entered_marker = marker;
 		marker->set_color_rgba (ARDOUR_UI::config()->canvasvar_EnteredMarker.get());
 		// fall through
 	case MeterMarkerItem:
@@ -1403,7 +1401,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case RegionViewNameHighlight:
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
-	case EditCursorItem:
 	case PlayheadCursorItem:
 
 #ifdef WITH_CMT
@@ -1454,8 +1451,10 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
-		loc = find_location_from_marker (marker, is_start);
-		if (loc) location_flags_changed (loc, this);
+		entered_marker = 0;
+		if ((loc = find_location_from_marker (marker, is_start)) != 0) {
+			location_flags_changed (loc, this);
+		}
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
@@ -1598,8 +1597,8 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		*/
 		if (!drag_info.move_threshold_passed) {
 
-			bool x_threshold_passed =  (abs ((nframes64_t) (drag_info.current_pointer_x - drag_info.grab_x)) > 4LL);
-			bool y_threshold_passed =  (abs ((nframes64_t) (drag_info.current_pointer_y - drag_info.grab_y)) > 4LL);
+			bool x_threshold_passed =  (::llabs ((nframes64_t) (drag_info.current_pointer_x - drag_info.grab_x)) > 4LL);
+			bool y_threshold_passed =  (::llabs ((nframes64_t) (drag_info.current_pointer_y - drag_info.grab_y)) > 4LL);
 			
 			drag_info.move_threshold_passed = (x_threshold_passed || y_threshold_passed);
 			
@@ -1617,7 +1616,6 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 
 	switch (item_type) {
 	case PlayheadCursorItem:
-	case EditCursorItem:
 	case MarkerItem:
 	case ControlPointItem:
 	case TempoMarkerItem:
@@ -1801,35 +1799,6 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	return did_drag;
-}
-
-void
-Editor::set_edit_cursor (GdkEvent* event)
-{
-	nframes_t pointer_frame = event_frame (event);
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		if (snap_type != SnapToEditCursor) {
-			snap_to (pointer_frame);
-		}
-	}
-
-	edit_cursor->set_position (pointer_frame);
-	edit_cursor_clock.set (pointer_frame);
-}
-
-void
-Editor::set_playhead_cursor (GdkEvent* event)
-{
-	nframes_t pointer_frame = event_frame (event);
-
-	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		snap_to (pointer_frame);
-	}
-
-	if (session) {
-		session->request_locate (pointer_frame, session->transport_rolling());
-	}
 }
 
 void
@@ -2102,7 +2071,7 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		if (cursor != edit_cursor || snap_type != SnapToEditCursor) {
+		if (cursor == playhead_cursor && snap_type != SnapToEditPoint) {
 			snap_to (adjusted_frame);
 		}
 	}
@@ -2111,11 +2080,7 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	cursor->set_position (adjusted_frame);
 	
-	if (cursor == edit_cursor) {
-		edit_cursor_clock.set (cursor->current_frame);
-	} else {
-		UpdateAllTransportClocks (cursor->current_frame);
-	}
+	UpdateAllTransportClocks (cursor->current_frame);
 
 	show_verbose_time_cursor (cursor->current_frame, 10);
 
@@ -2136,9 +2101,6 @@ Editor::cursor_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		if (session) {
 			session->request_locate (playhead_cursor->current_frame, drag_info.was_rolling);
 		}
-	} else if (item == &edit_cursor->canvas_item) {
-		edit_cursor->set_position (edit_cursor->current_frame);
-		edit_cursor_clock.set (edit_cursor->current_frame);
 	} 
 }
 
@@ -2180,14 +2142,16 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event);
 
+	_dragging_edit_point = true;
+
 	drag_info.copied_location = new Location (*location);
 	drag_info.pointer_frame_offset = drag_info.grab_frame - (is_start ? location->start() : location->end());	
 
 	update_marker_drag_item (location);
 
 	if (location->is_mark()) {
-		marker_drag_line->show();
-		marker_drag_line->raise_to_top();
+		// marker_drag_line->show();
+		// marker_drag_line->raise_to_top();
 	} else {
 		range_marker_drag_rect->show();
 		range_marker_drag_rect->raise_to_top();
@@ -2197,6 +2161,23 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		show_verbose_time_cursor (location->start(), 10);
 	} else {
 		show_verbose_time_cursor (location->end(), 10);
+	}
+
+	Selection::Operation op = Keyboard::selection_type (event->button.state);
+
+	switch (op) {
+	case Selection::Toggle:
+		selection->toggle (marker);
+		break;
+	case Selection::Set:
+		selection->set (marker);
+		break;
+	case Selection::Extend:
+		selection->add (marker);
+		break;
+	case Selection::Add:
+		selection->add (marker);
+		break;
 	}
 }
 
@@ -2209,7 +2190,6 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	Location  *copy_location;
 	bool is_start;
 	bool move_both = false;
-
 
 	nframes_t newframe;
 	if (drag_info.pointer_frame_offset <= drag_info.current_pointer_frame) {
@@ -2230,7 +2210,13 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	/* call this to find out if its the start or end */
 	
-	real_location = find_location_from_marker (marker, is_start);
+	if ((real_location = find_location_from_marker (marker, is_start)) == 0) {
+		return;
+	}
+
+	if (real_location->locked()) {
+		return;
+	}
 
 	/* use the copy that we're "dragging" around */
 	
@@ -2285,7 +2271,8 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	LocationMarkers* lm = find_location_markers (real_location);
 	lm->set_position (copy_location->start(), copy_location->end());
-	
+	edit_point_clock.set (copy_location->start());
+
 	show_verbose_time_cursor (newframe, 10);
 }
 
@@ -2296,17 +2283,23 @@ Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		marker_drag_motion_callback (item, event);
 
 	}
+
+	_dragging_edit_point = false;
 	
 	Marker* marker = (Marker *) drag_info.data;
 	bool is_start;
-
 
 	begin_reversible_command ( _("move marker") );
 	XMLNode &before = session->locations()->get_state();
 	
 	Location * location = find_location_from_marker (marker, is_start);
-	
+
 	if (location) {
+
+		if (location->locked()) {
+			return;
+		}
+
 		if (location->is_mark()) {
 			location->set_start (drag_info.copied_location->start());
 		} else {
@@ -5181,7 +5174,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 	switch (snap_type) {
 	case SnapToFrame:
 	case SnapToMark:
-	case SnapToEditCursor:
+	case SnapToEditPoint:
 		return;
 
 	default:

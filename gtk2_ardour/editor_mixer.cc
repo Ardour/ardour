@@ -342,7 +342,10 @@ Editor::session_going_away ()
 	named_selection_display.set_model (named_selection_model);
 	edit_group_display.set_model (group_model);
 
-	edit_cursor_clock.set_session (0);
+	edit_point_clock_connection_a.disconnect();
+	edit_point_clock_connection_b.disconnect();
+
+	edit_point_clock.set_session (0);
 	zoom_range_clock.set_session (0);
 	nudge_clock.set_session (0);
 
