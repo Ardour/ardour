@@ -1132,6 +1132,8 @@ class Editor : public PublicEditor
 
 	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
 	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
+	
+	void set_fade_length (bool in);
 
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
@@ -1626,6 +1628,9 @@ class Editor : public PublicEditor
 	
 	void trim_region_to_edit_point ();
 	void trim_region_from_edit_point ();
+	void trim_region_to_loop ();
+	void trim_region_to_punch ();
+	void trim_region_to_location (const ARDOUR::Location&, const char* cmd);
 
 	bool show_gain_after_trim;
 
@@ -1928,6 +1933,10 @@ class Editor : public PublicEditor
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 
 	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
+	
+	RegionSelection tmp_regions;
+	
+	RegionSelection& get_regions_for_action ();
 
 };
 

@@ -1820,6 +1820,8 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	
 	trim_items.push_back (MenuElem (_("Start to edit point"), mem_fun(*this, &Editor::trim_region_from_edit_point)));
 	trim_items.push_back (MenuElem (_("Edit point to end"), mem_fun(*this, &Editor::trim_region_to_edit_point)));
+	trim_items.push_back (MenuElem (_("Trim To Loop"), mem_fun(*this, &Editor::trim_region_to_loop)));
+	trim_items.push_back (MenuElem (_("Trim To Punch"), mem_fun(*this, &Editor::trim_region_to_punch)));
 			     
 	items.push_back (MenuElem (_("Trim"), *trim_menu));
 	items.push_back (SeparatorElem());
@@ -4104,4 +4106,16 @@ Editor::get_regions_at (nframes64_t where, const TrackSelection& ts) const
 	}
 
 	return rs;
+}
+
+RegionSelection&
+Editor::get_regions_for_action ()
+{
+	if (!selection->regions.empty()) {
+		return selection->regions;
+	} 
+
+	nframes64_t where = get_preferred_edit_position();
+	tmp_regions = get_regions_at (where, selection->tracks);
+	return tmp_regions;
 }

@@ -2725,54 +2725,155 @@ Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint poi
 }	
 
 void
-Editor::trim_region_to_edit_point ()
+Editor::trim_region_to_loop ()
 {
-	if (clicked_regionview == 0) {
+	Location* loc = session->locations()->auto_loop_location();
+	if (!loc) {
 		return;
 	}
+	trim_region_to_location (*loc, _("trim to loop"));
+}
 
-	boost::shared_ptr<Region> region (clicked_regionview->region());
+void
+Editor::trim_region_to_punch ()
+{
+	Location* loc = session->locations()->auto_punch_location();
+	if (!loc) {
+		return;
+	}
+	trim_region_to_location (*loc, _("trim to punch"));
+}
 
-	float speed = 1.0f;
-	AudioTimeAxisView *atav;
+void
+Editor::trim_region_to_location (const Location& loc, const char* str)
+{
+	RegionSelection& rs (get_regions_for_action ());
 
-	if ( clicked_trackview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_trackview)) != 0 ) {
+	begin_reversible_command (str);
+
+	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!arv) {
+			continue;
+		}
+
+		/* require region to span proposed trim */
+
+		switch (arv->region()->coverage (loc.start(), loc.end())) {
+		case OverlapInternal:
+			break;
+		default:
+			continue;
+		}
+				
+		AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&arv->get_time_axis_view());
+
+		if (!atav) {
+			return;
+		}
+
+		float speed = 1.0;
+		nframes_t start;
+		nframes_t end;
+
 		if (atav->get_diskstream() != 0) {
 			speed = atav->get_diskstream()->speed();
 		}
-	}
 
-	begin_reversible_command (_("trim to edit"));
-        XMLNode &before = region->playlist()->get_state();
-	region->trim_end( session_frame_to_track_frame(get_preferred_edit_position(), speed), this);
-        XMLNode &after = region->playlist()->get_state();
-	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+		start = session_frame_to_track_frame (loc.start(), speed);
+		end = session_frame_to_track_frame (loc.end(), speed);
+
+		XMLNode &before = arv->region()->playlist()->get_state();
+		arv->region()->trim_to (start, (end - start), this);
+		XMLNode &after = arv->region()->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(arv->region()->playlist()), &before, &after));
+	}
+		
+	commit_reversible_command ();
+}
+
+void
+Editor::trim_region_to_edit_point ()
+{
+	RegionSelection& rs (get_regions_for_action ());
+	nframes64_t where = get_preferred_edit_position();
+
+	begin_reversible_command (_("trim region start to edit point"));
+
+	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!arv) {
+			continue;
+		}
+
+		/* require region to cover trim */
+
+		if (!arv->region()->covers (where)) {
+			continue;
+		}
+
+		AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&arv->get_time_axis_view());
+
+		if (!atav) {
+			return;
+		}
+
+		float speed = 1.0;
+
+		if (atav->get_diskstream() != 0) {
+			speed = atav->get_diskstream()->speed();
+		}
+
+		XMLNode &before = arv->region()->playlist()->get_state();
+		arv->region()->trim_end( session_frame_to_track_frame(where, speed), this);
+		XMLNode &after = arv->region()->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(arv->region()->playlist()), &before, &after));
+	}
+		
 	commit_reversible_command ();
 }
 
 void
 Editor::trim_region_from_edit_point ()
 {
-	if (clicked_regionview == 0) {
-		return;
-	}
+	RegionSelection& rs (get_regions_for_action ());
+	nframes64_t where = get_preferred_edit_position();
 
-	boost::shared_ptr<Region> region (clicked_regionview->region());
+	begin_reversible_command (_("trim region end to edit point"));
 
-	float speed = 1.0f;
-	AudioTimeAxisView *atav;
+	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*x);
 
-	if ( clicked_trackview != 0 && (atav = dynamic_cast<AudioTimeAxisView*>(clicked_trackview)) != 0 ) {
+		if (!arv) {
+			continue;
+		}
+
+		/* require region to cover trim */
+
+		if (!arv->region()->covers (where)) {
+			continue;
+		}
+
+		AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&arv->get_time_axis_view());
+
+		if (!atav) {
+			return;
+		}
+
+		float speed = 1.0;
+
 		if (atav->get_diskstream() != 0) {
 			speed = atav->get_diskstream()->speed();
 		}
-	}
 
-	begin_reversible_command (_("trim to edit"));
-        XMLNode &before = region->playlist()->get_state();
-	region->trim_front ( session_frame_to_track_frame(get_preferred_edit_position(), speed), this);
-        XMLNode &after = region->playlist()->get_state();
-	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+		XMLNode &before = arv->region()->playlist()->get_state();
+		arv->region()->trim_front ( session_frame_to_track_frame(where, speed), this);
+		XMLNode &after = arv->region()->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(arv->region()->playlist()), &before, &after));
+	}
+		
 	commit_reversible_command ();
 }
 
@@ -3738,6 +3839,70 @@ Editor::toggle_region_opaque ()
 			}
 		}
 	}
+}
+
+void
+Editor::set_fade_length (bool in)
+{
+	/* we need a region to measure the offset from the start */
+
+	RegionView* rv;
+
+	if (entered_regionview) {
+		rv = entered_regionview;
+	} else if (!selection->regions.empty()) {
+		rv = selection->regions.front();
+	} else {
+		return;
+	}
+
+	nframes64_t pos = get_preferred_edit_position();
+	nframes_t len;
+	char* cmd;
+
+	if (in) {
+		if (pos <= rv->region()->start()) {
+			/* can't do it */
+			return;
+		}
+		len = pos - rv->region()->start();
+		cmd = _("set fade in length");
+	} else {
+		if (pos >= rv->region()->last_frame()) {
+			/* can't do it */
+			return;
+		}
+		len = rv->region()->last_frame() - pos;
+		cmd = _("set fade out length");
+	}
+
+	begin_reversible_command (cmd);
+
+	cerr << "start " << cmd << " with len = " << len << endl;
+
+	RegionSelection& rs (get_regions_for_action());
+
+	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		AutomationList& alist = tmp->audio_region()->fade_in();
+		XMLNode &before = alist.get_state();
+
+		if (in) {
+			tmp->audio_region()->set_fade_in_length (len);
+		} else {
+			tmp->audio_region()->set_fade_out_length (len);
+		}
+		
+		XMLNode &after = alist.get_state();
+		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
+	commit_reversible_command ();
 }
 
 void
