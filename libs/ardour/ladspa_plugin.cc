@@ -34,7 +34,6 @@
 
 #include <pbd/compose.h>
 #include <pbd/error.h>
-#include <pbd/pathscanner.h>
 #include <pbd/xml++.h>
 
 #include <midi++/manager.h>
