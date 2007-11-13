@@ -1588,7 +1588,7 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 					n, ext.c_str());
 		}
 
-		if (!Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+		if (!sys::exists (buf)) {
 			return buf;
 		}
 	}
