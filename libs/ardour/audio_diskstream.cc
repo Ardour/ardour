@@ -647,9 +647,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 				if (rec_nframes > total) {
 					DiskOverrun ();
-					if (Config->get_stop_recording_on_xrun()) {
-						goto out;
-					}
+					goto out;
 				}
 
 				Sample* buf = _io->input (n)->get_buffer (nframes) + offset;
@@ -745,9 +743,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				
 				if (necessary_samples > total) {
 					DiskUnderrun ();
-					if (Config->get_stop_recording_on_xrun()) {
-						goto out;
-					}
+					goto out;
 					
 				} else {
 					
