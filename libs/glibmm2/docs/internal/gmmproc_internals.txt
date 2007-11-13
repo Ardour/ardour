@@ -1,0 +1,135 @@
+How it works
+------------
+Gtkmmproc is a 3 pass process.
+1. Parse .hg/.ccg files and generate meta m4 macros in a tmp file (e.g. gtkmmproc5466.g1)
+2. run m4 to expand macro text (to get e.g. (e.g. gtkmmproc5466.g2)
+3. snip file into pieces. (.h .private_h, .cc)
+
+1.
+The first pass is to escape anything which may cause problems
+with m4 processing of a file.  This pass is performed in perl.
+It also implements meta macros which are macros in which
+a C++ declaration must be broken into an argument list.
+Commands marked with <meta> are implmented at this
+level.
+
+TODO: <meta> ? Is this still true? murrayc
+
+At this point there is a file (e.g. /tmp/gtkmmproc5466.g1)
+which contains text and m4 code. This m4 code is our m4
+macros which will be expanded in the next pass.
+
+2.
+The second pass does both expansion and rearrangement of
+code.  The entire file including both the .hg headers and the
+.ccg source files are processed as one piece.  This is because
+some macros expand into multiple sections.  Commands marked
+with <m4> are implemented at this level.
+
+3.
+The third pass is to take the M4 output and snip it into
+the actually header and implementation files for use.
+There are no commands which communicate directly with this layer,
+though any raw C++ code from the .hg/.ccg files will of course be
+carried through to here.
+
+All macros are in capitals and are proceed by an underscore.
+
+
+Output files
+-------------
+
+gtkmmproc generates 3 output files.  One is the header for inclusion
+in user code.  The other is the implementation including implementing
+all the macro built functions.  The last is a private header.  The
+private header contains all the functions which are necessary to
+derive a C object in the gtk+ object system from this widget.
+The private header is not for user consumption.
+
+
+Sectioning
+-----------
+
+Much of the magic of gtkmmproc happens at the m4 level.
+This includes sectioning.  Sectioning is method in which a macro
+can create pieces of text after or before the expansion of the
+macro.  Sectioning is done with the m4 divert command.
+The macros _SECTION(), _PUSH() and _POP() are used to
+control what section is being writen.
+
+It is important to understand how the sections of a class
+are assembled.
+
+Example:
+
+  something.hg:
+    #include <foo.h>
+
+    namespace Gtk {
+
+    class SomeThing
+      {
+        WRAP_CLASS(...)
+        public:
+        // my methods
+        void do();
+      };
+    }
+
+  something.cmm:
+    void Gtk::SomeThing::do() {}
+
+This will be broken up into the following sections
+<<>> represents a include section. * marks macro expansions.
+(Names don't match current code look at m4 file to see what current
+name is.)
+
+  something.h:
+*   #ifndef SOMETHING_H
+*   #define SOMETHING_H
+    #include <foo.h>
+    <<FORWARD>>
+    namespace Gtk {
+    class SomeThing {
+      {
+*      public:
+*        typedef ...
+*        ....
+       public:
+       // my methods
+       void do();
+
+       <<IMPL>>
+      };
+
+    }
+    #endif
+
+  something.cc:
+    void Gtk::SomeThing::do() {}
+
+*   void gtkmm_something_init_type(
+*     ....
+    <<METHOD>>
+    <<SIGNAL>>
+    <<MEMBER>>
+
+  something_p.h:
+*   class SomeThing_Class {
+    <<PRIVATE>>
+*   };
+
+
+If you, for example, need to place something in PRIVATE for this
+class, you would do
+
+  class SomeThing {
+     ....
+  _SECTION(PRIVATE)
+    my stuff
+  _SECTION(CLASS)
+  }
+
+
+In order to improve clarity the m4 template is expanded into
+multiple files, one for each type of macro processed.

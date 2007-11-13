@@ -1,0 +1,41 @@
+*** Reference documentation.
+- Type "make" in docs/reference to generate HTML docs
+  from the source code.
+- We use Doxygen.
+  Doxygen comments: Use either
+
+  /// This does something.
+  void something()
+
+  or
+
+  /** This does something
+   * It does it like so.
+   * @param foo The foo to be somethinged.
+   */
+  void something(Foo& foo);
+
+  Rememeber to actually look at the documentation before adding these
+  comments to the .hg files. It might not be necessary because
+  gtkmmproc might do it for you - see the next section.
+  
+- Reuse of GTK+ documentation:
+    When gtkmmproc generates the .h/.cc files from the .hg/.ccg files,
+  it inserts doxygen comments based on the gtk-doc comments in the
+  GTK+ source code.
+    gtkmmproc does this by looking at gtk/src/gtk_docs.xml, which is
+  generated occasionally by the pygtk/codegen/docextract_to_xml.py
+  python script, in the gnome-python cvs module.
+
+- Overriding the GTK documentation:
+    Sometimes the GTK documentation for a functoin is not appropriate
+    for the gtkmm method that wraps it. If so, you should add a
+    section to gtk/src/gtk_docs_override.xml
+
+
+*** Book
+- The "Programming with gtkmmproc" book is in DocBook XML 4 format.
+- Type make in docs/tutorial to build the HTML.
+
+
+

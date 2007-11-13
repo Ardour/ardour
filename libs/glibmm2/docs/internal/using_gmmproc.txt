@@ -1,0 +1,323 @@
+
+Command Summary
+==================
+ #m4               (meta)  one line m4 escape
+ #m4begin          (meta)  multi line m4 escape
+ #m4end            (meta)  end of multi line escape
+ _CTOR_CAST        (class) implement the cast constructor automatically
+ _CTOR_DEFAULT     (class) implement a constructor taking no arguments
+ _DTOR             (class) implement the dtor automatically
+ _MEMBER           (class) implement a member
+ _POP              (base)  save current section and switch to another
+ _PINCLUDE         (base)  specify the parents private header name
+ _PUSH             (base)  restore current section
+ _SECTION          (base)  change sections
+ _WRAP             (meta)  wrap various C types
+ _DEFS             (meta)  load a defs file
+ _IGNORE           (?)     tells gtkmmproc not to complain this function not wrapped
+ _CLASS_GOBJECT    (meta)  derive from GObject
+ _CLASS_GTKOBJECT  (meta)  derive from GtkObject
+
+
+M4 macro escaping <meta>
+-----------------
+At times it is useful to be able to issue commands directly to
+m4 preprocessor underneith gtkmmproc.  However, for safety
+the single quote and backtick were hiden.  Thus you must
+enter a special environment to be about to issue m4 commands
+without interpretation.
+
+single line m4 statements are any line proceed with a #m4.
+  #m4 don't eat my `backticks'
+
+Multiline m4 statements can be done with #m4begin/#m4end
+
+  #m4begin
+  define(`convert', `dnl
+  gtkmm_convert($1,$2->obj);
+  ')
+  #m4end
+
+_DEFS (module name, definition filename)
+----------------------------------------
+Takes two arguments, a module name (e.g., gtkmm, gnomemm, ...) and the
+filename of an API definition file sans ".defs" extension.
+
+Debugging
+---------
+If you see m4 errors, you can set the GTKMMPROC_DEBUG environment variable like so:
+# export GTKMMPROC_DEBUG=1
+This will ensure that the intermediate m4 files are not deleted, so that you can examine them.
+
+
+_WRAP_METHOD( C++ declaration, C function name )
+------------------------------------------------
+
+e.g. From entry.hg:
+_WRAP_METHOD(void set_text(const string &text),gtk_entry_set_text)
+
+The C function (e.g. gtk_entry_set_text) is described in gtk/src/gtk.defs,
+which is generated automatically by the h2defs.py script from pygtk. (see below)
+
+There are some optional extra arguments:
+refreturn: Do an extra reference() on the return value, in case the C function does not provide a reference.
+deprecated: Puts the generated code in #ifdef blocks.
+constversion: Just call the non-const version of the same function, instead of generating almost duplicate code.
+
+_WRAP_METHOD_DOCS_ONLY( C function name )
+------------------------------------------------
+
+e.g. From treestore.hg:
+_WRAP_METHOD_DOCS_ONLY(gtk_list_store_insert)
+
+Linke _WRAP_METHOD_DOCS_ONLY(), but only outputs the doxygen documentation comments, based on
+the gtk_docs.xml and gtk_docs_override.xml files. Use this when you must hand-code the method,
+but you want to use the documentation that would be generated if the method was generated.
+
+_WRAP_SIGNAL( C++ handler declaration, "signal name" )
+------------------------------------------------------
+
+e.g. From button.hg:
+_WRAP_SIGNAL(void clicked(),"clicked")
+
+Signals are function pointers in the GTK Class struct, with a
+corresponding enum value. and a gtk_signal_new.
+
+from gtkbutton.h:
+
+struct _GtkButtonClass
+{
+  GtkBinClass        parent_class;
+ 
+  void (* pressed)  (GtkButton *button);
+  void (* released) (GtkButton *button);
+  void (* clicked)  (GtkButton *button);
+  ...
+};
+
+from gtkbutton.c:
+
+enum {
+  PRESSED,
+  RELEASED,
+  CLICKED,
+  ENTER,
+  LEAVE,
+  ACTIVATE,
+  LAST_SIGNAL
+};
+
+and
+
+button_signals[CLICKED] =
+    gtk_signal_new ("clicked",
+                    GTK_RUN_FIRST | GTK_RUN_ACTION,
+                    GTK_CLASS_TYPE (object_class),
+                    GTK_SIGNAL_OFFSET (GtkButtonClass, clicked),
+                    gtk_marshal_VOID__VOID,
+    GTK_TYPE_NONE, 0);
+
+
+The signals are described in gtk_signals.defs using the define-signal
+command. This file was created by the tools/extra_defs_gen utility.
+You might need to modify the defs slightly.
+
+You might find a similarly named method. Just wrap it separately as a
+method, and don't worry about the names clashing.
+e.g _WRAP_METHOD(void clicked(), gtk_button_clicked)
+
+
+_MEMBER_GET(gtkmm name, gtk+ name, C++ type, C type)
+----------------------------------------------------
+
+e.g. from window.hg:
+_MEMBER_GET(window_type, type, GtkWindowType, GtkWindowType)
+
+In GTK+, you're sometimes supposed to read from an object data field directly.
+This macro creates a get_*() method for use with C++.
+
+
+_MEMBER_SET(gtkmm name, gtk+ name, C++ type, C type)
+----------------------------------------------------
+
+e.g. from buttonbox.hg:
+_MEMBER_SET(child_min_width, child_min_width, int, gint)
+
+In GTK+, you're sometimes supposed to write to an object data field directly.
+This macro creates a set_*() method for use with C++.
+
+
+_MEMBER_GET_PTR(gtkmm name, gtk+ name, C++ pointer type, C pointer type)
+------------------------------------------------------------------------
+
+e.g. from progress.hg:
+_MEMBER_GET_PTR(adjustment, adjustment, Gtk::Adjustment*, GtkAdjustment*)
+
+Similar to _MEMBER_GET(), but this macro create two access methods:
+A non-const method that returns a pointer to a writable object, and
+a const method returning a pointer to a read-only object.
+
+
+_MEMBER_GET_GOBJECT(gtkmm name, gtk+ name, C++ type, C pointer type)
+--------------------------------------------------------------------
+
+e.g. from window.hg:
+_MEMBER_GET_GOBJECT(frame, frame, Gdk::Window, GdkWindow*)
+
+Similar to _MEMBER_GET_PTR(), this macro creates two access methods.
+The difference is that the return types will actually be
+Glib::RefPtr<C++ type> and Glib::RefPtr<const C++ type>.
+
+Also, the methods call object->reference() before
+returning it to the caller.
+
+
+_WRAP_PROPERTY("property name", C++ type)
+-----------------------------------------
+
+e.g. From Widget.hg:
+_WRAP_PROPERTY("name", Glib::ustring)
+
+The properties are described in gtk_signals.defs using the
+define-property command. This file was created by the
+tools/extra_defs_gen utility. You might need to modify the defs
+slightly.
+
+Properties have enum values in the .c file. e.g from gtkwidget.c:
+
+enum {
+  PROP_0,
+  PROP_NAME,
+  PROP_PARENT,
+...
+
+These enums are used in a call to g_object_class_install_property().
+e.g. from gtkwidget.c:
+
+  g_object_class_install_property (gobject_class,
+				   PROP_NAME,
+				   g_param_spec_string ("name",
+ 							_("Widget name"),
+							_("The name of the widget"),
+							NULL,
+							G_PARAM_READWRITE));
+
+This sometimes shows the type of the property, but sometimes you
+need to look for the use of the property enum to see what type
+of values are being used with it. For instance, from gtkwidget.c:
+
+static void
+gtk_widget_get_property (GObject         *object,
+			 guint            prop_id,
+			 GValue          *value,
+			 GParamSpec      *pspec)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET (object);
+
+  switch (prop_id)
+    {
+      gint *eventp;
+      GdkExtensionMode *modep;
+
+    case PROP_NAME:
+      if (widget->name)
+...
+
+By looking at GtkWidget::name you can see the type.
+
+The defs file also shows the types of the properties, but
+when the type is an enum, flag, or object, it doesn't show
+the exact type.
+
+
+_WRAP_VFUNC( C++ declaration, vfunc C name )
+--------------------------------------------
+
+e.g. From checkbutton.hg:
+_WRAP_VFUNC(void draw_indicator(GdkRectangle* area),"draw_indicator")
+
+These are quite unusual, but you'll probably find one or two. They
+are function pointers in the GTK Class struct, which have no
+gtk_signal_new().
+
+For instance, from gtkcheckbutton.h:
+
+struct _GtkCheckButtonClass
+{
+  GtkToggleButtonClass parent_class;
+
+  void (* draw_indicator) (GtkCheckButton *check_button,
+   GdkRectangle   *area);
+};
+
+And from gtkcheckbutton.c:
+
+class->draw_indicator = gtk_real_check_button_draw_indicator;
+
+The virtual functions are described in gtk_vfuncs.defs using the
+define-vfunc command. This file was created manually so you will
+need to add a section to it for each new virtual function that you find.
+
+
+_CLASS_GOBJECT( C++ class, C class, C casting macro, C++ base class, C base class )
+-----------------------------------------------------------------------------------
+
+e.g. From accelgroup.hg:
+_CLASS_GOBJECT(AccelGroup, GtkAccelGroup, GTK_ACCEL_GROUP,Glib::Object,GObject)
+
+FIXME (2002-09-18 chrisime) text goes here.
+
+
+_CLASS_GTKOBJECT( C++ class, C class, C casting macro, C++ base class, C base class )
+-------------------------------------------------------------------------------------
+
+e.g. From button.hg:
+_CLASS_GTKOBJECT(Button,GtkButton,GTK_BUTTON,Gtk::Bin,GtkBin)
+
+Button is the class which derives from Gtk::Bin in gtkmm.
+GtkButton is the class which derives from GtkBin in gtk+.
+GTK_BUTTON is the casting macro in gtk+:
+
+GtkWidget *button;
+... GTK_BUTTON (button);
+
+
+Boxed Types:
+----------------------
+
+_CLASS_BOXEDTYPE()
+For non-GObject structs, registed with g_boxed_type_register_static().
+For example, Gdk::Color.
+
+_CLASS_BOXEDTYPE_STATIC()
+For simple assignable structs like GdkRectangle. Similar to _CLASS_BOXEDTYPE,
+but the C struct is not allocated dynamically.
+
+_CLASS_OPAQUE_COPYABLE()
+For opaque structs with corresponding copy/free functions.
+Very similar to _CLASS_BOXEDTYPE, but without a get_type() method.
+
+_CLASS_OPAQUE_REFCOUNTED()
+For reference-counted opaque structs.  The C++ wrappers can not be
+instantiated and can only be used with Glib::RefPtr<>.
+
+_CLASS_GENERIC()
+To wrap structs which don't fit into any specialized category.  Currently,
+it is only needed to wrap PangoLayoutIter.
+
+
+Re-generating the gtk_methods.defs interface definition files.
+------------------------------------------------------
+
+Use h2defs.py from the pygtk module in gnome cvs. e.g.:
+
+./h2def.py /gnome/head/cvs/gtk+/gtk/*.h > gtk_methods.defs
+
+The tools/enums.pl script works in the same way.
+
+Use your tools/extra_defs_gen utility to generate the .defs for the signals and properties.
+
+
+
