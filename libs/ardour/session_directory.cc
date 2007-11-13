@@ -46,10 +46,7 @@ SessionDirectory::create ()
 	{
 		try
 		{
-			if(create_directories(*i)) {
-				PBD::info << string_compose(_("Created Session directory at path %1"), (*i).to_string()) << endmsg;
-				is_new = true;
-			}
+			if(create_directories(*i)) is_new = true;
 		}
 		catch (PBD::sys::filesystem_error& ex)
 		{
