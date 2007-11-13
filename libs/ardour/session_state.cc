@@ -1573,23 +1573,24 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 	char buf[PATH_MAX+1];
 	uint32_t n;
 	SessionDirectory sdir(get_best_session_directory_for_new_source());
-	string sound_dir = ((type == DataType::AUDIO)
-		? sdir.sound_path().to_string()
-		: sdir.midi_path().to_string());
+	sys::path source_dir = ((type == DataType::AUDIO)
+		? sdir.sound_path() : sdir.midi_path());
 
 	string ext = ((type == DataType::AUDIO) ? ".wav" : ".mid");
 
 	for (n = 0; n < 999999; ++n) {
 		if (identifier.length()) {
-			snprintf (buf, sizeof(buf), "%s/%s%s%" PRIu32 "%s", sound_dir.c_str(), name.c_str(), 
+			snprintf (buf, sizeof(buf), "%s%s%" PRIu32 "%s", name.c_str(), 
 				  identifier.c_str(), n, ext.c_str());
 		} else {
-			snprintf (buf, sizeof(buf), "%s/%s-%" PRIu32 "%s", sound_dir.c_str(), name.c_str(),
+			snprintf (buf, sizeof(buf), "%s-%" PRIu32 "%s", name.c_str(),
 					n, ext.c_str());
 		}
 
-		if (!sys::exists (buf)) {
-			return buf;
+		sys::path source_path = source_dir / buf;
+
+		if (!sys::exists (source_path)) {
+			return source_path.to_string();
 		}
 	}
 
