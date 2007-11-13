@@ -3105,8 +3105,8 @@ Editor::duplicate_dialog (bool dup_region)
 	label.show ();
 	spinner.show ();
 
-	win.add_button (Stock::OK, RESPONSE_ACCEPT);
 	win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	win.add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	win.set_position (WIN_POS_MOUSE);
 
