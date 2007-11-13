@@ -2735,10 +2735,10 @@ Editor::setup_toolbar ()
 
 	/* Pack everything in... */
 
-	HBox* hbox = new HBox;
+	HBox* hbox = manage (new HBox);
 	hbox->set_spacing(10);
 
-	tools_tearoff = new TearOff (*hbox);
+	tools_tearoff = manage (new TearOff (*hbox));
 	tools_tearoff->set_name ("MouseModeBase");
 
 	tools_tearoff->Detach.connect (bind (mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox), 
@@ -2824,7 +2824,7 @@ Editor::setup_midi_toolbar ()
 	
 	/* Pack everything in... */
 
-	midi_tools_tearoff = new TearOff (midi_tool_button_box);
+	midi_tools_tearoff = manage (new TearOff (midi_tool_button_box));
 	midi_tools_tearoff->set_name ("MouseModeBase");
 
 	/*
