@@ -1,0 +1,13 @@
+cairomm
+-------------
+
+This library provides a C++ interface to cairo.
+
+Read the file 'INSTALL' for instructions to compile and install the library.
+
+See the examples directory for example code.
+
+Use pkg-config to discover the necessary include and linker arguments. For instance,
+  pkg-config cairomm-1.0 --cflags --libs
+Ideally you would use PKG_CHECK_MODULES in your configure.ac file.
+See http://www.openismus.com for generic help with that.
