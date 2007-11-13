@@ -164,6 +164,7 @@ Gdk::Cursor* Editor::fader_cursor = 0;
 Gdk::Cursor* Editor::speaker_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
+Gdk::Cursor* Editor::transparent_cursor = 0;
 
 void
 show_me_the_size (Requisition* r, const char* what)
@@ -1281,6 +1282,14 @@ Editor::build_cursors ()
 		source = Bitmap::create (speaker_cursor_bits, speaker_cursor_width, speaker_cursor_height);
 		mask = Bitmap::create (speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
 		speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
+	}
+
+	{ 
+		RefPtr<Bitmap> bits;
+		char pix[4] = { 0, 0, 0, 0 };
+		bits = Bitmap::create (pix, 2, 2);
+		Gdk::Color c;
+		transparent_cursor = new Gdk::Cursor (bits, bits, c, c, 0, 0);
 	}
 
 	grabber_cursor = new Gdk::Cursor (HAND2);

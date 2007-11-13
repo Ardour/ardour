@@ -850,6 +850,7 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* speaker_cursor;
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
+	static Gdk::Cursor* transparent_cursor;
 
 	static void build_cursors ();
 
@@ -1095,6 +1096,8 @@ class Editor : public PublicEditor
 	bool _scrubbing;
 	double last_scrub_x;
 	int scrubbing_direction;
+	int scrub_reversals;
+	int scrub_reverse_distance;
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
