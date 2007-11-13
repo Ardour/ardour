@@ -974,6 +974,7 @@ config.status:787: creating MSVC_Net2003/examples/thread_pool/Makefile
 config.status:787: creating MSVC_Net2003/tests/Makefile
 config.status:787: creating MSVC_Net2003/tests/glibmm_value/Makefile
 config.status:891: creating config.h
+config.status:1048: config.h is unchanged
 config.status:891: creating glib/glibmmconfig.h
 config.status:1228: executing depfiles commands
 

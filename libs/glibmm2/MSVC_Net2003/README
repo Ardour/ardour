@@ -1,0 +1,13 @@
+Building glibmm-2.4 with Visual Studio .NET 2003
+
+* You will need Visual Studio .NET 2003 (MSVC 7.1).  Earlier versions of the compiler, including 6.0 and 7.0 will not work.
+* Install the latest Win32 GTK+ Development Environment from the Glade for Windows project, http://gladewin32.sourceforge.net.
+* Build libsigc++ 2.0.6 or later from source, http://sourceforge.net/project/showfiles.php?group_id=1970&package_id=76644.
+* Add libsigc++ to the include and lib paths in Visual Studio.
+* Load the glibmm/MSVC_Net2003/glibmm.sln solution.
+* Build the entire solution.
+* Run the tests.
+
+Timothy M. Shead
+10/19/2004
+
