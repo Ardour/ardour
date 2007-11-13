@@ -1,0 +1,12 @@
+;; From /home/murrayc/cvs/gnome212/glib/gmodule/gmodule.h
+
+(define-flags-extended ModuleFlags
+  (in-module "G")
+  (c-name "GModuleFlags")
+  (values
+    '("lazy" "G_MODULE_BIND_LAZY" "1 << 0")
+    '("local" "G_MODULE_BIND_LOCAL" "1 << 1")
+    '("mask" "G_MODULE_BIND_MASK" "0x03")
+  )
+)
+

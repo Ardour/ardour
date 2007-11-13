@@ -1,0 +1,5 @@
+
+#undef HAVE_FLOCKFILE
+#undef HAVE_FUNLOCKFILE
+#undef GETC_UNLOCKED
+#undef HAVE_MKFIFO

@@ -1,0 +1,2 @@
+files_tools_pm = DocsParser.pm GtkDefs.pm Enum.pm Function.pm FunctionBase.pm Object.pm Output.pm Property.pm Util.pm WrapParser.pm
+

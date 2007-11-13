@@ -1,0 +1,432 @@
+// -*- c++ -*-
+/* $Id: optiongroup.ccg,v 1.17 2006/01/28 12:09:22 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/optionentry.h>
+#include <glibmm/optioncontext.h>
+#include <glibmm/utility.h>
+//#include <glibmm/containers.h>
+#include <glib/goption.h>
+
+namespace Glib
+{
+
+namespace //anonymous
+{
+
+extern "C"
+{
+
+static gboolean g_callback_pre_parse(GOptionContext* context, GOptionGroup* /* group */, gpointer data, GError** /* TODO error */)
+{
+  OptionContext cppContext(context, false /* take_ownership */);
+  //OptionGroup cppGroup(group, true /* take_copy */); //Maybe this should be option_group.
+  
+  OptionGroup* option_group = static_cast<OptionGroup*>(data);
+  if(option_group)
+    return option_group->on_pre_parse(cppContext, *option_group);
+  else
+    return false;
+}
+
+static gboolean g_callback_post_parse(GOptionContext* context, GOptionGroup* /* group */, gpointer data, GError** /* TODO error */)
+{
+  OptionContext cppContext(context, false /* take_ownership */);
+  //OptionGroup cppGroup(group, true /* take_copy */); //Maybe this should be option_group.
+  
+  OptionGroup* option_group = static_cast<OptionGroup*>(data);
+  if(option_group)
+  {
+    return option_group->on_post_parse(cppContext, *option_group);
+  }
+  else
+    return false;
+}
+
+static void g_callback_error(GOptionContext* context, GOptionGroup* /* group */, gpointer data, GError** /* TODO error*/)
+{
+  OptionContext cppContext(context, false /* take_ownership */);
+  //OptionGroup cppGroup(group); //Maybe this should be option_group.
+  
+  OptionGroup* option_group = static_cast<OptionGroup*>(data);
+  if(option_group)
+    return option_group->on_error(cppContext, *option_group);
+}
+
+} /* extern "C" */
+
+} //anonymous namespace
+
+
+OptionGroup::OptionGroup(const Glib::ustring& name, const Glib::ustring& description, const Glib::ustring& help_description)
+: gobject_( g_option_group_new(name.c_str(), description.c_str(), help_description.c_str(), this, 0 /* destroy_func */) ),
+  has_ownership_(true)
+{
+  //Connect callbacks, so that derived classes can override the virtual methods:
+  g_option_group_set_parse_hooks(gobj(), &g_callback_pre_parse, &g_callback_post_parse);
+  g_option_group_set_error_hook(gobj(), &g_callback_error);
+}
+
+OptionGroup::OptionGroup(GOptionGroup* castitem)
+: gobject_(castitem),
+  has_ownership_(true)
+{
+  //Always takes ownership - never takes copy.
+}
+
+
+OptionGroup::~OptionGroup()
+{
+  //Free any C types that were allocated during add_entry():
+  for(type_map_entries::iterator iter = map_entries_.begin(); iter != map_entries_.end(); ++iter)
+  {
+    CppOptionEntry& cpp_entry = iter->second;
+    cpp_entry.release_c_arg();
+  }
+  
+  if(has_ownership_)
+  {
+    g_option_group_free(gobj());
+    gobject_ = 0;
+  }
+}
+
+void OptionGroup::add_entry(const OptionEntry& entry)
+{
+  //It does not copy the entry, so it needs to live as long as the group.
+  
+  //g_option_group_add_entries takes an array, with the last item in the array having a null long_name.
+  //Hopefully this will be properly documented eventually - see bug #
+  
+  //Create a temporary array, just so we can give the correct thing to g_option_group_add_entries:
+  GOptionEntry array[2];
+  array[0] = *(entry.gobj()); //Copy contents.
+  GLIBMM_INITIALIZE_STRUCT(array[1], GOptionEntry);
+   
+  g_option_group_add_entries(gobj(), array);
+}
+
+void OptionGroup::add_entry(const OptionEntry& entry, bool& arg)
+{
+  add_entry_with_wrapper(entry, G_OPTION_ARG_NONE /* Actually a boolean on/off, depending on whether the argument name was given, without argument parameters. */, &arg);
+}
+
+void OptionGroup::add_entry(const OptionEntry& entry, int& arg)
+{
+  add_entry_with_wrapper(entry, G_OPTION_ARG_INT, &arg);
+}
+
+void OptionGroup::add_entry(const OptionEntry& entry, Glib::ustring& arg)
+{
+  add_entry_with_wrapper(entry, G_OPTION_ARG_STRING, &arg);
+}
+
+void OptionGroup::add_entry(const OptionEntry& entry, vecustrings& arg)
+{
+  add_entry_with_wrapper(entry, G_OPTION_ARG_STRING_ARRAY, &arg);
+}
+
+void OptionGroup::add_entry_filename(const OptionEntry& entry, std::string& arg)
+{
+  add_entry_with_wrapper(entry, G_OPTION_ARG_FILENAME, &arg);
+}
+
+void OptionGroup::add_entry_filename(const OptionEntry& entry, vecstrings& arg)
+{
+  add_entry_with_wrapper(entry, G_OPTION_ARG_FILENAME_ARRAY, &arg);
+}
+ 
+void OptionGroup::add_entry_with_wrapper(const OptionEntry& entry, GOptionArg arg_type, void* cpp_arg)
+{
+  const Glib::ustring name = entry.get_long_name();
+  type_map_entries::iterator iterFind = map_entries_.find(name);
+  if( iterFind == map_entries_.end() ) //If we have not added this entry already
+  {  
+    CppOptionEntry cppEntry;
+    cppEntry.carg_type_ = arg_type;
+    cppEntry.allocate_c_arg();
+
+    cppEntry.cpparg_ = cpp_arg;
+
+    //Give the information to the C API:
+
+    cppEntry.entry_ = new OptionEntry(entry); //g_option_group_add_entry() does not take its own copy, so we must keep the instance alive. */
+    //cppEntry.entry_ is deleted in release_c_arg(), via the destructor.
+
+    cppEntry.entry_->gobj()->arg = arg_type;
+    cppEntry.entry_->gobj()->arg_data = cppEntry.carg_;
+ 
+    //Remember the C++/C mapping so that we can use it later:
+    map_entries_[name] = cppEntry;
+
+    add_entry(*(cppEntry.entry_));
+  }
+}
+  
+
+bool OptionGroup::on_pre_parse(OptionContext& /* context */, OptionGroup& /* group */)
+{
+  
+  return true;
+}
+
+bool OptionGroup::on_post_parse(OptionContext& /* context */, OptionGroup& /* group */)
+{
+  //Call this at the start of overrides.
+  
+  //TODO: Maybe put this in the C callback:
+  
+  //The C args have now been given values by GOption.
+  //Convert C values to C++ values:
+  
+  for(type_map_entries::iterator iter = map_entries_.begin(); iter != map_entries_.end(); ++iter)
+  {
+    CppOptionEntry& cpp_entry = iter->second;
+    cpp_entry.convert_c_to_cpp();
+  }
+  
+  return true;
+}
+
+void OptionGroup::on_error(OptionContext& /* context */, OptionGroup& /* group */)
+{
+}
+
+
+OptionGroup::CppOptionEntry::CppOptionEntry()
+: carg_type_(G_OPTION_ARG_NONE), carg_(0), cpparg_(0), entry_(0)
+{}
+    
+void OptionGroup::CppOptionEntry::allocate_c_arg()
+{
+  //Create an instance of the appropriate C type.
+  //This will be destroyed in the OptionGroup destructor.
+  switch(carg_type_)
+  {
+    case G_OPTION_ARG_STRING: //The char* will be for UTF8 strins.
+    case G_OPTION_ARG_FILENAME: //The char* will be for strings in the current locale's encoding.
+    {
+      char** typed_arg = new char*;
+      *typed_arg = 0; //The C code will allocate a char* and put it here, for us to g_free() later.
+      carg_ = typed_arg;
+      
+      break;
+    }
+    case G_OPTION_ARG_INT:
+    {
+      int* typed_arg = new int;
+      *typed_arg = 0;
+      carg_ = typed_arg;
+      
+      break;
+    }
+    case G_OPTION_ARG_STRING_ARRAY:
+    case G_OPTION_ARG_FILENAME_ARRAY:
+    {
+      char*** typed_arg = new char**;
+      *typed_arg = 0;
+      carg_ = typed_arg;
+      
+      break;
+    }
+    case G_OPTION_ARG_NONE: /* Actually a boolean. */
+    {
+      gboolean* typed_arg = new gboolean;
+      *typed_arg = 0;
+      carg_ = typed_arg;
+      
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+void OptionGroup::CppOptionEntry::release_c_arg()
+{
+  //Delete the instances that we created in allocate_c_arg().
+  //Notice that we delete the type that we created, but not the value to which it points.
+  if(carg_)
+  {
+    switch(carg_type_)
+    {
+      case G_OPTION_ARG_STRING:
+      case G_OPTION_ARG_FILENAME:
+      {
+        char** typed_arg = (char**)carg_;
+        g_free(*typed_arg); //Free the char* string at type_arg, which was allocated by the C code.
+        delete typed_arg; //Delete the char** that we allocated in allocate_c_arg;
+        
+        break;
+      }
+      case G_OPTION_ARG_INT:
+      {
+        int* typed_arg = (int*)carg_;
+        delete typed_arg;
+
+        break;
+      }
+      case G_OPTION_ARG_STRING_ARRAY:
+      case G_OPTION_ARG_FILENAME_ARRAY:
+      {
+        delete (char**)carg_;
+        break;
+      }
+      case G_OPTION_ARG_NONE: /* Actually a boolean. */
+      {
+        gboolean* typed_arg = (gboolean*)carg_;
+        delete typed_arg;
+
+        break;
+      }
+      default:
+      {
+      /* TODO:
+	G_OPTION_ARG_CALLBACK,
+*/
+        break;
+      }
+    }
+    
+    carg_ = 0;
+  }
+  
+  if(entry_)
+    delete entry_;
+}
+
+void OptionGroup::CppOptionEntry::convert_c_to_cpp()
+{
+  switch(carg_type_)
+  {
+    case G_OPTION_ARG_STRING:
+    {
+      char** typed_arg = (char**)carg_;
+      Glib::ustring* typed_cpp_arg = (Glib::ustring*)cpparg_;
+      if(typed_arg && typed_cpp_arg)
+      {
+        char* pch = *typed_arg;
+        (*typed_cpp_arg) = Glib::convert_const_gchar_ptr_to_ustring(pch);
+       
+        break;
+      }
+    }
+    case G_OPTION_ARG_FILENAME:
+    {
+      char** typed_arg = (char**)carg_;
+      std::string* typed_cpp_arg = (std::string*)cpparg_;
+      if(typed_arg && typed_cpp_arg)
+      {
+        char* pch = *typed_arg;
+        (*typed_cpp_arg) = Glib::convert_const_gchar_ptr_to_stdstring(pch);
+       
+        break;
+      }
+    }
+    case G_OPTION_ARG_INT:
+    {
+      *((int*)cpparg_) = *((int*)carg_);
+      break;
+    }
+        case G_OPTION_ARG_STRING_ARRAY:
+    {
+      char*** typed_arg = (char***)carg_;
+      vecustrings* typed_cpp_arg = (vecustrings*)cpparg_;
+      if(typed_arg && typed_cpp_arg)
+      {
+        typed_cpp_arg->clear();
+        
+        //The C array seems to be null-terminated.
+        //Glib::StringArrayHandle array_handle(*typed_arg,  Glib::OWNERSHIP_NONE);
+        
+        //The SUN Forte compiler complains about this:
+        // "optiongroup.cc", line 354: Error: Cannot assign Glib::ArrayHandle<Glib::ustring, 
+        // Glib::Container_Helpers::TypeTraits<Glib::ustring>> to std::vector<Glib::ustring> without 
+        // "std::vector<Glib::ustring>::operator=(const std::vector<Glib::ustring>&)";.
+        //
+        //(*typed_cpp_arg) = array_handle;
+        //
+        //And the Tru64 compiler does not even like us to instantiate the StringArrayHandle:
+        //
+        // cxx: Error: ../../glib/glibmm/containerhandle_shared.h, line 149: the operand
+        //     of a pointer dynamic_cast must be a pointer to a complete class type
+        //   return dynamic_cast<CppType>(Glib::wrap_auto(cobj, false /* take_copy */));
+        
+        //for(Glib::StringArrayHandle::iterator iter = array_handle.begin(); iter != array_handle.end(); ++iter)
+        //{
+        //  typed_cpp_arg->push_back(*iter);
+        //}
+        
+        //So we do this:
+        
+        char** char_array_next = *typed_arg;
+        while(char_array_next && *char_array_next)
+        {
+          typed_cpp_arg->push_back(*char_array_next);
+          ++char_array_next;
+        }
+      }
+      
+      break;
+    }
+    case G_OPTION_ARG_FILENAME_ARRAY:
+    {
+      char*** typed_arg = (char***)carg_;
+      vecustrings* typed_cpp_arg = (vecustrings*)cpparg_;
+      if(typed_arg && typed_cpp_arg)
+      { 
+        typed_cpp_arg->clear();
+              
+        //See comments above about the SUN Forte and Tru64 compilers.
+   
+        char** char_array_next = *typed_arg;
+        while(char_array_next && *char_array_next)
+        {
+          typed_cpp_arg->push_back(*char_array_next);
+          ++char_array_next;
+        }
+      }
+      
+      break;
+    }
+    case G_OPTION_ARG_NONE: /* Actually a boolean. */
+    {
+      *((bool*)cpparg_) = *((gboolean*)carg_);
+      break;
+    }
+    default:
+    {
+      /* TODO:
+	G_OPTION_ARG_CALLBACK,
+	*/
+	break;
+    }
+  }
+} 
+
+GOptionGroup* OptionGroup::gobj_give_ownership()
+{
+  has_ownership_ = false;
+  return gobj();
+}
+  
+} // namespace Glib
+

@@ -1,0 +1,62 @@
+## Copyright (c) 2001
+## The gtkmm development team.
+##
+## **** Common rules for inclusion in Makefile.am ****
+##
+##
+## Used variable:	Example content:
+##
+## sublib_name		= gdkmm
+## sublib_namespace	= Gdk
+## files_defs		= gdk.defs gdk_pixbuf.defs
+
+
+tools_dir_m4	= $(top_srcdir)/tools/m4
+tools_dir_pm	= $(top_srcdir)/tools/pm
+
+gensrc_destdir	= $(srcdir)/../$(sublib_name)
+stamp_dir	= $(srcdir)/.stamps
+
+include $(top_srcdir)/tools/Makefile_list_of_sources.am_fragment
+tools_m4	= $(files_tools_m4:%.m4=$(tools_dir_m4)/%.m4)
+tools_pm	= $(files_tools_pm:%.pm=$(tools_dir_pm)/%.pm)
+
+include $(srcdir)/Makefile_list_of_hg.am_fragment
+include $(top_srcdir)/build_shared/Makefile_gensrc_platform.am_fragment
+files_all_ccg	= $(files_all_hg:%.hg=%.ccg)
+files_h		= $(files_all_hg:%.hg=$(gensrc_destdir)/%.h)
+files_cc	= $(files_all_hg:%.hg=$(gensrc_destdir)/%.cc)
+files_stamp	= $(files_all_hg:%.hg=$(stamp_dir)/stamp-%)
+
+gmmproc_in	= $(top_srcdir)/tools/gmmproc.in
+gmmproc_path	= $(top_builddir)/tools/gmmproc
+gmmproc_args	= -I $(tools_dir_m4) --defs $(srcdir)
+run_gmmproc	= $(PERL_PATH) -I$(tools_dir_pm) $(gmmproc_path) $(gmmproc_args)
+
+gen_wrap_init_in   = $(top_srcdir)/tools/generate_wrap_init.pl.in
+gen_wrap_init_path = $(top_builddir)/tools/generate_wrap_init.pl
+gen_wrap_init_args = --namespace=$(sublib_namespace)
+run_gen_wrap_init  = $(PERL_PATH) $(gen_wrap_init_path) $(gen_wrap_init_args)
+
+EXTRA_DIST	= Makefile_list_of_hg.am_fragment $(files_defs) $(files_all_hg) $(files_all_ccg)
+
+
+$(stamp_dir)/stamp-%: %.hg %.ccg $(gmmproc_in) $(tools_m4) $(tools_pm) $(files_defs)
+	$(run_gmmproc) $(notdir $*) $(srcdir) $(gensrc_destdir)
+	@echo 'timestamp' >$@
+
+$(gensrc_destdir)/wrap_init.cc: $(gen_wrap_init_in) $(files_all_hg)
+	$(run_gen_wrap_init) $(files_all_hg:%.hg=$(srcdir)/%.hg) >$@
+
+create-stamp-dir:
+	@(test -d $(stamp_dir) || mkdir $(stamp_dir))
+
+if MAINTAINER_MODE
+all-local: create-stamp-dir $(files_stamp) $(gensrc_destdir)/wrap_init.cc
+endif
+
+maintainer-clean-local:
+	rm -rf $(stamp_dir)
+
+.PHONY: create-stamp-dir
+

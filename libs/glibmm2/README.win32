@@ -1,0 +1,65 @@
+Building glibmm on Win32
+===========================
+
+Currently, both the mingw (native win32) gcc compiler and MS Visual
+Studio 2005 are supported. glibmm can be built with mingw32-gcc using
+the gnu autotools (automake, autoconf, libtool). As explicitly stated
+in the gtk+ for win32 distribution (http://www.gimp.org/win32/), the
+gcc compiler provided by the cygwin distribution should not be used to
+build glib/glibmm libraries and/or applications (see the README.win32
+that comes with the gtk+ DLLs). This MIGHT cause conflicts between the
+cygwin and msvcrt runtime environments.
+
+1. Mingw
+
+The mingw distribution which has been tested with this release is the
+following :
+
+* MinGW-4.1 as the base distribution.
+
+The bare mingw distribution does not provide the necessary tools (sh, perl, m4
+, autoconf, automake, ..) to run the provided configure script "as is". One 
+(currently non supported) solution is to use mingw in conjunction with msys,
+which is readily available on the mingw website (http://www.mingw.org/).
+
+The preferred method is to combine the cygwin distribution (for the unix tools
+that were mentioned above) with mingw by making sure that the mingw
+tools (gcc, ld, dlltool, ..) are called first.
+
+First, make sure that you have working distribution of the native port
+of both libsigc++-2.0.x and glib-2.0 on win32 (see
+http://www.gimp.org/win32). If you can't compile a simple glib example
+using gcc and `pkg-config --cflags --libs`, you should not even think
+about trying to compile glibmm, let alone using precompiled libglibmm
+DLLs to port your glibmm application !
+
+The configure script can then be called using (as an example) the
+following options
+
+./configure --prefix=/target --build=i386-pc-mingw32 --disable-static
+
+then
+
+make
+make check
+make install
+
+2. MS Visual Studio 2005
+
+Open the glibmm.sln solution file in the MSVC_Net2003 directory. In
+the Tools/Options panel, add the appropriate GTK+ include and lib
+directories to the Projects and Solutions/VC++ directories. Build the
+solution. 
+
+Important NOTE : to circumvent the C++ compiler bug described in this
+bugzilla entry (http://bugzilla.gnome.org/show_bug.cgi?id=158040), it
+is necessary to add '/vd2' to the list of compiler options when
+building and/or using glibmm with Visual Studio 2005. 
+
+glibmm-2.8 will probably not work correctly with Visual Studio 7.1 or
+below because of the aforementioned bug.
+
+3. Glibmm methods and signals not available on win32
+
+All glibmm methods and signals are available on win32.
+

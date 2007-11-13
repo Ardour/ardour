@@ -1,0 +1,25 @@
+## Copyright (c) 2001
+## The gtkmm development team.
+##
+## **** Common rules for inclusion in Makefile.am ****
+##
+##
+## Used variable:		Example content:
+##
+## files_general_hg		= button.hg
+## files_posix_hg		= socket.hg
+##
+## Returned variable:		Usage example:
+##
+## files_all_hg			EXTRA_DIST = $(files_all_hg)
+## files_hg			files_built_h = $(files_hg:.hg=_p.h)
+
+
+files_all_hg = $(files_general_hg) $(files_posix_hg) $(files_win32_hg)
+
+if OS_WIN32
+files_hg = $(files_general_hg) $(files_win32_hg)
+else
+files_hg = $(files_general_hg) $(files_posix_hg)
+endif
+

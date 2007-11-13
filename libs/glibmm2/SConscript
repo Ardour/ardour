@@ -1,0 +1,48 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+
+glibmm2_files = glob.glob('glib/glibmm/*.cc')
+
+Import('env libraries install_prefix')
+
+glibmm2 = env.Copy()
+glibmm2.Merge([libraries['sigc2'], libraries['glib2'], libraries['glibmm2']])
+
+glibmm2.Append(CXXFLAGS=['-DHAVE_CONFIG_H', '-DGLIBMM_EXCEPTIONS_ENABLED', '-DGLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED', '-DGLIBMM_PROPERTIES_ENABLED'])
+#glibmm2.Append(CXXFLAGS='-DG_DISABLE_DEPRECATED')
+glibmm2.Append(CXXFLAGS='-DG_LOG_DOMAIN=\\\"glibmm\\\"')
+
+libglibmm2 = glibmm2.SharedLibrary('glibmm2', glibmm2_files)
+
+if os.access ('autogen.sh', os.F_OK) :
+    glibmm2_configure_script = glibmm2.Command ('configure', 'configure.ac', 'cd libs/glibmm2; ./autogen.sh; cd -', ENV=os.environ)
+    glibmm2_config_h = glibmm2.Command('glib/glibmmconfig.h', [glibmm2_configure_script, 'glib/glibmmconfig.h.in'],
+                                       'cd libs/glibmm2; ./configure || exit 1; cd -', ENV=os.environ)
+else :
+    glibmm2_config_h = glibmm2.Command('glib/glibmmconfig.h', ['configure', 'glib/glibmmconfig.h.in'],
+                                       'cd libs/glibmm2; ./configure || exit 1; cd -', ENV=os.environ)
+
+Default([glibmm2_config_h, libglibmm2])
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libglibmm2))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript',
+                                       'glibmm.h',
+                                       'configure',
+                                       'Makefile.in',
+                                       'glibmmconfig.h',
+                                       'glibmmconfig.h.in',
+                                       'glibmm-2.4.pc.in',
+                                       'glibmm/Makefile.in',
+                                       'scripts'
+                                       ] +
+				     glibmm2_files + 
+				     glob.glob('glibmm/*.h') +
+				     glob.glob('glibmm/private/*.h')
+				     ))
+

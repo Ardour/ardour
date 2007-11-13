@@ -1,0 +1,2608 @@
+;; -*- scheme -*-
+; object definitions ...
+(define-object TypeModule
+  (in-module "G")
+  (parent "GObject")
+  (c-name "GTypeModule")
+  (gtype-id "G_TYPE_TYPE_MODULE")
+)
+
+;; Enumerations and flags ...
+
+(define-flags ParamFlags
+  (in-module "G")
+  (c-name "GParamFlags")
+  (gtype-id "G_TYPE_PARAM_FLAGS")
+  (values
+    '("readable" "G_PARAM_READABLE")
+    '("writable" "G_PARAM_WRITABLE")
+    '("construct" "G_PARAM_CONSTRUCT")
+    '("construct-only" "G_PARAM_CONSTRUCT_ONLY")
+    '("lax-validation" "G_PARAM_LAX_VALIDATION")
+    '("private" "G_PARAM_PRIVATE")
+  )
+)
+
+(define-flags SignalFlags
+  (in-module "G")
+  (c-name "GSignalFlags")
+  (gtype-id "G_TYPE_SIGNAL_FLAGS")
+  (values
+    '("run-first" "G_SIGNAL_RUN_FIRST")
+    '("run-last" "G_SIGNAL_RUN_LAST")
+    '("run-cleanup" "G_SIGNAL_RUN_CLEANUP")
+    '("no-recurse" "G_SIGNAL_NO_RECURSE")
+    '("detailed" "G_SIGNAL_DETAILED")
+    '("action" "G_SIGNAL_ACTION")
+    '("no-hooks" "G_SIGNAL_NO_HOOKS")
+  )
+)
+
+(define-flags ConnectFlags
+  (in-module "G")
+  (c-name "GConnectFlags")
+  (gtype-id "G_TYPE_CONNECT_FLAGS")
+  (values
+    '("after" "G_CONNECT_AFTER")
+    '("swapped" "G_CONNECT_SWAPPED")
+  )
+)
+
+(define-flags SignalMatchType
+  (in-module "G")
+  (c-name "GSignalMatchType")
+  (gtype-id "G_TYPE_SIGNAL_MATCH_TYPE")
+  (values
+    '("id" "G_SIGNAL_MATCH_ID")
+    '("detail" "G_SIGNAL_MATCH_DETAIL")
+    '("closure" "G_SIGNAL_MATCH_CLOSURE")
+    '("func" "G_SIGNAL_MATCH_FUNC")
+    '("data" "G_SIGNAL_MATCH_DATA")
+    '("unblocked" "G_SIGNAL_MATCH_UNBLOCKED")
+  )
+)
+
+(define-flags TypeDebugFlags
+  (in-module "G")
+  (c-name "GTypeDebugFlags")
+  (gtype-id "G_TYPE_TYPE_DEBUG_FLAGS")
+  (values
+    '("none" "G_TYPE_DEBUG_NONE")
+    '("objects" "G_TYPE_DEBUG_OBJECTS")
+    '("signals" "G_TYPE_DEBUG_SIGNALS")
+    '("mask" "G_TYPE_DEBUG_MASK")
+  )
+)
+
+(define-flags TypeFundamentalFlags
+  (in-module "G")
+  (c-name "GTypeFundamentalFlags")
+  (gtype-id "G_TYPE_TYPE_FUNDAMENTAL_FLAGS")
+  (values
+    '("classed" "G_TYPE_FLAG_CLASSED")
+    '("instantiatable" "G_TYPE_FLAG_INSTANTIATABLE")
+    '("derivable" "G_TYPE_FLAG_DERIVABLE")
+    '("deep-derivable" "G_TYPE_FLAG_DEEP_DERIVABLE")
+  )
+)
+
+(define-flags TypeFlags
+  (in-module "G")
+  (c-name "GTypeFlags")
+  (gtype-id "G_TYPE_TYPE_FLAGS")
+  (values
+    '("abstract" "G_TYPE_FLAG_ABSTRACT")
+    '("value-abstract" "G_TYPE_FLAG_VALUE_ABSTRACT")
+  )
+)
+
+
+;; From gobject/gboxed.h
+
+(define-function g_boxed_free
+  (c-name "g_boxed_free")
+  (return-type "none")
+  (parameters
+    '("GType" "boxed_type")
+    '("gpointer" "boxed")
+  )
+)
+
+(define-method set_boxed
+  (of-object "GValue")
+  (c-name "g_value_set_boxed")
+  (return-type "none")
+  (parameters
+    '("gconstpointer" "v_boxed")
+  )
+)
+
+(define-method set_static_boxed
+  (of-object "GValue")
+  (c-name "g_value_set_static_boxed")
+  (return-type "none")
+  (parameters
+    '("gconstpointer" "v_boxed")
+  )
+)
+
+(define-method get_boxed
+  (of-object "GValue")
+  (c-name "g_value_get_boxed")
+  (return-type "gpointer")
+)
+
+(define-method dup_boxed
+  (of-object "GValue")
+  (c-name "g_value_dup_boxed")
+  (return-type "gpointer")
+)
+
+(define-function g_boxed_type_register_static
+  (c-name "g_boxed_type_register_static")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+    '("GBoxedCopyFunc" "boxed_copy")
+    '("GBoxedFreeFunc" "boxed_free")
+  )
+)
+
+(define-method set_boxed_take_ownership
+  (of-object "GValue")
+  (c-name "g_value_set_boxed_take_ownership")
+  (return-type "none")
+  (parameters
+    '("gconstpointer" "v_boxed")
+  )
+)
+
+(define-function g_closure_get_type
+  (c-name "g_closure_get_type")
+  (return-type "GType")
+)
+
+(define-function g_value_get_type
+  (c-name "g_value_get_type")
+  (return-type "GType")
+)
+
+(define-function g_value_array_get_type
+  (c-name "g_value_array_get_type")
+  (return-type "GType")
+)
+
+(define-function g_gstring_get_type
+  (c-name "g_gstring_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From gobject/gclosure.h
+
+(define-function g_cclosure_new
+  (c-name "g_cclosure_new")
+  (return-type "GClosure*")
+  (parameters
+    '("GCallback" "callback_func")
+    '("gpointer" "user_data")
+    '("GClosureNotify" "destroy_data")
+  )
+)
+
+(define-function g_cclosure_new_swap
+  (c-name "g_cclosure_new_swap")
+  (return-type "GClosure*")
+  (parameters
+    '("GCallback" "callback_func")
+    '("gpointer" "user_data")
+    '("GClosureNotify" "destroy_data")
+  )
+)
+
+(define-function g_signal_type_cclosure_new
+  (c-name "g_signal_type_cclosure_new")
+  (return-type "GClosure*")
+  (parameters
+    '("GType" "itype")
+    '("guint" "struct_offset")
+  )
+)
+
+(define-method ref
+  (of-object "GClosure")
+  (c-name "g_closure_ref")
+  (return-type "GClosure*")
+)
+
+(define-method sink
+  (of-object "GClosure")
+  (c-name "g_closure_sink")
+  (return-type "none")
+)
+
+(define-method unref
+  (of-object "GClosure")
+  (c-name "g_closure_unref")
+  (return-type "none")
+)
+
+(define-function g_closure_new_simple
+  (c-name "g_closure_new_simple")
+  (return-type "GClosure*")
+  (parameters
+    '("guint" "sizeof_closure")
+    '("gpointer" "data")
+  )
+)
+
+(define-method add_finalize_notifier
+  (of-object "GClosure")
+  (c-name "g_closure_add_finalize_notifier")
+  (return-type "none")
+  (parameters
+    '("gpointer" "notify_data")
+    '("GClosureNotify" "notify_func")
+  )
+)
+
+(define-method remove_finalize_notifier
+  (of-object "GClosure")
+  (c-name "g_closure_remove_finalize_notifier")
+  (return-type "none")
+  (parameters
+    '("gpointer" "notify_data")
+    '("GClosureNotify" "notify_func")
+  )
+)
+
+(define-method add_invalidate_notifier
+  (of-object "GClosure")
+  (c-name "g_closure_add_invalidate_notifier")
+  (return-type "none")
+  (parameters
+    '("gpointer" "notify_data")
+    '("GClosureNotify" "notify_func")
+  )
+)
+
+(define-method remove_invalidate_notifier
+  (of-object "GClosure")
+  (c-name "g_closure_remove_invalidate_notifier")
+  (return-type "none")
+  (parameters
+    '("gpointer" "notify_data")
+    '("GClosureNotify" "notify_func")
+  )
+)
+
+(define-method add_marshal_guards
+  (of-object "GClosure")
+  (c-name "g_closure_add_marshal_guards")
+  (return-type "none")
+  (parameters
+    '("gpointer" "pre_marshal_data")
+    '("GClosureNotify" "pre_marshal_notify")
+    '("gpointer" "post_marshal_data")
+    '("GClosureNotify" "post_marshal_notify")
+  )
+)
+
+(define-method set_marshal
+  (of-object "GClosure")
+  (c-name "g_closure_set_marshal")
+  (return-type "none")
+  (parameters
+    '("GClosureMarshal" "marshal")
+  )
+)
+
+(define-method set_meta_marshal
+  (of-object "GClosure")
+  (c-name "g_closure_set_meta_marshal")
+  (return-type "none")
+  (parameters
+    '("gpointer" "marshal_data")
+    '("GClosureMarshal" "meta_marshal")
+  )
+)
+
+(define-method invalidate
+  (of-object "GClosure")
+  (c-name "g_closure_invalidate")
+  (return-type "none")
+)
+
+(define-method invoke
+  (of-object "GClosure")
+  (c-name "g_closure_invoke")
+  (return-type "none")
+  (parameters
+    '("GValue*" "return_value")
+    '("guint" "n_param_values")
+    '("const-GValue*" "param_values")
+    '("gpointer" "invocation_hint")
+  )
+)
+
+
+
+;; From gobject/genums.h
+
+(define-function g_enum_get_value
+  (c-name "g_enum_get_value")
+  (return-type "GEnumValue*")
+  (parameters
+    '("GEnumClass*" "enum_class")
+    '("gint" "value")
+  )
+)
+
+(define-function g_enum_get_value_by_name
+  (c-name "g_enum_get_value_by_name")
+  (return-type "GEnumValue*")
+  (parameters
+    '("GEnumClass*" "enum_class")
+    '("const-gchar*" "name")
+  )
+)
+
+(define-function g_enum_get_value_by_nick
+  (c-name "g_enum_get_value_by_nick")
+  (return-type "GEnumValue*")
+  (parameters
+    '("GEnumClass*" "enum_class")
+    '("const-gchar*" "nick")
+  )
+)
+
+(define-function g_flags_get_first_value
+  (c-name "g_flags_get_first_value")
+  (return-type "GFlagsValue*")
+  (parameters
+    '("GFlagsClass*" "flags_class")
+    '("guint" "value")
+  )
+)
+
+(define-function g_flags_get_value_by_name
+  (c-name "g_flags_get_value_by_name")
+  (return-type "GFlagsValue*")
+  (parameters
+    '("GFlagsClass*" "flags_class")
+    '("const-gchar*" "name")
+  )
+)
+
+(define-function g_flags_get_value_by_nick
+  (c-name "g_flags_get_value_by_nick")
+  (return-type "GFlagsValue*")
+  (parameters
+    '("GFlagsClass*" "flags_class")
+    '("const-gchar*" "nick")
+  )
+)
+
+(define-method set_enum
+  (of-object "GValue")
+  (c-name "g_value_set_enum")
+  (return-type "none")
+  (parameters
+    '("gint" "v_enum")
+  )
+)
+
+(define-method get_enum
+  (of-object "GValue")
+  (c-name "g_value_get_enum")
+  (return-type "gint")
+)
+
+(define-method set_flags
+  (of-object "GValue")
+  (c-name "g_value_set_flags")
+  (return-type "none")
+  (parameters
+    '("guint" "v_flags")
+  )
+)
+
+(define-method get_flags
+  (of-object "GValue")
+  (c-name "g_value_get_flags")
+  (return-type "guint")
+)
+
+(define-function g_enum_register_static
+  (c-name "g_enum_register_static")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-GEnumValue*" "const_static_values")
+  )
+)
+
+(define-function g_flags_register_static
+  (c-name "g_flags_register_static")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-GFlagsValue*" "const_static_values")
+  )
+)
+
+(define-function g_enum_complete_type_info
+  (c-name "g_enum_complete_type_info")
+  (return-type "none")
+  (parameters
+    '("GType" "g_enum_type")
+    '("GTypeInfo*" "info")
+    '("const-GEnumValue*" "const_values")
+  )
+)
+
+(define-function g_flags_complete_type_info
+  (c-name "g_flags_complete_type_info")
+  (return-type "none")
+  (parameters
+    '("GType" "g_flags_type")
+    '("GTypeInfo*" "info")
+    '("const-GFlagsValue*" "const_values")
+  )
+)
+
+
+
+;; From gobject/gmarshal.h
+
+
+
+;; From gobject/gobject.h
+
+(define-method install_property
+  (of-object "GObjectClass")
+  (c-name "g_object_class_install_property")
+  (return-type "none")
+  (parameters
+    '("guint" "property_id")
+    '("GParamSpec*" "pspec")
+  )
+)
+
+(define-method find_property
+  (of-object "GObjectClass")
+  (c-name "g_object_class_find_property")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "property_name")
+  )
+)
+
+(define-function g_object_new
+  (c-name "g_object_new")
+  (return-type "gpointer")
+  (parameters
+    '("GType" "object_type")
+    '("const-gchar*" "first_property_name")
+  )
+  (varargs #t)
+)
+
+(define-function g_object_newv
+  (c-name "g_object_newv")
+  (return-type "gpointer")
+  (parameters
+    '("GType" "object_type")
+    '("guint" "n_parameters")
+    '("GParameter*" "parameters")
+  )
+)
+
+(define-function g_object_new_valist
+  (c-name "g_object_new_valist")
+  (return-type "GObject*")
+  (parameters
+    '("GType" "object_type")
+    '("const-gchar*" "first_property_name")
+    '("va_list" "var_args")
+  )
+)
+
+(define-function g_object_set
+  (c-name "g_object_set")
+  (return-type "none")
+  (parameters
+    '("gpointer" "object")
+    '("const-gchar*" "first_property_name")
+  )
+  (varargs #t)
+)
+
+(define-function g_object_get
+  (c-name "g_object_get")
+  (return-type "none")
+  (parameters
+    '("gpointer" "object")
+    '("const-gchar*" "first_property_name")
+  )
+  (varargs #t)
+)
+
+(define-function g_object_connect
+  (c-name "g_object_connect")
+  (return-type "gpointer")
+  (parameters
+    '("gpointer" "object")
+    '("const-gchar*" "signal_spec")
+  )
+  (varargs #t)
+)
+
+(define-function g_object_disconnect
+  (c-name "g_object_disconnect")
+  (return-type "none")
+  (parameters
+    '("gpointer" "object")
+    '("const-gchar*" "signal_spec")
+  )
+  (varargs #t)
+)
+
+(define-method set_valist
+  (of-object "GObject")
+  (c-name "g_object_set_valist")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "first_property_name")
+    '("va_list" "var_args")
+  )
+)
+
+(define-method get_valist
+  (of-object "GObject")
+  (c-name "g_object_get_valist")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "first_property_name")
+    '("va_list" "var_args")
+  )
+)
+
+(define-method set_property
+  (of-object "GObject")
+  (c-name "g_object_set_property")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "property_name")
+    '("const-GValue*" "value")
+  )
+)
+
+(define-method get_property
+  (of-object "GObject")
+  (c-name "g_object_get_property")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "property_name")
+    '("GValue*" "value")
+  )
+)
+
+(define-method freeze_notify
+  (of-object "GObject")
+  (c-name "g_object_freeze_notify")
+  (return-type "none")
+)
+
+(define-method notify
+  (of-object "GObject")
+  (c-name "g_object_notify")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "property_name")
+  )
+)
+
+(define-method thaw_notify
+  (of-object "GObject")
+  (c-name "g_object_thaw_notify")
+  (return-type "none")
+)
+
+(define-function g_object_ref
+  (c-name "g_object_ref")
+  (return-type "gpointer")
+  (parameters
+    '("gpointer" "object")
+  )
+)
+
+(define-function g_object_unref
+  (c-name "g_object_unref")
+  (return-type "none")
+  (parameters
+    '("gpointer" "object")
+  )
+)
+
+(define-method weak_ref
+  (of-object "GObject")
+  (c-name "g_object_weak_ref")
+  (return-type "none")
+  (parameters
+    '("GWeakNotify" "notify")
+    '("gpointer" "data")
+  )
+)
+
+(define-method weak_unref
+  (of-object "GObject")
+  (c-name "g_object_weak_unref")
+  (return-type "none")
+  (parameters
+    '("GWeakNotify" "notify")
+    '("gpointer" "data")
+  )
+)
+
+(define-method add_weak_pointer
+  (of-object "GObject")
+  (c-name "g_object_add_weak_pointer")
+  (return-type "none")
+  (parameters
+    '("gpointer*" "weak_pointer_location")
+  )
+)
+
+(define-method remove_weak_pointer
+  (of-object "GObject")
+  (c-name "g_object_remove_weak_pointer")
+  (return-type "none")
+  (parameters
+    '("gpointer*" "weak_pointer_location")
+  )
+)
+
+(define-method get_qdata
+  (of-object "GObject")
+  (c-name "g_object_get_qdata")
+  (return-type "gpointer")
+  (parameters
+    '("GQuark" "quark")
+  )
+)
+
+(define-method set_qdata
+  (of-object "GObject")
+  (c-name "g_object_set_qdata")
+  (return-type "none")
+  (parameters
+    '("GQuark" "quark")
+    '("gpointer" "data")
+  )
+)
+
+(define-method set_qdata_full
+  (of-object "GObject")
+  (c-name "g_object_set_qdata_full")
+  (return-type "none")
+  (parameters
+    '("GQuark" "quark")
+    '("gpointer" "data")
+    '("GDestroyNotify" "destroy")
+  )
+)
+
+(define-method steal_qdata
+  (of-object "GObject")
+  (c-name "g_object_steal_qdata")
+  (return-type "gpointer")
+  (parameters
+    '("GQuark" "quark")
+  )
+)
+
+(define-method get_data
+  (of-object "GObject")
+  (c-name "g_object_get_data")
+  (return-type "gpointer")
+  (parameters
+    '("const-gchar*" "key")
+  )
+)
+
+(define-method set_data
+  (of-object "GObject")
+  (c-name "g_object_set_data")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "key")
+    '("gpointer" "data")
+  )
+)
+
+(define-method set_data_full
+  (of-object "GObject")
+  (c-name "g_object_set_data_full")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "key")
+    '("gpointer" "data")
+    '("GDestroyNotify" "destroy")
+  )
+)
+
+(define-method steal_data
+  (of-object "GObject")
+  (c-name "g_object_steal_data")
+  (return-type "gpointer")
+  (parameters
+    '("const-gchar*" "key")
+  )
+)
+
+(define-method watch_closure
+  (of-object "GObject")
+  (c-name "g_object_watch_closure")
+  (return-type "none")
+  (parameters
+    '("GClosure*" "closure")
+  )
+)
+
+(define-function g_cclosure_new_object
+  (c-name "g_cclosure_new_object")
+  (return-type "GClosure*")
+  (parameters
+    '("GCallback" "callback_func")
+    '("GObject*" "object")
+  )
+)
+
+(define-function g_cclosure_new_object_swap
+  (c-name "g_cclosure_new_object_swap")
+  (return-type "GClosure*")
+  (parameters
+    '("GCallback" "callback_func")
+    '("GObject*" "object")
+  )
+)
+
+(define-function g_closure_new_object
+  (c-name "g_closure_new_object")
+  (return-type "GClosure*")
+  (parameters
+    '("guint" "sizeof_closure")
+    '("GObject*" "object")
+  )
+)
+
+(define-method set_object
+  (of-object "GValue")
+  (c-name "g_value_set_object")
+  (return-type "none")
+  (parameters
+    '("gpointer" "v_object")
+  )
+)
+
+(define-method get_object
+  (of-object "GValue")
+  (c-name "g_value_get_object")
+  (return-type "gpointer")
+)
+
+(define-method dup_object
+  (of-object "GValue")
+  (c-name "g_value_dup_object")
+  (return-type "GObject*")
+)
+
+(define-function g_signal_connect_object
+  (c-name "g_signal_connect_object")
+  (return-type "gulong")
+  (parameters
+    '("gpointer" "instance")
+    '("const-gchar*" "detailed_signal")
+    '("GCallback" "c_handler")
+    '("gpointer" "gobject")
+    '("GConnectFlags" "connect_flags")
+  )
+)
+
+(define-method run_dispose
+  (of-object "GObject")
+  (c-name "g_object_run_dispose")
+  (return-type "none")
+)
+
+(define-method set_object_take_ownership
+  (of-object "GValue")
+  (c-name "g_value_set_object_take_ownership")
+  (return-type "none")
+  (parameters
+    '("gpointer" "v_object")
+  )
+)
+
+
+
+;; From gobject/gparam.h
+
+(define-method ref
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_ref")
+  (return-type "GParamSpec*")
+)
+
+(define-method unref
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_unref")
+  (return-type "none")
+)
+
+(define-method sink
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_sink")
+  (return-type "none")
+)
+
+(define-method get_qdata
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_get_qdata")
+  (return-type "gpointer")
+  (parameters
+    '("GQuark" "quark")
+  )
+)
+
+(define-method set_qdata
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_set_qdata")
+  (return-type "none")
+  (parameters
+    '("GQuark" "quark")
+    '("gpointer" "data")
+  )
+)
+
+(define-method set_qdata_full
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_set_qdata_full")
+  (return-type "none")
+  (parameters
+    '("GQuark" "quark")
+    '("gpointer" "data")
+    '("GDestroyNotify" "destroy")
+  )
+)
+
+(define-method steal_qdata
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_steal_qdata")
+  (return-type "gpointer")
+  (parameters
+    '("GQuark" "quark")
+  )
+)
+
+(define-function g_param_value_set_default
+  (c-name "g_param_value_set_default")
+  (return-type "none")
+  (parameters
+    '("GParamSpec*" "pspec")
+    '("GValue*" "value")
+  )
+)
+
+(define-function g_param_value_defaults
+  (c-name "g_param_value_defaults")
+  (return-type "gboolean")
+  (parameters
+    '("GParamSpec*" "pspec")
+    '("GValue*" "value")
+  )
+)
+
+(define-function g_param_value_validate
+  (c-name "g_param_value_validate")
+  (return-type "gboolean")
+  (parameters
+    '("GParamSpec*" "pspec")
+    '("GValue*" "value")
+  )
+)
+
+(define-function g_param_value_convert
+  (c-name "g_param_value_convert")
+  (return-type "gboolean")
+  (parameters
+    '("GParamSpec*" "pspec")
+    '("const-GValue*" "src_value")
+    '("GValue*" "dest_value")
+    '("gboolean" "strict_validation")
+  )
+)
+
+(define-function g_param_values_cmp
+  (c-name "g_param_values_cmp")
+  (return-type "gint")
+  (parameters
+    '("GParamSpec*" "pspec")
+    '("const-GValue*" "value1")
+    '("const-GValue*" "value2")
+  )
+)
+
+(define-method get_name
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_get_name")
+  (return-type "const-gchar*")
+)
+
+(define-method get_nick
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_get_nick")
+  (return-type "const-gchar*")
+)
+
+(define-method get_blurb
+  (of-object "GParamSpec")
+  (c-name "g_param_spec_get_blurb")
+  (return-type "const-gchar*")
+)
+
+(define-method set_param
+  (of-object "GValue")
+  (c-name "g_value_set_param")
+  (return-type "none")
+  (parameters
+    '("GParamSpec*" "param")
+  )
+)
+
+(define-method get_param
+  (of-object "GValue")
+  (c-name "g_value_get_param")
+  (return-type "GParamSpec*")
+)
+
+(define-method dup_param
+  (of-object "GValue")
+  (c-name "g_value_dup_param")
+  (return-type "GParamSpec*")
+)
+
+(define-method set_param_take_ownership
+  (of-object "GValue")
+  (c-name "g_value_set_param_take_ownership")
+  (return-type "none")
+  (parameters
+    '("GParamSpec*" "param")
+  )
+)
+
+(define-function g_param_type_register_static
+  (c-name "g_param_type_register_static")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-GParamSpecTypeInfo*" "pspec_info")
+  )
+)
+
+(define-function _g_param_type_register_static_constant
+  (c-name "_g_param_type_register_static_constant")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-GParamSpecTypeInfo*" "pspec_info")
+    '("GType" "opt_type")
+  )
+)
+
+(define-function g_param_spec_internal
+  (c-name "g_param_spec_internal")
+  (return-type "gpointer")
+  (parameters
+    '("GType" "param_type")
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_pool_new
+  (c-name "g_param_spec_pool_new")
+  (return-type "GParamSpecPool*")
+  (parameters
+    '("gboolean" "type_prefixing")
+  )
+)
+
+(define-method insert
+  (of-object "GParamSpecPool")
+  (c-name "g_param_spec_pool_insert")
+  (return-type "none")
+  (parameters
+    '("GParamSpec*" "pspec")
+    '("GType" "owner_type")
+  )
+)
+
+(define-method remove
+  (of-object "GParamSpecPool")
+  (c-name "g_param_spec_pool_remove")
+  (return-type "none")
+  (parameters
+    '("GParamSpec*" "pspec")
+  )
+)
+
+(define-method lookup
+  (of-object "GParamSpecPool")
+  (c-name "g_param_spec_pool_lookup")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "param_name")
+    '("GType" "owner_type")
+    '("gboolean" "walk_ancestors")
+  )
+)
+
+(define-method list_owned
+  (of-object "GParamSpecPool")
+  (c-name "g_param_spec_pool_list_owned")
+  (return-type "GList*")
+  (parameters
+    '("GType" "owner_type")
+  )
+)
+
+(define-method list
+  (of-object "GParamSpecPool")
+  (c-name "g_param_spec_pool_list")
+  (return-type "GParamSpec**")
+  (parameters
+    '("GType" "owner_type")
+    '("guint*" "n_pspecs_p")
+  )
+)
+
+
+
+;; From gobject/gparamspecs.h
+
+(define-function g_param_spec_char
+  (c-name "g_param_spec_char")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gint8" "minimum")
+    '("gint8" "maximum")
+    '("gint8" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_uchar
+  (c-name "g_param_spec_uchar")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("guint8" "minimum")
+    '("guint8" "maximum")
+    '("guint8" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_boolean
+  (c-name "g_param_spec_boolean")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gboolean" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_int
+  (c-name "g_param_spec_int")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gint" "minimum")
+    '("gint" "maximum")
+    '("gint" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_uint
+  (c-name "g_param_spec_uint")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("guint" "minimum")
+    '("guint" "maximum")
+    '("guint" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_long
+  (c-name "g_param_spec_long")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("glong" "minimum")
+    '("glong" "maximum")
+    '("glong" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_ulong
+  (c-name "g_param_spec_ulong")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gulong" "minimum")
+    '("gulong" "maximum")
+    '("gulong" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_int64
+  (c-name "g_param_spec_int64")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gint64" "minimum")
+    '("gint64" "maximum")
+    '("gint64" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_uint64
+  (c-name "g_param_spec_uint64")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("guint64" "minimum")
+    '("guint64" "maximum")
+    '("guint64" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_unichar
+  (c-name "g_param_spec_unichar")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gunichar" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_enum
+  (c-name "g_param_spec_enum")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GType" "enum_type")
+    '("gint" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_flags
+  (c-name "g_param_spec_flags")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GType" "flags_type")
+    '("guint" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_float
+  (c-name "g_param_spec_float")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gfloat" "minimum")
+    '("gfloat" "maximum")
+    '("gfloat" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_double
+  (c-name "g_param_spec_double")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("gdouble" "minimum")
+    '("gdouble" "maximum")
+    '("gdouble" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_string
+  (c-name "g_param_spec_string")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("const-gchar*" "default_value")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_param
+  (c-name "g_param_spec_param")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GType" "param_type")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_boxed
+  (c-name "g_param_spec_boxed")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GType" "boxed_type")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_pointer
+  (c-name "g_param_spec_pointer")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_value_array
+  (c-name "g_param_spec_value_array")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GParamSpec*" "element_spec")
+    '("GParamFlags" "flags")
+  )
+)
+
+(define-function g_param_spec_object
+  (c-name "g_param_spec_object")
+  (return-type "GParamSpec*")
+  (parameters
+    '("const-gchar*" "name")
+    '("const-gchar*" "nick")
+    '("const-gchar*" "blurb")
+    '("GType" "object_type")
+    '("GParamFlags" "flags")
+  )
+)
+
+
+
+;; From gobject/gsignal.h
+
+(define-function g_signal_newv
+  (c-name "g_signal_newv")
+  (return-type "guint")
+  (parameters
+    '("const-gchar*" "signal_name")
+    '("GType" "itype")
+    '("GSignalFlags" "signal_flags")
+    '("GClosure*" "class_closure")
+    '("GSignalAccumulator" "accumulator")
+    '("gpointer" "accu_data")
+    '("GSignalCMarshaller" "c_marshaller")
+    '("GType" "return_type")
+    '("guint" "n_params")
+    '("GType*" "param_types")
+  )
+)
+
+(define-function g_signal_new_valist
+  (c-name "g_signal_new_valist")
+  (return-type "guint")
+  (parameters
+    '("const-gchar*" "signal_name")
+    '("GType" "itype")
+    '("GSignalFlags" "signal_flags")
+    '("GClosure*" "class_closure")
+    '("GSignalAccumulator" "accumulator")
+    '("gpointer" "accu_data")
+    '("GSignalCMarshaller" "c_marshaller")
+    '("GType" "return_type")
+    '("guint" "n_params")
+    '("va_list" "args")
+  )
+)
+
+(define-function g_signal_new
+  (c-name "g_signal_new")
+  (return-type "guint")
+  (parameters
+    '("const-gchar*" "signal_name")
+    '("GType" "itype")
+    '("GSignalFlags" "signal_flags")
+    '("guint" "class_offset")
+    '("GSignalAccumulator" "accumulator")
+    '("gpointer" "accu_data")
+    '("GSignalCMarshaller" "c_marshaller")
+    '("GType" "return_type")
+    '("guint" "n_params")
+  )
+  (varargs #t)
+)
+
+(define-function g_signal_emitv
+  (c-name "g_signal_emitv")
+  (return-type "none")
+  (parameters
+    '("const-GValue*" "instance_and_params")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("GValue*" "return_value")
+  )
+)
+
+(define-function g_signal_emit_valist
+  (c-name "g_signal_emit_valist")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("va_list" "var_args")
+  )
+)
+
+(define-function g_signal_emit
+  (c-name "g_signal_emit")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+  )
+  (varargs #t)
+)
+
+(define-function g_signal_emit_by_name
+  (c-name "g_signal_emit_by_name")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("const-gchar*" "detailed_signal")
+  )
+  (varargs #t)
+)
+
+(define-function g_signal_lookup
+  (c-name "g_signal_lookup")
+  (return-type "guint")
+  (parameters
+    '("const-gchar*" "name")
+    '("GType" "itype")
+  )
+)
+
+(define-function g_signal_name
+  (c-name "g_signal_name")
+  (return-type "const-gchar*")
+  (parameters
+    '("guint" "signal_id")
+  )
+)
+
+(define-function g_signal_query
+  (c-name "g_signal_query")
+  (return-type "none")
+  (parameters
+    '("guint" "signal_id")
+    '("GSignalQuery*" "query")
+  )
+)
+
+(define-function g_signal_list_ids
+  (c-name "g_signal_list_ids")
+  (return-type "guint*")
+  (parameters
+    '("GType" "itype")
+    '("guint*" "n_ids")
+  )
+)
+
+(define-function g_signal_parse_name
+  (c-name "g_signal_parse_name")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "detailed_signal")
+    '("GType" "itype")
+    '("guint*" "signal_id_p")
+    '("GQuark*" "detail_p")
+    '("gboolean" "force_detail_quark")
+  )
+)
+
+(define-function g_signal_get_invocation_hint
+  (c-name "g_signal_get_invocation_hint")
+  (return-type "GSignalInvocationHint*")
+  (parameters
+    '("gpointer" "instance")
+  )
+)
+
+(define-function g_signal_stop_emission
+  (c-name "g_signal_stop_emission")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+  )
+)
+
+(define-function g_signal_stop_emission_by_name
+  (c-name "g_signal_stop_emission_by_name")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("const-gchar*" "detailed_signal")
+  )
+)
+
+(define-function g_signal_add_emission_hook
+  (c-name "g_signal_add_emission_hook")
+  (return-type "gulong")
+  (parameters
+    '("guint" "signal_id")
+    '("GQuark" "quark")
+    '("GSignalEmissionHook" "hook_func")
+    '("gpointer" "hook_data")
+    '("GDestroyNotify" "data_destroy")
+  )
+)
+
+(define-function g_signal_remove_emission_hook
+  (c-name "g_signal_remove_emission_hook")
+  (return-type "none")
+  (parameters
+    '("guint" "signal_id")
+    '("gulong" "hook_id")
+  )
+)
+
+(define-function g_signal_has_handler_pending
+  (c-name "g_signal_has_handler_pending")
+  (return-type "gboolean")
+  (parameters
+    '("gpointer" "instance")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("gboolean" "may_be_blocked")
+  )
+)
+
+(define-function g_signal_connect_closure_by_id
+  (c-name "g_signal_connect_closure_by_id")
+  (return-type "gulong")
+  (parameters
+    '("gpointer" "instance")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("GClosure*" "closure")
+    '("gboolean" "after")
+  )
+)
+
+(define-function g_signal_connect_closure
+  (c-name "g_signal_connect_closure")
+  (return-type "gulong")
+  (parameters
+    '("gpointer" "instance")
+    '("const-gchar*" "detailed_signal")
+    '("GClosure*" "closure")
+    '("gboolean" "after")
+  )
+)
+
+(define-function g_signal_connect_data
+  (c-name "g_signal_connect_data")
+  (return-type "gulong")
+  (parameters
+    '("gpointer" "instance")
+    '("const-gchar*" "detailed_signal")
+    '("GCallback" "c_handler")
+    '("gpointer" "data")
+    '("GClosureNotify" "destroy_data")
+    '("GConnectFlags" "connect_flags")
+  )
+)
+
+(define-function g_signal_handler_block
+  (c-name "g_signal_handler_block")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("gulong" "handler_id")
+  )
+)
+
+(define-function g_signal_handler_unblock
+  (c-name "g_signal_handler_unblock")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("gulong" "handler_id")
+  )
+)
+
+(define-function g_signal_handler_disconnect
+  (c-name "g_signal_handler_disconnect")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+    '("gulong" "handler_id")
+  )
+)
+
+(define-function g_signal_handler_is_connected
+  (c-name "g_signal_handler_is_connected")
+  (return-type "gboolean")
+  (parameters
+    '("gpointer" "instance")
+    '("gulong" "handler_id")
+  )
+)
+
+(define-function g_signal_handler_find
+  (c-name "g_signal_handler_find")
+  (return-type "gulong")
+  (parameters
+    '("gpointer" "instance")
+    '("GSignalMatchType" "mask")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("GClosure*" "closure")
+    '("gpointer" "func")
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_signal_handlers_block_matched
+  (c-name "g_signal_handlers_block_matched")
+  (return-type "guint")
+  (parameters
+    '("gpointer" "instance")
+    '("GSignalMatchType" "mask")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("GClosure*" "closure")
+    '("gpointer" "func")
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_signal_handlers_unblock_matched
+  (c-name "g_signal_handlers_unblock_matched")
+  (return-type "guint")
+  (parameters
+    '("gpointer" "instance")
+    '("GSignalMatchType" "mask")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("GClosure*" "closure")
+    '("gpointer" "func")
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_signal_handlers_disconnect_matched
+  (c-name "g_signal_handlers_disconnect_matched")
+  (return-type "guint")
+  (parameters
+    '("gpointer" "instance")
+    '("GSignalMatchType" "mask")
+    '("guint" "signal_id")
+    '("GQuark" "detail")
+    '("GClosure*" "closure")
+    '("gpointer" "func")
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_signal_override_class_closure
+  (c-name "g_signal_override_class_closure")
+  (return-type "none")
+  (parameters
+    '("guint" "signal_id")
+    '("GType" "instance_type")
+    '("GClosure*" "class_closure")
+  )
+)
+
+(define-function g_signal_chain_from_overridden
+  (c-name "g_signal_chain_from_overridden")
+  (return-type "none")
+  (parameters
+    '("const-GValue*" "instance_and_params")
+    '("GValue*" "return_value")
+  )
+)
+
+(define-function _g_signals_destroy
+  (c-name "_g_signals_destroy")
+  (return-type "none")
+  (parameters
+    '("GType" "itype")
+  )
+)
+
+
+
+;; From gobject/gsourceclosure.h
+
+(define-function g_io_channel_get_type
+  (c-name "g_io_channel_get_type")
+  (return-type "GType")
+)
+
+(define-function g_io_condition_get_type
+  (c-name "g_io_condition_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From gobject/gtype.h
+
+(define-function g_type_init
+  (c-name "g_type_init")
+  (return-type "none")
+)
+
+(define-function g_type_init_with_debug_flags
+  (c-name "g_type_init_with_debug_flags")
+  (return-type "none")
+  (parameters
+    '("GTypeDebugFlags" "debug_flags")
+  )
+)
+
+(define-method name
+  (of-object "GType")
+  (c-name "g_type_name")
+  (return-type "const-gchar*")
+)
+
+(define-method qname
+  (of-object "GType")
+  (c-name "g_type_qname")
+  (return-type "GQuark")
+)
+
+(define-function g_type_from_name
+  (c-name "g_type_from_name")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+  )
+)
+
+(define-method parent
+  (of-object "GType")
+  (c-name "g_type_parent")
+  (return-type "GType")
+)
+
+(define-method depth
+  (of-object "GType")
+  (c-name "g_type_depth")
+  (return-type "guint")
+)
+
+(define-method next_base
+  (of-object "GType")
+  (c-name "g_type_next_base")
+  (return-type "GType")
+  (parameters
+    '("GType" "root_type")
+  )
+)
+
+(define-method is_a
+  (of-object "GType")
+  (c-name "g_type_is_a")
+  (return-type "gboolean")
+  (parameters
+    '("GType" "is_a_type")
+  )
+)
+
+(define-method class_ref
+  (of-object "GType")
+  (c-name "g_type_class_ref")
+  (return-type "gpointer")
+)
+
+(define-method class_peek
+  (of-object "GType")
+  (c-name "g_type_class_peek")
+  (return-type "gpointer")
+)
+
+(define-function g_type_class_unref
+  (c-name "g_type_class_unref")
+  (return-type "none")
+  (parameters
+    '("gpointer" "g_class")
+  )
+)
+
+(define-function g_type_class_peek_parent
+  (c-name "g_type_class_peek_parent")
+  (return-type "gpointer")
+  (parameters
+    '("gpointer" "g_class")
+  )
+)
+
+(define-function g_type_interface_peek
+  (c-name "g_type_interface_peek")
+  (return-type "gpointer")
+  (parameters
+    '("gpointer" "instance_class")
+    '("GType" "iface_type")
+  )
+)
+
+(define-function g_type_interface_peek_parent
+  (c-name "g_type_interface_peek_parent")
+  (return-type "gpointer")
+  (parameters
+    '("gpointer" "g_iface")
+  )
+)
+
+(define-method children
+  (of-object "GType")
+  (c-name "g_type_children")
+  (return-type "GType*")
+  (parameters
+    '("guint*" "n_children")
+  )
+)
+
+(define-method interfaces
+  (of-object "GType")
+  (c-name "g_type_interfaces")
+  (return-type "GType*")
+  (parameters
+    '("guint*" "n_interfaces")
+  )
+)
+
+(define-method set_qdata
+  (of-object "GType")
+  (c-name "g_type_set_qdata")
+  (return-type "none")
+  (parameters
+    '("GQuark" "quark")
+    '("gpointer" "data")
+  )
+)
+
+(define-method get_qdata
+  (of-object "GType")
+  (c-name "g_type_get_qdata")
+  (return-type "gpointer")
+  (parameters
+    '("GQuark" "quark")
+  )
+)
+
+(define-method query
+  (of-object "GType")
+  (c-name "g_type_query")
+  (return-type "none")
+  (parameters
+    '("GTypeQuery*" "query")
+  )
+)
+
+(define-method register_static
+  (of-object "GType")
+  (c-name "g_type_register_static")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "type_name")
+    '("const-GTypeInfo*" "info")
+    '("GTypeFlags" "flags")
+  )
+)
+
+(define-method register_dynamic
+  (of-object "GType")
+  (c-name "g_type_register_dynamic")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "type_name")
+    '("GTypePlugin*" "plugin")
+    '("GTypeFlags" "flags")
+  )
+)
+
+(define-method register_fundamental
+  (of-object "GType")
+  (c-name "g_type_register_fundamental")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "type_name")
+    '("const-GTypeInfo*" "info")
+    '("const-GTypeFundamentalInfo*" "finfo")
+    '("GTypeFlags" "flags")
+  )
+)
+
+(define-method add_interface_static
+  (of-object "GType")
+  (c-name "g_type_add_interface_static")
+  (return-type "none")
+  (parameters
+    '("GType" "interface_type")
+    '("const-GInterfaceInfo*" "info")
+  )
+)
+
+(define-method add_interface_dynamic
+  (of-object "GType")
+  (c-name "g_type_add_interface_dynamic")
+  (return-type "none")
+  (parameters
+    '("GType" "interface_type")
+    '("GTypePlugin*" "plugin")
+  )
+)
+
+(define-method interface_add_prerequisite
+  (of-object "GType")
+  (c-name "g_type_interface_add_prerequisite")
+  (return-type "none")
+  (parameters
+    '("GType" "prerequisite_type")
+  )
+)
+
+(define-method get_plugin
+  (of-object "GType")
+  (c-name "g_type_get_plugin")
+  (return-type "GTypePlugin*")
+)
+
+(define-method interface_get_plugin
+  (of-object "GType")
+  (c-name "g_type_interface_get_plugin")
+  (return-type "GTypePlugin*")
+  (parameters
+    '("GType" "implementation_type")
+  )
+)
+
+(define-function g_type_fundamental_next
+  (c-name "g_type_fundamental_next")
+  (return-type "GType")
+)
+
+(define-method fundamental
+  (of-object "GType")
+  (c-name "g_type_fundamental")
+  (return-type "GType")
+)
+
+(define-method create_instance
+  (of-object "GType")
+  (c-name "g_type_create_instance")
+  (return-type "GTypeInstance*")
+)
+
+(define-function g_type_free_instance
+  (c-name "g_type_free_instance")
+  (return-type "none")
+  (parameters
+    '("GTypeInstance*" "instance")
+  )
+)
+
+(define-function g_type_add_class_cache_func
+  (c-name "g_type_add_class_cache_func")
+  (return-type "none")
+  (parameters
+    '("gpointer" "cache_data")
+    '("GTypeClassCacheFunc" "cache_func")
+  )
+)
+
+(define-function g_type_remove_class_cache_func
+  (c-name "g_type_remove_class_cache_func")
+  (return-type "none")
+  (parameters
+    '("gpointer" "cache_data")
+    '("GTypeClassCacheFunc" "cache_func")
+  )
+)
+
+(define-function g_type_class_unref_uncached
+  (c-name "g_type_class_unref_uncached")
+  (return-type "none")
+  (parameters
+    '("gpointer" "g_class")
+  )
+)
+
+(define-method value_table_peek
+  (of-object "GType")
+  (c-name "g_type_value_table_peek")
+  (return-type "GTypeValueTable*")
+)
+
+(define-function g_type_check_instance
+  (c-name "g_type_check_instance")
+  (return-type "gboolean")
+  (parameters
+    '("GTypeInstance*" "instance")
+  )
+)
+
+(define-function g_type_check_instance_cast
+  (c-name "g_type_check_instance_cast")
+  (return-type "GTypeInstance*")
+  (parameters
+    '("GTypeInstance*" "instance")
+    '("GType" "iface_type")
+  )
+)
+
+(define-function g_type_check_instance_is_a
+  (c-name "g_type_check_instance_is_a")
+  (return-type "gboolean")
+  (parameters
+    '("GTypeInstance*" "instance")
+    '("GType" "iface_type")
+  )
+)
+
+(define-function g_type_check_class_cast
+  (c-name "g_type_check_class_cast")
+  (return-type "GTypeClass*")
+  (parameters
+    '("GTypeClass*" "g_class")
+    '("GType" "is_a_type")
+  )
+)
+
+(define-function g_type_check_class_is_a
+  (c-name "g_type_check_class_is_a")
+  (return-type "gboolean")
+  (parameters
+    '("GTypeClass*" "g_class")
+    '("GType" "is_a_type")
+  )
+)
+
+(define-method check_is_value_type
+  (of-object "GType")
+  (c-name "g_type_check_is_value_type")
+  (return-type "gboolean")
+)
+
+(define-function g_type_check_value
+  (c-name "g_type_check_value")
+  (return-type "gboolean")
+  (parameters
+    '("GValue*" "value")
+  )
+)
+
+(define-function g_type_check_value_holds
+  (c-name "g_type_check_value_holds")
+  (return-type "gboolean")
+  (parameters
+    '("GValue*" "value")
+    '("GType" "type")
+  )
+)
+
+(define-method test_flags
+  (of-object "GType")
+  (c-name "g_type_test_flags")
+  (return-type "gboolean")
+  (parameters
+    '("guint" "flags")
+  )
+)
+
+(define-function g_type_name_from_instance
+  (c-name "g_type_name_from_instance")
+  (return-type "const-gchar*")
+  (parameters
+    '("GTypeInstance*" "instance")
+  )
+)
+
+(define-function g_type_name_from_class
+  (c-name "g_type_name_from_class")
+  (return-type "const-gchar*")
+  (parameters
+    '("GTypeClass*" "g_class")
+  )
+)
+
+
+
+;; From gobject/gtypemodule.h
+
+(define-function g_type_module_get_type
+  (c-name "g_type_module_get_type")
+  (return-type "GType")
+)
+
+(define-method use
+  (of-object "GTypeModule")
+  (c-name "g_type_module_use")
+  (return-type "gboolean")
+)
+
+(define-method unuse
+  (of-object "GTypeModule")
+  (c-name "g_type_module_unuse")
+  (return-type "none")
+)
+
+(define-method set_name
+  (of-object "GTypeModule")
+  (c-name "g_type_module_set_name")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "name")
+  )
+)
+
+(define-method register_type
+  (of-object "GTypeModule")
+  (c-name "g_type_module_register_type")
+  (return-type "GType")
+  (parameters
+    '("GType" "parent_type")
+    '("const-gchar*" "type_name")
+    '("const-GTypeInfo*" "type_info")
+    '("GTypeFlags" "flags")
+  )
+)
+
+(define-method add_interface
+  (of-object "GTypeModule")
+  (c-name "g_type_module_add_interface")
+  (return-type "none")
+  (parameters
+    '("GType" "instance_type")
+    '("GType" "interface_type")
+    '("const-GInterfaceInfo*" "interface_info")
+  )
+)
+
+
+
+;; From gobject/gtypeplugin.h
+
+(define-function g_type_plugin_get_type
+  (c-name "g_type_plugin_get_type")
+  (return-type "GType")
+)
+
+(define-method use
+  (of-object "GTypePlugin")
+  (c-name "g_type_plugin_use")
+  (return-type "none")
+)
+
+(define-method unuse
+  (of-object "GTypePlugin")
+  (c-name "g_type_plugin_unuse")
+  (return-type "none")
+)
+
+(define-method complete_type_info
+  (of-object "GTypePlugin")
+  (c-name "g_type_plugin_complete_type_info")
+  (return-type "none")
+  (parameters
+    '("GType" "g_type")
+    '("GTypeInfo*" "info")
+    '("GTypeValueTable*" "value_table")
+  )
+)
+
+(define-method complete_interface_info
+  (of-object "GTypePlugin")
+  (c-name "g_type_plugin_complete_interface_info")
+  (return-type "none")
+  (parameters
+    '("GType" "interface_type")
+    '("GType" "instance_type")
+    '("GInterfaceInfo*" "info")
+  )
+)
+
+
+
+;; From gobject/gvaluearray.h
+
+(define-method get_nth
+  (of-object "GValueArray")
+  (c-name "g_value_array_get_nth")
+  (return-type "GValue*")
+  (parameters
+    '("guint" "index")
+  )
+)
+
+(define-function g_value_array_new
+  (c-name "g_value_array_new")
+  (return-type "GValueArray*")
+  (parameters
+    '("guint" "n_prealloced")
+  )
+)
+
+(define-method free
+  (of-object "GValueArray")
+  (c-name "g_value_array_free")
+  (return-type "none")
+)
+
+(define-method copy
+  (of-object "GValueArray")
+  (c-name "g_value_array_copy")
+  (return-type "GValueArray*")
+)
+
+(define-method prepend
+  (of-object "GValueArray")
+  (c-name "g_value_array_prepend")
+  (return-type "GValueArray*")
+  (parameters
+    '("const-GValue*" "value")
+  )
+)
+
+(define-method append
+  (of-object "GValueArray")
+  (c-name "g_value_array_append")
+  (return-type "GValueArray*")
+  (parameters
+    '("const-GValue*" "value")
+  )
+)
+
+(define-method insert
+  (of-object "GValueArray")
+  (c-name "g_value_array_insert")
+  (return-type "GValueArray*")
+  (parameters
+    '("guint" "index")
+    '("const-GValue*" "value")
+  )
+)
+
+(define-method remove
+  (of-object "GValueArray")
+  (c-name "g_value_array_remove")
+  (return-type "GValueArray*")
+  (parameters
+    '("guint" "index")
+  )
+)
+
+(define-method sort
+  (of-object "GValueArray")
+  (c-name "g_value_array_sort")
+  (return-type "GValueArray*")
+  (parameters
+    '("GCompareFunc" "compare_func")
+  )
+)
+
+(define-method sort_with_data
+  (of-object "GValueArray")
+  (c-name "g_value_array_sort_with_data")
+  (return-type "GValueArray*")
+  (parameters
+    '("GCompareDataFunc" "compare_func")
+    '("gpointer" "user_data")
+  )
+)
+
+
+
+;; From gobject/gvaluecollector.h
+
+
+
+;; From gobject/gvalue.h
+
+(define-method init
+  (of-object "GValue")
+  (c-name "g_value_init")
+  (return-type "GValue*")
+  (parameters
+    '("GType" "g_type")
+  )
+)
+
+(define-method copy
+  (of-object "GValue")
+  (c-name "g_value_copy")
+  (return-type "none")
+  (parameters
+    '("GValue*" "dest_value")
+  )
+)
+
+(define-method reset
+  (of-object "GValue")
+  (c-name "g_value_reset")
+  (return-type "GValue*")
+)
+
+(define-method unset
+  (of-object "GValue")
+  (c-name "g_value_unset")
+  (return-type "none")
+)
+
+(define-method set_instance
+  (of-object "GValue")
+  (c-name "g_value_set_instance")
+  (return-type "none")
+  (parameters
+    '("gpointer" "instance")
+  )
+)
+
+(define-method fits_pointer
+  (of-object "GValue")
+  (c-name "g_value_fits_pointer")
+  (return-type "gboolean")
+)
+
+(define-method peek_pointer
+  (of-object "GValue")
+  (c-name "g_value_peek_pointer")
+  (return-type "gpointer")
+)
+
+(define-function g_value_type_compatible
+  (c-name "g_value_type_compatible")
+  (return-type "gboolean")
+  (parameters
+    '("GType" "src_type")
+    '("GType" "dest_type")
+  )
+)
+
+(define-function g_value_type_transformable
+  (c-name "g_value_type_transformable")
+  (return-type "gboolean")
+  (parameters
+    '("GType" "src_type")
+    '("GType" "dest_type")
+  )
+)
+
+(define-method transform
+  (of-object "GValue")
+  (c-name "g_value_transform")
+  (return-type "gboolean")
+  (parameters
+    '("GValue*" "dest_value")
+  )
+)
+
+(define-function g_value_register_transform_func
+  (c-name "g_value_register_transform_func")
+  (return-type "none")
+  (parameters
+    '("GType" "src_type")
+    '("GType" "dest_type")
+    '("GValueTransform" "transform_func")
+  )
+)
+
+
+
+;; From gobject/gvaluetypes.h
+
+(define-method get_char
+  (of-object "GValue")
+  (c-name "g_value_get_char")
+  (return-type "gchar")
+)
+
+(define-method set_uchar
+  (of-object "GValue")
+  (c-name "g_value_set_uchar")
+  (return-type "none")
+  (parameters
+    '("guchar" "v_uchar")
+  )
+)
+
+(define-method get_uchar
+  (of-object "GValue")
+  (c-name "g_value_get_uchar")
+  (return-type "guchar")
+)
+
+(define-method set_boolean
+  (of-object "GValue")
+  (c-name "g_value_set_boolean")
+  (return-type "none")
+  (parameters
+    '("gboolean" "v_boolean")
+  )
+)
+
+(define-method get_boolean
+  (of-object "GValue")
+  (c-name "g_value_get_boolean")
+  (return-type "gboolean")
+)
+
+(define-method set_int
+  (of-object "GValue")
+  (c-name "g_value_set_int")
+  (return-type "none")
+  (parameters
+    '("gint" "v_int")
+  )
+)
+
+(define-method get_int
+  (of-object "GValue")
+  (c-name "g_value_get_int")
+  (return-type "gint")
+)
+
+(define-method set_uint
+  (of-object "GValue")
+  (c-name "g_value_set_uint")
+  (return-type "none")
+  (parameters
+    '("guint" "v_uint")
+  )
+)
+
+(define-method get_uint
+  (of-object "GValue")
+  (c-name "g_value_get_uint")
+  (return-type "guint")
+)
+
+(define-method set_long
+  (of-object "GValue")
+  (c-name "g_value_set_long")
+  (return-type "none")
+  (parameters
+    '("glong" "v_long")
+  )
+)
+
+(define-method get_long
+  (of-object "GValue")
+  (c-name "g_value_get_long")
+  (return-type "glong")
+)
+
+(define-method set_ulong
+  (of-object "GValue")
+  (c-name "g_value_set_ulong")
+  (return-type "none")
+  (parameters
+    '("gulong" "v_ulong")
+  )
+)
+
+(define-method get_ulong
+  (of-object "GValue")
+  (c-name "g_value_get_ulong")
+  (return-type "gulong")
+)
+
+(define-method set_int64
+  (of-object "GValue")
+  (c-name "g_value_set_int64")
+  (return-type "none")
+  (parameters
+    '("gint64" "v_int64")
+  )
+)
+
+(define-method get_int64
+  (of-object "GValue")
+  (c-name "g_value_get_int64")
+  (return-type "gint64")
+)
+
+(define-method set_uint64
+  (of-object "GValue")
+  (c-name "g_value_set_uint64")
+  (return-type "none")
+  (parameters
+    '("guint64" "v_uint64")
+  )
+)
+
+(define-method get_uint64
+  (of-object "GValue")
+  (c-name "g_value_get_uint64")
+  (return-type "guint64")
+)
+
+(define-method set_float
+  (of-object "GValue")
+  (c-name "g_value_set_float")
+  (return-type "none")
+  (parameters
+    '("gfloat" "v_float")
+  )
+)
+
+(define-method get_float
+  (of-object "GValue")
+  (c-name "g_value_get_float")
+  (return-type "gfloat")
+)
+
+(define-method set_double
+  (of-object "GValue")
+  (c-name "g_value_set_double")
+  (return-type "none")
+  (parameters
+    '("gdouble" "v_double")
+  )
+)
+
+(define-method get_double
+  (of-object "GValue")
+  (c-name "g_value_get_double")
+  (return-type "gdouble")
+)
+
+(define-method set_string
+  (of-object "GValue")
+  (c-name "g_value_set_string")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "v_string")
+  )
+)
+
+(define-method set_static_string
+  (of-object "GValue")
+  (c-name "g_value_set_static_string")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "v_string")
+  )
+)
+
+(define-method get_string
+  (of-object "GValue")
+  (c-name "g_value_get_string")
+  (return-type "const-gchar*")
+)
+
+(define-method dup_string
+  (of-object "GValue")
+  (c-name "g_value_dup_string")
+  (return-type "gchar*")
+)
+
+(define-method set_pointer
+  (of-object "GValue")
+  (c-name "g_value_set_pointer")
+  (return-type "none")
+  (parameters
+    '("gpointer" "v_pointer")
+  )
+)
+
+(define-method get_pointer
+  (of-object "GValue")
+  (c-name "g_value_get_pointer")
+  (return-type "gpointer")
+)
+
+(define-function g_pointer_type_register_static
+  (c-name "g_pointer_type_register_static")
+  (return-type "GType")
+  (parameters
+    '("const-gchar*" "name")
+  )
+)
+
+(define-function g_strdup_value_contents
+  (c-name "g_strdup_value_contents")
+  (return-type "gchar*")
+  (parameters
+    '("const-GValue*" "value")
+  )
+)
+
+(define-method set_string_take_ownership
+  (of-object "GValue")
+  (c-name "g_value_set_string_take_ownership")
+  (return-type "none")
+  (parameters
+    '("gchar*" "v_string")
+  )
+)
+
+
