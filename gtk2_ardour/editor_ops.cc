@@ -4099,11 +4099,7 @@ Editor::ensure_entered_selected ()
 {
 	if (entered_regionview) {
 		if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) == selection->regions.end()) {
-			if (selection->regions.empty()) {
-				selection->set (entered_regionview);
-			} else {
-				selection->add (entered_regionview);
-			}
+			selection->set (entered_regionview);
 		}
 	}
 }
