@@ -455,7 +455,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
-                                        'ardour2_ui_dark.rc', 'ardour2_ui_light.rc', 'splash.png',
+                                        'ardour2_ui_dark.rc.in', 'ardour2_ui_light.rc.in', 'splash.png',
                                         'ardour.menus',
                                         'ardour-sae.menus',
 					'ardour.bindings.in', 'ardour2_ui_default.conf',
@@ -463,6 +463,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                         ] +
                                       gtkardour_files +
 				      vst_files +
+				      cmt_files +
 				      pixmap_files +
 				      icon_files +
 				      skipped_files +
