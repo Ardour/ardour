@@ -1,7 +1,6 @@
 #include <algorithm>
 
 #include <pbd/filesystem.h>
-#include <pbd/error.h>
 
 #include <ardour/template_utils.h>
 #include <ardour/directory_names.h>
@@ -18,11 +17,7 @@ system_template_directory ()
 	// just return the first directory in the search path that exists
 	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
 
-	if (i == spath.end())
-	{
-		warning << "System template directory does not exist" << endmsg;
-		return sys::path("");
-	}
+	if (i == spath.end()) return sys::path();
 
 	return *i;
 }
