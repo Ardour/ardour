@@ -531,8 +531,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
 					/* grab selection for moving */
 					start_selection_op (item, event, SelectionMove);
-				}
-				else {
+				} else {
 					/* this was debated, but decided the more common action was to
 					   make a new selection */
 					start_selection_op (item, event, CreateSelection);

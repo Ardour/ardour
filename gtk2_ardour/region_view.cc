@@ -69,6 +69,7 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
 							  TimeAxisViewItem::ShowFrame))
 	  , _region (r)
 	  , sync_mark(0)
+	  , sync_line(0)
 	  , editor(0)
 	  , current_visible_sync_position(0.0)
 	  , valid(false)
@@ -101,6 +102,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), visibility)
 	, _region (r)
 	, sync_mark(0)
+	, sync_line(0)
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
@@ -118,6 +120,8 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	in_destructor = false;
 	_height       = 0;
 	wait_for_data = wfd;
+	sync_mark     = 0;
+	sync_line     = 0;
 
 	compute_colors (basic_color);
 
@@ -126,19 +130,6 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	if (name_text) {
 		name_text->set_data ("regionview", this);
 	}
-
-	/* an equilateral triangle */
-
-	ArdourCanvas::Points shape;
-	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
-	shape.push_back (Gnome::Art::Point ((sync_mark_width - 1)/2, 1));
-	shape.push_back (Gnome::Art::Point (0, sync_mark_width - 1));
-	shape.push_back (Gnome::Art::Point (-((sync_mark_width-1)/2), 1));
-
-	sync_mark =  new ArdourCanvas::Polygon (*group);
-	sync_mark->property_points() = shape;
-	sync_mark->property_fill_color_rgba() = fill_color;
-	sync_mark->hide();
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
@@ -363,6 +354,7 @@ RegionView::set_colors ()
 	
 	if (sync_mark) {
 		sync_mark->property_fill_color_rgba() = fill_color;
+		sync_line->property_fill_color_rgba() = fill_color;
 	}
 }
 
@@ -427,14 +419,31 @@ RegionView::region_renamed ()
 void
 RegionView::region_sync_changed ()
 {
-	if (sync_mark == 0) {
-		return;
-	}
-
 	int sync_dir;
 	nframes_t sync_offset;
 
 	sync_offset = _region->sync_offset (sync_dir);
+
+	if (sync_offset == 0) {
+		/* no need for a sync mark */
+		if (sync_mark) {
+			sync_mark->hide();
+			sync_line->hide ();
+		}
+		return;
+	}
+
+	if (!sync_mark) {
+
+		/* points set below */
+		
+		sync_mark =  new ArdourCanvas::Polygon (*group);
+		sync_mark->property_fill_color_rgba() = fill_color;
+
+		sync_line = new ArdourCanvas::Line (*group);
+		sync_line->property_fill_color_rgba() = fill_color;
+		sync_line->property_width_pixels() = 1;
+	}
 
 	/* this has to handle both a genuine change of position, a change of samples_per_unit,
 	   and a change in the bounds of the _region->
@@ -443,8 +452,9 @@ RegionView::region_sync_changed ()
 	if (sync_offset == 0) {
 
 		/* no sync mark - its the start of the region */
-
+		
 		sync_mark->hide();
+		sync_line->hide ();
 
 	} else {
 
@@ -453,6 +463,7 @@ RegionView::region_sync_changed ()
 			/* no sync mark - its out of the bounds of the region */
 
 			sync_mark->hide();
+			sync_line->hide ();
 
 		} else {
 
@@ -468,8 +479,14 @@ RegionView::region_sync_changed ()
 			points.push_back (Gnome::Art::Point (offset, sync_mark_width - 1));
 			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));	
 			sync_mark->property_points().set_value (points);
-			sync_mark->show();
+			sync_mark->show ();
 
+			points.clear ();
+			points.push_back (Gnome::Art::Point (offset, 0));
+			points.push_back (Gnome::Art::Point (offset, _height - NAME_HIGHLIGHT_SIZE));
+
+			sync_line->property_points().set_value (points);
+			sync_line->show ();
 		}
 	}
 }
@@ -511,3 +528,18 @@ RegionView::get_fill_color ()
 	return fill_color;
 }
 
+void
+RegionView::set_height (double h)
+{
+	if (sync_line) {
+		Points points;
+		int sync_dir;
+		nframes_t sync_offset;
+		sync_offset = _region->sync_offset (sync_dir);
+		double offset = sync_offset / samples_per_unit;
+
+		points.push_back (Gnome::Art::Point (offset, 0));
+		points.push_back (Gnome::Art::Point (offset, h - NAME_HIGHLIGHT_SIZE));
+		sync_line->property_points().set_value (points);
+	}
+}

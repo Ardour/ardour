@@ -395,6 +395,8 @@ AudioRegionView::region_muted ()
 void
 AudioRegionView::set_height (gdouble height)
 {
+	RegionView::set_height (height);
+
 	uint32_t wcnt = waves.size();
 
 	// FIXME: ick
