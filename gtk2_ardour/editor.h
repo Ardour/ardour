@@ -169,6 +169,7 @@ class Editor : public PublicEditor
 	/* things that need to be public to be used in the main menubar */
 
 	void new_region_from_selection ();
+	void separate_regions_between (const TimeSelection&);
 	void separate_region_from_selection ();
 	void separate_regions_using_location (ARDOUR::Location&);
 	void toggle_playback (bool with_abort);
@@ -430,7 +431,7 @@ class Editor : public PublicEditor
 	TimeAxisView*      clicked_trackview;
 	AudioTimeAxisView* clicked_audio_trackview;
 	RegionView*        clicked_regionview;
-	RegionView*        latest_regionview;
+	RegionSelection    latest_regionviews;
 	uint32_t           clicked_selection;
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;

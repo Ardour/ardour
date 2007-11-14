@@ -329,6 +329,15 @@ Selection::add (TimeAxisView* track)
 }
 
 void
+Selection::add (const RegionSelection& rs)
+{
+	if (!rs.empty()) {
+		regions.insert (regions.end(), rs.begin(), rs.end());
+		RegionsChanged(); /* EMIT SIGNAL */
+	}
+}
+
+void
 Selection::add (RegionView* r)
 {
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
@@ -553,10 +562,20 @@ Selection::set (const list<boost::shared_ptr<Playlist> >& pllist)
 }
 
 void
-Selection::set (RegionView* r)
+Selection::set (const RegionSelection& rs)
+{
+	clear_regions();
+	regions = rs;
+	RegionsChanged(); /* EMIT SIGNAL */
+}
+
+void
+Selection::set (RegionView* r, bool also_clear_tracks)
 {
 	clear_regions ();
-	clear_tracks ();
+	if (also_clear_tracks) {
+		clear_tracks ();
+	}
 	add (r);
 }
 

@@ -2216,15 +2216,11 @@ Editor::new_region_from_selection ()
 }
 
 void
-Editor::separate_region_from_selection ()
+Editor::separate_regions_between (const TimeSelection& ts)
 {
 	bool doing_undo = false;
-
-	if (selection->time.empty()) {
-		return;
-	}
-
 	boost::shared_ptr<Playlist> playlist;
+	RegionSelection new_selection;
 		
 	sort_track_selection ();
 
@@ -2243,87 +2239,107 @@ Editor::separate_region_from_selection ()
 				}
 					
 				if ((playlist = atv->playlist()) != 0) {
+
 					if (!doing_undo) {
 						begin_reversible_command (_("separate"));
 						doing_undo = true;
 					}
+
                                         XMLNode *before;
-					if (doing_undo) 
+
+					if (doing_undo) {
                                             before = &(playlist->get_state());
-			
+					}
+
 					/* XXX need to consider musical time selections here at some point */
 
 					double speed = atv->get_diskstream()->speed();
 
-					for (list<AudioRange>::iterator t = selection->time.begin(); t != selection->time.end(); ++t) {
+					sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+					latest_regionviews.clear ();
+
+					for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
 						playlist->partition ((nframes_t)((*t).start * speed), (nframes_t)((*t).end * speed), true);
 					}
 
-					if (doing_undo) 
-                                            session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
+					c.disconnect ();
+
+					if (!latest_regionviews.empty()) {
+
+						/* here is a trick: partitioning will generally create 1 or 2 new regions.
+						   if the region spanned the selection, the first new one will be the middle
+						   of the original. if the region overlapped one end of the selection,
+						   the first (and only) new one will be the area corresponding to the
+						   selection.
+
+						   we want to select this region and return to mouse object mode ...
+						*/
+
+						new_selection.push_back (latest_regionviews.front());
+
+						if (doing_undo) {
+							session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
+						}
+					} else {
+						cerr << " no new rv's for " << playlist->name() << endl;
+					}
 				}
 			}
 		}
 	}
 
-	if (doing_undo)	commit_reversible_command ();
+	selection->set (new_selection);
+	set_mouse_mode (MouseObject);
+
+	if (doing_undo)	{
+		commit_reversible_command ();
+	}
+}
+
+void
+Editor::separate_region_from_selection ()
+{
+	/* preferentially use *all* ranges in the time selection if we're in range mode
+	   to allow discontiguous operation, since get_edit_op_range() currently
+	   returns a single range.
+	*/
+	if (mouse_mode == MouseRange && !selection->time.empty()) {
+
+		separate_regions_between (selection->time);
+
+	} else {
+
+		nframes64_t start;
+		nframes64_t end;
+		
+		if (get_edit_op_range (start, end)) {
+			
+			AudioRange ar (start, end, 1);
+			TimeSelection ts;
+			ts.push_back (ar);
+
+			/* force track selection */
+
+			ensure_entered_selected ();
+			
+			separate_regions_between (ts);
+		}
+	}
 }
 
 void
 Editor::separate_regions_using_location (Location& loc)
 {
-	bool doing_undo = false;
-
 	if (loc.is_mark()) {
 		return;
 	}
 
-	boost::shared_ptr<Playlist> playlist;
+	AudioRange ar (loc.start(), loc.end(), 1);
+	TimeSelection ts;
 
-	/* XXX i'm unsure as to whether this should operate on selected tracks only 
-	   or the entire enchillada. uncomment the below line to correct the behaviour 
-	   (currently set for all tracks)
-	*/
+	ts.push_back (ar);
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
-	//for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-
-		AudioTimeAxisView* atv;
-
-		if ((atv = dynamic_cast<AudioTimeAxisView*> ((*i))) != 0) {
-
-			if (atv->is_audio_track()) {
-					
-				/* no edits to destructive tracks */
-
-				if (atv->audio_track()->audio_diskstream()->destructive()) {
-					continue;
-				}
-
-				if ((playlist = atv->playlist()) != 0) {
-                                        XMLNode *before;
-					if (!doing_undo) {
-						begin_reversible_command (_("separate"));
-						doing_undo = true;
-					}
-					if (doing_undo) 
-                                            before = &(playlist->get_state());
-                                            
-			
-					/* XXX need to consider musical time selections here at some point */
-
-					double speed = atv->get_diskstream()->speed();
-
-
-					playlist->partition ((nframes_t)(loc.start() * speed), (nframes_t)(loc.end() * speed), true);
-					if (doing_undo) 
-                                            session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
-				}
-			}
-		}
-	}
-
-	if (doing_undo)	commit_reversible_command ();
+	separate_regions_between (ts);
 }
 
 void
@@ -3431,8 +3447,8 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 		c.disconnect ();
 
-		if (latest_regionview) {
-			selection->add (latest_regionview);
+		if (!latest_regionviews.empty()) {
+			selection->add (latest_regionviews);
 		}
 	}
 		
@@ -4099,7 +4115,10 @@ Editor::ensure_entered_selected ()
 {
 	if (entered_regionview) {
 		if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) == selection->regions.end()) {
-			selection->set (entered_regionview);
+			
+			/* do NOT clear any existing track selection when we do this */
+
+			selection->set (entered_regionview, false);
 		}
 	}
 }

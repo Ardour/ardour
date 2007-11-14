@@ -235,7 +235,6 @@ Editor::Editor ()
 	clicked_audio_trackview = 0;
 	clicked_crossfadeview = 0;
 	clicked_control_point = 0;
-	latest_regionview = 0;
 	last_update_frame = 0;
 	drag_info.item = 0;
 	current_mixer_strip = 0;

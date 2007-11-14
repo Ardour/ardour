@@ -301,7 +301,6 @@ Editor::session_going_away ()
 	clicked_crossfadeview = 0;
 	entered_regionview = 0;
 	entered_track = 0;
-	latest_regionview = 0;
 	last_update_frame = 0;
 	drag_info.item = 0;
 	last_canvas_frame = 0;

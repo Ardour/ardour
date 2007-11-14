@@ -100,7 +100,7 @@ class Selection : public sigc::trackable
 	
 	void set (TimeAxisView*);
 	void set (const std::list<TimeAxisView*>&);
-	void set (RegionView*);
+	void set (RegionView*, bool also_clear_tracks = true);
 	void set (std::vector<RegionView*>&);
 	long set (TimeAxisView*, nframes_t, nframes_t);
 	void set (ARDOUR::AutomationList*);
@@ -109,6 +109,7 @@ class Selection : public sigc::trackable
 	void set (boost::shared_ptr<ARDOUR::Redirect>);
 	void set (AutomationSelectable*);
 	void set (Marker*);
+	void set (const RegionSelection&);
 
 	void toggle (TimeAxisView*);
 	void toggle (const std::list<TimeAxisView*>&);
@@ -132,6 +133,7 @@ class Selection : public sigc::trackable
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void add (boost::shared_ptr<ARDOUR::Redirect>);
 	void add (Marker*);
+	void add (const RegionSelection&);
 
 	void remove (TimeAxisView*);
 	void remove (const std::list<TimeAxisView*>&);

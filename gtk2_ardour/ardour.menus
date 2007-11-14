@@ -78,6 +78,8 @@
                <menuitem action='editor-delete'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
+               <menuitem action='editor-separate'/>
+               <separator/>       
 	       <menuitem action='remove-last-capture'/>
                <separator/>       
 	       <menu action='EditCursorMovementOptions'>

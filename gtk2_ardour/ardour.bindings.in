@@ -143,6 +143,7 @@
 ; (gtk_accel_path "<Actions>/Snap/snap-to-region-boundary" "")
 ; (gtk_accel_path "<Actions>/JACK/JACK" "")
 (gtk_accel_path "<Actions>/Editor/editor-cut" "<Control>x")
+(gtk_accel_path "<Actions>/Editor/editor-separate" "F4")
 ; (gtk_accel_path "<Actions>/RegionList/SortAscending" "")
 ; (gtk_accel_path "<Actions>/Main/Help" "")
 ; (gtk_accel_path "<Actions>/options/UseExternalMonitoring" "")

@@ -3538,7 +3538,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				copies.push_back (rv);
 			}
 
-			latest_regionview = 0;
+			latest_regionviews.clear ();
 			
 			sigc::connection c = atv2->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	
@@ -3546,8 +3546,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			session->add_command (new MementoCommand<Playlist>(*to_playlist, 0, &to_playlist->get_state()));	
 			c.disconnect ();
 							      
-			if (latest_regionview) {
-				new_selection.push_back (latest_regionview);
+			if (!latest_regionviews.empty()) {
+				new_selection.insert (new_selection.end(), latest_regionviews.begin(), latest_regionviews.end());
 			}
 
 			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
@@ -3642,14 +3642,15 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 				/* add it */
 
-				latest_regionview = 0;
+				latest_regionviews.clear ();
 				sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 				to_playlist->add_region (newregion, (nframes_t) (where * atv->get_diskstream()->speed()));
 				c.disconnect ();
 				
-				if (latest_regionview) {
-					atv->reveal_dependent_views (*latest_regionview);
-					selection->add (latest_regionview);
+				if (!latest_regionviews.empty()) {
+					// XXX why just the first one ? we only expect one
+					atv->reveal_dependent_views (*latest_regionviews.front());
+					selection->add (latest_regionviews);
 				}
 				
 				/* if the original region was locked, we don't care for the new one */
@@ -3847,7 +3848,7 @@ Editor::show_verbose_duration_cursor (nframes_t start, nframes_t end, double off
 void
 Editor::collect_new_region_view (RegionView* rv)
 {
-	latest_regionview = rv;
+	latest_regionviews.push_back (rv);
 }
 
 void
@@ -3877,7 +3878,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	   set the regionview we want to then drag.
 	*/
 	
-	latest_regionview = 0;
+	latest_regionviews.clear();
 	sigc::connection c = clicked_audio_trackview->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 	
 	/* A selection grab currently creates two undo/redo operations, one for 
@@ -3897,24 +3898,25 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	
 	c.disconnect ();
 	
-	if (latest_regionview == 0) {
+	if (latest_regionviews.empty()) {
 		/* something went wrong */
 		return;
 	}
 
 	/* we need to deselect all other regionviews, and select this one
-	   i'm ignoring undo stuff, because the region creation will take care of it */
-	selection->set (latest_regionview);
+	   i'm ignoring undo stuff, because the region creation will take care of it 
+	*/
+	selection->set (latest_regionviews);
 	
-	drag_info.item = latest_regionview->get_canvas_group();
-	drag_info.data = latest_regionview;
+	drag_info.item = latest_regionviews.front()->get_canvas_group();
+	drag_info.data = latest_regionviews.front();
 	drag_info.motion_callback = &Editor::region_drag_motion_callback;
 	drag_info.finished_callback = &Editor::region_drag_finished_callback;
 
 	start_grab (event);
 	
 	drag_info.last_trackview = clicked_trackview;
-	drag_info.last_frame_position = latest_regionview->region()->position();
+	drag_info.last_frame_position = latest_regionviews.front()->region()->position();
 	drag_info.pointer_frame_offset = drag_info.grab_frame - drag_info.last_frame_position;
 	
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
