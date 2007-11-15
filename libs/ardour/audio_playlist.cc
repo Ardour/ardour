@@ -152,11 +152,18 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 	skip_frames = 0;
 	_read_data_count = 0;
 
+	RegionList* rlist = regions_to_read (start, start+cnt);
+
+	if (rlist->empty()) {
+		delete rlist;
+		return cnt;
+	}
+
 	map<uint32_t,vector<boost::shared_ptr<Region> > > relevant_regions;
 	map<uint32_t,vector<boost::shared_ptr<Crossfade> > > relevant_xfades;
 	vector<uint32_t> relevant_layers;
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (RegionList::iterator i = rlist->begin(); i != rlist->end(); ++i) {
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			relevant_regions[(*i)->layer()].push_back (*i);
 			relevant_layers.push_back ((*i)->layer());
@@ -201,6 +208,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 		}
 	}
 
+	delete rlist;
 	return ret;
 }
 

@@ -99,6 +99,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 
 	RegionList*                regions_at (nframes_t frame);
 	RegionList*                regions_touched (nframes_t start, nframes_t end);
+	RegionList*                regions_to_read (nframes_t start, nframes_t end);
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (nframes_t frame);
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);

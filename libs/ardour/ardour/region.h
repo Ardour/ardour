@@ -120,7 +120,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void thaw (const string& why);
 
 	bool covers (nframes_t frame) const {
-		return first_frame() <= frame && frame < last_frame();
+		return first_frame() <= frame && frame <= last_frame();
 	}
 
 	OverlapType coverage (nframes_t start, nframes_t end) const {
