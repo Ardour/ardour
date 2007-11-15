@@ -259,7 +259,7 @@ Session::import_audiofile (import_status& status)
 		status.sources.clear ();
 
 		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
-			unlink ((*i).c_str());
+			sys::remove (*i);
 		}
 	}
 
