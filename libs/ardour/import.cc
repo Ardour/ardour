@@ -106,6 +106,56 @@ get_non_existent_filename (const std::string& basename, uint channel, uint chann
 	return buf;
 }
 
+vector<string>
+get_paths_for_new_sources (const string& import_file_path, const string& session_dir, 
+		uint channels)
+{
+	vector<string> new_paths;
+	const string basename = sys::basename (import_file_path);
+	SessionDirectory sdir(session_dir);
+
+	for (uint n = 0; n < channels; ++n) {
+
+		std::string filename = get_non_existent_filename (basename, n, channels); 
+
+		sys::path filepath = sdir.sound_path() / filename;
+
+		new_paths.push_back (filepath.to_string());
+	}
+
+	return new_paths;
+}
+
+bool
+create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
+		uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+{
+	for (vector<string>::const_iterator i = new_paths.begin();
+			i != new_paths.end(); ++i)
+	{
+		boost::shared_ptr<Source> source;
+
+		try
+		{
+			source = SourceFactory::createWritable (
+					DataType::AUDIO,
+					sess,
+					i->c_str(),
+					false, // destructive
+					samplerate
+					);
+		}
+		catch (const failed_constructor& err)
+		{
+			error << string_compose (_("Unable to create file %1 during import"), *i) << endmsg;
+			return false;
+		}
+
+		newfiles.push_back(boost::dynamic_pointer_cast<AudioFileSource>(source));
+	}
+	return true;
+}
+
 void
 write_audio_data_to_new_files (ImportableSource* source, Session::import_status& status,
 		vector<boost::shared_ptr<AudioFileSource> >& newfiles)
@@ -155,12 +205,18 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 	}
 }
 
+void
+remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
+{
+	sys::remove (std::string(file_source->path()));
+}
+
 int
 Session::import_audiofile (import_status& status)
 {
-	int ret = -1;
-	vector<string> new_paths;
 	uint32_t cnt = 1;
+	typedef vector<boost::shared_ptr<AudioFileSource> > AudioSources;
+	AudioSources all_new_sources;
 
 	status.sources.clear ();
 	
@@ -181,33 +237,21 @@ Session::import_audiofile (import_status& status)
 			return -1;
 		}
 
-		vector<boost::shared_ptr<AudioFileSource> > newfiles;
+		vector<string> new_paths = get_paths_for_new_sources (*p,
+				get_best_session_directory_for_new_source (),
+				source->channels());
 
-		for (uint n = 0; n < source->channels(); ++n) {
-			newfiles.push_back (boost::shared_ptr<AudioFileSource>());
-		}
+		AudioSources newfiles;
 
-		SessionDirectory sdir(get_best_session_directory_for_new_source ());
-	
-		const string basename = sys::basename (string(*p));
+		status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles);
 
-		for (uint n = 0; n < source->channels(); ++n) {
+		// copy on cancel/failure so that any files that were created will be removed below
+		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(all_new_sources));
 
-			std::string filename = get_non_existent_filename (basename, n, source->channels()); 
+		if (status.cancel) break;
 
-			sys::path filepath = sdir.sound_path() / filename;
-
-			try { 
-				newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, filepath.to_string().c_str(), false, frame_rate()));
-			}
-
-			catch (failed_constructor& err) {
-				error << string_compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
-				goto out;
-			}
-
-			new_paths.push_back (filepath.to_string());
-			newfiles[n]->prepare_for_peakfile_writes ();
+		for (AudioSources::iterator i = newfiles.begin(); i != newfiles.end(); ++i) {
+			(*i)->prepare_for_peakfile_writes ();
 		}
 
 		if ((nframes_t) source->samplerate() != frame_rate()) {
@@ -225,10 +269,10 @@ Session::import_audiofile (import_status& status)
 		}
 
 		write_audio_data_to_new_files (source.get(), status, newfiles);
-	
-		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(status.sources));
 	}
 	
+	int ret = -1;
+
 	if (!status.cancel) {
 		struct tm* now;
 		time_t xnow;
@@ -238,26 +282,24 @@ Session::import_audiofile (import_status& status)
 
 		/* flush the final length(s) to the header(s) */
 
-		for (SourceList::iterator x = status.sources.begin(); x != status.sources.end(); ++x) {
-			boost::dynamic_pointer_cast<AudioFileSource>(*x)->update_header(0, *now, xnow);
-			boost::dynamic_pointer_cast<AudioSource>(*x)->done_with_peakfile_writes ();
+		for (AudioSources::iterator x = all_new_sources.begin();
+				x != all_new_sources.end(); ++x)
+		{
+			(*x)->update_header(0, *now, xnow);
+			(*x)->done_with_peakfile_writes ();
 		}
 
 		/* save state so that we don't lose these new Sources */
 
 		save_state (_name);
+
+		std::copy (all_new_sources.begin(), all_new_sources.end(),
+				std::back_inserter(status.sources));
+
 		ret = 0;
-	}
-
-  out:
-
-	if (status.cancel) {
-
-		status.sources.clear ();
-
-		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
-			sys::remove (*i);
-		}
+	} else {
+		// this can throw...but it seems very unlikely
+		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
 	}
 
 	status.done = true;
