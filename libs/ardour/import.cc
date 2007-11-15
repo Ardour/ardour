@@ -53,6 +53,21 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+std::auto_ptr<ImportableSource>
+open_importable_source (const string& path, nframes_t samplerate,
+		ARDOUR::SrcQuality quality)
+{
+	std::auto_ptr<ImportableSource> source(new ImportableSource(path));
+
+	if (source->samplerate() == samplerate) {
+		return source;
+	}
+
+	return std::auto_ptr<ImportableSource>(
+			new ResampledImportableSource(path, samplerate, quality)
+			);
+}
+
 std::string
 get_non_existent_filename (const std::string& basename, uint channel, uint channels)
 {
@@ -144,7 +159,6 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 int
 Session::import_audiofile (import_status& status)
 {
-	SF_INFO info;
 	string basepath;
 	int ret = -1;
 	vector<string> new_paths;
@@ -155,26 +169,22 @@ Session::import_audiofile (import_status& status)
 	
 	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p, ++cnt) {
 
-		boost::shared_ptr<SNDFILE> in (sf_open (p->c_str(), SFM_READ, &info), sf_close);
+		std::auto_ptr<ImportableSource> source;
 
-		if (!in) {
-			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
-			status.done = 1;
-			status.cancel = 1;
-			return -1;
+		try
+		{
+			source = open_importable_source (*p, frame_rate(), status.quality);
 		}
-	
-		std::auto_ptr<ImportableSource> importable;
-
-		if ((nframes_t) info.samplerate != frame_rate()) {
-			importable.reset(new ResampledImportableSource (in.get(), &info, frame_rate(), status.quality));
-		} else {
-			importable.reset(new ImportableSource (in.get(), &info));
+		catch (const failed_constructor& err)
+		{
+			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
+			status.done = status.cancel = true;
+			return -1;
 		}
 
 		vector<boost::shared_ptr<AudioFileSource> > newfiles;
 
-		for (int n = 0; n < info.channels; ++n) {
+		for (uint n = 0; n < source->channels(); ++n) {
 			newfiles.push_back (boost::shared_ptr<AudioFileSource>());
 		}
 
@@ -182,9 +192,9 @@ Session::import_audiofile (import_status& status)
 
 		basepath = PBD::basename_nosuffix ((*p));
 		
-		for (int n = 0; n < info.channels; ++n) {
+		for (uint n = 0; n < source->channels(); ++n) {
 
-			std::string filename = get_non_existent_filename (basepath, n, info.channels); 
+			std::string filename = get_non_existent_filename (basepath, n, source->channels()); 
 
 			sys::path filepath = sdir.sound_path() / filename;
 
@@ -201,10 +211,10 @@ Session::import_audiofile (import_status& status)
 			newfiles[n]->prepare_for_peakfile_writes ();
 		}
 
-		if ((nframes_t) info.samplerate != frame_rate()) {
+		if ((nframes_t) source->samplerate() != frame_rate()) {
 			status.doing_what = string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
 							    basepath,
-							    info.samplerate/1000.0f,
+							    source->samplerate()/1000.0f,
 							    frame_rate()/1000.0f,
 							    cnt, status.paths.size());
 							    
@@ -215,13 +225,13 @@ Session::import_audiofile (import_status& status)
 
 		}
 
-		write_audio_data_to_new_files (importable.get(), status, newfiles);
+		write_audio_data_to_new_files (source.get(), status, newfiles);
 
 		if (status.cancel) {
 			goto out;
 		}
 		
-		for (int n = 0; n < info.channels; ++n) {
+		for (uint n = 0; n < source->channels(); ++n) {
 			status.sources.push_back (newfiles[n]);
 		}
 

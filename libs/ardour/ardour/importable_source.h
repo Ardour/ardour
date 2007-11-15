@@ -21,30 +21,39 @@
 #define __ardour_importable_source_h__
 
 #include <sndfile.h>
+#include <pbd/failed_constructor.h>
 #include <ardour/types.h>
 
 namespace ARDOUR {
 
 class ImportableSource {
 public:
-	ImportableSource (SNDFILE* sf, SF_INFO* info) : in (sf), sf_info (info) {}
+	ImportableSource (const std::string& path)
+		: in (sf_open (path.c_str(), SFM_READ, &sf_info), sf_close)
+	{
+		if (!in) throw failed_constructor();
+	
+	}
+	
 	virtual ~ImportableSource() {}
 
 	virtual nframes_t read (Sample* buffer, nframes_t nframes) {
-		nframes_t per_channel = nframes / sf_info->channels;
-		per_channel = sf_readf_float (in, buffer, per_channel);
-		return per_channel * sf_info->channels;
+		nframes_t per_channel = nframes / sf_info.channels;
+		per_channel = sf_readf_float (in.get(), buffer, per_channel);
+		return per_channel * sf_info.channels;
 	}
 
 	virtual float ratio() const { return 1.0f; }
 
-	uint channels() const { return sf_info->channels; }
+	uint channels() const { return sf_info.channels; }
 
-	nframes_t length() const { return sf_info->frames; }
+	nframes_t length() const { return sf_info.frames; }
+
+	nframes_t samplerate() const { return sf_info.samplerate; }
 
 protected:
-	SNDFILE* in;
-	SF_INFO* sf_info;
+	SF_INFO sf_info;
+	boost::shared_ptr<SNDFILE> in;
 };
 
 }
