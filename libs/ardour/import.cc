@@ -146,7 +146,6 @@ Session::import_audiofile (import_status& status)
 {
 	vector<boost::shared_ptr<AudioFileSource> > newfiles;
 	SF_INFO info;
-	int nfiles = 0;
 	string basepath;
 	int ret = -1;
 	vector<string> new_paths;
@@ -201,7 +200,6 @@ Session::import_audiofile (import_status& status)
 
 			new_paths.push_back (filepath.to_string());
 			newfiles[n]->prepare_for_peakfile_writes ();
-			nfiles++;
 		}
 
 		if ((nframes_t) info.samplerate != frame_rate()) {
