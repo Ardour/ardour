@@ -32,6 +32,7 @@
 #include <glibmm.h>
 
 #include <boost/scoped_array.hpp>
+#include <boost/shared_array.hpp>
 
 #include <pbd/basename.h>
 #include <pbd/convert.h>
@@ -96,7 +97,6 @@ Session::import_audiofile (import_status& status)
 {
 	vector<boost::shared_ptr<AudioFileSource> > newfiles;
 	SF_INFO info;
-	Sample **channel_data = 0;
 	int nfiles = 0;
 	string basepath;
 	nframes_t so_far;
@@ -157,10 +157,10 @@ Session::import_audiofile (import_status& status)
 		}
 
 		boost::scoped_array<float> data(new float[nframes * info.channels]);
-		channel_data = new Sample * [ info.channels ];
-	
+		vector<boost::shared_array<Sample> > channel_data;
+
 		for (int n = 0; n < info.channels; ++n) {
-			channel_data[n] = new Sample[nframes];
+			channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
 		}
 
 		so_far = 0;
@@ -205,7 +205,7 @@ Session::import_audiofile (import_status& status)
 			/* flush to disk */
 
 			for (chn = 0; chn < info.channels; ++chn) {
-				newfiles[chn]->write (channel_data[chn], nfread);
+				newfiles[chn]->write (channel_data[chn].get(), nfread);
 			}
 
 			so_far += nread;
@@ -247,13 +247,6 @@ Session::import_audiofile (import_status& status)
 	ret = 0;
 
   out:
-	
-	if (channel_data) {
-		for (int n = 0; n < info.channels; ++n) {
-			delete [] channel_data[n];
-		}
-		delete [] channel_data;
-	}
 
 	if (status.cancel) {
 
