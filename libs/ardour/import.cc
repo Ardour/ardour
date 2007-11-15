@@ -162,7 +162,6 @@ Session::import_audiofile (import_status& status)
 	string basepath;
 	int ret = -1;
 	vector<string> new_paths;
-	struct tm* now;
 	uint32_t cnt = 1;
 
 	status.sources.clear ();
@@ -238,26 +237,25 @@ Session::import_audiofile (import_status& status)
 		}
 	}
 	
-	status.freeze = true;
-
-	time_t xnow;
-	time (&xnow);
-	now = localtime (&xnow);
-
-	/* flush the final length(s) to the header(s) */
-
-	for (SourceList::iterator x = status.sources.begin(); x != status.sources.end() && !status.cancel; ++x) {
-		boost::dynamic_pointer_cast<AudioFileSource>(*x)->update_header(0, *now, xnow);
-		boost::dynamic_pointer_cast<AudioSource>(*x)->done_with_peakfile_writes ();
-	}
-
-	/* save state so that we don't lose these new Sources */
-
 	if (!status.cancel) {
-		save_state (_name);
-	}
+		struct tm* now;
+		time_t xnow;
+		time (&xnow);
+		now = localtime (&xnow);
+		status.freeze = true;
 
-	ret = 0;
+		/* flush the final length(s) to the header(s) */
+
+		for (SourceList::iterator x = status.sources.begin(); x != status.sources.end(); ++x) {
+			boost::dynamic_pointer_cast<AudioFileSource>(*x)->update_header(0, *now, xnow);
+			boost::dynamic_pointer_cast<AudioSource>(*x)->done_with_peakfile_writes ();
+		}
+
+		/* save state so that we don't lose these new Sources */
+
+		save_state (_name);
+		ret = 0;
+	}
 
   out:
 
