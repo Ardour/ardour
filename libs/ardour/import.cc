@@ -53,7 +53,6 @@ using namespace PBD;
 int
 Session::import_audiofile (import_status& status)
 {
-	SNDFILE *in;
 	vector<boost::shared_ptr<AudioFileSource> > newfiles;
 	SF_INFO info;
 	float *data = 0;
@@ -74,7 +73,9 @@ Session::import_audiofile (import_status& status)
 	
 	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p, ++cnt) {
 
-		if ((in = sf_open ((*p).c_str(), SFM_READ, &info)) == 0) {
+		boost::shared_ptr<SNDFILE> in (sf_open (p->c_str(), SFM_READ, &info), sf_close);
+
+		if (!in) {
 			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
 			status.done = 1;
 			status.cancel = 1;
@@ -82,9 +83,9 @@ Session::import_audiofile (import_status& status)
 		}
 		
 		if ((nframes_t) info.samplerate != frame_rate()) {
-			importable = new ResampledImportableSource (in, &info, frame_rate(), status.quality);
+			importable = new ResampledImportableSource (in.get(), &info, frame_rate(), status.quality);
 		} else {
-			importable = new ImportableSource (in, &info);
+			importable = new ImportableSource (in.get(), &info);
 		}
 		
 		newfiles.clear ();
@@ -261,7 +262,6 @@ Session::import_audiofile (import_status& status)
 		delete importable;
 	}
 
-	sf_close (in);	
 	status.done = true;
 
 	return ret;
