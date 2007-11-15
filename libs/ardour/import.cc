@@ -230,10 +230,8 @@ Session::import_audiofile (import_status& status)
 		if (status.cancel) {
 			goto out;
 		}
-		
-		for (uint n = 0; n < source->channels(); ++n) {
-			status.sources.push_back (newfiles[n]);
-		}
+	
+		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(status.sources));
 
 		if (status.cancel) {
 			goto out;
