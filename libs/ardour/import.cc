@@ -31,6 +31,8 @@
 
 #include <glibmm.h>
 
+#include <boost/scoped_array.hpp>
+
 #include <pbd/basename.h>
 #include <pbd/convert.h>
 
@@ -94,7 +96,6 @@ Session::import_audiofile (import_status& status)
 {
 	vector<boost::shared_ptr<AudioFileSource> > newfiles;
 	SF_INFO info;
-	float *data = 0;
 	Sample **channel_data = 0;
 	int nfiles = 0;
 	string basepath;
@@ -154,8 +155,8 @@ Session::import_audiofile (import_status& status)
 			newfiles[n]->prepare_for_peakfile_writes ();
 			nfiles++;
 		}
-	
-		data = new float[nframes * info.channels];
+
+		boost::scoped_array<float> data(new float[nframes * info.channels]);
 		channel_data = new Sample * [ info.channels ];
 	
 		for (int n = 0; n < info.channels; ++n) {
@@ -186,7 +187,7 @@ Session::import_audiofile (import_status& status)
 			long x;
 			long chn;
 		
-			if ((nread = importable->read (data, nframes)) == 0) {
+			if ((nread = importable->read (data.get(), nframes)) == 0) {
 				break;
 			}
 			nfread = nread / info.channels;
@@ -246,10 +247,6 @@ Session::import_audiofile (import_status& status)
 	ret = 0;
 
   out:
-
-	if (data) {
-		delete [] data;
-	}
 	
 	if (channel_data) {
 		for (int n = 0; n < info.channels; ++n) {
