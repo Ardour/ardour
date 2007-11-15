@@ -34,7 +34,6 @@
 #include <boost/scoped_array.hpp>
 #include <boost/shared_array.hpp>
 
-#include <pbd/basename.h>
 #include <pbd/convert.h>
 
 #include <ardour/ardour.h>
@@ -159,7 +158,6 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 int
 Session::import_audiofile (import_status& status)
 {
-	string basepath;
 	int ret = -1;
 	vector<string> new_paths;
 	uint32_t cnt = 1;
@@ -188,12 +186,12 @@ Session::import_audiofile (import_status& status)
 		}
 
 		SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	
+		const string basename = sys::basename (string(*p));
 
-		basepath = PBD::basename_nosuffix ((*p));
-		
 		for (uint n = 0; n < source->channels(); ++n) {
 
-			std::string filename = get_non_existent_filename (basepath, n, source->channels()); 
+			std::string filename = get_non_existent_filename (basename, n, source->channels()); 
 
 			sys::path filepath = sdir.sound_path() / filename;
 
