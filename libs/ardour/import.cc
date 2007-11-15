@@ -225,10 +225,6 @@ Session::import_audiofile (import_status& status)
 		}
 
 		write_audio_data_to_new_files (source.get(), status, newfiles);
-
-		if (status.cancel) {
-			goto out;
-		}
 	
 		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(status.sources));
 	}
