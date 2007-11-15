@@ -144,7 +144,6 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 int
 Session::import_audiofile (import_status& status)
 {
-	vector<boost::shared_ptr<AudioFileSource> > newfiles;
 	SF_INFO info;
 	string basepath;
 	int ret = -1;
@@ -172,8 +171,8 @@ Session::import_audiofile (import_status& status)
 		} else {
 			importable.reset(new ImportableSource (in.get(), &info));
 		}
-		
-		newfiles.clear ();
+
+		vector<boost::shared_ptr<AudioFileSource> > newfiles;
 
 		for (int n = 0; n < info.channels; ++n) {
 			newfiles.push_back (boost::shared_ptr<AudioFileSource>());
