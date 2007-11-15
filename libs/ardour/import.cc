@@ -156,6 +156,26 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 	return true;
 }
 
+Glib::ustring
+compose_status_message (const string& path,
+		uint file_samplerate,
+		uint session_samplerate,
+		uint current_file,
+		uint total_files)
+{
+	if (file_samplerate != session_samplerate) {
+		return string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
+				sys::path(path).leaf(),
+				file_samplerate/1000.0f,
+				session_samplerate/1000.0f,
+				current_file, total_files);
+	}
+
+	return  string_compose (_("converting %1\n(%2 of %3)"), 
+			sys::path(path).leaf(),
+			current_file, total_files);
+}
+
 void
 write_audio_data_to_new_files (ImportableSource* source, Session::import_status& status,
 		vector<boost::shared_ptr<AudioFileSource> >& newfiles)
@@ -254,19 +274,8 @@ Session::import_audiofile (import_status& status)
 			(*i)->prepare_for_peakfile_writes ();
 		}
 
-		if ((nframes_t) source->samplerate() != frame_rate()) {
-			status.doing_what = string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
-							    sys::path(*p).leaf(),
-							    source->samplerate()/1000.0f,
-							    frame_rate()/1000.0f,
-							    cnt, status.paths.size());
-							    
-		} else {
-			status.doing_what = string_compose (_("converting %1\n(%2 of %3)"), 
-							    sys::path(*p).leaf(),
-							    cnt, status.paths.size());
-
-		}
+		status.doing_what = compose_status_message (*p, source->samplerate(),
+				frame_rate(), cnt, status.paths.size());
 
 		write_audio_data_to_new_files (source.get(), status, newfiles);
 	}
