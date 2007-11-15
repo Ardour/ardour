@@ -213,14 +213,14 @@ Session::import_audiofile (import_status& status)
 
 		if ((nframes_t) source->samplerate() != frame_rate()) {
 			status.doing_what = string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
-							    basepath,
+							    sys::path(*p).leaf(),
 							    source->samplerate()/1000.0f,
 							    frame_rate()/1000.0f,
 							    cnt, status.paths.size());
 							    
 		} else {
 			status.doing_what = string_compose (_("converting %1\n(%2 of %3)"), 
-							    basepath,
+							    sys::path(*p).leaf(),
 							    cnt, status.paths.size());
 
 		}
