@@ -106,6 +106,10 @@ Editor::split_region_at (nframes_t where)
 void
 Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 {
+	if (regions.empty()) {
+		return;
+	}
+
 	begin_reversible_command (_("split"));
 
 	// if splitting a single region, and snap-to is using
@@ -2534,40 +2538,40 @@ Editor::region_fill_selection ()
 }
 
 void
-Editor::set_a_regions_sync_position (boost::shared_ptr<Region> region, nframes_t position)
+Editor::set_region_sync_from_edit_point ()
 {
-
-	if (!region->covers (position)) {
-	  error << _("Programming error. that region doesn't cover that position") << __FILE__ << " +" << __LINE__ << endmsg;
-		return;
-	}
-	begin_reversible_command (_("set region sync position"));
-        XMLNode &before = region->playlist()->get_state();
-	region->set_sync_position (position);
-        XMLNode &after = region->playlist()->get_state();
-	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
-	commit_reversible_command ();
+	nframes64_t where = get_preferred_edit_position ();
+	ensure_entered_selected ();
+	set_sync_point (where, selection->regions);
 }
 
 void
-Editor::set_region_sync_from_edit_point ()
+Editor::set_sync_point (nframes64_t where, const RegionSelection& rs)
 {
-	if (clicked_regionview == 0) {
-		return;
+	bool in_command = false;
+
+	for (RegionSelection::const_iterator r = rs.begin(); r != rs.end(); ++r) {
+		
+		if (!(*r)->region()->covers (where)) {
+			continue;
+		}
+
+		boost::shared_ptr<Region> region ((*r)->region());
+
+		if (!in_command) {
+			begin_reversible_command (_("set sync point"));
+			in_command = true;
+		}
+
+		XMLNode &before = region->playlist()->get_state();
+		region->set_sync_position (get_preferred_edit_position());
+		XMLNode &after = region->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
 	}
 
-	if (!clicked_regionview->region()->covers (get_preferred_edit_position())) {
-		error << _("Place the edit point at the desired sync point") << endmsg;
-		return;
+	if (in_command) {
+		commit_reversible_command ();
 	}
-
-	boost::shared_ptr<Region> region (clicked_regionview->region());
-	begin_reversible_command (_("set sync from edit point"));
-        XMLNode &before = region->playlist()->get_state();
-	region->set_sync_position (get_preferred_edit_position());
-        XMLNode &after = region->playlist()->get_state();
-	session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
-	commit_reversible_command ();
 }
 
 void
@@ -3099,6 +3103,7 @@ Editor::cut_copy (CutCopyOp op)
 			commit_reversible_command ();	
 			break; // terminate case statement here
 		} 
+
 		if (!selection->time.empty()) {
 			/* don't cause suprises */
 			break;
@@ -4113,8 +4118,11 @@ Editor::split ()
 void
 Editor::ensure_entered_selected ()
 {
-	if (entered_regionview) {
-		if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) == selection->regions.end()) {
+	if (entered_regionview && mouse_mode == MouseObject) {
+
+		/* never reset the selection if it already exists */
+
+		if (selection->regions.empty()) {
 			
 			/* do NOT clear any existing track selection when we do this */
 

@@ -91,29 +91,6 @@ Editor::kbd_mute_unmute_region ()
 }
 
 void
-Editor::kbd_set_sync_position ()
-{
-	kbd_driver (mem_fun(*this, &Editor::kbd_do_set_sync_position), true, true, false);
-}
-
-void
-Editor::kbd_do_set_sync_position (GdkEvent* ev)
-{
-	if (entered_regionview) {
-		nframes64_t where = event_frame (ev);
-		snap_to (where);
-
-		set_a_regions_sync_position (entered_regionview->region(), where);
-
-	} else if (entered_marker) {
-
-		if (!selection->regions.empty()) {
-			set_a_regions_sync_position (selection->regions.front()->region(), entered_marker->position());
-		}
-	}
-}
-
-void
 Editor::kbd_do_brush (GdkEvent *ev)
 {
 	brush (event_frame (ev, 0, 0));

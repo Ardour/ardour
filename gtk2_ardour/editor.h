@@ -912,7 +912,7 @@ class Editor : public PublicEditor
 	void split_regions_at (nframes_t, RegionSelection&);
 	void crop_region_to_selection ();
 	void crop_region_to (nframes_t start, nframes_t end);
-	void set_a_regions_sync_position (boost::shared_ptr<ARDOUR::Region>, nframes_t);
+	void set_sync_point (nframes64_t, const RegionSelection&);
 	void set_region_sync_from_edit_point ();
 	void remove_region_sync();
 	void align_selection (ARDOUR::RegionPoint, nframes_t position, const RegionSelection&);
@@ -1247,11 +1247,9 @@ class Editor : public PublicEditor
 
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
 	void kbd_mute_unmute_region ();
-	void kbd_set_sync_position ();
 	void kbd_brush ();
 	void kbd_audition ();
 
-	void kbd_do_set_sync_position (GdkEvent* ev);
 	void kbd_do_brush (GdkEvent*);
 	void kbd_do_audition (GdkEvent*);
 

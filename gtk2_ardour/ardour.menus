@@ -78,7 +78,10 @@
                <menuitem action='editor-delete'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
+               <separator/>       
                <menuitem action='editor-separate'/>
+               <menuitem action='editor-crop'/>
+               <menuitem action='split-region'/>
                <separator/>       
 	       <menuitem action='remove-last-capture'/>
                <separator/>       
@@ -100,7 +103,6 @@
                		<menuitem action='set-edit-point'/>
                		<menuitem action='mute-unmute-region'/>
               	 	<menuitem action='set-playhead'/>
-	       		<menuitem action='split-region'/>
 	       		<menuitem action='set-region-sync-position'/>
 			<separator/>
 			<menuitem action='set-mouse-mode-object'/>

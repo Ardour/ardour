@@ -3989,6 +3989,10 @@ Editor::get_preferred_edit_position()
 	bool ignored;
 	nframes64_t where = 0;
 
+	if (entered_marker) {
+		return entered_marker->position();
+	}
+
 	switch (_edit_point) {
 	case EditAtPlayhead:
 		where = session->audible_frame();
