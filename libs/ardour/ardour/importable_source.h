@@ -26,25 +26,25 @@
 namespace ARDOUR {
 
 class ImportableSource {
-   public:
-    ImportableSource (SNDFILE* sf, SF_INFO* info) : in (sf), sf_info (info) {}
-    virtual ~ImportableSource() {}
+public:
+	ImportableSource (SNDFILE* sf, SF_INFO* info) : in (sf), sf_info (info) {}
+	virtual ~ImportableSource() {}
 
-    virtual nframes_t read (Sample* buffer, nframes_t nframes) {
-	    nframes_t per_channel = nframes / sf_info->channels;
-	    per_channel = sf_readf_float (in, buffer, per_channel);
-	    return per_channel * sf_info->channels;
-    }
+	virtual nframes_t read (Sample* buffer, nframes_t nframes) {
+		nframes_t per_channel = nframes / sf_info->channels;
+		per_channel = sf_readf_float (in, buffer, per_channel);
+		return per_channel * sf_info->channels;
+	}
 
-    virtual float ratio() const { return 1.0f; }
+	virtual float ratio() const { return 1.0f; }
 
-    uint channels() const { return sf_info->channels; }
+	uint channels() const { return sf_info->channels; }
 
-    nframes_t length() const { return sf_info->frames; }
+	nframes_t length() const { return sf_info->frames; }
 
 protected:
-       SNDFILE* in;
-       SF_INFO* sf_info;
+	SNDFILE* in;
+	SF_INFO* sf_info;
 };
 
 }
