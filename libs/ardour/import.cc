@@ -232,7 +232,7 @@ remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
 }
 
 int
-Session::import_audiofile (import_status& status)
+Session::import_audiofiles (import_status& status)
 {
 	uint32_t cnt = 1;
 	typedef vector<boost::shared_ptr<AudioFileSource> > AudioSources;

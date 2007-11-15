@@ -390,7 +390,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
 
-	/* start import thread for this spec. this will ultimately call Session::import_audiofile()
+	/* start import thread for this spec. this will ultimately call Session::import_audiofiles()
 	   and if successful will add the file(s) as a region to the session region list.
 	*/
 	
@@ -742,7 +742,7 @@ Editor::_import_thread (void *arg)
 void *
 Editor::import_thread ()
 {
-	session->import_audiofile (import_status);
+	session->import_audiofiles (import_status);
 	pthread_exit_pbd (0);
 	/*NOTREACHED*/
 	return 0;
