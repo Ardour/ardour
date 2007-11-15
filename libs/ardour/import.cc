@@ -50,6 +50,45 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+std::string
+get_non_existent_filename (const std::string& basename, uint channel, uint channels)
+{
+	char buf[PATH_MAX+1];
+	bool goodfile = false;
+	string base(basename);
+
+	do {
+		if (channels == 2) {
+			if (channel == 0) {
+				snprintf (buf, sizeof(buf), "%s-L.wav", base.c_str());
+			} else {
+				snprintf (buf, sizeof(buf), "%s-R.wav", base.c_str());
+			}
+		} else if (channels > 1) {
+			snprintf (buf, sizeof(buf), "%s-c%d.wav", base.c_str(), channel+1);
+		} else {
+			snprintf (buf, sizeof(buf), "%s.wav", base.c_str());
+		}
+
+		if (sys::exists (buf)) {
+
+			/* if the file already exists, we must come up with
+			 *  a new name for it.  for now we just keep appending
+			 *  _ to basename
+			 */
+
+			base += "_";
+
+		} else {
+
+			goodfile = true;
+		}
+
+	} while ( !goodfile);
+
+	return buf;
+}
+
 int
 Session::import_audiofile (import_status& status)
 {
@@ -59,9 +98,7 @@ Session::import_audiofile (import_status& status)
 	Sample **channel_data = 0;
 	int nfiles = 0;
 	string basepath;
-	string sounds_dir;
 	nframes_t so_far;
-	char buf[PATH_MAX+1];
 	int ret = -1;
 	vector<string> new_paths;
 	struct tm* now;
@@ -95,45 +132,17 @@ Session::import_audiofile (import_status& status)
 		}
 		
 		SessionDirectory sdir(get_best_session_directory_for_new_source ());
-		sounds_dir = sdir.sound_path().to_string();
 
 		basepath = PBD::basename_nosuffix ((*p));
 		
 		for (int n = 0; n < info.channels; ++n) {
-			
-			bool goodfile = false;
-			
-			do {
-				if (info.channels == 2) {
-					if (n == 0) {
-						snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
-					} else {
-						snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
-					}
-				} else if (info.channels > 1) {
-					snprintf (buf, sizeof(buf), "%s/%s-c%d.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
-				} else {
-					snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
-				}
 
-				if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+			std::string filename = get_non_existent_filename (basepath, n, info.channels); 
 
-					/* if the file already exists, we must come up with
-					 *  a new name for it.  for now we just keep appending
-					 *  _ to basepath
-					 */
-				
-					basepath += "_";
-
-				} else {
-
-					goodfile = true;
-				}
-
-			} while ( !goodfile);
+			sys::path filepath = sdir.sound_path() / filename;
 
 			try { 
-				newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
+				newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, filepath.to_string().c_str(), false, frame_rate()));
 			}
 
 			catch (failed_constructor& err) {
@@ -141,7 +150,7 @@ Session::import_audiofile (import_status& status)
 				goto out;
 			}
 
-			new_paths.push_back (buf);
+			new_paths.push_back (filepath.to_string());
 			newfiles[n]->prepare_for_peakfile_writes ();
 			nfiles++;
 		}
