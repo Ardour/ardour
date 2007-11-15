@@ -231,7 +231,7 @@ remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
 	sys::remove (std::string(file_source->path()));
 }
 
-int
+void
 Session::import_audiofiles (import_status& status)
 {
 	uint32_t cnt = 1;
@@ -254,7 +254,7 @@ Session::import_audiofiles (import_status& status)
 		{
 			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
 			status.done = status.cancel = true;
-			return -1;
+			return;
 		}
 
 		vector<string> new_paths = get_paths_for_new_sources (*p,
@@ -279,8 +279,6 @@ Session::import_audiofiles (import_status& status)
 
 		write_audio_data_to_new_files (source.get(), status, newfiles);
 	}
-	
-	int ret = -1;
 
 	if (!status.cancel) {
 		struct tm* now;
@@ -304,14 +302,10 @@ Session::import_audiofiles (import_status& status)
 
 		std::copy (all_new_sources.begin(), all_new_sources.end(),
 				std::back_inserter(status.sources));
-
-		ret = 0;
 	} else {
 		// this can throw...but it seems very unlikely
 		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
 	}
 
 	status.done = true;
-
-	return ret;
 }
