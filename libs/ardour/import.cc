@@ -164,7 +164,7 @@ Session::import_audiofile (import_status& status)
 			return -1;
 		}
 	
-		boost::scoped_ptr<ImportableSource> importable;
+		std::auto_ptr<ImportableSource> importable;
 
 		if ((nframes_t) info.samplerate != frame_rate()) {
 			importable.reset(new ResampledImportableSource (in.get(), &info, frame_rate(), status.quality));
