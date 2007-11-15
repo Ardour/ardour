@@ -92,6 +92,55 @@ get_non_existent_filename (const std::string& basename, uint channel, uint chann
 	return buf;
 }
 
+void
+write_audio_data_to_new_files (ImportableSource* source, Session::import_status& status,
+		vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+{
+	const nframes_t nframes = ResampledImportableSource::blocksize;
+	uint channels = source->channels();
+
+	boost::scoped_array<float> data(new float[nframes * channels]);
+	vector<boost::shared_array<Sample> > channel_data;
+
+	for (uint n = 0; n < channels; ++n) {
+		channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
+	}
+	
+	uint read_count = 0;
+	status.progress = 0.0f;
+
+	while (!status.cancel) {
+
+		nframes_t nread, nfread;
+		uint x;
+		uint chn;
+
+		if ((nread = source->read (data.get(), nframes)) == 0) {
+			break;
+		}
+		nfread = nread / channels;
+
+		/* de-interleave */
+
+		for (chn = 0; chn < channels; ++chn) {
+
+			nframes_t n;
+			for (x = chn, n = 0; n < nfread; x += channels, ++n) {
+				channel_data[chn][n] = (Sample) data[x];
+			}
+		}
+
+		/* flush to disk */
+
+		for (chn = 0; chn < channels; ++chn) {
+			newfiles[chn]->write (channel_data[chn].get(), nfread);
+		}
+
+		read_count += nread;
+		status.progress = read_count / (source->ratio () * source->length() * channels);
+	}
+}
+
 int
 Session::import_audiofile (import_status& status)
 {
@@ -99,12 +148,10 @@ Session::import_audiofile (import_status& status)
 	SF_INFO info;
 	int nfiles = 0;
 	string basepath;
-	nframes_t so_far;
 	int ret = -1;
 	vector<string> new_paths;
 	struct tm* now;
 	ImportableSource* importable = 0;
-	const nframes_t nframes = ResampledImportableSource::blocksize;
 	uint32_t cnt = 1;
 
 	status.sources.clear ();
@@ -156,15 +203,6 @@ Session::import_audiofile (import_status& status)
 			nfiles++;
 		}
 
-		boost::scoped_array<float> data(new float[nframes * info.channels]);
-		vector<boost::shared_array<Sample> > channel_data;
-
-		for (int n = 0; n < info.channels; ++n) {
-			channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
-		}
-
-		so_far = 0;
-
 		if ((nframes_t) info.samplerate != frame_rate()) {
 			status.doing_what = string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
 							    basepath,
@@ -179,38 +217,7 @@ Session::import_audiofile (import_status& status)
 
 		}
 
-		status.progress = 0.0;
-
-		while (!status.cancel) {
-
-			nframes_t nread, nfread;
-			long x;
-			long chn;
-		
-			if ((nread = importable->read (data.get(), nframes)) == 0) {
-				break;
-			}
-			nfread = nread / info.channels;
-
-			/* de-interleave */
-				
-			for (chn = 0; chn < info.channels; ++chn) {
-
-				nframes_t n;
-				for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
-					channel_data[chn][n] = (Sample) data[x];
-				}
-			}
-
-			/* flush to disk */
-
-			for (chn = 0; chn < info.channels; ++chn) {
-				newfiles[chn]->write (channel_data[chn].get(), nfread);
-			}
-
-			so_far += nread;
-			status.progress = so_far / (importable->ratio () * info.frames * info.channels);
-		}
+		write_audio_data_to_new_files (importable, status, newfiles);
 
 		if (status.cancel) {
 			goto out;

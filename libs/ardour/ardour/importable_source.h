@@ -38,6 +38,10 @@ class ImportableSource {
 
     virtual float ratio() const { return 1.0f; }
 
+    uint channels() const { return sf_info->channels; }
+
+    nframes_t length() const { return sf_info->frames; }
+
 protected:
        SNDFILE* in;
        SF_INFO* sf_info;
