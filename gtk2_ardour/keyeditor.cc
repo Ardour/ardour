@@ -137,7 +137,7 @@ KeyEditor::populate ()
 	model->clear ();
 
 	for (l = labels.begin(), k = keys.begin(), p = paths.begin(); l != labels.end(); ++k, ++p, ++l) {
-		
+
 		TreeModel::Row row;
 		vector<string> parts;
 		
