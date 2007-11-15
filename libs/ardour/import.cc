@@ -151,7 +151,6 @@ Session::import_audiofile (import_status& status)
 	int ret = -1;
 	vector<string> new_paths;
 	struct tm* now;
-	ImportableSource* importable = 0;
 	uint32_t cnt = 1;
 
 	status.sources.clear ();
@@ -166,11 +165,13 @@ Session::import_audiofile (import_status& status)
 			status.cancel = 1;
 			return -1;
 		}
-		
+	
+		boost::scoped_ptr<ImportableSource> importable;
+
 		if ((nframes_t) info.samplerate != frame_rate()) {
-			importable = new ResampledImportableSource (in.get(), &info, frame_rate(), status.quality);
+			importable.reset(new ResampledImportableSource (in.get(), &info, frame_rate(), status.quality));
 		} else {
-			importable = new ImportableSource (in.get(), &info);
+			importable.reset(new ImportableSource (in.get(), &info));
 		}
 		
 		newfiles.clear ();
@@ -178,7 +179,7 @@ Session::import_audiofile (import_status& status)
 		for (int n = 0; n < info.channels; ++n) {
 			newfiles.push_back (boost::shared_ptr<AudioFileSource>());
 		}
-		
+
 		SessionDirectory sdir(get_best_session_directory_for_new_source ());
 
 		basepath = PBD::basename_nosuffix ((*p));
@@ -217,7 +218,7 @@ Session::import_audiofile (import_status& status)
 
 		}
 
-		write_audio_data_to_new_files (importable, status, newfiles);
+		write_audio_data_to_new_files (importable.get(), status, newfiles);
 
 		if (status.cancel) {
 			goto out;
@@ -262,10 +263,6 @@ Session::import_audiofile (import_status& status)
 		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
 			unlink ((*i).c_str());
 		}
-	}
-
-	if (importable) {
-		delete importable;
 	}
 
 	status.done = true;
