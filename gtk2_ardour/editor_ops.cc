@@ -2219,10 +2219,21 @@ Editor::new_region_from_selection ()
 	cancel_selection ();
 }
 
+static void
+add_if_covered (RegionView* rv, const AudioRange* ar, RegionSelection* rs)
+{
+	switch (rv->region()->coverage (ar->start, ar->end - 1)) {
+	case OverlapNone:
+		break;
+	default:
+		rs->push_back (rv);
+	}
+}
+
 void
 Editor::separate_regions_between (const TimeSelection& ts)
 {
-	bool doing_undo = false;
+	bool in_command = false;
 	boost::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
 		
@@ -2244,58 +2255,55 @@ Editor::separate_regions_between (const TimeSelection& ts)
 					
 				if ((playlist = atv->playlist()) != 0) {
 
-					if (!doing_undo) {
-						begin_reversible_command (_("separate"));
-						doing_undo = true;
-					}
 
                                         XMLNode *before;
+					bool got_some;
 
-					if (doing_undo) {
-                                            before = &(playlist->get_state());
-					}
+					before = &(playlist->get_state());
+					got_some = false;
 
 					/* XXX need to consider musical time selections here at some point */
 
 					double speed = atv->get_diskstream()->speed();
 
-					sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
-					latest_regionviews.clear ();
 
 					for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
+
+						sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+						latest_regionviews.clear ();
+
 						playlist->partition ((nframes_t)((*t).start * speed), (nframes_t)((*t).end * speed), true);
+
+						c.disconnect ();
+
+						if (!latest_regionviews.empty()) {
+							
+							got_some = true;
+
+							atv->view()->foreach_regionview (bind (sigc::ptr_fun (add_if_covered), &(*t), &new_selection));
+							
+							if (!in_command) {
+								begin_reversible_command (_("separate"));
+								in_command = true;
+							}
+							
+							session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
+							
+						} 
 					}
 
-					c.disconnect ();
-
-					if (!latest_regionviews.empty()) {
-
-						/* here is a trick: partitioning will generally create 1 or 2 new regions.
-						   if the region spanned the selection, the first new one will be the middle
-						   of the original. if the region overlapped one end of the selection,
-						   the first (and only) new one will be the area corresponding to the
-						   selection.
-
-						   we want to select this region and return to mouse object mode ...
-						*/
-
-						new_selection.push_back (latest_regionviews.front());
-
-						if (doing_undo) {
-							session->add_command(new MementoCommand<Playlist>(*playlist, before, &playlist->get_state()));
-						}
-					} else {
-						cerr << " no new rv's for " << playlist->name() << endl;
+					if (!got_some) {
+						delete before;
 					}
 				}
 			}
 		}
 	}
 
-	selection->set (new_selection);
-	set_mouse_mode (MouseObject);
+	if (in_command)	{
+		selection->set (new_selection);
+		set_mouse_mode (MouseObject);
 
-	if (doing_undo)	{
 		commit_reversible_command ();
 	}
 }
