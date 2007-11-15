@@ -164,8 +164,10 @@ Session::import_audiofile (import_status& status)
 
 	status.sources.clear ();
 	
-	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p, ++cnt) {
-
+	for (vector<Glib::ustring>::iterator p = status.paths.begin();
+			p != status.paths.end() && !status.cancel;
+			++p, ++cnt)
+	{
 		std::auto_ptr<ImportableSource> source;
 
 		try
@@ -229,10 +231,6 @@ Session::import_audiofile (import_status& status)
 		}
 	
 		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(status.sources));
-
-		if (status.cancel) {
-			goto out;
-		}
 	}
 	
 	if (!status.cancel) {
