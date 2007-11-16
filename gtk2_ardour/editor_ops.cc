@@ -4128,13 +4128,19 @@ Editor::ensure_entered_selected ()
 {
 	if (entered_regionview && mouse_mode == MouseObject) {
 
-		/* never reset the selection if it already exists */
+		/* heuristic:
 
-		if (selection->regions.empty()) {
-			
-			/* do NOT clear any existing track selection when we do this */
+		   - if there is no existing selection, don't change it. the operation will thus apply to "all"
 
-			selection->set (entered_regionview, false);
+		   - if there is an existing selection, but the entered regionview isn't in it, add it. this
+		       avoids key-mouse ops on unselected regions from interfering with an existing selection,
+		       but also means that the operation will apply to the pointed-at region.
+		*/
+
+		if (!selection->regions.empty()) {
+			if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) != selection->regions.end()) {
+				selection->add (entered_regionview);
+			}
 		}
 	}
 }
