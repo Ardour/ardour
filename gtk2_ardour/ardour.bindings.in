@@ -237,6 +237,7 @@
 (gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<Control>d")
 ; (gtk_accel_path "<Actions>/redirectmenu/edit" "")
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
+(gtk_accel_path "<Actions>/Editor/multi-duplicate-region" "<Alt>d")
 ; (gtk_accel_path "<Actions>/JACK/JACKLatency2048" "")
 ; (gtk_accel_path "<Actions>/Editor/ToggleWaveformsWhileRecording" "")
 ; (gtk_accel_path "<Actions>/Zoom/zoom-focus-right" "")
