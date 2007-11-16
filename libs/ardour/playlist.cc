@@ -1245,88 +1245,73 @@ Playlist::regions_to_read (nframes_t start, nframes_t end)
 	/* Caller must hold lock */
 
 	RegionList covering;
-	RegionList spanning;
+	set<nframes_t> to_check;
+	set<boost::shared_ptr<Region> > unique;
+	RegionList here;
+
+	to_check.insert (start);
+	to_check.insert (end);
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		/* find all/any regions that span start+end */
 
 		switch ((*i)->coverage (start, end)) {
+		case OverlapNone:
+			break;
+
 		case OverlapInternal:
 			covering.push_back (*i);
-			spanning.push_back (*i);
+			break;
+
+		case OverlapStart:
+			to_check.insert ((*i)->position());
+			covering.push_back (*i);
+			break;
+
+		case OverlapEnd:
+			to_check.insert ((*i)->last_frame());
+			covering.push_back (*i);
 			break;
 
 		case OverlapExternal:
-		case OverlapStart:
-		case OverlapEnd:
 			covering.push_back (*i);
-			
-		case OverlapNone:
+			to_check.insert ((*i)->position());
+			to_check.insert ((*i)->last_frame());
 			break;
 		}
 
-		if ((*i)->position() > start) {
+		/* don't go too far */
+
+		if ((*i)->position() > end) {
 			break;
 		}
 	}
 
 	RegionList* rlist = new RegionList;
 
-	if (spanning.size() > 1) {
+	/* find all the regions that cover each position .... */
+
+	if (covering.size() == 1) {
+
+		rlist->push_back (covering.front());
 		
-		/* find the uppermost/non-transparent regions that span */
-		
-		RegionSortByLayer cmp;
-		spanning.sort (cmp);
-		
-		for (RegionList::reverse_iterator c = spanning.rbegin(); c != spanning.rend(); ++c) {
-
-			rlist->push_back (*c);
-			
-			if ((*c)->opaque()) {
-				
-				/* the other regions at this position are hidden by this one */
-
-				break;
-			}
-		}
-		
-	} else if (spanning.size() == 1) {
-		
-		rlist->push_back (spanning.front());
-
-	} else if (covering.size() > 1) {
-
-		set<nframes_t> to_check;
-		set<boost::shared_ptr<Region> > unique;
-		RegionList here;
-
-		/* get all starts and ends regions within the range we're looking at */
-
-		to_check.insert (start);
-		to_check.insert (end);
-
-		for (RegionList::iterator x = covering.begin(); x != covering.end(); ++x) {
-			to_check.insert ((*x)->position());
-			to_check.insert ((*x)->last_frame());
-		}
-
-		/* find all the regions that cover each position .... */
-
+	} else {
+	
 		for (set<nframes_t>::iterator t = to_check.begin(); t != to_check.end(); ++t) {
 			
 			here.clear ();
-
+			
 			for (RegionList::iterator x = covering.begin(); x != covering.end(); ++x) {
+			
 				if ((*x)->covers (*t)) {
 					here.push_back (*x);
 				}
 			}
-
+			
 			RegionSortByLayer cmp;
 			here.sort (cmp);
-
+			
 			/* ... and get the top/transparent regions at "here" */
 			
 			for (RegionList::reverse_iterator c = here.rbegin(); c != here.rend(); ++c) {
@@ -1336,27 +1321,22 @@ Playlist::regions_to_read (nframes_t start, nframes_t end)
 				if ((*c)->opaque()) {
 					
 					/* the other regions at this position are hidden by this one */
-
+					
 					break;
 				}
 			}
 		}
-
+		
 		for (set<boost::shared_ptr<Region> >::iterator s = unique.begin(); s != unique.end(); ++s) {
 			rlist->push_back (*s);
 		}
 
-	} else if (covering.size() == 1) {
-
-		rlist->push_back (covering.front());
-		
-	}
-
-	if (rlist->size() > 1) {
-		/* now sort by time order */
-		
-		RegionSortByPosition cmp;
-		rlist->sort (cmp);
+		if (rlist->size() > 1) {
+			/* now sort by time order */
+			
+			RegionSortByPosition cmp;
+			rlist->sort (cmp);
+		}
 	}
 
 	return rlist;
