@@ -953,8 +953,6 @@ class Editor : public PublicEditor
 	int  get_prefix (float&, bool&);
 
 	void keyboard_paste ();
-	void keyboard_duplicate_region ();
-	void keyboard_duplicate_selection ();
 	void keyboard_insert_region_list_selection ();
 
 	void region_from_selection ();
@@ -1744,7 +1742,7 @@ class Editor : public PublicEditor
 
 	/* duplication */
 
-	void duplicate_dialog (bool for_region);
+	void duplicate_dialog (bool with_dialog);
 	
 	nframes64_t event_frame (GdkEvent*, double* px = 0, double* py = 0) const;
 
@@ -1887,7 +1885,7 @@ class Editor : public PublicEditor
 
 	TimeAxisView* entered_track;
 	RegionView*   entered_regionview;
-	void ensure_entered_selected ();
+	void ensure_entered_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
 	gint left_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);

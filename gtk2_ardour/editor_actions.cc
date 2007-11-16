@@ -267,9 +267,11 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-paste", _("Paste"), mem_fun(*this, &Editor::keyboard_paste));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), mem_fun(*this, &Editor::keyboard_duplicate_region));
+	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), bind (mem_fun(*this, &Editor::duplicate_dialog), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "duplicate-range", _("Duplicate Range"), mem_fun(*this, &Editor::keyboard_duplicate_selection));
+	act = ActionManager::register_action (editor_actions, "multi-duplicate-region", _("Multi-Duplicate Region"), bind (mem_fun(*this, &Editor::duplicate_dialog), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "duplicate-range", _("Duplicate Range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-region", _("Insert Region"), mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
 	ActionManager::session_sensitive_actions.push_back (act);

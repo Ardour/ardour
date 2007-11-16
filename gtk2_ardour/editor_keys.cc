@@ -87,36 +87,6 @@ Editor::keyboard_selection_begin ()
 }
 
 void
-Editor::keyboard_duplicate_region ()
-{
-	if (selection->regions.empty()) {
-		return;
-	}
-
-	float prefix = 0;
-	bool was_floating;
-
-	if (get_prefix (prefix, was_floating) == 0) {
-		duplicate_some_regions (selection->regions, prefix);
-	} else {
-		duplicate_some_regions (selection->regions, 1);
-	}
-}
-
-void
-Editor::keyboard_duplicate_selection ()
-{
-	float prefix = 0;
-	bool was_floating;
-
-	if (get_prefix (prefix, was_floating) == 0) {
-		duplicate_selection (prefix);
-	} else {
-		duplicate_selection (1);
-	}
-}
-
-void
 Editor::keyboard_paste ()
 {
 	float prefix = 0;

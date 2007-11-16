@@ -2357,7 +2357,7 @@ Editor::separate_regions_using_location (Location& loc)
 void
 Editor::crop_region_to_selection ()
 {
-	ensure_entered_selected ();
+	ensure_entered_selected (true);
 
 	if (!selection->time.empty()) {
 
@@ -2381,8 +2381,6 @@ Editor::crop_region_to (nframes_t start, nframes_t end)
 	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Playlist> playlist;
 	TrackSelection* ts;
-
-	ensure_entered_selected ();
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -3439,8 +3437,9 @@ void
 Editor::duplicate_some_regions (RegionSelection& regions, float times)
 {
 	boost::shared_ptr<Playlist> playlist; 
-	RegionSelection sel = regions; // clear (below) will clear the argument list
-		
+	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
+	RegionSelection foo;
+
 	begin_reversible_command (_("duplicate region"));
 
 	selection->clear_regions ();
@@ -3451,6 +3450,8 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 		TimeAxisView& tv = (*i)->get_time_axis_view();
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&tv);
+
+		latest_regionviews.clear ();
 		sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 		
  		playlist = (*i)->region()->playlist();
@@ -3459,14 +3460,15 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 
 		c.disconnect ();
-
-		if (!latest_regionviews.empty()) {
-			selection->add (latest_regionviews);
-		}
-	}
 		
+		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
+	}
 
 	commit_reversible_command ();
+
+	if (!foo.empty()) {
+		selection->set (foo);
+	}
 }
 
 void
@@ -4124,7 +4126,7 @@ Editor::split ()
 }
 
 void
-Editor::ensure_entered_selected ()
+Editor::ensure_entered_selected (bool op_really_wants_one_region_if_none_are_selected)
 {
 	if (entered_regionview && mouse_mode == MouseObject) {
 
@@ -4140,6 +4142,12 @@ Editor::ensure_entered_selected ()
 		if (!selection->regions.empty()) {
 			if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) != selection->regions.end()) {
 				selection->add (entered_regionview);
+			}
+		} else {
+			/* there is no selection, but this operation requires/prefers selected objects */
+
+			if (op_really_wants_one_region_if_none_are_selected) {
+				selection->set (entered_regionview, false);
 			}
 		}
 	}

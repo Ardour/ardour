@@ -1840,7 +1840,8 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Make mono regions"), (mem_fun(*this, &Editor::split_multichannel_region))));
 	region_edit_menu_split_multichannel_item = &items.back();
 
-	items.push_back (MenuElem (_("Duplicate"), (bind (mem_fun(*this, &Editor::duplicate_dialog), true))));
+	items.push_back (MenuElem (_("Duplicate"), (bind (mem_fun(*this, &Editor::duplicate_dialog), false))));
+	items.push_back (MenuElem (_("Multi-Duplicate"), (bind (mem_fun(*this, &Editor::duplicate_dialog), true))));
 	items.push_back (MenuElem (_("Fill Track"), (mem_fun(*this, &Editor::region_fill_track))));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_clicked_region)));
@@ -2999,50 +3000,67 @@ Editor::history_changed ()
 }
 
 void
-Editor::duplicate_dialog (bool dup_region)
+Editor::duplicate_dialog (bool with_dialog)
 {
-	if (selection->regions.empty() && (selection->time.length() == 0)) {
-		return;
+	float times = 1.0f;
+
+	if (mouse_mode == MouseRange) {
+		if (selection->time.length() == 0) {
+			return;
+		}
 	}
 
-	ArdourDialog win ("duplicate dialog");
-	Label  label (_("Duplicate how many times?"));
-	Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
-	SpinButton spinner (adjustment);
+	
+	if (mouse_mode != MouseRange) {
 
-	win.get_vbox()->set_spacing (12);
-	win.get_vbox()->pack_start (label);
+		ensure_entered_selected (true);
 
-	/* dialogs have ::add_action_widget() but that puts the spinner in the wrong
-	   place, visually. so do this by hand.
-	*/
-
-	win.get_vbox()->pack_start (spinner);
-	spinner.signal_activate().connect (sigc::bind (mem_fun (win, &ArdourDialog::response), RESPONSE_ACCEPT));
-
-	label.show ();
-	spinner.show ();
-
-	win.add_button (Stock::OK, RESPONSE_ACCEPT);
-	win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-
-	win.set_position (WIN_POS_MOUSE);
-
-	spinner.grab_focus ();
-
-	switch (win.run ()) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
+		if (selection->regions.empty()) {
+			return;
+		}
 	}
 
-	float times = adjustment.get_value();
+	if (with_dialog) {
 
-	if (!selection->regions.empty()) {
-		duplicate_some_regions (selection->regions, times);
-	} else {
+		ArdourDialog win ("duplicate dialog");
+		Label  label (_("Duplicate how many times?"));
+		Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
+		SpinButton spinner (adjustment);
+		
+		win.get_vbox()->set_spacing (12);
+		win.get_vbox()->pack_start (label);
+		
+		/* dialogs have ::add_action_widget() but that puts the spinner in the wrong
+		   place, visually. so do this by hand.
+		*/
+		
+		win.get_vbox()->pack_start (spinner);
+		spinner.signal_activate().connect (sigc::bind (mem_fun (win, &ArdourDialog::response), RESPONSE_ACCEPT));
+		
+		label.show ();
+		spinner.show ();
+		
+		win.add_button (Stock::OK, RESPONSE_ACCEPT);
+		win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		
+		win.set_position (WIN_POS_MOUSE);
+		
+		spinner.grab_focus ();
+		
+		switch (win.run ()) {
+		case RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
+		}
+		
+		times = adjustment.get_value();
+	}
+
+	if (mouse_mode == MouseRange) {
 		duplicate_selection (times);
+	} else {
+		duplicate_some_regions (selection->regions, times);
 	}
 }
 
