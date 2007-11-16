@@ -43,9 +43,7 @@ using std::vector;
 
 namespace ARDOUR {
 
-const nframes_t frames_per_peak = 256;
-
- class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
+class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
 	AudioSource (Session&, Glib::ustring name);
@@ -83,7 +81,8 @@ const nframes_t frames_per_peak = 256;
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
- 	virtual int read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit) const;
+ 	int read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
+
  	int  build_peaks ();
 	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
 
@@ -140,6 +139,12 @@ const nframes_t frames_per_peak = 256;
 	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path, Glib::ustring audio_path) = 0;
 	
 	void update_length (nframes_t pos, nframes_t cnt);
+
+ 	virtual int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, 
+					 double samples_per_visual_peak, nframes_t fpp) const;
+
+	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, 
+				     bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);
 
   private:
 	int peakfile;
