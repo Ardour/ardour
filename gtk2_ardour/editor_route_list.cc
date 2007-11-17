@@ -115,6 +115,14 @@ Editor::remove_route (TimeAxisView *tv)
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 
+	/* Decrement old order keys for tracks `above' the one that is being removed */
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		TimeAxisView* v = (*ri)[route_display_columns.tv];
+		if (v->old_order_key() > tv->old_order_key()) {
+			v->set_old_order_key (v->old_order_key() - 1);
+		}
+	}
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[route_display_columns.tv] == tv) {
 			route_display_model->erase (ri);

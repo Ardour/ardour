@@ -327,6 +327,14 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 		strips.erase (i);
 	}
 
+	/* Decrement old order keys for strips `above' the one that is being removed */
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		MixerStrip* s = (*ri)[track_columns.strip];
+		if (s->old_order_key() > strip->old_order_key()) {
+			s->set_old_order_key (s->old_order_key() - 1);
+		}
+	}
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[track_columns.strip] == strip) {
 			track_model->erase (ri);
