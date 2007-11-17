@@ -38,6 +38,8 @@
 #include "enums.h"
 #include "time_axis_view.h"
 #include "canvas.h"
+#include "gain_meter.h"
+
 
 namespace ARDOUR {
 	class Session;
@@ -98,6 +100,11 @@ public:
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* edit_group() const;
 	boost::shared_ptr<ARDOUR::Playlist> playlist() const;
+	void fast_update ();
+	void hide_meter ();
+	void show_meter ();
+	void reset_meter ();
+	void meter_changed (void *);
 
 protected:
 	friend class StreamView;
@@ -243,6 +250,8 @@ protected:
 	sigc::connection modified_connection;
 
 	void post_construct ();
+	
+	GainMeter	gpm;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

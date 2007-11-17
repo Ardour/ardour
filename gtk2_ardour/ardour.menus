@@ -323,6 +323,7 @@
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
 	       <menu action='Metering'>
+					<menuitem action='ShowTrackMeters'/>
                    <menu action='MeteringFallOffRate'>
 		        <menuitem action='MeterFalloffOff'/>
    		        <menuitem action='MeterFalloffSlowest'/>

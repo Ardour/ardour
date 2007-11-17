@@ -71,7 +71,7 @@ bool TimeAxisView::need_size_info = true;
 TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
 	: AxisView (sess), 
 	  editor (ed),
-	  controls_table (2, 8)
+	  controls_table (2, 7)
 {
 	if (need_size_info) {
 		compute_controls_size_info ();
@@ -123,9 +123,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_border_width (2);
 	controls_table.set_row_spacings (0);
 	controls_table.set_col_spacings (0);
-	controls_table.set_homogeneous (true);
+	controls_table.set_homogeneous (false);
 
-	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::SHRINK|Gtk::EXPAND, Gtk::SHRINK|Gtk::EXPAND);
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
@@ -365,11 +365,12 @@ TimeAxisView::set_height_pixels (uint32_t h)
 {
 	height = h;
 	controls_frame.set_size_request (-1, height + ((order == 0) ? 1 : 0));
-
+	//cerr << "TimeAxisView::set_height_pixels() called h = " << h << endl;//DEBUG
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
 	}
+	
 }
 
 bool

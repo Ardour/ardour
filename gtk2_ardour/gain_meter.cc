@@ -73,7 +73,8 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	  // 0.781787 is the value needed for gain to be set to 0.
 	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
 	  gain_automation_style_button (""),
-	  gain_automation_state_button ("")
+	  gain_automation_state_button (""),
+	  regular_meter_width(5)
 	
 {
 	if (slider == 0) {
@@ -207,10 +208,11 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
 
 	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
+	//hide_all();
 }
 
 void
-GainMeter::set_width (Width w)
+GainMeter::set_width (Width w, int len)
 {
 	switch (w) {
 	case Wide:
@@ -222,7 +224,7 @@ GainMeter::set_width (Width w)
 	}
 
 	_width = w;
-	setup_meters ();
+	setup_meters (len);
 }
 
 Glib::RefPtr<Gdk::Pixmap>
@@ -406,7 +408,7 @@ GainMeter::hide_all_meters ()
 }
 
 void
-GainMeter::setup_meters ()
+GainMeter::setup_meters (int len)
 {
 	uint32_t nmeters = _io->n_outputs();
 	guint16 width;
@@ -455,11 +457,12 @@ GainMeter::setup_meters ()
 	}
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
-		if (meters[n].width != width) {
+		if (meters[n].width != width || meters[n].length != len) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical);
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len);
+			//cerr << "GainMeter::setup_meters() w:l = " << width << ":" << len << endl;//DEBUG
 			meters[n].width = width;
-
+			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
 			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &GainMeter::meter_button_release), n));
 		}
@@ -958,3 +961,15 @@ GainMeter::gain_automation_state_changed ()
 		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (*this, &GainMeter::effective_gain_display));
 	}
 }
+
+void GainMeter::setup_atv_meter (int len)
+{
+	set_no_show_all();
+	regular_meter_width = 3;
+	hide_all();
+	set_width(Narrow, len);
+	meter_packer.show_all();
+	hbox.show();
+	show();
+}
+	

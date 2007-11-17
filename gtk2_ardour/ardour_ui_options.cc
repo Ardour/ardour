@@ -507,6 +507,12 @@ ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor()
 }
 
 void
+ARDOUR_UI::toggle_ShowTrackMeters()
+{
+	ActionManager::toggle_config_state ("options", "ShowTrackMeters", &Configuration::set_show_track_meters, &Configuration::get_show_track_meters);
+}
+
+void
 ARDOUR_UI::mtc_port_changed ()
 {
 	bool have_mtc;

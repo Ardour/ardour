@@ -1939,6 +1939,12 @@ class Editor : public PublicEditor
 	
 	RegionSelection& get_regions_for_action ();
 
+	sigc::connection fast_screen_update_connection;
+	gint start_updating ();
+	gint stop_updating ();
+	void toggle_meter_updating();
+	void fast_update_strips ();
+
 };
 
 #endif /* __ardour_editor_h__ */

@@ -1248,6 +1248,8 @@ Editor::connect_to_session (Session *t)
         /* register for undo history */
 
         session->register_with_memento_command_factory(_id, this);
+
+		start_updating ();
 }
 
 void

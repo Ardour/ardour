@@ -115,7 +115,7 @@ CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
 CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 CONFIG_VARIABLE (bool, primary_clock_delta_edit_cursor, "primary-clock-delta-edit-cursor", false)
 CONFIG_VARIABLE (bool, secondary_clock_delta_edit_cursor, "secondary-clock-delta-edit-cursor", false)
-
+CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 /* timecode and sync */
 
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)

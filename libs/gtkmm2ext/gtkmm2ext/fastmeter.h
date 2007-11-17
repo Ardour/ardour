@@ -32,7 +32,7 @@ class FastMeter : public Gtk::DrawingArea {
 		Vertical
 	};
 	
-	FastMeter (long hold_cnt, unsigned long width, Orientation);
+	FastMeter (long hold_cnt, unsigned long width, Orientation, int len=0);
 	virtual ~FastMeter ();
 	
 	void set (float level);

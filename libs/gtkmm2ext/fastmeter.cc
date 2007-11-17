@@ -34,16 +34,16 @@ using namespace Gtkmm2ext;
 using namespace std;
 
 
-int FastMeter::min_v_pixbuf_size = 50;
+int FastMeter::min_v_pixbuf_size = 10;
 int FastMeter::max_v_pixbuf_size = 1024;
 Glib::RefPtr<Gdk::Pixbuf>* FastMeter::v_pixbuf_cache = 0;
 
-int FastMeter::min_h_pixbuf_size = 50;
+int FastMeter::min_h_pixbuf_size = 10;
 int FastMeter::max_h_pixbuf_size = 1024;
 Glib::RefPtr<Gdk::Pixbuf>* FastMeter::h_pixbuf_cache = 0;
 
 
-FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
+FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len)
 {
 	orientation = o;
 	hold_cnt = hold;
@@ -57,9 +57,13 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	pixrect.y = 0;
 
 	if (orientation == Vertical) {
-		pixbuf = request_vertical_meter(dimen, 250);
+		if (!len)
+			len = 250;
+		pixbuf = request_vertical_meter(dimen, len);
 	} else {
-		pixbuf = request_horizontal_meter(186, dimen);
+		if (!len)
+			len = 186;
+		pixbuf = request_horizontal_meter(len, dimen);
 	}
 
 	pixheight = pixbuf->get_height();
