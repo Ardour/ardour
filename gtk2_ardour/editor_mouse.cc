@@ -2335,6 +2335,7 @@ Editor::start_meter_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	drag_info.item = item;
+	drag_info.copy = false;
 	drag_info.data = marker;
 	drag_info.motion_callback = &Editor::meter_marker_drag_motion_callback;
 	drag_info.finished_callback = &Editor::meter_marker_drag_finished_callback;
@@ -2464,6 +2465,7 @@ Editor::start_tempo_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	drag_info.item = item;
+	drag_info.copy = false;
 	drag_info.data = marker;
 	drag_info.motion_callback = &Editor::tempo_marker_drag_motion_callback;
 	drag_info.finished_callback = &Editor::tempo_marker_drag_finished_callback;
