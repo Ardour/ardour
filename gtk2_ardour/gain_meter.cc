@@ -970,7 +970,7 @@ void GainMeter::setup_atv_meter (int len)
 	set_width(Narrow, len);
 	meter_packer.show_all();
 
-	cerr << "Config->get_show_track_meters() = " << Config->get_show_track_meters() << endl;
+	//cerr << "Config->get_show_track_meters() = " << Config->get_show_track_meters() << endl;//DEBUG
 
 	if (Config->get_show_track_meters()) {
 		hbox.show();		

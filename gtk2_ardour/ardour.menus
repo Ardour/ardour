@@ -323,7 +323,6 @@
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
 	       <menu action='Metering'>
-					<menuitem action='ShowTrackMeters'/>
                    <menu action='MeteringFallOffRate'>
 		        <menuitem action='MeterFalloffOff'/>
    		        <menuitem action='MeterFalloffSlowest'/>
@@ -386,6 +385,7 @@
 	       <menuitem action='PrimaryClockDeltaEditCursor'/>
 	       <menuitem action='SecondaryClockDeltaEditCursor'/>
 	       <menuitem action='OnlyCopyImportedFiles'/>
+			<menuitem action='ShowTrackMeters'/>
 	       <separator/>
          </menu>
 	 <menu name='Help' action='Help'>

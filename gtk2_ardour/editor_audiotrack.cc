@@ -98,6 +98,7 @@ Editor::start_updating ()
 {
 	AudioTimeAxisView* atv;
 
+	//cerr << "Editor::start_updating () called" << endl;//DEBUG
 	if (is_mapped() && session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {
@@ -116,7 +117,7 @@ Editor::stop_updating ()
 	fast_screen_update_connection.disconnect();
 	AudioTimeAxisView* atv;
 
-	cerr << "Editor::stop_updating () called" << endl;
+	//cerr << "Editor::stop_updating () called" << endl;//DEBUG
 	if (is_mapped() && session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {

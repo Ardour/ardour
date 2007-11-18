@@ -61,7 +61,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		}
 		
 		tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
-		cerr << "Editor::handle_new_route() called on " << route->name() << endl;//DEBUG
+		//cerr << "Editor::handle_new_route() called on " << route->name() << endl;//DEBUG
 		row = *(route_display_model->append ());
 		
 		row[route_display_columns.route] = route;

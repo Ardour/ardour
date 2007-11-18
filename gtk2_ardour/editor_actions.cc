@@ -1179,7 +1179,7 @@ void
 Editor::parameter_changed (const char* parameter_name)
 {
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-
+	//cerr << "Editor::parameter_changed: " << parameter_name << endl;
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::parameter_changed), parameter_name));
 
 	if (PARAM_IS ("auto-loop")) {
