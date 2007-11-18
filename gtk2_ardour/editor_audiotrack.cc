@@ -112,6 +112,8 @@ Editor::start_updating ()
 gint
 Editor::stop_updating ()
 {
+
+	fast_screen_update_connection.disconnect();
 	AudioTimeAxisView* atv;
 
 	cerr << "Editor::stop_updating () called" << endl;
@@ -122,7 +124,7 @@ Editor::stop_updating ()
 			}
 		}
 	}
-    fast_screen_update_connection.disconnect();
+
     return 0;
 }
 

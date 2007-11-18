@@ -1799,7 +1799,7 @@ RouteTimeAxisView::hide_meter ()
 void
 RouteTimeAxisView::show_meter ()
 {
-	gpm.show ();
+	reset_meter ();
 }
 
 void

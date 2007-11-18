@@ -965,14 +965,15 @@ GainMeter::gain_automation_state_changed ()
 void GainMeter::setup_atv_meter (int len)
 {
 	set_no_show_all();
+	regular_meter_width = 3;
+	hide_all();
+	set_width(Narrow, len);
+	meter_packer.show_all();
+
+	cerr << "Config->get_show_track_meters() = " << Config->get_show_track_meters() << endl;
 
 	if (Config->get_show_track_meters()) {
-		set_no_show_all();
-		regular_meter_width = 3;
-		hide_all();
-		set_width(Narrow, len);
-		meter_packer.show_all();
-		hbox.show();
+		hbox.show();		
 		show();
 	}
 }
