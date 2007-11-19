@@ -34,16 +34,12 @@ class Selectable : public virtual sigc::trackable
 	virtual void set_selected (bool yn) {
 		if (yn != _selected) {
 			_selected = yn;
-			Selected (_selected); /* EMIT_SIGNAL */
 		}
 	}
 
 	bool get_selected() const {
 		return _selected;
 	}
-
-	/** Emitted when the selected status of this Selectable changes */
-	sigc::signal<void, bool> Selected ;
 
   protected:
 	bool _selected;

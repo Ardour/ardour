@@ -134,6 +134,8 @@ class Editor : public PublicEditor
 		return (nframes_t) floor (canvas_width * frames_per_unit);
 	}
 
+	void cycle_snap_mode ();
+	void cycle_snap_choice ();
 	void set_snap_to (Editing::SnapType);
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
@@ -394,6 +396,7 @@ class Editor : public PublicEditor
 	void location_gone (ARDOUR::Location *);
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
+	void goto_nth_marker (int nth);
 
 	uint32_t location_marker_color;
 	uint32_t location_range_color;
@@ -456,11 +459,12 @@ class Editor : public PublicEditor
 
 	void catch_vanishing_regionview (RegionView *);
 
-	bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
-	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void set_selected_track_as_side_effect (bool force = false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
@@ -1383,6 +1387,8 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText edit_mode_selector;
 	Gtk::VBox         edit_mode_box;
 
+	void set_edit_mode (ARDOUR::EditMode);
+	void cycle_edit_mode ();
 	void edit_mode_selection_done ();
 
 	Gtk::ComboBoxText snap_type_selector;
@@ -1921,6 +1927,7 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText edit_point_selector;
 
 	void set_edit_point_preference (Editing::EditPoint ep);
+	void cycle_edit_point ();
 	void set_edit_point ();
 	void edit_point_selection_done ();
 	void edit_point_chosen (Editing::EditPoint);

@@ -315,6 +315,7 @@ ARDOUR_UI::setup_transport ()
 
 	primary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
 	secondary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
+	big_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (primary_clock, _("Primary clock"));
 	ARDOUR_UI::instance()->tooltips().set_tip (secondary_clock, _("secondary clock"));
@@ -407,12 +408,16 @@ ARDOUR_UI::setup_transport ()
 	if (!ARDOUR::Profile->get_small_screen()) {
 		clock_box->pack_start (secondary_clock, false, false);
 	}
-	VBox* time_controls_box = manage (new VBox);
-	time_controls_box->pack_start (sync_option_combo, false, false);
-	time_controls_box->pack_start (time_master_button, false, false);
-	clock_box->pack_start (*time_controls_box, false, false, 1);
+
+	if (!Profile->get_sae()) {
+		VBox* time_controls_box = manage (new VBox);
+		time_controls_box->pack_start (sync_option_combo, false, false);
+		time_controls_box->pack_start (time_master_button, false, false);
+		clock_box->pack_start (*time_controls_box, false, false, 1);
+	}
+
 	transport_tearoff_hbox.pack_start (*clock_box, false, false, 0);
-	
+
 	HBox* toggle_box = manage(new HBox);
 	
 	VBox* punch_box = manage (new VBox);

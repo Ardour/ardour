@@ -362,7 +362,7 @@ class TimeAxisViewItem : public Selectable
     /**
      * Sets the frame color depending on whether this item is selected
      */
-    void set_frame_color() ;
+    virtual void set_frame_color() ;
     
     /**
      * Sets the colors of the start and end trim handle depending on object state

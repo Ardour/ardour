@@ -231,11 +231,11 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 
 	void sort_regions ();
 
-	void possibly_splice ();
-	void possibly_splice_unlocked();
-	void core_splice ();
-	void splice_locked ();
-	void splice_unlocked ();
+	void possibly_splice (nframes_t at, nframes64_t distance);
+	void possibly_splice_unlocked(nframes_t at, nframes64_t distance);
+	void core_splice (nframes_t at, nframes64_t distance);
+	void splice_locked (nframes_t at, nframes64_t distance);
+	void splice_unlocked (nframes_t at, nframes64_t distance);
 
 
 	virtual void finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right) {}

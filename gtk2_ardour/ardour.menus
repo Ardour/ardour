@@ -169,11 +169,13 @@
                    <menuitem action='zoom-focus-mouse'/>
                </menu>
 	       <menu name='SnapMode' action='SnapMode'>
+		   <menuitem action='snap-off'/>
 		   <menuitem action='snap-normal'/>
 		   <menuitem action='snap-magnetic'/>
+		   <separator/>
+		   <menuitem action='cycle-snap-mode'/>
 	       </menu>
                <menu name='SnapTo' action='SnapTo'>
-		   <menuitem action='snap-to-frame'/>
 		   <menuitem action='snap-to-cd-frame'/>
 		   <menuitem action='snap-to-smpte-frame'/>
 		   <menuitem action='snap-to-smpte-seconds'/>
@@ -188,7 +190,6 @@
 		   <menuitem action='snap-to-beat'/>
 		   <menuitem action='snap-to-bar'/>
 		   <menuitem action='snap-to-mark'/>
-		   <menuitem action='snap-to-edit-cursor'/>
 		   <menuitem action='snap-to-region-start'/>
 		   <menuitem action='snap-to-region-end'/>
 		   <menuitem action='snap-to-region-sync'/>

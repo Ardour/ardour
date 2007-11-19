@@ -18,7 +18,6 @@
 */
 
 /* Changing this order will break the menu */
-SNAPTYPE(SnapToFrame)
 SNAPTYPE(SnapToCDFrame)
 SNAPTYPE(SnapToSMPTEFrame)
 SNAPTYPE(SnapToSMPTESeconds)
@@ -33,13 +32,13 @@ SNAPTYPE(SnapToAThirdBeat)
 SNAPTYPE(SnapToBeat)
 SNAPTYPE(SnapToBar)
 SNAPTYPE(SnapToMark)
-SNAPTYPE(SnapToEditPoint)
 SNAPTYPE(SnapToRegionStart)
 SNAPTYPE(SnapToRegionEnd)
 SNAPTYPE(SnapToRegionSync)
 SNAPTYPE(SnapToRegionBoundary)
 
 /* Changing this order will break the menu */
+SNAPMODE(SnapOff)
 SNAPMODE(SnapNormal)
 SNAPMODE(SnapMagnetic)
 

@@ -115,7 +115,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  /* big clock */
 
-	  big_clock (X_("bigclock"), false, "BigClockNonRecording", false, false, true),
+	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, false, true),
 
 	  /* transport */
 
@@ -1875,6 +1875,14 @@ ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (session) {
 		session->request_locate (primary_clock.current_time ());
+	}
+}
+
+void
+ARDOUR_UI::big_clock_value_changed ()
+{
+	if (session) {
+		session->request_locate (big_clock.current_time ());
 	}
 }
 

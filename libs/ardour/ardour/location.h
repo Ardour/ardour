@@ -146,6 +146,8 @@ class Locations : public PBD::StatefulDestructible
 	Locations ();
 	~Locations ();
 	
+	const LocationList& list() { return locations; }
+
 	void add (Location *, bool make_current = false);
 	void remove (Location *);
 	void clear ();

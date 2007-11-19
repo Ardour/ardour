@@ -143,7 +143,8 @@ class AudioRegionView : public RegionView
     void compute_colors (Gdk::Color&);
     void reset_width_dependent_items (double pixel_width);
     void set_waveview_data_src();
-    
+    void set_frame_color ();
+
     void color_handler ();
 
     vector<GnomeCanvasWaveViewCache*> wave_caches;

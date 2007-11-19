@@ -164,9 +164,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 
 	case 2:
 		/* edit point */
-		if (snap_type != Editing::SnapToEditPoint) {
-			snap_to (where);
-		}
+		snap_to (where);
 		break;
 
 	default:
@@ -205,9 +203,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 
 	case 2:
 		/* edit point */
-		if (snap_type != Editing::SnapToEditPoint) {
-			snap_to (where);
-		}
+		snap_to (where);
 		break;
 
 	case 3:
@@ -379,7 +375,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (_("Frames"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
+	ruler_items.push_back (CheckMenuElem (_("Samples"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
 	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_frames]) {
 		mitem->set_active(true);

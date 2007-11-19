@@ -106,7 +106,6 @@ const double Editor::timebar_height = 15.0;
 #include "editor_xpms"
 
 static const gchar *_snap_type_strings[] = {
-	N_("None"),
 	N_("CD Frames"),
 	N_("SMPTE Frames"),
 	N_("SMPTE Seconds"),
@@ -121,7 +120,6 @@ static const gchar *_snap_type_strings[] = {
 	N_("Beats"),
 	N_("Bars"),
 	N_("Marks"),
-	N_("Edit Point"),
 	N_("Region starts"),
 	N_("Region ends"),
 	N_("Region syncs"),
@@ -130,7 +128,8 @@ static const gchar *_snap_type_strings[] = {
 };
 
 static const gchar *_snap_mode_strings[] = {
-	N_("Normal"),
+	N_("No Grid"),
+	N_("Grid"),
 	N_("Magnetic"),
 	0
 };
@@ -178,7 +177,7 @@ Editor::Editor ()
 	  minsec_label (_("Mins:Secs")),
 	  bbt_label (_("Bars:Beats")),
 	  smpte_label (_("Timecode")),
-	  frame_label (_("Frames")),
+	  frame_label (_("Samples")),
 	  tempo_label (_("Tempo")),
 	  meter_label (_("Meter")),
 	  mark_label (_("Location Markers")),
@@ -245,10 +244,9 @@ Editor::Editor ()
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_point_strings = I18N (_edit_point_strings);
 
-	snap_type = SnapToFrame;
+	snap_type = SnapToBeat;
 	set_snap_to (snap_type);
-
-	snap_mode = SnapNormal;
+	snap_mode = SnapOff;
 	set_snap_mode (snap_mode);
 
 	_edit_point = EditAtMouse;
@@ -651,9 +649,12 @@ Editor::Editor ()
 	nlabel = manage (new Label (_("Edit Groups")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (*edit_group_display_packer, *nlabel);
-	nlabel = manage (new Label (_("Chunks")));
-	nlabel->set_angle (-90);
-	the_notebook.append_page (named_selection_scroller, *nlabel);
+	
+	if (!Profile->get_sae()) {
+		nlabel = manage (new Label (_("Chunks")));
+		nlabel->set_angle (-90);
+		the_notebook.append_page (named_selection_scroller, *nlabel);
+	}
 
 	the_notebook.set_show_tabs (true);
 	the_notebook.set_scrollable (true);
@@ -2356,7 +2357,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 	Location* before = 0;
 	Location* after = 0;
 
-	if (!session) {
+	if (!session || snap_mode == SnapOff) {
 		return;
 	}
 
@@ -2367,9 +2368,6 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 	nframes64_t presnap = start;
 
 	switch (snap_type) {
-	case SnapToFrame:
-		break;
-
 	case SnapToCDFrame:
 		if (direction) {
 			start = (nframes_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
@@ -2471,10 +2469,6 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
                 start = session->tempo_map().round_to_beat_subdivision (start, 3);
                 break;
 
-	case SnapToEditPoint:
-		start = get_preferred_edit_position ();
-		break;
-
 	case SnapToMark:
 		if (for_mark) {
 			return;
@@ -2555,6 +2549,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		}
 		
 	default:
+		/* handled at entry */
 		return;
 		
 	}
@@ -3099,6 +3094,25 @@ Editor::set_verbose_canvas_cursor_text (const string & txt)
 }
 
 void
+Editor::set_edit_mode (EditMode m)
+{
+	Config->set_edit_mode (m);
+}
+
+void
+Editor::cycle_edit_mode ()
+{
+	switch (Config->get_edit_mode()) {
+	case Slide:
+		Config->set_edit_mode (Splice);
+		break;
+	case Splice:
+		Config->set_edit_mode (Slide);
+		break;
+	}
+}
+
+void
 Editor::edit_mode_selection_done ()
 {
 	if (session == 0) {
@@ -3121,7 +3135,7 @@ void
 Editor::snap_type_selection_done ()
 {
 	string choice = snap_type_selector.get_active_text();
-	SnapType snaptype = SnapToFrame;
+	SnapType snaptype = SnapToBeat;
 
 	if (choice == _("Beats/3")) {
 		snaptype = SnapToAThirdBeat;
@@ -3139,8 +3153,6 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToBar;
 	} else if (choice == _("Marks")) {
 		snaptype = SnapToMark;
-	} else if (choice == _("Edit Point")) {
-		snaptype = SnapToEditPoint;
 	} else if (choice == _("Region starts")) {
 		snaptype = SnapToRegionStart;
 	} else if (choice == _("Region ends")) {
@@ -3161,8 +3173,6 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToSeconds;
 	} else if (choice == _("Minutes")) {
 		snaptype = SnapToMinutes;
-	} else if (choice == _("None")) {
-		snaptype = SnapToFrame;
 	}
 
 	RefPtr<RadioAction> ract = snap_type_action (snaptype);
@@ -3177,7 +3187,9 @@ Editor::snap_mode_selection_done ()
 	string choice = snap_mode_selector.get_active_text();
 	SnapMode mode = SnapNormal;
 
-	if (choice == _("Normal")) {
+	if (choice == _("No Grid")) {
+		mode = SnapOff;
+	} else if (choice == _("Grid")) {
 		mode = SnapNormal;
 	} else if (choice == _("Magnetic")) {
 		mode = SnapMagnetic;
@@ -3187,6 +3199,22 @@ Editor::snap_mode_selection_done ()
 
 	if (ract) {
 		ract->set_active (true);
+	}
+}
+
+void
+Editor::cycle_edit_point ()
+{
+	switch (_edit_point) {
+	case EditAtMouse:
+		set_edit_point_preference (EditAtPlayhead);
+		break;
+	case EditAtPlayhead:
+		set_edit_point_preference (EditAtSelectedMarker);
+		break;
+	case EditAtSelectedMarker:
+		set_edit_point_preference (EditAtMouse);
+		break;
 	}
 }
 

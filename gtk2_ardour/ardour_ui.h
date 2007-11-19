@@ -470,6 +470,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void solo_alert_toggle ();
 	void audition_alert_toggle ();
 
+	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
 	void secondary_clock_value_changed ();
 

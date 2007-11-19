@@ -159,36 +159,47 @@ Editor::select_all_tracks ()
 	selection->set (track_views);
 }
 
-bool
+void
+Editor::set_selected_track_as_side_effect (bool force)
+{
+	if (!clicked_trackview) {
+		return;
+	}
+
+	if (!selection->tracks.empty()) {
+		if (!selection->selected (clicked_trackview)) {
+			selection->add (clicked_trackview);
+		}
+
+	} else if (force) {
+		selection->set (clicked_trackview);
+	}
+}
+
+void
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
 {
-	bool commit = false;
 
 	switch (op) {
 	case Selection::Toggle:
 		if (selection->selected (&view)) {
 			if (!no_remove) {
 				selection->remove (&view);
-				commit = true;
 			}
 		} else {
 			selection->add (&view);
-			commit = false;
 		}
 		break;
 
 	case Selection::Add:
 		if (!selection->selected (&view)) {
 			selection->add (&view);
-			commit = true;
 		}
 		break;
 
 	case Selection::Set:
-		if (selection->selected (&view) && selection->tracks.size() == 1) {
-			/* no commit necessary */
-		} else {
-			
+		if (selection->selected (&view) && selection->tracks.size() > 1) {
+
 			/* reset track selection if there is only 1 other track
 			   selected OR if no_remove is not set (its there to 
 			   prevent deselecting a multi-track selection
@@ -198,34 +209,30 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 
 			if (selection->tracks.empty()) {
 				selection->set (&view);
-				commit = true;
 			} else if (selection->tracks.size() == 1 || !no_remove) {
 				selection->set (&view);
-				commit = true;
 			}
 		}
 		break;
 		
 	case Selection::Extend:
-		commit = extend_selection_to_track (view);
+		extend_selection_to_track (view);
 		break;
 	}
-
-	return commit;
 }
 
-bool
+void
 Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool no_remove)
 {
 	if (!clicked_trackview) {
-		return false;
+		return;
 	}
 	
 	if (!press) {
-		return false;
+		return;
 	}
 
-	return set_selected_track (*clicked_trackview, op, no_remove);
+	set_selected_track (*clicked_trackview, op, no_remove);
 }
 
 bool
@@ -386,7 +393,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		switch (op) {
 		case Selection::Toggle:
 			
-			if (clicked_regionview->get_selected()) {
+			if (selection->selected (clicked_regionview)) {
 				if (press) {
 
 					/* whatever was clicked was selected already; do nothing here but allow
@@ -436,7 +443,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			break;
 			
 		case Selection::Set:
-			if (!clicked_regionview->get_selected()) {
+			if (!selection->selected (clicked_regionview)) {
 
 				get_equivalent_regions (clicked_regionview, all_equivalent_regions);
 				selection->set (all_equivalent_regions);

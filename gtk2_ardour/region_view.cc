@@ -378,8 +378,8 @@ RegionView::fake_set_opaque (bool yn)
        } else {
                fill_opacity = 0;
        }
-
-       TimeAxisViewItem::set_frame_color ();
+       
+       set_frame_color ();
 }
 
 void

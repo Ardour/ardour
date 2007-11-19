@@ -328,8 +328,6 @@ Editor::step_mouse_mode (bool next)
 void
 Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	bool commit = false;
-
 	/* in object/audition/timefx mode, any button press sets
 	   the selection if the object can be selected. this is a
 	   bit of hack, because we want to avoid this if the
@@ -368,18 +366,18 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	switch (item_type) {
 	case RegionItem:
 		if (mouse_mode != MouseRange) {
-			commit = set_selected_regionview_from_click (press, op, true);
+			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			commit = set_selected_track_from_click (press, op, false);
+			set_selected_track_as_side_effect ();
 		}
 		break;
 		
 	case RegionViewNameHighlight:
 	case RegionViewName:
 		if (mouse_mode != MouseRange) {
-			commit = set_selected_regionview_from_click (press, op, true);
+			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			commit = set_selected_track_from_click (press, op, false);
+			set_selected_track_as_side_effect ();
 		}
 		break;
 
@@ -388,41 +386,37 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case FadeOutHandleItem:
 	case FadeOutItem:
 		if (mouse_mode != MouseRange) {
-			commit = set_selected_regionview_from_click (press, op, true);
+			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			commit = set_selected_track_from_click (press, op, false);
+			set_selected_track_as_side_effect ();
 		}
 		break;
 		
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		commit = set_selected_track_from_click (press, op, true);
+		set_selected_track_as_side_effect ();
 		if (mouse_mode != MouseRange) {
-			commit |= set_selected_control_point_from_click (op, false);
+			set_selected_control_point_from_click (op, false);
 		}
 		break;
 		
 	case StreamItem:
 		/* for context click or range selection, select track */
 		if (event->button.button == 3) {
-			commit = set_selected_track_from_click (press, op, true);
+			set_selected_track_as_side_effect ();
 		} else if (event->type == GDK_BUTTON_PRESS && mouse_mode == MouseRange) {
-			commit = set_selected_track_from_click (press, op, false);
+			set_selected_track_as_side_effect ();
 		}
 		break;
 		    
 	case AutomationTrackItem:
-		commit = set_selected_track_from_click (press, op, true);
+		set_selected_track_as_side_effect (true);
 		break;
 		
 	default:
 		break;
 	}
-	
-//	if (commit) {
-//		commit_reversible_command ();
-//	}
 }
 
 const static double ZERO_GAIN_FRACTION = gain_to_slider_position(dB_to_coefficient(0.0));
@@ -2063,7 +2057,7 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		if (cursor == playhead_cursor && snap_type != SnapToEditPoint) {
+		if (cursor == playhead_cursor) {
 			snap_to (adjusted_frame);
 		}
 	}
@@ -4437,7 +4431,7 @@ Editor::trim_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	if (!drag_info.first_move) {
 		trim_motion_callback (item, event);
 		
-		if (!clicked_regionview->get_selected()) {
+		if (!selection->selected (clicked_regionview)) {
 			thaw_region_after_trim (*clicked_regionview);		
 		} else {
 			
@@ -4479,7 +4473,7 @@ Editor::point_trim (GdkEvent* event)
 		trim_op = StartTrim;
 		begin_reversible_command (_("Start point trim"));
 
-		if (rv->get_selected()) {
+		if (selection->selected (rv)) {
 
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
 			     i != selection->regions.by_layer().end(); ++i)
@@ -4511,7 +4505,7 @@ Editor::point_trim (GdkEvent* event)
 		trim_op = EndTrim;
 		begin_reversible_command (_("End point trim"));
 
-		if (rv->get_selected()) {
+		if (selection->selected (rv)) {
 			
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i)
 			{
@@ -5060,9 +5054,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 	}
 
 	switch (snap_type) {
-	case SnapToFrame:
 	case SnapToMark:
-	case SnapToEditPoint:
 		return;
 
 	default:
