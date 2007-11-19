@@ -49,7 +49,7 @@ using Glib::ustring;
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
 
-#define _FPP 2048
+#define _FPP 256
 
 AudioSource::AudioSource (Session& s, ustring name)
 	: Source (s, name)
