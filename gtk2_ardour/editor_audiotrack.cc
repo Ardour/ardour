@@ -106,17 +106,21 @@ Editor::start_updating ()
 			}
 		}
 	}
-    fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Editor::fast_update_strips));
+
+	if (!meters_running) {
+		fast_screen_update_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (mem_fun(*this, &Editor::fast_update_strips));
+		meters_running = true;
+	}
     return 0;
 }
 
 gint
 Editor::stop_updating ()
 {
-
-	fast_screen_update_connection.disconnect();
 	AudioTimeAxisView* atv;
-
+	
+	meters_running = false;
+	fast_screen_update_connection.disconnect();
 	//cerr << "Editor::stop_updating () called" << endl;//DEBUG
 	if (is_mapped() && session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {

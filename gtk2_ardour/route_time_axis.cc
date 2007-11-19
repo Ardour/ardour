@@ -1793,7 +1793,8 @@ RouteTimeAxisView::fast_update ()
 void
 RouteTimeAxisView::hide_meter ()
 {
-	gpm.hide ();
+	//gpm.hide ();
+	gpm.clear_meters ();
 }
 
 void

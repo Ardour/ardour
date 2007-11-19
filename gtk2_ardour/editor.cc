@@ -184,7 +184,7 @@ Editor::Editor ()
 	  range_mark_label (_("Range Markers")),
 	  transport_mark_label (_("Loop/Punch Ranges")),
 
-	  edit_packer (3, 3, false),
+	  edit_packer (3, 3, true),
 
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
@@ -209,7 +209,8 @@ Editor::Editor ()
 
 	  /* nudge */
 
-	  nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, true)
+	  nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, true),
+	  meters_running(false)
 
 {
 	constructed = false;

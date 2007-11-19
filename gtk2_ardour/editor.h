@@ -1953,6 +1953,7 @@ class Editor : public PublicEditor
 	gint stop_updating ();
 	void toggle_meter_updating();
 	void fast_update_strips ();
+	bool meters_running;
 
 };
 

@@ -977,4 +977,11 @@ void GainMeter::setup_atv_meter (int len)
 		show();
 	}
 }
-	
+
+void GainMeter::clear_meters ()
+{
+	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
+		(*i).meter->clear();
+	}
+}
+
