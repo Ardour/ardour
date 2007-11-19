@@ -61,9 +61,11 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	_start = start; 
 	_sync_position = _start;
 	_length = length; 
+	_last_length = length; 
 	_ancestral_start = start; 
 	_ancestral_length = length; 
 	_stretch = 1.0;
+	_last_position = 0; 
 	_position = 0; 
 	_layer = layer;
 	_read_data_count = 0;
@@ -86,10 +88,12 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 		_sync_position = _start;
 	}
 	_length = length; 
+	_last_length = length; 
 	_ancestral_start = other->_ancestral_start + offset;
 	_ancestral_length = length; 
 	_stretch = 1.0;
 	_name = name;
+	_last_position = 0; 
 	_position = 0; 
 	_layer = layer; 
 	_flags = Flag (flags & ~(Locked|WholeFile|Hidden));
@@ -117,10 +121,12 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_start = other->_start;
 	_sync_position = other->_sync_position;
 	_length = other->_length; 
+	_last_length = other->_length; 
 	_ancestral_start = _start; 
 	_ancestral_length = _length; 
 	_stretch = 1.0;
 	_name = other->_name;
+	_last_position = other->_position; 
 	_position = other->_position; 
 	_layer = other->_layer; 
 	_flags = Flag (other->_flags & ~Locked);
@@ -135,7 +141,9 @@ Region::Region (const XMLNode& node)
 	_start = 0; 
 	_sync_position = _start;
 	_length = 0;
+	_last_length = 0;
 	_name = X_("error: XML did not reset this");
+	_last_position = 0; 
 	_position = 0; 
 	_layer = 0;
 	_flags = Flag (0);
@@ -187,6 +195,8 @@ Region::set_length (nframes_t len, void *src)
 			return;
 		}
 		
+
+		_last_length = _length;
 		_length = len;
 
 		_flags = Region::Flag (_flags & ~WholeFile);
@@ -265,6 +275,7 @@ Region::special_set_position (nframes_t pos)
 	   a way to store its "natural" or "captured" position.
 	*/
 
+	_position = _position;
 	_position = pos;
 }
 
@@ -276,6 +287,7 @@ Region::set_position (nframes_t pos, void *src)
 	}
 
 	if (_position != pos) {
+		_last_position = _position;
 		_position = pos;
 
 		/* check that the new _position wouldn't make the current
@@ -285,6 +297,7 @@ Region::set_position (nframes_t pos, void *src)
 		*/
 
 		if (max_frames - _length < _position) {
+			_last_length = _length;
 			_length = max_frames - _position;
 		}
 	}
@@ -304,6 +317,7 @@ Region::set_position_on_top (nframes_t pos, void *src)
 	}
 
 	if (_position != pos) {
+		_last_position = _position;
 		_position = pos;
 	}
 
@@ -321,7 +335,7 @@ Region::set_position_on_top (nframes_t pos, void *src)
 }
 
 void
-Region::nudge_position (long n, void *src)
+Region::nudge_position (nframes64_t n, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -331,6 +345,8 @@ Region::nudge_position (long n, void *src)
 		return;
 	}
 	
+	_last_position = _position;
+
 	if (n > 0) {
 		if (_position > max_frames - n) {
 			_position = max_frames;
@@ -545,10 +561,16 @@ Region::trim_to_internal (nframes_t position, nframes_t length, void *src)
 		what_changed = Change (what_changed|StartChanged);
 	}
 	if (_length != length) {
+		if (!_frozen) {
+			_last_length = _length;
+		}
 		_length = length;
 		what_changed = Change (what_changed|LengthChanged);
 	}
 	if (_position != position) {
+		if (!_frozen) {
+			_last_position = _position;
+		}
 		_position = position;
 		what_changed = Change (what_changed|PositionChanged);
 	}
@@ -783,7 +805,6 @@ Region::state (bool full_state)
 		fe = X_("id");
 		break;
 	default: /* should be unreachable but makes g++ happy */
-		cerr << "Odd region property found\n";
 		fe = X_("nothing");
 		break;
 	}
@@ -838,9 +859,11 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _length) {
 			what_changed = Change (what_changed|LengthChanged);
+			_last_length = _length;
 			_length = val;
 		}
 	} else {
+		_last_length = _length;
 		_length = 1;
 	}
 
@@ -848,9 +871,11 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _position) {
 			what_changed = Change (what_changed|PositionChanged);
+			_last_position = _position;
 			_position = val;
 		}
 	} else {
+		_last_position = _position;
 		_position = 0;
 	}
 
@@ -949,6 +974,8 @@ void
 Region::freeze ()
 {
 	_frozen++;
+	_last_length = _length;
+	_last_position = _position;
 }
 
 void

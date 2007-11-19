@@ -4167,6 +4167,48 @@ Editor::get_regions_at (nframes64_t where, const TrackSelection& ts) const
 	return rs;
 }
 
+
+RegionSelection
+Editor::get_regions_after (nframes64_t where, const TrackSelection& ts) const
+{
+	RegionSelection rs;
+	const TrackSelection* tracks;
+
+	if (ts.empty()) {
+		tracks = &track_views;
+	} else {
+		tracks = &ts;
+	}
+
+	for (TrackSelection::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
+	
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*t);
+
+		if (atv) {
+			boost::shared_ptr<Diskstream> ds;
+			boost::shared_ptr<Playlist> pl;
+			
+			if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
+
+				Playlist::RegionList* regions = pl->regions_touched ((nframes_t) floor ( (double)where * ds->speed()), max_frames);
+
+				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+
+					RegionView* rv = atv->audio_view()->find_view (*i);
+
+					if (rv) {
+						rs.push_back (rv);
+					}
+				}
+
+				delete regions;
+			}
+		}
+	}
+
+	return rs;
+}
+
 RegionSelection&
 Editor::get_regions_for_action ()
 {

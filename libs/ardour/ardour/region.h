@@ -90,6 +90,11 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	nframes_t length()    const { return _length; }
 	layer_t   layer ()    const { return _layer; }
 
+	/* these two are valid ONLY during a StateChanged signal handler */
+
+	nframes_t last_position() const { return _last_position; }
+	nframes_t last_length() const { return _last_length; }
+
 	nframes64_t ancestral_start () const { return _ancestral_start; }
 	nframes64_t ancestral_length () const { return _ancestral_length; }
 	float stretch() const { return _stretch; }
@@ -142,7 +147,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void set_position (nframes_t, void *src);
 	void set_position_on_top (nframes_t, void *src);
 	void special_set_position (nframes_t);
-	void nudge_position (long, void *src);
+	void nudge_position (nframes64_t, void *src);
 
 	bool at_natural_position () const;
 	void move_to_natural_position (void *src);
@@ -213,7 +218,9 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	
 	nframes_t               _start;
 	nframes_t               _length;
+	nframes_t               _last_length;
 	nframes_t               _position;
+	nframes_t               _last_position;
 	Flag                    _flags;
 	nframes_t               _sync_position;
 	layer_t                 _layer;

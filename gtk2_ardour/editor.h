@@ -1145,6 +1145,7 @@ class Editor : public PublicEditor
 	void set_fade_out_active (bool);
 	
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
+	RegionSelection pre_drag_region_selection;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
@@ -1941,6 +1942,7 @@ class Editor : public PublicEditor
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 
 	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
+	RegionSelection get_regions_after (nframes64_t where, const TrackSelection& ts) const;
 	
 	RegionSelection tmp_regions;
 	

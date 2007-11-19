@@ -150,6 +150,25 @@ Editor::register_actions ()
        	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("Select All in Loop Range"), mem_fun(*this, &Editor::select_all_selectables_using_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "goto-mark-1", _("Locate to Mark 1"), bind (mem_fun (*this, &Editor::goto_nth_marker), 0));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-2", _("Locate to Mark 2"), bind (mem_fun (*this, &Editor::goto_nth_marker), 1));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-3", _("Locate to Mark 3"), bind (mem_fun (*this, &Editor::goto_nth_marker), 2));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-4", _("Locate to Mark 4"), bind (mem_fun (*this, &Editor::goto_nth_marker), 3));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-5", _("Locate to Mark 5"), bind (mem_fun (*this, &Editor::goto_nth_marker), 4));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-6", _("Locate to Mark 6"), bind (mem_fun (*this, &Editor::goto_nth_marker), 5));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-7", _("Locate to Mark 7"), bind (mem_fun (*this, &Editor::goto_nth_marker), 6));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-8", _("Locate to Mark 8"), bind (mem_fun (*this, &Editor::goto_nth_marker), 7));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-mark-9", _("Locate to Mark 9"), bind (mem_fun (*this, &Editor::goto_nth_marker), 8));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "jump-forward-to-mark", _("Jump Forward to Mark"), mem_fun(*this, &Editor::jump_forward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "jump-backward-to-mark", _("Jump Backward to Mark"), mem_fun(*this, &Editor::jump_backward_to_mark));

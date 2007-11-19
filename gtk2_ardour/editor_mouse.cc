@@ -2948,6 +2948,14 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	vector<int32_t>  height_list(512) ;
 	vector<int32_t>::iterator j;
 
+	if (drag_info.first_move && drag_info.move_threshold_passed && pre_drag_region_selection.empty()) {
+		pre_drag_region_selection = selection->regions;
+		if (Config->get_edit_mode() == Splice) {
+			RegionSelection all_after = get_regions_after (clicked_regionview->region()->position(), selection->tracks);
+			selection->set (all_after);
+		} 
+	}
+
 	if (drag_info.copy && drag_info.move_threshold_passed && drag_info.want_move_threshold) {
 
 		drag_info.want_move_threshold = false; // don't copy again
@@ -3438,6 +3446,11 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	*/	
 
 	region_drag_motion_callback (item, event);
+
+	if (Config->get_edit_mode() == Splice && !pre_drag_region_selection.empty()) {
+		selection->set (pre_drag_region_selection);
+		pre_drag_region_selection.clear ();
+	}
 
 	if (drag_info.brushing) {
 		/* all changes were made during motion event handlers */

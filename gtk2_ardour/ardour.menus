@@ -59,6 +59,16 @@
                <separator/>       
                <menuitem action='playhead-to-range-start'/>
                <menuitem action='playhead-to-range-end'/>
+             	 <separator/>
+			<menuitem action='goto-mark-1'/>
+			<menuitem action='goto-mark-2'/>
+			<menuitem action='goto-mark-3'/>
+			<menuitem action='goto-mark-4'/>
+			<menuitem action='goto-mark-5'/>
+			<menuitem action='goto-mark-6'/>
+			<menuitem action='goto-mark-7'/>
+			<menuitem action='goto-mark-8'/>
+			<menuitem action='goto-mark-9'/>
                <menu action='TransportOptions'>
                     <menuitem action='ToggleTimeMaster'/>
                     <menuitem action='TogglePunchIn'/>

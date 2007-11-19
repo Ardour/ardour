@@ -487,7 +487,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 	}
 
 
-	possibly_splice_unlocked (position, (pos + length) - position);
+	possibly_splice_unlocked (position, (pos + length) - position, boost::shared_ptr<Region>());
 }
 
 void
@@ -523,6 +523,8 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 
 	regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	all_regions.insert (region);
+
+	possibly_splice_unlocked (position, region->length(), region);
 
 	if (!holding_state () && !in_set_state) {
 		/* layers get assigned from XML state */
@@ -564,7 +566,6 @@ void
 Playlist::remove_region (boost::shared_ptr<Region> region)
 {
 	RegionLock rlock (this);
-	nframes_t pos = region->position();
 	remove_region_internal (region);
 }
 
@@ -1048,7 +1049,7 @@ Playlist::split_region (boost::shared_ptr<Region> region, nframes_t playlist_pos
 }
 
 void
-Playlist::possibly_splice (nframes_t at, nframes64_t distance)
+Playlist::possibly_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
 {
 	if (_splicing || in_set_state) {
 		/* don't respond to splicing moves or state setting */
@@ -1056,12 +1057,12 @@ Playlist::possibly_splice (nframes_t at, nframes64_t distance)
 	}
 
 	if (_edit_mode == Splice) {
-		splice_locked (at, distance);
+		splice_locked (at, distance, exclude);
 	}
 }
 
 void
-Playlist::possibly_splice_unlocked (nframes_t at, nframes64_t distance)
+Playlist::possibly_splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
 {
 	if (_splicing || in_set_state) {
 		/* don't respond to splicing moves or state setting */
@@ -1069,38 +1070,36 @@ Playlist::possibly_splice_unlocked (nframes_t at, nframes64_t distance)
 	}
 
 	if (_edit_mode == Splice) {
-		splice_unlocked (at, distance);
+		splice_unlocked (at, distance, exclude);
 	}
 }
 
 void
-Playlist::splice_locked (nframes_t at, nframes64_t distance)
+Playlist::splice_locked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
 {
 	{
 		RegionLock rl (this);
-		core_splice (at, distance);
+		core_splice (at, distance, exclude);
 	}
-
-	notify_length_changed ();
 }
 
 void
-Playlist::splice_unlocked (nframes_t at, nframes64_t distance)
+Playlist::splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
 {
-	core_splice (at, distance);
-	notify_length_changed ();
+	core_splice (at, distance, exclude);
 }
 
 void
-Playlist::core_splice (nframes_t at, nframes64_t distance)
+Playlist::core_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
 {
-	stacktrace (cerr, 12);
-
 	_splicing = true;
 
-	cerr << "core splice, move everything >= " << at << " by " << distance << endl;
-	
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		if (exclude && (*i) == exclude) {
+			continue;
+		}
+
 		if ((*i)->position() >= at) {
 			nframes64_t new_pos = (*i)->position() + distance;
 			if (new_pos < 0) {
@@ -1109,13 +1108,13 @@ Playlist::core_splice (nframes_t at, nframes64_t distance)
 				new_pos = max_frames - (*i)->length();
 			} 
 				
-			cerr << "\tmove " << (*i)->name() << " to " << new_pos << endl;
 			(*i)->set_position (new_pos, this);
 		}
 	}
 
-	
 	_splicing = false;
+
+	notify_length_changed ();
 }
 
 void
@@ -1144,10 +1143,25 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 
 		regions.erase (i);
 		regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
-
 	}
 
 	if (what_changed & Change (ARDOUR::PositionChanged|ARDOUR::LengthChanged)) {
+		
+		nframes64_t delta = 0;
+		
+		if (what_changed & ARDOUR::PositionChanged) {
+			delta = (nframes64_t) region->position() - (nframes64_t) region->last_position();
+		} 
+		
+		if (what_changed & ARDOUR::LengthChanged) {
+			delta += (nframes64_t) region->length() - (nframes64_t) region->last_length();
+
+		} 
+
+		if (delta) {
+			possibly_splice (region->last_position(), delta, region);
+		}
+
 		if (holding_state ()) {
 			pending_bounds.push_back (region);
 		} else {
@@ -1155,9 +1169,7 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 				/* it moved or changed length, so change the timestamp */
 				timestamp_layer_op (region);
 			}
-
-			// XXX NEED TO SPLICE HERE ... HOW TO GET DISTANCE ?
-
+			
 			notify_length_changed ();
 			relayer ();
 			check_dependents (region, false);

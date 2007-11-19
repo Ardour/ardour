@@ -1109,22 +1109,32 @@ Editor::selected_marker_moved (Location* loc)
 	edit_point_clock.set (loc->start());
 }
 
+struct SortLocationsByPosition { 
+    bool operator() (Location* a, Location* b) {
+	    return a->start() < b->start();
+    }
+};
+
 void
 Editor::goto_nth_marker (int n)
 {
-#if 0
 	if (!session) {
 		return;
 	}
 	const Locations::LocationList& l (session->locations()->list());
-	LocationList ordered;
+	Locations::LocationList ordered;
 	ordered = l;
+
+	SortLocationsByPosition cmp;
+	ordered.sort (cmp);
 	
-	for (Locations::LocationList::iterator i = locations.begin(); n > 0 && i != ordered.end(); ++i) {
-		if (loc->is_mark() && !loc->is_hidden() && !loc->is_start()) {
-			session->request_locate ((*i)->start(), session->transport_rolling());
-			break;
+	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
+		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_start()) {
+			if (n == 0) {
+				session->request_locate ((*i)->start(), session->transport_rolling());
+				break;
+			}
+			--n;
 		}
 	}
-#endif
 }
