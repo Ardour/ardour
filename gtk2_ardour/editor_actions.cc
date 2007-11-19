@@ -222,6 +222,10 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("Edit to Playhead"), bind (mem_fun(*this, &Editor::cursor_align), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "trim-front", _("Trim front at edit point"), mem_fun(*this, &Editor::trim_region_front));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "trim-back", _("Trim back at edit point"), mem_fun(*this, &Editor::trim_region_back));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "trim-from-start", _("Start to edit point"), mem_fun(*this, &Editor::trim_region_from_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);

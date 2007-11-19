@@ -1632,7 +1632,11 @@ class Editor : public PublicEditor
 
 	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void thaw_region_after_trim (RegionView& rv);
-	
+
+	void trim_region_front();
+	void trim_region_back();
+	void trim_region (bool front);
+
 	void trim_region_to_edit_point ();
 	void trim_region_from_edit_point ();
 	void trim_region_to_loop ();

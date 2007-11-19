@@ -3029,6 +3029,13 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	
 	if ((pointer_y_span = (drag_info.last_trackview->order - tv->order)) != 0) {
 
+		/* drop any splice-induced selection madness */
+
+		if (!pre_drag_region_selection.empty()) {
+			selection->set (pre_drag_region_selection);
+			pre_drag_region_selection.clear ();
+		}
+
 		int32_t children = 0, numtracks = 0;
 		// XXX hard coding track limit, oh my, so very very bad
 		bitset <1024> tracks (0x00);

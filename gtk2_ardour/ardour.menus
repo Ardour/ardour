@@ -120,6 +120,9 @@
 			<menuitem action='set-mouse-mode-gain'/>
 			<menuitem action='set-mouse-mode-zoom'/>
 			<menuitem action='set-mouse-mode-timefx'/>
+			<separator/>
+			<menuitem action='cycle-edit-point'/>
+			<menuitem action='toggle-edit-mode'/>
           </menu>
         </menu>         
 	<menu name='Select' action='Select'>
@@ -164,6 +167,8 @@
 		   <menuitem action='set-fade-in-length'/>
 		   <menuitem action='set-fade-out-length'/>
                    <separator/>       
+		   <menuitem action='trim-back'/>
+		   <menuitem action='trim-front'/>
 		   <menuitem action='trim-from-start'/>
 		   <menuitem action='trim-to-end'/>
 		   <menuitem action='trim-region-to-loop'/>

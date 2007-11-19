@@ -1155,11 +1155,10 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 		
 		if (what_changed & ARDOUR::LengthChanged) {
 			delta += (nframes64_t) region->length() - (nframes64_t) region->last_length();
-
 		} 
 
 		if (delta) {
-			possibly_splice (region->last_position(), delta, region);
+			possibly_splice (region->last_position() + region->last_length(), delta, region);
 		}
 
 		if (holding_state ()) {

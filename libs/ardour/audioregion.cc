@@ -330,7 +330,7 @@ AudioRegion::listen_to_my_curves ()
 }
 
 bool
-AudioRegion::verify_length (nframes_t len)
+AudioRegion::verify_length (nframes_t& len)
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
 
@@ -338,16 +338,19 @@ AudioRegion::verify_length (nframes_t len)
 		return true;
 	}
 
+	nframes_t maxlen = 0;
+
 	for (uint32_t n=0; n < sources.size(); ++n) {
-		if (_start > sources[n]->length() - len) {
-			return false;
-		}
+		maxlen = max (maxlen, sources[n]->length() - _start);
 	}
+	
+	len = min (len, maxlen);
+	
 	return true;
 }
 
 bool
-AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t new_length)
+AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t& new_length)
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
 
@@ -355,11 +358,14 @@ AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t new_length)
 		return true;
 	}
 
+	nframes_t maxlen = 0;
+
 	for (uint32_t n=0; n < sources.size(); ++n) {
-		if (new_length > sources[n]->length() - new_start) {
-			return false;
-		}
+		maxlen = max (maxlen, sources[n]->length() - new_start);
 	}
+
+	new_length = min (new_length, maxlen);
+
 	return true;
 }
 bool

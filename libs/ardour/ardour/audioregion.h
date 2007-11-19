@@ -167,9 +167,9 @@ class AudioRegion : public Region
 				 nframes_t skip_frames = 0) const;
 
 	bool verify_start (nframes_t position);
-	bool verify_length (nframes_t position);
+	bool verify_length (nframes_t& length);
 	bool verify_start_mutable (nframes_t& start);
-	bool verify_start_and_length (nframes_t start, nframes_t length);
+	bool verify_start_and_length (nframes_t start, nframes_t& length);
 	void recompute_at_start ();
 	void recompute_at_end ();
 

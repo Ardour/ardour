@@ -4152,3 +4152,43 @@ Editor::ensure_entered_selected (bool op_really_wants_one_region_if_none_are_sel
 		}
 	}
 }
+
+void
+Editor::trim_region_front ()
+{
+	trim_region (true);
+}
+
+void
+Editor::trim_region_back ()
+{
+	trim_region (false);
+}
+
+void
+Editor::trim_region (bool front)
+{
+	nframes64_t where = get_preferred_edit_position();
+	RegionSelection& rs = get_regions_for_action ();
+
+	if (rs.empty()) {
+		return;
+	}
+
+	begin_reversible_command (front ? _("trim front") : _("trim back"));
+
+	for (list<RegionView*>::const_iterator i = rs.by_layer().begin(); i != rs.by_layer().end(); ++i) {
+		if (!(*i)->region()->locked()) {
+			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
+			XMLNode &before = pl->get_state();
+			if (front) {
+				(*i)->region()->trim_front (where, this);	
+			} else {
+				(*i)->region()->trim_end (where, this);	
+			}
+			XMLNode &after = pl->get_state();
+			session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+		}
+	}
+	commit_reversible_command ();
+}

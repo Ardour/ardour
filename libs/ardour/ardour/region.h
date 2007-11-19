@@ -209,9 +209,9 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	void first_edit ();
 	
 	virtual bool verify_start (nframes_t) = 0;
-	virtual bool verify_start_and_length (nframes_t, nframes_t) = 0;
+	virtual bool verify_start_and_length (nframes_t, nframes_t&) = 0;
 	virtual bool verify_start_mutable (nframes_t&_start) = 0;
-	virtual bool verify_length (nframes_t) = 0;
+	virtual bool verify_length (nframes_t&) = 0;
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
 	
