@@ -104,6 +104,7 @@ public:
 	void hide_meter ();
 	void show_meter ();
 	void reset_meter ();
+	void clear_meter ();
 	void meter_changed (void *);
 
 protected:
