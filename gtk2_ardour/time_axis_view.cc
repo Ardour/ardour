@@ -123,7 +123,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_border_width (2);
 	controls_table.set_row_spacings (0);
 	controls_table.set_col_spacings (0);
-	controls_table.set_homogeneous (false);
+	controls_table.set_homogeneous (true);
 
 	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::SHRINK|Gtk::EXPAND, Gtk::SHRINK|Gtk::EXPAND);
 	controls_table.show_all ();
