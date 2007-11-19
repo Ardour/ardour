@@ -691,7 +691,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 	case Large:
 	case Larger:
 	case Normal:
-		gpm.show();
+		show_meter();
 		show_name_entry ();
 		hide_name_label ();
 
@@ -712,7 +712,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		break;
 
 	case Smaller:
-		gpm.show();
+		show_meter();
 		show_name_entry ();
 		hide_name_label ();
 
@@ -733,7 +733,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		break;
 
 	case Small:
-		gpm.hide ();
+		hide_meter ();
 		hide_name_entry ();
 		show_name_label ();
 
