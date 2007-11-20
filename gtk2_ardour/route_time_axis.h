@@ -38,7 +38,7 @@
 #include "enums.h"
 #include "time_axis_view.h"
 #include "canvas.h"
-#include "gain_meter.h"
+#include "level_meter.h"
 
 
 namespace ARDOUR {
@@ -253,7 +253,7 @@ protected:
 
 	void post_construct ();
 	
-	GainMeter	gpm;
+	LevelMeter	lm;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

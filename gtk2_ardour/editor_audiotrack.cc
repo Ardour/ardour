@@ -125,7 +125,7 @@ Editor::stop_updating ()
 	if (is_mapped() && session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((atv = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {
-				atv->clear_meter ();
+				atv->hide_meter ();
 			}
 		}
 	}

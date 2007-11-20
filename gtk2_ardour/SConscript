@@ -171,6 +171,7 @@ io_selector.cc
 keyboard.cc
 keyeditor.cc
 ladspa_pluginui.cc
+level_meter.cc
 location_ui.cc
 main.cc
 marker.cc

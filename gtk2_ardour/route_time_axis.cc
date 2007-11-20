@@ -93,10 +93,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
 	  visual_button (_("v")),
-	  gpm (rt, sess)
+	  lm (rt, sess)
 
 {
-	gpm.setup_atv_meter(50);
+	lm.set_no_show_all();
+	lm.setup_meters(50);
 	_has_state = true;
 	playlist_menu = 0;
 	playlist_action_menu = 0;
@@ -151,7 +152,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	}
 
-	controls_hbox.pack_end(gpm);
+	controls_hbox.pack_start(lm, false, false);
 	_route->meter_change.connect (mem_fun(*this, &RouteTimeAxisView::meter_changed));
 	_route->input_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
 	_route->output_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
@@ -654,7 +655,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 {
 	int gmlen = (height_to_pixels (h)) - 5;
 	bool height_changed = (height == 0) || (h != height_style);
-	gpm.setup_atv_meter (gmlen);
+	lm.setup_meters (gmlen);
 	TimeAxisView::set_height (h);
 
 	ensure_xml_node ();
@@ -1790,13 +1791,14 @@ RouteTimeAxisView::update_rec_display ()
 void
 RouteTimeAxisView::fast_update ()
 {
-	gpm.update_meters ();
+	lm.update_meters ();
 }
 
 void
 RouteTimeAxisView::hide_meter ()
 {
-	gpm.hide ();
+	clear_meter ();
+	lm.hide_meters ();
 }
 
 void
@@ -1808,13 +1810,17 @@ RouteTimeAxisView::show_meter ()
 void
 RouteTimeAxisView::reset_meter ()
 {
-	gpm.setup_atv_meter (height-5);
+	if (Config->get_show_track_meters()) {
+		lm.setup_meters (height-5);
+	} else {
+		hide_meter ();
+	}
 }
 
 void
 RouteTimeAxisView::clear_meter ()
 {
-	gpm.clear_meters ();
+	lm.clear_meters ();
 }
 
 void
