@@ -541,7 +541,7 @@ libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext
 
 # SCons should really do this for us
 
-conf = Configure (env)
+conf = env.Configure ()
 
 have_cxx = conf.TryAction (Action (str(env['CXX']) + ' --version'))
 if have_cxx[0] != 1:
