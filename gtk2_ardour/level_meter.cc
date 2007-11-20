@@ -183,7 +183,7 @@ LevelMeter::setup_meters (int len)
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
 		}
 
-		pack_start (*meters[n].meter, false, false);
+		pack_end (*meters[n].meter, false, false);
 		meters[n].meter->show_all ();
 		meters[n].packed = true;
 	}
