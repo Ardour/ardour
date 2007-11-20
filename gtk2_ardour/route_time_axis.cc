@@ -153,6 +153,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	controls_hbox.pack_end(gpm);
 	_route->meter_change.connect (mem_fun(*this, &RouteTimeAxisView::meter_changed));
+	_route->input_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
+	_route->output_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
 
 	controls_table.attach (*mute_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (*solo_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
@@ -1822,3 +1824,8 @@ RouteTimeAxisView::meter_changed (void *src)
 	reset_meter();
 }
 
+void
+RouteTimeAxisView::io_changed (IOChange change, void *src)
+{
+	reset_meter ();
+}

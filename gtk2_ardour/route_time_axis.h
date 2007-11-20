@@ -105,6 +105,7 @@ public:
 	void show_meter ();
 	void reset_meter ();
 	void clear_meter ();
+	void io_changed (ARDOUR::IOChange, void *);
 	void meter_changed (void *);
 
 protected:
