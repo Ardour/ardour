@@ -479,11 +479,17 @@ libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
-libraries['fftw3f'] = LibraryInfo()
-libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
+conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
 
-libraries['fftw3'] = LibraryInfo()
-libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
+if conf.CheckPKGExists ('fftw3f'):
+    libraries['fftw3f'] = LibraryInfo()
+    libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
+
+if conf.CheckPKGExists ('fftw3'):
+    libraries['fftw3'] = LibraryInfo()
+    libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
+
+env = conf.Finish ()
 
 if env['FFT_ANALYSIS']:
         #
@@ -741,7 +747,7 @@ libraries['vamp'] = LibraryInfo()
 
 env['RUBBERBAND'] = False
 
-conf = Configure (libraries['vamp'], custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
+conf = libraries['vamp'].Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
 
 if conf.CheckPKGExists('vamp-sdk'):
     have_vamp = True
