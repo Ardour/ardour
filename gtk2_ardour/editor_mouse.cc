@@ -5048,8 +5048,12 @@ Editor::end_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	nframes_t newlen = drag_info.last_pointer_frame - clicked_regionview->region()->position();
+#ifdef USE_RUBBERBAND
+	float percentage = (float) ((double) newlen / (double) clicked_regionview->region()->length());
+#else
 	float percentage = (float) ((double) newlen - (double) clicked_regionview->region()->length()) / ((double) newlen) * 100.0f;
-	
+#endif	
+
 	begin_reversible_command (_("timestretch"));
 
 	if (run_timestretch (selection->regions, percentage) == 0) {

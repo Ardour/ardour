@@ -64,6 +64,7 @@ class LibraryInfo(Environment):
             self.Append (LIBPATH = other.get ('LIBPATH', []))
             self.Append (CPPPATH = other.get('CPPPATH', []))
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
+            self.Append (CCFLAGS = other.get('CCFLAGS', []))
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
         #doing LINKFLAGS breaks -framework
@@ -434,6 +435,12 @@ def CheckPKGVersion(context, name, version):
      context.Result( ret )
      return ret
 
+def CheckPKGExists(context, name):
+    context.Message ('Checking for %s...' % name)
+    ret = context.TryAction('pkg-config --exists %s' % name)[0]
+    context.Result (ret)
+    return ret
+
 conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                                        'CheckPKGVersion' : CheckPKGVersion })
 
@@ -472,27 +479,21 @@ libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
-libraries['rubberband'] = LibraryInfo()
-#
-# chris cannam's rubberband has not yet been released
-# 
-if os.path.exists ('libs/rubberband'):
-    libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
-                                           LIBPATH='#libs/rubberband/lib',
-                                           CPPPATH='#libs/rubberband/src',
-                                           CXXFLAGS='-DUSE_RUBBERBAND')
+libraries['fftw3f'] = LibraryInfo()
+libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
+
+libraries['fftw3'] = LibraryInfo()
+libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
 
 if env['FFT_ANALYSIS']:
-	libraries['fftw3f'] = LibraryInfo()
-	libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
         #
         # Check for fftw3 header as well as the library
-        conf = Configure (libraries['fftw3f'])
+        #
+        conf = env.Configure()
         if conf.CheckHeader ('fftw3.h') == False:
-                print "FFT Analysis cannot be compiled without the FFTW3 headers, which don't seem to be installed"
-                sys.exit (1)
-        libraries['fftw3f'] = conf.Finish();
-
+            print ('FFT Analysis cannot be compiled without the FFTW3 headers, which do not seem to be installed')
+            sys.exit (1)            
+        
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 
@@ -731,6 +732,35 @@ def prep_libcheck(topenv, libinfo):
 	libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
 prep_libcheck(env, env)
+
+#
+# check for VAMP and rubberband (currently optional)
+#
+
+libraries['vamp'] = LibraryInfo()
+
+env['RUBBERBAND'] = False
+
+conf = Configure (libraries['vamp'], custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
+
+if conf.CheckPKGExists('vamp-sdk'):
+    have_vamp = True
+    libraries['vamp'].ParseConfig('pkg-config --cflags --libs vamp-sdk')
+else:
+    have_vamp = False
+
+libraries['vamp'] = conf.Finish ()
+
+if have_vamp:
+    if os.path.exists ('libs/rubberband/src'):
+        conf = Configure (libraries['vamp'])
+        if conf.CheckHeader ('fftw3.h'):
+            env['RUBBERBAND'] = True
+            libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
+                                                   LIBPATH='#libs/rubberband',
+                                                   CPPPATH='#libs/rubberband/rubberband',
+                                                   CCFLAGS='-DUSE_RUBBERBAND')
+        libraries['vamp'] = conf.Finish ()
 
 #
 # Check for libusb
@@ -972,7 +1002,6 @@ else:
                                             CPPPATH='#libs/appleutility')
 
     coredirs = [
-        'libs/soundtouch',
         'templates'
     ]
     
@@ -1038,6 +1067,14 @@ if env['SURFACES']:
 else:
     env['POWERMATE'] = 0
     env['TRANZPORT'] = 0
+
+#
+# timestretch libraries
+#
+
+timefx_subdirs = ['libs/soundtouch']
+if env['RUBBERBAND']:
+    timefx_subdirs += ['libs/rubberband']
     
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
@@ -1212,7 +1249,7 @@ env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
 
-for sublistdir in [ subdirs, gtk_subdirs, surface_subdirs ]:
+for sublistdir in [ subdirs, timefx_subdirs, gtk_subdirs, surface_subdirs ]:
     for subdir in sublistdir:
         SConscript (subdir + '/SConscript')
 

@@ -49,8 +49,6 @@ gtkardour.Merge ([
     libraries['gtk2'],
     libraries['xml'],
     libraries['xslt'],
-    libraries['soundtouch'],
-    libraries['rubberband'],
     libraries['samplerate'],
     libraries['jack']
 ])
@@ -75,6 +73,11 @@ if gtkardour['DMALLOC']:
 if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
+
+if gtkardour['RUBBERBAND']:
+	gtkardour.Merge ([ libraries['rubberband'],  libraries['vamp'], libraries['fftw3f'], libraries['fftw3'] ])
+else:
+	gtkardour.Merge ([ libraries['soundtouch'] ])
 
 skipped_files=Split("""
 connection_editor.cc

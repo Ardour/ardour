@@ -134,6 +134,8 @@
                    <menuitem action='finish-add-range'/>
 		   <separator/>
                    <menuitem action='select-all'/>
+                   <menuitem action='deselect-all'/>
+	           <menuitem action='invert-selection'/>
                    <menuitem action='select-all-after-edit-cursor'/>
                    <menuitem action='select-all-before-edit-cursor'/>
                    <menuitem action='select-all-after-playhead'/>

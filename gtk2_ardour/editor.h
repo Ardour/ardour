@@ -45,8 +45,8 @@
 
 #include <pbd/stateful.h>
 #include <ardour/session.h>
-#include <ardour/stretch.h>
 #include <ardour/tempo.h>
+#include <ardour/stretch.h>
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
 

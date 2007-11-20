@@ -21,14 +21,17 @@
 #define __ardour_stretch_h__
 
 #include <ardour/audiofilter.h>
+
+#ifndef USE_RUBBERBAND
 #include <soundtouch/SoundTouch.h>
+#endif
 
 namespace ARDOUR {
 
 class AudioRegion;
 
 struct TimeStretchRequest : public InterThreadInfo {
-    float                fraction;   
+    float                fraction;
     bool                 quick_seek; 
     bool                 antialias;  
 };
@@ -42,7 +45,10 @@ class Stretch : public AudioFilter {
 
   private:
 	TimeStretchRequest& tsr;
+
+#ifndef USE_RUBBERBAND
 	soundtouch::SoundTouch st;
+#endif
 
 };
 
