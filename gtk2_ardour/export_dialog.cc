@@ -625,10 +625,9 @@ ExportDialog::export_toc_file (Locations::LocationList& locations, const string&
 		return;
 	}
 	
-    string filepath = path + ".toc";
+	string filepath = path + ".toc";
 	ofstream out (filepath.c_str());
 	long unsigned int last_end_time = spec.start_frame, last_start_time = spec.start_frame;
-	int numtracks = 0;
 	gchar buf[18];
 
 	if (!out) {
@@ -643,102 +642,110 @@ ExportDialog::export_toc_file (Locations::LocationList& locations, const string&
 	Locations::LocationList temp;
 
 	for (i = locations.begin(); i != locations.end(); ++i) {
-	  if ((*i)->start() >= spec.start_frame && (*i)->end() <= spec.end_frame && (*i)->is_cd_marker() && !(*i)->is_end()) {
-	    temp.push_back (*i);
-	    if (!(*i)->is_mark()) {
-	      numtracks ++;
-	    }
-	  }
+		if ((*i)->start() >= spec.start_frame && (*i)->end() <= spec.end_frame && (*i)->is_cd_marker() && !(*i)->is_end()) {
+			temp.push_back (*i);
+		}
 	}
 
-	if (numtracks == 0 ) {
-		    /* the user supplied no track markers.
-		       we now treat the session as one track.*/
-
-		    out << endl << "TRACK AUDIO" << endl;
-		   
-		    out << "COPY" << endl;
-
-		    out << "NO PRE_EMPHASIS" << endl;
-   
-		    /* XXX add session properties for catalog etc.
-		       (so far only the session name is used) */
-		    
-		    out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE \"" << session->name() << "\"" << endl;
-		    out << "  }" << endl << "}" << endl;
-
-		    out << "FILE \"" << path << "\" ";
-		    out << "00:00:00 " ;
-		    frames_to_cd_frames_string (buf, spec.end_frame - spec.start_frame, session->frame_rate());
-		    out << buf << endl;
-		    out << "START 00:00:00" << endl;
-
-		    last_start_time = spec.start_frame;
-		    last_end_time = spec.end_frame;
-	} 
-
-	if (temp.size()) {
+	if (temp.size() > 0) {
 		LocationSortByStart cmp;
 		temp.sort (cmp);
+		Location * curr_range = 0;
+		Locations::LocationList::iterator nexti;
 
 		for (i = temp.begin(); i != temp.end(); ++i) {
-	
-		      if (!(*i)->is_mark()) {
-			/*this is a track */
-		        out << endl << "TRACK AUDIO" << endl;
 
-			if ((*i)->cd_info.find("scms") != (*i)->cd_info.end())  {
-			  out << "NO ";
+			if ((*i)->start() >= last_end_time)
+			{
+				/* this is a track, defined by a cd range marker or a cd location marker outside of a cd range */
+				out << endl << "TRACK AUDIO" << endl;
+				
+				if ((*i)->cd_info.find("scms") != (*i)->cd_info.end())  {
+					out << "NO ";
+				}
+				out << "COPY" << endl;
+				
+				if ((*i)->cd_info.find("preemph") != (*i)->cd_info.end())  {
+					out << "PRE_EMPHASIS" << endl;
+				} else {
+					out << "NO PRE_EMPHASIS" << endl;
+				}
+				
+				if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end())  {
+					out << "ISRC \"" << (*i)->cd_info["isrc"] << "\"" << endl;
+				}
+				
+				out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE \"" << (*i)->name() << "\"" << endl;
+				if ((*i)->cd_info.find("performer") != (*i)->cd_info.end()) {
+					out << "     PERFORMER \"" << (*i)->cd_info["performer"]  << "\"" << endl;
+				}
+				if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
+					out  << "     COMPOSER \"" << (*i)->cd_info["string_composer"] << "\"" << endl;
+				}
+				
+				if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end()) {			  
+					out  << "     ISRC \"";
+					out << (*i)->cd_info["isrc"].substr(0,2) << "-";
+					out << (*i)->cd_info["isrc"].substr(2,3) << "-";
+					out << (*i)->cd_info["isrc"].substr(5,2) << "-";
+					out << (*i)->cd_info["isrc"].substr(7,5) << "\"" << endl;
+				}
+				
+				out << "  }" << endl << "}" << endl;
+				
+				frames_to_cd_frames_string (buf, last_end_time - spec.start_frame, session->frame_rate());
+				out << "FILE \"" << path << "\" " << buf;
+				
+				if ((*i)->is_mark()) {
+					// a mark track location needs to look ahead to the next marker's start to determine length
+					nexti = i;
+					++nexti;
+					if (nexti != temp.end()) {
+						frames_to_cd_frames_string (buf, (*nexti)->start() - last_end_time, session->frame_rate());
+						out << buf << endl;
+						
+						frames_to_cd_frames_string (buf, (*i)->start() - last_end_time, session->frame_rate());
+						out << "START" << buf << endl;
+						
+						last_start_time = (*i)->start();
+						last_end_time = (*nexti)->start();
+					}
+					else {
+						// this was the last marker, use session end
+						frames_to_cd_frames_string (buf, spec.end_frame - last_end_time, session->frame_rate());
+						out << buf << endl;
+						
+						frames_to_cd_frames_string (buf, (*i)->start() - last_end_time, session->frame_rate());
+						out << "START" << buf << endl;
+						
+						last_start_time = (*i)->start();
+						last_end_time = spec.end_frame;
+					}
+
+					curr_range = 0;
+				}
+				else {
+					// range
+					frames_to_cd_frames_string (buf, (*i)->end() - last_end_time, session->frame_rate());
+					out << buf << endl;
+					
+					frames_to_cd_frames_string (buf, (*i)->start() - last_end_time, session->frame_rate());
+					out << "START" << buf << endl;
+					
+					last_start_time = (*i)->start();
+					last_end_time = (*i)->end();
+
+					curr_range = (*i);
+				}
+				
 			}
-			out << "COPY" << endl;
-
-			if ((*i)->cd_info.find("preemph") != (*i)->cd_info.end())  {
-			  out << "PRE_EMPHASIS" << endl;
-			} else {
-			  out << "NO PRE_EMPHASIS" << endl;
+			else if ((*i)->is_mark()) 
+			{
+				/* this is an index within a track */
+				
+				frames_to_cd_frames_string (buf, (*i)->start() - last_start_time, session->frame_rate());
+				out << "INDEX" << buf << endl;
 			}
-
-			if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end())  {
-			  out << "ISRC \"" << (*i)->cd_info["isrc"] << "\"" << endl;
-			}
-
-			out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE \"" << (*i)->name() << "\"" << endl;
-			if ((*i)->cd_info.find("performer") != (*i)->cd_info.end()) {
-			  out << "     PERFORMER \"" << (*i)->cd_info["performer"]  << "\"" << endl;
-			}
-			if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
-			  out  << "     COMPOSER \"" << (*i)->cd_info["string_composer"] << "\"" << endl;
-			}
-
-			if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end()) {			  
-			  out  << "     ISRC \"";
-			  out << (*i)->cd_info["isrc"].substr(0,2) << "-";
-			  out << (*i)->cd_info["isrc"].substr(2,3) << "-";
-			  out << (*i)->cd_info["isrc"].substr(5,2) << "-";
-			  out << (*i)->cd_info["isrc"].substr(7,5) << "\"" << endl;
-			}
-
-			out << "  }" << endl << "}" << endl;
-
-			frames_to_cd_frames_string (buf, last_end_time - spec.start_frame, session->frame_rate());
-			out << "FILE \"" << path << "\" " << buf;
-
-			frames_to_cd_frames_string (buf, (*i)->end() - last_end_time, session->frame_rate());
-			out << buf << endl;
-
-			frames_to_cd_frames_string (buf, (*i)->start() - last_end_time, session->frame_rate());
-			out << "START" << buf << endl;
-			
-			last_start_time = (*i)->start();
-			last_end_time = (*i)->end();
-		 
-
-		      } else  if ((*i)->start() < last_end_time) {
-			/* this is an index within a track */
-			
-			frames_to_cd_frames_string (buf, (*i)->start() - last_start_time, session->frame_rate());
-			out << "INDEX" << buf << endl;
-		      }
 		}
 	}
 	
@@ -783,7 +790,7 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 		  out << "FILE " << path  << ' ' << (header_format_combo.get_active_text()) << endl;
 	}
 
-	if (numtracks == 0) {
+	if (false && numtracks == 0) {
 		    /* the user has supplied no track markers.
 		       the entire export is treated as one track. 
 		    */
@@ -814,58 +821,78 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 	if (temp.size()) {
 		LocationSortByStart cmp;
 		temp.sort (cmp);
+		Location * curr_range = 0;
+		Locations::LocationList::iterator nexti;
 
 		for ( i = temp.begin(); i != temp.end(); ++i) {
 
-		    if (!(*i)->is_mark() && ((*i)->start() >= last_track_end)) {
-		      /* this is a track and it doesn't start inside another one*/
-		      
-		      tracknum++;
-		      indexnum = 0;
-		      out << endl << "TRACK " << tracknum << " AUDIO" << endl;
-		      out << "FLAGS " ;
-		      
-		      if ((*i)->cd_info.find("scms") != (*i)->cd_info.end())  {
-			out << "SCMS ";
-		      } else {
-			out << "DCP ";
-		      }
-		      
-		      if ((*i)->cd_info.find("preemph") != (*i)->cd_info.end())  {
-			out << "PRE";
-		      }
-		      out << endl;
-		      
-		      if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end())  {
-			out << "ISRC " << (*i)->cd_info["isrc"] << endl;
-			
-		      }
-		      if ((*i)->name() != "") {
-			out << "TITLE \"" << (*i)->name() << "\"" << endl;
-		      }	      
-		      
-		      if ((*i)->cd_info.find("performer") != (*i)->cd_info.end()) {
-			out << "PERFORMER \"" <<  (*i)->cd_info["performer"] << "\"" << endl;
-		      }
-		      
-		      if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
-			out << "SONGWRITER \"" << (*i)->cd_info["string_composer"]  << "\"" << endl;
-		      }
-			snprintf (buf, sizeof(buf), "INDEX %02d", indexnum);
-			out << buf;
-			frames_to_cd_frames_string (buf, last_track_end - spec.start_frame, session->frame_rate());
-			out << buf << endl;
-			indexnum++;
-			last_track_end = (*i)->end();
-		    } 
-		    if ((tracknum > 0) && ((*i)->start() < last_track_end)) {
-		      /*this is an index and it lies within a track*/
-		      snprintf (buf, sizeof(buf), "INDEX %02d", indexnum);
-		      out << buf;
-		      frames_to_cd_frames_string (buf,(*i)->start() - spec.start_frame, session->frame_rate());
-		      out << buf << endl;
-		      indexnum++;
-		    }
+			if ((*i)->start() >= last_track_end)
+			{
+				/* this is a track and it doesn't start inside another one*/
+				
+				tracknum++;
+				indexnum = 0;
+				out << endl << "TRACK " << tracknum << " AUDIO" << endl;
+				out << "FLAGS " ;
+				
+				if ((*i)->cd_info.find("scms") != (*i)->cd_info.end())  {
+					out << "SCMS ";
+				} else {
+					out << "DCP ";
+				}
+				
+				if ((*i)->cd_info.find("preemph") != (*i)->cd_info.end())  {
+					out << "PRE";
+				}
+				out << endl;
+				
+				if ((*i)->cd_info.find("isrc") != (*i)->cd_info.end())  {
+					out << "ISRC " << (*i)->cd_info["isrc"] << endl;
+					
+				}
+				if ((*i)->name() != "") {
+					out << "TITLE \"" << (*i)->name() << "\"" << endl;
+				}	      
+				
+				if ((*i)->cd_info.find("performer") != (*i)->cd_info.end()) {
+					out << "PERFORMER \"" <<  (*i)->cd_info["performer"] << "\"" << endl;
+				}
+				
+				if ((*i)->cd_info.find("string_composer") != (*i)->cd_info.end()) {
+					out << "SONGWRITER \"" << (*i)->cd_info["string_composer"]  << "\"" << endl;
+				}
+				snprintf (buf, sizeof(buf), "INDEX %02d", indexnum);
+				out << buf;
+				frames_to_cd_frames_string (buf, last_track_end - spec.start_frame, session->frame_rate());
+				out << buf << endl;
+				indexnum++;
+
+				if ((*i)->is_mark()) {
+					// need to find the next start to define the end
+					nexti = i;
+					++nexti;
+					if (nexti != temp.end()) {
+						last_track_end = (*nexti)->start();
+					}
+					else {
+						last_track_end = spec.end_frame;
+					}
+					curr_range = 0;
+				}
+				else {
+					last_track_end = (*i)->end();
+					curr_range = (*i);
+				}
+			} 
+	
+			if ((tracknum > 0) && ((*i)->start() < last_track_end)) {
+				/*this is an index and it lies within a track*/
+				snprintf (buf, sizeof(buf), "INDEX %02d", indexnum);
+				out << buf;
+				frames_to_cd_frames_string (buf,(*i)->start() - spec.start_frame, session->frame_rate());
+				out << buf << endl;
+				indexnum++;
+			}
 		}
 	}
 	
