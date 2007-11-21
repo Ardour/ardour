@@ -495,10 +495,13 @@ if env['FFT_ANALYSIS']:
         #
         # Check for fftw3 header as well as the library
         #
-        conf = env.Configure()
+
+        conf = Configure(libraries['fftw3'])
+
         if conf.CheckHeader ('fftw3.h') == False:
             print ('FFT Analysis cannot be compiled without the FFTW3 headers, which do not seem to be installed')
             sys.exit (1)            
+        conf.Finish()
         
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
