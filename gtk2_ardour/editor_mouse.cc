@@ -496,6 +496,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return true;
 				break;
 
+			case CdMarkerBarItem:
+				start_range_markerbar_op (item, event, CreateCDMarker); 
+				return true;
+				break;
+
 			case TransportMarkerBarItem:
 				start_range_markerbar_op (item, event, CreateTransportMarker); 
 				return true;
@@ -880,7 +885,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case MarkerBarItem: 
 			case RangeMarkerBarItem: 
-			case TransportMarkerBarItem: 
+			case TransportMarkerBarItem:
+			case CdMarkerBarItem:
 			case TempoBarItem:
 			case MeterBarItem:
 				popup_ruler_menu (pixel_to_frame(event->button.x), item_type);
@@ -987,6 +993,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				snap_to (where, 0, true);
 			}
 			mouse_add_new_marker (where);
+			return true;
+
+		case CdMarkerBarItem:
+			// if we get here then a dragged range wasn't done
+			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+				snap_to (where, 0, true);
+			}
+			mouse_add_new_marker (where, true);
 			return true;
 
 		case TempoBarItem:
@@ -1263,6 +1277,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MarkerBarItem:
 	case RangeMarkerBarItem:
 	case TransportMarkerBarItem:
+	case CdMarkerBarItem:
 	case MeterBarItem:
 	case TempoBarItem:
 		if (is_drawable()) {
@@ -1396,6 +1411,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case RangeMarkerBarItem:
 	case TransportMarkerBarItem:
+	case CdMarkerBarItem:
 	case MeterBarItem:
 	case TempoBarItem:
 	case MarkerBarItem:
@@ -4609,7 +4625,8 @@ Editor::start_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event, Ran
 	switch (op) {
 	case CreateRangeMarker:
 	case CreateTransportMarker:
-		
+	case CreateCDMarker:
+	
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
 			drag_info.copy = true;
 		} else {
@@ -4643,6 +4660,7 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 	switch (range_marker_op) {
 	case CreateRangeMarker:
 	case CreateTransportMarker:
+	case CreateCDMarker:
 		if (drag_info.first_move) {
 			snap_to (drag_info.grab_frame);
 		}
@@ -4700,17 +4718,25 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	Location * newloc = 0;
 	string rangename;
+	int flags;
 	
 	if (!drag_info.first_move) {
 		drag_range_markerbar_op (item, event);
 
 		switch (range_marker_op) {
 		case CreateRangeMarker:
+		case CreateCDMarker:
 		    {
 			begin_reversible_command (_("new range marker"));
                         XMLNode &before = session->locations()->get_state();
 			session->locations()->next_available_name(rangename,"unnamed");
-			newloc = new Location(temp_location->start(), temp_location->end(), rangename, Location::IsRangeMarker);
+			if (range_marker_op == CreateCDMarker) {
+				flags =  Location::IsRangeMarker|Location::IsCDMarker;
+			}
+			else {
+				flags =  Location::IsRangeMarker;
+			}
+			newloc = new Location(temp_location->start(), temp_location->end(), rangename, (Location::Flags) flags);
 			session->locations()->add (newloc, true);
                         XMLNode &after = session->locations()->get_state();
 			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
@@ -4730,7 +4756,7 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 	} else {
 		/* just a click, no pointer movement. remember that context menu stuff was handled elsewhere */
 
-		if (Keyboard::no_modifier_keys_pressed (&event->button)) {
+		if (Keyboard::no_modifier_keys_pressed (&event->button) && range_marker_op != CreateCDMarker) {
 
 			nframes_t start;
 			nframes_t end;

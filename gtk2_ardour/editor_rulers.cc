@@ -90,6 +90,7 @@ Editor::initialize_rulers ()
 	ruler_shown[ruler_time_marker] = true;
 	ruler_shown[ruler_time_range_marker] = true;
 	ruler_shown[ruler_time_transport_marker] = true;
+	ruler_shown[ruler_time_cd_marker] = true;
 	ruler_shown[ruler_metric_frames] = false;
 	ruler_shown[ruler_metric_minsec] = false;
 	
@@ -331,7 +332,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 
 	switch (t) {
 	case MarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where)));
+		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, false)));
 		ruler_items.push_back (MenuElem (_("Clear all locations"), mem_fun(*this, &Editor::clear_markers)));
 		ruler_items.push_back (MenuElem (_("Unhide locations"), mem_fun(*this, &Editor::unhide_markers)));
 		ruler_items.push_back (SeparatorElem ());
@@ -346,7 +347,13 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 	case TransportMarkerBarItem:
 
 		break;
+	
+	case CdMarkerBarItem:
+		// TODO
+		ruler_items.push_back (MenuElem (_("New CD track marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, true)));
+		break;
 		
+	
 	case TempoBarItem:
 		ruler_items.push_back (MenuElem (_("New Tempo"), bind ( mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (MenuElem (_("Clear tempo")));
@@ -413,6 +420,12 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
  		mitem->set_active(true);
  	}
 
+ 	ruler_items.push_back (CheckMenuElem (_("CD Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_cd_marker)));
+ 	mitem = (CheckMenuItem *) &ruler_items.back(); 
+ 	if (ruler_shown[ruler_time_cd_marker]) {
+ 		mitem->set_active(true);
+ 	}
+
  	ruler_items.push_back (CheckMenuElem (_("Loop/Punch Ranges"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_transport_marker)));
  	mitem = (CheckMenuItem *) &ruler_items.back(); 
  	if (ruler_shown[ruler_time_transport_marker]) {
@@ -461,6 +474,7 @@ Editor::store_ruler_visibility ()
 	node->add_property (X_("marker"), ruler_shown[ruler_time_marker] ? "yes": "no");
 	node->add_property (X_("rangemarker"), ruler_shown[ruler_time_range_marker] ? "yes": "no");
 	node->add_property (X_("transportmarker"), ruler_shown[ruler_time_transport_marker] ? "yes": "no");
+	node->add_property (X_("cdmarker"), ruler_shown[ruler_time_cd_marker] ? "yes": "no");
 
 	session->add_extra_xml (*node);
 	session->set_dirty ();
@@ -526,6 +540,26 @@ Editor::restore_ruler_visibility ()
 				ruler_shown[ruler_time_transport_marker] = true;
 			else 
 				ruler_shown[ruler_time_transport_marker] = false;
+		}
+
+		if ((prop = node->property ("cdmarker")) != 0) {
+			if (prop->value() == "yes") 
+				ruler_shown[ruler_time_cd_marker] = true;
+			else 
+				ruler_shown[ruler_time_cd_marker] = false;
+		}
+		else {
+			// this session doesn't yet know about the cdmarker ruler
+			// as a benefit to the user who doesn't know the feature exists, show the ruler if 
+			// any cd marks exist
+			ruler_shown[ruler_time_cd_marker] = false;
+			const Locations::LocationList & locs = session->locations()->list();
+			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
+				if ((*i)->is_cd_marker()) {
+					ruler_shown[ruler_time_cd_marker] = true;
+					break;
+				}
+			}
 		}
 
 	}
@@ -681,6 +715,24 @@ Editor::update_ruler_visibility ()
 	}
 	else {
 		transport_marker_group->hide();
+	}
+
+	if (ruler_shown[ruler_time_cd_marker]) {
+		lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
+		old_unit_pos = cd_marker_group->property_y();
+		if (tbpos != old_unit_pos) {
+			cd_marker_group->move (0.0, tbpos - old_unit_pos);
+		}
+		cd_marker_group->show();
+		tbpos += timebar_height;
+		visible_timebars++;
+		// make sure all cd markers show up in their respective places
+		update_cd_marker_display();
+	}
+	else {
+		cd_marker_group->hide();
+		// make sure all cd markers show up in their respective places
+		update_cd_marker_display();
 	}
 	
 	if (ruler_shown[ruler_time_marker]) {

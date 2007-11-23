@@ -31,7 +31,7 @@
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
 		Type type, nframes_t frame, bool handle_events)
 
-	: editor (ed), _type(type)
+	: editor (ed), _parent(&parent), _type(type)
 {
 	double label_offset = 0;
 	bool annotate_left = false;
@@ -271,6 +271,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 }
 
+
 Marker::~Marker ()
 {
 	drop_references ();
@@ -284,6 +285,12 @@ Marker::~Marker ()
 		delete line;
 		delete line_points;
 	}
+}
+
+void Marker::reparent(ArdourCanvas::Group & parent)
+{
+	group->reparent(parent);
+	_parent = &parent;
 }
 
 void
@@ -381,6 +388,7 @@ void
 Marker::set_color_rgba (uint32_t color)
 {
 	mark->property_fill_color_rgba() = color;
+	mark->property_outline_color_rgba() = color;
 }
 
 /***********************************************************************/

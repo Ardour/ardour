@@ -825,6 +825,12 @@ Editor::canvas_transport_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* 
 }
 
 bool
+Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, CdMarkerBarItem);
+}
+
+bool
 Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, TempoMarker* marker)
 {
 	return typed_event (item, event, TempoMarkerItem);

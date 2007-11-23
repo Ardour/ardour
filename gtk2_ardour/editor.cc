@@ -183,6 +183,7 @@ Editor::Editor ()
 	  mark_label (_("Location Markers")),
 	  range_mark_label (_("Range Markers")),
 	  transport_mark_label (_("Loop/Punch Ranges")),
+	  cd_mark_label (_("CD Markers")),
 
 	  edit_packer (3, 3, true),
 
@@ -414,6 +415,10 @@ Editor::Editor ()
 	mark_label.set_size_request (-1, (int)timebar_height);
 	mark_label.set_alignment (1.0, 0.5);
 	mark_label.set_padding (5,0);
+	cd_mark_label.set_name ("EditorTimeButton");
+	cd_mark_label.set_size_request (-1, (int)timebar_height);
+	cd_mark_label.set_alignment (1.0, 0.5);
+	cd_mark_label.set_padding (5,0);
 	range_mark_label.set_name ("EditorTimeButton");
 	range_mark_label.set_size_request (-1, (int)timebar_height);
 	range_mark_label.set_alignment (1.0, 0.5);

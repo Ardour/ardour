@@ -77,9 +77,15 @@ Editor::add_new_location (Location *location)
 	}
 
 	if (location->is_mark()) {
-		lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
-		lam->end   = 0;
 
+		if (location->is_cd_marker() && ruler_shown[ruler_time_cd_marker]) {
+			lam->start = new Marker (*this, *cd_marker_group, color, location->name(), Marker::Mark, location->start());
+		}
+		else {
+			lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
+		}
+		lam->end   = 0;
+			
 	} else if (location->is_auto_loop()) {
 		// transport marker
 		lam->start = new Marker (*this, *transport_marker_group, color, 
@@ -95,12 +101,20 @@ Editor::add_new_location (Location *location)
 					 location->name(), Marker::PunchOut, location->end());
 		
 	} else {
-
 		// range marker
-		lam->start = new Marker (*this, *range_marker_group, color, 
-					 location->name(), Marker::Start, location->start());
-		lam->end   = new Marker (*this, *range_marker_group, color, 
-					 location->name(), Marker::End, location->end());
+		if (location->is_cd_marker() && ruler_shown[ruler_time_cd_marker]) {
+			lam->start = new Marker (*this, *cd_marker_group, color, 
+						 location->name(), Marker::Start, location->start());
+			lam->end   = new Marker (*this, *cd_marker_group, color, 
+						 location->name(), Marker::End, location->end());
+		}
+		else {
+			
+			lam->start = new Marker (*this, *range_marker_group, color, 
+						 location->name(), Marker::Start, location->start());
+			lam->end   = new Marker (*this, *range_marker_group, color, 
+						 location->name(), Marker::End, location->end());
+		}
 	}
 
 	if (location->is_hidden ()) {
@@ -157,6 +171,9 @@ Editor::location_flags_changed (Location *location, void *src)
 		return;
 	}
 
+	// move cd markers to/from cd marker bar as appropriate
+	ensure_cd_marker_updated (lam, location);
+
 	if (location->is_cd_marker()) {
 		lam->set_color_rgba (location_cd_marker_color);
 	} else if (location->is_mark()) {
@@ -173,6 +190,52 @@ Editor::location_flags_changed (Location *location, void *src)
 		lam->hide();
 	} else {
 		lam->show ();
+	}
+}
+
+void Editor::update_cd_marker_display ()
+{
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		LocationMarkers * lam = i->second;
+		Location * location = i->first;
+
+		ensure_cd_marker_updated (lam, location);
+	}
+}
+
+void Editor::ensure_cd_marker_updated (LocationMarkers * lam, Location * location)
+{
+	if (location->is_cd_marker()
+	    && (ruler_shown[ruler_time_cd_marker] &&  lam->start->get_parent() != cd_marker_group))
+	{
+		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
+		if (lam->start) {
+			lam->start->reparent (*cd_marker_group);
+		}
+		if (lam->end) {
+			lam->end->reparent (*cd_marker_group);
+		}
+	}
+	else if ( (!location->is_cd_marker() || !ruler_shown[ruler_time_cd_marker]) 
+		  && (lam->start->get_parent() == cd_marker_group))  
+	{
+		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
+		if (location->is_mark()) {
+			if (lam->start) {
+				lam->start->reparent (*marker_group);
+			}
+			if (lam->end) {
+				lam->end->reparent (*marker_group);
+			}
+		}
+		else {
+			if (lam->start) {
+				lam->start->reparent (*range_marker_group);
+			}
+			if (lam->end) {
+				lam->end->reparent (*range_marker_group);
+			}
+		}
 	}
 }
 
@@ -319,12 +382,14 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 }
 
 void
-Editor::mouse_add_new_marker (nframes_t where)
+Editor::mouse_add_new_marker (nframes_t where, bool is_cd)
 {
 	string markername;
+	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
+	
 	if (session) {
 		session->locations()->next_available_name(markername,"mark");
-		Location *location = new Location (where, where, markername, Location::IsMark);
+		Location *location = new Location (where, where, markername, (Location::Flags) flags);
 		session->begin_reversible_command (_("add marker"));
                 XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);

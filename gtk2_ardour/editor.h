@@ -429,7 +429,9 @@ class Editor : public PublicEditor
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_marker (nframes_t where);
+	void mouse_add_new_marker (nframes_t where, bool is_cd=false);
+	void update_cd_marker_display ();
+	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 
 	TimeAxisView*      clicked_trackview;
 	AudioTimeAxisView* clicked_audio_trackview;
@@ -537,6 +539,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      marker_group;
 	ArdourCanvas::Group*      range_marker_group;
 	ArdourCanvas::Group*      transport_marker_group;
+	ArdourCanvas::Group*      cd_marker_group;
 	
 	enum {
 		ruler_metric_smpte = 0,
@@ -549,10 +552,11 @@ class Editor : public PublicEditor
 		ruler_time_marker = 6,
 		ruler_time_range_marker = 7,
 		ruler_time_transport_marker = 8,
+		ruler_time_cd_marker = 9,
 	};
 
 	static GtkCustomMetric ruler_metrics[4];
-	bool                   ruler_shown[9];
+	bool                   ruler_shown[10];
 	bool                   no_ruler_shown_update;
 	
 	gint ruler_button_press (GdkEventButton*);
@@ -603,6 +607,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::SimpleRect* marker_bar;
 	ArdourCanvas::SimpleRect* range_marker_bar;
 	ArdourCanvas::SimpleRect* transport_marker_bar;
+	ArdourCanvas::SimpleRect* cd_marker_bar;
 
 	
 	ArdourCanvas::SimpleLine* tempo_line;
@@ -610,6 +615,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::SimpleLine* marker_line;
 	ArdourCanvas::SimpleLine* range_marker_line;
 	ArdourCanvas::SimpleLine* transport_marker_line;
+	ArdourCanvas::SimpleLine* cd_marker_line;
 
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
@@ -620,6 +626,7 @@ class Editor : public PublicEditor
 	Gtk::Label  mark_label;
 	Gtk::Label  range_mark_label;
 	Gtk::Label  transport_mark_label;
+	Gtk::Label  cd_mark_label;
 	
 
 	Gtk::VBox          time_button_vbox;
@@ -1221,6 +1228,7 @@ class Editor : public PublicEditor
 	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*);
 	bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameTimeAxis*);
@@ -1328,6 +1336,7 @@ class Editor : public PublicEditor
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
+	Gtk::Menu* cd_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
 	typedef list<Marker*> Marks;
@@ -1462,7 +1471,8 @@ class Editor : public PublicEditor
 	/* transport range select process */
 	enum RangeMarkerOp {
 		CreateRangeMarker,
-		CreateTransportMarker
+		CreateTransportMarker,
+		CreateCDMarker
 	} range_marker_op;
 
 	void start_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event, RangeMarkerOp);
