@@ -178,43 +178,7 @@ MidiPlaylist::refresh_dependents (boost::shared_ptr<Region> r)
 void
 MidiPlaylist::finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right)
 {
-	throw; // I don't wanna
-	/*
-	MidiRegion *orig  = dynamic_cast<MidiRegion*>(o);
-	MidiRegion *left  = dynamic_cast<MidiRegion*>(l);
-	MidiRegion *right = dynamic_cast<MidiRegion*>(r);
-
-	for (Crossfades::iterator x = _crossfades.begin(); x != _crossfades.end();) {
-		Crossfades::iterator tmp;
-		tmp = x;
-		++tmp;
-
-		Crossfade *fade = 0;
-
-		if ((*x)->_in == orig) {
-			if (! (*x)->covers(right->position())) {
-				fade = new Crossfade( *(*x), left, (*x)->_out);
-			} else {
-				// Overlap, the crossfade is copied on the left side of the right region instead
-				fade = new Crossfade( *(*x), right, (*x)->_out);
-			}
-		}
-
-		if ((*x)->_out == orig) {
-			if (! (*x)->covers(right->position())) {
-				fade = new Crossfade( *(*x), (*x)->_in, right);
-			} else {
-				// Overlap, the crossfade is copied on the right side of the left region instead
-				fade = new Crossfade( *(*x), (*x)->_in, left);
-			}
-		}
-
-		if (fade) {
-			_crossfades.remove( (*x) );
-			add_crossfade (*fade);
-		}
-		x = tmp;
-	}*/
+	/* No MIDI crossfading (yet?), so nothing to do here */
 }
 
 void
