@@ -1101,7 +1101,7 @@ Editor::edit_cursor_backward ()
 void
 Editor::edit_cursor_forward ()
 {
-	nframes_t pos;
+	//nframes_t pos;
 	nframes_t cnt;
 	bool was_floating;
 	float prefix;
