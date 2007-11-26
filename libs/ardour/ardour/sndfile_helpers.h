@@ -28,7 +28,7 @@ using std::string;
 // Use this define when initializing arrarys for use in sndfile_*_format()
 #define SNDFILE_STR_LENGTH 32
 
-#define SNDFILE_HEADER_FORMATS 7
+#define SNDFILE_HEADER_FORMATS 5
 extern const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1];
 extern const char * const sndfile_file_endings_strings[SNDFILE_HEADER_FORMATS+1];
 

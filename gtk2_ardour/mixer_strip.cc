@@ -42,6 +42,7 @@
 #include <ardour/panner.h>
 #include <ardour/send.h>
 #include <ardour/insert.h>
+#include <ardour/profile.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/connection.h>
 #include <ardour/session_connection.h>
@@ -992,7 +993,9 @@ MixerStrip::build_route_ops_menu ()
 	build_remote_control_menu ();
 	
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+	if (!Profile->get_sae()) {
+              items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+        }
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));

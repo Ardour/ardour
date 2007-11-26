@@ -763,13 +763,15 @@ class Editor : public PublicEditor
 	    
 	RegionListDisplayModelColumns          region_list_columns;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > region_list_display;
-
+	
 	Glib::RefPtr<Gtk::TreeStore>           region_list_model;
 	Glib::RefPtr<Gtk::ToggleAction>        toggle_full_region_list_action;
 	Glib::RefPtr<Gtk::ToggleAction>        toggle_show_auto_regions_action;
 
 	void region_list_selection_changed ();
 	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
+	void region_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 
 	Gtk::Menu          *region_list_menu;
 	Gtk::ScrolledWindow region_list_scroller;
@@ -1096,6 +1098,7 @@ class Editor : public PublicEditor
 	void set_punch_range (nframes_t start, nframes_t end, std::string cmd);
 
 	void add_location_from_playhead_cursor ();
+	bool select_new_marker;
 
 	void reverse_selection ();
 	void edit_envelope ();
@@ -1969,6 +1972,8 @@ class Editor : public PublicEditor
 	void fast_update_strips ();
 	bool meters_running;
 
+	void select_next_route ();
+	void select_prev_route ();
 };
 
 #endif /* __ardour_editor_h__ */

@@ -318,6 +318,7 @@ Editor::Editor ()
 	_dragging_playhead = false;
 	_dragging_edit_point = false;
 	_dragging_hscrollbar = false;
+	select_new_marker = false;
 
 	scrubbing_direction = 0;
 
@@ -489,7 +490,7 @@ Editor::Editor ()
 	CellRendererToggle* route_list_visible_cell = dynamic_cast<CellRendererToggle*>(route_list_display.get_column_cell_renderer (0));
 	route_list_visible_cell->property_activatable() = true;
 	route_list_visible_cell->property_radio() = false;
-	
+
 	route_display_model->signal_row_deleted().connect (mem_fun (*this, &Editor::route_list_delete));
 	route_display_model->signal_row_changed().connect (mem_fun (*this, &Editor::route_list_change));
 	route_display_model->signal_rows_reordered().connect (mem_fun (*this, &Editor::track_list_reorder));
@@ -578,6 +579,10 @@ Editor::Editor ()
 	region_list_display.set_model (region_list_model);
 	region_list_display.append_column (_("Regions"), region_list_columns.name);
 	region_list_display.set_headers_visible (false);
+
+	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
+	region_name_cell->property_editable() = true;
+	region_name_cell->signal_edited().connect (mem_fun (*this, &Editor::region_name_edit));
 
 	region_list_display.get_selection()->set_select_function (mem_fun (*this, &Editor::region_list_selection_filter));
 	
@@ -4226,3 +4231,37 @@ Editor::get_regions_for_action ()
 	tmp_regions = get_regions_at (where, selection->tracks);
 	return tmp_regions;
 }
+
+void
+Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions)
+{
+
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		
+		RouteTimeAxisView* tatv;
+		
+		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+			
+			boost::shared_ptr<Playlist> pl;
+			vector<boost::shared_ptr<Region> > results;
+			RegionView* marv;
+			boost::shared_ptr<Diskstream> ds;
+			
+			if ((ds = tatv->get_diskstream()) == 0) {
+				/* bus */
+				continue;
+			}
+			
+			if ((pl = (ds->playlist())) != 0) {
+				pl->get_region_list_equivalent_regions (region, results);
+			}
+			
+			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
+				if ((marv = tatv->view()->find_view (*ir)) != 0) {
+					regions.push_back (marv);
+				}
+			}
+			
+		}
+	}
+}	

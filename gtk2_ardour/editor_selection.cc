@@ -558,40 +558,18 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	return commit;
 }
 
+
 void
 Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> region, Selection::Operation op)
 {
 	vector<RegionView*> all_equivalent_regions;
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		
-		RouteTimeAxisView* tatv;
-		
-		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
-			
-			boost::shared_ptr<Playlist> pl;
-			vector<boost::shared_ptr<Region> > results;
-			RegionView* marv;
-			boost::shared_ptr<Diskstream> ds;
-			
-			if ((ds = tatv->get_diskstream()) == 0) {
-				/* bus */
-				continue;
-			}
-			
-			if ((pl = (ds->playlist())) != 0) {
-				pl->get_region_list_equivalent_regions (region, results);
-			}
-			
-			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
-				if ((marv = tatv->view()->find_view (*ir)) != 0) {
-					all_equivalent_regions.push_back (marv);
-				}
-			}
-			
-		}
+	get_regions_corresponding_to (region, all_equivalent_regions);
+
+	if (all_equivalent_regions.empty()) {
+		return;
 	}
-	
+
 	switch (op) {
 	case Selection::Toggle:
 		/* XXX this is not correct */

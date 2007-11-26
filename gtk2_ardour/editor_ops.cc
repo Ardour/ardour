@@ -1508,6 +1508,8 @@ Editor::add_location_from_playhead_cursor ()
 
 	nframes_t where = session->audible_frame();
 	
+	select_new_marker = true;
+
 	session->locations()->next_available_name(markername,"mark");
 	Location *location = new Location (where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
@@ -4191,4 +4193,57 @@ Editor::trim_region (bool front)
 		}
 	}
 	commit_reversible_command ();
+}
+
+struct EditorOrderRouteSorter {
+    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+	    /* use of ">" forces the correct sort order */
+	    return a->order_key ("editor") < b->order_key ("editor");
+    }
+};
+
+void
+Editor::select_next_route()
+{
+	if (selection->tracks.empty()) {
+		selection->set (track_views.front());
+		return;
+	}
+
+	TimeAxisView* current = selection->tracks.front();
+
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		if (*i == current) {
+			++i;
+			if (i != track_views.end()) {
+				selection->set (*i);
+			} else {
+				selection->set (*(track_views.begin()));
+			}
+			break;
+		}
+	}
+}
+
+void
+Editor::select_prev_route()
+{
+	if (selection->tracks.empty()) {
+		selection->set (track_views.front());
+		return;
+	}
+
+	TimeAxisView* current = selection->tracks.front();
+
+	for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
+		if (*i == current) {
+			++i;
+			if (i != track_views.rend()) {
+				selection->set (*i);
+			} else {
+				selection->set (*(track_views.rbegin()));
+			}
+			break;
+		}
+	}
 }

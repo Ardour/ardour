@@ -38,6 +38,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/gdither.h>
 #include <ardour/utils.h>
+#include <ardour/profile.h>
 
 #include "export_dialog.h"
 #include "ardour_ui.h"
@@ -318,30 +319,52 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	format_table.set_col_spacings (5);
 	format_table.set_row_spacings (5);
 
-	format_table.attach (channel_count_label, 0, 1, 0, 1);
-	format_table.attach (channel_count_combo, 1, 2, 0, 1);
+	int row = 0;
+
+	format_table.attach (channel_count_label, 0, 1, row, row+1);
+	format_table.attach (channel_count_combo, 1, 2, row, row+1);
+
+	row++;
 	
-	format_table.attach (header_format_label, 0, 1, 1, 2);
-	format_table.attach (header_format_combo, 1, 2, 1, 2);
+	format_table.attach (header_format_label, 0, 1, row, row+1);
+	format_table.attach (header_format_combo, 1, 2, row, row+1);
 
-	format_table.attach (bitdepth_format_label, 0, 1, 2, 3);
-	format_table.attach (bitdepth_format_combo, 1, 2, 2, 3);
+	row++;
 
-	format_table.attach (endian_format_label, 0, 1, 3, 4);
-	format_table.attach (endian_format_combo, 1, 2, 3, 4);
+	format_table.attach (bitdepth_format_label, 0, 1, row, row+1);
+	format_table.attach (bitdepth_format_combo, 1, 2, row, row+1);
 
-	format_table.attach (sample_rate_label, 0, 1, 4, 5);
-	format_table.attach (sample_rate_combo, 1, 2, 4, 5);
+	row++;
 
-	format_table.attach (src_quality_label, 0, 1, 5, 6);
-	format_table.attach (src_quality_combo, 1, 2, 5, 6);
+	if (!Profile->get_sae()) {
+		format_table.attach (endian_format_label, 0, 1, row, row+1);
+		format_table.attach (endian_format_combo, 1, 2, row, row+1);
+		row++;
+	}
 
-	format_table.attach (dither_type_label, 0, 1, 6, 7);
-	format_table.attach (dither_type_combo, 1, 2, 6, 7);
+	format_table.attach (sample_rate_label, 0, 1, row, row+1);
+	format_table.attach (sample_rate_combo, 1, 2, row, row+1);
 
-	format_table.attach (cue_file_label, 0, 1, 7, 8);
-	format_table.attach (cue_file_combo, 1, 2, 7, 8);
-	format_table.attach (cuefile_only_checkbox, 0, 2, 8, 9);
+	row++;
+
+	if (!Profile->get_sae()) {
+		format_table.attach (src_quality_label, 0, 1, row, row+1);
+		format_table.attach (src_quality_combo, 1, 2, row, row+1);
+		row++;
+	}
+
+	format_table.attach (dither_type_label, 0, 1, row, row+1);
+	format_table.attach (dither_type_combo, 1, 2, row, row+1);
+
+	row++;
+
+	if (!Profile->get_sae()) {
+		format_table.attach (cue_file_label, 0, 1, row, row+1);
+		format_table.attach (cue_file_combo, 1, 2, row, row+1);
+		row++;
+	
+		format_table.attach (cuefile_only_checkbox, 0, 2, row, row+1);
+	}
 
 	file_entry.set_name ("ExportFileDisplay");
 
@@ -918,7 +941,7 @@ ExportDialog::do_export ()
 		return;
 	}
 
-	if (export_cd_markers_allowed) {
+	if (!Profile->get_sae() && export_cd_markers_allowed) {
 		if (cue_file_combo.get_active_text () != _("None")) {
 			do_export_cd_markers (file_entry.get_text(), cue_file_combo.get_active_text ());
 		}
@@ -1212,10 +1235,12 @@ ExportDialog::initSpec(string &filepath)
 	spec.format = 0;
 
 	spec.format |= sndfile_header_format_from_string (header_format_combo.get_active_text ());
-	
-	if ((spec.format & SF_FORMAT_WAV) == 0) {
-		/* RIFF/WAV specifies endianess */
-		spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
+
+	if (!Profile->get_sae()) {
+		if ((spec.format & SF_FORMAT_WAV) == 0) {
+			/* RIFF/WAV specifies endianess */
+			spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
+		}
 	}
 
 	spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
@@ -1237,17 +1262,21 @@ ExportDialog::initSpec(string &filepath)
 		spec.sample_rate = session->frame_rate();
 	}
 	
-	string src_str = src_quality_combo.get_active_text();
-	if (src_str == _("fastest")) {
-		spec.src_quality = SRC_ZERO_ORDER_HOLD;
-	} else if (src_str == _("linear")) {
-		spec.src_quality = SRC_LINEAR;
-	} else if (src_str == _("better")) {
-		spec.src_quality = SRC_SINC_FASTEST;
-	} else if (src_str == _("intermediate")) {
-		spec.src_quality = SRC_SINC_MEDIUM_QUALITY;
-	} else {
+	if (Profile->get_sae()) {
 		spec.src_quality = SRC_SINC_BEST_QUALITY;
+	} else {
+		string src_str = src_quality_combo.get_active_text();
+		if (src_str == _("fastest")) {
+			spec.src_quality = SRC_ZERO_ORDER_HOLD;
+		} else if (src_str == _("linear")) {
+			spec.src_quality = SRC_LINEAR;
+		} else if (src_str == _("better")) {
+			spec.src_quality = SRC_SINC_FASTEST;
+		} else if (src_str == _("intermediate")) {
+			spec.src_quality = SRC_SINC_MEDIUM_QUALITY;
+		} else {
+			spec.src_quality = SRC_SINC_BEST_QUALITY;
+		}
 	}
 
 	string dither_str = dither_type_combo.get_active_text();

@@ -25,6 +25,7 @@
 #include <pbd/error.h>
 #include <pbd/convert.h>
 #include <gtkmm2ext/utils.h>
+#include <ardour/profile.h>
 
 #include "utils.h"
 #include "add_route_dialog.h"
@@ -70,6 +71,14 @@ AddRouteDialog::AddRouteDialog ()
 
 	if (track_mode_strings.empty()) {
 		track_mode_strings = I18N (track_mode_names);
+
+		if (ARDOUR::Profile->get_sae()) {
+			/* remove all but the first track mode (Normal) */
+
+			while (track_mode_strings.size() > 1) {
+				track_mode_strings.pop_back();
+			}
+		}
 	}
 
 	set_name ("AddRouteDialog");

@@ -38,6 +38,7 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "actions.h"
+#include "region_view.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -632,3 +633,30 @@ Editor::region_list_selection_filter (const RefPtr<TreeModel>& model, const Tree
 
 	return true;
 }
+
+void
+Editor::region_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+{
+	boost::shared_ptr<Region> region;
+	TreeIter iter;
+	
+	if ((iter = region_list_model->get_iter (path))) {
+		region = (*iter)[region_list_columns.region];
+		(*iter)[region_list_columns.name] = new_text;
+	}
+	
+	/* now mapover everything */
+
+	if (region) {
+		vector<RegionView*> equivalents;
+		get_regions_corresponding_to (region, equivalents);
+
+		for (vector<RegionView*>::iterator i = equivalents.begin(); i != equivalents.end(); ++i) {
+			if (new_text != (*i)->region()->name()) {
+				(*i)->region()->set_name (new_text);
+			}
+		}
+	}
+
+}
+

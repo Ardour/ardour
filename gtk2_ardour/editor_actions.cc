@@ -149,6 +149,12 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
        	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("Select All in Loop Range"), mem_fun(*this, &Editor::select_all_selectables_using_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
+	
+       	act = ActionManager::register_action (editor_actions, "select-next-route", _("Select Next Track/Bus"), mem_fun(*this, &Editor::select_next_route));
+	ActionManager::session_sensitive_actions.push_back (act);
+       	act = ActionManager::register_action (editor_actions, "select-prev-route", _("Select Previous Track/Bus"), mem_fun(*this, &Editor::select_prev_route));
+	ActionManager::session_sensitive_actions.push_back (act);
+	
 
 	act = ActionManager::register_action (editor_actions, "goto-mark-1", _("Locate to Mark 1"), bind (mem_fun (*this, &Editor::goto_nth_marker), 0));
 	ActionManager::session_sensitive_actions.push_back (act);

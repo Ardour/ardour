@@ -43,6 +43,7 @@
 #include <ardour/location.h>
 #include <ardour/panner.h>
 #include <ardour/playlist.h>
+#include <ardour/profile.h>
 #include <ardour/session.h>
 #include <ardour/session_playlist.h>
 #include <ardour/utils.h>
@@ -251,8 +252,12 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	waveform_items.push_back (RadioMenuElem (group, _("Traditional"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Traditional)));
 	traditional_item = static_cast<RadioMenuItem *> (&waveform_items.back());
 
-	waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
-	rectified_item = static_cast<RadioMenuItem *> (&waveform_items.back());
+	if (!Profile->get_sae()) {
+		waveform_items.push_back (RadioMenuElem (group, _("Rectified"), bind (mem_fun(*this, &AudioTimeAxisView::set_waveform_shape), Rectified)));
+		rectified_item = static_cast<RadioMenuItem *> (&waveform_items.back());
+	} else {
+		rectified_item = 0;
+	}
 
 	waveform_items.push_back (SeparatorElem());
 	
@@ -268,9 +273,11 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	AudioStreamView* asv = audio_view();
 	if (asv) {
 		ignore_toggle = true;
-		if (asv->get_waveform_shape() == Rectified) 
+		if (asv->get_waveform_shape() == Rectified && rectified_item) {
 			rectified_item->set_active(true);
-		else traditional_item->set_active(true);
+		} else {
+			traditional_item->set_active(true);
+		}
 
 		if (asv->get_waveform_scale() == LogWaveform) 
 			logscale_item->set_active(true);

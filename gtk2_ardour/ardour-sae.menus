@@ -95,6 +95,9 @@
                <menuitem action='select-all-in-punch-range'/>
                <menuitem action='select-all-in-loop-range'/>
 	       <separator/>
+               <menuitem action='select-next-route'/>
+               <menuitem action='select-prev-route'/>
+	       <separator/>
 	       <menu action='EditCursorMovementOptions'>
                    <menuitem action='edit-cursor-to-next-region-start'/>
     	           <menuitem action='edit-cursor-to-next-region-end'/>
@@ -154,9 +157,6 @@
 	       <menuitem action='ToggleMaximalEditor'/>
 	       <separator/>
                <menu name='ZoomFocus' action='ZoomFocus'>
-                   <menuitem action='zoom-focus-left'/>
-                   <menuitem action='zoom-focus-right'/>
-                   <menuitem action='zoom-focus-center'/>
                    <menuitem action='zoom-focus-playhead'/>
                    <menuitem action='zoom-focus-edit'/>
                    <menuitem action='zoom-focus-mouse'/>
@@ -208,6 +208,7 @@
    	       <separator/>
 	       <menuitem action='show-editor-mixer'/>
 	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
+               <menuitem action='ToggleMeasureVisibility'/>
 	       <menuitem action='ToggleLogoVisibility'/>
 	       <separator/>
                <menuitem action='goto-editor'/>

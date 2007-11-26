@@ -33,33 +33,27 @@ using namespace std;
 const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1] = {
 	N_("WAV"),
 	N_("AIFF"),
-	N_("raw (no header)"),
-	N_("PAF (Ensoniq Paris)"),
-	N_("AU (Sun/NeXT)"),
-	N_("IRCAM"),
+	N_("CAF"),
 	N_("W64 (64 bit WAV)"),
+	N_("raw (no header)"),
 	0
 };
 
 const char* const sndfile_file_endings_strings[SNDFILE_HEADER_FORMATS+1] = {
 	N_(".wav"),
 	N_(".aiff"),
-	N_(".raw"),
-	N_(".paf"),
-	N_(".au"),
-	N_(".ircam"),
+	N_(".caf"),
 	N_(".w64"),
+	N_(".raw"),
 	0
 };
 
 int sndfile_header_formats[SNDFILE_HEADER_FORMATS] = {
 	SF_FORMAT_WAV,
 	SF_FORMAT_AIFF,
-	SF_FORMAT_RAW,
-	SF_FORMAT_PAF,
-	SF_FORMAT_AU,
-	SF_FORMAT_IRCAM,
-	SF_FORMAT_W64
+	SF_FORMAT_CAF,
+	SF_FORMAT_W64,
+	SF_FORMAT_RAW
 };
 
 const char * const sndfile_bitdepth_formats_strings[SNDFILE_BITDEPTH_FORMATS+1] = {

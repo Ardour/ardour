@@ -50,6 +50,7 @@
 #include <ardour/session.h>
 #include <ardour/session_playlist.h>
 #include <ardour/utils.h>
+#include <ardour/profile.h>
 
 #include "ardour_ui.h"
 #include "route_time_axis.h"
@@ -416,7 +417,9 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 
 	build_remote_control_menu ();
-	items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+	}
 
 	build_automation_action_menu ();
 	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
@@ -446,10 +449,10 @@ RouteTimeAxisView::build_display_menu ()
 		if (get_diskstream()->alignment_style() == CaptureTime)
 			align_capture_item->set_active();
 		
-		items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-
-		get_diskstream()->AlignmentStyleChanged.connect (
-			mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+		if (!Profile->get_sae()) {
+			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
+			get_diskstream()->AlignmentStyleChanged.connect (mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+		}
 
 		RadioMenuItem::Group mode_group;
 		items.push_back (RadioMenuElem (mode_group, _("Normal mode"),

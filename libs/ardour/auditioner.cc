@@ -149,8 +149,19 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	_panner->reset (n_outputs(), _diskstream->n_channels());
 
 	length = the_region->length();
-	_diskstream->seek (0);
-	current_frame = 0;
+
+	int dir;
+	nframes_t offset = the_region->sync_offset (dir);
+
+	/* can't audition from a negative sync point */
+
+	if (dir < 0) {
+		offset = 0;
+	}
+
+	_diskstream->seek (offset);
+	current_frame = offset;
+
 	g_atomic_int_set (&_active, 1);
 }
 

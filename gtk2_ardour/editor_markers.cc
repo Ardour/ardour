@@ -135,6 +135,11 @@ Editor::add_new_location (Location *location)
 	newpair.second = lam;
 
 	location_markers.insert (newpair);
+
+	if (select_new_marker && location->is_mark()) {
+		selection->set (lam->start);
+		select_new_marker = false;
+	}
 }
 
 void
