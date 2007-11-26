@@ -341,7 +341,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   -------------------------------------------------------------------------------------------------- */
 
 	if (meter && (_meter_point == MeterInput)) {
-		_meter->run(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
 	}
 
 	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {

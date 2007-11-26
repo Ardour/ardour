@@ -31,7 +31,7 @@ BaseMidiPort::BaseMidiPort (const std::string& name, Flags flags)
 	, _own_buffer (false)
 {
 	_type = DataType::MIDI;
-	reset();
+	_mixdown = default_mixdown;
 }
 
 BaseMidiPort::~BaseMidiPort()
@@ -47,6 +47,7 @@ BaseMidiPort::default_mixdown (const set<Port*>& ports, MidiBuffer* dest, nframe
 	set<Port*>::const_iterator p = ports.begin();
 
 	if (first_overwrite) {
+		cout << "first overwrite" << endl;
 		dest->read_from ((dynamic_cast<BaseMidiPort*>(*p))->get_midi_buffer(), cnt, offset);
 		p++;
 	}
@@ -54,6 +55,7 @@ BaseMidiPort::default_mixdown (const set<Port*>& ports, MidiBuffer* dest, nframe
 	// XXX DAVE: this is just a guess
 
 	for (; p != ports.end(); ++p) {
+		cout << "merge" << endl;
 		dest->merge (*dest, (dynamic_cast<BaseMidiPort*>(*p))->get_midi_buffer());
 	}
 }

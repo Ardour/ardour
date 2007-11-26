@@ -27,13 +27,16 @@ JackMidiPort::JackMidiPort (const std::string& name, Flags flgs, MidiBuffer* buf
 {
 	if (buf) {
 
+		cout << name << " BUFFER" << endl;
+
 		_buffer = buf;
 		_own_buffer = false;
 
 	} else {
 
-		/* data space will be provided by JACK */
+		cout << name << " NO BUFFER" << endl;
 
+		/* data space will be provided by JACK */
 		_buffer = new MidiBuffer (0);
 		_own_buffer = true;
 	}
@@ -68,8 +71,8 @@ JackMidiPort::cycle_start (nframes_t nframes, nframes_t offset_ignored_but_proba
 
 	assert(_buffer->size() == event_count);
 
-	//if (_buffer->size() > 0)
-	//	cerr << "MIDIPort got " << event_count << " events." << endl;
+	if (_buffer->size() > 0)
+		cerr << "MIDIPort got " << event_count << " events." << endl;
 }
 
 void

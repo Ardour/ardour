@@ -543,7 +543,7 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	 * Route::process_output_buffers handle everything */
 	
 	if (meter && (_meter_point == MeterInput || _meter_point == MeterPreFader)) {
-		_meter->run(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
 	}
 
 	// Run all processors
@@ -557,7 +557,7 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	}
 	
 	if (meter && (_meter_point == MeterPostFader)) {
-		_meter->run(bufs, start_frame, end_frame, nframes, offset);
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
 	}
 	
 	// Main output stage

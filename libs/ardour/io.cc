@@ -331,7 +331,7 @@ IO::just_meter_input (nframes_t start_frame, nframes_t end_frame,
 
 	collect_input (bufs, nframes, offset);
 
-	_meter->run(bufs, start_frame, end_frame, nframes, offset);
+	_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
 }
 
 

@@ -131,7 +131,7 @@ Send::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 			if (_io->_gain == 0) {
 				_io->_meter->reset();
 			} else {
-				_io->_meter->run(_io->output_buffers(), start_frame, end_frame, nframes, offset);
+				_io->_meter->run_in_place(_io->output_buffers(), start_frame, end_frame, nframes, offset);
 			}
 		}
 
