@@ -356,6 +356,17 @@ Editor::nudge_forward (bool next)
 
 		commit_reversible_command ();
 
+		
+	} else if (!selection->markers.empty()) {
+
+		bool ignored;
+		Location* loc = find_location_from_marker (selection->markers.front(), ignored);
+
+		if (loc) {
+			distance = get_nudge_distance (loc->start(), next_distance);
+			loc->set_start (loc->start() + distance);
+		}
+		
 	} else {
 		distance = get_nudge_distance (playhead_cursor->current_frame, next_distance);
 		session->request_locate (playhead_cursor->current_frame + distance);
@@ -1777,6 +1788,10 @@ Editor::insert_region_list_selection (float times)
 		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
 			return;
 		}
+	} else if (entered_track != 0) {
+		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
+			return;
+		}
 	} else {
 		return;
 	}
@@ -2334,7 +2349,7 @@ Editor::separate_region_from_selection ()
 
 			/* force track selection */
 
-			ensure_entered_selected ();
+			ensure_entered_region_selected ();
 			
 			separate_regions_between (ts);
 		}
@@ -2359,7 +2374,7 @@ Editor::separate_regions_using_location (Location& loc)
 void
 Editor::crop_region_to_selection ()
 {
-	ensure_entered_selected (true);
+	ensure_entered_region_selected (true);
 
 	if (!selection->time.empty()) {
 
@@ -2549,7 +2564,7 @@ void
 Editor::set_region_sync_from_edit_point ()
 {
 	nframes64_t where = get_preferred_edit_position ();
-	ensure_entered_selected ();
+	ensure_entered_region_selected ();
 	set_sync_point (where, selection->regions);
 }
 
@@ -2615,7 +2630,7 @@ Editor::naturalize ()
 void
 Editor::align (RegionPoint what)
 {
-	ensure_entered_selected ();
+	ensure_entered_region_selected ();
 
 	nframes64_t where = get_preferred_edit_position();
 
@@ -2781,7 +2796,7 @@ Editor::trim_region_to_punch ()
 void
 Editor::trim_region_to_location (const Location& loc, const char* str)
 {
-	ensure_entered_selected ();
+	ensure_entered_region_selected ();
 
 	RegionSelection& rs (get_regions_for_action ());
 
@@ -3351,7 +3366,7 @@ Editor::paste_internal (nframes_t position, float times)
 {
 	bool commit = false;
 
-	if (cut_buffer->empty() || selection->tracks.empty()) {
+	if (cut_buffer->empty()) {
 		return;
 	}
 
@@ -3361,14 +3376,21 @@ Editor::paste_internal (nframes_t position, float times)
 
 	begin_reversible_command (_("paste"));
 
+	TrackSelection ts;
 	TrackSelection::iterator i;
 	size_t nth;
 
 	/* get everything in the correct order */
 
-	sort_track_selection ();
 
-	for (nth = 0, i = selection->tracks.begin(); i != selection->tracks.end(); ++i, ++nth) {
+	if (!selection->tracks.empty()) {
+		sort_track_selection ();
+		ts = selection->tracks;
+	} else if (entered_track) {
+		ts.push_back (entered_track);
+	}
+
+	for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
 
 		/* undo/redo is handled by individual tracks */
 
@@ -3888,7 +3910,7 @@ Editor::toggle_region_opaque ()
 void
 Editor::set_fade_length (bool in)
 {
-	ensure_entered_selected ();
+	ensure_entered_region_selected ();
 
 	/* we need a region to measure the offset from the start */
 
@@ -4114,7 +4136,7 @@ Editor::set_playhead_cursor ()
 void
 Editor::split ()
 {
-	ensure_entered_selected ();
+	ensure_entered_region_selected ();
 
 	nframes64_t where = get_preferred_edit_position();
 
@@ -4131,7 +4153,25 @@ Editor::split ()
 }
 
 void
-Editor::ensure_entered_selected (bool op_really_wants_one_region_if_none_are_selected)
+Editor::ensure_entered_track_selected (bool op_really_wants_one_track_if_none_are_selected)
+{
+	if (entered_track && mouse_mode == MouseObject) {
+		if (!selection->tracks.empty()) {
+			if (!selection->selected (entered_track)) {
+				selection->add (entered_track);
+			}
+		} else {
+			/* there is no selection, but this operation requires/prefers selected objects */
+
+			if (op_really_wants_one_track_if_none_are_selected) {
+				selection->set (entered_track);
+			}
+		}
+	}
+}
+
+void
+Editor::ensure_entered_region_selected (bool op_really_wants_one_region_if_none_are_selected)
 {
 	if (entered_regionview && mouse_mode == MouseObject) {
 

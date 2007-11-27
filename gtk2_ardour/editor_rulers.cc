@@ -23,6 +23,7 @@
 #include <string>
 
 #include <ardour/tempo.h>
+#include <ardour/profile.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "editor.h"
@@ -414,11 +415,13 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 		mitem->set_active(true);
 	}
 
- 	ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
- 	mitem = (CheckMenuItem *) &ruler_items.back(); 
- 	if (ruler_shown[ruler_time_range_marker]) {
- 		mitem->set_active(true);
- 	}
+	if (!Profile->get_sae()) {
+		ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
+		mitem = (CheckMenuItem *) &ruler_items.back(); 
+		if (ruler_shown[ruler_time_range_marker]) {
+			mitem->set_active(true);
+		}
+	}
 
  	ruler_items.push_back (CheckMenuElem (_("CD Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_cd_marker)));
  	mitem = (CheckMenuItem *) &ruler_items.back(); 
@@ -535,6 +538,7 @@ Editor::restore_ruler_visibility ()
 			else 
 				ruler_shown[ruler_time_range_marker] = false;
 		}
+
 		if ((prop = node->property ("transportmarker")) != 0) {
 			if (prop->value() == "yes") 
 				ruler_shown[ruler_time_transport_marker] = true;
@@ -689,7 +693,7 @@ Editor::update_ruler_visibility ()
 		tempo_group->hide();
 	}
 	
-	if (ruler_shown[ruler_time_range_marker]) {
+	if (!Profile->get_sae() && ruler_shown[ruler_time_range_marker]) {
 		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = range_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -698,8 +702,7 @@ Editor::update_ruler_visibility ()
 		range_marker_group->show();
 		tbpos += timebar_height;
 		visible_timebars++;
-	}
-	else {
+	} else {
 		range_marker_group->hide();
 	}
 

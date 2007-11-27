@@ -339,3 +339,5 @@
 (gtk_accel_path "<Actions>/Editor/goto-mark-9" "KP_9")
 (gtk_accel_path "<Actions>/Transport/ToggleClick" "5")
 (gtk_accel_path "<Actions>/Transport/ToggleAutoReturn" "4")
+(gtk_accel_path "<Actions>/Transport/focus-on-clock" "KP_Divide")
+

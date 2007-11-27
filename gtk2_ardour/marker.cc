@@ -306,12 +306,13 @@ Marker::add_line (ArdourCanvas::Group* group, double initial_height)
 		line->property_width_pixels() = 1;
 		line->property_points() = *line_points;
 		line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
+#if 0
 		line->property_first_arrowhead() = TRUE;
 		line->property_last_arrowhead() = TRUE;
 		line->property_arrow_shape_a() = 11.0;
 		line->property_arrow_shape_b() = 0.0;
 		line->property_arrow_shape_c() = 9.0;
-
+#endif
 		line->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 	}
 

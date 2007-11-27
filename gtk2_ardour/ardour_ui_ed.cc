@@ -297,6 +297,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), mem_fun(primary_clock, &AudioClock::focus));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch In"), mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);

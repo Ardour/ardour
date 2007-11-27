@@ -60,6 +60,7 @@
                <separator/>       
                <menuitem action='playhead-to-range-start'/>
                <menuitem action='playhead-to-range-end'/>
+               <menuitem action='focus-on-clock'/>
 	       <separator/>
 	       <menuitem action='ToggleTimeMaster'/>
                <menuitem action='TogglePunchIn'/>

@@ -438,9 +438,8 @@ def CheckPKGVersion(context, name, version):
 
 def CheckPKGExists(context, name):
     context.Message ('Checking for %s...' % name)
-    ret = context.TryAction('pkg-config --exists %s' % name)
-    print ("Result was [%s]" % ret[1])
-    context.Result (ret[0])
+    ret = context.TryAction('pkg-config --exists %s' % name)[0]
+    context.Result (ret)
     return ret
 
 conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,

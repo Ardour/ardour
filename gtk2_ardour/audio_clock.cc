@@ -655,6 +655,32 @@ AudioClock::set_session (Session *s)
 	}
 }
 
+void
+AudioClock::focus ()
+{
+	switch (_mode) {
+	case SMPTE:
+		hours_ebox.grab_focus ();
+		break;
+
+	case BBT:
+		bars_ebox.grab_focus ();
+		break;
+
+	case MinSec:
+		ms_hours_ebox.grab_focus ();
+		break;
+
+	case Frames:
+		frames_ebox.grab_focus ();
+		break;
+
+	case Off:
+		break;
+	}
+}
+
+
 bool
 AudioClock::field_key_press_event (GdkEventKey *ev, Field field)
 {

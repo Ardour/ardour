@@ -236,10 +236,12 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 		break;
 
 	case GDK_ENTER_NOTIFY:
+		set_entered_track (&rv->get_time_axis_view ());
 		set_entered_regionview (rv);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+		set_entered_track (0);
 		set_entered_regionview (0);
 		break;
 
@@ -275,6 +277,11 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 		break;
 
 	case GDK_ENTER_NOTIFY:
+		set_entered_track (tv);
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+		set_entered_track (0);
 		break;
 
 	default:
@@ -283,8 +290,6 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 
 	return ret;
 }
-
-
 
 bool
 Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationTimeAxisView *atv)

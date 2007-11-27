@@ -2575,12 +2575,17 @@ Editor::setup_toolbar ()
 	mouse_move_button.add (*(manage (new Image (::get_icon("tool_object")))));
 	mouse_move_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_move_button);
-	mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
-	mouse_select_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_mode_buttons.push_back (&mouse_select_button);
-	mouse_gain_button.add (*(manage (new Image (::get_icon("tool_gain")))));
-	mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_mode_buttons.push_back (&mouse_gain_button);
+
+	if (!Profile->get_sae()) {
+		mouse_select_button.add (*(manage (new Image (get_xpm("tool_range.xpm")))));
+		mouse_select_button.set_relief(Gtk::RELIEF_NONE);
+		mouse_mode_buttons.push_back (&mouse_select_button);
+
+		mouse_gain_button.add (*(manage (new Image (::get_icon("tool_gain")))));
+		mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
+		mouse_mode_buttons.push_back (&mouse_gain_button);
+	}
+
 	mouse_zoom_button.add (*(manage (new Image (::get_icon("tool_zoom")))));
 	mouse_zoom_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_mode_buttons.push_back (&mouse_zoom_button);
@@ -2598,9 +2603,13 @@ Editor::setup_toolbar ()
 	mode_box->set_spacing(4);
 	mouse_mode_button_box.set_spacing(1);
 	mouse_mode_button_box.pack_start(mouse_move_button, true, true);
-	mouse_mode_button_box.pack_start(mouse_select_button, true, true);
+	if (!Profile->get_sae()) {
+		mouse_mode_button_box.pack_start(mouse_select_button, true, true);
+	}
 	mouse_mode_button_box.pack_start(mouse_zoom_button, true, true);
-	mouse_mode_button_box.pack_start(mouse_gain_button, true, true);
+	if (!Profile->get_sae()) {
+		mouse_mode_button_box.pack_start(mouse_gain_button, true, true);
+	}
 	mouse_mode_button_box.pack_start(mouse_timefx_button, true, true);
 	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
 	mouse_mode_button_box.set_homogeneous(true);
@@ -3015,7 +3024,7 @@ Editor::duplicate_dialog (bool with_dialog)
 	
 	if (mouse_mode != MouseRange) {
 
-		ensure_entered_selected (true);
+		ensure_entered_region_selected (true);
 
 		if (selection->regions.empty()) {
 			return;

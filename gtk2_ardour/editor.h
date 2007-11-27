@@ -1911,7 +1911,8 @@ class Editor : public PublicEditor
 
 	TimeAxisView* entered_track;
 	RegionView*   entered_regionview;
-	void ensure_entered_selected (bool op_acts_on_objects = false);
+	void ensure_entered_region_selected (bool op_acts_on_objects = false);
+	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
 	gint left_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);

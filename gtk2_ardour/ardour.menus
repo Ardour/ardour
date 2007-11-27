@@ -59,7 +59,8 @@
                <separator/>       
                <menuitem action='playhead-to-range-start'/>
                <menuitem action='playhead-to-range-end'/>
-             	 <separator/>
+               <menuitem action='focus-on-clock'/>
+               <separator/>
 			<menuitem action='goto-mark-1'/>
 			<menuitem action='goto-mark-2'/>
 			<menuitem action='goto-mark-3'/>

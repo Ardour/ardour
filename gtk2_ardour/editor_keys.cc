@@ -25,6 +25,7 @@
 
 #include <ardour/session.h>
 #include <ardour/region.h>
+#include <gtkmm/treeview.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -41,8 +42,6 @@ using namespace sigc;
 void
 Editor::keyboard_selection_finish (bool add)
 {
-	cerr << "here\n";
-
 	if (session && have_pending_keyboard_selection) {
 
 		nframes64_t end;
@@ -89,27 +88,14 @@ Editor::keyboard_selection_begin ()
 void
 Editor::keyboard_paste ()
 {
-	float prefix = 0;
-	bool was_floating;
-
-	if (get_prefix (prefix, was_floating) == 0) {
-		paste (prefix);
-	} else {
-		paste (1);
-	}
+	ensure_entered_track_selected (true);
+	paste (1);
 }
 
 void
 Editor::keyboard_insert_region_list_selection ()
 {
-	float prefix = 0;
-	bool was_floating;
-
-	if (get_prefix (prefix, was_floating) == 0) {
-		insert_region_list_selection (prefix);
-	} else {
-		insert_region_list_selection (1);
-	}
+	insert_region_list_selection (1);
 }
 
 int
