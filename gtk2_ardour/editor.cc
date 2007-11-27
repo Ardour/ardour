@@ -2055,8 +2055,15 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 void
 Editor::set_snap_to (SnapType st)
 {
+   unsigned int snap_ind = (unsigned int)st;
 	snap_type = st;
-	string str = snap_type_strings[(int) st];
+
+   if ( snap_ind > snap_type_strings.size() - 1 ) {
+      snap_ind = 0;
+      snap_type = (SnapType)snap_ind;
+   }
+
+	string str = snap_type_strings[snap_ind];
 
 	if (str != snap_type_selector.get_active_text()) {
 		snap_type_selector.set_active_text (str);
