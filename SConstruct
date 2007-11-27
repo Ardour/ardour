@@ -30,6 +30,7 @@ opts.AddOptions(
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
+    BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
@@ -437,8 +438,9 @@ def CheckPKGVersion(context, name, version):
 
 def CheckPKGExists(context, name):
     context.Message ('Checking for %s...' % name)
-    ret = context.TryAction('pkg-config --exists %s' % name)[0]
-    context.Result (ret)
+    ret = context.TryAction('pkg-config --exists %s' % name)
+    print ("Result was [%s]" % ret[1])
+    context.Result (ret[0])
     return ret
 
 conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
@@ -758,6 +760,8 @@ if conf.CheckPKGExists('vamp-sdk'):
 else:
     have_vamp = False
 
+print "---> WE HAVE VAMP: ", have_vamp
+
 libraries['vamp'] = conf.Finish ()
 
 if have_vamp:
@@ -767,7 +771,7 @@ if have_vamp:
             env['RUBBERBAND'] = True
             libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
                                                    LIBPATH='#libs/rubberband',
-                                                   CPPPATH='#libs/rubberband/rubberband',
+                                                   CPPPATH='#libs/rubberband',
                                                    CCFLAGS='-DUSE_RUBBERBAND')
         libraries['vamp'] = conf.Finish ()
 

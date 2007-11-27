@@ -169,6 +169,8 @@ Editor::track_canvas_motion (GdkEvent *ev)
 		verbose_canvas_cursor->property_x() = ev->motion.x + 20;
 		verbose_canvas_cursor->property_y() = ev->motion.y + 20;
 	}
+
+	flush_canvas ();
 	return false;
 }
 

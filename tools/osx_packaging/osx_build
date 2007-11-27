@@ -107,9 +107,9 @@ cp ../../libs/clearlooks/libclearlooks.dylib $Frameworks
 mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
-# XXX STILL NEED TO DO SURFACES AND PANNERS
+# XXX STILL NEED TO DO PANNERS FOR TRUNK
 
-cp ../../libs/surfaces/control_protocol/libardour_cp.dylib $Frameworks
+cp ../../libs/surfaces/*/libardour_*.dylib $Frameworks
 
 while [ true ] ; do 
     missing=false
@@ -141,6 +141,7 @@ echo
 echo "Copying other stuff to Ardour2.app  ..."
 
 cp ../../gtk2_ardour/ardour.bindings  $Resources
+cp ../../gtk2_ardour/ardour-sae.bindings  $Resources
 cp ../../gtk2_ardour/ardour.menus $Resources
 cp ../../gtk2_ardour/ardour-sae.menus $Resources
 cp ../../ardour_system.rc $Resources

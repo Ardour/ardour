@@ -280,7 +280,24 @@ int main (int argc, char* argv[])
 	}
 
 	if (!keybindings_path.empty()) {
-		ui->set_keybindings_path (keybindings_path);
+		std::string path;
+
+		// XXX timbyr - we need a portable test for "is-absolute" here 
+
+		if (keybindings_path[0] != '/' && keybindings_path[0] != '.') {
+			path = find_config_file (keybindings_path);
+			if (path.empty()) {
+				warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
+							   keybindings_path)
+					<< endmsg;
+			}
+		} else {
+			path = keybindings_path;
+		}
+
+		if (!path.empty()) {
+			ui->set_keybindings_path (path);
+		}
 	}
 
 	ui->run (text_receiver);

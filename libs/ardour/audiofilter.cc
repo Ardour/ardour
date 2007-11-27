@@ -38,6 +38,12 @@ AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList
 {
 	vector<string> names = region->master_source_names();
 
+	if (names.size() != region->n_channels()) {
+		warning << _("This is an old Ardour session that does not have\n\
+sufficient information for rendered FX") << endmsg;
+		return -1;
+	}
+
 	for (uint32_t i = 0; i < region->n_channels(); ++i) {
 
 		string name = PBD::basename_nosuffix (names[i]);

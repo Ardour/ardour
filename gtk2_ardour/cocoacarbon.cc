@@ -61,5 +61,15 @@ ARDOUR_UI::platform_specific ()
 		ige_mac_menu_set_quit_menu_item ((GtkMenuItem*) widget->gobj());
 	}
 
+	IgeMacMenuGroup* group = ige_mac_menu_add_app_menu_group ();
+
+	widget = ActionManager::get_widget ("/ui/Main/Session/About");
+	if (widget) {
+		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
+	}
+	widget = ActionManager::get_widget ("/ui/Main/Session/ToggleOptionsEditor");
+	if (widget) {
+		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
+	}
 }
 

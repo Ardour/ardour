@@ -142,7 +142,16 @@ Session::import_audiofile (import_status& status)
 			nfiles++;
 		}
 	
+		if (data) {
+			delete [] data;
+		}
+
 		data = new float[nframes * info.channels];
+
+		if (channel_data) {
+			delete [] channel_data;
+		}
+
 		channel_data = new Sample * [ info.channels ];
 	
 		for (int n = 0; n < info.channels; ++n) {

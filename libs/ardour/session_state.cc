@@ -1460,10 +1460,10 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		}
 	}
 
-	for (uint32_t n=1; n < nchans; ++n) {
+	for (uint32_t n=0; n < nchans; ++n) {
 		snprintf (buf, sizeof(buf), X_("master-source-%d"), n);
 		if ((prop = node.property (buf)) != 0) {
-			
+		
 			PBD::ID id2 (prop->value());
 			
 			if ((source = source_by_id (id2)) == 0) {
@@ -1477,7 +1477,7 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 				return boost::shared_ptr<AudioRegion>();
 			}
 			master_sources.push_back (as);
-		}
+		} 
 	}
 
 	try {
@@ -1495,7 +1495,7 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 		}
 
 		if (!master_sources.empty()) {
-			if (master_sources.size() == nchans) {
+			if (master_sources.size() != nchans) {
 				error << _("Session: XMLNode describing an AudioRegion is missing some master sources; ignored") << endmsg;
 			} else {
 				region->set_master_sources (master_sources);

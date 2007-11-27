@@ -21,7 +21,7 @@
 #include <cmath>
 
 #include <pbd/error.h>
-#include "/usr/local/music/src/rubberband/rubberband/RubberBandStretcher.h" //!!!
+#include <rubberband/RubberBandStretcher.h>
 
 #include <ardour/types.h>
 #include <ardour/stretch.h>
@@ -83,7 +83,7 @@ Stretch::run (boost::shared_ptr<AudioRegion> region)
 	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.fraction * 100.0f));
 
 	/* create new sources */
-	
+
 	if (make_new_sources (region, nsrcs, suffix)) {
 		goto out;
 	}
@@ -135,15 +135,15 @@ Stretch::run (boost::shared_ptr<AudioRegion> region)
 			
 			pos += this_read;
 			done += this_read;
-			
-			tsr.progress = ((float) done / duration) * 0.25;
+
+			tsr.progress = ((float) done / duration) * 0.75;
 
 			stretcher.study(buffers, this_read, pos == duration);
 		}
 		
+		done = 0;
 		pos = 0;
-		tsr.done = 0;
-		
+
 		while (pos < duration && !tsr.cancel) {
 			
 			nframes_t this_read = 0;
@@ -174,7 +174,7 @@ Stretch::run (boost::shared_ptr<AudioRegion> region)
 			pos += this_read;
 			done += this_read;
 
-			tsr.progress = 0.25 + ((float) done / duration) * 0.75;
+			tsr.progress = 0.75 + ((float) done / duration) * 0.25;
 
 			stretcher.process(buffers, this_read, pos == duration);
 

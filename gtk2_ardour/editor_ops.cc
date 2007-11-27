@@ -3087,12 +3087,13 @@ Editor::cut_copy (CutCopyOp op)
 
 	switch (current_mouse_mode()) {
 	case MouseObject: 
+		cerr << "cutting in object mode\n";
 		if (!selection->regions.empty() || !selection->points.empty()) {
 
 			begin_reversible_command (opname + _(" objects"));
 
 			if (!selection->regions.empty()) {
-				
+				cerr << "have regions to cut" << endl;
 				cut_copy_regions (op);
 				
 				if (op == Cut) {
@@ -3111,7 +3112,7 @@ Editor::cut_copy (CutCopyOp op)
 			commit_reversible_command ();	
 			break; // terminate case statement here
 		} 
-
+		cerr << "nope, now cutting time range" << endl;
 		if (!selection->time.empty()) {
 			/* don't cause suprises */
 			break;
@@ -3121,7 +3122,9 @@ Editor::cut_copy (CutCopyOp op)
 	case MouseRange:
 		if (selection->time.empty()) {
 			nframes64_t start, end;
+			cerr << "no time selection, get edit op range" << endl;
 			if (!get_edit_op_range (start, end)) {
+				cerr << "no edit op range" << endl;
 				return;
 			}
 			selection->set (0, start, end);

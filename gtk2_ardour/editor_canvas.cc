@@ -777,4 +777,12 @@ Editor::color_handler()
 		session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 }
 
+void
+Editor::flush_canvas ()
+{
+	if (is_mapped()) {
+		track_canvas.update_now ();
+		gdk_window_process_updates (GTK_LAYOUT(track_canvas.gobj())->bin_window, true);
+	}
+}
 

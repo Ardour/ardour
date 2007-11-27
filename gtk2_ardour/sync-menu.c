@@ -315,7 +315,7 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 	  if (gdk_keymap_get_entries_for_keyval (keymap, key->accel_key,
 						 &keys, &n_keys))
 	    {
-	      UInt8 modifiers = 0;
+  	     UInt8 modifiers = 0; /* implies Command key */
 
 	      SetMenuItemCommandKey (carbon_item->menu, carbon_item->index,
 				     true, keys[0].keycode);
@@ -327,14 +327,15 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 		  if (key->accel_mods & GDK_SHIFT_MASK)
 		    modifiers |= kMenuShiftModifier;
 
-		  if (key->accel_mods & GDK_MOD1_MASK)
+		  if (key->accel_mods & GDK_MOD5_MASK)
 		    modifiers |= kMenuOptionModifier;
-		}
 
-	      if (!(key->accel_mods & GDK_CONTROL_MASK))
-		{
-		  modifiers |= kMenuNoCommandModifier;
-		}
+		  if (key->accel_mods & GDK_CONTROL_MASK)
+		    modifiers |= kMenuControlModifier;
+		}  
+
+	      if ((key->accel_mods & (GDK_SHIFT_MASK|GDK_MOD1_MASK|GDK_CONTROL_MASK) )== 0)
+  	        modifiers |= kMenuNoCommandModifier;
 
 	      SetMenuItemModifiers (carbon_item->menu, carbon_item->index,
 				    modifiers);

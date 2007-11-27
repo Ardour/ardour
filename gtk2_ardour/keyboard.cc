@@ -165,6 +165,12 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 {
 	uint32_t keyval;
 
+#if 0
+	cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 
+	     << " state " << std::hex << event->state << std::dec
+	     << endl;
+#endif
+
 #if KBD_DEBUG
 	if (debug_keyboard) {
 		cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 

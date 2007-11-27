@@ -6,6 +6,7 @@
            <menuitem action='Open'/>
            <menuitem action='Recent'/>
            <menuitem action='Close'/>
+           <menuitem action='Quit'/>
            <separator/>
            <menuitem action='Save'/>
            <menuitem action='Snapshot'/>
@@ -17,7 +18,6 @@
               <menuitem action='addExistingAudioFiles'/>
               <separator/>
 	      <menuitem action='ExportSession'/>
-              <menuitem action='ExportSelection'/>
 	   </menu>
 
            <separator/>
@@ -25,7 +25,6 @@
                <menuitem action='CleanupUnused'/>
                <menuitem action='FlushWastebasket'/>
            </menu>
-	   <separator/>       
            <menuitem action='ToggleOptionsEditor'/>
            <menuitem action='About'/>
         </menu>
@@ -132,9 +131,7 @@
                	   <menuitem action='normalize-region'/>
                    <separator/>       
 	           <menuitem action="nudge-forward"/>
-         	   <menuitem action="nudge-next-forward"/>
 	           <menuitem action="nudge-backward"/>
-        	   <menuitem action="nudge-next-backward"/>
         	   <menuitem action='split-region'/>
 	       	   <menuitem action='set-region-sync-position'/>
                    <separator/>       
@@ -148,8 +145,8 @@
 		   <menuitem action='set-fade-in-length'/>
 		   <menuitem action='set-fade-out-length'/>
                    <separator/>       
-		   <menuitem action='trim-from-start'/>
-		   <menuitem action='trim-to-end'/>
+		   <menuitem action='trim-front'/>
+		   <menuitem action='trim-back'/>
 		   <menuitem action='trim-region-to-loop'/>
 		   <menuitem action='trim-region-to-punch'/>
 	</menu>

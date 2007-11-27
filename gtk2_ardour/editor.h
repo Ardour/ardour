@@ -217,6 +217,8 @@ class Editor : public PublicEditor
 		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
 	}
 
+	void flush_canvas ();
+
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
