@@ -266,7 +266,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("Record"), _("Enable Record"), mem_fun(*this, &ARDOUR_UI::transport_record));
+	act = ActionManager::register_action (transport_actions, X_("Record"), _("Enable Record"), bind (mem_fun(*this, &ARDOUR_UI::transport_record), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("record-roll"), _("Start Recording"), bind (mem_fun(*this, &ARDOUR_UI::transport_record), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("Rewind"), _("Rewind"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));

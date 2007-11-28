@@ -30,6 +30,7 @@
         </menu>
         <menu name='Transport' action='Transport'>
                <menuitem action='ToggleRoll'/>
+               <menuitem action='record-roll'/>
                <menuitem action='ToggleRollForgetCapture'/>
                <menuitem action='Loop'/>
                <menuitem action='PlaySelection'/>

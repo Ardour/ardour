@@ -1406,7 +1406,7 @@ ARDOUR_UI::remove_last_capture()
 }
 
 void
-ARDOUR_UI::transport_record ()
+ARDOUR_UI::transport_record (bool roll)
 {
 	if (session) {
 		switch (session->record_status()) {
@@ -1417,8 +1417,18 @@ ARDOUR_UI::transport_record ()
 				return;
 			}
 			session->maybe_enable_record ();
+			if (roll) {
+				transport_roll ();
+			}
 			break;
 		case Session::Recording:
+			if (roll) {
+				session->request_stop();
+			} else {
+				session->disable_record (false, true);
+			}
+			break;
+
 		case Session::Enabled:
 			session->disable_record (false, true);
 		}

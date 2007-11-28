@@ -567,7 +567,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_goto_end ();
 	void transport_stop ();
 	void transport_stop_and_forget_capture ();
-	void transport_record ();
+	void transport_record (bool roll);
 	void transport_roll ();
 	void transport_play_selection(); 
 	void transport_forward (int option);
