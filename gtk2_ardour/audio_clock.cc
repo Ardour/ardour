@@ -1047,7 +1047,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 	if (dragging) {
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		dragging = false;
-		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)){
+		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)){
 			// we actually dragged so return without setting editing focus, or we shift clicked
 			return true;
 		}
@@ -1127,7 +1127,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 
 	switch (ev->button) {
 	case 1:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			set (frames, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 					}
@@ -1143,7 +1143,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 		break;
 
 	case 2:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			set (frames, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
@@ -1176,7 +1176,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 	case GDK_SCROLL_UP:
 	       frames = get_frames (field);
 	       if (frames != 0) {
-		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			     frames *= 10;
 		      }
 		      set (current_time() + frames, true);
@@ -1187,7 +1187,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 	case GDK_SCROLL_DOWN:
 	       frames = get_frames (field);
 	       if (frames != 0) {
-		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			     frames *= 10;
 		      }
 		      
@@ -1219,13 +1219,13 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 	float pixel_frame_scale_factor = 0.2f;
 
 /*
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control))  {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier))  {
 		pixel_frame_scale_factor = 0.1f;
 	}
 
 
 	if (Keyboard::modifier_state_contains (ev->state, 
-					       Keyboard::Control|Keyboard::Alt)) {
+					       Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) {
 
 		pixel_frame_scale_factor = 0.025f;
 	}

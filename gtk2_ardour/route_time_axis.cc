@@ -261,7 +261,7 @@ RouteTimeAxisView::playlist_modified ()
 gint
 RouteTimeAxisView::edit_click (GdkEventButton *ev)
 {
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 	        _route->set_edit_group (0, this);
 		return FALSE;
 	} 
@@ -1002,7 +1002,7 @@ RouteTimeAxisView::update_diskstream_display ()
 void
 RouteTimeAxisView::selection_click (GdkEventButton* ev)
 {
-	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::Shift|Keyboard::Control))) {
+	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
 
 		/* special case: select/deselect all tracks */
 		if (editor.get_selection().selected (this)) {

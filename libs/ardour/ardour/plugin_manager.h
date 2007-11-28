@@ -71,6 +71,7 @@ class PluginManager {
 	int ladspa_discover (std::string path);
 
 	std::string get_ladspa_category (uint32_t id);
+	std::vector<uint32_t> ladspa_plugin_whitelist;
 
 	static PluginManager* _manager; // singleton
 };

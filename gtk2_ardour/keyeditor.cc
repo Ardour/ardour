@@ -1,5 +1,7 @@
 #include <map>
 
+#include <ardour/profile.h>
+
 #include <gtkmm/stock.h>
 #include <gtkmm/accelkey.h>
 #include <gtkmm/accelmap.h>
@@ -35,7 +37,7 @@ KeyEditor::KeyEditor ()
 	view.set_enable_search (false);
 	view.set_rules_hint (true);
 	view.set_name (X_("KeyEditorTree"));
-
+	
 	view.get_selection()->signal_changed().connect (mem_fun (*this, &KeyEditor::action_selected));
 	
 	scroller.add (view);
@@ -78,7 +80,7 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 bool
 KeyEditor::on_key_release_event (GdkEventKey* ev)
 {
-	if (!can_bind || ev->state != last_state) {
+	if (ARDOUR::Profile->get_sae() || !can_bind || ev->state != last_state) {
 		return false;
 	}
 

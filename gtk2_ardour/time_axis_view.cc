@@ -248,14 +248,14 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			step_height (true);
 			return true;
 		}
 		break;
 		
 	case GDK_SCROLL_DOWN:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			step_height (false);
 			return true;
 		}

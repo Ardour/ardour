@@ -2646,7 +2646,7 @@ void
 Editor::set_region_sync_from_edit_point ()
 {
 	nframes64_t where = get_preferred_edit_position ();
-	ensure_entered_region_selected ();
+	ensure_entered_region_selected (true);
 	set_sync_point (where, selection->regions);
 }
 

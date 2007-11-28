@@ -81,10 +81,23 @@ PluginManager::PluginManager ()
 		vst_path = s;
 	}
 
-	refresh ();
 	if (_manager == 0) {
 		_manager = this;
 	}
+
+	/* the plugin manager is constructed too early to use Profile */
+
+	if (getenv ("ARDOUR_SAE")) {
+		ladspa_plugin_whitelist.push_back (1203); // single band parametric
+		ladspa_plugin_whitelist.push_back (1772); // caps compressor
+		ladspa_plugin_whitelist.push_back (1913); // fast lookahead limiter
+		ladspa_plugin_whitelist.push_back (1075); // simple RMS expander
+		ladspa_plugin_whitelist.push_back (1061); // feedback delay line (max 5s)
+		ladspa_plugin_whitelist.push_back (1216); // gverb
+		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
+	} 
+
+	refresh ();
 }
 
 void
@@ -244,6 +257,12 @@ PluginManager::ladspa_discover (string path)
 		if ((descriptor = dfunc (i)) == 0) {
 			break;
 		}
+
+		if (!ladspa_plugin_whitelist.empty()) {
+			if (find (ladspa_plugin_whitelist.begin(), ladspa_plugin_whitelist.end(), descriptor->UniqueID) == ladspa_plugin_whitelist.end()) {
+				continue;
+			}
+		} 
 
 		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;

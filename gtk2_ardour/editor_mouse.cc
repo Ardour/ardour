@@ -462,7 +462,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return true;
 
 			case MarkerItem:
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::Control|Keyboard::Shift))) {
+				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 					hide_marker (item, event);
 				} else {
 					start_marker_grab (item, event);
@@ -470,7 +470,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return true;
 
 			case TempoMarkerItem:
-				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 					start_tempo_marker_copy_grab (item, event);
 				} else {
 					start_tempo_marker_grab (item, event);
@@ -478,7 +478,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				return true;
 
 			case MeterMarkerItem:
-				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 					start_meter_marker_copy_grab (item, event);
 				} else {
 					start_meter_marker_grab (item, event);
@@ -524,10 +524,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 			case SelectionItem:
 				if (Keyboard::modifier_state_contains 
-				    (event->button.state, Keyboard::ModifierMask(Keyboard::Alt))) {
+				    (event->button.state, Keyboard::ModifierMask(Keyboard::SecondaryModifier))) {
 					// contains and not equals because I can't use alt as a modifier alone.
 					start_selection_grab (item, event);
-				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
+				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 					/* grab selection for moving */
 					start_selection_op (item, event, SelectionMove);
 				} else {
@@ -544,7 +544,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			break;
 			
 		case MouseObject:
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::Control|Keyboard::Alt)) &&
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) &&
 			    event->type == GDK_BUTTON_PRESS) {
 				
 				start_rubberband_select (item, event);
@@ -561,7 +561,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					return true;
 
 				case RegionItem:
-					if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+					if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 						start_region_copy_grab (item, event);
 					} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
 						start_region_brush_grab (item, event);
@@ -726,7 +726,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			if (event->type == GDK_BUTTON_PRESS) {
 				switch (item_type) {
 				case RegionItem:
-					if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+					if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 						start_region_copy_grab (item, event);
 					} else {
 						start_region_grab (item, event);
@@ -772,7 +772,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					
 				
 		case MouseZoom:
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				temporal_zoom_session();
 			} else {
 				temporal_zoom_to_frame (true, event_frame(event));
@@ -1092,9 +1092,9 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MouseObject:
 			switch (item_type) {
 			case RegionItem:
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
+				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 					raise_region ();
-				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::Shift|Keyboard::Alt))) {
+				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier|Keyboard::SecondaryModifier))) {
 					lower_region ();
 				} else {
 					// Button2 click is unused
@@ -1700,7 +1700,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
         // if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
 
 	if (event->button.button == 2) {
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Alt)) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
 			drag_info.y_constrained = true;
 			drag_info.x_constrained = false;
 		} else {
@@ -2228,7 +2228,7 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	f_delta = copy_location->end() - copy_location->start();
 	
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		move_both = true;
 	}
 
@@ -2655,7 +2655,7 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 	double dx = drag_info.current_pointer_x - drag_info.last_pointer_x;
 	double dy = drag_info.current_pointer_y - drag_info.last_pointer_y;
 
-	if (event->button.state & Keyboard::Alt) {
+	if (event->button.state & Keyboard::SecondaryModifier) {
 		dx *= 0.1;
 		dy *= 0.1;
 	}
@@ -2702,7 +2702,7 @@ Editor::control_point_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* 
 
 	bool push;
 
-	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
 		push = true;
 	} else {
 		push = false;
@@ -2724,7 +2724,7 @@ Editor::control_point_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent
 
 		/* just a click */
 		
-		if ((event->type == GDK_BUTTON_RELEASE) && (event->button.button == 1) && Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
+		if ((event->type == GDK_BUTTON_RELEASE) && (event->button.button == 1) && Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 			reset_point_selection ();
 		}
 
@@ -2805,7 +2805,7 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	double dy = drag_info.current_pointer_y - drag_info.last_pointer_y;
 
-	if (event->button.state & Keyboard::Alt) {
+	if (event->button.state & Keyboard::SecondaryModifier) {
 		dy *= 0.1;
 	}
 
@@ -2836,7 +2836,7 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	bool push;
 
-	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::Control)) {
+	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
 		push = false;
 	} else {
 		push = true;
@@ -3725,7 +3725,7 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 	   this is an alignment click (control used)
 	*/
 	
-	if (Keyboard::modifier_state_contains (event->state, Keyboard::Control)) {
+	if (Keyboard::modifier_state_contains (event->state, Keyboard::PrimaryModifier)) {
 		TimeAxisView* tv = &rv.get_time_axis_view();
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(tv);
 		double speed = 1.0;
@@ -3737,11 +3737,11 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 
 		if (where >= 0) {
 
-			if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
+			if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 				
 				align_region (rv.region(), SyncPoint, (nframes_t) (where * speed));
 				
-			} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+			} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 				
 				align_region (rv.region(), End, (nframes_t) (where * speed));
 				
@@ -3984,7 +3984,7 @@ Editor::start_selection_op (ArdourCanvas::Item* item, GdkEvent* event, Selection
 
 	switch (op) {
 	case CreateSelection:
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 			drag_info.copy = true;
 		} else {
 			drag_info.copy = false;
@@ -4199,7 +4199,7 @@ Editor::start_trim (ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab (event, trimmer_cursor);
 	
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		trim_op = ContentsTrim;
 	} else {
 		/* These will get overridden for a point trim.*/
@@ -4326,7 +4326,7 @@ Editor::trim_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		{
 			bool swap_direction = false;
 
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				swap_direction = true;
 			}
 			
@@ -4629,7 +4629,7 @@ Editor::start_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event, Ran
 	case CreateTransportMarker:
 	case CreateCDMarker:
 	
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 			drag_info.copy = true;
 		} else {
 			drag_info.copy = false;

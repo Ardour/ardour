@@ -497,9 +497,9 @@ GainMeter::peak_button_release (GdkEventButton* ev)
 {
 	/* reset peak label */
 
-	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control|Keyboard::Shift)) {
+	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 		ResetAllPeakDisplays ();
-	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 		Route* r;
 		if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 			ResetGroupPeakDisplays (r->mix_group());
@@ -712,7 +712,7 @@ GainMeter::meter_press(GdkEventButton* ev)
 				// ctrl-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
+				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
 					wait_for_release = true;
 					old_meter_point = _route->meter_point ();
 				}
@@ -720,7 +720,7 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 			if (ev->button == 1 || ev->button == 2) {
 
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 					/* ctrl-shift-click applies change to all routes */
 
@@ -732,7 +732,7 @@ GainMeter::meter_press(GdkEventButton* ev)
 					_session.commit_reversible_command ();
 					
 					
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 					/* ctrl-click: solo mix group.
 					   ctrl-button2 is MIDI learn.

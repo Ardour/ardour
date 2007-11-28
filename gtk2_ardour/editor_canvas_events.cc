@@ -55,7 +55,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			/* XXX 
 			   the ev->x will be out of step with the canvas
@@ -75,7 +75,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (false, where);
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {
@@ -91,7 +91,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		}
 		break;
 	case GDK_SCROLL_DOWN:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			track_canvas.get_pointer (x, y);
 			track_canvas.window_to_world (x, y, wx, wy);
@@ -106,7 +106,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (true, where);
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {

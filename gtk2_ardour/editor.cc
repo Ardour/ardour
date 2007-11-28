@@ -2099,6 +2099,8 @@ Editor::set_snap_mode (SnapMode mode)
 void
 Editor::set_edit_point_preference (EditPoint ep)
 {
+	bool changed = _edit_point != ep;
+
 	_edit_point = ep;
 	string str = edit_point_strings[(int)ep];
 
@@ -2106,6 +2108,33 @@ Editor::set_edit_point_preference (EditPoint ep)
 		edit_point_selector.set_active_text (str);
 	}
 
+	if (!changed) {
+		return;
+	}
+
+	if (Profile->get_sae()) {
+
+		switch (zoom_focus) {
+		case ZoomFocusMouse:
+		case ZoomFocusPlayhead:
+		case ZoomFocusEdit:
+			switch (_edit_point) {
+			case EditAtMouse:
+				set_zoom_focus (ZoomFocusMouse);
+				break;
+			case EditAtPlayhead:
+				set_zoom_focus (ZoomFocusPlayhead);
+				break;
+			case EditAtSelectedMarker:
+				set_zoom_focus (ZoomFocusEdit);
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+				
 	instant_save ();
 }
 
@@ -3239,11 +3268,11 @@ Editor::edit_point_selection_done ()
 	EditPoint ep = EditAtSelectedMarker;
 
 	if (choice == _("Marker")) {
-		_edit_point = EditAtSelectedMarker;
+		set_edit_point_preference (EditAtSelectedMarker);
 	} else if (choice == _("Playhead")) {
-		_edit_point = EditAtPlayhead;
+		set_edit_point_preference (EditAtPlayhead);
 	} else {
-		_edit_point = EditAtMouse;
+		set_edit_point_preference (EditAtMouse);
 	}
 
 	RefPtr<RadioAction> ract = edit_point_action (ep);

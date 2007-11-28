@@ -376,7 +376,7 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 
 	case 2:
 		// audition on middle click (stop audition too)
-		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			consider_auditioning (region);
 		}
 		return true;
