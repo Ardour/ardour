@@ -1474,7 +1474,7 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 
 	if (dir > 0) {
 
-		for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			
 			boost::shared_ptr<Region> r = (*i);
 			nframes64_t distance;
@@ -1511,7 +1511,7 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 
 	} else {
 
-		for (RegionList::const_reverse_iterator i = regions.rbegin(); i != regions.rend(); ++i) {
+		for (RegionList::reverse_iterator i = regions.rbegin(); i != regions.rend(); ++i) {
 			
 			boost::shared_ptr<Region> r = (*i);
 			nframes64_t distance;

@@ -1478,18 +1478,20 @@ Editor::left_automation_track ()
 bool
 Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type, bool from_autoscroll)
 {
-	gint x, y;
-
-	/* We call this so that MOTION_NOTIFY events continue to be
-	   delivered to the canvas. We need to do this because we set
-	   Gdk::POINTER_MOTION_HINT_MASK on the canvas. This reduces
-	   the density of the events, at the expense of a round-trip
-	   to the server. Given that this will mostly occur on cases
-	   where DISPLAY = :0.0, and given the cost of what the motion
-	   event might do, its a good tradeoff.  
-	*/
-
-	track_canvas.get_pointer (x, y);
+	if (event->motion.is_hint) {
+		gint x, y;
+		
+		/* We call this so that MOTION_NOTIFY events continue to be
+		   delivered to the canvas. We need to do this because we set
+		   Gdk::POINTER_MOTION_HINT_MASK on the canvas. This reduces
+		   the density of the events, at the expense of a round-trip
+		   to the server. Given that this will mostly occur on cases
+		   where DISPLAY = :0.0, and given the cost of what the motion
+		   event might do, its a good tradeoff.  
+		*/
+		
+		track_canvas.get_pointer (x, y);
+	}
 
 	if (current_stepping_trackview) {
 		/* don't keep the persistent stepped trackview if the mouse moves */

@@ -10,7 +10,9 @@ Import('env install_prefix libraries')
 rb = env.Copy()
 
 rb.Merge  ([libraries['fftw3f'], 
+	    libraries['fftw3'],
             libraries['vamp'],
+            libraries['samplerate'],
             libraries['sndfile-ardour']
             ])
 

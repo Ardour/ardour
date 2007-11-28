@@ -8,6 +8,7 @@ SAE=
 WITH_JACK=1
 WITH_LADSPA=1
 STRIP=1
+PRINT_SYSDEPS=
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -16,6 +17,7 @@ while [ $# -gt 0 ] ; do
 	--nojack) WITH_JACK= ; shift ;;
 	--noladpsa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
+	--sysdeps) PRINT_SYSDEPS=1; shift ;;
     esac
 done
 
@@ -30,6 +32,20 @@ Resources=$APPROOT/Resources
 Plugins=$APPROOT/Plugins
 Shared=$Resources/share
 Etc=$Resources/etc
+
+if [ x$PRINT_SYSDEPS != x ] ; then
+#
+# print system dependencies
+#
+
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do 
+	if ! file $file | grep -qs Mach-O ; then
+	    continue
+	fi
+	otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)" 
+    done | sort | uniq
+    exit 0
+fi
 
 echo "Removing old Ardour2.app tree ..."
 

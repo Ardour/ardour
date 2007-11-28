@@ -403,6 +403,29 @@ else:
         os.remove('.personal_use_only')
 
 
+####################
+# push environment
+####################
+
+def pushEnvironment(context):
+    if os.environ.has_key('PATH'):
+	context.Append(PATH = os.environ['PATH'])
+	
+    if os.environ.has_key('PKG_CONFIG_PATH'):
+	context.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
+	    
+    if os.environ.has_key('CC'):
+	context['CC'] = os.environ['CC']
+		
+    if os.environ.has_key('CXX'):
+	context['CXX'] = os.environ['CXX']
+
+    if os.environ.has_key('DISTCC_HOSTS'):
+	context['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
+	context['ENV']['HOME'] = os.environ['HOME']
+
+pushEnvironment (env)
+
 #######################
 # Dependency Checking #
 #######################
@@ -425,16 +448,16 @@ def DependenciesRequiredMessage():
 	print 'Please consult http://ardour.org/building for more information'
 
 def CheckPKGConfig(context, version):
-     context.Message( 'Checking for pkg-config version >= %s... ' %version )
-     ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
-     context.Result( ret )
-     return ret
+    context.Message( 'Checking for pkg-config version >= %s... ' %version )
+    ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
+    context.Result( ret )
+    return ret
 
 def CheckPKGVersion(context, name, version):
-     context.Message( 'Checking for %s... ' % name )
-     ret = context.TryAction('pkg-config --atleast-version=%s %s' %(version,name) )[0]
-     context.Result( ret )
-     return ret
+    context.Message( 'Checking for %s... ' % name )
+    ret = context.TryAction('pkg-config --atleast-version=%s %s' %(version,name) )[0]
+    context.Result( ret )
+    return ret
 
 def CheckPKGExists(context, name):
     context.Message ('Checking for %s...' % name)
@@ -751,15 +774,13 @@ libraries['vamp'] = LibraryInfo()
 
 env['RUBBERBAND'] = False
 
-conf = libraries['vamp'].Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
+conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
 
 if conf.CheckPKGExists('vamp-sdk'):
     have_vamp = True
     libraries['vamp'].ParseConfig('pkg-config --cflags --libs vamp-sdk')
 else:
     have_vamp = False
-
-print "---> WE HAVE VAMP: ", have_vamp
 
 libraries['vamp'] = conf.Finish ()
 
@@ -1090,22 +1111,6 @@ if env['RUBBERBAND']:
     
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
-
-if os.environ.has_key('PATH'):
-    env.Append(PATH = os.environ['PATH'])
-
-if os.environ.has_key('PKG_CONFIG_PATH'):
-    env.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
-
-if os.environ.has_key('CC'):
-    env['CC'] = os.environ['CC']
-
-if os.environ.has_key('CXX'):
-    env['CXX'] = os.environ['CXX']
-
-if os.environ.has_key('DISTCC_HOSTS'):
-    env['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
-    env['ENV']['HOME'] = os.environ['HOME']
 
 final_prefix = '$PREFIX'
 
