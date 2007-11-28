@@ -665,11 +665,14 @@ class Editor : public PublicEditor
 	void    cursor_to_selection_start (Cursor *);
 	void    cursor_to_selection_end   (Cursor *);
 
-	void    edit_point_to_next_region_point (ARDOUR::RegionPoint);
-	void    edit_point_to_previous_region_point (ARDOUR::RegionPoint);
-	void    edit_point_to_region_point (ARDOUR::RegionPoint, int32_t dir);
-	void    edit_point_to_selection_start ();
-	void    edit_point_to_selection_end   ();
+	void    selected_marker_to_region_boundary (int32_t dir);
+	void    selected_marker_to_next_region_boundary ();
+	void    selected_marker_to_previous_region_boundary ();
+	void    selected_marker_to_next_region_point (ARDOUR::RegionPoint);
+	void    selected_marker_to_previous_region_point (ARDOUR::RegionPoint);
+	void    selected_marker_to_region_point (ARDOUR::RegionPoint, int32_t dir);
+	void    selected_marker_to_selection_start ();
+	void    selected_marker_to_selection_end   ();
 
 	void    select_all_selectables_using_cursor (Cursor *, bool);
 	void    select_all_selectables_using_edit (bool);
@@ -1095,10 +1098,14 @@ class Editor : public PublicEditor
 	void set_selection_from_loop ();
 	void set_selection_from_audio_region ();
 
+	void add_location_mark (nframes64_t where);
 	void add_location_from_audio_region ();
 	void add_location_from_selection ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
+
+	void set_loop_from_edit_range (bool play);
+	void set_punch_from_edit_range ();
 
 	void set_loop_range (nframes_t start, nframes_t end, std::string cmd);
 	void set_punch_range (nframes_t start, nframes_t end, std::string cmd);

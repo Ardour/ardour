@@ -730,6 +730,7 @@ Editor::cursor_to_region_boundary (Cursor* cursor, int32_t dir)
 		return;
 	}
 
+
 	if (cursor == playhead_cursor) {
 		session->request_locate (target);
 	} else {
@@ -887,7 +888,68 @@ Editor::cursor_to_selection_end (Cursor *cursor)
 }
 
 void
-Editor::edit_point_to_region_point (RegionPoint point, int32_t dir)
+Editor::selected_marker_to_region_boundary (int32_t dir)
+{
+	nframes64_t target;
+	Location* loc;
+	bool ignored;
+
+	if (!session) {
+		return;
+	}
+
+	if (selection->markers.empty()) {
+		nframes64_t mouse;
+		bool ignored;
+
+		if (!mouse_frame (mouse, ignored)) {
+			return;
+		}
+		
+		add_location_mark (mouse);
+	}
+
+	if ((loc = find_location_from_marker (selection->markers.front(), ignored)) == 0) {
+		return;
+	}
+
+	nframes64_t pos = loc->start();
+
+	// so we don't find the current region again..
+	if (dir > 0 || pos > 0) {
+		pos += dir;
+	}
+
+	if (!selection->tracks.empty()) {
+		
+		target = find_next_region_boundary (pos, dir, selection->tracks);
+		
+	} else {
+		
+		target = find_next_region_boundary (pos, dir, track_views);
+	}
+	
+	if (target < 0) {
+		return;
+	}
+
+	loc->move_to (target);
+}
+
+void
+Editor::selected_marker_to_next_region_boundary ()
+{
+	selected_marker_to_region_boundary (1);
+}
+
+void
+Editor::selected_marker_to_previous_region_boundary ()
+{
+	selected_marker_to_region_boundary (-1);
+}
+
+void
+Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Region> r;
 	nframes_t pos;
@@ -959,19 +1021,19 @@ Editor::edit_point_to_region_point (RegionPoint point, int32_t dir)
 }
 
 void
-Editor::edit_point_to_next_region_point (RegionPoint point)
+Editor::selected_marker_to_next_region_point (RegionPoint point)
 {
-	edit_point_to_region_point (point, 1);
+	selected_marker_to_region_point (point, 1);
 }
 
 void
-Editor::edit_point_to_previous_region_point (RegionPoint point)
+Editor::selected_marker_to_previous_region_point (RegionPoint point)
 {
-	edit_point_to_region_point (point, -1);
+	selected_marker_to_region_point (point, -1);
 }
 
 void
-Editor::edit_point_to_selection_start ()
+Editor::selected_marker_to_selection_start ()
 {
 	nframes_t pos = 0;
 	Location* loc;
@@ -1006,7 +1068,7 @@ Editor::edit_point_to_selection_start ()
 }
 
 void
-Editor::edit_point_to_selection_end ()
+Editor::selected_marker_to_selection_end ()
 {
 	nframes_t pos = 0;
 	Location* loc;
@@ -1595,12 +1657,10 @@ Editor::add_location_from_selection ()
 }
 
 void
-Editor::add_location_from_playhead_cursor ()
+Editor::add_location_mark (nframes64_t where)
 {
 	string markername;
 
-	nframes_t where = session->audible_frame();
-	
 	select_new_marker = true;
 
 	session->locations()->next_available_name(markername,"mark");
@@ -1611,6 +1671,12 @@ Editor::add_location_from_playhead_cursor ()
         XMLNode &after = session->locations()->get_state();
 	session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	session->commit_reversible_command ();
+}
+
+void
+Editor::add_location_from_playhead_cursor ()
+{
+	add_location_mark (session->audible_frame());
 }
 
 void
@@ -3224,7 +3290,7 @@ Editor::cut_copy (CutCopyOp op)
 				cerr << "no edit op range" << endl;
 				return;
 			}
-			selection->set (0, start, end);
+			selection->set ((TimeAxisView*) 0, start, end);
 		}
 			
 		begin_reversible_command (opname + _(" range"));
@@ -4372,3 +4438,74 @@ Editor::select_prev_route()
 		}
 	}
 }
+
+void
+Editor::set_loop_from_selection (bool play)
+{
+	if (session == 0 || selection->time.empty()) {
+		return;
+	}
+
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
+	
+	set_loop_range (start, end,  _("set loop range from selection"));
+
+	if (play) {
+		session->request_play_loop (true);
+		session->request_locate (start, true);
+	}
+}
+
+void
+Editor::set_loop_from_edit_range (bool play)
+{
+	if (session == 0) {
+		return;
+	}
+
+	nframes64_t start;
+	nframes64_t end;
+	
+	if (!get_edit_op_range (start, end)) {
+		return;
+	}
+
+	set_loop_range (start, end,  _("set loop range from edit range"));
+
+	if (play) {
+		session->request_play_loop (true);
+		session->request_locate (start, true);
+	}
+}
+
+void
+Editor::set_punch_from_selection ()
+{
+	if (session == 0 || selection->time.empty()) {
+		return;
+	}
+
+	nframes_t start = selection->time[clicked_selection].start;
+	nframes_t end = selection->time[clicked_selection].end;
+	
+	set_punch_range (start, end,  _("set punch range from selection"));
+}
+
+void
+Editor::set_punch_from_edit_range ()
+{
+	if (session == 0) {
+		return;
+	}
+
+	nframes64_t start;
+	nframes64_t end;
+	
+	if (!get_edit_op_range (start, end)) {
+		return;
+	}
+
+	set_punch_range (start, end,  _("set punch range from edit range"));
+}
+

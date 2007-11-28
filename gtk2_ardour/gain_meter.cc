@@ -709,7 +709,7 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 			if (ev->button == 2) {
 
-				// ctrl-button2 click is the midi binding click
+				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
@@ -722,7 +722,7 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-					/* ctrl-shift-click applies change to all routes */
+					/* Primary+Tertiary-click applies change to all routes */
 
 					_session.begin_reversible_command (_("meter point change"));
                                         Session::GlobalMeteringStateCommand *cmd = new Session::GlobalMeteringStateCommand (_session, this);
@@ -734,8 +734,8 @@ GainMeter::meter_press(GdkEventButton* ev)
 					
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-					/* ctrl-click: solo mix group.
-					   ctrl-button2 is MIDI learn.
+					/* Primary-click: solo mix group.
+					   NOTE: Primary-button2 is MIDI learn.
 					*/
 					
 					if (ev->button == 1) {

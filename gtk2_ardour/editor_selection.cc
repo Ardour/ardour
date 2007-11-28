@@ -576,13 +576,13 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 		selection->toggle (all_equivalent_regions);
 		break;
 	case Selection::Set:
-		selection->set (all_equivalent_regions);
+		selection->set (all_equivalent_regions, false);
 		break;
 	case Selection::Extend:
-		selection->add (all_equivalent_regions);
+		selection->add (all_equivalent_regions, false);
 		break;
 	case Selection::Add:
-		selection->add (all_equivalent_regions);
+		selection->add (all_equivalent_regions, false);
 		break;
 	}
 }
@@ -1050,7 +1050,7 @@ Editor::select_range_between ()
 	}
 
 	set_mouse_mode (MouseRange);
-	selection->set (0, start, end);
+	selection->set ((TimeAxisView*) 0, start, end);
 }
 
 bool

@@ -55,10 +55,8 @@
                <menuitem action='playhead-to-next-region-sync'/>
                <menuitem action='playhead-to-previous-region-sync'/>
                <menuitem action='center-playhead'/>
+	       <separator/>
                <menuitem action='playhead-to-edit'/>
-               <separator/>       
-               <menuitem action='playhead-to-range-start'/>
-               <menuitem action='playhead-to-range-end'/>
                <menuitem action='focus-on-clock'/>
 	       <separator/>
 	       <menuitem action='ToggleTimeMaster'/>
@@ -69,6 +67,9 @@
                <menuitem action='ToggleAutoReturn'/>
                <menuitem action='ToggleClick'/>
                <menuitem action='toggle-follow-playhead'/>
+	       <separator/>
+	       <menuitem action='set-loop-from-edit-range'/>
+	       <menuitem action='set-punch-from-edit-range'/>
        </menu>
        <menu name='Edit' action='Edit'>
                <menuitem action='undo'/>
@@ -87,8 +88,6 @@
                <menuitem action='invert-selection'/>
                <menuitem action='select-all-after-edit-cursor'/>
                <menuitem action='select-all-before-edit-cursor'/>
-               <menuitem action='select-all-after-playhead'/>
-               <menuitem action='select-all-before-playhead'/>
                <menuitem action='select-all-between-cursors'/>
                <menuitem action='select-all-within-cursors'/>
                <menuitem action='select-all-in-punch-range'/>
@@ -98,16 +97,12 @@
                <menuitem action='select-prev-route'/>
 	       <separator/>
 	       <menu action='EditCursorMovementOptions'>
-                   <menuitem action='edit-cursor-to-next-region-start'/>
-    	           <menuitem action='edit-cursor-to-next-region-end'/>
-       	           <menuitem action='edit-cursor-to-previous-region-start'/>
-            	   <menuitem action='edit-cursor-to-previous-region-end'/>
+                   <menuitem action='selected-marker-to-next-region-boundary'/>
+    	           <menuitem action='selected-marker-to-previous-region-boundary'/>
 	           <menuitem action='edit-cursor-to-next-region-sync'/>
     	           <menuitem action='edit-cursor-to-previous-region-sync'/>
         	   <menuitem action='center-edit-cursor'/>
             	   <menuitem action='edit-to-playhead'/>
-    	           <menuitem action='edit-cursor-to-range-start'/>
-	           <menuitem action='edit-cursor-to-range-end'/>
 	       </menu>
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
 	       		<menuitem action='audition-at-mouse'/>

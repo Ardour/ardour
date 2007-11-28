@@ -33,37 +33,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 void
-Editor::set_loop_from_selection (bool play)
-{
-	if (session == 0 || selection->time.empty()) {
-		return;
-	}
-
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
-	
-	set_loop_range (start, end,  _("set loop range from selection"));
-
-	if (play) {
-		session->request_play_loop (true);
-		session->request_locate (start, true);
-	}
-}
-
-void
-Editor::set_punch_from_selection ()
-{
-	if (session == 0 || selection->time.empty()) {
-		return;
-	}
-
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
-	
-	set_punch_range (start, end,  _("set punch range from selection"));
-}
-
-void
 Editor::set_show_waveforms (bool yn)
 {
 	AudioTimeAxisView* atv;
