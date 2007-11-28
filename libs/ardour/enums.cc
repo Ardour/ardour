@@ -153,7 +153,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (SyncPoint);	
 	REGISTER (_RegionPoint);
 
-
 	REGISTER_ENUM (PreFader);
 	REGISTER_ENUM (PostFader);
 	REGISTER (_Placement);

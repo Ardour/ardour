@@ -84,6 +84,11 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-auto-xfades", _("Created Automatically"), mem_fun(*this, &Editor::toggle_auto_xfade));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), bind (mem_fun(*this, &Editor::cursor_to_next_region_boundary), playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "playhead-to-previous-region-boundary", _("Playhead to Previous Region Boundary"), bind (mem_fun(*this, &Editor::cursor_to_previous_region_boundary), playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-start", _("Playhead to Next Region Start"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (Start)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-end", _("Playhead to Next Region End"), bind (mem_fun(*this, &Editor::cursor_to_next_region_point), playhead_cursor, RegionPoint (End)));

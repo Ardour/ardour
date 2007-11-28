@@ -555,12 +555,15 @@ Editor::build_region_boundary_cache ()
 			case Start:
 				rpos = r->first_frame();
 				break;
+
 			case End:
 				rpos = r->last_frame();
 				break;	
+
 			case SyncPoint:
 				rpos = r->adjust_to_sync (r->first_frame());
 				break;
+
 			default:
 				break;
 			}
@@ -647,6 +650,7 @@ Editor::find_next_region (nframes_t frame, RegionPoint point, int32_t dir, Track
 			rpos = r->adjust_to_sync (r->first_frame());
 			break;
 		}
+
 		// rpos is a "track frame", converting it to "session frame"
 		rpos = track_frame_to_session_frame(rpos, track_speed);
 
@@ -665,6 +669,84 @@ Editor::find_next_region (nframes_t frame, RegionPoint point, int32_t dir, Track
 	}
 
 	return ret;
+}
+
+nframes64_t
+Editor::find_next_region_boundary (nframes64_t pos, int32_t dir, const TrackViewList& tracks)
+{
+	nframes64_t distance = max_frames;
+	nframes64_t current_nearest = -1;
+
+	for (TrackViewList::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		nframes64_t contender;
+		nframes64_t d;
+
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+
+		if (!rtv) {
+			continue;
+		}
+
+		if ((contender = rtv->find_next_region_boundary (pos, dir)) < 0) {
+			continue;
+		}
+
+		d = ::llabs (pos - contender);
+
+		if (d < distance) {
+			current_nearest = contender;
+			distance = d;
+		}
+	}
+	
+	return current_nearest;
+}
+
+void
+Editor::cursor_to_region_boundary (Cursor* cursor, int32_t dir)
+{
+	nframes64_t pos = cursor->current_frame;
+	nframes64_t target;
+
+	if (!session) {
+		return;
+	}
+
+	// so we don't find the current region again..
+	if (dir > 0 || pos > 0) {
+		pos += dir;
+	}
+
+	if (!selection->tracks.empty()) {
+		
+		target = find_next_region_boundary (pos, dir, selection->tracks);
+		
+	} else {
+		
+		target = find_next_region_boundary (pos, dir, track_views);
+	}
+	
+	if (target < 0) {
+		return;
+	}
+
+	if (cursor == playhead_cursor) {
+		session->request_locate (target);
+	} else {
+		cursor->set_position (target);
+	}
+}
+
+void
+Editor::cursor_to_next_region_boundary (Cursor* cursor)
+{
+	cursor_to_region_boundary (cursor, 1);
+}
+
+void
+Editor::cursor_to_previous_region_boundary (Cursor* cursor)
+{
+	cursor_to_region_boundary (cursor, -1);
 }
 
 void

@@ -1464,6 +1464,91 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 	return ret;
 }
 
+nframes64_t
+Playlist::find_next_region_boundary (nframes64_t frame, int dir)
+{
+	RegionLock rlock (this);
+
+	nframes64_t closest = max_frames;
+	nframes64_t ret = -1;
+
+	if (dir > 0) {
+
+		for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+			
+			boost::shared_ptr<Region> r = (*i);
+			nframes64_t distance;
+			bool reset;
+
+			reset = false;
+
+			if (r->first_frame() > frame) {
+
+				distance = r->first_frame() - frame;
+				
+				if (distance < closest) {
+					ret = r->first_frame();
+					closest = distance;
+					reset = true;
+				}
+			}
+
+			if (r->last_frame() > frame) {
+				
+				distance = r->last_frame() - frame;
+				
+				if (distance < closest) {
+					ret = r->last_frame();
+					closest = distance;
+					reset = true;
+				}
+			}
+
+			if (reset) {
+				break;
+			}
+		}
+
+	} else {
+
+		for (RegionList::const_reverse_iterator i = regions.rbegin(); i != regions.rend(); ++i) {
+			
+			boost::shared_ptr<Region> r = (*i);
+			nframes64_t distance;
+			bool reset;
+
+			reset = false;
+
+			if (r->last_frame() < frame) {
+
+				distance = frame - r->last_frame();
+				
+				if (distance < closest) {
+					ret = r->last_frame();
+					closest = distance;
+					reset = true;
+				}
+			}
+
+			if (r->first_frame() < frame) {
+				distance = frame - r->last_frame();
+				
+				if (distance < closest) {
+					ret = r->first_frame();
+					closest = distance;
+					reset = true;
+				}
+			}
+
+			if (reset) {
+				break;
+			}
+		}
+	}
+
+	return ret;
+}
+
 /***********************************************************************/
 
 

@@ -1180,6 +1180,19 @@ RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t d
 	return boost::shared_ptr<Region> ();
 }
 
+nframes64_t 
+RouteTimeAxisView::find_next_region_boundary (nframes64_t pos, int32_t dir)
+{
+	boost::shared_ptr<Diskstream> stream;
+	boost::shared_ptr<Playlist> playlist;
+
+	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
+		return playlist->find_next_region_boundary (pos, dir);
+	}
+
+	return -1;
+}
+
 bool
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {

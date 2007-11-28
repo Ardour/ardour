@@ -82,6 +82,7 @@ public:
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
 		
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
+	nframes64_t find_next_region_boundary (nframes64_t pos, int32_t dir);
 
 	/* Editing operations */
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);

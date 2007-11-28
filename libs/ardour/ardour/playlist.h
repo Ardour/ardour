@@ -103,6 +103,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (nframes_t frame);
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
+	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
 
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg);
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>));

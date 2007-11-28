@@ -656,6 +656,9 @@ class Editor : public PublicEditor
 	Cursor* playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
 
+	void    cursor_to_region_boundary (Cursor*, int32_t dir);
+	void    cursor_to_next_region_boundary (Cursor*);
+	void    cursor_to_previous_region_boundary (Cursor*);
 	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_previous_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_region_point (Cursor*, ARDOUR::RegionPoint, int32_t dir);
@@ -674,6 +677,7 @@ class Editor : public PublicEditor
 	void    select_range_between ();
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+	nframes64_t find_next_region_boundary (nframes64_t, int32_t dir, const TrackViewList&);
 
 	vector<nframes_t> region_boundary_cache;
 	void build_region_boundary_cache ();

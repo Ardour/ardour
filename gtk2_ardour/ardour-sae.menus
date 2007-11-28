@@ -49,10 +49,8 @@
                <menuitem action='jump-backward-to-mark'/>
                <menuitem action='add-location-from-playhead'/>
                <separator/> 
-               <menuitem action='playhead-to-next-region-start'/>
-               <menuitem action='playhead-to-next-region-end'/>
-               <menuitem action='playhead-to-previous-region-start'/>
-               <menuitem action='playhead-to-previous-region-end'/>
+               <menuitem action='playhead-to-next-region-boundary'/>
+               <menuitem action='playhead-to-previous-region-boundary'/>
                <menuitem action='playhead-to-next-region-sync'/>
                <menuitem action='playhead-to-previous-region-sync'/>
                <menuitem action='center-playhead'/>
