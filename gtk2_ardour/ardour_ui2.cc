@@ -398,7 +398,9 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
 
 	transport_tearoff_hbox.pack_start (auto_loop_button, false, false);
-	transport_tearoff_hbox.pack_start (play_selection_button, false, false);
+	if (!Profile->get_sae()) {
+		transport_tearoff_hbox.pack_start (play_selection_button, false, false);
+	}
 	transport_tearoff_hbox.pack_start (roll_button, false, false);
 	transport_tearoff_hbox.pack_start (stop_button, false, false);
 	transport_tearoff_hbox.pack_start (rec_button, false, false, 6);

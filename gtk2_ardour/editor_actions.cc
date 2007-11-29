@@ -254,6 +254,10 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "set-loop-from-edit-range", _("Set Loop From Edit Range"), bind (mem_fun(*this, &Editor::set_loop_from_edit_range), false));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "set-loop-from-region", _("Set Loop From Region"), bind (mem_fun(*this, &Editor::set_loop_from_region), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "loop-region", _("Loop Region"), bind (mem_fun(*this, &Editor::set_loop_from_region), true));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-punch-from-edit-range", _("Set Punch From Edit Range"), mem_fun(*this, &Editor::set_punch_from_edit_range));
 	ActionManager::session_sensitive_actions.push_back (act);
 	

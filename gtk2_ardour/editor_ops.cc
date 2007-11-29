@@ -4477,6 +4477,27 @@ Editor::set_loop_from_edit_range (bool play)
 }
 
 void
+Editor::set_loop_from_region (bool play)
+{
+	ensure_entered_region_selected (true);
+
+	if (selection->regions.empty()) {
+		info << _("cannot set loop: no region selected") << endmsg;
+		return;
+	}
+
+	nframes64_t start = selection->regions.front()->region()->first_frame();
+	nframes64_t end = selection->regions.front()->region()->last_frame() + 1;
+
+	set_loop_range (start, end, _("set loop range from region"));
+
+	if (play) {
+		session->request_play_loop (true);
+		session->request_locate (start, true);
+	}
+}
+
+void
 Editor::set_punch_from_selection ()
 {
 	if (session == 0 || selection->time.empty()) {

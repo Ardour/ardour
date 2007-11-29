@@ -243,7 +243,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		}
 	}
 
-	/* XXX the hack of unsetting all other buttongs should go 
+	/* XXX the hack of unsetting all other buttons should go 
 	   away once GTK2 allows us to use regular radio buttons drawn like
 	   normal buttons, rather than my silly GroupedButton hack.
 	*/
@@ -258,7 +258,11 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 
 	case MouseObject:
 		mouse_move_button.set_active (true);
-		current_canvas_cursor = grabber_cursor;
+		if (Profile->get_sae()) {
+			current_canvas_cursor = timebar_cursor;
+		} else {
+			current_canvas_cursor = grabber_cursor;
+		}
 		break;
 
 	case MouseGain:
@@ -1154,7 +1158,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
 			show_verbose_canvas_cursor ();
 
-			if (is_drawable()) {
+			if (is_drawable() && !_scrubbing) {
 			        track_canvas.get_window()->set_cursor (*fader_cursor);
 			}
 		}

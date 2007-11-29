@@ -1102,6 +1102,7 @@ class Editor : public PublicEditor
 	void set_punch_from_selection ();
 
 	void set_loop_from_edit_range (bool play);
+	void set_loop_from_region (bool play);
 	void set_punch_from_edit_range ();
 
 	void set_loop_range (nframes_t start, nframes_t end, std::string cmd);

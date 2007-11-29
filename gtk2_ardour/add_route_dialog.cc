@@ -129,7 +129,9 @@ AddRouteDialog::AddRouteDialog ()
 	ccframe.set_shadow_type (SHADOW_IN);
 
 	dvbox->pack_start (channel_combo, true, false, 5);
-	dvbox->pack_start (track_mode_combo, true, false, 5);
+	if (!ARDOUR::Profile->get_sae()) {
+		dvbox->pack_start (track_mode_combo, true, false, 5);
+	}
 	dhbox->pack_start (*dvbox, true, false, 5);
 
 	ccframe.add (*dhbox);
@@ -181,6 +183,10 @@ AddRouteDialog::count ()
 ARDOUR::TrackMode
 AddRouteDialog::mode ()
 {
+	if (ARDOUR::Profile->get_sae()) {
+		return ARDOUR::Normal;
+	}
+
 	Glib::ustring str = track_mode_combo.get_active_text();
 	if (str == _("Normal")) {
 		return ARDOUR::Normal;

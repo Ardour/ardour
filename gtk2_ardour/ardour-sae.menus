@@ -33,7 +33,7 @@
                <menuitem action='record-roll'/>
                <menuitem action='ToggleRollForgetCapture'/>
                <menuitem action='Loop'/>
-               <menuitem action='PlaySelection'/>
+               <menuitem action='loop-region'/>
                <menuitem action='set-playhead'/>
                <menuitem action='Forward'/>
                <menuitem action='Rewind'/>
@@ -69,6 +69,7 @@
                <menuitem action='toggle-follow-playhead'/>
 	       <separator/>
 	       <menuitem action='set-loop-from-edit-range'/>
+	       <menuitem action='set-loop-from-region'/>
 	       <menuitem action='set-punch-from-edit-range'/>
        </menu>
        <menu name='Edit' action='Edit'>
