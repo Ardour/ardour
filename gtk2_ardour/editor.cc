@@ -280,7 +280,8 @@ Editor::Editor ()
 	verbose_cursor_on = true;
 	route_removal = false;
 	show_automatic_regions_in_region_list = true;
-	region_list_sort_type = (Editing::RegionListSortType) 0; 
+
+	region_list_sort_type = (Editing::RegionListSortType) 0;
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
 	_xfade_visibility = true;
@@ -2595,8 +2596,11 @@ Editor::setup_toolbar ()
 {
 	string pixmap_path;
 
+#ifdef GTKOSX
+	const guint32 FUDGE = 38; // Combo's are stupid - they steal space from the entry for the button
+#else
 	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button
-
+#endif
 
 	/* Mode Buttons (tool selection) */
 

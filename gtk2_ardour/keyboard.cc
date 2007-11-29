@@ -43,7 +43,7 @@ guint Keyboard::delete_but = 3;
 guint Keyboard::delete_mod = GDK_SHIFT_MASK;
 guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
-#ifdef NATIVE_OSX_KEYS
+#ifdef GTKOSX
 guint Keyboard::PrimaryModifier = GDK_MOD1_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_MOD5_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
