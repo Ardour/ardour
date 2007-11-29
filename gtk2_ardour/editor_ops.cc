@@ -28,6 +28,7 @@
 #include <pbd/basename.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/memento_command.h>
+#include <pbd/whitespace.h>
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
@@ -2159,58 +2160,54 @@ Editor::edit_region ()
 }
 
 void
-Editor::rename_region ()
+Editor::rename_region()
 {
-	Dialog dialog;
-	Entry  entry;
-	Button ok_button (_("OK"));
-	Button cancel_button (_("Cancel"));
-
 	if (selection->regions.empty()) {
 		return;
 	}
 
-	WindowTitle title(Glib::get_application_name());
+	WindowTitle title (Glib::get_application_name());
 	title += _("Rename Region");
 
-	dialog.set_title (title.get_string());
-	dialog.set_name ("RegionRenameWindow");
-	dialog.set_size_request (300, -1);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
-	dialog.set_modal (true);
+	ArdourDialog d (*this, title.get_string(), true, false);
+	Entry entry;
+	Label label (_("New name:"));
+	HBox hbox;
 
-	dialog.get_vbox()->set_border_width (10);
-	dialog.get_vbox()->pack_start (entry);
-	dialog.get_action_area()->pack_start (ok_button);
-	dialog.get_action_area()->pack_start (cancel_button);
+	hbox.set_spacing (6);
+	hbox.pack_start (label, false, false);
+	hbox.pack_start (entry, true, true);
 
-	entry.set_name ("RegionNameDisplay");
-	ok_button.set_name ("EditorGTKButton");
-	cancel_button.set_name ("EditorGTKButton");
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->pack_start (hbox, false, false);
 
-	region_renamed = false;
+	d.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	d.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
-	entry.signal_activate().connect (bind (mem_fun(*this, &Editor::rename_region_finished), true));
-	ok_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::rename_region_finished), true));
-	cancel_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::rename_region_finished), false));
+	d.set_size_request (300, -1);
+	d.set_position (Gtk::WIN_POS_MOUSE);
 
-	/* recurse */
+	entry.set_text (selection->regions.front()->region()->name());
+	entry.select_region (0, -1);
 
-	dialog.show_all ();
-	Main::run ();
+	entry.signal_activate().connect (bind (mem_fun (d, &Dialog::response), RESPONSE_OK));
+	
+	d.show_all ();
+	
+	entry.grab_focus();
 
-	if (region_renamed) {
-		(*selection->regions.begin())->region()->set_name (entry.get_text());
-		redisplay_regions ();
+	int ret = d.run();
+
+	d.hide ();
+
+	if (ret == RESPONSE_OK) {
+		std::string str = entry.get_text();
+		strip_whitespace_edges (str);
+		if (!str.empty()) {
+			selection->regions.front()->region()->set_name (str);
+			redisplay_regions ();
+		}
 	}
-}
-
-void
-Editor::rename_region_finished (bool status)
-
-{
-	region_renamed = status;
-	Main::quit ();
 }
 
 void

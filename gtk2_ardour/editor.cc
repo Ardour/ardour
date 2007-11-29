@@ -1708,6 +1708,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 
+	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::rename_region)));
 	items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
 	items.push_back (MenuElem (_("Lower to bottom layer"), mem_fun  (*this, &Editor::lower_region_to_bottom)));

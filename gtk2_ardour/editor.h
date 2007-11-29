@@ -944,6 +944,7 @@ class Editor : public PublicEditor
 	void remove_clicked_region ();
 	void destroy_clicked_region ();
 	void edit_region ();
+	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
 	void region_fill_selection ();
@@ -979,10 +980,6 @@ class Editor : public PublicEditor
 
 	void region_from_selection ();
 	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::AudioRegion> >&);
-
-	bool region_renamed;
-	void rename_region ();
-	void rename_region_finished (bool);
 
 	void play_from_start ();
 	void play_from_edit_point ();
