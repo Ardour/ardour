@@ -26,6 +26,7 @@
 #include <gtkmm2ext/window_title.h>
 
 #include <ardour/location.h>
+#include <ardour/profile.h>
 #include <pbd/memento_command.h>
 
 #include "editor.h"
@@ -606,19 +607,21 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
+	items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::marker_menu_play_range)));
 	items.push_back (MenuElem (_("Locate to Range Mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Range Mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
 	if (!loop_or_punch) {
-		items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::marker_menu_play_range)));
 		items.push_back (MenuElem (_("Loop Range"), mem_fun(*this, &Editor::marker_menu_loop_range)));
 	}
 	items.push_back (MenuElem (_("Set Range Mark from Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
-	items.push_back (MenuElem (_("Set Range from Range Selection"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Set Range from Range Selection"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+	}
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
 	if (!loop_or_punch) {
+		items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range"), mem_fun(*this, &Editor::marker_menu_rename)));
 		items.push_back (MenuElem (_("Remove Range"), mem_fun(*this, &Editor::marker_menu_remove)));
 	}
@@ -627,8 +630,9 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 
 	items.push_back (MenuElem (_("Separate Regions in Range"), mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select All in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
-	items.push_back (MenuElem (_("Select Range"), mem_fun(*this, &Editor::marker_menu_select_using_range)));
-
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Select Range"), mem_fun(*this, &Editor::marker_menu_select_using_range)));
+	}
 }
 
 void
@@ -807,13 +811,13 @@ Editor::marker_menu_set_from_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			l->set_start (session->transport_frame ());
+			l->set_start (session->audible_frame ());
 		}
 		else {
 			if (is_start) {
-				l->set_start (session->transport_frame ());
+				l->set_start (session->audible_frame ());
 			} else {
-				l->set_end (session->transport_frame ());
+				l->set_end (session->audible_frame ());
 			}
 		}
 	}

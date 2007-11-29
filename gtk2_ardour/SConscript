@@ -236,6 +236,10 @@ icon_files = glob.glob ('icons/*.png')
 
 intl_files = gtkardour_files + glob.glob('*.h')
 
+evtest_files=Split("""
+evtest.cc
+""")
+
 mtest_files=Split("""
 mtest.cc
 """)
@@ -293,6 +297,7 @@ executable = 'ardour-' + ardour_version
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
 ardourlib = gtkardour.SharedLibrary(target = 'ardourgtk', source = gtkardour_files + extra_sources)
 
+evest = gtkmmtests.Program(target = 'evtest', source = evtest_files)
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
 itest = gtkardour.Program(target = 'itest', source = itest_files)
 rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
@@ -388,9 +393,9 @@ if gtkardour['GTKOSX'] and gtkardour['NATIVE_OSX_KEYS']:
 	#
 	# Command(Mod1), Alt(Mod5), Ctrl, Shift
 	#
-	keybindings_dict['%PRIMARY%'] = 'Mod1'
+	keybindings_dict['%PRIMARY%'] = 'Mod5'
 	keybindings_dict['%SECONDARY%'] = 'Alt'
-	keybindings_dict['%TERTIARY%'] = 'Ctrl'
+	keybindings_dict['%TERTIARY%'] = 'Shift'
 	keybindings_dict['%LEVEL4%'] = 'Shift'
 else:
 	#

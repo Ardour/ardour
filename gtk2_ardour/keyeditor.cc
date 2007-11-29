@@ -8,6 +8,7 @@
 #include <gtkmm/uimanager.h>
 
 #include <pbd/strsplit.h>
+#include <pbd/replace_all.h>
 
 #include "actions.h"
 #include "keyboard.h"
@@ -18,6 +19,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gdk;
+using namespace PBD;
 
 KeyEditor::KeyEditor ()
 	: ArdourDialog (_("Keybinding Editor"), false)
@@ -180,7 +182,16 @@ KeyEditor::populate ()
 		if (*k == ActionManager::unbound_string) {
 			row[columns.binding] = string();
 		} else {
+
+#ifdef GTKOSX
+			string label = (*k);
+			replace_all (label, "<Control>", _("Command-"));
+			replace_all (label, "<Alt>", _("Option-"));
+			replace_all (label, "<Shift>", _("Shift-"));
+			row[columns.binding] = label;
+#else		
 			row[columns.binding] = (*k);
+#endif
 		}
 	}
 }

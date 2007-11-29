@@ -1938,7 +1938,7 @@ Editor::insert_region_list_selection (float times)
 			return;
 		}
 	} else if (entered_track != 0) {
-		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
+		if ((tv = dynamic_cast<RouteTimeAxisView*>(entered_track)) == 0) {
 			return;
 		}
 	} else {

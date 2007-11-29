@@ -387,7 +387,8 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-selected-marker"), _("Marker"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 
-	ActionManager::register_action (editor_actions, "cycle-edit-point", _("Change edit point"), mem_fun (*this, &Editor::cycle_edit_point));
+	ActionManager::register_action (editor_actions, "cycle-edit-point", _("Change edit point"), bind (mem_fun (*this, &Editor::cycle_edit_point), false));
+	ActionManager::register_action (editor_actions, "cycle-edit-point-with-marker", _("Change edit point (w/Marker)"), bind (mem_fun (*this, &Editor::cycle_edit_point), true));
 
 	ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), bind (mem_fun (*this, &Editor::set_edit_mode), Splice));
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), bind (mem_fun (*this, &Editor::set_edit_mode), Slide));

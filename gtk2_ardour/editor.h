@@ -1957,7 +1957,7 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText edit_point_selector;
 
 	void set_edit_point_preference (Editing::EditPoint ep);
-	void cycle_edit_point ();
+	void cycle_edit_point (bool with_marker);
 	void set_edit_point ();
 	void edit_point_selection_done ();
 	void edit_point_chosen (Editing::EditPoint);

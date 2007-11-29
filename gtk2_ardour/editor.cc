@@ -3251,14 +3251,18 @@ Editor::snap_mode_selection_done ()
 }
 
 void
-Editor::cycle_edit_point ()
+Editor::cycle_edit_point (bool with_marker)
 {
 	switch (_edit_point) {
 	case EditAtMouse:
 		set_edit_point_preference (EditAtPlayhead);
 		break;
 	case EditAtPlayhead:
-		set_edit_point_preference (EditAtSelectedMarker);
+		if (with_marker) {
+			set_edit_point_preference (EditAtSelectedMarker);
+		} else {
+			set_edit_point_preference (EditAtMouse);
+		}
 		break;
 	case EditAtSelectedMarker:
 		set_edit_point_preference (EditAtMouse);

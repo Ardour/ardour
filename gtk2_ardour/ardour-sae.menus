@@ -117,6 +117,7 @@
 			<menuitem action='set-mouse-mode-timefx'/>
 			<separator/>
 			<menuitem action='cycle-edit-point'/>
+			<menuitem action='cycle-edit-point-with-marker'/>
 			<menuitem action='toggle-edit-mode'/>
 	 	</menu>
         </menu>         

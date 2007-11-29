@@ -10,6 +10,7 @@
 ; (gtk_accel_path "<Actions>/Editor/Autoconnect" "")
 ; (gtk_accel_path "<Actions>/Editor/Edit" "")
 (gtk_accel_path "<Actions>/Editor/cycle-edit-point" "grave")
+(gtk_accel_path "<Actions>/Editor/cycle-edit-point-with-marker" "<%SECONDARY%>grave")
 (gtk_accel_path "<Actions>/Editor/toggle-edit-mode" "1")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-mode" "2")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-choice" "3")

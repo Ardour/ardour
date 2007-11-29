@@ -311,6 +311,7 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 	  GdkKeymap       *keymap  = gdk_keymap_get_for_display (display);
 	  GdkKeymapKey    *keys;
 	  gint             n_keys;
+	  gint             use_command;
 
 	  if (gdk_keymap_get_entries_for_keyval (keymap, key->accel_key,
 						 &keys, &n_keys))
@@ -322,19 +323,32 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 
 	      g_free (keys);
 
+	      use_command = 0;
+
 	      if (key->accel_mods)
 		{
-		  if (key->accel_mods & GDK_SHIFT_MASK)
+		  if (key->accel_mods & GDK_SHIFT_MASK) {
 		    modifiers |= kMenuShiftModifier;
+		  }
 
-		  if (key->accel_mods & GDK_MOD5_MASK)
+		  if (key->accel_mods & (GDK_MOD1_MASK)) {
 		    modifiers |= kMenuOptionModifier;
+		  }
 
-		  if (key->accel_mods & GDK_CONTROL_MASK)
+		  if (key->accel_mods & GDK_CONTROL_MASK) {
 		    modifiers |= kMenuControlModifier;
+		  }
+		  
+		  if (key->accel_mods & GDK_MOD5_MASK) {
+			  /* Mod5 is what ardour's binding file uses to mean "Command"
+			     Nothing needs to be set in modifiers, but we need to notice
+			     that there *is* an implicit modifier
+			  */
+			  use_command = 1;
+		  }
 		}  
 
-	      if ((key->accel_mods & (GDK_SHIFT_MASK|GDK_MOD1_MASK|GDK_CONTROL_MASK) )== 0)
+	      if (!use_command)
   	        modifiers |= kMenuNoCommandModifier;
 
 	      SetMenuItemModifiers (carbon_item->menu, carbon_item->index,
