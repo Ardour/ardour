@@ -2525,7 +2525,7 @@ Editor::crop_region_to_selection ()
 
 		crop_region_to (selection->time.start(), selection->time.end_frame());
 
-	} else if (_edit_point != EditAtPlayhead) {
+	} else {
 
 		nframes64_t start;
 		nframes64_t end;
