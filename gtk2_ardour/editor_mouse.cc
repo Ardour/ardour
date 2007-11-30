@@ -4046,10 +4046,8 @@ Editor::cancel_selection ()
         for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
-	begin_reversible_command (_("cancel selection"));
 	selection->clear ();
 	clicked_selection = 0;
-	commit_reversible_command ();
 }	
 
 void

@@ -600,10 +600,15 @@ AudioClock::set_smpte (nframes_t when, bool force)
 		
 		smpte_upper_info_label->set_text (buf);
 		
-		if (session->smpte_drop_frames()) {
-			sprintf (buf, "DF");
+		if ((fabs(smpte_frames - 29.97) < 0.0001) || smpte_frames == 30) {
+			if (session->smpte_drop_frames()) {
+				sprintf (buf, "DF");
+			} else {
+				sprintf (buf, "NDF");
+			}
 		} else {
-			sprintf (buf, "NDF");
+			// there is no drop frame alternative
+			buf[0] = '\0';
 		}
 		
 		smpte_lower_info_label->set_text (buf);

@@ -134,9 +134,9 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "select-all", _("Select All"), bind (mem_fun(*this, &Editor::select_all), Selection::Set));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "deselect-all", _("Deselect All"), bind (mem_fun(*this, &Editor::select_all), Selection::Set));
+	act = ActionManager::register_action (editor_actions, "deselect-all", _("Deselect All"), mem_fun(*this, &Editor::deselect_all));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "invert-selection", _("Invert Selection"), bind (mem_fun(*this, &Editor::select_all), Selection::Set));
+	act = ActionManager::register_action (editor_actions, "invert-selection", _("Invert Selection"), mem_fun(*this, &Editor::invert_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
 	ActionManager::session_sensitive_actions.push_back (act);

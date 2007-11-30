@@ -487,7 +487,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			return true;
 		}
 	}
-		
+
 	if (!special_handling_of_unmodified_accelerators ||
 	    ev->state & (Gdk::MOD1_MASK|
 			 Gdk::MOD3_MASK|
@@ -495,7 +495,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			 Gdk::MOD5_MASK|
 			 Gdk::CONTROL_MASK)) {
 
-		/* no special handling or modifiers in effect: accelerate first */
+		/* no special handling or there are modifiers in effect: accelerate first */
 
 #ifdef DEBUG_ACCELERATOR_HANDLING
 		if (debug) {
@@ -508,12 +508,17 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		}
 #endif
 		if (!gtk_window_activate_key (win, ev)) {
+#ifdef DEBUG_ACCELERATOR_HANDLING
+			if (debug) {
+				cerr << "\tnot accelerated, now propagate\n";
+			}
+#endif
 			return gtk_window_propagate_key_event (win, ev);
 		} else {
 #ifdef DEBUG_ACCELERATOR_HANDLING
-		if (debug) {
-			cerr << "\tnot handled\n";
-		}
+			if (debug) {
+				cerr << "\taccelerated - done.\n";
+			}
 #endif
 			return true;
 		} 

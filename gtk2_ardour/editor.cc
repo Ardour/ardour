@@ -3936,6 +3936,13 @@ Editor::on_key_press_event (GdkEventKey* ev)
 	return key_press_focus_accelerator_handler (*this, ev);
 }
 
+bool
+Editor::on_key_release_event (GdkEventKey* ev)
+{
+	return Gtk::Window::on_key_release_event (ev);
+	// return key_press_focus_accelerator_handler (*this, ev);
+}
+
 void
 Editor::reset_x_origin (nframes_t frame)
 {

@@ -1096,10 +1096,36 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 			break;
 			
 		case EditAtMouse:
+			/* use mouse + selected marker */
+			if (selection->markers.empty()) {
+				start = m;
+				end = session->audible_frame();
+			} else {
+				start = selection->markers.front()->position();
+				end = m;
+			}
+			break;
+			
 		case EditAtSelectedMarker:
 			/* use mouse + selected marker */
 			if (selection->markers.empty()) {
-				return false;
+				
+				MessageDialog win (_("No edit range defined"),
+						   false,
+						   MESSAGE_INFO,
+						   BUTTONS_OK);
+
+				win.set_secondary_text (
+					_("the edit point is Selected Marker\nbut there is no selected marker."));
+				
+
+				win.set_default_response (RESPONSE_CLOSE);
+				win.set_position (Gtk::WIN_POS_MOUSE);
+				win.show_all();
+				
+				win.run ();
+				
+				return false; // NO RANGE
 			}
 			start = selection->markers.front()->position();
 			end = m;
@@ -1116,4 +1142,10 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 	}
 
 	return true;
+}
+
+void
+Editor::deselect_all ()
+{
+	selection->clear ();
 }

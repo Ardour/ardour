@@ -231,6 +231,7 @@ class Editor : public PublicEditor
 	void select_all (Selection::Operation op);
 	void invert_selection_in_track ();
 	void invert_selection ();
+	void deselect_all ();
 
 	/* tempo */
 
@@ -1945,6 +1946,7 @@ class Editor : public PublicEditor
 	Gtk::CheckMenuItem* region_opaque_item;
 	
 	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 
 	void session_state_saved (string);
 

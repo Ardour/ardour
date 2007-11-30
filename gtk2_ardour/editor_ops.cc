@@ -4479,6 +4479,9 @@ Editor::set_loop_from_edit_range (bool play)
 void
 Editor::set_loop_from_region (bool play)
 {
+	nframes64_t start = max_frames;
+	nframes64_t end = 0;
+
 	ensure_entered_region_selected (true);
 
 	if (selection->regions.empty()) {
@@ -4486,8 +4489,14 @@ Editor::set_loop_from_region (bool play)
 		return;
 	}
 
-	nframes64_t start = selection->regions.front()->region()->first_frame();
-	nframes64_t end = selection->regions.front()->region()->last_frame() + 1;
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		if ((*i)->region()->position() < start) {
+			start = (*i)->region()->position();
+		}
+		if ((*i)->region()->last_frame() + 1 > end) {
+			end = (*i)->region()->last_frame() + 1;
+		}
+	}
 
 	set_loop_range (start, end, _("set loop range from region"));
 
