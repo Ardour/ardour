@@ -3310,7 +3310,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 	    
 			if (sync_frame - sync_offset <= sync_frame) {
-				pending_region_position = sync_frame - (sync_dir*sync_offset);
+				pending_region_position = sync_frame + (sync_dir*sync_offset);
 			} else {
 				pending_region_position = 0;
 			}

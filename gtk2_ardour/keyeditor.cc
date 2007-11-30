@@ -35,7 +35,7 @@ KeyEditor::KeyEditor ()
 	view.set_headers_visible (true);
 	view.get_selection()->set_mode (SELECTION_SINGLE);
 	view.set_reorderable (false);
-	view.set_size_request (300,200);
+	view.set_size_request (500,300);
 	view.set_enable_search (false);
 	view.set_rules_hint (true);
 	view.set_name (X_("KeyEditorTree"));
