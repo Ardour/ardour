@@ -1169,6 +1169,10 @@ class Editor : public PublicEditor
 	RegionSelection pre_drag_region_selection;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+	bool check_region_drag_possible (AudioTimeAxisView**);
+	void possibly_copy_regions_during_grab (GdkEvent*);
+	void region_drag_splice_motion_callback (ArdourCanvas::Item*, GdkEvent*);
+	void region_drag_splice_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	bool _dragging_playhead;
 	bool _dragging_edit_point;

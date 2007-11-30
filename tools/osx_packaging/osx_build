@@ -91,6 +91,7 @@ if test x$WITH_JACK != x ; then
     cp /usr/local/lib/jack/jack_coreaudio.so $Frameworks
     cp /usr/local/bin/jackd $APPROOT/MacOS
 fi
+cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
 
 cp -R $GTKQUARTZ_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
@@ -180,7 +181,7 @@ done
 
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
-executables=Ardour2
+executables="Ardour2 gtkevents"
 if test x$WITH_JACK != x ; then
     executables="$executables jackd"
 fi

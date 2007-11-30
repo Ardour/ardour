@@ -91,7 +91,11 @@ Editor::initialize_rulers ()
 	ruler_shown[ruler_time_marker] = true;
 	ruler_shown[ruler_time_range_marker] = true;
 	ruler_shown[ruler_time_transport_marker] = true;
-	ruler_shown[ruler_time_cd_marker] = true;
+	if (Profile->get_sae()) {
+		ruler_shown[ruler_time_cd_marker] = false;
+	} else {
+		ruler_shown[ruler_time_cd_marker] = true;
+	}
 	ruler_shown[ruler_metric_frames] = false;
 	ruler_shown[ruler_metric_minsec] = false;
 	
@@ -551,8 +555,10 @@ Editor::restore_ruler_visibility ()
 				ruler_shown[ruler_time_cd_marker] = true;
 			else 
 				ruler_shown[ruler_time_cd_marker] = false;
-		}
-		else {
+
+			cerr << "cd marker ruler set to " << ruler_shown[ruler_time_cd_marker] << endl;
+
+		} else {
 			// this session doesn't yet know about the cdmarker ruler
 			// as a benefit to the user who doesn't know the feature exists, show the ruler if 
 			// any cd marks exist
@@ -564,6 +570,7 @@ Editor::restore_ruler_visibility ()
 					break;
 				}
 			}
+			cerr << "cd marker ruler default to " << ruler_shown[ruler_time_cd_marker] << endl;
 		}
 
 	}

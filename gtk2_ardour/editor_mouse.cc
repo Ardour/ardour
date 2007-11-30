@@ -2869,8 +2869,14 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.copy = false;
 	drag_info.item = item;
 	drag_info.data = clicked_regionview;
-	drag_info.motion_callback = &Editor::region_drag_motion_callback;
-	drag_info.finished_callback = &Editor::region_drag_finished_callback;
+
+	if (Config->get_edit_mode() == Splice) {
+		drag_info.motion_callback = &Editor::region_drag_splice_motion_callback;
+		drag_info.finished_callback = &Editor::region_drag_splice_finished_callback;
+	} else {
+		drag_info.motion_callback = &Editor::region_drag_motion_callback;
+		drag_info.finished_callback = &Editor::region_drag_finished_callback;
+	}
 
 	start_grab (event);
 
@@ -2927,7 +2933,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	if (selection->regions.empty() || clicked_regionview == 0) {
+	if (selection->regions.empty() || clicked_regionview == 0 || Config->get_edit_mode() == Splice) {
 		return;
 	}
 
@@ -2958,24 +2964,8 @@ Editor::start_region_brush_grab (ArdourCanvas::Item* item, GdkEvent* event)
 }
 
 void
-Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
+Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 {
-	double x_delta;
-	double y_delta = 0;
-	RegionView* rv = reinterpret_cast<RegionView*> (drag_info.data); 
-	nframes_t pending_region_position = 0;
-	int32_t pointer_y_span = 0, canvas_pointer_y_span = 0, original_pointer_order;
-	int32_t visible_y_high = 0, visible_y_low = 512;  //high meaning higher numbered.. not the height on the screen
-	bool clamp_y_axis = false;
-	vector<int32_t>  height_list(512) ;
-	vector<int32_t>::iterator j;
-
-	if (Config->get_edit_mode() == Splice && drag_info.first_move && drag_info.move_threshold_passed && pre_drag_region_selection.empty()) {
-		pre_drag_region_selection = selection->regions;
-		RegionSelection all_after = get_regions_after (clicked_regionview->region()->position(), selection->tracks);
-		selection->set (all_after);
-	}
-
 	if (drag_info.copy && drag_info.move_threshold_passed && drag_info.want_move_threshold) {
 
 		drag_info.want_move_threshold = false; // don't copy again
@@ -3017,24 +3007,123 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		swap_grab (new_regionviews.front()->get_canvas_group (), 0, event->motion.time);
 	}
+}
 
+bool
+Editor::check_region_drag_possible (AudioTimeAxisView** tv)
+{
 	/* Which trackview is this ? */
 
 	TimeAxisView* tvp = trackview_by_y_position (drag_info.current_pointer_y);
-	AudioTimeAxisView* tv = dynamic_cast<AudioTimeAxisView*>(tvp);
+	(*tv) = dynamic_cast<AudioTimeAxisView*>(tvp);
 
 	/* The region motion is only processed if the pointer is over
 	   an audio track.
 	*/
 	
-	if (!tv || !tv->is_audio_track()) {
+	if (!(*tv) || !(*tv)->is_audio_track()) {
 		/* To make sure we hide the verbose canvas cursor when the mouse is 
 		   not held over and audiotrack. 
 		*/
 		hide_verbose_canvas_cursor ();
-		return;
+		return false;
 	}
 	
+	return true;
+}
+
+struct RegionSelectionByPosition {
+    bool operator() (RegionView*a, RegionView* b) {
+	    return a->region()->position () < b->region()->position();
+    }
+};
+
+void
+Editor::region_drag_splice_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	AudioTimeAxisView* tv;
+	
+	if (!check_region_drag_possible (&tv)) {
+		return;
+	}
+
+	if (!drag_info.move_threshold_passed) {
+		return;
+	}
+
+	int dir;
+
+	if (drag_info.current_pointer_x - drag_info.grab_x > 0) {
+		dir = 1;
+	} else {
+		dir = -1;
+	}
+
+	RegionSelection copy (selection->regions);
+
+	RegionSelectionByPosition cmp;
+	copy.sort (cmp);
+
+	for (RegionSelection::iterator i = copy.begin(); i != copy.end(); ++i) {
+
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&(*i)->get_time_axis_view());
+
+		if (!atv) {
+			continue;
+		}
+
+		boost::shared_ptr<Playlist> playlist;
+
+		if ((playlist = atv->playlist()) == 0) {
+			continue;
+		}
+
+		if (!playlist->region_is_shuffle_constrained ((*i)->region())) {
+			continue;
+		} 
+
+		if (dir > 0) {
+			if (drag_info.current_pointer_frame < (*i)->region()->last_frame() + 1) {
+				continue;
+			}
+		} else {
+			if (drag_info.current_pointer_frame > (*i)->region()->first_frame()) {
+				continue;
+			}
+		}
+
+		
+		playlist->shuffle ((*i)->region(), dir);
+
+		drag_info.grab_x = drag_info.current_pointer_x;
+	}
+}
+
+void
+Editor::region_drag_splice_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
+{
+}
+
+void
+Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	double x_delta;
+	double y_delta = 0;
+	RegionView* rv = reinterpret_cast<RegionView*> (drag_info.data); 
+	nframes_t pending_region_position = 0;
+	int32_t pointer_y_span = 0, canvas_pointer_y_span = 0, original_pointer_order;
+	int32_t visible_y_high = 0, visible_y_low = 512;  //high meaning higher numbered.. not the height on the screen
+	bool clamp_y_axis = false;
+	vector<int32_t>  height_list(512) ;
+	vector<int32_t>::iterator j;
+	AudioTimeAxisView* tv;
+
+	possibly_copy_regions_during_grab (event);
+
+	if (!check_region_drag_possible (&tv)) {
+		return;
+	}
+
 	original_pointer_order = drag_info.last_trackview->order;
 		
 	/************************************************************
@@ -3048,13 +3137,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	if ((pointer_y_span = (drag_info.last_trackview->order - tv->order)) != 0) {
-
-		/* drop any splice-induced selection madness */
-
-		if (!pre_drag_region_selection.empty()) {
-			selection->set (pre_drag_region_selection);
-			pre_drag_region_selection.clear ();
-		}
 
 		int32_t children = 0, numtracks = 0;
 		// XXX hard coding track limit, oh my, so very very bad

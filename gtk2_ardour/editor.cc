@@ -246,14 +246,6 @@ Editor::Editor ()
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_point_strings = I18N (_edit_point_strings);
 
-	snap_type = SnapToBeat;
-	set_snap_to (snap_type);
-	snap_mode = SnapOff;
-	set_snap_mode (snap_mode);
-
-	_edit_point = EditAtMouse;
-	set_edit_point_preference (_edit_point);
-
 	snap_threshold = 5.0;
 	bbt_beat_subdivision = 4;
 	canvas_width = 0;
@@ -378,6 +370,13 @@ Editor::Editor ()
 
 	build_cursors ();
 	setup_toolbar ();
+
+	snap_type = SnapToBeat;
+	set_snap_to (snap_type);
+	snap_mode = SnapOff;
+	set_snap_mode (snap_mode);
+	_edit_point = EditAtMouse;
+	set_edit_point_preference (_edit_point);
 
  	edit_point_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_point_clock_changed));
 	

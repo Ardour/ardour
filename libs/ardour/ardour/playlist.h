@@ -92,6 +92,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	void partition (nframes_t start, nframes_t end, bool just_top_level);
 	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
 	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
+	void shuffle (boost::shared_ptr<Region>, int dir);
 
 	boost::shared_ptr<Playlist> cut  (list<AudioRange>&, bool result_is_hidden = true);
 	boost::shared_ptr<Playlist> copy (list<AudioRange>&, bool result_is_hidden = true);
@@ -104,6 +105,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	boost::shared_ptr<Region>  top_region_at (nframes_t frame);
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
 	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
+	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg);
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>));
@@ -187,6 +189,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;
+	bool            _shuffling;
 	bool            _nudging;
 	uint32_t        _refcnt;
 	EditMode        _edit_mode;

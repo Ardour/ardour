@@ -228,6 +228,7 @@ Playlist::init (bool hide)
 	_refcnt = 0;
 	_hidden = hide;
 	_splicing = false;
+	_shuffling = false;
 	_nudging = false;
 	in_set_state = 0;
 	_edit_mode = Config->get_edit_mode();
@@ -1120,7 +1121,7 @@ Playlist::core_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Reg
 void
 Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> region)
 {
-	if (in_set_state || _splicing || _nudging) {
+	if (in_set_state || _splicing || _nudging || _shuffling) {
 		return;
 	}
 
@@ -1478,6 +1479,7 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 			
 			boost::shared_ptr<Region> r = (*i);
 			nframes64_t distance;
+			nframes64_t end = r->position() + r->length();
 			bool reset;
 
 			reset = false;
@@ -1493,12 +1495,12 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 				}
 			}
 
-			if (r->last_frame() > frame) {
+			if (end > frame) {
 				
-				distance = r->last_frame() - frame;
+				distance = end - frame;
 				
 				if (distance < closest) {
-					ret = r->last_frame();
+					ret = end;
 					closest = distance;
 					reset = true;
 				}
@@ -2081,3 +2083,129 @@ Playlist::timestamp_layer_op (boost::shared_ptr<Region> region)
 	region->set_last_layer_op (++layer_op_counter);
 }
 
+
+void
+Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
+{
+	bool moved = false;
+	nframes_t new_pos;
+
+	if (region->locked()) {
+		return;
+	}
+
+	_shuffling = true;
+
+	{
+		RegionLock rlock (const_cast<Playlist*> (this));
+		
+		
+		if (dir > 0) {
+			
+			RegionList::iterator next;
+
+			for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {	
+				if ((*i) == region) {
+					next = i;
+					++next;
+
+					if (next != regions.end()) {
+
+						if ((*next)->locked()) {
+							break;
+						}
+
+						if ((*next)->position() != region->last_frame() + 1) {
+							/* they didn't used to touch, so after shuffle,
+							   just have them swap positions.
+							*/
+							new_pos = (*next)->position();
+						} else {
+							/* they used to touch, so after shuffle,
+							   make sure they still do. put the earlier
+							   region where the later one will end after
+							   it is moved.
+							*/
+							new_pos = region->position() + (*next)->length();
+						}
+
+						(*next)->set_position (region->position(), this);
+						region->set_position (new_pos, this);
+
+						/* avoid a full sort */
+
+						regions.erase (i); // removes the region from the list */
+						next++;
+						regions.insert (next, region); // adds it back after next
+
+						moved = true;
+					}
+					break;
+				}
+			}
+		} else {
+			
+			RegionList::iterator prev = regions.end();
+			
+			for (RegionList::iterator i = regions.begin(); i != regions.end(); prev = i, ++i) {	
+				if ((*i) == region) {
+
+					if (prev != regions.end()) {
+
+						if ((*prev)->locked()) {
+							break;
+						}
+
+						if (region->position() != (*prev)->last_frame() + 1) {
+							/* they didn't used to touch, so after shuffle,
+							   just have them swap positions.
+							*/
+							new_pos = region->position();
+						} else {
+							/* they used to touch, so after shuffle,
+							   make sure they still do. put the earlier
+							   one where the later one will end after
+							*/
+							new_pos = (*prev)->position() + region->length();
+						}
+
+						region->set_position ((*prev)->position(), this);
+						(*prev)->set_position (new_pos, this);
+						
+						/* avoid a full sort */
+
+						regions.erase (i); // remove region
+						regions.insert (prev, region); // insert region before prev
+
+						moved = true;
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	_shuffling = false;
+
+	if (moved) {
+
+		relayer ();
+		check_dependents (region, false);
+		
+		notify_modified();
+	}
+
+}
+
+bool
+Playlist::region_is_shuffle_constrained (boost::shared_ptr<Region>) 
+{
+	RegionLock rlock (const_cast<Playlist*> (this));
+	
+	if (regions.size() > 1) {
+		return true;
+	}
+
+	return false;
+}
