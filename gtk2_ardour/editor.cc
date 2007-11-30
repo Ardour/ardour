@@ -371,13 +371,6 @@ Editor::Editor ()
 	build_cursors ();
 	setup_toolbar ();
 
-	snap_type = SnapToBeat;
-	set_snap_to (snap_type);
-	snap_mode = SnapOff;
-	set_snap_mode (snap_mode);
-	_edit_point = EditAtMouse;
-	set_edit_point_preference (_edit_point);
-
  	edit_point_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_point_clock_changed));
 	
 	time_canvas_vbox.pack_start (*_ruler_separator, false, false);
@@ -700,7 +693,14 @@ Editor::Editor ()
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 	
 	register_actions ();
-	
+
+	snap_type = SnapToBeat;
+	set_snap_to (snap_type);
+	snap_mode = SnapOff;
+	set_snap_mode (snap_mode);
+	_edit_point = EditAtMouse;
+	set_edit_point_preference (_edit_point);
+
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
 
