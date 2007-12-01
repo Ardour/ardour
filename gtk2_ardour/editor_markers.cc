@@ -424,6 +424,10 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent* event)
 		/*NOTREACHED*/
 	}
 
+	if (entered_marker == marker) {
+		entered_marker = NULL;
+	}
+
 	Location* loc = find_location_from_marker (marker, is_start);
 
 	if (session && loc) {
