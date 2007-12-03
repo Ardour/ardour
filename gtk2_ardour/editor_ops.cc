@@ -1541,6 +1541,32 @@ Editor::temporal_zoom (gdouble fpu)
 }	
 
 void
+Editor::temporal_zoom_region ()
+{
+
+	nframes64_t start = max_frames;
+	nframes64_t end = 0;
+
+	ensure_entered_region_selected (true);
+
+	if (selection->regions.empty()) {
+		info << _("cannot set loop: no region selected") << endmsg;
+		return;
+	}
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		if ((*i)->region()->position() < start) {
+			start = (*i)->region()->position();
+		}
+		if ((*i)->region()->last_frame() + 1 > end) {
+			end = (*i)->region()->last_frame() + 1;
+		}
+	}
+
+	temporal_zoom_by_frame (start, end, "zoom to region");
+}
+
+void
 Editor::temporal_zoom_selection ()
 {
 	if (!selection) return;
@@ -4055,7 +4081,7 @@ Editor::toggle_region_opaque ()
 void
 Editor::set_fade_length (bool in)
 {
-	ensure_entered_region_selected ();
+	ensure_entered_region_selected (true);
 
 	/* we need a region to measure the offset from the start */
 
@@ -4111,6 +4137,44 @@ Editor::set_fade_length (bool in)
 		
 		XMLNode &after = alist.get_state();
 		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+	}
+
+	commit_reversible_command ();
+}
+
+
+void
+Editor::toggle_fade_active (bool in)
+{
+	ensure_entered_region_selected (true);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	const char* cmd = (in ? _("toggle fade in active") : _("toggle fade out active"));
+
+	begin_reversible_command (cmd);
+
+	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
+
+		if (!tmp) {
+			return;
+		}
+
+		boost::shared_ptr<AudioRegion> region (tmp->audio_region());
+
+		XMLNode &before = region->get_state();
+
+		if (in) {
+			region->set_fade_in_active (!region->fade_in_active());
+		} else {
+			region->set_fade_out_active (!region->fade_out_active());
+		}
+
+		XMLNode &after = region->get_state();
+		session->add_command(new MementoCommand<AudioRegion>(*region.get(), &before, &after));
 	}
 
 	commit_reversible_command ();

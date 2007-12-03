@@ -140,7 +140,9 @@
 		   <menuitem action='align-regions-sync-relative'/>
                    <separator/>       
 		   <menuitem action='set-fade-in-length'/>
+		   <menuitem action='toggle-fade-in-active'/>
 		   <menuitem action='set-fade-out-length'/>
+		   <menuitem action='toggle-fade-out-active'/>
                    <separator/>       
 		   <menuitem action='trim-front'/>
 		   <menuitem action='trim-back'/>
@@ -184,10 +186,11 @@
 		   <menuitem action='cycle-snap-choice'/>
                </menu>
                <separator/>
-
                <menuitem action='temporal-zoom-in'/>
                <menuitem action='temporal-zoom-out'/>
                <menuitem action='zoom-to-session'/>
+               <menuitem action='zoom-to-region'/>
+               <menuitem action='toggle-zoom'/>
                <menuitem action='scroll-tracks-down'/>
                <menuitem action='scroll-tracks-up'/>
                <menuitem action='scroll-tracks-down'/>

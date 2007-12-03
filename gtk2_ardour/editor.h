@@ -257,7 +257,7 @@ class Editor : public PublicEditor
 
 	void      set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	gdouble   get_current_zoom () { return frames_per_unit; }
+	double   get_current_zoom () const { return frames_per_unit; }
 
 	void temporal_zoom_step (bool coarser);
 
@@ -265,8 +265,6 @@ class Editor : public PublicEditor
 
 	PlaylistSelector& playlist_selector() const;
 	void route_name_changed (TimeAxisView *);
-	gdouble        frames_per_unit;
-	nframes_t leftmost_frame;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
 	void new_playlists (TimeAxisView*);
@@ -371,7 +369,22 @@ class Editor : public PublicEditor
 
 	PlaylistSelector* _playlist_selector;
 
-	void          set_frames_per_unit (double);
+	struct VisualState {
+	    double    frames_per_unit;
+	    nframes_t leftmost_frame;
+	    Editing::ZoomFocus zoom_focus;
+	};
+	
+	VisualState last_visual_state;
+
+	nframes_t   leftmost_frame;
+	double      frames_per_unit;
+	Editing::ZoomFocus zoom_focus;
+
+	void use_visual_state (const VisualState&);
+	void set_frames_per_unit (double);
+	void swap_visual_state ();
+	void post_zoom ();
 
 	Editing::MouseMode mouse_mode;
 
@@ -990,9 +1003,8 @@ class Editor : public PublicEditor
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
 
-	Editing::ZoomFocus zoom_focus;
-
 	void temporal_zoom_selection ();
+	void temporal_zoom_region ();
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
 	void temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & op);
@@ -1162,7 +1174,7 @@ class Editor : public PublicEditor
 	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
 	
 	void set_fade_length (bool in);
-
+	void toggle_fade_active (bool in);
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
 	

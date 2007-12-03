@@ -329,6 +329,8 @@ Editor::Editor ()
 	
 	set_mouse_mode (MouseObject, true);
 
+	last_visual_state.frames_per_unit = 0;
+
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
 	reset_hscrollbar_stepping ();
 	
@@ -3963,10 +3965,25 @@ Editor::reposition_and_zoom (nframes_t frame, double fpu)
 }
 
 void
+Editor::swap_visual_state ()
+{
+	if (last_visual_state.frames_per_unit == 0) {
+		// never set
+		return;
+	}
+
+	/* note: the correct functionality here is very dependent on the ordering of 
+	   setting zoom focus, horizontal position and finally zoom. this is because
+	   it is set_frames_per_unit() that overwrites last_visual_state.
+	*/
+
+	set_zoom_focus (last_visual_state.zoom_focus);
+	reposition_and_zoom (last_visual_state.leftmost_frame, last_visual_state.frames_per_unit);
+}
+
+void
 Editor::set_frames_per_unit (double fpu)
 {
-	nframes_t frames;
-
 	/* this is the core function that controls the zoom level of the canvas. it is called
 	   whenever one or more calls are made to reset_zoom(). it executes in an idle handler.
 	*/
@@ -3979,9 +3996,6 @@ Editor::set_frames_per_unit (double fpu)
 		fpu = 2.0;
 	}
 
-	// convert fpu to frame count
-
-	frames = (nframes_t) floor (fpu * canvas_width);
 	
 	/* don't allow zooms that fit more than the maximum number
 	   of frames into an 800 pixel wide space.
@@ -3994,10 +4008,23 @@ Editor::set_frames_per_unit (double fpu)
 	if (fpu == frames_per_unit) {
 		return;
 	}
+	
+	last_visual_state.frames_per_unit = frames_per_unit;
+	last_visual_state.leftmost_frame = leftmost_frame;
+	last_visual_state.zoom_focus = zoom_focus;
 
 	frames_per_unit = fpu;
+	post_zoom ();
+}
 
-	if (frames != zoom_range_clock.current_duration()) {
+void
+Editor::post_zoom ()
+{
+	// convert fpu to frame count
+
+	nframes_t frames = (nframes_t) floor (frames_per_unit * canvas_width);
+
+	if (frames_per_unit != zoom_range_clock.current_duration()) {
 		zoom_range_clock.set (frames);
 	}
 
@@ -4028,7 +4055,7 @@ Editor::queue_visual_change (nframes_t where)
 {
 	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
 	pending_visual_change.time_origin = where;
-
+	
 	if (pending_visual_change.idle_handler_id < 0) {
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
 	}

@@ -70,7 +70,7 @@ void
 TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 {
 	bpm_spinner.set_numeric (true);
-	bpm_spinner.set_digits (1);
+	bpm_spinner.set_digits (2);
 	bpm_spinner.set_wrap (true);
 	bpm_spinner.set_value (bpm);
 

@@ -67,6 +67,15 @@ AddRouteDialog::AddRouteDialog ()
 {
 	if (channel_combo_strings.empty()) {
 		channel_combo_strings = I18N (channel_setup_names);
+
+		if (ARDOUR::Profile->get_sae()) {
+			/* remove all but the first two (Mono & Stereo) */
+
+			while (track_mode_strings.size() > 2) {
+				track_mode_strings.pop_back();
+			}
+		}
+
 	}
 
 	if (track_mode_strings.empty()) {
