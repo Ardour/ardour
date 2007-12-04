@@ -185,7 +185,7 @@ KeyEditor::populate ()
 
 #ifdef GTKOSX
 			string label = (*k);
-			replace_all (label, "<Control>", _("Command-"));
+			replace_all (label, "<Mod5>", _("Command-"));
 			replace_all (label, "<Alt>", _("Option-"));
 			replace_all (label, "<Shift>", _("Shift-"));
 			row[columns.binding] = label;
