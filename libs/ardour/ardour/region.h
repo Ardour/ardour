@@ -98,8 +98,9 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	nframes64_t ancestral_start () const { return _ancestral_start; }
 	nframes64_t ancestral_length () const { return _ancestral_length; }
 	float stretch() const { return _stretch; }
+	float shift() const { return _shift; }
 
-	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch);
+	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch, float shift);
 
 	nframes_t sync_offset(int& dir) const;
 	nframes_t sync_position() const;
@@ -235,6 +236,7 @@ class Region : public PBD::StatefulDestructible, public boost::enable_shared_fro
 	nframes64_t             _ancestral_start;
 	nframes64_t             _ancestral_length;
 	float                   _stretch;
+	float                   _shift;
 };
 
 } /* namespace ARDOUR */

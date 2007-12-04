@@ -2028,6 +2028,8 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 		new_session_dialog->show();
 		new_session_dialog->present ();
 	        response = new_session_dialog->run ();
+		
+		loading_dialog->hide ();
 
 		_session_is_new = false;
 

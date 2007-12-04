@@ -2258,9 +2258,15 @@ Editor::audition_playlist_region_via_route (boost::shared_ptr<Region> region, Ro
 void
 Editor::audition_selected_region ()
 {
-	if (!selection->regions.empty()) {
-		RegionView* rv = *(selection->regions.begin());
-		session->audition_region (rv->region());
+	ensure_entered_region_selected (true);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		session->audition_region ((*i)->region());
+		/* XXX need to check if user requested stop between each one, but how? */
 	}
 }
 
@@ -4600,3 +4606,15 @@ Editor::set_punch_from_edit_range ()
 	set_punch_range (start, end,  _("set punch range from edit range"));
 }
 
+void
+Editor::pitch_shift_regions ()
+{
+	ensure_entered_region_selected (true);
+	
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	pitch_shift (selection->regions, 1.2);
+}
+	

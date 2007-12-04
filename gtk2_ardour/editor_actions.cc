@@ -267,6 +267,9 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	
 	
+	act = ActionManager::register_action (editor_actions, "pitch-shift-region", _("Transpose"), mem_fun(*this, &Editor::pitch_shift_regions));
+	ActionManager::session_sensitive_actions.push_back (act);
+	
 	act = ActionManager::register_action (editor_actions, "set-fade-in-length", _("Set Fade In Length"), bind (mem_fun(*this, &Editor::set_fade_length), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-fade-in-active", _("Toggle Fade In Active"), bind (mem_fun(*this, &Editor::toggle_fade_active), true));
@@ -290,7 +293,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "align-regions-sync-relative", _("Align Regions Sync Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
 	ActionManager::session_sensitive_actions.push_back (act);
 	
-        act = ActionManager::register_action (editor_actions, "audition-at-mouse", _("Audition at Mouse"), mem_fun(*this, &Editor::kbd_audition));
+        act = ActionManager::register_action (editor_actions, "audition-region", _("Audition Region"), mem_fun(*this, &Editor::audition_selected_region));
         ActionManager::session_sensitive_actions.push_back (act);
         act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), mem_fun(*this, &Editor::kbd_brush));
         ActionManager::session_sensitive_actions.push_back (act);

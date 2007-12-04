@@ -267,10 +267,10 @@ ardour.Merge ([
 
 if ardour['RUBBERBAND']:
 	ardour.Merge ([ libraries['rubberband'],  libraries['vamp'], libraries['fftw3f'] ])
-	timefx_sources += [ 'rb_stretch.cc' ]
+	timefx_sources += [ 'rb_effect.cc' ]
 else:
 	ardour.Merge ([ libraries['soundtouch'] ])
-	timefx_sources += [ 'st_stretch.cc' ]
+	timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
 	
 if ardour['LIBLO']:
 	ardour.Merge ([ libraries['lo'] ])
@@ -326,6 +326,6 @@ env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], [])
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h' ] + 
 				     [ 'sse_functions_xmm.cc', 'sse_functions.s', 'sse_functions_64bit.s' ] +
-				     [ 'rb_stretch.cc', 'st_stretch.cc' ] +
+				     [ 'rb_effect.cc', 'st_stretch.cc', 'st_pitch.cc' ] +
 				     ardour_files + osc_files + vst_files + coreaudio_files + audiounit_files +
 				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))

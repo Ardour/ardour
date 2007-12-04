@@ -302,7 +302,7 @@ Editor::Editor ()
 	entered_marker = 0;
 	clear_entered_track = false;
 	_new_regionviews_show_envelope = false;
-	current_timestretch = 0;
+	current_timefx = 0;
 	in_edit_group_row_change = false;
 	last_canvas_frame = 0;
 	playhead_cursor = 0;

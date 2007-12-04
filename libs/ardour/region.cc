@@ -65,6 +65,7 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	_ancestral_start = start; 
 	_ancestral_length = length; 
 	_stretch = 1.0;
+	_shift = 1.0;
 	_last_position = 0; 
 	_position = 0; 
 	_layer = layer;
@@ -92,6 +93,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	_ancestral_start = other->_ancestral_start + offset;
 	_ancestral_length = length; 
 	_stretch = 1.0;
+	_shift = 1.0;
 	_name = name;
 	_last_position = 0; 
 	_position = 0; 
@@ -125,6 +127,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_ancestral_start = _start; 
 	_ancestral_length = _length; 
 	_stretch = 1.0;
+	_shift = 1.0;
 	_name = other->_name;
 	_last_position = other->_position; 
 	_position = other->_position; 
@@ -365,11 +368,12 @@ Region::nudge_position (nframes64_t n, void *src)
 }
 
 void
-Region::set_ancestral_data (nframes64_t s, nframes64_t l, float st)
+Region::set_ancestral_data (nframes64_t s, nframes64_t l, float st, float sh)
 {
 	_ancestral_length = l;
 	_ancestral_start = s;
 	_stretch = st;
+	_shift = sh;
 }
 
 void
@@ -795,6 +799,8 @@ Region::state (bool full_state)
 	node->add_property ("ancestral-length", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _stretch);
 	node->add_property ("stretch", buf);
+	snprintf (buf, sizeof (buf), "%.12g", _shift);
+	node->add_property ("shift", buf);
 	
 	switch (_first_edit) {
 	case EditChangesNothing:
@@ -922,6 +928,12 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		_stretch = atof (prop->value());
 	} else {
 		_stretch = 1.0;
+	}
+
+	if ((prop = node.property ("shift")) != 0) {
+		_shift = atof (prop->value());
+	} else {
+		_shift = 1.0;
 	}
 
 	/* note: derived classes set flags */

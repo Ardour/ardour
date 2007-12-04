@@ -24,6 +24,7 @@
 #include <rubberband/RubberBandStretcher.h>
 
 #include <ardour/types.h>
+#include <ardour/stretch.h>
 #include <ardour/pitch.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/session.h>
@@ -37,6 +38,16 @@ using namespace PBD;
 using namespace RubberBand;
 
 Pitch::Pitch (Session& s, TimeFXRequest& req)
+	: RBEffect (s, req)
+{
+}
+
+Stretch::Stretch (Session& s, TimeFXRequest& req)
+	: RBEffect (s, req)
+{
+}
+
+RBEffect::RBEffect (Session& s, TimeFXRequest& req)
 	: AudioFilter (s)
 	, tsr (req)
 
@@ -44,12 +55,12 @@ Pitch::Pitch (Session& s, TimeFXRequest& req)
 	tsr.progress = 0.0f;
 }
 
-Pitch::~Pitch ()
+RBEffect::~RBEffect ()
 {
 }
 
 int
-Pitch::run (boost::shared_ptr<AudioRegion> region)
+RBEffect::run (boost::shared_ptr<AudioRegion> region)
 {
 	SourceList nsrcs;
 	nframes_t done;
@@ -63,12 +74,12 @@ Pitch::run (boost::shared_ptr<AudioRegion> region)
 	nframes_t pos = 0;
 	int avail = 0;
 
-	RubberBandStretcher pitcher (session.frame_rate(), region->n_channels(),
-				     RubberBandStretcher::DefaultOptions,
-				     1.0, tsr.fraction);
+	RubberBandStretcher stretcher (session.frame_rate(), region->n_channels(),
+				       RubberBandStretcher::DefaultOptions,
+				       tsr.time_fraction, tsr.pitch_fraction);
 	
-	pitcher.setExpectedInputDuration(region->length());
-	pitcher.setDebugLevel(1);
+	stretcher.setExpectedInputDuration(region->length());
+	stretcher.setDebugLevel(1);
 
 	tsr.progress = 0.0f;
 	tsr.done = false;
@@ -77,10 +88,18 @@ Pitch::run (boost::shared_ptr<AudioRegion> region)
 	nframes_t duration = region->length();
 
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
-	   digits just to disambiguate close but not identical stretches.
+	   digits just to disambiguate close but not identical FX
 	*/
-	
-	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.fraction * 100.0f));
+
+	if (tsr.time_fraction == 1.0) {
+		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.pitch_fraction * 100.0f));
+	} else if (tsr.pitch_fraction == 1.0) {
+		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.time_fraction * 100.0f));
+	} else {
+		snprintf (suffix, sizeof (suffix), "@%d-%d", 
+			  (int) floor (tsr.time_fraction * 100.0f),
+			  (int) floor (tsr.pitch_fraction * 100.0f));
+	}
 
 	/* create new sources */
 
@@ -138,7 +157,7 @@ Pitch::run (boost::shared_ptr<AudioRegion> region)
 
 			tsr.progress = ((float) done / duration) * 0.75;
 
-			pitcher.study(buffers, this_read, pos == duration);
+			stretcher.study(buffers, this_read, pos == duration);
 		}
 		
 		done = 0;
@@ -176,15 +195,15 @@ Pitch::run (boost::shared_ptr<AudioRegion> region)
 
 			tsr.progress = 0.75 + ((float) done / duration) * 0.25;
 
-			pitcher.process(buffers, this_read, pos == duration);
+			stretcher.process(buffers, this_read, pos == duration);
 
 			int avail = 0;
 
-			while ((avail = pitcher.available()) > 0) {
+			while ((avail = stretcher.available()) > 0) {
 
 				this_read = min(bufsize, uint32_t(avail));
 
-				pitcher.retrieve(buffers, this_read);
+				stretcher.retrieve(buffers, this_read);
 			
 				for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
@@ -197,11 +216,11 @@ Pitch::run (boost::shared_ptr<AudioRegion> region)
 			}
 		}
 
-		while ((avail = pitcher.available()) >= 0) {
+		while ((avail = stretcher.available()) >= 0) {
 
 			uint32_t this_read = min(bufsize, uint32_t(avail));
 
-			pitcher.retrieve(buffers, this_read);
+			stretcher.retrieve(buffers, this_read);
 
 			for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
@@ -240,9 +259,17 @@ Pitch::run (boost::shared_ptr<AudioRegion> region)
 		nframes_t start;
 		nframes_t length;
 
-		float shift = (*x)->shift() * (tsr.fraction/100.0);
+		// note: tsr.time_fraction is a percentage of original length. 100 = no change, 
+		// 50 is half as long, 200 is twice as long, etc.
+		
+		
+		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
+		float shift = (*x)->shift() * tsr.pitch_fraction;
 
-		(*x)->set_ancestral_data ((*x)->ancestral_start(), (*x)->ancestral_length(), (*x)->stretch(),  shift);
+		start = (nframes_t) floor (astart + ((astart - (*x)->start()) / stretch));
+		length = (nframes_t) floor (alength / stretch);
+
+		(*x)->set_ancestral_data (start, length, stretch, shift);
 	}
 
   out:
@@ -268,3 +295,8 @@ Pitch::run (boost::shared_ptr<AudioRegion> region)
 
 	return ret;
 }
+
+
+
+
+    

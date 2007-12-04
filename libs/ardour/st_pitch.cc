@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2004-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,50 +17,40 @@
 
 */
 
-#ifndef __ardour_stretch_h__
-#define __ardour_stretch_h__
+#include <algorithm>
+#include <cmath>
 
-#include <ardour/audiofilter.h>
+#include <pbd/error.h>
 
-namespace ARDOUR {
-	class AudioRegion;
+#include <ardour/types.h>
+#include <ardour/pitch.h>
+#include <ardour/audiofilesource.h>
+#include <ardour/session.h>
+#include <ardour/audioregion.h>
+
+#include "i18n.h"
+
+using namespace std;
+using namespace ARDOUR;
+using namespace PBD;
+
+Pitch::Pitch (Session& s, TimeFXRequest& req)
+	: AudioFilter (s)
+	, tsr (req)
+
+{
+	tsr.progress = 0.0f;
 }
 
-#ifdef USE_RUBBERBAND
+Pitch::~Pitch ()
+{
+}
 
-#include <ardour/rb_effect.h>
+int
+Pitch::run (boost::shared_ptr<AudioRegion> region)
+{
+	tsr.progress = 1.0f;
+	tsr.done = true;
 
-namespace ARDOUR {
-
-class Stretch : public RBEffect {
-  public:
-	Stretch (ARDOUR::Session&, TimeFXRequest&);
-	~Stretch() {}
-};
-
-} /* namespace */
-
-#else
-
-#include <soundtouch/SoundTouch.h>
-
-namespace ARDOUR {
-
-class Stretch : public AudioFilter {
-  public:
-	Stretch (ARDOUR::Session&, TimeFXRequest&);
-	~Stretch ();
-
-	int run (boost::shared_ptr<ARDOUR::AudioRegion>);
-
-  private:
-	TimeFXRequest& tsr;
-
-	soundtouch::SoundTouch st;
-};
-
-} /* namespace */
-
-#endif
-
-#endif /* __ardour_stretch_h__ */
+	return 1;
+}

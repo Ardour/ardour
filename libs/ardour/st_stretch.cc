@@ -35,7 +35,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace soundtouch;
 
-Stretch::Stretch (Session& s, TimeStretchRequest& req)
+Stretch::Stretch (Session& s, TimeFXRequest& req)
 	: AudioFilter (s)
 	, tsr (req)
 {
@@ -45,7 +45,7 @@ Stretch::Stretch (Session& s, TimeStretchRequest& req)
 	   of opposite sign to the length change.  
 	*/
 
-	percentage = -tsr.fraction;
+	percentage = -tsr.time_fraction;
 
 	st.setSampleRate (s.frame_rate());
 	st.setChannels (1);
@@ -185,7 +185,7 @@ Stretch::run (boost::shared_ptr<AudioRegion> region)
 		start = (nframes_t) floor (astart + ((astart - (*x)->start()) / stretch));
 		length = (nframes_t) floor (alength / stretch);
 
-		(*x)->set_ancestral_data (start, length, stretch);
+		(*x)->set_ancestral_data (start, length, stretch, (*x)->shift());
 	}
 
   out:

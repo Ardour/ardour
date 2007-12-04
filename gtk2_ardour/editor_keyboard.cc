@@ -102,14 +102,3 @@ Editor::kbd_brush ()
 	kbd_driver (mem_fun(*this, &Editor::kbd_do_brush), true, true, false);
 }
 
-void
-Editor::kbd_do_audition (GdkEvent *ignored)
-{
-	audition_selected_region ();
-}
-
-void
-Editor::kbd_audition ()
-{
-	kbd_driver (mem_fun(*this, &Editor::kbd_do_audition), true, false, true);
-}

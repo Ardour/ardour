@@ -5166,7 +5166,7 @@ Editor::end_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
 
 	begin_reversible_command (_("timestretch"));
 
-	if (run_timestretch (selection->regions, percentage) == 0) {
+	if (time_stretch (selection->regions, percentage) == 0) {
 		session->commit_reversible_command ();
 	}
 }

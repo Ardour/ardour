@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __ardour_stretch_h__
-#define __ardour_stretch_h__
+#ifndef __ardour_pitch_h__
+#define __ardour_pitch_h__
 
 #include <ardour/audiofilter.h>
 
@@ -32,35 +32,31 @@ namespace ARDOUR {
 
 namespace ARDOUR {
 
-class Stretch : public RBEffect {
+class Pitch : public RBEffect {
   public:
-	Stretch (ARDOUR::Session&, TimeFXRequest&);
-	~Stretch() {}
+	Pitch (ARDOUR::Session&, TimeFXRequest&);
+	~Pitch () {}
 };
 
 } /* namespace */
 
-#else
-
-#include <soundtouch/SoundTouch.h>
+# else
 
 namespace ARDOUR {
 
-class Stretch : public AudioFilter {
+class Pitch : public AudioFilter {
   public:
-	Stretch (ARDOUR::Session&, TimeFXRequest&);
-	~Stretch ();
+	Pitch (ARDOUR::Session&, TimeFXRequest&);
+	~Pitch () {}
 
 	int run (boost::shared_ptr<ARDOUR::AudioRegion>);
 
   private:
 	TimeFXRequest& tsr;
-
-	soundtouch::SoundTouch st;
 };
 
 } /* namespace */
 
 #endif
 
-#endif /* __ardour_stretch_h__ */
+#endif /* __ardour_pitch_h__ */

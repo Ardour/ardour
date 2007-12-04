@@ -1290,7 +1290,6 @@ class Editor : public PublicEditor
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
 	void kbd_mute_unmute_region ();
 	void kbd_brush ();
-	void kbd_audition ();
 
 	void kbd_do_brush (GdkEvent*);
 	void kbd_do_audition (GdkEvent*);
@@ -1806,9 +1805,16 @@ class Editor : public PublicEditor
 	void start_time_fx (ArdourCanvas::Item*, GdkEvent*);
 	void end_time_fx (ArdourCanvas::Item*, GdkEvent*);
 
-	struct TimeStretchDialog : public ArdourDialog {
-	    ARDOUR::TimeStretchRequest request;
+	struct TimeFXDialog : public ArdourDialog {
+	    ARDOUR::TimeFXRequest request;
 	    Editor&               editor;
+	    bool                  pitching;
+	    Gtk::Adjustment       pitch_octave_adjustment;
+	    Gtk::Adjustment       pitch_semitone_adjustment;
+	    Gtk::Adjustment       pitch_cent_adjustment;
+	    Gtk::SpinButton       pitch_octave_spinner;
+	    Gtk::SpinButton       pitch_semitone_spinner;
+	    Gtk::SpinButton       pitch_cent_spinner;
 	    RegionSelection       regions;
 	    Gtk::ProgressBar      progress_bar;
 	    Gtk::ToggleButton     quick_button;
@@ -1819,24 +1825,28 @@ class Editor : public PublicEditor
 	    Gtk::VBox             packer;
 	    int                   status;
 
-	    TimeStretchDialog (Editor& e);
+	    TimeFXDialog (Editor& e, bool for_pitch);
 
 	    gint update_progress ();
 	    sigc::connection first_cancel;
 	    sigc::connection first_delete;
-	    void cancel_timestretch_in_progress ();
-	    gint delete_timestretch_in_progress (GdkEventAny*);
+	    void cancel_in_progress ();
+	    gint delete_in_progress (GdkEventAny*);
 	};
 
 	/* "whats mine is yours" */
 
-	friend class TimeStretchDialog;
+	friend class TimeFXDialog;
 
-	TimeStretchDialog* current_timestretch;
+	TimeFXDialog* current_timefx;
 
-	static void* timestretch_thread (void *arg);
-	int run_timestretch (RegionSelection&, float fraction);
-	void do_timestretch (TimeStretchDialog&);
+	static void* timefx_thread (void *arg);
+	void do_timefx (TimeFXDialog&);
+
+	int time_stretch (RegionSelection&, float fraction);
+	int pitch_shift (RegionSelection&, float cents);
+	void pitch_shift_regions ();
+	int time_fx (RegionSelection&, float val, bool pitching);
 
 	/* editor-mixer strip */
 

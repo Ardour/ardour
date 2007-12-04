@@ -369,6 +369,13 @@ namespace ARDOUR {
 		SrcFastest
 	};
 
+	struct TimeFXRequest : public InterThreadInfo {
+	    float time_fraction;
+	    float pitch_fraction;
+	    bool  quick_seek; 
+	    bool  antialias;  
+	};
+
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
