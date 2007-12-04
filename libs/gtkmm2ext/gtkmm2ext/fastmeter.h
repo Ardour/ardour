@@ -32,7 +32,7 @@ class FastMeter : public Gtk::DrawingArea {
 		Vertical
 	};
 	
-	FastMeter (long hold_cnt, unsigned long width, Orientation, int len=0);
+	FastMeter (long hold_cnt, unsigned long width, Orientation, int len=0, int clrb0=0x00ff00, int clr1=0xffff00, int clr2=0xffaa00, int clr3=0xff0000);
 	virtual ~FastMeter ();
 	
 	void set (float level);
@@ -55,6 +55,7 @@ class FastMeter : public Gtk::DrawingArea {
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 	gint pixheight;
 	gint pixwidth;
+	static int rgb0, rgb1, rgb2, rgb3;
 
 	Orientation orientation;
 	GdkRectangle pixrect;

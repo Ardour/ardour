@@ -1397,6 +1397,8 @@ RouteTimeAxisView::color_handler ()
 	if (timestretch_rect) {
 		timestretch_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
 	}
+
+	reset_meter();
 }
 
 void

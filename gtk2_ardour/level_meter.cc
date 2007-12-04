@@ -65,6 +65,7 @@ LevelMeter::LevelMeter (boost::shared_ptr<IO> io, Session& s)
 	set_spacing (1);
 	Config->ParameterChanged.connect (mem_fun (*this, &LevelMeter::parameter_changed));
 	UI::instance()->theme_changed.connect (mem_fun(*this, &LevelMeter::on_theme_changed));
+	ColorsChanged.connect (mem_fun (*this, &LevelMeter::color_handler));
 }
 
 void
@@ -173,10 +174,18 @@ LevelMeter::setup_meters (int len)
 		meters.push_back (MeterInfo());
 	}
 
+
+	int b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
+	int m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
+	int t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
+	int c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+
+	cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
+
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
-		if (meters[n].width != width || meters[n].length != len) {
+		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len);
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
 			//cerr << "LevelMeter::setup_meters() w:l = " << width << ":" << len << endl;//DEBUG
 			meters[n].width = width;
 			meters[n].length = len;
@@ -188,6 +197,7 @@ LevelMeter::setup_meters (int len)
 		meters[n].packed = true;
 	}
 	show();
+	color_changed = false;
 }	
 
 void LevelMeter::clear_meters ()
@@ -201,3 +211,10 @@ void LevelMeter::hide_meters ()
 {
 	hide_all_meters();
 }
+
+void
+LevelMeter::color_handler ()
+{
+	color_changed = true;
+}
+

@@ -208,6 +208,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
 
 	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
+	ColorsChanged.connect (mem_fun (*this, &GainMeter::color_handler));
 	//hide_all();
 }
 
@@ -456,10 +457,17 @@ GainMeter::setup_meters (int len)
 		meter_metric_area.show_all ();
 	}
 
+	int b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
+	int m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
+	int t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
+	int c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+
+	cerr << "GainMeter::setup_meters() called color_changed = " << color_changed << " colors: " << hex << b << " " << m << " " << t << " " << c << endl;//DEBUG
+
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
-		if (meters[n].width != width || meters[n].length != len) {
+		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len);
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
 			//cerr << "GainMeter::setup_meters() w:l = " << width << ":" << len << endl;//DEBUG
 			meters[n].width = width;
 			meters[n].length = len;
@@ -471,6 +479,7 @@ GainMeter::setup_meters (int len)
 		meters[n].meter->show_all ();
 		meters[n].packed = true;
 	}
+	color_changed = false;
 }	
 
 int
@@ -985,3 +994,8 @@ void GainMeter::clear_meters ()
 	}
 }
 
+void GainMeter::color_handler()
+{
+	color_changed = true;
+	setup_meters();
+}

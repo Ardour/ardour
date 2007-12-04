@@ -101,6 +101,8 @@ class LevelMeter : public Gtk::HBox
 
 	void on_theme_changed ();
 	bool style_changed;
+	bool color_changed;
+	void color_handler ();
 };
 
 #endif /* __ardour_gtk_track_meter_h__ */
