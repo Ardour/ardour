@@ -42,10 +42,6 @@ Pitch::Pitch (Session& s, TimeFXRequest& req)
 	tsr.progress = 0.0f;
 }
 
-Pitch::~Pitch ()
-{
-}
-
 int
 Pitch::run (boost::shared_ptr<AudioRegion> region)
 {
