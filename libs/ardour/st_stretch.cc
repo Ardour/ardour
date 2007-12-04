@@ -87,7 +87,7 @@ Stretch::run (boost::shared_ptr<AudioRegion> region)
 	   digits just to disambiguate close but not identical stretches.
 	*/
 	
-	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.fraction * 100.0f));
+	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.time_fraction * 100.0f));
 
 	/* create new sources */
 	
@@ -180,7 +180,7 @@ Stretch::run (boost::shared_ptr<AudioRegion> region)
 		// note: tsr.fraction is a percentage of original length. 100 = no change, 
 		// 50 is half as long, 200 is twice as long, etc.
 
-		float stretch = (*x)->stretch() * (tsr.fraction/100.0);
+		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
 
 		start = (nframes_t) floor (astart + ((astart - (*x)->start()) / stretch));
 		length = (nframes_t) floor (alength / stretch);
