@@ -180,7 +180,7 @@ LevelMeter::setup_meters (int len)
 	int t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
 	int c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
 
-	cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
+	//cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		if (meters[n].width != width || meters[n].length != len || color_changed) {

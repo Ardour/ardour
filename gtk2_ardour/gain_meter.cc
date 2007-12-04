@@ -462,7 +462,7 @@ GainMeter::setup_meters (int len)
 	int t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
 	int c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
 
-	cerr << "GainMeter::setup_meters() called color_changed = " << color_changed << " colors: " << hex << b << " " << m << " " << t << " " << c << endl;//DEBUG
+	//cerr << "GainMeter::setup_meters() called color_changed = " << color_changed << " colors: " << hex << b << " " << m << " " << t << " " << c << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
