@@ -137,7 +137,7 @@ AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) con
 	/* check to see if the peak data is ready. if not
 	   connect the slot while still holding the lock.
 	*/
-	
+
 	if (!(ret = _peaks_built)) {
 		conn = PeaksReady.connect (the_slot);
 	}
@@ -194,44 +194,36 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 		peakpath = find_broken_peakfile (peakpath, audio_path);
 	}
 
-	if (newfile) {
-
-		if (!_build_peakfiles) {
-			return 0;
+	if (stat (peakpath.c_str(), &statbuf)) {
+		if (errno != ENOENT) {
+			/* it exists in the peaks dir, but there is some kind of error */
+			
+			error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), peakpath) << endmsg;
+			return -1;
 		}
 
+		/* peakfile does not exist */
+		
 		_peaks_built = false;
-
+		
 	} else {
-
-		if (stat (peakpath.c_str(), &statbuf)) {
-			if (errno != ENOENT) {
-				/* it exists in the peaks dir, but there is some kind of error */
-				
-				error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), peakpath) << endmsg;
-				return -1;
-			}
-			
+		
+		/* we found it in the peaks dir, so check it out */
+		
+		if (statbuf.st_size == 0) {
+			// empty
 			_peaks_built = false;
-
 		} else {
+			// Check if the audio file has changed since the peakfile was built.
+			struct stat stat_file;
+			int err = stat (audio_path.c_str(), &stat_file);
 			
-			/* we found it in the peaks dir, so check it out */
-
-			if (statbuf.st_size == 0) {
+			if (!err && stat_file.st_mtime > statbuf.st_mtime){
 				_peaks_built = false;
+				_peak_byte_max = 0;
 			} else {
-				// Check if the audio file has changed since the peakfile was built.
-				struct stat stat_file;
-				int err = stat (audio_path.c_str(), &stat_file);
-				
-				if (!err && stat_file.st_mtime > statbuf.st_mtime){
-					_peaks_built = false;
-					_peak_byte_max = 0;
-				} else {
-					_peaks_built = true;
-					_peak_byte_max = statbuf.st_size;
-				}
+				_peaks_built = true;
+				_peak_byte_max = statbuf.st_size;
 			}
 		}
 	}

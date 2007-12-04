@@ -134,18 +134,15 @@ AudioFileSource::removable () const
 int
 AudioFileSource::init (ustring pathstr, bool must_exist)
 {
-	bool is_new = false;
-
 	_length = 0;
 	timeline_position = 0;
 	_peaks_built = false;
-	file_is_new = false;
 
-	if (!find (pathstr, must_exist, is_new, _channel)) {
+	if (!find (pathstr, must_exist, file_is_new, _channel)) {
 		throw non_existent_source ();
 	}
 
-	if (is_new && must_exist) {
+	if (file_is_new && must_exist) {
 		return -1;
 	}
 
