@@ -109,7 +109,7 @@
 	           <menuitem action='edit-cursor-to-range-end'/>
 	       </menu>
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
-	       		<menuitem action='audition-at-mouse'/>
+	       		<menuitem action='audition-region'/>
                		<menuitem action='brush-at-mouse'/>
                		<menuitem action='set-edit-point'/>
                		<menuitem action='mute-unmute-region'/>

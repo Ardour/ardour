@@ -782,7 +782,7 @@ Region::state (bool full_state)
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
-	char* fe = NULL;
+	const char* fe = NULL;
 
 	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
