@@ -214,8 +214,6 @@ UIConfiguration::pack_canvasvars ()
 #define CANVAS_VARIABLE(var,name) canvas_colors.push_back(&var); 
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
-	cerr << "Configuration::pack_canvasvars () called, canvas_colors.size() = " << canvas_colors.size() << endl;
-	
 }
 
 
