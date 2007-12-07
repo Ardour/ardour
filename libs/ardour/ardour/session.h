@@ -537,6 +537,9 @@ class Session : public PBD::StatefulDestructible
 	bool        transport_stopped() const { return _transport_speed == 0.0f; }
 	bool        transport_rolling() const { return _transport_speed != 0.0f; }
 
+	void set_silent (bool yn);
+	bool silent () { return _silent; }
+
 	int jack_slave_sync (nframes_t);
 
 	TempoMap& tempo_map() { return *_tempo_map; }
@@ -974,6 +977,7 @@ class Session : public PBD::StatefulDestructible
 	Location*                end_location;
 	Location*                start_location;
 	Slave                  *_slave;
+	bool                    _silent;
 	volatile float          _transport_speed;
 	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;

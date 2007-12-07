@@ -45,6 +45,8 @@ using namespace std;
 void
 Session::process (nframes_t nframes)
 {
+	_silent = false;
+
 	if (synced_to_jack() && waiting_to_start) {
 		if ( _engine.transport_state() == AudioEngine::TransportRolling) {
 			actually_start_transport ();
@@ -278,7 +280,7 @@ Session::process_with_events (nframes_t nframes)
 	}
 
 	if (!process_can_proceed()) {
-		no_roll (nframes, 0);
+		_silent = true;
 		return;
 	}
 		
@@ -293,8 +295,8 @@ Session::process_with_events (nframes_t nframes)
 		Event* this_event;
 		Events::iterator the_next_one;
 		
-		if (post_transport_work & (PostTransportLocate|PostTransportStop)) {
-			no_roll (nframes, 0);
+		if (!process_can_proceed()) {
+			_silent = true;
 			return;
 		}
 		
@@ -725,65 +727,62 @@ Session::process_without_events (nframes_t nframes)
 	long frames_moved;
 	nframes_t offset = 0;
 
-	{
-		if (post_transport_work & (PostTransportLocate|PostTransportStop)) {
-			no_roll (nframes, 0);
+	if (!process_can_proceed()) {
+		_silent = true;
+		return;
+	}
+
+	if (!_exporting && _slave) {
+		if (!follow_slave (nframes, 0)) {
 			return;
 		}
+	} 
 
-		if (!_exporting && _slave) {
-			if (!follow_slave (nframes, 0)) {
-				return;
-			}
-		} 
-
-		if (_transport_speed == 0) {
-			no_roll (nframes, 0);
-			return;
-		}
+	if (_transport_speed == 0) {
+		no_roll (nframes, 0);
+		return;
+	}
 		
-		if (actively_recording()) {
+	if (actively_recording()) {
+		stop_limit = max_frames;
+	} else {
+		if (Config->get_stop_at_session_end()) {
+			stop_limit = current_end_frame();
+		} else {
 			stop_limit = max_frames;
-		} else {
-			if (Config->get_stop_at_session_end()) {
-				stop_limit = current_end_frame();
-			} else {
-				stop_limit = max_frames;
-			}
 		}
+	}
 		
-		if (maybe_stop (stop_limit)) {
-			no_roll (nframes, 0);
-			return;
-		} 
+	if (maybe_stop (stop_limit)) {
+		no_roll (nframes, 0);
+		return;
+	} 
 
-		if (maybe_sync_start (nframes, offset)) {
-			return;
-		}
+	if (maybe_sync_start (nframes, offset)) {
+		return;
+	}
 
-		click (_transport_frame, nframes, offset);
+	click (_transport_frame, nframes, offset);
 
-		prepare_diskstreams ();
+	prepare_diskstreams ();
 	
-		frames_moved = (long) floor (_transport_speed * nframes);
+	frames_moved = (long) floor (_transport_speed * nframes);
 
-		if (process_routes (nframes, offset)) {
-			no_roll (nframes, offset);
- 			return;
- 		}
+	if (process_routes (nframes, offset)) {
+		no_roll (nframes, offset);
+		return;
+	}
 
-		commit_diskstreams (nframes, session_needs_butler);
+	commit_diskstreams (nframes, session_needs_butler);
 
-		if (frames_moved < 0) {
-			decrement_transport_position (-frames_moved);
-		} else {
-			increment_transport_position (frames_moved);
-		}
+	if (frames_moved < 0) {
+		decrement_transport_position (-frames_moved);
+	} else {
+		increment_transport_position (frames_moved);
+	}
 
-		maybe_stop (stop_limit);
-		check_declick_out ();
-
-	} /* implicit release of route lock */
+	maybe_stop (stop_limit);
+	check_declick_out ();
 
 	if (session_needs_butler) {
 		summon_butler ();

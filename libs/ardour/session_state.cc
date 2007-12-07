@@ -164,6 +164,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_worst_track_latency = 0;
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading|Deletion);
 	_slave = 0;
+	_silent = false;
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
 	mmc = 0;

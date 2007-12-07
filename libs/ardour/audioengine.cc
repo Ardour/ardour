@@ -331,6 +331,23 @@ AudioEngine::process_callback (nframes_t nframes)
 		last_monitor_check = next_processed_frames;
 	}
 
+	if (session->silent()) {
+
+		boost::shared_ptr<Ports> p = ports.reader();
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+			
+			Port *port = (*i);
+			
+			if (port->sends_output()) {
+				Sample *buf = port->get_buffer(nframes);
+				memset (buf, 0, sizeof(Sample) * nframes);
+				// this should work but doesn't
+				//port->silence(0, nframes);  //need to implement declicking fade
+			}
+		}
+	}
+
 	_processed_frames = next_processed_frames;
 	return 0;
 }
