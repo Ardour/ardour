@@ -310,6 +310,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			// do nothing on midi bind event
+			return false;
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
@@ -327,6 +328,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			_session.commit_reversible_command ();
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+			/* Primary-button1 applies change to the mix group.
+			   NOTE: Primary-button2 is MIDI learn.
+			*/
 
 			set_mix_group_rec_enable (_route, !_route->record_enabled());
 
