@@ -316,6 +316,10 @@ Editor::track_canvas_size_allocated ()
 
 	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
 
+	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+		(*x)->set_line_length (canvas_height);
+	}
+	
 	// EDIT CURSOR XXX set line height for selected markers here
 
 	if (range_marker_drag_rect) {

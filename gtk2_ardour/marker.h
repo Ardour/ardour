@@ -60,6 +60,7 @@ class Marker : public PBD::Destructible
 	void add_line (ArdourCanvas::Group*, double initial_height);
 	void show_line ();
 	void hide_line ();
+	void set_line_length (double);
 
 	void set_position (nframes_t);
 	void set_name (const string&);

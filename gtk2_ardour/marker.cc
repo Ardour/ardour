@@ -294,6 +294,15 @@ void Marker::reparent(ArdourCanvas::Group & parent)
 }
 
 void
+Marker::set_line_length (double len)
+{
+	if (line) {
+		line_points->back().set_y (len);
+		line->property_points() = *line_points;
+	}
+}
+
+void
 Marker::add_line (ArdourCanvas::Group* group, double initial_height)
 {
 	if (!line) {
