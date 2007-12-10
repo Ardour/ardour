@@ -270,7 +270,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				} else {
 
 					/* click: solo this route */
-
+					
 					reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
 				}
 			}

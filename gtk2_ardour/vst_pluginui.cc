@@ -58,6 +58,12 @@ VSTPluginUI::get_preferred_height ()
 }
 
 int
+VSTPluginUI::get_preferred_width ()
+{
+	return vst->fst()->width;
+}
+
+int
 VSTPluginUI::package (Gtk::Window& win)
 {
 	/* forward configure events to plugin window */

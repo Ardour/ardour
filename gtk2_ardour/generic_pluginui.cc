@@ -56,7 +56,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-LadspaPluginUI::LadspaPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
+GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
 	: PlugUIBase (pi),
 	  button_table (initial_button_rows, initial_button_cols),
 	  output_table (initial_output_rows, initial_output_cols),
@@ -103,13 +103,13 @@ LadspaPluginUI::LadspaPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrolla
 		pack_start (hpacker, false, false);
 	}
 
-	insert->active_changed.connect (mem_fun(*this, &LadspaPluginUI::redirect_active_changed));
+	insert->active_changed.connect (mem_fun(*this, &GenericPluginUI::redirect_active_changed));
 	bypass_button.set_active (!insert->active());
 	
 	build ();
 }
 
-LadspaPluginUI::~LadspaPluginUI ()
+GenericPluginUI::~GenericPluginUI ()
 {
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
@@ -117,7 +117,7 @@ LadspaPluginUI::~LadspaPluginUI ()
 }
 
 void
-LadspaPluginUI::build ()
+GenericPluginUI::build ()
 
 {
 	guint32 i = 0;
@@ -288,7 +288,7 @@ LadspaPluginUI::build ()
 	button_table.show_all ();
 }
 
-LadspaPluginUI::ControlUI::ControlUI ()
+GenericPluginUI::ControlUI::ControlUI ()
 	: automate_button (X_("")) // force creation of a label 
 {
 	automate_button.set_name ("PluginAutomateButton");
@@ -310,7 +310,7 @@ LadspaPluginUI::ControlUI::ControlUI ()
 	meterinfo = 0;
 }
 
-LadspaPluginUI::ControlUI::~ControlUI() 
+GenericPluginUI::ControlUI::~ControlUI() 
 {
 	if (adjustment) {
 		delete adjustment;
@@ -323,7 +323,7 @@ LadspaPluginUI::ControlUI::~ControlUI()
 }
 
 void
-LadspaPluginUI::automation_state_changed (ControlUI* cui)
+GenericPluginUI::automation_state_changed (ControlUI* cui)
 {
 	/* update button label */
 
@@ -353,13 +353,13 @@ static void integer_printer (char buf[32], Adjustment &adj, void *arg)
 }
 
 void
-LadspaPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
+GenericPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 {
 	plugin->print_parameter (param, buf, len);
 }
 
-LadspaPluginUI::ControlUI*
-LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontrol)
+GenericPluginUI::ControlUI*
+GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontrol)
 
 {
 	ControlUI* control_ui;
@@ -386,16 +386,19 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		boost::shared_ptr<LadspaPlugin> lp;
 
 		if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
-			
-			lrdf_defaults* defaults = lrdf_get_scale_values(lp->unique_id(), port_index);
+
+			// all LADPSA plugins have a numeric unique ID
+			uint32_t id = atol (lp->unique_id().c_str());
+
+			lrdf_defaults* defaults = lrdf_get_scale_values(id, port_index);
 			
 			if (defaults && defaults->count > 0)	{
 				
 				control_ui->combo = new Gtk::ComboBoxText;
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &LadspaPluginUI::control_combo_changed), control_ui));
-				plugin->ParameterChanged.connect (bind (mem_fun (*this, &LadspaPluginUI::parameter_changed), control_ui));
+				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
+				plugin->ParameterChanged.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 				
@@ -418,7 +421,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 			control_ui->pack_start (*control_ui->button, false, true);
 			control_ui->pack_start (control_ui->automate_button, false, false);
 
-			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &LadspaPluginUI::control_port_toggled), control_ui));
+			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
 		
 			if(plugin->get_parameter (port_index) == 1){
 				control_ui->button->set_active(true);
@@ -456,7 +459,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			control_ui->clickbox->set_print_func (integer_printer, 0);
 		} else {
-			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &LadspaPluginUI::print_parameter), (uint32_t) port_index);
+			sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->control = new BarController (*control_ui->adjustment, *mcontrol, pslot);
 			control_ui->control->set_size_request (200, req.height);
@@ -464,8 +467,8 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 			control_ui->control->set_style (BarController::LeftToRight);
 			control_ui->control->set_use_parent (true);
 
-			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::start_touch), control_ui));
-			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &LadspaPluginUI::stop_touch), control_ui));
+			control_ui->control->StartGesture.connect (bind (mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
+			control_ui->control->StopGesture.connect (bind (mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
 			
 		}
 
@@ -488,14 +491,14 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &LadspaPluginUI::control_adjustment_changed), control_ui));
-		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &LadspaPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+		control_ui->adjustment->signal_value_changed().connect (bind (mem_fun(*this, &GenericPluginUI::control_adjustment_changed), control_ui));
+		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);
 
-		plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
+		plugin->ParameterChanged.connect (bind (mem_fun(*this, &GenericPluginUI::parameter_changed), control_ui));
 		insert->automation_list (port_index).automation_state_changed.connect 
-			(bind (mem_fun(*this, &LadspaPluginUI::automation_state_changed), control_ui));
+			(bind (mem_fun(*this, &GenericPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
 
@@ -517,7 +520,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		MeterInfo * info = new MeterInfo(port_index);
  		control_ui->meterinfo = info;
 		
-		info->meter = new FastMeter (5, 5, FastMeter::Vertical);
+		info->meter = new FastMeter (5, 100, FastMeter::Vertical);
 
 		info->min_unbound = desc.min_unbound;
 		info->max_unbound = desc.max_unbound;
@@ -544,24 +547,24 @@ LadspaPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontro
 		output_controls.push_back (control_ui);
 	}
 	
-	plugin->ParameterChanged.connect (bind (mem_fun(*this, &LadspaPluginUI::parameter_changed), control_ui));
+	plugin->ParameterChanged.connect (bind (mem_fun(*this, &GenericPluginUI::parameter_changed), control_ui));
 	return control_ui;
 }
 
 void
-LadspaPluginUI::start_touch (LadspaPluginUI::ControlUI* cui)
+GenericPluginUI::start_touch (GenericPluginUI::ControlUI* cui)
 {
 	insert->automation_list (cui->port_index).start_touch ();
 }
 
 void
-LadspaPluginUI::stop_touch (LadspaPluginUI::ControlUI* cui)
+GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
 {
 	insert->automation_list (cui->port_index).stop_touch ();
 }
 
 void
-LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
+GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 {
 	using namespace Menu_Helpers;
 
@@ -574,25 +577,25 @@ LadspaPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 
 	items.clear ();
 	items.push_back (MenuElem (_("Manual"), 
-				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Off, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
-				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Play, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));
 	items.push_back (MenuElem (_("Write"),
-				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Write, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
 	items.push_back (MenuElem (_("Touch"),
-				   bind (mem_fun(*this, &LadspaPluginUI::set_automation_state), (AutoState) Touch, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
 	automation_menu->popup (1, gtk_get_current_event_time());
 }
 
 void
-LadspaPluginUI::set_automation_state (AutoState state, ControlUI* cui)
+GenericPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 {
 	insert->set_port_automation_state (cui->port_index, state);
 }
 
 void
-LadspaPluginUI::control_adjustment_changed (ControlUI* cui)
+GenericPluginUI::control_adjustment_changed (ControlUI* cui)
 {
 	if (cui->ignore_change) {
 		return;
@@ -608,18 +611,18 @@ LadspaPluginUI::control_adjustment_changed (ControlUI* cui)
 }
 
 void
-LadspaPluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
+GenericPluginUI::parameter_changed (uint32_t abs_port_id, float val, ControlUI* cui)
 {
 	if (cui->port_index == abs_port_id) {
 		if (!cui->update_pending) {
 			cui->update_pending = true;
-			Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &LadspaPluginUI::update_control_display), cui));
+			Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &GenericPluginUI::update_control_display), cui));
 		}
 	}
 }
 
 void
-LadspaPluginUI::update_control_display (ControlUI* cui)	
+GenericPluginUI::update_control_display (ControlUI* cui)	
 {
 	/* XXX how do we handle logarithmic stuff here ? */
 	
@@ -656,7 +659,7 @@ LadspaPluginUI::update_control_display (ControlUI* cui)
 }
 
 void
-LadspaPluginUI::control_port_toggled (ControlUI* cui)
+GenericPluginUI::control_port_toggled (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
 		insert->set_parameter (cui->port_index, cui->button->get_active());
@@ -664,7 +667,7 @@ LadspaPluginUI::control_port_toggled (ControlUI* cui)
 }
 
 void
-LadspaPluginUI::control_combo_changed (ControlUI* cui)
+GenericPluginUI::control_combo_changed (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_active_text();
@@ -675,26 +678,26 @@ LadspaPluginUI::control_combo_changed (ControlUI* cui)
 }
 
 void
-LadspaPluginUI::redirect_active_changed (Redirect* r, void* src)
+GenericPluginUI::redirect_active_changed (Redirect* r, void* src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &LadspaPluginUI::redirect_active_changed), r, src));
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &GenericPluginUI::redirect_active_changed), r, src));
 	
 	bypass_button.set_active (!r->active());
 }
 
 bool
-LadspaPluginUI::start_updating (GdkEventAny* ignored)
+GenericPluginUI::start_updating (GdkEventAny* ignored)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
-			(mem_fun(*this, &LadspaPluginUI::output_update));
+			(mem_fun(*this, &GenericPluginUI::output_update));
 	}
 	return false;
 }
 
 bool
-LadspaPluginUI::stop_updating (GdkEventAny* ignored)
+GenericPluginUI::stop_updating (GdkEventAny* ignored)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
@@ -703,7 +706,7 @@ LadspaPluginUI::stop_updating (GdkEventAny* ignored)
 }
 
 void
-LadspaPluginUI::output_update ()
+GenericPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
 		float val = plugin->get_parameter ((*i)->port_index);
@@ -737,13 +740,20 @@ LadspaPluginUI::output_update ()
 }
 
 vector<string> 
-LadspaPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
+GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 {
 	vector<string> enums;
 	boost::shared_ptr<LadspaPlugin> lp = boost::dynamic_pointer_cast<LadspaPlugin> (plugin);
 
+	if (!lp) {
+		return enums;
+	}
+	
+	// all LADPSA plugins have a numeric unique ID
+	uint32_t id = atol (lp->unique_id().c_str());
+
 	cui->combo_map = new std::map<string, float>;
-	lrdf_defaults* defaults = lrdf_get_scale_values(lp->unique_id(), port_index);
+			    lrdf_defaults* defaults = lrdf_get_scale_values(id, port_index);
 	if (defaults)	{
 		for (uint32_t i = 0; i < defaults->count; ++i) {
 			enums.push_back(defaults->items[i].label);

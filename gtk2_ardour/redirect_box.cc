@@ -65,8 +65,8 @@
 
 #include "i18n.h"
 
-#ifdef HAVE_AUDIOUNIT
-#include "au_pluginui.h"
+#ifdef HAVE_AUDIOUNITS
+class AUPluginUI;
 #endif
 
 using namespace sigc;
@@ -1077,67 +1077,47 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 	} else {
 		
 		/* it's an insert */
+
+		cerr << "the plugin insert, that is\n";
 		
 		boost::shared_ptr<PluginInsert> plugin_insert;
 		boost::shared_ptr<PortInsert> port_insert;
 		
 		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
 			
-			ARDOUR::PluginType type = plugin_insert->type();
-
-			if (type == ARDOUR::LADSPA || type == ARDOUR::VST) {
-				PluginUIWindow *plugin_ui;
+			PluginUIWindow *plugin_ui;
 			
-				if (plugin_insert->get_gui() == 0) {
-								
-					plugin_ui = new PluginUIWindow (plugin_insert);
-
-					if (_owner_is_mixer) {
-						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
-					} else {
-						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
-					}
-
-					WindowTitle title(Glib::get_application_name());
-					title += generate_redirect_title (plugin_insert);
-					plugin_ui->set_title (title.get_string());
-
-					plugin_insert->set_gui (plugin_ui);
-					
-					// change window title when route name is changed
-					_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
-					
+			if (plugin_insert->get_gui() == 0) {
 				
+				plugin_ui = new PluginUIWindow (plugin_insert);
+				
+				if (_owner_is_mixer) {
+					ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
 				} else {
-					plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
-				}
-			
-				if (plugin_ui->is_visible()) {
-					plugin_ui->get_window()->raise ();
-				} else {
-					plugin_ui->show_all ();
-					plugin_ui->present ();
-				}
-#ifdef HAVE_AUDIOUNIT
-			} else if (type == ARDOUR::AudioUnit) {
-				AUPluginUI* plugin_ui;
-				if (plugin_insert->get_gui() == 0) {
-					plugin_ui = new AUPluginUI (plugin_insert);
-				} else {
-					plugin_ui = reinterpret_cast<AUPluginUI*> (plugin_insert->get_gui());
+					ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
 				}
 				
-				if (plugin_ui->is_visible()) {
-					plugin_ui->get_window()->raise ();
-				} else {
-					plugin_ui->show_all ();
-					plugin_ui->present ();
-				}
-#endif				
+				WindowTitle title(Glib::get_application_name());
+				title += generate_redirect_title (plugin_insert);
+				plugin_ui->set_title (title.get_string());
+				
+				plugin_insert->set_gui (plugin_ui);
+				
+				// change window title when route name is changed
+				_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
+				
+				
 			} else {
-				warning << "Unsupported plugin sent to RedirectBox::edit_redirect()" << endmsg;
-				return;
+				plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
 			}
+			
+			if (plugin_ui->is_visible()) {
+				plugin_ui->get_window()->raise ();
+			} else {
+				plugin_ui->show_all ();
+				plugin_ui->present ();
+			}
+
 		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 			
 			if (!_session.engine().connected()) {

@@ -464,15 +464,15 @@ NewSessionDialog::set_have_engine (bool yn)
 }
 
 void
-NewSessionDialog::set_session_name(const Glib::ustring& name)
+NewSessionDialog::set_session_name (const Glib::ustring& name)
 {
-	m_name->set_text(name);
+	m_name->set_text (name);
 }
 
 void
 NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 {
-	// XXX DO SOMETHING
+	m_folder->set_current_folder (dir);
 }
 
 std::string

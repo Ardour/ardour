@@ -84,7 +84,7 @@ connection_editor.cc
 """)
 
 audiounit_files=Split("""
-au_pluginui.cc
+au_pluginui.mm
 """)
 
 gtkosx_files=Split("""
@@ -161,6 +161,7 @@ export_region_dialog.cc
 export_range_markers_dialog.cc
 gain_automation_time_axis.cc
 gain_meter.cc
+generic_pluginui.cc
 ghostregion.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
@@ -173,7 +174,6 @@ imageframe_view.cc
 io_selector.cc
 keyboard.cc
 keyeditor.cc
-ladspa_pluginui.cc
 level_meter.cc
 location_ui.cc
 main.cc
@@ -272,6 +272,8 @@ if env['VST']:
 if gtkardour['GTKOSX']:
    extra_sources += gtkosx_files
    gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
+   gtkardour.Append (LINKFLAGS=" -framework AppKit -framework CoreAudioKit")
+   
 else:
    extra_sources += x11_files
 	

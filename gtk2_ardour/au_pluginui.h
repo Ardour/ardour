@@ -1,29 +1,18 @@
-/*
-    Copyright (C) 2006 Paul Davis 
+#ifndef __gtk2_ardour_auplugin_ui_h__
+#define __gtk2_ardour_auplugin_ui_h__
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
-
-#ifndef __au_plugin_ui_h__
-#define __au_plugin_ui_h__
-
-#include <boost/shared_ptr.hpp>
-
+#include <AppKit/AppKit.h>
 #include <Carbon/Carbon.h>
 #include <AudioUnit/AudioUnit.h>
+
+/* fix up stupid apple macros */
+
+#undef check
+#undef require
+#undef verify
+
+#include <gtkmm/box.h>
+#include "plugin_ui.h"
 
 namespace ARDOUR {
 	class AUPlugin;
@@ -31,14 +20,53 @@ namespace ARDOUR {
 	class Redirect;
 }
 
-class AUPluginUI
+class AUPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
 	AUPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~AUPluginUI ();
 	
+	gint get_preferred_height () { return prefheight; }
+	gint get_preferred_width () { return prefwidth; }
+	bool start_updating(GdkEventAny*);
+	bool stop_updating(GdkEventAny*);
+	
+	void on_realize ();
+	void on_show ();
+
+	OSStatus carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event);
+
   private:
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
+	int prefheight;
+	int prefwidth;
+
+	/* Cocoa */
+
+	NSWindow*           cocoa_window;
+	NSScrollView*       scroll_view;
+
+	/* Carbon */
+
+	NSWindow*            cocoa_parent;
+	ComponentDescription carbon_descriptor;
+	AudioUnitCarbonView  editView;
+	WindowRef            carbon_window;	
+ 	EventHandlerRef      carbon_event_handler;
+	bool                 carbon_parented;
+	bool                 cocoa_parented;
+
+	void test_view_support (bool&, bool&);
+	bool test_cocoa_view_support ();
+	bool test_carbon_view_support ();
+	int  create_carbon_view (bool generic);
+	int  create_cocoa_view ();
+
+	int parent_carbon_window ();
+	int parent_cocoa_window ();
+	NSWindow* get_nswindow();
+
+	bool plugin_class_valid (Class pluginClass);
 };
 
-#endif // __au_plugin_ui_h__
+#endif /* __gtk2_ardour_auplugin_ui_h__  */

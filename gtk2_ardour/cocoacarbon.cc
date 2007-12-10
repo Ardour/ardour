@@ -23,6 +23,9 @@
 #include "actions.h"
 #include "sync-menu.h"
 
+sigc::signal<void,bool> ApplicationActivationChanged;
+static EventHandlerRef  application_event_handler_ref;
+
 /* Called for clicks on the dock icon. Can be used to unminimize or
  * create a new window for example.
  */
@@ -45,6 +48,27 @@ handle_quit_application (const AppleEvent *inAppleEvent,
 	ARDOUR_UI::instance()->quit ();
 
         return noErr;
+}
+
+static OSStatus 
+application_event_handler (EventHandlerCallRef nextHandlerRef, EventRef event, void *userData) 
+{
+	UInt32 eventKind = GetEventKind (event);
+	
+	switch (eventKind) {
+	case kEventAppActivated:
+		ApplicationActivationChanged (true); // EMIT SIGNAL
+		return eventNotHandledErr;
+
+	case kEventAppDeactivated:
+		ApplicationActivationChanged (false); // EMIT SIGNAL
+		return eventNotHandledErr;
+		
+	default:
+		// pass-thru all kEventClassApplication events we're not interested in.
+		break;
+	}
+	return eventNotHandledErr;
 }
 
 void
@@ -71,5 +95,16 @@ ARDOUR_UI::platform_specific ()
 	if (widget) {
 		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
 	}
+
+	EventTypeSpec applicationEventTypes[] = {
+		{kEventClassApplication, kEventAppActivated },
+		{kEventClassApplication, kEventAppDeactivated }
+	};	
+	
+	EventHandlerUPP ehUPP = NewEventHandlerUPP (application_event_handler);
+	
+	InstallApplicationEventHandler (ehUPP, sizeof(applicationEventTypes) / sizeof(EventTypeSpec), 
+					applicationEventTypes, 0, &application_event_handler_ref);
 }
+
 

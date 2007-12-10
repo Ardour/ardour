@@ -255,11 +255,14 @@ Editor::do_timefx (TimeFXDialog& dialog)
 	Track*    t;
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<Region>   new_region;
+	bool in_command = false;
 
 	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
-		if (!arv)
+
+		if (!arv) {
 			continue;
+		}
 
 		boost::shared_ptr<AudioRegion> region (arv->audio_region());
 		TimeAxisView* tv = &(arv->get_time_axis_view());
@@ -308,6 +311,11 @@ Editor::do_timefx (TimeFXDialog& dialog)
 		if (!fx->results.empty()) {
 			new_region = fx->results.front();
 
+			if (!in_command) {
+				begin_reversible_command (dialog.pitching ? _("pitch shift") : _("time stretch"));
+				in_command = true;
+			}
+
 			XMLNode &before = playlist->get_state();
 			playlist->replace_region (region, new_region, region->position());
 			XMLNode &after = playlist->get_state();
@@ -316,6 +324,10 @@ Editor::do_timefx (TimeFXDialog& dialog)
 
 		i = tmp;
 		delete fx;
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
 	}
 
 	dialog.status = 0;

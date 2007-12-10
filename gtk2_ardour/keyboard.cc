@@ -195,7 +195,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		if (find (state.begin(), state.end(), keyval) == state.end()) {
 			state.push_back (keyval);
 			sort (state.begin(), state.end());
-		}
+		} 
 
 	} else if (event->type == GDK_KEY_RELEASE) {
 
