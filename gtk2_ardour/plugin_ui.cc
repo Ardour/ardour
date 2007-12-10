@@ -42,9 +42,6 @@
 #ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
 #endif
-#ifndef HAVE_AUDIOUNITS
-#include <ardour/audio_unit.h>
-#endif
 
 #include <lrdf.h>
 
