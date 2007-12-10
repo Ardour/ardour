@@ -52,7 +52,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	/* Plugin interface */
 	
-	uint32_t unique_id() const                       { return descriptor->UniqueID; }
+	std::string unique_id() const;
 	const char * label() const                       { return descriptor->Label; }
 	const char * name() const                        { return descriptor->Name; }
 	const char * maker() const                       { return descriptor->Maker; }

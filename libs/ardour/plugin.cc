@@ -42,6 +42,10 @@
 #include <ardour/ladspa_plugin.h>
 #include <ardour/plugin_manager.h>
 
+#ifdef HAVE_AUDIOUNITS
+#include <ardour/audio_unit.h>
+#endif
+
 #include <pbd/stl_delete.h>
 
 #include "i18n.h"
@@ -192,7 +196,21 @@ vector<string>
 Plugin::get_presets()
 {
 	vector<string> labels;
-	lrdf_uris* set_uris = lrdf_get_setting_uris(unique_id());
+	uint32_t id;
+	std::string unique (unique_id());
+
+	/* XXX problem: AU plugins don't have numeric ID's. 
+	   Solution: they have a different method of providing presets.
+	   XXX sub-problem: implement it.
+	*/
+
+	if (!isdigit (unique[0])) {
+		return labels;
+	}
+
+	id = atol (unique.c_str());
+
+	lrdf_uris* set_uris = lrdf_get_setting_uris(id);
 
 	if (set_uris) {
 		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
@@ -234,6 +252,20 @@ Plugin::save_preset (string name, string domain)
 {
 	lrdf_portvalue portvalues[parameter_count()];
 	lrdf_defaults defaults;
+	uint32_t id;
+	std::string unique (unique_id());
+
+	/* XXX problem: AU plugins don't have numeric ID's. 
+	   Solution: they have a different method of providing/saving presets.
+	   XXX sub-problem: implement it.
+	*/
+
+	if (!isdigit (unique[0])) {
+		return false;
+	}
+
+	id = atol (unique.c_str());
+
 	defaults.count = parameter_count();
 	defaults.items = portvalues;
 
@@ -252,7 +284,7 @@ Plugin::save_preset (string name, string domain)
 	
 	string source(string_compose("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain));
 
-	free(lrdf_add_preset(source.c_str(), name.c_str(), unique_id(), &defaults));
+	free(lrdf_add_preset(source.c_str(), name.c_str(), id,  &defaults));
 
 	string path = string_compose("%1/.%2", envvar, domain);
 	if (g_mkdir_with_parents (path.c_str(), 0775)) {
@@ -275,7 +307,7 @@ Plugin::save_preset (string name, string domain)
 }
 
 PluginPtr
-ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginType type)
+ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 {
 	PluginManager *mgr = PluginManager::the_manager();
 	PluginInfoList plugs;
@@ -288,14 +320,12 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginType ty
 #ifdef VST_SUPPORT
 	case ARDOUR::VST:
 		plugs = mgr->vst_plugin_info();
-		unique_id = 0; // VST plugins don't have a unique id.
 		break;
 #endif
 
 #ifdef HAVE_AUDIOUNITS
 	case ARDOUR::AudioUnit:
-		plugs = AUPluginInfo::discover ();
-		unique_id = 0; // Neither do AU.
+		plugs = mgr->au_plugin_info();
 		break;
 #endif
 
@@ -304,13 +334,49 @@ ARDOUR::find_plugin(Session& session, string name, long unique_id, PluginType ty
 	}
 
 	PluginInfoList::iterator i;
+
 	for (i = plugs.begin(); i != plugs.end(); ++i) {
-		if ((name == "" || (*i)->name == name) &&
-			(unique_id == 0 || (*i)->unique_id == unique_id)) {
-				return (*i)->load (session);
+		if (identifier == (*i)->unique_id){
+			return (*i)->load (session);
 		}
 	}
 	
 	return PluginPtr ((Plugin*) 0);
 }
+int32_t
+Plugin::can_support_input_configuration (int32_t in)
+{
+	/* LADSPA & VST should not get here because they do not
+	   return negative i/o counts.
+	*/
+	return -1;
+}
+
+int32_t
+Plugin::compute_output_streams (int32_t nplugins)
+{
+	/* LADSPA & VST should not get here because they do not
+	   return negative i/o counts.
+	*/
+	return -1;
+}
+
+uint32_t
+Plugin::output_streams () const
+{
+	/* LADSPA & VST should not get here because they do not
+	   return negative i/o counts.
+	*/
+	return 0;
+}
+
+uint32_t
+Plugin::input_streams () const
+{
+	/* LADSPA & VST should not get here because they do not
+	   return negative i/o counts.
+	*/
+	return 0;
+}
+
 

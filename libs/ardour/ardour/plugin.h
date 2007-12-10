@@ -67,11 +67,11 @@ class PluginInfo {
 	string category;
  	Glib::ustring creator;
  	Glib::ustring path;
-	uint32_t n_inputs;
-	uint32_t n_outputs;
+	int32_t n_inputs;
+	int32_t n_outputs;
 	ARDOUR::PluginType type;
 
-	long unique_id;
+	std::string unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
 
@@ -108,7 +108,7 @@ class Plugin : public PBD::StatefulDestructible
 	    bool max_unbound;
 	};
 
-	virtual uint32_t unique_id() const = 0;
+	virtual std::string unique_id() const = 0;
 	virtual const char * label() const = 0;
 	virtual const char * name() const = 0;
 	virtual const char * maker() const = 0;
@@ -142,6 +142,12 @@ class Plugin : public PBD::StatefulDestructible
 	virtual bool has_editor() const = 0;
 
 	sigc::signal<void,uint32_t,float> ParameterChanged;
+
+	virtual bool fixed_io() const { return true; }
+	virtual int32_t can_support_input_configuration (int32_t in);
+	virtual int32_t compute_output_streams (int32_t nplugins);
+	virtual uint32_t output_streams() const;
+	virtual uint32_t input_streams() const;
 	
 	PBD::Controllable *get_nth_control (uint32_t, bool do_not_create = false);
 	void make_nth_control (uint32_t, const XMLNode&);
@@ -186,7 +192,7 @@ class Plugin : public PBD::StatefulDestructible
 	vector<PortControllable*> controls;
 };
 
-PluginPtr find_plugin(ARDOUR::Session&, string name, long unique_id, ARDOUR::PluginType);
+PluginPtr find_plugin(ARDOUR::Session&, string unique_id, ARDOUR::PluginType);
 
 } // namespace ARDOUR
  

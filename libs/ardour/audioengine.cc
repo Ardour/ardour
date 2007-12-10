@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <cerrno>
 #include <vector>
+#include <sstream>
 
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>

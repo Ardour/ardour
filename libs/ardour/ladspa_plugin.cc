@@ -157,6 +157,15 @@ LadspaPlugin::~LadspaPlugin ()
 	}
 }
 
+string
+LadspaPlugin::unique_id() const
+{
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%u", descriptor->UniqueID);
+	return string (buf);
+}
+
+
 float
 LadspaPlugin::default_value (uint32_t port)
 {

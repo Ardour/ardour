@@ -40,6 +40,10 @@
 #include <ardour/vst_plugin.h>
 #endif
 
+#ifdef HAVE_AUDIOUNITS
+#include <ardour/audio_unit.h>
+#endif
+
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 
@@ -109,6 +113,9 @@ PluginManager::refresh ()
 		vst_refresh ();
 	}
 #endif // VST_SUPPORT
+#ifdef HAVE_AUDIOUNITS
+	au_refresh ();
+#endif
 }
 
 void
@@ -122,6 +129,7 @@ PluginManager::ladspa_refresh ()
 
 	ladspa_discover_from_path (ladspa_path);
 }
+
 
 int
 PluginManager::add_ladspa_directory (string path)
@@ -273,7 +281,10 @@ PluginManager::ladspa_discover (string path)
 		info->n_inputs = 0;
 		info->n_outputs = 0;
 		info->type = ARDOUR::LADSPA;
-		info->unique_id = descriptor->UniqueID;
+		
+		char buf[32];
+		snprintf (buf, sizeof (buf), "%u", descriptor->UniqueID);
+		info->unique_id = buf;
 		
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
 			if ( LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n]) ) {
@@ -310,7 +321,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_statement* matches1 = lrdf_matches (&pattern);
 
 	if (!matches1) {
-		return _("Unknown");
+		return _("");
 	}
 
 	pattern.subject = matches1->object;
@@ -322,7 +333,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_free_statements(matches1);
 
 	if (!matches2) {
-		return _("Unknown");
+		return _("");
 	}
 
 	string label = matches2->object;
@@ -330,6 +341,22 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 
 	return label;
 }
+
+#ifdef HAVE_AUDIOUNITS
+void
+PluginManager::au_refresh ()
+{
+	au_discover();
+}
+
+int
+PluginManager::au_discover ()
+{
+	_au_plugin_info = AUPluginInfo::discover();
+	return 0;
+}
+
+#endif
 
 #ifdef VST_SUPPORT
 
@@ -389,6 +416,7 @@ int
 PluginManager::vst_discover (string path)
 {
 	FSTInfo* finfo;
+	char buf[32];
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
 		warning << "Cannot get VST information from " << path << endmsg;
@@ -411,6 +439,9 @@ PluginManager::vst_discover (string path)
 		info->name = finfo->name;
 	}
 
+	
+	snprintf (buf, sizeof (buf), "%d", finfo->uniqueID);
+	info->uniqueID = buf;
 	info->category = "VST";
 	info->path = path;
 	// need to set info->creator but FST doesn't provide it

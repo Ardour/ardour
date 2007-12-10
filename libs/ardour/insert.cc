@@ -75,7 +75,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 	
 	init ();
 
-	{
+	if (_plugins[0]->fixed_io()) {
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::MoreOutputs (output_streams ());
 	}
@@ -94,7 +94,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 
-	{
+	if (_plugins[0]->fixed_io()) {
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::MoreOutputs (output_streams());
 	}
@@ -182,13 +182,24 @@ PluginInsert::auto_state_changed (uint32_t which)
 uint32_t
 PluginInsert::output_streams() const
 {
-	return _plugins[0]->get_info()->n_outputs * _plugins.size();
+	int32_t out = _plugins[0]->get_info()->n_outputs;
+
+	if (out < 0) {
+		return _plugins[0]->output_streams ();
+	} else {
+		return out * _plugins.size();
+	}
 }
 
 uint32_t
 PluginInsert::input_streams() const
 {
-	return _plugins[0]->get_info()->n_inputs * _plugins.size();
+	int32_t in = _plugins[0]->get_info()->n_inputs;
+	if (in < 0) {
+		return _plugins[0]->input_streams ();
+	} else {
+		return in * _plugins.size();
+	}
 }
 
 uint32_t
@@ -366,12 +377,17 @@ PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 		uint32_t in = _plugins[0]->get_info()->n_inputs;
 		uint32_t out = _plugins[0]->get_info()->n_outputs;
 
-		if (out > in) {
-
-			/* not active, but something has make up for any channel count increase */
+		if (in < 0 || out < 0) {
 			
-			for (uint32_t n = out - in; n < out; ++n) {
-				memcpy (bufs[n], bufs[in - 1], sizeof (Sample) * nframes);
+		} else {
+
+			if (out > in) {
+				
+				/* not active, but something has make up for any channel count increase */
+				
+				for (uint32_t n = out - in; n < out; ++n) {
+					memcpy (bufs[n], bufs[in - 1], sizeof (Sample) * nframes);
+				}
 			}
 		}
 	}
@@ -528,7 +544,14 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 int32_t
 PluginInsert::compute_output_streams (int32_t cnt) const
 {
-	return _plugins[0]->get_info()->n_outputs * cnt;
+	int32_t outputs;
+
+	if ((outputs = _plugins[0]->get_info()->n_outputs) < 0) {
+		// have to ask the plugin itself, because it has flexible I/O
+		return _plugins[0]->compute_output_streams (cnt);
+	}
+
+	return outputs * cnt;
 }
 
 int32_t
@@ -542,6 +565,12 @@ PluginInsert::can_support_input_configuration (int32_t in) const
 {
 	int32_t outputs = _plugins[0]->get_info()->n_outputs;
 	int32_t inputs = _plugins[0]->get_info()->n_inputs;
+
+	if (outputs < 0 || inputs < 0) {
+		/* have to ask the plugin because its got reconfigurable I/O
+		 */
+		return _plugins[0]->can_support_input_configuration (in);
+	}
 
 	if (inputs == 0) {
 
@@ -591,13 +620,7 @@ PluginInsert::state (bool full)
 	node->add_child_nocopy (Redirect::state (full));
 
 	node->add_property ("type", _plugins[0]->state_node_name());
-	snprintf(buf, sizeof(buf), "%s", _plugins[0]->name());
-	node->add_property("id", string(buf));
-	if (_plugins[0]->state_node_name() == "ladspa") {
-		char buf[32];
-		snprintf (buf, sizeof (buf), "%ld", _plugins[0]->get_info()->unique_id); 
-		node->add_property("unique-id", string(buf));
-	}
+	node->add_property("unique-id", _plugins[0]->unique_id());
 	node->add_property("count", string_compose("%1", _plugins.size()));
 	node->add_child_nocopy (_plugins[0]->get_state());
 
@@ -641,7 +664,6 @@ PluginInsert::set_state(const XMLNode& node)
 	XMLNodeIterator niter;
 	XMLPropertyList plist;
 	const XMLProperty *prop;
-	long unique = 0;
 	ARDOUR::PluginType type;
 
 	if ((prop = node.property ("type")) == 0) {
@@ -653,6 +675,8 @@ PluginInsert::set_state(const XMLNode& node)
 		type = ARDOUR::LADSPA;
 	} else if (prop->value() == X_("vst")) {
 		type = ARDOUR::VST;
+	} else if (prop->value() == X_("audiounit")) {
+		type = ARDOUR::AudioUnit;
 	} else {
 		error << string_compose (_("unknown plugin type %1 in plugin insert state"),
 				  prop->value())
@@ -661,22 +685,27 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 
 	prop = node.property ("unique-id");
-	if (prop != 0) {
-		unique = atol(prop->value().c_str());
-	}
+	if (prop == 0) {
+#ifdef VST_SUPPORT
+		/* older sessions contain VST plugins with only an "id" field.
+		 */
+		
+		if (type == ARDOUR::VST) {
+			if (prop = node.property ("id")) {
+			}
+		}
+#endif		
+		/* recheck  */
 
-	if ((prop = node.property ("id")) == 0) {
-		error << _("XML node describing insert is missing the `id' field") << endmsg;
- 		return -1;
+		if (prop == 0) {
+			error << _("Plugin has no unique ID field") << endmsg;
+			return -1;
+		}
 	}
 
 	boost::shared_ptr<Plugin> plugin;
 	
-	if (unique != 0) {
-		plugin = find_plugin (_session, "", unique, type);	
-	} else {
-		plugin = find_plugin (_session, prop->value(), 0, type);	
-	}
+	plugin = find_plugin (_session, prop->value(), type);	
 
 	if (plugin == 0) {
 		error << string_compose(_("Found a reference to a plugin (\"%1\") that is unknown.\n"

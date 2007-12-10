@@ -56,7 +56,7 @@ class VSTPlugin : public ARDOUR::Plugin
 
 	/* Plugin interface */
 	
-	uint32_t unique_id() const;
+	std::string unique_id() const;
 	const char * label() const;
 	const char * name() const;
 	const char * maker() const;

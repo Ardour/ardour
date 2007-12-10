@@ -1263,7 +1263,13 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inp
 		}
 		
 		(*i).in = required_inputs;
-		(*i).out = (*i).insert->compute_output_streams ((*i).cnt);
+
+		if (((*i).out = (*i).insert->compute_output_streams ((*i).cnt)) < 0) {
+			if (err_streams) {
+				*err_streams = required_inputs;
+			}
+			return -1;
+		}
 
 		required_inputs = (*i).out;
 	}
@@ -1560,22 +1566,29 @@ Route::add_redirect_from_xml (const XMLNode& node)
 			if ((prop = node.property ("type")) != 0) {
 
 				boost::shared_ptr<Insert> insert;
+				bool have_insert = false;
 
-				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || prop->value() == "vst") {
-
+				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+				    prop->value() == "vst" ||
+				    prop->value() == "audiounit") {
+					
 					insert.reset (new PluginInsert(_session, node));
+					have_insert = true;
 					
 				} else if (prop->value() == "port") {
 
 
 					insert.reset (new PortInsert (_session, node));
+					have_insert = true;
 
 				} else {
 
 					error << string_compose(_("unknown Insert type \"%1\"; ignored"), prop->value()) << endmsg;
 				}
 
-				add_redirect (insert, this);
+				if (have_insert) {
+					add_redirect (insert, this);
+				}
 				
 			} else {
 				error << _("Insert XML node has no type property") << endmsg;
