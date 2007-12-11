@@ -1563,6 +1563,30 @@ Editor::temporal_zoom_region ()
 		}
 	}
 
+	/* now comes an "interesting" hack ... make sure we leave a little space
+	   at each end of the editor so that the zoom doesn't fit the region
+	   precisely to the screen.
+	*/
+
+	GdkScreen* screen = gdk_screen_get_default ();
+	gint pixwidth = gdk_screen_get_width (screen);
+	gint mmwidth = gdk_screen_get_width_mm (screen);
+	double pix_per_mm = (double) pixwidth/ (double) mmwidth;
+	double one_centimeter_in_pixels = pix_per_mm * 10.0;
+	nframes_t extra_samples = unit_to_frame (one_centimeter_in_pixels);
+	
+	if (start > extra_samples) {
+		start -= extra_samples;
+	} else {
+		start = 0;
+	} 
+
+	if (max_frames - extra_samples > end) {
+		end += extra_samples;
+	} else {
+		end = max_frames;
+	}
+
 	temporal_zoom_by_frame (start, end, "zoom to region");
 }
 
@@ -2258,6 +2282,9 @@ Editor::audition_playlist_region_via_route (boost::shared_ptr<Region> region, Ro
 void
 Editor::audition_selected_region ()
 {
+	nframes64_t start = max_frames;
+	nframes64_t end = 0;
+
 	ensure_entered_region_selected (true);
 
 	if (selection->regions.empty()) {
@@ -2265,9 +2292,19 @@ Editor::audition_selected_region ()
 	}
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		session->audition_region ((*i)->region());
-		/* XXX need to check if user requested stop between each one, but how? */
+		if ((*i)->region()->position() < start) {
+			start = (*i)->region()->position();
+		}
+		if ((*i)->region()->last_frame() + 1 > end) {
+			end = (*i)->region()->last_frame() + 1;
+		}
 	}
+
+	list<AudioRange> lr;
+	lr.push_back (AudioRange (start, end, 0));
+
+	session->set_audio_range (lr);
+	session->request_play_range (true);
 }
 
 void

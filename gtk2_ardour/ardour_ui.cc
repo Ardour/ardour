@@ -629,7 +629,7 @@ ARDOUR_UI::startup ()
 		}
 		
 		new_session_dialog->set_session_name (name);
-		new_session_dialog->set_session_folder (Glib::path_get_basename (path));
+		new_session_dialog->set_session_folder (Glib::path_get_dirname (path));
 		_session_is_new = isnew;
 	}
 
@@ -2029,6 +2029,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 	if (dir.length()) {
 		new_session_dialog->set_session_folder (dir);
 	}
+
 	new_session_dialog->reset_recent();
 	new_session_dialog->set_position (WIN_POS_CENTER);
 	new_session_dialog->set_current_page (0);
@@ -2215,6 +2216,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					default:
 						response = RESPONSE_NONE;
 						new_session_dialog->reset ();
+						loading_dialog->hide ();
 						continue;
 					}
 				} 
