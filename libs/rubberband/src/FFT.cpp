@@ -74,6 +74,7 @@ public:
 
 #ifdef FFTW_DOUBLE_ONLY
 #ifdef FFTW_FLOAT_ONLY
+#error Building for FFTW-DOUBLE BOTH
 // Can't meaningfully define both
 #undef FFTW_DOUBLE_ONLY
 #undef FFTW_FLOAT_ONLY
@@ -91,6 +92,7 @@ public:
 #define cosf cos
 #define sinf sin
 #endif /* !FFTW_FLOAT_ONLY */
+#endif
 
 #ifdef FFTW_FLOAT_ONLY
 #define fftw_complex fftwf_complex
@@ -475,7 +477,6 @@ D_FFTW::m_extantd = 0;
 Mutex
 D_FFTW::m_extantMutex;
 
-#endif
 
 class D_Cross : public FFTImpl
 {
