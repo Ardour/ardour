@@ -52,8 +52,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
 	int x, y;
 	double wx, wy;
+	nframes_t xdelta;
+	int direction = ev->direction;
 
-	switch (ev->direction) {
+  retry:
+	switch (direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
@@ -75,6 +78,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (false, where);
 			return true;
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+			direction = GDK_SCROLL_LEFT;
+			goto retry;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
@@ -90,6 +96,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			return true;
 		}
 		break;
+
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
@@ -106,6 +113,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (true, where);
 			return true;
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+			direction = GDK_SCROLL_RIGHT;
+			goto retry;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
@@ -122,8 +132,26 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		}
 		break;	
 
+	case GDK_SCROLL_LEFT:
+		xdelta = (current_page_frames() / 2);
+		if (leftmost_frame > xdelta) {
+			reset_x_origin (leftmost_frame - xdelta);
+		} else {
+			reset_x_origin (0);
+		}
+		break;
+
+	case GDK_SCROLL_RIGHT:
+		xdelta = (current_page_frames() / 2);
+		if (max_frames - xdelta > leftmost_frame) {
+			reset_x_origin (leftmost_frame + xdelta);
+		} else {
+			reset_x_origin (max_frames - current_page_frames());
+		}
+		break;
+
 	default:
-		/* no left/right handling yet */
+		/* what? */
 		break;
 	}
 

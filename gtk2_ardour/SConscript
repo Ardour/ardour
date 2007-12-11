@@ -270,17 +270,18 @@ if env['VST']:
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
 if gtkardour['GTKOSX']:
-   extra_sources += gtkosx_files
-   gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
-   gtkardour.Append (LINKFLAGS=" -framework AppKit -framework CoreAudioKit")
-   
+	extra_sources += gtkosx_files
+	gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
+	gtkardour.Append (LINKFLAGS=" -framework AppKit -framework CoreAudioKit")
+
+	if gtkardour['AUDIOUNITS']:
+		extra_sources += audiounit_files
+		gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
+		gtkardour.Merge([libraries['appleutility']])
+
 else:
    extra_sources += x11_files
 	
-if gtkardour['AUDIOUNITS']:
-    extra_sources += audiounit_files
-    gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
-    gtkardour.Merge([libraries['appleutility']])
  
 if env['FFT_ANALYSIS']:
 	extra_sources += fft_analysis_files
