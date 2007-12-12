@@ -66,6 +66,7 @@ Editor::register_actions ()
 
 	/* add named actions for the editor */
 
+	ActionManager::register_toggle_action (editor_actions, "link-region-and-track-selection", _("Link Region/Track Selection"), mem_fun (*this, &Editor::toggle_link_region_and_track_selection));
 
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -641,6 +642,7 @@ Editor::update_crossfade_model ()
 		}
 	}
 }
+
 
 void
 Editor::update_smpte_mode ()
@@ -1320,6 +1322,12 @@ Editor::toggle_xfade_visibility ()
 	ActionManager::toggle_config_state ("Editor", "toggle-xfades-visible", &Configuration::set_xfades_visible, &Configuration::get_xfades_visible);
 }
 
+void
+Editor::toggle_link_region_and_track_selection ()
+{
+	ActionManager::toggle_config_state ("Editor", "link-region-and-track-selection", &Configuration::set_link_region_and_track_selection, &Configuration::get_link_region_and_track_selection);
+}
+
 /** A Configuration parameter has changed.
  * @param parameter_name Name of the changed parameter.
  */
@@ -1359,6 +1367,8 @@ Editor::parameter_changed (const char* parameter_name)
 		update_just_smpte ();
 	} else if (PARAM_IS ("show-track-meters")) {
 		toggle_meter_updating();
+	} else if (PARAM_IS ("link-region-and-track-selection")) {
+		ActionManager::map_some_state ("Editor", "link-region-and-track-selection", &Configuration::get_link_region_and_track_selection);
 	}
 
 #undef PARAM_IS

@@ -324,6 +324,8 @@ class Editor : public PublicEditor
 	/* layers */
 	void set_layer_model (ARDOUR::LayerModel);
 	void update_layering_model ();
+	
+	void toggle_link_region_and_track_selection ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 

@@ -404,7 +404,8 @@
 	       <menuitem action='PrimaryClockDeltaEditCursor'/>
 	       <menuitem action='SecondaryClockDeltaEditCursor'/>
 	       <menuitem action='OnlyCopyImportedFiles'/>
-			<menuitem action='ShowTrackMeters'/>
+    	       <menuitem action='ShowTrackMeters'/>
+               <menuitem action='link-region-and-track-selection'/>
 	       <separator/>
          </menu>
 	 <menu name='Help' action='Help'>

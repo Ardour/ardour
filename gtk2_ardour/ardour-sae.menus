@@ -223,6 +223,7 @@
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
                <menuitem action='LatchedSolo'/>
+               <menuitem action='link-region-and-track-selection'/>
          </menu>
      </menubar>
 
