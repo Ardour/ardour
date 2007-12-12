@@ -191,6 +191,59 @@ fixup_bundle_environment ()
 
 #endif
 
+static void
+setup_keybindings (ARDOUR_UI* ui)
+{
+	Glib::ustring path;
+
+	if (keybindings_path.empty()) {
+		keybindings_path = "ardour";
+	}
+
+	std::string kbpath;
+	
+	if (keybindings_path.find (".bindings") == string::npos) {
+
+		// just a style name - allow user to
+		// specify the layout type. 
+		
+		char* layout;
+		
+		if ((layout = getenv ("ARDOUR_KEYBOARD_LAYOUT")) != 0) {
+			keybindings_path += '-';
+			keybindings_path += layout;
+		}
+
+		keybindings_path += ".bindings";
+	} 
+
+	
+	// XXX timbyr - we need a portable test for "is-absolute" here 
+	
+	if (keybindings_path[0] != '/' && keybindings_path[0] != '.') {
+
+		/* not absolute - look in the usual places */
+		
+		path = find_config_file (keybindings_path);
+
+		if (path.empty()) {
+			warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
+						   keybindings_path)
+				<< endmsg;
+		}
+
+	} else {
+
+		// absolute path from user - use it as is
+
+		path = keybindings_path;
+	}
+
+	if (!path.empty()) {
+		ui->set_keybindings_path (path);
+	}
+}
+
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
@@ -279,26 +332,7 @@ int main (int argc, char* argv[])
 		}
 	}
 
-	if (!keybindings_path.empty()) {
-		std::string path;
-
-		// XXX timbyr - we need a portable test for "is-absolute" here 
-
-		if (keybindings_path[0] != '/' && keybindings_path[0] != '.') {
-			path = find_config_file (keybindings_path);
-			if (path.empty()) {
-				warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
-							   keybindings_path)
-					<< endmsg;
-			}
-		} else {
-			path = keybindings_path;
-		}
-
-		if (!path.empty()) {
-			ui->set_keybindings_path (path);
-		}
-	}
+	setup_keybindings (ui);
 
 	ui->run (text_receiver);
 	ui = 0;

@@ -338,11 +338,11 @@ Selection::add (const RegionSelection& rs)
 }
 
 void
-Selection::add (RegionView* r, bool with_track)
+Selection::add (RegionView* r)
 {
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		regions.add (r);
-		if (with_track) {
+		if (Config->get_link_region_and_track_selection()) {
 			add (&r->get_trackview());
 		}
 		RegionsChanged ();
@@ -350,14 +350,14 @@ Selection::add (RegionView* r, bool with_track)
 }
 
 void
-Selection::add (vector<RegionView*>& v, bool with_track)
+Selection::add (vector<RegionView*>& v)
 {
 	bool changed = false;
 
 	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
-			if (with_track && changed) {
+			if (Config->get_link_region_and_track_selection() && changed) {
 				add (&(*i)->get_trackview());
 			}
 		}
@@ -490,7 +490,7 @@ Selection::remove (RegionView* r)
 		RegionsChanged ();
 	}
 
-	if (!regions.involves (r->get_trackview())) {
+	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_trackview())) {
 		remove (&r->get_trackview());
 	}
 }
@@ -572,25 +572,25 @@ Selection::set (const RegionSelection& rs)
 }
 
 void
-Selection::set (RegionView* r, bool also_clear_tracks, bool with_track)
+Selection::set (RegionView* r, bool also_clear_tracks)
 {
 	clear_regions ();
 	if (also_clear_tracks) {
 		clear_tracks ();
 	}
-	add (r, with_track);
+	add (r);
 }
 
 void
-Selection::set (vector<RegionView*>& v, bool with_track)
+Selection::set (vector<RegionView*>& v)
 {
 	clear_regions ();
-	if (with_track) {
+	if (Config->get_link_region_and_track_selection()) {
 		clear_tracks ();
 		// make sure to deselect any automation selections
 		clear_points();
 	}
-	add (v, with_track);
+	add (v);
 }
 
 long

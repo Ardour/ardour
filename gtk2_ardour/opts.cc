@@ -73,7 +73,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 	if (getenv ("ARDOUR_SAE")) {
 		menus_file = "ardour-sae.menus";
-		keybindings_path = "ardour-sae.bindings";
+		keybindings_path = "ardour-sae";
 	}
 
 	if (execname == 0) {

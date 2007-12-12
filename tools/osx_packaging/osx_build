@@ -66,6 +66,10 @@ mkdir -p $Etc
 env=""
 if test x$SAE != x ; then
     env="$env<key>ARDOUR_SAE</key><string>true</string>"
+    #
+    # current default for SAE version is German keyboard layout
+    #
+    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de</string>"
 fi
 
 if test x$WITH_JACK != x ; then
@@ -158,7 +162,8 @@ echo
 echo "Copying other stuff to Ardour2.app  ..."
 
 cp ../../gtk2_ardour/ardour.bindings  $Resources
-cp ../../gtk2_ardour/ardour-sae.bindings  $Resources
+cp ../../gtk2_ardour/ardour-sae-ansi.bindings  $Resources
+cp ../../gtk2_ardour/ardour-sae-de.bindings  $Resources
 cp ../../gtk2_ardour/ardour.menus $Resources
 cp ../../gtk2_ardour/ardour-sae.menus $Resources
 cp ../../ardour_system.rc $Resources

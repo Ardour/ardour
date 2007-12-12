@@ -786,7 +786,7 @@ Editor::flush_canvas ()
 {
 	if (is_mapped()) {
 		track_canvas.update_now ();
-		gdk_window_process_updates (GTK_LAYOUT(track_canvas.gobj())->bin_window, true);
+		// gdk_window_process_updates (GTK_LAYOUT(track_canvas.gobj())->bin_window, true);
 	}
 }
 
