@@ -440,8 +440,8 @@ PluginManager::vst_discover (string path)
 	}
 
 	
-	snprintf (buf, sizeof (buf), "%d", finfo->uniqueID);
-	info->uniqueID = buf;
+	snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
+	info->unique_id = buf;
 	info->category = "VST";
 	info->path = path;
 	// need to set info->creator but FST doesn't provide it

@@ -134,11 +134,20 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
 #ifndef VST_SUPPORT
 	return false;
 #else
-	VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
+
+	boost::shared_ptr<VSTPlugin> vp;
+
+	if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (insert->plugin())) == 0) {
+		error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
+			      << endmsg;
+		throw failed_constructor ();
+	} else {
+		VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
 	
-	_pluginui = vpu;
-	get_vbox()->add (*vpu);
-	vpu->package (*this);
+		_pluginui = vpu;
+		get_vbox()->add (*vpu);
+		vpu->package (*this);
+	}
 
 	non_gtk_gui = true;
 	return true;
