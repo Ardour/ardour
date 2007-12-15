@@ -883,7 +883,8 @@ if env['SYSLIBS']:
     {
         'sigc++-2.0'           : '2.0',
         'gtkmm-2.4'            : '2.8',
-        'libgnomecanvasmm-2.6' : '2.12.0'
+        'libgnomecanvasmm-2.6' : '2.12.0',
+	'libSoundTouch'        : '1.3.1'
     }
 
     conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
