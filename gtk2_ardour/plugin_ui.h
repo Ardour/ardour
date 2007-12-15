@@ -39,9 +39,9 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/socket.h>
 
-#include <ardour_dialog.h>
 #include <ardour/types.h>
 
+#include "ardour_dialog.h"
 #include "latency_gui.h"
 #include "automation_controller.h"
 

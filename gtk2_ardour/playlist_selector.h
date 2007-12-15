@@ -28,7 +28,7 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm2ext/selector.h>
 
-#include <ardour_dialog.h>
+#include "ardour_dialog.h"
 
 namespace ARDOUR {
 	class Session;
