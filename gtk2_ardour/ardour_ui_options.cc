@@ -24,8 +24,11 @@
 
 #include <ardour/configuration.h>
 #include <ardour/session.h>
-#include <ardour/osc.h>
 #include <ardour/audioengine.h>
+
+#ifdef HAVE_LIBLO
+#include <ardour/osc.h>
+#endif
 
 #include "ardour_ui.h"
 #include "actions.h"
