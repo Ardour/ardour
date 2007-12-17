@@ -94,15 +94,22 @@ void MackieControlProtocol::update_ports()
 		if ( _ports_changed )
 		{
 			// create new pollfd structures
-			if ( pfd != 0 ) delete[] pfd;
+			if ( pfd != 0 )
+			{
+				delete[] pfd;
+				pfd = 0;
+			}
 			pfd = new pollfd[_ports.size()];
+#ifdef DEBUG
+			cout << "pfd: " << pfd << endl;
+#endif
 			nfds = 0;
 			for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 			{
 				// add the port any handler
 				(*it)->connect_any();
 #ifdef DEBUG
-				cout << "adding pollfd for port " << (*it)->port().name() << " to pollfd" << endl;
+				cout << "adding pollfd for port " << (*it)->port().name() << " to pollfd " << nfds << endl;
 #endif
 				pfd[nfds].fd = (*it)->port().selectable();
 				pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
