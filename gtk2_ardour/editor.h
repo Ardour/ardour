@@ -1000,13 +1000,14 @@ class Editor : public PublicEditor
 	void play_from_start ();
 	void play_from_edit_point ();
 	void play_selected_region ();
-	void audition_selected_region ();
 	void loop_selected_region ();
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
 
 	void temporal_zoom_selection ();
 	void temporal_zoom_region ();
+	void toggle_zoom_region ();
+	bool zoomed_to_region;
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
 	void temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & op);

@@ -1070,7 +1070,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* no drag, just a click */
 				switch (item_type) {
 				case RegionItem:
-					audition_selected_region ();
+					play_selected_region ();
 					break;
 				default:
 					break;

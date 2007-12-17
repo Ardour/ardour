@@ -1588,6 +1588,17 @@ Editor::temporal_zoom_region ()
 	}
 
 	temporal_zoom_by_frame (start, end, "zoom to region");
+	zoomed_to_region = true;
+}
+
+void
+Editor::toggle_zoom_region ()
+{
+	if (zoomed_to_region) {
+		swap_visual_state ();
+	} else {
+		temporal_zoom_region ();
+	}
 }
 
 void
@@ -2118,16 +2129,6 @@ Editor::play_selection ()
 }
 
 void
-Editor::play_selected_region ()
-{
-	if (!selection->regions.empty()) {
-		RegionView *rv = *(selection->regions.begin());
-
-		session->request_bounded_roll (rv->region()->position(), rv->region()->last_frame());	
-	}
-}
-
-void
 Editor::loop_selected_region ()
 {
 	if (!selection->regions.empty()) {
@@ -2280,7 +2281,7 @@ Editor::audition_playlist_region_via_route (boost::shared_ptr<Region> region, Ro
 }
 
 void
-Editor::audition_selected_region ()
+Editor::play_selected_region ()
 {
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
@@ -2300,11 +2301,7 @@ Editor::audition_selected_region ()
 		}
 	}
 
-	list<AudioRange> lr;
-	lr.push_back (AudioRange (start, end, 0));
-
-	session->set_audio_range (lr);
-	session->request_play_range (true);
+	session->request_bounded_roll (start, end);
 }
 
 void

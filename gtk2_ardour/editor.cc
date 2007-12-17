@@ -312,6 +312,7 @@ Editor::Editor ()
 	_dragging_edit_point = false;
 	_dragging_hscrollbar = false;
 	select_new_marker = false;
+	zoomed_to_region = false;
 
 	scrubbing_direction = 0;
 
@@ -1719,7 +1720,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Remove sync point"), mem_fun(*this, &Editor::remove_region_sync)));
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Audition"), mem_fun(*this, &Editor::audition_selected_region)));
+	items.push_back (MenuElem (_("Audition"), mem_fun(*this, &Editor::play_selected_region)));
 	items.push_back (MenuElem (_("Export"), mem_fun(*this, &Editor::export_region)));
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
 

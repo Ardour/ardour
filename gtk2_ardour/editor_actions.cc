@@ -209,7 +209,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "zoom-to-session", _("Zoom to Session"), mem_fun(*this, &Editor::temporal_zoom_session));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "zoom-to-region", _("Zoom to Region"), mem_fun(*this, &Editor::temporal_zoom_region));
+	act = ActionManager::register_action (editor_actions, "zoom-to-region", _("Zoom to Region"), mem_fun(*this, &Editor::toggle_zoom_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-zoom", _("Toggle Zoom State"), mem_fun(*this, &Editor::swap_visual_state));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -294,7 +294,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "align-regions-sync-relative", _("Align Regions Sync Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
 	ActionManager::session_sensitive_actions.push_back (act);
 	
-        act = ActionManager::register_action (editor_actions, "audition-region", _("Audition Region"), mem_fun(*this, &Editor::audition_selected_region));
+        act = ActionManager::register_action (editor_actions, "play-selected-regions", _("Play Selected Region(s)"), mem_fun(*this, &Editor::play_selected_region));
         ActionManager::session_sensitive_actions.push_back (act);
         act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), mem_fun(*this, &Editor::kbd_brush));
         ActionManager::session_sensitive_actions.push_back (act);

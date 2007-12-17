@@ -168,6 +168,7 @@ Editor::track_canvas_scroll_event (GdkEventScroll *event)
 bool
 Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
+	selection->clear ();
 	track_canvas.grab_focus();
 	return false;
 }
