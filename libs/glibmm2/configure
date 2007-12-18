@@ -23152,10 +23152,7 @@ AUTOHEADER=':'
 ac_config_files="$ac_config_files Makefile glib/Makefile glib/glibmm-2.4.pc glib/src/Makefile glib/glibmm/Makefile glib/glibmm/private/Makefile tools/Makefile tools/gmmproc tools/generate_wrap_init.pl tools/m4/Makefile tools/pm/Makefile tools/extra_defs_gen/Makefile"
 
 
-ac_config_files="$ac_config_files tests/Makefile tests/glibmm_value/Makefile examples/Makefile examples/markup/Makefile examples/options/Makefile examples/thread/Makefile examples/iochannel_stream/Makefile examples/child_watch/Makefile examples/regex/Makefile scripts/Makefile docs/Makefile docs/images/Makefile docs/reference/Makefile docs/reference/Doxyfile docs/reference/beautify_docs.pl docs/internal/Makefile"
-
-
-ac_config_files="$ac_config_files MSVC_Net2003/Makefile MSVC_Net2003/gendef/Makefile MSVC_Net2003/glibmm/Makefile MSVC_Net2003/glibmm/glibmm.rc MSVC_Net2003/examples/Makefile MSVC_Net2003/examples/dispatcher/Makefile MSVC_Net2003/examples/dispatcher2/Makefile MSVC_Net2003/examples/markup/Makefile MSVC_Net2003/examples/options/Makefile MSVC_Net2003/examples/thread/Makefile MSVC_Net2003/examples/thread_pool/Makefile MSVC_Net2003/tests/Makefile MSVC_Net2003/tests/glibmm_value/Makefile"
+ac_config_files="$ac_config_files tests/Makefile tests/glibmm_value/Makefile examples/Makefile examples/markup/Makefile examples/options/Makefile examples/thread/Makefile examples/iochannel_stream/Makefile examples/child_watch/Makefile examples/regex/Makefile scripts/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -23789,12 +23786,6 @@ do
     "examples/child_watch/Makefile") CONFIG_FILES="$CONFIG_FILES examples/child_watch/Makefile" ;;
     "examples/regex/Makefile") CONFIG_FILES="$CONFIG_FILES examples/regex/Makefile" ;;
     "scripts/Makefile") CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
-    "docs/Makefile") CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
-    "docs/images/Makefile") CONFIG_FILES="$CONFIG_FILES docs/images/Makefile" ;;
-    "docs/reference/Makefile") CONFIG_FILES="$CONFIG_FILES docs/reference/Makefile" ;;
-    "docs/reference/Doxyfile") CONFIG_FILES="$CONFIG_FILES docs/reference/Doxyfile" ;;
-    "docs/reference/beautify_docs.pl") CONFIG_FILES="$CONFIG_FILES docs/reference/beautify_docs.pl" ;;
-    "docs/internal/Makefile") CONFIG_FILES="$CONFIG_FILES docs/internal/Makefile" ;;
     "MSVC_Net2003/Makefile") CONFIG_FILES="$CONFIG_FILES MSVC_Net2003/Makefile" ;;
     "MSVC_Net2003/gendef/Makefile") CONFIG_FILES="$CONFIG_FILES MSVC_Net2003/gendef/Makefile" ;;
     "MSVC_Net2003/glibmm/Makefile") CONFIG_FILES="$CONFIG_FILES MSVC_Net2003/glibmm/Makefile" ;;
