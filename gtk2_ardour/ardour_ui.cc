@@ -2018,23 +2018,23 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 		
 	int response = Gtk::RESPONSE_NONE;
 
-	Glib::ustring dir = Glib::path_get_dirname (string (predetermined_path));
-	Glib::ustring name = basename_nosuffix (string (predetermined_path));
-
-	new_session_dialog->set_modal(true);
-
-	if (name.length()) {
-		new_session_dialog->set_session_name (name);
-	}
-	if (dir.length()) {
-		new_session_dialog->set_session_folder (dir);
+	if (predetermined_path.length()) {
+		Glib::ustring dir = Glib::path_get_dirname (string (predetermined_path));
+		Glib::ustring name = basename_nosuffix (string (predetermined_path));
+		
+		new_session_dialog->set_modal(true);
+		
+		if (name.length()) {
+			new_session_dialog->set_session_name (name);
+		}
+		if (dir.length()) {
+			new_session_dialog->set_session_folder (dir);
+		}
 	}
 
 	new_session_dialog->reset_recent();
 	new_session_dialog->set_position (WIN_POS_CENTER);
 	new_session_dialog->set_current_page (0);
-
-	cerr << "NSD with " << predetermined_path << endl;
 
 	do {
 		new_session_dialog->set_have_engine (have_engine);

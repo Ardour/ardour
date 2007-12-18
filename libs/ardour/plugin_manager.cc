@@ -283,7 +283,7 @@ PluginManager::ladspa_discover (string path)
 		info->type = ARDOUR::LADSPA;
 		
 		char buf[32];
-		snprintf (buf, sizeof (buf), "%u", descriptor->UniqueID);
+		snprintf (buf, sizeof (buf), "%lu", descriptor->UniqueID);
 		info->unique_id = buf;
 		
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
