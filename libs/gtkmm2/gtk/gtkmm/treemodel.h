@@ -181,8 +181,14 @@ private:
 
 protected:
   TreeModel(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit TreeModel(GtkTreeModel* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -289,19 +295,17 @@ public:
   void foreach(const SlotForeachPathAndIter& slot);
 
   
-  /** Returns a set of flags supported by this interface.  The flags are a bitwise
-   * combination of Gtk::TreeModelFlags.  The flags supported should not change
-   * during the lifecycle of the tree_model.
+  /** Return value: The flags supported by this interface.
    * @return The flags supported by this interface.
    */
   TreeModelFlags get_flags() const;
   
-  /** Returns the number of columns supported by @a tree_model .
+  /** Return value: The number of columns.
    * @return The number of columns.
    */
   int get_n_columns() const;
   
-  /** Returns the type of the column.
+  /** Return value: The type of the column.
    * @param index The column index.
    * @return The type of the column.
    */
@@ -336,9 +340,9 @@ public:
   void row_has_child_toggled(const Path& path, const iterator& iter);
   
   /** Emits the "row_deleted" signal on @a tree_model .  This should be called by
-   * models after a row has been removed.  The location pointed to by @a path  should
-   * be the location that the row previously was at.  It may not be a valid
-   * location anymore.
+   * models after a row has been removed.  The location pointed to by @a path  
+   * should be the location that the row previously was at.  It may not be a 
+   * valid location anymore.
    * @param path A Gtk::TreePath pointing to the previous location of the deleted row.
    */
   void row_deleted(const Path& path);
@@ -367,8 +371,10 @@ public:
   
   /** Emits the "rows_reordered" signal on @a tree_model .  This should be called by
    * models when their rows have been reordered.
-   * @param path A Gtk::TreePath pointing to the tree node whose children have been reordered.
-   * @param iter A valid Gtk::TreeIter pointing to the node whose children have been reordered, or <tt>0</tt> if the depth of @a path  is 0.
+   * @param path A Gtk::TreePath pointing to the tree node whose children have been 
+   * reordered.
+   * @param iter A valid Gtk::TreeIter pointing to the node whose children have been 
+   * reordered, or <tt>0</tt> if the depth of @a path  is 0.
    * @param new_order An array of integers mapping the current position of each child
    * to its old position before the re-ordering,
    * i.e. @a new_order <tt>[newpos] = oldpos</tt>.
@@ -387,41 +393,41 @@ public:
   Glib::ustring get_string(const iterator& iter) const;
 
  
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_changed(const TreeModel::Path& path, const TreeModel::iterator& iter)</tt>
+   * <tt>void on_my_%row_changed(const TreeModel::Path& path, const TreeModel::iterator& iter)</tt>
    */
 
   Glib::SignalProxy2< void,const TreeModel::Path&,const TreeModel::iterator& > signal_row_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_inserted(const TreeModel::Path& path, const TreeModel::iterator& iter)</tt>
+   * <tt>void on_my_%row_inserted(const TreeModel::Path& path, const TreeModel::iterator& iter)</tt>
    */
 
   Glib::SignalProxy2< void,const TreeModel::Path&,const TreeModel::iterator& > signal_row_inserted();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_has_child_toggled(const TreeModel::Path& path, const TreeModel::iterator& iter)</tt>
+   * <tt>void on_my_%row_has_child_toggled(const TreeModel::Path& path, const TreeModel::iterator& iter)</tt>
    */
 
   Glib::SignalProxy2< void,const TreeModel::Path&,const TreeModel::iterator& > signal_row_has_child_toggled();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_deleted(const TreeModel::Path& path)</tt>
+   * <tt>void on_my_%row_deleted(const TreeModel::Path& path)</tt>
    */
 
   Glib::SignalProxy1< void,const TreeModel::Path& > signal_row_deleted();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %rows_reordered(const TreeModel::Path& path, const TreeModel::iterator& iter, int* new_order)</tt>
+   * <tt>void on_my_%rows_reordered(const TreeModel::Path& path, const TreeModel::iterator& iter, int* new_order)</tt>
    */
 
   Glib::SignalProxy3< void,const TreeModel::Path&,const TreeModel::iterator&,int* > signal_rows_reordered();
@@ -663,10 +669,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TreeModel
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeModel
    */
   Glib::RefPtr<Gtk::TreeModel> wrap(GtkTreeModel* object, bool take_copy = false);
 

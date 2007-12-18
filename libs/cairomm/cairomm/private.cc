@@ -16,6 +16,7 @@
  * 02110-1301, USA.
  */
 
+//#include <cairommconfig.h> //For CAIROMM_EXCEPTIONS_ENABLED
 #include <cairomm/private.h>
 #include <cairomm/exception.h>
 #include <stdexcept>
@@ -24,6 +25,7 @@
 namespace Cairo
 {
 
+#ifdef CAIROMM_EXCEPTIONS_ENABLED
 void throw_exception(ErrorStatus status)
 {
   switch(status)
@@ -55,21 +57,28 @@ void throw_exception(ErrorStatus status)
       throw Cairo::logic_error(status);
       break;
 
-    // Other      
+    // Other
     case CAIRO_STATUS_READ_ERROR:
     case CAIRO_STATUS_WRITE_ERROR:
-    {
-      //The Cairo language binding advice suggests that these are stream errors 
-      //that should be mapped to their C++ equivalents.
-      const char* error_message = cairo_status_to_string(status);
-      throw std::ios_base::failure( error_message ? error_message : std::string() );
-    }
-    
+      {
+        //The Cairo language binding advice suggests that these are stream errors 
+        //that should be mapped to their C++ equivalents.
+        const char* error_message = cairo_status_to_string(status);
+        throw std::ios_base::failure( error_message ? error_message : std::string() );
+      }
+      break;
+
     default:
       throw Cairo::logic_error(status);
       break;
   }
 }
+#else
+void throw_exception(ErrorStatus /* status */)
+{
+  //Do nothing. The application should call get_status() instead.
+}
+#endif //CAIROMM_EXCEPTIONS_ENABLED
 
 } //namespace Cairo
 

@@ -113,7 +113,7 @@ void Hyperlink_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_VFUNCS_ENABLED
 gchar* Hyperlink_Class::get_uri_vfunc_callback(AtkHyperlink* self, gint i)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -121,40 +121,43 @@ gchar* Hyperlink_Class::get_uri_vfunc_callback(AtkHyperlink* self, gint i)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return obj->get_uri_vfunc(i
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return obj->get_uri_vfunc(i
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->get_uri)
-      return (*base->get_uri)(self, i);
-  }
+  // Call the original underlying C function:
+  if(base && base->get_uri)
+    return (*base->get_uri)(self, i);
+
 
   typedef gchar* RType;
   return RType();
 }
 AtkObject* Hyperlink_Class::get_object_vfunc_callback(AtkHyperlink* self, gint i)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -162,40 +165,43 @@ AtkObject* Hyperlink_Class::get_object_vfunc_callback(AtkHyperlink* self, gint i
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return Glib::unwrap(obj->get_object_vfunc(i
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return Glib::unwrap(obj->get_object_vfunc(i
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->get_object)
-      return (*base->get_object)(self, i);
-  }
+  // Call the original underlying C function:
+  if(base && base->get_object)
+    return (*base->get_object)(self, i);
+
 
   typedef AtkObject* RType;
   return RType();
 }
 gint Hyperlink_Class::get_end_index_vfunc_callback(AtkHyperlink* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -203,39 +209,42 @@ gint Hyperlink_Class::get_end_index_vfunc_callback(AtkHyperlink* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return obj->get_end_index_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return obj->get_end_index_vfunc();
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->get_end_index)
-      return (*base->get_end_index)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->get_end_index)
+    return (*base->get_end_index)(self);
+
 
   typedef gint RType;
   return RType();
 }
 gint Hyperlink_Class::get_start_index_vfunc_callback(AtkHyperlink* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -243,39 +252,42 @@ gint Hyperlink_Class::get_start_index_vfunc_callback(AtkHyperlink* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return obj->get_start_index_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return obj->get_start_index_vfunc();
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->get_start_index)
-      return (*base->get_start_index)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->get_start_index)
+    return (*base->get_start_index)(self);
+
 
   typedef gint RType;
   return RType();
 }
 gboolean Hyperlink_Class::is_valid_vfunc_callback(AtkHyperlink* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -283,39 +295,42 @@ gboolean Hyperlink_Class::is_valid_vfunc_callback(AtkHyperlink* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->is_valid_vfunc());
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->is_valid_vfunc());
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->is_valid)
-      return (*base->is_valid)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->is_valid)
+    return (*base->is_valid)(self);
+
 
   typedef gboolean RType;
   return RType();
 }
 gint Hyperlink_Class::get_n_anchors_vfunc_callback(AtkHyperlink* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -323,39 +338,42 @@ gint Hyperlink_Class::get_n_anchors_vfunc_callback(AtkHyperlink* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return obj->get_n_anchors_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return obj->get_n_anchors_vfunc();
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->get_n_anchors)
-      return (*base->get_n_anchors)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->get_n_anchors)
+    return (*base->get_n_anchors)(self);
+
 
   typedef gint RType;
   return RType();
 }
 guint Hyperlink_Class::link_state_vfunc_callback(AtkHyperlink* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -363,39 +381,42 @@ guint Hyperlink_Class::link_state_vfunc_callback(AtkHyperlink* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return obj->link_state_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return obj->link_state_vfunc();
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->link_state)
-      return (*base->link_state)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->link_state)
+    return (*base->link_state)(self);
+
 
   typedef guint RType;
   return RType();
 }
 gboolean Hyperlink_Class::is_selected_link_vfunc_callback(AtkHyperlink* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -403,32 +424,35 @@ gboolean Hyperlink_Class::is_selected_link_vfunc_callback(AtkHyperlink* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->is_selected_link_vfunc());
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->is_selected_link_vfunc());
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->is_selected_link)
-      return (*base->is_selected_link)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->is_selected_link)
+    return (*base->is_selected_link)(self);
+
 
   typedef gboolean RType;
   return RType();
@@ -438,7 +462,7 @@ gboolean Hyperlink_Class::is_selected_link_vfunc_callback(AtkHyperlink* self)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void Hyperlink_Class::link_activated_callback(AtkHyperlink* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -446,32 +470,35 @@ void Hyperlink_Class::link_activated_callback(AtkHyperlink* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_link_activated();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_link_activated();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->link_activated)
-      (*base->link_activated)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->link_activated)
+    (*base->link_activated)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 

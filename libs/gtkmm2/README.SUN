@@ -1,0 +1,88 @@
+Building gtkmm under Sun Solaris
+================================
+
+This README refers currently only to Sun Forte[tm] C++ compiler (WS6U2)
+under Solaris 8/Sparc.
+
+The described procedure to compile gtkmm with Sun's commercial C++
+compiler assumes the default compiler installation of Forte[tm] C++ 6
+update 2. Furthermore all currently available product and adequate SunOS
+patches for Forte[tm] C++ 6 update 2, which can be donwload from the
+links given at http://access1.sun.com/sundev/fdp6u2-patches.html, have
+to be applied. After that your compiler should give the following
+version information:
+
+  $ CC -V
+  CC: Sun WorkShop 6 update 2 C++ 5.3 Patch 111685-10 2002/09/16
+
+You will not be able to compile gtkmm with the unpatched compiler
+installation. Also, it is important to hide any gcc installation
+from your PATH.
+
+
+The installation procedure:
+
+* Recent versions of the following GNU utilities should be avalaible in
+  your PATH:
+
+    make        (3.79.1)
+    libtool     (1.4.2)
+    m4          (1.4)
+    perl        (5.6.1)
+
+    The version information (in brackets) apply to my GNU installation.
+
+* Assuming your compiler installation is in /opt/SUNWspro, the following
+  environment changes are required:
+
+    PATH=/opt/SUNWspro/bin:$PATH
+    LD_LIBRARY_PATH=/opt/SUNWspro/bin:$LD_LIBRARY_PATH
+    export PATH LD_LIBRARY_PATH
+
+    CC="cc"
+    CXX="CC"
+    LD="CC"
+    CFLAGS="-g"         or "-g -xO3" for better optimization
+    CXXFLAGS="-g"       or "-g -O3" for better optimization
+    export CC CXX LD CFLAGS CXXFLAGS
+
+* Select an installation directory ($PREFIX).
+
+* The image libraries jpeg-6b, libpng-1.2.5 and tiff-v3.5.7 are pre-
+  requisites to build gtk+ libraries. They can be obtained from
+  www.sunfreeware.com or build from source. Compiling from source
+  requires some manual corrections (basically prefix settings in the
+  makefiles), because their build mechanism are rather old. All three
+  libraries should be build as shared libraries and installed to the
+  choosen installation directory.
+
+* gtk+-Installation. For each package of pkgconfig-0.12.0, glib-2.0.6,
+  atk-1.0.3, pango-1.0.4, gtk+-2.0.6 do:
+
+    cd <package-path>
+    CPPFLAGS=-I$PREFIX/include CFLAGS="-I$PREFIX/include $CFLAGS" \
+    ./configure --prefix=$PREFIX
+    make
+    make install
+
+* gtkmm-Installation. For each package of libsigc++-1.2.x, gtkmm-2.0.x do:
+
+    cd <package-path>
+    ./configure --prefix=$PREFIX
+    make
+    make install
+
+* Verification can easily done by
+
+    cd gtkmm-1.2.x/examples
+    make
+
+    and testing all built executables.
+
+
+Feel free to contact the gtkmm mailing list in case of problems compiling gtkmm under Sun
+Solaris.
+
+
+Michael v. Szombathely, 31-Oct-02
+<szombath@bifab.de>

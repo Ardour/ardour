@@ -479,52 +479,131 @@ public:
   static void set_window_creation_hook(const SlotWindowCreation& slot);
   
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+
+  /** Sets an group identificator for @a notebook , notebooks sharing
+   * the same group identificator will be able to exchange tabs
+   * via drag and drop. A notebook with group identificator -1 will
+   * not be able to exchange tabs with any other notebook.
+   * 
+   * @newin2p10
+   * Deprecated:2.12: use set_group() instead.
+   * @param group_id A group identificator, or -1 to unset it.
+   */
   void set_group_id(int group_id);
-  
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
+#ifndef GTKMM_DISABLE_DEPRECATED
+
+  /** Gets the current group identificator for @a notebook .
+   * @return The group identificator, or -1 if none is set.
+   * 
+   * @newin2p10
+   * Deprecated:2.12: use get_group() instead.
+   */
   int get_group_id() const;
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
+  //TODO: Use something nicer than void*/gpointer?
+  
+  /** Sets a group identificator pointer for @a notebook , notebooks sharing
+   * the same group identificator pointer will be able to exchange tabs
+   * via drag and drop. A notebook with a <tt>0</tt> group identificator will
+   * not be able to exchange tabs with any other notebook.
+   * 
+   * @newin2p12
+   * @param group A pointer to identify the notebook group, or <tt>0</tt> to unset it.
+   */
+  void set_group(void* group);
+  
+  /** Gets the current group identificator pointer for @a notebook .
+   * @return The group identificator, or <tt>0</tt> if none is set.
+   * 
+   * @newin2p12.
+   */
+  void* get_group();
+  
+  /** Gets the current group identificator pointer for @a notebook .
+   * @return The group identificator, or <tt>0</tt> if none is set.
+   * 
+   * @newin2p12.
+   */
+  const void* get_group() const;
 
   
-  /** Returns the page number of the current page.
+  /** Return value: the index (starting from 0) of the current
    * @return The index (starting from 0) of the current
    * page in the notebook. If the notebook has no pages, then
    * -1 will be returned.
    */
   int get_current_page() const;
   
-  /** Returns the child widget contained in page number @a page_num .
-   * @param page_num The index of a page in the noteobok, or -1
+  /** Return value: the child widget, or <tt>0</tt> if @a page_num  is
+   * @param page_num The index of a page in the notebook, or -1
    * to get the last page.
    * @return The child widget, or <tt>0</tt> if @a page_num  is
    * out of bounds.
    */
   Widget* get_nth_page(int page_num);
   
-  /** Returns the child widget contained in page number @a page_num .
-   * @param page_num The index of a page in the noteobok, or -1
+  /** Return value: the child widget, or <tt>0</tt> if @a page_num  is
+   * @param page_num The index of a page in the notebook, or -1
    * to get the last page.
    * @return The child widget, or <tt>0</tt> if @a page_num  is
    * out of bounds.
    */
   const Widget* get_nth_page(int page_num) const;
   
+#ifndef GTKMM_DISABLE_DEPRECATED
+
   /** Gets the number of pages in a notebook.
+   * @deprecated Use the const method.
    * @return The number of pages in the notebook.
    * 
    * @newin2p2.
    */
   int get_n_pages();
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
+  /** Gets the number of pages in a notebook.
+   * @return The number of pages in the notebook.
+   * 
+   * @newin2p2.
+   */
+  int get_n_pages() const;
   /*Widget* get_current_page();*/ /*inconsistency with set_current_page*/
   
+#ifndef GTKMM_DISABLE_DEPRECATED
+
+  /** Finds the index of the page which contains the given child
+   * widget.
+   * @deprecated Use the const method.
+   * @param child A Gtk::Widget.
+   * @return The index of the page containing @a child , or
+   * -1 if @a child  is not in the notebook.
+   */
+  int page_num(const Widget& child);
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
   /** Finds the index of the page which contains the given child
    * widget.
    * @param child A Gtk::Widget.
    * @return The index of the page containing @a child , or
    * -1 if @a child  is not in the notebook.
    */
-  int page_num(const Widget& child);
+  int page_num(const Widget& child) const;
 
   
-  /** Switches to the page number @a page_num .
+  /** Switches to the page number @a page_num . 
+   * 
+   * Note that due to historical reasons, GtkNotebook refuses
+   * to switch to a page unless the child widget is visible. 
+   * Therefore, it is recommended to show child widgets before
+   * adding them to a notebook.
    * @param page_num Index of the page to switch to, starting from 0.
    * If negative, the last page will be used. If greater
    * than the number of pages in the notebook, nothing
@@ -551,8 +630,7 @@ public:
   void set_show_border(bool show_border = true);
 
   
-  /** Returns whether a bevel will be drawn around the notebook pages. See
-   * set_show_border().
+  /** Return value: <tt>true</tt> if the bevel is drawn
    * @return <tt>true</tt> if the bevel is drawn.
    */
   bool get_show_border() const;
@@ -562,8 +640,7 @@ public:
    */
   void set_show_tabs(bool show_tabs = true);
   
-  /** Returns whether the tabs of the notebook are shown. See
-   * set_show_tabs().
+  /** Return value: <tt>true</tt> if the tabs are shown
    * @return <tt>true</tt> if the tabs are shown.
    */
   bool get_show_tabs() const;
@@ -588,8 +665,7 @@ public:
    */
   void set_scrollable(bool scrollable = true);
   
-  /** Returns whether the tab label area has arrows for scrolling. See
-   * set_scrollable().
+  /** Return value: <tt>true</tt> if arrows for scrolling are present
    * @return <tt>true</tt> if arrows for scrolling are present.
    */
   bool get_scrollable() const;
@@ -606,17 +682,13 @@ public:
   void popup_disable();
 
 
-  /** Returns the tab label widget for the page @a child . <tt>0</tt> is returned
-   * if @a child  is not in @a notebook  or if no tab label has specifically
-   * been set for @a child .
+  /** Return value: the tab label
    * @param child The page.
    * @return The tab label.
    */
   Widget* get_tab_label(Widget& child);
   
-  /** Returns the tab label widget for the page @a child . <tt>0</tt> is returned
-   * if @a child  is not in @a notebook  or if no tab label has specifically
-   * been set for @a child .
+  /** Return value: the tab label
    * @param child The page.
    * @return The tab label.
    */
@@ -701,12 +773,73 @@ public:
   void reorder_child(Widget& child, int position);
 
   
+  /** Gets whether the tab can be reordered via drag and drop or not.
+   * @param child A child Gtk::Widget.
+   * @return <tt>true</tt> if the tab is reorderable.
+   * 
+   * @newin2p10.
+   */
   bool get_tab_reorderable(Widget& child) const;
   
+  /** Sets whether the notebook tab can be reordered
+   * via drag and drop or not.
+   * 
+   * @newin2p10
+   * @param child A child Gtk::Widget.
+   * @param reorderable Whether the tab is reorderable or not.
+   */
   void set_tab_reorderable(Widget& child, bool reorderable = true);
   
+  /** Return Value: <tt>true</tt> if the tab is detachable.
+   * @param child A child Gtk::Widget.
+   * @return <tt>true</tt> if the tab is detachable.
+   * 
+   * @newin2p10.
+   */
   bool get_tab_detachable(Widget& child) const;
   
+  /** Sets whether the tab can be detached from @a notebook  to another
+   * notebook or widget.
+   * 
+   * Note that 2 notebooks must share a common group identificator
+   * (see set_group_id()) to allow automatic tabs
+   * interchange between them.
+   * 
+   * If you want a widget to interact with a notebook through DnD
+   * (i.e.: accept dragged tabs from it) it must be set as a drop
+   * destination and accept the target "GTK_NOTEBOOK_TAB". The notebook
+   * will fill the selection with a GtkWidget** pointing to the child
+   * widget that corresponds to the dropped tab.
+   * 
+   * @code
+   * static void
+   * on_drop_zone_drag_data_received (GtkWidget        *widget,
+   * GdkDragContext   *context,
+   * <tt>int</tt>              x,
+   * <tt>int</tt>              y,
+   * GtkSelectionData *selection_data,
+   * <tt>unsigned int</tt>             info,
+   * <tt>unsigned int</tt>             time,
+   * gpointer          user_data)
+   * {
+   * GtkWidget *notebook;
+   * GtkWidget **child;
+   * 
+   * notebook = gtk_drag_get_source_widget (context);
+   * child = (void*) selection_data->data;
+   * 
+   * process_widget (*child);
+   * gtk_container_remove (GTK_CONTAINER (notebook), *child);
+   * }
+   * @endcode
+   * 
+   * If you want a notebook to accept drags from other widgets,
+   * you will have to set your own DnD code to do it.
+   * 
+   * @newin2p10
+   * @param child A child Gtk::Widget.
+   * @param detachable Whether the tab is detachable or not.
+   */
   void set_tab_detachable(Widget& child, bool detachable = true);
 
 
@@ -716,33 +849,33 @@ public:
   const PageList& pages() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %switch_page(GtkNotebookPage* page, guint page_num)</tt>
+   * <tt>void on_my_%switch_page(GtkNotebookPage* page, guint page_num)</tt>
    */
 
   Glib::SignalProxy2< void,GtkNotebookPage*,guint > signal_switch_page();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %page_reordered(Widget* page, guint page_num)</tt>
+   * <tt>void on_my_%page_reordered(Widget* page, guint page_num)</tt>
    */
 
   Glib::SignalProxy2< void,Widget*,guint > signal_page_reordered();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %page_removed(Widget* page, guint page_num)</tt>
+   * <tt>void on_my_%page_removed(Widget* page, guint page_num)</tt>
    */
 
   Glib::SignalProxy2< void,Widget*,guint > signal_page_removed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %page_added(Widget* page, guint page_num)</tt>
+   * <tt>void on_my_%page_added(Widget* page, guint page_num)</tt>
    */
 
   Glib::SignalProxy2< void,Widget*,guint > signal_page_added();
@@ -751,6 +884,9 @@ public:
   //Key-binding signals:
   
   
+  //This doesn't seem generally useful:
+  
+
   #ifdef GLIBMM_PROPERTIES_ENABLED
 /** Which side of the notebook holds the tabs.
    *
@@ -980,10 +1116,13 @@ PageIterator::pointer PageIterator::operator->() const
 
 namespace Glib
 {
-  /** @relates Gtk::Notebook
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Notebook
    */
   Gtk::Notebook* wrap(GtkNotebook* object, bool take_copy = false);
 } //namespace Glib

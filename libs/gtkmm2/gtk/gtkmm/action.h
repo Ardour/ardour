@@ -41,10 +41,41 @@ namespace Gtk
 namespace Gtk
 {
 
+class Menu;
 class MenuItem;
 class ToolItem;
 class Image;
 
+/** An action which can be triggered by a menu or toolbar item.
+ *
+ * Actions represent operations that the user can perform, along with 
+ * some information about how it should be presented in the user interface. 
+ * Each action provides methods to create icons, menu items and toolbar 
+ * items representing itself.
+ *
+ * As well as the callback that is called when the action is activated, 
+ * the following is also associated with the action:
+ *
+ *  - a name (not translated, for path lookup)
+ *  - a label (translated, for display)
+ *  - an accelerator
+ *  - whether the label indicates a stock id
+ *  - a tooltip (optional, translated)
+ *  - a toolbar label (optional, shorter than label)
+ *
+ * The action will also have some state information:
+ *
+ *  - visible (shown/hidden)
+ *  - sensitive (enabled/disabled)
+ *
+ * Apart from regular actions, there are toggle actions, 
+ * which can be toggled between two states and radio actions, 
+ * of which only one in a group can be in the "active" state. 
+ * Other actions can be implemented as Gtk::Action subclasses.
+ * 
+ * Each action can have one or more proxy menu item, toolbar button or other proxy widgets. 
+ * Proxies mirror the state of the action (text label, tooltip, icon, visible, sensitive, etc), and should change when the action's state changes. When the proxy is activated, it should activate its action.
+ */
 
 class Action : public Glib::Object
 {
@@ -93,17 +124,20 @@ private:
  
 protected:
  Action();
-  explicit Action(const Glib::ustring& name, const StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring());
+  explicit Action(const Glib::ustring& name, const StockID& stock_id = StockID(), const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring());
 
 public:
+  //Note that gtk_action_new() does not allow name to be NULL, which suggests that we should not have a default constructor,
+  //but it's OK to set the name later:
   
   static Glib::RefPtr<Action> create();
 
-  static Glib::RefPtr<Action> create(const Glib::ustring& name, const Glib::ustring& label =  Glib::ustring(), const Glib::ustring& tooltip =  Glib::ustring());
-  static Glib::RefPtr<Action> create(const Glib::ustring& name, const Gtk::StockID& stock_id, const Glib::ustring& label =  Glib::ustring(), const Glib::ustring& tooltip =  Glib::ustring());
+
+  static Glib::RefPtr<Action> create(const Glib::ustring& name, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring());
+  static Glib::RefPtr<Action> create(const Glib::ustring& name, const Gtk::StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring());
 
   
-  /** Returns the name of the action.
+  /** Return value: the name of the action. The string belongs to GTK+ and should not
    * @return The name of the action. The string belongs to GTK+ and should not
    * be freed.
    * 
@@ -112,7 +146,7 @@ public:
   Glib::ustring get_name() const;
 
   
-  /** Returns whether the action is effectively sensitive.
+  /** Return value: <tt>true</tt> if the action and its associated action group
    * @return <tt>true</tt> if the action and its associated action group 
    * are both sensitive.
    * 
@@ -120,9 +154,7 @@ public:
    */
   bool is_sensitive() const;
   
-  /** Returns whether the action itself is sensitive. Note that this doesn't 
-   * necessarily mean effective sensitivity. See is_sensitive() 
-   * for that.
+  /** Return value: <tt>true</tt> if the action itself is sensitive.
    * @return <tt>true</tt> if the action itself is sensitive.
    * 
    * @newin2p4.
@@ -143,7 +175,7 @@ public:
   void set_sensitive(bool sensitive = true);
 
   
-  /** Returns whether the action is effectively visible.
+  /** Return value: <tt>true</tt> if the action and its associated action group
    * @return <tt>true</tt> if the action and its associated action group 
    * are both visible.
    * 
@@ -151,9 +183,7 @@ public:
    */
   bool is_visible() const;
   
-  /** Returns whether the action itself is visible. Note that this doesn't 
-   * necessarily mean effective visibility. See is_sensitive() 
-   * for that.
+  /** Return value: <tt>true</tt> if the action itself is visible.
    * @return <tt>true</tt> if the action itself is visible.
    * 
    * @newin2p4.
@@ -204,6 +234,15 @@ public:
    */
   ToolItem* create_tool_item();
   
+  /** If @a action  provides a Gtk::Menu widget as a submenu for the menu
+   * item or the toolbar item it creates, this function returns an
+   * instance of that menu.
+   * @return The menu item provided by the action, or <tt>0</tt>.
+   * 
+   * @newin2p12.
+   */
+  Menu* create_menu();
+  
   /** Connects a widget to an action object as a proxy.  Synchronises 
    * various properties of the action with the widget (such as label 
    * text, icon, tooltip, etc), and attaches a callback so that the 
@@ -226,17 +265,17 @@ public:
   void disconnect_proxy(Widget& proxy);
 
   
-  /** Returns the proxy widgets for an action.
-   * @return A G::SList of proxy widgets. The list is owned by the action and
-   * must not be modified.
+  /** Return value: a G::SList of proxy widgets. The list is owned by GTK+
+   * @return A G::SList of proxy widgets. The list is owned by GTK+
+   * and must not be modified.
    * 
    * @newin2p4.
    */
   Glib::SListHandle<Widget*> get_proxies();
   
-  /** Returns the proxy widgets for an action.
-   * @return A G::SList of proxy widgets. The list is owned by the action and
-   * must not be modified.
+  /** Return value: a G::SList of proxy widgets. The list is owned by GTK+
+   * @return A G::SList of proxy widgets. The list is owned by GTK+
+   * and must not be modified.
    * 
    * @newin2p4.
    */
@@ -263,11 +302,9 @@ public:
   void disconnect_accelerator();
   
   
-  /** Returns the accel path for this action.  
-   * 
-   * @newin2p6
+  /** Returns: the accel path for this action, or <tt>0</tt>
    * @return The accel path for this action, or <tt>0</tt>
-   * if none is set. The returned string is owned by GTK+
+   * if none is set. The returned string is owned by GTK+ 
    * and must not be freed or modified.
    */
   Glib::ustring get_accel_path() const;
@@ -276,11 +313,9 @@ public:
   typedef sigc::slot<void> SlotActivate;
   
   /** The "activate" signal is emitted when the action is activated.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %activate()</tt>
+   * <tt>void on_my_%activate()</tt>
    */
 
   Glib::SignalProxy0< void > signal_activate();
@@ -587,10 +622,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Action
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Action
    */
   Glib::RefPtr<Gtk::Action> wrap(GtkAction* object, bool take_copy = false);
 }

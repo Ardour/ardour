@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_INTERFACE_H
 #define _GLIBMM_INTERFACE_H
 
-/* $Id: interface.h,v 1.1.1.1 2003/01/07 16:58:46 murrayc Exp $ */
+/* $Id: interface.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

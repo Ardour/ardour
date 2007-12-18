@@ -1,6 +1,6 @@
 divert(-1)
 
-dnl $Id: value_basictypes.cc.m4,v 1.2 2006/11/22 11:13:29 murrayc Exp $
+dnl $Id: value_basictypes.cc.m4 348 2006-11-22 11:14:43Z murrayc $
 
 dnl  Glib::Value specializations for fundamental types
 dnl

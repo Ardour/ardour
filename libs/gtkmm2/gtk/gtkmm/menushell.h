@@ -217,20 +217,28 @@ public:
   void cancel();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %deactivate()</tt>
+   * <tt>void on_my_%deactivate()</tt>
    */
 
   Glib::SignalProxy0< void > signal_deactivate();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %selection_done()</tt>
+   * <tt>void on_my_%selection_done()</tt>
    */
 
   Glib::SignalProxy0< void > signal_selection_done();
+
+  
+  /**
+   * @par Prototype:
+   * <tt>gboolean on_my_%move_selected(int distance)</tt>
+   */
+
+  Glib::SignalProxy1< gboolean,int > signal_move_selected();
 
 
   //Keybinding signals:
@@ -277,7 +285,7 @@ public:
   void accelerate(Widget& parent);
 
   
-  /** Returns <tt>true</tt> if the menu shell will take the keyboard focus on popup.
+  /** Returns: <tt>true</tt> if the menu shell will take the keyboard focus on popup.
    * @return <tt>true</tt> if the menu shell will take the keyboard focus on popup.
    * 
    * @newin2p8.
@@ -354,10 +362,13 @@ private:
 
 namespace Glib
 {
-  /** @relates Gtk::MenuShell
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::MenuShell
    */
   Gtk::MenuShell* wrap(GtkMenuShell* object, bool take_copy = false);
 } //namespace Glib

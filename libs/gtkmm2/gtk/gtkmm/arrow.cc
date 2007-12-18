@@ -152,8 +152,9 @@ GType Arrow::get_base_type()
 
 Arrow::Arrow(ArrowType arrow_type, ShadowType shadow_type)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(arrow_class_.init(), "arrow_type", ((GtkArrowType)(arrow_type)), "shadow_type", ((GtkShadowType)(shadow_type)), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(arrow_class_.init(), "arrow_type", ((GtkArrowType)(arrow_type)), "shadow_type", ((GtkShadowType)(shadow_type)), static_cast<char*>(0)))
 {
   }
 

@@ -38,8 +38,9 @@ namespace Gtk
 ImageMenuItem::ImageMenuItem(Widget& image, 
                              const Glib::ustring& label, bool mnemonic)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::MenuItem(Glib::ConstructParams(imagemenuitem_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::MenuItem(Glib::ConstructParams(imagemenuitem_class_.init()))
 {
   set_image(image);
   add_accel_label(label, mnemonic);
@@ -47,16 +48,18 @@ ImageMenuItem::ImageMenuItem(Widget& image,
 
 ImageMenuItem::ImageMenuItem(const Glib::ustring& label, bool mnemonic)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::MenuItem(Glib::ConstructParams(imagemenuitem_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::MenuItem(Glib::ConstructParams(imagemenuitem_class_.init()))
 {
   add_accel_label(label, mnemonic);
 }
 
 ImageMenuItem::ImageMenuItem(const Gtk::StockID& stock_id)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::MenuItem(Glib::ConstructParams(imagemenuitem_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::MenuItem(Glib::ConstructParams(imagemenuitem_class_.init()))
 {
   Gtk::Image* image = new Gtk::Image(stock_id, ICON_SIZE_MENU);
   image->show();
@@ -178,7 +181,8 @@ GType ImageMenuItem::get_base_type()
 
 ImageMenuItem::ImageMenuItem()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::MenuItem(Glib::ConstructParams(imagemenuitem_class_.init()))
 {
   }

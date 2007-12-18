@@ -157,8 +157,14 @@ private:
 
 protected:
   RecentChooser(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit RecentChooser(GtkRecentChooser* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -182,46 +188,134 @@ private:
 public:
 
   
+  /** Whether to show recently used resources marked registered as private.
+   * 
+   * @newin2p10
+   * @param show_private <tt>true</tt> to show private items, <tt>false</tt> otherwise.
+   */
   void set_show_private(bool show_private = true);
   
+  /** Return value: <tt>true</tt> if the recent chooser should show private items,
+   * @return <tt>true</tt> if the recent chooser should show private items,
+   * <tt>false</tt> otherwise.
+   * 
+   * @newin2p10.
+   */
   bool get_show_private() const;
   
+  /** Sets whether @a chooser  should display the recently used resources that
+   * it didn't find.  This only applies to local resources.
+   * 
+   * @newin2p10
+   * @param show_not_found Whether to show the local items we didn't find.
+   */
   void set_show_not_found(bool show_not_found = true);
   
+  /** Retrieves whether @a chooser  should show the recently used resources that
+   * were not found.
+   * @return <tt>true</tt> if the resources not found should be displayed, and
+   * <tt>false</tt> otheriwse.
+   * 
+   * @newin2p10.
+   */
   bool get_show_not_found() const;
   
+  /** Sets whether @a chooser  can select multiple items.
+   * 
+   * @newin2p10
+   * @param select_multiple <tt>true</tt> if @a chooser  can select more than one item.
+   */
   void set_select_multiple(bool select_multiple = true);
   
+  /** Gets whether @a chooser  can select multiple items.
+   * @return <tt>true</tt> if @a chooser  can select more than one item.
+   * 
+   * @newin2p10.
+   */
   bool get_select_multiple() const;
   
+  /** Sets the number of items that should be returned by
+   * get_items() and get_uris().
+   * 
+   * @newin2p10
+   * @param limit A positive integer, or -1 for all items.
+   */
   void set_limit(int limit);
   void unset_limit();
   
+  /** Gets the number of items returned by get_items()
+   * and get_uris().
+   * @return A positive integer, or -1 meaning that all items are
+   * returned.
+   * 
+   * @newin2p10.
+   */
   int get_limit() const;
   
+  /** Sets whether only local resources, that is resources using the file:// URI
+   * scheme, should be shown in the recently used resources selector.  If
+   *  @a local_only  is <tt>true</tt> (the default) then the shown resources are guaranteed
+   * to be accessible through the operating system native file system.
+   * 
+   * @newin2p10
+   * @param local_only <tt>true</tt> if only local files can be shown.
+   */
   void set_local_only(bool local_only = true);
   
+  /** Gets whether only local resources should be shown in the recently used
+   * resources selector.  See set_local_only()
+   * @return <tt>true</tt> if only local resources should be shown.
+   * 
+   * @newin2p10.
+   */
   bool get_local_only() const;
   
+  /** Sets whether to show a tooltips on the widget.
+   * 
+   * @newin2p10
+   * @param show_tips <tt>true</tt> if tooltips should be shown.
+   */
   void set_show_tips(bool show_tips = true);
   
+  /** Gets whether @a chooser  should display tooltips.
+   * @return <tt>true</tt> if the recent chooser should show tooltips,
+   * <tt>false</tt> otherwise.
+   * 
+   * @newin2p10.
+   */
   bool get_show_tips() const;
 
-  // TODO: These methods are declared in gtkrecentchooser.h but throw errors when
-  // using them on RecentChooserWidget or RecentChooserDialog.
-  // RecentChooserMenu reimplements them.
-  // In an email titled "GtkRecentChooser API glitch", Emmanuele Bassi said that these would be 
-  // deprecated in GTK+ 2.12. murrayc.
-  //_WRAP_METHOD(void set_show_numbers(bool show_numbers = true), gtk_recent_chooser_set_show_numbers)
-  //_WRAP_METHOD(bool get_show_numbers() const, gtk_recent_chooser_get_show_numbers)
+  // Deprecated in GTK+ 2.12. murrayc:
   
 
+  /** Sets whether @a chooser  should show an icon near the resource when
+   * displaying it.
+   * 
+   * @newin2p10
+   * @param show_icons Whether to show an icon near the resource.
+   */
   void set_show_icons(bool show_icons = true);
   
+  /** Retrieves whether @a chooser  should show an icon near the resource.
+   * @return <tt>true</tt> if the icons should be displayed, <tt>false</tt> otherwise.
+   * 
+   * @newin2p10.
+   */
   bool get_show_icons() const;
   
+  /** Changes the sorting order of the recently used resources list displayed by
+   *  @a chooser .
+   * 
+   * @newin2p10
+   * @param sort_type Sort order that the chooser should use.
+   */
   void set_sort_type(RecentSortType sort_type);
   
+  /** Gets the value set by set_sort_type().
+   * @return The sorting order of the @a chooser .
+   * 
+   * @newin2p10.
+   */
   RecentSortType get_sort_type() const;
 
 
@@ -240,6 +334,13 @@ public:
   // TODO: Return type should be void since it will never return false but
   // throwing RecentChooserError instead
   
+  /** Sets @a uri  as the current URI for @a chooser .
+   * @param uri A URI.
+   * @param error Return location for a G::Error, or <tt>0</tt>.
+   * @return <tt>true</tt> if the URI was found.
+   * 
+   * @newin2p10.
+   */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   bool set_current_uri(const Glib::ustring& uri);
 #else
@@ -247,13 +348,37 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
+  /** Gets the URI currently selected by @a chooser .
+   * @return A newly allocated string holding a URI.
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_current_uri() const;
   
+  /** Gets the Gtk::RecentInfo currently selected by @a chooser .
+   * @return A Gtk::RecentInfo.  Use gtk_recent_info_unref() when
+   * when you have finished using it.
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<RecentInfo> get_current_item();
   
+  /** Gets the Gtk::RecentInfo currently selected by @a chooser .
+   * @return A Gtk::RecentInfo.  Use gtk_recent_info_unref() when
+   * when you have finished using it.
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const RecentInfo> get_current_item() const;
   // TODO: Same here
   
+  /** Selects @a uri  inside @a chooser .
+   * @param uri A URI.
+   * @param error Return location for a G::Error, or <tt>0</tt>.
+   * @return <tt>true</tt> if @a uri  was found.
+   * 
+   * @newin2p10.
+   */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   bool select_uri(const Glib::ustring& uri);
 #else
@@ -261,15 +386,39 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
+  /** Unselects @a uri  inside @a chooser .
+   * 
+   * @newin2p10
+   * @param uri A URI.
+   */
   void unselect_uri(const Glib::ustring& uri);
   
+  /** Selects all the items inside @a chooser , if the @a chooser  supports
+   * multiple selection.
+   * 
+   * @newin2p10
+   */
   void select_all();
   
+  /** Unselects all the items inside @a chooser .
+   * 
+   * @newin2p10
+   */
   void unselect_all();
 
   typedef Glib::ListHandle<RecentInfo, RecentInfoTraits> ListHandle_RecentInfos;
   
 
+  /** Gets the list of recently used resources in form of Gtk::RecentInfo objects.
+   * 
+   * The return value of this function is affected by the "sort-type" and
+   * "limit" properties of @a chooser .
+   * @return A newly allocated list of Gtk::RecentInfo objects.  You should
+   * use gtk_recent_info_unref() on every item of the list, and then free
+   * the list itself using Glib::list_free().
+   * 
+   * @newin2p10.
+   */
   ListHandle_RecentInfos get_items() const;
 
   /** Gets the URI of the recently used resources.
@@ -280,29 +429,70 @@ public:
   Glib::StringArrayHandle get_uris() const;
   
 
+  /** Adds @a filter  to the list of Gtk::RecentFilter objects held by @a chooser .
+   * 
+   * If no previous filter objects were defined, this function will call
+   * set_filter().
+   * 
+   * @newin2p10
+   * @param filter A Gtk::RecentFilter.
+   */
   void add_filter(const RecentFilter& filter);
   
+  /** Removes @a filter  from the list of Gtk::RecentFilter objects held by @a chooser .
+   * 
+   * @newin2p10
+   * @param filter A Gtk::RecentFilter.
+   */
   void remove_filter(const RecentFilter& filter);
   
+  /** Gets the Gtk::RecentFilter objects held by @a chooser .
+   * @return A singly linked list of Gtk::RecentFilter objects.  You
+   * should just free the returned list using Glib::slist_free().
+   * 
+   * @newin2p10.
+   */
   Glib::SListHandle<RecentFilter*> list_filters();
   
+  /** Gets the Gtk::RecentFilter objects held by @a chooser .
+   * @return A singly linked list of Gtk::RecentFilter objects.  You
+   * should just free the returned list using Glib::slist_free().
+   * 
+   * @newin2p10.
+   */
   Glib::SListHandle<const RecentFilter*> list_filters() const;
   
+  /** Sets @a filter  as the current Gtk::RecentFilter object used by @a chooser 
+   * to affect the displayed recently used resources.
+   * 
+   * @newin2p10
+   * @param filter A Gtk::RecentFilter.
+   */
   void set_filter(const RecentFilter& filter);
   
+  /** Gets the Gtk::RecentFilter object currently used by @a chooser  to affect
+   * the display of the recently used resources.
+   * @return A Gtk::RecentFilter object.
+   * 
+   * @newin2p10.
+   */
   RecentFilter* get_filter();
   
+  /** Gets the Gtk::RecentFilter object currently used by @a chooser  to affect
+   * the display of the recently used resources.
+   * @return A Gtk::RecentFilter object.
+   * 
+   * @newin2p10.
+   */
   const RecentFilter* get_filter() const;
 
   /** This signal is emitted when there is a change in the set of
    * selected recently used resources.  This can happen when a user
    * modifies the selection with the mouse or the keyboard, or when
    * explicitely calling functions to change the selection.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %selection_changed()</tt>
+   * <tt>void on_my_%selection_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_selection_changed();
@@ -312,11 +502,9 @@ public:
    * in the recent chooser.  This can happen by double-clicking on an item
    * in the recently used resources list, or by pressing
    * <keycap>Enter</keycap>.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %item_activated()</tt>
+   * <tt>void on_my_%item_activated()</tt>
    */
 
   Glib::SignalProxy0< void > signal_item_activated();
@@ -583,10 +771,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::RecentChooser
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::RecentChooser
    */
   Glib::RefPtr<Gtk::RecentChooser> wrap(GtkRecentChooser* object, bool take_copy = false);
 

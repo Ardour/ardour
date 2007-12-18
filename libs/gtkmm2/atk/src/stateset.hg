@@ -1,0 +1,60 @@
+/* $Id: stateset.hg,v 1.3 2004/01/02 09:56:43 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(atkmm,atk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Atk
+{
+
+_CC_INCLUDE(atk/atk-enum-types.h)
+_WRAP_ENUM(StateType, AtkStateType)
+
+/** An AtkStateSet determines a component's state set.
+ * It is composed of a set of Atk::States.
+ */
+class StateSet : public Glib::Object
+{
+  _CLASS_GOBJECT(StateSet, AtkStateSet, ATK_STATE_SET, Glib::Object, GObject)
+
+protected:
+  _CTOR_DEFAULT()
+  
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(bool is_empty() const, atk_state_set_is_empty)
+
+  //Note that we use Atk::StateType instead of StateType, because there is a Gtk::StateType too, and Doxygen gets confused.
+  _WRAP_METHOD(bool add_state(Atk::StateType type), atk_state_set_add_state)
+  void add_states(const Glib::ArrayHandle<Atk::StateType>& types);
+  _IGNORE(atk_state_set_add_states)
+  _WRAP_METHOD(void clear_states(),atk_state_set_clear_states)
+  _WRAP_METHOD(bool contains_state(Atk::StateType type), atk_state_set_contains_state)
+   bool contains_states(const Glib::ArrayHandle<Atk::StateType>& types) const;
+  _IGNORE(atk_state_set_contains_states)
+  _WRAP_METHOD(bool remove_state(Atk::StateType type), atk_state_set_remove_state)
+  _WRAP_METHOD(Glib::RefPtr<StateSet> and_sets(const Glib::RefPtr<StateSet>& compare_set), atk_state_set_and_sets)
+  _WRAP_METHOD(Glib::RefPtr<StateSet> or_sets(const Glib::RefPtr<StateSet>& compare_set), atk_state_set_or_sets)
+  _WRAP_METHOD(Glib::RefPtr<StateSet> xor_sets(const Glib::RefPtr<StateSet>& compare_set), atk_state_set_xor_sets)
+};
+
+} // namespace Atk
+

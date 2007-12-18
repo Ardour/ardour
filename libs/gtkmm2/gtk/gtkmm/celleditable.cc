@@ -55,7 +55,7 @@ namespace Glib
 
 Glib::RefPtr<Gtk::CellEditable> wrap(GtkCellEditable* object, bool take_copy)
 {
-  return Glib::RefPtr<Gtk::CellEditable>( dynamic_cast<Gtk::CellEditable*> (Glib::wrap_auto ((GObject*)(object), take_copy)) );
+  return Glib::RefPtr<Gtk::CellEditable>( dynamic_cast<Gtk::CellEditable*> (Glib::wrap_auto_interface<Gtk::CellEditable> ((GObject*)(object), take_copy)) );
   //We use dynamic_cast<> in case of multiple inheritance.
 }
 
@@ -104,7 +104,7 @@ void CellEditable_Class::iface_init_function(void* g_iface, void*)
 #ifdef GLIBMM_VFUNCS_ENABLED
 void CellEditable_Class::start_editing_vfunc_callback(GtkCellEditable* self, GdkEvent* event)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -112,40 +112,44 @@ void CellEditable_Class::start_editing_vfunc_callback(GtkCellEditable* self, Gdk
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->start_editing_vfunc(event);
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->start_editing_vfunc(event);
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
-)    );
+)  );
 
-    // Call the original underlying C function:
-    if(base && base->start_editing)
-      (*base->start_editing)(self, event);
-  }
+  // Call the original underlying C function:
+  if(base && base->start_editing)
+    (*base->start_editing)(self, event);
+
 }
 #endif //GLIBMM_VFUNCS_ENABLED
 
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void CellEditable_Class::editing_done_callback(GtkCellEditable* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -153,37 +157,40 @@ void CellEditable_Class::editing_done_callback(GtkCellEditable* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_editing_done();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_editing_done();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
 )    );
 
-    // Call the original underlying C function:
-    if(base && base->editing_done)
-      (*base->editing_done)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->editing_done)
+    (*base->editing_done)(self);
 }
 void CellEditable_Class::remove_widget_callback(GtkCellEditable* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -191,33 +198,36 @@ void CellEditable_Class::remove_widget_callback(GtkCellEditable* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_remove_widget();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_remove_widget();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
 )    );
 
-    // Call the original underlying C function:
-    if(base && base->remove_widget)
-      (*base->remove_widget)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->remove_widget)
+    (*base->remove_widget)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 

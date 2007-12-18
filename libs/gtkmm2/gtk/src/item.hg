@@ -1,0 +1,57 @@
+/* $Id: item.hg,v 1.1 2003/01/21 13:40:28 murrayc Exp $ */
+
+/* item.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/bin.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/bin_p.h)
+
+
+namespace Gtk
+{
+
+/** This class should be considered as a virtual base class.
+ * Only the signals and methods it provides are of any interest.
+ * You don't want to instantiate any objects of that class.
+ *
+ * @ingroup Widgets
+ */
+class Item : public Bin
+{
+  _CLASS_GTKOBJECT(Item,GtkItem,GTK_ITEM,Gtk::Bin,GtkBin)
+public:
+
+  
+
+  _WRAP_METHOD(void select(), gtk_item_select)
+  _WRAP_SIGNAL(void select(), "select")
+
+  _WRAP_METHOD(void deselect(), gtk_item_deselect)
+  _WRAP_SIGNAL(void deselect(), "deselect")
+
+  _WRAP_METHOD(void toggle(), gtk_item_toggle)
+  _WRAP_SIGNAL(void toggle(), "toggle")
+
+protected:
+  _CTOR_DEFAULT
+};
+
+} /* namespace Gtk */
+

@@ -136,15 +136,17 @@ GType Alignment::get_base_type()
 
 Alignment::Alignment(float xalign, float yalign, float xscale, float yscale)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Bin(Glib::ConstructParams(alignment_class_.init(), "xalign", xalign, "yalign", yalign, "xscale", xscale, "yscale", yscale, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Bin(Glib::ConstructParams(alignment_class_.init(), "xalign", xalign, "yalign", yalign, "xscale", xscale, "yscale", yscale, static_cast<char*>(0)))
 {
   }
 
 Alignment::Alignment(AlignmentEnum xalign, AlignmentEnum yalign, float xscale, float yscale)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Bin(Glib::ConstructParams(alignment_class_.init(), "xalign", _gtkmm_align_float_from_enum(xalign), "yalign", _gtkmm_align_float_from_enum(yalign), "xscale", xscale, "yscale", yscale, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Bin(Glib::ConstructParams(alignment_class_.init(), "xalign", _gtkmm_align_float_from_enum(xalign), "yalign", _gtkmm_align_float_from_enum(yalign), "xscale", xscale, "yscale", yscale, static_cast<char*>(0)))
 {
   }
 

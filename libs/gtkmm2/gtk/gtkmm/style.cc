@@ -346,7 +346,7 @@ void Style_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_VFUNCS_ENABLED
 void Style_Class::realize_vfunc_callback(GtkStyle* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -354,36 +354,40 @@ void Style_Class::realize_vfunc_callback(GtkStyle* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->realize_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->realize_vfunc();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->realize)
-      (*base->realize)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->realize)
+    (*base->realize)(self);
+
 }
 void Style_Class::unrealize_vfunc_callback(GtkStyle* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -391,36 +395,40 @@ void Style_Class::unrealize_vfunc_callback(GtkStyle* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->unrealize_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->unrealize_vfunc();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->unrealize)
-      (*base->unrealize)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->unrealize)
+    (*base->unrealize)(self);
+
 }
 void Style_Class::copy_vfunc_callback(GtkStyle* self, GtkStyle* src)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -428,37 +436,41 @@ void Style_Class::copy_vfunc_callback(GtkStyle* self, GtkStyle* src)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->copy_vfunc(Glib::wrap(src, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->copy_vfunc(Glib::wrap(src, true)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->copy)
-      (*base->copy)(self, src);
-  }
+  // Call the original underlying C function:
+  if(base && base->copy)
+    (*base->copy)(self, src);
+
 }
 GtkStyle* Style_Class::clone_vfunc_callback(GtkStyle* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -466,39 +478,42 @@ GtkStyle* Style_Class::clone_vfunc_callback(GtkStyle* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return Glib::unwrap(obj->clone_vfunc());
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return Glib::unwrap(obj->clone_vfunc());
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->clone)
-      return (*base->clone)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->clone)
+    return (*base->clone)(self);
+
 
   typedef GtkStyle* RType;
   return RType();
 }
 void Style_Class::init_from_rc_vfunc_callback(GtkStyle* self, GtkRcStyle* rc_style)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -506,37 +521,41 @@ void Style_Class::init_from_rc_vfunc_callback(GtkStyle* self, GtkRcStyle* rc_sty
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->init_from_rc_vfunc(Glib::wrap(rc_style)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->init_from_rc_vfunc(Glib::wrap(rc_style)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->init_from_rc)
-      (*base->init_from_rc)(self, rc_style);
-  }
+  // Call the original underlying C function:
+  if(base && base->init_from_rc)
+    (*base->init_from_rc)(self, rc_style);
+
 }
 void Style_Class::set_background_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -544,38 +563,42 @@ void Style_Class::set_background_vfunc_callback(GtkStyle* self, GdkWindow* windo
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->set_background_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->set_background_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->set_background)
-      (*base->set_background)(self, window, state_type);
-  }
+  // Call the original underlying C function:
+  if(base && base->set_background)
+    (*base->set_background)(self, window, state_type);
+
 }
 GdkPixbuf* Style_Class::render_icon_vfunc_callback(GtkStyle* self, const GtkIconSource* source, GtkTextDirection direction, GtkStateType state, GtkIconSize size, GtkWidget* widget, const gchar* detail)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -583,45 +606,48 @@ GdkPixbuf* Style_Class::render_icon_vfunc_callback(GtkStyle* self, const GtkIcon
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return Glib::unwrap(obj->render_icon_vfunc(Glib::wrap(const_cast<GtkIconSource*>(source), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return Glib::unwrap(obj->render_icon_vfunc(Glib::wrap(const_cast<GtkIconSource*>(source), true)
 , ((TextDirection)(direction))
 , ((Gtk::StateType)(state))
 , IconSize(static_cast<int>(size))
 , Glib::wrap(widget)
 , Glib::convert_const_gchar_ptr_to_ustring(detail)
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->render_icon)
-      return (*base->render_icon)(self, source, direction, state, size, widget, detail);
-  }
+  // Call the original underlying C function:
+  if(base && base->render_icon)
+    return (*base->render_icon)(self, source, direction, state, size, widget, detail);
+
 
   typedef GdkPixbuf* RType;
   return RType();
 }
 void Style_Class::draw_hline_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x1, gint x2, gint y)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -629,14 +655,17 @@ void Style_Class::draw_hline_vfunc_callback(GtkStyle* self, GdkWindow* window, G
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_hline_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_hline_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , Glib::wrap(area)
 , Glib::wrap(widget)
@@ -645,28 +674,29 @@ void Style_Class::draw_hline_vfunc_callback(GtkStyle* self, GdkWindow* window, G
 , x2
 , y
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_hline)
-      (*base->draw_hline)(self, window, state_type, area, widget, detail, x1, x2, y);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_hline)
+    (*base->draw_hline)(self, window, state_type, area, widget, detail, x1, x2, y);
+
 }
 void Style_Class::draw_vline_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint y1, gint y2, gint x)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -674,14 +704,17 @@ void Style_Class::draw_vline_vfunc_callback(GtkStyle* self, GdkWindow* window, G
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_vline_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_vline_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , Glib::wrap(area)
 , Glib::wrap(widget)
@@ -690,28 +723,29 @@ void Style_Class::draw_vline_vfunc_callback(GtkStyle* self, GdkWindow* window, G
 , y2
 , x
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_vline)
-      (*base->draw_vline)(self, window, state_type, area, widget, detail, y1, y2, x);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_vline)
+    (*base->draw_vline)(self, window, state_type, area, widget, detail, y1, y2, x);
+
 }
 void Style_Class::draw_shadow_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -719,14 +753,17 @@ void Style_Class::draw_shadow_vfunc_callback(GtkStyle* self, GdkWindow* window, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_shadow_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_shadow_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -737,28 +774,29 @@ void Style_Class::draw_shadow_vfunc_callback(GtkStyle* self, GdkWindow* window, 
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_shadow)
-      (*base->draw_shadow)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_shadow)
+    (*base->draw_shadow)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_polygon_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, GdkPoint* point, gint npoints, gboolean fill)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -766,14 +804,17 @@ void Style_Class::draw_polygon_vfunc_callback(GtkStyle* self, GdkWindow* window,
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_polygon_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_polygon_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -782,28 +823,29 @@ void Style_Class::draw_polygon_vfunc_callback(GtkStyle* self, GdkWindow* window,
 , point, npoints
 , fill
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_polygon)
-      (*base->draw_polygon)(self, window, state_type, shadow_type, area, widget, detail, point, npoints, fill);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_polygon)
+    (*base->draw_polygon)(self, window, state_type, shadow_type, area, widget, detail, point, npoints, fill);
+
 }
 void Style_Class::draw_arrow_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, GtkArrowType arrow_type, gboolean fill, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -811,14 +853,17 @@ void Style_Class::draw_arrow_vfunc_callback(GtkStyle* self, GdkWindow* window, G
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_arrow_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_arrow_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -831,28 +876,29 @@ void Style_Class::draw_arrow_vfunc_callback(GtkStyle* self, GdkWindow* window, G
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_arrow)
-      (*base->draw_arrow)(self, window, state_type, shadow_type, area, widget, detail, arrow_type, fill, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_arrow)
+    (*base->draw_arrow)(self, window, state_type, shadow_type, area, widget, detail, arrow_type, fill, x, y, width, height);
+
 }
 void Style_Class::draw_diamond_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -860,14 +906,17 @@ void Style_Class::draw_diamond_vfunc_callback(GtkStyle* self, GdkWindow* window,
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_diamond_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_diamond_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -878,28 +927,29 @@ void Style_Class::draw_diamond_vfunc_callback(GtkStyle* self, GdkWindow* window,
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_diamond)
-      (*base->draw_diamond)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_diamond)
+    (*base->draw_diamond)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_string_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, const gchar* string)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -907,14 +957,17 @@ void Style_Class::draw_string_vfunc_callback(GtkStyle* self, GdkWindow* window, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_string_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_string_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , Glib::wrap(area)
 , Glib::wrap(widget)
@@ -923,28 +976,29 @@ void Style_Class::draw_string_vfunc_callback(GtkStyle* self, GdkWindow* window, 
 , y
 , Glib::convert_const_gchar_ptr_to_ustring(string)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_string)
-      (*base->draw_string)(self, window, state_type, area, widget, detail, x, y, string);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_string)
+    (*base->draw_string)(self, window, state_type, area, widget, detail, x, y, string);
+
 }
 void Style_Class::draw_box_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -952,14 +1006,17 @@ void Style_Class::draw_box_vfunc_callback(GtkStyle* self, GdkWindow* window, Gtk
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_box_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_box_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -970,28 +1027,29 @@ void Style_Class::draw_box_vfunc_callback(GtkStyle* self, GdkWindow* window, Gtk
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_box)
-      (*base->draw_box)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_box)
+    (*base->draw_box)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_flat_box_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -999,14 +1057,17 @@ void Style_Class::draw_flat_box_vfunc_callback(GtkStyle* self, GdkWindow* window
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_flat_box_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_flat_box_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1017,28 +1078,29 @@ void Style_Class::draw_flat_box_vfunc_callback(GtkStyle* self, GdkWindow* window
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_flat_box)
-      (*base->draw_flat_box)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_flat_box)
+    (*base->draw_flat_box)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_check_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1046,14 +1108,17 @@ void Style_Class::draw_check_vfunc_callback(GtkStyle* self, GdkWindow* window, G
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_check_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_check_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1064,28 +1129,29 @@ void Style_Class::draw_check_vfunc_callback(GtkStyle* self, GdkWindow* window, G
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_check)
-      (*base->draw_check)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_check)
+    (*base->draw_check)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_option_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1093,14 +1159,17 @@ void Style_Class::draw_option_vfunc_callback(GtkStyle* self, GdkWindow* window, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_option_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_option_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1111,28 +1180,29 @@ void Style_Class::draw_option_vfunc_callback(GtkStyle* self, GdkWindow* window, 
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_option)
-      (*base->draw_option)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_option)
+    (*base->draw_option)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_tab_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1140,14 +1210,17 @@ void Style_Class::draw_tab_vfunc_callback(GtkStyle* self, GdkWindow* window, Gtk
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_tab_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_tab_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1158,28 +1231,29 @@ void Style_Class::draw_tab_vfunc_callback(GtkStyle* self, GdkWindow* window, Gtk
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_tab)
-      (*base->draw_tab)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_tab)
+    (*base->draw_tab)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_shadow_gap_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height, GtkPositionType gap_side, gint gap_x, gint gap_width)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1187,14 +1261,17 @@ void Style_Class::draw_shadow_gap_vfunc_callback(GtkStyle* self, GdkWindow* wind
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_shadow_gap_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_shadow_gap_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1208,28 +1285,29 @@ void Style_Class::draw_shadow_gap_vfunc_callback(GtkStyle* self, GdkWindow* wind
 , gap_x
 , gap_width
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_shadow_gap)
-      (*base->draw_shadow_gap)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, gap_side, gap_x, gap_width);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_shadow_gap)
+    (*base->draw_shadow_gap)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, gap_side, gap_x, gap_width);
+
 }
 void Style_Class::draw_box_gap_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height, GtkPositionType gap_side, gint gap_x, gint gap_width)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1237,14 +1315,17 @@ void Style_Class::draw_box_gap_vfunc_callback(GtkStyle* self, GdkWindow* window,
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_box_gap_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_box_gap_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1258,28 +1339,29 @@ void Style_Class::draw_box_gap_vfunc_callback(GtkStyle* self, GdkWindow* window,
 , gap_x
 , gap_width
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_box_gap)
-      (*base->draw_box_gap)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, gap_side, gap_x, gap_width);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_box_gap)
+    (*base->draw_box_gap)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, gap_side, gap_x, gap_width);
+
 }
 void Style_Class::draw_extension_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height, GtkPositionType gap_side)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1287,14 +1369,17 @@ void Style_Class::draw_extension_vfunc_callback(GtkStyle* self, GdkWindow* windo
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_extension_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_extension_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1306,28 +1391,29 @@ void Style_Class::draw_extension_vfunc_callback(GtkStyle* self, GdkWindow* windo
 , height
 , ((PositionType)(gap_side))
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_extension)
-      (*base->draw_extension)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, gap_side);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_extension)
+    (*base->draw_extension)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, gap_side);
+
 }
 void Style_Class::draw_focus_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1335,14 +1421,17 @@ void Style_Class::draw_focus_vfunc_callback(GtkStyle* self, GdkWindow* window, G
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_focus_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_focus_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , Glib::wrap(area)
 , Glib::wrap(widget)
@@ -1352,28 +1441,29 @@ void Style_Class::draw_focus_vfunc_callback(GtkStyle* self, GdkWindow* window, G
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_focus)
-      (*base->draw_focus)(self, window, state_type, area, widget, detail, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_focus)
+    (*base->draw_focus)(self, window, state_type, area, widget, detail, x, y, width, height);
+
 }
 void Style_Class::draw_slider_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height, GtkOrientation orientation)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1381,14 +1471,17 @@ void Style_Class::draw_slider_vfunc_callback(GtkStyle* self, GdkWindow* window, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_slider_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_slider_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1400,28 +1493,29 @@ void Style_Class::draw_slider_vfunc_callback(GtkStyle* self, GdkWindow* window, 
 , height
 , ((Orientation)(orientation))
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_slider)
-      (*base->draw_slider)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, orientation);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_slider)
+    (*base->draw_slider)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, orientation);
+
 }
 void Style_Class::draw_handle_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GtkShadowType shadow_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, gint width, gint height, GtkOrientation orientation)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1429,14 +1523,17 @@ void Style_Class::draw_handle_vfunc_callback(GtkStyle* self, GdkWindow* window, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_handle_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_handle_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , ((ShadowType)(shadow_type))
 , Glib::wrap(area)
@@ -1448,28 +1545,29 @@ void Style_Class::draw_handle_vfunc_callback(GtkStyle* self, GdkWindow* window, 
 , height
 , ((Orientation)(orientation))
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_handle)
-      (*base->draw_handle)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, orientation);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_handle)
+    (*base->draw_handle)(self, window, state_type, shadow_type, area, widget, detail, x, y, width, height, orientation);
+
 }
 void Style_Class::draw_expander_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, GtkExpanderStyle expander_style)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1477,14 +1575,17 @@ void Style_Class::draw_expander_vfunc_callback(GtkStyle* self, GdkWindow* window
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_expander_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_expander_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , Glib::wrap(area)
 , Glib::wrap(widget)
@@ -1493,28 +1594,29 @@ void Style_Class::draw_expander_vfunc_callback(GtkStyle* self, GdkWindow* window
 , y
 , ((ExpanderStyle)(expander_style))
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_expander)
-      (*base->draw_expander)(self, window, state_type, area, widget, detail, x, y, expander_style);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_expander)
+    (*base->draw_expander)(self, window, state_type, area, widget, detail, x, y, expander_style);
+
 }
 void Style_Class::draw_layout_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, gboolean use_text, GdkRectangle* area, GtkWidget* widget, const gchar* detail, gint x, gint y, PangoLayout* layout)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1522,14 +1624,17 @@ void Style_Class::draw_layout_vfunc_callback(GtkStyle* self, GdkWindow* window, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_layout_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_layout_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , use_text
 , Glib::wrap(area)
@@ -1539,28 +1644,29 @@ void Style_Class::draw_layout_vfunc_callback(GtkStyle* self, GdkWindow* window, 
 , y
 , Glib::wrap(layout)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_layout)
-      (*base->draw_layout)(self, window, state_type, use_text, area, widget, detail, x, y, layout);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_layout)
+    (*base->draw_layout)(self, window, state_type, use_text, area, widget, detail, x, y, layout);
+
 }
 void Style_Class::draw_resize_grip_vfunc_callback(GtkStyle* self, GdkWindow* window, GtkStateType state_type, GdkRectangle* area, GtkWidget* widget, const gchar* detail, GdkWindowEdge edge, gint x, gint y, gint width, gint height)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1568,14 +1674,17 @@ void Style_Class::draw_resize_grip_vfunc_callback(GtkStyle* self, GdkWindow* win
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_resize_grip_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_resize_grip_vfunc(Glib::wrap((GdkWindowObject*)(window), true)
 , ((Gtk::StateType)(state_type))
 , Glib::wrap(area)
 , Glib::wrap(widget)
@@ -1586,31 +1695,32 @@ void Style_Class::draw_resize_grip_vfunc_callback(GtkStyle* self, GdkWindow* win
 , width
 , height
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_resize_grip)
-      (*base->draw_resize_grip)(self, window, state_type, area, widget, detail, edge, x, y, width, height);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_resize_grip)
+    (*base->draw_resize_grip)(self, window, state_type, area, widget, detail, edge, x, y, width, height);
+
 }
 #endif //GLIBMM_VFUNCS_ENABLED
 
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void Style_Class::realize_callback(GtkStyle* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1618,36 +1728,39 @@ void Style_Class::realize_callback(GtkStyle* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_realize();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_realize();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->realize)
-      (*base->realize)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->realize)
+    (*base->realize)(self);
 }
 void Style_Class::unrealize_callback(GtkStyle* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1655,32 +1768,35 @@ void Style_Class::unrealize_callback(GtkStyle* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_unrealize();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_unrealize();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->unrealize)
-      (*base->unrealize)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->unrealize)
+    (*base->unrealize)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -1728,7 +1844,8 @@ GType Style::get_base_type()
 
 Style::Style()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(style_class_.init()))
 {
   }
@@ -1985,6 +2102,16 @@ gtk_paint_resize_grip(const_cast<GtkStyle*>(gobj()), Glib::unwrap(window), ((Gtk
 Glib::RefPtr<Style> Style::copy()
 {
   return Glib::wrap(gtk_style_copy(gobj()));
+}
+
+Glib::RefPtr<Style> Style::attach(const Glib::RefPtr<Gdk::Window>& window)
+{
+  return Glib::wrap(gtk_style_attach(gobj(), Glib::unwrap(window)));
+}
+
+void Style::detach()
+{
+gtk_style_detach(gobj()); 
 }
 
 void Style::set_background(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type)

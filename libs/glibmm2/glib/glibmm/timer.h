@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_TIMER_H
 #define _GLIBMM_TIMER_H
 
-/* $Id: timer.h,v 1.1.1.1 2003/01/07 16:58:56 murrayc Exp $ */
+/* $Id: timer.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* timer.h
  *

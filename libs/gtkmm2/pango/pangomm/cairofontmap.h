@@ -73,8 +73,14 @@ private:
 
 protected:
   CairoFontMap(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit CairoFontMap(PangoCairoFontMap* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -99,6 +105,14 @@ private:
 public:
   //_WRAP_METHOD(static Glib::RefPtr<PangoFontMap> get_default(), pango_cairo_font_map_get_default) //TODO: ref this?
 
+ 
+  /** Gets the type of Cairo font backend that @a fontmap  uses.
+   * @return The #cairo_font_type_t cairo font backend type
+   * 
+   * Since: 1.18.
+   */
+  Cairo::FontType get_font_type() const;
+
   
   /** Sets the resolution for the fontmap. This is a scale factor between
    * points specified in a Pango::FontDescription and Cairo units. The
@@ -111,7 +125,7 @@ public:
    */
   void set_resolution(double dpi);
   
-  /** Gets the resolutions for the fontmap. See pango_cairo_font_map_set_resolution.
+  /** Gets the resolution for the fontmap. See set_resolution()
    * @return The resolution in "dots per inch"
    * 
    * Since: 1.10.
@@ -150,10 +164,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Pango::CairoFontMap
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::CairoFontMap
    */
   Glib::RefPtr<Pango::CairoFontMap> wrap(PangoCairoFontMap* object, bool take_copy = false);
 

@@ -180,9 +180,26 @@ public:
   void set_width_chars(int n_chars);
 
   
+  /** Return value: <tt>true</tt> if the button grabs focus when it is clicked with
+   * @return <tt>true</tt> if the button grabs focus when it is clicked with
+   * the mouse.
+   * 
+   * @newin2p10.
+   */
   bool get_focus_on_click() const;
   
+  /** Sets whether the button will grab focus when it is clicked with the mouse.
+   * Making mouse clicks not grab focus is useful in places like toolbars where
+   * you don't want the keyboard focus removed from the main area of the
+   * application.
+   * 
+   * @newin2p10
+   * @param focus_on_click Whether the button grabs focus when clicked with the mouse.
+   */
   void set_focus_on_click(gboolean focus_on_click = true);   
+
+  //I'm no totally convinced that this is only a key-binding signal. murrayc:
+  
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
 /** The file chooser dialog to use.
@@ -264,10 +281,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::FileChooserButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::FileChooserButton
    */
   Gtk::FileChooserButton* wrap(GtkFileChooserButton* object, bool take_copy = false);
 } //namespace Glib

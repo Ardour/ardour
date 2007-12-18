@@ -1,0 +1,204 @@
+/* $Id: container.hg,v 1.11 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+ 
+#include <glibmm/listhandle.h>
+#include <gtkmm/widget.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/widget_p.h)
+
+/** @defgroup Containers Container Widgets
+ * These widgets can be used to group other widgets together.
+ */
+
+/* we'll include gtkfeatures because we dont want to include the whole
+   gtk/gtk.h - this file is used by almost ALL our widgets, so dependencies
+   in minimum - adding things here will increase compile times ALOT */
+
+
+namespace Gtk
+{
+
+class Adjustment;
+class Label;
+
+/** Abstract container class
+ *
+ * This is the abstract container from which all gtk+ widgets which hold
+ * other items derive from.  It mainly houses virtual functions
+ * used for inserting and removing children.  Containers in gtk+
+ * may hold one item or many items depending on the implementation.
+ *
+ * This interface is used for all single item holding containers.
+ * Multi-item containers provide their own unique interface as their
+ * items are generally more complex.  The methods of the derived
+ * classes should be prefered over these.
+ *
+ * @ingroup Widgets
+ */
+class Container : public Widget
+{
+  _CLASS_GTKOBJECT(Container,GtkContainer,GTK_CONTAINER,Gtk::Widget,GtkWidget)
+  _IGNORE(gtk_container_child_set_valist, gtk_container_get_focus_chain,
+          gtk_container_foreach_full, gtk_container_children, gtk_container_border_width)
+public:
+
+/* Application-level methods */
+
+  _WRAP_METHOD(void set_border_width(guint border_width),
+               gtk_container_set_border_width)
+
+  _WRAP_METHOD(guint get_border_width() const,
+               gtk_container_get_border_width)
+
+  //This is virtual so that we can override it in Gtk::ScrolledWindow:
+ virtual void add(Widget& widget);
+  _IGNORE(gtk_container_add)
+
+  _WRAP_METHOD_DOCS_ONLY(gtk_container_remove)
+  void remove(Widget& widget);
+  _IGNORE(gtk_container_remove)
+
+  _WRAP_METHOD(void set_resize_mode(ResizeMode resize_mode),
+               gtk_container_set_resize_mode)
+
+  _WRAP_METHOD(ResizeMode get_resize_mode() const,
+               gtk_container_get_resize_mode)
+
+  /// Request that contained widgets check their size
+  _WRAP_METHOD(void check_resize(), gtk_container_check_resize)
+
+  /** For instance, 
+   * void on_foreach(Gtk::Widget* widget);
+   */
+  typedef sigc::slot<void, Widget&> ForeachSlot;
+
+  /** Operate on contained items
+   * This is largely an internal used mainly for things like
+   * creating duplicates of internal lists and other such
+   * operations.  The result is lossy as it only gets the
+   * the main child and not its external pieces.
+   *
+   * For example notebook pages contain a page, a label, and
+   * a menu item.  But this only operates on the pages.
+   */
+  void foreach(const ForeachSlot& slot);
+
+  /// (internal) Operate on contained items (see foreach())
+  //_WRAP_METHOD(void foreach_(GtkCallback callback,gpointer data),gtk_container_foreach)
+
+  /// (internal) Operate on contained items (see foreach())
+  //_WRAP_METHOD(void foreach_full_(GtkCallback callback,GtkCallbackMarshal marshal, gpointer data,GtkDestroyNotify notify),gtk_container_foreach_full)
+
+  _WRAP_METHOD(Glib::ListHandle<Widget*> get_children(), gtk_container_get_children)
+  _WRAP_METHOD(Glib::ListHandle<const Widget*> get_children() const, gtk_container_get_children)
+
+  _WRAP_METHOD(void propagate_expose(Widget& child, GdkEventExpose* event),
+               gtk_container_propagate_expose)
+
+  _WRAP_METHOD(void set_focus_chain(const Glib::ListHandle<Widget*>& focusable_widgets),
+               gtk_container_set_focus_chain)
+
+  // gtk_container_get_focus_chain() has been split up into two
+  // functions in order to make implicit container conversion possible.
+  bool has_focus_chain() const;
+  Glib::ListHandle<Widget*> get_focus_chain();
+  Glib::ListHandle<const Widget*> get_focus_chain() const;
+
+  _WRAP_METHOD(void unset_focus_chain(), gtk_container_unset_focus_chain)
+
+
+
+
+/* Widget-level methods */
+
+  _WRAP_METHOD(void set_reallocate_redraws(bool needs_redraws = true),
+               gtk_container_set_reallocate_redraws)
+
+  /// Sets the focus on a child
+  _WRAP_METHOD(void set_focus_child(Widget& widget),gtk_container_set_focus_child)
+
+  _WRAP_METHOD(void set_focus_vadjustment(Adjustment& adjustment),
+               gtk_container_set_focus_vadjustment)
+
+  _WRAP_METHOD(Adjustment* get_focus_vadjustment(),
+               gtk_container_get_focus_vadjustment)
+  _WRAP_METHOD(const Adjustment* get_focus_vadjustment() const,
+               gtk_container_get_focus_vadjustment, constversion)
+
+  _WRAP_METHOD(void set_focus_hadjustment(Adjustment& adjustment),
+               gtk_container_set_focus_hadjustment)
+
+  _WRAP_METHOD(Adjustment* get_focus_hadjustment(),
+               gtk_container_get_focus_hadjustment)
+  _WRAP_METHOD(const Adjustment* get_focus_hadjustment() const,
+               gtk_container_get_focus_hadjustment, constversion)
+
+
+  _WRAP_METHOD(void resize_children(), gtk_container_resize_children)
+  
+  _WRAP_METHOD(GType child_type() const, gtk_container_child_type)
+
+  // Ignore functions such as gtk_container_class_install_child_property(),  which I think are for themes, like the GtkWidget style properties.
+  _IGNORE(gtk_container_class_install_child_property, gtk_container_class_find_child_property, gtk_container_class_list_child_properties,
+          gtk_container_add_with_properties, gtk_container_child_set, gtk_container_child_get, gtk_container_child_get_valist, gtk_container_child_get_property)
+
+
+  _WRAP_SIGNAL(void add(Widget* widget), "add")
+
+  //We use the optional custom_c_callback parameter with _WRAP_SIGNAL() here,
+  //so that we can write special code to check for deleted child widget parameters:
+  _WRAP_SIGNAL(void remove(Widget* widget), "remove", custom_c_callback)
+
+  _WRAP_SIGNAL(void check_resize(), "check_resize")
+  _WRAP_SIGNAL(void set_focus_child(Widget* widget), "set_focus_child")
+
+  void show_all_children(bool recursive = true); 
+
+protected:
+  _CTOR_DEFAULT()
+
+  _WRAP_VFUNC(GtkType child_type() const, child_type)
+  _WRAP_VFUNC(void forall(gboolean include_internals, GtkCallback callback, gpointer callback_data), forall)
+  //TODO: What is this?
+  _WRAP_VFUNC(char* composite_name(GtkWidget* child), composite_name)
+  _WRAP_VFUNC(void set_child_property(GtkWidget* child, guint property_id, const GValue* value, GParamSpec* pspec), set_child_property)
+  _WRAP_VFUNC(void get_child_property(GtkWidget* child, guint property_id, GValue* value, GParamSpec* pspec) const, get_child_property)
+
+  _WRAP_PROPERTY("border_width", guint)
+  _WRAP_PROPERTY("resize_mode", ResizeMode)
+  _WRAP_PROPERTY("child", Widget*)
+
+#m4begin
+dnl// Hook in special code to catch explicit uses of gtk_object_destroy() by
+dnl// GTK+ code, e.g. when receiving the GDK_DELETE event.  For details, look
+dnl// at Gtk::Widget_Class::dispose_vfunc_callback() in widget.ccg.
+dnl
+  _PUSH(SECTION_PCC_CLASS_INIT_DEFAULT_SIGNAL_HANDLERS)
+    reinterpret_cast<GtkObjectClass*>(klass)->destroy = &destroy_callback;
+  _SECTION(SECTION_PH_DEFAULT_SIGNAL_HANDLERS)
+    static void destroy_callback(GtkObject* self);
+    static void remove_callback_normal(GtkContainer* self, GtkWidget* p0);
+  _POP()
+#m4end
+
+};
+
+} // namespace Gtk
+

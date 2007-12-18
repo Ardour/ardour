@@ -103,7 +103,7 @@ namespace Glib
 
 Glib::RefPtr<Gtk::PrintOperationPreview> wrap(GtkPrintOperationPreview* object, bool take_copy)
 {
-  return Glib::RefPtr<Gtk::PrintOperationPreview>( dynamic_cast<Gtk::PrintOperationPreview*> (Glib::wrap_auto ((GObject*)(object), take_copy)) );
+  return Glib::RefPtr<Gtk::PrintOperationPreview>( dynamic_cast<Gtk::PrintOperationPreview*> (Glib::wrap_auto_interface<Gtk::PrintOperationPreview> ((GObject*)(object), take_copy)) );
   //We use dynamic_cast<> in case of multiple inheritance.
 }
 
@@ -154,7 +154,7 @@ void PrintOperationPreview_Class::iface_init_function(void* g_iface, void*)
 #ifdef GLIBMM_VFUNCS_ENABLED
 void PrintOperationPreview_Class::render_page_vfunc_callback(GtkPrintOperationPreview* self, gint page_nr)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -162,38 +162,42 @@ void PrintOperationPreview_Class::render_page_vfunc_callback(GtkPrintOperationPr
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->render_page_vfunc(page_nr
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->render_page_vfunc(page_nr
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
-)    );
+)  );
 
-    // Call the original underlying C function:
-    if(base && base->render_page)
-      (*base->render_page)(self, page_nr);
-  }
+  // Call the original underlying C function:
+  if(base && base->render_page)
+    (*base->render_page)(self, page_nr);
+
 }
 void PrintOperationPreview_Class::end_preview_vfunc_callback(GtkPrintOperationPreview* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -201,37 +205,41 @@ void PrintOperationPreview_Class::end_preview_vfunc_callback(GtkPrintOperationPr
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->end_preview_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->end_preview_vfunc();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
-)    );
+)  );
 
-    // Call the original underlying C function:
-    if(base && base->end_preview)
-      (*base->end_preview)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->end_preview)
+    (*base->end_preview)(self);
+
 }
 gboolean PrintOperationPreview_Class::is_selected_vfunc_callback(GtkPrintOperationPreview* self, gint page_nr)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -239,34 +247,37 @@ gboolean PrintOperationPreview_Class::is_selected_vfunc_callback(GtkPrintOperati
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->is_selected_vfunc(page_nr
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->is_selected_vfunc(page_nr
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
-)    );
+)  );
 
-    // Call the original underlying C function:
-    if(base && base->is_selected)
-      return (*base->is_selected)(self, page_nr);
-  }
+  // Call the original underlying C function:
+  if(base && base->is_selected)
+    return (*base->is_selected)(self, page_nr);
+
 
   typedef gboolean RType;
   return RType();
@@ -276,7 +287,7 @@ g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Ge
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void PrintOperationPreview_Class::ready_callback(GtkPrintOperationPreview* self, GtkPrintContext* p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -284,38 +295,41 @@ void PrintOperationPreview_Class::ready_callback(GtkPrintOperationPreview* self,
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_ready(Glib::wrap(p0, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_ready(Glib::wrap(p0, true)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
 )    );
 
-    // Call the original underlying C function:
-    if(base && base->ready)
-      (*base->ready)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->ready)
+    (*base->ready)(self, p0);
 }
 void PrintOperationPreview_Class::got_page_size_callback(GtkPrintOperationPreview* self, GtkPrintContext* p0, GtkPageSetup* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -323,35 +337,38 @@ void PrintOperationPreview_Class::got_page_size_callback(GtkPrintOperationPrevie
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_got_page_size(Glib::wrap(p0, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_got_page_size(Glib::wrap(p0, true)
 , Glib::wrap(p1, true)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
 )    );
 
-    // Call the original underlying C function:
-    if(base && base->got_page_size)
-      (*base->got_page_size)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->got_page_size)
+    (*base->got_page_size)(self, p0, p1);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 

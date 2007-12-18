@@ -114,9 +114,9 @@ public:
   
   void select();
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %select()</tt>
+   * <tt>void on_my_%select()</tt>
    */
 
   Glib::SignalProxy0< void > signal_select();
@@ -124,9 +124,9 @@ public:
 
   void deselect();
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %deselect()</tt>
+   * <tt>void on_my_%deselect()</tt>
    */
 
   Glib::SignalProxy0< void > signal_deselect();
@@ -134,9 +134,9 @@ public:
 
   void toggle();
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %toggle()</tt>
+   * <tt>void on_my_%toggle()</tt>
    */
 
   Glib::SignalProxy0< void > signal_toggle();
@@ -153,10 +153,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Item
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Item
    */
   Gtk::Item* wrap(GtkItem* object, bool take_copy = false);
 } //namespace Glib

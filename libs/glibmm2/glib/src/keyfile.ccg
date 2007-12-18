@@ -92,13 +92,50 @@ Glib::ustring KeyFile::get_locale_string(const Glib::ustring& group_name, const 
   return retvalue;
 }
 
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
 int KeyFile::get_integer(const Glib::ustring& key) const
+#else
+int KeyFile::get_integer(const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const
+#endif //GLIBMM_EXCEPTIONS_ENABLED
 {
-  GError *error = 0;
-  int retvalue = g_key_file_get_integer(const_cast<GKeyFile*>(gobj()), 0, key.c_str(), &(error));
-  if(error) ::Glib::Error::throw_exception(error);
+  GError* gerror = 0;
+  int retvalue = g_key_file_get_integer(const_cast<GKeyFile*>(gobj()), NULL, key.c_str(), &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
   return retvalue;
 }
+
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+double KeyFile::get_double(const Glib::ustring& key) const
+#else
+double KeyFile::get_double(const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  double retvalue = g_key_file_get_double(const_cast<GKeyFile*>(gobj()), NULL, key.c_str(), &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+}
+
+void KeyFile::set_double(const Glib::ustring& key, double value)
+{
+  g_key_file_set_double(gobj(), 0, key.c_str(), value); 
+}
+
 
 Glib::ArrayHandle<Glib::ustring> KeyFile::get_string_list(const Glib::ustring& group_name, const Glib::ustring& key) const
 {
@@ -144,6 +181,17 @@ Glib::ArrayHandle<int> KeyFile::get_integer_list(const Glib::ustring& group_name
   return Glib::ArrayHandle<int>(integer_list, length_of_list, Glib::OWNERSHIP_DEEP);
 }
 
+Glib::ArrayHandle<double> KeyFile::get_double_list(const Glib::ustring& group_name, const Glib::ustring& key) const
+{
+  gdouble* integer_list   = 0;
+  gsize length_of_list = 0; 
+  GError* error        = 0;
+  integer_list = g_key_file_get_double_list(const_cast<GKeyFile*>(gobj()), group_name.c_str(), key.c_str(), &length_of_list, &error);
+  if(error)
+    Glib::Error::throw_exception(error);
+  return Glib::ArrayHandle<double>(integer_list, length_of_list, Glib::OWNERSHIP_DEEP);
+}
+
 void KeyFile::set_string_list(const Glib::ustring& group_name, const Glib::ustring& key, const Glib::ArrayHandle<Glib::ustring>& list)
 {
   gsize length_of_list = list.size();
@@ -160,6 +208,12 @@ void KeyFile::set_integer_list(const Glib::ustring& group_name, const Glib::ustr
 {
   gsize length_of_list = list.size();
   g_key_file_set_integer_list(gobj(), group_name.c_str(), key.c_str(), const_cast<int*>(list.data()), length_of_list);
+}
+
+void KeyFile::set_double_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<double>& list)
+{
+  gsize length_of_list = list.size();
+  g_key_file_set_double_list(gobj(), group_name.c_str(), key.c_str(), const_cast<double*>(list.data()), length_of_list);
 }
 
 void KeyFile::set_boolean_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<bool>& list)

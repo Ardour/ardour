@@ -163,21 +163,47 @@ public:
   const Menu* get_menu() const;
 
   
+#ifndef GTKMM_DISABLE_DEPRECATED
+
   /** Sets the Gtk::Tooltips object to be used for arrow button which
    * pops up the menu. See Gtk::ToolItem::set_tooltip() for setting
    * a tooltip on the whole Gtk::MenuToolButton.
    * 
    * @newin2p6
+   * 
+   * Deprecated: 2.12: Use set_arrow_tooltip_text()
+   * instead.
+   * @deprecated Use set_arrow_tooltip_text() or set_arrow_tooltip_markup() instead
    * @param tooltips The Gtk::Tooltips object to be used.
    * @param tip_text Text to be used as tooltip text for tool_item.
    * @param tip_private Text to be used as private tooltip text.
    */
   void set_arrow_tooltip(Tooltips& tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private);
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
+  /** Sets the tooltip text to be used as tooltip for the arrow button which
+   * pops up the menu.  See Gtk::ToolItem::set_tooltip() for setting a tooltip
+   * on the whole Gtk::MenuToolButton.
+   * 
+   * @newin2p12
+   * @param text Text to be used as tooltip text for button's arrow button.
+   */
+  void set_arrow_tooltip_text(const Glib::ustring& text);
+  
+  /** Sets the tooltip markup text to be used as tooltip for the arrow button
+   * which pops up the menu.  See Gtk::ToolItem::set_tooltip() for setting a
+   * tooltip on the whole Gtk::MenuToolButton.
+   * 
+   * @newin2p12
+   * @param markup Markup text to be used as tooltip text for button's arrow button.
+   */
+  void set_arrow_tooltip_markup(const Glib::ustring& markup);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %show_menu()</tt>
+   * <tt>void on_my_%show_menu()</tt>
    */
 
   Glib::SignalProxy0< void > signal_show_menu();
@@ -210,10 +236,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::MenuToolButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::MenuToolButton
    */
   Gtk::MenuToolButton* wrap(GtkMenuToolButton* object, bool take_copy = false);
 } //namespace Glib

@@ -1,6 +1,6 @@
 // -*- c++ -*-
 
-/* $Id: containers.cc,v 1.1.1.1 2003/01/07 16:58:44 murrayc Exp $ */
+/* $Id: containers.cc 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* containers.h
  *

@@ -5,7 +5,7 @@
 #include <glibmm/private/unicode_p.h>
 
 // -*- c++ -*-
-/* $Id: unicode.ccg,v 1.1.1.1 2003/01/07 16:58:42 murrayc Exp $ */
+/* $Id: unicode.ccg,v 1.1 2003/01/07 16:58:42 murrayc Exp $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

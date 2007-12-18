@@ -115,6 +115,12 @@ static const Glib::SignalProxyInfo Printer_signal_details_acquired_info =
 
 } // anonymous namespace
 
+// static
+GType Glib::Value<Gtk::PrintCapabilities>::value_type()
+{
+  return gtk_print_capabilities_get_type();
+}
+
 
 namespace Glib
 {
@@ -173,7 +179,7 @@ void Printer_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void Printer_Class::details_acquired_callback(GtkPrinter* self, gboolean p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -181,33 +187,36 @@ void Printer_Class::details_acquired_callback(GtkPrinter* self, gboolean p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_details_acquired(p0
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_details_acquired(p0
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->details_acquired)
-      (*base->details_acquired)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->details_acquired)
+    (*base->details_acquired)(self, p0);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -306,6 +315,31 @@ bool Printer::accepts_pdf() const
 bool Printer::accepts_ps() const
 {
   return gtk_printer_accepts_ps(const_cast<GtkPrinter*>(gobj()));
+}
+
+Glib::ListHandle< Glib::RefPtr<PageSetup> > Printer::list_papers()
+{
+  return Glib::ListHandle< Glib::RefPtr<PageSetup> >(gtk_printer_list_papers(gobj()), Glib::OWNERSHIP_DEEP);
+}
+
+Glib::ListHandle< Glib::RefPtr<const PageSetup> > Printer::list_papers() const
+{
+  return Glib::ListHandle< Glib::RefPtr<const PageSetup> >(gtk_printer_list_papers(const_cast<GtkPrinter*>(gobj())), Glib::OWNERSHIP_DEEP);
+}
+
+bool Printer::has_details() const
+{
+  return gtk_printer_has_details(const_cast<GtkPrinter*>(gobj()));
+}
+
+void Printer::request_details()
+{
+gtk_printer_request_details(gobj()); 
+}
+
+PrintCapabilities Printer::get_capabilities() const
+{
+  return (PrintCapabilities)gtk_printer_get_capabilities(const_cast<GtkPrinter*>(gobj()));
 }
 
 

@@ -1,0 +1,69 @@
+/* $Id: tooltips.hg,v 1.1 2003/01/21 13:40:46 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+_CONFIGINCLUDE(gtkmmconfig.h)
+
+#include <gdkmm/color.h>
+#include <gtkmm/object.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/object_p.h)
+
+typedef struct _GtkTooltipsData GtkTooltipsData;
+
+namespace Gtk
+{
+
+class Widget;
+
+/** Tooltips are the messages that appear next to a widget when the mouse
+ * pointer is held over it for a short amount of time. They are especially
+ * helpful for adding more verbose descriptions of things such as buttons
+ * in a toolbar. 
+ *
+ * This widget holds tooltips for other widgets.  You should only need one
+ * Tooltip widget for all widgets you wish to add tips to.
+ * 
+ * @deprecated Use the Gtk::Tooltip API instead.
+ */
+class Tooltips : public Object
+{
+  _CLASS_GTKOBJECT(Tooltips,GtkTooltips,GTK_TOOLTIPS,Gtk::Object,GtkObject)
+  _IS_DEPRECATED
+  _IGNORE(gtk_tooltips_set_delay)
+public:
+  _CTOR_DEFAULT
+
+  _WRAP_METHOD(void enable(), gtk_tooltips_enable)
+  _WRAP_METHOD(void disable(), gtk_tooltips_disable)
+
+  _WRAP_METHOD(void set_tip(Widget& widget, const Glib::ustring& tip_text, const Glib::ustring& tip_private), gtk_tooltips_set_tip)
+  void set_tip(Widget& widget, const Glib::ustring& tip_text);
+  void unset_tip(Widget& widget);
+
+protected:
+  _WRAP_METHOD(static GtkTooltipsData* data_get(Widget& widget), gtk_tooltips_data_get)
+
+public:
+  _WRAP_METHOD(void force_window(),gtk_tooltips_force_window)
+};
+
+} //namespace Gtk
+

@@ -82,7 +82,7 @@ public:
    * of text. (The logical top may be above or below the top of the
    * actual drawn ink. It is necessary to lay out the text to figure
    * where the ink will be.)
-   * @return The ascent, in pango units. (1 point == Pango::SCALE pango units.).
+   * @return The ascent, in Pango units. (1 point == Pango::SCALE Pango units.).
    */
   int get_ascent() const;
   
@@ -91,7 +91,7 @@ public:
    * of text. (The logical bottom may be above or below the bottom of the
    * actual drawn ink. It is necessary to lay out the text to figure
    * where the ink will be.)
-   * @return The descent, in pango units. (1 point == Pango::SCALE pango units.).
+   * @return The descent, in Pango units. (1 point == Pango::SCALE Pango units.).
    */
   int get_descent() const;
   
@@ -99,17 +99,17 @@ public:
    * This is merely a representative value useful, for example, for
    * determining the initial size for a window. Actual characters in
    * text will be wider and narrower than this.
-   * @return The character width, in pango units. (1 point == Pango::SCALE pango units.).
+   * @return The character width, in Pango units. (1 point == Pango::SCALE Pango units.).
    */
   int get_approximate_char_width() const;
   
   /** Gets the approximate digit width for a font metrics structure.
    * This is merely a representative value useful, for example, for
    * determining the initial size for a window. Actual digits in
-   * text can be wider and narrower than this, though this value
+   * text can be wider or narrower than this, though this value
    * is generally somewhat more accurate than the result of
-   * pango_font_metrics_get_approximate_digit_width().
-   * @return The digit width, in pango units. (1 point == Pango::SCALE pango units.).
+   * pango_font_metrics_get_approximate_char_width() for digits.
+   * @return The digit width, in Pango units. (1 point == Pango::SCALE Pango units.).
    */
   int get_approximate_digit_width() const;
 
@@ -169,10 +169,13 @@ inline void swap(FontMetrics& lhs, FontMetrics& rhs)
 namespace Glib
 {
 
-/** @relates Pango::FontMetrics
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Pango::FontMetrics
  */
 Pango::FontMetrics wrap(PangoFontMetrics* object, bool take_copy = false);
 

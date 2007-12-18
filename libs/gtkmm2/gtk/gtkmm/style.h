@@ -3,6 +3,8 @@
 #ifndef _GTKMM_STYLE_H
 #define _GTKMM_STYLE_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -24,6 +26,9 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
 
 
 #include <pangomm/fontdescription.h>
@@ -570,7 +575,20 @@ public:
                   int                               gap_width) const;
 
   
-  /** 
+  /** Draws a slider in the given rectangle on @a window  using the
+   * given style and orientation.
+   * @param window A Gdk::Window.
+   * @param state_type A state.
+   * @param shadow_type A shadow.
+   * @param area Clip rectangle, or <tt>0</tt> if the
+   * output should not be clipped.
+   * @param widget The widget (may be <tt>0</tt>).
+   * @param detail A style detail (may be <tt>0</tt>).
+   * @param x The x origin of the rectangle in which to draw a slider.
+   * @param y The y origin of the rectangle in which to draw a slider.
+   * @param width The width of the rectangle in which to draw a slider.
+   * @param height The height of the rectangle in which to draw a slider.
+   * @param orientation The orientation to be used.
    */
   void paint_slider(
                   const Glib::RefPtr<Gdk::Window>&  window,
@@ -668,7 +686,18 @@ public:
                   ExpanderStyle                     expander_style) const;
 
   
-  /** 
+  /** Draws a layout on @a window  using the given parameters.
+   * @param window A Gdk::Window.
+   * @param state_type A state.
+   * @param use_text Whether to use the text or foreground
+   * graphics context of @a style .
+   * @param area Clip rectangle, or <tt>0</tt> if the
+   * output should not be clipped.
+   * @param widget The widget (may be <tt>0</tt>).
+   * @param detail A style detail (may be <tt>0</tt>).
+   * @param x X origin.
+   * @param y Y origin.
+   * @param layout The layout to draw.
    */
   void paint_layout(
                   const Glib::RefPtr<Gdk::Window>&    window,
@@ -711,10 +740,28 @@ public:
 
   Glib::RefPtr<Style> copy();
 
-  // These are worthless to the users - they should use set_style instead.
   
-  //_WRAP_METHOD(Glib::RefPtr<Style> attach(const Glib::RefPtr<Gdk::Window>& window), gtk_style_attach)
-  //_WRAP_METHOD(void detach(), gtk_style_detach)
+  /** Attaches a style to a window; this process allocates the
+   * colors and creates the GC's for the style - it specializes
+   * it to a particular visual and colormap. The process may 
+   * involve the creation of a new style if the style has already 
+   * been attached to a window with a different style and colormap.
+   * 
+   * Since this function may return a new object, you have to use it 
+   * in the following way: 
+   * <tt>style = gtk_style_attach (style, window)</tt>
+   * @param window A Gdk::Window.
+   * @return Either @a style , or a newly-created Gtk::Style.
+   * If the style is newly created, the style parameter
+   * will be unref'ed, and the new style will have
+   * a reference count belonging to the caller.
+   */
+  Glib::RefPtr<Style> attach(const Glib::RefPtr<Gdk::Window>& window);
+  
+  /** Detaches a style from a window. If the style is not attached
+   * to any windows anymore, it is unrealized. See attach().
+   */
+  void detach();
 
   
   /** Sets the background of @a window  to the background color or pixmap
@@ -733,6 +780,17 @@ public:
   IconSet lookup_icon_set(const Gtk::StockID& stock_id);
 
   
+  /** Looks up @a color_name  in the style's logical color mappings,
+   * filling in @a color  and returning <tt>true</tt> if found, otherwise
+   * returning <tt>false</tt>. Do not cache the found mapping, because
+   * it depends on the Gtk::Style and might change when a theme
+   * switch occurs.
+   * @param color_name The name of the logical color to look up.
+   * @param color The Gdk::Color to fill in.
+   * @return <tt>true</tt> if the mapping was found.
+   * 
+   * @newin2p10.
+   */
   bool lookup_color(const Glib::ustring& color_name, Gdk::Color& color) const;
 
 
@@ -761,17 +819,21 @@ protected:
   virtual void unrealize_vfunc();
 #endif //GLIBMM_VFUNCS_ENABLED
 
+
   #ifdef GLIBMM_VFUNCS_ENABLED
   virtual void copy_vfunc(const Glib::RefPtr<Style>& src);
 #endif //GLIBMM_VFUNCS_ENABLED
+
 
   #ifdef GLIBMM_VFUNCS_ENABLED
   virtual Glib::RefPtr<Style> clone_vfunc();
 #endif //GLIBMM_VFUNCS_ENABLED
 
+
   #ifdef GLIBMM_VFUNCS_ENABLED
   virtual void init_from_rc_vfunc(const Glib::RefPtr<RcStyle>& rc_style);
 #endif //GLIBMM_VFUNCS_ENABLED
+
 
   #ifdef GLIBMM_VFUNCS_ENABLED
   virtual void set_background_vfunc(const Glib::RefPtr<Gdk::Window>& window, Gtk::StateType state_type);
@@ -867,17 +929,17 @@ protected:
 #endif //GLIBMM_VFUNCS_ENABLED
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %realize()</tt>
+   * <tt>void on_my_%realize()</tt>
    */
 
   Glib::SignalProxy0< void > signal_realize();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %unrealize()</tt>
+   * <tt>void on_my_%unrealize()</tt>
    */
 
   Glib::SignalProxy0< void > signal_unrealize();
@@ -909,10 +971,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Style
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Style
    */
   Glib::RefPtr<Gtk::Style> wrap(GtkStyle* object, bool take_copy = false);
 }

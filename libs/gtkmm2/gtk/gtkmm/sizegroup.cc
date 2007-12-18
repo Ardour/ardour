@@ -34,8 +34,9 @@ namespace Gtk
 
 SizeGroup::SizeGroup(SizeGroupMode mode)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(sizegroup_class_.init(), "mode",(GtkSizeGroupMode) mode, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(sizegroup_class_.init(), "mode",(GtkSizeGroupMode) mode, static_cast<char*>(0)))
 {}
 
 } // namespace Gtk

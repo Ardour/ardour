@@ -123,6 +123,8 @@ public:
    * of pango_font_metrics_get_approximate_char_width() may be affected
    * by double-width characters.
    * @return <tt>true</tt> if the family is monospace.
+   * 
+   * Since: 1.4.
    */
   bool is_monospace() const;
 
@@ -165,10 +167,13 @@ struct FontFamilyRefPtrTraits
 
 namespace Glib
 {
-  /** @relates Pango::FontFamily
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::FontFamily
    */
   Glib::RefPtr<Pango::FontFamily> wrap(PangoFontFamily* object, bool take_copy = false);
 }

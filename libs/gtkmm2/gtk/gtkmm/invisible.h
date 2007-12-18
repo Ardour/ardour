@@ -109,14 +109,14 @@ public:
   explicit Invisible(const Glib::RefPtr<Gdk::Screen>& screen);
  
   
-  /** Returns the Gdk::Screen object associated with @a invisible 
+  /** Return value: the associated Gdk::Screen.
    * @return The associated Gdk::Screen.
    * 
    * @newin2p2.
    */
   Glib::RefPtr<Gdk::Screen> get_screen();
   
-  /** Returns the Gdk::Screen object associated with @a invisible 
+  /** Return value: the associated Gdk::Screen.
    * @return The associated Gdk::Screen.
    * 
    * @newin2p2.
@@ -138,10 +138,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Invisible
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Invisible
    */
   Gtk::Invisible* wrap(GtkInvisible* object, bool take_copy = false);
 } //namespace Glib

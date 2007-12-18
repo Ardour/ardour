@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: exception.cc,v 1.1.1.1 2003/01/07 16:58:45 murrayc Exp $ */
+/* $Id: exception.cc 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* exception.cc
  *

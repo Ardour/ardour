@@ -154,9 +154,9 @@ public:
   bool event(const Glib::RefPtr<Glib::Object>& event_object, GdkEvent* event, const TextIter& iter);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %event(const Glib::RefPtr<Glib::Object>& event_object, GdkEvent* event, const TextIter& iter)</tt>
+   * <tt>bool on_my_%event(const Glib::RefPtr<Glib::Object>& event_object, GdkEvent* event, const TextIter& iter)</tt>
    */
 
   Glib::SignalProxy3< bool,const Glib::RefPtr<Glib::Object>&,GdkEvent*,const TextIter& > signal_event();
@@ -816,6 +816,57 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Paragraph background color as a string.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_WriteOnly<Glib::ustring> property_paragraph_background() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Paragraph background color as a (possibly unallocated) GdkColor.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<Gdk::Color> property_paragraph_background_gdk() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Paragraph background color as a (possibly unallocated) GdkColor.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<Gdk::Color> property_paragraph_background_gdk() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether left and right margins accumulate.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_accumulative_margin() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether left and right margins accumulate.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_accumulative_margin() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether this tag affects the background color.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
@@ -1355,6 +1406,26 @@ public:
   Glib::PropertyProxy_ReadOnly<bool> property_invisible_set() const;
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether this tag affects the paragraph background color.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_paragraph_background_set() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether this tag affects the paragraph background color.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_paragraph_background_set() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
 
 public:
 
@@ -1381,10 +1452,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TextTag
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TextTag
    */
   Glib::RefPtr<Gtk::TextTag> wrap(GtkTextTag* object, bool take_copy = false);
 }

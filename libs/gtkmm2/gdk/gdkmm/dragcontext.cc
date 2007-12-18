@@ -47,29 +47,10 @@ void DragContext::drag_refuse(guint32 time)
   gdk_drag_status(gobj(), ((GdkDragAction)(0)) /* see GDK docs */, time);
 }
 
-Glib::StringArrayHandle DragContext::get_targets() const
+Gdk::ListHandle_AtomString DragContext::get_targets() const
 {
-  std::list<Glib::ustring> listTargets;
-
-  //Get a newly-allocated array of atoms:
-  GList* list = gobj()->targets;
-  while(list)
-  {
-    GdkAtom atom = GDK_POINTER_TO_ATOM(list->data);
-    
-    //Convert the atom to a string:
-    gchar* const atom_name = gdk_atom_name(atom);
-
-    Glib::ustring target;
-    if(atom_name)
-      target = Glib::ScopedPtr<char>(atom_name).get(); //This frees the gchar*.
-      
-    listTargets.push_back(target);
-
-    list = list->next;
-  }
-
-  return listTargets;
+  //Note that we don't free the GList* (or it's items), because we are accessing the struct directly:
+  return ListHandle_AtomString( gobj()->targets, Glib::OWNERSHIP_NONE);
 }
 
 } /* namespace Gdk */
@@ -191,7 +172,8 @@ GType DragContext::get_base_type()
 
 DragContext::DragContext()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(dragcontext_class_.init()))
 {
   }

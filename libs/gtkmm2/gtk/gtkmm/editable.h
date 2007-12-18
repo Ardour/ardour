@@ -72,8 +72,14 @@ private:
 
 protected:
   Editable(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit Editable(GtkEditable* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -135,17 +141,17 @@ public:
   Glib::SignalProxy2< void,const Glib::ustring&,int* > signal_insert_text();
 
     
-/**
+  /**
    * @par Prototype:
-   * <tt>void %delete_text(int start_pos, int end_pos)</tt>
+   * <tt>void on_my_%delete_text(int start_pos, int end_pos)</tt>
    */
 
   Glib::SignalProxy2< void,int,int > signal_delete_text();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %changed()</tt>
+   * <tt>void on_my_%changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_changed();
@@ -210,10 +216,13 @@ virtual void insert_text_vfunc(const Glib::ustring& text, int& position);
 
 namespace Glib
 {
-  /** @relates Gtk::Editable
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Editable
    */
   Glib::RefPtr<Gtk::Editable> wrap(GtkEditable* object, bool take_copy = false);
 

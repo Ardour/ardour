@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_QUARK_H
 #define _GLIBMM_QUARK_H
-/* $Id: quark.h,v 1.1.1.1 2003/01/07 16:58:52 murrayc Exp $ */
+/* $Id: quark.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* quark.h
  *

@@ -1,4 +1,4 @@
-/* $Id: glibmm.h,v 1.5 2006/09/19 20:36:41 murrayc Exp $ */
+/* $Id: glibmm.h 417 2007-06-12 13:38:39Z murrayc $ */
 
 /* glibmm - a C++ wrapper for the GLib toolkit
  *
@@ -54,6 +54,7 @@
 #include <glibmm/propertyproxy.h>
 #include <glibmm/quark.h>
 #include <glibmm/random.h>
+#include <glibmm/regex.h>
 #include <glibmm/refptr.h>
 #include <glibmm/shell.h>
 #include <glibmm/signalproxy_connectionnode.h>

@@ -95,9 +95,8 @@ private:
 
 public:
   
-  /** Returns the font in the fontset that contains the best glyph for the
-   * unicode character wc.
-   * @param wc A unicode character.
+  /** Return value: a Pango::Font. The caller must call g_object_unref when finished
+   * @param wc A Unicode character.
    * @return A Pango::Font. The caller must call g_object_unref when finished
    * with the font.
    */
@@ -148,10 +147,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Pango::Fontset
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::Fontset
    */
   Glib::RefPtr<Pango::Fontset> wrap(PangoFontset* object, bool take_copy = false);
 }

@@ -141,19 +141,45 @@ public:
   explicit Region(const Rectangle& rectangle);
 
   
+  /** Obtains the smallest rectangle which includes the entire Gdk::Region.
+   * @param rectangle Return location for the clipbox.
+   */
   void get_clipbox(const Rectangle& rectangle);
   Glib::ArrayHandle<Rectangle> get_rectangles() const;
 
   
+  /** Finds out if the Gdk::Region is empty.
+   * @return <tt>true</tt> if @a region  is empty.
+   */
   bool empty();
   
+  /** Finds out if a point is in a region.
+   * @param x The x coordinate of a point.
+   * @param y The y coordinate of a point.
+   * @return <tt>true</tt> if the point is in @a region .
+   */
   bool point_in(int x, int y);
   
+  /** Tests whether a rectangle is within a region.
+   * @param rectangle A Gdk::Rectangle.
+   * @return Gdk::OVERLAP_RECTANGLE_IN, Gdk::OVERLAP_RECTANGLE_OUT, or
+   * Gdk::OVERLAP_RECTANGLE_PART, depending on whether the rectangle is inside,
+   * outside, or partly inside the Gdk::Region, respectively.
+   */
   OverlapType rect_in(const Rectangle& rect);
 
   
+  /** Moves a region the specified distance.
+   * @param dx The distance to move the region horizontally.
+   * @param dy The distance to move the region vertically.
+   */
   void offset(int dx, int dy);
   
+  /** Resizes a region by the specified amount.
+   * Positive values shrink the region. Negative values expand it.
+   * @param dx The number of pixels to shrink the region horizontally.
+   * @param dy The number of pixels to shrink the region vertically.
+   */
   void shrink(int dx, int dy);
   
   /** Sets the area of @a region  to the union of the areas of @a region  and
@@ -190,6 +216,13 @@ public:
    */
   void xor_(const Region& source2); //xor is a keyword
   
+  /** Calls a function on each span in the intersection of @a region  and @a spans .
+   * @param spans An array of Gdk::Spans.
+   * @param n_spans The length of @a spans .
+   * @param sorted <tt>true</tt> if @a spans  is sorted wrt. the y coordinate.
+   * @param function Function to call on each span in the intersection.
+   * @param data Data to pass to @a function .
+   */
   void spans_intersect_foreach(GdkSpan* spans, int n_spans, bool sorted, GdkSpanFunc function, gpointer data);
   
 
@@ -222,10 +255,13 @@ bool operator!=(const Region& lhs, const Region& rhs);
 namespace Glib
 {
 
-  /** @relates Gdk::Region
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::Region
    */
 Gdk::Region wrap(GdkRegion* object, bool take_copy = false);
 

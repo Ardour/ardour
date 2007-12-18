@@ -120,8 +120,8 @@ public:
   void set_alignment(AlignmentEnum xalign = Gtk::ALIGN_LEFT, AlignmentEnum yalign = Gtk::ALIGN_CENTER);
 
   
-  /** Gets the X and Y alignment of the widget within its allocation. See
-   * set_alignment().
+  /** Gets the X and Y alignment of the widget within its allocation. 
+   * See set_alignment().
    * @param xalign Location to store X alignment of @a misc , or <tt>0</tt>.
    * @param yalign Location to store Y alignment of @a misc , or <tt>0</tt>.
    */
@@ -130,7 +130,8 @@ public:
   
   void set_padding(int xpad, int ypad);
   
-  /** Gets the padding in the X and Y directions of the widget. See set_padding().
+  /** Gets the padding in the X and Y directions of the widget. 
+   * See set_padding().
    * @param xpad Location to store padding in the X direction, or <tt>0</tt>.
    * @param ypad Location to store padding in the Y direction, or <tt>0</tt>.
    */
@@ -224,10 +225,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Misc
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Misc
    */
   Gtk::Misc* wrap(GtkMisc* object, bool take_copy = false);
 } //namespace Glib

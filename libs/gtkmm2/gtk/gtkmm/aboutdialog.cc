@@ -190,19 +190,38 @@ GType AboutDialog::get_base_type()
 
 AboutDialog::AboutDialog()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Dialog(Glib::ConstructParams(aboutdialog_class_.init()))
 {
   }
+
+#ifndef GTKMM_DISABLE_DEPRECATED
 
 Glib::ustring AboutDialog::get_name() const
 {
   return Glib::convert_const_gchar_ptr_to_ustring(gtk_about_dialog_get_name(const_cast<GtkAboutDialog*>(gobj())));
 }
 
+#endif // GTKMM_DISABLE_DEPRECATED
+
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 void AboutDialog::set_name(const Glib::ustring& name)
 {
 gtk_about_dialog_set_name(gobj(), name.c_str()); 
+}
+
+#endif // GTKMM_DISABLE_DEPRECATED
+
+Glib::ustring AboutDialog::get_program_name() const
+{
+  return Glib::convert_const_gchar_ptr_to_ustring(gtk_about_dialog_get_program_name(const_cast<GtkAboutDialog*>(gobj())));
+}
+
+void AboutDialog::set_program_name(const Glib::ustring& name)
+{
+gtk_about_dialog_set_program_name(gobj(), name.c_str()); 
 }
 
 Glib::ustring AboutDialog::get_version() const
@@ -352,6 +371,20 @@ Glib::PropertyProxy<Glib::ustring> AboutDialog::property_name()
 Glib::PropertyProxy_ReadOnly<Glib::ustring> AboutDialog::property_name() const
 {
   return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "name");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Glib::ustring> AboutDialog::property_program_name() 
+{
+  return Glib::PropertyProxy<Glib::ustring>(this, "program-name");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Glib::ustring> AboutDialog::property_program_name() const
+{
+  return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "program-name");
 }
 #endif //GLIBMM_PROPERTIES_ENABLED
 

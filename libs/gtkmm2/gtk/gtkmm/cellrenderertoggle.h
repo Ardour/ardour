@@ -112,7 +112,7 @@ public:
   CellRendererToggle();
   
 
-  /** Returns whether we're rendering radio toggles rather than checkboxes.
+  /** Return value: <tt>true</tt> if we're rendering radio toggles rather than checkboxes
    * @return <tt>true</tt> if we're rendering radio toggles rather than checkboxes.
    */
   bool get_radio() const;
@@ -128,8 +128,7 @@ public:
    */
   void set_radio(bool radio = true);
   
-  /** Returns whether the cell renderer is active. See
-   * set_active().
+  /** Return value: <tt>true</tt> if the cell renderer is active.
    * @return <tt>true</tt> if the cell renderer is active.
    */
   bool get_active() const;
@@ -143,11 +142,9 @@ public:
   /** The toggled signal is emitted when the cell is toggled.
    *
    * @param path string representation of TreePath describing the event location
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %toggled(const Glib::ustring& path)</tt>
+   * <tt>void on_my_%toggled(const Glib::ustring& path)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::ustring& > signal_toggled();
@@ -248,10 +245,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::CellRendererToggle
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellRendererToggle
    */
   Gtk::CellRendererToggle* wrap(GtkCellRendererToggle* object, bool take_copy = false);
 } //namespace Glib

@@ -1,5 +1,121 @@
+2.14.2:
+
+* Build: Hopefully fix the build on NetBSD-4.99.6/amd64.
+  Bug #386990. (was already in 2.12.7) (Murray Cumming)
+* gmmproc: Added support for the new _CONFIGINCLUDE() macro.
+  (Armin Burgmeier)
+
+2.14.1:
+
+* Glib::wrap(): Don't fail when wrapping an interface that 
+  is implemented by an unrecognized type.
+  gmmproc-generated code now uses the new wrap_auto_interface(), 
+  so newly-generated source code will require this latest glibmm 
+  version.
+* Increase version number check for glib.
+  (Rémi Cardona)
+
+2.14:
+
+Changes sinze 2.12:
+
+* New Regex class, allowing string searching with regular expressions.
+  (Murray Cumming, Daniel Elstner)
+* New KeyFile class.
+  (Rob Page, Jonathan Jongsma, Murray Cumming)
+* Main: Added SignalTimeout::connect_seconds().
+  (Murray Cumming)
+* OptionContext: Added get/set_summary(), get/set_description(), 
+  set_translation_domain() and set_translate_func().
+  (Jonathan Jongsma)
+* Added Glib::get_user_special_dir(), get_user_data_dir(),
+  get_user_config_dir(), and get_user_cache_dir().
+  (Jonathan Jongsma, Murray Cumming)
+* Improved documentation.
+  (Johannes Schmid, Jonathan Jongsma, Ralf Stephan)
+
+2.14.0:
+
+* Regex:
+  - Add escape_string().
+  - match_full(): Rename to match().
+  - match_all_full(): Rename to match_all().
+  - split_full(): Rename to split().
+
+2.13.9:
+
+* KeyFile: Added Added get_double(), set_double(), get_double_list() 
+  and set_double_list().
+  (Murray Cumming)
+
+2.13.8:
+
+* OptionContext: Added get/set_summary(), get/set_description(), set_translation_domain(),
+  and set_translate_func().
+  (Jonathon Jongsma)
+* Documenation:
+  Added RegEx class documentation. (Johannes Schmid)
+  Show new API in 2.14.
+
+2.13.7:
+
+* Regex: Added a create() method and added default parameter values.
+  Added a simple example.
+* Added  SignalTimeout::connect_seconds(), in addition to the existing 
+  SignalTimeout::connect(), as a wrapper of g_timeout_add_seconds().
+  Improveed the documentation.
+* Added get_user_special_dir().
+  (Murray Cumming)
+
+2.13.6:
+
+* Added Glib::Regex, an API for doing regular expression search/matching.
+  This is not fully wrapped yet, but the simple versions of the API are there.
+  We need to write an example for this.
+  (Murray Cumming)
+
+2.13.5:
+
+* Correctly ifdef-out initialization of deprecated classes.
+  (Johannes Schmid, Openismus)
+* Build: Cope with newer m4 versions. (Yselkowitz)
+
+2.13.4:
+
+* Correct initialization when using --disable-deprecated for reduced code-size 
+  on embedded devices. (Johannes Schmid, Openismus)
+* Glib::ObjectBase::is_derived_() is now public, though it is still only for 
+  internal use. This allows us to do some optimization of default signal handlers and 
+  vfuncs.
+  (Armin Burgmeier, Openismus)
+* Options: Don't overwrite default arguments. This change was lost in 
+  March 2006, but now it is back.
+  (Armin Burgmeier)
+* Dispatcher: Several minor implementation improvements. (Daniel Elstner)
+* ustring: Minor improvements. (Daniel Elstner)
+* Documentation: Actually use the signals documentation again.
+  (Armin Burgmeier, Openismus)
+* Build:
+  - Fix code generation when using the latest m4, and functions named 
+  mkstemp, as experienced on Ubuntu Feisty.
+  Bug #397167 (Dodji Seketeli, Daniel Elstner)
+  - helperlist.h: Avoid warnings about a shadowed member.
+  Bug #420316 from Bradley Bell.
+  - utility.h: Avoid a warning about a redundant declaration.
+  Bug #420339 from Bradley Bell.
+
 2.13.3:
 
+
+* Glib::ObjectBase::is_derived_() is now public, though it is still only for 
+  internal use. This allows us to do some optimization of default signal handlers and 
+  vfuncs.
+  (Armin Burgmeier, Openismus)
+* Build:
+  - helperlist.h: Avoid warnings about a shadowed member.
+  Bug #420316 from Bradley Bell.
+  - utility.h: Avoid a warning about a redundant declaration.
+  Bug #420339 from Bradley Bell.
 * gmmproc improvements:
   - gmmproc: Allow () in property and signal docuemntation.
   - gmmproc: Do not try to remove a common prefix from the 
@@ -7,7 +123,6 @@
   - enum.pl: Allow whitespace in front of an enum typedef. 
   (Daniel Elstner)
   - enum.pl: Fix an infinite loop.
-
 * ObjectBase: Added connect_property_changed(), 
   as an alternative to use when the property proxies are not 
   available because GLIBMM_PROPERTIES_ENABLED is not defined.

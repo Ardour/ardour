@@ -40,6 +40,12 @@ namespace Gtk
 namespace Gtk
 {
 
+/** An action of which only one in a group can be active.
+ *
+ * A Gtk::RadioAction is similar to Gtk::RadioMenuItem. A number of 
+ * radio actions can be linked together so that only one may be active 
+ * at any one time.
+ */
 
 class RadioAction : public Gtk::ToggleAction
 {
@@ -89,34 +95,22 @@ public:
   typedef RadioButtonGroup Group;
   
 protected:
+  //TODO: Remove the default constructor, because name may not be NULL.
   RadioAction();
-  explicit RadioAction(Group& group, const Glib::ustring& name, const StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring());
+  explicit RadioAction(Group& group, const Glib::ustring& name, const StockID& stock_id = StockID(), const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring());
 
 public:
+  //Note that gtk_recent_action_new() does not allow name to be NULL, which suggests that we should not have a default constructor,
+  //but it's OK to set the name later:
   
   static Glib::RefPtr<RadioAction> create();
+
 
   static Glib::RefPtr<RadioAction> create(Group& group, const Glib::ustring& name, const Glib::ustring& label =  Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring());
   static Glib::RefPtr<RadioAction> create(Group& group, const Glib::ustring& name, const Gtk::StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip =  Glib::ustring());
 
   
-  /** Returns the list representing the radio group for this object.
-   * Note that the returned list is only valid until the next change
-   * to the group. 
-   * 
-   * A common way to set up a group of radio group is the following:
-   * @code
-   * GSList *group = <tt>0</tt>;
-   * GtkRadioAction *action;
-   * 
-   * while (/&lt;!-- --&gt;* more actions to add *&lt;!-- --&gt;/)
-   * {
-   * action = gtk_radio_action_new (...);
-   * 
-   * gtk_radio_action_set_group (action, group);
-   * group = gtk_radio_action_get_group (action);
-   * }
-   * @endcode
+  /** Returns: the list representing the radio group for this object
    * @return The list representing the radio group for this object
    * 
    * @newin2p4.
@@ -133,25 +127,30 @@ public:
    */
   int get_current_value() const;
   
+  /** Sets the currently active group member to the member with value
+   * property @a current_value .
+   * 
+   * @newin2p10
+   * @param current_value The new value.
+   */
   void set_current_value(int current_value);
 
+   
   /** The changed signal is emitted on every member of a radio group when the
    * active member is changed. The signal is emitted after the activate signals
    * for the previous and current active members.
    *
    * @param current the member of this action's group which has just been activated.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %changed(const Glib::RefPtr<RadioAction>& current)</tt>
+   * <tt>void on_my_%changed(const Glib::RefPtr<RadioAction>& current)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<RadioAction>& > signal_changed();
 
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The value returned by gtk_radio_action_get_current_value when this action is the current action of its group.
+/** The value returned by gtk_radio_action_get_current_value() when this action is the current action of its group.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -161,7 +160,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The value returned by gtk_radio_action_get_current_value when this action is the current action of its group.
+/** The value returned by gtk_radio_action_get_current_value() when this action is the current action of its group.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -216,10 +215,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::RadioAction
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::RadioAction
    */
   Glib::RefPtr<Gtk::RadioAction> wrap(GtkRadioAction* object, bool take_copy = false);
 }

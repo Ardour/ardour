@@ -116,6 +116,22 @@ namespace Gtk
 {
 
 
+/** A filter for selecting a file subset.
+ *
+ * A Gtk::FileFilter can be used to restrict the files being shown in a Gtk::FileChooser.
+ * Files can be filtered based on their name (with add_pattern()), 
+ * on their mime type (with add_mime_type()), or by a custom filter 
+ * function (with add_custom()).
+ *
+ * Filtering by mime types handles aliasing and subclassing of mime types; 
+ * e.g. a filter for text/plain also matches a file with mime type application/rtf, 
+ * since application/rtf is a subclass of text/plain. Note that Gtk::FileFilter 
+ * allows wildcards for the subtype of a mime type, so you can e.g. filter for image/ *.
+ * 
+ * Normally, filters are used by adding them to a Gtk::FileChooser. See Gtk::FileChooser::add_filter(). 
+ * But it is also possible to manually use a filter on a file with filter(). 
+ */
+
 class FileFilter : public Gtk::Object
 {
   public:
@@ -260,10 +276,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::FileFilter
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::FileFilter
    */
   Gtk::FileFilter* wrap(GtkFileFilter* object, bool take_copy = false);
 } //namespace Glib

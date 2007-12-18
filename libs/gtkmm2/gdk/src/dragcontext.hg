@@ -1,0 +1,132 @@
+/* $Id: dragcontext.hg,v 1.11 2006/03/22 16:53:21 murrayc Exp $ */
+
+/* dragcontext.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/color.h>
+#include <gdkmm/pixbuf.h>
+#include <gdkmm/bitmap.h>
+#include <glibmm/object.h>
+#include <gdk/gdkdnd.h>
+#include <glibmm/listhandle.h>
+#include <gtkmm/stockid.h>
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gtk
+{
+  class Widget;
+} /* namespace Gtk */
+
+//typedef struct _GdkAtom            *GdkAtom;
+
+namespace Gdk
+{
+
+_CC_INCLUDE(gdk/gdkenumtypes.h)
+_WRAP_ENUM(DragAction, GdkDragAction)
+_WRAP_ENUM(DragProtocol, GdkDragProtocol)
+
+/** A Gdk::DragContext holds information about a drag in progress. It is used on both source and destination sides.
+ */
+class DragContext : public Glib::Object
+{
+  _CLASS_GOBJECT(DragContext, GdkDragContext, GDK_DRAG_CONTEXT, Glib::Object,GObject)
+  _IGNORE(gdk_drag_context_ref, gdk_drag_context_unref)
+protected:
+  _CTOR_DEFAULT
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(void drag_status(DragAction action, guint32 time), gdk_drag_status)
+  void drag_refuse(guint32 time);
+  
+  _IGNORE(gdk_drag_motion) //gdk_drag_motion is only used in GDK internally.
+  
+  _WRAP_METHOD(void drop_reply(bool ok, guint32 time), gdk_drop_reply)
+  _WRAP_METHOD(void drop_finish(bool success, guint32 time), gdk_drop_finish)
+  _WRAP_METHOD(Glib::ustring get_selection() const, gdk_drag_get_selection)
+
+  _WRAP_METHOD(void drag_finish(bool success, bool del, guint32 time), gtk_drag_finish)
+  //Gtk::Widget* get_source_widget() - see Gtk::Widget::drag_get_source_widget()
+
+  // void set_icon(Gtk::Widget* widget, int hot_x, int hot_y) - see Gtk::Widget::set_as_icon().
+  _WRAP_METHOD(void set_icon(const Glib::RefPtr<Gdk::Colormap>& colormap, const Glib::RefPtr<Gdk::Pixmap>& pixmap, const Glib::RefPtr<Gdk::Bitmap>& mask, int hot_x, int hot_y), gtk_drag_set_icon_pixmap)
+  _WRAP_METHOD(void set_icon(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf, int hot_x, int hot_y), gtk_drag_set_icon_pixbuf)
+
+  // The first argument was changed from StockID to ustring to avoid 
+  // cross-dependence between gdkmm and gtkmm.
+  // See http://bugzilla.gnome.org/show_bug.cgi?id=79124 for details
+  _WRAP_METHOD(void set_icon(const Glib::ustring& stock_id, int hot_x, int hot_y), gtk_drag_set_icon_stock)
+  _WRAP_METHOD(void set_icon_name(const Glib::ustring& name, int hot_x, int hot_y), gtk_drag_set_icon_name)
+  _WRAP_METHOD(void set_icon(), gtk_drag_set_icon_default)
+
+  /** Get the the source window of this drag.
+   * @result the source window of this drag.
+   */
+  _MEMBER_GET_GOBJECT(source_window, source_window, Window, GdkWindow*)
+
+  /** Get the the source window of this drag.
+   * @result the source window of this drag.
+   */
+  _MEMBER_GET_GOBJECT(destination_window, dest_window, Window, GdkWindow*)
+    
+  /** Get a list of targets offered by the source.
+   * @result a list of targets offered by the source.
+   */
+  Gdk::ListHandle_AtomString get_targets() const;
+
+  /** Get the DND protocol which governs this drag.
+   * @result the DND protocol which governs this drag.
+   */
+  _MEMBER_GET(protocol, protocol, DragProtocol, GdkDragProtocol)
+  
+  /** Discover whether the context is used on the source side.
+   * @result true if the context is used on the source side.
+   */
+  _MEMBER_GET(is_source, is_source, bool, gboolean)
+
+  /** Get a bitmask of actions proposed by the source when the suggested_action is Gdk::ACTION_ASK
+   * @result a bitmask of actions proposed by the source when the suggested_action is Gdk::ACTION_ASK
+   */
+  _MEMBER_GET(actions, actions, DragAction, GdkDragAction)
+
+  /** Get the action suggested by the source.
+   * @result The action suggested by the source.
+   */
+  _MEMBER_GET(suggested_action, suggested_action, DragAction, GdkDragAction)
+
+  /** Get the action chosen by the destination.
+   * @result the action chosen byt the destination.
+   */
+  _MEMBER_GET(action, action, DragAction, GdkDragAction)
+
+  /** Get a timestamp recording the start time of this drag.
+   * @result a timestamp recording the start time of this drag.
+   */
+  _MEMBER_GET(start_time, start_time, guint32, guint32)
+
+  _WRAP_METHOD_DOCS_ONLY(gdk_drag_find_window_for_screen)
+  void find_window_for_screen(const Glib::RefPtr<Window>& drag_window, const Glib::RefPtr<Screen>& screen, int x_root, int y_root, Glib::RefPtr<Window>& dest_window, DragProtocol* protocol) const;
+  _IGNORE(gdk_drag_find_window_for_screen)
+};
+
+} /* namespace Gdk */
+

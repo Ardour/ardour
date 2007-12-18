@@ -1,0 +1,50 @@
+/* Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/rectangle.h>
+#include <gdkmm/pixbuf.h>
+#include <gdkmm/types.h>
+
+//#include <gtk/gtkicontheme.h>
+ 
+_DEFS(gtkmm,gtk)
+
+namespace Gtk
+{
+
+class IconInfo
+{
+  _CLASS_BOXEDTYPE(IconInfo, GtkIconInfo, NONE, gtk_icon_info_copy, gtk_icon_info_free)
+  _IGNORE(gtk_icon_info_get_attach_points, gtk_icon_info_copy, gtk_icon_info_free)
+public:
+
+  ///Tests whether the IconInfo is valid.
+  operator bool();
+
+  _WRAP_METHOD(int get_base_size() const, gtk_icon_info_get_base_size)
+  _WRAP_METHOD(Glib::ustring get_filename() const, gtk_icon_info_get_filename)
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_builtin_pixbuf(), gtk_icon_info_get_builtin_pixbuf, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_builtin_pixbuf() const, gtk_icon_info_get_builtin_pixbuf, refreturn, constversion)
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> load_icon() const, gtk_icon_info_load_icon, errthrow)
+  _WRAP_METHOD(void set_raw_coordinates(bool raw_coordinates = true), gtk_icon_info_set_raw_coordinates)
+  _WRAP_METHOD(bool get_embedded_rect(Gdk::Rectangle& rectangle) const, gtk_icon_info_get_embedded_rect)
+  bool get_attach_points(Glib::ArrayHandle<Gdk::Point>& points) const;
+  _WRAP_METHOD(Glib::ustring get_display_name() const, gtk_icon_info_get_display_name)
+};
+
+} // namespace Gtk
+

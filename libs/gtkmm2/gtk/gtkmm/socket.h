@@ -183,17 +183,17 @@ public:
   Gdk::NativeWindow get_id() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %plug_added()</tt>
+   * <tt>void on_my_%plug_added()</tt>
    */
 
   Glib::SignalProxy0< void > signal_plug_added();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %plug_removed()</tt>
+   * <tt>bool on_my_%plug_removed()</tt>
    */
 
   Glib::SignalProxy0< bool > signal_plug_removed();
@@ -206,10 +206,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Socket
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Socket
    */
   Gtk::Socket* wrap(GtkSocket* object, bool take_copy = false);
 } //namespace Glib

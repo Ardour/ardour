@@ -159,7 +159,7 @@ public:
   void set_current_alpha(guint16 alpha);
   Gdk::Color get_current_color() const;
   
-  /** Returns the current alpha value.
+  /** Return value: an integer between 0 and 65535.
    * @return An integer between 0 and 65535.
    */
   guint16 get_current_alpha() const;
@@ -179,7 +179,7 @@ public:
   void set_previous_alpha(guint16 alpha);
   Gdk::Color get_previous_color() const;
   
-  /** Returns the previous alpha value.
+  /** Return value: an integer between 0 and 65535.
    * @return An integer between 0 and 65535.
    */
   guint16 get_previous_alpha() const;
@@ -200,9 +200,9 @@ public:
   static SlotChangePaletteHook set_change_palette_hook(const SlotChangePaletteHook& slot);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %color_changed()</tt>
+   * <tt>void on_my_%color_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_color_changed();
@@ -376,10 +376,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ColorSelection
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ColorSelection
    */
   Gtk::ColorSelection* wrap(GtkColorSelection* object, bool take_copy = false);
 } //namespace Glib
@@ -387,10 +390,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::ColorSelectionDialog
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ColorSelectionDialog
    */
   Gtk::ColorSelectionDialog* wrap(GtkColorSelectionDialog* object, bool take_copy = false);
 } //namespace Glib

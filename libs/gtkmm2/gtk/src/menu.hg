@@ -1,0 +1,139 @@
+/* $Id: menu.hg,v 1.11 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/menushell_p.h)
+
+//#include <gtk/gtkmenu.h>
+#include <gtkmm/menushell.h>
+#include <gtkmm/menuitem.h>
+
+namespace Gtk
+{
+
+class AccelGroup;
+
+/** @defgroup Menus Menu classes
+ */
+
+/** A drop-down menu consisting of Gtk::MenuItem objects which can be navigated and activated by the user to perform application functions.
+ * Menus are normally placed inside a Gtk::MenuBar or another MenuItem as a sub menu.
+ * A Menu can also be popped up, for instance as a right-click context menu, by calling the popup() method.
+ * See also Gtk::OptionMenu.
+ * @ingroup Widgets
+ * @ingroup Menus
+ */
+class Menu : public MenuShell
+{
+  _CLASS_GTKOBJECT(Menu,GtkMenu,GTK_MENU,Gtk::MenuShell,GtkMenuShell)
+  
+  _IGNORE(gtk_menu_append, gtk_menu_prepend, gtk_menu_insert) //deprecated.
+public:
+  _CTOR_DEFAULT
+
+/* append, prepend, and insert are defined in MenuShell */
+
+  /** For instance,
+   * void on_popup_menu_position(int& x, int& y, bool& push_in);
+   */
+  typedef sigc::slot<void, int&, int&, bool&> SlotPositionCalc;
+             
+  void popup(MenuShell& parent_menu_shell, MenuItem& parent_menu_item, const SlotPositionCalc& slot, guint button, guint32 activate_time);
+  _IGNORE(gtk_menu_popup)
+
+  /** Displays a menu and makes it available for selection.  Applications can use
+   * this function to display context-sensitive menus.
+   *
+   * The @a button  parameter should be the mouse button pressed to initiate
+   * the menu popup. If the menu popup was initiated by something other than
+   * a mouse button press, such as a mouse button release or a keypress,
+   *  @a button  should be 0.
+   *
+   * The @a activate_time  parameter should be the time stamp of the event that
+   * initiated the popup. If such an event is not available, use
+   * gtk_get_current_event_time() instead.
+   * @param func A position_calc_slot supplied function used to position the menu, or <tt>0</tt>.
+   * @param button The mouse button which was pressed to initiate the event.
+   * @param activate_time The time at which the activation event occurred.
+   */
+  void popup(const SlotPositionCalc& position_calc_slot, guint button, guint32 activate_time);
+
+  /** Displays a menu and makes it available for selection.
+   * Applications can use this function to display context-sensitive menus, at the current pointer position.
+   * @param button The button which was pressed to initiate the event.
+   * @param activate_time The time at which the activation event occurred.
+   */
+  void popup(guint button, guint32 activate_time);
+
+  _WRAP_METHOD(void reposition(), gtk_menu_reposition)
+
+  _WRAP_METHOD(void popdown(), gtk_menu_popdown)
+
+  _WRAP_METHOD(MenuItem* get_active(),gtk_menu_get_active)
+  _WRAP_METHOD(const MenuItem* get_active() const, gtk_menu_get_active, constversion)
+  _WRAP_METHOD(void set_active(guint index),gtk_menu_set_active)
+
+  _WRAP_METHOD(void set_accel_group(const Glib::RefPtr<AccelGroup>& accel_group), gtk_menu_set_accel_group)
+  void unset_accel_group();
+  _WRAP_METHOD(Glib::RefPtr<AccelGroup> get_accel_group(), gtk_menu_get_accel_group, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const AccelGroup> get_accel_group() const, gtk_menu_get_accel_group, refreturn, constversion)
+  
+  _WRAP_METHOD(void set_accel_path(const Glib::ustring& accel_path), gtk_menu_set_accel_path)
+
+  _WRAP_METHOD(void detach(),gtk_menu_detach)
+  _WRAP_METHOD(Widget* get_attach_widget(), gtk_menu_get_attach_widget)
+  _WRAP_METHOD(const Widget* get_attach_widget() const, gtk_menu_get_attach_widget, constversion)
+
+  _WRAP_METHOD(void set_tearoff_state(bool torn_off = true), gtk_menu_set_tearoff_state)
+  _WRAP_METHOD(bool get_tearoff_state() const, gtk_menu_get_tearoff_state)
+
+  _WRAP_METHOD(void set_title(const Glib::ustring& title), gtk_menu_set_title)
+  void unset_title();
+  _WRAP_METHOD(Glib::ustring get_title() const, gtk_menu_get_title)
+  _WRAP_METHOD(void set_screen(const Glib::RefPtr<Gdk::Screen>& screen), gtk_menu_set_screen)
+
+  _WRAP_METHOD(void attach(Gtk::Widget& child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach), gtk_menu_attach)
+
+  _WRAP_METHOD(void set_monitor(int monitor_num), gtk_menu_set_monitor)
+  
+  void reorder_child(const MenuItem& child, int position);
+  _IGNORE(gtk_menu_reorder_child)
+
+  _IGNORE_SIGNAL("move_scroll")
+  _WRAP_PROPERTY("tearoff-title", Glib::ustring)
+
+protected:
+
+  //We can not wrap this as a slot because there is no data parameter, and no destroy callback to destroy that data.
+  typedef void (*GtkMenuDetachFunc)   (GtkWidget *attach_widget, GtkMenu   *menu);
+  _WRAP_METHOD(void attach_to_widget(Widget& attach_widget, GtkMenuDetachFunc detacher), gtk_menu_attach_to_widget)
+
+  //TODO: What does "attach" actually mean here? murrayc
+  /** Attaches the menu to the widget.
+   * 
+   * param @attach_widget: the Widget that the menu will be attached to.
+   *
+   * @newin2p10
+   */
+  void attach_to_widget(Widget& attach_widget);
+};
+
+} // namespace Gtk
+
+

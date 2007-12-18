@@ -96,15 +96,17 @@ namespace Gtk
 
 TreeModelFilter::TreeModelFilter(const Glib::RefPtr<TreeModel>& child_model)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(treemodelfilter_class_.init(), "child_model",child_model->gobj(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(treemodelfilter_class_.init(), "child_model",child_model->gobj(), static_cast<char*>(0)))
 {
 }
 
 TreeModelFilter::TreeModelFilter(const Glib::RefPtr<TreeModel>& child_model, const TreeModel::Path& virtual_root)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(treemodelfilter_class_.init(), "child_model",child_model->gobj(),"virtual_root",(virtual_root.empty() ? 0 : const_cast<GtkTreePath*>((virtual_root).gobj())) , (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(treemodelfilter_class_.init(), "child_model",child_model->gobj(),"virtual_root",(virtual_root.empty() ? 0 : const_cast<GtkTreePath*>((virtual_root).gobj())) , static_cast<char*>(0)))
 {
 }
 

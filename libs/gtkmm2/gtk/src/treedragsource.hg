@@ -1,0 +1,74 @@
+/* $Id: treedragsource.hg,v 1.8 2006/05/10 20:59:28 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/interface.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/selectiondata.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+typedef struct _GtkTreeDragSourceIface GtkTreeDragSourceIface;
+typedef struct _GtkSelectionData GtkSelectionData;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gtk
+{
+
+/**
+ * @ingroup TreeView
+*/
+class TreeDragSource : public Glib::Interface
+{
+  _CLASS_INTERFACE(TreeDragSource, GtkTreeDragSource, GTK_TREE_DRAG_SOURCE, GtkTreeDragSourceIface)
+
+public:
+  _WRAP_METHOD(bool row_draggable(const TreeModel::Path& path) const, gtk_tree_drag_source_row_draggable)
+
+  _WRAP_METHOD(bool drag_data_get(const TreeModel::Path& path, SelectionData& selection_data), gtk_tree_drag_source_drag_data_get)
+               
+  _WRAP_METHOD(bool drag_data_delete(const TreeModel::Path& path), gtk_tree_drag_source_drag_data_delete)
+
+protected:
+
+#m4begin
+dnl// We want to hand-code these C vfunc callbacks,
+  _PUSH(SECTION_PCC_CLASS_INIT_VFUNCS)
+    klass->drag_data_get = &drag_data_get_vfunc_callback;
+  _SECTION(SECTION_PH_VFUNCS)
+    static gboolean drag_data_get_vfunc_callback(GtkTreeDragSource* self, GtkTreePath* path, GtkSelectionData* selection_data);
+  _POP()
+#m4end
+
+  _WRAP_VFUNC(bool row_draggable(const TreeModel::Path& path) const, row_draggable)
+
+  //We hand-code this so that we can use a temporary instance for the SelectionData& output parameter:
+  #ifdef GLIBMM_VFUNCS_ENABLED
+  virtual bool drag_data_get_vfunc(const TreeModel::Path& path, SelectionData& selection_data) const;
+  #endif //GLIBMM_VFUNCS_ENABLED
+   
+  _WRAP_VFUNC(bool drag_data_delete(const TreeModel::Path& path), drag_data_delete)
+};
+
+} // namespace Gtk
+

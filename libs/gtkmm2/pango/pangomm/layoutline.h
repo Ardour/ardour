@@ -89,7 +89,7 @@ public:
    * left of the line results in @a index  pointing to the (logical) last
    * grapheme in the line and @a trailing  being set to the number of characters
    * in that grapheme. The reverse is true for a left-to-right line.
-   * @param x_pos The x offset (in Pango::GlyphUnit)
+   * @param x_pos The X offset (in Pango::GlyphUnit)
    * from the left edge of the line.
    * @param index Location to store calculated byte index for
    * the grapheme in which the user clicked.
@@ -227,10 +227,13 @@ typedef Glib::SListHandle< Glib::RefPtr<const LayoutLine>, LayoutLineTraits > SL
 namespace Glib
 {
 
-  /** @relates Pango::LayoutLine
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::LayoutLine
    */
   Glib::RefPtr<Pango::LayoutLine> wrap(PangoLayoutLine* object, bool take_copy = false);
 

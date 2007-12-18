@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_REFPTR_H
 #define _GLIBMM_REFPTR_H
 
-/* $Id: refptr.h,v 1.4 2005/04/07 08:28:46 murrayc Exp $ */
+/* $Id: refptr.h 216 2005-04-07 08:28:46Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

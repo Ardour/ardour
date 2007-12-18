@@ -1,0 +1,1 @@
+SUBDIRS = gtk-demo

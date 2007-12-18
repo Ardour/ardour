@@ -116,8 +116,7 @@ public:
   EventBox();
 
   
-  /** Returns whether the event box has a visible window.
-   * See set_visible_window() for details.
+  /** Return value: <tt>true</tt> if the event box window is visible
    * @return <tt>true</tt> if the event box window is visible
    * 
    * @newin2p4.
@@ -127,7 +126,7 @@ public:
   /** Set whether the event box uses a visible or invisible child
    * window. The default is to use visible windows.
    * 
-   * In an invisible window event box, the window that that the
+   * In an invisible window event box, the window that the
    * event box creates is a Gdk::INPUT_ONLY window, which 
    * means that it is invisible and only serves to receive
    * events.
@@ -165,9 +164,7 @@ public:
    */
   void set_visible_window(bool visible_window = true);
   
-  /** Returns whether the event box window is above or below the
-   * windows of its child. See set_above_child() for
-   * details.
+  /** Return value: <tt>true</tt> if the event box window is above the window
    * @return <tt>true</tt> if the event box window is above the window
    * of its child.
    * 
@@ -236,10 +233,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::EventBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::EventBox
    */
   Gtk::EventBox* wrap(GtkEventBox* object, bool take_copy = false);
 } //namespace Glib

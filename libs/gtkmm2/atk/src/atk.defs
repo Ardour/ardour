@@ -1,0 +1,4 @@
+(include atk_methods.defs)
+(include atk_signals.defs)
+(include atk_enums.defs)
+(include atk_vfuncs.defs)

@@ -1,0 +1,112 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/pixbuf.h>
+
+#include <time.h>
+
+_DEFS(gtkmm,gtk)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+typedef struct _GtkRecentInfo GtkRecentInfo;
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
+namespace Gtk
+{
+
+
+/** Contains informations found when looking up an entry of the
+ * recently used files list.
+ *
+ * @newin2p10
+ *
+ * @ingroup RecentFiles
+ */
+class RecentInfo
+{
+  _CLASS_OPAQUE_REFCOUNTED(RecentInfo, GtkRecentInfo, NONE, gtk_recent_info_ref, gtk_recent_info_unref)
+  _IGNORE(gtk_recent_info_ref, gtk_recent_info_unref)
+public:
+
+  bool equal(const RecentInfo& other) const;
+  /// Tests whether the RecentInfo is valid.
+  operator bool() const;
+
+  _WRAP_METHOD(Glib::ustring get_uri() const, gtk_recent_info_get_uri)
+  _WRAP_METHOD(Glib::ustring get_display_name() const, gtk_recent_info_get_display_name)
+  _WRAP_METHOD(Glib::ustring get_description() const, gtk_recent_info_get_description)
+  _WRAP_METHOD(Glib::ustring get_mime_type() const, gtk_recent_info_get_mime_type)
+  
+  _WRAP_METHOD(time_t get_added() const, gtk_recent_info_get_added)
+  _WRAP_METHOD(time_t get_modified() const, gtk_recent_info_get_modified)
+  _WRAP_METHOD(time_t get_visited() const, gtk_recent_info_get_visited)
+  
+  _WRAP_METHOD(bool get_private_hint() const, gtk_recent_info_get_private_hint)
+
+  _WRAP_METHOD(bool get_application_info(const Glib::ustring& app_name, Glib::StringArrayHandle& app_exec, guint& count, time_t& time) const, gtk_recent_info_get_application_info)
+  Glib::StringArrayHandle get_applications() const;
+  _IGNORE(gtk_recent_info_get_applications)
+  //_WRAP_METHOD(Glib::StringArrayHandle get_applications(unsigned& length) const, gtk_recent_info_get_applications)
+  _WRAP_METHOD(Glib::ustring last_application() const, gtk_recent_info_last_application)
+  _WRAP_METHOD(bool has_application(const Glib::ustring& app_name) const, gtk_recent_info_has_application)
+  
+  Glib::StringArrayHandle get_groups() const;
+  _IGNORE(gtk_recent_info_get_groups)
+  //_WRAP_METHOD(Glib::StringArrayHandle get_groups(unsigned& length) const, gtk_recent_info_get_groups)
+  _WRAP_METHOD(bool has_group(const Glib::ustring& group) const, gtk_recent_info_has_group)
+  
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_icon(int size), gtk_recent_info_get_icon, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_icon(int size) const, gtk_recent_info_get_icon, refreturn)
+  
+  _WRAP_METHOD(Glib::ustring get_short_name() const, gtk_recent_info_get_short_name)
+  _WRAP_METHOD(Glib::ustring get_uri_display() const, gtk_recent_info_get_uri_display)
+  
+  _WRAP_METHOD(int get_age() const, gtk_recent_info_get_age)
+  _WRAP_METHOD(bool is_local() const, gtk_recent_info_is_local)
+  _WRAP_METHOD(bool exists() const, gtk_recent_info_exists)
+
+  _IGNORE(gtk_recent_info_match)
+  //_WRAP_METHOD(bool match(const RecentInfo& b) const, gtk_recent_info_match)
+};
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+struct RecentInfoTraits
+{
+  typedef Glib::RefPtr<RecentInfo> CppType;
+  typedef const GtkRecentInfo* CType;
+  typedef GtkRecentInfo* CTypeNonConst;
+
+  static CType to_c_type(const CppType& obj) { return Glib::unwrap(obj); }
+  static CType to_c_type(const CType& obj) { return obj; }
+  static CppType to_cpp_type(const CType& obj); //Implemented in the .cpp file
+  static void release_c_type(const CType& /* obj */) { /* gtk_recent_info_unref(const_cast<CTypeNonConst>(obj)); */}
+};
+#endif
+
+//TODO: We normally put these inside the class:
+
+/** @relates Gtk::RecentInfo */
+inline bool operator==(const RecentInfo& lhs, const RecentInfo& rhs)
+  { return lhs.equal(rhs); }
+
+/** @relates Gtk::RecentInfo */
+inline bool operator!=(const RecentInfo& lhs, const RecentInfo& rhs)
+  { return !lhs.equal(rhs); }
+
+} // namespace Gtk

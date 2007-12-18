@@ -82,7 +82,11 @@ public:
   bool next();
 
   
-  /** Get the range of the current segment.
+  /** Get the range of the current segment. Note that the
+   * stored return values are signed, not unsigned like
+   * the values in Pango::Attribute. To deal with this API
+   * oversight, stored return values that wouldn't fit into
+   * a signed integer are clamped to G::MAXINT.
    * @param start Location to store the start of the range.
    * @param end Location to store the end of the range.
    */

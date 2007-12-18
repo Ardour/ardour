@@ -218,8 +218,7 @@ public:
    */
   void set_use_underline(bool use_underline = true);
   
-  /** Returns whether an embedded underline in the expander label indicates a
-   * mnemonic. See set_use_underline().
+  /** Return value: <tt>true</tt> if an embedded underline in the expander label
    * @return <tt>true</tt> if an embedded underline in the expander label
    * indicates the mnemonic accelerator keys.
    * 
@@ -236,9 +235,7 @@ public:
    */
   void set_use_markup(bool use_markup = true);
   
-  /** Returns whether the label's text is interpreted as marked up with
-   * the Pango text markup
-   * language. See set_use_markup().
+  /** Return value: <tt>true</tt> if the label's text will be parsed for markup
    * @return <tt>true</tt> if the label's text will be parsed for markup
    * 
    * @newin2p4.
@@ -333,7 +330,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The text of the label includes XML markup. See pango_parse_markup.
+/** The text of the label includes XML markup. See pango_parse_markup().
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -343,7 +340,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The text of the label includes XML markup. See pango_parse_markup.
+/** The text of the label includes XML markup. See pango_parse_markup().
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -401,10 +398,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Expander
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Expander
    */
   Gtk::Expander* wrap(GtkExpander* object, bool take_copy = false);
 } //namespace Glib

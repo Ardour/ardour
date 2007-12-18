@@ -1,0 +1,63 @@
+/* $Id: cellrendererpixbuf.hg,v 1.4 2006/05/10 20:59:27 murrayc Exp $ */
+
+/* cellrenderertext.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/cellrenderer.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/cellrenderer_p.h)
+
+
+namespace Gtk
+{
+
+/** Renders a pixbuf in a cell.
+ * A CellRendererPixbuf can be used to render an image in a cell. It allows you to render either a 
+ * given Pixbuf (set via the pixbuf property) or a stock icon (set via the stock_id property).
+ *
+ * To support the tree view, CellRendererPixbuf also supports rendering two alternative pixbufs, when 
+ * the is_expanded property is true. If the is_expanded property is true and the pixbuf_expander_open 
+ * property is set to a pixbuf, it renders that pixbuf. If the is_expanded property is false and the *
+ * pixbuf_expander_closed property is set to a pixbuf, it renders that one.
+ *
+ * @ingroup TreeView
+ */
+class CellRendererPixbuf : public CellRenderer
+{
+  _CLASS_GTKOBJECT(CellRendererPixbuf,GtkCellRendererPixbuf,GTK_CELL_RENDERER_PIXBUF,Gtk::CellRenderer,GtkCellRenderer)
+public:
+
+  _CTOR_DEFAULT
+
+  _WRAP_PROPERTY("pixbuf", Glib::RefPtr<Gdk::Pixbuf>)
+  _WRAP_PROPERTY("pixbuf_expander_open", Glib::RefPtr<Gdk::Pixbuf>)
+  _WRAP_PROPERTY("pixbuf_expander_closed", Glib::RefPtr<Gdk::Pixbuf>)
+  _WRAP_PROPERTY("stock_id", Glib::ustring)
+  _WRAP_PROPERTY("stock_size", guint)
+  _WRAP_PROPERTY("stock_detail", Glib::ustring)
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable();
+#else
+  virtual Glib::ustring _property_renderable();
+#endif
+};
+
+} /* namespace Gtk */
+

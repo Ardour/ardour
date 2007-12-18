@@ -43,7 +43,12 @@ namespace Gtk
 {
 
 /**  .
- * TODO.
+ * Renders a keyboard accelerator in a cell
+ *
+ * Gtk::CellRendererAccel displays a keyboard accelerator 
+ * (i.e. a key combination like <Control>-a).
+ * If the cell renderer is editable, the accelerator can be changed by 
+ * simply typing the new combination.
  *
  * @ingroup TreeView
  * @newin2p10
@@ -115,17 +120,17 @@ public:
 
   //TODO: Wrap accel_key and accel_mods in an AccelKey?
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %accel_edited(const Glib::ustring& path_string, guint accel_key, Gdk::ModifierType accel_mods, guint hardware_keycode)</tt>
+   * <tt>void on_my_%accel_edited(const Glib::ustring& path_string, guint accel_key, Gdk::ModifierType accel_mods, guint hardware_keycode)</tt>
    */
 
   Glib::SignalProxy4< void,const Glib::ustring&,guint,Gdk::ModifierType,guint > signal_accel_edited();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %accel_cleared(const Glib::ustring& path_string)</tt>
+   * <tt>void on_my_%accel_cleared(const Glib::ustring& path_string)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::ustring& > signal_accel_cleared();
@@ -204,10 +209,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::CellRendererAccel
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellRendererAccel
    */
   Gtk::CellRendererAccel* wrap(GtkCellRendererAccel* object, bool take_copy = false);
 } //namespace Glib

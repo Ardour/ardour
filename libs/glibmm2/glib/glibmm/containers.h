@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_CONTAINERS_H
 #define _GLIBMM_CONTAINERS_H
 
-/* $Id: containers.h,v 1.7 2005/11/23 07:22:43 murrayc Exp $ */
+/* $Id: containers.h 229 2005-11-23 07:22:43Z murrayc $ */
 
 /* containers.h
  *

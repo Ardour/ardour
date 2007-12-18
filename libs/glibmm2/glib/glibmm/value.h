@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_VALUE_H
 #define _GLIBMM_VALUE_H
-/* $Id: value.h,v 1.11 2006/05/14 12:12:41 murrayc Exp $ */
+/* $Id: value.h 292 2006-05-14 12:12:41Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

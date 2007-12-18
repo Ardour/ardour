@@ -39,16 +39,18 @@ host_triplet = @host@
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/cairomm-1.0.pc.in \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	config.guess config.sub depcomp install-sh ltmain.sh missing \
-	mkinstalldirs
+	config.guess config.sub depcomp install-sh ltmain.sh missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_boost_base.m4 \
+	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
+	$(top_srcdir)/m4/reduced.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
+CONFIG_HEADER = $(top_builddir)/cairomm/cairommconfig.h
 CONFIG_CLEAN_FILES = cairomm-1.0.pc
 SOURCES =
 DIST_SOURCES =
@@ -89,7 +91,12 @@ AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
+AUTOTESTS_FALSE = @AUTOTESTS_FALSE@
+AUTOTESTS_TRUE = @AUTOTESTS_TRUE@
 AWK = @AWK@
+BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
+BOOST_LDFLAGS = @BOOST_LDFLAGS@
+BOOST_UNIT_TEST_FRAMEWORK_LIB = @BOOST_UNIT_TEST_FRAMEWORK_LIB@
 CAIROMM_CFLAGS = @CAIROMM_CFLAGS@
 CAIROMM_LIBS = @CAIROMM_LIBS@
 CC = @CC@
@@ -121,6 +128,7 @@ GENERIC_MAJOR_VERSION = @GENERIC_MAJOR_VERSION@
 GENERIC_MICRO_VERSION = @GENERIC_MICRO_VERSION@
 GENERIC_MINOR_VERSION = @GENERIC_MINOR_VERSION@
 GENERIC_VERSION = @GENERIC_VERSION@
+GREP = @GREP@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -134,6 +142,8 @@ LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OS_WIN32_FALSE = @OS_WIN32_FALSE@
+OS_WIN32_TRUE = @OS_WIN32_TRUE@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -145,20 +155,14 @@ PKG_CONFIG = @PKG_CONFIG@
 PLATFORM_WIN32_FALSE = @PLATFORM_WIN32_FALSE@
 PLATFORM_WIN32_TRUE = @PLATFORM_WIN32_TRUE@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
-ac_ct_AR = @ac_ct_AR@
-ac_ct_AS = @ac_ct_AS@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_DLLTOOL = @ac_ct_DLLTOOL@
 ac_ct_F77 = @ac_ct_F77@
-ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = @ac_ct_STRIP@
-ac_pt_PKG_CONFIG = @ac_pt_PKG_CONFIG@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -175,29 +179,37 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
+htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = cairomm examples MSVC $(DOCS_SUBDIR)
+SUBDIRS = cairomm examples MSVC $(DOCS_SUBDIR) tests
 #docs examples
+ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = MAINTAINERS cairomm-1.0.pc.in
 DIST_SUBDIRS = $(SUBDIRS)
 
@@ -216,7 +228,7 @@ RELEASE_UPLOAD_BASE = /srv/cairo.freedesktop.org/www
 RELEASE_UPLOAD_DIR = $(RELEASE_UPLOAD_BASE)/releases
 RELEASE_URL_BASE = http://cairographics.org/releases
 RELEASE_ANNOUNCE_LIST = cairo-announce@cairographics.org (and CC gnome-announce-list@gnome.org)
-CVS = cvs
+GIT = $(top_srcdir)/missing --run git
 
 #MANUAL_DATED =		cairo-manual-`date +%Y%m%d`
 #MANUAL_TAR_FILE = 	$(MANUAL_DATED).tar.gz
@@ -425,7 +437,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/MSVC/cairomm $(distdir)/docs/reference
+	$(mkdir_p) $(distdir)/. $(distdir)/MSVC/cairomm $(distdir)/docs/reference $(distdir)/m4
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -684,7 +696,7 @@ release-verify-newer:
 	@echo -n "Checking that no $(VERSION) release already exists..."
 	@ssh $(RELEASE_UPLOAD_HOST) test ! -e $(RELEASE_UPLOAD_DIR)/$(tar_file) \
 		|| (echo "Ouch." && echo "Found: $(RELEASE_UPLOAD_HOST):$(RELEASE_UPLOAD_DIR)/$(tar_file)" \
-		&& echo "Are you sure you have an updated CVS checkout?" \
+		&& echo "Are you sure you have an updated git checkout?" \
 		&& echo "This should never happen." \
 		&& false)
 	@echo "Good."
@@ -706,9 +718,12 @@ release-upload: release-check $(tar_file) $(sha1_file) $(gpg_file)
 	scp $(tar_file) $(sha1_file) $(gpg_file) $(RELEASE_UPLOAD_HOST):$(RELEASE_UPLOAD_DIR)
 	mv $(tar_file) $(sha1_file) $(gpg_file) releases
 	ssh $(RELEASE_UPLOAD_HOST) "rm -f $(RELEASE_UPLOAD_DIR)/LATEST-$(PACKAGE)-[0-9]* && ln -s $(tar_file) $(RELEASE_UPLOAD_DIR)/LATEST-$(PACKAGE)-$(VERSION)"
-	$(CVS) tag RELEASE_$(GENERIC_MAJOR_VERSION)_$(GENERIC_MINOR_VERSION)_$(GENERIC_MICRO_VERSION)
+	$(GIT) tag -s -m "$(PACKAGE) release $(VERSION)" v$(VERSION)
 
-release-publish: release-upload releases/$(sha1_file)
+doc-publish:
+	(cd docs/reference && $(MAKE) $(AM_MAKEFLAGS) publish)
+
+release-publish: release-upload doc-publish releases/$(sha1_file)
 	@echo ""
 	@echo "Please send an announcement to $(RELEASE_ANNOUNCE_LIST)"
 	@echo "including the following:"

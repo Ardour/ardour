@@ -1,0 +1,855 @@
+;; -*- scheme -*-
+; virtual function definitions
+; define-vfunc is gtkmm-specific
+
+; AtkAction
+
+(define-vfunc do_action
+  (of-object "AtkAction")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc get_n_actions
+  (of-object "AtkAction")
+  (return-type "gint")
+)
+
+(define-vfunc get_description
+  (of-object "AtkAction")
+  (return-type "const-gchar*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc get_name
+  (of-object "AtkAction")
+  (return-type "const-gchar*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc get_keybinding
+  (of-object "AtkAction")
+  (return-type "const-gchar*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc set_description
+  (of-object "AtkAction")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "i")
+    '("const-gchar*" "desc")
+  )
+)
+
+(define-vfunc get_localized_name
+  (of-object "AtkAction")
+  (return-type "const-gchar*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+; AtkComponent
+
+(define-vfunc add_focus_handler
+  (of-object "AtkComponent")
+  (return-type "guint")
+  (parameters
+    '("AtkFocusHandler" "handler")
+  )
+)
+
+(define-vfunc contains
+  (of-object "AtkComponent")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "x")
+    '("gint" "y")
+    '("AtkCoordType" "coord_type")
+  )
+)
+
+(define-vfunc ref_accessible_at_point
+  (of-object "AtkComponent")
+  (return-type "AtkObject*")
+  (parameters
+    '("gint" "x")
+    '("gint" "y")
+    '("AtkCoordType" "coord_type")
+  )
+)
+
+
+(define-vfunc get_extents
+  (of-object "AtkComponent")
+  (return-type "void")
+  (parameters
+    '("gint*" "x")
+    '("gint*" "y")
+    '("gint*" "width")
+    '("gint*" "height")
+    '("AtkCoordType" "coord_type")
+  )
+)
+
+(define-vfunc get_position
+  (of-object "AtkComponent")
+  (return-type "void")
+  (parameters
+    '("gint*" "x")
+    '("gint*" "y")
+    '("AtkCoordType" "coord_type")
+  )
+)
+
+(define-vfunc get_size
+  (of-object "AtkComponent")
+  (return-type "void")
+  (parameters
+    '("gint*" "width")
+    '("gint*" "height")
+  )
+)
+
+(define-vfunc grab_focus
+  (of-object "AtkComponent")
+  (return-type "gboolean")
+)
+
+(define-vfunc remove_focus_handler
+  (of-object "AtkComponent")
+  (return-type "void")
+  (parameters
+    '("guint" "handler_id")
+  )
+)
+
+(define-vfunc set_extents
+  (of-object "AtkComponent")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+    '("AtkCoordType" "coord_type")
+  )
+)
+
+(define-vfunc set_position
+  (of-object "AtkComponent")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "x")
+    '("gint" "y")
+    '("AtkCoordType" "coord_type")
+  )
+)
+
+(define-vfunc set_size
+  (of-object "AtkComponent")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-vfunc get_layer
+  (of-object "AtkComponent")
+  (return-type "AtkLayer")
+)
+
+(define-vfunc get_mdi_zorder
+  (of-object "AtkComponent")
+  (return-type "gint")
+)
+
+;; AtkDocument
+
+(define-vfunc get_document_type
+  (of-object "AtkDocument")
+  (return-type "const-gchar*")
+)
+
+(define-vfunc get_document
+  (of-object "AtkDocument")
+  (return-type "gpointer")
+)
+
+;; AtkText
+
+(define-vfunc get_text
+  (of-object "AtkText")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "start_offset")
+    '("gint" "end_offset")
+  )
+)
+
+(define-vfunc get_character_at_offset
+  (of-object "AtkText")
+  (return-type "gunichar")
+  (parameters
+    '("gint" "offset")
+  )
+)
+
+(define-vfunc get_text_after_offset
+  (of-object "AtkText")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "offset")
+    '("AtkTextBoundary" "boundary_type")
+    '("gint*" "start_offset")
+    '("gint*" "end_offset")
+  )
+)
+
+(define-vfunc get_text_at_offset
+  (of-object "AtkText")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "offset")
+    '("AtkTextBoundary" "boundary_type")
+    '("gint*" "start_offset")
+    '("gint*" "end_offset")
+  )
+)
+
+(define-vfunc get_text_before_offset
+  (of-object "AtkText")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "offset")
+    '("AtkTextBoundary" "boundary_type")
+    '("gint*" "start_offset")
+    '("gint*" "end_offset")
+  )
+)
+
+(define-vfunc get_caret_offset
+  (of-object "AtkText")
+  (return-type "gint")
+)
+
+(define-vfunc get_character_extents
+  (of-object "AtkText")
+  (return-type "none")
+  (parameters
+    '("gint" "offset")
+    '("gint*" "x")
+    '("gint*" "y")
+    '("gint*" "width")
+    '("gint*" "height")
+    '("AtkCoordType" "coords")
+  )
+)
+
+(define-vfunc get_run_attributes
+  (of-object "AtkText")
+  (return-type "AtkAttributeSet*")
+  (parameters
+    '("gint" "offset")
+    '("gint*" "start_offset")
+    '("gint*" "end_offset")
+  )
+)
+
+(define-vfunc get_default_attributes
+  (of-object "AtkText")
+  (return-type "AtkAttributeSet*")
+)
+
+(define-vfunc get_character_count
+  (of-object "AtkText")
+  (return-type "gint")
+)
+
+(define-vfunc get_offset_at_point
+  (of-object "AtkText")
+  (return-type "gint")
+  (parameters
+    '("gint" "x")
+    '("gint" "y")
+    '("AtkCoordType" "coords")
+  )
+)
+
+(define-vfunc get_n_selections
+  (of-object "AtkText")
+  (return-type "gint")
+)
+
+(define-vfunc get_selection
+  (of-object "AtkText")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "selection_num")
+    '("gint*" "start_offset")
+    '("gint*" "end_offset")
+  )
+)
+
+(define-vfunc add_selection
+  (of-object "AtkText")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "start_offset")
+    '("gint" "end_offset")
+  )
+)
+
+(define-vfunc remove_selection
+  (of-object "AtkText")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "selection_num")
+  )
+)
+
+(define-vfunc set_selection
+  (of-object "AtkText")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "selection_num")
+    '("gint" "start_offset")
+    '("gint" "end_offset")
+  )
+)
+
+(define-vfunc set_caret_offset
+  (of-object "AtkText")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "offset")
+  )
+)
+
+;; AtkEditableText
+
+(define-vfunc set_run_attributes
+  (of-object "AtkEditableText")
+  (return-type "gboolean")
+  (parameters
+    '("AtkAttributeSet*" "attrib_set")
+    '("gint" "start_offset")
+    '("gint" "end_offset")
+  )
+)
+
+(define-vfunc set_text_contents
+  (of-object "AtkEditableText")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "string")
+  )
+)
+
+(define-vfunc insert_text
+  (of-object "AtkEditableText")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "string")
+    '("gint" "length")
+    '("gint*" "position")
+  )
+)
+
+(define-vfunc copy_text
+  (of-object "AtkEditableText")
+  (return-type "none")
+  (parameters
+    '("gint" "start_pos")
+    '("gint" "end_pos")
+  )
+)
+
+(define-vfunc cut_text
+  (of-object "AtkEditableText")
+  (return-type "none")
+  (parameters
+    '("gint" "start_pos")
+    '("gint" "end_pos")
+  )
+)
+
+(define-vfunc delete_text
+  (of-object "AtkEditableText")
+  (return-type "none")
+  (parameters
+    '("gint" "start_pos")
+    '("gint" "end_pos")
+  )
+)
+
+(define-vfunc paste_text
+  (of-object "AtkEditableText")
+  (return-type "none")
+  (parameters
+    '("gint" "position")
+  )
+)
+
+;; AtkImage
+
+(define-vfunc set_image_description
+  (of-object "AtkImage")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "description")
+  )
+)
+
+(define-vfunc get_image_description
+  (of-object "AtkImage")
+  (return-type "const-gchar*")
+)
+
+(define-vfunc get_image_size
+  (of-object "AtkImage")
+  (return-type "void")
+  (parameters
+    '("gint*" "width")
+    '("gint*" "height")
+  )
+)
+
+(define-vfunc get_image_position
+  (of-object "AtkImage")
+  (return-type "void")
+  (parameters
+    '("gint*" "x")
+    '("gint*" "y")
+    '("AtkCoordType" "coord_type")
+  )
+)
+
+;; AtkImplmentor
+
+(define-vfunc ref_accessible
+  (of-object "AtkImplementor")
+  (return-type "AtkObject*")
+)
+
+;; AtkSelection
+
+(define-vfunc add_selection
+  (of-object "AtkSelection")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc clear_selection
+  (of-object "AtkSelection")
+  (return-type "gboolean")
+)
+
+(define-vfunc ref_selection
+  (of-object "AtkSelection")
+  (return-type "AtkObject*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc get_selection_count
+  (of-object "AtkSelection")
+  (return-type "gint")
+)
+
+(define-vfunc is_child_selected
+  (of-object "AtkSelection")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc remove_selection
+  (of-object "AtkSelection")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc select_all_selection
+  (of-object "AtkSelection")
+  (return-type "gboolean")
+)
+
+;; AtkTable
+
+(define-vfunc ref_at
+  (of-object "AtkTable")
+  (return-type "AtkObject*")
+  (parameters
+    '("gint" "row")
+    '("gint" "column")
+  )
+)
+
+(define-vfunc get_index_at
+  (of-object "AtkTable")
+  (return-type "gint")
+  (parameters
+    '("gint" "row")
+    '("gint" "column")
+  )
+)
+
+(define-vfunc get_column_at_index
+  (of-object "AtkTable")
+  (return-type "gint")
+  (parameters
+    '("gint" "index_")
+  )
+)
+
+(define-vfunc get_row_at_index
+  (of-object "AtkTable")
+  (return-type "gint")
+  (parameters
+    '("gint" "index_")
+  )
+)
+
+(define-vfunc get_n_columns
+  (of-object "AtkTable")
+  (return-type "gint")
+)
+
+(define-vfunc get_n_rows
+  (of-object "AtkTable")
+  (return-type "gint")
+)
+
+(define-vfunc get_column_extent_at
+  (of-object "AtkTable")
+  (return-type "gint")
+  (parameters
+    '("gint" "row")
+    '("gint" "column")
+  )
+)
+
+(define-vfunc get_row_extent_at
+  (of-object "AtkTable")
+  (return-type "gint")
+  (parameters
+    '("gint" "row")
+    '("gint" "column")
+  )
+)
+
+(define-vfunc get_caption
+  (of-object "AtkTable")
+  (return-type "AtkObject*")
+)
+
+(define-vfunc get_column_description
+  (of-object "AtkTable")
+  (return-type "const-gchar*")
+  (parameters
+    '("gint" "column")
+  )
+)
+
+(define-vfunc get_column_header
+  (of-object "AtkTable")
+  (return-type "AtkObject*")
+  (parameters
+    '("gint" "column")
+  )
+)
+
+(define-vfunc get_row_description
+  (of-object "AtkTable")
+  (return-type "const-gchar*")
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-vfunc get_row_header
+  (of-object "AtkTable")
+  (return-type "AtkObject*")
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-vfunc get_summary
+  (of-object "AtkTable")
+  (return-type "AtkObject*")
+)
+
+(define-vfunc set_caption
+  (of-object "AtkTable")
+  (return-type "none")
+  (parameters
+    '("AtkObject*" "caption")
+  )
+)
+
+(define-vfunc set_column_description
+  (of-object "AtkTable")
+  (return-type "none")
+  (parameters
+    '("gint" "column")
+    '("const-gchar*" "description")
+  )
+)
+
+(define-vfunc set_column_header
+  (of-object "AtkTable")
+  (return-type "none")
+  (parameters
+    '("gint" "column")
+    '("AtkObject*" "header")
+  )
+)
+
+(define-vfunc set_row_description
+  (of-object "AtkTable")
+  (return-type "none")
+  (parameters
+    '("gint" "row")
+    '("const-gchar*" "description")
+  )
+)
+
+(define-vfunc set_row_header
+  (of-object "AtkTable")
+  (return-type "none")
+  (parameters
+    '("gint" "row")
+    '("AtkObject*" "header")
+  )
+)
+
+(define-vfunc set_summary
+  (of-object "AtkTable")
+  (return-type "none")
+  (parameters
+    '("AtkObject*" "accessible")
+  )
+)
+
+(define-vfunc get_selected_columns
+  (of-object "AtkTable")
+  (return-type "gint")
+  (parameters
+    '("gint**" "selected")
+  )
+)
+
+(define-vfunc get_selected_rows
+  (of-object "AtkTable")
+  (return-type "gint")
+  (parameters
+    '("gint**" "selected")
+  )
+)
+
+(define-vfunc is_column_selected
+  (of-object "AtkTable")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "column")
+  )
+)
+
+(define-vfunc is_row_selected
+  (of-object "AtkTable")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-vfunc is_selected
+  (of-object "AtkTable")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "row")
+    '("gint" "column")
+  )
+)
+
+(define-vfunc add_row_selection
+  (of-object "AtkTable")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-vfunc remove_row_selection
+  (of-object "AtkTable")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-vfunc add_column_selection
+  (of-object "AtkTable")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "column")
+  )
+)
+
+(define-vfunc remove_column_selection
+  (of-object "AtkTable")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "column")
+  )
+)
+
+;; AtkValue
+
+(define-vfunc get_current_value
+  (of-object "AtkValue")
+  (return-type "none")
+  (parameters
+    '("GValue*" "value")
+  )
+)
+
+(define-vfunc get_maximum_value
+  (of-object "AtkValue")
+  (return-type "none")
+  (parameters
+    '("GValue*" "value")
+  )
+)
+
+(define-vfunc get_minimum_value
+  (of-object "AtkValue")
+  (return-type "none")
+  (parameters
+    '("GValue*" "value")
+  )
+)
+
+(define-vfunc set_current_value
+  (of-object "AtkValue")
+  (return-type "gboolean")
+  (parameters
+    '("const-GValue*" "value")
+  )
+)
+
+;; AtkHyperlink
+
+(define-vfunc get_uri
+  (of-object "AtkHyperlink")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc get_object
+  (of-object "AtkHyperlink")
+  (return-type "AtkObject*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc get_end_index
+  (of-object "AtkHyperlink")
+  (return-type "gint")
+)
+
+(define-vfunc get_start_index
+  (of-object "AtkHyperlink")
+  (return-type "gint")
+)
+
+(define-vfunc is_valid
+  (of-object "AtkHyperlink")
+  (return-type "gboolean")
+)
+
+(define-vfunc get_n_anchors
+  (of-object "AtkHyperlink")
+  (return-type "gint")
+)
+
+(define-vfunc link_state
+  (of-object "AtkHyperlink")
+  (return-type "guint")
+)
+
+(define-vfunc is_selected_link
+  (of-object "AtkHyperlink")
+  (return-type "gboolean")
+)
+
+;; AtkHypertext
+
+(define-vfunc get_link
+  (of-object "AtkHypertext")
+  (return-type "AtkHyperlink*")
+  (parameters
+    '("gint" "link_index")
+  )
+)
+
+(define-vfunc get_n_links
+  (of-object "AtkHypertext")
+  (return-type "gint")
+)
+
+(define-vfunc get_link_index
+  (of-object "AtkHypertext")
+  (return-type "gint")
+  (parameters
+    '("gint" "char_index")
+  )
+)
+
+;; AtkStreamableContent
+
+(define-vfunc get_n_mime_types
+  (of-object "AtkStreamableContent")
+  (return-type "int")
+)
+
+(define-vfunc get_mime_type
+  (of-object "AtkStreamableContent")
+  (return-type "const-gchar*")
+  (parameters
+    '("gint" "i")
+  )
+)
+
+(define-vfunc get_stream
+  (of-object "AtkStreamableContent")
+  (return-type "GIOChannel*")
+  (parameters
+    '("const-gchar*" "mime_type")
+  )
+)
+
+
+  
+

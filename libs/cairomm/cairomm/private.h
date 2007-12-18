@@ -23,10 +23,11 @@
 #include <cairomm/exception.h>
 #include <string>
 
-
+#ifndef DOXYGEN_IGNORE_THIS
 namespace Cairo
 {
 
+/// Throws the appropriate exception, if exceptions are enabled.
 void throw_exception(ErrorStatus status);
 
 //We inline this because it is called so often.
@@ -44,6 +45,7 @@ void check_object_status_and_throw_exception(const T& object)
 }
 
 } // namespace Cairo
+#endif //DOXYGEN_IGNORE_THIS
 
 #endif //__CAIROMM_PRIVATE_H
 

@@ -165,16 +165,16 @@ public:
   SizeGroupMode get_mode() const;
 
   
-  /** Sets whether invisible widgets should be ignored when
+  /** Sets whether unmapped widgets should be ignored when
    * calculating the size.
    * 
    * @newin2p8
-   * @param ignore_hidden Whether hidden widgets should be ignored
+   * @param ignore_hidden Whether unmapped widgets should be ignored
    * when calculating the size.
    */
   void set_ignore_hidden(bool ignore_hidden = true);
   
-  /** Returns if invisible widgets are ignored when calculating the size.
+  /** Returns: <tt>true</tt> if invisible widgets are ignored.
    * @return <tt>true</tt> if invisible widgets are ignored.
    * 
    * @newin2p8.
@@ -187,6 +187,9 @@ public:
    * and the requisition of the other widgets in the size group.
    * Whether this applies horizontally, vertically, or in both directions
    * depends on the mode of the size group. See set_mode().
+   * 
+   * When the widget is destroyed or no longer referenced elsewhere, it will 
+   * be removed from the size group.
    * @param widget The Gtk::Widget to add.
    */
   void add_widget(Widget& widget);
@@ -197,8 +200,20 @@ public:
   void remove_widget(Widget& widget);
 
   
+  /** Return value: a G::SList of widgets. The list is owned by GTK+
+   * @return A G::SList of widgets. The list is owned by GTK+ 
+   * and should not be modified.
+   * 
+   * @newin2p10.
+   */
   Glib::SListHandle<Widget*> get_widgets();
   
+  /** Return value: a G::SList of widgets. The list is owned by GTK+
+   * @return A G::SList of widgets. The list is owned by GTK+ 
+   * and should not be modified.
+   * 
+   * @newin2p10.
+   */
   Glib::SListHandle<const Widget*> get_widgets() const;
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
@@ -266,10 +281,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::SizeGroup
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::SizeGroup
    */
   Glib::RefPtr<Gtk::SizeGroup> wrap(GtkSizeGroup* object, bool take_copy = false);
 }

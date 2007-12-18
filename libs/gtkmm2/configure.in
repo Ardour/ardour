@@ -1,0 +1,589 @@
+# Configure.in
+#
+#  This file tests for various compiler features needed to configure 
+#  the gtkmm package.  Original skeleton was provided by Stephan Kulow.
+#  All tests were written by Tero Pulkkinen, Mirko Streckenbach, and 
+#  Karl Nelson.
+#
+#  NOTE! IF YOU DO CHANGES HERE, CHECK IF YOU NEED TO MODIFY .m4 TOO!!!
+#
+#  Copyright 2001 Free Software Foundation
+#  Copyright 1999 gtkmm Development Team
+#  Copyright 1998 Stephan Kulow 
+#
+
+#We use pushdef here because we can't use shell variables before AC_INIT, but we want to use a variable with AC_INIT:
+pushdef([GTKMM_MAJOR_VERSION],     [2])
+pushdef([GTKMM_MINOR_VERSION],     [12])
+pushdef([GTKMM_MICRO_VERSION],     [3])
+pushdef([GTKMM_EXTRA_VERSION],     [])
+pushdef([GTKMM_VERSION], GTKMM_MAJOR_VERSION.GTKMM_MINOR_VERSION.GTKMM_MICRO_VERSION[]GTKMM_EXTRA_VERSION)
+AC_INIT([gtkmm], GTKMM_VERSION, [gtkmm-list@gnome.org])
+AC_CONFIG_SRCDIR([gtk/gtkmmconfig.h.in])
+AC_PREREQ(2.59)
+
+#########################################################################
+#  Version and initialization
+#########################################################################
+[GTKMM_MAJOR_VERSION]=GTKMM_MAJOR_VERSION
+[GTKMM_MINOR_VERSION]=GTKMM_MINOR_VERSION
+[GTKMM_MICRO_VERSION]=GTKMM_MICRO_VERSION
+[GTKMM_EXTRA_VERSION]=GTKMM_EXTRA_VERSION
+[GTKMM_VERSION]=GTKMM_VERSION
+popdef([GTKMM_MAJOR_VERSION])
+popdef([GTKMM_MINOR_VERSION])
+popdef([GTKMM_MICRO_VERSION])
+popdef([GTKMM_EXTRA_VERSION])
+popdef([GTKMM_VERSION])
+GTKMM_RELEASE=$GTKMM_MAJOR_VERSION.$GTKMM_MINOR_VERSION
+AC_DEFINE_UNQUOTED(GTKMM_MAJOR_VERSION, $GTKMM_MAJOR_VERSION, [Major version of gtkmm])
+AC_DEFINE_UNQUOTED(GTKMM_MINOR_VERSION, $GTKMM_MINOR_VERSION, [Minor version of gtkmm])
+AC_DEFINE_UNQUOTED(GTKMM_MICRO_VERSION, $GTKMM_MICRO_VERSION, [Micro version of gtkmm])
+AC_SUBST(GTKMM_MAJOR_VERSION)
+AC_SUBST(GTKMM_MINOR_VERSION)
+AC_SUBST(GTKMM_MICRO_VERSION)
+AC_SUBST(GTKMM_VERSION)
+AC_SUBST(GTKMM_RELEASE)
+
+#
+# +1 : ? : +1  == new interface that does not break old one
+# +1 : ? : 0   == new interface that breaks old one
+#  ? : ? : 0   == no new interfaces, but breaks apps
+#  ? :+1 : ?   == just some internal changes, nothing breaks but might work 
+#                 better
+# CURRENT : REVISION : AGE
+LIBGTKMM_SO_VERSION=1:30:0
+AC_SUBST(LIBGTKMM_SO_VERSION)
+
+AC_CONFIG_AUX_DIR(scripts)
+
+# Initialize automake stuff
+# tar-ustar asks it to use a sensible tar format that can handle long filenames.
+AM_INIT_AUTOMAKE([1.9 tar-ustar])
+
+dnl Specify a configuration file (no autoheader)
+AM_CONFIG_HEADER(config.h gdk/gdkmmconfig.h gtk/gtkmmconfig.h)
+AM_MAINTAINER_MODE
+AL_ACLOCAL_INCLUDE(scripts)
+
+
+#########################################################################
+#  Configure arguments 
+#########################################################################
+
+#########################################################################
+#  Environment Checks
+#########################################################################
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_MAKE_SET
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
+
+dnl Used for enabling the "-no-undefined" flag while generating DLLs
+dnl Copied from the official gtk+-2 configure.in
+AC_MSG_CHECKING([for some Win32 platform])
+case "$host" in
+  *-*-mingw*|*-*-cygwin*)
+    platform_win32=yes
+    ;;
+  *)
+    platform_win32=no
+    ;;
+esac
+AC_MSG_RESULT([$platform_win32])
+AM_CONDITIONAL(PLATFORM_WIN32, test "$platform_win32" = "yes")
+
+AC_MSG_CHECKING([for native Win32])
+case "$host" in
+  *-*-mingw*)
+    os_win32=yes
+    ;;
+  *)
+    os_win32=no
+    ;;
+esac
+AC_MSG_RESULT([$os_win32])
+AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
+
+AC_DISABLE_STATIC
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
+
+AL_PROG_GNU_M4(AC_MSG_ERROR([dnl
+SUN m4 does not work for building gtkmm. 
+Please install GNU m4.]))
+
+AL_PROG_GNU_MAKE(AC_MSG_ERROR([dnl
+SUN make does not work for building gtkmm.
+Please install GNU make.]))
+
+# This macro is installed by glibmm
+# Doxygen needs the path to the installed perl.
+GLIBMM_CHECK_PERL([5.6.0])
+
+#########################################################################
+#  Function checks
+#########################################################################
+
+AC_CHECK_FUNC(mkfifo, AC_DEFINE(HAVE_MKFIFO))
+
+# functions used in demos/gtk-demo. Undefined in config.h.
+AC_LANG_PUSH(C++)
+AC_MSG_CHECKING([for flockfile])
+AC_TRY_LINK([
+#include <stdio.h>],[
+flockfile (NULL);],[
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_FLOCKFILE, 1,
+    [Define to 1 if you have the `flockfile' function.])],[
+  AC_MSG_RESULT(no)
+  AC_MSG_CHECKING([for flockfile with a custom prototype])
+  AC_TRY_LINK([
+#include <stdio.h>
+
+extern "C" void flockfile (FILE *);],[
+flockfile (NULL);],[
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_FLOCKFILE, 1,
+      [Define to 1 if you have the `flockfile' function.])
+    AC_DEFINE(NEED_FLOCKFILE_PROTO, 1,
+      [Define if flockfile() prototype needed.])],[
+    AC_MSG_RESULT(not available)])])
+
+AC_MSG_CHECKING([for funlockfile])
+AC_TRY_LINK([
+#include <stdio.h>],[
+funlockfile (NULL);],[
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_FUNLOCKFILE, 1,
+    [Define to 1 if you have the `funlockfile' function.])],[
+  AC_MSG_RESULT(no)
+  AC_MSG_CHECKING([for funlockfile with a custom prototype])
+  AC_TRY_LINK([
+#include <stdio.h>
+
+extern "C" void funlockfile (FILE *);],[
+funlockfile (NULL);],[
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_FUNLOCKFILE, 1,
+      [Define to 1 if you have the `funlockfile' function.])
+    AC_DEFINE(NEED_FUNLOCKFILE_PROTO, 1,
+      [Define if funlockfile() prototype needed.])],[
+    AC_MSG_RESULT(not available)])])
+
+AC_MSG_CHECKING([for getc_unlocked])
+AC_TRY_LINK([
+#include <stdio.h>],[
+getc_unlocked (NULL);],[
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_GETC_UNLOCKED, 1,
+    [Define to 1 if you have the `getc_unlocked' function.])],[
+  AC_MSG_RESULT(no)
+  AC_MSG_CHECKING([for getc_unlocked with a custom prototype])
+  AC_TRY_LINK([
+#include <stdio.h>
+
+extern "C" int getc_unlocked (FILE *);],[
+getc_unlocked (NULL);],[
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_GETC_UNLOCKED, 1,
+      [Define to 1 if you have the `getc_unlocked' function.])
+    AC_DEFINE(NEED_GETC_UNLOCKED_PROTO, 1,
+      [Define if getc_unlocked() prototype needed.])],[
+    AC_MSG_RESULT(not available)])])
+AC_LANG_POP(C++)
+
+#########################################################################
+#  Dependancy checks
+#########################################################################
+gtkmm_min_glibmm_version=2.14.1
+gtkmm_min_gtk_version=2.12.0
+gtkmm_min_cairomm_version=1.1.12
+
+
+GLIBMM_LIBDIR=`pkg-config --variable=libdir glibmm-2.4`
+GMMPROC_DIR=$GLIBMM_LIBDIR/glibmm-2.4/proc
+AC_SUBST(GMMPROC_DIR)
+GMMPROC=$GMMPROC_DIR/gmmproc
+AC_SUBST(GMMPROC)
+
+
+PKG_CHECK_MODULES(ATKMM, glibmm-2.4 >= ${gtkmm_min_glibmm_version} atk >= 1.9.0)
+AC_SUBST(ATKMM_CFLAGS)
+AC_SUBST(ATKMM_LIBS)
+
+PKG_CHECK_MODULES(PANGOMM, glibmm-2.4 >= ${gtkmm_min_glibmm_version} cairomm-1.0 >= ${gtkmm_min_cairomm_version} pangocairo >= 1.5.2)
+AC_SUBST(PANGOMM_CFLAGS)
+AC_SUBST(PANGOMM_LIBS)
+
+# gdkmm really does need GTK+, because part of Gdk::DragContext is in GTK+.
+PKG_CHECK_MODULES(GDKMM, glibmm-2.4 >= ${gtkmm_min_glibmm_version} cairomm-1.0 >= ${gtkmm_min_cairomm_version} gtk+-2.0 >= ${gtkmm_min_gtk_version})
+AC_SUBST(GDKMM_CFLAGS)
+AC_SUBST(GDKMM_LIBS)
+
+# Only check for gtk+-unix-print-2.0 on non-win32 platform, as 
+# gtk+-unix-print-2.0.pc is not always included in win32 installers. 
+if test x"$os_win32" = xyes; then
+  PKG_CHECK_MODULES(GTKMM, glibmm-2.4 >= ${gtkmm_min_glibmm_version} cairomm-1.0 >= ${gtkmm_min_cairomm_version} gtk+-2.0 >= ${gtkmm_min_gtk_version})
+else
+  PKG_CHECK_MODULES(GTKMM, glibmm-2.4 >= ${gtkmm_min_glibmm_version} cairomm-1.0 >= ${gtkmm_min_cairomm_version} gtk+-2.0 >= ${gtkmm_min_gtk_version} gtk+-unix-print-2.0 >= ${gtkmm_min_gtk_version})
+fi
+AC_SUBST(GTKMM_CFLAGS)
+AC_SUBST(GTKMM_LIBS)
+
+# gthread isn't a requirement, but we should use its CFLAGS if available.
+PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.4.0,[],[GTHREAD_CFLAGS=''; GTHREAD_LIBS=''])
+AC_SUBST(GTHREAD_CFLAGS)
+AC_SUBST(GTHREAD_LIBS)
+
+#########################################################################
+#  C++ checks
+#########################################################################
+AC_PROG_CXX
+
+# Check for the SUN Forte compiler, and define GLIBMM_COMPILER_SUN_FORTE in the header.
+#GLIBMM_PROG_CXX_SUN
+
+# Ensure MSVC-compatible struct packing convention is used when
+# compiling for Win32 with gcc.
+# What flag to depends on gcc version: gcc3 uses "-mms-bitfields", while
+# gcc2 uses "-fnative-struct".
+if test x"$os_win32" = xyes; then
+  if test x"$GCC" = xyes -a x"$GXX" = xyes; then
+    msnative_struct=''
+    AC_MSG_CHECKING([how to get MSVC-compatible struct packing])
+    if test -z "$ac_cv_prog_CC"; then
+      our_gcc="$CC"
+    else
+      our_gcc="$ac_cv_prog_CC"
+    fi
+    case `$our_gcc --version | sed -e 's,\..*,.,' -e q` in
+      2.)
+	if $our_gcc -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
+	  msnative_struct='-fnative-struct'
+	fi
+	;;
+      *)
+	if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+	  msnative_struct='-mms-bitfields'
+	fi
+	;;
+    esac
+    if test x"$msnative_struct" = x ; then
+      AC_MSG_RESULT([no way])
+      AC_MSG_WARN([produced libraries might be incompatible with MSVC-compiled code])
+    else
+      CXXFLAGS="$CXXFLAGS $msnative_struct"
+      AC_MSG_RESULT([${msnative_struct}])
+    fi
+  fi
+fi
+
+AC_LANG_CPLUSPLUS
+
+
+# Create a list of input directories for Doxygen.
+GTKMM_DOXYGEN_INPUT_SUBDIRS([pango atk gdk gtk])
+
+# Evaluate the --enable-warnings=level option.
+GTKMM_ARG_ENABLE_WARNINGS()
+
+# Add an --enable-use-deprecations configure option:
+AC_ARG_ENABLE(deprecations,
+              [AC_HELP_STRING([--enable-use-deprecations],
+                              [warn about deprecated usages [default=no]])],,
+              [enable_deprecations=no])
+              
+if test "x$enable_use_deprecations" = "xyes"; then
+   DISABLE_DEPRECATED_CFLAGS="\
+-DG_DISABLE_DEPRECATED \
+-DGDK_DISABLE_DEPRECATED \
+-DGTK_DISABLE_DEPRECATED \
+-DGDK_PIXBUF_DISABLE_DEPRECATED \
+-DGNOME_DISABLE_DEPRECATED"
+   AC_SUBST(DISABLE_DEPRECATED_CFLAGS)
+fi
+	
+# Add an --enable-deprecated-api option:
+AC_ARG_ENABLE(deprecated-api, [AC_HELP_STRING([--enable-deprecated-api],
+                                        [include (build) deprecated API in the libraries [default=yes]])],,
+                        [enable_deprecated_api=yes])
+if test "x$enable_deprecated_api" = "xyes"; then
+AC_MSG_WARN([Deprecated API will be built, for backwards-compatibility.])
+else
+  AC_DEFINE(PANGOMM_DISABLE_DEPRECATED, 1, [Whether not to build deprecated API in pangomm])
+  AC_DEFINE(ATKMM_DISABLE_DEPRECATED, 1, [Whether not to build deprecated API in atkmm])
+  AC_DEFINE(GDKMM_DISABLE_DEPRECATED, 1, [Whether not to build deprecated API in gdkmm])
+  AC_DEFINE(GTKMM_DISABLE_DEPRECATED, 1, [Whether not to build deprecated API in gtkmm])
+  DISABLE_DEPRECATED_API_CFLAGS="-DPANGOMM_DISABLE_DEPRECATED -DATKMM_DISABLE_DEPRECATED -DGDKMM_DISABLE_DEPRECATED -DGTKMM_DISABLE_DEPRECATED"
+AC_SUBST(DISABLE_DEPRECATED_API_CFLAGS)
+AC_MSG_WARN([Deprecated API will not be built, breaking backwards-compatibility. Do not use this build for distribution packages.])
+fi
+
+
+AC_ARG_ENABLE(examples, [AC_HELP_STRING([--enable-examples],
+                                        [build the included examples [default=yes]])],,
+                        [enable_examples=yes])
+if test "x$enable_examples" = "xyes"; then
+  EXAMPLE_SUBDIR="examples"
+  AC_CONFIG_FILES([
+    examples/Makefile
+      examples/arrow/Makefile
+      examples/base/Makefile
+      examples/book/Makefile
+        examples/book/alignment/Makefile
+        examples/book/aspectframe/Makefile
+        examples/book/box/Makefile
+        examples/book/builder/Makefile
+        examples/book/builder/basic/Makefile
+        examples/book/builder/derived/Makefile
+        examples/book/buttonbox/Makefile
+        examples/book/buttons/Makefile
+          examples/book/buttons/button/Makefile
+          examples/book/buttons/checkbutton/Makefile
+          examples/book/buttons/filechooserbutton/Makefile
+          examples/book/buttons/radiobutton/Makefile
+          examples/book/buttons/togglebutton/Makefile
+      examples/book/clipboard/Makefile
+        examples/book/clipboard/simple/Makefile
+        examples/book/clipboard/ideal/Makefile
+      examples/book/combobox/Makefile
+        examples/book/combobox/text/Makefile
+        examples/book/combobox/complex/Makefile
+      examples/book/comboboxentry/Makefile
+        examples/book/comboboxentry/text/Makefile
+        examples/book/comboboxentry/complex/Makefile
+      examples/book/custom/Makefile
+        examples/book/custom/custom_container/Makefile
+        examples/book/custom/custom_widget/Makefile
+      examples/book/dialogs/Makefile
+          examples/book/dialogs/aboutdialog/Makefile
+          examples/book/dialogs/colorselectiondialog/Makefile
+          examples/book/dialogs/filechooserdialog/Makefile        
+          examples/book/dialogs/fileselection/Makefile
+          examples/book/dialogs/fontselectiondialog/Makefile
+          examples/book/dialogs/messagedialog/Makefile
+          examples/book/dialogs/simple/Makefile
+        examples/book/drag_and_drop/Makefile
+        examples/book/drawingarea/Makefile
+        examples/book/drawingarea/simple/Makefile
+        examples/book/drawingarea/curve/Makefile
+        examples/book/drawingarea/arcs/Makefile
+        examples/book/drawingarea/clock/Makefile
+        examples/book/drawingarea/joins/Makefile
+        examples/book/entry/Makefile
+          examples/book/entry/completion/Makefile
+          examples/book/entry/simple/Makefile
+        examples/book/eventbox/Makefile
+        examples/book/expander/Makefile
+        examples/book/frame/Makefile
+        examples/book/helloworld/Makefile
+        examples/book/helloworld2/Makefile
+        examples/book/iconview/Makefile
+        examples/book/idle/Makefile
+        examples/book/input/Makefile
+        examples/book/label/Makefile
+        examples/book/menus/Makefile
+          examples/book/menus/main_menu/Makefile
+          examples/book/menus/popup/Makefile
+        examples/book/menus_and_toolbars/Makefile
+        examples/book/notebook/Makefile
+        examples/book/paned/Makefile
+	examples/book/printing/Makefile
+	  examples/book/printing/advanced/Makefile
+	  examples/book/printing/simple/Makefile
+        examples/book/progressbar/Makefile
+        examples/book/recent_files/Makefile
+        examples/book/range_widgets/Makefile
+        examples/book/scrolledwindow/Makefile
+        examples/book/signals/Makefile
+          examples/book/signals/custom/Makefile
+        examples/book/socket/Makefile
+        examples/book/spinbutton/Makefile
+        examples/book/statusicon/Makefile
+        examples/book/table/Makefile
+        examples/book/textview/Makefile
+        examples/book/timeout/Makefile
+        examples/book/toolbar/Makefile
+        examples/book/tooltips/Makefile
+        examples/book/treeview/Makefile
+          examples/book/treeview/combo_renderer/Makefile
+          examples/book/treeview/editable_cells/Makefile
+          examples/book/treeview/list/Makefile
+          examples/book/treeview/listviewtext/Makefile
+          examples/book/treeview/tree/Makefile
+          examples/book/treeview/drag_and_drop/Makefile
+          examples/book/treeview/popup/Makefile
+          examples/book/treeview/filter/Makefile
+          examples/book/treeview/filter_modify/Makefile
+          examples/book/treeview/modelsort/Makefile
+        examples/book/update_ui/Makefile
+      examples/calendar/Makefile
+      examples/dnd/Makefile
+      examples/exception/Makefile
+      examples/gdk/Makefile
+      examples/rulers/Makefile
+      examples/statusbar/Makefile
+      examples/stock/Makefile
+      examples/tictactoe/Makefile
+      examples/treemodelcustom/Makefile
+      examples/window/Makefile
+  ])
+else
+  EXAMPLE_SUBDIR=""
+fi
+
+AC_SUBST(EXAMPLE_SUBDIR)
+
+
+AC_ARG_ENABLE(demos, [AC_HELP_STRING([--enable-demos],
+              [build the included demos [default=yes]])],,
+                        [enable_demos=yes])
+if test "x$enable_demos" = "xyes"; then
+  DEMO_SUBDIR="demos"
+  AC_CONFIG_FILES([
+    demos/Makefile
+      demos/gtk-demo/Makefile
+  ])
+else
+  DEMO_SUBDIR=""
+fi
+
+AC_SUBST(DEMO_SUBDIR)
+
+
+#Offer the ability to omit some API from the library, 
+#to reduce the code size:
+#Note that there are other options in glibmm, which affect gtkmm.
+GTKMM_ARG_ENABLE_API_ATKMM()
+
+if test "x$gtkmm_enable_api_atkmm" = "xyes"; then
+  AC_CONFIG_FILES([
+	atk/Makefile
+  	atk/atkmm-1.6.pc
+	atk/src/Makefile
+	atk/atkmm/Makefile
+	atk/atkmm/private/Makefile
+  ])
+  GTKMM_PC_ATKMM_DEP="atkmm-1.6"
+else
+  GTKMM_PC_ATKMM_DEP=""
+fi
+AC_SUBST(GTKMM_PC_ATKMM_DEP)
+
+#Allow us to test for atkmm support in Makefile.am files:
+AM_CONDITIONAL(GTKMM_ATKMM_ENABLED, test "x$gtkmm_enable_api_atkmm" = "xyes")
+
+
+GTKMM_ARG_ENABLE_API_MAEMO_EXTENSIONS()
+
+
+AC_ARG_ENABLE(docs, [AC_HELP_STRING([--enable-docs],
+              [build the included docs [default=yes]])],,
+                        [enable_docs=yes])
+if test "x$enable_docs" = "xyes"; then
+  DOCS_SUBDIR="docs"
+  AC_CONFIG_FILES([
+    docs/Makefile
+      docs/FAQ/Makefile
+      docs/images/Makefile
+      docs/tutorial/Makefile
+        docs/tutorial/figures/Makefile
+        docs/tutorial/icons/Makefile
+      docs/reference/Makefile
+      docs/reference/Doxyfile
+  ])
+else
+  DOCS_SUBDIR=""
+fi
+AC_SUBST(DOCS_SUBDIR)
+
+# Dummy conditional just to make automake-1.4 happy.
+# We need an always-false condition in docs/Makefile.am.
+AM_CONDITIONAL(GTKMM_FALSE,[false])
+
+# HACK:  Assign a dummy in order to prevent execution of autoheader by the
+# maintainer-mode rules.  That would fail since we aren't using autoheader.
+AUTOHEADER=':'
+
+
+AC_CONFIG_FILES([
+  Makefile
+
+  gdk/Makefile
+  gdk/gdkmm-2.4.pc
+    gdk/src/Makefile
+    gdk/gdkmm/Makefile
+      gdk/gdkmm/private/Makefile
+
+  gtk/Makefile
+  gtk/gtkmm-2.4.pc
+    gtk/src/Makefile
+    gtk/gtkmm/Makefile
+      gtk/gtkmm/private/Makefile
+
+  pango/Makefile
+  pango/pangomm-1.4.pc
+    pango/src/Makefile
+    pango/pangomm/Makefile
+      pango/pangomm/private/Makefile
+
+  tools/Makefile
+    tools/m4/Makefile
+    tools/extra_defs_gen/Makefile
+])
+
+AC_CONFIG_FILES([
+  tests/Makefile
+    tests/child_widget/Makefile
+    tests/child_widget2/Makefile
+    tests/child_widget_managed/Makefile
+    tests/refcount_dialog/Makefile
+    tests/dialog/Makefile
+    tests/dialog_deletethis/Makefile
+    tests/delete_cpp_child/Makefile
+    tests/main_with_options/Makefile
+    tests/menu_destruction/Makefile
+    tests/property_notification/Makefile
+    tests/scrolledwindow/Makefile
+    tests/wrap_existing/Makefile
+])
+
+AC_CONFIG_FILES([
+  scripts/Makefile
+])
+
+AC_CONFIG_FILES([
+  MSVC_Net2003/Makefile
+    MSVC_Net2003/gendef/Makefile
+    MSVC_Net2003/atkmm/Makefile
+    MSVC_Net2003/atkmm/atkmm.rc
+    MSVC_Net2003/pangomm/Makefile
+    MSVC_Net2003/pangomm/pangomm.rc
+    MSVC_Net2003/gdkmm/Makefile
+    MSVC_Net2003/gdkmm/gdkmm.rc
+    MSVC_Net2003/gtkmm/Makefile
+    MSVC_Net2003/gtkmm/gtkmm.rc
+    MSVC_Net2003/demos/Makefile
+      MSVC_Net2003/demos/gtk-demo/Makefile
+    MSVC_Net2003/examples/Makefile
+      MSVC_Net2003/examples/arrow/Makefile
+      MSVC_Net2003/examples/calendar/Makefile
+      MSVC_Net2003/examples/cellrenderercustom_popup/Makefile
+      MSVC_Net2003/examples/cellrenderercustom_toggle/Makefile
+      MSVC_Net2003/examples/direction/Makefile
+      MSVC_Net2003/examples/dnd/Makefile
+      MSVC_Net2003/examples/exception/Makefile
+      MSVC_Net2003/examples/gdk/Makefile
+      MSVC_Net2003/examples/printing/Makefile
+      MSVC_Net2003/examples/rulers/Makefile
+      MSVC_Net2003/examples/statusbar/Makefile
+      MSVC_Net2003/examples/stock/Makefile
+      MSVC_Net2003/examples/tictactoe/Makefile
+      MSVC_Net2003/examples/treemodelcustom/Makefile
+      MSVC_Net2003/examples/window/Makefile
+])
+
+AC_OUTPUT()
+

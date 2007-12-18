@@ -34,8 +34,9 @@ namespace Gtk
 
 AccelLabel::AccelLabel(const Glib::ustring& label, bool mnemonic)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Label(Glib::ConstructParams(accellabel_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Label(Glib::ConstructParams(accellabel_class_.init()))
 {
   if(mnemonic)
     set_text_with_mnemonic(label);
@@ -153,7 +154,8 @@ GType AccelLabel::get_base_type()
 
 AccelLabel::AccelLabel()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Label(Glib::ConstructParams(accellabel_class_.init()))
 {
   }

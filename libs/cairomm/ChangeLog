@@ -1,3 +1,243 @@
+== 1.4.6 ==
+
+2007-11-10  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Doxyfile.in: update doxygen config file since my version of
+	doxygen now complains that there are obsolete config keys
+
+2007-11-10  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* NEWS: update news for 1.4.6 release
+	* configure.in: bumped version
+
+2007-08-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* cairomm/context.cc: Add #include <cairomm/quartz_surface.h>
+	to fix the build on MacOS. Thanks to Elias N (Bug #11972).
+
+== 1.4.4 ==
+
+2007-07-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* m4/reduced.m4: Added, containing CAIROMM_ARG_ENABLE_API_EXCEPTIONS().
+	* configure.in: Use CAIROMM_ARG_ENABLE_API_EXCEPTIONS() to add a 
+	--enable-api-exceptions=yes/no option.
+	Used to generate a cairomm/cairommconfig.h config file, which 
+	defines (or not) CAIROMM_EXCEPTIONS_ENABLED.
+	* cairomm/cairommconfig.h.in: Added, used to generate cairommconfig.h
+	* cairomm/private.cc:
+	* cairomm/private.h: Use ifdef to replace throw_exception() with an empty 
+	implementation when exceptions are disabled.
+	This allows cairomm to be built when using CXXFLAGS=-fno-exceptions.
+
+2007-07-14  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* configure.in: post-release version number bump
+
+=== 1.4.2 ===
+
+2007-07-14  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* NEWS: updated for 1.4.2 release
+	* configure.in: bumped version to 1.4.2
+
+2007-06-14  Dave Beckett  <dave@dajobe.org>
+
+	* configure.in: Update the GENERIC_LIBRARY_VERSION correctly
+	Was: 1:0:0 in 1.2.4
+	current: interfaces were added, increment to 2
+	revision: set to zero since current was incremented
+	age: increment since interfaces were added
+	Changed to: 2:0:1
+
+2007-06-14  Murray Cumming  <murrayc@murrayc.com>
+
+	* cairomm/refptr.h: Added RefPtr(object, refcount) constructor
+	for use in cast_*(), so that the casted RefPtr shares the same 
+	refcount, avoiding an early deletion. I do not like making 
+	this constructor public, but I do not see another way.
+
+=== 1.4.0 ===
+
+2007-07-12  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* Makefile.am: add doc-publish target and make release-publish depend on
+	this.  This automatically uploads the new API documentation on release
+	* docs/reference/Makefile.am: upload the html documentation and a tarball of
+	the documentation to the cairographics.org site
+
+2007-07-12  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Makefile.am: hacky workaround to get distcheck to pass
+
+2007-07-10  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* NEWS: Update NEWS for release
+	* configure.in: bump version for release
+
+2007-07-10  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* cairomm/context.cc: add ability to use dynamic casting with the return
+	values from more functions, including:
+		Context::get_target()
+		Context::get_target() const
+		Context::get_source()
+		Context::get_source() const
+		Context::get_group_target()
+		Context::get_group_target() const
+		Context::pop_group()
+	* tests/test-context.cc: a few additional tests to verify the const /
+	non-const versions both work with dynamic casting.
+
+2007-07-10  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/cairomm.css: Improve the documentation style a little bit
+	to make it more readable
+	* docs/reference/Doxyfile.in: build the reference doc for the new
+	QuartzSurface class
+
+2007-07-10  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* cairomm/context.cc:
+	* cairomm/context.h: add alternate API for set_dash() which takes a
+	std::vector argument instead of the slightly unexpected std::valarray
+	argument
+	* tests/test-context.cc: test that both API work correctly and compile
+	correctly without any problems
+
+2007-07-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* tests/test-context.cc: add some tests for matrix transformations and
+	user-to-device coordinate mappings.  The matrix transformation 'test' does
+	nothing more than call the functions to excercise them a bit, but it's
+	causing an unexpected exception to be triggered when calling
+	Context::set_matrix().  The odd thing is that exception.what() results in
+	'success' being printed.  This requires further investigation
+	Also used BOOST_CHECK_EQUAL in most places instead of BOOST_CHECK to get
+	more meaningful failure messages.
+
+2007-07-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* cairomm/private.cc: add missing 'break;' on the I/O error case statement
+
+2007-07-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* cairomm/context.cc: when getting the source pattern of a Cairo::Context,
+	check which type of Pattern it is so that we create the correct C++ wrapper.
+	Without this, RefPtr<>::cast_dynamic() doesn't seem to work as we would
+	expect it to.
+	* tests/test-context.cc: improve the Context::get_source() /
+	Context::set_source () tests now that dynamic casting works correctly
+
+2007-07-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* examples/pdf-surface/main.cc:
+	* examples/png_file/main.cc:
+	* examples/ps-surface/main.cc:
+	* examples/svg-surface/main.cc:
+	* examples/text-rotate/text-rotate.cc:
+	* tests/test-context.cc: fix a bunch of minor compile errors when compiling
+	with -Werror
+
+2007-07-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* configure.in: enable extra compiler warnings and -Werror if the
+	CAIROMM_DEVEL environment variable is set to 'on'.  This caught the
+	following mistake.
+	* cairomm/pattern.cc: forgot to return the ColorStop vector
+
+2007-07-04  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* cairomm/context.cc: fix a FIXME to match the style of
+	ScaledFont::glyph_extents since MSVC (and possibly other compilers) complain
+	when allocating an array on the stack and the size of the array is not a
+	compile-time constante
+
+2007-04-16  Hugo Vincent  <hugo.vincent@gmail.com>
+
+	* Added QuartzSurface for MacOS X (when cairo is built with Quartz support),
+	similar to the existing Win32Surface and XlibSurface. These allow use of 
+	platform-specific features and data structures.
+
+2007-03-23  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* Makefile.am:
+	* autogen.sh:
+	* configure.in:
+	* m4/ax_boost_base.m4:
+	* m4/ax_boost_unit_test_framework.m4: Add some basic test infrastructure.
+	It's disabled by default, and must be explicitly enabled by passing
+	--enable-tests to configure (or by setting the CAIROMM_DEVEL environment
+	variable to "on").  It uses the boost unit test framework, but this should
+	not be required unless you've explicitly enabled tests.  If tests are
+	enabled, you can easily run them with 'make check'
+	* tests/Makefile.am:
+	* tests/test-context.cc: added the beginning of a test for Cairo::Context.
+	Most of these tests are really very interesting.  Basically what I'm trying
+	to do is a) test some basic behaviors, and b) excercise the functionality a
+	little bit.  One of the tests currently fails due to a RefPtr::cast_dynamic
+	failure, so I have to see what's going on there.
+
+2007-03-22  Murray Cumming  <murrayc@murrayc@murrayc.com>
+
+	* cairomm/enums.h: Restored FORMAT_RGB16_565 and marked it as deprecated.
+	Note that CAIRO_FORMAT_RGB16_565 has not really been removed from cairo. 
+	It has just moved from the enum to a #define in cairo-deprecated.
+	* cairomm/context.cc:
+	* cairomm/context.h: Made get_dash() const.
+	Renamed clip_extents() to get_clip_extents(), to match the other get_*_extents() methods
+	(in Context, if not in other classes), and made it const.
+	Made copy_clip_rectangle_list() const.
+	* cairomm/pattern.cc:
+	* cairomm/pattern.h: Make the RadialGradient::get_radial_circles(), LinearGradient::get_linear_points(), 
+	and Gradient::get_color_stops() methods const.
+	Added a non-const method overload of get_surface().
+	Correc the get_color_stops() implementation to match the declaration.
+
+2007-03-22  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* cairomm/context.cc: Minor comment cleanups
+	* cairomm/pattern.cc: get the gradient stops by reference parameter instead
+	of returning by value.  This saves an extra copy of the vector.
+
+2007-03-21  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* cairomm/context.cc:
+	* cairomm/context.h:
+	* cairomm/enums.h:
+	* cairomm/pattern.cc:
+	* cairomm/pattern.h:
+	* configure.in: Add initial support for new cairo 1.4.x API.  It will
+	probably still need quite a bit of work, but I wanted to commit what I have
+	now so that it doesn't keep sitting in my working directory.
+	(Extra note from Murray:
+	This was:
+	- Pattern::create_rgba() - a new method overload with 4 args, including alpha.
+	- SurfacePattern::get_surface()
+	- Gradient::get_color_stops() (with a new ColorStop struct)
+	- LinearGradient::get_linear_points()
+	- RadialGradient::get_radial_circles()
+	- Context::clip_extents()
+	- Context::copy_clip_rectangle_list()
+	- Context::get_dash()
+	- SURFACE_TYPE_OS2 was added
+	- FORMAT_RGB16_565 was removed (but that is not allowed, so I'll fix that.)
+
+2007-02-01  Jonathon Jongsma  <jonathon.jongsma@gmail.com>
+
+	* configure.in: Fixes for building on Cygwin from
+	yselkowitz@users.sourceforge.net.  Closes bug #9726
+
+2007-01-28  Jonathon Jongsma  <jonathon.jongsma@gmail.com>
+
+	* configure.in: bump rev to 1.2.5
+
+2007-01-28  Jonathon Jongsma  <jonathon.jongsma@gmail.com>
+
+	* docs/reference/Doxyfile.in: fixes building the cairomm documentation where
+	builddir != srcdir.  Patch from yselkowitz@users.sourceforge.net for bug
+	#9727
+
 1.2.4:
 
 2007-01-17  Jonathon Jongsma  <jonathon.jongsma@gmail.com>

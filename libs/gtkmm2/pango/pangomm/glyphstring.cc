@@ -180,6 +180,11 @@ void GlyphString::get_extents(int start, int end, const Glib::RefPtr<const Font>
 pango_glyph_string_extents_range(const_cast<PangoGlyphString*>(gobj()), start, end, const_cast<PangoFont*>(Glib::unwrap<Font>(font)), (ink_rect).gobj(), (logical_rect).gobj()); 
 }
 
+int GlyphString::get_width() const
+{
+  return pango_glyph_string_get_width(const_cast<PangoGlyphString*>(gobj()));
+}
+
 
 } // namespace Pango
 

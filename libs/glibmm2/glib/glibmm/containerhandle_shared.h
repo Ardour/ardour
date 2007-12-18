@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_CONTAINERHANDLE_SHARED_H
 #define _GLIBMM_CONTAINERHANDLE_SHARED_H
 
-/* $Id: containerhandle_shared.h,v 1.12 2006/09/19 20:36:42 murrayc Exp $ */
+/* $Id: containerhandle_shared.h 322 2006-09-19 20:36:43Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

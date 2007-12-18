@@ -42,80 +42,6 @@ namespace Gtk
 namespace Gtk
 {
 
-/** @addtogroup gtkmmEnums Enums and Flags */
-
-/**
- * @ingroup gtkmmEnums
- * @par Bitwise operators:
- * <tt>%PrintCapabilities operator|(PrintCapabilities, PrintCapabilities)</tt><br>
- * <tt>%PrintCapabilities operator&(PrintCapabilities, PrintCapabilities)</tt><br>
- * <tt>%PrintCapabilities operator^(PrintCapabilities, PrintCapabilities)</tt><br>
- * <tt>%PrintCapabilities operator~(PrintCapabilities)</tt><br>
- * <tt>%PrintCapabilities& operator|=(PrintCapabilities&, PrintCapabilities)</tt><br>
- * <tt>%PrintCapabilities& operator&=(PrintCapabilities&, PrintCapabilities)</tt><br>
- * <tt>%PrintCapabilities& operator^=(PrintCapabilities&, PrintCapabilities)</tt><br>
- */
-enum PrintCapabilities
-{
-  PRINT_CAPABILITY_PAGE_SET = 1 << 0,
-  PRINT_CAPABILITY_COPIES = 1 << 1,
-  PRINT_CAPABILITY_COLLATE = 1 << 2,
-  PRINT_CAPABILITY_REVERSE = 1 << 3,
-  PRINT_CAPABILITY_SCALE = 1 << 4,
-  PRINT_CAPABILITY_GENERATE_PDF = 1 << 5,
-  PRINT_CAPABILITY_GENERATE_PS = 1 << 6
-};
-
-/** @ingroup gtkmmEnums */
-inline PrintCapabilities operator|(PrintCapabilities lhs, PrintCapabilities rhs)
-  { return static_cast<PrintCapabilities>(static_cast<unsigned>(lhs) | static_cast<unsigned>(rhs)); }
-
-/** @ingroup gtkmmEnums */
-inline PrintCapabilities operator&(PrintCapabilities lhs, PrintCapabilities rhs)
-  { return static_cast<PrintCapabilities>(static_cast<unsigned>(lhs) & static_cast<unsigned>(rhs)); }
-
-/** @ingroup gtkmmEnums */
-inline PrintCapabilities operator^(PrintCapabilities lhs, PrintCapabilities rhs)
-  { return static_cast<PrintCapabilities>(static_cast<unsigned>(lhs) ^ static_cast<unsigned>(rhs)); }
-
-/** @ingroup gtkmmEnums */
-inline PrintCapabilities operator~(PrintCapabilities flags)
-  { return static_cast<PrintCapabilities>(~static_cast<unsigned>(flags)); }
-
-/** @ingroup gtkmmEnums */
-inline PrintCapabilities& operator|=(PrintCapabilities& lhs, PrintCapabilities rhs)
-  { return (lhs = static_cast<PrintCapabilities>(static_cast<unsigned>(lhs) | static_cast<unsigned>(rhs))); }
-
-/** @ingroup gtkmmEnums */
-inline PrintCapabilities& operator&=(PrintCapabilities& lhs, PrintCapabilities rhs)
-  { return (lhs = static_cast<PrintCapabilities>(static_cast<unsigned>(lhs) & static_cast<unsigned>(rhs))); }
-
-/** @ingroup gtkmmEnums */
-inline PrintCapabilities& operator^=(PrintCapabilities& lhs, PrintCapabilities rhs)
-  { return (lhs = static_cast<PrintCapabilities>(static_cast<unsigned>(lhs) ^ static_cast<unsigned>(rhs))); }
-
-} // namespace Gtk
-
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-namespace Glib
-{
-
-template <>
-class Value<Gtk::PrintCapabilities> : public Glib::Value_Flags<Gtk::PrintCapabilities>
-{
-public:
-  static GType value_type() G_GNUC_CONST;
-};
-
-} // namespace Glib
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-
-namespace Gtk
-{
-
-
 /** A PrintJob object represents a job that is sent to a printer. You only need to deal 
  * directly with print jobs if you  use the non-portable PrintUnixDialog API.
  * 
@@ -185,21 +111,62 @@ public:
   static Glib::RefPtr<PrintJob> create(const Glib::ustring& title, const Glib::RefPtr<Printer>& printer, const Glib::RefPtr<PrintSettings>& settings, const Glib::RefPtr<PageSetup>& page_setup);
 
 
+  /** Gets the Gtk::PrintSettings of the print job.
+   * @return The settings of @a job 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PrintSettings> get_settings();
   
+  /** Gets the Gtk::PrintSettings of the print job.
+   * @return The settings of @a job 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const PrintSettings> get_settings() const;
 
   
+  /** Gets the Gtk::Printer of the print job.
+   * @return The printer of @a job 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<Printer> get_printer();
   
+  /** Gets the Gtk::Printer of the print job.
+   * @return The printer of @a job 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const Printer> get_printer() const;
 
   
+  /** Gets the job title.
+   * @return The title of @a job 
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_title() const;
   
+  /** Gets the status of the print job.
+   * @return The status of @a job 
+   * 
+   * @newin2p10.
+   */
   PrintStatus get_status() const;
    // this appears in gtkprinter-private.h
   
+  /** Make the Gtk::PrintJob send an existing document to the 
+   * printing system. The file can be in any format understood
+   * by the platforms printing system (typically PostScript,
+   * but on many platforms PDF may work too). See 
+   * Gtk::Printer::accepts_pdf() and Gtk::Printer::accepts_ps().
+   * @param filename The file to be printed.
+   * @param error Return location for errors.
+   * @return <tt>false</tt> if an error occurred
+   * 
+   * @newin2p10.
+   */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   void set_source_file(const std::string& filename);
 #else
@@ -207,17 +174,52 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
 
+  /** Gets a cairo surface onto which the pages of
+   * the print job should be rendered.
+   * @param error Return location for errors, or <tt>0</tt>.
+   * @return The cairo surface of @a job 
+   * 
+   * @newin2p10.
+   */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   Cairo::RefPtr<Cairo::Surface> get_surface();
 #else
   Cairo::RefPtr<Cairo::Surface> get_surface(std::auto_ptr<Glib::Error>& error);
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
-  //TODO: _WRAP_METHOD(Cairo::RefPtr<const Cairo::Surface> get_surface() const, gtk_print_job_get_surface, constversion, errthrow)
-
   
+  /** Gets a cairo surface onto which the pages of
+   * the print job should be rendered.
+   * @param error Return location for errors, or <tt>0</tt>.
+   * @return The cairo surface of @a job 
+   * 
+   * @newin2p10.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  Cairo::RefPtr<const Cairo::Surface> get_surface() const;
+#else
+  Cairo::RefPtr<const Cairo::Surface> get_surface(std::auto_ptr<Glib::Error>& error) const;
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+
+  /** If track_status is <tt>true</tt>, the print job will try to continue report
+   * on the status of the print job in the printer queues and printer. This
+   * can allow your application to show things like "out of paper" issues,
+   * and when the print job actually reaches the printer.
+   * 
+   * This function is often implemented using some form of polling, so it should
+   * not be enabled unless needed.
+   * 
+   * @newin2p10
+   * @param track_status <tt>true</tt> to track status after printing.
+   */
   void set_track_print_status(bool track_status = true);
   
+  /** Return value: <tt>true</tt> if print job status will be reported after printing
+   * @return <tt>true</tt> if print job status will be reported after printing
+   * 
+   * @newin2p10.
+   */
   bool get_track_print_status() const;
 
   
@@ -235,15 +237,15 @@ public:
   typedef sigc::slot< void, const Glib::RefPtr<PrintJob>&, std::auto_ptr<Glib::Error>& > SlotPrintJobComplete;
   #endif
 
-  /** TODO: document this
-   *
+  /** Sends the print job off to the printer.
+   * @param slot A function to call when the job completes or an error occurs.
    */
   void send(const SlotPrintJobComplete& slot);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %status_changed()</tt>
+   * <tt>void on_my_%status_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_status_changed();
@@ -318,10 +320,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::PrintJob
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::PrintJob
    */
   Glib::RefPtr<Gtk::PrintJob> wrap(GtkPrintJob* object, bool take_copy = false);
 }

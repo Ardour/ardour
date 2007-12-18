@@ -1,4 +1,4 @@
-/* $Id: quark.cc,v 1.1.1.1 2003/01/07 16:58:52 murrayc Exp $ */
+/* $Id: quark.cc 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* quark.cc
  *

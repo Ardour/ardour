@@ -39,7 +39,7 @@ namespace Glib
 
 Glib::RefPtr<Gtk::TreeDragDest> wrap(GtkTreeDragDest* object, bool take_copy)
 {
-  return Glib::RefPtr<Gtk::TreeDragDest>( dynamic_cast<Gtk::TreeDragDest*> (Glib::wrap_auto ((GObject*)(object), take_copy)) );
+  return Glib::RefPtr<Gtk::TreeDragDest>( dynamic_cast<Gtk::TreeDragDest*> (Glib::wrap_auto_interface<Gtk::TreeDragDest> ((GObject*)(object), take_copy)) );
   //We use dynamic_cast<> in case of multiple inheritance.
 }
 
@@ -87,7 +87,7 @@ void TreeDragDest_Class::iface_init_function(void* g_iface, void*)
 #ifdef GLIBMM_VFUNCS_ENABLED
 gboolean TreeDragDest_Class::drag_data_received_vfunc_callback(GtkTreeDragDest* self, GtkTreePath* dest, GtkSelectionData* selection_data)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -95,42 +95,45 @@ gboolean TreeDragDest_Class::drag_data_received_vfunc_callback(GtkTreeDragDest* 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->drag_data_received_vfunc(Gtk::TreePath(dest, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->drag_data_received_vfunc(Gtk::TreePath(dest, true)
 , SelectionData_WithoutOwnership(selection_data)
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
-)    );
+)  );
 
-    // Call the original underlying C function:
-    if(base && base->drag_data_received)
-      return (*base->drag_data_received)(self, dest, selection_data);
-  }
+  // Call the original underlying C function:
+  if(base && base->drag_data_received)
+    return (*base->drag_data_received)(self, dest, selection_data);
+
 
   typedef gboolean RType;
   return RType();
 }
 gboolean TreeDragDest_Class::row_drop_possible_vfunc_callback(GtkTreeDragDest* self, GtkTreePath* dest_path, GtkSelectionData* selection_data)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -138,35 +141,38 @@ gboolean TreeDragDest_Class::row_drop_possible_vfunc_callback(GtkTreeDragDest* s
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->row_drop_possible_vfunc(Gtk::TreePath(dest_path, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->row_drop_possible_vfunc(Gtk::TreePath(dest_path, true)
 , SelectionData_WithoutOwnership(selection_data)
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_interface_peek_parent( // Get the parent interface of the interface (The original underlying C interface).
 g_type_interface_peek(G_OBJECT_GET_CLASS(self), CppObjectType::get_type()) // Get the interface.
-)    );
+)  );
 
-    // Call the original underlying C function:
-    if(base && base->row_drop_possible)
-      return (*base->row_drop_possible)(self, dest_path, selection_data);
-  }
+  // Call the original underlying C function:
+  if(base && base->row_drop_possible)
+    return (*base->row_drop_possible)(self, dest_path, selection_data);
+
 
   typedef gboolean RType;
   return RType();

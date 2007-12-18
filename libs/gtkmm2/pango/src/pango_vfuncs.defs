@@ -1,0 +1,17 @@
+;; -*- scheme -*-
+; virtual function definitions
+; define-vfunc is gtkmm-specific
+
+; PangoFontFace
+
+(define-vfunc get_face_name
+  (of-object "PangoFontFace")
+  (return-type "const-gchar*")
+)
+
+(define-vfunc describe
+  (of-object "PangoFontFace")
+  (return-type "PangoFontDescription*")
+)
+
+

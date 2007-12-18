@@ -1,19 +1,22 @@
 ;; -*- scheme -*-
 ; object definitions ...
-(define-object Module
-  (in-module "GType")
-  (parent "GObject")
-  (c-name "GTypeModule")
-  (gtype-id "G_TYPE_TYPE_MODULE")
-)
-
-(define-object Plugin
-  (in-module "GType")
-  (c-name "GTypePlugin")
-  (gtype-id "G_TYPE_TYPE_PLUGIN")
-)
-
 ;; Enumerations and flags ...
+
+(define-enum FileError
+  (in-module "GBookmark")
+  (c-name "GBookmarkFileError")
+  (gtype-id "G_TYPE_BOOKMARK_FILE_ERROR")
+  (values
+    '("invalid-uri" "G_BOOKMARK_FILE_ERROR_INVALID_URI")
+    '("invalid-value" "G_BOOKMARK_FILE_ERROR_INVALID_VALUE")
+    '("app-not-registered" "G_BOOKMARK_FILE_ERROR_APP_NOT_REGISTERED")
+    '("uri-not-found" "G_BOOKMARK_FILE_ERROR_URI_NOT_FOUND")
+    '("read" "G_BOOKMARK_FILE_ERROR_READ")
+    '("unknown-encoding" "G_BOOKMARK_FILE_ERROR_UNKNOWN_ENCODING")
+    '("write" "G_BOOKMARK_FILE_ERROR_WRITE")
+    '("file-not-found" "G_BOOKMARK_FILE_ERROR_FILE_NOT_FOUND")
+  )
+)
 
 (define-flags ArrayFlags
   (in-module "GBSearch")
@@ -92,7 +95,8 @@
   (c-name "GDebugFlag")
   (gtype-id "G_TYPE_DEBUG_FLAG")
   (values
-    '("s" "G_DEBUG_FATAL_WARNINGS")
+    '("warnings" "G_DEBUG_FATAL_WARNINGS")
+    '("criticals" "G_DEBUG_FATAL_CRITICALS")
   )
 )
 
@@ -279,7 +283,8 @@
   (c-name "GMarkupParseFlags")
   (gtype-id "G_TYPE_MARKUP_PARSE_FLAGS")
   (values
-    '("g" "G_MARKUP_DO_NOT_USE_THIS_UNSUPPORTED_FLAG")
+    '("do-not-use-this-unsupported-flag" "G_MARKUP_DO_NOT_USE_THIS_UNSUPPORTED_FLAG")
+    '("treat-cdata-as-text" "G_MARKUP_TREAT_CDATA_AS_TEXT")
   )
 )
 
@@ -353,6 +358,8 @@
     '("filename" "G_OPTION_ARG_FILENAME")
     '("string-array" "G_OPTION_ARG_STRING_ARRAY")
     '("filename-array" "G_OPTION_ARG_FILENAME_ARRAY")
+    '("double" "G_OPTION_ARG_DOUBLE")
+    '("int64" "G_OPTION_ARG_INT64")
   )
 )
 
@@ -364,6 +371,57 @@
     '("unknown-option" "G_OPTION_ERROR_UNKNOWN_OPTION")
     '("bad-value" "G_OPTION_ERROR_BAD_VALUE")
     '("failed" "G_OPTION_ERROR_FAILED")
+  )
+)
+
+(define-enum Error
+  (in-module "GRegex")
+  (c-name "GRegexError")
+  (gtype-id "G_TYPE_REGEX_ERROR")
+  (values
+    '("compile" "G_REGEX_ERROR_COMPILE")
+    '("optimize" "G_REGEX_ERROR_OPTIMIZE")
+    '("replace" "G_REGEX_ERROR_REPLACE")
+    '("match" "G_REGEX_ERROR_MATCH")
+  )
+)
+
+(define-flags CompileFlags
+  (in-module "GRegex")
+  (c-name "GRegexCompileFlags")
+  (gtype-id "G_TYPE_REGEX_COMPILE_FLAGS")
+  (values
+    '("caseless" "G_REGEX_CASELESS")
+    '("multiline" "G_REGEX_MULTILINE")
+    '("dotall" "G_REGEX_DOTALL")
+    '("extended" "G_REGEX_EXTENDED")
+    '("anchored" "G_REGEX_ANCHORED")
+    '("dollar-endonly" "G_REGEX_DOLLAR_ENDONLY")
+    '("ungreedy" "G_REGEX_UNGREEDY")
+    '("raw" "G_REGEX_RAW")
+    '("no-auto-capture" "G_REGEX_NO_AUTO_CAPTURE")
+    '("optimize" "G_REGEX_OPTIMIZE")
+    '("dupnames" "G_REGEX_DUPNAMES")
+    '("newline-cr" "G_REGEX_NEWLINE_CR")
+    '("newline-lf" "G_REGEX_NEWLINE_LF")
+    '("newline-crlf" "G_REGEX_NEWLINE_CRLF")
+  )
+)
+
+(define-flags MatchFlags
+  (in-module "GRegex")
+  (c-name "GRegexMatchFlags")
+  (gtype-id "G_TYPE_REGEX_MATCH_FLAGS")
+  (values
+    '("anchored" "G_REGEX_MATCH_ANCHORED")
+    '("notbol" "G_REGEX_MATCH_NOTBOL")
+    '("noteol" "G_REGEX_MATCH_NOTEOL")
+    '("notempty" "G_REGEX_MATCH_NOTEMPTY")
+    '("partial" "G_REGEX_MATCH_PARTIAL")
+    '("newline-cr" "G_REGEX_MATCH_NEWLINE_CR")
+    '("newline-lf" "G_REGEX_MATCH_NEWLINE_LF")
+    '("newline-crlf" "G_REGEX_MATCH_NEWLINE_CRLF")
+    '("newline-any" "G_REGEX_MATCH_NEWLINE_ANY")
   )
 )
 
@@ -391,6 +449,20 @@
     '("bad-quoting" "G_SHELL_ERROR_BAD_QUOTING")
     '("empty-string" "G_SHELL_ERROR_EMPTY_STRING")
     '("failed" "G_SHELL_ERROR_FAILED")
+  )
+)
+
+(define-enum Config
+  (in-module "GSlice")
+  (c-name "GSliceConfig")
+  (gtype-id "G_TYPE_SLICE_CONFIG")
+  (values
+    '("always-malloc" "G_SLICE_CONFIG_ALWAYS_MALLOC")
+    '("bypass-magazines" "G_SLICE_CONFIG_BYPASS_MAGAZINES")
+    '("working-set-msecs" "G_SLICE_CONFIG_WORKING_SET_MSECS")
+    '("color-increment" "G_SLICE_CONFIG_COLOR_INCREMENT")
+    '("chunk-sizes" "G_SLICE_CONFIG_CHUNK_SIZES")
+    '("contention-counter" "G_SLICE_CONFIG_CONTENTION_COUNTER")
   )
 )
 
@@ -562,6 +634,87 @@
     '("unknown" "G_UNICODE_BREAK_UNKNOWN")
     '("next-line" "G_UNICODE_BREAK_NEXT_LINE")
     '("word-joiner" "G_UNICODE_BREAK_WORD_JOINER")
+    '("hangul-l-jamo" "G_UNICODE_BREAK_HANGUL_L_JAMO")
+    '("hangul-v-jamo" "G_UNICODE_BREAK_HANGUL_V_JAMO")
+    '("hangul-t-jamo" "G_UNICODE_BREAK_HANGUL_T_JAMO")
+    '("hangul-lv-syllable" "G_UNICODE_BREAK_HANGUL_LV_SYLLABLE")
+    '("hangul-lvt-syllable" "G_UNICODE_BREAK_HANGUL_LVT_SYLLABLE")
+  )
+)
+
+(define-enum Script
+  (in-module "GUnicode")
+  (c-name "GUnicodeScript")
+  (gtype-id "G_TYPE_UNICODE_SCRIPT")
+  (values
+    '("invalid-code" "G_UNICODE_SCRIPT_INVALID_CODE")
+    '("common" "G_UNICODE_SCRIPT_COMMON")
+    '("inherited" "G_UNICODE_SCRIPT_INHERITED")
+    '("arabic" "G_UNICODE_SCRIPT_ARABIC")
+    '("armenian" "G_UNICODE_SCRIPT_ARMENIAN")
+    '("bengali" "G_UNICODE_SCRIPT_BENGALI")
+    '("bopomofo" "G_UNICODE_SCRIPT_BOPOMOFO")
+    '("cherokee" "G_UNICODE_SCRIPT_CHEROKEE")
+    '("coptic" "G_UNICODE_SCRIPT_COPTIC")
+    '("cyrillic" "G_UNICODE_SCRIPT_CYRILLIC")
+    '("deseret" "G_UNICODE_SCRIPT_DESERET")
+    '("devanagari" "G_UNICODE_SCRIPT_DEVANAGARI")
+    '("ethiopic" "G_UNICODE_SCRIPT_ETHIOPIC")
+    '("georgian" "G_UNICODE_SCRIPT_GEORGIAN")
+    '("gothic" "G_UNICODE_SCRIPT_GOTHIC")
+    '("greek" "G_UNICODE_SCRIPT_GREEK")
+    '("gujarati" "G_UNICODE_SCRIPT_GUJARATI")
+    '("gurmukhi" "G_UNICODE_SCRIPT_GURMUKHI")
+    '("han" "G_UNICODE_SCRIPT_HAN")
+    '("hangul" "G_UNICODE_SCRIPT_HANGUL")
+    '("hebrew" "G_UNICODE_SCRIPT_HEBREW")
+    '("hiragana" "G_UNICODE_SCRIPT_HIRAGANA")
+    '("kannada" "G_UNICODE_SCRIPT_KANNADA")
+    '("katakana" "G_UNICODE_SCRIPT_KATAKANA")
+    '("khmer" "G_UNICODE_SCRIPT_KHMER")
+    '("lao" "G_UNICODE_SCRIPT_LAO")
+    '("latin" "G_UNICODE_SCRIPT_LATIN")
+    '("malayalam" "G_UNICODE_SCRIPT_MALAYALAM")
+    '("mongolian" "G_UNICODE_SCRIPT_MONGOLIAN")
+    '("myanmar" "G_UNICODE_SCRIPT_MYANMAR")
+    '("ogham" "G_UNICODE_SCRIPT_OGHAM")
+    '("old-italic" "G_UNICODE_SCRIPT_OLD_ITALIC")
+    '("oriya" "G_UNICODE_SCRIPT_ORIYA")
+    '("runic" "G_UNICODE_SCRIPT_RUNIC")
+    '("sinhala" "G_UNICODE_SCRIPT_SINHALA")
+    '("syriac" "G_UNICODE_SCRIPT_SYRIAC")
+    '("tamil" "G_UNICODE_SCRIPT_TAMIL")
+    '("telugu" "G_UNICODE_SCRIPT_TELUGU")
+    '("thaana" "G_UNICODE_SCRIPT_THAANA")
+    '("thai" "G_UNICODE_SCRIPT_THAI")
+    '("tibetan" "G_UNICODE_SCRIPT_TIBETAN")
+    '("canadian-aboriginal" "G_UNICODE_SCRIPT_CANADIAN_ABORIGINAL")
+    '("yi" "G_UNICODE_SCRIPT_YI")
+    '("tagalog" "G_UNICODE_SCRIPT_TAGALOG")
+    '("hanunoo" "G_UNICODE_SCRIPT_HANUNOO")
+    '("buhid" "G_UNICODE_SCRIPT_BUHID")
+    '("tagbanwa" "G_UNICODE_SCRIPT_TAGBANWA")
+    '("braille" "G_UNICODE_SCRIPT_BRAILLE")
+    '("cypriot" "G_UNICODE_SCRIPT_CYPRIOT")
+    '("limbu" "G_UNICODE_SCRIPT_LIMBU")
+    '("osmanya" "G_UNICODE_SCRIPT_OSMANYA")
+    '("shavian" "G_UNICODE_SCRIPT_SHAVIAN")
+    '("linear-b" "G_UNICODE_SCRIPT_LINEAR_B")
+    '("tai-le" "G_UNICODE_SCRIPT_TAI_LE")
+    '("ugaritic" "G_UNICODE_SCRIPT_UGARITIC")
+    '("new-tai-lue" "G_UNICODE_SCRIPT_NEW_TAI_LUE")
+    '("buginese" "G_UNICODE_SCRIPT_BUGINESE")
+    '("glagolitic" "G_UNICODE_SCRIPT_GLAGOLITIC")
+    '("tifinagh" "G_UNICODE_SCRIPT_TIFINAGH")
+    '("syloti-nagri" "G_UNICODE_SCRIPT_SYLOTI_NAGRI")
+    '("old-persian" "G_UNICODE_SCRIPT_OLD_PERSIAN")
+    '("kharoshthi" "G_UNICODE_SCRIPT_KHAROSHTHI")
+    '("unknown" "G_UNICODE_SCRIPT_UNKNOWN")
+    '("balinese" "G_UNICODE_SCRIPT_BALINESE")
+    '("cuneiform" "G_UNICODE_SCRIPT_CUNEIFORM")
+    '("phoenician" "G_UNICODE_SCRIPT_PHOENICIAN")
+    '("phags-pa" "G_UNICODE_SCRIPT_PHAGS_PA")
+    '("nko" "G_UNICODE_SCRIPT_NKO")
   )
 )
 
@@ -581,113 +734,29 @@
   )
 )
 
-(define-flags Flags
-  (in-module "GParam")
-  (c-name "GParamFlags")
-  (gtype-id "G_TYPE_PARAM_FLAGS")
+(define-enum Directory
+  (in-module "GUser")
+  (c-name "GUserDirectory")
+  (gtype-id "G_TYPE_USER_DIRECTORY")
   (values
-    '("g-param-readable" "G_PARAM_READABLE")
-    '("g-param-writable" "G_PARAM_WRITABLE")
-    '("g-param-construct" "G_PARAM_CONSTRUCT")
-    '("g-param-construct-only" "G_PARAM_CONSTRUCT_ONLY")
-    '("g-param-lax-validation" "G_PARAM_LAX_VALIDATION")
-    '("g-param-static-name" "G_PARAM_STATIC_NAME")
-    '("#ifndef" "#ifndef")
-    '("#endif" "#endif")
-    '("g-param-static-blurb" "G_PARAM_STATIC_BLURB")
-  )
-)
-
-(define-flags Flags
-  (in-module "GSignal")
-  (c-name "GSignalFlags")
-  (gtype-id "G_TYPE_SIGNAL_FLAGS")
-  (values
-    '("run-first" "G_SIGNAL_RUN_FIRST")
-    '("run-last" "G_SIGNAL_RUN_LAST")
-    '("run-cleanup" "G_SIGNAL_RUN_CLEANUP")
-    '("no-recurse" "G_SIGNAL_NO_RECURSE")
-    '("detailed" "G_SIGNAL_DETAILED")
-    '("action" "G_SIGNAL_ACTION")
-    '("no-hooks" "G_SIGNAL_NO_HOOKS")
-  )
-)
-
-(define-flags Flags
-  (in-module "GConnect")
-  (c-name "GConnectFlags")
-  (gtype-id "G_TYPE_CONNECT_FLAGS")
-  (values
-    '("after" "G_CONNECT_AFTER")
-    '("swapped" "G_CONNECT_SWAPPED")
-  )
-)
-
-(define-flags MatchType
-  (in-module "GSignal")
-  (c-name "GSignalMatchType")
-  (gtype-id "G_TYPE_SIGNAL_MATCH_TYPE")
-  (values
-    '("id" "G_SIGNAL_MATCH_ID")
-    '("detail" "G_SIGNAL_MATCH_DETAIL")
-    '("closure" "G_SIGNAL_MATCH_CLOSURE")
-    '("func" "G_SIGNAL_MATCH_FUNC")
-    '("data" "G_SIGNAL_MATCH_DATA")
-    '("unblocked" "G_SIGNAL_MATCH_UNBLOCKED")
-  )
-)
-
-(define-flags DebugFlags
-  (in-module "GType")
-  (c-name "GTypeDebugFlags")
-  (gtype-id "G_TYPE_TYPE_DEBUG_FLAGS")
-  (values
-    '("none" "G_TYPE_DEBUG_NONE")
-    '("objects" "G_TYPE_DEBUG_OBJECTS")
-    '("signals" "G_TYPE_DEBUG_SIGNALS")
-    '("mask" "G_TYPE_DEBUG_MASK")
-  )
-)
-
-(define-flags FundamentalFlags
-  (in-module "GType")
-  (c-name "GTypeFundamentalFlags")
-  (gtype-id "G_TYPE_TYPE_FUNDAMENTAL_FLAGS")
-  (values
-    '("classed" "G_TYPE_FLAG_CLASSED")
-    '("instantiatable" "G_TYPE_FLAG_INSTANTIATABLE")
-    '("derivable" "G_TYPE_FLAG_DERIVABLE")
-    '("deep-derivable" "G_TYPE_FLAG_DEEP_DERIVABLE")
-  )
-)
-
-(define-flags Flags
-  (in-module "GType")
-  (c-name "GTypeFlags")
-  (gtype-id "G_TYPE_TYPE_FLAGS")
-  (values
-    '("abstract" "G_TYPE_FLAG_ABSTRACT")
-    '("value-abstract" "G_TYPE_FLAG_VALUE_ABSTRACT")
-  )
-)
-
-(define-flags Flags
-  (in-module "GModule")
-  (c-name "GModuleFlags")
-  (gtype-id "G_TYPE_MODULE_FLAGS")
-  (values
-    '("lazy" "G_MODULE_BIND_LAZY")
-    '("local" "G_MODULE_BIND_LOCAL")
-    '("mask" "G_MODULE_BIND_MASK")
+    '("directory-desktop" "G_USER_DIRECTORY_DESKTOP")
+    '("directory-documents" "G_USER_DIRECTORY_DOCUMENTS")
+    '("directory-download" "G_USER_DIRECTORY_DOWNLOAD")
+    '("directory-music" "G_USER_DIRECTORY_MUSIC")
+    '("directory-pictures" "G_USER_DIRECTORY_PICTURES")
+    '("directory-public-share" "G_USER_DIRECTORY_PUBLIC_SHARE")
+    '("directory-templates" "G_USER_DIRECTORY_TEMPLATES")
+    '("directory-videos" "G_USER_DIRECTORY_VIDEOS")
+    '("n-directories" "G_USER_N_DIRECTORIES")
   )
 )
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/galias.h
+;; From galias.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/galloca.h
+;; From galloca.h
 
 (define-function alloca
   (c-name "alloca")
@@ -698,7 +767,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/garray.h
+;; From garray.h
 
 (define-function g_array_new
   (c-name "g_array_new")
@@ -1038,7 +1107,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gasyncqueue.h
+;; From gasyncqueue.h
 
 (define-function g_async_queue_new
   (c-name "g_async_queue_new")
@@ -1100,6 +1169,28 @@
   )
 )
 
+(define-method push_sorted
+  (of-object "GAsyncQueue")
+  (c-name "g_async_queue_push_sorted")
+  (return-type "none")
+  (parameters
+    '("gpointer" "data")
+    '("GCompareDataFunc" "func")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method push_sorted_unlocked
+  (of-object "GAsyncQueue")
+  (c-name "g_async_queue_push_sorted_unlocked")
+  (return-type "none")
+  (parameters
+    '("gpointer" "data")
+    '("GCompareDataFunc" "func")
+    '("gpointer" "user_data")
+  )
+)
+
 (define-method pop
   (of-object "GAsyncQueue")
   (c-name "g_async_queue_pop")
@@ -1154,15 +1245,35 @@
   (return-type "gint")
 )
 
+(define-method sort
+  (of-object "GAsyncQueue")
+  (c-name "g_async_queue_sort")
+  (return-type "none")
+  (parameters
+    '("GCompareDataFunc" "func")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method sort_unlocked
+  (of-object "GAsyncQueue")
+  (c-name "g_async_queue_sort_unlocked")
+  (return-type "none")
+  (parameters
+    '("GCompareDataFunc" "func")
+    '("gpointer" "user_data")
+  )
+)
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gatomic.h
+
+;; From gatomic.h
 
 (define-function g_atomic_int_exchange_and_add
   (c-name "g_atomic_int_exchange_and_add")
   (return-type "gint")
   (parameters
-    '("gint*" "atomic")
+    '("volatile-gint*" "atomic")
     '("gint" "val")
   )
 )
@@ -1171,7 +1282,7 @@
   (c-name "g_atomic_int_add")
   (return-type "none")
   (parameters
-    '("gint*" "atomic")
+    '("volatile-gint*" "atomic")
     '("gint" "val")
   )
 )
@@ -1180,7 +1291,7 @@
   (c-name "g_atomic_int_compare_and_exchange")
   (return-type "gboolean")
   (parameters
-    '("gint*" "atomic")
+    '("volatile-gint*" "atomic")
     '("gint" "oldval")
     '("gint" "newval")
   )
@@ -1190,7 +1301,7 @@
   (c-name "g_atomic_pointer_compare_and_exchange")
   (return-type "gboolean")
   (parameters
-    '("gpointer*" "atomic")
+    '("volatile-gpointer*" "atomic")
     '("gpointer" "oldval")
     '("gpointer" "newval")
   )
@@ -1200,7 +1311,16 @@
   (c-name "g_atomic_int_get")
   (return-type "gint")
   (parameters
-    '("gint*" "atomic")
+    '("volatile-gint*" "atomic")
+  )
+)
+
+(define-function g_atomic_int_set
+  (c-name "g_atomic_int_set")
+  (return-type "none")
+  (parameters
+    '("volatile-gint*" "atomic")
+    '("gint" "newval")
   )
 )
 
@@ -1208,13 +1328,22 @@
   (c-name "g_atomic_pointer_get")
   (return-type "gpointer")
   (parameters
-    '("gpointer*" "atomic")
+    '("volatile-gpointer*" "atomic")
+  )
+)
+
+(define-function g_atomic_pointer_set
+  (c-name "g_atomic_pointer_set")
+  (return-type "none")
+  (parameters
+    '("volatile-gpointer*" "atomic")
+    '("gpointer" "newval")
   )
 )
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gbacktrace.h
+;; From gbacktrace.h
 
 (define-function g_on_error_query
   (c-name "g_on_error_query")
@@ -1234,7 +1363,472 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gbsearcharray.h
+;; From gbase64.h
+
+(define-function g_base64_encode_step
+  (c-name "g_base64_encode_step")
+  (return-type "gsize")
+  (parameters
+    '("const-guchar*" "in")
+    '("gsize" "len")
+    '("gboolean" "break_lines")
+    '("gchar*" "out")
+    '("gint*" "state")
+    '("gint*" "save")
+  )
+)
+
+(define-function g_base64_encode_close
+  (c-name "g_base64_encode_close")
+  (return-type "gsize")
+  (parameters
+    '("gboolean" "break_lines")
+    '("gchar*" "out")
+    '("gint*" "state")
+    '("gint*" "save")
+  )
+)
+
+(define-function g_base64_encode
+  (c-name "g_base64_encode")
+  (return-type "gchar*")
+  (parameters
+    '("const-guchar*" "data")
+    '("gsize" "len")
+  )
+)
+
+(define-function g_base64_decode_step
+  (c-name "g_base64_decode_step")
+  (return-type "gsize")
+  (parameters
+    '("const-gchar*" "in")
+    '("gsize" "len")
+    '("guchar*" "out")
+    '("gint*" "state")
+    '("guint*" "save")
+  )
+)
+
+(define-function g_base64_decode
+  (c-name "g_base64_decode")
+  (return-type "guchar*")
+  (parameters
+    '("const-gchar*" "text")
+    '("gsize*" "out_len")
+  )
+)
+
+
+
+;; From gbookmarkfile.h
+
+(define-function g_bookmark_file_error_quark
+  (c-name "g_bookmark_file_error_quark")
+  (return-type "GQuark")
+)
+
+(define-function g_bookmark_file_new
+  (c-name "g_bookmark_file_new")
+  (is-constructor-of "GBookmarkFile")
+  (return-type "GBookmarkFile*")
+)
+
+(define-method free
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_free")
+  (return-type "none")
+)
+
+(define-method load_from_file
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_load_from_file")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "filename")
+    '("GError**" "error")
+  )
+)
+
+(define-method load_from_data
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_load_from_data")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "data")
+    '("gsize" "length")
+    '("GError**" "error")
+  )
+)
+
+(define-method load_from_data_dirs
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_load_from_data_dirs")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "file")
+    '("gchar**" "full_path")
+    '("GError**" "error")
+  )
+)
+
+(define-method to_data
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_to_data")
+  (return-type "gchar*")
+  (parameters
+    '("gsize*" "length")
+    '("GError**" "error")
+  )
+)
+
+(define-method to_file
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_to_file")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "filename")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_title
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_title")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "title")
+  )
+)
+
+(define-method get_title
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_title")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_description
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_description")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "description")
+  )
+)
+
+(define-method get_description
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_description")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_mime_type
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_mime_type")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "mime_type")
+  )
+)
+
+(define-method get_mime_type
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_mime_type")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_groups
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_groups")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar**" "groups")
+    '("gsize" "length")
+  )
+)
+
+(define-method add_group
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_add_group")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "group")
+  )
+)
+
+(define-method has_group
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_has_group")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "group")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_groups
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_groups")
+  (return-type "gchar**")
+  (parameters
+    '("const-gchar*" "uri")
+    '("gsize*" "length")
+    '("GError**" "error")
+  )
+)
+
+(define-method add_application
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_add_application")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "name")
+    '("const-gchar*" "exec")
+  )
+)
+
+(define-method has_application
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_has_application")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "name")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_applications
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_applications")
+  (return-type "gchar**")
+  (parameters
+    '("const-gchar*" "uri")
+    '("gsize*" "length")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_app_info
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_app_info")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "name")
+    '("const-gchar*" "exec")
+    '("gint" "count")
+    '("time_t" "stamp")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_app_info
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_app_info")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "name")
+    '("gchar**" "exec")
+    '("guint*" "count")
+    '("time_t*" "stamp")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_is_private
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_is_private")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("gboolean" "is_private")
+  )
+)
+
+(define-method get_is_private
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_is_private")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_icon
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_icon")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "href")
+    '("const-gchar*" "mime_type")
+  )
+)
+
+(define-method get_icon
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_icon")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("gchar**" "href")
+    '("gchar**" "mime_type")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_added
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_added")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("time_t" "added")
+  )
+)
+
+(define-method get_added
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_added")
+  (return-type "time_t")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_modified
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_modified")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("time_t" "modified")
+  )
+)
+
+(define-method get_modified
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_modified")
+  (return-type "time_t")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_visited
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_set_visited")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+    '("time_t" "visited")
+  )
+)
+
+(define-method get_visited
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_visited")
+  (return-type "time_t")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method has_item
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_has_item")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+  )
+)
+
+(define-method get_size
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_size")
+  (return-type "gint")
+)
+
+(define-method get_uris
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_get_uris")
+  (return-type "gchar**")
+  (parameters
+    '("gsize*" "length")
+  )
+)
+
+(define-method remove_group
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_remove_group")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "group")
+    '("GError**" "error")
+  )
+)
+
+(define-method remove_application
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_remove_application")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("const-gchar*" "name")
+    '("GError**" "error")
+  )
+)
+
+(define-method remove_item
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_remove_item")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-method move_item
+  (of-object "GBookmarkFile")
+  (c-name "g_bookmark_file_move_item")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "old_uri")
+    '("const-gchar*" "new_uri")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gbsearcharray.h
 
 (define-function if
   (c-name "if")
@@ -1254,7 +1848,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gcache.h
+;; From gcache.h
 
 (define-function g_cache_new
   (c-name "g_cache_new")
@@ -1317,7 +1911,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gcompletion.h
+;; From gcompletion.h
 
 (define-function g_completion_new
   (c-name "g_completion_new")
@@ -1389,7 +1983,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gconvert.h
+;; From gconvert.h
 
 (define-function g_convert_error_quark
   (c-name "g_convert_error_quark")
@@ -1402,17 +1996,6 @@
   (parameters
     '("const-gchar*" "to_codeset")
     '("const-gchar*" "from_codeset")
-  )
-)
-
-(define-function g_iconv
-  (c-name "g_iconv")
-  (return-type "size_t")
-  (parameters
-    '("gchar**" "inbuf")
-    '("gsize*" "inbytes_left")
-    '("gchar**" "outbuf")
-    '("gsize*" "outbytes_left")
   )
 )
 
@@ -1566,7 +2149,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gdataset.h
+;; From gdataset.h
 
 (define-function g_datalist_init
   (c-name "g_datalist_init")
@@ -1698,11 +2281,11 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gdatasetprivate.h
+;; From gdatasetprivate.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gdate.h
+;; From gdate.h
 
 (define-function g_date_new
   (c-name "g_date_new")
@@ -1859,6 +2442,24 @@
   (return-type "none")
   (parameters
     '("const-gchar*" "str")
+  )
+)
+
+(define-method set_time_t
+  (of-object "GDate")
+  (c-name "g_date_set_time_t")
+  (return-type "none")
+  (parameters
+    '("time_t" "timet")
+  )
+)
+
+(define-method set_time_val
+  (of-object "GDate")
+  (c-name "g_date_set_time_val")
+  (return-type "none")
+  (parameters
+    '("GTimeVal*" "timeval")
   )
 )
 
@@ -2076,11 +2677,11 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gdebug.h
+;; From gdebug.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gdir.h
+;; From gdir.h
 
 (define-function g_dir_open
   (c-name "g_dir_open")
@@ -2112,7 +2713,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gerror.h
+;; From gerror.h
 
 (define-function g_error_new
   (c-name "g_error_new")
@@ -2189,7 +2790,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gfileutils.h
+;; From gfileutils.h
 
 (define-function g_file_error_quark
   (c-name "g_file_error_quark")
@@ -2309,7 +2910,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/ghash.h
+;; From ghash.h
 
 (define-function g_hash_table_new
   (c-name "g_hash_table_new")
@@ -2367,6 +2968,12 @@
   )
 )
 
+(define-method remove_all
+  (of-object "GHashTable")
+  (c-name "g_hash_table_remove_all")
+  (return-type "none")
+)
+
 (define-method steal
   (of-object "GHashTable")
   (c-name "g_hash_table_steal")
@@ -2374,6 +2981,12 @@
   (parameters
     '("gconstpointer" "key")
   )
+)
+
+(define-method steal_all
+  (of-object "GHashTable")
+  (c-name "g_hash_table_steal_all")
+  (return-type "none")
 )
 
 (define-method lookup
@@ -2442,6 +3055,30 @@
   (return-type "guint")
 )
 
+(define-method get_keys
+  (of-object "GHashTable")
+  (c-name "g_hash_table_get_keys")
+  (return-type "GList*")
+)
+
+(define-method get_values
+  (of-object "GHashTable")
+  (c-name "g_hash_table_get_values")
+  (return-type "GList*")
+)
+
+(define-method ref
+  (of-object "GHashTable")
+  (c-name "g_hash_table_ref")
+  (return-type "GHashTable*")
+)
+
+(define-method unref
+  (of-object "GHashTable")
+  (c-name "g_hash_table_unref")
+  (return-type "none")
+)
+
 (define-function g_str_equal
   (c-name "g_str_equal")
   (return-type "gboolean")
@@ -2495,7 +3132,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/ghook.h
+;; From ghook.h
 
 (define-method init
   (of-object "GHookList")
@@ -2715,15 +3352,15 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gi18n.h
+;; From gi18n.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gi18n-lib.h
+;; From gi18n-lib.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/giochannel.h
+;; From giochannel.h
 
 (define-method init
   (of-object "GIOChannel")
@@ -3114,7 +3751,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gkeyfile.h
+;; From gkeyfile.h
 
 (define-function g_key_file_error_quark
   (c-name "g_key_file_error_quark")
@@ -3160,6 +3797,19 @@
   (parameters
     '("const-gchar*" "data")
     '("gsize" "length")
+    '("GKeyFileFlags" "flags")
+    '("GError**" "error")
+  )
+)
+
+(define-method load_from_dirs
+  (of-object "GKeyFile")
+  (c-name "g_key_file_load_from_dirs")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "file")
+    '("const-gchar**" "search_dirs")
+    '("gchar**" "full_path")
     '("GKeyFileFlags" "flags")
     '("GError**" "error")
   )
@@ -3345,6 +3995,28 @@
   )
 )
 
+(define-method get_double
+  (of-object "GKeyFile")
+  (c-name "g_key_file_get_double")
+  (return-type "gdouble")
+  (parameters
+    '("const-gchar*" "group_name")
+    '("const-gchar*" "key")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_double
+  (of-object "GKeyFile")
+  (c-name "g_key_file_set_double")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "group_name")
+    '("const-gchar*" "key")
+    '("gdouble" "value")
+  )
+)
+
 (define-method get_string_list
   (of-object "GKeyFile")
   (c-name "g_key_file_get_string_list")
@@ -3431,6 +4103,30 @@
   )
 )
 
+(define-method set_double_list
+  (of-object "GKeyFile")
+  (c-name "g_key_file_set_double_list")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "group_name")
+    '("const-gchar*" "key")
+    '("gdouble[]" "list")
+    '("gsize" "length")
+  )
+)
+
+(define-method get_double_list
+  (of-object "GKeyFile")
+  (c-name "g_key_file_get_double_list")
+  (return-type "gdouble*")
+  (parameters
+    '("const-gchar*" "group_name")
+    '("const-gchar*" "key")
+    '("gsize*" "length")
+    '("GError**" "error")
+  )
+)
+
 (define-method set_integer_list
   (of-object "GKeyFile")
   (c-name "g_key_file_set_integer_list")
@@ -3500,32 +4196,19 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/glib.h
+;; From glib.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/glibintl.h
+;; From glibintl.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/glib-object.h
+;; From glib-object.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/glist.h
-
-(define-function g_list_push_allocator
-  (c-name "g_list_push_allocator")
-  (return-type "none")
-  (parameters
-    '("GAllocator*" "allocator")
-  )
-)
-
-(define-function g_list_pop_allocator
-  (c-name "g_list_pop_allocator")
-  (return-type "none")
-)
+;; From glist.h
 
 (define-function g_list_alloc
   (c-name "g_list_alloc")
@@ -3579,6 +4262,17 @@
   (parameters
     '("gpointer" "data")
     '("GCompareFunc" "func")
+  )
+)
+
+(define-method insert_sorted_with_data
+  (of-object "GList")
+  (c-name "g_list_insert_sorted_with_data")
+  (return-type "GList*")
+  (parameters
+    '("gpointer" "data")
+    '("GCompareDataFunc" "func")
+    '("gpointer" "user_data")
   )
 )
 
@@ -3760,13 +4454,26 @@
   )
 )
 
+(define-function g_list_push_allocator
+  (c-name "g_list_push_allocator")
+  (return-type "none")
+  (parameters
+    '("gpointer" "allocator")
+  )
+)
+
+(define-function g_list_pop_allocator
+  (c-name "g_list_pop_allocator")
+  (return-type "none")
+)
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmacros.h
+
+;; From gmacros.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmain.h
+;; From gmain.h
 
 (define-function g_main_context_new
   (c-name "g_main_context_new")
@@ -3850,6 +4557,12 @@
   (of-object "GMainContext")
   (c-name "g_main_context_release")
   (return-type "none")
+)
+
+(define-method is_owner
+  (of-object "GMainContext")
+  (c-name "g_main_context_is_owner")
+  (return-type "gboolean")
 )
 
 (define-method wait
@@ -3936,7 +4649,12 @@
 
 (define-function g_main_depth
   (c-name "g_main_depth")
-  (return-type "int")
+  (return-type "gint")
+)
+
+(define-function g_main_current_source
+  (c-name "g_main_current_source")
+  (return-type "GSource*")
 )
 
 (define-function g_main_loop_new
@@ -4075,6 +4793,21 @@
   )
 )
 
+(define-method set_funcs
+  (of-object "GSource")
+  (c-name "g_source_set_funcs")
+  (return-type "none")
+  (parameters
+    '("GSourceFuncs*" "funcs")
+  )
+)
+
+(define-method is_destroyed
+  (of-object "GSource")
+  (c-name "g_source_is_destroyed")
+  (return-type "gboolean")
+)
+
 (define-method set_callback_indirect
   (of-object "GSource")
   (c-name "g_source_set_callback_indirect")
@@ -4136,6 +4869,14 @@
   )
 )
 
+(define-function g_timeout_source_new_seconds
+  (c-name "g_timeout_source_new_seconds")
+  (return-type "GSource*")
+  (parameters
+    '("guint" "interval")
+  )
+)
+
 (define-function g_get_current_time
   (c-name "g_get_current_time")
   (return-type "none")
@@ -4183,6 +4924,16 @@
 
 (define-function g_timeout_add
   (c-name "g_timeout_add")
+  (return-type "guint")
+  (parameters
+    '("guint" "interval")
+    '("GSourceFunc" "function")
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_timeout_add_seconds
+  (c-name "g_timeout_add_seconds")
   (return-type "guint")
   (parameters
     '("guint" "interval")
@@ -4243,7 +4994,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmappedfile.h
+;; From gmappedfile.h
 
 (define-function g_mapped_file_new
   (c-name "g_mapped_file_new")
@@ -4276,7 +5027,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmarkup.h
+;; From gmarkup.h
 
 (define-function g_markup_error_quark
   (c-name "g_markup_error_quark")
@@ -4366,7 +5117,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmem.h
+;; From gmem.h
 
 (define-function g_malloc
   (c-name "g_malloc")
@@ -4529,7 +5280,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmessages.h
+;; From gmessages.h
 
 (define-function g_printf_string_upper_bound
   (c-name "g_printf_string_upper_bound")
@@ -4668,20 +5419,11 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gnode.h
+;; From gmirroringtable.h
 
-(define-function g_node_push_allocator
-  (c-name "g_node_push_allocator")
-  (return-type "none")
-  (parameters
-    '("GAllocator*" "allocator")
-  )
-)
 
-(define-function g_node_pop_allocator
-  (c-name "g_node_pop_allocator")
-  (return-type "none")
-)
+
+;; From gnode.h
 
 (define-function g_node_new
   (c-name "g_node_new")
@@ -4897,9 +5639,22 @@
   (return-type "GNode*")
 )
 
+(define-function g_node_push_allocator
+  (c-name "g_node_push_allocator")
+  (return-type "none")
+  (parameters
+    '("gpointer" "dummy")
+  )
+)
+
+(define-function g_node_pop_allocator
+  (c-name "g_node_pop_allocator")
+  (return-type "none")
+)
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/goption.h
+
+;; From goption.h
 
 (define-function g_option_error_quark
   (c-name "g_option_error_quark")
@@ -4913,6 +5668,36 @@
   (parameters
     '("const-gchar*" "parameter_string")
   )
+)
+
+(define-method set_summary
+  (of-object "GOptionContext")
+  (c-name "g_option_context_set_summary")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "summary")
+  )
+)
+
+(define-method get_summary
+  (of-object "GOptionContext")
+  (c-name "g_option_context_get_summary")
+  (return-type "const-gchar*")
+)
+
+(define-method set_description
+  (of-object "GOptionContext")
+  (c-name "g_option_context_set_description")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "description")
+  )
+)
+
+(define-method get_description
+  (of-object "GOptionContext")
+  (c-name "g_option_context_get_description")
+  (return-type "const-gchar*")
 )
 
 (define-method free
@@ -4972,6 +5757,26 @@
   )
 )
 
+(define-method set_translate_func
+  (of-object "GOptionContext")
+  (c-name "g_option_context_set_translate_func")
+  (return-type "none")
+  (parameters
+    '("GTranslateFunc" "func")
+    '("gpointer" "data")
+    '("GDestroyNotify" "destroy_notify")
+  )
+)
+
+(define-method set_translation_domain
+  (of-object "GOptionContext")
+  (c-name "g_option_context_set_translation_domain")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "domain")
+  )
+)
+
 (define-method add_group
   (of-object "GOptionContext")
   (c-name "g_option_context_add_group")
@@ -4994,6 +5799,16 @@
   (of-object "GOptionContext")
   (c-name "g_option_context_get_main_group")
   (return-type "GOptionGroup*")
+)
+
+(define-method get_help
+  (of-object "GOptionContext")
+  (c-name "g_option_context_get_help")
+  (return-type "gchar*")
+  (parameters
+    '("gboolean" "main_help")
+    '("GOptionGroup*" "group")
+  )
 )
 
 (define-function g_option_group_new
@@ -5065,7 +5880,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gpattern.h
+;; From gpattern.h
 
 (define-function g_pattern_spec_new
   (c-name "g_pattern_spec_new")
@@ -5122,7 +5937,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gprimes.h
+;; From gprimes.h
 
 (define-function g_spaced_primes_closest
   (c-name "g_spaced_primes_closest")
@@ -5134,7 +5949,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gprintf.h
+;; From gprintf.h
 
 (define-function g_printf
   (c-name "g_printf")
@@ -5160,17 +5975,6 @@
   (return-type "gint")
   (parameters
     '("gchar*" "string")
-    '("gchar-const*" "format")
-  )
-  (varargs #t)
-)
-
-(define-function g_snprintf
-  (c-name "g_snprintf")
-  (return-type "gint")
-  (parameters
-    '("gchar*" "string")
-    '("gulong" "n")
     '("gchar-const*" "format")
   )
   (varargs #t)
@@ -5205,17 +6009,6 @@
   )
 )
 
-(define-function g_vsnprintf
-  (c-name "g_vsnprintf")
-  (return-type "gint")
-  (parameters
-    '("gchar*" "string")
-    '("gulong" "n")
-    '("gchar-const*" "format")
-    '("va_list" "args")
-  )
-)
-
 (define-function g_vasprintf
   (c-name "g_vasprintf")
   (return-type "gint")
@@ -5228,11 +6021,11 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gprintfint.h
+;; From gprintfint.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gqsort.h
+;; From gqsort.h
 
 (define-function g_qsort_with_data
   (c-name "g_qsort_with_data")
@@ -5248,7 +6041,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gquark.h
+;; From gquark.h
 
 (define-function g_quark_try_string
   (c-name "g_quark_try_string")
@@ -5280,9 +6073,25 @@
   (return-type "const-gchar*")
 )
 
+(define-function g_intern_string
+  (c-name "g_intern_string")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "string")
+  )
+)
+
+(define-function g_intern_static_string
+  (c-name "g_intern_static_string")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "string")
+  )
+)
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gqueue.h
+
+;; From gqueue.h
 
 (define-function g_queue_new
   (c-name "g_queue_new")
@@ -5293,6 +6102,18 @@
 (define-method free
   (of-object "GQueue")
   (c-name "g_queue_free")
+  (return-type "none")
+)
+
+(define-method init
+  (of-object "GQueue")
+  (c-name "g_queue_init")
+  (return-type "none")
+)
+
+(define-method clear
+  (of-object "GQueue")
+  (c-name "g_queue_clear")
   (return-type "none")
 )
 
@@ -5586,7 +6407,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/grand.h
+;; From grand.h
 
 (define-function g_rand_new_with_seed
   (c-name "g_rand_new_with_seed")
@@ -5712,7 +6533,326 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/grel.h
+;; From gregex.h
+
+(define-function g_regex_error_quark
+  (c-name "g_regex_error_quark")
+  (return-type "GQuark")
+)
+
+(define-function g_regex_new
+  (c-name "g_regex_new")
+  (is-constructor-of "GRegex")
+  (return-type "GRegex*")
+  (parameters
+    '("const-gchar*" "pattern")
+    '("GRegexCompileFlags" "compile_options")
+    '("GRegexMatchFlags" "match_options")
+    '("GError**" "error")
+  )
+)
+
+(define-method ref
+  (of-object "GRegex")
+  (c-name "g_regex_ref")
+  (return-type "GRegex*")
+)
+
+(define-method unref
+  (of-object "GRegex")
+  (c-name "g_regex_unref")
+  (return-type "none")
+)
+
+(define-method get_pattern
+  (of-object "GRegex")
+  (c-name "g_regex_get_pattern")
+  (return-type "const-gchar*")
+)
+
+(define-method get_max_backref
+  (of-object "GRegex")
+  (c-name "g_regex_get_max_backref")
+  (return-type "gint")
+)
+
+(define-method get_capture_count
+  (of-object "GRegex")
+  (c-name "g_regex_get_capture_count")
+  (return-type "gint")
+)
+
+(define-method get_string_number
+  (of-object "GRegex")
+  (c-name "g_regex_get_string_number")
+  (return-type "gint")
+  (parameters
+    '("const-gchar*" "name")
+  )
+)
+
+(define-function g_regex_escape_string
+  (c-name "g_regex_escape_string")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "string")
+    '("gint" "length")
+  )
+)
+
+(define-function g_regex_match_simple
+  (c-name "g_regex_match_simple")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "pattern")
+    '("const-gchar*" "string")
+    '("GRegexCompileFlags" "compile_options")
+    '("GRegexMatchFlags" "match_options")
+  )
+)
+
+(define-method match
+  (of-object "GRegex")
+  (c-name "g_regex_match")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "string")
+    '("GRegexMatchFlags" "match_options")
+    '("GMatchInfo**" "match_info")
+  )
+)
+
+(define-method match_full
+  (of-object "GRegex")
+  (c-name "g_regex_match_full")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "string")
+    '("gssize" "string_len")
+    '("gint" "start_position")
+    '("GRegexMatchFlags" "match_options")
+    '("GMatchInfo**" "match_info")
+    '("GError**" "error")
+  )
+)
+
+(define-method match_all
+  (of-object "GRegex")
+  (c-name "g_regex_match_all")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "string")
+    '("GRegexMatchFlags" "match_options")
+    '("GMatchInfo**" "match_info")
+  )
+)
+
+(define-method match_all_full
+  (of-object "GRegex")
+  (c-name "g_regex_match_all_full")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "string")
+    '("gssize" "string_len")
+    '("gint" "start_position")
+    '("GRegexMatchFlags" "match_options")
+    '("GMatchInfo**" "match_info")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_regex_split_simple
+  (c-name "g_regex_split_simple")
+  (return-type "gchar**")
+  (parameters
+    '("const-gchar*" "pattern")
+    '("const-gchar*" "string")
+    '("GRegexCompileFlags" "compile_options")
+    '("GRegexMatchFlags" "match_options")
+  )
+)
+
+(define-method split
+  (of-object "GRegex")
+  (c-name "g_regex_split")
+  (return-type "gchar**")
+  (parameters
+    '("const-gchar*" "string")
+    '("GRegexMatchFlags" "match_options")
+  )
+)
+
+(define-method split_full
+  (of-object "GRegex")
+  (c-name "g_regex_split_full")
+  (return-type "gchar**")
+  (parameters
+    '("const-gchar*" "string")
+    '("gssize" "string_len")
+    '("gint" "start_position")
+    '("GRegexMatchFlags" "match_options")
+    '("gint" "max_tokens")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace
+  (of-object "GRegex")
+  (c-name "g_regex_replace")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "string")
+    '("gssize" "string_len")
+    '("gint" "start_position")
+    '("const-gchar*" "replacement")
+    '("GRegexMatchFlags" "match_options")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace_literal
+  (of-object "GRegex")
+  (c-name "g_regex_replace_literal")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "string")
+    '("gssize" "string_len")
+    '("gint" "start_position")
+    '("const-gchar*" "replacement")
+    '("GRegexMatchFlags" "match_options")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace_eval
+  (of-object "GRegex")
+  (c-name "g_regex_replace_eval")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "string")
+    '("gssize" "string_len")
+    '("gint" "start_position")
+    '("GRegexMatchFlags" "match_options")
+    '("GRegexEvalCallback" "eval")
+    '("gpointer" "user_data")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_regex_check_replacement
+  (c-name "g_regex_check_replacement")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "replacement")
+    '("gboolean*" "has_references")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_regex
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_get_regex")
+  (return-type "GRegex*")
+)
+
+(define-method get_string
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_get_string")
+  (return-type "const-gchar*")
+)
+
+(define-method free
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_free")
+  (return-type "none")
+)
+
+(define-method next
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_next")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method matches
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_matches")
+  (return-type "gboolean")
+)
+
+(define-method get_match_count
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_get_match_count")
+  (return-type "gint")
+)
+
+(define-method is_partial_match
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_is_partial_match")
+  (return-type "gboolean")
+)
+
+(define-method expand_references
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_expand_references")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "string_to_expand")
+    '("GError**" "error")
+  )
+)
+
+(define-method fetch
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_fetch")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "match_num")
+  )
+)
+
+(define-method fetch_pos
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_fetch_pos")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "match_num")
+    '("gint*" "start_pos")
+    '("gint*" "end_pos")
+  )
+)
+
+(define-method fetch_named
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_fetch_named")
+  (return-type "gchar*")
+  (parameters
+    '("const-gchar*" "name")
+  )
+)
+
+(define-method fetch_named_pos
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_fetch_named_pos")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "name")
+    '("gint*" "start_pos")
+    '("gint*" "end_pos")
+  )
+)
+
+(define-method fetch_all
+  (of-object "GMatchInfo")
+  (c-name "g_match_info_fetch_all")
+  (return-type "gchar**")
+)
+
+
+
+;; From grel.h
 
 (define-function g_relation_new
   (c-name "g_relation_new")
@@ -5812,7 +6952,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gscanner.h
+;; From gscanner.h
 
 (define-function g_scanner_new
   (c-name "g_scanner_new")
@@ -5992,7 +7132,314 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gshell.h
+;; From gscripttable.h
+
+
+
+;; From gsequence.h
+
+(define-function g_sequence_new
+  (c-name "g_sequence_new")
+  (is-constructor-of "GSequence")
+  (return-type "GSequence*")
+  (parameters
+    '("GDestroyNotify" "data_destroy")
+  )
+)
+
+(define-method free
+  (of-object "GSequence")
+  (c-name "g_sequence_free")
+  (return-type "none")
+)
+
+(define-method get_length
+  (of-object "GSequence")
+  (c-name "g_sequence_get_length")
+  (return-type "gint")
+)
+
+(define-method foreach
+  (of-object "GSequence")
+  (c-name "g_sequence_foreach")
+  (return-type "none")
+  (parameters
+    '("GFunc" "func")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-function g_sequence_foreach_range
+  (c-name "g_sequence_foreach_range")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "begin")
+    '("GSequenceIter*" "end")
+    '("GFunc" "func")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method sort
+  (of-object "GSequence")
+  (c-name "g_sequence_sort")
+  (return-type "none")
+  (parameters
+    '("GCompareDataFunc" "cmp_func")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-method sort_iter
+  (of-object "GSequence")
+  (c-name "g_sequence_sort_iter")
+  (return-type "none")
+  (parameters
+    '("GSequenceIterCompareFunc" "cmp_func")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-method get_begin_iter
+  (of-object "GSequence")
+  (c-name "g_sequence_get_begin_iter")
+  (return-type "GSequenceIter*")
+)
+
+(define-method get_end_iter
+  (of-object "GSequence")
+  (c-name "g_sequence_get_end_iter")
+  (return-type "GSequenceIter*")
+)
+
+(define-method get_iter_at_pos
+  (of-object "GSequence")
+  (c-name "g_sequence_get_iter_at_pos")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gint" "pos")
+  )
+)
+
+(define-method append
+  (of-object "GSequence")
+  (c-name "g_sequence_append")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gpointer" "data")
+  )
+)
+
+(define-method prepend
+  (of-object "GSequence")
+  (c-name "g_sequence_prepend")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_sequence_insert_before
+  (c-name "g_sequence_insert_before")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("GSequenceIter*" "iter")
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_sequence_move
+  (c-name "g_sequence_move")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "src")
+    '("GSequenceIter*" "dest")
+  )
+)
+
+(define-function g_sequence_swap
+  (c-name "g_sequence_swap")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "a")
+    '("GSequenceIter*" "b")
+  )
+)
+
+(define-method insert_sorted
+  (of-object "GSequence")
+  (c-name "g_sequence_insert_sorted")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gpointer" "data")
+    '("GCompareDataFunc" "cmp_func")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-method insert_sorted_iter
+  (of-object "GSequence")
+  (c-name "g_sequence_insert_sorted_iter")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gpointer" "data")
+    '("GSequenceIterCompareFunc" "iter_cmp")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-function g_sequence_sort_changed
+  (c-name "g_sequence_sort_changed")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "iter")
+    '("GCompareDataFunc" "cmp_func")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-function g_sequence_sort_changed_iter
+  (c-name "g_sequence_sort_changed_iter")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "iter")
+    '("GSequenceIterCompareFunc" "iter_cmp")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-function g_sequence_remove
+  (c-name "g_sequence_remove")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "iter")
+  )
+)
+
+(define-function g_sequence_remove_range
+  (c-name "g_sequence_remove_range")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "begin")
+    '("GSequenceIter*" "end")
+  )
+)
+
+(define-function g_sequence_move_range
+  (c-name "g_sequence_move_range")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "dest")
+    '("GSequenceIter*" "begin")
+    '("GSequenceIter*" "end")
+  )
+)
+
+(define-method search
+  (of-object "GSequence")
+  (c-name "g_sequence_search")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gpointer" "data")
+    '("GCompareDataFunc" "cmp_func")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-method search_iter
+  (of-object "GSequence")
+  (c-name "g_sequence_search_iter")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gpointer" "data")
+    '("GSequenceIterCompareFunc" "iter_cmp")
+    '("gpointer" "cmp_data")
+  )
+)
+
+(define-function g_sequence_get
+  (c-name "g_sequence_get")
+  (return-type "gpointer")
+  (parameters
+    '("GSequenceIter*" "iter")
+  )
+)
+
+(define-function g_sequence_set
+  (c-name "g_sequence_set")
+  (return-type "none")
+  (parameters
+    '("GSequenceIter*" "iter")
+    '("gpointer" "data")
+  )
+)
+
+(define-method is_begin
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_is_begin")
+  (return-type "gboolean")
+)
+
+(define-method is_end
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_is_end")
+  (return-type "gboolean")
+)
+
+(define-method next
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_next")
+  (return-type "GSequenceIter*")
+)
+
+(define-method prev
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_prev")
+  (return-type "GSequenceIter*")
+)
+
+(define-method get_position
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_get_position")
+  (return-type "gint")
+)
+
+(define-method move
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_move")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("gint" "delta")
+  )
+)
+
+(define-method get_sequence
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_get_sequence")
+  (return-type "GSequence*")
+)
+
+(define-method compare
+  (of-object "GSequenceIter")
+  (c-name "g_sequence_iter_compare")
+  (return-type "gint")
+  (parameters
+    '("GSequenceIter*" "b")
+  )
+)
+
+(define-function g_sequence_range_get_midpoint
+  (c-name "g_sequence_range_get_midpoint")
+  (return-type "GSequenceIter*")
+  (parameters
+    '("GSequenceIter*" "begin")
+    '("GSequenceIter*" "end")
+  )
+)
+
+
+
+;; From gshell.h
 
 (define-function g_shell_error_quark
   (c-name "g_shell_error_quark")
@@ -6029,20 +7476,73 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gslist.h
+;; From gslice.h
 
-(define-function g_slist_push_allocator
-  (c-name "g_slist_push_allocator")
-  (return-type "none")
+(define-function g_slice_alloc
+  (c-name "g_slice_alloc")
+  (return-type "gpointer")
   (parameters
-    '("GAllocator*" "allocator")
+    '("gsize" "block_size")
   )
 )
 
-(define-function g_slist_pop_allocator
-  (c-name "g_slist_pop_allocator")
-  (return-type "none")
+(define-function g_slice_alloc0
+  (c-name "g_slice_alloc0")
+  (return-type "gpointer")
+  (parameters
+    '("gsize" "block_size")
+  )
 )
+
+(define-function g_slice_free1
+  (c-name "g_slice_free1")
+  (return-type "none")
+  (parameters
+    '("gsize" "block_size")
+    '("gpointer" "mem_block")
+  )
+)
+
+(define-function g_slice_free_chain_with_offset
+  (c-name "g_slice_free_chain_with_offset")
+  (return-type "none")
+  (parameters
+    '("gsize" "block_size")
+    '("gpointer" "mem_chain")
+    '("gsize" "next_offset")
+  )
+)
+
+(define-function g_slice_set_config
+  (c-name "g_slice_set_config")
+  (return-type "none")
+  (parameters
+    '("GSliceConfig" "ckey")
+    '("gint64" "value")
+  )
+)
+
+(define-function g_slice_get_config
+  (c-name "g_slice_get_config")
+  (return-type "gint64")
+  (parameters
+    '("GSliceConfig" "ckey")
+  )
+)
+
+(define-function g_slice_get_config_state
+  (c-name "g_slice_get_config_state")
+  (return-type "gint64*")
+  (parameters
+    '("GSliceConfig" "ckey")
+    '("gint64" "address")
+    '("guint*" "n_values")
+  )
+)
+
+
+
+;; From gslist.h
 
 (define-function g_slist_alloc
   (c-name "g_slist_alloc")
@@ -6096,6 +7596,17 @@
   (parameters
     '("gpointer" "data")
     '("GCompareFunc" "func")
+  )
+)
+
+(define-method insert_sorted_with_data
+  (of-object "GSList")
+  (c-name "g_slist_insert_sorted_with_data")
+  (return-type "GSList*")
+  (parameters
+    '("gpointer" "data")
+    '("GCompareDataFunc" "func")
+    '("gpointer" "user_data")
   )
 )
 
@@ -6262,9 +7773,22 @@
   )
 )
 
+(define-function g_slist_push_allocator
+  (c-name "g_slist_push_allocator")
+  (return-type "none")
+  (parameters
+    '("gpointer" "dummy")
+  )
+)
+
+(define-function g_slist_pop_allocator
+  (c-name "g_slist_pop_allocator")
+  (return-type "none")
+)
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gspawn.h
+
+;; From gspawn.h
 
 (define-function g_spawn_error_quark
   (c-name "g_spawn_error_quark")
@@ -6352,7 +7876,40 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gstdio.h
+;; From gstdio.h
+
+(define-function g_access
+  (c-name "g_access")
+  (return-type "int")
+  (parameters
+    '("const-gchar*" "filename")
+    '("int" "mode")
+  )
+)
+
+(define-function g_chdir
+  (c-name "g_chdir")
+  (return-type "int")
+  (parameters
+    '("const-gchar*" "path")
+  )
+)
+
+(define-function g_unlink
+  (c-name "g_unlink")
+  (return-type "int")
+  (parameters
+    '("const-gchar*" "filename")
+  )
+)
+
+(define-function g_rmdir
+  (c-name "g_rmdir")
+  (return-type "int")
+  (parameters
+    '("const-gchar*" "filename")
+  )
+)
 
 (define-function g_access
   (c-name "g_access")
@@ -6480,7 +8037,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gstrfuncs.h
+;; From gstrfuncs.h
 
 (define-function g_ascii_tolower
   (c-name "g_ascii_tolower")
@@ -6646,6 +8203,16 @@
 (define-function g_ascii_strtoull
   (c-name "g_ascii_strtoull")
   (return-type "guint64")
+  (parameters
+    '("const-gchar*" "nptr")
+    '("gchar**" "endptr")
+    '("guint" "base")
+  )
+)
+
+(define-function g_ascii_strtoll
+  (c-name "g_ascii_strtoll")
+  (return-type "gint64")
   (parameters
     '("const-gchar*" "nptr")
     '("gchar**" "endptr")
@@ -6923,7 +8490,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gstring.h
+;; From gstring.h
 
 (define-function g_string_chunk_new
   (c-name "g_string_chunk_new")
@@ -6937,6 +8504,12 @@
 (define-method free
   (of-object "GStringChunk")
   (c-name "g_string_chunk_free")
+  (return-type "none")
+)
+
+(define-method clear
+  (of-object "GStringChunk")
+  (c-name "g_string_chunk_clear")
   (return-type "none")
 )
 
@@ -7202,7 +8775,15 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gthread.h
+;; From gthread.h
+
+(define-function guint64
+  (c-name "guint64")
+  (return-type "GLIB_VAR")
+  (parameters
+    '("*" "g_thread_gettime")
+  )
+)
 
 (define-function g_thread_init
   (c-name "g_thread_init")
@@ -7403,6 +8984,15 @@
   (return-type "none")
 )
 
+(define-function g_thread_foreach
+  (c-name "g_thread_foreach")
+  (return-type "none")
+  (parameters
+    '("GFunc" "thread_func")
+    '("gpointer" "user_data")
+  )
+)
+
 (define-method impl
   (of-object "GOnce")
   (c-name "g_once_impl")
@@ -7415,16 +9005,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gthreadinit.h
-
-(define-function g_thread_init_glib
-  (c-name "g_thread_init_glib")
-  (return-type "none")
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/glib/gthreadpool.h
+;; From gthreadpool.h
 
 (define-function g_thread_pool_new
   (c-name "g_thread_pool_new")
@@ -7483,7 +9064,7 @@
   (return-type "none")
   (parameters
     '("gboolean" "immediate")
-    '("gboolean" "wait")
+    '("gboolean" "wait_")
   )
 )
 
@@ -7510,9 +9091,41 @@
   (return-type "none")
 )
 
+(define-method set_sort_function
+  (of-object "GThreadPool")
+  (c-name "g_thread_pool_set_sort_function")
+  (return-type "none")
+  (parameters
+    '("GCompareDataFunc" "func")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-function g_thread_pool_set_max_idle_time
+  (c-name "g_thread_pool_set_max_idle_time")
+  (return-type "none")
+  (parameters
+    '("guint" "interval")
+  )
+)
+
+(define-function g_thread_pool_get_max_idle_time
+  (c-name "g_thread_pool_get_max_idle_time")
+  (return-type "guint")
+)
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gtimer.h
+
+;; From gthreadprivate.h
+
+(define-function g_thread_init_glib
+  (c-name "g_thread_init_glib")
+  (return-type "none")
+)
+
+
+
+;; From gtimer.h
 
 (define-function g_timer_new
   (c-name "g_timer_new")
@@ -7576,9 +9189,24 @@
   )
 )
 
+(define-function g_time_val_from_iso8601
+  (c-name "g_time_val_from_iso8601")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "iso_date")
+    '("GTimeVal*" "time_")
+  )
+)
+
+(define-method to_iso8601
+  (of-object "GTimeVal")
+  (c-name "g_time_val_to_iso8601")
+  (return-type "gchar*")
+)
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gtree.h
+
+;; From gtree.h
 
 (define-function g_tree_new
   (c-name "g_tree_new")
@@ -7718,19 +9346,19 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gtypes.h
+;; From gtypes.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gunibreak.h
+;; From gunibreak.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gunichartables.h
+;; From gunichartables.h
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gunicode.h
+;; From gunicode.h
 
 (define-function g_get_charset
   (c-name "g_get_charset")
@@ -7821,6 +9449,24 @@
 (define-method iswide
   (of-object "gunichar")
   (c-name "g_unichar_iswide")
+  (return-type "gboolean")
+)
+
+(define-method iswide_cjk
+  (of-object "gunichar")
+  (c-name "g_unichar_iswide_cjk")
+  (return-type "gboolean")
+)
+
+(define-method iszerowidth
+  (of-object "gunichar")
+  (c-name "g_unichar_iszerowidth")
+  (return-type "gboolean")
+)
+
+(define-method ismark
+  (of-object "gunichar")
+  (c-name "g_unichar_ismark")
   (return-type "gboolean")
 )
 
@@ -8173,21 +9819,27 @@
   )
 )
 
-
-
-;; From /home/murrayc/cvs/gnome212/glib/glib/gunicodeprivate.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/glib/gunicomp.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/glib/gunidecomp.h
+(define-method get_script
+  (of-object "gunichar")
+  (c-name "g_unichar_get_script")
+  (return-type "GUnicodeScript")
+)
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gutils.h
+;; From gunicodeprivate.h
+
+
+
+;; From gunicomp.h
+
+
+
+;; From gunidecomp.h
+
+
+
+;; From gutils.h
 
 (define-function g_get_user_name
   (c-name "g_get_user_name")
@@ -8253,6 +9905,14 @@
 (define-function g_get_user_cache_dir
   (c-name "g_get_user_cache_dir")
   (return-type "const-gchar*")
+)
+
+(define-function g_get_user_special_dir
+  (c-name "g_get_user_special_dir")
+  (return-type "const-gchar*")
+  (parameters
+    '("GUserDirectory" "directory")
+  )
 )
 
 (define-function g_parse_debug_string
@@ -8399,7 +10059,7 @@
 
 
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gwin32.h
+;; From gwin32.h
 
 (define-function g_win32_ftruncate
   (c-name "g_win32_ftruncate")
@@ -8427,8 +10087,8 @@
   (c-name "g_win32_get_package_installation_directory")
   (return-type "gchar*")
   (parameters
-    '("gchar*" "package")
-    '("gchar*" "dll_name")
+    '("const-gchar*" "package")
+    '("const-gchar*" "dll_name")
   )
 )
 
@@ -8436,9 +10096,9 @@
   (c-name "g_win32_get_package_installation_subdirectory")
   (return-type "gchar*")
   (parameters
-    '("gchar*" "package")
-    '("gchar*" "dll_name")
-    '("gchar*" "subdir")
+    '("const-gchar*" "package")
+    '("const-gchar*" "dll_name")
+    '("const-gchar*" "subdir")
   )
 )
 
@@ -8452,2883 +10112,6 @@
   (return-type "gchar*")
   (parameters
     '("const-gchar*" "utf8filename")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gboxed.h
-
-(define-function g_boxed_copy
-  (c-name "g_boxed_copy")
-  (return-type "gpointer")
-  (parameters
-    '("GType" "boxed_type")
-    '("gconstpointer" "src_boxed")
-  )
-)
-
-(define-function g_boxed_free
-  (c-name "g_boxed_free")
-  (return-type "none")
-  (parameters
-    '("GType" "boxed_type")
-    '("gpointer" "boxed")
-  )
-)
-
-(define-method set_boxed
-  (of-object "GValue")
-  (c-name "g_value_set_boxed")
-  (return-type "none")
-  (parameters
-    '("gconstpointer" "v_boxed")
-  )
-)
-
-(define-method set_static_boxed
-  (of-object "GValue")
-  (c-name "g_value_set_static_boxed")
-  (return-type "none")
-  (parameters
-    '("gconstpointer" "v_boxed")
-  )
-)
-
-(define-method get_boxed
-  (of-object "GValue")
-  (c-name "g_value_get_boxed")
-  (return-type "gpointer")
-)
-
-(define-method dup_boxed
-  (of-object "GValue")
-  (c-name "g_value_dup_boxed")
-  (return-type "gpointer")
-)
-
-(define-function g_boxed_type_register_static
-  (c-name "g_boxed_type_register_static")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-    '("GBoxedCopyFunc" "boxed_copy")
-    '("GBoxedFreeFunc" "boxed_free")
-  )
-)
-
-(define-method take_boxed
-  (of-object "GValue")
-  (c-name "g_value_take_boxed")
-  (return-type "none")
-  (parameters
-    '("gconstpointer" "v_boxed")
-  )
-)
-
-(define-method set_boxed_take_ownership
-  (of-object "GValue")
-  (c-name "g_value_set_boxed_take_ownership")
-  (return-type "none")
-  (parameters
-    '("gconstpointer" "v_boxed")
-  )
-)
-
-(define-function g_closure_get_type
-  (c-name "g_closure_get_type")
-  (return-type "GType")
-)
-
-(define-function g_value_get_type
-  (c-name "g_value_get_type")
-  (return-type "GType")
-)
-
-(define-function g_value_array_get_type
-  (c-name "g_value_array_get_type")
-  (return-type "GType")
-)
-
-(define-function g_date_get_type
-  (c-name "g_date_get_type")
-  (return-type "GType")
-)
-
-(define-function g_strv_get_type
-  (c-name "g_strv_get_type")
-  (return-type "GType")
-)
-
-(define-function g_gstring_get_type
-  (c-name "g_gstring_get_type")
-  (return-type "GType")
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gclosure.h
-
-(define-function g_cclosure_new
-  (c-name "g_cclosure_new")
-  (is-constructor-of "GCclosure")
-  (return-type "GClosure*")
-  (parameters
-    '("GCallback" "callback_func")
-    '("gpointer" "user_data")
-    '("GClosureNotify" "destroy_data")
-  )
-)
-
-(define-function g_cclosure_new_swap
-  (c-name "g_cclosure_new_swap")
-  (return-type "GClosure*")
-  (parameters
-    '("GCallback" "callback_func")
-    '("gpointer" "user_data")
-    '("GClosureNotify" "destroy_data")
-  )
-)
-
-(define-function g_signal_type_cclosure_new
-  (c-name "g_signal_type_cclosure_new")
-  (is-constructor-of "GSignalTypeCclosure")
-  (return-type "GClosure*")
-  (parameters
-    '("GType" "itype")
-    '("guint" "struct_offset")
-  )
-)
-
-(define-method ref
-  (of-object "GClosure")
-  (c-name "g_closure_ref")
-  (return-type "GClosure*")
-)
-
-(define-method sink
-  (of-object "GClosure")
-  (c-name "g_closure_sink")
-  (return-type "none")
-)
-
-(define-method unref
-  (of-object "GClosure")
-  (c-name "g_closure_unref")
-  (return-type "none")
-)
-
-(define-function g_closure_new_simple
-  (c-name "g_closure_new_simple")
-  (return-type "GClosure*")
-  (parameters
-    '("guint" "sizeof_closure")
-    '("gpointer" "data")
-  )
-)
-
-(define-method add_finalize_notifier
-  (of-object "GClosure")
-  (c-name "g_closure_add_finalize_notifier")
-  (return-type "none")
-  (parameters
-    '("gpointer" "notify_data")
-    '("GClosureNotify" "notify_func")
-  )
-)
-
-(define-method remove_finalize_notifier
-  (of-object "GClosure")
-  (c-name "g_closure_remove_finalize_notifier")
-  (return-type "none")
-  (parameters
-    '("gpointer" "notify_data")
-    '("GClosureNotify" "notify_func")
-  )
-)
-
-(define-method add_invalidate_notifier
-  (of-object "GClosure")
-  (c-name "g_closure_add_invalidate_notifier")
-  (return-type "none")
-  (parameters
-    '("gpointer" "notify_data")
-    '("GClosureNotify" "notify_func")
-  )
-)
-
-(define-method remove_invalidate_notifier
-  (of-object "GClosure")
-  (c-name "g_closure_remove_invalidate_notifier")
-  (return-type "none")
-  (parameters
-    '("gpointer" "notify_data")
-    '("GClosureNotify" "notify_func")
-  )
-)
-
-(define-method add_marshal_guards
-  (of-object "GClosure")
-  (c-name "g_closure_add_marshal_guards")
-  (return-type "none")
-  (parameters
-    '("gpointer" "pre_marshal_data")
-    '("GClosureNotify" "pre_marshal_notify")
-    '("gpointer" "post_marshal_data")
-    '("GClosureNotify" "post_marshal_notify")
-  )
-)
-
-(define-method set_marshal
-  (of-object "GClosure")
-  (c-name "g_closure_set_marshal")
-  (return-type "none")
-  (parameters
-    '("GClosureMarshal" "marshal")
-  )
-)
-
-(define-method set_meta_marshal
-  (of-object "GClosure")
-  (c-name "g_closure_set_meta_marshal")
-  (return-type "none")
-  (parameters
-    '("gpointer" "marshal_data")
-    '("GClosureMarshal" "meta_marshal")
-  )
-)
-
-(define-method invalidate
-  (of-object "GClosure")
-  (c-name "g_closure_invalidate")
-  (return-type "none")
-)
-
-(define-method invoke
-  (of-object "GClosure")
-  (c-name "g_closure_invoke")
-  (return-type "none")
-  (parameters
-    '("GValue*" "return_value")
-    '("guint" "n_param_values")
-    '("const-GValue*" "param_values")
-    '("gpointer" "invocation_hint")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/genums.h
-
-(define-function g_enum_get_value
-  (c-name "g_enum_get_value")
-  (return-type "GEnumValue*")
-  (parameters
-    '("GEnumClass*" "enum_class")
-    '("gint" "value")
-  )
-)
-
-(define-function g_enum_get_value_by_name
-  (c-name "g_enum_get_value_by_name")
-  (return-type "GEnumValue*")
-  (parameters
-    '("GEnumClass*" "enum_class")
-    '("const-gchar*" "name")
-  )
-)
-
-(define-function g_enum_get_value_by_nick
-  (c-name "g_enum_get_value_by_nick")
-  (return-type "GEnumValue*")
-  (parameters
-    '("GEnumClass*" "enum_class")
-    '("const-gchar*" "nick")
-  )
-)
-
-(define-function g_flags_get_first_value
-  (c-name "g_flags_get_first_value")
-  (return-type "GFlagsValue*")
-  (parameters
-    '("GFlagsClass*" "flags_class")
-    '("guint" "value")
-  )
-)
-
-(define-function g_flags_get_value_by_name
-  (c-name "g_flags_get_value_by_name")
-  (return-type "GFlagsValue*")
-  (parameters
-    '("GFlagsClass*" "flags_class")
-    '("const-gchar*" "name")
-  )
-)
-
-(define-function g_flags_get_value_by_nick
-  (c-name "g_flags_get_value_by_nick")
-  (return-type "GFlagsValue*")
-  (parameters
-    '("GFlagsClass*" "flags_class")
-    '("const-gchar*" "nick")
-  )
-)
-
-(define-method set_enum
-  (of-object "GValue")
-  (c-name "g_value_set_enum")
-  (return-type "none")
-  (parameters
-    '("gint" "v_enum")
-  )
-)
-
-(define-method get_enum
-  (of-object "GValue")
-  (c-name "g_value_get_enum")
-  (return-type "gint")
-)
-
-(define-method set_flags
-  (of-object "GValue")
-  (c-name "g_value_set_flags")
-  (return-type "none")
-  (parameters
-    '("guint" "v_flags")
-  )
-)
-
-(define-method get_flags
-  (of-object "GValue")
-  (c-name "g_value_get_flags")
-  (return-type "guint")
-)
-
-(define-function g_enum_register_static
-  (c-name "g_enum_register_static")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-GEnumValue*" "const_static_values")
-  )
-)
-
-(define-function g_flags_register_static
-  (c-name "g_flags_register_static")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-GFlagsValue*" "const_static_values")
-  )
-)
-
-(define-function g_enum_complete_type_info
-  (c-name "g_enum_complete_type_info")
-  (return-type "none")
-  (parameters
-    '("GType" "g_enum_type")
-    '("GTypeInfo*" "info")
-    '("const-GEnumValue*" "const_values")
-  )
-)
-
-(define-function g_flags_complete_type_info
-  (c-name "g_flags_complete_type_info")
-  (return-type "none")
-  (parameters
-    '("GType" "g_flags_type")
-    '("GTypeInfo*" "info")
-    '("const-GFlagsValue*" "const_values")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gmarshal.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gobjectalias.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gobject.h
-
-(define-method install_property
-  (of-object "GObjectClass")
-  (c-name "g_object_class_install_property")
-  (return-type "none")
-  (parameters
-    '("guint" "property_id")
-    '("GParamSpec*" "pspec")
-  )
-)
-
-(define-method find_property
-  (of-object "GObjectClass")
-  (c-name "g_object_class_find_property")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "property_name")
-  )
-)
-
-(define-method list_properties
-  (of-object "GObjectClass")
-  (c-name "g_object_class_list_properties")
-  (return-type "GParamSpec**")
-  (parameters
-    '("guint*" "n_properties")
-  )
-)
-
-(define-method override_property
-  (of-object "GObjectClass")
-  (c-name "g_object_class_override_property")
-  (return-type "none")
-  (parameters
-    '("guint" "property_id")
-    '("const-gchar*" "name")
-  )
-)
-
-(define-function g_object_interface_install_property
-  (c-name "g_object_interface_install_property")
-  (return-type "none")
-  (parameters
-    '("gpointer" "g_iface")
-    '("GParamSpec*" "pspec")
-  )
-)
-
-(define-function g_object_interface_find_property
-  (c-name "g_object_interface_find_property")
-  (return-type "GParamSpec*")
-  (parameters
-    '("gpointer" "g_iface")
-    '("const-gchar*" "property_name")
-  )
-)
-
-(define-function g_object_interface_list_properties
-  (c-name "g_object_interface_list_properties")
-  (return-type "GParamSpec**")
-  (parameters
-    '("gpointer" "g_iface")
-    '("guint*" "n_properties_p")
-  )
-)
-
-(define-function g_object_new
-  (c-name "g_object_new")
-  (return-type "gpointer")
-  (parameters
-    '("GType" "object_type")
-    '("const-gchar*" "first_property_name")
-  )
-  (varargs #t)
-)
-
-(define-function g_object_newv
-  (c-name "g_object_newv")
-  (return-type "gpointer")
-  (parameters
-    '("GType" "object_type")
-    '("guint" "n_parameters")
-    '("GParameter*" "parameters")
-  )
-)
-
-(define-function g_object_new_valist
-  (c-name "g_object_new_valist")
-  (return-type "GObject*")
-  (parameters
-    '("GType" "object_type")
-    '("const-gchar*" "first_property_name")
-    '("va_list" "var_args")
-  )
-)
-
-(define-function g_object_set
-  (c-name "g_object_set")
-  (return-type "none")
-  (parameters
-    '("gpointer" "object")
-    '("const-gchar*" "first_property_name")
-  )
-  (varargs #t)
-)
-
-(define-function g_object_get
-  (c-name "g_object_get")
-  (return-type "none")
-  (parameters
-    '("gpointer" "object")
-    '("const-gchar*" "first_property_name")
-  )
-  (varargs #t)
-)
-
-(define-function g_object_connect
-  (c-name "g_object_connect")
-  (return-type "gpointer")
-  (parameters
-    '("gpointer" "object")
-    '("const-gchar*" "signal_spec")
-  )
-  (varargs #t)
-)
-
-(define-function g_object_disconnect
-  (c-name "g_object_disconnect")
-  (return-type "none")
-  (parameters
-    '("gpointer" "object")
-    '("const-gchar*" "signal_spec")
-  )
-  (varargs #t)
-)
-
-(define-method set_valist
-  (of-object "GObject")
-  (c-name "g_object_set_valist")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "first_property_name")
-    '("va_list" "var_args")
-  )
-)
-
-(define-method get_valist
-  (of-object "GObject")
-  (c-name "g_object_get_valist")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "first_property_name")
-    '("va_list" "var_args")
-  )
-)
-
-(define-method set_property
-  (of-object "GObject")
-  (c-name "g_object_set_property")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "property_name")
-    '("const-GValue*" "value")
-  )
-)
-
-(define-method get_property
-  (of-object "GObject")
-  (c-name "g_object_get_property")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "property_name")
-    '("GValue*" "value")
-  )
-)
-
-(define-method freeze_notify
-  (of-object "GObject")
-  (c-name "g_object_freeze_notify")
-  (return-type "none")
-)
-
-(define-method notify
-  (of-object "GObject")
-  (c-name "g_object_notify")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "property_name")
-  )
-)
-
-(define-method thaw_notify
-  (of-object "GObject")
-  (c-name "g_object_thaw_notify")
-  (return-type "none")
-)
-
-(define-function g_object_ref
-  (c-name "g_object_ref")
-  (return-type "gpointer")
-  (parameters
-    '("gpointer" "object")
-  )
-)
-
-(define-function g_object_unref
-  (c-name "g_object_unref")
-  (return-type "none")
-  (parameters
-    '("gpointer" "object")
-  )
-)
-
-(define-method weak_ref
-  (of-object "GObject")
-  (c-name "g_object_weak_ref")
-  (return-type "none")
-  (parameters
-    '("GWeakNotify" "notify")
-    '("gpointer" "data")
-  )
-)
-
-(define-method weak_unref
-  (of-object "GObject")
-  (c-name "g_object_weak_unref")
-  (return-type "none")
-  (parameters
-    '("GWeakNotify" "notify")
-    '("gpointer" "data")
-  )
-)
-
-(define-method add_weak_pointer
-  (of-object "GObject")
-  (c-name "g_object_add_weak_pointer")
-  (return-type "none")
-  (parameters
-    '("gpointer*" "weak_pointer_location")
-  )
-)
-
-(define-method remove_weak_pointer
-  (of-object "GObject")
-  (c-name "g_object_remove_weak_pointer")
-  (return-type "none")
-  (parameters
-    '("gpointer*" "weak_pointer_location")
-  )
-)
-
-(define-method add_toggle_ref
-  (of-object "GObject")
-  (c-name "g_object_add_toggle_ref")
-  (return-type "none")
-  (parameters
-    '("GToggleNotify" "notify")
-    '("gpointer" "data")
-  )
-)
-
-(define-method remove_toggle_ref
-  (of-object "GObject")
-  (c-name "g_object_remove_toggle_ref")
-  (return-type "none")
-  (parameters
-    '("GToggleNotify" "notify")
-    '("gpointer" "data")
-  )
-)
-
-(define-method get_qdata
-  (of-object "GObject")
-  (c-name "g_object_get_qdata")
-  (return-type "gpointer")
-  (parameters
-    '("GQuark" "quark")
-  )
-)
-
-(define-method set_qdata
-  (of-object "GObject")
-  (c-name "g_object_set_qdata")
-  (return-type "none")
-  (parameters
-    '("GQuark" "quark")
-    '("gpointer" "data")
-  )
-)
-
-(define-method set_qdata_full
-  (of-object "GObject")
-  (c-name "g_object_set_qdata_full")
-  (return-type "none")
-  (parameters
-    '("GQuark" "quark")
-    '("gpointer" "data")
-    '("GDestroyNotify" "destroy")
-  )
-)
-
-(define-method steal_qdata
-  (of-object "GObject")
-  (c-name "g_object_steal_qdata")
-  (return-type "gpointer")
-  (parameters
-    '("GQuark" "quark")
-  )
-)
-
-(define-method get_data
-  (of-object "GObject")
-  (c-name "g_object_get_data")
-  (return-type "gpointer")
-  (parameters
-    '("const-gchar*" "key")
-  )
-)
-
-(define-method set_data
-  (of-object "GObject")
-  (c-name "g_object_set_data")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "key")
-    '("gpointer" "data")
-  )
-)
-
-(define-method set_data_full
-  (of-object "GObject")
-  (c-name "g_object_set_data_full")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "key")
-    '("gpointer" "data")
-    '("GDestroyNotify" "destroy")
-  )
-)
-
-(define-method steal_data
-  (of-object "GObject")
-  (c-name "g_object_steal_data")
-  (return-type "gpointer")
-  (parameters
-    '("const-gchar*" "key")
-  )
-)
-
-(define-method watch_closure
-  (of-object "GObject")
-  (c-name "g_object_watch_closure")
-  (return-type "none")
-  (parameters
-    '("GClosure*" "closure")
-  )
-)
-
-(define-function g_cclosure_new_object
-  (c-name "g_cclosure_new_object")
-  (return-type "GClosure*")
-  (parameters
-    '("GCallback" "callback_func")
-    '("GObject*" "object")
-  )
-)
-
-(define-function g_cclosure_new_object_swap
-  (c-name "g_cclosure_new_object_swap")
-  (return-type "GClosure*")
-  (parameters
-    '("GCallback" "callback_func")
-    '("GObject*" "object")
-  )
-)
-
-(define-function g_closure_new_object
-  (c-name "g_closure_new_object")
-  (return-type "GClosure*")
-  (parameters
-    '("guint" "sizeof_closure")
-    '("GObject*" "object")
-  )
-)
-
-(define-method set_object
-  (of-object "GValue")
-  (c-name "g_value_set_object")
-  (return-type "none")
-  (parameters
-    '("gpointer" "v_object")
-  )
-)
-
-(define-method get_object
-  (of-object "GValue")
-  (c-name "g_value_get_object")
-  (return-type "gpointer")
-)
-
-(define-method dup_object
-  (of-object "GValue")
-  (c-name "g_value_dup_object")
-  (return-type "GObject*")
-)
-
-(define-function g_signal_connect_object
-  (c-name "g_signal_connect_object")
-  (return-type "gulong")
-  (parameters
-    '("gpointer" "instance")
-    '("const-gchar*" "detailed_signal")
-    '("GCallback" "c_handler")
-    '("gpointer" "gobject")
-    '("GConnectFlags" "connect_flags")
-  )
-)
-
-(define-method run_dispose
-  (of-object "GObject")
-  (c-name "g_object_run_dispose")
-  (return-type "none")
-)
-
-(define-method take_object
-  (of-object "GValue")
-  (c-name "g_value_take_object")
-  (return-type "none")
-  (parameters
-    '("gpointer" "v_object")
-  )
-)
-
-(define-method set_object_take_ownership
-  (of-object "GValue")
-  (c-name "g_value_set_object_take_ownership")
-  (return-type "none")
-  (parameters
-    '("gpointer" "v_object")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gparam.h
-
-(define-method ref
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_ref")
-  (return-type "GParamSpec*")
-)
-
-(define-method unref
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_unref")
-  (return-type "none")
-)
-
-(define-method sink
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_sink")
-  (return-type "none")
-)
-
-(define-method get_qdata
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_get_qdata")
-  (return-type "gpointer")
-  (parameters
-    '("GQuark" "quark")
-  )
-)
-
-(define-method set_qdata
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_set_qdata")
-  (return-type "none")
-  (parameters
-    '("GQuark" "quark")
-    '("gpointer" "data")
-  )
-)
-
-(define-method set_qdata_full
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_set_qdata_full")
-  (return-type "none")
-  (parameters
-    '("GQuark" "quark")
-    '("gpointer" "data")
-    '("GDestroyNotify" "destroy")
-  )
-)
-
-(define-method steal_qdata
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_steal_qdata")
-  (return-type "gpointer")
-  (parameters
-    '("GQuark" "quark")
-  )
-)
-
-(define-method get_redirect_target
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_get_redirect_target")
-  (return-type "GParamSpec*")
-)
-
-(define-function g_param_value_set_default
-  (c-name "g_param_value_set_default")
-  (return-type "none")
-  (parameters
-    '("GParamSpec*" "pspec")
-    '("GValue*" "value")
-  )
-)
-
-(define-function g_param_value_defaults
-  (c-name "g_param_value_defaults")
-  (return-type "gboolean")
-  (parameters
-    '("GParamSpec*" "pspec")
-    '("GValue*" "value")
-  )
-)
-
-(define-function g_param_value_validate
-  (c-name "g_param_value_validate")
-  (return-type "gboolean")
-  (parameters
-    '("GParamSpec*" "pspec")
-    '("GValue*" "value")
-  )
-)
-
-(define-function g_param_value_convert
-  (c-name "g_param_value_convert")
-  (return-type "gboolean")
-  (parameters
-    '("GParamSpec*" "pspec")
-    '("const-GValue*" "src_value")
-    '("GValue*" "dest_value")
-    '("gboolean" "strict_validation")
-  )
-)
-
-(define-function g_param_values_cmp
-  (c-name "g_param_values_cmp")
-  (return-type "gint")
-  (parameters
-    '("GParamSpec*" "pspec")
-    '("const-GValue*" "value1")
-    '("const-GValue*" "value2")
-  )
-)
-
-(define-method get_name
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_get_name")
-  (return-type "const-gchar*")
-)
-
-(define-method get_nick
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_get_nick")
-  (return-type "const-gchar*")
-)
-
-(define-method get_blurb
-  (of-object "GParamSpec")
-  (c-name "g_param_spec_get_blurb")
-  (return-type "const-gchar*")
-)
-
-(define-method set_param
-  (of-object "GValue")
-  (c-name "g_value_set_param")
-  (return-type "none")
-  (parameters
-    '("GParamSpec*" "param")
-  )
-)
-
-(define-method get_param
-  (of-object "GValue")
-  (c-name "g_value_get_param")
-  (return-type "GParamSpec*")
-)
-
-(define-method dup_param
-  (of-object "GValue")
-  (c-name "g_value_dup_param")
-  (return-type "GParamSpec*")
-)
-
-(define-method take_param
-  (of-object "GValue")
-  (c-name "g_value_take_param")
-  (return-type "none")
-  (parameters
-    '("GParamSpec*" "param")
-  )
-)
-
-(define-method set_param_take_ownership
-  (of-object "GValue")
-  (c-name "g_value_set_param_take_ownership")
-  (return-type "none")
-  (parameters
-    '("GParamSpec*" "param")
-  )
-)
-
-(define-function g_param_type_register_static
-  (c-name "g_param_type_register_static")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-GParamSpecTypeInfo*" "pspec_info")
-  )
-)
-
-(define-function g_param_spec_internal
-  (c-name "g_param_spec_internal")
-  (return-type "gpointer")
-  (parameters
-    '("GType" "param_type")
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_pool_new
-  (c-name "g_param_spec_pool_new")
-  (is-constructor-of "GParamSpecPool")
-  (return-type "GParamSpecPool*")
-  (parameters
-    '("gboolean" "type_prefixing")
-  )
-)
-
-(define-method insert
-  (of-object "GParamSpecPool")
-  (c-name "g_param_spec_pool_insert")
-  (return-type "none")
-  (parameters
-    '("GParamSpec*" "pspec")
-    '("GType" "owner_type")
-  )
-)
-
-(define-method remove
-  (of-object "GParamSpecPool")
-  (c-name "g_param_spec_pool_remove")
-  (return-type "none")
-  (parameters
-    '("GParamSpec*" "pspec")
-  )
-)
-
-(define-method lookup
-  (of-object "GParamSpecPool")
-  (c-name "g_param_spec_pool_lookup")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "param_name")
-    '("GType" "owner_type")
-    '("gboolean" "walk_ancestors")
-  )
-)
-
-(define-method list_owned
-  (of-object "GParamSpecPool")
-  (c-name "g_param_spec_pool_list_owned")
-  (return-type "GList*")
-  (parameters
-    '("GType" "owner_type")
-  )
-)
-
-(define-method list
-  (of-object "GParamSpecPool")
-  (c-name "g_param_spec_pool_list")
-  (return-type "GParamSpec**")
-  (parameters
-    '("GType" "owner_type")
-    '("guint*" "n_pspecs_p")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gparamspecs.h
-
-(define-function g_param_spec_char
-  (c-name "g_param_spec_char")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gint8" "minimum")
-    '("gint8" "maximum")
-    '("gint8" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_uchar
-  (c-name "g_param_spec_uchar")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("guint8" "minimum")
-    '("guint8" "maximum")
-    '("guint8" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_boolean
-  (c-name "g_param_spec_boolean")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gboolean" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_int
-  (c-name "g_param_spec_int")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gint" "minimum")
-    '("gint" "maximum")
-    '("gint" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_uint
-  (c-name "g_param_spec_uint")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("guint" "minimum")
-    '("guint" "maximum")
-    '("guint" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_long
-  (c-name "g_param_spec_long")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("glong" "minimum")
-    '("glong" "maximum")
-    '("glong" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_ulong
-  (c-name "g_param_spec_ulong")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gulong" "minimum")
-    '("gulong" "maximum")
-    '("gulong" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_int64
-  (c-name "g_param_spec_int64")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gint64" "minimum")
-    '("gint64" "maximum")
-    '("gint64" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_uint64
-  (c-name "g_param_spec_uint64")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("guint64" "minimum")
-    '("guint64" "maximum")
-    '("guint64" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_unichar
-  (c-name "g_param_spec_unichar")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gunichar" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_enum
-  (c-name "g_param_spec_enum")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GType" "enum_type")
-    '("gint" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_flags
-  (c-name "g_param_spec_flags")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GType" "flags_type")
-    '("guint" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_float
-  (c-name "g_param_spec_float")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gfloat" "minimum")
-    '("gfloat" "maximum")
-    '("gfloat" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_double
-  (c-name "g_param_spec_double")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("gdouble" "minimum")
-    '("gdouble" "maximum")
-    '("gdouble" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_string
-  (c-name "g_param_spec_string")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("const-gchar*" "default_value")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_param
-  (c-name "g_param_spec_param")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GType" "param_type")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_boxed
-  (c-name "g_param_spec_boxed")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GType" "boxed_type")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_pointer
-  (c-name "g_param_spec_pointer")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_value_array
-  (c-name "g_param_spec_value_array")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GParamSpec*" "element_spec")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_object
-  (c-name "g_param_spec_object")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-gchar*" "nick")
-    '("const-gchar*" "blurb")
-    '("GType" "object_type")
-    '("GParamFlags" "flags")
-  )
-)
-
-(define-function g_param_spec_override
-  (c-name "g_param_spec_override")
-  (return-type "GParamSpec*")
-  (parameters
-    '("const-gchar*" "name")
-    '("GParamSpec*" "overridden")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gsignal.h
-
-(define-function g_signal_newv
-  (c-name "g_signal_newv")
-  (return-type "guint")
-  (parameters
-    '("const-gchar*" "signal_name")
-    '("GType" "itype")
-    '("GSignalFlags" "signal_flags")
-    '("GClosure*" "class_closure")
-    '("GSignalAccumulator" "accumulator")
-    '("gpointer" "accu_data")
-    '("GSignalCMarshaller" "c_marshaller")
-    '("GType" "return_type")
-    '("guint" "n_params")
-    '("GType*" "param_types")
-  )
-)
-
-(define-function g_signal_new_valist
-  (c-name "g_signal_new_valist")
-  (return-type "guint")
-  (parameters
-    '("const-gchar*" "signal_name")
-    '("GType" "itype")
-    '("GSignalFlags" "signal_flags")
-    '("GClosure*" "class_closure")
-    '("GSignalAccumulator" "accumulator")
-    '("gpointer" "accu_data")
-    '("GSignalCMarshaller" "c_marshaller")
-    '("GType" "return_type")
-    '("guint" "n_params")
-    '("va_list" "args")
-  )
-)
-
-(define-function g_signal_new
-  (c-name "g_signal_new")
-  (return-type "guint")
-  (parameters
-    '("const-gchar*" "signal_name")
-    '("GType" "itype")
-    '("GSignalFlags" "signal_flags")
-    '("guint" "class_offset")
-    '("GSignalAccumulator" "accumulator")
-    '("gpointer" "accu_data")
-    '("GSignalCMarshaller" "c_marshaller")
-    '("GType" "return_type")
-    '("guint" "n_params")
-  )
-  (varargs #t)
-)
-
-(define-function g_signal_emitv
-  (c-name "g_signal_emitv")
-  (return-type "none")
-  (parameters
-    '("const-GValue*" "instance_and_params")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("GValue*" "return_value")
-  )
-)
-
-(define-function g_signal_emit_valist
-  (c-name "g_signal_emit_valist")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("va_list" "var_args")
-  )
-)
-
-(define-function g_signal_emit
-  (c-name "g_signal_emit")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-  )
-  (varargs #t)
-)
-
-(define-function g_signal_emit_by_name
-  (c-name "g_signal_emit_by_name")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("const-gchar*" "detailed_signal")
-  )
-  (varargs #t)
-)
-
-(define-function g_signal_lookup
-  (c-name "g_signal_lookup")
-  (return-type "guint")
-  (parameters
-    '("const-gchar*" "name")
-    '("GType" "itype")
-  )
-)
-
-(define-function g_signal_name
-  (c-name "g_signal_name")
-  (return-type "const-gchar*")
-  (parameters
-    '("guint" "signal_id")
-  )
-)
-
-(define-function g_signal_query
-  (c-name "g_signal_query")
-  (return-type "none")
-  (parameters
-    '("guint" "signal_id")
-    '("GSignalQuery*" "query")
-  )
-)
-
-(define-function g_signal_list_ids
-  (c-name "g_signal_list_ids")
-  (return-type "guint*")
-  (parameters
-    '("GType" "itype")
-    '("guint*" "n_ids")
-  )
-)
-
-(define-function g_signal_parse_name
-  (c-name "g_signal_parse_name")
-  (return-type "gboolean")
-  (parameters
-    '("const-gchar*" "detailed_signal")
-    '("GType" "itype")
-    '("guint*" "signal_id_p")
-    '("GQuark*" "detail_p")
-    '("gboolean" "force_detail_quark")
-  )
-)
-
-(define-function g_signal_get_invocation_hint
-  (c-name "g_signal_get_invocation_hint")
-  (return-type "GSignalInvocationHint*")
-  (parameters
-    '("gpointer" "instance")
-  )
-)
-
-(define-function g_signal_stop_emission
-  (c-name "g_signal_stop_emission")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-  )
-)
-
-(define-function g_signal_stop_emission_by_name
-  (c-name "g_signal_stop_emission_by_name")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("const-gchar*" "detailed_signal")
-  )
-)
-
-(define-function g_signal_add_emission_hook
-  (c-name "g_signal_add_emission_hook")
-  (return-type "gulong")
-  (parameters
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("GSignalEmissionHook" "hook_func")
-    '("gpointer" "hook_data")
-    '("GDestroyNotify" "data_destroy")
-  )
-)
-
-(define-function g_signal_remove_emission_hook
-  (c-name "g_signal_remove_emission_hook")
-  (return-type "none")
-  (parameters
-    '("guint" "signal_id")
-    '("gulong" "hook_id")
-  )
-)
-
-(define-function g_signal_has_handler_pending
-  (c-name "g_signal_has_handler_pending")
-  (return-type "gboolean")
-  (parameters
-    '("gpointer" "instance")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("gboolean" "may_be_blocked")
-  )
-)
-
-(define-function g_signal_connect_closure_by_id
-  (c-name "g_signal_connect_closure_by_id")
-  (return-type "gulong")
-  (parameters
-    '("gpointer" "instance")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("GClosure*" "closure")
-    '("gboolean" "after")
-  )
-)
-
-(define-function g_signal_connect_closure
-  (c-name "g_signal_connect_closure")
-  (return-type "gulong")
-  (parameters
-    '("gpointer" "instance")
-    '("const-gchar*" "detailed_signal")
-    '("GClosure*" "closure")
-    '("gboolean" "after")
-  )
-)
-
-(define-function g_signal_connect_data
-  (c-name "g_signal_connect_data")
-  (return-type "gulong")
-  (parameters
-    '("gpointer" "instance")
-    '("const-gchar*" "detailed_signal")
-    '("GCallback" "c_handler")
-    '("gpointer" "data")
-    '("GClosureNotify" "destroy_data")
-    '("GConnectFlags" "connect_flags")
-  )
-)
-
-(define-function g_signal_handler_block
-  (c-name "g_signal_handler_block")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("gulong" "handler_id")
-  )
-)
-
-(define-function g_signal_handler_unblock
-  (c-name "g_signal_handler_unblock")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("gulong" "handler_id")
-  )
-)
-
-(define-function g_signal_handler_disconnect
-  (c-name "g_signal_handler_disconnect")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-    '("gulong" "handler_id")
-  )
-)
-
-(define-function g_signal_handler_is_connected
-  (c-name "g_signal_handler_is_connected")
-  (return-type "gboolean")
-  (parameters
-    '("gpointer" "instance")
-    '("gulong" "handler_id")
-  )
-)
-
-(define-function g_signal_handler_find
-  (c-name "g_signal_handler_find")
-  (return-type "gulong")
-  (parameters
-    '("gpointer" "instance")
-    '("GSignalMatchType" "mask")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("GClosure*" "closure")
-    '("gpointer" "func")
-    '("gpointer" "data")
-  )
-)
-
-(define-function g_signal_handlers_block_matched
-  (c-name "g_signal_handlers_block_matched")
-  (return-type "guint")
-  (parameters
-    '("gpointer" "instance")
-    '("GSignalMatchType" "mask")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("GClosure*" "closure")
-    '("gpointer" "func")
-    '("gpointer" "data")
-  )
-)
-
-(define-function g_signal_handlers_unblock_matched
-  (c-name "g_signal_handlers_unblock_matched")
-  (return-type "guint")
-  (parameters
-    '("gpointer" "instance")
-    '("GSignalMatchType" "mask")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("GClosure*" "closure")
-    '("gpointer" "func")
-    '("gpointer" "data")
-  )
-)
-
-(define-function g_signal_handlers_disconnect_matched
-  (c-name "g_signal_handlers_disconnect_matched")
-  (return-type "guint")
-  (parameters
-    '("gpointer" "instance")
-    '("GSignalMatchType" "mask")
-    '("guint" "signal_id")
-    '("GQuark" "detail")
-    '("GClosure*" "closure")
-    '("gpointer" "func")
-    '("gpointer" "data")
-  )
-)
-
-(define-function g_signal_override_class_closure
-  (c-name "g_signal_override_class_closure")
-  (return-type "none")
-  (parameters
-    '("guint" "signal_id")
-    '("GType" "instance_type")
-    '("GClosure*" "class_closure")
-  )
-)
-
-(define-function g_signal_chain_from_overridden
-  (c-name "g_signal_chain_from_overridden")
-  (return-type "none")
-  (parameters
-    '("const-GValue*" "instance_and_params")
-    '("GValue*" "return_value")
-  )
-)
-
-(define-function g_signal_accumulator_true_handled
-  (c-name "g_signal_accumulator_true_handled")
-  (return-type "gboolean")
-  (parameters
-    '("GSignalInvocationHint*" "ihint")
-    '("GValue*" "return_accu")
-    '("const-GValue*" "handler_return")
-    '("gpointer" "dummy")
-  )
-)
-
-(define-function g_signal_handlers_destroy
-  (c-name "g_signal_handlers_destroy")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gsourceclosure.h
-
-(define-method set_closure
-  (of-object "GSource")
-  (c-name "g_source_set_closure")
-  (return-type "none")
-  (parameters
-    '("GClosure*" "closure")
-  )
-)
-
-(define-function g_io_channel_get_type
-  (c-name "g_io_channel_get_type")
-  (return-type "GType")
-)
-
-(define-function g_io_condition_get_type
-  (c-name "g_io_condition_get_type")
-  (return-type "GType")
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gtype.h
-
-(define-function g_type_init
-  (c-name "g_type_init")
-  (return-type "none")
-)
-
-(define-function g_type_init_with_debug_flags
-  (c-name "g_type_init_with_debug_flags")
-  (return-type "none")
-  (parameters
-    '("GTypeDebugFlags" "debug_flags")
-  )
-)
-
-(define-method name
-  (of-object "GType")
-  (c-name "g_type_name")
-  (return-type "const-gchar*")
-)
-
-(define-method qname
-  (of-object "GType")
-  (c-name "g_type_qname")
-  (return-type "GQuark")
-)
-
-(define-function g_type_from_name
-  (c-name "g_type_from_name")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-  )
-)
-
-(define-method parent
-  (of-object "GType")
-  (c-name "g_type_parent")
-  (return-type "GType")
-)
-
-(define-method depth
-  (of-object "GType")
-  (c-name "g_type_depth")
-  (return-type "guint")
-)
-
-(define-method next_base
-  (of-object "GType")
-  (c-name "g_type_next_base")
-  (return-type "GType")
-  (parameters
-    '("GType" "root_type")
-  )
-)
-
-(define-method is_a
-  (of-object "GType")
-  (c-name "g_type_is_a")
-  (return-type "gboolean")
-  (parameters
-    '("GType" "is_a_type")
-  )
-)
-
-(define-method class_ref
-  (of-object "GType")
-  (c-name "g_type_class_ref")
-  (return-type "gpointer")
-)
-
-(define-method class_peek
-  (of-object "GType")
-  (c-name "g_type_class_peek")
-  (return-type "gpointer")
-)
-
-(define-method class_peek_static
-  (of-object "GType")
-  (c-name "g_type_class_peek_static")
-  (return-type "gpointer")
-)
-
-(define-function g_type_class_unref
-  (c-name "g_type_class_unref")
-  (return-type "none")
-  (parameters
-    '("gpointer" "g_class")
-  )
-)
-
-(define-function g_type_class_peek_parent
-  (c-name "g_type_class_peek_parent")
-  (return-type "gpointer")
-  (parameters
-    '("gpointer" "g_class")
-  )
-)
-
-(define-function g_type_interface_peek
-  (c-name "g_type_interface_peek")
-  (return-type "gpointer")
-  (parameters
-    '("gpointer" "instance_class")
-    '("GType" "iface_type")
-  )
-)
-
-(define-function g_type_interface_peek_parent
-  (c-name "g_type_interface_peek_parent")
-  (return-type "gpointer")
-  (parameters
-    '("gpointer" "g_iface")
-  )
-)
-
-(define-method default_interface_ref
-  (of-object "GType")
-  (c-name "g_type_default_interface_ref")
-  (return-type "gpointer")
-)
-
-(define-method default_interface_peek
-  (of-object "GType")
-  (c-name "g_type_default_interface_peek")
-  (return-type "gpointer")
-)
-
-(define-function g_type_default_interface_unref
-  (c-name "g_type_default_interface_unref")
-  (return-type "none")
-  (parameters
-    '("gpointer" "g_iface")
-  )
-)
-
-(define-method children
-  (of-object "GType")
-  (c-name "g_type_children")
-  (return-type "GType*")
-  (parameters
-    '("guint*" "n_children")
-  )
-)
-
-(define-method interfaces
-  (of-object "GType")
-  (c-name "g_type_interfaces")
-  (return-type "GType*")
-  (parameters
-    '("guint*" "n_interfaces")
-  )
-)
-
-(define-method set_qdata
-  (of-object "GType")
-  (c-name "g_type_set_qdata")
-  (return-type "none")
-  (parameters
-    '("GQuark" "quark")
-    '("gpointer" "data")
-  )
-)
-
-(define-method get_qdata
-  (of-object "GType")
-  (c-name "g_type_get_qdata")
-  (return-type "gpointer")
-  (parameters
-    '("GQuark" "quark")
-  )
-)
-
-(define-method query
-  (of-object "GType")
-  (c-name "g_type_query")
-  (return-type "none")
-  (parameters
-    '("GTypeQuery*" "query")
-  )
-)
-
-(define-method register_static
-  (of-object "GType")
-  (c-name "g_type_register_static")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "type_name")
-    '("const-GTypeInfo*" "info")
-    '("GTypeFlags" "flags")
-  )
-)
-
-(define-method register_dynamic
-  (of-object "GType")
-  (c-name "g_type_register_dynamic")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "type_name")
-    '("GTypePlugin*" "plugin")
-    '("GTypeFlags" "flags")
-  )
-)
-
-(define-method register_fundamental
-  (of-object "GType")
-  (c-name "g_type_register_fundamental")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "type_name")
-    '("const-GTypeInfo*" "info")
-    '("const-GTypeFundamentalInfo*" "finfo")
-    '("GTypeFlags" "flags")
-  )
-)
-
-(define-method add_interface_static
-  (of-object "GType")
-  (c-name "g_type_add_interface_static")
-  (return-type "none")
-  (parameters
-    '("GType" "interface_type")
-    '("const-GInterfaceInfo*" "info")
-  )
-)
-
-(define-method add_interface_dynamic
-  (of-object "GType")
-  (c-name "g_type_add_interface_dynamic")
-  (return-type "none")
-  (parameters
-    '("GType" "interface_type")
-    '("GTypePlugin*" "plugin")
-  )
-)
-
-(define-method interface_add_prerequisite
-  (of-object "GType")
-  (c-name "g_type_interface_add_prerequisite")
-  (return-type "none")
-  (parameters
-    '("GType" "prerequisite_type")
-  )
-)
-
-(define-method interface_prerequisites
-  (of-object "GType")
-  (c-name "g_type_interface_prerequisites")
-  (return-type "GType*")
-  (parameters
-    '("guint*" "n_prerequisites")
-  )
-)
-
-(define-function g_type_class_add_private
-  (c-name "g_type_class_add_private")
-  (return-type "none")
-  (parameters
-    '("gpointer" "g_class")
-    '("gsize" "private_size")
-  )
-)
-
-(define-method get_private
-  (of-object "GTypeInstance")
-  (c-name "g_type_instance_get_private")
-  (return-type "gpointer")
-  (parameters
-    '("GType" "private_type")
-  )
-)
-
-(define-method get_plugin
-  (of-object "GType")
-  (c-name "g_type_get_plugin")
-  (return-type "GTypePlugin*")
-)
-
-(define-method interface_get_plugin
-  (of-object "GType")
-  (c-name "g_type_interface_get_plugin")
-  (return-type "GTypePlugin*")
-  (parameters
-    '("GType" "interface_type")
-  )
-)
-
-(define-function g_type_fundamental_next
-  (c-name "g_type_fundamental_next")
-  (return-type "GType")
-)
-
-(define-method fundamental
-  (of-object "GType")
-  (c-name "g_type_fundamental")
-  (return-type "GType")
-)
-
-(define-method create_instance
-  (of-object "GType")
-  (c-name "g_type_create_instance")
-  (return-type "GTypeInstance*")
-)
-
-(define-function g_type_free_instance
-  (c-name "g_type_free_instance")
-  (return-type "none")
-  (parameters
-    '("GTypeInstance*" "instance")
-  )
-)
-
-(define-function g_type_add_class_cache_func
-  (c-name "g_type_add_class_cache_func")
-  (return-type "none")
-  (parameters
-    '("gpointer" "cache_data")
-    '("GTypeClassCacheFunc" "cache_func")
-  )
-)
-
-(define-function g_type_remove_class_cache_func
-  (c-name "g_type_remove_class_cache_func")
-  (return-type "none")
-  (parameters
-    '("gpointer" "cache_data")
-    '("GTypeClassCacheFunc" "cache_func")
-  )
-)
-
-(define-function g_type_class_unref_uncached
-  (c-name "g_type_class_unref_uncached")
-  (return-type "none")
-  (parameters
-    '("gpointer" "g_class")
-  )
-)
-
-(define-function g_type_add_interface_check
-  (c-name "g_type_add_interface_check")
-  (return-type "none")
-  (parameters
-    '("gpointer" "check_data")
-    '("GTypeInterfaceCheckFunc" "check_func")
-  )
-)
-
-(define-function g_type_remove_interface_check
-  (c-name "g_type_remove_interface_check")
-  (return-type "none")
-  (parameters
-    '("gpointer" "check_data")
-    '("GTypeInterfaceCheckFunc" "check_func")
-  )
-)
-
-(define-method value_table_peek
-  (of-object "GType")
-  (c-name "g_type_value_table_peek")
-  (return-type "GTypeValueTable*")
-)
-
-(define-function g_type_check_instance
-  (c-name "g_type_check_instance")
-  (return-type "gboolean")
-  (parameters
-    '("GTypeInstance*" "instance")
-  )
-)
-
-(define-function g_type_check_instance_cast
-  (c-name "g_type_check_instance_cast")
-  (return-type "GTypeInstance*")
-  (parameters
-    '("GTypeInstance*" "instance")
-    '("GType" "iface_type")
-  )
-)
-
-(define-function g_type_check_instance_is_a
-  (c-name "g_type_check_instance_is_a")
-  (return-type "gboolean")
-  (parameters
-    '("GTypeInstance*" "instance")
-    '("GType" "iface_type")
-  )
-)
-
-(define-function g_type_check_class_cast
-  (c-name "g_type_check_class_cast")
-  (return-type "GTypeClass*")
-  (parameters
-    '("GTypeClass*" "g_class")
-    '("GType" "is_a_type")
-  )
-)
-
-(define-function g_type_check_class_is_a
-  (c-name "g_type_check_class_is_a")
-  (return-type "gboolean")
-  (parameters
-    '("GTypeClass*" "g_class")
-    '("GType" "is_a_type")
-  )
-)
-
-(define-method check_is_value_type
-  (of-object "GType")
-  (c-name "g_type_check_is_value_type")
-  (return-type "gboolean")
-)
-
-(define-function g_type_check_value
-  (c-name "g_type_check_value")
-  (return-type "gboolean")
-  (parameters
-    '("GValue*" "value")
-  )
-)
-
-(define-function g_type_check_value_holds
-  (c-name "g_type_check_value_holds")
-  (return-type "gboolean")
-  (parameters
-    '("GValue*" "value")
-    '("GType" "type")
-  )
-)
-
-(define-method test_flags
-  (of-object "GType")
-  (c-name "g_type_test_flags")
-  (return-type "gboolean")
-  (parameters
-    '("guint" "flags")
-  )
-)
-
-(define-function g_type_name_from_instance
-  (c-name "g_type_name_from_instance")
-  (return-type "const-gchar*")
-  (parameters
-    '("GTypeInstance*" "instance")
-  )
-)
-
-(define-function g_type_name_from_class
-  (c-name "g_type_name_from_class")
-  (return-type "const-gchar*")
-  (parameters
-    '("GTypeClass*" "g_class")
-  )
-)
-
-(define-function g_value_c_init
-  (c-name "g_value_c_init")
-  (return-type "none")
-)
-
-(define-function g_value_types_init
-  (c-name "g_value_types_init")
-  (return-type "none")
-)
-
-(define-function g_enum_types_init
-  (c-name "g_enum_types_init")
-  (return-type "none")
-)
-
-(define-function g_param_type_init
-  (c-name "g_param_type_init")
-  (return-type "none")
-)
-
-(define-function g_boxed_type_init
-  (c-name "g_boxed_type_init")
-  (return-type "none")
-)
-
-(define-function g_object_type_init
-  (c-name "g_object_type_init")
-  (return-type "none")
-)
-
-(define-function g_param_spec_types_init
-  (c-name "g_param_spec_types_init")
-  (return-type "none")
-)
-
-(define-function g_value_transforms_init
-  (c-name "g_value_transforms_init")
-  (return-type "none")
-)
-
-(define-function g_signal_init
-  (c-name "g_signal_init")
-  (return-type "none")
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gtypemodule.h
-
-(define-function g_type_module_get_type
-  (c-name "g_type_module_get_type")
-  (return-type "GType")
-)
-
-(define-method use
-  (of-object "GTypeModule")
-  (c-name "g_type_module_use")
-  (return-type "gboolean")
-)
-
-(define-method unuse
-  (of-object "GTypeModule")
-  (c-name "g_type_module_unuse")
-  (return-type "none")
-)
-
-(define-method set_name
-  (of-object "GTypeModule")
-  (c-name "g_type_module_set_name")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "name")
-  )
-)
-
-(define-method register_type
-  (of-object "GTypeModule")
-  (c-name "g_type_module_register_type")
-  (return-type "GType")
-  (parameters
-    '("GType" "parent_type")
-    '("const-gchar*" "type_name")
-    '("const-GTypeInfo*" "type_info")
-    '("GTypeFlags" "flags")
-  )
-)
-
-(define-method add_interface
-  (of-object "GTypeModule")
-  (c-name "g_type_module_add_interface")
-  (return-type "none")
-  (parameters
-    '("GType" "instance_type")
-    '("GType" "interface_type")
-    '("const-GInterfaceInfo*" "interface_info")
-  )
-)
-
-(define-method register_enum
-  (of-object "GTypeModule")
-  (c-name "g_type_module_register_enum")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-GEnumValue*" "const_static_values")
-  )
-)
-
-(define-method register_flags
-  (of-object "GTypeModule")
-  (c-name "g_type_module_register_flags")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-    '("const-GFlagsValue*" "const_static_values")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gtypeplugin.h
-
-(define-function g_type_plugin_get_type
-  (c-name "g_type_plugin_get_type")
-  (return-type "GType")
-)
-
-(define-method use
-  (of-object "GTypePlugin")
-  (c-name "g_type_plugin_use")
-  (return-type "none")
-)
-
-(define-method unuse
-  (of-object "GTypePlugin")
-  (c-name "g_type_plugin_unuse")
-  (return-type "none")
-)
-
-(define-method complete_type_info
-  (of-object "GTypePlugin")
-  (c-name "g_type_plugin_complete_type_info")
-  (return-type "none")
-  (parameters
-    '("GType" "g_type")
-    '("GTypeInfo*" "info")
-    '("GTypeValueTable*" "value_table")
-  )
-)
-
-(define-method complete_interface_info
-  (of-object "GTypePlugin")
-  (c-name "g_type_plugin_complete_interface_info")
-  (return-type "none")
-  (parameters
-    '("GType" "instance_type")
-    '("GType" "interface_type")
-    '("GInterfaceInfo*" "info")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gvaluearray.h
-
-(define-method get_nth
-  (of-object "GValueArray")
-  (c-name "g_value_array_get_nth")
-  (return-type "GValue*")
-  (parameters
-    '("guint" "index_")
-  )
-)
-
-(define-function g_value_array_new
-  (c-name "g_value_array_new")
-  (is-constructor-of "GValueArray")
-  (return-type "GValueArray*")
-  (parameters
-    '("guint" "n_prealloced")
-  )
-)
-
-(define-method free
-  (of-object "GValueArray")
-  (c-name "g_value_array_free")
-  (return-type "none")
-)
-
-(define-method copy
-  (of-object "GValueArray")
-  (c-name "g_value_array_copy")
-  (return-type "GValueArray*")
-)
-
-(define-method prepend
-  (of-object "GValueArray")
-  (c-name "g_value_array_prepend")
-  (return-type "GValueArray*")
-  (parameters
-    '("const-GValue*" "value")
-  )
-)
-
-(define-method append
-  (of-object "GValueArray")
-  (c-name "g_value_array_append")
-  (return-type "GValueArray*")
-  (parameters
-    '("const-GValue*" "value")
-  )
-)
-
-(define-method insert
-  (of-object "GValueArray")
-  (c-name "g_value_array_insert")
-  (return-type "GValueArray*")
-  (parameters
-    '("guint" "index_")
-    '("const-GValue*" "value")
-  )
-)
-
-(define-method remove
-  (of-object "GValueArray")
-  (c-name "g_value_array_remove")
-  (return-type "GValueArray*")
-  (parameters
-    '("guint" "index_")
-  )
-)
-
-(define-method sort
-  (of-object "GValueArray")
-  (c-name "g_value_array_sort")
-  (return-type "GValueArray*")
-  (parameters
-    '("GCompareFunc" "compare_func")
-  )
-)
-
-(define-method sort_with_data
-  (of-object "GValueArray")
-  (c-name "g_value_array_sort_with_data")
-  (return-type "GValueArray*")
-  (parameters
-    '("GCompareDataFunc" "compare_func")
-    '("gpointer" "user_data")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gvaluecollector.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gvalue.h
-
-(define-method init
-  (of-object "GValue")
-  (c-name "g_value_init")
-  (return-type "GValue*")
-  (parameters
-    '("GType" "g_type")
-  )
-)
-
-(define-method copy
-  (of-object "GValue")
-  (c-name "g_value_copy")
-  (return-type "none")
-  (parameters
-    '("GValue*" "dest_value")
-  )
-)
-
-(define-method reset
-  (of-object "GValue")
-  (c-name "g_value_reset")
-  (return-type "GValue*")
-)
-
-(define-method unset
-  (of-object "GValue")
-  (c-name "g_value_unset")
-  (return-type "none")
-)
-
-(define-method set_instance
-  (of-object "GValue")
-  (c-name "g_value_set_instance")
-  (return-type "none")
-  (parameters
-    '("gpointer" "instance")
-  )
-)
-
-(define-method fits_pointer
-  (of-object "GValue")
-  (c-name "g_value_fits_pointer")
-  (return-type "gboolean")
-)
-
-(define-method peek_pointer
-  (of-object "GValue")
-  (c-name "g_value_peek_pointer")
-  (return-type "gpointer")
-)
-
-(define-function g_value_type_compatible
-  (c-name "g_value_type_compatible")
-  (return-type "gboolean")
-  (parameters
-    '("GType" "src_type")
-    '("GType" "dest_type")
-  )
-)
-
-(define-function g_value_type_transformable
-  (c-name "g_value_type_transformable")
-  (return-type "gboolean")
-  (parameters
-    '("GType" "src_type")
-    '("GType" "dest_type")
-  )
-)
-
-(define-method transform
-  (of-object "GValue")
-  (c-name "g_value_transform")
-  (return-type "gboolean")
-  (parameters
-    '("GValue*" "dest_value")
-  )
-)
-
-(define-function g_value_register_transform_func
-  (c-name "g_value_register_transform_func")
-  (return-type "none")
-  (parameters
-    '("GType" "src_type")
-    '("GType" "dest_type")
-    '("GValueTransform" "transform_func")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gvaluetypes.h
-
-(define-method set_char
-  (of-object "GValue")
-  (c-name "g_value_set_char")
-  (return-type "none")
-  (parameters
-    '("gchar" "v_char")
-  )
-)
-
-(define-method get_char
-  (of-object "GValue")
-  (c-name "g_value_get_char")
-  (return-type "gchar")
-)
-
-(define-method set_uchar
-  (of-object "GValue")
-  (c-name "g_value_set_uchar")
-  (return-type "none")
-  (parameters
-    '("guchar" "v_uchar")
-  )
-)
-
-(define-method get_uchar
-  (of-object "GValue")
-  (c-name "g_value_get_uchar")
-  (return-type "guchar")
-)
-
-(define-method set_boolean
-  (of-object "GValue")
-  (c-name "g_value_set_boolean")
-  (return-type "none")
-  (parameters
-    '("gboolean" "v_boolean")
-  )
-)
-
-(define-method get_boolean
-  (of-object "GValue")
-  (c-name "g_value_get_boolean")
-  (return-type "gboolean")
-)
-
-(define-method set_int
-  (of-object "GValue")
-  (c-name "g_value_set_int")
-  (return-type "none")
-  (parameters
-    '("gint" "v_int")
-  )
-)
-
-(define-method get_int
-  (of-object "GValue")
-  (c-name "g_value_get_int")
-  (return-type "gint")
-)
-
-(define-method set_uint
-  (of-object "GValue")
-  (c-name "g_value_set_uint")
-  (return-type "none")
-  (parameters
-    '("guint" "v_uint")
-  )
-)
-
-(define-method get_uint
-  (of-object "GValue")
-  (c-name "g_value_get_uint")
-  (return-type "guint")
-)
-
-(define-method set_long
-  (of-object "GValue")
-  (c-name "g_value_set_long")
-  (return-type "none")
-  (parameters
-    '("glong" "v_long")
-  )
-)
-
-(define-method get_long
-  (of-object "GValue")
-  (c-name "g_value_get_long")
-  (return-type "glong")
-)
-
-(define-method set_ulong
-  (of-object "GValue")
-  (c-name "g_value_set_ulong")
-  (return-type "none")
-  (parameters
-    '("gulong" "v_ulong")
-  )
-)
-
-(define-method get_ulong
-  (of-object "GValue")
-  (c-name "g_value_get_ulong")
-  (return-type "gulong")
-)
-
-(define-method set_int64
-  (of-object "GValue")
-  (c-name "g_value_set_int64")
-  (return-type "none")
-  (parameters
-    '("gint64" "v_int64")
-  )
-)
-
-(define-method get_int64
-  (of-object "GValue")
-  (c-name "g_value_get_int64")
-  (return-type "gint64")
-)
-
-(define-method set_uint64
-  (of-object "GValue")
-  (c-name "g_value_set_uint64")
-  (return-type "none")
-  (parameters
-    '("guint64" "v_uint64")
-  )
-)
-
-(define-method get_uint64
-  (of-object "GValue")
-  (c-name "g_value_get_uint64")
-  (return-type "guint64")
-)
-
-(define-method set_float
-  (of-object "GValue")
-  (c-name "g_value_set_float")
-  (return-type "none")
-  (parameters
-    '("gfloat" "v_float")
-  )
-)
-
-(define-method get_float
-  (of-object "GValue")
-  (c-name "g_value_get_float")
-  (return-type "gfloat")
-)
-
-(define-method set_double
-  (of-object "GValue")
-  (c-name "g_value_set_double")
-  (return-type "none")
-  (parameters
-    '("gdouble" "v_double")
-  )
-)
-
-(define-method get_double
-  (of-object "GValue")
-  (c-name "g_value_get_double")
-  (return-type "gdouble")
-)
-
-(define-method set_string
-  (of-object "GValue")
-  (c-name "g_value_set_string")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "v_string")
-  )
-)
-
-(define-method set_static_string
-  (of-object "GValue")
-  (c-name "g_value_set_static_string")
-  (return-type "none")
-  (parameters
-    '("const-gchar*" "v_string")
-  )
-)
-
-(define-method get_string
-  (of-object "GValue")
-  (c-name "g_value_get_string")
-  (return-type "const-gchar*")
-)
-
-(define-method dup_string
-  (of-object "GValue")
-  (c-name "g_value_dup_string")
-  (return-type "gchar*")
-)
-
-(define-method set_pointer
-  (of-object "GValue")
-  (c-name "g_value_set_pointer")
-  (return-type "none")
-  (parameters
-    '("gpointer" "v_pointer")
-  )
-)
-
-(define-method get_pointer
-  (of-object "GValue")
-  (c-name "g_value_get_pointer")
-  (return-type "gpointer")
-)
-
-(define-function g_pointer_type_register_static
-  (c-name "g_pointer_type_register_static")
-  (return-type "GType")
-  (parameters
-    '("const-gchar*" "name")
-  )
-)
-
-(define-function g_strdup_value_contents
-  (c-name "g_strdup_value_contents")
-  (return-type "gchar*")
-  (parameters
-    '("const-GValue*" "value")
-  )
-)
-
-(define-method take_string
-  (of-object "GValue")
-  (c-name "g_value_take_string")
-  (return-type "none")
-  (parameters
-    '("gchar*" "v_string")
-  )
-)
-
-(define-method set_string_take_ownership
-  (of-object "GValue")
-  (c-name "g_value_set_string_take_ownership")
-  (return-type "none")
-  (parameters
-    '("gchar*" "v_string")
-  )
-)
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/stamp-gmarshal.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gmodule/gmoduleconf.h
-
-
-
-;; From /home/murrayc/cvs/gnome212/glib/gmodule/gmodule.h
-
-(define-function g_module_supported
-  (c-name "g_module_supported")
-  (return-type "gboolean")
-)
-
-(define-function g_module_open
-  (c-name "g_module_open")
-  (return-type "GModule*")
-  (parameters
-    '("const-gchar*" "file_name")
-    '("GModuleFlags" "flags")
-  )
-)
-
-(define-method close
-  (of-object "GModule")
-  (c-name "g_module_close")
-  (return-type "gboolean")
-)
-
-(define-method make_resident
-  (of-object "GModule")
-  (c-name "g_module_make_resident")
-  (return-type "none")
-)
-
-(define-function g_module_error
-  (c-name "g_module_error")
-  (return-type "const-gchar*")
-)
-
-(define-method symbol
-  (of-object "GModule")
-  (c-name "g_module_symbol")
-  (return-type "gboolean")
-  (parameters
-    '("const-gchar*" "symbol_name")
-    '("gpointer*" "symbol")
-  )
-)
-
-(define-method name
-  (of-object "GModule")
-  (c-name "g_module_name")
-  (return-type "const-gchar*")
-)
-
-(define-function g_module_build_path
-  (c-name "g_module_build_path")
-  (return-type "gchar*")
-  (parameters
-    '("const-gchar*" "directory")
-    '("const-gchar*" "module_name")
   )
 )
 

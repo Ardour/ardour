@@ -159,7 +159,7 @@ void TextTag_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 gboolean TextTag_Class::event_callback(GtkTextTag* self, GObject* p0, GdkEvent* p1, const GtkTextIter* p2)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -167,34 +167,36 @@ gboolean TextTag_Class::event_callback(GtkTextTag* self, GObject* p0, GdkEvent* 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_event(Glib::wrap(p0, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_event(Glib::wrap(p0, true)
 , p1, Glib::wrap(p2)
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->event)
-      return (*base->event)(self, p0, p1, p2);
-  }
+  // Call the original underlying C function:
+  if(base && base->event)
+    return (*base->event)(self, p0, p1, p2);
 
   typedef gboolean RType;
   return RType();
@@ -245,15 +247,17 @@ GType TextTag::get_base_type()
 
 TextTag::TextTag()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(texttag_class_.init()))
 {
   }
 
 TextTag::TextTag(const Glib::ustring& name)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(texttag_class_.init(), "name", name.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(texttag_class_.init(), "name", name.c_str(), static_cast<char*>(0)))
 {
   }
 
@@ -743,6 +747,41 @@ Glib::PropertyProxy_ReadOnly<bool> TextTag::property_invisible() const
 #endif //GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_WriteOnly<Glib::ustring> TextTag::property_paragraph_background() 
+{
+  return Glib::PropertyProxy_WriteOnly<Glib::ustring>(this, "paragraph-background");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Gdk::Color> TextTag::property_paragraph_background_gdk() 
+{
+  return Glib::PropertyProxy<Gdk::Color>(this, "paragraph-background-gdk");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Gdk::Color> TextTag::property_paragraph_background_gdk() const
+{
+  return Glib::PropertyProxy_ReadOnly<Gdk::Color>(this, "paragraph-background-gdk");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> TextTag::property_accumulative_margin() 
+{
+  return Glib::PropertyProxy<bool>(this, "accumulative-margin");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> TextTag::property_accumulative_margin() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "accumulative-margin");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
 Glib::PropertyProxy<bool> TextTag::property_background_set() 
 {
   return Glib::PropertyProxy<bool>(this, "background-set");
@@ -1117,6 +1156,20 @@ Glib::PropertyProxy<bool> TextTag::property_invisible_set()
 Glib::PropertyProxy_ReadOnly<bool> TextTag::property_invisible_set() const
 {
   return Glib::PropertyProxy_ReadOnly<bool>(this, "invisible-set");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> TextTag::property_paragraph_background_set() 
+{
+  return Glib::PropertyProxy<bool>(this, "paragraph-background-set");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> TextTag::property_paragraph_background_set() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "paragraph-background-set");
 }
 #endif //GLIBMM_PROPERTIES_ENABLED
 

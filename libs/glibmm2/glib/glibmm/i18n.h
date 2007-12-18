@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_I18N_H
 #define _GLIBMM_I18N_H
 
-/* $Id: i18n.h,v 1.1 2004/03/02 23:29:56 murrayc Exp $ */
+/* $Id: i18n.h 77 2004-03-02 23:29:57Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

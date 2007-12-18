@@ -128,8 +128,11 @@ enum ModifierType
   BUTTON3_MASK = 1 << 10,
   BUTTON4_MASK = 1 << 11,
   BUTTON5_MASK = 1 << 12,
+  SUPER_MASK = 1 << 26,
+  HYPER_MASK = 1 << 27,
+  META_MASK = 1 << 28,
   RELEASE_MASK = 1 << 30,
-  MODIFIER_MASK = 0x40001FFF
+  MODIFIER_MASK = 0x5c001fff
 };
 
 /** @ingroup gdkmmEnums */
@@ -352,6 +355,7 @@ typedef AtomStringTraits AtomString;
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 typedef Glib::ArrayHandle<std::string,AtomStringTraits> ArrayHandle_AtomString;
+typedef Glib::ListHandle<std::string,AtomStringTraits> ListHandle_AtomString;
 
 } // namespace Gdk
 

@@ -128,6 +128,10 @@ public:
   explicit MenuItem(const Glib::ustring& label, bool mnemonic = false);
 
   
+  /** Sets or replaces the menu item's submenu, or removes it when a <tt>0</tt>
+   * submenu is passed.
+   * @param submenu The submenu, or <tt>0</tt>.
+   */
   void set_submenu(Menu& submenu);
   
   /** Gets the submenu underneath this menu item, if any. See
@@ -144,6 +148,12 @@ public:
   bool has_submenu() const;
 
   
+  /** Removes the widget's submenu.
+   * 
+   * Deprecated: 2.12: remove_submenu() is deprecated and
+   * should not be used in newly written code. Use
+   * set_submenu() instead.
+   */
   void remove_submenu();
   
   void select();
@@ -194,33 +204,33 @@ public:
   void unset_accel_path();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %activate()</tt>
+   * <tt>void on_my_%activate()</tt>
    */
 
   Glib::SignalProxy0< void > signal_activate();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %activate_item()</tt>
+   * <tt>void on_my_%activate_item()</tt>
    */
 
   Glib::SignalProxy0< void > signal_activate_item();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %toggle_size_request(int* requisition)</tt>
+   * <tt>void on_my_%toggle_size_request(int* requisition)</tt>
    */
 
   Glib::SignalProxy1< void,int* > signal_toggle_size_request();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %toggle_size_allocate(int allocation)</tt>
+   * <tt>void on_my_%toggle_size_allocate(int allocation)</tt>
    */
 
   Glib::SignalProxy1< void,int > signal_toggle_size_allocate();
@@ -249,10 +259,13 @@ private:
 
 namespace Glib
 {
-  /** @relates Gtk::MenuItem
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::MenuItem
    */
   Gtk::MenuItem* wrap(GtkMenuItem* object, bool take_copy = false);
 } //namespace Glib

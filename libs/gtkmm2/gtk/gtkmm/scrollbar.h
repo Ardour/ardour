@@ -297,10 +297,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Scrollbar
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Scrollbar
    */
   Gtk::Scrollbar* wrap(GtkScrollbar* object, bool take_copy = false);
 } //namespace Glib
@@ -308,10 +311,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::VScrollbar
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::VScrollbar
    */
   Gtk::VScrollbar* wrap(GtkVScrollbar* object, bool take_copy = false);
 } //namespace Glib
@@ -319,10 +325,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::HScrollbar
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::HScrollbar
    */
   Gtk::HScrollbar* wrap(GtkHScrollbar* object, bool take_copy = false);
 } //namespace Glib

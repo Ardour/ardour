@@ -41,7 +41,15 @@ namespace Gtk
 namespace Gtk
 {
 
-/** TODO
+/** Create buttons bound to a URL.
+ *
+ * A Gtk::LinkButton is a Gtk::Button with a hyperlink, similar to the one
+ * used by web browsers, which triggers an action when clicked. It is useful
+ * to show quick links to resources.
+ *
+ * The URI bound to a Gtk::LinkButton can be set specifically using set_uri(), 
+ * and retrieved using get_uri().
+ * Gtk::LinkButton offers a global hook, which is called when the used clicks on it: see set_uri_hook(). 
  *
  * @newin2p10
  * @ingroup Widgets
@@ -108,15 +116,47 @@ private:
 public:
   LinkButton();
   explicit LinkButton(const Glib::ustring& uri);
+  
   explicit LinkButton(const Glib::ustring& uri, const Glib::ustring& label);
 
   
+  /** Retrieves the URI set using set_uri().
+   * @return A valid URI.  The returned string is owned by the link button
+   * and should not be modified or freed.
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_uri() const;
   
+  /** Sets @a uri  as the URI where the Gtk::LinkButton points.
+   * 
+   * @newin2p10
+   * @param uri A valid URI.
+   */
   void set_uri(const Glib::ustring& uri);
 
+  /** For instance,
+   * void on_linkbutton_uri(Gtk::LinkButton *button, const Glib::ustring& uri);
+   *
+   * @see set_uri_hook().
+   */
+  typedef sigc::slot<void, Gtk::LinkButton*, const Glib::ustring&> SlotUri;
 
-  //TODO: GtkLinkButtonUriFunc  gtk_link_button_set_uri_hook(GtkLinkButtonUriFunc func, gpointer data, GDestroyNotify destroy);
+  /** Sets slot as the function that should be invoked every time a user clicks a LinkButton. 
+   * This function is called before every signal handler registered for the "clicked" signal.
+   *
+   * @param slot A function called each time a LinkButton is clicked.
+   * @newin2p12
+   */
+  static void set_uri_hook(const SlotUri& slot);
+  
+
+  /** Unsets any previously set slot as the function that should be invoked every time a user clicks a LinkButton. 
+   * @see set_uri_hook().
+   * @newin2p12
+   */
+  static void unset_uri_hook();
+
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
 /** The URI bound to this button.
@@ -147,10 +187,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::LinkButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::LinkButton
    */
   Gtk::LinkButton* wrap(GtkLinkButton* object, bool take_copy = false);
 } //namespace Glib

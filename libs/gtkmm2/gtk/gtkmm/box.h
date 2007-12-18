@@ -312,6 +312,20 @@ public:
    * The difference between spacing (set when the box is created)
    * and padding (set when elements are packed) is, that spacing is added between
    * objects, and padding is added on either side of an object.
+   * @param child The Gtk::Widget to be added to @a box .
+   * @param expand <tt>true</tt> if the new child is to be given extra space allocated to
+   *  @a box .  The extra space will be divided evenly between all children of
+   *  @a box  that use this option.
+   * @param fill <tt>true</tt> if space given to @a child  by the @a expand  option is
+   * actually allocated to @a child , rather than just padding it.  This
+   * parameter has no effect if @a expand  is set to <tt>false</tt>.  A child is
+   * always allocated the full height of a Gtk::HBox and the full width 
+   * of a Gtk::VBox. This option affects the other dimension.
+   * @param padding Extra space in pixels to put between this child and its
+   * neighbors, over and above the global amount specified by
+   * Gtk::Box:spacing property.  If @a child  is a widget at one of the 
+   * reference ends of @a box , then @a padding  pixels are also put between 
+   *  @a child  and the reference edge of @a box .
    */
   void pack_start(Widget& child, bool expand, bool fill, guint padding = 0);
 
@@ -323,6 +337,24 @@ public:
   void pack_start(Widget& child, PackOptions options = PACK_EXPAND_WIDGET, guint padding = 0);
 
   
+  /** Adds @a child  to @a box , packed with reference to the end of @a box .  
+   * The @a child  is packed after (away from end of) any other child 
+   * packed with reference to the end of @a box .
+   * @param child The Gtk::Widget to be added to @a box .
+   * @param expand <tt>true</tt> if the new child is to be given extra space allocated 
+   * to @a box . The extra space will be divided evenly between all children 
+   * of @a box  that use this option.
+   * @param fill <tt>true</tt> if space given to @a child  by the @a expand  option is
+   * actually allocated to @a child , rather than just padding it.  This
+   * parameter has no effect if @a expand  is set to <tt>false</tt>.  A child is
+   * always allocated the full height of a Gtk::HBox and the full width 
+   * of a Gtk::VBox.  This option affects the other dimension.
+   * @param padding Extra space in pixels to put between this child and its
+   * neighbors, over and above the global amount specified by
+   * Gtk::Box:spacing property.  If @a child  is a widget at one of the 
+   * reference ends of @a box , then @a padding  pixels are also put between 
+   *  @a child  and the reference edge of @a box .
+   */
   void pack_end(Widget& child, bool expand, bool fill, guint padding = 0);
 
   /** Right side insert a widget to a box.
@@ -333,15 +365,24 @@ public:
   void pack_end(Widget& child, PackOptions options = PACK_EXPAND_WIDGET, guint padding = 0);
 
   
+  /** Sets the Gtk::Box:homogeneous property of @a box , controlling 
+   * whether or not all children of @a box  are given equal space 
+   * in the box.
+   * @param homogeneous A boolean value, <tt>true</tt> to create equal allotments,
+   * <tt>false</tt> for variable allotments.
+   */
   void set_homogeneous(bool homogeneous = true);
   
-  /** Returns whether the box is homogeneous (all children are the
-   * same size). See set_homogeneous().
+  /** Return value: <tt>true</tt> if the box is homogeneous.
    * @return <tt>true</tt> if the box is homogeneous.
    */
   bool get_homogeneous() const;
 
   
+  /** Sets the Gtk::Box:spacing property of @a box , which is the 
+   * number of pixels to place between children of @a box .
+   * @param spacing The number of pixels to put between children.
+   */
   void set_spacing(int spacing);
   
   /** Gets the value set by set_spacing().
@@ -350,6 +391,21 @@ public:
   int get_spacing() const;
 
   
+  /** Moves @a child  to a new @a position  in the list of @a box  children.  
+   * The list is the &lt;structfield&gt;children&lt;/structfield&gt; field of
+   * Gtk::Box-struct, and contains both widgets packed Gtk::PACK_START 
+   * as well as widgets packed Gtk::PACK_END, in the order that these 
+   * widgets were added to @a box .
+   * 
+   * A widget's position in the @a box  children list determines where 
+   * the widget is packed into @a box .  A child widget at some position 
+   * in the list will be packed just after all other widgets of the 
+   * same packing type that appear earlier in the list.
+   * @param child The Gtk::Widget to move.
+   * @param position The new position for @a child  in the list of children 
+   * of @a box , starting from 0. If negative, indicates the end of 
+   * the list.
+   */
   void reorder_child(Widget& child, int pos);
 
   /* Get the child widgets.
@@ -586,10 +642,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Box
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Box
    */
   Gtk::Box* wrap(GtkBox* object, bool take_copy = false);
 } //namespace Glib
@@ -597,10 +656,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::VBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::VBox
    */
   Gtk::VBox* wrap(GtkVBox* object, bool take_copy = false);
 } //namespace Glib
@@ -608,10 +670,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::HBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::HBox
    */
   Gtk::HBox* wrap(GtkHBox* object, bool take_copy = false);
 } //namespace Glib

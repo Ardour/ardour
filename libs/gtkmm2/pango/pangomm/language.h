@@ -94,7 +94,20 @@ enum Script
   SCRIPT_SHAVIAN,
   SCRIPT_LINEAR_B,
   SCRIPT_TAI_LE,
-  SCRIPT_UGARITIC
+  SCRIPT_UGARITIC,
+  SCRIPT_NEW_TAI_LUE,
+  SCRIPT_BUGINESE,
+  SCRIPT_GLAGOLITIC,
+  SCRIPT_TIFINAGH,
+  SCRIPT_SYLOTI_NAGRI,
+  SCRIPT_OLD_PERSIAN,
+  SCRIPT_KHAROSHTHI,
+  SCRIPT_UNKNOWN,
+  SCRIPT_BALINESE,
+  SCRIPT_CUNEIFORM,
+  SCRIPT_PHOENICIAN,
+  SCRIPT_PHAGS_PA,
+  SCRIPT_NKO
 };
 
 } // namespace Pango
@@ -179,10 +192,11 @@ public:
   /** Checks if a language tag matches one of the elements in a list of
    * language ranges. A language tag is considered to match a range
    * in the list if the range is '*', the range is exactly the tag,
-   * or the range is a prefix of the tag, and the character after the
-   * tag is '-'.
-   * @param range_list A list of language ranges, separated by ';' characters.
-   * each element must either be '*', or a RFC 3066 language range
+   * or the range is a prefix of the tag, and the character after it
+   * in the tag is '-'.
+   * @param range_list A list of language ranges, separated by ';', ':',
+   * ',', or space characters.
+   * Each element must either be '*', or a RFC 3066 language range
    * canonicalized as by pango_language_from_string().
    * @return <tt>true</tt> if a match was found.
    */
@@ -200,7 +214,9 @@ public:
    * applications in most circumstances.
    * @param script A Pango::Script.
    * @return <tt>true</tt> if @a script  is one of the scripts used
-   * to write @a language , or if nothing is known about @a language .
+   * to write @a language  or if nothing is known about @a language 
+   * (including the case that @a language  is <tt>0</tt>),
+   * <tt>false</tt> otherwise.
    * 
    * Since: 1.4.
    */
@@ -227,10 +243,13 @@ inline void swap(Language& lhs, Language& rhs)
 namespace Glib
 {
 
-/** @relates Pango::Language
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Pango::Language
  */
 Pango::Language wrap(PangoLanguage* object, bool take_copy = false);
 

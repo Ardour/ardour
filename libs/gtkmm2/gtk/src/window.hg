@@ -1,0 +1,368 @@
+/* $Id: window.hg,v 1.20 2006/05/10 20:59:28 murrayc Exp $ */
+
+/* window.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+ 
+#include <glibmm/object.h>
+#include <glibmm/listhandle.h>
+#include <gtkmm/bin.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/bin_p.h)
+
+namespace Gtk
+{
+
+class AccelGroup;
+class WindowGroup;
+
+/** Limit the effect of grabs
+ */
+class WindowGroup : public Glib::Object
+{
+  _CLASS_GOBJECT(WindowGroup, GtkWindowGroup, GTK_WINDOW_GROUP, Glib::Object, GObject)
+
+protected:
+  _CTOR_DEFAULT()
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(void add_window(Window& window), gtk_window_group_add_window)
+  _WRAP_METHOD(void remove_window(Window& window), gtk_window_group_remove_window)
+};
+
+/** Toplevel Window
+ * This represents all widgets which are physical windows controlled
+ * by the window manager.
+ *
+ * The window will be hidden when the window manager's close button is clicked. Override on_delete_event() to stop this.
+ *
+ * Gtk::manage() has no effect on Windows because they have no parent Containers.
+ * @ingroup Widgets
+ */
+class Window : public Bin
+{
+  _CLASS_GTKOBJECT(Window,GtkWindow,GTK_WINDOW,Gtk::Bin,GtkBin)
+  _UNMANAGEABLE
+  _IGNORE(_gtk_window_internal_set_focus, _gtk_window_reposition, _gtk_window_constrain_size, gtk_window_remove_embedded_xid,
+                _gtk_window_get_group, _gtk_window_activate_key, gtk_window_add_embedded_xid, _gtk_window_keys_foreach)
+public:
+   _WRAP_CTOR(Window(WindowType type = WINDOW_TOPLEVEL), gtk_window_new)
+
+  _WRAP_PROPERTY("title", Glib::ustring)
+  _WRAP_PROPERTY("allow_shrink", bool)
+  _WRAP_PROPERTY("allow_grow", bool)
+  _WRAP_PROPERTY("resizable", bool)
+  _WRAP_PROPERTY("modal", bool)
+  _WRAP_PROPERTY("window_position", WindowPosition)
+  _WRAP_PROPERTY("default_width", int)
+  _WRAP_PROPERTY("default_height", int)
+  _WRAP_PROPERTY("destroy_with_parent", bool)
+  _WRAP_PROPERTY("icon", Glib::RefPtr<Gdk::Pixbuf>)
+  
+  _WRAP_PROPERTY("screen", Glib::RefPtr<Gdk::Screen>)
+  _WRAP_PROPERTY("is_active", bool)
+  _WRAP_PROPERTY("has_toplevel_focus", bool)
+  _WRAP_PROPERTY("type_hint", GdkWindowTypeHint)
+  _WRAP_PROPERTY("skip_taskbar_hint", bool)
+  _WRAP_PROPERTY("skip_pager_hint", bool)        
+  _WRAP_PROPERTY("role", Glib::ustring)
+  _WRAP_PROPERTY("decorated", bool)
+  _WRAP_PROPERTY("gravity", Gdk::Gravity)
+  _WRAP_PROPERTY("transient_for", Window*)
+  _WRAP_PROPERTY("urgency_hint", bool) 
+  _WRAP_PROPERTY("deletable", bool) 
+  _WRAP_PROPERTY("opacity", double)
+
+  bool is_toplevel() const;
+  bool is_dialog() const;
+  bool is_popup() const;
+
+  _MEMBER_GET(window_type, type, WindowType, guint)
+
+  //: This is special to the GTK+ linux-fb port.
+  _MEMBER_GET_GOBJECT(frame, frame, Gdk::Window, GdkWindow*)
+
+
+  _WRAP_SIGNAL(void set_focus(Widget* focus), "set_focus")
+  _WRAP_SIGNAL(bool frame_event(GdkEvent* event), "frame_event")
+
+  //Keybinding signals:
+  _IGNORE_SIGNAL("activate_focus")
+  _IGNORE_SIGNAL("activate_default")
+  _IGNORE_SIGNAL("move_focus")
+
+#m4begin
+dnl// Hook in special code to catch explicit uses of gtk_object_destroy() by
+dnl// GTK+ code, e.g. when receiving the GDK_DELETE event.  For details, look
+dnl// at Gtk::Window_Class::dispose_vfunc_callback() in window.ccg.
+dnl
+  _PUSH(SECTION_PCC_CLASS_INIT_VFUNCS)
+#endif //GLIBMM_VFUNCS_ENABLED //We always need dispose_vfunc_callback
+    reinterpret_cast<GObjectClass*>(klass)->dispose = &dispose_vfunc_callback;
+#ifdef GLIBMM_VFUNCS_ENABLED
+  _SECTION(SECTION_PH_VFUNCS)
+#endif //GLIBMM_VFUNCS_ENABLED //We always need dispose_vfunc_callback
+    static void dispose_vfunc_callback(GObject* self);
+#ifdef GLIBMM_VFUNCS_ENABLED
+  _POP()
+#m4end
+
+
+  _WRAP_METHOD(void set_title(const Glib::ustring& title),
+               gtk_window_set_title)
+
+  _WRAP_METHOD(Glib::ustring get_title() const, gtk_window_get_title)
+
+  _WRAP_METHOD(void set_wmclass(const Glib::ustring& wmclass_name,
+                                const Glib::ustring& wmclass_class),
+               gtk_window_set_wmclass)
+
+  _WRAP_METHOD(void set_role(const Glib::ustring& role), gtk_window_set_role)
+
+  //: Returns the role of the window.
+  //- See {set_role()} for further explanation.
+  _WRAP_METHOD(Glib::ustring get_role() const, gtk_window_get_role)
+
+
+  _WRAP_METHOD(void add_accel_group(const Glib::RefPtr<AccelGroup>& accel_group),
+               gtk_window_add_accel_group)
+
+  _WRAP_METHOD(void remove_accel_group(const Glib::RefPtr<AccelGroup>& accel_group),
+               gtk_window_remove_accel_group)
+
+  _WRAP_METHOD(void set_position(WindowPosition position),
+               gtk_window_set_position)
+
+  _WRAP_METHOD(bool activate_focus(), gtk_window_activate_focus)
+
+  _WRAP_METHOD(void set_focus(Gtk::Widget& focus), gtk_window_set_focus)
+  void unset_focus();
+  
+  _WRAP_METHOD(Widget* get_focus(), gtk_window_get_focus)
+  _WRAP_METHOD(const Widget* get_focus() const, gtk_window_get_focus, constversion)
+  _WRAP_METHOD(void set_default(Gtk::Widget& default_widget), gtk_window_set_default)
+  void unset_default();
+ 
+  _WRAP_METHOD(bool activate_default(), gtk_window_activate_default)
+
+  _WRAP_METHOD(void set_transient_for(Window& parent), gtk_window_set_transient_for)
+
+  _WRAP_METHOD(Window* get_transient_for(), gtk_window_get_transient_for)
+  _WRAP_METHOD(const Window* get_transient_for() const, gtk_window_get_transient_for, constversion)
+
+  _WRAP_METHOD(void set_opacity(double opacity), gtk_window_set_opacity)
+  _WRAP_METHOD(double get_opacity() const, gtk_window_get_opacity)
+
+  _WRAP_METHOD(void set_type_hint(Gdk::WindowTypeHint hint), gtk_window_set_type_hint)
+  _WRAP_METHOD(Gdk::WindowTypeHint get_type_hint() const, gtk_window_get_type_hint)
+
+  _WRAP_METHOD(void set_skip_taskbar_hint(bool setting = true), gtk_window_set_skip_taskbar_hint)
+  _WRAP_METHOD(bool get_skip_taskbar_hint() const, gtk_window_get_skip_taskbar_hint)
+
+  _WRAP_METHOD(void set_skip_pager_hint(bool setting = true), gtk_window_set_skip_pager_hint)
+  _WRAP_METHOD(bool get_skip_pager_hint() const, gtk_window_get_skip_pager_hint)
+
+  _WRAP_METHOD(void set_urgency_hint(bool setting = true), gtk_window_set_urgency_hint)
+  _WRAP_METHOD(bool get_urgency_hint() const, gtk_window_get_urgency_hint)
+
+  _WRAP_METHOD(void set_accept_focus(bool setting = true), gtk_window_set_accept_focus)
+  _WRAP_METHOD(bool get_accept_focus() const, gtk_window_get_accept_focus)
+  _WRAP_METHOD(void set_focus_on_map(bool setting = true), gtk_window_set_focus_on_map)
+  _WRAP_METHOD(bool get_focus_on_map() const, gtk_window_get_focus_on_map)
+
+  //_WRAP_METHOD(void set_destroy_with_parent(bool setting = true), gtk_window_set_destroy_with_parent)
+  // I don't that that this is ever a good thing for C++.murrayc.
+
+  _WRAP_METHOD(bool get_destroy_with_parent() const, gtk_window_get_destroy_with_parent)
+  // I don't that that this is ever a good thing for C++.murrayc.
+
+  _WRAP_METHOD(void set_resizable(bool resizable = true), gtk_window_set_resizable)
+
+  _WRAP_METHOD(bool get_resizable() const, gtk_window_get_resizable)
+
+  _WRAP_METHOD(void set_gravity(Gdk::Gravity gravity), gtk_window_set_gravity)
+
+  _WRAP_METHOD(Gdk::Gravity get_gravity() const, gtk_window_get_gravity)
+
+  _WRAP_METHOD(void set_geometry_hints(Widget& geometry_widget,
+                                       const Gdk::Geometry& geometry,
+                                       Gdk::WindowHints geom_mask),
+               gtk_window_set_geometry_hints)
+
+  _WRAP_METHOD(void set_screen(const Glib::RefPtr<Gdk::Screen>& screen), gtk_window_set_screen)
+
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Screen> get_screen(), gtk_window_get_screen, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Screen> get_screen() const, gtk_window_get_screen, refreturn, constversion)
+
+
+  _WRAP_METHOD(void set_has_frame(bool setting = true), gtk_window_set_has_frame)
+
+  _WRAP_METHOD(bool get_has_frame() const, gtk_window_get_has_frame)
+
+  _WRAP_METHOD(void set_frame_dimensions(int left,  int top,
+                                         int right, int bottom),
+               gtk_window_set_frame_dimensions)
+
+  _WRAP_METHOD(void get_frame_dimensions(int& left,  int& top,
+                                         int& right, int& bottom) const,
+               gtk_window_get_frame_dimensions)
+
+  _WRAP_METHOD(void set_decorated(bool setting = true), gtk_window_set_decorated)
+  _WRAP_METHOD(bool get_decorated() const, gtk_window_get_decorated)
+
+  _WRAP_METHOD(void set_deletable(bool setting = true), gtk_window_set_deletable)
+  _WRAP_METHOD(bool get_deletable() const, gtk_window_get_deletable)
+
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<Gdk::Pixbuf> > get_icon_list(), gtk_window_get_icon_list)
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<const Gdk::Pixbuf> > get_icon_list() const, gtk_window_get_icon_list)
+
+  _WRAP_METHOD(void set_icon_list(const Glib::ListHandle< Glib::RefPtr<Gdk::Pixbuf> >& list),
+               gtk_window_set_icon_list)
+
+  _WRAP_METHOD(void set_icon(const Glib::RefPtr<Gdk::Pixbuf>& icon),
+               gtk_window_set_icon)
+
+
+  _WRAP_METHOD(bool set_icon_from_file(const std::string& filename), gtk_window_set_icon_from_file, errthrow)
+
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_icon(), gtk_window_get_icon, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_icon() const, gtk_window_get_icon, refreturn, constversion)
+
+  _WRAP_METHOD(static void set_default_icon_list(
+                   const Glib::ListHandle< Glib::RefPtr<Gdk::Pixbuf> >& list),
+               gtk_window_set_default_icon_list)
+
+  _WRAP_METHOD(static Glib::ListHandle< Glib::RefPtr<Gdk::Pixbuf> > get_default_icon_list(), gtk_window_get_default_icon_list)
+  
+  _WRAP_METHOD(static void set_default_icon(const Glib::RefPtr<Gdk::Pixbuf>& icon), gtk_window_set_default_icon)
+  _WRAP_METHOD(static void set_default_icon_name(const Glib::ustring& name), gtk_window_set_default_icon_name)
+  _WRAP_METHOD(static bool set_default_icon_from_file(const std::string& filename), gtk_window_set_default_icon_from_file, errthrow)
+  _WRAP_METHOD(static void set_auto_startup_notification(bool setting = true), gtk_window_set_auto_startup_notification)
+
+  _WRAP_METHOD(void set_modal(bool modal = true), gtk_window_set_modal)
+
+  _WRAP_METHOD(bool get_modal() const, gtk_window_get_modal)
+
+
+  _WRAP_METHOD(static Glib::ListHandle<Window*> list_toplevels(), gtk_window_list_toplevels)
+
+
+  _WRAP_METHOD(void add_mnemonic(guint keyval, Widget& target),
+               gtk_window_add_mnemonic)
+
+  _WRAP_METHOD(void remove_mnemonic(guint keyval, Widget& target),
+               gtk_window_remove_mnemonic)
+
+  _WRAP_METHOD(bool mnemonic_activate(guint keyval, Gdk::ModifierType modifier),
+               gtk_window_mnemonic_activate)
+
+  _WRAP_METHOD(void set_mnemonic_modifier(Gdk::ModifierType modifier),
+               gtk_window_set_mnemonic_modifier)
+
+  _WRAP_METHOD(Gdk::ModifierType get_mnemonic_modifier(),
+               gtk_window_get_mnemonic_modifier)
+
+
+  _WRAP_METHOD(void present(), gtk_window_present)
+  _WRAP_METHOD(void present(guint32 timestamp), gtk_window_present_with_time)
+
+  _WRAP_METHOD(void iconify(), gtk_window_iconify)
+  _WRAP_METHOD(void deiconify(), gtk_window_deiconify)
+
+  _WRAP_METHOD(void stick(), gtk_window_stick)
+  _WRAP_METHOD(void unstick(), gtk_window_unstick)
+
+  _WRAP_METHOD(void maximize(), gtk_window_maximize)
+  _WRAP_METHOD(void unmaximize(), gtk_window_unmaximize)
+
+  _WRAP_METHOD(void fullscreen(), gtk_window_fullscreen)
+  _WRAP_METHOD(void unfullscreen(), gtk_window_unfullscreen)
+        
+  _WRAP_METHOD(void begin_resize_drag(Gdk::WindowEdge edge,
+                   int button, int root_x, int root_y, guint32 timestamp),
+               gtk_window_begin_resize_drag)
+
+  _WRAP_METHOD(void begin_move_drag(
+                   int button, int root_x, int root_y, guint32 timestamp),
+               gtk_window_begin_move_drag)
+
+  _WRAP_METHOD(void set_default_size(int width, int height),
+               gtk_window_set_default_size)
+
+  _WRAP_METHOD(void get_default_size(int& width, int& height) const,
+               gtk_window_get_default_size)
+
+  _WRAP_METHOD(void resize(int width, int height), gtk_window_resize)
+
+  _WRAP_METHOD(void get_size(int& width, int& height) const,
+               gtk_window_get_size)
+
+
+  _WRAP_METHOD(void move(int x, int y), gtk_window_move)
+
+  _WRAP_METHOD(void get_position(int& root_x, int& root_y) const,
+               gtk_window_get_position)
+
+  _WRAP_METHOD(bool parse_geometry(const Glib::ustring& geometry),
+               gtk_window_parse_geometry)
+
+  _WRAP_METHOD(Glib::RefPtr<WindowGroup> get_group(), gtk_window_get_group, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const WindowGroup> get_group() const, gtk_window_get_group, refreturn, constversion)
+
+  _WRAP_METHOD(void reshow_with_initial_size(),
+               gtk_window_reshow_with_initial_size)
+
+
+  _WRAP_METHOD(void set_keep_above(bool setting = true), gtk_window_set_keep_above)
+  _WRAP_METHOD(void set_keep_below(bool setting = true), gtk_window_set_keep_below)
+
+  
+  /** Returns a default accel group for this window
+   * This is a gtkmm-specific function.  This accel group can not
+   * be removed.
+   */
+  Glib::RefPtr<AccelGroup> get_accel_group();
+
+  /** Brings the window to the front.
+   * This is just a more obvious convenience wrapper for get_window()->raise().
+   */
+  virtual void raise();
+
+  ///Overriden to warn that it doesn't make sense to use Gtk::manage() on this class because it has no parent container.
+  virtual void set_manage();
+
+protected:
+
+  //See comments in the implementations:
+  void destroy_();
+  void _destroy_c_instance();
+
+private:
+
+  //We'll create an accel_group if it's requested, and remember it.
+  //Otherwise, you'd have to create it, add it to the window, then remember it somewhere else while you add it to other widgets.
+  Glib::RefPtr<AccelGroup> accel_group_;
+};
+
+
+
+} // namespace Gtk
+

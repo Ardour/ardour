@@ -187,11 +187,11 @@ public:
 
   
   /** Adds an activatable widget to the action area of a Gtk::Dialog,
-   * connecting a signal handler that will emit the "response" signal on
-   * the dialog when the widget is activated.  The widget is appended to
-   * the end of the dialog's action area.  If you want to add a
-   * non-activatable widget, simply pack it into the
-   * <tt>action_area</tt> field of the Gtk::Dialog struct.
+   * connecting a signal handler that will emit the Gtk::Dialog::response 
+   * signal on the dialog when the widget is activated. The widget is 
+   * appended to the end of the dialog's action area. If you want to add a
+   * non-activatable widget, simply pack it into the @a action_area  field 
+   * of the Gtk::Dialog struct.
    * @param child An activatable widget.
    * @param response_id Response ID for @a child .
    */
@@ -199,9 +199,9 @@ public:
   
   /** Adds a button with the given text (or a stock button, if @a button_text  is a
    * stock ID) and sets things up so that clicking the button will emit the
-   * "response" signal with the given @a response_id . The button is appended to the
-   * end of the dialog's action area. The button widget is returned, but usually
-   * you don't need it.
+   * Gtk::Dialog::response signal with the given @a response_id . The button is 
+   * appended to the end of the dialog's action area. The button widget is 
+   * returned, but usually you don't need it.
    * @param button_text Text of button, or stock ID.
    * @param response_id Response ID for the button.
    * @return The button widget that was added.
@@ -210,9 +210,9 @@ public:
   
   /** Adds a button with the given text (or a stock button, if @a button_text  is a
    * stock ID) and sets things up so that clicking the button will emit the
-   * "response" signal with the given @a response_id . The button is appended to the
-   * end of the dialog's action area. The button widget is returned, but usually
-   * you don't need it.
+   * Gtk::Dialog::response signal with the given @a response_id . The button is 
+   * appended to the end of the dialog's action area. The button widget is 
+   * returned, but usually you don't need it.
    * @param button_text Text of button, or stock ID.
    * @param response_id Response ID for the button.
    * @return The button widget that was added.
@@ -256,15 +256,7 @@ public:
   bool get_has_separator() const;
 
   
-  /** Returns <tt>true</tt> if dialogs are expected to use an alternative
-   * button order on the screen @a screen . See 
-   * Gtk::Dialog::set_alternative_button_order() for more details
-   * about alternative button order. 
-   * 
-   * If you need to use this function, you should probably connect
-   * to the ::notify:gtk-alternative-button-order signal on the
-   * Gtk::Settings object associated to @a screen , in order to be 
-   * notified if the button order setting changes.
+  /** Returns: Whether the alternative button order should be used
    * @param screen A Gdk::Screen, or <tt>0</tt> to use the default screen.
    * @return Whether the alternative button order should be used
    * 
@@ -292,10 +284,10 @@ public:
   void set_alternative_button_order_from_array(const Glib::ArrayHandle<int>& new_order);
   
 
-  /** Emits the "response" signal with the given response ID. Used to
-   * indicate that the user has responded to the dialog in some way;
+  /** Emits the Gtk::Dialog::response signal with the given response ID. 
+   * Used to indicate that the user has responded to the dialog in some way;
    * typically either you or run() will be monitoring the
-   * "response" signal and take appropriate action.
+   * ::response signal and take appropriate action.
    * @param response_id Response ID.
    */
   void response(int response_id);
@@ -358,9 +350,9 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %response(int response_id)</tt>
+   * <tt>void on_my_%response(int response_id)</tt>
    */
 
   Glib::SignalProxy1< void,int > signal_response();
@@ -377,10 +369,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Dialog
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Dialog
    */
   Gtk::Dialog* wrap(GtkDialog* object, bool take_copy = false);
 } //namespace Glib

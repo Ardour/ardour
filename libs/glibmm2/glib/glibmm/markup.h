@@ -153,11 +153,13 @@ typedef Glib::MarkupError Error;
 Glib::ustring escape_text(const Glib::ustring& text);
 
 
-/** @addtogroup glibmmEnums Enums and Flags */
-
 /** There are no flags right now. Pass <tt>Glib::Markup::ParseFlags(0)</tt> for
  * the flags argument to all functions (this should be the default argument
  * anyway).
+ */
+/** @addtogroup glibmmEnums Enums and Flags */
+
+/**
  * @ingroup glibmmEnums
  * @par Bitwise operators:
  * <tt>%ParseFlags operator|(ParseFlags, ParseFlags)</tt><br>
@@ -170,7 +172,8 @@ Glib::ustring escape_text(const Glib::ustring& text);
  */
 enum ParseFlags
 {
-  DO_NOT_USE_THIS_UNSUPPORTED_FLAG = 1 << 0
+  DO_NOT_USE_THIS_UNSUPPORTED_FLAG = 1 << 0,
+  TREAT_CDATA_AS_TEXT = 1 << 1
 };
 
 /** @ingroup glibmmEnums */

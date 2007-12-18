@@ -135,7 +135,8 @@ GType SeparatorToolItem::get_base_type()
 
 SeparatorToolItem::SeparatorToolItem()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::ToolItem(Glib::ConstructParams(separatortoolitem_class_.init()))
 {
   }

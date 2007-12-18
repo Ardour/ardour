@@ -155,13 +155,36 @@ public:
   void get_policy(PolicyType& hscrollbar_policy, PolicyType& vscrollbar_policy) const;
 
   
+  /** Sets the placement of the contents with respect to the scrollbars
+   * for the scrolled window.
+   * The default is Gtk::CORNER_TOP_LEFT, meaning the child is
+   * in the top left, with the scrollbars underneath and to the right.
+   * Other values in Gtk::CornerType are Gtk::CORNER_TOP_RIGHT,
+   * Gtk::CORNER_BOTTOM_LEFT, and Gtk::CORNER_BOTTOM_RIGHT.
+   * 
+   * See also get_placement() and
+   * unset_placement().
+   * @param window_placement Position of the child window.
+   */
   void set_placement(CornerType window_placement);
   
+  /** Unsets the placement of the contents with respect to the scrollbars
+   * for the scrolled window. If no window placement is set for a scrolled
+   * window, it obeys the "gtk-scrolled-window-placement" XSETTING.
+   * 
+   * See also set_placement() and
+   * get_placement().
+   * 
+   * @newin2p10
+   */
   void unset_placement();
   
-  /** Gets the placement of the scrollbars for the scrolled window. See 
-   * set_placement().
+  /** Gets the placement of the contents with respect to the scrollbars
+   * for the scrolled window. See set_placement().
    * @return The current placement value.
+   * 
+   * See also set_placement() and
+   * unset_placement().
    */
   CornerType get_placement() const;
 
@@ -182,7 +205,7 @@ public:
   virtual void add(Gtk::Widget& widget);
   
 
-  /** Returns the vertical scrollbar of @a scrolled_window .
+  /** Returns: the vertical scrollbar of the scrolled window, or
    * @return The vertical scrollbar of the scrolled window, or
    * <tt>0</tt> if it does not have one.
    * 
@@ -190,7 +213,7 @@ public:
    */
   VScrollbar* get_vscrollbar();
   
-  /** Returns the vertical scrollbar of @a scrolled_window .
+  /** Returns: the vertical scrollbar of the scrolled window, or
    * @return The vertical scrollbar of the scrolled window, or
    * <tt>0</tt> if it does not have one.
    * 
@@ -199,7 +222,7 @@ public:
   const VScrollbar* get_vscrollbar() const;
 
   
-  /** Returns the horizontal scrollbar of @a scrolled_window .
+  /** Returns: the horizontal scrollbar of the scrolled window, or
    * @return The horizontal scrollbar of the scrolled window, or 
    * <tt>0</tt> if it does not have one.
    * 
@@ -207,7 +230,7 @@ public:
    */
   HScrollbar* get_hscrollbar();
   
-  /** Returns the horizontal scrollbar of @a scrolled_window .
+  /** Returns: the horizontal scrollbar of the scrolled window, or
    * @return The horizontal scrollbar of the scrolled window, or 
    * <tt>0</tt> if it does not have one.
    * 
@@ -349,10 +372,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ScrolledWindow
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ScrolledWindow
    */
   Gtk::ScrolledWindow* wrap(GtkScrolledWindow* object, bool take_copy = false);
 } //namespace Glib

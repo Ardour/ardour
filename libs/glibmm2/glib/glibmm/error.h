@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_ERROR_H
 #define _GLIBMM_ERROR_H
-/* $Id: error.h,v 1.3 2006/10/04 12:04:05 murrayc Exp $ */
+/* $Id: error.h 336 2006-10-04 12:06:14Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

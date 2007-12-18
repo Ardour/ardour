@@ -38,8 +38,9 @@ namespace Gtk
 
 FileSelection::FileSelection()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(fileselection_class_.init(), "title",(char*) 0, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(fileselection_class_.init(), "title",(char*) 0, static_cast<char*>(0)))
 {}
 
 } // namespace Gtk
@@ -146,8 +147,9 @@ GType FileSelection::get_base_type()
 
 FileSelection::FileSelection(const Glib::ustring& title)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(fileselection_class_.init(), "title", title.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(fileselection_class_.init(), "title", title.c_str(), static_cast<char*>(0)))
 {
   }
 

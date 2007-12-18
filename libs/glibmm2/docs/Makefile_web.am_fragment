@@ -1,8 +1,0 @@
-web_host = gtkmm.org
-web_path_gtkmm = /home/murrayc/gtkmm.org/docs/glibmm-2.4/
-#web_path_gtkmm = /home/groups/g/gt/gtkmm/htdocs/docs/glibmm-2.4/
-web_path_docs = $(web_path_gtkmm)docs/
-rsync_args = -vz --rsh ssh --delete --delete-after
-
-gtkmm_docdir = $(datadir)/doc/glibmm-2.4/docs
-

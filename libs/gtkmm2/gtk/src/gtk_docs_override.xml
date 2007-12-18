@@ -1,0 +1,2831 @@
+<root>
+<function name="gtk_box_pack_start">
+<description>
+Left side insert a widget to a box.
+The expand argument to pack_start() or pack_end()
+controls whether the widgets are laid out in the box to fill in all
+the extra space in the box so the box is expanded to fill the area
+allocated to it (%TRUE). Or the box is shrunk to just fit the widgets
+(%FALSE).  Setting @expand to %FALSE will allow you to do right and left
+justifying of your widgets.  Otherwise, they will all expand to fit in
+the box, and the same effect could be achieved by using only one of
+pack_start() or pack_end() functions.
+
+The @fill argument to the pack_start()/pack_end() functions control whether the
+extra space is allocated to the objects themselves (%TRUE), or as extra
+padding in the box around these objects (%FALSE). It only has an effect
+if the @expand argument is also %TRUE.
+
+The difference between spacing (set when the box is created)
+and padding (set when elements are packed) is, that spacing is added between
+objects, and padding is added on either side of an object.
+</description>
+</function>
+
+<function name="gtk_text_view_get_default_attributes">
+<description>
+Obtains a copy of the default text attributes. These are the
+attributes used for text unless a tag overrides them.
+You&apos;d typically pass the default attributes in to
+Gtk::TextIter::get_attributes() in order to get the
+attributes in effect at a given text position.
+
+</description>
+<parameters>
+<parameter name="text_view">
+<parameter_description> a #GtkTextView
+ 
+</parameter_description>
+</parameter>
+</parameters>
+<return> a new #Gtk::TextAttributes
+</return>
+</function>
+
+<function name="gtk_label_get_label">
+<description>
+Fetches the text from a label widget including any embedded
+underlines indicating mnemonics and Pango markup. (See
+get_text ()).
+</description>
+<parameters>
+<parameter name="label">
+<parameter_description> a #GtkLabel
+
+</parameter_description>
+</parameter>
+</parameters>
+<return> the text of the label widget..
+</return>
+</function>
+
+<function name="gtk_label_get_text">
+<description>
+Fetches the text from a label widget, as displayed on the
+screen. This does not include any embedded underlines
+indicating mnemonics or Pango markup. (See get_label())
+</description>
+<parameters>
+<parameter name="label">
+<parameter_description> a #GtkLabel
+</parameter_description>
+</parameter>
+</parameters>
+<return> the text in the label widget.
+</return>
+</function>
+
+<function name="gtk_label_get_layout">
+<description>
+Gets the #PangoLayout used to display the label.
+The layout is useful to e.g. convert text positions to
+pixel positions, in combination with gtk_label_get_layout_offsets().
+</description>
+<parameters>
+<parameter name="label">
+<parameter_description> a #GtkLabel
+
+</parameter_description>
+</parameter>
+</parameters>
+<return> the #PangoLayout for this label
+</return>
+</function>
+
+<function name="gtk_notebook_get_tab_label_text">
+<description>
+Retrieves the text of the tab label for the page containing
+@child.
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> a widget contained in a page of @notebook
+
+</parameter_description>
+</parameter>
+</parameters>
+<return>value: the text of the tab label.
+</return>
+</function>
+
+<function name="gtk_notebook_get_menu_label_text">
+<description>
+Retrieves the text of the menu label for the page containing
+@child.
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> the child widget of a page of the notebook.
+
+</parameter_description>
+</parameter>
+</parameters>
+<return>value: the text of the tab label.
+</return>
+</function>
+
+<function name="gtk_text_buffer_create_mark">
+<description>
+Creates a mark at position @where. The mark can be retrieved by name using
+gtk_text_buffer_get_mark (). If a mark has left gravity, and text is
+inserted at the mark&apos;s current location, the mark will be moved to
+the left of the newly-inserted text. If the mark has right gravity
+(@left_gravity = %FALSE), the mark will end up on the right of
+newly-inserted text. The standard left-to-right cursor is a mark
+with right gravity (when you type, the cursor stays on the right
+side of the text you&apos;re typing).
+
+Emits the &quot;mark_set&quot; signal as notification of the mark&apos;s initial
+placement.
+
+
+</description>
+<parameters>
+<parameter name="buffer">
+<parameter_description> a #GtkTextBuffer
+</parameter_description>
+</parameter>
+<parameter name="mark_name">
+<parameter_description> name for mark, or %NULL
+</parameter_description>
+</parameter>
+<parameter name="where">
+<parameter_description> location to place mark
+</parameter_description>
+</parameter>
+<parameter name="left_gravity">
+<parameter_description> whether the mark has left gravity
+</parameter_description>
+</parameter>
+</parameters>
+<return> the new #GtkTextMark object
+</return>
+</function>
+
+
+<function name="gtk_text_buffer_delete_mark">
+<description>
+Deletes @mark, so that it&apos;s no longer located anywhere in the
+buffer. Removes the reference the buffer holds to the mark, so if
+you don't keep a Glib::RefPtr to the mark, it will be freed. Even
+if the mark isn&apos;t freed, most operations on @mark become
+invalid. There is no way to undelete a
+mark. gtk_text_mark_get_deleted () will return TRUE after this
+function has been called on a mark; gtk_text_mark_get_deleted ()
+indicates that a mark no longer belongs to a buffer. The &quot;mark_deleted&quot;
+signal will be emitted as notification after the mark is deleted.
+</description>
+<parameters>
+<parameter name="buffer">
+<parameter_description> a #GtkTextBuffer
+
+</parameter_description>
+</parameter>
+<parameter name="mark">
+<parameter_description> a #GtkTextMark in @buffer
+
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_text_iter_get_tags">
+<description>
+Returns a list of tags that apply to @iter, in ascending order of
+priority (highest-priority tags are last).
+</description>
+<parameters>
+<parameter name="iter">
+<parameter_description> a #GtkTextIter
+
+</parameter_description>
+</parameter>
+</parameters>
+<return> list of #GtkTextTag
+</return>
+</function>
+
+<function name="gtk_text_view_get_tabs">
+<description>
+Gets the default tabs for @text_view. Tags in the buffer may
+override the defaults. The returned array will be empty if
+&quot;standard&quot; (8-space) tabs are used.
+</description>
+<parameters>
+<parameter name="text_view">
+<parameter_description> a #GtkTextView
+
+</parameter_description>
+</parameter>
+</parameters>
+<return> copy of default tab array, or an empty array if &quot;standard&quot; tabs are used.
+</return>
+</function>
+
+
+
+<function name="gtk_dialog_run">
+<description>
+Blocks in a recursive main loop until the @dialog emits the
+response signal. It returns the response ID from the &quot;response&quot; signal emission.
+Before entering the recursive main loop, gtk_dialog_run() calls
+Gtk::Widget::show() on the dialog for you. Note that you still
+need to show any children of the dialog yourself.
+
+If the dialog receives &quot;delete_event&quot;,  Gtk::Dialog::run() will return
+#GTK_RESPONSE_DELETE_EVENT. Also, during Gtk::Dialog::run() the dialog will be
+modal. You can force Gtk::Dialog::run() to return at any time by
+calling Gtk::Dialog::response() to emit the &quot;response&quot;
+signal.
+
+After Gtk::Dialog::run() returns, you are responsible for hiding or
+destroying the dialog if you wish to do so.
+
+Typical usage of this function might be:
+&amp;lt;informalexample&amp;gt;&amp;lt;programlisting&amp;gt;
+gint result = dialog.run();
+switch (result)
+{
+case GTK_RESPONSE_ACCEPT:
+do_application_specific_something (&amp;lt;!-- --&amp;gt;);
+break;
+default:
+do_nothing_since_dialog_was_cancelled (&amp;lt;!-- --&amp;gt;);
+break;
+}
+&amp;lt;/programlisting&amp;gt;&amp;lt;/informalexample&amp;gt;
+
+
+</description>
+<parameters>
+<parameter name="dialog">
+<parameter_description> a #GtkDialog
+</parameter_description>
+</parameter>
+</parameters>
+<return> response ID
+</return>
+</function>
+
+<function name="gtk_accel_label_set_accel_width">
+<description>
+Sets the widget to be monitored by this accelerator label.
+</description>
+<parameters>
+<parameter name="accel_label">
+<parameter_description> Ignored :)
+</parameter_description>
+</parameter>
+<parameter name="widget">
+<parameter_description> The Widget to be monitored.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_accel_label_get_accel_width">
+<description>
+Gets the width needed to display this accelerator label. This is used by menus to align all of the Gtk::MenuItem widgets, and shouldn't be needed by applications.
+</description>
+<parameters>
+</parameters>
+<return> width of this accelerator label.
+</return>
+</function>
+
+<function name="gtk_accel_label_refetch">
+<description>
+Recreates the string representing the accelerator keys.
+</description>
+<parameters>
+</parameters>
+<return> always returns %FALSE.
+</return>
+</function>
+
+<function name="gtk_adjustment_changed">
+<description>
+Emits a "changed" signal from the Adjustment.  This is typically called by the owner of the Adjustment after it has changed any of the Adjustment fields other than the value.
+</description>
+<parameters>
+</parameters>
+<return>
+</return>
+</function>
+
+<function name="gtk_adjustment_value_changed">
+<description>
+Emits a "value_changed" signal from the Adjustment.  This is typically called by the owner of the Adjustment after it has changed the Adjustment value field.
+</description>
+<parameters>
+</parameters>
+<return>
+</return>
+</function>
+
+<function name="gtk_adjustment_clamp_page">
+<description>
+Updates the Adjustment value to ensure that the range between the parameters @lower and @upper is in the current page (i.e. between @value and @value + @page_size).  If this range is larger than the page size, then only the start of it will be in the current page.  A "changed" signal will be emitted if the value is changed.
+</description>
+<parameters>
+<parameter name="adjustment">
+<parameter_description> Ignored :)
+</parameter_description>
+</parameter>
+<parameter name="upper">
+<parameter_description> The upper value.
+</parameter_description>
+</parameter>
+<parameter name="lower">
+<parameter_description> The lower value.
+</parameter_description>
+</parameter>
+</parameters>
+<return>
+</return>
+</function>
+
+<function name="gtk_adjustment_set_value">
+<description>
+Sets the current value of the Adjustment
+</description>
+<parameters>
+<parameter name="adjustment">
+<parameter_description> Ignored :)
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> The new value of the Adjustment
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_alignment_set">
+<description>
+Sets the Alignment values.
+</description>
+<parameters>
+<parameter name="alignment">
+<parameter_description> Ignored :)
+</parameter_description>
+</parameter>
+<parameter name="xalign">
+<parameter_description> The horizontal alignment of the child of this Alignment, from 0 (left) to 1 (right).
+</parameter_description>
+</parameter>
+<parameter name="yalign">
+<parameter_description> The vertical alignment of the child of this Alignment, from 0 (top) to 1 (bottom).
+</parameter_description>
+</parameter>
+<parameter name="xscale">
+<parameter_description> The amount that the child expands horizontally to fill up unused space, from 0 to 1.  A value of 0 indicates that the child widget should never expand.  A value of 1 indicates that the child widget will expand to fill all the space allocated for the Alignment.
+</parameter_description>
+</parameter>
+<parameter name="yscale">
+<parameter_description> The amount that the child widget expands vertically to fill up unused space from 0 to 1.  The values are similar to @xscale.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_arrow_set">
+<description>
+Sets the direction and shadow of this Arrow.
+</description>
+<parameters>
+<parameter name="arrow">
+<parameter_description> Ignored :)
+</parameter_description>
+</parameter>
+<parameter name="arrow_type">
+<parameter_description> A Gtk::ArrowType enum describing what arrow type to set this Arrow to.
+</parameter_description>
+</parameter>
+<parameter name="shadow_type">
+<parameter_description> A Gtk::ShadowType enum describing what shadow type to set this Arrow to.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_text_child_anchor_get_widgets">
+<description>
+Gets a list of all widgets anchored at this child anchor.
+
+</description>
+<parameters>
+<parameter name="anchor">
+<parameter_description> a #GtkTextChildAnchor
+</parameter_description>
+</parameter>
+</parameters>
+<return> list of widgets anchored at @anchor
+</return>
+</function>
+
+
+<function name="gtk_tree_model_get_path">
+<description>
+Returns a #GtkTreePath referenced by @iter. 
+
+
+</description>
+<parameters>
+<parameter name="tree_model">
+<parameter_description> A #GtkTreeModel.
+</parameter_description>
+</parameter>
+<parameter name="iter">
+<parameter_description> The #GtkTreeIter.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GtkTreePath.
+</return>
+</function>
+
+
+<function name="gtk_tree_view_column_get_cell_renderers">
+<description>
+Returns a list of all the cell renderers in the column,
+in no particular order. 
+
+</description>
+<parameters>
+<parameter name="tree_column">
+<parameter_description> A #GtkTreeViewColumn
+</parameter_description>
+</parameter>
+</parameters>
+<return> A list of #GtkCellRenderers
+</return>
+</function>
+
+
+<function name="gtk_tree_view_get_columns">
+<description>
+Returns a list of all the #GtkTreeViewColumn s currently in @tree_view.
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> A #GtkTreeView
+</parameter_description>
+</parameter>
+</parameters>
+<return> A list of #GtkTreeViewColumn s
+</return>
+</function>
+
+
+<function name="gtk_window_get_default_icon_list">
+<description>
+Gets the value set by Gtk::Window::set_default_icon_list().
+
+</description>
+<parameters>
+</parameters>
+<return> copy of default icon list
+</return>
+</function>
+
+
+<function name="gtk_window_set_default">
+<description>
+The default widget is the widget that&apos;s activated when the user
+presses Enter in a dialog (for example). This function sets or
+unsets the default widget for a #GtkWindow. When setting
+(rather than unsetting) the default widget it&apos;s generally easier to
+call gtk_widget_grab_focus() on the widget. Before making a widget
+the default widget, you must set the #GTK_CAN_DEFAULT flag on the
+widget you&apos;d like to make the default using Gtk::Widget::set_flags().
+
+</description>
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="default_widget">
+<parameter_description> widget to be the default.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_menu_item_set_accel_path">
+<description>
+Set the accelerator path on @menu_item, through which runtime changes of the
+menu item&apos;s accelerator caused by the user can be identified and saved to
+persistant storage (see gtk_accel_map_save() on this).
+To setup a default accelerator for this menu item, call
+gtk_accel_map_add_entry() with the same @accel_path.
+See also gtk_accel_map_add_entry() on the specifics of accelerator paths,
+and gtk_menu_set_accel_path() for a more convenient variant of this function.
+
+This function is basically a convenience wrapper that handles calling
+gtk_widget_set_accel_path() with the appropriate accelerator group for
+the menu item.
+
+Note that you do need to set an accelerator on the parent menu with
+gtk_menu_set_accel_group() for this to work.
+
+</description>
+<parameters>
+<parameter name="menu_item">
+<parameter_description>  a valid #GtkMenuItem
+</parameter_description>
+</parameter>
+<parameter name="accel_path">
+<parameter_description> accelerator path, corresponding to this menu item&apos;s
+functionality.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_notebook_append_page">
+<description>
+Appends a page to @notebook.
+
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> the #GtkWidget to use as the contents of the page.
+</parameter_description>
+</parameter>
+<parameter name="tab_label">
+<parameter_description> the #GtkWidget to be used as the label for the page.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_notebook_append_page_menu">
+<description>
+Appends a page to @notebook, specifying the widget to use as the
+label in the popup menu.
+
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> the #GtkWidget to use as the contents of the page.
+</parameter_description>
+</parameter>
+<parameter name="tab_label">
+<parameter_description> the #GtkWidget to be used as the label for the page.
+</parameter_description>
+</parameter>
+<parameter name="menu_label">
+<parameter_description> the widget to use as a label for the page-switch
+menu.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_notebook_insert_page">
+<description>
+Insert a page into @notebook at the given position
+
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> the #GtkWidget to use as the contents of the page.
+</parameter_description>
+</parameter>
+<parameter name="tab_label">
+<parameter_description> the #GtkWidget to be used as the label for the page.
+</parameter_description>
+</parameter>
+<parameter name="position">
+<parameter_description> the index (starting at 0) at which to insert the page,
+or -1 to append the page after all other pages.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_notebook_insert_page_menu">
+<description>
+Insert a page into @notebook at the given position, specifying
+the widget to use as the label in the popup menu.
+
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> the #GtkWidget to use as the contents of the page.
+</parameter_description>
+</parameter>
+<parameter name="tab_label">
+<parameter_description> the #GtkWidget to be used as the label for the page..
+</parameter_description>
+</parameter>
+<parameter name="menu_label">
+<parameter_description> the widget to use as a label for the page-switch
+menu.
+</parameter_description>
+</parameter>
+<parameter name="position">
+<parameter_description> the index (starting at 0) at which to insert the page,
+or -1 to append the page after all other pages.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_notebook_prepend_page">
+<description>
+Prepends a page to @notebook.
+
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> the #GtkWidget to use as the contents of the page.
+</parameter_description>
+</parameter>
+<parameter name="tab_label">
+<parameter_description> the #GtkWidget to be used as the label for the page.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_notebook_prepend_page_menu">
+<description>
+Prepends a page to @notebook, specifying the widget to use as the
+label in the popup menu.
+
+</description>
+<parameters>
+<parameter name="notebook">
+<parameter_description> a #GtkNotebook
+</parameter_description>
+</parameter>
+<parameter name="child">
+<parameter_description> the #GtkWidget to use as the contents of the page.
+</parameter_description>
+</parameter>
+<parameter name="tab_label">
+<parameter_description> the #GtkWidget to be used as the label for the page.
+</parameter_description>
+</parameter>
+<parameter name="menu_label">
+<parameter_description> the widget to use as a label for the page-switch
+menu.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_tree_view_get_background_area">
+<description>
+Fills the bounding rectangle in tree window coordinates for the cell at the
+row specified by @path and the column specified by @column.  The returned rectangle is equivalent to the
+@background_area passed to gtk_cell_renderer_render().  These background
+areas tile to cover the entire tree window (except for the area used for
+header buttons). Contrast with the @cell_area, returned by
+gtk_tree_view_get_cell_area(), which returns only the cell itself, excluding
+surrounding borders and the tree expander area.
+
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> a #GtkTreeView
+</parameter_description>
+</parameter>
+<parameter name="path">
+<parameter_description> a #GtkTreePath for the row.
+</parameter_description>
+</parameter>
+<parameter name="column">
+<parameter_description> a #GtkTreeViewColumn for the column.
+</parameter_description>
+</parameter>
+<parameter name="rect">
+<parameter_description> rectangle to fill with cell background rect
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_tree_view_get_cell_area">
+<description>
+Fills the bounding rectangle in tree window coordinates for the cell at the
+row specified by @path and the column specified by @column.  If @path points to a path not currently displayed, the @y and @height fields
+of the rectangle will be filled with 0.  The sum of all cell rects does not cover the
+entire tree; there are extra pixels in between rows, for example. The
+returned rectangle is equivalent to the @cell_area passed to
+gtk_cell_renderer_render().  This function is only valid if #tree_view is
+realized.
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> a #GtkTreeView
+</parameter_description>
+</parameter>
+<parameter name="path">
+<parameter_description> a #GtkTreePath for the row.
+</parameter_description>
+</parameter>
+<parameter name="column">
+<parameter_description> a #GtkTreeViewColumn for the column.
+</parameter_description>
+</parameter>
+<parameter name="rect">
+<parameter_description> rectangle to fill with cell rect
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_widget_modify_base">
+<description>
+Sets the base color for a widget in a particular state.
+All other style values are left untouched. The base color
+is the background color used along with the text color
+(see gtk_widget_modify_text()) for widgets such as #GtkEntry
+and #GtkTextView. See also gtk_widget_modify_style().
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget.
+</parameter_description>
+</parameter>
+<parameter name="state">
+<parameter_description> the state for which to set the base color.
+</parameter_description>
+</parameter>
+<parameter name="color">
+<parameter_description> the color to assign (does not need to be allocated).
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_widget_modify_bg">
+<description>
+Sets the background color for a widget in a particular state.  All
+other style values are left untouched. See also
+gtk_widget_modify_style().
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget.
+</parameter_description>
+</parameter>
+<parameter name="state">
+<parameter_description> the state for which to set the background color.
+</parameter_description>
+</parameter>
+<parameter name="color">
+<parameter_description> the color to assign (does not need to be allocated).
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_widget_modify_fg">
+<description>
+Sets the foreground color for a widget in a particular state.  All
+other style values are left untouched. See also
+gtk_widget_modify_style().
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget.
+</parameter_description>
+</parameter>
+<parameter name="state">
+<parameter_description> the state for which to set the foreground color.
+</parameter_description>
+</parameter>
+<parameter name="color">
+<parameter_description> the color to assign (does not need to be allocated).
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_widget_modify_font">
+<description>
+Sets the font to use for a widget.  All other style values are left
+untouched. See also gtk_widget_modify_style().
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+<parameter name="font_desc">
+<parameter_description> the font description to use.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_widget_modify_text">
+<description>
+Sets the text color for a widget in a particular state.  All other
+style values are left untouched. The text color is the foreground
+color used along with the base color (see gtk_widget_modify_base())
+for widgets such as #GtkEntry and #GtkTextView. See also
+gtk_widget_modify_style().
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget.
+</parameter_description>
+</parameter>
+<parameter name="state">
+<parameter_description> the state for which to set the text color.
+</parameter_description>
+</parameter>
+<parameter name="color">
+<parameter_description> the color to assign (does not need to be allocated).
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_widget_set_style">
+<description>
+Sets the #GtkStyle for a widget (@widget-&amp;gt;style). You probably don&apos;t
+want to use this function; it interacts badly with themes, because
+themes work by replacing the #GtkStyle. Instead, use
+gtk_widget_modify_style().
+
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+<parameter name="style">
+<parameter_description> a #GtkStyle.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_widget_shape_combine_mask">
+<description>
+Sets a shape for this widget&apos;s GDK window. This allows for
+transparent windows etc., see gdk_window_shape_combine_mask()
+for more information.
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget.
+</parameter_description>
+</parameter>
+<parameter name="shape_mask">
+<parameter_description> shape to be added.
+</parameter_description>
+</parameter>
+<parameter name="offset_x">
+<parameter_description> X position of shape mask with respect to @window.
+</parameter_description>
+</parameter>
+<parameter name="offset_y">
+<parameter_description> Y position of shape mask with respect to @window.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_window_set_default">
+<description>
+The default widget is the widget that&apos;s activated when the user
+presses Enter in a dialog (for example). This function sets the default widget for a #GtkWindow. When setting
+(rather than unsetting) the default widget it&apos;s generally easier to
+call gtk_widget_grab_focus() on the widget. Before making a widget
+the default widget, you must set the #GTK_CAN_DEFAULT flag on the
+widget you&apos;d like to make the default using GTK_WIDGET_SET_FLAGS().
+
+</description>
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="default_widget">
+<parameter_description> widget to be the default.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_window_set_focus">
+<description>
+If @focus is not the current focus widget, and is focusable, sets
+it as the focus widget for the window. To set the focus to a particular
+widget in the toplevel, it is usually more convenient to use
+gtk_widget_grab_focus() instead of this function.
+
+</description>
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="focus">
+<parameter_description> widget to be the new focus widget.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_drag_dest_find_target">
+<description>
+Looks for a match between @context-&amp;gt;targets and the
+@dest_target_list, returning the first matching target, otherwise
+returning %GDK_NONE. @dest_target_list should usually be the return
+value from gtk_drag_dest_get_target_list(), but some widgets may
+have different valid targets for different parts of the widget; in
+that case, they will have to implement a drag_motion handler that
+passes the correct target list to this function.
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> drag destination widget
+</parameter_description>
+</parameter>
+<parameter name="context">
+<parameter_description> drag context
+</parameter_description>
+</parameter>
+<parameter name="target_list">
+<parameter_description> list of droppable targets.
+</parameter_description>
+</parameter>
+</parameters>
+<return> first target that the source offers and the dest can accept, or %GDK_NONE
+</return>
+    <mapping class="Widget" />
+</function>
+
+<function name="gdk_drawable_get_image">
+<description>
+A #GdkImage stores client-side image data (pixels). In contrast,
+#GdkPixmap and #GdkWindow are server-side
+objects. gdk_drawable_get_image() obtains the pixels from a
+server-side drawable as a client-side #GdkImage.  The format of a
+#GdkImage depends on the #GdkVisual of the current display, which
+makes manipulating #GdkImage extremely difficult; therefore, in
+most cases you should use the Gdk::Pixbuf constructor that takes a Gdk::Drawable instead of
+this lower-level function. A #GdkPixbuf contains image data in a
+canonicalized RGB format, rather than a display-dependent format.
+Of course, there&apos;s a convenience vs. speed tradeoff here, so you&apos;ll
+want to think about what makes sense for your application.
+
+@x, @y, @width, and @height define the region of @drawable to
+obtain as an image.
+
+You would usually copy image data to the client side if you intend
+to examine the values of individual pixels, for example to darken
+an image or add a red tint. It would be prohibitively slow to
+make a round-trip request to the windowing system for each pixel,
+so instead you get all of them at once, modify them, then copy
+them all back at once.
+
+If the X server or other windowing system backend is on the local
+machine, this function may use shared memory to avoid copying
+the image data.
+
+If the source drawable is a #GdkWindow and partially offscreen
+or obscured, then the obscured portions of the returned image
+will contain undefined data.
+
+
+</description>
+<parameters>
+<parameter name="drawable">
+<parameter_description> a #GdkDrawable
+</parameter_description>
+</parameter>
+<parameter name="x">
+<parameter_description> x coordinate on @drawable
+</parameter_description>
+</parameter>
+<parameter name="y">
+<parameter_description> y coordinate on @drawable
+</parameter_description>
+</parameter>
+<parameter name="width">
+<parameter_description> width of region to get
+</parameter_description>
+</parameter>
+<parameter name="height">
+<parameter_description> height or region to get
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GdkImage containing the contents of @drawable
+</return>
+</function>
+
+<function name="gtk_clipboard_wait_for_text">
+<description>
+Requests the contents of the clipboard as text and converts
+the result to UTF-8 if necessary. This function waits for
+the data to be received using the main loop, so events,
+timeouts, etc, may be dispatched during the wait.
+
+
+</description>
+<parameters>
+<parameter name="clipboard">
+<parameter_description> a #GtkClipboard
+</parameter_description>
+</parameter>
+</parameters>
+<return> A UTF-8 string, which is empty if retrieving
+the selection data failed. (This could happen
+for various reasons, in particular if the
+clipboard was empty or if the contents of the
+clipboard could not be converted into text form.)
+</return>
+</function>
+
+<function name="gtk_tree_path_to_string">
+<description>
+Generates a string representation of the path.  This string is a &apos;:&apos;
+separated list of numbers.  For example, &quot;4:10:0:3&quot; would be an acceptable return value for this string.
+
+
+</description>
+<parameters>
+<parameter name="path">
+<parameter_description> A #GtkTreePath
+</parameter_description>
+</parameter>
+</parameters>
+<return> The string.
+</return>
+</function>
+
+<function name="gtk_tree_model_get_string_from_iter">
+<description>
+Generates a string representation of the iter. This string is a &apos;:&apos;
+separated list of numbers. For example, &quot;4:10:0:3&quot; would be an
+acceptable return value for this string.
+
+@newin2p2
+</description>
+<parameters>
+<parameter name="tree_model">
+<parameter_description> A #GtkTreeModel.
+</parameter_description>
+</parameter>
+<parameter name="iter">
+<parameter_description> An #GtkTreeIter.
+</parameter_description>
+</parameter>
+</parameters>
+<return> The string.
+</return>
+</function>
+
+<function name="gtk_paint_arrow">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_box">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_box_gap">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_check">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_diamond">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_expander">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_extension">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_flat_box">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_focus">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_handle">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_hline">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_layout">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_option">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_polygon">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_resize_grip">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_shadow">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_shadow_gap">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_slider">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_tab">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_paint_vline">
+    <mapping class="Style" />
+</function>
+
+<function name="gtk_window_set_icon_from_file">
+<description>
+Sets the icon for the window.
+
+This function is equivalent to calling gtk_window_set_icon()
+with a pixbuf created by loading the image from @filename.
+</description>
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="filename">
+<parameter_description> location of icon file
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_window_get_position">
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="root_x">
+<parameter_description> return location for X coordinate of gravity-determined reference point
+</parameter_description>
+</parameter>
+<parameter name="root_y">
+<parameter_description> return location for Y coordinate of gravity-determined reference point
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_window_set_default_icon_from_file">
+<parameters>
+<parameter name="filename">
+<parameter_description> location of icon file
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_widget_style_get_property">
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+<parameter name="the_property_name">
+<parameter_description> the name of a style property
+</parameter_description>
+</parameter>
+<parameter name="value">
+<parameter_description> location to return the property value 
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_drag_dest_get_target_list">
+    <mapping class="Widget" />
+</function>
+
+<function name="gtk_drag_source_set_icon">
+    <mapping class="Widget" />
+</function>
+
+<function name="gtk_drag_source_set_icon_pixbuf">
+    <mapping class="Widget" />
+</function>
+
+<function name="gtk_drag_source_set_icon_stock">
+    <mapping class="Widget" />
+</function>
+
+<function name="gtk_drag_begin">
+    <mapping class="Widget" />
+</function>
+
+<function name="gtk_drag_check_threshold">
+    <mapping class="Widget" />
+</function>
+
+<function name="gtk_drag_dest_set_target_list">
+    <mapping class="Widget" />
+</function>
+
+<function name="gtk_ui_manager_add_ui_from_file">
+<parameters>
+<parameter name="self">
+<parameter_description> a #GtkUIManager object
+</parameter_description>
+</parameter>
+<parameter name="filename">
+<parameter_description> the name of the file to parse 
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_icon_theme_load_icon">
+<parameters>
+<parameter name="icon_theme">
+<parameter_description> a #GtkIconTheme
+</parameter_description>
+</parameter>
+<parameter name="icon_name">
+<parameter_description> the name of the icon to lookup
+</parameter_description>
+</parameter>
+<parameter name="size">
+<parameter_description> the desired icon size. The resulting icon may not be exactly this size; see gtk_icon_info_load_icon().
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> flags modifying the behavior of the icon lookup
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_icon_theme_get_example_icon_name">
+<description>
+Gets the name of an icon that is representative of the
+current theme (for instance, to use when presenting
+a list of themes to the user.)
+
+Since: 2.4
+</description>
+<parameters>
+<parameter name="icon_theme">
+<parameter_description> a #GtkIconTheme
+</parameter_description>
+</parameter>
+</parameters>
+<return>
+</return>
+</function>
+
+<function name="gtk_file_chooser_add_shortcut_folder">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+<parameter name="folder">
+<parameter_description> filename of the folder to add
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_file_chooser_remove_shortcut_folder">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+<parameter name="folder">
+<parameter_description> filename of the folder to remove
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_file_chooser_add_shortcut_folder_uri">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+<parameter name="uri">
+<parameter_description> URI of the folder to add
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_file_chooser_remove_shortcut_folder_uri">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+<parameter name="uri">
+<parameter_description> URI of the folder to remove
+</parameter_description>
+</parameter>
+</parameters>
+</function>
+
+<function name="gtk_tree_view_move_column_after">
+<description>
+Moves @column to be after to @base_column.  See also move_column_to_start().
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> A #GtkTreeView
+</parameter_description>
+</parameter>
+<parameter name="column">
+<parameter_description> The #GtkTreeViewColumn to be moved.
+</parameter_description>
+</parameter>
+<parameter name="base_column">
+<parameter_description> The #GtkTreeViewColumn to be moved relative to.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_cell_renderer_get_size">
+<description>
+Obtains the width and height needed to render the cell. Used by view widgets
+to determine the appropriate size for the cell_area passed to
+gtk_cell_renderer_render().  Fills in the x and y
+offsets of the cell relative to this location.  Please note that the
+values set in @width and @height, as well as those in @x_offset and @y_offset
+are inclusive of the xpad and ypad properties.
+
+</description>
+<parameters>
+<parameter name="cell">
+<parameter_description> a #GtkCellRenderer
+</parameter_description>
+</parameter>
+<parameter name="widget">
+<parameter_description> the widget the renderer is rendering to
+</parameter_description>
+</parameter>
+<parameter name="cell_area">
+<parameter_description> The area a cell will be allocated.
+</parameter_description>
+</parameter>
+<parameter name="x_offset">
+<parameter_description> location to return x offset of cell relative to @cell_area.
+</parameter_description>
+</parameter>
+<parameter name="y_offset">
+<parameter_description> location to return y offset of cell relative to @cell_area.
+</parameter_description>
+</parameter>
+<parameter name="width">
+<parameter_description> location to return width needed to render a cell.
+</parameter_description>
+</parameter>
+<parameter name="height">
+<parameter_description> location to return height needed to render a cell.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_menu_popup">
+<description>
+Displays a menu and makes it available for selection.  Applications can use
+this function to display context-sensitive menus. The default menu positioning function will position the menu
+at the current mouse cursor position.
+
+The @button parameter should be the mouse button pressed to initiate
+the menu popup. If the menu popup was initiated by something other than
+a mouse button press, such as a mouse button release or a keypress,
+@button should be 0.
+
+The @activate_time parameter should be the time stamp of the event that
+initiated the popup. If such an event is not available, use
+gtk_get_current_event_time() instead.
+
+
+</description>
+<parameters>
+<parameter name="menu">
+<parameter_description> a #GtkMenu.
+</parameter_description>
+</parameter>
+<parameter name="parent_menu_shell">
+<parameter_description> the menu shell containing the triggering menu item.
+</parameter_description>
+</parameter>
+<parameter name="parent_menu_item">
+<parameter_description> the menu item whose activation triggered the popup.
+</parameter_description>
+</parameter>
+<parameter name="func">
+<parameter_description> a user supplied function used to position the menu, or %NULL
+</parameter_description>
+</parameter>
+<parameter name="data">
+<parameter_description> user supplied data to be passed to @func.
+</parameter_description>
+</parameter>
+<parameter name="button">
+<parameter_description> the mouse button which was pressed to initiate the event.
+</parameter_description>
+</parameter>
+<parameter name="activate_time">
+<parameter_description> the time at which the activation event occurred.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_tree_view_column_cell_get_size">
+<description>
+Obtains the width and height needed to render the column.  This is used
+primarily by the #GtkTreeView.
+
+</description>
+<parameters>
+<parameter name="tree_column">
+<parameter_description> A #GtkTreeViewColumn.
+</parameter_description>
+</parameter>
+<parameter name="cell_area">
+<parameter_description> The area a cell in the column will be allocated.
+</parameter_description>
+</parameter>
+<parameter name="x_offset">
+<parameter_description> location to return x offset of a cell relative to @cell_area.
+</parameter_description>
+</parameter>
+<parameter name="y_offset">
+<parameter_description> location to return y offset of a cell relative to @cell_area.
+</parameter_description>
+</parameter>
+<parameter name="width">
+<parameter_description> location to return width needed to render a cell.
+</parameter_description>
+</parameter>
+<parameter name="height">
+<parameter_description> location to return height needed to render a cell.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_tree_view_column_cell_get_position">
+<description>
+Obtains the horizontal position and size of a cell in a column. If the
+cell is not found in the column, @start_pos and @width are not changed and
+%FALSE is returned.
+
+
+</description>
+<parameters>
+<parameter name="tree_column">
+<parameter_description> a #GtkTreeViewColumn
+</parameter_description>
+</parameter>
+<parameter name="cell_renderer">
+<parameter_description> a #GtkCellRenderer
+</parameter_description>
+</parameter>
+<parameter name="start_pos">
+<parameter_description> return location for the horizontal position of @cell within
+@tree_column.
+</parameter_description>
+</parameter>
+<parameter name="width">
+<parameter_description> return location for the width of @cell.
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if @cell belongs to @tree_column.
+</return>
+</function>
+
+<function name="gtk_tree_view_set_vadjustment">
+<description>
+Sets the #GtkAdjustment for the current vertical aspect. See also unset_vadjustment().
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> A #GtkTreeView
+</parameter_description>
+</parameter>
+<parameter name="adjustment">
+<parameter_description> The #GtkAdjustment to set.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_tree_view_set_hadjustment">
+<description>
+Sets the #GtkAdjustment for the current horizontal aspect. See also unset_hadjustment().
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> A #GtkTreeView
+</parameter_description>
+</parameter>
+<parameter name="adjustment">
+<parameter_description> The #GtkAdjustment to set.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_tree_view_set_expander_column">
+<description>
+Sets the column to draw the expander arrow at. It must be in the TreeView.  See also reset_expander_column().
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> A #GtkTreeView
+</parameter_description>
+</parameter>
+<parameter name="column">
+<parameter_description>The column to draw the expander arrow at.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_tree_view_set_cursor">
+<description>
+Sets the current keyboard focus to be at @path, and selects it.  This is
+useful when you want to focus the user&apos;s attention on a particular row. Focus is given to the column specified.
+Additionally, if @start_editing is
+%TRUE, then editing should be started in the specified cell.
+This function is often followed by Gtk::Widget::grab_focus(@tree_view)
+in order to give keyboard focus to the widget.  Please note that editing
+can only happen when the widget is realized.
+
+</description>
+<parameters>
+<parameter name="tree_view">
+<parameter_description> A #GtkTreeView
+</parameter_description>
+</parameter>
+<parameter name="path">
+<parameter_description> A #GtkTreePath
+</parameter_description>
+</parameter>
+<parameter name="focus_column">
+<parameter_description> A #GtkTreeViewColumn.
+</parameter_description>
+</parameter>
+<parameter name="start_editing">
+<parameter_description> %TRUE if the specified cell should start being edited.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_ui_manager_add_ui">
+<description>
+Adds a UI element to the current contents of @self.
+
+If @type is %GTK_UI_MANAGER_AUTO, GTK+ inserts a menuitem, toolitem or
+separator if such an element can be inserted at the place determined by
+@path. Otherwise @type must indicate an element that can be inserted at
+the place determined by @path.
+
+@see add_ui_separator().
+
+@newin2p4
+
+</description>
+<parameters>
+<parameter name="self">
+<parameter_description> a #GtkUIManager
+</parameter_description>
+</parameter>
+<parameter name="merge_id">
+<parameter_description> the merge id for the merged UI, see gtk_ui_manager_new_merge_id()
+</parameter_description>
+</parameter>
+<parameter name="path">
+<parameter_description> a path
+</parameter_description>
+</parameter>
+<parameter name="name">
+<parameter_description> the name for the added UI element
+</parameter_description>
+</parameter>
+<parameter name="action">
+<parameter_description> the name of the action to be proxied, if this is not a separator.
+</parameter_description>
+</parameter>
+<parameter name="type">
+<parameter_description> the type of UI element to add.
+</parameter_description>
+</parameter>
+<parameter name="top">
+<parameter_description> if %TRUE, the UI element is added before its siblings, otherwise it
+is added after its siblings.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_window_get_frame_dimensions">
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="left">
+<parameter_description> location to store the width of the frame at the left.
+</parameter_description>
+</parameter>
+<parameter name="top">
+<parameter_description> location to store the height of the frame at the top.
+</parameter_description>
+</parameter>
+<parameter name="right">
+<parameter_description> location to store the width of the frame at the returns.
+</parameter_description>
+</parameter>
+<parameter name="bottom">
+<parameter_description> location to store the height of the frame at the bottom.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_window_get_default_size">
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="width">
+<parameter_description> location to store the default width.
+</parameter_description>
+</parameter>
+<parameter name="height">
+<parameter_description> location to store the default height.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_window_get_size">
+
+<parameters>
+<parameter name="window">
+<parameter_description> a #GtkWindow
+</parameter_description>
+</parameter>
+<parameter name="width">
+<parameter_description> return location for width.
+</parameter_description>
+</parameter>
+<parameter name="height">
+<parameter_description> return location for height.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_icon_info_get_filename">
+<parameters>
+<parameter name="icon_info">
+<parameter_description> a #GtkIconInfo
+</parameter_description>
+</parameter>
+</parameters>
+<return> the filename for the icon, or %NULL
+if gtk_icon_info_get_builtin_pixbuf() should
+be used instead.
+</return>
+</function>
+
+<function name="gtk_icon_info_get_builtin_pixbuf">
+<parameters>
+<parameter name="icon_info">
+<parameter_description> a #GtkIconInfo structure
+</parameter_description>
+</parameter>
+</parameters>
+<return> the built-in image pixbuf, or %NULL.
+The returned image must not be modified.
+</return>
+</function>
+
+<function name="gtk_file_chooser_get_preview_filename">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> the filename to preview, or an empty string if no file
+is selected, or if the selected file cannot be represented
+as a local filename.
+</return>
+</function>
+
+<function name="gtk_file_chooser_get_preview_uri">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> the URI for the file to preview, or an empty string if no file is
+selected.
+</return>
+</function>
+
+<function name="gtk_file_chooser_get_current_folder_uri">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> the URI for the current folder.
+</return>
+</function>
+
+<function name="gtk_file_chooser_get_uri">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> The currently selected URI, or an empty string
+if no file is selected.
+</return>
+</function>
+
+<function name="gtk_file_chooser_get_filename">
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> The currently selected filename, or an empty string
+if no file is selected, or the selected file can&apos;t
+be represented with a local filename.
+</return>
+</function>
+
+<function name="gtk_cell_renderer_get_fixed_size">
+<parameters>
+<parameter name="cell">
+<parameter_description> A #GtkCellRenderer
+</parameter_description>
+</parameter>
+<parameter name="width">
+<parameter_description> location to fill in with the fixed width of the widget.
+</parameter_description>
+</parameter>
+<parameter name="height">
+<parameter_description> location to fill in with the fixed height of the widget.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_text_iter_forward_search">
+<description>
+Searches forward for @str. Any match is returned by setting 
+@match_start to the first character of the match and @match_end to the 
+first character after the match. The search will not continue past
+@limit. Note that a search is a linear or O(n) operation, so you
+may wish to use @limit to avoid locking up your UI on large
+buffers.
+
+If the #GTK_TEXT_SEARCH_VISIBLE_ONLY flag is present, the match may
+have invisible text interspersed in @str. i.e. @str will be a
+possibly-noncontiguous subsequence of the matched range. similarly,
+if you specify #GTK_TEXT_SEARCH_TEXT_ONLY, the match may have
+pixbufs or child widgets mixed inside the matched range. If these
+flags are not given, the match must be exact; the special 0xFFFC
+character in @str will match embedded pixbufs or child widgets.
+</description>
+<parameters>
+<parameter name="iter">
+<parameter_description> start of search
+</parameter_description>
+</parameter>
+<parameter name="str">
+<parameter_description> a search string
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> flags affecting how the search is done
+</parameter_description>
+</parameter>
+<parameter name="match_start">
+<parameter_description> return location for start of match
+</parameter_description>
+</parameter>
+<parameter name="match_end">
+<parameter_description> return location for end of match
+</parameter_description>
+</parameter>
+<parameter name="limit">
+<parameter_description> bound for the search
+</parameter_description>
+</parameter>
+</parameters>
+<return> whether a match was found
+</return>
+</function>
+
+
+<function name="gtk_text_iter_backward_search">
+<description>
+Same as gtk_text_iter_forward_search(), but moves backward.
+</description>
+<parameters>
+<parameter name="iter">
+<parameter_description> a #GtkTextIter where the search begins
+</parameter_description>
+</parameter>
+<parameter name="str">
+<parameter_description> search string
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> bitmask of flags affecting the search
+</parameter_description>
+</parameter>
+<parameter name="match_start">
+<parameter_description> return location for start of match
+</parameter_description>
+</parameter>
+<parameter name="match_end">
+<parameter_description> return location for end of match
+</parameter_description>
+</parameter>
+<parameter name="limit">
+<parameter_description> location of last possible @match_start
+</parameter_description>
+</parameter>
+</parameters>
+<return> whether a match was found
+</return>
+</function>
+
+<function name="gtk_button_get_image">
+  <description>
+    Gets the widget that is currenty set as the image of @button.
+    This may have been explicitly set by set_image()
+    or specified as a stock item to the constructor.
+
+    @newin2p6
+
+  </description>
+  <parameters>
+    <parameter name="button">
+      <parameter_description> a #GtkButton
+      </parameter_description>
+    </parameter>
+  </parameters>
+  <return></return>
+</function>
+
+
+<function name="gtk_image_set_from_stock">
+  <description>
+    See the Image::Image(const Gtk::StockID&amp; stock_id, IconSize size) constructor for details.
+  </description>
+  <parameters>
+    <parameter name="image">
+      <parameter_description> a #GtkImage
+      </parameter_description>
+    </parameter>
+    <parameter name="stock_id">
+      <parameter_description> a stock icon name
+      </parameter_description>
+    </parameter>
+    <parameter name="size">
+      <parameter_description> a stock icon size
+      </parameter_description>
+    </parameter>
+  </parameters>
+  <return></return>
+</function>
+
+<function name="gtk_icon_factory_add_default">
+  <description>
+    Adds an icon factory to the list of icon factories searched by
+    gtk_style_lookup_icon_set(). This means that, for example,
+    the Image::Image(const Gtk::StockID&amp; stock_id, IconSize size) constructor will be able to find icons in @factory.
+    There will normally be an icon factory added for each library or
+    application that comes with icons. The default icon factories
+    can be overridden by themes.
+  </description>
+  <parameters>
+    <parameter name="factory">
+      <parameter_description> a #GtkIconFactory
+      </parameter_description>
+    </parameter>
+  </parameters>
+  <return></return>
+</function>
+
+<function name="gtk_tool_button_set_stock_id">
+  <description>
+    Sets the name of the stock item. See the ToolButton::ToolButton(const Gtk::StockID&amp; stock_id, IconSize size) constructor.
+    The stock_id property only has an effect if not
+    overridden by &quot;label&quot; and &quot;icon_widget&quot; properties.
+
+    @newin2p4
+
+  </description>
+  <parameters>
+    <parameter name="button">
+      <parameter_description> a #GtkToolButton
+      </parameter_description>
+    </parameter>
+    <parameter name="stock_id">
+      <parameter_description> a name of a stock item, or %NULL
+      </parameter_description>
+    </parameter>
+  </parameters>
+  <return></return>
+</function>
+
+<function name="gtk_image_get_icon_name">
+<description>
+Gets the icon name and size being displayed by the #GtkImage.
+The storage type of the image must be %GTK_IMAGE_EMPTY or
+%GTK_IMAGE_ICON_NAME (see gtk_image_get_storage_type()).
+
+Since: 2.6
+
+</description>
+<parameters>
+<parameter name="image">
+<parameter_description> a #GtkImage
+</parameter_description>
+</parameter>
+<parameter name="icon_name">
+<parameter_description> place to store an icon name
+</parameter_description>
+</parameter>
+<parameter name="size">
+<parameter_description> place to store an icon size
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_progress_bar_get_text">
+<description>
+Retrieves the text displayed superimposed on the progress bar,
+if any.
+
+
+</description>
+<parameters>
+<parameter name="pbar">
+<parameter_description> a #GtkProgressBar
+</parameter_description>
+</parameter>
+</parameters>
+<return> text.
+</return>
+</function>
+
+<function name="gtk_color_button_get_title">
+<description>
+Gets the title of the color selection dialog.
+
+Since: 2.4
+</description>
+<parameters>
+<parameter name="color_button">
+<parameter_description> a #GtkColorButton
+</parameter_description>
+</parameter>
+</parameters>
+<return>The title
+</return>
+</function>
+
+<function name="gtk_file_chooser_get_current_folder">
+<description>
+Gets the current folder of @chooser as a local filename.
+See gtk_file_chooser_set_current_folder().
+
+
+</description>
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> the full path of the current folder, possibly empty if the current
+path cannot be represented as a local filename.  This function may also return
+and empty string if the file chooser was unable to load the last folder that was
+requested from it; for example, as would be for calling
+gtk_file_chooser_set_current_folder() on a nonexistent folder.
+
+Since: 2.4
+</return>
+</function>
+
+<function name="gtk_file_chooser_list_shortcut_folders">
+<description>
+Queries the list of shortcut folders in the file chooser, as set by
+gtk_file_chooser_add_shortcut_folder().
+
+Since: 2.4
+</description>
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> A list of folder filenames, if there are any shortcut
+folders..
+
+
+</return>
+</function>
+
+<function name="gtk_file_chooser_list_shortcut_folder_uris">
+<description>
+Queries the list of shortcut folders in the file chooser, as set by
+gtk_file_chooser_add_shortcut_folder_uri().
+
+
+</description>
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> A list of folder URIs
+
+Since: 2.4
+</return>
+</function>
+
+<function name="gtk_file_chooser_list_filters">
+<description>
+Lists the current set of user-selectable filters; see
+gtk_file_chooser_add_filter(), gtk_file_chooser_remove_filter().
+
+
+</description>
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> a list containing the current set of
+user selectable filters.
+
+Since: 2.4
+</return>
+</function>
+
+
+<function name="gtk_file_chooser_get_uris">
+<description>
+Lists all the selected files and subfolders in the current folder of
+@chooser. The returned names are full absolute URIs.
+
+
+</description>
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> a list containing the URIs of all selected
+files and subfolders in the current folder.
+
+Since: 2.4
+</return>
+</function>
+
+
+<function name="gtk_file_chooser_get_filenames">
+<description>
+Lists all the selected files and subfolders in the current folder of
+@chooser. The returned names are full absolute paths. If files in the current
+folder cannot be represented as local filenames they will be ignored. (See
+gtk_file_chooser_get_uris())
+
+
+</description>
+<parameters>
+<parameter name="chooser">
+<parameter_description> a #GtkFileChooser
+</parameter_description>
+</parameter>
+</parameters>
+<return> a list containing the filenames of all selected
+files and subfolders in the current folder.
+
+Since: 2.4
+</return>
+</function>
+
+<function name="gtk_icon_theme_list_icons">
+<description>
+Lists a subset of icons in the current icon theme, by providing a context string.
+The set of values for the context string is system dependent,
+but will typically include such values as &apos;Applications&apos; and
+&apos;MimeTypes&apos;.
+
+</description>
+<parameters>
+<parameter name="icon_theme">
+<parameter_description> a #GtkIconTheme
+</parameter_description>
+</parameter>
+<parameter name="context">
+<parameter_description> a string identifying a particular type of icon.
+</parameter_description>
+</parameter>
+</parameters>
+<return>  The names of all the
+icons in the theme.
+
+Since: 2.4
+</return>
+</function>
+
+<function name="gtk_widget_render_icon">
+<description>
+A convenience function that uses the theme engine and RC file
+settings for the widget to look up @stock_id and render it to
+a pixbuf. @stock_id should be a stock icon ID such as
+#GTK_STOCK_OPEN or #GTK_STOCK_OK. @size should be a size
+such as #GTK_ICON_SIZE_MENU. @detail should be a string that
+identifies the widget or code doing the rendering, so that
+theme engines can special-case rendering for that widget or code.
+
+The pixels in the returned #GdkPixbuf are shared with the rest of
+the application and should not be modified. The pixbuf should be freed
+after use with g_object_unref().
+
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+<parameter name="stock_id">
+<parameter_description> a stock ID
+</parameter_description>
+</parameter>
+<parameter name="size">
+<parameter_description> a stock size. A size of (GtkIconSize)-1 means render at 
+the size of the source and don&apos;t scale (if there are multiple 
+source sizes, GTK+ picks one of the available sizes).
+</parameter_description>
+</parameter>
+<parameter name="detail">
+<parameter_description> render detail to pass to theme engine
+</parameter_description>
+</parameter>
+</parameters>
+<return> a new pixbuf if the stock ID was known.
+</return>
+</function>
+
+<function name="gtk_table_get_homogeneous">
+<description>
+Returns whether the table cells are all constrained to the same
+width and height. (See set_homogenous())
+</description>
+<parameters>
+<parameter name="table">
+<parameter_description> a #GtkTable
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE if the cells are all constrained to the same size
+</return>
+</function>
+
+
+<!-- I don't know what this GTK+ documentation means by "update its internal state". murrayc. -->
+<function name="gtk_widget_add_mnemonic_label">
+<description>
+Adds a widget to the list of mnemonic labels for
+this widget. (See gtk_widget_list_mnemonic_labels()). Note the
+list of mnemonic labels for the widget is cleared when the
+widget is destroyed, so the caller must make sure to update
+its internal state at this point as well.
+
+Since: 2.4
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+<parameter name="label">
+<parameter_description> a #GtkWidget that acts as a mnemonic label for @widget.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_container_remove">
+<description>
+Removes @widget from @container. @widget must be inside @container.
+If @widget is managed with Gtk::manage(), and you don&apos;t want to use @widget
+again then you should delete @widget, because there will no longer be any parent 
+container to delete it automatically.
+</description>
+<parameters>
+<parameter name="container">
+<parameter_description> a #GtkContainer
+</parameter_description>
+</parameter>
+<parameter name="widget">
+<parameter_description> a current child of @container
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_page_setup_to_key_file">
+<description>
+This function adds the page setup from @setup to @key_file.
+
+Since: 2.12
+
+</description>
+<parameters>
+<parameter name="setup">
+<parameter_description> a #GtkPageSetup
+</parameter_description>
+</parameter>
+<parameter name="key_file">
+<parameter_description> the Glib::KeyFile to save the page setup to
+</parameter_description>
+</parameter>
+<parameter name="group_name">
+<parameter_description> the group to add the settings to in @key_file.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_print_settings_to_key_file">
+<description>
+This function adds the print settings from @settings to @key_file.
+
+Since: 2.12
+
+</description>
+<parameters>
+<parameter name="settings">
+<parameter_description> a #GtkPrintSettings
+</parameter_description>
+</parameter>
+<parameter name="key_file">
+<parameter_description> the Glib::KeyFile to save the print settings to
+</parameter_description>
+</parameter>
+<parameter name="group_name">
+<parameter_description> the group to add the settings to in @key_file.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_about_dialog_get_program_name">
+<description>
+Return value: The program name.
+
+</description>
+<parameters>
+<parameter name="about">
+<parameter_description> a #GtkAboutDialog
+</parameter_description>
+</parameter>
+</parameters>
+<return> The program name.
+
+Since: 2.12
+</return>
+</function>
+
+<function name="gtk_about_dialog_get_website_label">
+<description>
+Return value: The label used for the website link.
+
+</description>
+<parameters>
+<parameter name="about">
+<parameter_description> a #GtkAboutDialog
+</parameter_description>
+</parameter>
+</parameters>
+<return> The label used for the website link. 
+
+Since: 2.6
+</return>
+</function>
+
+
+<function name="gtk_entry_completion_get_completion_prefix">
+<description>
+Get the original text entered by the user that triggered
+the completion or an empty string if there&apos;s no completion ongoing.
+
+
+</description>
+<parameters>
+<parameter name="completion">
+<parameter_description> a #GtkEntryCompletion
+</parameter_description>
+</parameter>
+</parameters>
+<return> the prefix for the current completion
+
+Since: 2.12
+</return>
+</function>
+
+
+<function name="gtk_icon_theme_choose_icon">
+<description>
+Looks up a named icon and returns a structure containing
+information such as the filename of the icon. The icon
+can then be rendered into a pixbuf using
+gtk_icon_info_load_icon(). (gtk_icon_theme_load_icon()
+combines these two steps if all you need is the pixbuf.)
+
+If @icon_names contains more than one name, this function 
+tries them all in the given order before falling back to 
+inherited icon themes.
+
+
+</description>
+<parameters>
+<parameter name="icon_theme">
+<parameter_description> a #GtkIconTheme
+</parameter_description>
+</parameter>
+<parameter name="icon_names">
+<parameter_description> array of icon names to lookup
+</parameter_description>
+</parameter>
+<parameter name="size">
+<parameter_description> desired icon size
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> flags modifying the behavior of the icon lookup
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #GtkIconInfo structure containing information
+about the icon. IconInfo::operator bool() will be false if the icon wasn&apos;t found - 
+for instance, if (icon_info) { ... }.
+
+Since: 2.12
+</return>
+</function>
+
+
+<function name="gtk_icon_theme_list_contexts">
+<description>
+Gets the list of contexts available within the current
+hierarchy of icon themes.
+
+
+</description>
+<parameters>
+<parameter name="icon_theme">
+<parameter_description> a #GtkIconTheme
+</parameter_description>
+</parameter>
+</parameters>
+<return> a list holding the names of all the
+contexts in the theme.
+
+Since: 2.12
+</return>
+</function>
+
+
+<function name="gtk_icon_view_set_tooltip_cell">
+<description>
+Sets the tip area of @tooltip to the area which @cell occupies in
+the item pointed to by @path. See also Tooltip::set_tip_area().
+
+Since: 2.12
+
+</description>
+<parameters>
+<parameter name="icon_view">
+<parameter_description> a #GtkIconView
+</parameter_description>
+</parameter>
+<parameter name="tooltip">
+<parameter_description> a #GtkTooltip
+</parameter_description>
+</parameter>
+<parameter name="path">
+<parameter_description> a #GtkTreePath
+</parameter_description>
+</parameter>
+<parameter name="cell">
+<parameter_description> a #GtkCellRenderer.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_icon_view_set_tooltip_item">
+<description>
+Sets the tip area of @tooltip to be the area covered by the item at @path.
+See also Tooltip::set_tip_area().
+
+Since: 2.12
+
+</description>
+<parameters>
+<parameter name="icon_view">
+<parameter_description> a #GtkIconView
+</parameter_description>
+</parameter>
+<parameter name="tooltip">
+<parameter_description> a #GtkTooltip
+</parameter_description>
+</parameter>
+<parameter name="path">
+<parameter_description> a #GtkTreePath
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_page_setup_to_file">
+<description>
+This function saves the information from @setup to @file_name.
+@throws Glib::FileError
+
+</description>
+<parameters>
+<parameter name="setup">
+<parameter_description> a #GtkPageSetup
+</parameter_description>
+</parameter>
+<parameter name="file_name">
+<parameter_description> the file to save to
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on success
+
+Since: 2.12
+</return>
+</function>
+
+
+<function name="gtk_print_settings_to_file">
+<description>
+This function saves the print settings from @settings to @file_name.
+@throws FileError
+
+</description>
+<parameters>
+<parameter name="settings">
+<parameter_description> a #GtkPrintSettings
+</parameter_description>
+</parameter>
+<parameter name="file_name">
+<parameter_description> the file to save to
+</parameter_description>
+</parameter>
+</parameters>
+<return> %TRUE on success
+
+Since: 2.12
+</return>
+</function>
+
+
+<function name="gtk_printer_request_details">
+<description>
+Requests the printer details. When the details are available,
+the details_acquired signal will be emitted.
+
+Since: 2.12
+
+</description>
+<parameters>
+<parameter name="printer">
+<parameter_description> a #GtkPrinter
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_cell_layout_get_cells">
+<description>
+Return value: a list of cell renderers.
+
+</description>
+<parameters>
+<parameter name="cell_layout">
+<parameter_description> a #GtkCellLayout
+</parameter_description>
+</parameter>
+</parameters>
+<return> a list of cell renderers.
+
+Since: 2.12
+</return>
+</function>
+
+
+<function name="gtk_widget_error_bell">
+<description>
+Notifies the user about an input-related error on this widget. 
+If the Gtk::Settings gtk-error-bell proeprty is true, it calls
+Gdk::Window::beep(), otherwise it does nothing.
+
+Note that the effect of Gdk::Window::beep() can be configured in many
+ways, depending on the windowing backend and the desktop environment
+or window manager that is used.
+
+Since: 2.12
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+<function name="gtk_widget_get_tooltip_markup">
+<description>
+Gets the contents of the tooltip for @widget.
+
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+</parameters>
+<return> the tooltip text.
+
+Since: 2.12
+</return>
+</function>
+
+
+<function name="gtk_widget_get_tooltip_text">
+<description>
+Gets the contents of the tooltip for @widget.
+
+
+</description>
+<parameters>
+<parameter name="widget">
+<parameter_description> a #GtkWidget
+</parameter_description>
+</parameter>
+</parameters>
+<return> the tooltip text.
+
+Since: 2.12
+</return>
+</function>
+
+<function name="gtk_icon_theme_lookup_icon">
+<description>
+Looks up a named icon and returns a structure containing
+information such as the filename of the icon. The icon
+can then be rendered into a pixbuf using
+gtk_icon_info_load_icon(). (gtk_icon_theme_load_icon()
+combines these two steps if all you need is the pixbuf.)
+
+
+</description>
+<parameters>
+<parameter name="icon_theme">
+<parameter_description> a #GtkIconTheme
+</parameter_description>
+</parameter>
+<parameter name="icon_name">
+<parameter_description> the name of the icon to lookup
+</parameter_description>
+</parameter>
+<parameter name="size">
+<parameter_description> desired icon size
+</parameter_description>
+</parameter>
+<parameter name="flags">
+<parameter_description> flags modifying the behavior of the icon lookup
+</parameter_description>
+</parameter>
+</parameters>
+<return> an IconInfo structure containing information
+about the icon. IconInfo::operator bool() will return false if the icon wasn&apos;t found.
+For instance, if (icon_info) { ... }.
+
+Since: 2.4
+</return>
+</function>
+
+
+<function name="gtk_toolbar_set_icon_size">
+<description>
+This function sets the size of stock icons in the toolbar. You
+can call it both before you add the icons and after they&apos;ve been
+added. The size you set will override user preferences for the default
+icon size.
+
+This should only be used for special-purpose toolbars, normal
+application toolbars should respect the user preferences for the
+size of icons.
+
+Since: 2.12
+</description>
+<parameters>
+<parameter name="toolbar">
+<parameter_description> A #GtkToolbar
+</parameter_description>
+</parameter>
+<parameter name="icon_size">
+<parameter_description> The #GtkIconSize that stock icons in the toolbar shall have.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="gtk_toolbar_unset_icon_size">
+<description>
+Unsets toolbar icon size set with gtk_toolbar_set_icon_size(), so that
+user preferences will be used to determine the icon size.
+
+Since: 2.12
+</description>
+<parameters>
+<parameter name="toolbar">
+<parameter_description> a #GtkToolbar
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+
+
+</root>

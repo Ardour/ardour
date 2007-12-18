@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: propertyproxy_base.cc,v 1.7 2006/11/28 12:59:19 murrayc Exp $ */
+/* $Id: propertyproxy_base.cc 354 2006-11-28 12:59:19Z murrayc $ */
 
 /* propertyproxy_base.h
  *

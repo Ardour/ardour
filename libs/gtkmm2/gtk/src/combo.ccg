@@ -1,0 +1,129 @@
+// -*- c++ -*-
+/* $Id: combo.ccg,v 1.2 2003/10/17 16:18:24 murrayc Exp $ */
+
+/* 
+ *
+ * Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+//These were deprecated between 1.2 and 2.0:
+#include <gtk/gtklistitem.h>
+#include <gtk/gtklist.h>
+
+#include <gtk/gtkcombo.h>
+#include <gtk/gtklabel.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/button.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/window.h>
+#include <gtkmm/item.h>
+
+namespace Gtk
+{
+
+namespace ComboDropDown_Helpers
+{
+
+ComboDropDownList::iterator ComboDropDownList::insert(ComboDropDownList::iterator position, const Element& item)
+{
+  int pos = -1;
+
+  if(position.node_)
+    pos = g_list_position(glist(), position.node_);
+
+  // gtk+ inserts the GList node allocated by g_list_append into the list as is!
+  gtk_list_insert_items((GtkList*)gparent(), g_list_append(0, const_cast<GtkWidget*>(item.Widget::gobj())), pos);
+
+  return --position;
+}
+
+void ComboDropDownList::remove(const_reference child)
+{
+  GList child_list;
+  child_list.data = (gpointer)child.gobj();
+  child_list.next = child_list.prev = 0;
+  gtk_list_remove_items(GTK_LIST(gparent_), &child_list);
+}
+
+ComboDropDownList::iterator ComboDropDownList::erase(iterator position)
+{
+  //Check that it is a valid iterator, to a real item:
+  if ( !position.node_|| (position == end()) )
+    return end();
+
+  //Get an iterator the the next item, to return:
+  iterator next = position;
+  next++;
+
+  //Use GTK+ C function to remove it, by providing the GtkWidget*:
+  GList child_list;
+  child_list.data = (gpointer)position->gobj();
+  child_list.next = child_list.prev = 0;
+  gtk_list_remove_items(GTK_LIST(gparent_), &child_list);
+
+  return next;
+}
+
+} // namespace ComboList_Helpers
+
+ComboDropDown::ComboDropDownList& ComboDropDown::children()
+{
+  children_proxy_ = ComboDropDownList(gobj());
+  return children_proxy_;
+}
+
+const ComboDropDown::ComboDropDownList& ComboDropDown::children() const
+{
+  children_proxy_ = ComboDropDownList(const_cast<GtkList*>(gobj()));
+  return children_proxy_;
+}
+
+} // namespace Gtk
+
+
+namespace Gtk
+{
+
+void Combo::remove_item_string(Gtk::Item& item)
+{
+  gtk_combo_set_item_string(gobj(), item.gobj(), 0);
+}
+
+Glib::ListHandle<Glib::ustring> Combo::get_popdown_strings() const
+{
+  GList* popdown_strings = 0;
+
+  GList *const list_children =
+      gtk_container_get_children(reinterpret_cast<GtkContainer*>(gobj()->list));
+
+  for(const GList* node = list_children; node != 0; node = node->next)
+  {
+    GtkLabel *const label = reinterpret_cast<GtkLabel*>(
+        gtk_bin_get_child(static_cast<GtkBin*>(node->data)));
+
+    popdown_strings = g_list_prepend(
+        popdown_strings, const_cast<char*>(gtk_label_get_text(label)));
+  }
+
+  g_list_free(list_children);
+  popdown_strings = g_list_reverse(popdown_strings);
+
+  return Glib::ListHandle<Glib::ustring>(popdown_strings, Glib::OWNERSHIP_SHALLOW);
+}
+
+} // namespace Gtk
+

@@ -24,6 +24,16 @@
 #include <gtk/gtkpagesetup.h>
 #include <gtk/gtktypebuiltins.h>
 
+namespace Gtk
+{
+
+void PageSetup::save_to_key_file(Glib::KeyFile& key_file)
+{
+  gtk_page_setup_to_key_file(gobj(), (key_file).gobj(), 0); 
+}
+
+} //namespace
+
 namespace
 {
 } // anonymous namespace
@@ -129,7 +139,8 @@ GType PageSetup::get_base_type()
 
 PageSetup::PageSetup()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(pagesetup_class_.init()))
 {
   }
@@ -226,6 +237,31 @@ double PageSetup::get_page_width(Unit unit) const
 double PageSetup::get_page_height(Unit unit) const
 {
   return gtk_page_setup_get_page_height(const_cast<GtkPageSetup*>(gobj()), ((GtkUnit)(unit)));
+}
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool PageSetup::save_to_file(const std::string& file_name) const
+#else
+bool PageSetup::save_to_file(const std::string& file_name, std::auto_ptr<Glib::Error>& error) const
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retvalue = gtk_page_setup_to_file(const_cast<GtkPageSetup*>(gobj()), file_name.c_str(), &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+
+}
+
+void PageSetup::save_to_key_file(Glib::KeyFile& key_file, const Glib::ustring& group_name)
+{
+gtk_page_setup_to_key_file(gobj(), (key_file).gobj(), group_name.c_str()); 
 }
 
 

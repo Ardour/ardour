@@ -114,10 +114,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::PixbufAnimationIter
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::PixbufAnimationIter
    */
   Glib::RefPtr<Gdk::PixbufAnimationIter> wrap(GdkPixbufAnimationIter* object, bool take_copy = false);
 }

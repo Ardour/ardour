@@ -297,8 +297,14 @@ private:
 
 protected:
   Text(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit Text(AtkText* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -622,33 +628,33 @@ public:
                                                  TextClipType x_clip_type, TextClipType y_clip_type);
                                                            
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %text_changed(int position, int length)</tt>
+   * <tt>void on_my_%text_changed(int position, int length)</tt>
    */
 
   Glib::SignalProxy2< void,int,int > signal_text_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %text_caret_moved(int location)</tt>
+   * <tt>void on_my_%text_caret_moved(int location)</tt>
    */
 
   Glib::SignalProxy1< void,int > signal_text_caret_moved();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %text_selection_changed()</tt>
+   * <tt>void on_my_%text_selection_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_text_selection_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %text_attributes_changed()</tt>
+   * <tt>void on_my_%text_attributes_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_text_attributes_changed();
@@ -757,10 +763,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Atk::Text
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Atk::Text
    */
   Glib::RefPtr<Atk::Text> wrap(AtkText* object, bool take_copy = false);
 

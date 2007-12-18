@@ -148,22 +148,25 @@ GType ComboBoxEntry::get_base_type()
 
 ComboBoxEntry::ComboBoxEntry()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::ComboBox(Glib::ConstructParams(comboboxentry_class_.init()))
 {
   }
 
 ComboBoxEntry::ComboBoxEntry(const Glib::RefPtr<TreeModel>& model, const TreeModelColumnBase& text_column)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::ComboBox(Glib::ConstructParams(comboboxentry_class_.init(), "model", Glib::unwrap(model), "text_column", (text_column).index(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::ComboBox(Glib::ConstructParams(comboboxentry_class_.init(), "model", Glib::unwrap(model), "text_column", (text_column).index(), static_cast<char*>(0)))
 {
   }
 
 ComboBoxEntry::ComboBoxEntry(const Glib::RefPtr<TreeModel>& model, int text_column)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::ComboBox(Glib::ConstructParams(comboboxentry_class_.init(), "model", Glib::unwrap(model), "text_column", text_column, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::ComboBox(Glib::ConstructParams(comboboxentry_class_.init(), "model", Glib::unwrap(model), "text_column", text_column, static_cast<char*>(0)))
 {
   }
 

@@ -29,30 +29,34 @@ namespace Gtk
 
 RecentChooserDialog::RecentChooserDialog(Gtk::Window& parent, const Glib::ustring& title)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(), static_cast<char*>(0)))
 {
   set_transient_for(parent);
 }
 
 RecentChooserDialog::RecentChooserDialog(const Glib::ustring& title)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(), static_cast<char*>(0)))
 {
 }
 
 RecentChooserDialog::RecentChooserDialog(const Glib::ustring& title, const Glib::RefPtr<RecentManager>& recent_manager)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(),"recent-manager",recent_manager->gobj(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(),"recent-manager",recent_manager->gobj(), static_cast<char*>(0)))
 {
 }
 
 RecentChooserDialog::RecentChooserDialog(Gtk::Window& parent, const Glib::ustring& title, const Glib::RefPtr<RecentManager>& recent_manager)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(),"recent-manager",recent_manager->gobj(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(recentchooserdialog_class_.init(), "title",title.c_str(),"recent-manager",recent_manager->gobj(), static_cast<char*>(0)))
 {
   set_transient_for(parent);
 }

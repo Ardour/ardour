@@ -415,10 +415,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Ruler
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Ruler
    */
   Gtk::Ruler* wrap(GtkRuler* object, bool take_copy = false);
 } //namespace Glib
@@ -426,10 +429,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::VRuler
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::VRuler
    */
   Gtk::VRuler* wrap(GtkVRuler* object, bool take_copy = false);
 } //namespace Glib
@@ -437,10 +443,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::HRuler
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::HRuler
    */
   Gtk::HRuler* wrap(GtkHRuler* object, bool take_copy = false);
 } //namespace Glib

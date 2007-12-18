@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_TIMEVAL_H
 #define _GLIBMM_TIMEVAL_H
 
-/* $Id: timeval.h,v 1.1.1.1 2003/01/07 16:58:56 murrayc Exp $ */
+/* $Id: timeval.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* timeval.h
  *

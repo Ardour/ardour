@@ -191,7 +191,8 @@ enum FontMask
   FONT_MASK_VARIANT = 1 << 2,
   FONT_MASK_WEIGHT = 1 << 3,
   FONT_MASK_STRETCH = 1 << 4,
-  FONT_MASK_SIZE = 1 << 5
+  FONT_MASK_SIZE = 1 << 5,
+  FONT_MASK_GRAVITY = 1 << 6
 };
 
 /** @ingroup pangommEnums */
@@ -231,6 +232,39 @@ namespace Glib
 
 template <>
 class Value<Pango::FontMask> : public Glib::Value_Flags<Pango::FontMask>
+{
+public:
+  static GType value_type() G_GNUC_CONST;
+};
+
+} // namespace Glib
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Pango
+{
+
+/**
+ * @ingroup pangommEnums
+ */
+enum Gravity
+{
+  GRAVITY_SOUTH,
+  GRAVITY_EAST,
+  GRAVITY_NORTH,
+  GRAVITY_WEST,
+  GRAVITY_AUTO
+};
+
+} // namespace Pango
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+namespace Glib
+{
+
+template <>
+class Value<Pango::Gravity> : public Glib::Value_Enum<Pango::Gravity>
 {
 public:
   static GType value_type() G_GNUC_CONST;
@@ -311,6 +345,7 @@ public:
   
   /** Computes a hash of a Pango::FontDescription structure suitable
    * to be used, for example, as an argument to Glib::hash_table_new().
+   * The hash value is independent of @a desc -&gt;mask.
    * @return The hash value.
    */
   guint hash() const;
@@ -326,7 +361,9 @@ public:
   
   /** Gets the family name field of a font description. See
    * pango_font_description_set_family().
-   * @return The family name field. (Will be <tt>0</tt> if not previously set.).
+   * @return The family name field for the font description, or
+   * <tt>0</tt> if not previously set.  This has the same life-time
+   * as the font description itself and should not be freed.
    */
   Glib::ustring get_family() const;
   
@@ -335,7 +372,7 @@ public:
    * the manner in which it is slanted; it can be either
    * Pango::STYLE_NORMAL, Pango::STYLE_ITALIC, or Pango::STYLE_OBLIQUE.
    * Most fonts will either have a italic style or an oblique
-   * style, but not both, and font matching in Pango will 
+   * style, but not both, and font matching in Pango will
    * match italic specifications with oblique fonts and vice-versa
    * if an exact match is not found.
    * @param style The style for the font description.
@@ -344,9 +381,9 @@ public:
   
   /** Gets the style field of a Pango::FontDescription. See
    * pango_font_description_set_style().
-   * @return The style field for the font description. 
+   * @return The style field for the font description.
    * Use pango_font_description_get_set_fields() to find out if
-   * the field was explicitely set or not.
+   * the field was explicitly set or not.
    */
   Style get_style() const;
   
@@ -360,7 +397,7 @@ public:
    * pango_font_description_set_variant().
    * @return The variant field for the font description. Use
    * pango_font_description_get_set_fields() to find out if
-   * the field was explicitely set or not.
+   * the field was explicitly set or not.
    */
   Variant get_variant() const;
   
@@ -376,7 +413,7 @@ public:
    * pango_font_description_set_weight().
    * @return The weight field for the font description. Use
    * pango_font_description_get_set_fields() to find out if
-   * the field was explicitely set or not.
+   * the field was explicitly set or not.
    */
   Weight get_weight() const;
   
@@ -390,7 +427,7 @@ public:
    * See pango_font_description_set_stretch().
    * @return The stretch field for the font description. Use
    * pango_font_description_get_set_fields() to find out if
-   * the field was explicitely set or not.
+   * the field was explicitly set or not.
    */
   Stretch get_stretch() const;
   
@@ -407,34 +444,59 @@ public:
   void set_size(int size);
   
   /** Gets the size field of a font description.
-   * See pango_font_description_get_size().
+   * See pango_font_description_set_size().
    * @return The size field for the font description in points or device units.
    * You must call pango_font_description_get_size_is_absolute()
    * to find out which is the case. Returns 0 if the size field has not
-   * previously been set.  pango_font_description_get_set_fields() to
-   * find out if the field was explicitely set or not.
+   * previously been set or it has been set to 0 explicitly.
+   * Use pango_font_description_get_set_fields() to
+   * find out if the field was explicitly set or not.
    */
   int get_size() const;
   
   /** Sets the size field of a font description, in device units. This is mutually
-   * exclusive with pango_font_description_set_size().
+   * exclusive with pango_font_description_set_size() which sets the font size
+   * in points.
    * 
    * Since: 1.8
-   * @param size The new size, in pango units. There are Pango::SCALE Pango units in one
+   * @param size The new size, in Pango units. There are Pango::SCALE Pango units in one
    * device unit. For an output backend where a device unit is a pixel, a @a size 
    * value of 10 * PANGO_SCALE gives a 10 pixel font.
    */
   void set_absolute_size(double size);
   
-  /** Determines whether the size of the font is in points or device units.
+  /** Determines whether the size of the font is in points (not absolute) or device units (absolute).
    * See pango_font_description_set_size() and pango_font_description_set_absolute_size().
-   * @return Whether the the size for the font description is in
+   * @return Whether the size for the font description is in
    * points or device units.  Use pango_font_description_get_set_fields() to
-   * find out if the size field of the font description was explicitely set or not.
+   * find out if the size field of the font description was explicitly set or not.
    * 
    * Since: 1.8.
    */
   bool get_size_is_absolute() const;
+  
+  /** Sets the gravity field of a font description. The gravity field
+   * specifies how the glyphs should be rotated.  If @a gravity  is
+   * Pango::GRAVITY_AUTO, this actually unsets the gravity mask on
+   * the font description.
+   * 
+   * This function is seldom useful to the user.  Gravity should normally
+   * be set on a Pango::Context.
+   * 
+   * Since: 1.16
+   * @param gravity The gravity for the font description.
+   */
+  void set_gravity(Gravity gravity);
+  
+  /** Gets the gravity field of a font description. See
+   * pango_font_description_set_gravity().
+   * @return The gravity field for the font description. Use
+   * pango_font_description_get_set_fields() to find out if
+   * the field was explicitly set or not.
+   * 
+   * Since: 1.16.
+   */
+  Gravity get_gravity() const;
   
   /** Determines which fields in a font description have been set.
    * @return A bitmask with bits set corresponding to the
@@ -442,12 +504,8 @@ public:
    */
   FontMask get_set_fields() const;
   
-  /** Unsets some of the fields in a Pango::FontDescription. Note that
-   * this merely marks the fields cleared, it does not clear the
-   * settings for those fields, to clear a family name set with
-   * pango_font_description_set_family_static() so that it won't
-   * be returned by subsequent calls to pango_font_description_get_family(),
-   * you must actually call pango_font_description_set_family (desc, <tt>0</tt>);
+  /** Unsets some of the fields in a Pango::FontDescription.  The unset
+   * fields will get back to their default values.
    * @param to_unset Bitmask of fields in the @a desc  to unset.
    */
   void unset_fields(FontMask to_unset);
@@ -532,10 +590,13 @@ inline void swap(FontDescription& lhs, FontDescription& rhs)
 namespace Glib
 {
 
-/** @relates Pango::FontDescription
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Pango::FontDescription
  */
 Pango::FontDescription wrap(PangoFontDescription* object, bool take_copy = false);
 

@@ -173,7 +173,9 @@ public:
    * of the widget. A value of 0.0 represents left alignment;
    * 1.0 represents right alignment.
    * @param yalign The y alignment of the label. A value of 0.0 aligns under 
-   * the frame; 1.0 aligns above the frame.
+   * the frame; 1.0 aligns above the frame. If the values are exactly
+   * 0.0 or 1.0 the gap in the frame won't be painted because the label
+   * will be completely above or below the frame.
    */
   void set_label_align(float xalign = 0.0, float yalign = 0.5);
   
@@ -183,7 +185,9 @@ public:
    * of the widget. A value of 0.0 represents left alignment;
    * 1.0 represents right alignment.
    * @param yalign The y alignment of the label. A value of 0.0 aligns under 
-   * the frame; 1.0 aligns above the frame.
+   * the frame; 1.0 aligns above the frame. If the values are exactly
+   * 0.0 or 1.0 the gap in the frame won't be painted because the label
+   * will be completely above or below the frame.
    */
   void set_label_align(AlignmentEnum xalign, AlignmentEnum yalign = Gtk::ALIGN_CENTER);
 
@@ -323,10 +327,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Frame
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Frame
    */
   Gtk::Frame* wrap(GtkFrame* object, bool take_copy = false);
 } //namespace Glib

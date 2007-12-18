@@ -1,0 +1,3 @@
+These are the actual sources for gtkmm.  They are preprocessed to
+make ../gtkmm files.  Make necessary modifications here.
+

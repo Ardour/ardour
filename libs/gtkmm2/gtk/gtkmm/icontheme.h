@@ -57,7 +57,8 @@ enum IconLookupFlags
 {
   ICON_LOOKUP_NO_SVG = 1 << 0,
   ICON_LOOKUP_FORCE_SVG = 1 << 1,
-  ICON_LOOKUP_USE_BUILTIN = 1 << 2
+  ICON_LOOKUP_USE_BUILTIN = 1 << 2,
+  ICON_LOOKUP_GENERIC_FALLBACK = 1 << 3
 };
 
 /** @ingroup gtkmmEnums */
@@ -271,8 +272,6 @@ public:
   Glib::ArrayHandle<int> get_icon_sizes(const Glib::ustring& icon_name) const;
   
 
-//TODO: Update the docs for this, to suggest use of IconInfo::operator bool() instead of saying that it returns null.
-  
   /** Looks up a named icon and returns a structure containing
    * information such as the filename of the icon. The icon
    * can then be rendered into a pixbuf using
@@ -281,13 +280,34 @@ public:
    * @param icon_name The name of the icon to lookup.
    * @param size Desired icon size.
    * @param flags Flags modifying the behavior of the icon lookup.
-   * @return A Gtk::IconInfo structure containing information
-   * about the icon, or <tt>0</tt> if the icon wasn't found. Free with
-   * gtk_icon_info_free()
+   * @return An IconInfo structure containing information
+   * about the icon. IconInfo::operator bool() will return false if the icon wasn't found.
+   * For instance, if (icon_info) { ... }.
    * 
    * @newin2p4.
    */
   IconInfo lookup_icon(const Glib::ustring& icon_name, int size, IconLookupFlags flags) const;
+
+   
+  /** Looks up a named icon and returns a structure containing
+   * information such as the filename of the icon. The icon
+   * can then be rendered into a pixbuf using
+   * gtk_icon_info_load_icon(). (load_icon()
+   * combines these two steps if all you need is the pixbuf.)
+   * 
+   * If @a icon_names  contains more than one name, this function 
+   * tries them all in the given order before falling back to 
+   * inherited icon themes.
+   * @param icon_names Array of icon names to lookup.
+   * @param size Desired icon size.
+   * @param flags Flags modifying the behavior of the icon lookup.
+   * @return A Gtk::IconInfo structure containing information
+   * about the icon. IconInfo::operator bool() will be false if the icon wasn't found - 
+   * for instance, if (icon_info) { ... }.
+   * 
+   * @newin2p12.
+   */
+  IconInfo choose_icon(const Glib::StringArrayHandle& icon_names, int size, IconLookupFlags flags);
 
   
   /** Looks up an icon in an icon theme, scales it to the given size
@@ -341,13 +361,21 @@ public:
    Glib::ListHandle<Glib::ustring> list_icons() const;
 
   
+  /** Gets the list of contexts available within the current
+   * hierarchy of icon themes.
+   * @return A list holding the names of all the
+   * contexts in the theme.
+   * 
+   * @newin2p12.
+   */
+  Glib::ListHandle<Glib::ustring> list_contexts() const;
+
+  
   /** Gets the name of an icon that is representative of the
    * current theme (for instance, to use when presenting
    * a list of themes to the user.)
-   * @return The name of an example icon or <tt>0</tt>.
-   * Free with Glib::free().
    * 
-   * @newin2p4.
+   * @newin2p4
    */
   Glib::ustring get_example_icon_name() const;
   
@@ -386,9 +414,9 @@ public:
   static void add_builtin_icon(const Glib::ustring& icon_name, int size, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %changed()</tt>
+   * <tt>void on_my_%changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_changed();
@@ -419,10 +447,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::IconTheme
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::IconTheme
    */
   Glib::RefPtr<Gtk::IconTheme> wrap(GtkIconTheme* object, bool take_copy = false);
 }

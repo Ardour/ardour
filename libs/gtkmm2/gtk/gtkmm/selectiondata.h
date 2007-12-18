@@ -182,7 +182,7 @@ public:
   std::string get_target() const;
 
   /// See also Gtk::Clipboard::request_targets()
-  Glib::StringArrayHandle get_targets() const;
+  Gdk::ArrayHandle_AtomString get_targets() const;
   
 
   /** Returns the ID of the selection.
@@ -198,6 +198,14 @@ public:
   Glib::RefPtr<const Gdk::Display> get_display() const;
  
   
+  /** Given a Gtk::SelectionData object holding a list of targets,
+   * determines if any of the targets in @a targets  can be used to
+   * provide a list or URIs.
+   * @return <tt>true</tt> if @a selection_data  holds a list of targets,
+   * and a suitable target for text is included, otherwise <tt>false</tt>.
+   * 
+   * @newin2p10.
+   */
   bool targets_include_uri() const;
   
   /** Given a Gtk::SelectionData object holding a list of targets,
@@ -208,6 +216,16 @@ public:
    */
   bool targets_include_text() const;
   
+  /** Given a Gtk::SelectionData object holding a list of targets,
+   * determines if any of the targets in @a targets  can be used to
+   * provide rich text.
+   * @param buffer A Gtk::TextBuffer.
+   * @return <tt>true</tt> if @a selection_data  holds a list of targets,
+   * and a suitable target for rich text is included,
+   * otherwise <tt>false</tt>.
+   * 
+   * @newin2p10.
+   */
   bool targets_include_rich_text(const Glib::RefPtr<TextBuffer>& buffer) const;
   
   /** Given a Gtk::SelectionData object holding a list of targets,
@@ -243,10 +261,13 @@ inline void swap(SelectionData& lhs, SelectionData& rhs)
 namespace Glib
 {
 
-/** @relates Gtk::SelectionData
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gtk::SelectionData
  */
 Gtk::SelectionData wrap(GtkSelectionData* object, bool take_copy = false);
 

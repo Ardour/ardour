@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_PROPERTY_H
 #define _GLIBMM_PROPERTY_H
-/* $Id: property.h,v 1.6 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: property.h 291 2006-05-12 08:08:45Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

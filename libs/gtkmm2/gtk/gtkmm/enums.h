@@ -148,6 +148,8 @@ namespace Gtk
 
 
 /** Used to indicate the direction in which a Gtk::Arrow should point.
+ */
+/**
  * @ingroup gtkmmEnums
  */
 enum ArrowType
@@ -198,6 +200,8 @@ namespace Gtk
  */
 
 /** Denotes the expansion properties that a widget will have when it (or its parent) is resized.
+ */
+/**
  * @ingroup gtkmmEnums
  * @par Bitwise operators:
  * <tt>%AttachOptions operator|(AttachOptions, AttachOptions)</tt><br>
@@ -284,7 +288,8 @@ enum ButtonBoxStyle
   BUTTONBOX_SPREAD,
   BUTTONBOX_EDGE,
   BUTTONBOX_START,
-  BUTTONBOX_END
+  BUTTONBOX_END,
+  BUTTONBOX_CENTER
 };
 
 } // namespace Gtk
@@ -1078,7 +1083,9 @@ namespace Gtk
 enum TargetFlags
 {
   TARGET_SAME_APP = 1 << 0,
-  TARGET_SAME_WIDGET = 1 << 1
+  TARGET_SAME_WIDGET = 1 << 1,
+  TARGET_OTHER_APP = 1 << 2,
+  TARGET_OTHER_WIDGET = 1 << 3
 };
 
 /** @ingroup gtkmmEnums */

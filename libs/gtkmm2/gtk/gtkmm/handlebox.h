@@ -143,17 +143,17 @@ public:
   PositionType get_snap_edge() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %child_attached(Widget* child)</tt>
+   * <tt>void on_my_%child_attached(Widget* child)</tt>
    */
 
   Glib::SignalProxy1< void,Widget* > signal_child_attached();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %child_detached(Widget* child)</tt>
+   * <tt>void on_my_%child_detached(Widget* child)</tt>
    */
 
   Glib::SignalProxy1< void,Widget* > signal_child_detached();
@@ -238,10 +238,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::HandleBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::HandleBox
    */
   Gtk::HandleBox* wrap(GtkHandleBox* object, bool take_copy = false);
 } //namespace Glib

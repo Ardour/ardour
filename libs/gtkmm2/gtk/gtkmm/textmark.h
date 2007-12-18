@@ -119,8 +119,74 @@ private:
 
 protected:
 
+  /** Creates an anoymous text mark. Add it to a buffer using Gtk::TextBuffer::add_mark().
+   * If a mark has left 
+   * gravity, and text is inserted at the mark's current location, the mark 
+   * will be moved to the left of the newly-inserted text. If the mark has 
+   * right gravity (@a left_gravity = false), the mark will end up on the 
+   * right of newly-inserted text. The standard left-to-right cursor is a 
+   * mark with right gravity (when you type, the cursor stays on the right
+   * side of the text you're typing).
+
+   * @param name mark name.
+   * @param left_gravity Whether the mark should have left gravity.
+   * @newin2p12
+   */
+  explicit TextMark(bool left_gravity = true);
+
+  /** Creates a text mark. Add it to a buffer using Gtk::TextBuffer::add_mark().
+   * The mark can be retrieved by name using Gtk::TextBuffer::get_mark(). If a mark has left 
+   * gravity, and text is inserted at the mark's current location, the mark 
+   * will be moved to the left of the newly-inserted text. If the mark has 
+   * right gravity (@a left_gravity = false), the mark will end up on the 
+   * right of newly-inserted text. The standard left-to-right cursor is a 
+   * mark with right gravity (when you type, the cursor stays on the right
+   * side of the text you're typing).
+
+   * @param name mark name.
+   * @param left_gravity Whether the mark should have left gravity.
+   * @newin2p12
+   */
+  explicit TextMark(const Glib::ustring& name, bool left_gravity = true);
+
 public:
+
+  /** Creates an anoymous text mark. Add it to a buffer using Gtk::TextBuffer::add_mark().
+   * If a mark has left 
+   * gravity, and text is inserted at the mark's current location, the mark 
+   * will be moved to the left of the newly-inserted text. If the mark has 
+   * right gravity (@a left_gravity = false), the mark will end up on the 
+   * right of newly-inserted text. The standard left-to-right cursor is a 
+   * mark with right gravity (when you type, the cursor stays on the right
+   * side of the text you're typing).
+
+   * @param name mark name.
+   * @param left_gravity Whether the mark should have left gravity.
+   * @result A RefPtr to a new text mark.
+   * @newin2p12
+   */
   
+  static Glib::RefPtr<TextMark> create(bool left_gravity =  true);
+
+
+/** Creates a text mark. Add it to a buffer using Gtk::TextBuffer::add_mark().
+   * The mark can be retrieved by name using Gtk::TextBuffer::get_mark(). If a mark has left 
+   * gravity, and text is inserted at the mark's current location, the mark 
+   * will be moved to the left of the newly-inserted text. If the mark has 
+   * right gravity (@a left_gravity = false), the mark will end up on the 
+   * right of newly-inserted text. The standard left-to-right cursor is a 
+   * mark with right gravity (when you type, the cursor stays on the right
+   * side of the text you're typing).
+
+   * @param name mark name.
+   * @param left_gravity Whether the mark should have left gravity.
+   * @result A RefPtr to a new text mark.
+   * @newin2p12
+   */
+  
+  static Glib::RefPtr<TextMark> create(const Glib::ustring& name, bool left_gravity =  true);
+
+
   /** Sets the visibility of @a mark ; the insertion point is normally
    * visible, i.e.\ you can see it as a vertical bar. Also, the text
    * widget uses a visible mark to indicate where a drop will occur when
@@ -130,20 +196,17 @@ public:
    */
   void set_visible(bool setting = true);
   
-  /** Returns <tt>true</tt> if the mark is visible (i.e.\ a cursor is displayed
-   * for it)
+  /** Return value: <tt>true</tt> if visible
    * @return <tt>true</tt> if visible.
    */
   bool get_visible() const;
   
-  /** Returns the mark name; returns <tt>0</tt> for anonymous marks.
+  /** Return value: mark name
    * @return Mark name.
    */
   Glib::ustring get_name() const;
   
-  /** Returns <tt>true</tt> if the mark has been removed from its buffer
-   * with Gtk::TextBuffer::delete_mark(). Marks can't be used
-   * once deleted.
+  /** Return value: whether the mark is deleted
    * @return Whether the mark is deleted.
    */
   bool get_deleted() const;
@@ -164,6 +227,8 @@ public:
    * @return <tt>true</tt> if the mark has left gravity, <tt>false</tt> otherwise.
    */
   bool get_left_gravity() const;
+
+  //TODO: Add a const overload, if we have a ConstTextIter. 
   TextIter get_iter();
 
 
@@ -191,10 +256,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TextMark
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TextMark
    */
   Glib::RefPtr<Gtk::TextMark> wrap(GtkTextMark* object, bool take_copy = false);
 }

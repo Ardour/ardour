@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: atkmm
+Description: C++ wrapper for atk
+Requires: glibmm-2.4 atk
+Version: @VERSION@
+Libs: -L${libdir} -latkmm-1.6
+Cflags: -I${includedir}/atkmm-1.6

@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_MAIN_H
 #define _GLIBMM_MAIN_H
 
-/* $Id: main.h,v 1.9 2005/03/14 15:22:13 murrayc Exp $ */
+/* $Id: main.h 420 2007-06-22 15:29:58Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *
@@ -166,6 +166,18 @@ public:
 #endif
 
   /** Connects a timeout handler.
+   *
+   * Note that timeout functions may be delayed, due to the processing of other
+   * event sources. Thus they should not be relied on for precise timing.
+   * After each call to the timeout function, the time of the next
+   * timeout is recalculated based on the current time and the given interval
+   * (it does not try to 'catch up' time lost in delays).
+   *
+   * If you want to have a timer in the "seconds" range and do not care
+   * about the exact time of the first call of the timer, use the
+   * connect_seconds() function; this function allows for more
+   * optimizations and more efficient system power usage.
+   *
    * @code
    * Glib::signal_timeout().connect(sigc::ptr_fun(&timeout_handler), 1000);
    * @endcode
@@ -175,13 +187,45 @@ public:
    * timeout_source->connect(sigc::ptr_fun(&timeout_handler));
    * timeout_source->attach(Glib::MainContext::get_default());
    * @endcode
-   * @param slot A slot to call when @a interval elapsed.
+   * @param slot A slot to call when @a interval has elapsed.
    * @param interval The timeout in milliseconds.
    * @param priority The priority of the new event source.
    * @return A connection handle, which can be used to disconnect the handler.
    */
   sigc::connection connect(const sigc::slot<bool>& slot, unsigned int interval,
                            int priority = PRIORITY_DEFAULT);
+
+
+  /** Connects a timeout handler with whole second granularity.
+   *
+   * Unlike connect(), this operates at whole second granularity.
+   * The initial starting point of the timer is determined by the implementation
+   * and the implementation is expected to group multiple timers together so that
+   * they fire all at the same time.
+   *
+   * To allow this grouping, the @a interval to the first timer is rounded
+   * and can deviate up to one second from the specified interval.
+   * Subsequent timer iterations will generally run at the specified interval.
+   *
+   * @code
+   * Glib::signal_timeout().connect(sigc::ptr_fun(&timeout_handler), 1000);
+   * @endcode
+   * is equivalent to:
+   * @code
+   * const Glib::RefPtr<Glib::TimeoutSource> timeout_source = Glib::TimeoutSource::create(1000);
+   * timeout_source->connectseconds(sigc::ptr_fun(&timeout_handler));
+   * timeout_source->attach(Glib::MainContext::get_default());
+   * @endcode
+   * @param slot A slot to call when @a interval has elapsed.
+   * @param interval The timeout in seconds.
+   * @param priority The priority of the new event source.
+   * @return A connection handle, which can be used to disconnect the handler.
+   *
+   * @newin2p14
+   */
+  sigc::connection connect_seconds(const sigc::slot<bool>& slot, unsigned int interval,
+                           int priority = PRIORITY_DEFAULT);
+
 private:
   GMainContext* context_;
 

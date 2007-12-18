@@ -684,13 +684,13 @@ namespace Glib
 
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-IOStatus IOChannel::read(gunichar& unichar)
+IOStatus IOChannel::read(gunichar& thechar)
 #else
-IOStatus IOChannel::read(gunichar& unichar, std::auto_ptr<Glib::Error>& error)
+IOStatus IOChannel::read(gunichar& thechar, std::auto_ptr<Glib::Error>& error)
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 {
   GError* gerror = 0;
-  IOStatus retvalue = ((IOStatus)(g_io_channel_read_unichar(gobj(), &(unichar), &(gerror))));
+  IOStatus retvalue = ((IOStatus)(g_io_channel_read_unichar(gobj(), &(thechar), &(gerror))));
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   if(gerror)
     ::Glib::Error::throw_exception(gerror);

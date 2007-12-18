@@ -37,16 +37,18 @@ namespace Gtk
 
 VScrollbar::VScrollbar(Adjustment& adjustment)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scrollbar(Glib::ConstructParams(vscrollbar_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scrollbar(Glib::ConstructParams(vscrollbar_class_.init()))
 {
   set_adjustment(adjustment);
 }
 
 VScrollbar::VScrollbar()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scrollbar(Glib::ConstructParams(vscrollbar_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scrollbar(Glib::ConstructParams(vscrollbar_class_.init()))
 {
   Adjustment* adjustment = manage(new Adjustment(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
 
@@ -57,8 +59,9 @@ VScrollbar::VScrollbar()
 
 HScrollbar::HScrollbar()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scrollbar(Glib::ConstructParams(hscrollbar_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scrollbar(Glib::ConstructParams(hscrollbar_class_.init()))
 {
   Adjustment* adjustment = manage(new Adjustment(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
 
@@ -68,8 +71,9 @@ HScrollbar::HScrollbar()
 
 HScrollbar::HScrollbar(Adjustment& adjustment)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scrollbar(Glib::ConstructParams(hscrollbar_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scrollbar(Glib::ConstructParams(hscrollbar_class_.init()))
 {
   set_adjustment(adjustment);
 }

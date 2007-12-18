@@ -176,6 +176,79 @@ const Glib::SignalProxyInfo EntryCompletion_signal_match_selected_info =
   (GCallback) &Widget_signal_match_selected_notify_callback
 };
 
+
+static gboolean Widget_signal_cursor_on_match_callback(GtkEntryCompletion* self, GtkTreeModel* c_model, GtkTreeIter* c_iter, void* data)
+{
+  using namespace Gtk;
+  typedef sigc::slot< bool, const TreeModel::iterator& > SlotType;
+
+  // Do not try to call a signal on a disassociated wrapper.
+  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    try
+    {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
+      {
+        //This conversion is the custom-written part:
+        Gtk::TreeModel::iterator cppIter(c_model, c_iter);
+
+        return static_cast<int>( (*static_cast<SlotType*>(slot))(cppIter) );
+      }
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    }
+    catch(...)
+    {
+      Glib::exception_handlers_invoke();
+    }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
+
+  typedef gboolean RType;
+  return RType();
+}
+
+static gboolean Widget_signal_cursor_on_match_notify_callback(GtkEntryCompletion* self, GtkTreeModel* c_model, GtkTreeIter* c_iter, void* data)
+{
+  using namespace Gtk;
+  typedef sigc::slot< void, const TreeModel::iterator& > SlotType;
+
+  // Do not try to call a signal on a disassociated wrapper.
+  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    try
+    {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
+      {
+        //This conversion is the custom-written part:
+        Gtk::TreeModel::iterator cppIter(c_model, c_iter);
+
+        (*static_cast<SlotType*>(slot))(cppIter);
+      }
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    }
+    catch(...)
+    {
+      Glib::exception_handlers_invoke();
+    }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
+
+  typedef gboolean RType;
+  return RType();
+}
+
+
+const Glib::SignalProxyInfo EntryCompletion_signal_cursor_on_match_info =
+{
+  "match_selected",
+  (GCallback) &Widget_signal_cursor_on_match_callback,
+  (GCallback) &Widget_signal_cursor_on_match_notify_callback
+};
+
 } //anonymous namespace
 
 
@@ -248,6 +321,11 @@ gboolean EntryCompletion_Class::match_selected_callback_custom(GtkEntryCompletio
 Glib::SignalProxy1< bool, const TreeModel::iterator& > EntryCompletion::signal_match_selected()
 {
   return Glib::SignalProxy1< bool, const TreeModel::iterator& >(this, &EntryCompletion_signal_match_selected_info);
+}
+
+Glib::SignalProxy1< bool, const TreeModel::iterator& > EntryCompletion::signal_cursor_on_match()
+{
+  return Glib::SignalProxy1< bool, const TreeModel::iterator& >(this, &EntryCompletion_signal_cursor_on_match_info);
 }
 
 
@@ -416,7 +494,7 @@ void EntryCompletion_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void EntryCompletion_Class::action_activated_callback(GtkEntryCompletion* self, gint p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -424,33 +502,36 @@ void EntryCompletion_Class::action_activated_callback(GtkEntryCompletion* self, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_action_activated(p0
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_action_activated(p0
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->action_activated)
-      (*base->action_activated)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->action_activated)
+    (*base->action_activated)(self, p0);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -498,7 +579,8 @@ GType EntryCompletion::get_base_type()
 
 EntryCompletion::EntryCompletion()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(entrycompletion_class_.init()))
 {
   }
@@ -572,6 +654,16 @@ bool EntryCompletion::get_inline_completion() const
   return gtk_entry_completion_get_inline_completion(const_cast<GtkEntryCompletion*>(gobj()));
 }
 
+void EntryCompletion::set_inline_selection(bool inline_selection)
+{
+gtk_entry_completion_set_inline_selection(gobj(), static_cast<int>(inline_selection)); 
+}
+
+bool EntryCompletion::get_inline_selection() const
+{
+  return gtk_entry_completion_get_inline_selection(const_cast<GtkEntryCompletion*>(gobj()));
+}
+
 void EntryCompletion::set_popup_completion(bool popup_completion)
 {
 gtk_entry_completion_set_popup_completion(gobj(), static_cast<int>(popup_completion)); 
@@ -600,6 +692,11 @@ gtk_entry_completion_set_popup_single_match(gobj(), static_cast<int>(popup_singl
 bool EntryCompletion::get_popup_single_match() const
 {
   return gtk_entry_completion_get_popup_single_match(const_cast<GtkEntryCompletion*>(gobj()));
+}
+
+Glib::ustring EntryCompletion::get_completion_prefix() const
+{
+  return Glib::convert_const_gchar_ptr_to_ustring(gtk_entry_completion_get_completion_prefix(const_cast<GtkEntryCompletion*>(gobj())));
 }
 
 void EntryCompletion::set_text_column(const TreeModelColumnBase& column)
@@ -725,6 +822,20 @@ Glib::PropertyProxy<bool> EntryCompletion::property_popup_single_match()
 Glib::PropertyProxy_ReadOnly<bool> EntryCompletion::property_popup_single_match() const
 {
   return Glib::PropertyProxy_ReadOnly<bool>(this, "popup-single-match");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> EntryCompletion::property_inline_selection() 
+{
+  return Glib::PropertyProxy<bool>(this, "inline-selection");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> EntryCompletion::property_inline_selection() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "inline-selection");
 }
 #endif //GLIBMM_PROPERTIES_ENABLED
 

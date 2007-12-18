@@ -209,9 +209,9 @@ public:
 
   //TODO: Discover real parameter names:
   
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %accel_activate(const Glib::RefPtr<Glib::Object>& object, guint param2, Gdk::ModifierType param3)</tt>
+   * <tt>bool on_my_%accel_activate(const Glib::RefPtr<Glib::Object>& object, guint param2, Gdk::ModifierType param3)</tt>
    */
 
   Glib::SignalProxy3< bool,const Glib::RefPtr<Glib::Object>&,guint,Gdk::ModifierType > signal_accel_activate();
@@ -219,9 +219,9 @@ public:
   //TODO: The C type is unpleasant:
   //This has C docs, but it isn't worth mentioning them for such a useless signal. murrayc.
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %accel_changed(guint keyval, Gdk::ModifierType modifier, GClosure* accel_closure)</tt>
+   * <tt>void on_my_%accel_changed(guint keyval, Gdk::ModifierType modifier, GClosure* accel_closure)</tt>
    */
 
   Glib::SignalProxy3< void,guint,Gdk::ModifierType,GClosure* > signal_accel_changed();
@@ -252,10 +252,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::AccelGroup
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::AccelGroup
    */
   Glib::RefPtr<Gtk::AccelGroup> wrap(GtkAccelGroup* object, bool take_copy = false);
 }

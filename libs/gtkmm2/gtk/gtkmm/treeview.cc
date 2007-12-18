@@ -5,7 +5,7 @@
 #include <gtkmm/private/treeview_p.h>
 
 #include <gtk/gtktypebuiltins.h>
-// -*- c++ -*-
+// -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 /* $Id$ */
 
 /* Copyright 2002 The gtkmm Development Team
@@ -173,7 +173,7 @@ void TreeView::get_cursor(TreeModel::Path& path, TreeViewColumn*& focus_column)
   GtkTreeViewColumn* pTreeViewColumn = 0;
   gtk_tree_view_get_cursor(gobj(), &pTreePath, &pTreeViewColumn);
 
-  path = TreeModel::Path(pTreePath, true);
+  path = TreeModel::Path(pTreePath, false); /* Use the existing underlying GtkTreePath instance without copying and freeing, because gtk_tree_view_get_cursor() gives us ownernship. */
   focus_column = Glib::wrap(pTreeViewColumn);
 }
 
@@ -456,8 +456,51 @@ void TreeView::unset_model()
   gtk_tree_view_set_model(gobj(), 0);
 }
 
-} // namespace Gtk
+bool
+TreeView::get_tooltip_context_path(int& x, int& y,
+                                   bool keyboard_tip,
+                                   TreeModel::Path& path)
+{
+  //It's cleaner to use a temporary C++ object and get a C pointer to it,
+  //because GtkTreePath is a simple struct, not a GtkObject, so
+  //gtk_tree_path_new() would be necessary. markoa.
+  TreeModel::Path tmp_path;
+  GtkTreePath* cpath = tmp_path.gobj();
 
+  gboolean result =
+    gtk_tree_view_get_tooltip_context(gobj(),
+                                      &x, &y,
+                                      keyboard_tip,
+                                      0,
+                                      &cpath,
+                                      0);
+
+  path = Glib::wrap(cpath, false /* take_copy=false */);
+
+  return result;
+}
+
+bool
+TreeView::get_tooltip_context_iter(int& x, int& y,
+                                   bool keyboard_tip,
+                                   Gtk::TreeModel::iterator& iter)
+{
+  GtkTreeIter src_iter;
+
+  gboolean result =
+    gtk_tree_view_get_tooltip_context(gobj(),
+                                      &x, &y,
+                                      keyboard_tip,
+                                      0,
+                                      0,
+                                      &src_iter);
+
+  iter = TreeIter(gtk_tree_view_get_model(this->gobj()), &src_iter);
+
+  return result;
+}
+
+} // namespace Gtk
 
 namespace
 {
@@ -824,7 +867,7 @@ void TreeView_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void TreeView_Class::set_scroll_adjustments_callback(GtkTreeView* self, GtkAdjustment* p0, GtkAdjustment* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -832,38 +875,41 @@ void TreeView_Class::set_scroll_adjustments_callback(GtkTreeView* self, GtkAdjus
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_set_scroll_adjustments(Glib::wrap(p0)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_set_scroll_adjustments(Glib::wrap(p0)
 , Glib::wrap(p1)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->set_scroll_adjustments)
-      (*base->set_scroll_adjustments)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->set_scroll_adjustments)
+    (*base->set_scroll_adjustments)(self, p0, p1);
 }
 void TreeView_Class::row_activated_callback(GtkTreeView* self, GtkTreePath* p0, GtkTreeViewColumn* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -871,38 +917,41 @@ void TreeView_Class::row_activated_callback(GtkTreeView* self, GtkTreePath* p0, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_row_activated(Gtk::TreePath(p0, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_row_activated(Gtk::TreePath(p0, true)
 , Glib::wrap(p1)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->row_activated)
-      (*base->row_activated)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->row_activated)
+    (*base->row_activated)(self, p0, p1);
 }
 gboolean TreeView_Class::test_expand_row_callback(GtkTreeView* self, GtkTreeIter* p0, GtkTreePath* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -910,41 +959,43 @@ gboolean TreeView_Class::test_expand_row_callback(GtkTreeView* self, GtkTreeIter
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_test_expand_row(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_test_expand_row(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
 , Gtk::TreePath(p1, true)
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->test_expand_row)
-      return (*base->test_expand_row)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->test_expand_row)
+    return (*base->test_expand_row)(self, p0, p1);
 
   typedef gboolean RType;
   return RType();
 }
 gboolean TreeView_Class::test_collapse_row_callback(GtkTreeView* self, GtkTreeIter* p0, GtkTreePath* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -952,41 +1003,43 @@ gboolean TreeView_Class::test_collapse_row_callback(GtkTreeView* self, GtkTreeIt
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_test_collapse_row(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_test_collapse_row(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
 , Gtk::TreePath(p1, true)
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->test_collapse_row)
-      return (*base->test_collapse_row)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->test_collapse_row)
+    return (*base->test_collapse_row)(self, p0, p1);
 
   typedef gboolean RType;
   return RType();
 }
 void TreeView_Class::row_expanded_callback(GtkTreeView* self, GtkTreeIter* p0, GtkTreePath* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -994,38 +1047,41 @@ void TreeView_Class::row_expanded_callback(GtkTreeView* self, GtkTreeIter* p0, G
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_row_expanded(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_row_expanded(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
 , Gtk::TreePath(p1, true)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->row_expanded)
-      (*base->row_expanded)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->row_expanded)
+    (*base->row_expanded)(self, p0, p1);
 }
 void TreeView_Class::row_collapsed_callback(GtkTreeView* self, GtkTreeIter* p0, GtkTreePath* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1033,38 +1089,41 @@ void TreeView_Class::row_collapsed_callback(GtkTreeView* self, GtkTreeIter* p0, 
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_row_collapsed(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_row_collapsed(TreeModel::iterator(gtk_tree_view_get_model(self), p0)
 , Gtk::TreePath(p1, true)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->row_collapsed)
-      (*base->row_collapsed)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->row_collapsed)
+    (*base->row_collapsed)(self, p0, p1);
 }
 void TreeView_Class::cursor_changed_callback(GtkTreeView* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1072,36 +1131,39 @@ void TreeView_Class::cursor_changed_callback(GtkTreeView* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_cursor_changed();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_cursor_changed();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->cursor_changed)
-      (*base->cursor_changed)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->cursor_changed)
+    (*base->cursor_changed)(self);
 }
 void TreeView_Class::columns_changed_callback(GtkTreeView* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -1109,32 +1171,35 @@ void TreeView_Class::columns_changed_callback(GtkTreeView* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_columns_changed();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_columns_changed();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->columns_changed)
-      (*base->columns_changed)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->columns_changed)
+    (*base->columns_changed)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -1180,15 +1245,17 @@ GType TreeView::get_base_type()
 
 TreeView::TreeView()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Container(Glib::ConstructParams(treeview_class_.init()))
 {
   }
 
 TreeView::TreeView(const Glib::RefPtr<TreeModel>& model)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Container(Glib::ConstructParams(treeview_class_.init(), "model", Glib::unwrap(model), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Container(Glib::ConstructParams(treeview_class_.init(), "model", Glib::unwrap(model), static_cast<char*>(0)))
 {
   }
 
@@ -1557,6 +1624,36 @@ void TreeView::set_search_entry(Entry& entry)
 gtk_tree_view_set_search_entry(gobj(), (entry).gobj()); 
 }
 
+void TreeView::convert_widget_to_tree_coords(int wx, int wy, int& tx, int& ty) const
+{
+gtk_tree_view_convert_widget_to_tree_coords(const_cast<GtkTreeView*>(gobj()), wx, wy, &tx, &ty); 
+}
+
+void TreeView::convert_tree_to_widget_coords(int tx, int ty, int& wx, int& wy) const
+{
+gtk_tree_view_convert_tree_to_widget_coords(const_cast<GtkTreeView*>(gobj()), tx, ty, &wx, &wy); 
+}
+
+void TreeView::convert_widget_to_bin_window_coords(int wx, int wy, int& bx, int& by) const
+{
+gtk_tree_view_convert_widget_to_bin_window_coords(const_cast<GtkTreeView*>(gobj()), wx, wy, &bx, &by); 
+}
+
+void TreeView::convert_bin_window_to_widget_coords(int bx, int by, int& wx, int& wy) const
+{
+gtk_tree_view_convert_bin_window_to_widget_coords(const_cast<GtkTreeView*>(gobj()), bx, by, &wx, &wy); 
+}
+
+void TreeView::convert_tree_to_bin_window_coords(int tx, int ty, int& bx, int& by) const
+{
+gtk_tree_view_convert_tree_to_bin_window_coords(const_cast<GtkTreeView*>(gobj()), tx, ty, &bx, &by); 
+}
+
+void TreeView::convert_bin_window_to_tree_coords(int bx, int by, int& tx, int& ty) const
+{
+gtk_tree_view_convert_bin_window_to_tree_coords(const_cast<GtkTreeView*>(gobj()), bx, by, &tx, &ty); 
+}
+
 void TreeView::set_fixed_height_mode(bool enable)
 {
 gtk_tree_view_set_fixed_height_mode(gobj(), static_cast<int>(enable)); 
@@ -1597,6 +1694,11 @@ bool TreeView::get_rubber_banding() const
   return gtk_tree_view_get_rubber_banding(const_cast<GtkTreeView*>(gobj()));
 }
 
+bool TreeView::is_rubber_banding_active() const
+{
+  return gtk_tree_view_is_rubber_banding_active(const_cast<GtkTreeView*>(gobj()));
+}
+
 void TreeView::set_grid_lines(TreeViewGridLines grid_lines)
 {
 gtk_tree_view_set_grid_lines(gobj(), ((GtkTreeViewGridLines)(grid_lines))); 
@@ -1615,6 +1717,46 @@ gtk_tree_view_set_enable_tree_lines(gobj(), static_cast<int>(enable));
 bool TreeView::get_enable_tree_lines() const
 {
   return gtk_tree_view_get_enable_tree_lines(const_cast<GtkTreeView*>(gobj()));
+}
+
+void TreeView::set_show_expanders(bool enabled)
+{
+gtk_tree_view_set_show_expanders(gobj(), static_cast<int>(enabled)); 
+}
+
+bool TreeView::get_show_expanders() const
+{
+  return gtk_tree_view_get_show_expanders(const_cast<GtkTreeView*>(gobj()));
+}
+
+void TreeView::set_level_indentation(int indentation)
+{
+gtk_tree_view_set_level_indentation(gobj(), indentation); 
+}
+
+int TreeView::get_level_indentation() const
+{
+  return gtk_tree_view_get_level_indentation(const_cast<GtkTreeView*>(gobj()));
+}
+
+void TreeView::set_tooltip_row(const Glib::RefPtr<Tooltip>& tooltip, const TreePath& path)
+{
+gtk_tree_view_set_tooltip_row(gobj(), Glib::unwrap(tooltip), const_cast<GtkTreePath*>((path).gobj())); 
+}
+
+void TreeView::set_tooltip_cell(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path* path, TreeViewColumn* column, CellRenderer* cell)
+{
+gtk_tree_view_set_tooltip_cell(gobj(), Glib::unwrap(tooltip), ((path) ? const_cast<GtkTreePath*>((path)->gobj()) : 0), (GtkTreeViewColumn*)Glib::unwrap(column), (GtkCellRenderer*)Glib::unwrap(cell)); 
+}
+
+void TreeView::set_tooltip_column(int column)
+{
+gtk_tree_view_set_tooltip_column(gobj(), column); 
+}
+
+int TreeView::get_tooltip_column() const
+{
+  return gtk_tree_view_get_tooltip_column(const_cast<GtkTreeView*>(gobj()));
 }
 
 

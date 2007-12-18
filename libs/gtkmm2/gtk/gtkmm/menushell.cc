@@ -35,8 +35,9 @@ namespace Gtk
 
 MenuShell::MenuShell()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Container(Glib::ConstructParams(menushell_class_.init(), (char*) 0)),
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Container(Glib::ConstructParams(menushell_class_.init())),
   items_proxy_  (gobj()),
   accel_window_ (0)
 {}
@@ -227,6 +228,70 @@ static const Glib::SignalProxyInfo MenuShell_signal_selection_done_info =
 };
 
 
+static gboolean MenuShell_signal_move_selected_callback(GtkMenuShell* self, gint p0,void* data)
+{
+  using namespace Gtk;
+  typedef sigc::slot< gboolean,int > SlotType;
+
+  // Do not try to call a signal on a disassociated wrapper.
+  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    try
+    {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
+        return (*static_cast<SlotType*>(slot))(p0
+);
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    }
+    catch(...)
+    {
+      Glib::exception_handlers_invoke();
+    }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
+
+  typedef gboolean RType;
+  return RType();
+}
+
+static gboolean MenuShell_signal_move_selected_notify_callback(GtkMenuShell* self, gint p0, void* data)
+{
+  using namespace Gtk;
+  typedef sigc::slot< void,int > SlotType;
+
+  // Do not try to call a signal on a disassociated wrapper.
+  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    try
+    {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
+        (*static_cast<SlotType*>(slot))(p0
+);
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    }
+    catch(...)
+    {
+      Glib::exception_handlers_invoke();
+    }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
+
+  typedef gboolean RType;
+  return RType();
+}
+
+static const Glib::SignalProxyInfo MenuShell_signal_move_selected_info =
+{
+  "move-selected",
+  (GCallback) &MenuShell_signal_move_selected_callback,
+  (GCallback) &MenuShell_signal_move_selected_notify_callback
+};
+
+
 } // anonymous namespace
 
 
@@ -287,7 +352,7 @@ void MenuShell_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void MenuShell_Class::deactivate_callback(GtkMenuShell* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -295,36 +360,39 @@ void MenuShell_Class::deactivate_callback(GtkMenuShell* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_deactivate();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_deactivate();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->deactivate)
-      (*base->deactivate)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->deactivate)
+    (*base->deactivate)(self);
 }
 void MenuShell_Class::selection_done_callback(GtkMenuShell* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -332,32 +400,35 @@ void MenuShell_Class::selection_done_callback(GtkMenuShell* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_selection_done();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_selection_done();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->selection_done)
-      (*base->selection_done)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->selection_done)
+    (*base->selection_done)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -497,6 +568,12 @@ Glib::SignalProxy0< void > MenuShell::signal_deactivate()
 Glib::SignalProxy0< void > MenuShell::signal_selection_done()
 {
   return Glib::SignalProxy0< void >(this, &MenuShell_signal_selection_done_info);
+}
+
+
+Glib::SignalProxy1< gboolean,int > MenuShell::signal_move_selected()
+{
+  return Glib::SignalProxy1< gboolean,int >(this, &MenuShell_signal_move_selected_info);
 }
 
 

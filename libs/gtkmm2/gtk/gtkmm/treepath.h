@@ -3,6 +3,8 @@
 #ifndef _GTKMM_TREEPATH_H
 #define _GTKMM_TREEPATH_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -24,6 +26,9 @@
  * License along with this library, ) if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
 
 
 #include <gtkmm/treemodel.h>
@@ -170,7 +175,8 @@ public:
    */
   void next();
   
-  /** Moves the @a path  to point to the previous node at the current depth, if it exists.
+  /** Moves the @a path  to point to the previous node at the current depth, 
+   * if it exists.
    * @return <tt>true</tt> if @a path  has a previous node, and the move was made.
    */
   bool prev();
@@ -185,13 +191,13 @@ public:
   void down();
 
   
-  /** Returns <tt>true</tt> if @a descendant  is a descendant of @a path .
+  /** Return value: <tt>true</tt> if @a descendant  is contained inside @a path 
    * @param descendant Another Gtk::TreePath.
    * @return <tt>true</tt> if @a descendant  is contained inside @a path .
    */
   bool is_ancestor(const TreePath& descendant) const;
   
-  /** Returns <tt>true</tt> if @a path  is a descendant of @a ancestor .
+  /** Return value: <tt>true</tt> if @a ancestor  contains @a path  somewhere below it
    * @param ancestor Another Gtk::TreePath.
    * @return <tt>true</tt> if @a ancestor  contains @a path  somewhere below it.
    */
@@ -229,7 +235,7 @@ public:
 
 #ifndef GTKMM_DISABLE_DEPRECATED
 
-  /** Returns the current depth of @a path .
+  /** Return value: The depth of @a path 
    * @deprecated replaced by size().
    * @return The depth of @a path .
    */
@@ -396,10 +402,13 @@ inline void swap(TreePath& lhs, TreePath& rhs)
 namespace Glib
 {
 
-/** @relates Gtk::TreePath
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gtk::TreePath
  */
 Gtk::TreePath wrap(GtkTreePath* object, bool take_copy = false);
 

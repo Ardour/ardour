@@ -118,17 +118,49 @@ public:
   explicit PageSetupUnixDialog(const Glib::ustring& title);
 
   
+  /** Sets the Gtk::PageSetup from which the page setup
+   * dialog takes its values.
+   * 
+   * @newin2p10
+   * @param page_setup A Gtk::PageSetup.
+   */
   void set_page_setup(const Glib::RefPtr<PageSetup>& page_setup);
   
+  /** Gets the currently selected page setup from the dialog.
+   * @return The current page setup 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PageSetup> get_page_setup();
   
+  /** Gets the currently selected page setup from the dialog.
+   * @return The current page setup 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const PageSetup> get_page_setup() const;
 
   
+  /** Sets the Gtk::PrintSettings from which the page setup dialog
+   * takes its values.
+   * 
+   * @newin2p10
+   * @param print_settings A Gtk::PrintSettings.
+   */
   void set_print_settings(const Glib::RefPtr<PrintSettings>& print_settings);
   
+  /** Gets the current print settings from the dialog.
+   * @return The current print settings
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PrintSettings> get_print_settings();
   
+  /** Gets the current print settings from the dialog.
+   * @return The current print settings
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const PrintSettings> get_print_settings() const;
 
 
@@ -139,10 +171,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::PageSetupUnixDialog
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::PageSetupUnixDialog
    */
   Gtk::PageSetupUnixDialog* wrap(GtkPageSetupUnixDialog* object, bool take_copy = false);
 } //namespace Glib

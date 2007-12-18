@@ -1,3 +1,29 @@
+1.4.6:
+
+ * Bugfixes:
+   - Bug #11972: Cannot build cairomm with Quartz enabled
+
+1.4.4:
+
+ * Added the --enable-api-exceptions=yes/no configure option, to allow 
+   cairomm to build when exceptions are disabled. For instance, when using
+   CXXFLAGS=-fno-exceptions with g++.
+
+1.4.2:
+
+ * Bugfixes:
+   - Bug #11596: Fixed broken shared library versioning (Dave Beckett)
+   - Bug #8511: RefPtr: refcounting broken with cast_*() methods (Murray
+     Cumming)
+
+1.4.0:
+
+ * Wrapped new API added in cairo 1.4
+ * Added support for Quartz surfaces
+ * ability to use dynamic casting for surfaces and patterns returned from
+   Context::get_target(), Context::get_source(), etc.
+ * Various build and bug fixes
+
 1.2.4:
 
  * Fixed an error that prevented Cairo::RefPtr<>::cast_static() and

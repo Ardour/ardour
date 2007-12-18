@@ -35,8 +35,9 @@ namespace Gtk
 
 CellView::CellView(const Glib::ustring& text, bool use_markup)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Widget(Glib::ConstructParams(cellview_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Widget(Glib::ConstructParams(cellview_class_.init()))
 {
   Gtk::CellRendererText* cell = Gtk::manage(new Gtk::CellRendererText());
 
@@ -62,8 +63,9 @@ CellView::CellView(const Glib::ustring& text, bool use_markup)
 
 CellView::CellView(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Widget(Glib::ConstructParams(cellview_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Widget(Glib::ConstructParams(cellview_class_.init()))
 {
   Gtk::CellRendererPixbuf* cell = Gtk::manage(new Gtk::CellRendererPixbuf());
 
@@ -181,7 +183,8 @@ GType CellView::get_base_type()
 
 CellView::CellView()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Widget(Glib::ConstructParams(cellview_class_.init()))
 {
   }

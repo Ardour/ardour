@@ -1,3 +1,370 @@
+2.14.2:
+
+2007-10-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* Merged this change from 2007-03-03 from the glibmm-2-12 branch, which was 
+	missing from this branch:
+	* configure.in:
+	* glib/glibmmconfig.h.in:
+	* glib/src/date.ccg:
+	* glib/src/date.hg:
+	* scripts/Makefile.am:
+	* scripts/c_std.m4: Added a test for the case that time_t is equivalent to 
+	guint32, as seems to be the case on NetBSD-4.99.6/amd64, so we can ifdef-out 
+	the (deprecated, anyway) Glib::Date::set_time(GTime) method when necessary, because 
+	GTime is also equivalent to guint32.
+	Bug #386990.
+
+2007-10-12  Armin Burgmeier  <armin@openismus.com>
+
+	* tools/m4/base.m4: Added a new section called SECTION_HEADER_FIRST
+	that within the header file that is before any generated code (apart
+	from the include guards) and a _CONFIGINCLUDE macro that includes a
+	file within this section. This is intended to be used with
+	g*mmconfig.h so the *_DISABLE_DEPRECATED define is set for deprecated
+	classes also when included from other code.
+
+2.14.1:
+
+2007-09-29  Rémi Cardona  <remi@gentoo.org>
+
+	* configure.in:
+	increase the minimum glib requirements.
+	Bug #481566.
+
+2007-10-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/wrap.cc:
+	* glib/glibmm/wrap.h: Replaced wrap_create_new_wrapper() 
+	(introduced by the last commit) with wrap_create_new_wrapper(),
+	allowing us to check that the parent GType actually implements 
+	the interface. This allows us to return a parent known type 
+	if it implements the wanted interface.
+
+2007-09-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/wrap.cc:
+	* glib/glibmm/wrap.h: Added wrap_auto_interface<>(), which should 
+	be used by wrap() specializations for interfaces, so we create 
+	instances of the interface even if the derived C type is unknown to 
+	us.
+	* glib/glibmm/signalproxy_connectionnode.h: Do not wrap.h from here 
+	unnecessarily, to allow us to include objectbase.h in wrap.h, 
+	needed by the new templated method.
+	* tools/m4/class_interface.m4: Use wrap_auto_interface<>() 
+	instead of wrap_auto() for interfaces.
+
+2.14.0:
+
+2007-09-06  Daniel Elstner  <danielk@openismus.com>
+
+        * glib/src/regex.{ccg,hg} (Regex): Some cosmetic cleanup.  Also
+        replace C-style casts in default argument values with static_cast<>.
+        (escape_string): Wrap missing function.
+        (match_full): Rename to and add as overloads of match().
+        (match_all_full): Rename to and add as overloads of match_all().
+        (split_full): Rename to and add as overloads of split().
+
+	This has freeze-break approval from the release team.
+
+2007-08-16  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/glibmm_footer.html_fragment,
+	docs/reference/glibmm_header.html_fragment: added <div> to doxygen header
+	and footer to make it easier to integrate with library.gnome.org, per a
+	request by Frederic Peters
+
+2.13.9:
+
+2007-07-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/keyfile.hg:
+	* glib/src/keyfile.ccg: Added a set_double() without the group_name 
+	parameter, because the C function can take NULL.
+	* glib/src/glib_docs_override.xml: Corrected the documnentation for 
+	g_keyfile_set/get_double() to mention 2.14, instead of 2.12, 
+	because we only added these to glibmm in 2.14.
+	* glib/src/regex.hg: Correct the since documentation to be 2.14 
+	not 2.12.
+	* glib/src/iochannel.hg: read(): Corrected a parameter name to 
+	match the generated documentation.
+	* glib/glibmm/miscutils.h: Fixed typos in the use of newin2p14.
+
+2007-07-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/Makefile_web.am_fragment: Corrected the rsync options, to 
+	match those used by gtkmm, to fix the examples upload.
+	* glib/src/glib_docs.xml: Regenerated from the C documentation.
+
+2007-07-14  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/keyfile.ccg:
+	* glib/src/keyfile.hg: Added get_double(), set_double(), get_double_list() 
+	and set_double_list().
+
+2.13.8:
+
+2007-07-07  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* glib/src/optioncontext.ccg:
+	* glib/src/optioncontext.hg: add some new API that was added in glib 2.12,
+	including get/set_summary(), get/set_description(), set_translation_domain(),
+	and set_translate_func().
+	* glib/src/glib_docs.xml: Regenerated with docextract_to_xml.py
+	* glib/src/glib_docs_override.xml: override docs for the new functions so
+	that they say that they were introduced in glibmm 2.14 instead of 2.12
+
+2007-07-02  Johannes Schmid <johannes.schmid@openismus.com>
+
+	* glib/src/regex.hg:
+	Added class documentation
+
+2007-07-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/pm/DocsParser.pm: convert_tags_to_doxygen():
+	Handle newin markers for 2.12 and a few after that. 
+	* docs/reference/Doxyfile.in: Added ALIASES for newin2p12 and 
+	a few more.
+
+2.13.7:
+
+2007-06-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/glibmm/main.cc:
+	* glib/glibmm/main.h: Added SignalTimeout::connect_seconds() 
+	as an equivalent for g_timeout_add_seconds() and took the improved 
+	documentation from glib.
+
+	* glib/glibmm/miscutils.cc:
+	* glib/glibmm/miscutils.h: Added get_user_special_dir(), though we 
+	should maybe wrap the enum.
+	Reimplemented many of the functions with the 
+	convert_return_gchar_ptr_to_stdstring() and 
+	convert_const_gchar_ptr_to_stdstring() functions to simplify them 
+	and make them handle NULLs properly.
+
+2007-06-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/regex.ccg:
+	* glib/src/regex.hg: Added a create() method, and added some 
+	more default parameter values to the methods.
+
+	* configure.in:
+	* examples/Makefile.am:
+	* examples/regex/main.cc: Added a very simple example.
+
+	* glib/glibmm/value_custom.h: Put header guards around this, though 
+	this should never be included directly anyway.
+
+2.13.6:
+
+2007-06-17  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/regex.hg:
+	* glib/src/matchinfo.hg: Removed API that uses GMatchInfo, until we 
+	wrap this properly, probably as a C++ iterator. This will avoid this 
+	API accidentally being released as stable sometime.
+
+2007-06-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* glib/src/glib_enums.defs: Regenerated with enums.pl
+	* glib/src/glib_functions.defs: Regenerated with h2defs.py
+
+	* glib/src/Makefile_list_of_hg.am_fragment:
+	* tools/m4/convert_glib.m4:
+	* glib/src/matchinfo.ccg:
+	* glib/src/matchinfo.hg:
+	* glib/src/regex.ccg:
+	* glib/src/regex.hg: Added the RegEx and MatchInfo classes.
+	These need some examples to test them. The MatchInfo class is 
+	probably particularly broken at the moment. See the TODO comments.
+
+	* glib/glibmm.h: Added regex.h
+
+2007-05-14  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/m4/class_boxedtype.m4:
+	* tools/m4/class_gobject.m4:
+	* tools/m4/class_gtkobject.m4:
+	* tools/m4/class_interface.m4:
+	* tools/m4/class_opaque_copyable.m4:
+	* tools/m4/class_opaque_refcounted.m4: Explicitly mention Glib::wrap() 
+	in the documentation for generated Glib::wrap() functions, because doxygen 
+	does not show their namespace.
+
+2007-05-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/pm/Function.pm: When generating example prototypes for 
+	signal handlers, prefix them with on_my_, to avoid confusion with 
+	similarly named functions and with on_*() default signal handlers.
+
+2.13.5:
+
+2007-04-30  Johannes Schmid <johannes.schmid@openismus.com>
+
+	* tools/generate_wrap_init.pl.in:
+	* tools/m4/class_gtkobject.m4:
+	Use _IS_DEPRECATED instead of _CLASS_DEPRECATED because
+	the latter confuses gmmproc.
+	We cannot just use _DEPRECATED because it will result
+	in incorrect handling of for example
+	#ifndef GTKMM_DISABLE_DEPRECATED
+
+2007-04-24  Yselkowitz <yselkowitz@users.sourceforge.net>
+
+	* scripts/macros.m4: Check for both m4 and M4 in the GNU m4 output,
+	to fix the build on some platforms.
+	Bug #423990
+
+2.13.4:
+
+2007-04-11  Armin Burgmeier  <armin@openismus.com>
+
+	* tools/pm/WrapParser.pm: Added peek_token() function which only
+	returns the next token without removing it from the tokens array.
+	Parse '/**' as a separate token and handle it in a special way so that
+	when the final '*/' is encountered and _WRAP_SIGNAL follows, the
+	comment is not terminated but continued by that automatically
+	generated doxygen comment.
+
+	* tools/pm/Output.pm: Added a merge_doxygen_comment_with_previous
+	parameter in output_wrap_sig_decl(). If it is nonzero, the function
+	assumes that there is already a comment open and continues to use it
+	instead of opening a new comment by removing the leading '/**' from
+	what get_refdoc_comment() returns. Bug #378810.
+
+2007-04-06  Johannes Schmid <johannes.schmid@openismus.com>
+
+	* tools/generate_wrap_init.pl.in:
+	Use _CLASS_DEPRECATE instead of just _DEPRECATE to
+	known whether a whole class should be avoided in wrap_init.
+	Otherwise every .hg file containing deprecated methods
+	might get ignored. (Fixes Gtk::TextBuffer bug in maemo)
+
+2007-03-19  Bradley Bell  <btb@debian.org>
+
+ 	* glib/glibmm/helperlist.h: Change variable name to avoid
+ 	warnings about a shadowed member.
+	Bug #420316.
+
+2007-03-19  Bradley Bell  <btb@debian.org>
+
+	* glib/glibmm/utility.h: remove g_free prototype, include gmem.h
+	instead, to avoid a warning about a redundant declaration.
+	Bug #420339.
+
+2007-03-17  Armin Burgmeier  <armin@openismus.com>
+
+	* tools/m4/signal.m4:
+	* tools/m4/vfunc.m4: 
+	Use static_cast in vfuncs and signal handlers to cast the
+	wrapper object to ObjectBase*. This is enough to check whether the object is
+	from a derived type or not. A slow dynamic_cast has only to be performed if it
+	is derived, and the C++ vfunc needs to be called.
+	* glib/glibmm/objectbase.h: This requires ObjectBase::is_derived_ to be public, 
+	because it is called on a ObjectBase* rather than the actual type.
+	This causes a slight speed up of vfuncs and default signal handler invokation.
+
+	Also added commented-out inline versions of ObjectBase::_get_current_wrapper() and 
+	ObjectBase::is_derived(), which could be used in the generated code if we find 
+	that this has significant performance benefits. Note that these methods must be 
+	additional to the non-inline methods, because inline methods are not usually exported in the 
+	shared library. 
+
+2007-02-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/options/main.cc: Use a default value, to show that it 
+	can be done.
+	(This change, from 2006-03-30 was restored after being accidentally lost on Apr 12 2006)
+
+2007-02-10  Armin Burgmeier <armin@arbur.net>
+
+	* glib/src/optiongroup.ccg: default_c_arg(): Set the initial
+	value of the C argument to the value the C++ argument has, to avoid
+	that glibmm resets arguments to zero that were not given on the
+	command line.
+	(This change, from 2006-03-30 was restored after being accidentally lost on Apr 12 2006)
+
+2007-01-28  Daniel Elstner  <daniel.kitta@gmail.com>
+
+	* tools/m4/ctor.m4: If the argument list is empty, call the non-
+	varargs overload of the Glib::ConstructParams constructor instead
+	of using an empty varargs list.  This mistake was exposed thanks
+	to the recent addition of G_GNUC_NULL_TERMINATED to the varargs
+	constructor declaration.  Fortunately it was harmless in this case.
+	Also use the opportunity to clean up the M4 code and prefix builtin
+	M4 macros with m4_, so that we may get rid of the unprefixed macros
+	altogether some day.
+
+Thu, 25 Jan 2007 23:13:05 +0100 Dodji Seketeli
+
+	* tools/m4/base.m4:
+	  prefix the builting mkstemp with 'm4' because otherwise,
+	  m4 1.4.8 recognizes it as a builtin macro and expands it, leading
+	  to compilation errors on some distros.
+	  This should fix #397167. Thanks to Daniel Elstner for spotting this.
+
+2007-01-20  Daniel Elstner  <daniel.kitta@gmail.com>
+
+	* glib/glibmm/dispatcher.{cc,h}: Early spring cleaning.  Also add
+	a paragraph about Dispatcher on win32 to the documentation.
+	(DispatchNotifyData): Remove the 'tag' member from the struct that
+	was always set to 0xdeadbeef in order to detect memory corruption.
+	This is pointless, as we already check the DispatchNotifier pointer
+	sent across the pipe, which is a far better indicator of corruption
+	anyway.
+	(warn_failed_pipe_io): Remove the err_no parameter and retrieve
+	errno respectively GetLastError() within the function instead.
+	(DispatchNotifier::conn_io_handler_): Remove, as we now inherit
+	from sigc::trackable.  I verified that this doesn't cause problems
+	with threading in this particular case.
+	(DispatchNotifier::DispatchNotifier): If creating the pipe failed
+	and exceptions are disabled, call at least warn_failed_pipe_io()
+	instead of doing nothing at all.
+	(DispatchNotifier::*): Rework the win32 implementation so that it
+	matches more closely the Dispatcher semantics on Unix.  This still
+	needs testing by someone on win32, though.  So far I only verified
+	that it compiles with dummy definitions of the win32 API.  Also,
+	I accidentally located the real cause of the race condition Cedric
+	experienced in bug #109966.  It was a bug in my patch, rather than
+	in the example code.
+
+	* examples/thread/dispatcher.cc: Cleanup.  In particular, get rid
+	of the Glib::RefPtr<> abuse with non-Glib::Object types.  I don't
+	believe we endorse such usage officially, so it shouldn't be in
+	the examples.
+
+2007-01-20  Daniel Elstner  <daniel.kitta@gmail.com>
+
+	* glib/glibmm/miscutils.cc: Clean up the code a bit.
+	(get_application_name): Remove the code that checked the string for
+	valid UTF-8, and attempted conversion if not valid.  I must have
+	been on crack when I wrote this, as the combination of conditions
+	that would cause the string to be invalid UTF-8 is quite unlikely.
+	If this is a valid concern at all, it should be filed as a GLib bug
+	and not worked around in glibmm.
+	(build_filename(const std::string&, const std::string&)): Just call
+	the plain g_build_filename() instead of building a temporary array
+	and passing that via ArrayHandle to the build_filename() overload
+	for containers.
+	(build_path): Remove the already deactivated custom implementation
+	from the time before g_build_pathv() was added to GLib.
+
+	* glib/glibmm/object.{cc,h}: Improve/fix a couple of comments.
+	(ConstructParams::ConstructParams): Add G_GNUC_NULL_TERMINATED
+	function attribute to make the compiler complain if the variadic
+	argument list is not terminated by a NULL pointer.
+
+	* glib/glibmm/ustring.{cc,h} (utf8_find_last_of): Avoid applying
+	bitwise logical operators directly to (possibly signed) operands
+	of char type.  In order to avoid relying on implementation-defined
+	behavior, make sure that the operands are of unsigned integer type.
+	(ustring::is_ascii): Likewise,
+	(ustring_Iterator<T>::operator--): Likewise.
+	(get_unichar_from_std_iterator): De-obfuscate this highly optimized
+	piece of code, as the current stable release of GCC (4.1.2-pre on
+	my system) generates better assembler output without the voodoo.
+
 2.13.3:
 
 2006-11-28  Daniel Elstner  <danielk@openismus.com>

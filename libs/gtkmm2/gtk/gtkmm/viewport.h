@@ -111,23 +111,23 @@ public:
   explicit Viewport(Adjustment& hadjustment, Adjustment& vadjustment);
 
 
-  /** Returns the horizontal adjustment of the viewport.
+  /** Return value: the horizontal adjustment of @a viewport .
    * @return The horizontal adjustment of @a viewport .
    */
   Gtk::Adjustment* get_hadjustment();
   
-  /** Returns the horizontal adjustment of the viewport.
+  /** Return value: the horizontal adjustment of @a viewport .
    * @return The horizontal adjustment of @a viewport .
    */
   const Gtk::Adjustment* get_hadjustment() const;
 
   
-  /** Returns the vertical adjustment of the viewport.
+  /** Return value: the vertical adjustment of @a viewport .
    * @return The vertical adjustment of @a viewport .
    */
   Gtk::Adjustment* get_vadjustment();
   
-  /** Returns the vertical adjustment of the viewport.
+  /** Return value: the vertical adjustment of @a viewport .
    * @return The vertical adjustment of @a viewport .
    */
   const Gtk::Adjustment* get_vadjustment() const;
@@ -168,9 +168,9 @@ public:
   ShadowType get_shadow_type() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %set_scroll_adjustments(Gtk::Adjustment* hadjustment, Gtk::Adjustment* vadjustment)</tt>
+   * <tt>void on_my_%set_scroll_adjustments(Gtk::Adjustment* hadjustment, Gtk::Adjustment* vadjustment)</tt>
    */
 
   Glib::SignalProxy2< void,Gtk::Adjustment*,Gtk::Adjustment* > signal_set_scroll_adjustments();
@@ -244,10 +244,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Viewport
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Viewport
    */
   Gtk::Viewport* wrap(GtkViewport* object, bool take_copy = false);
 } //namespace Glib

@@ -202,21 +202,22 @@ public:
   
   void set_tearoff_state(bool torn_off = true);
   
-  /** Returns whether the menu is torn off. See
-   * set_tearoff_state().
+  /** Return value: <tt>true</tt> if the menu is currently torn off.
    * @return <tt>true</tt> if the menu is currently torn off.
    */
   bool get_tearoff_state() const;
 
   
   /** Sets the title string for the menu.  The title is displayed when the menu
-   * is shown as a tearoff menu.
+   * is shown as a tearoff menu.  If @a title  is <tt>0</tt>, the menu will see if it is
+   * attached to a parent menu item, and if so it will try to use the same text as
+   * that menu item's label.
    * @param title A string containing the title for the menu.
    */
   void set_title(const Glib::ustring& title);
   void unset_title();
   
-  /** Returns the title of the menu. See set_title().
+  /** Return value: the title of the menu, or <tt>0</tt> if the menu has no
    * @return The title of the menu, or <tt>0</tt> if the menu has no
    * title set on it. This string is owned by the widget and should
    * not be modified or freed.
@@ -313,10 +314,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Menu
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Menu
    */
   Gtk::Menu* wrap(GtkMenu* object, bool take_copy = false);
 } //namespace Glib

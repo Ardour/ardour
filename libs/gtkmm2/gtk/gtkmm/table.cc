@@ -306,8 +306,9 @@ TableList::reference TableList::operator[](size_type l) const
 
 Table::Table(guint n_rows, guint n_columns, bool homogeneous)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Container(Glib::ConstructParams(table_class_.init(), "n_rows", n_rows, "n_columns", n_columns, "homogeneous", static_cast<int>(homogeneous), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Container(Glib::ConstructParams(table_class_.init(), "n_rows", n_rows, "n_columns", n_columns, "homogeneous", static_cast<int>(homogeneous), static_cast<char*>(0)))
 {
   }
 

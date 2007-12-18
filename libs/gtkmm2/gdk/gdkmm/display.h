@@ -131,7 +131,7 @@ public:
    */
   int get_n_screens() const;
   
-  /** Returns a screen object for one of the screens of the display.
+  /** Returns: the Gdk::Screen object
    * @param screen_num The screen number.
    * @return The Gdk::Screen object
    * 
@@ -139,7 +139,7 @@ public:
    */
   Glib::RefPtr<Screen> get_screen(int screen_num);
   
-  /** Returns a screen object for one of the screens of the display.
+  /** Returns: the Gdk::Screen object
    * @param screen_num The screen number.
    * @return The Gdk::Screen object
    * 
@@ -212,16 +212,14 @@ public:
   void	close();
 
   
-  /** Returns the list of available input devices attached to @a display .
-   * The list is statically allocated and should not be freed.
+  /** Return value: a list of Gdk::Device
    * @return A list of Gdk::Device
    * 
    * @newin2p2.
    */
   Glib::ListHandle< Glib::RefPtr<Device> > list_devices();
   
-  /** Returns the list of available input devices attached to @a display .
-   * The list is statically allocated and should not be freed.
+  /** Return value: a list of Gdk::Device
    * @return A list of Gdk::Device
    * 
    * @newin2p2.
@@ -286,6 +284,8 @@ public:
   //Find out whether we can use a string representation for the atom - look for examples of this function's use.
   
   /** Adds a filter to be called when X ClientMessage events are received.
+   * See gdk_window_add_filter() if you are interested in filtering other
+   * types of events.
    * 
    * @newin2p2
    * @param message_type The type of ClientMessage events to receive.
@@ -332,7 +332,7 @@ public:
   static Glib::RefPtr<Display> get_default();
 
   
-  /** Returns the core pointer device for the given display
+  /** Return value: the core pointer device; this is owned by the
    * @return The core pointer device; this is owned by the
    * display and should not be freed.
    * 
@@ -340,7 +340,7 @@ public:
    */
   Glib::RefPtr<Device> get_core_pointer();
   
-  /** Returns the core pointer device for the given display
+  /** Return value: the core pointer device; this is owned by the
    * @return The core pointer device; this is owned by the
    * display and should not be freed.
    * 
@@ -529,25 +529,21 @@ public:
    */
   void flush();
   
-  /** Returns <tt>true</tt> if cursors can use an 8bit alpha channel 
-   * on @a display . Otherwise, cursors are restricted to bilevel 
-   * alpha (i.e. a mask).
+  /** Returns: whether cursors can have alpha channels.
    * @return Whether cursors can have alpha channels.
    * 
    * @newin2p4.
    */
   bool supports_cursor_alpha() const;
   
-  /** Returns <tt>true</tt> if multicolored cursors are supported
-   * on @a display . Otherwise, cursors have only a forground
-   * and a background color.
+  /** Returns: whether cursors can have multiple colors.
    * @return Whether cursors can have multiple colors.
    * 
    * @newin2p4.
    */
   bool supports_cursor_color() const;
   
-  /** Returns the default size to use for cursors on @a display .
+  /** Returns: the default cursor size.
    * @return The default cursor size.
    * 
    * @newin2p4.
@@ -563,18 +559,14 @@ public:
   void get_maximal_cursor_size(guint& width, guint& height);
 
   
-  /** Returns the default group leader window for all toplevel windows
-   * on @a display . This window is implicitly created by GDK. 
-   * See gdk_window_set_group().
+  /** Return value: The default group leader window for @a display 
    * @return The default group leader window for @a display 
    * 
    * @newin2p4.
    */
   Glib::RefPtr<Window> get_default_group(); 
   
-  /** Returns the default group leader window for all toplevel windows
-   * on @a display . This window is implicitly created by GDK. 
-   * See gdk_window_set_group().
+  /** Return value: The default group leader window for @a display 
    * @return The default group leader window for @a display 
    * 
    * @newin2p4.
@@ -584,8 +576,7 @@ public:
   //TODO: wrap the vfuncs, though they are not very useful because people will not derive from this class? murrayc.
   
 
-  /** Returns whether Gdk::EventOwnerChange events will be 
-   * sent when the owner of a selection changes.
+  /** Return value: whether Gdk::EventOwnerChange events will
    * @return Whether Gdk::EventOwnerChange events will 
    * be sent.
    * 
@@ -605,31 +596,56 @@ public:
   bool request_selection_notification(const Glib::ustring& selection);
 
   
-  /** Returns whether the speicifed display supports clipboard
-   * persistance; i.e.\ if it's possible to store the clipboard data after an
-   * application has quit. On X11 this checks if a clipboard daemon is
-   * running.
+  /** Returns: <tt>true</tt> if the display supports clipboard persistance.
    * @return <tt>true</tt> if the display supports clipboard persistance.
    * 
    * @newin2p6.
    */
   bool supports_clipboard_persistence() const;
 
-  //TODO: Documentation, based on C docs:
+  /** Issues a request to the clipboard manager to store the clipboard data, 
+   * saving all available targets.
+   * On X11, this is a special program that works according to the freedesktop clipboard specification, 
+   * available at http://www.freedesktop.org/Standards/clipboard-manager-spec.
+   * @newin2p6
+   *
+   * @param clipboard_window A Gdk::Window belonging to the clipboard owner.
+   * @param time_ A timestamp.
+   */
   void store_clipboard(const Glib::RefPtr<Gdk::Window>& clipboard_window, guint32 time_);
   
   void store_clipboard(const Glib::RefPtr<Gdk::Window>& clipboard_window, guint32 time_, const Glib::StringArrayHandle& targets);
-                                                     
+        
+
+  /** Returns: <tt>true</tt> if shaped windows are supported
+   * @return <tt>true</tt> if shaped windows are supported 
+   * 
+   * @newin2p10.
+   */
+  bool supports_shapes() const;
+  
+  /** Returns: <tt>true</tt> if windows with modified input shape are supported
+   * @return <tt>true</tt> if windows with modified input shape are supported 
+   * 
+   * @newin2p10.
+   */
+  bool supports_input_shapes() const;
+  
+  /** Returns: <tt>true</tt> if windows may be composited.
+   * @return <tt>true</tt> if windows may be composited.
+   * 
+   * @newin2p12.
+   */
+  bool supports_composite() const;
+                                             
   
   /** The closed signal is emitted when the connection to the windowing
    * system for this display is closed.
    *
    * @param is_error true if the display was closed due to an error
-   */  
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %closed(bool is_error)</tt>
+   * <tt>void on_my_%closed(bool is_error)</tt>
    */
 
   Glib::SignalProxy1< void,bool > signal_closed();
@@ -660,10 +676,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::Display
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::Display
    */
   Glib::RefPtr<Gdk::Display> wrap(GdkDisplay* object, bool take_copy = false);
 }

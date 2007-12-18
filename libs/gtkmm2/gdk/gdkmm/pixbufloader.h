@@ -270,11 +270,9 @@ public:
    * pixbuf in the desired size.  After this signal is emitted, 
    * applications can call get_pixbuf() to fetch 
    * the partially-loaded pixbuf.
-   */ 
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %area_prepared()</tt>
+   * <tt>void on_my_%area_prepared()</tt>
    */
 
   Glib::SignalProxy0< void > signal_area_prepared();
@@ -290,11 +288,9 @@ public:
    * @param y Y offset of upper-left corner of the updated area.
    * @param width Width of updated area.
    * @param height Height of updated area.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %area_updated(int x, int y, int width, int height)</tt>
+   * <tt>void on_my_%area_updated(int x, int y, int width, int height)</tt>
    */
 
   Glib::SignalProxy4< void,int,int,int,int > signal_area_updated();
@@ -304,11 +300,9 @@ public:
    * It can be used by different parts of an application to receive
    * notification when an image loader is closed by the code that
    * drives it.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %closed()</tt>
+   * <tt>void on_my_%closed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_closed();
@@ -324,11 +318,9 @@ public:
    *
    * @param width The original width of the image.
    * @param height The original height of the image
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %size_prepared(int width, int height)</tt>
+   * <tt>void on_my_%size_prepared(int width, int height)</tt>
    */
 
   Glib::SignalProxy2< void,int,int > signal_size_prepared();
@@ -361,10 +353,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::PixbufLoader
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::PixbufLoader
    */
   Glib::RefPtr<Gdk::PixbufLoader> wrap(GdkPixbufLoader* object, bool take_copy = false);
 }

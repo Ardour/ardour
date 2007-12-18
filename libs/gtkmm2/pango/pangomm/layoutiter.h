@@ -67,14 +67,24 @@ public:
    * line, there's a position with a <tt>0</tt> run, so this function can return
    * <tt>0</tt>. The <tt>0</tt> run at the end of each line ensures that all lines have
    * at least one run, even lines consisting of only a newline.
+   * 
+   * Use the faster pango_layout_iter_get_run_readonly() if you do not plan
+   * to modify the contents of the run (glyphs, glyph widths, etc.).
    * @return The current run.
    */
   LayoutRun get_run() const;
+  //TODO: Use pango_layout_iter_get_run_readonly()?
+
   
   /** Gets the current line.
+   * 
+   * Use the faster pango_layout_iter_get_line_readonly() if you do not plan
+   * to modify the contents of the line (glyphs, glyph widths, etc.).
    * @return The current line.
    */
   Glib::RefPtr<LayoutLine> get_line() const;
+  //TODO: We should really have a const and non-const version: _WRAP_METHOD(Glib::RefPtr<const LayoutLine> get_line() const, pango_layout_iter_get_line_readonly, refreturn)
+
   
   /** Determines whether @a iter  is on the last line of the layout.
    * @return <tt>true</tt> if @a iter  is on the last line.
@@ -115,8 +125,8 @@ public:
   
   /** Gets the extents of the current cluster, in layout coordinates
    * (origin is the top left of the entire layout).
-   * @param ink_rect Rectangle to fill with ink extents.
-   * @param logical_rect Rectangle to fill with logical extents.
+   * @param ink_rect Rectangle to fill with ink extents, or <tt>0</tt>.
+   * @param logical_rect Rectangle to fill with logical extents, or <tt>0</tt>.
    */
   void get_cluster_extents(Rectangle& ink_rect, Rectangle& logical_rect) const;
 
@@ -133,8 +143,8 @@ public:
   
   /** Gets the extents of the current run in layout coordinates
    * (origin is the top left of the entire layout).
-   * @param ink_rect Rectangle to fill with ink extents.
-   * @param logical_rect Rectangle to fill with logical extents.
+   * @param ink_rect Rectangle to fill with ink extents, or <tt>0</tt>.
+   * @param logical_rect Rectangle to fill with logical extents, or <tt>0</tt>.
    */
   void get_run_extents(Rectangle& ink_rect, Rectangle& logical_rect) const;
 
@@ -155,8 +165,8 @@ public:
    * Pango::Layout).  Thus the extents returned by this function will be
    * the same width/height but not at the same x/y as the extents
    * returned from pango_layout_line_get_extents().
-   * @param ink_rect Rectangle to fill with ink extents.
-   * @param logical_rect Rectangle to fill with logical extents.
+   * @param ink_rect Rectangle to fill with ink extents, or <tt>0</tt>.
+   * @param logical_rect Rectangle to fill with logical extents, or <tt>0</tt>.
    */
   void get_line_extents(Rectangle& ink_rect, Rectangle& logical_rect) const;
 
@@ -176,7 +186,7 @@ public:
    * the current line.  A line's range includes the line's logical
    * extents, plus half of the spacing above and below the line, if
    * pango_layout_set_spacing() has been called to set layout spacing.
-   * The y positions are in layout coordinates (origin at top left of the
+   * The Y positions are in layout coordinates (origin at top left of the
    * entire layout).
    * @param y0 Start of line.
    * @param y1 End of line.
@@ -187,8 +197,8 @@ public:
   /** Obtains the extents of the Pango::Layout being iterated
    * over. @a ink_rect  or @a logical_rect  can be <tt>0</tt> if you
    * aren't interested in them.
-   * @param ink_rect Rectangle to fill with ink extents.
-   * @param logical_rect Rectangle to fill with logical extents.
+   * @param ink_rect Rectangle to fill with ink extents, or <tt>0</tt>.
+   * @param logical_rect Rectangle to fill with logical extents, or <tt>0</tt>.
    */
   void get_layout_extents(Rectangle& ink_rect, Rectangle& logical_rect) const;
 
@@ -203,7 +213,7 @@ public:
   Rectangle get_layout_logical_extents() const;
 
   
-  /** Gets the y position of the current line's baseline, in layout
+  /** Gets the Y position of the current line's baseline, in layout
    * coordinates (origin at top left of the entire layout).
    * @return Baseline of current line.
    */

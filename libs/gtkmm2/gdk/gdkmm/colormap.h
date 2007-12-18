@@ -3,6 +3,8 @@
 #ifndef _GDKMM_COLORMAP_H
 #define _GDKMM_COLORMAP_H
 
+#include <gdkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -26,6 +28,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GDKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <glibmm/object.h>
 #include <gdkmm/visual.h>
@@ -158,12 +164,12 @@ public:
   void query_color (gulong pixel, Color& result);
 
   
-  /** Returns the visual for which a given colormap was created.
+  /** Return value: the visual of the colormap.
    * @return The visual of the colormap.
    */
   Glib::RefPtr<Visual> get_visual();
   
-  /** Returns the visual for which a given colormap was created.
+  /** Return value: the visual of the colormap.
    * @return The visual of the colormap.
    */
   Glib::RefPtr<const Visual> get_visual() const;
@@ -208,10 +214,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::Colormap
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::Colormap
    */
   Glib::RefPtr<Gdk::Colormap> wrap(GdkColormap* object, bool take_copy = false);
 }

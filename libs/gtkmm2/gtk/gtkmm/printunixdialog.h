@@ -129,33 +129,107 @@ public:
   explicit PrintUnixDialog(const Glib::ustring& title);
 
   
+  /** Sets the page setup of the Gtk::PrintUnixDialog.
+   * 
+   * @newin2p10
+   * @param page_setup A Gtk::PageSetup.
+   */
   void set_page_setup(const Glib::RefPtr<PageSetup>& page_setup);
   
+  /** Gets the page setup that is used by the Gtk::PrintUnixDialog.
+   * @return The page setup of @a dialog .
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PageSetup> get_page_setup();
   
+  /** Gets the page setup that is used by the Gtk::PrintUnixDialog.
+   * @return The page setup of @a dialog .
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const PageSetup> get_page_setup() const;
 
   
+  /** Sets the current page number. If @a current_page  is not -1, this enables
+   * the current page choice for the range of pages to print.
+   * 
+   * @newin2p10
+   * @param current_page The current page number.
+   */
   void set_current_page(int current_page);
   
+  /** Gets the current page of the Gtk::PrintDialog.
+   * @return The current page of @a dialog 
+   * 
+   * @newin2p10.
+   */
   int get_current_page() const;
 
   
+  /** Sets the Gtk::PrintSettings for the Gtk::PrintUnixDialog. Typically,
+   * this is used to restore saved print settings from a previous print
+   * operation before the print dialog is shown.
+   * 
+   * @newin2p10
+   * @param settings A Gtk::PrintSettings, or <tt>0</tt>.
+   */
   void set_settings(const Glib::RefPtr<PrintSettings>& print_settings);
   
+  /** Gets a new Gtk::PrintSettings object that represents the
+   * current values in the print dialog. Note that this creates a
+   * <em>new object</em>, and you need to unref it
+   * if don't want to keep it.
+   * @return A new Gtk::PrintSettings object with the values from @a dialog 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PrintSettings> get_settings();
   
+  /** Gets a new Gtk::PrintSettings object that represents the
+   * current values in the print dialog. Note that this creates a
+   * <em>new object</em>, and you need to unref it
+   * if don't want to keep it.
+   * @return A new Gtk::PrintSettings object with the values from @a dialog 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const PrintSettings> get_settings() const;
 
    
+  /** Gets the currently selected printer.
+   * @return The currently selected printer
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<Printer> get_selected_printer();
   
+  /** Gets the currently selected printer.
+   * @return The currently selected printer
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const Printer> get_selected_printer() const;
 
   void add_custom_tab(const Widget& child, const Glib::ustring& tab_label);
   
+  /** Adds a custom tab to the print dialog.
+   * 
+   * @newin2p10
+   * @param child The widget to put in the custom tab.
+   * @param tab_label The widget to use as tab label.
+   */
   void add_custom_tab(const Widget& child, const Widget& tab_label);
   
+  /** This lets you specify the printing capabilities your application
+   * supports. For instance, if you can handle scaling the output then
+   * you pass Gtk::PRINT_CAPABILITY_SCALE. If you don't pass that, then
+   * the dialog will only let you select the scale if the printing
+   * system automatically handles scaling.
+   * 
+   * @newin2p10
+   * @param capabilities The printing capabilities of your application.
+   */
   void set_manual_capabilities(PrintCapabilities capabilities);
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
@@ -236,10 +310,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::PrintUnixDialog
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::PrintUnixDialog
    */
   Gtk::PrintUnixDialog* wrap(GtkPrintUnixDialog* object, bool take_copy = false);
 } //namespace Glib

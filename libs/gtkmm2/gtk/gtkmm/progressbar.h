@@ -214,12 +214,12 @@ public:
   Glib::ustring get_text() const;
   
   /** Causes the given @a text  to appear superimposed on the progress bar.
-   * @param text A UTF-8 string.
+   * @param text A UTF-8 string, or <tt>0</tt>.
    */
   void set_text(const Glib::ustring& text);
 
   
-  /** Returns the current fraction of the task that's been completed.
+  /** Return value: a fraction from 0.0 to 1.0
    * @return A fraction from 0.0 to 1.0.
    */
   double get_fraction() const;
@@ -264,8 +264,7 @@ public:
    */
   void set_ellipsize(Pango::EllipsizeMode mode);
   
-  /** Returns the ellipsizing position of the progressbar. 
-   * See set_ellipsize().
+  /** Return value: Pango::EllipsizeMode
    * @return Pango::EllipsizeMode
    * 
    * @newin2p6.
@@ -380,10 +379,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ProgressBar
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ProgressBar
    */
   Gtk::ProgressBar* wrap(GtkProgressBar* object, bool take_copy = false);
 } //namespace Glib

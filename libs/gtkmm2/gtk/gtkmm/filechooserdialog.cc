@@ -34,30 +34,34 @@ namespace Gtk
 
 FileChooserDialog::FileChooserDialog(Gtk::Window& parent, const Glib::ustring& title, FileChooserAction action)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action, static_cast<char*>(0)))
 {
   set_transient_for(parent);
 }
 
 FileChooserDialog::FileChooserDialog(const Glib::ustring& title, FileChooserAction action)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action, static_cast<char*>(0)))
 {
 }
 
 FileChooserDialog::FileChooserDialog(const Glib::ustring& title, FileChooserAction action, const Glib::ustring& backend)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action,"file-system-backend",backend.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action,"file-system-backend",backend.c_str(), static_cast<char*>(0)))
 {
 }
 
 FileChooserDialog::FileChooserDialog(Gtk::Window& parent, const Glib::ustring& title, FileChooserAction action, const Glib::ustring& backend)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action,"file-system-backend",backend.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(filechooserdialog_class_.init(), "title",title.c_str(),"action",(GtkFileChooserAction)action,"file-system-backend",backend.c_str(), static_cast<char*>(0)))
 {
   set_transient_for(parent);
 }

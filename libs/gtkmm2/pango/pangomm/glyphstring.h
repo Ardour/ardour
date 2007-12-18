@@ -120,6 +120,17 @@ public:
    */
   void get_extents(int start, int end, const Glib::RefPtr<const Font>& font, Rectangle& ink_rect, Rectangle& logical_rect) const;
 
+  
+  /** Computes the logical width of the glyph string as can also be computed
+   * using pango_glyph_string_extents().  However, since this only computes the
+   * width, it's much faster.  This is in fact only a convenience function that
+   * computes the sum of geometry.width for each glyph in the @a glyphs .
+   * @return The logical width of the glyph string.
+   * 
+   * Since: 1.14.
+   */
+  int get_width() const;
+
   /** Computes the extents of the glyph string as drawn.
    * @param font A Pango::Font.
    * @return The extents of the glyph string as drawn.
@@ -185,7 +196,10 @@ public:
    */
   Glib::ArrayHandle<GlyphInfo> get_glyphs() const;
 
-  //TODO: Wrap pango_cairo_glyph_string_path().
+  //TODO: 
+  //void        pango_cairo_glyph_string_path   (cairo_t *cr,
+  //                                         PangoFont *font,
+  //                                         PangoGlyphString *glyphs);
 
 
 };
@@ -208,10 +222,13 @@ inline void swap(GlyphString& lhs, GlyphString& rhs)
 namespace Glib
 {
 
-/** @relates Pango::GlyphString
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Pango::GlyphString
  */
 Pango::GlyphString wrap(PangoGlyphString* object, bool take_copy = false);
 

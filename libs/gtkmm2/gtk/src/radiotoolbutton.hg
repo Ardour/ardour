@@ -1,0 +1,107 @@
+/* $Id: radiotoolbutton.hg,v 1.10 2005/11/30 14:10:49 murrayc Exp $ */
+
+/* box.h
+ *
+ * Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/toggletoolbutton.h>
+#include <gtkmm/radiobuttongroup.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/toggletoolbutton_p.h)
+
+
+namespace Gtk
+{
+
+/** A toolbar item that contains a radio button.
+ *
+ * A Gtk::RadioToolButton is a Gtk::ToolItem that contains a radio button, that is,
+ * a button that is part of a group of toggle buttons where only one button can be
+ * active at a time.
+ *
+ * @ingroup Widgets
+ */
+class RadioToolButton : public ToggleToolButton
+{
+  _CLASS_GTKOBJECT(RadioToolButton, GtkRadioToolButton, GTK_RADIO_TOOL_BUTTON, Gtk::ToggleToolButton, GtkToggleToolButton)
+public:
+  typedef RadioButtonGroup Group;
+
+  /** Creates a new Gtk::RadioToolButton and a new group.
+   *
+   * The RadioToolButton will have an empty label and will reside in an newly created Group.
+   * Use get_group() to retrieve this group and pass it to other radio buttons to assign
+   * them to this group.
+   *
+   * @newin2p4
+   */
+  _CTOR_DEFAULT()
+  
+  /** Creates a new Gtk::RadioToolButton in an existing group.
+   *
+   * The RadioToolButton will have the label @a label and will be put into the Group
+   * @a group.
+   *
+   * @param group The existing group which will be used for this RadioButton.
+   * @param label The string used to display the label for this RadioToolButton.
+   *
+   * @newin2p4
+   */
+  explicit RadioToolButton(Group& group, const Glib::ustring& label = Glib::ustring());
+  _IGNORE(gtk_radio_tool_button_new)
+  
+  /** Creates a new Gtk::RadioToolButton in an existing group.
+   *
+   * The RadioToolButton will be created according to the StockID properties and put into
+   * the Group @a group.
+   * 
+   * @param group The existing group which will be used for this RadioButton.
+   * @param stock_id The StockID which determines the look of the RadioToolButton.
+   *
+   * @newin2p4
+   */
+  RadioToolButton(Group& group, const Gtk::StockID& stock_id);
+  _IGNORE(gtk_radio_tool_button_new_from_stock)
+
+  //This would look to much like a copy constructor:
+  //People should use second.set_group(first.get_group()) instead.
+  //explicit RadioToolButton(RadioToolButton& group, const Gtk::StockID& stock_id = Gtk::StockID());
+  _IGNORE(gtk_radio_tool_button_new_with_stock_from_widget, gtk_radio_tool_button_new_from_widget)
+
+  //This does not correspond to any gtk_radio_tool_button_*_new() function,
+  //but it should work (it just sets properties), and it makes this class consistent with the
+  //other ToolButton classes.
+  
+  /** Creates a new Gtk::RadioToolButton with an image and a new group.
+   *
+   * The RadioToolButton will have the label @a label and an image widget @a icon_widget.
+   *
+   * @param icon_widget The widget placed as the RadioToolButton's icon.
+   * @param label The string used to display the label for this RadioToolButton.
+   *
+   * @newin2p4
+   */
+  explicit RadioToolButton(Widget& icon_widget, const Glib::ustring& label = Glib::ustring());
+
+  
+  _WRAP_METHOD(Group get_group(), gtk_radio_tool_button_get_group)
+  _WRAP_METHOD(void set_group(Group& group), gtk_radio_tool_button_set_group)
+};
+
+} // namespace Gtk
+

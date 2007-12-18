@@ -175,14 +175,14 @@ public:
   void set_visible_column(int column);
 
   
-  /** Returns a pointer to the child model of @a filter .
+  /** Return value: A pointer to a Gtk::TreeModel.
    * @return A pointer to a Gtk::TreeModel.
    * 
    * @newin2p4.
    */
   Glib::RefPtr<TreeModel> get_model();
   
-  /** Returns a pointer to the child model of @a filter .
+  /** Return value: A pointer to a Gtk::TreeModel.
    * @return A pointer to a Gtk::TreeModel.
    * 
    * @newin2p4.
@@ -210,7 +210,8 @@ public:
   /** Converts @a child_path  to a path relative to @a filter . That is, @a child_path 
    * points to a path in the child model. The rerturned path will point to the
    * same row in the filtered model. If @a child_path  isn't a valid path on the
-   * child model, then <tt>0</tt> is returned.
+   * child model or points to a row which is not visible in @a filter , then <tt>0</tt>
+   * is returned.
    * @deprecated Use convert_child_path_to_path(const Path& child_path) const
    * @param child_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
@@ -240,7 +241,8 @@ public:
   /** Converts @a child_path  to a path relative to @a filter . That is, @a child_path 
    * points to a path in the child model. The rerturned path will point to the
    * same row in the filtered model. If @a child_path  isn't a valid path on the
-   * child model, then <tt>0</tt> is returned.
+   * child model or points to a row which is not visible in @a filter , then <tt>0</tt>
+   * is returned.
    * @param child_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    * 
@@ -272,7 +274,7 @@ public:
    * ref_node(). This might be useful if the child model
    * being filtered is static (and doesn't change often) and there has been
    * a lot of unreffed access to nodes. As a side effect of this function,
-   * all unreffed itters will be invalid.
+   * all unreffed iters will be invalid.
    * 
    * @newin2p4
    */
@@ -306,10 +308,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TreeModelFilter
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeModelFilter
    */
   Glib::RefPtr<Gtk::TreeModelFilter> wrap(GtkTreeModelFilter* object, bool take_copy = false);
 }

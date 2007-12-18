@@ -32,8 +32,9 @@ namespace Gtk
 
 TreeStore::TreeStore(const TreeModelColumnRecord& columns)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(treestore_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(treestore_class_.init()))
 {
   gtk_tree_store_set_column_types(gobj(), columns.size(), const_cast<GType*>(columns.types()));
 }
@@ -255,7 +256,8 @@ GType TreeStore::get_base_type()
 
 TreeStore::TreeStore()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(treestore_class_.init()))
 {
   }

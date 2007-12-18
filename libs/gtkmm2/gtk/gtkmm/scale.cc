@@ -54,8 +54,9 @@ int Scale::calc_digits_(double step) const
 
 VScale::VScale(double min, double max, double step)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scale(Glib::ConstructParams(vscale_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scale(Glib::ConstructParams(vscale_class_.init()))
 {
   Adjustment* adjustment = manage(new Adjustment(min, min, max, step, 10 * step, step));
   // The adjustment will be destroyed along with the object
@@ -66,16 +67,18 @@ VScale::VScale(double min, double max, double step)
 
 VScale::VScale(Adjustment& adjustment)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scale(Glib::ConstructParams(vscale_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scale(Glib::ConstructParams(vscale_class_.init()))
 {
   set_adjustment(adjustment);
 }
 
 VScale::VScale()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scale(Glib::ConstructParams(vscale_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scale(Glib::ConstructParams(vscale_class_.init()))
 {
   Adjustment* adjustment = manage(new Adjustment(0.0, 0.0, 0.0,
 						  0.0, 0.0, 0.0));
@@ -86,8 +89,9 @@ VScale::VScale()
 
 HScale::HScale(double min, double max, double step)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scale(Glib::ConstructParams(hscale_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scale(Glib::ConstructParams(hscale_class_.init()))
 {
   Adjustment* adjustment = manage(new Adjustment(min, min, max, step, 10 * step, step));
   // The adjustment will be destroyed along with the object
@@ -98,8 +102,9 @@ HScale::HScale(double min, double max, double step)
 
 HScale::HScale()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scale(Glib::ConstructParams(hscale_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scale(Glib::ConstructParams(hscale_class_.init()))
 {
   Adjustment* adjustment = manage(new Adjustment(0.0, 0.0, 0.0,
 						  0.0, 0.0, 0.0));
@@ -109,8 +114,9 @@ HScale::HScale()
 
 HScale::HScale(Adjustment& adjustment)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Scale(Glib::ConstructParams(hscale_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Scale(Glib::ConstructParams(hscale_class_.init()))
 {
   set_adjustment(adjustment);
 }
@@ -243,7 +249,7 @@ void Scale_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_VFUNCS_ENABLED
 void Scale_Class::draw_value_vfunc_callback(GtkScale* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -251,39 +257,43 @@ void Scale_Class::draw_value_vfunc_callback(GtkScale* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->draw_value_vfunc();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->draw_value_vfunc();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
-        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
-    );
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+  );
 
-    // Call the original underlying C function:
-    if(base && base->draw_value)
-      (*base->draw_value)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->draw_value)
+    (*base->draw_value)(self);
+
 }
 #endif //GLIBMM_VFUNCS_ENABLED
 
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 gchar* Scale_Class::format_value_callback(GtkScale* self, gdouble p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -291,34 +301,36 @@ gchar* Scale_Class::format_value_callback(GtkScale* self, gdouble p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return (strlen(obj->on_format_value(p0
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return (strlen(obj->on_format_value(p0
 ).c_str()) ? g_strdup(obj->on_format_value(p0
 ).c_str()) : 0);
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->format_value)
-      return (*base->format_value)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->format_value)
+    return (*base->format_value)(self, p0);
 
   typedef gchar* RType;
   return RType();
@@ -367,7 +379,8 @@ GType Scale::get_base_type()
 
 Scale::Scale()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Range(Glib::ConstructParams(scale_class_.init()))
 {
   }

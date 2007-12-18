@@ -32,6 +32,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treepath.h>
 #include <gtkmm/cellrenderer.h>
+#include <gtkmm/tooltip.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -172,16 +173,14 @@ public:
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
   
-  /** Returns the model the Gtk::IconView is based on.  Returns <tt>0</tt> if the
-   * model is unset.
+  /** Return value: A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * 
    * @newin2p6.
    */
   Glib::RefPtr<TreeModel> get_model();
   
-  /** Returns the model the Gtk::IconView is based on.  Returns <tt>0</tt> if the
-   * model is unset.
+  /** Return value: A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * 
    * @newin2p6.
@@ -193,7 +192,7 @@ public:
    * column must be of type G::TYPE_STRING.
    * 
    * @newin2p6
-   * @param column A column in the currently used model.
+   * @param column A column in the currently used model, or -1 to display no text.
    */
   void set_text_column(int column);
   
@@ -201,11 +200,11 @@ public:
    * column must be of type G::TYPE_STRING.
    * 
    * @newin2p6
-   * @param column A column in the currently used model.
+   * @param column A column in the currently used model, or -1 to display no text.
    */
   void set_text_column(const TreeModelColumnBase& model_column);
   
-  /** Returns the column with text for @a icon_view .
+  /** Returns: the text column, or -1 if it's unset.
    * @return The text column, or -1 if it's unset.
    * 
    * @newin2p6.
@@ -218,7 +217,7 @@ public:
    * the text column set by set_text_column().
    * 
    * @newin2p6
-   * @param column A column in the currently used model.
+   * @param column A column in the currently used model, or -1 to display no text.
    */
   void set_markup_column(int column);
   
@@ -228,11 +227,11 @@ public:
    * the text column set by set_text_column().
    * 
    * @newin2p6
-   * @param column A column in the currently used model.
+   * @param column A column in the currently used model, or -1 to display no text.
    */
   void set_markup_column(const TreeModelColumnBase& column); 
   
-  /** Returns the column with markup text for @a icon_view .
+  /** Returns: the markup column, or -1 if it's unset.
    * @return The markup column, or -1 if it's unset.
    * 
    * @newin2p6.
@@ -243,7 +242,7 @@ public:
    * column must be of type Gdk::TYPE_PIXBUF
    * 
    * @newin2p6
-   * @param column A column in the currently used model.
+   * @param column A column in the currently used model, or -1 to disable.
    */
   void set_pixbuf_column(int column);
   
@@ -251,11 +250,11 @@ public:
    * column must be of type Gdk::TYPE_PIXBUF
    * 
    * @newin2p6
-   * @param column A column in the currently used model.
+   * @param column A column in the currently used model, or -1 to disable.
    */
   void set_pixbuf_column(const TreeModelColumnBase& column);  
   
-  /** Returns the column with pixbufs for @a icon_view .
+  /** Returns: the pixbuf column, or -1 if it's unset.
    * @return The pixbuf column, or -1 if it's unset.
    * 
    * @newin2p6.
@@ -271,8 +270,7 @@ public:
    */
   void set_orientation(Orientation orientation);
   
-  /** Returns the value of the ::orientation property which determines 
-   * whether the labels are drawn beside the icons instead of below.
+  /** Return value: the relative position of texts and icons
    * @return The relative position of texts and icons 
    * 
    * @newin2p6.
@@ -290,7 +288,7 @@ public:
    */
   void set_columns(int columns);
   
-  /** Returns the value of the ::columns property.
+  /** Return value: the number of columns, or -1
    * @return The number of columns, or -1
    * 
    * @newin2p6.
@@ -306,7 +304,7 @@ public:
    */
   void set_item_width(int item_width);
   
-  /** Returns the value of the ::item-width property.
+  /** Return value: the width of a single item, or -1
    * @return The width of a single item, or -1
    * 
    * @newin2p6.
@@ -322,7 +320,7 @@ public:
    */
   void set_spacing(int spacing);
   
-  /** Returns the value of the ::spacing property.
+  /** Return value: the space between cells
    * @return The space between cells 
    * 
    * @newin2p6.
@@ -337,7 +335,7 @@ public:
    */
   void set_row_spacing(int row_spacing);
   
-  /** Returns the value of the ::row-spacing property.
+  /** Return value: the space between rows
    * @return The space between rows
    * 
    * @newin2p6.
@@ -352,7 +350,7 @@ public:
    */
   void set_column_spacing(int column_spacing);
   
-  /** Returns the value of the ::column-spacing property.
+  /** Return value: the space between columns
    * @return The space between columns
    * 
    * @newin2p6.
@@ -369,7 +367,7 @@ public:
    */
   void set_margin(int margin);
   
-  /** Returns the value of the ::margin property.
+  /** Return value: the space at the borders
    * @return The space at the borders 
    * 
    * @newin2p6.
@@ -377,9 +375,11 @@ public:
   int get_margin() const;
 
   
-  /** Finds the path at the point ( @a x , @a y ), relative to widget coordinates.
+  /** Finds the path at the point ( @a x , @a y ), relative to bin_window coordinates.
    * See get_item_at_pos(), if you are also interested in
-   * the cell at the specified position.
+   * the cell at the specified position. 
+   * See convert_widget_to_bin_window_coords() for converting
+   * widget coordinates to bin_window coordinates.
    * @param x The x position to be identified.
    * @param y The y position to be identified.
    * @return The Gtk::TreePath corresponding to the icon or <tt>0</tt>
@@ -474,8 +474,7 @@ public:
    */
   void unselect_path(const TreeModel::Path& path);
   
-  /** Returns <tt>true</tt> if the icon pointed to by @a path  is currently
-   * selected. If @a icon  does not point to a valid location, <tt>false</tt> is returned.
+  /** Return value: <tt>true</tt> if @a path  is selected.
    * @param path A Gtk::TreePath to check selection on.
    * @return <tt>true</tt> if @a path  is selected.
    * 
@@ -539,8 +538,24 @@ public:
    */
   void item_activated(const TreeModel::Path& path);
 
-  void set_cursor(const TreeModel::Path& path, CellRenderer& cell, bool start_editing);
+  //TODO: Add a version with no cell parameter.
   
+  /** Sets the current keyboard focus to be at @a path , and selects it.  This is
+   * useful when you want to focus the user's attention on a particular item.  
+   * If @a cell  is not <tt>0</tt>, then focus is given to the cell specified by 
+   * it. Additionally, if @a start_editing  is <tt>true</tt>, then editing should be 
+   * started in the specified cell.  
+   * 
+   * This function is often followed by <tt>gtk_widget_grab_focus 
+   * (icon_view)</tt> in order to give keyboard focus to the widget.  
+   * Please note that editing can only happen when the widget is realized.
+   * 
+   * @newin2p8
+   * @param path A Gtk::TreePath.
+   * @param cell One of the cell renderers of @a icon_view , or <tt>0</tt>.
+   * @param start_editing <tt>true</tt> if the specified cell should start being edited.
+   */
+  void set_cursor(const TreeModel::Path& path, CellRenderer& cell, bool start_editing);
 
   /** Fills in @a path and @a cell with the current cursor path and cell. 
    * If the cursor isn't currently set, then @a path will be empty.
@@ -578,18 +593,19 @@ public:
   
 
   /** Moves the alignments of @a icon_view  to the position specified by @a path .  
-   *  @a row_align  determines where the row is placed, and @a col_align  determines where 
-   *  @a column  is placed.  Both are expected to be between 0.0 and 1.0. 
-   * 0.0 means left/top alignment, 1.0 means right/bottom alignment, 0.5 means center.
+   *  @a row_align  determines where the row is placed, and @a col_align  determines 
+   * where @a column  is placed.  Both are expected to be between 0.0 and 1.0. 
+   * 0.0 means left/top alignment, 1.0 means right/bottom alignment, 0.5 means 
+   * center.
    * 
    * If @a use_align  is <tt>false</tt>, then the alignment arguments are ignored, and the
    * tree does the minimum amount of work to scroll the item onto the screen.
    * This means that the item will be scrolled to the edge closest to its current
    * position.  If the item is currently visible on the screen, nothing is done.
    * 
-   * This function only works if the model is set, and @a path  is a valid row on the
-   * model.  If the model changes before the @a icon_view  is realized, the centered
-   * path will be modified to reflect this change.
+   * This function only works if the model is set, and @a path  is a valid row on 
+   * the model. If the model changes before the @a icon_view  is realized, the 
+   * centered path will be modified to reflect this change.
    * 
    * @newin2p8
    * @param path The path of the item to move to.
@@ -739,26 +755,124 @@ public:
    */
   Glib::RefPtr<Gdk::Pixmap> create_drag_icon( const TreeModel::Path& path);
 
+  
+  /** Converts widget coordinates to coordinates for the bin_window,
+   * as expected by e.g.\ get_path_at_pos(). 
+   * 
+   * @newin2p12
+   * @param wy Y coordinate relative to the widget.
+   * @param bx Return location for bin_window X coordinate.
+   * @param by Return location for bin_window Y coordinate.
+   */
+  void convert_widget_to_bin_window_coords(int wx, int wy, int& bx, int& by) const;
 
-/**
+  
+  /** Sets the tip area of @a tooltip  to be the area covered by the item at @a path .
+   * See also Tooltip::set_tip_area().
+   * 
+   * @newin2p12
+   * @param tooltip A Gtk::Tooltip.
+   * @param path A Gtk::TreePath.
+   */
+  void set_tooltip_item(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path& path);
+  
+  /** Sets the tip area of @a tooltip  to the area which @a cell  occupies in
+   * the item pointed to by @a path . See also Tooltip::set_tip_area().
+   * 
+   * @newin2p12
+   * @param tooltip A Gtk::Tooltip.
+   * @param path A Gtk::TreePath.
+   * @param cell A Gtk::CellRenderer.
+   */
+  void set_tooltip_cell(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path& path, CellRenderer& cell);
+
+  /** Sets the tip area of @a tooltip to the area occupied by 
+   * the item pointed to by @a path. See also Tooltip::set_tip_area().
+   * 
+   * @newin2p12
+   * @param tooltip A Gtk::Tooltip.
+   * @param path A Gtk::TreePath.
+   */
+  void set_tooltip_cell(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path& path);
+
+  
+  /**
+   * @param x: the x coordinate (relative to widget coordinates)
+   * @param y: the y coordinate (relative to widget coordinates)
+   * @param keyboard_tip: whether this is a keyboard tooltip or not
+   * @param path: a reference to receive a Gtk::TreePath
+   *
+   * This function is supposed to be used in a Gtk::Widget::query-tooltip
+   * signal handler for Gtk::IconView. The x, y and keyboard_tip values
+   * which are received in the signal handler, should be passed to this
+   * function without modification.
+   *
+   * The return value indicates whether there is an icon view item at the given
+   * coordinates (true) or not (false) for mouse tooltips. For keyboard
+   * tooltips the item returned will be the cursor item. When true, then the
+   * path which has been provided will be set to point to
+   * that row and the corresponding model. x and y will always be converted
+   * to be relative to IconView's bin_window if keyboard_tooltip is false.
+   *
+   * Return value: whether or not the given tooltip context points to a item.
+   *
+   * @newin2p12
+   */
+  bool get_tooltip_context_path(int& x, int& y,
+                                bool keyboard_tip,
+                                TreeModel::Path& path);
+
+  /**
+   * @param x: the x coordinate (relative to widget coordinates)
+   * @param y: the y coordinate (relative to widget coordinates)
+   * @param keyboard_tip: whether this is a keyboard tooltip or not
+   * @param iter: a pointer to receive a Gtk::TreeIter
+   *
+   * This function is supposed to be used in a Gtk::Widget::query-tooltip
+   * signal handler for Gtk::IconView. The x, y and keyboard_tip values
+   * which are received in the signal handler, should be passed to this
+   * function without modification.
+   *
+   * The return value indicates whether there is an icon view item at the given
+   * coordinates (true) or not (false) for mouse tooltips. For keyboard
+   * tooltips the item returned will be the cursor item. When true, then the
+   * iter which has been provided will be set to point to
+   * that row and the corresponding model. x and y will always be converted
+   * to be relative to IconView's bin_window if keyboard_tooltip is false.
+   *
+   * Return value: whether or not the given tooltip context points to a item.
+   *
+   * @newin2p12
+   */
+  bool get_tooltip_context_iter(int& x, int& y,
+                                bool keyboard_tip,
+                                Gtk::TreeModel::iterator& iter);
+
+  
+  void set_tooltip_column(int column);
+  
+  int get_tooltip_column() const;
+
+
+  /**
    * @par Prototype:
-   * <tt>void %set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment)</tt>
+   * <tt>void on_my_%set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment)</tt>
    */
 
   Glib::SignalProxy2< void,Adjustment*,Adjustment* > signal_set_scroll_adjustments();
  
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %item_activated(const TreeModel::Path& path)</tt>
+   * <tt>void on_my_%item_activated(const TreeModel::Path& path)</tt>
    */
 
   Glib::SignalProxy1< void,const TreeModel::Path& > signal_item_activated();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %selection_changed()</tt>
+   * <tt>void on_my_%selection_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_selection_changed();
@@ -1015,10 +1129,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::IconView
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::IconView
    */
   Gtk::IconView* wrap(GtkIconView* object, bool take_copy = false);
 } //namespace Glib

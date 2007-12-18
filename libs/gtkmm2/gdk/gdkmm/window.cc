@@ -380,9 +380,34 @@ void Window::set_child_shapes()
 gdk_window_set_child_shapes(gobj()); 
 }
 
+void Window::set_composited(bool composited)
+{
+gdk_window_set_composited(gobj(), static_cast<int>(composited)); 
+}
+
 void Window::merge_child_shapes()
 {
 gdk_window_merge_child_shapes(gobj()); 
+}
+
+void Window::input_shape_combine_mask(const Glib::RefPtr<Bitmap>& mask, int x, int y)
+{
+gdk_window_input_shape_combine_mask(gobj(), Glib::unwrap(mask), x, y); 
+}
+
+void Window::input_shape_combine_region(const Region& shape_region, int offset_x, int offset_y)
+{
+gdk_window_input_shape_combine_region(gobj(), const_cast<GdkRegion*>((shape_region).gobj()), offset_x, offset_y); 
+}
+
+void Window::set_child_input_shapes()
+{
+gdk_window_set_child_input_shapes(gobj()); 
+}
+
+void Window::merge_child_input_shapes()
+{
+gdk_window_merge_child_input_shapes(gobj()); 
 }
 
 bool Window::is_visible() const
@@ -408,6 +433,11 @@ bool Window::set_static_gravities(bool use_static)
 void Window::set_type_hint(WindowTypeHint hint)
 {
 gdk_window_set_type_hint(gobj(), ((GdkWindowTypeHint)(hint))); 
+}
+
+WindowTypeHint Window::get_type_hint()
+{
+  return ((WindowTypeHint)(gdk_window_get_type_hint(gobj())));
 }
 
 void Window::set_modal_hint(bool modal)
@@ -449,6 +479,11 @@ gdk_window_set_title(gobj(), title.c_str());
 void Window::set_role(const Glib::ustring& role)
 {
 gdk_window_set_role(gobj(), role.c_str()); 
+}
+
+void Window::set_startup_id(const Glib::ustring& startup_id)
+{
+gdk_window_set_startup_id(gobj(), startup_id.c_str()); 
 }
 
 void Window::set_transient_for(const Glib::RefPtr<Window>& parent)
@@ -612,6 +647,11 @@ Glib::ListHandle< Glib::RefPtr<Window> > Window::get_toplevels()
 }
 
 
+void Window::beep()
+{
+gdk_window_beep(gobj()); 
+}
+
 void Window::iconify()
 {
 gdk_window_iconify(gobj()); 
@@ -770,6 +810,11 @@ gdk_window_set_keep_above(gobj(), static_cast<int>(setting));
 void Window::set_keep_below(bool setting)
 {
 gdk_window_set_keep_below(gobj(), static_cast<int>(setting)); 
+}
+
+void Window::set_opacity(double opacity)
+{
+gdk_window_set_opacity(gobj(), opacity); 
 }
 
 void Window::set_accept_focus(bool accept_focus)

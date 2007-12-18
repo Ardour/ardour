@@ -48,6 +48,7 @@ class Widget;
 //TODO_API: Is _CLASS_BOXEDTYPE the appropriate thing to use here.
 //This seems to be reference-counted, not copied.
 
+/* TODO: Documentation, thought the C API has no documentation for this either. */
 class IconSet
 {
   public:
@@ -173,10 +174,13 @@ inline void swap(IconSet& lhs, IconSet& rhs)
 namespace Glib
 {
 
-/** @relates Gtk::IconSet
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gtk::IconSet
  */
 Gtk::IconSet wrap(GtkIconSet* object, bool take_copy = false);
 

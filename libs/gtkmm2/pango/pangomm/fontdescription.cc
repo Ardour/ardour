@@ -75,6 +75,12 @@ GType Glib::Value<Pango::FontMask>::value_type()
   return pango_font_mask_get_type();
 }
 
+// static
+GType Glib::Value<Pango::Gravity>::value_type()
+{
+  return pango_gravity_get_type();
+}
+
 
 namespace Glib
 {
@@ -214,6 +220,16 @@ pango_font_description_set_absolute_size(gobj(), size);
 bool FontDescription::get_size_is_absolute() const
 {
   return pango_font_description_get_size_is_absolute(const_cast<PangoFontDescription*>(gobj()));
+}
+
+void FontDescription::set_gravity(Gravity gravity)
+{
+pango_font_description_set_gravity(gobj(), ((PangoGravity)(gravity))); 
+}
+
+Gravity FontDescription::get_gravity() const
+{
+  return ((Gravity)(pango_font_description_get_gravity(const_cast<PangoFontDescription*>(gobj()))));
 }
 
 FontMask FontDescription::get_set_fields() const

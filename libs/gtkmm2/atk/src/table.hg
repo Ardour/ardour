@@ -1,0 +1,142 @@
+/* $Id: table.hg,v 1.4 2006/04/12 11:11:24 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(atkmm,atk)
+_PINCLUDE(atk/atkobject.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+  typedef struct _AtkTableIface AtkTableIface;
+  typedef struct _AtkTable      AtkTable;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Atk
+{
+
+class Object;
+
+/** The ATK interface implemented for UI components which contain tabular or row/column information.
+ * This should be implemented by components which present elements ordered via rows and columns. It may also be used to
+ * present tree-structured information if the nodes of the trees can be said to contain multiple "columns". Individual
+ * elements of an Atk::Table are typically referred to as "cells", and these cells are exposed by Atk::Table as child
+ * Atk::Objects of the Atk::Table. Both row/column and child-index-based access to these children is provided.
+ *
+ * Children of Atk::Table are frequently "lightweight" objects, that is, they may not have backing widgets in the host UI
+ * toolkit. They are therefore often transient.
+ *
+ * Since tables are often very complex, Atk::Table includes provision for offering simplified summary information, as
+ * well as row and column headers and captions. Headers and captions are AtkObjects which may implement other interfaces
+ * (Atk::Text, Atk::Image, etc.) as appropriate. Atk::Table summaries may themselves be (simplified) Atk::Tables, etc. 
+ */
+class Table : public Glib::Interface
+{
+  _CLASS_INTERFACE(Table, AtkTable, ATK_TABLE, AtkTableIface)
+
+public:
+  _WRAP_METHOD(Glib::RefPtr<Atk::Object> get_at(int row, int column), atk_table_ref_at)
+  _WRAP_METHOD(int get_index_at(int row, int column) const, atk_table_get_index_at)
+  _WRAP_METHOD(int get_column_at_index(int index) const, atk_table_get_column_at_index)
+  _WRAP_METHOD(int get_row_at_index(int index) const, atk_table_get_row_at_index)
+  _WRAP_METHOD(int get_n_columns() const, atk_table_get_n_columns)
+  _WRAP_METHOD(int get_n_rows() const, atk_table_get_n_rows)
+  _WRAP_METHOD(int get_column_extent_at(int row, int column) const, atk_table_get_column_extent_at)
+  _WRAP_METHOD(int get_row_extent_at(int row, int column) const, atk_table_get_row_extent_at)
+  
+  _WRAP_METHOD(Glib::RefPtr<Atk::Object> get_caption(), atk_table_get_caption, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Atk::Object> get_caption() const, atk_table_get_caption, refreturn, constversion)
+  
+  _WRAP_METHOD(Glib::ustring get_column_description(int column) const, atk_table_get_column_description)
+  
+  _WRAP_METHOD(Glib::RefPtr<Atk::Object> get_column_header(int column), atk_table_get_column_header, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Atk::Object> get_column_header(int column) const, atk_table_get_column_header, refreturn, constversion)
+
+  
+  _WRAP_METHOD(Glib::ustring get_row_description(int row) const, atk_table_get_row_description)
+
+  _WRAP_METHOD(Glib::RefPtr<Atk::Object> get_row_header(int row), atk_table_get_row_header, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Atk::Object> get_row_header(int row) const, atk_table_get_row_header, refreturn, constversion)
+  
+  _WRAP_METHOD(Glib::RefPtr<Atk::Object> get_summary(), atk_table_get_summary, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Atk::Object> get_summary() const, atk_table_get_summary, refreturn, constversion)
+  
+  _WRAP_METHOD(void set_caption(const Glib::RefPtr<Atk::Object>& caption), atk_table_set_caption)
+  _WRAP_METHOD(void set_column_description(int column, const Glib::ustring& description), atk_table_set_column_description)
+  _WRAP_METHOD(void set_column_header(int column, const Glib::RefPtr<Atk::Object>& header), atk_table_set_column_header)
+  _WRAP_METHOD(void set_row_description(int row, const Glib::ustring& description), atk_table_set_row_description)
+  _WRAP_METHOD(void set_row_header(int row, const Glib::RefPtr<Atk::Object>& header), atk_table_set_row_header)
+  _WRAP_METHOD(void set_summary(const Glib::RefPtr<Atk::Object>& accessible), atk_table_set_summary)
+
+  _IGNORE(atk_table_get_selected_columns, atk_table_get_selected_rows)
+  Glib::ArrayHandle<int> get_selected_columns() const;
+  Glib::ArrayHandle<int> get_selected_rows() const;
+
+  _WRAP_METHOD(bool is_column_selected(int column) const, atk_table_is_column_selected)
+  _WRAP_METHOD(bool is_row_selected(int row) const, atk_table_is_row_selected)
+  _WRAP_METHOD(bool is_selected(int row, int column) const, atk_table_is_selected)
+  _WRAP_METHOD(bool add_row_selection(int row), atk_table_add_row_selection)
+  _WRAP_METHOD(bool remove_row_selection(int row), atk_table_remove_row_selection)
+  _WRAP_METHOD(bool add_column_selection(int column), atk_table_add_column_selection)
+  _WRAP_METHOD(bool remove_column_selection(int column), atk_table_remove_column_selection)
+
+  _WRAP_SIGNAL(void row_inserted(int row, int num_inserted), "row_inserted")
+  _WRAP_SIGNAL(void column_inserted(int column, int num_inserted), "column_inserted")
+  _WRAP_SIGNAL(void row_deleted(int row, int num_deleted), "row_deleted")
+  _WRAP_SIGNAL(void column_deleted(int column, int num_deleted), "column_deleted")
+  _WRAP_SIGNAL(void row_reordered(), "row_reordered")
+  _WRAP_SIGNAL(void column_reordered(), "column_reordered")
+  _WRAP_SIGNAL(void model_changed(), "model_changed")
+
+protected:
+#m4 _CONVERSION(`AtkObject*',`const Glib::RefPtr<Atk::Object>&',`Glib::wrap($3, true)')
+  _WRAP_VFUNC(Glib::RefPtr<Atk::Object> get_at(int row, int column), ref_at, refreturn_ctype)
+  _WRAP_VFUNC(int get_index_at(int row, int column) const, get_index_at)
+  _WRAP_VFUNC(int get_column_at_index(int index) const, get_column_at_index)
+  _WRAP_VFUNC(int get_row_at_index(int index) const, get_row_at_index)
+  _WRAP_VFUNC(int get_n_columns() const, get_n_columns)
+  _WRAP_VFUNC(int get_n_rows() const, get_n_rows)
+  _WRAP_VFUNC(int get_column_extent_at(int row, int column) const, get_column_extent_at)
+  _WRAP_VFUNC(int get_row_extent_at(int row, int column) const, get_row_extent_at)
+  _WRAP_VFUNC(Glib::RefPtr<Atk::Object> get_caption(), get_caption, refreturn)
+  _WRAP_VFUNC(const char* get_column_description(int column) const, get_column_description)
+  _WRAP_VFUNC(Glib::RefPtr<Atk::Object> get_column_header(int column), get_column_header, refreturn)
+  _WRAP_VFUNC(const char* get_row_description(int row) const, get_row_description)
+  _WRAP_VFUNC(Glib::RefPtr<Atk::Object> get_row_header(int row), get_row_header, refreturn)
+  _WRAP_VFUNC(Glib::RefPtr<Atk::Object> get_summary(), get_summary, refreturn)
+  _WRAP_VFUNC(void set_caption(const Glib::RefPtr<Atk::Object>& caption), set_caption)
+  _WRAP_VFUNC(void set_column_description(int column, const char* description), set_column_description)
+  _WRAP_VFUNC(void set_column_header(int column, const Glib::RefPtr<Atk::Object>& header), set_column_header)
+  _WRAP_VFUNC(void set_row_description(int row, const char* description), set_row_description)
+  _WRAP_VFUNC(void set_row_header(int row, const Glib::RefPtr<Atk::Object>& header), set_row_header)
+  _WRAP_VFUNC(void set_summary(const Glib::RefPtr<Atk::Object>& accessible), set_summary)
+  _WRAP_VFUNC(bool is_column_selected(int column) const, is_column_selected)
+  _WRAP_VFUNC(bool is_row_selected(int row) const, is_row_selected)
+  _WRAP_VFUNC(bool is_selected(int row, int column) const, is_selected)
+  _WRAP_VFUNC(bool add_row_selection(int row), add_row_selection)
+  _WRAP_VFUNC(bool remove_row_selection(int row), remove_row_selection)
+  _WRAP_VFUNC(bool add_column_selection(int column), add_column_selection)
+  _WRAP_VFUNC(bool remove_column_selection(int column), remove_column_selection)
+  _WRAP_VFUNC(int get_selected_columns(int** selected) const, get_selected_columns)
+  _WRAP_VFUNC(int get_selected_rows(int** selected) const, get_selected_rows)
+};
+
+} // namespace Atk
+

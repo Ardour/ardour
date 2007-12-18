@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: pattern.cc,v 1.1.1.1 2003/01/07 16:58:51 murrayc Exp $ */
+/* $Id: pattern.cc 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* pattern.cc
  *

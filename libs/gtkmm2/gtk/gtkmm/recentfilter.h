@@ -193,21 +193,69 @@ public:
   RecentFilter();
 
   
+  /** Sets the human-readable name of the filter; this is the string
+   * that will be displayed in the recently used resources selector
+   * user interface if there is a selectable list of filters.
+   * 
+   * @newin2p10
+   * @param name Then human readable name of @a filter .
+   */
   void set_name(const Glib::ustring& name);
   
+  /** Gets the human-readable name for the filter.
+   * See gtk_recent_filter_set_name().
+   * @return The name of the filter, or <tt>0</tt>.  The returned string
+   * is owned by the filter object and should not be freed.
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_name() const;
 
   
+  /** Adds a rule that allows resources based on their registered MIME type.
+   * 
+   * @newin2p10
+   * @param mime_type A MIME type.
+   */
   void add_mime_type(const Glib::ustring& mime_type);
   
+  /** Adds a rule that allows resources based on a pattern matching their
+   * display name.
+   * 
+   * @newin2p10
+   * @param pattern A file pattern.
+   */
   void add_pattern(const Glib::ustring& pattern);
   
+  /** Adds a rule allowing image files in the formats supported
+   * by GdkPixbuf.
+   * 
+   * @newin2p10
+   */
   void add_pixbuf_formats();
   
+  /** Adds a rule that allows resources based on the name of the application
+   * that has registered them.
+   * 
+   * @newin2p10
+   * @param application An application name.
+   */
   void add_application(const Glib::ustring& application);
   
+  /** Adds a rule that allows resources based on the name of the group
+   * to which they belong
+   * 
+   * @newin2p10
+   * @param group A group name.
+   */
   void add_group(const Glib::ustring& group);
   
+  /** Adds a rule that allows resources based on their age - that is, the number
+   * of days elapsed since they were last modified.
+   * 
+   * @newin2p10
+   * @param days Number of days.
+   */
   void add_age(int days);
 
   /** A RecentFilter::Info class is used to pass information
@@ -243,6 +291,17 @@ public:
   void add_custom(RecentFilterFlags needed, const SlotCustom& slot);
   
 
+  /** Gets the fields that need to be filled in for the structure
+   * passed to gtk_recent_filter_filter()
+   * 
+   * This function will not typically be used by applications; it
+   * is intended principally for use in the implementation of
+   * Gtk::RecentChooser.
+   * @return Bitfield of flags indicating needed fields when
+   * calling gtk_recent_filter_filter()
+   * 
+   * @newin2p10.
+   */
   RecentFilterFlags get_needed() const;
 
   // Method is used by class RecentChooser implementors.
@@ -257,10 +316,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::RecentFilter
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::RecentFilter
    */
   Gtk::RecentFilter* wrap(GtkRecentFilter* object, bool take_copy = false);
 } //namespace Glib

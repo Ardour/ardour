@@ -466,16 +466,11 @@ int Notebook::insert_page(Widget& child, int position)
   return gtk_notebook_insert_page(gobj(), child.gobj(), 0 /* see GTK+ docs */, position);
 }
 
-  /** For instance,
-   * Notebook* on_window_creation(Widget* page, int x, int y);
-   */
-  typedef sigc::slot<Widget*, int, int> SlotWindowCreation;
+typedef sigc::slot<Widget*, int, int> SlotWindowCreation;
 
 void Notebook::set_window_creation_hook(const SlotWindowCreation& slot)
 {
   SlotWindowCreation* slot_copy = new SlotWindowCreation(slot);
-  //TODO: GTK+ needs a destroy callback so we can delete the slot later.
-  //See bug 344209
   gtk_notebook_set_window_creation_hook(&SignalProxy_WindowCreation_gtk_callback, slot_copy, &SignalProxy_WindowCreation_gtk_callback_destroy);
 }
 
@@ -681,7 +676,7 @@ void Notebook_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void Notebook_Class::switch_page_callback(GtkNotebook* self, GtkNotebookPage* p0, guint p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -689,32 +684,35 @@ void Notebook_Class::switch_page_callback(GtkNotebook* self, GtkNotebookPage* p0
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_switch_page(p0, p1);
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_switch_page(p0, p1);
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->switch_page)
-      (*base->switch_page)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->switch_page)
+    (*base->switch_page)(self, p0, p1);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -760,7 +758,8 @@ GType Notebook::get_base_type()
 
 Notebook::Notebook()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Container(Glib::ConstructParams(notebook_class_.init()))
 {
   }
@@ -800,14 +799,37 @@ void Notebook::remove_page(int page_num)
 gtk_notebook_remove_page(gobj(), page_num); 
 }
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 void Notebook::set_group_id(int group_id)
 {
 gtk_notebook_set_group_id(gobj(), group_id); 
 }
 
+#endif // GTKMM_DISABLE_DEPRECATED
+
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 int Notebook::get_group_id() const
 {
   return gtk_notebook_get_group_id(const_cast<GtkNotebook*>(gobj()));
+}
+
+#endif // GTKMM_DISABLE_DEPRECATED
+
+void Notebook::set_group(void* group)
+{
+gtk_notebook_set_group(gobj(), group); 
+}
+
+void* Notebook::get_group()
+{
+  return gtk_notebook_get_group(gobj());
+}
+
+const void* Notebook::get_group() const
+{
+  return const_cast<Notebook*>(this)->get_group();
 }
 
 int Notebook::get_current_page() const
@@ -825,14 +847,32 @@ const Widget* Notebook::get_nth_page(int page_num) const
   return const_cast<Notebook*>(this)->get_nth_page(page_num);
 }
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 int Notebook::get_n_pages()
 {
   return gtk_notebook_get_n_pages(gobj());
 }
 
+#endif // GTKMM_DISABLE_DEPRECATED
+
+int Notebook::get_n_pages() const
+{
+  return gtk_notebook_get_n_pages(const_cast<GtkNotebook*>(gobj()));
+}
+
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 int Notebook::page_num(const Widget& child)
 {
   return gtk_notebook_page_num(gobj(), const_cast<GtkWidget*>((child).gobj()));
+}
+
+#endif // GTKMM_DISABLE_DEPRECATED
+
+int Notebook::page_num(const Widget& child) const
+{
+  return gtk_notebook_page_num(const_cast<GtkNotebook*>(gobj()), const_cast<GtkWidget*>((child).gobj()));
 }
 
 void Notebook::set_current_page(int page_num)

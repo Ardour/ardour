@@ -19,6 +19,8 @@
 #ifndef __CAIROMM_CONTEXT_H
 #define __CAIROMM_CONTEXT_H
 
+#include <vector>
+#include <utility>
 #include <cairomm/surface.h>
 #include <cairomm/fontface.h>
 #include <cairomm/pattern.h>
@@ -35,6 +37,7 @@ typedef cairo_glyph_t Glyph; //A simple struct.
 typedef cairo_font_extents_t FontExtents; //A simple struct.
 typedef cairo_text_extents_t TextExtents; //A simple struct.
 typedef cairo_matrix_t Matrix; //A simple struct. //TODO: Derive and add operator[] and operator. matrix multiplication?
+typedef cairo_rectangle_t Rectangle;
 
 /** Context is the main class used to draw in cairomm. 
  * In the simplest case, create a Context with its target Surface, set its
@@ -232,6 +235,11 @@ public:
    */
   void set_line_join(LineJoin line_join);
 
+  /** 
+   * Alternate version of set_dash().  You'll probably want to use the one that
+   * takes a std::vector argument instead.
+   */
+  void set_dash(std::valarray<double>& dashes, double offset);
   /** Sets the dash pattern to be used by stroke(). A dash pattern is specified
    * by dashes, an array of positive values. Each value provides the user-space
    * length of altenate "on" and "off" portions of the stroke. The offset
@@ -249,7 +257,7 @@ public:
    *
    * @exception
    */
-  void set_dash(std::valarray<double>& dashes, double offset);
+  void set_dash(std::vector<double>& dashes, double offset);
 
   /** This function disables a dash pattern that was set with set_dash()
    */
@@ -668,6 +676,30 @@ public:
    * @sa set_fill_rule()
    */
   void clip_preserve();
+
+  /**
+   * Computes a bounding box in user coordinates covering the area inside the
+   * current clip.
+   *
+   * @param x1 left of the resulting extents
+   * @param y1 top of the resulting extents
+   * @param x2 right of the resulting extents
+   * @param y2 bottom of the resulting extents
+   *
+   * @since 1.4
+   **/
+  void get_clip_extents(double& x1, double& y1, double& x2, double& y2) const;
+
+  /**
+   * Returns the current clip region as a list of rectangles in user coordinates.
+   *
+   * This function will throw an exception if the clip region cannot be
+   * represented as a list of user-space rectangles.
+   *
+   * @Since 1.4
+   **/
+   void copy_clip_rectangle_list(std::vector<Rectangle>& rectangles) const;
+
   void select_font_face(const std::string& family, FontSlant slant, FontWeight weight);
   void set_font_size(double size);
   void set_font_matrix(const Matrix& matrix);
@@ -737,6 +769,17 @@ public:
    */
   double get_miter_limit() const;
 
+  /**
+   * Gets the current dash array and offset.
+   *
+   * @param dashes return value for the dash array
+   * @param offset return value for the current dash offset
+   *
+   * Since: 1.4
+   **/
+  void get_dash(std::vector<double>& dashes, double& offset) const;
+
+
   /** Stores the current transformation matrix (CTM) into matrix.
    *
    * @param matrix	return value for the matrix
@@ -754,7 +797,7 @@ public:
    * @exception
    */
   RefPtr<const Surface> get_target() const;
-  
+
   //TODO: Copy or reference-count a Path somethow instead of asking the caller to delete it?
   /** Creates a copy of the current path and returns it to the user.
    *

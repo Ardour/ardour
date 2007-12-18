@@ -82,7 +82,7 @@ public:
    GlyphVisAttr get_attr() const;
  
 //I don't think that we need these set_* functions!
-//TODO: Who wrote this? Investigate. murrayc.
+//TODO: Who wrote this comment? Investigate. murrayc.
   /* Sets the glyph itself.
    * @param glyph The new glyph.
    */

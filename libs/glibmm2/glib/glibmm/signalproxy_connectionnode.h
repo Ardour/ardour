@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_SIGNALPROXY_CONNECTIONNODE_H
 #define _GLIBMM_SIGNALPROXY_CONNECTIONNODE_H
 
-/* $Id: signalproxy_connectionnode.h,v 1.6 2004/12/18 23:52:44 murrayc Exp $ */
+/* $Id: signalproxy_connectionnode.h 446 2007-09-26 15:10:44Z murrayc $ */
 
 /* signalproxy_connectionnode.h
  *
@@ -24,12 +24,17 @@
  */
 
 #include <sigc++/sigc++.h>
-#include <glibmm/wrap.h>
+#include <glib/gtypes.h>
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef struct _GObject GObject;
+typedef struct _GClosure GClosure;
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 namespace Glib
 {
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 /** SignalProxyConnectionNode is a connection node for use with SignalProxy.
   * It lives between the layer of Gtk+ and libsigc++.
@@ -62,6 +67,8 @@ public:
 protected:
   GObject* object_;
 };
+
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 } /* namespace Glib */
 

@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: error.cc,v 1.4 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: error.cc 291 2006-05-12 08:08:45Z murrayc $ */
 
 /* error.cc
  *

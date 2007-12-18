@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_WRAP_INIT_H
 #define _GLIBMM_WRAP_INIT_H
 
-/* $Id: wrap_init.h,v 1.1.1.1 2003/01/07 16:59:01 murrayc Exp $ */
+/* $Id: wrap_init.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* wrap_init.h
  *

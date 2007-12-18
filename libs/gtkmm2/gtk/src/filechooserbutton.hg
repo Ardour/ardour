@@ -1,0 +1,101 @@
+/* $Id: filechooserbutton.hg,v 1.7 2005/12/12 08:14:21 murrayc Exp $ */
+
+/* filechooserbutton.h
+ * 
+ * Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/box.h>
+#include <gtkmm/filechooserdialog.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/box_p.h)
+
+
+namespace Gtk
+{
+
+/** A button to launch a file chooser dialog.
+ * 
+ * This widget lets the user select a file. It implements the FileChooser interface. Visually, it is a file name with a 
+ * button to bring up a FileChooserDialog. The user can then use that dialog to change the file associated with that 
+ * button. This widget does not support setting the "select_multiple" property to true.
+ *
+ * The FileChooserButton supports the FileChooserActions FILE_CHOOSER_ACTION_OPEN and FILE_CHOOSER_ACTION_SELECT_FOLDER.
+ *
+ * The FileChooserButton will ellipsize the label, and will thus request little horizontal space. To give the button more 
+ * space, you should call size_request(), set_width_chars(), or pack the button in such a way that other interface 
+ * elements give space to the widget.
+ *
+ * @ingroup Widgets
+ */
+class FileChooserButton
+  : public HBox,
+    public FileChooser
+{
+  _CLASS_GTKOBJECT(FileChooserButton, GtkFileChooserButton, GTK_FILE_CHOOSER_BUTTON, Gtk::HBox, GtkHBox)
+  _IMPLEMENTS_INTERFACE(FileChooser)
+public:
+
+  /** Creates a new file-selecting button widget with the default title.
+   * @param title The title of the browse dialog.
+   * @param action The open mode for the widget.
+   * @param backend The name of the Gtk::FileSystem backend to use.
+   */
+  explicit FileChooserButton(FileChooserAction action = FILE_CHOOSER_ACTION_OPEN);
+  
+  /** Creates a new file-selecting button widget.
+   *
+   * @param title The title of the browse dialog.
+   * @param action The open mode for the widget.
+   */
+  _WRAP_CTOR(FileChooserButton(const Glib::ustring& title, FileChooserAction action = FILE_CHOOSER_ACTION_OPEN), gtk_file_chooser_button_new)
+  
+  /** Creates a new file-selecting button widget using backend.
+   *
+   * @param title The title of the browse dialog.
+   * @param action The open mode for the widget.
+   * @param backend The name of the Gtk::FileSystem backend to use.
+   */ 
+  _WRAP_CTOR(FileChooserButton(const Glib::ustring& title, FileChooserAction action, const Glib::ustring& backend), gtk_file_chooser_button_new_with_backend)
+  
+  /** Creates a new file-selecting button widget which uses dialog as its file-picking window.
+   *
+   * @param dialog The dialog to use.
+   */
+  _WRAP_CTOR(FileChooserButton(FileChooserDialog& dialog), gtk_file_chooser_button_new_with_dialog)
+  
+  _WRAP_METHOD(Glib::ustring get_title() const, gtk_file_chooser_button_get_title)
+  _WRAP_METHOD(void set_title(const Glib::ustring& title), gtk_file_chooser_button_set_title)
+ 
+  _WRAP_METHOD(int get_width_chars() const, gtk_file_chooser_button_get_width_chars)
+  _WRAP_METHOD(void set_width_chars(int n_chars), gtk_file_chooser_button_set_width_chars)
+
+  _WRAP_METHOD(bool get_focus_on_click() const, gtk_file_chooser_button_get_focus_on_click)
+  _WRAP_METHOD(void set_focus_on_click(gboolean focus_on_click = true), gtk_file_chooser_button_set_focus_on_click)   
+
+  //I'm no totally convinced that this is only a key-binding signal. murrayc:
+  _IGNORE_SIGNAL("file-set")
+
+  _WRAP_PROPERTY("dialog", FileChooserDialog*)
+  _WRAP_PROPERTY("focus-on-click", bool)
+  _WRAP_PROPERTY("title", Glib::ustring)                                          
+  _WRAP_PROPERTY("width-chars", int)    
+};
+
+
+} // namespace Gtk
+

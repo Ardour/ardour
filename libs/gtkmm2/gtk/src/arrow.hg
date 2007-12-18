@@ -1,0 +1,66 @@
+/* $Id: arrow.hg,v 1.1 2003/01/21 13:38:42 murrayc Exp $ */
+
+/* arrow.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/misc.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/misc_p.h)
+
+namespace Gtk
+{
+
+/** Produces an arrow pointing in one of the four cardinal directions.
+ *
+ * This is intended for use where a directional arrow (in one of the four
+ * cardinal directions) is desired. As such, it has very limited
+ * functionality and basically only draws itself in a particular direction
+ * and with a particular shadow type.
+ *
+ * Gtk::Arrow will fill any space alloted to it, but since it is inherited
+ * from Gtk::Misc, it can be padded and/or aligned, to fill exactly the
+ * space the programmer desires.
+ *
+ * @ingroup Widgets
+ */
+class Arrow : public Misc {
+  _CLASS_GTKOBJECT(Arrow,GtkArrow,GTK_ARROW,Gtk::Misc,GtkMisc)
+public:
+
+
+  /** Creates an arrow.
+   *
+   * @param arrow_type A Gtk::ArrowType enum describing the arrow direction.
+   * @param shadow_type A Gtk::ShadowType enum describing the shadow type of
+   * the arrow.
+   */
+  _WRAP_CTOR(Arrow(ArrowType arrow_type, ShadowType shadow_type), gtk_arrow_new)
+  
+
+  // Changes the direction and shadow of an arrow.
+  _WRAP_METHOD(void set(ArrowType arrow_type, ShadowType shadow_type),gtk_arrow_set)
+
+  _WRAP_PROPERTY("arrow-type", ArrowType)
+  _WRAP_PROPERTY("shadow-type", ShadowType)
+
+};
+
+
+} /* namespace Gtk */
+

@@ -174,7 +174,8 @@ GType RadioToolButton::get_base_type()
 
 RadioToolButton::RadioToolButton()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::ToggleToolButton(Glib::ConstructParams(radiotoolbutton_class_.init()))
 {
   }

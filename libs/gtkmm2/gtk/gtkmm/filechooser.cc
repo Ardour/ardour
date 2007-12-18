@@ -181,7 +181,7 @@ namespace Glib
 
 Glib::RefPtr<Gtk::FileChooser> wrap(GtkFileChooser* object, bool take_copy)
 {
-  return Glib::RefPtr<Gtk::FileChooser>( dynamic_cast<Gtk::FileChooser*> (Glib::wrap_auto ((GObject*)(object), take_copy)) );
+  return Glib::RefPtr<Gtk::FileChooser>( dynamic_cast<Gtk::FileChooser*> (Glib::wrap_auto_interface<Gtk::FileChooser> ((GObject*)(object), take_copy)) );
   //We use dynamic_cast<> in case of multiple inheritance.
 }
 

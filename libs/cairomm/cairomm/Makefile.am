@@ -2,9 +2,9 @@ SUBDIRS =
 
 INCLUDES = -I$(top_srcdir) @CAIROMM_CFLAGS@
 
-h_sources_public = cairomm.h context.h enums.h fontface.h fontoptions.h path.h pattern.h surface.h xlib_surface.h win32_surface.h exception.h refptr.h scaledfont.h
+h_sources_public = cairomm.h context.h enums.h fontface.h fontoptions.h path.h pattern.h quartz_surface.h surface.h xlib_surface.h win32_surface.h exception.h refptr.h scaledfont.h
 h_sources_private = private.h
-cc_sources = context.cc fontface.cc fontoptions.cc path.cc pattern.cc surface.cc xlib_surface.cc win32_surface.cc exception.cc scaledfont.cc
+cc_sources = context.cc fontface.cc fontoptions.cc path.cc pattern.cc quartz_surface.cc surface.cc xlib_surface.cc win32_surface.cc exception.cc scaledfont.cc
 cc_sources_private = private.cc
 
 # Support for DLL on cygwin/mingw using libtool > 1.4

@@ -1,0 +1,61 @@
+// -*- c++ -*-
+/* $Id: iconfactory.ccg,v 1.1 2003/01/21 13:40:26 murrayc Exp $ */
+
+/* 
+ *
+ * Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkiconfactory.h>
+
+namespace Gtk
+{
+
+// static
+bool IconSize::lookup(IconSize size, int& width, int& height)
+{
+  return gtk_icon_size_lookup((GtkIconSize) int(size), &width, &height);
+}
+
+// static
+IconSize IconSize::register_new(const Glib::ustring& name, int width, int height)
+{
+  const int size = gtk_icon_size_register(name.c_str(), width, height);
+  return IconSize(size);
+}
+
+// static
+void IconSize::register_alias(const Glib::ustring& alias, IconSize target)
+{
+  gtk_icon_size_register_alias(alias.c_str(), (GtkIconSize) int(target));
+}
+
+// static
+IconSize IconSize::from_name(const Glib::ustring& name)
+{
+  const int size = gtk_icon_size_from_name(name.c_str());
+  return IconSize(size);
+}
+
+// static
+Glib::ustring IconSize::get_name(IconSize size)
+{
+  return gtk_icon_size_get_name((GtkIconSize) int(size));
+}
+
+} // namespace Gtk
+

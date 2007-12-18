@@ -1,0 +1,129 @@
+/* $Id: spinbutton.hg,v 1.4 2006/07/19 15:35:02 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/entry.h>
+#include <gtkmm/editable.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/entry_p.h)
+
+
+namespace Gtk
+{
+
+_CC_INCLUDE(gtk/gtktypebuiltins.h)
+_WRAP_ENUM(SpinButtonUpdatePolicy, GtkSpinButtonUpdatePolicy)
+_WRAP_ENUM(SpinType, GtkSpinType)
+
+/** @ingroup gtkmmEnums */
+enum { INPUT_ERROR = -1 };
+
+class Adjustment;
+
+/** numeric Entry with up/down buttons
+ * Slightly misnamed, this should be called a SpinEntry.
+ *
+ * @ingroup Widgets
+ */
+class SpinButton : public Entry
+{
+  _CLASS_GTKOBJECT(SpinButton,GtkSpinButton,GTK_SPIN_BUTTON,Gtk::Entry,GtkEntry)
+  _IMPLEMENTS_INTERFACE(Editable)
+public:
+
+  //: create instance
+  // adjustment: see Gtk::Adjustment
+  // climb_rate:
+  // digits: number of decimal digits (has to be < 6)
+  SpinButton(double climb_rate = 0.0, guint digits = 0);
+  _WRAP_CTOR(SpinButton(Adjustment& adjustment, double climb_rate = 0.0, guint digits = 0), gtk_spin_button_new)
+
+
+  _WRAP_METHOD(void configure(Adjustment& adjustment, double climb_rate, guint digits), gtk_spin_button_configure)
+
+  _WRAP_METHOD(void set_adjustment(Adjustment& adjustment), gtk_spin_button_set_adjustment)
+  void unset_adjustment();
+  _WRAP_METHOD(Gtk::Adjustment* get_adjustment(), gtk_spin_button_get_adjustment)
+  _WRAP_METHOD(const Gtk::Adjustment* get_adjustment() const, gtk_spin_button_get_adjustment, constversion)
+
+  _WRAP_METHOD(void set_digits(guint digits), gtk_spin_button_set_digits)
+  _WRAP_METHOD(guint get_digits() const, gtk_spin_button_get_digits)
+
+  _WRAP_METHOD(void set_increments(double step, double page), gtk_spin_button_set_increments)
+  _WRAP_METHOD(void get_increments(double& step, double& page) const, gtk_spin_button_get_increments)
+
+  _WRAP_METHOD(void set_range(double min, double max), gtk_spin_button_set_range)
+  _WRAP_METHOD(void get_range(double& min, double& max) const, gtk_spin_button_get_range)
+
+  _WRAP_METHOD(double get_value() const, gtk_spin_button_get_value)
+  _WRAP_METHOD(int get_value_as_int() const, gtk_spin_button_get_value_as_int)
+  _WRAP_METHOD(void set_value(double value), gtk_spin_button_set_value)
+
+  _WRAP_METHOD(void set_update_policy(SpinButtonUpdatePolicy policy), gtk_spin_button_set_update_policy)
+  _WRAP_METHOD(SpinButtonUpdatePolicy get_update_policy() const, gtk_spin_button_get_update_policy)
+
+  _WRAP_METHOD(void set_numeric(bool numeric = true), gtk_spin_button_set_numeric)
+  _WRAP_METHOD(bool get_numeric() const, gtk_spin_button_get_numeric)
+
+  _WRAP_METHOD(void spin(SpinType direction, double increment), gtk_spin_button_spin)
+
+  _WRAP_METHOD(void set_wrap(bool wrap = true), gtk_spin_button_set_wrap)
+  _WRAP_METHOD(bool get_wrap() const, gtk_spin_button_get_wrap)
+
+  _WRAP_METHOD(void set_snap_to_ticks(bool snap_to_ticks = true), gtk_spin_button_set_snap_to_ticks)
+  _WRAP_METHOD(bool get_snap_to_ticks() const, gtk_spin_button_get_snap_to_ticks)
+
+  _WRAP_METHOD(void update(), gtk_spin_button_update)
+
+  /** Convert the Entry text to a number.
+   * The computed number should be written to <tt>*new_value</tt>.
+   * @return
+   * @li <tt>false</tt>: No conversion done, continue with default handler.
+   * @li <tt>true</tt>: Conversion successful, don't call default handler.
+   * @li <tt>Gtk::INPUT_ERROR</tt>: Conversion failed, don't call default handler.
+   */
+  _WRAP_SIGNAL(int input(double* new_value), "input")
+
+  /** Convert the Adjustment position to text.
+   * The computed text should be written via Gtk::Entry::set_text().
+   * @return
+   * @li <tt>false</tt>: No conversion done, continue with default handler.
+   * @li <tt>true</tt>: Conversion successful, don't call default handler.
+   */
+  _WRAP_SIGNAL(bool output(), "output")
+
+  _WRAP_SIGNAL(bool wrapped(), "wrapped", no_default_handler)
+
+  _WRAP_SIGNAL(void value_changed(), "value_changed")
+
+  //Keybinding signals:
+  _IGNORE_SIGNAL("change_value")
+
+  _WRAP_PROPERTY("adjustment", Gtk::Adjustment*)
+  _WRAP_PROPERTY("climb-rate", double)
+  _WRAP_PROPERTY("digits", guint)
+  _WRAP_PROPERTY("snap-to-ticks", bool)
+  _WRAP_PROPERTY("numeric", bool)
+  _WRAP_PROPERTY("wrap", bool)
+  _WRAP_PROPERTY("update-policy", SpinButtonUpdatePolicy)
+  _WRAP_PROPERTY("value", double)
+};
+
+} // namespace Gtk
+

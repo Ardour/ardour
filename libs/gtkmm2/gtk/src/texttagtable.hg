@@ -1,0 +1,69 @@
+/* $Id: texttagtable.hg,v 1.4 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* texttagtable.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/object.h>
+#include <gtkmm/texttag.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gtk
+{
+
+class TextTag;
+
+/** Typedefed as Gtk::TextBuffer::TagTable. A Collection of @link Gtk::TextTag Gtk::TextBuffer::Tags@endlink that can be used together.
+ *
+ * A tag table defines a set of @link Gtk::TextTag Gtk::TextBuffer::Tags@endlink that can be used together. Each buffer has one tag
+ * table associated with it; only tags from that tag table can be used with the buffer. A single tag table can be shared between
+ * multiple buffers, however.
+ *
+ * @ingroup TextView
+ */
+class TextTagTable : public Glib::Object
+{
+   _CLASS_GOBJECT(TextTagTable, GtkTextTagTable, GTK_TEXT_TAG_TABLE, Glib::Object, GObject)
+protected:
+
+  _CTOR_DEFAULT
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(void add(const Glib::RefPtr<TextTag>& tag), gtk_text_tag_table_add)
+  _WRAP_METHOD(void remove(const Glib::RefPtr<TextTag>& tag), gtk_text_tag_table_remove)
+  _WRAP_METHOD(Glib::RefPtr<TextTag> lookup(const Glib::ustring& name), gtk_text_tag_table_lookup, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const TextTag> lookup(const Glib::ustring& name) const, gtk_text_tag_table_lookup, refreturn, constversion)
+
+  typedef sigc::slot<void, const Glib::RefPtr<TextTag>&> SlotForEach;
+  void foreach(const SlotForEach& slot);
+  _IGNORE(gtk_text_tag_table_foreach)
+
+  _WRAP_METHOD(int get_size() const, gtk_text_tag_table_get_size)
+
+  _WRAP_SIGNAL(void tag_changed(const Glib::RefPtr<TextTag>& tag, bool size_changed), "tag_changed")
+  _WRAP_SIGNAL(void tag_added(const Glib::RefPtr<TextTag>& tag), "tag_added")
+  _WRAP_SIGNAL(void tag_removed(const Glib::RefPtr<TextTag>& tag), "tag_removed")
+
+};
+
+} /* namespace Gtk */
+

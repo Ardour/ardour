@@ -1,0 +1,87 @@
+/* $Id: layout.hg,v 1.4 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* layout.h
+ * 
+ * Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/container.h>
+#include <gtkmm/adjustment.h>
+#include <gdkmm/window.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/container_p.h)
+
+
+namespace Gtk
+{
+
+/** Infinite scrollable area containing child widgets and/or custom drawing.
+ *
+ * Gtk::Layout is similar to Gtk::DrawingArea in that it's a "blank slate"
+ * and doesn't do anything but paint a blank background by default. It's
+ * different in that it supports scrolling natively (You can add it directly
+ * to a Gtk::ScrolledWindow), and it can contain child widgets, since it's a
+ * Gtk::Container.  However if you're just going to draw, a Gtk::DrawingArea
+ * is a better choice since it has lower overhead.
+ *
+ * When handling expose_event signals, you must draw to the bin_window
+ * Gdk::Window - see get_bin_window() - rather than the normal Gdk::Window -
+ * see get_window() - as you would for a drawing area.
+ *
+ * @ingroup Widgets
+ * @ingroup Containers
+ */
+class Layout : public Container
+{
+  _CLASS_GTKOBJECT(Layout,GtkLayout,GTK_LAYOUT,Gtk::Container,GtkContainer)
+  _IGNORE(gtk_layout_freeze, gtk_layout_thaw)
+public:
+  Layout();
+  Layout(Adjustment& hadjustment, Adjustment& vadjustment);
+
+  _WRAP_METHOD(void put(Widget& child_widget, int x, int y), gtk_layout_put)
+  _WRAP_METHOD(void move(Widget& child_widget, int x, int y), gtk_layout_move)
+  _WRAP_METHOD(void set_size(guint width, guint height), gtk_layout_set_size)
+  _WRAP_METHOD(void get_size(guint& width, guint& height) const, gtk_layout_get_size)
+
+  _WRAP_METHOD(void set_hadjustment(Adjustment& adjustment), gtk_layout_set_hadjustment)
+
+  /// Creates the Adjustment.
+  void set_hadjustment();
+  _WRAP_METHOD(Adjustment* get_hadjustment(), gtk_layout_get_hadjustment)
+  _WRAP_METHOD(const Adjustment* get_hadjustment() const, gtk_layout_get_hadjustment, constversion)
+  _WRAP_METHOD(void set_vadjustment(Adjustment& adjustment), gtk_layout_set_vadjustment)
+
+  /// Creates the Adjustment.
+  void set_vadjustment();
+  _WRAP_METHOD(Adjustment* get_vadjustment(), gtk_layout_get_vadjustment)
+  _WRAP_METHOD(const Adjustment* get_vadjustment() const, gtk_layout_get_vadjustment, constversion)
+
+  _MEMBER_GET_GOBJECT(bin_window, bin_window, Gdk::Window, GdkWindow*)
+
+  // See Gtk::Widget::set_scroll_adjustments()
+  _WRAP_SIGNAL(void set_scroll_adjustments(Adjustment* hadj, Adjustment* vadj), "set_scroll_adjustments")
+
+  _WRAP_PROPERTY("hadjustment", Adjustment*)
+  _WRAP_PROPERTY("vadjustment", Adjustment*)
+  _WRAP_PROPERTY("width", guint)
+  _WRAP_PROPERTY("height", guint)
+};
+
+} /* namespace Gtk */
+

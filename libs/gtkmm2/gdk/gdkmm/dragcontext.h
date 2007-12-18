@@ -249,7 +249,7 @@ public:
    */
   void drop_finish(bool success, guint32 time);
   
-  /** Returns the selection atom for the current source window.
+  /** Return value: the selection atom.
    * @return The selection atom.
    */
   Glib::ustring get_selection() const;
@@ -289,7 +289,7 @@ public:
   /** Get a list of targets offered by the source.
    * @result a list of targets offered by the source.
    */
-  Glib::StringArrayHandle get_targets() const;
+  Gdk::ListHandle_AtomString get_targets() const;
 
   /** Get the DND protocol which governs this drag.
    * @result the DND protocol which governs this drag.
@@ -365,10 +365,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::DragContext
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::DragContext
    */
   Glib::RefPtr<Gdk::DragContext> wrap(GdkDragContext* object, bool take_copy = false);
 }

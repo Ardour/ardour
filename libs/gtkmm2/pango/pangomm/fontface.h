@@ -111,8 +111,19 @@ public:
    */
   Glib::ustring get_name() const;
 
+  /** List the available sizes for a font. This is only applicable to bitmap fonts. 
+   * For scalable fonts this returns an empty array. 
+   * The sizes returned are in Pango units and are sorted in ascending order.
+   */
   Glib::ArrayHandle<int> list_sizes() const;
   
+
+  /** Return value: whether @a face  is synthesized.
+   * @return Whether @a face  is synthesized.
+   * 
+   * Since: 1.18.
+   */
+  bool is_synthesized() const;
   
 protected:
   //We can't wrap the virtual functions because PangoFontFace has a hidden class.
@@ -145,10 +156,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Pango::FontFace
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::FontFace
    */
   Glib::RefPtr<Pango::FontFace> wrap(PangoFontFace* object, bool take_copy = false);
 }

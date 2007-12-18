@@ -70,8 +70,14 @@ private:
 
 protected:
   Implementor(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit Implementor(AtkImplementor* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -123,10 +129,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Atk::Implementor
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Atk::Implementor
    */
   Glib::RefPtr<Atk::Implementor> wrap(AtkImplementor* object, bool take_copy = false);
 

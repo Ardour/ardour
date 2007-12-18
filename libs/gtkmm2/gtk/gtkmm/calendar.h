@@ -28,6 +28,7 @@
  */
 
 #include <gtkmm/widget.h>
+#include <glibmm/date.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -236,7 +237,7 @@ public:
 
   /** Sets display options (whether to display the heading and the month headings).
    * 
-   * Deprecated: Use set_display_options() instead
+   * Deprecated: 2.4: Use set_display_options() instead
    * @param flags The display options to set.
    */
   void display_options(CalendarDisplayOptions flags);
@@ -251,7 +252,7 @@ public:
    */
   void set_display_options(CalendarDisplayOptions flags);
   
-  /** Returns the current display options of @a calendar .
+  /** Return value: the display options.
    * @return The display options.
    * 
    * @newin2p4.
@@ -265,69 +266,80 @@ public:
    * @param day Location to store the day number (between 1 and 31), or <tt>0</tt>.
    */
   void get_date(guint& year, guint& month, guint& day) const;
+  // Additional method not in GTK (#350584)
+  /** Get the date as Glib::Date
+   *
+   * @param date Referenz to set the date
+   */
+  void get_date(Glib::Date& date) const;
+  
   
   /** Does nothing. Previously locked the display of the calendar until
    * it was thawed with thaw().
+   * 
+   * Deprecated: 2.8:
    */
   void freeze();
   
   /** Does nothing. Previously defrosted a calendar; all the changes made
    * since the last freeze() were displayed.
+   * 
+   * Deprecated: 2.8:
    */
   void thaw();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %month_changed()</tt>
+   * <tt>void on_my_%month_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_month_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %day_selected()</tt>
+   * <tt>void on_my_%day_selected()</tt>
    */
 
   Glib::SignalProxy0< void > signal_day_selected();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %day_selected_double_click()</tt>
+   * <tt>void on_my_%day_selected_double_click()</tt>
    */
 
   Glib::SignalProxy0< void > signal_day_selected_double_click();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %prev_month()</tt>
+   * <tt>void on_my_%prev_month()</tt>
    */
 
   Glib::SignalProxy0< void > signal_prev_month();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %next_month()</tt>
+   * <tt>void on_my_%next_month()</tt>
    */
 
   Glib::SignalProxy0< void > signal_next_month();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %prev_year()</tt>
+   * <tt>void on_my_%prev_year()</tt>
    */
 
   Glib::SignalProxy0< void > signal_prev_year();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %next_year()</tt>
+   * <tt>void on_my_%next_year()</tt>
    */
 
   Glib::SignalProxy0< void > signal_next_year();
@@ -340,10 +352,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Calendar
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Calendar
    */
   Gtk::Calendar* wrap(GtkCalendar* object, bool take_copy = false);
 } //namespace Glib

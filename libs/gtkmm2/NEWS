@@ -1,0 +1,2530 @@
+2.12.3:
+
+* Documentation: Improved the devhelp file to 
+  - show the full method name, including the class name.
+  - really jump to the method's anchor on the page.
+  (Jonathon Jongsma) Bug #488261
+* Build: Fix the win32 build.
+  (Yevgen Muntyan)
+
+2.12.2:
+
+* IconView: set_cursor(): Actually implement this.
+  (Murray Cumming)
+* LinkButton: Correct the implementation of the 
+  constructor that takes just the URI. Bug #492200
+  (Marko Anastasov)
+* Build: Fix the build on MacOS X. Bug #493057.
+  (Alberto Ruiz)
+
+2.12.1:
+
+* PrintOperation: Corrected a reference-counting problem that caused 
+  crashes.
+
+2.12:
+
+Changes since gtkmm 2.10:
+
+Gtk:
+* New classes: Builder, RecentAction, Tooltip, VolumeButton.
+* Deprecated the Tooltips class.
+* AboutDialog: Added set/get_program_name() and deprecated 
+  set/get_name().
+* Action: Action: Added create_menu().
+* Calendar: Added a get_date() method using Glib::Date.
+* CellLayout: Added get_cells().
+* CellRendererProgress: Added pulse, text-xalign, and 
+  text-yalign properties.
+* Entry: Added set_cursor_hadjustment(), get_cursor_hadjustment().
+* EntryCompletion: Added set_inline_selection() and 
+  get_inline_selection(), and Added cursor_on_match signal.
+* IconTheme: Added choose_icon(), list_contexts().
+* IconView: Added set_tooltip_item(), set_tooltip_cell(), 
+  get_tooltip_context_path() and get_tooltip_context_iter(),
+  convert_widget_to_bin_window_coords()
+* LinkButton: Added set_uri_hook() and unset_uri_hook().
+* MenuToolButton: Added set_arrow_tooltip_text() and 
+  set_arrow_tooltip_markup().
+* Notebook: Added set/get_group() and deprecated set/get_group_id().
+* PageSetup: Added to_file(), to_key_file().
+* PaperSize: Added get_paper_sizes(), get_capabilities().
+* Printer: Added list_papers().
+* PrintSettings: Added to_file(), to_key_file().
+* Range: Added set_show_fill_level(), get_show_fill_level(),
+  set_restrict_to_fill_level(), get_restrict_to_fill_level(), 
+  set_fill_level(), get_fill_level().
+* RecentAction: Added class.
+* ScaleButton: Added class.
+* StatusIcon: Added set_screen() and get_screen() and 
+  popup_menu_at_position().
+  Added popup and activate signals.
+* Stock IDs: Added DISCARD, ORIENTATION_PORTRAIT, 
+  ORIENTATION_LANDSCAPE, ORIENTATION_REVERSE_LANDSCAPE, 
+  ORIENTATION_REVERSE_PORTRAIT, SELECT_ALL
+* Style: Added attach() detach().
+* TextBuffer: Addded add_mark(), and cursor-position property.
+* TextMark: Added constructor and create() method, though these 
+  are usually created via TextBuffer.
+* Toolbar: Added set_icon_size(), unset_icon_size().
+* TreeView: Added is_rubber_banding_active(), 
+  convert_widget_to_tree_coords(), 
+  convert_tree_to_widget_coords(), convert_widget_to_bin_window_coords(), 
+  convert_bin_window_to_widget_coords(), convert_tree_to_bin_window_coords(), 
+  convert_bin_window_to_tree_coords(),
+  set_tooltip_row(), set_tooltip_cell(), set_tooltip_column(), 
+  get_tooltip_column(), get_tooltip_context_path() and 
+  get_tooltip_context_iter().
+* Widget: Added keynav_failed(), error_bell(), 
+  modify_cursor(), unset_cursor(), 
+  set_has_tooltip(), get_has_tooltip().
+* Window: Added set_opacity(), get_opacity(), 
+  set_default_icon_name(), set_accept_focus(), 
+  get_accept_focus(), set_focus_on_map() and get_focus_on_map(). 
+
+Gdk:
+* Display: Added supports_shapes(), supports_input_shapes(), 
+  supports_composite().
+* Pixbuf:
+  - Added constructors that do not take dest_x 
+  and dest_y (which are ignored in this case).
+* Screen: Added is_composited(), set_font_options(), 
+  get_font_options(), set_resolution(), get_resolution(), 
+  get_active_window().
+* Window: Added set_composited(), input_shape_combine_mask(), 
+  input_shape_combine_region(), set_child_input_shapes(), 
+  merge_child_input_shapes(), get_type_hint(), set_startup_id(), beep(), 
+  set_opacity().
+
+Pango:
+* Color: Added to_string().
+* Context: Added set_base_gravity(), get_base_gravity(), 
+  get_gravity(), set_gravity_hint(), get_gravity_hint().
+* FontDescription: Added set_gravity() and get_gravity().
+* FontFace: Added is_synthesized().
+* GlyphString: Added get_width().
+* Layout: Added is_wrapped(), is_ellipsized() and 
+  get_unknown_glyphs_count().
+
+Thanks to Marko Anastasov, Murray Cumming, Daniel Elstner, 
+Jonathon Jongsma, Johannes Schmid, and Kalle Vahlman.
+
+2.12.0:
+
+* RecentAction: Rearrange the constructor parameters, to match the other Action classes.
+  Added more default parameters.
+
+2.11.8:
+
+* Gdk::Cairo::set_source_color(), set_source_pixbuf(), set_source_pixmap():
+  Deprecated the existing versions of these methods and added overloads that 
+  take a const RefPtr& instead. 
+  (Jonathan Jongsma)
+* Deprecated Gdk::Cairo::rectangle(), replacing it with add_rectangle_to_path().
+  and deprecated Gdk::Cairo::region(), replacing it with add_region_to_path(), 
+  because these names are clearer.
+  (Jonathan Jongsma)
+* Documentation: Tutorial: DrawingArea: Corrected a mention of 
+  PixBuf to Pixbuf. Bug #465961 (Jonathan Jongsma)
+
+2.11.7:
+
+* Some build fixes for some compilers/setups.
+ (Daniel Elstner)
+* Documentation markup change for future appearance 
+  in library.gnome.org. (Jonathon Jongsma)
+
+2.11.6:
+
+Gdk:
+* Pixbuf:
+  - Added constructors that do not take dest_x 
+  and dest_y (which are ignored in this case).
+  - get_formats(): Corrected the reference counting.
+
+Pango:
+* Color: Added to_string().
+* Context: Added set_base_gravity(), get_base_gravity(), 
+  get_gravity(), set_gravity_hint(), get_gravity_hint().
+* FontDescription: Added set_gravity() and get_gravity().
+* FontFace: Added is_synthesized().
+* GlyphString: Added get_width().
+* Layout: Added is_wrapped(), is_ellipsized() and 
+  get_unknown_glyphs_count().
+
+Gtk:
+* Builder: Removed get_type_from_name().
+* IconView:
+  - set_tooltip_item(), set_tooltip_cell():
+  Use Tooltip only via a RefPtr.
+  (Murray Cumming)
+  - Added get_tooltip_context_path()
+  and get_tooltip_context_iter().
+  (Marko Anastasov)
+* LinkButton: Added set_uri_hook() and unset_uri_hook().
+* PrintJob: Added a const version of get_surface() 
+* PrintSettings: Corrected the typedef for SlotForeach - 
+  the ustring&s should be const. I do not believe that anybody could 
+  have been using this, so I think it is OK to change it.
+* Tooltip: Added set_tip_area().
+* TreeView:
+  - Added convert_widget_to_tree_coords(), 
+    convert_tree_to_widget_coords(), convert_widget_to_bin_window_coords(), 
+    convert_bin_window_to_widget_coords(), convert_tree_to_bin_window_coords(), 
+    convert_bin_window_to_tree_coords(),
+    set_tooltip_row(), set_tooltip_cell(), set_tooltip_column(), 
+    get_tooltip_column().
+  (Murray Cumming)
+  - Added get_tooltip_context_path() and get_tooltip_context_iter().
+  (Marko Anastasov)
+* Widget: Added keynav_failed(), error_bell(), 
+  modify_cursor(), unset_cursor(), 
+  set_has_tooltip(), get_has_tooltip().
+  (Murray Cumming)
+* Documentation:
+  - Corrected lots of API reference documentation.
+  (Murray Cumming, Marko Anastasov, Jonathan Jongsma)
+  - Added a Tooltip example. (Marko Anastasov)
+
+2.11.5:
+
+Pango:
+* Color: Added to_string().
+* Context: Added set_base_gravity(), get_base_gravity(), 
+  get_gravity(), set_gravity_hint(), get_gravity_hint().
+* FontDescription: Added set_gravity() and get_gravity().
+* FontFace: Added is_synthesized().
+* GlyphString: Added get_width().
+* Layout: Added is_wrapped(), is_ellipsized() and 
+  get_unknown_glyphs_count().
+
+
+Gdk:
+* Screen: Added is_composited(), set_font_options(), 
+  get_font_options(), set_resolution(), get_resolution(), 
+  get_active_window().
+ 
+Gtk:
+* IconView:
+  Added set_tooltip_item(), set_tooltip_cell(), 
+  convert_widget_to_bin_window_coords().
+* MenuToolButton.hg: Added set_arrow_tooltip_text() and 
+  set_arrow_tooltip_markup().
+* StatusIcon: Added set_screen() and get_screen().
+  (Murray Cumming)
+* TextBuffer: Addded cursor-position property.
+  (Marko Anastasov)
+* TreeVIew: Added is_rubber_banding_active()
+  (Murray Cumming)
+
+2.11.4:
+
+Gtk:
+ * Added Builder, which will eventually replace use of libglade.
+ (Murray Cumming)
+ * Added Tooltip, which replaces the deprecated Tooltips class.
+ (Marko Anastasov)
+ * RecentAction: Added constructor and create() method and an example.
+ (Murray Cumming)
+ * Documentation: Added lots of class overview documentation. 
+ (Johannes Schimd)
+
+2.11.3:
+
+Gtk:
+* Action: Added create_menu().
+* CellRendererProgress: Added pulse, text-xalign, and 
+  text-yalign properties.
+  (Murray Cumming)
+* DragContext::get_targets(), SelectionData::get_targets():
+  Use the correct intermediate return type, to correct memory 
+  management problems. This technically breaks ABI of these two 
+  functions, but we believe that it was impossible to use them before, 
+  so no applications should be broken by this improvement.
+  (Murray Cummng, Daniel Elstner) Bug #399403 (Yannick Guesnet)
+* EntryCompletion: Added set_inline_selection() and 
+  get_inline_selection(). 
+  Added cursor_on_match signal, though without a default signal 
+  handlers, to preserve ABI.
+  Added inline-selection property.
+* Notebook: Added const versions of get_n_pages() and page_num(), 
+  deprecating the non-const methods. Bug #442284 (Tomasz Ostrowski).
+* Printer: Added list_papers().
+* Range: Added set_show_fill_level(), get_show_fill_level(),
+  set_restrict_to_fill_level(), get_restrict_to_fill_level(), 
+  set_fill_level(), get_fill_level().
+  Added show-fill-level, restrict-to-fill-level, and 
+  fill-level properties.
+* RecentAction: Added class.
+* ScaleButton: Added class.
+* VolumeButton: Added class.
+* Stock IDs: Added DISCARD, ORIENTATION_PORTRAIT, 
+  ORIENTATION_LANDSCAPE, ORIENTATION_REVERSE_LANDSCAPE, 
+  ORIENTATION_REVERSE_PORTRAIT, SELECT_ALL
+  (Murray Cumming)
+
+* Build fix when disabling properties.
+  (Kalle Vahlman)
+* Documentation:
+  - Improved gmmproc chapter.
+  (Murray Cumming)
+  - Improved internationalization chapter.
+  (Jonathan Jongsma)
+
+2.11.2:
+
+Gdk:
+* Display: Added supports_shapes(), supports_input_shapes(), 
+  supports_composite().
+* Window: Added set_composited(), input_shape_combine_mask(), 
+  input_shape_combine_region(), set_child_input_shapes(), 
+  merge_child_input_shapes(), get_type_hint(), set_startup_id(), beep(), 
+  set_opacity().
+
+Gtk:
+* AboutDialog: Added set/get_program_name() and deprecated 
+  set/get_name().
+  (Murray Cumming)
+* CellLayout: Added get_cells().
+* Entry: Added set_cursor_hadjustment(), get_cursor_hadjustment().
+* IconTheme: Added choose_icon(), list_contexts().
+* Notebook: Added set/get_group() and deprecated set/get_group_id().
+* PageSetup: Added to_file(), to_key_file().
+* PaperSize: Added get_paper_sizes().
+  get_capabilities().
+* PrintSettings: Added to_file(), to_key_file().
+  (Murray Cumming)
+* TextBuffer: Added add_mark().
+* TextMark.ccg: Added constructor and create() method, though these 
+  are usually created via TextBuffer.
+* Toolbar: Added set_icon_size(), unset_icon_size().
+* Window:
+  - Added set_opacity(), get_opacity().
+  - Added transient_for, and opacity properties.
+  (Murray Cumming)
+
+Documentation:
+* Fixed some wrong mentions of g_free().
+  (Jonathon Jongsma)
+
+2.11.1:
+
+Gtk:
+* Calendar: Added a get_date() method using Glib::Date.
+  (Johannes Schmid) Bug #350584
+* StatusIcon:
+  - Added popup and activate signals
+  (without default signal handlers, to preserve ABI) though we 
+  still cannot get any answer from the GTK+ maintainers about whether 
+  these are public API.
+  - Added popup_menu_at_position().
+  (Murray Cumming)
+* Style: Added attach() detach().
+  (Jonathan Jongsma) Bug #351336
+* Window:
+  - Added set_default_icon_name()
+    (Johannes Schmid) Bug #364395 (Yuriy Syrota)
+  - Added set_accept_focus(), get_accept_focus(), 
+    set_focus_on_map() and get_focus_on_map(). 
+    (Murray Cumming) Bug #421936
+
+* Documentation:
+  - Book: Improvements to allow easier pdf generation.
+    (Jonathan Jongsma)
+  - Book: More help with headers and linking, also for libglademm.
+    (Murray Cumming)
+  - Examples: custom/custom_widget/: Now uses cairo instead of the 
+    GDK drawing functions.
+ (Jonathan Jongsma)
+
+2.10.10:
+
+* RadioAction: Correct a reference-counting error in the "changed" signal.
+  (Armin Burgmeier, Openismus)
+  Bug #350734 (Johnathon Jongsma, "pjdavis" Paul Davis)
+* RecentManager: Allow Gtk::RecentManager::Data to be instantiated, for use with 
+  the full version of add_item(). (Armin Burgmeier, Openismus)
+  Bug #388086 (Grant Patterson)
+* Menu: Fix memory problems during destruction by handling attached widgets as 
+  we already handle child widgets. (Johannes Schmid, Openismus)
+  Bug #339791 ("pjdavis" Paul Davis, Andrew E. Makeev)
+* Correctly ifdef-out initialization of deprecated classes.
+  (Johannes Schmid, Openismus)
+* Build: Cope with newer m4 versions. (Yselkowitz)
+* Documentation: 
+  FAQ: Emphasize that libglademm is preferred to glademm. (Marko Anastasov) 
+  Bug #429043.
+
+2.10.9:
+
+* Depend on glibmm 2.10.9, which has some slight performance optimization for 
+  default signal handlers and vfuncs.
+  (Murray Cumming, openismus)
+* TreeView: Fix memory leak in get_cursor().
+  Bug #417539 (Andrew E. Makeev)
+* IconTheme::get_example_icon_name() documentation fix.
+  (Jonathon Jongsma)
+
+2.10.8:
+
+* ActionGroup::add(): Avoid a problem on 64-bit systems due to 0/NULL confusion.
+  (Daniel Elstner)
+* Documentation:
+  - Updated the Internationalization chapter. (Marko Anastasov)
+  - Added appendix about Visual Studio 2005. (Alan Ott, bug #409102)
+
+2.10.7:
+
+* Main: Cleanup data structures in the destructor, preventing leaks, and allowing 
+  a second instantiation. (Bug #383340 from Christopher Raine).
+* Build: Fix build with SUN Workshop 11
+  (Marko Anastasov, Bug #395572 from Tim Mooney)
+* Documentation:
+  - glade/libglade tutorial section: Clarification.
+  (Martin Nordholts, Bug #387708)
+  - Added SizeGroup documentation.
+  (Murray Cumming)
+
+2.10.6:
+
+* Gdk::Drawable::create_cairo_context(), 
+  Gtk::PrintContext::get_cairo_context(),
+  Gtk::PrintJob::get_surface(): Fix memory leak caused by doing 
+  an extra reference.
+  Bug #362181 from austinf.
+
+2.10.5:
+
+* UIManager: Fix crash when built without exceptions support.
+  (Johannes Schmid)
+* Style: lookup_icon_set(): Memory-management correction.
+  Bug #374094 (patch from Nate Nielsen)
+* Build:
+  - Windows:  Do not check for gtk+-unix-print-2.0 on as it is not 
+  always included in GTK installers and/or binary archives (like in Tor's binaries).
+  Bug #371882 from Alexis Wilke.
+  (Cedric Gustin)
+
+2.10.4:
+
+* Build:
+  - Omit the atkmm dependency from the gtkmm pkg-config .pc file 
+  when atkmm was optionally disabled. (Rémi Cardona) 
+  Bug #366930 from John N. Laliberte.
+  - Added --enable-api-maemo-extensions configure option, 
+  to optionally provide C++ wrappers for the additional GtkTextBuffer 
+  functions in the Maemo version of GTK+.
+  (Johannes Schmid, Murray Cumming)
+
+* Documentation:
+  - Drawable: Add comment paragraph about using cairo.
+  (Ralf Stephan)
+
+2.10.3:
+
+* Adjustment: Preventing the value from being ignored.
+  Bug #369335 from Daniel Holbach, via Vincent Levesque,
+  with help from Paul Davis.
+* Build:
+  - ListViewText:
+  Fix an odd build problem with gcc 3.3.6.
+  Bug #352226. (Thomas Zajic)
+* Documentation:
+  - Explain the optional (at build-time) API for 
+  reduced resources environments.
+  - Correct the links to the Memory Management and libglademm chapters.
+  - Drawable::get_image(), Container::remove(), Widget::add_mnemonic_label:
+  avoid mentioning a functions that do not exist in gtkmm.
+  Bug #358268 from Evgeny Rippi, and  Nickolai Dobrynin.
+
+2.10.2:
+
+*  Added --enable-atk=no option, to disable the build and use 
+  of the atkmm API, for use in embedded environments.
+  (Johannes Schimd, Murray Cuming, Openismus)
+* Documentation: 
+  - Book: Added Plug and Socket chapter to book, with example.
+  (Jonathon Jongsma)
+
+2.10.1:
+
+* Button: fix typo in get_image_position()
+* Added MSVC support for 2.10
+
+2.10.0:
+
+Changes since 2.8:
+
+gtkmm now depends on cairomm.
+
+* AccelMap: Added lookup_entry() (Paul Davis)
+* Button: Added get/set_image_position().
+* Added CellRendererAccel (Murray Cumming)
+* Added CellRendererSpin (Marko Anastasov)
+* CellRendererToggle: Added "indicator-size" property.
+* Clipboard: Added request_rich_text(), wait_for_rich_text(), 
+  and wait_rich_text_is_available().
+* Entry:
+  - Added get/set_inner_border().
+  - Added xalign and truncate-multiline properties.
+* FileChooserButton: Added set/get_focus_on_click()
+* MessageDialog: Added properties.
+* Menu: Add attach_to_widget() overload without a destroy callback.
+* Label: Added get/set_line_wrap_mode() and property.
+* Added LinkButton.
+* Added ListViewText very simple text-based convenience class for TextView.
+  (J. Baltasar García Perez-Schofield)
+* MenuShell: Added get/set_take_focus() and property.
+* MessageDialog: Added set_image() and property.
+* Notebook:
+  - Added page_reordered, page_removed, and 
+  page_added signals.
+  - Added set_group_id(), get_group_id(), 
+  get_tab_reorderable(), set_tab_reorderable(), 
+  get_tab_detachable(), set_tab_detachable().
+* Added Printing support, via PrintOperation, PrintContext, PrintJob, PrintSettings, 
+  Printer, PageSetup. (Marko Anastasov, Murray Cumming)
+* Added Recent Files support, via RecentChooser, RecentChooserWidget, RecentChooserMenu, 
+  RecentChooserDialog, RecentInfo, RecentManager
+  (Armin Burgmeier, Marko Anastasov, Jonathon Jongsma)
+* RadioAction: Added set_current_value().
+* Range: Added get/set_lower_stepper_sensitivity(),
+  get/set_upper_stepper_sensitivity() and properties.
+* SectionData: Added Added targets_include_uri.
+* SizeGroup: Added get_widgets().
+* Style:
+  - Added overload set_bg_pixmap() that takes const Pixmap.
+  (Michael Hofmann)
+  - Added Added lookup_color().
+* SelectionData: Added targets_include_rich_text().
+* SizeGroup: Added get/set_ignore_hidden().
+* SpinButton: Added "wrapped" signal, without a default signal handler, to 
+  preserve ABI. (Murray Cumming)
+* ToggleButton: Added constructor that takes a stock item.
+* TreeView:
+  - Added get/set_rubber_banding(), 
+  get/set_grid_lines(), get/set_enable_tree_lines(),
+  get_search_entry(), set_search_position_func(), 
+  get_headers_clickable().
+  - Added properties for show-expanders, level-indentation, 
+  rubber-banding, enable-grid-lines, and enable-tree-lines.
+  (Murray Cumming)
+* Widget:
+  - Added composited_changed signal. (Murray Cumming)
+  - Added input_shape_combine_mask(). (Marko Anastasov)
+  - Added is_composited(), input_shape_combine_mask(), 
+  unset_input_shape_combine_mask(), and the "composited_changed" signal.
+  (Jonathon Jongsma)
+  - Added get_action().
+  - Made map() public, because custom containers sometimes 
+    (e.g. GtkNotebook) need to call it on their child widgets, 
+    though we are not sure when. 
+* Window: Added get_group(), and get/set_deletable(), 
+  set_urgency_hint()
+  (Murray Cumming)
+
+Pango:
+* AttrList: Added operator bool.
+* Context: Added get_matrix(), update_from_cairo_context(), 
+  set_cairo_font_options(), set_cairo_font_options(), get_font_options(), 
+  set_resolution(), get_resolution().
+* Font: Added describe_with_absolute_size(), get_font_map(). 
+* FontDescription: Added set_absolute_size(), get_size_is_absolute().
+* Layout: Added get_font_description(), index_to_line_x(),
+  create(Cairo::Context), update_from_cairo_context(), 
+  add_to_cairo_context().
+* LayoutLine: Added show_in_cairo_context(), add_to_cairo_context().
+  (Murray Cumming)
+* Renderer: Added get_matrix().
+(Murray Cumming)
+
+Gdk:
+* GC: Added set_clip_rectangle() overload that takes const argument.
+  (Michael J M Thompson)
+* Added static functions for using Cairo, in general.h.
+  (Murray Cumming)
+
+Documentation:
+* Stylesheet improvements, to improve the appearance. (Jonathon Jongsma)
+* Printing Chapter, with example (Marko Anastasov)
+* Recent Files chapter, with example (Armin Burgmeier, Jonathon Jongsma)
+* "Wrapping C libraries" appendix (Murray Cumming)
+* DrawingArea chapter updated for Cairo. (Jonathan Jongsma)
+* Added ComboBox chapter and removed Combo section. (Murray Cumming)
+* Improved RadioButton example. (Pierre Thierry)
+* Added an example that uses events_pending() 
+  to update the UI (Gareth Foster, Murray Cumming)
+* Added IconView example. (R. Douglas Barbieri)
+
+Win32 build: Plug and Socket added. (Cedric Gustin)
+
+Other bug fixes from Paul Davis, Gezim Hoxha.
+
+
+2.9.10:
+
+Gtk:
+* FontButton: Fix the constructor that takes a font_name.
+(Armin Burgmeier)
+* PrintOperationPreview: Fix some reference-counting issues to 
+fix a crash. (Marko Anastasov)
+* RecentManager: Fix get_items() memory management.
+
+Documentation:
+* Recent Files chapter: Started this chapter, with a screenshot.
+  (Jonathon Jongsma)
+
+Examples:
+* printing/advanced: Various bugfixing, though it might 
+  still have problems on amd64. Do test. See bug #347857.
+  (Marko Anastasov, Murray Cumming)
+* recent files: Actually show a dialog, and add _mnemonics to 
+  menu items.
+  (Jonathon Jongsma)
+ 
+2.9.9:
+
+Gtk:
+* PrintOperation: get_print_settings(): Ref the return to avoid a crash.
+  (Marko Anastasov)
+* RecentManager: Change add_fullI to add_item(), overloading according to the 
+  parameters. (Jonathon Jongsma)
+* SpinButton: Added "wrapped" signal, without a default signal handler, to 
+  preserve ABI. (Murray Cumming)
+* Widget:
+  - Correct the new composited_changed signal to avoid breaking ABI.
+  (Murray Cumming)
+  Bug #348241 from Daniel Holbach.
+  - Fixed a typo so that input_shape_combine_mask() is really wrapped.
+  (Marko Anastasov)
+* Build: Build with the new glibmm --enable-api-default-signal-handlers=no 
+  option for reduced-resources embedded devices. (Murray Cumming)
+
+Documentation:
+* Printing examples: Use the new gdkmm cairo methods instead of the 
+  C functions. (Marko Anastasov)
+
+2.9.8:
+
+Gtk:
+* Printing API mostly finished. (Marko Anastasov)
+* TextBuffer: Added register_serialize_tagset(), unregister_serialize_format(), 
+  unregister_deserialize_format(), set_can_create_tags(), get_can_create_tags(), 
+  get_serialize_formats(), get_deserialize_formats(). There's more to do.
+  (Murray Cumming)
+* ToggleButton: Added constructor that takes a stock item.
+* Widget: Added is_composited(), input_shape_combine_mask(), 
+  unset_input_shape_combine_mask(), and the "composited_changed" signal.
+  (Jonathon Jongsma)
+
+Documentation:
+* Added Printing chapter and printing example. (Marko Anastasov)
+* Added "Wrapping C libraries" appendix. (Murray Cumming)
+* Style updated to match the new website. (Jonathon Jongsma)
+
+2.9.7:
+
+Gtk:
+* Notebook: Added page_reordered, page_removed, and 
+  page_added signals.
+* PrintContext: Renamed the const get_cairo()
+  to get_cairo_context(), to match the original.
+* PrintOperation: run(): Added a default value.
+  (Marko Anastasov)
+* SelectionData: Added targets_include_rich_text().
+* SizeGroup: Added get/set_ignore_hidden().
+* StatusIcon: Added size_changed signal.
+  (Murray Cumming)
+
+Documentation:
+* Add links to gtkmm_hello and gnomemm_hello programs.
+* Fixed the sentence explaining disconnect() in the Timeouts chapter.
+* Typo correction in the Clipboard chapter
+  (Gezim Hoxha)
+
+2.9.6:
+
+Gtk:
+* Label: Added get/set_line_wrap_mode() and property.
+* MenuShell: Added get/set_take_focus() and property.
+* MessageDialog: Added set_image() and property.
+* StatusIcon: Added get_geometry().
+* TreeView: Added get/set_rubber_banding(), 
+  get/set_grid_lines(), get/set_enable_tree_lines().
+  Added properties for show-expanders, level-indentation, 
+  rubber-banding, enable-grid-lines, and enable-tree-lines.
+  (Murray Cumming)
+* PrintJob: send_job(): No longer throws an exception.
+* PrintUnixDialog: Added add_custom_tab() overload that takes a ustring.
+* Printer: Added get_job_count(), and enumerate_printers(), and others.
+* Printsettings:
+  - Put the standard settings in a member class  so they can be 
+  used as Gtk::PrintSettings::Keys::SOMETHING.
+  -  Remove get/set_print_to_file().
+* PrintOperation: Added a version of run() without the Window parameter.
+* PrintOperationPreview: New class.
+  (Most printing stuff: Marko Anastasov)
+
+2.9.5:
+
+Gtk:
+* Assistant: Added update_buttons_state().
+* Button: Added get/set_image_position().
+* Clipboard: Added request_rich_text(), wait_for_rich_text(), 
+  and wait_rich_text_is_available().
+* Entry: Added get/set_inner_border().
+* Notebook: Added set_group_id(), get_group_id(), 
+  get_tab_reorderable(), set_tab_reorderable(), 
+  get_tab_detachable(), set_tab_detachable().
+
+* PrintContext: Added set_cairo_context().
+* Printoperation:
+  - run(): Added PrintOperationAction parameter.
+  - Removed set_show_dialog(), set_pdf_target(), 
+    set_track_print_status(), run_async().
+  - Added set_export_filename(), set_track_print_status(), 
+   set_show_progress(), set_allow_async(), set_custom_tab_label().
+* Fixed warnings (Elijah Newren, Jonathon Jongsma)
+
+Pango:
+* Context: Added get_matrix().
+* Font: Added describe_with_absolute_size(), get_font_map(). 
+* FontDescription: Added set_absolute_size(), get_size_is_absolute().
+* Layout: Added get_font_description(), index_to_line_x().
+* Renderer: Added get_matrix().
+
+
+2.9.4:
+
+Gtk:
+* PrintContext:
+  - Added set_track_print_status() and cancel(), paginate signal.
+  (Marko Anastasov)
+  - get_cairo() renamed to get_cairo_context(), 
+  - get_fontmap() renamed to get_pango_fontmap(), 
+  - create_context() renamed to create_pango_context(), 
+  - create_layout() renamed to create_pango_layout().
+  (Murray Cumming)
+* PrintJob:
+  - Added set/get_track_print_status().
+  (Marko Anastasov)
+
+Pango:
+* Added CairoFontMap. (Might be removed later)
+* Context: Added update_from_cairo_context(), 
+  set_cairo_font_options(), set_cairo_font_options(), get_font_options(), 
+  set_resolution(), get_resolution().
+* Layout: Added create(Cairo::Context), update_from_cairo_context(), 
+  add_to_cairo_context().
+* LayoutLine: Added show_in_cairo_context(), add_to_cairo_context().
+  (Murray Cumming)
+
+2.9.3:
+
+* Fixed regressions from 2.9.1 and 2.8.6:
+  - Regenerated with latest glibmm to fix several empty methods.
+  - ActionGroup:add(): Fix crash in alternate property get.
+  - Gdk::PixbufLoader: Correct the vfunc sequence to avoid the ABI break.
+  (Murray Cumming)
+* Added Printer, PrintJob, PageSetupUnixDialog, PrintUnixDialog
+  (Marko Anastasov)
+* Table: Fix crash in Table_Helpers::TableList.erase(). Bug #341962
+  (Paul Davis)
+* Documentation:
+  - Fix stylesheet installation.
+  - Fix some links
+  (Jonathon Jongsma)
+
+2.9.2:
+
+* Fixed a typo to fix the build when not disabling exceptions.
+
+2.9.1:
+
+Gtk:
+* Depends on cairomm.
+* gtkmm.h: Include menutoolbutton.h and tearoffmenuitem.h.
+  (Michael J M Thomson)
+* Added ListViewText very simple text-based convenience class for TextView.
+  (J. Baltasar García Perez-Schofield)
+* New classes:
+  - Assistant, CellRendererAccel, LinkButton, StatusIcon.
+    (Murray Cumming, Armin Burgmeier)
+  - CellRendererSpin (Marko Anastasov)
+  - PageSetup, PaperSize, PrintContext, PrintOperation, PrintSettings
+    (Marko Anastasov)
+  - RecentChooser, RecentChooserWidget, RecentChooserMenu, 
+    RecentChooserDialog. (Armin Burgmeier)
+  - RecentInfo, RecentManager (Marko Anastasov)
+* AccelMap: Added lookup_entry() (Paul Davis)
+* CellRendererToggle: Added "indicator-size" property.
+* Entry: Added xalign and truncate-multiline properties.
+* FileChooserButton: Added set/get_focus_on_click()
+* MessageDialog: Added properties.
+* Menu: Add attach_to_widget() overload without a destroy callback.
+* RadioAction: Added set_current_value().
+* Range: Added get/set_lower_stepper_sensitivity(),
+  get/set_upper_stepper_sensitivity() and properties.
+* SectionData: Added Added targets_include_uri.
+* SizeGroup: Added get_widgets().
+* Style: Added overload set_bg_pixmap() that takes const Pixmap.
+  (Michael Hofmann)
+* TextBuffer: Added get_has_selection() and 
+  property. Added text property.
+* TextBuffer: Added const overloads of get_text() and get_slice().
+* TreeModel: Added rows_reordered() overload without the iter.
+* TreeView: get_search_entry(), set_search_position_func(), 
+  get_headers_clickable().
+* Style: Added Added lookup_color().
+* Widget:
+  - Added get_action().
+  - Made map() public, because custom containers sometimes 
+    (e.g. GtkNotebook) need to call it on their child widgets, 
+    though we are not sure when. 
+* Window: Added get_group(), and get/set_deletable(), 
+  set_urgency_hint()
+  (Murray Cumming)
+* Win32 build: Plug and Socket added. (Cedric Gustin)
+* Fix the build when using --enable-api-properties, --enable-api-vfuncs, or 
+  --enable-api-exceptions when configuring glibmm.
+  When using these, the API, and any API generated by gmmproc, will be 
+  changed. This allows users of embedded platforms to reduce the code size of *mm 
+  libraries and *mm-using applications, at the small cost of losing some rarely-used 
+  API. Alternatives exist for that API, as show in the examples.
+
+Gdk:
+* GC: Added set_clip_rectangle() overload that takes const argument.
+  (Michael J M Thompson)
+* Added static functions for using Cairo, in general.h.
+  (Murray Cumming)
+
+Pango:
+* AttrList: Added operator bool.
+
+Documentation:
+* Book:
+  - DrawingArea: Updated for Cairo.
+  - HTML appearance greatly improved.
+  - Updated screenshots.
+  (Jonathan Jongsma)
+  - Added ComboBox chapter and removed 
+    Combo section. (Murray Cumming)
+  - Improved RadioButton example. (Pierre Thierry)
+* Reference:
+  - Added RadioButton::get/set/reset_group() 
+    documentation.
+  - Add documentation for manage().
+    (Murray Cumming) 
+  - Improved Box documentation. (Pierre Thierry)
+* Examples:
+  - Added an example that uses events_pending() 
+  to update the UI (Gareth Foster, Murray Cumming)
+  - Added IconView example. (R. Douglas Barbieri)
+
+2.8.1:
+
+* Build: Check for GTK+ 2.8.
+* ScrolledWindow: get_*scrollbar_visible(): 
+  get_hscrollbar_visible() returned 
+  vscrollbar_visible() and vice-versa. Fixed.
+  Bug #317309 (Bartek Kostrzewa)
+* UIManager: get_action_groups(): 
+  Memory management fix. 
+  Bug #31865 (Colin Law)
+* Fix SUN Solaris Forte build problem. 
+  Bug #314283 (Felipe Zipitria)
+* Documentation corrections.
+  Bug #311176 (Marco Scholten)
+
+2.8.0:
+
+API additions since 2.6:
+
+Gtk:
+* AboutDialog: Added set/get_wrap_license() and property.
+* CellRenderer: Added "sensitive" property.
+* ComboBoxText, ComboBoxEntryText: 
+  - Deprecated clear() in favour of new clear_items() method, 
+  because clear() exists in the base CellLayout class and is 
+  very different. 
+  - Added remove_text() to remove items one at a time.
+* Dialog: Added get_response_for_widget().
+* EntryCompletion: Added properties, get/set_popup_set_width(), 
+  get/set_popup_single_width().
+* FileChooser: Added get/set_do_overwrite_confirmation(
+* Iconview: Added get_item_at_pos(), get_visible_range(), get/set_cursor(), 
+  scroll_to_path().
+* TreeRowReference: Added get_model().
+* TreeView:
+  - Added unset_model().
+  - Added const versions of get_path_at_pos(), 
+  get_cell_area(), get_background_area(), get_visible_rect(), 
+  widget_to_tree_coords(), tree_to_widget_coords().
+  - Added get_visible_range().
+* TreeView::Column: Added queue_resize().
+* Sizegroup: Added ignore_hidden property.
+* Stock: Added FULLSCREEN, LEAVE_FULLSCREEN, and INFO stock items.
+* Widget: Added drag_source_set_icon(const Glib::ustring& icon_name).
+* Window:
+  - Added urgency_hint property, and get/set_urgency_hint().
+  Added present(timestamp) overload.
+
+Gdk:
+* Colormap: Deprecated alloc_colors() and  free_colors(). 
+  Add free_color() for use with alloc_color().
+* Cursor: Added get_image() and a Cursor(name) constructor.
+* DragContext:Added set_icon(const Glib::ustring& name).
+* Pixbuf: Added a save_to_buffer() overload without the options
+  parameters.
+* Window: Added move_region().
+
+(Murray Cumming, Jonathon (Jongsma), Ishmal, Daniel Glöckner, Alexander Nedotsukov, Philip Langdale, The Written Word)
+
+2.7.4:
+
+Gtk:
+* Generated properties accessors.
+  (Murray Cumming)
+* Settings::get_default(): Do not generate 
+  a second wrapper. (Regis Duchesne)
+* TreeView: Added unset_model().
+* SUN Forte and Tru64 build fixes.
+  (The Written Word.)
+* Documentation fixes. (Jonathon Jongsma)
+
+2.7.3:
+
+Gtk:
+* FileChooser: Added get/set_do_overwrite_confirmation().
+* TreeRowReference: Added get_model().
+* TreeView: Added const versions of get_path_at_pos(), 
+  get_cell_area(), get_background_area(), get_visible_rect(), 
+  widget_to_tree_coords(), tree_to_widget_coords().
+  Added get_visible_range().
+* TreeView::Column: Added queue_resize().
+Gdk:
+* PixbufLoader:create_with_type(): Really return the 
+  created GdkPixbufLoader.
+Win32 build:
+* Provide an extra hint to work around a DLL export/import bug
+  with MSVC++ and TreeViewColumn (Ishmal)
+
+
+2.7.2:
+
+Build fix: Removed an extra; that caused a warning.
+
+Gdk:
+* Pixbuf: Added a save_to_buffer() overload without the options
+  parameters.
+
+2.7.1:
+
+Gdk:
+* Colormap: Deprecated alloc_colors() and  free_colors(). 
+  Add free_color() for use with alloc_color().
+* Cursor: Added get_image() and a Cursor(name) constructor.
+* DragContext:Added set_icon(const Glib::ustring& name).
+* Window: Added move_region().
+
+Gtk:
+* AboutDialog: Added set/get_wrap_license() and property.
+* CellRenderer: Added "sensitive" property.
+* ComboBoxText, ComboBoxEntryText: 
+  - Deprecated clear() in favour of new clear_items() method, 
+  because clear() exists in the base CellLayout class and is 
+  very different. 
+  - Added remove_text() to remove items one at a time.
+* Dialog: Added get_response_for_widget().
+* EntryCompletion: Added properties, get/set_popup_set_width(), 
+  get/set_popup_single_width().
+* Iconview: Added get_item_at_pos(), get_visible_range(), get/set_cursor(), 
+  scroll_to_path().
+* Sizegroup: Added ignore_hidden property.
+* Stock: Added FULLSCREEN, LEAVE_FULLSCREEN, and INFO stock items.
+* Widget: Added drag_source_set_icon(const Glib::ustring& icon_name).
+* Window: Added urgency_hint property, and get/set_urgency_hint().
+  Added present(timestamp) overload.
+
+
+gtkmm 2.7 wraps new API in GTK+ 2.7, and is API/ABI-compatibile with gtkmm 2.4 and 2.6. 
+The new API is unstable, until this become the API/ABI-stable gtkmm 2.8 when 
+GTK+ 2.7 becomes the API-stable GTK+ 2.8.
+
+2.6.1:
+
+* CellRenderer: Prevent an infinite loop.
+  (Murray Cumming)
+* MSVC++ .Net 2003 build fixes. (Cedric Gustin)
+* Documentation:
+  - Hide deprecated widgets from the list of widgets.
+  (Murray Cumming)
+  - Correct the description of the IO input example.
+  (Claudio Saavedra)
+
+
+2.6.0:
+
+gtkmm 2.6 wraps new API in GTK+ 2.6, and is API/ABI-compatibile with gtkmm 2.4. 
+
+Changes compared to gtkmm 2.4.x:
+
+Gtk:
+* New widgets: AboutDialog, CellRendererCombo, 
+  CellRendererProgress, CellView, FileChooserButton, IconView, 
+  MenuToolButton
+* Action: Added get_accel_path(), set_visible().
+* ActionGroup: Added translate_string().
+* Button: Added set/get_image().
+* CellRenderer:
+  - Added editing_started signal.
+  - Added stop_editing() which replaces the 
+  now-deprecated editing_cancelled()
+* CellRendererText: Added language, ellipsize, and 
+  ellipsize-set properties.
+* Clipboard:
+* - Added set_image(), wait_is_image_available(),
+  wait_for_image(), request_image(), wait_is_target_available(), 
+  set_can_store(), and store().
+* ComboBox:
+  - Added get_wrap_width(), get_row_span_column(),
+    get_column_span_column(), get_add_tearoffs(), set_add_tearoffs(), 
+    get_focus_on_click(), set_focus_on_click(), 
+   get_popup_accessible(), unset_row_separator_func().
+* ComboBoxEntry: Added get_entry().
+* ComboBoxText: Added set_active_text(), clear().
+* Dialog:
+  - Added set_secondary_text() for HIG-compliant dialogs.
+  - Added set_alternative_button_order().
+* Entry: Added layout_index_to_text_index() and 
+  text_index_to_layout_index().
+* EntryCompletion: Added insert_prefix(), set_inline_completion(),
+  get_inline_completion(), set_popup_completion(), 
+  get_popup_completion(), get_text_column()
+* FileChooser:
+  - Added FileChooserError exception class.
+  - Added get/set_show_hidden().
+* FileChooserButton: Added get/set_width_chars().
+* FileFilter: Added add_pixbuf_formats().
+* IconTheme:
+  - Added get_icon_sizes().
+  - Added IconThemeError exception class.
+* Image: Added set_from_icon_name(), get/set_pixel_size(), 
+  get_icon_name().
+* Label: Added get/set_max_chars_width(), set/get_single_line_mode(), 
+  get/set_width_chars(), get/set_ellipsize().
+* Main: Added Main constructor that takes a Glib:: OptionContext, 
+  and add_gtk_option_group(option_context).
+* MessageDialog: Added set_secondary_text().
+* PixbufLoader: Added size_prepared signal.
+* Plug: Added default constructor.
+* ProgressBar: Added set/get_ellipsize().
+* SelectionData: Added targets_include_image(), get/set_pixbuf(), 
+  and get/set_uris().
+* Scale: Now works with libglademm. 
+* Style: Added create() method.
+* TextView: Added get_iter_at_position().
+* TreeSortable: Added DEFAULT_UNSORTED_COLUMN_ID constant.
+* TreeView: Added get/set_fixed_height_mode(), get/set_hover_selection(), 
+  get/set_hover_expand(), 
+* TreeModel::itereator: Add forward_search() and backward_search() 
+  overloads without the limit argument.
+* IconInfo: Added operator bool(), needed to check 
+  the result of IconTheme::lookup_icon().
+* Label: Added get/set_angle().
+* TreeView: Added append_column_numeric(), and 
+  append_column_numeric_editable().
+* Widget: Made set_parent(), and unparent() public instead 
+  of protected. Added a size_request() overload which is const 
+  and returns a value.
+* Window: Added drag_dest_add_text_targets(), 
+  drag_dest_add_uri_targets(), drag_dest_add_image_targets(), 
+  drag_source_add_text_targets(), drag_source_add_uri_targets(),
+  and drag_source_add_image_targets().
+* New Stock items.
+* Documentation:
+  - Extra reference documentation.
+  - Properties are now documented.
+
+Gdk:
+* Display: Added supports_selection_notification(), 
+  request_selection_notification(), supports_clipboard_persistance(), 
+  store_clipboard().
+* Pixbuf:
+  - Added rotate_simple(), flip(), save_to_buffer().
+  - Added create_from_file() overload that takes 
+  height and width.
+* PixbufFormat: Added is_scalable(), is_disabled(), 
+  set_disabled(), get_license().
+* Window: Added enable_synchronized_configure(), 
+  configure_finished(), set_focus_on_map().
+
+Pango:
+* New classes: Renderer
+* Color: Added operator bool(). 
+* Context: Added get/set_matrix(), get_font_map().
+* FontMetrics: Added get_underline_position(), 
+  get_underline_thickness(), get_strikethrough_position(), 
+  get_strikethrough_thickness().
+* Layout: Added get/set_ellipsize().
+
+Atk:
+* Relation: Added add_target().
+* RelationSet.hg: add_relation_by_type().
+* Text: Added get_range_extents(), get_bounded_ranges().
+
+gtkmm 2.6 is the result of hard work from the following developers:
+Murray Cumming, Bryan Forbes, and Albert Chin, Cedric Gustin, Roger Leigh, Ronald Lembcke, Gene Ruebsamen, Claudio Saavedra, Marco Scholten, Roel Vanhout, Chris Vine.
+
+
+2.5.7:
+
+* Gdk::DragContext: Avoid infinite loop. (Ronald Lembcke)
+* Gtk::TargetList: Fix typo to ctually define this. (Ronald Lembcke).
+* Examples now build with the IRIX MipsPro, and AIX compilers.
+* Check for the correct atk version in configure.
+  (Murray Cumming)
+* Documentation:
+  - Properties are now documented, using the text from the
+    GTK+ documentation.
+  - Added MessageDialog documentation.
+  - Added CellRendererText::edited() documentation. (Antonio Coralles)
+  - examples: book/treeview/editable_cells/:
+    Demonstrated data-entry validation.
+  (Murray Cumming)
+  - 
+2.5.6:
+
+* Now builds with the following compilers, in addition to 
+the existing GNU g++, and Intel compilers:
+- SUN Forte CC 5.5
+- IBM AIX xlC v7
+- Tru64 C++ V6.5-042
+- IRIX MIPSpro 7.4.2m
+  (Older versions of all these compilers might also work.)
+  (Murray Cumming, www.thewrittenword.com)
+* Now builds with MSVC++ .Net 2003 (gtkmm 2.4 already did).
+  (Cedric Gustin)
+
+Gtk:
+* Plug: Added default constructor. (Bryan Forbes) 
+
+Documentation:
+- examples/book/custom/custom_widget/: 
+  Now it works. (Marco Scholten)
+
+2.5.5:
+
+Gtk:
+* Remove default signal handlers for new signals in 2.6, 
+  because adding virtual methods to existing classes would 
+  break ABI. (Murray Cumming, Bryan Forbes)
+* Stock: Wrapped several new stock items. (Bryan Forbes)
+* AboutDialog: Added logo_icon_name property. (Murray Cumming)
+* Clipboard: Added set_can_store() overload that takes no 
+  arguments. (Murray Cumming)
+* ComboBox: Added unset_row_separator_func(). (Murray Cumming)
+* FileChooserDialog:
+  - Inherit from FileChooser interface. (Murray Cumming)
+  - Added constructors which allow specifying backend. (Bryan Forbes)
+* IconView: Added the properties. (Murray Cumming)
+* Main: Added Main constructor that takes a Glib::OptionContext(), 
+  and Main::add_gtk_option_group(option_context).
+  (Murray Cumming, Bryan Forbes)
+* TreeIter: Add forward_search() and backward_search() 
+  overloads without the limit argument.
+  (Rob Page, Murray Cumming)
+
+Pango:
+* Color: Added operator bool(). 
+* Renderer: Added get_color().
+  ((Murray Cumming)
+
+Documentation:
+* Added some reference documenation for the new classes,
+  plus several older classes.
+* Corrected documentation tarball and the link to it.
+* examples:
+  - Added book/dialogs/aboutdialog example.
+  - Added book/buttons/filechooserbutton example.
+  - Used ProgressCellRenderer in book/treeview/list example.
+(Murray Cumming)
+  
+2.5.4:
+
+Gtk:
+* Action: Added get_accel_path(). (Murray Cumming)
+* CellRendererText: Added language, ellipsize, and 
+  ellipsize-set properties. (Bryan Forbes)
+* TreeView: Added hover_expand and hover_selection 
+  properties.
+
+Gdk:
+* Display: Added supports_selection_notification(), 
+  request_selection_notification(), supports_clipboard_persistance(), 
+  store_clipboard().
+* Pixbuf: Added rotate_simple(), flip(), save_to_buffer().
+* PixbufFormat: Added is_scalable(), is_disabled(), 
+  set_disabled(), get_license().
+* Window: Added enable_synchronized_configure(), 
+  configure_finished(), set_focus_on_map().
+
+Atk:
+* Relation: Added add_target().
+* RelationSet.hg: add_relation_by_type().
+* Text: Added get_range_extents(), get_bounded_ranges().
+  (Murray Cumming)
+
+2.5.3:
+
+* Builds against the final GTK+ 2.6 API.
+
+Gtk:
+* CellRenderer.hg: Added stop_editing() which replaces the 
+  now-deprecated editing_cancelled().
+* CellView: Inherit from CellLayout. Removed set_value(). 
+  Added convenience constructors.
+* FileChooserButton.hg: Added action parameters to constructors. 
+* IconView: Added get/set_columns(), get/set_item_width(),
+  get/set_spacing(), get/set_row_spacing(), get/set_column_spacing(), 
+  get/set_margin().
+* Label: Added get/set_max_chars_width(), and property.
+* TextView: Added get_iter_at_position().
+
+Gdk:
+* Pixbuf: Added create_from_file() overload that takes 
+  height and width. (Murray Cumming)
+
+Documentation:
+* Reference API: Re-extracted C docs, so that the new API
+  will be automatically documented. (Murray Cumming)
+* examples:
+  - input: Use Glib::IOChannel. (Claudio Saavedra)
+
+2.5.2:
+
+Gtk:
+* Button: Added set/get_image().
+* CellView: Removed set_cell_data().
+* Dialog: Added set_alternative_button_order().
+* FileChooserButton:
+  - Now inherits from HBox, not Button.
+  - Removed get/set_active().
+* IconInfo: Added operator bool(), needed to check 
+  the result of IconTheme::lookup_icon().
+* Label: Added get/set_angle().
+* TreeView: Added append_column_numeric(), and append_column_numeric_editable(),
+  which allow more control over the formatting of numeric data than 
+  append_column() and append_column_editable().
+  (Murray Cumming)
+
+Pango:
+* Added Renderer.
+* Context: Added get/set_matrix().
+* FontMetrics.hg: Added get_underline_position(), 
+  get_underline_thickness(), get_strikethrough_position(), 
+  get_strikethrough_thickness().
+  (Murray Cumming)
+
+Documentation:
+* example/book/input/: This now works. (Chris Vine)
+* Book:
+  - TreeView selection: Use selected_foreach_iter() 
+  instead of selected_foreach(). (Teus Benschop)
+  - Fixed some typos. (Claudio Saavedra)
+
+
+2.5.1:
+
+Gtk:
+* AboutDialog:
+  - Added more get and set methods and properties.
+  - Wrapped signals.
+* ActionGroup: Added translate_string().
+* Added CellRendererCombo, with example.
+* Added CellRendererProgress.
+* Clipboard: Added set_image(), wait_is_image_available(),
+  wait_for_image(), request_image(), 
+  wait_is_target_available(), set_can_store(), and store()
+* ComboBoxEntry: Added get_entry().
+* ComboBoxText: Added set_active_text(), clear().
+* Dialog: Added alternative_button_order().
+* FileChooser: Added FileChooserError exception class.
+* FileChooserButton: Added get/set_width_chars().
+* FileFilter: Added add_pixbuf_formats().
+* IconTheme:
+  - Added get_icon_sizes().
+  - Added IconThemeError exception class.
+* IconView:
+  - Added get_selected_items(), foreach().
+  - Added set_text_column(), and set_pixbuf_column() overrides 
+    that take ModelColumns instead of ints.
+  - Wrapped signals.
+* Image: Added set_from_icon_name(), get/set_pixel_size(), 
+  get_icon_name().
+* Label: Added set/get_single_line_mode(), get/set_width_chars().
+* MessageDialog: Added set_secondary_text().
+* Added MenuToolButton.
+* PixbufLoader: Added size_prepared signal.
+* ProgressBar: Added set/get_ellipsize().
+* SelectionData: Added targets_include_image(), get/set_pixbuf(), 
+  and get/set_uris().
+* Style: Added create() method.
+* Widget: Made set_parent(), and unparent() public instead 
+  of protected. Added a size_request() overload which is const 
+  and returns a value.
+* Window: Added drag_dest_add_text_targets(), 
+  drag_dest_add_uri_targets(), drag_dest_add_image_targets(), 
+  drag_source_add_text_targets(), drag_source_add_uri_targets(),
+  and drag_source_add_image_targets().
+
+Pango:
+* Context: Added get_font_map().
+
+* Documentation:
+  - Partly-updated "input" example. Bug 
+  - Added IconView and CellRendererCombo examples.
+(Murray Cumming)
+
+2.5.0:
+
+gtkmm 2.5 wraps new API in GTK+ 2.5, and is API/ABI-compatibile with gtkmm 2.4. 
+The new API is unstable, until this become the API/ABI-stable gtkmm 2.6 when 
+GTK+ 2.5 becomes the API-stable GTK+ 2.6.
+
+* Pango: Layout: Added set_ellipsize(), get_ellipsize(), and 
+  EllipsizeMode enum.
+* Gtk:
+  - Added IconView, FileChooserButton, and CellView widgets.
+  - Action: Added set_visible().
+  - Entry: Added layout_index_to_text_index() and 
+    text_index_to_layout_index().
+  - EntryCompletion: Added insert_prefix(), set_inline_completion(),
+    get_inline_completion(), set_popup_completion(), get_popup_completion(), 
+    get_text_column()
+  - CellRenderer: Added editing_started signal.
+  - ComboBox: Added get_wrap_width(), get_row_span_column(),
+    get_column_span_column(), get_add_tearoffs(), set_add_tearoffs(), 
+    get_focus_on_click(), set_focus_on_click(), get_popup_accessible().
+  - Label: Added set_ellipsize(), get_ellipsize().
+  - FileChooser: Added set_show_hidden(), get_show_hidden().
+  - TreeSortable: Added DEFAULT_UNSORTED_COLUMN_ID constant.
+  - TreeView: Added set_fixed_height_mode(), get_fixed_height_mode(), 
+    set_hover_selection(), get_hover_selection(), set_hover_expand(), 
+    get_hover_expand().
+(Murray Cumming)
+
+2.4.5:
+
+* Gtk::Settings::get_default(): Correct reference-count error.
+  (Murray Cumming)
+* Gtk::ActionGroup, EntryCompletion, UIManager: Make constructors 
+  protected instead of private (Christopher Palm).
+* Examples: TreeView:
+  - Added popup example, from gtkmm 2.2.
+  - drag_and_drop: Correct vfuncs.
+* Documentation:
+  - libglademm memory management.
+  - Tell people to check pkg-config for 2.4, not 2.2. 
+  - Gtk::TreeSortable: Document sort function return value. 
+  (Murray Cumming)
+
+2.4.4:
+
+* More gcc 3.4 build fixes. (Daniel Elstner)
+* Gtk::StockItem: Use the global translation domain when no other 
+  translation domain has been specified. (Daniel Elstner)
+* Gtk::Action, ToggleAction, RadioAction, IconTheme: Constructors are now 
+  protected so that you can derive from these classes.
+* Gtk::Container: Avoid warning about unimplemented GtkContainer::remove 
+  vfunc when deriving directly from Gtk::Container.
+  (Murray Cumming)
+
+2.4.3:
+
+* Win32: gdkmm: Link against the correct libpangomm library.
+  (Cedric Gustin)
+* Gtk::TreeModel::iterator: Correct the operator--() implementation, so that 
+  it actually works. Remember, this is very slow compared to operator++().
+  (Daniel Elstner)
+* Gtk::ComboBoxText, Gtk::ComboBoxEntryText: Implement the constructors that 
+  take C instances.
+  (Murray Cumming)
+
+  
+2.4.2:
+
+Gtk:
+* ComboBox::get_active(): Properly initialize the iterator. 
+  (Murray Cumming)
+* ComboBoxTextEntry: Don't add the text column twice. (Teemu Tervo)
+* ComboBoxText, ComboBoxEntryText::get_active_text(): Fix potential 
+  crash. (Murray Cumming)
+* TreeView::get_path_at_pos(): Correct memory mangement.
+  (Murray Cumming, David)
+* Use GTHREAD_CFLAGS when appropriate. (Daniel Elstner)
+* gtkmm.h: Add comboboxentry.h and comboboxentrytext.h.
+  (Daniel Elstner)
+
+Reference Documentation:
+* FileChooser: Mention the need to convert to UTF8. (Daniel Elstner)
+
+
+2.4.1:
+
+* Build fixes for gcc 3.4.0. (Murray Cumming)
+* Install gdkmmconfig.h in the correct place.
+  (Murray Cumming)
+* Install atkmm/private headers in the correct place.
+  (Alexander Nedotsukov)
+
+Changes in gtkmm 2.4:
+
+- Highlights:
+
+  There are several new widgets/classes, with examples:
+
+  * New File Chooser:
+    FileChooser, FileChooserWidget, FileChooserDialog, FileFilter.
+
+  * Action-based Toolbar/Menu API:
+    UIManager, Action, ToggleAction, RadioAction.
+
+  * New Combo Box:
+    ComboBox, ComboBoxEntry, ComboBoxText, CellLayout. 
+
+  * Auto-complete for Entry:
+    EntryCompletion.
+
+  * Other new classes:
+    IconInfo, IconTheme TargetList.
+
+  * New ATK, Pango, and GDK API wrapped.
+
+- Existing API improved:
+  * Use of improved libsigc++ 2 API.
+  * Removed useless key-binding signals.
+  * Alignment: Added set/get_padding().
+  * Entry: Added set/get_alignment().
+  * Settings: New properties.
+  * ListStore/TreeStores: Added insert_after(), which should be faster than insert().
+  * TreeView: Added move_column_to_start()
+  * TreeModel: Deriving is now easier, because the virtual functions now use C++ types.
+  * TreeModel::iterator: Added operator--(), which is slow.
+  * See the NEWS file for detailed API changes.
+  * Various bugfixes - see ChangeLog.
+
+The following people made gtkmm 2.4 happen:
+  Bradley Bell
+  Murray Cumming
+  Bryan Forbes (lots of very significant work)
+  Cedric Gustin
+  Oli Kessler
+  Ole Laursen
+  Andrew E. Makeev
+  Hagen Moebius
+  Frank Naumann
+  Elijah Newren
+  Billy O'Connor
+  Gene Ruebsamen
+  Martin Schulze
+  Enrico Scholz
+  Sebastian Rittau
+  Takashi Takekawa
+  Matthew Walton
+
+
+
+2.3.8:
+
+* Gtk:
+  - Action: Added set_sensitive() and set_tooltip(). (Murray Cumming)
+  - Settings: Added some properties. (Bryan Forbes)
+  - TargetList: Added a create() method.  (Bryan Forbes)
+  - TreeModel: Rename 2 of the foreach() methods, to foreach_iter() and foreach_path(),
+    because they are ambiguous with libsigc++ 2. (Murray Cumming)
+  - ListStore/TreeStore:  Added insert_after(), because it is apparently faster with 
+    many rows. (Murray Cumming)
+  - IconTheme: Corrected refcounting of get_default() and get_for_screen().
+    (Bryan Forbes)
+
+
+2.3.7:
+
+* Gtk:
+  - Action:
+    - create_tool_item(), create_menu(), and create_icon() return specific types.
+      (Bryan Forbes)
+    - Constructors: Give 0 instead of "" to GTK+ for empty strings, to make 
+      stock items work. (Murray Cumming)
+  - Container: Keep managed child widgets alive when remove()ing them.
+    (Murray Cumming)
+  - IconTheme: Wrapped the changed signal. (Murray Cumming)
+  - FileFilter: It's a Gtk::Object, not a Glib::Object. (Murray Cumming) 
+  - TreeView: Added move_column_to_start(). (Andrew E. Makeev)
+  - UIManager: Fixed typo in disconnect_proxy signal name. (Bryan Forbes)
+  - many: Do the extra reference for several get_*() methods.
+    (Bryan Forbes, Murray Cumming) 
+
+
+* Documentation:
+  - Reference documentation: Corrected some mention of null parameters, and g_free(), 
+    in generated-from-C docs. (Murray Cumming)
+  - Book: Corrected typos and updated libsigc++ syntax. (Elijah Newren)
+  - FAQ: Don't mention gtkmm 1.2 so much. (Elijah Newren)
+  - Examples: Adde book/menus_and_toolbars, to show UIManager. (Murray Cumming)
+
+
+2.3.6:
+
+* Build fixes:
+  - Partial Sun Forte C++ build fixes.
+    (Murray Cumming, Michael v.Szombathely)
+  - gcc 3.4 (cvs) build fixes
+    (Murray Cumming, Matthew Tuck)
+  - win32 (cygwin) build fixes:
+    (Cedric Gustin)
+  - Doxygen is, again, not required when building from tarballs.
+    (Murray Cumming)
+
+* Gtk: RadioButton, RadioMenuItem: Added group_changed signal.
+  (Murray Cumming)
+
+* Documentation:
+  _Lots_ of added, and improved reference documentation.
+  (Hagen Moebius)
+
+2.3.5:
+
+* Gtk:
+  - ComboBox: Added popup() and popdown(). (Murray Cumming)
+  - ComboBoxEntry: Added a set_text_column() overload that takes a
+	ModelColumnBase instead of an int.
+  - Added ComboBoxEntryText, like ComboBoxText. (Murray Cumming)
+  - Entry: Added set/get_alignment().
+  - FileChooser:
+    - Removed set_folder_mode() and get_folder_mode(),
+      which are no longer in GTK+. (Bryan Forbes)
+    - Added set/get_preview_label(). (Murray Cumming)
+  - Added IconInfo, TargetList (Bryan Forbes)
+  - IconTheme: methods now use IconInfo. (Bryan Forbes)
+  - Added Gtk::Stock::DIALOG_AUTHENTICATION stock item.
+    (Bryan Forbes)
+  - Scale: Added get_layout() and get_layout_offsets().
+  - Toolbar
+    - Added append(), prepend(), insert() overloads which take
+      slots, so that signal connecting requires less code.
+    - Removed old STL-style API, because the APIs do not 
+      co-exist well together at the GTK+ level.
+    (Bryan Forbes)
+  - TreePath: Corrected template typo found by gcc 3.4
+    (Matthew Tuck)
+  - Widget: Added add_mnemonic_labels(), remove_mnemonic_label(), 
+    list_mnemonic_labels(), draw_insertion_cursor().
+    (Murray Cumming)
+  - Window: Added "role" property. (Bryan Forbes)
+
+  - Several const corrections. (Murray Cumming)
+  - Fixes to the libsigc++2 port. (Martin Schulze, Bryan Forbes)
+  - Added --enable-examples configure option. (Bryan Forbes) 
+
+  - Documentation:
+    - Added some TreeView reference documentation.
+      (Billy O'Connor)
+
+* Gdk:
+  - Drawable::draw_glyphs() now takes a c++ Pango::GlyphString.
+    (Bryan Forbes)
+  - Window
+    - get_children() now returns a C++ container instead of a GList.
+      (Bryan Forbes)
+    - get_internal_paint_info() now takes C++ parameters.
+      (Bryan Forbes)
+    - removed peek_children() because it's the same as get_children().
+      (Murray Cumming)
+
+* Pango:
+  - FontFace: Added list_sizes().
+  - AttrIter: Added get_attrs().
+  - FontFamily: Added is_monospace().
+  - FontSet: Added foreach()
+  - Language: Added includes_script().
+  - Layout: Added set/get_auto_dir().
+
+2.3.4:
+
+* Gtk:
+  - Now uses libsigc++ 2 (Murray Cumming)
+  - Frame: Methods use C++ Gtk::Allocation instead of C GtkAllocation.
+    (Bryan Forbes)
+  - Added IconTheme. (Bryan Forbes).
+  - Added TargetList. (Bryan Forbes)
+  - TargetEntry: Use a C++ TargetFlags enum instead of the C enum.
+    (Bryan Forbes)
+  - Widget
+    - drag_dest_find_target(), drag_dest_get_target_list(), drag_begin(): 
+    Use C++ TargetList instead of C GtkTargetList. (Bryan Forbes)
+    - Use C++ Gtk::Allocation instead of GtkAllocation, and 
+      Gtk::Requisition instead of GtkRequisition in methods.
+    (Bryan Forbes)
+   - Socket: Use C++ Gdk::NativeWindow type for method parametrs.
+    (Bryan Forbes)
+   
+* Gdk:
+  - Colormap: Use C++ Gdk::Color instead of C GdkColor for method parameters
+    (Bryan Forbes)
+  - Device: Use C++ InputSource enum instead of the C GdkInputSource enum.
+    (Bryan Forbes)
+  - Display: Use ustring for target parameters instead of GdkAtom.
+    (Bryan Forbes)
+  - Added C++ NativeWindow typedef and used it instead of GdkNativeWindow
+    (Bryan Forbes)
+
+* examples: book/dialogs/filechooser: Added buttons.
+  (Matthew Walton)
+
+2.3.3:
+
+- CellLayout: signals take a C++ CellRenderer* instead of a C 
+  GtkCellRenderer*.
+- Widget:
+  - signal_drag_data_get and signal_selection_get now use the C++
+    SelectionData type.
+  - Methods now take C++ Gdk::Region& instead of C GdkRegion*.
+- SelectionData: Added set() method overload with fewer parameters. 
+- TreeDragSource: The drag_get_data vfunc now uses the C++ 
+  SelectionData type.
+- TreeIter (TreeModel::iterator): Added operator--().
+- Added const version of many ListHandle<> get_*() methods.
+  (Murray Cumming)
+
+2.3.2:
+
+* Gtk:
+  * AccelMap: Added lock_path() and unlock_path().
+  * Button: Added get/set_alignment().
+  * CellLayout: Added reorder().
+  * Clipboard: Added wait_for_targets(), and a simpler request_targets().
+  * MenuShell: Added cancel().
+  * ListStore, TreeStore: Added set_model_columns() for use by derived
+    classes.
+  * TreeModel: vfuncs now use C++ types, and are documented.
+  * TreeModelFilter: Wrapped set_modify_func().
+  * Window: Added get_group() and set_accept_focus().
+
+* Gdk:
+  * Colormap: Added get_system().
+  * Device: Added get_name(), get_source(), get_mode() and get_has_cursor() 
+  * Display: Added set_double_click_distance() and get_default_group().
+  * DragContext: Added get_targets().
+  * Added rgb_*() methods.
+
+* Pango:
+  * LayoutLine: Added get_length(), get_start_index(), and get_layout().
+  
+* Atk:
+  * Added Document, Hyperlink, Hypertext, and StreamableContent classes.
+
+* Portability:
+  * Atk::Text build fix for Intel compiler. (Takashi Takekawa)
+
+* Documentation:
+  * devhelp file now installs correctly, with working hyperlinks.
+  * Documented Gtk::AccelMap methods.
+  * Documented Atk classes.
+  * TreeView, TextView, and associated classes are almost fully documented.
+  (Murray Cumming)
+
+* Also:
+  - build fix. (Billy O'Connor)
+  - spec file fix. (Eric Bourque)
+
+
+2.3.1:
+
+* Gtk:
+  * Action, ToggleAction, RadioAction:
+    - Added create() method overloads without stock_id.
+    - ToggleAction::create() has extra bool is_active parameter.
+  * EntryCompletion: Wrapped match_selected signal.
+  * Expander: Added get/set_markup()
+  * Menu: Added set_monitor()
+  * Menu::AccelKey is now Gtk::AccelKey
+  * MessageDialog: Added set_markup().
+  * Added FileChooser (interface), FileChooserWidget, FileChooserDialog, FileFilter, with example.
+  * ComboBox example
+  * ComboBoxText now works, with example.
+  * RadioToolButton: constructors properly implemented. (Murray Cumming, Billy O'Connor)
+  * Toolbar: Old API deprecated. New API wrapped. Expect more change here.
+  * TreeModel:: Add virtual iter_is_valid() method, now used by TreeModel::iterator operator bool().
+  * TreeViewColumn: Added get_cell_position().
+  * Widget: Wrapped get_accessible and screen_changed signals.
+* Gdk:
+  * Pixbuf: Added get_formats()
+
+* Added Atk::init() and Pango::init(), to use when you don't want all of gtkmm.
+* Documentation: Corrected installation and links with glibmm documentation.
+* Deprecation: Define GTKMM_DISABLE_DEPRECATED to prevent use of deprecated API in your application. 
+  (Murray Cumming)
+
+2.3.0:
+
+* Removed key-binding signals. (Murray Cumming)
+
+* Use of Gdk::Device and Gtk::SelectionData instead of C equivalents
+  (Murray Cumming)
+
+* New classes:
+  Gtk::
+    Action, ActionGroup, CellLayout, ComboBox, ComboxText, ComboBoxEntry, ColorButton, EntryCompletion,
+    Expander, FontButton, RadioAction, RadioToolButton, ToggleAction, ToggleToolButton, ToolItem, ToolButton,
+    UIManager
+
+* New API for existing classes:
+  Gtk::Alignment: get/set_padding(). Useful for indenting Gtk::Frame contents.
+  Gtk::Button: get/set_focus_on_click()
+  Gtk::ButtonBox: get_child_secondary().
+  Gtk::Calendar:
+    - display_options() is now set_display_options().
+    - New properties.
+  Gtk::CheckMenuItem: get/set_draw_as_radio()
+  Gtk::Entry: get/set_completion()
+  Gtk::EventBox: get/set_visible_window(), get/set_above_child()
+  Gtk::IconSource: get/set_icon_name()
+  Gtk::Menu: attach()
+  Gtk::MessageDialog:
+    Constructors: Added bool use_markup paramater after message parameter.
+      This is an API change, and I'd leak to hear suggestions for alternatives.
+  Gtk::TextBuffer: select_range()
+  Gtk::TextIter (also known as Gtk::TextBuffer::iterator):
+    Added *_visible_* versions of forwards/backwards methods.
+  Gtk::TextView:
+  - get/set_overwrite(), get/set_accepts_tab()
+  - Added WRAP_WORD_CHAR wrap mode.
+  Gtk::TreeViewColumn (also known as Gtk::TreeView::Column):
+    Added get/set_expand().
+  Gtk::Widget:
+  - queue_resize_no_redraw(), get/set__no_show_all()
+  - Added unset_fg(), unset_bg(), unset_font(), unset_text(), unset_base().
+  - Added add_modal_grab(), remove_modal_grab(), get_current_modal_grab().
+    (Ole Laursen)
+  - Added set_window() and set_allocation() for implementing new native widgets.
+    (Detlef Reichl)
+  Gtk::Window: set_default_icon(), set_keep_above(), set_keep_below()
+
+  Gdk::Cursor: new constructor: Cursor(const Glib::RefPtr<Display>& display, const Glib::RefPtr<Pixbuf>& pixbuf, int x, int y)
+  Gdk::Display: flush(), supports_cursor_alpha(), supports_cursor_color(), get_default_cursor_size(),
+    get_maximal_cursor_size
+  Gdk::PixbufLoader: create() now has extra bool mime_type parameter.
+  Gdk::Window: set_keep_above(), set_keep_below().
+  (Murray Cumming)
+  
+
+2.2.2:
+ 
+ * OptionMenu: Fixed segfault when Menu remembers destroyed OptionMenu.
+   (Murray Cumming)
+ * Gtk::Image::get_pixbuf(): Fixed reference counting error.
+   (Enrico Costanza)
+ * Pango::AttrList::insert(), insert_before(), change()):  Pass a copy of
+   the attribute parameter. (Martin Schulze)
+ * Menu: Fixed memory leak when removing MenuItems.
+   (Murray Cumming)
+ * Build fixage (Enrico Scholz, Cedric Gustin)
+ * Win32:
+   - Dispatcher ported to Win32, we think.
+     (Andrew Makeev, Cedric Gustin, Murray Cumming)
+ * Examples:
+   - Updated book/idle and book/timeout.
+   (Gene Ruebsamen, Murray Cumming)  
+ * Documentation:
+   - Win32 installation instructions. (Gene Ruebsamen)
+   - Glib::Module documented (Ross Burton)
+   - Updated idle/timeout chapter. (Gene Ruebsamen)
+   - Correct all automatic-from-GTK+ documentation that mentions
+     _free() functions by mistake. (Murray Cumming)
+   - Corrected typo in gtk_window_set_default(). (Oli Kessler)    
+   - gobj() methods documented.
+   - Documented Glib::ListHandle, Glib::ListHandle, Glib::SListHandle.
+     (Murray Cumming)
+
+Changes in gtkmm 2.2:
+
+Highlights:
+- New GTK+ 2.2 API wrapped:
+  * Gtk::ListStore and TreeStore move(), reorder(), iter_is_valid() 
+  methods added.
+  * Gdk::DisplayManager, Display, and Screen added.
+
+- Existing API improved:
+  * atkmm rewritten and usable.
+  * Gtk::Clipboard rewritten and now usable, with examples and documentation.
+  * Gtk::TreeView drag-and-drop now usable, with examples, and documentation.
+  * Gtk::TreeModelSort wrapped.
+  * Gtk::Toolbar has a non-STL-style interface, like the other containers.
+  * glibmm: Added string utility functions, get_appname(), file_open_tmp() 
+    and file_open_contents(). Glib::Markup added - this is not a real XML 
+    parser. 
+  * Various bugfixes - see ChangeLog.
+
+The following people made gtkmm 2.2 happen:
+Ross Burton
+Murray Cumming
+Daniel Elstner
+Walter H. van Holst
+Mark Jones
+Gary Peck
+Daniel Sundberg
+Naofumi Yasufuku
+
+
+
+2.2.0:
+
+* Added Gdk::Window::pointer_grab(), pointer_ungrab(), keyboard_grab()
+  and keyboard_ungrab(). (Murray Cumming)
+
+2.1.3:
+
+* Changed library binary version so libtool knows that
+  2.2 is API compatible with 2.0. We did this wrong in the past
+  so people MUST do this:
+
+    rm -rf <prefix>/lib/lib{glib,pango,atk,gdk,gtk}mm-[12].0.so.[345]*
+
+  where <prefix> is something like /usr/local or /opt/gnome2
+  This will remove previous bad versions of 2.1.x.
+* atkmm: Lots of new interfaces wrapped. (Daniel Elstner).
+* Gtk::TextView:: Fixed bytes/length confusion in TextBuffer's 
+  insert_text callback. (Daniel Elstner)
+
+Documentation:
+  C->C++ docs conversion improved. (Daniel Elstner)
+
+2.1.2:
+
+* Gtk::Clipboard API finished, with examples, and a book chapter:
+  http://www.gtkmm.org/gtkmm2/docs/tutorial/html/ch16.html
+  (Murray Cumming, Daniel Elstner)
+* Gtk::TreeView: Some drag-and-drop API improvements, with examples.
+  (Murray Cumming)
+* Gtk::TreeModelSort added. (Daniel Elstner)
+* Glib::RefPtr: Added swap(). (Daniel Elstner)
+* Gtk::ColorSelection: catch exceptions. (Daniel Elstner)
+* Gdk::Pixmap: Prevent rare segfault in creation. (Daniel Elstner)
+* Gtk::AccelGroup::activate(): Implemented as a wrapper of 
+  gtk_accel_groups_activate().  (Daniel Elstner)
+* Glib::file_open_tmp() and Glib::file_open_contents() implemented.
+  (Daniel Elstner)
+* win32: Glib::Dispatcher compilation fix. (Naofumi Yasufuku)
+
+2.1.1:
+* Gtk::Clipboard API usable, and demonstrated in examples/book/clipboard
+  (Murray Cumming)
+* new Gtk::ListStore and TreeStore move(), reorder(), iter_is_valid() 
+  methods added. (Daniel Elstner)
+* Gtk::FileSelection: get_history_pulldown() added. (Mark Jones)
+* Added Gtk::Widget::modify_bg_pixmap(). (Daniel Elstner)
+* Gtk::RcStyle: Added accessors for public struct fields. (Daniel Elstner)
+* Gtk::Style: Added accessors. (Daniel Elstner)
+* Gtk::ColorSelection: Added palette methods. (Daniel Elstner)
+* Gtk::Label::get_layout(): Corrected refcounting (Daniel Elstner)
+* Prevent leak when constructors throw exceptions. (Daniel Elstner)
+* Added Glib::get_application_name() and set_application_name()
+  (Daniel Elstner)
+* spec file improved (Gary Peck)
+
+* Documentation updated automatically from latest C API docs.
+  (Daniel Elstner) 
+
+
+2.1.0:
+
+* atkmm: Major API corrections. It was unusable before, so we felt free to break 
+  the API. (Daniel Elstner)
+* Gtk::Clipboard: Now inherits from Glib::Object, so it should be used with 
+  Glib::RefPtr<>. This was unusable before, so we felt free to break the API.
+  (Murray Cumming)
+* Gtk::TreeModel::RowReference: It's now a "boxed type" so it can be copied.
+  (Murray Cumming)
+* Gtk::TreeView: some convenience method overloads added. (Daniel Elstner)
+* gdkmm: New classes and methods added, mostly to support multi-head.
+  (Murray Cumming)
+* gtkmm: New methods, for multi-head and some new TreeView methods.
+  (Daniel Sundberg, Murray Cumming)
+* glibmm/stringutils.h: New utility functions. (Daniel Elstner)
+* Gtk::Toolbar: Now has non-STL-style interface - e.g. append().
+  (Murray Cumming)
+* Glib::Markup added. You probably want to use a real XML parser instead.
+  (Daniel Elstner)
+* Spec file for RPMs corrected. (Walter H. van Holst)
+
+Documentation:
+* Widget-specific and Internationalization chapters completed.
+* Book now has inline example code. (Murray Cumming, Daniel Elstner)
+* New book/dialogs example. (Murray Cumming)
+* examples: warnings fixed. (Daniel Elstner)
+
+Also in 2.0.2:
+* Lifetime fix: rare segfault involving destruction and hide() fixed.
+  (Daniel Elstner)
+* TreeView::append_editable(): Now works with bool model columns.
+  (Murray Cumming)
+* reference-counting fixed in some vfuncs. (Daniel Elstner)
+
+
+gtkmm-2-0 branch created. This is HEAD, for gtkmm 2.2
+
+2.0.1:
+
+* Lifetime: Fixed segfault during destruction of non-scrollable children
+  in ScrolledWindow. (Murray Cumming, Daniel Elstner)
+* Signals: Honor the blocked flag of the SigC::Connection.
+  (Daniel Elstner)
+* Gtk::WindowGroup: Added missing create() method.
+  (Daniel Elstner)
+* Win32:
+  - Uses -mms-bitfields option for use with GTK+ with MinGW gcc3
+  - Temporarily #undef some badly named win32 macros.
+  (Naofumi Yasufuku)
+
+* Documentation:
+  - Built HTML is now distributed in the tarball.
+    (Murray Cumming, Daniel Elstner)
+  - Documentation is installed in <prefix>/share/doc/gtkmm-2.0/
+    (Daniel Elstner)
+  - "Programming with gtkmm": widget-specific sections updated.
+    (Murray Cumming)
+
+
+2.0.0
+
+* Now builds with gcc even with -Werror warnings. (Daniel Elstner)
+* Various low-level cleanups/improvements. (Daniel Elstner)
+* SUN-specific workarounds removed now that SUN fixed their
+  compiler (Michael v. Szombathely)
+
+API Changes:
+* Gtk::Box::pack_start() and pack_end():
+  removed default argument values for the bool, bool overloads,
+  to improve type-safety of the more useful PackOptions overload.
+  (Daniel Elstner)
+* Gtk::Menu_Helpers::StockMenuElems can be used to create 
+  submenus. (Christof Pettig)
+* Gtk::AspectFrame: Added a constructor that uses AlignmentEnum.
+  (Murray Cumming)
+* Some minor Pango API corrections (Daniel Elstner)
+* Glib::ustring::clear(): Added. (Daniel Elstner)
+* Glib::Ascii::tolower() and Glib::Ascii::toupper() added.
+  (Daniel Elstner)
+
+
+Documentation:
+* Book:
+    Updated almost all widget-specific sections.
+    Used links to reference docs and to example source code.
+    Added screenshots.
+* FAQ: Updated and converted to DocBook XML.
+* examples: Rewrote many examples - see examples/book/
+  (Murray Cumming)
+* Glib::ustring non-standard methods documented.
+  (Daniel Elstner)
+
+
+2002-10-17: 1.3.26:
+
+* GCC 2.95 build fixed. (Daniel Elstner)
+
+2002-10-17: 1.3.25:
+
+* Now requires libsigc++ 1.2.0
+* Gtk::Entry::get_layout(): refcounting fixed. (Daniel Elstner)
+* gcc 3.2 warnings fixes. (Daniel Elstner)
+* Gtk::TextBuffer::iterator::operator bool() now works.
+ (Daniel Elstner)
+
+API changes:
+* Gtk::TextBuffer:
+  * create_mark() Added overload for anonymous marks.
+  * iterator: Return values instead of references, for UTF8.
+  * insert_interactive() and erase_interactive now return a pair, 
+    with a bool to indicate success, like std::map::insert().
+  * insert_range()renamed to insert().
+  * insert_range_interactive() renamed to insert_interactive().
+  * delete_text() renamed to erase()
+  * delete_interactive_text() renamed to erase_interactive()
+  * delete_selection() renamed to erase_selection().
+  * insert_child_anchor() now returns an iterator.
+  * signal_insert_text() renamed to signal_insert().
+  * signal_delete_range() renamed to signal_erase().
+  * assign(): New alias method for set_text().
+  (Daniel Elstner)
+* Gtk::TreeView:
+  * Added scroll_to_row() and scroll_to_column()
+  * Added unset_hadjustment(),unset_vadjustment(), and 
+      unset_expander_column().
+    Added set_cursor() overload taking a TreePath.
+    * enable_drag_model_source() now takes a Gtk::TargetEntry instead
+      of the C type.
+  (Daniel Elstner)
+* Glib::IOChannel StreamIOChannel: new wrappers.
+  (Tassos Bassoukos, Martin Schulze, Daniel Elstner)
+* Glib::IOSource: Added create() overload that takes IOChannel.
+  (Martin Schulze).
+
+* Documentation:
+  * Book: Some Sections on common widgets updated and rearranged, 
+    with screenshots. Example code is now linked instead of being
+    inline.
+  * examples:
+      Several examples rewritten and moved into examples/book.
+  (Murray Cumming)
+  * demos: warnings in TextBuffer demo fixed. (Daniel Elstner)  
+
+2002-10-09 1.3.24:
+
+* Lifetime: On-stack child widgets are not destroyed during destruction of their
+  containers. (Murray Cumming)
+* Gtk::TextMark::get_iter(): Corrected reference counting (Mike McEwan)
+
+API changes:
+* Glib::Source: Can now wrap existing GSource objects.
+  (Martin Schulze)
+* Glib::TimeVal: Convenience methods added. (Stephan Puchegger)
+* Glib::IConv: Added reset(). (Daniel Elstner)
+* Glib::Dispatcher: new constructor accepts an arbitrary Glib::MainContext.
+  (Stephan Puchegger)
+* Gdk: Added screen_width() and screen_height(). (Murray Cumming)
+
+
+2002-09-13 1.3.23:
+
+Documentation:
+* We now reuse ATK, GDK, and Pango reference documentation:
+  e.g: http://www.gtkmm.org/gtkmm2/reference/html/namespacePango.html
+  (Martin Schulze)
+* README.SUN added (Michael v. Szombathely)
+
+API breakage:
+* pangomm: New classes, and some corrections to existing classes.
+  (Martin Schulze)
+  Excuse: Pangomm isn't used very much.
+* Gtk::TreeView::set_column() takes a Widget& instead of a GtkWidget*.
+  (Murray Cumming)
+  Excuse: If anybody was using it already, they would have told us.
+* Gtk::TextBuffer::get_text(): Added overload that takes no iterators.
+  (Murray Cumming)
+  Excuse: It's API addition.
+* Gtk::Style: Wrapped GTK+ vfuncs.
+  (Murray Cumming)
+  Excuse: It's API addition.
+
+
+2002-08-28 1.3.22:
+
+* Win32:
+  - Don't include strings.h on Win32.
+  - Use -fnative-struct, as used by GTK+ DLLs.
+  - Install win32 import libraries.
+  (Naofumi Yasufuku)
+  - Don't try to register non-wrapped classes. (Murray Cumming)
+
+* Sun Forte build fixes. (Michael v. Szombathely)
+
+API breakage:
+* pangomm:
+  - Added Rectangle, Language, Color, Item, Glyph, Attributes, Attr, AttrItem.
+  - Used these wrappers in other class methods.
+  - Added some wrapper methods.
+  (Martin Schulze)
+  Excuse for breakage: pangomm isn't used much directly so this shouldn't break much.
+* Added Gdk::Window::set_cursor(void) to reset the cursor. (Murray Cumming)
+  Excuse: It's additional API so it doesn't break anything.
+ 
+2002-08-18 1.3.21:
+* Lifecycle: Prevented double-destroying of GtkObjects. (Murray Cumming)
+* Pango::Layout: Added constructor and create() method. (Martin Schulze)
+* Gtk::Scale: set_draw_value() and get_draw_value() parameters are now bools.
+  (Ole Laursen)
+
+Documentation:
+* Additions to PORTING. (Elke Meier).
+* PORTING is now distributed. (Bradley Bell)
+* docs/internal: Added documentation_generation.tx.t (Murray Cumming)
+* More reference docs for Scale, VScale, and HScale. (Ole Laursen)
+
+
+2002-08-14 1.3.20:
+* Gtk::TreeView classes:
+  - TreeView::append_column_editable() Workaround for gcc 2.95.3 compilation
+    bug. (Martin Schulze)
+  - TreeModel::foreach() return value marshalled properly. (Gergo Erdi)
+
+* lifecyle: C++ deletion really destroys GtkObjects again. (Murray Cumming)
+* Glib::Object: removed warnings when using libglademm. (Murray Cumming)
+* Gtk::manage(): Now emits warnings when you try to use it on a top-level 
+  Window. (Murray Cumming)
+
+* examples:
+  - Removed old menu and combo examples.
+  - Corrected use of Gtk::manage() on top-level windows.
+  - Added cleaner combo example in example/book/combo.
+  - rulers fixed. (Martin Schulze)
+   
+* API changes:
+  - Gtk::Combo: Added ComboDrowDown class - it wraps the deprecated GtkList
+    widget that is used in the GtkCombo interface. gtkmm coders can now set
+    individual item strings and use widgets for Combo items. See
+    examples/book/combo. (Martin Schulze)
+  - Gdk::Drawable: draw_rectangle() and draw_arc(): Changed filled arg from 
+    int to bool. (Michael Koziarski)
+  - Gdk::Color: *_p() renamed to get_*_p(). (Andreas Holzmann) 
+  - Gtk::TextMark: Added get_iter() as a convenience. (Martin Schulze)
+  - Gtk::TextBuffer: delete_at_cursor() and insert_at_cursor() return the 
+    iterator, to be consistent with the other methods. (Martin Schulze)
+  - Gtk::TextBuffer: paste_clipboard(), insert_child(), and 
+    create_child_anchor() parameters are now const. (Martin Schulze)
+  - Gtk::Bin::add_label(): Added override, using enum. (Gergo Erdi)
+  - Gtk::IconFactory and Gtk::StockItem: Changed string parameters to
+    Gtk::StockID to allow use of Gtk::BuiltinStockID. (Murray Cumming)
+
+
+2002-08-06 1.3.19:
+* Gtk::TreeView classes:
+  - Added TreeModel::RowReference wrapper - it remains valid even when the 
+    rows are sorted.
+  - All methods that take a Model::iterator can also take a Model::Row.
+    (Murray Cumming)
+  - Added TreeView::append_column_editable() method. It creates columns whose
+    cells automatically store new values in the model when they are edited.
+    See documentation:
+    http://www.gtkmm.org/gtkmm2/tutorial/html/ch10s02.html#id2837147
+  - Added TreeModel::foreach() wrapper.
+  - Added TreeView::remove_all_columns().
+  - treestore demo: Parent rows don't show toggle cells anymore.
+    (Daniel somebody)
+* Box::pack_start() and pack_end() API:
+  - Restore the old (bool, bool) methods as overload, so it's easier to 
+    port to gtkmm2.
+  - Changed the ORed flags to a simpler set of 3 mutually-exclusive enums.
+  (Michael Babcock)
+* Menu API:
+  - Main Menu items are now accelerated automatically.
+  - Popup menus need to be accelerated at the appropriate time - handy
+    accelerate() overloads were created for this.
+  - AccelMap: New wrapper.
+   (Andreas Holzmann)
+  - ImageMenuElem items now show their icons automatically.
+   (Murray Cumming)
+* Lifecycle:
+  - Top-level windows are now properly destroyed, and definitely can't be
+    manage()d.
+  - Added test for this (Michael v. Szthombathely)
+  - Prevented some double-destruction of signal connections.
+  - Prevented recreation of 2nd C++ instances by Glib::wrap() during 
+    destruction of the C instances.
+  - Prevented calling of signal handlers of destroyed C++ instances.
+  (Murray Cumming, Valgrind)
+  - Corrected refounting of some get*() methods. (Christof Pettig)
+* Sun Forte compiler fixes:
+  - Examples use more lengthy code when Sun's compiler can't handle the 
+    templated TreeView methods.
+  - Explicit specification of templated Glib::wrap() specializations.
+  (Michael v. Szthombathely, Murray Cumming)
+* gcc 3.1 fixes (Jarek Dukat)
+* Added vast number of const get_*() const overloads. (Jarek Dukat)
+* Added alignment enum, used in overloads as an alternative to 0.5, 1.0, etc.
+  (Murray Cumming)
+* Gtk::Style: Added const overloads of get_*gc() methods. 
+* Documentation:
+  - Allow use of a local DocBook stylesheet, for people who aren't connected.
+  (Marcelo E. Magallo)
+  - Added Gtk::Main::run(window) overload reference docs.
+    (Moreten Brix Pedersen)
+  - Added RefPtr<> reference docs. (Ole Laursen)
+  - Prevented reuse of C docs that talk about free-ing stuff. (Murray Cumming)
+* autogen fix for GTKMM_VC_PERL_VERSION problem. (Marcel E. Magallo)
+* Corrected library versioning of the internal gtk_extra_defs library.
+  (Bradley Bell)
+* FontSelection example fixed. (Morten Brix Pedersen)
+
+
+2002-07-14 1.3.18:
+
+* documentation:
+    ( See http://www.gtkmm.org/gtkmm2/ )
+    book: Added TreeView chapter.
+          Added custom signals section.
+          (Murray Cumming)
+    reference: Added Menus and TextView groups.
+               Added vast amounts of class documentation, and method
+               documentation reused from GTK+.
+               (Murray Cumming, James Henstridge, Morten Brix Pedersen)
+    PORTING: Additions and clarifications. (Jarek Dukat, Morten Brix Pedersen)
+    examples: Added menus and custom signals examples. (Murray Cumming)
+              Corected original menu examples. (Liam Girdwood) 
+    internals: Corrected _DEPS description. (Marcelo Magallon)
+* Gtk::TreeView classes:
+  - Models columns can be accessed by number, for dynamically-created models.
+  - Added overrides to take TreeModel::Rows as well as TreeModel::iterators.
+  - Row: Added operator bool(). 
+  (Murray Cumming)
+* Gtk::TextView classes 
+   - Added TextBuffer:: typedefs for Tag, TagTable and Mark.
+   - TextBuffer: insert() methods now return the new iterator instead of 
+     modifying the input iterator, to be more STL-like.
+   - Renamed get_start_iter() and get_end_iter() to begin() and end().
+   - Made get() methods const.
+   (Murray Cumming)
+* Gtk::Table: The STL-style list now works. It probably never worked before, 
+  even in gtkmm 1.2. (Murray Cumming)
+* Gtk::RadioButton::Group: Simplified copying/passing semantics.
+* Gtk::Menu: Show stock menu item icons. (Christof Petig)
+* Glib::IConv: constructor handles errors and throws appropriate exceptions.
+  (Jarek Dukat)
+* Sun Forte compiler fixes. (Murray Cumming)
+* vfunc wrapper generation simplification. (Murray Cumming)
+* Gtk::Invisible: Correct constructor bug discovered by
+  Tony <a_a_c@bellsouth.net> (Murray Cumming)
+*  gcc 3.1 fixes. (Jarek Dukat, Gergo Erdi)
+ 
+
+2002-06-22 1.3.17:
+
+* Win32 support. (Cedric Gustin, Daniel Elstner)
+* STL-style interfaces: Use of references rather than pointers as value types,
+  to avoid double indirection when dereferencing iterators. (Martin Schulze)
+* vfunc wrappers: All overrideable vfuncs now have the "_vfunc" suffix, and 
+  they all have separate invoker methods, which are usually wrappers of the C 
+  invoker functions. (Daniel Elstner)
+* Gtk::Box STL-style interface uses Gtk::AttachOptions instead of bools,
+  for consistency. (Jarek Dukat)
+* Added examples/gdk, which shows gdkmm drawing code. (Alain Rouge)
+* Added Gdk::RgbCMap wrapper. (Murray Cumming)
+* Added Pango::GlyphString wrapper. (Murray Cumming)
+* Many more get_*() methods are now const. (Jarek Dukat)
+* Gtk::TextBuffer::create_mark() reference-count bug fixed. (Andrew E Makeev)
+* Gdk::Drawable: Compilation fix for Sun's Forte compiler. (Michael v. Szombathely)
+* Added Glib::Module wrapper. (Murray Cumming)
+* Improved gtkmmproc documentation. (Murray Cumming)
+* Distribute CHANGES files. (Morten Brix Pedersen)
+
+
+2002-06-17: 1.3.16:
+
+* Distribute cell renderer example header files.  Doh!  (Daniel Elstner)
+* Rename several remove_foo() methods to unset_foo(), to avoid confusion with
+  container operations.  (Daniel Elstner)
+* Gtk::FileSelection::set_filename(): Change argument type to std::string, to
+  follow the GTK+ inconsistency fix -- both get_filename() and set_filename()
+  work with on-disk encoding now.  (Daniel Elstner)
+* Glib::Mutex::Lock and friends: Replace the bool acquire_immediately
+  parameter with overloaded ctors.  See the docs, it should be easier now.
+  (Daniel Elstner)
+
+2002-06-15: 1.3.15:
+
+* Major low-level GObject changes to allow on-the-fly GType registration. This allows
+  creation of custom TreeView CellRenderers in C++, and should allow implementation of
+  GTK+ Interfaces in C++. See examples/cellrenderercustom/
+  (Daniel Elstner)
+* Gtk::Notebook: Restored the STL-style interface, but this time properly.
+   (Martin Schulze)
+* Gtk::TreeSortable: set_sort_func() now uses SigC C++ Slots instead of C callbacks.
+   (Jarek Dukat)
+* Glib::Dispatcher:  A special libsigc++ signal for easy inter-thread communication through
+   a pipe. See examples/thread/dispatcher and
+   http://www.gtkmm.org/gtkmm2/reference/html/classGlib_1_1Dispatcher.html#_details
+  (Daniel Elstner)
+* Added optimisation that allows us to use C++ types even in default signal handlers, so
+  there should soon be no C types anywhere in the gtkmm interface. (Daniel Elstner)
+* Added comments to the C<->C++ callback hookups. (Murray Cumming)
+* Gtk::MenuShell and MenuBar implementation cleanup. (Daniel Elstner)
+* Gdk::Pixmap/Bitmap implementation simplified. (Daniel Elstner)
+* Gtk::Widget:
+   - new enum Gtk::WidgetFlags.
+   - width() renamed to get_width(). Likewise height().
+  (Daniel Elstner)
+* Gdk::Drawable: More use of C++ types, and constness fixes. (Daniel Elstner)
+* Gtk::Style: Wrap gtk_paint_*() functions. (Daniel Elstner)
+* Gtk::Stock:
+  - Implement Gtk::Stock::add().
+  - StockItem: Allow checking for null.
+  (Daniel Elstner)
+* Gtk::Paned::pack(): Uses the AttachOptions enum instead of unreadable bools.
+  (Daniel Elstner)
+* Removed need for wrap_specific_type(). (Daniel Elstner)
+* Removed Gtk::Kit typedef. Just use Gtk::Main. (Daniel Elstner)
+
+2002-05-12: 1.3.14:
+
+* Gtk::TreeView and friends:
+  - Namespaced TreeIter, TreePath, TreeViewColumn, etc, as TreeModel::iterator,
+    TreeModel::Path, TreeView::Column, etc. (Murray Cumming)
+  - Separated TreeModel::iterator into iterator and Row, obtained by 
+    dereferencing the iterator. This is more STL-like. (Daniel Elstner)
+  - Some Model methods moved to Row, and set_value()/get_value() replaced by
+    array-style operator[]. (Daniel Elstner)
+  - Added overrides to allow for simple model-to-view column mapping without
+    repetitive specifying of TreeViewColumns and CellRenderers and attributes.
+    Examples and demos therefore greatly simplified. (Murray Cumming)
+  - TreeModel::iterator comparison problems fixed. (Daniel Elstner)
+  - Added Path(iterator&) constructor.
+  - All get_*() methods are now const. (Murray Cumming)
+* Gtk::Box::pack_start() and pack_end(): Now uses AttachOptions flags instead
+  of two bool paratemers, to make code more readable and to be consistent with 
+  Gtk::Table::attach(). (Murray Cumming)
+* Gtk::Notebook: STL-style interface remoeved because GTK+ doesn't expose 
+  enough internals anymore. The simple append/prepend interface remains.
+  (Murray Cumming)
+* Some enums placed inside their related classes. (Daniel Elstner)
+* Glib::FileError enums renamed to avoid clashes with C #defines on some 
+  platforms (Daniel Elstner)
+* Fixed refcount problem with manage() ed child widget destruction.
+  (Murray Cumming)
+* test suite started. (Daniel Elstner)
+* Glib::Value and properties simplifications. (Daniel Elstner)
+* Gtk::Dialog: Dialogs are now hidden when run() finishes. (Murray Cumming)
+
+2002-05-01 gtkmm 1.3.13:
+
+* Mostly just a release to sync with a new gnomemm release.
+* Some glibmm code is now autogenerated with gtkmmproc (Daniel Elstner)
+* Improvements to enum generation (Daniel Elstner)
+* Improvements to glibmm character conversions (Daniel Elstner)
+* gtk-demo segfault fixed. (Martin Schulze) 
+
+2002-04-27 gtkmm 1.3.12:
+
+* Many many fixes for Sun's Forte C++ compiler.
+  (Michael v. Szombathel, Daniel Elstner, Murray Cumming)
+* StockID API improved and used more consistently.
+  (Martin Schultze, Daniel Elstner)
+* Glib::ustring conversion improvements (Daniel Elstner)
+* gtkmmproc improved for use in bonobomm. (Murray Cumming)
+* Gdk::Point wrapper improved. (Martin Schulze)
+* Gtk::Adjustment constructor fixed. (Murray Cumming)
+* Gtk::TreeView:methods that took function pointers now take SigC::Slots.
+  (Murray Cumming)
+* Less #including of C headers in gtkmm headers, so less pollution of the 
+  global namespace. (Murray Cumming)
+* Menu API more complete and consistent. (Martin Schultze)
+* Gtk::Dialog::get_action_area() now does. (Murray Cumming)
+* GType changes to allow libglade/libglademm cooperation. (Murray Cumming)
+* Reference documentation:
+  - Stock IDs in HTML:
+  http://gtkmm.org/gtkmm2/reference/html/namespaceGtk_1_1Stock.html#a6
+  - Makefile dependencies fixed for faster docs building.
+* General API review.
+
+2002-04-13 gtkmm 1.3.11:
+
+* gdkmm.h: No longer includes non-existent files. (Daniel Elstner)
+* Build: Non-cvs users don't need perl. (Daniel Elstner)
+* glibmm: pkg-config now reports libgobject for linking. (Murray Cumming).
+
+2002-04-11 gtkmm 1.3.10:
+
+* Now builds with {G,GDK,GTK}_DISABLE_DEPRECATED - some methods removed;
+  entirely removed Gdk::Font and Gtk::Progress. (Daniel Elstner)
+* Reference documentation:
+  - Some automatic C->C++ conversion when reusing C reference documentation:
+  - enums and flags grouped together.
+  - html post-processed to produce "int& someint" instead of "int &someint".
+  - Some example code merged into the refernce docs.
+  (Daniel Elstner)
+* Gtk::TreeView:
+  - Gtk::TreeIter is a bit more like a STL iterator.
+  - Gtk::ListStore has a more STL-like interface.
+  - Gtk::TreeModelColumn - new class used to contain column type and number.
+  - Gtk::TreeModelColumnRecord - new class to contain all TreeModelColumns.
+  - examples/demos updated accordingly.
+  (Daniel Elstner)
+* gtkmm now uses its own enums, in the Gtk namespace. (Daniel Elstner)
+* Gtk::ProgressBar: removed deprecated Adjustment stuff, leaving just the
+  new fraction-orientated interface. (Daniel Elstner)
+* Some .hg format changes needed by bonobomm. (Murray Cumming)
+* new Glib::IOSource for watching file descriptor. (Martin Schultze)
+
+2002-03-27 gtkmm 1.3.9:
+
+* Custom Signal Proxies simplified, implementing only custom C callback
+  functions and specifying them to the signal proxy constructors.
+  (Daniel Elstner)
+* Complete recoding of Boxed Types wrappers, not using generic _copy
+  and _free methods functions when they aren't necessary, and sometimes
+  inheriting directly from the underlying struct. (Daniel Elstner)
+* gtk-demo compilation fixed. (Daniel Elstner)
+* gtk-demo stock browser part rewritten and working. (Matthew Walton)
+* Properly implemented enum and flags property proxies. (Daniel Elstner).
+* Reference documentation:
+  - some gtk+ docs are now merged in automatically, but we don't yet
+    have acccess to the stuff in gtk+'s tmpl/*.sgml files.
+    (Murray Cumming)
+  - Added class documentation, based on docs in GTK+.
+  - Custom headers and footers.  (Paolo Pinto)
+* Added Gtk::TreeSortable, Gtk::TreeDragDest, and Gtk::TreeDragSource
+  interface wrappers.  (Murray Cumming)
+* Gdk::Pixbuf: render* method args are now const-correct, which allows
+  casting of temporary instances. (Murray Cumming)
+* Gtk::MessageDialog: changed argument order in constructors, to
+  allow sensible defaults. (Murray Cumming)
+
+2002-03-11 gtkmm 1.3.8:
+
+* Generated C++ source code is now distributed, so that we can use extra 
+  dependencies, such as perl modules, when generating the C++ source.
+  (Daniel Elstner)
+* Signals now use C++ types. We've said it before, but this time we meant it.
+  (Murray Cumming)
+* Added an exception hierarchy, used to wrap GError. Used in 
+  Gdk::Pixbuf and demonstrated in demos/pixbuf-demo. (Daniel Elstner).
+* Drag and Drop now wrapped, with examples, and the first draft of a chapter in
+  the tutorial:
+  http://gtkmm.sourceforge.net//gtkmm2/tutorial/html/ch12.html
+  (Murray Cumming)
+* Revised Gtk::Menu API - accelerators now work. (Andreas Holzmann)
+* Glib::ustring can now be used directly with standard streams, converting 
+  to the current locale where necessary. (Daniel Elstner)
+* Added wrappers for glib conversion functions. (Daniel Elstner)
+* Initial GtkClipboard wrapper. (Murray Cumming)
+* Simplified checks for standard library features (Daniel Elstner)
+
+
+
+2002-02-24 gtkmm-1.3.7:
+
+* operator=() for BoxedTypes improved. (Daniel Elstner)
+* pangomm api review, and use of generic intermediate ListHandle containers. 
+  for method arguments instead of just std::list. (Gergo Erdi)
+* Gdk::Cursor constructor now public. (Andreas Holzmann)
+* property.get_value() improved. (Andreas Holzmann)
+* New wrappers for Atk::Relation, Atk::RelationSet, and Atk::StateSet.
+  (Murray Cumming)
+* Glib::ustring documentation and case conversion methods.
+  (Daniel Elstner)
+* Improvements to ListHandle generic intermediate containers.
+  (Daniel Elstner)
+* Gtk::TreeModel: several methods now take C++ arguments instead of C types.
+  (Murray Cumming)
+* Build fails on failed m4 conversions. (Daniel Elstner)
+
+
+2002-02-20 gtkmm-1.3.6:
+
+No major changes - mostly just a workaround for gcc 2.95.4.
+
+* gcc 2.95.4 seems to have a problem with a use 
+of RefPtr::operator bool() in textbuffer.cc, so
+we've used is_null() as a workaround. This is mysterious.
+* configure.in mentioned a Makefile.am that isn't distributed. 
+* Added examples/book, which will contain examples from the 
+
+2002-02-18 gtkmm-1.3.5:
+* Tutorial converted to latest DocBook XML, with some improvements of the text.
+  (Murray Cumming)
+* Examples can be built all at once. Some use of deprecated widgets removed.
+  (Murray Cumming)
+* Gdk::Cursor: Gdk::Color args are now const. (Andreas Holzmann)
+* Toolbar: StockElem can now be used to add stock items to toolbars.
+  (Andreas Holzmann)
+* Gdk::Bitmap now derives from Gdk::Pixmap, allowing a Bitmap to be used 
+  anywhere that a Pixmap can be used. This is the intention in GTK+. 
+  (Murray Cumming, Andreas Holzmann)
+* Gtk::TextBuffer improvements (Daniel Elstner)
+* More wrapping of Atk::Object (Murray Cumming)
+* Documentation overview page:
+  http://gtkmm.sourceforge.net/gtkmm2/
+  (Paulo Pinto) 
+
+2002-01-26 gtkmm-1.3.4:
+
+* Removed deprecated widgets such as CList, CTree, Text, etc. (Murray Cumming)
+* Some exception handling: Use Glib::add_exception_handler() to specify a method to be called in the unlikely event that a signal handler throws an exception. If it's not used then gtkmm will report the problem and then segfault normally. Previously the exception would just be swallowed by the underlying C code and you'd have an uniformative segfault.
+  (Karl Nelson)
+* Menu Elements: Menu Elements can now be stored in STL containers. Fixed rare memory leak
+  (Karl Nelson)
+* Improved, clearer, more versatile intermediate handle types, for lists/vectors/arrays of strings/widgets etc.
+  (Daniel Elstner)
+* Improved reference documentation: Signal accessors show the names of the signal handler arguments, and Widgets, Containers, and Dialogs can be seen grouped toether on their own special pages.
+  (Murray Cumming)
+* Improved Gtk::TreeView and Gtk::TextView API, using more C++ types. (Murray Cumming, Daniel Elstner).
+
+
+2002-01-10 gtkmm-1.3.3:
+
+* Interface methods use C++ types:
+    Interfaces now have a something_vfunc() which uses C types and which can be overridden to change the behaviour, and something() which uses C++ types and can be used to invoke the virtual function. This seems like the best mix of efficiency and convenience. (Murray Cumming)
+* Property change notification:
+    Added changed signal to property proxies. For instance, you can now do:
+      something.property_example().signal_changed().connect( ... ).
+   (Murray Cumming)
+* Simplified inheritance hierarchy:
+   Glib::ObjectBase derives from SigC::Object, thus Glib::Object no longer needs to derive from SigC::Object by using Multiple Inheritance. (Daniel Elstner)
+
+
+2001-12-28 gtkmm-1.3.2:
+
+* No more gint, gdouble, gfloat, glong:
+   We use normal C++ types instead. (Murray Cumming)
+* Signals are now used via accessors, and SigC::slot() requires a reference to the instance instead of a pointer.
+    For instance,
+    gtkmm 1.2: button.clicked.connect(SigC::slot(this, &Something::somemethod));
+    gtkmm 1.3: button.signal_clicked().connect(SigC::slot(*this, &Something::somemethod));
+  (Karl Nelson)
+* Properties are used via accessors. For instance:
+    someobject.property_something().set_value(2);
+  (Karl Nelson)
+* Removed any uses of Glib::nstring:
+  We provide an additional method instead of allowing a null value. e.g. remove_something() instead of
+  set_something(0). (Daniel Elstner)
+* Improved gtkmmproc installation:
+    For use by, for instance, libgnomeuimm and libgnomecanvasmm. (Murray Cumming)
+* Menu wrappers updated for GTK+2. (Murray Cumming)
+* Another gtkmmproc overhaul. It now detects more .defs format errors, warns about as yet unwrapped functions,
+  and is faster. (Karl Nelson)
+* More api review and fixes. (Murray Cumming, Daniel Elstner, Gergo Erdi, Karl Nelson)
+
+Note also that we use a newer version of libsigc++-1.1 which contains some segfault-related fixes.
+
+
+2001-11-28	gtkmm-1.3.1.
+
+* Properties ( e.g. someobject.property_something.set_value(2); ) (Murray Cumming)
+* ListHandler (Use almost any std container where GTK+ takes/returns a GList*) (Daniel Elstner)
+* TreeView and TextView wrappers, including multiply-inherited 'Interface' classes, such as Gtk::TreeModel
+  (Murray Cumming)
+* gtk-demo: C++ version of the big new gtk+ demo that shows its own source code.
+  This demonstrates TreeView, TextView, and Pango, among other things. (Murray Cumming)
+* Reference documentation, using doxygen:
+  http://gtkmm.sourceforge.net/gtkmm2/reference/html/
+  (Murray Cumming)
+* Gtk::Window no longer self-destructs. The bool return value of Gtk::Window::signal_delete_event now
+  determines whether the window will be hidden, not whether it will be destroyed. (Daniel Elstner)
+* Gtk::Main::run(Gtk::Window& window):
+  Allows you to specify a main application window. The application will quit when that window is hidden.
+  (Murray Cumming)
+* Lots and lots of API review. See our progress here:
+  http://cvs.gnome.org/bonsai/cvsblame.cgi?file=gtkmm-root/base/api_status.txt&rev=&root=/cvs/gnome
+  (Murray Cumming, Daniel Elstner, Gergo Erdi)
+* We can now use either automake 1.4p5 (like the rest of GNOME2) or automake 1.5 (Daniel Elstner)
+* Glib::ustring, which interoperates with std::string now has even more of the std::string interace.
+  (Daniel Elstner)
+* Fixed the library names and the names reported by pkgconfig, for better co-existence with gtkmm 1.2.
+  (Gergo Erdi)
+
+Known problems:
+  gtk-demo crashes on exit with warnings.
+  gtk-demo "stock browser" doesn't work yet.
+  Gtk::TreePath(ustring) constructor seems to have problems - see the TODO comments in demos/gtk-demo/example_treeview_editable_cells.cc
+
+
+
+2001-10-26	gtkmm-1.3.0.
+
+Initial release, introducing:
+* Glib::ustring
+* Glib::RefPtr
+* signal_ prefix
+* Renamed default signal handlers (on_ prefix).
+* Rewritten gdkmm

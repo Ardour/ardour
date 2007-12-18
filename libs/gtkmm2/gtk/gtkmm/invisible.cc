@@ -136,15 +136,17 @@ GType Invisible::get_base_type()
 
 Invisible::Invisible()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Widget(Glib::ConstructParams(invisible_class_.init()))
 {
   }
 
 Invisible::Invisible(const Glib::RefPtr<Gdk::Screen>& screen)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Widget(Glib::ConstructParams(invisible_class_.init(), "screen", Glib::unwrap(screen), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Widget(Glib::ConstructParams(invisible_class_.init(), "screen", Glib::unwrap(screen), static_cast<char*>(0)))
 {
   }
 

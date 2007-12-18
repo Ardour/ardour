@@ -154,12 +154,12 @@ public:
    // This would be our SignalProxy_Select* data.
 
   
-  /** Returns the tree view associated with @a selection .
+  /** Return value: A Gtk::TreeView
    * @return A Gtk::TreeView.
    */
   TreeView* get_tree_view();
   
-  /** Returns the tree view associated with @a selection .
+  /** Return value: A Gtk::TreeView
    * @return A Gtk::TreeView.
    */
   const TreeView* get_tree_view() const;
@@ -209,7 +209,7 @@ public:
   ListHandle_Path get_selected_rows(Glib::RefPtr<TreeModel>& model);
 
   
-  /** Returns the number of rows that have been selected in @a tree .
+  /** Return value: The number of rows selected.
    * @return The number of rows selected.
    * 
    * @newin2p2.
@@ -312,14 +312,13 @@ public:
   void unselect(const TreeModel::iterator& iter);
 
   
-  /** Returns <tt>true</tt> if the row pointed to by @a path  is currently selected.  If @a path 
-   * does not point to a valid location, <tt>false</tt> is returned
+  /** Return value: <tt>true</tt> if @a path  is selected.
    * @param path A Gtk::TreePath to check selection on.
    * @return <tt>true</tt> if @a path  is selected.
    */
   bool is_selected(const TreeModel::Path& path) const;
   
-  /** Returns <tt>true</tt> if the row at @a iter  is currently selected.
+  /** Return value: <tt>true</tt>, if @a iter  is selected
    * @param iter A valid Gtk::TreeIter.
    * @return <tt>true</tt>, if @a iter  is selected.
    */
@@ -336,9 +335,9 @@ public:
   void unselect_all();
   
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %changed()</tt>
+   * <tt>void on_my_%changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_changed();
@@ -369,10 +368,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TreeSelection
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeSelection
    */
   Glib::RefPtr<Gtk::TreeSelection> wrap(GtkTreeSelection* object, bool take_copy = false);
 }

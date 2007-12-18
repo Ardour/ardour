@@ -3,6 +3,8 @@
 #ifndef _GTKMM_FILESELECTION_H
 #define _GTKMM_FILESELECTION_H
 
+#include <gtkmmconfig.h>
+
 #ifndef GTKMM_DISABLE_DEPRECATED
 
 
@@ -29,6 +31,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gtkmm/dialog.h>
 #include <gtkmm/button.h>
@@ -279,10 +285,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::FileSelection
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::FileSelection
    */
   Gtk::FileSelection* wrap(GtkFileSelection* object, bool take_copy = false);
 } //namespace Glib

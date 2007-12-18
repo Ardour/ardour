@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: value_custom.cc,v 1.7 2006/04/12 08:12:11 murrayc Exp $ */
+/* $Id: value_custom.cc 260 2006-04-12 08:12:12Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

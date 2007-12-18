@@ -1,0 +1,63 @@
+/* $Id: toggleaction.hg,v 1.5 2004/07/01 08:55:45 murrayc Exp $ */
+
+/* Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/action.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/action_p.h)
+
+
+namespace Gtk
+{
+
+/** An action which can be toggled between two states.
+ *
+ * A Gtk::ToggleAction corresponds roughly to a Gtk::CheckMenuItem. 
+ * It has an "active" state specifying whether the action has been checked or not.
+ *
+ */
+class ToggleAction : public Gtk::Action
+{
+  _CLASS_GOBJECT(ToggleAction, GtkToggleAction, GTK_TOGGLE_ACTION, Gtk::Action, GtkAction)
+
+protected:
+  _CTOR_DEFAULT
+   explicit ToggleAction(const Glib::ustring& name, const StockID& stock_id = StockID(), const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring(), bool is_active = false);
+
+public:
+  //Note that gtk_toggle_action_new() does not allow name to be NULL, which suggests that we should not have a default constructor,
+  //but it's OK to set the name later:
+  _WRAP_CREATE()
+
+   static Glib::RefPtr<ToggleAction> create(const Glib::ustring& name, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip =  Glib::ustring(), bool is_active = false);
+   static Glib::RefPtr<ToggleAction> create(const Glib::ustring& name, const Gtk::StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring(), bool is_active = false);
+
+  _WRAP_METHOD(void toggled(), gtk_toggle_action_toggled)
+  _WRAP_METHOD(void set_active(bool is_active = true), gtk_toggle_action_set_active)
+  _WRAP_METHOD(bool get_active() const, gtk_toggle_action_get_active)
+  _WRAP_METHOD(void set_draw_as_radio(bool draw_as_radio = true), gtk_toggle_action_set_draw_as_radio)
+  _WRAP_METHOD(bool get_draw_as_radio() const, gtk_toggle_action_get_draw_as_radio)
+
+  _WRAP_SIGNAL(void toggled(), "toggled")
+
+  _WRAP_PROPERTY("draw_as_radio", bool)          
+};
+
+} // namespace Gtk
+

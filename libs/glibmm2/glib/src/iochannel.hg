@@ -163,12 +163,12 @@ public:
 #endif /* defined(G_OS_WIN32) || defined(DOXYGEN_SHOULD_SKIP_THIS) */
 
   /** Read a single UCS-4 character.
-   * @retval unichar The Unicode character.
+   * @retval thechar The Unicode character.
    * @return The status of the operation.
    * @throw Glib::IOChannelError
    * @throw Glib::ConvertError
    */
-  _WRAP_METHOD(IOStatus read(gunichar& unichar), g_io_channel_read_unichar, errthrow)
+  _WRAP_METHOD(IOStatus read(gunichar& thechar), g_io_channel_read_unichar, errthrow)
 
   /** Read a character sequence into memory.
    * @param buf A buffer to read data into.

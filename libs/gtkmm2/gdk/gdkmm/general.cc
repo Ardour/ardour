@@ -53,27 +53,62 @@ void flush()
 namespace Cairo
 {
 
+#ifndef GDKMM_DISABLE_DEPRECATED
 void set_source_color(::Cairo::RefPtr< ::Cairo::Context >& context, const Gdk::Color& color)
 {
   gdk_cairo_set_source_color(context->cobj(), const_cast<GdkColor*>(color.gobj()));
 }
+#endif
 
+void set_source_color(const ::Cairo::RefPtr< ::Cairo::Context >& context, const Gdk::Color& color)
+{
+  gdk_cairo_set_source_color(context->cobj(), const_cast<GdkColor*>(color.gobj()));
+}
+
+#ifndef GDKMM_DISABLE_DEPRECATED
 void set_source_pixbuf(::Cairo::RefPtr< ::Cairo::Context >& context, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf, double pixbuf_x, double pixbuf_y)
 {
   gdk_cairo_set_source_pixbuf(context->cobj(), pixbuf->gobj(), pixbuf_x, pixbuf_y);
 }
+#endif
 
+void set_source_pixbuf(const ::Cairo::RefPtr< ::Cairo::Context >& context, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf, double pixbuf_x, double pixbuf_y)
+{
+  gdk_cairo_set_source_pixbuf(context->cobj(), pixbuf->gobj(), pixbuf_x, pixbuf_y);
+}
+
+#ifndef GDKMM_DISABLE_DEPRECATED
 void set_source_pixmap(::Cairo::RefPtr< ::Cairo::Context >& context, const Glib::RefPtr<Gdk::Pixmap>& pixmap, double pixmap_x, double pixmap_y)
 {
   gdk_cairo_set_source_pixmap(context->cobj(), pixmap->gobj(), pixmap_x, pixmap_y);
 }
+#endif
 
+void set_source_pixmap(const ::Cairo::RefPtr< ::Cairo::Context >& context, const Glib::RefPtr<Gdk::Pixmap>& pixmap, double pixmap_x, double pixmap_y)
+{
+  gdk_cairo_set_source_pixmap(context->cobj(), pixmap->gobj(), pixmap_x, pixmap_y);
+}
+
+#ifndef GDKMM_DISABLE_DEPRECATED
 void rectangle(::Cairo::RefPtr< ::Cairo::Context >& context, const Gdk::Rectangle& rectangle)
 {
   gdk_cairo_rectangle(context->cobj(), const_cast<GdkRectangle*>(rectangle.gobj()));
 }
+#endif
 
+void add_rectangle_to_path(const ::Cairo::RefPtr< ::Cairo::Context >& context, const Gdk::Rectangle& rectangle)
+{
+  gdk_cairo_rectangle(context->cobj(), const_cast<GdkRectangle*>(rectangle.gobj()));
+}
+
+#ifndef GDKMM_DISABLE_DEPRECATED
 void region(::Cairo::RefPtr< ::Cairo::Context >& context, const Gdk::Region& region)
+{
+  gdk_cairo_region(context->cobj(), const_cast<GdkRegion*>(region.gobj()));
+}
+#endif
+
+void add_region_to_path(const ::Cairo::RefPtr< ::Cairo::Context >& context, const Gdk::Region& region)
 {
   gdk_cairo_region(context->cobj(), const_cast<GdkRegion*>(region.gobj()));
 }

@@ -1,0 +1,61 @@
+/* $Id: misc.hg,v 1.1 2003/01/21 13:40:31 murrayc Exp $ */
+
+/* misc.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/widget.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/widget_p.h)
+
+namespace Gtk
+{
+
+/** A base class for widgets with alignments and padding.
+ *
+ * This is an abstract for a set of utility widgets
+ * that lack a physical window.  They do have
+ * alignment and padding within their defined space.
+ *
+ * Without a window, widgets of this type cannot capture events.
+ * To capture events place in Gtk::EventBox.
+ *
+ */
+class Misc : public Widget
+{
+  _CLASS_GTKOBJECT(Misc,GtkMisc,GTK_MISC,Gtk::Widget,GtkWidget)
+protected:
+  _CTOR_DEFAULT
+public:
+
+  _WRAP_METHOD(void set_alignment(float xalign = 0.0, float yalign = 0.5), gtk_misc_set_alignment)
+  _WRAP_METHOD(void set_alignment(AlignmentEnum xalign = Gtk::ALIGN_LEFT, AlignmentEnum yalign = Gtk::ALIGN_CENTER), gtk_misc_set_alignment)
+
+  _WRAP_METHOD(void get_alignment(float& xalign, float& yalign) const, gtk_misc_get_alignment)
+
+  _WRAP_METHOD(void set_padding(int xpad, int ypad), gtk_misc_set_padding)
+  _WRAP_METHOD(void get_padding(int& xpad, int& ypad) const, gtk_misc_get_padding)
+
+  _WRAP_PROPERTY("xalign", float)
+  _WRAP_PROPERTY("yalign", float)
+  _WRAP_PROPERTY("xpad", int)
+  _WRAP_PROPERTY("ypad", int)
+};
+
+} /* namespace Gtk */
+

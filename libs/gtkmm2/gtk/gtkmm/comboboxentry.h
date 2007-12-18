@@ -140,7 +140,7 @@ public:
   /** Sets the model column which @a entry_box  should use to get strings from
    * to be @a text_column .
    * 
-   * @newin2p4.
+   * @newin2p4
    * @param text_column A column in @a model  to get the strings from.
    */
   void set_text_column(const TreeModelColumnBase& text_column) const;   
@@ -148,12 +148,12 @@ public:
   /** Sets the model column which @a entry_box  should use to get strings from
    * to be @a text_column .
    * 
-   * @newin2p4.
+   * @newin2p4
    * @param text_column A column in @a model  to get the strings from.
    */
   void set_text_column(int text_column) const; 
   
-  /** Returns the column which @a entry_box  is using to get the strings from.
+  /** Return value: A column in the data source model of @a entry_box .
    * @return A column in the data source model of @a entry_box .
    * 
    * @newin2p4.
@@ -179,10 +179,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ComboBoxEntry
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ComboBoxEntry
    */
   Gtk::ComboBoxEntry* wrap(GtkComboBoxEntry* object, bool take_copy = false);
 } //namespace Glib

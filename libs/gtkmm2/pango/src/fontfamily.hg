@@ -1,0 +1,68 @@
+/* $Id: fontfamily.hg,v 1.2 2004/03/03 01:07:40 murrayc Exp $ */
+
+/* fontfamily.h
+ * 
+ * Copyright 2001      The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+
+#include <glibmm/object.h>
+#include <glibmm/arrayhandle.h>
+#include <pangomm/fontface.h>
+#include <pango/pango-font.h>
+
+_DEFS(pangomm,pango)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Pango
+{
+
+/** A Pango::FontFamily is used to represent a family of related font faces.
+ * The faces in a family share a common design, but differ in slant, weight, width and other aspects.
+ */
+class FontFamily : public Glib::Object
+{
+   _CLASS_GOBJECT(FontFamily, PangoFontFamily, PANGO_FONT_FAMILY, Glib::Object, GObject)
+   _IGNORE(pango_font_family_list_faces)
+
+public:
+  /** Lists the different font faces that make up family.
+   * The faces in a family share a common design, but differ in slant, weight, width and other aspects.
+   * @return an array of pointers to Pango::FontFace objects.
+   */
+  Glib::ArrayHandle< Glib::RefPtr<FontFace> > list_faces() const;
+
+  _WRAP_METHOD(Glib::ustring get_name() const, pango_font_family_get_name)
+  _WRAP_METHOD(bool is_monospace() const, pango_font_family_is_monospace)
+};
+
+/*
+struct FontFamilyRefPtrTraits
+{
+  typedef Glib::RefPtr<FontFamily> CppType;
+  typedef PangoFontFamily *        CType;
+  typedef PangoFontFamily *        CTypeNonConst;
+
+  static CType   to_c_type      (const CppType& ptr) { return Glib::unwrap (ptr);                   }
+  static CType   to_c_type      (CType          ptr) { return ptr;                                  }
+  static CppType to_cpp_type    (CType          ptr) { return FontFamily::wrap_specific_type (ptr); }
+  static void    release_c_type (CType          ptr) { g_object_unref (ptr);                        }
+};
+*/
+
+} // namespace Pango
+

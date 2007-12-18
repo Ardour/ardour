@@ -98,6 +98,14 @@ void Toolbar::unset_drop_highlight_item()
   gtk_toolbar_set_drop_highlight_item(gobj(), 0, 0);
 }
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+Tooltips* Toolbar::get_tooltips_object() const
+{
+  //Note that the _tooltips field is deprecated and broken since GTK+ 2.12:
+  return Glib::wrap((GtkTooltips*)gobj()->_tooltips);
+}
+#endif //GTKMM_DISABLE_DEPRECATED
+
 } // namespace Gtk
 
 
@@ -299,7 +307,7 @@ void Toolbar_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void Toolbar_Class::orientation_changed_callback(GtkToolbar* self, GtkOrientation p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -307,37 +315,40 @@ void Toolbar_Class::orientation_changed_callback(GtkToolbar* self, GtkOrientatio
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_orientation_changed(((Orientation)(p0))
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_orientation_changed(((Orientation)(p0))
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->orientation_changed)
-      (*base->orientation_changed)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->orientation_changed)
+    (*base->orientation_changed)(self, p0);
 }
 void Toolbar_Class::style_changed_callback(GtkToolbar* self, GtkToolbarStyle p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -345,37 +356,40 @@ void Toolbar_Class::style_changed_callback(GtkToolbar* self, GtkToolbarStyle p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_toolbar_style_changed(((ToolbarStyle)(p0))
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_toolbar_style_changed(((ToolbarStyle)(p0))
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->style_changed)
-      (*base->style_changed)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->style_changed)
+    (*base->style_changed)(self, p0);
 }
 gboolean Toolbar_Class::popup_context_menu_callback(GtkToolbar* self, gint p0, gint p1, gint p2)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -383,35 +397,37 @@ gboolean Toolbar_Class::popup_context_menu_callback(GtkToolbar* self, gint p0, g
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_popup_context_menu(p0
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_popup_context_menu(p0
 , p1
 , p2
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->popup_context_menu)
-      return (*base->popup_context_menu)(self, p0, p1, p2);
-  }
+  // Call the original underlying C function:
+  if(base && base->popup_context_menu)
+    return (*base->popup_context_menu)(self, p0, p1, p2);
 
   typedef gboolean RType;
   return RType();
@@ -460,7 +476,8 @@ GType Toolbar::get_base_type()
 
 Toolbar::Toolbar()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Container(Glib::ConstructParams(toolbar_class_.init()))
 {
   }
@@ -535,6 +552,16 @@ void Toolbar::unset_toolbar_style()
 gtk_toolbar_unset_style(gobj()); 
 }
 
+void Toolbar::set_icon_size(IconSize icon_size)
+{
+gtk_toolbar_set_icon_size(gobj(), static_cast<GtkIconSize>(int(icon_size))); 
+}
+
+void Toolbar::unset_icon_size()
+{
+gtk_toolbar_unset_icon_size(gobj()); 
+}
+
 IconSize Toolbar::get_icon_size() const
 {
   return IconSize(static_cast<int>(gtk_toolbar_get_icon_size(const_cast<GtkToolbar*>(gobj()))));
@@ -555,11 +582,6 @@ void Toolbar::set_drop_highlight_item(ToolItem& tool_item, int index)
 gtk_toolbar_set_drop_highlight_item(gobj(), (tool_item).gobj(), index); 
 }
 
- Tooltips* Toolbar::get_tooltips_object() const
-{
-  return Glib::wrap(gobj()->tooltips);
-}
- 
 
 Glib::SignalProxy1< void,Orientation > Toolbar::signal_orientation_changed()
 {

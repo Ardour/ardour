@@ -1,0 +1,126 @@
+/* $Id: dialog.hg,v 1.8 2006/03/22 16:53:22 murrayc Exp $ */
+
+/* dialog.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/window.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/buttonbox.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/window_p.h)
+
+namespace Gtk
+{
+
+/** @defgroup Dialogs Dialogs
+ */
+
+_CC_INCLUDE(gtk/gtktypebuiltins.h)
+_WRAP_ENUM(ResponseType, GtkResponseType)
+
+/** Create popup windows.
+ *
+ * Dialog boxes are a convenient way to prompt the user for a small amount
+ * of input, eg. to display a message, ask a question, or anything else that
+ * does not require extensive effort on the user's part. 
+ *
+ * gtkmm treats a dialog as a window split vertically. The top section is a
+ * Gtk::VBox, and is where widgets such as a Gtk::Label or a Gtk::Entry should be
+ * packed. The bottom area is known as the action_area. This is generally
+ * used for packing buttons into the dialog which may perform functions such
+ * as cancel, ok, or apply. The two areas are separated by a Gtk::HSeparator. 
+ *
+ * The dialog can be 'modal' (that is, one which freezes the rest of the
+ * application from user input) - this can be specified in the Gtk::Dialog
+ * constructor.
+ *
+ * When adding buttons using add_button(), clicking the button will emit
+ * signal_response() with a "response id" you specified. You are encouraged
+ * to use the Gtk::ResponseType enum. If a dialog receives a delete event,
+ * the "response" signal will be emitted with a response id of
+ * Gtk::RESPONSE_NONE.
+ *
+ * If you want to block waiting for a dialog to return before returning control
+ * flow to your code, you can call run(). This function enters a
+ * recursive main loop and waits for the user to respond to the dialog, returning
+ * the response ID corresponding to the button the user clicked. 
+ *
+ * @ingroup Dialogs
+ */
+class Dialog : public Window
+{
+  _CLASS_GTKOBJECT(Dialog,GtkDialog,GTK_DIALOG,Gtk::Window,GtkWindow)
+  _UNMANAGEABLE
+  _IGNORE(gtk_dialog_add_buttons)
+public:
+  _CTOR_DEFAULT()
+  explicit Dialog(const Glib::ustring& title, bool modal = false, bool use_separator = false);
+  Dialog(const Glib::ustring& title, Gtk::Window& parent, bool modal = false, bool use_separator = false);
+
+  _WRAP_METHOD(void add_action_widget(Widget& child, int response_id), gtk_dialog_add_action_widget)
+  _WRAP_METHOD(Button* add_button(const Glib::ustring& button_text, int response_id), gtk_dialog_add_button)
+  _WRAP_METHOD(Button* add_button(const Gtk::StockID& stock_id, int response_id), gtk_dialog_add_button)
+  _WRAP_METHOD(void set_response_sensitive(int response_id, bool setting = true), gtk_dialog_set_response_sensitive)
+  _WRAP_METHOD(void set_default_response(int response_id), gtk_dialog_set_default_response)
+  _WRAP_METHOD(int get_response_for_widget(const Gtk::Widget& widget) const, gtk_dialog_get_response_for_widget)
+  _WRAP_METHOD(void set_has_separator(bool setting = true), gtk_dialog_set_has_separator)
+  _WRAP_METHOD(bool get_has_separator() const, gtk_dialog_get_has_separator)
+
+  _WRAP_METHOD(static bool alternative_button_order(const Glib::RefPtr<const Gdk::Screen>& screen), gtk_alternative_dialog_button_order)
+
+  /** Sets an alternative button order. If the gtk-alternative-button-order 
+   * setting is set to true, the dialog buttons are reordered according to 
+   * the order of the response ids in @a new_order.
+   *
+   * By default, GTK+ dialogs use the button order advocated by the Gnome 
+   * <ulink url="http://developer.gnome.org/projects/gup/hig/2.0/">Human 
+   * Interface Guidelines</ulink> with the affirmative button at the far 
+   * right, and the cancel button left of it. But the builtin GTK+ dialogs
+   * and #GtkMessageDialog<!-- -->s do provide an alternative button order,
+   * which is more suitable on some platforms, e.g. Windows.
+   *
+   * Use this function after adding all the buttons to your dialog
+   *
+   * @param new_order an array of response ids of the dialog's buttons.
+   * 
+   * @newinp26
+   */
+  void set_alternative_button_order_from_array(const Glib::ArrayHandle<int>& new_order);
+  _IGNORE(gtk_dialog_set_alternative_button_order_from_array, gtk_dialog_set_alternative_button_order)
+
+  _WRAP_METHOD(void response(int response_id), gtk_dialog_response)
+  _WRAP_METHOD(int run(), gtk_dialog_run)
+
+  _MEMBER_GET_PTR(vbox, vbox, VBox*, GtkWidget*)
+  _MEMBER_GET_PTR(action_area, action_area, HButtonBox*, GtkWidget*)
+
+  _WRAP_PROPERTY("has_separator", bool)
+
+  _WRAP_SIGNAL(void response(int response_id), "response")
+
+  _IGNORE_SIGNAL("close")
+
+protected:
+  void construct_(bool modal, bool use_separator);
+};
+
+} /* namespace Gtk */
+

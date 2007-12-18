@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_PROPERTYPROXY_H
 #define _GLIBMM_PROPERTYPROXY_H
-/* $Id: propertyproxy.h,v 1.5 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: propertyproxy.h 291 2006-05-12 08:08:45Z murrayc $ */
 
 /* propertyproxy.h
  *

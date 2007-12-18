@@ -45,7 +45,7 @@ namespace Glib
 
 Glib::RefPtr<Pango::CairoFontMap> wrap(PangoCairoFontMap* object, bool take_copy)
 {
-  return Glib::RefPtr<Pango::CairoFontMap>( dynamic_cast<Pango::CairoFontMap*> (Glib::wrap_auto ((GObject*)(object), take_copy)) );
+  return Glib::RefPtr<Pango::CairoFontMap>( dynamic_cast<Pango::CairoFontMap*> (Glib::wrap_auto_interface<Pango::CairoFontMap> ((GObject*)(object), take_copy)) );
   //We use dynamic_cast<> in case of multiple inheritance.
 }
 
@@ -134,6 +134,11 @@ GType CairoFontMap::get_base_type()
   return pango_cairo_font_map_get_type();
 }
 
+
+Cairo::FontType CairoFontMap::get_font_type() const
+{
+  return static_cast<Cairo::FontType>(pango_cairo_font_map_get_font_type(const_cast<PangoCairoFontMap*>(gobj())));
+}
 
 void CairoFontMap::set_resolution(double dpi)
 {

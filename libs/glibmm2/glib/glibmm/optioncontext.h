@@ -27,6 +27,7 @@
 #include <glibmm/optionentry.h>
 #include <glibmm/optiongroup.h>
 #include <glibmm/error.h>
+#include <sigc++/signal.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C" { typedef struct _GOptionContext GOptionContext; }
@@ -103,8 +104,7 @@ public:
    */
   void set_help_enabled(bool help_enabled = true);
   
-  /** Returns whether automatic &lt;option&gt;--help&lt;/option&gt; generation
-   * is turned on for @a context . See g_option_context_set_help_enabled().
+  /** Returns: <tt>true</tt> if automatic help generation is turned on.
    * @return <tt>true</tt> if automatic help generation is turned on.
    * 
    * @newin2p6.
@@ -125,8 +125,7 @@ public:
    */
   void set_ignore_unknown_options(bool ignore_unknown = true);
   
-  /** Returns whether unknown options are ignored or not. See
-   * g_option_context_set_ignore_unknown_options().
+  /** Returns: <tt>true</tt> if unknown options are ignored.
    * @return <tt>true</tt> if unknown options are ignored.
    * 
    * @newin2p6.
@@ -151,6 +150,11 @@ public:
    *  @a argv  array contains one of the recognized help options,
    * this function will produce help output to stdout and
    * call <tt>exit (0)</tt>.
+   * 
+   * Note that function depends on the 
+   * current locale for 
+   * automatic character set conversion of string and filename
+   * arguments.
    * @param argc A pointer to the number of command line arguments.
    * @param argv A pointer to the array of command line arguments.
    * @param error A return location for errors.
@@ -194,6 +198,68 @@ public:
 
   GOptionContext*       gobj()       { return gobject_; }
   const GOptionContext* gobj() const { return gobject_; }
+
+  
+  /** Adds a string to be displayed in --help output before the list of options. This
+   *             is typically a summary of the program functionality. 
+   * 
+   *             Note that the summary is translated (see set_translate_func(),
+   *             set_translation_domain()).
+   * 
+   *             @newin2p14
+   */
+  void set_summary(const Glib::ustring& summary);
+  
+  /** Returns: the summary
+   *             See set_summary() for more information
+   * @return The summary
+   * 
+   *             @newin2p14.
+   */
+  Glib::ustring get_summary() const;
+  
+  /** Adds a string to be displayed in --help output after the list of
+   *             options. This text often includes a bug reporting address.
+   * 
+   *             Note that the summary is translated (see set_translate_func()).
+   * 
+   *             @newin2p14
+   */
+  void set_description(const Glib::ustring& description);
+  
+  /** Returns: the description
+   *             See set_description() for more information
+   * @return The description
+   * 
+   *             @newin2p14.
+   */
+  Glib::ustring get_description() const;
+
+  
+  /** A convenience function to use gettext() for translating
+   *             user-visible strings. 
+   * 
+   *             @newin2p14
+   */
+  void set_translation_domain(const Glib::ustring& domain);
+
+  /**
+   * This function is used to translate user-visible strings, for --help output.
+   * The function takes an untranslated string and returns a translated string
+   */
+  typedef sigc::slot<Glib::ustring, const Glib::ustring&> SlotTranslate;
+
+  /**
+   * Sets the function which is used to translate user-visible
+   * strings, for --help output.  Different groups can use different functions.
+   *
+   * If you are using gettext(), you only need to set the translation domain,
+   * see set_translation_domain().
+   *
+   * @newin2p14
+   */
+  void set_translate_func (const SlotTranslate& slot);
+  
 
 protected:
 

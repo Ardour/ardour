@@ -113,11 +113,16 @@ private:
 
 public:
   
-  /** Returns a description of the font.
+  /** Return value: a newly-allocated Pango::FontDescription object.
    * @return A newly-allocated Pango::FontDescription object.
    */
   FontDescription describe() const;
   
+  /** Return value: a newly-allocated Pango::FontDescription object.
+   * @return A newly-allocated Pango::FontDescription object.
+   * 
+   * Since: 1.14.
+   */
   FontDescription describe_with_absolute_size() const;
   
   /** Computes the coverage map for a given font and language tag.
@@ -158,12 +163,16 @@ public:
 
   
   /** Gets the font map for which the font was created.
-   * @return The Pango::FontMap for the font.
+   * @return The Pango::FontMap for the font
+   * 
+   * Since: 1.10.
    */
   Glib::RefPtr<FontMap> get_font_map();
   
   /** Gets the font map for which the font was created.
-   * @return The Pango::FontMap for the font.
+   * @return The Pango::FontMap for the font
+   * 
+   * Since: 1.10.
    */
   Glib::RefPtr<const FontMap> get_font_map() const;
 
@@ -204,10 +213,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Pango::Font
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::Font
    */
   Glib::RefPtr<Pango::Font> wrap(PangoFont* object, bool take_copy = false);
 }

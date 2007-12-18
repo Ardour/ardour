@@ -82,7 +82,9 @@ namespace Pango
 {
 
 
-/** TODO.
+/** Pango::Renderer is a base class that contains the necessary logic for rendering a Pango::Layout or Pango::LayoutLine. 
+ * By subclassing Pango::Renderer and overriding operations such as draw_glyphs and draw_rectangle, 
+ * renderers for particular font backends and destinations can be created.
  */
 
 class Renderer : public Glib::Object
@@ -141,7 +143,7 @@ public:
    * @param layout A Pango::Layout.
    * @param x X position of left edge of baseline, in user space coordinates
    * in Pango units.
-   * @param y X position of left edge of baseline, in user space coordinates
+   * @param y Y position of left edge of baseline, in user space coordinates
    * in Pango units.
    */
   void draw_layout(const Glib::RefPtr<Layout>& layout, int x, int y);
@@ -152,7 +154,7 @@ public:
    * @param line A Pango::LayoutLine.
    * @param x X position of left edge of baseline, in user space coordinates
    * in Pango units.
-   * @param y X position of left edge of baseline, in user space coordinates
+   * @param y Y position of left edge of baseline, in user space coordinates
    * in Pango units.
    */
   void draw_layout_line(const Glib::RefPtr<LayoutLine>& line, int x, int y);
@@ -164,7 +166,7 @@ public:
    * @param glyphs A Pango::GlyphString.
    * @param x X position of left edge of baseline, in user space coordinates
    * in Pango units.
-   * @param y X position of left edge of baseline, in user space coordinates
+   * @param y Y position of left edge of baseline, in user space coordinates
    * in Pango units.
    */
   void draw_glyphs(const Glib::RefPtr<Font>& font, const GlyphString& glyphs, int x, int y);
@@ -172,12 +174,15 @@ public:
   /** Draws an axis-aligned rectangle in user space coordinates with the
    * specified Pango::Renderer.
    * 
+   * This should be called while @a renderer  is already active.  Use
+   * activate() to activate a renderer.
+   * 
    * Since: 1.8
    * @param part Type of object this rectangle is part of.
    * @param x X position at which to draw rectangle, in user space coordinates in Pango units.
    * @param y Y position at which to draw rectangle, in user space coordinates in Pango units.
-   * @param width Width of rectangle in PangoUnits in user space coordinates.
-   * @param height Height of rectangle in PangoUnits in user space coordinates.
+   * @param width Width of rectangle in Pango units in user space coordinates.
+   * @param height Height of rectangle in Pango units in user space coordinates.
    */
   void draw_rectangle(RenderPart part, int x, int y, int width, int height);
   
@@ -186,6 +191,9 @@ public:
    * (The width of the underline is rounded to an integer number
    * of up/down segments and the resulting rectangle is centered
    * in the original rectangle)
+   * 
+   * This should be called while @a renderer  is already active.  Use
+   * activate() to activate a renderer.
    * 
    * Since: 1.8
    * @param x X coordinate of underline, in Pango units in user coordinate system.
@@ -203,9 +211,9 @@ public:
    * @param y1 Y coordinate of top of trapezoid.
    * @param x11 X coordinate of left end of top of trapezoid.
    * @param x21 X coordinate of right end of top of trapezoid.
-   * @param y2 X coordinate of top of trapezoid.
-   * @param x12 X coordinate of left end of top of trapezoid.
-   * @param x22 Y coordinate of left end of top of trapezoid.
+   * @param y2 Y coordinate of bottom of trapezoid.
+   * @param x12 X coordinate of left end of bottom of trapezoid.
+   * @param x22 X coordinate of right end of bottom of trapezoid.
    */
   void draw_trapezoid(RenderPart part, double y1, double x11, double x21, double y2, double x12, double x22);
   
@@ -240,7 +248,7 @@ public:
   void deactivate();
 
   
-  /** Informs Pango that the way that the renderering is done
+  /** Informs Pango that the way that the rendering is done
    * for @a part  has changed in a way that would prevent multiple
    * pieces being joined together into one drawing call. For
    * instance, if a subclass of Pango::Renderer was to add a stipple
@@ -314,10 +322,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Pango::Renderer
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::Renderer
    */
   Glib::RefPtr<Pango::Renderer> wrap(PangoRenderer* object, bool take_copy = false);
 }

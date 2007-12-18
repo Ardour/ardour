@@ -18,6 +18,10 @@
 
 #include <cairomm/context.h>
 #include <cairomm/private.h>
+#include <cairomm/surface.h>
+#include <cairomm/win32_surface.h>
+#include <cairomm/xlib_surface.h>
+#include <cairomm/quartz_surface.h>
 
 /* M_PI is defined in math.h in the case of Microsoft Visual C++ */
 #if defined(_MSC_VER)
@@ -146,6 +150,12 @@ void Context::set_line_join(LineJoin line_join)
 }
 
 void Context::set_dash(std::valarray<double>& dashes, double offset)
+{
+  cairo_set_dash(m_cobject, &dashes[0], dashes.size(), offset);
+  check_object_status_and_throw_exception(*this);
+}
+
+void Context::set_dash(std::vector<double>& dashes, double offset)
 {
   cairo_set_dash(m_cobject, &dashes[0], dashes.size(), offset);
   check_object_status_and_throw_exception(*this);
@@ -405,9 +415,35 @@ void Context::clip_preserve()
   check_object_status_and_throw_exception(*this);
 }
 
+void Context::get_clip_extents(double& x1, double& y1, double& x2, double& y2) const
+{
+  cairo_clip_extents(const_cast<cairo_t*>(m_cobject), &x1, &y1, &x2, &y2);
+  check_object_status_and_throw_exception(*this);
+}
+
+void Context::copy_clip_rectangle_list(std::vector<Rectangle>& rectangles) const
+{
+  cairo_rectangle_list_t* c_list = 0;
+  // It would be nice if the cairo interface didn't copy it into a C array first
+  // and just let us do the copying...
+  c_list = cairo_copy_clip_rectangle_list(const_cast<cairo_t*>(m_cobject));
+  // the rectangle list contains a status field that we need to check and the
+  // cairo context also has a status that we need to check
+  // FIXME: do we want to throw an exception if the clip can't be represented by
+  // rectangles?  or do we just want to return an empty list?
+  check_status_and_throw_exception(c_list->status);
+  check_object_status_and_throw_exception(*this);
+  // copy the C array into the passed C++ list
+  rectangles.assign(c_list->rectangles,
+                    c_list->rectangles + c_list->num_rectangles);
+  // free the memory allocated to the C array since we've copied it into a
+  // standard C++ container
+  cairo_rectangle_list_destroy(c_list);
+}
+
 void Context::select_font_face(const std::string& family, FontSlant slant, FontWeight weight)
 {
-  cairo_select_font_face (m_cobject, family.c_str(),
+  cairo_select_font_face(m_cobject, family.c_str(),
           static_cast<cairo_font_slant_t>(slant),
           static_cast<cairo_font_weight_t>(weight));
   check_object_status_and_throw_exception(*this);
@@ -506,18 +542,40 @@ Operator Context::get_operator() const
   return result;
 }
 
+static RefPtr<Pattern> get_pattern_wrapper (cairo_pattern_t* pattern)
+{
+  cairo_pattern_type_t pattern_type = cairo_pattern_get_type (pattern);
+  switch (pattern_type)
+  {
+    case CAIRO_PATTERN_TYPE_SOLID:
+      return RefPtr<SolidPattern>(new SolidPattern(pattern, false /* does not have reference */));
+      break;
+    case CAIRO_PATTERN_TYPE_SURFACE:
+      return RefPtr<SurfacePattern>(new SurfacePattern(pattern, false /* does not have reference */));
+      break;
+    case CAIRO_PATTERN_TYPE_LINEAR:
+      return RefPtr<LinearGradient>(new LinearGradient(pattern, false /* does not have reference */));
+      break;
+    case CAIRO_PATTERN_TYPE_RADIAL:
+      return RefPtr<RadialGradient>(new RadialGradient(pattern, false /* does not have reference */));
+      break;
+    default:
+      return RefPtr<Pattern>(new Pattern(pattern, false /* does not have reference */));
+  }
+}
+
 RefPtr<Pattern> Context::get_source()
 {
   cairo_pattern_t* pattern = cairo_get_source(m_cobject);
   check_object_status_and_throw_exception(*this);
-  return RefPtr<Pattern>(new Pattern(pattern, false /* does not have reference */));
+  return get_pattern_wrapper (pattern);
 }
 
 RefPtr<const Pattern> Context::get_source() const
 {
   cairo_pattern_t* pattern = cairo_get_source(m_cobject);
   check_object_status_and_throw_exception(*this);
-  return RefPtr<const Pattern>(new Pattern(pattern, false /* does not have reference */));
+  return RefPtr<const Pattern>::cast_const (get_pattern_wrapper (pattern));
 }
 
 double Context::get_tolerance() const
@@ -575,24 +633,92 @@ double Context::get_miter_limit() const
   return result;
 }
 
+void
+Context::get_dash(std::vector<double>& dashes, double& offset) const
+{
+  // Allocate this array dynamically because some compilers complain about
+  // allocating arrays on the stack when the array size isn't a compile-time
+  // constant...
+  const int cnt = cairo_get_dash_count(m_cobject);
+  double* dash_array = new double[cnt];
+  cairo_get_dash(const_cast<cairo_t*>(m_cobject), dash_array, &offset);
+  check_object_status_and_throw_exception(*this);
+  dashes.assign(dash_array, dash_array + cnt);
+  delete[] dash_array;
+}
+
 void Context::get_matrix(Matrix& matrix)
 {
   cairo_get_matrix(m_cobject, &matrix);
   check_object_status_and_throw_exception(*this);
 }
 
+static
+RefPtr<Surface> get_surface_wrapper (cairo_surface_t* surface)
+{
+  cairo_surface_type_t surface_type = cairo_surface_get_type (surface);
+  switch (surface_type)
+  {
+    case CAIRO_SURFACE_TYPE_IMAGE:
+      return RefPtr<ImageSurface>(new ImageSurface(surface, false /* does not have reference */));
+      break;
+#if CAIRO_HAS_PDF_SURFACE
+    case CAIRO_SURFACE_TYPE_PDF:
+      return RefPtr<PdfSurface>(new PdfSurface(surface, false /* does not have reference */));
+      break;
+#endif
+#if CAIRO_HAS_PS_SURFACE
+    case CAIRO_SURFACE_TYPE_PS:
+      return RefPtr<PsSurface>(new PsSurface(surface, false /* does not have reference */));
+      break;
+#endif
+#if CAIRO_HAS_XLIB_SURFACE
+    case CAIRO_SURFACE_TYPE_XLIB:
+      return RefPtr<XlibSurface>(new XlibSurface(surface, false /* does not have reference */));
+      break;
+#endif
+#if CAIRO_HAS_GLITZ_SURFACE
+    case CAIRO_SURFACE_TYPE_GLITZ:
+      return RefPtr<GlitzSurface>(new GlitzSurface(surface, false /* does not have reference */));
+      break;
+#endif
+#if CAIRO_HAS_QUARTZ_SURFACE
+    case CAIRO_SURFACE_TYPE_QUARTZ:
+      return RefPtr<QuartzSurface>(new QuartzSurface(surface, false /* does not have reference */));
+      break;
+#endif
+#if CAIRO_HAS_WIN32_SURFACE
+    case CAIRO_SURFACE_TYPE_WIN32:
+      return RefPtr<Win32Surface>(new Win32Surface(surface, false /* does not have reference */));
+      break;
+#endif
+#if CAIRO_HAS_SVG_SURFACE
+    case CAIRO_SURFACE_TYPE_SVG:
+      return RefPtr<SvgSurface>(new SvgSurface(surface, false /* does not have reference */));
+      break;
+#endif
+    // the following surfaces are not directly supported in cairomm yet
+    case CAIRO_SURFACE_TYPE_DIRECTFB:
+    case CAIRO_SURFACE_TYPE_OS2:
+    case CAIRO_SURFACE_TYPE_BEOS:
+    case CAIRO_SURFACE_TYPE_XCB:
+    default:
+      return RefPtr<Surface>(new Surface(surface, false /* does not have reference */));
+  }
+}
+
 RefPtr<Surface> Context::get_target()
 {
   cairo_surface_t* surface = cairo_get_target(const_cast<cairo_t*>(m_cobject));
   check_object_status_and_throw_exception(*this);
-  return RefPtr<Surface>(new Surface(surface, false /* does not have reference */));
+  return get_surface_wrapper (surface);
 }
 
 RefPtr<const Surface> Context::get_target() const
 {
   cairo_surface_t* surface = cairo_get_target(const_cast<cairo_t*>(m_cobject));
   check_object_status_and_throw_exception(*this);
-  return RefPtr<const Surface>(new Surface(surface, false /* does not have reference */));
+  return RefPtr<const Surface>::cast_const (get_surface_wrapper (surface));
 }
 
 Path* Context::copy_path() const
@@ -631,7 +757,7 @@ RefPtr<Pattern> Context::pop_group()
 {
   cairo_pattern_t* pattern = cairo_pop_group(m_cobject);
   check_object_status_and_throw_exception(*this);
-  return RefPtr<Pattern>(new Pattern(pattern));
+  return get_pattern_wrapper(pattern);
 }
 
 void Context::pop_group_to_source()
@@ -644,24 +770,26 @@ RefPtr<Surface> Context::get_group_target()
 {
   cairo_surface_t* surface = cairo_get_group_target(m_cobject);
   // surface can be NULL if you're not between push/pop group calls
-  if (surface == NULL)
+  if(!surface)
   {
     // FIXME: is this really the right way to handle this?
     throw_exception(CAIRO_STATUS_NULL_POINTER);
   }
-  return RefPtr<Surface>(new Surface(surface, false));
+
+  return get_surface_wrapper(surface);
 }
 
 RefPtr<const Surface> Context::get_group_target() const
 {
   cairo_surface_t* surface = cairo_get_group_target(m_cobject);
   // surface can be NULL if you're not between push/pop group calls
-  if (surface == NULL)
+  if(!surface)
   {
     // FIXME: is this really the right way to handle this?
     throw_exception(CAIRO_STATUS_NULL_POINTER);
   }
-  return RefPtr<const Surface>(new Surface(surface, false));
+
+  return get_surface_wrapper(surface);
 }
 
 } //namespace Cairo

@@ -1,0 +1,78 @@
+/* $Id: checkmenuitem.hg,v 1.3 2004/01/19 19:48:44 murrayc Exp $ */
+
+/* checkmenuitem.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/menuitem.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/menuitem_p.h)
+
+
+namespace Gtk
+{
+
+/** A menu item that maintains the state of a boolean value in addition to a Gtk::MenuItem's usual role in activating application code.
+ * A check box indicating the state of the boolean value is displayed at the left side of the Gtk::MenuItem.
+ * Activating the Gtk::MenuItem toggles the value.
+ * @ingroup Widgets
+ * @ingroup Menus
+ */
+class CheckMenuItem : public MenuItem
+{
+  _CLASS_GTKOBJECT(CheckMenuItem,GtkCheckMenuItem,GTK_CHECK_MENU_ITEM,Gtk::MenuItem,GtkMenuItem)
+  _IGNORE(gtk_check_menu_item_set_show_toggle)
+public:
+
+  _CTOR_DEFAULT
+  explicit CheckMenuItem(const Glib::ustring& label, bool mnemonic = false);
+  
+
+  _WRAP_METHOD(void set_active(bool state = true), gtk_check_menu_item_set_active)
+  _WRAP_METHOD(bool get_active() const, gtk_check_menu_item_get_active)
+
+  _WRAP_METHOD(void toggled(), gtk_check_menu_item_toggled)
+
+  _WRAP_METHOD(void set_inconsistent(bool setting = true), gtk_check_menu_item_set_inconsistent)
+  _WRAP_METHOD(bool get_inconsistent() const, gtk_check_menu_item_get_inconsistent)
+
+  _WRAP_METHOD(void set_draw_as_radio(bool draw_as_radio = true), gtk_check_menu_item_set_draw_as_radio)
+  _WRAP_METHOD(bool get_draw_as_radio() const, gtk_check_menu_item_get_draw_as_radio)
+  
+  /** Triggered when the item changes state
+   * (Note : changing the item's state with set_active() will also trigger
+   * this signal)
+   */
+  _WRAP_SIGNAL(void toggled(), "toggled")
+
+  _WRAP_PROPERTY("active", bool)
+  _WRAP_PROPERTY("inconsistent", bool)
+  _WRAP_PROPERTY("draw-as-radio", bool)
+
+protected:
+  /** Triggered when the item is redrawn (e.g.after being toggled)
+   * Overload this signal if you want to implement your own check item
+   * look. Otherwise, you most likely don't care about it.
+   * The GdkRectangle specifies the area of the widget which will get
+   * redrawn.
+   */
+  _WRAP_VFUNC(void draw_indicator(GdkRectangle* area), draw_indicator)
+};
+
+} /* namespace Gtk */
+

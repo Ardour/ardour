@@ -3,6 +3,8 @@
 #ifndef _GTKMM_COMBO_H
 #define _GTKMM_COMBO_H
 
+#include <gtkmmconfig.h>
+
 #ifndef GTKMM_DISABLE_DEPRECATED
 
 
@@ -28,6 +30,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <glibmm/listhandle.h>
 #include <glibmm/helperlist.h>
@@ -137,17 +143,17 @@ public:
   ComboDropDownItem();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %scroll_horizontal(ScrollType scroll_type, float position)</tt>
+   * <tt>void on_my_%scroll_horizontal(ScrollType scroll_type, float position)</tt>
    */
 
   Glib::SignalProxy2< void,ScrollType,float > signal_scroll_horizontal();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %scroll_vertical(ScrollType scroll_type, float position)</tt>
+   * <tt>void on_my_%scroll_vertical(ScrollType scroll_type, float position)</tt>
    */
 
   Glib::SignalProxy2< void,ScrollType,float > signal_scroll_vertical();
@@ -304,25 +310,25 @@ public:
   const ComboDropDownList& children() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %select_child(Widget& item)</tt>
+   * <tt>void on_my_%select_child(Widget& item)</tt>
    */
 
   Glib::SignalProxy1< void,Widget& > signal_select_child();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %selection_changed()</tt>
+   * <tt>void on_my_%selection_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_selection_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %unselect_child(Widget& item)</tt>
+   * <tt>void on_my_%unselect_child(Widget& item)</tt>
    */
 
   Glib::SignalProxy1< void,Widget& > signal_unselect_child();
@@ -582,10 +588,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ComboDropDownItem
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ComboDropDownItem
    */
   Gtk::ComboDropDownItem* wrap(GtkListItem* object, bool take_copy = false);
 } //namespace Glib
@@ -593,10 +602,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::ComboDropDown
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ComboDropDown
    */
   Gtk::ComboDropDown* wrap(GtkList* object, bool take_copy = false);
 } //namespace Glib
@@ -604,10 +616,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::Combo
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Combo
    */
   Gtk::Combo* wrap(GtkCombo* object, bool take_copy = false);
 } //namespace Glib

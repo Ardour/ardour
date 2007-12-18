@@ -2,8 +2,8 @@ AC_INIT(cairomm/cairomm.h)
 
 #release versioning
 GENERIC_MAJOR_VERSION=1
-GENERIC_MINOR_VERSION=2
-GENERIC_MICRO_VERSION=4
+GENERIC_MINOR_VERSION=4
+GENERIC_MICRO_VERSION=6
 GENERIC_VERSION=$GENERIC_MAJOR_VERSION.$GENERIC_MINOR_VERSION.$GENERIC_MICRO_VERSION
 AC_SUBST(GENERIC_MAJOR_VERSION)
 AC_SUBST(GENERIC_MINOR_VERSION)
@@ -11,7 +11,7 @@ AC_SUBST(GENERIC_MICRO_VERSION)
 AC_SUBST(GENERIC_VERSION)
 
 #shared library versioning
-GENERIC_LIBRARY_VERSION=1:0:0
+GENERIC_LIBRARY_VERSION=2:0:1
 #                       | | |
 #                +------+ | +---+
 #                |        |     |
@@ -28,8 +28,9 @@ AC_SUBST(GENERIC_LIBRARY_VERSION)
 
 VERSION=$GENERIC_VERSION
 
-
 AM_INIT_AUTOMAKE(cairomm, $GENERIC_VERSION)
+
+AM_CONFIG_HEADER(cairomm/cairommconfig.h)
 
 AC_PROG_CXX
 AC_PROG_CXXCPP
@@ -52,11 +53,23 @@ esac
 AC_MSG_RESULT([$platform_win32])
 AM_CONDITIONAL(PLATFORM_WIN32, test "$platform_win32" = "yes")
 
+AC_MSG_CHECKING([for native Win32])
+case "$host" in
+  *-*-mingw*)
+    os_win32=yes
+    ;;
+  *)
+    os_win32=no
+    ;;
+esac
+AC_MSG_RESULT([$os_win32])
+AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
+
 # Ensure MSVC-compatible struct packing convention is used when
 # compiling for Win32 with gcc.
 # What flag to depends on gcc version: gcc3 uses "-mms-bitfields", while
 # gcc2 uses "-fnative-struct".
-if test x"$platform_win32" = xyes; then
+if test x"$os_win32" = xyes; then
   if test x"$GCC" = xyes; then
     msnative_struct=''
     AC_MSG_CHECKING([how to get MSVC-compatible struct packing])
@@ -89,8 +102,32 @@ fi
 
 AC_CHECK_HEADERS(string list map, , exit)
 
-PKG_CHECK_MODULES(CAIROMM, cairo >= 1.2.0)
+PKG_CHECK_MODULES(CAIROMM, cairo >= 1.4)
 
+AC_ARG_ENABLE(tests,
+              AC_HELP_STRING([--enable-tests=yes|no],
+                             [enable automated tests (default is no)]),
+              ENABLE_TESTS=$enableval,
+              ENABLE_TESTS=no)
+if test x$CAIROMM_DEVEL = xon ; then
+    ENABLE_TESTS=yes
+fi
+
+if test x$ENABLE_TESTS = xyes ; then
+AX_BOOST_BASE([1.33.1])
+AX_BOOST_UNIT_TEST_FRAMEWORK
+AC_MSG_NOTICE(support of automated tests enabled)
+else
+    AC_MSG_NOTICE(disabled support of automated tests)
+fi
+AM_CONDITIONAL(AUTOTESTS, test x$ENABLE_TESTS = xyes)
+
+dnl enable compiler warnings when the CAIROMM_DEVEL environment variable is set to 'on'
+if test  "x$CAIROMM_DEVEL" = "xon" ; then
+    CXXFLAGS="$CXXFLAGS -Wall -g -Werror -Wextra"
+fi
+
+CAIROMM_ARG_ENABLE_API_EXCEPTIONS()
 
 dnl Check whether to build the documentation directory
 DOCS_SUBDIR="" dnl set DOCS_SUBDIR initially blank
@@ -130,6 +167,8 @@ AC_CONFIG_FILES(
   examples/ps-surface/Makefile
   examples/svg-surface/Makefile
   examples/text-rotate/Makefile
+
+  tests/Makefile
 
   cairomm-1.0.pc
 )

@@ -3,6 +3,8 @@
 #ifndef _GTKMM_TREESORTABLE_H
 #define _GTKMM_TREESORTABLE_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -25,6 +27,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <glibmm/interface.h>
 #include <gtkmm/enums.h>
@@ -70,8 +76,14 @@ private:
 
 protected:
   TreeSortable(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit TreeSortable(GtkTreeSortable* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -184,9 +196,7 @@ public:
   void unset_default_sort_func();
 
   
-  /** Returns <tt>true</tt> if the model has a default sort function.  This is used
-   * primarily by GtkTreeViewColumns in order to determine if a model can go back
-   * to the default state, or not.
+  /** Return value: <tt>true</tt>, if the model has a default sort function
    * @return <tt>true</tt>, if the model has a default sort function.
    */
   bool has_default_sort_func() const;
@@ -196,9 +206,9 @@ public:
    */
   void sort_column_changed();
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %sort_column_changed()</tt>
+   * <tt>void on_my_%sort_column_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_sort_column_changed();
@@ -255,10 +265,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TreeSortable
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeSortable
    */
   Glib::RefPtr<Gtk::TreeSortable> wrap(GtkTreeSortable* object, bool take_copy = false);
 

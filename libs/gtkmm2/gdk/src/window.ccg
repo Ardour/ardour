@@ -1,0 +1,81 @@
+// -*- c++ -*-
+/* $Id: window.ccg,v 1.7 2004/03/09 17:36:25 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdk/gdkwindow.h>
+#include <gdkmm/pixmap.h>
+#include <gdkmm/cursor.h>
+#include <gdkmm/types.h>
+
+
+namespace Gdk
+{
+
+Window::Window(const Glib::RefPtr<Window>& parent, GdkWindowAttr* attributes, int attributes_mask)
+:
+  Drawable((GdkDrawable*) gdk_window_new(parent->gobj(), attributes, attributes_mask))
+{
+  //GdkWindow is X11/win32-specific, so we probably can't derived our own GType.
+}
+
+void Window::set_cursor()
+{
+  gdk_window_set_cursor(gobj(), 0);
+}
+
+GrabStatus Window::pointer_grab(bool owner_events, EventMask event_mask, const Cursor& cursor, guint32 timestamp)
+{
+  return ((GrabStatus)(gdk_pointer_grab(gobj(), static_cast<int>(owner_events), ((GdkEventMask)(event_mask)), 0, (cursor).gobj_copy(), timestamp)));
+}
+
+GrabStatus Window::pointer_grab(bool owner_events, EventMask event_mask, guint32 timestamp)
+{
+  return ((GrabStatus)(gdk_pointer_grab(gobj(), static_cast<int>(owner_events), ((GdkEventMask)(event_mask)), 0, 0, timestamp)));
+}
+
+//static
+void Window::unset_sm_client_id()
+{
+  gdk_set_sm_client_id(0 /* see GDK docs */);
+}
+
+void Window::set_icon(const Glib::RefPtr<Window>& icon_window, const Glib::RefPtr<Pixmap>& pixmap)
+{
+  gdk_window_set_icon(gobj(), icon_window->gobj(), pixmap->gobj(), 0); /* See GDK docs */  
+}
+  
+void Window::unset_icon()
+{
+  gdk_window_set_icon(gobj(), 0, 0, 0); /* See GDK docs */
+}
+
+void Window::unset_shape_combine_mask()
+{
+  gdk_window_shape_combine_mask(gobj(), 0, 0, 0); //See GDK docs.
+} 
+
+void Window::get_internal_paint_info(Glib::RefPtr<Drawable>& real_drawable, int& x_offset, int& y_offset) const
+{
+  GdkDrawable* temp_drawable = 0;
+  gdk_window_get_internal_paint_info(const_cast<GdkWindow*>(gobj()), &temp_drawable, &x_offset, &y_offset);
+  real_drawable = Glib::wrap(temp_drawable);
+}
+
+} // namespace Gdk
+

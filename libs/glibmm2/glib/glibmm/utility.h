@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_UTILITY_H
 #define _GLIBMM_UTILITY_H
-/* $Id: utility.h,v 1.2 2003/01/21 12:43:26 murrayc Exp $ */
+/* $Id: utility.h 386 2007-03-23 17:31:16Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
@@ -21,13 +21,11 @@
  */
 
 #include <glib/gmacros.h>
+#include <glib/gmem.h>
 #include <glibmm/ustring.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-extern "C" void g_free(void*);
-
 
 /* Occasionally, a struct variable has to be initialized after its definition,
  * i.e. when using structs as class member data.  For convenience, the macro

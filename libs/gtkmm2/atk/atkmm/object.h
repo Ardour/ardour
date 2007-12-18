@@ -321,49 +321,49 @@ public:
   bool remove_relationship(RelationType relationship, const Glib::RefPtr<Object>& target);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %children_changed(guint change_index, gpointer changed_child)</tt>
+   * <tt>void on_my_%children_changed(guint change_index, gpointer changed_child)</tt>
    */
 
   Glib::SignalProxy2< void,guint,gpointer > signal_children_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %focus_event(bool focus_in)</tt>
+   * <tt>void on_my_%focus_event(bool focus_in)</tt>
    */
 
   Glib::SignalProxy1< void,bool > signal_focus_event();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %property_change(AtkPropertyValues* values)</tt>
+   * <tt>void on_my_%property_change(AtkPropertyValues* values)</tt>
    */
 
   Glib::SignalProxy1< void,AtkPropertyValues* > signal_property_change();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %state_change(const Glib::ustring& name, bool state_set)</tt>
+   * <tt>void on_my_%state_change(const Glib::ustring& name, bool state_set)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::ustring&,bool > signal_state_change();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %visible_data_changed()</tt>
+   * <tt>void on_my_%visible_data_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_visible_data_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %active_descendant_changed(void** child)</tt>
+   * <tt>void on_my_%active_descendant_changed(void** child)</tt>
    */
 
   Glib::SignalProxy1< void,void** > signal_active_descendant_changed();
@@ -642,10 +642,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Atk::Object
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Atk::Object
    */
   Glib::RefPtr<Atk::Object> wrap(AtkObject* object, bool take_copy = false);
 }

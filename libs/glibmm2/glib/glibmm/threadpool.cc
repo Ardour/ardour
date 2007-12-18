@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: threadpool.cc,v 1.6 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: threadpool.cc 291 2006-05-12 08:08:45Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

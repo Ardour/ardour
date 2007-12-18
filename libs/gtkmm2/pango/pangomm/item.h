@@ -132,18 +132,11 @@ public:
 public:
   
   /** Modifies @a orig  to cover only the text after @a split_index , and
-   * returns a new item that covers the text before @a split_index  that
-   * used to be in @a orig . You can think of @a split_index  as the length of
-   * the returned item. @a split_index  may not be 0, and it may not be
-   * greater than or equal to the length of @a orig  (that is, there must
-   * be at least one byte assigned to each item, you can't create a
-   * zero-length item). @a split_offset  is the length of the first item in
-   * chars, and must be provided because the text used to generate the
-   * item isn't available, so pango_item_split() can't count the char
-   * length of the split items itself.
+   * Return value: new item representing text before @a split_index , which
    * @param split_index Byte index of position to split item, relative to the start of the item.
    * @param split_offset Number of chars between start of @a orig  and @a split_index .
-   * @return New item representing text before @a split_index .
+   * @return New item representing text before @a split_index , which
+   * should be freed with pango_item_free().
    */
   Item split(int split_index, int split_offset);
 

@@ -127,6 +127,7 @@ public:
   
   /** Determine whether a particular index is covered by @a coverage 
    * @param index The index to check.
+   * @return The coverage level of @a coverage  for character @a index .
    */
   CoverageLevel get(int index) const;
   
@@ -157,10 +158,13 @@ public:
 namespace Glib
 {
 
-  /** @relates Pango::Coverage
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::Coverage
    */
   Glib::RefPtr<Pango::Coverage> wrap(PangoCoverage* object, bool take_copy = false);
 

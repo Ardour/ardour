@@ -83,8 +83,14 @@ private:
 
 protected:
   Table(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit Table(AtkTable* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -337,63 +343,65 @@ public:
   bool remove_column_selection(int column);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_inserted(int row, int num_inserted)</tt>
+   * <tt>void on_my_%row_inserted(int row, int num_inserted)</tt>
    */
 
   Glib::SignalProxy2< void,int,int > signal_row_inserted();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %column_inserted(int column, int num_inserted)</tt>
+   * <tt>void on_my_%column_inserted(int column, int num_inserted)</tt>
    */
 
   Glib::SignalProxy2< void,int,int > signal_column_inserted();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_deleted(int row, int num_deleted)</tt>
+   * <tt>void on_my_%row_deleted(int row, int num_deleted)</tt>
    */
 
   Glib::SignalProxy2< void,int,int > signal_row_deleted();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %column_deleted(int column, int num_deleted)</tt>
+   * <tt>void on_my_%column_deleted(int column, int num_deleted)</tt>
    */
 
   Glib::SignalProxy2< void,int,int > signal_column_deleted();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_reordered()</tt>
+   * <tt>void on_my_%row_reordered()</tt>
    */
 
   Glib::SignalProxy0< void > signal_row_reordered();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %column_reordered()</tt>
+   * <tt>void on_my_%column_reordered()</tt>
    */
 
   Glib::SignalProxy0< void > signal_column_reordered();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %model_changed()</tt>
+   * <tt>void on_my_%model_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_model_changed();
 
 
 protected:
+ 
+
   #ifdef GLIBMM_VFUNCS_ENABLED
   virtual Glib::RefPtr<Atk::Object> get_at_vfunc(int row, int column);
 #endif //GLIBMM_VFUNCS_ENABLED
@@ -542,10 +550,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Atk::Table
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Atk::Table
    */
   Glib::RefPtr<Atk::Table> wrap(AtkTable* object, bool take_copy = false);
 

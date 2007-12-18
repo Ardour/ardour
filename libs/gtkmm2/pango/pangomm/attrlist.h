@@ -123,14 +123,16 @@ public:
   void change(Attribute& attr);
    // hand code because we need to pass a copy of the attribute
   
-  /** This function splices attribute list @a other  into @a list .
+  /** This function opens up a hole in @a list , fills it in with attributes from
+   * the left, and then merges @a other  on top of the hole.
+   * 
    * This operation is equivalent to stretching every attribute
    * that applies at position @a pos  in @a list  by an amount @a len ,
    * and then calling pango_attr_list_change() with a copy
    * of each attribute in @a other  in sequence (offset in position by @a pos ).
    * 
    * This operation proves useful for, for instance, inserting
-   * a preedit string in the middle of an edit buffer.
+   * a pre-edit string in the middle of an edit buffer.
    * @param other Another Pango::AttrList.
    * @param pos The position in @a list  at which to insert @a other .
    * @param len The length of the spliced segment. (Note that this
@@ -140,8 +142,9 @@ public:
   void splice(AttrList& other, int pos, int len);
   
   /** Create a iterator initialized to the beginning of the list.
-   * @return A new Pango::Iterator. @a list  must not be modified
-   * until this iterator is freed with pango_attr_iterator_destroy().
+   *  @a list  must not be modified until this iterator is freed.
+   * @return The newly allocated Pango::AttrIterator, which should
+   * be freed with pango_attr_iterator_destroy().
    */
   AttrIter get_iter();
 
@@ -169,10 +172,13 @@ inline void swap(AttrList& lhs, AttrList& rhs)
 namespace Glib
 {
 
-/** @relates Pango::AttrList
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Pango::AttrList
  */
 Pango::AttrList wrap(PangoAttrList* object, bool take_copy = false);
 

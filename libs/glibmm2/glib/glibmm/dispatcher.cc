@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: dispatcher.cc,v 1.13 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: dispatcher.cc 370 2007-01-20 10:53:28Z daniel $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
@@ -28,83 +28,76 @@
 #include <fcntl.h>
 #include <glib.h>
 
-#ifndef G_OS_WIN32
-#include <unistd.h>
-
-#if defined(_tru64) //TODO: Use the real define
-//EINTR is not defined on Tru64
-//I have tried including these
-//#include <sys/types.h>
-//#include <sys/statvfs.h>
-//#include <signal.h>
-  #ifndef EINTR
-  #define EINTR 0
-  #endif
+#ifdef G_OS_WIN32
+# include <windows.h>
+# include <io.h>
+# include <direct.h>
+# include <list>
+#else
+# include <unistd.h>
 #endif
 
-#else
-#include <windows.h>
-#include <io.h>
-#include <direct.h>
-#include <list>
-#endif /* G_OS_WIN32 */
-
+// EINTR is not defined on Tru64. I have tried including these:
+// #include <sys/types.h>
+// #include <sys/statvfs.h>
+// #include <signal.h>
+// danielk:  I think someone should just do a grep on a Tru64 box.  Googling
+// for "tru64 EINTR" returns lots of hits telling me that handling EINTR is
+// actually a requirement on Tru64.  So it must exist.
+#if defined(_tru64) && !defined(EINTR)
+# define EINTR 0 /* TODO: should use the real define */
+#endif
 
 namespace
 {
 
 struct DispatchNotifyData
 {
-  unsigned long           tag;
   Glib::Dispatcher*       dispatcher;
   Glib::DispatchNotifier* notifier;
 
   DispatchNotifyData()
-    : tag (0), dispatcher (0), notifier (0) {}
+    : dispatcher (0), notifier (0) {}
 
-  DispatchNotifyData(unsigned long tag_, Glib::Dispatcher* dispatcher_, Glib::DispatchNotifier* notifier_)
-    : tag (tag_), dispatcher (dispatcher_), notifier (notifier_) {}
+  DispatchNotifyData(Glib::Dispatcher* d, Glib::DispatchNotifier* n)
+    : dispatcher (d), notifier (n) {}
 };
 
-static void warn_failed_pipe_io(const char* what, int err_no)
+static void warn_failed_pipe_io(const char* what)
 {
 #ifdef G_OS_WIN32
-  const char *const message = g_win32_error_message(err_no);
+  const char *const message = g_win32_error_message(GetLastError());
 #else
-  const char *const message = g_strerror(err_no);
+  const char *const message = g_strerror(errno);
 #endif
   g_critical("Error in inter-thread communication: %s() failed: %s", what, message);
 }
 
-#ifndef G_OS_WIN32
-/*
- * Try to set the close-on-exec flag of the file descriptor,
- * so that it won't be leaked if a new process is spawned.
- */
-static void fd_set_close_on_exec(int fd)
-{
-  const int flags = fcntl(fd, F_GETFD, 0);
-  g_return_if_fail(flags >= 0);
-
-  fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-}
-#endif /* !G_OS_WIN32 */
-
-/*
- * One word: paranoia.
- */
 #ifdef G_OS_WIN32
+
 static void fd_close_and_invalidate(HANDLE& fd)
 {
   if(fd != 0)
   {
     if(!CloseHandle(fd))
-      warn_failed_pipe_io("CloseHandle", GetLastError());
+      warn_failed_pipe_io("CloseHandle");
 
     fd = 0;
   }
 }
 #else /* !G_OS_WIN32 */
+/*
+ * Set the close-on-exec flag on the file descriptor,
+ * so that it won't be leaked if a new process is spawned.
+ */
+static void fd_set_close_on_exec(int fd)
+{
+  const int flags = fcntl(fd, F_GETFD, 0);
+
+  if(flags < 0 || fcntl(fd, F_SETFD, unsigned(flags) | FD_CLOEXEC) < 0)
+    warn_failed_pipe_io("fcntl");
+}
+
 static void fd_close_and_invalidate(int& fd)
 {
   if(fd >= 0)
@@ -113,10 +106,10 @@ static void fd_close_and_invalidate(int& fd)
 
     do
       result = close(fd);
-    while(result < 0 && errno == EINTR);
+    while(G_UNLIKELY(result < 0) && errno == EINTR);
 
-    if(result < 0)
-      warn_failed_pipe_io("close", errno);
+    if(G_UNLIKELY(result < 0))
+      warn_failed_pipe_io("close");
 
     fd = -1;
   }
@@ -124,7 +117,6 @@ static void fd_close_and_invalidate(int& fd)
 #endif /* !G_OS_WIN32 */
 
 } // anonymous namespace
-
 
 namespace Glib
 {
@@ -147,17 +139,16 @@ protected:
 private:
   static Glib::StaticPrivate<DispatchNotifier> thread_specific_instance_;
 
-  Glib::RefPtr<MainContext> context_;
-  int                       ref_count_;
+  long                          ref_count_;
+  Glib::RefPtr<MainContext>     context_;
 #ifdef G_OS_WIN32
-  HANDLE                        fd_receiver_;
   Glib::Mutex                   mutex_;
   std::list<DispatchNotifyData> notify_queue_;
+  HANDLE                        fd_receiver_;
 #else
-  int                       fd_receiver_;
-  int                       fd_sender_;
-#endif /* !G_OS_WIN32 */
-  sigc::connection          conn_io_handler_;
+  int                           fd_receiver_;
+  int                           fd_sender_;
+#endif
 
   void create_pipe();
   bool pipe_io_handler(Glib::IOCondition condition);
@@ -167,20 +158,20 @@ private:
   DispatchNotifier& operator=(const DispatchNotifier&);
 };
 
-
 /**** Glib::DispatchNotifier ***********************************************/
 
+// static
 Glib::StaticPrivate<DispatchNotifier>
 DispatchNotifier::thread_specific_instance_ = GLIBMM_STATIC_PRIVATE_INIT;
 
 DispatchNotifier::DispatchNotifier(const Glib::RefPtr<MainContext>& context)
 :
-  context_      (context),
   ref_count_    (0),
+  context_      (context),
 #ifdef G_OS_WIN32
-  fd_receiver_  (0),
   mutex_        (),
-  notify_queue_ ()
+  notify_queue_ (),
+  fd_receiver_  (0)
 #else
   fd_receiver_  (-1),
   fd_sender_    (-1)
@@ -188,76 +179,86 @@ DispatchNotifier::DispatchNotifier(const Glib::RefPtr<MainContext>& context)
 {
   create_pipe();
 
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+#if defined(GLIBMM_EXCEPTIONS_ENABLED)
   try
+#elif defined(G_OS_WIN32)
+  if(fd_receiver_)
+#else
+  if(fd_receiver_ >= 0)
+#endif
   {
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
 #ifdef G_OS_WIN32
-    conn_io_handler_ = context_->signal_io().connect(
-        sigc::mem_fun(*this, &DispatchNotifier::pipe_io_handler),
-        GPOINTER_TO_INT(fd_receiver_), Glib::IO_IN);
-#else /* !G_OS_WIN32 */
-    conn_io_handler_ = context_->signal_io().connect(
-        sigc::mem_fun(*this, &DispatchNotifier::pipe_io_handler),
-        fd_receiver_, Glib::IO_IN);
-#endif /* !G_OS_WIN32 */
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    const int fd = GPOINTER_TO_INT(fd_receiver_);
+#else
+    const int fd = fd_receiver_;
+#endif
+    context_->signal_io().connect(sigc::mem_fun(*this, &DispatchNotifier::pipe_io_handler),
+                                  fd, Glib::IO_IN);
   }
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   catch(...)
   {
-#ifndef G_OS_WIN32
+# ifndef G_OS_WIN32
     fd_close_and_invalidate(fd_sender_);
-#endif /* !G_OS_WIN32 */
+# endif
     fd_close_and_invalidate(fd_receiver_);
 
     throw;
   }
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
+#endif /* GLIBMM_EXCEPTIONS_ENABLED */
 }
 
 DispatchNotifier::~DispatchNotifier()
 {
-  // Disconnect manually because we don't inherit from sigc::trackable
-  conn_io_handler_.disconnect();
-
 #ifndef G_OS_WIN32
   fd_close_and_invalidate(fd_sender_);
-#endif /* !G_OS_WIN32 */
+#endif
   fd_close_and_invalidate(fd_receiver_);
 }
 
 void DispatchNotifier::create_pipe()
 {
 #ifdef G_OS_WIN32
-  // On Win32 we are using synchronization object instead of pipe
-  // thus storing its handle as fd_receiver_.
-  fd_receiver_ = CreateEvent(0, FALSE, FALSE, 0);
 
-  if(!fd_receiver_)
+  // On Win32, create a synchronization object instead of a pipe and store
+  // its handle as fd_receiver_.  Use a manual-reset event object, so that
+  // we can closely match the behavior on Unix in pipe_io_handler().
+  const HANDLE event = CreateEvent(0, TRUE, FALSE, 0);
+
+  if(!event)
   {
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
+# ifdef GLIBMM_EXCEPTIONS_ENABLED
     GError* const error = g_error_new(G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                       "Failed to create event for inter-thread communication: %s",
                                       g_win32_error_message(GetLastError()));
     throw Glib::FileError(error);
-#else 
-    return; //TODO: Provide an alternative to the exception.
-#endif //GLIBMM_EXCEPTIONS_ENABLED
+# else
+    warn_failed_pipe_io("CreateEvent"); // TODO: see below
+    return;
+# endif
   }
 
+  fd_receiver_ = event;
+
 #else /* !G_OS_WIN32 */
+
   int filedes[2] = { -1, -1 };
 
   if(pipe(filedes) < 0)
   {
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
+# ifdef GLIBMM_EXCEPTIONS_ENABLED
     GError* const error = g_error_new(G_FILE_ERROR, g_file_error_from_errno(errno),
                                       "Failed to create pipe for inter-thread communication: %s",
                                       g_strerror(errno));
     throw Glib::FileError(error);
-#else 
-    return; //TODO: Provide an alternative to the exception.
-#endif //GLIBMM_EXCEPTIONS_ENABLED
+# else
+    // TODO: Provide an alternative to the exception.  This is not trivial
+    // from within a constructor, though.  One possibility would be to add
+    // a Glib::Dispatcher::valid() method which returns whether construction
+    // was successful.
+    warn_failed_pipe_io("pipe");
+    return;
+# endif
   }
 
   fd_set_close_on_exec(filedes[0]);
@@ -265,6 +266,7 @@ void DispatchNotifier::create_pipe()
 
   fd_receiver_ = filedes[0];
   fd_sender_   = filedes[1];
+
 #endif /* !G_OS_WIN32 */
 }
 
@@ -301,7 +303,7 @@ void DispatchNotifier::unreference_instance(DispatchNotifier* notifier)
   {
     g_return_if_fail(instance->ref_count_ == 0); // could be < 0 if messed up
 
-    // This will cause deletion of the notifier object.
+    // This causes deletion of the notifier object.
     thread_specific_instance_.set(0);
   }
 }
@@ -310,120 +312,120 @@ void DispatchNotifier::send_notification(Dispatcher* dispatcher)
 {
 #ifdef G_OS_WIN32
   {
-    Glib::Mutex::Lock lock (mutex_);
-    notify_queue_.push_back(DispatchNotifyData(0xdeadbeef, dispatcher, this));
-  }
+    const Mutex::Lock lock (mutex_);
 
-  // Send notification event to GUI-thread.
-  if(!SetEvent(fd_receiver_))
-  {
-    warn_failed_pipe_io("SetEvent", GetLastError());
-    return;
+    const bool was_empty = notify_queue_.empty();
+    notify_queue_.push_back(DispatchNotifyData(dispatcher, this));
+
+    if(was_empty)
+    {
+      // The event will stay in signaled state until it is reset
+      // in pipe_io_handler() after processing the last queued event.
+      if(!SetEvent(fd_receiver_))
+        warn_failed_pipe_io("SetEvent");
+    }
   }
 #else /* !G_OS_WIN32 */
-  DispatchNotifyData data (0xdeadbeef, dispatcher, this);
+
+  DispatchNotifyData data (dispatcher, this);
   gssize n_written;
 
   do
     n_written = write(fd_sender_, &data, sizeof(data));
-  while(n_written < 0 && errno == EINTR);
+  while(G_UNLIKELY(n_written < 0) && errno == EINTR);
 
-  if(n_written < 0)
-  {
-    warn_failed_pipe_io("write", errno);
-    return;
-  }
-
-  // All data must be written in a single call to write(), otherwise we can't
+  // All data must be written in a single call to write(), otherwise we cannot
   // guarantee reentrancy since another thread might be scheduled between two
-  // write() calls.  The manpage is a bit unclear about this -- but I hope
-  // it's safe to assume immediate success for the tiny amount of data we're
-  // writing.
-  g_return_if_fail(n_written == sizeof(data));
+  // write() calls.  From the glibc manual:
+  //
+  // "Reading or writing pipe data is atomic if the size of data written is not
+  // greater than PIPE_BUF. This means that the data transfer seems to be an
+  // instantaneous unit, in that nothing else in the system can observe a state
+  // in which it is partially complete. Atomic I/O may not begin right away (it
+  // may need to wait for buffer space or for data), but once it does begin it
+  // finishes immediately."
+  //
+  // The minimum value allowed by POSIX for PIPE_BUF is 512, so we are on safe
+  // grounds here.
+
+  if(G_UNLIKELY(n_written != sizeof(data)))
+    warn_failed_pipe_io("write");
+
 #endif /* !G_OS_WIN32 */
 }
 
 bool DispatchNotifier::pipe_io_handler(Glib::IOCondition)
 {
+  DispatchNotifyData data;
+
 #ifdef G_OS_WIN32
-  DispatchNotifyData data;
-
-  for(;;)
   {
+    const Mutex::Lock lock (mutex_);
+
+    // Should never be empty at this point, but let's allow for bogus
+    // notifications with no data available anyway; just to be safe.
+    if(notify_queue_.empty())
     {
-      Glib::Mutex::Lock lock (mutex_);
+      if(!ResetEvent(fd_receiver_))
+        warn_failed_pipe_io("ResetEvent");
 
-      if(notify_queue_.empty())
-        break;
-
-      data = notify_queue_.front();
-      notify_queue_.pop_front();
-    }
-
-    g_return_val_if_fail(data.tag == 0xdeadbeef, true);
-    g_return_val_if_fail(data.notifier == this,  true);
-
-    // Actually, we wouldn't need the try/catch block because the Glib::Source
-    // C callback already does it for us.  However, we do it anyway because the
-    // default return value is 'false', which is not what we want.
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try
-    {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      data.dispatcher->signal_();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-  }
-#else /* !G_OS_WIN32 */
-  DispatchNotifyData data;
-  gsize n_read = 0;
-
-  do
-  {
-    void * const buffer = reinterpret_cast<guint8*>(&data) + n_read;
-    const gssize result = read(fd_receiver_, buffer, sizeof(data) - n_read);
-
-    if(result < 0)
-    {
-      if(errno == EINTR)
-        continue;
-
-      warn_failed_pipe_io("read", errno);
       return true;
     }
 
-    n_read += result;
+    data = notify_queue_.front();
+    notify_queue_.pop_front();
+
+    // Handle only a single event with each invocation of the I/O handler,
+    // and reset to nonsignaled state only after the last event in the queue
+    // has been processed.  This matches the behavior on Unix.
+    if(notify_queue_.empty())
+    {
+      if(!ResetEvent(fd_receiver_))
+        warn_failed_pipe_io("ResetEvent");
+    }
   }
-  while(n_read < sizeof(data));
+#else /* !G_OS_WIN32 */
 
-  g_return_val_if_fail(data.tag == 0xdeadbeef, true);
-  g_return_val_if_fail(data.notifier == this,  true);
+  gssize n_read;
 
+  do
+    n_read = read(fd_receiver_, &data, sizeof(data));
+  while(G_UNLIKELY(n_read < 0) && errno == EINTR);
+
+  // Pipe I/O of a block size not greater than PIPE_BUF should be atomic.
+  // See the comment on atomicity in send_notification() for details.
+  if(G_UNLIKELY(n_read != sizeof(data)))
+  {
+    // Should probably never be zero, but for safety let's allow for bogus
+    // notifications when no data is actually available.  Although in fact
+    // the read() should block in that case.
+    if(n_read != 0)
+      warn_failed_pipe_io("read");
+
+    return true;
+  }
+#endif /* !G_OS_WIN32 */
+
+  g_return_val_if_fail(data.notifier == this, true);
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   // Actually, we wouldn't need the try/catch block because the Glib::Source
   // C callback already does it for us.  However, we do it anyway because the
   // default return value is 'false', which is not what we want.
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   try
+#endif
   {
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
     data.dispatcher->signal_(); // emit
-  #ifdef GLIBMM_EXCEPTIONS_ENABLED
   }
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   catch(...)
   {
     Glib::exception_handlers_invoke();
   }
-  #endif //GLIBMM_EXCEPTIONS_ENABLED
-#endif /* !G_OS_WIN32 */
+#endif
 
   return true;
 }
-
 
 /**** Glib::Dispatcher *****************************************************/
 
@@ -451,7 +453,7 @@ void Dispatcher::emit()
 
 void Dispatcher::operator()()
 {
-  emit();
+  notifier_->send_notification(this);
 }
 
 sigc::connection Dispatcher::connect(const sigc::slot<void>& slot)
@@ -460,4 +462,3 @@ sigc::connection Dispatcher::connect(const sigc::slot<void>& slot)
 }
 
 } // namespace Glib
-

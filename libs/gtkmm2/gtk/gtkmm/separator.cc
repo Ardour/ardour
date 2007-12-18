@@ -131,7 +131,8 @@ GType Separator::get_base_type()
 
 Separator::Separator()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Widget(Glib::ConstructParams(separator_class_.init()))
 {
   }
@@ -242,7 +243,8 @@ GType VSeparator::get_base_type()
 
 VSeparator::VSeparator()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Separator(Glib::ConstructParams(vseparator_class_.init()))
 {
   }
@@ -353,7 +355,8 @@ GType HSeparator::get_base_type()
 
 HSeparator::HSeparator()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Separator(Glib::ConstructParams(hseparator_class_.init()))
 {
   }

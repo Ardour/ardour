@@ -144,7 +144,7 @@ public:
 
   /// Doesn't use markup.
   
-  /** Sets the text within the Gtk::Label widget.  It overwrites any text that
+  /** Sets the text within the Gtk::Label widget. It overwrites any text that
    * was there before.  
    * 
    * This will also clear any previously set mnemonic accelerators.
@@ -162,8 +162,8 @@ public:
   
   /** Sets a Pango::AttrList; the attributes in the list are applied to the
    * label text. The attributes set with this function will be ignored
-   * if the "use_underline" property or the "use_markup" property
-   * is <tt>true</tt>.
+   * if the Gtk::Label:use-underline" or Gtk::Label:use-markup properties
+   * are set to <tt>true</tt>.
    * @param attrs A Pango::AttrList.
    */
   void set_attributes(Pango::AttrList& attrs);
@@ -181,7 +181,8 @@ public:
   
   /** Sets the text of the label. The label is interpreted as
    * including embedded underlines and/or Pango markup depending
-   * on the values of label->use_underline and label->use_markup.
+   * on the values of the Gtk::Label:use-underline" and
+   * Gtk::Label:use-markup properties.
    * @param str The new text to set for the label.
    */
   void set_label(const Glib::ustring& str);
@@ -194,7 +195,7 @@ public:
   Glib::ustring get_label() const;
   
   /** Parses @a str  which is marked up with the Pango text markup language, setting the
-   * label's text and attribute list based on the parse results.  If the @a str  is
+   * label's text and attribute list based on the parse results. If the @a str  is
    * external data, you may need to escape it with Glib::markup_escape_text() or
    * Glib::markup_printf_escaped()&lt;!-- --&gt;:
    * @code
@@ -214,9 +215,7 @@ public:
    */
   void set_use_markup(bool setting = true);
   
-  /** Returns whether the label's text is interpreted as marked up with
-   * the Pango text markup
-   * language. See set_use_markup().
+  /** Return value: <tt>true</tt> if the label's text will be parsed for markup.
    * @return <tt>true</tt> if the label's text will be parsed for markup.
    */
   bool get_use_markup() const;
@@ -227,8 +226,7 @@ public:
    */
   void set_use_underline(bool setting = true);
   
-  /** Returns whether an embedded underline in the label indicates a
-   * mnemonic. See set_use_underline().
+  /** Return value: <tt>true</tt> whether an embedded underline in the label indicates
    * @return <tt>true</tt> whether an embedded underline in the label indicates
    * the mnemonic accelerator keys.
    */
@@ -240,21 +238,20 @@ public:
    * If characters in @a str  are preceded by an underscore, they are underlined
    * indicating that they represent a keyboard accelerator called a mnemonic.
    * 
-   * The mnemonic key can be used to activate another widget, chosen automatically,
-   * or explicitly using set_mnemonic_widget().
+   * The mnemonic key can be used to activate another widget, chosen 
+   * automatically, or explicitly using set_mnemonic_widget().
    * @param str A markup string (see Pango markup format).
    */
   void set_markup_with_mnemonic(const Glib::ustring& str);
   
   /** If the label has been set so that it has an mnemonic key this function
-   * returns the keyval used for the mnemonic accelerator. If there is no
-   * mnemonic set up it returns #GDK_VoidSymbol.
+   * Returns: GDK keyval usable for accelerators, or #GDK_VoidSymbol
    * @return GDK keyval usable for accelerators, or #GDK_VoidSymbol.
    */
   guint get_mnemonic_keyval() const;
   
   /** If the label has been set so that it has an mnemonic key (using
-   * i.e.\  set_markup_with_mnemonic(),
+   * i.e.\ set_markup_with_mnemonic(),
    * set_text_with_mnemonic(), new_with_mnemonic()
    * or the "use_underline" property) the label can be associated with a
    * widget that is the target of the mnemonic. When the label is inside
@@ -263,9 +260,10 @@ public:
    * (i.e. when the target is a Gtk::Entry next to the label) you need to
    * set it explicitly using this function.
    * 
-   * The target widget will be accelerated by emitting "mnemonic_activate" on it.
-   * The default handler for this signal will activate the widget if there are no
-   * mnemonic collisions and toggle focus between the colliding widgets otherwise.
+   * The target widget will be accelerated by emitting the 
+   * GtkWidget::mnemonic-activate signal on it. The default handler for 
+   * this signal will activate the widget if there are no mnemonic collisions 
+   * and toggle focus between the colliding widgets otherwise.
    * @param widget The target Gtk::Widget.
    */
   void set_mnemonic_widget(Widget& widget);
@@ -287,14 +285,14 @@ public:
   /** Sets the label's text from the string @a str .
    * If characters in @a str  are preceded by an underscore, they are underlined
    * indicating that they represent a keyboard accelerator called a mnemonic.
-   * The mnemonic key can be used to activate another widget, chosen automatically,
-   * or explicitly using set_mnemonic_widget().
+   * The mnemonic key can be used to activate another widget, chosen 
+   * automatically, or explicitly using set_mnemonic_widget().
    * @param str A string.
    */
   void set_text_with_mnemonic(const Glib::ustring& str);
   
   /** Sets the alignment of the lines in the text of the label relative to
-   * each other.  Gtk::JUSTIFY_LEFT is the default value when the
+   * each other. Gtk::JUSTIFY_LEFT is the default value when the
    * widget is first created with new(). If you instead want
    * to set the alignment of the label as a whole, use
    * Gtk::Misc::set_alignment() instead. set_justify() has no
@@ -303,22 +301,21 @@ public:
    */
   void set_justify(Justification jtype);
   
-  /** Returns the justification of the label. See set_justify().
+  /** Return value: Gtk::Justification
    * @return Gtk::Justification.
    */
   Justification get_justify() const;
 
-//TODO: Default value?:
   
-  /** Sets the mode used to ellipsize (add an ellipsis: "...") to the text if there
-   * is not enough space to render the entire string.
+  /** Sets the mode used to ellipsize (add an ellipsis: "...") to the text 
+   * if there is not enough space to render the entire string.
    * 
    * @newin2p6
    * @param mode A Pango::EllipsizeMode.
    */
   void set_ellipsize(Pango::EllipsizeMode mode);
   
-  /** Returns the ellipsizing position of the label. See set_ellipsize().
+  /** Return value: Pango::EllipsizeMode
    * @return Pango::EllipsizeMode
    * 
    * @newin2p6.
@@ -360,20 +357,38 @@ public:
   
   void set_pattern(const Glib::ustring& pattern);
   
-  /** Toggles line wrapping within the Gtk::Label widget.  <tt>true</tt> makes it break
-   * lines if text exceeds the widget's size.  <tt>false</tt> lets the text get cut off
+  /** Toggles line wrapping within the Gtk::Label widget. <tt>true</tt> makes it break
+   * lines if text exceeds the widget's size. <tt>false</tt> lets the text get cut off
    * by the edge of the widget if it exceeds the widget size.
+   * 
+   * Note that setting line wrapping to <tt>true</tt> does not make the label
+   * wrap at its parent container's width, because GTK+ widgets
+   * conceptually can't make their requisition depend on the parent
+   * container's size. For a label that wraps at a specific position,
+   * set the label's width using Gtk::Widget::set_size_request().
    * @param wrap The setting.
    */
   void set_line_wrap(bool wrap = true);
   
-  /** Returns whether lines in the label are automatically wrapped. See set_line_wrap().
+  /** Return value: <tt>true</tt> if the lines of the label are automatically wrapped.
    * @return <tt>true</tt> if the lines of the label are automatically wrapped.
    */
   bool get_line_wrap() const;
   
+  /** If line wrapping is on (see set_line_wrap()) this controls how
+   * the line wrapping is done. The default is Pango::WRAP_WORD which means
+   * wrap on word boundaries.
+   * 
+   * @newin2p10
+   * @param wrap_mode The line wrapping mode.
+   */
   void set_line_wrap_mode(Pango::WrapMode wrap_mode);
   
+  /** Return value: <tt>true</tt> if the lines of the label are automatically wrapped.
+   * @return <tt>true</tt> if the lines of the label are automatically wrapped.
+   * 
+   * @newin2p10.
+   */
   Pango::WrapMode get_line_wrap_mode() const;
   
   /** Selectable labels allow the user to select text from the label, for
@@ -399,7 +414,7 @@ public:
   void set_angle(double angle);
   
   /** Gets the angle of rotation for the label. See
-   * gtk_label_set_angle.
+   * set_angle().
    * @return The angle of rotation for the label
    * 
    * @newin2p6.
@@ -469,7 +484,7 @@ public:
    */
   void set_single_line_mode(bool single_line_mode = true);
   
-  /** Returns whether the label is in single line mode.
+  /** Return value: <tt>true</tt> when the label is in single line mode.
    * @return <tt>true</tt> when the label is in single line mode.
    * 
    * @newin2p6.
@@ -477,9 +492,9 @@ public:
   bool get_single_line_mode() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %populate_popup(Menu* menu)</tt>
+   * <tt>void on_my_%populate_popup(Menu* menu)</tt>
    */
 
   Glib::SignalProxy1< void,Menu* > signal_populate_popup();
@@ -529,7 +544,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The text of the label includes XML markup. See pango_parse_markup.
+/** The text of the label includes XML markup. See pango_parse_markup().
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -539,7 +554,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
-/** The text of the label includes XML markup. See pango_parse_markup.
+/** The text of the label includes XML markup. See pango_parse_markup().
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -820,10 +835,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Label
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Label
    */
   Gtk::Label* wrap(GtkLabel* object, bool take_copy = false);
 } //namespace Glib

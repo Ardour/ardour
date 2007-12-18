@@ -60,6 +60,8 @@ static void pixbuf_destroy_data_callback(guint8* pixels, void* user_data)
 namespace Gdk
 {
 
+#ifndef GDKMM_DISABLE_DEPRECATED
+
 Pixbuf::Pixbuf(const Glib::RefPtr<Image>& src,
                const Glib::RefPtr<Colormap>& cmap,
                int src_x, int src_y,
@@ -69,6 +71,27 @@ Pixbuf::Pixbuf(const Glib::RefPtr<Image>& src,
   Object((GObject*) gdk_pixbuf_get_from_image(
       0, src->gobj(), cmap->gobj(), src_x, src_y, dest_x, dest_y, width, height))
 {}
+#endif // GDKMM_DISABLE_DEPRECATED
+
+
+Pixbuf::Pixbuf(const Glib::RefPtr<Image>& src,
+               const Glib::RefPtr<Colormap>& cmap,
+               int src_x, int src_y,
+               int width, int height)
+:
+  Object((GObject*) gdk_pixbuf_get_from_image(
+      0, src->gobj(), cmap->gobj(), src_x, src_y, 0, 0, width, height))
+{}
+
+Pixbuf::Pixbuf(const Glib::RefPtr<Image>& src,
+               int src_x, int src_y,
+               int width, int height)
+:
+  Object((GObject*) gdk_pixbuf_get_from_image(
+      0, src->gobj(), 0, src_x, src_y, 0, 0, width, height))
+{}
+
+#ifndef GDKMM_DISABLE_DEPRECATED
 
 Pixbuf::Pixbuf(const Glib::RefPtr<Drawable>& src,
                const Glib::RefPtr<Colormap>& cmap,
@@ -79,6 +102,46 @@ Pixbuf::Pixbuf(const Glib::RefPtr<Drawable>& src,
   Object((GObject*) gdk_pixbuf_get_from_drawable(
       0, src->gobj(), cmap->gobj(), src_x, src_y, dest_x, dest_y, width, height))
 {}
+#endif // GDKMM_DISABLE_DEPRECATED
+
+
+Pixbuf::Pixbuf(const Glib::RefPtr<Drawable>& src,
+               const Glib::RefPtr<Colormap>& cmap,
+               int src_x, int src_y,
+               int width, int height)
+:
+  Object((GObject*) gdk_pixbuf_get_from_drawable(
+      0, src->gobj(), cmap->gobj(), src_x, src_y, 0, 0, width, height))
+{}
+
+Pixbuf::Pixbuf(const Glib::RefPtr<Drawable>& src,
+               int src_x, int src_y,
+               int width, int height)
+:
+  Object((GObject*) gdk_pixbuf_get_from_drawable(
+      0, src->gobj(), 0, src_x, src_y, 0, 0, width, height))
+{}
+
+#ifndef GDKMM_DISABLE_DEPRECATED
+
+Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Drawable>& src,
+                                    const Glib::RefPtr<Colormap>& cmap,
+                                    int src_x, int src_y,
+                                    int dest_x, int dest_y,
+                                    int width, int height)
+{
+  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, cmap, src_x, src_y, dest_x, dest_y, width, height) );
+}
+
+Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Image>& src,
+                                    const Glib::RefPtr<Colormap>& cmap,
+                                    int src_x, int src_y,
+                                    int dest_x, int dest_y,
+                                    int width, int height)
+{
+  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, cmap, src_x, src_y, dest_x, dest_y, width, height) );
+}
+#endif // GDKMM_DISABLE_DEPRECATED
 
 
 Glib::RefPtr<Pixbuf> Pixbuf::create_from_data(const guint8* data, Colorspace colorspace,
@@ -234,10 +297,8 @@ void Pixbuf::save_to_buffer(gchar*& buffer, gsize& buffer_size,
 
 Pixbuf::SListHandle_PixbufFormat Pixbuf::get_formats()
 {
-  //TODO: Check that this ownership is appropriate. murrayc.
-  return SListHandle_PixbufFormat(gdk_pixbuf_get_formats(), Glib::OWNERSHIP_DEEP);
+  return SListHandle_PixbufFormat(gdk_pixbuf_get_formats(), Glib::OWNERSHIP_SHALLOW);
 }
-
 
 } // namespace Gdk
 
@@ -404,13 +465,21 @@ GType Pixbuf::get_base_type()
 }
 
 
-Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int dest_x, int dest_y, int width, int height)
+Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height)
 {
-  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, cmap, src_x, src_y, dest_x, dest_y, width, height) );
+  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, cmap, src_x, src_y, width, height) );
 }
-Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int dest_x, int dest_y, int width, int height)
+Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Drawable>& src, int src_x, int src_y, int width, int height)
 {
-  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, cmap, src_x, src_y, dest_x, dest_y, width, height) );
+  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, src_x, src_y, width, height) );
+}
+Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height)
+{
+  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, cmap, src_x, src_y, width, height) );
+}
+Glib::RefPtr<Pixbuf> Pixbuf::create(const Glib::RefPtr<Image>& src, int src_x, int src_y, int width, int height)
+{
+  return Glib::RefPtr<Pixbuf>( new Pixbuf(src, src_x, src_y, width, height) );
 }
 Glib::RefPtr<Pixbuf> Pixbuf::copy() const
 {

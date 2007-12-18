@@ -56,21 +56,21 @@ public:
   PixbufFormat& operator=(const PixbufFormat& src);
 
   
-  /** Returns the name of the format.
+  /** Return value: the name of the format.
    * @return The name of the format. 
    * 
    * @newin2p2.
    */
   Glib::ustring get_name() const;
   
-  /** Returns a description of the format.
+  /** Return value: a description of the format.
    * @return A description of the format.
    * 
    * @newin2p2.
    */
   Glib::ustring get_description() const;
   
-  /** Returns the mime types supported by the format.
+  /** Return value: a <tt>0</tt>-terminated array of mime types which must be freed with
    * @return A <tt>0</tt>-terminated array of mime types which must be freed with 
    * Glib::strfreev() when it is no longer needed.
    * 
@@ -78,8 +78,7 @@ public:
    */
   Glib::StringArrayHandle get_mime_types() const;
   
-  /** Returns the filename extensions typically used for files in the 
-   * given format.
+  /** Return value: a <tt>0</tt>-terminated array of filename extensions which must be
    * @return A <tt>0</tt>-terminated array of filename extensions which must be
    * freed with Glib::strfreev() when it is no longer needed.
    * 
@@ -87,7 +86,7 @@ public:
    */
   Glib::StringArrayHandle get_extensions() const;
   
-  /** Returns whether pixbufs can be saved in the given format.
+  /** Return value: whether pixbufs can be saved in the given format.
    * @return Whether pixbufs can be saved in the given format.
    * 
    * @newin2p2.
@@ -95,18 +94,14 @@ public:
   bool is_writable() const;
   
   
-  /** Returns whether this image format is scalable. If a file is in a 
-   * scalable format, it is preferable to load it at the desired size, 
-   * rather than loading it at the default size and scaling the 
-   * resulting pixbuf to the desired size.
+  /** Return value: whether this image format is scalable.
    * @return Whether this image format is scalable.
    * 
    * @newin2p6.
    */
   bool is_scalable() const;
   
-  /** Returns whether this image format is disabled. See
-   * gdk_pixbuf_format_set_disabled().
+  /** Return value: whether this image format is disabled.
    * @return Whether this image format is disabled.
    * 
    * @newin2p6.
@@ -123,10 +118,7 @@ public:
    */
   void set_disabled(bool disabled = true);
   
-  /** Returns information about the license of the image loader
-   * for the format. The returned string should be a shorthand for 
-   * a wellknown license, e.g. "LGPL", "GPL", "QPL", "GPL/QPL",
-   * or "other" to indicate some other license.
+  /** Returns: a string describing the license of @a format .
    * @return A string describing the license of @a format . 
    * 
    * @newin2p6.

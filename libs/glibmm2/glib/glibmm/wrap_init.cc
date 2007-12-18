@@ -22,6 +22,7 @@
 #include "optioncontext.h"
 #include "optionentry.h"
 #include "optiongroup.h"
+#include "regex.h"
 #include "shell.h"
 #include "spawn.h"
 #include "thread.h"
@@ -41,6 +42,7 @@ GQuark g_io_channel_error_quark(void);
 GQuark g_key_file_error_quark(void);
 GQuark g_markup_error_quark(void);
 GQuark g_option_error_quark(void);
+GQuark g_regex_error_quark(void);
 GQuark g_shell_error_quark(void);
 GQuark g_spawn_error_quark(void);
 GQuark g_thread_error_quark(void);
@@ -61,6 +63,7 @@ void wrap_init()
   Glib::Error::register_domain(g_key_file_error_quark(), &Glib::KeyFileError::throw_func);
   Glib::Error::register_domain(g_markup_error_quark(), &Glib::MarkupError::throw_func);
   Glib::Error::register_domain(g_option_error_quark(), &Glib::OptionError::throw_func);
+  Glib::Error::register_domain(g_regex_error_quark(), &Glib::RegexError::throw_func);
   Glib::Error::register_domain(g_shell_error_quark(), &Glib::ShellError::throw_func);
   Glib::Error::register_domain(g_spawn_error_quark(), &Glib::SpawnError::throw_func);
   Glib::Error::register_domain(g_thread_error_quark(), &Glib::ThreadError::throw_func);

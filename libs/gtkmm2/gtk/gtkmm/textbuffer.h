@@ -3,6 +3,8 @@
 #ifndef _GTKMM_TEXTBUFFER_H
 #define _GTKMM_TEXTBUFFER_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -24,6 +26,9 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
 
 
 #include <gtkmm/object.h>
@@ -421,13 +426,7 @@ public:
   /** @deprecated Use get_text(const iterator& start, const iterator& end, bool include_hidden_chars) const
    */
   
-  /** Returns the text in the range [ @a start , @a end ). Excludes undisplayed
-   * text (text marked with tags that set the invisibility attribute) if
-   *  @a include_hidden_chars  is <tt>false</tt>. Does not include characters
-   * representing embedded images, so byte and character indexes into
-   * the returned string do <em>not</em> correspond to byte
-   * and character indexes into the buffer. Contrast with
-   * get_slice().
+  /** Return value: an allocated UTF-8 string
    * @param start Start of a range.
    * @param end End of a range.
    * @param include_hidden_chars Whether to include invisible text.
@@ -436,13 +435,7 @@ public:
   Glib::ustring get_text(const iterator& start, const iterator& end, bool include_hidden_chars = true);
 
   
-  /** Returns the text in the range [ @a start , @a end ). Excludes undisplayed
-   * text (text marked with tags that set the invisibility attribute) if
-   *  @a include_hidden_chars  is <tt>false</tt>. Does not include characters
-   * representing embedded images, so byte and character indexes into
-   * the returned string do <em>not</em> correspond to byte
-   * and character indexes into the buffer. Contrast with
-   * get_slice().
+  /** Return value: an allocated UTF-8 string
    * @param start Start of a range.
    * @param end End of a range.
    * @param include_hidden_chars Whether to include invisible text.
@@ -470,16 +463,7 @@ public:
   /** @deprecated Use get_slice(const iterator& start, const iterator& end, bool include_hidden_chars) const.
    */
   
-  /** Returns the text in the range [ @a start , @a end ). Excludes undisplayed
-   * text (text marked with tags that set the invisibility attribute) if
-   *  @a include_hidden_chars  is <tt>false</tt>. The returned string includes a
-   * 0xFFFC character whenever the buffer contains
-   * embedded images, so byte and character indexes into
-   * the returned string <em>do</em> correspond to byte
-   * and character indexes into the buffer. Contrast with
-   * get_text(). Note that 0xFFFC can occur in normal
-   * text as well, so it is not a reliable indicator that a pixbuf or
-   * widget is in the buffer.
+  /** Return value: an allocated UTF-8 string
    * @param start Start of a range.
    * @param end End of a range.
    * @param include_hidden_chars Whether to include invisible text.
@@ -488,16 +472,7 @@ public:
   Glib::ustring get_slice(const iterator& start, const iterator& end, bool include_hidden_chars = true);
 
   
-  /** Returns the text in the range [ @a start , @a end ). Excludes undisplayed
-   * text (text marked with tags that set the invisibility attribute) if
-   *  @a include_hidden_chars  is <tt>false</tt>. The returned string includes a
-   * 0xFFFC character whenever the buffer contains
-   * embedded images, so byte and character indexes into
-   * the returned string <em>do</em> correspond to byte
-   * and character indexes into the buffer. Contrast with
-   * get_text(). Note that 0xFFFC can occur in normal
-   * text as well, so it is not a reliable indicator that a pixbuf or
-   * widget is in the buffer.
+  /** Return value: an allocated UTF-8 string
    * @param start Start of a range.
    * @param end End of a range.
    * @param include_hidden_chars Whether to include invisible text.
@@ -514,6 +489,20 @@ public:
   Glib::RefPtr<ChildAnchor> create_child_anchor(const iterator& pos);
   
 
+  /** Adds the mark at position @a where . The mark must not be added to
+   * another buffer, and if its name is not <tt>0</tt> then there must not
+   * be another mark in the buffer with the same name.
+   * 
+   * Emits the "mark_set" signal as notification of the mark's initial
+   * placement.
+   * 
+   * @newin2p12
+   * @param mark The mark to add.
+   * @param where Location to place mark.
+   */
+  void add_mark(const Glib::RefPtr<TextBuffer::Mark>& mark, const iterator& where);
+
+  
   /** Creates a mark at position @a where . The mark can be retrieved by name using
    * get_mark(). If a mark has left gravity, and text is
    * inserted at the mark's current location, the mark will be moved to
@@ -573,15 +562,13 @@ public:
   void delete_mark(const Glib::RefPtr<Mark>& mark);
 
   
-  /** Returns the mark named @a name  in buffer @a buffer , or <tt>0</tt> if no such
-   * mark exists in the buffer.
+  /** Return value: a Gtk::TextMark, or <tt>0</tt>
    * @param name A mark name.
    * @return A Gtk::TextMark, or <tt>0</tt>.
    */
   Glib::RefPtr<TextBuffer::Mark> get_mark(const Glib::ustring& name);
   
-  /** Returns the mark named @a name  in buffer @a buffer , or <tt>0</tt> if no such
-   * mark exists in the buffer.
+  /** Return value: a Gtk::TextMark, or <tt>0</tt>
    * @param name A mark name.
    * @return A Gtk::TextMark, or <tt>0</tt>.
    */
@@ -602,25 +589,12 @@ public:
   void delete_mark_by_name(const Glib::ustring& name);
 
   
-  /** Returns the mark that represents the cursor (insertion point).
-   * Equivalent to calling get_mark() to get the mark
-   * named "insert", but very slightly more efficient, and involves less
-   * typing.
+  /** Return value: insertion point mark
    * @return Insertion point mark.
    */
   Glib::RefPtr<TextBuffer::Mark> get_insert();
   
-  /** Returns the mark that represents the selection bound.  Equivalent
-   * to calling get_mark() to get the mark named
-   * "selection_bound", but very slightly more efficient, and involves
-   * less typing.
-   * 
-   * The currently-selected text in @a buffer  is the region between the
-   * "selection_bound" and "insert" marks. If "selection_bound" and
-   * "insert" are in the same place, then there is no current selection.
-   * get_selection_bounds() is another convenient function
-   * for handling the selection, if you just want to know whether there's a
-   * selection and what its bounds are.
+  /** Return value: selection bound mark
    * @return Selection bound mark.
    */
   Glib::RefPtr<TextBuffer::Mark> get_selection_bound();
@@ -737,18 +711,25 @@ public:
   void set_modified(bool setting = true);
 
   
+  /** Indicates whether the buffer has some text currently selected.
+   * @return <tt>true</tt> if the there is text selected
+   * 
+   * @newin2p10.
+   */
   bool get_has_selection() const;
 
   
-  /** Adds @a clipboard  to the list of clipboards in which the selection contents
-   * of @a buffer  are available. In most cases, @a clipboard  will be the Gtk::Clipboard
-   * of type Gdk::SELECTION_PRIMARY for a view of @a buffer .
+  /** Adds @a clipboard  to the list of clipboards in which the selection 
+   * contents of @a buffer  are available. In most cases, @a clipboard  will be 
+   * the Gtk::Clipboard of type Gdk::SELECTION_PRIMARY for a view of @a buffer .
    * @param clipboard A Gtk::Clipboard.
    */
   void add_selection_clipboard(const Glib::RefPtr<Clipboard>& clipboard);
   
-  /** Removes a Gtk::Clipboard added with add_selection_clipboard()
-   * @param clipboard A Gtk::Clipboard added to @a buffer  by add_selection_clipboard().
+  /** Removes a Gtk::Clipboard added with 
+   * add_selection_clipboard().
+   * @param clipboard A Gtk::Clipboard added to @a buffer  by 
+   * add_selection_clipboard().
    */
   void remove_selection_clipboard(const Glib::RefPtr<Clipboard>& clipboard);
   
@@ -767,12 +748,7 @@ public:
   void paste_clipboard(const Glib::RefPtr<Clipboard>& clipboard, bool default_editable = true);
   
 
-  /** Returns <tt>true</tt> if some text is selected; places the bounds
-   * of the selection in @a start  and @a end  (if the selection has length 0,
-   * then @a start  and @a end  are filled in with the same value).
-   *  @a start  and @a end  will be in ascending order. If @a start  and @a end  are
-   * <tt>0</tt>, then they are not filled in, but the return value still indicates
-   * whether text is selected.
+  /** Return value: whether the selection has nonzero length
    * @param start Iterator to initialize with selection start.
    * @param end Iterator to initialize with selection end.
    * @return Whether the selection has nonzero length.
@@ -813,9 +789,10 @@ public:
    * end_user_action() can then be grouped when creating
    * an undo stack. Gtk::TextBuffer maintains a count of calls to
    * begin_user_action() that have not been closed with
-   * a call to end_user_action(), and emits the "begin_user_action"
-   * and "end_user_action" signals only for the outermost pair of calls.
-   * This allows you to build user actions from other user actions.
+   * a call to end_user_action(), and emits the 
+   * "begin_user_action" and "end_user_action" signals only for the 
+   * outermost pair of calls. This allows you to build user actions 
+   * from other user actions.
    * 
    * The "interactive" buffer mutation functions, such as
    * insert_interactive(), automatically call begin/end
@@ -833,39 +810,10 @@ public:
 
   //These are only available on the Maemo platform (patched Gtk+):
 
-  
-  /** Sets whether rich text can be pasted and dropped to the text buffer.
-   * 
-   * Since: maemo 1.0
-   * @param can_paste_rich_text Whether rich text pasting and dropping is enabled.
-   */
+  //gtkmmproc error: gtk_text_buffer_set_can_paste_rich_text : method defs lookup failed (1)
+  //gtkmmproc error: gtk_text_buffer_get_can_paste_rich_text : method defs lookup failed (1)
 
-#ifdef  GTKMM_MAEMO_EXTENSIONS_ENABLED
-  void set_can_paste_rich_text(bool can_paste_rich_text);
-#endif //  GTKMM_MAEMO_EXTENSIONS_ENABLED
-
-  
-  /** 
-   * @return Whether rich text pasting and dropping is enabled
-   * 
-   * Since: maemo 1.0.
-   */
-
-#ifdef  GTKMM_MAEMO_EXTENSIONS_ENABLED
-  bool get_can_paste_rich_text() const;
-#endif //  GTKMM_MAEMO_EXTENSIONS_ENABLED
-
-
-  /** Sets a new rich text format for the widget.
-   * 
-   * Since: maemo 1.0
-   * @param format Name of a collection of tags that the text view supports.
-   */
-
-#ifdef  GTKMM_MAEMO_EXTENSIONS_ENABLED
-  void set_rich_text_format(const Glib::ustring& format);
-#endif //  GTKMM_MAEMO_EXTENSIONS_ENABLED
-
+  //gtkmmproc error: gtk_text_buffer_set_rich_text_format : method defs lookup failed (1)
 
 #ifdef GTKMM_MAEMO_EXTENSIONS_ENABLED
   /** Accept all formats from clipboard
@@ -874,17 +822,8 @@ public:
   void set_rich_text_format_all();
 #endif //GTKMM_MAEMO_EXTENSIONS_ENABLED
 
-  
-  /** 
-   * @return The widget's current rich text format.
-   * 
-   * Since: maemo 1.0.
-   */
+  //gtkmmproc error: gtk_text_buffer_get_rich_text_format : method defs lookup failed (1) 
 
-#ifdef  GTKMM_MAEMO_EXTENSIONS_ENABLED
-  Glib::ustring get_rich_text_format() const;
-#endif //  GTKMM_MAEMO_EXTENSIONS_ENABLED
- 
 
 //TODO: I have commented these out for now because I don't understand what the register_buffer and content_buffer are. murrayc.
  //TODO: Documentation.
@@ -900,6 +839,29 @@ public:
 */
 
   
+  /** This function registers GTK+'s internal rich text serialization
+   * format with the passed @a buffer . The internal format does not comply
+   * to any standard rich text format and only works between Gtk::TextBuffer
+   * instances. It is capable of serializing all of a text buffer's tags
+   * and embedded pixbufs.
+   * 
+   * This function is just a wrapper around
+   * register_serialize_format(). The mime type used
+   * for registering is "application/x-gtk-text-buffer-rich-text", or
+   * "application/x-gtk-text-buffer-rich-text;format= @a tagset_name " if a
+   *  @a tagset_name  was passed.
+   * 
+   * The @a tagset_name  can be used to restrict the transfer of rich text
+   * to buffers with compatible sets of tags, in order to avoid unknown
+   * tags from being pasted. It is probably the common case to pass an
+   * identifier != <tt>0</tt> here, since the <tt>0</tt> tagset requires the
+   * receiving buffer to deal with with pasting of arbitrary tags.
+   * @param tagset_name An optional tagset name, on <tt>0</tt>.
+   * @return The Gdk::Atom that corresponds to the newly registered
+   * format's mime-type.
+   * 
+   * @newin2p10.
+   */
   Glib::ustring register_serialize_tagset(const Glib::ustring& tagset_name);
 
 /*
@@ -907,17 +869,68 @@ public:
   _IGNORE(gtk_text_buffer_register_deserialize_format)
 */
   
+  /** This function registers GTK+'s internal rich text serialization
+   * format with the passed @a buffer . See
+   * register_serialize_tagset() for details.
+   * @param tagset_name An optional tagset name, on <tt>0</tt>.
+   * @return The Gdk::Atom that corresponds to the newly registered
+   * format's mime-type.
+   * 
+   * @newin2p10.
+   */
   Glib::ustring register_deserialize_tagset(const Glib::ustring& tagset_name);
 
   
+  /** This function unregisters a rich text format that was previously
+   * registered using register_serialize_format() or
+   * register_serialize_tagset()
+   * 
+   * @newin2p10
+   * @param format A Gdk::Atom representing a registered rich text format.
+   */
   void unregister_serialize_format(const Glib::ustring& format);
   
+  /** This function unregisters a rich text format that was previously
+   * registered using register_deserialize_format() or
+   * register_deserialize_tagset().
+   * 
+   * @newin2p10
+   * @param format A Gdk::Atom representing a registered rich text format.
+   */
   void unregister_deserialize_format(const Glib::ustring& format);
 
-//TODO: Wrap property too, if there is one.
   
+  /** Use this function to allow a rich text deserialization function to
+   * create new tags in the receiving buffer. Note that using this
+   * function is almost always a bad idea, because the rich text
+   * functions you register should know how to map the rich text format
+   * they handler to your text buffers set of tags.
+   * 
+   * The ability of creating new (arbitrary!) tags in the receiving buffer
+   * is meant for special rich text formats like the internal one that
+   * is registered using register_deserialize_tagset(),
+   * because that format is essentially a dump of the internal structure
+   * of the source buffer, including its tag names.
+   * 
+   * You should allow creation of tags only if you know what you are
+   * doing, e.g. if you defined a tagset name for your application
+   * suite's text buffers and you know that it's fine to receive new
+   * tags from these buffers, because you know that your application can
+   * handle the newly created tags.
+   * 
+   * @newin2p10
+   * @param format A Gdk::Atom representing a registered rich text format.
+   * @param can_create_tags Whether deserializing this format may create tags.
+   */
   void set_can_create_tags(const Glib::ustring& format, bool can_create_tags = true);
   
+  /** This functions returns the value set with
+   * deserialize_set_can_create_tags()
+   * @param format A Gdk::Atom representing a registered rich text format.
+   * @return Whether deserializing this format may create tags
+   * 
+   * @newin2p10.
+   */
   bool get_can_create_tags(const Glib::ustring& format) const;
 
 
@@ -946,25 +959,25 @@ public:
 */
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %insert(const TextBuffer::iterator& pos, const Glib::ustring& text, int bytes)</tt>
+   * <tt>void on_my_%insert(const TextBuffer::iterator& pos, const Glib::ustring& text, int bytes)</tt>
    */
 
   Glib::SignalProxy3< void,const TextBuffer::iterator&,const Glib::ustring&,int > signal_insert();
 
-  
-/**
+
+  /**
    * @par Prototype:
-   * <tt>void %insert_pixbuf(const TextBuffer::iterator& pos, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)</tt>
+   * <tt>void on_my_%insert_pixbuf(const TextBuffer::iterator& pos, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)</tt>
    */
 
   Glib::SignalProxy2< void,const TextBuffer::iterator&,const Glib::RefPtr<Gdk::Pixbuf>& > signal_insert_pixbuf();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %insert_child_anchor(const TextBuffer::iterator& pos, const Glib::RefPtr<ChildAnchor>& anchor)</tt>
+   * <tt>void on_my_%insert_child_anchor(const TextBuffer::iterator& pos, const Glib::RefPtr<ChildAnchor>& anchor)</tt>
    */
 
   Glib::SignalProxy2< void,const TextBuffer::iterator&,const Glib::RefPtr<ChildAnchor>& > signal_insert_child_anchor();
@@ -979,75 +992,73 @@ public:
    *
    * @param start the start of the range to be deleted.
    * @param end the end of the range to be deleted.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %erase(const TextBuffer::iterator& start, const TextBuffer::iterator& end)</tt>
+   * <tt>void on_my_%erase(const TextBuffer::iterator& start, const TextBuffer::iterator& end)</tt>
    */
 
   Glib::SignalProxy2< void,const TextBuffer::iterator&,const TextBuffer::iterator& > signal_erase();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %changed()</tt>
+   * <tt>void on_my_%changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %modified_changed()</tt>
+   * <tt>void on_my_%modified_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_modified_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %mark_set(const TextBuffer::iterator& location, const Glib::RefPtr<TextBuffer::Mark>& mark)</tt>
+   * <tt>void on_my_%mark_set(const TextBuffer::iterator& location, const Glib::RefPtr<TextBuffer::Mark>& mark)</tt>
    */
 
   Glib::SignalProxy2< void,const TextBuffer::iterator&,const Glib::RefPtr<TextBuffer::Mark>& > signal_mark_set();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %mark_deleted(const Glib::RefPtr<TextBuffer::Mark>& mark)</tt>
+   * <tt>void on_my_%mark_deleted(const Glib::RefPtr<TextBuffer::Mark>& mark)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<TextBuffer::Mark>& > signal_mark_deleted();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %apply_tag(const Glib::RefPtr<TextBuffer::Tag>& tag, const TextBuffer::iterator& range_begin, const TextBuffer::iterator& range_end)</tt>
+   * <tt>void on_my_%apply_tag(const Glib::RefPtr<TextBuffer::Tag>& tag, const TextBuffer::iterator& range_begin, const TextBuffer::iterator& range_end)</tt>
    */
 
   Glib::SignalProxy3< void,const Glib::RefPtr<TextBuffer::Tag>&,const TextBuffer::iterator&,const TextBuffer::iterator& > signal_apply_tag();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %remove_tag(const Glib::RefPtr<TextBuffer::Tag>& tag, const TextBuffer::iterator& range_begin, const TextBuffer::iterator& range_end)</tt>
+   * <tt>void on_my_%remove_tag(const Glib::RefPtr<TextBuffer::Tag>& tag, const TextBuffer::iterator& range_begin, const TextBuffer::iterator& range_end)</tt>
    */
 
   Glib::SignalProxy3< void,const Glib::RefPtr<TextBuffer::Tag>&,const TextBuffer::iterator&,const TextBuffer::iterator& > signal_remove_tag();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %begin_user_action()</tt>
+   * <tt>void on_my_%begin_user_action()</tt>
    */
 
   Glib::SignalProxy0< void > signal_begin_user_action();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %end_user_action()</tt>
+   * <tt>void on_my_%end_user_action()</tt>
    */
 
   Glib::SignalProxy0< void > signal_end_user_action();
@@ -1082,6 +1093,21 @@ public:
    */
   Glib::PropertyProxy_ReadOnly<bool> property_has_selection() const;
 #endif //#GLIBMM_PROPERTIES_ENABLED
+
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The position of the insert mark (as offset from the beginning of the buffer).
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<int> property_cursor_position() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+
+  //TODO: Check the ref-counting/conversion for these: _WRAP_PROPERTY("copy-target-list", Glib::ListHandle< Glib::RefPtr<TargetList> >)
+  //TODO: _WRAP_PROPERTY("paste-target-list", Glib::ListHandle< Glib::RefPtr<TargetList> >)
 
 
 public:
@@ -1120,10 +1146,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TextBuffer
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TextBuffer
    */
   Glib::RefPtr<Gtk::TextBuffer> wrap(GtkTextBuffer* object, bool take_copy = false);
 }

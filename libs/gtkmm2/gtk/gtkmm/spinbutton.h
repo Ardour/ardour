@@ -288,8 +288,7 @@ public:
    */
   void set_numeric(bool numeric = true);
   
-  /** Returns whether non-numeric text can be typed into the spin button.
-   * See set_numeric().
+  /** Return value: <tt>true</tt> if only numeric text can be entered
    * @return <tt>true</tt> if only numeric text can be entered.
    */
   bool get_numeric() const;
@@ -309,9 +308,7 @@ public:
    */
   void set_wrap(bool wrap = true);
   
-  /** Returns whether the spin button's value wraps around to the
-   * opposite limit when the upper or lower limit of the range is
-   * exceeded. See set_wrap().
+  /** Return value: <tt>true</tt> if the spin button wraps around
    * @return <tt>true</tt> if the spin button wraps around.
    */
   bool get_wrap() const;
@@ -323,8 +320,7 @@ public:
    */
   void set_snap_to_ticks(bool snap_to_ticks = true);
   
-  /** Returns whether the values are corrected to the nearest step. See
-   * set_snap_to_ticks().
+  /** Return value: <tt>true</tt> if values are snapped to the nearest step.
    * @return <tt>true</tt> if values are snapped to the nearest step.
    */
   bool get_snap_to_ticks() const;
@@ -340,11 +336,9 @@ public:
    * @li <tt>false</tt>: No conversion done, continue with default handler.
    * @li <tt>true</tt>: Conversion successful, don't call default handler.
    * @li <tt>Gtk::INPUT_ERROR</tt>: Conversion failed, don't call default handler.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>int %input(double* new_value)</tt>
+   * <tt>int on_my_%input(double* new_value)</tt>
    */
 
   Glib::SignalProxy1< int,double* > signal_input();
@@ -355,27 +349,25 @@ public:
    * @return
    * @li <tt>false</tt>: No conversion done, continue with default handler.
    * @li <tt>true</tt>: Conversion successful, don't call default handler.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>bool %output()</tt>
+   * <tt>bool on_my_%output()</tt>
    */
 
   Glib::SignalProxy0< bool > signal_output();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %wrapped()</tt>
+   * <tt>bool on_my_%wrapped()</tt>
    */
 
   Glib::SignalProxy0< bool > signal_wrapped();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %value_changed()</tt>
+   * <tt>void on_my_%value_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_value_changed();
@@ -552,10 +544,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::SpinButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::SpinButton
    */
   Gtk::SpinButton* wrap(GtkSpinButton* object, bool take_copy = false);
 } //namespace Glib

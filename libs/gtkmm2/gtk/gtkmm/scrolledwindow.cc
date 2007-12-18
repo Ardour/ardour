@@ -156,15 +156,17 @@ GType ScrolledWindow::get_base_type()
 
 ScrolledWindow::ScrolledWindow()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Bin(Glib::ConstructParams(scrolledwindow_class_.init()))
 {
   }
 
 ScrolledWindow::ScrolledWindow(Adjustment& hadjustment, Adjustment& vadjustment)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Bin(Glib::ConstructParams(scrolledwindow_class_.init(), "hadjustment", (hadjustment).gobj(), "vadjustment", (vadjustment).gobj(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Bin(Glib::ConstructParams(scrolledwindow_class_.init(), "hadjustment", (hadjustment).gobj(), "vadjustment", (vadjustment).gobj(), static_cast<char*>(0)))
 {
   }
 

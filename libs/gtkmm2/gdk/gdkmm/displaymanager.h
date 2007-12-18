@@ -162,11 +162,9 @@ public:
    * @newin2p2
    *
    * @param display the opened display
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %display_opened(const Glib::RefPtr<Display>& display)</tt>
+   * <tt>void on_my_%display_opened(const Glib::RefPtr<Display>& display)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<Display>& > signal_display_opened();
@@ -197,10 +195,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::DisplayManager
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::DisplayManager
    */
   Glib::RefPtr<Gdk::DisplayManager> wrap(GdkDisplayManager* object, bool take_copy = false);
 }

@@ -261,8 +261,8 @@ public:
   static bool events_pending();
 
   
-  /** Returns the time stamp from @a event , if there is one; otherwise
-   * returns Gdk::CURRENT_TIME. If @a event  is <tt>0</tt>, returns Gdk::CURRENT_TIME.
+  /** returns Gdk::CURRENT_TIME. If @a event  is <tt>0</tt>, returns Gdk::CURRENT_TIME.
+   * Return value: time stamp field from @a event 
    * @return Time stamp field from @a event .
    */
   guint32 get_time() const;
@@ -323,26 +323,14 @@ public:
    */
   void set_screen(const Glib::RefPtr<Screen>& screen);
   
-  /** Returns the screen for the event. The screen is
-   * typically the screen for <tt>event->any.window</tt>, but
-   * for events such as mouse events, it is the screen
-   * where the pointer was when the event occurs -
-   * that is, the screen which has the root window 
-   * to which <tt>event->motion.x_root</tt> and
-   * <tt>event->motion.y_root</tt> are relative.
+  /** Return value: the screen for the event
    * @return The screen for the event
    * 
    * @newin2p2.
    */
   Glib::RefPtr<Screen> get_screen();
   
-  /** Returns the screen for the event. The screen is
-   * typically the screen for <tt>event->any.window</tt>, but
-   * for events such as mouse events, it is the screen
-   * where the pointer was when the event occurs -
-   * that is, the screen which has the root window 
-   * to which <tt>event->motion.x_root</tt> and
-   * <tt>event->motion.y_root</tt> are relative.
+  /** Return value: the screen for the event
    * @return The screen for the event
    * 
    * @newin2p2.
@@ -381,10 +369,13 @@ inline void swap(Event& lhs, Event& rhs)
 namespace Glib
 {
 
-/** @relates Gdk::Event
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gdk::Event
  */
 Gdk::Event wrap(GdkEvent* object, bool take_copy = false);
 

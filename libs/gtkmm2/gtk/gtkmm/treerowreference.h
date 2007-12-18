@@ -86,33 +86,29 @@ public:
   operator bool() const;
 
   
-  /** Returns a path that the row reference currently points to, or <tt>0</tt> if the
-   * path pointed to is no longer valid.
+  /** Return value: A current path, or <tt>0</tt>.
    * @return A current path, or <tt>0</tt>.
    */
   TreeModel::Path get_path() const;
 
   
-  /** Returns the model which @a reference  is monitoring in order to appropriately
-   * the path.
-   * @return The model, or <tt>0</tt>.
+  /** Return value: the model
+   * @return The model
    * 
    * @newin2p8.
    */
   Glib::RefPtr<TreeModel> get_model();
   
-  /** Returns the model which @a reference  is monitoring in order to appropriately
-   * the path.
-   * @return The model, or <tt>0</tt>.
+  /** Return value: the model
+   * @return The model
    * 
    * @newin2p8.
    */
   Glib::RefPtr<const TreeModel> get_model() const;
 
   
-  /** Returns <tt>true</tt> if the %reference is non-<tt>0</tt> and refers to a current valid
-   * path.
-   * @return <tt>true</tt> if %reference points to a valid path.
+  /** Return value: <tt>true</tt> if @a reference  points to a valid path.
+   * @return <tt>true</tt> if @a reference  points to a valid path.
    */
   bool is_valid() const;
 
@@ -137,10 +133,13 @@ inline void swap(TreeRowReference& lhs, TreeRowReference& rhs)
 namespace Glib
 {
 
-/** @relates Gtk::TreeRowReference
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gtk::TreeRowReference
  */
 Gtk::TreeRowReference wrap(GtkTreeRowReference* object, bool take_copy = false);
 

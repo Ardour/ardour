@@ -73,8 +73,14 @@ private:
 
 protected:
   Hypertext(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit Hypertext(AtkHypertext* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -128,9 +134,9 @@ public:
   int get_link_index(int char_index) const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %link_selected(int link_index)</tt>
+   * <tt>void on_my_%link_selected(int link_index)</tt>
    */
 
   Glib::SignalProxy1< void,int > signal_link_selected();
@@ -174,10 +180,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Atk::Hypertext
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Atk::Hypertext
    */
   Glib::RefPtr<Atk::Hypertext> wrap(AtkHypertext* object, bool take_copy = false);
 

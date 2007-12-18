@@ -145,10 +145,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ImageMenuItem
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ImageMenuItem
    */
   Gtk::ImageMenuItem* wrap(GtkImageMenuItem* object, bool take_copy = false);
 } //namespace Glib

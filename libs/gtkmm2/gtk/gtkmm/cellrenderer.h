@@ -258,7 +258,8 @@ public:
    *  @a window .  @a expose_area  is a clip rectangle.
    * @param window A Gdk::Drawable to draw to.
    * @param widget The widget owning @a window .
-   * @param background_area Entire cell area (including tree expanders and maybe padding on the sides).
+   * @param background_area Entire cell area (including tree expanders and maybe 
+   * padding on the sides).
    * @param cell_area Area normally rendered by a cell renderer.
    * @param expose_area Area that actually needs updating.
    * @param flags Flags that affect rendering.
@@ -272,14 +273,15 @@ public:
                   CellRendererState flags);
 
   
-  /** Passes an activate event to the cell renderer for possible processing.  Some
-   * cell renderers may use events; for example, Gtk::CellRendererToggle toggles
-   * when it gets a mouse click.
+  /** Passes an activate event to the cell renderer for possible processing.  
+   * Some cell renderers may use events; for example, Gtk::CellRendererToggle 
+   * toggles when it gets a mouse click.
    * @param event A Gdk::Event.
    * @param widget Widget that received the event.
-   * @param path Widget-dependent string representation of the event location; e.g. for Gtk::TreeView, a string representation of Gtk::TreePath.
-   * @param background_area Background area as passed to @a gtk_cell_renderer_render .
-   * @param cell_area Cell area as passed to @a gtk_cell_renderer_render .
+   * @param path Widget-dependent string representation of the event location; 
+   * e.g. for Gtk::TreeView, a string representation of Gtk::TreePath.
+   * @param background_area Background area as passed to render().
+   * @param cell_area Cell area as passed to render().
    * @param flags Render flags.
    * @return <tt>true</tt> if the event was consumed/handled.
    */
@@ -295,9 +297,10 @@ public:
   /** Passes an activate event to the cell renderer for possible processing.
    * @param event A Gdk::Event.
    * @param widget Widget that received the event.
-   * @param path Widget-dependent string representation of the event location; e.g. for Gtk::TreeView, a string representation of Gtk::TreePath.
-   * @param background_area Background area as passed to @a gtk_cell_renderer_render .
-   * @param cell_area Cell area as passed to @a gtk_cell_renderer_render .
+   * @param path Widget-dependent string representation of the event location; 
+   * e.g. for Gtk::TreeView, a string representation of Gtk::TreePath.
+   * @param background_area Background area as passed to render().
+   * @param cell_area Cell area as passed to render().
    * @param flags Render flags.
    * @return A new Gtk::CellEditable, or <tt>0</tt>.
    */
@@ -324,13 +327,15 @@ public:
   
 #ifndef GTKMM_DISABLE_DEPRECATED
 
-  /** Causes the cell renderer to emit the "editing-canceled" signal.  This
-   * function is for use only by implementations of cell renderers that need to
-   * notify the client program that an editing process was canceled and the
-   * changes were not committed.
+  /** Causes the cell renderer to emit the Gtk::CellRenderer::editing-canceled 
+   * signal.  
+   * 
+   * This function is for use only by implementations of cell renderers that 
+   * need to notify the client program that an editing process was canceled 
+   * and the changes were not committed.
    * 
    * @newin2p4
-   * Deprecated: Use stop_editing() instead
+   * Deprecated: 2.6: Use stop_editing() instead
    * @deprecated Use stop_editing().
    */
   void editing_canceled();
@@ -338,9 +343,12 @@ public:
 
 
   /** Informs the cell renderer that the editing is stopped.
-   * If @a canceled  is <tt>true</tt>, the cell renderer will emit the "editing-canceled" 
-   * signal. This function should be called by cell renderer implementations 
-   * in response to the "editing-done" signal of Gtk::CellEditable.
+   * If @a canceled  is <tt>true</tt>, the cell renderer will emit the 
+   * Gtk::CellRenderer::editing-canceled signal. 
+   * 
+   * This function should be called by cell renderer implementations 
+   * in response to the Gtk::CellEditable::editing-done signal of 
+   * Gtk::CellEditable.
    * 
    * @newin2p6
    * @param canceled <tt>true</tt> if the editing has been canceled.
@@ -362,11 +370,9 @@ public:
    * editing when the user presses Escape. 
    *
    * @see editing_canceled() 
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %editing_canceled()</tt>
+   * <tt>void on_my_%editing_canceled()</tt>
    */
 
   Glib::SignalProxy0< void > signal_editing_canceled();
@@ -392,11 +398,9 @@ public:
    *
    * @param editable the CellEditable.
    * @param path the path identifying the edited cell.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %editing_started(CellEditable* editable, const Glib::ustring& path)</tt>
+   * <tt>void on_my_%editing_started(CellEditable* editable, const Glib::ustring& path)</tt>
    */
 
   Glib::SignalProxy2< void,CellEditable*,const Glib::ustring& > signal_editing_started();
@@ -720,10 +724,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::CellRenderer
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellRenderer
    */
   Gtk::CellRenderer* wrap(GtkCellRenderer* object, bool take_copy = false);
 } //namespace Glib

@@ -153,7 +153,8 @@ GType Paned::get_base_type()
 
 Paned::Paned()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Container(Glib::ConstructParams(paned_class_.init()))
 {
   }
@@ -357,7 +358,8 @@ GType HPaned::get_base_type()
 
 HPaned::HPaned()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Paned(Glib::ConstructParams(hpaned_class_.init()))
 {
   }
@@ -468,7 +470,8 @@ GType VPaned::get_base_type()
 
 VPaned::VPaned()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Paned(Glib::ConstructParams(vpaned_class_.init()))
 {
   }

@@ -1,0 +1,88 @@
+/* $Id: filefilter.hg,v 1.8 2004/11/12 11:51:42 murrayc Exp $ */
+
+/* Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/object.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/object_p.h)
+
+//TODO: remove this if we wrap this in a C++ type:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//typedef struct _GtkFileFilterInfo GtkFileFilterInfo;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gtk
+{
+
+_WRAP_ENUM(FileFilterFlags, GtkFileFilterFlags)
+
+/** A filter for selecting a file subset.
+ *
+ * A Gtk::FileFilter can be used to restrict the files being shown in a Gtk::FileChooser.
+ * Files can be filtered based on their name (with add_pattern()), 
+ * on their mime type (with add_mime_type()), or by a custom filter 
+ * function (with add_custom()).
+ *
+ * Filtering by mime types handles aliasing and subclassing of mime types; 
+ * e.g. a filter for text/plain also matches a file with mime type application/rtf, 
+ * since application/rtf is a subclass of text/plain. Note that Gtk::FileFilter 
+ * allows wildcards for the subtype of a mime type, so you can e.g. filter for image/ *.
+ * 
+ * Normally, filters are used by adding them to a Gtk::FileChooser. See Gtk::FileChooser::add_filter(). 
+ * But it is also possible to manually use a filter on a file with filter(). 
+ */
+class FileFilter : public Gtk::Object
+{
+  _CLASS_GTKOBJECT(FileFilter, GtkFileFilter, GTK_FILE_FILTER, Gtk::Object, GtkObject)
+public:
+ _CTOR_DEFAULT
+
+  _WRAP_METHOD(void set_name(const Glib::ustring& name), gtk_file_filter_set_name)
+  _WRAP_METHOD(Glib::ustring get_name() const, gtk_file_filter_get_name)
+
+  _WRAP_METHOD(void add_mime_type(const Glib::ustring& mime_type), gtk_file_filter_add_mime_type)
+  _WRAP_METHOD(void add_pattern(const Glib::ustring& pattern), gtk_file_filter_add_pattern)
+  _WRAP_METHOD(void add_pixbuf_formats(), gtk_file_filter_add_pixbuf_formats)
+
+  class Info
+  {
+  public:
+    FileFilterFlags contains;
+    Glib::ustring filename;
+    Glib::ustring uri;
+    Glib::ustring display_name;
+    Glib::ustring mime_type;
+  };
+
+  /// For instance, bool on_custom(const Gtk::FileFilter::Info& filter_info);
+  typedef sigc::slot<bool, const Info&> SlotCustom;
+  
+  void add_custom(FileFilterFlags needed, const SlotCustom& slot);
+  _IGNORE(gtk_file_filter_add_custom)
+
+  _WRAP_METHOD(FileFilterFlags get_needed() const, gtk_file_filter_get_needed)
+
+  //TODO: This method is used by FileChooser implementors, so we don't need to wrap it.
+  _IGNORE(gtk_file_filter_filter)
+  //_WRAP_METHOD(bool filter(const GtkFileFilterInfo* filter_info), gtk_file_filter_filter)
+};
+
+} // namespace Gtk
+

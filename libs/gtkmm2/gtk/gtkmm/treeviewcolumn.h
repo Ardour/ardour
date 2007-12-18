@@ -3,6 +3,8 @@
 #ifndef _GTKMM_TREEVIEWCOLUMN_H
 #define _GTKMM_TREEVIEWCOLUMN_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -24,6 +26,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gtkmm/object.h>
 #include <gtkmm/treeiter.h>
@@ -303,7 +309,7 @@ public:
    */
   void set_spacing(int spacing);
   
-  /** Returns the spacing of @a tree_column .
+  /** Return value: the spacing of @a tree_column .
    * @return The spacing of @a tree_column .
    */
   int get_spacing() const;
@@ -313,7 +319,7 @@ public:
    */
   void set_visible(bool visible = true);
   
-  /** Returns <tt>true</tt> if @a tree_column  is visible.
+  /** Return value: whether the column is visible or not.  If it is visible, then
    * @return Whether the column is visible or not.  If it is visible, then
    * the tree will show the column.
    */
@@ -327,7 +333,7 @@ public:
    */
   void set_resizable(bool resizable = true);
   
-  /** Returns <tt>true</tt> if the @a tree_column  can be resized by the end user.
+  /** Return value: <tt>true</tt>, if the @a tree_column  can be resized.
    * @return <tt>true</tt>, if the @a tree_column  can be resized.
    */
   bool get_resizable() const;
@@ -337,12 +343,12 @@ public:
    */
   void set_sizing(TreeViewColumnSizing type);
   
-  /** Returns the current type of @a tree_column .
+  /** Return value: The type of @a tree_column .
    * @return The type of @a tree_column .
    */
   TreeViewColumnSizing get_sizing();
   
-  /** Returns the current size of @a tree_column  in pixels.
+  /** Return value: The current width of @a tree_column .
    * @return The current width of @a tree_column .
    */
   int get_width() const;
@@ -368,8 +374,7 @@ public:
    */
   void set_min_width(int min_width);
   
-  /** Returns the minimum width in pixels of the @a tree_column , or -1 if no minimum
-   * width is set.
+  /** Return value: The minimum width of the @a tree_column .
    * @return The minimum width of the @a tree_column .
    */
   int get_min_width() const;
@@ -382,8 +387,7 @@ public:
    */
   void set_max_width(int max_width);
   
-  /** Returns the maximum width in pixels of the @a tree_column , or -1 if no maximum
-   * width is set.
+  /** Return value: The maximum width of the @a tree_column .
    * @return The maximum width of the @a tree_column .
    */
   int get_max_width() const;
@@ -400,7 +404,7 @@ public:
    */
   void set_title(const Glib::ustring& title);
   
-  /** Returns the title of the widget.
+  /** Return value: the title of the column. This string should not be
    * @return The title of the column. This string should not be
    * modified or freed.
    */
@@ -431,7 +435,7 @@ public:
    */
   void set_clickable(bool clickable = true);
   
-  /** Returns <tt>true</tt> if the user can click on the header for the column.
+  /** Return value: <tt>true</tt> if user can click the column header.
    * @return <tt>true</tt> if user can click the column header.
    */
   bool get_clickable() const;
@@ -442,14 +446,12 @@ public:
    */
   void set_widget(Gtk::Widget& widget);
   
-  /** Returns the Gtk::Widget in the button on the column header.  If a custom
-   * widget has not been set then <tt>0</tt> is returned.
+  /** Return value: The Gtk::Widget in the column header, or <tt>0</tt>
    * @return The Gtk::Widget in the column header, or <tt>0</tt>.
    */
   Widget* get_widget();
   
-  /** Returns the Gtk::Widget in the button on the column header.  If a custom
-   * widget has not been set then <tt>0</tt> is returned.
+  /** Return value: The Gtk::Widget in the column header, or <tt>0</tt>
    * @return The Gtk::Widget in the column header, or <tt>0</tt>.
    */
   const Widget* get_widget() const;
@@ -470,8 +472,7 @@ public:
   void set_alignment(AlignmentEnum xalign);
 
   
-  /** Returns the current x alignment of @a tree_column .  This value can range
-   * between 0.0 and 1.0.
+  /** Return value: The current alignent of @a tree_column .
    * @return The current alignent of @a tree_column .
    */
   float get_alignment() const;
@@ -482,7 +483,7 @@ public:
    */
   void set_reorderable(bool reorderable = true);
   
-  /** Returns <tt>true</tt> if the @a tree_column  can be reordered by the user.
+  /** Return value: <tt>true</tt> if the @a tree_column  can be reordered by the user.
    * @return <tt>true</tt> if the @a tree_column  can be reordered by the user.
    */
   bool get_reorderable() const;
@@ -575,9 +576,7 @@ public:
    */
   void cell_get_size(Gdk::Rectangle& cell_area, int& x_offset, int& y_offset, int& width, int& height) const;
   
-  /** Returns <tt>true</tt> if any of the cells packed into the @a tree_column  are visible.
-   * For this to be meaningful, you must first initialize the cells with
-   * cell_set_cell_data()
+  /** Return value: <tt>true</tt>, if any of the cells packed into the @a tree_column  are currently visible
    * @return <tt>true</tt>, if any of the cells packed into the @a tree_column  are currently visible.
    */
   bool cell_is_visible() const;
@@ -610,9 +609,9 @@ public:
   void queue_resize();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %clicked()</tt>
+   * <tt>void on_my_%clicked()</tt>
    */
 
   Glib::SignalProxy0< void > signal_clicked();
@@ -942,10 +941,13 @@ TreeViewColumn::TreeViewColumn(const Glib::ustring& title,
 
 namespace Glib
 {
-  /** @relates Gtk::TreeViewColumn
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeViewColumn
    */
   Gtk::TreeViewColumn* wrap(GtkTreeViewColumn* object, bool take_copy = false);
 } //namespace Glib

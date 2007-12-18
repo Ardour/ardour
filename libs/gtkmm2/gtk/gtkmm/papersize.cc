@@ -54,11 +54,28 @@ PaperSize::PaperSize(const Glib::ustring& name, const Glib::ustring& display_nam
                                      GtkUnit(unit)))
 {}
 
+//TODO: Add an operator bool() so we can detect if this succeeded:
+PaperSize::PaperSize(const Glib::KeyFile& key_file, const Glib::ustring& group_name)
+:
+  gobject_(gtk_paper_size_new_from_key_file(const_cast<GKeyFile*>(key_file.gobj()), (group_name.empty() ? NULL : group_name.c_str()) , NULL /* GError */))
+{}
+
 bool PaperSize::equal(const PaperSize& other) const
 {
   return (static_cast<bool>(gtk_paper_size_is_equal(const_cast<GtkPaperSize*>(this->gobj()),
                                                     const_cast<GtkPaperSize*>(other.gobj()))));
 }
+
+PaperSize::operator bool() const
+{
+  return (gobj() != NULL);
+}
+
+void PaperSize::save_to_key_file(Glib::KeyFile& key_file)
+{
+  gtk_paper_size_to_key_file( gobj(), (key_file).gobj(), 0); 
+}
+
 
 } // namespace Gtk
 
@@ -196,6 +213,12 @@ double PaperSize::get_default_right_margin(Unit unit) const
 Glib::ustring PaperSize::get_default()
 {
   return Glib::convert_const_gchar_ptr_to_ustring(gtk_paper_size_get_default());
+}
+
+
+void PaperSize::save_to_key_file(Glib::KeyFile& key_file, const Glib::ustring& group_name)
+{
+gtk_paper_size_to_key_file(gobj(), (key_file).gobj(), group_name.c_str()); 
 }
 
 

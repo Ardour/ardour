@@ -276,10 +276,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Separator
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Separator
    */
   Gtk::Separator* wrap(GtkSeparator* object, bool take_copy = false);
 } //namespace Glib
@@ -287,10 +290,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::VSeparator
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::VSeparator
    */
   Gtk::VSeparator* wrap(GtkVSeparator* object, bool take_copy = false);
 } //namespace Glib
@@ -298,10 +304,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::HSeparator
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::HSeparator
    */
   Gtk::HSeparator* wrap(GtkHSeparator* object, bool take_copy = false);
 } //namespace Glib

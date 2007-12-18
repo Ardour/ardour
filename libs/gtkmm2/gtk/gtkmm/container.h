@@ -144,8 +144,8 @@ public:
    * the container. To add space to only one side, one approach is to
    * create a Gtk::Alignment widget, call Gtk::Widget::set_usize() to give
    * it a size, and place it on the side of the container as a spacer.
-   * @param border_width Amount of blank space to leave <em>outside</em> the container.
-   * Valid values are in the range 0-65535 pixels.
+   * @param border_width Amount of blank space to leave <em>outside</em> 
+   * the container. Valid values are in the range 0-65535 pixels.
    */
   void set_border_width(guint border_width);
 
@@ -180,8 +180,7 @@ public:
   void set_resize_mode(ResizeMode resize_mode);
 
   
-  /** Returns the resize mode for the container. See
-   * set_resize_mode().
+  /** Return value: the current resize mode
    * @return The current resize mode.
    */
   ResizeMode get_resize_mode() const;
@@ -213,14 +212,12 @@ public:
   //_WRAP_METHOD(void foreach_full_(GtkCallback callback,GtkCallbackMarshal marshal, gpointer data,GtkDestroyNotify notify),gtk_container_foreach_full)
 
   
-  /** Returns the container's non-internal children. See
-   * forall() for details on what constitutes an "internal" child.
+  /** Return value: a newly-allocated list of the container's non-internal children.
    * @return A newly-allocated list of the container's non-internal children.
    */
   Glib::ListHandle<Widget*> get_children();
   
-  /** Returns the container's non-internal children. See
-   * forall() for details on what constitutes an "internal" child.
+  /** Return value: a newly-allocated list of the container's non-internal children.
    * @return A newly-allocated list of the container's non-internal children.
    */
   Glib::ListHandle<const Widget*> get_children() const;
@@ -237,7 +234,7 @@ public:
    * the event's area with the child area, and sending the event.
    * 
    * In most cases, a container can simply either simply inherit the
-   * ::expose implementation from Gtk::Container, or, do some drawing 
+   * Gtk::Widget::expose implementation from Gtk::Container, or, do some drawing 
    * and then chain to the ::expose implementation from Gtk::Container.
    * @param child A child of @a container .
    * @param event A expose event sent to container.
@@ -284,16 +281,17 @@ public:
   void set_focus_child(Widget& widget);
 
   
-  /** Hooks up an adjustment to focus handling in a container, so when a child of the 
-   * container is focused, the adjustment is scrolled to show that widget. This function
-   * sets the vertical alignment. See Gtk::ScrolledWindow::get_vadjustment() for a typical
-   * way of obtaining the adjustment and set_focus_hadjustment() for setting
+  /** Hooks up an adjustment to focus handling in a container, so when a 
+   * child of the container is focused, the adjustment is scrolled to 
+   * show that widget. This function sets the vertical alignment. See 
+   * Gtk::ScrolledWindow::get_vadjustment() for a typical way of obtaining 
+   * the adjustment and set_focus_hadjustment() for setting
    * the horizontal adjustment.
    * 
-   * The adjustments have to be in pixel units and in the same coordinate system as the 
-   * allocation for immediate children of the container.
-   * @param adjustment An adjustment which should be adjusted when the focus is moved among the
-   * descendents of @a container .
+   * The adjustments have to be in pixel units and in the same coordinate 
+   * system as the allocation for immediate children of the container.
+   * @param adjustment An adjustment which should be adjusted when the focus 
+   * is moved among the descendents of @a container .
    */
   void set_focus_vadjustment(Adjustment& adjustment);
 
@@ -313,16 +311,17 @@ public:
   const Adjustment* get_focus_vadjustment() const;
 
   
-  /** Hooks up an adjustment to focus handling in a container, so when a child of the 
-   * container is focused, the adjustment is scrolled to show that widget. This function
-   * sets the horizontal alignment. See Gtk::ScrolledWindow::get_hadjustment() for a typical
-   * way of obtaining the adjustment and set_focus_vadjustment() for setting
+  /** Hooks up an adjustment to focus handling in a container, so when a child 
+   * of the container is focused, the adjustment is scrolled to show that 
+   * widget. This function sets the horizontal alignment. 
+   * See Gtk::ScrolledWindow::get_hadjustment() for a typical way of obtaining 
+   * the adjustment and set_focus_vadjustment() for setting
    * the vertical adjustment.
    * 
-   * The adjustments have to be in pixel units and in the same coordinate system as the 
-   * allocation for immediate children of the container.
-   * @param adjustment An adjustment which should be adjusted when the focus is moved among the
-   * descendents of @a container .
+   * The adjustments have to be in pixel units and in the same coordinate 
+   * system as the allocation for immediate children of the container.
+   * @param adjustment An adjustment which should be adjusted when the focus is 
+   * moved among the descendents of @a container .
    */
   void set_focus_hadjustment(Adjustment& adjustment);
 
@@ -345,11 +344,7 @@ public:
   void resize_children();
   
   
-  /** Returns the type of the children supported by the container.
-   * 
-   * Note that this may return G::TYPE_NONE to indicate that no more
-   * children can be added, e.g. for a Gtk::Paned which already has two 
-   * children.
+  /** Return value: a G::Type.
    * @return A G::Type.
    */
   GType child_type() const;
@@ -357,9 +352,9 @@ public:
   // Ignore functions such as gtk_container_class_install_child_property(),  which I think are for themes, like the GtkWidget style properties.
   
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %add(Widget* widget)</tt>
+   * <tt>void on_my_%add(Widget* widget)</tt>
    */
 
   Glib::SignalProxy1< void,Widget* > signal_add();
@@ -368,25 +363,25 @@ public:
   //We use the optional custom_c_callback parameter with _WRAP_SIGNAL() here,
   //so that we can write special code to check for deleted child widget parameters:
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %remove(Widget* widget)</tt>
+   * <tt>void on_my_%remove(Widget* widget)</tt>
    */
 
   Glib::SignalProxy1< void,Widget* > signal_remove();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %check_resize()</tt>
+   * <tt>void on_my_%check_resize()</tt>
    */
 
   Glib::SignalProxy0< void > signal_check_resize();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %set_focus_child(Widget* widget)</tt>
+   * <tt>void on_my_%set_focus_child(Widget* widget)</tt>
    */
 
   Glib::SignalProxy1< void,Widget* > signal_set_focus_child();
@@ -477,10 +472,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Container
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Container
    */
   Gtk::Container* wrap(GtkContainer* object, bool take_copy = false);
 } //namespace Glib

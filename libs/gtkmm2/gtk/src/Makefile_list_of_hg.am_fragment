@@ -1,0 +1,43 @@
+# This file is include by other Makefile.am files, using the new automake include feature.
+# The include happens in Makefile.am, not Makefile.in or Makefile,
+# so it's like copy-and-pasting this into each of those Makefile.am files.
+
+files_posix_hg = pagesetupunixdialog.hg printunixdialog.hg \
+	printer.hg printjob.hg
+files_win32_hg =
+files_general_hg = aboutdialog.hg accelgroup.hg accellabel.hg action.hg actiongroup.hg adjustment.hg alignment.hg \
+          arrow.hg aspectframe.hg assistant.hg \
+          bin.hg box.hg builder.hg button.hg buttonbox.hg \
+          calendar.hg celleditable.hg celllayout.hg cellview.hg \
+          cellrenderer.hg cellrendereraccel.hg cellrenderercombo.hg cellrendererpixbuf.hg cellrendererprogress.hg cellrendererspin.hg cellrenderertext.hg cellrenderertoggle.hg \
+          checkbutton.hg checkmenuitem.hg clipboard.hg colorselection.hg colorbutton.hg \
+          combobox.hg comboboxentry.hg container.hg curve.hg \
+          dialog.hg drawingarea.hg \
+          editable.hg entry.hg entrycompletion.hg enums.hg eventbox.hg expander.hg \
+          filechooser.hg filechooserbutton.hg filechooserwidget.hg filechooserdialog.hg filefilter.hg \
+          fileselection.hg fixed.hg fontbutton.hg fontselection.hg frame.hg \
+          handlebox.hg \
+          iconfactory.hg iconset.hg iconsource.hg iconinfo.hg icontheme.hg iconview.hg image.hg imagemenuitem.hg inputdialog.hg invisible.hg item.hg \
+          label.hg layout.hg linkbutton.hg liststore.hg \
+          main.hg menu.hg menubar.hg menuitem.hg menushell.hg menutoolbutton.hg messagedialog.hg misc.hg \
+          notebook.hg object.hg optionmenu.hg \
+          paned.hg plug.hg progressbar.hg \
+	  papersize.hg pagesetup.hg printsettings.hg printcontext.hg printoperation.hg printoperationpreview.hg \
+	  radioaction.hg radiobutton.hg radiomenuitem.hg radiotoolbutton.hg range.hg rc.hg \
+          recentaction.hg recentchooser.hg recentchooserdialog.hg recentchoosermenu.hg recentchooserwidget.hg \
+	  recentfilter.hg recentinfo.hg recentmanager.hg ruler.hg \
+          scale.hg scalebutton.hg scrollbar.hg scrolledwindow.hg selectiondata.hg \
+          separator.hg separatormenuitem.hg separatortoolitem.hg settings.hg sizegroup.hg socket.hg spinbutton.hg statusbar.hg statusicon.hg \
+          stockitem.hg style.hg \
+          table.hg targetlist.hg tearoffmenuitem.hg \
+          textattributes.hg textbuffer.hg textchildanchor.hg textiter.hg textmark.hg texttag.hg texttagtable.hg textview.hg \
+          toggleaction.hg \
+          togglebutton.hg toggletoolbutton.hg toolbar.hg toolitem.hg toolbutton.hg tooltips.hg tooltip.hg \
+          treedragdest.hg treedragsource.hg treepath.hg treerowreference.hg treeselection.hg treesortable.hg \
+          treeiter.hg treemodel.hg treemodelfilter.hg treemodelsort.hg treestore.hg treeview.hg treeviewcolumn.hg \
+          viewport.hg volumebutton.hg uimanager.hg \
+          widget.hg window.hg
+
+files_general_deprecated_hg = combo.hg 
+
+include $(top_srcdir)/build_shared/Makefile_build_gensrc.am_fragment

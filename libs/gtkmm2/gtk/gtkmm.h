@@ -41,6 +41,7 @@ extern const int gtkmm_micro_version;
 #include <gtkmm/base.h>
 #include <gtkmm/bin.h>
 #include <gtkmm/box.h>
+#include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/cellview.h>
@@ -126,6 +127,7 @@ extern const int gtkmm_micro_version;
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/radiotoolbutton.h>
 #include <gtkmm/range.h>
+#include <gtkmm/recentaction.h>
 #include <gtkmm/recentchooser.h>
 #include <gtkmm/recentchooserdialog.h>
 #include <gtkmm/recentchoosermenu.h>
@@ -165,6 +167,7 @@ extern const int gtkmm_micro_version;
 #include <gtkmm/toolbutton.h>
 #include <gtkmm/toggletoolbutton.h>
 #include <gtkmm/menutoolbutton.h>
+#include <gtkmm/tooltip.h>
 #include <gtkmm/tooltips.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treemodelfilter.h>

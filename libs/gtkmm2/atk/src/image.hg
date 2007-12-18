@@ -1,0 +1,66 @@
+/* $Id: image.hg,v 1.2 2004/01/02 09:56:43 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(atkmm,atk)
+_PINCLUDE(atk/atkimage.h)
+
+#include <atkmm/component.h> /* for Atk::CoordType */
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+  typedef struct _AtkImageIface AtkImageIface;
+  typedef struct _AtkImage      AtkImage;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Atk
+{
+
+/** The ATK Interface implemented by components which expose image or pixmap content on-screen.
+ * This should be implemented by Atk::Object subtypes on behalf of components which display image/pixmap information
+ * onscreen, and which provide information (other than just widget borders, etc.) via that image content. For instance,
+ * icons, buttons with icons, toolbar elements, and image viewing panes typically should implement AtkImage.
+ *
+ * Atk::Image primarily provides two types of information: coordinate information (useful for screen review mode of
+ * screenreaders, and for use by onscreen magnifiers), and descriptive information. The descriptive information is
+ * provided for alternative, text-only presentation of the most significant information present in the image. 
+ */
+class Image : public Glib::Interface
+{
+  _CLASS_INTERFACE(Image, AtkImage, ATK_IMAGE, AtkImageIface)
+
+public:
+  _WRAP_METHOD(bool set_image_description(const Glib::ustring& description), atk_image_set_image_description)
+  _WRAP_METHOD(Glib::ustring get_image_description() const, atk_image_get_image_description)
+
+  _WRAP_METHOD(void get_image_size(int& width, int& height) const, atk_image_get_image_size)
+  _WRAP_METHOD(void get_image_position(int& x, int& y, CoordType coord_type) const, atk_image_get_image_position)
+
+protected:
+  _WRAP_VFUNC(bool set_image_description(const Glib::ustring& description), set_image_description)
+  _WRAP_VFUNC(const char* get_image_description() const, get_image_description)
+
+  _WRAP_VFUNC(void get_image_position(int& x, int& y, CoordType coord_type) const, get_image_position)
+  _WRAP_VFUNC(void get_image_size(int& width, int& height) const, get_image_size)
+};
+
+} // namespace Atk
+

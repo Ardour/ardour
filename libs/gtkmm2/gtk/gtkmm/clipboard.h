@@ -124,8 +124,7 @@ private:
 public:
 
   
-  /** Returns the clipboard object for the given selection.
-   * See gtk_clipboard_get_for_display() for complete details.
+  /** Return value: the appropriate clipboard object. If no
    * @param selection A Gdk::Atom which identifies the clipboard
    * to use.
    * @return The appropriate clipboard object. If no
@@ -137,30 +136,7 @@ public:
    */
   static Glib::RefPtr<Clipboard> get(GdkAtom selection = GDK_SELECTION_CLIPBOARD);
   
-  /** Returns the clipboard object for the given selection.
-   * Cut/copy/paste menu items and keyboard shortcuts should use
-   * the default clipboard, returned by passing Gdk::SELECTION_CLIPBOARD for @a selection .
-   * (Gdk::NONE is supported as a synonym for GDK_SELECTION_CLIPBOARD
-   * for backwards compatibility reasons.)
-   * The currently-selected object or text should be provided on the clipboard
-   * identified by Gdk::SELECTION_PRIMARY. Cut/copy/paste menu items
-   * conceptually copy the contents of the Gdk::SELECTION_PRIMARY clipboard
-   * to the default clipboard, i.e. they copy the selection to what the
-   * user sees as the clipboard.
-   * 
-   * (Passing Gdk::NONE is the same as using <tt>gdk_atom_intern
-   * ("CLIPBOARD", <tt>false</tt>)</tt>. See 
-   * http://www.freedesktop.org/Standards/clipboards-spec
-   * for a detailed discussion of the "CLIPBOARD" vs. "PRIMARY"
-   * selections under the X window system. On Win32 the
-   * Gdk::SELECTION_PRIMARY clipboard is essentially ignored.)
-   * 
-   * It's possible to have arbitrary named clipboards; if you do invent
-   * new clipboards, you should prefix the selection name with an
-   * underscore (because the ICCCM requires that nonstandard atoms are
-   * underscore-prefixed), and namespace it as well. For example,
-   * if your application called "Foo" has a special-purpose
-   * clipboard, you might call it "_FOO_SPECIAL_CLIPBOARD".
+  /** Return value: the appropriate clipboard object. If no
    * @param display The display for which the clipboard is to be retrieved or created.
    * @param selection A Gdk::Atom which identifies the clipboard
    * to use.
@@ -418,6 +394,20 @@ public:
    */
   bool wait_is_text_available() const;
   
+  /** Test to see if there is rich text available to be pasted
+   * This is done by requesting the TARGETS atom and checking
+   * if it contains any of the supported rich text targets. This function
+   * waits for the data to be received using the main loop, so events,
+   * timeouts, etc, may be dispatched during the wait.
+   * 
+   * This function is a little faster than calling
+   * gtk_clipboard_wait_for_rich_text() since it doesn't need to retrieve
+   * the actual text.
+   * @param buffer A Gtk::TextBuffer.
+   * @return <tt>true</tt> is there is rich text available, <tt>false</tt> otherwise.
+   * 
+   * @newin2p10.
+   */
   bool wait_is_rich_text_available(const Glib::RefPtr<TextBuffer>& buffer) const;
   
   /** Test to see if there is an image available to be pasted
@@ -487,9 +477,9 @@ public:
 
   //We use no_default_handler because this signal was added and we don't want to break the ABI by adding a virtual function.
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %owner_change(GdkEventOwnerChange* event)</tt>
+   * <tt>void on_my_%owner_change(GdkEventOwnerChange* event)</tt>
    */
 
   Glib::SignalProxy1< void,GdkEventOwnerChange* > signal_owner_change();
@@ -519,10 +509,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Clipboard
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Clipboard
    */
   Glib::RefPtr<Gtk::Clipboard> wrap(GtkClipboard* object, bool take_copy = false);
 }

@@ -409,6 +409,12 @@ public:
    * The clip mask of @a gc  is ignored, but clip rectangles and clip regions work
    * fine.
    * 
+   * If GDK is built with the Sun mediaLib library, the gdk_draw_pixbuf
+   * function is accelerated using mediaLib, which provides hardware
+   * acceleration on Intel, AMD, and Sparc chipsets.  If desired, mediaLib
+   * support can be turned off by setting the GDK_DISABLE_MEDIALIB environment
+   * variable.
+   * 
    * @newin2p2
    * @param gc A Gdk::GC, used for clipping, or <tt>0</tt>.
    * @param pixbuf A Gdk::Pixbuf.
@@ -609,10 +615,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::Drawable
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::Drawable
    */
   Glib::RefPtr<Gdk::Drawable> wrap(GdkDrawable* object, bool take_copy = false);
 }

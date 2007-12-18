@@ -1,0 +1,5 @@
+This should help people with some of the first problems that they are likely
+to find when porting apps from gtkmm 1.2 to gtkmm 2:
+
+Some of these are explained in more details in the CHANGES file.
+

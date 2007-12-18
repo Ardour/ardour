@@ -1,6 +1,6 @@
 // -*- c++ -*-
 
-/* $Id: utility.cc,v 1.1.1.1 2003/01/07 16:58:59 murrayc Exp $ */
+/* $Id: utility.cc 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

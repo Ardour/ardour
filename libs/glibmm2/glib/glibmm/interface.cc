@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: interface.cc,v 1.3 2005/03/07 15:42:20 murrayc Exp $ */
+/* $Id: interface.cc 209 2005-03-07 15:42:20Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

@@ -1,0 +1,41 @@
+/* $Id: pixbufanimationiter.hg,v 1.2 2004/04/12 11:04:05 murrayc Exp $ */
+
+/* pixbufanimationiter.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+class PixbufAnimationIter : public Glib::Object
+{
+  _CLASS_GOBJECT(PixbufAnimationIter, GdkPixbufAnimationIter, GDK_PIXBUF_ANIMATION_ITER, Glib::Object, GObject)
+protected:
+
+
+};
+
+} /* namespace Gdk */
+

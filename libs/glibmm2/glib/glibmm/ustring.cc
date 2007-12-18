@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: ustring.cc,v 1.7 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: ustring.cc 369 2007-01-20 10:19:33Z daniel $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *
@@ -54,8 +54,8 @@ struct UnicharToUtf8
 // std::string will do that for us.
 
 // First overload: stop on '\0' character.
-//
-static ustring::size_type utf8_byte_offset(const char* str, ustring::size_type offset)
+static
+ustring::size_type utf8_byte_offset(const char* str, ustring::size_type offset)
 {
   if(offset == ustring::npos)
     return ustring::npos;
@@ -77,8 +77,8 @@ static ustring::size_type utf8_byte_offset(const char* str, ustring::size_type o
 }
 
 // Second overload: stop when reaching maxlen.
-//
-static ustring::size_type utf8_byte_offset(const char* str, ustring::size_type offset,
+static
+ustring::size_type utf8_byte_offset(const char* str, ustring::size_type offset,
                                     ustring::size_type maxlen)
 {
   if(offset == ustring::npos)
@@ -139,8 +139,8 @@ ustring::size_type utf8_char_offset(const std::string& str, ustring::size_type o
 
 // Helper to implement ustring::find_first_of() and find_first_not_of().
 // Returns the UTF-8 character offset, or ustring::npos if not found.
-//
-static ustring::size_type utf8_find_first_of(const std::string& str, ustring::size_type offset,
+static
+ustring::size_type utf8_find_first_of(const std::string& str, ustring::size_type offset,
                                       const char* utf8_match, long utf8_match_size,
                                       bool find_not_of)
 {
@@ -175,8 +175,8 @@ static ustring::size_type utf8_find_first_of(const std::string& str, ustring::si
 
 // Helper to implement ustring::find_last_of() and find_last_not_of().
 // Returns the UTF-8 character offset, or ustring::npos if not found.
-//
-static ustring::size_type utf8_find_last_of(const std::string& str, ustring::size_type offset,
+static
+ustring::size_type utf8_find_last_of(const std::string& str, ustring::size_type offset,
                                      const char* utf8_match, long utf8_match_size,
                                      bool find_not_of)
 {
@@ -197,7 +197,9 @@ static ustring::size_type utf8_find_last_of(const std::string& str, ustring::siz
   while(pstr > str_begin)
   {
     // Move to previous character.
-    do --pstr; while((*pstr & '\xC0') == '\x80');
+    do
+      --pstr;
+    while((static_cast<unsigned char>(*pstr) & 0xC0u) == 0x80);
 
     const gunichar *const pfound = std::find(match_begin, match_end, g_utf8_get_char(pstr));
 
@@ -220,36 +222,44 @@ namespace Glib
 const ustring::size_type ustring::npos = std::string::npos;
 #endif
 
-// We need our own version of g_utf8_get_char(), because the std::string
-// iterator is not necessarily a plain pointer (it's in fact not in GCC's
-// libstdc++-v3).  Copying the UTF-8 data into a temporary buffer isn't an
-// option since this operation is quite time critical.  The implementation
-// is quite different from g_utf8_get_char() -- both more generic and faster.
-//
-// By looking at the first byte of a UTF-8 character one can determine the
-// number of bytes used.  GLib offers the g_utf8_skip[] array for this purpose,
-// but accessing this global variable would introduce a function call to fetch
-// the Global Offset Table, plus two levels of indirection in order to read the
-// value.  Even worse, fetching the GOT is always done right at the start of
-// the function instead of the branch that actually uses the variable.
-//
-// Fortunately, there's a better way to get the byte count.  As this table
-// shows, there's a nice regular pattern in the UTF-8 encoding scheme:
-//
-// 0x00000000 - 0x0000007F: 0xxxxxxx
-// 0x00000080 - 0x000007FF: 110xxxxx 10xxxxxx
-// 0x00000800 - 0x0000FFFF: 1110xxxx 10xxxxxx 10xxxxxx
-// 0x00010000 - 0x001FFFFF: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-// 0x00200000 - 0x03FFFFFF: 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-// 0x04000000 - 0x7FFFFFFF: 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-//
-// Except for the single byte case, the number of leading 1-bits equals the
-// byte count.  All that is needed is to shift the first byte to the left
-// until bit 7 becomes 0.  Naturally, doing so requires a loop -- but since
-// we already have one, no additional cost is introduced.  This shifting can
-// further be combined with the computation of the bitmask needed to eliminate
-// the leading length bits, thus saving yet another register.
-//
+/*
+ * We need our own version of g_utf8_get_char(), because the std::string
+ * iterator is not necessarily a plain pointer (it's in fact not in GCC's
+ * libstdc++-v3).  Copying the UTF-8 data into a temporary buffer isn't an
+ * option since this operation is quite time critical.  The implementation
+ * is quite different from g_utf8_get_char() -- both more generic and likely
+ * faster.
+ *
+ * By looking at the first byte of a UTF-8 character one can determine the
+ * number of bytes used.  GLib offers the g_utf8_skip[] array for this purpose,
+ * but accessing this global variable would, on IA32 at least, introduce
+ * a function call to fetch the Global Offset Table, plus two levels of
+ * indirection in order to read the value.  Even worse, fetching the GOT is
+ * always done right at the start of the function instead of the branch that
+ * actually uses the variable.
+ *
+ * Fortunately, there's a better way to get the byte count.  As this table
+ * shows, there's a nice regular pattern in the UTF-8 encoding scheme:
+ *
+ * 0x00000000 - 0x0000007F: 0xxxxxxx
+ * 0x00000080 - 0x000007FF: 110xxxxx 10xxxxxx
+ * 0x00000800 - 0x0000FFFF: 1110xxxx 10xxxxxx 10xxxxxx
+ * 0x00010000 - 0x001FFFFF: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+ * 0x00200000 - 0x03FFFFFF: 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+ * 0x04000000 - 0x7FFFFFFF: 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+ *
+ * Except for the single byte case, the number of leading 1-bits equals the
+ * byte count.  All that is needed is to shift the first byte to the left
+ * until bit 7 becomes 0.  Naturally, doing so requires a loop -- but since
+ * we already have one, no additional cost is introduced.  This shifting can
+ * further be combined with the computation of the bitmask needed to eliminate
+ * the leading length bits, thus saving yet another register.
+ *
+ * Note:  If you change this code, it is advisable to also review what the
+ * compiler makes of it in the assembler output.  Except for some pointless
+ * register moves, the generated code is sufficiently close to the optimum
+ * with GCC 4.1.2 on x86_64.
+ */
 gunichar get_unichar_from_std_iterator(std::string::const_iterator pos)
 {
   unsigned int result = static_cast<unsigned char>(*pos);
@@ -258,21 +268,16 @@ gunichar get_unichar_from_std_iterator(std::string::const_iterator pos)
   {
     unsigned int mask = 0x40;
 
-    // This loop may look somewhat strange, but this happens to be the
-    // one variant g++ 3.3 generates optimum code for.  (In particular,
-    // the unconditional break avoids counterproductive loop alignment.)
-    for(++pos;; ++pos)
+    do
     {
-      mask <<= 5;
-      const unsigned int c = static_cast<unsigned char>(*pos);
-      result = (result << 6) + c - 0x80;
-
-      if((result & mask) != 0)
-        continue;
-      break;
+      result <<= 6;
+      const unsigned int c = static_cast<unsigned char>(*++pos);
+      mask   <<= 5;
+      result  += c - 0x80;
     }
+    while((result & mask) != 0);
 
-    result &= --mask;
+    result &= mask - 1;
   }
 
   return result;
@@ -1125,7 +1130,7 @@ bool ustring::is_ascii() const
 
   for(; p != pend; ++p)
   {
-    if((*p & '\x80') != 0)
+    if((static_cast<unsigned char>(*p) & 0x80u) != 0)
       return false;
   }
 

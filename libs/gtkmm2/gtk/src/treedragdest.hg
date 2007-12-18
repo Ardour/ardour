@@ -1,0 +1,60 @@
+/* $Id: treedragdest.hg,v 1.4 2004/03/09 17:36:29 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/interface.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/selectiondata.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+typedef struct _GtkTreeDragDestIface GtkTreeDragDestIface;
+typedef struct _GtkSelectionData GtkSelectionData;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gtk
+{
+
+/**
+ * @ingroup TreeView
+ */
+class TreeDragDest : public Glib::Interface
+{
+  _CLASS_INTERFACE(TreeDragDest, GtkTreeDragDest, GTK_TREE_DRAG_DEST, GtkTreeDragDestIface)
+
+public:
+
+  _WRAP_METHOD(bool drag_data_received(const TreeModel::Path& dest, const SelectionData& selection_data), gtk_tree_drag_dest_drag_data_received)              
+
+  _WRAP_METHOD(bool row_drop_possible(const TreeModel::Path& dest_path, const SelectionData& selection_data) const, gtk_tree_drag_dest_row_drop_possible)
+                             
+protected:
+  _WRAP_VFUNC(bool drag_data_received(const TreeModel::Path& dest, const SelectionData& selection_data),
+              drag_data_received)
+
+  _WRAP_VFUNC(bool row_drop_possible(const TreeModel::Path& dest, const SelectionData& selection_data) const,
+              row_drop_possible)
+};
+
+} // namespace Gtk
+

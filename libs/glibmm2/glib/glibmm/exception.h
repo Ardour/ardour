@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_EXCEPTION_H
 #define _GLIBMM_EXCEPTION_H
-/* $Id: exception.h,v 1.1.1.1 2003/01/07 16:58:45 murrayc Exp $ */
+/* $Id: exception.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* exception.h
  *

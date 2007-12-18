@@ -1,0 +1,124 @@
+/* $Id: treesortable.hg,v 1.8 2006/04/21 07:41:28 murrayc Exp $ */
+
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+_CONFIGINCLUDE(gtkmmconfig.h)
+
+#include <glibmm/interface.h>
+#include <gtkmm/enums.h>
+#include <gtkmm/treemodelcolumn.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeiter.h>
+#include <gtk/gtktreesortable.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+namespace Gtk
+{
+
+/**
+ * @ingroup TreeView
+*/
+class TreeSortable : public Glib::Interface
+{
+  _CLASS_INTERFACE(TreeSortable, GtkTreeSortable, GTK_TREE_SORTABLE, GtkTreeSortableIface)
+
+public:
+
+  enum
+  {
+    /// See set_default_sort_func() and set_sort_column().
+    DEFAULT_SORT_COLUMN_ID = -1,
+    DEFAULT_UNSORTED_COLUMN_ID = -2
+  }; //See GTK+ implementation.
+
+  _WRAP_METHOD(bool get_sort_column_id(int& sort_column_id, SortType& order) const,
+               gtk_tree_sortable_get_sort_column_id)
+
+  _WRAP_METHOD(void set_sort_column(const TreeModelColumnBase& sort_column_id, SortType order),
+               gtk_tree_sortable_set_sort_column_id)
+  _WRAP_METHOD(void set_sort_column(int sort_column_id, SortType order),
+               gtk_tree_sortable_set_sort_column_id)
+
+  _DEPRECATE_IFDEF_START
+  /** @deprecated Use set_sort_column() instead.
+   */
+  void set_sort_column_id(const TreeModelColumnBase& sort_column_id, SortType order);
+
+  /** @deprecated Use set_sort_column() instead.
+   */
+  void set_sort_column_id(int sort_column_id, SortType order);
+  _DEPRECATE_IFDEF_END
+
+  /** This callback should return -1 if a compares before b, 0 if they compare equal, 1 if a compares after b. 
+   * For instance, int on_sort_compare(const Gtk::TreeModel::iterator& a, const Gtk::TreeModel::iterator& b);
+   */
+  typedef sigc::slot<int, const Gtk::TreeModel::iterator&, const Gtk::TreeModel::iterator&> SlotCompare;
+
+  _IGNORE(gtk_tree_sortable_set_sort_func, gtk_tree_sortable_set_default_sort_func)
+
+  /** Sets the comparison function used when sorting a certain column.
+   * If the current sort column is the same as @a sort_column, then the model will sort using this function.
+   * @param sort_column the sort column to set the function for
+   * @param slot The sorting slot callback.
+   */
+  void set_sort_func(const TreeModelColumnBase& sort_column, const SlotCompare& slot);
+
+  /** Sets the comparison function used when sorting a certain column.
+   * If the current sort column id is the same as @a sort_column_id, then the model will sort using this function.
+   * @param sort_column_id the sort column id to set the function for
+   * @param slot The sorting slot callback.
+   */
+  void set_sort_func(int sort_column_id, const SlotCompare& slot);
+
+  /** Sets the default comparison function used when sorting.
+   * If the current sort column id of sortable is DEFAULT_SORT_COLUMN_ID, then the model will
+   * sort using this function.  See also unset_default_sort_func().
+   *
+   * @param slot The sorting function
+   */
+  void set_default_sort_func(const SlotCompare& slot);
+
+  /** Sets the default comparison function used when sorting. See set_default_sort_func().
+   *
+   * After calling this method there will be no default comparison function. This means that once the model has been sorted,
+   * it can't go back to the default state. In this case, when the current sort column id of sortable is
+   * DEFAULT_SORT_COLUMN_ID, the model will be unsorted.
+   */
+  void unset_default_sort_func();
+
+  _WRAP_METHOD(bool has_default_sort_func() const, gtk_tree_sortable_has_default_sort_func)
+
+  _WRAP_METHOD(void sort_column_changed(), gtk_tree_sortable_sort_column_changed)
+  _WRAP_SIGNAL(void sort_column_changed(), "sort_column_changed")
+
+protected:
+  _WRAP_VFUNC(bool get_sort_column_id(int* sort_column_id, SortType* order) const, get_sort_column_id)
+  _WRAP_VFUNC(void set_sort_column_id(int sort_column_id, SortType order), set_sort_column_id)
+  _WRAP_VFUNC(void set_sort_func(int sort_column_id, GtkTreeIterCompareFunc func, void* data, GtkDestroyNotify destroy), set_sort_func)
+  _WRAP_VFUNC(void set_default_sort_func(GtkTreeIterCompareFunc func, void* data, GtkDestroyNotify destroy), set_default_sort_func)
+  _WRAP_VFUNC(bool has_default_sort_func() const, has_default_sort_func)
+  _WRAP_VFUNC(void sort_column_changed() const, sort_column_changed)
+};
+
+} // namespace Gtk
+

@@ -116,8 +116,7 @@ public:
 
   void set_active(bool state = true);
   
-  /** Returns whether the check menu item is active. See
-   * set_active().
+  /** Return value: <tt>true</tt> if the menu item is checked.
    * @return <tt>true</tt> if the menu item is checked.
    */
   bool get_active() const;
@@ -151,7 +150,7 @@ public:
    */
   void set_draw_as_radio(bool draw_as_radio = true);
   
-  /** Returns whether @a check_menu_item  looks like a Gtk::RadioMenuItem
+  /** Return value: Whether @a check_menu_item  looks like a Gtk::RadioMenuItem
    * @return Whether @a check_menu_item  looks like a Gtk::RadioMenuItem
    * 
    * @newin2p4.
@@ -161,11 +160,9 @@ public:
   /** Triggered when the item changes state
    * (Note : changing the item's state with set_active() will also trigger
    * this signal)
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %toggled()</tt>
+   * <tt>void on_my_%toggled()</tt>
    */
 
   Glib::SignalProxy0< void > signal_toggled();
@@ -251,10 +248,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::CheckMenuItem
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CheckMenuItem
    */
   Gtk::CheckMenuItem* wrap(GtkCheckMenuItem* object, bool take_copy = false);
 } //namespace Glib

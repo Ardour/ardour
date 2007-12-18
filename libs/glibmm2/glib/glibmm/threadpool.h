@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_THREADPOOL_H
 #define _GLIBMM_THREADPOOL_H
 
-/* $Id: threadpool.h,v 1.2 2004/02/10 14:26:04 murrayc Exp $ */
+/* $Id: threadpool.h 72 2004-02-10 14:26:07Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

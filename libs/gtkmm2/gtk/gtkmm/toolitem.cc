@@ -31,6 +31,15 @@
 namespace Gtk
 {
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+Glib::SignalProxy3< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& > ToolItem::signal_set_tooltip()
+{
+  //This is an empty implementation to maintain API (and ABI, sort of, but blame GTK+) compatibility.
+  //GTK+ now never emits this signal.
+  return Glib::SignalProxy3< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& >(this, 0);
+}
+#endif //GTKMM_DISABLE_DEPRECATED
+
 
 } // namespace Gtk
 
@@ -109,74 +118,6 @@ static const Glib::SignalProxyInfo ToolItem_signal_toolbar_reconfigured_info =
 };
 
 
-static gboolean ToolItem_signal_set_tooltip_callback(GtkToolItem* self, GtkTooltips* p0,const gchar* p1,const gchar* p2,void* data)
-{
-  using namespace Gtk;
-  typedef sigc::slot< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& > SlotType;
-
-  // Do not try to call a signal on a disassociated wrapper.
-  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
-  {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try
-    {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
-        return static_cast<int>((*static_cast<SlotType*>(slot))(Glib::wrap(p0)
-, Glib::convert_const_gchar_ptr_to_ustring(p1)
-, Glib::convert_const_gchar_ptr_to_ustring(p2)
-));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-  }
-
-  typedef gboolean RType;
-  return RType();
-}
-
-static gboolean ToolItem_signal_set_tooltip_notify_callback(GtkToolItem* self, GtkTooltips* p0,const gchar* p1,const gchar* p2, void* data)
-{
-  using namespace Gtk;
-  typedef sigc::slot< void,Tooltips*,const Glib::ustring&,const Glib::ustring& > SlotType;
-
-  // Do not try to call a signal on a disassociated wrapper.
-  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
-  {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try
-    {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
-        (*static_cast<SlotType*>(slot))(Glib::wrap(p0)
-, Glib::convert_const_gchar_ptr_to_ustring(p1)
-, Glib::convert_const_gchar_ptr_to_ustring(p2)
-);
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-  }
-
-  typedef gboolean RType;
-  return RType();
-}
-
-static const Glib::SignalProxyInfo ToolItem_signal_set_tooltip_info =
-{
-  "set_tooltip",
-  (GCallback) &ToolItem_signal_set_tooltip_callback,
-  (GCallback) &ToolItem_signal_set_tooltip_notify_callback
-};
-
-
 } // anonymous namespace
 
 
@@ -236,7 +177,7 @@ void ToolItem_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 gboolean ToolItem_Class::create_menu_proxy_callback(GtkToolItem* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -244,39 +185,41 @@ gboolean ToolItem_Class::create_menu_proxy_callback(GtkToolItem* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_create_menu_proxy());
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_create_menu_proxy());
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->create_menu_proxy)
-      return (*base->create_menu_proxy)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->create_menu_proxy)
+    return (*base->create_menu_proxy)(self);
 
   typedef gboolean RType;
   return RType();
 }
 void ToolItem_Class::toolbar_reconfigured_callback(GtkToolItem* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -284,32 +227,35 @@ void ToolItem_Class::toolbar_reconfigured_callback(GtkToolItem* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_toolbar_reconfigured();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_toolbar_reconfigured();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->toolbar_reconfigured)
-      (*base->toolbar_reconfigured)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->toolbar_reconfigured)
+    (*base->toolbar_reconfigured)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -355,7 +301,8 @@ GType ToolItem::get_base_type()
 
 ToolItem::ToolItem()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Bin(Glib::ConstructParams(toolitem_class_.init()))
 {
   }
@@ -380,9 +327,23 @@ bool ToolItem::get_expand() const
   return gtk_tool_item_get_expand(const_cast<GtkToolItem*>(gobj()));
 }
 
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 void ToolItem::set_tooltip(Tooltips& tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private)
 {
 gtk_tool_item_set_tooltip(gobj(), (tooltips).gobj(), tip_text.c_str(), tip_private.c_str()); 
+}
+
+#endif // GTKMM_DISABLE_DEPRECATED
+
+void ToolItem::set_tooltip_text(const Glib::ustring& text)
+{
+gtk_tool_item_set_tooltip_text(gobj(), text.c_str()); 
+}
+
+void ToolItem::set_tooltip_markup(const Glib::ustring& markup)
+{
+gtk_tool_item_set_tooltip_markup(gobj(), markup.c_str()); 
 }
 
 void ToolItem::set_use_drag_window(bool use_drag_window)
@@ -485,12 +446,6 @@ Glib::SignalProxy0< bool > ToolItem::signal_create_menu_proxy()
 Glib::SignalProxy0< void > ToolItem::signal_toolbar_reconfigured()
 {
   return Glib::SignalProxy0< void >(this, &ToolItem_signal_toolbar_reconfigured_info);
-}
-
-
-Glib::SignalProxy3< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& > ToolItem::signal_set_tooltip()
-{
-  return Glib::SignalProxy3< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& >(this, &ToolItem_signal_set_tooltip_info);
 }
 
 

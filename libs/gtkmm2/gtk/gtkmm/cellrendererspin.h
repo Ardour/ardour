@@ -38,9 +38,23 @@ namespace Gtk
 namespace Gtk
 {
 
-/**  TODO. 
+/**  Renders a spin button in a cell.
+ *
+ * Gtk::CellRendererSpin renders text in a cell like Gtk::CellRendererText, 
+ * from which it is derived. But while Gtk::CellRendererText offers a simple 
+ * entry to edit the text, Gtk::CellRendererSpin offers a Gtk::SpinButton widget. 
+ * Of course, that means that the text must be parseable as a floating point 
+ * number.
+ *
+ * The range of the spinbutton is taken from the adjustment property of the 
+ * cell renderer, which can be set explicitly or mapped to a column in 
+ * the tree model, like all properties of cell renders. Gtk::CellRendererSpin 
+ * also has properties for the climb rate and the number of digits to display. 
+ * Other Gtk::SpinButton properties can be set in a handler for the start-editing
+ * signal. 
  *
  * @ingroup TreeView
+ * @newin2p12
  */
 
 class CellRendererSpin : public CellRendererText
@@ -178,10 +192,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::CellRendererSpin
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellRendererSpin
    */
   Gtk::CellRendererSpin* wrap(GtkCellRendererSpin* object, bool take_copy = false);
 } //namespace Glib

@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: object.cc,v 1.6 2004/06/20 03:41:20 daniel Exp $ */
+/* $Id: object.cc 369 2007-01-20 10:19:33Z daniel $ */
 
 /* Copyright 1998-2002 The gtkmm Development Team
  *
@@ -27,8 +27,6 @@
 #include <gobject/gvaluecollector.h>
 
 #include <cstdarg>
-
-#include <cstring>
 
 //Weak references:
 //I'm not sure what the point of these are apart from being a hacky way out of circular references,
@@ -59,10 +57,15 @@ ConstructParams::ConstructParams(const Glib::Class& glibmm_class_)
   parameters   (0)
 {}
 
-/* The implementation is mostly copied from gobject.c, with some minor tweaks.
+/*
+ * The implementation is mostly copied from gobject.c, with some minor tweaks.
  * Basically, it looks up each property name to get its GType, and then uses
  * G_VALUE_COLLECT() to store the varargs argument in a GValue of the correct
  * type.
+ *
+ * Note that the property name arguments are assumed to be static string
+ * literals.  No attempt is made to copy the string content.  This is no
+ * different from g_object_new().
  */
 ConstructParams::ConstructParams(const Glib::Class& glibmm_class_,
                                  const char* first_property_name, ...)
@@ -89,7 +92,7 @@ ConstructParams::ConstructParams(const Glib::Class& glibmm_class_,
     if(!pspec)
     {
       g_warning("Glib::ConstructParams::ConstructParams(): "
-                "object class `%s' has no property named `%s'",
+                "object class \"%s\" has no property named \"%s\"",
                 g_type_name(glibmm_class.get_type()), name);
       break;
     }
@@ -131,7 +134,7 @@ ConstructParams::~ConstructParams()
 }
 
 /*
- * Some compilers require the existance of a copy constructor in certain
+ * Some compilers require the existence of a copy constructor in certain
  * usage contexts.  This implementation is fully functional, but unlikely
  * to be ever actually called due to optimization.
  */
@@ -196,12 +199,9 @@ Object::Object()
   if(custom_type_name_ && !is_anonymous_custom_())
   {
     object_class_.init();
-    object_type = object_class_.clone_custom_type(custom_type_name_); //A type that is derived from GObject.
+    // This creates a type that is derived (indirectly) from GObject.
+    object_type = object_class_.clone_custom_type(custom_type_name_);
   }
-
-  // Create a new GObject with the specified array of construct properties.
-  // This works with custom types too, since those inherit the properties of
-  // their base class.
 
   void *const new_object = g_object_newv(object_type, 0, 0);
 

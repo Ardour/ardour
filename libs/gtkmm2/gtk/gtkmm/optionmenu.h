@@ -3,6 +3,8 @@
 #ifndef _GTKMM_OPTIONMENU_H
 #define _GTKMM_OPTIONMENU_H
 
+#include <gtkmmconfig.h>
+
 #ifndef GTKMM_DISABLE_DEPRECATED
 
 
@@ -28,6 +30,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gtkmm/button.h>
 
@@ -131,16 +137,16 @@ public:
   /** Retrieves the index of the currently selected menu item. The menu
    * items are numbered from top to bottom, starting with 0.
    * @return Index of the selected menu item, or -1 if there are no menu items
-   * Deprecated: Use Gtk::ComboBox instead.
+   * Deprecated: 2.4: Use Gtk::ComboBox instead.
    */
   int get_history() const;
   
   void set_history(guint index);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %changed()</tt>
+   * <tt>void on_my_%changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_changed();
@@ -157,10 +163,13 @@ private:
 
 namespace Glib
 {
-  /** @relates Gtk::OptionMenu
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::OptionMenu
    */
   Gtk::OptionMenu* wrap(GtkOptionMenu* object, bool take_copy = false);
 } //namespace Glib

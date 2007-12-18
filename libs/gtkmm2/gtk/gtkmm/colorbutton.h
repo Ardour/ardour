@@ -162,7 +162,7 @@ public:
   Gdk::Color get_color() const;
   
   
-  /** Returns the current alpha value.
+  /** Return value: an integer between 0 and 65535.
    * @return An integer between 0 and 65535.
    * 
    * @newin2p4.
@@ -281,11 +281,9 @@ public:
   /** The color_set signal is emitted when the user selects a color. When handling this signal,
    * use get_color() and get_alpha() to find out which color 
    * was just selected.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %color_set()</tt>
+   * <tt>void on_my_%color_set()</tt>
    */
 
   Glib::SignalProxy0< void > signal_color_set();
@@ -299,10 +297,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ColorButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ColorButton
    */
   Gtk::ColorButton* wrap(GtkColorButton* object, bool take_copy = false);
 } //namespace Glib

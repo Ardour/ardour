@@ -154,6 +154,11 @@ Glib::ustring FontFace::get_name() const
   return Glib::convert_const_gchar_ptr_to_ustring(pango_font_face_get_face_name(const_cast<PangoFontFace*>(gobj())));
 }
 
+bool FontFace::is_synthesized() const
+{
+  return pango_font_face_is_synthesized(const_cast<PangoFontFace*>(gobj()));
+}
+
 
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED

@@ -38,8 +38,9 @@ MessageDialog::MessageDialog(const Glib::ustring& message, bool use_markup,
                              MessageType type, ButtonsType buttons,
                              bool modal)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(messagedialog_class_.init(), "message_type",(GtkMessageType)type,"buttons",(GtkButtonsType)buttons, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(messagedialog_class_.init(), "message_type",(GtkMessageType)type,"buttons",(GtkButtonsType)buttons, static_cast<char*>(0)))
 {
   set_modal(modal);
   set_message(message, use_markup);
@@ -49,8 +50,9 @@ MessageDialog::MessageDialog(Gtk::Window& parent, const Glib::ustring& message, 
                              MessageType type, ButtonsType buttons,
                              bool modal)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Dialog(Glib::ConstructParams(messagedialog_class_.init(), "message_type",(GtkMessageType)type,"buttons",(GtkButtonsType)buttons, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Dialog(Glib::ConstructParams(messagedialog_class_.init(), "message_type",(GtkMessageType)type,"buttons",(GtkButtonsType)buttons, static_cast<char*>(0)))
 {
   set_modal(modal);
   set_transient_for(parent);

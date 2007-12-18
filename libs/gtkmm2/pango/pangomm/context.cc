@@ -99,6 +99,12 @@ GType Glib::Value<Pango::Direction>::value_type()
   return pango_direction_get_type();
 }
 
+// static
+GType Glib::Value<Pango::GravityHint>::value_type()
+{
+  return pango_gravity_hint_get_type();
+}
+
 
 namespace Glib
 {
@@ -200,7 +206,8 @@ GType Context::get_base_type()
 
 Context::Context()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(context_class_.init()))
 {
   }
@@ -258,6 +265,31 @@ pango_context_set_base_dir(gobj(), ((PangoDirection)(direction)));
 Direction Context::get_base_dir() const
 {
   return ((Direction)(pango_context_get_base_dir(const_cast<PangoContext*>(gobj()))));
+}
+
+void Context::set_base_gravity(Gravity gravity)
+{
+pango_context_set_base_gravity(gobj(), ((PangoGravity)(gravity))); 
+}
+
+Gravity Context::get_base_gravity() const
+{
+  return ((Gravity)(pango_context_get_base_gravity(const_cast<PangoContext*>(gobj()))));
+}
+
+Gravity Context::get_gravity() const
+{
+  return ((Gravity)(pango_context_get_gravity(const_cast<PangoContext*>(gobj()))));
+}
+
+void Context::set_gravity_hint(GravityHint hint)
+{
+pango_context_set_gravity_hint(gobj(), ((PangoGravityHint)(hint))); 
+}
+
+GravityHint Context::get_gravity_hint() const
+{
+  return ((GravityHint)(pango_context_get_gravity_hint(const_cast<PangoContext*>(gobj()))));
 }
 
 void Context::set_matrix(const Matrix& matrix)

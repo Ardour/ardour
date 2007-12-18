@@ -35,6 +35,13 @@
 namespace Gtk
 {
 
+TextMark::TextMark(bool left_gravity)
+:
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(textmark_class_.init(), "left_gravity",gboolean(left_gravity), static_cast<char*>(0)))
+{}
+
 TextIter TextMark::get_iter()
 {
   Glib::RefPtr<TextMark> mark = Glib::RefPtr<TextMark>(this);
@@ -148,6 +155,22 @@ GType TextMark::get_base_type()
 }
 
 
+TextMark::TextMark(const Glib::ustring& name, bool left_gravity)
+:
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(textmark_class_.init(), "name", name.c_str(), "left_gravity", static_cast<int>(left_gravity), static_cast<char*>(0)))
+{
+  }
+
+Glib::RefPtr<TextMark> TextMark::create(bool left_gravity)
+{
+  return Glib::RefPtr<TextMark>( new TextMark(left_gravity) );
+}
+Glib::RefPtr<TextMark> TextMark::create(const Glib::ustring& name, bool left_gravity)
+{
+  return Glib::RefPtr<TextMark>( new TextMark(name, left_gravity) );
+}
 void TextMark::set_visible(bool setting)
 {
 gtk_text_mark_set_visible(gobj(), static_cast<int>(setting)); 

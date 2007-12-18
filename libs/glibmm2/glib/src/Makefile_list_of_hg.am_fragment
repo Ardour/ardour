@@ -5,4 +5,4 @@
 
 files_posix_hg =
 files_win32_hg =
-files_general_hg = convert.hg date.hg fileutils.hg iochannel.hg keyfile.hg markup.hg module.hg optioncontext.hg optionentry.hg optiongroup.hg shell.hg spawn.hg thread.hg unicode.hg
+files_general_hg = convert.hg date.hg fileutils.hg iochannel.hg keyfile.hg markup.hg module.hg optioncontext.hg optionentry.hg optiongroup.hg regex.hg shell.hg spawn.hg thread.hg unicode.hg

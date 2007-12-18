@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_DISPATCHER_H
 #define _GLIBMM_DISPATCHER_H
 
-/* $Id: dispatcher.h,v 1.4 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: dispatcher.h 370 2007-01-20 10:53:28Z daniel $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
@@ -23,7 +23,6 @@
 
 #include <sigc++/sigc++.h>
 #include <glibmm/main.h>
-
 
 namespace Glib
 {
@@ -59,6 +58,14 @@ class DispatchNotifier;
  * @li All Dispatcher instances of a receiver thread share the same pipe.  That
  * is, if you use Glib::Dispatcher only to notify the GUI thread, only one pipe
  * is created no matter how many Dispatcher objects you have.
+ *
+ * Using Glib::Dispatcher on Windows:
+ *
+ * Glib::Dispatcher also works on win32-based systems.  Unfortunately though,
+ * the implementation cannot use a pipe on win32 and therefore does have to
+ * lock a mutex on emission, too.  However, the impact on performance is
+ * likely minor and the notification still happens asynchronously.  Apart
+ * from the additional lock the behavior matches the Unix implementation.
  */
 class Dispatcher
 {
@@ -98,6 +105,4 @@ private:
 
 } // namespace Glib
 
-
 #endif /* _GLIBMM_DISPATCHER_H */
-

@@ -206,12 +206,36 @@ public:
   bool get_inverted() const;
 
   
+  /** Sets the sensitivity policy for the stepper that points to the
+   * 'lower' end of the GtkRange's adjustment.
+   * 
+   * @newin2p10
+   * @param sensitivity The lower stepper's sensitivity policy.
+   */
   void set_lower_stepper_sensitivity(SensitivityType sensitivity);
   
+  /** Gets the sensitivity policy for the stepper that points to the
+   * 'lower' end of the GtkRange's adjustment.
+   * @return The lower stepper's sensitivity policy.
+   * 
+   * @newin2p10.
+   */
   SensitivityType get_lower_stepper_sensitivity() const;
   
+  /** Sets the sensitivity policy for the stepper that points to the
+   * 'upper' end of the GtkRange's adjustment.
+   * 
+   * @newin2p10
+   * @param sensitivity The upper stepper's sensitivity policy.
+   */
   void set_upper_stepper_sensitivity(SensitivityType sensitivity);
   
+  /** Gets the sensitivity policy for the stepper that points to the
+   * 'upper' end of the GtkRange's adjustment.
+   * @return The upper stepper's sensitivity policy.
+   * 
+   * @newin2p10.
+   */
   SensitivityType get_upper_stepper_sensitivity() const;
 
   
@@ -234,8 +258,8 @@ public:
   
   /** Sets the current value of the range; if the value is outside the
    * minimum or maximum range values, it will be clamped to fit inside
-   * them. The range emits the "value_changed" signal if the value
-   * changes.
+   * them. The range emits the Gtk::Range::value-changed signal if the 
+   * value changes.
    * @param value New value of the range.
    */
   void set_value(double value);
@@ -246,25 +270,88 @@ public:
   double get_value() const;
 
   
-/**
+  /** Sets whether a graphical fill level is show on the trough. See
+   * set_fill_level() for a general description of the fill
+   * level concept.
+   * 
+   * @newin2p12
+   * @param show_fill_level Whether a fill level indicator graphics is shown.
+   */
+  void set_show_fill_level(bool show_fill_level = true);
+  
+  /** Gets whether the range displays the fill level graphically.
+   * @return <tt>true</tt> if @a range  shows the fill level.
+   * 
+   * @newin2p12.
+   */
+  bool get_show_fill_level() const;
+  
+  /** Sets whether the slider is restricted to the fill level. See
+   * set_fill_level() for a general description of the fill
+   * level concept.
+   * 
+   * @newin2p12
+   * @param restrict_to_fill_level Whether the fill level restricts slider movement.
+   */
+  void set_restrict_to_fill_level(bool restrict_to_fill_level = true);
+  
+  /** Gets whether the range is restricted to the fill level.
+   * @return <tt>true</tt> if @a range  is restricted to the fill level.
+   * 
+   * @newin2p12.
+   */
+  bool get_restrict_to_fill_level() const;
+  
+  /** Set the new position of the fill level indicator.
+   * 
+   * The "fill level" is probably best described by its most prominent
+   * use case, which is an indicator for the amount of pre-buffering in
+   * a streaming media player. In that use case, the value of the range
+   * would indicate the current play position, and the fill level would
+   * be the position up to which the file/stream has been downloaded.
+   * 
+   * This amount of prebuffering can be displayed on the range's trough
+   * and is themeable separately from the trough. To enable fill level
+   * display, use set_show_fill_level(). The range defaults
+   * to not showing the fill level.
+   * 
+   * Additionally, it's possible to restrict the range's slider position
+   * to values which are smaller than the fill level. This is controller
+   * by set_restrict_to_fill_level() and is by default
+   * enabled.
+   * 
+   * @newin2p12
+   * @param fill_level The new position of the fill level indicator.
+   */
+  void set_fill_level(double fill_level);
+  
+  /** Gets the current position of the fill level indicator.
+   * @return The current fill level
+   * 
+   * @newin2p12.
+   */
+  double get_fill_level() const;
+
+  
+  /**
    * @par Prototype:
-   * <tt>void %value_changed()</tt>
+   * <tt>void on_my_%value_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_value_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %adjust_bounds(double new_value)</tt>
+   * <tt>void on_my_%adjust_bounds(double new_value)</tt>
    */
 
   Glib::SignalProxy1< void,double > signal_adjust_bounds();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %move_slider(ScrollType scroll)</tt>
+   * <tt>void on_my_%move_slider(ScrollType scroll)</tt>
    */
 
   Glib::SignalProxy1< void,ScrollType > signal_move_slider();
@@ -292,11 +379,9 @@ public:
    * @param new_value the new value resulting from the scroll action.
    * @result true to prevent other handlers from being invoked for the
    * signal, or false to propagate the signal further.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>bool %change_value(ScrollType scroll, double new_value)</tt>
+   * <tt>bool on_my_%change_value(ScrollType scroll, double new_value)</tt>
    */
 
   Glib::SignalProxy2< bool,ScrollType,double > signal_change_value();
@@ -402,6 +487,66 @@ public:
   Glib::PropertyProxy_ReadOnly<SensitivityType> property_upper_stepper_sensitivity() const;
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to display a fill level indicator graphics on trough.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_show_fill_level() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to display a fill level indicator graphics on trough.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_show_fill_level() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to restrict the upper boundary to the fill level.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_restrict_to_fill_level() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Whether to restrict the upper boundary to the fill level.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_restrict_to_fill_level() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** The fill level.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<double> property_fill_level() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** The fill level.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<double> property_fill_level() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
   
 protected:
   #ifdef GLIBMM_VFUNCS_ENABLED
@@ -416,10 +561,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::Range
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Range
    */
   Gtk::Range* wrap(GtkRange* object, bool take_copy = false);
 } //namespace Glib

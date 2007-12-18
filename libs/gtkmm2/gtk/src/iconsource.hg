@@ -1,0 +1,62 @@
+/* $Id: iconsource.hg,v 1.5 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* iconsource.h
+ *
+ * Copyright(C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software, ) you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation, ) either
+ * version 2 of the License, or(at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY, ) without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library, ) if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/pixbuf.h>
+#include <gtkmm/enums.h>
+
+_DEFS(gtkmm,gtk)
+
+namespace Gtk
+{
+
+class IconSource
+{
+  _CLASS_BOXEDTYPE(IconSource, GtkIconSource, gtk_icon_source_new, gtk_icon_source_copy, gtk_icon_source_free)
+  _IGNORE(gtk_icon_source_copy, gtk_icon_source_free)
+public:
+
+  _WRAP_METHOD(void set_filename(const Glib::ustring& filename), gtk_icon_source_set_filename)
+  _WRAP_METHOD(void set_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>&pixbuf), gtk_icon_source_set_pixbuf)
+
+  _WRAP_METHOD(Glib::ustring get_filename() const, gtk_icon_source_get_filename)
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_pixbuf(), gtk_icon_source_get_pixbuf, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_pixbuf() const, gtk_icon_source_get_pixbuf, refreturn, constversion)
+  
+  _WRAP_METHOD(void set_direction_wildcarded(bool setting = true), gtk_icon_source_set_direction_wildcarded)
+  _WRAP_METHOD(void set_state_wildcarded(bool setting = true), gtk_icon_source_set_state_wildcarded)
+  _WRAP_METHOD(void set_size_wildcarded (bool setting = true), gtk_icon_source_set_size_wildcarded)
+  _WRAP_METHOD(bool get_size_wildcarded() const, gtk_icon_source_get_size_wildcarded)
+  _WRAP_METHOD(bool get_state_wildcarded() const, gtk_icon_source_get_state_wildcarded)
+  _WRAP_METHOD(bool get_direction_wildcarded() const, gtk_icon_source_get_direction_wildcarded)
+  _WRAP_METHOD(void set_direction(TextDirection direction), gtk_icon_source_set_direction)
+  _WRAP_METHOD(void set_state(Gtk::StateType state), gtk_icon_source_set_state)
+  _WRAP_METHOD(void set_size(IconSize size),  gtk_icon_source_set_size)
+  _WRAP_METHOD(TextDirection get_direction() const, gtk_icon_source_get_direction)
+  _WRAP_METHOD(Gtk::StateType get_state() const, gtk_icon_source_get_state)
+  _WRAP_METHOD(IconSize get_size() const, gtk_icon_source_get_size)
+
+  _WRAP_METHOD(void set_icon_name(const Glib::ustring& icon_name), gtk_icon_source_set_icon_name)
+  _WRAP_METHOD(Glib::ustring get_icon_name() const, gtk_icon_source_get_icon_name)
+};
+
+} /* namespace Gtk */
+
+

@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: main.cc,v 1.11 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: main.cc 420 2007-06-22 15:29:58Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *
@@ -288,6 +288,7 @@ SignalTimeout::SignalTimeout(GMainContext* context)
   context_ (context)
 {}
 
+/* Note that this is our equivalent of g_timeout_add(). */
 sigc::connection SignalTimeout::connect(const sigc::slot<bool>& slot,
                                         unsigned int interval, int priority)
 {
@@ -295,6 +296,29 @@ sigc::connection SignalTimeout::connect(const sigc::slot<bool>& slot,
   const sigc::connection connection (*conn_node->get_slot());
 
   GSource *const source = g_timeout_source_new(interval);
+
+  if(priority != G_PRIORITY_DEFAULT)
+    g_source_set_priority(source, priority);
+
+  g_source_set_callback(
+      source, &glibmm_source_callback, conn_node,
+      &SourceConnectionNode::destroy_notify_callback);
+
+  g_source_attach(source, context_);
+  g_source_unref(source); // GMainContext holds a reference
+
+  conn_node->install(source);
+  return connection;
+}
+
+/* Note that this is our equivalent of g_timeout_add_seconds(). */
+sigc::connection SignalTimeout::connect_seconds(const sigc::slot<bool>& slot,
+                                        unsigned int interval, int priority)
+{
+  SourceConnectionNode *const conn_node = new SourceConnectionNode(slot);
+  const sigc::connection connection (*conn_node->get_slot());
+
+  GSource *const source = g_timeout_source_new_seconds(interval);
 
   if(priority != G_PRIORITY_DEFAULT)
     g_source_set_priority(source, priority);

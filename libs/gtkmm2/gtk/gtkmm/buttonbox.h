@@ -153,7 +153,7 @@ public:
    */
   void set_child_secondary(Widget& child, bool is_secondary = true);
   
-  /** Returns whether @a child  should appear in a secondary group of children.
+  /** Return value: whether @a child  should appear in a secondary group of children.
    * @param child A child of @a widget .
    * @return Whether @a child  should appear in a secondary group of children.
    * 
@@ -355,10 +355,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ButtonBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ButtonBox
    */
   Gtk::ButtonBox* wrap(GtkButtonBox* object, bool take_copy = false);
 } //namespace Glib
@@ -366,10 +369,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::VButtonBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::VButtonBox
    */
   Gtk::VButtonBox* wrap(GtkVButtonBox* object, bool take_copy = false);
 } //namespace Glib
@@ -377,10 +383,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::HButtonBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::HButtonBox
    */
   Gtk::HButtonBox* wrap(GtkHButtonBox* object, bool take_copy = false);
 } //namespace Glib

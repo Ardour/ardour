@@ -199,14 +199,14 @@ public:
   explicit Cursor(const Glib::RefPtr<Display>& display, const Glib::ustring& name);
 
   
-  /** Returns the display on which the Gdk::Cursor is defined.
+  /** Returns: the Gdk::Display associated to @a cursor 
    * @return The Gdk::Display associated to @a cursor 
    * 
    * @newin2p2.
    */
   Glib::RefPtr<Display> get_display();
   
-  /** Returns the display on which the Gdk::Cursor is defined.
+  /** Returns: the Gdk::Display associated to @a cursor 
    * @return The Gdk::Display associated to @a cursor 
    * 
    * @newin2p2.
@@ -214,22 +214,14 @@ public:
   Glib::RefPtr<const Display> get_display() const;
 
   
-  /** Returns a Gdk::Pixbuf with the image used to display the cursor.
-   * 
-   * Note that depending on the capabilities of the windowing system and 
-   * on the cursor, GDK may not be able to obtain the image data. In this 
-   * case, <tt>0</tt> is returned.
+  /** Returns: a Gdk::Pixbuf representing @a cursor , or <tt>0</tt>
    * @return A Gdk::Pixbuf representing @a cursor , or <tt>0</tt>
    * 
    * @newin2p8.
    */
   Glib::RefPtr<Gdk::Pixbuf> get_image();
   
-  /** Returns a Gdk::Pixbuf with the image used to display the cursor.
-   * 
-   * Note that depending on the capabilities of the windowing system and 
-   * on the cursor, GDK may not be able to obtain the image data. In this 
-   * case, <tt>0</tt> is returned.
+  /** Returns: a Gdk::Pixbuf representing @a cursor , or <tt>0</tt>
    * @return A Gdk::Pixbuf representing @a cursor , or <tt>0</tt>
    * 
    * @newin2p8.
@@ -257,10 +249,13 @@ inline void swap(Cursor& lhs, Cursor& rhs)
 namespace Glib
 {
 
-/** @relates Gdk::Cursor
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gdk::Cursor
  */
 Gdk::Cursor wrap(GdkCursor* object, bool take_copy = false);
 

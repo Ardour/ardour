@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_EXCEPTIONHANDLER_H
 #define _GLIBMM_EXCEPTIONHANDLER_H
 
-/* $Id: exceptionhandler.h,v 1.3 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: exceptionhandler.h 291 2006-05-12 08:08:45Z murrayc $ */
 
 /* exceptionhandler.h
  *

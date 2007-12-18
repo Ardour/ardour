@@ -187,6 +187,11 @@ public:
   MessageDialog(Gtk::Window& parent, const Glib::ustring& message, bool use_markup = false, MessageType type = MESSAGE_INFO, ButtonsType buttons = BUTTONS_OK, bool modal = false);
   
 
+  /** Sets the dialog's image to @a image .
+   * 
+   * @newin2p10
+   * @param image The image.
+   */
   void set_image(Widget& image);
 
   
@@ -362,10 +367,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::MessageDialog
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::MessageDialog
    */
   Gtk::MessageDialog* wrap(GtkMessageDialog* object, bool take_copy = false);
 } //namespace Glib

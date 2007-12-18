@@ -43,6 +43,34 @@ namespace Gtk
 class Entry;
 
 //TODO: This should derive+implement from CellLayout, when we can break ABI.
+//Then we should add "It derives from the Gtk::CellLayout, to allow the user to add extra cells to the Gtk::TreeView with completion matches".
+
+/** Completion functionality for Gtk::Entry.
+ *
+ * Gtk::EntryCompletion is an auxiliary object to be used in conjunction with 
+ * Gtk::Entry to provide the completion functionality. 
+ * 
+ * "Completion functionality" means that when the user modifies the text in the 
+ * entry, Gtk::EntryCompletion checks which rows in the model match the current 
+ * content of the entry, and displays a list of matches. By default, the
+ * matching is done by comparing the entry text case-insensitively against 
+ * the text column of the model (see set_text_column()), 
+ * but this can be overridden with a custom match function (see set_match_func()).
+ *
+ * When the user selects a completion, the content of the entry is updated. 
+ * By default, the content of the entry is replaced by the text column of the 
+ * model, but this can be overridden by connecting to the match_selected signal 
+ * and updating the entry in the signal handler. Note that you should return true 
+ * from the signal handler to suppress the default behaviour.
+ * 
+ * To add completion functionality to an entry, use Gtk::Entry::set_completion().
+ * 
+ * In addition to regular completion matches, which will be inserted into 
+ * the entry when they are selected, Gtk::EntryCompletion also allows the display of  
+ * "actions" in the popup window. Their appearance is similar to menu items, 
+ * to differentiate them clearly from completion strings. When an action is 
+ * selected, the action_activated signal is emitted. 
+ */
 
 class EntryCompletion : public Glib::Object
 {
@@ -123,16 +151,16 @@ public:
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
   
-  /** Returns the model the Gtk::EntryCompletion is using as data source.
-   * Returns <tt>0</tt> if the model is unset.
+  /** Returns <tt>0</tt> if the model is unset.
+   * Return value: A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * 
    * @newin2p4.
    */
   Glib::RefPtr<TreeModel> get_model();
   
-  /** Returns the model the Gtk::EntryCompletion is using as data source.
-   * Returns <tt>0</tt> if the model is unset.
+  /** Returns <tt>0</tt> if the model is unset.
+   * Return value: A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * 
    * @newin2p4.
@@ -155,7 +183,7 @@ public:
    */
   void set_minimum_key_length(int length);
   
-  /** Returns the minimum key length as set for @a completion .
+  /** Return value: The currently used minimum key length.
    * @return The currently used minimum key length.
    * 
    * @newin2p4.
@@ -207,13 +235,27 @@ public:
    */
   void set_inline_completion(bool inline_completion = true);
   
-  /** Returns whether the common prefix of the possible completions should
-   * be automatically inserted in the entry.
+  /** Return value: <tt>true</tt> if inline completion is turned on
    * @return <tt>true</tt> if inline completion is turned on
    * 
    * @newin2p6.
    */
   bool get_inline_completion() const;
+  
+  /** Sets whether it is possible to cycle through the possible completions
+   * inside the entry.
+   * 
+   * @newin2p12
+   * @param inline_selection <tt>true</tt> to do inline selection.
+   */
+  void set_inline_selection(bool inline_selection = true);
+  
+  /** Returns: <tt>true</tt> if inline-selection mode is on
+   * @return <tt>true</tt> if inline-selection mode is on
+   * 
+   * @newin2p12.
+   */
+  bool get_inline_selection() const;
   
   /** Sets whether the completions should be presented in a popup window.
    * 
@@ -222,7 +264,7 @@ public:
    */
   void set_popup_completion(bool popup_completion = true);
   
-  /** Returns whether the completions should be presented in a popup window.
+  /** Return value: <tt>true</tt> if popup completion is turned on
    * @return <tt>true</tt> if popup completion is turned on
    * 
    * @newin2p6.
@@ -238,14 +280,15 @@ public:
    */
   void set_popup_set_width(bool popup_set_width = true);
   
-  /** Returns whether the  completion popup window will be resized to the 
-   * width of the entry.
+  /** Return value: <tt>true</tt> if the popup window will be resized to the width of
    * @return <tt>true</tt> if the popup window will be resized to the width of 
    * the entry
    * 
    * @newin2p8.
    */
   bool get_popup_set_width() const;
+
+  //TODO This is wrongly named: Deprecate it and add set_popup_single_match().
   
   /** Sets whether the completion popup window will appear even if there is
    * only a single match. You may want to set this to <tt>false</tt> if you
@@ -257,15 +300,23 @@ public:
    * match.
    */
   void set_popup_single_width(bool popup_single_match = true);
+
   
-  /** Returns whether the completion popup window will appear even if there is
-   * only a single match.
+  /** Return value: <tt>true</tt> if the popup window will appear regardless of the
    * @return <tt>true</tt> if the popup window will appear regardless of the
    * number of matches.
    * 
    * @newin2p8.
    */
   bool get_popup_single_match() const;
+  
+  /** Get the original text entered by the user that triggered
+   * the completion or an empty string if there's no completion ongoing.
+   * @return The prefix for the current completion
+   * 
+   * @newin2p12.
+   */
+  Glib::ustring get_completion_prefix() const;
 
   
   /** Convenience function for setting up the most used case of this code: a
@@ -296,7 +347,7 @@ public:
    */
   void set_text_column(int column);
   
-  /** Returns the column in the model of @a completion  to get strings from.
+  /** Return value: the column containing the strings
    * @return The column containing the strings
    * 
    * @newin2p6.
@@ -306,20 +357,18 @@ public:
   /** Emitted when an action is activated.
    *
    * @param index The index of the activated action.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %action_activated(int index)</tt>
+   * <tt>void on_my_%action_activated(int index)</tt>
    */
 
   Glib::SignalProxy1< void,int > signal_action_activated();
 
 
-  //We completely hand-code this signal because we want to change how the parameters are wrapped,
+  //We completely hand-code these signals because we want to change how the parameters are wrapped,
   //because we need both the iter and the model to make the C++ iter.
   
-
+  
   /** Emitted when a match from the list is selected. 
    * The default behaviour is to replace the contents of the 
    * entry with the contents of the text column in the row 
@@ -330,13 +379,30 @@ public:
    * @result true if the signal has been handled
    * 
    * @par Prototype:
-   * <tt>bool %match_selected(const TreeModel::iterator& iter)</tt>
+   * <tt>bool %on_match_selected(const TreeModel::iterator& iter)</tt>
    */
   Glib::SignalProxy1< bool, const TreeModel::iterator& > signal_match_selected();
 
-  
-  //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
+  /** Emitted when a match from the cursor is on a match
+   * of the list. The default behaviour is to replace the contents
+   * of the entry with the contents of the text column in the row 
+   * pointed to by @a iter.
+   *
+   * @param model The TreeModel containing the matches
+   * @param iter A TreeModel::iterator positioned at the selected match
+   * @result true if the signal has been handled
+   * 
+   * @par Prototype:
+   * <tt>bool %on_cursor_on_match(const TreeModel::iterator& iter)</tt>
+   *
+   * @newin2p12
+   */
+  Glib::SignalProxy1< bool, const TreeModel::iterator& > signal_cursor_on_match();
+
+
+  //We use no_default_handler for these signals, because we can not add a new vfunc without breaking ABI.
   //TODO: Remove no_default_handler when we do an ABI-break-with-parallel-install.
+
   /** Emitted when the inline autocompletion is triggered. 
    * The default behaviour is to make the entry display the 
    * whole prefix and select the newly inserted part.
@@ -350,15 +416,13 @@ public:
    *
    * @param prefix The common prefix of all possible completions.
    * @result true if the signal has been handled
-   */ 
-  
-/**
+   *
    * @par Prototype:
-   * <tt>bool %insert_prefix(const Glib::ustring& prefix)</tt>
+   * <tt>bool on_my_%insert_prefix(const Glib::ustring& prefix)</tt>
    */
 
   Glib::SignalProxy1< bool,const Glib::ustring& > signal_insert_prefix();
- 
+
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
 /** The model to find matches in.
@@ -500,12 +564,33 @@ public:
   Glib::PropertyProxy_ReadOnly<bool> property_popup_single_match() const;
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
+  #ifdef GLIBMM_PROPERTIES_ENABLED
+/** Your description here.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy<bool> property_inline_selection() ;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+/** Your description here.
+   *
+   * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
+   * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
+   * the value of the property changes.
+   */
+  Glib::PropertyProxy_ReadOnly<bool> property_inline_selection() const;
+#endif //#GLIBMM_PROPERTIES_ENABLED
+
 
 protected:
 
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   //Default Signal Handler:
-  virtual bool on_match_selected(const TreeModel::iterator& iter);        
+  virtual bool on_match_selected(const TreeModel::iterator& iter);  
+  //No default handler for on_cursor_on_match(), to preserver ABI. TODO: Add this when we can break ABI.      
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
 
@@ -534,10 +619,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::EntryCompletion
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::EntryCompletion
    */
   Glib::RefPtr<Gtk::EntryCompletion> wrap(GtkEntryCompletion* object, bool take_copy = false);
 }

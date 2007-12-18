@@ -76,7 +76,7 @@ std::string SelectionData::get_target() const
       gdk_atom_name(const_cast<GtkSelectionData*>(gobj())->target));
 }
 
-Glib::StringArrayHandle SelectionData::get_targets() const
+Gdk::ArrayHandle_AtomString SelectionData::get_targets() const
 {
   GdkAtom* targets = 0;
   int    n_targets = 0;
@@ -84,24 +84,10 @@ Glib::StringArrayHandle SelectionData::get_targets() const
   if(!gtk_selection_data_get_targets(const_cast<GtkSelectionData*>(gobj()), &targets, &n_targets))
     n_targets = 0; // it's set to -1 otherwise
 
-  //Build a C++ list containing the target names:
-  std::list<Glib::ustring> listTargets;
-  for(int i = 0; i < n_targets; n_targets++)
-  {
-    //Convert the atom to a string:
-    gchar* const atom_name = gdk_atom_name(targets[i]);
-
-    Glib::ustring target;
-    if(atom_name)
-      target = Glib::ScopedPtr<char>(atom_name).get(); //This frees the gchar*.
-
-    listTargets.push_back(target);
-  }
-
-  g_free(targets);
-
-  return listTargets;
+  //Note that we free the GdkAtom* array, but we don't need to free its items:
+  return Gdk::ArrayHandle_AtomString(targets, n_targets, Glib::OWNERSHIP_SHALLOW);
 }
+
 
 std::string SelectionData::get_data_type() const
 {

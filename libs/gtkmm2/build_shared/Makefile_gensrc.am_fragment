@@ -1,0 +1,67 @@
+## Copyright (c) 2001
+## The gtkmm development team.
+##
+## **** Common rules for inclusion in Makefile.am ****
+## Included from something/src/Makefile.am
+##
+## Used variable:	Example content:
+##
+## sublib_name		= gdkmm
+## sublib_namespace     = Gdk
+
+## files_defs		= gdk.defs gdk_pixbuf.defs
+
+
+tools_dir	= $(top_srcdir)/tools
+tools_dir_m4= $(top_srcdir)/tools/m4
+tools_dir_pm= $(top_srcdir)/tools/pm
+
+gensrc_destdir = $(srcdir)/../$(sublib_name)
+stamp_dir = $(srcdir)/.stamps
+
+include $(top_srcdir)/tools/Makefile_list_of_sources.am_fragment
+tools_m4	= $(files_tools_m4:%.m4=$(tools_dir_m4)/%.m4)
+# tools_pm	= $(files_tools_pm:%.pm=$(tools_dir_pm)/%.pm)
+
+include $(srcdir)/../src/Makefile_list_of_hg.am_fragment
+files_all_ccg	= $(files_all_hg:%.hg=%.ccg)
+files_h		= $(files_all_hg:%.hg=$(gensrc_destdir)/%.h)
+files_cc	= $(files_all_hg:%.hg=$(gensrc_destdir)/%.cc)
+files_stamp	= $(files_all_hg:%.hg=$(stamp_dir)/stamp-%)
+
+#Installed gmmproc stuff, from glibmm:
+gmmproc_path = $(GMMPROC)
+gmmproc_dir = $(GMMPROC_DIR)
+
+# We use our own m4 and pm files as well as the ones installed by gtkmm:
+# Our override m4 include seems to need to be before the default one.
+gmmproc_args	= -I $(tools_dir_m4) --defs $(srcdir)
+run_gmmproc	= $(gmmproc_path) $(gmmproc_args)
+
+gen_wrap_init_path = $(gmmproc_dir)/generate_wrap_init.pl
+gen_wrap_init_args = --namespace=$(sublib_namespace) --parent_dir=$(sublib_parentdir)
+run_gen_wrap_init  = $(gen_wrap_init_path) $(gen_wrap_init_args)
+
+EXTRA_DIST	= Makefile_list_of_hg.am_fragment \
+		  $(files_defs) $(files_all_hg) $(files_all_ccg)
+
+
+$(stamp_dir)/stamp-%: %.hg %.ccg $(tools_m4) $(files_defs)
+	$(run_gmmproc) $(notdir $*) $(srcdir) $(gensrc_destdir)
+	@echo 'timestamp' > $@
+
+sublib_srcdir		= $(srcdir)/../src
+files_hg_with_path	= $(patsubst %.hg,$(sublib_srcdir)/%.hg,$(files_all_hg))
+
+$(gensrc_destdir)/wrap_init.cc: $(gen_wrap_init_path) $(files_hg_with_path)
+	$(run_gen_wrap_init) $(files_all_hg:%.hg=$(srcdir)/%.hg) >$@
+
+create-stamp-dir:
+	@(test -d $(stamp_dir) || mkdir $(stamp_dir))
+
+if MAINTAINER_MODE
+all-local: create-stamp-dir $(files_stamp) $(gensrc_destdir)/wrap_init.cc
+endif
+
+maintainer-clean-local:
+	rm -rf $(stamp_dir)

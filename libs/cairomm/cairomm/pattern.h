@@ -26,6 +26,11 @@
 
 namespace Cairo
 {
+struct ColorStop
+{
+  double offset;
+  double red, green, blue, alpha;
+};
 
 /**
  * This is a reference-counted object that should be used via Cairo::RefPtr.
@@ -83,8 +88,25 @@ public:
    */
   explicit SolidPattern(cairo_pattern_t* cobject, bool has_reference = false);
 
+  /**
+   * Gets the solid color for a solid color pattern.
+   *
+   * @param red return value for red component of color
+   * @param green return value for green component of color
+   * @param blue return value for blue component of color
+   * @param alpha return value for alpha component of color
+   *
+   * @since 1.4
+   **/
+  void get_rgba (double& red, double& green,
+                 double& blue, double& alpha) const;
+
+  //TODO: Documentation
   static RefPtr<SolidPattern> create_rgb(double red, double green, double blue);
-  static RefPtr<SolidPattern> create_rgba(double red, double green, double blue, double alpha);
+
+  //TODO: Documentation
+  static RefPtr<SolidPattern> create_rgba(double red, double green,
+                                          double blue, double alpha);
 
   //TODO?: SolidPattern(cairo_pattern_t *target);
   virtual ~SolidPattern();
@@ -106,6 +128,19 @@ public:
    */
   explicit SurfacePattern(cairo_pattern_t* cobject, bool has_reference = false);
 
+  /**
+   * Gets the surface associated with this pattern
+   *
+   * @since 1.4
+   **/
+  RefPtr<const Surface> get_surface () const;
+
+  /**
+   * Gets the surface associated with this pattern
+   *
+   * @since 1.4
+   **/
+  RefPtr<Surface> get_surface ();
 
   virtual ~SurfacePattern();
 
@@ -134,8 +169,46 @@ public:
 
   virtual ~Gradient();
 
+  /**
+   * Adds an opaque color stop to a gradient pattern. The offset
+   * specifies the location along the gradient's control vector. For
+   * example, a linear gradient's control vector is from (x0,y0) to
+   * (x1,y1) while a radial gradient's control vector is from any point
+   * on the start circle to the corresponding point on the end circle.
+   *
+   * The color is specified in the same way as in Context::set_source_rgb().
+   *
+   * @param offset an offset in the range [0.0 .. 1.0]
+   * @param red red component of color
+   * @param green green component of color
+   * @param blue blue component of color
+   **/
   void add_color_stop_rgb(double offset, double red, double green, double blue);
+
+  /**
+   * Adds a translucent color stop to a gradient pattern. The offset
+   * specifies the location along the gradient's control vector. For
+   * example, a linear gradient's control vector is from (x0,y0) to
+   * (x1,y1) while a radial gradient's control vector is from any point
+   * on the start circle to the corresponding point on the end circle.
+   *
+   * The color is specified in the same way as in Context::set_source_rgba().
+   *
+   * @param offset an offset in the range [0.0 .. 1.0]
+   * @param red red component of color
+   * @param green green component of color
+   * @param blue blue component of color
+   * @param alpha alpha component of color
+   */
   void add_color_stop_rgba(double offset, double red, double green, double blue, double alpha);
+
+  /*
+   * Gets the color stops and offsets for this Gradient
+   *
+   * @since 1.4
+   */
+  std::vector<ColorStop> get_color_stops() const;
+
 
 protected:
   Gradient();
@@ -154,6 +227,19 @@ public:
    * @param has_reference Whether we already have a reference. Otherwise, the constructor will take an extra reference.
    */
   explicit LinearGradient(cairo_pattern_t* cobject, bool has_reference = false);
+
+  /**
+   * @param x0 return value for the x coordinate of the first point
+   * @param y0 return value for the y coordinate of the first point
+   * @param x1 return value for the x coordinate of the second point
+   * @param y1 return value for the y coordinate of the second point
+   *
+   * Gets the gradient endpoints for a linear gradient.
+   *
+   * @since 1.4
+   **/
+  void get_linear_points(double &x0, double &y0,
+                          double &x1, double &y1) const;
 
   //TODO?: LinearGradient(cairo_pattern_t *target);
   virtual ~LinearGradient();
@@ -175,6 +261,21 @@ public:
    */
   explicit RadialGradient(cairo_pattern_t* cobject, bool has_reference = false);
 
+  /**
+   * @param x0 return value for the x coordinate of the center of the first (inner) circle
+   * @param y0 return value for the y coordinate of the center of the first (inner) circle
+   * @param r0 return value for the radius of the first (inner) circle
+   * @param x1 return value for the x coordinate of the center of the second (outer) circle
+   * @param y1 return value for the y coordinate of the center of the second (outer) circle
+   * @param r1 return value for the radius of the second (outer) circle
+   *
+   * Gets the gradient endpoint circles for a radial gradient, each
+   * specified as a center coordinate and a radius.
+   *
+   * @since 1.4
+   **/
+  void get_radial_circles(double& x0, double& y0, double& r0,
+                           double& x1, double& y1, double& r1) const;
 
   //TODO?: RadialGradient(cairo_pattern_t *target);
   virtual ~RadialGradient();

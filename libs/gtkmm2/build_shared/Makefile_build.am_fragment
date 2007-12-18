@@ -1,0 +1,52 @@
+## Copyright (c) 2001
+## The gtkmm development team.
+##
+## **** Common rules for inclusion in Makefile.am ****
+## Included by Makefile_build_gensrc.am_fragment
+##
+
+include $(srcdir)/../src/Makefile_list_of_hg.am_fragment
+
+# Support for DLL on mingw using libtool > 1.4
+# When creating DLLs on win32, we need to explicitly add a few extra
+# libraries at link time to resolve symbols (remember a dll is like an
+# executable).
+if PLATFORM_WIN32
+extra_win32_defines = \
+	-D$(shell echo $(sublib_name) | tr [:lower:] [:upper:])_BUILD
+no_undefined = -no-undefined -Wl,--export-all-symbols
+win32_dlls_extra_libs = $(sublib_win32_dlls_libs)
+else
+extra_win32_defines = 
+no_undefined =
+win32_dlls_extra_libs =
+endif
+
+common_ldflags	= -version-info $(sublib_libversion) $(no_undefined)
+
+# All modules can include all other modules,
+# for instance, so that gdkmm can use headers in pangomm.
+all_includes	= -I$(top_builddir)/$(sublib_topdir)		-I$(top_srcdir)/$(sublib_topdir)	\
+		  -I$(top_builddir)/pango	-I$(top_srcdir)/pango	\
+		  -I$(top_builddir)/atk		-I$(top_srcdir)/atk	\
+		  -I$(top_builddir)/gdk		-I$(top_srcdir)/gdk	\
+		  -I$(top_builddir)/gtk		-I$(top_srcdir)/gtk	\
+		  $(sublib_cflags) $(GTHREAD_CFLAGS)
+
+dist_sources	= $(files_all_built_cc) $(files_all_extra_cc) $(files_all_built_h) $(files_all_extra_h)
+DISTFILES	= $(DIST_COMMON) $(dist_sources) $(TEXINFOS) $(EXTRA_DIST)
+
+
+DEFS = @DEFS@ -DG_LOG_DOMAIN=\"$(sublib_name)\" $(extra_win32_defines)
+DEFAULT_INCLUDES	=
+
+# DISABLE_DEPRECATED_CFLAGS and DISABLE_DEPRECATED_API_CFLAGS are empty unless the appropriate --enable-*=no options are specified to configure:
+INCLUDES = $(strip $(all_includes)) $(DISABLE_DEPRECATED_CFLAGS) $(DISABLE_DEPRECATED_API_CFLAGS)
+
+sublib_includedir	= $(includedir)/$(sublib_libname)/$(sublib_name)
+sublib_include_HEADERS	= $(files_all_built_h) $(files_all_extra_h)
+
+maintainer-clean-local:
+	(cd $(srcdir) && rm -f $(files_all_built_cc) $(files_all_built_h))
+
+

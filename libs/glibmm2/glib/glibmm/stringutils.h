@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_STRINGUTILS_H
 #define _GLIBMM_STRINGUTILS_H
 
-/* $Id: stringutils.h,v 1.2 2004/06/07 17:26:39 daniel Exp $ */
+/* $Id: stringutils.h 116 2004-06-07 17:26:39Z daniel $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

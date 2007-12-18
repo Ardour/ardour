@@ -169,7 +169,7 @@ public:
   explicit RadioToolButton(Widget& icon_widget, const Glib::ustring& label = Glib::ustring());
 
   
-  /** Returns the radio button group @a button  belongs to.
+  /** Return value: The group @a button  belongs to.
    * @return The group @a button  belongs to.
    * 
    * @newin2p4.
@@ -191,10 +191,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::RadioToolButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::RadioToolButton
    */
   Gtk::RadioToolButton* wrap(GtkRadioToolButton* object, bool take_copy = false);
 } //namespace Glib

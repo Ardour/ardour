@@ -4,7 +4,7 @@
 #include <gtkmm/iconview.h>
 #include <gtkmm/private/iconview_p.h>
 
-// -*- c++ -*-
+// -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 /* $Id$ */
 
 /* Copyright 1998-2004 The gtkmm Development Team
@@ -26,6 +26,9 @@
 
 #include <gtkmm/adjustment.h> 
 #include <gtk/gtkiconview.h>
+#include <gtk/gtktreemodel.h>
+#include <gtk/gtktreeview.h>
+#include <gtk/gtk.h>
 
 namespace //anonymous namespace
 {
@@ -193,6 +196,50 @@ void  IconView::enable_model_drag_dest(const ArrayHandle_TargetEntry& targets, G
   gtk_icon_view_enable_model_drag_dest(gobj(), targets.data(), targets.size(), (GdkDragAction)actions);
 }
 
+bool
+IconView::get_tooltip_context_path(int& x, int& y,
+                                   bool keyboard_tip,
+                                   TreeModel::Path& path)
+{
+  //It's cleaner to use a temporary C++ object and get a C pointer to it,
+  //because GtkTreePath is a simple struct, not a GtkObject, so
+  //gtk_tree_path_new() would be necessary. markoa.
+  TreeModel::Path tmp_path;
+  GtkTreePath* cpath = tmp_path.gobj();
+
+  gboolean result =
+    gtk_icon_view_get_tooltip_context(gobj(),
+                                      &x, &y,
+                                      keyboard_tip,
+                                      0,
+                                      &cpath,
+                                      0);
+
+  path = Glib::wrap(cpath, false /* take_copy=false */);
+
+  return result;
+}
+
+bool
+IconView::get_tooltip_context_iter(int& x, int& y,
+                                   bool keyboard_tip,
+                                   Gtk::TreeModel::iterator& iter)
+{
+  GtkTreeIter src_iter;
+
+  gboolean result =
+    gtk_icon_view_get_tooltip_context(gobj(),
+                                      &x, &y,
+                                      keyboard_tip,
+                                      0,
+                                      0,
+                                      &src_iter);
+
+  iter = TreeIter(gtk_icon_view_get_model(this->gobj()), &src_iter);
+
+  return result;
+}
+
 } // namespace Gtk
 
 
@@ -341,7 +388,7 @@ void IconView_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void IconView_Class::set_scroll_adjustments_callback(GtkIconView* self, GtkAdjustment* p0, GtkAdjustment* p1)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -349,38 +396,41 @@ void IconView_Class::set_scroll_adjustments_callback(GtkIconView* self, GtkAdjus
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_set_scroll_adjustments(Glib::wrap(p0)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_set_scroll_adjustments(Glib::wrap(p0)
 , Glib::wrap(p1)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->set_scroll_adjustments)
-      (*base->set_scroll_adjustments)(self, p0, p1);
-  }
+  // Call the original underlying C function:
+  if(base && base->set_scroll_adjustments)
+    (*base->set_scroll_adjustments)(self, p0, p1);
 }
 void IconView_Class::item_activated_callback(GtkIconView* self, GtkTreePath* p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -388,37 +438,40 @@ void IconView_Class::item_activated_callback(GtkIconView* self, GtkTreePath* p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_item_activated(Gtk::TreePath(p0, true)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_item_activated(Gtk::TreePath(p0, true)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->item_activated)
-      (*base->item_activated)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->item_activated)
+    (*base->item_activated)(self, p0);
 }
 void IconView_Class::selection_changed_callback(GtkIconView* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -426,32 +479,35 @@ void IconView_Class::selection_changed_callback(GtkIconView* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_selection_changed();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_selection_changed();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->selection_changed)
-      (*base->selection_changed)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->selection_changed)
+    (*base->selection_changed)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -497,15 +553,17 @@ GType IconView::get_base_type()
 
 IconView::IconView()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Container(Glib::ConstructParams(iconview_class_.init()))
 {
   }
 
 IconView::IconView(const Glib::RefPtr<TreeModel>& model)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Container(Glib::ConstructParams(iconview_class_.init(), "model", Glib::unwrap(model), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Container(Glib::ConstructParams(iconview_class_.init(), "model", Glib::unwrap(model), static_cast<char*>(0)))
 {
   }
 
@@ -689,6 +747,11 @@ void IconView::item_activated(const TreeModel::Path& path)
 gtk_icon_view_item_activated(gobj(), const_cast<GtkTreePath*>((path).gobj())); 
 }
 
+void IconView::set_cursor(const TreeModel::Path& path, CellRenderer& cell, bool start_editing)
+{
+gtk_icon_view_set_cursor(gobj(), const_cast<GtkTreePath*>((path).gobj()), (cell).gobj(), static_cast<int>(start_editing)); 
+}
+
 void IconView::scroll_to_path(const TreeModel::Path& path, bool use_align, gfloat row_align, gfloat col_align)
 {
 gtk_icon_view_scroll_to_path(gobj(), const_cast<GtkTreePath*>((path).gobj()), static_cast<int>(use_align), row_align, col_align); 
@@ -722,6 +785,31 @@ gtk_icon_view_set_drag_dest_item(gobj(), const_cast<GtkTreePath*>((path).gobj())
 Glib::RefPtr<Gdk::Pixmap> IconView::create_drag_icon(const TreeModel::Path& path)
 {
   return Glib::wrap((GdkPixmapObject*)(gtk_icon_view_create_drag_icon(gobj(), const_cast<GtkTreePath*>((path).gobj()))));
+}
+
+void IconView::convert_widget_to_bin_window_coords(int wx, int wy, int& bx, int& by) const
+{
+gtk_icon_view_convert_widget_to_bin_window_coords(const_cast<GtkIconView*>(gobj()), wx, wy, &bx, &by); 
+}
+
+void IconView::set_tooltip_item(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path& path)
+{
+gtk_icon_view_set_tooltip_item(gobj(), Glib::unwrap(tooltip), const_cast<GtkTreePath*>((path).gobj())); 
+}
+
+void IconView::set_tooltip_cell(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path& path, CellRenderer& cell)
+{
+gtk_icon_view_set_tooltip_cell(gobj(), Glib::unwrap(tooltip), const_cast<GtkTreePath*>((path).gobj()), (cell).gobj()); 
+}
+
+void IconView::set_tooltip_column(int column)
+{
+gtk_icon_view_set_tooltip_column(gobj(), column); 
+}
+
+int IconView::get_tooltip_column() const
+{
+  return gtk_icon_view_get_tooltip_column(const_cast<GtkIconView*>(gobj()));
 }
 
 

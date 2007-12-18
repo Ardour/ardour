@@ -171,31 +171,33 @@ public:
   PositionType get_value_pos() const;
 
   
-  /** Gets the Pango::Layout used to display the scale. The returned object
-   * is owned by the scale so does not need to be freed by the caller.
-   * @return The Pango::Layout for this scale, or <tt>0</tt> if the draw_value property
-   * is <tt>false</tt>.
+  /** Gets the Pango::Layout used to display the scale. 
+   * The returned object is owned by the scale so does 
+   * not need to be freed by the caller.
+   * @return The Pango::Layout for this scale, or <tt>0</tt> 
+   * if the Gtk::Scale:draw-value property is <tt>false</tt>.
    * 
    * @newin2p4.
    */
   Glib::RefPtr<Pango::Layout> get_layout();
   
-  /** Gets the Pango::Layout used to display the scale. The returned object
-   * is owned by the scale so does not need to be freed by the caller.
-   * @return The Pango::Layout for this scale, or <tt>0</tt> if the draw_value property
-   * is <tt>false</tt>.
+  /** Gets the Pango::Layout used to display the scale. 
+   * The returned object is owned by the scale so does 
+   * not need to be freed by the caller.
+   * @return The Pango::Layout for this scale, or <tt>0</tt> 
+   * if the Gtk::Scale:draw-value property is <tt>false</tt>.
    * 
    * @newin2p4.
    */
   Glib::RefPtr<const Pango::Layout> get_layout() const;
   
-  /** Obtains the coordinates where the scale will draw the Pango::Layout
-   * representing the text in the scale. Remember
+  /** Obtains the coordinates where the scale will draw the 
+   * Pango::Layout representing the text in the scale. Remember
    * when using the Pango::Layout function you need to convert to
    * and from pixels using PANGO_PIXELS() or Pango::SCALE. 
    * 
-   * If the draw_value property is <tt>false</tt>, the return values are 
-   * undefined.
+   * If the Gtk::Scale:draw-value property is <tt>false</tt>, the return 
+   * values are undefined.
    * 
    * @newin2p4
    * @param x Location to store X offset of layout, or <tt>0</tt>.
@@ -209,11 +211,9 @@ public:
    * This can be used to connect a custom function for determining how the
    * value is formatted. The function (or function object) is given a the value
    * as a double and should return the representation of it as a Glib::ustring.
-   */ 
-  
-/**
+   *
    * @par Prototype:
-   * <tt>Glib::ustring %format_value(double value)</tt>
+   * <tt>Glib::ustring on_my_%format_value(double value)</tt>
    */
 
   Glib::SignalProxy1< Glib::ustring,double > signal_format_value();
@@ -469,10 +469,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Scale
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Scale
    */
   Gtk::Scale* wrap(GtkScale* object, bool take_copy = false);
 } //namespace Glib
@@ -480,10 +483,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::VScale
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::VScale
    */
   Gtk::VScale* wrap(GtkVScale* object, bool take_copy = false);
 } //namespace Glib
@@ -491,10 +497,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::HScale
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::HScale
    */
   Gtk::HScale* wrap(GtkHScale* object, bool take_copy = false);
 } //namespace Glib

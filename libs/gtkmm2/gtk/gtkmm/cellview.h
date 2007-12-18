@@ -159,9 +159,7 @@ public:
    */
   void set_displayed_row(const TreeModel::Path& path);
   
-  /** Returns a Gtk::TreePath referring to the currently 
-   * displayed row. If no row is currently displayed, 
-   * <tt>0</tt> is returned.
+  /** Returns: the currently displayed row or <tt>0</tt>
    * @return The currently displayed row or <tt>0</tt>
    * 
    * @newin2p6.
@@ -187,7 +185,7 @@ public:
   void set_background_color(const Gdk::Color& color);
 
   
-  /** Returns the cell renderers which have been added to @a cell_view .
+  /** Return value: a list of cell renderers. The list, but not the
    * @return A list of cell renderers. The list, but not the
    * renderers has been newly allocated and should be freed with
    * Glib::list_free() when no longer needed.
@@ -196,7 +194,7 @@ public:
    */
   Glib::ListHandle<CellRenderer*> get_cell_renderers();
   
-  /** Returns the cell renderers which have been added to @a cell_view .
+  /** Return value: a list of cell renderers. The list, but not the
    * @return A list of cell renderers. The list, but not the
    * renderers has been newly allocated and should be freed with
    * Glib::list_free() when no longer needed.
@@ -213,10 +211,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::CellView
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellView
    */
   Gtk::CellView* wrap(GtkCellView* object, bool take_copy = false);
 } //namespace Glib

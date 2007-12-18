@@ -1,0 +1,111 @@
+/* $Id: celllayout.hg,v 1.12 2006/05/10 20:59:27 murrayc Exp $ */
+
+/* Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/interface.h>
+#include <gtkmm/cellrenderer.h>
+#include <gtkmm/cellrenderer_generation.h>
+#include <gtkmm/treemodel.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+typedef struct _GtkCellLayoutIface GtkCellLayoutIface;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gtk
+{
+
+/** An interface for packing cells.
+ * CellLayout is an interface to be implemented by all objects which want to provide a TreeView::Column-like API 
+ * for packing cells, setting attributes and data funcs.
+ */
+class CellLayout : public Glib::Interface
+{
+  _CLASS_INTERFACE(CellLayout, GtkCellLayout, GTK_CELL_LAYOUT, GtkCellLayoutIface)
+
+public:
+
+  template <class ColumnType> inline
+  void pack_start(const TreeModelColumn<ColumnType>& model_column, bool expand = true);
+  _IGNORE(gtk_cell_layout_add_attribute, gtk_cell_layout_set_attributes)
+
+  _WRAP_METHOD(void pack_start(CellRenderer& cell, bool expand = true), gtk_cell_layout_pack_start)
+  _WRAP_METHOD(void pack_end(CellRenderer& cell, bool expand = true), gtk_cell_layout_pack_end)
+
+  #m4 _CONVERSION(`GList*', `Glib::ListHandle<CellRenderer*>', `$2($3, Glib::OWNERSHIP_SHALLOW)')
+  #m4 _CONVERSION(`GList*', `Glib::ListHandle<const CellRenderer*>', `$2($3, Glib::OWNERSHIP_SHALLOW)')
+  _WRAP_METHOD(Glib::ListHandle<CellRenderer*> get_cells(), gtk_cell_layout_get_cells)
+  _WRAP_METHOD(Glib::ListHandle<const CellRenderer*> get_cells() const, gtk_cell_layout_get_cells)
+
+  _WRAP_METHOD(void clear(), gtk_cell_layout_clear)
+
+  _IGNORE(gtk_cell_layout_set_attributes) //I think this is just a convenience method, equivalent to clear() and multiple add_attribute()s. murrayc.
+
+  _WRAP_METHOD(void add_attribute(CellRenderer& cell, const Glib::ustring& attribute, int column), gtk_cell_layout_add_attribute)
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  void add_attribute(const Glib::PropertyProxy_Base& property, const TreeModelColumnBase& column);
+#endif
+
+  void add_attribute(CellRenderer& cell, const Glib::ustring& attribute, const TreeModelColumnBase& column);
+
+  //For instance, void on_cell_data(const TreeModel::const_iterator& iter)
+  typedef sigc::slot<void, const TreeModel::const_iterator&> SlotCellData;
+
+  void set_cell_data_func(CellRenderer& cell, const SlotCellData& slot);
+  _IGNORE(gtk_cell_layout_set_cell_data_func)
+
+  _WRAP_METHOD(void clear_attributes(CellRenderer& cell), gtk_cell_layout_clear_attributes)
+
+  _WRAP_METHOD(void reorder(CellRenderer& cell, int position), gtk_cell_layout_reorder)
+
+protected:
+  _WRAP_VFUNC(void pack_start(CellRenderer* cell, bool expand), pack_start)
+  _WRAP_VFUNC(void pack_end(CellRenderer* cell, bool expand), pack_end)
+  _WRAP_VFUNC(void clear(), clear)
+  _WRAP_VFUNC(void add_attribute(CellRenderer* cell, const Glib::ustring& attribute, int column), add_attribute)
+//TODO (added in GTK+ 2.4):  _WRAP_VFUNC(void set_cell_data_func(CellRenderer* cell, GtkCellLayoutDataFunc func, gpointer func_data, GDestroyNotify destroy), gtk_cell_layout_set_cell_data_func)
+  _WRAP_VFUNC(void clear_attributes(CellRenderer* cell), clear_attributes)
+  _WRAP_VFUNC(void reorder(CellRenderer* cell, int position), reorder)
+
+};
+
+template<class T_ModelColumnType>
+void CellLayout::pack_start(const TreeModelColumn<T_ModelColumnType>& column, bool expand)
+{
+  //Generate appropriate Renderer for the column:
+  CellRenderer* pCellRenderer = manage( CellRenderer_Generation::generate_cellrenderer<T_ModelColumnType>() );
+
+  //Use the renderer:
+  pack_start(*pCellRenderer, expand);
+
+  //Make the renderer render the column:
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  add_attribute(pCellRenderer->_property_renderable(), column);
+#else
+  add_attribute(*pCellRenderer, pCellRenderer->_property_renderable(), column);
+#endif
+}
+
+} // namespace Gtk
+

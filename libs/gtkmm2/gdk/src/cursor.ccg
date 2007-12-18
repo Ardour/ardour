@@ -1,0 +1,59 @@
+// -*- c++ -*-
+/* $Id: cursor.ccg,v 1.3 2005/07/10 19:24:21 murrayc Exp $ */
+
+/*
+ *
+ * Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdk/gdkcursor.h>
+
+namespace Gdk
+{
+
+Cursor::Cursor(CursorType cursor_type)
+{
+  gobject_ = gdk_cursor_new((GdkCursorType)cursor_type);
+}
+
+Cursor::Cursor(const Glib::RefPtr<Pixmap>& source, const Glib::RefPtr<Pixmap>& mask,
+				       const Color& fg, const Color& bg,
+				       int x, int y)
+{
+  gobject_ = gdk_cursor_new_from_pixmap(source->gobj(), mask->gobj(), 
+                                        const_cast<GdkColor*>(fg.gobj()),
+				        const_cast<GdkColor*>(bg.gobj()),
+                                        x, y);
+}
+
+Cursor::Cursor(const Glib::RefPtr<Display>& display, CursorType cursor_type)
+{
+  gobject_ = gdk_cursor_new_for_display(display->gobj(), (GdkCursorType)cursor_type);
+}
+
+Cursor::Cursor(const Glib::RefPtr<Display>& display, const Glib::RefPtr<Pixbuf>& pixbuf, int x, int y)
+{
+  gobject_ = gdk_cursor_new_from_pixbuf(display->gobj(), pixbuf->gobj(), x, y);
+}
+
+Cursor::Cursor(const Glib::RefPtr<Display>& display, const Glib::ustring& name)
+{
+  gobject_ = gdk_cursor_new_from_name(display->gobj(), name.c_str());
+}      
+
+} //namespace Gdk
+

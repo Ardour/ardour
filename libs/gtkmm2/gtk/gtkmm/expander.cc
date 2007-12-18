@@ -33,8 +33,9 @@ namespace Gtk
 
 Expander::Expander(const Glib::ustring& label, bool mnemonic)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Bin(Glib::ConstructParams(expander_class_.init(), "label",label.c_str(),"use_underline",gboolean(mnemonic), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Bin(Glib::ConstructParams(expander_class_.init(), "label",label.c_str(),"use_underline",gboolean(mnemonic), static_cast<char*>(0)))
 {}
 
 } // namespace Gtk
@@ -141,7 +142,8 @@ GType Expander::get_base_type()
 
 Expander::Expander()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Bin(Glib::ConstructParams(expander_class_.init()))
 {
   }

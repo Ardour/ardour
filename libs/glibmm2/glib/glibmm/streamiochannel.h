@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: streamiochannel.h,v 1.2 2003/01/22 12:08:52 murrayc Exp $ */
+/* $Id: streamiochannel.h 17 2003-01-22 12:09:02Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

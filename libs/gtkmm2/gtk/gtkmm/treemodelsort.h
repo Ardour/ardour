@@ -117,12 +117,12 @@ public:
   static Glib::RefPtr<TreeModelSort> create(const Glib::RefPtr<TreeModel>& model);
 
 
-  /** Returns the model the Gtk::TreeModelSort is sorting.
+  /** Return value: the "child model" being sorted
    * @return The "child model" being sorted.
    */
   Glib::RefPtr<TreeModel> get_model();
   
-  /** Returns the model the Gtk::TreeModelSort is sorting.
+  /** Return value: the "child model" being sorted
    * @return The "child model" being sorted.
    */
   Glib::RefPtr<const TreeModel> get_model() const;
@@ -220,10 +220,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TreeModelSort
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeModelSort
    */
   Glib::RefPtr<Gtk::TreeModelSort> wrap(GtkTreeModelSort* object, bool take_copy = false);
 }

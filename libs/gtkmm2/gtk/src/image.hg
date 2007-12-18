@@ -1,0 +1,119 @@
+/* $Id: image.hg,v 1.9 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* image.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/misc.h>
+#include <gtkmm/iconset.h>
+#include <gdkmm/pixbufanimation.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/misc_p.h)
+
+
+namespace Gtk
+{
+
+_CC_INCLUDE(gtk/gtktypebuiltins.h)
+_WRAP_ENUM(ImageType, GtkImageType)
+
+
+/** A widget displaying an image.
+ *
+ * The Gtk::Image widget displays an image. Various kinds of object can be
+ * displayed as an image; most typically, you would load a Gdk::Pixbuf ("pixel
+ * buffer") from a file, and then display that. 
+ *
+ * Gtk::Image is a subclass of Gtk::Misc, which implies that you can align it
+ * (center, left, right) and add padding to it, using Gtk::Misc methods.
+ *
+ * Gtk::Image is a "no window" widget (has no Gdk::Window of its own), so by
+ * default does not receive events. If you want to receive events on the
+ * image, such as button clicks, place the image inside a Gtk::EventBox, then
+ * connect to the event signals on the event box. 
+ *
+ * @ingroup Widgets
+ */
+class Image : public Misc
+{
+  _CLASS_GTKOBJECT(Image,GtkImage,GTK_IMAGE,Gtk::Misc,GtkMisc)
+  _IGNORE(gtk_image_set, gtk_image_get, gtk_image_get_pixmap, gtk_image_get_image, gtk_image_get_stock, gtk_image_get_icon_set)
+public:
+
+  _CTOR_DEFAULT
+  _WRAP_CTOR(Image(const Glib::RefPtr<Gdk::Pixmap>& pixmap, const Glib::RefPtr<Gdk::Bitmap>& mask), gtk_image_new_from_pixmap)
+  _WRAP_CTOR(Image(const Glib::RefPtr<Gdk::Image>& image, const Glib::RefPtr<Gdk::Bitmap>& mask), gtk_image_new_from_image)
+  _WRAP_CTOR(Image(const std::string& file), gtk_image_new_from_file)
+  _WRAP_CTOR(Image(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf), gtk_image_new_from_pixbuf)
+
+  /** Creates am Image displaying a stock icon.
+   * Sample stock icon identifiers are Gtk::Stock::OPEN, Gtk::Stock::EXIT. Sample stock sizes are Gtk::ICON_SIZE_MENU, Gtk::ICON_SIZE_SMALL_TOOLBAR.
+   * If the stock icon name isn't known, a "broken image" icon will be displayed instead.
+   * You can register your own stock icon names - see Gtk::IconFactory::add().
+   * @param stock_id A stock icon.
+   * @param size A stock icon size.
+   */
+  Image(const Gtk::StockID& stock_id, IconSize size);
+
+  Image(IconSet& icon_set, IconSize size);
+  Image(const Glib::RefPtr<Gdk::PixbufAnimation>& animation);
+
+  _WRAP_METHOD(void set(const Glib::RefPtr<Gdk::Pixmap>& pixmap, const Glib::RefPtr<Gdk::Bitmap>& mask), gtk_image_set_from_pixmap)
+  _WRAP_METHOD(void set(const Glib::RefPtr<Gdk::Image>& gdk_image, const Glib::RefPtr<Gdk::Bitmap>& mask), gtk_image_set_from_image)
+  _WRAP_METHOD(void set(const std::string& filename), gtk_image_set_from_file)
+  _WRAP_METHOD(void set(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf), gtk_image_set_from_pixbuf)
+  _WRAP_METHOD(void set(const Gtk::StockID& stock_id, IconSize size), gtk_image_set_from_stock)
+  _WRAP_METHOD(void set(IconSet& icon_set, IconSize size), gtk_image_set_from_icon_set)
+  _WRAP_METHOD(void set(const Glib::RefPtr<Gdk::PixbufAnimation>& animation), gtk_image_set_from_animation)
+  _WRAP_METHOD(void set_from_icon_name(const Glib::ustring& icon_name, IconSize size), gtk_image_set_from_icon_name)
+
+  _WRAP_METHOD(void clear(), gtk_image_clear)
+
+  _WRAP_METHOD(ImageType get_storage_type() const, gtk_image_get_storage_type)
+
+  void get_pixmap(Glib::RefPtr<Gdk::Pixmap>& pixmap, Glib::RefPtr<Gdk::Bitmap>& mask) const;
+  void get_image(Glib::RefPtr<Gdk::Image>& gdk_image, Glib::RefPtr<Gdk::Bitmap>& mask) const;
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_pixbuf(), gtk_image_get_pixbuf, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_pixbuf() const, gtk_image_get_pixbuf, refreturn, constversion)
+  void get_stock(Gtk::StockID& stock_id, IconSize& size) const;
+  void get_icon_set(IconSet& icon_set, IconSize& size) const;
+  _WRAP_METHOD(Glib::RefPtr<Gdk::PixbufAnimation> get_animation(), gtk_image_get_animation, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::PixbufAnimation> get_animation() const, gtk_image_get_animation, refreturn, constversion)
+
+  Glib::ustring get_icon_name() const;
+  Glib::ustring get_icon_name(IconSize& size);
+  _IGNORE(gtk_image_get_icon_name)
+
+ _WRAP_METHOD(int get_pixel_size() const, gtk_image_get_pixel_size)
+ _WRAP_METHOD(void set_pixel_size(int pixel_size), gtk_image_set_pixel_size)
+
+  _WRAP_PROPERTY("pixbuf", Glib::RefPtr<Gdk::Pixbuf>)
+  _WRAP_PROPERTY("pixmap", Glib::RefPtr<Gdk::Pixmap>)
+  _WRAP_PROPERTY("image", Glib::RefPtr<Gdk::Image>)
+  _WRAP_PROPERTY("mask", Glib::RefPtr<Gdk::Pixmap>)
+  _WRAP_PROPERTY("file", Glib::ustring)
+  _WRAP_PROPERTY("stock", Glib::ustring)
+  _WRAP_PROPERTY("icon-set", Gtk::IconSet)
+  _WRAP_PROPERTY("icon-size", int)
+  _WRAP_PROPERTY("pixbuf-animation", Glib::RefPtr<Gdk::PixbufAnimation>)
+  _WRAP_PROPERTY("storage-type", ImageType)
+};
+
+} /* namespace Gtk */
+

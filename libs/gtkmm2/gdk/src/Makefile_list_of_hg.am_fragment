@@ -1,0 +1,13 @@
+# This file is include by other Makefile.am files, using the new automake include feature.
+# The include happens in Makefile.am, not Makefile.in or Makefile,
+# so it's like copy-and-pasting this into each of those Makefile.am files.
+
+files_posix_hg =
+files_win32_hg =
+files_general_hg = bitmap.hg color.hg colormap.hg cursor.hg \
+           device.hg display.hg displaymanager.hg dragcontext.hg drawable.hg event.hg gc.hg image.hg \
+           pixbuf.hg pixbufanimation.hg pixbufanimationiter.hg pixmap.hg pixbufformat.hg pixbufloader.hg \
+           rectangle.hg region.hg rgbcmap.hg screen.hg types.hg visual.hg window.hg
+files_general_deprecated_hg =
+
+include $(top_srcdir)/build_shared/Makefile_build_gensrc.am_fragment

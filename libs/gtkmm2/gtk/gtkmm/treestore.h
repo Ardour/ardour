@@ -215,16 +215,14 @@ public:
    */
   void clear();
   
-  /** Returns <tt>true</tt> if @a iter  is an ancestor of @a descendant .  That is, @a iter  is the
-   * parent (or grandparent or great-grandparent) of @a descendant .
+  /** Return value: <tt>true</tt>, if @a iter  is an ancestor of @a descendant 
    * @param iter A valid Gtk::TreeIter.
    * @param descendant A valid Gtk::TreeIter.
    * @return <tt>true</tt>, if @a iter  is an ancestor of @a descendant .
    */
   bool is_ancestor(const iterator& iter, const iterator& descendant) const;
   
-  /** Returns the depth of @a iter .  This will be 0 for anything on the root level, 1
-   * for anything down a level, etc.
+  /** Return value: The depth of @a iter 
    * @param iter A valid Gtk::TreeIter.
    * @return The depth of @a iter .
    */
@@ -270,10 +268,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TreeStore
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeStore
    */
   Glib::RefPtr<Gtk::TreeStore> wrap(GtkTreeStore* object, bool take_copy = false);
 }

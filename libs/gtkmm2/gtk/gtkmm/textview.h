@@ -3,6 +3,8 @@
 #ifndef _GTKMM_TEXTVIEW_H
 #define _GTKMM_TEXTVIEW_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -24,6 +26,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gtkmm/container.h>
 #include <gtkmm/textbuffer.h>
@@ -169,16 +175,12 @@ public:
    */
   void set_buffer(const Glib::RefPtr<TextBuffer>& buffer);
   
-  /** Returns the Gtk::TextBuffer being displayed by this text view.
-   * The reference count on the buffer is not incremented; the caller
-   * of this function won't own a new reference.
+  /** Return value: a Gtk::TextBuffer
    * @return A Gtk::TextBuffer.
    */
   Glib::RefPtr<TextBuffer> get_buffer();
   
-  /** Returns the Gtk::TextBuffer being displayed by this text view.
-   * The reference count on the buffer is not incremented; the caller
-   * of this function won't own a new reference.
+  /** Return value: a Gtk::TextBuffer
    * @return A Gtk::TextBuffer.
    */
   Glib::RefPtr<const TextBuffer> get_buffer() const;
@@ -433,10 +435,10 @@ public:
   int get_border_window_size(TextWindowType type) const;
 
   
-  /** Moves the given @a iter  forward by one display (wrapped) line.  A
-   * display line is different from a paragraph. Paragraphs are
+  /** Moves the given @a iter  forward by one display (wrapped) line.
+   * A display line is different from a paragraph. Paragraphs are
    * separated by newlines or other paragraph separator characters.
-   * Display lines are created by line-wrapping a paragraph.  If
+   * Display lines are created by line-wrapping a paragraph. If
    * wrapping is turned off, display lines and paragraphs will be the
    * same. Display lines are divided differently for each view, since
    * they depend on the view's width; paragraphs are the same in all
@@ -446,10 +448,10 @@ public:
    */
   bool forward_display_line(TextBuffer::iterator& iter);
   
-  /** Moves the given @a iter  backward by one display (wrapped) line.  A
-   * display line is different from a paragraph. Paragraphs are
+  /** Moves the given @a iter  backward by one display (wrapped) line.
+   * A display line is different from a paragraph. Paragraphs are
    * separated by newlines or other paragraph separator characters.
-   * Display lines are created by line-wrapping a paragraph.  If
+   * Display lines are created by line-wrapping a paragraph. If
    * wrapping is turned off, display lines and paragraphs will be the
    * same. Display lines are divided differently for each view, since
    * they depend on the view's width; paragraphs are the same in all
@@ -459,10 +461,10 @@ public:
    */
   bool backward_display_line(TextBuffer::iterator& iter);
   
-  /** Moves the given @a iter  forward to the next display line end.  A
-   * display line is different from a paragraph. Paragraphs are
+  /** Moves the given @a iter  forward to the next display line end.
+   * A display line is different from a paragraph. Paragraphs are
    * separated by newlines or other paragraph separator characters.
-   * Display lines are created by line-wrapping a paragraph.  If
+   * Display lines are created by line-wrapping a paragraph. If
    * wrapping is turned off, display lines and paragraphs will be the
    * same. Display lines are divided differently for each view, since
    * they depend on the view's width; paragraphs are the same in all
@@ -472,10 +474,10 @@ public:
    */
   bool forward_display_line_end(TextBuffer::iterator& iter);
   
-  /** Moves the given @a iter  backward to the next display line start.  A
-   * display line is different from a paragraph. Paragraphs are
+  /** Moves the given @a iter  backward to the next display line start.
+   * A display line is different from a paragraph. Paragraphs are
    * separated by newlines or other paragraph separator characters.
-   * Display lines are created by line-wrapping a paragraph.  If
+   * Display lines are created by line-wrapping a paragraph. If
    * wrapping is turned off, display lines and paragraphs will be the
    * same. Display lines are divided differently for each view, since
    * they depend on the view's width; paragraphs are the same in all
@@ -500,12 +502,13 @@ public:
    * cursor position will be @a count  positions to the left of the old
    * cursor position.
    * 
-   * In the presence of bidirection text, the correspondence
+   * In the presence of bi-directional text, the correspondence
    * between logical and visual order will depend on the direction
    * of the current run, and there may be jumps when the cursor
    * is moved off of the end of a run.
    * @param iter A Gtk::TextIter.
-   * @param count Number of characters to move (negative moves left, positive moves right).
+   * @param count Number of characters to move (negative moves left, 
+   * positive moves right).
    * @return <tt>true</tt> if @a iter  moved and is not on the end iterator.
    */
   bool move_visually(TextBuffer::iterator& iter, int count);
@@ -519,8 +522,8 @@ public:
 
   
   /** Adds a child at fixed coordinates in one of the text widget's
-   * windows.  The window must have nonzero size (see
-   * set_border_window_size()).  Note that the child
+   * windows. The window must have nonzero size (see
+   * set_border_window_size()). Note that the child
    * coordinates are given relative to the Gdk::Window in question, and
    * that these coordinates have no sane relationship to scrolling. When
    * placing a child in Gtk::TEXT_WINDOW_WIDGET, scrolling is
@@ -568,8 +571,7 @@ public:
    */
   void set_editable(bool setting = true);
   
-  /** Returns the default editability of the Gtk::TextView. Tags in the
-   * buffer may override this setting for some ranges of text.
+  /** Return value: whether text is editable by default
    * @return Whether text is editable by default.
    */
   bool get_editable() const;
@@ -688,7 +690,7 @@ public:
    */
   void set_overwrite(bool overwrite = true);
   
-  /** Returns whether the Gtk::TextView is in overwrite mode or not.
+  /** Return value: whether @a text_view  is in overwrite mode or not.
    * @return Whether @a text_view  is in overwrite mode or not.
    * 
    * @newin2p4.
@@ -696,51 +698,54 @@ public:
   bool get_overwrite() const;
   
   
-  /** Sets the behavior of the text widget when the Tab key is pressed. If @a accepts_tab 
-   * is <tt>true</tt> a tab character is inserted. If @a accepts_tab  is <tt>false</tt> the keyboard focus
-   * is moved to the next widget in the focus chain.
+  /** Sets the behavior of the text widget when the Tab key is pressed. 
+   * If @a accepts_tab  is <tt>true</tt>, a tab character is inserted. If @a accepts_tab  
+   * is <tt>false</tt> the keyboard focus is moved to the next widget in the focus 
+   * chain.
    * 
    * @newin2p4
-   * @param accepts_tab <tt>true</tt> if pressing the Tab key should insert a tab character, <tt>false</tt>, if pressing the Tab key should move the keyboard focus.
+   * @param accepts_tab <tt>true</tt> if pressing the Tab key should insert a tab 
+   * character, <tt>false</tt>, if pressing the Tab key should move the 
+   * keyboard focus.
    */
   void set_accepts_tab(bool accepts_tab = true);
   
-  /** Returns whether pressing the Tab key inserts a tab characters.
-   * set_accepts_tab().
-   * @return <tt>true</tt> if pressing the Tab key inserts a tab character, <tt>false</tt> if pressing the Tab key moves the keyboard focus.
+  /** Return value: <tt>true</tt> if pressing the Tab key inserts a tab character,
+   * @return <tt>true</tt> if pressing the Tab key inserts a tab character, 
+   * <tt>false</tt> if pressing the Tab key moves the keyboard focus.
    * 
    * @newin2p4.
    */
   bool get_accepts_tab() const;
     
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment)</tt>
+   * <tt>void on_my_%set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment)</tt>
    */
 
   Glib::SignalProxy2< void,Adjustment*,Adjustment* > signal_set_scroll_adjustments();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %populate_popup(Menu* menu)</tt>
+   * <tt>void on_my_%populate_popup(Menu* menu)</tt>
    */
 
   Glib::SignalProxy1< void,Menu* > signal_populate_popup();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %set_anchor()</tt>
+   * <tt>void on_my_%set_anchor()</tt>
    */
 
   Glib::SignalProxy0< void > signal_set_anchor();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %insert_at_cursor(const Glib::ustring& str)</tt>
+   * <tt>void on_my_%insert_at_cursor(const Glib::ustring& str)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::ustring& > signal_insert_at_cursor();
@@ -1037,10 +1042,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::TextView
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TextView
    */
   Gtk::TextView* wrap(GtkTextView* object, bool take_copy = false);
 } //namespace Glib

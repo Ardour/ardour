@@ -31,6 +31,7 @@
 //#include <gdkmm/window.h>
 #include <gdkmm/rectangle.h>
 #include <glibmm/object.h>
+#include <cairomm/fontoptions.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -216,6 +217,11 @@ public:
    * when displaying the window on the screen: in particular, for
    * X an appropriate windowing manager and compositing manager
    * must be running to provide appropriate display.
+   * 
+   * This functionality is not implemented in the Windows backend.
+   * 
+   * For setting an overall opacity for a top-level window, see
+   * gdk_window_set_opacity().
    * @return A colormap to use for windows with an alpha channel
    * or <tt>0</tt> if the capability is not available.
    * 
@@ -231,6 +237,11 @@ public:
    * when displaying the window on the screen: in particular, for
    * X an appropriate windowing manager and compositing manager
    * must be running to provide appropriate display.
+   * 
+   * This functionality is not implemented in the Windows backend.
+   * 
+   * For setting an overall opacity for a top-level window, see
+   * gdk_window_set_opacity().
    * @return A colormap to use for windows with an alpha channel
    * or <tt>0</tt> if the capability is not available.
    * 
@@ -258,6 +269,15 @@ public:
    * @newin2p8.
    */
   Glib::RefPtr<const Visual> get_rgba_visual() const;
+
+  
+  /** Return value: Whether windows with RGBA visuals can reasonably be
+   * @return Whether windows with RGBA visuals can reasonably be
+   * expected to have their alpha channels drawn correctly on the screen.
+   * 
+   * @newin2p10.
+   */
+  bool is_composited() const;
 
   
   /** Gets the root window of @a screen .
@@ -320,15 +340,14 @@ public:
    */
   int get_width_mm() const;
   
-  /** Returns the height of @a screen  in millimeters. 
-   * Note that on some X servers this value will not be correct.
+  /** Returns: the heigth of @a screen  in millimeters.
    * @return The heigth of @a screen  in millimeters.
    * 
    * @newin2p2.
    */
   int get_height_mm() const;
 
-  
+ 
   /** Lists the available visuals for the specified @a screen .
    * A visual describes a hardware image data format.
    * For example, a visual might support 24-bit color, or 8-bit color,
@@ -337,7 +356,8 @@ public:
    * @return A list of visuals.
    */
   Glib::ListHandle< Glib::RefPtr<Visual> > list_visuals();
-  
+
+ 
   /** Obtains a list of all toplevel windows known to GDK on the screen @a screen .
    * A toplevel window is a child of the root window (see
    * gdk_get_default_root_window()).
@@ -345,6 +365,7 @@ public:
    * @return List of toplevel windows.
    */
   Glib::ListHandle< Glib::RefPtr<Window> > get_toplevel_windows();
+
   
   /** Determines the name to pass to Gdk::Display::open() to get
    * a Gdk::Display with this screen as the default screen.
@@ -355,7 +376,7 @@ public:
   Glib::ustring make_display_name();
 
   
-  /** Returns the number of monitors which @a screen  consists of.
+  /** Returns: number of monitors which @a screen  consists of.
    * @return Number of monitors which @a screen  consists of.
    * 
    * @newin2p2.
@@ -374,7 +395,7 @@ public:
    */
   void get_monitor_geometry(int monitor_num, Rectangle& dest) const;
   
-  /** Returns the monitor number in which the point ( @a x , @a y ) is located.
+  /** Returns: the monitor number in which the point ( @a x , @a y ) lies, or
    * @param x The x coordinate in the virtual screen.
    * @param y The y coordinate in the virtual screen.
    * @return The monitor number in which the point ( @a x , @a y ) lies, or
@@ -427,13 +448,79 @@ public:
   bool get_setting(const Glib::ustring& name, ValueType& value) const;
   
 
+  /** Sets the default font options for the screen. These
+   * options will be set on any Pango::Context's newly created
+   * with gdk_pango_context_get_for_screen(). Changing the
+   * default set of font options does not affect contexts that
+   * have already been created.
+   * 
+   * @newin2p10
+   * @param options A #cairo_font_options_t, or <tt>0</tt> to unset any
+   * previously set default font options.
+   */
+  void set_font_options(const Cairo::FontOptions& options);
+
+  // Note: This returns a const, so we assume that we must copy it:
+   
+
+  /** Gets any options previously set with set_font_options().
+   * @return The current font options, or <tt>0</tt> if no default
+   * font options have been set.
+   * 
+   * @newin2p10.
+   */
+  Cairo::FontOptions get_font_options() const;
+
+  
+  /** @newin2p10
+   * @param dpi The resolution in "dots per inch". (Physical inches aren't actually
+   * involved; the terminology is conventional.)
+   *  
+   * Sets the resolution for font handling on the screen. This is a
+   * scale factor between points specified in a Pango::FontDescription
+   * and cairo units. The default value is 96, meaning that a 10 point
+   * font will be 13 units high. (10 * 96. / 72. = 13.3).
+   */
+  void set_resolution(double dpi);
+  
+  /** Gets the resolution for font handling on the screen; see
+   * set_resolution() for full details.
+   * @return The current resolution, or -1 if no resolution
+   * has been set.
+   * 
+   * @newin2p10.
+   */
+  double get_resolution() const;
+
+  
+  /** Return value: the currently active window, or <tt>0</tt>.
+   * @return The currently active window, or <tt>0</tt>.
+   * 
+   * @newin2p10.
+   */
+  Glib::RefPtr<Gdk::Window> get_active_window();
+  
+  /** Return value: the currently active window, or <tt>0</tt>.
+   * @return The currently active window, or <tt>0</tt>.
+   * 
+   * @newin2p10.
+   */
+  Glib::RefPtr<const Gdk::Window> get_active_window() const;
+
+ 
+  /** Return value: a list of Gdk::Window&lt;!-- --&gt;s for the current window stack,
+   * @return A list of Gdk::Window&lt;!-- --&gt;s for the current window stack,
+   * or <tt>0</tt>.
+   * 
+   * @newin2p10.
+   */
+  Glib::ListHandle< Glib::RefPtr<Window> > get_window_stack();
+
   /** The size_changed signal is emitted when the pixel width or 
    * height of a screen changes.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %size_changed()</tt>
+   * <tt>void on_my_%size_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_size_changed();
@@ -476,10 +563,13 @@ bool Screen::get_setting(const Glib::ustring& name, ValueType& value) const
 
 namespace Glib
 {
-  /** @relates Gdk::Screen
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::Screen
    */
   Glib::RefPtr<Gdk::Screen> wrap(GdkScreen* object, bool take_copy = false);
 }

@@ -263,7 +263,7 @@ public:
 #endif /* defined(G_OS_WIN32) || defined(DOXYGEN_SHOULD_SKIP_THIS) */
 
   /** Read a single UCS-4 character.
-   * @retval unichar The Unicode character.
+   * @retval thechar The Unicode character.
    * @return The status of the operation.
    * @throw Glib::IOChannelError
    * @throw Glib::ConvertError
@@ -276,9 +276,9 @@ public:
    * @return A G::IOStatus.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-  IOStatus read(gunichar& unichar);
+  IOStatus read(gunichar& thechar);
 #else
-  IOStatus read(gunichar& unichar, std::auto_ptr<Glib::Error>& error);
+  IOStatus read(gunichar& thechar, std::auto_ptr<Glib::Error>& error);
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
 
@@ -601,7 +601,7 @@ public:
    * @return The buffering status of the channel.
    */
   
-  /** Returns whether @a channel  is buffered.
+  /** Return Value: <tt>true</tt> if the @a channel  is buffered.
    * @return <tt>true</tt> if the @a channel  is buffered.
    */
   bool get_buffered() const;
@@ -628,10 +628,7 @@ public:
    * IOChannel object.
    */
   
-  /** Returns whether the file/socket/whatever associated with @a channel 
-   * will be closed when @a channel  receives its final unref and is
-   * destroyed. The default value of this is <tt>true</tt> for channels created
-   * by g_io_channel_new_file(), and <tt>false</tt> for all other channels.
+  /** Return value: Whether the channel will be closed on the final unref of
    * @return Whether the channel will be closed on the final unref of
    * the GIOChannel data structure.
    */

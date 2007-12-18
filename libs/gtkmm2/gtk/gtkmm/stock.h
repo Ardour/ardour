@@ -79,6 +79,7 @@ extern GTKMM_API const Gtk::BuiltinStockID COPY;             /*!< @image html st
 extern GTKMM_API const Gtk::BuiltinStockID CUT;              /*!< @image html stock_cut_24.png                 */
 extern GTKMM_API const Gtk::BuiltinStockID DELETE;           /*!< @image html stock_trash_24.png               */
 extern GTKMM_API const Gtk::BuiltinStockID DIRECTORY;        /*!< @image html stock_directory_24.png           */
+extern GTKMM_API const Gtk::BuiltinStockID DISCARD;          /*!< @image html stock_discard_24.png             */
 extern GTKMM_API const Gtk::BuiltinStockID DISCONNECT;       /*!< @image html stock_disconnect_24.png          */
 extern GTKMM_API const Gtk::BuiltinStockID EDIT;             /*!< @image html stock_edit_24.png                */
 extern GTKMM_API const Gtk::BuiltinStockID EXECUTE;          /*!< @image html stock_exec_24.png                */
@@ -123,6 +124,10 @@ extern GTKMM_API const Gtk::BuiltinStockID NEW;              /*!< @image html st
 extern GTKMM_API const Gtk::BuiltinStockID NO;               /*!< @image html stock_no_20.png                  */
 extern GTKMM_API const Gtk::BuiltinStockID OK;               /*!< @image html stock_ok_20.png                  */
 extern GTKMM_API const Gtk::BuiltinStockID OPEN;             /*!< @image html stock_open_24.png                */
+extern GTKMM_API const Gtk::BuiltinStockID ORIENTATION_PORTRAIT; /*!< @image html stock_orientation_portrait_24.png                */
+extern GTKMM_API const Gtk::BuiltinStockID ORIENTATION_LANDSCAPE; /*!< @image html stock_orientation_landscape_24.png                */
+extern GTKMM_API const Gtk::BuiltinStockID ORIENTATION_REVERSE_LANDSCAPE; /*!< @image html stock_orientation_reverse_landscape_24.png                */
+extern GTKMM_API const Gtk::BuiltinStockID ORIENTATION_REVERSE_PORTRAIT; /*!< @image html stock_orientation_reverse_portrait_24.png                */
 extern GTKMM_API const Gtk::BuiltinStockID PASTE;            /*!< @image html stock_paste_24.png               */
 extern GTKMM_API const Gtk::BuiltinStockID PREFERENCES;      /*!< @image html stock_preferences_24.png         */
 extern GTKMM_API const Gtk::BuiltinStockID PRINT;            /*!< @image html stock_print_24.png               */
@@ -135,6 +140,7 @@ extern GTKMM_API const Gtk::BuiltinStockID REMOVE;           /*!< @image html st
 extern GTKMM_API const Gtk::BuiltinStockID REVERT_TO_SAVED;  /*!< @image html stock_revert_24.png              */
 extern GTKMM_API const Gtk::BuiltinStockID SAVE;             /*!< @image html stock_save_24.png                */
 extern GTKMM_API const Gtk::BuiltinStockID SAVE_AS;          /*!< @image html stock_save_as_24.png             */
+extern GTKMM_API const Gtk::BuiltinStockID SELECT_ALL;       /*!< @image html stock_selectall_24.png           */
 extern GTKMM_API const Gtk::BuiltinStockID SELECT_COLOR;     /*!< @image html stock_colorselector_24.png       */
 extern GTKMM_API const Gtk::BuiltinStockID SELECT_FONT;      /*!< @image html stock_font_24.png                */
 extern GTKMM_API const Gtk::BuiltinStockID SORT_ASCENDING;   /*!< @image html stock_sort_ascending_24.png      */

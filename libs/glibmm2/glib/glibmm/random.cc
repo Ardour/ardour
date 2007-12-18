@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: random.cc,v 1.1.1.1 2003/01/07 16:58:52 murrayc Exp $ */
+/* $Id: random.cc 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* random.cc
  *

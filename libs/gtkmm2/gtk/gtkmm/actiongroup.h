@@ -103,10 +103,7 @@ public:
   Glib::ustring get_name() const;
 
   
-  /** Returns <tt>true</tt> if the group is sensitive.  The constituent actions
-   * can only be logically sensitive (see is_sensitive()) if
-   * they are sensitive (see get_sensitive()) and their group
-   * is sensitive.
+  /** Return value: <tt>true</tt> if the group is sensitive.
    * @return <tt>true</tt> if the group is sensitive.
    * 
    * @newin2p4.
@@ -120,10 +117,7 @@ public:
    */
   void set_sensitive(bool sensitive = true);
   
-  /** Returns <tt>true</tt> if the group is visible.  The constituent actions
-   * can only be logically visible (see is_visible()) if
-   * they are visible (see get_visible()) and their group
-   * is visible.
+  /** Return value: <tt>true</tt> if the group is visible.
    * @return <tt>true</tt> if the group is visible.
    * 
    * @newin2p4.
@@ -222,11 +216,9 @@ public:
    *
    * @param action the action
    * @param proxy the proxy
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %connect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
+   * <tt>void on_my_%connect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_connect_proxy();
@@ -241,11 +233,9 @@ public:
    *
    * @param action the action
    * @param proxy the proxy
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
+   * <tt>void on_my_%disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_disconnect_proxy();
@@ -258,11 +248,9 @@ public:
    * notification just before any action is activated.
    *
    * @action the action
-   */          
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %pre_activate(const Glib::RefPtr<Action>& action)</tt>
+   * <tt>void on_my_%pre_activate(const Glib::RefPtr<Action>& action)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_pre_activate();
@@ -275,11 +263,9 @@ public:
    * notification just after any action is activated.
    *
    * @param action the action
-   */ 
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %post_activate(const Glib::RefPtr<Action>& action)</tt>
+   * <tt>void on_my_%post_activate(const Glib::RefPtr<Action>& action)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_post_activate();
@@ -309,10 +295,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::ActionGroup
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ActionGroup
    */
   Glib::RefPtr<Gtk::ActionGroup> wrap(GtkActionGroup* object, bool take_copy = false);
 }

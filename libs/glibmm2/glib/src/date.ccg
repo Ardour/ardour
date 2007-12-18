@@ -65,13 +65,21 @@ void Date::set_parse(const Glib::ustring& str)
   g_date_set_parse(&gobject_, str.c_str());
 }
 
+
 _DEPRECATE_IFDEF_START
+
+//Avoid a build problem in the case that time_t is equivalent to guint32 (GTime is also guint32)
+//That would make the set_time() method overload impossible.
+#ifdef GLIBMM_HAVE_C_STD_TIME_T_IS_NOT_INT32
 void Date::set_time(GTime time)
 {
   //This method, and the C function that it wraps, are deprecated.
   g_date_set_time(&gobject_, time);
 }
+#endif //GLIBMM_HAVE_C_STD_TIME_T_IS_NOT_INT32
+
 _DEPRECATE_IFDEF_END
+
 
 void Date::set_time(time_t timet)
 {

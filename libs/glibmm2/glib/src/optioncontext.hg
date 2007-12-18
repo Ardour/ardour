@@ -22,6 +22,7 @@ _DEFS(glibmm,glib)
 #include <glibmm/optionentry.h>
 #include <glibmm/optiongroup.h>
 #include <glibmm/error.h>
+#include <sigc++/signal.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern "C" { typedef struct _GOptionContext GOptionContext; }
@@ -89,6 +90,31 @@ public:
 
   GOptionContext*       gobj()       { return gobject_; }
   const GOptionContext* gobj() const { return gobject_; }
+
+  _WRAP_METHOD(void set_summary(const Glib::ustring& summary), g_option_context_set_summary)
+  _WRAP_METHOD(Glib::ustring get_summary() const, g_option_context_get_summary)
+  _WRAP_METHOD(void set_description(const Glib::ustring& description), g_option_context_set_description)
+  _WRAP_METHOD(Glib::ustring get_description() const, g_option_context_get_description)
+
+  _WRAP_METHOD(void set_translation_domain(const Glib::ustring& domain), g_option_context_set_translation_domain)
+
+  /**
+   * This function is used to translate user-visible strings, for --help output.
+   * The function takes an untranslated string and returns a translated string
+   */
+  typedef sigc::slot<Glib::ustring, const Glib::ustring&> SlotTranslate;
+
+  /**
+   * Sets the function which is used to translate user-visible
+   * strings, for --help output.  Different groups can use different functions.
+   *
+   * If you are using gettext(), you only need to set the translation domain,
+   * see set_translation_domain().
+   *
+   * @newin2p14
+   */
+  void set_translate_func (const SlotTranslate& slot);
+  _IGNORE(g_option_context_set_translate_func)
 
 protected:
 

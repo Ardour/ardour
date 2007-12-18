@@ -118,28 +118,48 @@ public:
   Statusbar();
 
   
+  /** Returns: an integer id
+   * @param context_description Textual description of what context 
+   * the new message is being used in.
+   * @return An integer id.
+   */
   guint get_context_id(const Glib::ustring& context_description);
   guint push(const Glib::ustring& text, guint context_id = 0);
   
+  /** Removes the first message in the Gtk::StatusBar's stack
+   * with the given context id. 
+   * 
+   * Note that this may not change the displayed message, if 
+   * the message at the top of the stack has a different 
+   * context id.
+   * @param context_id A context identifier.
+   */
   void pop(guint context_id = 0);
   void remove_message(guint message_id, guint context_id = 0);
   
+  /** Sets whether the statusbar has a resize grip. 
+   * <tt>true</tt> by default.
+   * @param setting <tt>true</tt> to have a resize grip.
+   */
   void set_has_resize_grip(bool setting = true);
   
+  /** Returns: <tt>true</tt> if the statusbar has a resize grip.
+   * @return <tt>true</tt> if the statusbar has a resize grip.
+   */
   bool get_has_resize_grip() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %text_pushed(guint context_id, const Glib::ustring& text)</tt>
+   * <tt>void on_my_%text_pushed(guint context_id, const Glib::ustring& text)</tt>
    */
 
   Glib::SignalProxy2< void,guint,const Glib::ustring& > signal_text_pushed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %text_popped(guint context_id, const Glib::ustring& text)</tt>
+   * <tt>void on_my_%text_popped(guint context_id, const Glib::ustring& text)</tt>
    */
 
   Glib::SignalProxy2< void,guint,const Glib::ustring& > signal_text_popped();
@@ -173,10 +193,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Statusbar
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Statusbar
    */
   Gtk::Statusbar* wrap(GtkStatusbar* object, bool take_copy = false);
 } //namespace Glib

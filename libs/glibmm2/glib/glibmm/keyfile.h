@@ -84,9 +84,9 @@ inline KeyFileFlags& operator^=(KeyFileFlags& lhs, KeyFileFlags rhs)
   { return (lhs = static_cast<KeyFileFlags>(static_cast<unsigned>(lhs) ^ static_cast<unsigned>(rhs))); }
 
 
-  /** Exception class for KeyFile errors.
-   */
-  class KeyFileError : public Glib::Error
+/** Exception class for KeyFile errors.
+ */
+class KeyFileError : public Glib::Error
 {
 public:
   enum Code
@@ -118,6 +118,61 @@ private:
 };
 
 
+/** This class lets you parse, edit or create files containing groups of key-value pairs, which we call key files 
+ * for lack of a better name. Several freedesktop.org specifications use key files now, e.g the Desktop Entry 
+ * Specification and the Icon Theme Specification.
+ *
+ * The syntax of key files is described in detail in the Desktop Entry Specification, here is a quick summary: Key  
+ * files consists of groups of key-value pairs, interspersed with comments. 
+ *
+ * @code
+ * # this is just an example
+ * # there can be comments before the first group
+ *
+ * [First Group]
+ *
+ * Name=Key File Example\tthis value shows\nescaping
+ *
+ * # localized strings are stored in multiple key-value pairs
+ * Welcome=Hello
+ * Welcome[de]=Hallo
+ * Welcome[fr]=Bonjour
+ * Welcome[it]=Ciao
+ *
+ * [Another Group]
+ *
+ * Numbers=2;20;-200;0
+ *
+ * Booleans=true;false;true;true
+ * @endcode
+ *
+ * Lines beginning with a '#' and blank lines are considered comments.
+ *
+ * Groups are started by a header line containing the group name enclosed in '[' and ']', and ended implicitly by 
+ * the start of the next group or the end of the file. Each key-value pair must be contained in a group.
+ * 
+ * Key-value pairs generally have the form key=value, with the exception of localized strings, which have the form 
+ * key[locale]=value. Space before and after the '=' character are ignored. Newline, tab, carriage return and 
+ * backslash characters in value are escaped as \n, \t, \r, and \\, respectively. To preserve leading spaces in 
+ * values, these can also be escaped as \s.
+ * 
+ * Key files can store strings (possibly with localized variants), integers, booleans and lists of these. Lists are 
+ * separated by a separator character, typically ';' or ','. To use the list separator character in a value in a 
+ * list, it has to be escaped by prefixing it with a backslash.
+ * 
+ * This syntax is obviously inspired by the .ini files commonly met on Windows, but there are some important 
+ * differences:
+ * - .ini files use the ';' character to begin comments, key files use the '#' character.
+ * - Key files allow only comments before the first group.
+ * - Key files are always encoded in UTF-8.
+ * - Key and Group names are case-sensitive, for example a group called [GROUP] is a different group from [group].
+ * 
+ * Note that in contrast to the Desktop Entry Specification, groups in key files may contain the same key multiple 
+ * times; the last entry wins. Key files may also contain multiple groups with the same name; they are merged 
+ * together. Another difference is that keys and group names in key files are not restricted to ASCII characters. 
+ *
+ * @newin2p14
+ */
 class KeyFile
 {
   public:
@@ -178,6 +233,16 @@ public:
   bool load_from_data(const Glib::ustring& data, KeyFileFlags flags = Glib::KEY_FILE_NONE);
   
 
+  //TODO: 
+  /*
+  gboolean g_key_file_load_from_dirs          (GKeyFile             *key_file,
+					     const gchar	  *file,
+					     const gchar	 **search_dirs,
+					     gchar		 **full_path,
+					     GKeyFileFlags         flags,
+					     GError              **error);
+  */
+
   /** Looks for a KeyFile named @a file in the paths returned from
    * g_get_user_data_dir() and g_get_system_data_dirs() and loads them
    * into the keyfile object, placing the full path to the file in
@@ -198,7 +263,7 @@ public:
   Glib::ustring to_data();
   
 
-  /** Returns the name of the start group of the file.
+  /** Return value: The start group of the key file.
    * @return The start group of the key file.
    * 
    * @newin2p6.
@@ -243,12 +308,7 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
 	
-  /** Returns the value associated with @a key  under @a group_name .  
-   * 
-   * In the event the key cannot be found, <tt>0</tt> is returned and 
-   *  @a error  is set to G::KEY_FILE_ERROR_KEY_NOT_FOUND.  In the 
-   * event that the @a group_name  cannot be found, <tt>0</tt> is returned 
-   * and @a error  is set to G::KEY_FILE_ERROR_GROUP_NOT_FOUND.
+  /** Return value: a newly allocated string or <tt>0</tt> if the specified
    * @param group_name A group name.
    * @param key A key.
    * @param error Return location for a G::Error, or <tt>0</tt>.
@@ -264,12 +324,7 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
-  /** Returns the value associated with @a key  under @a group_name .  
-   * 
-   * In the event the key cannot be found, <tt>0</tt> is returned and 
-   *  @a error  is set to G::KEY_FILE_ERROR_KEY_NOT_FOUND.  In the 
-   * event that the @a group_name  cannot be found, <tt>0</tt> is returned 
-   * and @a error  is set to G::KEY_FILE_ERROR_GROUP_NOT_FOUND.
+  /** Return value: a newly allocated string or <tt>0</tt> if the specified
    * @param group_name A group name.
    * @param key A key.
    * @param error Return location for a G::Error, or <tt>0</tt>.
@@ -291,14 +346,7 @@ public:
   Glib::ustring get_locale_string(const Glib::ustring& group_name, const Glib::ustring& key) const;
 
   
-  /** Returns the value associated with @a key  under @a group_name 
-   * translated in the given @a locale  if available.  If @a locale  is
-   * <tt>0</tt> then the current locale is assumed. 
-   * 
-   * If @a key  cannot be found then <tt>0</tt> is returned and @a error  is set to
-   * G::KEY_FILE_ERROR_KEY_NOT_FOUND. If the value associated
-   * with @a key  cannot be interpreted or no suitable translation can
-   * be found then the untranslated value is returned.
+  /** Return value: a newly allocated string or <tt>0</tt> if the specified
    * @param group_name A group name.
    * @param key A key.
    * @param locale A locale or <tt>0</tt>.
@@ -315,18 +363,13 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
-  /** Returns the value associated with @a key  under @a group_name  as a
-   * boolean. 
-   * 
-   * If @a key  cannot be found then the return value is undefined and
-   *  @a error  is set to G::KEY_FILE_ERROR_KEY_NOT_FOUND. Likewise, if
-   * the value associated with @a key  cannot be interpreted as a boolean
-   * then the return value is also undefined and @a error  is set to
-   * G::KEY_FILE_ERROR_INVALID_VALUE.
+  /** Return value: the value associated with the key as a boolean, or
    * @param group_name A group name.
    * @param key A key.
    * @param error Return location for a G::Error.
-   * @return The value associated with the key as a boolean
+   * @return The value associated with the key as a boolean, or
+   * <tt>false</tt> if the key was not found or could not be parsed.
+   * 
    * @newin2p6.
    */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
@@ -345,18 +388,12 @@ public:
   int get_integer(const Glib::ustring& key) const;
 
   
-  /** Returns the value associated with @a key  under @a group_name  as an
-   * integer. If @a group_name  is <tt>0</tt>, the start_group is used.
-   * 
-   * If @a key  cannot be found then the return value is undefined and
-   *  @a error  is set to G::KEY_FILE_ERROR_KEY_NOT_FOUND. Likewise, if
-   * the value associated with @a key  cannot be interpreted as an integer
-   * then the return value is also undefined and @a error  is set to
-   * G::KEY_FILE_ERROR_INVALID_VALUE.
+  /** Return value: the value associated with the key as an integer, or
    * @param group_name A group name.
    * @param key A key.
    * @param error Return location for a G::Error.
-   * @return The value associated with the key as an integer.
+   * @return The value associated with the key as an integer, or
+   * 0 if the key was not found or could not be parsed.
    * 
    * @newin2p6.
    */
@@ -366,6 +403,52 @@ public:
   int get_integer(const Glib::ustring& group_name, const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const;
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
+
+  /** Gets the value in the first group, under @a key, interpreting it as
+   * a double.
+   * @param key The name of the key
+   * @return The value of @a key as an double
+   * @throws Glib::KeyFileError
+   *
+   * @newin2p14
+   */
+   double get_double(const Glib::ustring& key) const;
+
+  
+  /** Return value: the value associated with the key as a double, or
+   * @param group_name A group name.
+   * @param key A key.
+   * @param error Return location for a G::Error.
+   * @return The value associated with the key as a double, or
+   * 0.0 if the key was not found or could not be parsed.
+   * 
+   * @newin2p14.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  double get_double(const Glib::ustring& group_name, const Glib::ustring& key) const;
+#else
+  double get_double(const Glib::ustring& group_name, const Glib::ustring& key, std::auto_ptr<Glib::Error>& error) const;
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+
+  /** Associates a new double value with @a key  under @a group_name .
+   * If @a key  cannot be found then it is created. 
+   * 
+   * @newin2p14
+   * @param group_name A group name.
+   * @param key A key.
+   * @param value An double value.
+   */
+  void set_double(const Glib::ustring& group_name, const Glib::ustring& key, double value);
+
+  /** Associates a new double value with @a key under the start group.
+   * If @a key  cannot be found then it is created.
+   * 
+   * @newin2p12
+   * @param key A key.
+   * @param value An double value.
+   */
+  void set_double(const Glib::ustring& key, double value);
 
   /** Returns the values associated with @a key under @a group_name
    * @param group_name The name of a group
@@ -412,6 +495,15 @@ public:
    * @throws Glib::KeyFileError
    */
   Glib::ArrayHandle<int> get_integer_list(const Glib::ustring& group_name, const Glib::ustring& key) const;
+  
+
+  /** Returns the values associated with @a key under @a group_name
+   * @param group_name The name of a group
+   * @param key The name of a key
+   * @return A list of doubles
+   * @throws Glib::KeyFileError
+   */
+  Glib::ArrayHandle<double> get_double_list(const Glib::ustring& group_name, const Glib::ustring& key) const;
   
 
   /** Get comment from top of file
@@ -530,7 +622,7 @@ public:
   
 
   /** Sets a list of booleans for the @a key under @a group_name.
-   * If either the @a key or @a group_name cannot be found they are created
+   * If either the @a key or @a group_name cannot be found they are created.
    * @param group_name The name of a group
    * @param key The name of a key
    * @param list A list holding object of type bool
@@ -539,12 +631,23 @@ public:
   
 	
   /** Sets a list of integers for the @a key under @a group_name.
-   * If either the @a key or @a group_name cannot be found they are created
+   * If either the @a key or @a group_name cannot be found they are created.
    * @param group_name The name of a group
    * @param key The name of a key
    * @param list A list holding object of type int
    */
   void set_integer_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<int>& list);
+  
+
+  /** Sets a list of doubles for the @a key under @a group_name.
+   * If either the @a key or @a group_name cannot be found they are created.
+   * @param group_name The name of a group
+   * @param key The name of a key
+   * @param list A list holding object of type int
+   *
+   * @newin2p14
+   */
+  void set_double_list(const Glib::ustring& group_name, const Glib::ustring& key, Glib::ArrayHandle<double>& list);
   
 
   /** Places @a comment at the start of the file, before the first group.

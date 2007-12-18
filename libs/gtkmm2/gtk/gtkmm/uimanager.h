@@ -41,7 +41,7 @@ namespace Gtk
 { class UIManager_Class; } // namespace Gtk
 namespace Gtk
 {
-
+	
 /** @addtogroup gtkmmEnums Enums and Flags */
 
 /**
@@ -119,6 +119,149 @@ namespace Gtk
 {
 
 
+/** Constructing menus and toolbars from an XML description.
+ *
+ * A Gtk::UIManager constructs a user interface (menus and toolbars) from one or more UI definitions,
+ * which reference actions from one or more action groups.
+ *
+ * \par UI Definitions
+ *
+ * The UI definitions are specified in an XML format which can be roughly described by the following DTD.
+ * \code
+ * <!ELEMENT ui          (menubar|toolbar|popup|accelerator)* >
+ * <!ELEMENT menubar     (menuitem|separator|placeholder|menu)* >
+ * <!ELEMENT menu        (menuitem|separator|placeholder|menu)* >
+ * <!ELEMENT popup       (menuitem|separator|placeholder|menu)* >
+ * <!ELEMENT toolbar     (toolitem|separator|placeholder)* >
+ * <!ELEMENT placeholder (menuitem|toolitem|separator|placeholder|menu)* >
+ * <!ELEMENT menuitem     EMPTY >
+ * <!ELEMENT toolitem     (menu?) >
+ * <!ELEMENT separator    EMPTY >
+ * <!ELEMENT accelerator  EMPTY >
+ * <!ATTLIST menubar      name                  #IMPLIED 
+ *                      action                #IMPLIED >
+ * <!ATTLIST toolbar      name                  #IMPLIED 
+ *                      action                #IMPLIED >
+ * <!ATTLIST popup        name                  #IMPLIED 
+ *                      action                #IMPLIED >
+ * <!ATTLIST placeholder  name                  #IMPLIED
+ *                       action                #IMPLIED >
+ * <!ATTLIST separator    name                  #IMPLIED
+ *                       action                #IMPLIED
+ *                       expand   (true|false) #IMPLIED >
+ * <!ATTLIST menu         name                  #IMPLIED
+ *                       action                #REQUIRED
+ *                       position (top|bot)    #IMPLIED >
+ * <!ATTLIST menuitem     name                  #IMPLIED
+ *                      action                #REQUIRED
+ *                      position (top|bot)    #IMPLIED >
+ * <!ATTLIST toolitem     name                  #IMPLIED
+ *                      action                #REQUIRED
+ *                      position (top|bot)    #IMPLIED >
+ * <!ATTLIST accelerator  name                  #IMPLIED
+ *                       action                #REQUIRED >
+ * \endcode
+ *
+ * There are some additional restrictions beyond those specified in the DTD, e.g. 
+ * every toolitem must have a toolbar in its anchestry and every menuitem must have a +
+ * menubar or popup in its anchestry. Since a GMarkup parser is used to parse the UI description, 
+ * it must not only be valid XML, but valid GMarkup.
+ *
+ * If a name is not specified, it defaults to the action. If an action is not specified either,
+ * the element name is used. The name and action attributes must not contain '/' characters after 
+ * parsing (since that would mess up path lookup) and must be usable as XML attributes when 
+ * enclosed in doublequotes, thus they must not '"' characters or references to the &quot; entity.
+ *
+ * \par Example: UI Definition
+ * \code
+ * <ui>
+ * <menubar>
+ *   <menu name="FileMenu" action="FileMenuAction">
+ *     <menuitem name="New" action="New2Action" />
+ *     <placeholder name="FileMenuAdditions" />
+ *   </menu>
+ *   <menu name="JustifyMenu" action="JustifyMenuAction">
+ *     <menuitem name="Left" action="justify-left"/>
+ *     <menuitem name="Centre" action="justify-center"/>
+ *     <menuitem name="Right" action="justify-right"/>
+ *     <menuitem name="Fill" action="justify-fill"/>
+ *   </menu>
+ * </menubar>
+ * <toolbar action="toolbar1">
+ *   <placeholder name="JustifyToolItems">
+ *     <separator/>
+ *     <toolitem name="Left" action="justify-left"/>
+ *     <toolitem name="Centre" action="justify-center"/>
+ *     <toolitem name="Right" action="justify-right"/>
+ *     <toolitem name="Fill" action="justify-fill"/>
+ *     <separator/>
+ *   </placeholder>
+ * </toolbar>
+ * </ui>
+ * \endcode
+ * 
+ * The constructed widget hierarchy is very similar to the element tree of the XML,
+ * with the exception that placeholders are merged into their parents. The correspondence
+ * of XML elements to widgets should be almost obvious:
+ * - menubar 	a Gtk::MenuBar
+ * - toolbar 	a Gtk::Toolbar
+ * - popup  a toplevel Gtk::Menu
+ * - menu  a Gtk::Menu attached to a menuitem
+ * - menuitem  a Gtk::MenuItem subclass, the exact type depends on the action
+ * - toolitem  a Gtk::ToolItem subclass, the exact type depends on the action. 
+ * Note that toolitem elements may contain a menu element, but only if their 
+ * associated action specifies a Gtk::MenuToolButton as proxy.
+ * - separator  a Gtk::SeparatorMenuItem or Gtk::SeparatorToolItem
+ * - accelerator 	a keyboard accelerator
+ * 
+ * The "position" attribute determines where a constructed widget is positioned wrt. 
+ * to its siblings in the partially constructed tree. If it is "top", the widget is 
+ * prepended, otherwise it is appended. 
+ *
+ * \par UI Merging
+ *
+ * The most remarkable feature of Gtk::UIManager is that it can overlay a set of menuitems 
+ * and toolitems over another one, and demerge them later.
+ *
+ * Merging is done based on the names of the XML elements. Each element is identified by
+ * a path which consists of the names of its anchestors, separated by slashes. For example, 
+ * the menuitem named "Left" in the example above has the path /ui/menubar/JustifyMenu/Left 
+ * and the toolitem with the same name has path /ui/toolbar1/JustifyToolItems/Left.
+ *
+ * \par Accelerators
+ *
+ * Every action has an accelerator path. Accelerators are installed together with menuitem 
+ * proxies, but they can also be explicitly added with <accelerator> elements in the 
+ * UI definition. This makes it possible to have accelerators for actions even 
+ * if they have no visible proxies.
+ * 
+ * \par Smart Separators
+ *
+ * The separators created by Gtk::UIManager are "smart", i.e. they do not show up in 
+ * the UI unless they end up between two visible menu or tool items. Separators which are 
+ * located at the very beginning or end of the menu or toolbar containing them, or multiple 
+ * separators next to each other, are hidden. This is a useful feature, since the merging 
+ * of UI elements from multiple sources can make it hard or impossible to determine in 
+ * advance whether a separator will end up in such an unfortunate position.
+ *
+ * For separators in toolbars, you can set expand="true" to turn them from a small,
+ * visible separator to an expanding, invisible one. Toolitems following an expanding 
+ * separator are effectively right-aligned.
+ *
+ * \par Empty Menus
+ *
+ * Submenus pose similar problems to separators inconnection with merging. It is impossible 
+ * to know in advance whether they will end up empty after merging. Gtk::UIManager offers 
+ * two ways to treat empty submenus:
+ *
+ * - make them disappear by hiding the menu item they're attached to
+ * - add an insensitive "Empty" item
+ *
+ * The behaviour is chosen based on the "hide_if_empty" property of the action to which the submenu is associated.
+ *
+ * @newin2p4
+ */
+
 class UIManager : public Glib::Object
 {
   
@@ -182,8 +325,7 @@ public:
    */
   void set_add_tearoffs(bool add_tearoffs = true);
   
-  /** Returns whether menus generated by this Gtk::UIManager
-   * will have tearoff menu items.
+  /** Return value: whether tearoff menu items are added
    * @return Whether tearoff menu items are added
    * 
    * @newin2p4.
@@ -209,7 +351,7 @@ public:
   void remove_action_group(const Glib::RefPtr<ActionGroup>& action_group);
 
   
-  /** Returns the list of action groups associated with @a self .
+  /** Return value: a G::List of action groups. The list is owned by GTK+
    * @return A G::List of action groups. The list is owned by GTK+ 
    * and should not be modified.
    * 
@@ -217,7 +359,7 @@ public:
    */
   Glib::ListHandle< Glib::RefPtr<ActionGroup> > get_action_groups();
   
-  /** Returns the list of action groups associated with @a self .
+  /** Return value: a G::List of action groups. The list is owned by GTK+
    * @return A G::List of action groups. The list is owned by GTK+ 
    * and should not be modified.
    * 
@@ -226,14 +368,14 @@ public:
   Glib::ListHandle< Glib::RefPtr<const ActionGroup> > get_action_groups() const;
   
   
-  /** Returns the Gtk::AccelGroup associated with @a self .
+  /** Return value: the Gtk::AccelGroup.
    * @return The Gtk::AccelGroup.
    * 
    * @newin2p4.
    */
   Glib::RefPtr<AccelGroup> get_accel_group();
   
-  /** Returns the Gtk::AccelGroup associated with @a self .
+  /** Return value: the Gtk::AccelGroup.
    * @return The Gtk::AccelGroup.
    * 
    * @newin2p4.
@@ -440,8 +582,7 @@ public:
    */
   void ensure_update();
   
-  /** Returns an unused merge id, suitable for use with 
-   * gtk_ui_manager_add_ui().
+  /** Return value: an unused merge id.
    * @return An unused merge id.
    * 
    * @newin2p4.
@@ -453,11 +594,9 @@ public:
    * get_widget().
    * 
    * @param widget the added widget
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %add_widget(Widget* widget)</tt>
+   * <tt>void on_my_%add_widget(Widget* widget)</tt>
    */
 
   Glib::SignalProxy1< void,Widget* > signal_add_widget();
@@ -465,11 +604,9 @@ public:
   
   /** The "actions-changed" signal is emitted whenever the set of actions
    * changes.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %actions_changed()</tt>
+   * <tt>void on_my_%actions_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_actions_changed();
@@ -484,11 +621,9 @@ public:
    *
    * @param action the action
    * @param widget the proxy
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %connect_proxy(const Glib::RefPtr<Action>& action, Widget* widget)</tt>
+   * <tt>void on_my_%connect_proxy(const Glib::RefPtr<Action>& action, Widget* widget)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_connect_proxy();
@@ -499,11 +634,9 @@ public:
    *
    * @param action the action
    * @param widget the proxy
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* widget)</tt>
+   * <tt>void on_my_%disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* widget)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_disconnect_proxy();
@@ -516,11 +649,9 @@ public:
    * just before any action is activated.
    *
    * @param action the action
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %pre_activate(const Glib::RefPtr<Action>& action)</tt>
+   * <tt>void on_my_%pre_activate(const Glib::RefPtr<Action>& action)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_pre_activate();
@@ -533,11 +664,9 @@ public:
    * just after any action is activated.
    *
    * @param action the action
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %post_activate(const Glib::RefPtr<Action>& action)</tt>
+   * <tt>void on_my_%post_activate(const Glib::RefPtr<Action>& action)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_post_activate();
@@ -600,10 +729,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::UIManager
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::UIManager
    */
   Glib::RefPtr<Gtk::UIManager> wrap(GtkUIManager* object, bool take_copy = false);
 }

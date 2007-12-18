@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_SLISTHANDLE_H
 #define _GLIBMM_SLISTHANDLE_H
 
-/* $Id: slisthandle.h,v 1.3 2003/04/21 17:39:41 murrayc Exp $ */
+/* $Id: slisthandle.h 32 2003-04-21 17:39:41Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

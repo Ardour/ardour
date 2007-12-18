@@ -215,10 +215,13 @@ inline void swap(IconInfo& lhs, IconInfo& rhs)
 namespace Glib
 {
 
-/** @relates Gtk::IconInfo
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gtk::IconInfo
  */
 Gtk::IconInfo wrap(GtkIconInfo* object, bool take_copy = false);
 

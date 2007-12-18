@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_MISCUTILS_H
 #define _GLIBMM_MISCUTILS_H
 
-/* $Id: miscutils.h,v 1.5 2006/09/10 14:38:53 jjongsma Exp $ */
+/* $Id: miscutils.h 428 2007-07-29 12:43:29Z murrayc $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *
@@ -154,13 +154,31 @@ std::string get_tmp_dir();
  */
 std::string get_current_dir();
 
+//TODO: We could create a C++ enum to wrap the C GUserDirectory enum,
+//but we would have to either be very careful, or define the enum 
+//values in terms of the C enums anyway.
+/** Returns the full path of a special directory using its logical id.
+ *
+ * On Unix this is done using the XDG special user directories.
+ *
+ * Depending on the platform, the user might be able to change the path
+ * of the special directory without requiring the session to restart; GLib
+ * will not reflect any change once the special directories are loaded.
+ *
+ * Return value: the path to the specified special directory.
+ * @param directory Te logical id of special directory
+ * 
+ * @newin2p14
+ */
+std::string get_user_special_dir(GUserDirectory directory);
+
 /** Returns a base directory in which to access application data such as icons
  * that is customized for a particular user.
  *
  * On UNIX platforms this is determined using the mechanisms described in the
  * XDG Base Directory Specification
  *
- * @since glibmm 2.14
+ * @newin2p14
  */
 std::string get_user_data_dir();
 
@@ -170,7 +188,7 @@ std::string get_user_data_dir();
  * On UNIX platforms this is determined using the mechanisms described in the
  * XDG Base Directory Specification
  *
- * @since glibmm 2.14
+ * @newin2p14
  */
 std::string get_user_config_dir();
 
@@ -180,7 +198,7 @@ std::string get_user_config_dir();
  * On UNIX platforms this is determined using the mechanisms described in the
  * XDG Base Directory Specification
  *
- * @since glibmm 2.14
+ * @newin2p14
  */
 std::string get_user_cache_dir();
 

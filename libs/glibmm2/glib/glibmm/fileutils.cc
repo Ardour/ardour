@@ -5,7 +5,7 @@
 #include <glibmm/private/fileutils_p.h>
 
 // -*- c++ -*-
-/* $Id: fileutils.ccg,v 1.1.1.1 2003/01/07 16:58:25 murrayc Exp $ */
+/* $Id: fileutils.ccg,v 1.1 2003/01/07 16:58:25 murrayc Exp $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

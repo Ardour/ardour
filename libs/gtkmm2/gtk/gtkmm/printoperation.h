@@ -153,7 +153,8 @@ public:
   {
     GENERAL,
     INTERNAL_ERROR,
-    NOMEM
+    NOMEM,
+    INVALID_FILE
   };
 
   PrintError(Code error_code, const Glib::ustring& error_message);
@@ -272,34 +273,152 @@ public:
   static Glib::RefPtr<PrintOperation> create();
 
 
+  /** Makes @a default_page_setup  the default page setup for @a op .
+   * 
+   * This page setup will be used by run(),
+   * but it can be overridden on a per-page basis by connecting
+   * to the Gtk::PrintOperation::request-page-setup signal.
+   * 
+   * @newin2p10
+   * @param default_page_setup A Gtk::PageSetup, or <tt>0</tt>.
+   */
   void set_default_page_setup(const Glib::RefPtr<PageSetup>& default_page_setup);
   
+  /** Returns: the default page setup
+   * @return The default page setup 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PageSetup> get_default_page_setup() const;
 
   
+  /** Sets the print settings for @a op . This is typically used to
+   * re-establish print settings from a previous print operation,
+   * see run().
+   * 
+   * @newin2p10
+   * @param print_settings Gtk::PrintSettings, or <tt>0</tt>.
+   */
   void set_print_settings(const Glib::RefPtr<PrintSettings>& print_settings);
   
+  /** Return value: the current print settings of @a op .
+   * @return The current print settings of @a op .
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PrintSettings> get_print_settings() const;
 
   
+  /** Sets the name of the print job. The name is used to identify 
+   * the job (e.g. in monitoring applications like eggcups). 
+   * 
+   * If you don't set a job name, GTK+ picks a default one by 
+   * numbering successive print jobs.
+   * 
+   * @newin2p10
+   * @param job_name A string that identifies the print job.
+   */
   void set_job_name(const Glib::ustring& job_name);
   
+  /** Sets the number of pages in the document. 
+   * 
+   * This <em>must</em> be set to a positive number
+   * before the rendering starts. It may be set in a 
+   * Gtk::PrintOperation::begin-print signal hander.
+   * 
+   * Note that the page numbers passed to the 
+   * Gtk::PrintOperation::request-page-setup 
+   * and Gtk::PrintOperation::draw-page signals are 0-based, i.e. if 
+   * the user chooses to print all pages, the last ::draw-page signal 
+   * will be for page @a n_pages  - 1.
+   * 
+   * @newin2p10
+   * @param n_pages The number of pages.
+   */
   void set_n_pages(int n_pages);
   
+  /** Sets the current page.
+   * 
+   * If this is called before run(), 
+   * the user will be able to select to print only the current page.
+   * 
+   * Note that this only makes sense for pre-paginated documents.
+   * 
+   * @newin2p10
+   * @param current_page The current page, 0-based.
+   */
   void set_current_page(int current_page);
   
+  /** If @a full_page  is <tt>true</tt>, the transformation for the cairo context 
+   * obtained from Gtk::PrintContext puts the origin at the top left 
+   * corner of the page (which may not be the top left corner of the 
+   * sheet, depending on page orientation and the number of pages per 
+   * sheet). Otherwise, the origin is at the top left corner of the
+   * imageable area (i.e. inside the margins).
+   * 
+   * @newin2p10
+   * @param full_page <tt>true</tt> to set up the Gtk::PrintContext for the full page.
+   */
   void set_use_full_page(bool use_full_page = true);
   
+  /** Sets up the transformation for the cairo context obtained from
+   * Gtk::PrintContext in such a way that distances are measured in 
+   * units of @a unit .
+   * 
+   * @newin2p10
+   * @param unit The unit to use.
+   */
   void set_unit(Unit unit);
   
+  /** Sets up the Gtk::PrintOperation to generate a file instead
+   * of showing the print dialog. The indended use of this function
+   * is for implementing "Export to PDF" actions. Currently, PDF
+   * is the only supported format.
+   * 
+   * "Print to PDF" support is independent of this and is done
+   * by letting the user pick the "Print to PDF" item from the list
+   * of printers in the print dialog.
+   * 
+   * @newin2p10
+   * @param filename The filename for the exported file.
+   */
   void set_export_filename(const std::string& filename);
   
+  /** If track_status is <tt>true</tt>, the print operation will try to continue report
+   * on the status of the print job in the printer queues and printer. This
+   * can allow your application to show things like "out of paper" issues,
+   * and when the print job actually reaches the printer.
+   * 
+   * This function is often implemented using some form of polling, so it should
+   * not be enabled unless needed.
+   * 
+   * @newin2p10
+   * @param track_status <tt>true</tt> to track status after printing.
+   */
   void set_track_print_status(bool track_status = true);
   
+  /** If @a show_progress  is <tt>true</tt>, the print operation will show a 
+   * progress dialog during the print operation.
+   * 
+   * @newin2p10
+   * @param show_progress <tt>true</tt> to show a progress dialog.
+   */
   void set_show_progress (bool show_progress = true);
   
+  /** Sets whether the run() may return
+   * before the print operation is completed. Note that
+   * some platforms may not allow asynchronous operation.
+   * 
+   * @newin2p10
+   * @param allow_async <tt>true</tt> to allow asynchronous operation.
+   */
   void set_allow_async(bool allow_async = true);
   
+  /** Sets the label for the tab holding custom widgets.
+   * 
+   * @newin2p10
+   * @param label The label to use, or <tt>0</tt> to use the default label.
+   */
   void set_custom_tab_label(const Glib::ustring& label);
 
    
@@ -310,6 +429,71 @@ public:
   #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
+  /** Runs the print operation, by first letting the user modify
+   * print settings in the print dialog, and then print the document.
+   * 
+   * Normally that this function does not return until the rendering of all 
+   * pages is complete. You can connect to the 
+   * Gtk::PrintOperation::status-changed signal on @a op  to obtain some 
+   * information about the progress of the print operation. 
+   * Furthermore, it may use a recursive mainloop to show the print dialog.
+   * 
+   * If you call set_allow_async() or set the allow-async
+   * property the operation will run asyncronously if this is supported on the
+   * platform. The Gtk::PrintOperation::done signal will be emitted with the 
+   * operation results when the operation is done (i.e. when the dialog is 
+   * canceled, or when the print succeeds or fails).
+   * 
+   * @code
+   * if (settings != <tt>0</tt>)
+   * gtk_print_operation_set_print_settings (print, settings);
+   * 
+   * if (page_setup != <tt>0</tt>)
+   * gtk_print_operation_set_default_page_setup (print, page_setup);
+   * 
+   * g_signal_connect (print, "begin-print", 
+   * G_CALLBACK (begin_print), &amp;data);
+   * g_signal_connect (print, "draw-page", 
+   * G_CALLBACK (draw_page), &amp;data);
+   * 
+   * res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG, parent, &amp;error);
+   * 
+   * if (res == GTK_PRINT_OPERATION_RESULT_ERROR)
+   * {
+   * error_dialog = gtk_message_dialog_new (GTK_WINDOW (parent),
+   * GTK_DIALOG_DESTROY_WITH_PARENT,
+   * GTK_MESSAGE_ERROR,
+   * GTK_BUTTONS_CLOSE,
+   * "Error printing file:<tt>\\n</tt>&percnt;s",
+   * error->message);
+   * g_signal_connect (error_dialog, "response", 
+   * G_CALLBACK (gtk_widget_destroy), <tt>0</tt>);
+   * gtk_widget_show (error_dialog);
+   * g_error_free (error);
+   * }
+   * else if (res == GTK_PRINT_OPERATION_RESULT_APPLY)
+   * {
+   * if (settings != <tt>0</tt>)
+   * g_object_unref (settings);
+   * settings = g_object_ref (gtk_print_operation_get_print_settings (print));
+   * }
+   * @endcode
+   * 
+   * Note that run() can only be called once on a
+   * given Gtk::PrintOperation.
+   * @param action The action to start.
+   * @param parent Transient parent of the dialog, or <tt>0</tt>.
+   * @param error Return location for errors, or <tt>0</tt>.
+   * @return The result of the print operation. A return value of 
+   * Gtk::PRINT_OPERATION_RESULT_APPLY indicates that the printing was
+   * completed successfully. In this case, it is a good idea to obtain 
+   * the used print settings with get_print_settings() 
+   * and store them for reuse with the next print operation. A value of
+   * Gtk::PRINT_OPERATION_RESULT_IN_PROGRESS means the operation is running
+   * asynchronously, and will emit the ::done signal when done.
+   * 
+   * @newin2p10.
+   */
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   PrintOperationResult run(PrintOperationAction action, Window& parent);
 #else
@@ -317,95 +501,125 @@ public:
 #endif //GLIBMM_EXCEPTIONS_ENABLED
 
   
+  /** Return value: the status of the print operation
+   * @return The status of the print operation
+   * 
+   * @newin2p10.
+   */
   PrintStatus get_status() const;
   
+  /** Return value: a string representation of the status
+   * @return A string representation of the status
+   * of the print operation
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_status_string() const;
   
+  /** Cancels a running print operation. This function may
+   * be called from a Gtk::PrintOperation::begin-print, 
+   * Gtk::PrintOperation::paginate or Gtk::PrintOperation::draw-page
+   * signal handler to stop the currently running print 
+   * operation.
+   * 
+   * @newin2p10
+   */
   void cancel();
   
+  /** A convenience function to find out if the print operation
+   * is finished, either successfully (Gtk::PRINT_STATUS_FINISHED)
+   * or unsuccessfully (Gtk::PRINT_STATUS_FINISHED_ABORTED).
+   * 
+   * @note when you enable print status tracking the print operation
+   * can be in a non-finished state even after done has been called, as
+   * the operation status then tracks the print job status on the printer.
+   * @return <tt>true</tt>, if the print operation is finished.
+   * 
+   * @newin2p10.
+   */
   bool is_finished() const;
 
   
   //TODO: point out in the docs that the PrintOperationResult enum may also indicate
   // that an error occurred, and in that case it is up to him to handle it.
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %done(PrintOperationResult result)</tt>
+   * <tt>void on_my_%done(PrintOperationResult result)</tt>
    */
 
   Glib::SignalProxy1< void,PrintOperationResult > signal_done();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %begin_print(const Glib::RefPtr<PrintContext>& context)</tt>
+   * <tt>void on_my_%begin_print(const Glib::RefPtr<PrintContext>& context)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<PrintContext>& > signal_begin_print();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %paginate(const Glib::RefPtr<PrintContext>& context)</tt>
+   * <tt>bool on_my_%paginate(const Glib::RefPtr<PrintContext>& context)</tt>
    */
 
   Glib::SignalProxy1< bool,const Glib::RefPtr<PrintContext>& > signal_paginate();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %request_page_setup(const Glib::RefPtr<PrintContext>& context, int page_no, const Glib::RefPtr<PageSetup>& setup)</tt>
+   * <tt>void on_my_%request_page_setup(const Glib::RefPtr<PrintContext>& context, int page_no, const Glib::RefPtr<PageSetup>& setup)</tt>
    */
 
   Glib::SignalProxy3< void,const Glib::RefPtr<PrintContext>&,int,const Glib::RefPtr<PageSetup>& > signal_request_page_setup();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %draw_page(const Glib::RefPtr<PrintContext>& context, int page_nr)</tt>
+   * <tt>void on_my_%draw_page(const Glib::RefPtr<PrintContext>& context, int page_nr)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::RefPtr<PrintContext>&,int > signal_draw_page();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %end_print(const Glib::RefPtr<PrintContext>& context)</tt>
+   * <tt>void on_my_%end_print(const Glib::RefPtr<PrintContext>& context)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<PrintContext>& > signal_end_print();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %status_changed()</tt>
+   * <tt>void on_my_%status_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_status_changed();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>Widget* %create_custom_widget()</tt>
+   * <tt>Widget* on_my_%create_custom_widget()</tt>
    */
 
   Glib::SignalProxy0< Widget* > signal_create_custom_widget();
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %custom_widget_apply(Widget* widget)</tt>
+   * <tt>void on_my_%custom_widget_apply(Widget* widget)</tt>
    */
 
   Glib::SignalProxy1< void,Widget* > signal_custom_widget_apply();
 
 
-  //TODO: This is causing crashes:
+  //TODO: This is causing crashes. Is it still causing crashes? murrayc.
   
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %preview(const Glib::RefPtr<PrintOperationPreview>& preview, const Glib::RefPtr<PrintContext>& context, Window* parent)</tt>
+   * <tt>bool on_my_%preview(const Glib::RefPtr<PrintOperationPreview>& preview, const Glib::RefPtr<PrintContext>& context, Window* parent)</tt>
    */
 
   Glib::SignalProxy3< bool,const Glib::RefPtr<PrintOperationPreview>&,const Glib::RefPtr<PrintContext>&,Window* > signal_preview();
@@ -512,7 +726,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
-/** TRUE if the the origin of the context should be at the corner of the page and not the corner of the imageable area.
+/** TRUE if the origin of the context should be at the corner of the page and not the corner of the imageable area.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -522,7 +736,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
-/** TRUE if the the origin of the context should be at the corner of the page and not the corner of the imageable area.
+/** TRUE if the origin of the context should be at the corner of the page and not the corner of the imageable area.
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -736,10 +950,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::PrintOperation
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::PrintOperation
    */
   Glib::RefPtr<Gtk::PrintOperation> wrap(GtkPrintOperation* object, bool take_copy = false);
 }

@@ -331,7 +331,8 @@ BoxList::reference BoxList::operator[](size_type l) const
 
 Box::Box()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Container(Glib::ConstructParams(box_class_.init()))
 {
   }
@@ -506,8 +507,9 @@ GType VBox::get_base_type()
 
 VBox::VBox(bool homogeneous, int spacing)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Box(Glib::ConstructParams(vbox_class_.init(), "homogeneous", static_cast<int>(homogeneous), "spacing", spacing, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Box(Glib::ConstructParams(vbox_class_.init(), "homogeneous", static_cast<int>(homogeneous), "spacing", spacing, static_cast<char*>(0)))
 {
   }
 
@@ -617,8 +619,9 @@ GType HBox::get_base_type()
 
 HBox::HBox(bool homogeneous, int spacing)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Box(Glib::ConstructParams(hbox_class_.init(), "homogeneous", static_cast<int>(homogeneous), "spacing", spacing, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Box(Glib::ConstructParams(hbox_class_.init(), "homogeneous", static_cast<int>(homogeneous), "spacing", spacing, static_cast<char*>(0)))
 {
   }
 

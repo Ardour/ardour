@@ -1,0 +1,111 @@
+// -*- c++ -*-
+/* $Id: text.ccg,v 1.1 2003/01/21 13:37:07 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <atkmm/object.h>
+#include <glib.h>
+#include <algorithm> /* for std::swap() */
+
+
+// static
+GType Glib::Value<Atk::TextAttribute>::value_type()
+{
+  return atk_text_attribute_get_type();
+}
+
+
+namespace Atk
+{
+
+/**** Atk::Attribute *******************************************************/
+
+Attribute::Attribute()
+{
+  gobject_.name  = 0;
+  gobject_.value = 0;
+}
+
+Attribute::Attribute(const Glib::ustring& name, const Glib::ustring& value)
+{
+  gobject_.name  = g_strndup(name .data(), name .bytes());
+  gobject_.value = g_strndup(value.data(), value.bytes());
+}
+
+Attribute::Attribute(const AtkAttribute* gobject)
+{
+  g_return_if_fail(gobject != 0);
+
+  gobject_.name  = g_strdup(gobject->name);
+  gobject_.value = g_strdup(gobject->value);
+}
+
+Attribute::~Attribute()
+{
+  g_free(gobject_.name);
+  g_free(gobject_.value);
+}
+
+Attribute::Attribute(const Attribute& other)
+{
+  gobject_.name  = g_strdup(other.gobject_.name);
+  gobject_.value = g_strdup(other.gobject_.value);
+}
+
+Attribute& Attribute::operator=(const Attribute& other)
+{
+  Attribute temp (other);
+  swap(temp);
+  return *this;
+}
+
+void Attribute::swap(Attribute& other)
+{
+  std::swap(gobject_.name,  other.gobject_.name);
+  std::swap(gobject_.value, other.gobject_.value);
+}
+
+
+/**** Atk::TextAttribute ***************************************************/
+
+// static
+TextAttribute TextAttribute::for_name(const Glib::ustring& name)
+{
+  return TextAttribute(int(atk_text_attribute_for_name(name.c_str())));
+}
+
+// static
+Glib::ustring TextAttribute::get_name(TextAttribute attribute)
+{
+  if(const char *const name = atk_text_attribute_get_name(AtkTextAttribute(int(attribute))))
+    return Glib::ustring(name);
+  else
+    return Glib::ustring();
+}
+
+// static
+Glib::ustring TextAttribute::get_value(TextAttribute attribute, int index)
+{
+  if(const char *const value = atk_text_attribute_get_value(AtkTextAttribute(int(attribute)), index))
+    return Glib::ustring(value);
+  else
+    return Glib::ustring();
+}
+
+} // namespace Atk
+

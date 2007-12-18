@@ -78,8 +78,14 @@ private:
 
 protected:
   Selection(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit Selection(AtkSelection* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -164,9 +170,9 @@ public:
   bool select_all_selection();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %selection_changed()</tt>
+   * <tt>void on_my_%selection_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_selection_changed();
@@ -227,10 +233,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Atk::Selection
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Atk::Selection
    */
   Glib::RefPtr<Atk::Selection> wrap(AtkSelection* object, bool take_copy = false);
 

@@ -127,7 +127,7 @@ public:
    */
   void set_title(const Glib::ustring& title);
   
-  /** Returns whether the selected font is used in the label.
+  /** Returns: whether the selected font is used in the label.
    * @return Whether the selected font is used in the label.
    * 
    * @newin2p4.
@@ -141,7 +141,7 @@ public:
    */
   void set_use_font(bool use_font = true);
   
-  /** Returns whether the selected size is used in the label.
+  /** Returns: whether the selected size is used in the label.
    * @return Whether the selected size is used in the label.
    * 
    * @newin2p4.
@@ -171,7 +171,7 @@ public:
    */
   bool set_font_name(const Glib::ustring& fontname);
   
-  /** Returns whether the name of the font style will be shown in the label.
+  /** Return value: whether the font style will be shown in the label.
    * @return Whether the font style will be shown in the label.
    * 
    * @newin2p4.
@@ -185,7 +185,7 @@ public:
    */
   void set_show_style(bool show_style = true);
   
-  /** Returns whether the font size will be shown in the label.
+  /** Return value: whether the font size will be shown in the label.
    * @return Whether the font size will be shown in the label.
    * 
    * @newin2p4.
@@ -322,11 +322,9 @@ public:
 
   /** The font_set signal is emitted when the user selects a font. When handling this signal,
    * use get_font_name() to find out which font was just selected.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %font_set()</tt>
+   * <tt>void on_my_%font_set()</tt>
    */
 
   Glib::SignalProxy0< void > signal_font_set();
@@ -340,10 +338,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::FontButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::FontButton
    */
   Gtk::FontButton* wrap(GtkFontButton* object, bool take_copy = false);
 } //namespace Glib

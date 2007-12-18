@@ -1,0 +1,86 @@
+/* $Id: menutoolbutton.hg,v 1.2 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* box.h
+ *
+ * Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/toolbutton.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/tooltips.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/toolbutton_p.h)
+
+
+namespace Gtk
+{
+
+/** A Gtk::ToolItem containing a toggle button.
+ *
+ * A MenuToolButton is a Gtk::ToolItem that contains a menu.
+ * @ingroup Widgets
+ */
+class MenuToolButton : public ToolButton
+{
+  _CLASS_GTKOBJECT(MenuToolButton, GtkMenuToolButton, GTK_MENU_TOOL_BUTTON, Gtk::ToolButton, GtkToolButton)
+public:
+
+  /** Creates a new MenuToolButton.
+   */
+  _CTOR_DEFAULT()
+  
+  /** Creates a new MenuToolButton from a StockID.
+   *
+   * The MenuToolButton will be created according to the @a stock_id properties.
+   * 
+   * @param stock_id The StockID which determines the look of the MenuToolButton.
+   */
+  _WRAP_CTOR(MenuToolButton(const Gtk::StockID& stock_id), gtk_toggle_tool_button_new_from_stock)
+  
+  /** Creates a new MenuToolButton with a label.
+   *
+   * The MenuToolButton will have the label @a label.
+   *
+   * @param label The string used to display the label for this MenuToolButton.
+   */
+  explicit MenuToolButton(const Glib::ustring& label);
+  
+  /** Creates a new MenuToolButton with an image.
+   *
+   * The MenuToolButton will have the label @a label and an image widget @a icon_widget.
+   *
+   * @param icon_widget The widget placed as the MenuToolButton's icon.
+   * @param label The string used to display the label for this MenuToolButton.
+   */
+  explicit MenuToolButton(Widget& icon_widget, const Glib::ustring& label = Glib::ustring());
+
+  _WRAP_METHOD(void set_menu(Menu& menu), gtk_menu_tool_button_set_menu)
+  _WRAP_METHOD(Menu* get_menu(), gtk_menu_tool_button_get_menu)
+  _WRAP_METHOD(const Menu* get_menu() const, gtk_menu_tool_button_get_menu, constversion)
+
+  _WRAP_METHOD(void set_arrow_tooltip(Tooltips& tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private), gtk_menu_tool_button_set_arrow_tooltip, deprecated "Use set_arrow_tooltip_text() or set_arrow_tooltip_markup() instead")
+
+  _WRAP_METHOD(void set_arrow_tooltip_text(const Glib::ustring& text), gtk_menu_tool_button_set_arrow_tooltip_text)
+  _WRAP_METHOD(void set_arrow_tooltip_markup(const Glib::ustring& markup), gtk_menu_tool_button_set_arrow_tooltip_markup)
+
+  _WRAP_SIGNAL(void show_menu(), show_menu)
+  _WRAP_PROPERTY("menu", Menu*)
+};
+
+} // namespace Gtk
+

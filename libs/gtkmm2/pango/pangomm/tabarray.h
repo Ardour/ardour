@@ -135,7 +135,7 @@ public:
    * implementation.
    * @param tab_index The index of a tab stop.
    * @param alignment Tab alignment.
-   * @param location Tab location in pango units.
+   * @param location Tab location in Pango units.
    */
   void set_tab(int tab_index, TabAlign alignment, int location);
 
@@ -150,8 +150,7 @@ public:
   Glib::ArrayHandle< std::pair<TabAlign,int> > get_tabs() const;
 
   
-  /** Returns <tt>true</tt> if the tab positions are in pixels, <tt>false</tt> if they are
-   * in Pango units.
+  /** Return value: whether positions are in pixels.
    * @return Whether positions are in pixels.
    */
   bool get_positions_in_pixels() const;
@@ -177,10 +176,13 @@ inline void swap(TabArray& lhs, TabArray& rhs)
 namespace Glib
 {
 
-/** @relates Pango::TabArray
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Pango::TabArray
  */
 Pango::TabArray wrap(PangoTabArray* object, bool take_copy = false);
 

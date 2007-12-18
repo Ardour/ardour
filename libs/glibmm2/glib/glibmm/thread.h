@@ -70,14 +70,16 @@ enum { THREAD_PRIORITY_NORMAL = GLIBMM_MACRO_DEFINITION_THREAD_PRIORITY_NORMAL }
 namespace Glib
 {
 
-/** @addtogroup glibmmEnums Enums and Flags */
-
 /** Specifies the priority of a thread.
  * @note It is not guaranteed, that threads with different priorities really
  * behave accordingly. On some systems (e.g. Linux) only <tt>root</tt> can
  * increase priorities. On other systems (e.g. Solaris) there doesn't seem to
  * be different scheduling for different priorities. All in all try to avoid
  * being dependent on priorities.
+ */
+/** @addtogroup glibmmEnums Enums and Flags */
+
+/**
  * @ingroup glibmmEnums
  */
 enum ThreadPriority

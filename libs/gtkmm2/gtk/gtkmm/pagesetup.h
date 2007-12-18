@@ -102,54 +102,199 @@ private:
 protected:
   PageSetup();
 
+#if 0 //TODO: Reimplement, or add _construct_from_* functions in GTK+. See bug #475565 .
+GtkPageSetup	  *gtk_page_setup_new_from_file	    (const gchar         *file_name,
+						     GError              **error);
+GtkPageSetup	  *gtk_page_setup_new_from_key_file (GKeyFile            *key_file,
+						     const gchar         *group_name,
+						     GError             **error);
+#endif
+
 public:
   
   static Glib::RefPtr<PageSetup> create();
 
 
+  /** Gets the page orientation of the Gtk::PageSetup.
+   * @return The page orientation
+   * 
+   * @newin2p10.
+   */
   PageOrientation get_orientation() const;
   
+  /** Sets the page orientation of the Gtk::PageSetup.
+   * 
+   * @newin2p10
+   * @param orientation A Gtk::PageOrientation value.
+   */
   void set_orientation(PageOrientation orientation);
 
   
+  /** Gets the paper size of the Gtk::PageSetup.
+   * @return The paper size
+   * 
+   * @newin2p10.
+   */
   PaperSize get_paper_size();
   
+  /** Gets the paper size of the Gtk::PageSetup.
+   * @return The paper size
+   * 
+   * @newin2p10.
+   */
   const PaperSize get_paper_size() const;
   
+  /** Sets the paper size of the Gtk::PageSetup without
+   * changing the margins. See 
+   * gtk_page_setup_set_paper_size_and_default_margins().
+   * 
+   * @newin2p10
+   * @param size A Gtk::PaperSize.
+   */
   void set_paper_size(const PaperSize& paper_size);
 
   
+  /** Gets the top margin in units of @a unit .
+   * @param unit The unit for the return value.
+   * @return The top margin
+   * 
+   * @newin2p10.
+   */
   double get_top_margin(Unit unit) const;
   
+  /** Sets the top margin of the Gtk::PageSetup.
+   * 
+   * @newin2p10
+   * @param margin The new top margin in units of @a unit .
+   * @param unit The units for @a margin .
+   */
   void set_top_margin(double margin, Unit unit);
 
   
+  /** Gets the bottom margin in units of @a unit .
+   * @param unit The unit for the return value.
+   * @return The bottom margin
+   * 
+   * @newin2p10.
+   */
   double get_bottom_margin(Unit unit) const;
   
+  /** Sets the bottom margin of the Gtk::PageSetup.
+   * 
+   * @newin2p10
+   * @param margin The new bottom margin in units of @a unit .
+   * @param unit The units for @a margin .
+   */
   void set_bottom_margin(double margin, Unit unit);
 
   
+  /** Gets the left margin in units of @a unit .
+   * @param unit The unit for the return value.
+   * @return The left margin
+   * 
+   * @newin2p10.
+   */
   double get_left_margin(Unit unit) const;
   
+  /** Sets the left margin of the Gtk::PageSetup.
+   * 
+   * @newin2p10
+   * @param margin The new left margin in units of @a unit .
+   * @param unit The units for @a margin .
+   */
   void set_left_margin(double margin, Unit unit);
 
   
+  /** Gets the right margin in units of @a unit .
+   * @param unit The unit for the return value.
+   * @return The right margin
+   * 
+   * @newin2p10.
+   */
   double get_right_margin(Unit unit) const;
   
+  /** Sets the right margin of the Gtk::PageSetup.
+   * 
+   * @newin2p10
+   * @param margin The new right margin in units of @a unit .
+   * @param unit The units for @a margin .
+   */
   void set_right_margin(double margin, Unit unit);
 
   
+  /** Sets the paper size of the Gtk::PageSetup and modifies
+   * the margins according to the new paper size.
+   * 
+   * @newin2p10
+   * @param size A Gtk::PaperSize.
+   */
   void set_paper_size_and_default_margins(const PaperSize& paper_size);
 
   
+  /** Return value: the paper width.
+   * @param unit The unit for the return value.
+   * @return The paper width.
+   * 
+   * @newin2p10.
+   */
   double get_paper_width(Unit unit) const;
   
+  /** Return value: the paper height.
+   * @param unit The unit for the return value.
+   * @return The paper height.
+   * 
+   * @newin2p10.
+   */
   double get_paper_height(Unit unit) const;
 
   
+  /** Return value: the page width.
+   * @param unit The unit for the return value.
+   * @return The page width.
+   * 
+   * @newin2p10.
+   */
   double get_page_width(Unit unit) const;
   
+  /** Return value: the page height.
+   * @param unit The unit for the return value.
+   * @return The page height.
+   * 
+   * @newin2p10.
+   */
   double get_page_height(Unit unit) const;
+
+  //The save_ prefix was added to these functions to make them clearer. GTK+ didn't want to change them.
+  
+  /** This function saves the information from @a setup  to @a file_name .
+   *  @a throws  Glib::FileError
+   * @param file_name The file to save to.
+   * @return <tt>true</tt> on success
+   * 
+   * @newin2p12.
+   */
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool save_to_file(const std::string& file_name) const;
+#else
+  bool save_to_file(const std::string& file_name, std::auto_ptr<Glib::Error>& error) const;
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+
+  /** This function adds the page setup from @a setup  to @a key_file .
+   * 
+   * @newin2p12
+   * @param key_file The Glib::KeyFile to save the page setup to.
+   * @param group_name The group to add the settings to in @a key_file .
+   */
+  void save_to_key_file(Glib::KeyFile& key_file, const Glib::ustring& group_name);
+
+  /** This function adds the page setup from @a setup to @a key_file,
+   * in the group "Page Setup"
+   * 
+   * @newin2p12
+   * @param key_file The G::KeyFile to save the page setup to.
+   */
+  void save_to_key_file(Glib::KeyFile& key_file);
 
 
 public:
@@ -176,10 +321,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::PageSetup
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::PageSetup
    */
   Glib::RefPtr<Gtk::PageSetup> wrap(GtkPageSetup* object, bool take_copy = false);
 }

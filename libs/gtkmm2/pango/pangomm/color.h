@@ -106,6 +106,14 @@ public:
    */
   bool parse(const Glib::ustring& spec);
 
+  
+  /** Return value: a newly-allocated text string that must be freed with Glib::free().
+   * @return A newly-allocated text string that must be freed with Glib::free().
+   * 
+   * Since: 1.16.
+   */
+  Glib::ustring to_string() const;
+
 
 };
 

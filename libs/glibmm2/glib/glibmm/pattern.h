@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_PATTERN_H
 #define _GLIBMM_PATTERN_H
 
-/* $Id: pattern.h,v 1.1.1.1 2003/01/07 16:58:51 murrayc Exp $ */
+/* $Id: pattern.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* pattern.h
  *

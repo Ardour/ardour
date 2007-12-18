@@ -1,0 +1,142 @@
+/* $Id: screen.hg,v 1.8 2006/06/10 15:26:24 murrayc Exp $ */
+
+/* screen.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+//#include <gdkmm/visual.h>
+//#include <gdkmm/window.h>
+#include <gdkmm/rectangle.h>
+#include <glibmm/object.h>
+#include <cairomm/fontoptions.h>
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+class Display;
+class Colormap;
+class Visual;
+class Window;
+
+/** Object representing a physical screen
+ * Gdk::Screen objects are the GDK representation of a physical screen. It is used throughout GDK and GTK+ to specify
+ * which screen the top level windows are to be displayed on. It is also used to query the screen specification and
+ * default settings such as the default colormap (get_default_colormap()), the screen width (get_width()), etc.
+ * Note that a screen may consist of multiple monitors which are merged to form a large screen area. 
+ */
+class Screen : public Glib::Object
+{
+  _CLASS_GOBJECT(Screen,GdkScreen,GDK_SCREEN,Glib::Object,GObject)
+protected:
+
+public:
+  _WRAP_METHOD(Glib::RefPtr<Colormap> get_default_colormap(), gdk_screen_get_default_colormap, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Colormap> get_default_colormap() const, gdk_screen_get_default_colormap, refreturn, constversion)
+
+  _WRAP_METHOD(void set_default_colormap(const Glib::RefPtr<const Colormap>& colormap), gdk_screen_set_default_colormap)
+  _WRAP_METHOD(Glib::RefPtr<Colormap> get_system_colormap(), gdk_screen_get_system_colormap, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Colormap> get_system_colormap() const, gdk_screen_get_system_colormap, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Visual> get_system_visual(), gdk_screen_get_system_visual, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Visual> get_system_visual() const, gdk_screen_get_system_visual, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Colormap> get_rgb_colormap(), gdk_screen_get_rgb_colormap, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Colormap> get_rgb_colormap() const, gdk_screen_get_rgb_colormap, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Visual> get_rgb_visual(), gdk_screen_get_rgb_visual, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Visual> get_rgb_visual() const, gdk_screen_get_rgb_visual, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Colormap> get_rgba_colormap(), gdk_screen_get_rgba_colormap, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Colormap> get_rgba_colormap() const, gdk_screen_get_rgba_colormap, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Visual> get_rgba_visual(), gdk_screen_get_rgba_visual, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Visual> get_rgba_visual() const, gdk_screen_get_rgba_visual, refreturn, constversion)
+
+  _WRAP_METHOD(bool is_composited() const, gdk_screen_is_composited)
+
+  _WRAP_METHOD(Glib::RefPtr<Window> get_root_window(), gdk_screen_get_root_window, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Window> get_root_window() const, gdk_screen_get_root_window, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Display> get_display(), gdk_screen_get_display, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Display> get_display() const, gdk_screen_get_display, refreturn, constversion)
+
+  _WRAP_METHOD(int get_number() const, gdk_screen_get_number)
+  _WRAP_METHOD(int get_width() const, gdk_screen_get_width)
+  _WRAP_METHOD(int get_height() const, gdk_screen_get_height)
+  _WRAP_METHOD(int get_width_mm() const, gdk_screen_get_width_mm)
+  _WRAP_METHOD(int get_height_mm() const, gdk_screen_get_height_mm)
+
+#m4 _CONVERSION(`GList*',`Glib::ListHandle< Glib::RefPtr<Visual> >',`$2($3, Glib::OWNERSHIP_SHALLOW)')
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<Visual> > list_visuals(), gdk_screen_list_visuals)
+
+#m4 _CONVERSION(`GList*',`Glib::ListHandle< Glib::RefPtr<Window> >',`$2($3, Glib::OWNERSHIP_SHALLOW)')
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<Window> > get_toplevel_windows(), gdk_screen_get_toplevel_windows)
+
+  _WRAP_METHOD(Glib::ustring make_display_name(), gdk_screen_make_display_name)
+
+  _WRAP_METHOD(int get_n_monitors() const, gdk_screen_get_n_monitors)
+  _WRAP_METHOD(void get_monitor_geometry(int monitor_num, Rectangle& dest) const, gdk_screen_get_monitor_geometry)
+  _WRAP_METHOD(int get_monitor_at_point(int x, int y) const, gdk_screen_get_monitor_at_point)
+  _WRAP_METHOD(int get_monitor_at_window(const Glib::RefPtr<Window>& window) const, gdk_screen_get_monitor_at_window)
+
+  _WRAP_METHOD(void broadcast_client_message(GdkEvent* event), gdk_screen_broadcast_client_message)
+
+  _WRAP_METHOD(static Glib::RefPtr<Screen> get_default(), gdk_screen_get_default, refreturn)
+
+  template <class ValueType>
+  bool get_setting(const Glib::ustring& name, ValueType& value) const;
+  _IGNORE(gdk_screen_get_setting)
+
+  _WRAP_METHOD(void set_font_options(const Cairo::FontOptions& options), gdk_screen_set_font_options)
+
+  // Note: This returns a const, so we assume that we must copy it:
+  #m4 _CONVERSION(`const cairo_font_options_t*', `Cairo::FontOptions', `Cairo::FontOptions(const_cast<cairo_font_options_t*>($3), true /* take_reference */)')
+  _WRAP_METHOD(Cairo::FontOptions get_font_options() const, gdk_screen_get_font_options)
+
+  _WRAP_METHOD(void set_resolution(double dpi), gdk_screen_set_resolution)
+  _WRAP_METHOD(double get_resolution() const, gdk_screen_get_resolution)
+
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Window> get_active_window(), gdk_screen_get_active_window, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Window> get_active_window() const, gdk_screen_get_active_window, refreturn, constversion)
+
+#m4 _CONVERSION(`GList*',`Glib::ListHandle< Glib::RefPtr<Window> >',`$2($3, Glib::OWNERSHIP_DEEP)')
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<Window> > get_window_stack(), gdk_screen_get_window_stack)
+
+  /** The size_changed signal is emitted when the pixel width or 
+   * height of a screen changes.
+   */
+  _WRAP_SIGNAL(void size_changed(), size-changed)
+};
+
+template <class ValueType>
+bool Screen::get_setting(const Glib::ustring& name, ValueType& value) const
+{
+  Glib::Value<ValueType> glibmmvalue;
+  glibmmvalue.init(Glib::Value<ValueType>::value_type());
+
+  gboolean result = gdk_screen_get_setting(const_cast<GdkScreen*>(gobj()), name.c_str(), glibmmvalue.gobj());
+
+  value = glibmmvalue.get();
+  return result;
+}
+
+} /* namespace Gdk */
+

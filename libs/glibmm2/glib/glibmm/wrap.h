@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_WRAP_H
 #define _GLIBMM_WRAP_H
 
-/* $Id: wrap.h,v 1.2 2003/01/27 16:14:36 murrayc Exp $ */
+/* $Id: wrap.h 447 2007-10-03 09:51:41Z murrayc $ */
 
 /* Copyright (C) 1998-2002 The gtkmm Development Team
  *
@@ -23,10 +23,12 @@
 
 #include <glib-object.h>
 #include <glibmm/refptr.h>
-
+#include <glibmm/objectbase.h>
 
 namespace Glib
 {
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 class ObjectBase;
 class Object;
@@ -45,6 +47,50 @@ void wrap_register(GType type, WrapNewFunction func);
 // Return the current C++ wrapper instance of the GObject,
 // or automatically generate a new wrapper if there's none.
 Glib::ObjectBase* wrap_auto(GObject* object, bool take_copy = false);
+
+/** Create a C++ instance of a known C++ type that is mostly closely associated with the GType of the C object.
+ * @param object The C object which should be placed in a new C++ instance.
+ * @param interface_gtype The returned instance will implement this interface. Otherwise it will be NULL.
+ */
+Glib::ObjectBase* wrap_create_new_wrapper_for_interface(GObject* object, GType interface_gtype);
+
+// Return the current C++ wrapper instance of the GObject,
+// or automatically generate a new wrapper if there's none.
+template<class TInterface>
+TInterface* wrap_auto_interface(GObject* object, bool take_copy = false)
+{
+  if(!object)
+    return 0;
+
+  // Look up current C++ wrapper instance:
+  ObjectBase* pCppObject = ObjectBase::_get_current_wrapper(object);
+
+  if(!pCppObject)
+  {
+    // There's not already a wrapper: generate a new C++ instance.
+    // We use exact_type_only=true avoid creating Glib::Object for interfaces of unknown implementation,
+    // because we do not want a C++ object that does not dynamic_cast to the expected interface type.
+    pCppObject = wrap_create_new_wrapper_for_interface(object, TInterface::get_base_type());
+  }
+
+  //If no exact wrapper was created, 
+  //create an instance of the interface, 
+  //so we at least get the expected type:
+  TInterface* result = 0;
+  if(pCppObject)
+     result = dynamic_cast<TInterface*>(pCppObject);
+  else
+     result = new TInterface((typename TInterface::BaseObjectType*)object);
+
+  // take_copy=true is used where the GTK+ function doesn't do
+  // an extra ref for us, and always for plain struct members.
+  if(take_copy && result)
+    result->reference();
+
+  return result;
+}
+
+#endif //DOXYGEN_SHOULD_SKIP_THIS
 
 // Get a C++ instance that wraps the C instance.
 // This always returns the same C++ instance for the same C instance.

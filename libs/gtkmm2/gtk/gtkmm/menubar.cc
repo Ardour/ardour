@@ -31,8 +31,9 @@ namespace Gtk
 
 MenuBar::MenuBar()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::MenuShell(Glib::ConstructParams(menubar_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::MenuShell(Glib::ConstructParams(menubar_class_.init()))
 {
   // Connect to the signal instead of overriding the on_hierarchy_changed()
   // method because invocation of C++ default signal handlers is skipped

@@ -3,6 +3,8 @@
 #ifndef _GDKMM_PIXBUF_H
 #define _GDKMM_PIXBUF_H
 
+#include <gdkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -24,6 +26,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GDKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gdkmm/drawable.h>
 #include <gdkmm/image.h>
@@ -287,20 +293,229 @@ private:
   
 protected:
 
-  //TODO: Document these, based on the docs for the C functions.
-  Pixbuf(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap,
+  /** Creates a pixbuf object from a drawable.
+   *
+   * Transfers image data from a Drawable and converts it to an RGB(A)
+   * representation inside a Pixbuf. In other words, copies
+   * image data from a server-side drawable to a client-side RGB(A) buffer.
+   * This allows you to efficiently read individual pixels on the client side.
+   * 
+   * If the drawable @src has no colormap (See Gdk::Drawable::get_colormap()),
+   * then a suitable colormap must be specified. Otherwise, you may use the 
+   * constructor that takes no colormap argument.
+   * Typically a Gdk::Window or a pixmap created by passing a Gdk:Window
+   * to the Gdk::Pixbuf constructor will already have a colormap associated with
+   * it.  If the drawable is a bitmap (1 bit per pixel pixmap),
+   * then a colormap is not required; pixels with a value of 1 are
+   * assumed to be white, and pixels with a value of 0 are assumed to be
+   * black. For taking screenshots, Gdk::Colormap::get_system() returns
+   * the correct colormap to use.
+   *
+   * This will create an RGB pixbuf with 8 bits per channel and no
+   * alpha, with the same size specified by the @a width and @a height
+   * arguments.
+   *
+   * If the specified drawable is a pixmap, then the requested source
+   * rectangle must be completely contained within the pixmap, otherwise
+   * the constructor will fail. For pixmaps only (not for windows)
+   * passing -1 for width or height is allowed to mean the full width
+   * or height of the pixmap.
+   *
+   * If the specified drawable is a window, and the window is off the
+   * screen, then there is no image data in the obscured/offscreen
+   * regions to be placed in the pixbuf. The contents of portions of the
+   * pixbuf corresponding to the offscreen region are undefined.
+   *
+   * If the window you're obtaining data from is partially obscured by
+   * other windows, then the contents of the pixbuf areas corresponding
+   * to the obscured regions are undefined.
+   * 
+   * See alo Gdk::Drawable::get_image().
+   *
+   * @param src Source drawable.
+   * @param cmap: A colormap.
+   * @param src_x Source X coordinate within drawable.
+   * @param src_y Source Y coordinate within drawable.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newin2p12
+   */
+   Pixbuf(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap,
+         int src_x, int src_y, int width, int height);
+
+  /** Creates a pixbuf object from a drawable, using the colormap from the drawable.
+   *
+   * @param src Source drawable.
+   * @param src_x Source X coordinate within drawable.
+   * @param src_y Source Y coordinate within drawable.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newin2p12
+   */
+   Pixbuf(const Glib::RefPtr<Drawable>& src,
+         int src_x, int src_y, int width, int height);
+
+  #ifndef GDKMM_DISABLE_DEPRECATED
+
+   /// @deprecated Use the constructor without dest_x and dest_y parameters.
+   Pixbuf(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap,
          int src_x, int src_y, int dest_x, int dest_y, int width, int height);
+  #endif // GDKMM_DISABLE_DEPRECATED
+
+
+  /** Creates a pixbuf object from an image.
+   *
+   * @param src Source Image.
+   * @param cmap A colormap.
+   * @param src_x Source X coordinate within the image.
+   * @param src_y Source Y coordinate within the image.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newin2p12
+   */
+  Pixbuf(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap,
+         int src_x, int src_y, int width, int height);
+
+  /** Creates a pixbuf object from an image, using the colormap from the image.
+   *
+   * @param src Source Image.
+   * @param src_x Source X coordinate within the image.
+   * @param src_y Source Y coordinate within the image.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newinp212
+   */
+  Pixbuf(const Glib::RefPtr<Image>& src,
+         int src_x, int src_y, int width, int height);
+
+  #ifndef GDKMM_DISABLE_DEPRECATED
+
+  /// @deprecated Use the constructors without dest_x and dest_y parameters.
   Pixbuf(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap,
          int src_x, int src_y, int dest_x, int dest_y, int width, int height);
+  #endif // GDKMM_DISABLE_DEPRECATED
+
 
 public:
   typedef sigc::slot<void, const guint8*> SlotDestroyData;
 
-  
-  static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int dest_x, int dest_y, int width, int height);
+  // Hand-coded so the implementation in the .ccg is also only
+  // built when GDKMM_DISABLE_DEPRECATED is defined.
+  #ifndef GDKMM_DISABLE_DEPRECATED
 
+  /** @deprecated Use the create() methods that don't have the unused dest_x and dest_y parameters. */
+  static Glib::RefPtr<Gdk::Pixbuf> create(const Glib::RefPtr<Drawable>& src,
+                                          const Glib::RefPtr<Colormap>& cmap,
+                                          int src_x, int src_y,
+                                          int dest_x, int dest_y,
+                                          int width, int height);
+
+  /** @deprecated Use the create() methods that that don't have the unused dest_x and dest_y parameters. */
+  static Glib::RefPtr<Gdk::Pixbuf> create(const Glib::RefPtr<Image>& src,
+                                          const Glib::RefPtr<Colormap>& cmap,
+                                          int src_x, int src_y,
+                                          int dest_x, int dest_y,
+                                          int width, int height);
+  #endif // GDKMM_DISABLE_DEPRECATED
+
+
+  /** Creates a pixbuf object from a drawable.
+   *
+   * Transfers image data from a Drawable and converts it to an RGB(A)
+   * representation inside a Pixbuf. In other words, copies
+   * image data from a server-side drawable to a client-side RGB(A) buffer.
+   * This allows you to efficiently read individual pixels on the client side.
+   * 
+   * If the drawable @src has no colormap (See Gdk::Drawable::get_colormap()),
+   * then a suitable colormap must be specified. Otherwise, you may use the 
+   * constructor that takes no colormap argument.
+   * Typically a Gdk::Window or a pixmap created by passing a Gdk:Window
+   * to the Gdk::Pixbuf constructor will already have a colormap associated with
+   * it.  If the drawable is a bitmap (1 bit per pixel pixmap),
+   * then a colormap is not required; pixels with a value of 1 are
+   * assumed to be white, and pixels with a value of 0 are assumed to be
+   * black. For taking screenshots, Gdk::Colormap::get_system() returns
+   * the correct colormap to use.
+   *
+   * This will create an RGB pixbuf with 8 bits per channel and no
+   * alpha, with the same size specified by the @a width and @a height
+   * arguments.
+   *
+   * If the specified drawable is a pixmap, then the requested source
+   * rectangle must be completely contained within the pixmap, otherwise
+   * the constructor will fail. For pixmaps only (not for windows)
+   * passing -1 for width or height is allowed to mean the full width
+   * or height of the pixmap.
+   *
+   * If the specified drawable is a window, and the window is off the
+   * screen, then there is no image data in the obscured/offscreen
+   * regions to be placed in the pixbuf. The contents of portions of the
+   * pixbuf corresponding to the offscreen region are undefined.
+   *
+   * If the window you're obtaining data from is partially obscured by
+   * other windows, then the contents of the pixbuf areas corresponding
+   * to the obscured regions are undefined.
+   * 
+   * See alo Gdk::Drawable::get_image().
+   *
+   * @param src Source drawable.
+   * @param cmap: A colormap.
+   * @param src_x Source X coordinate within drawable.
+   * @param src_y Source Y coordinate within drawable.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newin2p12
+   */
   
-  static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int dest_x, int dest_y, int width, int height);
+  static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height);
+
+
+  /** Creates a pixbuf object from a drawable, using the colormap from the drawable.
+   *
+   * @param src Source drawable.
+   * @param src_x Source X coordinate within drawable.
+   * @param src_y Source Y coordinate within drawable.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newin2p12
+   */
+  
+  static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Drawable>& src, int src_x, int src_y, int width, int height);
+
+
+  /** Creates a pixbuf object from an image.
+   *
+   * @param src Source Image.
+   * @param cmap A colormap.
+   * @param src_x Source X coordinate within the image.
+   * @param src_y Source Y coordinate within the image.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newin2p12
+   */
+  
+  static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height);
+
+
+  /** Creates a pixbuf object from an image, using the colormap from the image.
+   *
+   * @param src Source Image.
+   * @param src_x Source X coordinate within the image.
+   * @param src_y Source Y coordinate within the image.
+   * @param width Width in pixels of region to get.
+   * @param height Height in pixels of region to get.
+   *
+   * @newinp212
+   */
+  
+  static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Image>& src, int src_x, int src_y, int width, int height);
 
 
   /** Creates a new Gdk::Pixbuf with a copy of the information in the specified
@@ -317,8 +532,8 @@ public:
    * @param colorspace Color space for image.
    * @param has_alpha Whether the image should have transparency information.
    * @param bits_per_sample Number of bits per color sample.
-   * @param width Width of image in pixels.
-   * @param height Height of image in pixels.
+   * @param width Width of image in pixels, must be &gt; 0.
+   * @param height Height of image in pixels, must be &gt; 0.
    * @return A newly-created Gdk::Pixbuf with a reference count of 1, or 
    * <tt>0</tt> if not enough memory could be allocated for the image buffer.
    */
@@ -736,14 +951,14 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
                    int dest_x, int dest_y) const;
 
   
-  /** Modifies saturation and optionally pixelates @a src , placing the
-   * result in @a dest . @a src  and @a dest  may be the same pixbuf with no ill
-   * effects.  If @a saturation  is 1.0 then saturation is not changed. If
-   * it's less than 1.0, saturation is reduced (the image is darkened);
-   * if greater than 1.0, saturation is increased (the image is
-   * brightened). If @a pixelate  is <tt>true</tt>, then pixels are faded in a
-   * checkerboard pattern to create a pixelated image. @a src  and @a dest 
-   * must have the same image format, size, and rowstride.
+  /** Modifies saturation and optionally pixelates @a src , placing the result in
+   *  @a dest . @a src  and @a dest  may be the same pixbuf with no ill effects.  If
+   *  @a saturation  is 1.0 then saturation is not changed. If it's less than 1.0,
+   * saturation is reduced (the image turns toward grayscale); if greater than
+   * 1.0, saturation is increased (the image gets more vivid colors). If @a pixelate 
+   * is <tt>true</tt>, then pixels are faded in a checkerboard pattern to create a
+   * pixelated image. @a src  and @a dest  must have the same image format, size, and
+   * rowstride.
    * @param dest Place to write modified version of @a src .
    * @param saturation Saturation factor.
    * @param pixelate Whether to pixelate.
@@ -901,7 +1116,8 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
   /** Rotates a pixbuf by a multiple of 90 degrees, and returns the
    * result in a new pixbuf.
    * @param angle The angle to rotate by.
-   * @return A new pixbuf
+   * @return The new Gdk::Pixbuf, or <tt>0</tt> if not enough memory could be
+   * allocated for it.
    * 
    * @newin2p6.
    */
@@ -910,7 +1126,8 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
   /** Flips a pixbuf horizontally or vertically and returns the
    * result in a new pixbuf.
    * @param horizontal <tt>true</tt> to flip horizontally, <tt>false</tt> to flip vertically.
-   * @return A new pixbuf.
+   * @return The new Gdk::Pixbuf, or <tt>0</tt> if not enough memory could be
+   * allocated for it.
    * 
    * @newin2p6.
    */
@@ -950,7 +1167,7 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
    * for consistent visual results.  If you do not have any of these cases, the
    * dither offsets can be both zero.
    * 
-   * Deprecated: This function is obsolete. Use gdk_draw_pixbuf() instead.
+   * Deprecated: 2.4: This function is obsolete. Use gdk_draw_pixbuf() instead.
    * @param drawable Destination drawable.
    * @param gc GC used for rendering.
    * @param src_x Source X coordinate within pixbuf.
@@ -979,7 +1196,7 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
    * On older X servers, rendering pixbufs with an alpha channel involves round trips
    * to the X server, and may be somewhat slow.
    * 
-   * Deprecated: This function is obsolete. Use gdk_draw_pixbuf() instead.
+   * Deprecated: 2.4: This function is obsolete. Use gdk_draw_pixbuf() instead.
    * @param drawable Destination drawable.
    * @param src_x Source X coordinate within pixbuf.
    * @param src_y Source Y coordinates within pixbuf.
@@ -1012,7 +1229,15 @@ gboolean gdk_pixbuf_save_to_callbackv   (GdkPixbuf  *pixbuf,
 
   
   /** Looks up @a key  in the list of options that may have been attached to the
-   *  @a pixbuf  when it was loaded.
+   *  @a pixbuf  when it was loaded, or that may have been attached by another
+   * function using set_option().
+   * 
+   * For instance, the ANI loader provides "Title" and "Artist" options. 
+   * The ICO, XBM, and XPM loaders provide "x_hot" and "y_hot" hot-spot 
+   * options for cursor definitions. The PNG loader provides the tEXt ancillary
+   * chunk key/value pairs as options. Since 2.12, the TIFF and JPEG loaders
+   * return an "orientation" option string that corresponds to the embedded 
+   * TIFF/Exif orientation tag (if present).
    * @param key A nul-terminated string.
    * @return The value associated with @a key . This is a nul-terminated 
    * string that should not be freed or <tt>0</tt> if @a key  was not found.
@@ -1048,10 +1273,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::Pixbuf
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::Pixbuf
    */
   Glib::RefPtr<Gdk::Pixbuf> wrap(GdkPixbuf* object, bool take_copy = false);
 }

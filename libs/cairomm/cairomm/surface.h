@@ -28,6 +28,7 @@
 
 //See xlib_surface.h for XlibSurface.
 //See win32_surface.h for Win32Surface.
+//See quartz_surface.h for QuartzSurface (Mac OS X).
 
 #ifdef CAIRO_HAS_PDF_SURFACE
 #include <cairo-pdf.h>

@@ -149,9 +149,7 @@ public:
    */
   void set_label(const Glib::ustring& label);
   
-  /** Returns the label used by the tool button, or <tt>0</tt> if the tool button
-   * doesn't have a label. or uses a the label from a stock item. The returned
-   * string is owned by GTK+, and must not be modified or freed.
+  /** Return value: The label, or <tt>0</tt>
    * @return The label, or <tt>0</tt>
    * 
    * @newin2p4.
@@ -172,8 +170,7 @@ public:
    */
   void set_use_underline(bool use_underline = true);
   
-  /** Returns whether underscores in the label property are used as mnemonics
-   * on menu items on the overflow menu. See set_use_underline().
+  /** Return value: <tt>true</tt> if underscores in the label property are used as
    * @return <tt>true</tt> if underscores in the label property are used as
    * mnemonics on menu items on the overflow menu.
    * 
@@ -190,8 +187,7 @@ public:
    */
   void set_stock_id(const Gtk::StockID& stock_id);
   
-  /** Returns the name of the stock item. See set_stock_id().
-   * The returned string is owned by GTK+ and must not be freed or modifed.
+  /** Return value: the name of the stock item for @a button .
    * @return The name of the stock item for @a button .
    * 
    * @newin2p4.
@@ -209,8 +205,7 @@ public:
    */
   void set_icon_name(const Glib::ustring& icon_name);
   
-  /** Returns the name of the themed icon for the tool button,
-   * see set_icon_name().
+  /** Returns: the icon name or <tt>0</tt> if the tool button has
    * @return The icon name or <tt>0</tt> if the tool button has
    * no themed icon
    * 
@@ -254,16 +249,14 @@ public:
    */
   void set_label_widget(Widget& label_widget);
   
-  /** Returns the widget used as label on @a button . See
-   * set_label_widget().
+  /** Return value: The widget used as label on @a button , or <tt>0</tt>.
    * @return The widget used as label on @a button , or <tt>0</tt>.
    * 
    * @newin2p4.
    */
   Widget* get_label_widget();
   
-  /** Returns the widget used as label on @a button . See
-   * set_label_widget().
+  /** Return value: The widget used as label on @a button , or <tt>0</tt>.
    * @return The widget used as label on @a button , or <tt>0</tt>.
    * 
    * @newin2p4.
@@ -273,11 +266,9 @@ public:
  /** This signal is emitted when the tool button is clicked with the mouse
   * or activated with the keyboard.
   * @deprecated This is an "action" key-binding signal that you should rarely need to use.
-  */
-  
-/**
+  *
    * @par Prototype:
-   * <tt>void %clicked()</tt>
+   * <tt>void on_my_%clicked()</tt>
    */
 
   Glib::SignalProxy0< void > signal_clicked();
@@ -391,10 +382,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ToolButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ToolButton
    */
   Gtk::ToolButton* wrap(GtkToolButton* object, bool take_copy = false);
 } //namespace Glib

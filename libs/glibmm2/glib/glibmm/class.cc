@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: class.cc,v 1.7 2006/10/04 12:04:05 murrayc Exp $ */
+/* $Id: class.cc 336 2006-10-04 12:06:14Z murrayc $ */
 
 /* Copyright (C) 1998-2002 The gtkmm Development Team
  *

@@ -19,11 +19,41 @@
  */
 
 #include <glibmm/utility.h>
+#include <glibmm/exceptionhandler.h>
 #include <glib/goption.h>
 
 namespace Glib
 {
 
+  namespace Private
+  {
+    static const gchar* SignalProxy_translate_gtk_callback (const gchar* str, gpointer data)
+    {
+      Glib::ustring translated_str;
+      Glib::OptionContext::SlotTranslate* the_slot =
+        static_cast<Glib::OptionContext::SlotTranslate*>(data);
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try
+      {
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+        translated_str = (*the_slot)(str);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+      return translated_str.c_str ();
+    }
+
+    static void SignalProxy_translate_gtk_callback_destroy (gpointer data)
+    {
+      delete static_cast<Glib::OptionContext::SlotTranslate*>(data);
+    }
+
+  } //namespace Private
 
 OptionContext::OptionContext(const Glib::ustring& parameter_string)
 : gobject_( g_option_context_new(parameter_string.c_str()) ),
@@ -68,7 +98,15 @@ OptionGroup OptionContext::get_main_group() const
 
 */
 
-  
+void OptionContext::set_translate_func (const SlotTranslate& slot)
+{
+  //Create a copy of the slot. A pointer to this will be passed through the callback's data parameter.
+  //It will be deleted when SignalProxy_translate_gtk_callback_destroy() is called.
+  SlotTranslate* slot_copy = new SlotTranslate(slot);
+
+  g_option_context_set_translate_func(
+      gobj(), &Private::SignalProxy_translate_gtk_callback, slot_copy,
+      &Private::SignalProxy_translate_gtk_callback_destroy);
+}
 
 } // namespace Glib
-

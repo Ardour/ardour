@@ -1,3 +1,855 @@
+2007-11-06  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/doxygen_to_devhelp.xsl: minor clean-up of the xsl file to
+	extract common stuff out to separate templates so we don't have so much
+	duplication in the 'as-func' and 'as-sub' templates
+
+2007-11-05  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/doxygen_to_devhelp.xsl: Fully-qualify functions in the
+	devhelp file so it's easy to see which class they belong to in the search
+	results (Bug #493999)
+
+2007-11-05  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/Makefile.am: clean up the makefile rules for building the
+	devhelp files a bit so that it gets rebuilt if the xsl stylesheet changes,
+	etc.
+	* docs/reference/doxygen_to_devhelp.xsl: Fix the devhelp XSL stylesheet so
+	that the functions link correctly (fixes Bug #488261)
+
+2007-11-05  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	* tools/extra_defs_gen/generate_defs_gtk.cc: Added ifdefs around the 
+	unix-specific printer objects, to fix the build on Windows.
+
+2.12.2:
+
+2007-11-05  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/linkbutton.ccg:
+	* gtk/src/linkbutton.hg: Partially hand-code one of the 
+	constructors, so it can pass the uri for the label too, 
+	as in gtk_link_button_new(). Bug #492200 (Marko Anastasov).
+
+2007-11-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/widget.hg: Change a Style to Gtk::Style in 
+	a signal, to fix the build on MacOS X. Bug #493057.
+	(Alberto Ruiz)
+	* tools/m4/convert_gtk.m4:
+	* gtk/src/style.hg: Moved some signal-specific conversions to 
+	the .hg file, to avoid their misuse.
+
+2007-10-25  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/iconview.hg: set_cursor(): Actually implement this.
+
+This is the gtkmm-2-12 branch. See the svn trunk branch for gtkmm 2.13/14.
+
+2007-10-14  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* gdk/src/pixbuf.hg: Fixed build by correcting a typo for create()
+	from previous commit. Bug #486257 (Craig Keogh).
+
+2007-10-12  Armin Burgmeier  <armin@openismus.com>
+
+	* gdk/gdkmmconfig.h.in:
+	* gtk/gtkmmconfig.h.in:
+	* configure.in: Added G{D,T}KMM_DISABLE_DEPRECATED defines to
+	g{d,t}kmmconfig.h so other code can check whether deprecated API is
+	available or not.
+
+	* gdk/src/pixbuf.hg:
+	* gdk/src/pixbuf.ccg: Fixed build with deprecated API disabled.
+
+	* gtk/src/tooltips.hg:
+	* gtk/src/combo.hg:
+	* gtk/src/textview.hg:
+	* gtk/src/optionmenu.hg:
+	* gtk/src/toolbar.hg:
+	* gtk/src/inputdialog.hg:
+	* gtk/src/treeview.hg:
+	* gtk/src/style.hg:
+	* gtk/src/toolitem.hg:
+	* gtk/src/textbuffer.hg:
+	* gtk/src/treepath.hg:
+	* gtk/src/treesortable.hg:
+	* gtk/src/progress.hg:
+	* gtk/src/treeviewcolumn.hg:
+	* gtk/src/fileselection.hg:
+	* gdk/src/colormap.hg:
+	* gdk/src/color.hg: Use the new _CONFIGINCLUDE m4 macro in glibmm to
+	include gtkmmconfig.h before the #ifdef GTKMM_DISABLE_DEPRECATED at
+	the top of the file so that the define is actually present when other
+	code includes one of these files directly. Note this requires glibmm
+	from SVN to generate the source files (though building the sources
+	should still work with 2.14.1).
+
+2.12.1:
+
+2007-10-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/printoperation.hg: Add a custom conversion for the 
+	signals that use PrintContext, to fix a reference-counting 
+	problem that caused crashes when printing or showing a 
+	print preview.
+	Note that this was removed mistakenly on 2007-07-14
+	(appearing in 2.11.4) so gtkmm 2.10 does not have this problem. 
+
+	* tools/m4/convert_atk.m4:
+	* tools/m4/convert_gdk.m4:
+	* tools/m4/convert_gtk.m4:
+	* atk/src/hypertext.hg:
+	* atk/src/table.hg:
+	* gdk/src/displaymanager.hg:
+	* gtk/src/inputdialog.hg:
+	* gtk/src/style.hg:
+	* gtk/src/textbuffer.hg:
+	* gtk/src/widget.hg: Move all signal-specific conversions to 
+	the .hg files where they are used, to make this clearer.
+
+2.12.0:
+
+2007-09-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/gdk_docs_override.xml:
+	* gdk/src/window.hg:
+	* gtk/src/builder.hg:
+	* gtk/src/celllayout.hg:
+	* gtk/src/filechooser.hg:
+	* gtk/src/iconinfo.ccg:
+	* gtk/src/pagesetup.hg:
+	* gtk/src/printsettings.hg:
+	* gtk/src/recentchooser.hg: Dealt with some simple TODO:
+	mostly documentation.
+
+2007-09-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/recentaction.ccg:
+	* gtk/src/recentaction.hg: Make the constructors use the same 
+	parameter order as the other action classes. Remove the comment 
+	about the default constructor, now that the GTK+ C documentation 
+	is clearer in bug #450032.
+	* gtk/src/action.hg:
+	* gtk/src/radioaction.hg:
+	* gtk/src/toggleaction.hg: Deprecate the default constructors, 
+	because they cannot work. We could maybe remove them, but maybe 
+	they are used in the build of some applications, but never used 
+	at runtime.
+	Added default values for the StockID parameters, now that we 
+	know that we know that this is OK - see bug #450032.
+
+2.11.8:
+
+2007-08-31  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtkmm-tut.xml: DrawingArea: Corrected a mention of 
+	PixBuf to Pixbuf. Bug #465961 (Jonathan Jongsma).
+
+2007-08-29  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gdk/gdkmm/general.cc, gdk/gdkmm/general.h: deprecate cairo helper
+	functions and added new overloaded functions that take *const*
+	RefPtr<Cairo::Context>& parameters.
+	Also renamed the new rectangle() and region() functions per the TODO in the
+	source file.  The new names are add_rectangle_to_path() and
+	add_region_to_path()
+
+2.11.7:
+
+2007-08-16  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/reference/gtkmm_footer.html_fragment,
+	docs/reference/gtkmm_header.html_fragment: add <div> to make it easier to
+	incoporate the documentation into library.gnome.org, per a request by
+	Frederic Peters
+
+2007-08-13  Daniel Elstner  <danielk@openismus.com>
+
+	* gtk/src/iconview.hg: Remove stray semicolon.
+	* gtk/src/printer.hg: Likewise.
+	* gtk/src/tooltip.ccg: Remove /* inside comment.
+
+	* gtk/src/builder.ccg (get_type_from_name_vfunc_callback):
+	Remove unused argument names to avoid compiler warnings.
+	* examples/book/printing/advanced/previewdialog.cc: ditto,
+	* examples/book/tooltips/examplewindow.cc: ditto.
+
+2.11.6:
+
+2007-07-30  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* .cvsignore: Updated, along with all other, and added some
+	where missing.
+	
+2007-07-29  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* gtk/src/treeview.[ccg|hg]:
+	* gtk/src/iconview.[ccg|hg]: Modified get_tooltip_context_iter()
+	and get_tooltip_context_path() implementations to use local
+	structs/objects to pass to the C function instead of
+	unguaranteed pointers. Added doxygen documentation for these
+	functions in both classes.
+
+2007-07-29  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* gtk/src/treeview.[ccg|hg]:
+	* gtk/src/iconview.[ccg|hg]: Added get_tooltip_context_path()
+	and get_tooltip_context_iter(). They are wrappers for
+	gtk_tree/icon_view_get_tooltip_context().
+
+2007-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_docs_override.xml: Corrected the documentation for 
+	gtk_toolbar_set_icon_size() and gtk_toolbar_unset_icon_size() to 
+	use the correct Since:.
+	* gtk/src/papersize.ccg:
+	* gtk/src/papersize.hg: save_to_key_file(): Removed the default 
+	group_name parameter value and added an overload instead.
+	* gtk/src/printer.hg: Added some documentation.
+	* gtk/src/printjob.hg: Added a const version of get_surface() 
+	and added documentation for send().
+	* gtk/src/printsettings.ccg:
+	* gtk/src/printsettings.hg: Corrected the typedef for SlotForeach - 
+	the ustring&s should be const. I do not believe that anybody could 
+	have been using this, so I think it is OK to change it.
+	* gtk/src/textmark.hg: Added documentation for constructors and 
+	create() methods.
+	* gtk/src/volumebutton.hg: Added documentation for the constructor.
+
+	* pango/src/fontface.hg: Added documentation for list_sizes().
+	* pango/src/renderer.hg: Added class documentation.
+
+2007-07-29  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/pixbuf.hg: Document the old 
+	create() methods as deprecated. Added documentation for 
+	the new create() methods.
+	* gdk/src/screen.hg: Correct the const version for 
+	get_font_options().
+	* gtk/src/builder.hg: Added documentation for the 
+	create methods.
+	* gtk/src/gtk_docs_override.xml: Corrected the 
+	documentation for gtk_icon_theme_lookup_icon().
+	* gtk/src/linkbutton.hg:
+	* gtk/src/linkbutton.ccg: Added set_uri_hook() 
+	and unset_uri_hook().
+	* gtk/src/papersize.hg:
+	* gtk/src/papersize.ccg: Added operator bool() so 
+	that return values can be checked.
+
+2007-07-29  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* gtk/src/tooltip.hg: Added class documentation based on GTK+ docs.
+
+2007-07-29  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* configure.in:
+	* examples/book/Makefile.am:
+	* examples/book/tooltips/Makefile.am:
+	* examples/book/tooltips/examplewindow.[cc|h]:
+	* examples/book/tooltips/main.cc: Added an example for the new
+	tooltips API.
+
+2007-07-29  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* gtk/src/gtk_docs_override.xml: Corrected mismatched tag
+	for PageSetup::save_to_file().
+
+2007-07-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_docs_override.xml: Corrected the 
+	documentation for
+	AboutDialog::get_program_name(), get_website_label(),
+	CellLayout::get_cells(), 
+	EntryCompletion::get_completion_prefix(), 
+	IconTheme::choose_icon(), list_contexts(), 
+	IconView::set_tooltip_cell(), set_tooltip_item(), 
+	PageSetup::save_to_file(), 
+	PrinterSettings::save_to_file(), request_details(), 
+	Widget::error_bell(), get_tooltip_markup(), 
+	get_tooltip_text(), 
+	* gtk/src/iconview.hg: Added a set_tooltip_cell() method 
+	overload without the cell parameter.
+	* gtk/src/settings.hg: Added new properties:
+	gtk-modules, gtk-cursor-theme-name, 
+	gtk-cursor-theme-size, gtk-alternative-button-order, 
+	gtk-alternative-sort-arrows, gtk-show-input-method-menu, 
+	gtk-show-unicode-menu, gtk-timeout-initial, 
+	gtk-timeout-repeat, gtk-timeout-expand, 
+	gtk-color-scheme, gtk-enable-animations, 
+	gtk-touchscreen-mode, gtk-tooltip-timeout, 
+	gtk-tooltip-browse-timeout, gtk-tooltip-browse-mode-timeout, 
+	gtk-keynav-cursor-only, gtk-keynav-wrap-around, 
+	gtk-error-bell, gtk-color-hash, 
+	gtk-file-chooser-backend, gtk-print-backends, 
+	gtk-print-preview-command, gtk-enable-mnemonics, 
+	gtk-enable-accels, gtk-recent-files-limit.
+
+2007-07-28  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/builder.hg: Removed get_type_from_name() because it 
+	seems only useful when implementing GTK+ widgets.
+	* gtk/src/gtk_docs_override.xml: Corrected the 
+	gtk_page_setup_to_key_file() and gtk_print_settings_to_key_file() 
+	documentation.
+	* gtk/src/pagesetup.ccg:
+	* gtk/src/pagesetup.hg:  Added a save_to_key_file() method 
+	overload without the group parameter. 
+	* gtk/src/printsettings.ccg:
+	* gtk/src/printsettings.hg: Renamed to_key_file() to save_to_key_file() 
+	and to_file() to save_to_file(). Added a save_to_key_file() method 
+	overload without the group parameter. 
+	* gtk/src/scalebutton.hg: Use IconSize instead of GtkIconSize 
+	for the constructor parameter.
+	* gtk/src/widget.hg: Added a @see unset_cursor() to the 
+	documentation.
+	Thanks to Jonathan Jongsma for the API review.
+
+2007-07-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_defs_gtk.cc:
+	* gtk/src/gtk_signals.defs: Added GtkScaleButton, GtkVolumeButton 
+	and GtkRecentAction.
+	* gtk/src/gtk_methods.defs: Regenerated with h2defs.py.
+
+	* gdk/src/pixbuf.ccg:
+	* gdk/src/pixbuf.hg: Added constructors that do not take dest_x 
+	and dest_y (which are ignored in this case), and deprecated those old 
+	constructors. Added constructors that do not take a colormap, because 
+	that is optional.
+	get_formats(): Corrected the reference counting.
+	* gdk/src/screen.hg:
+	* tools/m4/convert_gtk.m4:
+	* gtk/src/iconview.hg: set_tooltip_item(), set_tooltip_cell(): 
+	Use Tooltip only via a RefPtr.
+	* gtk/src/menushell.hg: Added move_selected signal.
+
+	* gtk/src/textview.hg:
+	* gtk/src/scalebutton.hg: Ignore key-bindings signals.
+
+	* gtk/src/tooltip.hg: Added set_tip_area().
+	* gtk/src/treeview.hg: Added convert_widget_to_tree_coords(), 
+	convert_tree_to_widget_coords(), convert_widget_to_bin_window_coords(), 
+	convert_bin_window_to_widget_coords(), convert_tree_to_bin_window_coords(), 
+	convert_bin_window_to_tree_coords(),
+	set_tooltip_row(), set_tooltip_cell(), set_tooltip_column(), 
+	get_tooltip_column().
+	* gtk/src/widget.hg: Added keynav_failed(), error_bell(), 
+	modify_cursor(), unset_cursor(), 
+	set_has_tooltip(), get_has_tooltip().
+
+2.11.5:
+
+2007-07-21  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/gdk_docs.xml:
+	* pango/src/pango_docs.xml:
+	* gtk/src/gtk_docs.xml: Regenerated with docextract_to_xml.py.
+	* pango/src/pango_methods.defs: Regenerated with h2defs.py.
+
+	* pango/src/color.hg: Added to_string().
+	* pango/src/cairofontmap.hg: Added get_font_type().
+	* gdk/src/screen.hg: Added is_composited(), set_font_options(), 
+	get_font_options(), set_resolution(), get_resolution(), 
+	get_active_window() 
+
+	* gtk/src/combobox.hg: 
+	* gtk/src/filechooserbutton.hg:
+	* gtk/src/notebook.hg: Ignored some new key-binding signals.
+
+	* gtk/src/iconview.hg: Added set_tooltip_item() and 
+	set_tooltip_cell().
+	* tools/m4/convert_gtk.m4: Added necessary new conversions.
+
+	* gtk/src/textbuffer.hg: Commented out the copy-target-list
+	and paste-target-list properties for now, with a TODO, because I fear 
+	that the reference-counting might not be correct. 
+
+2007-07-20  Marko Anastasov <marko@marko.anastasov.name>
+
+	* gtk/src/textbuffer.hg: Wrapped cursor-position, copy-target-list
+	and paste-target-list properties from GTK+ 2.10.
+
+2007-07-14  Murray Cumming  <murrayc@murrayc.com>
+
+	* tools/extra_defs_gen/generate_defs_gtk.cc: Mention the GtkPrint* 
+	classes so that signal/property .defs are generated for these.
+	* gdk/src/Makefile.am:
+	* gdk/src/gdk_pixbuf_enums.defs: Added this instead of pasting it 
+	into gdk_enums.defs.
+	* gdk/src/gdk.defs:
+	* gdk/src/gdk_enums.defs:
+	* gdk/src/gdk_methods.defs:
+	* gtk/src/gtk_enums.defs:
+	* gtk/src/gtk_methods.defs:
+	* gtk/src/gtk_signals.defs: Regenerated, with h2defs.py, enums.pl, 
+	and generate_extra_defs.
+	* gtk/src/gtk_others.defs: Move the hand-written GtkPrintOperationPreview 
+	signal defs to here instead of having them in gtk_signals.defs where they 
+	will be overwritten when it's regenerated.
+	* gtk/src/iconview.hg: Added convert_widget_to_bin_window_coords().
+	* gtk/src/papersize.hg: Commented out get_paper_sizes() until I 
+	figure out the build break.
+	* gtk/src/statusicon.hg: Added set_screen() and get_screen().
+
+	* pango/src/pango_enums.defs:
+	* pango/src/pango_methods.defs: Regenerated.
+	* tools/m4/convert_pango.m4: New conversions.
+	* pango/src/context.hg: Added GravityHint enum.
+	Added set_base_gravity(), get_base_gravity(), get_gravity(), 
+	set_gravity_hint(), get_gravity_hint().
+	* pango/src/fontdescription.hg: Added Gravity enum.
+	Added set_gravity() and get_gravity().
+	* pango/src/fontface.hg: Added is_synthesized().
+	* pango/src/glyphstring.hg: Added get_width().
+	* pango/src/layout.hg: Added is_wrapped(), is_ellipsized() and 
+	get_unknown_glyphs_count().
+	Reimplemented the const get_line() and get_lines() methods with 
+	the (faster) *_read_only() C functions.
+
+2007-07-13  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/tooltips.hg: Deprecated in favour of the various 
+	set_tooltip_text() and set_tooltip_markup() methods, and the new 
+	Gtl::Tooltip class.
+	* gtk/src/menutoolbutton.hg: Added set_arrow_tooltip_text() and 
+	set_arrow_tooltip_markup(). Deprecated set_arrow_tooltip().
+	* gtk/src/toolitem.ccg: 
+	* gtk/src/toolitem.hg: Deprecated signal_set_tooltip.
+	* examples/book/eventbox/examplewindow.cc:
+	* examples/book/eventbox/examplewindow.h:
+	* examples/book/toolbar/examplewindow.cc:
+	Replace use, or mention, of the deprecated Gtk::Tooltips class.
+
+2007-07-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/toolbar.ccg:
+	* gtk/src/toolbar.hg: get_tooltips_object(): Reimplement 
+	to fix the build because GTK+ broke the API of GtkTooltips::tooltips
+	(renaming it to GtkTooltips::_tooltips). I think I read that they 
+	will change it back before a stable release.
+	Deprecated get_tooltips_object().
+
+2007-07-03  Johannes Schmid  <johannes.schmid@openismus.com>
+
+	* gtk/src/uimanager.hg:
+	Added class documentation based on GTK+
+
+2007-07-03  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/treeview.hg: Added is_rubber_banding_active().
+
+2007-07-02  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/reference/Doxyfile.in: Correct the ALIASES for newin2p*.
+	* gtk/src/builder.hg:
+	* gtk/src/cellrendererprogress.hg:
+	* gtk/src/cellrendererspin.hg:
+	* gtk/src/recentaction.hg:
+	* gtk/src/scalebutton.hg:
+	* gtk/src/volumebutton.hg: Use newin2p12.
+
+2.11.4:
+
+2007-06-30  Johannes Schmid <johannes.schmid@openismus.com>
+
+	* gtk/src/action.hg:
+	* gtk/src/assistant.hg:
+	* gtk/src/builder.hg:
+	* gtk/src/cellrendereraccel.hg:
+	* gtk/src/cellrendererspin.hg:
+	* gtk/src/entrycompletion.hg:
+	* gtk/src/filefilter.hg:
+	* gtk/src/linkbutton.hg:
+	* gtk/src/radioaction.hg:
+	* gtk/src/recentaction.hg:
+	* gtk/src/scalebutton.hg:
+	* gtk/src/settings.hg:
+	* gtk/src/toggleaction.hg:
+	* gtk/src/volumebutton.hg:
+	* gtk/src/window.hg:
+
+	Fixed class documentation
+
+2007-06-30  Marko Anastasov  <marko@marko.anastasov.name>
+
+	* gtk/src/tooltip.[hg|ccg]:
+	* gtk/src/widget.[hg|ccg]: New files and functions, properties and signal
+	of the new tooltips API.
+	* gtk/gtkmm.h: Include tooltip.h.
+	* gtk/src/gtk_signals.defs: Added query_tooltip signal for Widget.
+	* gtk/src/Makefile_list_of_hg.am_fragment: Include tooltip.hg in build.
+	* tools/m4/convert_gtk.m4: Added conversions between GtkTooltip*
+	and Glib::RefPtr<Gtk::Tooltip>.
+	* tools/extra_defs_gen/generate_defs_gtk.cc: Generate defs for Tooltip.
+
+2007-06-26  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/builder/basic/basic.ui:
+	* examples/book/builder/basic/main.cc:
+	* examples/book/builder/derived/basic.ui:
+	* examples/book/builder/derived/main.cc:
+	Convert the libglade .glade files to GtkBuilder .ui files, 
+	with gtk-builder-convert script from GTK+.
+	* gtk/src/builder.ccg:
+	* gtk/src/builder.hg: Addded create_from_file() and create_from_string(), 
+	as conveniences. Changed the add_from_file() parameter to a std::string, 
+	as all filenames should be, because their encoding is unknown.
+	Added a add_from_string() version that accepts a simple std::string.
+
+2007-06-24  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_enums.defs: Regenerated with enums.pl
+	* gtk/src/gtk_methods.defs: Regenerated with h2defs.py.
+
+	* gtk/src/Makefile_list_of_hg.am_fragment:
+	* gtk/src/builder.ccg:
+	* gtk/src/builder.hg: Added wrapper for GtkBuilder, taking code from 
+	libglademm so that it instantiates derived GTypes by using the vfunc, 
+	and has templated get_widget() and get_widet_derived() methods.
+	* gtk/gtkmm.h: Added builder.h
+
+	* configure.in:
+	* examples/book/builder/basic/
+	* examples/book/builder/derived/
+	Added GtkBuilder versions of the libgladem examples. These will not 
+	work until I find the script to conver the glade files to GtkBuilder 
+	files, or find a UI editor that creates GtkBuilder files.
+
+2007-06-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/recentaction.hg: Constuctor and create(): 
+	Added default values for the tooltips and stock_id paramters,
+	though I think none of these should need to specified.
+	See bug #450032.
+	* gtk/gtkmm.h: Added recentaction.h
+	* examples/book/recent_files/examplewindow.cc: Used the RecentAction to 
+	create a sub-menu.
+
+2007-06-22  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/treeview/editable_cells/examplewindow.cc:
+	* examples/book/treeview/editable_cells/examplewindow.h:
+	Added comments about using CellRendererSpin or CellRendererProgress here.
+	I tested the new CellRendererSpin here and it works.
+
+2.11.3:
+
+2007-06-10  Kalle Vahlman  <zuh@iki.fi>
+
+	* tests/property_notification/main.cc: #ifdef out the use of the regular property API 
+	if properties are disabled.
+
+2007-02-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gdk/src/types.hg: Add ListHandle_AtomString intermediate container 
+	type.
+	* gdk/src/dragcontext.ccg:
+	* gdk/src/dragcontext.hg: get_targets(),
+	* gtk/src/selectiondata.hg: 
+	* gtk/src/selectiondata.ccg: get_targets(): Use ListHandle_AtomString with appropriate 
+	ownership instead of the current faulty code. This changes the return type, and 
+	therefore changes the API and ABI of this method, but it is not possible that 
+	anyone was using these functions until now, due to the brokenness.
+	Bug #399403 (Yannick Guesnet)
+
+2007-06-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/action.ccg:
+	* gtk/src/action.hg: Added create_menu().
+	* gtk/src/printer.hg: Added list_papers().
+
+	* docs/tutorial/gtkmm-tut.xml: In the gmmproc chapter, mention the optional text 
+	for the _WRAP_METHOD() deprecated parameter.
+
+2007-06-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm/treemodelcolumn.h: Added a comment about the difficulty of using 
+	a static instance.
+	* gtk/src/notebook.hg: Added const versions of get_n_pages() and page_num(), 
+	deprecating the non-const methods. Bug #442284 (Tomasz Ostrowski).
+	* gtk/src/scalebutton.hg: Use refresult instead of refreturn. Maybe gmmproc 
+	should not ignore unknown options.
+
+2007-06-10  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/scalebutton.hg: Added the constructor now that 
+	gtk_scale_button_new() has been fixed in GTK+.
+
+2007-06-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/cellrendererprogress.hg: Added pulse, text-xalign, and 
+	text-yalign properties.
+	* gtk/src/entrycompletion.hg:
+	* gtk/src/entrycompletion.ccg: Added set_inline_selection(), 
+	and get_inline_selection(). 
+	Added cursor_on_match signal, though without a default signal 
+	handlers, to preserve ABI.
+	Added inline-selection property.
+	* gtk/src/range.hg: Added set_show_fill_level(), get_show_fill_level(),
+	set_restrict_to_fill_level(), get_restrict_to_fill_level(), 
+	set_fill_level(), get_fill_level().
+	Added show-fill-level, restrict-to-fill-level, and 
+	fill-level properties.
+	* gtk/src/texttag.hg: Added paragraph-background, 
+	paragraph-background-gdk, paragraph-background-set, 
+	accumulative-margin properties.
+	* gtk/src/treeview.hg: Added set_show_expanders(), get_show_expanders(), 
+	set_level_indentation(), get_level_indentation().
+
+2007-06-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/Makefile_list_of_hg.am_fragment:
+	* gtk/src/recentaction.ccg:
+	* gtk/src/recentaction.hg: Added RecentAction.
+	* gtk/src/scalebutton.ccg:
+	* gtk/src/scalebutton.hg: Added ScaleButton.
+	* gtk/src/volumebutton.ccg:
+	* gtk/src/volumebutton.hg: Added VolumeButton.
+
+2007-06-09  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/gtkmm/stock.cc:
+	* gtk/gtkmm/stock.h: Added DISCARD, ORIENTATION_PORTRAIT, 
+	ORIENTATION_LANDSCAPE, ORIENTATION_REVERSE_LANDSCAPE, 
+	ORIENTATION_REVERSE_PORTRAIT, SELECT_ALL
+
+2007-06-06  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/tutorial/gtkmm-tut.xml: updated the internationalization section
+	slightly, prompted by some discussion / criticism on gtkmm-list.  There's
+	probably more that could be done here still.  I mostly worked on the wording
+	to make it flow a bit better and added a bit more explanatory text.
+
+2.11.2:
+
+2007-06-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* docs/tutorial/gtkmm-tut.xml: gmmproc appendix: Added documentation 
+	on constructors, create() methods, _CONSTRUCT(), and some hints about 
+	wrapping GList* and GSList* parameters.
+	Bug #350870. (Paul Davis and Johannes Schmid)
+
+	* docs/reference/Doxyfile.in: Added newin2p12 tag, for marking API 
+	as new since 2.12.
+
+	* gdk/src/gdk_methods.defs:
+	* gtk/src/gtk_methods.defs: Regenerated with h2defs.py
+
+	* gdk/src/display.hg: Added supports_shapes(), supports_input_shapes(), 
+	supports_composite().
+	* gdk/src/window.hg: Added set_composited(), input_shape_combine_mask(), 
+	input_shape_combine_region(), set_child_input_shapes(), 
+	merge_child_input_shapes(), get_type_hint(), set_startup_id(), beep(), 
+	set_opacity().
+	* gtk/src/aboutdialog.hg: Added set/get_program_name() and deprecated 
+	set/get_name().
+	* gtk/src/celllayout.hg: Added get_cells().
+	* gtk/src/entry.hg: Added set_cursor_hadjustment(), get_cursor_hadjustment().
+	* gtk/src/icontheme.hg: Added choose_icon(), list_contexts().
+	* gtk/src/notebook.hg: Added set/get_group() and deprecated set/get_group_id().
+	* gtk/src/pagesetup.hg: Added to_file(), to_key_file().
+	* gtk/src/papersize.hg: Added get_paper_sizes().
+	* gtk/src/printer.hg: Added has_details(), request_details(), 
+	get_capabilities().
+	* gtk/src/printsettings.hg: Added to_file(), to_key_file().
+	* gtk/src/textbuffer.hg: Added add_mark().
+	* gtk/src/textmark.ccg:
+	* gtk/src/textmark.hg: Added constructor and create() method, though these 
+	are usually created via TextBuffer.
+	* gtk/src/toolbar.hg: Added set_icon_size(), unset_icon_size().
+	* gtk/src/window.hg: Added set_opacity(), get_opacity().
+	Added transient_for, and opacity properties.
+
+2007-05-26  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gtk/src/gtk_docs_override.xml: update documentation for some FileChooser
+	methods which incorrectly stated that the returned list of strings needs to
+	be freed with Glib::free()
+
+2.11.1:
+
+2007-05-23  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/tutorial/gtkmm-tut.xml: renamed the gmmproc appendix to "Wrapping C
+	Libraries with gmmproc" so that it shows up better in google searches for
+	'gmmproc'
+
+2007-05-09  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/tutorial/gtkmm-tut.xml: Another big set of changes to improve pdf
+	output.  I shortened a lot of the <programlisting> code in the docbook
+	document so that things will fit on a printed page / pdf document.  In
+	addition, a lot of little changes were made to reduce a lot of unnecessary
+	whitespace in the generated PDF (e.g.  don't wrap <programlisting> or
+	<itemizedList> elements in empty <para> tags, etc).  This has the advantage
+	of streamlining the markup as well.  I didn't make it all of the way through
+	the document, will clean up more in the future.
+	* examples/book/drag_and_drop/dndwindow.h: shorten another long line in this
+	example so that when it's included into the tutorial it fits on a page
+
+2007-05-09  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* examples/book/comboboxentry/complex/examplewindow.cc: accidentally broke
+	the build on this example when reducing the line length
+
+2007-05-08  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/tutorial/Makefile.am: add a 'pdf' target so that we can build a pdf
+	version of the tutorial more easily.  Also fixed the command for the
+	'validate' targets and a couple other minor cleanups.
+
+2007-05-08  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* examples/book/*: modified all of the book examples to make all lines 80
+	characters long or less.  This makes it so that the examples have a chance
+	of fitting on the page of a printed pdf version of the tutorial book
+
+2007-05-08  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* docs/tutorial/gtkmm-tut.xml: LOTS of changes to the tutorial to get it to
+	validate against the docbook DTD.  This was necessary because if the xml
+	wasn't valid then we couldn't use tools such as docbook2pdf to generate a
+	pdf version of the tutorial.  Most of the changes involved things such as
+	adding <para> elements inside of <note> and <listitem> elements (since these
+	elements can't old raw character data, but <para> can).  Also defined some
+	entities such as &uuml; in ways that xml validators find acceptable, and a
+	few other things.  I have not yet created a makefile rule to build a pdf
+	automatically (or at least more easily), but I will do that soon.
+
+2007-05-07  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* examples/book/custom/custom_widget/mywidget.cc,h: Update the custom widget
+	example to use cairo-based drawing instead of the old GDK drawing functions.
+
+2007-05-03  Murray Cumming  <murrayc@murrayc-desktop>
+
+	* docs/tutorial/gtkmm-tut.xml: Basics: Split part of the example section into 
+	a Headers and Linking section, with slightly fuller information.
+	libglademm section: Describe what you need to include and link for libglademm, 
+	and link back to the basics section that I just created.
+
+2007-05-01  Johannes Schmid <jhs@gnome.org>
+	
+	* gtk/src/style.hg:
+	Wrap gtk_style_attach() and gtk_style_detach().
+	Bug #351336
+
+2007-05-01  Johannes Schmid <jhs@gnome.org>
+
+	* gtk/src/window.hg: Added static set_default_icon_name() method, 
+	wrapping gtk_window_set_default_icon_name().
+	Bug #364395 (Yuriy Syrota)
+
+2007-05-01  Johannes Schmid <jhs@gnome.org>
+	
+	* gtk/src/calendar.hg
+	* gtk/src/calendar.ccg
+	Bug #350584 – Calendar::get_date() method using Glib::Date
+
+2007-05-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/gtk_signals.defs: Adjust the GtkStatusIcon::popup_menu signal 
+	definition, because the GType parameter system can not distinguish between 
+	guint and guint32 (There is no G_TYPE_UINT32).
+	* gtk/src/statusicon.hg: Add signals for the GtkStatusIcon activate and 
+	popup_menu signals. See the comment in the code about these not being 
+	public API, but we are adding them anyway because they seem necessary, 
+	and we cannot get an answer out of the GTK+ maintainers.
+	Bug #
+
+2007-05-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/statusicon.ccg:
+	* gtk/src/statusicon.hg: Added popup_menu_at_position(), as an equivalent for 
+	the gtk_status_icon_position_menu() helper callback.
+	Bug #392948 (Jan Niklas Hasse)
+
+2007-05-01  Murray Cumming  <murrayc@murrayc.com>
+
+	* gtk/src/window.hg: Added set_accept_focus(), get_accept_focus(), 
+	set_focus_on_map() and get_focus_on_map(). 
+	Bug #421936
+
+This is the trunk branch for gtkmm 2.11/12.
+
+2.10.10:
+
+2007-04-30  Johannes Schmid <johannes.schmid@openismus.com>
+
+	* gtk/src/combo.hg:
+	* gtk/src/fileselection.hg:
+	* gtk/src/optionmenu.hg:
+	* gtk/src/progress.hg:
+
+	Use _IS_DEPRECATED instead of _DEPRECATED to sync with
+	glibmm HEAD.
+
+2007-04-24  Yselkowitz <yselkowitz@users.sourceforge.net>
+
+        * scripts/macros.m4: Check for both m4 and M4 in the GNU m4 output,
+        to fix the build on some platforms.
+        Bug #423990
+
+2007-04-18  Armin Burgmeier  <armin@openismus.com>
+
+	* gtk/src/recentmanager.hg:
+	* gtk/src/recentmanager.ccg: Made a std::vector<Glib::ustring> out of
+	the StringArrayHandle in Gtk::RecentManager::Data because the latter
+	is not instantiable and only meant to be used as an intermediate type.
+
+	Also hand-code RecentManager::add_item(const Glib::ustring&, const
+	Data&) because we cannot do an easy conversion. We have to fill in a C
+	struct instead.
+	Bug #388086 (Grant Patterson)
+
+2007-04-12  Armin Burgmeier  <armin@openismus.com>
+
+	* tools/m4/convert_gtk.m4: Removed GtkRadioAction* ->
+	Glib::RefPtr<RadioAction> conversion.
+
+	* gtk/src/radioaction.hg: Added a custom conversion from
+	GtkRadioAction* to Glib::RefPtr<RadioAction> that increases the
+	reference count for the radio action object. The only place where this
+	conversion actually is required is the changed signal of the radio
+	action, and we need an additional reference there.
+	Bug #350734 (Johnathon Jongsma, "pjdavis" Paul Davis)
+
+2007-04-12  Johannes Schmid <johannes.schmid@openismus.com>
+
+	* gtk/src/widget.ccg:
+	Added a special case for Gtk::Menu in
+	Widget_Class::dispose_vfunc_callback to fix a crash in menu
+	destruction.
+	Bug #339791 ("pjdavis" Paul Davis, Andrew E. Makeev)
+
+2007-04-14  Marko Anastasov <marko@marko.anastasov.name>
+
+	* docs/FAQ/gtkmm-faq.xml: Emphasised that the use libglademm is
+	preferred over glademm. Bug #429043.
+	Removed the old libglademm URL entity.
+
+2.10.9:
+
+2007-03-30  Murray Cumming  <murrayc@murrayc.com>
+
+	* examples/book/notebook/examplewindow.cc:
+	* examples/book/notebook/examplewindow.h: Connect to the switch-page signal, 
+	as a demonstration.
+
+2007-03-12  Andrew E. Makeev  <andrew@solvo.ru>
+
+	* gtk/src/treeview.ccg: fix memory leak in get_cursor() function.
+	Bug #417539
+
+2007-03-09  Jonathon Jongsma  <jjongsma@gnome.org>
+
+	* gtk/src/gtk_docs_override.xml: fix documentation of
+	IconTheme::get_example_icon_name() so that it doesn't imply that the
+	returned ustring needs to be freed.
+
 2.10.8:
 
 2007-03-03  Alan Ott  <alan@signal11.us>

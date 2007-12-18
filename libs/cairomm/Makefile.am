@@ -1,7 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = cairomm examples MSVC $(DOCS_SUBDIR)
+SUBDIRS = cairomm examples MSVC $(DOCS_SUBDIR) tests
 #docs examples
+ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = MAINTAINERS cairomm-1.0.pc.in
 
@@ -23,7 +24,7 @@ RELEASE_UPLOAD_BASE =	/srv/cairo.freedesktop.org/www
 RELEASE_UPLOAD_DIR =	$(RELEASE_UPLOAD_BASE)/releases
 RELEASE_URL_BASE = 	http://cairographics.org/releases
 RELEASE_ANNOUNCE_LIST = cairo-announce@cairographics.org (and CC gnome-announce-list@gnome.org)
-CVS = cvs
+GIT = $(top_srcdir)/missing --run git
 
 #MANUAL_DATED =		cairo-manual-`date +%Y%m%d`
 #MANUAL_TAR_FILE = 	$(MANUAL_DATED).tar.gz
@@ -52,7 +53,7 @@ release-verify-newer:
 	@echo -n "Checking that no $(VERSION) release already exists..."
 	@ssh $(RELEASE_UPLOAD_HOST) test ! -e $(RELEASE_UPLOAD_DIR)/$(tar_file) \
 		|| (echo "Ouch." && echo "Found: $(RELEASE_UPLOAD_HOST):$(RELEASE_UPLOAD_DIR)/$(tar_file)" \
-		&& echo "Are you sure you have an updated CVS checkout?" \
+		&& echo "Are you sure you have an updated git checkout?" \
 		&& echo "This should never happen." \
 		&& false)
 	@echo "Good."
@@ -74,9 +75,12 @@ release-upload: release-check $(tar_file) $(sha1_file) $(gpg_file)
 	scp $(tar_file) $(sha1_file) $(gpg_file) $(RELEASE_UPLOAD_HOST):$(RELEASE_UPLOAD_DIR)
 	mv $(tar_file) $(sha1_file) $(gpg_file) releases
 	ssh $(RELEASE_UPLOAD_HOST) "rm -f $(RELEASE_UPLOAD_DIR)/LATEST-$(PACKAGE)-[0-9]* && ln -s $(tar_file) $(RELEASE_UPLOAD_DIR)/LATEST-$(PACKAGE)-$(VERSION)"
-	$(CVS) tag RELEASE_$(GENERIC_MAJOR_VERSION)_$(GENERIC_MINOR_VERSION)_$(GENERIC_MICRO_VERSION)
+	$(GIT) tag -s -m "$(PACKAGE) release $(VERSION)" v$(VERSION)
 
-release-publish: release-upload releases/$(sha1_file)
+doc-publish:
+	(cd docs/reference && $(MAKE) $(AM_MAKEFLAGS) publish)
+
+release-publish: release-upload doc-publish releases/$(sha1_file)
 	@echo ""
 	@echo "Please send an announcement to $(RELEASE_ANNOUNCE_LIST)"
 	@echo "including the following:"

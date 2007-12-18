@@ -216,17 +216,17 @@ public:
   void set_page_size(double size);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %changed()</tt>
+   * <tt>void on_my_%changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %value_changed()</tt>
+   * <tt>void on_my_%value_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_value_changed();
@@ -239,10 +239,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Adjustment
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Adjustment
    */
   Gtk::Adjustment* wrap(GtkAdjustment* object, bool take_copy = false);
 } //namespace Glib

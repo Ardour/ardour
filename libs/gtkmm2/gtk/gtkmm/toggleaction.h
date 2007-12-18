@@ -39,6 +39,12 @@ namespace Gtk
 namespace Gtk
 {
 
+/** An action which can be toggled between two states.
+ *
+ * A Gtk::ToggleAction corresponds roughly to a Gtk::CheckMenuItem. 
+ * It has an "active" state specifying whether the action has been checked or not.
+ *
+ */
 
 class ToggleAction : public Gtk::Action
 {
@@ -87,14 +93,17 @@ private:
 
 protected:
   ToggleAction();
-   explicit ToggleAction(const Glib::ustring& name, const StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring(), bool is_active = false);
+   explicit ToggleAction(const Glib::ustring& name, const StockID& stock_id = StockID(), const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring(), bool is_active = false);
 
 public:
+  //Note that gtk_toggle_action_new() does not allow name to be NULL, which suggests that we should not have a default constructor,
+  //but it's OK to set the name later:
   
   static Glib::RefPtr<ToggleAction> create();
 
+
    static Glib::RefPtr<ToggleAction> create(const Glib::ustring& name, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip =  Glib::ustring(), bool is_active = false);
-   static Glib::RefPtr<ToggleAction> create(const Glib::ustring& name, const Gtk::StockID& stock_id, const Glib::ustring& label =  Glib::ustring(), const Glib::ustring& tooltip =  Glib::ustring(), bool is_active = false);
+   static Glib::RefPtr<ToggleAction> create(const Glib::ustring& name, const Gtk::StockID& stock_id, const Glib::ustring& label = Glib::ustring(), const Glib::ustring& tooltip = Glib::ustring(), bool is_active = false);
 
   
   /** Emits the "toggled" signal on the toggle action.
@@ -110,7 +119,7 @@ public:
    */
   void set_active(bool is_active = true);
   
-  /** Returns the checked state of the toggle action.
+  /** Returns: the checked state of the toggle action
    * @return The checked state of the toggle action
    * 
    * @newin2p4.
@@ -125,7 +134,7 @@ public:
    */
   void set_draw_as_radio(bool draw_as_radio = true);
   
-  /** Returns whether the action should have proxies like a radio action.
+  /** Returns: whether the action should have proxies like a radio action.
    * @return Whether the action should have proxies like a radio action.
    * 
    * @newin2p4.
@@ -133,9 +142,9 @@ public:
   bool get_draw_as_radio() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %toggled()</tt>
+   * <tt>void on_my_%toggled()</tt>
    */
 
   Glib::SignalProxy0< void > signal_toggled();
@@ -187,10 +196,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::ToggleAction
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ToggleAction
    */
   Glib::RefPtr<Gtk::ToggleAction> wrap(GtkToggleAction* object, bool take_copy = false);
 }

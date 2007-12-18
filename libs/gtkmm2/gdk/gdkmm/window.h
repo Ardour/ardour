@@ -264,7 +264,8 @@ enum WindowAttributesType
   WA_COLORMAP = 1 << 5,
   WA_VISUAL = 1 << 6,
   WA_WMCLASS = 1 << 7,
-  WA_NOREDIR = 1 << 8
+  WA_NOREDIR = 1 << 8,
+  WA_TYPE_HINT = 1 << 9
 };
 
 /** @ingroup gdkmmEnums */
@@ -401,7 +402,13 @@ enum WindowTypeHint
   WINDOW_TYPE_HINT_SPLASHSCREEN,
   WINDOW_TYPE_HINT_UTILITY,
   WINDOW_TYPE_HINT_DOCK,
-  WINDOW_TYPE_HINT_DESKTOP
+  WINDOW_TYPE_HINT_DESKTOP,
+  WINDOW_TYPE_HINT_DROPDOWN_MENU,
+  WINDOW_TYPE_HINT_POPUP_MENU,
+  WINDOW_TYPE_HINT_TOOLTIP,
+  WINDOW_TYPE_HINT_NOTIFICATION,
+  WINDOW_TYPE_HINT_COMBO,
+  WINDOW_TYPE_HINT_DND
 };
 
 } // namespace Gdk
@@ -904,6 +911,9 @@ public:
    * easy to break GDK and/or GTK+, so you have to know what you're
    * doing. Pass <tt>0</tt> for @a window  to get all events for all windows,
    * instead of events for a specific window.
+   * 
+   * See Gdk::Display::add_client_message_filter() if you are interested
+   * in X ClientMessage events.
    * @param function Filter callback.
    * @param data Data to pass to filter callback.
    */
@@ -957,12 +967,14 @@ public:
    * buggy. On servers without the shape extension, this function
    * will do nothing.
    * 
+   * On the Win32 platform the functionality is always present.
+   * 
    * This function works on both toplevel and child windows.
    * @param mask Shape mask.
    * @param x X position of shape mask with respect to @a window .
    * @param y Y position of shape mask with respect to @a window .
    */
-  void shape_combine_mask(const Glib::RefPtr<Bitmap>& mask, int	x, int y);
+  void shape_combine_mask(const Glib::RefPtr<Bitmap>& mask, int x, int y);
   void unset_shape_combine_mask();
 
   
@@ -980,6 +992,8 @@ public:
    * buggy. On servers without the shape extension, this function
    * will do nothing.
    * 
+   * On the Win32 platform, this functionality is always present.
+   * 
    * This function works on both toplevel and child windows.
    * @param shape_region Region of window to be non-transparent.
    * @param offset_x X position of @a shape_region  in @a window  coordinates.
@@ -994,6 +1008,35 @@ public:
    */
   void set_child_shapes();
   
+  /** Sets a Gdk::Window as composited, or unsets it. Composited 
+   * windows do not automatically have their contents drawn to 
+   * the screen. Drawing is redirected to an offscreen buffer 
+   * and an expose event is emitted on the parent of the composited 
+   * window. It is the responsibility of the parent's expose handler
+   * to manually merge the off-screen content onto the screen in
+   * whatever way it sees fit. See &lt;xref linkend="composited-window-example"/&gt;
+   * for an example.
+   * 
+   * It only makes sense for child windows to be composited; see
+   * gdk_window_set_opacity() if you need translucent toplevel
+   * windows.
+   * 
+   * An additional effect of this call is that the area of this
+   * window is no longer clipped from regions marked for
+   * invalidation on its parent. Draws done on the parent
+   * window are also no longer clipped by the child.
+   * 
+   * This call is only supported on some systems (currently,
+   * only X11 with new enough Xcomposite and Xdamage extensions). 
+   * You must call Gdk::Display::supports_composite() to check if
+   * setting a window as composited is supported before
+   * attempting to do so.
+   * 
+   * @newin2p12
+   * @param composited <tt>true</tt> to set the window as composited.
+   */
+  void set_composited(bool composited = TRUE);
+  
   /** Merges the shape masks for any child windows into the
    * shape mask for @a window . i.e. the union of all masks
    * for @a window  and its children will become the new mask
@@ -1004,7 +1047,79 @@ public:
    * be merged.
    */
   void merge_child_shapes();
+
   
+  /** Like gdk_window_shape_combine_mask(), but the shape applies
+   * only to event handling. Mouse events which happen while
+   * the pointer position corresponds to an unset bit in the 
+   * mask will be passed on the window below @a window .
+   * 
+   * An input shape is typically used with RGBA windows.
+   * The alpha channel of the window defines which pixels are 
+   * invisible and allows for nicely antialiased borders,
+   * and the input shape controls where the window is
+   * "clickable".
+   * 
+   * On the X11 platform, this requires version 1.1 of the
+   * shape extension.
+   * 
+   * On the Win32 platform, this functionality is not present and the
+   * function does nothing.
+   * 
+   * @newin2p10
+   * @param mask Shape mask.
+   * @param x X position of shape mask with respect to @a window .
+   * @param y Y position of shape mask with respect to @a window .
+   */
+  void input_shape_combine_mask(const Glib::RefPtr<Bitmap>& mask, int x, int y);
+  
+  /** Like gdk_window_shape_combine_region(), but the shape applies
+   * only to event handling. Mouse events which happen while
+   * the pointer position corresponds to an unset bit in the 
+   * mask will be passed on the window below @a window .
+   * 
+   * An input shape is typically used with RGBA windows.
+   * The alpha channel of the window defines which pixels are 
+   * invisible and allows for nicely antialiased borders,
+   * and the input shape controls where the window is
+   * "clickable".
+   * 
+   * On the X11 platform, this requires version 1.1 of the
+   * shape extension.
+   * 
+   * On the Win32 platform, this functionality is not present and the
+   * function does nothing.
+   * 
+   * @newin2p10
+   * @param shape_region Region of window to be non-transparent.
+   * @param offset_x X position of @a shape_region  in @a window  coordinates.
+   * @param offset_y Y position of @a shape_region  in @a window  coordinates.
+   */
+  void input_shape_combine_region (const Region& shape_region, int offset_x, int offset_y);
+  
+  /** Sets the input shape mask of @a window  to the union of input shape masks
+   * for all children of @a window , ignoring the input shape mask of @a window 
+   * itself. Contrast with gdk_window_merge_child_input_shapes() which includes
+   * the input shape mask of @a window  in the masks to be merged.
+   * 
+   * @newin2p10
+   */
+  void set_child_input_shapes();
+  
+  /** Merges the input shape masks for any child windows into the
+   * input shape mask for @a window . i.e. the union of all input masks
+   * for @a window  and its children will become the new input mask
+   * for @a window . See gdk_window_input_shape_combine_mask().
+   * 
+   * This function is distinct from gdk_window_set_child_input_shapes()
+   * because it includes @a window 's input shape mask in the set of 
+   * shapes to be merged.
+   * 
+   * @newin2p10
+   */
+  void merge_child_input_shapes(); 
+
+
   /** Checks whether the window has been mapped (with gdk_window_show() or
    * gdk_window_show_unraised()).
    * @return <tt>true</tt> if the window is mapped.
@@ -1043,6 +1158,13 @@ public:
    * @param hint A hint of the function this window will have.
    */
   void set_type_hint(WindowTypeHint hint);
+  
+  /** This function returns the type hint set for a window.
+   * @return The type hint set for @a window 
+   * 
+   * @newin2p10.
+   */
+  WindowTypeHint get_type_hint();
   
   /** The application can use this hint to tell the window manager
    * that a certain window has modal behaviour. The window manager
@@ -1180,6 +1302,14 @@ public:
    */
   void set_role(const Glib::ustring& role);
   
+  /** When using GTK+, typically you should use gtk_window_set_startup_id()
+   * instead of this low-level function.
+   * 
+   * @newin2p12
+   * @param startup_id A string with startup-notification identifier.
+   */
+  void set_startup_id(const Glib::ustring& startup_id);
+  
   /** Indicates to the window manager that @a window  is a transient dialog
    * associated with the application window @a parent . This allows the
    * window manager to do things like center @a window  on @a parent  and
@@ -1314,10 +1444,14 @@ public:
   void get_frame_extents(Rectangle& rect);
   
   /** Obtains the current pointer position and modifier state.
-   * The position is given in coordinates relative to @a window .
-   * @param x Return location for X coordinate of pointer.
-   * @param y Return location for Y coordinate of pointer.
-   * @param mask Return location for modifier mask.
+   * The position is given in coordinates relative to the upper left 
+   * corner of @a window .
+   * @param x Return location for X coordinate of pointer or <tt>0</tt> to not
+   * return the X coordinate.
+   * @param y Return location for Y coordinate of pointer or <tt>0</tt> to not
+   * return the Y coordinate.
+   * @param mask Return location for modifier mask or <tt>0</tt> to not return the
+   * modifier mask.
    * @return The window containing the pointer (as with
    * gdk_window_at_pointer()), or <tt>0</tt> if the window containing the
    * pointer isn't known to GDK.
@@ -1440,14 +1574,14 @@ public:
    */
   void set_group(const Glib::RefPtr<Window>& leader);  
   
-  /** Returns the group leader window for @a window . See gdk_window_set_group().
+  /** Return value: the group leader window for @a window 
    * @return The group leader window for @a window 
    * 
    * @newin2p4.
    */
   Glib::RefPtr<Window> get_group();
   
-  /** Returns the group leader window for @a window . See gdk_window_set_group().
+  /** Return value: the group leader window for @a window 
    * @return The group leader window for @a window 
    * 
    * @newin2p4.
@@ -1473,15 +1607,17 @@ public:
    */
   void set_decorations(WMDecoration decorations);
   
-  /** Returns the decorations set on the GdkWindow with #gdk_window_set_decorations
+  /** Returns: <tt>true</tt> if the window has decorations set, <tt>false</tt> otherwise.
    * @param decorations The window decorations will be written here.
    * @return <tt>true</tt> if the window has decorations set, <tt>false</tt> otherwise.
    */
   bool get_decorations(WMDecoration& decorations) const;
   
-  /** This function isn't really good for much. It sets the traditional
-   * Motif window manager hint for which operations the window manager
-   * should allow on a toplevel window. However, few window managers do
+  /** Sets hints about the window management functions to make available
+   * via buttons on the window frame.
+   * 
+   * On the X backend, this function sets the traditional Motif window 
+   * manager hint for this purpose. However, few window managers do
    * anything reliable or interesting with this hint. Many ignore it
    * entirely.
    * 
@@ -1503,6 +1639,15 @@ public:
    */
   static Glib::ListHandle< Glib::RefPtr<Window> > get_toplevels();
     
+  
+  /** Emits a short beep associated to @a window  in the appropriate
+   * display, if supported. Otherwise, emits a short beep on
+   * the display just as Gdk::Display::beep().
+   * 
+   * @newin2p12
+   */
+  void beep();
+
   
   /** Asks to iconify (minimize) @a window . The window manager may choose
    * to ignore the request, but normally will honor it. Using
@@ -1596,7 +1741,8 @@ public:
   /** A convenience wrapper around gdk_window_invalidate_region() which
    * invalidates a rectangular region. See
    * gdk_window_invalidate_region() for details.
-   * @param rect Rectangle to invalidate.
+   * @param rect Rectangle to invalidate or <tt>0</tt> to invalidate the whole
+   * window.
    * @param invalidate_children Whether to also invalidate child windows.
    */
   void invalidate_rect(const Rectangle& rect, bool invalidate_children);
@@ -1624,14 +1770,12 @@ public:
    */
   void invalidate_region(const Region& region, bool invalidate_children = true);
 
-  //TODO: Rewrite the docs, to be more C++-like.
   
   /** Transfers ownership of the update area from @a window  to the caller
    * of the function. That is, after calling this function, @a window  will
    * no longer have an invalid/dirty region; the update area is removed
    * from @a window  and handed to you. If a window has no update area,
-   * gdk_window_get_update_area() returns <tt>0</tt>. You are responsible for
-   * calling gdk_region_destroy() on the returned region if it's non-<tt>0</tt>.
+   * get_update_area() returns an invalid Region.
    * @return The update area for @a window .
    */
   Region get_update_area();
@@ -1826,7 +1970,8 @@ public:
   GrabStatus pointer_grab(bool owner_events, EventMask event_mask, guint32 timestamp);
 
   
-  /** Ungrabs the pointer, if it is grabbed by this application.
+  /** Ungrabs the pointer on the default display, if it is grabbed by this 
+   * application.
    * @param timestamp A timestamp from a Gdk::Event, or Gdk::CURRENT_TIME if no 
    * timestamp is available.
    */
@@ -1834,7 +1979,8 @@ public:
   
   GrabStatus keyboard_grab(bool owner_events, guint32 timestamp);
   
-  /** Ungrabs the keyboard, if it is grabbed by this application.
+  /** Ungrabs the keyboard on the default display, if it is grabbed by this 
+   * application.
    * @param timestamp A timestamp from a Gdk::Event, or Gdk::CURRENT_TIME if no
    * timestamp is available.
    */
@@ -1870,6 +2016,23 @@ public:
    * @param setting Whether to keep @a window  below other windows.
    */
   void set_keep_below(bool setting = true);
+
+  
+  /** Request the windowing system to make @a window  partially transparent,
+   * with opacity 0 being fully transparent and 1 fully opaque. (Values
+   * of the opacity parameter are clamped to the [0,1] range.) 
+   * 
+   * On X11, this works only on X screens with a compositing manager 
+   * running.
+   * 
+   * For setting up per-pixel alpha, see Gdk::Screen::get_rgba_colormap().
+   * For making non-toplevel windows translucent, see 
+   * gdk_window_set_composited().
+   * 
+   * @newin2p12
+   * @param opacity Opacity.
+   */
+  void set_opacity(double opacity);
 
   
   /** Setting @a accept_focus  to <tt>false</tt> hints the desktop environment that the
@@ -1923,10 +2086,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gdk::Window
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gdk::Window
    */
   Glib::RefPtr<Gdk::Window> wrap(GdkWindowObject* object, bool take_copy = false);
 }

@@ -1,0 +1,71 @@
+/* $Id: action.hg,v 1.5 2004/03/12 20:35:53 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(atkmm,atk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C" { typedef struct _AtkActionIface AtkActionIface; }
+#endif
+
+
+namespace Atk
+{
+
+/** The ATK interface provided by UI components which the user can activate/interact with,
+ * This should be implemented by instances of Atk::Object classes with which the user can interact directly, i.e. buttons,
+ * checkboxes, scrollbars, e.g. components which are not "passive" providers of UI information.
+ *
+ * Exceptions: when the user interaction is already covered by another appropriate interface such as Atk::EditableText
+ * (insert/delete test, etc.) or Atk::Value (set value) then these actions should not be exposed by Atk::Action as well.
+ * 
+ * Also note that the Atk::Action API is limited in that parameters may not be passed to the object being activated;
+ * thus the action must be self-contained and specifiable via only a single "verb". Concrete examples include "press",
+ * "release", "click" for buttons, "drag" (meaning initiate drag) and "drop" for drag sources and drop targets, etc.
+ * 
+ * Though most UI interactions on components should be invocable via keyboard as well as mouse, there will generally be
+ * a close mapping between "mouse actions" that are possible on a component and the Atk::Actions. Where mouse and keyboard
+ * actions are redundant in effect, Atk::Action should expose only one action rather than exposing redundant actions if
+ * possible. By convention we have been using "mouse centric" terminology for Atk::Action names. 
+ */
+class Action : public Glib::Interface
+{
+  _CLASS_INTERFACE(Action, AtkAction, ATK_ACTION, AtkActionIface)
+
+public:
+
+  _WRAP_METHOD(bool do_action(int i), atk_action_do_action)
+  _WRAP_METHOD(int get_n_actions() const, atk_action_get_n_actions)
+  _WRAP_METHOD(Glib::ustring get_description(int i) const, atk_action_get_description)
+  _WRAP_METHOD(Glib::ustring get_name(int i) const, atk_action_get_name)
+  _WRAP_METHOD(Glib::ustring get_keybinding(int i), atk_action_get_keybinding)
+  _WRAP_METHOD(bool set_description(int i, const Glib::ustring& desc), atk_action_set_description)
+  _WRAP_METHOD(Glib::ustring get_localized_name(int i), atk_action_get_localized_name)
+
+protected:
+  _WRAP_VFUNC(bool do_action(int i), "do_action")
+  _WRAP_VFUNC(int get_n_actions() const, "get_n_actions")
+  _WRAP_VFUNC(const char* get_description(int i) const, "get_description")
+  _WRAP_VFUNC(const char* get_name(int i) const, "get_name")
+  _WRAP_VFUNC(const char* get_keybinding(int i) const, "get_keybinding")
+  _WRAP_VFUNC(bool set_description(int i, const Glib::ustring& desc), "set_description")
+};
+
+} // namespace Atk
+

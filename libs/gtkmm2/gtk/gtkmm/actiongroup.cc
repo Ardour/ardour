@@ -355,8 +355,9 @@ GType ActionGroup::get_base_type()
 
 ActionGroup::ActionGroup(const Glib::ustring& name)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(actiongroup_class_.init(), "name", name.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(actiongroup_class_.init(), "name", name.c_str(), static_cast<char*>(0)))
 {
   }
 

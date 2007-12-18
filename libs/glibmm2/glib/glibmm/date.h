@@ -119,8 +119,13 @@ enum DMY
    */
   void set_parse (const Glib::ustring& str);
 
+
   #ifndef GLIBMM_DISABLE_DEPRECATED
 
+  
+  //Avoid a build problem in the case that time_t is equivalent to guint32 (GTime is also guint32)
+  //That would make the set_time() method overload impossible.
+  #ifdef GLIBMM_HAVE_C_STD_TIME_T_IS_NOT_INT32
   /** Sets the value of a date from a GTime (time_t) value. 
    *
    * @param time GTime value to set.
@@ -128,6 +133,8 @@ enum DMY
    * @deprecated Please use set_time(time_t) or set_time(const GTimeVal&).
    */
   void set_time(GTime time);
+  #endif //GLIBMM_HAVE_C_STD_TIME_T_IS_NOT_INT32
+
   #endif // GLIBMM_DISABLE_DEPRECATED
 
 

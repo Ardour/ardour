@@ -38,7 +38,7 @@ protected:
   //You could prevent the original default signal handlers being called by overriding the *_impl method.
   static void activate_callback(GtkMenuItem* self);
   static void activate_item_callback(GtkMenuItem* self);
-  static void toggle_size_request_callback(GtkMenuItem* self, int* p0);
+  static void toggle_size_request_callback(GtkMenuItem* self, gint* p0);
   static void toggle_size_allocate_callback(GtkMenuItem* self, gint p0);
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 

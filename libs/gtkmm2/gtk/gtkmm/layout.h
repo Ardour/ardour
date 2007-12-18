@@ -220,9 +220,9 @@ public:
  
   // See Gtk::Widget::set_scroll_adjustments()
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %set_scroll_adjustments(Adjustment* hadj, Adjustment* vadj)</tt>
+   * <tt>void on_my_%set_scroll_adjustments(Adjustment* hadj, Adjustment* vadj)</tt>
    */
 
   Glib::SignalProxy2< void,Adjustment*,Adjustment* > signal_set_scroll_adjustments();
@@ -316,10 +316,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Layout
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Layout
    */
   Gtk::Layout* wrap(GtkLayout* object, bool take_copy = false);
 } //namespace Glib

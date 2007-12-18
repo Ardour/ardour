@@ -92,6 +92,37 @@ public:
 namespace Pango
 {
 
+/**
+ * @ingroup pangommEnums
+ */
+enum GravityHint
+{
+  GRAVITY_HINT_NATURAL,
+  GRAVITY_HINT_STRONG,
+  GRAVITY_HINT_LINE
+};
+
+} // namespace Pango
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+namespace Glib
+{
+
+template <>
+class Value<Pango::GravityHint> : public Glib::Value_Enum<Pango::GravityHint>
+{
+public:
+  static GType value_type() G_GNUC_CONST;
+};
+
+} // namespace Glib
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Pango
+{
+
 
 /** A Pango::Context stores global information used to control the itemization process.
  * You can retrieve a Pango::Context object with Gtk::Widget::create_pango_context() or
@@ -252,7 +283,9 @@ public:
    */
   Language get_language() const;
   
-  /** Sets the global language tag for the context.
+  /** Sets the global language tag for the context.  The default language
+   * for the locale of the running process can be found using
+   * pango_language_get_default().
    * @param language The new language tag.
    */
   void set_language(const Language& language);
@@ -276,10 +309,57 @@ public:
   Direction get_base_dir() const;
 
   
+  /** Sets the base gravity for the context.
+   * 
+   * The base gravity is used in laying vertical text out.
+   * 
+   * Since: 1.16
+   * @param gravity The new base gravity.
+   */
+  void set_base_gravity(Gravity gravity);
+  
+  /** Retrieves the base gravity for the context. See
+   * pango_context_set_base_gravity().
+   * @return The base gravity for the context.
+   * 
+   * Since: 1.16.
+   */
+  Gravity get_base_gravity() const;
+  
+  /** Retrieves the gravity for the context. This is similar to
+   * pango_context_get_base_gravity(), except for when the base gravity
+   * is Pango::GRAVITY_AUTO for which pango_gravity_get_for_matrix() is used
+   * to return the gravity from the current context matrix.
+   * @return The resolved gravity for the context.
+   * 
+   * Since: 1.16.
+   */
+  Gravity get_gravity() const;
+  
+  /** Sets the gravity hint for the context.
+   * 
+   * The gravity hint is used in laying vertical text out, and is only relevant
+   * if gravity of the context as returned by pango_context_get_gravity()
+   * is set Pango::GRAVITY_EAST or Pango::GRAVITY_WEST.
+   * 
+   * Since: 1.16
+   * @param hint The new gravity hint.
+   */
+  void set_gravity_hint(GravityHint hint);
+  
+  /** Retrieves the gravity hint for the context. See
+   * pango_context_set_gravity_hint() for details.
+   * @return The gravity hint for the context.
+   * 
+   * Since: 1.16.
+   */
+  GravityHint get_gravity_hint() const;
+
+  
   /** Sets the transformation matrix that will be applied when rendering
    * with this context. Note that reported metrics are in the user space
    * coordinates before the application of the matrix, not device-space
-   * coordiantes after the application of the matrix. So, they don't scale
+   * coordinates after the application of the matrix. So, they don't scale
    * with the matrix, though they may change slightly for different
    * matrices, depending on how the text is fit to the pixel grid.
    * 
@@ -333,14 +413,47 @@ public:
   void update_from_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
 
 
+  /** Sets the font options used when rendering text with this context.
+   * These options override any options that pango_cairo_update_context()
+   * derives from the target surface.
+   * @param context A Pango::Context, from Pango::CairoFontMap::create_context().
+   * @param options A #cairo_font_options_t, or <tt>0</tt> to unset any previously set
+   * options. A copy is made.
+   */
   void set_cairo_font_options(const Cairo::FontOptions& options);
 
  
+  /** Retrieves any font rendering options previously set with
+   * pango_cairo_font_map_set_font_options(). This functions not report options
+   * that are derived from the target surface by pango_cairo_update_context()
+   * @param context A Pango::Context, from Pango::CairoFontMap::create_context().
+   * @return The font options previously set on the context, or <tt>0</tt>
+   * if no options have been set. This value is owned by the context
+   * and must not be modified or freed.
+   */
   Cairo::FontOptions get_font_options() const;
 
   
+  /** Sets the resolution for the context. This is a scale factor between
+   * points specified in a Pango::FontDescription and Cairo units. The
+   * default value is 96, meaning that a 10 point font will be 13
+   * units high. (10 * 96. / 72. = 13.3).
+   * 
+   * Since: 1.10
+   * @param context A Pango::Context, from Pango::CairoFontMap::create_context().
+   * @param dpi The resolution in "dots per inch". (Physical inches aren't actually
+   * involved; the terminology is conventional.) A 0 or negative value
+   * means to use the resolution from the font map.
+   */
   void set_resolution(double dpi);
   
+  /** Gets the resolution for the context. See pango_cairo_context_set_resolution()
+   * @param context A Pango::Context, from Pango::CairoFontMap::create_context().
+   * @return The resolution in "dots per inch". A negative value will
+   * be returned if no resolution has previously been set.
+   * 
+   * Since: 1.10.
+   */
   double get_resolution() const;
 
 
@@ -368,10 +481,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Pango::Context
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::Context
    */
   Glib::RefPtr<Pango::Context> wrap(PangoContext* object, bool take_copy = false);
 }

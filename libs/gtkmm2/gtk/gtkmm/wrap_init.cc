@@ -28,6 +28,7 @@
 #include "assistant.h"
 #include "bin.h"
 #include "box.h"
+#include "builder.h"
 #include "button.h"
 #include "buttonbox.h"
 #include "calendar.h"
@@ -111,6 +112,7 @@
 #include "radiotoolbutton.h"
 #include "range.h"
 #include "rc.h"
+#include "recentaction.h"
 #include "recentchooser.h"
 #include "recentchooserdialog.h"
 #include "recentchoosermenu.h"
@@ -120,6 +122,7 @@
 #include "recentmanager.h"
 #include "ruler.h"
 #include "scale.h"
+#include "scalebutton.h"
 #include "scrollbar.h"
 #include "scrolledwindow.h"
 #include "selectiondata.h"
@@ -152,6 +155,7 @@
 #include "toolitem.h"
 #include "toolbutton.h"
 #include "tooltips.h"
+#include "tooltip.h"
 #include "treedragdest.h"
 #include "treedragsource.h"
 #include "treepath.h"
@@ -166,6 +170,7 @@
 #include "treeview.h"
 #include "treeviewcolumn.h"
 #include "viewport.h"
+#include "volumebutton.h"
 #include "uimanager.h"
 #include "widget.h"
 #include "window.h"
@@ -188,6 +193,7 @@ GType gtk_aspect_frame_get_type(void);
 GType gtk_assistant_get_type(void);
 GType gtk_bin_get_type(void);
 GType gtk_box_get_type(void);
+GType gtk_builder_get_type(void);
 GType gtk_button_get_type(void);
 GType gtk_button_box_get_type(void);
 GType gtk_calendar_get_type(void);
@@ -297,6 +303,7 @@ GType gtk_radio_menu_item_get_type(void);
 GType gtk_radio_tool_button_get_type(void);
 GType gtk_range_get_type(void);
 GType gtk_rc_style_get_type(void);
+GType gtk_recent_action_get_type(void);
 GType gtk_recent_chooser_dialog_get_type(void);
 GType gtk_recent_chooser_menu_get_type(void);
 GType gtk_recent_chooser_widget_get_type(void);
@@ -304,6 +311,7 @@ GType gtk_recent_filter_get_type(void);
 GType gtk_recent_manager_get_type(void);
 GType gtk_ruler_get_type(void);
 GType gtk_scale_get_type(void);
+GType gtk_scale_button_get_type(void);
 GType gtk_scrollbar_get_type(void);
 GType gtk_scrolled_window_get_type(void);
 GType gtk_separator_get_type(void);
@@ -332,7 +340,10 @@ GType gtk_toggle_tool_button_get_type(void);
 GType gtk_tool_button_get_type(void);
 GType gtk_tool_item_get_type(void);
 GType gtk_toolbar_get_type(void);
+GType gtk_tooltip_get_type(void);
+#ifndef GTKMM_DISABLE_DEPRECATED
 GType gtk_tooltips_get_type(void);
+#endif // *_DISABLE_DEPRECATED
 GType gtk_tree_model_filter_get_type(void);
 GType gtk_tree_model_sort_get_type(void);
 GType gtk_tree_selection_get_type(void);
@@ -348,12 +359,14 @@ GType gtk_vscale_get_type(void);
 GType gtk_vscrollbar_get_type(void);
 GType gtk_vseparator_get_type(void);
 GType gtk_viewport_get_type(void);
+GType gtk_volume_button_get_type(void);
 GType gtk_widget_get_type(void);
 GType gtk_window_get_type(void);
 GType gtk_window_group_get_type(void);
 
 //Declarations of the *_error_quark() functions:
 
+GQuark gtk_builder_error_quark(void);
 GQuark gtk_file_chooser_error_quark(void);
 GQuark gtk_icon_theme_error_quark(void);
 GQuark gtk_print_error_quark(void);
@@ -376,6 +389,7 @@ namespace Gtk {  class AspectFrame_Class { public: static Glib::ObjectBase* wrap
 namespace Gtk {  class Assistant_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Bin_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Box_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
+namespace Gtk {  class Builder_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Button_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class ButtonBox_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Calendar_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
@@ -485,6 +499,7 @@ namespace Gtk {  class RadioMenuItem_Class { public: static Glib::ObjectBase* wr
 namespace Gtk {  class RadioToolButton_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Range_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class RcStyle_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
+namespace Gtk {  class RecentAction_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class RecentChooserDialog_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class RecentChooserMenu_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class RecentChooserWidget_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
@@ -492,6 +507,7 @@ namespace Gtk {  class RecentFilter_Class { public: static Glib::ObjectBase* wra
 namespace Gtk {  class RecentManager_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Ruler_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Scale_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
+namespace Gtk {  class ScaleButton_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Scrollbar_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class ScrolledWindow_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Separator_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
@@ -520,7 +536,10 @@ namespace Gtk {  class ToggleToolButton_Class { public: static Glib::ObjectBase*
 namespace Gtk {  class ToolButton_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class ToolItem_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Toolbar_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
+namespace Gtk {  class Tooltip_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
+#ifndef GTKMM_DISABLE_DEPRECATED
 namespace Gtk {  class Tooltips_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
+#endif // *_DISABLE_DEPRECATED
 namespace Gtk {  class TreeModelFilter_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class TreeModelSort_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class TreeSelection_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
@@ -536,6 +555,7 @@ namespace Gtk {  class VScale_Class { public: static Glib::ObjectBase* wrap_new(
 namespace Gtk {  class VScrollbar_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class VSeparator_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Viewport_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
+namespace Gtk {  class VolumeButton_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Widget_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class Window_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
 namespace Gtk {  class WindowGroup_Class { public: static Glib::ObjectBase* wrap_new(GObject*); };  }
@@ -545,6 +565,7 @@ namespace Gtk {
 void wrap_init()
 {
   // Register Error domains:
+  Glib::Error::register_domain(gtk_builder_error_quark(), &Gtk::BuilderError::throw_func);
   Glib::Error::register_domain(gtk_file_chooser_error_quark(), &Gtk::FileChooserError::throw_func);
   Glib::Error::register_domain(gtk_icon_theme_error_quark(), &Gtk::IconThemeError::throw_func);
   Glib::Error::register_domain(gtk_print_error_quark(), &Gtk::PrintError::throw_func);
@@ -564,6 +585,7 @@ void wrap_init()
   Glib::wrap_register(gtk_assistant_get_type(), &Gtk::Assistant_Class::wrap_new);
   Glib::wrap_register(gtk_bin_get_type(), &Gtk::Bin_Class::wrap_new);
   Glib::wrap_register(gtk_box_get_type(), &Gtk::Box_Class::wrap_new);
+  Glib::wrap_register(gtk_builder_get_type(), &Gtk::Builder_Class::wrap_new);
   Glib::wrap_register(gtk_button_get_type(), &Gtk::Button_Class::wrap_new);
   Glib::wrap_register(gtk_button_box_get_type(), &Gtk::ButtonBox_Class::wrap_new);
   Glib::wrap_register(gtk_calendar_get_type(), &Gtk::Calendar_Class::wrap_new);
@@ -673,6 +695,7 @@ void wrap_init()
   Glib::wrap_register(gtk_radio_tool_button_get_type(), &Gtk::RadioToolButton_Class::wrap_new);
   Glib::wrap_register(gtk_range_get_type(), &Gtk::Range_Class::wrap_new);
   Glib::wrap_register(gtk_rc_style_get_type(), &Gtk::RcStyle_Class::wrap_new);
+  Glib::wrap_register(gtk_recent_action_get_type(), &Gtk::RecentAction_Class::wrap_new);
   Glib::wrap_register(gtk_recent_chooser_dialog_get_type(), &Gtk::RecentChooserDialog_Class::wrap_new);
   Glib::wrap_register(gtk_recent_chooser_menu_get_type(), &Gtk::RecentChooserMenu_Class::wrap_new);
   Glib::wrap_register(gtk_recent_chooser_widget_get_type(), &Gtk::RecentChooserWidget_Class::wrap_new);
@@ -680,6 +703,7 @@ void wrap_init()
   Glib::wrap_register(gtk_recent_manager_get_type(), &Gtk::RecentManager_Class::wrap_new);
   Glib::wrap_register(gtk_ruler_get_type(), &Gtk::Ruler_Class::wrap_new);
   Glib::wrap_register(gtk_scale_get_type(), &Gtk::Scale_Class::wrap_new);
+  Glib::wrap_register(gtk_scale_button_get_type(), &Gtk::ScaleButton_Class::wrap_new);
   Glib::wrap_register(gtk_scrollbar_get_type(), &Gtk::Scrollbar_Class::wrap_new);
   Glib::wrap_register(gtk_scrolled_window_get_type(), &Gtk::ScrolledWindow_Class::wrap_new);
   Glib::wrap_register(gtk_separator_get_type(), &Gtk::Separator_Class::wrap_new);
@@ -708,7 +732,10 @@ void wrap_init()
   Glib::wrap_register(gtk_tool_button_get_type(), &Gtk::ToolButton_Class::wrap_new);
   Glib::wrap_register(gtk_tool_item_get_type(), &Gtk::ToolItem_Class::wrap_new);
   Glib::wrap_register(gtk_toolbar_get_type(), &Gtk::Toolbar_Class::wrap_new);
+  Glib::wrap_register(gtk_tooltip_get_type(), &Gtk::Tooltip_Class::wrap_new);
+#ifndef GTKMM_DISABLE_DEPRECATED
   Glib::wrap_register(gtk_tooltips_get_type(), &Gtk::Tooltips_Class::wrap_new);
+#endif // *_DISABLE_DEPRECATED
   Glib::wrap_register(gtk_tree_model_filter_get_type(), &Gtk::TreeModelFilter_Class::wrap_new);
   Glib::wrap_register(gtk_tree_model_sort_get_type(), &Gtk::TreeModelSort_Class::wrap_new);
   Glib::wrap_register(gtk_tree_selection_get_type(), &Gtk::TreeSelection_Class::wrap_new);
@@ -724,6 +751,7 @@ void wrap_init()
   Glib::wrap_register(gtk_vscrollbar_get_type(), &Gtk::VScrollbar_Class::wrap_new);
   Glib::wrap_register(gtk_vseparator_get_type(), &Gtk::VSeparator_Class::wrap_new);
   Glib::wrap_register(gtk_viewport_get_type(), &Gtk::Viewport_Class::wrap_new);
+  Glib::wrap_register(gtk_volume_button_get_type(), &Gtk::VolumeButton_Class::wrap_new);
   Glib::wrap_register(gtk_widget_get_type(), &Gtk::Widget_Class::wrap_new);
   Glib::wrap_register(gtk_window_get_type(), &Gtk::Window_Class::wrap_new);
   Glib::wrap_register(gtk_window_group_get_type(), &Gtk::WindowGroup_Class::wrap_new);
@@ -741,6 +769,7 @@ void wrap_init()
   Gtk::Assistant::get_type();
   Gtk::Bin::get_type();
   Gtk::Box::get_type();
+  Gtk::Builder::get_type();
   Gtk::Button::get_type();
   Gtk::ButtonBox::get_type();
   Gtk::Calendar::get_type();
@@ -850,6 +879,7 @@ void wrap_init()
   Gtk::RadioToolButton::get_type();
   Gtk::Range::get_type();
   Gtk::RcStyle::get_type();
+  Gtk::RecentAction::get_type();
   Gtk::RecentChooserDialog::get_type();
   Gtk::RecentChooserMenu::get_type();
   Gtk::RecentChooserWidget::get_type();
@@ -857,6 +887,7 @@ void wrap_init()
   Gtk::RecentManager::get_type();
   Gtk::Ruler::get_type();
   Gtk::Scale::get_type();
+  Gtk::ScaleButton::get_type();
   Gtk::Scrollbar::get_type();
   Gtk::ScrolledWindow::get_type();
   Gtk::Separator::get_type();
@@ -885,7 +916,10 @@ void wrap_init()
   Gtk::ToolButton::get_type();
   Gtk::ToolItem::get_type();
   Gtk::Toolbar::get_type();
+  Gtk::Tooltip::get_type();
+#ifndef GTKMM_DISABLE_DEPRECATED
   Gtk::Tooltips::get_type();
+#endif // *_DISABLE_DEPRECATED
   Gtk::TreeModelFilter::get_type();
   Gtk::TreeModelSort::get_type();
   Gtk::TreeSelection::get_type();
@@ -901,6 +935,7 @@ void wrap_init()
   Gtk::VScrollbar::get_type();
   Gtk::VSeparator::get_type();
   Gtk::Viewport::get_type();
+  Gtk::VolumeButton::get_type();
   Gtk::Widget::get_type();
   Gtk::Window::get_type();
   Gtk::WindowGroup::get_type();

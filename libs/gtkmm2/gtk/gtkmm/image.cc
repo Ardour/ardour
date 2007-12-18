@@ -37,20 +37,23 @@ namespace Gtk
 
 Image::Image(const Gtk::StockID& stock_id, IconSize size)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "stock",stock_id.get_c_str(),"icon-size",(GtkIconSize) int(size), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "stock",stock_id.get_c_str(),"icon-size",(GtkIconSize) int(size), static_cast<char*>(0)))
 {}
 
 Image::Image(IconSet& icon_set, IconSize size)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "icon-set",icon_set.gobj(),"icon-size",(GtkIconSize) int(size), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "icon-set",icon_set.gobj(),"icon-size",(GtkIconSize) int(size), static_cast<char*>(0)))
 {}
 
 Image::Image(const Glib::RefPtr<Gdk::PixbufAnimation>& animation)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "pixbuf-animation",Glib::unwrap(animation), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "pixbuf-animation",Glib::unwrap(animation), static_cast<char*>(0)))
 {}
 
 void Image::get_pixmap(Glib::RefPtr<Gdk::Pixmap>& pixmap, Glib::RefPtr<Gdk::Bitmap>& mask) const
@@ -223,36 +226,41 @@ GType Image::get_base_type()
 
 Image::Image()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Misc(Glib::ConstructParams(image_class_.init()))
 {
   }
 
 Image::Image(const Glib::RefPtr<Gdk::Pixmap>& pixmap, const Glib::RefPtr<Gdk::Bitmap>& mask)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "pixmap", Glib::unwrap(pixmap), "mask", Glib::unwrap(mask), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "pixmap", Glib::unwrap(pixmap), "mask", Glib::unwrap(mask), static_cast<char*>(0)))
 {
   }
 
 Image::Image(const Glib::RefPtr<Gdk::Image>& image, const Glib::RefPtr<Gdk::Bitmap>& mask)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "image", Glib::unwrap(image), "mask", Glib::unwrap(mask), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "image", Glib::unwrap(image), "mask", Glib::unwrap(mask), static_cast<char*>(0)))
 {
   }
 
 Image::Image(const std::string& file)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "file", file.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "file", file.c_str(), static_cast<char*>(0)))
 {
   }
 
 Image::Image(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "pixbuf", Glib::unwrap(pixbuf), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Misc(Glib::ConstructParams(image_class_.init(), "pixbuf", Glib::unwrap(pixbuf), static_cast<char*>(0)))
 {
   }
 

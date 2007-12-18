@@ -1,0 +1,132 @@
+/* $Id: adjustment.hg,v 1.5 2006/11/08 21:51:35 murrayc Exp $ */
+
+/* adjustment.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/object.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/object_p.h)
+
+
+namespace Gtk
+{
+
+/** A class representing an adjustable bounded value.
+ *
+ * The Gtk::Adjustment object represents a value which has an associated
+ * lower and upper bound, together with step and page increments, and a page
+ * size.  It is used within several gtkmm widgets, including
+ * Gtk::SpinButton, Gtk::Viewport, and Gtk::Range (which is a base class for
+ * Gtk::HScrollbar, Gtk::VScrollbar, Gtk::HScale, and Gtk::VScale).
+ *
+ * The Gtk::Adjustment object does not update the value itself. Instead it
+ * is left up to the owner of the Gtk::Adjustment to control the value.
+ *
+ * The owner of the Gtk::Adjustment typically calls the value_changed() and
+ * changed() functions after changing the value and its bounds. This results
+ * in the emission of the "value_changed" or "changed" signal respectively. 
+ *
+ */
+class Adjustment : public Object
+{
+  _CLASS_GTKOBJECT(Adjustment,GtkAdjustment,GTK_ADJUSTMENT,Gtk::Object,GtkObject)
+public:
+
+  friend class Range;
+  friend class HScrollbar;
+  friend class VScrollbar;
+
+  /** Constructor to create an Adjustment object.
+   * @param value The initial value
+   * @param lower The minimum value
+   * @param upper The maximum value
+   * @param step_increment The step increment
+   * @param page_increment The page increment
+   * @param page_size The page size
+   */
+  Adjustment(double value, double lower, double upper, double step_increment = 1, double page_increment = 10, double page_size = 0);
+  
+  _WRAP_METHOD(void changed(), gtk_adjustment_changed)
+  _WRAP_METHOD(void value_changed(), gtk_adjustment_value_changed)
+
+  _WRAP_METHOD(void clamp_page(double lower, double upper), gtk_adjustment_clamp_page)
+
+  _WRAP_METHOD(void set_value(double value), gtk_adjustment_set_value)
+  _WRAP_METHOD(double get_value() const, gtk_adjustment_get_value)
+
+  // Other internal fields accessors
+  /** Retrieve the @a lower member variable.
+   * @return The current value of @a lower.
+   */
+  _MEMBER_GET(lower,lower,double,double)
+
+  /** Retrieve the @a upper member variable.
+   * @return The current value of @a upper.
+   */
+  _MEMBER_GET(upper,upper,double,double)
+
+  /** Retrieve the @a step_increment variable.
+   * @return The current value of @a step_increment.
+   */
+  _MEMBER_GET(step_increment,step_increment,double,double)
+
+  /** Retrieve the @a page_increment variable.
+   * @return The current value of @a page_increment.
+   */
+  _MEMBER_GET(page_increment,page_increment,double,double)
+
+  /** Retrieve the @a page_size variable.
+   * @return The current value of @a page_size.
+   */
+  _MEMBER_GET(page_size,page_size,double,double)
+
+  // TODO: This section needs changing. We must be able to set more at a time,
+  // emitting "changed" signal only once.
+  /** Sets the @a lower member variable
+   * @param lower The value to set the @a lower member variable to.
+   */
+  void set_lower(double lower);
+  
+  /** Sets the @a upper member variable
+   * @param upper The value to set the @a upper member variable to.
+   */
+  void set_upper(double upper);
+
+  /** Sets the @a step_increment member variable
+   * @param incr The value to set the @a step_incrememnt member variable to.
+   */
+  void set_step_increment(double incr);
+
+  /** Sets the @a page_increment member variable
+   * @param incr The value to set the @a page_increment member variable to.
+   */
+  void set_page_increment(double incr);
+
+  /** Sets the @a page_size member variable
+   * @param size The value to set the @ page_size member varialbe to.
+   */
+  void set_page_size(double size);
+
+  _WRAP_SIGNAL(void changed(), "changed")
+  _WRAP_SIGNAL(void value_changed(), "value_changed")
+
+};
+
+} /* namespace Gtk */
+

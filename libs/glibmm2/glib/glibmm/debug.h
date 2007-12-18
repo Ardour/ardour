@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_DEBUG_H
 #define _GLIBMM_DEBUG_H
 
-/* $Id: debug.h,v 1.2 2003/01/22 12:08:52 murrayc Exp $ */
+/* $Id: debug.h 17 2003-01-22 12:09:02Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

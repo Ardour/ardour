@@ -76,8 +76,14 @@ private:
 
 protected:
   CellLayout(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit CellLayout(GtkCellLayout* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -128,6 +134,22 @@ public:
    * @param expand <tt>true</tt> if @a cell  is to be given extra space allocated to @a cell_layout .
    */
   void pack_end(CellRenderer& cell, bool expand = true);
+
+   
+  /** Return value: a list of cell renderers.
+   * @return A list of cell renderers.
+   * 
+   * @newin2p12.
+   */
+  Glib::ListHandle<CellRenderer*> get_cells();
+  
+  /** Return value: a list of cell renderers.
+   * @return A list of cell renderers.
+   * 
+   * @newin2p12.
+   */
+  Glib::ListHandle<const CellRenderer*> get_cells() const;
+
   
   /** Unsets all the mappings on all renderers on @a cell_layout  and
    * removes all renderers from @a cell_layout .
@@ -199,7 +221,7 @@ protected:
   virtual void add_attribute_vfunc(CellRenderer* cell, const Glib::ustring& attribute, int column);
 #endif //GLIBMM_VFUNCS_ENABLED
 
-//TODO:  _WRAP_VFUNC(void set_cell_data_func(CellRenderer* cell, GtkCellLayoutDataFunc func, gpointer func_data, GDestroyNotify destroy), set_cell_data_func)
+//TODO (added in GTK+ 2.4):  _WRAP_VFUNC(void set_cell_data_func(CellRenderer* cell, GtkCellLayoutDataFunc func, gpointer func_data, GDestroyNotify destroy), gtk_cell_layout_set_cell_data_func)
   #ifdef GLIBMM_VFUNCS_ENABLED
   virtual void clear_attributes_vfunc(CellRenderer* cell);
 #endif //GLIBMM_VFUNCS_ENABLED
@@ -250,10 +272,13 @@ void CellLayout::pack_start(const TreeModelColumn<T_ModelColumnType>& column, bo
 
 namespace Glib
 {
-  /** @relates Gtk::CellLayout
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellLayout
    */
   Glib::RefPtr<Gtk::CellLayout> wrap(GtkCellLayout* object, bool take_copy = false);
 

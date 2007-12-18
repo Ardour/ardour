@@ -42,7 +42,8 @@ namespace Gtk
 namespace Gtk
 {
 
-/** TODO:
+//TODO: There is no GtkPrintOperationPreview documentation either.
+/** 
  * @newin2p10
  *
  * @ingroup Printing
@@ -69,8 +70,14 @@ private:
 
 protected:
   PrintOperationPreview(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit PrintOperationPreview(GtkPrintOperationPreview* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -94,10 +101,32 @@ private:
 public:
 
   
+  /** Renders a page to the preview, using the print context that
+   * was passed to the Gtk::PrintOperation::preview handler together
+   * with @a preview .
+   * 
+   * Note that this function requires a suitable cairo context to 
+   * be associated with the print context. 
+   * 
+   * @newin2p10
+   * @param page_nr The page to render.
+   */
   void render_page(int page_nr);
   
+  /** Ends a preview. 
+   * 
+   * This function must be called to finish a custom print preview.
+   * 
+   * @newin2p10
+   */
   void end_preview();
   
+  /** Returns: <tt>true</tt> if the page has been selected for printing
+   * @param page_nr A page number.
+   * @return <tt>true</tt> if the page has been selected for printing
+   * 
+   * @newin2p10.
+   */
   bool is_selected(int page_nr) const;
 
   #ifdef GLIBMM_VFUNCS_ENABLED
@@ -113,17 +142,17 @@ public:
 #endif //GLIBMM_VFUNCS_ENABLED
 
 
-/**
+  /**
    * @par Prototype:
-   * <tt>void %ready(const Glib::RefPtr<PrintContext>& context)</tt>
+   * <tt>void on_my_%ready(const Glib::RefPtr<PrintContext>& context)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<PrintContext>& > signal_ready();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %got_page_size(const Glib::RefPtr<PrintContext>& context, const Glib::RefPtr<PageSetup>& page_setup)</tt>
+   * <tt>void on_my_%got_page_size(const Glib::RefPtr<PrintContext>& context, const Glib::RefPtr<PageSetup>& page_setup)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::RefPtr<PrintContext>&,const Glib::RefPtr<PageSetup>& > signal_got_page_size();
@@ -155,10 +184,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::PrintOperationPreview
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::PrintOperationPreview
    */
   Glib::RefPtr<Gtk::PrintOperationPreview> wrap(GtkPrintOperationPreview* object, bool take_copy = false);
 

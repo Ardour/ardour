@@ -301,6 +301,20 @@ Glib::PropertyProxy_ReadOnly<Glib::ustring> Settings::property_gtk_font_name() c
 #endif //GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Glib::ustring> Settings::property_gtk_modules() 
+{
+  return Glib::PropertyProxy<Glib::ustring>(this, "gtk-modules");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Glib::ustring> Settings::property_gtk_modules() const
+{
+  return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "gtk-modules");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
 Glib::PropertyProxy<int> Settings::property_gtk_xft_antialias() 
 {
   return Glib::PropertyProxy<int>(this, "gtk-xft-antialias");
@@ -367,6 +381,328 @@ Glib::PropertyProxy<int> Settings::property_gtk_xft_dpi()
 Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_xft_dpi() const
 {
   return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-xft-dpi");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Glib::ustring> Settings::property_gtk_cursor_theme_name() 
+{
+  return Glib::PropertyProxy<Glib::ustring>(this, "gtk-cursor-theme-name");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Glib::ustring> Settings::property_gtk_cursor_theme_name() const
+{
+  return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "gtk-cursor-theme-name");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> Settings::property_gtk_cursor_theme_size() 
+{
+  return Glib::PropertyProxy<int>(this, "gtk-cursor-theme-size");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_cursor_theme_size() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-cursor-theme-size");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_alternative_button_order() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-alternative-button-order");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_alternative_button_order() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-alternative-button-order");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_alternative_sort_arrows() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-alternative-sort-arrows");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_alternative_sort_arrows() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-alternative-sort-arrows");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_show_input_method_menu() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-show-input-method-menu");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_show_input_method_menu() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-show-input-method-menu");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_show_unicode_menu() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-show-unicode-menu");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_show_unicode_menu() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-show-unicode-menu");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> Settings::property_gtk_timeout_initial() 
+{
+  return Glib::PropertyProxy<int>(this, "gtk-timeout-initial");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_timeout_initial() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-timeout-initial");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> Settings::property_gtk_timeout_repeat() 
+{
+  return Glib::PropertyProxy<int>(this, "gtk-timeout-repeat");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_timeout_repeat() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-timeout-repeat");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> Settings::property_gtk_timeout_expand() 
+{
+  return Glib::PropertyProxy<int>(this, "gtk-timeout-expand");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_timeout_expand() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-timeout-expand");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Glib::ustring> Settings::property_gtk_color_scheme() 
+{
+  return Glib::PropertyProxy<Glib::ustring>(this, "gtk-color-scheme");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Glib::ustring> Settings::property_gtk_color_scheme() const
+{
+  return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "gtk-color-scheme");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_enable_animations() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-enable-animations");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_enable_animations() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-enable-animations");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_touchscreen_mode() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-touchscreen-mode");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_touchscreen_mode() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-touchscreen-mode");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> Settings::property_gtk_tooltip_timeout() 
+{
+  return Glib::PropertyProxy<int>(this, "gtk-tooltip-timeout");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_tooltip_timeout() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-tooltip-timeout");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> Settings::property_gtk_tooltip_browse_timeout() 
+{
+  return Glib::PropertyProxy<int>(this, "gtk-tooltip-browse-timeout");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_tooltip_browse_timeout() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-tooltip-browse-timeout");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> Settings::property_gtk_tooltip_browse_mode_timeout() 
+{
+  return Glib::PropertyProxy<int>(this, "gtk-tooltip-browse-mode-timeout");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> Settings::property_gtk_tooltip_browse_mode_timeout() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "gtk-tooltip-browse-mode-timeout");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_keynav_cursor_only() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-keynav-cursor-only");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_keynav_cursor_only() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-keynav-cursor-only");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_keynav_wrap_around() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-keynav-wrap-around");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_keynav_wrap_around() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-keynav-wrap-around");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_error_bell() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-error-bell");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_error_bell() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-error-bell");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Glib::ustring> Settings::property_gtk_file_chooser_backend() 
+{
+  return Glib::PropertyProxy<Glib::ustring>(this, "gtk-file-chooser-backend");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Glib::ustring> Settings::property_gtk_file_chooser_backend() const
+{
+  return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "gtk-file-chooser-backend");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Glib::ustring> Settings::property_gtk_print_backends() 
+{
+  return Glib::PropertyProxy<Glib::ustring>(this, "gtk-print-backends");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Glib::ustring> Settings::property_gtk_print_backends() const
+{
+  return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "gtk-print-backends");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Glib::ustring> Settings::property_gtk_print_preview_command() 
+{
+  return Glib::PropertyProxy<Glib::ustring>(this, "gtk-print-preview-command");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Glib::ustring> Settings::property_gtk_print_preview_command() const
+{
+  return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "gtk-print-preview-command");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_enable_mnemonics() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-enable-mnemonics");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_enable_mnemonics() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-enable-mnemonics");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<bool> Settings::property_gtk_enable_accels() 
+{
+  return Glib::PropertyProxy<bool>(this, "gtk-enable-accels");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<bool> Settings::property_gtk_enable_accels() const
+{
+  return Glib::PropertyProxy_ReadOnly<bool>(this, "gtk-enable-accels");
 }
 #endif //GLIBMM_PROPERTIES_ENABLED
 

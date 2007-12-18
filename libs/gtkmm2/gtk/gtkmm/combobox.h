@@ -144,9 +144,7 @@ public:
    */
   void set_wrap_width(int width);
   
-  /** Returns the wrap width which is used to determine the number
-   * of columns for the popup menu. If the wrap width is larger than
-   * 1, the combo box is in table mode.
+  /** Returns: the wrap width.
    * @return The wrap width.
    * 
    * @newin2p6.
@@ -163,7 +161,7 @@ public:
    */
   void set_row_span_column(int row_span);
   
-  /** Returns the column with row span information for @a combo_box .
+  /** Returns: the row span column.
    * @return The row span column.
    * 
    * @newin2p6.
@@ -180,7 +178,7 @@ public:
    */
   void set_column_span_column(int column_span);
   
-  /** Returns the column with column span information for @a combo_box .
+  /** Returns: the column span column.
    * @return The column span column.
    * 
    * @newin2p6.
@@ -202,13 +200,24 @@ public:
   void set_add_tearoffs(bool add_tearoffs = true);
 
   
+  /** Gets the current title of the menu in tearoff mode. See
+   * set_add_tearoffs().
+   * @return The menu's title in tearoff mode. This is an internal copy of the
+   * string which must not be freed.
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_title() const;
   
+  /** Sets the menu's title in tearoff mode.
+   * 
+   * @newin2p10
+   * @param title A title for the menu in tearoff mode.
+   */
   void set_title(const Glib::ustring& title);
 
   
-  /** Returns whether the combo box grabs focus when it is clicked 
-   * with the mouse. See set_focus_on_click().
+  /** Return value: <tt>true</tt> if the combo box grabs focus when it is
    * @return <tt>true</tt> if the combo box grabs focus when it is 
    * clicked with the mouse.
    * 
@@ -229,13 +238,9 @@ public:
 
 /* get/set active item */
   
-  /** Returns the index of the currently active item, or -1 if there's no
-   * active item. If the model is a non-flat treemodel, and the active item 
-   * is not an immediate child of the root of the tree, this function returns 
-   * <tt>gtk_tree_path_get_indices (path)[0]</tt>, where 
-   * <tt>path</tt> is the Gtk::TreePath of the active item.
-   * @return An integer which is the index of the currently active item, or
-   * -1 if there's no active item.
+  /** Return value: An integer which is the index of the currently active item,
+   * @return An integer which is the index of the currently active item, 
+   * or -1 if there's no active item.
    * 
    * @newin2p4.
    */
@@ -273,14 +278,14 @@ public:
   void unset_active();
 
   
-  /** Returns the Gtk::TreeModel which is acting as data source for @a combo_box .
+  /** Return value: A Gtk::TreeModel which was passed during construction.
    * @return A Gtk::TreeModel which was passed during construction.
    * 
    * @newin2p4.
    */
   Glib::RefPtr<TreeModel> get_model();
   
-  /** Returns the Gtk::TreeModel which is acting as data source for @a combo_box .
+  /** Return value: A Gtk::TreeModel which was passed during construction.
    * @return A Gtk::TreeModel which was passed during construction.
    * 
    * @newin2p4.
@@ -291,8 +296,8 @@ public:
    * model (if applicable). If model is <tt>0</tt>, then it will unset the model.
    * 
    * Note that this function does not clear the cell renderers, you have to 
-   * call gtk_combo_box_cell_layout_clear() yourself if you need to set up 
-   * different cell renderers for the new model.
+   * call Gtk::CellLayout::clear() yourself if you need to set up different 
+   * cell renderers for the new model.
    * 
    * @newin2p4
    * @param model A Gtk::TreeModel.
@@ -547,16 +552,17 @@ public:
    * item is changed. This can be due to the user selecting
    * a different item from the list, or due to a 
    * call to set_active_iter().
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %changed()</tt>
+   * <tt>void on_my_%changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_changed();
-                                             
 
+
+  //Key-binding signals:
+  
+    
 };
 
 
@@ -565,10 +571,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ComboBox
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ComboBox
    */
   Gtk::ComboBox* wrap(GtkComboBox* object, bool take_copy = false);
 } //namespace Glib

@@ -18,8 +18,8 @@ AC_PREREQ(2.50)
 #  Version and initialization
 #########################################################################
 GLIBMM_MAJOR_VERSION=2
-GLIBMM_MINOR_VERSION=13
-GLIBMM_MICRO_VERSION=3
+GLIBMM_MINOR_VERSION=14
+GLIBMM_MICRO_VERSION=2
 GLIBMM_VERSION=$GLIBMM_MAJOR_VERSION.$GLIBMM_MINOR_VERSION.$GLIBMM_MICRO_VERSION
 GLIBMM_RELEASE=$GLIBMM_MAJOR_VERSION.$GLIBMM_MINOR_VERSION
 AC_DEFINE_UNQUOTED([GLIBMM_MAJOR_VERSION], $GLIBMM_MAJOR_VERSION, [Major Version])
@@ -120,7 +120,7 @@ AC_CHECK_FUNCS([flockfile funlockfile getc_unlocked mkfifo])
 #  Dependancy checks
 #########################################################################
 gtkmm_min_sigc_version=2.0.0
-gtkmm_min_glib_version=2.9.0
+gtkmm_min_glib_version=2.14.0
 
 PKG_CHECK_MODULES(GLIBMM, sigc++-2.0 >= ${gtkmm_min_sigc_version} glib-2.0 >= ${gtkmm_min_glib_version} gobject-2.0 >= ${gtkmm_min_glib_version} gmodule-2.0 >= ${gtkmm_min_glib_version})
 AC_SUBST(GLIBMM_CFLAGS)
@@ -198,6 +198,7 @@ GLIBMM_CXX_CAN_USE_DYNAMIC_CAST_IN_UNUSED_TEMPLATE_WITHOUT_DEFINITION()
 GLIBMM_CXX_CAN_ASSIGN_NON_EXTERN_C_FUNCTIONS_TO_EXTERN_C_CALLBACKS()
 GLIBMM_CXX_CAN_USE_NAMESPACES_INSIDE_EXTERNC()
 GLIBMM_CXX_ALLOWS_STATIC_INLINE_NPOS()
+GLIBMM_C_STD_TIME_T_IS_NOT_INT32()
 
 
 # Create a list of input directories for Doxygen.
@@ -271,6 +272,7 @@ AC_CONFIG_FILES([
     examples/thread/Makefile
     examples/iochannel_stream/Makefile
     examples/child_watch/Makefile
+    examples/regex/Makefile
 
   scripts/Makefile
 

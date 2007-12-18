@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_HELPERLIST_H
 #define _GLIBMM_HELPERLIST_H
-/* $Id: helperlist.h,v 1.1.1.1 2003/01/07 16:58:46 murrayc Exp $ */
+/* $Id: helperlist.h 386 2007-03-23 17:31:16Z murrayc $ */
 
 /* helperlist.h
  *
@@ -36,8 +36,8 @@ public:
   : gparent_(0)
   {}
 
-  HelperList(GObject* gparent)
-  : gparent_(gparent)
+  HelperList(GObject* gp) //We use gp instead of gparent because that can cause warnings about a shadowed member.
+  : gparent_(gp)
   {}
 
   virtual ~HelperList()

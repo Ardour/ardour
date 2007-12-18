@@ -178,11 +178,9 @@ public:
   void toggled();
 
   /** Emitted whenever the toggle tool button changes state.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %toggled()</tt>
+   * <tt>void on_my_%toggled()</tt>
    */
 
   Glib::SignalProxy0< void > signal_toggled();
@@ -256,10 +254,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ToggleButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ToggleButton
    */
   Gtk::ToggleButton* wrap(GtkToggleButton* object, bool take_copy = false);
 } //namespace Glib

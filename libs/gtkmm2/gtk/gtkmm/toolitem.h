@@ -3,6 +3,8 @@
 #ifndef _GTKMM_TOOLITEM_H
 #define _GTKMM_TOOLITEM_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -26,6 +28,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gtkmm/bin.h>
 #include <gtkmm/tooltips.h>
@@ -120,8 +126,7 @@ public:
    */
   void set_homogeneous(bool homogeneous = true);
   
-  /** Returns whether @a tool_item  is the same size as other homogeneous
-   * items. See set_homogeneous().
+  /** Return value: <tt>true</tt> if the item is the same size as other homogeneous
    * @return <tt>true</tt> if the item is the same size as other homogeneous
    * item.s
    * 
@@ -140,8 +145,7 @@ public:
    */
   void set_expand(bool expand = true);
   
-  /** Returns whether @a tool_item  is allocated extra space.
-   * See set_expand().
+  /** Return value: <tt>true</tt> if @a tool_item  is allocated extra space.
    * @return <tt>true</tt> if @a tool_item  is allocated extra space.
    * 
    * @newin2p4.
@@ -149,47 +153,68 @@ public:
   bool get_expand() const;
 
   
+#ifndef GTKMM_DISABLE_DEPRECATED
+
   /** Sets the Gtk::Tooltips object to be used for @a tool_item , the
    * text to be displayed as tooltip on the item and the private text
    * to be used. See Gtk::Tooltips::set_tip().
    * 
    * @newin2p4
+   * 
+   * Deprecated: 2.12: Use set_tooltip_text() instead.
+   * @deprecated Use set_tooltip_text() or set_tooltip_markup() instead
    * @param tooltips The Gtk::Tooltips object to be used.
    * @param tip_text Text to be used as tooltip text for @a tool_item .
    * @param tip_private Text to be used as private tooltip text.
    */
   void set_tooltip(Tooltips& tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private = Glib::ustring());
+#endif // GTKMM_DISABLE_DEPRECATED
+
+
+  /** Sets the text to be displayed as tooltip on the item.
+   * See Gtk::Widget::set_tooltip_text().
+   * 
+   * @newin2p12
+   * @param text Text to be used as tooltip for @a tool_item .
+   */
+  void set_tooltip_text(const Glib::ustring& text);
+  
+  /** Sets the markup text to be displayed as tooltip on the item.
+   * See Gtk::Widget::set_tooltip_markup().
+   * 
+   * @newin2p12
+   * @param markup Markup text to be used as tooltip for @a tool_item .
+   */
+  void set_tooltip_markup(const Glib::ustring& markup);
   
   
-  /** Sets whether @a toolitem  has a drag window. When <tt>true</tt> the
+  /** Sets whether @a tool_item  has a drag window. When <tt>true</tt> the
    * toolitem can be used as a drag source through gtk_drag_source_set().
-   * When @a toolitem  has a drag window it will intercept all events,
-   * even those that would otherwise be sent to a child of @a toolitem .
+   * When @a tool_item  has a drag window it will intercept all events,
+   * even those that would otherwise be sent to a child of @a tool_item .
    * 
    * @newin2p4
-   * @param use_drag_window Whether @a toolitem  has a drag window.
+   * @param use_drag_window Whether @a tool_item  has a drag window.
    */
   void set_use_drag_window(bool use_drag_window = true);
   
-  /** Returns whether @a toolitem  has a drag window. See
-   * set_use_drag_window().
-   * @return <tt>true</tt> if @a toolitem  uses a drag window.
+  /** Return value: <tt>true</tt> if @a tool_item  uses a drag window.
+   * @return <tt>true</tt> if @a tool_item  uses a drag window.
    * 
    * @newin2p4.
    */
   bool get_use_drag_window() const;
 
   
-  /** Sets whether @a toolitem  is visible when the toolbar is docked horizontally.
+  /** Sets whether @a tool_item  is visible when the toolbar is docked horizontally.
    * 
    * @newin2p4
-   * @param visible_horizontal Whether @a toolitem  is visible when in horizontal mode.
+   * @param visible_horizontal Whether @a tool_item  is visible when in horizontal mode.
    */
   void set_visible_horizontal(bool visible_horizontal = true);
   
-  /** Returns whether the @a toolitem  is visible on toolbars that are
-   * docked horizontally.
-   * @return <tt>true</tt> if @a toolitem  is visible on toolbars that are
+  /** Return value: <tt>true</tt> if @a tool_item  is visible on toolbars that are
+   * @return <tt>true</tt> if @a tool_item  is visible on toolbars that are
    * docked horizontally.
    * 
    * @newin2p4.
@@ -197,28 +222,26 @@ public:
   bool get_visible_horizontal() const;
 
   
-  /** Sets whether @a toolitem  is visible when the toolbar is docked
+  /** Sets whether @a tool_item  is visible when the toolbar is docked
    * vertically. Some tool items, such as text entries, are too wide to be
    * useful on a vertically docked toolbar. If @a visible_vertical  is <tt>false</tt>
-   *  @a toolitem  will not appear on toolbars that are docked vertically.
+   *  @a tool_item  will not appear on toolbars that are docked vertically.
    * 
    * @newin2p4
-   * @param visible_vertical Whether @a toolitem  is visible when the toolbar
+   * @param visible_vertical Whether @a tool_item  is visible when the toolbar
    * is in vertical mode.
    */
   void set_visible_vertical(bool visible_vertical = true);
   
-  /** Returns whether @a toolitem  is visible when the toolbar is docked vertically.
-   * See set_visible_vertical().
-   * @return Whether @a toolitem  is visible when the toolbar is docked vertically
+  /** Return value: Whether @a tool_item  is visible when the toolbar is docked vertically
+   * @return Whether @a tool_item  is visible when the toolbar is docked vertically
    * 
    * @newin2p4.
    */
   bool get_visible_vertical() const;
 
   
-  /** Returns whether @a tool_item  is considered important. See
-   * set_is_important()
+  /** Return value: <tt>true</tt> if @a tool_item  is considered important.
    * @return <tt>true</tt> if @a tool_item  is considered important.
    * 
    * @newin2p4.
@@ -237,18 +260,14 @@ public:
   void set_is_important(bool is_important = true);
 
   
-  /** Returns the icon size used for @a tool_item . Custom subclasses of
-   * Gtk::ToolItem should call this function to find out what size icons
-   * they should use.
+  /** Return value: a Gtk::IconSize indicating the icon size used for @a tool_item 
    * @return A Gtk::IconSize indicating the icon size used for @a tool_item 
    * 
    * @newin2p4.
    */
   IconSize get_icon_size () const;
   
-  /** Returns the orientation used for @a tool_item . Custom subclasses of
-   * Gtk::ToolItem should call this function to find out what size icons
-   * they should use.
+  /** Return value: a Gtk::Orientation indicating the orientation
    * @return A Gtk::Orientation indicating the orientation
    * used for @a tool_item 
    * 
@@ -256,25 +275,7 @@ public:
    */
   Orientation get_orientation() const;
   
-  /** Returns the toolbar style used for @a tool_item . Custom subclasses of
-   * Gtk::ToolItem should call this function in the handler of the
-   * GtkToolItem::toolbar_reconfigured signal to find out in what style
-   * the toolbar is displayed and change themselves accordingly 
-   * 
-   * Possibilities are:
-   * &lt;itemizedlist&gt;
-   * &lt;listitem&gt; GTK_TOOLBAR_BOTH, meaning the tool item should show
-   * both an icon and a label, stacked vertically &lt;/listitem&gt;
-   * &lt;listitem&gt; GTK_TOOLBAR_ICONS, meaning the toolbar shows
-   * only icons &lt;/listitem&gt;
-   * &lt;listitem&gt; GTK_TOOLBAR_TEXT, meaning the tool item should only
-   * show text&lt;/listitem&gt;
-   * &lt;listitem&gt; GTK_TOOLBAR_BOTH_HORIZ, meaning the tool item should show
-   * both an icon and a label, arranged horizontally (however, note the 
-   * Gtk::ToolButton::has_text_horizontally that makes tool buttons not
-   * show labels when the toolbar style is GTK_TOOLBAR_BOTH_HORIZ.
-   * &lt;/listitem&gt;
-   * &lt;/itemizedlist&gt;
+  /** Return value: A Gtk::ToolbarStyle indicating the toolbar style used
    * @return A Gtk::ToolbarStyle indicating the toolbar style used
    * for @a tool_item .
    * 
@@ -282,10 +283,7 @@ public:
    */
   ToolbarStyle get_toolbar_style() const;
   
-  /** Returns the relief style of @a tool_item . See gtk_button_set_relief_style().
-   * Custom subclasses of Gtk::ToolItem should call this function in the handler
-   * of the Gtk::ToolItem::toolbar_reconfigured signal to find out the
-   * relief style of buttons.
+  /** Return value: a Gtk::ReliefStyle indicating the relief style used
    * @return A Gtk::ReliefStyle indicating the relief style used
    * for @a tool_item .
    * 
@@ -294,9 +292,7 @@ public:
   ReliefStyle get_relief_style() const;
 
   
-  /** Returns the Gtk::MenuItem that was last set by
-   * set_proxy_menu_item(), ie. the Gtk::MenuItem
-   * that is going to appear in the overflow menu.
+  /** Return value: The Gtk::MenuItem that is going to appear in the
    * @return The Gtk::MenuItem that is going to appear in the
    * overflow menu for @a tool_item .
    * 
@@ -304,9 +300,7 @@ public:
    */
   Widget* retrieve_proxy_menu_item();
   
-  /** Returns the Gtk::MenuItem that was last set by
-   * set_proxy_menu_item(), ie. the Gtk::MenuItem
-   * that is going to appear in the overflow menu.
+  /** Return value: The Gtk::MenuItem that is going to appear in the
    * @return The Gtk::MenuItem that is going to appear in the
    * overflow menu for @a tool_item .
    * 
@@ -393,11 +387,9 @@ public:
    * menu.
    *
    * @result true if the signal was handled, false if not
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>bool %create_menu_proxy()</tt>
+   * <tt>bool on_my_%create_menu_proxy()</tt>
    */
 
   Glib::SignalProxy0< bool > signal_create_menu_proxy();
@@ -414,36 +406,33 @@ public:
    * </itemizedlist>
    * to find out what the toolbar should look like and change
    * themselves accordingly.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %toolbar_reconfigured()</tt>
+   * <tt>void on_my_%toolbar_reconfigured()</tt>
    */
 
   Glib::SignalProxy0< void > signal_toolbar_reconfigured();
 
 
   //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
-  //TODO: Remove no_default_handler when we do an ABI-break-with-parallel-install.
+
+  #ifndef GTKMM_DISABLE_DEPRECATED
+  //Note that we can ifdef this out, only because it doesn't affect class size, because we use no_default_handler:
   /** This signal is emitted when the toolitem's tooltip changes.
    * Application developers can use gtk_tool_item_set_tooltip() to
    * set the item's tooltip.
+   * @deprecated: Use the new Gtk::Tooltip API. This signal will now never be emitted.
    *
    * @param tooltips the Tooltips
    * @param tip_text the tooltip text
    * @param tip_private the tooltip private text
    * @result true if the signal was handled, false if not.
    */
-  
-/**
-   * @par Prototype:
-   * <tt>bool %set_tooltip(Tooltips* tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private)</tt>
-   */
-
   Glib::SignalProxy3< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& > signal_set_tooltip();
+  //_WRAP_SIGNAL(bool set_tooltip(Tooltips* tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private), set_tooltip, no_default_handler, deprecated) //TODO: Implement deprecated for _WRAP_SIGNAL() to avoid hand-coding this:
+  #endif //GTKMM_DISABLE_DEPRECATED
 
-  
+
   #ifdef GLIBMM_PROPERTIES_ENABLED
 /** Whether the toolbar item is visible when the toolbar is in a horizontal orientation.
    *
@@ -512,10 +501,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ToolItem
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ToolItem
    */
   Gtk::ToolItem* wrap(GtkToolItem* object, bool take_copy = false);
 } //namespace Glib

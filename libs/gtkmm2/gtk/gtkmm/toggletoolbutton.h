@@ -148,7 +148,7 @@ public:
   void set_active(bool is_active = true);
   
   /** Queries a Gtk::ToggleToolButton and returns its current state.
-   * Returns <tt>true</tt> if the toggle button is pressed in and <tt>false</tt> if it is raised.
+   * Return value: <tt>true</tt> if the toggle tool button is pressed in, <tt>false</tt> if not
    * @return <tt>true</tt> if the toggle tool button is pressed in, <tt>false</tt> if not
    * 
    * @newin2p4.
@@ -156,9 +156,9 @@ public:
   bool get_active() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %toggled()</tt>
+   * <tt>void on_my_%toggled()</tt>
    */
 
   Glib::SignalProxy0< void > signal_toggled();
@@ -171,10 +171,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::ToggleToolButton
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::ToggleToolButton
    */
   Gtk::ToggleToolButton* wrap(GtkToggleToolButton* object, bool take_copy = false);
 } //namespace Glib

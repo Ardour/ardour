@@ -121,9 +121,9 @@ public:
   void set_fixed_height_from_font(int number_of_rows);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %edited(const Glib::ustring& path, const Glib::ustring& new_text)</tt>
+   * <tt>void on_my_%edited(const Glib::ustring& path, const Glib::ustring& new_text)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::ustring&,const Glib::ustring& > signal_edited();
@@ -243,7 +243,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
   #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Font description as a string.
+/** Font description as a string
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -253,7 +253,7 @@ public:
 #endif //#GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
-/** Font description as a string.
+/** Font description as a string
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -983,10 +983,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::CellRendererText
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellRendererText
    */
   Gtk::CellRendererText* wrap(GtkCellRendererText* object, bool take_copy = false);
 } //namespace Glib

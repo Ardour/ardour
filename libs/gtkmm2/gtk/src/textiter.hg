@@ -1,0 +1,367 @@
+/* $Id: textiter.hg,v 1.8 2006/05/11 11:40:24 murrayc Exp $ */
+
+/* Copyright(C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software, ) you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation, ) either
+ * version 2 of the License, or(at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY, ) without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library, ) if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/exceptionhandler.h>
+#include <glibmm/slisthandle.h>
+#include <gdkmm/pixbuf.h>
+#include <gtkmm/texttag.h>
+#include <gtkmm/textchildanchor.h>
+#include <gtkmm/textattributes.h>
+#include <gtk/gtktextiter.h> /* we need the definition of GtkTextIter */
+
+
+_DEFS(gtkmm,gtk)
+
+namespace Gtk
+{
+
+_CC_INCLUDE(gtk/gtktypebuiltins.h)
+_WRAP_ENUM(TextSearchFlags, GtkTextSearchFlags)
+
+class TextBuffer;
+class TextMark;
+
+//TODO: Maybe we should have separate iterators for words, lines, and sentences.
+/** Typefed as Gtk::TextBuffer::iterator.
+ * An iterator represents a position between two characters in the text buffer. Iterators are not valid indefinitely; whenever the buffer is
+ * modified in a way that affects the number of characters in the buffer, all outstanding iterators become invalid. (Note that
+ * deleting 5 characters and then reinserting 5 still invalidates iterators, though you end up with the same number of characters
+ * you pass through a state with a different number).
+ *
+ * Because of this, iterators can't be used to preserve positions across buffer modifications. To preserve a position, the
+ * @link Gtk::TextMark Gtk::TextBuffer::Mark@endlink object is ideal.
+ *
+ * You can iterate over characters, words, lines, and sentences,
+ * but operator*() and operator++() deal only in characters.
+ * 
+ * @ingroup TextView
+ */
+class TextIter
+{
+  _CLASS_BOXEDTYPE_STATIC(TextIter, GtkTextIter)
+  _IGNORE(gtk_text_iter_get_attributes, gtk_text_iter_copy, gtk_text_iter_free, gtk_text_iter_equal)
+public:
+  typedef std::bidirectional_iterator_tag iterator_category;
+  typedef gunichar                        value_type;
+  typedef int                             difference_type;
+  typedef value_type                      reference;
+  typedef void                            pointer;
+
+  /** Alias for forward_char(). */
+  inline TextIter&      operator++();
+  inline const TextIter operator++(int);
+
+  /** Alias for backward_char(). */
+  inline TextIter&      operator--();
+  inline const TextIter operator--(int);
+
+  /** Alias for get_char(). */
+  inline value_type operator*() const;
+
+  /** Alias for !is_end(). */
+  inline operator bool() const;
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+protected:
+  template <class Predicate>
+  struct PredicateAdapter
+  {
+    Predicate predicate_;
+    inline PredicateAdapter(const Predicate& predicate);
+    static gboolean gtk_callback(gunichar uc, void* user_data);
+  };
+
+  _WRAP_METHOD(bool forward_find_char_impl(GtkTextCharPredicate predicate,
+                                           void* user_data,
+                                           const GtkTextIter* limit), gtk_text_iter_forward_find_char)
+
+  _WRAP_METHOD(bool backward_find_char_impl(GtkTextCharPredicate predicate,
+                                            void* user_data,
+                                            const GtkTextIter* limit), gtk_text_iter_backward_find_char)
+
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+public:
+  _WRAP_METHOD(Glib::RefPtr<TextBuffer> get_buffer() const, gtk_text_iter_get_buffer, refreturn)
+
+  _WRAP_METHOD(int get_offset() const, gtk_text_iter_get_offset)
+  _WRAP_METHOD(int get_line() const, gtk_text_iter_get_line)
+  _WRAP_METHOD(int get_line_offset() const, gtk_text_iter_get_line_offset)
+  _WRAP_METHOD(int get_line_index() const, gtk_text_iter_get_line_index)
+
+  _WRAP_METHOD(int get_visible_line_offset() const, gtk_text_iter_get_visible_line_offset)
+  _WRAP_METHOD(int get_visible_line_index() const, gtk_text_iter_get_visible_line_index)
+
+  _WRAP_METHOD(gunichar get_char() const, gtk_text_iter_get_char)
+  _WRAP_METHOD(Glib::ustring get_slice(const TextIter& end) const, gtk_text_iter_get_slice)
+  _WRAP_METHOD(Glib::ustring get_text(const TextIter& end) const, gtk_text_iter_get_text)
+  _WRAP_METHOD(Glib::ustring get_visible_slice(const TextIter& end) const, gtk_text_iter_get_visible_slice)
+  _WRAP_METHOD(Glib::ustring get_visible_text(const TextIter& end) const, gtk_text_iter_get_visible_text)
+
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_pixbuf() const, gtk_text_iter_get_pixbuf, refreturn)
+  _WRAP_METHOD(Glib::SListHandle< Glib::RefPtr<TextMark> > get_marks(), gtk_text_iter_get_marks)
+  _WRAP_METHOD(Glib::SListHandle< Glib::RefPtr<const TextMark> > get_marks() const, gtk_text_iter_get_marks)
+  
+  _WRAP_METHOD(Glib::RefPtr<TextChildAnchor> get_child_anchor(), gtk_text_iter_get_child_anchor, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const TextChildAnchor> get_child_anchor() const, gtk_text_iter_get_child_anchor, refreturn)
+
+  _WRAP_METHOD(Glib::SListHandle< Glib::RefPtr<TextTag> > get_toggled_tags(bool toggled_on = true), gtk_text_iter_get_toggled_tags)
+  _WRAP_METHOD(Glib::SListHandle< Glib::RefPtr<const TextTag> > get_toggled_tags(bool toggled_on = true) const, gtk_text_iter_get_toggled_tags)
+
+  _WRAP_METHOD(bool begins_tag(const Glib::RefPtr<const TextTag>& tag) const, gtk_text_iter_begins_tag)
+  bool begins_tag() const;
+  _WRAP_METHOD(bool ends_tag(const Glib::RefPtr<const TextTag>& tag) const, gtk_text_iter_ends_tag)
+  bool ends_tag() const;
+  _WRAP_METHOD(bool toggles_tag(const Glib::RefPtr<const TextTag>& tag) const, gtk_text_iter_toggles_tag)
+  bool toggles_tag() const;
+
+  _WRAP_METHOD(bool has_tag(const Glib::RefPtr<const TextTag>& tag) const, gtk_text_iter_has_tag)
+  bool has_tag() const;
+  
+  _WRAP_METHOD(Glib::SListHandle< Glib::RefPtr<TextTag> > get_tags(), gtk_text_iter_get_tags)
+  _WRAP_METHOD(Glib::SListHandle< Glib::RefPtr<const TextTag> > get_tags() const, gtk_text_iter_get_tags)
+
+  _WRAP_METHOD(bool editable(bool default_setting = true) const, gtk_text_iter_editable)
+  _WRAP_METHOD(bool can_insert(bool default_editability = true) const, gtk_text_iter_can_insert)
+
+  _WRAP_METHOD(bool starts_word() const, gtk_text_iter_starts_word)
+  _WRAP_METHOD(bool ends_word() const, gtk_text_iter_ends_word)
+  _WRAP_METHOD(bool inside_word() const, gtk_text_iter_inside_word)
+  _WRAP_METHOD(bool starts_sentence() const, gtk_text_iter_starts_sentence)
+  _WRAP_METHOD(bool ends_sentence() const, gtk_text_iter_ends_sentence)
+  _WRAP_METHOD(bool inside_sentence() const, gtk_text_iter_inside_sentence)
+  _WRAP_METHOD(bool starts_line() const, gtk_text_iter_starts_line)
+  _WRAP_METHOD(bool ends_line() const, gtk_text_iter_ends_line)
+  _WRAP_METHOD(bool is_cursor_position() const, gtk_text_iter_is_cursor_position)
+
+  _WRAP_METHOD(int get_chars_in_line() const, gtk_text_iter_get_chars_in_line)
+  _WRAP_METHOD(int get_bytes_in_line() const, gtk_text_iter_get_bytes_in_line)
+
+  bool get_attributes(TextAttributes& values) const;
+  _WRAP_METHOD(Pango::Language get_language() const, gtk_text_iter_get_language)
+  _WRAP_METHOD(bool is_end() const, gtk_text_iter_is_end)
+  _WRAP_METHOD(bool is_start() const, gtk_text_iter_is_start)
+
+  _WRAP_METHOD(bool forward_char(), gtk_text_iter_forward_char)
+  _WRAP_METHOD(bool backward_char(), gtk_text_iter_backward_char)
+  _WRAP_METHOD(bool forward_chars(int count), gtk_text_iter_forward_chars)
+  _WRAP_METHOD(bool backward_chars(int count), gtk_text_iter_backward_chars)
+  _WRAP_METHOD(bool forward_line(), gtk_text_iter_forward_line)
+  _WRAP_METHOD(bool backward_line(), gtk_text_iter_backward_line)
+  _WRAP_METHOD(bool forward_lines(int count), gtk_text_iter_forward_lines)
+  _WRAP_METHOD(bool backward_lines(int count), gtk_text_iter_backward_lines)
+  _WRAP_METHOD(bool forward_word_end(), gtk_text_iter_forward_word_end)
+  _WRAP_METHOD(bool backward_word_start(), gtk_text_iter_backward_word_start)
+  _WRAP_METHOD(bool forward_word_ends(int count), gtk_text_iter_forward_word_ends)
+  _WRAP_METHOD(bool backward_word_starts(int count), gtk_text_iter_backward_word_starts)
+
+  _WRAP_METHOD(bool forward_visible_line(), gtk_text_iter_forward_visible_line)
+  _WRAP_METHOD(bool backward_visible_line(), gtk_text_iter_backward_visible_line)
+  _WRAP_METHOD(bool forward_visible_line(int count), gtk_text_iter_forward_visible_lines)
+  _WRAP_METHOD(bool backward_visible_lines(int count), gtk_text_iter_backward_visible_lines)
+
+  //TODO: Now that there are so many *_visible_ versions of the methods, maybe we should
+  //just add a visible=false parameter and therefore halve the number of methods. murrayc
+ 
+  _WRAP_METHOD(bool forward_visible_word_end(), gtk_text_iter_forward_visible_word_end)
+  _WRAP_METHOD(bool backward_visible_word_start(), gtk_text_iter_backward_visible_word_start)
+  _WRAP_METHOD(bool forward_visible_word_ends(int count), gtk_text_iter_forward_visible_word_ends)
+  _WRAP_METHOD(bool backward_visible_word_starts(int count), gtk_text_iter_backward_visible_word_starts)
+
+  _WRAP_METHOD(bool forward_sentence_end(), gtk_text_iter_forward_sentence_end)
+  _WRAP_METHOD(bool backward_sentence_start(), gtk_text_iter_backward_sentence_start)
+  _WRAP_METHOD(bool forward_sentence_ends(int count), gtk_text_iter_forward_sentence_ends)
+  _WRAP_METHOD(bool backward_sentence_starts(int count), gtk_text_iter_backward_sentence_starts)
+
+  _WRAP_METHOD(bool forward_cursor_position(), gtk_text_iter_forward_cursor_position)
+  _WRAP_METHOD(bool backward_cursor_position(), gtk_text_iter_backward_cursor_position)
+  _WRAP_METHOD(bool forward_cursor_positions(int count), gtk_text_iter_forward_cursor_positions)
+  _WRAP_METHOD(bool backward_cursor_positions(int count), gtk_text_iter_backward_cursor_positions)
+
+  _WRAP_METHOD(bool forward_visible_cursor_position(), gtk_text_iter_forward_visible_cursor_position)
+  _WRAP_METHOD(bool backward_visible_cursor_position(), gtk_text_iter_backward_visible_cursor_position)
+  _WRAP_METHOD(bool forward_visible_cursor_positions(int count), gtk_text_iter_forward_visible_cursor_positions)
+  _WRAP_METHOD(bool backward_visible_cursor_positions(int count), gtk_text_iter_backward_visible_cursor_positions)
+
+  _WRAP_METHOD(void set_offset(int char_offset), gtk_text_iter_set_offset)
+  _WRAP_METHOD(void set_line(int line_number), gtk_text_iter_set_line)
+  _WRAP_METHOD(void set_line_offset(int char_on_line), gtk_text_iter_set_line_offset)
+  _WRAP_METHOD(void set_line_index(int byte_on_line), gtk_text_iter_set_line_index)
+  _WRAP_METHOD(void forward_to_end(), gtk_text_iter_forward_to_end)
+  _WRAP_METHOD(bool forward_to_line_end(), gtk_text_iter_forward_to_line_end)
+
+  _WRAP_METHOD(void set_visible_line_offset(int char_on_line), gtk_text_iter_set_visible_line_offset)
+  _WRAP_METHOD(void set_visible_line_index(int byte_on_line), gtk_text_iter_set_visible_line_index)
+
+  _WRAP_METHOD(bool forward_to_tag_toggle(const Glib::RefPtr<TextTag>& tag), gtk_text_iter_forward_to_tag_toggle)
+  _WRAP_METHOD(bool backward_to_tag_toggle(const Glib::RefPtr<TextTag>& tag), gtk_text_iter_backward_to_tag_toggle)
+
+  template <class Predicate> bool forward_find_char(const Predicate& predicate, const TextIter& limit);
+  template <class Predicate> bool forward_find_char(const Predicate& predicate);
+  template <class Predicate> bool backward_find_char(const Predicate& predicate, const TextIter& limit);
+  template <class Predicate> bool backward_find_char(const Predicate& predicate);
+
+  _WRAP_METHOD(bool forward_search(const Glib::ustring& str,
+                                   TextSearchFlags flags,
+                                   TextIter& match_start,
+                                   TextIter& match_end,
+                                   const TextIter& limit) const, gtk_text_iter_forward_search)
+         
+  /** Same as forward_search(), but searchs to the end.
+   *
+   * @param str A search string.
+   * @param flags Flags affecting how the search is done.
+   * @param match_start Return location for start of match, or <tt>0</tt>.
+   * @param match_end Return location for end of match, or <tt>0</tt>.
+   * @return Whether a match was found.
+   */                          
+   bool forward_search(const Glib::ustring& str, TextSearchFlags flags, TextIter& match_start, TextIter& match_end) const;
+
+  _WRAP_METHOD(bool backward_search(const Glib::ustring& str,
+                                    TextSearchFlags flags,
+                                    TextIter& match_start,
+                                    TextIter& match_end,
+                                    const TextIter& limit) const, gtk_text_iter_backward_search)
+
+  /** Same as backward_search(), but searches to the start.
+   * @param str Search string.
+   * @param flags Bitmask of flags affecting the search.
+   * @param match_start Return location for start of match, or <tt>0</tt>.
+   * @param match_end Return location for end of match, or <tt>0</tt>.
+   * @return Whether a match was found.
+   */                                    
+  bool backward_search(const Glib::ustring& str, TextSearchFlags flags, TextIter& match_start, TextIter& match_end) const;
+
+  _WRAP_METHOD(int compare(const TextIter& rhs) const, gtk_text_iter_compare)
+  _WRAP_METHOD(bool in_range(const TextIter& start, const TextIter& end) const, gtk_text_iter_in_range)
+  _WRAP_METHOD(void order(TextIter& second), gtk_text_iter_order)
+
+  _WRAP_EQUAL_AND_COMPARE(gtk_text_iter_equal, gtk_text_iter_compare)
+};
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+template <class Predicate> inline
+TextIter::PredicateAdapter<Predicate>::PredicateAdapter(const Predicate& predicate)
+:
+  predicate_ (predicate)
+{}
+
+// static
+template <class Predicate>
+gboolean TextIter::PredicateAdapter<Predicate>::gtk_callback(gunichar uc, void* user_data)
+{
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+    // This will either use Predicate::operator(), or call a function pointer.
+    // The explicit conditional expression avoids relying on an implicit
+    // conversion of the return type to int, which might be not available.
+    return (static_cast<TextIter::PredicateAdapter<Predicate>*>(user_data)->predicate_(uc)) ? 1 : 0;
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    Glib::exception_handlers_invoke();
+    return 0;
+  }
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+}
+
+inline
+TextIter& TextIter::operator++()
+{
+  forward_char();
+  return *this;
+}
+
+inline
+const TextIter TextIter::operator++(int)
+{
+  const TextIter temp (*this);
+  forward_char();
+  return temp;
+}
+
+inline
+TextIter& TextIter::operator--()
+{
+  backward_char();
+  return *this;
+}
+
+inline
+const TextIter TextIter::operator--(int)
+{
+  const TextIter temp (*this);
+  backward_char();
+  return temp;
+}
+
+inline
+TextIter::value_type TextIter::operator*() const
+{
+  return get_char();
+}
+
+inline
+TextIter::operator bool() const
+{
+  return !is_end();
+}
+
+template <class Predicate>
+bool TextIter::forward_find_char(const Predicate& predicate, const TextIter& limit)
+{
+  typedef TextIter::PredicateAdapter<Predicate> PredAdapter;
+  PredAdapter adapter (predicate);
+  return this->forward_find_char_impl(&PredAdapter::gtk_callback, &adapter, limit.gobj());
+}
+
+template <class Predicate>
+bool TextIter::forward_find_char(const Predicate& predicate)
+{
+  typedef TextIter::PredicateAdapter<Predicate> PredAdapter;
+  PredAdapter adapter (predicate);
+  return this->forward_find_char_impl(&PredAdapter::gtk_callback, &adapter, 0);
+}
+
+template <class Predicate>
+bool TextIter::backward_find_char(const Predicate& predicate, const TextIter& limit)
+{
+  typedef TextIter::PredicateAdapter<Predicate> PredAdapter;
+  PredAdapter adapter (predicate);
+  return this->backward_find_char_impl(&PredAdapter::gtk_callback, &adapter, limit.gobj());
+}
+
+template <class Predicate>
+bool TextIter::backward_find_char(const Predicate& predicate)
+{
+  typedef TextIter::PredicateAdapter<Predicate> PredAdapter;
+  PredAdapter adapter (predicate);
+  return this->backward_find_char_impl(&PredAdapter::gtk_callback, &adapter, 0);
+}
+
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+} // namespace Gtk
+

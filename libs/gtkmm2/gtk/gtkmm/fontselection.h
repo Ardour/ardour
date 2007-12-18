@@ -127,8 +127,25 @@ public:
   FontSelection();
 
   
+  /** Gets the currently-selected font name.  Note that this can be a different
+   * string than what you set with set_font_name(), as
+   * the font selection widget may normalize font names and thus return a string
+   * with a different structure.  For example, "Helvetica Italic Bold 12" could be
+   * normalized to "Helvetica Bold Italic 12".  Use pango_font_description_equal()
+   * if you want to compare two font descriptions.
+   * @return A string with the name of the current font, or #<tt>0</tt> if no font
+   * is selected.  You must free this string with Glib::free().
+   */
   Glib::ustring get_font_name() const;
   
+  /** Sets the currently-selected font.  Note that the @a fontsel  needs to know the
+   * screen in which it will appear for this to work; this can be guaranteed by
+   * simply making sure that the @a fontsel  is inserted in a toplevel window before
+   * you call this function.
+   * @param fontname A font name like "Helvetica 12" or "Times Bold 18".
+   * @return #<tt>true</tt> if the font could be set successfully; #<tt>false</tt> if no such
+   * font exists or if the @a fontsel  doesn't belong to a particular screen yet.
+   */
   bool set_font_name(const Glib::ustring& fontname);
   
   Glib::ustring get_preview_text() const;
@@ -270,6 +287,15 @@ public:
   
   bool set_font_name(const Glib::ustring& fontname);
   
+  /** Gets the currently-selected font name.  Note that this can be a different
+   * string than what you set with set_font_name(), as
+   * the font selection widget may normalize font names and thus return a string
+   * with a different structure.  For example, "Helvetica Italic Bold 12" could be
+   * normalized to "Helvetica Bold Italic 12".  Use pango_font_description_equal()
+   * if you want to compare two font descriptions.
+   * @return A string with the name of the current font, or #<tt>0</tt> if no font
+   * is selected.  You must free this string with Glib::free().
+   */
   Glib::ustring get_font_name() const;
   
   Glib::ustring get_preview_text() const;
@@ -293,10 +319,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::FontSelection
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::FontSelection
    */
   Gtk::FontSelection* wrap(GtkFontSelection* object, bool take_copy = false);
 } //namespace Glib
@@ -304,10 +333,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::FontSelectionDialog
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::FontSelectionDialog
    */
   Gtk::FontSelectionDialog* wrap(GtkFontSelectionDialog* object, bool take_copy = false);
 } //namespace Glib

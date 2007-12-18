@@ -148,7 +148,8 @@ GType CellRendererProgress::get_base_type()
 
 CellRendererProgress::CellRendererProgress()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::CellRenderer(Glib::ConstructParams(cellrendererprogress_class_.init()))
 {
   }
@@ -179,6 +180,48 @@ Glib::PropertyProxy<Glib::ustring> CellRendererProgress::property_text()
 Glib::PropertyProxy_ReadOnly<Glib::ustring> CellRendererProgress::property_text() const
 {
   return Glib::PropertyProxy_ReadOnly<Glib::ustring>(this, "text");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<int> CellRendererProgress::property_pulse() 
+{
+  return Glib::PropertyProxy<int>(this, "pulse");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<int> CellRendererProgress::property_pulse() const
+{
+  return Glib::PropertyProxy_ReadOnly<int>(this, "pulse");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<float> CellRendererProgress::property_text_xalign() 
+{
+  return Glib::PropertyProxy<float>(this, "text-xalign");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<float> CellRendererProgress::property_text_xalign() const
+{
+  return Glib::PropertyProxy_ReadOnly<float>(this, "text-xalign");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<float> CellRendererProgress::property_text_yalign() 
+{
+  return Glib::PropertyProxy<float>(this, "text-yalign");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<float> CellRendererProgress::property_text_yalign() const
+{
+  return Glib::PropertyProxy_ReadOnly<float>(this, "text-yalign");
 }
 #endif //GLIBMM_PROPERTIES_ENABLED
 

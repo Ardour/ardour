@@ -3,6 +3,10 @@
 #ifndef _GTKMM_TOOLTIPS_H
 #define _GTKMM_TOOLTIPS_H
 
+#include <gtkmmconfig.h>
+
+#ifndef GTKMM_DISABLE_DEPRECATED
+
 
 #include <glibmm.h>
 
@@ -24,6 +28,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gdkmm/color.h>
 #include <gtkmm/object.h>
@@ -51,6 +59,8 @@ class Widget;
  *
  * This widget holds tooltips for other widgets.  You should only need one
  * Tooltip widget for all widgets you wish to add tips to.
+ * 
+ * @deprecated Use the Gtk::Tooltip API instead.
  */
 
 class Tooltips : public Object
@@ -141,13 +151,19 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Tooltips
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Tooltips
    */
   Gtk::Tooltips* wrap(GtkTooltips* object, bool take_copy = false);
 } //namespace Glib
+
+
+#endif // GTKMM_DISABLE_DEPRECATED
 
 
 #endif /* _GTKMM_TOOLTIPS_H */

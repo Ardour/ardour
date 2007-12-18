@@ -323,6 +323,11 @@ WrapMode Layout::get_wrap() const
   return ((WrapMode)(pango_layout_get_wrap(const_cast<PangoLayout*>(gobj()))));
 }
 
+bool Layout::is_wrapped() const
+{
+  return pango_layout_is_wrapped(const_cast<PangoLayout*>(gobj()));
+}
+
 void Layout::set_indent(int indent)
 {
 pango_layout_set_indent(gobj(), indent); 
@@ -403,6 +408,16 @@ EllipsizeMode Layout::get_ellipsize() const
   return ((EllipsizeMode)(pango_layout_get_ellipsize(const_cast<PangoLayout*>(gobj()))));
 }
 
+bool Layout::is_ellipsized() const
+{
+  return pango_layout_is_ellipsized(const_cast<PangoLayout*>(gobj()));
+}
+
+int Layout::get_unknown_glyphs_count() const
+{
+  return pango_layout_get_unknown_glyphs_count(const_cast<PangoLayout*>(gobj()));
+}
+
 void Layout::context_changed()
 {
 pango_layout_context_changed(gobj()); 
@@ -466,7 +481,7 @@ Glib::RefPtr<LayoutLine> Layout::get_line(int line)
 Glib::RefPtr<const LayoutLine> Layout::get_line(int line) const
 {
 
-  Glib::RefPtr<const LayoutLine> retvalue = Glib::wrap(pango_layout_get_line(const_cast<PangoLayout*>(gobj()), line));
+  Glib::RefPtr<const LayoutLine> retvalue = Glib::wrap(pango_layout_get_line_readonly(const_cast<PangoLayout*>(gobj()), line));
   if(retvalue)
     retvalue->reference(); //The function does not do a ref for us.
   return retvalue;
@@ -480,7 +495,7 @@ SListHandle_LayoutLine Layout::get_lines()
 
 SListHandle_ConstLayoutLine Layout::get_lines() const
 {
-  return SListHandle_ConstLayoutLine(pango_layout_get_lines(const_cast<PangoLayout*>(gobj())), Glib::OWNERSHIP_SHALLOW);
+  return SListHandle_ConstLayoutLine(pango_layout_get_lines_readonly(const_cast<PangoLayout*>(gobj())), Glib::OWNERSHIP_SHALLOW);
 }
 
 

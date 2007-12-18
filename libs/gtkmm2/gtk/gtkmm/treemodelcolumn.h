@@ -67,9 +67,11 @@ class TreeModelColumnBase;
  * @link TreeModelColumn TreeModelColumns@endlink contain any real data --
  * they merely describe what C++ type is stored in which column
  * of a TreeModel, and save you from having to repeat that type information in several places.
- * Thus it's absolutely legal to use a statically allocated
+ *
+ * Thus you may use a statically allocated
  * TreeModel::ColumnRecord (as long as you make sure it's instantiated after
- * Gtk::Main), even when creating multiple models from it.
+ * Gtk::Main), even when creating multiple models from it. However, it is very difficult to 
+ * specify the sequence of allocation of static objects, so this should probably be avoided.
  */
 class TreeModelColumnRecord
 {

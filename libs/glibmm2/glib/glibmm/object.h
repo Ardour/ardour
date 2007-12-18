@@ -1,7 +1,7 @@
 // -*- c++ -*-
 #ifndef _GLIBMM_OBJECT_H
 #define _GLIBMM_OBJECT_H
-/* $Id: object.h,v 1.14 2006/06/19 20:43:42 murrayc Exp $ */
+/* $Id: object.h 369 2007-01-20 10:19:33Z daniel $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
@@ -23,15 +23,16 @@
 //X11 defines DestroyNotify and some other non-prefixed stuff, and it's too late to change that now,
 //so let's give people a clue about the compilation errors that they will see:
 #ifdef DestroyNotify
-  #error "X11/Xlib.h seems to have been included before this header. Due to some commonly-named macros in X11/Xlib.h, it may only be included after any glibmm, gdkmm, or gtkmm headers."
-#endif //DestroyNotify
+# error "X11/Xlib.h seems to have been included before this header. Due to some commonly-named macros in X11/Xlib.h, it may only be included after any glibmm, gdkmm, or gtkmm headers."
+#endif
 
+#include <glib/gmacros.h> /* for G_GNUC_NULL_TERMINATED */
 #include <glibmm/objectbase.h>
 #include <glibmm/wrap.h>
 #include <glibmm/quark.h>
 #include <glibmm/refptr.h>
 #include <glibmm/utility.h> /* Could be private, but that would be tedious. */
-#include <glibmm/containerhandle_shared.h> //Because its specializations may be here.
+#include <glibmm/containerhandle_shared.h> /* Because its specializations may be here. */
 #include <glibmm/value.h>
 
 #include <glibmmconfig.h>
@@ -60,7 +61,7 @@ class GSigConnectionNode;
  * involved, since g_object_new() is just a wrapper around g_object_newv()
  * as well.
  *
- * The advantage of an auxilary ConstructParams object over g_object_new()
+ * The advantage of an auxiliary ConstructParams object over g_object_new()
  * is that the actual construction is always done in the Glib::Object ctor.
  * This allows for neat tricks like easy creation of derived custom types,
  * without adding special support to each ctor of every class.
@@ -76,16 +77,18 @@ public:
   GParameter*         parameters;
 
   explicit ConstructParams(const Glib::Class& glibmm_class_);
-  ConstructParams(const Glib::Class& glibmm_class_, const char* first_property_name, ...);
+  ConstructParams(const Glib::Class& glibmm_class_, const char* first_property_name, ...)
+    G_GNUC_NULL_TERMINATED; // warn if called without a trailing NULL pointer
   ~ConstructParams();
 
-  // This is only used by the C++ compiler (since g++ 3.4) to create temporary instances.
-  // Apparently the compiler will actually optimize away the use of this.
-  // See bug #132300.
+  // The copy constructor is semantically required by the C++ compiler
+  // (since g++ 3.4) to be able to create temporary instances, depending
+  // on the usage context.  Apparently the compiler will actually optimize
+  // away the copy, though.  See bug #132300.
   ConstructParams(const ConstructParams& other);
 
 private:
-  // noncopyable 
+  // no copy assignment
   ConstructParams& operator=(const ConstructParams&);
 };
 
@@ -158,7 +161,7 @@ private:
 //For some (proably, more spec-compliant) compilers, these specializations must
 //be next to the objects that they use.
 #ifndef GLIBMM_CAN_USE_DYNAMIC_CAST_IN_UNUSED_TEMPLATE_WITHOUT_DEFINITION
-#ifndef DOXYGEN_SHOULD_SKIP_THIS /* hide the specializations */
+# ifndef DOXYGEN_SHOULD_SKIP_THIS /* hide the specializations */
 
 namespace Container_Helpers
 {
@@ -174,9 +177,9 @@ struct TypeTraits< Glib::RefPtr<T> >
   typedef typename T::BaseObjectType * CType;
   typedef typename T::BaseObjectType * CTypeNonConst;
 
-  static CType   to_c_type      (const CppType& ptr) { return Glib::unwrap(ptr);     }
-  static CType   to_c_type      (CType          ptr) { return ptr;                   }
-  static CppType to_cpp_type    (CType          ptr)
+  static CType   to_c_type  (const CppType& ptr) { return Glib::unwrap(ptr); }
+  static CType   to_c_type  (CType          ptr) { return ptr;               }
+  static CppType to_cpp_type(CType          ptr)
   {
     //return Glib::wrap(ptr, true);
 
@@ -189,7 +192,7 @@ struct TypeTraits< Glib::RefPtr<T> >
     //We use dynamic_cast<> in case of multiple inheritance.
   }
   
-  static void    release_c_type (CType          ptr)
+  static void release_c_type(CType ptr)
   {
     GLIBMM_DEBUG_UNREFERENCE(0, ptr);
     g_object_unref(ptr);
@@ -197,7 +200,7 @@ struct TypeTraits< Glib::RefPtr<T> >
 };
 
 //This confuses the SUN Forte compiler, so we ifdef it out:
-#ifdef GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
+#  ifdef GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
 
 /** Partial specialization for pointers to const GObject instances.
  * @ingroup ContHelpers
@@ -210,9 +213,9 @@ struct TypeTraits< Glib::RefPtr<const T> >
   typedef const typename T::BaseObjectType * CType;
   typedef typename T::BaseObjectType *       CTypeNonConst;
 
-  static CType   to_c_type      (const CppType& ptr) { return Glib::unwrap(ptr);     }
-  static CType   to_c_type      (CType          ptr) { return ptr;                   }
-  static CppType to_cpp_type    (CType          ptr)
+  static CType   to_c_type  (const CppType& ptr) { return Glib::unwrap(ptr); }
+  static CType   to_c_type  (CType          ptr) { return ptr;               }
+  static CppType to_cpp_type(CType          ptr)
   {
     //return Glib::wrap(ptr, true);
 
@@ -225,14 +228,14 @@ struct TypeTraits< Glib::RefPtr<const T> >
     //We use dynamic_cast<> in case of multiple inheritance.
   }
   
-  static void    release_c_type (CType          ptr)
+  static void release_c_type (CType ptr)
   {
     GLIBMM_DEBUG_UNREFERENCE(0, ptr);
     g_object_unref(const_cast<CTypeNonConst>(ptr));
   }
 };
 
-#endif //GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
+#  endif /* GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS */
 
 } //namespace Container_Helpers
 
@@ -261,7 +264,7 @@ public:
 };
 
 //The SUN Forte Compiler has a problem with this: 
-#ifdef GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
+#  ifdef GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
 
 /** Partial specialization for RefPtr<> to const Glib::Object.
  * @ingroup glibmmValue
@@ -278,11 +281,10 @@ public:
   void set(const CppType& data) { set_object(const_cast<T*>(data.operator->())); }
   CppType get() const           { return Glib::RefPtr<T>::cast_dynamic(get_object_copy()); }
 };
-#endif //GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS
+#  endif /* GLIBMM_HAVE_DISAMBIGUOUS_CONST_TEMPLATE_SPECIALIZATIONS */
 
-
-#endif //DOXYGEN_SHOULD_SKIP_THIS
-#endif //GLIBMM_CAN_USE_DYNAMIC_CAST_IN_UNUSED_TEMPLATE_WITHOUT_DEFINITION
+# endif /* DOXYGEN_SHOULD_SKIP_THIS */
+#endif /* GLIBMM_CAN_USE_DYNAMIC_CAST_IN_UNUSED_TEMPLATE_WITHOUT_DEFINITION */
 
 } // namespace Glib
 

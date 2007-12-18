@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_RANDOM_H
 #define _GLIBMM_RANDOM_H
 
-/* $Id: random.h,v 1.1.1.1 2003/01/07 16:58:52 murrayc Exp $ */
+/* $Id: random.h 2 2003-01-07 16:59:16Z murrayc $ */
 
 /* random.h
  *

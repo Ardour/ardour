@@ -1,4 +1,0 @@
-SUBDIRS = glibmm_value
-
-
-

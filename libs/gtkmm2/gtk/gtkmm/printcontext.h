@@ -107,36 +107,116 @@ private:
 public:
 
    
+  /** Obtains the cairo context that is associated with the
+   * Gtk::PrintContext.
+   * @return The cairo context of @a context 
+   * 
+   * @newin2p10.
+   */
   Cairo::RefPtr<Cairo::Context> get_cairo_context();
   
+  /** Obtains the cairo context that is associated with the
+   * Gtk::PrintContext.
+   * @return The cairo context of @a context 
+   * 
+   * @newin2p10.
+   */
   Cairo::RefPtr<const Cairo::Context> get_cairo_context() const;
 
   
+  /** Obtains the Gtk::PageSetup that determines the page
+   * dimensions of the Gtk::PrintContext.
+   * @return The page setup of @a context 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<PageSetup> get_page_setup();
   
+  /** Obtains the Gtk::PageSetup that determines the page
+   * dimensions of the Gtk::PrintContext.
+   * @return The page setup of @a context 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const PageSetup> get_page_setup() const;
 
   
+  /** Obtains the width of the Gtk::PrintContext, in pixels.
+   * @return The width of @a context 
+   * 
+   * @newin2p10.
+   */
   double get_width() const;
   
+  /** Obtains the height of the Gtk::PrintContext, in pixels.
+   * @return The height of @a context 
+   * 
+   * @newin2p10.
+   */
   double get_height() const;
 
   
+  /** Obtains the horizontal resolution of the Gtk::PrintContext,
+   * in dots per inch.
+   * @return The horizontal resolution of @a context 
+   * 
+   * @newin2p10.
+   */
   double get_dpi_x() const;
   
+  /** Obtains the vertical resolution of the Gtk::PrintContext,
+   * in dots per inch.
+   * @return The vertical resolution of @a context 
+   * 
+   * @newin2p10.
+   */
   double get_dpi_y() const;
 
   
+  /** Return value: the font map of @a context 
+   * @return The font map of @a context 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<Pango::FontMap> get_pango_fontmap();
   
+  /** Return value: the font map of @a context 
+   * @return The font map of @a context 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<const Pango::FontMap> get_pango_fontmap() const;
 
   
+  /** Creates a new Pango::Context that can be used with the
+   * Gtk::PrintContext.
+   * @return A new Pango context for @a context 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<Pango::Context> create_pango_context();
   
+  /** Creates a new Pango::Layout that is suitable for use
+   * with the Gtk::PrintContext.
+   * @return A new Pango layout for @a context 
+   * 
+   * @newin2p10.
+   */
   Glib::RefPtr<Pango::Layout> create_pango_layout();
 
   
+  /** Sets a new cairo context on a print context. 
+   * 
+   * This function is intended to be used when implementing
+   * an internal print preview, it is not needed for printing,
+   * since GTK+ itself creates a suitable cairo context in that
+   * case.
+   * 
+   * @newin2p10
+   * @param cr The cairo context.
+   * @param dpi_x The horizontal resolution to use with @a cr .
+   * @param dpi_y The vertical resolution to use with @a cr .
+   */
   void set_cairo_context(const Cairo::RefPtr<Cairo::Context>& cr, double dpi_x, double dpi_y);
 
 
@@ -164,10 +244,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::PrintContext
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::PrintContext
    */
   Glib::RefPtr<Gtk::PrintContext> wrap(GtkPrintContext* object, bool take_copy = false);
 }

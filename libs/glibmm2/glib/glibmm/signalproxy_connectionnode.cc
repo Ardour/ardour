@@ -1,6 +1,6 @@
 // -*- c++ -*-
 
-/* $Id: signalproxy_connectionnode.cc,v 1.6 2004/10/07 16:02:01 philipl Exp $ */
+/* $Id: signalproxy_connectionnode.cc 137 2004-10-07 16:02:01Z philipl $ */
 
 /* signalproxy_connectionnode.cc
  *

@@ -133,7 +133,8 @@ GType RelationSet::get_base_type()
 
 RelationSet::RelationSet()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(relationset_class_.init()))
 {
   }

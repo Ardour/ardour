@@ -1,0 +1,54 @@
+// -*- c++ -*-
+/* $Id: scrolledwindow.ccg,v 1.1 2003/01/21 13:40:36 murrayc Exp $ */
+
+/* 
+ *
+ * Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/scrollbar.h>
+#include <gtkmm/viewport.h>
+#include <gtkmm/adjustment.h>
+#include <gtk/gtkscrolledwindow.h>
+
+
+namespace Gtk
+{
+
+void ScrolledWindow::add(Gtk::Widget& widget)
+{
+  GtkWidget* gwidget = widget.gobj();
+
+  //This check is courtesy of James Henstridge on gtk-devel-list@gnome.org.
+  if( GTK_WIDGET_GET_CLASS(gwidget)->set_scroll_adjustments_signal == 0)
+  {
+    //It doesn't have native scrolling capability, so it should be put inside a viewport first:
+    gtk_scrolled_window_add_with_viewport(gobj(), gwidget);
+  }
+  else
+  {
+    //It can work directly with a GtkScrolledWindow, so just use the Container::add():
+    Bin::add(widget);
+  }
+}
+
+} //namespace Gtk
+
+
+
+
+

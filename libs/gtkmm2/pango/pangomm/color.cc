@@ -118,6 +118,11 @@ bool Color::parse(const Glib::ustring& spec)
   return pango_color_parse(gobj(), spec.c_str());
 }
 
+Glib::ustring Color::to_string() const
+{
+  return Glib::convert_return_gchar_ptr_to_ustring(pango_color_to_string(const_cast<PangoColor*>(gobj())));
+}
+
 
 } // namespace Pango
 

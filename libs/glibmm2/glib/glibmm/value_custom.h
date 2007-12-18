@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: value_custom.h,v 1.8 2005/01/21 19:26:04 murrayc Exp $ */
+/* $Id: value_custom.h 419 2007-06-22 14:43:53Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
@@ -17,6 +17,9 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+#ifndef _GLIBMM_VALUE_CUSTOM_H
+#define _GLIBMM_VALUE_CUSTOM_H
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #ifndef _GLIBMM_VALUE_H_INCLUDE_VALUE_CUSTOM_H
@@ -286,4 +289,7 @@ void Value<T>::value_copy_func(const GValue* src_value, GValue* dest_value)
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 } // namespace Glib
+
+#endif //_GLIBMM_VALUE_CUSTOM_H
+
 

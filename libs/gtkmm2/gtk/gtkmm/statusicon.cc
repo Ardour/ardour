@@ -51,6 +51,13 @@ bool StatusIcon::get_geometry(Glib::RefPtr<Gdk::Screen>& screen, Gdk::Rectangle&
   return result;
 }
 
+void StatusIcon::popup_menu_at_position(Menu& menu, guint button, guint32 activate_time)
+{
+  gtk_menu_popup(menu.gobj(), NULL, NULL,
+			gtk_status_icon_position_menu, gobj() /* user_data, passed to gtk_status_icon_position_menu()/ */,
+			button, activate_time);
+}
+
 
 } // namespace Gtk
 
@@ -123,6 +130,46 @@ static const Glib::SignalProxyInfo StatusIcon_signal_size_changed_info =
 };
 
 
+static const Glib::SignalProxyInfo StatusIcon_signal_activate_info =
+{
+  "activate",
+  (GCallback) &Glib::SignalProxyNormal::slot0_void_callback,
+  (GCallback) &Glib::SignalProxyNormal::slot0_void_callback
+};
+
+
+static void StatusIcon_signal_popup_menu_callback(GtkStatusIcon* self, guint p0,guint32 p1,void* data)
+{
+  using namespace Gtk;
+  typedef sigc::slot< void,guint,guint32 > SlotType;
+
+  // Do not try to call a signal on a disassociated wrapper.
+  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    try
+    {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
+        (*static_cast<SlotType*>(slot))(p0, p1);
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    }
+    catch(...)
+    {
+      Glib::exception_handlers_invoke();
+    }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
+}
+
+static const Glib::SignalProxyInfo StatusIcon_signal_popup_menu_info =
+{
+  "popup_menu",
+  (GCallback) &StatusIcon_signal_popup_menu_callback,
+  (GCallback) &StatusIcon_signal_popup_menu_callback
+};
+
+
 } // anonymous namespace
 
 
@@ -183,7 +230,7 @@ void StatusIcon_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 gboolean StatusIcon_Class::size_changed_callback(GtkStatusIcon* self, gint p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -191,33 +238,35 @@ gboolean StatusIcon_Class::size_changed_callback(GtkStatusIcon* self, gint p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_size_changed(p0
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_size_changed(p0
 ));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->size_changed)
-      return (*base->size_changed)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->size_changed)
+    return (*base->size_changed)(self, p0);
 
   typedef gboolean RType;
   return RType();
@@ -268,29 +317,33 @@ GType StatusIcon::get_base_type()
 
 StatusIcon::StatusIcon()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(statusicon_class_.init()))
 {
   }
 
 StatusIcon::StatusIcon(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(statusicon_class_.init(), "pixbuf", Glib::unwrap(pixbuf), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(statusicon_class_.init(), "pixbuf", Glib::unwrap(pixbuf), static_cast<char*>(0)))
 {
   }
 
 StatusIcon::StatusIcon(const StockID& stock)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(statusicon_class_.init(), "stock", (stock).get_c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(statusicon_class_.init(), "stock", (stock).get_c_str(), static_cast<char*>(0)))
 {
   }
 
 StatusIcon::StatusIcon(const Glib::ustring& icon_name)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(statusicon_class_.init(), "icon_name", icon_name.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(statusicon_class_.init(), "icon_name", icon_name.c_str(), static_cast<char*>(0)))
 {
   }
 
@@ -356,6 +409,26 @@ int StatusIcon::get_size() const
   return gtk_status_icon_get_size(const_cast<GtkStatusIcon*>(gobj()));
 }
 
+void StatusIcon::set_screen(const Glib::RefPtr<Gdk::Screen>& screen)
+{
+gtk_status_icon_set_screen(gobj(), Glib::unwrap(screen)); 
+}
+
+Glib::RefPtr<Gdk::Screen> StatusIcon::get_screen()
+{
+
+  Glib::RefPtr<Gdk::Screen> retvalue = Glib::wrap(gtk_status_icon_get_screen(gobj()));
+  if(retvalue)
+    retvalue->reference(); //The function does not do a ref for us.
+  return retvalue;
+
+}
+
+Glib::RefPtr<const Gdk::Screen> StatusIcon::get_screen() const
+{
+  return const_cast<StatusIcon*>(this)->get_screen();
+}
+
 void StatusIcon::set_tooltip(const Glib::ustring& tooltip_text)
 {
 gtk_status_icon_set_tooltip(gobj(), tooltip_text.c_str()); 
@@ -390,6 +463,18 @@ bool StatusIcon::is_embedded() const
 Glib::SignalProxy1< bool,int > StatusIcon::signal_size_changed()
 {
   return Glib::SignalProxy1< bool,int >(this, &StatusIcon_signal_size_changed_info);
+}
+
+
+Glib::SignalProxy0< void > StatusIcon::signal_activate()
+{
+  return Glib::SignalProxy0< void >(this, &StatusIcon_signal_activate_info);
+}
+
+
+Glib::SignalProxy2< void,guint,guint32 > StatusIcon::signal_popup_menu()
+{
+  return Glib::SignalProxy2< void,guint,guint32 >(this, &StatusIcon_signal_popup_menu_info);
 }
 
 

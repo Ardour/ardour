@@ -3,6 +3,8 @@
 #ifndef _GTKMM_TREEVIEW_H
 #define _GTKMM_TREEVIEW_H
 
+#include <gtkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -25,6 +27,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
+
 #include <glibmm/listhandle.h>
 #include <gtkmm/container.h>
 #include <gtkmm/adjustment.h>
@@ -35,6 +41,7 @@
 #include <gtkmm/cellrenderer.h>
 #include <gtkmm/targetentry.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/tooltip.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -252,14 +259,12 @@ public:
   explicit TreeView(const Glib::RefPtr<TreeModel>& model);
 
   
-  /** Returns the model the Gtk::TreeView is based on.  Returns <tt>0</tt> if the
-   * model is unset.
+  /** Return value: A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    */
   Glib::RefPtr<TreeModel> get_model();
   
-  /** Returns the model the Gtk::TreeView is based on.  Returns <tt>0</tt> if the
-   * model is unset.
+  /** Return value: A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    * @return A Gtk::TreeModel, or <tt>0</tt> if none is currently being used.
    */
   Glib::RefPtr<const TreeModel> get_model() const;
@@ -332,7 +337,7 @@ public:
   void unset_vadjustment();
   
   
-  /** Returns <tt>true</tt> if the headers on the @a tree_view  are visible.
+  /** Return value: Whether the headers are visible or not.
    * @return Whether the headers are visible or not.
    */
   bool get_headers_visible() const;
@@ -347,6 +352,11 @@ public:
    */
   void columns_autosize();
   
+  /** Return value: <tt>true</tt> if all header columns are clickable, otherwise <tt>false</tt>
+   * @return <tt>true</tt> if all header columns are clickable, otherwise <tt>false</tt>
+   * 
+   * @newin2p10.
+   */
   bool get_headers_clickable() const;
   
   /** Allow the column title buttons to be clicked.
@@ -597,14 +607,12 @@ public:
   void reset_expander_column();
   
   
-  /** Returns the column that is the current expander column.  This
-   * column has the expander arrow drawn next to it.
+  /** Return value: The expander column.
    * @return The expander column.
    */
   TreeViewColumn* get_expander_column();
   
-  /** Returns the column that is the current expander column.  This
-   * column has the expander arrow drawn next to it.
+  /** Return value: The expander column.
    * @return The expander column.
    */
   const TreeViewColumn* get_expander_column() const;
@@ -640,7 +648,7 @@ public:
   
   /** Scrolls the tree view such that the top-left corner of the visible
    * area is @a tree_x , @a tree_y , where @a tree_x  and @a tree_y  are specified
-   * in tree window coordinates.  The @a tree_view  must be realized before
+   * in tree coordinates.  The @a tree_view  must be realized before
    * this function is called.  If it isn't, you probably want to be
    * using scroll_to_cell().
    * 
@@ -778,7 +786,7 @@ public:
   void map_expanded_rows(const SlotMapping& slot);
   
 
-  /** Returns <tt>true</tt> if the node pointed to by @a path  is expanded in @a tree_view .
+  /** Return value: <tt>true</tt> if #path is expanded.
    * @param path A Gtk::TreePath to test expansion state.
    * @return <tt>true</tt> if #path is expanded.
    */
@@ -859,16 +867,12 @@ public:
 
 /* Layout information */
   
-  /** Returns the window that @a tree_view  renders to.  This is used primarily to
-   * compare to <tt>event->window</tt> to confirm that the event on
-   *  @a tree_view  is on the right window.
+  /** Return value: A Gdk::Window, or <tt>0</tt> when @a tree_view  hasn't been realized yet
    * @return A Gdk::Window, or <tt>0</tt> when @a tree_view  hasn't been realized yet.
    */
   Glib::RefPtr<Gdk::Window> get_bin_window();
   
-  /** Returns the window that @a tree_view  renders to.  This is used primarily to
-   * compare to <tt>event->window</tt> to confirm that the event on
-   *  @a tree_view  is on the right window.
+  /** Return value: A Gdk::Window, or <tt>0</tt> when @a tree_view  hasn't been realized yet
    * @return A Gdk::Window, or <tt>0</tt> when @a tree_view  hasn't been realized yet.
    */
   Glib::RefPtr<const Gdk::Window> get_bin_window() const;
@@ -968,10 +972,10 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Fills @a visible_rect  with the currently-visible region of the
-   * buffer, in tree coordinates. Convert to widget coordinates with
-   * tree_to_widget_coords(). Tree coordinates start at
-   * 0,0 for row 0 of the tree, and cover the entire scrollable area of
-   * the tree.
+   * buffer, in tree coordinates. Convert to bin_window coordinates with
+   * convert_tree_to_bin_window_coords().
+   * Tree coordinates start at 0,0 for row 0 of the tree, and cover the entire
+   * scrollable area of the tree.
    * @deprecated Use the const version.
    * @param visible_rect Rectangle to fill.
    */
@@ -980,10 +984,10 @@ public:
 
 
   /** Fills @a visible_rect  with the currently-visible region of the
-   * buffer, in tree coordinates. Convert to widget coordinates with
-   * tree_to_widget_coords(). Tree coordinates start at
-   * 0,0 for row 0 of the tree, and cover the entire scrollable area of
-   * the tree.
+   * buffer, in tree coordinates. Convert to bin_window coordinates with
+   * convert_tree_to_bin_window_coords().
+   * Tree coordinates start at 0,0 for row 0 of the tree, and cover the entire
+   * scrollable area of the tree.
    * @param visible_rect Rectangle to fill.
    */
   void get_visible_rect(Gdk::Rectangle&  visible_rect) const;
@@ -991,11 +995,16 @@ public:
   
 #ifndef GTKMM_DISABLE_DEPRECATED
 
-  /** Converts widget coordinates to coordinates for the
-   * tree window (the full scrollable area of the tree).
+  /** Converts bin_window coordinates to coordinates for the
+   * tree (the full scrollable area of the tree).
+   * 
+   * Deprecated: 2.12: Due to historial reasons the name of this function is
+   * incorrect.  For converting coordinates relative to the widget to
+   * bin_window coordinates, please see
+   * convert_widget_to_bin_window_coords().
    * @deprecated Use the const version
-   * @param wx Widget X coordinate.
-   * @param wy Widget Y coordinate.
+   * @param wx X coordinate relative to bin_window.
+   * @param wy Y coordinate relative to bin_window.
    * @param tx Return location for tree X coordinate.
    * @param ty Return location for tree Y coordinate.
    */
@@ -1003,10 +1012,15 @@ public:
 #endif // GTKMM_DISABLE_DEPRECATED
 
 
-  /** Converts widget coordinates to coordinates for the
-   * tree window (the full scrollable area of the tree).
-   * @param wx Widget X coordinate.
-   * @param wy Widget Y coordinate.
+  /** Converts bin_window coordinates to coordinates for the
+   * tree (the full scrollable area of the tree).
+   * 
+   * Deprecated: 2.12: Due to historial reasons the name of this function is
+   * incorrect.  For converting coordinates relative to the widget to
+   * bin_window coordinates, please see
+   * convert_widget_to_bin_window_coords().
+   * @param wx X coordinate relative to bin_window.
+   * @param wy Y coordinate relative to bin_window.
    * @param tx Return location for tree X coordinate.
    * @param ty Return location for tree Y coordinate.
    */
@@ -1016,23 +1030,33 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Converts tree coordinates (coordinates in full scrollable area of the tree)
-   * to widget coordinates.
+   * to bin_window coordinates.
+   * 
+   * Deprecated: 2.12: Due to historial reasons the name of this function is
+   * incorrect.  For converting bin_window coordinates to coordinates relative
+   * to bin_window, please see
+   * convert_bin_window_to_widget_coords().
    * @deprecated Use the const version.
    * @param tx Tree X coordinate.
    * @param ty Tree Y coordinate.
-   * @param wx Return location for widget X coordinate.
-   * @param wy Return location for widget Y coordinate.
+   * @param wx Return location for X coordinate relative to bin_window.
+   * @param wy Return location for Y coordinate relative to bin_window.
    */
   void tree_to_widget_coords(int tx, int ty, int& wx, int& wy);
 #endif // GTKMM_DISABLE_DEPRECATED
 
 
   /** Converts tree coordinates (coordinates in full scrollable area of the tree)
-   * to widget coordinates.
+   * to bin_window coordinates.
+   * 
+   * Deprecated: 2.12: Due to historial reasons the name of this function is
+   * incorrect.  For converting bin_window coordinates to coordinates relative
+   * to bin_window, please see
+   * convert_bin_window_to_widget_coords().
    * @param tx Tree X coordinate.
    * @param ty Tree Y coordinate.
-   * @param wx Return location for widget X coordinate.
-   * @param wy Return location for widget Y coordinate.
+   * @param wx Return location for X coordinate relative to bin_window.
+   * @param wy Return location for Y coordinate relative to bin_window.
    */
   void tree_to_widget_coords(int tx, int ty, int& wx, int& wy) const;
 
@@ -1142,8 +1166,7 @@ public:
    */
   void set_enable_search(bool enable_search = true);
   
-  /** Returns whether or not the tree allows to start interactive searching 
-   * by typing in text.
+  /** Return value: whether or not to let the user search interactively
    * @return Whether or not to let the user search interactively.
    */
   bool get_enable_search() const;
@@ -1189,16 +1212,102 @@ public:
   void set_search_equal_func(const SlotSearchEqual& slot);
   
 
+  /** Return value: the entry currently in use as search entry.
+   * @return The entry currently in use as search entry.
+   * 
+   * @newin2p10.
+   */
   Entry* get_search_entry();
   
+  /** Return value: the entry currently in use as search entry.
+   * @return The entry currently in use as search entry.
+   * 
+   * @newin2p10.
+   */
   const Entry* get_search_entry() const;
   
+  /** Sets the entry which the interactive search code will use for this
+   *  @a tree_view .  This is useful when you want to provide a search entry
+   * in our interface at all time at a fixed position.  Passing <tt>0</tt> for
+   *  @a entry  will make the interactive search code use the built-in popup
+   * entry again.
+   * 
+   * @newin2p10
+   * @param entry The entry the interactive search code of @a tree_view  should use or <tt>0</tt>.
+   */
   void set_search_entry(Entry& entry);
 
   ///void on_search_position(Gtk::Widget* search_dialog)
   typedef sigc::slot<void, Gtk::Widget* /* search_dialog */> SlotSearchPosition;
   void set_search_position_func(const SlotSearchPosition& slot);
   
+
+  /** Converts widget coordinates to coordinates for the
+   * tree (the full scrollable area of the tree).
+   * 
+   * @newin2p12
+   * @param wx X coordinate relative to the widget.
+   * @param wy Y coordinate relative to the widget.
+   * @param tx Return location for tree X coordinate.
+   * @param ty Return location for tree Y coordinate.
+   */
+  void convert_widget_to_tree_coords(int wx, int wy, int& tx, int& ty) const;
+  
+  /** Converts tree coordinates (coordinates in full scrollable area of the tree)
+   * to widget coordinates.
+   * 
+   * @newin2p12
+   * @param tx X coordinate relative to the tree.
+   * @param ty Y coordinate relative to the tree.
+   * @param wx Return location for widget X coordinate.
+   * @param wy Return location for widget Y coordinate.
+   */
+  void convert_tree_to_widget_coords(int tx, int ty, int& wx, int& wy) const;
+  
+  /** Converts widget coordinates to coordinates for the bin_window
+   * (see get_bin_window()).
+   * 
+   * @newin2p12
+   * @param wx X coordinate relative to the widget.
+   * @param wy Y coordinate relative to the widget.
+   * @param bx Return location for bin_window X coordinate.
+   * @param by Return location for bin_window Y coordinate.
+   */
+  void convert_widget_to_bin_window_coords(int wx, int wy, int& bx, int& by) const;
+  
+  /** Converts bin_window coordinates (see get_bin_window())
+   * to widget relative coordinates.
+   * 
+   * @newin2p12
+   * @param bx Bin_window X coordinate.
+   * @param by Bin_window Y coordinate.
+   * @param wx Return location for widget X coordinate.
+   * @param wy Return location for widget Y coordinate.
+   */
+  void convert_bin_window_to_widget_coords(int bx, int by, int& wx, int& wy) const;
+  
+  /** Converts tree coordinates (coordinates in full scrollable area of the tree)
+   * to bin_window coordinates.
+   * 
+   * @newin2p12
+   * @param tx Tree X coordinate.
+   * @param ty Tree Y coordinate.
+   * @param bx Return location for X coordinate relative to bin_window.
+   * @param by Return location for Y coordinate relative to bin_window.
+   */
+  void convert_tree_to_bin_window_coords(int tx, int ty, int& bx, int& by) const;
+  
+  /** Converts bin_window coordinates to coordinates for the
+   * tree (the full scrollable area of the tree).
+   * 
+   * @newin2p12
+   * @param bx X coordinate relative to bin_window.
+   * @param by Y coordinate relative to bin_window.
+   * @param tx Return location for tree X coordinate.
+   * @param ty Return location for tree Y coordinate.
+   */
+  void convert_bin_window_to_tree_coords(int bx, int by, int& tx, int& ty) const;
+
 
   /** Enables or disables the fixed height mode of @a tree_view . 
    * Fixed height mode speeds up Gtk::TreeView by assuming that all 
@@ -1211,7 +1320,7 @@ public:
    */
   void set_fixed_height_mode(bool enable = true);
   
-  /** Returns whether fixed height mode is turned on for @a tree_view .
+  /** Return value: <tt>true</tt> if @a tree_view  is in fixed height mode
    * @return <tt>true</tt> if @a tree_view  is in fixed height mode
    * 
    * @newin2p6.
@@ -1228,7 +1337,7 @@ public:
    */
   void set_hover_selection(bool hover = true);
   
-  /** Returns whether hover selection mode is turned on for @a tree_view .
+  /** Return value: <tt>true</tt> if @a tree_view  is in hover selection mode
    * @return <tt>true</tt> if @a tree_view  is in hover selection mode
    * 
    * @newin2p6.
@@ -1244,16 +1353,38 @@ public:
    */
   void set_hover_expand(bool expand = true);
   
-  /** Returns whether hover expansion mode is turned on for @a tree_view .
+  /** Return value: <tt>true</tt> if @a tree_view  is in hover expansion mode
    * @return <tt>true</tt> if @a tree_view  is in hover expansion mode
    * 
    * @newin2p6.
    */
   bool get_hover_expand() const;
   
+  /** Enables or disables rubber banding in @a tree_view .  If the selection mode
+   * is Gtk::SELECTION_MULTIPLE, rubber banding will allow the user to select
+   * multiple rows by dragging the mouse.
+   * 
+   * @newin2p10
+   * @param enable <tt>true</tt> to enable rubber banding.
+   */
   void set_rubber_banding(bool enable = true);
   
+  /** Return value: <tt>true</tt> if rubber banding in @a tree_view  is enabled.
+   * @return <tt>true</tt> if rubber banding in @a tree_view  is enabled.
+   * 
+   * @newin2p10.
+   */
   bool get_rubber_banding() const;
+
+  //TODO: Rename to get_is?
+  
+  /** Return value: <tt>true</tt> if a rubber banding operation is currently being
+   * @return <tt>true</tt> if a rubber banding operation is currently being
+   * done in @a tree_view .
+   * 
+   * @newin2p12.
+   */
+  bool is_rubber_banding_active() const;
 
   /** For instance,
    * void on_row_separator(const Gtk::TreeModel& model, const Gtk::TreeModel::iterator& iter);
@@ -1263,75 +1394,224 @@ public:
   void set_row_separator_func(const SlotRowSeparator& slot);
   
 
+  /** Sets which grid lines to draw in @a tree_view .
+   * 
+   * @newin2p10
+   * @param grid_lines A Gtk::TreeViewGridLines value indicating which grid lines to
+   * enable.
+   */
   void set_grid_lines(TreeViewGridLines grid_lines);
   
+  /** Return value: a Gtk::TreeViewGridLines value indicating which grid lines
+   * @return A Gtk::TreeViewGridLines value indicating which grid lines
+   * are enabled.
+   * 
+   * @newin2p10.
+   */
   TreeViewGridLines get_grid_lines() const;
 
   
+  /** Sets whether to draw lines interconnecting the expanders in @a tree_view .
+   * This does not have any visible effects for lists.
+   * 
+   * @newin2p10
+   * @param enabled <tt>true</tt> to enable tree line drawing, <tt>false</tt> otherwise.
+   */
   void set_enable_tree_lines(bool enable = true);
   
+  /** Return value: <tt>true</tt> if tree lines are drawn in @a tree_view , <tt>false</tt>
+   * @return <tt>true</tt> if tree lines are drawn in @a tree_view , <tt>false</tt>
+   * otherwise.
+   * 
+   * @newin2p10.
+   */
   bool get_enable_tree_lines() const;
 
+  
+  /** Sets whether to draw and enable expanders and indent child rows in
+   *  @a tree_view .  When disabled there will be no expanders visible in trees
+   * and there will be no way to expand and collapse rows by default.  Also
+   * note that hiding the expanders will disable the default indentation.  You
+   * can set a custom indentation in this case using
+   * set_level_indentation().
+   * This does not have any visible effects for lists.
+   * 
+   * @newin2p12
+   * @param enabled <tt>true</tt> to enable expander drawing, <tt>false</tt> otherwise.
+   */
+  void set_show_expanders(bool enabled = true);
+  
+  /** Return value: <tt>true</tt> if expanders are drawn in @a tree_view , <tt>false</tt>
+   * @return <tt>true</tt> if expanders are drawn in @a tree_view , <tt>false</tt>
+   * otherwise.
+   * 
+   * @newin2p12.
+   */
+  bool get_show_expanders() const;
+  
+  /** Sets the amount of extra indentation for child levels to use in @a tree_view 
+   * in addition to the default indentation.  The value should be specified in
+   * pixels, a value of 0 disables this feature and in this case only the default
+   * indentation will be used.
+   * This does not have any visible effects for lists.
+   * 
+   * @newin2p12
+   * @param indentation The amount, in pixels, of extra indentation in @a tree_view .
+   */
+  void set_level_indentation(int indentation);
+  
+  /** Return value: the amount of extra indentation for child levels in
+   * @return The amount of extra indentation for child levels in
+   *  @a tree_view .  A return value of 0 means that this feature is disabled.
+   * 
+   * @newin2p12.
+   */
+  int get_level_indentation() const;
 
-/**
+  
+  /** Sets the tip area of @a tooltip  to be the area covered by the row at @a path .
+   * See also gtk_tooltip_set_tip_area().
+   * 
+   * @newin2p12
+   * @param tooltip A Gtk::Tooltip.
+   * @param path A Gtk::TreePath.
+   */
+  void set_tooltip_row(const Glib::RefPtr<Tooltip>& tooltip, const TreePath& path);
+
+  //Note that we use pointers instead of references because any one of the 3 arguments may be NULL, and we don't want that many method overloads:
+ 
+
+  /** Sets the tip area of @a tooltip  to the area @a path , @a column  and @a cell  have
+   * in common.  For example if @a path  is <tt>0</tt> and @a column  is set, the tip
+   * area will be set to the full area covered by @a column .  See also
+   * gtk_tooltip_set_tip_area().
+   * 
+   * @newin2p12
+   * @param tooltip A Gtk::Tooltip.
+   * @param path A Gtk::TreePath or <tt>0</tt>.
+   * @param column A Gtk::TreeViewColumn or <tt>0</tt>.
+   * @param cell A Gtk::CellRendererText or <tt>0</tt>.
+   */
+  void set_tooltip_cell(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path* path, TreeViewColumn* column, CellRenderer* cell);
+
+  
+  /**
+   * @param x: the x coordinate (relative to widget coordinates)
+   * @param y: the y coordinate (relative to widget coordinates)
+   * @param keyboard_tip: whether this is a keyboard tooltip or not
+   * @param path: a reference to receive a Gtk::TreePath
+   *
+   * This function is supposed to be used in a Gtk::Widget::query-tooltip
+   * signal handler for Gtk::TreeView. The x, y and keyboard_tip values
+   * which are received in the signal handler, should be passed to this
+   * function without modification.
+   *
+   * The return value indicates whether there is an tree view row at the given
+   * coordinates (true) or not (false) for mouse tooltips. For keyboard
+   * tooltips the row returned will be the cursor item. When true, then the
+   * path which has been provided will be set to point to
+   * that row and the corresponding model. x and y will always be converted
+   * to be relative to Gtk::TreeView's bin_window if keyboard_tooltip is false.
+   *
+   * Return value: whether or not the given tooltip context points to a row.
+   *
+   * @newin2p12
+   */
+  bool get_tooltip_context_path(int& x, int& y,
+                                bool keyboard_tip,
+                                TreeModel::Path& path);
+
+  /**
+   * @param x: the x coordinate (relative to widget coordinates)
+   * @param y: the y coordinate (relative to widget coordinates)
+   * @param keyboard_tip: whether this is a keyboard tooltip or not
+   * @param iter: a pointer to receive a Gtk::TreeIter
+   *
+   * This function is supposed to be used in a Gtk::Widget::query-tooltip
+   * signal handler for Gtk::TreeView. The x, y and keyboard_tip values
+   * which are received in the signal handler, should be passed to this
+   * function without modification.
+   *
+   * The return value indicates whether there is an tree view row at the given
+   * coordinates (true) or not (false) for mouse tooltips. For keyboard
+   * tooltips the row returned will be the cursor item. When true, then the
+   * iter which has been provided will be set to point to
+   * that row and the corresponding model. x and y will always be converted
+   * to be relative to Gtk::TreeView's bin_window if keyboard_tooltip is false.
+   *
+   * Return value: whether or not the given tooltip context points to a row.
+   *
+   * @newin2p12
+   */
+  bool get_tooltip_context_iter(int& x, int& y,
+                                bool keyboard_tip,
+                                Gtk::TreeModel::iterator& iter);
+
+  
+  void set_tooltip_column(int column);
+  
+  int get_tooltip_column() const;
+
+
+  /**
    * @par Prototype:
-   * <tt>void %set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment)</tt>
+   * <tt>void on_my_%set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment)</tt>
    */
 
   Glib::SignalProxy2< void,Adjustment*,Adjustment* > signal_set_scroll_adjustments();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_activated(const TreeModel::Path& path, TreeViewColumn* column)</tt>
+   * <tt>void on_my_%row_activated(const TreeModel::Path& path, TreeViewColumn* column)</tt>
    */
 
   Glib::SignalProxy2< void,const TreeModel::Path&,TreeViewColumn* > signal_row_activated();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %test_expand_row(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
+   * <tt>bool on_my_%test_expand_row(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
    */
 
   Glib::SignalProxy2< bool,const TreeModel::iterator&,const TreeModel::Path& > signal_test_expand_row();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>bool %test_collapse_row(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
+   * <tt>bool on_my_%test_collapse_row(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
    */
 
   Glib::SignalProxy2< bool,const TreeModel::iterator&,const TreeModel::Path& > signal_test_collapse_row();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_expanded(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
+   * <tt>void on_my_%row_expanded(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
    */
 
   Glib::SignalProxy2< void,const TreeModel::iterator&,const TreeModel::Path& > signal_row_expanded();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %row_collapsed(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
+   * <tt>void on_my_%row_collapsed(const TreeModel::iterator& iter, const TreeModel::Path& path)</tt>
    */
 
   Glib::SignalProxy2< void,const TreeModel::iterator&,const TreeModel::Path& > signal_row_collapsed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %cursor_changed()</tt>
+   * <tt>void on_my_%cursor_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_cursor_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %columns_changed()</tt>
+   * <tt>void on_my_%columns_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_columns_changed();
@@ -2204,10 +2484,13 @@ void _auto_cell_data_func(Gtk::CellRenderer* cell, const Gtk::TreeModel::iterato
 
 namespace Glib
 {
-  /** @relates Gtk::TreeView
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TreeView
    */
   Gtk::TreeView* wrap(GtkTreeView* object, bool take_copy = false);
 } //namespace Glib

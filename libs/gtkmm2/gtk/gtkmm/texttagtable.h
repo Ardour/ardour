@@ -138,31 +138,31 @@ public:
   void foreach(const SlotForEach& slot);
   
 
-  /** Returns the size of the table (number of tags)
+  /** Return value: number of tags in @a table 
    * @return Number of tags in @a table .
    */
   int get_size() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %tag_changed(const Glib::RefPtr<TextTag>& tag, bool size_changed)</tt>
+   * <tt>void on_my_%tag_changed(const Glib::RefPtr<TextTag>& tag, bool size_changed)</tt>
    */
 
   Glib::SignalProxy2< void,const Glib::RefPtr<TextTag>&,bool > signal_tag_changed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %tag_added(const Glib::RefPtr<TextTag>& tag)</tt>
+   * <tt>void on_my_%tag_added(const Glib::RefPtr<TextTag>& tag)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<TextTag>& > signal_tag_added();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %tag_removed(const Glib::RefPtr<TextTag>& tag)</tt>
+   * <tt>void on_my_%tag_removed(const Glib::RefPtr<TextTag>& tag)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::RefPtr<TextTag>& > signal_tag_removed();
@@ -195,10 +195,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::TextTagTable
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::TextTagTable
    */
   Glib::RefPtr<Gtk::TextTagTable> wrap(GtkTextTagTable* object, bool take_copy = false);
 }

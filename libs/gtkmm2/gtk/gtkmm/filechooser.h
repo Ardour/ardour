@@ -107,9 +107,8 @@ namespace Gtk
 {
 
 
-//TODO: //Is GTK_FILE_SYSTEM_ERROR really part of the public API? For instance, do app writers ever need to check for it?.
-//If so, then it needs to have a generated get_type() function, like the others. murrayc.
-//_TODO_GERROR(FileSystemError,GtkFileSystemError,GTK_FILE_SYSTEM_ERROR)
+//Note that GTK_FILE_SYSTEM_ERROR is not currently public GTK+ API and should 
+//never be instantiated by the GTK+ C API.
 
 /** Exception class for Gdk::FileChooser errors.
  */
@@ -218,8 +217,14 @@ private:
 
 protected:
   FileChooser(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit FileChooser(GtkFileChooser* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -287,8 +292,7 @@ public:
   
   /** Sets whether multiple files can be selected in the file selector.  This is
    * only relevant if the action is set to be GTK_FILE_CHOOSER_ACTION_OPEN or
-   * GTK_FILE_CHOOSER_ACTION_SAVE.  It cannot be set with either of the folder
-   * actions.
+   * GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER.  
    * 
    * @newin2p4
    * @param select_multiple <tt>true</tt> if multiple files can be selected.
@@ -451,9 +455,8 @@ public:
    *  @a chooser . The returned names are full absolute paths. If files in the current
    * folder cannot be represented as local filenames they will be ignored. (See
    * get_uris())
-   * @return A G::SList containing the filenames of all selected
-   * files and subfolders in the current folder. Free the returned list
-   * with Glib::slist_free(), and the filenames with Glib::free().
+   * @return A list containing the filenames of all selected
+   * files and subfolders in the current folder.
    * 
    * @newin2p4.
    */
@@ -472,10 +475,10 @@ public:
   
   /** Gets the current folder of @a chooser  as a local filename.
    * See set_current_folder().
-   * @return The full path of the current folder, or <tt>0</tt> if the current
-   * path cannot be represented as a local filename.  Free with Glib::free().  This
-   * function will also return <tt>0</tt> if the file chooser was unable to load the
-   * last folder that was requested from it; for example, as would be for calling
+   * @return The full path of the current folder, possibly empty if the current
+   * path cannot be represented as a local filename.  This function may also return
+   * and empty string if the file chooser was unable to load the last folder that was
+   * requested from it; for example, as would be for calling
    * set_current_folder() on a nonexistent folder.
    * 
    * @newin2p4.
@@ -559,9 +562,8 @@ public:
   
   /** Lists all the selected files and subfolders in the current folder of
    *  @a chooser . The returned names are full absolute URIs.
-   * @return A G::SList containing the URIs of all selected
-   * files and subfolders in the current folder. Free the returned list
-   * with Glib::slist_free(), and the filenames with Glib::free().
+   * @return A list containing the URIs of all selected
+   * files and subfolders in the current folder.
    * 
    * @newin2p4.
    */
@@ -581,6 +583,14 @@ public:
   
   /** Gets the current folder of @a chooser  as an URI.
    * See set_current_folder_uri().
+   * 
+   * Note that this is the folder that the file chooser is currently displaying
+   * (e.g. "file:///home/username/Documents"), which is <em>not the same</em>
+   * as the currently-selected folder if the chooser is in
+   * Gtk::FILE_CHOOSER_SELECT_FOLDER mode
+   * (e.g. "file:///home/username/Documents/selected-folder/".  To get the
+   * currently-selected folder in that mode, use get_uri() as the
+   * usual way to get the selection.
    * @return The URI for the current folder.
    */
   Glib::ustring get_current_folder_uri() const;
@@ -731,10 +741,8 @@ public:
   
   /** Lists the current set of user-selectable filters; see
    * add_filter(), remove_filter().
-   * @return A G::SList containing the current set of
-   * user selectable filters. The contents of the list are
-   * owned by GTK+, but you must free the list itself with
-   * Glib::slist_free() when you are done with it.
+   * @return A list containing the current set of
+   * user selectable filters.
    * 
    * @newin2p4.
    */
@@ -742,10 +750,8 @@ public:
   
   /** Lists the current set of user-selectable filters; see
    * add_filter(), remove_filter().
-   * @return A G::SList containing the current set of
-   * user selectable filters. The contents of the list are
-   * owned by GTK+, but you must free the list itself with
-   * Glib::slist_free() when you are done with it.
+   * @return A list containing the current set of
+   * user selectable filters.
    * 
    * @newin2p4.
    */
@@ -861,9 +867,7 @@ public:
   
   /** Queries the list of shortcut folders in the file chooser, as set by
    * add_shortcut_folder_uri().
-   * @return A list of folder URIs, or <tt>0</tt> if there are no shortcut
-   * folders.  Free the returned list with Glib::slist_free(), and the URIs with
-   * Glib::free().
+   * @return A list of folder URIs
    * 
    * @newin2p4.
    */
@@ -881,11 +885,9 @@ public:
    *
    * @see set_current_folder(), get_current_folder(),
    * set_current_folder_uri(), get_current_folder_uri().
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %current_folder_changed()</tt>
+   * <tt>void on_my_%current_folder_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_current_folder_changed();
@@ -904,11 +906,9 @@ public:
    * get_filenames(), select_uri(),
    * unselect_uri(), get_uri(),
    * get_uris().
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %selection_changed()</tt>
+   * <tt>void on_my_%selection_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_selection_changed();
@@ -929,11 +929,9 @@ public:
    *
    * @see set_preview_widget(), set_preview_widget_active(),
    * set_use_preview_label(), get_preview_filename(), get_preview_uri().
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %update_preview()</tt>
+   * <tt>void on_my_%update_preview()</tt>
    */
 
   Glib::SignalProxy0< void > signal_update_preview();
@@ -948,22 +946,17 @@ public:
    * dialog.
    *
    * @see get_filename(), get_filenames(), get_uri(), get_uris().
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %file_activated()</tt>
+   * <tt>void on_my_%file_activated()</tt>
    */
 
   Glib::SignalProxy0< void > signal_file_activated();
 
 
-  /** TODO
-   */
-  
-/**
+  /**
    * @par Prototype:
-   * <tt>FileChooserConfirmation %confirm_overwrite()</tt>
+   * <tt>FileChooserConfirmation on_my_%confirm_overwrite()</tt>
    */
 
   Glib::SignalProxy0< FileChooserConfirmation > signal_confirm_overwrite();
@@ -1215,10 +1208,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::FileChooser
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::FileChooser
    */
   Glib::RefPtr<Gtk::FileChooser> wrap(GtkFileChooser* object, bool take_copy = false);
 

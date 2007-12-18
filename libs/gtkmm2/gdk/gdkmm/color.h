@@ -3,6 +3,8 @@
 #ifndef _GDKMM_COLOR_H
 #define _GDKMM_COLOR_H
 
+#include <gdkmmconfig.h>
+
 
 #include <glibmm.h>
 
@@ -24,6 +26,10 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+// This is for including the config header before any code (such as
+// the #ifndef GDKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+
 
 #include <gdk/gdkcolor.h>
 
@@ -258,10 +264,13 @@ inline void swap(Color& lhs, Color& rhs)
 namespace Glib
 {
 
-/** @relates Gdk::Color
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gdk::Color
  */
 Gdk::Color wrap(GdkColor* object, bool take_copy = false);
 

@@ -132,36 +132,134 @@ public:
   explicit PaperSize(const Glib::ustring& ppd_name, const Glib::ustring& ppd_display_name, double width, double height);
   explicit PaperSize(const Glib::ustring& name, const Glib::ustring& display_name, double width, double height, Unit unit);
 
+  explicit PaperSize(const Glib::KeyFile& key_file, const Glib::ustring& group_name = Glib::ustring());
+
   
   bool equal(const PaperSize& other) const;
 
+  /** Returns true if the PaperSize is a valid object.
+   * @newin2p12
+   */
+  operator bool() const;
+
+  //TODO: Check this conversion and type:
+   
+
+  //TODO: _WRAP_METHOD(static Glib::ListHandle<PaperSize> get_paper_sizes(bool include_custom = true) const, gtk_paper_size_get_paper_sizes)
+
   
+  /** Gets the name of the Gtk::PaperSize.
+   * @return The name of @a size 
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_name() const;
   
+  /** Gets the human-readable name of the Gtk::PaperSize.
+   * @return The human-readable name of @a size 
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_display_name() const;
   
+  /** Gets the PPD name of the Gtk::PaperSize, which
+   * may be <tt>0</tt>.
+   * @return The PPD name of @a size 
+   * 
+   * @newin2p10.
+   */
   Glib::ustring get_ppd_name() const;
 
   
+  /** Gets the paper width of the Gtk::PaperSize, in 
+   * units of @a unit .
+   * @param unit The unit for the return value.
+   * @return The paper width 
+   * 
+   * @newin2p10.
+   */
   double get_width(Unit unit) const;
   
+  /** Gets the paper height of the Gtk::PaperSize, in 
+   * units of @a unit .
+   * @param unit The unit for the return value.
+   * @return The paper height 
+   * 
+   * @newin2p10.
+   */
   double get_height(Unit unit) const;
   
+  /** Return value: whether @a size  is a custom paper size.
+   * @return Whether @a size  is a custom paper size.
+   */
   bool is_custom() const;
 
   
+  /** Changes the dimensions of a @a size  to @a width  x @a height .
+   * 
+   * @newin2p10
+   * @param width The new width in units of @a unit .
+   * @param height The new height in units of @a unit .
+   * @param unit The unit for @a width  and @a height .
+   */
   void set_size(double width, double height, Unit unit);
   
+  /** Gets the default top margin for the Gtk::PaperSize.
+   * @param unit The unit for the return value.
+   * @return The default top margin
+   * 
+   * @newin2p10.
+   */
   double get_default_top_margin(Unit unit) const;
   
+  /** Gets the default bottom margin for the Gtk::PaperSize.
+   * @param unit The unit for the return value.
+   * @return The default bottom margin
+   * 
+   * @newin2p10.
+   */
   double get_default_bottom_margin(Unit unit) const;
   
+  /** Gets the default left margin for the Gtk::PaperSize.
+   * @param unit The unit for the return value.
+   * @return The default left margin
+   * 
+   * @newin2p10.
+   */
   double get_default_left_margin(Unit unit) const;
   
+  /** Gets the default right margin for the Gtk::PaperSize.
+   * @param unit The unit for the return value.
+   * @return The default right margin
+   * 
+   * @newin2p10.
+   */
   double get_default_right_margin(Unit unit) const;
 
   
+  /** Return value: the name of the default paper size. The string
+   * @return The name of the default paper size. The string
+   * is owned by GTK+ and should not be modified.
+   * 
+   * @newin2p10.
+   */
   static Glib::ustring get_default();
+
+   
+  /** This function adds the paper size from @a size  to @a key_file .
+   * 
+   * @newin2p12
+   * @param key_file The G::KeyFile to save the paper size to.
+   * @param group_name The group to add the settings to in @a key_file .
+   */
+  void save_to_key_file(Glib::KeyFile& key_file, const Glib::ustring& group_name);
+
+  /** This function adds the paper size to @a key_file in the first group.
+   * 
+   * @newin2p12
+   * @param key_file The Glib::KeyFile to save the paper size to.
+   */
+  void save_to_key_file(Glib::KeyFile& key_file);
 
 
 };
@@ -192,10 +290,13 @@ inline void swap(PaperSize& lhs, PaperSize& rhs)
 namespace Glib
 {
 
-/** @relates Gtk::PaperSize
- * @param object The C instance
+/** A Glib::wrap() method for this object.
+ * 
+ * @param object The C instance.
  * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
  * @result A C++ instance that wraps this C instance.
+ *
+ * @relates Gtk::PaperSize
  */
 Gtk::PaperSize wrap(GtkPaperSize* object, bool take_copy = false);
 

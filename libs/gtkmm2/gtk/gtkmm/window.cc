@@ -412,7 +412,8 @@ GType WindowGroup::get_base_type()
 
 WindowGroup::WindowGroup()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(windowgroup_class_.init()))
 {
   }
@@ -501,7 +502,7 @@ void Window_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void Window_Class::set_focus_callback(GtkWindow* self, GtkWidget* p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -509,37 +510,40 @@ void Window_Class::set_focus_callback(GtkWindow* self, GtkWidget* p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_set_focus(Glib::wrap(p0)
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_set_focus(Glib::wrap(p0)
 );
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->set_focus)
-      (*base->set_focus)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->set_focus)
+    (*base->set_focus)(self, p0);
 }
 gboolean Window_Class::frame_event_callback(GtkWindow* self, GdkEvent* p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -547,32 +551,34 @@ gboolean Window_Class::frame_event_callback(GtkWindow* self, GdkEvent* p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_frame_event(p0));
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_frame_event(p0));
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->frame_event)
-      return (*base->frame_event)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->frame_event)
+    return (*base->frame_event)(self, p0);
 
   typedef gboolean RType;
   return RType();
@@ -620,8 +626,9 @@ GType Window::get_base_type()
 
 Window::Window(WindowType type)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Bin(Glib::ConstructParams(window_class_.init(), "type", ((GtkWindowType)(type)), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Bin(Glib::ConstructParams(window_class_.init(), "type", ((GtkWindowType)(type)), static_cast<char*>(0)))
 {
   }
 
@@ -735,6 +742,16 @@ const Window* Window::get_transient_for() const
   return const_cast<Window*>(this)->get_transient_for();
 }
 
+void Window::set_opacity(double opacity)
+{
+gtk_window_set_opacity(gobj(), opacity); 
+}
+
+double Window::get_opacity() const
+{
+  return gtk_window_get_opacity(const_cast<GtkWindow*>(gobj()));
+}
+
 void Window::set_type_hint(Gdk::WindowTypeHint hint)
 {
 gtk_window_set_type_hint(gobj(), ((GdkWindowTypeHint)(hint))); 
@@ -773,6 +790,26 @@ gtk_window_set_urgency_hint(gobj(), static_cast<int>(setting));
 bool Window::get_urgency_hint() const
 {
   return gtk_window_get_urgency_hint(const_cast<GtkWindow*>(gobj()));
+}
+
+void Window::set_accept_focus(bool setting)
+{
+gtk_window_set_accept_focus(gobj(), static_cast<int>(setting)); 
+}
+
+bool Window::get_accept_focus() const
+{
+  return gtk_window_get_accept_focus(const_cast<GtkWindow*>(gobj()));
+}
+
+void Window::set_focus_on_map(bool setting)
+{
+gtk_window_set_focus_on_map(gobj(), static_cast<int>(setting)); 
+}
+
+bool Window::get_focus_on_map() const
+{
+  return gtk_window_get_focus_on_map(const_cast<GtkWindow*>(gobj()));
 }
 
 bool Window::get_destroy_with_parent() const
@@ -929,6 +966,18 @@ gtk_window_set_default_icon_list(list.data());
 Glib::ListHandle< Glib::RefPtr<Gdk::Pixbuf> > Window::get_default_icon_list()
 {
   return Glib::ListHandle< Glib::RefPtr<Gdk::Pixbuf> >(gtk_window_get_default_icon_list(), Glib::OWNERSHIP_SHALLOW);
+}
+
+
+void Window::set_default_icon(const Glib::RefPtr<Gdk::Pixbuf>& icon)
+{
+gtk_window_set_default_icon(Glib::unwrap(icon));
+}
+
+
+void Window::set_default_icon_name(const Glib::ustring& name)
+{
+gtk_window_set_default_icon_name(name.c_str());
 }
 
 
@@ -1114,12 +1163,6 @@ void Window::reshow_with_initial_size()
 {
 gtk_window_reshow_with_initial_size(gobj()); 
 }
-
-void Window::set_default_icon(const Glib::RefPtr<Gdk::Pixbuf>& icon)
-{
-gtk_window_set_default_icon(Glib::unwrap(icon));
-}
-
 
 void Window::set_keep_above(bool setting)
 {
@@ -1397,6 +1440,20 @@ Glib::PropertyProxy_ReadOnly<Gdk::Gravity> Window::property_gravity() const
 #endif //GLIBMM_PROPERTIES_ENABLED
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<Window*> Window::property_transient_for() 
+{
+  return Glib::PropertyProxy<Window*>(this, "transient-for");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<Window*> Window::property_transient_for() const
+{
+  return Glib::PropertyProxy_ReadOnly<Window*>(this, "transient-for");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
 Glib::PropertyProxy<bool> Window::property_urgency_hint() 
 {
   return Glib::PropertyProxy<bool>(this, "urgency-hint");
@@ -1421,6 +1478,20 @@ Glib::PropertyProxy<bool> Window::property_deletable()
 Glib::PropertyProxy_ReadOnly<bool> Window::property_deletable() const
 {
   return Glib::PropertyProxy_ReadOnly<bool>(this, "deletable");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy<double> Window::property_opacity() 
+{
+  return Glib::PropertyProxy<double>(this, "opacity");
+}
+#endif //GLIBMM_PROPERTIES_ENABLED
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+Glib::PropertyProxy_ReadOnly<double> Window::property_opacity() const
+{
+  return Glib::PropertyProxy_ReadOnly<double>(this, "opacity");
 }
 #endif //GLIBMM_PROPERTIES_ENABLED
 

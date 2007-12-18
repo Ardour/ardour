@@ -1,0 +1,91 @@
+/* $Id: component.hg,v 1.5 2004/03/12 20:35:53 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(atkmm,atk)
+_PINCLUDE(atk/atkcomponent.h)
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+  typedef struct _AtkComponentIface AtkComponentIface;
+  typedef struct _AtkObject         AtkObject;
+  typedef void (* AtkFocusHandler) (AtkObject*, gboolean);
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Atk
+{
+
+_CC_INCLUDE(atk/atk-enum-types.h)
+_WRAP_ENUM(CoordType, AtkCoordType)
+_WRAP_ENUM(Layer, AtkLayer)
+
+class Object;
+
+
+/** The ATK interface provided by UI components which occupy a physical area on the screen.
+ * This should be implemented by most if not all UI elements with an actual on-screen presence, i.e. components which
+ * can be said to have a screen-coordinate bounding box. Virtually all widgets will need to have Atk::Component
+ * implementations provided for their corresponding Atk::Object class. In short, only UI elements which are *not* GUI
+ * elements will omit this ATK interface.
+ * 
+ * A possible exception might be textual information with a transparent background, in which case text glyph bounding
+ * box information is provided by Atk::Text.
+ */
+class Component : public Glib::Interface
+{
+  _CLASS_INTERFACE(Component, AtkComponent, ATK_COMPONENT, AtkComponentIface)
+  
+public:
+  _WRAP_METHOD(guint add_focus_handler(AtkFocusHandler handler), atk_component_add_focus_handler)
+  _WRAP_METHOD(bool contains(int x, int y, CoordType coord_type) const, atk_component_contains)
+  _WRAP_METHOD(Glib::RefPtr<Atk::Object> get_accessible_at_point(int x, int y, CoordType coord_type), atk_component_ref_accessible_at_point)
+  _WRAP_METHOD(void get_extents(int& x, int& y, int& width, int& height, CoordType coord_type) const, atk_component_get_extents)
+  _WRAP_METHOD(void get_position(int& x, int& y, CoordType coord_type) const, atk_component_get_position)
+  _WRAP_METHOD(void get_size(int& width, int& height) const, atk_component_get_size)
+  _WRAP_METHOD(Layer get_layer() const, atk_component_get_layer)
+  _WRAP_METHOD(int get_mdi_zorder() const, atk_component_get_mdi_zorder)
+  _WRAP_METHOD(bool grab_focus(), atk_component_grab_focus)
+  _WRAP_METHOD(void remove_focus_handler(guint handler_id), atk_component_remove_focus_handler)
+  _WRAP_METHOD(bool set_extents(int x, int y, int width, int height, CoordType coord_type), atk_component_set_extents)
+  _WRAP_METHOD(bool set_position(int x, int y, CoordType coord_type), atk_component_set_position)
+  _WRAP_METHOD(bool set_size(int width, int height), atk_component_set_size)
+
+protected:
+  _WRAP_VFUNC(guint add_focus_handler(AtkFocusHandler handler), add_focus_handler)
+  _WRAP_VFUNC(bool contains(int x, int y, CoordType coord_type) const, contains)
+
+  _WRAP_VFUNC(Glib::RefPtr<Atk::Object> get_accessible_at_point(int x, int y, CoordType coord_type), ref_accessible_at_point, refreturn_ctype)
+
+  _WRAP_VFUNC(void get_extents(int& x, int& y, int& width, int& height, CoordType coord_type) const, get_extents)
+  _WRAP_VFUNC(void get_position(int& x, int& y, CoordType coord_type) const, get_position)
+  _WRAP_VFUNC(void get_size(int& width, int& height) const, get_size)
+  _WRAP_VFUNC(Layer get_layer() const, get_layer)
+  _WRAP_VFUNC(int get_mdi_zorder() const, get_mdi_zorder)
+  _WRAP_VFUNC(bool grab_focus(), grab_focus)
+  _WRAP_VFUNC(void remove_focus_handler(guint handler_id), remove_focus_handler)
+  _WRAP_VFUNC(bool set_extents(int x, int y, int width, int height, CoordType coord_type), set_extents)
+  _WRAP_VFUNC(bool set_position(int x, int y, CoordType coord_type), set_position)
+  _WRAP_VFUNC(bool set_size(int width, int height), set_size)
+};
+
+} // namespace Atk
+

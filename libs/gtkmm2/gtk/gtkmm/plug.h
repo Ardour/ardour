@@ -118,9 +118,9 @@ public:
   GdkNativeWindow get_id() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %embedded()</tt>
+   * <tt>void on_my_%embedded()</tt>
    */
 
   Glib::SignalProxy0< void > signal_embedded();
@@ -133,10 +133,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Plug
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Plug
    */
   Gtk::Plug* wrap(GtkPlug* object, bool take_copy = false);
 } //namespace Glib

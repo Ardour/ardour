@@ -36,12 +36,14 @@ namespace Pango
 {
 
 
-/** @addtogroup pangommEnums Enums and Flags */
-
 /** Pango::AttrType distinguishes between different types of attributes.
  * Along with the predefined values, it is possible to allocate additional values for
  * custom attributes using Pango::Attribute::register_type(). The predefined values
  * are given below.
+ */
+/** @addtogroup pangommEnums Enums and Flags */
+
+/**
  * @ingroup pangommEnums
  */
 enum AttrType
@@ -66,7 +68,9 @@ enum AttrType
   ATTR_LETTER_SPACING,
   ATTR_UNDERLINE_COLOR,
   ATTR_STRIKETHROUGH_COLOR,
-  ATTR_ABSOLUTE_SIZE
+  ATTR_ABSOLUTE_SIZE,
+  ATTR_GRAVITY,
+  ATTR_GRAVITY_HINT
 };
 
 } // namespace Pango
@@ -92,6 +96,8 @@ namespace Pango
 
 
 /** A Pango::Underline is used to specify whether text should be underlined, and if so, the type of underlining.
+ */
+/**
  * @ingroup pangommEnums
  */
 enum Underline

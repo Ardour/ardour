@@ -129,15 +129,17 @@ GType AspectFrame::get_base_type()
 
 AspectFrame::AspectFrame(const Glib::ustring& label, AlignmentEnum xalign, AlignmentEnum yalign, float ratio, bool obey_child)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Frame(Glib::ConstructParams(aspectframe_class_.init(), "label", label.c_str(), "xalign", _gtkmm_align_float_from_enum(xalign), "yalign", _gtkmm_align_float_from_enum(yalign), "ratio", ratio, "obey_child", static_cast<int>(obey_child), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Frame(Glib::ConstructParams(aspectframe_class_.init(), "label", label.c_str(), "xalign", _gtkmm_align_float_from_enum(xalign), "yalign", _gtkmm_align_float_from_enum(yalign), "ratio", ratio, "obey_child", static_cast<int>(obey_child), static_cast<char*>(0)))
 {
   }
 
 AspectFrame::AspectFrame(const Glib::ustring& label, float xalign, float yalign, float ratio, bool obey_child)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Frame(Glib::ConstructParams(aspectframe_class_.init(), "label", label.c_str(), "xalign", xalign, "yalign", yalign, "ratio", ratio, "obey_child", static_cast<int>(obey_child), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Frame(Glib::ConstructParams(aspectframe_class_.init(), "label", label.c_str(), "xalign", xalign, "yalign", yalign, "ratio", ratio, "obey_child", static_cast<int>(obey_child), static_cast<char*>(0)))
 {
   }
 

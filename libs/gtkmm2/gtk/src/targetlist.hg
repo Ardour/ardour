@@ -1,0 +1,44 @@
+/* Copyright(C) 2002 The gtkmm Development Team
+ *
+ * This library is free software, ) you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation, ) either
+ * version 2 of the License, or(at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY, ) without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library, ) if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(gtkmm,gtk)
+
+#include <gtkmm/enums.h>
+#include <gtkmm/targetentry.h>
+#include <gdkmm/types.h>
+
+_CC_INCLUDE(gtk/gtkselection.h)
+  
+namespace Gtk
+{
+
+class TargetList
+{
+  _CLASS_OPAQUE_REFCOUNTED(TargetList, GtkTargetList, NONE, gtk_target_list_ref, gtk_target_list_unref)
+  _IGNORE(gtk_selection_data_copy, gtk_selection_data_free)
+public:
+  static Glib::RefPtr<Gtk::TargetList> create(const ArrayHandle_TargetEntry& targets);
+  
+#m4 _CONVERSION(`TargetFlags', `guint', `($2)($3)')
+  _WRAP_METHOD(void add(const Glib::ustring& target, TargetFlags flags = TargetFlags(0), guint info = 0), gtk_target_list_add)
+  void add(const ArrayHandle_TargetEntry& targets);
+  _WRAP_METHOD(void remove(const Glib::ustring& target), gtk_target_list_remove)
+  _WRAP_METHOD(bool find(const Glib::ustring& target, guint* info) const, gtk_target_list_find)
+};
+
+} // namespace Gtk
+

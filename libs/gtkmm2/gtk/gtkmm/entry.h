@@ -32,6 +32,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/celleditable.h>
 #include <gtkmm/entrycompletion.h>
+#include <gtkmm/adjustment.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -128,6 +129,16 @@ public:
   Entry();
   
 
+  /** Sets whether the contents of the entry are visible or not. 
+   * When visibility is set to <tt>false</tt>, characters are displayed 
+   * as the invisible char, and will also appear that way when 
+   * the text in the entry widget is copied elsewhere.
+   * 
+   * The default invisible char is the asterisk '*', but it can
+   * be changed with set_invisible_char().
+   * @param visible <tt>true</tt> if the contents of the entry are displayed
+   * as plaintext.
+   */
   void set_visibility(bool visible = true);
   
   /** Retrieves whether the text in @a entry  is visible. See
@@ -148,7 +159,7 @@ public:
   void set_invisible_char(gunichar ch);
   
   /** Retrieves the character displayed in place of the real characters
-   * for entries with visisbility set to false. See set_invisible_char().
+   * for entries with visibility set to false. See set_invisible_char().
    * @return The current invisible char, or 0, if the entry does not
    * show invisible text at all.
    */
@@ -165,8 +176,26 @@ public:
   bool get_has_frame() const;
 
   
+  /** Sets %entry's inner-border property to %border, or clears it if <tt>0</tt>
+   * is passed. The inner-border is the area around the entry's text, but
+   * inside its frame.
+   * 
+   * If set, this property overrides the inner-border style property.
+   * Overriding the style-provided border is useful when you want to do
+   * in-place editing of some text in a canvas or list widget, where
+   * pixel-exact positioning of the entry is important.
+   * 
+   * @newin2p10
+   * @param border A Gtk::Border, or <tt>0</tt>.
+   */
   void set_inner_border(const Border& border);
   
+  /** This function returns the entry's Gtk::Entry:inner-border property. See
+   * set_inner_border() for more information.
+   * @return The entry's Gtk::Border, or <tt>0</tt> if none was set.
+   * 
+   * @newin2p10.
+   */
   Border get_inner_border() const;
 
   
@@ -193,7 +222,7 @@ public:
    * 
    * (For experts: if @a setting  is <tt>true</tt>, the entry calls
    * Gtk::Window::activate_default() on the window containing the entry, in
-   * the default handler for the "activate" signal.)
+   * the default handler for the Gtk::Widget::activate signal.)
    * @param setting <tt>true</tt> to activate window's default widget on Enter keypress.
    */
   void set_activates_default(bool setting = true);
@@ -217,12 +246,16 @@ public:
    */
   int get_width_chars() const;
   
+  /** Sets the text in the widget to the given
+   * value, replacing the current contents.
+   * @param text The new text.
+   */
   void set_text(const Glib::ustring &text);
   
   /** Retrieves the contents of the entry widget.
    * See also Gtk::Editable::get_chars().
    * @return A pointer to the contents of the widget as a
-   * string.  This string points to internally allocated
+   * string. This string points to internally allocated
    * storage in the widget and must not be freed, modified or
    * stored.
    */
@@ -299,6 +332,39 @@ public:
   int text_index_to_layout_index(int text_index) const;
 
   
+  /** Hooks up an adjustment to the cursor position in an entry, so that when 
+   * the cursor is moved, the adjustment is scrolled to show that position. 
+   * See Gtk::ScrolledWindow::get_hadjustment() for a typical way of obtaining 
+   * the adjustment.
+   * 
+   * The adjustment has to be in pixel units and in the same coordinate system 
+   * as the entry. 
+   * 
+   * @newin2p12
+   * @param adjustment An adjustment which should be adjusted when the cursor 
+   * is moved, or <tt>0</tt>.
+   */
+  void set_cursor_hadjustment (Adjustment& adjustment);
+  
+  /** Retrieves the horizontal cursor adjustment for the entry. 
+   * See set_cursor_hadjustment().
+   * @return The horizontal cursor adjustment, or <tt>0</tt> 
+   * if none has been set.
+   * 
+   * @newin2p12.
+   */
+  Adjustment* get_cursor_hadjustment();
+  
+  /** Retrieves the horizontal cursor adjustment for the entry. 
+   * See set_cursor_hadjustment().
+   * @return The horizontal cursor adjustment, or <tt>0</tt> 
+   * if none has been set.
+   * 
+   * @newin2p12.
+   */
+  const Adjustment* get_cursor_hadjustment() const;
+
+  
   /** Sets the alignment for the contents of the entry. This controls
    * the horizontal positioning of the contents when the displayed
    * text is shorter than the width of the entry.
@@ -329,21 +395,22 @@ public:
   
   /** Sets @a completion  to be the auxiliary completion object to use with @a entry .
    * All further configuration of the completion mechanism is done on
-   *  @a completion  using the Gtk::EntryCompletion API.
+   *  @a completion  using the Gtk::EntryCompletion API. Completion is disabled if
+   *  @a completion  is set to <tt>0</tt>.
    * 
    * @newin2p4
-   * @param completion The Gtk::EntryCompletion.
+   * @param completion The Gtk::EntryCompletion or <tt>0</tt>.
    */
   void set_completion(const Glib::RefPtr<EntryCompletion>& completion);
   
-  /** Returns the auxiliary completion object currently in use by @a entry .
+  /** Return value: The auxiliary completion object currently in use by @a entry .
    * @return The auxiliary completion object currently in use by @a entry .
    * 
    * @newin2p4.
    */
   Glib::RefPtr<EntryCompletion> get_completion();
   
-  /** Returns the auxiliary completion object currently in use by @a entry .
+  /** Return value: The auxiliary completion object currently in use by @a entry .
    * @return The auxiliary completion object currently in use by @a entry .
    * 
    * @newin2p4.
@@ -353,17 +420,17 @@ public:
    guint16 get_text_length() const;
  
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %populate_popup(Menu* menu)</tt>
+   * <tt>void on_my_%populate_popup(Menu* menu)</tt>
    */
 
   Glib::SignalProxy1< void,Menu* > signal_populate_popup();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %insert_at_cursor(const Glib::ustring& str)</tt>
+   * <tt>void on_my_%insert_at_cursor(const Glib::ustring& str)</tt>
    */
 
   Glib::SignalProxy1< void,const Glib::ustring& > signal_insert_at_cursor();
@@ -375,9 +442,9 @@ public:
   // http://mail.gnome.org/archives/gtk-devel-list/2003-January/msg00108.html
   // "activate is probably about the only exception"
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %activate()</tt>
+   * <tt>void on_my_%activate()</tt>
    */
 
   Glib::SignalProxy0< void > signal_activate();
@@ -624,10 +691,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Entry
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Entry
    */
   Gtk::Entry* wrap(GtkEntry* object, bool take_copy = false);
 } //namespace Glib

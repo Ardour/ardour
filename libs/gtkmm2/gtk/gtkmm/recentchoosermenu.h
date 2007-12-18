@@ -119,8 +119,21 @@ public:
   explicit RecentChooserMenu(const Glib::RefPtr<RecentManager>& recent_manager);
 
   
+  /** Sets whether a number should be added to the items of @a menu .  The
+   * numbers are shown to provide a unique character for a mnemonic to
+   * be used inside ten menu item's label.  Only the first the items
+   * get a number to avoid clashes.
+   * 
+   * @newin2p10
+   * @param show_numbers Whether to show numbers.
+   */
   void set_show_numbers(bool show_numbers = true);
   
+  /** Return value: <tt>true</tt> if numbers should be shown.
+   * @return <tt>true</tt> if numbers should be shown.
+   * 
+   * @newin2p10.
+   */
   bool get_show_numbers() const;
 
 
@@ -131,10 +144,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::RecentChooserMenu
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::RecentChooserMenu
    */
   Gtk::RecentChooserMenu* wrap(GtkRecentChooserMenu* object, bool take_copy = false);
 } //namespace Glib

@@ -1,0 +1,91 @@
+/* $Id: image.hg,v 1.5 2006/04/12 11:11:24 murrayc Exp $ */
+
+/* bitmap.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+#include <gdkmm/visual.h>
+#include <gdkmm/colormap.h>
+#include <gdkmm/types.h> //For ByteOrder.
+#include <gdk/gdkimage.h>
+
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+_CC_INCLUDE(gdk/gdkenumtypes.h)
+_WRAP_ENUM(ImageType, GdkImageType)
+
+/** This represents an area for drawing graphics. It has now been superceded to a large extent by the much more flexible
+ * Gdk::Drawable RGB functions.
+ * To create an image from part of a Gdk::Window use Gdk::Drawable::get_image().
+ *
+ * The image can be manipulated with get_pixel() and put_pixel(), or alternatively by changing the actual pixel data, though
+ * manipulating the pixel data requires complicated code to cope with the different formats that may be used.
+ * To draw a Gdk::Image in a Gdk::Window or Gdk::Pixmap use Gdk::Drawable::draw_image().
+ */
+class Image : public Glib::Object
+{
+  _CLASS_GOBJECT(Image,GdkImage,GDK_IMAGE,Glib::Object,GObject)
+  _IGNORE(gdk_image_unref, gdk_image_ref)
+protected:
+
+  /** Instantiate a new Gdk::Image.
+   *
+   * @param type The type of the Gdk::Image. Gdk::IMAGE_FASTEST is probably the best choice, since it will try to create a Gdk::IMAGE_SHARED image first and if that fails it will then use Gdk::IMAGE_NORMAL.
+   * @param visual The Gdk::Visual to use for the image.
+   * @param width The width of the image in pixels.
+   * @param height The height of the image in pixels.
+   */
+  Image(ImageType type, const Glib::RefPtr<Visual>& visual, int	width, int height);
+  _IGNORE(gdk_image_new)
+  
+public:
+  _WRAP_CREATE(ImageType type, const Glib::RefPtr<Visual>& visual, int width, int height)
+
+  //We ignore gdk_image_new_bitmap() because the documentation says that it is deprecated.
+  _IGNORE(gdk_image_new_bitmap)
+
+  _WRAP_METHOD(void put_pixel(int x, int y, guint32 pixel), gdk_image_put_pixel)
+  _WRAP_METHOD(guint32 get_pixel(int x, int y) const, gdk_image_get_pixel)
+  _WRAP_METHOD(void set_colormap(const Glib::RefPtr<Colormap>& colormap), gdk_image_set_colormap)
+  _WRAP_METHOD(Glib::RefPtr<Colormap> get_colormap(), gdk_image_get_colormap, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Colormap> get_colormap() const, gdk_image_get_colormap, refreturn, constversion)
+  
+  _MEMBER_GET(image_type, type, ImageType, GdkImageType)
+  _MEMBER_GET_GOBJECT(visual, visual, Visual, GdkVisual*)
+  _MEMBER_GET(byte_order, byte_order, ByteOrder, GdkByteOrder)
+  _MEMBER_GET(width, width, int, gint)
+  _MEMBER_GET(height, height, int, gint)
+  _MEMBER_GET(bpp, bpp, guint16, guint16)
+  _MEMBER_GET(bpl, bpl, guint16, guint16)
+  _MEMBER_GET(bits_per_pixel, bits_per_pixel, guint16, guint16)
+
+  //This memory block is not read-only, apparently:
+  _MEMBER_GET_PTR(mem, mem, void*, gpointer)
+
+  //TODO: This should be const really.
+  _MEMBER_GET(windowing_data, windowing_data, void*, gpointer)
+};
+
+} /* namespace Gdk */
+

@@ -1,0 +1,267 @@
+/* $Id: box.hg,v 1.10 2006/01/28 18:49:13 jjongsma Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/container_p.h)
+
+#include <gtkmm/container.h>
+#include <glibmm/helperlist.h>
+#include <gtk/gtkbox.h>  /* For _GtkBoxChild */
+
+
+namespace Gtk
+{
+
+/** Packing options for adding child widgets to a Box with pack_start() and pack_end(). 
+ * @ingroup gtkmmEnums
+ */
+enum PackOptions
+{
+  PACK_SHRINK, /**< Space is contracted to the child widget size. */
+  PACK_EXPAND_PADDING, /**< Space is expanded, with extra space filled with padding. */
+  PACK_EXPAND_WIDGET /**< Space is expanded, with extra space filled by increasing the child widget size. */
+};
+
+class Box;
+
+namespace Box_Helpers
+{
+
+//This may not have any data or virtual functions. See below.
+class Child : protected _GtkBoxChild
+{
+private:
+  Child& operator=(const Child&); //Not implemented.
+  Child(const Child&); //Not implemented.
+
+public:
+  /// Provides access to the underlying C GObject.
+  inline _GtkBoxChild* gobj() { return this; }
+  /// Provides access to the underlying C GObject.
+  inline const _GtkBoxChild* gobj() const { return this; }
+
+  Widget* get_widget() const;
+
+  inline guint16 get_padding() const   { return (gobj()->padding); }
+  inline bool get_expand() const       { return (gobj()->expand); }
+  inline bool get_fill() const         { return (gobj()->fill); }
+  inline bool get_pack() const         { return (gobj()->pack); }
+
+  void set_options(PackOptions options, guint padding = 0);
+  void set_options(bool expand, bool fill, guint padding = 0);
+
+  void set_pack(PackType pack);
+
+protected:
+  inline GtkBox* parent()
+    { return (GtkBox*) (gobj()->widget->parent); }
+
+  void redraw();
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  friend class Dummy_; // silence the compiler (Child has only private ctors)
+#endif
+};
+
+class Element
+{
+public:
+ Element(Widget& widget,
+          PackOptions options = PACK_EXPAND_WIDGET,
+          guint padding = 0,
+          PackType pack = PACK_START)
+      : widget_(&widget), options_(options),
+        padding_(padding), pack_(pack)
+    {}
+
+  Widget* widget_;
+  PackOptions options_;
+  guint padding_;
+  PackType pack_;
+};
+
+typedef Element StartElem;
+
+struct EndElem : public Element
+{
+  EndElem(Widget& widget,
+          PackOptions options = PACK_EXPAND_WIDGET,
+          guint padding = 0)
+      : Element (widget, options, padding, PACK_END)
+    {}
+};
+
+#m4 include(list.m4)
+  GP_LIST(BoxList,Box,GtkBox,Child,children)
+  //The standard iterator, instead of List_Cpp_Iterator,
+  //only works because Child is derived from _GtkBoxChild.
+  
+  GP_LIST_FIND(get_widget)
+  GP_LIST_CONTAINER_REMOVE(get_widget)
+        // Non-standard
+        void reorder(iterator loc,iterator pos);
+  GP_LIST_END()
+
+} /* namespace Box_Helpers */
+
+
+/** A base class for box containers
+ *
+ * Abstract base class for horizontal and vertical boxes, which organize a
+ * variable number of widgets into a rectangular area.  This is an abstract
+ * class and it defers choice of which way the widgets are packed to the screen
+ * to the derived classes.  It provides a common interface for inserting
+ * widgets to a box indepenently of how it is shown in the screen.
+ *
+ * Gtk::Box uses a notion of packing. Packing refers to adding widgets with
+ * reference to a particular position in a Gtk::Container. There are two
+ * reference positions: the start and the end of the box. For a VBox, the start
+ * is defined as the top of the box and the end is defined as the bottom.  For
+ * a HBox the start is defined as the left side and the end is defined as the
+ * right side.  Use repeated calls to pack_start() to pack widgets into a
+ * Gtk::Box from start to end. Use pack_end() to add widgets from end to start.
+ * You may intersperse these calls and add widgets from both ends of the same
+ * Gtk::Box. The last widget added with pack_start() will be placed just before
+ * the last widget added with pack_end()
+ *
+ * Because Gtk::Box is a Gtk::Container, you may also use Gtk::Container::add()
+ * to insert widgets, and they will be packed as if with pack_start(). Use
+ * Gtk::Container::remove() to remove widgets.
+ *
+ * Use set_homogeneous() to specify whether or not all children of the Gtk::Box
+ * occupy the same amount of space.  Use set_spacing() to determine the minimum
+ * space placed between all children in the Gtk::Box.  Use reorder_child() to
+ * move a child widget to a different place in the box.  Use
+ * set_child_packing() to reset the pack options and padding attributes of any
+ * Gtk::Box child. Use query_child_packing() to query these fields.
+ */
+class Box : public Container
+{
+  _CLASS_GTKOBJECT(Box,GtkBox,GTK_BOX,Gtk::Container,GtkContainer)
+  _IGNORE(gtk_box_pack_end_defaults, gtk_box_set_child_packing, gtk_box_pack_start_defaults, gtk_box_query_child_packing)
+public:
+  typedef Box_Helpers::BoxList BoxList;
+
+protected:
+  _CTOR_DEFAULT
+public:
+
+  _WRAP_METHOD(void pack_start(Widget& child, bool expand, bool fill, guint padding = 0), gtk_box_pack_start)
+
+  /** Left side insert a widget to a box.
+   * @param child A Widget to be added to box.
+   * @param options Controls how the widget expands to fill space, and how the space around them is used.
+   * @param padding Padding that is added on either side of the widget. This is different to spacing set when the box is created (or with set_spacing()) - spacing is added between objects, and padding is added on either side of an object.
+   */
+  void pack_start(Widget& child, PackOptions options = PACK_EXPAND_WIDGET, guint padding = 0);
+
+  _WRAP_METHOD(void pack_end(Widget& child, bool expand, bool fill, guint padding = 0), gtk_box_pack_end)
+
+  /** Right side insert a widget to a box.
+   * @param child A Widget to be added to box.
+   * @param options Controls how the widget expands to fill space, and how the space around them is used.
+   * @param padding Padding that is added on either side of the widget. This is different to spacing set when the box is created (or with set_spacing()) - spacing is added between objects, and padding is added on either side of an object.
+   */
+  void pack_end(Widget& child, PackOptions options = PACK_EXPAND_WIDGET, guint padding = 0);
+
+  _WRAP_METHOD(void set_homogeneous(bool homogeneous = true), gtk_box_set_homogeneous)
+  _WRAP_METHOD(bool get_homogeneous() const, gtk_box_get_homogeneous)
+
+  _WRAP_METHOD(void set_spacing(int spacing), gtk_box_set_spacing)
+  _WRAP_METHOD(int get_spacing() const, gtk_box_get_spacing)
+
+  _WRAP_METHOD(void reorder_child(Widget& child, int pos), gtk_box_reorder_child)
+
+  /* Get the child widgets.
+   * @result An STL-style container of pointers to the box's child widgets.
+   */
+  BoxList& children();
+
+  /* Get the child widgets.
+   * @result An STL-style container of pointers to the box's child widgets.
+   */
+  const BoxList& children() const;
+
+  _WRAP_PROPERTY("spacing", int)
+  _WRAP_PROPERTY("homogeneous", bool)
+
+protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  mutable BoxList children_proxy_;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+};
+
+
+/** Vertical Box for laying widgets in a vertical row.
+ *
+ * You should create these objects, but it is more confortable to pass
+ * around pointers of Gtk::Box. All the methods that do anything are in
+ * class Gtk::Box and this allows you to later change the direction of the
+ * box, when there's no dependencies to HBox and VBox classes.
+ *
+ * @ingroup Widgets
+ * @ingroup Containers
+ */
+class VBox : public Box
+{
+  _CLASS_GTKOBJECT(VBox,GtkVBox,GTK_VBOX,Gtk::Box,GtkBox)
+public:
+
+  /** Creates a new vertical box.
+   * @param homogeneous Whether each widget in the VBox should have the same
+   * height.  If set, a PACK_SHRINK argument to pack_start() or pack_end() is
+   * ignored.
+   * @param spacing Determines the space in pixels between child widgets.
+   */
+  _WRAP_CTOR(VBox(bool homogeneous = false, int spacing = 0), gtk_vbox_new)
+  
+};
+
+/** Horizontal Box for laying widgets in a horizontal row.
+ *
+ * You should create these objects, but it is more confortable to pass
+ * around pointers of Gtk::Box. All the methods that do anything are in
+ * class Gtk::Box and this allows you to later change the direction of the
+ * box, when there's no dependencies to HBox and VBox classes.
+ *
+ * Use the Gtk::Box packing interface to determine the arrangement, spacing,
+ * width, and alignment of Gtk::HBox children.
+ *
+ * All children are allocated the same height.
+ *
+ * @ingroup Widgets
+ * @ingroup Containers
+ */
+class HBox : public Box
+{
+  _CLASS_GTKOBJECT(HBox,GtkHBox,GTK_HBOX,Gtk::Box,GtkBox)
+public:
+
+  /** Creates a new horizontal box.
+   * @param homogeneous Whether each widget in the HBox should have the same
+   * width.  If set, a PACK_SHRINK argument to pack_start() or pack_end() is
+   * ignored.
+   * @param spacing Determines the space in pixels between child widgets.
+   */
+  _WRAP_CTOR(HBox(bool homogeneous = false, int spacing = 0), gtk_hbox_new)
+
+};
+
+} // namespace Gtk
+

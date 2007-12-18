@@ -40,10 +40,7 @@ static void proxy_foreach_callback(const gchar* key, const gchar* value, void* d
   try
   {
   #endif //GLIBMM_EXCEPTIONS_ENABLED
-    Glib::ustring k(key);
-    Glib::ustring v(value);
-    slot(k, v);
-    //slot(Glib::ustring(key), Glib::ustring(value)); // TODO: this won't work
+    slot(Glib::convert_const_gchar_ptr_to_ustring(key), Glib::convert_const_gchar_ptr_to_ustring(value));
   #ifdef GLIBMM_EXCEPTIONS_ENABLED
   }
   catch(...)
@@ -140,6 +137,11 @@ void PrintSettings::set_page_ranges(const Glib::ArrayHandle<PrintSettings::PageR
 
   gtk_print_settings_set_page_ranges(const_cast<GtkPrintSettings*>(gobj()), ranges, n);
   g_free(ranges);
+}
+
+void PrintSettings::save_to_key_file(Glib::KeyFile& key_file)
+{
+  gtk_print_settings_to_key_file(gobj(), (key_file).gobj(), 0); 
 }
 
 } // namespace Gtk
@@ -273,7 +275,8 @@ GType PrintSettings::get_base_type()
 
 PrintSettings::PrintSettings()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Glib::Object(Glib::ConstructParams(printsettings_class_.init()))
 {
   }
@@ -282,6 +285,31 @@ Glib::RefPtr<PrintSettings> PrintSettings::create()
 {
   return Glib::RefPtr<PrintSettings>( new PrintSettings() );
 }
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+bool PrintSettings::save_to_file(const std::string& file_name) const
+#else
+bool PrintSettings::save_to_file(const std::string& file_name, std::auto_ptr<Glib::Error>& error) const
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+{
+  GError* gerror = 0;
+  bool retvalue = gtk_print_settings_to_file(const_cast<GtkPrintSettings*>(gobj()), file_name.c_str(), &(gerror));
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  if(gerror)
+    ::Glib::Error::throw_exception(gerror);
+#else
+  if(gerror)
+    error = ::Glib::Error::throw_exception(gerror);
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  return retvalue;
+
+}
+
+void PrintSettings::save_to_key_file(Glib::KeyFile& key_file, const Glib::ustring& group_name) const
+{
+gtk_print_settings_to_key_file(const_cast<GtkPrintSettings*>(gobj()), (key_file).gobj(), group_name.c_str()); 
+}
+
 bool PrintSettings::has_key(const Glib::ustring& key) const
 {
   return gtk_print_settings_has_key(const_cast<GtkPrintSettings*>(gobj()), key.c_str());

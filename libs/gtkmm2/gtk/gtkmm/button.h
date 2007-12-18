@@ -186,20 +186,19 @@ public:
    */
   void set_use_underline(bool use_underline = true);
   
-  /** Returns whether an embedded underline in the button label indicates a
-   * mnemonic. See set_use_underline().
+  /** Return value: <tt>true</tt> if an embedded underline in the button label
    * @return <tt>true</tt> if an embedded underline in the button label
    * indicates the mnemonic accelerator keys.
    */
   bool get_use_underline() const;
   
-  /** If true, the label set on the button is used as a
+  /** If <tt>true</tt>, the label set on the button is used as a
    * stock id to select the stock item for the button.
    * @param use_stock <tt>true</tt> if the button should use a stock item.
    */
   void set_use_stock(bool use_stock = true);
   
-  /** Returns whether the button label is a stock item.
+  /** Return value: <tt>true</tt> if the button label is used to
    * @return <tt>true</tt> if the button label is used to
    * select a stock item instead of being
    * used directly as the label text.
@@ -217,8 +216,7 @@ public:
    */
   void set_focus_on_click(bool focus_on_click = true);
   
-  /** Returns whether the button grabs focus when it is clicked with the mouse.
-   * See set_focus_on_click().
+  /** Return value: <tt>true</tt> if the button grabs focus when it is clicked with
    * @return <tt>true</tt> if the button grabs focus when it is clicked with
    * the mouse.
    * 
@@ -248,7 +246,7 @@ public:
 
   
   /** Set the image of @a button  to the given widget. Note that
-   * it depends on the gtk-button-images setting whether the
+   * it depends on the Gtk::Settings:gtk-button-images setting whether the
    * image will be displayed or not, you don't have to call
    * Gtk::Widget::show() on @a image  yourself.
    * 
@@ -274,54 +272,66 @@ public:
   const Widget* get_image() const;
 
   
+  /** Sets the position of the image relative to the text 
+   * inside the button.
+   * 
+   * @newin2p10
+   * @param position The position.
+   */
   void set_image_position(PositionType position);
   
+  /** Gets the position of the image relative to the text 
+   * inside the button.
+   * @return The position
+   * 
+   * @newin2p10.
+   */
   PositionType get_image_position() const;
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %pressed()</tt>
+   * <tt>void on_my_%pressed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_pressed();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %released()</tt>
+   * <tt>void on_my_%released()</tt>
    */
 
   Glib::SignalProxy0< void > signal_released();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %clicked()</tt>
+   * <tt>void on_my_%clicked()</tt>
    */
 
   Glib::SignalProxy0< void > signal_clicked();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %enter()</tt>
+   * <tt>void on_my_%enter()</tt>
    */
 
   Glib::SignalProxy0< void > signal_enter();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %leave()</tt>
+   * <tt>void on_my_%leave()</tt>
    */
 
   Glib::SignalProxy0< void > signal_leave();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %activate()</tt>
+   * <tt>void on_my_%activate()</tt>
    */
 
   Glib::SignalProxy0< void > signal_activate();
@@ -521,10 +531,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Button
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Button
    */
   Gtk::Button* wrap(GtkButton* object, bool take_copy = false);
 } //namespace Glib

@@ -1,0 +1,64 @@
+/* $Id: cellrendereraccel.hg,v 1.2 2006/05/11 11:40:24 murrayc Exp $ */
+
+/* cellrendereraccel.h
+ * 
+ * Copyright (C) 2005 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/cellrenderertext.h>
+#include <gtkmm/accelkey.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/cellrenderertext_p.h)
+
+
+namespace Gtk
+{
+
+/**  .
+ * Renders a keyboard accelerator in a cell
+ *
+ * Gtk::CellRendererAccel displays a keyboard accelerator 
+ * (i.e. a key combination like <Control>-a).
+ * If the cell renderer is editable, the accelerator can be changed by 
+ * simply typing the new combination.
+ *
+ * @ingroup TreeView
+ * @newin2p10
+ */
+class CellRendererAccel : public CellRendererText
+{
+  _CLASS_GTKOBJECT(CellRendererAccel, GtkCellRendererAccel, GTK_CELL_RENDERER_ACCEL, Gtk::CellRendererText, GtkCellRendererText)
+public:
+
+  _CTOR_DEFAULT
+
+  //TODO: Wrap accel_key and accel_mods in an AccelKey?
+  _WRAP_SIGNAL(void accel_edited(const Glib::ustring& path_string, guint accel_key, Gdk::ModifierType accel_mods, guint hardware_keycode), "accel_edited")
+  _WRAP_SIGNAL(void accel_cleared(const Glib::ustring& path_string), "accel_cleared")
+
+  _WRAP_PROPERTY("accel-key", guint)
+  _WRAP_PROPERTY("accel-mods", Gdk::ModifierType)
+  _WRAP_PROPERTY("keycode", guint)
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable(); //override
+#endif //GLIBMM_PROPERTIES_ENABLED
+};
+
+} /* namespace Gtk */
+

@@ -73,8 +73,14 @@ private:
 
 protected:
   CellEditable(); // you must derive from this class
+
+public:
+  // This is public so that C++ wrapper instances can be
+  // created for C instances of unwrapped types.
+  // For instance, if an unexpected C type implements the C interface. 
   explicit CellEditable(GtkCellEditable* castitem);
 
+protected:
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:
@@ -98,35 +104,33 @@ private:
 
 public:
   
-  /** Begins editing on a @a cell_editable .  @a event  is the Gdk::Event that began the
-   * editing process.  It may be <tt>0</tt>, in the instance that editing was initiated
-   * through programatic means.
+  /** Begins editing on a @a cell_editable . @a event  is the Gdk::Event that began 
+   * the editing process. It may be <tt>0</tt>, in the instance that editing was 
+   * initiated through programatic means.
    * @param event A Gdk::Event, or <tt>0</tt>.
    */
   void start_editing(GdkEvent* event);
   
-  /** Emits the "editing_done" signal.  This signal is a sign for the cell renderer
-   * to update its value from the cell.
+  /** Emits the Gtk::CellEditable::editing-done signal.
    */
   void editing_done();
   
-  /** Emits the "remove_widget" signal.  This signal is meant to indicate that the
-   * cell is finished editing, and the widget may now be destroyed.
+  /** Emits the Gtk::CellEditable::remove-widget signal.
    */
   void remove_widget();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %editing_done()</tt>
+   * <tt>void on_my_%editing_done()</tt>
    */
 
   Glib::SignalProxy0< void > signal_editing_done();
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %remove_widget()</tt>
+   * <tt>void on_my_%remove_widget()</tt>
    */
 
   Glib::SignalProxy0< void > signal_remove_widget();
@@ -164,10 +168,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::CellEditable
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::CellEditable
    */
   Glib::RefPtr<Gtk::CellEditable> wrap(GtkCellEditable* object, bool take_copy = false);
 

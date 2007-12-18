@@ -110,7 +110,7 @@ void Screen_Class::class_init_function(void* g_class, void* class_data)
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 void Screen_Class::size_changed_callback(GdkScreen* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -118,32 +118,35 @@ void Screen_Class::size_changed_callback(GdkScreen* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_size_changed();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_size_changed();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->size_changed)
-      (*base->size_changed)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->size_changed)
+    (*base->size_changed)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -299,6 +302,11 @@ Glib::RefPtr<const Visual> Screen::get_rgba_visual() const
   return const_cast<Screen*>(this)->get_rgba_visual();
 }
 
+bool Screen::is_composited() const
+{
+  return gdk_screen_is_composited(const_cast<GdkScreen*>(gobj()));
+}
+
 Glib::RefPtr<Window> Screen::get_root_window()
 {
 
@@ -402,6 +410,47 @@ Glib::RefPtr<Screen> Screen::get_default()
   if(retvalue)
     retvalue->reference(); //The function does not do a ref for us.
   return retvalue;
+}
+
+
+void Screen::set_font_options(const Cairo::FontOptions& options)
+{
+gdk_screen_set_font_options(gobj(), (options).cobj()); 
+}
+
+Cairo::FontOptions Screen::get_font_options() const
+{
+  return Cairo::FontOptions(const_cast<cairo_font_options_t*>(gdk_screen_get_font_options(const_cast<GdkScreen*>(gobj()))), true /* take_reference */);
+}
+
+void Screen::set_resolution(double dpi)
+{
+gdk_screen_set_resolution(gobj(), dpi); 
+}
+
+double Screen::get_resolution() const
+{
+  return gdk_screen_get_resolution(const_cast<GdkScreen*>(gobj()));
+}
+
+Glib::RefPtr<Gdk::Window> Screen::get_active_window()
+{
+
+  Glib::RefPtr<Gdk::Window> retvalue = Glib::wrap((GdkWindowObject*)(gdk_screen_get_active_window(gobj())));
+  if(retvalue)
+    retvalue->reference(); //The function does not do a ref for us.
+  return retvalue;
+
+}
+
+Glib::RefPtr<const Gdk::Window> Screen::get_active_window() const
+{
+  return const_cast<Screen*>(this)->get_active_window();
+}
+
+Glib::ListHandle< Glib::RefPtr<Window> > Screen::get_window_stack()
+{
+  return Glib::ListHandle< Glib::RefPtr<Window> >(gdk_screen_get_window_stack(gobj()), Glib::OWNERSHIP_DEEP);
 }
 
 

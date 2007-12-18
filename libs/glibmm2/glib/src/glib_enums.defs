@@ -1,15 +1,21 @@
-;; From /home/murrayc/cvs/gnome212/glib/glib/gbsearcharray.h
+;; From /opt/gnome218/include/glib-2.0/glib/gbookmarkfile.h
 
-(define-flags-extended BSearchArrayFlags
+(define-enum-extended BookmarkFileError
   (in-module "G")
-  (c-name "GBSearchArrayFlags")
+  (c-name "GBookmarkFileError")
   (values
-    '("align-power2" "G_BSEARCH_ARRAY_ALIGN_POWER2" "1 << 0")
-    '("auto-shrink" "G_BSEARCH_ARRAY_AUTO_SHRINK" "1 << 1")
+    '("invalid-uri" "G_BOOKMARK_FILE_ERROR_INVALID_URI" "0")
+    '("invalid-value" "G_BOOKMARK_FILE_ERROR_INVALID_VALUE" "1")
+    '("app-not-registered" "G_BOOKMARK_FILE_ERROR_APP_NOT_REGISTERED" "2")
+    '("uri-not-found" "G_BOOKMARK_FILE_ERROR_URI_NOT_FOUND" "3")
+    '("read" "G_BOOKMARK_FILE_ERROR_READ" "4")
+    '("unknown-encoding" "G_BOOKMARK_FILE_ERROR_UNKNOWN_ENCODING" "5")
+    '("write" "G_BOOKMARK_FILE_ERROR_WRITE" "6")
+    '("file-not-found" "G_BOOKMARK_FILE_ERROR_FILE_NOT_FOUND" "7")
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gconvert.h
+;; From /opt/gnome218/include/glib-2.0/glib/gconvert.h
 
 (define-enum-extended ConvertError
   (in-module "G")
@@ -24,7 +30,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gdate.h
+;; From /opt/gnome218/include/glib-2.0/glib/gdate.h
 
 (define-enum-extended DateDMY
   (in-module "G")
@@ -71,17 +77,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gdebug.h
-
-(define-flags-extended DebugFlag
-  (in-module "G")
-  (c-name "GDebugFlag")
-  (values
-    '("s" "G_DEBUG_FATAL_WARNINGS" "1 << 0")
-  )
-)
-
-;; From /home/murrayc/cvs/gnome212/glib/glib/gfileutils.h
+;; From /opt/gnome218/include/glib-2.0/glib/gfileutils.h
 
 (define-enum-extended FileError
   (in-module "G")
@@ -127,7 +123,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/ghook.h
+;; From /opt/gnome218/include/glib-2.0/glib/ghook.h
 
 (define-flags-extended HookFlagMask
   (in-module "G")
@@ -139,7 +135,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/giochannel.h
+;; From /opt/gnome218/include/glib-2.0/glib/giochannel.h
 
 (define-enum-extended IOError
   (in-module "G")
@@ -210,7 +206,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gkeyfile.h
+;; From /opt/gnome218/include/glib-2.0/glib/gkeyfile.h
 
 (define-enum-extended KeyFileError
   (in-module "G")
@@ -235,7 +231,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmarkup.h
+;; From /opt/gnome218/include/glib-2.0/glib/gmarkup.h
 
 (define-enum-extended MarkupError
   (in-module "G")
@@ -254,11 +250,12 @@
   (in-module "G")
   (c-name "GMarkupParseFlags")
   (values
-    '("g" "G_MARKUP_DO_NOT_USE_THIS_UNSUPPORTED_FLAG" "1 << 0")
+    '("do-not-use-this-unsupported-flag" "G_MARKUP_DO_NOT_USE_THIS_UNSUPPORTED_FLAG" "1 << 0")
+    '("treat-cdata-as-text" "G_MARKUP_TREAT_CDATA_AS_TEXT" "1 << 1")
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gmessages.h
+;; From /opt/gnome218/include/glib-2.0/glib/gmessages.h
 
 (define-flags-extended LogLevelFlags
   (in-module "G")
@@ -276,7 +273,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gnode.h
+;; From /opt/gnome218/include/glib-2.0/glib/gnode.h
 
 (define-flags-extended TraverseFlags
   (in-module "G")
@@ -302,7 +299,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/goption.h
+;; From /opt/gnome218/include/glib-2.0/glib/goption.h
 
 (define-flags-extended OptionFlags
   (in-module "G")
@@ -329,6 +326,8 @@
     '("filename" "G_OPTION_ARG_FILENAME" "4")
     '("string-array" "G_OPTION_ARG_STRING_ARRAY" "5")
     '("filename-array" "G_OPTION_ARG_FILENAME_ARRAY" "6")
+    '("double" "G_OPTION_ARG_DOUBLE" "7")
+    '("int64" "G_OPTION_ARG_INT64" "8")
   )
 )
 
@@ -342,7 +341,57 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gscanner.h
+;; From /opt/gnome218/include/glib-2.0/glib/gregex.h
+
+(define-enum-extended RegexError
+  (in-module "G")
+  (c-name "GRegexError")
+  (values
+    '("compile" "G_REGEX_ERROR_COMPILE" "0")
+    '("optimize" "G_REGEX_ERROR_OPTIMIZE" "1")
+    '("replace" "G_REGEX_ERROR_REPLACE" "2")
+    '("match" "G_REGEX_ERROR_MATCH" "3")
+  )
+)
+
+(define-flags-extended RegexCompileFlags
+  (in-module "G")
+  (c-name "GRegexCompileFlags")
+  (values
+    '("caseless" "G_REGEX_CASELESS" "1 << 0")
+    '("multiline" "G_REGEX_MULTILINE" "1 << 1")
+    '("dotall" "G_REGEX_DOTALL" "1 << 2")
+    '("extended" "G_REGEX_EXTENDED" "1 << 3")
+    '("anchored" "G_REGEX_ANCHORED" "1 << 4")
+    '("dollar-endonly" "G_REGEX_DOLLAR_ENDONLY" "1 << 5")
+    '("ungreedy" "G_REGEX_UNGREEDY" "1 << 9")
+    '("raw" "G_REGEX_RAW" "1 << 11")
+    '("no-auto-capture" "G_REGEX_NO_AUTO_CAPTURE" "1 << 12")
+    '("optimize" "G_REGEX_OPTIMIZE" "1 << 13")
+    '("dupnames" "G_REGEX_DUPNAMES" "1 << 19")
+    '("newline-cr" "G_REGEX_NEWLINE_CR" "1 << 20")
+    '("newline-lf" "G_REGEX_NEWLINE_LF" "1 << 21")
+    '("newline-crlf" "G_REGEX_NEWLINE_CRLF" "0x100000")
+  )
+)
+
+(define-flags-extended RegexMatchFlags
+  (in-module "G")
+  (c-name "GRegexMatchFlags")
+  (values
+    '("anchored" "G_REGEX_MATCH_ANCHORED" "1 << 4")
+    '("notbol" "G_REGEX_MATCH_NOTBOL" "1 << 7")
+    '("noteol" "G_REGEX_MATCH_NOTEOL" "1 << 8")
+    '("notempty" "G_REGEX_MATCH_NOTEMPTY" "1 << 10")
+    '("partial" "G_REGEX_MATCH_PARTIAL" "1 << 15")
+    '("newline-cr" "G_REGEX_MATCH_NEWLINE_CR" "1 << 20")
+    '("newline-lf" "G_REGEX_MATCH_NEWLINE_LF" "1 << 21")
+    '("newline-crlf" "G_REGEX_MATCH_NEWLINE_CRLF" "0x100000")
+    '("newline-any" "G_REGEX_MATCH_NEWLINE_ANY" "1 << 22")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gscanner.h
 
 (define-enum-extended ErrorType
   (in-module "G")
@@ -359,38 +408,7 @@
   )
 )
 
-(define-enum-extended TokenType
-  (in-module "G")
-  (c-name "GTokenType")
-  (values
-    '("eof" "G_TOKEN_EOF" "0")
-    '("left-paren" "G_TOKEN_LEFT_PAREN" "'gmmproc_cannot_handle_quoted_left_bracket'")
-    '("right-paren" "G_TOKEN_RIGHT_PAREN" "'gmmproc_cannot_handle_quoted_right_bracket'")
-    '("left-curly" "G_TOKEN_LEFT_CURLY" "'{'")
-    '("right-curly" "G_TOKEN_RIGHT_CURLY" "']'")
-    '("left-brace" "G_TOKEN_LEFT_BRACE" "'['")
-    '("right-brace" "G_TOKEN_RIGHT_BRACE" "']'")
-    '("equal-sign" "G_TOKEN_EQUAL_SIGN" "'='")
-    '("comma" "G_TOKEN_COMMA" "','")
-    '("none" "G_TOKEN_NONE" "256")
-    '("error" "G_TOKEN_ERROR" "257")
-    '("char" "G_TOKEN_CHAR" "258")
-    '("binary" "G_TOKEN_BINARY" "259")
-    '("octal" "G_TOKEN_OCTAL" "260")
-    '("int" "G_TOKEN_INT" "261")
-    '("hex" "G_TOKEN_HEX" "262")
-    '("float" "G_TOKEN_FLOAT" "263")
-    '("string" "G_TOKEN_STRING" "264")
-    '("symbol" "G_TOKEN_SYMBOL" "265")
-    '("identifier" "G_TOKEN_IDENTIFIER" "266")
-    '("identifier-null" "G_TOKEN_IDENTIFIER_NULL" "267")
-    '("comment-single" "G_TOKEN_COMMENT_SINGLE" "268")
-    '("comment-multi" "G_TOKEN_COMMENT_MULTI" "269")
-    '("last" "G_TOKEN_LAST" "270")
-  )
-)
-
-;; From /home/murrayc/cvs/gnome212/glib/glib/gshell.h
+;; From /opt/gnome218/include/glib-2.0/glib/gshell.h
 
 (define-enum-extended ShellError
   (in-module "G")
@@ -402,7 +420,22 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gspawn.h
+;; From /opt/gnome218/include/glib-2.0/glib/gslice.h
+
+(define-enum-extended SliceConfig
+  (in-module "G")
+  (c-name "GSliceConfig")
+  (values
+    '("always-malloc" "G_SLICE_CONFIG_ALWAYS_MALLOC" "1")
+    '("bypass-magazines" "G_SLICE_CONFIG_BYPASS_MAGAZINES" "2")
+    '("working-set-msecs" "G_SLICE_CONFIG_WORKING_SET_MSECS" "3")
+    '("color-increment" "G_SLICE_CONFIG_COLOR_INCREMENT" "4")
+    '("chunk-sizes" "G_SLICE_CONFIG_CHUNK_SIZES" "5")
+    '("contention-counter" "G_SLICE_CONFIG_CONTENTION_COUNTER" "6")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gspawn.h
 
 (define-enum-extended SpawnError
   (in-module "G")
@@ -444,7 +477,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gstrfuncs.h
+;; From /opt/gnome218/include/glib-2.0/glib/gstrfuncs.h
 
 (define-flags-extended AsciiType
   (in-module "G")
@@ -464,7 +497,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gthread.h
+;; From /opt/gnome218/include/glib-2.0/glib/gthread.h
 
 (define-enum-extended ThreadError
   (in-module "G")
@@ -495,7 +528,7 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/glib/gunicode.h
+;; From /opt/gnome218/include/glib-2.0/glib/gunicode.h
 
 (define-enum-extended UnicodeType
   (in-module "G")
@@ -569,6 +602,86 @@
     '("unknown" "G_UNICODE_BREAK_UNKNOWN" "28")
     '("next-line" "G_UNICODE_BREAK_NEXT_LINE" "29")
     '("word-joiner" "G_UNICODE_BREAK_WORD_JOINER" "30")
+    '("hangul-l-jamo" "G_UNICODE_BREAK_HANGUL_L_JAMO" "31")
+    '("hangul-v-jamo" "G_UNICODE_BREAK_HANGUL_V_JAMO" "32")
+    '("hangul-t-jamo" "G_UNICODE_BREAK_HANGUL_T_JAMO" "33")
+    '("hangul-lv-syllable" "G_UNICODE_BREAK_HANGUL_LV_SYLLABLE" "34")
+    '("hangul-lvt-syllable" "G_UNICODE_BREAK_HANGUL_LVT_SYLLABLE" "35")
+  )
+)
+
+(define-enum-extended UnicodeScript
+  (in-module "G")
+  (c-name "GUnicodeScript")
+  (values
+    '("invalid-code" "G_UNICODE_SCRIPT_INVALID_CODE" "-1")
+    '("common" "G_UNICODE_SCRIPT_COMMON" "0")
+    '("inherited" "G_UNICODE_SCRIPT_INHERITED" "1")
+    '("arabic" "G_UNICODE_SCRIPT_ARABIC" "2")
+    '("armenian" "G_UNICODE_SCRIPT_ARMENIAN" "3")
+    '("bengali" "G_UNICODE_SCRIPT_BENGALI" "4")
+    '("bopomofo" "G_UNICODE_SCRIPT_BOPOMOFO" "5")
+    '("cherokee" "G_UNICODE_SCRIPT_CHEROKEE" "6")
+    '("coptic" "G_UNICODE_SCRIPT_COPTIC" "7")
+    '("cyrillic" "G_UNICODE_SCRIPT_CYRILLIC" "8")
+    '("deseret" "G_UNICODE_SCRIPT_DESERET" "9")
+    '("devanagari" "G_UNICODE_SCRIPT_DEVANAGARI" "10")
+    '("ethiopic" "G_UNICODE_SCRIPT_ETHIOPIC" "11")
+    '("georgian" "G_UNICODE_SCRIPT_GEORGIAN" "12")
+    '("gothic" "G_UNICODE_SCRIPT_GOTHIC" "13")
+    '("greek" "G_UNICODE_SCRIPT_GREEK" "14")
+    '("gujarati" "G_UNICODE_SCRIPT_GUJARATI" "15")
+    '("gurmukhi" "G_UNICODE_SCRIPT_GURMUKHI" "16")
+    '("han" "G_UNICODE_SCRIPT_HAN" "17")
+    '("hangul" "G_UNICODE_SCRIPT_HANGUL" "18")
+    '("hebrew" "G_UNICODE_SCRIPT_HEBREW" "19")
+    '("hiragana" "G_UNICODE_SCRIPT_HIRAGANA" "20")
+    '("kannada" "G_UNICODE_SCRIPT_KANNADA" "21")
+    '("katakana" "G_UNICODE_SCRIPT_KATAKANA" "22")
+    '("khmer" "G_UNICODE_SCRIPT_KHMER" "23")
+    '("lao" "G_UNICODE_SCRIPT_LAO" "24")
+    '("latin" "G_UNICODE_SCRIPT_LATIN" "25")
+    '("malayalam" "G_UNICODE_SCRIPT_MALAYALAM" "26")
+    '("mongolian" "G_UNICODE_SCRIPT_MONGOLIAN" "27")
+    '("myanmar" "G_UNICODE_SCRIPT_MYANMAR" "28")
+    '("ogham" "G_UNICODE_SCRIPT_OGHAM" "29")
+    '("old-italic" "G_UNICODE_SCRIPT_OLD_ITALIC" "30")
+    '("oriya" "G_UNICODE_SCRIPT_ORIYA" "31")
+    '("runic" "G_UNICODE_SCRIPT_RUNIC" "32")
+    '("sinhala" "G_UNICODE_SCRIPT_SINHALA" "33")
+    '("syriac" "G_UNICODE_SCRIPT_SYRIAC" "34")
+    '("tamil" "G_UNICODE_SCRIPT_TAMIL" "35")
+    '("telugu" "G_UNICODE_SCRIPT_TELUGU" "36")
+    '("thaana" "G_UNICODE_SCRIPT_THAANA" "37")
+    '("thai" "G_UNICODE_SCRIPT_THAI" "38")
+    '("tibetan" "G_UNICODE_SCRIPT_TIBETAN" "39")
+    '("canadian-aboriginal" "G_UNICODE_SCRIPT_CANADIAN_ABORIGINAL" "40")
+    '("yi" "G_UNICODE_SCRIPT_YI" "41")
+    '("tagalog" "G_UNICODE_SCRIPT_TAGALOG" "42")
+    '("hanunoo" "G_UNICODE_SCRIPT_HANUNOO" "43")
+    '("buhid" "G_UNICODE_SCRIPT_BUHID" "44")
+    '("tagbanwa" "G_UNICODE_SCRIPT_TAGBANWA" "45")
+    '("braille" "G_UNICODE_SCRIPT_BRAILLE" "46")
+    '("cypriot" "G_UNICODE_SCRIPT_CYPRIOT" "47")
+    '("limbu" "G_UNICODE_SCRIPT_LIMBU" "48")
+    '("osmanya" "G_UNICODE_SCRIPT_OSMANYA" "49")
+    '("shavian" "G_UNICODE_SCRIPT_SHAVIAN" "50")
+    '("linear-b" "G_UNICODE_SCRIPT_LINEAR_B" "51")
+    '("tai-le" "G_UNICODE_SCRIPT_TAI_LE" "52")
+    '("ugaritic" "G_UNICODE_SCRIPT_UGARITIC" "53")
+    '("new-tai-lue" "G_UNICODE_SCRIPT_NEW_TAI_LUE" "54")
+    '("buginese" "G_UNICODE_SCRIPT_BUGINESE" "55")
+    '("glagolitic" "G_UNICODE_SCRIPT_GLAGOLITIC" "56")
+    '("tifinagh" "G_UNICODE_SCRIPT_TIFINAGH" "57")
+    '("syloti-nagri" "G_UNICODE_SCRIPT_SYLOTI_NAGRI" "58")
+    '("old-persian" "G_UNICODE_SCRIPT_OLD_PERSIAN" "59")
+    '("kharoshthi" "G_UNICODE_SCRIPT_KHAROSHTHI" "60")
+    '("unknown" "G_UNICODE_SCRIPT_UNKNOWN" "61")
+    '("balinese" "G_UNICODE_SCRIPT_BALINESE" "62")
+    '("cuneiform" "G_UNICODE_SCRIPT_CUNEIFORM" "63")
+    '("phoenician" "G_UNICODE_SCRIPT_PHOENICIAN" "64")
+    '("phags-pa" "G_UNICODE_SCRIPT_PHAGS_PA" "65")
+    '("nko" "G_UNICODE_SCRIPT_NKO" "66")
   )
 )
 
@@ -577,7 +690,7 @@
   (c-name "GNormalizeMode")
   (values
     '("default" "G_NORMALIZE_DEFAULT" "0")
-    '("nfd" "G_NORMALIZE_NFD" "0")
+    '("nfd" "G_NORMALIZE_NFD" "#error")
     '("default-compose" "G_NORMALIZE_DEFAULT_COMPOSE" "1")
     '("nfc" "G_NORMALIZE_NFC" "1")
     '("all" "G_NORMALIZE_ALL" "2")
@@ -587,96 +700,21 @@
   )
 )
 
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gparam.h
+;; From /opt/gnome218/include/glib-2.0/glib/gutils.h
 
-(define-flags-extended ParamFlags
+(define-enum-extended UserDirectory
   (in-module "G")
-  (c-name "GParamFlags")
+  (c-name "GUserDirectory")
   (values
-    '("readable" "G_PARAM_READABLE" "1 << 0")
-    '("writable" "G_PARAM_WRITABLE" "1 << 1")
-    '("construct" "G_PARAM_CONSTRUCT" "1 << 2")
-    '("construct-only" "G_PARAM_CONSTRUCT_ONLY" "1 << 3")
-    '("lax-validation" "G_PARAM_LAX_VALIDATION" "1 << 4")
-    '("static-name" "G_PARAM_STATIC_NAME" "1 << 5")
-    '("static-blurb" "G_PARAM_STATIC_BLURB" "1 << 7")
-  )
-)
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gsignal.h
-
-(define-flags-extended SignalFlags
-  (in-module "G")
-  (c-name "GSignalFlags")
-  (values
-    '("run-first" "G_SIGNAL_RUN_FIRST" "1 << 0")
-    '("run-last" "G_SIGNAL_RUN_LAST" "1 << 1")
-    '("run-cleanup" "G_SIGNAL_RUN_CLEANUP" "1 << 2")
-    '("no-recurse" "G_SIGNAL_NO_RECURSE" "1 << 3")
-    '("detailed" "G_SIGNAL_DETAILED" "1 << 4")
-    '("action" "G_SIGNAL_ACTION" "1 << 5")
-    '("no-hooks" "G_SIGNAL_NO_HOOKS" "1 << 6")
-  )
-)
-
-(define-flags-extended ConnectFlags
-  (in-module "G")
-  (c-name "GConnectFlags")
-  (values
-    '("after" "G_CONNECT_AFTER" "1 << 0")
-    '("swapped" "G_CONNECT_SWAPPED" "1 << 1")
-  )
-)
-
-(define-flags-extended SignalMatchType
-  (in-module "G")
-  (c-name "GSignalMatchType")
-  (values
-    '("id" "G_SIGNAL_MATCH_ID" "1 << 0")
-    '("detail" "G_SIGNAL_MATCH_DETAIL" "1 << 1")
-    '("closure" "G_SIGNAL_MATCH_CLOSURE" "1 << 2")
-    '("func" "G_SIGNAL_MATCH_FUNC" "1 << 3")
-    '("data" "G_SIGNAL_MATCH_DATA" "1 << 4")
-    '("unblocked" "G_SIGNAL_MATCH_UNBLOCKED" "1 << 5")
-  )
-)
-
-;; From /home/murrayc/cvs/gnome212/glib/gobject/gtype.h
-
-(define-flags-extended TypeDebugFlags
-  (in-module "G")
-  (c-name "GTypeDebugFlags")
-  (values
-    '("none" "G_TYPE_DEBUG_NONE" "0")
-    '("objects" "G_TYPE_DEBUG_OBJECTS" "1 << 0")
-    '("signals" "G_TYPE_DEBUG_SIGNALS" "1 << 1")
-    '("mask" "G_TYPE_DEBUG_MASK" "0x03")
-  )
-)
-
-(define-enum-extended TypeFundamentalFlags
-  (in-module "G")
-  (c-name "GTypeFundamentalFlags")
-  (values
-  )
-)
-
-(define-enum-extended TypeFlags
-  (in-module "G")
-  (c-name "GTypeFlags")
-  (values
-  )
-)
-
-;; From /home/murrayc/cvs/gnome212/glib/gmodule/gmodule.h
-
-(define-flags-extended ModuleFlags
-  (in-module "G")
-  (c-name "GModuleFlags")
-  (values
-    '("lazy" "G_MODULE_BIND_LAZY" "1 << 0")
-    '("local" "G_MODULE_BIND_LOCAL" "1 << 1")
-    '("mask" "G_MODULE_BIND_MASK" "0x03")
+    '("directory-desktop" "G_USER_DIRECTORY_DESKTOP" "0")
+    '("directory-documents" "G_USER_DIRECTORY_DOCUMENTS" "1")
+    '("directory-download" "G_USER_DIRECTORY_DOWNLOAD" "2")
+    '("directory-music" "G_USER_DIRECTORY_MUSIC" "3")
+    '("directory-pictures" "G_USER_DIRECTORY_PICTURES" "4")
+    '("directory-public-share" "G_USER_DIRECTORY_PUBLIC_SHARE" "5")
+    '("directory-templates" "G_USER_DIRECTORY_TEMPLATES" "6")
+    '("directory-videos" "G_USER_DIRECTORY_VIDEOS" "7")
+    '("n-directories" "G_USER_N_DIRECTORIES" "8")
   )
 )
 

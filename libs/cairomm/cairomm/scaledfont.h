@@ -77,9 +77,11 @@ public:
   static RefPtr<ScaledFont> create(FontFace& font_face, const Matrix& font_matrix,
       const Matrix& ctm, const FontOptions& options);
 
+  //TODO: This should really be get_extents().
   /** Gets the metrics for a ScaledFont */
   void extents(FontExtents& extents) const;
 
+  //TODO: This should really be get_text_extents().
   /** Gets the extents for a string of text. The extents describe a user-space
    * rectangle that encloses the "inked" portion of the text drawn at the origin
    * (0,0) (as it would be drawn by Context::show_text() if the cairo graphics
@@ -102,6 +104,7 @@ public:
    */
   void text_extents(const std::string& utf8, TextExtents& extents) const;
 
+  //TODO: This should really be get_glyph_extents().
   /** Gets the extents for an array of glyphs. The extents describe a user-space
    * rectangle that encloses the "inked" portion of the glyphs, (as they would
    * be drawn by Context::show_glyphs() if the cairo graphics state were set to the

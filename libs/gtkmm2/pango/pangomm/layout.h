@@ -238,7 +238,9 @@ public:
   /** Does a deep copy-by-value of the @a src  layout. The attribute list,
    * tab array, and text from the original layout are all copied by
    * value.
-   * @return A new Pango::Layout identical to @a src .
+   * @return The newly allocated Pango::Layout, with a reference
+   * count of one, which should be freed with
+   * Glib::object_unref().
    */
   Glib::RefPtr<Layout> copy();
   
@@ -250,6 +252,7 @@ public:
   Glib::RefPtr<Context> get_context() const;
   
   /** Sets the text attributes for a layout object.
+   * References @a attrs , so the caller can unref its reference.
    * @param attrs A Pango::AttrList.
    */
   void set_attributes(AttrList& attrs);
@@ -307,22 +310,24 @@ public:
    * or <tt>0</tt> if the font description from the layout's
    * context is inherited. This value is owned by the layout
    * and must not be modified or freed.
+   * 
+   * Since: 1.8.
    */
   FontDescription get_font_description() const;
 
   
-  /** Sets the width to which the lines of the Pango::Layout should be wrapped.
-   * @param width The desired width, or -1 to indicate that no wrapping should be
-   * performed.
+  /** Sets the width to which the lines of the Pango::Layout should wrap.
+   * @param width The desired width in Pango units, or -1 to indicate that no
+   * wrapping should be performed.
    */
   void set_width(int width);
   
-  /** Gets the width to which the lines of the Pango::Layout should be wrapped.
-   * @return The width.
+  /** Gets the width to which the lines of the Pango::Layout should wrap.
+   * @return The width, or -1 if no width set.
    */
   int get_width() const;
   
-  /** Sets the wrap mode; the wrap mode only has an effect if a width
+  /** Sets the wrap mode; the wrap mode only has effect if a width
    * is set on the layout with pango_layout_set_width(). To turn off wrapping,
    * set the width to -1.
    * @param wrap The wrap mode.
@@ -330,46 +335,66 @@ public:
   void set_wrap(WrapMode wrap);
   
   /** Gets the wrap mode for the layout.
+   * 
+   * Use pango_layout_is_wrapped() to query whether any paragraphs
+   * were actually wrapped.
    * @return Active wrap mode.
    */
   WrapMode get_wrap() const;
   
-  /** Sets the width in pango units to indent each paragraph. A negative value
-   * of @a indent  will produce a hanging indent. That is, the first line will
+  /** Queries whether the layout had to wrap any paragraphs.
+   * 
+   * This returns <tt>true</tt> if a positive width is set on @a layout ,
+   * ellipsization mode of @a layout  is set to Pango::ELLIPSIZE_NONE,
+   * and there are paragraphs exceeding the layout width that have
+   * to be wrapped.
+   * @return <tt>true</tt> if any paragraphs had to be wrapped, <tt>false</tt>
+   * otherwise.
+   * 
+   * Since: 1.16.
+   */
+  bool is_wrapped() const;
+  
+  /** Sets the width in Pango units to indent each paragraph. A negative value
+   * of @a indent  will produce a hanging indentation. That is, the first line will
    * have the full width, and subsequent lines will be indented by the
    * absolute value of @a indent .
-   * @param indent The amount by which to indentset.
+   * @param indent The amount by which to indent.
    */
   void set_indent(int indent);
   
-  /** Gets the paragraph indent width in pango units. A negative value
-   * indicates a hanging indent.
+  /** Gets the paragraph indent width in Pango units. A negative value
+   * indicates a hanging indentation.
    * @return The indent.
    */
   int get_indent() const;
   
-  /** Sets the amount of spacing between the lines of the layout.
+  /** Sets the amount of spacing in Pango::GlyphUnit between the lines of the
+   * layout.
    * @param spacing The amount of spacing.
    */
   void set_spacing(int spacing);
   
-  /** Gets the amount of spacing between the lines of the layout.
-   * @return The spacing (in Pango::GlyphUnit).
+  /** Gets the amount of spacing in Pango::GlyphUnit between the lines of the
+   * layout.
+   * @return The spacing.
    */
   int get_spacing() const;
   
-  /** Sets whether or not each complete line should be stretched to
+  /** Sets whether each complete line should be stretched to
    * fill the entire width of the layout. This stretching is typically
    * done by adding whitespace, but for some scripts (such as Arabic),
-   * the justification is done by extending the characters.
+   * the justification may be done in more complex ways, like extending
+   * the characters.
    * 
-   * Note that as of Pango-1.4, this functionality is not yet implemented.
+   * Note that this setting is not implemented and so is ignored in Pango
+   * older than 1.18.
    * @param justify Whether the lines in the layout should be justified.
    */
   void set_justify(bool justify = true);
   
-  /** Gets whether or not each complete line should be stretched to
-   * fill the entire width of the layout.
+  /** Gets whether each complete line should be stretched to fill the entire
+   * width of the layout.
    * @return The justify.
    */
   bool get_justify() const;
@@ -378,8 +403,10 @@ public:
   /** Gets whether to calculate the bidirectional base direction
    * for the layout according to the contents of the layout.
    * See pango_layout_set_auto_dir().
-   * @return If <tt>true</tt>, the bidirectional base direction
-   * is computed from the layout's contents.
+   * @return <tt>true</tt> if the bidirectional base direction
+   * is computed from the layout's contents, <tt>false</tt> otherwise.
+   * 
+   * Since: 1.4.
    */
   bool get_auto_dir() const;
   
@@ -393,27 +420,29 @@ public:
    * characters get their direction from the surrounding paragraphs.
    * 
    * When <tt>false</tt>, the choice between left-to-right and
-   * right-to-left layout is done by according to the base direction
+   * right-to-left layout is done according to the base direction
    * of the layout's Pango::Context. (See pango_context_set_base_dir()).
    * 
-   * When the auto-computed direction or a paragraph differs from the
-   * base direction of the context, then the interpretation of
+   * When the auto-computed direction of a paragraph differs from the
+   * base direction of the context, the interpretation of
    * Pango::ALIGN_LEFT and Pango::ALIGN_RIGHT are swapped.
+   * 
+   * Since: 1.4
    * @param auto_dir If <tt>true</tt>, compute the bidirectional base direction
    * from the layout's contents.
    */
   void set_auto_dir(bool auto_dir = true);
   
   
-  /** Sets the alignment for the layout (how partial lines are
-   * positioned within the horizontal space available.)
-   * @param alignment The new alignment.
+  /** Sets the alignment for the layout: how partial lines are
+   * positioned within the horizontal space available.
+   * @param alignment The alignment.
    */
   void set_alignment(Alignment alignment);
   
-  /** Sets the alignment for the layout (how partial lines are
-   * positioned within the horizontal space available.)
-   * @return The alignment value.
+  /** Gets the alignment for the layout: how partial lines are
+   * positioned within the horizontal space available.
+   * @return The alignment.
    */
   Alignment get_alignment() const;
 
@@ -443,8 +472,8 @@ public:
   void set_single_paragraph_mode(bool setting = true);
   
   /** Obtains the value set by pango_layout_set_single_paragraph_mode().
-   * @return <tt>true</tt> if the layout does not break paragraphs at 
-   * paragraph separator characters.
+   * @return <tt>true</tt> if the layout does not break paragraphs at
+   * paragraph separator characters, <tt>false</tt> otherwise.
    */
   bool get_single_paragraph_mode() const;
 
@@ -465,11 +494,37 @@ public:
   
   /** Gets the type of ellipsization being performed for @a layout .
    * See pango_layout_set_ellipsize()
-   * @return The current ellipsization mode for @a layout 
+   * @return The current ellipsization mode for @a layout .
+   * 
+   * Use pango_layout_is_ellipsized() to query whether any paragraphs
+   * were actually ellipsized.
    * 
    * Since: 1.6.
    */
   EllipsizeMode get_ellipsize() const;
+
+  
+  /** Queries whether the layout had to ellipsize any paragraphs.
+   * 
+   * This returns <tt>true</tt> if the ellipsization mode for @a layout 
+   * is not Pango::ELLIPSIZE_NONE, a positive width is set on @a layout ,
+   * and there are paragraphs exceeding that width that have to be
+   * ellipsized.
+   * @return <tt>true</tt> if any paragraphs had to be ellipsized, <tt>false</tt>
+   * otherwise.
+   * 
+   * Since: 1.16.
+   */
+  bool is_ellipsized() const;
+  
+  /** Counts the number unknown glyphs in @a layout .  That is, zero if
+   * glyphs for all characters in the layout text were found, or more
+   * than zero otherwise.
+   * @return The number of unknown glyphs in @a layout .
+   * 
+   * Since: 1.16.
+   */
+  int get_unknown_glyphs_count() const;
 
   
   /** Forces recomputation of any state in the Pango::Layout that
@@ -497,13 +552,13 @@ public:
   /** Converts from byte @a index  within the @a layout  to line and X position.
    * (X position is measured from the left edge of the line)
    * @param index The byte index of a grapheme within the layout.
-   * @param trailing An integer indicating the edge of the grapheme to retrieve the 
-   * position of. If 0, the trailing edge of the grapheme, if &gt; 0, 
+   * @param trailing An integer indicating the edge of the grapheme to retrieve the
+   * position of. If 0, the trailing edge of the grapheme, if &gt; 0,
    * the leading of the grapheme.
    * @param line Location to store resulting line index. (which will
    * between 0 and pango_layout_get_line_count(layout) - 1).
    * @param x_pos Location to store resulting position within line
-   * (in thousandths of a device unit).
+   * (Pango::SCALE units per device unit).
    */
   void index_to_line_x(int index_, bool trailing, int& line, int& x_pos) const;
 
@@ -536,13 +591,13 @@ public:
 
   
   /** Computes a new cursor position from an old position and
-   * a count of positions to move visually. If @a count  is positive,
+   * a count of positions to move visually. If @a direction  is positive,
    * then the new strong cursor position will be one position
-   * to the right of the old cursor position. If @a count  is position
+   * to the right of the old cursor position. If @a direction  is negative,
    * then the new strong cursor position will be one position
-   * to the left of the old cursor position. 
+   * to the left of the old cursor position.
    * 
-   * In the presence of bidirection text, the correspondence
+   * In the presence of bidirectional text, the correspondence
    * between logical and visual order will depend on the direction
    * of the current run, and there may be jumps when the cursor
    * is moved off of the end of a run.
@@ -555,14 +610,14 @@ public:
    * weak cursor. The strong cursor is the cursor corresponding
    * to text insertion in the base direction for the layout.
    * @param old_index The byte index of the grapheme for the old index.
-   * @param old_trailing If 0, the cursor was at the trailing edge of the 
+   * @param old_trailing If 0, the cursor was at the trailing edge of the
    * grapheme indicated by @a old_index , if &gt; 0, the cursor
    * was at the leading edge.
    * @param direction Direction to move cursor. A negative
    * value indicates motion to the left.
-   * @param new_index Location to store the new cursor byte index. A value of -1 
+   * @param new_index Location to store the new cursor byte index. A value of -1
    * indicates that the cursor has been moved off the beginning
-   * of the layout. A value of G_MAXINT indicates that
+   * of the layout. A value of G::MAXINT indicates that
    * the cursor has been moved off the end of the layout.
    * @param new_trailing Number of characters to move forward from the location returned
    * for @a new_index  to get the position where the cursor should
@@ -576,7 +631,7 @@ public:
      int& new_index, int& new_trailing) const;
 
   
-  /** Converts from X and Y position within a layout to the byte 
+  /** Converts from X and Y position within a layout to the byte
    * index to the character at that logical position. If the
    * Y position is not inside the layout, the closest position is chosen
    * (the position will be clamped inside the layout). If the
@@ -593,7 +648,7 @@ public:
    * in the grapheme the user clicked. It will either
    * be zero, or the number of characters in the
    * grapheme. 0 represents the trailing edge of the grapheme.
-   * @return <tt>true</tt> if the coordinates were inside text.
+   * @return <tt>true</tt> if the coordinates were inside text, <tt>false</tt> otherwise.
    */
   bool xy_to_index(int x, int y, int& index, int& trailing) const;
 
@@ -640,7 +695,7 @@ public:
 
   
   /** Determines the logical width and height of a Pango::Layout
-   * in Pango units. (device units divided by Pango::SCALE). This
+   * in Pango units (device units scaled by Pango::SCALE). This
    * is simply a convenience function around pango_layout_get_extents().
    * @param width Location to store the logical width, or <tt>0</tt>.
    * @param height Location to store the logical height, or <tt>0</tt>.
@@ -649,8 +704,9 @@ public:
   
   /** Determines the logical width and height of a Pango::Layout
    * in device units. (pango_layout_get_size() returns the width
-   * and height in thousandths of a device unit.) This
-   * is simply a convenience function around pango_layout_get_extents().
+   * and height scaled by Pango::SCALE.) This
+   * is simply a convenience function around
+   * pango_layout_get_pixel_extents().
    * @param width Location to store the logical width, or <tt>0</tt>.
    * @param height Location to store the logical height, or <tt>0</tt>.
    */
@@ -662,8 +718,12 @@ public:
    */
   int get_line_count() const;
   
+  //Note that the const version uses a different (faster) C function:
   
   /** Retrieves a particular line from a Pango::Layout.
+   * 
+   * Use the faster pango_layout_get_line_readonly() if you do not plan
+   * to modify the contents of the line (glyphs, glyph widths, etc.).
    * @param line The index of a line, which must be between 0 and
    * <tt>pango_layout_get_line_count(layout) - 1</tt>, inclusive.
    * @return The requested Pango::LayoutLine, or <tt>0</tt> if the
@@ -674,17 +734,25 @@ public:
   Glib::RefPtr<LayoutLine> get_line(int line);
   
   /** Retrieves a particular line from a Pango::Layout.
+   * 
+   * This is a faster alternative to pango_layout_get_line(),
+   * but the user is not expected
+   * to modify the contents of the line (glyphs, glyph widths, etc.).
    * @param line The index of a line, which must be between 0 and
    * <tt>pango_layout_get_line_count(layout) - 1</tt>, inclusive.
    * @return The requested Pango::LayoutLine, or <tt>0</tt> if the
    * index is out of range. This layout line can
    * be ref'ed and retained, but will become invalid
    * if changes are made to the Pango::Layout.
+   * No changes should be made to the line.
+   * 
+   * Since: 1.16.
    */
-  Glib::RefPtr<const LayoutLine> get_line(int line) const;
+  Glib::RefPtr<const LayoutLine> get_line(int line) const; 
+
+  //Note that the const version uses a different (faster) C function:
   
-  
-  /** Returns the lines of the @a layout  as a list.
+  /** Return value: a G::SList containing the lines in the layout. This
    * @return A G::SList containing the lines in the layout. This
    * points to internal data of the Pango::Layout and must be used with
    * care. It will become invalid on any change to the layout's
@@ -692,11 +760,13 @@ public:
    */
   SListHandle_LayoutLine get_lines();
   
-  /** Returns the lines of the @a layout  as a list.
+  /** Return value: a G::SList containing the lines in the layout. This
    * @return A G::SList containing the lines in the layout. This
    * points to internal data of the Pango::Layout and must be used with
    * care. It will become invalid on any change to the layout's
-   * text or properties.
+   * text or properties.  No changes should be made to the lines.
+   * 
+   * Since: 1.16.
    */
   SListHandle_ConstLayoutLine get_lines() const;
   
@@ -739,10 +809,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Pango::Layout
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Pango::Layout
    */
   Glib::RefPtr<Pango::Layout> wrap(PangoLayout* object, bool take_copy = false);
 }

@@ -1,0 +1,88 @@
+/* $Id: cellview.hg,v 1.6 2005/02/13 20:48:35 murrayc Exp $ */
+
+/* cellview.h
+ * 
+ * Copyright (C) 2004 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+
+#include <gtkmm/widget.h>
+#include <gtkmm/celllayout.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treepath.h>
+#include <gtkmm/cellrenderer.h>
+#include <gdkmm/pixbuf.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/widget_p.h)
+
+
+namespace Gtk
+{
+
+/** A widget displaying a single row of a TreeModel.
+ * A CellView displays a single row of a TreeModel, using cell renderers just like TreeView. CellView doesn't support some of the more 
+ * complex features of GtkTreeView, like cell editing and drag and drop.
+ *
+ * @ingroup Widgets
+ */
+class CellView :
+  public Widget,
+  public CellLayout
+{
+  _CLASS_GTKOBJECT(CellView, GtkCellView, GTK_CELL_VIEW, Gtk::Widget, GtkWidget)
+  _IMPLEMENTS_INTERFACE(CellLayout)
+  
+public:
+  _CTOR_DEFAULT()
+  
+  /** Creates a new CellView widget, adds a CellRendererText to it, and makes it show the text. 
+   * Optionally, the text can be marked up with the Pango text markup language.
+   *
+   * @param text The text to display in the cell view
+   * @param markup Whether the @a text uses Pango text markup language.
+   */
+  explicit CellView(const Glib::ustring& text, bool use_markup = false);
+  _IGNORE(gtk_cell_view_new_with_text, gtk_cell_view_new_with_markup)
+  
+  /** Creates a new CellView widget, adds a CellRendererPixbuf to it, and makes it show the pixbuf.
+   *
+   * @param pixbuf The image to display in the cell view
+   * @param markup Whether the @a text uses Pango text markup language.
+   */
+  explicit CellView(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
+  _IGNORE(gtk_cell_view_new_with_pixbuf)
+
+  //_WRAP_METHOD(void set_value(CellRenderer& renderer, const Glib::ustring& property, const Glib::ValueBase& value), gtk_cell_view_set_value)
+  _IGNORE(gtk_cell_view_set_values)
+
+  _WRAP_METHOD(void set_model(const Glib::RefPtr<TreeModel>& model), gtk_cell_view_set_model)
+  _WRAP_METHOD(void set_displayed_row(const TreeModel::Path& path), gtk_cell_view_set_displayed_row)
+  _WRAP_METHOD(TreeModel::Path get_displayed_row() const, gtk_cell_view_get_displayed_row)
+  _WRAP_METHOD(bool get_size_of_row(const TreeModel::Path& path, Requisition& requisition) const, gtk_cell_view_get_size_of_row)
+
+  _WRAP_METHOD(void set_background_color(const Gdk::Color& color), gtk_cell_view_set_background_color)
+
+  _WRAP_METHOD(Glib::ListHandle<CellRenderer*> get_cell_renderers(), gtk_cell_view_get_cell_renderers)
+  _WRAP_METHOD(Glib::ListHandle<const CellRenderer*> get_cell_renderers() const, gtk_cell_view_get_cell_renderers)
+
+};
+
+} // namespace Gtk
+
+
+

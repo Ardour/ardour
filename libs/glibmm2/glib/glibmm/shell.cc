@@ -5,7 +5,7 @@
 #include <glibmm/private/shell_p.h>
 
 // -*- c++ -*-
-/* $Id: shell.ccg,v 1.1.1.1 2003/01/07 16:58:38 murrayc Exp $ */
+/* $Id: shell.ccg,v 1.1 2003/01/07 16:58:38 murrayc Exp $ */
 
 /* Copyright (C) 2002 The gtkmm Development Team
  *

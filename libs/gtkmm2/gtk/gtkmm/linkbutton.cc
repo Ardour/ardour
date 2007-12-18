@@ -28,8 +28,55 @@
 
 #include <gtk/gtklinkbutton.h>
 
+
+static void SignalProxy_UriHook_gtk_callback(GtkLinkButton *button, const gchar *link, gpointer user_data)
+{
+  Gtk::LinkButton::SlotUri* the_slot = static_cast<Gtk::LinkButton::SlotUri*>(user_data);
+
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLE
+    // use Slot::operator()
+    (*the_slot)(Glib::wrap(button), Glib::convert_const_gchar_ptr_to_ustring(link));
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    Glib::exception_handlers_invoke();
+  }
+  #endif //GLIBMM_EXCEPTIONS_ENABLE
+}
+
+static void SignalProxy_UriHook_gtk_callback_destroy(void* data)
+{
+  delete static_cast<Gtk::LinkButton::SlotUri*>(data);
+}
+
+
 namespace Gtk
 {
+
+LinkButton::LinkButton(const Glib::ustring& uri)
+:
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Button(Glib::ConstructParams(linkbutton_class_.init(), "uri",uri.c_str(),"label",uri.c_str(), static_cast<char*>(0))) //Note that the uri is used for the label too, as in the C _new() function.
+{}
+
+void LinkButton::set_uri_hook(const SlotUri& slot)
+{
+  //Create a copy of the slot. A pointer to this will be passed through the callback's data parameter.
+  //It will be deleted when TreeView_Private::SignalProxy_CellData_gtk_callback_destroy() is called.
+   SlotUri* slot_copy = new SlotUri(slot);
+
+  gtk_link_button_set_uri_hook (&SignalProxy_UriHook_gtk_callback, slot_copy, &SignalProxy_UriHook_gtk_callback_destroy);
+}
+
+void LinkButton::unset_uri_hook()
+{
+  gtk_link_button_set_uri_hook (0, 0, 0);
+}
 
 
 } // namespace Gtk
@@ -136,22 +183,17 @@ GType LinkButton::get_base_type()
 
 LinkButton::LinkButton()
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
   Gtk::Button(Glib::ConstructParams(linkbutton_class_.init()))
-{
-  }
-
-LinkButton::LinkButton(const Glib::ustring& uri)
-:
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Button(Glib::ConstructParams(linkbutton_class_.init(), "uri", uri.c_str(), (char*) 0))
 {
   }
 
 LinkButton::LinkButton(const Glib::ustring& uri, const Glib::ustring& label)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Button(Glib::ConstructParams(linkbutton_class_.init(), "uri", uri.c_str(), "label", label.c_str(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Button(Glib::ConstructParams(linkbutton_class_.init(), "uri", uri.c_str(), "label", label.c_str(), static_cast<char*>(0)))
 {
   }
 

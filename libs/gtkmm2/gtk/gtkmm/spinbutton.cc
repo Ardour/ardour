@@ -33,8 +33,9 @@ namespace Gtk
 
 SpinButton::SpinButton(double climb_rate, guint digits)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Entry(Glib::ConstructParams(spinbutton_class_.init(), "climb_rate",climb_rate,"digits",digits, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Entry(Glib::ConstructParams(spinbutton_class_.init(), "climb_rate",climb_rate,"digits",digits, static_cast<char*>(0)))
 {}
 
 void SpinButton::unset_adjustment()
@@ -49,7 +50,7 @@ namespace
 {
 
 
-static gint SpinButton_signal_input_callback(GtkSpinButton* self, double* p0,void* data)
+static gint SpinButton_signal_input_callback(GtkSpinButton* self, gdouble* p0,void* data)
 {
   using namespace Gtk;
   typedef sigc::slot< int,double* > SlotType;
@@ -62,7 +63,8 @@ static gint SpinButton_signal_input_callback(GtkSpinButton* self, double* p0,voi
     {
     #endif //GLIBMM_EXCEPTIONS_ENABLED
       if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
-        return (*static_cast<SlotType*>(slot))(p0);
+        return (*static_cast<SlotType*>(slot))(p0
+);
     #ifdef GLIBMM_EXCEPTIONS_ENABLED
     }
     catch(...)
@@ -76,7 +78,7 @@ static gint SpinButton_signal_input_callback(GtkSpinButton* self, double* p0,voi
   return RType();
 }
 
-static gint SpinButton_signal_input_notify_callback(GtkSpinButton* self, double* p0, void* data)
+static gint SpinButton_signal_input_notify_callback(GtkSpinButton* self, gdouble* p0, void* data)
 {
   using namespace Gtk;
   typedef sigc::slot< void,double* > SlotType;
@@ -89,7 +91,8 @@ static gint SpinButton_signal_input_notify_callback(GtkSpinButton* self, double*
     {
     #endif //GLIBMM_EXCEPTIONS_ENABLED
       if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
-        (*static_cast<SlotType*>(slot))(p0);
+        (*static_cast<SlotType*>(slot))(p0
+);
     #ifdef GLIBMM_EXCEPTIONS_ENABLED
     }
     catch(...)
@@ -284,9 +287,9 @@ void SpinButton_Class::class_init_function(void* g_class, void* class_data)
 #endif //GLIBMM_VFUNCS_ENABLED
 
 #ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
-gint SpinButton_Class::input_callback(GtkSpinButton* self, double* p0)
+gint SpinButton_Class::input_callback(GtkSpinButton* self, gdouble* p0)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -294,39 +297,42 @@ gint SpinButton_Class::input_callback(GtkSpinButton* self, double* p0)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return obj->on_input(p0);
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return obj->on_input(p0
+);
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->input)
-      return (*base->input)(self, p0);
-  }
+  // Call the original underlying C function:
+  if(base && base->input)
+    return (*base->input)(self, p0);
 
   typedef gint RType;
   return RType();
 }
 gboolean SpinButton_Class::output_callback(GtkSpinButton* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -334,39 +340,41 @@ gboolean SpinButton_Class::output_callback(GtkSpinButton* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      return static_cast<int>(obj->on_output());
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        return static_cast<int>(obj->on_output());
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->output)
-      return (*base->output)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->output)
+    return (*base->output)(self);
 
   typedef gboolean RType;
   return RType();
 }
 void SpinButton_Class::value_changed_callback(GtkSpinButton* self)
 {
-  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+  Glib::ObjectBase *const obj_base = static_cast<Glib::ObjectBase*>(
       Glib::ObjectBase::_get_current_wrapper((GObject*)self));
 
   // Non-gtkmmproc-generated custom classes implicitly call the default
@@ -374,32 +382,35 @@ void SpinButton_Class::value_changed_callback(GtkSpinButton* self)
   // generated classes can use this optimisation, which avoids the unnecessary
   // parameter conversions if there is no possibility of the virtual function
   // being overridden:
-  if(obj && obj->is_derived_())
+  if(obj_base && obj_base->is_derived_())
   {
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
-    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    CppObjectType *const obj = dynamic_cast<CppObjectType* const>(obj_base);
+    if(obj) // This can be NULL during destruction.
     {
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
-      // Call the virtual member method, which derived classes might override.
-      obj->on_value_changed();
-    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try // Trap C++ exceptions which would normally be lost because this is a C callback.
+      {
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
+        // Call the virtual member method, which derived classes might override.
+        obj->on_value_changed();
+        return;
+      #ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+      #endif //GLIBMM_EXCEPTIONS_ENABLED
     }
-    catch(...)
-    {
-      Glib::exception_handlers_invoke();
-    }
-    #endif //GLIBMM_EXCEPTIONS_ENABLED
   }
-  else
-  {
-    BaseClassType *const base = static_cast<BaseClassType*>(
+  
+  BaseClassType *const base = static_cast<BaseClassType*>(
         g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
     );
 
-    // Call the original underlying C function:
-    if(base && base->value_changed)
-      (*base->value_changed)(self);
-  }
+  // Call the original underlying C function:
+  if(base && base->value_changed)
+    (*base->value_changed)(self);
 }
 #endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
 
@@ -445,8 +456,9 @@ GType SpinButton::get_base_type()
 
 SpinButton::SpinButton(Adjustment& adjustment, double climb_rate, guint digits)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Gtk::Entry(Glib::ConstructParams(spinbutton_class_.init(), "adjustment", (adjustment).gobj(), "climb_rate", climb_rate, "digits", digits, (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Gtk::Entry(Glib::ConstructParams(spinbutton_class_.init(), "adjustment", (adjustment).gobj(), "climb_rate", climb_rate, "digits", digits, static_cast<char*>(0)))
 {
   }
 

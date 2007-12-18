@@ -110,6 +110,7 @@ namespace Gtk
 class TextBuffer;
 class TextMark;
 
+//TODO: Maybe we should have separate iterators for words, lines, and sentences.
 /** Typefed as Gtk::TextBuffer::iterator.
  * An iterator represents a position between two characters in the text buffer. Iterators are not valid indefinitely; whenever the buffer is
  * modified in a way that affects the number of characters in the buffer, all outstanding iterators become invalid. (Note that
@@ -121,8 +122,7 @@ class TextMark;
  *
  * You can iterate over characters, words, lines, and sentences,
  * but operator*() and operator++() deal only in characters.
- *
- * TODO: Maybe we should have separate iterators for words, lines, and sentences.
+ * 
  * @ingroup TextView
  */
 class TextIter
@@ -212,91 +212,57 @@ protected:
 
 public:
   
-  /** Returns the Gtk::TextBuffer this iterator is associated with.
+  /** Return value: the buffer
    * @return The buffer.
    */
   Glib::RefPtr<TextBuffer> get_buffer() const;
 
   
-  /** Returns the character offset of an iterator.
-   * Each character in a Gtk::TextBuffer has an offset,
-   * starting with 0 for the first character in the buffer.
-   * Use Gtk::TextBuffer::get_iter_at_offset() to convert an
-   * offset back into an iterator.
+  /** Return value: a character offset
    * @return A character offset.
    */
   int get_offset() const;
   
-  /** Returns the line number containing the iterator. Lines in
-   * a Gtk::TextBuffer are numbered beginning with 0 for the first
-   * line in the buffer.
+  /** Return value: a line number
    * @return A line number.
    */
   int get_line() const;
   
-  /** Returns the character offset of the iterator,
-   * counting from the start of a newline-terminated line.
-   * The first character on the line has offset 0.
+  /** Return value: offset from start of line
    * @return Offset from start of line.
    */
   int get_line_offset() const;
   
-  /** Returns the byte index of the iterator, counting
-   * from the start of a newline-terminated line.
-   * Remember that Gtk::TextBuffer encodes text in
-   * UTF-8, and that characters can require a variable
-   * number of bytes to represent.
+  /** Return value: distance from start of line, in bytes
    * @return Distance from start of line, in bytes.
    */
   int get_line_index() const;
 
   
-  /** Returns the offset in characters from the start of the
-   * line to the given @a iter , not counting characters that
-   * are invisible due to tags with the "invisible" flag
-   * toggled on.
+  /** Return value: offset in visible characters from the start of the line
    * @return Offset in visible characters from the start of the line.
    */
   int get_visible_line_offset() const;
   
-  /** Returns the number of bytes from the start of the
-   * line to the given @a iter , not counting bytes that
-   * are invisible due to tags with the "invisible" flag
-   * toggled on.
+  /** Return value: byte index of @a iter  with respect to the start of the line
    * @return Byte index of @a iter  with respect to the start of the line.
    */
   int get_visible_line_index() const;
 
   
-  /** Returns the Unicode character at this iterator.  (Equivalent to
-   * operator* on a C++ iterator.)  If the element at this iterator is a
-   * non-character element, such as an image embedded in the buffer, the
-   * Unicode "unknown" character 0xFFFC is returned. If invoked on
-   * the end iterator, zero is returned; zero is not a valid Unicode character.
-   * So you can write a loop which ends when gtk_text_iter_get_char()
-   * returns 0.
+  /** returns 0.
+   * Return value: a Unicode character, or 0 if @a iter  is not dereferenceable
    * @return A Unicode character, or 0 if @a iter  is not dereferenceable.
    */
   gunichar get_char() const;
   
-  /** Returns the text in the given range. A "slice" is an array of
-   * characters encoded in UTF-8 format, including the Unicode "unknown"
-   * character 0xFFFC for iterable non-character elements in the buffer,
-   * such as images.  Because images are encoded in the slice, byte and
-   * character offsets in the returned array will correspond to byte
-   * offsets in the text buffer. Note that 0xFFFC can occur in normal
-   * text as well, so it is not a reliable indicator that a pixbuf or
-   * widget is in the buffer.
+  /** Return value: slice of text from the buffer
    * @param end Iterator at end of a range.
    * @return Slice of text from the buffer.
    */
   Glib::ustring get_slice(const TextIter& end) const;
   
-  /** Returns <em>text</em> in the given range.  If the range
-   * contains non-text elements such as images, the character and byte
-   * offsets in the returned string will not correspond to character and
-   * byte offsets in the buffer. If you want offsets to correspond, see
-   * gtk_text_iter_get_slice().
+  /** Return value: array of characters from the buffer
    * @param end Iterator at end of a range.
    * @return Array of characters from the buffer.
    */
@@ -326,20 +292,12 @@ public:
    */
   Glib::RefPtr<Gdk::Pixbuf> get_pixbuf() const;
   
-  /** Returns a list of all Gtk::TextMark at this location. Because marks
-   * are not iterable (they don't take up any "space" in the buffer,
-   * they are just marks in between iterable locations), multiple marks
-   * can exist in the same place. The returned list is not in any
-   * meaningful order.
+  /** Return value: list of Gtk::TextMark
    * @return List of Gtk::TextMark.
    */
   Glib::SListHandle< Glib::RefPtr<TextMark> > get_marks();
   
-  /** Returns a list of all Gtk::TextMark at this location. Because marks
-   * are not iterable (they don't take up any "space" in the buffer,
-   * they are just marks in between iterable locations), multiple marks
-   * can exist in the same place. The returned list is not in any
-   * meaningful order.
+  /** Return value: list of Gtk::TextMark
    * @return List of Gtk::TextMark.
    */
   Glib::SListHandle< Glib::RefPtr<const TextMark> > get_marks() const;
@@ -360,47 +318,27 @@ public:
   Glib::RefPtr<const TextChildAnchor> get_child_anchor() const;
 
   
-  /** Returns a list of Gtk::TextTag that are toggled on or off at this
-   * point.  (If @a toggled_on  is <tt>true</tt>, the list contains tags that are
-   * toggled on.) If a tag is toggled on at @a iter , then some non-empty
-   * range of characters following @a iter  has that tag applied to it.  If
-   * a tag is toggled off, then some non-empty range following @a iter 
-   * does <em>not</em> have the tag applied to it.
+  /** Return value: tags toggled at this point
    * @param toggled_on <tt>true</tt> to get toggled-on tags.
    * @return Tags toggled at this point.
    */
   Glib::SListHandle< Glib::RefPtr<TextTag> > get_toggled_tags(bool toggled_on = true);
   
-  /** Returns a list of Gtk::TextTag that are toggled on or off at this
-   * point.  (If @a toggled_on  is <tt>true</tt>, the list contains tags that are
-   * toggled on.) If a tag is toggled on at @a iter , then some non-empty
-   * range of characters following @a iter  has that tag applied to it.  If
-   * a tag is toggled off, then some non-empty range following @a iter 
-   * does <em>not</em> have the tag applied to it.
+  /** Return value: tags toggled at this point
    * @param toggled_on <tt>true</tt> to get toggled-on tags.
    * @return Tags toggled at this point.
    */
   Glib::SListHandle< Glib::RefPtr<const TextTag> > get_toggled_tags(bool toggled_on = true) const;
 
   
-  /** Returns <tt>true</tt> if @a tag  is toggled on at exactly this point. If @a tag 
-   * is <tt>0</tt>, returns <tt>true</tt> if any tag is toggled on at this point. Note
-   * that the gtk_text_iter_begins_tag() returns <tt>true</tt> if @a iter  is the
-   * <em>start</em> of the tagged range;
-   * gtk_text_iter_has_tag() tells you whether an iterator is
-   * <em>within</em> a tagged range.
+  /** Return value: whether @a iter  is the start of a range tagged with @a tag 
    * @param tag A Gtk::TextTag, or <tt>0</tt>.
    * @return Whether @a iter  is the start of a range tagged with @a tag .
    */
   bool begins_tag(const Glib::RefPtr<const TextTag>& tag) const;
   bool begins_tag() const;
   
-  /** Returns <tt>true</tt> if @a tag  is toggled off at exactly this point. If @a tag 
-   * is <tt>0</tt>, returns <tt>true</tt> if any tag is toggled off at this point. Note
-   * that the gtk_text_iter_ends_tag() returns <tt>true</tt> if @a iter  is the
-   * <em>end</em> of the tagged range;
-   * gtk_text_iter_has_tag() tells you whether an iterator is
-   * <em>within</em> a tagged range.
+  /** Return value: whether @a iter  is the end of a range tagged with @a tag 
    * @param tag A Gtk::TextTag, or <tt>0</tt>.
    * @return Whether @a iter  is the end of a range tagged with @a tag .
    */
@@ -417,7 +355,7 @@ public:
   bool toggles_tag() const;
 
   
-  /** Returns <tt>true</tt> if @a iter  is within a range tagged with @a tag .
+  /** Return value: whether @a iter  is tagged with @a tag 
    * @param tag A Gtk::TextTag.
    * @return Whether @a iter  is tagged with @a tag .
    */
@@ -438,18 +376,7 @@ public:
   Glib::SListHandle< Glib::RefPtr<const TextTag> > get_tags() const;
 
   
-  /** Returns whether the character at @a iter  is within an editable region
-   * of text.  Non-editable text is "locked" and can't be changed by the
-   * user via Gtk::TextView. This function is simply a convenience
-   * wrapper around gtk_text_iter_get_attributes(). If no tags applied
-   * to this text affect editability, @a default_setting  will be returned.
-   * 
-   * You don't want to use this function to decide whether text can be
-   * inserted at @a iter , because for insertion you don't want to know
-   * whether the char at @a iter  is inside an editable range, you want to
-   * know whether a new character inserted at @a iter  would be inside an
-   * editable range. Use gtk_text_iter_can_insert() to handle this
-   * case.
+  /** Return value: whether @a iter  is inside an editable range
    * @param default_setting <tt>true</tt> if text is editable by default.
    * @return Whether @a iter  is inside an editable range.
    */
@@ -516,23 +443,12 @@ public:
    */
   bool inside_sentence() const;
   
-  /** Returns <tt>true</tt> if @a iter  begins a paragraph,
-   * i.e.\ if gtk_text_iter_get_line_offset() would return 0.
-   * However this function is potentially more efficient than
-   * gtk_text_iter_get_line_offset() because it doesn't have to compute
-   * the offset, it just has to see whether it's 0.
+  /** Return value: whether @a iter  begins a line
    * @return Whether @a iter  begins a line.
    */
   bool starts_line() const;
   
-  /** Returns <tt>true</tt> if @a iter  points to the start of the paragraph
-   * delimiter characters for a line (delimiters will be either a
-   * newline, a carriage return, a carriage return followed by a
-   * newline, or a Unicode paragraph separator character). Note that an
-   * iterator pointing to the <tt>\\n</tt> of a <tt>\\r</tt><tt>\\n</tt> pair will not be counted as
-   * the end of a line, the line ends before the <tt>\\r</tt>. The end iterator is
-   * considered to be at the end of a line, even though there are no
-   * paragraph delimiter chars there.
+  /** Return value: whether @a iter  is at the end of a line
    * @return Whether @a iter  is at the end of a line.
    */
   bool ends_line() const;
@@ -544,14 +460,12 @@ public:
   bool is_cursor_position() const;
 
   
-  /** Returns the number of characters in the line containing @a iter ,
-   * including the paragraph delimiters.
+  /** Return value: number of characters in the line
    * @return Number of characters in the line.
    */
   int get_chars_in_line() const;
   
-  /** Returns the number of bytes in the line containing @a iter ,
-   * including the paragraph delimiters.
+  /** Return value: number of bytes in the line
    * @return Number of bytes in the line.
    */
   int get_bytes_in_line() const;
@@ -566,16 +480,12 @@ public:
    */
   Pango::Language get_language() const;
   
-  /** Returns <tt>true</tt> if @a iter  is the end iterator, i.e.\ one past the last
-   * dereferenceable iterator in the buffer. gtk_text_iter_is_end() is
-   * the most efficient way to check whether an iterator is the end
-   * iterator.
+  /** Return value: whether @a iter  is the end iterator
    * @return Whether @a iter  is the end iterator.
    */
   bool is_end() const;
   
-  /** Returns <tt>true</tt> if @a iter  is the first iterator in the buffer, that is
-   * if @a iter  has a character offset of 0.
+  /** Return value: whether @a iter  is the first in the buffer
    * @return Whether @a iter  is the first in the buffer.
    */
   bool is_start() const;
@@ -885,7 +795,7 @@ public:
   bool forward_visible_cursor_positions(int count);
   
   /** Moves up to @a count  visible cursor positions. See
-   * gtk_text_iter_forward_cursor_position() for details.
+   * gtk_text_iter_backward_cursor_position() for details.
    * @param count Number of positions to move.
    * @return <tt>true</tt> if we moved and the new position is dereferenceable
    * 
@@ -962,10 +872,7 @@ public:
   /** Moves forward to the next toggle (on or off) of the
    * Gtk::TextTag @a tag , or to the next toggle of any tag if
    *  @a tag  is <tt>0</tt>. If no matching tag toggles are found,
-   * returns <tt>false</tt>, otherwise <tt>true</tt>. Does not return toggles
-   * located at @a iter , only toggles after @a iter . Sets @a iter  to
-   * the location of the toggle, or to the end of the buffer
-   * if no toggle is found.
+   * Return value: whether we found a tag toggle after @a iter 
    * @param tag A Gtk::TextTag, or <tt>0</tt>.
    * @return Whether we found a tag toggle after @a iter .
    */
@@ -974,10 +881,7 @@ public:
   /** Moves backward to the next toggle (on or off) of the
    * Gtk::TextTag @a tag , or to the next toggle of any tag if
    *  @a tag  is <tt>0</tt>. If no matching tag toggles are found,
-   * returns <tt>false</tt>, otherwise <tt>true</tt>. Does not return toggles
-   * located at @a iter , only toggles before @a iter . Sets @a iter 
-   * to the location of the toggle, or the start of the buffer
-   * if no toggle is found.
+   * Return value: whether we found a tag toggle before @a iter 
    * @param tag A Gtk::TextTag, or <tt>0</tt>.
    * @return Whether we found a tag toggle before @a iter .
    */

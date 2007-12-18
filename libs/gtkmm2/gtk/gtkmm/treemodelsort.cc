@@ -182,8 +182,9 @@ GType TreeModelSort::get_base_type()
 
 TreeModelSort::TreeModelSort(const Glib::RefPtr<TreeModel>& model)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  Glib::Object(Glib::ConstructParams(treemodelsort_class_.init(), "model", Glib::unwrap(model), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  Glib::Object(Glib::ConstructParams(treemodelsort_class_.init(), "model", Glib::unwrap(model), static_cast<char*>(0)))
 {
   }
 

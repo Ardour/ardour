@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: init.cc,v 1.1 2003/11/03 09:27:31 murrayc Exp $ */
+/* $Id: init.cc 54 2003-11-03 09:27:33Z murrayc $ */
 
 /* Copyright (C) 2003 The glibmm Development Team
  *

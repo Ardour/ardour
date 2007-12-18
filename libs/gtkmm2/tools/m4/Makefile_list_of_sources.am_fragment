@@ -1,0 +1,3 @@
+files_tools_m4 = convert.m4 convert_gtkmm.m4 convert_atk.m4 convert_gdk.m4 \
+		 convert_gtk.m4 convert_pango.m4
+

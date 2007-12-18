@@ -34,8 +34,9 @@ bool IconInfo::get_attach_points(Glib::ArrayHandle<Gdk::Point>& /* points */) co
 
   if(c_attach_points)
   {
-    //TODO: Why doesn't this compile?
-    //points = Glib::ArrayHandle<Gdk::Point>(c_attach_points, n_points, Glib::OWNERSHIP_SHALLOW); //We use OWNERSHIP_SHALLOW because we just need to g_free() the array and nothing more.        
+    //TODO: We can't use = with an ArrayHandle. 
+    //Investigate whether the bool return value has a special meaning - maybe we can just return an empty ArrayHandle.
+    //points = Glib::ArrayHandle<Gdk::Point>(reinterpret_cast<Gdk::Point*>(c_attach_points), (size_t)n_points, Glib::OWNERSHIP_SHALLOW); //We use OWNERSHIP_SHALLOW because we just need to g_free() the array and nothing more.        
   }
   return result;
 }

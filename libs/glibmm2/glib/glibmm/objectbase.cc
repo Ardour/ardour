@@ -1,5 +1,5 @@
 // -*- c++ -*-
-/* $Id: objectbase.cc,v 1.8 2006/11/10 02:24:49 murrayc Exp $ */
+/* $Id: objectbase.cc 337 2006-11-10 02:24:49Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *

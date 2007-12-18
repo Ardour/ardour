@@ -136,9 +136,9 @@ public:
   void set_curve_type(CurveType type);
 
   
-/**
+  /**
    * @par Prototype:
-   * <tt>void %curve_type_changed()</tt>
+   * <tt>void on_my_%curve_type_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_curve_type_changed();
@@ -321,10 +321,13 @@ public:
 
 namespace Glib
 {
-  /** @relates Gtk::Curve
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::Curve
    */
   Gtk::Curve* wrap(GtkCurve* object, bool take_copy = false);
 } //namespace Glib
@@ -332,10 +335,13 @@ namespace Glib
 
 namespace Glib
 {
-  /** @relates Gtk::GammaCurve
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::GammaCurve
    */
   Gtk::GammaCurve* wrap(GtkGammaCurve* object, bool take_copy = false);
 } //namespace Glib

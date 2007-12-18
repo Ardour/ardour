@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_OBJECTBASE_H
 #define _GLIBMM_OBJECTBASE_H
 
-/* $Id: objectbase.h,v 1.13 2006/11/10 02:24:49 murrayc Exp $ */
+/* $Id: objectbase.h 385 2007-03-23 17:23:42Z murrayc $ */
 
 /* Copyright 2002 The gtkmm Development Team
  *
@@ -25,6 +25,7 @@
 #include <glibmm/propertyproxy.h>
 #include <glibmm/ustring.h>
 #include <glibmm/value.h>
+#include <glibmm/quark.h>
 #include <sigc++/trackable.h>
 #include <typeinfo>
 #include <glibmmconfig.h>
@@ -134,7 +135,24 @@ public:
   GObject* gobj_copy() const;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  static ObjectBase* _get_current_wrapper(GObject* object);
+
+  /// This is for use by gtkmm wrappers only, and not by applications.
+  static ObjectBase* _get_current_wrapper(GObject* object); //We keep this non-inline version, to preserve ABI.
+
+  // This is commented-out because it's not clear yet whether it's a worthwhile optimization.
+  /// This is for use by gtkmm wrappers only, and not by applications.
+  //
+  //inline static ObjectBase* _get_current_wrapper_inline(GObject* object)
+  //{
+  //  // This is what g_object_get_qdata does internally. However,
+  //  // g_object_get_qdata does an addition G_IS_OBJECT(object) check that
+  //  // needs three times as much time as the actual lookup.
+  //  if(object)
+  //    return static_cast<ObjectBase*>(g_datalist_id_get_data(&object->qdata, Glib::quark_));
+  //  else
+  //    return 0;
+  //}
+
   bool _cpp_destruction_is_in_progress() const;
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
@@ -146,8 +164,21 @@ protected:
   bool                cpp_destruction_in_progress_;
 
   bool is_anonymous_custom_() const;
-  bool is_derived_() const;
 
+public: //  is_derived_() must be public, so that overridden vfuncs and signal handlers can call it via ObjectBase.
+
+  /// This is for use by gtkmm wrappers only, and not by applications.
+  bool is_derived_() const; //We keep this non-inline version, to preserve ABI.
+
+  //This is commented-out because it's not clear yet whether it's a worthwhile optimization.
+  //
+  /// This is for use by gtkmm wrappers only, and not by applications.
+  //inline bool is_derived_inline_() const
+  //{
+  //  return (custom_type_name_ != 0);
+  //}
+
+protected:
   static  void destroy_notify_callback_(void* data);
   virtual void destroy_notify_();
 

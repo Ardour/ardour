@@ -2,7 +2,7 @@
 #ifndef _GLIBMM_CLASS_H
 #define _GLIBMM_CLASS_H
 
-/* $Id: class.h,v 1.6 2006/05/12 08:08:43 murrayc Exp $ */
+/* $Id: class.h 291 2006-05-12 08:08:45Z murrayc $ */
 
 /* Copyright 2001 Free Software Foundation
  * Copyright (C) 1998-2002 The gtkmm Development Team

@@ -34,8 +34,9 @@ namespace Gtk
 
 VButtonBox::VButtonBox(ButtonBoxStyle layout, int spacing)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  ButtonBox(Glib::ConstructParams(vbuttonbox_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  ButtonBox(Glib::ConstructParams(vbuttonbox_class_.init()))
 {
   set_layout(layout);
   set_spacing(spacing);
@@ -43,8 +44,9 @@ VButtonBox::VButtonBox(ButtonBoxStyle layout, int spacing)
 
 HButtonBox::HButtonBox(ButtonBoxStyle layout, int spacing)
 :
-  Glib::ObjectBase(0), //Mark this class as gtkmmproc-generated, rather than a custom class, to allow vfunc optimisations.
-  ButtonBox(Glib::ConstructParams(hbuttonbox_class_.init(), (char*) 0))
+  // Mark this class as non-derived to allow C++ vfuncs to be skipped.
+  Glib::ObjectBase(0),
+  ButtonBox(Glib::ConstructParams(hbuttonbox_class_.init()))
 {
   set_layout(layout);
   set_spacing(spacing);

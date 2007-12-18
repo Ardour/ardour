@@ -132,11 +132,9 @@ public:
    * vice-versa, and when a buttton is moved from one group of 2 or
    * more menu items to a different one, but not when the composition
    * of the group that a menu item belongs to changes.
-   */
-  
-/**
+   *
    * @par Prototype:
-   * <tt>void %group_changed()</tt>
+   * <tt>void on_my_%group_changed()</tt>
    */
 
   Glib::SignalProxy0< void > signal_group_changed();
@@ -153,10 +151,13 @@ protected:
 
 namespace Glib
 {
-  /** @relates Gtk::RadioMenuItem
-   * @param object The C instance
+  /** A Glib::wrap() method for this object.
+   * 
+   * @param object The C instance.
    * @param take_copy False if the result should take ownership of the C instance. True if it should take a new copy or ref.
    * @result A C++ instance that wraps this C instance.
+   *
+   * @relates Gtk::RadioMenuItem
    */
   Gtk::RadioMenuItem* wrap(GtkRadioMenuItem* object, bool take_copy = false);
 } //namespace Glib
