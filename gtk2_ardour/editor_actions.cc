@@ -63,6 +63,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
 	ActionManager::register_action (editor_actions, X_("Subframes"), _("Subframes"));
+	ActionManager::register_action (editor_actions, X_("LocateToMarker"), _("Locate To Markers"));
 
 	/* add named actions for the editor */
 

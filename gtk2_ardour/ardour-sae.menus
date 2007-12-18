@@ -72,6 +72,17 @@
 	       <menuitem action='set-loop-from-edit-range'/>
 	       <menuitem action='set-loop-from-region'/>
 	       <menuitem action='set-punch-from-edit-range'/>
+	       <menu action='LocateToMarker'>
+		     <menuitem action='goto-mark-1'/>
+		     <menuitem action='goto-mark-2'/>
+		     <menuitem action='goto-mark-3'/>
+		     <menuitem action='goto-mark-4'/>
+		     <menuitem action='goto-mark-5'/>
+		     <menuitem action='goto-mark-6'/>
+		     <menuitem action='goto-mark-7'/>
+		     <menuitem action='goto-mark-8'/>
+		     <menuitem action='goto-mark-9'/>
+		</menu>
        </menu>
        <menu name='Edit' action='Edit'>
                <menuitem action='undo'/>
