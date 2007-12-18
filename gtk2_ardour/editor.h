@@ -999,6 +999,7 @@ class Editor : public PublicEditor
 
 	void play_from_start ();
 	void play_from_edit_point ();
+	void play_from_edit_point_and_return ();
 	void play_selected_region ();
 	void loop_selected_region ();
 	void play_location (ARDOUR::Location&);
@@ -1581,6 +1582,13 @@ class Editor : public PublicEditor
 	bool ignore_route_order_sync;
 
 	bool route_list_display_button_press (GdkEventButton*);
+	void route_list_display_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,
+						     gint                x,
+						     gint                y,
+						     const Gtk::SelectionData& data,
+						     guint               info,
+						     guint               time);
+
 	bool route_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	void route_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);

@@ -22,6 +22,7 @@
 #define __ardour_audio_unit_h__
 
 #include <stdint.h>
+#include <boost/shared_ptr.hpp>
 
 #include <list>
 #include <set>
@@ -47,7 +48,7 @@ class Session;
 class AUPlugin : public ARDOUR::Plugin
 {
   public:
-	AUPlugin (AudioEngine& engine, Session& session, CAComponent* comp);
+	AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> comp);
 	virtual ~AUPlugin ();
 	
         std::string unique_id () const;
@@ -92,20 +93,21 @@ class AUPlugin : public ARDOUR::Plugin
 	uint32_t output_streams() const;
 	uint32_t input_streams() const;
 
-	CAAudioUnit* get_au () { return unit; }
-	CAComponent* get_comp () { return comp; }
+	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
+	boost::shared_ptr<CAComponent> get_comp () { return comp; }
     
-    OSStatus render_callback(AudioUnitRenderActionFlags *ioActionFlags,
-			     const AudioTimeStamp    *inTimeStamp,
-			     UInt32       inBusNumber,
-			     UInt32       inNumberFrames,
-			     AudioBufferList*       ioData);
+        OSStatus render_callback(AudioUnitRenderActionFlags *ioActionFlags,
+				 const AudioTimeStamp    *inTimeStamp,
+				 UInt32       inBusNumber,
+				 UInt32       inNumberFrames,
+				 AudioBufferList*       ioData);
   private:
-	CAComponent* comp;
-	CAAudioUnit* unit;
+        boost::shared_ptr<CAComponent> comp;
+        boost::shared_ptr<CAAudioUnit> unit;
 	
 	AudioStreamBasicDescription streamFormat;
         bool initialized;
+        int format_set;
 	AudioBufferList* buffers;
 	
 	UInt32 global_elements;
@@ -129,7 +131,7 @@ typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
 
 class AUPluginInfo : public PluginInfo {
   public:	
-         AUPluginInfo (CAComponentDescription*);
+	 AUPluginInfo (boost::shared_ptr<CAComponentDescription>);
 	~AUPluginInfo ();
 
 	PluginPtr load (Session& session);
@@ -139,7 +141,8 @@ class AUPluginInfo : public PluginInfo {
         static std::string stringify_descriptor (const CAComponentDescription&);
 
   private:
-	CAComponentDescription* descriptor;
+	boost::shared_ptr<CAComponentDescription> descriptor;
+
         static void discover_music (PluginInfoList&);
         static void discover_fx (PluginInfoList&);
         static void discover_by_description (PluginInfoList&, CAComponentDescription&);

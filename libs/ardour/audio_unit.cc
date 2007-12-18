@@ -53,7 +53,7 @@ _render_callback(void *userData,
 	return ((AUPlugin*)userData)->render_callback (ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
 }
 
-AUPlugin::AUPlugin (AudioEngine& engine, Session& session, CAComponent* _comp)
+AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> _comp)
 	:
 	Plugin (engine, session),
 	comp (_comp),
@@ -65,12 +65,10 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, CAComponent* _comp)
 	current_buffers (0),
 	frames_processed (0)
 {			
-	OSErr err = CAAudioUnit::Open (*comp, *unit);
+	OSErr err = CAAudioUnit::Open (*(comp.get()), *unit);
 
 	if (err != noErr) {
 		error << _("AudioUnit: Could not convert CAComponent to CAAudioUnit") << endmsg;
-		delete unit;
-		delete comp;
 		throw failed_constructor ();
 	}
 	
@@ -82,8 +80,6 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, CAComponent* _comp)
 	if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
 					 0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
 		cerr << "cannot install render callback (err = " << err << ')' << endl;
-		delete unit;
-		delete comp;
 		throw failed_constructor();
 	}
 
@@ -104,10 +100,10 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, CAComponent* _comp)
 	streamFormat.mBytesPerFrame = 4;
 	streamFormat.mChannelsPerFrame = 1;
 
+	format_set = 0;
+
 	if (_set_block_size (_session.get_block_size())) {
 		error << _("AUPlugin: cannot set processing block size") << endmsg;
-		delete unit;
-		delete comp;
 		throw failed_constructor();
 	}
 }
@@ -116,15 +112,10 @@ AUPlugin::~AUPlugin ()
 {
 	if (unit) {
 		unit->Uninitialize ();
-		delete unit;
 	}
 
 	if (buffers) {
 		free (buffers);
-	}
-	
-	if (comp) {
-		delete comp;
 	}
 }
 
@@ -224,9 +215,6 @@ AUPlugin::_set_block_size (nframes_t nframes)
 		unit->Uninitialize ();
 	}
 
-	set_input_format ();
-	set_output_format ();
-
 	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 
 				      0, &numFrames, sizeof (numFrames))) != noErr) {
 		cerr << "cannot set max frames (err = " << err << ')' << endl;
@@ -242,10 +230,13 @@ AUPlugin::_set_block_size (nframes_t nframes)
 
 int32_t 
 AUPlugin::can_support_input_configuration (int32_t in)
-{
-	streamFormat.mBytesPerPacket = 4 * in;
-	streamFormat.mBytesPerFrame = 4 * in;
+{	
 	streamFormat.mChannelsPerFrame = in;
+	/* apple says that for non-interleaved data, these
+	   values always refer to a single channel.
+	*/
+	streamFormat.mBytesPerPacket = 4;
+	streamFormat.mBytesPerFrame = 4;
 
 	if (set_input_format () == 0) {
 		return 1;
@@ -273,10 +264,16 @@ AUPlugin::set_stream_format (int scope, uint32_t cnt)
 
 	for (uint32_t i = 0; i < cnt; ++i) {
 		if ((result = unit->SetFormat (scope, i, streamFormat)) != 0) {
-			error << string_compose (_("AUPlugin: could not set stream format for %1/%2"),
-						 (scope == kAudioUnitScope_Input ? "input" : "output"), i) << endmsg;
+			error << string_compose (_("AUPlugin: could not set stream format for %1/%2 (err = %3)"),
+						 (scope == kAudioUnitScope_Input ? "input" : "output"), i, result) << endmsg;
 			return -1;
 		}
+	}
+
+	if (scope == kAudioUnitScope_Input) {
+		format_set |= 0x1;
+	} else {
+		format_set |= 0x2;
 	}
 
 	return 0;
@@ -311,8 +308,8 @@ AUPlugin::compute_output_streams (int32_t nplugins)
 uint32_t
 AUPlugin::output_streams() const
 {
-	if (!initialized) {
-		warning << _("AUPlugin: output_streams() called without calling Initialize!") << endmsg;
+	if (!(format_set & 0x2)) {
+		warning << _("AUPlugin: output_streams() called without any format set!") << endmsg;
 		return 1;
 	}
 	return streamFormat.mChannelsPerFrame;
@@ -322,8 +319,8 @@ AUPlugin::output_streams() const
 uint32_t
 AUPlugin::input_streams() const
 {
-	if (!initialized) {
-		warning << _("AUPlugin: input_streams() called without calling Initialize!") << endmsg;
+	if (!(format_set & 0x1)) {
+		warning << _("AUPlugin: input_streams() called without any format set!") << endmsg;
 		return 1;
 	}
 	return streamFormat.mChannelsPerFrame;
@@ -478,7 +475,7 @@ AUPlugin::has_editor () const
 	return true;
 }
 
-AUPluginInfo::AUPluginInfo (CAComponentDescription* d)
+AUPluginInfo::AUPluginInfo (boost::shared_ptr<CAComponentDescription> d)
 	: descriptor (d)
 {
 
@@ -486,9 +483,6 @@ AUPluginInfo::AUPluginInfo (CAComponentDescription* d)
 
 AUPluginInfo::~AUPluginInfo ()
 {
-	if (descriptor) {
-		delete descriptor;
-	}
 }
 
 PluginPtr
@@ -497,7 +491,7 @@ AUPluginInfo::load (Session& session)
 	try {
 		PluginPtr plugin;
 
-		CAComponent* comp = new CAComponent(*descriptor);
+		boost::shared_ptr<CAComponent> comp (new CAComponent(*descriptor));
 		
 		if (!comp->IsValid()) {
 			error << ("AudioUnit: not a valid Component") << endmsg;
@@ -505,7 +499,7 @@ AUPluginInfo::load (Session& session)
 			plugin.reset (new AUPlugin (session.engine(), session, comp));
 		}
 		
-		plugin->set_info(PluginInfoPtr(new AUPluginInfo(*this)));
+		plugin->set_info (PluginInfoPtr (new AUPluginInfo (*this)));
 		return plugin;
 	}
 
@@ -562,7 +556,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		CAComponentDescription temp;
 		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
 
-		AUPluginInfoPtr info (new AUPluginInfo (new CAComponentDescription(temp)));
+		AUPluginInfoPtr info (new AUPluginInfo 
+				      (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
 
 		/* no panners, format converters or i/o AU's for our purposes
 		 */

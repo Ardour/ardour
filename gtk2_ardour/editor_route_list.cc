@@ -38,6 +38,7 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Glib;
 
 void
 Editor::handle_new_route (Session::RouteList& routes)
@@ -545,4 +546,22 @@ Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
 	session->set_remote_control_ids();
 	redisplay_route_list ();
+}
+
+
+void  
+Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
+						int x, int y, 
+						const SelectionData& data,
+						guint info, guint time)
+{
+	cerr << "RouteLD::dddr target = " << data.get_target() << endl;
+	
+	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
+		cerr << "Delete drag data drop to treeview\n";
+		route_list_display.on_drag_data_received (context, x, y, data, info, time);
+		return;
+	}
+	cerr << "some other kind of drag\n";
+	context->drag_finish (true, false, time);
 }

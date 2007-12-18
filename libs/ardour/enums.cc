@@ -231,6 +231,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session::Event, SetDiskstreamSpeed);
 	REGISTER_CLASS_ENUM (Session::Event, Locate);
 	REGISTER_CLASS_ENUM (Session::Event, LocateRoll);
+	REGISTER_CLASS_ENUM (Session::Event, LocateRollLocate);
 	REGISTER_CLASS_ENUM (Session::Event, SetLoop);
 	REGISTER_CLASS_ENUM (Session::Event, PunchIn);
 	REGISTER_CLASS_ENUM (Session::Event, PunchOut);

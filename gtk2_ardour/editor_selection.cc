@@ -675,6 +675,8 @@ Editor::region_selection_changed ()
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->set_selected_regionviews (selection->regions);
 	}
+	
+	zoomed_to_region = false;
 }
 
 void

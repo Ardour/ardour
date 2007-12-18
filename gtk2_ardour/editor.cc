@@ -3980,6 +3980,7 @@ Editor::swap_visual_state ()
 
 	set_zoom_focus (last_visual_state.zoom_focus);
 	reposition_and_zoom (last_visual_state.leftmost_frame, last_visual_state.frames_per_unit);
+	zoomed_to_region = false;
 }
 
 void

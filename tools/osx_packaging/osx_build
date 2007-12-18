@@ -23,6 +23,8 @@ done
 
 version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
 echo "Version is $version"
+info_string="$version built on `hostname` by `whoami` on `date`"
+echo "Info string is $info_string"
 
 # setup directory structure
 
@@ -79,7 +81,9 @@ fi
 env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"
 
 # edit plist
-sed -e "s?@ENV@?$env?g" -e "s?@VERSION@?$version?g" < Info.plist.in > Info.plist
+sed -e "s?@ENV@?$env?g" \
+    -e "s?@VERSION@?$version?g" \
+    -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
 
 # copy static files
 

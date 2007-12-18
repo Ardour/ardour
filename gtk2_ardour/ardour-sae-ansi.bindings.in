@@ -341,4 +341,5 @@
 (gtk_accel_path "<Actions>/Editor/toggle-zoom" "o")
 (gtk_accel_path "<Actions>/Editor/zoom-to-region" "y")
 (gtk_accel_path "<Actions>/Editor/pitch-shift-region" "F5")
+(gtk_accel_path "<Actions>/Editor/play-from-edit-point-and-return" "<%LEVEL4%>space")
 

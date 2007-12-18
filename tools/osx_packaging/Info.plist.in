@@ -23,7 +23,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Ardour2</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Ardour @VERSION@ Copyright 2007 Paul Davis</string>
+	<string>@INFOSTRING@</string>
 	<key>CFBundleIconFile</key>
 	<string>appIcon.icns</string>
 	<key>CFBundleIdentifier</key>

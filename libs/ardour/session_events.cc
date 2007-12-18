@@ -41,6 +41,7 @@ static const char* event_names[] = {
 	"SetDiskstreamSpeed",
 	"Locate",
 	"LocateRoll",
+	"LocateRollLocate",
 	"SetLoop",
 	"PunchIn",
 	"PunchOut",
@@ -346,6 +347,13 @@ Session::process_event (Event* ev)
 			start_locate (ev->target_frame, true, true, false);
 		}
 		break;
+
+	case Event::LocateRollLocate:
+		// locate is handled by ::request_roll_at_and_return()
+		requested_return_frame = ev->target_frame;
+		set_transport_speed (ev->speed, true);
+		break;
+
 
 	case Event::SetTransportSpeed:
 		set_transport_speed (ev->speed, ev->yes_or_no);

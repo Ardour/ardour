@@ -125,6 +125,7 @@ class Session : public PBD::StatefulDestructible
 		    SetDiskstreamSpeed,
 		    Locate,
 		    LocateRoll,
+		    LocateRollLocate,
 		    SetLoop,
 		    PunchIn,
 		    PunchOut,
@@ -347,7 +348,7 @@ class Session : public PBD::StatefulDestructible
 
 	sigc::signal<void,RouteList&> RouteAdded;
 
-	void request_roll ();
+	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
 	void request_stop (bool abort = false);
 	void request_locate (nframes_t frame, bool with_roll = false);
@@ -985,6 +986,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t          _last_slave_transport_frame;
 	nframes_t           maximum_output_latency;
 	nframes_t           last_stop_frame;
+	nframes64_t              requested_return_frame;
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
 	vector<Sample *>        _send_buffers;

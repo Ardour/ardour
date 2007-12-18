@@ -2119,6 +2119,32 @@ Editor::play_from_edit_point ()
 }
 
 void
+Editor::play_from_edit_point_and_return ()
+{
+	nframes64_t start_frame;
+	nframes64_t return_frame;
+
+	if (session->transport_rolling()) {
+		session->request_stop ();
+		return;
+	}
+
+	switch (_edit_point) {
+	case EditAtPlayhead:
+		session->request_transport_speed (1.0f);
+		break;
+		
+	default:
+		return_frame = session->transport_frame();
+		start_frame = get_preferred_edit_position ();
+		if (start_frame >= 0) {
+			session->request_roll_at_and_return (start_frame, return_frame);
+		}
+		break;
+	}
+}
+
+void
 Editor::play_selection ()
 {
 	if (selection->time.empty()) {
@@ -4193,31 +4219,38 @@ Editor::toggle_fade_active (bool in)
 	}
 
 	const char* cmd = (in ? _("toggle fade in active") : _("toggle fade out active"));
+	bool have_switch = false;
+	bool yn;
+	bool in_command = false;
 
 	begin_reversible_command (cmd);
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
-
+		
 		if (!tmp) {
 			return;
 		}
 
 		boost::shared_ptr<AudioRegion> region (tmp->audio_region());
 
-		XMLNode &before = region->get_state();
-
-		if (in) {
-			region->set_fade_in_active (!region->fade_in_active());
-		} else {
-			region->set_fade_out_active (!region->fade_out_active());
+		/* make the behaviour consistent across all regions */
+		
+		if (!have_switch) {
+			yn = region->fade_in_active();
+			have_switch = true;
 		}
 
+		XMLNode &before = region->get_state();
+		region->set_fade_in_active (!yn);
 		XMLNode &after = region->get_state();
 		session->add_command(new MementoCommand<AudioRegion>(*region.get(), &before, &after));
+		in_command = true;
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void

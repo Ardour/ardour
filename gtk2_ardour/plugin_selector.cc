@@ -379,7 +379,8 @@ PluginSelector::run ()
 	switch (r) {
 	case RESPONSE_APPLY:
 		for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
-			use_plugin ((*i)[acols.plugin]);
+			PluginInfoPtr pp = (*i)[acols.plugin];
+			use_plugin (pp);
 		}
 		break;
 
