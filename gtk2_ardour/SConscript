@@ -409,7 +409,7 @@ else:
 	keybindings_dict['%PRIMARY%'] = 'Ctrl'
 	keybindings_dict['%SECONDARY%'] = 'Alt'
 	keybindings_dict['%TERTIARY%'] = 'Shift'
-	keybindings_dict['%LEVEL4%'] = 'Mod3'
+	keybindings_dict['%LEVEL4%'] = 'Mod2'
 	keybindings_dict['%WINDOW%'] = 'Ctrl'
 
 ardourbindings = env.SubstInFile ('ardour.bindings', 'ardour.bindings.in', SUBST_DICT = keybindings_dict);

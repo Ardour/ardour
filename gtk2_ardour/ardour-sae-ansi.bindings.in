@@ -246,7 +246,7 @@
 ; (gtk_accel_path "<Actions>/Zoom/zoom-focus-right" "")
 (gtk_accel_path "<Actions>/Editor/remove-last-capture" "<%PRIMARY%>Delete")
 ; (gtk_accel_path "<Actions>/options/FileHeaderFormatWAVE" "")
-(gtk_accel_path "<Actions>/Transport/GotoZero" "KP_Insert")
+(gtk_accel_path "<Actions>/Transport/GotoZero" "KP_0")
 (gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<%TERTIARY%>End")
 ; (gtk_accel_path "<Actions>/redirectmenu/cut" "")
 ; (gtk_accel_path "<Actions>/redirectmenu/newinsert" "")

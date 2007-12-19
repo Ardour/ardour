@@ -341,10 +341,6 @@ NewSessionDialog::NewSessionDialog()
 
 	m_notebook->set_flags(Gtk::CAN_FOCUS);
 	m_notebook->set_scrollable(true);
-	m_notebook->append_page(*new_session_table, _("New Session"));
-	m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
-	m_notebook->append_page(*open_session_vbox, _("Open Session"));
-	m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
 	
 	get_vbox()->set_homogeneous(false);
 	get_vbox()->set_spacing(0);
@@ -441,6 +437,8 @@ NewSessionDialog::NewSessionDialog()
 	m_open_filechooser->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::file_chosen));
 	m_template->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::template_chosen));
 	m_name->grab_focus();
+	
+	page_set = Pages (0);
 }
 
 NewSessionDialog::~NewSessionDialog()
@@ -448,18 +446,54 @@ NewSessionDialog::~NewSessionDialog()
 	in_destructor = true;
 }
 
+int
+NewSessionDialog::run ()
+{
+	if (!page_set) {
+		/* nothing to display */
+		return Gtk::RESPONSE_OK;
+	}
+
+	return ArdourDialog::run ();
+}
+
 void
 NewSessionDialog::set_have_engine (bool yn)
 {
 	if (yn) {
 		m_notebook->remove_page (engine_control);
+		page_set = Pages (page_set & ~EnginePage);
 	} else {
-		// XXX this is a bit of crude hack. if we ever add or remove
-		// pages from the notebook, this is going to break.
-		if (m_notebook->get_n_pages () != 3) {
+		if (!(page_set & EnginePage)) {
 			m_notebook->append_page (engine_control, _("Audio Setup"));
 			m_notebook->show_all_children();
+			page_set = Pages (page_set | EnginePage);
 		}
+	}
+}
+
+void
+NewSessionDialog::set_existing_session (bool yn)
+{
+	if (yn) {
+
+		if (page_set & NewPage) {
+			m_notebook->remove_page (*new_session_table);
+			page_set = Pages (page_set & ~NewPage);
+		}
+
+		if (page_set & OpenPage) {
+			m_notebook->remove_page (*open_session_vbox);
+			page_set = Pages (page_set & ~OpenPage);
+		}
+
+	} else {
+		m_notebook->append_page(*new_session_table, _("New Session"));
+		m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+		m_notebook->append_page(*open_session_vbox, _("Open Session"));
+		m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+		m_notebook->show_all_children();
+		page_set = Pages (page_set | (NewPage|OpenPage));
 	}
 }
 

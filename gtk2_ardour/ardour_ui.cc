@@ -2004,6 +2004,8 @@ ARDOUR_UI::save_template ()
 bool
 ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_engine, bool should_be_new)
 {
+	bool existing_session = false;
+
 	string session_name;
 	string session_path;
 	string template_name;
@@ -2015,26 +2017,58 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						    Gtk::MESSAGE_INFO,
 						    Gtk::BUTTONS_NONE);
 	}
+
 		
 	int response = Gtk::RESPONSE_NONE;
 
 	if (predetermined_path.length()) {
+
+		/* before we start, lets see if the given path looks like
+		   an existing ardour session. if it does, skip the
+		   tabs that we don't need
+		*/
+
+
 		Glib::ustring dir = Glib::path_get_dirname (string (predetermined_path));
 		Glib::ustring name = basename_nosuffix (string (predetermined_path));
-		
-		new_session_dialog->set_modal(true);
-		
-		if (name.length()) {
-			new_session_dialog->set_session_name (name);
-		}
-		if (dir.length()) {
-			new_session_dialog->set_session_folder (dir);
-		}
-	}
 
-	new_session_dialog->reset_recent();
+		
+		if (name.length() == 0 || dir.length() == 0) {
+			error << string_compose (_("Ardour cannot understand \"%1\" as a session name"), predetermined_path) << endmsg;
+			return false;
+		}
+
+		new_session_dialog->set_session_name (name);
+		new_session_dialog->set_session_folder (dir);
+
+		if (Glib::file_test (predetermined_path, Glib::FILE_TEST_IS_DIR)) {
+
+			Glib::ustring predicted_session_file;
+
+			predicted_session_file = predetermined_path;
+			predicted_session_file += '/';
+			predicted_session_file += name;
+			predicted_session_file += Session::statefile_suffix();
+
+			if (Glib::file_test (predicted_session_file, Glib::FILE_TEST_EXISTS)) {
+				existing_session = true;
+			}
+
+		} else if (Glib::file_test (predetermined_path, Glib::FILE_TEST_EXISTS)) {
+
+			if (predetermined_path.find (Session::statefile_suffix()) == predetermined_path.length() - 7) {
+				/* existing .ardour file */
+				existing_session = true;
+			}
+		}
+
+		new_session_dialog->set_modal(true);
+	}
+	
 	new_session_dialog->set_position (WIN_POS_CENTER);
 	new_session_dialog->set_current_page (0);
+	new_session_dialog->set_existing_session (existing_session);
+	new_session_dialog->reset_recent();
 
 	do {
 		new_session_dialog->set_have_engine (have_engine);
