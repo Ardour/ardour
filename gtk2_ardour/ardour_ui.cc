@@ -1974,8 +1974,8 @@ ARDOUR_UI::save_template ()
 	}
 }
 
-static void
-fontconfig_dialog ()
+void
+ARDOUR_UI::fontconfig_dialog ()
 {
 #ifdef GTKOSX
 	/* X11 users will always have fontconfig info around, but new GTK-OSX users 

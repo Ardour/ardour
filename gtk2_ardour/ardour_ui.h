@@ -748,6 +748,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::MessageDialog* loading_dialog;
 
 	void platform_specific ();
+	void fontconfig_dialog ();
 };
 
 #endif /* __ardour_gui_h__ */
