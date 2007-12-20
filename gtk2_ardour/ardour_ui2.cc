@@ -449,6 +449,11 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
+
+	if (Profile->get_sae()) {
+		Image* img = manage (new Image ((::get_icon (X_("sae")))));
+		transport_tearoff_hbox.pack_end (*img, false, false, 6);
+	}
 }
 
 void

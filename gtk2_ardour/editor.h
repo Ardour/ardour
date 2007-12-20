@@ -350,7 +350,7 @@ class Editor : public PublicEditor
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes_t, double);
 
-	nframes64_t get_preferred_edit_position ();
+	nframes64_t get_preferred_edit_position (bool ignore_playhead = false);
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();

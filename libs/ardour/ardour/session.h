@@ -494,6 +494,7 @@ class Session : public PBD::StatefulDestructible
 
 	nframes_t transport_frame () const {return _transport_frame; }
 	nframes_t audible_frame () const;
+	nframes64_t requested_return_frame() const { return _requested_return_frame; }
 
 	enum PullupFormat {
 		pullup_Plus4Plus1,
@@ -986,7 +987,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t          _last_slave_transport_frame;
 	nframes_t           maximum_output_latency;
 	nframes_t           last_stop_frame;
-	nframes64_t              requested_return_frame;
+	nframes64_t             _requested_return_frame;
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
 	vector<Sample *>        _send_buffers;

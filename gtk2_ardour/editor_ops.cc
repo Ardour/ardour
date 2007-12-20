@@ -2124,23 +2124,16 @@ Editor::play_from_edit_point_and_return ()
 	nframes64_t start_frame;
 	nframes64_t return_frame;
 
-	if (session->transport_rolling()) {
-		session->request_stop ();
-		return;
+	/* don't reset the return frame if its already set */
+
+	if ((return_frame = session->requested_return_frame()) < 0) {
+		return_frame = session->audible_frame();
 	}
 
-	switch (_edit_point) {
-	case EditAtPlayhead:
-		session->request_transport_speed (1.0f);
-		break;
-		
-	default:
-		return_frame = session->transport_frame();
-		start_frame = get_preferred_edit_position ();
-		if (start_frame >= 0) {
-			session->request_roll_at_and_return (start_frame, return_frame);
-		}
-		break;
+	start_frame = get_preferred_edit_position (true);
+
+	if (start_frame >= 0) {
+		session->request_roll_at_and_return (start_frame, return_frame);
 	}
 }
 

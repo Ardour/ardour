@@ -373,7 +373,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if ((Config->get_slave_source() == None && Config->get_auto_return()) || 
 	    (post_transport_work & PostTransportLocate) || 
-	    (requested_return_frame >= 0) ||
+	    (_requested_return_frame >= 0) ||
 	    synced_to_jack()) {
 		
 		if (pending_locate_flush) {
@@ -382,14 +382,14 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		
 		if (((Config->get_slave_source() == None && Config->get_auto_return()) || 
 		     synced_to_jack() ||
-		     requested_return_frame >= 0) &&
+		     _requested_return_frame >= 0) &&
 		    !(post_transport_work & PostTransportLocate)) {
 
 			bool do_locate = false;
 
-			if (requested_return_frame >= 0) {
-				_transport_frame = requested_return_frame;
-				requested_return_frame = -1;
+			if (_requested_return_frame >= 0) {
+				_transport_frame = _requested_return_frame;
+				_requested_return_frame = -1;
 				do_locate = true;
 			} else {
 				_transport_frame = last_stop_frame;
@@ -1185,9 +1185,7 @@ Session::setup_auto_play ()
 void
 Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
 {
-	request_stop ();
 	request_locate (start, false);
-
  	Event *ev = new Event (Event::LocateRollLocate, Event::Add, Event::Immediate, return_to, 1.0);
 	queue_event (ev);
 }

@@ -350,7 +350,7 @@ Session::process_event (Event* ev)
 
 	case Event::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
-		requested_return_frame = ev->target_frame;
+		_requested_return_frame = ev->target_frame;
 		set_transport_speed (ev->speed, true);
 		break;
 

@@ -4119,16 +4119,21 @@ Editor::sort_track_selection ()
 }
 
 nframes64_t
-Editor::get_preferred_edit_position()
+Editor::get_preferred_edit_position (bool ignore_playhead)
 {
 	bool ignored;
 	nframes64_t where = 0;
+	EditPoint ep = _edit_point;
 
 	if (entered_marker) {
 		return entered_marker->position();
 	}
 
-	switch (_edit_point) {
+	if (ignore_playhead && ep == EditAtPlayhead) {
+		ep = EditAtSelectedMarker;
+	}
+
+	switch (ep) {
 	case EditAtPlayhead:
 		where = session->audible_frame();
 		break;
