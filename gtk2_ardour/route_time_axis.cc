@@ -93,9 +93,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  playlist_button (_("p")), 
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
-	  visual_button (_("v"))
-
+	  visual_button (_("v")),
+	  lm (rt, sess)
 {
+	lm.set_no_show_all();
+	lm.setup_meters(50);
 	_has_state = true;
 	playlist_menu = 0;
 	playlist_action_menu = 0;
@@ -145,12 +147,17 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
 		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
-		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (*rec_enable_button, 4, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 	}
 
-	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_hbox.pack_start(lm, false, false);
+	_route->meter_change.connect (mem_fun(*this, &RouteTimeAxisView::meter_changed));
+	_route->input_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
+	_route->output_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
+
+	controls_table.attach (*mute_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*solo_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	controls_table.attach (edit_group_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
@@ -731,6 +738,7 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 void
 RouteTimeAxisView::set_height (TrackHeight h)
 {
+	int gmlen = (height_to_pixels (h)) - 5;
 	bool height_changed = (height == 0) || (h != height_style);
 
 	TimeAxisView::set_height (h);
@@ -772,6 +780,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 	case Large:
 	case Larger:
 	case Normal:
+		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
 
@@ -792,6 +801,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		break;
 
 	case Smaller:
+		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
 
@@ -812,6 +822,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		break;
 
 	case Small:
+		hide_meter();
 		hide_name_entry ();
 		show_name_label ();
 
@@ -2028,3 +2039,50 @@ RouteTimeAxisView::automation_child(ARDOUR::Parameter param)
 		return boost::shared_ptr<AutomationTimeAxisView>();
 }
 
+void
+RouteTimeAxisView::fast_update ()
+{
+	lm.update_meters ();
+}
+
+void
+RouteTimeAxisView::hide_meter ()
+{
+	clear_meter ();
+	lm.hide_meters ();
+}
+
+void
+RouteTimeAxisView::show_meter ()
+{
+	reset_meter ();
+}
+
+void
+RouteTimeAxisView::reset_meter ()
+{
+	if (Config->get_show_track_meters()) {
+		lm.setup_meters (height-5);
+	} else {
+		hide_meter ();
+	}
+}
+
+void
+RouteTimeAxisView::clear_meter ()
+{
+	lm.clear_meters ();
+}
+
+void
+RouteTimeAxisView::meter_changed (void *src)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &RouteTimeAxisView::meter_changed), src));
+	reset_meter();
+}
+
+void
+RouteTimeAxisView::io_changed (IOChange change, void *src)
+{
+	reset_meter ();
+}

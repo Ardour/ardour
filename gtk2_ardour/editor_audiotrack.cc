@@ -20,9 +20,11 @@
 #include <ardour/location.h>
 #include <ardour/audio_diskstream.h>
 
+#include "ardour_ui.h"
 #include "editor.h"
 #include "editing.h"
 #include "audio_time_axis.h"
+#include "route_time_axis.h"
 #include "audio_region_view.h"
 #include "selection.h"
 
@@ -91,3 +93,68 @@ Editor::set_show_waveforms_recording (bool yn)
 		}
 	}
 }
+
+gint
+Editor::start_updating ()
+{
+	RouteTimeAxisView* rtv;
+
+	//cerr << "Editor::start_updating () called" << endl;//DEBUG
+	if (is_mapped() && session) {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+				rtv->reset_meter ();
+			}
+		}
+	}
+
+	if (!meters_running) {
+		fast_screen_update_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (mem_fun(*this, &Editor::fast_update_strips));
+		meters_running = true;
+	}
+    return 0;
+}
+
+gint
+Editor::stop_updating ()
+{
+	RouteTimeAxisView* rtv;
+	
+	meters_running = false;
+	fast_screen_update_connection.disconnect();
+	//cerr << "Editor::stop_updating () called" << endl;//DEBUG
+	if (is_mapped() && session) {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+				rtv->hide_meter ();
+			}
+		}
+	}
+
+    return 0;
+}
+
+void
+Editor::toggle_meter_updating()
+{
+	if (Config->get_show_track_meters()) {
+		start_updating();
+	} else {
+		stop_updating ();
+	}
+}
+
+void
+Editor::fast_update_strips ()
+{
+	RouteTimeAxisView* rtv;
+
+	if (is_mapped() && session) {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+				rtv->fast_update ();
+			}
+		}
+	}
+}
+

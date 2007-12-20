@@ -27,6 +27,8 @@
 #include <gtkmm/style.h>
 #include <string.h>
 
+#define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
+#define UINT_TO_RGBA(u,r,g,b,a) { UINT_TO_RGB(((u)>>8),r,g,b); (*(a)) = (u)&0xff; }
 using namespace Gtk;
 using namespace Gdk;
 using namespace Glib;
@@ -34,22 +36,30 @@ using namespace Gtkmm2ext;
 using namespace std;
 
 
-int FastMeter::min_v_pixbuf_size = 50;
+int FastMeter::min_v_pixbuf_size = 10;
 int FastMeter::max_v_pixbuf_size = 1024;
 Glib::RefPtr<Gdk::Pixbuf>* FastMeter::v_pixbuf_cache = 0;
 
-int FastMeter::min_h_pixbuf_size = 50;
+int FastMeter::min_h_pixbuf_size = 10;
 int FastMeter::max_h_pixbuf_size = 1024;
 Glib::RefPtr<Gdk::Pixbuf>* FastMeter::h_pixbuf_cache = 0;
 
+int FastMeter::_clr0 = 0;
+int FastMeter::_clr1 = 0;
+int FastMeter::_clr2 = 0;
+int FastMeter::_clr3 = 0;
 
-FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
+FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, int clr0, int clr1, int clr2, int clr3)
 {
 	orientation = o;
 	hold_cnt = hold;
 	hold_state = 0;
 	current_peak = 0;
 	current_level = 0;
+	_clr0 = clr0;
+	_clr1 = clr1;
+	_clr2 = clr2;
+	_clr3 = clr3;
 	
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
@@ -57,9 +67,13 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o)
 	pixrect.y = 0;
 
 	if (orientation == Vertical) {
-		pixbuf = request_vertical_meter(dimen, 250);
+		if (!len)
+			len = 250;
+		pixbuf = request_vertical_meter(dimen, len);
 	} else {
-		pixbuf = request_horizontal_meter(186, dimen);
+		if (!len)
+			len = 186;
+		pixbuf = request_horizontal_meter(len, dimen);
 	}
 
 	pixheight = pixbuf->get_height();
@@ -83,70 +97,80 @@ Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_vertical_meter(int width, int heigh
 		height = min_v_pixbuf_size;
 	if (height > max_v_pixbuf_size)
 		height = max_v_pixbuf_size;
-	
-	int index = height - 1;
 
-	if (v_pixbuf_cache == 0) {
-		v_pixbuf_cache = (Glib::RefPtr<Gdk::Pixbuf>*) malloc(sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_v_pixbuf_size);
-		memset(v_pixbuf_cache,0,sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_v_pixbuf_size);
-	}
-	Glib::RefPtr<Gdk::Pixbuf> ret = v_pixbuf_cache[index];
-	if (ret)
-		return ret;
+	//if (v_pixbuf_cache == 0) {
+	//	v_pixbuf_cache = (Glib::RefPtr<Gdk::Pixbuf>*) malloc(sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_v_pixbuf_size);
+	//	memset(v_pixbuf_cache,0,sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_v_pixbuf_size);
+	//}
+	Glib::RefPtr<Gdk::Pixbuf> ret;// = v_pixbuf_cache[index];
+	//if (ret)
+	//	return ret;
 
 	guint8* data;
 
 	data = (guint8*) malloc(width*height * 3);
-	
-	guint8 r,g,b;
-	r=0;
-	g=255;
-	b=0;
 
+	guint8 r,g,b,r0,g0,b0,r1,g1,b1,r2,g2,b2,r3,g3,b3,a;
+
+	UINT_TO_RGBA (_clr0, &r0, &g0, &b0, &a);
+	UINT_TO_RGBA (_clr1, &r1, &g1, &b1, &a);
+	UINT_TO_RGBA (_clr2, &r2, &g2, &b2, &a);
+	UINT_TO_RGBA (_clr3, &r3, &g3, &b3, &a);
 	// fake log calculation copied from log_meter.h
 	// actual calculation:
 	// log_meter(0.0f) =
 	//  def = (0.0f + 20.0f) * 2.5f + 50f
 	//  return def / 115.0f
 	int knee = (int)floor((float)height * 100.0f / 115.0f);
-	
 	int y;
-	
-	for (y = 0; y < knee / 2; y++) {
 
-		r = (guint8)floor(255.0 * (float)y/(float)(knee / 2));
-		
+	for (y = 0; y < knee/2; y++) {
+
+		r = (guint8)floor((float)abs(r1 - r0) * (float)y / (float)(knee/2));
+		(r0 >= r1) ? r = r0 - r : r += r0;
+			
+		g = (guint8)floor((float)abs(g1 - g0) * (float)y / (float)(knee/2));
+		(g0 >= g1) ? g = g0 - g : g += g0;
+
+		b = (guint8)floor((float)abs(b1 - b0) * (float)y / (float)(knee/2));
+		(b0 >= b1) ? b = b0 - b : b += b0;
+
 		for (int x = 0; x < width; x++) {
 			data[ (x+(height-y-1)*width) * 3 + 0 ] = r;
 			data[ (x+(height-y-1)*width) * 3 + 1 ] = g;
 			data[ (x+(height-y-1)*width) * 3 + 2 ] = b;
 		}
 	}
-	
-	for (; y < knee; y++) {
 
-		g = 255 - (guint8)floor(170.0 * (float)(y - knee/ 2)/(float)(knee / 2));
-		
+	int offset = knee - y;
+	for (int i=0; i < offset; i++,y++) {
+
+		r = (guint8)floor((float)abs(r2 - r1) * (float)i / (float)offset);
+		(r1 >= r2) ? r = r1 - r : r += r1;
+
+		g = (guint8)floor((float)abs(g2 - g1) * (float)i / (float)offset);
+		(g1 >= g2) ? g = g1 - g : g += g1;
+
+		b = (guint8)floor((float)abs(b2 - b1) * (float)i / (float)offset);
+		(b1 >= b2) ? b = b1 - b : b += b1;
+
 		for (int x = 0; x < width; x++) {
 			data[ (x+(height-y-1)*width) * 3 + 0 ] = r;
 			data[ (x+(height-y-1)*width) * 3 + 1 ] = g;
 			data[ (x+(height-y-1)*width) * 3 + 2 ] = b;
 		}
 	}
-
-	r=255;
-	g=0;
-	b=0;
+	y--;
 	for (; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			data[ (x+(height-y-1)*width) * 3 + 0 ] = r;
-			data[ (x+(height-y-1)*width) * 3 + 1 ] = g;
-			data[ (x+(height-y-1)*width) * 3 + 2 ] = b;
+			data[ (x+(height-y-1)*width) * 3 + 0 ] = r3;
+			data[ (x+(height-y-1)*width) * 3 + 1 ] = g3;
+			data[ (x+(height-y-1)*width) * 3 + 2 ] = b3;
 		}
 	}
 	
 	ret = Pixbuf::create_from_data(data, COLORSPACE_RGB, false, 8, width, height, width * 3);
-	v_pixbuf_cache[index] = ret;
+	//v_pixbuf_cache[index] = ret;
 
 	return ret;
 }

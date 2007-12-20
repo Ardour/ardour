@@ -67,8 +67,8 @@ class GainMeter : public Gtk::VBox
 
 	void effective_gain_display ();
 
-	void set_width (Width);
-	void setup_meters ();
+	void set_width (Width, int len=0);
+	void setup_meters (int len=0);
 
 	int get_gm_width ();
 
@@ -129,17 +129,19 @@ class GainMeter : public Gtk::VBox
 
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;
-	    gint16          width;   
+	    gint16          width;
+		int				length;
 	    bool            packed;
 	    
 	    MeterInfo() { 
 		    meter = 0;
 		    width = 0;
+			length = 0;
 		    packed = false;
 	    }
 	};
 
-	static const guint16 regular_meter_width = 5;
+	guint16 regular_meter_width;
 	static const guint16 thin_meter_width = 2;
 	vector<MeterInfo>    meters;
 	float       max_peak;

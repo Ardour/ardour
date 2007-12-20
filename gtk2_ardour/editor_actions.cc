@@ -1208,7 +1208,9 @@ Editor::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("subframes-per-frame")) {
 		update_subframes_per_frame ();
 		update_just_smpte ();
-	}
+	} else if (PARAM_IS ("show-track-meters")) {
+		toggle_meter_updating();
+ 	}
 
 #undef PARAM_IS
 }

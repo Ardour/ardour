@@ -2035,6 +2035,14 @@ class Editor : public PublicEditor
 	RegionSelection tmp_regions;
 	
 	RegionSelection& get_regions_for_action ();
+
+	sigc::connection fast_screen_update_connection;
+	gint start_updating ();
+	gint stop_updating ();
+	void toggle_meter_updating();
+	void fast_update_strips ();
+
+	bool meters_running;
 };
 
 #endif /* __ardour_editor_h__ */

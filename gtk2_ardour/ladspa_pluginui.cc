@@ -517,7 +517,7 @@ LadspaPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automati
 		MeterInfo * info = new MeterInfo(port_index);
  		control_ui->meterinfo = info;
 		
-		info->meter = new FastMeter (5, 100, FastMeter::Vertical);
+		info->meter = new FastMeter (5, 5, FastMeter::Vertical);
 
 		info->min_unbound = desc.min_unbound;
 		info->max_unbound = desc.max_unbound;

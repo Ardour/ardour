@@ -38,6 +38,7 @@
 #include "enums.h"
 #include "time_axis_view.h"
 #include "canvas.h"
+#include "level_meter.h"
 
 namespace ARDOUR {
 	class Session;
@@ -117,6 +118,14 @@ public:
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* edit_group() const;
 	boost::shared_ptr<ARDOUR::Playlist> playlist() const;
+
+	void fast_update ();
+	void hide_meter ();
+	void show_meter ();
+	void reset_meter ();
+	void clear_meter ();
+	void io_changed (ARDOUR::IOChange, void *);
+	void meter_changed (void *);
 
 protected:
 	friend class StreamView;
@@ -283,6 +292,8 @@ protected:
 	void set_state (const XMLNode&);
 	
 	XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param);
+
+	LevelMeter	lm;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

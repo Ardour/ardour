@@ -74,7 +74,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	  height_style(Small),
 	  y_position(0),
 	  order(0),
-	  controls_table (2, 8)
+	  controls_table (2, 7)
 {
 	if (need_size_info) {
 		compute_controls_size_info ();
@@ -128,7 +128,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_col_spacings (0);
 	controls_table.set_homogeneous (true);
 
-	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::SHRINK|Gtk::EXPAND, Gtk::SHRINK|Gtk::EXPAND);
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 

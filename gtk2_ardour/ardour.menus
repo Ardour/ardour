@@ -385,6 +385,7 @@
                <menuitem action='GainReduceFastTransport'/>
 	       <menuitem action='PrimaryClockDeltaEditCursor'/>
 	       <menuitem action='SecondaryClockDeltaEditCursor'/>
+			<menuitem action='ShowTrackMeters'/>
 	       <menuitem action='OnlyCopyImportedFiles'/>
 	       <separator/>
          </menu>

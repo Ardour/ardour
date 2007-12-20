@@ -723,6 +723,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_RegionEquivalentsOverlap ();
 	void toggle_PrimaryClockDeltaEditCursor ();
 	void toggle_SecondaryClockDeltaEditCursor ();
+	void toggle_ShowTrackMeters ();
 	void toggle_only_copy_imported_files ();
 
 	void mtc_port_changed ();
