@@ -211,9 +211,9 @@ class Session : public PBD::StatefulDestructible
 	/* creating from an XML file */
 
 	Session (AudioEngine&,
-		 string fullpath,
-		 string snapshot_name,
-		 string* mix_template = 0);
+		 const string& fullpath,
+		 const string& snapshot_name,
+		 string mix_template = "");
 
 	/* creating a new Session */
 
@@ -941,7 +941,7 @@ class Session : public PBD::StatefulDestructible
 	void update_latency_compensation (bool, bool);
 	
   private:
-	int  create (bool& new_session, string* mix_template, nframes_t initial_length);
+	int  create (bool& new_session, const string& mix_template, nframes_t initial_length);
 	void destroy ();
 
 	nframes_t compute_initial_length ();

@@ -110,9 +110,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_splash ();
 	void hide_splash ();
 	
-	int load_session (const string & path, const string & snapshot, string* mix_template = 0);
+	int load_session (const Glib::ustring & path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
-	int build_session (const string & path, const string & snapshot, 
+	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
 			   ARDOUR::AutoConnectOption input_connect,

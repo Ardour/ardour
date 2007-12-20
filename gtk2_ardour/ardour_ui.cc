@@ -611,9 +611,18 @@ ARDOUR_UI::startup ()
 		/* Load session or start the new session dialog */
 		
 		if (Session::find_session (ARDOUR_COMMAND_LINE::session_name, path, name, isnew)) {
-			error << string_compose(_("could not load command line session \"%1\""), 
-						ARDOUR_COMMAND_LINE::session_name) << endmsg;
-			return;
+			
+			MessageDialog msg (string_compose(_("Could not find command line session \"%1\""), 
+							  ARDOUR_COMMAND_LINE::session_name),
+					   true,
+					   Gtk::MESSAGE_ERROR,
+					   Gtk::BUTTONS_OK);
+			
+			msg.set_position (Gtk::WIN_POS_MOUSE);
+			msg.present ();
+			msg.run ();
+			
+			exit (1);
 		}
 
 		if (!ARDOUR_COMMAND_LINE::new_session) {
@@ -621,70 +630,34 @@ ARDOUR_UI::startup ()
 			/* Supposed to be loading an existing session, but the session doesn't exist */
 			
 			if (isnew) {
-				error << string_compose (_("\n\nNo session named \"%1\" exists.\n"
-							   "To create it from the command line, start ardour as \"ardour --new %1"), path) 
-				      << endmsg;
-				return;
+				MessageDialog msg (string_compose (_("\n\nNo session named \"%1\" exists.\n"
+								     "To create it from the command line, start ardour as:\n   ardour --new %1"), path),
+						   true,
+						   Gtk::MESSAGE_ERROR,
+						   Gtk::BUTTONS_OK);
+
+				msg.set_position (Gtk::WIN_POS_MOUSE);
+				msg.present ();
+				msg.run ();
+
+				exit (1);
 			}
 		}
-		
-		new_session_dialog->set_session_name (name);
-		new_session_dialog->set_session_folder (Glib::path_get_dirname (path));
-		_session_is_new = isnew;
 	}
 
 	hide_splash ();
 
 	bool have_backend = EngineControl::engine_running();
-	bool need_nsd;
-	bool load_needed = false;
-
-	if (have_backend) {
-
-		/* backend audio is working */
-
-		if (ARDOUR_COMMAND_LINE::session_name.empty() || ARDOUR_COMMAND_LINE::new_session) {
-			/* need NSD to get session name and other info */
-			need_nsd = true;
-		} else {
-			need_nsd = false;
-		}
-		
-	} else {
-
-		XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
-		
-		if (audio_setup) {
-			new_session_dialog->engine_control.set_state (*audio_setup);
-		}
-
-		/* no backend audio, must bring up NSD to check configuration */
-		
-		need_nsd = true;
-	}
-
-	if (need_nsd) {
-
-		if (!get_session_parameters (ARDOUR_COMMAND_LINE::session_name, have_backend, ARDOUR_COMMAND_LINE::new_session)) {
-			return;
-		}
-
-	} else {
-
-		if (create_engine ()) {
-			backend_audio_error (false);
-			exit (1);
-		}
-
-		load_needed = true;
+	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
+	
+	if (audio_setup) {
+		new_session_dialog->engine_control.set_state (*audio_setup);
 	}
 	
-	if (load_needed) {
-		if (load_session (ARDOUR_COMMAND_LINE::session_name, name)) {
-			return;
-		}
+	if (!get_session_parameters (ARDOUR_COMMAND_LINE::session_name, have_backend, ARDOUR_COMMAND_LINE::new_session)) {
+		return;
 	}
-
+	
 	show ();
 }
 
@@ -2001,14 +1974,40 @@ ARDOUR_UI::save_template ()
 	}
 }
 
+static void
+fontconfig_dialog ()
+{
+#ifdef GTKOSX
+	/* X11 users will always have fontconfig info around, but new GTK-OSX users 
+	   may not and it can take a while to build it. Warn them.
+	*/
+	
+	Glib::ustring fontconfig = Glib::build_filename (Glib::get_home_dir(), ".fontconfig");
+	
+	if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+		MessageDialog msg (*new_session_dialog,
+				   _("Welcome to Ardour.\n\n"
+				     "The program will take a bit longer to start up\n"
+				     "while the system fonts are checked.\n\n"
+				     "This will only be done once, and you will\n"
+				     "not see this message again\n"),
+				   true,
+				   Gtk::MESSAGE_INFO,
+				   Gtk::BUTTONS_OK);
+		msg.show_all ();
+		msg.present ();
+		msg.run ();
+	}
+#endif
+}
+
 bool
 ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_engine, bool should_be_new)
 {
 	bool existing_session = false;
-
-	string session_name;
-	string session_path;
-	string template_name;
+	Glib::ustring session_name;
+	Glib::ustring session_path;
+	Glib::ustring template_name;
 
 	if (!loading_dialog) {
 		loading_dialog = new MessageDialog (*new_session_dialog, 
@@ -2028,26 +2027,30 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 		   tabs that we don't need
 		*/
 
+		if (Glib::file_test (predetermined_path, Glib::FILE_TEST_IS_DIR)) {
+			session_path = predetermined_path;
+		} else {
+			session_path = Glib::path_get_dirname (string (predetermined_path));
+		}
 
-		Glib::ustring dir = Glib::path_get_dirname (string (predetermined_path));
-		Glib::ustring name = basename_nosuffix (string (predetermined_path));
+		session_name = basename_nosuffix (string (predetermined_path));
 
-		
-		if (name.length() == 0 || dir.length() == 0) {
+		if (session_name.length() == 0 || session_path.length() == 0) {
 			error << string_compose (_("Ardour cannot understand \"%1\" as a session name"), predetermined_path) << endmsg;
 			return false;
 		}
 
-		new_session_dialog->set_session_name (name);
-		new_session_dialog->set_session_folder (dir);
+		new_session_dialog->set_session_name (session_name);
+		new_session_dialog->set_session_folder (session_path);
+
+		cerr << "Set name to " << session_name << " and dir to " << session_path << endl;
 
 		if (Glib::file_test (predetermined_path, Glib::FILE_TEST_IS_DIR)) {
-
 			Glib::ustring predicted_session_file;
 
 			predicted_session_file = predetermined_path;
 			predicted_session_file += '/';
-			predicted_session_file += name;
+			predicted_session_file += session_name;
 			predicted_session_file += Session::statefile_suffix();
 
 			if (Glib::file_test (predicted_session_file, Glib::FILE_TEST_EXISTS)) {
@@ -2062,9 +2065,29 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 			}
 		}
 
-		new_session_dialog->set_modal(true);
+		new_session_dialog->set_modal (true);
 	}
-	
+
+	if (existing_session && have_engine) {
+		/* lets just try to load it */
+
+		loading_dialog->set_message (_("Starting audio engine"));
+		loading_dialog->show_all ();
+		flush_pending ();
+
+		if (create_engine ()) {
+			backend_audio_error (!have_engine, new_session_dialog);
+			loading_dialog->hide ();
+			return false;
+		}
+
+		if (load_session (session_path, session_name) == 0) {
+			goto done;
+		}
+	}
+
+	/* loading failed, or we need the NSD for something */
+
 	new_session_dialog->set_position (WIN_POS_CENTER);
 	new_session_dialog->set_current_page (0);
 	new_session_dialog->set_existing_session (existing_session);
@@ -2072,32 +2095,31 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
 	do {
 		new_session_dialog->set_have_engine (have_engine);
-
-		new_session_dialog->show();
 		new_session_dialog->present ();
-	        response = new_session_dialog->run ();
-		
+		response = new_session_dialog->run ();
 		loading_dialog->hide ();
-
+		
 		_session_is_new = false;
+		
+		/* handle possible negative responses */
 
 		if (response == Gtk::RESPONSE_CANCEL || response == Gtk::RESPONSE_DELETE_EVENT) {
-
+			
 			if (!session) {
 				quit();
 			}
 			new_session_dialog->hide ();
 			return false;
-
+			
 		} else if (response == Gtk::RESPONSE_NONE) {
-
-		        /* Clear was pressed */
-		        new_session_dialog->reset();
-			continue;
+			/* "Clear" was pressed */
+			
+			goto try_again;
 		}
 
-		/* first things first ... if we're here to help set up audio parameters
-		   this is where want to do that.
+		fontconfig_dialog();
+
+		/* if we're here to help set up audio parameters this is where want to do that.
 		*/
 
 		if (!have_engine) {
@@ -2105,45 +2127,24 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				new_session_dialog->hide ();
 				return false;
 			} 
+
+			loading_dialog->set_message (_("Starting audio engine"));
+			loading_dialog->show_all ();
+			flush_pending ();
 		}
 
-#ifdef GTKOSX
-		/* X11 users will always have fontconfig info around, but new GTK-OSX users 
-		   may not and it can take a while to build it. Warn them.
-		*/
-
-		Glib::ustring fontconfig = Glib::build_filename (Glib::get_home_dir(), ".fontconfig");
-		
-		if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-			MessageDialog msg (*new_session_dialog,
-					   _("Welcome to Ardour.\n\n"
-					     "The program will take a bit longer to start up\n"
-					     "while the system fonts are checked.\n\n"
-					     "This will only be done once, and you will\n"
-					     "not see this message again\n"),
-					   true,
-					   Gtk::MESSAGE_INFO,
-					   Gtk::BUTTONS_OK);
-			msg.show_all ();
-			msg.present ();
-			msg.run ();
-		}
-#endif
-		loading_dialog->set_message (_("Starting audio engine"));
-		loading_dialog->show_all ();
-		flush_pending ();
-		
 		if (create_engine ()) {
 			backend_audio_error (!have_engine, new_session_dialog);
 			loading_dialog->hide ();
 			flush_pending ();
 			/* audio setup page */
+			new_session_dialog->set_existing_session (false);
 			new_session_dialog->set_current_page (2);
-			/* try again */
 			response = Gtk::RESPONSE_NONE;
-			continue;
+			goto try_again;
 		}
 
+		loading_dialog->hide ();
 		have_engine = true;		
 			
 		/* now handle possible affirmative responses */
@@ -2156,16 +2157,22 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 			
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
-				continue;
+				goto try_again;
 			} 
 
 			if (session_name[0] == '/' || 
 			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
-				load_session (Glib::path_get_dirname (session_name), session_name);
+				if (load_session (Glib::path_get_dirname (session_name), session_name)) {
+					response = Gtk::RESPONSE_NONE;
+					goto try_again;
+				}
 			} else {
 				session_path = new_session_dialog->session_folder();
-				load_session (session_path, session_name);
+				if (load_session (session_path, session_name)) {
+					response = Gtk::RESPONSE_NONE;
+					goto try_again;
+				}
 			}
 			
 		} else if (response == Gtk::RESPONSE_OK) {
@@ -2176,8 +2183,10 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 		
 			if (session_name.empty()) {
 				response = Gtk::RESPONSE_NONE;
-				continue;
+				goto try_again;
 			} 
+
+			cerr <<  "nsd now on page " << new_session_dialog->get_current_page() << endl;
 				
 			switch (new_session_dialog->get_current_page()) {
 			case 1: /* recent session selector */
@@ -2186,10 +2195,17 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				if (session_name[0] == '/' || 
 				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
-					load_session (Glib::path_get_dirname (session_name), session_name);
+					if (load_session (Glib::path_get_dirname (session_name), session_name)) {
+						response = Gtk::RESPONSE_NONE;
+						goto try_again;
+					}
+
 				} else {
 					session_path = new_session_dialog->session_folder();
-					load_session (session_path, session_name);
+					if (load_session (session_path, session_name)) {
+						response = Gtk::RESPONSE_NONE;
+						goto try_again;
+					}
 				}
 				break;
 
@@ -2221,7 +2237,11 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				
 				if (!should_be_new) {
 
-					load_session (session_path, session_name);
+					if (load_session (session_path, session_name)) {
+						response = Gtk::RESPONSE_NONE;
+						goto try_again;
+					}
+
 					continue; /* leaves while() loop because response != NONE */
 
 				} else if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
@@ -2244,12 +2264,16 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						new_session_dialog->hide ();
 						goto_editor_window ();
 						flush_pending ();
-						load_session (session_path, session_name);
+						if (load_session (session_path, session_name)) {
+							response = Gtk::RESPONSE_NONE;
+							goto try_again;
+						}
 						goto done;
 						break;
 					default:
 						response = RESPONSE_NONE;
 						new_session_dialog->reset ();
+						new_session_dialog->set_existing_session (false);
 						loading_dialog->hide ();
 						continue;
 					}
@@ -2265,7 +2289,11 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					goto_editor_window ();
 					flush_pending ();
 
-					load_session (session_path, session_name, &template_name);
+					if (load_session (session_path, session_name, template_name)) {
+						response = Gtk::RESPONSE_NONE;
+						goto try_again;
+					}
+
 			  
 				} else {
 
@@ -2321,10 +2349,6 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						nphysout = (uint32_t) new_session_dialog->output_limit_count();
 					}
 
-					new_session_dialog->hide ();
-					goto_editor_window ();
-					flush_pending ();
-
 					if (build_session (session_path,
 							   session_name,
 							   cchns,
@@ -2336,15 +2360,25 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 							   engine->frame_rate() * 60 * 5)) {
 						
 						response = Gtk::RESPONSE_NONE;
-						new_session_dialog->reset ();
-						continue;
+						goto try_again;
 					}
+
+					new_session_dialog->hide ();
+					goto_editor_window ();
+					flush_pending ();
 				}
 				break;
 
 			default:
 				break;
 			}
+		}
+
+	  try_again:
+		if (response == Gtk::RESPONSE_NONE) {
+			loading_dialog->hide ();
+			new_session_dialog->set_existing_session (false);
+			new_session_dialog->reset ();
 		}
 		
 	} while (response == Gtk::RESPONSE_NONE);
@@ -2369,7 +2403,7 @@ ARDOUR_UI::close_session ()
 }
 
 int
-ARDOUR_UI::load_session (const string & path, const string & snap_name, string* mix_template)
+ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_name, Glib::ustring mix_template)
 {
 	Session *new_session;
 	int unload_status;
@@ -2392,7 +2426,7 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 
 	/* if it already exists, we must have write access */
 
-	if (::access (path.c_str(), F_OK) == 0 && ::access (path.c_str(), W_OK)) {
+	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS) && ::access (path.c_str(), W_OK)) {
 		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
 					      "This prevents the session from being loaded."));
 		msg.run ();
@@ -2411,7 +2445,26 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 	}
 
 	catch (...) {
-		error << string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name) << endmsg;
+		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
+				   true,
+				   Gtk::MESSAGE_INFO,
+				   Gtk::BUTTONS_OK_CANCEL);
+		
+		msg.set_title (_("Loading Error"));
+		msg.set_secondary_text (_("Click the OK button to try again."));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		msg.present ();
+
+		int response = msg.run ();
+
+		msg.hide ();
+
+		switch (response) {
+		case RESPONSE_CANCEL:
+			exit (1);
+		default:
+			break;
+		}
 		goto out;
 	}
 
@@ -2436,7 +2489,7 @@ ARDOUR_UI::load_session (const string & path, const string & snap_name, string* 
 }
 
 int
-ARDOUR_UI::build_session (const string & path, const string & snap_name, 
+ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_name, 
 			  uint32_t control_channels,
 			  uint32_t master_channels, 
 			  AutoConnectOption input_connect,

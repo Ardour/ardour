@@ -259,9 +259,9 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 }
 
 Session::Session (AudioEngine &eng,
-		  string fullpath,
-		  string snapshot_name,
-		  string* mix_template)
+		  const string& fullpath,
+		  const string& snapshot_name,
+		  string mix_template)
 
 	: _engine (eng),
 	  _mmc_port (default_mmc_port),
@@ -361,7 +361,7 @@ Session::Session (AudioEngine &eng,
 	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 
 	if (new_session) {
-		if (create (new_session, 0, initial_length)) {
+		if (create (new_session, string(), initial_length)) {
 			destroy ();
 			throw failed_constructor ();
 		}

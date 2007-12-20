@@ -488,12 +488,18 @@ NewSessionDialog::set_existing_session (bool yn)
 		}
 
 	} else {
-		m_notebook->append_page(*new_session_table, _("New Session"));
-		m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
-		m_notebook->append_page(*open_session_vbox, _("Open Session"));
-		m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+		if (!(page_set & NewPage)) {
+			m_notebook->append_page(*new_session_table, _("New Session"));
+			m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+			page_set = Pages (page_set | NewPage);
+		}
+		if (!(page_set & OpenPage)) {
+			m_notebook->append_page(*open_session_vbox, _("Open Session"));
+			m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+			page_set = Pages (page_set | OpenPage);
+		}
+
 		m_notebook->show_all_children();
-		page_set = Pages (page_set | (NewPage|OpenPage));
 	}
 }
 

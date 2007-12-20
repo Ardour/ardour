@@ -231,8 +231,10 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	MenuList& items = display_menu->items();
 
 	// crossfade stuff
-	items.push_back (MenuElem (_("Hide all crossfades"), mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
-	items.push_back (MenuElem (_("Show all crossfades"), mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Hide all crossfades"), mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
+		items.push_back (MenuElem (_("Show all crossfades"), mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
+	}
 
 	// waveform menu
 	Menu *waveform_menu = manage(new Menu);

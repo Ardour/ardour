@@ -457,7 +457,7 @@ Session::setup_raid_path (string path)
 }
 
 int
-Session::create (bool& new_session, string* mix_template, nframes_t initial_length)
+Session::create (bool& new_session, const string& mix_template, nframes_t initial_length)
 {
 	string dir;
 
@@ -502,8 +502,8 @@ Session::create (bool& new_session, string* mix_template, nframes_t initial_leng
 
 	/* check new_session so we don't overwrite an existing one */
 
-	if (mix_template) {
-		std::string in_path = *mix_template;
+	if (!mix_template.empty()) {
+		std::string in_path = mix_template;
 
 		ifstream in(in_path.c_str());
 

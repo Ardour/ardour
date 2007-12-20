@@ -106,6 +106,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	_view = 0;
 	timestretch_rect = 0;
 	no_redraw = false;
+	destructive_track_mode_item = 0;
+	normal_track_mode_item = 0;
 
 	ignore_toggle = false;
 
@@ -174,17 +176,22 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	
 	label_view ();
 
-	controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	if (!Profile->get_sae()) {
+
+		controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+
+	} else {
+
+		controls_table.attach (automation_button, 4, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	}
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
 		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	}
 
-	/* remove focus from the buttons */
-	
 	y_position = -1;
 
 	_route->redirects_changed.connect (mem_fun(*this, &RouteTimeAxisView::redirects_changed));
@@ -419,13 +426,12 @@ RouteTimeAxisView::build_display_menu ()
 	build_remote_control_menu ();
 	if (!Profile->get_sae()) {
 		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		build_automation_action_menu ();
+		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+		items.push_back (SeparatorElem());
 	}
 
-	build_automation_action_menu ();
-	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
-
 	// Hook for derived classes to add type specific stuff
-	items.push_back (SeparatorElem());
 	append_extra_display_menu_items ();
 	items.push_back (SeparatorElem());
 	
@@ -452,28 +458,28 @@ RouteTimeAxisView::build_display_menu ()
 		if (!Profile->get_sae()) {
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
 			get_diskstream()->AlignmentStyleChanged.connect (mem_fun(*this, &RouteTimeAxisView::align_style_changed));
-		}
+			
+			RadioMenuItem::Group mode_group;
+			items.push_back (RadioMenuElem (mode_group, _("Normal mode"),
+							bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal)));
+			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+			items.push_back (RadioMenuElem (mode_group, _("Tape mode"),
+							bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive)));
+			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+			
+			switch (track()->mode()) {
+			case ARDOUR::Destructive:
+				destructive_track_mode_item->set_active ();
+				break;
+			case ARDOUR::Normal:
+				normal_track_mode_item->set_active ();
+				break;
+			}
 
-		RadioMenuItem::Group mode_group;
-		items.push_back (RadioMenuElem (mode_group, _("Normal mode"),
-						bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal)));
-		normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-		items.push_back (RadioMenuElem (mode_group, _("Tape mode"),
-						bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive)));
-		destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-				 
-		
-		switch (track()->mode()) {
-		case ARDOUR::Destructive:
-			destructive_track_mode_item->set_active ();
-			break;
-		case ARDOUR::Normal:
-			normal_track_mode_item->set_active ();
-			break;
+			items.push_back (SeparatorElem());
 		}
 	}
 
-	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route->active());
@@ -508,8 +514,8 @@ RouteTimeAxisView::set_track_mode (TrackMode mode)
 		/*NOTREACHED*/
 		return;
 	}
-
-	if (item->get_active () && track()->mode() != mode) {
+	
+	if (item && other_item && item->get_active () && track()->mode() != mode) {
 		_set_track_mode (track(), mode, other_item);
 	}
 }

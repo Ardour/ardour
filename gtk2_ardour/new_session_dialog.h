@@ -169,9 +169,9 @@ protected:
 
  private:
 	enum Pages {
-		NewPage,
-		OpenPage,
-		EnginePage
+		NewPage = 0x1,
+		OpenPage = 0x2,
+		EnginePage = 0x4
 	};
 
 	Pages page_set;
