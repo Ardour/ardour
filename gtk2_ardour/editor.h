@@ -1001,6 +1001,7 @@ class Editor : public PublicEditor
 	void play_from_edit_point ();
 	void play_from_edit_point_and_return ();
 	void play_selected_region ();
+	void play_edit_range ();
 	void loop_selected_region ();
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);

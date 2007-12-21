@@ -31,6 +31,7 @@
         <menu name='Transport' action='Transport'>
                <menuitem action='ToggleRoll'/>
                <menuitem action='play-from-edit-point-and-return'/>
+               <menuitem action='play-edit-range'/>
                <menuitem action='record-roll'/>
                <menuitem action='ToggleRollForgetCapture'/>
                <menuitem action='Loop'/>

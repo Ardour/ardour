@@ -67,6 +67,7 @@
 ; (gtk_accel_path "<Actions>/Main/AudioFileFormatData" "")
 ; (gtk_accel_path "<Actions>/options/MeterFalloffFastest" "")
 (gtk_accel_path "<Actions>/Editor/play-selected-regions" "w")
+(gtk_accel_path "<Actions>/Editor/play-edit-range" "<%SECONDARY%>w")
 (gtk_accel_path "<Actions>/Transport/Forward" "<%PRIMARY%>rightarrow")
 ; (gtk_accel_path "<Actions>/Snap/snap-to-smpte-seconds" "")
 ; (gtk_accel_path "<Actions>/Snap/snap-to-smpte-frame" "")

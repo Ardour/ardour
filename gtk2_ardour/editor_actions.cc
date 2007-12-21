@@ -300,6 +300,7 @@ Editor::register_actions ()
         act = ActionManager::register_action (editor_actions, "play-from-edit-point-and-return", _("Play from Edit Point & Return"), mem_fun(*this, &Editor::play_from_edit_point_and_return));
         ActionManager::session_sensitive_actions.push_back (act);
 
+        act = ActionManager::register_action (editor_actions, "play-edit-range", _("Play Edit Range"), mem_fun(*this, &Editor::play_edit_range));
         act = ActionManager::register_action (editor_actions, "play-selected-regions", _("Play Selected Region(s)"), mem_fun(*this, &Editor::play_selected_region));
         ActionManager::session_sensitive_actions.push_back (act);
         act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), mem_fun(*this, &Editor::kbd_brush));

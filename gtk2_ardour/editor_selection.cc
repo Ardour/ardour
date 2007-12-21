@@ -17,6 +17,9 @@
 
 */
 
+#include <algorithm>
+#include <stdlib.h>
+
 #include <pbd/stacktrace.h>
 
 #include <ardour/diskstream.h>
@@ -464,6 +467,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		list<Selectable*> results;
 		nframes_t last_frame;
 		nframes_t first_frame;
+		bool same_track = false;
 
 		/* 1. find the last selected regionview in the track that was clicked in */
 
@@ -480,63 +484,181 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 				if ((*x)->region()->first_frame() < first_frame) {
 					first_frame = (*x)->region()->first_frame();
 				}
+
+				same_track = true;
 			}
 		}
 
-		/* 2. figure out the boundaries for our search for new objects */
+		if (same_track) {
 
-		switch (clicked_regionview->region()->coverage (first_frame, last_frame)) {
-		case OverlapNone:
-			if (last_frame < clicked_regionview->region()->first_frame()) {
-				first_frame = last_frame;
-				last_frame = clicked_regionview->region()->last_frame();
-			} else {
-				last_frame = first_frame;
-				first_frame = clicked_regionview->region()->first_frame();
+			/* 2. figure out the boundaries for our search for new objects */
+			
+			switch (clicked_regionview->region()->coverage (first_frame, last_frame)) {
+			case OverlapNone:
+				if (last_frame < clicked_regionview->region()->first_frame()) {
+					first_frame = last_frame;
+					last_frame = clicked_regionview->region()->last_frame();
+				} else {
+					last_frame = first_frame;
+					first_frame = clicked_regionview->region()->first_frame();
+				}
+				break;
+				
+			case OverlapExternal:
+				if (last_frame < clicked_regionview->region()->first_frame()) {
+					first_frame = last_frame;
+					last_frame = clicked_regionview->region()->last_frame();
+				} else {
+					last_frame = first_frame;
+					first_frame = clicked_regionview->region()->first_frame();
+				}
+				break;
+				
+			case OverlapInternal:
+				if (last_frame < clicked_regionview->region()->first_frame()) {
+					first_frame = last_frame;
+					last_frame = clicked_regionview->region()->last_frame();
+				} else {
+					last_frame = first_frame;
+					first_frame = clicked_regionview->region()->first_frame();
+				}
+				break;
+				
+			case OverlapStart:
+			case OverlapEnd:
+				/* nothing to do except add clicked region to selection, since it
+				   overlaps with the existing selection in this track.
+				*/
+				break;
 			}
-			break;
 
-		case OverlapExternal:
-			if (last_frame < clicked_regionview->region()->first_frame()) {
-				first_frame = last_frame;
-				last_frame = clicked_regionview->region()->last_frame();
-			} else {
-				last_frame = first_frame;
-				first_frame = clicked_regionview->region()->first_frame();
-			}
-			break;
+		} else {
 
-		case OverlapInternal:
-			if (last_frame < clicked_regionview->region()->first_frame()) {
-				first_frame = last_frame;
-				last_frame = clicked_regionview->region()->last_frame();
-			} else {
-				last_frame = first_frame;
-				first_frame = clicked_regionview->region()->first_frame();
-			}
-			break;
-
-		case OverlapStart:
-		case OverlapEnd:
-			/* nothing to do except add clicked region to selection, since it
-			   overlaps with the existing selection in this track.
+			/* click in a track that has no regions selected, so extend vertically
+			   to pick out all regions that are defined by the existing selection
+			   plus this one.
 			*/
-			break;
+			
+			
+			first_frame = entered_regionview->region()->position();
+			last_frame = entered_regionview->region()->last_frame();
+			
+			for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+				if ((*i)->region()->position() < first_frame) {
+					first_frame = (*i)->region()->position();
+				}
+				if ((*i)->region()->last_frame() + 1 > last_frame) {
+					last_frame = (*i)->region()->last_frame();
+				}
+			}
 		}
 
-		/* 2. find all selectable objects (regionviews in this case) between that one and the end of the
-		      one that was clicked.
-		*/
+		/* 2. find all the tracks we should select in */
 
 		set<AudioTimeAxisView*> relevant_tracks;
-		
+		set<AudioTimeAxisView*> already_in_selection;
+
 		get_relevant_audio_tracks (relevant_tracks);
+
+		if (relevant_tracks.empty()) {
+
+			/* no relevant tracks -> no tracks selected .. thus .. if
+			   the regionview we're in isn't selected (i.e. we're
+			   about to extend to it), then find all tracks between
+			   the this one and any selected ones.
+			*/
+
+			if (!selection->selected (entered_regionview)) {
+
+				AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (&entered_regionview->get_time_axis_view());
+
+				if (atv) {
+
+					/* add this track to the ones we will search */
+
+					relevant_tracks.insert (atv);
+
+					/* find the track closest to this one that
+					   already a selected region.
+					*/
+
+					AudioTimeAxisView* closest = 0;
+					int distance = INT_MAX;
+					int key = atv->route()->order_key ("editor");
+
+					for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
+
+						AudioTimeAxisView* aatv = dynamic_cast<AudioTimeAxisView*>(&(*x)->get_time_axis_view());
+
+						if (aatv && aatv != atv) {
+
+							pair<set<AudioTimeAxisView*>::iterator,bool> result;
+
+							result = already_in_selection.insert (aatv);
+
+							if (result.second) {
+								/* newly added to already_in_selection */
+							
+
+								int d = aatv->route()->order_key ("editor");
+								
+								d -= key;
+								
+								if (abs (d) < distance) {
+									distance = abs (d);
+									closest = aatv;
+								}
+							}
+						}
+					}
+					
+					if (closest) {
+
+						/* now add all tracks between that one and this one */
+						
+						int okey = closest->route()->order_key ("editor");
+						
+						if (okey > key) {
+							swap (okey, key);
+						}
+						
+						for (TrackViewList::iterator x = track_views.begin(); x != track_views.end(); ++x) {
+							AudioTimeAxisView* aatv = dynamic_cast<AudioTimeAxisView*>(*x);
+							if (aatv && aatv != atv) {
+
+								int k = aatv->route()->order_key ("editor");
+
+								if (k >= okey && k <= key) {
+
+									/* in range but don't add it if
+									   it already has tracks selected.
+									   this avoids odd selection
+									   behaviour that feels wrong.
+									*/
+
+									if (find (already_in_selection.begin(),
+										  already_in_selection.end(),
+										  aatv) == already_in_selection.end()) {
+
+										relevant_tracks.insert (aatv);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/* 3. find all selectable objects (regionviews in this case) between that one and the end of the
+			   one that was clicked.
+		*/
 
 		for (set<AudioTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
 		}
 		
-		/* 3. convert to a vector of audio regions */
+		/* 4. convert to a vector of audio regions */
 
 		vector<RegionView*> regions;
 		

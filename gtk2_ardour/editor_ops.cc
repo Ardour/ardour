@@ -2365,6 +2365,16 @@ Editor::audition_playlist_region_via_route (boost::shared_ptr<Region> region, Ro
 }
 
 void
+Editor::play_edit_range ()
+{
+	nframes64_t start, end;
+
+	if (get_edit_op_range (start, end)) {
+		session->request_bounded_roll (start, end);
+	}
+}
+
+void
 Editor::play_selected_region ()
 {
 	nframes64_t start = max_frames;

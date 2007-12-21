@@ -33,6 +33,7 @@
                <menuitem action='ToggleRollForgetCapture'/>
                <menuitem action='Loop'/>
                <menuitem action='PlaySelection'/>
+               <menuitem action='play-edit-range'/>
                <menuitem action='Forward'/>
                <menuitem action='Rewind'/>
                <menuitem action='GotoZero'/>
