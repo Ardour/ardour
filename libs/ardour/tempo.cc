@@ -43,12 +43,17 @@ Tempo    TempoMap::_default_tempo (120.0);
 
 const double Meter::ticks_per_beat = 1920.0;
 
+double Tempo::frames_per_beat (nframes_t sr, const Meter& meter) const
+{
+	return  ((60.0 * sr) / (_beats_per_minute * meter.note_divisor()/_note_type));
+}
+
 /***********************************************************************/
 
 double
 Meter::frames_per_bar (const Tempo& tempo, nframes_t sr) const
 {
-	return ((60.0 * sr * _beats_per_bar) / tempo.beats_per_minute());
+	return ((60.0 * sr * _beats_per_bar) / (tempo.beats_per_minute() * _note_type/tempo.note_type()));
 }
 
 /***********************************************************************/
@@ -86,6 +91,16 @@ TempoSection::TempoSection (const XMLNode& node)
 		error << _("TempoSection XML node has an illegal \"beats_per_minute\" value") << endmsg;
 		throw failed_constructor();
 	}
+	
+	if ((prop = node.property ("note-type")) == 0) {
+		/* older session, make note type be quarter by default */
+		_note_type = 4.0;
+	} else {
+		if (sscanf (prop->value().c_str(), "%lf", &_note_type) != 1 || _note_type < 1.0) {
+			error << _("TempoSection XML node has an illegal \"note-type\" value") << endmsg;
+			throw failed_constructor();
+		}
+	}
 
 	if ((prop = node.property ("movable")) == 0) {
 		error << _("TempoSection XML node has no \"movable\" property") << endmsg;
@@ -109,6 +124,8 @@ TempoSection::get_state() const
 	root->add_property ("start", buf);
 	snprintf (buf, sizeof (buf), "%f", _beats_per_minute);
 	root->add_property ("beats-per-minute", buf);
+	snprintf (buf, sizeof (buf), "%f", _note_type);
+	root->add_property ("note-type", buf);
 	snprintf (buf, sizeof (buf), "%s", movable()?"yes":"no");
 	root->add_property ("movable", buf);
 
@@ -210,7 +227,7 @@ TempoMap::TempoMap (nframes_t fr)
 	start.beats = 1;
 	start.ticks = 0;
 
-	TempoSection *t = new TempoSection (start, _default_tempo.beats_per_minute());
+	TempoSection *t = new TempoSection (start, _default_tempo.beats_per_minute(), _default_tempo.note_type());
 	MeterSection *m = new MeterSection (start, _default_meter.beats_per_bar(), _default_meter.note_divisor());
 
 	t->set_movable (false);
@@ -359,7 +376,7 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 	
 		where.ticks = 0;
 		
-		do_insert (new TempoSection (where, tempo.beats_per_minute()));
+		do_insert (new TempoSection (where, tempo.beats_per_minute(), tempo.note_type()));
 	}
 
 	StateChanged (Change (0));
@@ -614,7 +631,7 @@ TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const Metric& me
 
 	const double beats_per_bar = metric.meter().beats_per_bar();
 	const double frames_per_bar = metric.meter().frames_per_bar (metric.tempo(), _frame_rate);
-	const double beat_frames = metric.tempo().frames_per_beat (_frame_rate);
+	const double beat_frames = metric.tempo().frames_per_beat (_frame_rate, metric.meter());
 
 	/* now compute how far beyond that point we actually are. */
 
@@ -667,7 +684,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 		+ start.ticks/Meter::ticks_per_beat;
 
 
-	start_frame = m.frame() + (nframes_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate));
+	start_frame = m.frame() + (nframes_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
 
     	m =  metric_at(end);
 
@@ -676,7 +693,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 	beat_offset = bar_offset * m.meter().beats_per_bar() - (m.start().beats -1) + (end.beats - 1) 
 		+ end.ticks/Meter::ticks_per_beat;
 
-	end_frame = m.frame() + (nframes_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate));
+	end_frame = m.frame() + (nframes_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
 
 	frames = end_frame - start_frame;
 
@@ -697,7 +714,7 @@ TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, 
 	double beat_frames = 0;
 
 	beats_per_bar = meter.beats_per_bar();
-	beat_frames = tempo.frames_per_beat (_frame_rate);
+	beat_frames = tempo.frames_per_beat (_frame_rate,meter);
 
 	frames = 0;
 
@@ -1088,7 +1105,7 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 
 	beats_per_bar = meter->beats_per_bar ();
 	frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-	beat_frames = tempo->frames_per_beat (_frame_rate);
+	beat_frames = tempo->frames_per_beat (_frame_rate, *meter);
 	
 	if (meter->frame() > tempo->frame()) {
 		bar = meter->start().bars;
@@ -1198,7 +1215,7 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 
 			beats_per_bar = meter->beats_per_bar ();
 			frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
-			beat_frames = tempo->frames_per_beat (_frame_rate);
+			beat_frames = tempo->frames_per_beat (_frame_rate, *meter);
 			
 			++i;
 		}
@@ -1304,7 +1321,7 @@ TempoMap::dump (std::ostream& o) const
 	for (Metrics::const_iterator i = metrics->begin(); i != metrics->end(); ++i) {
 
 		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			o << "Tempo @ " << *i << ' ' << t->beats_per_minute() << " BPM at " << t->start() << " frame= " << t->frame() << " (move? "
+			o << "Tempo @ " << *i << ' ' << t->beats_per_minute() << " BPM (denom = " << t->note_type() << ") at " << t->start() << " frame= " << t->frame() << " (move? "
 			  << t->movable() << ')' << endl;
 		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			o << "Meter @ " << *i << ' ' << m->beats_per_bar() << '/' << m->note_divisor() << " at " << m->start() << " frame= " << m->frame() 

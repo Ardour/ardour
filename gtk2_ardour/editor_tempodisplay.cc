@@ -308,13 +308,14 @@ Editor::mouse_add_new_tempo_event (nframes_t frame)
 	BBT_Time requested;
 	
 	bpm = tempo_dialog.get_bpm ();
+	double nt = tempo_dialog.get_note_type();
 	bpm = max (0.01, bpm);
 	
 	tempo_dialog.get_bbt_time (requested);
 	
 	begin_reversible_command (_("add tempo mark"));
         XMLNode &before = map.get_state();
-	map.add_tempo (Tempo (bpm), requested);
+	map.add_tempo (Tempo (bpm,nt), requested);
         XMLNode &after = map.get_state();
 	session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 	commit_reversible_command ();
@@ -429,13 +430,14 @@ Editor::edit_tempo_section (TempoSection* section)
 	}
 
 	double bpm = tempo_dialog.get_bpm ();
+	double nt = tempo_dialog.get_note_type ();
 	BBT_Time when;
 	tempo_dialog.get_bbt_time(when);
 	bpm = max (0.01, bpm);
 	
 	begin_reversible_command (_("replace tempo mark"));
         XMLNode &before = session->tempo_map().get_state();
-	session->tempo_map().replace_tempo (*section, Tempo (bpm));
+	session->tempo_map().replace_tempo (*section, Tempo (bpm,nt));
 	session->tempo_map().move_tempo (*section, when);
         XMLNode &after = session->tempo_map().get_state();
 	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));

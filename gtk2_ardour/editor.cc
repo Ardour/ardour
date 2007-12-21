@@ -2731,7 +2731,7 @@ Editor::setup_toolbar ()
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, "Playhead", FUDGE, 0);
+	Gtkmm2ext::set_size_request_to_display_given_text (zoom_focus_selector, _("Playhead"), FUDGE, 0);
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (mem_fun(*this, &Editor::zoom_focus_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
@@ -2745,19 +2745,19 @@ Editor::setup_toolbar ()
 	snap_box.set_border_width (2);
 
 	snap_type_selector.set_name ("SnapTypeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, "SMPTE Seconds", 2+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_type_selector, _("SMPTE Seconds"), 2+FUDGE, 10);
 	set_popdown_strings (snap_type_selector, snap_type_strings);
 	snap_type_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_type_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Snap/Grid Units"));
 
 	snap_mode_selector.set_name ("SnapModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, "Magnetic Snap", 2+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (snap_mode_selector, _("Magnetic Snap"), 2+FUDGE, 10);
 	set_popdown_strings (snap_mode_selector, snap_mode_strings);
 	snap_mode_selector.signal_changed().connect (mem_fun(*this, &Editor::snap_mode_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (snap_mode_selector, _("Snap/Grid Mode"));
 
 	edit_point_selector.set_name ("SnapModeSelector");
-	Gtkmm2ext::set_size_request_to_display_given_text (edit_point_selector, "Playhead", 2+FUDGE, 10);
+	Gtkmm2ext::set_size_request_to_display_given_text (edit_point_selector, _("Playhead"), 2+FUDGE, 10);
 	set_popdown_strings (edit_point_selector, edit_point_strings);
 	edit_point_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_point_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (edit_point_selector, _("Edit point"));
@@ -4140,10 +4140,14 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 		
 	case EditAtSelectedMarker:
 		if (!selection->markers.empty()) {
-			bool whocares;
-			Location* loc = find_location_from_marker (selection->markers.front(), whocares);
+			bool is_start;
+			Location* loc = find_location_from_marker (selection->markers.front(), is_start);
 			if (loc) {
-				where =  loc->start();
+				if (is_start) {
+					where =  loc->start();
+				} else {
+					where = loc->end();
+				}
 				break;
 			}
 		} 

@@ -161,7 +161,7 @@ string
 LadspaPlugin::unique_id() const
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), "%u", descriptor->UniqueID);
+	snprintf (buf, sizeof (buf), "%lu", descriptor->UniqueID);
 	return string (buf);
 }
 

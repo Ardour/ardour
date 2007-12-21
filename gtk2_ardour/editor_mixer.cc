@@ -183,7 +183,7 @@ Editor::update_current_screen ()
 
 		/* only update if the playhead is on screen or we are following it */
 
-		if (_follow_playhead) {
+		if (_follow_playhead && session->requested_return_frame() < 0) {
 
 			playhead_cursor->canvas_item.show();
 

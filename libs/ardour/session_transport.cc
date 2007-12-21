@@ -478,7 +478,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		
 	}
 
-	PositionChanged (_transport_frame); /* EMIT SIGNAL */
+        PositionChanged ((nframes_t) _transport_frame); /* EMIT SIGNAL */
 	TransportStateChange (); /* EMIT SIGNAL */
 
 	/* and start it up again if relevant */

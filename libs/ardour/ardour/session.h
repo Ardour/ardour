@@ -966,35 +966,35 @@ class Session : public PBD::StatefulDestructible
 
 	typedef void (Session::*process_function_type)(nframes_t);
 
-	AudioEngine            &_engine;
-	mutable gint            processing_prohibited;
+	AudioEngine&            _engine;
+	mutable gint             processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	bool                     waiting_for_sync_offset;
-	nframes_t          _base_frame_rate;
-	nframes_t          _current_frame_rate;  //this includes video pullup offset
+	nframes_t               _base_frame_rate;
+	nframes_t               _current_frame_rate;  //this includes video pullup offset
 	int                      transport_sub_state;
-	mutable gint           _record_status;
-	nframes_t          _transport_frame;
+	mutable gint            _record_status;
+	volatile nframes_t      _transport_frame;
 	Location*                end_location;
 	Location*                start_location;
-	Slave                  *_slave;
+	Slave*                  _slave;
 	bool                    _silent;
 	volatile float          _transport_speed;
 	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;
 	bool                     auto_play_legal;
-	nframes_t          _last_slave_transport_frame;
-	nframes_t           maximum_output_latency;
-	nframes_t           last_stop_frame;
-	nframes64_t             _requested_return_frame;
+	nframes_t               _last_slave_transport_frame;
+	nframes_t                maximum_output_latency;
+	nframes_t                last_stop_frame;
+	volatile nframes64_t    _requested_return_frame;
 	vector<Sample *>        _passthru_buffers;
 	vector<Sample *>        _silent_buffers;
 	vector<Sample *>        _send_buffers;
-	nframes_t           current_block_size;
-	nframes_t          _worst_output_latency;
-	nframes_t          _worst_input_latency;
-	nframes_t          _worst_track_latency;
+	nframes_t                current_block_size;
+	nframes_t               _worst_output_latency;
+	nframes_t               _worst_input_latency;
+	nframes_t               _worst_track_latency;
 	bool                    _have_captured;
 	float                   _meter_hold;
 	float                   _meter_falloff;
