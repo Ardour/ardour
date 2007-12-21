@@ -338,7 +338,7 @@ Editor::nudge_forward (bool next)
 	
 	if (!selection->regions.empty()) {
 
-		begin_reversible_command (_("nudge forward"));
+		begin_reversible_command (_("nudge regions forward"));
 
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 			boost::shared_ptr<Region> r ((*i)->region());
@@ -360,12 +360,39 @@ Editor::nudge_forward (bool next)
 		
 	} else if (!selection->markers.empty()) {
 
-		bool ignored;
-		Location* loc = find_location_from_marker (selection->markers.front(), ignored);
+		bool is_start;
+		Location* loc = find_location_from_marker (selection->markers.front(), is_start);
 
 		if (loc) {
-			distance = get_nudge_distance (loc->start(), next_distance);
-			loc->set_start (loc->start() + distance);
+
+			begin_reversible_command (_("nudge location forward"));
+
+			XMLNode& before (loc->get_state());
+
+			if (is_start) {
+				distance = get_nudge_distance (loc->start(), next_distance);
+				if (next) {
+					distance = next_distance;
+				}
+				if (max_frames - distance > loc->start() + loc->length()) {
+					loc->set_start (loc->start() + distance);
+				} else {
+					loc->set_start (max_frames - loc->length());
+				}
+			} else {
+				distance = get_nudge_distance (loc->end(), next_distance);
+				if (next) {
+					distance = next_distance;
+				}
+				if (max_frames - distance > loc->end()) {
+					loc->set_end (loc->end() + distance);
+				} else {
+					loc->set_end (max_frames);
+				}
+			}
+			XMLNode& after (loc->get_state());
+			session->add_command (new MementoCommand<Location>(*loc, &before, &after));
+			commit_reversible_command ();
 		}
 		
 	} else {
@@ -384,7 +411,7 @@ Editor::nudge_backward (bool next)
 	
 	if (!selection->regions.empty()) {
 
-		begin_reversible_command (_("nudge forward"));
+		begin_reversible_command (_("nudge regions backward"));
 
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 			boost::shared_ptr<Region> r ((*i)->region());
@@ -408,6 +435,44 @@ Editor::nudge_backward (bool next)
 
 		commit_reversible_command ();
 
+	} else if (!selection->markers.empty()) {
+
+		bool is_start;
+		Location* loc = find_location_from_marker (selection->markers.front(), is_start);
+
+		if (loc) {
+
+			begin_reversible_command (_("nudge location forward"));
+			XMLNode& before (loc->get_state());
+
+			if (is_start) {
+				distance = get_nudge_distance (loc->start(), next_distance);
+				if (next) {
+					distance = next_distance;
+				}
+				if (distance < loc->start()) {
+					loc->set_start (loc->start() - distance);
+				} else {
+					loc->set_start (0);
+				}
+			} else {
+				distance = get_nudge_distance (loc->end(), next_distance);
+
+				if (next) {
+					distance = next_distance;
+				}
+
+				if (distance < loc->end() - loc->length()) {
+					loc->set_end (loc->end() - distance);
+				} else {
+					loc->set_end (loc->length());
+				}
+			}
+
+			XMLNode& after (loc->get_state());
+			session->add_command (new MementoCommand<Location>(*loc, &before, &after));
+		}
+		
 	} else {
 
 		distance = get_nudge_distance (playhead_cursor->current_frame, next_distance);

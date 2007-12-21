@@ -403,7 +403,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
 
-#undef  DEBUG_ACCELERATOR_HANDLING
+#undef DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
 	bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
 #endif
@@ -488,12 +488,11 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		}
 	}
 
-	if (!special_handling_of_unmodified_accelerators ||
-	    ev->state & (Gdk::MOD1_MASK|
-			 Gdk::MOD3_MASK|
-			 Gdk::MOD4_MASK|
-			 Gdk::MOD5_MASK|
-			 Gdk::CONTROL_MASK)) {
+	/* consider all relevant modifiers but not LOCK or SHIFT */
+
+	guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
+
+	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
 
 		/* no special handling or there are modifiers in effect: accelerate first */
 
