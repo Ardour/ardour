@@ -360,7 +360,10 @@ LadspaPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 LadspaPluginUI::ControlUI*
 LadspaPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<AutomationControl> mcontrol)
 {
-	ControlUI* control_ui;
+	ControlUI* control_ui = NULL;
+	if (!mcontrol)
+		return control_ui;
+
 	Plugin::ParameterDescriptor desc;
 
 	plugin->get_parameter_descriptor (port_index, desc);
