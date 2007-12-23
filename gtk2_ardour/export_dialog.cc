@@ -24,7 +24,6 @@
 #include <fstream>
 
 #include <samplerate.h>
-
 #include <pbd/convert.h>
 #include <pbd/xml++.h>
 
@@ -936,7 +935,19 @@ void
 ExportDialog::do_export ()
 {
 	string filepath = file_entry.get_text();
- 	
+
+	if (!ARDOUR_UI::instance()->the_engine().connected()) {
+		MessageDialog msg (*this, 
+				   _("Not connected to audioengine"),
+				   true,
+				   MESSAGE_ERROR,
+				   BUTTONS_OK);
+		msg.set_secondary_text (_("Ardour cannot export audio when disconnected"));
+		msg.present ();
+		msg.run ();
+		return;
+	}
+		
 	if(!is_filepath_valid(filepath)){
 		return;
 	}

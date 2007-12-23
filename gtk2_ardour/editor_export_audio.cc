@@ -96,9 +96,7 @@ Editor::export_region ()
 	ExportDialog* dialog = new ExportRegionDialog (*this, clicked_regionview->region());
 		
 	dialog->connect_to_session (session);
-	dialog->set_range (
-		clicked_regionview->region()->first_frame(), 
-		clicked_regionview->region()->last_frame());
+	dialog->set_range (clicked_regionview->region()->first_frame(), clicked_regionview->region()->last_frame());
 	dialog->start_export();
 }
 

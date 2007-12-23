@@ -149,7 +149,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
-	
+
+	ARDOUR::AudioEngine& the_engine() const { return *engine; }
+
 	void toggle_key_editor ();
 	void toggle_location_window ();
 	void toggle_theme_manager ();
@@ -266,8 +268,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	ARDOUR::AudioEngine                 *engine;
 	ARDOUR::Session                     *session;
-
-	bool check_audioengine();
 
 	Gtk::Tooltips          _tooltips;
 
@@ -739,6 +739,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void no_memory_warning ();
 	void check_memory_locking ();
 
+	bool check_audioengine();
 	void audioengine_setup ();
 
 	void display_message (const char *prefix, gint prefix_len, 

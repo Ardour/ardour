@@ -427,6 +427,10 @@ AudioExportSpecification::process (nframes_t nframes)
 int
 Session::start_audio_export (AudioExportSpecification& spec)
 {
+	if (!_engine.connected()) {
+		return -1;
+	}
+
 	if (spec.prepare (current_block_size, frame_rate())) {
 		return -1;
 	}
