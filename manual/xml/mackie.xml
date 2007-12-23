@@ -33,7 +33,7 @@
 
     <para>
       While ardour is not running, edit your
-      <filename>.ardour2/ardour.rc</filename> (and for now
+      <filename>~/.ardour2/ardour.rc</filename> (and for now
       <filename>etc/ardour2/ardour_system.rc</filename> and
       <filename>etc/ardour2/ardour.rc</filename>) and add at the top, with
       the other ports:
@@ -93,7 +93,7 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
     <title>Mackie Mode</title>
     <para>
       If you have a Mackie MCU make sure that you have the following under
-      the &lt;Config&gt; tag:
+      the &lt;Config&gt; tag in <filename>~/.ardour2/ardour.rc</filename>:
 <programlisting>
 &lt;Option name="mackie-emulation" value="mcu"/&gt;
 </programlisting>
@@ -110,15 +110,19 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
     </note>
 
     <para>
-      In this mode, the original mappings are used. Note that many of the
-      buttons have not yet been implemented.
+      In this mode, the button mappings from
+      <ulink url="http://www.mackie.com/products/mcu/pdf/MCU_MCU_Overlay.pdf">MCU
+      Overlay</ulink> are used. Note that many of the buttons have not yet
+      been implemented, mainly because I have no idea what they should do.
+      Suggestions welcome.
     </para>
   </section>
 
   <section id="mackie-bcf-mode">
     <title>BCF mode</title>
     <para>
-      If you have a BCF2000 you must add under the &lt;Config&gt; tag:
+      If you have a BCF2000 you must add under the &lt;Config&gt; tag in
+      <filename>~/.ardour2/ardour.rc</filename>:
 <programlisting>
 &lt;Option name="mackie-emulation" value="bcf"/&gt;
 </programlisting>
@@ -343,8 +347,11 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
     <title>Connecting to Ardour</title>
     <note>
       <para>
-        Currently, support for the mackie using alsa/sequencer ports is
-        borked. You're better off using alsa/raw as documented above.
+        Currently (in 2.0.x and 2.0-ongoing), support for the mackie using
+        alsa/sequencer ports is not working properly. That is, some MIDI
+        messages get through, but some don't. So it's not reliable enough
+        for use. Until that's fixed, you're better off using alsa/raw as
+        documented above.
       </para>
     </note>
 
