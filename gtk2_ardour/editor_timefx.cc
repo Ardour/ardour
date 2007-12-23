@@ -256,7 +256,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<Region>   new_region;
 	bool in_command = false;
-
+	
 	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
 

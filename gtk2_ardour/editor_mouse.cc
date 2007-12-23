@@ -5166,7 +5166,12 @@ Editor::end_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
 
 	begin_reversible_command (_("timestretch"));
 
-	if (time_stretch (selection->regions, percentage) == 0) {
+	// XXX how do timeFX on multiple regions ?
+
+	RegionSelection rs;
+	rs.add (clicked_regionview);
+
+	if (time_stretch (rs, percentage) == 0) {
 		session->commit_reversible_command ();
 	}
 }
