@@ -41,11 +41,11 @@ void Mackie::BcfSurface::init_controls()
 	groups["strip_2"] = group;
 	strips[1] = dynamic_cast<Strip*>( group );
 	
-	group = new Group ( "functions" );
-	groups["functions"] = group;
-	
 	group = new Group ( "automation" );
 	groups["automation"] = group;
+	
+	group = new Group ( "functions" );
+	groups["functions"] = group;
 	
 	group = new Strip ( "strip_3", 2 );
 	groups["strip_3"] = group;
@@ -428,11 +428,11 @@ void Mackie::BcfSurface::init_controls()
 	controls_by_name["plugin"] = button;
 	group->add( *button );
 
-	group = groups["assignment"];
-	button = new Button ( 88, 1, "eq", *group );
+	group = groups["functions"];
+	button = new Button ( 88, 1, "drop", *group );
 	buttons[0x58] = button;
 	controls.push_back( button );
-	controls_by_name["eq"] = button;
+	controls_by_name["drop"] = button;
 	group->add( *button );
 
 	group = groups["assignment"];
@@ -653,8 +653,8 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *button );
 
 	group = groups["automation"];
-	button = new Button ( 77, 1, "snapshot", *group );
-	buttons[0x4d] = button;
+	button = new Button ( 95, 1, "snapshot", *group );
+	buttons[0x5f] = button;
 	controls.push_back( button );
 	controls_by_name["snapshot"] = button;
 	group->add( *button );
@@ -692,6 +692,13 @@ void Mackie::BcfSurface::init_controls()
 	buttons[0x53] = button;
 	controls.push_back( button );
 	controls_by_name["mixer"] = button;
+	group->add( *button );
+
+	group = groups["functions"];
+	button = new Button ( 77, 1, "save", *group );
+	buttons[0x4d] = button;
+	controls.push_back( button );
+	controls_by_name["save"] = button;
 	group->add( *button );
 
 	group = groups["transport"];
@@ -969,10 +976,10 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x9058: // eq
+		case 0x9058: // drop
 			switch ( bs ) {
-				case press: ls = mbh.eq_press( button ); break;
-				case release: ls = mbh.eq_release( button ); break;
+				case press: ls = mbh.drop_press( button ); break;
+				case release: ls = mbh.drop_release( button ); break;
 				case neither: break;
 			}
 			break;
@@ -1225,7 +1232,7 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x904d: // snapshot
+		case 0x905f: // snapshot
 			switch ( bs ) {
 				case press: ls = mbh.snapshot_press( button ); break;
 				case release: ls = mbh.snapshot_release( button ); break;
@@ -1269,6 +1276,14 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			switch ( bs ) {
 				case press: ls = mbh.mixer_press( button ); break;
 				case release: ls = mbh.mixer_release( button ); break;
+				case neither: break;
+			}
+			break;
+
+		case 0x904d: // save
+			switch ( bs ) {
+				case press: ls = mbh.save_press( button ); break;
+				case release: ls = mbh.save_release( button ); break;
 				case neither: break;
 			}
 			break;

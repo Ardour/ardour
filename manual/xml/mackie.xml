@@ -292,7 +292,13 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
               </entry>
 
               <entry>
-                end
+                <para>
+                  end
+                </para>
+
+                <para>
+                  shift 2: save
+                </para>
               </entry>
             </row>
 
@@ -330,11 +336,19 @@ KERNEL=="midiC[0-9]D0", ATTRS{product}=="BCF2000", SYMLINK+="midi-bcf2000"
 
             <row>
               <entry>
-                stop
+                <para>
+                  stop
+                </para>
+
+                <para>
+                  shift 1: remove last capture
+                </para>
               </entry>
 
               <entry>
-                play
+                <para>
+                  play
+                </para>
               </entry>
             </row>
           </tbody>

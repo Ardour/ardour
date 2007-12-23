@@ -102,7 +102,9 @@ class MackieControlProtocol
 	void notify_panner_changed( Mackie::RouteSignal *, bool force_update = true );
 	/// Signal handler for new routes added
 	void notify_route_added( ARDOUR::Session::RouteList & );
-
+	/// Signal handler for Route::active_changed
+	void notify_active_changed( Mackie::RouteSignal * );
+ 
 	void notify_remote_id_changed();
 
 	/// rebuild the current bank. Called on route added/removed and
@@ -184,6 +186,12 @@ class MackieControlProtocol
 	// function buttons
 	virtual Mackie::LedState marker_press( Mackie::Button & );
 	virtual Mackie::LedState marker_release( Mackie::Button & );
+
+	virtual Mackie::LedState drop_press( Mackie::Button & );
+	virtual Mackie::LedState drop_release( Mackie::Button & );
+
+	virtual Mackie::LedState save_press( Mackie::Button & );
+	virtual Mackie::LedState save_release( Mackie::Button & );
 
 	// jog wheel states
 	virtual Mackie::LedState zoom_press( Mackie::Button & );

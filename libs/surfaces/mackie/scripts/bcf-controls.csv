@@ -20,7 +20,7 @@ button,1,assignment,io,1,1,0x28
 button,1,assignment,sends,1,1,0x5a
 button,1,assignment,pan,1,1,0x59
 button,1,assignment,plugin,1,1,0x57
-button,1,assignment,eq,1,1,0x58
+button,1,functions,drop,1,1,0x58 # was eq
 button,1,assignment,zoom,1,1,0x2d
 button,1,bank,left,1,0,0x2e
 button,1,bank,right,1,0,0x2f
@@ -54,12 +54,13 @@ button,1,modifiers,cmd_alt,1,0,0x49
 button,1,automation,on,1,1,0x4a
 button,1,automation,rec_ready,1,1,0x4b
 button,1,functions,undo,1,1,0x4c
-button,1,automation,snapshot,1,1,0x4d
+button,1,automation,snapshot,1,1,0x5f
 button,1,functions,redo,1,1,0x4f
 button,1,functions,marker,1,1,0x47
 button,1,functions,enter,1,1,0x51
 button,1,functions,cancel,1,0,0x52
 button,1,functions,mixer,1,0,0x53
+button,1,functions,save,1,0,0x4d
 
 # transport buttons
 button,1,transport,frm_left,1,1,0x5b

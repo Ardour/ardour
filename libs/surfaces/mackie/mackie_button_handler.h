@@ -220,6 +220,12 @@ public:
 
 	virtual LedState global_solo_press( Button & );
 	virtual LedState global_solo_release( Button & );
+
+	virtual LedState drop_press( Button & );
+	virtual LedState drop_release( Button & );
+
+	virtual LedState save_press( Button & );
+	virtual LedState save_release( Button & );
 };
 
 }

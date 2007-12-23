@@ -954,6 +954,21 @@ void MackieControlProtocol::notify_record_enable_changed( RouteSignal * route_si
 	}
 }
 
+void MackieControlProtocol::notify_active_changed( RouteSignal * route_signal )
+{
+	try
+	{
+#ifdef DEBUG
+		cout << "MackieControlProtocol::notify_active_changed" << endl;
+#endif
+		refresh_current_bank();
+	}
+	catch( exception & e )
+	{
+		cout << e.what() << endl;
+	}
+}
+	
 void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal, bool force_update )
 {
 	try
@@ -1545,4 +1560,26 @@ Mackie::LedState MackieControlProtocol::scrub_release( Mackie::Button & )
 		||
 		_jog_wheel.jog_wheel_state() == JogWheel::shuttle
 	;
+}
+
+LedState MackieControlProtocol::drop_press( Button & button )
+{
+	session->remove_last_capture();
+	return on;
+}
+
+LedState MackieControlProtocol::drop_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::save_press( Button & button )
+{
+	session->save_state( "" );
+	return on;
+}
+
+LedState MackieControlProtocol::save_release( Button & button )
+{
+	return off;
 }

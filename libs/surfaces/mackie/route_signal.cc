@@ -63,8 +63,11 @@ void RouteSignal::connect()
 		// with can't be record-enabled
 	}
 
+	// TODO this works when a currently-banked route is made inactive, but not
+	// when a route is activated which should be currently banked.
+	cins = _route.active_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_active_changed ), this ) );
+	
 	// TODO
-	// active_changed
 	// SelectedChanged
 	// RemoteControlIDChanged. Better handled at Session level.
 }
