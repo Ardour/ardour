@@ -580,6 +580,7 @@ class Editor : public PublicEditor
 	gint ruler_button_press (GdkEventButton*);
 	gint ruler_button_release (GdkEventButton*);
 	gint ruler_mouse_motion (GdkEventMotion*);
+	bool ruler_scroll (GdkEventScroll* event);
 
 	gint ruler_pressed_button;
 	Gtk::Widget * ruler_grabbed_widget;
@@ -1279,11 +1280,14 @@ class Editor : public PublicEditor
 
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
+	bool time_canvas_scroll (GdkEventScroll* event);
 
 	bool track_canvas_scroll_event (GdkEventScroll* event);
 	bool track_canvas_button_press_event (GdkEventButton* event);
 	bool track_canvas_button_release_event (GdkEventButton* event);
 	bool track_canvas_motion_notify_event (GdkEventMotion* event);
+
+	bool time_canvas_scroll_event (GdkEventScroll* event);
 
 	Gtk::Allocation canvas_allocation;
 	bool canvas_idle_queued;

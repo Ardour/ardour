@@ -157,11 +157,64 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	return false;
 }
+
 bool
 Editor::track_canvas_scroll_event (GdkEventScroll *event)
 {
 	track_canvas.grab_focus();
 	track_canvas_scroll (event);
+	return false;
+}
+
+bool
+Editor::time_canvas_scroll (GdkEventScroll* ev)
+{
+	int x, y;
+	double wx, wy;
+	nframes_t xdelta;
+	int direction = ev->direction;
+
+  retry:
+	switch (direction) {
+	case GDK_SCROLL_UP:
+		temporal_zoom_step (true);
+		break;
+
+	case GDK_SCROLL_DOWN:
+		temporal_zoom_step (false);
+		break;	
+
+	case GDK_SCROLL_LEFT:
+		xdelta = (current_page_frames() / 2);
+		if (leftmost_frame > xdelta) {
+			reset_x_origin (leftmost_frame - xdelta);
+		} else {
+			reset_x_origin (0);
+		}
+		break;
+
+	case GDK_SCROLL_RIGHT:
+		xdelta = (current_page_frames() / 2);
+		if (max_frames - xdelta > leftmost_frame) {
+			reset_x_origin (leftmost_frame + xdelta);
+		} else {
+			reset_x_origin (max_frames - current_page_frames());
+		}
+		break;
+
+	default:
+		/* what? */
+		break;
+	}
+
+	return false;
+}
+
+bool
+Editor::time_canvas_scroll_event (GdkEventScroll *event)
+{
+	time_canvas.grab_focus();
+	time_canvas_scroll (event);
 	return false;
 }
 

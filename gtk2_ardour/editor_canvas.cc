@@ -102,6 +102,9 @@ Editor::initialize_canvas ()
 	track_canvas.signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
 	track_canvas.signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
 
+	/* just scroll stuff for the timecanvas */
+	time_canvas.signal_scroll_event().connect (mem_fun (*this, &Editor::time_canvas_scroll_event));
+
 	track_canvas.set_name ("EditorMainCanvas");
 	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));

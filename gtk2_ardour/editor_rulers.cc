@@ -99,28 +99,54 @@ Editor::initialize_rulers ()
 	ruler_shown[ruler_metric_frames] = false;
 	ruler_shown[ruler_metric_minsec] = false;
 	
-	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-
-	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	frames_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	minsec_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-
-	smpte_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	bbt_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	frames_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	minsec_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	
-	smpte_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	
 	visible_timebars = 7; /* 4 here, 3 in time_canvas */
 	ruler_pressed_button = 0;
+}
+
+bool
+Editor::ruler_scroll (GdkEventScroll* event)
+{
+	nframes_t xdelta;
+	int direction = event->direction;
+	bool handled = false;
+
+	switch (direction) {
+	case GDK_SCROLL_UP:
+		temporal_zoom_step (true);
+		handled = true;
+		break;
+
+	case GDK_SCROLL_DOWN:
+		temporal_zoom_step (false);
+		handled = true;
+		break;
+
+	case GDK_SCROLL_LEFT:
+		xdelta = (current_page_frames() / 2);
+		if (leftmost_frame > xdelta) {
+			reset_x_origin (leftmost_frame - xdelta);
+		} else {
+			reset_x_origin (0);
+		}
+		handled = true;
+		break;
+
+	case GDK_SCROLL_RIGHT:
+		xdelta = (current_page_frames() / 2);
+		if (max_frames - xdelta > leftmost_frame) {
+			reset_x_origin (leftmost_frame + xdelta);
+		} else {
+			reset_x_origin (max_frames - current_page_frames());
+		}
+		handled = true;
+		break;
+
+	default:
+		/* what? */
+		break;
+	}
+
+	return handled;
 }
 
 
@@ -621,11 +647,10 @@ Editor::update_ruler_visibility ()
 	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
-	
-	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	smpte_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	bbt_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	frames_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 
 	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
@@ -641,6 +666,11 @@ Editor::update_ruler_visibility ()
 	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+
+	smpte_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	bbt_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	frames_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	minsec_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
 
 	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
 	
