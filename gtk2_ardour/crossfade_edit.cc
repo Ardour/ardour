@@ -1122,13 +1122,13 @@ CrossfadeEditor::audition_both ()
 	nframes_t left_length;
 
 	if (preroll_button.get_active()) {
-		preroll = ARDOUR_UI::instance()->preroll_clock.current_duration ();
+		preroll = session.frame_rate() * 2;  //2 second hardcoded preroll for now
 	} else {
 		preroll = 0;
 	}
 
 	if (postroll_button.get_active()) {
-		postroll = ARDOUR_UI::instance()->postroll_clock.current_duration ();
+		postroll = session.frame_rate() * 2;  //2 second hardcoded postroll for now
 	} else {
 		postroll = 0;
 	}
