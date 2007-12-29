@@ -1512,7 +1512,8 @@ Editor::temporal_zoom (gdouble fpu)
 	nframes64_t current_leftmost = leftmost_frame;
 	nframes64_t current_rightmost;
 	nframes64_t current_center;
-	nframes64_t new_page;
+	nframes64_t new_page_size;
+	nframes64_t half_page_size;
 	nframes64_t leftmost_after_zoom = 0;
 	nframes64_t where;
 	bool in_track_canvas;
@@ -1520,7 +1521,8 @@ Editor::temporal_zoom (gdouble fpu)
 
 	nfpu = fpu;
 	
-	new_page = (nframes_t) floor (canvas_width * nfpu);
+	new_page_size = (nframes_t) floor (canvas_width * nfpu);
+	half_page_size = new_page_size / 2;
 
 	switch (zoom_focus) {
 	case ZoomFocusLeft:
@@ -1529,28 +1531,28 @@ Editor::temporal_zoom (gdouble fpu)
 		
 	case ZoomFocusRight:
 		current_rightmost = leftmost_frame + current_page;
-		if (current_rightmost > new_page) {
-			leftmost_after_zoom = current_rightmost - new_page;
-		} else {
+		if (current_rightmost < new_page_size) {
 			leftmost_after_zoom = 0;
+		} else {
+			leftmost_after_zoom = current_rightmost - new_page_size;
 		}
 		break;
 		
 	case ZoomFocusCenter:
 		current_center = current_leftmost + (current_page/2); 
-		if (current_center > (new_page/2)) {
-			leftmost_after_zoom = current_center - (new_page / 2);
-		} else {
+		if (current_center < half_page_size) {
 			leftmost_after_zoom = 0;
+		} else {
+			leftmost_after_zoom = current_center - half_page_size;
 		}
 		break;
 		
 	case ZoomFocusPlayhead:
 		/* try to keep the playhead in the center */
-		if (playhead_cursor->current_frame > new_page/2) {
-			leftmost_after_zoom = playhead_cursor->current_frame - (new_page/2);
-		} else {
+		if (playhead_cursor->current_frame < half_page_size) {
 			leftmost_after_zoom = 0;
+		} else {
+			leftmost_after_zoom = playhead_cursor->current_frame - half_page_size;
 		}
 		break;
 
@@ -1561,20 +1563,20 @@ Editor::temporal_zoom (gdouble fpu)
 			/* use playhead instead */
 			where = playhead_cursor->current_frame;
 
-			if (where > new_page/2) {
-				leftmost_after_zoom = where - (new_page/2);
-			} else {
+			if (where < half_page_size) {
 				leftmost_after_zoom = 0;
+			} else {
+				leftmost_after_zoom = where - half_page_size;
 			}
 
 		} else {
 
-			double l = - ((new_page * ((where - current_leftmost)/(double)current_page)) - where);
+			double l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
 
 			if (l < 0) {
 				leftmost_after_zoom = 0;
 			} else if (l > max_frames) { 
-				leftmost_after_zoom = max_frames - new_page;
+				leftmost_after_zoom = max_frames - new_page_size;
 			} else {
 				leftmost_after_zoom = (nframes64_t) l;
 			}
@@ -1584,23 +1586,29 @@ Editor::temporal_zoom (gdouble fpu)
 
 	case ZoomFocusEdit:
 		/* try to keep the edit point in the center */
-		if (get_preferred_edit_position() > new_page/2) {
-			leftmost_after_zoom = get_preferred_edit_position() - (new_page/2);
+		where = get_preferred_edit_position ();
+
+		if (where > 0) {
+
+			double l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+
+			if (l < 0) {
+				leftmost_after_zoom = 0;
+			} else if (l > max_frames) { 
+				leftmost_after_zoom = max_frames - new_page_size;
+			} else {
+				leftmost_after_zoom = (nframes64_t) l;
+			}
+
 		} else {
-			leftmost_after_zoom = 0;
+			/* edit point not defined */
+			return;
 		}
 		break;
 		
 	}
  
 	// leftmost_after_zoom = min (leftmost_after_zoom, session->current_end_frame());
-
-//	begin_reversible_command (_("zoom"));
-//	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), current_leftmost, frames_per_unit));
-//	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_after_zoom, nfpu));
-//	commit_reversible_command ();
-	
-	// cerr << "repos & zoom to " << leftmost_after_zoom << " @ " << nfpu << endl;
 
 	reposition_and_zoom (leftmost_after_zoom, nfpu);
 }	

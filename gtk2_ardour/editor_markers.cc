@@ -1105,8 +1105,14 @@ Editor::update_punch_range_view (bool visibility)
 		double x1 = frame_to_pixel (tpl->start());
 		double x2 = frame_to_pixel (tpl->end());
 		
+		guint track_canvas_width,track_canvas_height;
+		track_canvas.get_size(track_canvas_width,track_canvas_height);
+		
 		transport_punch_range_rect->property_x1() = x1;
 		transport_punch_range_rect->property_x2() = x2;
+		
+		transport_punch_range_rect->property_x1() = (Config->get_punch_in() ? x1 : 0);
+		transport_punch_range_rect->property_x2() = (Config->get_punch_out() ? x2 : track_canvas_width);
 		
 		if (visibility) {
 		        transport_punch_range_rect->show();

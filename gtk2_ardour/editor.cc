@@ -147,7 +147,7 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Center"),
 	N_("Playhead"),
  	N_("Mouse"),
- 	N_("Marker"),
+ 	N_("Edit Point"),
 	0
 };
 
@@ -2137,8 +2137,8 @@ Editor::set_edit_point_preference (EditPoint ep)
 		default:
 			break;
 		}
-	}
-				
+	} 
+						
 	instant_save ();
 }
 

@@ -317,39 +317,21 @@ Editor::track_canvas_size_allocated ()
 	reset_hscrollbar_stepping ();
 	reset_scrolling_region ();
 
-	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
+	guint track_canvas_width,track_canvas_height;
+ 	track_canvas.get_size(track_canvas_width,track_canvas_height);
 
+	if (playhead_cursor) playhead_cursor->set_length (track_canvas_height);
+ 	
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->set_line_length (canvas_height);
+		(*x)->set_line_length (track_canvas_height);
 	}
+
+ 	range_marker_drag_rect->property_y2() = track_canvas_height;
+ 	transport_loop_range_rect->property_y2() = track_canvas_height;
+ 	transport_punch_range_rect->property_y2() = track_canvas_height;
+ 	transport_punchin_line->property_y2() = track_canvas_height;
+ 	transport_punchout_line->property_y2() = track_canvas_height;
 	
-	// EDIT CURSOR XXX set line height for selected markers here
-
-	if (range_marker_drag_rect) {
-		range_marker_drag_rect->property_y1() = 0.0;
-		range_marker_drag_rect->property_y2() = canvas_height;
-	}
-
-	if (transport_loop_range_rect) {
-		transport_loop_range_rect->property_y1() = 0.0;
-		transport_loop_range_rect->property_y2() = canvas_height;
-	}
-
-	if (transport_punch_range_rect) {
-		transport_punch_range_rect->property_y1() = 0.0;
-		transport_punch_range_rect->property_y2() = canvas_height;
-	}
-
-	if (transport_punchin_line) {
-		transport_punchin_line->property_y1() = 0.0;
-		transport_punchin_line->property_y2() = canvas_height;
-	}
-
-	if (transport_punchout_line) {
-		transport_punchout_line->property_y1() = 0.0;
-		transport_punchout_line->property_y2() = canvas_height;
-	}
-		
 	update_fixed_rulers();
 	redisplay_tempo (true);
 
@@ -383,6 +365,16 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 
 	// XXX what is the correct height value for the time canvas ? this overstates it
 	time_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_width), canvas_height);
+	
+	guint track_canvas_width,track_canvas_height;
+	track_canvas.get_size(track_canvas_width,track_canvas_height);
+	range_marker_drag_rect->property_y2() = track_canvas_height;
+	transport_loop_range_rect->property_y2() = track_canvas_height;
+	transport_punch_range_rect->property_y2() = track_canvas_height;
+	transport_punchin_line->property_y2() = track_canvas_height;
+	transport_punchout_line->property_y2() = track_canvas_height;
+
+	update_punch_range_view(true);
 
 	controls_layout.queue_resize();
 }
