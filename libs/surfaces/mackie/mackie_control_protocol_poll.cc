@@ -61,8 +61,8 @@ void * MackieControlProtocol::monitor_work()
 					update_ports();
 				}
 			}
-			// poll for automation data from the routes
-			poll_automation();
+			// poll for session data that needs to go to the unit
+			poll_session_data();
 		}
 		catch ( exception & e )
 		{

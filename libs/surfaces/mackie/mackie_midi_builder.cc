@@ -20,6 +20,7 @@
 #include <typeinfo>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
 #include "controls.h"
 #include "midi_byte_array.h"
@@ -232,5 +233,42 @@ MidiByteArray MackieMidiBuilder::all_strips_display( MackiePort & port, std::vec
 	retval << 0x12 << 0;
 	// NOTE remember max 112 bytes per message, including sysex headers
 	retval << "Not working yet";
+	return retval;
+}
+
+MidiByteArray MackieMidiBuilder::timecode_display( MackiePort & port, const std::string & timecode, const std::string & last_timecode )
+{
+	// if there's no change, send nothing, not even sysex header
+	if ( timecode == last_timecode ) return MidiByteArray();
+	
+	// length sanity checking
+	string local_timecode = timecode;
+	// truncate to 10 characters
+	if ( local_timecode.length() > 10 ) local_timecode = local_timecode.substr( 0, 10 );
+	// pad to 10 characters
+	while ( local_timecode.length() < 10 ) local_timecode += " ";
+		
+	// find the suffix of local_timecode that differs from last_timecode
+	std::pair<string::const_iterator,string::iterator> pp = mismatch( last_timecode.begin(), last_timecode.end(), local_timecode.begin() );
+	
+	MidiByteArray retval;
+	
+	// sysex header
+	retval << port.sysex_hdr();
+	
+	// code for timecode display
+	retval << 0x10;
+	
+	// translate characters. These are sent in reverse order of display
+	// hence the reverse iterators
+	string::reverse_iterator rend = reverse_iterator<string::iterator>( pp.second );
+	for ( string::reverse_iterator it = local_timecode.rbegin(); it != rend; ++it )
+	{
+		retval << translate_seven_segment( *it );
+	}
+	
+	// sysex trailer
+	retval << MIDI::eox;
+	
 	return retval;
 }

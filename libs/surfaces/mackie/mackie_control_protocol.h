@@ -120,12 +120,15 @@ class MackieControlProtocol
 	void notify_parameter_changed( const char * );
    void notify_solo_active_changed( bool );
 
-	// this is called to generate the midi to send in response to
-   // a button press.
+	/// Turn smpte on and beats off, or vice versa, depending
+	/// on state of _timecode_type
+	void update_smpte_beats_led();
+  
+	/// this is called to generate the midi to send in response to a button press.
 	void update_led( Mackie::Button & button, Mackie::LedState );
   
-	// calls update_led, but looks up the button by name
 	void update_global_button( const std::string & name, Mackie::LedState );
+	void update_global_led( const std::string & name, Mackie::LedState );
   
    // transport button handler methods from MackieButtonHandler
 	virtual Mackie::LedState frm_left_press( Mackie::Button & );
@@ -192,6 +195,9 @@ class MackieControlProtocol
 
 	virtual Mackie::LedState save_press( Mackie::Button & );
 	virtual Mackie::LedState save_release( Mackie::Button & );
+
+	virtual Mackie::LedState smpte_beats_press( Mackie::Button & );
+	virtual Mackie::LedState smpte_beats_release( Mackie::Button & );
 
 	// jog wheel states
 	virtual Mackie::LedState zoom_press( Mackie::Button & );
@@ -274,12 +280,22 @@ class MackieControlProtocol
 
 	void add_port( MIDI::Port &, int number );
 
-	/// read automation data from the currently active routes and send to surface
-	void poll_automation();
+	/**
+		Read session data and send to surface. Includes
+		automation from the currently active routes and
+		timecode displays.
+	*/
+	void poll_session_data();
 	
 	// called from poll_automation to figure out which automations need to be sent
 	void update_automation( Mackie::RouteSignal & );
+	
+	// also called from poll_automation to update timecode display
+	void update_timecode_display();
 
+	std::string format_bbt_timecode( nframes_t now_frame );
+	std::string format_smpte_timecode( nframes_t now_frame );
+	
 	/**
 		notification that the port is about to start it's init sequence.
 		We must make sure that before this exits, the port is being polled
@@ -341,6 +357,12 @@ class MackieControlProtocol
 	
 	// Timer for controlling midi bandwidth used by automation polls
 	Mackie::Timer _automation_last;
+	
+	// last written timecode string
+	std::string _timecode_last;
+	
+	// Which timecode are we displaying? BBT or SMPTE
+	ARDOUR::AnyTime::Type _timecode_type;
 };
 
 #endif // ardour_mackie_control_protocol_h

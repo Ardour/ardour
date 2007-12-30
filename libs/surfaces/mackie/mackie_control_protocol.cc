@@ -14,7 +14,6 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <iostream>
@@ -22,6 +21,7 @@
 #include <cmath>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -45,6 +45,8 @@
 #include <ardour/location.h>
 #include <ardour/dB.h>
 #include <ardour/panner.h>
+#include <ardour/tempo.h>
+#include <ardour/types.h>
 
 #include "mackie_control_protocol.h"
 
@@ -79,6 +81,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, pfd( 0 )
 	, nfds( 0 )
 	, _jog_wheel( *this )
+	, _timecode_type( ARDOUR::AnyTime::BBT )
 {
 #ifdef DEBUG
 	cout << "MackieControlProtocol::MackieControlProtocol" << endl;
@@ -489,9 +492,28 @@ void MackieControlProtocol::update_led( Mackie::Button & button, Mackie::LedStat
 	}
 }
 
+void MackieControlProtocol::update_smpte_beats_led()
+{
+	switch ( _timecode_type )
+	{
+		case ARDOUR::AnyTime::BBT:
+			update_global_led( "beats", on );
+			update_global_led( "smpte", off );
+			break;
+		case ARDOUR::AnyTime::SMPTE:
+			update_global_led( "smpte", on );
+			update_global_led( "beats", off );
+			break;
+		default:
+			ostringstream os;
+			os << "Unknown Anytime::Type " << _timecode_type;
+			throw runtime_error( os.str() );
+	}
+}
+
 void MackieControlProtocol::update_global_button( const string & name, LedState ls )
 {
-	if ( surface().controls_by_name.find( name ) !=surface().controls_by_name.end() )
+	if ( surface().controls_by_name.find( name ) != surface().controls_by_name.end() )
 	{
 		Button * button = dynamic_cast<Button*>( surface().controls_by_name[name] );
 		mcu_port().write( builder.build_led( button->led(), ls ) );
@@ -500,6 +522,21 @@ void MackieControlProtocol::update_global_button( const string & name, LedState 
 	{
 #ifdef DEBUG
 		cout << "Button " << name << " not found" << endl;
+#endif
+	}
+}
+
+void MackieControlProtocol::update_global_led( const string & name, LedState ls )
+{
+	if ( surface().controls_by_name.find( name ) != surface().controls_by_name.end() )
+	{
+		Led * led = dynamic_cast<Led*>( surface().controls_by_name[name] );
+		mcu_port().write( builder.build_led( *led, ls ) );
+	}
+	else
+	{
+#ifdef DEBUG
+		cout << "Led " << name << " not found" << endl;
 #endif
 	}
 }
@@ -529,6 +566,7 @@ void MackieControlProtocol::update_surface()
 		// update global buttons and displays
 		notify_record_state_changed();
 		notify_transport_state_changed();
+		update_smpte_beats_led();
 	}
 }
 
@@ -1071,7 +1109,82 @@ void MackieControlProtocol::update_automation( RouteSignal & rs )
 	_automation_last.start();
 }
 
-void MackieControlProtocol::poll_automation()
+string MackieControlProtocol::format_bbt_timecode( nframes_t now_frame )
+{
+	BBT_Time bbt_time;
+	session->bbt_time( now_frame, bbt_time );
+	
+	// According to the Logic docs
+	// digits: 888/88/88/888
+	// BBT mode: Bars/Beats/Subdivisions/Ticks
+	ostringstream os;
+	os << setw(3) << setfill('0') << bbt_time.bars;
+	os << setw(2) << setfill('0') << bbt_time.beats;
+	
+	// figure out subdivisions per beat
+	const Meter & meter = session->tempo_map().meter_at( now_frame );
+	int subdiv = 2;
+	if ( meter.note_divisor() == 8 && meter.beats_per_bar() == 12.0 || meter.beats_per_bar() == 9.0 || meter.beats_per_bar() == 6.0 )
+	{
+		subdiv = 3;
+	}
+	
+	uint32_t subdivisions = bbt_time.ticks / uint32_t( Meter::ticks_per_beat / subdiv );
+	uint32_t ticks = bbt_time.ticks % uint32_t( Meter::ticks_per_beat / subdiv );
+	
+	os << setw(2) << setfill('0') << subdivisions + 1;
+	os << setw(3) << setfill('0') << ticks;
+	
+	return os.str();
+}
+
+string MackieControlProtocol::format_smpte_timecode( nframes_t now_frame )
+{
+	SMPTE::Time smpte;
+	session->smpte_time( now_frame, smpte );
+
+	// According to the Logic docs
+	// digits: 888/88/88/888
+	// SMPTE mode: Hours/Minutes/Seconds/Frames
+	ostringstream os;
+	os << setw(3) << setfill('0') << smpte.hours;
+	os << setw(2) << setfill('0') << smpte.minutes;
+	os << setw(2) << setfill('0') << smpte.seconds;
+	os << setw(3) << setfill('0') << smpte.frames;
+	
+	return os.str();
+}
+
+void MackieControlProtocol::update_timecode_display()
+{
+	// do assignment here so current_frame is fixed
+	nframes_t current_frame = session->transport_frame();
+	string timecode;
+	
+	switch ( _timecode_type )
+	{
+		case ARDOUR::AnyTime::BBT:
+			timecode = format_bbt_timecode( current_frame );
+			break;
+		case ARDOUR::AnyTime::SMPTE:
+			timecode = format_smpte_timecode( current_frame );
+			break;
+		default:
+			ostringstream os;
+			os << "Unknown timecode: " << _timecode_type;
+			throw runtime_error( os.str() );
+	}	
+	
+	// only write the timecode string to the MCU if it's changed
+	// since last time. This is to reduce midi bandwidth used.
+	if ( timecode != _timecode_last )
+	{
+		mcu_port().write( builder.timecode_display( mcu_port(), timecode, _timecode_last ) );
+		_timecode_last = timecode;
+	}
+}
+
+void MackieControlProtocol::poll_session_data()
 {
 	if ( _active && _automation_last.elapsed() >= 20 )
 	{
@@ -1082,8 +1195,17 @@ void MackieControlProtocol::poll_automation()
 		}
 		
 		// and the master strip
-		if ( master_route_signal != 0 ) update_automation( *master_route_signal );
-			
+		if ( master_route_signal != 0 )
+		{
+			update_automation( *master_route_signal );
+		}
+		
+		// and timecode display if it's a real mackie
+		if ( mcu_port().emulation() == MackiePort::mackie )
+		{
+			update_timecode_display();
+		}
+		
 		_automation_last.start();
 	}
 }
@@ -1580,6 +1702,30 @@ LedState MackieControlProtocol::save_press( Button & button )
 }
 
 LedState MackieControlProtocol::save_release( Button & button )
+{
+	return off;
+}
+
+LedState MackieControlProtocol::smpte_beats_press( Button & )
+{
+	switch ( _timecode_type )
+	{
+		case ARDOUR::AnyTime::BBT:
+			_timecode_type = ARDOUR::AnyTime::SMPTE;
+			break;
+		case ARDOUR::AnyTime::SMPTE:
+			_timecode_type = ARDOUR::AnyTime::BBT;
+			break;
+		default:
+			ostringstream os;
+			os << "Unknown Anytime::Type " << _timecode_type;
+			throw runtime_error( os.str() );
+	}
+	update_smpte_beats_led();
+	return on;
+}
+
+LedState MackieControlProtocol::smpte_beats_release( Button & )
 {
 	return off;
 }

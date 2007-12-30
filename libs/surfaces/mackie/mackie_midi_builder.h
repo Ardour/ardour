@@ -77,6 +77,13 @@ public:
 	MidiByteArray two_char_display( unsigned int value, const std::string & dots = "  " );
 	
 	/**
+		Timecode display. Only the difference between timecode and last_timecode will
+		be encoded, to save midi bandwidth. If they're the same, an empty array will
+		be returned
+	*/
+	MidiByteArray timecode_display( MackiePort &, const std::string & timecode, const std::string & last_timecode = "" );
+	
+	/**
 		for displaying characters on the strip LCD
 		pass MackiePort so we know which sysex header to use
 	*/

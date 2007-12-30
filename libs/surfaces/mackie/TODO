@@ -1,5 +1,5 @@
 * two bcf doesn't work
-* remappable buttons
+* remappable buttons (OSC or Surfax?)
 * 7/1 configurable to 8
 * need an object that can encapsulate different port types, ie BCF vs MCU. Not at the surface level.
 * finish button implementations.
@@ -11,7 +11,6 @@
 MCU
 ---
 * if mackie wheel moves too fast, it's ignored.
-* timecode displays
 * gain/panner display in second line
 * metering on second line
 * per-strip signal led
