@@ -317,20 +317,17 @@ Editor::track_canvas_size_allocated ()
 	reset_hscrollbar_stepping ();
 	reset_scrolling_region ();
 
-	guint track_canvas_width,track_canvas_height;
- 	track_canvas.get_size(track_canvas_width,track_canvas_height);
-
-	if (playhead_cursor) playhead_cursor->set_length (track_canvas_height);
+	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
  	
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->set_line_length (track_canvas_height);
+		(*x)->set_line_length (canvas_height);
 	}
 
- 	range_marker_drag_rect->property_y2() = track_canvas_height;
- 	transport_loop_range_rect->property_y2() = track_canvas_height;
- 	transport_punch_range_rect->property_y2() = track_canvas_height;
- 	transport_punchin_line->property_y2() = track_canvas_height;
- 	transport_punchout_line->property_y2() = track_canvas_height;
+ 	range_marker_drag_rect->property_y2() = canvas_height;
+ 	transport_loop_range_rect->property_y2() = canvas_height;
+ 	transport_punch_range_rect->property_y2() = canvas_height;
+ 	transport_punchin_line->property_y2() = canvas_height;
+ 	transport_punchout_line->property_y2() = canvas_height;
 	
 	update_fixed_rulers();
 	redisplay_tempo (true);
