@@ -371,7 +371,7 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	transport_punchin_line->property_y2() = track_canvas_height;
 	transport_punchout_line->property_y2() = track_canvas_height;
 
-	update_punch_range_view(true);
+	update_punch_range_view (true);
 
 	controls_layout.queue_resize();
 }
@@ -695,7 +695,7 @@ Editor::canvas_horizontally_scrolled ()
 
   	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
-	
+
 	if (rightmost_frame > last_canvas_frame) {
 		last_canvas_frame = rightmost_frame;
 		reset_scrolling_region ();

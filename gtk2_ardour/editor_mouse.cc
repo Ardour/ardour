@@ -735,8 +735,9 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					} else {
 						start_region_grab (item, event);
 					}
-					
+					return true;
 					break;
+
 				case GainAutomationControlPointItem:
 				case PanAutomationControlPointItem:
 				case RedirectAutomationControlPointItem:
@@ -3121,7 +3122,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	possibly_copy_regions_during_grab (event);
 
 	if (!check_region_drag_possible (&tv)) {
-		cerr << "early return in RDMC\n";
 		return;
 	}
 
@@ -3137,20 +3137,12 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		goto y_axis_done;
 	}
 
-	cerr << "last tv order = " << drag_info.last_trackview->name() << " order = " 
-	     << drag_info.last_trackview->order
-	     << " vs " << tv->name() 
-	     << " order " << tv->order
-	     << endl;
-	
 	if ((pointer_y_span = (drag_info.last_trackview->order - tv->order)) != 0) {
 
 		int32_t children = 0, numtracks = 0;
 		// XXX hard coding track limit, oh my, so very very bad
 		bitset <1024> tracks (0x00);
 		/* get a bitmask representing the visible tracks */
-
-		cerr << "Pointer y span non zero (" << pointer_y_span << ")\n";
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			TimeAxisView *tracklist_timeview;
@@ -3362,8 +3354,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
                         PREPARE TO MOVE
 	************************************************************/
 
-	cerr << "prep +> xdelta = " << x_delta << " pys = " << pointer_y_span << endl;
-
 	if (x_delta == 0 && (pointer_y_span == 0)) {
 		/* haven't reached next snap point, and we're not switching
 		   trackviews. nothing to do.
@@ -3410,8 +3400,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 		const list<RegionView*>& layered_regions = selection->regions.by_layer();
-
-		cerr << "moving " << layered_regions.size() << "regions\n";
 
 		for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
 	    
@@ -3519,8 +3507,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				rv->fake_set_opaque (true);
 			}
 
-			cerr << "about to move, xd = " << x_delta << " yd = " << y_delta << endl;
-			
 			if (drag_info.brushing) {
 				mouse_brush_insert_region (rv, pending_region_position);
 			} else {

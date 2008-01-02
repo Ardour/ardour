@@ -219,7 +219,6 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	canvas_display->show();/* XXX not necessary */
 	y_position = y;
 	order = nth;
-	cerr << name() << " has order set to " << nth << endl;
 	_hidden = false;
 	
 	/* height in pixels depends on _order, so update it now we've changed _order */

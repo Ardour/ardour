@@ -382,6 +382,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	vector<RegionView*> all_equivalent_regions;
 	bool commit = false;
 
+	cerr << "Set selected regionview from click, op = " << op << " press ? " << press << " ntr ? " << no_track_remove << endl;
+
 	if (!clicked_regionview || !clicked_audio_trackview) {
 		return false;
 	}

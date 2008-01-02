@@ -4087,13 +4087,14 @@ Editor::idle_visual_changer ()
 
 	pending_visual_change.pending = (VisualChange::Type) 0;
 	pending_visual_change.idle_handler_id = -1;
-	
+
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
 	}
 
 	if (p & VisualChange::TimeOrigin) {
-		if (pending_visual_change.time_origin != leftmost_frame) {
+		double val = horizontal_adjustment.get_value();
+		if ((nframes_t) floor (val * frames_per_unit) != pending_visual_change.time_origin) {
 			horizontal_adjustment.set_value (pending_visual_change.time_origin/frames_per_unit);
 			/* the signal handler will do the rest */
 		} else {
