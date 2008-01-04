@@ -742,7 +742,7 @@ Editor::_import_thread (void *arg)
 void *
 Editor::import_thread ()
 {
-	session->import_audiofile (import_status);
+	session->import_audiofiles (import_status);
 	pthread_exit_pbd (0);
 	/*NOTREACHED*/
 	return 0;
