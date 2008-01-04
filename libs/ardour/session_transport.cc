@@ -812,6 +812,7 @@ Session::set_transport_speed (float speed, bool abort)
 		}
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
+			cerr << "synced to jack and speed == " << speed << endl;
 			warning << _("Global varispeed cannot be supported while Ardour is connected to JACK transport control")
 				<< endmsg;
 			return;
