@@ -29,6 +29,7 @@
 #include <glibmm/thread.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
 
 #include <midi++/mmc.h>
 #include <midi++/port.h>
@@ -751,6 +752,8 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 void
 Session::set_transport_speed (float speed, bool abort)
 {
+	cerr << "Session::set_transport_speed " << speed << " abort  capture ? " << abort << endl;
+
 	if (_transport_speed == speed) {
 		return;
 	}
@@ -813,6 +816,7 @@ Session::set_transport_speed (float speed, bool abort)
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
 			cerr << "synced to jack and speed == " << speed << endl;
+			stacktrace (cerr, 20);
 			warning << _("Global varispeed cannot be supported while Ardour is connected to JACK transport control")
 				<< endmsg;
 			return;
