@@ -578,7 +578,7 @@ class Session : public PBD::StatefulDestructible
 	    
 	};
 
-	int import_audiofile (import_status&);
+	void import_audiofiles (import_status&);
 	bool sample_rate_convert (import_status&, string infile, string& outfile);
 	string build_tmp_convert_name (string file);
 

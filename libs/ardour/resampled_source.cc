@@ -28,12 +28,13 @@ using namespace PBD;
 
 const uint32_t ResampledImportableSource::blocksize = 4096U;
 
-ResampledImportableSource::ResampledImportableSource (SNDFILE* sf, SF_INFO* info, nframes_t rate, SrcQuality srcq)
-	: ImportableSource (sf, info) 
+ResampledImportableSource::ResampledImportableSource (const std::string& path,
+		nframes_t rate, SrcQuality srcq)
+	: ImportableSource (path) 
 {
 	int err;
 	
-	sf_seek (in, 0, SEEK_SET) ;
+	sf_seek (in.get(), 0, SEEK_SET) ;
 	
 	/* Initialize the sample rate converter. */
 	
@@ -57,7 +58,7 @@ ResampledImportableSource::ResampledImportableSource (SNDFILE* sf, SF_INFO* info
 		break;
 	}
 	
-	if ((src_state = src_new (src_type, sf_info->channels, &err)) == 0) {	
+	if ((src_state = src_new (src_type, sf_info.channels, &err)) == 0) {	
 		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
 		throw failed_constructor ();
 	}
@@ -69,7 +70,7 @@ ResampledImportableSource::ResampledImportableSource (SNDFILE* sf, SF_INFO* info
 	src_data.input_frames = 0 ;
 	src_data.data_in = input ;
 	
-	src_data.src_ratio = ((float) rate) / sf_info->samplerate ;
+	src_data.src_ratio = ((float) rate) / sf_info.samplerate ;
 	
 	input = new float[blocksize];
 }
@@ -97,14 +98,14 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 			src_data.end_of_input = SF_TRUE ;
 		}		
 
-		src_data.input_frames /= sf_info->channels;
+		src_data.input_frames /= sf_info.channels;
 		src_data.data_in = input ;
 	} 
 	
 	src_data.data_out = output;
 
 	if (!src_data.end_of_input) {
-		src_data.output_frames = nframes / sf_info->channels ;
+		src_data.output_frames = nframes / sf_info.channels ;
 	} else {
 		src_data.output_frames = src_data.input_frames;
 	}
@@ -120,9 +121,9 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 		return 0;
 	}
 	
-	src_data.data_in += src_data.input_frames_used * sf_info->channels ;
+	src_data.data_in += src_data.input_frames_used * sf_info.channels ;
 	src_data.input_frames -= src_data.input_frames_used ;
 
-	return src_data.output_frames_gen * sf_info->channels;
+	return src_data.output_frames_gen * sf_info.channels;
 }
 

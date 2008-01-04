@@ -76,10 +76,6 @@ Session::request_slave_source (SlaveSource src)
 void
 Session::request_transport_speed (float speed)
 {
-	if (speed != 0.0 && speed != 1.0) {
-		cerr << "odd speed requested\n";
-		stacktrace (cerr, 20);
-	}
 	Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, speed);
 	queue_event (ev);
 }
@@ -756,8 +752,6 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 void
 Session::set_transport_speed (float speed, bool abort)
 {
-	cerr << "Session::set_transport_speed " << speed << " abort  capture ? " << abort << endl;
-
 	if (_transport_speed == speed) {
 		return;
 	}
@@ -819,7 +813,6 @@ Session::set_transport_speed (float speed, bool abort)
 		}
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
-			cerr << "synced to jack and speed == " << speed << endl;
 			warning << _("Global varispeed cannot be supported while Ardour is connected to JACK transport control")
 				<< endmsg;
 			return;

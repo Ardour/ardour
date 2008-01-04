@@ -31,6 +31,9 @@
 
 #include <glibmm.h>
 
+#include <boost/scoped_array.hpp>
+#include <boost/shared_array.hpp>
+
 #include <pbd/basename.h>
 #include <pbd/convert.h>
 
@@ -49,226 +52,258 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-int
-Session::import_audiofile (import_status& status)
+static std::auto_ptr<ImportableSource>
+open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
-	SNDFILE *in;
-	vector<boost::shared_ptr<AudioFileSource> > newfiles;
-	SF_INFO info;
-	float *data = 0;
-	Sample **channel_data = 0;
-	int nfiles = 0;
-	string basepath;
-	string sounds_dir;
-	nframes_t so_far;
+	std::auto_ptr<ImportableSource> source(new ImportableSource(path));
+
+	if (source->samplerate() == samplerate) {
+		return source;
+	}
+	
+	return std::auto_ptr<ImportableSource>(new ResampledImportableSource(path, samplerate, quality));
+}
+
+static std::string
+get_non_existent_filename (const std::string& basename, uint channel, uint channels)
+{
 	char buf[PATH_MAX+1];
-	int ret = -1;
+	bool goodfile = false;
+	string base(basename);
+
+	do {
+		if (channels == 2) {
+			if (channel == 0) {
+				snprintf (buf, sizeof(buf), "%s-L.wav", base.c_str());
+			} else {
+				snprintf (buf, sizeof(buf), "%s-R.wav", base.c_str());
+			}
+		} else if (channels > 1) {
+			snprintf (buf, sizeof(buf), "%s-c%d.wav", base.c_str(), channel+1);
+		} else {
+			snprintf (buf, sizeof(buf), "%s.wav", base.c_str());
+		}
+		
+		if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+
+			/* if the file already exists, we must come up with
+			 *  a new name for it.  for now we just keep appending
+			 *  _ to basename
+			 */
+
+			base += "_";
+
+		} else {
+
+			goodfile = true;
+		}
+
+	} while ( !goodfile);
+
+	return buf;
+}
+
+static vector<string>
+get_paths_for_new_sources (const string& import_file_path, const string& session_dir, uint channels)
+{
 	vector<string> new_paths;
-	struct tm* now;
-	ImportableSource* importable = 0;
+	const string basename = basename_nosuffix (import_file_path);
+
+	for (uint n = 0; n < channels; ++n) {
+
+		std::string filepath;
+
+		filepath = session_dir;
+		filepath += '/';
+		filepath += get_non_existent_filename (basename, n, channels); 
+
+		new_paths.push_back (filepath);
+	}
+
+	return new_paths;
+}
+
+static bool
+create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
+		uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+{
+	for (vector<string>::const_iterator i = new_paths.begin();
+			i != new_paths.end(); ++i)
+	{
+		boost::shared_ptr<Source> source;
+
+		try
+		{
+			source = SourceFactory::createWritable (
+				sess,
+				i->c_str(),
+				false, // destructive
+				samplerate
+				);
+		}
+		catch (const failed_constructor& err)
+		{
+			error << string_compose (_("Unable to create file %1 during import"), *i) << endmsg;
+			return false;
+		}
+
+		newfiles.push_back(boost::dynamic_pointer_cast<AudioFileSource>(source));
+	}
+	return true;
+}
+
+static Glib::ustring
+compose_status_message (const string& path,
+			uint file_samplerate,
+			uint session_samplerate,
+			uint current_file,
+			uint total_files)
+{
+	if (file_samplerate != session_samplerate) {
+		return string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
+				       Glib::path_get_basename (path),
+				       file_samplerate/1000.0f,
+				       session_samplerate/1000.0f,
+				       current_file, total_files);
+	}
+
+	return  string_compose (_("converting %1\n(%2 of %3)"), 
+				Glib::path_get_basename (path),
+				current_file, total_files);
+}
+
+static void
+write_audio_data_to_new_files (ImportableSource* source, Session::import_status& status,
+			       vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+{
 	const nframes_t nframes = ResampledImportableSource::blocksize;
+	uint channels = source->channels();
+
+	boost::scoped_array<float> data(new float[nframes * channels]);
+	vector<boost::shared_array<Sample> > channel_data;
+
+	for (uint n = 0; n < channels; ++n) {
+		channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
+	}
+	
+	uint read_count = 0;
+	status.progress = 0.0f;
+
+	while (!status.cancel) {
+
+		nframes_t nread, nfread;
+		uint x;
+		uint chn;
+
+		if ((nread = source->read (data.get(), nframes)) == 0) {
+			break;
+		}
+		nfread = nread / channels;
+
+		/* de-interleave */
+
+		for (chn = 0; chn < channels; ++chn) {
+
+			nframes_t n;
+			for (x = chn, n = 0; n < nfread; x += channels, ++n) {
+				channel_data[chn][n] = (Sample) data[x];
+			}
+		}
+
+		/* flush to disk */
+
+		for (chn = 0; chn < channels; ++chn) {
+			newfiles[chn]->write (channel_data[chn].get(), nfread);
+		}
+
+		read_count += nread;
+		status.progress = read_count / (source->ratio () * source->length() * channels);
+	}
+}
+
+static void
+remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
+{
+	::unlink (file_source->path().c_str());
+}
+
+void
+Session::import_audiofiles (import_status& status)
+{
 	uint32_t cnt = 1;
+	typedef vector<boost::shared_ptr<AudioFileSource> > AudioSources;
+	AudioSources all_new_sources;
 
 	status.sources.clear ();
 	
-	for (vector<Glib::ustring>::iterator p = status.paths.begin(); p != status.paths.end(); ++p, ++cnt) {
+	for (vector<Glib::ustring>::iterator p = status.paths.begin();
+			p != status.paths.end() && !status.cancel;
+			++p, ++cnt)
+	{
+		std::auto_ptr<ImportableSource> source;
 
-		if ((in = sf_open ((*p).c_str(), SFM_READ, &info)) == 0) {
+		try
+		{
+			source = open_importable_source (*p, frame_rate(), status.quality);
+		}
+		catch (const failed_constructor& err)
+		{
 			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
-			status.done = 1;
-			status.cancel = 1;
-			return -1;
+			status.done = status.cancel = true;
+			return;
 		}
+
+		vector<string> new_paths = get_paths_for_new_sources (*p,
+								      discover_best_sound_dir (),
+								      source->channels());
 		
-		if ((nframes_t) info.samplerate != frame_rate()) {
-			importable = new ResampledImportableSource (in, &info, frame_rate(), status.quality);
-		} else {
-			importable = new ImportableSource (in, &info);
-		}
-		
-		newfiles.clear ();
+		AudioSources newfiles;
 
-		for (int n = 0; n < info.channels; ++n) {
-			newfiles.push_back (boost::shared_ptr<AudioFileSource>());
-		}
-		
-		sounds_dir = discover_best_sound_dir ();
-		basepath = PBD::basename_nosuffix ((*p));
-		
-		for (int n = 0; n < info.channels; ++n) {
-			
-			bool goodfile = false;
-			
-			do {
-				if (info.channels == 2) {
-					if (n == 0) {
-						snprintf (buf, sizeof(buf), "%s/%s-L.wav", sounds_dir.c_str(), basepath.c_str());
-					} else {
-						snprintf (buf, sizeof(buf), "%s/%s-R.wav", sounds_dir.c_str(), basepath.c_str());
-					}
-				} else if (info.channels > 1) {
-					snprintf (buf, sizeof(buf), "%s/%s-c%d.wav", sounds_dir.c_str(), basepath.c_str(), n+1);
-				} else {
-					snprintf (buf, sizeof(buf), "%s/%s.wav", sounds_dir.c_str(), basepath.c_str());
-				}
+		status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles);
 
-				if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+		// copy on cancel/failure so that any files that were created will be removed below
+		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(all_new_sources));
 
-					/* if the file already exists, we must come up with
-					 *  a new name for it.  for now we just keep appending
-					 *  _ to basepath
-					 */
-				
-					basepath += "_";
+		if (status.cancel) break;
 
-				} else {
-
-					goodfile = true;
-				}
-
-			} while ( !goodfile);
-
-			try { 
-				newfiles[n] = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (*this, buf, false, frame_rate()));
-			}
-
-			catch (failed_constructor& err) {
-				error << string_compose(_("Session::import_audiofile: cannot open new file source for channel %1"), n+1) << endmsg;
-				goto out;
-			}
-
-			new_paths.push_back (buf);
-			newfiles[n]->prepare_for_peakfile_writes ();
-			nfiles++;
-		}
-	
-		if (data) {
-			delete [] data;
+		for (AudioSources::iterator i = newfiles.begin(); i != newfiles.end(); ++i) {
+			(*i)->prepare_for_peakfile_writes ();
 		}
 
-		data = new float[nframes * info.channels];
+		status.doing_what = compose_status_message (*p, source->samplerate(),
+				frame_rate(), cnt, status.paths.size());
 
-		if (channel_data) {
-			delete [] channel_data;
-		}
-
-		channel_data = new Sample * [ info.channels ];
-	
-		for (int n = 0; n < info.channels; ++n) {
-			channel_data[n] = new Sample[nframes];
-		}
-
-		so_far = 0;
-
-		if ((nframes_t) info.samplerate != frame_rate()) {
-			status.doing_what = string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
-							    basepath,
-							    info.samplerate/1000.0f,
-							    frame_rate()/1000.0f,
-							    cnt, status.paths.size());
-							    
-		} else {
-			status.doing_what = string_compose (_("converting %1\n(%2 of %3)"), 
-							    basepath,
-							    cnt, status.paths.size());
-
-		}
-
-		status.progress = 0.0;
-
-		while (!status.cancel) {
-
-			nframes_t nread, nfread;
-			long x;
-			long chn;
-		
-			if ((nread = importable->read (data, nframes)) == 0) {
-				break;
-			}
-			nfread = nread / info.channels;
-
-			/* de-interleave */
-				
-			for (chn = 0; chn < info.channels; ++chn) {
-
-				nframes_t n;
-				for (x = chn, n = 0; n < nfread; x += info.channels, ++n) {
-					channel_data[chn][n] = (Sample) data[x];
-				}
-			}
-
-			/* flush to disk */
-
-			for (chn = 0; chn < info.channels; ++chn) {
-				newfiles[chn]->write (channel_data[chn], nfread);
-			}
-
-			so_far += nread;
-			status.progress = so_far / (importable->ratio () * info.frames * info.channels);
-		}
-
-		if (status.cancel) {
-			goto out;
-		}
-		
-		for (int n = 0; n < info.channels; ++n) {
-			status.sources.push_back (newfiles[n]);
-		}
-
-		if (status.cancel) {
-			goto out;
-		}
+		write_audio_data_to_new_files (source.get(), status, newfiles);
 	}
-	
-	status.freeze = true;
-
-	time_t xnow;
-	time (&xnow);
-	now = localtime (&xnow);
-
-	/* flush the final length(s) to the header(s) */
-
-	for (SourceList::iterator x = status.sources.begin(); x != status.sources.end() && !status.cancel; ++x) {
-		boost::dynamic_pointer_cast<AudioFileSource>(*x)->update_header(0, *now, xnow);
-		boost::dynamic_pointer_cast<AudioSource>(*x)->done_with_peakfile_writes ();
-	}
-
-	/* save state so that we don't lose these new Sources */
 
 	if (!status.cancel) {
+		struct tm* now;
+		time_t xnow;
+		time (&xnow);
+		now = localtime (&xnow);
+		status.freeze = true;
+
+		/* flush the final length(s) to the header(s) */
+
+		for (AudioSources::iterator x = all_new_sources.begin();
+				x != all_new_sources.end(); ++x)
+		{
+			(*x)->update_header(0, *now, xnow);
+			(*x)->done_with_peakfile_writes ();
+		}
+
+		/* save state so that we don't lose these new Sources */
+
 		save_state (_name);
+
+		std::copy (all_new_sources.begin(), all_new_sources.end(),
+				std::back_inserter(status.sources));
+	} else {
+		// this can throw...but it seems very unlikely
+		std::for_each (all_new_sources.begin(), all_new_sources.end(), remove_file_source);
 	}
 
-	ret = 0;
-
-  out:
-
-	if (data) {
-		delete [] data;
-	}
-	
-	if (channel_data) {
-		for (int n = 0; n < info.channels; ++n) {
-			delete [] channel_data[n];
-		}
-		delete [] channel_data;
-	}
-
-	if (status.cancel) {
-
-		status.sources.clear ();
-
-		for (vector<string>::iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
-			unlink ((*i).c_str());
-		}
-	}
-
-	if (importable) {
-		delete importable;
-	}
-
-	sf_close (in);	
 	status.done = true;
-
-	return ret;
 }
+
+
