@@ -141,18 +141,16 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	hbox.set_spacing (2);
 	hbox.pack_start (*fader_vbox, true, true);
 
-	set_width(Narrow);
-
 	Route* r;
 
 	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 
-	        /* 
+		/* 
 		   if we have a non-hidden route (ie. we're not the click or the auditioner), 
 		   pack some route-dependent stuff.
 		*/
 
-	        gain_display_box.pack_end (peak_display, true, true);
+		gain_display_box.pack_end (peak_display, true, true);
 		hbox.pack_end (meter_packer, true, true);
 
 		if (!r->hidden()) {
@@ -215,15 +213,6 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 void
 GainMeter::set_width (Width w, int len)
 {
-	switch (w) {
-	case Wide:
-		peak_display.show();
-		break;
-	case Narrow:
-		peak_display.hide();
-		break;
-	}
-
 	_width = w;
 	setup_meters (len);
 }
@@ -452,10 +441,8 @@ GainMeter::setup_meters (int len)
 
 	/* pack them backwards */
 
-	if (_width == Wide) {
-	        meter_packer.pack_end (meter_metric_area, false, false);
-		meter_metric_area.show_all ();
-	}
+	meter_packer.pack_end (meter_metric_area, false, false);
+	meter_metric_area.show_all ();
 
 	int b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
 	int m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();

@@ -403,10 +403,6 @@ MixerStrip::set_width (Width w, void* owner)
 
 	_width_owner = owner;
 
-	if (_width == w) {
-		return;
-	}
-
 	ensure_xml_node ();
 	
 	_width = w;
@@ -460,7 +456,7 @@ MixerStrip::set_width (Width w, void* owner)
 		((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (panners.short_astyle_string(_route->panner().automation_style()));
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.short_astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
-		set_size_request (max (50, gpm.get_gm_width()), -1);
+		set_size_request (max (60, gpm.get_gm_width()), -1);
 		break;
 	}
 
@@ -761,12 +757,14 @@ void
 MixerStrip::input_changed (IOChange change, void *src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_input_display));
+	set_width(_width, this);
 }
 
 void
 MixerStrip::output_changed (IOChange change, void *src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
+	set_width(_width, this);
 }
 
 
@@ -1225,5 +1223,6 @@ MixerStrip::meter_changed (void *src)
 		}
 
 		gpm.setup_meters ();
+		set_width(_width, this);
 }
 
