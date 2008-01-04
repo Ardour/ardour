@@ -695,6 +695,13 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_plugin_inserts() const { return _plugin_inserts.size(); }
 	uint32_t n_sends() const { return _sends.size(); }
 
+	static void set_disable_all_loaded_plugins (bool yn) { 
+		_disable_all_loaded_plugins = yn;
+	}
+	static bool get_disable_all_loaded_plugins() { 
+		return _disable_all_loaded_plugins;
+	}
+
 	uint32_t next_send_id();
 	uint32_t next_insert_id();
 	void mark_send_id (uint32_t);
@@ -1711,6 +1718,8 @@ class Session : public PBD::StatefulDestructible
 	
 	void set_history_depth (uint32_t depth);
 	void sync_order_keys ();
+
+	static bool _disable_all_loaded_plugins;
 };
 
 } // namespace ARDOUR

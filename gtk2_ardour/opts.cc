@@ -21,6 +21,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <ardour/session.h>
+
 #include "opts.h"
 
 #include "i18n.h"
@@ -48,8 +50,9 @@ print_help (const char *execname)
 	     << _("  -v, --version                    Show version information\n")
 	     << _("  -h, --help                       Print this message\n")
 	     << _("  -b, --bindings                   Print all possible keyboard binding names\n")
-	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -c, --name  name                 Use a specific jack client name, default is ardour\n")
+	     << _("  -d, --disable-plugins            Disable all plugins in an existing session\n")
+	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")                       
 	     << _("  -N, --new session-name           Create a new session from the command line\n")
 	     << _("  -O, --no-hw-optimizations        Disable h/w specific optimizations\n")
@@ -68,7 +71,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "U:hSbvVnOc:C:m:N:k:p:";
+	const char *optstring = "U:hSbvVnOdc:C:m:N:k:p:";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -123,6 +126,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'b':
 			show_key_actions = true;
+			break;
+			
+		case 'd':
+			ARDOUR::Session::set_disable_all_loaded_plugins (true);
 			break;
 
                 case 'm':

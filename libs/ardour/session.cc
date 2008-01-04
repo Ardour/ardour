@@ -95,6 +95,8 @@ const char* Session::dead_sound_dir_name = X_("dead_sounds");
 const char* Session::interchange_dir_name = X_("interchange");
 const char* Session::export_dir_name = X_("export");
 
+bool Session::_disable_all_loaded_plugins = false;
+
 Session::compute_peak_t			Session::compute_peak 		= 0;
 Session::find_peaks_t			Session::find_peaks 		= 0;
 Session::apply_gain_to_buffer_t		Session::apply_gain_to_buffer 	= 0;

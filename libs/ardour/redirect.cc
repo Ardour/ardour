@@ -274,8 +274,11 @@ Redirect::set_state (const XMLNode& node)
 	}
 
 	if (_active != (prop->value() == "yes")) {
-		_active = !_active;
-		active_changed (this, this); /* EMIT_SIGNAL */
+		if (!(_session.state_of_the_state() & Session::Loading) || 
+		    !Session::get_disable_all_loaded_plugins()) {
+			_active = !_active;
+			active_changed (this, this); /* EMIT_SIGNAL */
+		}
 	}
 	
 	if ((prop = node.property ("placement")) == 0) {
