@@ -343,7 +343,7 @@ Editor::Editor ()
 	initialize_canvas ();
 
 	edit_controls_vbox.set_spacing (0);
-	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled));
+	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled), false);
 	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	
 	track_canvas.set_hadjustment (horizontal_adjustment);
@@ -4046,7 +4046,7 @@ Editor::post_zoom ()
 
 	reset_hscrollbar_stepping ();
 	reset_scrolling_region ();
-	
+
 	if (playhead_cursor) playhead_cursor->set_position (playhead_cursor->current_frame);
 
 	instant_save ();
@@ -4093,10 +4093,11 @@ Editor::idle_visual_changer ()
 	}
 
 	if (p & VisualChange::TimeOrigin) {
-		double val = horizontal_adjustment.get_value();
-		if ((nframes_t) floor (val * frames_per_unit) != pending_visual_change.time_origin) {
+		
+		nframes_t time_origin = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+
+		if (time_origin != pending_visual_change.time_origin) {
 			horizontal_adjustment.set_value (pending_visual_change.time_origin/frames_per_unit);
-			/* the signal handler will do the rest */
 		} else {
 			update_fixed_rulers();
 			redisplay_tempo (true);

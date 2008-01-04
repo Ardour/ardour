@@ -1518,6 +1518,7 @@ Editor::temporal_zoom (gdouble fpu)
 	nframes64_t where;
 	bool in_track_canvas;
 	double nfpu;
+	double l;
 
 	nfpu = fpu;
 	
@@ -1548,11 +1549,18 @@ Editor::temporal_zoom (gdouble fpu)
 		break;
 		
 	case ZoomFocusPlayhead:
-		/* try to keep the playhead in the center */
-		if (playhead_cursor->current_frame < half_page_size) {
+		/* try to keep the playhead in the same place */
+
+		where = playhead_cursor->current_frame;
+		
+		l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+		
+		if (l < 0) {
 			leftmost_after_zoom = 0;
+		} else if (l > max_frames) { 
+			leftmost_after_zoom = max_frames - new_page_size;
 		} else {
-			leftmost_after_zoom = playhead_cursor->current_frame - half_page_size;
+			leftmost_after_zoom = (nframes64_t) l;
 		}
 		break;
 
@@ -1571,7 +1579,7 @@ Editor::temporal_zoom (gdouble fpu)
 
 		} else {
 
-			double l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+			l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
 
 			if (l < 0) {
 				leftmost_after_zoom = 0;
@@ -1585,7 +1593,7 @@ Editor::temporal_zoom (gdouble fpu)
 		break;
 
 	case ZoomFocusEdit:
-		/* try to keep the edit point in the center */
+		/* try to keep the edit point in the same place */
 		where = get_preferred_edit_position ();
 
 		if (where > 0) {

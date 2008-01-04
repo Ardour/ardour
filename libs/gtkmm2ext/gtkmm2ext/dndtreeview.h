@@ -93,18 +93,15 @@ class DnDTreeView : public DnDTreeViewBase
 			*/
 			suggested_action = Gdk::DragAction (0);
 			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
-			std::cerr << "DDR, suggested action\n";
 			return;
 		}
 		
 		if (selection_data.get_target() == "GTK_TREE_MODEL_ROW") {
 			
 			TreeView::on_drag_data_received (context, x, y, selection_data, info, time);
-			std::cerr << "\n\nREGULAR TREEVIEW DRAG HAS DROPPED HERE @  " << x << '.' << y << std::endl;
 
 		} else if (data_column >= 0) {
 			
-			std::cerr << "DDR, data/object drop\n";
 			/* object D-n-D */
 			
 			const void* data = selection_data.get_data();
@@ -115,7 +112,6 @@ class DnDTreeView : public DnDTreeViewBase
 			}
 			
 		} else {
-			std::cerr << "DDR, unknown drop\n";
 			/* some kind of target type added by the app, which will be handled by a signal handler */
 		}
 	}

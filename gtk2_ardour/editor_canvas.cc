@@ -356,20 +356,18 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 		}
 	}
 
-	double last_canvas_unit =  last_canvas_frame / frames_per_unit;
+	double last_canvas_unit =  max ((last_canvas_frame / frames_per_unit), canvas_width);
 
-	track_canvas.set_scroll_region (0.0, 0.0, max (last_canvas_unit, canvas_width), pos);
+	track_canvas.set_scroll_region (0.0, 0.0, last_canvas_unit, pos);
 
 	// XXX what is the correct height value for the time canvas ? this overstates it
-	time_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_width), canvas_height);
-	
-	guint track_canvas_width,track_canvas_height;
-	track_canvas.get_size(track_canvas_width,track_canvas_height);
-	range_marker_drag_rect->property_y2() = track_canvas_height;
-	transport_loop_range_rect->property_y2() = track_canvas_height;
-	transport_punch_range_rect->property_y2() = track_canvas_height;
-	transport_punchin_line->property_y2() = track_canvas_height;
-	transport_punchout_line->property_y2() = track_canvas_height;
+	time_canvas.set_scroll_region ( 0.0, 0.0, last_canvas_unit, canvas_height);
+
+	range_marker_drag_rect->property_y2() = canvas_height;
+	transport_loop_range_rect->property_y2() = canvas_height;
+	transport_punch_range_rect->property_y2() = canvas_height;
+	transport_punchin_line->property_y2() = canvas_height;
+	transport_punchout_line->property_y2() = canvas_height;
 
 	update_punch_range_view (true);
 
@@ -687,13 +685,17 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 void 
 Editor::canvas_horizontally_scrolled ()
 {
-	/* this is the core function that controls horizontal scrolling of the canvas. it is called
-	   whenever the horizontal_adjustment emits its "value_changed" signal. it typically executes in an
-	   idle handler, which is important because tempo_map_changed() should issue redraws immediately
-	   and not defer them to an idle handler.
-	*/
+	nframes64_t time_origin = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
-  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	if (time_origin != leftmost_frame) {
+		canvas_scroll_to (time_origin);
+	}
+}
+
+void
+Editor::canvas_scroll_to (nframes64_t time_origin)
+{
+  	leftmost_frame = time_origin;
 	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
 
 	if (rightmost_frame > last_canvas_frame) {

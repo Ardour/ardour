@@ -749,6 +749,7 @@ class Editor : public PublicEditor
 
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
+	void canvas_scroll_to (nframes64_t);
 
 	struct VisualChange {
 	    enum Type { 
