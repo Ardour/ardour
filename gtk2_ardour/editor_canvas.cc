@@ -282,7 +282,6 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 	} 
 
 	initial_ruler_update_required = false;
-	
 	track_canvas_size_allocated ();
 }
 
@@ -381,8 +380,8 @@ Editor::controls_layout_size_request (Requisition* req)
 	TreeModel::Children::iterator i;
 	double pos;
 
-        for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
-	        TimeAxisView *tv = (*i)[route_display_columns.tv];
+	for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
+		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		if (tv != 0) {
 			pos += tv->effective_height;
 		}
@@ -394,12 +393,9 @@ Editor::controls_layout_size_request (Requisition* req)
 		screen = Gdk::Screen::get_default();
 	}
 
-	/* never let the width of the controls area shrink horizontally */
-
 	edit_controls_vbox.check_resize();
-
 	req->width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
-	
+
 	/* don't get too big. the fudge factors here are just guesses */
 	
 	req->width = min (req->width, screen->get_width() - 300);
@@ -408,8 +404,13 @@ Editor::controls_layout_size_request (Requisition* req)
 	/* this one is important: it determines how big the layout thinks it really is, as 
 	   opposed to what it displays on the screen
 	*/
+	
+	controls_layout.set_size (edit_controls_vbox.get_width(), (gint) pos);
+	controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
+	zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
+	time_button_frame.set_size_request(edit_controls_vbox.get_width() + edit_vscrollbar.get_width(), -1);
 
-	controls_layout.set_size (req->width, (gint) pos);
+	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG	
 }
 
 bool
