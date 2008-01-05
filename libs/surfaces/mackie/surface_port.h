@@ -48,20 +48,20 @@ public:
 
 	/// read bytes from the port. They'll either end up in the
 	/// parser, or if that's not active they'll be returned
-	MidiByteArray read();
+	virtual MidiByteArray read();
 	
 	/// an easier way to output bytes via midi
-	void write( const MidiByteArray & );
+	virtual void write( const MidiByteArray & );
 	
 	/// write a sysex message
 	void write_sysex( const MidiByteArray & mba );
 	void write_sysex( MIDI::byte msg );
 
-	// return the correct sysex header for this port
+	/// return the correct sysex header for this port
 	virtual const MidiByteArray & sysex_hdr() const = 0;
 
-	MIDI::Port & port() { return _port; }
-	const MIDI::Port & port() const { return _port; }
+	MIDI::Port & port() { return *_port; }
+	const MIDI::Port & port() const { return *_port; }
 	
 	// all control notofications are sent from here
 	sigc::signal<void, SurfacePort &, Control &, const ControlState &> control_event;
@@ -85,8 +85,12 @@ public:
 	virtual bool active() const { return _active; }
 	virtual void active( bool yn ) { _active = yn; }
 	
+protected:
+	/// Only for use by DummyPort
+	SurfacePort();
+	
 private:
-	MIDI::Port & _port;
+	MIDI::Port * _port;
 	int _number;
 	bool _active;
 

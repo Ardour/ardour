@@ -25,7 +25,7 @@
 namespace Mackie
 {
 
-class MackiePort;
+class SurfacePort;
 
 /**
 	This knows how to build midi messages given a control and
@@ -64,8 +64,8 @@ public:
 	MidiByteArray build_fader( const Fader & fader, float pos );
 	
 	/// return bytes that will reset all controls to their zero positions
-	/// And blank the display for the strip. Pass MackiePort so we know which sysex header to use.
-	MidiByteArray zero_strip( MackiePort &, const Strip & strip );
+	/// And blank the display for the strip. Pass SurfacePort so we know which sysex header to use.
+	MidiByteArray zero_strip( SurfacePort &, const Strip & strip );
 	
 	// provide bytes to zero the given control
 	MidiByteArray zero_control( const Control & control );
@@ -81,19 +81,19 @@ public:
 		be encoded, to save midi bandwidth. If they're the same, an empty array will
 		be returned
 	*/
-	MidiByteArray timecode_display( MackiePort &, const std::string & timecode, const std::string & last_timecode = "" );
+	MidiByteArray timecode_display( SurfacePort &, const std::string & timecode, const std::string & last_timecode = "" );
 	
 	/**
 		for displaying characters on the strip LCD
-		pass MackiePort so we know which sysex header to use
+		pass SurfacePort so we know which sysex header to use
 	*/
-	MidiByteArray strip_display( MackiePort &, const Strip & strip, unsigned int line_number, const std::string & line );
+	MidiByteArray strip_display( SurfacePort &, const Strip & strip, unsigned int line_number, const std::string & line );
 	
-	/// blank the strip LCD, ie write all spaces. Pass MackiePort so we know which sysex header to use.
-	MidiByteArray strip_display_blank( MackiePort &, const Strip & strip, unsigned int line_number );
+	/// blank the strip LCD, ie write all spaces. Pass SurfacePort so we know which sysex header to use.
+	MidiByteArray strip_display_blank( SurfacePort &, const Strip & strip, unsigned int line_number );
 	
-	/// for generating all strip names. Pass MackiePort so we know which sysex header to use.
-	MidiByteArray all_strips_display( MackiePort &, std::vector<std::string> & lines1, std::vector<std::string> & lines2 );
+	/// for generating all strip names. Pass SurfacePort so we know which sysex header to use.
+	MidiByteArray all_strips_display( SurfacePort &, std::vector<std::string> & lines1, std::vector<std::string> & lines2 );
 	
 protected:
 	static MIDI::byte calculate_pot_value( midi_pot_mode mode, const ControlState & );

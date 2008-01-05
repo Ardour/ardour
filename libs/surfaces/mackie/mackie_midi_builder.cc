@@ -102,7 +102,7 @@ MidiByteArray MackieMidiBuilder::build_fader( const Fader & fader, float pos )
 	);
 }
 
-MidiByteArray MackieMidiBuilder::zero_strip( MackiePort & port, const Strip & strip )
+MidiByteArray MackieMidiBuilder::zero_strip( SurfacePort & port, const Strip & strip )
 {
 	Group::Controls::const_iterator it = strip.controls().begin();
 	MidiByteArray retval;
@@ -178,13 +178,13 @@ MidiByteArray MackieMidiBuilder::two_char_display( unsigned int value, const std
 	return two_char_display( os.str() );
 }
 
-MidiByteArray MackieMidiBuilder::strip_display_blank( MackiePort & port, const Strip & strip, unsigned int line_number )
+MidiByteArray MackieMidiBuilder::strip_display_blank( SurfacePort & port, const Strip & strip, unsigned int line_number )
 {
 	// 6 spaces, not 7 because strip_display adds a space where appropriate
 	return strip_display( port, strip, line_number, "      " );
 }
 
-MidiByteArray MackieMidiBuilder::strip_display( MackiePort & port, const Strip & strip, unsigned int line_number, const std::string & line )
+MidiByteArray MackieMidiBuilder::strip_display( SurfacePort & port, const Strip & strip, unsigned int line_number, const std::string & line )
 {
 	if ( line_number > 1 )
 	{
@@ -227,7 +227,7 @@ MidiByteArray MackieMidiBuilder::strip_display( MackiePort & port, const Strip &
 	return retval;
 }
 	
-MidiByteArray MackieMidiBuilder::all_strips_display( MackiePort & port, std::vector<std::string> & lines1, std::vector<std::string> & lines2 )
+MidiByteArray MackieMidiBuilder::all_strips_display( SurfacePort & port, std::vector<std::string> & lines1, std::vector<std::string> & lines2 )
 {
 	MidiByteArray retval;
 	retval << 0x12 << 0;
@@ -236,7 +236,7 @@ MidiByteArray MackieMidiBuilder::all_strips_display( MackiePort & port, std::vec
 	return retval;
 }
 
-MidiByteArray MackieMidiBuilder::timecode_display( MackiePort & port, const std::string & timecode, const std::string & last_timecode )
+MidiByteArray MackieMidiBuilder::timecode_display( SurfacePort & port, const std::string & timecode, const std::string & last_timecode )
 {
 	// if there's no change, send nothing, not even sysex header
 	if ( timecode == last_timecode ) return MidiByteArray();

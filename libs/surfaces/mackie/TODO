@@ -1,3 +1,4 @@
+* implement handle_port_inactive properly
 * two bcf doesn't work
 * remappable buttons (OSC or Surfax?)
 * 7/1 configurable to 8
@@ -15,6 +16,19 @@ MCU
 * metering on second line
 * per-strip signal led
 * midi bandwidth?
+* Zoom buttons, from Jean-Martin Barbut. In fact I'm a bit desappointed with those functions, because I was used
+	to use the 4 "N-E-S-W" buttons to zoom in and out with horizontal
+	buttons and zoom in/out on track height with vertical buttons. That is
+	with the zoom button in. with the zoom button off, it selects tracks
+	with vertical buttons and selects regions with horizontal buttons. This
+	was quite useful. The fact that the zoom button switches the wheel to
+	zoom is fine, but it would be great to also have the track/region
+	selection and the track height available from those buttons. I.e : you
+	select a track with the vertical arrows and you increase/decrease the
+	eight of the track with the zoom btn on. This combined with the region
+	selection allows to zoom in a region (vertical and horizontal zoom) very
+	easily.
+
 
 Later
 -----
@@ -50,3 +64,5 @@ Bugs
 ----
 * when using alsa/sequencer, some midi events intended for mcu port end up being
   read by the seq port.
+* MIDI::Port::type() returns _type, which is undefined. It might be in the descriptor
+* auditioner doesn't connect to master 1 and master 2 - it loses the spaces.

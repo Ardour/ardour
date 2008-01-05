@@ -9,6 +9,8 @@ namespace Mackie
 {
 
 class MackieButtonHandler;
+class SurfacePort;
+class MackieMidiBuilder;
 
 /**
 	This represents an entire control surface, made up of Groups,
@@ -82,6 +84,20 @@ public:
 	/// map button ids to calls to press_ and release_ in mbh
 	virtual void handle_button( MackieButtonHandler & mbh, ButtonState bs, Button & button ) = 0;
 
+public:
+	/// display an indicator of the first switched-in Route. Do nothing by default.
+	virtual void display_bank_start( SurfacePort &, MackieMidiBuilder &, uint32_t current_bank ) {};
+		
+	/// called from MackieControlPRotocol::zero_all to turn things off
+	virtual void zero_all( SurfacePort &, MackieMidiBuilder & ) {};
+
+	/// turn off leds around the jog wheel. This is for surfaces that use a pot
+	/// pretending to be a jog wheel.
+	virtual void blank_jog_ring( SurfacePort &, MackieMidiBuilder & ) {};
+
+	virtual bool has_timecode_display() const = 0;
+	virtual void display_timecode( SurfacePort &, MackieMidiBuilder &, const std::string & timecode, const std::string & timecode_last ) {};
+	
 public:
 	/**
 		This is used to calculate the clicks per second that define

@@ -28,12 +28,13 @@ mackie_files=Split("""
 interface.cc
 midi_byte_array.cc
 controls.cc
+surface_port.cc
+dummy_port.cc
+mackie_port.cc
 route_signal.cc
 mackie_midi_builder.cc
 mackie_button_handler.cc
 mackie_control_protocol_poll.cc
-surface_port.cc
-mackie_port.cc
 types.cc
 surface.cc
 mackie_control_protocol.cc

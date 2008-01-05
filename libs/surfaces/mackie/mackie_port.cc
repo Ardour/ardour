@@ -249,6 +249,7 @@ void MackiePort::finalise_init( bool yn )
 	// if an mcu and a bcf are needed to work as one surface
 	if ( _emulation == none )
 	{
+		// TODO same as code in mackie_control_protocol.cc
 		if ( ARDOUR::Config->get_mackie_emulation() == "bcf" )
 		{
 			_emulation = bcf2000;

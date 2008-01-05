@@ -121,14 +121,28 @@ Mackie::Surface & MackieControlProtocol::surface()
 	return *_surface;
 }
 
-const Mackie::MackiePort & MackieControlProtocol::mcu_port() const
+const Mackie::SurfacePort & MackieControlProtocol::mcu_port() const
 {
-	return dynamic_cast<const MackiePort &>( *_ports[0] );
+	if ( _ports.size() < 1 )
+	{
+		return _dummy_port;
+	}
+	else
+	{
+		return dynamic_cast<const MackiePort &>( *_ports[0] );
+	}
 }
 
-Mackie::MackiePort & MackieControlProtocol::mcu_port()
+Mackie::SurfacePort & MackieControlProtocol::mcu_port()
 {
-	return dynamic_cast<const MackiePort &>( *_ports[0] );
+	if ( _ports.size() < 1 )
+	{
+		return _dummy_port;
+	}
+	else
+	{
+		return dynamic_cast<MackiePort &>( *_ports[0] );
+	}
 }
 
 // go to the previous track.
@@ -297,30 +311,12 @@ void MackieControlProtocol::switch_banks( int initial )
 	}
 	
 	// display the current start bank.
-	if ( mcu_port().emulation() == MackiePort::bcf2000 )
-	{
-		if ( _current_initial_bank == 0 )
-		{
-			// send Ar. to 2-char display on the master
-			mcu_port().write( builder.two_char_display( "Ar", ".." ) );
-		}
-		else
-		{
-			// write the current first remote_id to the 2-char display
-			mcu_port().write( builder.two_char_display( _current_initial_bank ) );
-		}
-	}
+	surface().display_bank_start( mcu_port(), builder, _current_initial_bank );
 }
 
 void MackieControlProtocol::zero_all()
 {
 	// TODO turn off SMPTE displays
-	
-	if ( mcu_port().emulation() == MackiePort::bcf2000 )
-	{
-		// clear 2-char display
-		mcu_port().write( builder.two_char_display( "LC" ) );
-	}
 	
 	// zero all strips
 	for ( Surface::Strips::iterator it = surface().strips.begin(); it != surface().strips.end(); ++it )
@@ -330,14 +326,7 @@ void MackieControlProtocol::zero_all()
 	}
 	
 	// and the master strip
-	mcu_port().write( builder.zero_strip( mcu_port(), master_strip() ) );
-	
-	// and the led ring for the master strip, in bcf mode
-	if ( mcu_port().emulation() == MackiePort::bcf2000 )
-	{
-		Control & control = *surface().controls_by_name["jog"];
-		mcu_port().write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
-	}
+	mcu_port().write( builder.zero_strip( dynamic_cast<MackiePort&>( mcu_port() ), master_strip() ) );
 	
 	// turn off global buttons and leds
 	// global buttons are only ever on mcu_port, so we don't have
@@ -350,6 +339,9 @@ void MackieControlProtocol::zero_all()
 			mcu_port().write( builder.zero_control( control ) );
 		}
 	}
+
+	// any hardware-specific stuff
+	surface().zero_all( mcu_port(), builder );
 }
 
 int MackieControlProtocol::set_active( bool yn )
@@ -472,7 +464,7 @@ void MackieControlProtocol::update_led( Mackie::Button & button, Mackie::LedStat
 {
 	if ( ls != none )
 	{
-		MackiePort * port = 0;
+		SurfacePort * port = 0;
 		if ( button.group().is_strip() )
 		{
 			if ( button.group().is_master() )
@@ -556,12 +548,8 @@ void MackieControlProtocol::update_surface()
 		// update strip from route
 		master_route_signal->notify_all();
 		
-		// turn off the led ring, for bcf emulation mode
-		if ( mcu_port().emulation() == MackiePort::bcf2000 )
-		{
-			Control & control = *surface().controls_by_name["jog"];
-			mcu_port().write( builder.build_led_ring( dynamic_cast<Pot &>( control ), off ) );
-		}
+		// sometimes the jog wheel is a pot
+		surface().blank_jog_ring( mcu_port(), builder );
 		
 		// update global buttons and displays
 		notify_record_state_changed();
@@ -595,34 +583,46 @@ void MackieControlProtocol::connect_session_signals()
 void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 {
 #ifdef DEBUG
-		cout << "add port " << midi_port.name() << ", " << midi_port.device() << endl;
+	cout << "add port " << midi_port.name() << ", " << midi_port.device() << ", " << midi_port.type() << endl;
+	cout << "MIDI::Port::ALSA_Sequencer " << MIDI::Port::ALSA_Sequencer << endl;
+	cout << "MIDI::Port::Unknown " << MIDI::Port::Unknown << endl;
 #endif
+	if ( string( midi_port.device() ) == string( "ardour" ) )
+	{
+		throw MackieControlException( "The Mackie MCU driver will not use a port with device=ardour" );
+	}
+	else if ( midi_port.type() == MIDI::Port::ALSA_Sequencer )
+	{
+		throw MackieControlException( "alsa/sequencer ports don't work with the Mackie MCU driver right now" );
+	}
+	else
+	{
+		MackiePort * sport = new MackiePort( *this, midi_port, number );
+		_ports.push_back( sport );
+		
+		connections_back = sport->init_event.connect(
+			sigc::bind (
+				mem_fun (*this, &MackieControlProtocol::handle_port_init)
+				, sport
+			)
+		);
 
-	MackiePort * sport = new MackiePort( *this, midi_port, number );
-	_ports.push_back( sport );
+		connections_back = sport->active_event.connect(
+			sigc::bind (
+				mem_fun (*this, &MackieControlProtocol::handle_port_active)
+				, sport
+			)
+		);
 
-	connections_back = sport->init_event.connect(
-		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_init)
-			, sport
-		)
-	);
-
-	connections_back = sport->active_event.connect(
-		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_active)
-			, sport
-		)
-	);
-
-	connections_back = sport->inactive_event.connect(
-		sigc::bind (
-			mem_fun (*this, &MackieControlProtocol::handle_port_inactive)
-			, sport
-		)
-	);
-	
-	_ports_changed = true;
+		connections_back = sport->inactive_event.connect(
+			sigc::bind (
+				mem_fun (*this, &MackieControlProtocol::handle_port_inactive)
+				, sport
+			)
+		);
+		
+		_ports_changed = true;
+	}
 }
 
 void MackieControlProtocol::create_ports()
@@ -681,15 +681,23 @@ void MackieControlProtocol::initialize_surface()
 	
 	set_route_table_size( strips );
 	
-	switch ( mcu_port().emulation() )
+	// TODO same as code in mackie_port.cc
+	string emulation = ARDOUR::Config->get_mackie_emulation();
+	if ( emulation == "bcf" )
 	{
-		case MackiePort::bcf2000: _surface = new BcfSurface( strips ); break;
-		case MackiePort::mackie: _surface = new MackieSurface( strips ); break;
-		default:
-			ostringstream os;
-			os << "no Surface class found for emulation: " << mcu_port().emulation();
-			throw MackieControlException( os.str() );
+		_surface = new BcfSurface( strips );
 	}
+	else if ( emulation == "mcu" )
+	{
+		_surface = new MackieSurface( strips );
+	}
+	else
+	{
+		ostringstream os;
+		os << "no Surface class found for emulation: " << emulation;
+		throw MackieControlException( os.str() );
+	}
+
 	_surface->init();
 	
 	// Connect events. Must be after route table otherwise there will be trouble
@@ -1048,7 +1056,7 @@ void MackieControlProtocol::notify_name_changed( void *, RouteSignal * route_sig
 				line1 = PBD::short_version( fullname, 6 );
 			}
 			
-			MackiePort & port = route_signal->port();
+			SurfacePort & port = route_signal->port();
 			port.write( builder.strip_display( port, strip, 0, line1 ) );
 			port.write( builder.strip_display_blank( port, strip, 1 ) );
 		}
@@ -1157,30 +1165,33 @@ string MackieControlProtocol::format_smpte_timecode( nframes_t now_frame )
 
 void MackieControlProtocol::update_timecode_display()
 {
-	// do assignment here so current_frame is fixed
-	nframes_t current_frame = session->transport_frame();
-	string timecode;
-	
-	switch ( _timecode_type )
+	if ( surface().has_timecode_display() )
 	{
-		case ARDOUR::AnyTime::BBT:
-			timecode = format_bbt_timecode( current_frame );
-			break;
-		case ARDOUR::AnyTime::SMPTE:
-			timecode = format_smpte_timecode( current_frame );
-			break;
-		default:
-			ostringstream os;
-			os << "Unknown timecode: " << _timecode_type;
-			throw runtime_error( os.str() );
-	}	
-	
-	// only write the timecode string to the MCU if it's changed
-	// since last time. This is to reduce midi bandwidth used.
-	if ( timecode != _timecode_last )
-	{
-		mcu_port().write( builder.timecode_display( mcu_port(), timecode, _timecode_last ) );
-		_timecode_last = timecode;
+		// do assignment here so current_frame is fixed
+		nframes_t current_frame = session->transport_frame();
+		string timecode;
+		
+		switch ( _timecode_type )
+		{
+			case ARDOUR::AnyTime::BBT:
+				timecode = format_bbt_timecode( current_frame );
+				break;
+			case ARDOUR::AnyTime::SMPTE:
+				timecode = format_smpte_timecode( current_frame );
+				break;
+			default:
+				ostringstream os;
+				os << "Unknown timecode: " << _timecode_type;
+				throw runtime_error( os.str() );
+		}	
+		
+		// only write the timecode string to the MCU if it's changed
+		// since last time. This is to reduce midi bandwidth used.
+		if ( timecode != _timecode_last )
+		{
+			surface().display_timecode( mcu_port(), builder, timecode, _timecode_last );
+			_timecode_last = timecode;
+		}
 	}
 }
 
@@ -1200,11 +1211,7 @@ void MackieControlProtocol::poll_session_data()
 			update_automation( *master_route_signal );
 		}
 		
-		// and timecode display if it's a real mackie
-		if ( mcu_port().emulation() == MackiePort::mackie )
-		{
-			update_timecode_display();
-		}
+		update_timecode_display();
 		
 		_automation_last.start();
 	}
@@ -1637,7 +1644,7 @@ LedState MackieControlProtocol::marker_release( Button & button )
 	return off;
 }
 
-void jog_wheel_state_display( JogWheel::State state, MackiePort & port )
+void jog_wheel_state_display( JogWheel::State state, SurfacePort & port )
 {
 	switch( state )
 	{

@@ -32,6 +32,7 @@
 #include <control_protocol/control_protocol.h>
 #include "midi_byte_array.h"
 #include "controls.h"
+#include "dummy_port.h"
 #include "route_signal.h"
 #include "mackie_button_handler.h"
 #include "mackie_port.h"
@@ -208,8 +209,8 @@ class MackieControlProtocol
 	
    /// This is the main MCU port, ie not an extender port
 	/// Only for use by JogWheel
-	const Mackie::MackiePort & mcu_port() const;
-	Mackie::MackiePort & mcu_port();
+	const Mackie::SurfacePort & mcu_port() const;
+	Mackie::SurfacePort & mcu_port();
 	ARDOUR::Session & get_session() { return *session; }
  
   protected:
@@ -320,6 +321,9 @@ class MackieControlProtocol
 	/// The Midi port(s) connected to the units
 	typedef vector<Mackie::MackiePort*> MackiePorts;
 	MackiePorts _ports;
+  
+	/// Sometimes the real port goes away, and we want to contain the breakage
+	Mackie::DummyPort _dummy_port;
   
    // the thread that polls the ports for incoming midi data
 	pthread_t thread;

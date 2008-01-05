@@ -35,8 +35,13 @@
 using namespace std;
 using namespace Mackie;
 
+SurfacePort::SurfacePort()
+: _port( 0 ), _number( 0 ), _active( false )
+{
+}
+
 SurfacePort::SurfacePort( MIDI::Port & port, int number )
-: _port( port ), _number( number ), _active( false )
+: _port( &port ), _number( number ), _active( false )
 {
 }
 
@@ -142,9 +147,8 @@ void SurfacePort::write( const MidiByteArray & mba )
 			os << "Surface: couldn't write to port " << port().name();
 			os << ", error: " << fetch_errmsg( errno ) << "(" << errno << ")";
 			
-			cout << os.str();
+			cout << os.str() << endl;
 			inactive_event();
-			throw MackieControlException( os.str() );
 		}
 	}
 #ifdef PORT_DEBUG
