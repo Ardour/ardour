@@ -1963,6 +1963,7 @@ AudioDiskstream::set_state (const XMLNode& node)
 	if (nchans > _n_channels) {
 
 		add_channel (nchans - _n_channels);
+		IO::MoreOutputs(_n_channels);
 
 	} else if (nchans < _n_channels) {
 
