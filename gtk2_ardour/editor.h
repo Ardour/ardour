@@ -355,6 +355,8 @@ class Editor : public PublicEditor
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
 
+	void toggle_meter_updating();
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes_t);
@@ -2025,7 +2027,6 @@ class Editor : public PublicEditor
 	sigc::connection fast_screen_update_connection;
 	gint start_updating ();
 	gint stop_updating ();
-	void toggle_meter_updating();
 	void fast_update_strips ();
 	bool meters_running;
 

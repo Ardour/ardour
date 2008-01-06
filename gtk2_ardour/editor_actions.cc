@@ -1372,9 +1372,6 @@ Editor::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("subframes-per-frame")) {
 		update_subframes_per_frame ();
 		update_just_smpte ();
-	} else if (PARAM_IS ("show-track-meters")) {
-		toggle_meter_updating();
-		track_canvas_allocate(track_canvas.get_allocation());
 	} else if (PARAM_IS ("link-region-and-track-selection")) {
 		ActionManager::map_some_state ("Editor", "link-region-and-track-selection", &Configuration::get_link_region_and_track_selection);
 	}

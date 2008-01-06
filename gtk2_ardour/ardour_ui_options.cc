@@ -30,6 +30,7 @@
 #include "ardour_ui.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "public_editor.h"
 
 #include "i18n.h"
 
@@ -1113,6 +1114,9 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "SecondaryClockDeltaEditCursor", &Configuration::get_secondary_clock_delta_edit_cursor);
 	} else if (PARAM_IS ("only-copy-imported-files")) {
 		map_only_copy_imported_files ();
+	} else if (PARAM_IS ("show-track-meters")) {
+		ActionManager::map_some_state ("options",  "ShowTrackMeters", &Configuration::get_show_track_meters);
+		editor->toggle_meter_updating();
 	}
 			   
 
