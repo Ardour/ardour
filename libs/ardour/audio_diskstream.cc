@@ -847,10 +847,18 @@ AudioDiskstream::commit (nframes_t nframes)
 	}
 	
 	if (_slaved) {
-		need_butler = c->front()->playback_buf->write_space() >= c->front()->playback_buf->bufsize() / 2;
+		if (_io && _io->active()) {
+			need_butler = c->front()->playback_buf->write_space() >= c->front()->playback_buf->bufsize() / 2;
+		} else {
+			need_butler = false;
+		}
 	} else {
-		need_butler = c->front()->playback_buf->write_space() >= disk_io_chunk_frames
-			|| c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
+		if (_io && _io->active()) {
+			need_butler = c->front()->playback_buf->write_space() >= disk_io_chunk_frames
+				|| c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
+		} else {
+			need_butler = c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
+		}
 	}
 
 	if (commit_should_unlock) {

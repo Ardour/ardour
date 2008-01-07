@@ -79,7 +79,6 @@ Route::init ()
 	_phase_invert = false;
 	_denormal_protection = false;
 	order_keys[strdup (N_("signal"))] = order_key_cnt++;
-	_active = true;
 	_silent = false;
 	_meter_point = MeterPostFader;
 	_initial_delay = 0;
@@ -1455,7 +1454,6 @@ Route::state(bool full_state)
 	
 	node->add_property("default-type", _default_type.to_string());
 
-	node->add_property("active", _active?"yes":"no");
 	node->add_property("muted", _muted?"yes":"no");
 	node->add_property("soloed", _soloed?"yes":"no");
 	node->add_property("phase-invert", _phase_invert?"yes":"no");
@@ -1639,10 +1637,6 @@ Route::_set_state (const XMLNode& node, bool call_base)
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
 		set_denormal_protection (prop->value()=="yes"?true:false, this);
-	}
-
-	if ((prop = node.property (X_("active"))) != 0) {
-		set_active (prop->value() == "yes");
 	}
 
 	if ((prop = node.property (X_("muted"))) != 0) {
@@ -2174,13 +2168,6 @@ Route::get_mute_config (mute_type t)
 	}
 	
 	return onoff;
-}
-
-void
-Route::set_active (bool yn)
-{
-	_active = yn; 
-	 active_changed(); /* EMIT SIGNAL */
 }
 
 void

@@ -481,6 +481,26 @@ AudioEngine::remove_session ()
 	remove_all_ports ();
 }
 
+void
+AudioEngine::port_registration_failure (const std::string& portname)
+{
+	string full_portname = jack_client_name;
+	full_portname += ':';
+	full_portname += portname;
+	
+	
+	jack_port_t* p = jack_port_by_name (_jack, full_portname.c_str());
+	string reason;
+	
+	if (p) {
+		reason = _("a port with this name already exists: check for duplicated track/bus names");
+	} else {
+		reason = _("unknown error");
+	}
+	
+	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
+}	
+
 Port *
 AudioEngine::register_input_port (DataType type, const string& portname)
 {
@@ -509,7 +529,7 @@ AudioEngine::register_input_port (DataType type, const string& portname)
 		return newport;
 
 	} else {
-		throw PortRegistrationFailure();
+		port_registration_failure (portname);
 	}
 
 	return 0;
@@ -547,7 +567,7 @@ AudioEngine::register_output_port (DataType type, const string& portname)
 		return newport;
 
 	} else {
-		throw PortRegistrationFailure ();
+		port_registration_failure (portname);
 	}
 
 	return 0;

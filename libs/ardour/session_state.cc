@@ -323,11 +323,10 @@ Session::second_stage_init (bool new_session)
 	}
 
 	/* handle this one in a different way than all others, so that its clear what happened */
-	
+
 	catch (AudioEngine::PortRegistrationFailure& err) {
-		error << _("Unable to create all required ports")
-		      << endmsg;
-		return -1;
+		destroy ();
+		throw;
 	}
 
 	catch (...) {

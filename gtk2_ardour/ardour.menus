@@ -30,8 +30,12 @@
         </menu>
         <menu name='Transport' action='Transport'>
                <menuitem action='ToggleRoll'/>
+               <menuitem action='play-from-edit-point-and-return'/>
+               <menuitem action='play-edit-range'/>
+               <menuitem action='record-roll'/>
                <menuitem action='ToggleRollForgetCapture'/>
                <menuitem action='Loop'/>
+               <menuitem action='loop-region'/>
                <menuitem action='PlaySelection'/>
                <menuitem action='play-edit-range'/>
                <menuitem action='Forward'/>
@@ -49,10 +53,8 @@
                <menuitem action='jump-backward-to-mark'/>
                <menuitem action='add-location-from-playhead'/>
                <separator/> 
-               <menuitem action='playhead-to-next-region-start'/>
-               <menuitem action='playhead-to-next-region-end'/>
-               <menuitem action='playhead-to-previous-region-start'/>
-               <menuitem action='playhead-to-previous-region-end'/>
+               <menuitem action='playhead-to-next-region-boundary'/>
+               <menuitem action='playhead-to-previous-region-boundary'/>
                <menuitem action='playhead-to-next-region-sync'/>
                <menuitem action='playhead-to-previous-region-sync'/>
                <menuitem action='center-playhead'/>
@@ -82,6 +84,9 @@
                     <menuitem action='toggle-follow-playhead'/>
                     <menuitem action='ToggleVideoSync'/>
                </menu>
+	       <menuitem action='set-loop-from-edit-range'/>
+	       <menuitem action='set-loop-from-region'/>
+	       <menuitem action='set-punch-from-edit-range'/>
        </menu>
        <menu name='Edit' action='Edit'>
                <menuitem action='undo'/>
@@ -124,6 +129,7 @@
 			<menuitem action='set-mouse-mode-timefx'/>
 			<separator/>
 			<menuitem action='cycle-edit-point'/>
+			<menuitem action='cycle-edit-point-with-marker'/>
 			<menuitem action='toggle-edit-mode'/>
           </menu>
         </menu>         
@@ -146,6 +152,9 @@
                    <menuitem action='select-all-within-cursors'/>
                    <menuitem action='select-all-in-punch-range'/>
                    <menuitem action='select-all-in-loop-range'/>
+		   <separator/>
+                   <menuitem action='select-next-route'/>
+                   <menuitem action='select-prev-route'/>
 	</menu>
 	<menu name='Regions' action='Regions'>
                    <menuitem action='crop'/>
@@ -170,6 +179,8 @@
                    <separator/>       
 		   <menuitem action='set-fade-in-length'/>
 		   <menuitem action='set-fade-out-length'/>
+		   <menuitem action='toggle-fade-in-active'/>
+		   <menuitem action='toggle-fade-out-active'/>
                    <separator/>       
 		   <menuitem action='trim-back'/>
 		   <menuitem action='trim-front'/>
@@ -177,6 +188,8 @@
 		   <menuitem action='trim-to-end'/>
 		   <menuitem action='trim-region-to-loop'/>
 		   <menuitem action='trim-region-to-punch'/>
+		   <separator/>
+		   <menuitem action='pitch-shift-region'/>
 	</menu>
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>
@@ -193,6 +206,7 @@
 		   <menuitem action='snap-magnetic'/>
 		   <separator/>
 		   <menuitem action='cycle-snap-mode'/>
+		   <menuitem action='cycle-snap-choice'/>
 	       </menu>
                <menu name='SnapTo' action='SnapTo'>
 		   <menuitem action='snap-to-cd-frame'/>
@@ -235,6 +249,8 @@
                <menuitem action='temporal-zoom-in'/>
                <menuitem action='temporal-zoom-out'/>
                <menuitem action='zoom-to-session'/>
+               <menuitem action='zoom-to-region'/>
+               <menuitem action='toggle-zoom'/>
                <menuitem action='scroll-tracks-down'/>
                <menuitem action='scroll-tracks-up'/>
                <menuitem action='scroll-tracks-down'/>

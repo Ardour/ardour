@@ -2444,7 +2444,35 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		new_session = new Session (*engine, path, snap_name, mix_template);
 	}
 
+	/* this one is special */
+
+	catch (AudioEngine::PortRegistrationFailure& err) {
+
+		MessageDialog msg (err.what(),
+				   true,
+				   Gtk::MESSAGE_INFO,
+				   Gtk::BUTTONS_OK_CANCEL);
+		
+		msg.set_title (_("Loading Error"));
+		msg.set_secondary_text (_("Click the OK button to try again."));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		msg.present ();
+
+		int response = msg.run ();
+
+		msg.hide ();
+
+		switch (response) {
+		case RESPONSE_CANCEL:
+			exit (1);
+		default:
+			break;
+		}
+		goto out;
+	}
+
 	catch (...) {
+		cerr << "Caught something\n";
 		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
 				   true,
 				   Gtk::MESSAGE_INFO,

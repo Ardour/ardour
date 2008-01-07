@@ -72,6 +72,9 @@ class IO : public PBD::StatefulDestructible
 
 	virtual ~IO();
 
+	bool active() const { return _active; }
+	void set_active (bool yn);
+
 	int input_minimum() const { return _input_minimum; }
 	int input_maximum() const { return _input_maximum; }
 	int output_minimum() const { return _output_minimum; }
@@ -158,6 +161,8 @@ class IO : public PBD::StatefulDestructible
 	uint32_t n_inputs () const { return _ninputs; }
 	uint32_t n_outputs () const { return _noutputs; }
 
+	sigc::signal<void>                active_changed;
+
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
 
@@ -210,39 +215,41 @@ class IO : public PBD::StatefulDestructible
 	void reset_max_peak_meters ();
 
 	
-    static void update_meters();
+	static void update_meters();
 
   private: 
 
-    static sigc::signal<void>   Meter;
-    static Glib::StaticMutex    m_meter_signal_lock;
-    sigc::connection            m_meter_connection;
+	static sigc::signal<void>   Meter;
+	static Glib::StaticMutex    m_meter_signal_lock;
+	sigc::connection            m_meter_connection;
 
   public:
 
-	/* automation */
+         bool                     _active;
 
-	static void set_automation_interval (jack_nframes_t frames) {
-		_automation_interval = frames;
-	}
+	 /* automation */
+	 
+	 static void set_automation_interval (jack_nframes_t frames) {
+		 _automation_interval = frames;
+	 }
+	 
+	 static jack_nframes_t automation_interval() { 
+		 return _automation_interval;
+	 }
+	 
+	 void clear_automation ();
+	 
+	 bool gain_automation_recording() const { 
+		 return (_gain_automation_curve.automation_state() & (Write|Touch));
+	 }
+	 
+	 bool gain_automation_playback() const {
+		 return (_gain_automation_curve.automation_state() & Play) ||
+			 ((_gain_automation_curve.automation_state() & Touch) && 
+			  !_gain_automation_curve.touching());
+	 }
 
-	static jack_nframes_t automation_interval() { 
-		return _automation_interval;
-	}
-
-	void clear_automation ();
-
-	bool gain_automation_recording() const { 
-		return (_gain_automation_curve.automation_state() & (Write|Touch));
-	}
-
-	bool gain_automation_playback() const {
-		return (_gain_automation_curve.automation_state() & Play) ||
-			((_gain_automation_curve.automation_state() & Touch) && 
-			 !_gain_automation_curve.touching());
-	}
-
-	virtual void set_gain_automation_state (AutoState);
+	 virtual void set_gain_automation_state (AutoState);
 	AutoState gain_automation_state() const { return _gain_automation_curve.automation_state(); }
 	sigc::signal<void> gain_automation_state_changed;
 

@@ -113,6 +113,7 @@ IO::IO (Session& s, string name,
 	  _output_maximum (output_max)
 {
 	_panner = new Panner (name, _session);
+	_active = true;
 	_gain = 1.0;
 	_desired_gain = 1.0;
 	_input_connection = 0;
@@ -148,6 +149,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	  _gain_automation_curve (0, 0, 0) // all reset in set_state()
 {
 	_panner = 0;
+	_active = true;
 	deferred_state = 0;
 	no_panner_reset = false;
 	_desired_gain = 1.0;
@@ -1088,7 +1090,7 @@ IO::ensure_inputs_locked (uint32_t n, bool clear, void* src)
 			setup_peak_meters ();
 			reset_panner ();
 			/* pass it on */
-			throw AudioEngine::PortRegistrationFailure();
+			throw;
 		}
 		
 		_inputs.push_back (input_port);
@@ -1193,7 +1195,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 				setup_peak_meters ();
 				reset_panner ();
 				/* pass it on */
-				throw AudioEngine::PortRegistrationFailure();
+				throw;
 			}
 		
 			_inputs.push_back (port);
@@ -1226,7 +1228,7 @@ IO::ensure_io (uint32_t nin, uint32_t nout, bool clear, void* src)
 				setup_peak_meters ();
 				reset_panner ();
 				/* pass it on */
-				throw AudioEngine::PortRegistrationFailure ();
+				throw;
 			}
 		
 			_outputs.push_back (port);
@@ -1469,6 +1471,7 @@ IO::state (bool full_state)
 	node->add_property("name", _name);
 	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
+	node->add_property("active", _active? "yes" : "no");
 
 	str = "";
 
@@ -1619,6 +1622,10 @@ IO::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("automation-state")) != 0 || (prop = node.property ("automation-style")) != 0) {
 		/* old school automation handling */
+	}
+
+	if ((prop = node.property (X_("active"))) != 0) {
+		set_active (prop->value() == "yes");
 	}
 
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
@@ -2718,3 +2725,11 @@ IO::find_output_port_hole ()
 	
 	return n;
 }
+
+void
+IO::set_active (bool yn)
+{
+	_active = yn; 
+	 active_changed(); /* EMIT SIGNAL */
+}
+

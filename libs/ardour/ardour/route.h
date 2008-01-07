@@ -109,9 +109,6 @@ class Route : public IO
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
 
-	bool active() const { return _active; }
-	void set_active (bool yn);
-
 	void set_solo (bool yn, void *src);
 	bool soloed() const { return _soloed; }
 
@@ -193,7 +190,6 @@ class Route : public IO
 	sigc::signal<void,void*> record_enable_changed;
 	sigc::signal<void,void*> edit_group_changed;
 	sigc::signal<void,void*> mix_group_changed;
-	sigc::signal<void>       active_changed;
 	sigc::signal<void,void*> meter_change;
 
 	/* gui's call this for their own purposes. */
@@ -267,7 +263,6 @@ class Route : public IO
 	bool                     _phase_invert : 1;
 	bool                     _denormal_protection : 1;
 	bool                     _recordable : 1;
-	bool                     _active : 1;
 	bool                     _mute_affects_pre_fader : 1;
 	bool                     _mute_affects_post_fader : 1;
 	bool                     _mute_affects_control_outs : 1;
