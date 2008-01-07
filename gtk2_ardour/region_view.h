@@ -60,6 +60,7 @@ class RegionView : public TimeAxisViewItem
 
 	void set_valid (bool yn) { valid = yn; }
 	
+	virtual void set_height (double);
 	virtual void set_samples_per_unit (double);
 	virtual bool set_duration (nframes_t, void*);
 	
@@ -124,6 +125,7 @@ class RegionView : public TimeAxisViewItem
     boost::shared_ptr<ARDOUR::Region> _region;
     
     ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position 
+    ArdourCanvas::Line* sync_line; ///< polgyon for sync position 
 
     RegionEditor* editor;
 

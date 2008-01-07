@@ -2306,6 +2306,8 @@ Editor::separate_regions_using_location (Location& loc)
 void
 Editor::crop_region_to_selection ()
 {
+	ensure_entered_selected ();
+
 	if (!selection->time.empty()) {
 
 		crop_region_to (selection->time.start(), selection->time.end_frame());
@@ -2328,6 +2330,8 @@ Editor::crop_region_to (nframes_t start, nframes_t end)
 	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Playlist> playlist;
 	TrackSelection* ts;
+
+	ensure_entered_selected ();
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -2567,6 +2571,8 @@ Editor::naturalize ()
 void
 Editor::align (RegionPoint what)
 {
+	ensure_entered_selected ();
+
 	nframes64_t where = get_preferred_edit_position();
 
 	if (!selection->regions.empty()) {
@@ -2731,6 +2737,8 @@ Editor::trim_region_to_punch ()
 void
 Editor::trim_region_to_location (const Location& loc, const char* str)
 {
+	ensure_entered_selected ();
+
 	RegionSelection& rs (get_regions_for_action ());
 
 	begin_reversible_command (str);
@@ -3907,6 +3915,8 @@ Editor::toggle_region_opaque ()
 void
 Editor::set_fade_length (bool in)
 {
+	ensure_entered_selected ();
+
 	/* we need a region to measure the offset from the start */
 
 	RegionView* rv;
@@ -4131,6 +4141,8 @@ Editor::set_playhead_cursor ()
 void
 Editor::split ()
 {
+	ensure_entered_selected ();
+
 	nframes64_t where = get_preferred_edit_position();
 
 	if (!selection->regions.empty()) {
@@ -4142,5 +4154,15 @@ Editor::split ()
 		RegionSelection rs;
 		rs = get_regions_at (where, selection->tracks);
 		split_regions_at (where, rs);
+	}
+}
+
+void
+Editor::ensure_entered_selected ()
+{
+	if (entered_regionview) {
+		if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) == selection->regions.end()) {
+			selection->set (entered_regionview);
+		}
 	}
 }

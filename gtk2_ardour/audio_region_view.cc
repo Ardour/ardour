@@ -410,12 +410,14 @@ AudioRegionView::region_muted ()
 void
 AudioRegionView::set_y_position_and_height (double y, double h)
 {
-	RegionView::set_y_position_and_height(y, h - 1);
+	//RegionView::set_y_position_and_height(y, h - 1);
+	RegionView::set_height (height);
+
+	const uint32_t wcnt = waves.size();
 
 	_y_position = y;
 	_height = h;
 
-	uint32_t const wcnt = waves.size();
 	for (uint32_t n = 0; n < wcnt; ++n) {
 		double ht;
 

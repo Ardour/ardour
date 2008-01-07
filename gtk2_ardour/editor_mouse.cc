@@ -649,8 +649,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Control)) {
 					/* grab selection for moving */
 					start_selection_op (item, event, SelectionMove);
-				}
-				else {
+				} else {
 					/* this was debated, but decided the more common action was to
 					   make a new selection */
 					start_selection_op (item, event, CreateSelection);
@@ -810,8 +809,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		case MouseAudition:
 			_scrubbing = true;
+			scrub_reversals = 0;
+			scrub_reverse_distance = 0;
 			last_scrub_x = event->button.x;
 			scrubbing_direction = 0;
+			track_canvas.get_window()->set_cursor (*transparent_cursor);
 			/* rest handled in motion & release */
 			break;
 
@@ -1144,6 +1146,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			
 		case MouseAudition:
 			_scrubbing = false;
+			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
 			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
 				switch (item_type) {
@@ -1548,39 +1551,67 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 				scrubbing_direction = 1;
 
 			} else {
-
 				
 				if (last_scrub_x > drag_info.current_pointer_x) {
-					/* move to the left */
+
+					/* pointer moved to the left */
 					
 					if (scrubbing_direction > 0) {
+
 						/* we reversed direction to go backwards */
-						
-						session->request_transport_speed (-0.1);
-						
+
+						scrub_reversals++;
+						scrub_reverse_distance += (int) (last_scrub_x - drag_info.current_pointer_x);
+
 					} else {
+
 						/* still moving to the left (backwards) */
 						
-						delta = 0.005 * (last_scrub_x - drag_info.current_pointer_x);
+						scrub_reversals = 0;
+						scrub_reverse_distance = 0;
+
+						delta = 0.01 * (last_scrub_x - drag_info.current_pointer_x);
 						session->request_transport_speed (session->transport_speed() - delta);
 					}
 					
-					scrubbing_direction = -1;
-					
 				} else {
-					/* move to the right */
+					/* pointer moved to the right */
+
 					if (scrubbing_direction < 0) {
 						/* we reversed direction to go forward */
-						
-						session->request_transport_speed (0.1);
+
+						scrub_reversals++;
+						scrub_reverse_distance += (int) (drag_info.current_pointer_x - last_scrub_x);
+
 					} else {
 						/* still moving to the right */
+
+						scrub_reversals = 0;
+						scrub_reverse_distance = 0;
 						
-						delta = 0.005 * (drag_info.current_pointer_x - last_scrub_x);
+						delta = 0.01 * (drag_info.current_pointer_x - last_scrub_x);
 						session->request_transport_speed (session->transport_speed() + delta);
 					}
+				}
+
+				/* if there have been more than 2 opposite motion moves detected, or one that moves
+				   back more than 10 pixels, reverse direction
+				*/
+
+				if (scrub_reversals >= 2 || scrub_reverse_distance > 10) {
+
+					if (scrubbing_direction > 0) {
+						/* was forwards, go backwards */
+						session->request_transport_speed (-0.1);
+						scrubbing_direction = -1;
+					} else {
+						/* was backwards, go forwards */
+						session->request_transport_speed (0.1);
+						scrubbing_direction = 1;
+					}
 					
-					scrubbing_direction = 1;
+					scrub_reverse_distance = 0;
+					scrub_reversals = 0;
 				}
 			}
 
