@@ -21,7 +21,10 @@
 
 #include "ardour_ui.h"
 #include "actions.h"
+#include "opts.h"
 #include "sync-menu.h"
+
+#include <Appkit/Appkit.h>
 
 sigc::signal<void,bool> ApplicationActivationChanged;
 static EventHandlerRef  application_event_handler_ref;
@@ -107,4 +110,13 @@ ARDOUR_UI::platform_specific ()
 					applicationEventTypes, 0, &application_event_handler_ref);
 }
 
-
+void
+ARDOUR_UI::platform_setup ()
+{
+	if (!ARDOUR_COMMAND_LINE::finder_invoked_ardour) {
+		
+		/* if invoked from the command line, make sure we're visible */
+		
+		[NSApp activateIgnoringOtherApps:YES];
+	} 
+}

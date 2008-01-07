@@ -34,7 +34,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	bool has_carbon;
 	bool has_cocoa;
-	
+
 	carbon_parented = false;
 	cocoa_parented = false;
 	cocoa_parent = 0;
@@ -42,12 +42,13 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	test_view_support (has_carbon, has_cocoa);
 
-	cerr << "plugin has carbon ? " << has_carbon <<  " cocoa ? " << has_cocoa << endl;
-
 	if (has_cocoa) {
 		create_cocoa_view ();
-	} else {
+	} else if (has_carbon) {
 		create_carbon_view (has_carbon);
+	} else {
+		/* fallback to cocoa */
+		create_cocoa_view ();
 	}
 }
 
@@ -71,7 +72,7 @@ AUPluginUI::test_view_support (bool& has_carbon, bool& has_cocoa)
 bool
 AUPluginUI::test_carbon_view_support ()
 {
-	bool ret = true; // there is always the generic GUI
+	bool ret = false;
 	
 	carbon_descriptor.componentType = kAudioUnitCarbonViewComponentType;
 	carbon_descriptor.componentSubType = 'gnrc';
@@ -126,7 +127,6 @@ AUPluginUI::plugin_class_valid (Class pluginClass)
 int
 AUPluginUI::create_cocoa_view ()
 {
-	NSView *AUView = nil;
 	BOOL wasAbleToLoadCustomView = NO;
 	AudioUnitCocoaViewInfo* cocoaViewInfo = NULL;
 	UInt32               numberOfClasses = 0;
@@ -141,11 +141,6 @@ AUPluginUI::create_cocoa_view ()
 						    0,
 						    &dataSize,
 						    &isWritable );
-
-
-	if (result != noErr) {
-		return -1;
-	}
 
 	numberOfClasses = (dataSize - sizeof(CFURLRef)) / sizeof(CFStringRef);
 	
@@ -174,15 +169,7 @@ AUPluginUI::create_cocoa_view ()
 		}
 	}
 
-	cocoa_window = [NSWindow alloc];
-
-	NSRect frameRect = [[cocoa_window contentView] frame];
-	scroll_view = [[[NSScrollView alloc] initWithFrame:frameRect] autorelease];
-	[scroll_view setDrawsBackground:NO];
-	[scroll_view setHasHorizontalScroller:YES];
-	[scroll_view setHasVerticalScroller:YES];
-	
-	[cocoa_window setContentView:scroll_view];
+	NSRect crect = { { 0, 0 }, { 1, 1} };
 
 	// [A] Show custom UI if view has it
 
@@ -211,8 +198,7 @@ AUPluginUI::create_cocoa_view ()
 			}
 
 			// make a view
-			AUView = [factoryInstance uiViewForAudioUnit:*au->get_au()
-				                  withSize:[[scroll_view contentView] bounds].size];
+			au_view = [factoryInstance uiViewForAudioUnit:*au->get_au() withSize:crect.size];
 			
 			// cleanup
 			[CocoaViewBundlePath release];
@@ -229,32 +215,17 @@ AUPluginUI::create_cocoa_view ()
 
 	if (!wasAbleToLoadCustomView) {
 		// [B] Otherwise show generic Cocoa view
-		AUView = [[AUGenericView alloc] initWithAudioUnit:*au->get_au()];
-		[(AUGenericView *)AUView setShowsExpertParameters:YES];
+		au_view = [[AUGenericView alloc] initWithAudioUnit:*au->get_au()];
+		[(AUGenericView *)au_view setShowsExpertParameters:YES];
 	}
-	
-	// Display view
-	NSRect viewFrame = [AUView frame];
-	NSSize frameSize = [NSScrollView  frameSizeForContentSize:viewFrame.size
-			    hasHorizontalScroller:[scroll_view hasHorizontalScroller]
-			    hasVerticalScroller:[scroll_view hasVerticalScroller]
-			    borderType:[scroll_view borderType]];
-	
 
-	NSRect newFrame;
-	newFrame.origin = [scroll_view frame].origin;
-	newFrame.size = frameSize;
+	/* make a child cocoa window */
 
-	NSRect currentFrame = [scroll_view frame];
-	[scroll_view setFrame:newFrame];
-	[scroll_view setDocumentView:AUView];
-	
-	NSSize oldContentSize = [[cocoa_window contentView] frame].size;
-	NSSize newContentSize = oldContentSize;
-	newContentSize.width += (newFrame.size.width - currentFrame.size.width);
-	newContentSize.height += (newFrame.size.height - currentFrame.size.height);
-	
-	[cocoa_window setContentSize:newContentSize];
+	cocoa_window = [[NSWindow alloc] 
+			initWithContentRect:crect
+			styleMask:NSBorderlessWindowMask
+			backing:NSBackingStoreBuffered
+			defer:NO];
 
 	return 0;
 }
@@ -279,7 +250,7 @@ AUPluginUI::create_carbon_view (bool generic)
 						  kWindowNoShadowAttribute|
 						  kWindowNoTitleBarAttribute);
 
-	if ((err = CreateNewWindow(kFloatingWindowClass, attr, &r, &carbon_window)) != noErr) {
+	if ((err = CreateNewWindow(kDocumentWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
 		return -1;
 	}
@@ -335,6 +306,24 @@ AUPluginUI::get_nswindow ()
 	return true_parent;
 }
 
+void
+AUPluginUI::activate ()
+{
+	NSWindow* win = get_nswindow ();
+	[win setLevel:NSFloatingWindowLevel];
+	
+	if (carbon_parented) {
+		[cocoa_parent makeKeyAndOrderFront:nil];
+		ActivateWindow (carbon_window, TRUE);
+	} 
+}
+
+void
+AUPluginUI::deactivate ()
+{
+	/* nothing to do here */
+}
+
 
 OSStatus 
 _carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event, void *userData) 
@@ -347,26 +336,24 @@ AUPluginUI::carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event)
 {
 	UInt32 eventKind = GetEventKind(event);
 	ClickActivationResult howToHandleClick;
-
-	cerr << "Carbon event for " << au->name();
+	NSWindow* win = get_nswindow ();
 
 	switch (eventKind) {
+	case kEventWindowHandleActivate:
+		[win makeMainWindow];
+		return eventNotHandledErr;
+		break;
+
 	case kEventWindowHandleDeactivate:
-		// don't allow window to get deactivated while app is active
-		// (do this only if you are a floating window that doesn't hide)
-		cerr << " deactivate!";
-		ActivateWindow(carbon_window, TRUE);
+		return eventNotHandledErr;
 		break;
 		
 	case kEventWindowGetClickActivation:
-		cerr << " click activate!";
 		howToHandleClick = kActivateAndHandleClick;
 		SetEventParameter(event, kEventParamClickActivation, typeClickActivationResult, 
 				  sizeof(ClickActivationResult), &howToHandleClick);
 		break;
 	}
-
-	cerr << "\n";
 
 	return noErr;
 }
@@ -407,7 +394,8 @@ AUPluginUI::parent_carbon_window ()
 
 	EventTypeSpec	windowEventTypes[] = {
 		{kEventClassWindow, kEventWindowGetClickActivation },
-		{kEventClassWindow, kEventWindowHandleDeactivate }
+		{kEventClassWindow, kEventWindowHandleDeactivate },
+		{kEventClassWindow, kEventWindowHandleActivate }
 	};
 	
 	EventHandlerUPP   ehUPP = NewEventHandlerUPP(_carbon_event);
@@ -420,6 +408,7 @@ AUPluginUI::parent_carbon_window ()
 
 	[win addChildWindow:cocoa_parent ordered:NSWindowAbove];
 	[win setLevel:NSFloatingWindowLevel];
+	[win setHidesOnDeactivate:YES];
 
 	carbon_parented = true;
 		
@@ -435,8 +424,90 @@ AUPluginUI::parent_cocoa_window ()
 		return -1;
 	}
 
+	Gtk::Container* toplevel = get_toplevel();
+
+	if (!toplevel || !toplevel->is_toplevel()) {
+		error << _("AUPluginUI: no top level window!") << endmsg;
+		return -1;
+	}
+	
+	// Get the size of the new AU View's frame 
+	NSRect au_view_frame = [au_view frame];
+
+	if (au_view_frame.size.width > 500 || au_view_frame.size.height > 500) {
+		
+		/* its too big - use a scrollview */
+
+		NSRect frameRect = [[cocoa_window contentView] frame];
+		scroll_view = [[[NSScrollView alloc] initWithFrame:frameRect] autorelease];
+		[scroll_view setDrawsBackground:NO];
+		[scroll_view setHasHorizontalScroller:YES];
+		[scroll_view setHasVerticalScroller:YES];
+
+		NSSize frameSize = [NSScrollView  frameSizeForContentSize:au_view_frame.size
+				    hasHorizontalScroller:[scroll_view hasHorizontalScroller]
+				    hasVerticalScroller:[scroll_view hasVerticalScroller]
+				    borderType:[scroll_view borderType]];
+		
+		// Create a new frame with same origin as current
+		// frame but size equal to the size of the new view
+		NSRect newFrame;
+		newFrame.origin = [scroll_view frame].origin;
+		newFrame.size = frameSize;
+		
+		// Set the new frame and document views on the scroll view
+		NSRect currentFrame = [scroll_view frame];
+		[scroll_view setFrame:newFrame];
+		[scroll_view setDocumentView:au_view];
+		
+		cerr << "scroll view size is " << newFrame.size.width << " x " << newFrame.size.height << endl;
+		
+		NSSize oldContentSize = [[cocoa_window contentView] frame].size;
+		NSSize newContentSize = oldContentSize;
+		
+		cerr << "original size is " << newContentSize.width << " x " << newContentSize.height << endl;
+		
+		newContentSize.width += (newFrame.size.width - currentFrame.size.width);
+		newContentSize.height += (newFrame.size.height - currentFrame.size.height);
+		
+		[cocoa_window setContentSize:newContentSize];
+		[cocoa_window setContentView:scroll_view];
+		
+	} else {
+
+		[cocoa_window setContentSize:au_view_frame.size];
+		[cocoa_window setContentView:au_view];
+
+	}
+
+	/* compute how tall the title bar is, because we have to offset the position of the child window
+	   by that much.
+	*/
+
+	NSRect content_frame = [NSWindow contentRectForFrameRect:[win frame] styleMask:[win styleMask]];
+	NSRect wm_frame = [NSWindow frameRectForContentRect:content_frame styleMask:[win styleMask]];
+	int titlebar_height = wm_frame.size.height - content_frame.size.height;
+
+	// move cocoa window into position relative to the toplevel window
+
+	NSRect view_frame = [[cocoa_window contentView] frame];
+	view_frame.origin.x = content_frame.origin.x;
+	view_frame.origin.y = content_frame.origin.y;
+
+	[cocoa_window setFrame:view_frame display:NO];
+
+	/* make top level window big enough to hold cocoa window and titlebar */
+	
+	content_frame.size.width = view_frame.size.width;
+	content_frame.size.height = view_frame.size.height + titlebar_height;
+
+	[win setFrame:content_frame display:NO];
+
+	/* now make cocoa window a child of this top level */
+
 	[win addChildWindow:cocoa_window ordered:NSWindowAbove];
-	[win setLevel:NSFloatingWindowLevel];
+	// [win setLevel:NSFloatingWindowLevel];
+	[win setHidesOnDeactivate:YES];
 
 	cocoa_parented = true;
 
@@ -469,9 +540,9 @@ AUPluginUI::on_show ()
 	VBox::on_show ();
 
 	if (cocoa_window) {
-		// [cocoa_window setIsVisible:YES];
+		[cocoa_window setIsVisible:YES];
 	} else if (carbon_window) {
-		// [cocoa_parent setIsVisible:YES];
+		[cocoa_parent setIsVisible:YES];
 	}
 }
 

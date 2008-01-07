@@ -26,6 +26,9 @@
 #include <glib/gconvert.h>
 #include <glib/gmessages.h>
 #include <glib/gunicode.h>
+#ifndef g_assert
+#include <glib/gtestutils.h>
+#endif
 #include <glibmm/utility.h>
 
 

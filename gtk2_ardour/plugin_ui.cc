@@ -175,13 +175,11 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 void
 PluginUIWindow::app_activated (bool yn)
 {
-#if defined(HAVE_AUDIOUNITS) && defined(GTKOSX)
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
 	if (yn) {
-		ARDOUR_UI::instance()->the_editor().ensure_float (*this);
-		show ();
-	} else {
-		hide ();
+		_pluginui->activate ();
 	}
+	cerr << "activated ? " << yn << endl;
 #endif
 }
 

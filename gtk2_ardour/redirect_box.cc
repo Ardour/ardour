@@ -1078,8 +1078,6 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 		
 		/* it's an insert */
 
-		cerr << "the plugin insert, that is\n";
-		
 		boost::shared_ptr<PluginInsert> plugin_insert;
 		boost::shared_ptr<PortInsert> port_insert;
 		

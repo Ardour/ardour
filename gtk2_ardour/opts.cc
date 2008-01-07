@@ -40,6 +40,7 @@ char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
 bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
 Glib::ustring ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
 Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
+bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -142,6 +143,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'p':
 			//undocumented OS X finder -psn_XXXXX argument
+			finder_invoked_ardour = true;
 			break;
 		
 		case 'S':

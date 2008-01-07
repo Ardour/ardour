@@ -89,7 +89,7 @@ au_pluginui.mm
 
 gtkosx_files=Split("""
 sync-menu.c
-cocoacarbon.cc
+cocoacarbon.mm
 """)
 
 x11_files=Split("""

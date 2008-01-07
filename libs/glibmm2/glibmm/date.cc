@@ -25,6 +25,9 @@
 
 #include <glib/gmem.h>
 #include <glib/gmessages.h>
+#ifndef g_assert
+#include <glib/gtestutils.h>
+#endif
 
 #include <ctime>
 #include <algorithm>

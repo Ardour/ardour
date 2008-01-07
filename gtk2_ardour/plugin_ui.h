@@ -73,6 +73,9 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual gint get_preferred_width () = 0;
 	virtual bool start_updating(GdkEventAny*) = 0;
 	virtual bool stop_updating(GdkEventAny*) = 0;
+	
+	virtual void activate () {}
+	virtual void deactivate () {}
 
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;

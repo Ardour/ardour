@@ -245,6 +245,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
+
+	platform_setup ();
+
 }
 
 int
@@ -2017,6 +2020,8 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						    Gtk::BUTTONS_NONE);
 	}
 
+
+	cerr << "PDP = " << predetermined_path << endl;
 		
 	int response = Gtk::RESPONSE_NONE;
 
@@ -2229,11 +2234,6 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					session_path = new_session_dialog->session_folder();
 
 				}
-				
-				//XXX This is needed because session constructor wants a 
-				//non-existant path. hopefully this will be fixed at some point.
-				
-				session_path = Glib::build_filename (session_path, session_name);
 				
 				if (!should_be_new) {
 

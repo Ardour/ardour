@@ -31,6 +31,9 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
 	
+	virtual void activate ();
+	virtual void deactivate ();
+
 	void on_realize ();
 	void on_show ();
 
@@ -45,6 +48,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	NSWindow*           cocoa_window;
 	NSScrollView*       scroll_view;
+	NSView*             au_view;
 
 	/* Carbon */
 
