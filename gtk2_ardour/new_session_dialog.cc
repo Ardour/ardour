@@ -436,7 +436,6 @@ NewSessionDialog::NewSessionDialog()
 	m_treeview->signal_row_activated().connect (mem_fun (*this, &NewSessionDialog::recent_row_activated));
 	m_open_filechooser->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::file_chosen));
 	m_template->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::template_chosen));
-	m_name->grab_focus();
 	
 	page_set = Pages (0);
 }
@@ -696,11 +695,9 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		}
 	} else {
 		on_new_session_page = true;
-		if (m_name->get_text() != "") {
-			set_response_sensitive (Gtk::RESPONSE_NONE, true);
-		}
 		if (m_name->get_text() == "") {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
+			m_name->grab_focus();
 		} else {
 			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
