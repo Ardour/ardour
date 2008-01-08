@@ -826,14 +826,11 @@ EngineControl::find_jack_servers (vector<string>& strings)
 
 	_NSGetExecutablePath (execpath, &pathsz);
 	
-	cerr << " execpath = " << execpath << endl;
-
 	Glib::ustring path (Glib::path_get_dirname (execpath));
 	path += "/jackd";
 
 	if (Glib::file_test (path, FILE_TEST_EXISTS)) {
 		strings.push_back (path);
-		cerr << "Found jack in " << path << endl;
 	} 
 
 	if (getenv ("ARDOUR_WITH_JACK")) {
