@@ -2234,7 +2234,14 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					session_path = new_session_dialog->session_folder();
 
 				}
+
+				//XXX This is needed because session constructor wants a 
+				//non-existant path. hopefully this will be fixed at some point.
 				
+				if (!predetermined_path.length()) {
+					session_path = Glib::build_filename (session_path, session_name);
+				}
+
 				if (!should_be_new) {
 
 					if (load_session (session_path, session_name)) {
