@@ -10,6 +10,8 @@
 #include <pbd/strsplit.h>
 #include <pbd/replace_all.h>
 
+#include <ardour/profile.h>
+
 #include "actions.h"
 #include "keyboard.h"
 #include "keyeditor.h"
@@ -54,13 +56,18 @@ KeyEditor::KeyEditor ()
 
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (scroller);
-	get_vbox()->pack_start (unbind_box, false, false);
+
+	if (!ARDOUR::Profile->get_sae()) {
+		get_vbox()->pack_start (unbind_box, false, false);
+		unbind_box.show ();
+		unbind_button.show ();
+	}
+
 	get_vbox()->set_border_width (12);
 
-	scroller.show ();
 	view.show ();
-	unbind_box.show ();
-	unbind_button.show ();
+	scroller.show ();
+
 	unbind_button.set_sensitive (false);
 }
 
