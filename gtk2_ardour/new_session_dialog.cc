@@ -383,7 +383,7 @@ NewSessionDialog::NewSessionDialog()
 	// add_button(Gtk::Stock::HELP, Gtk::RESPONSE_HELP);
 	add_button(Gtk::Stock::QUIT, Gtk::RESPONSE_CANCEL);
 	add_button(Gtk::Stock::CLEAR, Gtk::RESPONSE_NONE);
-	m_okbutton = add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+	m_okbutton = add_button(Gtk::Stock::NEW, Gtk::RESPONSE_OK);
 
 	recent_model = Gtk::TreeStore::create (recent_columns);
 	m_treeview->set_model (recent_model);
@@ -712,6 +712,8 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 
 	if (pagenum == 1) {
 		on_new_session_page = false;
+		m_okbutton->set_label(_("Open"));
+		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
@@ -720,6 +722,8 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		}
 	} else {
 		on_new_session_page = true;
+		m_okbutton->set_label(_("New"));
+		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		if (m_name->get_text() == "") {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
 			m_name->grab_focus();
