@@ -22,7 +22,10 @@ using namespace Gdk;
 using namespace PBD;
 
 KeyEditor::KeyEditor ()
-	: ArdourDialog (_("Keybinding Editor"), false)
+	: ArdourDialog (_("Shortcut Editor"), false)
+	, unbind_button (_("Remove shortcut"))
+	, unbind_box (BUTTONBOX_END)
+	
 {
 	can_bind = false;
 	last_state = 0;
@@ -31,7 +34,7 @@ KeyEditor::KeyEditor ()
 
 	view.set_model (model);
 	view.append_column (_("Action"), columns.action);
-	view.append_column (_("Binding"), columns.binding);
+	view.append_column (_("Shortcut"), columns.binding);
 	view.set_headers_visible (true);
 	view.get_selection()->set_mode (SELECTION_SINGLE);
 	view.set_reorderable (false);
@@ -45,11 +48,44 @@ KeyEditor::KeyEditor ()
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
+	unbind_box.pack_start (unbind_button, false, false);
+
+	unbind_button.signal_clicked().connect (mem_fun (*this, &KeyEditor::unbind));
+
+	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (scroller);
+	get_vbox()->pack_start (unbind_box, false, false);
 	get_vbox()->set_border_width (12);
 
 	scroller.show ();
 	view.show ();
+	unbind_box.show ();
+	unbind_button.show ();
+	unbind_button.set_sensitive (false);
+}
+
+void
+KeyEditor::unbind ()
+{
+	TreeModel::iterator i = view.get_selection()->get_selected();
+	
+	unbind_button.set_sensitive (false);
+
+	if (i != model->children().end()) {
+		string path = (*i)[columns.path];
+		
+		if (!(*i)[columns.bindable]) {
+			return;
+		} 
+
+		bool result = AccelMap::change_entry (path,
+						      0,
+						      (ModifierType) 0,
+						      true);
+		if (result) {
+			(*i)[columns.binding] = string ();
+		}
+	}
 }
 
 void
@@ -69,6 +105,28 @@ KeyEditor::on_unmap ()
 void
 KeyEditor::action_selected ()
 {
+	if (view.get_selection()->count_selected_rows() == 0) {
+		return;
+	}
+
+	TreeModel::iterator i = view.get_selection()->get_selected();
+	
+	unbind_button.set_sensitive (false);
+
+	if (i != model->children().end()) {
+
+		string path = (*i)[columns.path];
+		
+		if (!(*i)[columns.bindable]) {
+			return;
+		} 
+
+		string binding = (*i)[columns.binding];
+
+		if (!binding.empty()) {
+			unbind_button.set_sensitive (true);
+		}
+	}
 }
 
 bool
@@ -112,8 +170,6 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 				(*i)[columns.binding] = string();
 			}
 		}
-
-		
 	}
 
   out:

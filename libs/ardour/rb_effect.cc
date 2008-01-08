@@ -155,7 +155,7 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 			pos += this_read;
 			done += this_read;
 
-			tsr.progress = ((float) done / duration) * 0.75;
+			tsr.progress = ((float) done / duration) * 0.25;
 
 			stretcher.study(buffers, this_read, pos == duration);
 		}
@@ -193,7 +193,7 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 			pos += this_read;
 			done += this_read;
 
-			tsr.progress = 0.75 + ((float) done / duration) * 0.25;
+			tsr.progress = 0.25 + ((float) done / duration) * 0.75;
 
 			stretcher.process(buffers, this_read, pos == duration);
 
