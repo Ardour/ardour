@@ -38,6 +38,7 @@
 using namespace Gtkmm2ext;
 
 #include "opts.h"
+#include "utils.h"
 
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
@@ -345,6 +346,30 @@ NewSessionDialog::NewSessionDialog()
 	get_vbox()->set_homogeneous(false);
 	get_vbox()->set_spacing(0);
 	get_vbox()->pack_start(*m_notebook, Gtk::PACK_SHRINK, 0);
+
+	/* 
+	   icon setting is done again in the editor (for the whole app),
+	   but its all chickens and eggs at this point.
+	*/
+
+	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
+	Glib::RefPtr<Gdk::Pixbuf> icon;
+
+	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if (!window_icons.empty()) {
+		set_icon_list (window_icons);
+	}
 
 	WindowTitle title(Glib::get_application_name());
 	title += _("Session Control");

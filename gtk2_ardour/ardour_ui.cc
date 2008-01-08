@@ -2957,7 +2957,9 @@ ARDOUR_UI::disk_speed_dialog_gone (int ignored_response, MessageDialog* msg)
 int
 ARDOUR_UI::pending_state_dialog ()
 {
-	ArdourDialog dialog ("pending state dialog");
+ 	HBox* hbox = new HBox();
+	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	ArdourDialog dialog (_("Crash Recovery"), true);
 	Label  message (_("\
 This session appears to have been in\n\
 middle of recording when ardour or\n\
@@ -2966,14 +2968,18 @@ the computer was shutdown.\n\
 Ardour can recover any captured audio for\n\
 you, or it can ignore it. Please decide\n\
 what you would like to do.\n"));
-
-	dialog.get_vbox()->pack_start (message);
-	dialog.add_button (_("Recover from crash"), RESPONSE_ACCEPT);
+	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
+	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
+	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
 	dialog.add_button (_("Ignore crash data"), RESPONSE_REJECT);
-
+	dialog.add_button (_("Recover from crash"), RESPONSE_ACCEPT);
+	dialog.set_default_response (RESPONSE_ACCEPT);
 	dialog.set_position (WIN_POS_CENTER);
-	dialog.show_all ();
-	
+	message.show();
+	image->show();
+	hbox->show();
+
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:
 		return 1;
