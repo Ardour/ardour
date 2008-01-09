@@ -854,6 +854,8 @@ EngineControl::find_jack_servers (vector<string>& strings)
 		}
 		return;
 	}
+#else
+	string path;
 #endif
 	
 	PathScanner scanner;
@@ -862,7 +864,7 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	
 	path = getenv ("PATH");
 	
-	jack_servers = scanner(path, jack_server_filter, 0, false, true);
+	jack_servers = scanner (path, jack_server_filter, 0, false, true);
 	
 	vector<string *>::iterator iter;
 	
