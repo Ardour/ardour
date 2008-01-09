@@ -729,32 +729,39 @@ ARDOUR_UI::check_memory_locking ()
 void
 ARDOUR_UI::finish()
 {
-	if (session && session->dirty()) {
-		switch (ask_about_saving_session(_("quit"))) {
-		case -1:
-			return;
-			break;
-		case 1:
-			/* use the default name */
-			if (save_state_canfail ("")) {
-				/* failed - don't quit */
-				MessageDialog msg (*editor, 
-					       _("\
+	if (session) {
+
+		if (session->transport_rolling()) {
+			session->request_stop ();
+			usleep (2500000);
+		}
+
+		if (session->dirty()) {
+			switch (ask_about_saving_session(_("quit"))) {
+			case -1:
+				return;
+				break;
+			case 1:
+				/* use the default name */
+				if (save_state_canfail ("")) {
+					/* failed - don't quit */
+					MessageDialog msg (*editor, 
+							   _("\
 Ardour was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
 \"Just quit\" option."));
-				msg.run ();
-				return;
+					msg.run ();
+					return;
+				}
+				break;
+			case 0:
+				break;
 			}
-			break;
-		case 0:
-			break;
 		}
-	}
-
-	if (session) {
+		
 		session->set_deletion_in_progress ();
 	}
+
 	engine->stop (true);
 	save_ardour_state ();
 	quit ();
@@ -1085,37 +1092,50 @@ ARDOUR_UI::recent_session_row_activated (const TreePath& path, TreeViewColumn* c
 void
 ARDOUR_UI::open_recent_session ()
 {
-	/* popup selector window */
+	bool can_return = (session != 0);
 
-	if (session_selector_window == 0) {
-		build_session_selector ();
+	while (true) {
+		
+		if (session_selector_window == 0) {
+			build_session_selector ();
+		}
+		
+		redisplay_recent_sessions ();
+
+		session_selector_window->set_position (WIN_POS_MOUSE);
+
+		ResponseType r = (ResponseType) session_selector_window->run ();
+		
+		session_selector_window->hide();
+		
+		switch (r) {
+		case RESPONSE_ACCEPT:
+			break;
+		default:
+			if (can_return) {
+				return;
+			} else {
+				exit (1);
+			}
+		}
+		
+		Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
+		
+		if (i == recent_session_model->children().end()) {
+			return;
+		}
+		
+		Glib::ustring path = (*i)[recent_session_columns.fullpath];
+		Glib::ustring state = (*i)[recent_session_columns.visible_name];
+		
+		_session_is_new = false;
+		
+		if (load_session (path, state) == 0) {
+			break;
+		}
+
+		can_return = false;
 	}
-
-	redisplay_recent_sessions ();
-
-	ResponseType r = (ResponseType) session_selector_window->run ();
-
-	session_selector_window->hide();
-
-	switch (r) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
-	}
-
-	Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
-
-	if (i == recent_session_model->children().end()) {
-		return;
-	}
-	
-	Glib::ustring path = (*i)[recent_session_columns.fullpath];
-	Glib::ustring state = (*i)[recent_session_columns.visible_name];
-
-	_session_is_new = false;
-
-	load_session (path, state);
 }
 
 bool
@@ -2021,12 +2041,10 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 	}
 
 
-	cerr << "PDP = " << predetermined_path << endl;
-		
 	int response = Gtk::RESPONSE_NONE;
 
 	if (predetermined_path.length()) {
-
+		
 		/* before we start, lets see if the given path looks like
 		   an existing ardour session. if it does, skip the
 		   tabs that we don't need
@@ -2034,60 +2052,67 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
 		if (Glib::file_test (predetermined_path, Glib::FILE_TEST_IS_DIR)) {
 			session_path = predetermined_path;
+			existing_session = true;
+		} else if (Glib::file_test (predetermined_path, Glib::FILE_TEST_IS_REGULAR)) {
+			session_path = Glib::path_get_dirname (string (predetermined_path));
+			existing_session = true;
 		} else {
+			/* it doesn't exist, assume the best */
 			session_path = Glib::path_get_dirname (string (predetermined_path));
 		}
-
+		       
 		session_name = basename_nosuffix (string (predetermined_path));
-
-		if (session_name.length() == 0 || session_path.length() == 0) {
-			error << string_compose (_("Ardour cannot understand \"%1\" as a session name"), predetermined_path) << endmsg;
-			return false;
-		}
 
 		new_session_dialog->set_session_name (session_name);
 		new_session_dialog->set_session_folder (session_path);
-
-		cerr << "Set name to " << session_name << " and dir to " << session_path << endl;
-
-		if (Glib::file_test (predetermined_path, Glib::FILE_TEST_IS_DIR)) {
-			Glib::ustring predicted_session_file;
-
-			predicted_session_file = predetermined_path;
-			predicted_session_file += '/';
-			predicted_session_file += session_name;
-			predicted_session_file += Session::statefile_suffix();
-
-			if (Glib::file_test (predicted_session_file, Glib::FILE_TEST_EXISTS)) {
-				existing_session = true;
-			}
-
-		} else if (Glib::file_test (predetermined_path, Glib::FILE_TEST_EXISTS)) {
-
-			if (predetermined_path.find (Session::statefile_suffix()) == predetermined_path.length() - 7) {
-				/* existing .ardour file */
-				existing_session = true;
-			}
-		}
-
 		new_session_dialog->set_modal (true);
-	}
 
-	if (existing_session && have_engine) {
-		/* lets just try to load it */
+		if (existing_session) {
 
-		loading_dialog->set_message (_("Starting audio engine"));
-		loading_dialog->show_all ();
-		flush_pending ();
-
-		if (create_engine ()) {
-			backend_audio_error (!have_engine, new_session_dialog);
-			loading_dialog->hide ();
-			return false;
-		}
-
-		if (load_session (session_path, session_name) == 0) {
-			goto done;
+			if (session_name.length() == 0 || session_path.length() == 0) {
+				error << string_compose (_("Ardour cannot understand \"%1\" as a session name"), predetermined_path) << endmsg;
+				return false;
+			}
+			
+			if (Glib::file_test (predetermined_path, Glib::FILE_TEST_IS_DIR)) {
+				Glib::ustring predicted_session_file;
+				
+				predicted_session_file = predetermined_path;
+				predicted_session_file += '/';
+				predicted_session_file += session_name;
+				predicted_session_file += Session::statefile_suffix();
+				
+				if (Glib::file_test (predicted_session_file, Glib::FILE_TEST_EXISTS)) {
+					existing_session = true;
+				}
+				
+			} else if (Glib::file_test (predetermined_path, Glib::FILE_TEST_EXISTS)) {
+				
+				if (predetermined_path.find (Session::statefile_suffix()) == predetermined_path.length() - 7) {
+					/* existing .ardour file */
+					existing_session = true;
+				}
+			} else {
+				existing_session = false;
+			}
+			
+			if (existing_session && have_engine) {
+				/* lets just try to load it */
+				
+				loading_dialog->set_message (_("Starting audio engine"));
+				loading_dialog->show_all ();
+				flush_pending ();
+				
+				if (create_engine ()) {
+					backend_audio_error (!have_engine, new_session_dialog);
+					loading_dialog->hide ();
+					return false;
+				}
+				
+				if (load_session (session_path, session_name) == 0) {
+					goto done;
+				}
+			}
 		}
 	}
 
@@ -2191,8 +2216,6 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				goto try_again;
 			} 
 
-			cerr <<  "nsd now on page " << new_session_dialog->get_current_page() << endl;
-				
 			switch (new_session_dialog->get_current_page()) {
 			case 1: /* recent session selector */
 			case 2: /* audio engine control */
@@ -2200,6 +2223,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				if (session_name[0] == '/' || 
 				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+					cerr << "here\n";
 					if (load_session (Glib::path_get_dirname (session_name), session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2207,6 +2231,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
 				} else {
 					session_path = new_session_dialog->session_folder();
+					cerr << "there\n";
 					if (load_session (session_path, session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2238,9 +2263,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				//XXX This is needed because session constructor wants a 
 				//non-existant path. hopefully this will be fixed at some point.
 				
-				if (!predetermined_path.length()) {
-					session_path = Glib::build_filename (session_path, session_name);
-				}
+				session_path = Glib::build_filename (session_path, session_name);
 
 				if (!should_be_new) {
 
@@ -2479,7 +2502,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	}
 
 	catch (...) {
-		cerr << "Caught something\n";
+
 		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
 				   true,
 				   Gtk::MESSAGE_INFO,
@@ -2520,6 +2543,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	retval = 0;
 
   out:
+	cerr << "load session returns " << retval << endl;
 	return retval;
 }
 

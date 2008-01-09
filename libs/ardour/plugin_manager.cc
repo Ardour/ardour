@@ -333,7 +333,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_free_statements(matches1);
 
 	if (!matches2) {
-		return _("");
+		return ("");
 	}
 
 	string label = matches2->object;

@@ -1,6 +1,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <map>
 
 #include <glibmm.h>
 #include <pbd/xml++.h>
@@ -22,6 +23,7 @@
 
 #include <pbd/convert.h>
 #include <pbd/error.h>
+#include <pbd/pathscanner.h>
 
 #ifdef __APPLE
 #include <CFBundle.h>
@@ -363,6 +365,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	bool using_coreaudio = false;
 	bool using_netjack = false;
 	bool using_ffado = false;
+   bool using_dummy = false;
 
 	/* first, path to jackd */
 
@@ -425,7 +428,10 @@ EngineControl::build_command_line (vector<string>& cmd)
 	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
 		cmd.push_back ("ffado");
-	}
+	} else if ( driver == X_("Dummy")) {
+      using_dummy = true;
+      cmd.push_back ("dummy");
+   }
 
 	/* driver arguments */
 
@@ -449,8 +455,10 @@ EngineControl::build_command_line (vector<string>& cmd)
 			cmd.push_back ("-C");
 		}
 
-		cmd.push_back ("-n");
-		cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
+      if (! using_dummy ) {
+		   cmd.push_back ("-n");
+		   cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
+      }
 	}
 
 	cmd.push_back ("-r");
@@ -813,6 +821,11 @@ EngineControl::audio_mode_changed ()
 	}
 }
 
+static bool jack_server_filter(const string& str, void *arg)
+{
+   return str == "jackd" || str == "jackdmp";
+}
+
 void
 EngineControl::find_jack_servers (vector<string>& strings)
 {
@@ -843,26 +856,25 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	}
 #endif
 	
-	if (Glib::file_test ("/usr/bin/jackd", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/bin/jackd");
-	}
-	if (Glib::file_test ("/usr/local/bin/jackd", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/local/bin/jackd");
-	}
-	if (Glib::file_test ("/opt/bin/jackd", FILE_TEST_EXISTS)) {
-		strings.push_back ("/opt/bin/jackd");
-	}
-	if (Glib::file_test ("/usr/bin/jackdmp", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/bin/jackd");
-	}
-	if (Glib::file_test ("/usr/local/bin/jackdmp", FILE_TEST_EXISTS)) {
-		strings.push_back ("/usr/local/bin/jackd");
-	}
-	if (Glib::file_test ("/opt/bin/jackdmp", FILE_TEST_EXISTS)) {
-		strings.push_back ("/opt/bin/jackd");
-	}
+   PathScanner scanner;
+   vector<string *> *jack_servers;
+   std::map<string,int> un;
 
+   string path = getenv("PATH");
+
+
+   jack_servers = scanner(path, jack_server_filter, 0, false, true);
+
+   vector<string *>::iterator iter;
+
+   for( iter = jack_servers->begin(); iter != jack_servers->end(); iter++ ) {
+       string p = **iter;
+        if ( un[p]++ == 0 ) {
+          strings.push_back(p);
+        }
+   }
 }
+
 
 string
 EngineControl::get_device_name (const string& driver, const string& human_readable)
@@ -1008,8 +1020,17 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNode* child;
 	XMLProperty* prop;
 
+   bool using_dummy = false;
+
 	int val;
 	string strval;
+
+   if ( (child = root.child("driver"))){
+      prop = child->property("val");
+      if (prop && (prop->value() == "Dummy") ) {
+         using_dummy = true;
+      }
+   }
 
 	clist = root.children();
 
@@ -1020,6 +1041,8 @@ EngineControl::set_state (const XMLNode& root)
 		prop = child->property ("val");
 
 		if (!prop || prop->value().empty()) {
+         if ( using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" ))
+               continue;
 			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
 			continue;
 		}

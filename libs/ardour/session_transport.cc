@@ -55,7 +55,7 @@ Session::request_input_change_handling ()
 	if (!(_state_of_the_state & (InitialConnecting|Deletion))) {
 		Event* ev = new Event (Event::InputConfigurationChange, Event::Add, Event::Immediate, 0, 0.0);
 		queue_event (ev);
-	}
+	} 
 }
 
 void

@@ -255,7 +255,7 @@ Session::process_with_events (nframes_t nframes)
 	bool session_needs_butler = false;
 	nframes_t stop_limit;
 	long           frames_moved;
-
+	
 	/* make sure the auditioner is silent */
 
 	if (auditioner) {

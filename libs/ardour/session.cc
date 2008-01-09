@@ -293,7 +293,6 @@ Session::Session (AudioEngine &eng,
 	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 	if (new_session) {
 		if (create (new_session, mix_template, compute_initial_length())) {
-			cerr << "create failed\n";
 			destroy ();
 			throw failed_constructor ();
 		}
@@ -393,7 +392,7 @@ Session::Session (AudioEngine &eng,
 		}
 		
 		if (!rl.empty()) {
-			add_routes (rl);
+			add_routes (rl, false);
 		}
 		
 	}
@@ -406,17 +405,12 @@ Session::Session (AudioEngine &eng,
 		throw failed_constructor ();
 	}
 	
-	store_recent_sessions(_name, _path);
+	store_recent_sessions (_name, _path);
 	
-	bool was_dirty = dirty ();
-
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
 
-	if (was_dirty) {
-		DirtyChanged (); /* EMIT SIGNAL */
-	}
+	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
 }
 
 Session::~Session ()
@@ -434,6 +428,7 @@ Session::destroy ()
 	remove_pending_capture_state ();
 
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
+
 	_engine.remove_session ();
 
 	GoingAway (); /* EMIT SIGNAL */
@@ -872,6 +867,7 @@ Session::when_engine_running ()
 	
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
+
 	/* hook us up to the engine */
 
 	_engine.set_session (this);
@@ -882,9 +878,6 @@ Session::when_engine_running ()
 	osc->set_session (*this);
 #endif
     
-	_state_of_the_state = Clean;
-
-	DirtyChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -895,6 +888,7 @@ Session::hookup_io ()
 	*/
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InitialConnecting);
+
 
 	if (auditioner == 0) {
 		
@@ -964,6 +958,7 @@ Session::hookup_io ()
 	IOConnectionsComplete (); /* EMIT SIGNAL */
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~InitialConnecting);
+
 
 	/* now handle the whole enchilada as if it was one
 	   graph reorder event.
@@ -1825,8 +1820,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
   failed:
 	if (!new_routes.empty()) {
-		add_routes (new_routes, false);
-		save_state (_current_snapshot_name);
+		add_routes (new_routes, true);
 	}
 
 	return ret;
@@ -1960,8 +1954,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 
   failure:
 	if (!ret.empty()) {
-		add_routes (ret, false);
-		save_state (_current_snapshot_name);
+		add_routes (ret, true);
 	}
 
 	return ret;
