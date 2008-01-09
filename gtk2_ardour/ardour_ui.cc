@@ -1070,8 +1070,7 @@ ARDOUR_UI::build_session_selector ()
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 	recent_session_display.set_headers_visible (false);
-	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
-
+	recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
 	recent_session_display.signal_row_activated().connect (mem_fun (*this, &ARDOUR_UI::recent_session_row_activated));
 
 	scroller->add (recent_session_display);
@@ -1094,31 +1093,36 @@ ARDOUR_UI::open_recent_session ()
 {
 	bool can_return = (session != 0);
 
+	if (session_selector_window == 0) {
+		build_session_selector ();
+	}
+	
+	redisplay_recent_sessions ();
+
 	while (true) {
 		
-		if (session_selector_window == 0) {
-			build_session_selector ();
-		}
-		
-		redisplay_recent_sessions ();
-
 		session_selector_window->set_position (WIN_POS_MOUSE);
 
 		ResponseType r = (ResponseType) session_selector_window->run ();
-		
-		session_selector_window->hide();
 		
 		switch (r) {
 		case RESPONSE_ACCEPT:
 			break;
 		default:
 			if (can_return) {
+				session_selector_window->hide();
 				return;
 			} else {
 				exit (1);
 			}
 		}
+
+		if (recent_session_display.get_selection()->count_selected_rows() == 0) {
+			continue;
+		}
 		
+		session_selector_window->hide();
+
 		Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
 		
 		if (i == recent_session_model->children().end()) {
@@ -2216,14 +2220,13 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				goto try_again;
 			} 
 
-			switch (new_session_dialog->get_current_page()) {
-			case 1: /* recent session selector */
-			case 2: /* audio engine control */
+			switch (new_session_dialog->which_page()) {
+			case NewSessionDialog::OpenPage: 
+			case NewSessionDialog::EnginePage:
 
 				if (session_name[0] == '/' || 
 				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
-					cerr << "here\n";
 					if (load_session (Glib::path_get_dirname (session_name), session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2231,7 +2234,6 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
 				} else {
 					session_path = new_session_dialog->session_folder();
-					cerr << "there\n";
 					if (load_session (session_path, session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2239,7 +2241,9 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				}
 				break;
 
-			case 0: /* nominally the "new" session creator, but could be in use for an old session */
+			case NewSessionDialog::NewPage: /* nominally the "new" session creator, but could be in use for an old session */
+
+				cerr << "on page zero\n";
 
 				if (new_session_dialog->get_current_page() == 0 && ARDOUR_COMMAND_LINE::session_name.empty()) {
 					should_be_new = true;
@@ -2543,7 +2547,6 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	retval = 0;
 
   out:
-	cerr << "load session returns " << retval << endl;
 	return retval;
 }
 

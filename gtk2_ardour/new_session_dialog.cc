@@ -678,6 +678,56 @@ NewSessionDialog::get_current_page()
 	return m_notebook->get_current_page();
 }
 
+NewSessionDialog::Pages
+NewSessionDialog::which_page ()
+{
+	int num = m_notebook->get_current_page();
+
+	if (page_set == NewPage) {
+		return NewPage;
+
+	} else if (page_set == OpenPage) {
+		return OpenPage;
+
+	} else if (page_set == EnginePage) {
+		return EnginePage;
+
+	} else if (page_set == NewPage|OpenPage) {
+		switch (num) {
+		case 0:
+			return NewPage;
+		default:
+			return OpenPage;
+		}
+
+	} else if (page_set == NewPage|EnginePage) {
+		switch (num) {
+		case 0:
+			return NewPage;
+		default:
+			return EnginePage;
+		}
+
+	} else if (page_set == NewPage|EnginePage|OpenPage) {
+		switch (num) {
+		case 0:
+			return NewPage;
+		case 1:
+			return OpenPage;
+		default:
+			return EnginePage;
+		}
+
+	} else if (page_set == OpenPage|EnginePage) {
+		switch (num) {
+		case 0:
+			return OpenPage;
+		default:
+			return EnginePage;
+		}
+	}
+}
+
 void
 NewSessionDialog::set_current_page(int page)
 {
@@ -710,17 +760,28 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		return;
 	}
 
-	if (pagenum == 1) {
+	switch (which_page()) {
+	case OpenPage:
 		on_new_session_page = false;
 		m_okbutton->set_label(_("Open"));
-		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
+		m_okbutton->set_image (*(manage (new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON))));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {
 			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
-	} else {
+		break;
+
+	case EnginePage:
+		on_new_session_page = false;
+		m_okbutton->set_label(_("Open"));
+		m_okbutton->set_image (*(manage (new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON))));
+		set_response_sensitive (Gtk::RESPONSE_NONE, false);
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
+		break;
+
+	default:
 		on_new_session_page = true;
 		m_okbutton->set_label(_("New"));
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
@@ -750,11 +811,19 @@ NewSessionDialog::treeview_selection_changed ()
 void
 NewSessionDialog::file_chosen ()
 {
-	if (on_new_session_page) return;
+	switch (which_page()) {
+	case NewPage:
+	case EnginePage:
+		return;
+	}
 
 	m_treeview->get_selection()->unselect_all();
 
-	get_window()->set_cursor(Gdk::Cursor(Gdk::WATCH));
+	Glib::RefPtr<Gdk::Window> win (get_window());
+
+	if (win) {
+		win->set_cursor(Gdk::Cursor(Gdk::WATCH));
+	}
 
 	if (!m_open_filechooser->get_filename().empty()) {
 	        set_response_sensitive (Gtk::RESPONSE_OK, true);

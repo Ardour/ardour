@@ -54,6 +54,12 @@ class NewSessionDialog : public ArdourDialog
 {
 public:
 		
+	enum Pages {
+		NewPage = 0x1,
+		OpenPage = 0x2,
+		EnginePage = 0x4
+	};
+
 	NewSessionDialog();
 	~NewSessionDialog ();
 
@@ -86,6 +92,8 @@ public:
 
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const ;
+	Pages which_page ();
+
 	int get_current_page();
 	void set_current_page (int);
 	void reset_recent();
@@ -168,11 +176,6 @@ protected:
 	Gtk::Notebook* m_notebook;
 
  private:
-	enum Pages {
-		NewPage = 0x1,
-		OpenPage = 0x2,
-		EnginePage = 0x4
-	};
 
 	Pages page_set;
 

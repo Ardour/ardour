@@ -410,7 +410,7 @@ else:
 	keybindings_dict['%SECONDARY%'] = 'Alt'
 	keybindings_dict['%TERTIARY%'] = 'Shift'
 	keybindings_dict['%LEVEL4%'] = 'Mod2'
-	keybindings_dict['%WINDOW%'] = 'Ctrl'
+	keybindings_dict['%WINDOW%'] = 'Alt'
 
 ardourbindings = env.SubstInFile ('ardour.bindings', 'ardour.bindings.in', SUBST_DICT = keybindings_dict);
 ardoursaeDEbindings = env.SubstInFile ('ardour-sae-de.bindings', 'ardour-sae-de.bindings.in', SUBST_DICT = keybindings_dict);
