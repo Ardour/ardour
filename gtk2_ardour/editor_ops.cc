@@ -3171,7 +3171,7 @@ Editor::trim_region_to_punch ()
 void
 Editor::trim_region_to_location (const Location& loc, const char* str)
 {
-	ensure_entered_region_selected ();
+	ExclusiveRegionSelection ers (*this, entered_regionview);
 
 	RegionSelection& rs (get_regions_for_action ());
 
@@ -3222,6 +3222,8 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 void
 Editor::trim_region_to_edit_point ()
 {
+	ExclusiveRegionSelection ers (*this, entered_regionview);
+
 	RegionSelection& rs (get_regions_for_action ());
 	nframes64_t where = get_preferred_edit_position();
 
@@ -3264,6 +3266,8 @@ Editor::trim_region_to_edit_point ()
 void
 Editor::trim_region_from_edit_point ()
 {
+	ExclusiveRegionSelection ers (*this, entered_regionview);
+
 	RegionSelection& rs (get_regions_for_action ());
 	nframes64_t where = get_preferred_edit_position();
 
@@ -4609,27 +4613,29 @@ Editor::ensure_entered_track_selected (bool op_really_wants_one_track_if_none_ar
 void
 Editor::ensure_entered_region_selected (bool op_really_wants_one_region_if_none_are_selected)
 {
-	if (entered_regionview && mouse_mode == MouseObject) {
+	if (!entered_regionview || mouse_mode != MouseObject) {
+		return;
+	}
 
-		/* heuristic:
-
-		   - if there is no existing selection, don't change it. the operation will thus apply to "all"
-
-		   - if there is an existing selection, but the entered regionview isn't in it, add it. this
-		       avoids key-mouse ops on unselected regions from interfering with an existing selection,
-		       but also means that the operation will apply to the pointed-at region.
-		*/
-
-		if (!selection->regions.empty()) {
-			if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) != selection->regions.end()) {
-				selection->add (entered_regionview);
-			}
-		} else {
-			/* there is no selection, but this operation requires/prefers selected objects */
-
-			if (op_really_wants_one_region_if_none_are_selected) {
-				selection->set (entered_regionview, false);
-			}
+	
+	/* heuristic:
+	   
+	- if there is no existing selection, don't change it. the operation will thus apply to "all"
+	
+	- if there is an existing selection, but the entered regionview isn't in it, add it. this
+	avoids key-mouse ops on unselected regions from interfering with an existing selection,
+	but also means that the operation will apply to the pointed-at region.
+	*/
+	
+	if (!selection->regions.empty()) {
+		if (!selection->selected (entered_regionview)) {
+			selection->add (entered_regionview);
+		}
+	} else {
+		/* there is no selection, but this operation requires/prefers selected objects */
+		
+		if (op_really_wants_one_region_if_none_are_selected) {
+			selection->set (entered_regionview, false);
 		}
 	}
 }
@@ -4649,6 +4655,8 @@ Editor::trim_region_back ()
 void
 Editor::trim_region (bool front)
 {
+	ExclusiveRegionSelection ers (*this, entered_regionview);
+
 	nframes64_t where = get_preferred_edit_position();
 	RegionSelection& rs = get_regions_for_action ();
 
@@ -4671,6 +4679,7 @@ Editor::trim_region (bool front)
 			session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 		}
 	}
+
 	commit_reversible_command ();
 }
 

@@ -1966,6 +1966,18 @@ class Editor : public PublicEditor
 
 	TimeAxisView* entered_track;
 	RegionView*   entered_regionview;
+
+	class ExclusiveRegionSelection {
+	  public:
+		ExclusiveRegionSelection (Editor&, RegionView*);
+		~ExclusiveRegionSelection ();
+
+	  private:
+		Editor& editor;
+		RegionView* regionview;
+		bool remove;
+	};
+
 	void ensure_entered_region_selected (bool op_acts_on_objects = false);
 	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
