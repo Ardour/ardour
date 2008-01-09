@@ -4276,8 +4276,14 @@ Editor::set_fade_length (bool in)
 			return;
 		}
 
-		AutomationList& alist = tmp->audio_region()->fade_in();
-		XMLNode &before = alist.get_state();
+		AutomationList* alist;
+		if (in) {
+			alist = &tmp->audio_region()->fade_in();
+		} else {
+			alist = &tmp->audio_region()->fade_out();
+		}
+
+		XMLNode &before = alist->get_state();
 
 		if (in) {
 			tmp->audio_region()->set_fade_in_length (len);
@@ -4285,8 +4291,8 @@ Editor::set_fade_length (bool in)
 			tmp->audio_region()->set_fade_out_length (len);
 		}
 		
-		XMLNode &after = alist.get_state();
-		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
+		XMLNode &after = alist->get_state();
+		session->add_command(new MementoCommand<AutomationList>(*alist, &before, &after));
 	}
 
 	commit_reversible_command ();
@@ -4305,7 +4311,6 @@ Editor::toggle_fade_active (bool in)
 	const char* cmd = (in ? _("toggle fade in active") : _("toggle fade out active"));
 	bool have_switch = false;
 	bool yn;
-	bool in_command = false;
 
 	begin_reversible_command (cmd);
 
@@ -4321,25 +4326,31 @@ Editor::toggle_fade_active (bool in)
 		/* make the behaviour consistent across all regions */
 		
 		if (!have_switch) {
-			yn = region->fade_in_active();
+			if (in) {
+				yn = region->fade_in_active();
+			} else {
+				yn = region->fade_out_active();
+			}
 			have_switch = true;
 		}
 
 		XMLNode &before = region->get_state();
-		region->set_fade_in_active (!yn);
+		if (in) {
+			region->set_fade_in_active (!yn);
+		} else {
+			region->set_fade_out_active (!yn);
+		}
 		XMLNode &after = region->get_state();
 		session->add_command(new MementoCommand<AudioRegion>(*region.get(), &before, &after));
-		in_command = true;
 	}
 
-	if (in_command) {
-		commit_reversible_command ();
-	}
+	commit_reversible_command ();
 }
 
 void
 Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
 {
+
 	begin_reversible_command (_("set fade in shape"));
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
@@ -4359,6 +4370,7 @@ Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
 	}
 
 	commit_reversible_command ();
+		
 }
 
 void
@@ -4407,6 +4419,8 @@ Editor::set_fade_in_active (bool yn)
 		XMLNode &after = ar->get_state();
 		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
 	}
+
+	commit_reversible_command ();
 }
 
 void
@@ -4430,6 +4444,8 @@ Editor::set_fade_out_active (bool yn)
 		XMLNode &after = ar->get_state();
 		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
 	}
+
+	commit_reversible_command ();
 }
 
 

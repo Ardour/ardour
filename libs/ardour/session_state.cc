@@ -2305,6 +2305,10 @@ Session::commit_reversible_command (Command *cmd)
 		current_trans->add_command (cmd);
 	}
 
+	if (current_trans->empty()) {
+		return;
+	}
+
 	gettimeofday (&now, 0);
 	current_trans->set_timestamp (now);
 
