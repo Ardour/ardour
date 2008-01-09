@@ -4289,16 +4289,16 @@ Editor::toggle_region_opaque ()
 void
 Editor::set_fade_length (bool in)
 {
-	ensure_entered_region_selected (true);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	/* we need a region to measure the offset from the start */
 
 	RegionView* rv;
 
-	if (entered_regionview) {
-		rv = entered_regionview;
-	} else if (!selection->regions.empty()) {
+	if (!selection->regions.empty()) {
 		rv = selection->regions.front();
+	} else if (entered_regionview) {
+		rv = entered_regionview;
 	} else {
 		return;
 	}
@@ -4306,6 +4306,11 @@ Editor::set_fade_length (bool in)
 	nframes64_t pos = get_preferred_edit_position();
 	nframes_t len;
 	char* cmd;
+	
+	if (pos > rv->region()->last_frame() || pos < rv->region()->first_frame()) {
+		/* edit point is outside the relevant region */
+		return;
+	}
 
 	if (in) {
 		if (pos <= rv->region()->position()) {
