@@ -422,7 +422,9 @@
 	       <menuitem action='SecondaryClockDeltaEditCursor'/>
 	       <menuitem action='OnlyCopyImportedFiles'/>
     	       <menuitem action='ShowTrackMeters'/>
+			<menuitem action='DefaultNarrowMS'/>
                <menuitem action='link-region-and-track-selection'/>
+			
 	       <separator/>
          </menu>
 	 <menu name='Help' action='Help'>
