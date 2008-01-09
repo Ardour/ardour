@@ -415,7 +415,7 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 
 	/* i hate this kind of code */
 
-	if (streams > p.get_info()->n_inputs) {
+	if (streams > (unsigned)p.get_info()->n_inputs) {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -427,7 +427,7 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 					 p.name(),
 					 p.get_info()->n_inputs,
 					 streams));
-	} else if (streams < p.get_info()->n_inputs) {
+	} else if (streams < (unsigned)p.get_info()->n_inputs) {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"

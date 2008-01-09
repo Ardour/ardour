@@ -98,7 +98,7 @@ Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_vertical_meter(int width, int heigh
 	if (height > max_v_pixbuf_size)
 		height = max_v_pixbuf_size;
 	
-	int index = height - 1;
+	//int index = height - 1;
 
 	//if (v_pixbuf_cache == 0) {
 	//	v_pixbuf_cache = (Glib::RefPtr<Gdk::Pixbuf>*) malloc(sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_v_pixbuf_size);

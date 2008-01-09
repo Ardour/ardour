@@ -51,7 +51,7 @@
 
 #include "i18n.h"
 
-#define MUTED_ALPHA 0x50
+#define MUTED_ALPHA 10
 
 using namespace sigc;
 using namespace ARDOUR;
@@ -1185,14 +1185,22 @@ AudioRegionView::set_frame_color ()
 
 		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
 		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-			(*w)->property_wave_color() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);// Lets still use the theme's opacity value if Opaque is not set
+			if (_region->muted()) {
+				(*w)->property_wave_color() = RGBA_TO_UINT(r, g, b, MUTED_ALPHA);
+			} else {
+				(*w)->property_wave_color() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);// Lets still use the theme's opacity value if Opaque is not set
+			}
 		}
 	} else {
 		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
 		frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
 
 		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-			(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+			if (_region->muted()) {
+				(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
+			} else {
+				(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+			}
 		}
 	}
 }

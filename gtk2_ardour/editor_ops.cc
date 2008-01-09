@@ -2574,10 +2574,34 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	bool in_command = false;
 	boost::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
-		
-	sort_track_selection ();
+	TrackSelection tmptracks;
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	if (selection->tracks.empty()) {
+		
+		/* use tracks with selected regions */
+
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			TimeAxisView* tv = &(*i)->get_time_axis_view();
+
+			if (find (tmptracks.begin(), tmptracks.end(), tv) == tmptracks.end()) {
+				tmptracks.push_back (tv);
+			}
+		}
+
+		if (tmptracks.empty()) {
+			/* no regions selected: use all tracks */
+			tmptracks = track_views;
+		}
+
+	} else {
+
+		tmptracks = selection->tracks;
+
+	}
+
+	sort_track_selection (&tmptracks);
+
+	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
 		AudioTimeAxisView* atv;
 
@@ -3003,29 +3027,59 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position, const R
 
 	switch (point) {
 	case Start:
-		pos = r->first_frame ();
+		pos = position;
+		if (position > r->position()) {
+			distance = position - r->position();
+			dir = 1;
+		} else {
+			distance = r->position() - position;
+			dir = -1;
+		}
 		break;
-
+		
 	case End:
-		pos = r->last_frame();
+		if (position > r->last_frame()) {
+			distance = position - r->last_frame();
+			pos = r->position() + distance;
+			dir = 1;
+		} else {
+			distance = r->last_frame() - position;
+			pos = r->position() - distance;
+			dir = -1;
+		}
 		break;
 
 	case SyncPoint:
-		pos = r->adjust_to_sync (r->first_frame());
+		pos = r->adjust_to_sync (position);
+		if (pos > r->position()) {
+			distance = pos - r->position();
+			dir = 1;
+		} else {
+			distance = r->position() - pos;
+			dir = -1;
+		}
 		break;	
 	}
 
-	if (pos > position) {
-		distance = pos - position;
-		dir = -1;
-	} else {
-		distance = position - pos;
-		dir = 1;
+	if (pos == r->position()) {
+		return;
 	}
 
 	begin_reversible_command (_("align selection (relative)"));
 
-	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
+	/* move first one specially */
+
+	XMLNode &before = r->playlist()->get_state();
+	r->set_position (pos, this);
+	XMLNode &after = r->playlist()->get_state();
+	session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+
+	/* move rest by the same amount */
+	
+	RegionSelection::const_iterator i = rs.begin();
+	++i;
+
+	for (; i != rs.end(); ++i) {
 
 		boost::shared_ptr<Region> region ((*i)->region());
 

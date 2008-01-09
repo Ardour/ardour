@@ -4114,10 +4114,15 @@ struct EditorOrderTimeAxisSorter {
 };
 	
 void
-Editor::sort_track_selection ()
+Editor::sort_track_selection (TrackSelection* sel)
 {
 	EditorOrderTimeAxisSorter cmp;
-	selection->tracks.sort (cmp);
+
+	if (sel) {
+		sel->sort (cmp);
+	} else {
+		selection->tracks.sort (cmp);
+	}
 }
 
 nframes64_t

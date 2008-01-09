@@ -710,7 +710,7 @@ RubberBandStretcher::Impl::writeChunk(size_t channel, size_t shiftIncrement, boo
         cerr << "writeChunk(" << channel << ", " << shiftIncrement << ", " << last << ")" << endl;
     }
 
-    for (int i = 0; i < shiftIncrement; ++i) {
+    for (unsigned int i = 0; i < shiftIncrement; ++i) {
         if (cd.windowAccumulator[i] > 0.f) {
             cd.accumulator[i] /= cd.windowAccumulator[i];
         }

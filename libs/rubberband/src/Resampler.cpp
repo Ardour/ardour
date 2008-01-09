@@ -117,7 +117,8 @@ Resampler::D::resample(float **in, float **out, size_t incount, float ratio,
     data.src_ratio = ratio;
     data.end_of_input = (final ? 1 : 0);
 
-    int err = src_process(m_src, &data);
+    int err = 0;
+    err = src_process(m_src, &data);
 
     //!!! check err, respond appropriately
 

@@ -461,7 +461,7 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
-	void sort_track_selection ();
+	void sort_track_selection (TrackSelection* sel = 0);
 
 	void get_relevant_audio_tracks (std::set<AudioTimeAxisView*>& relevant_tracks);
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&);

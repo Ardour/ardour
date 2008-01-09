@@ -711,8 +711,6 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 
 	uint32_t old_flags = _flags;
 
-	cerr << _name << " setting live state\n";
-		
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 

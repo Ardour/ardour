@@ -169,12 +169,9 @@ Editor::track_canvas_scroll_event (GdkEventScroll *event)
 bool
 Editor::time_canvas_scroll (GdkEventScroll* ev)
 {
-	int x, y;
-	double wx, wy;
 	nframes_t xdelta;
 	int direction = ev->direction;
 
-  retry:
 	switch (direction) {
 	case GDK_SCROLL_UP:
 		temporal_zoom_step (true);

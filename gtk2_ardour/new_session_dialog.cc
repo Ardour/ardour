@@ -812,9 +812,11 @@ void
 NewSessionDialog::file_chosen ()
 {
 	switch (which_page()) {
-	case NewPage:
-	case EnginePage:
-		return;
+      case OpenPage:
+         break;
+	   case NewPage:
+	   case EnginePage:
+		   return;
 	}
 
 	m_treeview->get_selection()->unselect_all();
