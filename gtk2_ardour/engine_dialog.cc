@@ -856,23 +856,23 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	}
 #endif
 	
-   PathScanner scanner;
-   vector<string *> *jack_servers;
-   std::map<string,int> un;
-
-   string path = getenv("PATH");
-
-
-   jack_servers = scanner(path, jack_server_filter, 0, false, true);
-
-   vector<string *>::iterator iter;
-
-   for( iter = jack_servers->begin(); iter != jack_servers->end(); iter++ ) {
-       string p = **iter;
-        if ( un[p]++ == 0 ) {
-          strings.push_back(p);
-        }
-   }
+	PathScanner scanner;
+	vector<string *> *jack_servers;
+	std::map<string,int> un;
+	
+	path = getenv ("PATH");
+	
+	jack_servers = scanner(path, jack_server_filter, 0, false, true);
+	
+	vector<string *>::iterator iter;
+	
+	for (iter = jack_servers->begin(); iter != jack_servers->end(); iter++) {
+		string p = **iter;
+		
+		if (un[p]++ == 0) {
+			strings.push_back(p);
+		}
+	}
 }
 
 
