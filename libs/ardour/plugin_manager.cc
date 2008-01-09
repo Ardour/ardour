@@ -321,7 +321,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_statement* matches1 = lrdf_matches (&pattern);
 
 	if (!matches1) {
-		return _("");
+		return "";
 	}
 
 	pattern.subject = matches1->object;
