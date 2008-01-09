@@ -231,6 +231,7 @@ def i18n (buildenv, sources, installenv):
         buildenv.PoBuild(po_file, ['po/'+po_file, potfile])
         mo_file = po_file.replace (".po", ".mo")
         installenv.Alias ('install', buildenv.MoBuild (mo_file, po_file))
+        installenv.Alias ('msgupdate', buildenv.MoBuild (mo_file, po_file))
     
     for lang in languages:
         modir = (os.path.join (install_prefix, 'share/locale/' + lang + '/LC_MESSAGES/'))
