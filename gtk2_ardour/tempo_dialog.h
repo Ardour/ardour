@@ -39,10 +39,10 @@ struct TempoDialog : public ArdourDialog
 {
     Gtk::ComboBoxText note_types;
     vector<string> strings;
-    Gtk::Frame   note_frame;
     Gtk::Adjustment   bpm_adjustment;
     Gtk::SpinButton   bpm_spinner;
     Gtk::Frame        bpm_frame;
+    Gtk::Frame   note_frame;
     Gtk::VBox    vpacker;
     Gtk::Button  ok_button;
     Gtk::Button  cancel_button;

@@ -2389,7 +2389,7 @@ Editor::play_selected_region ()
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 
-	ensure_entered_region_selected (true);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	if (selection->regions.empty()) {
 		return;
@@ -2404,6 +2404,7 @@ Editor::play_selected_region ()
 		}
 	}
 
+	session->request_stop ();
 	session->request_bounded_roll (start, end);
 }
 
@@ -2567,27 +2568,58 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	bool in_command = false;
 	boost::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
-		
-	sort_track_selection ();
+	TrackSelection tmptracks;
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+	if (selection->tracks.empty()) {
+		
+		/* use tracks with selected regions */
+
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			TimeAxisView* tv = &(*i)->get_time_axis_view();
+
+			if (find (tmptracks.begin(), tmptracks.end(), tv) == tmptracks.end()) {
+				tmptracks.push_back (tv);
+			}
+		}
+
+		if (tmptracks.empty()) {
+			/* no regions selected: use all tracks */
+			tmptracks = track_views;
+		}
+
+	} else {
+
+		tmptracks = selection->tracks;
+
+	}
+
+	sort_track_selection (&tmptracks);
+
+	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
 		RouteTimeAxisView* rtv;
-		
+
 		if ((rtv = dynamic_cast<RouteTimeAxisView*> ((*i))) != 0) {
 
-			boost::shared_ptr<Track> t = rtv->track();
+			if (rtv->is_track()) {
 
-			if (t != 0 && ! t->diskstream()->destructive()) {
-				
+				/* no edits to destructive tracks */
+
+				if (rtv->track()->diskstream()->destructive()) {
+					continue;
+				}
+					
 				if ((playlist = rtv->playlist()) != 0) {
 
-					XMLNode *before = &(playlist->get_state());
-					bool got_some = false;	
-					
+					XMLNode *before;
+					bool got_some;
+
+					before = &(playlist->get_state());
+					got_some = false;
+
 					/* XXX need to consider musical time selections here at some point */
 
-					double speed = t->diskstream()->speed();
+					double speed = rtv->get_diskstream()->speed();
 
 
 					for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
@@ -2986,29 +3018,59 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position, const R
 
 	switch (point) {
 	case Start:
-		pos = r->first_frame ();
+		pos = position;
+		if (position > r->position()) {
+			distance = position - r->position();
+			dir = 1;
+		} else {
+			distance = r->position() - position;
+			dir = -1;
+		}
 		break;
-
+		
 	case End:
-		pos = r->last_frame();
+		if (position > r->last_frame()) {
+			distance = position - r->last_frame();
+			pos = r->position() + distance;
+			dir = 1;
+		} else {
+			distance = r->last_frame() - position;
+			pos = r->position() - distance;
+			dir = -1;
+		}
 		break;
 
 	case SyncPoint:
-		pos = r->adjust_to_sync (r->first_frame());
+		pos = r->adjust_to_sync (position);
+		if (pos > r->position()) {
+			distance = pos - r->position();
+			dir = 1;
+		} else {
+			distance = r->position() - pos;
+			dir = -1;
+		}
 		break;	
 	}
 
-	if (pos > position) {
-		distance = pos - position;
-		dir = -1;
-	} else {
-		distance = position - pos;
-		dir = 1;
+	if (pos == r->position()) {
+		return;
 	}
 
 	begin_reversible_command (_("align selection (relative)"));
 
-	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
+	/* move first one specially */
+
+	XMLNode &before = r->playlist()->get_state();
+	r->set_position (pos, this);
+	XMLNode &after = r->playlist()->get_state();
+	session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+
+	/* move rest by the same amount */
+	
+	RegionSelection::const_iterator i = rs.begin();
+	++i;
+
+	for (; i != rs.end(); ++i) {
 
 		boost::shared_ptr<Region> region ((*i)->region());
 
@@ -3100,7 +3162,7 @@ Editor::trim_region_to_punch ()
 void
 Editor::trim_region_to_location (const Location& loc, const char* str)
 {
-	ensure_entered_region_selected ();
+	ExclusiveRegionSelection ers (*this, entered_regionview);
 
 	RegionSelection& rs (get_regions_for_action ());
 
@@ -3151,6 +3213,8 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 void
 Editor::trim_region_to_edit_point ()
 {
+	ExclusiveRegionSelection ers (*this, entered_regionview);
+
 	RegionSelection& rs (get_regions_for_action ());
 	nframes64_t where = get_preferred_edit_position();
 
@@ -3193,6 +3257,8 @@ Editor::trim_region_to_edit_point ()
 void
 Editor::trim_region_from_edit_point ()
 {
+	ExclusiveRegionSelection ers (*this, entered_regionview);
+
 	RegionSelection& rs (get_regions_for_action ());
 	nframes64_t where = get_preferred_edit_position();
 
@@ -4292,16 +4358,16 @@ Editor::toggle_region_opaque ()
 void
 Editor::set_fade_length (bool in)
 {
-	ensure_entered_region_selected (true);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	/* we need a region to measure the offset from the start */
 
 	RegionView* rv;
 
-	if (entered_regionview) {
-		rv = entered_regionview;
-	} else if (!selection->regions.empty()) {
+	if (!selection->regions.empty()) {
 		rv = selection->regions.front();
+	} else if (entered_regionview) {
+		rv = entered_regionview;
 	} else {
 		return;
 	}
@@ -4309,6 +4375,11 @@ Editor::set_fade_length (bool in)
 	nframes64_t pos = get_preferred_edit_position();
 	nframes_t len;
 	char* cmd;
+	
+	if (pos > rv->region()->last_frame() || pos < rv->region()->first_frame()) {
+		/* edit point is outside the relevant region */
+		return;
+	}
 
 	if (in) {
 		if (pos <= rv->region()->position()) {
@@ -4337,7 +4408,13 @@ Editor::set_fade_length (bool in)
 			return;
 		}
 
-		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
+		boost::shared_ptr<AutomationList> alist;
+		if (in) {
+			alist = tmp->audio_region()->fade_in();
+		} else {
+			alist = tmp->audio_region()->fade_out();
+		}
+
 		XMLNode &before = alist->get_state();
 
 		if (in) {
@@ -4347,12 +4424,11 @@ Editor::set_fade_length (bool in)
 		}
 		
 		XMLNode &after = alist->get_state();
-		session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
+		session->add_command(new MementoCommand<AutomationList>(*alist, &before, &after));
 	}
 
 	commit_reversible_command ();
 }
-
 
 void
 Editor::toggle_fade_active (bool in)
@@ -4366,7 +4442,6 @@ Editor::toggle_fade_active (bool in)
 	const char* cmd = (in ? _("toggle fade in active") : _("toggle fade out active"));
 	bool have_switch = false;
 	bool yn;
-	bool in_command = false;
 
 	begin_reversible_command (cmd);
 
@@ -4382,25 +4457,31 @@ Editor::toggle_fade_active (bool in)
 		/* make the behaviour consistent across all regions */
 		
 		if (!have_switch) {
-			yn = region->fade_in_active();
+			if (in) {
+				yn = region->fade_in_active();
+			} else {
+				yn = region->fade_out_active();
+			}
 			have_switch = true;
 		}
 
 		XMLNode &before = region->get_state();
-		region->set_fade_in_active (!yn);
+		if (in) {
+			region->set_fade_in_active (!yn);
+		} else {
+			region->set_fade_out_active (!yn);
+		}
 		XMLNode &after = region->get_state();
 		session->add_command(new MementoCommand<AudioRegion>(*region.get(), &before, &after));
-		in_command = true;
 	}
 
-	if (in_command) {
-		commit_reversible_command ();
-	}
+	commit_reversible_command ();
 }
 
 void
 Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
 {
+
 	begin_reversible_command (_("set fade in shape"));
 
 	for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
@@ -4420,6 +4501,7 @@ Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
 	}
 
 	commit_reversible_command ();
+		
 }
 
 void
@@ -4468,6 +4550,8 @@ Editor::set_fade_in_active (bool yn)
 		XMLNode &after = ar->get_state();
 		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
 	}
+
+	commit_reversible_command ();
 }
 
 void
@@ -4491,6 +4575,8 @@ Editor::set_fade_out_active (bool yn)
 		XMLNode &after = ar->get_state();
 		session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
 	}
+
+	commit_reversible_command ();
 }
 
 
@@ -4600,27 +4686,29 @@ Editor::ensure_entered_track_selected (bool op_really_wants_one_track_if_none_ar
 void
 Editor::ensure_entered_region_selected (bool op_really_wants_one_region_if_none_are_selected)
 {
-	if (entered_regionview && mouse_mode == MouseObject) {
+	if (!entered_regionview || mouse_mode != MouseObject) {
+		return;
+	}
 
-		/* heuristic:
-
-		   - if there is no existing selection, don't change it. the operation will thus apply to "all"
-
-		   - if there is an existing selection, but the entered regionview isn't in it, add it. this
-		       avoids key-mouse ops on unselected regions from interfering with an existing selection,
-		       but also means that the operation will apply to the pointed-at region.
-		*/
-
-		if (!selection->regions.empty()) {
-			if (find (selection->regions.begin(), selection->regions.end(), entered_regionview) != selection->regions.end()) {
-				selection->add (entered_regionview);
-			}
-		} else {
-			/* there is no selection, but this operation requires/prefers selected objects */
-
-			if (op_really_wants_one_region_if_none_are_selected) {
-				selection->set (entered_regionview, false);
-			}
+	
+	/* heuristic:
+	   
+	- if there is no existing selection, don't change it. the operation will thus apply to "all"
+	
+	- if there is an existing selection, but the entered regionview isn't in it, add it. this
+	avoids key-mouse ops on unselected regions from interfering with an existing selection,
+	but also means that the operation will apply to the pointed-at region.
+	*/
+	
+	if (!selection->regions.empty()) {
+		if (!selection->selected (entered_regionview)) {
+			selection->add (entered_regionview);
+		}
+	} else {
+		/* there is no selection, but this operation requires/prefers selected objects */
+		
+		if (op_really_wants_one_region_if_none_are_selected) {
+			selection->set (entered_regionview, false);
 		}
 	}
 }
@@ -4640,6 +4728,8 @@ Editor::trim_region_back ()
 void
 Editor::trim_region (bool front)
 {
+	ExclusiveRegionSelection ers (*this, entered_regionview);
+
 	nframes64_t where = get_preferred_edit_position();
 	RegionSelection& rs = get_regions_for_action ();
 
@@ -4662,6 +4752,7 @@ Editor::trim_region (bool front)
 			session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 		}
 	}
+
 	commit_reversible_command ();
 }
 
@@ -4764,7 +4855,7 @@ Editor::set_loop_from_region (bool play)
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 
-	ensure_entered_region_selected (true);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	if (selection->regions.empty()) {
 		info << _("cannot set loop: no region selected") << endmsg;
@@ -4816,6 +4907,31 @@ Editor::set_punch_from_edit_range ()
 	}
 
 	set_punch_range (start, end,  _("set punch range from edit range"));
+}
+
+void
+Editor::set_punch_from_region ()
+{
+	nframes64_t start = max_frames;
+	nframes64_t end = 0;
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		info << _("cannot set punch: no region selected") << endmsg;
+		return;
+	}
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		if ((*i)->region()->position() < start) {
+			start = (*i)->region()->position();
+		}
+		if ((*i)->region()->last_frame() + 1 > end) {
+			end = (*i)->region()->last_frame() + 1;
+		}
+	}
+
+	set_punch_range (start, end, _("set punch range from region"));
 }
 
 void

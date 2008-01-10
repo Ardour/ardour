@@ -168,6 +168,10 @@ class Editor : public PublicEditor
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
 	void remove_a_region (boost::shared_ptr<ARDOUR::Region>);
 
+#ifdef USE_RUBBERBAND
+	std::vector<std::string> rb_opt_strings;
+#endif
+
 	/* option editor-access */
 
 	void set_show_waveforms (bool yn);
@@ -478,7 +482,7 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
-	void sort_track_selection ();
+	void sort_track_selection (TrackSelection* sel = 0);
 
 	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks);
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&) const;
@@ -1179,7 +1183,8 @@ class Editor : public PublicEditor
 	void add_location_from_selection ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
-	
+	void set_punch_from_region ();
+
 	void set_loop_from_edit_range (bool play);
 	void set_loop_from_region (bool play);
 	void set_punch_from_edit_range ();
@@ -1930,11 +1935,20 @@ class Editor : public PublicEditor
 	    Gtk::SpinButton       pitch_cent_spinner;
 	    RegionSelection       regions;
 	    Gtk::ProgressBar      progress_bar;
+
+	    /* SoundTouch */
 	    Gtk::ToggleButton     quick_button;
 	    Gtk::ToggleButton     antialias_button;
+	    Gtk::HBox             upper_button_box;
+
+	    /* RubberBand */
+	    Gtk::ComboBoxText     stretch_opts_selector;
+	    Gtk::Label            stretch_opts_label;
+	    Gtk::ToggleButton     precise_button;
+	    Gtk::HBox             opts_box;
+
 	    Gtk::Button*          cancel_button;
 	    Gtk::Button*          action_button;
-	    Gtk::HBox             upper_button_box;
 	    Gtk::VBox             packer;
 	    int                   status;
 
@@ -2061,6 +2075,18 @@ class Editor : public PublicEditor
 
 	TimeAxisView* entered_track;
 	RegionView*   entered_regionview;
+
+	class ExclusiveRegionSelection {
+	  public:
+		ExclusiveRegionSelection (Editor&, RegionView*);
+		~ExclusiveRegionSelection ();
+
+	  private:
+		Editor& editor;
+		RegionView* regionview;
+		bool remove;
+	};
+
 	void ensure_entered_region_selected (bool op_acts_on_objects = false);
 	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;

@@ -741,32 +741,39 @@ ARDOUR_UI::check_memory_locking ()
 void
 ARDOUR_UI::finish()
 {
-	if (session && session->dirty()) {
-		switch (ask_about_saving_session(_("quit"))) {
-		case -1:
-			return;
-			break;
-		case 1:
-			/* use the default name */
-			if (save_state_canfail ("")) {
-				/* failed - don't quit */
-				MessageDialog msg (*editor, 
-					       _("\
+	if (session) {
+
+		if (session->transport_rolling()) {
+			session->request_stop ();
+			usleep (2500000);
+		}
+
+		if (session->dirty()) {
+			switch (ask_about_saving_session(_("quit"))) {
+			case -1:
+				return;
+				break;
+			case 1:
+				/* use the default name */
+				if (save_state_canfail ("")) {
+					/* failed - don't quit */
+					MessageDialog msg (*editor, 
+							   _("\
 Ardour was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
 \"Just quit\" option."));
-				msg.run ();
-				return;
+					msg.run ();
+					return;
+				}
+				break;
+			case 0:
+				break;
 			}
-			break;
-		case 0:
-			break;
 		}
-	}
-
-	if (session) {
+		
 		session->set_deletion_in_progress ();
 	}
+
 	engine->stop (true);
 	Config->save_state();
 	ARDOUR_UI::config()->save_state();
@@ -1074,8 +1081,7 @@ ARDOUR_UI::build_session_selector ()
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 	recent_session_display.set_headers_visible (false);
-	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
-
+	recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
 	recent_session_display.signal_row_activated().connect (mem_fun (*this, &ARDOUR_UI::recent_session_row_activated));
 
 	scroller->add (recent_session_display);
@@ -1099,37 +1105,55 @@ ARDOUR_UI::recent_session_row_activated (const TreePath& path, TreeViewColumn* c
 void
 ARDOUR_UI::open_recent_session ()
 {
-	/* popup selector window */
+	bool can_return = (session != 0);
 
 	if (session_selector_window == 0) {
 		build_session_selector ();
 	}
-
+	
 	redisplay_recent_sessions ();
 
-	ResponseType r = (ResponseType) session_selector_window->run ();
+	while (true) {
+		
+		session_selector_window->set_position (WIN_POS_MOUSE);
 
-	session_selector_window->hide();
+		ResponseType r = (ResponseType) session_selector_window->run ();
+		
+		switch (r) {
+		case RESPONSE_ACCEPT:
+			break;
+		default:
+			if (can_return) {
+				session_selector_window->hide();
+				return;
+			} else {
+				exit (1);
+			}
+		}
 
-	switch (r) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
+		if (recent_session_display.get_selection()->count_selected_rows() == 0) {
+			continue;
+		}
+		
+		session_selector_window->hide();
+
+		Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
+		
+		if (i == recent_session_model->children().end()) {
+			return;
+		}
+		
+		Glib::ustring path = (*i)[recent_session_columns.fullpath];
+		Glib::ustring state = (*i)[recent_session_columns.visible_name];
+		
+		_session_is_new = false;
+		
+		if (load_session (path, state) == 0) {
+			break;
+		}
+
+		can_return = false;
 	}
-
-	Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
-
-	if (i == recent_session_model->children().end()) {
-		return;
-	}
-	
-	Glib::ustring path = (*i)[recent_session_columns.fullpath];
-	Glib::ustring state = (*i)[recent_session_columns.visible_name];
-
-	_session_is_new = false;
-
-	load_session (path, state);
 }
 
 bool
@@ -2239,9 +2263,9 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				goto try_again;
 			} 
 
-			switch (new_session_dialog->get_current_page()) {
-			case 1: /* recent session selector */
-			case 2: /* audio engine control */
+			switch (new_session_dialog->which_page()) {
+			case NewSessionDialog::OpenPage: 
+			case NewSessionDialog::EnginePage:
 
 				if (session_name[0] == '/' || 
 				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
@@ -2262,7 +2286,9 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				}
 				break;
 
-			case 0: /* nominally the "new" session creator, but could be in use for an old session */
+			case NewSessionDialog::NewPage: /* nominally the "new" session creator, but could be in use for an old session */
+
+				cerr << "on page zero\n";
 
 				if (new_session_dialog->get_current_page() == 0 && ARDOUR_COMMAND_LINE::session_name.empty()) {
 					should_be_new = true;
@@ -2525,7 +2551,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	}
 
 	catch (...) {
-		cerr << "Caught something\n";
+
 		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
 				   true,
 				   Gtk::MESSAGE_INFO,
@@ -3027,7 +3053,7 @@ ARDOUR_UI::pending_state_dialog ()
 {
  	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
-	ArdourDialog dialog (_("Crash recovery"), true);
+	ArdourDialog dialog (_("Crash Recovery"), true);
 	Label  message (_("\
 This session appears to have been in\n\
 middle of recording when ardour or\n\
@@ -3036,7 +3062,7 @@ the computer was shutdown.\n\
 Ardour can recover any captured audio for\n\
 you, or it can ignore it. Please decide\n\
 what you would like to do.\n"));
-
+	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
@@ -3047,8 +3073,7 @@ what you would like to do.\n"));
 	message.show();
 	image->show();
 	hbox->show();
-	//dialog.get_vbox()->show();
-	
+
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:
 		return 1;

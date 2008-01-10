@@ -257,8 +257,7 @@ Session::butler_thread_work ()
 
 			/*IO* io = ds->io();
 			
-			if (ds->io() && !ds->io()->active()) {
-				cerr << "Skip inactive diskstream " << ds->io()->name() << endl;
+			if (io && !io->active()) {
 				continue;
 			}*/
 

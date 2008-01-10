@@ -1427,7 +1427,7 @@ class Session : public PBD::StatefulDestructible
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void   add_routes (RouteList&, bool save = true);
+	void   add_routes (RouteList&, bool save);
 	uint32_t destructive_index;
 
 	int load_routes (const XMLNode&);

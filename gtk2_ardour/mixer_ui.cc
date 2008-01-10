@@ -62,7 +62,7 @@ Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 {
 	session = 0;
-	_strip_width = Wide;
+	Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 	track_menu = 0;
 	mix_group_context_menu = 0;
 	no_track_list_redisplay = false;
@@ -309,6 +309,8 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 		strip = new MixerStrip (*this, *session, route);
 		strips.push_back (strip);
 		
+		Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
+
 		if (strip->width_owner() != strip) {
 			strip->set_width (_strip_width, this);
 		}

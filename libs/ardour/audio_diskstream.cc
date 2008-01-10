@@ -264,7 +264,7 @@ AudioDiskstream::use_new_playlist ()
 {
 	string newname;
 	boost::shared_ptr<AudioPlaylist> playlist;
-
+	
 	if (!in_set_state && destructive()) {
 		return 0;
 	}
@@ -1998,8 +1998,6 @@ AudioDiskstream::set_state (const XMLNode& node)
 	   up of the IO that owns this DS (::non_realtime_input_change())
 	*/
 		
-	in_set_state = false;
-
 	return 0;
 }
 

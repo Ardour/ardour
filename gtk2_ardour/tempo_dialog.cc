@@ -34,10 +34,10 @@ using namespace PBD;
 
 TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
 	: ArdourDialog (_("edit tempo")),
-	  note_frame (_("BPM denominator")),
 	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
 	  bpm_spinner (bpm_adjustment),
 	  bpm_frame (_("Beats per minute")),
+	  note_frame (_("BPM denominator")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
 	  when_bar_label (_("Bar")),

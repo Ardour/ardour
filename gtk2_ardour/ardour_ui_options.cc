@@ -518,6 +518,12 @@ ARDOUR_UI::toggle_ShowTrackMeters()
 }
 
 void
+ARDOUR_UI::toggle_use_narrow_ms()
+{
+	ActionManager::toggle_config_state ("options", "DefaultNarrowMS", &Configuration::set_default_narrow_ms, &Configuration::get_default_narrow_ms);
+}
+
+void
 ARDOUR_UI::mtc_port_changed ()
 {
 	bool have_mtc;
@@ -1122,6 +1128,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("show-track-meters")) {
 		ActionManager::map_some_state ("options",  "ShowTrackMeters", &Configuration::get_show_track_meters);
 		editor->toggle_meter_updating();
+	} else if (PARAM_IS ("default-narrow_ms")) {
+		ActionManager::map_some_state ("options",  "DefaultNarrowMS", &Configuration::get_default_narrow_ms);
 	}
 
 #undef PARAM_IS

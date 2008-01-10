@@ -42,6 +42,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 #include "opts.h"
+#include "utils.h"
 
 NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
@@ -348,6 +349,30 @@ NewSessionDialog::NewSessionDialog()
 	get_vbox()->set_spacing(0);
 	get_vbox()->pack_start(*m_notebook, Gtk::PACK_SHRINK, 0);
 
+	/* 
+	   icon setting is done again in the editor (for the whole app),
+	   but its all chickens and eggs at this point.
+	*/
+
+	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
+	Glib::RefPtr<Gdk::Pixbuf> icon;
+
+	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
+		window_icons.push_back (icon);
+	}
+	if (!window_icons.empty()) {
+		set_icon_list (window_icons);
+	}
+
 	WindowTitle title(Glib::get_application_name());
 	title += _("Session Control");
 	set_title(title.get_string());
@@ -360,7 +385,7 @@ NewSessionDialog::NewSessionDialog()
 	// add_button(Gtk::Stock::HELP, Gtk::RESPONSE_HELP);
 	add_button(Gtk::Stock::QUIT, Gtk::RESPONSE_CANCEL);
 	add_button(Gtk::Stock::CLEAR, Gtk::RESPONSE_NONE);
-	m_okbutton = add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+	m_okbutton = add_button(Gtk::Stock::NEW, Gtk::RESPONSE_OK);
 
 	recent_model = Gtk::TreeStore::create (recent_columns);
 	m_treeview->set_model (recent_model);
@@ -425,7 +450,6 @@ NewSessionDialog::NewSessionDialog()
 	m_treeview->signal_row_activated().connect (mem_fun (*this, &NewSessionDialog::recent_row_activated));
 	m_open_filechooser->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::file_chosen));
 	m_template->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::template_chosen));
-	m_name->grab_focus();
 	
 	page_set = Pages (0);
 }
@@ -523,7 +547,10 @@ NewSessionDialog::session_name() const
 	}	  
 	*/
 
-	if (on_newable_page()) {
+	int page = m_notebook->get_current_page();
+
+	if (page == 0 || page == 2) {
+		/* new or audio setup pages */
 	        return Glib::filename_from_utf8(m_name->get_text());
 	} else {
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
@@ -537,12 +564,13 @@ NewSessionDialog::session_name() const
 std::string
 NewSessionDialog::session_folder() const
 {
-	if (on_newable_page()) {
-		return Glib::filename_from_utf8(m_folder->get_filename());
+	if (m_notebook->get_current_page() == 0) {
+	        return Glib::filename_from_utf8(m_folder->get_filename());
 	} else {
+	       
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
-			std::string str = Glib::filename_from_utf8(m_open_filechooser->get_filename());
-			return Glib::path_get_dirname(str);
+			const string filename(Glib::filename_from_utf8(m_open_filechooser->get_filename()));
+			return Glib::path_get_dirname(filename);
 		}
 		Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
 		return (*i)[recent_columns.fullpath];
@@ -634,17 +662,60 @@ NewSessionDialog::connect_outs_to_physical() const
 	return m_connect_outputs_to_physical->get_active();
 }
 
-bool
-NewSessionDialog::on_newable_page() const
-{
-	return (m_notebook->get_current_page() == 0 ||
-		m_notebook->get_current_page() == 2);
-}
-
 int
 NewSessionDialog::get_current_page() const
 {
 	return m_notebook->get_current_page();
+}
+
+NewSessionDialog::Pages
+NewSessionDialog::which_page ()
+{
+	int num = m_notebook->get_current_page();
+
+	if (page_set == NewPage) {
+		return NewPage;
+
+	} else if (page_set == OpenPage) {
+		return OpenPage;
+
+	} else if (page_set == EnginePage) {
+		return EnginePage;
+
+	} else if (page_set == NewPage|OpenPage) {
+		switch (num) {
+		case 0:
+			return NewPage;
+		default:
+			return OpenPage;
+		}
+
+	} else if (page_set == NewPage|EnginePage) {
+		switch (num) {
+		case 0:
+			return NewPage;
+		default:
+			return EnginePage;
+		}
+
+	} else if (page_set == NewPage|EnginePage|OpenPage) {
+		switch (num) {
+		case 0:
+			return NewPage;
+		case 1:
+			return OpenPage;
+		default:
+			return EnginePage;
+		}
+
+	} else if (page_set == OpenPage|EnginePage) {
+		switch (num) {
+		case 0:
+			return OpenPage;
+		default:
+			return EnginePage;
+		}
+	}
 }
 
 void
@@ -678,8 +749,11 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		return;
 	}
 
-	if (!on_newable_page ()) {
+	switch (which_page()) {
+	case OpenPage:
+		on_new_session_page = false;
 		m_okbutton->set_label(_("Open"));
+		m_okbutton->set_image (*(manage (new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON))));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
@@ -687,14 +761,24 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		} else {
 			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
-	} else {
-		if (m_name->get_text() != "") {
-			set_response_sensitive (Gtk::RESPONSE_NONE, true);
-		}
+		break;
+
+	case EnginePage:
+		on_new_session_page = false;
+		m_okbutton->set_label(_("Open"));
+		m_okbutton->set_image (*(manage (new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON))));
+		set_response_sensitive (Gtk::RESPONSE_NONE, false);
+		set_response_sensitive (Gtk::RESPONSE_OK, true);
+		break;
+
+	default:
+		m_okbutton->set_label(_("New"));
+		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		m_okbutton->set_label(_("New"));
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		if (m_name->get_text() == "") {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
+			m_name->grab_focus();
 		} else {
 			set_response_sensitive (Gtk::RESPONSE_OK, true);
 		}
@@ -718,12 +802,21 @@ NewSessionDialog::treeview_selection_changed ()
 void
 NewSessionDialog::file_chosen ()
 {
-	if (on_newable_page ()) return;
+	switch (which_page()) {
+      case OpenPage:
+         break;
+	   case NewPage:
+	   case EnginePage:
+		   return;
+	}
 
 	m_treeview->get_selection()->unselect_all();
 
-	if (get_window())
-		get_window()->set_cursor(Gdk::Cursor(Gdk::WATCH));
+	Glib::RefPtr<Gdk::Window> win (get_window());
+
+	if (win) {
+		win->set_cursor(Gdk::Cursor(Gdk::WATCH));
+	}
 
 	if (!m_open_filechooser->get_filename().empty()) {
 	        set_response_sensitive (Gtk::RESPONSE_OK, true);

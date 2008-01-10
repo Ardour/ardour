@@ -18,6 +18,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -28,11 +29,13 @@
 #include <fcntl.h>
 
 #include <pbd/pthread_utils.h>
+#include <pbd/file_utils.h>
 
 #include <ardour/osc.h>
 #include <ardour/session.h>
 #include <ardour/route.h>
 #include <ardour/audio_track.h>
+#include <ardour/filesystem_paths.h>
 
 #include "i18n.h"
 
@@ -101,6 +104,24 @@ OSC::start ()
 #endif
 	
 	cerr << "OSC @ " << get_server_url () << endl;
+
+	sys::path url_file;
+
+	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+				"osc_url", url_file)) {
+		_osc_url_file = url_file.to_string();
+		ofstream urlfile;
+		urlfile.open(_osc_url_file.c_str(), ios::trunc);
+		if ( urlfile )
+		{
+			urlfile << get_server_url () << endl;
+			urlfile.close();
+		}
+		else
+		{  
+			cerr << "Couldn't write '" <<  _osc_url_file << "'" <<endl;
+		}
+	}
 	
 	register_callbacks();
 	
@@ -131,6 +152,9 @@ OSC::stop ()
 		unlink(_osc_unix_socket_path.c_str());
 	}
 	
+   if (!  _osc_url_file.empty() ) {
+      unlink(_osc_url_file.c_str() );
+   }
 	return 0;
 }
 

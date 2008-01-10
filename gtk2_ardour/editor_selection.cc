@@ -808,7 +808,7 @@ void
 Editor::select_all (Selection::Operation op)
 {
 	list<Selectable *> touched;
-	
+
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
@@ -991,7 +991,15 @@ Editor::select_all_selectables_using_time_selection ()
 		return;
 	}
 
-	for (TrackViewList::iterator iter = selection->tracks.begin(); iter != selection->tracks.end(); ++iter) {
+	TrackSelection* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackViewList::iterator iter = ts->begin(); iter != ts->end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -1014,7 +1022,16 @@ Editor::select_all_selectables_using_punch()
 		return;
 	}
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+
+	TrackSelection* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackViewList::iterator iter = ts->begin(); iter != ts->end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -1036,7 +1053,16 @@ Editor::select_all_selectables_using_loop()
 		return;
 	}
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+
+	TrackSelection* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackViewList::iterator iter = ts->begin(); iter != ts->end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -1069,7 +1095,16 @@ Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 		}
 	}
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+
+	TrackSelection* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackViewList::iterator iter = ts->begin(); iter != ts->end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -1100,7 +1135,16 @@ Editor::select_all_selectables_using_edit (bool after)
 		}
 	}
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+
+	TrackSelection* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackViewList::iterator iter = ts->begin(); iter != ts->end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -1120,8 +1164,16 @@ Editor::select_all_selectables_between (bool within)
 	if (!get_edit_op_range (start, end)) {
 		return;
 	}
-	
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+
+	TrackSelection* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackViewList::iterator iter = ts->begin(); iter != ts->end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -1241,3 +1293,28 @@ Editor::deselect_all ()
 {
 	selection->clear ();
 }
+
+Editor::ExclusiveRegionSelection::ExclusiveRegionSelection (Editor& ed, RegionView* rv)
+	: editor (ed),
+	  regionview (rv)
+{
+
+	if (!rv || ed.current_mouse_mode() != Editing::MouseObject) {
+		return;
+	}
+	
+	if (ed.get_selection().regions.empty() && !ed.get_selection().selected (rv)) {
+		ed.get_selection().set (rv, false);
+		remove = true;
+	} else {
+		remove = false;
+	}
+}
+
+Editor::ExclusiveRegionSelection::~ExclusiveRegionSelection ()
+{
+	if (remove) {
+		editor.get_selection().remove (regionview);
+	}
+}
+

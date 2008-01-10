@@ -47,12 +47,12 @@
 #endif
 
 #include <glibmm.h>
+#include <glibmm/thread.h>
 
 #include <midi++/mmc.h>
 #include <midi++/port.h>
-#include <pbd/error.h>
 
-#include <glibmm/thread.h>
+#include <pbd/error.h>
 #include <pbd/pathscanner.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/search_path.h>
@@ -178,7 +178,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
 	_worst_track_latency = 0;
-	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading|Deletion);
+	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
+
 	_slave = 0;
 	butler_mixdown_buffer = 0;
 	butler_gain_buffer = 0;
@@ -301,6 +302,7 @@ Session::second_stage_init (bool new_session)
 
 	// set_state() will call setup_raid_path(), but if it's a new session we need
 	// to call setup_raid_path() here.
+
 	if (state_tree) {
 		if (set_state (*state_tree->root())) {
 			return -1;
@@ -321,7 +323,7 @@ Session::second_stage_init (bool new_session)
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
 
- 	// set_auto_input (true);
+
 	_locations.changed.connect (mem_fun (this, &Session::locations_changed));
 	_locations.added.connect (mem_fun (this, &Session::locations_added));
 	setup_click_sounds (0);
@@ -359,6 +361,17 @@ Session::second_stage_init (bool new_session)
 		_end_location_is_free = true;
 	} else {
 		_end_location_is_free = false;
+	}
+
+	_state_of_the_state = Clean;
+
+	
+	DirtyChanged (); /* EMIT SIGNAL */
+
+	if (state_was_pending) {
+		save_state (_current_snapshot_name);
+		remove_pending_capture_state ();
+		state_was_pending = false;
 	}
 	
 	return 0;
@@ -1119,6 +1132,7 @@ Session::set_state (const XMLNode& node)
 	int ret = -1;
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
+
 	
 	if (node.name() != X_("Session")){
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
@@ -1307,14 +1321,6 @@ Session::set_state (const XMLNode& node)
 
 	StateReady (); /* EMIT SIGNAL */
 
-	_state_of_the_state = Clean;
-
-	if (state_was_pending) {
-		save_state (_current_snapshot_name);
-		remove_pending_capture_state ();
-		state_was_pending = false;
-	}
-
 	return 0;
 
   out:
@@ -1344,7 +1350,7 @@ Session::load_routes (const XMLNode& node)
 		new_routes.push_back (route);
 	}
 
-	add_routes (new_routes);
+	add_routes (new_routes, false);
 
 	return 0;
 }
@@ -2120,6 +2126,10 @@ Session::commit_reversible_command (Command *cmd)
 		current_trans->add_command (cmd);
 	}
 
+	if (current_trans->empty()) {
+		return;
+	}
+
 	gettimeofday (&now, 0);
 	current_trans->set_timestamp (now);
 
@@ -2363,6 +2373,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	int ret = -1;
 		
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
+
 	
 	/* step 1: consider deleting all unused playlists */
 
@@ -2602,6 +2613,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
   out:
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state & ~InCleanup);
+
 	return ret;
 }
 
@@ -2675,6 +2687,7 @@ Session::set_dirty ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Dirty);
 
+
 	if (!was_dirty) {
 		DirtyChanged(); /* EMIT SIGNAL */
 	}
@@ -2688,6 +2701,7 @@ Session::set_clean ()
 	
 	_state_of_the_state = Clean;
 
+
 	if (was_dirty) {
 		DirtyChanged(); /* EMIT SIGNAL */
 	}
@@ -2697,6 +2711,7 @@ void
 Session::set_deletion_in_progress ()
 {
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Deletion);
+
 }
 
 void

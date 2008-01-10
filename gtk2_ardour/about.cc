@@ -155,6 +155,7 @@ static const char* authors[] = {
 	N_("John Anderson"),
 	N_("Nedko Arnaudov"),
 	N_("Carl Hetherington"),
+	N_("Colin Fletcher"),
 	0
 };
 
@@ -200,7 +201,7 @@ About::About ()
 	}
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2007 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2008 Paul Davis\n"));
 	set_license (_("Ardour comes with ABSOLUTELY NO WARRANTY\n"
 		       "This is free software, and you are welcome to redistribute it\n"
 		       "under certain conditions; see the file COPYING for details.\n"));

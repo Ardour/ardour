@@ -155,6 +155,18 @@ static const gchar *_zoom_focus_strings[] = {
 	0
 };
 
+#ifdef USE_RUBBERBAND
+static const gchar *_rb_opt_strings[] = {
+	N_("Mushy"),
+	N_("Smooth"),
+	N_("Balanced multitimbral mixture"),
+	N_("Unpitched percussion with stable notes"),
+	N_("Crisp monophonic instrumental"),
+	N_("Unpitched solo percussion"),
+	0
+};
+#endif
+
 /* Soundfile  drag-n-drop */
 
 Gdk::Cursor* Editor::cross_hair_cursor = 0;
@@ -256,7 +268,10 @@ Editor::Editor ()
 	snap_mode_strings =  I18N (_snap_mode_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_point_strings = I18N (_edit_point_strings);
-
+#ifdef USE_RUBBERBAND
+	rb_opt_strings = I18N (_rb_opt_strings);
+#endif
+	
 	snap_threshold = 5.0;
 	bbt_beat_subdivision = 4;
 	canvas_width = 0;
@@ -4224,10 +4239,15 @@ struct EditorOrderTimeAxisSorter {
 };
 	
 void
-Editor::sort_track_selection ()
+Editor::sort_track_selection (TrackSelection* sel)
 {
 	EditorOrderTimeAxisSorter cmp;
-	selection->tracks.sort (cmp);
+
+	if (sel) {
+		sel->sort (cmp);
+	} else {
+		selection->tracks.sort (cmp);
+	}
 }
 
 nframes64_t

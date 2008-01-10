@@ -382,8 +382,11 @@ namespace ARDOUR {
 	struct TimeFXRequest : public InterThreadInfo {
 	    float time_fraction;
 	    float pitch_fraction;
+	    /* SoundTouch */
 	    bool  quick_seek; 
 	    bool  antialias;  
+	    /* RubberBand */
+	    int   opts; // really RubberBandStretcher::Options
 	};
 
 } // namespace ARDOUR

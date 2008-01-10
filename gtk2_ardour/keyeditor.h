@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <gtkmm/buttonbox.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/scrolledwindow.h>
@@ -39,6 +40,10 @@ class KeyEditor : public ArdourDialog
 	Gtk::TreeView view;
 	Glib::RefPtr<Gtk::TreeStore> model;
 	KeyEditorColumns columns;
+	Gtk::Button unbind_button;
+	Gtk::HButtonBox unbind_box;
+
+	void unbind ();
 
 	bool can_bind;
 	guint last_state;

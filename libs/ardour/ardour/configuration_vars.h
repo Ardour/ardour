@@ -152,6 +152,7 @@ CONFIG_VARIABLE (bool, sync_all_route_ordering, "sync-all-route-ordering", true)
 CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", true)
 CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
+CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 
 /* denormal management */
 

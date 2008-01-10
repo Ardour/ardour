@@ -548,7 +548,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 	Region::set_live_state (node, what_changed, false);
 
 	uint32_t old_flags = _flags;
-		
+
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 
@@ -599,17 +599,44 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			
 			_fade_in->clear ();
 			
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_in->set_state (*child)) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_in ();
-			} 
+			} else {
+				XMLNode* grandchild = child->child ("AutomationList");
+				if (grandchild) {
+					_fade_in->set_state (*grandchild);
+				}
+			}
+
+			if ((prop = child->property ("active")) != 0) {
+				if (prop->value() == "yes") {
+					set_fade_in_active (true);
+				} else {
+					set_fade_in_active (true);
+				}
+			}
 
 		} else if (child->name() == "FadeOut") {
 			
 			_fade_out->clear ();
 
-			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0 || _fade_out->set_state (*child)) {
+			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_out ();
-			} 
+			} else {
+				XMLNode* grandchild = child->child ("AutomationList");
+				if (grandchild) {
+					_fade_out->set_state (*grandchild);
+				} 
+			}
+
+			if ((prop = child->property ("active")) != 0) {
+				if (prop->value() == "yes") {
+					set_fade_out_active (true);
+				} else {
+					set_fade_out_active (false);
+				}
+			}
+		
 		} 
 	}
 

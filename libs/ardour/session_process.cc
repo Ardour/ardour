@@ -268,10 +268,10 @@ Session::process_with_events (nframes_t nframes)
 	nframes_t this_nframes;
 	nframes_t end_frame;
 	nframes_t offset;
+	bool session_needs_butler = false;
 	nframes_t stop_limit;
 	long           frames_moved;
-	bool           session_needs_butler = false;
-
+	
 	/* make sure the auditioner is silent */
 
 	if (auditioner) {
