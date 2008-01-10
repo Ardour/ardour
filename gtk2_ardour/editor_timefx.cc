@@ -17,6 +17,7 @@
 
 */
 
+#include <iostream>
 #include <cstdlib>
 #include <cmath>
 
@@ -27,6 +28,7 @@
 #include <pbd/memento_command.h>
 
 #include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/utils.h>
 
 #include "editor.h"
 #include "audio_time_axis.h"
@@ -42,8 +44,14 @@
 #include <ardour/stretch.h>
 #include <ardour/pitch.h>
 
+#ifdef USE_RUBBERBAND
+#include <rubberband/RubberBandStretcher.h>
+using namespace RubberBand;
+#endif
+
 #include "i18n.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
@@ -61,7 +69,9 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	  pitch_semitone_spinner (pitch_semitone_adjustment),
 	  pitch_cent_spinner (pitch_cent_adjustment),
 	  quick_button (_("Quick but Ugly")),
-	  antialias_button (_("Skip Anti-aliasing"))
+	  antialias_button (_("Skip Anti-aliasing")),
+	  stretch_opts_label (_("Contents:")),
+	  precise_button (_("Correct Onset"))
 {
 	set_modal (true);
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -79,7 +89,12 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 	get_vbox()->set_spacing (5);
 	get_vbox()->set_border_width (12);
+
+#ifdef USE_RUBBERBAND
+	get_vbox()->pack_start (opts_box, false, false);
+#else
 	get_vbox()->pack_start (upper_button_box, false, false);
+#endif
 	get_vbox()->pack_start (progress_bar);
 
 	if (pitching) {
@@ -107,17 +122,33 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 	} else {
 
+#ifdef USE_RUBBERBAND
+		opts_box.set_spacing (5);
+		opts_box.set_border_width (5);
+		vector<string> strings;
+
+		set_popdown_strings (stretch_opts_selector, editor.rb_opt_strings);
+		/* set default */
+		stretch_opts_selector.set_active_text (editor.rb_opt_strings[4]);
+
+		opts_box.pack_start (precise_button, false, false);
+		opts_box.pack_start (stretch_opts_label, false, false);
+		opts_box.pack_start (stretch_opts_selector, false, false);
+#else
 		upper_button_box.set_homogeneous (true);
 		upper_button_box.set_spacing (5);
 		upper_button_box.set_border_width (5);
+
 		upper_button_box.pack_start (quick_button, true, true);
 		upper_button_box.pack_start (antialias_button, true, true);
-	
+
+		quick_button.set_name (N_("TimeFXButton"));
+		antialias_button.set_name (N_("TimeFXButton"));
+#endif	
+
 		add_button (_("Stretch/Shrink"), Gtk::RESPONSE_ACCEPT);
 	}
 
-	quick_button.set_name (N_("TimeFXButton"));
-	antialias_button.set_name (N_("TimeFXButton"));
 	progress_bar.set_name (N_("TimeFXProgress"));
 
 	show_all_children ();
@@ -213,8 +244,70 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 
 	}
 
+#ifdef USE_RUBBERBAND
+	/* parse options */
+
+	RubberBandStretcher::Options options = 0;
+
+	bool realtime = false;
+	bool precise = false;
+	bool peaklock = true;
+	bool softening = true;
+	bool longwin = false;
+	bool shortwin = false;
+	string txt;
+
+	enum {
+		NoTransients,
+		BandLimitedTransients,
+		Transients
+	} transients = Transients;
+	
+	precise = current_timefx->precise_button.get_active();
+	
+	txt = current_timefx->stretch_opts_selector.get_active_text ();
+
+	if (txt == rb_opt_strings[0]) {
+		transients = NoTransients; peaklock = false; longwin = true; shortwin = false; 
+	} else if (txt == rb_opt_strings[1]) {
+		transients = NoTransients; peaklock = false; longwin = false; shortwin = false; 
+	} else if (txt == rb_opt_strings[2]) {
+		transients = NoTransients; peaklock = true; longwin = false; shortwin = false; 
+	} else if (txt == rb_opt_strings[3]) {
+		transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false; 
+	} else if (txt == rb_opt_strings[5]) {
+		transients = Transients; peaklock = false; longwin = false; shortwin = true; 
+	} else {
+		/* default/4 */
+
+		transients = Transients; peaklock = true; longwin = false; shortwin = false; 
+	};
+
+
+	if (realtime)    options |= RubberBandStretcher::OptionProcessRealTime;
+	if (precise)     options |= RubberBandStretcher::OptionStretchPrecise;
+	if (!peaklock)   options |= RubberBandStretcher::OptionPhaseIndependent;
+	if (!softening)  options |= RubberBandStretcher::OptionPhasePeakLocked;
+	if (longwin)     options |= RubberBandStretcher::OptionWindowLong;
+	if (shortwin)    options |= RubberBandStretcher::OptionWindowShort;
+		
+	switch (transients) {
+	case NoTransients:
+		options |= RubberBandStretcher::OptionTransientsSmooth;
+		break;
+	case BandLimitedTransients:
+		options |= RubberBandStretcher::OptionTransientsMixed;
+		break;
+	case Transients:
+		options |= RubberBandStretcher::OptionTransientsCrisp;
+		break;
+	}
+
+	current_timefx->request.opts = (int) options;
+#else
 	current_timefx->request.quick_seek = current_timefx->quick_button.get_active();
 	current_timefx->request.antialias = !current_timefx->antialias_button.get_active();
+#endif
 	current_timefx->request.progress = 0.0f;
 	current_timefx->request.done = false;
 	current_timefx->request.cancel = false;

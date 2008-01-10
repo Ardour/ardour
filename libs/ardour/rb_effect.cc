@@ -75,7 +75,7 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	int avail = 0;
 
 	RubberBandStretcher stretcher (session.frame_rate(), region->n_channels(),
-				       RubberBandStretcher::DefaultOptions,
+				       (RubberBandStretcher::Options) tsr.opts,
 				       tsr.time_fraction, tsr.pitch_fraction);
 	
 	stretcher.setExpectedInputDuration(region->length());

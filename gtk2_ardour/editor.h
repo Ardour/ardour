@@ -160,6 +160,10 @@ class Editor : public PublicEditor
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
 	void remove_a_region (boost::shared_ptr<ARDOUR::Region>);
 
+#ifdef USE_RUBBERBAND
+	std::vector<std::string> rb_opt_strings;
+#endif
+
 	/* option editor-access */
 
 	void set_show_waveforms (bool yn);
@@ -1836,11 +1840,20 @@ class Editor : public PublicEditor
 	    Gtk::SpinButton       pitch_cent_spinner;
 	    RegionSelection       regions;
 	    Gtk::ProgressBar      progress_bar;
+
+	    /* SoundTouch */
 	    Gtk::ToggleButton     quick_button;
 	    Gtk::ToggleButton     antialias_button;
+	    Gtk::HBox             upper_button_box;
+
+	    /* RubberBand */
+	    Gtk::ComboBoxText     stretch_opts_selector;
+	    Gtk::Label            stretch_opts_label;
+	    Gtk::ToggleButton     precise_button;
+	    Gtk::HBox             opts_box;
+
 	    Gtk::Button*          cancel_button;
 	    Gtk::Button*          action_button;
-	    Gtk::HBox             upper_button_box;
 	    Gtk::VBox             packer;
 	    int                   status;
 
