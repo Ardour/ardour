@@ -772,6 +772,8 @@ libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
                                  LIBPATH='#libs/vamp-sdk',
                                  CPPPATH='#libs/vamp-sdk/vamp')
 
+env['RUBBERBAND'] = False
+
 conf = Configure (env)
 if conf.CheckHeader ('fftw3.h'):
     env['RUBBERBAND'] = True
@@ -779,6 +781,12 @@ if conf.CheckHeader ('fftw3.h'):
                                            LIBPATH='#libs/rubberband',
                                            CPPPATH='#libs/rubberband',
                                            CCFLAGS='-DUSE_RUBBERBAND')
+else:
+    print "You do not have the FFTW single-precision development package installed."
+    print "This prevents Ardour from using the Rubberband library for timestretching"
+    print "and pitchshifting. It will fall back on SoundTouch for timestretch, and "
+    print "pitchshifting will not be available."
+
 conf.Finish()
 
 #
