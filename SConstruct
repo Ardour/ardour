@@ -775,6 +775,7 @@ libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
 env['RUBBERBAND'] = False
 
 conf = Configure (env)
+
 if conf.CheckHeader ('fftw3.h'):
     env['RUBBERBAND'] = True
     libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
