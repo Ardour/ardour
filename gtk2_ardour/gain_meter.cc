@@ -958,22 +958,6 @@ GainMeter::gain_automation_state_changed ()
 	}
 }
 
-void GainMeter::setup_atv_meter (int len)
-{
-	set_no_show_all();
-	regular_meter_width = 3;
-	set_width(Narrow, len);
-	hide_all();
-
-	//cerr << "Config->get_show_track_meters() = " << Config->get_show_track_meters() << endl;//DEBUG
-
-	if (Config->get_show_track_meters()) {
-		meter_packer.show_all();
-		hbox.show();		
-		show();
-	}
-}
-
 void GainMeter::clear_meters ()
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {

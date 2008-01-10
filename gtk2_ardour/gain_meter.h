@@ -74,7 +74,6 @@ class GainMeter : public Gtk::VBox
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
 
-	void setup_atv_meter (int);
 	void clear_meters ();
 
   private:
