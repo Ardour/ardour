@@ -772,13 +772,15 @@ libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
                                  LIBPATH='#libs/vamp-sdk',
                                  CPPPATH='#libs/vamp-sdk/vamp')
 
+conf = Configure (env)
 if conf.CheckHeader ('fftw3.h'):
     env['RUBBERBAND'] = True
     libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
                                            LIBPATH='#libs/rubberband',
                                            CPPPATH='#libs/rubberband',
                                            CCFLAGS='-DUSE_RUBBERBAND')
-    
+conf.Finish()
+
 #
 # Check for libusb
 
