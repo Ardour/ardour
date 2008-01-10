@@ -353,7 +353,12 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	GdkRectangle background;
 
 	top_of_meter = (gint) floor (pixheight * current_level);
+	
+	/* reset the height & origin of the rect that needs to show the pixbuf
+	 */
+
 	pixrect.height = top_of_meter;
+	pixrect.y = pixheight - top_of_meter;
 
 	background.x = 0;
 	background.y = 0;
@@ -365,13 +370,13 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 					      intersection.x, intersection.y,
 					      intersection.width, intersection.height);
 	}
-	
+
 	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		get_window()->draw_pixbuf(get_style()->get_fg_gc(get_state()), pixbuf, 
-					  intersection.x, pixheight - top_of_meter,
-					  intersection.x, pixheight - top_of_meter,
-					  intersection.width, pixrect.height,
+					  intersection.x, intersection.y,
+					  intersection.x, intersection.y,
+					  intersection.width, intersection.height,
 					  Gdk::RGB_DITHER_NONE, 0, 0);
 	}
 
