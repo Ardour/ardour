@@ -4788,7 +4788,7 @@ Editor::set_loop_from_region (bool play)
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 
-	ensure_entered_region_selected (true);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	if (selection->regions.empty()) {
 		info << _("cannot set loop: no region selected") << endmsg;
@@ -4840,6 +4840,31 @@ Editor::set_punch_from_edit_range ()
 	}
 
 	set_punch_range (start, end,  _("set punch range from edit range"));
+}
+
+void
+Editor::set_punch_from_region ()
+{
+	nframes64_t start = max_frames;
+	nframes64_t end = 0;
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		info << _("cannot set punch: no region selected") << endmsg;
+		return;
+	}
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		if ((*i)->region()->position() < start) {
+			start = (*i)->region()->position();
+		}
+		if ((*i)->region()->last_frame() + 1 > end) {
+			end = (*i)->region()->last_frame() + 1;
+		}
+	}
+
+	set_punch_range (start, end, _("set punch range from region"));
 }
 
 void

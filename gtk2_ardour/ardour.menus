@@ -87,6 +87,7 @@
 	       <menuitem action='set-loop-from-edit-range'/>
 	       <menuitem action='set-loop-from-region'/>
 	       <menuitem action='set-punch-from-edit-range'/>
+	       <menuitem action='set-punch-from-region'/>
        </menu>
        <menu name='Edit' action='Edit'>
                <menuitem action='undo'/>

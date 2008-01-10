@@ -1126,6 +1126,7 @@ class Editor : public PublicEditor
 	void add_location_from_selection ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
+	void set_punch_from_region ();
 
 	void set_loop_from_edit_range (bool play);
 	void set_loop_from_region (bool play);

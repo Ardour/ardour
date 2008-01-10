@@ -36,4 +36,4 @@ env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      vamphostsdk_files +
                                      glob.glob('vamp/*.h') + 
                                      glob.glob('vamp-sdk/*.h') + 
-                                     glob.glob('vamp-sdk/host-ext/*.h')))
+                                     glob.glob('vamp-sdk/hostext/*.h')))

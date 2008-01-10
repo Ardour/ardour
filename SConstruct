@@ -364,7 +364,7 @@ def distcopy (target, source, env):
     return p.close ()
 
 def tarballer (target, source, env):
-    cmd = 'tar -jcf ' + str (target[0]) +  ' ' + str(source[0]) + "  --exclude '*~'"
+    cmd = 'tar -jcf ' + str (target[0]) +  ' ' + str(source[0]) + "  --exclude '*~'" + " --exclude .svn --exclude '.svn/*'"
     print 'running ', cmd, ' ... '
     p = os.popen (cmd)
     return p.close ()
@@ -767,15 +767,18 @@ def prep_libcheck(topenv, libinfo):
 
 prep_libcheck(env, env)
 
-env['RUBBERBAND'] = True
-libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
-                                       LIBPATH='#libs/rubberband',
-                                       CPPPATH='#libs/rubberband',
-                                       CCFLAGS='-DUSE_RUBBERBAND')
-libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
-                                       LIBPATH='#libs/vamp-sdk',
-                                       CPPPATH='#libs/vamp-sdk/vamp')
 
+libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
+                                 LIBPATH='#libs/vamp-sdk',
+                                 CPPPATH='#libs/vamp-sdk/vamp')
+
+if conf.CheckHeader ('fftw3.h'):
+    env['RUBBERBAND'] = True
+    libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
+                                           LIBPATH='#libs/rubberband',
+                                           CPPPATH='#libs/rubberband',
+                                           CCFLAGS='-DUSE_RUBBERBAND')
+    
 #
 # Check for libusb
 
