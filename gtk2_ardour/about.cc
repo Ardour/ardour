@@ -152,6 +152,7 @@ static const char* authors[] = {
 	N_("John Anderson"),
 	N_("Nedko Arnaudov"),
 	N_("Carl Hetherington"),
+	N_("Colin Fletcher"),
 	0
 };
 
