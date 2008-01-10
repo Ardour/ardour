@@ -25,6 +25,9 @@ Default(librb)
 env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), librb))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-	[ 'SConscript'] + rubberband_files + glob.glob('src/*.h')))
+                                     [ 'SConscript'] +
+                                     rubberband_files +
+                                     glob.glob('rubberband/*.h') +
+                                     glob.glob('src/*.h')))
 
 
