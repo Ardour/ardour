@@ -1079,6 +1079,23 @@ static const struct {
     const char *name;
     guint   modifier;
 } modifiers[] = {
+
+#ifdef GTKOSX 
+
+	/* Command = Mod1
+	   Option/Alt = Mod5
+	*/
+
+	{ "Shift", GDK_SHIFT_MASK },
+	{ "Command", GDK_MOD1_MASK },
+	{ "Control", GDK_CONTROL_MASK },
+	{ "Option", GDK_MOD5_MASK },
+	{ "Command-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
+	{ "Command-Option", GDK_MOD1_MASK|GDK_MOD5_MASK },
+	{ "Shift-Option", GDK_SHIFT_MASK|GDK_MOD5_MASK },
+	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_MOD1_MASK },
+
+#else
 	{ "Shift", GDK_SHIFT_MASK },
 	{ "Control", GDK_CONTROL_MASK },
 	{ "Alt (Mod1)", GDK_MOD1_MASK },
@@ -1090,6 +1107,7 @@ static const struct {
 	{ "Mod3", GDK_MOD3_MASK },
 	{ "Mod4", GDK_MOD4_MASK },
 	{ "Mod5", GDK_MOD5_MASK },
+#endif
 	{ 0, 0 }
 };
 

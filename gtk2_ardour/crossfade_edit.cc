@@ -637,8 +637,14 @@ CrossfadeEditor::redraw ()
 
 	for (list<Point*>::iterator i = fade[current].points.begin(); i != fade[current].points.end(); ++i) {
 		fade[current].normative_curve.add ((*i)->x, (*i)->y);
-		fade[current].gain_curve.add (((*i)->x * len), (*i)->y);
+		double offset;
+		if (current==In)
+			offset = xfade->in()->start();
+		else
+			offset = xfade->out()->start()+xfade->out()->length()-xfade->length();
+		fade[current].gain_curve.add (((*i)->x * len) + offset, (*i)->y);
 	}
+
 
 	size_t npoints = (size_t) effective_width();
 	float vec[npoints];
@@ -1079,6 +1085,11 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 			waveview->property_amplitude_above_axis() = 2.0;
 			waveview->property_wave_color() = color;
 			
+			if (which==In)
+				waveview->property_region_start() = region->start();
+			else
+				waveview->property_region_start() = region->start()+region->length()-xfade->length();
+
 			waveview->lower_to_bottom();
 			fade[which].waves.push_back (waveview);
 		}
@@ -1110,13 +1121,13 @@ CrossfadeEditor::audition_both ()
 	nframes_t left_length;
 
 	if (preroll_button.get_active()) {
-		preroll = ARDOUR_UI::instance()->preroll_clock.current_duration ();
+		preroll = session.frame_rate() * 2;  //2 second hardcoded preroll for now
 	} else {
 		preroll = 0;
 	}
 
 	if (postroll_button.get_active()) {
-		postroll = ARDOUR_UI::instance()->postroll_clock.current_duration ();
+		postroll = session.frame_rate() * 2;  //2 second hardcoded postroll for now
 	} else {
 		postroll = 0;
 	}

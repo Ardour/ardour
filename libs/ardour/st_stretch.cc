@@ -35,7 +35,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace soundtouch;
 
-Stretch::Stretch (Session& s, TimeStretchRequest& req)
+Stretch::Stretch (Session& s, TimeFXRequest& req)
 	: Filter (s)
 	, tsr (req)
 {
@@ -45,7 +45,7 @@ Stretch::Stretch (Session& s, TimeStretchRequest& req)
 	   of opposite sign to the length change.  
 	*/
 
-	percentage = -tsr.fraction;
+	percentage = -tsr.time_fraction;
 
 	st.setSampleRate (s.frame_rate());
 	st.setChannels (1);
@@ -64,14 +64,8 @@ Stretch::~Stretch ()
 }
 
 int
-Stretch::run (boost::shared_ptr<Region> r)
+Stretch::run (boost::shared_ptr<Region> a_region)
 {
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
-
-	if (!region) {
-		return -1;
-	}
-
 	SourceList nsrcs;
 	nframes_t total_frames;
 	nframes_t done;
@@ -85,6 +79,8 @@ Stretch::run (boost::shared_ptr<Region> r)
 
 	tsr.progress = 0.0f;
 	tsr.done = false;
+	
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(a_region);
 
 	total_frames = region->length() * region->n_channels();
 	done = 0;
@@ -93,7 +89,7 @@ Stretch::run (boost::shared_ptr<Region> r)
 	   digits just to disambiguate close but not identical stretches.
 	*/
 	
-	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.fraction * 100.0f));
+	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.time_fraction * 100.0f));
 
 	/* create new sources */
 	
@@ -109,12 +105,9 @@ Stretch::run (boost::shared_ptr<Region> r)
 	try {
 		for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (nsrcs[i]);
+			boost::shared_ptr<AudioSource> asrc
+				= boost::dynamic_pointer_cast<AudioSource>(nsrcs[i]);
 
-			if (!afs) {
-				continue;
-			}
-			
 			nframes_t pos = 0;
 			nframes_t this_read = 0;
 
@@ -131,7 +124,7 @@ Stretch::run (boost::shared_ptr<Region> r)
 				*/
 
 				if ((this_read = region->master_read_at (buffer, buffer, gain_buffer, pos + region->position(), this_time)) != this_time) {
-					error << string_compose (_("tempoize: error reading data from %1"), afs->name()) << endmsg;
+					error << string_compose (_("tempoize: error reading data from %1"), asrc->name()) << endmsg;
 					goto out;
 				}
 			
@@ -143,8 +136,8 @@ Stretch::run (boost::shared_ptr<Region> r)
 				st.putSamples (buffer, this_read);
 			
 				while ((this_read = st.receiveSamples (buffer, bufsize)) > 0 && !tsr.cancel) {
-					if (afs->write (buffer, this_read) != this_read) {
-						error << string_compose (_("error writing tempo-adjusted data to %1"), afs->name()) << endmsg;
+					if (asrc->write (buffer, this_read) != this_read) {
+						error << string_compose (_("error writing tempo-adjusted data to %1"), asrc->name()) << endmsg;
 						goto out;
 					}
 				}
@@ -155,8 +148,8 @@ Stretch::run (boost::shared_ptr<Region> r)
 			}
 		
 			while (!tsr.cancel && (this_read = st.receiveSamples (buffer, bufsize)) > 0) {
-				if (afs->write (buffer, this_read) != this_read) {
-					error << string_compose (_("error writing tempo-adjusted data to %1"), afs->name()) << endmsg;
+				if (asrc->write (buffer, this_read) != this_read) {
+					error << string_compose (_("error writing tempo-adjusted data to %1"), asrc->name()) << endmsg;
 					goto out;
 				}
 			}
@@ -184,25 +177,20 @@ Stretch::run (boost::shared_ptr<Region> r)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin(); x != results.end(); ++x) {
-
-		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (*x);
-
-		assert (region != 0);
-
-		nframes64_t astart = region->ancestral_start();
-		nframes64_t alength = region->ancestral_length();
+		nframes64_t astart = (*x)->ancestral_start();
+		nframes64_t alength = (*x)->ancestral_length();
 		nframes_t start;
 		nframes_t length;
 
 		// note: tsr.fraction is a percentage of original length. 100 = no change, 
 		// 50 is half as long, 200 is twice as long, etc.
 
-		float stretch = region->stretch() * (tsr.fraction/100.0);
+		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
 
-		start = (nframes_t) floor (astart + ((astart - region->start()) / stretch));
+		start = (nframes_t) floor (astart + ((astart - (*x)->start()) / stretch));
 		length = (nframes_t) floor (alength / stretch);
 
-		region->set_ancestral_data (start, length, stretch);
+		(*x)->set_ancestral_data (start, length, stretch, (*x)->shift());
 	}
 
   out:

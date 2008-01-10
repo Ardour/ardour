@@ -95,6 +95,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	void partition (nframes_t start, nframes_t end, bool just_top_level);
 	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
 	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
+	void shuffle (boost::shared_ptr<Region>, int dir);
 
 	boost::shared_ptr<Playlist> cut  (list<AudioRange>&, bool result_is_hidden = true);
 	boost::shared_ptr<Playlist> copy (list<AudioRange>&, bool result_is_hidden = true);
@@ -102,9 +103,12 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 
 	RegionList*                regions_at (nframes_t frame);
 	RegionList*                regions_touched (nframes_t start, nframes_t end);
+	RegionList*                regions_to_read (nframes_t start, nframes_t end);
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (nframes_t frame);
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
+	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
+	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg);
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>));
@@ -124,6 +128,8 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	void freeze ();
 	void thaw ();
 
+	void raise_region (boost::shared_ptr<Region>);
+	void lower_region (boost::shared_ptr<Region>);
 	void raise_region_to_top (boost::shared_ptr<Region>);
 	void lower_region_to_bottom (boost::shared_ptr<Region>);
 
@@ -182,6 +188,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;
+	bool            _shuffling;
 	bool            _nudging;
 	uint32_t        _refcnt;
 	EditMode        _edit_mode;
@@ -227,12 +234,12 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 
 	void sort_regions ();
 
-	void possibly_splice ();
-	void possibly_splice_unlocked();
-	void core_splice ();
-	void splice_locked ();
-	void splice_unlocked ();
+	void possibly_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
+	void possibly_splice_unlocked(nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
 
+	void core_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
+	void splice_locked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
+	void splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
 
 	virtual void finalize_split_region (boost::shared_ptr<Region> original, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right) {}
 	
@@ -258,6 +265,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	boost::shared_ptr<Playlist> cut (nframes_t start, nframes_t cnt, bool result_is_hidden);
 	boost::shared_ptr<Playlist> copy (nframes_t start, nframes_t cnt, bool result_is_hidden);
 
+	int move_region_to_layer (layer_t, boost::shared_ptr<Region> r, int dir);
 	void relayer ();
 	
 	void unset_freeze_parent (Playlist*);

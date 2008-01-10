@@ -27,6 +27,7 @@ enum ItemType {
 	MarkerItem,
 	MarkerBarItem,
 	RangeMarkerBarItem,
+	CdMarkerBarItem,
 	TransportMarkerBarItem,
 	SelectionItem,
 	ControlPointItem,

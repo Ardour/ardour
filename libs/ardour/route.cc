@@ -80,10 +80,11 @@ Route::init ()
 	_muted = false;
 	_soloed = false;
 	_solo_safe = false;
+	_recordable = true;
+	_active = true;
 	_phase_invert = false;
 	_denormal_protection = false;
 	order_keys[strdup (N_("signal"))] = order_key_cnt++;
-	_active = true;
 	_silent = false;
 	_meter_point = MeterPostFader;
 	_initial_delay = 0;
@@ -1662,10 +1663,14 @@ Route::add_processor_from_xml (const XMLNode& node)
 			if ((prop = node.property ("type")) != 0) {
 
 				boost::shared_ptr<Processor> processor;
+				bool have_insert = false;
 
-				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || prop->value() == "vst") {
-
+				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+				    prop->value() == "vst" ||
+				    prop->value() == "audiounit") {
+					
 					processor.reset (new PluginInsert(_session, node));
+					have_insert = true;
 					
 				} else if (prop->value() == "port") {
 
@@ -1674,19 +1679,20 @@ Route::add_processor_from_xml (const XMLNode& node)
 				} else if (prop->value() == "send") {
 
 					processor.reset (new Send (_session, node));
+					have_insert = true;
 
 				} else {
 
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 				}
-
+				
 				add_processor (processor);
 				
 			} else {
 				error << _("Processor XML node has no type property") << endmsg;
 			}
 		}
-		
+
 		catch (failed_constructor &err) {
 			warning << _("processor could not be created. Ignored.") << endmsg;
 			return;
@@ -1732,7 +1738,8 @@ Route::_set_state (const XMLNode& node, bool call_base)
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
 		set_denormal_protection (prop->value()=="yes"?true:false, this);
 	}
-
+	
+	_active = true;
 	if ((prop = node.property (X_("active"))) != 0) {
 		set_active (prop->value() == "yes");
 	}

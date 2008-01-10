@@ -104,21 +104,23 @@ void
 MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 {
 	assert(src.type() == DataType::MIDI);
-	const MidiBuffer& msrc = (MidiBuffer&)src;
+	assert(&src != this);
 
-	assert(_capacity >= src.size());
+	const MidiBuffer& msrc = (MidiBuffer&)src;
+	
+	assert(_capacity >= msrc.size());
 
 	clear();
 	assert(_size == 0);
-
+	
 	// FIXME: slow
-	for (size_t i=0; i < src.size(); ++i) {
+	for (size_t i=0; i < msrc.size(); ++i) {
 		const MidiEvent& ev = msrc[i];
 		if (ev.time() >= offset && ev.time() < offset+nframes) {
-			//cerr << "MidiBuffer::read_from got event, " << ev.time() << endl;
+			//cout << "MidiBuffer::read_from got event, " << ev.time() << endl;
 			push_back(ev);
 		} else {
-			//cerr << "MidiBuffer event out of range, " << ev.time() << endl;
+			cerr << "MidiBuffer event out of range, " << ev.time() << endl;
 		}
 	}
 

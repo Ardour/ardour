@@ -40,27 +40,29 @@ using std::list;
 using std::vector;
 
 namespace ARDOUR {
-
+class Meter;
 class Tempo {
   public:
-	Tempo (double bpm)
-		: _beats_per_minute (bpm) {}
+	Tempo (double bpm, double type=4.0) // defaulting to quarter note
+		: _beats_per_minute (bpm), _note_type(type) {} 
 	Tempo (const Tempo& other) {
 		_beats_per_minute = other._beats_per_minute;
+		_note_type = other._note_type;
 	}
 	void operator= (const Tempo& other) {
 		if (&other != this) {
 			_beats_per_minute = other._beats_per_minute;
+			_note_type = other._note_type;
 		}
 	}
 
-	double beats_per_minute () const { return _beats_per_minute; }
-	double frames_per_beat (nframes_t sr) const {
-		return  ((60.0 * sr) / _beats_per_minute);
-	}
+	double beats_per_minute () const { return _beats_per_minute;}
+	double note_type () const { return _note_type;}
+	double frames_per_beat (nframes_t sr, const Meter& meter) const;
 
   protected:
 	double _beats_per_minute;
+	double _note_type;
 };
 
 class Meter {
@@ -149,8 +151,8 @@ class MeterSection : public MetricSection, public Meter {
 
 class TempoSection : public MetricSection, public Tempo {
   public:
-	TempoSection (const BBT_Time& start, double qpm)
-		: MetricSection (start), Tempo (qpm) {}
+	TempoSection (const BBT_Time& start, double qpm, double note_type)
+		: MetricSection (start), Tempo (qpm, note_type) {}
 	TempoSection (const XMLNode&);
 
 	static const string xml_state_node_name;

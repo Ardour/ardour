@@ -145,6 +145,8 @@ class LocationUI : public ArdourDialog
 
 	void set_session (ARDOUR::Session *);
 
+	void on_show();
+
   private:
 	ARDOUR::LocationStack* locations;
         

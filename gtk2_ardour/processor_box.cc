@@ -104,7 +104,6 @@ ProcessorBox::ProcessorBox (Placement pcmnt, Session& sess, boost::shared_ptr<Ro
 	processor_drag_in_progress = false;
 	no_processor_redisplay = false;
 	ignore_delete = false;
-	ab_direction = true;
 
 	model = ListStore::create(columns);
 

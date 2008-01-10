@@ -41,6 +41,7 @@ using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Glib;
 
 
 void
@@ -70,7 +71,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 			tv = new MidiTimeAxisView (*this, *session, route, track_canvas);
 		else
 			throw unknown_type();
-		
+		//cerr << "Editor::handle_new_route() called on " << route->name() << endl;//DEBUG
 #if 0
 		if (route_display_model->children().size() == 0) {
 			
@@ -155,41 +156,9 @@ Editor::remove_route (TimeAxisView *tv)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::remove_route), tv));
 
+	TrackViewList::iterator i;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
-
-	/* find the track view that's being deleted */
-	TrackViewList::iterator i = find (track_views.begin(), track_views.end(), tv);
-
-	/* set up `nearby' to be a suitable nearby track to select once
-	   this one has gone */
-	TrackViewList::iterator nearby = track_views.end ();
-	if (i != track_views.end()) {
-
-		nearby = i;
-
-		if (nearby != track_views.begin()) {
-			/* go to the previous track if there is one */
-			nearby--;
-		} else {
-			/* otherwise the next track */
-			nearby++;
-		}
-
-		/* and remove the track view that's going */
-		track_views.erase (i);
-
-		if (nearby != track_views.end()) {
-			/* we've got another track to select, so select it */
-			set_selected_track (**nearby, Selection::Set);
-		} else {
-			/* we've got no other track, so the editor mixer will disappear */
-			editor_mixer_button.set_active (false);
-			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
-			editor_mixer_button.set_sensitive (false);
-			editor_list_button.set_sensitive (false);
-		}
-	}
 
 	/* Decrement old order keys for tracks `above' the one that is being removed */
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
@@ -204,6 +173,23 @@ Editor::remove_route (TimeAxisView *tv)
 			route_display_model->erase (ri);
 			break;
 		}
+	}
+
+	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
+		track_views.erase (i);
+	}
+
+	/* since the editor mixer goes away when you remove a route, set the
+	 * button to inactive and untick the menu option
+	 */
+
+	editor_mixer_button.set_active(false);
+	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+
+	/* and disable if all tracks and/or routes are gone */
+
+	if (track_views.size() == 0) {
+		editor_mixer_button.set_sensitive(false);
 	}
 }
 
@@ -608,4 +594,22 @@ Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
 	session->set_remote_control_ids();
 	redisplay_route_list ();
+}
+
+
+void  
+Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
+						int x, int y, 
+						const SelectionData& data,
+						guint info, guint time)
+{
+	cerr << "RouteLD::dddr target = " << data.get_target() << endl;
+	
+	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
+		cerr << "Delete drag data drop to treeview\n";
+		route_list_display.on_drag_data_received (context, x, y, data, info, time);
+		return;
+	}
+	cerr << "some other kind of drag\n";
+	context->drag_finish (true, false, time);
 }

@@ -40,6 +40,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/stretch.h>
+#include <ardour/pitch.h>
 
 #include "i18n.h"
 
@@ -49,50 +50,88 @@ using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-Editor::TimeStretchDialog::TimeStretchDialog (Editor& e)
-	: ArdourDialog ("time stretch dialog"),
+Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
+	: ArdourDialog (X_("time fx dialog")),
 	  editor (e),
+	  pitching (pitch),
+	  pitch_octave_adjustment (0.0, 0.0, 4.0, 1, 2.0),
+	  pitch_semitone_adjustment (0.0, 0.0, 12.0, 1.0, 4.0),
+	  pitch_cent_adjustment (0.0, 0.0, 150.0, 5.0, 15.0),
+	  pitch_octave_spinner (pitch_octave_adjustment),
+	  pitch_semitone_spinner (pitch_semitone_adjustment),
+	  pitch_cent_spinner (pitch_cent_adjustment),
 	  quick_button (_("Quick but Ugly")),
 	  antialias_button (_("Skip Anti-aliasing"))
 {
 	set_modal (true);
 	set_position (Gtk::WIN_POS_MOUSE);
-	set_name (N_("TimeStretchDialog"));
+	set_name (N_("TimeFXDialog"));
 
 	WindowTitle title(Glib::get_application_name());
-	title += _("Timestretch");
+	if (pitching) {
+		title += _("Pitch Shift");
+	} else {
+		title += _("Time Stretch");
+	}
 	set_title(title.get_string());
 
-	get_vbox()->set_spacing (5);
-	get_vbox()->set_border_width (5);
-	get_vbox()->pack_start (upper_button_box);
-	get_vbox()->pack_start (progress_bar);
-
-	upper_button_box.set_homogeneous (true);
-	upper_button_box.set_spacing (5);
-	upper_button_box.set_border_width (5);
-	upper_button_box.pack_start (quick_button, true, true);
-	upper_button_box.pack_start (antialias_button, true, true);
-
-	action_button = add_button (_("Stretch/Shrink it"), Gtk::RESPONSE_ACCEPT);
 	cancel_button = add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
 
-	quick_button.set_name (N_("TimeStretchButton"));
-	antialias_button.set_name (N_("TimeStretchButton"));
-	progress_bar.set_name (N_("TimeStretchProgress"));
+	get_vbox()->set_spacing (5);
+	get_vbox()->set_border_width (12);
+	get_vbox()->pack_start (upper_button_box, false, false);
+	get_vbox()->pack_start (progress_bar);
+
+	if (pitching) {
+
+		upper_button_box.set_spacing (5);
+		upper_button_box.set_border_width (5);
+		
+		Gtk::Label* l;
+
+		l = manage (new Label (_("Octaves")));
+		upper_button_box.pack_start (*l, false, false);
+		upper_button_box.pack_start (pitch_octave_spinner, false, false);
+
+		l = manage (new Label (_("Semitones (12TET)")));
+		upper_button_box.pack_start (*l, false, false);
+		upper_button_box.pack_start (pitch_semitone_spinner, false, false);
+
+		l = manage (new Label (_("Cents")));
+		upper_button_box.pack_start (*l, false, false);
+		upper_button_box.pack_start (pitch_cent_spinner, false, false);
+
+		pitch_cent_spinner.set_digits (1);
+
+		add_button (_("Shift"), Gtk::RESPONSE_ACCEPT);
+
+	} else {
+
+		upper_button_box.set_homogeneous (true);
+		upper_button_box.set_spacing (5);
+		upper_button_box.set_border_width (5);
+		upper_button_box.pack_start (quick_button, true, true);
+		upper_button_box.pack_start (antialias_button, true, true);
+	
+		add_button (_("Stretch/Shrink"), Gtk::RESPONSE_ACCEPT);
+	}
+
+	quick_button.set_name (N_("TimeFXButton"));
+	antialias_button.set_name (N_("TimeFXButton"));
+	progress_bar.set_name (N_("TimeFXProgress"));
 
 	show_all_children ();
 }
 
 gint
-Editor::TimeStretchDialog::update_progress ()
+Editor::TimeFXDialog::update_progress ()
 {
 	progress_bar.set_fraction (request.progress);
 	return !request.done;
 }
 
 void
-Editor::TimeStretchDialog::cancel_timestretch_in_progress ()
+Editor::TimeFXDialog::cancel_in_progress ()
 {
 	status = -2;
 	request.cancel = true;
@@ -100,7 +139,7 @@ Editor::TimeStretchDialog::cancel_timestretch_in_progress ()
 }
 
 gint
-Editor::TimeStretchDialog::delete_timestretch_in_progress (GdkEventAny* ev)
+Editor::TimeFXDialog::delete_in_progress (GdkEventAny* ev)
 {
 	status = -2;
 	request.cancel = true;
@@ -109,72 +148,121 @@ Editor::TimeStretchDialog::delete_timestretch_in_progress (GdkEventAny* ev)
 }
 
 int
-Editor::run_timestretch (RegionSelection& regions, float fraction)
+Editor::time_stretch (RegionSelection& regions, float fraction)
 {
-	if (current_timestretch == 0) {
-		current_timestretch = new TimeStretchDialog (*this);
+	return time_fx (regions, fraction, false);
+}
+
+int
+Editor::pitch_shift (RegionSelection& regions, float fraction)
+{
+	return time_fx (regions, fraction, true);
+}
+
+int
+Editor::time_fx (RegionSelection& regions, float val, bool pitching)
+{
+	if (current_timefx != 0) {
+		delete current_timefx;
 	}
 
-	current_timestretch->progress_bar.set_fraction (0.0f);
+	current_timefx = new TimeFXDialog (*this, pitching);
 
-	switch (current_timestretch->run ()) {
+	current_timefx->progress_bar.set_fraction (0.0f);
+
+	switch (current_timefx->run ()) {
 	case RESPONSE_ACCEPT:
 		break;
 	default:
-		current_timestretch->hide ();
+		current_timefx->hide ();
 		return 1;
 	}
 
-	current_timestretch->status = 0;
-	current_timestretch->regions = regions;
-	current_timestretch->request.fraction = fraction;
-	current_timestretch->request.quick_seek = current_timestretch->quick_button.get_active();
-	current_timestretch->request.antialias = !current_timestretch->antialias_button.get_active();
-	current_timestretch->request.progress = 0.0f;
-	current_timestretch->request.done = false;
-	current_timestretch->request.cancel = false;
+	current_timefx->status = 0;
+	current_timefx->regions = regions;
+
+	if (pitching) {
+
+		float cents = current_timefx->pitch_octave_adjustment.get_value() * 1200.0;
+		cents += current_timefx->pitch_semitone_adjustment.get_value() * 100.0;
+		cents += current_timefx->pitch_cent_adjustment.get_value();
+
+		if (cents == 0.0) {
+			// user didn't change anything
+			current_timefx->hide ();
+			return 0;
+		}
+
+		// we now have the pitch shift in cents. divide by 1200 to get octaves
+		// then multiply by 2.0 because 1 octave == doubling the frequency
+		
+		cents /= 1200.0;
+		cents /= 2.0;
+
+		// add 1.0 to convert to RB scale
+
+		cents += 1.0;
+
+		current_timefx->request.time_fraction = 1.0;
+		current_timefx->request.pitch_fraction = cents;
+
+	} else {
+
+		current_timefx->request.time_fraction = val;
+		current_timefx->request.pitch_fraction = 1.0;
+
+	}
+
+	current_timefx->request.quick_seek = current_timefx->quick_button.get_active();
+	current_timefx->request.antialias = !current_timefx->antialias_button.get_active();
+	current_timefx->request.progress = 0.0f;
+	current_timefx->request.done = false;
+	current_timefx->request.cancel = false;
 	
 	/* re-connect the cancel button and delete events */
 	
-	current_timestretch->first_cancel.disconnect();
-	current_timestretch->first_delete.disconnect();
+	current_timefx->first_cancel.disconnect();
+	current_timefx->first_delete.disconnect();
 	
-	current_timestretch->first_cancel = current_timestretch->cancel_button->signal_clicked().connect 
-		(mem_fun (current_timestretch, &TimeStretchDialog::cancel_timestretch_in_progress));
-	current_timestretch->first_delete = current_timestretch->signal_delete_event().connect 
-		(mem_fun (current_timestretch, &TimeStretchDialog::delete_timestretch_in_progress));
+	current_timefx->first_cancel = current_timefx->cancel_button->signal_clicked().connect 
+		(mem_fun (current_timefx, &TimeFXDialog::cancel_in_progress));
+	current_timefx->first_delete = current_timefx->signal_delete_event().connect 
+		(mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
 
-	if (pthread_create_and_store ("timestretch", &current_timestretch->request.thread, 0, timestretch_thread, current_timestretch)) {
-		current_timestretch->hide ();
-		error << _("timestretch cannot be started - thread creation error") << endmsg;
+	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, 0, timefx_thread, current_timefx)) {
+		current_timefx->hide ();
+		error << _("timefx cannot be started - thread creation error") << endmsg;
 		return -1;
 	}
 
-	pthread_detach (current_timestretch->request.thread);
+	pthread_detach (current_timefx->request.thread);
 
-	sigc::connection c = Glib::signal_timeout().connect (mem_fun (current_timestretch, &TimeStretchDialog::update_progress), 100);
+	sigc::connection c = Glib::signal_timeout().connect (mem_fun (current_timefx, &TimeFXDialog::update_progress), 100);
 
-	while (!current_timestretch->request.done) {
+	while (!current_timefx->request.done) {
 		gtk_main_iteration ();
 	}
 
 	c.disconnect ();
 	
-	current_timestretch->hide ();
-	return current_timestretch->status;
+	current_timefx->hide ();
+	return current_timefx->status;
 }
 
 void
-Editor::do_timestretch (TimeStretchDialog& dialog)
+Editor::do_timefx (TimeFXDialog& dialog)
 {
 	Track*    t;
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<Region>   new_region;
-
+	bool in_command = false;
+	
 	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
-		if (!arv)
+
+		if (!arv) {
 			continue;
+		}
 
 		boost::shared_ptr<AudioRegion> region (arv->audio_region());
 		TimeAxisView* tv = &(arv->get_time_axis_view());
@@ -205,16 +293,28 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 			return;
 		}
 
-		Stretch stretch (*session, dialog.request);
+		Filter* fx;
 
-		if (stretch.run (region)) {
+		if (dialog.pitching) {
+			fx = new Pitch (*session, dialog.request);
+		} else {
+			fx = new Stretch (*session, dialog.request);
+		}
+
+		if (fx->run (region)) {
 			dialog.status = -1;
 			dialog.request.done = true;
+			delete fx;
 			return;
 		}
 
-		if (!stretch.results.empty()) {
-			new_region = stretch.results.front();
+		if (!fx->results.empty()) {
+			new_region = fx->results.front();
+
+			if (!in_command) {
+				begin_reversible_command (dialog.pitching ? _("pitch shift") : _("time stretch"));
+				in_command = true;
+			}
 
 			XMLNode &before = playlist->get_state();
 			playlist->replace_region (region, new_region, region->position());
@@ -223,6 +323,11 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 		}
 
 		i = tmp;
+		delete fx;
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
 	}
 
 	dialog.status = 0;
@@ -230,15 +335,15 @@ Editor::do_timestretch (TimeStretchDialog& dialog)
 }
 
 void*
-Editor::timestretch_thread (void *arg)
+Editor::timefx_thread (void *arg)
 {
 	PBD::ThreadCreated (pthread_self(), X_("TimeFX"));
 
-	TimeStretchDialog* tsd = static_cast<TimeStretchDialog*>(arg);
+	TimeFXDialog* tsd = static_cast<TimeFXDialog*>(arg);
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
-	tsd->editor.do_timestretch (*tsd);
+	tsd->editor.do_timefx (*tsd);
 
 	return 0;
 }

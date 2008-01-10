@@ -46,10 +46,27 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	typedef vector<uint32_t> State;
 	typedef uint32_t ModifierMask;
 
-	static uint32_t Control;
-	static uint32_t Shift;
-	static uint32_t Alt;
-	static uint32_t Meta;
+	static uint32_t PrimaryModifier;
+	static uint32_t SecondaryModifier;
+	static uint32_t TertiaryModifier;
+	static uint32_t CopyModifier;
+	static uint32_t RangeSelectModifier;
+
+	static void set_primary_modifier (uint32_t newval) {
+		set_modifier (newval, PrimaryModifier);
+	}
+	static void set_secondary_modifier (uint32_t newval) {
+		set_modifier (newval, SecondaryModifier);
+	}
+	static void set_tertiary_modifier (uint32_t newval) {
+		set_modifier (newval, TertiaryModifier);
+	}
+	static void set_copy_modifier (uint32_t newval) {
+		set_modifier (newval, CopyModifier);
+	}
+	static void set_range_select_modifier (uint32_t newval) {
+		set_modifier (newval, RangeSelectModifier);
+	}
 
 	bool key_is_down (uint32_t keyval);
 
@@ -68,8 +85,6 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static Selection::Operation selection_type (guint state);
 
 	static bool no_modifiers_active (guint state);
-
-	static void set_meta_modifier (guint);
 
 	static void set_snap_modifier (guint);
 	static ModifierMask snap_modifier () { return ModifierMask (snap_mod); }
@@ -109,6 +124,8 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 
 	static gint _snooper (GtkWidget*, GdkEventKey*, gpointer);
 	gint snooper (GtkWidget*, GdkEventKey*);
+
+	static void set_modifier (uint32_t newval, uint32_t& variable);
 
 	static bool _some_magic_widget_has_focus;
 };

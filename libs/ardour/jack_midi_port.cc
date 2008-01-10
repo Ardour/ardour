@@ -71,8 +71,8 @@ JackMidiPort::cycle_start (nframes_t nframes, nframes_t offset_ignored_but_proba
 
 	assert(_buffer->size() == event_count);
 
-	if (_buffer->size() > 0)
-		cerr << "MIDIPort got " << event_count << " events." << endl;
+	/*if (_buffer->size() > 0)
+		cerr << "JackMIDIPort got " << event_count << " events (buf " << _buffer << ")" << endl;*/
 }
 
 void

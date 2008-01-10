@@ -606,17 +606,10 @@ PluginInsert::get_state(void)
 XMLNode&
 PluginInsert::state (bool full)
 {
-	char buf[256];
 	XMLNode& node = Processor::state (full);
 
 	node.add_property ("type", _plugins[0]->state_node_name());
-	snprintf(buf, sizeof(buf), "%s", _plugins[0]->name());
-	node.add_property("id", string(buf));
-	if (_plugins[0]->state_node_name() == "ladspa") {
-		char buf[32];
-		snprintf (buf, sizeof (buf), "%ld", _plugins[0]->get_info()->unique_id); 
-		node.add_property("unique-id", string(buf));
-	}
+	node.add_property("unique-id", _plugins[0]->unique_id());
 	node.add_property("count", string_compose("%1", _plugins.size()));
 	node.add_child_nocopy (_plugins[0]->get_state());
 
@@ -648,7 +641,6 @@ PluginInsert::set_state(const XMLNode& node)
 	XMLNodeIterator niter;
 	XMLPropertyList plist;
 	const XMLProperty *prop;
-	long unique = 0;
 	ARDOUR::PluginType type;
 
 	if ((prop = node.property ("type")) == 0) {
@@ -666,24 +658,16 @@ PluginInsert::set_state(const XMLNode& node)
 		      << endmsg;
 		return -1;
 	}
-
+	
 	prop = node.property ("unique-id");
-	if (prop != 0) {
-		unique = atol(prop->value().c_str());
-	}
-
-	if ((prop = node.property ("id")) == 0) {
-		error << _("XML node describing insert is missing the `id' field") << endmsg;
- 		return -1;
+	if (prop == 0) {
+		error << _("Plugin has no unique ID field") << endmsg;
+		return -1;
 	}
 
 	boost::shared_ptr<Plugin> plugin;
 	
-	if (unique != 0) {
-		plugin = find_plugin (_session, "", unique, type);	
-	} else {
-		plugin = find_plugin (_session, prop->value(), 0, type);	
-	}
+	plugin = find_plugin (_session, prop->value(), type);	
 
 	if (plugin == 0) {
 		error << string_compose(_("Found a reference to a plugin (\"%1\") that is unknown.\n"

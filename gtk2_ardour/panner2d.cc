@@ -534,7 +534,7 @@ Panner2d::on_button_release_event (GdkEventButton *ev)
 		y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
 
-		if (drag_is_puck && (Keyboard::modifier_state_contains (state, Keyboard::Shift))) {
+		if (drag_is_puck && (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier))) {
 			
 			for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
 				Target* puck = i->second;

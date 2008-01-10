@@ -1,7 +1,7 @@
 /*
     Copyright (C) 2001-2006 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
+    This program is free software; you can r>edistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
@@ -411,8 +411,8 @@ void
 AudioRegionView::set_y_position_and_height (double y, double h)
 {
 	//RegionView::set_y_position_and_height(y, h - 1);
-	RegionView::set_height (height);
-
+	RegionView::set_height (h);
+	
 	const uint32_t wcnt = waves.size();
 
 	_y_position = y;
@@ -1204,4 +1204,36 @@ AudioRegionView::color_handler ()
 	//case cGainLine:
 	envelope_active_changed();
 
+}
+
+void
+AudioRegionView::set_frame_color ()
+{
+	if (!frame) {
+		return;
+	}
+
+	if (_region->opaque()) {
+		fill_opacity = 130;
+	} else {
+		fill_opacity = 0;
+	}
+
+	uint32_t r,g,b,a;
+	
+	if (_selected && should_show_selection) {
+		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+
+		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
+		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+			(*w)->property_wave_color() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);// Lets still use the theme's opacity value if Opaque is not set
+		}
+	} else {
+		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
+		frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+
+		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+			(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+		}
+	}
 }

@@ -46,8 +46,8 @@
 
 #include <pbd/stateful.h>
 #include <ardour/session.h>
-#include <ardour/stretch.h>
 #include <ardour/tempo.h>
+#include <ardour/stretch.h>
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
 
@@ -136,6 +136,8 @@ class Editor : public PublicEditor
 		return (nframes_t) floor (canvas_width * frames_per_unit);
 	}
 
+	void cycle_snap_mode ();
+	void cycle_snap_choice ();
 	void set_snap_to (Editing::SnapType);
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
@@ -177,6 +179,7 @@ class Editor : public PublicEditor
 	/* things that need to be public to be used in the main menubar */
 
 	void new_region_from_selection ();
+	void separate_regions_between (const TimeSelection&);
 	void separate_region_from_selection ();
 	void separate_regions_using_location (ARDOUR::Location&);
 	void toggle_playback (bool with_abort);
@@ -222,6 +225,8 @@ class Editor : public PublicEditor
 		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
 	}
 
+	void flush_canvas ();
+
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
@@ -234,6 +239,7 @@ class Editor : public PublicEditor
 	void select_all (Selection::Operation op);
 	void invert_selection_in_selected_tracks ();
 	void invert_selection ();
+	void deselect_all ();
 
 	/* tempo */
 
@@ -260,7 +266,7 @@ class Editor : public PublicEditor
 
 	void      set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	gdouble   get_current_zoom () { return frames_per_unit; }
+	double   get_current_zoom () const { return frames_per_unit; }
 
 	void temporal_zoom_step (bool coarser);
 
@@ -268,8 +274,6 @@ class Editor : public PublicEditor
 
 	PlaylistSelector& playlist_selector() const;
 	void route_name_changed (TimeAxisView *);
-	gdouble        frames_per_unit;
-	nframes_t leftmost_frame;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
 	void new_playlists (TimeAxisView* v);
@@ -330,6 +334,8 @@ class Editor : public PublicEditor
 	/* layers */
 	void set_layer_model (ARDOUR::LayerModel);
 	void update_layering_model ();
+	
+	void toggle_link_region_and_track_selection ();
 
 	/* redirect shared ops menu. caller must free returned menu */
 
@@ -354,10 +360,12 @@ class Editor : public PublicEditor
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes_t, double);
 
-	nframes64_t get_preferred_edit_position ();
+	nframes64_t get_preferred_edit_position (bool ignore_playhead = false);
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
+
+	void toggle_meter_updating();
 
   protected:
 	void map_transport_state ();
@@ -377,9 +385,24 @@ class Editor : public PublicEditor
  
 	PlaylistSelector* _playlist_selector;
 
-	void          set_frames_per_unit (double);
+	struct VisualState {
+	    double    frames_per_unit;
+	    nframes_t leftmost_frame;
+	    Editing::ZoomFocus zoom_focus;
+	};
+	
+	VisualState last_visual_state;
 
-	Editing::MouseMode    mouse_mode;
+	nframes_t   leftmost_frame;
+	double      frames_per_unit;
+	Editing::ZoomFocus zoom_focus;
+
+	void use_visual_state (const VisualState&);
+	void set_frames_per_unit (double);
+	void swap_visual_state ();
+	void post_zoom ();
+
+	Editing::MouseMode mouse_mode;
 	Editing::MidiEditMode midi_edit_mode;
 
 	int  post_maximal_editor_width;
@@ -406,6 +429,7 @@ class Editor : public PublicEditor
 	void location_gone (ARDOUR::Location *);
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
+	void goto_nth_marker (int nth);
 
 	uint32_t location_marker_color;
 	uint32_t location_range_color;
@@ -438,7 +462,9 @@ class Editor : public PublicEditor
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_marker (nframes_t where);
+	void mouse_add_new_marker (nframes_t where, bool is_cd=false);
+	void update_cd_marker_display ();
+	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 
 	TimeAxisView*      clicked_axisview;
 	RouteTimeAxisView* clicked_routeview;
@@ -447,8 +473,7 @@ class Editor : public PublicEditor
          * editor_canvas_events.cc
          */
 	RegionView*        clicked_regionview;
-	
-	RegionView*        latest_regionview;
+	RegionSelection    latest_regionviews;
 	uint32_t           clicked_selection;
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
@@ -473,11 +498,12 @@ class Editor : public PublicEditor
 
 	void catch_vanishing_regionview (RegionView *);
 
-	bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
-	bool set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void set_selected_track_as_side_effect (bool force = false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
@@ -539,6 +565,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group      *marker_group;
 	ArdourCanvas::Group      *range_marker_group;
 	ArdourCanvas::Group      *transport_marker_group;
+	ArdourCanvas::Group*      cd_marker_group;
 	
 	enum {
 		ruler_metric_smpte = 0,
@@ -551,15 +578,17 @@ class Editor : public PublicEditor
 		ruler_time_marker = 6,
 		ruler_time_range_marker = 7,
 		ruler_time_transport_marker = 8,
+		ruler_time_cd_marker = 9,
 	};
 
 	static GtkCustomMetric ruler_metrics[4];
-	bool                   ruler_shown[9];
+	bool                   ruler_shown[10];
 	bool                   no_ruler_shown_update;
 	
 	gint ruler_button_press (GdkEventButton*);
 	gint ruler_button_release (GdkEventButton*);
 	gint ruler_mouse_motion (GdkEventMotion*);
+	bool ruler_scroll (GdkEventScroll* event);
 
 	gint ruler_pressed_button;
 	Gtk::Widget * ruler_grabbed_widget;
@@ -655,7 +684,8 @@ class Editor : public PublicEditor
 	ArdourCanvas::SimpleRect* marker_bar;
 	ArdourCanvas::SimpleRect* range_marker_bar;
 	ArdourCanvas::SimpleRect* transport_marker_bar;
-
+	ArdourCanvas::SimpleRect* cd_marker_bar;
+	
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
 	Gtk::Label  smpte_label;
@@ -665,6 +695,7 @@ class Editor : public PublicEditor
 	Gtk::Label  mark_label;
 	Gtk::Label  range_mark_label;
 	Gtk::Label  transport_mark_label;
+	Gtk::Label  cd_mark_label;
 	
 
 	Gtk::VBox          time_button_vbox;
@@ -692,17 +723,23 @@ class Editor : public PublicEditor
 	Cursor* playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
 
+	void    cursor_to_region_boundary (Cursor*, int32_t dir);
+	void    cursor_to_next_region_boundary (Cursor*);
+	void    cursor_to_previous_region_boundary (Cursor*);
 	void    cursor_to_next_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_previous_region_point (Cursor*, ARDOUR::RegionPoint);
 	void    cursor_to_region_point (Cursor*, ARDOUR::RegionPoint, int32_t dir);
 	void    cursor_to_selection_start (Cursor *);
 	void    cursor_to_selection_end   (Cursor *);
 
-	void    edit_point_to_next_region_point (ARDOUR::RegionPoint);
-	void    edit_point_to_previous_region_point (ARDOUR::RegionPoint);
-	void    edit_point_to_region_point (ARDOUR::RegionPoint, int32_t dir);
-	void    edit_point_to_selection_start ();
-	void    edit_point_to_selection_end   ();
+	void    selected_marker_to_region_boundary (int32_t dir);
+	void    selected_marker_to_next_region_boundary ();
+	void    selected_marker_to_previous_region_boundary ();
+	void    selected_marker_to_next_region_point (ARDOUR::RegionPoint);
+	void    selected_marker_to_previous_region_point (ARDOUR::RegionPoint);
+	void    selected_marker_to_region_point (ARDOUR::RegionPoint, int32_t dir);
+	void    selected_marker_to_selection_start ();
+	void    selected_marker_to_selection_end   ();
 
 	void    select_all_selectables_using_cursor (Cursor *, bool);
 	void    select_all_selectables_using_edit (bool);
@@ -710,6 +747,7 @@ class Editor : public PublicEditor
 	void    select_range_between ();
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+	nframes64_t find_next_region_boundary (nframes64_t, int32_t dir, const TrackViewList&);
 
 	vector<nframes_t> region_boundary_cache;
 	void build_region_boundary_cache ();
@@ -761,8 +799,7 @@ class Editor : public PublicEditor
 
 	void tie_vertical_scrolling ();
 	void canvas_horizontally_scrolled ();
-	static int _idle_canvas_horizontally_scrolled (void *arg);
-	bool idle_canvas_horizontally_scrolled ();
+	void canvas_scroll_to (nframes64_t);
 
 	struct VisualChange {
 	    enum Type { 
@@ -803,8 +840,7 @@ class Editor : public PublicEditor
 	    
 	RegionListDisplayModelColumns          region_list_columns;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > region_list_display;
-	std::list<sigc::connection> region_state_changed_connections;
-
+	
 	Glib::RefPtr<Gtk::TreeStore>           region_list_model;
 	Glib::RefPtr<Gtk::ToggleAction>        toggle_full_region_list_action;
 	Glib::RefPtr<Gtk::ToggleAction>        toggle_show_auto_regions_action;
@@ -812,6 +848,8 @@ class Editor : public PublicEditor
 	void region_list_region_changed (ARDOUR::Change, boost::weak_ptr<ARDOUR::Region>);
 	void region_list_selection_changed ();
 	bool region_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
+	void region_name_edit (const Glib::ustring&, const Glib::ustring&);
+	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 
 	Gtk::Menu          *region_list_menu;
 	Gtk::ScrolledWindow region_list_scroller;
@@ -961,14 +999,16 @@ class Editor : public PublicEditor
 	void toggle_region_lock ();
 	void toggle_region_opaque ();
 	void toggle_region_position_lock ();
+	void raise_region ();
 	void raise_region_to_top ();
+	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_region ();
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
 	void crop_region_to_selection ();
 	void crop_region_to (nframes_t start, nframes_t end);
-	void set_a_regions_sync_position (boost::shared_ptr<ARDOUR::Region>, nframes_t);
+	void set_sync_point (nframes64_t, const RegionSelection&);
 	void set_region_sync_from_edit_point ();
 	void remove_region_sync();
 	void align_selection (ARDOUR::RegionPoint, nframes_t position, const RegionSelection&);
@@ -978,6 +1018,7 @@ class Editor : public PublicEditor
 	void remove_selected_regions ();
 	void remove_clicked_region ();
 	void edit_region ();
+	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
 	void region_fill_selection ();
@@ -1010,28 +1051,24 @@ class Editor : public PublicEditor
 	int  get_prefix (float&, bool&);
 
 	void keyboard_paste ();
-	void keyboard_duplicate_region ();
-	void keyboard_duplicate_selection ();
 	void keyboard_insert_region_list_selection ();
 
 	void region_from_selection ();
 	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::AudioRegion> >&);
 
-	bool region_renamed;
-	void rename_region ();
-	void rename_region_finished (bool);
-
 	void play_from_start ();
 	void play_from_edit_point ();
+	void play_from_edit_point_and_return ();
 	void play_selected_region ();
-	void audition_selected_region ();
+	void play_edit_range ();
 	void loop_selected_region ();
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
 
-	Editing::ZoomFocus zoom_focus;
-
 	void temporal_zoom_selection ();
+	void temporal_zoom_region ();
+	void toggle_zoom_region ();
+	bool zoomed_to_region;
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
 	void temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & op);
@@ -1137,15 +1174,21 @@ class Editor : public PublicEditor
 	void set_selection_from_loop ();
 	void set_selection_from_audio_region ();
 
+	void add_location_mark (nframes64_t where);
 	void add_location_from_audio_region ();
 	void add_location_from_selection ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
 	
+	void set_loop_from_edit_range (bool play);
+	void set_loop_from_region (bool play);
+	void set_punch_from_edit_range ();
+
 	void set_loop_range (nframes_t start, nframes_t end, std::string cmd);
 	void set_punch_range (nframes_t start, nframes_t end, std::string cmd);
 
 	void add_location_from_playhead_cursor ();
+	bool select_new_marker;
 
 	void reverse_selection ();
 	void edit_envelope ();
@@ -1199,15 +1242,20 @@ class Editor : public PublicEditor
 	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
 	
 	void set_fade_length (bool in);
-
+	void toggle_fade_active (bool in);
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
 	
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
+	RegionSelection pre_drag_region_selection;
 	void region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void create_region_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);
 	void create_region_drag_finished_callback (ArdourCanvas::Item*, GdkEvent*);
+	bool check_region_drag_possible (RouteTimeAxisView**);
+	void possibly_copy_regions_during_grab (GdkEvent*);
+	void region_drag_splice_motion_callback (ArdourCanvas::Item*, GdkEvent*);
+	void region_drag_splice_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 
 	bool _dragging_playhead;
 	bool _dragging_edit_point;
@@ -1282,6 +1330,7 @@ class Editor : public PublicEditor
 	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*);
 	bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameTimeAxis*);
@@ -1296,11 +1345,14 @@ class Editor : public PublicEditor
 
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
+	bool time_canvas_scroll (GdkEventScroll* event);
 
 	bool track_canvas_scroll_event (GdkEventScroll* event);
 	bool track_canvas_button_press_event (GdkEventButton* event);
 	bool track_canvas_button_release_event (GdkEventButton* event);
 	bool track_canvas_motion_notify_event (GdkEventMotion* event);
+
+	bool time_canvas_scroll_event (GdkEventScroll* event);
 
 	Gtk::Allocation canvas_allocation;
 	bool canvas_idle_queued;
@@ -1311,11 +1363,8 @@ class Editor : public PublicEditor
 
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
 	void kbd_mute_unmute_region ();
-	void kbd_set_sync_position ();
 	void kbd_brush ();
-	void kbd_audition ();
 
-	void kbd_do_set_sync_position (GdkEvent* ev);
 	void kbd_do_brush (GdkEvent*);
 	void kbd_do_audition (GdkEvent*);
 
@@ -1396,6 +1445,7 @@ class Editor : public PublicEditor
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
+	Gtk::Menu* cd_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
 	typedef list<Marker*> Marks;
@@ -1463,6 +1513,8 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText edit_mode_selector;
 	Gtk::VBox         edit_mode_box;
 
+	void set_edit_mode (ARDOUR::EditMode);
+	void cycle_edit_mode ();
 	void edit_mode_selection_done ();
 
 	Gtk::ComboBoxText snap_type_selector;
@@ -1553,7 +1605,8 @@ class Editor : public PublicEditor
 	/* transport range select process */
 	enum RangeMarkerOp {
 		CreateRangeMarker,
-		CreateTransportMarker
+		CreateTransportMarker,
+		CreateCDMarker
 	} range_marker_op;
 
 	void start_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event, RangeMarkerOp);
@@ -1629,6 +1682,13 @@ class Editor : public PublicEditor
 	bool ignore_route_order_sync;
 
 	bool route_list_display_button_press (GdkEventButton*);
+	void route_list_display_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,
+						     gint                x,
+						     gint                y,
+						     const Gtk::SelectionData& data,
+						     guint               info,
+						     guint               time);
+
 	bool route_list_selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	void route_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
@@ -1724,7 +1784,11 @@ class Editor : public PublicEditor
 
 	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void thaw_region_after_trim (RegionView& rv);
-	
+
+	void trim_region_front();
+	void trim_region_back();
+	void trim_region (bool front);
+
 	void trim_region_to_edit_point ();
 	void trim_region_from_edit_point ();
 	void trim_region_to_loop ();
@@ -1842,7 +1906,7 @@ class Editor : public PublicEditor
 
 	/* duplication */
 
-	void duplicate_dialog (bool for_region);
+	void duplicate_dialog (bool with_dialog);
 	
 	nframes64_t event_frame (GdkEvent*, double* px = 0, double* py = 0) const;
 
@@ -1854,9 +1918,16 @@ class Editor : public PublicEditor
 	void start_time_fx (ArdourCanvas::Item*, GdkEvent*);
 	void end_time_fx (ArdourCanvas::Item*, GdkEvent*);
 
-	struct TimeStretchDialog : public ArdourDialog {
-	    ARDOUR::TimeStretchRequest request;
+	struct TimeFXDialog : public ArdourDialog {
+	    ARDOUR::TimeFXRequest request;
 	    Editor&               editor;
+	    bool                  pitching;
+	    Gtk::Adjustment       pitch_octave_adjustment;
+	    Gtk::Adjustment       pitch_semitone_adjustment;
+	    Gtk::Adjustment       pitch_cent_adjustment;
+	    Gtk::SpinButton       pitch_octave_spinner;
+	    Gtk::SpinButton       pitch_semitone_spinner;
+	    Gtk::SpinButton       pitch_cent_spinner;
 	    RegionSelection       regions;
 	    Gtk::ProgressBar      progress_bar;
 	    Gtk::ToggleButton     quick_button;
@@ -1867,24 +1938,28 @@ class Editor : public PublicEditor
 	    Gtk::VBox             packer;
 	    int                   status;
 
-	    TimeStretchDialog (Editor& e);
+	    TimeFXDialog (Editor& e, bool for_pitch);
 
 	    gint update_progress ();
 	    sigc::connection first_cancel;
 	    sigc::connection first_delete;
-	    void cancel_timestretch_in_progress ();
-	    gint delete_timestretch_in_progress (GdkEventAny*);
+	    void cancel_in_progress ();
+	    gint delete_in_progress (GdkEventAny*);
 	};
 
 	/* "whats mine is yours" */
 
-	friend class TimeStretchDialog;
+	friend class TimeFXDialog;
 
-	TimeStretchDialog* current_timestretch;
+	TimeFXDialog* current_timefx;
 
-	static void* timestretch_thread (void *arg);
-	int run_timestretch (RegionSelection&, float fraction);
-	void do_timestretch (TimeStretchDialog&);
+	static void* timefx_thread (void *arg);
+	void do_timefx (TimeFXDialog&);
+
+	int time_stretch (RegionSelection&, float fraction);
+	int pitch_shift (RegionSelection&, float cents);
+	void pitch_shift_regions ();
+	int time_fx (RegionSelection&, float val, bool pitching);
 
 	/* editor-mixer strip */
 
@@ -1986,7 +2061,8 @@ class Editor : public PublicEditor
 
 	TimeAxisView* entered_track;
 	RegionView*   entered_regionview;
-	void ensure_entered_selected ();
+	void ensure_entered_region_selected (bool op_acts_on_objects = false);
+	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
 	gint left_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);
@@ -2007,6 +2083,7 @@ class Editor : public PublicEditor
 	Gtk::CheckMenuItem* region_opaque_item;
 	
 	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 
 	void session_state_saved (string);
 
@@ -2022,6 +2099,7 @@ class Editor : public PublicEditor
 	Gtk::ComboBoxText edit_point_selector;
 
 	void set_edit_point_preference (Editing::EditPoint ep);
+	void cycle_edit_point (bool with_marker);
 	void set_edit_point ();
 	void edit_point_selection_done ();
 	void edit_point_chosen (Editing::EditPoint);
@@ -2035,6 +2113,7 @@ class Editor : public PublicEditor
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 
 	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
+	RegionSelection get_regions_after (nframes64_t where, const TrackSelection& ts) const;
 	
 	RegionSelection tmp_regions;
 	
@@ -2043,10 +2122,11 @@ class Editor : public PublicEditor
 	sigc::connection fast_screen_update_connection;
 	gint start_updating ();
 	gint stop_updating ();
-	void toggle_meter_updating();
 	void fast_update_strips ();
-
 	bool meters_running;
+
+	void select_next_route ();
+	void select_prev_route ();
 };
 
 #endif /* __ardour_editor_h__ */

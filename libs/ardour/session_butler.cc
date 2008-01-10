@@ -233,10 +233,6 @@ Session::butler_thread_work ()
 			}
 		}
 
-		//for (i = diskstreams.begin(); i != diskstreams.end(); ++i) {
-			// cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
-		//}
-
 		if (transport_work_requested()) {
 			butler_transport_work ();
 		}
@@ -249,9 +245,22 @@ Session::butler_thread_work ()
 
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader ();
 
+//		for (i = dsl->begin(); i != dsl->end(); ++i) {
+//			cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
+//		}
+
 		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 
 			boost::shared_ptr<Diskstream> ds = *i;
+
+			/* don't read inactive tracks */
+
+			/*IO* io = ds->io();
+			
+			if (ds->io() && !ds->io()->active()) {
+				cerr << "Skip inactive diskstream " << ds->io()->name() << endl;
+				continue;
+			}*/
 
 			switch (ds->do_refill ()) {
 			case 0:
@@ -294,6 +303,9 @@ Session::butler_thread_work ()
 
 		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
+
+			/* note that we still try to flush diskstreams attached to inactive routes
+			 */
 			
 			switch ((*i)->do_flush (Session::ButlerContext)) {
 			case 0:

@@ -599,10 +599,15 @@ AudioClock::set_smpte (nframes_t when, bool force)
 		
 		smpte_upper_info_label->set_text (buf);
 		
-		if (session->smpte_drop_frames()) {
-			sprintf (buf, "DF");
+		if ((fabs(smpte_frames - 29.97) < 0.0001) || smpte_frames == 30) {
+			if (session->smpte_drop_frames()) {
+				sprintf (buf, "DF");
+			} else {
+				sprintf (buf, "NDF");
+			}
 		} else {
-			sprintf (buf, "NDF");
+			// there is no drop frame alternative
+			buf[0] = '\0';
 		}
 		
 		smpte_lower_info_label->set_text (buf);
@@ -653,6 +658,32 @@ AudioClock::set_session (Session *s)
 		set (last_when, true);
 	}
 }
+
+void
+AudioClock::focus ()
+{
+	switch (_mode) {
+	case SMPTE:
+		hours_ebox.grab_focus ();
+		break;
+
+	case BBT:
+		bars_ebox.grab_focus ();
+		break;
+
+	case MinSec:
+		ms_hours_ebox.grab_focus ();
+		break;
+
+	case Frames:
+		frames_ebox.grab_focus ();
+		break;
+
+	case Off:
+		break;
+	}
+}
+
 
 bool
 AudioClock::field_key_press_event (GdkEventKey *ev, Field field)
@@ -1020,7 +1051,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 	if (dragging) {
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		dragging = false;
-		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)){
+		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)){
 			// we actually dragged so return without setting editing focus, or we shift clicked
 			return true;
 		}
@@ -1100,7 +1131,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 
 	switch (ev->button) {
 	case 1:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			set (frames, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 					}
@@ -1116,7 +1147,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field field)
 		break;
 
 	case 2:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			set (frames, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
@@ -1149,7 +1180,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 	case GDK_SCROLL_UP:
 	       frames = get_frames (field);
 	       if (frames != 0) {
-		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			     frames *= 10;
 		      }
 		      set (current_time() + frames, true);
@@ -1160,7 +1191,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 	case GDK_SCROLL_DOWN:
 	       frames = get_frames (field);
 	       if (frames != 0) {
-		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			     frames *= 10;
 		      }
 		      
@@ -1192,13 +1223,13 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 	float pixel_frame_scale_factor = 0.2f;
 
 /*
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control))  {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier))  {
 		pixel_frame_scale_factor = 0.1f;
 	}
 
 
 	if (Keyboard::modifier_state_contains (ev->state, 
-					       Keyboard::Control|Keyboard::Alt)) {
+					       Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) {
 
 		pixel_frame_scale_factor = 0.025f;
 	}
@@ -1853,7 +1884,7 @@ AudioClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
 	ops_items.push_back (MenuElem (_("Bars:Beats"), bind (mem_fun(*this, &AudioClock::set_mode), BBT)));
 	ops_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
-	ops_items.push_back (MenuElem (_("Audio Frames"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));
+	ops_items.push_back (MenuElem (_("Samples"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));
 	ops_items.push_back (MenuElem (_("Off"), bind (mem_fun(*this, &AudioClock::set_mode), Off)));
 }
 

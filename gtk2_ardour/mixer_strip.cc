@@ -41,6 +41,7 @@
 #include <ardour/panner.h>
 #include <ardour/send.h>
 #include <ardour/processor.h>
+#include <ardour/profile.h>
 #include <ardour/ladspa_plugin.h>
 #include <ardour/auto_bundle.h>
 #include <ardour/user_bundle.h>
@@ -448,10 +449,6 @@ MixerStrip::set_width (Width w, void* owner)
 
 	_width_owner = owner;
 
-	if (_width == w) {
-		return;
-	}
-
 	ensure_xml_node ();
 	
 	_width = w;
@@ -819,12 +816,14 @@ void
 MixerStrip::input_changed (IOChange change, void *src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_input_display));
+	set_width(_width, this);
 }
 
 void
 MixerStrip::output_changed (IOChange change, void *src)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &MixerStrip::update_output_display));
+	set_width(_width, this);
 }
 
 
@@ -1056,7 +1055,9 @@ MixerStrip::build_route_ops_menu ()
 	build_remote_control_menu ();
 	
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+	if (!Profile->get_sae()) {
+              items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+        }
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
@@ -1297,5 +1298,6 @@ MixerStrip::meter_changed (void *src)
 	}
 
 	gpm.setup_meters ();
+		set_width(_width, this);
 }
 

@@ -65,20 +65,20 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	manager = mgr;
 	session = 0;
 	
-	current_selection = ARDOUR::LADSPA;
-
-	lmodel = Gtk::ListStore::create(lcols);
-	ladspa_display.set_model (lmodel);
-	ladspa_display.append_column (_("Available LADSPA Plugins"), lcols.name);
-	ladspa_display.append_column (_("Type"), lcols.type);
-	ladspa_display.append_column (_("# Inputs"),lcols.ins);
-	ladspa_display.append_column (_("# Outputs"), lcols.outs);
-	ladspa_display.set_headers_visible (true);
-	ladspa_display.set_headers_clickable (true);
-	ladspa_display.set_reorderable (false);
-	lscroller.set_border_width(10);
-	lscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	lscroller.add(ladspa_display);
+	plugin_model = Gtk::ListStore::create (plugin_columns);
+	plugin_display.set_model (plugin_model);
+	plugin_display.append_column (_("Available Plugins"), plugin_columns.name);
+	plugin_display.append_column (_("Type"), plugin_columns.type_name);
+	plugin_display.append_column (_("Category"), plugin_columns.category);
+	plugin_display.append_column (_("Creator"), plugin_columns.creator);
+	plugin_display.append_column (_("# Inputs"),plugin_columns.ins);
+	plugin_display.append_column (_("# Outputs"), plugin_columns.outs);
+	plugin_display.set_headers_visible (true);
+	plugin_display.set_headers_clickable (true);
+	plugin_display.set_reorderable (false);
+	scroller.set_border_width(10);
+	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	scroller.add(plugin_display);
 
 	amodel = Gtk::ListStore::create(acols);
 	added_list.set_model (amodel);
@@ -87,47 +87,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	added_list.set_reorderable (false);
 
 	for (int i = 0; i <=3; i++) {
-		Gtk::TreeView::Column* column = ladspa_display.get_column(i);
+		Gtk::TreeView::Column* column = plugin_display.get_column(i);
 		column->set_sort_column(i);
 	}
-
-#ifdef VST_SUPPORT
-	vmodel = ListStore::create(vcols);
-	vst_display.set_model (vmodel);
-	vst_display.append_column (_("Available plugins"), vcols.name);
-	vst_display.append_column (_("# Inputs"), vcols.ins);
-	vst_display.append_column (_("# Outputs"), vcols.outs);
-	vst_display.set_headers_visible (true);
-	vst_display.set_headers_clickable (true);
-	vst_display.set_reorderable (false);
-	vscroller.set_border_width(10);
-	vscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	vscroller.add(vst_display);
-
-	for (int i = 0; i <=2; i++) {
-		Gtk::TreeView::Column* column = vst_display.get_column(i);
-		column->set_sort_column(i);
-	}
-#endif
-
-#ifdef HAVE_AUDIOUNIT
-	aumodel = ListStore::create(aucols);
-	au_display.set_model (aumodel);
-	au_display.append_column (_("Available plugins"), aucols.name);
-	au_display.append_column (_("# Inputs"), aucols.ins);
-	au_display.append_column (_("# Outputs"), aucols.outs);
-	au_display.set_headers_visible (true);
-	au_display.set_headers_clickable (true);
-	au_display.set_reorderable (false);
-	auscroller.set_border_width(10);
-	auscroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	auscroller.add(au_display);
-
-	for (int i = 0; i <=2; i++) {
-		Gtk::TreeView::Column* column = au_display.get_column(i);
-		column->set_sort_column(i);
-	}
-#endif
 
 	ascroller.set_border_width(10);
 	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -146,7 +108,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	Gtk::Table* table = manage(new Gtk::Table(7, 11));
 	table->set_size_request(750, 500);
-	table->attach(notebook, 0, 7, 0, 5);
+	table->attach(scroller, 0, 7, 0, 5);
 
 	HBox* filter_box = manage (new HBox);
 
@@ -176,98 +138,26 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	table->attach(ascroller, 0, 7, 8, 10);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::CONNECT, RESPONSE_APPLY);
+	add_button (_("Insert Plugin(s)"), RESPONSE_APPLY);
 	set_default_response (RESPONSE_APPLY);
 	set_response_sensitive (RESPONSE_APPLY, false);
 	get_vbox()->pack_start (*table);
 
-
-	// Notebook tab order must be the same in here as in set_correct_focus()
-	using namespace Notebook_Helpers;
-	notebook.pages().push_back (TabElem (lscroller, _("LADSPA")));
-
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		notebook.pages().push_back (TabElem (vscroller, _("VST")));
-	}
-#endif
-
-#ifdef HAVE_AUDIOUNIT
-	notebook.pages().push_back (TabElem (auscroller, _("AudioUnit")));
-#endif
-
 	table->set_name("PluginSelectorTable");
-	ladspa_display.set_name("PluginSelectorDisplay");
-	//ladspa_display.set_name("PluginSelectorList");
+	plugin_display.set_name("PluginSelectorDisplay");
+	//plugin_display.set_name("PluginSelectorList");
 	added_list.set_name("PluginSelectorList");
 
-	ladspa_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
-	ladspa_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::ladspa_display_selection_changed));
-	ladspa_display.grab_focus();
+	plugin_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
+	plugin_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::display_selection_changed));
+	plugin_display.grab_focus();
 	
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		vst_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
-		vst_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::vst_display_selection_changed));
-	}
-#endif
-
-#ifdef HAVE_AUDIOUNIT
-	au_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
-	au_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::au_display_selection_changed));
-#endif
-
 	btn_update->signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
 	btn_add->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
 	added_list.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::added_list_selection_changed));
 
-	ladspa_refiller ();
-	
-#ifdef VST_SUPPORT
-	vst_refiller ();
-#endif
-
-#ifdef HAVE_AUDIOUNIT
-	au_refiller ();
-#endif
-
-	signal_show().connect (mem_fun (*this, &PluginSelector::set_correct_focus));
-}
-
-/**
- * Makes sure keyboard focus is always in the plugin list
- * of the selected notebook tab.
- **/
-void
-PluginSelector::set_correct_focus()
-{
-	int cp = notebook.get_current_page();
-
-	if (cp == 0) {
-		ladspa_display.grab_focus();
-		return;
-	}
-
-#ifdef VST_SUPPORT
-	if (Config->get_use_vst()) {
-		cp--;
-	
-		if (cp == 0) {
-			vst_display.grab_focus();
-			return;
-		}
-	}
-#endif
-
-#ifdef HAVE_AUDIOUNIT
-	cp--;
-
-	if (cp == 0) {
-		au_display.grab_focus();
-		return;
-	}
-#endif
+	refill ();
 }
 
 void
@@ -290,7 +180,7 @@ PluginSelector::set_session (Session* s)
 }
 
 bool
-PluginSelector::show_this_plugin (PluginInfoPtr& info, const std::string& filterstr)
+PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& filterstr)
 {
 	std::string compstr;
 	std::string mode = filter_mode.get_active_text ();
@@ -328,124 +218,83 @@ PluginSelector::setup_filter_string (string& filterstr)
 }	
 
 void
-PluginSelector::ladspa_refiller ()
+PluginSelector::refill ()
 {
-	guint row;
-	PluginInfoList &plugs = manager->ladspa_plugin_info ();
-	PluginInfoList::iterator i;
-	char ibuf[16], obuf[16];
-
-	lmodel->clear();
-
 	std::string filterstr;
+
+	plugin_model->clear ();
+
 	setup_filter_string (filterstr);
-	
-	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
-		if (show_this_plugin (*i, filterstr)) {
-			snprintf (ibuf, sizeof(ibuf)-1, "%u", (*i)->n_inputs.n_total());
-			snprintf (obuf, sizeof(obuf)-1, "%u", (*i)->n_outputs.n_total());		
 
-			TreeModel::Row newrow = *(lmodel->append());
-			newrow[lcols.name] = (*i)->name.c_str();
-			newrow[lcols.type] = (*i)->category.c_str();
-			newrow[lcols.ins] = ibuf;
-			newrow[lcols.outs] = obuf;
-			newrow[lcols.plugin] = *i;
-		}
-	}
-
-	lmodel->set_sort_column (0, SORT_ASCENDING);
+	ladspa_refiller (filterstr);
+	vst_refiller (filterstr);
+	au_refiller (filterstr);
 }
 
+void
+PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filterstr, const char* type)
+{
+	char buf[16];
+
+	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
+
+		if (show_this_plugin (*i, filterstr)) {
+
+			TreeModel::Row newrow = *(plugin_model->append());
+			newrow[plugin_columns.name] = (*i)->name;
+			newrow[plugin_columns.type_name] = type;
+			newrow[plugin_columns.category] = (*i)->category;
+
+
+			string creator = (*i)->creator;
+			string::size_type pos = 0;
+
+			/* stupid LADSPA creator strings */
+
+			while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+			creator = creator.substr (0, pos);
+
+			newrow[plugin_columns.creator] = creator;
+
+			if ((*i)->n_inputs.n_total() < 0) {
+				newrow[plugin_columns.ins] = "various";
+			} else {
+				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_total());
+				newrow[plugin_columns.ins] = buf;
+			}
+			if ((*i)->n_outputs.n_total() < 0) {
+				newrow[plugin_columns.outs] = "various";
+			} else {
+				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_total());		
+				newrow[plugin_columns.outs] = buf;
+			}
+
+			newrow[plugin_columns.plugin] = *i;
+		}
+	}	
+}
+
+void
+PluginSelector::ladspa_refiller (const std::string& filterstr)
+{
+	refiller (manager->ladspa_plugin_info(), filterstr, "LADSPA");
+}
+
+void
+PluginSelector::vst_refiller (const std::string& filterstr)
+{
 #ifdef VST_SUPPORT
-
-void
-PluginSelector::vst_refiller ()
-{
-	guint row;
-	PluginInfoList &plugs = manager->vst_plugin_info ();
-	PluginInfoList::iterator i;
-	char ibuf[16], obuf[16];
-	vmodel->clear();
-	
-	std::string filterstr;
-	setup_filter_string (filterstr);
-	
-	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
-
-		if (show_this_plugin (*i, filterstr)) {
-			snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
-			snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
-			
-			TreeModel::Row newrow = *(vmodel->append());
-			newrow[vcols.name] = (*i)->name.c_str();
-			newrow[vcols.ins] = ibuf;
-			newrow[vcols.outs] = obuf;
-			newrow[vcols.plugin] = *i;
-		}
-	}
-	vmodel->set_sort_column (0, SORT_ASCENDING);
+	refiller (manager->vst_plugin_info(), filterstr, "VST");
+#endif
 }
 
 void
-PluginSelector::vst_display_selection_changed()
+PluginSelector::au_refiller (const std::string& filterstr)
 {
-	if (vst_display.get_selection()->count_selected_rows() != 0) {
-		btn_add->set_sensitive (true);
-	} else {
-		btn_add->set_sensitive (false);
-	}
-
-	current_selection = ARDOUR::VST;
+#ifdef HAVE_AUDIOUNITS
+	refiller (manager->au_plugin_info(), filterstr, "AU");
+#endif
 }
-
-#endif //VST_SUPPORT
-
-#ifdef HAVE_AUDIOUNIT
-
-void
-PluginSelector::au_refiller ()
-{
-	guint row;
-	PluginInfoList plugs (AUPluginInfo::discover ());
-	PluginInfoList::iterator i;
-	char ibuf[16], obuf[16];
-	aumodel->clear();
-	
-	std::string filterstr;
-	setup_filter_string (filterstr);
-	
-	for (row = 0, i=plugs.begin(); i != plugs.end(); ++i, ++row) {
-
-		if (show_this_plugin (*i, filterstr)) {
-
-			snprintf (ibuf, sizeof(ibuf)-1, "%d", (*i)->n_inputs);
-			snprintf (obuf, sizeof(obuf)-1, "%d", (*i)->n_outputs);		
-			
-			TreeModel::Row newrow = *(aumodel->append());
-			newrow[aucols.name] = (*i)->name.c_str();
-			newrow[aucols.ins] = ibuf;
-			newrow[aucols.outs] = obuf;
-			newrow[aucols.plugin] = *i;
-		}
-	}
-
-	aumodel->set_sort_column (0, SORT_ASCENDING);
-}
-
-void
-PluginSelector::au_display_selection_changed()
-{
-	if (au_display.get_selection()->count_selected_rows() != 0) {
-		btn_add->set_sensitive (true);
-	} else {
-		btn_add->set_sensitive (false);
-	}
-	
-	current_selection = ARDOUR::AudioUnit;
-}
-
-#endif //HAVE_AUDIOUNIT
 
 void
 PluginSelector::use_plugin (PluginInfoPtr pi)
@@ -467,33 +316,11 @@ PluginSelector::btn_add_clicked()
 	std::string name;
 	PluginInfoPtr pi;
 	TreeModel::Row newrow = *(amodel->append());
-	
 	TreeModel::Row row;
 
-	switch (current_selection) {
-		case ARDOUR::LADSPA:
-			row = *(ladspa_display.get_selection()->get_selected());
-			name = row[lcols.name];
-			pi = row[lcols.plugin];
-			break;
-		case ARDOUR::VST:
-#ifdef VST_SUPPORT
-			row = *(vst_display.get_selection()->get_selected());
-			name = row[vcols.name];
-			pi = row[vcols.plugin];
-#endif
-			break;
-		case ARDOUR::AudioUnit:
-#ifdef HAVE_AUDIOUNIT
-			row = *(au_display.get_selection()->get_selected());
-			name = row[aucols.name];
-			pi = row[aucols.plugin];
-#endif
-			break;
-		default:
-			error << "Programming error.  Unknown plugin selected." << endmsg;
-			return;
-	}
+	row = *(plugin_display.get_selection()->get_selected());
+	name = row[plugin_columns.name];
+	pi = row[plugin_columns.plugin];
 
 	newrow[acols.text] = name;
 	newrow[acols.plugin] = pi;
@@ -522,27 +349,13 @@ PluginSelector::btn_update_clicked()
 }
 
 void
-PluginSelector::refill()
+PluginSelector::display_selection_changed()
 {
-	ladspa_refiller ();
-#ifdef VST_SUPPORT
-	vst_refiller ();
-#endif	
-#ifdef HAVE_AUDIOUNIT
-	au_refiller ();
-#endif
-}
-
-void
-PluginSelector::ladspa_display_selection_changed()
-{
-	if (ladspa_display.get_selection()->count_selected_rows() != 0) {
+	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		btn_add->set_sensitive (true);
 	} else {
 		btn_add->set_sensitive (false);
 	}
-	
-	current_selection = ARDOUR::LADSPA;
 }
 
 void
@@ -566,7 +379,8 @@ PluginSelector::run ()
 	switch (r) {
 	case RESPONSE_APPLY:
 		for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
-			use_plugin ((*i)[acols.plugin]);
+			PluginInfoPtr pp = (*i)[acols.plugin];
+			use_plugin (pp);
 		}
 		break;
 

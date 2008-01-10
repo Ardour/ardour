@@ -38,6 +38,7 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "actions.h"
+#include "region_view.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -88,10 +89,6 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 	TreeModel::Row row;
 	Gdk::Color c;
 	bool missing_source;
-
-	region_state_changed_connections.push_back (
-		region->StateChanged.connect (bind (mem_fun (*this, &Editor::region_list_region_changed), boost::weak_ptr<Region> (region)))
-		);
 
 	missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
 
@@ -309,13 +306,6 @@ Editor::redisplay_regions ()
 {
 	if (session) {
 
-		for (std::list<connection>::iterator i = region_state_changed_connections.begin();
-		     i != region_state_changed_connections.end();
-		     ++i)
-		{
-			i->disconnect ();
-		}
-
 		region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 		region_list_model->clear ();
 
@@ -419,6 +409,8 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	int cellx;
 	int celly;
 
+	cerr << "Button press release, button = " << ev->button << endl;
+
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {
 			region = (*iter)[region_list_columns.region];
@@ -427,27 +419,25 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_region_list_display_context_menu (ev->button, ev->time);
+		cerr << "\tcontext menu event, event handled\n";
 		return true;
 	}
 
 	if (region == 0) {
+		cerr << "\tno region, event not handled\n";
 		return false;
 	}
 
 	switch (ev->button) {
 	case 1:
-		/* audition on double click */
-		if (ev->type == GDK_2BUTTON_PRESS) {
-			consider_auditioning (region);
-			return true;
-		}
-		return false;
 		break;
 
 	case 2:
-		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		// audition on middle click (stop audition too)
+		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			consider_auditioning (region);
 		}
+		cerr << "\taudition, event handled\n";
 		return true;
 		break;
 
@@ -455,6 +445,7 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 		break; 
 	}
 
+	cerr << "\tnot handled\n";
 	return false;
 }	
 
@@ -674,6 +665,12 @@ Editor::region_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& 
 {
 	vector<ustring> paths;
 
+	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
+		cerr << "Delete drag data drop to treeview\n";
+		region_list_display.on_drag_data_received (context, x, y, data, info, time);
+		return;
+	}
+
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
 		nframes64_t pos = 0;
 		do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
@@ -697,3 +694,30 @@ Editor::region_list_selection_filter (const RefPtr<TreeModel>& model, const Tree
 
 	return true;
 }
+
+void
+Editor::region_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+{
+	boost::shared_ptr<Region> region;
+	TreeIter iter;
+	
+	if ((iter = region_list_model->get_iter (path))) {
+		region = (*iter)[region_list_columns.region];
+		(*iter)[region_list_columns.name] = new_text;
+	}
+	
+	/* now mapover everything */
+
+	if (region) {
+		vector<RegionView*> equivalents;
+		get_regions_corresponding_to (region, equivalents);
+
+		for (vector<RegionView*>::iterator i = equivalents.begin(); i != equivalents.end(); ++i) {
+			if (new_text != (*i)->region()->name()) {
+				(*i)->region()->set_name (new_text);
+			}
+		}
+	}
+
+}
+

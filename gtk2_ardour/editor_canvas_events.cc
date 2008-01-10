@@ -52,10 +52,13 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
 	int x, y;
 	double wx, wy;
+	nframes_t xdelta;
+	int direction = ev->direction;
 
-	switch (ev->direction) {
+  retry:
+	switch (direction) {
 	case GDK_SCROLL_UP:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			/* XXX 
 			   the ev->x will be out of step with the canvas
@@ -75,7 +78,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (false, where);
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+			direction = GDK_SCROLL_LEFT;
+			goto retry;
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {
@@ -90,8 +96,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			return true;
 		}
 		break;
+
 	case GDK_SCROLL_DOWN:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
 			track_canvas.get_pointer (x, y);
 			track_canvas.window_to_world (x, y, wx, wy);
@@ -106,7 +113,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			nframes_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (true, where);
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+			direction = GDK_SCROLL_RIGHT;
+			goto retry;
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				if (!(current_stepping_trackview = trackview_by_y_position (ev->y))) {
@@ -122,8 +132,26 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		}
 		break;	
 
+	case GDK_SCROLL_LEFT:
+		xdelta = (current_page_frames() / 2);
+		if (leftmost_frame > xdelta) {
+			reset_x_origin (leftmost_frame - xdelta);
+		} else {
+			reset_x_origin (0);
+		}
+		break;
+
+	case GDK_SCROLL_RIGHT:
+		xdelta = (current_page_frames() / 2);
+		if (max_frames - xdelta > leftmost_frame) {
+			reset_x_origin (leftmost_frame + xdelta);
+		} else {
+			reset_x_origin (max_frames - current_page_frames());
+		}
+		break;
+
 	default:
-		/* no left/right handling yet */
+		/* what? */
 		break;
 	}
 	
@@ -139,8 +167,58 @@ Editor::track_canvas_scroll_event (GdkEventScroll *event)
 }
 
 bool
+Editor::time_canvas_scroll (GdkEventScroll* ev)
+{
+	nframes_t xdelta;
+	int direction = ev->direction;
+
+	switch (direction) {
+	case GDK_SCROLL_UP:
+		temporal_zoom_step (true);
+		break;
+
+	case GDK_SCROLL_DOWN:
+		temporal_zoom_step (false);
+		break;	
+
+	case GDK_SCROLL_LEFT:
+		xdelta = (current_page_frames() / 2);
+		if (leftmost_frame > xdelta) {
+			reset_x_origin (leftmost_frame - xdelta);
+		} else {
+			reset_x_origin (0);
+		}
+		break;
+
+	case GDK_SCROLL_RIGHT:
+		xdelta = (current_page_frames() / 2);
+		if (max_frames - xdelta > leftmost_frame) {
+			reset_x_origin (leftmost_frame + xdelta);
+		} else {
+			reset_x_origin (max_frames - current_page_frames());
+		}
+		break;
+
+	default:
+		/* what? */
+		break;
+	}
+
+	return false;
+}
+
+bool
+Editor::time_canvas_scroll_event (GdkEventScroll *event)
+{
+	time_canvas.grab_focus();
+	time_canvas_scroll (event);
+	return false;
+}
+
+bool
 Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
+	selection->clear ();
 	track_canvas.grab_focus();
 	return false;
 }
@@ -170,6 +248,11 @@ Editor::track_canvas_motion (GdkEvent *ev)
 		verbose_canvas_cursor->property_x() = ev->motion.x + 20;
 		verbose_canvas_cursor->property_y() = ev->motion.y + 20;
 	}
+
+#ifdef GTKOSX
+	flush_canvas ();
+#endif
+
 	return false;
 }
 
@@ -235,10 +318,12 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 		break;
 
 	case GDK_ENTER_NOTIFY:
+		set_entered_track (&rv->get_time_axis_view ());
 		set_entered_regionview (rv);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+		set_entered_track (0);
 		set_entered_regionview (0);
 		break;
 
@@ -274,6 +359,11 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 		break;
 
 	case GDK_ENTER_NOTIFY:
+		set_entered_track (tv);
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+		set_entered_track (0);
 		break;
 
 	default:
@@ -282,8 +372,6 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 
 	return ret;
 }
-
-
 
 bool
 Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationTimeAxisView *atv)
@@ -803,6 +891,12 @@ bool
 Editor::canvas_transport_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, TransportMarkerBarItem);
+}
+
+bool
+Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, CdMarkerBarItem);
 }
 
 bool

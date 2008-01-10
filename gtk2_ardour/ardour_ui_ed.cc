@@ -82,7 +82,7 @@ ARDOUR_UI::install_actions ()
 	/* menus + submenus that need action items */
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
-	ActionManager::register_action (main_actions, X_("Files"), _("Files"));
+	ActionManager::register_action (main_actions, X_("Files"), _("Import/Export"));
 	ActionManager::register_action (main_actions, X_("Regions"), _("Regions"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
@@ -269,7 +269,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("Record"), _("Enable Record"), mem_fun(*this, &ARDOUR_UI::transport_record));
+	act = ActionManager::register_action (transport_actions, X_("Record"), _("Enable Record"), bind (mem_fun(*this, &ARDOUR_UI::transport_record), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("record-roll"), _("Start Recording"), bind (mem_fun(*this, &ARDOUR_UI::transport_record), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("Rewind"), _("Rewind"), bind (mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
@@ -297,6 +299,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("GotoEnd"), _("Goto End"), mem_fun(*this, &ARDOUR_UI::transport_goto_end));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), mem_fun(primary_clock, &AudioClock::focus));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
@@ -420,7 +426,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region equivalents overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
 	ActionManager::register_toggle_action (option_actions, X_("PrimaryClockDeltaEditCursor"), _("Primary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor));
 	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));	
-	ActionManager::register_toggle_action (option_actions, X_("ShowTrackMeters"), _("Display Editor Meters"), mem_fun (*this, &ARDOUR_UI::toggle_ShowTrackMeters));	
+	ActionManager::register_toggle_action (option_actions, X_("ShowTrackMeters"), _("Enable Editor Meters"), mem_fun (*this, &ARDOUR_UI::toggle_ShowTrackMeters));
 	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));	
 
 	RadioAction::Group denormal_group;
@@ -464,17 +470,16 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);
-
 	
 	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (option_actions, X_("DisableAllPlugins"), _("Disable All Plugins"), mem_fun (*this, &ARDOUR_UI::disable_all_plugins));
+	/*act = ActionManager::register_action (option_actions, X_("DisableAllPlugins"), _("Disable All Plugins"), mem_fun (*this, &ARDOUR_UI::disable_all_plugins));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (option_actions, X_("ABAllPlugins"), _("A/B All Plugins"), mem_fun (*this, &ARDOUR_UI::ab_all_plugins));
-	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::session_sensitive_actions.push_back (act);*/
 
 	/* !!! REMEMBER THAT RADIO ACTIONS HAVE TO BE HANDLED WITH MORE FINESSE THAN SIMPLE TOGGLES !!! */
 

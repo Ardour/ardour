@@ -1,11 +1,14 @@
 #include <map>
 
+#include <ardour/profile.h>
+
 #include <gtkmm/stock.h>
 #include <gtkmm/accelkey.h>
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
 
 #include <pbd/strsplit.h>
+#include <pbd/replace_all.h>
 
 #include "actions.h"
 #include "keyboard.h"
@@ -16,6 +19,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gdk;
+using namespace PBD;
 
 KeyEditor::KeyEditor ()
 	: ArdourDialog (_("Keybinding Editor"), false)
@@ -31,11 +35,11 @@ KeyEditor::KeyEditor ()
 	view.set_headers_visible (true);
 	view.get_selection()->set_mode (SELECTION_SINGLE);
 	view.set_reorderable (false);
-	view.set_size_request (300,200);
+	view.set_size_request (500,300);
 	view.set_enable_search (false);
 	view.set_rules_hint (true);
 	view.set_name (X_("KeyEditorTree"));
-
+	
 	view.get_selection()->signal_changed().connect (mem_fun (*this, &KeyEditor::action_selected));
 	
 	scroller.add (view);
@@ -78,7 +82,7 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 bool
 KeyEditor::on_key_release_event (GdkEventKey* ev)
 {
-	if (!can_bind || ev->state != last_state) {
+	if (ARDOUR::Profile->get_sae() || !can_bind || ev->state != last_state) {
 		return false;
 	}
 
@@ -137,7 +141,7 @@ KeyEditor::populate ()
 	model->clear ();
 
 	for (l = labels.begin(), k = keys.begin(), p = paths.begin(); l != labels.end(); ++k, ++p, ++l) {
-		
+
 		TreeModel::Row row;
 		vector<string> parts;
 		
@@ -178,7 +182,16 @@ KeyEditor::populate ()
 		if (*k == ActionManager::unbound_string) {
 			row[columns.binding] = string();
 		} else {
+
+#ifdef GTKOSX
+			string label = (*k);
+			replace_all (label, "<Mod5>", _("Command-"));
+			replace_all (label, "<Alt>", _("Option-"));
+			replace_all (label, "<Shift>", _("Shift-"));
+			row[columns.binding] = label;
+#else		
 			row[columns.binding] = (*k);
+#endif
 		}
 	}
 }

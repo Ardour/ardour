@@ -68,12 +68,16 @@ namespace Gtkmm2ext {
 class PlugUIBase : public virtual sigc::trackable
 {
   public:
-	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>, nframes64_t sample_rate, nframes64_t period_size);
+	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>);
 	virtual ~PlugUIBase() {}
 
 	virtual gint get_preferred_height () = 0;
+	virtual gint get_preferred_width () = 0;
 	virtual bool start_updating(GdkEventAny*) = 0;
 	virtual bool stop_updating(GdkEventAny*) = 0;
+	
+	virtual void activate () {}
+	virtual void deactivate () {}
 
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
@@ -88,14 +92,15 @@ class PlugUIBase : public virtual sigc::trackable
 	void bypass_toggled();
 };
 
-class LadspaPluginUI : public PlugUIBase, public Gtk::VBox 
+class GenericPluginUI : public PlugUIBase, public Gtk::VBox 
 {
   public:
-	LadspaPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, nframes64_t sample_rate, nframes64_t period_size, bool scrollable = false);
-	~LadspaPluginUI ();
+	GenericPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
+	~GenericPluginUI ();
 	
 	gint get_preferred_height () { return prefheight; }
-
+	gint get_preferred_width () { return -1; }
+	
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
 
@@ -210,7 +215,12 @@ class PluginUIWindow : public ArdourDialog
 	
   private:
 	PlugUIBase* _pluginui;
+	bool non_gtk_gui;
+	void app_activated (bool);
 	void plugin_going_away ();
+
+	bool create_vst_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
+	bool create_audiounit_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 };
 
 #ifdef VST_SUPPORT
@@ -221,6 +231,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	~VSTPluginUI ();
 
 	gint get_preferred_height ();
+	gint get_preferred_width ();
 	bool start_updating(GdkEventAny*) {return false;}
 	bool stop_updating(GdkEventAny*) {return false;}
 
@@ -236,5 +247,10 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	void save_plugin_setting ();
 };
 #endif // VST_SUPPORT
+
+#ifdef HAVE_AUDIOUNITS
+/* this function has to be in a .mm file */
+extern PlugUIBase* create_au_gui (boost::shared_ptr<ARDOUR::PluginInsert>, Gtk::VBox**);
+#endif
 
 #endif /* __ardour_plugin_ui_h__ */

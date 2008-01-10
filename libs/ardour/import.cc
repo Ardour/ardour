@@ -34,11 +34,11 @@
 #include <boost/scoped_array.hpp>
 #include <boost/shared_array.hpp>
 
+#include <pbd/basename.h>
 #include <pbd/convert.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
-#include <ardour/session_directory.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
@@ -52,22 +52,19 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-std::auto_ptr<ImportableSource>
-open_importable_source (const string& path, nframes_t samplerate,
-		ARDOUR::SrcQuality quality)
+static std::auto_ptr<ImportableSource>
+open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
 	std::auto_ptr<ImportableSource> source(new ImportableSource(path));
 
 	if (source->samplerate() == samplerate) {
 		return source;
 	}
-
-	return std::auto_ptr<ImportableSource>(
-			new ResampledImportableSource(path, samplerate, quality)
-			);
+	
+	return std::auto_ptr<ImportableSource>(new ResampledImportableSource(path, samplerate, quality));
 }
 
-std::string
+static std::string
 get_non_existent_filename (const std::string& basename, uint channel, uint channels)
 {
 	char buf[PATH_MAX+1];
@@ -86,8 +83,8 @@ get_non_existent_filename (const std::string& basename, uint channel, uint chann
 		} else {
 			snprintf (buf, sizeof(buf), "%s.wav", base.c_str());
 		}
-
-		if (sys::exists (buf)) {
+		
+		if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 
 			/* if the file already exists, we must come up with
 			 *  a new name for it.  for now we just keep appending
@@ -106,27 +103,27 @@ get_non_existent_filename (const std::string& basename, uint channel, uint chann
 	return buf;
 }
 
-vector<string>
-get_paths_for_new_sources (const string& import_file_path, const string& session_dir, 
-		uint channels)
+static vector<string>
+get_paths_for_new_sources (const string& import_file_path, const string& session_dir, uint channels)
 {
 	vector<string> new_paths;
-	const string basename = sys::basename (import_file_path);
-	SessionDirectory sdir(session_dir);
+	const string basename = basename_nosuffix (import_file_path);
 
 	for (uint n = 0; n < channels; ++n) {
 
-		std::string filename = get_non_existent_filename (basename, n, channels); 
+		std::string filepath;
 
-		sys::path filepath = sdir.sound_path() / filename;
+		filepath = session_dir;
+		filepath += '/';
+		filepath += get_non_existent_filename (basename, n, channels); 
 
-		new_paths.push_back (filepath.to_string());
+		new_paths.push_back (filepath);
 	}
 
 	return new_paths;
 }
 
-bool
+static bool
 create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 		uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles)
 {
@@ -138,12 +135,12 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 		try
 		{
 			source = SourceFactory::createWritable (
-					DataType::AUDIO,
-					sess,
-					i->c_str(),
-					false, // destructive
-					samplerate
-					);
+				DataType::AUDIO,
+				sess,
+				i->c_str(),
+				false, // destructive
+				samplerate
+				);
 		}
 		catch (const failed_constructor& err)
 		{
@@ -156,29 +153,29 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 	return true;
 }
 
-Glib::ustring
+static Glib::ustring
 compose_status_message (const string& path,
-		uint file_samplerate,
-		uint session_samplerate,
-		uint current_file,
-		uint total_files)
+			uint file_samplerate,
+			uint session_samplerate,
+			uint current_file,
+			uint total_files)
 {
 	if (file_samplerate != session_samplerate) {
 		return string_compose (_("converting %1\n(resample from %2KHz to %3KHz)\n(%4 of %5)"),
-				sys::path(path).leaf(),
-				file_samplerate/1000.0f,
-				session_samplerate/1000.0f,
-				current_file, total_files);
+				       Glib::path_get_basename (path),
+				       file_samplerate/1000.0f,
+				       session_samplerate/1000.0f,
+				       current_file, total_files);
 	}
 
 	return  string_compose (_("converting %1\n(%2 of %3)"), 
-			sys::path(path).leaf(),
-			current_file, total_files);
+				Glib::path_get_basename (path),
+				current_file, total_files);
 }
 
-void
+static void
 write_audio_data_to_new_files (ImportableSource* source, Session::import_status& status,
-		vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+			       vector<boost::shared_ptr<AudioFileSource> >& newfiles)
 {
 	const nframes_t nframes = ResampledImportableSource::blocksize;
 	uint channels = source->channels();
@@ -225,10 +222,10 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 	}
 }
 
-void
+static void
 remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
 {
-	sys::remove (std::string(file_source->path()));
+	::unlink (file_source->path().c_str());
 }
 
 void
@@ -260,7 +257,7 @@ Session::import_audiofiles (import_status& status)
 		vector<string> new_paths = get_paths_for_new_sources (*p,
 				get_best_session_directory_for_new_source (),
 				source->channels());
-
+		
 		AudioSources newfiles;
 
 		status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles);
@@ -309,3 +306,4 @@ Session::import_audiofiles (import_status& status)
 
 	status.done = true;
 }
+

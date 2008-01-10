@@ -247,14 +247,14 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			step_height (true);
 			return true;
 		}
 		break;
 		
 	case GDK_SCROLL_DOWN:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			step_height (false);
 			return true;
 		}
@@ -364,11 +364,12 @@ TimeAxisView::set_height_pixels (uint32_t h)
 {
 	height = h;
 	controls_frame.set_size_request (-1, height + ((order == 0) ? 1 : 0));
-
+	//cerr << "TimeAxisView::set_height_pixels() called h = " << h << endl;//DEBUG
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
 	}
+	
 }
 
 bool
@@ -518,10 +519,7 @@ TimeAxisView::popup_display_menu (guint32 when)
 		build_display_menu ();
 	}
 
-	if (!get_selected()) {
-		editor.set_selected_track (*this, Selection::Set);
-	}
-
+	editor.set_selected_track (*this, Selection::Add);
 	display_menu->popup (1, when);	
 }
 

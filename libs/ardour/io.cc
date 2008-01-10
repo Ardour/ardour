@@ -307,12 +307,12 @@ void
 IO::collect_input (BufferSet& outs, nframes_t nframes, nframes_t offset)
 {
 	assert(outs.available() >= n_inputs());
+	
+	if (n_inputs() == ChanCount::ZERO)
+		return;
 
 	outs.set_count(n_inputs());
 	
-	if (outs.count() == ChanCount::ZERO)
-		return;
-
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		
 		BufferSet::iterator o = outs.begin(*t);
@@ -2567,3 +2567,4 @@ IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 		sigc::mem_fun (*io, &IO::bundle_ports_have_changed)
 		);
 }
+

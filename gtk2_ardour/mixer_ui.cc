@@ -422,7 +422,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 		if (_selection.selected (strip->route())) {
 			_selection.remove (strip->route());
 		} else {
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 				_selection.add (strip->route());
 			} else {
 				_selection.set (strip->route());

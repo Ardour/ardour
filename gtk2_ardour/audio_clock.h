@@ -45,7 +45,9 @@ class AudioClock : public Gtk::HBox
 	AudioClock (std::string clock_name, bool transient, std::string widget_name, bool editable, bool is_duration = false, bool with_info = false);
 
 	Mode mode() const { return _mode; }
-	
+
+	void focus ();
+
 	void set (nframes_t, bool force = false, nframes_t offset = 0, char which = 0);
 	void set_mode (Mode);
 	

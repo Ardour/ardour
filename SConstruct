@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '3.0'
+ardour_version = '2.1'
 
 subst_dict = { }
 
@@ -28,26 +28,26 @@ opts = Options('scache.conf')
 opts.AddOptions(
     ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
-    BoolOption('CMT', 'Compile with support for CMT Additions', 1),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
-    BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 1),
+    BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
+    BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
-    BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
-    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
+    BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
+    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
 )
 
 #----------------------------------------------------------------------
@@ -65,6 +65,7 @@ class LibraryInfo(Environment):
             self.Append (LIBPATH = other.get ('LIBPATH', []))
             self.Append (CPPPATH = other.get('CPPPATH', []))
             self.Append (LINKFLAGS = other.get('LINKFLAGS', []))
+            self.Append (CCFLAGS = other.get('CCFLAGS', []))
 	self.Replace(LIBPATH = list(Set(self.get('LIBPATH', []))))
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
         #doing LINKFLAGS breaks -framework
@@ -402,6 +403,29 @@ else:
         os.remove('.personal_use_only')
 
 
+####################
+# push environment
+####################
+
+def pushEnvironment(context):
+    if os.environ.has_key('PATH'):
+	context.Append(PATH = os.environ['PATH'])
+	
+    if os.environ.has_key('PKG_CONFIG_PATH'):
+	context.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
+	    
+    if os.environ.has_key('CC'):
+	context['CC'] = os.environ['CC']
+		
+    if os.environ.has_key('CXX'):
+	context['CXX'] = os.environ['CXX']
+
+    if os.environ.has_key('DISTCC_HOSTS'):
+	context['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
+	context['ENV']['HOME'] = os.environ['HOME']
+
+pushEnvironment (env)
+
 #######################
 # Dependency Checking #
 #######################
@@ -415,7 +439,7 @@ deps = \
 	'samplerate'           : '0.1.0',
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
-	'jack'                 : '0.105.0',
+	'jack'                 : '0.101.1',
 	'libgnomecanvas-2.0'   : '2.0'
 }
 
@@ -424,16 +448,22 @@ def DependenciesRequiredMessage():
 	print 'Please consult http://ardour.org/building for more information'
 
 def CheckPKGConfig(context, version):
-     context.Message( 'Checking for pkg-config version >= %s... ' %version )
-     ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
-     context.Result( ret )
-     return ret
+    context.Message( 'Checking for pkg-config version >= %s... ' %version )
+    ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
+    context.Result( ret )
+    return ret
 
 def CheckPKGVersion(context, name, version):
-     context.Message( 'Checking for %s... ' % name )
-     ret = context.TryAction('pkg-config --atleast-version=%s %s' %(version,name) )[0]
-     context.Result( ret )
-     return ret
+    context.Message( 'Checking for %s... ' % name )
+    ret = context.TryAction('pkg-config --atleast-version=%s %s' %(version,name) )[0]
+    context.Result( ret )
+    return ret
+
+def CheckPKGExists(context, name):
+    context.Message ('Checking for %s...' % name)
+    ret = context.TryAction('pkg-config --exists %s' % name)[0]
+    context.Result (ret)
+    return ret
 
 conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                                        'CheckPKGVersion' : CheckPKGVersion })
@@ -473,27 +503,30 @@ libraries['raptor'].ParseConfig('pkg-config --cflags --libs raptor')
 libraries['samplerate'] = LibraryInfo()
 libraries['samplerate'].ParseConfig('pkg-config --cflags --libs samplerate')
 
-libraries['rubberband'] = LibraryInfo()
-#
-# chris cannam's rubberband has not yet been released
-# 
-if os.path.exists ('libs/rubberband'):
-    libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
-                                           LIBPATH='#libs/rubberband/lib',
-                                           CPPPATH='#libs/rubberband/src',
-                                           CXXFLAGS='-DUSE_RUBBERBAND')
+conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
+
+if conf.CheckPKGExists ('fftw3f'):
+    libraries['fftw3f'] = LibraryInfo()
+    libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
+
+if conf.CheckPKGExists ('fftw3'):
+    libraries['fftw3'] = LibraryInfo()
+    libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
+
+env = conf.Finish ()
 
 if env['FFT_ANALYSIS']:
-	libraries['fftw3f'] = LibraryInfo()
-	libraries['fftw3f'].ParseConfig('pkg-config --cflags --libs fftw3f')
         #
         # Check for fftw3 header as well as the library
-        conf = Configure (libraries['fftw3f'])
-        if conf.CheckHeader ('fftw3.h') == False:
-                print "FFT Analysis cannot be compiled without the FFTW3 headers, which don't seem to be installed"
-                sys.exit (1)
-        libraries['fftw3f'] = conf.Finish();
+        #
 
+        conf = Configure(libraries['fftw3'])
+
+        if conf.CheckHeader ('fftw3.h') == False:
+            print ('FFT Analysis cannot be compiled without the FFTW3 headers, which do not seem to be installed')
+            sys.exit (1)            
+        conf.Finish()
+        
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 
@@ -515,12 +548,6 @@ libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
 libraries['pango'] = LibraryInfo()
 libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
 
-libraries['cairo'] = LibraryInfo()
-libraries['cairo'].ParseConfig ('pkg-config --cflags --libs cairo')
-
-libraries['gtk2-unix-print'] = LibraryInfo()
-libraries['gtk2-unix-print'].ParseConfig ('pkg-config --cflags --libs gtk+-unix-print-2.0')
-
 libraries['libgnomecanvas2'] = LibraryInfo()
 libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomecanvas-2.0')
 
@@ -541,7 +568,7 @@ libraries['gtkmm2ext'] = LibraryInfo (LIBS='gtkmm2ext', LIBPATH='#libs/gtkmm2ext
 
 # SCons should really do this for us
 
-conf = Configure (env)
+conf = env.Configure ()
 
 have_cxx = conf.TryAction (Action (str(env['CXX']) + ' --version'))
 if have_cxx[0] != 1:
@@ -559,9 +586,9 @@ env = conf.Finish()
 
 opt_flags = []
 if env['GPROFILE'] == 1:
-    debug_flags = [ '-O0', '-g', '-pg' ]
+    debug_flags = [ '-g', '-pg' ]
 else:
-    debug_flags = [ '-O0', '-g' ]
+    debug_flags = [ '-g' ]
 
 # guess at the platform, used to define compiler flags
 
@@ -728,23 +755,45 @@ if env['LIBLO']:
 
 def prep_libcheck(topenv, libinfo):
     if topenv['DIST_TARGET'] == 'panther' or topenv['DIST_TARGET'] == 'tiger':
-        #
-        # rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
-        #            All libraries needed should be built against this location
-        if topenv['GTKOSX']:
-            libinfo.Append(CCFLAGS="-I/opt/gtk/include", LINKFLAGS="-L/opt/gtk/lib")
-        libinfo.Append(CCFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
-            
+	#
+	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
+	#            All libraries needed should be built against this location
+	if topenv['GTKOSX']:
+		libinfo.Append(CPPPATH="/opt/gtk/include", LIBPATH="/opt/gtk/lib")
+		libinfo.Append(CXXFLAGS="-I/opt/gtk/include", LINKFLAGS="-L/opt/gtk/lib")
+	libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
+	libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+
 prep_libcheck(env, env)
 
 #
-# glibc backtrace API, needed everywhere if we want to do shared_ptr<T> debugging
+# check for VAMP and rubberband (currently optional)
 #
 
-conf = Configure (env)
-if conf.CheckCHeader('execinfo.h'):
-    conf.env.Append(CXXFLAGS="-DHAVE_EXECINFO")
-env = conf.Finish ()
+libraries['vamp'] = LibraryInfo()
+
+env['RUBBERBAND'] = False
+
+#conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
+#
+#if conf.CheckPKGExists('vamp-sdk'):
+#    have_vamp = True
+#    libraries['vamp'].ParseConfig('pkg-config --cflags --libs vamp-sdk')
+#else:
+#    have_vamp = False
+#
+#libraries['vamp'] = conf.Finish ()
+#
+#if have_vamp:
+#    if os.path.exists ('libs/rubberband/src'):
+#        conf = Configure (libraries['vamp'])
+#        if conf.CheckHeader ('fftw3.h'):
+#            env['RUBBERBAND'] = True
+#            libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
+#                                                   LIBPATH='#libs/rubberband',
+#                                                   CPPPATH='#libs/rubberband',
+#                                                   CCFLAGS='-DUSE_RUBBERBAND')
+#        libraries['vamp'] = conf.Finish ()
 
 #
 # Check for libusb
@@ -771,7 +820,7 @@ libraries['usb'] = conf.Finish ()
 
 libraries['flac'] = LibraryInfo ()
 prep_libcheck(env, libraries['flac'])
-libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
+libraries['flac'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
 
 #
 # june 1st 2007: look for a function that is in FLAC 1.1.2 and not in later versions
@@ -780,12 +829,14 @@ libraries['flac'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local
 #
 
 conf = Configure (libraries['flac'])
-if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_set_read_callback', language='CXX'):
+if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_init', language='CXX'):
     conf.env.Append(CCFLAGS='-DHAVE_FLAC')
     use_flac = True
 else:
     use_flac = False
+    
 libraries['flac'] = conf.Finish ()
+
 # or if that fails...
 #libraries['flac']    = LibraryInfo (LIBS='FLAC')
 
@@ -793,7 +844,7 @@ libraries['flac'] = conf.Finish ()
 
 libraries['boost'] = LibraryInfo ()
 prep_libcheck(env, libraries['boost'])
-libraries['boost'].Append(CCFLAGS="-I/usr/local/include", LINKFLAGS="-L/usr/local/lib")
+libraries['boost'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
 conf = Configure (libraries['boost'])
 if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         print "Boost header files do not appear to be installed."
@@ -834,17 +885,16 @@ else:
 libraries['dmalloc'] = conf.Finish ()
 
 #
-# Audio/MIDI library (needed for MIDI, since audio is all handled via JACK. Note, however, that
-#                     we still need ALSA & CoreAudio to discover audio devices for the engine
-#                     dialog, regardless of what MIDI subsystem is being used)
+# Audio/MIDI library (needed for MIDI, since audio is all handled via JACK)
 #
 
 conf = Configure(env)
+    
+# ALSA, for engine dialog
+libraries['asound'] = LibraryInfo ()
 
 if conf.CheckCHeader('alsa/asoundlib.h'):
-    libraries['sysaudio'] = LibraryInfo (LIBS='asound')
-elif conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/Headers/CoreAudio.h'):
-    libraries['sysaudio'] = LibraryInfo (LINKFLAGS= '-framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load')
+    libraries['asound'] = LibraryInfo (LIBS='asound')
 
 if conf.CheckCHeader('jack/midiport.h'):
     libraries['sysmidi'] = LibraryInfo (LIBS='jack')
@@ -863,14 +913,13 @@ elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/Co
     if env['GTKOSX']:
         # We need Carbon as well as the rest
         libraries['sysmidi'] = LibraryInfo (
-               LINKFLAGS = ' -framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -framework Carbon -bind_at_load' )
+	    	LINKFLAGS = ' -framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -framework Carbon -bind_at_load' )
     else:
         libraries['sysmidi'] = LibraryInfo (
 		LINKFLAGS = ' -framework CoreMIDI -framework CoreFoundation -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -bind_at_load' )
     env['SYSMIDI'] = 'CoreMIDI'
     subst_dict['%MIDITAG%'] = "ardour"
     subst_dict['%MIDITYPE%'] = "coremidi"
-    print "Using CoreMIDI"
 else:
     print "It appears you don't have the required MIDI libraries installed. For Linux this means you are missing the development package for ALSA libraries."
     sys.exit (1)
@@ -883,8 +932,7 @@ if env['SYSLIBS']:
     {
         'sigc++-2.0'           : '2.0',
         'gtkmm-2.4'            : '2.8',
-        'libgnomecanvasmm-2.6' : '2.12.0',
-        'libSoundTouch'        : '1.2.1'
+        'libgnomecanvasmm-2.6' : '2.12.0'
     }
 
     conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
@@ -912,8 +960,6 @@ if env['SYSLIBS']:
     libraries['atkmm'].ParseConfig ('pkg-config --cflags --libs atkmm-1.6')
     libraries['pangomm'] = LibraryInfo()
     libraries['pangomm'].ParseConfig ('pkg-config --cflags --libs pangomm-1.4')
-    libraries['cairomm'] = LibraryInfo()
-    libraries['cairomm'].ParseConfig ('pkg-config --cflags --libs cairomm-1.0')
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
 
@@ -930,17 +976,16 @@ if env['SYSLIBS']:
 
 #    libraries['flowcanvas'] = LibraryInfo(LIBS='flowcanvas', LIBPATH='#/libs/flowcanvas', CPPPATH='#libs/flowcanvas')
     libraries['soundtouch'] = LibraryInfo()
-    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
+    #libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs soundtouch-1.0')
     # Comment the previous line and uncomment this for Debian:
-    #libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
+    libraries['soundtouch'].ParseConfig ('pkg-config --cflags --libs libSoundTouch')
 
     libraries['appleutility'] = LibraryInfo(LIBS='libappleutility',
                                             LIBPATH='#libs/appleutility',
                                             CPPPATH='#libs/appleutility')
     
     coredirs = [
-        'templates',
-        'manual'
+        'templates'
     ]
     
     subdirs = [
@@ -972,10 +1017,7 @@ else:
                                     CPPPATH='#libs/sigc++2')
     libraries['glibmm2'] = LibraryInfo(LIBS='glibmm2',
                                     LIBPATH='#libs/glibmm2',
-                                    CPPPATH=['#libs/glibmm2/glib', '#libs/glibmm2'])
-    libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
-                                       LIBPATH="#libs/cairomm",
-                                       CPPPATH='#libs/cairomm')
+                                    CPPPATH='#libs/glibmm2')
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')
@@ -1006,9 +1048,7 @@ else:
                                             CPPPATH='#libs/appleutility')
 
     coredirs = [
-        'libs/soundtouch',
-        'templates',
-        'manual'
+        'templates'
     ]
     
     subdirs = [
@@ -1034,7 +1074,6 @@ else:
 	'libs/gtkmm2/atk',
 	'libs/gtkmm2/gdk',
 	'libs/gtkmm2/gtk',
-        'libs/cairomm',
 	'libs/libgnomecanvasmm',
 #	'libs/flowcanvas',
         'libs/gtkmm2ext',
@@ -1075,24 +1114,16 @@ else:
     env['POWERMATE'] = 0
     env['TRANZPORT'] = 0
 
+#
+# timestretch libraries
+#
+
+timefx_subdirs = ['libs/soundtouch']
+#if env['RUBBERBAND']:
+#    timefx_subdirs += ['libs/rubberband']
+    
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
-
-if os.environ.has_key('PATH'):
-    env.Append(PATH = os.environ['PATH'])
-
-if os.environ.has_key('PKG_CONFIG_PATH'):
-    env.Append(PKG_CONFIG_PATH = os.environ['PKG_CONFIG_PATH'])
-
-if os.environ.has_key('CC'):
-    env['CC'] = os.environ['CC']
-
-if os.environ.has_key('CXX'):
-    env['CXX'] = os.environ['CXX']
-
-if os.environ.has_key('DISTCC_HOSTS'):
-    env['ENV']['DISTCC_HOSTS'] = os.environ['DISTCC_HOSTS']
-    env['ENV']['HOME'] = os.environ['HOME']
 
 final_prefix = '$PREFIX'
 
@@ -1111,14 +1142,6 @@ else:
     final_config_prefix = env['PREFIX'] + '/etc'
 
 config_prefix = '$DESTDIR' + final_config_prefix
-
-# For colorgcc
-if os.environ.has_key('PATH'):
-	env['PATH'] = os.environ['PATH']
-if os.environ.has_key('TERM'):
-	env['TERM'] = os.environ['TERM']
-if os.environ.has_key('HOME'):
-	env['HOME'] = os.environ['HOME']
 
 #
 # everybody needs this
@@ -1174,8 +1197,8 @@ if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Versions/A/
     subst_dict['%JACK_INPUT%'] = "coreaudio:Built-in Audio:in"
     subst_dict['%JACK_OUTPUT%'] = "coreaudio:Built-in Audio:out"
 else:
-    subst_dict['%JACK_INPUT%'] = "system:playback_"
-    subst_dict['%JACK_OUTPUT%'] = "system:capture_"
+    subst_dict['%JACK_INPUT%'] = "alsa_pcm:playback_"
+    subst_dict['%JACK_OUTPUT%'] = "alsa_pcm:capture_"
 
 # posix_memalign available
 if not conf.CheckFunc('posix_memalign'):
@@ -1256,7 +1279,7 @@ env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
 
-for sublistdir in [ subdirs, gtk_subdirs, surface_subdirs ]:
+for sublistdir in [ subdirs, timefx_subdirs, gtk_subdirs, surface_subdirs ]:
     for subdir in sublistdir:
         SConscript (subdir + '/SConscript')
 

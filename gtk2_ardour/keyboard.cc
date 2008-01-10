@@ -43,10 +43,19 @@ guint Keyboard::delete_but = 3;
 guint Keyboard::delete_mod = GDK_SHIFT_MASK;
 guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
-uint32_t Keyboard::Control = GDK_CONTROL_MASK;
-uint32_t Keyboard::Shift = GDK_SHIFT_MASK;
-uint32_t Keyboard::Alt = GDK_MOD1_MASK;
-uint32_t Keyboard::Meta;
+#ifdef GTKOSX
+guint Keyboard::PrimaryModifier = GDK_MOD1_MASK;   // Command
+guint Keyboard::SecondaryModifier = GDK_MOD5_MASK; // Alt/Option
+guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
+guint Keyboard::CopyModifier = GDK_MOD5_MASK;      // Alt/Option
+guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+#else
+guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
+guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
+guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
+guint Keyboard::CopyModifier = GDK_CONTROL_MASK;    
+guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+#endif
 
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
@@ -82,17 +91,11 @@ Keyboard::Keyboard ()
 
 	RelevantModifierKeyMask = (GdkModifierType) gtk_accelerator_get_default_mod_mask ();
 
-	/* figure out Meta */
-
-	uint32_t possible_meta[] = { GDK_MOD2_MASK, GDK_MOD3_MASK, GDK_MOD4_MASK, GDK_MOD5_MASK, 0};
-	int i;
-
-	for (i = 0; possible_meta[i]; ++i) {
-		if (!(RelevantModifierKeyMask & possible_meta[i])) {
-			break;
-		}
-	}
-	Meta = possible_meta[i];
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | PrimaryModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | SecondaryModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | TertiaryModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | CopyModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | RangeSelectModifier);
 
 	snooper_id = gtk_key_snooper_install (_snooper, (gpointer) this);
 
@@ -164,6 +167,12 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 {
 	uint32_t keyval;
 
+#if 0
+	cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 
+	     << " state " << std::hex << event->state << std::dec
+	     << endl;
+#endif
+
 #if KBD_DEBUG
 	if (debug_keyboard) {
 		cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 
@@ -186,7 +195,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		if (find (state.begin(), state.end(), keyval) == state.end()) {
 			state.push_back (keyval);
 			sort (state.begin(), state.end());
-		}
+		} 
 
 	} else if (event->type == GDK_KEY_RELEASE) {
 
@@ -199,7 +208,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 
 	}
 
-	if (event->type == GDK_KEY_RELEASE && event->keyval == GDK_w && modifier_state_equals (event->state, Control)) {
+	if (event->type == GDK_KEY_RELEASE && event->keyval == GDK_w && modifier_state_equals (event->state, PrimaryModifier)) {
 		if (current_window) {
 			current_window->hide ();
 			current_window = 0;
@@ -279,15 +288,11 @@ Keyboard::set_delete_modifier (guint mod)
 }
 
 void
-Keyboard::set_meta_modifier (guint mod)
+Keyboard::set_modifier (uint32_t newval, uint32_t& var)
 {
-	/* we don't include Meta in the RelevantModifierKeyMask because its not used
-	   in the same way as snap_mod, delete_mod etc. the only reason we allow it to be
-	   set at all is that X Window has no convention for the keyboard modifier
-	   that Meta should use. Some Linux distributions bind NumLock to Mod2, which
-	   is our default Meta modifier, and this causes severe problems.
-	*/
-	Meta = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~var);
+	var = newval;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | var);
 }
 
 void
@@ -346,9 +351,9 @@ Keyboard::selection_type (guint state)
 {
 	/* note that there is no modifier for "Add" */
 
-	if (modifier_state_equals (state, Shift)) {
+	if (modifier_state_equals (state, RangeSelectModifier)) {
 		return Selection::Extend;
-	} else if (modifier_state_equals (state, Control)) {
+	} else if (modifier_state_equals (state, PrimaryModifier)) {
 		return Selection::Toggle;
 	} else {
 		return Selection::Set;

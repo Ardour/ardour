@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <string>
+#include <list>
 
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>
@@ -150,6 +151,14 @@ ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 	return known;
 }
 
+struct SortActionsByLabel {
+    bool operator() (Glib::RefPtr<Gtk::Action> a, Glib::RefPtr<Gtk::Action> b) {
+	    ustring astr = a->get_accel_path();
+	    ustring bstr = b->get_accel_path();
+	    return astr < bstr;
+    }
+};
+
 void
 ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
 {
@@ -162,18 +171,29 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 	GList* acts;
 
 	for (node = list; node; node = g_list_next (node)) {
-
+		
 		GtkActionGroup* group = (GtkActionGroup*) node->data;
+		
+		/* first pass: collect them all */
+		
+		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
+		action_list the_acts;
 
 		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
-
 			GtkAction* action = (GtkAction*) acts->data;
+			the_acts.push_back (Glib::wrap (action, true));
+		}
+		
+		/* now sort by label */
+		
+		SortActionsByLabel cmp;
+		the_acts.sort (cmp);
 
-			Glib::RefPtr<Action> act = Glib::wrap (action, true);
+		for (action_list::iterator a = the_acts.begin(); a != the_acts.end(); ++a) {
 
-			string accel_path = act->get_accel_path ();
-			ustring label = act->property_label();
-			
+			string accel_path = (*a)->get_accel_path ();
+			ustring label = (*a)->property_label();
+
 			names.push_back (label);
 			paths.push_back (accel_path);
 			

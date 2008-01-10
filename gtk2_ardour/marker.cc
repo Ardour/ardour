@@ -33,7 +33,7 @@ using namespace ARDOUR;
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
 		Type type, nframes_t frame, bool handle_events)
 
-	: editor (ed), _type(type)
+	: editor (ed), _parent(&parent), _type(type)
 {
 	double label_offset = 0;
 	bool annotate_left = false;
@@ -273,6 +273,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 }
 
+
 Marker::~Marker ()
 {
 	drop_references ();
@@ -285,6 +286,21 @@ Marker::~Marker ()
 	if (line) {
 		delete line;
 		delete line_points;
+	}
+}
+
+void Marker::reparent(ArdourCanvas::Group & parent)
+{
+	group->reparent(parent);
+	_parent = &parent;
+}
+
+void
+Marker::set_line_length (double len)
+{
+	if (line) {
+		line_points->back().set_y (len);
+		line->property_points() = *line_points;
 	}
 }
 
@@ -301,12 +317,13 @@ Marker::add_line (ArdourCanvas::Group* group, double initial_height)
 		line->property_width_pixels() = 1;
 		line->property_points() = *line_points;
 		line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
+#if 0
 		line->property_first_arrowhead() = TRUE;
 		line->property_last_arrowhead() = TRUE;
 		line->property_arrow_shape_a() = 11.0;
 		line->property_arrow_shape_b() = 0.0;
 		line->property_arrow_shape_c() = 9.0;
-
+#endif
 		line->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 	}
 
@@ -383,6 +400,7 @@ void
 Marker::set_color_rgba (uint32_t color)
 {
 	mark->property_fill_color_rgba() = color;
+	mark->property_outline_color_rgba() = color;
 }
 
 /***********************************************************************/

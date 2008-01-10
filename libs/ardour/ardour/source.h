@@ -63,6 +63,8 @@ class Source : public SessionObject
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 	
+	virtual bool destructive() const { return false; }
+	
 	void use () { _in_use++; }
 	void disuse () { if (_in_use) { _in_use--; } }
 	

@@ -345,7 +345,8 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
-			_session.engine().frame_rate());
+			_session.engine().frame_rate(),
+			_session.tempo_map().meter_at(_timeline_position));
 	
 	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * _ppqn);
 
@@ -456,8 +457,9 @@ SMFSource::append_event_unlocked(const MidiEvent& ev)
 	assert(ev.time() >= _last_ev_time);
 	
 	// FIXME: assumes tempo never changes after start
-	const double frames_per_beat = _session.tempo_map().tempo_at
-			(_timeline_position).frames_per_beat(_session.engine().frame_rate());
+	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
+			_session.engine().frame_rate(),
+			_session.tempo_map().meter_at(_timeline_position));
 	
 	const uint32_t delta_time = (uint32_t)((ev.time() - _last_ev_time) / frames_per_beat * _ppqn);
 
@@ -888,7 +890,8 @@ SMFSource::load_model(bool lock, bool force_reload)
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
-			_session.engine().frame_rate());
+			_session.engine().frame_rate(),
+			_session.tempo_map().meter_at(_timeline_position));
 	
 	uint32_t delta_t = 0;
 	int ret;

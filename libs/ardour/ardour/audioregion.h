@@ -76,8 +76,10 @@ class AudioRegion : public Region
 				      uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 	
 	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,
-				   float *gain_buf, nframes_t position, nframes_t cnt, 
-				   uint32_t       chan_n      = 0) const;
+			float *gain_buf, nframes_t position, nframes_t cnt, 
+			uint32_t  chan_n      = 0,
+			nframes_t read_frames = 0,
+			nframes_t skip_frames = 0) const;
 	
 	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, 
 					  float *gain_buf,
@@ -146,8 +148,10 @@ class AudioRegion : public Region
 	void recompute_gain_at_start ();
 
 	nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
-			    float *gain_buffer, nframes_t position, nframes_t cnt, 
-			    uint32_t chan_n = 0) const;
+				 float *gain_buffer, nframes_t position, nframes_t cnt, 
+				 uint32_t chan_n = 0,
+				 nframes_t read_frames = 0,
+				 nframes_t skip_frames = 0) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
@@ -174,13 +178,6 @@ class AudioRegion : public Region
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
 
 	int set_live_state (const XMLNode&, Change&, bool send);
-	
-	virtual bool verify_start (nframes_t);
-	virtual bool verify_start_and_length (nframes_t, nframes_t);
-	virtual bool verify_start_mutable (nframes_t&_start);
-	virtual bool verify_length (nframes_t);
-	/*virtual void recompute_at_start () = 0;
-	virtual void recompute_at_end () = 0;*/
 };
 
 } /* namespace ARDOUR */

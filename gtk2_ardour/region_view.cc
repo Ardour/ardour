@@ -123,6 +123,8 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	wait_for_data   = wfd;
 	sync_mark     = 0;
 	sync_line     = 0;
+	sync_mark     = 0;
+	sync_line     = 0;
 
 	compute_colors (basic_color);
 
@@ -131,8 +133,6 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	if (name_text) {
 		name_text->set_data ("regionview", this);
 	}
-
-	//reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	if (wfd)
 		_enable_display = true;
@@ -385,8 +385,8 @@ RegionView::fake_set_opaque (bool yn)
        } else {
                fill_opacity = 60;
        }
-
-       TimeAxisViewItem::set_frame_color ();
+       
+       set_frame_color ();
 }
 
 void
@@ -500,7 +500,7 @@ RegionView::region_sync_changed ()
 
 			points.clear ();
 			points.push_back (Gnome::Art::Point (offset, 0));
-			points.push_back (Gnome::Art::Point (offset, _height - NAME_HIGHLIGHT_SIZE));
+			points.push_back (Gnome::Art::Point (offset, trackview.height - NAME_HIGHLIGHT_SIZE));
 
 			sync_line->property_points().set_value (points);
 			sync_line->show ();

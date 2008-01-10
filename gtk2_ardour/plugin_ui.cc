@@ -64,41 +64,42 @@ using namespace sigc;
 PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes64_t sr, nframes64_t period, bool scrollable)
 	: ArdourDialog ("plugin ui")
 {
+	bool have_gui = false;
+	non_gtk_gui = false;
+
 	if (insert->plugin()->has_editor()) {
+		switch (insert->type()) {
+		case ARDOUR::VST:
+			have_gui = create_vst_editor (insert);
+			break;
 
-#ifdef VST_SUPPORT
+		case ARDOUR::AudioUnit:
+			have_gui = create_audiounit_editor (insert);
+			break;
+			
+		case ARDOUR::LADSPA:
+			error << _("Eh? LADSPA plugins don't have editors!") << endmsg;
+			break;
 
-		boost::shared_ptr<VSTPlugin> vp;
-
-		if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (insert->plugin())) != 0) {
-			
-			
-			VSTPluginUI* vpu = new VSTPluginUI (insert, vp, session.frame_rate(), session.engine().frames_per_cycle());
-			
-			_pluginui = vpu;
-			get_vbox()->add (*vpu);
-			vpu->package (*this);
-			
-		} else {
-#endif
+		default:
 			error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
 			      << endmsg;
 			throw failed_constructor ();
-#ifdef VST_SUPPORT
 		}
-#endif
 
-	} else {
+	} 
 
-		LadspaPluginUI*  pu  = new LadspaPluginUI (insert, sr, period, scrollable);
+	if (!have_gui) {
+
+		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
 		
 		_pluginui = pu;
 		get_vbox()->add (*pu);
 		
 		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 
-		signal_map_event().connect (mem_fun (*pu, &LadspaPluginUI::start_updating));
-		signal_unmap_event().connect (mem_fun (*pu, &LadspaPluginUI::stop_updating));
+		signal_map_event().connect (mem_fun (*pu, &GenericPluginUI::start_updating));
+		signal_unmap_event().connect (mem_fun (*pu, &GenericPluginUI::stop_updating));
 	}
 
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -108,12 +109,19 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
 	insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
 
+	gint h = _pluginui->get_preferred_height ();
+	gint w = _pluginui->get_preferred_width ();
+
 	if (scrollable) {
-		gint h = _pluginui->get_preferred_height ();
 		if (h > 600) h = 600;
-		set_default_size (450, h); 
+		if (w > 600) w = 600;
+
+		if (w < 0) {
+			w = 450;
+		}
 	}
 
+	set_default_size (w, h); 
 }
 
 PluginUIWindow::~PluginUIWindow ()
@@ -121,8 +129,67 @@ PluginUIWindow::~PluginUIWindow ()
 }
 
 bool
+PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
+{
+#ifndef VST_SUPPORT
+	return false;
+#else
+
+	boost::shared_ptr<VSTPlugin> vp;
+
+	if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (insert->plugin())) == 0) {
+		error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
+			      << endmsg;
+		throw failed_constructor ();
+	} else {
+		VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
+	
+		_pluginui = vpu;
+		get_vbox()->add (*vpu);
+		vpu->package (*this);
+	}
+
+	non_gtk_gui = true;
+	return true;
+#endif
+}
+
+bool
+PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
+{
+#if !defined(HAVE_AUDIOUNITS) || !defined(GTKOSX)
+	return false;
+#else
+	VBox* box;
+	_pluginui = create_au_gui (insert, &box);
+	get_vbox()->add (*box);
+	non_gtk_gui = true;
+
+	extern sigc::signal<void,bool> ApplicationActivationChanged;
+	ApplicationActivationChanged.connect (mem_fun (*this, &PluginUIWindow::app_activated));
+
+	return true;
+#endif
+}
+
+void
+PluginUIWindow::app_activated (bool yn)
+{
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+	if (yn) {
+		_pluginui->activate ();
+	}
+	cerr << "activated ? " << yn << endl;
+#endif
+}
+
+bool
 PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
+	if (non_gtk_gui) {
+		return false;
+	}
+
 	if (!key_press_focus_accelerator_handler (*this, event)) {
 		return PublicEditor::instance().on_key_press_event(event);
 	} else {
@@ -145,12 +212,12 @@ PluginUIWindow::plugin_going_away ()
 	delete_when_idle (this);
 }
 
-PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi, nframes64_t sr, nframes64_t period)
+PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	: insert (pi),
 	  plugin (insert->plugin()),
 	  save_button(_("Add")),
 	  bypass_button (_("Bypass")),
-	  latency_gui (*pi, sr, period)
+	  latency_gui (*pi, pi->session().frame_rate(), pi->session().get_block_size())
 {
         //combo.set_use_arrows_always(true);
 	set_popdown_strings (combo, plugin->get_presets());

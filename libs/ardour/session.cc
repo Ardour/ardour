@@ -97,6 +97,14 @@ static const int CPU_CACHE_ALIGN = 64;
 static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
 #endif
 
+bool Session::_disable_all_loaded_plugins = false;
+
+Session::compute_peak_t          Session::compute_peak          = 0;
+Session::find_peaks_t            Session::find_peaks            = 0;
+Session::apply_gain_to_buffer_t  Session::apply_gain_to_buffer  = 0;
+Session::mix_buffers_with_gain_t Session::mix_buffers_with_gain = 0;
+Session::mix_buffers_no_gain_t   Session::mix_buffers_no_gain   = 0;
+
 sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<void> Session::SendFeedback;
 
@@ -105,9 +113,9 @@ sigc::signal<void> Session::StartTimeChanged;
 sigc::signal<void> Session::EndTimeChanged;
 
 Session::Session (AudioEngine &eng,
-		  string fullpath,
-		  string snapshot_name,
-		  string* mix_template)
+		  const string& fullpath,
+		  const string& snapshot_name,
+		  string mix_template)
 
 	: _engine (eng),
 	  _scratch_buffers(new BufferSet()),
@@ -127,62 +135,29 @@ Session::Session (AudioEngine &eng,
 	  _click_io ((IO*) 0),
 	  main_outs (0)
 {
+	bool new_session;
+
 	if (!eng.connected()) {
 		throw failed_constructor();
 	}
+	
+	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
 	n_physical_outputs = _engine.n_physical_outputs();
 	n_physical_inputs =  _engine.n_physical_inputs();
 
 	first_stage_init (fullpath, snapshot_name);
 
-	initialize_start_and_end_locations(0, compute_initial_length ());
-
-	if(mix_template) {
-		// try and create a new session directory
-		try
-		{
-			if(!_session_dir->create()) {
-				// an existing session.
-				// throw a_more_meaningful_exception()
-				destroy ();
-				throw failed_constructor ();
-			}
-		}
-		catch(sys::filesystem_error& ex)
-		{
+	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	if (new_session) {
+		if (create (new_session, mix_template, compute_initial_length())) {
+			cerr << "create failed\n";
 			destroy ();
 			throw failed_constructor ();
 		}
-
-		if(!create_session_file_from_template (*mix_template)) {
-			destroy ();
-			throw failed_constructor ();
-		}
-
-		cerr << "Creating session " << fullpath
-			<<" using template" << *mix_template
-			<< endl;
-	} else {
-		// must be an existing session
-		try
-		{
-			// ensure the necessary session subdirectories exist
-			// in case the directory structure has changed etc.
-			_session_dir->create();
-		}
-		catch(sys::filesystem_error& ex)
-		{
-			destroy ();
-			throw failed_constructor ();
-		}
-
-		cerr << "Loading session " << fullpath
-			<< " using snapshot " << snapshot_name << " (1)"
-			<< endl;
 	}
-
-	if (second_stage_init (false)) {
+	
+	if (second_stage_init (new_session)) {
 		destroy ();
 		throw failed_constructor ();
 	}
@@ -228,6 +203,8 @@ Session::Session (AudioEngine &eng,
 	  main_outs (0)
 
 {
+	bool new_session;
+
 	if (!eng.connected()) {
 		throw failed_constructor();
 	}
@@ -247,11 +224,13 @@ Session::Session (AudioEngine &eng,
 
 	first_stage_init (fullpath, snapshot_name);
 
-	initialize_start_and_end_locations(0, initial_length);
-	
-	if (!_session_dir->create () || !create_session_file ())	{
-		destroy ();
-		throw failed_constructor ();
+	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+
+	if (new_session) {
+		if (create (new_session, string(), initial_length)) {
+			destroy ();
+			throw failed_constructor ();
+		}
 	}
 
 	{
@@ -286,7 +265,7 @@ Session::Session (AudioEngine &eng,
 	Config->set_input_auto_connect (input_ac);
 	Config->set_output_auto_connect (output_ac);
 
-	if (second_stage_init (true)) {
+	if (second_stage_init (new_session)) {
 		destroy ();
 		throw failed_constructor ();
 	}
@@ -3273,7 +3252,7 @@ Session::midi_path_from_name (string name)
 
 	return spath;
 }
-
+	
 boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (MidiDiskstream& ds)
 {

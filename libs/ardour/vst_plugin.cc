@@ -142,7 +142,7 @@ VSTPlugin::get_state()
 {
 	XMLNode *root = new XMLNode (state_node_name());
 	LocaleGuard lg (X_("POSIX"));
-	
+
 	if (_plugin->flags & effFlagsProgramChunks) {
 
 		/* fetch the current chunk */
@@ -418,10 +418,12 @@ VSTPlugin::activate ()
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 1, NULL, 0.0f);
 }
 
-uint32_t 
+string
 VSTPlugin::unique_id() const
 {
-	return _plugin->uniqueID;
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%d", _plugin->uniqueID);
+	return string (buf);
 }
 
 

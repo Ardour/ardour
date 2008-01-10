@@ -260,7 +260,8 @@ Crossfade::read_raw_internal (Sample* buf, nframes_t start, nframes_t cnt) const
 
 nframes_t 
 Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
-		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n) const
+		    float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n,
+		    nframes_t read_frames, nframes_t skip_frames) const
 {
 	nframes_t offset;
 	nframes_t to_write;
@@ -301,9 +302,9 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 	} else if (!(_in->opaque())) {
 		memset (crossfade_buffer_in, 0, sizeof (Sample) * to_write);
 	}
-	
-	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n);
-	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n);
+
+	_out->read_at (crossfade_buffer_out, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
+	_in->read_at (crossfade_buffer_in, mixdown_buffer, gain_buffer, start, to_write, chan_n, read_frames, skip_frames);
 
 	float* fiv = new float[to_write];
 	float* fov = new float[to_write];

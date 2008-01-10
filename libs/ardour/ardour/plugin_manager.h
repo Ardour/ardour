@@ -40,6 +40,7 @@ class PluginManager {
 
 	ARDOUR::PluginInfoList &vst_plugin_info () { return _vst_plugin_info; }
 	ARDOUR::PluginInfoList &ladspa_plugin_info () { return _ladspa_plugin_info; }
+	ARDOUR::PluginInfoList &au_plugin_info () { return _au_plugin_info; }
 
 	void refresh ();
 
@@ -51,6 +52,8 @@ class PluginManager {
   private:
 	ARDOUR::PluginInfoList _vst_plugin_info;
 	ARDOUR::PluginInfoList _ladspa_plugin_info;
+	ARDOUR::PluginInfoList _au_plugin_info;
+	
 	std::map<uint32_t, std::string> rdf_type;
 
 	std::string ladspa_path;
@@ -64,6 +67,9 @@ class PluginManager {
 	void add_vst_presets ();
 	void add_presets (std::string domain);
 
+	int au_discover ();
+	void au_refresh ();
+
 	int vst_discover_from_path (std::string path);
 	int vst_discover (std::string path);
 
@@ -71,6 +77,7 @@ class PluginManager {
 	int ladspa_discover (std::string path);
 
 	std::string get_ladspa_category (uint32_t id);
+	std::vector<uint32_t> ladspa_plugin_whitelist;
 
 	static PluginManager* _manager; // singleton
 };

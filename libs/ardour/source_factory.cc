@@ -60,7 +60,7 @@ peak_thread_work ()
 		if (SourceFactory::files_with_peaks.empty()) {
 			goto wait;
 		}
-		
+
 		boost::shared_ptr<AudioSource> as (SourceFactory::files_with_peaks.front().lock());
 		SourceFactory::files_with_peaks.pop_front ();
 		SourceFactory::peak_building_lock.unlock ();
@@ -68,7 +68,6 @@ peak_thread_work ()
 		if (!as) {
 			continue;
 		}
-
 		as->setup_peakfile ();
 	}
 }

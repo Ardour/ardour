@@ -26,23 +26,23 @@
 using namespace ARDOUR;
 using namespace std;
 
-MidiPort::MidiPort (const std::string& name, Flags flags, bool external, nframes_t bufsize)
+MidiPort::MidiPort (const std::string& name, Flags flags, bool external, nframes_t capacity)
 	: Port (name, flags)
 	, BaseMidiPort (name, flags)
 	, PortFacade (name, flags)
 {
-	set_name (name);
+	_buffer = new MidiBuffer (capacity);
 
-	_buffer = new MidiBuffer (bufsize);
-
-	cout << "MIDI port "  << name << " external: " << external << endl;
-
-	if (!external) {
-		_ext_port = 0;
-	} else {
+	if (external) {
+		/* external ports use the same buffer for the jack port (_ext_port)
+		 * and internal ports (this) */
 		_ext_port = new JackMidiPort (name, flags, _buffer);
+	} else {
+		/* internal ports just have a single buffer, no jack port */
+		_ext_port = 0;
 	}
 
+	set_name (name);
 	reset ();
 }
 
@@ -70,7 +70,6 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 	/* caller must hold process lock */
 	
 	if (_ext_port) {
-		// cout << "external\n";
 		_ext_port->cycle_start (nframes, offset);
 	}
 	
@@ -78,11 +77,9 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 			
 		if (_ext_port) {
 		
-			// cout << "external in\n";
-
-			_buffer->read_from (dynamic_cast<BaseMidiPort*>(_ext_port)->get_midi_buffer(), nframes, offset);
-
-			// cout << "read " << _buffer->size() << " events." << endl;
+			BaseMidiPort* mprt = dynamic_cast<BaseMidiPort*>(_ext_port);
+			assert(mprt);
+			assert(&mprt->get_midi_buffer() == _buffer);
 
 			if (!_connections.empty()) {
 				(*_mixdown) (_connections, _buffer, nframes, offset, false);
@@ -90,8 +87,6 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 
 		} else {
 		
-			// cout << "internal in\n";
-
 			if (_connections.empty()) {
 				_buffer->silence (nframes, offset);
 			} else {
@@ -101,10 +96,6 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 
 	} else {
 			
-		// cout << "out\n";
-		
 		_buffer->silence (nframes, offset);
 	}
-
-	// cout << endl;
 }

@@ -43,6 +43,10 @@
 #include <ardour/vst_plugin.h>
 #endif
 
+#ifdef HAVE_AUDIOUNITS
+#include <ardour/audio_unit.h>
+#endif
+
 #include <pbd/error.h>
 #include <pbd/stl_delete.h>
 
@@ -84,10 +88,23 @@ PluginManager::PluginManager ()
 		vst_path = s;
 	}
 
-	refresh ();
 	if (_manager == 0) {
 		_manager = this;
 	}
+
+	/* the plugin manager is constructed too early to use Profile */
+
+	if (getenv ("ARDOUR_SAE")) {
+		ladspa_plugin_whitelist.push_back (1203); // single band parametric
+		ladspa_plugin_whitelist.push_back (1772); // caps compressor
+		ladspa_plugin_whitelist.push_back (1913); // fast lookahead limiter
+		ladspa_plugin_whitelist.push_back (1075); // simple RMS expander
+		ladspa_plugin_whitelist.push_back (1061); // feedback delay line (max 5s)
+		ladspa_plugin_whitelist.push_back (1216); // gverb
+		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
+	} 
+
+	refresh ();
 }
 
 void
@@ -99,6 +116,9 @@ PluginManager::refresh ()
 		vst_refresh ();
 	}
 #endif // VST_SUPPORT
+#ifdef HAVE_AUDIOUNITS
+	au_refresh ();
+#endif
 }
 
 void
@@ -112,6 +132,7 @@ PluginManager::ladspa_refresh ()
 
 	ladspa_discover_from_path (ladspa_path);
 }
+
 
 int
 PluginManager::add_ladspa_directory (string path)
@@ -248,6 +269,12 @@ PluginManager::ladspa_discover (string path)
 			break;
 		}
 
+		if (!ladspa_plugin_whitelist.empty()) {
+			if (find (ladspa_plugin_whitelist.begin(), ladspa_plugin_whitelist.end(), descriptor->UniqueID) == ladspa_plugin_whitelist.end()) {
+				continue;
+			}
+		} 
+
 		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;
 		info->category = get_ladspa_category(descriptor->UniqueID);
@@ -257,7 +284,10 @@ PluginManager::ladspa_discover (string path)
 		info->n_inputs = ChanCount();
 		info->n_outputs = ChanCount();
 		info->type = ARDOUR::LADSPA;
-		info->unique_id = descriptor->UniqueID;
+		
+		char buf[32];
+		snprintf (buf, sizeof (buf), "%lu", descriptor->UniqueID);
+		info->unique_id = buf;
 		
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
 			if ( LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n]) ) {
@@ -294,7 +324,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_statement* matches1 = lrdf_matches (&pattern);
 
 	if (!matches1) {
-		return _("Unknown");
+		return _("");
 	}
 
 	pattern.subject = matches1->object;
@@ -306,7 +336,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_free_statements(matches1);
 
 	if (!matches2) {
-		return _("Unknown");
+		return _("");
 	}
 
 	string label = matches2->object;
@@ -314,6 +344,22 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 
 	return label;
 }
+
+#ifdef HAVE_AUDIOUNITS
+void
+PluginManager::au_refresh ()
+{
+	au_discover();
+}
+
+int
+PluginManager::au_discover ()
+{
+	_au_plugin_info = AUPluginInfo::discover();
+	return 0;
+}
+
+#endif
 
 #ifdef VST_SUPPORT
 
@@ -373,6 +419,7 @@ int
 PluginManager::vst_discover (string path)
 {
 	FSTInfo* finfo;
+	char buf[32];
 
 	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
 		warning << "Cannot get VST information from " << path << endmsg;
@@ -395,6 +442,9 @@ PluginManager::vst_discover (string path)
 		info->name = finfo->name;
 	}
 
+	
+	snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
+	info->unique_id = buf;
 	info->category = "VST";
 	info->path = path;
 	// need to set info->creator but FST doesn't provide it

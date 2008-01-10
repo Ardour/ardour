@@ -26,6 +26,7 @@
 #include <gtkmm2ext/window_title.h>
 
 #include <ardour/location.h>
+#include <ardour/profile.h>
 #include <pbd/memento_command.h>
 
 #include "editor.h"
@@ -77,9 +78,15 @@ Editor::add_new_location (Location *location)
 	}
 
 	if (location->is_mark()) {
-		lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
-		lam->end   = 0;
 
+		if (location->is_cd_marker() && ruler_shown[ruler_time_cd_marker]) {
+			lam->start = new Marker (*this, *cd_marker_group, color, location->name(), Marker::Mark, location->start());
+		}
+		else {
+			lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
+		}
+		lam->end   = 0;
+			
 	} else if (location->is_auto_loop()) {
 		// transport marker
 		lam->start = new Marker (*this, *transport_marker_group, color, 
@@ -95,12 +102,20 @@ Editor::add_new_location (Location *location)
 					 location->name(), Marker::PunchOut, location->end());
 		
 	} else {
-
 		// range marker
-		lam->start = new Marker (*this, *range_marker_group, color, 
-					 location->name(), Marker::Start, location->start());
-		lam->end   = new Marker (*this, *range_marker_group, color, 
-					 location->name(), Marker::End, location->end());
+		if (location->is_cd_marker() && ruler_shown[ruler_time_cd_marker]) {
+			lam->start = new Marker (*this, *cd_marker_group, color, 
+						 location->name(), Marker::Start, location->start());
+			lam->end   = new Marker (*this, *cd_marker_group, color, 
+						 location->name(), Marker::End, location->end());
+		}
+		else {
+			
+			lam->start = new Marker (*this, *range_marker_group, color, 
+						 location->name(), Marker::Start, location->start());
+			lam->end   = new Marker (*this, *range_marker_group, color, 
+						 location->name(), Marker::End, location->end());
+		}
 	}
 
 	if (location->is_hidden ()) {
@@ -121,6 +136,11 @@ Editor::add_new_location (Location *location)
 	newpair.second = lam;
 
 	location_markers.insert (newpair);
+
+	if (select_new_marker && location->is_mark()) {
+		selection->set (lam->start);
+		select_new_marker = false;
+	}
 }
 
 void
@@ -157,6 +177,9 @@ Editor::location_flags_changed (Location *location, void *src)
 		return;
 	}
 
+	// move cd markers to/from cd marker bar as appropriate
+	ensure_cd_marker_updated (lam, location);
+
 	if (location->is_cd_marker()) {
 		lam->set_color_rgba (location_cd_marker_color);
 	} else if (location->is_mark()) {
@@ -173,6 +196,52 @@ Editor::location_flags_changed (Location *location, void *src)
 		lam->hide();
 	} else {
 		lam->show ();
+	}
+}
+
+void Editor::update_cd_marker_display ()
+{
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		LocationMarkers * lam = i->second;
+		Location * location = i->first;
+
+		ensure_cd_marker_updated (lam, location);
+	}
+}
+
+void Editor::ensure_cd_marker_updated (LocationMarkers * lam, Location * location)
+{
+	if (location->is_cd_marker()
+	    && (ruler_shown[ruler_time_cd_marker] &&  lam->start->get_parent() != cd_marker_group))
+	{
+		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
+		if (lam->start) {
+			lam->start->reparent (*cd_marker_group);
+		}
+		if (lam->end) {
+			lam->end->reparent (*cd_marker_group);
+		}
+	}
+	else if ( (!location->is_cd_marker() || !ruler_shown[ruler_time_cd_marker]) 
+		  && (lam->start->get_parent() == cd_marker_group))  
+	{
+		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
+		if (location->is_mark()) {
+			if (lam->start) {
+				lam->start->reparent (*marker_group);
+			}
+			if (lam->end) {
+				lam->end->reparent (*marker_group);
+			}
+		}
+		else {
+			if (lam->start) {
+				lam->start->reparent (*range_marker_group);
+			}
+			if (lam->end) {
+				lam->end->reparent (*range_marker_group);
+			}
+		}
 	}
 }
 
@@ -319,12 +388,14 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 }
 
 void
-Editor::mouse_add_new_marker (nframes_t where)
+Editor::mouse_add_new_marker (nframes_t where, bool is_cd)
 {
 	string markername;
+	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
+	
 	if (session) {
 		session->locations()->next_available_name(markername,"mark");
-		Location *location = new Location (where, where, markername, Location::IsMark);
+		Location *location = new Location (where, where, markername, (Location::Flags) flags);
 		session->begin_reversible_command (_("add marker"));
                 XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);
@@ -351,6 +422,10 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent* event)
 	if ((marker = static_cast<Marker*> (item.get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
+	}
+
+	if (entered_marker == marker) {
+		entered_marker = NULL;
 	}
 
 	Location* loc = find_location_from_marker (marker, is_start);
@@ -535,19 +610,21 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
+	items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::marker_menu_play_range)));
 	items.push_back (MenuElem (_("Locate to Range Mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Range Mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
 	if (! loop_or_punch) {
-		items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::marker_menu_play_range)));
 		items.push_back (MenuElem (_("Loop Range"), mem_fun(*this, &Editor::marker_menu_loop_range)));
 	}
 	items.push_back (MenuElem (_("Set Range Mark from Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
-	items.push_back (MenuElem (_("Set Range from Range Selection"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Set Range from Range Selection"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+	}
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
 	if (! loop_or_punch) {
+		items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range"), mem_fun(*this, &Editor::marker_menu_rename)));
 		items.push_back (MenuElem (_("Remove Range"), mem_fun(*this, &Editor::marker_menu_remove)));
 	}
@@ -556,8 +633,9 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 
 	items.push_back (MenuElem (_("Separate Regions in Range"), mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
 	items.push_back (MenuElem (_("Select All in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
-	items.push_back (MenuElem (_("Select Range"), mem_fun(*this, &Editor::marker_menu_select_using_range)));
-
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Select Range"), mem_fun(*this, &Editor::marker_menu_select_using_range)));
+	}
 }
 
 void
@@ -736,13 +814,13 @@ Editor::marker_menu_set_from_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			l->set_start (session->transport_frame ());
+			l->set_start (session->audible_frame ());
 		}
 		else {
 			if (is_start) {
-				l->set_start (session->transport_frame ());
+				l->set_start (session->audible_frame ());
 			} else {
-				l->set_end (session->transport_frame ());
+				l->set_end (session->audible_frame ());
 			}
 		}
 	}
@@ -1027,8 +1105,14 @@ Editor::update_punch_range_view (bool visibility)
 		double x1 = frame_to_pixel (tpl->start());
 		double x2 = frame_to_pixel (tpl->end());
 		
+		guint track_canvas_width,track_canvas_height;
+		track_canvas.get_size(track_canvas_width,track_canvas_height);
+		
 		transport_punch_range_rect->property_x1() = x1;
 		transport_punch_range_rect->property_x2() = x2;
+		
+		transport_punch_range_rect->property_x1() = (Config->get_punch_in() ? x1 : 0);
+		transport_punch_range_rect->property_x2() = (Config->get_punch_out() ? x2 : track_canvas_width);
 		
 		if (visibility) {
 		        transport_punch_range_rect->show();
@@ -1107,4 +1191,34 @@ void
 Editor::selected_marker_moved (Location* loc)
 {
 	edit_point_clock.set (loc->start());
+}
+
+struct SortLocationsByPosition { 
+    bool operator() (Location* a, Location* b) {
+	    return a->start() < b->start();
+    }
+};
+
+void
+Editor::goto_nth_marker (int n)
+{
+	if (!session) {
+		return;
+	}
+	const Locations::LocationList& l (session->locations()->list());
+	Locations::LocationList ordered;
+	ordered = l;
+
+	SortLocationsByPosition cmp;
+	ordered.sort (cmp);
+	
+	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
+		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_start()) {
+			if (n == 0) {
+				session->request_locate ((*i)->start(), session->transport_rolling());
+				break;
+			}
+			--n;
+		}
+	}
 }

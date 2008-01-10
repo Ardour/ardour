@@ -678,6 +678,11 @@ LocationUI::~LocationUI()
 {
 }
 
+void LocationUI::on_show()
+{
+	ArdourDialog::on_show();
+	refresh_location_list();
+}
 
 
 gint LocationUI::do_location_remove (ARDOUR::Location *loc)
@@ -855,6 +860,9 @@ LocationUI::refresh_location_list ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &LocationUI::refresh_location_list));
 	using namespace Box_Helpers;
+
+	// this is just too expensive to do when window is not shown
+	if (!is_visible()) return;
 
 	BoxList & loc_children = location_rows.children();
 	BoxList & range_children = range_rows.children();

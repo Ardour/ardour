@@ -113,6 +113,9 @@ Editor::initialize_canvas ()
 	track_canvas.signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
 	track_canvas.signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
 
+	/* just scroll stuff for the timecanvas */
+	time_canvas.signal_scroll_event().connect (mem_fun (*this, &Editor::time_canvas_scroll_event));
+
 	track_canvas.set_name ("EditorMainCanvas");
 	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
 	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
@@ -173,6 +176,7 @@ Editor::initialize_canvas ()
 	range_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 2.0);
 	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
 	marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
+	cd_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 5.0);
 	
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
@@ -185,6 +189,10 @@ Editor::initialize_canvas ()
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 1;
+
+	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
+	cd_marker_bar->property_outline_pixels() = 1;
 	
 	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
@@ -252,6 +260,7 @@ Editor::initialize_canvas ()
 	tempo_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
 	meter_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
 	marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
+	cd_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
 	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 	
@@ -291,7 +300,6 @@ Editor::track_canvas_allocate (Gtk::Allocation alloc)
 	} 
 
 	initial_ruler_update_required = false;
-	
 	track_canvas_size_allocated ();
 }
 
@@ -327,8 +335,10 @@ Editor::track_canvas_size_allocated ()
 	reset_scrolling_region ();
 
 	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
-
-	// EDIT CURSOR XXX set line height for selected markers here
+ 	
+	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+		(*x)->set_line_length (canvas_height);
+	}
 
 	if (range_marker_drag_rect) {
 		range_marker_drag_rect->property_y1() = 0.0;
@@ -355,6 +365,7 @@ Editor::track_canvas_size_allocated ()
 		transport_punchout_line->property_y2() = canvas_height;
 	}
 	compute_fixed_ruler_scale ();
+ 	
 	update_fixed_rulers();
 	redisplay_tempo (true);
 
@@ -382,12 +393,20 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 		}
 	}
 
-	double last_canvas_unit =  last_canvas_frame / frames_per_unit;
+	double last_canvas_unit =  max ((last_canvas_frame / frames_per_unit), canvas_width);
 
-	track_canvas.set_scroll_region (0.0, 0.0, max (last_canvas_unit, canvas_width), pos);
+	track_canvas.set_scroll_region (0.0, 0.0, last_canvas_unit, pos);
 
 	// XXX what is the correct height value for the time canvas ? this overstates it
-	time_canvas.set_scroll_region ( 0.0, 0.0, max (last_canvas_unit, canvas_width), canvas_height);
+	time_canvas.set_scroll_region ( 0.0, 0.0, last_canvas_unit, canvas_height);
+
+	range_marker_drag_rect->property_y2() = canvas_height;
+	transport_loop_range_rect->property_y2() = canvas_height;
+	transport_punch_range_rect->property_y2() = canvas_height;
+	transport_punchin_line->property_y2() = canvas_height;
+	transport_punchout_line->property_y2() = canvas_height;
+
+	update_punch_range_view (true);
 
 	controls_layout.queue_resize();
 }
@@ -399,8 +418,8 @@ Editor::controls_layout_size_request (Requisition* req)
 	TreeModel::Children::iterator i;
 	double pos;
 
-        for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
-	        TimeAxisView *tv = (*i)[route_display_columns.tv];
+	for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
+		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		if (tv != 0) {
 			pos += tv->effective_height;
 		}
@@ -412,12 +431,9 @@ Editor::controls_layout_size_request (Requisition* req)
 		screen = Gdk::Screen::get_default();
 	}
 
-	/* never let the width of the controls area shrink horizontally */
-
 	edit_controls_vbox.check_resize();
-
 	req->width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
-	
+
 	/* don't get too big. the fudge factors here are just guesses */
 	
 	req->width = min (req->width, screen->get_width() - 300);
@@ -426,8 +442,13 @@ Editor::controls_layout_size_request (Requisition* req)
 	/* this one is important: it determines how big the layout thinks it really is, as 
 	   opposed to what it displays on the screen
 	*/
+	
+	controls_layout.set_size (edit_controls_vbox.get_width(), (gint) pos);
+	controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
+	zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
+	time_button_frame.set_size_request(edit_controls_vbox.get_width() + edit_vscrollbar.get_width(), -1);
 
-	controls_layout.set_size (req->width, (gint) pos);
+	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG	
 }
 
 bool
@@ -700,17 +721,19 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 void 
 Editor::canvas_horizontally_scrolled ()
 {
-	cerr << "chs\n";
+	nframes64_t time_origin = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
-	/* this is the core function that controls horizontal scrolling of the canvas. it is called
-	   whenever the horizontal_adjustment emits its "value_changed" signal. it typically executes in an
-	   idle handler, which is important because tempo_map_changed() should issue redraws immediately
-	   and not defer them to an idle handler.
-	*/
+	if (time_origin != leftmost_frame) {
+		canvas_scroll_to (time_origin);
+	}
+}
 
-  	leftmost_frame = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+void
+Editor::canvas_scroll_to (nframes64_t time_origin)
+{
+  	leftmost_frame = time_origin;
 	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
-	
+
 	if (rightmost_frame > last_canvas_frame) {
 		last_canvas_frame = rightmost_frame;
 		reset_scrolling_region ();
@@ -739,6 +762,9 @@ Editor::color_handler()
 
 	marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBar.get();
 	marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
+
+	cd_marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CDMarkerBar.get();
+	cd_marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
 
 	range_marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeMarkerBar.get();
 	range_marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();

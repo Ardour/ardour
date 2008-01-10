@@ -23,6 +23,7 @@
 #include <gtkmm/settings.h>
 
 #include <pbd/error.h>
+#include <pbd/file_utils.h>
 #include <pbd/textreceiver.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/pthread_utils.h>
@@ -33,13 +34,15 @@
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
 #include <ardour/session_utils.h>
+#include <ardour/filesystem_paths.h>
 
 #include <gtkmm/main.h>
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
-#include "svn_revision.h"
+#include "../svn_revision.h"
 #include "version.h"
+#include "utils.h"
 #include "ardour_ui.h"
 #include "opts.h"
 #include "enums.h"
@@ -222,6 +225,63 @@ fixup_bundle_environment ()
 
 #endif
 
+static void
+setup_keybindings (ARDOUR_UI* ui)
+{
+	Glib::ustring path;
+
+	if (keybindings_path.empty()) {
+		keybindings_path = "ardour";
+	}
+
+	std::string kbpath;
+	
+	if (keybindings_path.find (".bindings") == string::npos) {
+
+		// just a style name - allow user to
+		// specify the layout type. 
+		
+		char* layout;
+		
+		if ((layout = getenv ("ARDOUR_KEYBOARD_LAYOUT")) != 0) {
+			keybindings_path += '-';
+			keybindings_path += layout;
+		}
+
+		keybindings_path += ".bindings";
+	} 
+
+	
+	// XXX timbyr - we need a portable test for "is-absolute" here 
+	
+	if (keybindings_path[0] != '/' && keybindings_path[0] != '.') {
+
+		/* not absolute - look in the usual places */
+		
+		sys::path key_bindings_file;
+
+		find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+				keybindings_path, key_bindings_file);
+
+		path = key_bindings_file.to_string();
+
+		if (path.empty()) {
+			warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
+					keybindings_path) << endmsg;
+		}
+
+	} else {
+
+		// absolute path from user - use it as is
+
+		path = keybindings_path;
+	}
+
+	if (!path.empty()) {
+		ui->set_keybindings_path (path);
+	}
+}
+
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
@@ -310,9 +370,7 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	if (!keybindings_path.empty()) {
-		ui->set_keybindings_path (keybindings_path);
-	}
+	setup_keybindings (ui);
 
 	ui->run (text_receiver);
 	ui = 0;

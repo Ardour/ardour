@@ -29,10 +29,14 @@ JackAudioPort::JackAudioPort (const std::string& name, Flags flgs, AudioBuffer* 
 {
 	if (buf) {
 
+		cout << "jack audio port buffer" << endl;
+
 		_buffer = buf;
 		_own_buffer = false;
 
 	} else {
+		
+		cout << "jack audio port no buffer" << endl;
 
 		/* data space will be provided by JACK */
 

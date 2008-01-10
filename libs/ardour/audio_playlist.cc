@@ -123,7 +123,10 @@ ARDOUR::nframes_t
 AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t start,
 		     nframes_t cnt, unsigned chan_n)
 {
+	nframes_t ret = cnt;
 	nframes_t end;
+	nframes_t read_frames;
+	nframes_t skip_frames;
 
 	/* optimizing this memset() away involves a lot of conditionals
 	   that may well cause more of a hit due to cache misses 
@@ -147,14 +150,24 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 	Glib::Mutex::Lock rm (region_lock);
 
 	end =  start + cnt - 1;
+	read_frames = 0;
+	skip_frames = 0;
+	_read_data_count = 0;
 
 	_read_data_count = 0;
+
+	RegionList* rlist = regions_to_read (start, start+cnt);
+
+	if (rlist->empty()) {
+		delete rlist;
+		return cnt;
+	}
 
 	map<uint32_t,vector<boost::shared_ptr<Region> > > relevant_regions;
 	map<uint32_t,vector<boost::shared_ptr<Crossfade> > > relevant_xfades;
 	vector<uint32_t> relevant_layers;
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (RegionList::iterator i = rlist->begin(); i != rlist->end(); ++i) {
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			relevant_regions[(*i)->layer()].push_back (*i);
 			relevant_layers.push_back ((*i)->layer());
@@ -186,7 +199,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 		for (vector<boost::shared_ptr<Region> >::iterator i = r.begin(); i != r.end(); ++i) {
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*i);
 			assert(ar);
-			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n);
+			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n, read_frames, skip_frames);
 			_read_data_count += ar->read_data_count();
 		}
 		
@@ -199,7 +212,8 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 		}
 	}
 
-	return cnt;
+	delete rlist;
+	return ret;
 }
 
 

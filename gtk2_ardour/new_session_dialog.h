@@ -57,6 +57,8 @@ public:
 	NewSessionDialog();
 	~NewSessionDialog ();
 
+	int run ();
+
 	void set_session_name(const Glib::ustring& name);
 	void set_session_folder(const Glib::ustring& folder);
 
@@ -95,6 +97,7 @@ public:
 
 	EngineControl engine_control;
 	void set_have_engine (bool yn);
+	void set_existing_session (bool yn);
 
 protected:
 
@@ -167,6 +170,14 @@ protected:
 	Gtk::Notebook* m_notebook;
 
  private:
+	enum Pages {
+		NewPage = 0x1,
+		OpenPage = 0x2,
+		EnginePage = 0x4
+	};
+
+	Pages page_set;
+
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RecentSessionModelColumns() { 
 		    add (visible_name);

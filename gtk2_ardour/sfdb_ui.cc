@@ -395,6 +395,11 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  found_search_btn (_("Search"))
 
 {
+	if (ARDOUR::Profile->get_sae()) {
+		chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
+		chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
+	}
+	
 	VBox* vbox;
 	HBox* hbox;
 

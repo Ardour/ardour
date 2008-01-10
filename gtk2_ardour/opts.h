@@ -39,6 +39,7 @@ extern bool   try_hw_optimization;
 extern bool   use_gtk_theme;
 extern string keybindings_path;
 extern Glib::ustring menus_file;
+extern bool   finder_invoked_ardour;
 
 extern int32_t parse_opts (int argc, char *argv[]);
 

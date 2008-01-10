@@ -406,7 +406,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
 
-#undef  DEBUG_ACCELERATOR_HANDLING
+#undef DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
 	bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
 #endif
@@ -490,15 +490,14 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			return true;
 		}
 	}
-		
-	if (!special_handling_of_unmodified_accelerators ||
-	    ev->state & (Gdk::MOD1_MASK|
-			 Gdk::MOD3_MASK|
-			 Gdk::MOD4_MASK|
-			 Gdk::MOD5_MASK|
-			 Gdk::CONTROL_MASK)) {
 
-		/* no special handling or modifiers in effect: accelerate first */
+	/* consider all relevant modifiers but not LOCK or SHIFT */
+
+	guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
+
+	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
+
+		/* no special handling or there are modifiers in effect: accelerate first */
 
 #ifdef DEBUG_ACCELERATOR_HANDLING
 		if (debug) {
@@ -511,12 +510,17 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		}
 #endif
 		if (!gtk_window_activate_key (win, ev)) {
+#ifdef DEBUG_ACCELERATOR_HANDLING
+			if (debug) {
+				cerr << "\tnot accelerated, now propagate\n";
+			}
+#endif
 			return gtk_window_propagate_key_event (win, ev);
 		} else {
 #ifdef DEBUG_ACCELERATOR_HANDLING
-		if (debug) {
-			cerr << "\tnot handled\n";
-		}
+			if (debug) {
+				cerr << "\taccelerated - done.\n";
+			}
 #endif
 			return true;
 		} 
@@ -588,11 +592,24 @@ get_icon (const char* cname)
 
 	sys::path data_file_path;
 
-	if(!find_file_in_search_path (spath, name, data_file_path)) {
+	if (!find_file_in_search_path (spath, name, data_file_path)) {
 		fatal << string_compose (_("cannot find icon image for %1"), name) << endmsg;
 	}
 
-	return Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+	Glib::RefPtr<Gdk::Pixbuf> img;
+	try {
+		img = Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+	}
+	catch (const Gdk::PixbufError &e)
+    {
+        cerr << "Caught PixbufError: " << e.what() << endl;
+    }
+    catch (...)
+    {
+        g_message("Caught ... ");
+    }
+
+	return img;
 }
 
 string

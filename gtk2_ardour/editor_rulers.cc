@@ -23,6 +23,7 @@
 #include <string>
 
 #include <ardour/tempo.h>
+#include <ardour/profile.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "editor.h"
@@ -91,31 +92,62 @@ Editor::initialize_rulers ()
 	ruler_shown[ruler_time_marker] = true;
 	ruler_shown[ruler_time_range_marker] = true;
 	ruler_shown[ruler_time_transport_marker] = true;
+	if (Profile->get_sae()) {
+		ruler_shown[ruler_time_cd_marker] = false;
+	} else {
+		ruler_shown[ruler_time_cd_marker] = true;
+	}
 	ruler_shown[ruler_metric_frames] = false;
 	ruler_shown[ruler_metric_minsec] = false;
 	
-	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-
-	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	frames_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	minsec_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-
-	smpte_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	bbt_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	frames_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	minsec_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	
-	smpte_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	
 	visible_timebars = 7; /* 4 here, 3 in time_canvas */
 	ruler_pressed_button = 0;
+}
+
+bool
+Editor::ruler_scroll (GdkEventScroll* event)
+{
+	nframes_t xdelta;
+	int direction = event->direction;
+	bool handled = false;
+
+	switch (direction) {
+	case GDK_SCROLL_UP:
+		temporal_zoom_step (true);
+		handled = true;
+		break;
+
+	case GDK_SCROLL_DOWN:
+		temporal_zoom_step (false);
+		handled = true;
+		break;
+
+	case GDK_SCROLL_LEFT:
+		xdelta = (current_page_frames() / 2);
+		if (leftmost_frame > xdelta) {
+			reset_x_origin (leftmost_frame - xdelta);
+		} else {
+			reset_x_origin (0);
+		}
+		handled = true;
+		break;
+
+	case GDK_SCROLL_RIGHT:
+		xdelta = (current_page_frames() / 2);
+		if (max_frames - xdelta > leftmost_frame) {
+			reset_x_origin (leftmost_frame + xdelta);
+		} else {
+			reset_x_origin (max_frames - current_page_frames());
+		}
+		handled = true;
+		break;
+
+	default:
+		/* what? */
+		break;
+	}
+
+	return handled;
 }
 
 
@@ -165,9 +197,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 
 	case 2:
 		/* edit point */
-		if (snap_type != Editing::SnapToEditPoint) {
-			snap_to (where);
-		}
+		snap_to (where);
 		break;
 
 	default:
@@ -206,9 +236,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 
 	case 2:
 		/* edit point */
-		if (snap_type != Editing::SnapToEditPoint) {
-			snap_to (where);
-		}
+		snap_to (where);
 		break;
 
 	case 3:
@@ -338,7 +366,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 
 	switch (t) {
 	case MarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where)));
+		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, false)));
 		ruler_items.push_back (MenuElem (_("Clear all locations"), mem_fun(*this, &Editor::clear_markers)));
 		ruler_items.push_back (MenuElem (_("Unhide locations"), mem_fun(*this, &Editor::unhide_markers)));
 		ruler_items.push_back (SeparatorElem ());
@@ -353,7 +381,13 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 	case TransportMarkerBarItem:
 
 		break;
+	
+	case CdMarkerBarItem:
+		// TODO
+		ruler_items.push_back (MenuElem (_("New CD track marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, true)));
+		break;
 		
+	
 	case TempoBarItem:
 		ruler_items.push_back (MenuElem (_("New Tempo"), bind ( mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (MenuElem (_("Clear tempo")));
@@ -382,7 +416,7 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 		mitem->set_active(true);
 	}
 
-	ruler_items.push_back (CheckMenuElem (_("Frames"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
+	ruler_items.push_back (CheckMenuElem (_("Samples"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
 	mitem = (CheckMenuItem *) &ruler_items.back(); 
 	if (ruler_shown[ruler_metric_frames]) {
 		mitem->set_active(true);
@@ -414,9 +448,17 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 		mitem->set_active(true);
 	}
 
- 	ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
+	if (!Profile->get_sae()) {
+		ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
+		mitem = (CheckMenuItem *) &ruler_items.back(); 
+		if (ruler_shown[ruler_time_range_marker]) {
+			mitem->set_active(true);
+		}
+	}
+
+ 	ruler_items.push_back (CheckMenuElem (_("CD Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_cd_marker)));
  	mitem = (CheckMenuItem *) &ruler_items.back(); 
- 	if (ruler_shown[ruler_time_range_marker]) {
+ 	if (ruler_shown[ruler_time_cd_marker]) {
  		mitem->set_active(true);
  	}
 
@@ -468,6 +510,7 @@ Editor::store_ruler_visibility ()
 	node->add_property (X_("marker"), ruler_shown[ruler_time_marker] ? "yes": "no");
 	node->add_property (X_("rangemarker"), ruler_shown[ruler_time_range_marker] ? "yes": "no");
 	node->add_property (X_("transportmarker"), ruler_shown[ruler_time_transport_marker] ? "yes": "no");
+	node->add_property (X_("cdmarker"), ruler_shown[ruler_time_cd_marker] ? "yes": "no");
 
 	session->add_extra_xml (*node);
 	session->set_dirty ();
@@ -528,11 +571,35 @@ Editor::restore_ruler_visibility ()
 			else 
 				ruler_shown[ruler_time_range_marker] = false;
 		}
+
 		if ((prop = node->property ("transportmarker")) != 0) {
 			if (prop->value() == "yes") 
 				ruler_shown[ruler_time_transport_marker] = true;
 			else 
 				ruler_shown[ruler_time_transport_marker] = false;
+		}
+
+		if ((prop = node->property ("cdmarker")) != 0) {
+			if (prop->value() == "yes") 
+				ruler_shown[ruler_time_cd_marker] = true;
+			else 
+				ruler_shown[ruler_time_cd_marker] = false;
+
+			cerr << "cd marker ruler set to " << ruler_shown[ruler_time_cd_marker] << endl;
+
+		} else {
+			// this session doesn't yet know about the cdmarker ruler
+			// as a benefit to the user who doesn't know the feature exists, show the ruler if 
+			// any cd marks exist
+			ruler_shown[ruler_time_cd_marker] = false;
+			const Locations::LocationList & locs = session->locations()->list();
+			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
+				if ((*i)->is_cd_marker()) {
+					ruler_shown[ruler_time_cd_marker] = true;
+					break;
+				}
+			}
+			cerr << "cd marker ruler default to " << ruler_shown[ruler_time_cd_marker] << endl;
 		}
 
 	}
@@ -583,11 +650,10 @@ Editor::update_ruler_visibility ()
 	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
-	
-	smpte_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	bbt_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	frames_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	minsec_ruler->set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	smpte_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	bbt_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	frames_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 
 	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
@@ -606,6 +672,13 @@ Editor::update_ruler_visibility ()
 	
 	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
 
+	smpte_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	bbt_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	frames_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	minsec_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+
+	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
+	
 	if (ruler_shown[ruler_metric_minsec]) {
 		lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
@@ -662,7 +735,7 @@ Editor::update_ruler_visibility ()
 		tempo_group->hide();
 	}
 	
-	if (ruler_shown[ruler_time_range_marker]) {
+	if (!Profile->get_sae() && ruler_shown[ruler_time_range_marker]) {
 		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = range_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -671,8 +744,7 @@ Editor::update_ruler_visibility ()
 		range_marker_group->show();
 		tbpos += timebar_height;
 		visible_timebars++;
-	}
-	else {
+	} else {
 		range_marker_group->hide();
 	}
 
@@ -688,6 +760,24 @@ Editor::update_ruler_visibility ()
 	}
 	else {
 		transport_marker_group->hide();
+	}
+
+	if (ruler_shown[ruler_time_cd_marker]) {
+		lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
+		old_unit_pos = cd_marker_group->property_y();
+		if (tbpos != old_unit_pos) {
+			cd_marker_group->move (0.0, tbpos - old_unit_pos);
+		}
+		cd_marker_group->show();
+		tbpos += timebar_height;
+		visible_timebars++;
+		// make sure all cd markers show up in their respective places
+		update_cd_marker_display();
+	}
+	else {
+		cd_marker_group->hide();
+		// make sure all cd markers show up in their respective places
+		update_cd_marker_display();
 	}
 	
 	if (ruler_shown[ruler_time_marker]) {

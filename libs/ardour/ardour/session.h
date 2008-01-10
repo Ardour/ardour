@@ -138,6 +138,7 @@ class Session : public PBD::StatefulDestructible
 		    SetDiskstreamSpeed,
 		    Locate,
 		    LocateRoll,
+		    LocateRollLocate,
 		    SetLoop,
 		    PunchIn,
 		    PunchOut,
@@ -224,9 +225,9 @@ class Session : public PBD::StatefulDestructible
 	/* creating from an XML file */
 
 	Session (AudioEngine&,
-		 string fullpath,
-		 string snapshot_name,
-		 string* mix_template = 0);
+		 const string& fullpath,
+		 const string& snapshot_name,
+		 string mix_template = "");
 
 	/* creating a new Session */
 
@@ -354,7 +355,7 @@ class Session : public PBD::StatefulDestructible
 
 	sigc::signal<void,RouteList&> RouteAdded;
 
-	void request_roll ();
+	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
 	void request_stop (bool abort = false);
 	void request_locate (nframes_t frame, bool with_roll = false);
@@ -499,6 +500,7 @@ class Session : public PBD::StatefulDestructible
 
 	nframes_t transport_frame () const {return _transport_frame; }
 	nframes_t audible_frame () const;
+	nframes64_t requested_return_frame() const { return _requested_return_frame; }
 
 	enum PullupFormat {
 		pullup_Plus4Plus1,
@@ -542,6 +544,9 @@ class Session : public PBD::StatefulDestructible
 	float       transport_speed() const { return _transport_speed; }
 	bool        transport_stopped() const { return _transport_speed == 0.0f; }
 	bool        transport_rolling() const { return _transport_speed != 0.0f; }
+	
+	void set_silent (bool yn);
+	bool silent () { return _silent; }
 
 	int jack_slave_sync (nframes_t);
 
@@ -701,6 +706,13 @@ class Session : public PBD::StatefulDestructible
 	uint32_t n_port_inserts() const { return _port_inserts.size(); }
 	uint32_t n_plugin_inserts() const { return _plugin_inserts.size(); }
 	uint32_t n_sends() const { return _sends.size(); }
+	
+	static void set_disable_all_loaded_plugins (bool yn) { 
+		_disable_all_loaded_plugins = yn;
+	}
+	static bool get_disable_all_loaded_plugins() { 
+		return _disable_all_loaded_plugins;
+	}
 
 	uint32_t next_send_id();
 	uint32_t next_insert_id();
@@ -901,6 +913,18 @@ class Session : public PBD::StatefulDestructible
 				  long value,
 				  void* ptr,
 				  float opt);
+	
+	typedef float (*compute_peak_t)          (Sample *, nframes_t, float);
+	typedef void  (*find_peaks_t)            (Sample *, nframes_t, float *, float*);
+	typedef void  (*apply_gain_to_buffer_t)  (Sample *, nframes_t, float);
+	typedef void  (*mix_buffers_with_gain_t) (Sample *, Sample *, nframes_t, float);
+	typedef void  (*mix_buffers_no_gain_t)   (Sample *, Sample *, nframes_t);
+
+	static compute_peak_t           compute_peak;
+	static find_peaks_t             find_peaks;
+	static apply_gain_to_buffer_t   apply_gain_to_buffer;
+	static mix_buffers_with_gain_t  mix_buffers_with_gain;
+	static mix_buffers_no_gain_t    mix_buffers_no_gain;
 
 	static sigc::signal<void> SendFeedback;
 
@@ -927,12 +951,9 @@ class Session : public PBD::StatefulDestructible
 	void update_latency_compensation (bool, bool);
 	
   private:
+	int  create (bool& new_session, const string& mix_template, nframes_t initial_length);
 	void destroy ();
-
-	void initialize_start_and_end_locations(nframes_t start, nframes_t end);
-	bool create_session_file();
- 	bool create_session_file_from_template (const string& template_path);
-
+	
 	nframes_t compute_initial_length ();
 
 	enum SubState {
@@ -949,35 +970,36 @@ class Session : public PBD::StatefulDestructible
 	*/
 
 	typedef void (Session::*process_function_type)(nframes_t);
-
-	AudioEngine            &_engine;
-	mutable gint            processing_prohibited;
-	/// the function called when the main JACK process callback happens
+	
+	AudioEngine&            _engine;
+	mutable gint             processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	bool                     waiting_for_sync_offset;
-	nframes_t          _base_frame_rate;
-	nframes_t          _current_frame_rate;  //this includes video pullup offset
+	nframes_t               _base_frame_rate;
+	nframes_t               _current_frame_rate;  //this includes video pullup offset
 	int                      transport_sub_state;
-	mutable gint           _record_status;
-	nframes_t          _transport_frame;
+	mutable gint            _record_status;
+	volatile nframes_t      _transport_frame;
 	Location*                end_location;
 	Location*                start_location;
-	Slave                  *_slave;
+	Slave*                  _slave;
+	bool                    _silent;
 	volatile float          _transport_speed;
 	volatile float          _desired_transport_speed;
 	float                   _last_transport_speed;
 	bool                     auto_play_legal;
-	nframes_t          _last_slave_transport_frame;
-	nframes_t           maximum_output_latency;
-	nframes_t           last_stop_frame;
+	nframes_t               _last_slave_transport_frame;
+	nframes_t                maximum_output_latency;
+	nframes_t                last_stop_frame;
+	volatile nframes64_t    _requested_return_frame;
 	BufferSet*              _scratch_buffers;
 	BufferSet*              _silent_buffers;
 	BufferSet*              _mix_buffers;
-	nframes_t           current_block_size;
-	nframes_t          _worst_output_latency;
-	nframes_t          _worst_input_latency;
-	nframes_t          _worst_track_latency;
+	nframes_t                current_block_size;
+	nframes_t               _worst_output_latency;
+	nframes_t               _worst_input_latency;
+	nframes_t               _worst_track_latency;
 	bool                    _have_captured;
 	float                   _meter_hold;
 	float                   _meter_falloff;
@@ -1675,6 +1697,8 @@ class Session : public PBD::StatefulDestructible
 	
 	void set_history_depth (uint32_t depth);
 	void sync_order_keys ();
+	
+	static bool _disable_all_loaded_plugins;
 };
 
 } // namespace ARDOUR

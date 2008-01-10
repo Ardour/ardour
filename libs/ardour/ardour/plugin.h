@@ -77,7 +77,7 @@ class PluginInfo {
 	ChanCount n_outputs;
 	ARDOUR::PluginType type;
 	
-	long unique_id;
+	std::string unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
 
@@ -114,7 +114,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	    bool max_unbound;
 	};
 
-	virtual uint32_t unique_id() const = 0;
+	virtual std::string unique_id() const = 0;
 	virtual const char * label() const = 0;
 	virtual const char * name() const = 0;
 	virtual const char * maker() const = 0;
@@ -170,7 +170,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	bool save_preset(string name, string domain /* vst, ladspa etc. */);
 };
 
-PluginPtr find_plugin(ARDOUR::Session&, string name, long unique_id, ARDOUR::PluginType);
+PluginPtr find_plugin(ARDOUR::Session&, string unique_id, ARDOUR::PluginType);
 
 } // namespace ARDOUR
  

@@ -37,6 +37,9 @@
 
 struct TempoDialog : public ArdourDialog 
 {
+    Gtk::ComboBoxText note_types;
+    vector<string> strings;
+    Gtk::Frame   note_frame;
     Gtk::Adjustment   bpm_adjustment;
     Gtk::SpinButton   bpm_spinner;
     Gtk::Frame        bpm_frame;
@@ -44,8 +47,8 @@ struct TempoDialog : public ArdourDialog
     Gtk::Button  ok_button;
     Gtk::Button  cancel_button;
     Gtk::HBox    button_box;
-    Gtk::HBox    hspacer1;
-    Gtk::VBox    vspacer1;
+    Gtk::HBox    hspacer1, hspacer2;
+    Gtk::VBox    vspacer1, vspacer2;
     Gtk::Entry   when_bar_entry;
     Gtk::Entry   when_beat_entry;
     Gtk::Label   when_bar_label;
@@ -58,13 +61,15 @@ struct TempoDialog : public ArdourDialog
     TempoDialog (ARDOUR::TempoSection&, const string & action);
 
     double get_bpm ();
+    double get_note_type ();
     bool   get_bbt_time (ARDOUR::BBT_Time&);
     
   private:
-    void init (const ARDOUR::BBT_Time& start, double, bool);
+    void init (const ARDOUR::BBT_Time& start, double, double, bool);
     void bpm_changed ();
     bool bpm_button_press (GdkEventButton* );
     bool bpm_button_release (GdkEventButton* );
+    void note_types_change ();
 };
 
 struct MeterDialog : public ArdourDialog 

@@ -156,12 +156,11 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 
 		/* 
-		   if we have a route (ie. we're not the click), 
+		   if we have a non-hidden route (ie. we're not the click or the auditioner), 
 		   pack some route-dependent stuff.
 		*/
 
 		gain_display_box.pack_end (peak_display, true, true);
-
 		hbox.pack_end (meter_packer, true, true);
 
 		using namespace Menu_Helpers;
@@ -218,35 +217,14 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
 
 	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
-
-	fader_centering_box->show();
-	fader_vbox->show();
-	gain_slider->show();
-
-	hbox.show();
-	meter_packer.show();
-	gain_display.show();
-	peak_display.show();
-	gain_display_box.show();
-	fader_box.show();
-	meter_metric_area.show();
-	gain_automation_style_button.show();
-	gain_automation_state_button.show();
-	show();
+	
+	ColorsChanged.connect (mem_fun (*this, &GainMeter::color_handler));
+	//hide_all();
 }
 
 void
 GainMeter::set_width (Width w, int len)
 {
-	switch (w) {
-	case Wide:
-		peak_display.show();
-		break;
-	case Narrow:
-		peak_display.hide();
-		break;
-	}
-
 	_width = w;
 	setup_meters (len);
 }
@@ -478,15 +456,21 @@ GainMeter::setup_meters (int len)
 
 	/* pack them backwards */
 
-	if (_width == Wide) {
-		meter_packer.pack_end (meter_metric_area, false, false);
-		meter_metric_area.show_all ();
-	}
+	meter_packer.pack_end (meter_metric_area, false, false);
+	meter_metric_area.show_all ();
+
+	int b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
+	int m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
+	int t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
+	int c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+
+	//cerr << "GainMeter::setup_meters() called color_changed = " << color_changed << " colors: " << hex << b << " " << m << " " << t << " " << c << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
-		if (meters[n].width != width || meters[n].length != len) {
+		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len);
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
+			//cerr << "GainMeter::setup_meters() w:l = " << width << ":" << len << endl;//DEBUG
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
@@ -497,6 +481,7 @@ GainMeter::setup_meters (int len)
 		meters[n].meter->show_all ();
 		meters[n].packed = true;
 	}
+	color_changed = false;
 }	
 
 int
@@ -522,9 +507,9 @@ GainMeter::peak_button_release (GdkEventButton* ev)
 {
 	/* reset peak label */
 
-	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control|Keyboard::Shift)) {
+	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 		ResetAllPeakDisplays ();
-	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 		Route* r;
 		if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 			ResetGroupPeakDisplays (r->mix_group());
@@ -733,10 +718,10 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 			if (ev->button == 2) {
 
-				// ctrl-button2 click is the midi binding click
+				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
+				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
 					wait_for_release = true;
 					old_meter_point = _route->meter_point ();
 				}
@@ -744,9 +729,9 @@ GainMeter::meter_press(GdkEventButton* ev)
 
 			if (ev->button == 1 || ev->button == 2) {
 
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-					/* ctrl-shift-click applies change to all routes */
+					/* Primary+Tertiary-click applies change to all routes */
 
 					_session.begin_reversible_command (_("meter point change"));
                                         Session::GlobalMeteringStateCommand *cmd = new Session::GlobalMeteringStateCommand (_session, this);
@@ -756,10 +741,10 @@ GainMeter::meter_press(GdkEventButton* ev)
 					_session.commit_reversible_command ();
 					
 					
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-					/* ctrl-click: solo mix group.
-					   ctrl-button2 is MIDI learn.
+					/* Primary-click: solo mix group.
+					   NOTE: Primary-button2 is MIDI learn.
 					*/
 					
 					if (ev->button == 1) {
@@ -984,4 +969,33 @@ GainMeter::gain_automation_state_changed ()
 	if (x) {
 		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (*this, &GainMeter::effective_gain_display));
 	}
+}
+
+void GainMeter::setup_atv_meter (int len)
+{
+	set_no_show_all();
+	regular_meter_width = 3;
+	set_width(Narrow, len);
+	hide_all();
+
+	//cerr << "Config->get_show_track_meters() = " << Config->get_show_track_meters() << endl;//DEBUG
+
+	if (Config->get_show_track_meters()) {
+		meter_packer.show_all();
+		hbox.show();		
+		show();
+	}
+}
+
+void GainMeter::clear_meters ()
+{
+	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
+		(*i).meter->clear();
+	}
+}
+
+void GainMeter::color_handler()
+{
+	color_changed = true;
+	setup_meters();
 }

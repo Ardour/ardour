@@ -237,54 +237,6 @@ AudioRegion::listen_to_my_curves ()
 	_fade_out->StateChanged.connect (mem_fun (*this, &AudioRegion::fade_out_changed));
 }
 
-bool
-AudioRegion::verify_length (nframes_t len)
-{
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
-
-	if (afs && afs->destructive()) {
-		return true;
-	} else {
-		return Region::verify_length(len);
-	}
-}
-
-bool
-AudioRegion::verify_start_and_length (nframes_t new_start, nframes_t new_length)
-{
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
-
-	if (afs && afs->destructive()) {
-		return true;
-	} else {
-		return Region::verify_start_and_length(new_start, new_length);
-	}
-}
-
-bool
-AudioRegion::verify_start (nframes_t pos)
-{
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
-
-	if (afs && afs->destructive()) {
-		return true;
-	} else {
-		return Region::verify_start(pos);
-	}
-}
-
-bool
-AudioRegion::verify_start_mutable (nframes_t& new_start)
-{
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source());
-
-	if (afs && afs->destructive()) {
-		return true;
-	} else {
-		return Region::verify_start_mutable(new_start);
-	}
-}
-
 void
 AudioRegion::set_envelope_active (bool yn)
 {
@@ -321,25 +273,26 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 	}
 }
 
-ARDOUR::nframes_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, nframes_t cnt, uint32_t chan_n) const
+nframes_t
+AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
+		      nframes_t cnt, 
+		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
-	return _read_at (_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n);
+	return _read_at (_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames);
 }
 
-ARDOUR::nframes_t
+nframes_t
 AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
 			     nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (_master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n);
+	return _read_at (_master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
 }
 
-ARDOUR::nframes_t
+nframes_t
 AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		       nframes_t position, nframes_t cnt, uint32_t chan_n) const
+		       nframes_t position, nframes_t cnt, 
+		       uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
-	// cerr << _name << "._read_at(" << position << ") - " << _position << endl;
-
 	nframes_t internal_offset;
 	nframes_t buf_offset;
 	nframes_t to_read;
@@ -377,13 +330,12 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 	_read_data_count = 0;
 
 	if (chan_n < n_channels()) {
-		
+
 		boost::shared_ptr<AudioSource> src = audio_source(chan_n);
 		if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
-
 			return 0; /* "read nothing" */
 		}
-
+		
 		_read_data_count += src->read_data_count();
 
 	} else {

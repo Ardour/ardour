@@ -25,6 +25,7 @@
 #include <ardour/session.h>
 #include <ardour/session_route.h>
 #include <ardour/dB.h>
+#include <ardour/meter.h>
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/fastmeter.h>
@@ -43,7 +44,6 @@
 
 #include <ardour/session.h>
 #include <ardour/route.h>
-#include <ardour/meter.h>
 
 #include "i18n.h"
 
@@ -146,11 +146,9 @@ LevelMeter::setup_meters (int len)
 	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
 
 		switch (r->meter_point()) {
+		case MeterPreFader:
 		case MeterInput:
 			nmeters = r->n_inputs().n_total();
-			break;
-		case MeterPreFader:
-			nmeters = r->pre_fader_streams().n_total();
 			break;
 		case MeterPostFader:
 			nmeters = r->n_outputs().n_total();

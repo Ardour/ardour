@@ -296,12 +296,22 @@ Selection::add (TimeAxisView* track)
 }
 
 void
+Selection::add (const RegionSelection& rs)
+{
+	if (!rs.empty()) {
+		regions.insert (regions.end(), rs.begin(), rs.end());
+		RegionsChanged(); /* EMIT SIGNAL */
+	}
+}
+
+void
 Selection::add (RegionView* r)
 {
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		regions.add (r);
-		select_edit_group_regions ();
-		add (&r->get_trackview());
+		if (Config->get_link_region_and_track_selection()) {
+			add (&r->get_trackview());
+		}
 		RegionsChanged ();
 	}
 }
@@ -314,7 +324,7 @@ Selection::add (vector<RegionView*>& v)
 	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
-			if (changed) {
+			if (Config->get_link_region_and_track_selection() && changed) {
 				add (&(*i)->get_trackview());
 			}
 		}
@@ -438,7 +448,7 @@ Selection::remove (RegionView* r)
 		RegionsChanged ();
 	}
 
-	if (!regions.involves (r->get_trackview())) {
+	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_trackview())) {
 		remove (&r->get_trackview());
 	}
 }
@@ -505,20 +515,32 @@ Selection::set (const list<boost::shared_ptr<Playlist> >& pllist)
 }
 
 void
-Selection::set (RegionView* r)
+Selection::set (const RegionSelection& rs)
+{
+	clear_regions();
+	regions = rs;
+	RegionsChanged(); /* EMIT SIGNAL */
+}
+
+void
+Selection::set (RegionView* r, bool also_clear_tracks)
 {
 	clear_regions ();
-	clear_tracks ();
+	if (also_clear_tracks) {
+		clear_tracks ();
+	}
 	add (r);
 }
 
 void
 Selection::set (vector<RegionView*>& v)
 {
-	clear_tracks ();
 	clear_regions ();
-	// make sure to deselect any automation selections
-	clear_points();
+	if (Config->get_link_region_and_track_selection()) {
+		clear_tracks ();
+		// make sure to deselect any automation selections
+		clear_points();
+	}
 	add (v);
 }
 

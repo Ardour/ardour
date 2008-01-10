@@ -344,10 +344,6 @@ NewSessionDialog::NewSessionDialog()
 	open_session_vbox->pack_start(*open_session_hbox, Gtk::PACK_SHRINK, 12);
 	m_notebook->set_flags(Gtk::CAN_FOCUS);
 	m_notebook->set_scrollable(true);
-	m_notebook->append_page(*new_session_table, _("New Session"));
-	m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
-	m_notebook->append_page(*open_session_vbox, _("Open Session"));
-	m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
 	get_vbox()->set_homogeneous(false);
 	get_vbox()->set_spacing(0);
 	get_vbox()->pack_start(*m_notebook, Gtk::PACK_SHRINK, 0);
@@ -430,6 +426,8 @@ NewSessionDialog::NewSessionDialog()
 	m_open_filechooser->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::file_chosen));
 	m_template->signal_selection_changed ().connect (mem_fun (*this, &NewSessionDialog::template_chosen));
 	m_name->grab_focus();
+	
+	page_set = Pages (0);
 }
 
 NewSessionDialog::~NewSessionDialog()
@@ -437,32 +435,74 @@ NewSessionDialog::~NewSessionDialog()
        in_destructor = true;
 }
 
+int
+NewSessionDialog::run ()
+{
+	if (!page_set) {
+		/* nothing to display */
+		return Gtk::RESPONSE_OK;
+	}
+
+	return ArdourDialog::run ();
+}
+
 void
 NewSessionDialog::set_have_engine (bool yn)
 {
-       if (yn) {
-               m_notebook->remove_page (engine_control);
-       } else {
-               // XXX this is a bit of crude hack. if we ever add or remove
-               // pages from the notebook, this is going to break.
-               if (m_notebook->get_n_pages () != 3) {
-                       m_notebook->append_page (engine_control, _("Audio Setup"));
-                       m_notebook->show_all_children();
-               }
-       }
+	if (yn) {
+		m_notebook->remove_page (engine_control);
+		page_set = Pages (page_set & ~EnginePage);
+	} else {
+		if (!(page_set & EnginePage)) {
+			m_notebook->append_page (engine_control, _("Audio Setup"));
+			m_notebook->show_all_children();
+			page_set = Pages (page_set | EnginePage);
+		}
+	}
 }
 
 
 void
-NewSessionDialog::set_session_name(const Glib::ustring& name)
+NewSessionDialog::set_existing_session (bool yn)
 {
-	m_name->set_text(name);
+	if (yn) {
+
+		if (page_set & NewPage) {
+			m_notebook->remove_page (*new_session_table);
+			page_set = Pages (page_set & ~NewPage);
+		}
+
+		if (page_set & OpenPage) {
+			m_notebook->remove_page (*open_session_vbox);
+			page_set = Pages (page_set & ~OpenPage);
+		}
+
+	} else {
+		if (!(page_set & NewPage)) {
+			m_notebook->append_page(*new_session_table, _("New Session"));
+			m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+			page_set = Pages (page_set | NewPage);
+		}
+		if (!(page_set & OpenPage)) {
+			m_notebook->append_page(*open_session_vbox, _("Open Session"));
+			m_notebook->pages().back().set_tab_label_packing(false, true, Gtk::PACK_START);
+			page_set = Pages (page_set | OpenPage);
+		}
+
+		m_notebook->show_all_children();
+	}
+}
+
+void
+NewSessionDialog::set_session_name (const Glib::ustring& name)
+{
+	m_name->set_text (name);
 }
 
 void
 NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 {
-	// XXX DO SOMETHING
+	m_folder->set_current_folder (dir);
 }
 
 std::string
@@ -682,7 +722,8 @@ NewSessionDialog::file_chosen ()
 
 	m_treeview->get_selection()->unselect_all();
 
-	get_window()->set_cursor(Gdk::Cursor(Gdk::WATCH));
+	if (get_window())
+		get_window()->set_cursor(Gdk::Cursor(Gdk::WATCH));
 
 	if (!m_open_filechooser->get_filename().empty()) {
 	        set_response_sensitive (Gtk::RESPONSE_OK, true);

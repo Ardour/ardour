@@ -72,6 +72,8 @@ CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 
 
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (LayerModel, layer_model, "layer-model", MoveAddHigher)
+CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)
+CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
 
 /* monitoring, mute, solo etc */
 
@@ -148,6 +150,8 @@ CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-bac
 CONFIG_VARIABLE (float, automation_interval, "automation-interval", 50)
 CONFIG_VARIABLE (bool, sync_all_route_ordering, "sync-all-route-ordering", true)
 CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", true)
+CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
+CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 
 /* denormal management */
 

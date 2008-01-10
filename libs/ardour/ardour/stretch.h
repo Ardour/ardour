@@ -21,31 +21,46 @@
 #define __ardour_stretch_h__
 
 #include <ardour/filter.h>
+
+namespace ARDOUR {
+	class AudioRegion;
+}
+
+#ifdef USE_RUBBERBAND
+
+#include <ardour/rb_effect.h>
+
+namespace ARDOUR {
+
+class Stretch : public RBEffect {
+  public:
+	Stretch (ARDOUR::Session&, TimeFXRequest&);
+	~Stretch() {}
+};
+
+} /* namespace */
+
+#else
+
 #include <soundtouch/SoundTouch.h>
 
 namespace ARDOUR {
 
-class AudioRegion;
-
-struct TimeStretchRequest : public InterThreadInfo {
-    float                fraction;   
-    bool                 quick_seek; 
-    bool                 antialias;  
-};
-
 class Stretch : public Filter {
   public:
-	Stretch (ARDOUR::Session&, TimeStretchRequest&);
+	Stretch (ARDOUR::Session&, TimeFXRequest&);
 	~Stretch ();
 
 	int run (boost::shared_ptr<ARDOUR::Region>);
 
   private:
-	TimeStretchRequest& tsr;
-	soundtouch::SoundTouch st;
+	TimeFXRequest& tsr;
 
+	soundtouch::SoundTouch st;
 };
 
 } /* namespace */
+
+#endif
 
 #endif /* __ardour_stretch_h__ */

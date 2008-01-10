@@ -96,5 +96,5 @@ void
 TapeAudioRegionView::set_frame_color ()
 {
 	fill_opacity = 255;
-	TimeAxisViewItem::set_frame_color ();
+	AudioRegionView::set_frame_color ();
 }

@@ -29,6 +29,7 @@
 #include <glibmm/thread.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/memento_command.h>
+#include <pbd/stacktrace.h>
 
 #include <midi++/mmc.h>
 #include <midi++/port.h>
@@ -392,17 +393,35 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		update_latency_compensation (true, abort);
 	}
 
-	if ((Config->get_slave_source() == None && Config->get_auto_return()) || (post_transport_work & PostTransportLocate) || synced_to_jack()) {
+	if ((Config->get_slave_source() == None && Config->get_auto_return()) || 
+	    (post_transport_work & PostTransportLocate) || 
+	    (_requested_return_frame >= 0) ||
+	    synced_to_jack()) {
 		
 		if (pending_locate_flush) {
 			flush_all_inserts ();
 		}
 		
-		if (((Config->get_slave_source() == None && Config->get_auto_return()) || synced_to_jack()) && !(post_transport_work & PostTransportLocate)) {
+		if (((Config->get_slave_source() == None && Config->get_auto_return()) || 
+		     synced_to_jack() ||
+		     _requested_return_frame >= 0) &&
+		    !(post_transport_work & PostTransportLocate)) {
 
-			_transport_frame = last_stop_frame;
+			bool do_locate = false;
+
+			if (_requested_return_frame >= 0) {
+				_transport_frame = _requested_return_frame;
+				_requested_return_frame = -1;
+				do_locate = true;
+			} else {
+				_transport_frame = last_stop_frame;
+			}
 
 			if (synced_to_jack() && !play_loop) {
+				do_locate = true;
+			}
+			
+			if (do_locate) {
 				// cerr << "non-realtimestop: transport locate to " << _transport_frame << endl;
 				_engine.transport_locate (_transport_frame);
 			}
@@ -478,7 +497,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		
 	}
 
-	PositionChanged (_transport_frame); /* EMIT SIGNAL */
+        nframes_t tf = _transport_frame;
+
+        PositionChanged (tf); /* EMIT SIGNAL */
 	TransportStateChange (); /* EMIT SIGNAL */
 
 	/* and start it up again if relevant */
@@ -1200,6 +1221,14 @@ Session::setup_auto_play ()
 	
 	ev = new Event (Event::LocateRoll, Event::Add, Event::Immediate, current_audio_range.front().start, 0.0f, false);
 	merge_event (ev);
+}
+
+void
+Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
+{
+	request_locate (start, false);
+ 	Event *ev = new Event (Event::LocateRollLocate, Event::Add, Event::Immediate, return_to, 1.0);
+	queue_event (ev);
 }
 
 void

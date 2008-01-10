@@ -49,6 +49,8 @@ using Glib::ustring;
 bool AudioSource::_build_missing_peakfiles = false;
 bool AudioSource::_build_peakfiles = false;
 
+#define _FPP 256
+
 AudioSource::AudioSource (Session& s, ustring name)
 	: Source (s, name, DataType::AUDIO)
 {
@@ -135,7 +137,7 @@ AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) con
 	/* check to see if the peak data is ready. if not
 	   connect the slot while still holding the lock.
 	*/
-	
+
 	if (!(ret = _peaks_built)) {
 		conn = PeaksReady.connect (the_slot);
 	}
@@ -192,44 +194,36 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 		peakpath = find_broken_peakfile (peakpath, audio_path);
 	}
 
-	if (newfile) {
-
-		if (!_build_peakfiles) {
-			return 0;
+	if (stat (peakpath.c_str(), &statbuf)) {
+		if (errno != ENOENT) {
+			/* it exists in the peaks dir, but there is some kind of error */
+			
+			error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), peakpath) << endmsg;
+			return -1;
 		}
 
+		/* peakfile does not exist */
+		
 		_peaks_built = false;
-
+		
 	} else {
-
-		if (stat (peakpath.c_str(), &statbuf)) {
-			if (errno != ENOENT) {
-				/* it exists in the peaks dir, but there is some kind of error */
-				
-				error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), peakpath) << endmsg;
-				return -1;
-			}
-			
+		
+		/* we found it in the peaks dir, so check it out */
+		
+		if (statbuf.st_size == 0) {
+			// empty
 			_peaks_built = false;
-
 		} else {
+			// Check if the audio file has changed since the peakfile was built.
+			struct stat stat_file;
+			int err = stat (audio_path.c_str(), &stat_file);
 			
-			/* we found it in the peaks dir, so check it out */
-
-			if (statbuf.st_size == 0) {
+			if (!err && stat_file.st_mtime > statbuf.st_mtime){
 				_peaks_built = false;
+				_peak_byte_max = 0;
 			} else {
-				// Check if the audio file has changed since the peakfile was built.
-				struct stat stat_file;
-				int err = stat (audio_path.c_str(), &stat_file);
-				
-				if (!err && stat_file.st_mtime > statbuf.st_mtime){
-					_peaks_built = false;
-					_peak_byte_max = 0;
-				} else {
-					_peaks_built = true;
-					_peak_byte_max = statbuf.st_size;
-				}
+				_peaks_built = true;
+				_peak_byte_max = statbuf.st_size;
 			}
 		}
 	}
@@ -255,8 +249,15 @@ AudioSource::write (Sample *dst, nframes_t cnt)
 	return write_unlocked (dst, cnt);
 }
 
-int 
+int
 AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const
+{
+	return read_peaks_with_fpp (peaks, npeaks, start, cnt, samples_per_visual_peak, _FPP);
+}
+
+int 
+AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, 
+				  double samples_per_visual_peak, nframes_t samples_per_file_peak) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	double scale;
@@ -271,7 +272,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 	Sample* raw_staging = 0;
 	int _peakfile = -1;
 
-	expected_peaks = (cnt / (double) frames_per_peak);
+	expected_peaks = (cnt / (double) samples_per_file_peak);
 	scale = npeaks/expected_peaks;
 
 #undef DEBUG_READ_PEAKS
@@ -326,7 +327,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 	if (scale == 1.0) {
 
-		off_t first_peak_byte = (start / frames_per_peak) * sizeof (PeakData);
+		off_t first_peak_byte = (start / samples_per_file_peak) * sizeof (PeakData);
 
 		/* open, read, close */
 
@@ -390,10 +391,10 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 		/* compute the rounded up frame position  */
 	
 		nframes_t current_frame = start;
-		nframes_t current_stored_peak = (nframes_t) ceil (current_frame / (double) frames_per_peak);
+		nframes_t current_stored_peak = (nframes_t) ceil (current_frame / (double) samples_per_file_peak);
 		uint32_t       next_visual_peak  = (uint32_t) ceil (current_frame / samples_per_visual_peak);
 		double         next_visual_peak_frame = next_visual_peak * samples_per_visual_peak;
-		uint32_t       stored_peak_before_next_visual_peak = (nframes_t) next_visual_peak_frame / frames_per_peak;
+		uint32_t       stored_peak_before_next_visual_peak = (nframes_t) next_visual_peak_frame / samples_per_file_peak;
 		uint32_t       nvisual_peaks = 0;
 		uint32_t       stored_peaks_read = 0;
 		uint32_t       i = 0;
@@ -414,7 +415,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 			if (i == stored_peaks_read) {
 
 				uint32_t       start_byte = current_stored_peak * sizeof(PeakData);
-				tnp = min ((_length/frames_per_peak - current_stored_peak), (nframes_t) expected_peaks);
+				tnp = min ((_length/samples_per_file_peak - current_stored_peak), (nframes_t) expected_peaks);
 				to_read = min (chunksize, tnp);
 				
 #ifdef DEBUG_READ_PEAKS
@@ -437,7 +438,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 					     << ')'
 					     << " at start_byte = " << start_byte 
 					     << " _length = " << _length << " versus len = " << fend
-					     << " expected maxpeaks = " << (_length - current_frame)/frames_per_peak
+					     << " expected maxpeaks = " << (_length - current_frame)/samples_per_file_peak
 					     << " npeaks was " << npeaks
 					     << endl;
 					goto out;
@@ -466,7 +467,7 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nfr
 
 			//next_visual_peak_frame = min ((next_visual_peak * samples_per_visual_peak), (next_visual_peak_frame+samples_per_visual_peak) );
 			next_visual_peak_frame =  min ((double) start+cnt, (next_visual_peak_frame+samples_per_visual_peak) );
-			stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_frame / frames_per_peak; 
+			stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_frame / samples_per_file_peak; 
 		}
 
 		if (zero_fill) {
@@ -611,7 +612,7 @@ AudioSource::build_peaks_from_scratch ()
 				goto out;
 			}
 
-			if (compute_and_write_peaks (buf, current_frame, frames_read, true, false)) {
+			if (compute_and_write_peaks (buf, current_frame, frames_read, true, false, _FPP)) {
 				break;
 			}
 			
@@ -662,7 +663,7 @@ void
 AudioSource::done_with_peakfile_writes (bool done)
 {
 	if (peak_leftover_cnt) {
-		compute_and_write_peaks (0, 0, 0, true, false);
+		compute_and_write_peaks (0, 0, 0, true, false, _FPP);
 	}
 	
 	if (done) {
@@ -677,6 +678,13 @@ AudioSource::done_with_peakfile_writes (bool done)
 
 int
 AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, bool intermediate_peaks_ready)
+{
+	return compute_and_write_peaks (buf, first_frame, cnt, force, intermediate_peaks_ready, _FPP);
+}
+
+int
+AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, 
+				      bool intermediate_peaks_ready, nframes_t fpp)
 {
 	Sample* buf2 = 0;
 	nframes_t to_do;
@@ -707,9 +715,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 			x.min = peak_leftovers[0];
 			x.max = peak_leftovers[0];
 
-			ARDOUR::find_peaks (peak_leftovers + 1, peak_leftover_cnt - 1, &x.min, &x.max);
-
-			off_t byte = (peak_leftover_frame / frames_per_peak) * sizeof (PeakData);
+			off_t byte = (peak_leftover_frame / fpp) * sizeof (PeakData);
 
 			if (::pwrite (peakfile, &x, sizeof (PeakData), byte) != sizeof (PeakData)) {
 				error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
@@ -761,7 +767,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		to_do = cnt;
 	}
 
-	peakbuf = new PeakData[(to_do/frames_per_peak)+1];
+	peakbuf = new PeakData[(to_do/fpp)+1];
 	peaks_computed = 0;
 	current_frame = first_frame;
 	frames_done = 0;
@@ -769,11 +775,11 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 	while (to_do) {
 
 		/* if some frames were passed in (i.e. we're not flushing leftovers)
-		   and there are less than frames_per_peak to do, save them till
+		   and there are less than fpp to do, save them till
 		   next time
 		*/
 
-		if (force && (to_do < frames_per_peak)) {
+		if (force && (to_do < fpp)) {
 			/* keep the left overs around for next time */
 
 			if (peak_leftover_size < to_do) {
@@ -790,7 +796,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 			break;
 		}
 			
-		nframes_t this_time = min (frames_per_peak, to_do);
+		nframes_t this_time = min (fpp, to_do);
 
 		peakbuf[peaks_computed].max = buf[0];
 		peakbuf[peaks_computed].min = buf[0];
@@ -804,7 +810,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframe
 		current_frame += this_time;
 	}
 		
-	first_peak_byte = (first_frame / frames_per_peak) * sizeof (PeakData);
+	first_peak_byte = (first_frame / fpp) * sizeof (PeakData);
 
 	if (can_truncate_peaks()) {
 
@@ -887,7 +893,7 @@ AudioSource::available_peaks (double zoom_factor) const
 {
 	off_t end;
 
-	if (zoom_factor < frames_per_peak) {
+	if (zoom_factor < _FPP) {
 		return length(); // peak data will come from the audio file
 	} 
 	
@@ -899,7 +905,7 @@ AudioSource::available_peaks (double zoom_factor) const
 
 	end = _peak_byte_max;
 
-	return (end/sizeof(PeakData)) * frames_per_peak;
+	return (end/sizeof(PeakData)) * _FPP;
 }
 
 void

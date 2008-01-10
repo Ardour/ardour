@@ -73,8 +73,6 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	_amplitude_above_axis = 1.0;
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
-
-
 }
 
 AudioStreamView::~AudioStreamView ()

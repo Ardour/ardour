@@ -109,7 +109,7 @@ class Route : public IO
 
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
-
+	
 	bool active() const { return _active; }
 	void set_active (bool yn);
 

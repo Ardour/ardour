@@ -25,10 +25,10 @@
 using namespace ARDOUR;
 using namespace std;
 
-AudioPort::AudioPort (const std::string& name, Flags flgs, bool external, nframes_t capacity)
-	: Port (name, flgs)
-	, BaseAudioPort (name, flgs)
-	, PortFacade (name, flgs)
+AudioPort::AudioPort (const std::string& name, Flags flags, bool external, nframes_t capacity)
+	: Port (name, flags)
+	, BaseAudioPort (name, flags)
+	, PortFacade (name, flags)
 {
 	if (!external || receives_input()) {
 
@@ -43,6 +43,7 @@ AudioPort::AudioPort (const std::string& name, Flags flgs, bool external, nframe
 	if (!external) {
 
 		_ext_port = 0;
+		set_name (name);
 
 	} else {
 		
@@ -52,7 +53,7 @@ AudioPort::AudioPort (const std::string& name, Flags flgs, bool external, nframe
 		   will in turn be using the JACK port buffer for data.
 		*/
 
-		_ext_port = new JackAudioPort (name, flgs, 0);
+		_ext_port = new JackAudioPort (name, flags, 0);
 
 		if (sends_output()) {
 			_buffer = &dynamic_cast<JackAudioPort*>(_ext_port)->get_audio_buffer();

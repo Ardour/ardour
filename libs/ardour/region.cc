@@ -365,6 +365,8 @@ Region::set_length (nframes_t len, void *src)
 			return;
 		}
 		
+
+		_last_length = _length;
 		_length = len;
 
 		_flags = Region::Flag (_flags & ~WholeFile);
@@ -443,6 +445,7 @@ Region::special_set_position (nframes_t pos)
 	   a way to store its "natural" or "captured" position.
 	*/
 
+	_position = _position;
 	_position = pos;
 }
 
@@ -454,6 +457,7 @@ Region::set_position (nframes_t pos, void *src)
 	}
 
 	if (_position != pos) {
+		_last_position = _position;
 		_position = pos;
 
 		/* check that the new _position wouldn't make the current
@@ -463,6 +467,7 @@ Region::set_position (nframes_t pos, void *src)
 		*/
 
 		if (max_frames - _length < _position) {
+			_last_length = _length;
 			_length = max_frames - _position;
 		}
 	}
@@ -482,6 +487,7 @@ Region::set_position_on_top (nframes_t pos, void *src)
 	}
 
 	if (_position != pos) {
+		_last_position = _position;
 		_position = pos;
 	}
 
@@ -499,7 +505,7 @@ Region::set_position_on_top (nframes_t pos, void *src)
 }
 
 void
-Region::nudge_position (long n, void *src)
+Region::nudge_position (nframes64_t n, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -509,6 +515,8 @@ Region::nudge_position (long n, void *src)
 		return;
 	}
 	
+	_last_position = _position;
+
 	if (n > 0) {
 		if (_position > max_frames - n) {
 			_position = max_frames;
@@ -527,11 +535,12 @@ Region::nudge_position (long n, void *src)
 }
 
 void
-Region::set_ancestral_data (nframes64_t s, nframes64_t l, float st)
+Region::set_ancestral_data (nframes64_t s, nframes64_t l, float st, float sh)
 {
 	_ancestral_length = l;
 	_ancestral_start = s;
 	_stretch = st;
+	_shift = sh;
 }
 
 void
@@ -723,10 +732,16 @@ Region::trim_to_internal (nframes_t position, nframes_t length, void *src)
 		what_changed = Change (what_changed|StartChanged);
 	}
 	if (_length != length) {
+		if (!_frozen) {
+			_last_length = _length;
+		}
 		_length = length;
 		what_changed = Change (what_changed|LengthChanged);
 	}
 	if (_position != position) {
+		if (!_frozen) {
+			_last_position = _position;
+		}
 		_position = position;
 		what_changed = Change (what_changed|PositionChanged);
 	}
@@ -867,14 +882,16 @@ Region::adjust_to_sync (nframes_t pos)
 {
 	int sync_dir;
 	nframes_t offset = sync_offset (sync_dir);
+
+	// cerr << "adjusting pos = " << pos << " to sync at " << _sync_position << " offset = " << offset << " with dir = " << sync_dir << endl;
 	
 	if (sync_dir > 0) {
 		if (max_frames - pos > offset) {
-			pos += offset;
+			pos -= offset;
 		}
 	} else {
 		if (pos > offset) {
-			pos -= offset;
+			pos += offset;
 		} else {
 			pos = 0;
 		}
@@ -890,6 +907,24 @@ Region::sync_position() const
 		return _sync_position; 
 	} else {
 		return _start;
+	}
+}
+
+void
+Region::raise ()
+{
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->raise_region (shared_from_this ());
+	}
+}
+
+void
+Region::lower ()
+{
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (pl) {
+		pl->lower_region (shared_from_this ());
 	}
 }
 
@@ -945,6 +980,8 @@ Region::state (bool full_state)
 	node->add_property ("ancestral-length", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _stretch);
 	node->add_property ("stretch", buf);
+	snprintf (buf, sizeof (buf), "%.12g", _shift);
+	node->add_property ("shift", buf);
 	
 	switch (_first_edit) {
 	case EditChangesNothing:
@@ -1017,9 +1054,11 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _length) {
 			what_changed = Change (what_changed|LengthChanged);
+			_last_length = _length;
 			_length = val;
 		}
 	} else {
+		_last_length = _length;
 		_length = 1;
 	}
 
@@ -1027,9 +1066,11 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _position) {
 			what_changed = Change (what_changed|PositionChanged);
+			_last_position = _position;
 			_position = val;
 		}
 	} else {
+		_last_position = _position;
 		_position = 0;
 	}
 
@@ -1074,6 +1115,12 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		_stretch = atof (prop->value());
 	} else {
 		_stretch = 1.0;
+	}
+
+	if ((prop = node.property ("shift")) != 0) {
+		_shift = atof (prop->value());
+	} else {
+		_shift = 1.0;
 	}
 
 	/* note: derived classes set flags */
@@ -1128,6 +1175,8 @@ void
 Region::freeze ()
 {
 	_frozen++;
+	_last_length = _length;
+	_last_position = _position;
 }
 
 void
@@ -1261,27 +1310,46 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 bool
 Region::verify_length (nframes_t len)
 {
-	for (uint32_t n=0; n < _sources.size(); ++n) {
-		if (_start > _sources[n]->length() - len) {
-			return false;
-		}
+	if (source() && source()->destructive()) {
+		return true;
 	}
+
+	nframes_t maxlen = 0;
+
+	for (uint32_t n=0; n < _sources.size(); ++n) {
+		maxlen = max (maxlen, _sources[n]->length() - _start);
+	}
+	
+	len = min (len, maxlen);
+	
 	return true;
 }
 
 bool
-Region::verify_start_and_length (nframes_t new_start, nframes_t new_length)
+Region::verify_start_and_length (nframes_t new_start, nframes_t& new_length)
 {
-	for (uint32_t n=0; n < _sources.size(); ++n) {
-		if (new_length > _sources[n]->length() - new_start) {
-			return false;
-		}
+	if (source() && source()->destructive()) {
+		return true;
 	}
+
+	nframes_t maxlen = 0;
+
+	for (uint32_t n=0; n < _sources.size(); ++n) {
+		maxlen = max (maxlen, _sources[n]->length() - new_start);
+	}
+
+	new_length = min (new_length, maxlen);
+
 	return true;
 }
+
 bool
 Region::verify_start (nframes_t pos)
 {
+	if (source() && source()->destructive()) {
+		return true;
+	}
+
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		if (pos > _sources[n]->length() - _length) {
 			return false;
@@ -1293,6 +1361,10 @@ Region::verify_start (nframes_t pos)
 bool
 Region::verify_start_mutable (nframes_t& new_start)
 {
+	if (source() && source()->destructive()) {
+		return true;
+	}
+
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		if (new_start > _sources[n]->length() - _length) {
 			new_start = _sources[n]->length() - _length;

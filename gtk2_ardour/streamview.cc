@@ -379,7 +379,6 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 {
 	bool selected;
 
-	// cerr << _trackview.name() << " (selected = " << regions.size() << ")" << endl;
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		
 		selected = false;
@@ -389,8 +388,7 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 				selected = true;
 			}
 		}
-		
-		// cerr << "\tregion " << (*i)->region().name() << " selected = " << selected << endl;
+
 		(*i)->set_selected (selected);
 	}
 }

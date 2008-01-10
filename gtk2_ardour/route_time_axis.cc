@@ -52,6 +52,7 @@
 #include <ardour/session_playlist.h>
 #include <ardour/utils.h>
 #include <ardour/parameter.h>
+#include <ardour/profile.h>
 
 #include "ardour_ui.h"
 #include "route_time_axis.h"
@@ -105,6 +106,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	_view = 0;
 	timestretch_rect = 0;
 	no_redraw = false;
+	destructive_track_mode_item = 0;
+	normal_track_mode_item = 0;
 
 	ignore_toggle = false;
 
@@ -149,6 +152,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
 		controls_table.attach (*rec_enable_button, 4, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
+
 	}
 
 	controls_hbox.pack_start(lm, false, false);
@@ -172,17 +176,22 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	
 	label_view ();
 
-	controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	if (!Profile->get_sae()) {
+
+		controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+
+	} else {
+
+		controls_table.attach (automation_button, 4, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	}
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
 		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	}
 
-	/* remove focus from the buttons */
-	
 	y_position = -1;
 
 	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
@@ -325,7 +334,7 @@ RouteTimeAxisView::get_automation_child_xml_node (Parameter param)
 gint
 RouteTimeAxisView::edit_click (GdkEventButton *ev)
 {
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 	        _route->set_edit_group (0, this);
 		return FALSE;
 	} 
@@ -502,13 +511,15 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 
 	build_remote_control_menu ();
-	items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
-
 	build_automation_action_menu ();
-	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Remote Control ID"), *remote_control_menu));
+		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+		items.push_back (SeparatorElem());
+	}
 
 	// Hook for derived classes to add type specific stuff
-	items.push_back (SeparatorElem());
 	append_extra_display_menu_items ();
 	items.push_back (SeparatorElem());
 	
@@ -545,7 +556,26 @@ RouteTimeAxisView::build_display_menu ()
 		if (get_diskstream()->alignment_style() == CaptureTime)
 			align_capture_item->set_active();
 
-		items.push_back (MenuElem (_("Alignment"), *alignment_menu));
+		if (!Profile->get_sae()) {
+			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
+			get_diskstream()->AlignmentStyleChanged.connect (mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+			
+			RadioMenuItem::Group mode_group;
+			items.push_back (RadioMenuElem (mode_group, _("Normal mode"),
+							bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal)));
+			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+			items.push_back (RadioMenuElem (mode_group, _("Tape mode"),
+							bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive)));
+			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+			
+			switch (track()->mode()) {
+			case ARDOUR::Destructive:
+				destructive_track_mode_item->set_active ();
+				break;
+			case ARDOUR::Normal:
+				normal_track_mode_item->set_active ();
+				break;
+			}
 
 		get_diskstream()->AlignmentStyleChanged.connect (
 				mem_fun(*this, &RouteTimeAxisView::align_style_changed));
@@ -553,9 +583,11 @@ RouteTimeAxisView::build_display_menu ()
 		mode_menu = build_mode_menu();
 		if (mode_menu)
 			items.push_back (MenuElem (_("Mode"), *mode_menu));
+			
+		items.push_back (SeparatorElem());
+		}
 	}
 
-	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route->active());
@@ -590,8 +622,8 @@ RouteTimeAxisView::set_track_mode (TrackMode mode)
 		/*NOTREACHED*/
 		return;
 	}
-
-	if (item->get_active () && track()->mode() != mode) {
+	
+	if (item && other_item && item->get_active () && track()->mode() != mode) {
 		_set_track_mode (track().get(), mode, other_item);
 	}
 }
@@ -740,7 +772,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 {
 	int gmlen = (height_to_pixels (h)) - 5;
 	bool height_changed = (height == 0) || (h != height_style);
-
+	lm.setup_meters (gmlen);
 	TimeAxisView::set_height (h);
 
 	ensure_xml_node ();
@@ -822,7 +854,6 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		break;
 
 	case Small:
-		hide_meter();
 		hide_name_entry ();
 		show_name_label ();
 
@@ -1084,7 +1115,7 @@ RouteTimeAxisView::update_diskstream_display ()
 void
 RouteTimeAxisView::selection_click (GdkEventButton* ev)
 {
-	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::Shift|Keyboard::Control))) {
+	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
 
 		/* special case: select/deselect all tracks */
 		if (editor.get_selection().selected (this)) {
@@ -1292,6 +1323,19 @@ RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t d
 	return boost::shared_ptr<Region> ();
 }
 
+nframes64_t 
+RouteTimeAxisView::find_next_region_boundary (nframes64_t pos, int32_t dir)
+{
+	boost::shared_ptr<Diskstream> stream;
+	boost::shared_ptr<Playlist> playlist;
+
+	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
+		return playlist->find_next_region_boundary (pos, dir);
+	}
+
+	return -1;
+}
+
 bool
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
@@ -1497,6 +1541,7 @@ RouteTimeAxisView::color_handler ()
 		timestretch_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
 	}
 
+	reset_meter();
 }
 
 void

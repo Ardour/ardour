@@ -49,12 +49,10 @@ gtkardour.Merge ([
     libraries['gtk2'],
     libraries['xml'],
     libraries['xslt'],
-    libraries['soundtouch'],
-    libraries['rubberband'],
     libraries['samplerate'],
     libraries['jack'],
-    libraries['sysaudio'],
-    libraries['cairomm']
+    libraries['cairomm'],
+    libraries['asound']
 ])
 
 gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
@@ -78,17 +76,22 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
+if gtkardour['RUBBERBAND']:
+	gtkardour.Merge ([ libraries['rubberband'],  libraries['vamp'], libraries['fftw3f'], libraries['fftw3'] ])
+else:
+	gtkardour.Merge ([ libraries['soundtouch'] ])
+
 skipped_files=Split("""
 connection_editor.cc
 """)
 
 audiounit_files=Split("""
-au_pluginui.cc
+au_pluginui.mm
 """)
 
 gtkosx_files=Split("""
 sync-menu.c
-cocoacarbon.c
+cocoacarbon.mm
 """)
 
 x11_files=Split("""
@@ -165,6 +168,7 @@ export_session_dialog.cc
 export_region_dialog.cc
 export_range_markers_dialog.cc
 gain_meter.cc
+generic_pluginui.cc
 ghostregion.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
@@ -172,7 +176,6 @@ io_selector.cc
 port_matrix.cc
 keyboard.cc
 keyeditor.cc
-ladspa_pluginui.cc
 latency_gui.cc
 level_meter.cc
 location_ui.cc
@@ -183,6 +186,7 @@ mixer_ui.cc
 new_session_dialog.cc
 option_editor.cc
 opts.cc
+
 panner.cc
 panner2d.cc
 panner_ui.cc
@@ -230,6 +234,10 @@ icon_files = glob.glob ('icons/*.png')
 
 intl_files = gtkardour_files + glob.glob('*.h')
 
+evtest_files=Split("""
+evtest.cc
+""")
+
 mtest_files=Split("""
 mtest.cc
 """)
@@ -274,21 +282,23 @@ marker_view.cc
 visual_time_axis.cc
 """)
 
-if env['CMT']:
-    extra_sources += cmt_files
-    gtkardour.Append (CCFLAGS="-DWITH_CMT")
+#if env['CMT']:
+#   extra_sources += cmt_files
+#    gtkardour.Append (CCFLAGS="-DWITH_CMT")
 
 if gtkardour['GTKOSX']:
-   extra_sources += gtkosx_files
-   gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
+	extra_sources += gtkosx_files
+	gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
+	gtkardour.Append (LINKFLAGS=" -framework AppKit -framework CoreAudioKit")
+
+	if gtkardour['AUDIOUNITS']:
+		extra_sources += audiounit_files
+		gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
+		gtkardour.Merge([libraries['appleutility']])
+
 else:
    extra_sources += x11_files
 	
-if gtkardour['AUDIOUNITS']:
-    extra_sources += audiounit_files
-    gtkardour.Append(CCFLAGS='-DHAVE_AUDIOUNITS')
-    gtkardour.Append(LINKFLAGS='-framework Carbon')
-    gtkardour.Merge([libraries['appleutility']])
  
 if env['FFT_ANALYSIS']:
 	extra_sources += fft_analysis_files
@@ -307,6 +317,7 @@ executable = 'ardour-' + ardour_version
 ardour = gtkardour.Program(target = executable, source = gtkardour_files + extra_sources)
 ardourlib = gtkardour.SharedLibrary(target = 'ardourgtk', source = gtkardour_files + extra_sources)
 
+evest = gtkmmtests.Program(target = 'evtest', source = evtest_files)
 mtest = gtkardour.Program(target = 'mtest', source = mtest_files)
 itest = gtkardour.Program(target = 'itest', source = itest_files)
 rcu = gtkardour.Program(target = 'rcu', source = rcu_files)
@@ -396,7 +407,30 @@ my_subst_dict = { }
 # null substitution just to avoid ardour.bindings being in svn
 #
 
-ardourbindings = env.SubstInFile ('ardour.bindings', 'ardour.bindings.in', SUBST_DICT = my_subst_dict);
+keybindings_dict = { }
+
+if gtkardour['GTKOSX'] and gtkardour['NATIVE_OSX_KEYS']:
+	#
+	# Command(Mod1), Alt(Mod5), Ctrl, Shift
+	#
+	keybindings_dict['%PRIMARY%'] = 'Mod5'
+	keybindings_dict['%SECONDARY%'] = 'Alt'
+	keybindings_dict['%TERTIARY%'] = 'Shift'
+	keybindings_dict['%LEVEL4%'] = 'Ctrl'
+	keybindings_dict['%WINDOW%'] = 'Mod5'
+else:
+	#
+	# Ctrl, Alt, Shift, Mod3(Meta)
+	#
+	keybindings_dict['%PRIMARY%'] = 'Ctrl'
+	keybindings_dict['%SECONDARY%'] = 'Alt'
+	keybindings_dict['%TERTIARY%'] = 'Shift'
+	keybindings_dict['%LEVEL4%'] = 'Mod2'
+	keybindings_dict['%WINDOW%'] = 'Ctrl'
+
+ardourbindings = env.SubstInFile ('ardour.bindings', 'ardour.bindings.in', SUBST_DICT = keybindings_dict);
+ardoursaeDEbindings = env.SubstInFile ('ardour-sae-de.bindings', 'ardour-sae-de.bindings.in', SUBST_DICT = keybindings_dict);
+ardoursaeANSIbindings = env.SubstInFile ('ardour-sae-ansi.bindings', 'ardour-sae-ansi.bindings.in', SUBST_DICT = keybindings_dict);
 
 my_subst_dict['%INSTALL_PREFIX%'] = final_prefix
 my_subst_dict['%LIBDIR%'] = env['LIBDIR']
@@ -409,6 +443,8 @@ ardourdev = env.SubstInFile ('ardev_common.sh','ardev_common.sh.in', SUBST_DICT 
 env.AddPostAction (ardourdev, Chmod ('$TARGET', 0755))
 
 Default(ardourbindings)
+Default(ardoursaeDEbindings)
+Default(ardoursaeANSIbindings)
 Default(ardourdev)
 Default(ardoursh)
 Default(ardour_dark_theme)
@@ -441,7 +477,8 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_default.conf'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae-ansi.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae-de.bindings'))
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
@@ -457,9 +494,11 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
                                         'ardour2_ui_dark.rc.in', 'ardour2_ui_light.rc.in', 'splash.png',
-                                        'ardour.menus',
-                                        'ardour-sae.menus',
-					'ardour.bindings.in', 'ardour2_ui_default.conf',
+                                        'ardour.menus', 'ardour-sae.menus', 
+					'ardour.bindings.in', 
+					'ardour-sae-ansi.bindings.in', 
+					'ardour-sae-de.bindings.in', 
+					'ardour2_ui_default.conf',
 					'editor_xpms'
                                         ] +
                                       gtkardour_files +

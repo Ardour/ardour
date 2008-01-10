@@ -112,10 +112,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_splash ();
 	void hide_splash ();
 	
-	int load_session (const string & path, const string & snapshot, string* mix_template = 0);
+	int load_session (const Glib::ustring & path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
-	/// @return zero if building the session was successful
-	int build_session (const string & path, const string & snapshot, 
+	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, 
 			   uint32_t ctl_chns, 
 			   uint32_t master_chns,
 			   ARDOUR::AutoConnectOption input_connect,
@@ -155,7 +154,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
-	
+
+	ARDOUR::AudioEngine& the_engine() const { return *engine; }
+
 	void toggle_key_editor ();
 	void toggle_location_window ();
 	void toggle_theme_manager ();
@@ -279,8 +280,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	ARDOUR::AudioEngine                 *engine;
 	ARDOUR::Session                     *session;
-
-	bool check_audioengine();
 
 	Gtk::Tooltips          _tooltips;
 
@@ -482,6 +481,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void solo_alert_toggle ();
 	void audition_alert_toggle ();
 
+	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
 	void secondary_clock_value_changed ();
 
@@ -578,7 +578,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_goto_end ();
 	void transport_stop ();
 	void transport_stop_and_forget_capture ();
-	void transport_record ();
+	void transport_record (bool roll);
 	void transport_roll ();
 	void transport_play_selection(); 
 	void transport_forward (int option);
@@ -753,10 +753,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void no_memory_warning ();
 	void check_memory_locking ();
 
-	bool ab_direction;
-	void disable_all_plugins ();
-	void ab_all_plugins ();
-
+	bool check_audioengine();
 	void audioengine_setup ();
 
 	void display_message (const char *prefix, gint prefix_len, 
@@ -766,6 +763,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::MessageDialog* loading_dialog;
 
 	void platform_specific ();
+	void platform_setup ();
+	void fontconfig_dialog ();
 };
 
 #endif /* __ardour_gui_h__ */

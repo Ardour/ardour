@@ -43,6 +43,7 @@ public:
 	
 	/** Read @a len frames FROM THE START OF @a src into self at @a offset */
 	void read_from(const Buffer& src, nframes_t len, nframes_t offset) {
+		assert(&src != this);
 		assert(_capacity > 0);
 		assert(src.type() == DataType::AUDIO);
 		assert(offset + len <= _capacity);

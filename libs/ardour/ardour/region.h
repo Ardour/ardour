@@ -96,11 +96,17 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	nframes_t length()    const { return _length; }
 	layer_t   layer ()    const { return _layer; }
 
+	/* these two are valid ONLY during a StateChanged signal handler */
+
+	nframes_t last_position() const { return _last_position; }
+	nframes_t last_length() const { return _last_length; }
+
 	nframes64_t ancestral_start () const { return _ancestral_start; }
 	nframes64_t ancestral_length () const { return _ancestral_length; }
 	float stretch() const { return _stretch; }
+	float shift() const { return _shift; }
 
-	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch);
+	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch, float shift);
 
 	nframes_t sync_offset(int& dir) const;
 	nframes_t sync_position() const;
@@ -129,7 +135,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	void thaw (const string& why);
 
 	bool covers (nframes_t frame) const {
-		return first_frame() <= frame && frame < last_frame();
+		return first_frame() <= frame && frame <= last_frame();
 	}
 
 	OverlapType coverage (nframes_t start, nframes_t end) const {
@@ -149,7 +155,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	void set_position (nframes_t, void *src);
 	void set_position_on_top (nframes_t, void *src);
 	void special_set_position (nframes_t);
-	void nudge_position (long, void *src);
+	void nudge_position (nframes64_t, void *src);
 
 	bool at_natural_position () const;
 	void move_to_natural_position (void *src);
@@ -160,6 +166,8 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	void trim_to (nframes_t position, nframes_t length, void *src);
 	
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
+	void raise ();
+	void lower ();
 	void raise_to_top ();
 	void lower_to_bottom ();
 
@@ -232,10 +240,11 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	void maybe_uncopy ();
 	void first_edit ();
 	
-	virtual bool verify_start (nframes_t);
-	virtual bool verify_start_and_length (nframes_t, nframes_t);
-	virtual bool verify_start_mutable (nframes_t&_start);
-	virtual bool verify_length (nframes_t);
+	bool verify_start (nframes_t);
+	bool verify_start_and_length (nframes_t, nframes_t&);
+	bool verify_start_mutable (nframes_t&_start);
+	bool verify_length (nframes_t);
+	
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
 
@@ -243,7 +252,9 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	Flag                    _flags;
 	nframes_t               _start;
 	nframes_t               _length;
+	nframes_t               _last_length;
 	nframes_t               _position;
+	nframes_t               _last_position;
 	nframes_t               _sync_position;
 	layer_t                 _layer;
 	mutable RegionEditState _first_edit;
@@ -251,6 +262,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	nframes64_t             _ancestral_start;
 	nframes64_t             _ancestral_length;
 	float                   _stretch;
+	float                   _shift;
 	mutable uint32_t        _read_data_count;  ///< modified in read()
 	Change                  _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp

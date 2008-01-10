@@ -34,6 +34,7 @@ using namespace PBD;
 
 TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
 	: ArdourDialog (_("edit tempo")),
+	  note_frame (_("BPM denominator")),
 	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
 	  bpm_spinner (bpm_adjustment),
 	  bpm_frame (_("Beats per minute")),
@@ -48,7 +49,7 @@ TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
 	Tempo tempo (map.tempo_at (frame));
 	map.bbt_time (frame, when);
 
-	init (when, tempo.beats_per_minute(), true);
+	init (when, tempo.beats_per_minute(), tempo.note_type(), true);
 }
 
 TempoDialog::TempoDialog (TempoSection& section, const string & action)
@@ -63,23 +64,62 @@ TempoDialog::TempoDialog (TempoSection& section, const string & action)
 	  when_table (2, 2),
 	  when_frame (_("Location"))
 {
-	init (section.start(), section.beats_per_minute(), section.movable());
+	init (section.start(), section.beats_per_minute(), section.note_type(), section.movable());
 }
 
 void
-TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
+TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool movable)
 {
 	bpm_spinner.set_numeric (true);
-	bpm_spinner.set_digits (1);
+	bpm_spinner.set_digits (2);
 	bpm_spinner.set_wrap (true);
 	bpm_spinner.set_value (bpm);
+
+	strings.push_back (_("whole (1)"));
+	strings.push_back (_("second (2)"));
+	strings.push_back (_("third (3)"));
+	strings.push_back (_("quarter (4)"));
+	strings.push_back (_("eighth (8)"));
+	strings.push_back (_("sixteenth (16)"));
+	strings.push_back (_("thirty-second (32)"));
+	
+	/* the string here needs to be the longest one to display */
+	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
+	// TRANSLATORS: this is not a mis-spelling of "thirty", we're including a vertical 
+	// descender to make sure the height gets computed properly.
+        Gtkmm2ext::set_size_request_to_display_given_text (note_types, "thirtq-second (32)", 7+FUDGE, 15);
+
+	set_popdown_strings (note_types, strings);
+
+	if (note_type==1.0f)
+		note_types.set_active_text (_("whole (1)"));
+	else if (note_type==2.0f)
+		note_types.set_active_text (_("second (2)"));
+	else if (note_type==3.0f)
+		note_types.set_active_text (_("third (3)"));
+	else if (note_type==4.0f)
+		note_types.set_active_text (_("quarter (4)"));
+	else if (note_type==8.0f)
+		note_types.set_active_text (_("eighth (8)"));
+	else if (note_type==16.0f)
+		note_types.set_active_text (_("sixteenth (16)"));
+	else if (note_type==32.0f)
+		note_types.set_active_text (_("thirty-second (32)"));
+	else
+		note_types.set_active_text (_("quarter (4)"));
 
 	hspacer1.set_border_width (5);
 	hspacer1.pack_start (bpm_spinner, false, false);
 	vspacer1.set_border_width (5);
 	vspacer1.pack_start (hspacer1, false, false);
 
+	hspacer2.set_border_width (5);
+	hspacer2.pack_start (note_types, false, false);
+	vspacer2.set_border_width (5);
+	vspacer2.pack_start (hspacer2, false, false);
+
 	bpm_frame.add (vspacer1);
+	note_frame.add (vspacer2);
 
 	if (movable) {
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
@@ -115,9 +155,12 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 
 	bpm_frame.set_name ("MetricDialogFrame");
 	bpm_spinner.set_name ("MetricEntry");
+	note_frame.set_name ("MetricDialogFrame");
 
+	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (bpm_frame, false, false);
-	
+	get_vbox()->pack_start (note_frame, false, false);
+
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::APPLY, RESPONSE_ACCEPT);
 	set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
@@ -131,6 +174,7 @@ TempoDialog::init (const BBT_Time& when, double bpm, bool movable)
 	bpm_spinner.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	bpm_spinner.signal_button_press_event().connect (mem_fun (*this, &TempoDialog::bpm_button_press), false);
 	bpm_spinner.signal_button_release_event().connect (mem_fun (*this, &TempoDialog::bpm_button_release), false);
+	note_types.signal_changed().connect (mem_fun (*this, &TempoDialog::note_types_change));
 }
 
 bool
@@ -166,6 +210,41 @@ TempoDialog::get_bbt_time (BBT_Time& requested)
 	}
 
 	return true;
+}
+
+double
+TempoDialog::get_note_type ()
+{
+	double note_type = 0;
+	vector<string>::iterator i;
+	string text = note_types.get_active_text();
+	
+	for (i = strings.begin(); i != strings.end(); ++i) {
+		if (text == *i) {
+			if (sscanf (text.c_str(), "%*[^0-9]%lf", &note_type) != 1) {
+				error << string_compose(_("garbaged note type entry (%1)"), text) << endmsg;
+				return 0;
+			} else {
+				break;
+			}
+		}
+	} 
+	
+	if (i == strings.end()) {
+		if (sscanf (text.c_str(), "%lf", &note_type) != 1) {
+			error << string_compose(_("incomprehensible note type entry (%1)"), text) << endmsg;
+			return 0;
+		}
+	}
+
+	cerr << "returning " << note_type << " based on " << text << endl;
+	return note_type;
+}
+
+void
+TempoDialog::note_types_change ()
+{
+        set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
 }
 
 
@@ -216,6 +295,13 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
 	
+	/* the string here needs to be the longest one to display */
+	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
+
+	// TRANSLATORS: this is not a mis-spelling of "thirty", we're including a vertical 
+	// descender to make sure the height gets computed properly.
+        Gtkmm2ext::set_size_request_to_display_given_text (note_types, _("thirtq-second (32)"), 7+FUDGE, 15);
+
 	set_popdown_strings (note_types, strings);
 
 	if (note_type==1.0f)
@@ -235,10 +321,6 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	else
 		note_types.set_active_text (_("quarter (4)"));
 		
-	/* the string here needs to be the longest one to display */
-	const guint32 FUDGE = 20; // Combo's are stupid - they steal space from the entry for the button
-        Gtkmm2ext::set_size_request_to_display_given_text (note_types, "thirty-second (32)", 7+FUDGE, 7);
-
 	hspacer1.set_border_width (5);
 	hspacer1.pack_start (note_types, false, false);
 	vspacer1.set_border_width (5);
@@ -283,6 +365,8 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		
 		get_vbox()->pack_start (when_frame, false, false);
 	}
+
+	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (bpb_frame, false, false);
 	get_vbox()->pack_start (note_frame, false, false);
 	

@@ -21,6 +21,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <ardour/session.h>
+
 #include "opts.h"
 
 #include "i18n.h"
@@ -38,6 +40,7 @@ char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
 bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
 string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
 Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
+bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -48,8 +51,9 @@ print_help (const char *execname)
 	     << _("  -v, --version                    Show version information\n")
 	     << _("  -h, --help                       Print this message\n")
 	     << _("  -b, --bindings                   Print all possible keyboard binding names\n")
-	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -c, --name  name                 Use a specific jack client name, default is ardour\n")
+	     << _("  -d, --disable-plugins            Disable all plugins in an existing session\n")
+	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")                       
 	     << _("  -N, --new session-name           Create a new session from the command line\n")                       
 	     << _("  -O, --no-hw-optimizations        Disable h/w specific optimizations\n")
@@ -69,11 +73,12 @@ int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 {
-	const char *optstring = "U:hSbvVnOc:C:m:N:k:";
+	const char *optstring = "U:hSbvVnOdc:C:m:N:k:p:";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
 		menus_file = "ardour-sae.menus";
+		keybindings_path = "ardour-sae";
 	}
 
 	if (execname == 0) {
@@ -122,6 +127,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'b':
 			show_key_actions = true;
 			break;
+			
+		case 'd':
+			ARDOUR::Session::set_disable_all_loaded_plugins (true);
+			break;
 
  
                 case 'm':
@@ -130,6 +139,11 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'n':
 			no_splash = false;
+			break;
+
+		case 'p':
+			//undocumented OS X finder -psn_XXXXX argument
+			finder_invoked_ardour = true;
 			break;
 		
 		case 'S':
@@ -143,11 +157,6 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'O':
 			try_hw_optimization = false;
-			break;
-
-
-		case 'p':
-			//undocumented OS X finder -psn_XXXXX argument
 			break;
  		
 		case 'V':

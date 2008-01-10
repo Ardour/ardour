@@ -47,6 +47,7 @@ class Slave {
 	virtual bool starting() const { return false; }
 	virtual nframes_t resolution() const = 0;
 	virtual bool requires_seekahead () const = 0;
+	virtual bool is_always_synced() const { return false; }
 };
 
 
@@ -139,6 +140,7 @@ class JACK_Slave : public Slave
 	nframes_t resolution() const { return 1; }
 	bool requires_seekahead () const { return false; }
 	void reset_client (jack_client_t* jack);
+	bool is_always_synced() const { return true; }
 
   private:
 	jack_client_t* jack;

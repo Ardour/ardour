@@ -40,6 +40,7 @@
 #include "canvas.h"
 #include "level_meter.h"
 
+
 namespace ARDOUR {
 	class Session;
 	class Region;
@@ -83,6 +84,7 @@ public:
 	void set_layer_display (LayerDisplay d);
 		
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
+	nframes64_t find_next_region_boundary (nframes64_t pos, int32_t dir);
 
 	/* Editing operations */
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);

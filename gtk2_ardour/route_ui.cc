@@ -148,10 +148,10 @@ RouteUI::mute_press(GdkEventButton* ev)
 		} else {
 
 			if (ev->button == 2) {
-				// ctrl-button2 click is the midi binding click
+				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
+				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
 					wait_for_release = true;
 				} else {
 					return false;
@@ -160,9 +160,9 @@ RouteUI::mute_press(GdkEventButton* ev)
 
 			if (ev->button == 1 || ev->button == 2) {
 
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-					/* ctrl-shift-click applies change to all routes */
+					/* Primary-Tertiary-click applies change to all routes */
 
 					_session.begin_reversible_command (_("mute change"));
                                         Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand(_session, this);
@@ -171,10 +171,10 @@ RouteUI::mute_press(GdkEventButton* ev)
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
 
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-					/* ctrl-click applies change to the mix group.
-					   ctrl-button2 is MIDI learn.
+					/* Primary-button1 applies change to the mix group.
+					   NOTE: Primary-button2 is MIDI learn.
 					*/
 
 					if (ev->button == 1) {
@@ -226,10 +226,10 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 			if (ev->button == 2) {
 
-				// ctrl-button2 click is the midi binding click
+				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control))) {
+				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
 					wait_for_release = true;
 				} else {
 					return false;
@@ -238,9 +238,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 			if (ev->button == 1 || ev->button == 2) {
 
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-					/* ctrl-shift-click applies change to all routes */
+					/* Primary-Tertiary-click applies change to all routes */
 
 					_session.begin_reversible_command (_("solo change"));
                                         Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
@@ -249,9 +249,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 					_session.add_command (cmd);
 					_session.commit_reversible_command ();
 					
-				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Alt))) {
+				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
-					// ctrl-alt-click: exclusively solo this track, not a toggle */
+					// Primary-Secondary-click: exclusively solo this track, not a toggle */
 
 					_session.begin_reversible_command (_("solo change"));
                                         Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (_session, this);
@@ -261,17 +261,17 @@ RouteUI::solo_press(GdkEventButton* ev)
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
 
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Shift)) {
+				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 
 					// shift-click: set this route to solo safe
 
 					_route->set_solo_safe (!_route->solo_safe(), this);
 					wait_for_release = false;
 
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-					/* ctrl-click: solo mix group.
-					   ctrl-button2 is MIDI learn.
+					/* Primary-button1: solo mix group.
+					   NOTE: Primary-button2 is MIDI learn.
 					*/
 
 					if (ev->button == 1) {
@@ -281,7 +281,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				} else {
 
 					/* click: solo this route */
-
+					
 					reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
 				}
 			}
@@ -318,11 +318,12 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
-		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			// do nothing on midi bind event
+			return false;
 
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::Control|Keyboard::Shift))) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 			_session.begin_reversible_command (_("rec-enable change"));
                         Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
@@ -337,7 +338,11 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			_session.add_command(cmd);
 			_session.commit_reversible_command ();
 
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::Control)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+			/* Primary-button1 applies change to the mix group.
+			   NOTE: Primary-button2 is MIDI learn.
+			*/
 
 			set_mix_group_rec_enable (_route, !_route->record_enabled());
 

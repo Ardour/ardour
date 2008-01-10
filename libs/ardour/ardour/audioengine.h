@@ -106,7 +106,13 @@ class AudioEngine : public sigc::trackable
 
 	class PortRegistrationFailure : public std::exception {
 	  public:
-		virtual const char *what() const throw() { return "failed port registration"; }
+		PortRegistrationFailure (const char* why = "") {
+			reason = why;
+		}
+		virtual const char *what() const throw() { return reason; }
+
+	  private:
+		const char* reason;
 	};
 
 	class NoBackendAvailable : public std::exception {
@@ -234,6 +240,8 @@ class AudioEngine : public sigc::trackable
 	void   remove_connections_for (Port&);
 
 	std::string get_nth_physical (DataType type, uint32_t n, int flags);
+
+	void port_registration_failure (const std::string& portname);
 
 	static int  _xrun_callback (void *arg);
 	static int  _graph_order_callback (void *arg);

@@ -34,11 +34,6 @@ class SilentFileSource : public AudioFileSource {
 
 	void set_length (nframes_t len);
 	
- 	int read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit) const {
-		memset (peaks, 0, sizeof (PeakData) * npeaks);
-		return 0;
-	}
-
 	bool destructive() const { return false; }
 
   protected:
@@ -57,6 +52,11 @@ class SilentFileSource : public AudioFileSource {
 	nframes_t write_unlocked (Sample *dst, nframes_t cnt) { return 0; }
 
 	void set_header_timeline_position () {}
+
+ 	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_unit, nframes_t fpp) const {
+		memset (peaks, 0, sizeof (PeakData) * npeaks);
+		return 0;
+	}
 
 };
 

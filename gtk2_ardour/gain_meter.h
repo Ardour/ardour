@@ -75,6 +75,9 @@ class GainMeter : public Gtk::VBox
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
 
+	void setup_atv_meter (int);
+	void clear_meters ();
+
   private:
 
 	friend class MixerStrip;
@@ -129,9 +132,9 @@ class GainMeter : public Gtk::VBox
 
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;
-	    gint16          width;
-		int				length;
-	    bool            packed;
+	    gint16                width;
+		int                   length;
+	    bool                  packed;
 	    
 	    MeterInfo() { 
 		    meter = 0;
@@ -191,6 +194,8 @@ class GainMeter : public Gtk::VBox
 
 	void on_theme_changed ();
 	bool style_changed;
+	bool color_changed;
+	void color_handler();
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */

@@ -32,7 +32,7 @@ AudioBuffer::AudioBuffer(size_t capacity)
 	, _owns_data (false)
 	, _data (0)
 {
-	if (_capacity) {
+	if (_capacity > 0) {
 		_owns_data = true; // prevent resize() from gagging
 		resize (_capacity);
 		silence (_capacity);

@@ -212,15 +212,15 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void add_toplevel_controls (Gtk::Container&) = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	virtual gdouble get_current_zoom () = 0;
-	virtual PlaylistSelector& playlist_selector () const = 0;
+	virtual gdouble   get_current_zoom () const = 0;
+	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void route_name_changed (TimeAxisView *) = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void new_playlists (TimeAxisView*) = 0;
 	virtual void copy_playlists (TimeAxisView*) = 0;
 	virtual void clear_playlists (TimeAxisView*) = 0;
 	virtual void select_all_tracks () = 0;
-	virtual bool set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
+	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView& tv) = 0;
 	virtual void show_track_in_display (TimeAxisView& tv) = 0;
@@ -252,7 +252,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual nframes64_t get_preferred_edit_position () = 0;
+	virtual nframes64_t get_preferred_edit_position (bool ignore_playhead = false) = 0;
+	virtual void toggle_meter_updating() = 0;
 
 #ifdef WITH_CMT
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;

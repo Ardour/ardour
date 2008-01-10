@@ -201,7 +201,7 @@ class TimeAxisViewItem : public Selectable
      */
     void set_name_text(const Glib::ustring& new_name) ;
     
-  virtual void set_y_position_and_height(double y, double h);
+    virtual void set_y_position_and_height(double y, double h) ;
     
     /**
      * 
@@ -357,7 +357,7 @@ class TimeAxisViewItem : public Selectable
     /**
      * Sets the frame color depending on whether this item is selected
      */
-    void set_frame_color() ;
+    virtual void set_frame_color() ;
     
     /**
      * Sets the colors of the start and end trim handle depending on object state

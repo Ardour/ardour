@@ -25,6 +25,7 @@
 #include <pbd/error.h>
 #include <pbd/convert.h>
 #include <gtkmm2ext/utils.h>
+#include <ardour/profile.h>
 
 #include "utils.h"
 #include "add_route_dialog.h"
@@ -67,10 +68,27 @@ AddRouteDialog::AddRouteDialog ()
 {
 	if (channel_combo_strings.empty()) {
 		channel_combo_strings = I18N (channel_setup_names);
+
+		if (ARDOUR::Profile->get_sae()) {
+			/* remove all but the first two (Mono & Stereo) */
+
+			while (track_mode_strings.size() > 2) {
+				track_mode_strings.pop_back();
+			}
+		}
+
 	}
 
 	if (track_mode_strings.empty()) {
 		track_mode_strings = I18N (track_mode_names);
+
+		if (ARDOUR::Profile->get_sae()) {
+			/* remove all but the first track mode (Normal) */
+
+			while (track_mode_strings.size() > 1) {
+				track_mode_strings.pop_back();
+			}
+		}
 	}
 
 	set_name ("AddRouteDialog");
@@ -121,7 +139,9 @@ AddRouteDialog::AddRouteDialog ()
 	ccframe.set_shadow_type (SHADOW_IN);
 
 	dvbox->pack_start (channel_combo, true, false, 5);
-	dvbox->pack_start (track_mode_combo, true, false, 5);
+	if (!ARDOUR::Profile->get_sae()) {
+		dvbox->pack_start (track_mode_combo, true, false, 5);
+	}
 	dhbox->pack_start (*dvbox, true, false, 5);
 
 	ccframe.add (*dhbox);
@@ -198,6 +218,10 @@ AddRouteDialog::count ()
 ARDOUR::TrackMode
 AddRouteDialog::mode ()
 {
+	if (ARDOUR::Profile->get_sae()) {
+		return ARDOUR::Normal;
+	}
+
 	Glib::ustring str = track_mode_combo.get_active_text();
 	if (str == _("Normal")) {
 		return ARDOUR::Normal;

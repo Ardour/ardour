@@ -418,48 +418,105 @@ Session::setup_raid_path (string path)
 	last_rr_session_dir = session_dirs.begin();
 }
 
-void
-Session::initialize_start_and_end_locations (nframes_t start, nframes_t end)
+int
+Session::create (bool& new_session, const string& mix_template, nframes_t initial_length)
 {
-	start_location->set_end (start);
+	string dir;
+
+	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	dir = session_directory().peak_path().to_string();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	dir = session_directory().sound_path().to_string();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+	
+	dir = session_directory().midi_path().to_string();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	dir = session_directory().dead_sound_path().to_string();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	dir = session_directory().export_path().to_string();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session export dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+
+	/* check new_session so we don't overwrite an existing one */
+
+	if (!mix_template.empty()) {
+		std::string in_path = mix_template;
+
+		ifstream in(in_path.c_str());
+
+		if (in){
+			string out_path = _path;
+			out_path += _name;
+			out_path += statefile_suffix;
+
+			ofstream out(out_path.c_str());
+
+			if (out){
+				out << in.rdbuf();
+
+				// okay, session is set up.  Treat like normal saved
+				// session from now on.
+
+				new_session = false;
+				return 0;
+
+			} else {
+				error << string_compose (_("Could not open %1 for writing mix template"), out_path) 
+					<< endmsg;
+				return -1;
+			}
+
+		} else {
+			error << string_compose (_("Could not open mix template %1 for reading"), in_path) 
+				<< endmsg;
+			return -1;
+		}
+
+	}
+
+	/* set initial start + end point */
+
+	start_location->set_end (0);
 	_locations.add (start_location);
 
-	end_location->set_end (end);
+	end_location->set_end (initial_length);
 	_locations.add (end_location);
-}
 
-bool
-Session::create_session_file ()
-{
 	_state_of_the_state = Clean;
 
-	if (save_state (_current_snapshot_name)) {
-		error << "Could not create new session file" << endmsg;
-		return false;
-	}
-	return true;
+
+	save_state ("");
+
+	return 0;
 }
 
-bool
-Session::create_session_file_from_template (const string& template_path)
-{
-	sys::path session_file_path(_session_dir->root_path());
-
-	session_file_path /= _name + statefile_suffix;
-
-	try
-	{
-		sys::copy_file (template_path, session_file_path);
-	}
-	catch(sys::filesystem_error& ex)
-	{
-		error << string_compose (_("Could not use session template %1 to create new session (%2)."),
-				template_path, ex.what())
-			<< endmsg;
-		return false;
-	}
-	return true;
-}
 
 int
 Session::load_diskstreams (const XMLNode& node)
@@ -2767,7 +2824,7 @@ Session::restore_history (string snapshot_name)
 	const string xml_filename = snapshot_name + history_suffix;
 	const sys::path xml_path = _session_dir->root_path() / xml_filename;
 
-	info << string_compose(_("Loading history from '%1'."), xml_path.to_string()) << endmsg;
+    cerr << "Loading history from " << xml_path.to_string() << endmsg;
 
 	if (!sys::exists (xml_path)) {
 		info << string_compose (_("%1: no history file \"%2\" for this session."),

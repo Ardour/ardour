@@ -164,7 +164,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (SyncPoint);	
 	REGISTER (_RegionPoint);
 
-
 	REGISTER_ENUM (PreFader);
 	REGISTER_ENUM (PostFader);
 	REGISTER (_Placement);
@@ -243,6 +242,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session::Event, SetDiskstreamSpeed);
 	REGISTER_CLASS_ENUM (Session::Event, Locate);
 	REGISTER_CLASS_ENUM (Session::Event, LocateRoll);
+	REGISTER_CLASS_ENUM (Session::Event, LocateRollLocate);
 	REGISTER_CLASS_ENUM (Session::Event, SetLoop);
 	REGISTER_CLASS_ENUM (Session::Event, PunchIn);
 	REGISTER_CLASS_ENUM (Session::Event, PunchOut);

@@ -22,6 +22,7 @@
 #define __ardour_audio_unit_h__
 
 #include <stdint.h>
+#include <boost/shared_ptr.hpp>
 
 #include <list>
 #include <set>
@@ -29,6 +30,8 @@
 #include <vector>
 
 #include <ardour/plugin.h>
+
+#include <AudioUnit/AudioUnit.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -45,13 +48,13 @@ class Session;
 class AUPlugin : public ARDOUR::Plugin
 {
   public:
-	AUPlugin (AudioEngine& engine, Session& session, CAComponent* comp);
+	AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> comp);
 	virtual ~AUPlugin ();
 	
-	uint32_t unique_id () const;
+        std::string unique_id () const;
 	const char * label () const;
 	const char * name () const { return _info->name.c_str(); }
-	const char * maker () const;
+	const char * maker () const { return _info->creator.c_str(); }
 	uint32_t parameter_count () const;
 	float default_value (uint32_t port);
 	nframes_t signal_latency () const;
@@ -87,34 +90,65 @@ class AUPlugin : public ARDOUR::Plugin
     
 	bool has_editor () const;
 	
-	CAAudioUnit* get_au () { return unit; }
-	CAComponent* get_comp () { return comp; }
-	
-  private:
-	CAComponent* comp;
-    CAAudioUnit* unit;
+	bool fixed_io() const { return false; }
+	int32_t can_support_input_configuration (int32_t in);
+	int32_t compute_output_streams (int32_t nplugins);
+	uint32_t output_streams() const;
+	uint32_t input_streams() const;
 
-	AudioBufferList* in_list;
-	AudioBufferList* out_list;
+	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
+	boost::shared_ptr<CAComponent> get_comp () { return comp; }
+    
+        OSStatus render_callback(AudioUnitRenderActionFlags *ioActionFlags,
+				 const AudioTimeStamp    *inTimeStamp,
+				 UInt32       inBusNumber,
+				 UInt32       inNumberFrames,
+				 AudioBufferList*       ioData);
+  private:
+        boost::shared_ptr<CAComponent> comp;
+        boost::shared_ptr<CAAudioUnit> unit;
+	
+	AudioStreamBasicDescription streamFormat;
+        bool initialized;
+        int format_set;
+	AudioBufferList* buffers;
+	
+	UInt32 global_elements;
+	UInt32 output_elements;
+	UInt32 input_elements;
+	
+	int set_output_format ();
+	int set_input_format ();
+	int set_stream_format (int scope, uint32_t cnt);
+        int _set_block_size (nframes_t nframes);
 
 	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
+	uint32_t current_maxbuf;
+        nframes_t current_offset;
+        nframes_t cb_offset;
+        vector<Sample*>* current_buffers;
+        nframes_t frames_processed;
 };
-
+	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
 
 class AUPluginInfo : public PluginInfo {
   public:	
-	AUPluginInfo () { };
+	 AUPluginInfo (boost::shared_ptr<CAComponentDescription>);
 	~AUPluginInfo ();
 
-	CAComponentDescription* desc;
-
-	static PluginInfoList discover ();
 	PluginPtr load (Session& session);
 
+	static PluginInfoList discover ();
+	static void get_names (CAComponentDescription&, std::string& name, Glib::ustring& maker);
+        static std::string stringify_descriptor (const CAComponentDescription&);
+
   private:
-	static std::string get_name (CAComponentDescription&);
-	void setup_nchannels (CAComponentDescription&);
+	boost::shared_ptr<CAComponentDescription> descriptor;
+
+        static void discover_music (PluginInfoList&);
+        static void discover_fx (PluginInfoList&);
+        static void discover_by_description (PluginInfoList&, CAComponentDescription&);
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;

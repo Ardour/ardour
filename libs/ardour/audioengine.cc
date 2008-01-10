@@ -22,6 +22,7 @@
 #include <vector>
 #include <exception>
 #include <stdexcept>
+#include <sstream>
 
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>
@@ -368,6 +369,20 @@ AudioEngine::process_callback (nframes_t nframes)
 		last_monitor_check = next_processed_frames;
 	}
 
+	if (session->silent()) {
+
+		boost::shared_ptr<Ports> p = ports.reader();
+
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+			
+			Port *port = (*i);
+			
+			if (port->sends_output()) {
+				port->get_buffer().silence(nframes);
+			}
+		}
+	}
+
 	_processed_frames = next_processed_frames;
 	return 0;
 }
@@ -510,6 +525,26 @@ AudioEngine::remove_session ()
 	remove_all_ports ();
 }
 
+void
+AudioEngine::port_registration_failure (const std::string& portname)
+{
+	string full_portname = jack_client_name;
+	full_portname += ':';
+	full_portname += portname;
+	
+	
+	jack_port_t* p = jack_port_by_name (_jack, full_portname.c_str());
+	string reason;
+	
+	if (p) {
+		reason = _("a port with this name already exists: check for duplicated track/bus names");
+	} else {
+		reason = _("unknown error");
+	}
+	
+	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
+}	
+
 Port *
 AudioEngine::register_port (DataType dtype, const string& portname, bool input, bool publish)
 {
@@ -533,7 +568,7 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input, 
 	}
 
 	catch (...) {
-		throw PortRegistrationFailure();
+		throw PortRegistrationFailure("unable to create port (unknown type?)");
 	}
 }
 
@@ -563,7 +598,7 @@ AudioEngine::register_output_port (DataType type, const string& portname, bool p
 	return register_port (type, portname, false, publish);
 }
 
-int          
+int
 AudioEngine::unregister_port (Port& port)
 {
 	/* caller must hold process lock */
@@ -590,6 +625,8 @@ AudioEngine::unregister_port (Port& port)
 		
 		/* writer goes out of scope, forces update */
 	}
+		
+	remove_connections_for (port);
 
 	return 0;
 }
@@ -1051,6 +1088,23 @@ AudioEngine::remove_all_ports ()
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		ps->clear ();
+	}
+}
+
+void
+AudioEngine::remove_connections_for (Port& port)
+{
+	for (PortConnections::iterator i = port_connections.begin(); i != port_connections.end(); ) {
+		PortConnections::iterator tmp;
+		
+		tmp = i;
+		++tmp;
+		
+		if ((*i).first == port.name()) {
+			port_connections.erase (i);
+		}
+
+		i = tmp;
 	}
 }
 
