@@ -5,8 +5,8 @@
 
 ;; punctuation
 
-(gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "minus")
-(gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "equal")
+(gtk_accel_path "<Actions>/Editor/temporal-zoom-in" "equal")
+(gtk_accel_path "<Actions>/Editor/temporal-zoom-out" "minus")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-sync" "apostrophe")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-sync" "semicolon")
 (gtk_accel_path "<Actions>/Editor/cycle-edit-point" "grave")
@@ -22,6 +22,7 @@
 
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>space")
+(gtk_accel_path "<Actions>/Transport/record-roll" "<%TERTIARY%>space")
 
 (gtk_accel_path "<Actions>/Editor/set-fade-in-length" "slash")
 (gtk_accel_path "<Actions>/Editor/set-fade-out-length" "backslash")
@@ -52,6 +53,7 @@
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-timefx" "t")
 (gtk_accel_path "<Actions>/Editor/select-all-between-cursors" "u")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
+(gtk_accel_path "<Actions>/Editor/invert-selection" "<%TERTIARY%>i")
 (gtk_accel_path "<Actions>/Editor/addExistingAudioFiles" "<%SECONDARY%>i")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-object" "o")
 (gtk_accel_path "<Actions>/Editor/set-playhead" "p")
@@ -74,6 +76,7 @@
 
 (gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "f")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
+(gtk_accel_path "<Actions>/Editor/play-selected-regions" "h")
 (gtk_accel_path "<Actions>/Editor/trim-front" "j")
 (gtk_accel_path "<Actions>/Editor/trim-back" "k")
 (gtk_accel_path "<Actions>/Transport/Loop" "l")
@@ -108,9 +111,11 @@
 
 (gtk_accel_path "<Actions>/Editor/step-tracks-up" "uparrow")
 (gtk_accel_path "<Actions>/Transport/TransitionToRoll" "<%PRIMARY%>uparrow")
+(gtk_accel_path "<Actions>/Editor/select-prev-route" "<%SECONDARY%>uparrow")
 
 (gtk_accel_path "<Actions>/Editor/step-tracks-down" "downarrow")
 (gtk_accel_path "<Actions>/Transport/TransitionToReverse" "<%PRIMARY%>downarrow")
+(gtk_accel_path "<Actions>/Editor/select-next-route" "<%SECONDARY%>downarrow")
 
 (gtk_accel_path "<Actions>/Editor/scroll-backward" "leftarrow")
 (gtk_accel_path "<Actions>/Transport/Rewind" "<%PRIMARY%>leftarrow")
@@ -162,9 +167,13 @@
 
 ;; F-N keys
 
-(gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
-(gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-start" "F1")
+(gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
+(gtk_accel_path "<Actions>/Editor/crop" "F3")
+(gtk_accel_path "<Actions>/Editor/separate" "F4")
+(gtk_accel_path "<Actions>/Editor/pitch-shift-region" "F5")
+(gtk_accel_path "<Actions>/Editor/select-range-between-cursors" "F6")
+(gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
 
 ;; numbers
 

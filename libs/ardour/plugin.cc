@@ -91,9 +91,7 @@ void
 Plugin::make_nth_control (uint32_t n, const XMLNode& node)
 {
 	if (controls[n]) {
-		error << string_compose (_("programming error: %1"),
-					 X_("Plugin::make_nth_control() called too late"))
-		      << endmsg;
+		/* already constructed */
 		return;
 	}
 

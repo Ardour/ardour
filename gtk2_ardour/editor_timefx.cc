@@ -90,13 +90,6 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	get_vbox()->set_spacing (5);
 	get_vbox()->set_border_width (12);
 
-#ifdef USE_RUBBERBAND
-	get_vbox()->pack_start (opts_box, false, false);
-#else
-	get_vbox()->pack_start (upper_button_box, false, false);
-#endif
-	get_vbox()->pack_start (progress_bar);
-
 	if (pitching) {
 
 		upper_button_box.set_spacing (5);
@@ -120,6 +113,8 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 		add_button (_("Shift"), Gtk::RESPONSE_ACCEPT);
 
+		get_vbox()->pack_start (upper_button_box, false, false);
+
 	} else {
 
 #ifdef USE_RUBBERBAND
@@ -134,6 +129,9 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 		opts_box.pack_start (precise_button, false, false);
 		opts_box.pack_start (stretch_opts_label, false, false);
 		opts_box.pack_start (stretch_opts_selector, false, false);
+
+		get_vbox()->pack_start (opts_box, false, false);
+
 #else
 		upper_button_box.set_homogeneous (true);
 		upper_button_box.set_spacing (5);
@@ -144,10 +142,14 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 		quick_button.set_name (N_("TimeFXButton"));
 		antialias_button.set_name (N_("TimeFXButton"));
-#endif	
 
+		get_vbox()->pack_start (upper_button_box, false, false);
+
+#endif	
 		add_button (_("Stretch/Shrink"), Gtk::RESPONSE_ACCEPT);
 	}
+
+	get_vbox()->pack_start (progress_bar);
 
 	progress_bar.set_name (N_("TimeFXProgress"));
 

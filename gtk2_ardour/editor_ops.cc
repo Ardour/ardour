@@ -2396,7 +2396,7 @@ Editor::play_selected_region ()
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 
-	ensure_entered_region_selected (true);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	if (selection->regions.empty()) {
 		return;
@@ -2411,6 +2411,7 @@ Editor::play_selected_region ()
 		}
 	}
 
+	session->request_stop ();
 	session->request_bounded_roll (start, end);
 }
 
