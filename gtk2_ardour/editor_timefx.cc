@@ -62,9 +62,9 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	: ArdourDialog (X_("time fx dialog")),
 	  editor (e),
 	  pitching (pitch),
-	  pitch_octave_adjustment (0.0, 0.0, 4.0, 1, 2.0),
-	  pitch_semitone_adjustment (0.0, 0.0, 12.0, 1.0, 4.0),
-	  pitch_cent_adjustment (0.0, 0.0, 150.0, 5.0, 15.0),
+	  pitch_octave_adjustment (0.0, -4.0, 4.0, 1, 2.0),
+	  pitch_semitone_adjustment (0.0, -12.0, 12.0, 1.0, 4.0),
+	  pitch_cent_adjustment (0.0, -499.0, 500.0, 5.0, 15.0),
 	  pitch_octave_spinner (pitch_octave_adjustment),
 	  pitch_semitone_spinner (pitch_semitone_adjustment),
 	  pitch_cent_spinner (pitch_cent_adjustment),
@@ -217,6 +217,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	if (pitching) {
 
 		float cents = current_timefx->pitch_octave_adjustment.get_value() * 1200.0;
+		float pitch_fraction;
 		cents += current_timefx->pitch_semitone_adjustment.get_value() * 100.0;
 		cents += current_timefx->pitch_cent_adjustment.get_value();
 
@@ -226,19 +227,15 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 			return 0;
 		}
 
-		// we now have the pitch shift in cents. divide by 1200 to get octaves
-		// then multiply by 2.0 because 1 octave == doubling the frequency
-		
-		cents /= 1200.0;
-		cents /= 2.0;
-
-		// add 1.0 to convert to RB scale
-
-		cents += 1.0;
+		// one octave == 1200 cents
+		// adding one octave doubles the frequency
+		// ratio is 2^^octaves
+				
+		pitch_fraction = pow(2, cents/1200);
 
 		current_timefx->request.time_fraction = 1.0;
-		current_timefx->request.pitch_fraction = cents;
-
+		current_timefx->request.pitch_fraction = pitch_fraction;
+		
 	} else {
 
 		current_timefx->request.time_fraction = val;

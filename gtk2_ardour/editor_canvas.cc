@@ -319,20 +319,20 @@ Editor::track_canvas_size_allocated ()
 	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
  	
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->set_line_length (canvas_height);
+		(*x)->set_line_length (full_canvas_height);
 	}
 
- 	range_marker_drag_rect->property_y2() = canvas_height;
- 	transport_loop_range_rect->property_y2() = canvas_height;
- 	transport_punch_range_rect->property_y2() = canvas_height;
- 	transport_punchin_line->property_y2() = canvas_height;
- 	transport_punchout_line->property_y2() = canvas_height;
+ 	range_marker_drag_rect->property_y2() = full_canvas_height;
+ 	transport_loop_range_rect->property_y2() = full_canvas_height;
+ 	transport_punch_range_rect->property_y2() = full_canvas_height;
+ 	transport_punchin_line->property_y2() = full_canvas_height;
+ 	transport_punchout_line->property_y2() = full_canvas_height;
 	
 	update_fixed_rulers();
 	redisplay_tempo (true);
 
 	if (logo_item) {
-		// logo_item->property_height() = canvas_height;
+		// logo_item->property_height() = full_canvas_height;
 		// logo_item->property_width() = canvas_width;
 	}
 
