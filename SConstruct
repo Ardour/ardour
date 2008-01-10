@@ -782,10 +782,14 @@ if conf.CheckHeader ('fftw3.h'):
                                            CPPPATH='#libs/rubberband',
                                            CCFLAGS='-DUSE_RUBBERBAND')
 else:
+    print ""
+    print "-------------------------------------------------------------------------"
     print "You do not have the FFTW single-precision development package installed."
     print "This prevents Ardour from using the Rubberband library for timestretching"
     print "and pitchshifting. It will fall back on SoundTouch for timestretch, and "
     print "pitchshifting will not be available."
+    print "-------------------------------------------------------------------------"
+    print ""
 
 conf.Finish()
 
