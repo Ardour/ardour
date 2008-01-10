@@ -71,7 +71,7 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	  quick_button (_("Quick but Ugly")),
 	  antialias_button (_("Skip Anti-aliasing")),
 	  stretch_opts_label (_("Contents:")),
-	  precise_button (_("Correct Onset"))
+	  precise_button (_("Strict Linear"))
 {
 	set_modal (true);
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -332,7 +332,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 
 	sigc::connection c = Glib::signal_timeout().connect (mem_fun (current_timefx, &TimeFXDialog::update_progress), 100);
 
-	while (!current_timefx->request.done) {
+	while (!current_timefx->request.done && !current_timefx->request.cancel) {
 		gtk_main_iteration ();
 	}
 

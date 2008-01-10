@@ -18,6 +18,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -101,6 +102,19 @@ OSC::start ()
 #endif
 	
 	cerr << "OSC @ " << get_server_url () << endl;
+
+   _osc_url_file = get_user_ardour_path () + "/osc_url";
+   ofstream urlfile;
+   urlfile.open(_osc_url_file.c_str(),ios::trunc);
+   if ( urlfile )
+   {
+      urlfile << get_server_url () << endl;
+      urlfile.close();
+   }
+   else
+   {  
+      cerr << "Couldn't write '" <<  _osc_url_file << "'" <<endl;
+   }
 	
 	register_callbacks();
 	
@@ -131,6 +145,9 @@ OSC::stop ()
 		unlink(_osc_unix_socket_path.c_str());
 	}
 	
+   if (!  _osc_url_file.empty() ) {
+      unlink(_osc_url_file.c_str() );
+   }
 	return 0;
 }
 

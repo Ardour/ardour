@@ -54,6 +54,7 @@ class OSC : public BasicUI, public sigc::trackable
 	lo_server _osc_server;
 	lo_server _osc_unix_server;
 	std::string _osc_unix_socket_path;
+   std::string _osc_url_file;
 	pthread_t _osc_thread;
 	int _request_pipe[2];
 

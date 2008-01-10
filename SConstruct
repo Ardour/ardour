@@ -767,34 +767,14 @@ def prep_libcheck(topenv, libinfo):
 
 prep_libcheck(env, env)
 
-#
-# check for VAMP and rubberband (currently optional)
-#
-
-libraries['vamp'] = LibraryInfo()
-
-env['RUBBERBAND'] = False
-
-conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
-
-if conf.CheckPKGExists('vamp-sdk'):
-    have_vamp = True
-    libraries['vamp'].ParseConfig('pkg-config --cflags --libs vamp-sdk')
-else:
-    have_vamp = False
-
-libraries['vamp'] = conf.Finish ()
-
-if have_vamp:
-    if os.path.exists ('libs/rubberband/src'):
-        conf = Configure (libraries['vamp'])
-        if conf.CheckHeader ('fftw3.h'):
-            env['RUBBERBAND'] = True
-            libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
-                                                   LIBPATH='#libs/rubberband',
-                                                   CPPPATH='#libs/rubberband',
-                                                   CCFLAGS='-DUSE_RUBBERBAND')
-        libraries['vamp'] = conf.Finish ()
+env['RUBBERBAND'] = True
+libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
+                                       LIBPATH='#libs/rubberband',
+                                       CPPPATH='#libs/rubberband',
+                                       CCFLAGS='-DUSE_RUBBERBAND')
+libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
+                                       LIBPATH='#libs/vamp-sdk',
+                                       CPPPATH='#libs/vamp-sdk/vamp')
 
 #
 # Check for libusb
@@ -981,6 +961,7 @@ if env['SYSLIBS']:
         'libs/pbd',
         'libs/midi++2',
         'libs/ardour',
+        'libs/vamp-sdk',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set
@@ -1045,6 +1026,7 @@ else:
         'libs/pbd',
         'libs/midi++2',
         'libs/ardour',
+        'libs/vamp-sdk',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set
@@ -1107,9 +1089,8 @@ else:
 #
 
 timefx_subdirs = ['libs/soundtouch']
-if env['RUBBERBAND']:
-    timefx_subdirs += ['libs/rubberband']
-    
+timefx_subdirs += ['libs/rubberband']
+
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 
