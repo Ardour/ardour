@@ -6903,7 +6903,7 @@ msgstr "Taggar:"
 
 #: gtk2_ardour/sfdb_ui.cc:175
 msgid "Play (double click)"
-msgstr "Spela (dubbelklicka)"
+msgstr "Spela (dblklicka)"
 
 #: gtk2_ardour/sfdb_ui.cc:847
 msgid ""
@@ -7023,7 +7023,7 @@ msgstr "Halvtoner (12TET)"
 
 #: gtk2_ardour/editor_timefx.cc:100
 msgid "Cents"
-msgstr ""
+msgstr "Cent"
 
 #: gtk2_ardour/editor_timefx.cc:106
 msgid "Shift"
@@ -7041,3 +7041,24 @@ msgstr "Redigeringspunkten"
 #: gtk2_ardour/ardour_ui_ed.cc:271
 msgid "Start Recording"
 msgstr "Börja inspelning"
+
+#: gtk2_ardour/ardour_ui_ed.cc:428
+msgid "Use narrow mixer strips"
+msgstr "Använd smala mixerremsor"
+
+#: gtk2_ardour/sfdb_ui.cc:766 gtk2_ardour/sfdb_ui.cc:1049
+#: gtk2_ardour/sfdb_ui.cc:1091
+msgid "one track per file"
+msgstr "ett spår per fil"
+
+#: gtk2_ardour/sfdb_ui.cc:1067 gtk2_ardour/sfdb_ui.cc:1145
+msgid "Best"
+msgstr "Bäst"
+
+#: gtk2_ardour/sfdb_ui.cc:1068 gtk2_ardour/sfdb_ui.cc:1147
+msgid "Good"
+msgstr "Bra"
+
+#: gtk2_ardour/sfdb_ui.cc:1069 gtk2_ardour/sfdb_ui.cc:1149
+msgid "Quick"
+msgstr "Snabb"
