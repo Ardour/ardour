@@ -1,0 +1,120 @@
+
+/** \mainpage Vamp Plugin SDK
+
+\section about About Vamp
+
+Vamp is an API for C and C++ plugins that process sampled audio data
+to produce descriptive output (measurements or semantic observations).
+Find more information at http://www.vamp-plugins.org/ .
+
+Although the official API for Vamp plugins is defined in C for maximum
+binary compatibility, we strongly recommend using the provided C++
+classes in the SDK to implement your own plugins and hosts.
+
+\section plugins For Plugins
+
+Plugins should subclass Vamp::Plugin, and then use a
+Vamp::PluginAdapter to expose the correct C API for the plugin.  Read
+the documentation for Vamp::PluginBase and Vamp::Plugin before
+starting.
+
+Plugins should be compiled and linked into dynamic libraries using the
+usual convention for your platform, and should link (preferably
+statically) with -lvamp-sdk.  Any number of plugins can reside in a
+single dynamic library.  See plugins.cpp in the example plugins
+directory for the sort of code that will need to accompany your plugin
+class or classes, to make it possible for a host to look up your
+plugins properly.
+
+The following example plugins are provided:
+
+ - ZeroCrossing calculates the positions and density of zero-crossing
+ points in an audio waveform.
+
+ - SpectralCentroid calculates the centre of gravity of the frequency
+ domain representation of each block of audio.
+
+ - AmplitudeFollower is an implementation of SuperCollider's
+ amplitude-follower algorithm as a simple Vamp plugin.
+
+ - PercussionOnsetDetector estimates the locations of percussive
+ onsets using a simple method described in "Drum Source Separation
+ using Percussive Feature Detection and Spectral Modulation" by Dan
+ Barry, Derry Fitzgerald, Eugene Coyle and Bob Lawlor, ISSC 2005.
+
+\section hosts For Hosts
+
+Hosts will normally use a Vamp::PluginHostAdapter to convert each
+plugin's exposed C API back into a useful Vamp::Plugin C++ object.
+
+Starting with version 1.1 of the Vamp SDK, there are several classes
+in the Vamp::HostExt namespace that aim to make the host's life as
+easy as possible:
+
+ - Vamp::HostExt::PluginLoader provides a very simple interface for a
+ host to discover, load, and find out category information about the
+ available plugins.  Most "casual" Vamp hosts will probably want to
+ use this class.
+
+ - Vamp::HostExt::PluginInputDomainAdapter provides a simple means for
+ hosts to handle plugins that expect frequency-domain input, without
+ having to convert the input themselves.
+
+ - Vamp::HostExt::PluginChannelAdapter provides a simple means for
+ hosts to use plugins that do not necessarily support the same number
+ of audio channels as they have available, without having to apply a
+ channel management / mixdown policy themselves.
+
+The PluginLoader class can also use the input domain and channel
+adapters automatically to make the entire conversion process
+transparent to the host if required.
+
+Hosts should link with -lvamp-hostsdk.
+
+(The following notes in this section are mostly relevant for
+developers that are not using the HostExt classes, or that wish to
+know more about the policy they implement.)
+
+The Vamp API does not officially specify how to load plugin libraries
+or where to find them.  However, the SDK does include a function
+(Vamp::PluginHostAdapter::getPluginPath()) that returns a recommended
+directory search path that hosts may use for plugin libraries.
+
+Our suggestion for a host is to search each directory in this path for
+.DLL (on Windows), .so (on Linux, Solaris, BSD etc) or .dylib (on
+OS/X) files, then to load each one and perform a dynamic name lookup
+on the vampGetPluginDescriptor function to enumerate the plugins in
+the library.  The example host has some code that may help, but this
+operation will necessarily be system-dependent.
+
+Vamp also has an informal convention for sorting plugins into
+functional categories.  In addition to the library file itself, a
+plugin library may install a category file with the same name as the
+library but .cat extension.  The existence and format of this file are
+not specified by the Vamp API, but by convention the file may contain
+lines of the format
+
+\code
+vamp:pluginlibrary:pluginname::General Category > Specific Category
+\endcode
+
+which a host may read and use to assign plugins a location within a
+category tree for display to the user.  The expectation is that
+advanced users may also choose to set up their own preferred category
+trees, which is why this information is not queried as part of the
+Vamp API itself.
+
+There is an example host in the "host" directory from which code may
+be drawn.
+
+\section license License
+
+This plugin SDK is freely redistributable under a "new-style BSD"
+licence.  See the file COPYING for more details.  In short, you may
+modify and redistribute the SDK and example plugins within any
+commercial or non-commercial, proprietary or open-source plugin or
+application under almost any conditions, with no obligation to provide
+source code, provided you retain the original copyright note.
+
+
+*/
