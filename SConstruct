@@ -1024,6 +1024,9 @@ else:
     libraries['atkmm'] = LibraryInfo(LIBS='atkmm',
                                      LIBPATH='#libs/gtkmm2/atk',
                                      CPPPATH='#libs/gtkmm2/atk')
+    libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
+                                      LIBPATH='#libs/cairomm/cairomm',
+                                      CPPPATH='#libs/cairomm/cairomm')
     libraries['gdkmm2'] = LibraryInfo(LIBS='gdkmm2',
                                       LIBPATH='#libs/gtkmm2/gdk',
                                       CPPPATH='#libs/gtkmm2/gdk')
