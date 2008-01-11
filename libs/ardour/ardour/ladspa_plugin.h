@@ -53,51 +53,47 @@ class LadspaPlugin : public ARDOUR::Plugin
 	/* Plugin interface */
 	
 	std::string unique_id() const;
-	const char * label() const                       { return descriptor->Label; }
-	const char * name() const                        { return descriptor->Name; }
-	const char * maker() const                       { return descriptor->Maker; }
-	uint32_t parameter_count() const                 { return descriptor->PortCount; }
-	float default_value (uint32_t port);
-	nframes_t latency() const;
-	void set_parameter (uint32_t port, float val);
-	float get_parameter (uint32_t port) const;
-	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
-	std::set<uint32_t> automatable() const;
-	uint32_t nth_parameter (uint32_t port, bool& ok) const;
-	void activate () { 
-		if (was_activated)
-			return;
-
-		if (descriptor->activate) {
-			descriptor->activate (handle);
-		}
-
-		was_activated = true;
-	}
-	void deactivate () {
-		if (!was_activated)
-			return;
-
-		if (descriptor->deactivate) {
-			descriptor->deactivate (handle);
-		}
+	const char* label() const           { return _descriptor->Label; }
+	const char* name() const            { return _descriptor->Name; }
+	const char* maker() const           { return _descriptor->Maker; }
+	uint32_t    parameter_count() const { return _descriptor->PortCount; }
+	float       default_value (uint32_t port);
+	nframes_t   latency() const;
+	void        set_parameter (uint32_t port, float val);
+	float       get_parameter (uint32_t port) const;
+	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
+	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
 	
-		was_activated = false;
+	std::set<uint32_t> automatable() const;
+
+	void activate () { 
+		if (!_was_activated && _descriptor->activate)
+			_descriptor->activate (_handle);
+
+		_was_activated = true;
 	}
+
+	void deactivate () {
+		if (_was_activated && _descriptor->deactivate)
+			_descriptor->deactivate (_handle);
+	
+		_was_activated = false;
+	}
+
 	void cleanup () {
 		activate();
 		deactivate();
 
-		if (descriptor->cleanup) {
-			descriptor->cleanup (handle);
-		}
+		if (_descriptor->cleanup)
+			_descriptor->cleanup (_handle);
 	}
+
 	void set_block_size (nframes_t nframes) {}
 	
-	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
+	int    connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
 	string describe_parameter (uint32_t);
 	string state_node_name() const { return "ladspa"; }
-	void print_parameter (uint32_t, char*, uint32_t len) const;
+	void   print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio(uint32_t) const;
 	bool parameter_is_control(uint32_t) const;
@@ -106,8 +102,8 @@ class LadspaPlugin : public ARDOUR::Plugin
 	bool parameter_is_toggled(uint32_t) const;
 
 	XMLNode& get_state();
-	int set_state(const XMLNode& node);
-	bool save_preset(string name);
+	int      set_state(const XMLNode& node);
+	bool     save_preset(string name);
 
 	bool has_editor() const { return false; }
 
@@ -115,32 +111,27 @@ class LadspaPlugin : public ARDOUR::Plugin
 	
 	/* LADSPA extras */
 
-	LADSPA_Properties properties() const             { return descriptor->Properties; }
-	uint32_t index() const                      { return _index; }
-	const char * copyright() const                   { return descriptor->Copyright; }
-	LADSPA_PortDescriptor port_descriptor(uint32_t i) const { return descriptor->PortDescriptors[i]; }
-	const LADSPA_PortRangeHint * port_range_hints() const { return descriptor->PortRangeHints; }
-	const char * const * port_names() const          { return descriptor->PortNames; }
-	void set_gain (float gain) {
-		descriptor->set_run_adding_gain (handle, gain);
-	}
-	void run_adding (uint32_t nsamples) {
-		descriptor->run_adding (handle, nsamples);
-	}
-	void connect_port (uint32_t port, float *ptr) {
-		descriptor->connect_port (handle, port, ptr);
-	}
+	LADSPA_Properties           properties() const                { return _descriptor->Properties; }
+	uint32_t                    index() const                     { return _index; }
+	const char *                copyright() const                 { return _descriptor->Copyright; }
+	LADSPA_PortDescriptor       port_descriptor(uint32_t i) const { return _descriptor->PortDescriptors[i]; }
+	const LADSPA_PortRangeHint* port_range_hints() const          { return _descriptor->PortRangeHints; }
+	const char * const *        port_names() const                { return _descriptor->PortNames; }
+	
+	void set_gain (float gain)                    { _descriptor->set_run_adding_gain (_handle, gain); }
+	void run_adding (uint32_t nsamples)           { _descriptor->run_adding (_handle, nsamples); }
+	void connect_port (uint32_t port, float *ptr) { _descriptor->connect_port (_handle, port, ptr); }
 
   private:
-	void                    *module;
-	const LADSPA_Descriptor *descriptor;
-	LADSPA_Handle            handle;
-	nframes_t           sample_rate;
-	LADSPA_Data             *control_data;
-	LADSPA_Data             *shadow_data;
-	LADSPA_Data             *latency_control_port;
-	uint32_t                _index;
-	bool                     was_activated;
+	void*                    _module;
+	const LADSPA_Descriptor* _descriptor;
+	LADSPA_Handle            _handle;
+	nframes_t                _sample_rate;
+	LADSPA_Data*             _control_data;
+	LADSPA_Data*             _shadow_data;
+	LADSPA_Data*             _latency_control_port;
+	uint32_t                 _index;
+	bool                     _was_activated;
 
 	void init (void *mod, uint32_t index, nframes_t rate);
 	void run (nframes_t nsamples);
