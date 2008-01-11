@@ -548,7 +548,6 @@ NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 		cerr << "canonical = " << res << endl;
 
 		Glib::ustring realdir = res;
-		free (res);
 		
 		if (!Glib::file_test (realdir, Glib::FILE_TEST_IS_DIR)) {
 			realdir = Glib::path_get_dirname (realdir);

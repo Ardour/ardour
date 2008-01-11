@@ -2068,7 +2068,6 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 		session_name = basename_nosuffix (string (predetermined_path));
 
 		new_session_dialog->set_session_name (session_name);
-		cerr << "set sF to " << session_path << endl;
 		new_session_dialog->set_session_folder (session_path);
 		new_session_dialog->set_modal (true);
 
