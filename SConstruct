@@ -16,7 +16,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '2.1'
+ardour_version = '3.0'
 
 subst_dict = { }
 
@@ -950,6 +950,8 @@ if env['SYSLIBS']:
     libraries['sigc2'].ParseConfig('pkg-config --cflags --libs sigc++-2.0')
     libraries['glibmm2'] = LibraryInfo()
     libraries['glibmm2'].ParseConfig('pkg-config --cflags --libs glibmm-2.4')
+    libraries['cairo'] = LibraryInfo()
+    libraries['cairo'].ParseConfig('pkg-config --cflags --libs cairo')
     libraries['cairomm'] = LibraryInfo()
     libraries['cairomm'].ParseConfig('pkg-config --cflags --libs cairomm-1.0')
     libraries['gdkmm2'] = LibraryInfo()
@@ -1012,12 +1014,18 @@ if env['SYSLIBS']:
         ]
 
 else:
+    libraries['cairo'] = LibraryInfo()
+    libraries['cairo'].ParseConfig('pkg-config --cflags --libs cairo')
+    
+    libraries['gtk2-unix-print'] = LibraryInfo()
+    libraries['gtk2-unix-print'].ParseConfig('pkg-config --cflags --libs gtk+-unix-print-2.0')
+    
     libraries['sigc2'] = LibraryInfo(LIBS='sigc++2',
                                     LIBPATH='#libs/sigc++2',
                                     CPPPATH='#libs/sigc++2')
     libraries['glibmm2'] = LibraryInfo(LIBS='glibmm2',
                                     LIBPATH='#libs/glibmm2',
-                                    CPPPATH='#libs/glibmm2')
+                                    CPPPATH='#libs/glibmm2/glib')
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')
@@ -1025,8 +1033,8 @@ else:
                                      LIBPATH='#libs/gtkmm2/atk',
                                      CPPPATH='#libs/gtkmm2/atk')
     libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
-                                      LIBPATH='#libs/cairomm/cairomm',
-                                      CPPPATH='#libs/cairomm/cairomm')
+                                      LIBPATH='#libs/cairomm',
+                                      CPPPATH='#libs/cairomm')
     libraries['gdkmm2'] = LibraryInfo(LIBS='gdkmm2',
                                       LIBPATH='#libs/gtkmm2/gdk',
                                       CPPPATH='#libs/gtkmm2/gdk')
@@ -1072,13 +1080,12 @@ else:
         ]
     
     gtk_subdirs = [
-	'libs/glibmm2',
-	'libs/gtkmm2/pango',
-	'libs/gtkmm2/atk',
-	'libs/gtkmm2/gdk',
-	'libs/gtkmm2/gtk',
-	'libs/libgnomecanvasmm',
-#	'libs/flowcanvas',
+        'libs/glibmm2',
+        'libs/gtkmm2/pango',
+        'libs/gtkmm2/atk',
+        'libs/gtkmm2/gdk',
+        'libs/gtkmm2/gtk',
+        'libs/libgnomecanvasmm',
         'libs/gtkmm2ext',
         'gtk2_ardour',
         'libs/clearlooks'
