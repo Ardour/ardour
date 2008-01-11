@@ -33,7 +33,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-static char* TAG = "http://ardour.org/ontology/Tag";
+static const char* TAG = "http://ardour.org/ontology/Tag";
 
 AudioLibrary::AudioLibrary ()
 {
@@ -106,7 +106,7 @@ AudioLibrary::get_tags (string member)
 	
 	lrdf_statement pattern;
 	pattern.subject = strdup(path2uri(member).c_str());
-	pattern.predicate = TAG;
+	pattern.predicate = (char*)TAG;
 	pattern.object = 0;
 	pattern.object_type = lrdf_literal;
 	
@@ -138,8 +138,8 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string> 
 	vector<string>::const_iterator i;
 	for (i = tags.begin(); i != tags.end(); ++i){
 		pattern = new lrdf_statement;
-		pattern->subject = "?";
-		pattern->predicate = TAG;
+		pattern->subject = (char*)"?";
+		pattern->predicate = (char*)TAG;
 		pattern->object = strdup((*i).c_str());
 		pattern->next = old;
 

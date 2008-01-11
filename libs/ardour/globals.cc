@@ -467,7 +467,7 @@ find_file (string name, string dir, string subdir = "")
 string
 ARDOUR::find_config_file (string name)
 {
-	char* envvar;
+	const char* envvar;
 
 	if ((envvar = getenv("ARDOUR_CONFIG_PATH")) == 0) {
 		envvar = CONFIG_DIR;
@@ -479,7 +479,7 @@ ARDOUR::find_config_file (string name)
 string
 ARDOUR::find_data_file (string name, string subdir)
 {
-	char* envvar;
+	const char* envvar;
 	if ((envvar = getenv("ARDOUR_DATA_PATH")) == 0) {
 		envvar = DATA_DIR;
 	}
