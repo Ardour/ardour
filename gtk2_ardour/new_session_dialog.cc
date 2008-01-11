@@ -20,6 +20,8 @@
 #include "i18n.h"
 #include "new_session_dialog.h"
 
+#include <pbd/error.h>
+
 #include <ardour/recent_sessions.h>
 #include <ardour/session.h>
 #include <ardour/profile.h>
@@ -36,6 +38,7 @@
 #include <gtkmm2ext/window_title.h>
 
 using namespace Gtkmm2ext;
+using namespace PBD;
 
 #include "opts.h"
 #include "utils.h"
@@ -557,40 +560,46 @@ NewSessionDialog::session_name() const
 	}	  
 	*/
 
-	int page = m_notebook->get_current_page();
-
-	if (page == 0 || page == 2) {
+	switch (which_page()) {
+	case NewPage:
+	case EnginePage:
 		/* new or audio setup pages */
 	        return Glib::filename_from_utf8(m_name->get_text());
-	} else {
-		if (m_treeview->get_selection()->count_selected_rows() == 0) {
-		        return Glib::filename_from_utf8(str);
-		}
-		Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
-		return (*i)[recent_columns.visible_name];
+	default:
+		break;
+	} 
+
+	if (m_treeview->get_selection()->count_selected_rows() == 0) {
+		return Glib::filename_from_utf8(str);
 	}
+	Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
+	return (*i)[recent_columns.visible_name];
 }
 
 std::string
 NewSessionDialog::session_folder() const
 {
-        if (m_notebook->get_current_page() == 0) {
+	switch (which_page()) {
+	case NewPage:
 	        return Glib::filename_from_utf8(m_folder->get_filename());
-	} else {
-	       
-		if (m_treeview->get_selection()->count_selected_rows() == 0) {
-			const string filename(Glib::filename_from_utf8(m_open_filechooser->get_filename()));
-			return Glib::path_get_dirname(filename);
-		}
-		Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
-		return (*i)[recent_columns.fullpath];
+		
+	default:
+		break;
 	}
+	       
+	if (m_treeview->get_selection()->count_selected_rows() == 0) {
+		const string filename(Glib::filename_from_utf8(m_open_filechooser->get_filename()));
+		return Glib::path_get_dirname(filename);
+	}
+
+	Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
+	return (*i)[recent_columns.fullpath];
 }
 
 bool
 NewSessionDialog::use_session_template() const
 {
-        if(m_template->get_filename().empty() && (m_notebook->get_current_page() == 0)) return false;
+        if(m_template->get_filename().empty() && (which_page() == NewPage)) return false;
 	return true;
 }
 
@@ -679,7 +688,7 @@ NewSessionDialog::get_current_page()
 }
 
 NewSessionDialog::Pages
-NewSessionDialog::which_page ()
+NewSessionDialog::which_page () const
 {
 	int num = m_notebook->get_current_page();
 
@@ -902,7 +911,7 @@ NewSessionDialog::monitor_bus_button_clicked ()
 void
 NewSessionDialog::reset_template()
 {
-        m_template->set_filename("");
+        m_template->unselect_all ();
 }
 
 void

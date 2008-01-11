@@ -92,7 +92,7 @@ public:
 
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const ;
-	Pages which_page ();
+	Pages which_page () const;
 
 	int get_current_page();
 	void set_current_page (int);

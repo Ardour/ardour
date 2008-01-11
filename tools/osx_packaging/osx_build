@@ -15,7 +15,7 @@ while [ $# -gt 0 ] ; do
     case $1 in
 	--sae) SAE=1 ; shift ;;
 	--nojack) WITH_JACK= ; shift ;;
-	--noladpsa) WITH_LADSPA= ; shift ;;
+	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
     esac
@@ -76,6 +76,8 @@ fi
 
 if test x$WITH_JACK != x ; then
     env="$env<key>ARDOUR_WITH_JACK</key><string>true</string>"
+else
+    env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin</string>"
 fi
 
 env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"
@@ -142,7 +144,12 @@ while [ true ] ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)"`
+	if test x$WITH_JACK != x ; then
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)"`
+	else
+	    # do not include libjack
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | grep -v 'libjack\.'`
+	fi
 	echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
@@ -198,10 +205,17 @@ fi
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
-	base=`basename $lib`
-	changes="$changes -change $lib @executable_path/../Frameworks/$base"
-    done
+    if test x$WITH_JACK != x ; then
+	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
+	    base=`basename $lib`
+	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	done
+    else
+	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	    base=`basename $lib`
+	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	done
+    fi
     if test "x$changes" != "x" ; then
 	install_name_tool $changes $EXE
     fi
@@ -216,10 +230,17 @@ for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
 	# change all the dependencies
 
 	changes=""
-	for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
-	    base=`basename $lib`
-	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
-	done
+	if test x$WITH_JACK != x ; then
+	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
+		base=`basename $lib`
+		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    done
+	else
+	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+		base=`basename $lib`
+		changes="$changes -change $lib @executable_path/../Frameworks/$base"
+	    done
+	fi
 
 	if test "x$changes" != x ; then
 	    if  install_name_tool $changes $dylib ; then
