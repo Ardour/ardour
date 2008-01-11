@@ -539,7 +539,26 @@ NewSessionDialog::set_session_name (const Glib::ustring& name)
 void
 NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 {
-	m_folder->set_current_folder (dir);
+	Glib::ustring realdir = dir;
+
+	/* GtkFileChooser doesn't accept non-absolute pathnames without vomiting */
+
+	if (!Glib::path_is_absolute (realdir)) {
+		if (realdir.length() == 1 && realdir[0] == '.') {
+			realdir.replace (0, 1, Glib::get_current_dir());
+		} else if (realdir.length() > 1 && realdir[0] == '.' && realdir[1] != '.') {
+			realdir.replace (0, 1, Glib::get_current_dir());
+		} else if (realdir.length() == 2 && realdir[0] == '.' && realdir[1] == '.') {
+			realdir.replace (0, 2, Glib::path_get_dirname (Glib::get_current_dir()));
+		} else if (realdir.length() > 2 && realdir[0] == '.' && realdir[1] == '.') {
+			realdir.replace (0, 2, Glib::path_get_dirname (Glib::get_current_dir()));
+		} else {
+			error << string_compose (_("Non-absolute path \"%1\" not usable - ignored"), realdir) << endmsg;
+			return;
+		}
+	}
+
+	m_folder->set_current_folder (realdir);
 }
 
 std::string

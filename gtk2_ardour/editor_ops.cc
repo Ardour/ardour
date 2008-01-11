@@ -4223,10 +4223,7 @@ Editor::toggle_gain_envelope_visibility ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_envelope_visible_item->get_active();
-			if (x != arv->envelope_visible()) {
-				arv->set_envelope_visible (x);
-			}
+			arv->set_envelope_visible (!arv->envelope_visible());
 		}
 	}
 }
@@ -4237,10 +4234,7 @@ Editor::toggle_gain_envelope_active ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_envelope_active_item->get_active();
-			if (x != arv->audio_region()->envelope_active()) {
-				arv->audio_region()->set_envelope_active (x);
-			}
+			arv->audio_region()->set_envelope_active (!arv->audio_region()->envelope_active());
 		}
 	}
 }
@@ -4251,10 +4245,7 @@ Editor::toggle_region_lock ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_lock_item->get_active();
-			if (x != arv->audio_region()->locked()) {
-				arv->audio_region()->set_locked (x);
-			}
+			arv->audio_region()->set_locked (!arv->audio_region()->locked());
 		}
 	}
 }
@@ -4265,10 +4256,7 @@ Editor::toggle_region_mute ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_mute_item->get_active();
-			if (x != arv->audio_region()->muted()) {
-				arv->audio_region()->set_muted (x);
-			}
+			arv->audio_region()->set_muted (!arv->audio_region()->muted());
 		}
 	}
 }
@@ -4279,10 +4267,7 @@ Editor::toggle_region_opaque ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_opaque_item->get_active();
-			if (x != arv->audio_region()->opaque()) {
-				arv->audio_region()->set_opaque (x);
-			}
+			arv->audio_region()->set_opaque (!arv->audio_region()->opaque());
 		}
 	}
 }

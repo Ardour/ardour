@@ -1748,7 +1748,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	sigc::connection fooc;
 
 	items.push_back (CheckMenuElem (_("Lock")));
-	region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
 	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
 	if (region->locked()) {
 		fooc.block (true);
@@ -1756,7 +1756,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		fooc.block (false);
 	}
 	items.push_back (CheckMenuElem (_("Mute")));
-	region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
 	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
 	if (region->muted()) {
 		fooc.block (true);
@@ -1766,7 +1766,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	
 	if (!Profile->get_sae()) {
 		items.push_back (CheckMenuElem (_("Opaque")));
-		region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+		CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
 		fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
 		if (region->opaque()) {
 			fooc.block (true);
@@ -1791,7 +1791,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 			items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
 
 			items.push_back (CheckMenuElem (_("Envelope Visible")));
-			region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
+			CheckMenuItem* region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
 			fooc = region_envelope_visible_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
 			if (arv->envelope_visible()) {
 				fooc.block (true);
@@ -1800,7 +1800,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 			}
 		
 			items.push_back (CheckMenuElem (_("Envelope Active")));
-			region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
+			CheckMenuItem* region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
 			fooc = region_envelope_active_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_active));
 			
 			if (ar->envelope_active()) {
