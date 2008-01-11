@@ -1088,7 +1088,8 @@ else:
         'libs/libgnomecanvasmm',
         'libs/gtkmm2ext',
         'gtk2_ardour',
-        'libs/clearlooks'
+        'libs/clearlooks',
+        'libs/cairomm'
         ]
 
 #
