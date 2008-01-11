@@ -539,25 +539,47 @@ NewSessionDialog::set_session_name (const Glib::ustring& name)
 void
 NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 {
+	Glib::ustring realdir = dir;
+	char* res;
+
+	/* this little tangled mess is a result of 4 things:
+
+	    1) GtkFileChooser vomits when given a non-absolute directory
+                   argument to set_current_folder()
+            2) canonicalize_file_name() doesn't exist on OS X
+	    3) linux man page for realpath() says "do not use this function"
+	    4) canonicalize_file_name() & realpath() have entirely
+                   different semantics on OS X and Linux when given
+		   a non-existent path.
+		   
+	   as result of all this, we take two distinct pathways through the code.
+	*/
+
+
+#ifdef __APPLE__
+
 	char buf[PATH_MAX];
 
-	char *res = realpath (dir.c_str(), buf);
-
-	if (res) {
-
-		cerr << "canonical = " << res << endl;
-
-		Glib::ustring realdir = res;
-		
-		if (!Glib::file_test (realdir, Glib::FILE_TEST_IS_DIR)) {
+	if((res = realpath (dir.c_str(), buf)) != 0) {
+		if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 			realdir = Glib::path_get_dirname (realdir);
-			cerr << "no such dir, use " << realdir << endl;
 		}
-
 		m_folder->set_current_folder (realdir);
-	} else {
-		cerr << dir << " not resolvable\n";
 	}
+
+	
+#else 
+	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+		realdir = Glib::path_get_dirname (realdir);
+	}
+
+	if ((res = canonicalize_file_name (realdir.c_str())) != 0) {
+		m_folder->set_current_folder (res);
+		free (res);
+	}
+	
+#endif
+
 }
 
 std::string
