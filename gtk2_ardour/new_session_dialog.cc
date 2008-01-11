@@ -539,26 +539,26 @@ NewSessionDialog::set_session_name (const Glib::ustring& name)
 void
 NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 {
-	Glib::ustring realdir = dir;
+	char buf[PATH_MAX];
 
-	/* GtkFileChooser doesn't accept non-absolute pathnames without vomiting */
+	char *res = realpath (dir.c_str(), buf);
 
-	if (!Glib::path_is_absolute (realdir)) {
-		if (realdir.length() == 1 && realdir[0] == '.') {
-			realdir.replace (0, 1, Glib::get_current_dir());
-		} else if (realdir.length() > 1 && realdir[0] == '.' && realdir[1] == '/') {
-			realdir.replace (0, 1, Glib::get_current_dir());
-		} else if (realdir.length() == 2 && realdir[0] == '.' && realdir[1] == '.') {
-			realdir.replace (0, 2, Glib::path_get_dirname (Glib::get_current_dir()));
-		} else if (realdir.length() > 2 && realdir[0] == '.' && realdir[1] == '.' && realdir[2] == '/') {
-			realdir.replace (0, 2, Glib::path_get_dirname (Glib::get_current_dir()));
-		} else {
-			error << string_compose (_("Non-absolute path \"%1\" not usable - ignored"), realdir) << endmsg;
-			return;
+	if (res) {
+
+		cerr << "canonical = " << res << endl;
+
+		Glib::ustring realdir = res;
+		free (res);
+		
+		if (!Glib::file_test (realdir, Glib::FILE_TEST_IS_DIR)) {
+			realdir = Glib::path_get_dirname (realdir);
+			cerr << "no such dir, use " << realdir << endl;
 		}
-	}
 
-	m_folder->set_current_folder (realdir);
+		m_folder->set_current_folder (realdir);
+	} else {
+		cerr << dir << " not resolvable\n";
+	}
 }
 
 std::string
