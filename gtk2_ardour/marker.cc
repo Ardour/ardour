@@ -303,16 +303,16 @@ Marker::set_line_vpos (double pos, double height)
 }
 
 void
-Marker::add_line (ArdourCanvas::Group* group, double initial_height)
+Marker::add_line (ArdourCanvas::Group* group, double y_origin, double initial_height)
 {
 	if (!line) {
 
 		line = new ArdourCanvas::SimpleLine (*group);
 		line->property_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
 		line->property_x1() = unit_position + shift;
-		line->property_y1() = 0.0;
+		line->property_y1() = y_origin;
 		line->property_x2() = unit_position + shift;
-		line->property_y2() = initial_height;
+		line->property_y2() = y_origin + initial_height;
 
 		line->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 	}

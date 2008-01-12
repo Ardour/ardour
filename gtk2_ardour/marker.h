@@ -57,7 +57,7 @@ class Marker : public PBD::Destructible
 
 	ArdourCanvas::Item& the_item() const;
 
-	void add_line (ArdourCanvas::Group*, double initial_height);
+	void add_line (ArdourCanvas::Group*, double y_origin, double initial_height);
 	void show_line ();
 	void hide_line ();
 	void set_line_vpos (double y_origin, double height);
