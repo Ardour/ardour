@@ -716,7 +716,7 @@ Session::save_state (string snapshot_name, bool pending)
 		bool was_dirty = dirty();
 
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
-
+		
 		if (was_dirty) {
 			DirtyChanged (); /* EMIT SIGNAL */
 		}
@@ -1270,8 +1270,8 @@ Session::set_state (const XMLNode& node)
 	}
 
 	if ((child = find_named_node (node, "Bundles")) == 0) {
-		error << _("Session: XML state has no bundles section") << endmsg;
-		goto out;
+		warning << _("Session: XML state has no bundles section (2.0 session?)") << endmsg;
+		//goto out;
 	} else {
 		/* We can't load Bundles yet as they need to be able
 		   to convert from port names to Port objects, which can't happen until

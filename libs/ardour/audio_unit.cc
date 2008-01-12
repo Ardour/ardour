@@ -401,18 +401,6 @@ AUPlugin::automatable() const
 	return automates;
 }
 
-void
-AUPlugin::store_state (ARDOUR::PluginState&)
-{
-	
-}
-
-void
-AUPlugin::restore_state (ARDOUR::PluginState&)
-{
-	
-}
-
 string
 AUPlugin::describe_parameter (uint32_t)
 {

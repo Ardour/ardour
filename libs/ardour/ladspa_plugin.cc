@@ -62,11 +62,11 @@ LadspaPlugin::LadspaPlugin (void *mod, AudioEngine& e, Session& session, uint32_
 LadspaPlugin::LadspaPlugin (const LadspaPlugin &other)
 	: Plugin (other)
 {
-	init (other.module, other._index, other.sample_rate);
+	init (other._module, other._index, other._sample_rate);
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
-		control_data[i] = other.shadow_data[i];
-		shadow_data[i] = other.shadow_data[i];
+		_control_data[i] = other._shadow_data[i];
+		_shadow_data[i] = other._shadow_data[i];
 	}
 }
 
@@ -77,61 +77,61 @@ LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 	uint32_t i, port_cnt;
 	const char *errstr;
 
-	module = mod;
-	control_data = 0;
-	shadow_data = 0;
-	latency_control_port = 0;
-	was_activated = false;
+	_module = mod;
+	_control_data = 0;
+	_shadow_data = 0;
+	_latency_control_port = 0;
+	_was_activated = false;
 
-	dfunc = (LADSPA_Descriptor_Function) dlsym (module, "ladspa_descriptor");
+	dfunc = (LADSPA_Descriptor_Function) dlsym (_module, "ladspa_descriptor");
 
 	if ((errstr = dlerror()) != NULL) {
 		error << _("LADSPA: module has no descriptor function.") << endmsg;
 		throw failed_constructor();
 	}
 
-	if ((descriptor = dfunc (index)) == 0) {
+	if ((_descriptor = dfunc (index)) == 0) {
 		error << _("LADSPA: plugin has gone away since discovery!") << endmsg;
 		throw failed_constructor();
 	}
 
 	_index = index;
 
-	if (LADSPA_IS_INPLACE_BROKEN(descriptor->Properties)) {
-		error << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), descriptor->Name) << endmsg;
+	if (LADSPA_IS_INPLACE_BROKEN(_descriptor->Properties)) {
+		error << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), _descriptor->Name) << endmsg;
 		throw failed_constructor();
 	}
 	
-	sample_rate = rate;
+	_sample_rate = rate;
 
-	if (descriptor->instantiate == 0) {
+	if (_descriptor->instantiate == 0) {
 		throw failed_constructor();
 	}
 
-	if ((handle = descriptor->instantiate (descriptor, rate)) == 0) {
+	if ((_handle = _descriptor->instantiate (_descriptor, rate)) == 0) {
 		throw failed_constructor();
 	}
 
 	port_cnt = parameter_count();
 
-	control_data = new LADSPA_Data[port_cnt];
-	shadow_data = new LADSPA_Data[port_cnt];
+	_control_data = new LADSPA_Data[port_cnt];
+	_shadow_data = new LADSPA_Data[port_cnt];
 
 	for (i = 0; i < port_cnt; ++i) {
 		if (LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
-			connect_port (i, &control_data[i]);
+			connect_port (i, &_control_data[i]);
 			
 			if (LADSPA_IS_PORT_OUTPUT(port_descriptor (i)) &&
 			    strcmp (port_names()[i], X_("latency")) == 0) {
-				latency_control_port = &control_data[i];
-				*latency_control_port = 0;
+				_latency_control_port = &_control_data[i];
+				*_latency_control_port = 0;
 			}
 
 			if (!LADSPA_IS_PORT_INPUT(port_descriptor (i))) {
 				continue;
 			}
 		
-			shadow_data[i] = default_value (i);
+			_shadow_data[i] = default_value (i);
 		}
 	}
 
@@ -149,39 +149,12 @@ LadspaPlugin::~LadspaPlugin ()
 
         // dlclose (module);
 
-	if (control_data) {
-		delete [] control_data;
+	if (_control_data) {
+		delete [] _control_data;
 	}
 
-	if (shadow_data) {
-		delete [] shadow_data;
-	}
-}
-
-void
-LadspaPlugin::store_state (PluginState& state)
-{
-	state.parameters.clear ();
-	
-	for (uint32_t i = 0; i < parameter_count(); ++i){
-
-		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
-		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
-			pair<uint32_t,float> datum;
-
-			datum.first = i;
-			datum.second = shadow_data[i];
-
-			state.parameters.insert (datum);
-		}
-	}
-}
-
-void
-LadspaPlugin::restore_state (PluginState& state)
-{
-	for (map<uint32_t,float>::iterator i = state.parameters.begin(); i != state.parameters.end(); ++i) {
-		set_parameter (i->first, i->second);
+	if (_shadow_data) {
+		delete [] _shadow_data;
 	}
 }
 
@@ -189,7 +162,7 @@ string
 LadspaPlugin::unique_id() const
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), "%lu", descriptor->UniqueID);
+	snprintf (buf, sizeof (buf), "%lu", _descriptor->UniqueID);
 	return string (buf);
 }
 
@@ -308,10 +281,10 @@ LadspaPlugin::default_value (uint32_t port)
 	if (LADSPA_IS_HINT_SAMPLE_RATE(prh[port].HintDescriptor) && !earlier_hint) {
 		if (bounds_given) {
 			if (sr_scaling) {
-				ret *= sample_rate;
+				ret *= _sample_rate;
 			}
 		} else {
-			ret = sample_rate;
+			ret = _sample_rate;
 		}
 	}
 
@@ -321,8 +294,8 @@ LadspaPlugin::default_value (uint32_t port)
 void
 LadspaPlugin::set_parameter (uint32_t which, float val)
 {
-	if (which < descriptor->PortCount) {
-		shadow_data[which] = (LADSPA_Data) val;
+	if (which < _descriptor->PortCount) {
+		_shadow_data[which] = (LADSPA_Data) val;
 #if 0
 		ParameterChanged (Parameter(PluginAutomation, which), val); /* EMIT SIGNAL */
 
@@ -343,9 +316,9 @@ float
 LadspaPlugin::get_parameter (uint32_t which) const
 {
 	if (LADSPA_IS_PORT_INPUT(port_descriptor (which))) {
-		return (float) shadow_data[which];
+		return (float) _shadow_data[which];
 	} else {
-		return (float) control_data[which];
+		return (float) _control_data[which];
 	}
 }
 
@@ -356,7 +329,7 @@ LadspaPlugin::nth_parameter (uint32_t n, bool& ok) const
 
 	ok = false;
 
-	for (c = 0, x = 0; x < descriptor->PortCount; ++x) {
+	for (c = 0, x = 0; x < _descriptor->PortCount; ++x) {
 		if (LADSPA_IS_PORT_CONTROL (port_descriptor (x))) {
 			if (c++ == n) {
 				ok = true;
@@ -383,7 +356,7 @@ LadspaPlugin::get_state()
 			child = new XMLNode("port");
 			snprintf(buf, sizeof(buf), "%u", i);
 			child->add_property("number", string(buf));
-			snprintf(buf, sizeof(buf), "%+f", shadow_data[i]);
+			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
 			child->add_property("value", string(buf));
 			root->add_child_nocopy (*child);
 		}
@@ -515,8 +488,8 @@ LadspaPlugin::signal_latency () const
 		return _user_latency;
 	}
 
-	if (latency_control_port) {
-		return (nframes_t) floor (*latency_control_port);
+	if (_latency_control_port) {
+		return (nframes_t) floor (*_latency_control_port);
 	} else {
 		return 0;
 	}
@@ -617,16 +590,16 @@ LadspaPlugin::run_in_place (nframes_t nframes)
 {
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
-			control_data[i] = shadow_data[i];
+			_control_data[i] = _shadow_data[i];
 		}
 	}
-	descriptor->run (handle, nframes);
+	_descriptor->run (_handle, nframes);
 }
 
 void
 LadspaPlugin::latency_compute_run ()
 {
-	if (!latency_control_port) {
+	if (!_latency_control_port) {
 		return;
 	}
 

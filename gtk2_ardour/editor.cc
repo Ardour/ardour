@@ -901,19 +901,6 @@ Editor::show_window ()
 }
 
 void
-Editor::tie_vertical_scrolling ()
-{
-	double y1 = vertical_adjustment.get_value();
-
-	playhead_cursor->set_y_axis (y1);
-	if (logo_item) {
-		logo_item->property_y() = y1;
-	}
-
-	controls_layout.get_vadjustment()->set_value (y1);
-}
-
-void
 Editor::instant_save ()
 {
 	if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
@@ -1431,28 +1418,179 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 	fade_context_menu.popup (button, time);
 }
 
-/* Pop up the general track context menu for when the user clicks pretty much anywhere in a track or bus */
 void
-Editor::popup_track_context_menu (int button, int32_t time, nframes_t frame)
+Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, nframes_t frame)
 {
-	build_track_context_menu (frame)->popup (button, time);
+	using namespace Menu_Helpers;
+	Menu* (Editor::*build_menu_function)(nframes_t);
+	Menu *menu;
+
+	switch (item_type) {
+	case RegionItem:
+	case RegionViewName:
+	case RegionViewNameHighlight:
+		if (with_selection) {
+			build_menu_function = &Editor::build_track_selection_context_menu;
+		} else {
+			build_menu_function = &Editor::build_track_region_context_menu;
+		}
+		break;
+
+	case SelectionItem:
+		if (with_selection) {
+			build_menu_function = &Editor::build_track_selection_context_menu;
+		} else {
+			build_menu_function = &Editor::build_track_context_menu;
+		}
+		break;
+
+	case CrossfadeViewItem:
+		build_menu_function = &Editor::build_track_crossfade_context_menu;
+		break;
+
+	case StreamItem:
+		if (clicked_routeview->get_diskstream()) {
+			build_menu_function = &Editor::build_track_context_menu;
+		} else {
+			build_menu_function = &Editor::build_track_bus_context_menu;
+		}
+		break;
+
+	default:
+		/* probably shouldn't happen but if it does, we don't care */
+		return;
+	}
+
+	menu = (this->*build_menu_function)(frame);
+	menu->set_name ("ArdourContextMenu");
+	
+	/* now handle specific situations */
+
+	switch (item_type) {
+	case RegionItem:
+	case RegionViewName:
+	case RegionViewNameHighlight:
+		if (!with_selection) {
+			if (region_edit_menu_split_item) {
+				if (clicked_regionview && clicked_regionview->region()->covers (get_preferred_edit_position())) {
+					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, true);
+				} else {
+					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, false);
+				}
+			}
+			/*
+			if (region_edit_menu_split_multichannel_item) {
+				if (clicked_regionview && clicked_regionview->region().n_channels() > 1) {
+					// GTK2FIX find the action, change its sensitivity
+					// region_edit_menu_split_multichannel_item->set_sensitive (true);
+				} else {
+					// GTK2FIX see above
+					// region_edit_menu_split_multichannel_item->set_sensitive (false);
+				}
+			}*/
+		}
+		break;
+
+	case SelectionItem:
+		break;
+
+	case CrossfadeViewItem:
+		break;
+
+	case StreamItem:
+		break;
+
+	default:
+		/* probably shouldn't happen but if it does, we don't care */
+		return;
+	}
+
+	if (item_type != SelectionItem && clicked_routeview && clicked_routeview->audio_track()) {
+
+		/* Bounce to disk */
+		
+		using namespace Menu_Helpers;
+		MenuList& edit_items  = menu->items();
+		
+		edit_items.push_back (SeparatorElem());
+
+		switch (clicked_routeview->audio_track()->freeze_state()) {
+		case AudioTrack::NoFreeze:
+			edit_items.push_back (MenuElem (_("Freeze"), mem_fun(*this, &Editor::freeze_route)));
+			break;
+
+		case AudioTrack::Frozen:
+			edit_items.push_back (MenuElem (_("Unfreeze"), mem_fun(*this, &Editor::unfreeze_route)));
+			break;
+			
+		case AudioTrack::UnFrozen:
+			edit_items.push_back (MenuElem (_("Freeze"), mem_fun(*this, &Editor::freeze_route)));
+			break;
+		}
+
+	}
+
+	menu->popup (button, time);
 }
 
 Menu*
-Editor::build_track_context_menu (nframes_t frame)
+Editor::build_track_context_menu (nframes_t ignored)
 {
 	using namespace Menu_Helpers;
 
-	Menu* menu = manage (new Menu);
- 	MenuList& edit_items = menu->items();
+ 	MenuList& edit_items = track_context_menu.items();
 	edit_items.clear();
 
-	/* Build the general `track' context menu, adding what is appropriate given
-	   the current selection */
+	add_dstream_context_items (edit_items);
+	return &track_context_menu;
+}
 
-	/* XXX: currently crossfades can't be selected, so we can't use the selection
-	   to decide which crossfades to mention in the menu.  I believe this will
-	   change at some point.  For now we have to use clicked_trackview to decide. */
+Menu*
+Editor::build_track_bus_context_menu (nframes_t ignored)
+{
+	using namespace Menu_Helpers;
+
+ 	MenuList& edit_items = track_context_menu.items();
+	edit_items.clear();
+
+	add_bus_context_items (edit_items);
+	return &track_context_menu;
+}
+
+Menu*
+Editor::build_track_region_context_menu (nframes_t frame)
+{
+	using namespace Menu_Helpers;
+	MenuList& edit_items  = track_region_context_menu.items();
+	edit_items.clear();
+
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
+
+	if (rtv) {
+		boost::shared_ptr<Diskstream> ds;
+		boost::shared_ptr<Playlist> pl;
+		
+		if ((ds = rtv->get_diskstream()) && ((pl = ds->playlist()))) {
+			Playlist::RegionList* regions = pl->regions_at ((nframes_t) floor ( (double)frame * ds->speed()));
+			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+				add_region_context_items (rtv->view(), (*i), edit_items);
+			}
+			delete regions;
+		}
+	}
+
+	add_dstream_context_items (edit_items);
+
+	return &track_region_context_menu;
+}
+
+Menu*
+Editor::build_track_crossfade_context_menu (nframes_t frame)
+{
+	using namespace Menu_Helpers;
+	MenuList& edit_items  = track_crossfade_context_menu.items();
+	edit_items.clear ();
+
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
@@ -1462,7 +1600,9 @@ Editor::build_track_context_menu (nframes_t frame)
 
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()) != 0) && ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) != 0)) {
 
+			Playlist::RegionList* regions = pl->regions_at (frame);
 			AudioPlaylist::Crossfades xfades;
+
 			apl->crossfades_at (frame, xfades);
 
 			bool many = xfades.size() > 1;
@@ -1470,24 +1610,18 @@ Editor::build_track_context_menu (nframes_t frame)
 			for (AudioPlaylist::Crossfades::iterator i = xfades.begin(); i != xfades.end(); ++i) {
 				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
+
+			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+				add_region_context_items (atv->audio_view(), (*i), edit_items);
+			}
+
+			delete regions;
 		}
-	}	
-
-	if (!selection->time.empty()) {
-		add_selection_context_items (edit_items);
 	}
 
-	if (!selection->regions.empty()) {
-		add_region_context_items (edit_items);
-	}
+	add_dstream_context_items (edit_items);
 
-	if (!selection->tracks.empty()) {
-		add_bus_or_audio_track_context_items (edit_items);
-	}
-	
-	menu->set_name ("ArdourContextMenu");
-
-	return menu;
+	return &track_crossfade_context_menu;
 }
 
 #ifdef FFT_ANALYSIS
@@ -1528,6 +1662,19 @@ Editor::analyze_range_selection()
 }
 #endif /* FFT_ANALYSIS */
 
+Menu*
+Editor::build_track_selection_context_menu (nframes_t ignored)
+{
+	using namespace Menu_Helpers;
+	MenuList& edit_items  = track_selection_context_menu.items();
+	edit_items.clear ();
+
+	add_selection_context_items (edit_items);
+	// edit_items.push_back (SeparatorElem());
+	// add_dstream_context_items (edit_items);
+
+	return &track_selection_context_menu;
+}
 
 /** Add context menu items relevant to crossfades.
  * @param edit_items List to add the items to.
@@ -1603,34 +1750,27 @@ Editor::add_item_with_sensitivity (Menu_Helpers::MenuList& m, Menu_Helpers::Menu
 	}
 }
 
-/** Add context menu items relevant to regions.
- * @param edit_items List to add the items to.
- */
 void
-Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
+Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> region, Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
-	sigc::connection fooc;
-	Menu *region_menu = manage (new Menu);
-	MenuList& items = region_menu->items();
+	Menu     *region_menu = manage (new Menu);
+	MenuList& items       = region_menu->items();
 	region_menu->set_name ("ArdourContextMenu");
 	
-	items.push_back (MenuElem (_("Edit..."), mem_fun(*this, &Editor::edit_region)));
-	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
-	items.push_back (MenuElem (_("Lower to bottom layer"), mem_fun  (*this, &Editor::lower_region_to_bottom)));
+	boost::shared_ptr<AudioRegion> ar;
+	boost::shared_ptr<MidiRegion>  mr;
 
-	Menu* sync_point_menu = manage (new Menu);
-	MenuList& sync_point_items = sync_point_menu->items();
-	sync_point_menu->set_name("ArdourContextMenu");
-	
-	sync_point_items.push_back (MenuElem (_("Define"), mem_fun(*this, &Editor::set_region_sync_from_edit_point)));
-	sync_point_items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_region_sync)));
+	if (region) {
+		ar = boost::dynamic_pointer_cast<AudioRegion> (region);
+		mr = boost::dynamic_pointer_cast<MidiRegion> (region);
+	}
 
-	items.push_back (MenuElem (_("Sync points"), *sync_point_menu));
+	/* when this particular menu pops up, make the relevant region 
+	   become selected.
+	*/
 
-	//add_item_with_sensitivity (items, MenuElem (_("Audition"), mem_fun(*this, &Editor::audition_selected_region)), selection->regions.size() == 1);
-	
-	add_item_with_sensitivity (items, MenuElem (_("Export"), mem_fun(*this, &Editor::export_region)), selection->regions.size() == 1);
+	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::rename_region)));
 	items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
@@ -1646,97 +1786,59 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
 
 #ifdef FFT_ANALYSIS
-	items.push_back (MenuElem (_("Analyze region"), mem_fun(*this, &Editor::analyze_region_selection)));
+	if (ar)
+		items.push_back (MenuElem (_("Analyze region"), mem_fun(*this, &Editor::analyze_region_selection)));
 #endif
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (CheckMenuElem (_("Lock")));
-	region_lock_item = static_cast<CheckMenuItem*>(&items.back());
-	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
+	sigc::connection fooc;
 
-#if FIXUP_REGION_MENU
+	items.push_back (CheckMenuElem (_("Lock")));
+	CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
 	if (region->locked()) {
 		fooc.block (true);
 		region_lock_item->set_active();
 		fooc.block (false);
 	}
-#endif
-
-	items.push_back (CheckMenuElem (_("Lock Position")));
-	region_lock_position_item = static_cast<CheckMenuItem*>(&items.back());
-	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_position_lock));
-#if FIXUP_REGION_MENU
-	if (region->locked()) {
-		fooc.block (true);
-		region_lock_position_item->set_active();
-		fooc.block (false);
-	}
-#endif
-
 	items.push_back (CheckMenuElem (_("Mute")));
-	region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
 	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
-#if FIXUP_REGION_MENU
 	if (region->muted()) {
 		fooc.block (true);
 		region_mute_item->set_active();
 		fooc.block (false);
 	}
-#endif
 	
 	if (!Profile->get_sae()) {
 		items.push_back (CheckMenuElem (_("Opaque")));
-		region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+		CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
 		fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
-#if FIXUP_REGION_MENU
 		if (region->opaque()) {
 			fooc.block (true);
 			region_opaque_item->set_active();
 			fooc.block (false);
 		}
-#endif
 	}
 
-	/* We allow "Original position" if at least one region is not at its
-	   natural position 
-	*/
-	RegionSelection::iterator i = selection->regions.begin();
-	while (i != selection->regions.end() && (*i)->region()->at_natural_position() == true) {
-		++i;
+	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
+	if (region->at_natural_position()) {
+		items.back().set_sensitive (false);
 	}
-
-	add_item_with_sensitivity (items, MenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)), i != selection->regions.end());
 	
 	items.push_back (SeparatorElem());
-
-	/* Find out if we have a selected audio region */
-	i = selection->regions.begin();
-	while (i != selection->regions.end() && boost::dynamic_pointer_cast<AudioRegion>((*i)->region()) == 0) {
-		++i;
-	}
-	const bool have_selected_audio_region = (i != selection->regions.end());
-
-	if (have_selected_audio_region) {
-
-		Menu* envelopes_menu = manage (new Menu);
-
-		envelopes_menu->set_name ("ArdourContextMenu");
-
-#if FIXUP_REGION_MENU
-
-   XXX NEED TO RESOLVE ONE v. MANY REGION ISSUE		
+	
+	if (ar) {
 		
-		MenuList& envelopes_items = envelopes_menu->items();
-
 		RegionView* rv = sv->find_view (ar);
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
-
+		
 		if (!Profile->get_sae()) {
-			envelopes_items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
+			items.push_back (MenuElem (_("Reset Envelope"), mem_fun(*this, &Editor::reset_region_gain_envelopes)));
 
-			envelopes_items.push_back (CheckMenuElem (_("Envelope Visible")));
-			region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
+			items.push_back (CheckMenuElem (_("Envelope Visible")));
+			CheckMenuItem* region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
 			fooc = region_envelope_visible_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
 			if (arv->envelope_visible()) {
 				fooc.block (true);
@@ -1744,8 +1846,8 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 				fooc.block (false);
 			}
 		
-			envelopes_items.push_back (CheckMenuElem (_("Envelope Active")));
-			region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
+			items.push_back (CheckMenuElem (_("Envelope Active")));
+			CheckMenuItem* region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
 			fooc = region_envelope_active_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_gain_envelope_active));
 			
 			if (ar->envelope_active()) {
@@ -1756,39 +1858,25 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 
 			items.push_back (SeparatorElem());
 		}
-#endif
 
-		items.push_back (MenuElem (_("Envelopes"), *envelopes_menu));
-		
-#if FIXUP_REGION_MENU
 		if (ar->scale_amplitude() != 1.0f) {
-			items.push_back (MenuElem (_("DeNormalize"), mem_fun(*this, &Editor::denormalize_regions)));
+			items.push_back (MenuElem (_("DeNormalize"), mem_fun(*this, &Editor::denormalize_region)));
 		} else {
-			items.push_back (MenuElem (_("Normalize"), mem_fun(*this, &Editor::normalize_regions)));
+			items.push_back (MenuElem (_("Normalize"), mem_fun(*this, &Editor::normalize_region)));
 		}
-#endif
-	}
-	
-	/* Find out if we have a selected MIDI region */
-	i = selection->regions.begin();
-	while (i != selection->regions.end() && boost::dynamic_pointer_cast<MidiRegion>((*i)->region()) == 0) {
-		++i;
-	}
-	const bool have_selected_midi_region = (i != selection->regions.end());
-	
-	if (have_selected_midi_region) {
 
-		items.push_back (MenuElem (_("Quantize"), mem_fun(*this, &Editor::quantize_regions)));
+	} else if (mr) {
+		items.push_back (MenuElem (_("Quantize"), mem_fun(*this, &Editor::quantize_region)));
 		items.push_back (SeparatorElem());
-
 	}
+
+	items.push_back (MenuElem (_("Reverse"), mem_fun(*this, &Editor::reverse_region)));
+	items.push_back (SeparatorElem());
 
 	/* range related stuff */
-	
-	add_item_with_sensitivity (items, MenuElem (_("Add range markers"), mem_fun (*this, &Editor::add_location_from_audio_region)), selection->regions.size() == 1);
-	
-	add_item_with_sensitivity (items, MenuElem (_("Set range selection"), mem_fun (*this, &Editor::set_selection_from_audio_region)), selection->regions.size() == 1);
-	
+
+	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_audio_region)));
+	items.push_back (MenuElem (_("Set Range Selection"), mem_fun (*this, &Editor::set_selection_from_region)));
 	items.push_back (SeparatorElem());
 			 
 	/* Nudge region */
@@ -1797,12 +1885,13 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& nudge_items = nudge_menu->items();
 	nudge_menu->set_name ("ArdourContextMenu");
 	
-	nudge_items.push_back (MenuElem (_("Nudge forward"), (bind (mem_fun(*this, &Editor::nudge_forward), false))));
-	nudge_items.push_back (MenuElem (_("Nudge backward"), (bind (mem_fun(*this, &Editor::nudge_backward), false))));
-	nudge_items.push_back (MenuElem (_("Nudge forward by capture offset"), (mem_fun(*this, &Editor::nudge_forward_capture_offset))));
-	nudge_items.push_back (MenuElem (_("Nudge backward by capture offset"), (mem_fun(*this, &Editor::nudge_backward_capture_offset))));
+	nudge_items.push_back (MenuElem (_("Nudge fwd"), (bind (mem_fun(*this, &Editor::nudge_forward), false))));
+	nudge_items.push_back (MenuElem (_("Nudge bwd"), (bind (mem_fun(*this, &Editor::nudge_backward), false))));
+	nudge_items.push_back (MenuElem (_("Nudge fwd by capture offset"), (mem_fun(*this, &Editor::nudge_forward_capture_offset))));
+	nudge_items.push_back (MenuElem (_("Nudge bwd by capture offset"), (mem_fun(*this, &Editor::nudge_backward_capture_offset))));
 
 	items.push_back (MenuElem (_("Nudge"), *nudge_menu));
+	items.push_back (SeparatorElem());
 
 	Menu *trim_menu = manage (new Menu);
 	MenuList& trim_items = trim_menu->items();
@@ -1814,20 +1903,38 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items)
 	trim_items.push_back (MenuElem (_("Trim To Punch"), mem_fun(*this, &Editor::trim_region_to_punch)));
 			     
 	items.push_back (MenuElem (_("Trim"), *trim_menu));
+	items.push_back (SeparatorElem());
+
 	items.push_back (MenuElem (_("Split"), (mem_fun(*this, &Editor::split_region))));
+	region_edit_menu_split_item = &items.back();
+
 	items.push_back (MenuElem (_("Make mono regions"), (mem_fun(*this, &Editor::split_multichannel_region))));
+	region_edit_menu_split_multichannel_item = &items.back();
+
 	items.push_back (MenuElem (_("Duplicate"), (bind (mem_fun(*this, &Editor::duplicate_dialog), false))));
 	items.push_back (MenuElem (_("Multi-Duplicate"), (bind (mem_fun(*this, &Editor::duplicate_dialog), true))));
-	items.push_back (MenuElem (_("Fill track"), (mem_fun(*this, &Editor::region_fill_track))));
+	items.push_back (MenuElem (_("Fill Track"), (mem_fun(*this, &Editor::region_fill_track))));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_selected_regions)));
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_clicked_region)));
 
 	/* OK, stick the region submenu at the top of the list, and then add
 	   the standard items.
 	*/
 
-	string const menu_item_name = selection->regions.size() > 1 ? _("Regions") : _("Region");
+	/* we have to hack up the region name because "_" has a special
+	   meaning for menu titles.
+	*/
+
+	string::size_type pos = 0;
+	string menu_item_name = region->name();
+
+	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
+		menu_item_name.replace (pos, 1, "__");
+		pos += 2;
+	}
+	
 	edit_items.push_back (MenuElem (menu_item_name, *region_menu));
+	edit_items.push_back (SeparatorElem());
 }
 
 /** Add context menu items relevant to selection ranges.
@@ -1876,32 +1983,11 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_selection)));
 }
 
-/** Add context menu items relevant to busses or audio tracks.
- * @param edit_items List to add the items to.
- */
+	
 void
-Editor::add_bus_or_audio_track_context_items (Menu_Helpers::MenuList& edit_items)
+Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
-
-	/* We add every possible action here, and de-sensitize things
-	   that aren't allowed.  The sensitivity logic is a bit spread out;
-	   on the one hand I'm using things like can_cut_copy (), which is
-	   reasonably complicated and so perhaps better near the function that
-	   it expresses sensitivity for, and on the other hand checks
-	   in this function as well.  You can't really have can_* for everything
-	   or the number of methods would get silly. */
-
-	bool const one_selected_region = selection->regions.size() == 1;
-
-	/* Count the number of selected audio tracks */
-	int n_audio_tracks = 0;
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		RouteTimeAxisView const * r = dynamic_cast<RouteTimeAxisView*>(*i);
-		if (r && r->is_audio_track()) {
-			n_audio_tracks++;
-		}
-	}
 
 	/* Playback */
 
@@ -1911,9 +1997,9 @@ Editor::add_bus_or_audio_track_context_items (Menu_Helpers::MenuList& edit_items
 	
 	play_items.push_back (MenuElem (_("Play from edit point"), mem_fun(*this, &Editor::play_from_edit_point)));
 	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
-	add_item_with_sensitivity (play_items, MenuElem (_("Play region"), mem_fun(*this, &Editor::play_selected_region)), one_selected_region);
-	
-	add_item_with_sensitivity (play_items, MenuElem (_("Loop region"), mem_fun(*this, &Editor::loop_selected_region)), one_selected_region);
+	play_items.push_back (MenuElem (_("Play region"), mem_fun(*this, &Editor::play_selected_region)));
+	play_items.push_back (SeparatorElem());
+	play_items.push_back (MenuElem (_("Loop Region"), mem_fun(*this, &Editor::loop_selected_region)));
 	
 	edit_items.push_back (MenuElem (_("Play"), *play_menu));
 
@@ -1922,25 +2008,15 @@ Editor::add_bus_or_audio_track_context_items (Menu_Helpers::MenuList& edit_items
 	Menu *select_menu = manage (new Menu);
 	MenuList& select_items = select_menu->items();
 	select_menu->set_name ("ArdourContextMenu");
-
-	string str = selection->tracks.size() == 1 ? _("Select all in track") : _("Select all in tracks");
-
-	select_items.push_back (MenuElem (str, bind (mem_fun(*this, &Editor::select_all_in_selected_tracks), Selection::Set)));
 	
-	select_items.push_back (MenuElem (_("Select all"), bind (mem_fun(*this, &Editor::select_all), Selection::Set)));
-
-	str = selection->tracks.size() == 1 ? _("Invert selection in track") : _("Invert selection in tracks");
-	
-	select_items.push_back (MenuElem (str, mem_fun(*this, &Editor::invert_selection_in_selected_tracks)));
-	
+	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), Selection::Set)));
+	select_items.push_back (MenuElem (_("Invert selection in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
 	select_items.push_back (MenuElem (_("Invert selection"), mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
-
-	if (n_audio_tracks) {
-		select_items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
-		select_items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
-	}
-	
+	select_items.push_back (MenuElem (_("Set range to loop range"), mem_fun(*this, &Editor::set_selection_from_loop)));
+	select_items.push_back (MenuElem (_("Set range to punch range"), mem_fun(*this, &Editor::set_selection_from_punch)));
+	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select All After Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
 	select_items.push_back (MenuElem (_("Select All Before Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
 	select_items.push_back (MenuElem (_("Select All After Playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
@@ -1958,69 +2034,97 @@ Editor::add_bus_or_audio_track_context_items (Menu_Helpers::MenuList& edit_items
 	Menu *cutnpaste_menu = manage (new Menu);
 	MenuList& cutnpaste_items = cutnpaste_menu->items();
 	cutnpaste_menu->set_name ("ArdourContextMenu");
- 	
+	
 	cutnpaste_items.push_back (MenuElem (_("Cut"), mem_fun(*this, &Editor::cut)));
 	cutnpaste_items.push_back (MenuElem (_("Copy"), mem_fun(*this, &Editor::copy)));
 	cutnpaste_items.push_back (MenuElem (_("Paste"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
 
-	add_item_with_sensitivity (cutnpaste_items, MenuElem (_("Cut"), mem_fun(*this, &Editor::cut)), can_cut_copy ());
-	
-	add_item_with_sensitivity (cutnpaste_items, MenuElem (_("Copy"), mem_fun(*this, &Editor::copy)), can_cut_copy ());
-	
-	if (n_audio_tracks) {
-		cutnpaste_items.push_back (MenuElem (_("Paste at edit cursor"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
-		cutnpaste_items.push_back (MenuElem (_("Paste at mouse"), mem_fun(*this, &Editor::mouse_paste)));
-		
-		cutnpaste_items.push_back (SeparatorElem());
-		
-		cutnpaste_items.push_back (MenuElem (_("Align"), bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint)));
-		cutnpaste_items.push_back (MenuElem (_("Align relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint)));
-		cutnpaste_items.push_back (MenuElem (_("Insert chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f)));
-	} else {
-		cutnpaste_items.push_back (MenuElem (_("Paste"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
-	}
+	cutnpaste_items.push_back (SeparatorElem());
 
-	edit_items.push_back (SeparatorElem());
+	cutnpaste_items.push_back (MenuElem (_("Align"), bind (mem_fun(*this, &Editor::align), ARDOUR::SyncPoint)));
+	cutnpaste_items.push_back (MenuElem (_("Align Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint)));
+
+	cutnpaste_items.push_back (SeparatorElem());
+
+	cutnpaste_items.push_back (MenuElem (_("Insert chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f)));
+
 	edit_items.push_back (MenuElem (_("Edit"), *cutnpaste_menu));
 
-	if (n_audio_tracks) {
-
-		Menu *track_menu = manage (new Menu);
-		MenuList& track_items = track_menu->items();
-		track_menu->set_name ("ArdourContextMenu");
-		
-		/* Adding new material */
+	/* Adding new material */
 	
-		add_item_with_sensitivity (track_items, MenuElem (_("Insert Selected Region"), bind (mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)), n_audio_tracks == 1);
-		add_item_with_sensitivity (track_items, MenuElem (_("Insert Existing Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)), n_audio_tracks == 1);
-		
-		/* Nudge */
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Insert Selected Region"), bind (mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)));
+	edit_items.push_back (MenuElem (_("Insert Existing Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
 
-		Menu *nudge_menu = manage (new Menu());
-		MenuList& nudge_items = nudge_menu->items();
-		nudge_menu->set_name ("ArdourContextMenu");
+	/* Nudge track */
 
-		str = selection->tracks.size() == 1 ? _("Nudge track after edit cursor forward") : _("Nudge tracks after edit cursor forward");
-		
-		nudge_items.push_back (MenuElem (str, (bind (mem_fun(*this, &Editor::nudge_selected_tracks), true, true))));
+	Menu *nudge_menu = manage (new Menu());
+	MenuList& nudge_items = nudge_menu->items();
+	nudge_menu->set_name ("ArdourContextMenu");
+	
+	edit_items.push_back (SeparatorElem());
+	nudge_items.push_back (MenuElem (_("Nudge entire track fwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, true))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point fwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge entire track bwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point bwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, false))));
 
-		str = selection->tracks.size() == 1 ? _("Nudge track backward") : _("Nudge tracks backward");
-		
-		nudge_items.push_back (MenuElem (str, (bind (mem_fun(*this, &Editor::nudge_selected_tracks), false, false))));
+	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
+}
 
-		str = selection->tracks.size() == 1 ? _("Nudge track after edit cursor backward") : _("Nudge tracks after edit cursor backward");
-		
-		nudge_items.push_back (MenuElem (str, (bind (mem_fun(*this, &Editor::nudge_selected_tracks), true, false))));
-		
-		track_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
+void
+Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
+{
+	using namespace Menu_Helpers;
 
-		/* Freeze */
-		track_items.push_back (MenuElem (_("Freeze"), mem_fun(*this, &Editor::freeze_routes)));
-		track_items.push_back (MenuElem (_("Unfreeze"), mem_fun(*this, &Editor::unfreeze_routes)));
+	/* Playback */
 
-		str = selection->tracks.size() == 1 ? _("Track") : _("Tracks");
-		edit_items.push_back (MenuElem (str, *track_menu));
-	}
+	Menu *play_menu = manage (new Menu);
+	MenuList& play_items = play_menu->items();
+	play_menu->set_name ("ArdourContextMenu");
+	
+	play_items.push_back (MenuElem (_("Play from edit point"), mem_fun(*this, &Editor::play_from_edit_point)));
+	play_items.push_back (MenuElem (_("Play from start"), mem_fun(*this, &Editor::play_from_start)));
+	edit_items.push_back (MenuElem (_("Play"), *play_menu));
+
+	/* Selection */
+
+	Menu *select_menu = manage (new Menu);
+	MenuList& select_items = select_menu->items();
+	select_menu->set_name ("ArdourContextMenu");
+	
+	select_items.push_back (MenuElem (_("Select All in track"), bind (mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All"), bind (mem_fun(*this, &Editor::select_all), Selection::Set)));
+	select_items.push_back (MenuElem (_("Invert selection in track"), mem_fun(*this, &Editor::invert_selection_in_track)));
+	select_items.push_back (MenuElem (_("Invert selection"), mem_fun(*this, &Editor::invert_selection)));
+	select_items.push_back (SeparatorElem());
+	select_items.push_back (MenuElem (_("Select all after edit point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
+	select_items.push_back (MenuElem (_("Select all before edit point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
+	select_items.push_back (MenuElem (_("Select all after playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
+	select_items.push_back (MenuElem (_("Select all before playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
+
+	edit_items.push_back (MenuElem (_("Select"), *select_menu));
+
+	/* Cut-n-Paste */
+
+	Menu *cutnpaste_menu = manage (new Menu);
+	MenuList& cutnpaste_items = cutnpaste_menu->items();
+	cutnpaste_menu->set_name ("ArdourContextMenu");
+	
+	cutnpaste_items.push_back (MenuElem (_("Cut"), mem_fun(*this, &Editor::cut)));
+	cutnpaste_items.push_back (MenuElem (_("Copy"), mem_fun(*this, &Editor::copy)));
+	cutnpaste_items.push_back (MenuElem (_("Paste"), bind (mem_fun(*this, &Editor::paste), 1.0f)));
+
+	Menu *nudge_menu = manage (new Menu());
+	MenuList& nudge_items = nudge_menu->items();
+	nudge_menu->set_name ("ArdourContextMenu");
+	
+	edit_items.push_back (SeparatorElem());
+	nudge_items.push_back (MenuElem (_("Nudge entire track fwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, true))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point fwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge entire track bwd"), (bind (mem_fun(*this, &Editor::nudge_track), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge track after edit point bwd"), (bind (mem_fun(*this, &Editor::nudge_track), true, false))));
+
+	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
 
 /* CURSOR SETTING AND MARKS AND STUFF */

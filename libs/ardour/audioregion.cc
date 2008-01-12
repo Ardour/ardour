@@ -636,7 +636,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 					set_fade_out_active (false);
 				}
 			}
-		
+
 		} 
 	}
 

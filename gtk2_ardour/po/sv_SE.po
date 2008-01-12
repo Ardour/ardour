@@ -6854,7 +6854,7 @@ msgstr "som nya bandspår"
 
 #: gtk2_ardour/sfdb_ui.cc:109
 msgid "Auto-play"
-msgstr "Spela automatiskt"
+msgstr "Spela autom."
 
 #: gtk2_ardour/sfdb_ui.cc:994 gtk2_ardour/sfdb_ui.cc:1129
 msgid "use file timestamp"
@@ -7062,3 +7062,39 @@ msgstr "Bra"
 #: gtk2_ardour/sfdb_ui.cc:1069 gtk2_ardour/sfdb_ui.cc:1149
 msgid "Quick"
 msgstr "Snabb"
+
+#: gtk2_ardour/editor_timefx.cc:74
+msgid "Strict Linear"
+msgstr "Strikt linjär"
+
+#: gtk2_ardour/editor_timefx.cc:84
+msgid "Time Stretch"
+msgstr "Förläng/förkorta"
+
+#: gtk2_ardour/editor.cc:156
+msgid "Mushy"
+msgstr "Mossig"
+
+#: gtk2_ardour/editor.cc:157
+msgid "Smooth"
+msgstr "Mjuk"
+
+#: gtk2_ardour/editor.cc:158
+msgid "Balanced multitimbral mixture"
+msgstr "Balanserad flerröstig mix"
+
+#: gtk2_ardour/editor.cc:159
+msgid "Unpitched percussion with stable notes"
+msgstr "Ej tonhöjdsändrat slagverk med stabila noter"
+
+#: gtk2_ardour/editor.cc:160
+msgid "Crisp monophonic instrumental"
+msgstr "Skarpt monofoniskt"
+
+#: gtk2_ardour/editor.cc:161
+msgid "Unpitched solo percussion"
+msgstr "EJ tonhöjdsändrat soloslagverk"
+
+#: gtk2_ardour/editor_timefx.cc:73
+msgid "Contents:"
+msgstr "Innehåll"

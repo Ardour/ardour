@@ -25,7 +25,6 @@
 
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
-#include <ardour/plugin_state.h>
 #include <ardour/types.h>
 #include <ardour/processor.h>
 #include <ardour/automation_event.h>

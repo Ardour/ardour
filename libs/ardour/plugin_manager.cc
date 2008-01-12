@@ -328,7 +328,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	}
 
 	pattern.subject = matches1->object;
-	pattern.predicate = (char*)LADSPA_BASE "hasLabel";
+	pattern.predicate = (char*)(LADSPA_BASE "hasLabel");
 	pattern.object = 0;
 	pattern.object_type = lrdf_literal;
 

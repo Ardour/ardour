@@ -273,7 +273,6 @@ Session::Session (AudioEngine &eng,
 	
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-
 	Config->ParameterChanged.connect (mem_fun (*this, &Session::config_changed));
 }
 
@@ -711,7 +710,7 @@ Session::when_engine_running ()
 
 	osc->set_session (*this);
 #endif
-
+    
 }
 
 void

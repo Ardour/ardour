@@ -311,6 +311,8 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 		
 		Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 
+		Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
+
 		if (strip->width_owner() != strip) {
 			strip->set_width (_strip_width, this);
 		}

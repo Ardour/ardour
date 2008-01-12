@@ -335,51 +335,27 @@ Editor::track_canvas_size_allocated ()
 	reset_scrolling_region ();
 
 	if (playhead_cursor) playhead_cursor->set_length (canvas_height);
+
+	double y1 = vertical_adjustment.get_value ();
  	
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->set_line_length (full_canvas_height);
+		(*x)->set_line_vpos (y1, canvas_height);
 	}
 
-	if (range_marker_drag_rect) {
-		range_marker_drag_rect->property_y1() = 0.0;
-		range_marker_drag_rect->property_y2() = canvas_height;
-	}
-
-	if (transport_loop_range_rect) {
-		transport_loop_range_rect->property_y1() = 0.0;
-		transport_loop_range_rect->property_y2() = canvas_height;
-	}
-
-	if (transport_punch_range_rect) {
-		transport_punch_range_rect->property_y1() = 0.0;
-		transport_punch_range_rect->property_y2() = canvas_height;
-	}
-
-	if (transport_punchin_line) {
-		transport_punchin_line->property_y1() = 0.0;
-		transport_punchin_line->property_y2() = canvas_height;
-	}
-
-	if (transport_punchout_line) {
-		transport_punchout_line->property_y1() = 0.0;
-		transport_punchout_line->property_y2() = canvas_height;
-	}
-	compute_fixed_ruler_scale ();
- 	
- 	range_marker_drag_rect->property_y2() = full_canvas_height;
- 	transport_loop_range_rect->property_y2() = full_canvas_height;
- 	transport_punch_range_rect->property_y2() = full_canvas_height;
- 	transport_punchin_line->property_y2() = full_canvas_height;
- 	transport_punchout_line->property_y2() = full_canvas_height;
+	range_marker_drag_rect->property_y1() = 0.0;
+	range_marker_drag_rect->property_y2() = canvas_height;
+	transport_loop_range_rect->property_y1() = 0.0;
+	transport_loop_range_rect->property_y2() = canvas_height;
+	transport_punch_range_rect->property_y1() = 0.0;
+	transport_punch_range_rect->property_y2() = canvas_height;
+	transport_punchin_line->property_y1() = 0.0;
+	transport_punchin_line->property_y2() = canvas_height;
+	transport_punchout_line->property_y1() = 0.0;
+	transport_punchout_line->property_y2() = canvas_height;
 	
 	update_fixed_rulers();
 	redisplay_tempo (true);
 
-	if (logo_item) {
-		// logo_item->property_height() = full_canvas_height;
-		// logo_item->property_width() = canvas_width;
-	}
-	
 	Resized (); /* EMIT_SIGNAL */
 
 	return false;
@@ -723,6 +699,38 @@ Editor::left_track_canvas (GdkEventCrossing *ev)
 	return FALSE;
 }
 
+void
+Editor::tie_vertical_scrolling ()
+{
+	double y1 = vertical_adjustment.get_value();
+
+	playhead_cursor->set_y_axis (y1);
+
+ 	range_marker_drag_rect->property_y1() = y1;
+ 	range_marker_drag_rect->property_y2() = y1 + canvas_height;
+ 	transport_loop_range_rect->property_y1() = y1;
+ 	transport_loop_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_punch_range_rect->property_y1() = y1;
+ 	transport_punch_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_punchin_line->property_y1() = y1;
+ 	transport_punchin_line->property_y2() = y1 + canvas_height;
+ 	transport_punchout_line->property_y1() = y1;
+ 	transport_punchout_line->property_y2() = y1 + canvas_height;
+
+	if (!selection->markers.empty()) {
+		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {		
+			(*x)->set_line_vpos (y1, canvas_height);
+		}
+	}
+
+	if (logo_item) {
+		logo_item->property_y() = y1;
+	}
+
+	/* this will do an immediate redraw */
+
+	controls_layout.get_vadjustment()->set_value (y1);
+}
 
 void 
 Editor::canvas_horizontally_scrolled ()

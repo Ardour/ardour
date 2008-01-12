@@ -2595,6 +2595,9 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 	sort_track_selection (&tmptracks);
 
+
+
+
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
 		RouteTimeAxisView* rtv;
@@ -3298,16 +3301,14 @@ Editor::trim_region_from_edit_point ()
 	commit_reversible_command ();
 }
 
-/** Unfreeze selected routes */
 void
-Editor::unfreeze_routes ()
+Editor::unfreeze_route ()
 {
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*i);
-		if (atv && atv->is_audio_track()) {
-			atv->audio_track()->unfreeze ();
-		}
+	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
+		return;
 	}
+	
+	clicked_routeview->audio_track()->unfreeze ();
 }
 
 void*
@@ -3320,15 +3321,7 @@ Editor::_freeze_thread (void* arg)
 void*
 Editor::freeze_thread ()
 {
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*i);
-		if (atv && atv->is_audio_track()) {
-			atv->audio_track()->freeze (*current_interthread_info);
-		}
-	}
-
-	current_interthread_info->done = true;
-	
+	clicked_routeview->audio_track()->freeze (*current_interthread_info);
 	return 0;
 }
 
@@ -3339,10 +3332,13 @@ Editor::freeze_progress_timeout (void *arg)
 	return !(current_interthread_info->done || current_interthread_info->cancel);
 }
 
-/** Freeze selected routes */
 void
-Editor::freeze_routes ()
+Editor::freeze_route ()
 {
+	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
+		return;
+	}
+	
 	InterThreadInfo itt;
 
 	if (interthread_progress_window == 0) {
@@ -3991,7 +3987,7 @@ Editor::clear_playlist (boost::shared_ptr<Playlist> playlist)
 }
 
 void
-Editor::nudge_selected_tracks (bool use_edit, bool forwards)
+Editor::nudge_track (bool use_edit, bool forwards)
 {
 	boost::shared_ptr<Playlist> playlist; 
 	nframes_t distance;
@@ -4058,7 +4054,7 @@ Editor::remove_last_capture ()
 }
 
 void
-Editor::normalize_regions ()
+Editor::normalize_region ()
 {
 	if (!session) {
 		return;
@@ -4088,7 +4084,7 @@ Editor::normalize_regions ()
 
 
 void
-Editor::denormalize_regions ()
+Editor::denormalize_region ()
 {
 	if (!session) {
 		return;
@@ -4114,7 +4110,7 @@ Editor::denormalize_regions ()
 
 
 void
-Editor::reverse_regions ()
+Editor::reverse_region ()
 {
 	if (!session) {
 		return;
@@ -4126,7 +4122,7 @@ Editor::reverse_regions ()
 
 
 void
-Editor::quantize_regions ()
+Editor::quantize_region ()
 {
 	if (!session) {
 		return;
@@ -4270,10 +4266,7 @@ Editor::toggle_gain_envelope_visibility ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_envelope_visible_item->get_active();
-			if (x != arv->envelope_visible()) {
-				arv->set_envelope_visible (x);
-			}
+			arv->set_envelope_visible (!arv->envelope_visible());
 		}
 	}
 }
@@ -4284,28 +4277,7 @@ Editor::toggle_gain_envelope_active ()
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			bool x = region_envelope_active_item->get_active();
-			if (x != arv->audio_region()->envelope_active()) {
-				arv->audio_region()->set_envelope_active (x);
-			}
-		}
-	}
-}
-
-/** Set the position-locked state of all selected regions to a particular value.
- * @param yn true to make locked, false to make unlocked.
- */
-void
-Editor::toggle_region_position_lock ()
-{
-	bool x = region_lock_position_item->get_active();
-
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			if (x != arv->audio_region()->locked()) {
-				arv->audio_region()->set_position_locked (x);
-			}
+			arv->audio_region()->set_envelope_active (!arv->audio_region()->envelope_active());
 		}
 	}
 }
@@ -4313,45 +4285,24 @@ Editor::toggle_region_position_lock ()
 void
 Editor::toggle_region_lock ()
 {
-	bool x = region_lock_item->get_active();
-
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			if (x != arv->audio_region()->locked()) {
-				arv->audio_region()->set_locked (x);
-			}
-		}
+		(*i)->region()->set_locked (!(*i)->region()->locked());
 	}
 }
 
 void
 Editor::toggle_region_mute ()
 {
-	bool x = region_mute_item->get_active();
-
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			if (x != arv->audio_region()->muted()) {
-				arv->audio_region()->set_muted (x);
-			}
-		}
+		(*i)->region()->set_muted (!(*i)->region()->muted());
 	}
 }
 
 void
 Editor::toggle_region_opaque ()
 {
-	bool x = region_opaque_item->get_active();
-
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv) {
-			if (x != arv->audio_region()->opaque()) {
-				arv->audio_region()->set_opaque (x);
-			}
-		}
+		(*i)->region()->set_opaque (!(*i)->region()->opaque());
 	}
 }
 

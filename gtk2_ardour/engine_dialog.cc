@@ -4,6 +4,7 @@
 #include <map>
 
 #include <glibmm.h>
+#include <gtkmm/messagedialog.h>
 #include <pbd/xml++.h>
 
 #ifdef __APPLE__
@@ -427,11 +428,11 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("netjack");
 	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
-		cmd.push_back ("firewire");
+		cmd.push_back ("ffado");
 	} else if ( driver == X_("Dummy")) {
       using_dummy = true;
       cmd.push_back ("dummy");
-   }
+	}
 
 	/* driver arguments */
 
@@ -621,9 +622,28 @@ EngineControl::enumerate_coreaudio_devices ()
 			// Look for the CoreAudio device name...
 			char coreDeviceName[256];
 			size_t nameSize;
+
 			for (int i = 0; i < numCoreDevices; i++) {
 
 				nameSize = sizeof (coreDeviceName);
+
+				/* enforce duplex devices only */
+
+				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
+								 0, true, kAudioDevicePropertyStreams,
+								 &outSize, &isWritable);
+
+				if (err != noErr || outSize == 0) {
+					continue;
+				}
+
+				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
+								 0, false, kAudioDevicePropertyStreams,
+								 &outSize, &isWritable);
+
+				if (err != noErr || outSize == 0) {
+					continue;
+				}
 
 				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
 								 0, true, kAudioDevicePropertyDeviceName,
@@ -647,6 +667,26 @@ EngineControl::enumerate_coreaudio_devices ()
 			}
 		}
 		delete [] coreDeviceIDs;
+	}
+
+	if (devs.size() == 0) {
+		MessageDialog msg (_("\
+You do not have any audio devices capable of\n\
+simultaneous playback and recording.\n\n\
+Please use Applications -> Utilities -> Audio MIDI Setup\n\
+to create an \"aggregrate\" device, or install a suitable\n\
+audio interface.\n\n\
+Please send email to Apple and ask them why new Macs\n\
+have no duplex audio device.\n\n\
+Alternatively, if you really want just playback\n\
+or recording but not both, start JACK before running\n\
+Ardour and choose the relevant device then."
+					   ), 
+				   true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+		msg.set_title (_("No suitable audio devices"));
+		msg.set_position (Gtk::WIN_POS_MOUSE);
+		msg.run ();
+		exit (1);
 	}
 
 	return devs;
@@ -869,7 +909,7 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	std::map<string,int> un;
 	
 	path = getenv ("PATH");
-	
+
 	jack_servers = scanner (path, jack_server_filter, 0, false, true);
 	
 	vector<string *>::iterator iter;

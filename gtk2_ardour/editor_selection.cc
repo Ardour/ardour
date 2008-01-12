@@ -713,6 +713,37 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 	commit_reversible_command () ;
 }
 
+bool
+Editor::set_selected_regionview_from_map_event (GdkEventAny* ev, StreamView* sv, boost::weak_ptr<Region> weak_r)
+{
+	RegionView* rv;
+	boost::shared_ptr<Region> r (weak_r.lock());
+
+	if (!r) {
+		return true;
+	}
+
+	if ((rv = sv->find_view (r)) == 0) {
+		return true;
+	}
+
+	/* don't reset the selection if its something other than 
+	   a single other region.
+	*/
+
+	if (selection->regions.size() > 1) {
+		return true;
+	}
+	
+	begin_reversible_command (_("set selected regions"));
+	
+	selection->set (rv);
+
+	commit_reversible_command () ;
+
+	return true;
+}
+
 void
 Editor::track_selection_changed ()
 {
@@ -776,17 +807,16 @@ Editor::point_selection_changed ()
 	}
 }
 
-/** Select everything in the selected tracks
- * @param Selection operation to apply.
- */
 void
-Editor::select_all_in_selected_tracks (Selection::Operation op)
+Editor::select_all_in_track (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		(*i)->get_selectables (0, max_frames, 0, DBL_MAX, touched);
+	if (!clicked_routeview) {
+		return;
 	}
+	
+	clicked_routeview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
 
 	switch (op) {
 	case Selection::Toggle:
@@ -832,17 +862,16 @@ Editor::select_all (Selection::Operation op)
 	}
 	commit_reversible_command ();
 }
-
-/** Invert the selection in the selected tracks */
 void
-Editor::invert_selection_in_selected_tracks ()
+Editor::invert_selection_in_track ()
 {
 	list<Selectable *> touched;
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		(*i)->get_inverted_selectables (*selection, touched);
+	if (!clicked_routeview) {
+		return;
 	}
 	
+	clicked_routeview->get_inverted_selectables (*selection, touched);
 	selection->set (touched);
 }
 
@@ -926,7 +955,7 @@ Editor::select_all_within (nframes_t start, nframes_t end, double top, double bo
 }
 
 void
-Editor::set_selection_from_audio_region ()
+Editor::set_selection_from_region ()
 {
 	if (selection->regions.empty()) {
 		return;

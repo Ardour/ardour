@@ -20,6 +20,8 @@
 #include "i18n.h"
 #include "new_session_dialog.h"
 
+#include <pbd/error.h>
+
 #include <ardour/recent_sessions.h>
 #include <ardour/session_state_utils.h>
 #include <ardour/template_utils.h>
@@ -38,8 +40,8 @@
 #include <gtkmm2ext/window_title.h>
 
 using namespace Gtkmm2ext;
-using namespace ARDOUR;
 using namespace PBD;
+using namespace ARDOUR;
 
 #include "opts.h"
 #include "utils.h"
@@ -526,7 +528,49 @@ NewSessionDialog::set_session_name (const Glib::ustring& name)
 void
 NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 {
-	m_folder->set_current_folder (dir);
+	Glib::ustring realdir = dir;
+	char* res;
+
+	/* this little tangled mess is a result of 4 things:
+
+	    1) GtkFileChooser vomits when given a non-absolute directory
+                   argument to set_current_folder()
+            2) canonicalize_file_name() doesn't exist on OS X
+	    3) linux man page for realpath() says "do not use this function"
+	    4) canonicalize_file_name() & realpath() have entirely
+                   different semantics on OS X and Linux when given
+		   a non-existent path.
+		   
+	   as result of all this, we take two distinct pathways through the code.
+	*/
+
+
+#ifdef __APPLE__
+
+	char buf[PATH_MAX];
+
+	if((res = realpath (dir.c_str(), buf)) != 0) {
+		if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+			realdir = Glib::path_get_dirname (realdir);
+		}
+		m_folder->set_current_folder (realdir);
+	}
+
+	
+#else 
+	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+		realdir = Glib::path_get_dirname (realdir);
+		cerr << "didn't exist, use " << realdir << endl;
+	}
+
+	if ((res = canonicalize_file_name (realdir.c_str())) != 0) {
+		cerr << "canonical, use " << res << endl;
+		m_folder->set_current_folder (res);
+		free (res);
+	}
+	
+#endif
+
 }
 
 std::string
@@ -547,40 +591,54 @@ NewSessionDialog::session_name() const
 	}	  
 	*/
 
-	int page = m_notebook->get_current_page();
-
-	if (page == 0 || page == 2) {
+	switch (which_page()) {
+	case NewPage:
+	case EnginePage:
 		/* new or audio setup pages */
 	        return Glib::filename_from_utf8(m_name->get_text());
-	} else {
-		if (m_treeview->get_selection()->count_selected_rows() == 0) {
-		        return Glib::filename_from_utf8(str);
-		}
-		Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
-		return (*i)[recent_columns.visible_name];
+	default:
+		break;
+	} 
+
+	if (m_treeview->get_selection()->count_selected_rows() == 0) {
+		return Glib::filename_from_utf8(str);
 	}
+	Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
+	return (*i)[recent_columns.visible_name];
 }
 
 std::string
 NewSessionDialog::session_folder() const
 {
-	if (m_notebook->get_current_page() == 0) {
+	switch (which_page()) {
+	case NewPage:
 	        return Glib::filename_from_utf8(m_folder->get_filename());
-	} else {
-	       
-		if (m_treeview->get_selection()->count_selected_rows() == 0) {
-			const string filename(Glib::filename_from_utf8(m_open_filechooser->get_filename()));
-			return Glib::path_get_dirname(filename);
+		
+	case EnginePage:
+		if (page_set == EnginePage) {
+			/* just engine page, nothing else : use m_folder since it should be set */
+			return Glib::filename_from_utf8(m_folder->get_filename());
 		}
-		Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
-		return (*i)[recent_columns.fullpath];
+		break;
+
+	default:
+		break;
 	}
+	       
+	if (m_treeview->get_selection()->count_selected_rows() == 0) {
+		const string filename(Glib::filename_from_utf8(m_open_filechooser->get_filename()));
+		return Glib::path_get_dirname(filename);
+	}
+
+	Gtk::TreeModel::iterator i = m_treeview->get_selection()->get_selected();
+	return (*i)[recent_columns.fullpath];
 }
 
 bool
 NewSessionDialog::use_session_template() const
 {
-	if(m_template->get_filename().empty() && (m_notebook->get_current_page() == 0)) return false;
+	if (m_template->get_filename().empty() && (which_page() == NewPage))
+		return false;
 	return true;
 }
 
@@ -663,13 +721,13 @@ NewSessionDialog::connect_outs_to_physical() const
 }
 
 int
-NewSessionDialog::get_current_page() const
+NewSessionDialog::get_current_page()
 {
 	return m_notebook->get_current_page();
 }
 
 NewSessionDialog::Pages
-NewSessionDialog::which_page ()
+NewSessionDialog::which_page () const
 {
 	int num = m_notebook->get_current_page();
 
@@ -755,7 +813,6 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		m_okbutton->set_label(_("Open"));
 		m_okbutton->set_image (*(manage (new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON))));
 		set_response_sensitive (Gtk::RESPONSE_NONE, false);
-		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON)));
 		if (m_treeview->get_selection()->count_selected_rows() == 0) {
 			set_response_sensitive (Gtk::RESPONSE_OK, false);
 		} else {
@@ -772,8 +829,7 @@ NewSessionDialog::notebook_page_changed (GtkNotebookPage* np, uint pagenum)
 		break;
 
 	default:
-		m_okbutton->set_label(_("New"));
-		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
+		on_new_session_page = true;
 		m_okbutton->set_label(_("New"));
 		m_okbutton->set_image (*(new Gtk::Image (Gtk::Stock::NEW, Gtk::ICON_SIZE_BUTTON)));
 		if (m_name->get_text() == "") {
@@ -893,7 +949,7 @@ NewSessionDialog::monitor_bus_button_clicked ()
 void
 NewSessionDialog::reset_template()
 {
-	m_template->set_filename("");
+	m_template->unselect_all ();
 }
 
 void

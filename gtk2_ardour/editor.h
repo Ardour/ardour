@@ -239,9 +239,9 @@ class Editor : public PublicEditor
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
-	void select_all_in_selected_tracks (Selection::Operation op);
+	void select_all_in_track (Selection::Operation op);
 	void select_all (Selection::Operation op);
-	void invert_selection_in_selected_tracks ();
+	void invert_selection_in_track ();
 	void invert_selection ();
 	void deselect_all ();
 
@@ -511,16 +511,30 @@ class Editor : public PublicEditor
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
+	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 	void collect_and_select_new_region_view (RegionView *);
+	
+	Gtk::Menu track_context_menu;
+	Gtk::Menu track_region_context_menu;
+	Gtk::Menu track_selection_context_menu;
+	Gtk::Menu track_crossfade_context_menu;
 
 	Gtk::MenuItem* region_edit_menu_split_item;
 	Gtk::MenuItem* region_edit_menu_split_multichannel_item;
+	Gtk::Menu * track_region_edit_playlist_menu;
+	Gtk::Menu * track_edit_playlist_submenu;
+	Gtk::Menu * track_selection_edit_playlist_submenu;
 
-	void popup_track_context_menu (int, int, nframes_t);
+	void popup_track_context_menu (int, int, ItemType, bool, nframes_t);
 	Gtk::Menu* build_track_context_menu (nframes_t);
-	void add_bus_or_audio_track_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (Gtk::Menu_Helpers::MenuList&);
+	Gtk::Menu* build_track_bus_context_menu (nframes_t);
+	Gtk::Menu* build_track_region_context_menu (nframes_t frame);
+	Gtk::Menu* build_track_crossfade_context_menu (nframes_t);
+	Gtk::Menu* build_track_selection_context_menu (nframes_t);
+	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
+	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
+	void add_region_context_items (StreamView*, boost::shared_ptr<ARDOUR::Region>, Gtk::Menu_Helpers::MenuList&);
 	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
@@ -1031,10 +1045,10 @@ class Editor : public PublicEditor
 	void audition_playlist_region_standalone (boost::shared_ptr<ARDOUR::Region>);
 	void audition_playlist_region_via_route (boost::shared_ptr<ARDOUR::Region>, ARDOUR::Route&);
 	void split_multichannel_region();
-	void reverse_regions ();
-	void normalize_regions ();
-	void denormalize_regions ();
-	void quantize_regions ();
+	void reverse_region ();
+	void normalize_region ();
+	void denormalize_region ();
+	void quantize_region ();
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
@@ -1176,7 +1190,7 @@ class Editor : public PublicEditor
 	void set_selection_from_range (ARDOUR::Location&);
 	void set_selection_from_punch ();
 	void set_selection_from_loop ();
-	void set_selection_from_audio_region ();
+	void set_selection_from_region ();
 
 	void add_location_mark (nframes64_t where);
 	void add_location_from_audio_region ();
@@ -1901,8 +1915,8 @@ class Editor : public PublicEditor
 	static void* _freeze_thread (void*);
 	void* freeze_thread ();
 
-	void freeze_routes ();
-	void unfreeze_routes ();
+	void freeze_route ();
+	void unfreeze_route ();
 
 	/* edit-group solo + mute */
 
@@ -1990,7 +2004,7 @@ class Editor : public PublicEditor
 
 	/* nudging tracks */
 
-	void nudge_selected_tracks (bool use_edit_cursor, bool forwards);
+	void nudge_track (bool use_edit_point, bool forwards);
 
 	/* xfades */
 
@@ -2101,13 +2115,6 @@ class Editor : public PublicEditor
 	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();
 
-	Gtk::CheckMenuItem* region_envelope_visible_item;
-	Gtk::CheckMenuItem* region_envelope_active_item;
-	Gtk::CheckMenuItem* region_mute_item;
-	Gtk::CheckMenuItem* region_lock_item;
-	Gtk::CheckMenuItem* region_lock_position_item;
-	Gtk::CheckMenuItem* region_opaque_item;
-	
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 

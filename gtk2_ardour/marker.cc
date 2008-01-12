@@ -25,6 +25,7 @@
 #include "utils.h"
 #include "canvas_impl.h"
 #include "ardour_ui.h"
+#include "simpleline.h"
 
 #include "i18n.h"
 
@@ -269,7 +270,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	}
 
 	line = 0;
-	line_points = 0;
 
 }
 
@@ -285,7 +285,6 @@ Marker::~Marker ()
 
 	if (line) {
 		delete line;
-		delete line_points;
 	}
 }
 
@@ -295,35 +294,28 @@ void Marker::reparent(ArdourCanvas::Group & parent)
 	_parent = &parent;
 }
 
+
 void
-Marker::set_line_length (double len)
+Marker::set_line_vpos (double pos, double height)
 {
 	if (line) {
-		line_points->back().set_y (len);
-		line->property_points() = *line_points;
+		line->property_y1() = pos;
+		line->property_y2() = pos + height;
 	}
 }
 
 void
-Marker::add_line (ArdourCanvas::Group* group, double initial_height)
+Marker::add_line (ArdourCanvas::Group* group, double y_origin, double initial_height)
 {
 	if (!line) {
 
-		line_points = new ArdourCanvas::Points ();
-		line_points->push_back (Gnome::Art::Point (unit_position + shift, 0.0));
-		line_points->push_back (Gnome::Art::Point (unit_position + shift, initial_height));			
-		
-		line = new ArdourCanvas::Line (*group);
-		line->property_width_pixels() = 1;
-		line->property_points() = *line_points;
-		line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
-#if 0
-		line->property_first_arrowhead() = TRUE;
-		line->property_last_arrowhead() = TRUE;
-		line->property_arrow_shape_a() = 11.0;
-		line->property_arrow_shape_b() = 0.0;
-		line->property_arrow_shape_c() = 9.0;
-#endif
+		line = new ArdourCanvas::SimpleLine (*group);
+		line->property_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
+		line->property_x1() = unit_position + shift;
+		line->property_y1() = y_origin;
+		line->property_x2() = unit_position + shift;
+		line->property_y2() = y_origin + initial_height;
+
 		line->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 	}
 
@@ -372,9 +364,8 @@ Marker::set_position (nframes_t frame)
 	unit_position = new_unit_position;
 
 	if (line) {
-		(*line_points)[0].set_x (unit_position + shift);
-		(*line_points)[1].set_x (unit_position + shift);
-		line->property_points() = *line_points;
+		line->property_x1() = unit_position + shift;
+		line->property_x2() = unit_position + shift;
 	}
 }
 

@@ -1341,7 +1341,6 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 	}
 
 	catch (...) {
-		cerr << "About to complain about JACK\n";
 		MessageDialog msg (*editor, 
 				   _("There are insufficient JACK ports available\n\
 to create a new track or bus.\n\
@@ -2270,7 +2269,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				if (session_name[0] == '/' || 
 				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
-					cerr << "here\n";
+
 					if (load_session (Glib::path_get_dirname (session_name), session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;

@@ -510,15 +510,3 @@ VSTPluginInfo::load (Session& session)
 		return PluginPtr ((Plugin*) 0);
 	}
 }
-
-void
-VSTPlugin::store_state (ARDOUR::PluginState& s)
-{
-
-}
-
-void
-VSTPlugin::restore_state (ARDOUR::PluginState& s)
-{
-
-}

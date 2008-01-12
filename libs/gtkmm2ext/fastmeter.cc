@@ -97,6 +97,8 @@ Glib::RefPtr<Gdk::Pixbuf> FastMeter::request_vertical_meter(int width, int heigh
 		height = min_v_pixbuf_size;
 	if (height > max_v_pixbuf_size)
 		height = max_v_pixbuf_size;
+	
+	//int index = height - 1;
 
 	//if (v_pixbuf_cache == 0) {
 	//	v_pixbuf_cache = (Glib::RefPtr<Gdk::Pixbuf>*) malloc(sizeof(Glib::RefPtr<Gdk::Pixbuf>) * max_v_pixbuf_size);
@@ -363,7 +365,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
 
-    if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
 		get_window()->draw_rectangle (get_style()->get_black_gc(), true, 
 					      intersection.x, intersection.y,
 					      intersection.width, intersection.height);
@@ -408,7 +410,7 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	background.width  = pixwidth - right_of_meter;
 	background.height = pixrect.height;
 
-    if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
 		get_window()->draw_rectangle (get_style()->get_black_gc(), true, 
 					      intersection.x + right_of_meter, intersection.y,
 					      intersection.width, intersection.height);
@@ -419,7 +421,7 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		get_window()->draw_pixbuf(get_style()->get_fg_gc(get_state()), pixbuf, 
 					  intersection.x, intersection.y,
 					  intersection.x, intersection.y,
-					  intersection.width, intersection.height,
+					  pixrect.width, intersection.height,
 					  Gdk::RGB_DITHER_NONE, 0, 0);
 	}
 

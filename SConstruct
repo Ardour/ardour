@@ -231,6 +231,7 @@ def i18n (buildenv, sources, installenv):
         buildenv.PoBuild(po_file, ['po/'+po_file, potfile])
         mo_file = po_file.replace (".po", ".mo")
         installenv.Alias ('install', buildenv.MoBuild (mo_file, po_file))
+        installenv.Alias ('msgupdate', buildenv.MoBuild (mo_file, po_file))
     
     for lang in languages:
         modir = (os.path.join (install_prefix, 'share/locale/' + lang + '/LC_MESSAGES/'))
@@ -363,7 +364,7 @@ def distcopy (target, source, env):
     return p.close ()
 
 def tarballer (target, source, env):
-    cmd = 'tar -jcf ' + str (target[0]) +  ' ' + str(source[0]) + "  --exclude '*~'"
+    cmd = 'tar -jcf ' + str (target[0]) +  ' ' + str(source[0]) + "  --exclude '*~'" + " --exclude .svn --exclude '.svn/*'"
     print 'running ', cmd, ' ... '
     p = os.popen (cmd)
     return p.close ()
@@ -766,34 +767,32 @@ def prep_libcheck(topenv, libinfo):
 
 prep_libcheck(env, env)
 
-#
-# check for VAMP and rubberband (currently optional)
-#
 
-libraries['vamp'] = LibraryInfo()
+libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
+                                 LIBPATH='#libs/vamp-sdk',
+                                 CPPPATH='#libs/vamp-sdk/vamp')
 
 env['RUBBERBAND'] = False
 
-#conf = env.Configure (custom_tests = { 'CheckPKGExists' : CheckPKGExists } )
+#conf = Configure (env)
 #
-#if conf.CheckPKGExists('vamp-sdk'):
-#    have_vamp = True
-#    libraries['vamp'].ParseConfig('pkg-config --cflags --libs vamp-sdk')
+#if conf.CheckHeader ('fftw3.h'):
+#    env['RUBBERBAND'] = True
+#    libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
+#                                           LIBPATH='#libs/rubberband',
+#                                           CPPPATH='#libs/rubberband',
+#                                           CCFLAGS='-DUSE_RUBBERBAND')
 #else:
-#    have_vamp = False
+#    print ""
+#    print "-------------------------------------------------------------------------"
+#    print "You do not have the FFTW single-precision development package installed."
+#    print "This prevents Ardour from using the Rubberband library for timestretching"
+#    print "and pitchshifting. It will fall back on SoundTouch for timestretch, and "
+#    print "pitchshifting will not be available."
+#    print "-------------------------------------------------------------------------"
+#    print ""
 #
-#libraries['vamp'] = conf.Finish ()
-#
-#if have_vamp:
-#    if os.path.exists ('libs/rubberband/src'):
-#        conf = Configure (libraries['vamp'])
-#        if conf.CheckHeader ('fftw3.h'):
-#            env['RUBBERBAND'] = True
-#            libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
-#                                                   LIBPATH='#libs/rubberband',
-#                                                   CPPPATH='#libs/rubberband',
-#                                                   CCFLAGS='-DUSE_RUBBERBAND')
-#        libraries['vamp'] = conf.Finish ()
+#conf.Finish()
 
 #
 # Check for libusb
@@ -995,6 +994,7 @@ if env['SYSLIBS']:
         'libs/pbd',
         'libs/midi++2',
         'libs/ardour',
+        'libs/vamp-sdk',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set
@@ -1068,6 +1068,7 @@ else:
         'libs/pbd',
         'libs/midi++2',
         'libs/ardour',
+        'libs/vamp-sdk',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set
@@ -1132,7 +1133,7 @@ else:
 timefx_subdirs = ['libs/soundtouch']
 #if env['RUBBERBAND']:
 #    timefx_subdirs += ['libs/rubberband']
-    
+
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 

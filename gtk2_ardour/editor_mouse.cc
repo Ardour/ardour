@@ -967,24 +967,23 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeOutHandleItem:
 				popup_fade_context_menu (1, event->button.time, item, item_type);
 				break;
-
+			
 			case StreamItem:
-				popup_track_context_menu (1, event->button.time, where);
+				popup_track_context_menu (1, event->button.time, item_type, false, where);
 				break;
 				
 			case RegionItem:
 			case RegionViewNameHighlight:
 			case RegionViewName:
-				popup_track_context_menu (1, event->button.time, where);
+				popup_track_context_menu (1, event->button.time, item_type, false, where);
 				break;
 				
 			case SelectionItem:
-				popup_track_context_menu (1, event->button.time, where);
+				popup_track_context_menu (1, event->button.time, item_type, true, where);
 				break;
 
 			case AutomationTrackItem:
-			case CrossfadeViewItem:
-				popup_track_context_menu (1, event->button.time, where);
+				popup_track_context_menu (1, event->button.time, item_type, false, where);
 				break;
 
 			case MarkerBarItem: 
@@ -1006,6 +1005,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				
 			case MeterMarkerItem:
 				tm_marker_context_menu (&event->button, item);
+				break;
+			
+			case CrossfadeViewItem:
+				popup_track_context_menu (1, event->button.time, item_type, false, where);
 				break;
 
 #ifdef WITH_CMT
@@ -3680,7 +3683,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	if (regionview_y_movement) {
 
-		/* moved to a different audio track. */
+		/* moved to a different track. */
 		
 		vector<RegionView*> new_selection;
 		
@@ -3695,7 +3698,11 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 			RouteTimeAxisView* rtv2 = dynamic_cast<RouteTimeAxisView*>(trackview_by_y_position (iy1));
 
+			boost::shared_ptr<Playlist> from_playlist = rv->region()->playlist();
 			boost::shared_ptr<Playlist> to_playlist = rtv2->playlist();
+			
+			where = (nframes_t) (unit_to_frame (ix1) * speed);
+			boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
 
 			if (! to_playlist->frozen()) {
 				/* 
@@ -3720,35 +3727,26 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				to_playlist->freeze();
 			}
 			
-			where = (nframes_t) (unit_to_frame (ix1) * speed);
-			boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
+			/* undo the previous hide_dependent_views so that xfades don't
+			   disappear on copying regions 
+			*/
+
+			rv->get_time_axis_view().reveal_dependent_views (*rv);
 
 			if (!drag_info.copy) {
-
-
+				
 				/* the region that used to be in the old playlist is not
 				   moved to the new one - we make a copy of it. as a result,
 				   any existing editor for the region should no longer be
 				   visible.
 				*/ 
-
-				RouteTimeAxisView* from_playlist_rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_trackview());
-				boost::shared_ptr<Playlist> from_playlist = from_playlist_rtv->playlist();
-
-				if (! from_playlist->frozen()) {
-					from_playlist->freeze();
-					used_playlists.push_back(from_playlist);
-
-					sigc::connection c = rtv2->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_and_select_new_region_view));
-					used_connections.push_back (c);
-
-					session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
-				}
-
+	    
 				rv->hide_region_editor();
 				rv->fake_set_opaque (false);
 
+				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
 				from_playlist->remove_region ((rv->region()));
+				session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));	
 
 			} else {
 

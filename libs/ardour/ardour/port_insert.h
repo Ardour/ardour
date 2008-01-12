@@ -27,7 +27,6 @@
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
 #include <ardour/io_processor.h>
-#include <ardour/plugin_state.h>
 #include <ardour/types.h>
 
 class XMLNode;

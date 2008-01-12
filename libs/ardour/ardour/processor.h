@@ -30,7 +30,6 @@
 
 #include <ardour/types.h>
 #include <ardour/ardour.h>
-#include <ardour/plugin_state.h>
 #include <ardour/buffer_set.h>
 #include <ardour/automatable.h>
 #include <ardour/latent.h>
