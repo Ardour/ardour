@@ -60,7 +60,7 @@ class Marker : public PBD::Destructible
 	void add_line (ArdourCanvas::Group*, double initial_height);
 	void show_line ();
 	void hide_line ();
-	void set_line_length (double);
+	void set_line_vpos (double y_origin, double height);
 
 	void set_position (nframes_t);
 	void set_name (const string&);
@@ -84,7 +84,7 @@ class Marker : public PBD::Destructible
 	ArdourCanvas::Polygon *mark;
 	ArdourCanvas::Text *text;
 	ArdourCanvas::Points *points;
-	ArdourCanvas::Line *line;
+	ArdourCanvas::SimpleLine *line;
 	ArdourCanvas::Points *line_points;
 
 	double        unit_position;

@@ -1172,7 +1172,7 @@ Editor::marker_selection_changed ()
 	}
 
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->add_line (cursor_group, full_canvas_height);
+		(*x)->add_line (cursor_group, canvas_height);
 		(*x)->show_line ();
 	}
 

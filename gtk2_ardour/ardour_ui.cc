@@ -2067,6 +2067,8 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 		       
 		session_name = basename_nosuffix (string (predetermined_path));
 
+		cerr << "set name to " << session_name << " path to " << session_path << endl;
+
 		new_session_dialog->set_session_name (session_name);
 		new_session_dialog->set_session_folder (session_path);
 		new_session_dialog->set_modal (true);
@@ -2227,6 +2229,9 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 				if (session_name[0] == '/' || 
 				    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 				    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+
+					cerr << "A\n";
+
 					if (load_session (Glib::path_get_dirname (session_name), session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2234,6 +2239,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
 				} else {
 					session_path = new_session_dialog->session_folder();
+					cerr << "B\n";
 					if (load_session (session_path, session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2271,6 +2277,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 
 				if (!should_be_new) {
 
+					cerr << "C\n";
 					if (load_session (session_path, session_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2298,6 +2305,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 						new_session_dialog->hide ();
 						goto_editor_window ();
 						flush_pending ();
+						cerr << "D\n";
 						if (load_session (session_path, session_name)) {
 							response = Gtk::RESPONSE_NONE;
 							goto try_again;
@@ -2323,6 +2331,7 @@ ARDOUR_UI::get_session_parameters (Glib::ustring predetermined_path, bool have_e
 					goto_editor_window ();
 					flush_pending ();
 
+					cerr << "F\n";
 					if (load_session (session_path, session_name, template_name)) {
 						response = Gtk::RESPONSE_NONE;
 						goto try_again;
@@ -2442,6 +2451,8 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	Session *new_session;
 	int unload_status;
 	int retval = -1;
+
+	cerr << "load session with path = " << path << " name = " << snap_name << endl;
 
 	session_loaded = false;
 

@@ -571,9 +571,11 @@ NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 #else 
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		realdir = Glib::path_get_dirname (realdir);
+		cerr << "didn't exist, use " << realdir << endl;
 	}
 
 	if ((res = canonicalize_file_name (realdir.c_str())) != 0) {
+		cerr << "canonical, use " << res << endl;
 		m_folder->set_current_folder (res);
 		free (res);
 	}
@@ -623,6 +625,13 @@ NewSessionDialog::session_folder() const
 	case NewPage:
 	        return Glib::filename_from_utf8(m_folder->get_filename());
 		
+	case EnginePage:
+		if (page_set == EnginePage) {
+			/* just engine page, nothing else : use m_folder since it should be set */
+			return Glib::filename_from_utf8(m_folder->get_filename());
+		}
+		break;
+
 	default:
 		break;
 	}

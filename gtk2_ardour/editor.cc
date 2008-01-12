@@ -873,19 +873,6 @@ Editor::show_window ()
 }
 
 void
-Editor::tie_vertical_scrolling ()
-{
-	double y1 = vertical_adjustment.get_value();
-
-	playhead_cursor->set_y_axis (y1);
-	if (logo_item) {
-		logo_item->property_y() = y1;
-	}
-
-	controls_layout.get_vadjustment()->set_value (y1);
-}
-
-void
 Editor::instant_save ()
 {
 	if (!constructed || !ARDOUR_UI::instance()->session_loaded) {
