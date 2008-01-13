@@ -428,7 +428,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("netjack");
 	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
-		cmd.push_back ("ffado");
+		cmd.push_back ("firewire");
 	} else if ( driver == X_("Dummy")) {
       using_dummy = true;
       cmd.push_back ("dummy");
@@ -757,6 +757,15 @@ vector<string>
 EngineControl::enumerate_ffado_devices ()
 {
 	vector<string> devs;
+	backend_devs.clear ();
+
+	devs.push_back("hw:0");
+	devs.push_back("hw:1");
+	devs.push_back("wh:2");
+
+	backend_devs.push_back("hw:0");
+	backend_devs.push_back("hw:1");
+	backend_devs.push_back("wh:2");
 	return devs;
 }
 vector<string>
