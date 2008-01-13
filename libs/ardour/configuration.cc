@@ -20,6 +20,9 @@
 #include <unistd.h>
 #include <cstdio> /* for snprintf, grrr */
 
+#include <glib.h>  
+#include <glib/gstdio.h> /* for g_stat() */
+
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 
@@ -74,7 +77,8 @@ int
 Configuration::load_state ()
 {
 	string rcfile;
-	
+	struct stat statbuf;
+
 	/* load system configuration first */
 
 	rcfile = find_config_file ("ardour_system.rc");
@@ -83,18 +87,28 @@ Configuration::load_state ()
 
 		XMLTree tree;
 
-		cerr << string_compose (_("loading system configuration file %1"), rcfile) << endl;
+		/* stupid XML Parser hates empty files */
 		
-		if (!tree.read (rcfile.c_str())) {
-			error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
+		if (g_stat (rcfile.c_str(), &statbuf)) {
 			return -1;
 		}
 
-		current_owner = ConfigVariableBase::System;
-
-		if (set_state (*tree.root())) {
-			error << string_compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
-			return -1;
+		if (statbuf.st_size != 0) {
+			cerr << string_compose (_("loading system configuration file %1"), rcfile) << endl;
+			
+			if (!tree.read (rcfile.c_str())) {
+				error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
+				return -1;
+			}
+			
+			current_owner = ConfigVariableBase::System;
+			
+			if (set_state (*tree.root())) {
+				error << string_compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+				return -1;
+			}
+		} else {
+			error << _("your system Ardour configuration file is empty. This probably means that there as an error installing Ardour") << endmsg;
 		}
 	}
 
@@ -106,20 +120,30 @@ Configuration::load_state ()
 	if (rcfile.length()) {
 
 		XMLTree tree;
-		
-		cerr << string_compose (_("loading user configuration file %1"), rcfile) << endl;
 
-		if (!tree.read (rcfile)) {
-			error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
+		/* stupid XML parser hates empty files */
+
+		if (g_stat (rcfile.c_str(), &statbuf)) {
 			return -1;
 		}
 
-		current_owner = ConfigVariableBase::Config;
-
-		if (set_state (*tree.root())) {
-			error << string_compose(_("Ardour: user configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
-			return -1;
-		}
+		if (statbuf.st_size != 0) {
+			cerr << string_compose (_("loading user configuration file %1"), rcfile) << endl;
+			
+			if (!tree.read (rcfile)) {
+				error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
+				return -1;
+			}
+			
+			current_owner = ConfigVariableBase::Config;
+			
+			if (set_state (*tree.root())) {
+				error << string_compose(_("Ardour: user configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+				return -1;
+			}
+		} else {
+			warning << _("your Ardour configuration file is empty. This is not normal.") << endmsg;
+		}	
 	}
 
 	return 0;
