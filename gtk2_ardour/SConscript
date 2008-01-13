@@ -401,8 +401,8 @@ else:
 	my_font_dict['%FONT_ITALIC_HUGER%'] = 'sans italic 34'
 	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'sans italic 60'
 
-ardour_dark_theme = env.SubstInFile ('ardour2_ui_dark.rc', 'ardour2_ui_dark.rc.in', SUBST_DICT = my_font_dict)
-ardour_light_theme = env.SubstInFile ('ardour2_ui_light.rc', 'ardour2_ui_light.rc.in', SUBST_DICT = my_font_dict)
+ardour_dark_theme = env.SubstInFile ('ardour3_ui_dark.rc', 'ardour3_ui_dark.rc.in', SUBST_DICT = my_font_dict)
+ardour_light_theme = env.SubstInFile ('ardour3_ui_light.rc', 'ardour3_ui_light.rc.in', SUBST_DICT = my_font_dict)
 
 my_subst_dict = { }
 
@@ -456,7 +456,7 @@ Default(ardour_light_theme)
 if env['VST']:
 	Default(ardourlib)
 	# the library - into the library dir
-	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), ardourlib))
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), ardourlib))
 else:
 
 	if env['VERSIONED']:
@@ -467,25 +467,25 @@ else:
         #install
 
 	# the executable - into the library dir
-	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), ardour))
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), ardour))
 	# the script - into the bin dir
-	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour2', ardoursh))
+	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour3', ardoursh))
 
 if env['NLS']:
 	i18n (gtkardour, gtkardour_files+skipped_files+fft_analysis_files, env)
     
 # configuration files
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_dark_theme))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_light_theme))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae.menus'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae-ansi.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae-de.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_dark_theme))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_light_theme))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour.menus'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour-sae.menus'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour-sae-ansi.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour-sae-de.bindings'))
 # data files
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'icons'), icon_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3'), 'splash.png'))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3', 'pixmaps'), pixmap_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3', 'icons'), icon_files))
 
 env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], []))
 		
@@ -496,12 +496,12 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
-                                        'ardour2_ui_dark.rc.in', 'ardour2_ui_light.rc.in', 'splash.png',
+                                        'ardour3_ui_dark.rc.in', 'ardour3_ui_light.rc.in', 'splash.png',
                                         'ardour.menus', 'ardour-sae.menus', 
 					'ardour.bindings.in', 
 					'ardour-sae-ansi.bindings.in', 
 					'ardour-sae-de.bindings.in', 
-					'ardour2_ui_default.conf',
+					'ardour3_ui_default.conf',
 					'editor_xpms'
                                         ] +
                                       gtkardour_files +

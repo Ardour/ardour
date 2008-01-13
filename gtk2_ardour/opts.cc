@@ -63,7 +63,7 @@ print_help (const char *execname)
 #endif
 	     << _("  [session-name]                   Name of session to load\n")
 	     << _("  -C, --curvetest filename         Curve algorithm debugger\n")
-	     << _("  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour2/ardour.bindings)\n")
+	     << _("  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n")
 		;
 	return 1;
 

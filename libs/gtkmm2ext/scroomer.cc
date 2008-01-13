@@ -264,8 +264,6 @@ void
 Scroomer::on_size_allocate (Allocation& a) {
 	Gtk::DrawingArea::on_size_allocate(a);
 
-	cerr << "allocate" << endl;
-
 	position[Total] = a.get_height();
 	set_min_page_size(min_page_size);
 	update();
@@ -314,7 +312,7 @@ Scroomer::set_min_page_size(double ps) {
 void
 Scroomer::update() {
 	double range = adj.get_upper() - adj.get_lower();
-	double value = adj.get_value() - adj.get_lower();
+	//double value = adj.get_value() - adj.get_lower();
 	int height = position[Total];
 	double coeff = ((double) height) / range;
 

@@ -56,7 +56,7 @@ sys::path
 ardour_module_directory ()
 {
 	sys::path module_directory(MODULE_DIR);
-	module_directory /= "ardour2";
+	module_directory /= "ardour3";
 	return module_directory;
 }
 
@@ -80,7 +80,7 @@ system_config_search_path ()
 
 #endif
 
-	config_path.add_subdirectory_to_paths("ardour2");
+	config_path.add_subdirectory_to_paths("ardour3");
 
 	return config_path;
 }
@@ -98,7 +98,7 @@ system_data_search_path ()
 
 #endif
 
-	data_path.add_subdirectory_to_paths("ardour2");
+	data_path.add_subdirectory_to_paths("ardour3");
 
 	return data_path;
 }

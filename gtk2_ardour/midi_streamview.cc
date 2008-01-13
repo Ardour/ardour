@@ -605,11 +605,11 @@ MidiStreamView::note_range_adjustment_changed() {
 	int highest;
 
 	if(sum == _range_sum_cache) {
-		cerr << "cached" << endl;
+		//cerr << "cached" << endl;
 		highest = (int) floor(sum);
 	}
 	else {
-		cerr << "recalc" << endl;
+		//cerr << "recalc" << endl;
 		highest = lowest + (int) floor(note_range_adjustment.get_page_size());
 		_range_sum_cache = sum;
 	}
@@ -618,7 +618,7 @@ MidiStreamView::note_range_adjustment_changed() {
 		return;
 	}
 
-	cerr << "note range changed: " << lowest << " " << highest << endl;
+	//cerr << "note range changed: " << lowest << " " << highest << endl;
 	//cerr << "  val=" << v_zoom_adjustment.get_value() << " page=" << v_zoom_adjustment.get_page_size() << " sum=" << v_zoom_adjustment.get_value() + v_zoom_adjustment.get_page_size() << endl;
 
 	set_note_range(lowest, highest);

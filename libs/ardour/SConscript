@@ -355,7 +355,7 @@ if env['NLS']:
 	i18n (ardour, ardour_files + vst_files + coreaudio_files + timefx_sources + audiounit_files, env)
 
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libardour))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libardour))
 
 env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], []))
 

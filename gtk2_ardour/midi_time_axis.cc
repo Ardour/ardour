@@ -128,7 +128,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 
 		/* ask for notifications of any new RegionViews */
 		_view->attach ();
-
 	}
 }
 
@@ -148,7 +147,10 @@ MidiTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 	ensure_xml_node ();
 	xml_node->add_property ("shown_editor", "yes");
 		
-	return TimeAxisView::show_at (y, nth, parent);
+	guint32 ret = TimeAxisView::show_at (y, nth, parent);
+	_piano_roll_header->show();
+	_range_scroomer->show();
+	return ret;
 }
 
 void

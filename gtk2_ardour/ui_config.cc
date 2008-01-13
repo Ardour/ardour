@@ -64,7 +64,7 @@ UIConfiguration::load_state ()
 	sys::path default_ui_rc_file;
 	
 	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-			"ardour2_ui_default.conf", default_ui_rc_file) )
+			"ardour3_ui_default.conf", default_ui_rc_file) )
 	{
 		XMLTree tree;
 		found = true;
@@ -87,7 +87,7 @@ UIConfiguration::load_state ()
 	sys::path user_ui_rc_file;
 
 	if (find_file_in_search_path (ardour_search_path() + user_config_directory(),
-			"ardour2_ui.conf", user_ui_rc_file))
+			"ardour3_ui.conf", user_ui_rc_file))
 	{
 		XMLTree tree;
 		found = true;
@@ -131,7 +131,7 @@ UIConfiguration::save_state()
 	
 	sys::path rcfile_path(user_config_directory());
 
-	rcfile_path /= "ardour2_ui.conf";
+	rcfile_path /= "ardour3_ui.conf";
 	const string rcfile = rcfile_path.to_string();
 
 	// this test seems bogus?
