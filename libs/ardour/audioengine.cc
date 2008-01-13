@@ -337,16 +337,16 @@ AudioEngine::process_callback (nframes_t nframes)
 	if (session) {
 		session->process (nframes);
 	}
-
-	if (!_running) {
-		_processed_frames = next_processed_frames;
-		return 0;
-	}
 	
 	// Finalize ports (ie write data if necessary)
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		(*i)->cycle_end (nframes, 0);
+	}
+
+	if (!_running) {
+		_processed_frames = next_processed_frames;
+		return 0;
 	}
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {

@@ -67,8 +67,6 @@ MidiPort::reset()
 void
 MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 {
-	/* caller must hold process lock */
-	
 	if (_ext_port) {
 		_ext_port->cycle_start (nframes, offset);
 	}
@@ -99,3 +97,13 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 		_buffer->silence (nframes, offset);
 	}
 }
+
+	
+void
+MidiPort::cycle_end (nframes_t nframes, nframes_t offset)
+{
+	if (_ext_port) {
+		_ext_port->cycle_end (nframes, offset);
+	}
+}
+

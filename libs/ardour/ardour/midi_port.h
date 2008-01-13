@@ -34,6 +34,7 @@ class MidiPort : public BaseMidiPort, public PortFacade {
 	void reset ();
 
 	void cycle_start (nframes_t nframes, nframes_t offset);
+	void cycle_end (nframes_t nframes, nframes_t offset);
 
   protected:
 	friend class AudioEngine;

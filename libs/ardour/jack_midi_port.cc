@@ -25,31 +25,22 @@ JackMidiPort::JackMidiPort (const std::string& name, Flags flgs, MidiBuffer* buf
 	, JackPort (name, DataType::MIDI, flgs)
 	, BaseMidiPort (name, flgs) 
 {
-	if (buf) {
+	// MIDI ports always need a buffer since jack buffer format is different
+	assert(buf);
 
-		cout << name << " BUFFER" << endl;
-
-		_buffer = buf;
-		_own_buffer = false;
-
-	} else {
-
-		cout << name << " NO BUFFER" << endl;
-
-		/* data space will be provided by JACK */
-		_buffer = new MidiBuffer (0);
-		_own_buffer = true;
-	}
+	_buffer = buf;
+	_own_buffer = false;
 }
 
 void
-JackMidiPort::cycle_start (nframes_t nframes, nframes_t offset_ignored_but_probably_should_not_be)
+JackMidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 {
+	/* FIXME: offset */
+
 	_buffer->clear();
 	assert(_buffer->size() == 0);
 
 	if (_flags & IsOutput) {
-		// no buffer, nothing to do
 		return;
 	}
 
@@ -76,8 +67,10 @@ JackMidiPort::cycle_start (nframes_t nframes, nframes_t offset_ignored_but_proba
 }
 
 void
-JackMidiPort::cycle_end (nframes_t nframes, nframes_t offset_ignored_but_probably_should_not_be)
+JackMidiPort::cycle_end (nframes_t nframes, nframes_t offset)
 {
+	/* FIXME: offset */
+
 	if (_flags & IsInput) {
 		return;
 	}
