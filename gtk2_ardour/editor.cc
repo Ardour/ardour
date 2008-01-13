@@ -82,6 +82,7 @@
 #include "actions.h"
 #include "sfdb_ui.h"
 #include "gui_thread.h"
+#include "simpleline.h"
 
 #ifdef FFT_ANALYSIS
 #include "analysis_window.h"

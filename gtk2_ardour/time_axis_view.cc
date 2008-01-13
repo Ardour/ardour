@@ -148,9 +148,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_hbox.pack_start (controls_ebox,true,true);
 	controls_hbox.show ();
 
-	controls_frame.add (controls_hbox);
-	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+	//controls_frame.add (controls_hbox);
+	//controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
+	//controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	ColorsChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
 }
@@ -193,13 +193,13 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	effective_height = 0;
 	
 	if (control_parent) {
-		control_parent->reorder_child (controls_frame, nth);
+		control_parent->reorder_child (controls_hbox, nth);
 	} else {
 		control_parent = parent;
-		parent->pack_start (controls_frame, false, false);
-		parent->reorder_child (controls_frame, nth);
+		parent->pack_start (controls_hbox, false, false);
+		parent->reorder_child (controls_hbox, nth);
 	}
-	controls_frame.show ();
+	controls_hbox.show ();
 	controls_ebox.show ();
 	
 	/* the coordinates used here are in the system of the
@@ -299,10 +299,10 @@ TimeAxisView::hide ()
 	}
 
 	canvas_display->hide();
-	controls_frame.hide ();
+	controls_hbox.hide ();
 
 	if (control_parent) {
-		control_parent->remove (controls_frame);
+		control_parent->remove (controls_hbox);
 		control_parent = 0;
 	}
 
@@ -363,7 +363,7 @@ void
 TimeAxisView::set_height_pixels (uint32_t h)
 {
 	height = h;
-	controls_frame.set_size_request (-1, height + ((order == 0) ? 1 : 0));
+	controls_hbox.set_size_request (-1, height + ((order == 0) ? 1 : 0));
 	//cerr << "TimeAxisView::set_height_pixels() called h = " << h << endl;//DEBUG
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
@@ -551,7 +551,7 @@ TimeAxisView::set_selected (bool yn)
 
 	if (_selected) {
 		controls_ebox.set_name (controls_base_selected_name);
-		controls_frame.set_name (controls_base_selected_name);
+		controls_hbox.set_name (controls_base_selected_name);
 		
 		/* propagate any existing selection, if the mode is right */
 
@@ -561,7 +561,7 @@ TimeAxisView::set_selected (bool yn)
 
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
-		controls_frame.set_name (controls_base_unselected_name);
+		controls_hbox.set_name (controls_base_unselected_name);
 
 		hide_selection ();
 

@@ -72,6 +72,8 @@ class MidiRegionView : public RegionView
 	
 	void set_y_position_and_height (double, double);
 	
+	void set_frame_color();
+
 	void redisplay_model();
 
     GhostRegion* add_ghost (AutomationTimeAxisView&);

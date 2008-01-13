@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2008 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,26 +17,23 @@
 
 */
 
-#ifndef __ardour_gtk_canvas_h__
-#define __ardour_gtk_canvas_h__
+#ifndef __ardour_midi_scroomer_h__
+#define __ardour_midi_scroomer_h__
 
-namespace Gnome {
-	namespace Canvas {
-		class Item;
-		class Group;
-		class Canvas;
-		class SimpleRect;
-		class SimpleLine;
-		class Polygon;
-		class WaveView;
-		class Text;
-		class Line;
-		class Points;
-		class ImageFrame;
-		class Lineset;
-	}
-}
+#include <gtkmm2ext/scroomer.h>
+#include <gdkmm/pixbuf.h>
 
-namespace ArdourCanvas = Gnome::Canvas;
+class MidiScroomer : public Gtkmm2ext::Scroomer {
+public:
+	MidiScroomer(Gtk::Adjustment&);
+	~MidiScroomer();
 
-#endif /* __ardour_gtk_canvas_h__ */
+	bool on_expose_event(GdkEventExpose*);
+
+	void on_size_request(Gtk::Requisition*);
+	void on_size_allocate(Gtk::Allocation&);
+
+	void get_colors(double color[], Component comp);
+};
+
+#endif /* __ardour_midi_scroomer_h__ */

@@ -50,6 +50,8 @@ namespace ARDOUR {
 
 class PublicEditor;
 class MidiStreamView;
+class MidiScroomer;
+class PianoRollHeader;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
@@ -67,7 +69,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void create_automation_child (ARDOUR::Parameter param, bool show);
 
 	ARDOUR::NoteMode note_mode() const { return _note_mode; }
-	
+
   private:
 	
 	void append_extra_display_menu_items ();
@@ -83,6 +85,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	
 	Gtk::Menu _subplugin_menu;
 
+	MidiScroomer* _range_scroomer;
+	PianoRollHeader* _piano_roll_header;
 	ARDOUR::NoteMode    _note_mode;
 	Gtk::RadioMenuItem* _note_mode_item;
 	Gtk::RadioMenuItem* _percussion_mode_item;

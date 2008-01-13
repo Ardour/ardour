@@ -67,6 +67,8 @@
 #include "simplerect.h"
 #include "midi_streamview.h"
 #include "utils.h"
+#include "midi_scroomer.h"
+#include "piano_roll_header.h"
 
 #include <ardour/midi_track.h>
 
@@ -81,6 +83,8 @@ using namespace Editing;
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess) // FIXME: won't compile without this, why??
 	, RouteTimeAxisView(ed, sess, rt, canvas)
+	, _range_scroomer(0)
+	, _piano_roll_header(0)
 	, _note_mode(Sustained)
 	, _note_mode_item(NULL)
 	, _percussion_mode_item(NULL)
@@ -112,6 +116,11 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	_route->processors_changed.connect (mem_fun(*this, &MidiTimeAxisView::processors_changed));
 
 	if (is_track()) {
+		_piano_roll_header = new PianoRollHeader(*midi_view());
+		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
+
+		controls_hbox.pack_start(*_range_scroomer);
+		controls_hbox.pack_start(*_piano_roll_header);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
@@ -318,5 +327,3 @@ MidiTimeAxisView::route_active_changed ()
 		}
 	}
 }
-
-

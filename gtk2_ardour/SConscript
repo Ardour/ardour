@@ -123,12 +123,14 @@ automation_region_view.cc
 bundle_manager.cc
 midi_port_dialog.cc
 midi_time_axis.cc
+midi_scroomer.cc
 midi_streamview.cc
 axis_view.cc
 canvas-simpleline.c
 simpleline.cc
 canvas-simplerect.c
 simplerect.cc
+lineset.cc
 canvas-waveview.c
 diamond.cc
 canvas-midi-event.cc
@@ -190,6 +192,7 @@ opts.cc
 panner.cc
 panner2d.cc
 panner_ui.cc
+piano_roll_header.cc
 playlist_selector.cc
 plugin_selector.cc
 plugin_ui.cc

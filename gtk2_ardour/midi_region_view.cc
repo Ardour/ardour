@@ -69,7 +69,10 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _mouse_state(None)
 	, _pressed_button(0)
 {
+	group->lower_to_bottom();
 	_note_group->raise_to_top();
+
+	frame->property_fill_color_rgba() = 0xff000033;
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
@@ -795,3 +798,14 @@ MidiRegionView::switch_source(boost::shared_ptr<Source> src)
 		display_model(msrc->model());
 }
 
+void
+MidiRegionView::set_frame_color()
+{
+	if (frame) {
+		if (_selected && should_show_selection) {
+			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+		} else {
+			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiFrameBase.get();
+		}
+	}
+}

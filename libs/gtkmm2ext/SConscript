@@ -50,6 +50,7 @@ pixfader.cc
 pixscroller.cc
 popup.cc
 prompter.cc
+scroomer.cc
 selector.cc
 slider_controller.cc
 stateful_button.cc

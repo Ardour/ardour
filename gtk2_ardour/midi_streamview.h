@@ -24,10 +24,10 @@
 
 #include <ardour/location.h>
 #include "enums.h"
-#include "simplerect.h"
 #include "streamview.h"
 #include "time_axis_view_item.h"
 #include "route_time_axis.h"
+#include "canvas.h"
 
 namespace Gdk {
 	class Color;
@@ -66,8 +66,11 @@ class MidiStreamView : public StreamView
 		ContentsRange
 	};
 
+	Gtk::Adjustment note_range_adjustment;
+
 	VisibleNoteRange note_range() { return _range; }
 	void set_note_range(VisibleNoteRange r);
+	void set_note_range(uint8_t lowest, uint8_t highest);
 
 	uint8_t lowest_note()  const { return (_range == FullRange) ? 0 : _lowest_note; }
 	uint8_t highest_note() const { return (_range == FullRange) ? 127 : _highest_note; }
@@ -93,6 +96,8 @@ class MidiStreamView : public StreamView
 	
 	inline uint8_t contents_note_range() const
 		{ return _highest_note - _lowest_note + 1; }
+	
+	sigc::signal<void> NoteRangeChanged;
 
   private:
 	void setup_rec_box ();
@@ -104,15 +109,17 @@ class MidiStreamView : public StreamView
 	void        display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
 	
 	void update_contents_y_position_and_height ();
-	void draw_note_separators();
+	void draw_note_lines();
 
 	void color_handler ();
 
+	void note_range_adjustment_changed();
+
 	VisibleNoteRange          _range;
+	double                    _range_sum_cache;
 	uint8_t                   _lowest_note;
 	uint8_t                   _highest_note;
-	ArdourCanvas::Group*      _note_line_group;
-	ArdourCanvas::SimpleLine* _note_lines[127];
+	ArdourCanvas::Lineset*    _note_lines;
 };
 
 #endif /* __ardour_midi_streamview_h__ */

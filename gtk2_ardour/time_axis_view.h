@@ -309,7 +309,6 @@ class TimeAxisView : public virtual AxisView
 
 	void set_height_pixels (uint32_t h);
 	void color_handler ();
-
 }; /* class TimeAxisView */
 
 #endif /* __ardour_gtk_time_axis_h__ */

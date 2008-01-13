@@ -46,7 +46,7 @@
 #include "gui_thread.h"
 #include "utils.h"
 #include "simplerect.h"
-#include "simpleline.h"
+#include "lineset.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -55,7 +55,9 @@ using namespace Editing;
 
 MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
+	, note_range_adjustment(0.0f, 0.0f, 0.0f)
 	, _range(ContentsRange)
+	, _range_sum_cache(-1.0)
 	, _lowest_note(60)
 	, _highest_note(60)
 {
@@ -63,19 +65,20 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	else
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();
-	
-	canvas_rect->property_fill_color_rgba() = stream_base_color;
-	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
-	
-	_note_line_group = new ArdourCanvas::Group (*canvas_group);
-	
-	for (uint8_t i=0; i < 127; ++i) {
-		_note_lines[i] = new ArdourCanvas::SimpleLine(*_note_line_group,
-				0, note_to_y(i), 10, note_to_y(i));
-		_note_lines[i]->property_color_rgba() = 0xEEEEEE55;
-	}
+
+	_note_lines = new ArdourCanvas::Lineset(*canvas_group, ArdourCanvas::Lineset::Horizontal);
+
+	_note_lines->property_x1() = 0;
+	_note_lines->property_y1() = 0;
+	_note_lines->property_x2() = trackview().editor.frame_to_pixel (max_frames);
+	_note_lines->property_y2() = 0;
+
+	_note_lines->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), _note_lines, &_trackview));
+
+	note_range_adjustment.signal_value_changed().connect (mem_fun (*this, &MidiStreamView::note_range_adjustment_changed));
+	ColorsChanged.connect(mem_fun(*this, &MidiStreamView::draw_note_lines));
 }
 
 MidiStreamView::~MidiStreamView ()
@@ -159,7 +162,8 @@ void
 MidiStreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	StreamView::display_diskstream(ds);
-	draw_note_separators();
+	draw_note_lines();
+	NoteRangeChanged();
 }
 
 // FIXME: code duplication with AudioStreamView
@@ -216,7 +220,10 @@ MidiStreamView::redisplay_diskstream ()
 		region_layered (*i);
 	}
 	
-	draw_note_separators();
+	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
+	note_range_adjustment.set_value(_lowest_note);
+	NoteRangeChanged();
+	draw_note_lines();
 }
 
 
@@ -224,22 +231,45 @@ void
 MidiStreamView::update_contents_y_position_and_height ()
 {
 	StreamView::update_contents_y_position_and_height();
-	draw_note_separators();
+	_note_lines->property_y2() = height;
+	draw_note_lines();
 }
 	
 void
-MidiStreamView::draw_note_separators()
+MidiStreamView::draw_note_lines()
 {
-	for (uint8_t i=0; i < 127; ++i) {
-		if (i >= _lowest_note-1 && i <= _highest_note) {
-			_note_lines[i]->property_x1() = 0;
-			_note_lines[i]->property_x2() = canvas_rect->property_x2() - 2;
-			_note_lines[i]->property_y1() = note_to_y(i);
-			_note_lines[i]->property_y2() = note_to_y(i);
-			_note_lines[i]->show();
-		} else {
-			_note_lines[i]->hide();
+	double y;
+	double prev_y = contents_height();
+	uint32_t color;
+
+	_note_lines->clear();
+
+	for(int i = _lowest_note; i <= _highest_note; ++i) {
+		y = floor(note_to_y(i));
+		
+		_note_lines->add_line(prev_y, 1.0, ARDOUR_UI::config()->canvasvar_PianoRollBlackOutline.get());
+
+		switch(i % 12) {
+		case 1:
+		case 3:
+		case 6:
+		case 8:
+		case 10:
+			color = ARDOUR_UI::config()->canvasvar_PianoRollBlack.get();
+			break;
+		default:
+			color = ARDOUR_UI::config()->canvasvar_PianoRollWhite.get();
+			break;
 		}
+
+		if(i == _highest_note) {
+			_note_lines->add_line(y, prev_y - y, color);
+		}
+		else {
+			_note_lines->add_line(y + 1.0, prev_y - y - 1.0, color);
+		}
+
+		prev_y = y;
 	}
 }
 	
@@ -258,6 +288,21 @@ MidiStreamView::set_note_range(VisibleNoteRange r)
 	redisplay_diskstream();
 }
 
+void
+MidiStreamView::set_note_range(uint8_t lowest, uint8_t highest) {
+	if(_range == ContentsRange) {
+		_lowest_note = lowest;
+		_highest_note = highest;
+
+		list<RegionView *>::iterator i;
+		for (i = region_views.begin(); i != region_views.end(); ++i) {
+			(*i)->set_y_position_and_height(0, height); // apply note range
+		}
+	}
+
+	draw_note_lines();
+	NoteRangeChanged();
+}
 	
 void 
 MidiStreamView::update_bounds(uint8_t note_num)
@@ -544,12 +589,37 @@ MidiStreamView::color_handler ()
 
 	//case cMidiTrackBase:
 	if (_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
+		//canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	} 
 
 	//case cMidiBusBase:
 	if (!_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
+		//canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
 	}
 }
 
+void
+MidiStreamView::note_range_adjustment_changed() {
+	double sum = note_range_adjustment.get_value() + note_range_adjustment.get_page_size();
+	int lowest = (int) floor(note_range_adjustment.get_value());
+	int highest;
+
+	if(sum == _range_sum_cache) {
+		cerr << "cached" << endl;
+		highest = (int) floor(sum);
+	}
+	else {
+		cerr << "recalc" << endl;
+		highest = lowest + (int) floor(note_range_adjustment.get_page_size());
+		_range_sum_cache = sum;
+	}
+
+	if(lowest == lowest_note() && highest == highest_note()) {
+		return;
+	}
+
+	cerr << "note range changed: " << lowest << " " << highest << endl;
+	//cerr << "  val=" << v_zoom_adjustment.get_value() << " page=" << v_zoom_adjustment.get_page_size() << " sum=" << v_zoom_adjustment.get_value() + v_zoom_adjustment.get_page_size() << endl;
+
+	set_note_range(lowest, highest);
+}
