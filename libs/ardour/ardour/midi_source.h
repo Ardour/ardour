@@ -76,6 +76,8 @@ class MidiSource : public Source
 	
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
+	
+	bool length_mutable() const { return true; }
 
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;

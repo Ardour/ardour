@@ -1310,7 +1310,7 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 bool
 Region::verify_length (nframes_t len)
 {
-	if (source() && source()->destructive()) {
+	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
 	}
 
@@ -1328,7 +1328,7 @@ Region::verify_length (nframes_t len)
 bool
 Region::verify_start_and_length (nframes_t new_start, nframes_t& new_length)
 {
-	if (source() && source()->destructive()) {
+	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
 	}
 
@@ -1346,7 +1346,7 @@ Region::verify_start_and_length (nframes_t new_start, nframes_t& new_length)
 bool
 Region::verify_start (nframes_t pos)
 {
-	if (source() && source()->destructive()) {
+	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
 	}
 
@@ -1361,7 +1361,7 @@ Region::verify_start (nframes_t pos)
 bool
 Region::verify_start_mutable (nframes_t& new_start)
 {
-	if (source() && source()->destructive()) {
+	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
 	}
 
