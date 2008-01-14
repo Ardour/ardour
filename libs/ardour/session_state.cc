@@ -1391,7 +1391,14 @@ Session::load_regions (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((region = XMLRegionFactory (**niter, false)) == 0) {
-			error << _("Session: cannot create Region from XML description.") << endmsg;
+			error << _("Session: cannot create Region from XML description.");
+			const XMLProperty *name = (**niter).property("name");
+
+			if (name) {
+				error << " " << string_compose (_("Can not load state for region '%1'"), name->value());
+			}
+
+			error << endmsg;
 		}
 	}
 

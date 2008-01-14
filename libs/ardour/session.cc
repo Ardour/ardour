@@ -2571,7 +2571,9 @@ Session::add_region (boost::shared_ptr<Region> region)
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		if ((ar = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
+		if (region == 0) {
+			error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
+		} else if ((ar = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
 
 			AudioRegionList::iterator x;
 
