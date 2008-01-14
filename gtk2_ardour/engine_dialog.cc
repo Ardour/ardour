@@ -758,14 +758,6 @@ EngineControl::enumerate_ffado_devices ()
 {
 	vector<string> devs;
 	backend_devs.clear ();
-
-	devs.push_back("hw:0");
-	devs.push_back("hw:1");
-	devs.push_back("wh:2");
-
-	backend_devs.push_back("hw:0");
-	backend_devs.push_back("hw:1");
-	backend_devs.push_back("wh:2");
 	return devs;
 }
 vector<string>
