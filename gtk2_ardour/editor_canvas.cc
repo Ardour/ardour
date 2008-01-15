@@ -428,7 +428,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	controls_layout.set_size (edit_controls_vbox.get_width(), (gint) pos);
 	controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
 	zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
-	time_button_frame.set_size_request(edit_controls_vbox.get_width() + edit_vscrollbar.get_width(), -1);
+	time_button_frame.set_size_request(edit_controls_vbox.get_width(), -1);
 
 	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG	
 }
