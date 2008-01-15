@@ -582,6 +582,8 @@ EngineControl::enumerate_devices (const string& driver)
 #ifdef __APPLE__		
 		devices[driver] = enumerate_coreaudio_devices ();
 #endif
+
+#ifndef __APPLE__
 	} else if (driver == "ALSA") {
 		devices[driver] = enumerate_alsa_devices ();
 	} else if (driver == "FFADO") {
@@ -593,6 +595,9 @@ EngineControl::enumerate_devices (const string& driver)
 	} else if (driver == "NetJACK") {
 		devices[driver] = enumerate_netjack_devices ();
 	}
+#else
+        }
+#endif
 }
 
 #ifdef __APPLE__
