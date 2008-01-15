@@ -239,7 +239,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	/* lets get this party started */
 
     	try {
-		ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization);
+		if (ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization)) {
+			throw failed_constructor ();
+		}
+
 		setup_gtk_ardour_enums ();
 		Config->set_current_owner (ConfigVariableBase::Interface);
 		setup_profile ();
@@ -247,7 +250,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;
 		// pass it on up
-		throw err;
+		throw;
 	} 
 
 	/* we like keyboards */

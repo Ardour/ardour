@@ -133,7 +133,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;	
 
 	case GDK_SCROLL_LEFT:
-		xdelta = (current_page_frames() / 2);
+		xdelta = (current_page_frames() / 8);
 		if (leftmost_frame > xdelta) {
 			reset_x_origin (leftmost_frame - xdelta);
 		} else {
@@ -142,7 +142,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;
 
 	case GDK_SCROLL_RIGHT:
-		xdelta = (current_page_frames() / 2);
+		xdelta = (current_page_frames() / 8);
 		if (max_frames - xdelta > leftmost_frame) {
 			reset_x_origin (leftmost_frame + xdelta);
 		} else {

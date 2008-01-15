@@ -83,7 +83,7 @@ class EngineControl : public Gtk::VBox {
 
 	std::map<std::string,std::vector<std::string> > devices;
 	std::vector<std::string> backend_devs;
-	void enumerate_devices ();
+	void enumerate_devices (const string& driver);
 
 #ifdef __APPLE__
 	std::vector<std::string> enumerate_coreaudio_devices ();

@@ -2542,40 +2542,42 @@ Session::region_name (string& result, string base, bool newlevel) const
 void
 Session::add_region (boost::shared_ptr<Region> region)
 {
-	boost::shared_ptr<Region> other;
 	bool added = false;
 
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		RegionList::iterator x;
+		if (region == 0) {
+			error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
+		} else {
 
-		for (x = regions.begin(); x != regions.end(); ++x) {
+			RegionList::iterator x;
 
-			other = x->second;
+			for (x = regions.begin(); x != regions.end(); ++x) {
 
-			if (region->region_list_equivalent (other)) {
-				break;
+				if (region->region_list_equivalent (x->second)) {
+					break;
+				}
 			}
+
+			if (x == regions.end()) {
+
+				pair<RegionList::key_type,RegionList::mapped_type> entry;
+
+				entry.first = region->id();
+				entry.second = region;
+
+				pair<RegionList::iterator,bool> x = regions.insert (entry);
+
+				
+				if (!x.second) {
+					return;
+				}
+
+				added = true;
+			} 
+
 		}
-
-		if (x == regions.end()) {
-
-			pair<RegionList::key_type,RegionList::mapped_type> entry;
-
-			entry.first = region->id();
-			entry.second = region;
-
-			pair<RegionList::iterator,bool> x = regions.insert (entry);
-
-
-			if (!x.second) {
-				return;
-			}
-
-			added = true;
-		} 
-
 	}
 
 	/* mark dirty because something has changed even if we didn't

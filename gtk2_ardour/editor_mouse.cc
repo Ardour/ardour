@@ -3072,7 +3072,7 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 		/* reset selection to new regionviews */
 
 		selection->set (new_regionviews);
-		
+
 		/* reset drag_info data to reflect the fact that we are dragging the copies */
 		
 		drag_info.data = new_regionviews.front();
@@ -3471,7 +3471,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 		const list<RegionView*>& layered_regions = selection->regions.by_layer();
-
+		
 		for (list<RegionView*>::const_iterator i = layered_regions.begin(); i != layered_regions.end(); ++i) {
 	    
 			RegionView* rv = (*i);
@@ -3866,7 +3866,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 				to_playlist->add_region (newregion, (nframes_t) (where * rtv->get_diskstream()->speed()));
 				c.disconnect ();
-				
+
 				if (!latest_regionviews.empty()) {
 					// XXX why just the first one ? we only expect one
 					rtv->reveal_dependent_views (*latest_regionviews.front());

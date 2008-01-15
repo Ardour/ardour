@@ -122,9 +122,6 @@ EngineControl::EngineControl ()
 	set_popdown_strings (driver_combo, strings);
 	driver_combo.set_active_text (strings.front());
 
-	/* figure out available devices and set up interface_combo */
-
-	enumerate_devices ();
 	driver_combo.signal_changed().connect (mem_fun (*this, &EngineControl::driver_changed));
 	driver_changed ();
 
@@ -428,10 +425,20 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("netjack");
 	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
-		cmd.push_back ("ffado");
+
+		/* do this until FFADO becomes the standard */
+
+		char* hack = getenv ("ARDOUR_FIREWIRE_DRIVER_NAME");
+
+		if (hack) {
+			cmd.push_back (hack);
+		} else {
+			cmd.push_back ("freebob");
+		}
+
 	} else if ( driver == X_("Dummy")) {
-      using_dummy = true;
-      cmd.push_back ("dummy");
+		using_dummy = true;
+		cmd.push_back ("dummy");
 	}
 
 	/* driver arguments */
@@ -456,10 +463,10 @@ EngineControl::build_command_line (vector<string>& cmd)
 			cmd.push_back ("-C");
 		}
 
-      if (! using_dummy ) {
-		   cmd.push_back ("-n");
-		   cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
-      }
+		if (! using_dummy ) {
+			cmd.push_back ("-n");
+			cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
+		}
 	}
 
 	cmd.push_back ("-r");
@@ -567,18 +574,29 @@ EngineControl::realtime_changed ()
 }
 
 void
-EngineControl::enumerate_devices ()
+EngineControl::enumerate_devices (const string& driver)
 {
 	/* note: case matters for the map keys */
 
-#ifdef __APPLE__
-	devices["CoreAudio"] = enumerate_coreaudio_devices ();
+	if (driver == "CoreAudio") {
+#ifdef __APPLE__		
+		devices[driver] = enumerate_coreaudio_devices ();
+#endif
+
+#ifndef __APPLE__
+	} else if (driver == "ALSA") {
+		devices[driver] = enumerate_alsa_devices ();
+	} else if (driver == "FFADO") {
+		devices[driver] = enumerate_ffado_devices ();
+	} else if (driver == "OSS") {
+		devices[driver] = enumerate_oss_devices ();
+	} else if (driver == "Dummy") {
+		devices[driver] = enumerate_dummy_devices ();
+	} else if (driver == "NetJACK") {
+		devices[driver] = enumerate_netjack_devices ();
+	}
 #else
-	devices["ALSA"] = enumerate_alsa_devices ();
-	devices["FFADO"] = enumerate_ffado_devices ();
-	devices["OSS"] = enumerate_oss_devices ();
-	devices["Dummy"] = enumerate_dummy_devices ();
-	devices["NetJACK"] = enumerate_netjack_devices ();
+        }
 #endif
 }
 
@@ -669,6 +687,7 @@ EngineControl::enumerate_coreaudio_devices ()
 		delete [] coreDeviceIDs;
 	}
 
+
 	if (devs.size() == 0) {
 		MessageDialog msg (_("\
 You do not have any audio devices capable of\n\
@@ -688,6 +707,7 @@ Ardour and choose the relevant device then."
 		msg.run ();
 		exit (1);
 	}
+
 
 	return devs;
 }
@@ -757,8 +777,10 @@ vector<string>
 EngineControl::enumerate_ffado_devices ()
 {
 	vector<string> devs;
+	backend_devs.clear ();
 	return devs;
 }
+
 vector<string>
 EngineControl::enumerate_freebob_devices ()
 {
@@ -789,11 +811,19 @@ void
 EngineControl::driver_changed ()
 {
 	string driver = driver_combo.get_active_text();
-	vector<string>& strings = devices[driver];
 	string::size_type maxlen = 0;
 	int maxindex = -1;
 	int n = 0;
 
+	enumerate_devices (driver);
+
+	vector<string>& strings = devices[driver];
+
+	if (strings.empty()) {
+		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
+		return;
+	}
+	
 	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i, ++n) {
 		if ((*i).length() > maxlen) {
 			maxlen = (*i).length();
@@ -1067,19 +1097,18 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNodeConstIterator citer;
 	XMLNode* child;
 	XMLProperty* prop;
-
-   bool using_dummy = false;
-
+	bool using_dummy = false;
+	
 	int val;
 	string strval;
-
-   if ( (child = root.child("driver"))){
-      prop = child->property("val");
-      if (prop && (prop->value() == "Dummy") ) {
-         using_dummy = true;
-      }
-   }
-
+	
+	if ( (child = root.child ("driver"))){
+		prop = child->property("val");
+		if (prop && (prop->value() == "Dummy") ) {
+			using_dummy = true;
+		}
+	}
+	
 	clist = root.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
@@ -1089,8 +1118,9 @@ EngineControl::set_state (const XMLNode& root)
 		prop = child->property ("val");
 
 		if (!prop || prop->value().empty()) {
-         if ( using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" ))
-               continue;
+
+			if ( using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" ))
+				continue;
 			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
 			continue;
 		}
