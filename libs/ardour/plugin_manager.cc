@@ -106,8 +106,10 @@ PluginManager::PluginManager ()
 		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
 	} 
 
+#ifdef HAVE_SLV2
 	_lv2_world = slv2_world_new();
 	slv2_world_load_all(_lv2_world);
+#endif
 
 	refresh ();
 }
