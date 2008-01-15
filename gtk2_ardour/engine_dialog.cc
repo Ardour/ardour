@@ -428,11 +428,21 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("netjack");
 	} else if (driver == X_("FFADO")) {
 		using_ffado = true;
-		cmd.push_back ("firewire");
+
+		/* do this until FFADO becomes the standard */
+
+		char* hack = getenv ("ARDOUR_FIREWIRE_DRIVER_NAME");
+
+		if (hack) {
+			cmd.push_back (hack);
+		} else {
+			cmd.push_back ("freebob");
+		}
+
 	} else if ( driver == X_("Dummy")) {
-      using_dummy = true;
-      cmd.push_back ("dummy");
-   }
+		using_dummy = true;
+		cmd.push_back ("dummy");
+	}
 
 	/* driver arguments */
 

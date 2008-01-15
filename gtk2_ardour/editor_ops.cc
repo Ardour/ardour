@@ -1520,6 +1520,12 @@ Editor::temporal_zoom (gdouble fpu)
 	double nfpu;
 	double l;
 
+	/* XXX this limit is also in ::set_frames_per_unit() */
+
+	if (frames_per_unit <= 2.0 && fpu <= frames_per_unit) {
+		return;
+	}
+
 	nfpu = fpu;
 	
 	new_page_size = (nframes_t) floor (canvas_width * nfpu);
@@ -1554,7 +1560,7 @@ Editor::temporal_zoom (gdouble fpu)
 		where = playhead_cursor->current_frame;
 		
 		l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
-		
+
 		if (l < 0) {
 			leftmost_after_zoom = 0;
 		} else if (l > max_frames) { 

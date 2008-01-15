@@ -329,11 +329,46 @@ Selection::add (TimeAxisView* track)
 }
 
 void
+Selection::add (vector<RegionView*>& v)
+{
+	/* XXX This method or the add (const RegionSelection&) needs to go
+	 */
+
+	bool changed = false;
+	
+	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
+		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
+			changed = regions.add ((*i));
+			if (Config->get_link_region_and_track_selection() && changed) {
+				add (&(*i)->get_trackview());
+			}
+		}
+	}
+
+	if (changed) {
+		RegionsChanged ();
+	}
+}
+
+void
 Selection::add (const RegionSelection& rs)
 {
-	if (!rs.empty()) {
-		regions.insert (regions.end(), rs.begin(), rs.end());
-		RegionsChanged(); /* EMIT SIGNAL */
+	/* XXX This method or the add (const vector<RegionView*>&) needs to go
+	 */
+
+	bool changed = false;
+	
+	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
+		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
+			changed = regions.add ((*i));
+			if (Config->get_link_region_and_track_selection() && changed) {
+				add (&(*i)->get_trackview());
+			}
+		}
+	}
+	
+	if (changed) {
+		RegionsChanged ();
 	}
 }
 
@@ -345,25 +380,6 @@ Selection::add (RegionView* r)
 		if (Config->get_link_region_and_track_selection()) {
 			add (&r->get_trackview());
 		}
-		RegionsChanged ();
-	}
-}
-
-void
-Selection::add (vector<RegionView*>& v)
-{
-	bool changed = false;
-
-	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
-		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
-			changed = regions.add ((*i));
-			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_trackview());
-			}
-		}
-	}
-
-	if (changed) {
 		RegionsChanged ();
 	}
 }
