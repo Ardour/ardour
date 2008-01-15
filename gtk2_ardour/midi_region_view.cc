@@ -603,6 +603,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 {
 	assert(note->time() >= 0);
 	//assert(note->time() < _region->length());
+	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
 
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 	
@@ -639,7 +640,8 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 
 	} else if (midi_view()->note_mode() == Percussive) {
 		
-		//cerr << "MRV::add_note percussive " << note->note() << " @ " << note->time() << endl;
+		//cerr << "MRV::add_note percussive " << note->note() << " @ " << note->time()
+		//	<< " .. " << note->end_time() << endl;
 		
 		const double diamond_size = midi_stream_view()->note_height() / 2.0;
 		const double x = trackview.editor.frame_to_pixel((nframes_t)note->time());
@@ -651,6 +653,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		ev_diamond->property_fill_color_rgba() = note_fill_color(note->velocity());
 		ev_diamond->property_outline_color_rgba() = note_outline_color(note->velocity());
 		_events.push_back(ev_diamond);
+	
 	}
 }
 

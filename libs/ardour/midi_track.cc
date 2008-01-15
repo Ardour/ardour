@@ -47,6 +47,7 @@ using namespace PBD;
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode, DataType::MIDI)
 	, _immediate_events(1024) // FIXME: size?
+	, _note_mode(Sustained)
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 

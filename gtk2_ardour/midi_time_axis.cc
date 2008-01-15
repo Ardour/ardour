@@ -230,7 +230,7 @@ MidiTimeAxisView::build_mode_menu()
 void
 MidiTimeAxisView::set_note_mode(NoteMode mode)
 {
-	if (_note_mode != mode) {
+	if (_note_mode != mode || midi_track()->note_mode() != mode) {
 		_note_mode = mode;
 		midi_track()->set_note_mode(mode);
 		_view->redisplay_diskstream();
