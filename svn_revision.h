@@ -1,4 +1,4 @@
 #ifndef __ardour_svn_revision_h__
 #define __ardour_svn_revision_h__
-static const char* ardour_svn_revision = "2903";
+static const char* ardour_svn_revision = "2914";
 #endif
