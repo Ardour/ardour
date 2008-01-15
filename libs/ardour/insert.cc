@@ -30,6 +30,10 @@
 #include <ardour/route.h>
 #include <ardour/ladspa_plugin.h>
 
+#ifdef HAVE_SLV2
+#include <ardour/lv2_plugin.h>
+#endif
+
 #ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
 #endif
@@ -515,6 +519,9 @@ boost::shared_ptr<Plugin>
 PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 {
 	boost::shared_ptr<LadspaPlugin> lp;
+#ifdef HAVE_SLV2
+	boost::shared_ptr<LV2Plugin> lv2p;
+#endif
 #ifdef VST_SUPPORT
 	boost::shared_ptr<VSTPlugin> vp;
 #endif
@@ -524,6 +531,10 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 
 	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LadspaPlugin (*lp));
+#ifdef HAVE_SLV2
+	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
+#endif
 #ifdef VST_SUPPORT
 	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new VSTPlugin (*vp));
@@ -673,6 +684,8 @@ PluginInsert::set_state(const XMLNode& node)
 
 	if (prop->value() == X_("ladspa") || prop->value() == X_("Ladspa")) { /* handle old school sessions */
 		type = ARDOUR::LADSPA;
+	} else if (prop->value() == X_("lv2")) {
+		type = ARDOUR::LV2;
 	} else if (prop->value() == X_("vst")) {
 		type = ARDOUR::VST;
 	} else if (prop->value() == X_("audiounit")) {

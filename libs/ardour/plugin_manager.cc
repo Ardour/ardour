@@ -36,6 +36,11 @@
 #include <ardour/plugin.h>
 #include <ardour/ladspa_plugin.h>
 
+#ifdef HAVE_SLV2
+#include <slv2/slv2.h>
+#include <ardour/lv2_plugin.h>
+#endif
+
 #ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
 #endif
@@ -101,6 +106,9 @@ PluginManager::PluginManager ()
 		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
 	} 
 
+	_lv2_world = slv2_world_new();
+	slv2_world_load_all(_lv2_world);
+
 	refresh ();
 }
 
@@ -108,6 +116,9 @@ void
 PluginManager::refresh ()
 {
 	ladspa_refresh ();
+#ifdef HAVE_SLV2
+	lv2_refresh ();
+#endif
 #ifdef VST_SUPPORT
 	if (Config->get_use_vst()) {
 		vst_refresh ();
@@ -341,6 +352,21 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 
 	return label;
 }
+
+#ifdef HAVE_SLV2
+void
+PluginManager::lv2_refresh ()
+{
+	lv2_discover();
+}
+
+int
+PluginManager::lv2_discover ()
+{
+	_lv2_plugin_info = LV2PluginInfo::discover(_lv2_world);
+	return 0;
+}
+#endif
 
 #ifdef HAVE_AUDIOUNITS
 void

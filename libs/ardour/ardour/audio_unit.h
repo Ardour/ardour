@@ -143,9 +143,9 @@ class AUPluginInfo : public PluginInfo {
   private:
 	boost::shared_ptr<CAComponentDescription> descriptor;
 
-        static void discover_music (PluginInfoList&);
-        static void discover_fx (PluginInfoList&);
-        static void discover_by_description (PluginInfoList&, CAComponentDescription&);
+	static void discover_music (PluginInfoList&);
+	static void discover_fx (PluginInfoList&);
+	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;

@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2008 Paul Davis
+    Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +18,8 @@
 
 */
 
-#ifndef __ardour_ladspa_plugin_h__
-#define __ardour_ladspa_plugin_h__
+#ifndef __ardour_lv2_plugin_h__
+#define __ardour_lv2_plugin_h__
 
 #include <set>
 #include <vector>
@@ -30,27 +31,27 @@
 #include <pbd/stateful.h> 
 
 #include <jack/types.h>
-#include <ardour/ladspa.h>
+#include <slv2/slv2.h>
 #include <ardour/plugin.h>
 
 namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-class LadspaPlugin : public ARDOUR::Plugin
+class LV2Plugin : public ARDOUR::Plugin
 {
   public:
-	LadspaPlugin (void *module, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, nframes_t sample_rate);
-	LadspaPlugin (const LadspaPlugin &);
-	~LadspaPlugin ();
+	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, SLV2Plugin plugin, nframes_t sample_rate);
+	LV2Plugin (const LV2Plugin &);
+	~LV2Plugin ();
 
 	/* Plugin interface */
 	
 	std::string unique_id() const;
-	const char* label() const           { return _descriptor->Label; }
-	const char* name() const            { return _descriptor->Name; }
-	const char* maker() const           { return _descriptor->Maker; }
-	uint32_t    parameter_count() const { return _descriptor->PortCount; }
+	const char* label() const           { return slv2_plugin_get_name(_plugin); }
+	const char* name() const            { return slv2_plugin_get_name(_plugin); }
+	const char* maker() const           { return slv2_plugin_get_author_name(_plugin); }
+	uint32_t    parameter_count() const { return slv2_plugin_get_num_ports(_plugin); }
 	float       default_value (uint32_t port);
 	nframes_t   latency() const;
 	void        set_parameter (uint32_t port, float val);
@@ -61,32 +62,31 @@ class LadspaPlugin : public ARDOUR::Plugin
 	std::set<uint32_t> automatable() const;
 
 	void activate () { 
-		if (!_was_activated && _descriptor->activate)
-			_descriptor->activate (_handle);
-
-		_was_activated = true;
+		if (!_was_activated) {
+			slv2_instance_activate(_instance);
+			_was_activated = true;
+		}
 	}
 
 	void deactivate () {
-		if (_was_activated && _descriptor->deactivate)
-			_descriptor->deactivate (_handle);
-	
-		_was_activated = false;
+		if (_was_activated) {
+			slv2_instance_deactivate(_instance);
+			_was_activated = false;
+		}
 	}
 
 	void cleanup () {
 		activate();
 		deactivate();
-
-		if (_descriptor->cleanup)
-			_descriptor->cleanup (_handle);
+		slv2_instance_free(_instance);
+		_instance = NULL;
 	}
 
 	void set_block_size (nframes_t nframes) {}
 	
 	int         connect_and_run (std::vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
 	std::string describe_parameter (uint32_t);
-	std::string state_node_name() const { return "ladspa"; }
+	std::string state_node_name() const { return "lv2"; }
 	void        print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio(uint32_t) const;
@@ -103,45 +103,36 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	int require_output_streams (uint32_t);
 	
-	/* LADSPA extras */
-
-	LADSPA_Properties           properties() const                { return _descriptor->Properties; }
-	uint32_t                    index() const                     { return _index; }
-	const char *                copyright() const                 { return _descriptor->Copyright; }
-	LADSPA_PortDescriptor       port_descriptor(uint32_t i) const { return _descriptor->PortDescriptors[i]; }
-	const LADSPA_PortRangeHint* port_range_hints() const          { return _descriptor->PortRangeHints; }
-	const char * const *        port_names() const                { return _descriptor->PortNames; }
-	
-	void set_gain (float gain)                    { _descriptor->set_run_adding_gain (_handle, gain); }
-	void run_adding (uint32_t nsamples)           { _descriptor->run_adding (_handle, nsamples); }
-	void connect_port (uint32_t port, float *ptr) { _descriptor->connect_port (_handle, port, ptr); }
-
   private:
 	void*                    _module;
-	const LADSPA_Descriptor* _descriptor;
-	LADSPA_Handle            _handle;
+	SLV2Plugin               _plugin;
+	SLV2Template             _template;
+	SLV2Instance             _instance;
 	nframes_t                _sample_rate;
-	LADSPA_Data*             _control_data;
-	LADSPA_Data*             _shadow_data;
-	LADSPA_Data*             _latency_control_port;
-	uint32_t                 _index;
+	float*                   _control_data;
+	float*                   _shadow_data;
+	float*                   _latency_control_port;
 	bool                     _was_activated;
+	vector<bool>             _port_is_input;
 
-	void init (void *mod, uint32_t index, nframes_t rate);
+	void init (SLV2Plugin plugin, nframes_t rate);
 	void run (nframes_t nsamples);
 	void latency_compute_run ();
 };
 
-class LadspaPluginInfo : public PluginInfo {
-  public:	
-	LadspaPluginInfo () { };
-	~LadspaPluginInfo () { };
+class LV2PluginInfo : public PluginInfo {
+public:	
+	LV2PluginInfo (void* slv2_plugin);;
+	~LV2PluginInfo ();;
+	static PluginInfoList discover (void* slv2_world);
 
 	PluginPtr load (Session& session);
+
+	void* _slv2_plugin;
 };
 
-typedef boost::shared_ptr<LadspaPluginInfo> LadspaPluginInfoPtr;
+typedef boost::shared_ptr<LV2PluginInfo> LV2PluginInfoPtr;
 
 } // namespace ARDOUR
 
-#endif /* __ardour_ladspa_plugin_h__ */
+#endif /* __ardour_lv2_plugin_h__ */

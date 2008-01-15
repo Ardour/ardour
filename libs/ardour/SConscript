@@ -57,6 +57,7 @@ insert.cc
 io.cc
 jack_slave.cc
 ladspa_plugin.cc
+lv2_plugin.cc
 location.cc
 mtc_slave.cc
 named_selection.cc
@@ -110,6 +111,9 @@ timefx_sources = [ ]
 if ardour['VST']:
 	extra_sources += vst_files
 	ardour.Append(CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
+
+if ardour['LV2']:
+	ardour.Append(CCFLAGS="-DHAVE_SLV2")
 
 if ardour['LIBLO']:
     extra_sources += osc_files
@@ -272,6 +276,9 @@ else:
 	ardour.Merge ([ libraries['soundtouch'] ])
 	timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
 	
+if ardour['LV2']:
+	ardour.Merge ([ libraries['slv2'] ])
+
 if ardour['LIBLO']:
 	ardour.Merge ([ libraries['lo'] ])
 

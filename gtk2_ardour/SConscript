@@ -270,6 +270,9 @@ if env['VST']:
 	extra_sources += vst_files
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
+if env['LV2']:
+	gtkardour.Append (CCFLAGS="-DHAVE_SLV2")
+
 if gtkardour['GTKOSX']:
 	extra_sources += gtkosx_files
 	gtkardour.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")

@@ -1567,6 +1567,7 @@ Route::add_redirect_from_xml (const XMLNode& node)
 				bool have_insert = false;
 
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+				    prop->value() == "lv2" ||
 				    prop->value() == "vst" ||
 				    prop->value() == "audiounit") {
 					
