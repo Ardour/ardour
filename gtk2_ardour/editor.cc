@@ -1821,8 +1821,8 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	MenuList& nudge_items = nudge_menu->items();
 	nudge_menu->set_name ("ArdourContextMenu");
 	
-	nudge_items.push_back (MenuElem (_("Nudge fwd"), (bind (mem_fun(*this, &Editor::nudge_forward), false))));
-	nudge_items.push_back (MenuElem (_("Nudge bwd"), (bind (mem_fun(*this, &Editor::nudge_backward), false))));
+	nudge_items.push_back (MenuElem (_("Nudge fwd"), (bind (mem_fun(*this, &Editor::nudge_forward), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge bwd"), (bind (mem_fun(*this, &Editor::nudge_backward), false, false))));
 	nudge_items.push_back (MenuElem (_("Nudge fwd by capture offset"), (mem_fun(*this, &Editor::nudge_forward_capture_offset))));
 	nudge_items.push_back (MenuElem (_("Nudge bwd by capture offset"), (mem_fun(*this, &Editor::nudge_backward_capture_offset))));
 
@@ -2775,8 +2775,8 @@ Editor::setup_toolbar ()
 	nudge_box->set_spacing(1);
 	nudge_box->set_border_width (2);
 
-	nudge_forward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_forward), false));
-	nudge_backward_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::nudge_backward), false));
+	nudge_forward_button.signal_button_release_event().connect (mem_fun(*this, &Editor::nudge_forward_release), false);
+	nudge_backward_button.signal_button_release_event().connect (mem_fun(*this, &Editor::nudge_backward_release), false);
 
 	nudge_box->pack_start (nudge_backward_button, false, false);
 	nudge_box->pack_start (nudge_forward_button, false, false);
