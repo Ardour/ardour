@@ -132,6 +132,16 @@ fixup_bundle_environment ()
 	path += "/../Plugins";
 	
 	setenv ("LADSPA_PATH", path.c_str(), 1);
+	
+	cstr = getenv ("LV2_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	}
+	path = dir_path;
+	path += "/../Plugins";
+	
+	setenv ("LV2_PATH", path.c_str(), 1);
 
 	path = dir_path;
 	path += "/../Frameworks/clearlooks";
