@@ -536,6 +536,7 @@ if env['LV2']:
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
 	else:
 		print 'Building Ardour with LV2 support requires SLV2 >= 0.4.4'
+		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
 		env['LV2'] = 0
 	conf.Finish()
         
