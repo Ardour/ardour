@@ -115,6 +115,7 @@ if ardour['VST']:
 if ardour['LV2']:
 	extra_sources += lv2_files
 	ardour.Append(CCFLAGS="-DHAVE_SLV2")
+	ardour.Merge ([ libraries['slv2'] ])
 
 if ardour['LIBLO']:
     extra_sources += osc_files
