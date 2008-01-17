@@ -84,6 +84,7 @@ midi_playlist.cc
 midi_port.cc
 midi_region.cc
 midi_source.cc
+midi_stretch.cc
 midi_track.cc
 mix.cc
 mtc_slave.cc

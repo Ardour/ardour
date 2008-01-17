@@ -380,6 +380,8 @@ namespace ARDOUR {
 	};
 
 	struct TimeFXRequest : public InterThreadInfo {
+		TimeFXRequest() : time_fraction(0), pitch_fraction(0),
+			quick_seek(false), antialias(false),  opts(0) {}
 	    float time_fraction;
 	    float pitch_fraction;
 	    /* SoundTouch */

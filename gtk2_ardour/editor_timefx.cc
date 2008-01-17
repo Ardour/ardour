@@ -42,6 +42,7 @@
 #include <ardour/audioregion.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/stretch.h>
+#include <ardour/midi_stretch.h>
 #include <ardour/pitch.h>
 
 #ifdef USE_RUBBERBAND
@@ -183,7 +184,34 @@ Editor::TimeFXDialog::delete_in_progress (GdkEventAny* ev)
 int
 Editor::time_stretch (RegionSelection& regions, float fraction)
 {
-	return time_fx (regions, fraction, false);
+	// FIXME: kludge, implement stretching of selection of both types
+	
+	if (regions.front()->region()->data_type() == DataType::AUDIO) {
+		// Audio, pop up timefx dialog
+		return time_fx (regions, fraction, false);
+	} else {
+		// MIDI, just stretch
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&regions.front()->get_time_axis_view());
+		if (!rtv)
+			return -1;
+		
+		boost::shared_ptr<Playlist> playlist
+			= rtv->track()->diskstream()->playlist();
+
+	    ARDOUR::TimeFXRequest request;
+		request.time_fraction = fraction;
+		MidiStretch stretch(*session, request);
+		begin_reversible_command ("midi stretch");
+		stretch.run(regions.front()->region());
+		XMLNode &before = playlist->get_state();
+		playlist->replace_region (regions.front()->region(), stretch.results[0],
+				regions.front()->region()->position());
+		XMLNode &after = playlist->get_state();
+		session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+		commit_reversible_command ();
+	}
+
+	return 0;
 }
 
 int

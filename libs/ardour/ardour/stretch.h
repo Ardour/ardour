@@ -22,10 +22,6 @@
 
 #include <ardour/filter.h>
 
-namespace ARDOUR {
-	class AudioRegion;
-}
-
 #ifdef USE_RUBBERBAND
 
 #include <ardour/rb_effect.h>

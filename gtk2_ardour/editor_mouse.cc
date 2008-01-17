@@ -5331,11 +5331,15 @@ Editor::end_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	nframes_t newlen = drag_info.last_pointer_frame - clicked_regionview->region()->position();
-#ifdef USE_RUBBERBAND
-	float percentage = (float) ((double) newlen / (double) clicked_regionview->region()->length());
-#else
-	float percentage = (float) ((double) newlen - (double) clicked_regionview->region()->length()) / ((double) newlen) * 100.0f;
+
+	float percentage = (double) newlen / (double) clicked_regionview->region()->length();
+
+#ifndef USE_RUBBERBAND
+	// Soundtouch uses percentage / 100 instead of normal (/ 1) 
+	if (clicked_regionview->region()->data_type() == DataType::AUDIO) {
+		percentage = (float) ((double) newlen - (double) clicked_regionview->region()->length()) / ((double) newlen) * 100.0f;
 #endif	
+	}
 
 	begin_reversible_command (_("timestretch"));
 
