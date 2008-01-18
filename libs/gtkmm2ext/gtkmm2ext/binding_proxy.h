@@ -33,7 +33,7 @@ class BindingProxy : public sigc::trackable
 {
    public:
 	BindingProxy (PBD::Controllable&);
-	virtual ~BindingProxy() {}
+	virtual ~BindingProxy();
 	
 	void set_bind_button_state (guint button, guint statemask);
 	void get_bind_button_state (guint &button, guint &statemask);
@@ -42,7 +42,7 @@ class BindingProxy : public sigc::trackable
 
   protected:
 
-	Gtkmm2ext::PopUp     prompter;
+	Gtkmm2ext::PopUp*  prompter;
 	PBD::Controllable& controllable;
 	guint bind_button;
 	guint bind_statemask;

@@ -399,8 +399,9 @@ class IO : public PBD::StatefulDestructible
 	bool ensure_inputs_locked (uint32_t, bool clear, void *src);
 	bool ensure_outputs_locked (uint32_t, bool clear, void *src);
 
-	int32_t find_input_port_hole ();
-	int32_t find_output_port_hole ();
+	std::string build_legal_port_name (bool for_input);
+	int32_t find_input_port_hole (const char* base);
+	int32_t find_output_port_hole (const char* base);
 };
 
 } // namespace ARDOUR

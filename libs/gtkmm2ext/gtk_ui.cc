@@ -591,7 +591,8 @@ UI::flush_pending ()
 bool
 UI::just_hide_it (GdkEventAny *ev, Window *win)
 {
-	win->hide_all ();
+	cerr << "++++ JUST HIDING " << win->get_window() << endl;
+	win->hide ();
 	return true;
 }
 

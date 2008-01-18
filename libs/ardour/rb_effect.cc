@@ -74,9 +74,12 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	nframes_t pos = 0;
 	int avail = 0;
 
+	double this_time_fraction = tsr.time_fraction * region->stretch ();
+	double this_pitch_fraction = tsr.pitch_fraction * region->shift ();
+
 	RubberBandStretcher stretcher (session.frame_rate(), region->n_channels(),
 				       (RubberBandStretcher::Options) tsr.opts,
-				       tsr.time_fraction, tsr.pitch_fraction);
+				       this_time_fraction, this_pitch_fraction);
 	
 	stretcher.setExpectedInputDuration(region->length());
 	stretcher.setDebugLevel(1);
@@ -91,14 +94,14 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	   digits just to disambiguate close but not identical FX
 	*/
 
-	if (tsr.time_fraction == 1.0) {
-		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.pitch_fraction * 100.0f));
-	} else if (tsr.pitch_fraction == 1.0) {
-		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.time_fraction * 100.0f));
+	if (this_time_fraction == 1.0) {
+		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (this_pitch_fraction * 100.0f));
+	} else if (this_pitch_fraction == 1.0) {
+		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (this_time_fraction * 100.0f));
 	} else {
 		snprintf (suffix, sizeof (suffix), "@%d-%d", 
-			  (int) floor (tsr.time_fraction * 100.0f),
-			  (int) floor (tsr.pitch_fraction * 100.0f));
+			  (int) floor (this_time_fraction * 100.0f),
+			  (int) floor (this_pitch_fraction * 100.0f));
 	}
 
 	/* create new sources */
@@ -259,9 +262,8 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 		nframes_t start;
 		nframes_t length;
 
-		// note: tsr.time_fraction is a percentage of original length. 100 = no change, 
-		// 50 is half as long, 200 is twice as long, etc.
-		
+		// note: this_time_fraction is a ratio of original length. 1.0 = no change, 
+		// 0.5 is half as long, 2.0 is twice as long, etc.
 		
 		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
 		float shift = (*x)->shift() * tsr.pitch_fraction;

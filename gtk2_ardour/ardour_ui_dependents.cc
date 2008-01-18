@@ -31,6 +31,7 @@
 #include "public_editor.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
+#include "splash.h"
 #include "route_params_ui.h"
 #include "i18n.h"
 
@@ -106,9 +107,21 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	s->restore_history ("");
 }
 
+static bool
+_hide_splash (gpointer arg)
+{
+	((ARDOUR_UI*)arg)->hide_splash();
+	return false;
+}
+
 void
 ARDOUR_UI::goto_editor_window ()
 {
+	if (splash && splash->is_visible()) {
+		// in 2 seconds, hide the splash screen 
+		Glib::signal_timeout().connect (bind (sigc::ptr_fun (_hide_splash), this), 2000);
+	}
+
 	editor->show_window ();
 	editor->present();
 	flush_pending ();

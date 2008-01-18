@@ -47,6 +47,7 @@
 #include <ardour/region_factory.h>
 #include <ardour/playlist_factory.h>
 #include <ardour/reverse.h>
+#include <ardour/dB.h>
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -62,6 +63,7 @@
 #include "gtk-custom-hruler.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -4090,6 +4092,8 @@ Editor::denormalize_region ()
 		return;
 	}
 
+	ExclusiveRegionSelection (*this, entered_regionview);
+
 	if (selection->regions.empty()) {
 		return;
 	}
@@ -4102,6 +4106,62 @@ Editor::denormalize_region ()
 			continue;
 		XMLNode &before = arv->region()->get_state();
 		arv->audio_region()->set_scale_amplitude (1.0f);
+		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
+	}
+
+	commit_reversible_command ();
+}
+
+void
+Editor::adjust_region_scale_amplitude (bool up)
+{
+	if (!session) {
+		return;
+	}
+
+	ExclusiveRegionSelection (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	begin_reversible_command ("denormalize");
+
+	for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (!arv)
+			continue;
+		XMLNode &before = arv->region()->get_state();
+		
+		double fraction = gain_to_slider_position (arv->audio_region()->scale_amplitude ());
+		
+		cerr << "slider pos for " << arv->audio_region()->scale_amplitude ()
+		     << " = " << fraction
+		     << endl;
+
+		if (up) {
+			fraction += 0.05;
+			fraction = min (fraction, 1.0);
+		} else {
+			fraction -= 0.05;
+			fraction = max (fraction, 0.0);
+		}
+
+		if (!up && fraction <= 0) {
+			continue;
+		}
+
+		if (up && fraction >= 1.0) {
+			continue;
+		}
+
+		fraction = slider_position_to_gain (fraction);
+		fraction = coefficient_to_dB (fraction);
+		fraction = dB_to_coefficient (fraction);
+		
+		cerr << "set scale amp for " << arv->audio_region()->name() << " to " << fraction << endl;
+
+		arv->audio_region()->set_scale_amplitude (fraction);
 		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
 	}
 

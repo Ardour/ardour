@@ -21,6 +21,9 @@
 #define __ardour_gtk_splash_h__
 
 #include <gtkmm/window.h>
+#include <gtkmm/drawingarea.h>
+#include <gtkmm/box.h>
+#include <gtkmm/label.h>
 #include <gdkmm/pixbuf.h>
 
 class ARDOUR_UI;
@@ -31,11 +34,16 @@ class Splash : public Gtk::Window
 	Splash ();
 	~Splash () {}
 
-	bool on_expose_event (GdkEventExpose*);
+	bool expose (GdkEventExpose*);
 	bool on_button_release_event (GdkEventButton*);
+	void on_realize ();
 
+	void message (const std::string& msg);
+	
   private:
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+	Gtk::DrawingArea darea;
+	Glib::RefPtr<Pango::Layout> layout;
 };	
 
 #endif /* __ardour_gtk_splash_h__ */

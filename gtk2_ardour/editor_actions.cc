@@ -353,6 +353,12 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region"), mem_fun(*this, &Editor::normalize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "boost-region-gain", _("Boost Region Gain"), bind (mem_fun(*this, &Editor::adjust_region_scale_amplitude), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "cut-region-gain", _("Cut Region Gain"), bind (mem_fun(*this, &Editor::adjust_region_scale_amplitude), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-chunk", _("Insert Chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));

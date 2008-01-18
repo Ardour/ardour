@@ -106,7 +106,7 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 gint
 just_hide_it (GdkEventAny *ev, Gtk::Window *win)
 {
-	win->hide_all ();
+	win->hide ();
 	return TRUE;
 }
 

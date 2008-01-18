@@ -74,10 +74,16 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de</string>"
 fi
 
+#
+# if we're not going to bundle JACK, make sure we can find
+# jack in the places where it might be
+#
+
 if test x$WITH_JACK != x ; then
     env="$env<key>ARDOUR_WITH_JACK</key><string>true</string>"
 else
     env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin</string>"
+    env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
 fi
 
 env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"

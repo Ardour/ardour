@@ -512,7 +512,7 @@ PluginInfoList
 AUPluginInfo::discover ()
 {
 	PluginInfoList plugs;
-
+	
 	discover_fx (plugs);
 	discover_music (plugs);
 
