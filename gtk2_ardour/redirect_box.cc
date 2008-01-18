@@ -1379,7 +1379,7 @@ RedirectBox::route_name_changed (void* src, PluginUIWindow* plugin_ui, boost::we
 string 
 RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
 {
-	string maker = pi->plugin()->maker();
+	string maker = pi->plugin()->maker() ? pi->plugin()->maker() : "";
 	string::size_type email_pos;
 
 	if ((email_pos = maker.find_first_of ('<')) != string::npos) {
