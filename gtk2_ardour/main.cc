@@ -59,16 +59,6 @@ extern int curvetest (string);
 static ARDOUR_UI  *ui = 0;
 static char* localedir = LOCALEDIR;
 
-gint
-show_ui_callback (void *arg)
-{
- 	ARDOUR_UI * ui = (ARDOUR_UI *) arg;
-
-	ui->hide_splash();
-	
-	return FALSE;
-}
-
 #ifdef __APPLE__
 
 #include <mach-o/dyld.h>
@@ -333,13 +323,6 @@ int main (int argc, char* argv[])
 	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;
 		exit (1);
-	}
-
-	if (!no_splash) {
-		ui->show_splash ();
-		if (session_name.length()) {  
-			g_timeout_add (4000, show_ui_callback, ui);
-		}
 	}
 
 	setup_keybindings (ui);

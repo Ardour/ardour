@@ -73,6 +73,7 @@ class Mixer_UI;
 class ConnectionEditor;
 class RouteParams_UI;
 class About;
+class Splash;
 class AddRouteDialog;
 class LocationUI;
 class ThemeManager;
@@ -109,6 +110,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	
 	void show_splash ();
 	void hide_splash ();
+
+	void show_about ();
+	void hide_about ();
 	
 	int load_session (const Glib::ustring & path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
@@ -132,8 +136,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-	bool get_session_parameters (Glib::ustring path, bool have_engine = false, bool should_be_new = false);
-	gint cmdline_new_session (string path);
+	bool get_session_parameters (bool have_engine = false, bool should_be_new = false);
+	void parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring& session_name, Glib::ustring& session_path, bool& existing_session);
+	int  load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session);
+	int  build_session_from_nsd (const Glib::ustring& session_name, const Glib::ustring& session_path);
+	bool ask_about_loading_existing_session (const Glib::ustring& session_path);
 	int  unload_session (bool hide_stuff = false);
 	void close_session(); 
 
@@ -639,6 +646,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void count_recenabled_streams (ARDOUR::Route&);
 
 	About* about;
+	Splash* splash;
 	bool shown_flag;
 	/* cleanup */
 

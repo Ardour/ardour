@@ -717,7 +717,7 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 
 	boost::shared_ptr<Plugin> plugin;
-	
+
 	plugin = find_plugin (_session, prop->value(), type);	
 
 	if (plugin == 0) {

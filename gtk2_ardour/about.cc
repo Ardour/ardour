@@ -153,6 +153,8 @@ static const char* authors[] = {
 	N_("Nedko Arnaudov"),
 	N_("Carl Hetherington"),
 	N_("Colin Fletcher"),
+	N_("Roland Stigge"),
+	N_("Audun Halland"),
 	0
 };
 
@@ -175,7 +177,7 @@ About::About ()
 	: paypal_pixmap (paypal_xpm)
 #endif
 {
-	set_type_hint(Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
+	// set_type_hint(Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
 
 	string path;
 	string t;

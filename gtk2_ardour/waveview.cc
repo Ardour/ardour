@@ -267,6 +267,22 @@ Glib::PropertyProxy_ReadOnly<guint> WaveView::property_zero_color() const
 {
 	return Glib::PropertyProxy_ReadOnly<guint> (this, "zero_color");
 }
+Glib::PropertyProxy<guint> WaveView::property_fill_color()
+{
+	return Glib::PropertyProxy<guint> (this, "fill_color");
+}
+Glib::PropertyProxy_ReadOnly<guint> WaveView::property_fill_color() const
+{
+	return Glib::PropertyProxy_ReadOnly<guint> (this, "fill_color");
+}
+Glib::PropertyProxy<gint> WaveView::property_filled()
+{
+	return Glib::PropertyProxy<gint> (this, "filled");
+}
+Glib::PropertyProxy_ReadOnly<gint> WaveView::property_filled() const
+{
+	return Glib::PropertyProxy_ReadOnly<gint> (this, "filled");
+}
 Glib::PropertyProxy<gint> WaveView::property_rectified()
 {
 	return Glib::PropertyProxy<gint> (this, "rectified");
@@ -274,6 +290,14 @@ Glib::PropertyProxy<gint> WaveView::property_rectified()
 Glib::PropertyProxy_ReadOnly<gint> WaveView::property_rectified() const
 {
 	return Glib::PropertyProxy_ReadOnly<gint> (this, "rectified");
+}
+Glib::PropertyProxy<gint> WaveView::property_zero_line()
+{
+	return Glib::PropertyProxy<gint> (this, "zero_line");
+}
+Glib::PropertyProxy_ReadOnly<gint> WaveView::property_zero_line() const
+{
+	return Glib::PropertyProxy_ReadOnly<gint> (this, "zero_line");
 }
 Glib::PropertyProxy<guint> WaveView::property_region_start()
 {

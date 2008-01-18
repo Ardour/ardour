@@ -1200,6 +1200,7 @@ AudioRegionView::set_frame_color ()
 				(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
 			} else {
 				(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+				(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
 			}
 		}
 	}

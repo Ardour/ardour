@@ -211,6 +211,7 @@ route_ui.cc
 selection.cc
 sfdb_ui.cc
 send_ui.cc
+splash.cc
 streamview.cc
 audio_streamview.cc
 tape_region_view.cc
