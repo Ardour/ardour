@@ -2164,11 +2164,9 @@ ARDOUR_UI::end_loading_messages ()
 void
 ARDOUR_UI::loading_message (const std::string& msg)
 {
-#ifdef __APPLE__
 	show_splash ();
 	splash->message (msg);
 	flush_pending ();
-#endif 				
 }
 	
 bool
@@ -2580,6 +2578,7 @@ ARDOUR_UI::show_splash ()
 	}
 
 	splash->show ();
+	splash->queue_draw ();
 	splash->get_window()->process_updates (true);
 	flush_pending ();
 }
