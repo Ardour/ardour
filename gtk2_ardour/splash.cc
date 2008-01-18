@@ -60,11 +60,6 @@ Splash::expose (GdkEventExpose* ev)
 {
 	RefPtr<Gdk::Window> window = darea.get_window();
 
-	cerr << "splash expose " << ev->area.x << ", "
-	     << ev->area.y
-	     << ev->area.width << " x "
-	     << ev->area.height 
-	     << endl;
 	window->draw_pixbuf (get_style()->get_bg_gc (STATE_NORMAL), pixbuf,
 			     ev->area.x, ev->area.y,
 			     ev->area.x, ev->area.y,
