@@ -54,16 +54,15 @@ UIConfiguration::~UIConfiguration ()
 }
 
 int
-UIConfiguration::load_state ()
+UIConfiguration::load_defaults ()
 {
-	bool found = false;
-
+	int found = 0;
 	std::string rcfile = find_config_file ("ardour2_ui_default.conf");
 	
 	if (rcfile.length())
 	{
 		XMLTree tree;
-		found = true;
+		found = 1;
 
 		cerr << string_compose (_("loading default ui configuration file %1"), rcfile) << endl;
 		
@@ -77,8 +76,14 @@ UIConfiguration::load_state ()
 			return -1;
 		}
 	}
-
-	rcfile = find_config_file ("ardour2_ui.conf");
+	return found;
+}
+	
+int
+UIConfiguration::load_state ()
+{
+	int found = load_defaults ();
+	std::string rcfile = find_config_file ("ardour2_ui.conf");
 
 	if (rcfile.length())
 	{

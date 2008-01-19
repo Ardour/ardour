@@ -25,6 +25,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/colorselection.h>
 #include <gtkmm/radiobutton.h>
+#include <gtkmm/button.h>
 #include <gtkmm/rc.h>
 #include "ardour_dialog.h"
 #include "ui_config.h"
@@ -37,6 +38,7 @@ class ThemeManager : public ArdourDialog
 
 	int save (std::string path);
 	void setup_theme ();
+	void reset_canvas_colors();
 	
 	void on_dark_theme_button_toggled ();
 	void on_light_theme_button_toggled ();
@@ -66,6 +68,7 @@ class ThemeManager : public ArdourDialog
 	Gtk::HBox theme_selection_hbox;
 	Gtk::RadioButton dark_button;
 	Gtk::RadioButton light_button;
+	Gtk::Button reset_button;
 
 	bool button_press_event (GdkEventButton*);
 };

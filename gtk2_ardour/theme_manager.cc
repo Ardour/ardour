@@ -44,7 +44,8 @@ sigc::signal<void,uint32_t> ColorChanged;
 ThemeManager::ThemeManager()
 	: ArdourDialog ("ThemeManager"),
 	dark_button ("Dark Theme"),
-	light_button ("Light Theme")
+	light_button ("Light Theme"),
+	reset_button ("Restore Defaults")
 {
 	color_list = ListStore::create (columns);
 	color_display.set_model (color_list);
@@ -71,6 +72,7 @@ ThemeManager::ThemeManager()
 
 	get_vbox()->set_homogeneous(false);
 	get_vbox()->pack_start (theme_selection_hbox, PACK_SHRINK);
+	get_vbox()->pack_start (reset_button, PACK_SHRINK);
 	get_vbox()->pack_start (scroller);
 
 	color_display.signal_button_press_event().connect (mem_fun (*this, &ThemeManager::button_press_event), false);
@@ -82,6 +84,7 @@ ThemeManager::ThemeManager()
 	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
 	dark_button.signal_toggled().connect (mem_fun (*this, &ThemeManager::on_dark_theme_button_toggled));
 	light_button.signal_toggled().connect (mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
+	reset_button.signal_clicked().connect (mem_fun (*this, &ThemeManager::reset_canvas_colors));
 
 	set_size_request (-1, 400);
 	setup_theme ();
@@ -210,6 +213,8 @@ void
 ThemeManager::setup_theme ()
 {
 	int r, g, b, a;
+	color_list->clear();
+
 	for (std::vector<UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
 		
 		TreeModel::Row row = *(color_list->append());
@@ -244,5 +249,12 @@ ThemeManager::setup_theme ()
 	}
 
 	load_rc_file(rcfile, false);
+}
+
+void
+ThemeManager::reset_canvas_colors()
+{
+	ARDOUR_UI::config()->load_defaults();
+	setup_theme ();
 }
 

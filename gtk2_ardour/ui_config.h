@@ -110,6 +110,7 @@ class UIConfiguration : public Stateful
 
 	int load_state ();
 	int save_state ();
+	int load_defaults ();
 
 	int set_state (const XMLNode&);
 	XMLNode& get_state (void);
