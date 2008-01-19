@@ -95,6 +95,9 @@ class IO : public Automatable, public Latent
 	void set_output_minimum (ChanCount n);
 	void set_output_maximum (ChanCount n);
 	
+	bool active() const { return _active; }
+	void set_active (bool yn);
+	
 	DataType default_type() const         { return _default_type; }
 	void     set_default_type(DataType t) { _default_type = t; }
 	
@@ -184,6 +187,8 @@ class IO : public Automatable, public Latent
 	const ChanCount& n_outputs () const { return _outputs.count(); }
 
 	void attach_buffers(ChanCount ignored);
+	
+	sigc::signal<void>                active_changed;
 
 	sigc::signal<void,IOChange,void*> input_changed;
 	sigc::signal<void,IOChange,void*> output_changed;
@@ -268,6 +273,7 @@ class IO : public Automatable, public Latent
   protected:
 	Panner*             _panner;
 	BufferSet*          _output_buffers; //< Set directly to output port buffers
+	bool                _active;
 	gain_t              _gain;
 	gain_t              _effective_gain;
 	gain_t              _desired_gain;

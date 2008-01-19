@@ -144,9 +144,15 @@ public:
   Glib::PropertyProxy_ReadOnly<guint> property_wave_color() const;
   Glib::PropertyProxy<guint> property_clip_color();
   Glib::PropertyProxy_ReadOnly<guint> property_clip_color() const;
-  Glib::PropertyProxy<gint> property_rectified();
+  Glib::PropertyProxy<guint> property_fill_color();
+  Glib::PropertyProxy_ReadOnly<guint> property_fill_color() const;
+  Glib::PropertyProxy<gint> property_filled();
+  Glib::PropertyProxy_ReadOnly<gint> property_filled() const;
+  Glib::PropertyProxy<gint> property_zero_line();
+  Glib::PropertyProxy_ReadOnly<gint> property_zero_line() const;
   Glib::PropertyProxy<guint> property_zero_color();
   Glib::PropertyProxy_ReadOnly<guint> property_zero_color() const;
+  Glib::PropertyProxy<gint> property_rectified();
   Glib::PropertyProxy_ReadOnly<gint> property_rectified() const;
   Glib::PropertyProxy<guint> property_region_start();
   Glib::PropertyProxy_ReadOnly<guint> property_region_start() const;

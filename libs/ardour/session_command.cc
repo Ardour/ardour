@@ -90,7 +90,10 @@ Session::memento_command_factory(XMLNode *n)
 	    if (sources.count(id))
 		    return new MementoCommand<Source>(*sources[id], before, after);
     } else if (obj_T == typeid (Location).name()) {
-	    return new MementoCommand<Location>(*_locations.get_location_by_id(id), before, after);
+	    Location* loc = _locations.get_location_by_id(id);
+	    if (loc) {
+		    return new MementoCommand<Location>(*loc, before, after);
+	    }
     } else if (obj_T == typeid (Locations).name()) {
 	    return new MementoCommand<Locations>(_locations, before, after);
     } else if (obj_T == typeid (TempoMap).name()) {

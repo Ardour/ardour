@@ -142,6 +142,7 @@ arch_specific_objects = [ ]
 
 osc_files = [ 'osc.cc' ]
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
+lv2_files = [ 'lv2_plugin.cc' ]
 audiounit_files = [ 'audio_unit.cc' ]
 coreaudio_files = [ 'coreaudiosource.cc' ]
 extra_sources = [ ]
@@ -150,6 +151,10 @@ timefx_sources = [ ]
 if ardour['VST']:
 	extra_sources += vst_files
 	ardour.Append(CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
+
+if ardour['LV2']:
+	extra_sources += lv2_files
+	ardour.Append(CCFLAGS="-DHAVE_SLV2")
 
 if ardour['LIBLO']:
     extra_sources += osc_files
@@ -309,6 +314,9 @@ ardour.Merge ([
 ardour.Merge ([ libraries['soundtouch'] ])
 timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
 	
+if ardour['LV2']:
+	ardour.Merge ([ libraries['slv2'] ])
+
 if ardour['LIBLO']:
 	ardour.Merge ([ libraries['lo'] ])
 

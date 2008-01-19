@@ -211,6 +211,7 @@ route_ui.cc
 selection.cc
 sfdb_ui.cc
 send_ui.cc
+splash.cc
 streamview.cc
 audio_streamview.cc
 tempo_dialog.cc
@@ -270,24 +271,8 @@ if env['VST']:
 	extra_sources += vst_files
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
-cmt_files=Split("""
-canvas-imageframe.c
-editor_imageframe.cc
-imageframe.cc
-imageframe_socket_handler.cc
-imageframe_time_axis.cc
-imageframe_time_axis_group.cc
-imageframe_time_axis_view.cc
-imageframe_view.cc
-marker_time_axis.cc
-marker_time_axis_view.cc
-marker_view.cc
-visual_time_axis.cc
-""")
-
-#if env['CMT']:
-#   extra_sources += cmt_files
-#    gtkardour.Append (CCFLAGS="-DWITH_CMT")
+if env['LV2']:
+	gtkardour.Append (CCFLAGS="-DHAVE_SLV2")
 
 if gtkardour['GTKOSX']:
 	extra_sources += gtkosx_files
@@ -506,7 +491,6 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                         ] +
                                       gtkardour_files +
 				      vst_files +
-				      cmt_files +
 				      pixmap_files +
 				      icon_files +
 				      skipped_files +

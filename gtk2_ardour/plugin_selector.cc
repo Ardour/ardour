@@ -227,6 +227,7 @@ PluginSelector::refill ()
 	setup_filter_string (filterstr);
 
 	ladspa_refiller (filterstr);
+	lv2_refiller (filterstr);
 	vst_refiller (filterstr);
 	au_refiller (filterstr);
 }
@@ -278,6 +279,14 @@ void
 PluginSelector::ladspa_refiller (const std::string& filterstr)
 {
 	refiller (manager->ladspa_plugin_info(), filterstr, "LADSPA");
+}
+
+void
+PluginSelector::lv2_refiller (const std::string& filterstr)
+{
+#ifdef HAVE_SLV2
+	refiller (manager->lv2_plugin_info(), filterstr, "LV2");
+#endif
 }
 
 void

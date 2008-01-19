@@ -102,6 +102,7 @@ IO::IO (Session& s, const string& name,
 	DataType default_type, bool public_ports)
 	: Automatable (s, name),
   	  _output_buffers (new BufferSet()),
+	  _active(true),
 	  _default_type (default_type),
  	  _public_ports (public_ports),
 	  _input_minimum (ChanCount::ZERO),
@@ -2349,6 +2350,14 @@ IO::find_output_port_hole ()
 	
 	return n;
 }
+
+void
+IO::set_active (bool yn)
+{
+	_active = yn; 
+	 active_changed(); /* EMIT SIGNAL */
+}
+
 
 AudioPort*
 IO::audio_input(uint32_t n) const

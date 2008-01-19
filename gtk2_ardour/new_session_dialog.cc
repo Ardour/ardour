@@ -379,12 +379,9 @@ NewSessionDialog::NewSessionDialog()
 	title += _("Session Control");
 	set_title(title.get_string());
 
-	//set_modal(false);
-	//property_window_position().set_value(Gtk::WIN_POS_NONE);
+	set_position (Gtk::WIN_POS_MOUSE);
 	set_resizable(false);
-	//property_destroy_with_parent().set_value(false);
 	set_has_separator(false);
-	// add_button(Gtk::Stock::HELP, Gtk::RESPONSE_HELP);
 	add_button(Gtk::Stock::QUIT, Gtk::RESPONSE_CANCEL);
 	add_button(Gtk::Stock::CLEAR, Gtk::RESPONSE_NONE);
 	m_okbutton = add_button(Gtk::Stock::NEW, Gtk::RESPONSE_OK);
@@ -895,7 +892,7 @@ NewSessionDialog::template_chosen ()
 void
 NewSessionDialog::recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col)
 {
-	response (Gtk::RESPONSE_YES);
+	response (Gtk::RESPONSE_OK);
 }
 
 void

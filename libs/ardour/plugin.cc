@@ -44,6 +44,10 @@
 #include <ardour/audio_unit.h>
 #endif
 
+#ifdef HAVE_SLV2
+#include <ardour/lv2_plugin.h>
+#endif
+
 #include <pbd/stl_delete.h>
 
 #include "i18n.h"
@@ -190,6 +194,12 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	case ARDOUR::LADSPA:
 		plugs = mgr->ladspa_plugin_info();
 		break;
+	
+#ifdef HAVE_SLV2
+	case ARDOUR::LV2:
+		plugs = mgr->lv2_plugin_info();
+		break;
+#endif
 
 #ifdef VST_SUPPORT
 	case ARDOUR::VST:

@@ -523,6 +523,11 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	commit_should_unlock = false;
 
+	if (!_io->active()) {
+		_processed = true;
+		return 0;
+	}
+
 	check_record_status (transport_frame, nframes, can_record);
 
 	nominally_recording = (can_record && re);
@@ -744,6 +749,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 				nframes_t total = chaninfo->playback_vector.len[0] + chaninfo->playback_vector.len[1];
 				
 				if (necessary_samples > total) {
+					cerr << "underrun for " << _name << endl;
 					DiskUnderrun ();
 					goto out;
 					
@@ -827,6 +833,10 @@ bool
 AudioDiskstream::commit (nframes_t nframes)
 {
 	bool need_butler = false;
+
+	if (!_io->active()) {
+		return false;
+	}
 
 	if (_actual_speed < 0.0) {
 		playback_sample -= playback_distance;

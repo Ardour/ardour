@@ -94,6 +94,7 @@ class PluginSelector : public ArdourDialog
 	void refill ();
 	void refiller (const ARDOUR::PluginInfoList& plugs, const::std::string& filterstr, const char* type);
 	void ladspa_refiller (const std::string&);
+	void lv2_refiller (const std::string&);
 	void vst_refiller (const std::string&);
 	void au_refiller (const std::string&);
 

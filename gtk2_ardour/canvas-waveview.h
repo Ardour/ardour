@@ -101,9 +101,12 @@ struct _GnomeCanvasWaveView
     uint32_t wave_color;
     uint32_t clip_color;
     uint32_t zero_color;
+    uint32_t fill_color;
 
+    char filled;
     char rectified;
-    char logscaled; 
+    char zero_line;
+    char logscaled;
 	
     /* These are updated by the update() routine
        to optimize the render() routine, which may
@@ -116,6 +119,7 @@ struct _GnomeCanvasWaveView
     int32_t bbox_lry;
     unsigned char wave_r, wave_g, wave_b, wave_a;
     unsigned char clip_r, clip_g, clip_b, clip_a;
+    unsigned char fill_r, fill_g, fill_b, fill_a;
     uint32_t samples;
     uint32_t region_start;
     int32_t reload_cache_in_render;

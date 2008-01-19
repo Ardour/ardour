@@ -1666,6 +1666,7 @@ Route::add_processor_from_xml (const XMLNode& node)
 				bool have_insert = false;
 
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+				    prop->value() == "lv2" ||
 				    prop->value() == "vst" ||
 				    prop->value() == "audiounit") {
 					
@@ -2279,13 +2280,6 @@ Route::get_mute_config (mute_type t)
 	}
 	
 	return onoff;
-}
-
-void
-Route::set_active (bool yn)
-{
-	_active = yn; 
-	active_changed(); /* EMIT SIGNAL */
 }
 
 void

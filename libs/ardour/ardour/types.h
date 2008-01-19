@@ -350,6 +350,7 @@ namespace ARDOUR {
 	enum PluginType {
 		AudioUnit,
 		LADSPA,
+		LV2,
 		VST
 	};
 

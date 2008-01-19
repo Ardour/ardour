@@ -111,12 +111,15 @@ ARDOUR_UI::goto_editor_window ()
 {
 	editor->show_window ();
 	editor->present ();
+	flush_pending ();
 }
+
 void
 ARDOUR_UI::goto_mixer_window ()
 {
 	mixer->show_window ();
 	mixer->present ();
+	flush_pending ();
 }
 
 gint

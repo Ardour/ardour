@@ -46,6 +46,7 @@ opts.AddOptions(
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
+    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
 )
@@ -403,7 +404,6 @@ else:
     if os.path.isfile('.personal_use_only'):
         os.remove('.personal_use_only')
 
-
 ####################
 # push environment
 ####################
@@ -527,6 +527,18 @@ if env['FFT_ANALYSIS']:
             print ('FFT Analysis cannot be compiled without the FFTW3 headers, which do not seem to be installed')
             sys.exit (1)            
         conf.Finish()
+
+if env['LV2']:
+	conf = env.Configure(custom_tests = { 'CheckPKGExists' : CheckPKGExists })
+	
+	if conf.CheckPKGExists ('\"slv2 >= 0.4.4\"'):
+		libraries['slv2'] = LibraryInfo()
+		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
+	else:
+		print 'Building Ardour with LV2 support requires SLV2 >= 0.4.4'
+		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
+		env['LV2'] = 0
+	conf.Finish()
         
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
@@ -942,7 +954,7 @@ if env['SYSLIBS']:
             print '%s >= %s not found.' %(pkg, version)
             DependenciesRequiredMessage()
             Exit(1)
-	
+    
     env = conf.Finish()
     
     libraries['sigc2'] = LibraryInfo()

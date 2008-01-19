@@ -296,8 +296,8 @@ class Editor : public PublicEditor
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
-	void nudge_forward (bool next);
-	void nudge_backward (bool next);
+	void nudge_forward (bool next, bool force_playhead);
+	void nudge_backward (bool next, bool force_playhead);
 
 	/* nudge initiated from context menu */
 
@@ -2069,6 +2069,9 @@ class Editor : public PublicEditor
 	AudioClock       nudge_clock;
 
 	nframes_t get_nudge_distance (nframes_t pos, nframes_t& next);
+
+	bool nudge_forward_release (GdkEventButton*);
+	bool nudge_backward_release (GdkEventButton*);
 	
 	/* audio filters */
 

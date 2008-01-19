@@ -20,7 +20,6 @@
 #ifndef __ardour_ladspa_plugin_h__
 #define __ardour_ladspa_plugin_h__
 
-#include <list>
 #include <set>
 #include <vector>
 #include <string>
@@ -33,11 +32,6 @@
 #include <jack/types.h>
 #include <ardour/ladspa.h>
 #include <ardour/plugin.h>
-#include <ardour/ladspa_plugin.h>
-
-using std::string;
-using std::vector;
-using std::list;
 
 namespace ARDOUR {
 class AudioEngine;
@@ -90,10 +84,10 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	void set_block_size (nframes_t nframes) {}
 	
-	int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
-	string describe_parameter (Parameter);
-	string state_node_name() const { return "ladspa"; }
-	void   print_parameter (uint32_t, char*, uint32_t len) const;
+	int         connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
+	std::string describe_parameter (Parameter);
+	std::string state_node_name() const { return "ladspa"; }
+	void        print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio(uint32_t) const;
 	bool parameter_is_control(uint32_t) const;
@@ -103,7 +97,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node);
-	bool     save_preset(string name);
+	bool     save_preset(std::string name);
 
 	bool has_editor() const { return false; }
 

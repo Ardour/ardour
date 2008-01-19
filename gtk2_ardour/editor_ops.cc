@@ -65,6 +65,7 @@
 #include "editing.h"
 #include "gtk-custom-hruler.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 
 #include "i18n.h"
 
@@ -330,16 +331,38 @@ Editor::extend_selection_to_start_of_region (bool previous)
 	commit_reversible_command ();
 }
 
+bool
+Editor::nudge_forward_release (GdkEventButton* ev)
+{
+	if (ev->state & Keyboard::PrimaryModifier) {
+		nudge_forward (false, true);
+	} else {
+		nudge_forward (false, false);
+	}
+	return false;
+}
+
+bool
+Editor::nudge_backward_release (GdkEventButton* ev)
+{
+	if (ev->state & Keyboard::PrimaryModifier) {
+		nudge_backward (false, true);
+	} else {
+		nudge_backward (false, false);
+	}
+	return false;
+}
+
 
 void
-Editor::nudge_forward (bool next)
+Editor::nudge_forward (bool next, bool force_playhead)
 {
 	nframes_t distance;
 	nframes_t next_distance;
 
 	if (!session) return;
 	
-	if (!selection->regions.empty()) {
+	if (!force_playhead && !selection->regions.empty()) {
 
 		begin_reversible_command (_("nudge regions forward"));
 
@@ -361,7 +384,7 @@ Editor::nudge_forward (bool next)
 		commit_reversible_command ();
 
 		
-	} else if (!selection->markers.empty()) {
+	} else if (!force_playhead && !selection->markers.empty()) {
 
 		bool is_start;
 		Location* loc = find_location_from_marker (selection->markers.front(), is_start);
@@ -405,14 +428,14 @@ Editor::nudge_forward (bool next)
 }
 		
 void
-Editor::nudge_backward (bool next)
+Editor::nudge_backward (bool next, bool force_playhead)
 {
 	nframes_t distance;
 	nframes_t next_distance;
 
 	if (!session) return;
 	
-	if (!selection->regions.empty()) {
+	if (!force_playhead && !selection->regions.empty()) {
 
 		begin_reversible_command (_("nudge regions backward"));
 
@@ -438,7 +461,7 @@ Editor::nudge_backward (bool next)
 
 		commit_reversible_command ();
 
-	} else if (!selection->markers.empty()) {
+	} else if (!force_playhead && !selection->markers.empty()) {
 
 		bool is_start;
 		Location* loc = find_location_from_marker (selection->markers.front(), is_start);

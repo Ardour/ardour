@@ -102,7 +102,7 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::get_session_parameters), string (), true, true)));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::get_session_parameters), true, true)));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  mem_fun(*this, &ARDOUR_UI::open_recent_session));
@@ -204,6 +204,11 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_about));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Keybindings"), mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
+	
 	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal, 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("Add Audio Bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1, 1));
@@ -218,11 +223,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
 	
-	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Keybindings"), mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
-
 	Glib::RefPtr<ActionGroup> transport_actions = ActionGroup::create (X_("Transport"));
 
 	/* do-nothing action for the "transport" menu bar item */

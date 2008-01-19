@@ -128,7 +128,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_col_spacings (0);
 	controls_table.set_homogeneous (true);
 
-	controls_table.attach (name_hbox, 0, 4, 0, 1, Gtk::SHRINK|Gtk::EXPAND, Gtk::SHRINK|Gtk::EXPAND);
+	controls_table.attach (name_hbox, 0, 4, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
@@ -143,8 +143,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
 	controls_ebox.signal_scroll_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);
 
-	controls_lhs_pad.set_name ("TimeAxisViewControlsPadding");
-	controls_hbox.pack_start (controls_lhs_pad,false,false);
 	controls_hbox.pack_start (controls_ebox,true,true);
 	controls_hbox.show ();
 
