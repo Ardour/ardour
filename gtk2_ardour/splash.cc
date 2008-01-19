@@ -29,7 +29,7 @@ Splash::Splash ()
 	catch (...) {
 		throw failed_constructor();
 	}
-	
+
 	darea.set_size_request (pixbuf->get_width(), pixbuf->get_height());
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
 	set_keep_above (true);
@@ -62,19 +62,21 @@ Splash::on_button_release_event (GdkEventButton* ev)
 bool
 Splash::expose (GdkEventExpose* ev)
 {
+#if 0
 	RefPtr<Gdk::Window> window = darea.get_window();
+	
+	Glib::RefPtr<Gtk::Style> style = darea.get_style();
 
-	window->draw_pixbuf (get_style()->get_bg_gc (STATE_NORMAL), pixbuf,
+	window->draw_pixbuf (darea.get_style()->get_bg_gc (STATE_NORMAL), pixbuf,
 			     ev->area.x, ev->area.y,
 			     ev->area.x, ev->area.y,
 			     ev->area.width, ev->area.height,
 			     Gdk::RGB_DITHER_NONE, 0, 0);
 
-	Glib::RefPtr<Gtk::Style> style = darea.get_style();
 	Glib::RefPtr<Gdk::GC> white = style->get_white_gc();
 
 	window->draw_layout (white, 10, pixbuf->get_height() - 30, layout);
-
+#endif
 	return true;
 }
 
