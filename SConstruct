@@ -539,7 +539,9 @@ if env['LV2']:
 		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
 		env['LV2'] = 0
 	conf.Finish()
-        
+else:
+	print 'LV2 support is not enabled.  Build with \'scons LV2=1\' to enable.'
+
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 
