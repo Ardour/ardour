@@ -216,11 +216,8 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	filter_any.set_name("All files");
 	filter_any.add_pattern("*");
 	file_chooser.add_filter(filter_any);
-	file_chooser.set_no_show_all();
 
 	get_vbox()->pack_start (progress_bar, false, false, 5);
-	progress_bar.set_no_show_all();
-	progress_bar.hide();
 
 	file_hbox.set_spacing (5);
 	file_hbox.set_border_width (5);
@@ -1060,18 +1057,20 @@ ExportDialog::start_export ()
 
 	progress_bar.set_fraction (0);
 	progress_bar.hide();
-	progress_bar.set_no_show_all();
 	cancel_label.set_text (_("Cancel"));
 
-	show_all();
+	hpacker.show_all();
+
+	file_hbox.show();
+	file_frame.show();
+	file_chooser.show();
+	show ();
 
 	if (track_and_master_selection_allowed) {
 		track_vpacker.show();
 	} else {
 		track_vpacker.hide();
 	}
-
-	file_chooser.show();
 
 	if (channel_count_selection_allowed) {
 		channel_count_combo.show();
