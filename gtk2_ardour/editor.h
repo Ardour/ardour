@@ -982,6 +982,8 @@ class Editor : public PublicEditor
 	void denormalize_region ();
 	void adjust_region_scale_amplitude (bool up);
 
+	void use_region_as_bar ();
+
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
 	void remove_region_from_region_list ();

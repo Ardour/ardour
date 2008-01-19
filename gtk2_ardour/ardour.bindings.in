@@ -38,6 +38,10 @@
 (gtk_accel_path "<Actions>/Editor/set-punch-from-edit-range" "bracketleft")
 (gtk_accel_path "<Actions>/Editor/set-punch-from-region" "<%SECONDARY%>bracketleft")
 
+(gtk_accel_path "<Actions>/Editor/boost-region-gain" "asciicircum")
+(gtk_accel_path "<Actions>/Editor/cut-region-gain" "ampersand")
+(gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "asterisk")
+
 ;; letters
 
 ;; TOP ROW
@@ -50,6 +54,7 @@
 (gtk_accel_path "<Actions>/Editor/select-all-before-edit-cursor" "<%PRIMARY%>e")
 (gtk_accel_path "<Actions>/Editor/show-editor-mixer" "<%TERTIARY%>e")
 (gtk_accel_path "<Actions>/Common/goto-editor" "<%WINDOW%>e")
+(gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<%TERTIARY%><%PRIMARY%>e")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-range" "r")
 (gtk_accel_path "<Actions>/Editor/redo" "<%PRIMARY%>r")
 (gtk_accel_path "<Actions>/Transport/Record" "<%TERTIARY%>r")
@@ -62,22 +67,19 @@
 (gtk_accel_path "<Actions>/Common/ToggleOptionsEditor" "<%WINDOW%>o")
 (gtk_accel_path "<Actions>/Editor/set-playhead" "p")
 (gtk_accel_path "<Actions>/Editor/select-all-before-playhead" "<%PRIMARY%>p")
+(gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<%TERTIARY%><%PRIMARY%>p")
 
 ;; MIDDLE ROW
 
 (gtk_accel_path "<Actions>/Editor/align-regions-sync-relative" "a")
-(gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<%PRIMARY%>a")
+(gtk_accel_path "<Actions>/Editor/select-all" "<%PRIMARY%>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-end" "<%SECONDARY%>a")
 (gtk_accel_path "<Actions>/Editor/align-regions-sync" "<%TERTIARY%>a")
+(gtk_accel_path "<Actions>/Editor/align-regions-start-relative" "<%LEVEL4%>a")
 (gtk_accel_path "<Actions>/Editor/split-region" "s")
 (gtk_accel_path "<Actions>/Common/Save" "<%PRIMARY%>s")
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
 (gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<%PRIMARY%>d")
-
-(gtk_accel_path "<Actions>/Editor/select-all" "<%PRIMARY%>a")
-(gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<%TERTIARY%><%PRIMARY%>p")
-(gtk_accel_path "<Actions>/Editor/select-all-after-edit-cursor" "<%TERTIARY%><%PRIMARY%>e")
-
 (gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "f")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
 (gtk_accel_path "<Actions>/Editor/play-selected-regions" "h")

@@ -4119,7 +4119,7 @@ Editor::adjust_region_scale_amplitude (bool up)
 		return;
 	}
 
-	ExclusiveRegionSelection (*this, entered_regionview);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	if (selection->regions.empty()) {
 		return;
@@ -4135,10 +4135,6 @@ Editor::adjust_region_scale_amplitude (bool up)
 		
 		double fraction = gain_to_slider_position (arv->audio_region()->scale_amplitude ());
 		
-		cerr << "slider pos for " << arv->audio_region()->scale_amplitude ()
-		     << " = " << fraction
-		     << endl;
-
 		if (up) {
 			fraction += 0.05;
 			fraction = min (fraction, 1.0);
@@ -4151,16 +4147,14 @@ Editor::adjust_region_scale_amplitude (bool up)
 			continue;
 		}
 
-		if (up && fraction >= 1.0) {
-			continue;
-		}
-
 		fraction = slider_position_to_gain (fraction);
 		fraction = coefficient_to_dB (fraction);
 		fraction = dB_to_coefficient (fraction);
-		
-		cerr << "set scale amp for " << arv->audio_region()->name() << " to " << fraction << endl;
 
+		if (up && fraction >= 2.0) {
+			continue;
+		}
+		
 		arv->audio_region()->set_scale_amplitude (fraction);
 		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
 	}
@@ -4953,3 +4947,52 @@ Editor::pitch_shift_regions ()
 	pitch_shift (selection->regions, 1.2);
 }
 	
+void
+Editor::use_region_as_bar ()
+{
+	if (!session) {
+		return;
+	}
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	RegionView* rv = selection->regions.front();
+
+	const Meter& m (session->tempo_map().meter_at (rv->region()->position()));
+
+	/* region length = 1 bar */
+
+	/* 1 bar = how many beats per bar */
+	
+	double beats_per_bar = m.beats_per_bar();
+	
+	/* now we want frames per beat.
+	   we have frames per bar, and beats per bar, so ...
+	*/
+
+	double frames_per_beat = rv->region()->length() / beats_per_bar;
+	
+	/* beats per minute = */
+
+	double beats_per_minute = (session->frame_rate() * 60.0) / frames_per_beat;
+
+	const TempoSection& t (session->tempo_map().tempo_section_at (rv->region()->position()));
+
+	begin_reversible_command (_("set tempo from region"));
+	XMLNode& before (session->tempo_map().get_state());
+
+	if (t.frame() == rv->region()->position()) {
+		session->tempo_map().change_existing_tempo_at (rv->region()->position(), beats_per_minute, t.note_type());
+	} else {
+		session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), rv->region()->position());
+	}
+
+	XMLNode& after (session->tempo_map().get_state());
+
+	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
+	commit_reversible_command ();
+}
