@@ -1048,6 +1048,7 @@ class Editor : public PublicEditor
 	void reverse_region ();
 	void normalize_region ();
 	void denormalize_region ();
+	void adjust_region_scale_amplitude (bool up);
 	void quantize_region ();
 
 	void audition_region_from_region_list ();

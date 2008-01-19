@@ -375,8 +375,9 @@ class IO : public Automatable, public Latent
 	bool ensure_inputs_locked (ChanCount, bool clear, void *src);
 	bool ensure_outputs_locked (ChanCount, bool clear, void *src);
 
-	int32_t find_input_port_hole ();
-	int32_t find_output_port_hole ();
+	std::string build_legal_port_name (DataType type, bool for_input);
+	int32_t find_input_port_hole (const char* base);
+	int32_t find_output_port_hole (const char* base);
 
 	void create_bundles_for_inputs_and_outputs ();
 	void setup_bundles_for_inputs_and_outputs ();

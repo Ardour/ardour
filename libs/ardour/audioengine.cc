@@ -1119,9 +1119,8 @@ AudioEngine::connect_to_jack (string client_name)
 	const char *server_name = NULL;
 
 	jack_client_name = client_name; /* might be reset below */
-
 	_jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
-	
+
 	if (_jack == NULL) {
 
 		if (status & JackServerFailed) {

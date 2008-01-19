@@ -67,6 +67,9 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 	bool have_gui = false;
 	non_gtk_gui = false;
 
+	Label* label = manage (new Label());
+	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
+
 	if (insert->plugin()->has_editor()) {
 		switch (insert->type()) {
 		case ARDOUR::VST:
@@ -74,7 +77,10 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 			break;
 
 		case ARDOUR::AudioUnit:
-			have_gui = create_audiounit_editor (insert);
+			//have_gui = create_audiounit_editor (insert);
+			have_gui = true;
+			get_vbox()->pack_start (*label, false, false);
+			cerr << "#*#*#*#*#*#*#*#*## PACK " << label << " INTO PLUGIN UI\n";
 			break;
 			
 		case ARDOUR::LADSPA:
@@ -82,8 +88,13 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 			break;
 
 		default:
+#ifndef VST_SUPPORT
 			error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
 			      << endmsg;
+#else
+			error << _("unknown type of editor-supplying plugin")
+			      << endmsg;
+#endif
 			throw failed_constructor ();
 		}
 
@@ -106,9 +117,10 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
 	insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
 
+#if 0
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
 
@@ -122,10 +134,35 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 	}
 
 	set_default_size (w, h); 
+#endif
 }
 
 PluginUIWindow::~PluginUIWindow ()
 {
+}
+
+void
+PluginUIWindow::on_show ()
+{
+	cerr << "PluginWindow shown\n";
+		
+	ArdourDialog::on_show ();
+	Glib::ListHandle<Widget*> kids (get_vbox()->get_children());
+	
+	cerr << "send show to " << kids.size() << " children of this plugin UI\n";
+
+	for (Glib::ListHandle<Widget*>::iterator x = kids.begin(); x != kids.end(); ++x) {
+		cerr << "\tSend show to " << (*x) << endl;
+		(*x)->show ();
+	}
+	cerr << "!! send done\n";
+}
+
+void
+PluginUIWindow::on_hide ()
+{
+	cerr << "PluginWindow hidden\n";
+	ArdourDialog::on_hide ();
 }
 
 bool
@@ -162,6 +199,7 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 #else
 	VBox* box;
 	_pluginui = create_au_gui (insert, &box);
+	cerr << "#*#*#*#*#*#*#*#*## PACK " << box << " INTO PLUGIN UI\n";
 	get_vbox()->add (*box);
 	non_gtk_gui = true;
 
@@ -177,9 +215,11 @@ PluginUIWindow::app_activated (bool yn)
 {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
 	if (yn) {
-		_pluginui->activate ();
+		if (_pluginui) {
+			_pluginui->activate ();
+		}
 	}
-	cerr << "activated ? " << yn << endl;
+	cerr << "APP activated ? " << yn << endl;
 #endif
 }
 
@@ -208,7 +248,9 @@ PluginUIWindow::plugin_going_away ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &PluginUIWindow::plugin_going_away));
 	
-	_pluginui->stop_updating(0);
+	if (_pluginui) {
+		_pluginui->stop_updating(0);
+	}
 	delete_when_idle (this);
 }
 

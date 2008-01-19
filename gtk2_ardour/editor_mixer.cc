@@ -173,7 +173,10 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		current_mixer_strip = 0;
 	}
 
-	cms_new (rt->route ());
+	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
+					      *session,
+					      rt->route(), false);
+	current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::cms_deleted));
 	
 	if (show) {
 		show_editor_mixer (true);

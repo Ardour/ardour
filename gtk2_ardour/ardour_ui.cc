@@ -198,7 +198,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	connection_editor = 0;
 	_will_create_new_session_automatically = false;
 	new_session_dialog = 0;
-	loading_dialog = 0;
 	add_route_dialog = 0;
 	route_params = 0;
 	option_editor = 0;
@@ -279,12 +278,7 @@ ARDOUR_UI::create_engine ()
 		return 0;
 	}
 
-#ifdef __APPLE__
-	// OS X where everything is sllloooowwww
-	loading_dialog->set_message (_("Starting audio engine"));
-	loading_dialog->show_all ();
-	flush_pending ();
-#endif 				
+	loading_message (_("Starting audio engine"));
 
 	try { 
 		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::jack_client_name);
@@ -623,23 +617,12 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.run ();
 }
 
-static bool
-_hide_splash (gpointer arg)
-{
-	((ARDOUR_UI*)arg)->hide_splash();
-	return false;
-}
-
 void
 ARDOUR_UI::startup ()
 {
 	string name, path;
 
 	new_session_dialog = new NewSessionDialog();
-
-	// in 4 seconds, hide the splash screen 
-
-	Glib::signal_timeout().connect (bind (sigc::ptr_fun (_hide_splash), this), 4000);
 
 	bool backend_audio_is_running = EngineControl::engine_running();
 	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
@@ -2113,8 +2096,6 @@ ARDOUR_UI::load_cmdline_session (const Glib::ustring& session_name, const Glib::
 	/* lets just try to load it */
 	
 	if (create_engine ()) {
-		hide_splash ();
-		loading_dialog->hide ();
 		backend_audio_error (false, new_session_dialog);
 		return -1;
 	}
@@ -2218,6 +2199,19 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 	return 0;
 }
 
+void
+ARDOUR_UI::end_loading_messages ()
+{
+	// hide_splash ();
+}
+
+void
+ARDOUR_UI::loading_message (const std::string& msg)
+{
+	show_splash ();
+	splash->message (msg);
+	flush_pending ();
+}
 	
 bool
 ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be_new)
@@ -2226,14 +2220,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 	Glib::ustring session_name;
 	Glib::ustring session_path;
 	Glib::ustring template_name;
-
-	if (!loading_dialog) {
-		loading_dialog = new MessageDialog (*new_session_dialog, 
-						    "",
-						    false,
-						    Gtk::MESSAGE_INFO,
-						    Gtk::BUTTONS_NONE);
-	}
 
 	int response = Gtk::RESPONSE_NONE;
 
@@ -2275,8 +2261,8 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 	do {
 		new_session_dialog->set_have_engine (backend_audio_is_running);
 		new_session_dialog->present ();
+		end_loading_messages ();
 		response = new_session_dialog->run ();
-		loading_dialog->hide ();
 		
 		_session_is_new = false;
 		
@@ -2308,7 +2294,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		if (create_engine ()) {
 
 			backend_audio_error (!backend_audio_is_running, new_session_dialog);
-			loading_dialog->hide ();
 			flush_pending ();
 
 			new_session_dialog->set_existing_session (false);
@@ -2318,7 +2303,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			goto try_again;
 		}
 
-		loading_dialog->hide ();
 		backend_audio_is_running = true;		
 			
 		if (response == Gtk::RESPONSE_OK) {
@@ -2402,7 +2386,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 
 		  try_again:
 			if (response == Gtk::RESPONSE_NONE) {
-				loading_dialog->hide ();
 				new_session_dialog->set_existing_session (false);
 				new_session_dialog->reset ();
 			}
@@ -2412,7 +2395,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 
   done:
 	show();
-	loading_dialog->hide ();
 	new_session_dialog->hide();
 	new_session_dialog->reset();
 	goto_editor_window ();
@@ -2462,14 +2444,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		goto out;
 	}
 
-#ifdef __APPLE__
-	// OS X where everything is sllloooowwww
-	if (loading_dialog) {
-		loading_dialog->set_markup (_("Please wait while Ardour loads your session"));
-		flush_pending ();
-	}
-#endif
-
+	loading_message (_("Please wait while Ardour loads your session"));
 	disable_screen_updates ();
 
 	try {
@@ -2647,6 +2622,7 @@ ARDOUR_UI::show_splash ()
 	}
 
 	splash->show ();
+	splash->queue_draw ();
 	splash->get_window()->process_updates (true);
 	flush_pending ();
 }

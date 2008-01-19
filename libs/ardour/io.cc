@@ -28,6 +28,7 @@
 
 #include <pbd/xml++.h>
 #include <pbd/replace_all.h>
+#include <pbd/unknown_type.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/io.h>
@@ -612,7 +613,6 @@ int
 IO::add_output_port (string destination, void* src, DataType type)
 {
 	Port* our_port;
-	char name[64];
 
 	if (type == DataType::NIL)
 		type = _default_type;
@@ -630,15 +630,10 @@ IO::add_output_port (string destination, void* src, DataType type)
 		
 			/* Create a new output port */
 			
-			// FIXME: naming scheme for differently typed ports?
-			if (_output_maximum.get(type) == 1) {
-				snprintf (name, sizeof (name), _("%s/out"), _name.c_str());
-			} else {
-				snprintf (name, sizeof (name), _("%s/out %u"), _name.c_str(), find_output_port_hole());
-			}
+			string portname = build_legal_port_name (type, false);
 			
-			if ((our_port = _session.engine().register_output_port (type, name, _public_ports)) == 0) {
-				error << string_compose(_("IO: cannot register output port %1"), name) << endmsg;
+			if ((our_port = _session.engine().register_output_port (type, portname, _public_ports)) == 0) {
+				error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
 				return -1;
 			}
 			
@@ -723,7 +718,6 @@ int
 IO::add_input_port (string source, void* src, DataType type)
 {
 	Port* our_port;
-	char name[64];
 	
 	if (type == DataType::NIL)
 		type = _default_type;
@@ -740,15 +734,10 @@ IO::add_input_port (string source, void* src, DataType type)
 
 			/* Create a new input port */
 			
-			// FIXME: naming scheme for differently typed ports?
-			if (_input_maximum.get(type) == 1) {
-				snprintf (name, sizeof (name), _("%s/in"), _name.c_str());
-			} else {
-				snprintf (name, sizeof (name), _("%s/in %u"), _name.c_str(), find_input_port_hole());
-			}
+			string portname = build_legal_port_name (type, true);
 
-			if ((our_port = _session.engine().register_input_port (type, name, _public_ports)) == 0) {
-				error << string_compose(_("IO: cannot register input port %1"), name) << endmsg;
+			if ((our_port = _session.engine().register_input_port (type, portname, _public_ports)) == 0) {
+				error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
 				return -1;
 			}
 
@@ -845,18 +834,12 @@ IO::ensure_inputs_locked (ChanCount count, bool clear, void* src)
 		/* create any necessary new ports */
 		while (n_inputs().get(*t) < n) {
 
-			char buf[64];
-
-			if (_input_maximum.get(*t) == 1) {
-				snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
-			} else {
-				snprintf (buf, sizeof (buf), _("%s/in %u"), _name.c_str(), find_input_port_hole());
-			}
+			string portname = build_legal_port_name (*t, true);
 
 			try {
 
-				if ((input_port = _session.engine().register_input_port (*t, buf, _public_ports)) == 0) {
-					error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
+				if ((input_port = _session.engine().register_input_port (*t, portname, _public_ports)) == 0) {
+					error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
 					return -1;
 				}
 			}
@@ -960,19 +943,11 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 
 			while (n_inputs().get(*t) < nin) {
 
-				char buf[64];
-
-				/* Create a new input port */
-
-				if (_input_maximum.get(*t) == 1) {
-					snprintf (buf, sizeof (buf), _("%s/in"), _name.c_str());
-				} else {
-					snprintf (buf, sizeof (buf), _("%s/in %u"), _name.c_str(), find_input_port_hole());
-				}
+				string portname = build_legal_port_name (*t, true);
 
 				try {
-					if ((port = _session.engine().register_input_port (*t, buf, _public_ports)) == 0) {
-						error << string_compose(_("IO: cannot register input port %1"), buf) << endmsg;
+					if ((port = _session.engine().register_input_port (*t, portname, _public_ports)) == 0) {
+						error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
 						return -1;
 					}
 				}
@@ -992,19 +967,11 @@ IO::ensure_io (ChanCount in, ChanCount out, bool clear, void* src)
 
 			while (n_outputs().get(*t) < nout) {
 
-				char buf[64];
-
-				/* Create a new output port */
-
-				if (_output_maximum.get(*t) == 1) {
-					snprintf (buf, sizeof (buf), _("%s/out"), _name.c_str());
-				} else {
-					snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
-				}
-
+				string portname = build_legal_port_name (*t, false);
+				
 				try { 
-					if ((port = _session.engine().register_output_port (*t, buf, _public_ports)) == 0) {
-						error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
+					if ((port = _session.engine().register_output_port (*t, portname, _public_ports)) == 0) {
+						error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
 						return -1;
 					}
 				}
@@ -1115,16 +1082,10 @@ IO::ensure_outputs_locked (ChanCount count, bool clear, void* src)
 		/* create any necessary new ports */
 		while (n_outputs().get(*t) < n) {
 
-			char buf[64];
+			string portname = build_legal_port_name (*t, false);
 
-			if (_output_maximum.get(*t) == 1) {
-				snprintf (buf, sizeof (buf), _("%s/out"), _name.c_str());
-			} else {
-				snprintf (buf, sizeof (buf), _("%s/out %u"), _name.c_str(), find_output_port_hole());
-			}
-
-			if ((output_port = _session.engine().register_output_port (*t, buf, _public_ports)) == 0) {
-				error << string_compose(_("IO: cannot register output port %1"), buf) << endmsg;
+			if ((output_port = _session.engine().register_output_port (*t, portname, _public_ports)) == 0) {
+				error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
 				return -1;
 			}
 
@@ -2290,8 +2251,62 @@ IO::transport_stopped (nframes_t frame)
 	_panner->transport_stopped (frame);
 }
 
+string
+IO::build_legal_port_name (DataType type, bool in)
+{
+	const int name_size = jack_port_name_size();
+	int limit;
+	string suffix;
+	int maxports;
+
+	if (type == DataType::AUDIO) {
+		suffix = _("audio");
+	} else if (type == DataType::MIDI) {
+		suffix = _("midi");
+	} else {
+		throw unknown_type();
+	}
+	
+	if (in) {
+		suffix += _("_in");
+		maxports = _input_maximum.get(type);
+	} else {
+		suffix += _("_out");
+		maxports = _output_maximum.get(type);
+	}
+	
+	if (maxports == 1) {
+		// allow space for the slash + the suffix
+		limit = name_size - _session.engine().client_name().length() - (suffix.length() + 1);
+		char buf[name_size+1];
+		snprintf (buf, name_size+1, ("%.*s/%s"), limit, _name.c_str(), suffix.c_str());
+		return string (buf);
+	} 
+	
+	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space
+
+	limit = name_size - _session.engine().client_name().length() - (suffix.length() + 5);
+
+	char buf1[name_size+1];
+	char buf2[name_size+1];
+	
+	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, _name.c_str(), suffix.c_str());
+	
+	int port_number;
+	
+	if (in) {
+		port_number = find_input_port_hole (buf1);
+	} else {
+		port_number = find_output_port_hole (buf1);
+	}
+	
+	snprintf (buf2, name_size+1, "%s %d", buf1, port_number);
+	
+	return string (buf2);
+}
+
 int32_t
-IO::find_input_port_hole ()
+IO::find_input_port_hole (const char* base)
 {
 	/* CALLER MUST HOLD IO LOCK */
 
@@ -2301,11 +2316,14 @@ IO::find_input_port_hole ()
 		return 1;
 	}
 
-	for (n = 1; n < UINT_MAX; ++n) {
+	/* we only allow up to 4 characters for the port number
+	 */
+
+	for (n = 1; n < 9999; ++n) {
 		char buf[jack_port_name_size()];
 		PortSet::iterator i = _inputs.begin();
 
-		snprintf (buf, jack_port_name_size(), _("%s/in %u"), _name.c_str(), n);
+		snprintf (buf, jack_port_name_size(), _("%s %u"), base, n);
 
 		for ( ; i != _inputs.end(); ++i) {
 			if (i->short_name() == buf) {
@@ -2321,7 +2339,7 @@ IO::find_input_port_hole ()
 }
 
 int32_t
-IO::find_output_port_hole ()
+IO::find_output_port_hole (const char* base)
 {
 	/* CALLER MUST HOLD IO LOCK */
 
@@ -2331,11 +2349,14 @@ IO::find_output_port_hole ()
 		return 1;
 	}
 
-	for (n = 1; n < UINT_MAX; ++n) {
+	/* we only allow up to 4 characters for the port number
+	 */
+
+	for (n = 1; n < 9999; ++n) {
 		char buf[jack_port_name_size()];
 		PortSet::iterator i = _outputs.begin();
 
-		snprintf (buf, jack_port_name_size(), _("%s/out %u"), _name.c_str(), n);
+		snprintf (buf, jack_port_name_size(), _("%s %u"), base, n);
 
 		for ( ; i != _outputs.end(); ++i) {
 			if (i->short_name() == buf) {

@@ -1435,7 +1435,7 @@ ProcessorBox::route_name_changed (PluginUIWindow* plugin_ui, boost::weak_ptr<Plu
 string 
 ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 {
-	string maker = pi->plugin()->maker();
+	string maker = pi->plugin()->maker() ? pi->plugin()->maker() : "";
 	string::size_type email_pos;
 
 	if ((email_pos = maker.find_first_of ('<')) != string::npos) {

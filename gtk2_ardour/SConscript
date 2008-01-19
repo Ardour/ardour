@@ -273,6 +273,8 @@ if env['VST']:
 
 if env['LV2']:
 	gtkardour.Append (CCFLAGS="-DHAVE_SLV2")
+	gtkardour.Merge ([libraries['slv2']])
+
 
 if gtkardour['GTKOSX']:
 	extra_sources += gtkosx_files

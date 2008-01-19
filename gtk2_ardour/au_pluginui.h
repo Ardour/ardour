@@ -36,6 +36,10 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	void on_realize ();
 	void on_show ();
+	void on_hide ();
+	bool on_map_event (GdkEventAny*);
+	bool on_focus_in_event (GdkEventFocus*);
+	bool on_focus_out_event (GdkEventFocus*);
 
 	OSStatus carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event);
 
@@ -60,6 +64,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
  	EventHandlerRef      carbon_event_handler;
 	bool                 carbon_parented;
 	bool                 cocoa_parented;
+	bool                 _activating_from_app;
 
 	void test_view_support (bool&, bool&);
 	bool test_cocoa_view_support ();

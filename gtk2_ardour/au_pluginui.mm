@@ -35,10 +35,12 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	bool has_carbon;
 	bool has_cocoa;
 
+	_activating_from_app = false;
 	carbon_parented = false;
 	cocoa_parented = false;
 	cocoa_parent = 0;
 	cocoa_window = 0;
+	au_view = 0;
 
 	test_view_support (has_carbon, has_cocoa);
 
@@ -250,7 +252,7 @@ AUPluginUI::create_carbon_view (bool generic)
 						  kWindowNoShadowAttribute|
 						  kWindowNoTitleBarAttribute);
 
-	if ((err = CreateNewWindow(kDocumentWindowClass, attr, &r, &carbon_window)) != noErr) {
+	if ((err = CreateNewWindow(kFloatingWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
 		return -1;
 	}
@@ -314,7 +316,10 @@ AUPluginUI::activate ()
 	
 	if (carbon_parented) {
 		[cocoa_parent makeKeyAndOrderFront:nil];
+		cerr << "APP activated, activate carbon window\n";
+		_activating_from_app = true;
 		ActivateWindow (carbon_window, TRUE);
+		_activating_from_app = false;
 	} 
 }
 
@@ -338,17 +343,26 @@ AUPluginUI::carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event)
 	ClickActivationResult howToHandleClick;
 	NSWindow* win = get_nswindow ();
 
+	cerr << "window " << win << " carbon event type " << eventKind << endl;
+
 	switch (eventKind) {
 	case kEventWindowHandleActivate:
+		cerr << "carbon window activated\n";
+		if (_activating_from_app) {
+			cerr << "app activation, ignore window activation\n";
+			return noErr;
+		}
 		[win makeMainWindow];
 		return eventNotHandledErr;
 		break;
 
 	case kEventWindowHandleDeactivate:
+		cerr << "carbon window deactivated\n";
 		return eventNotHandledErr;
 		break;
 		
 	case kEventWindowGetClickActivation:
+		cerr << "carbon window CLICK activated\n";
 		howToHandleClick = kActivateAndHandleClick;
 		SetEventParameter(event, kEventParamClickActivation, typeClickActivationResult, 
 				  sizeof(ClickActivationResult), &howToHandleClick);
@@ -470,13 +484,27 @@ AUPluginUI::parent_cocoa_window ()
 		newContentSize.width += (newFrame.size.width - currentFrame.size.width);
 		newContentSize.height += (newFrame.size.height - currentFrame.size.height);
 		
+#ifdef PACK_COCOA_INTO_GTK_WINDOW
+		NSView* view = [win contentView];
+
+		[win setContentSize:newContentSize];
+		[view addSubview:scroll_view]; 
+#else
 		[cocoa_window setContentSize:newContentSize];
 		[cocoa_window setContentView:scroll_view];
+#endif
 		
 	} else {
 
+#ifdef PACK_COCOA_INTO_GTK_WINDOW
+		NSView* view = [win contentView];
+
+		[win setContentSize:au_view_frame.size];
+		[view addSubview:au_view];
+#else
 		[cocoa_window setContentSize:au_view_frame.size];
 		[cocoa_window setContentView:au_view];
+#endif
 
 	}
 
@@ -497,16 +525,16 @@ AUPluginUI::parent_cocoa_window ()
 	[cocoa_window setFrame:view_frame display:NO];
 
 	/* make top level window big enough to hold cocoa window and titlebar */
-	
+		
 	content_frame.size.width = view_frame.size.width;
 	content_frame.size.height = view_frame.size.height + titlebar_height;
 
 	[win setFrame:content_frame display:NO];
 
 	/* now make cocoa window a child of this top level */
-
+	
 	[win addChildWindow:cocoa_window ordered:NSWindowAbove];
-	// [win setLevel:NSFloatingWindowLevel];
+	[win setLevel:NSFloatingWindowLevel];
 	[win setHidesOnDeactivate:YES];
 
 	cocoa_parented = true;
@@ -519,7 +547,7 @@ AUPluginUI::on_realize ()
 {
 	VBox::on_realize ();
 
-	if (cocoa_window) {
+	if (au_view) {
 		
 		if (parent_cocoa_window ()) {
 		}
@@ -533,16 +561,38 @@ AUPluginUI::on_realize ()
 }
 
 void
+AUPluginUI::on_hide ()
+{
+	// VBox::on_hide ();
+	cerr << "AU plugin window hidden\n";
+}
+
+bool
+AUPluginUI::on_map_event (GdkEventAny* ev)
+{
+	cerr << "AU plugin map event\n";
+
+	if (au_view) {
+		show_all ();
+	} else if (carbon_window) {
+		[cocoa_parent setIsVisible:YES];
+		ShowWindow (carbon_window);
+	}
+	return false;
+}
+
+void
 AUPluginUI::on_show ()
 {
 	cerr << "AU plugin window shown\n";
 
 	VBox::on_show ();
 
-	if (cocoa_window) {
-		[cocoa_window setIsVisible:YES];
+	if (au_view) {
+		show_all ();
 	} else if (carbon_window) {
 		[cocoa_parent setIsVisible:YES];
+		ShowWindow (carbon_window);
 	}
 }
 
@@ -564,4 +614,18 @@ create_au_gui (boost::shared_ptr<PluginInsert> plugin_insert, VBox** box)
 	AUPluginUI* aup = new AUPluginUI (plugin_insert);
 	(*box) = aup;
 	return aup;
+}
+
+bool
+AUPluginUI::on_focus_in_event (GdkEventFocus* ev)
+{
+	cerr << "au plugin focus in\n";
+	return false;
+}
+
+bool
+AUPluginUI::on_focus_out_event (GdkEventFocus* ev)
+{
+	cerr << "au plugin focus out\n";
+	return false;
 }
