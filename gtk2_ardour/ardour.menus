@@ -195,6 +195,7 @@
 		   <separator/>
 		   <menuitem action='pitch-shift-region'/>
 		   <menuitem action='set-tempo-from-region'/>
+		   <menuitem action='set-tempo-from-edit-range'/>
 	</menu>
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>

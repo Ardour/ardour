@@ -10,6 +10,7 @@
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-previous-region-sync" "apostrophe")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-next-region-sync" "semicolon")
 (gtk_accel_path "<Actions>/Editor/cycle-edit-point" "grave")
+(gtk_accel_path "<Actions>/Editor/cycle-edit-point-with-marker" "<%PRIMARY%>asciicircum")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-boundary" "period")
 (gtk_accel_path "<Actions>/Editor/playhead-to-next-region-sync" "<%PRIMARY%>period")
@@ -40,7 +41,6 @@
 
 (gtk_accel_path "<Actions>/Editor/boost-region-gain" "asciicircum")
 (gtk_accel_path "<Actions>/Editor/cut-region-gain" "ampersand")
-(gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "asterisk")
 
 ;; letters
 
@@ -182,6 +182,8 @@
 (gtk_accel_path "<Actions>/Editor/cycle-snap-choice" "3")
 (gtk_accel_path "<Actions>/Transport/ToggleAutoReturn" "4")
 (gtk_accel_path "<Actions>/Transport/ToggleClick" "5")
+(gtk_accel_path "<Actions>/Editor/set-tempo-from-region" "9")
+(gtk_accel_path "<Actions>/Editor/set-tempo-from-edit-range" "0")
 
 ;;
 ;; unbound actions

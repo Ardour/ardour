@@ -4962,7 +4962,24 @@ Editor::use_region_as_bar ()
 
 	RegionView* rv = selection->regions.front();
 
-	const Meter& m (session->tempo_map().meter_at (rv->region()->position()));
+	define_one_bar (rv->region()->position(), rv->region()->last_frame() + 1);
+}
+
+void
+Editor::use_range_as_bar ()
+{
+	nframes64_t start, end;
+	if (get_edit_op_range (start, end)) {
+		define_one_bar (start, end);
+	}
+}
+
+void
+Editor::define_one_bar (nframes64_t start, nframes64_t end)
+{
+	nframes64_t length = end - start;
+
+	const Meter& m (session->tempo_map().meter_at (start));
 
 	/* region length = 1 bar */
 
@@ -4974,21 +4991,21 @@ Editor::use_region_as_bar ()
 	   we have frames per bar, and beats per bar, so ...
 	*/
 
-	double frames_per_beat = rv->region()->length() / beats_per_bar;
+	double frames_per_beat = length / beats_per_bar;
 	
 	/* beats per minute = */
 
 	double beats_per_minute = (session->frame_rate() * 60.0) / frames_per_beat;
 
-	const TempoSection& t (session->tempo_map().tempo_section_at (rv->region()->position()));
+	const TempoSection& t (session->tempo_map().tempo_section_at (start));
 
 	begin_reversible_command (_("set tempo from region"));
 	XMLNode& before (session->tempo_map().get_state());
 
-	if (t.frame() == rv->region()->position()) {
-		session->tempo_map().change_existing_tempo_at (rv->region()->position(), beats_per_minute, t.note_type());
+	if (t.frame() == start) {
+		session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type());
 	} else {
-		session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), rv->region()->position());
+		session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), start);
 	}
 
 	XMLNode& after (session->tempo_map().get_state());

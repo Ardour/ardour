@@ -983,6 +983,9 @@ class Editor : public PublicEditor
 	void adjust_region_scale_amplitude (bool up);
 
 	void use_region_as_bar ();
+	void use_range_as_bar ();
+
+	void define_one_bar (nframes64_t start, nframes64_t end);
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
