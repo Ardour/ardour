@@ -813,7 +813,7 @@ EngineControl::driver_changed ()
 
 	vector<string>& strings = devices[driver];
 
-	if (strings.empty()) {
+	if (strings.empty() && driver != "FFADO") {
 		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
 		return;
 	}
@@ -1105,7 +1105,8 @@ EngineControl::set_state (const XMLNode& root)
 	clist = root.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-
+		if ( prop && (prop->value() == "FFADO" ))
+				continue;
 		child = *citer;
 
 		prop = child->property ("val");

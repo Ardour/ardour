@@ -763,6 +763,7 @@ AudioRegionView::set_envelope_visible (bool yn)
 void
 AudioRegionView::create_waves ()
 {
+	//cerr << "AudioRegionView::create_waves() called on " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 
 	if (!atv.get_diskstream()) {
@@ -785,23 +786,16 @@ AudioRegionView::create_waves ()
 		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_data) {
-
-			if (audio_region()->source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
-				create_one_wave (n, true);
-			} else {
-				// we'll get a PeaksReady signal from the source in the future
-				// and will call create_one_wave(n) then.
-			}
-
-		} else {
 			create_one_wave (n, true);
 		}
+
 	}
 }
 
 void
 AudioRegionView::create_one_wave (uint32_t which, bool direct)
 {
+	//cerr << "AudioRegionView::create_one_wave() called which: " << which << " this: " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 	uint32_t nchans = atv.get_diskstream()->n_channels();
 	uint32_t n;
@@ -885,7 +879,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
+	//Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
+	cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
 }
 
 void
