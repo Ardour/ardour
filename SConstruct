@@ -33,7 +33,7 @@ opts.AddOptions(
     BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
-    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
+    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
@@ -623,8 +623,10 @@ if env['DIST_TARGET'] == 'auto':
         # The [.] matches to the dot after the major version, "." would match any character
         if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
             env['DIST_TARGET'] = 'panther'
-        else:
+        if re.search ("darwin8[.]", config[config_kernel]) != None:
             env['DIST_TARGET'] = 'tiger'
+        else:
+            env['DIST_TARGET'] = 'leopard'
     else:
         if re.search ("x86_64", config[config_cpu]) != None:
             env['DIST_TARGET'] = 'x86_64'
@@ -712,6 +714,15 @@ else:
     env['LIBDIR']='lib'
 
 #
+# a single way to test if we're on OS X
+#
+
+if env['DIST_TARGET'] in ['panther', 'tiger', 'leopard' ]:
+    env['IS_OSX'] = 1
+else:
+    env['IS_OSX'] = 0
+
+#
 # save off guessed arch element in an env
 #
 env.Append(CONFIG_ARCH=config[config_arch])
@@ -769,7 +780,7 @@ if env['LIBLO']:
 
 
 def prep_libcheck(topenv, libinfo):
-    if topenv['DIST_TARGET'] == 'panther' or topenv['DIST_TARGET'] == 'tiger':
+    if topenv['IS_OSX']:
 	#
 	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
 	#            All libraries needed should be built against this location

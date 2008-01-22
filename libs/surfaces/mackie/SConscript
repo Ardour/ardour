@@ -24,6 +24,9 @@ if mackie['DEBUG'] == 1:
   mackie.Append(CXXFLAGS="-DDEBUG")
   mackie.Append(CXXFLAGS="-DPORT_DEBUG")
 
+if mackie['IS_OSX']:
+    mackie.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 mackie_files=Split("""
 interface.cc
 midi_byte_array.cc

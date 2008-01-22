@@ -24,7 +24,7 @@ gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
-if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
+if gtkardour['IS_OSX']:
 	gtkardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
 
 gtkardour.Merge ([
@@ -315,7 +315,7 @@ tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
 my_font_dict = { }
 
-if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
+if gtkardour['IS_OSX']:
 	#
 	# OS X font rendering is different even with X11
 	#

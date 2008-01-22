@@ -10,7 +10,7 @@ Import('env libraries install_prefix')
 gtkmm2 = env.Copy()
 gtkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'] ])
 
-if gtkmm2['DIST_TARGET'] == 'panther' or gtkmm2['DIST_TARGET'] == 'tiger':
+if gtkmm2['IS_OSX']:
     gtkmm2.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
 
 libgtkmm2 = gtkmm2.SharedLibrary('gtkmm2', gtkmm2_files)
