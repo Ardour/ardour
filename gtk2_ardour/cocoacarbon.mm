@@ -18,6 +18,8 @@
 
 #include <Carbon/Carbon.h>
 #undef check // stupid, stupid carbon
+#undef YES   // stupid, stupid gtkmm and/or NSObjC
+#undef NO    // ditto
 
 #include "ardour_ui.h"
 #include "actions.h"
@@ -117,6 +119,6 @@ ARDOUR_UI::platform_setup ()
 		
 		/* if invoked from the command line, make sure we're visible */
 		
-		[NSApp activateIgnoringOtherApps:YES];
+		[NSApp activateIgnoringOtherApps:1];
 	} 
 }
