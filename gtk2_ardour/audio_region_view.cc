@@ -1074,6 +1074,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		wave->property_samples_per_unit() =  samples_per_unit;
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 		wave->property_wave_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
+		wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
 		wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWaveClip.get();
 		wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_GhostTrackZeroLine.get();
 		wave->property_region_start() = _region->start();
