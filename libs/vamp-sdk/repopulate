@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#
+# this script copies the relevant files from $1 into this
+# working copy of the repository, adds new files and
+# prints a list of mods for SConscript
+#
+
+from=$1
+strip=`dirname $1`
+
+for file in `find $from \( -name \*.cpp -o -name \*.h -o -name \*.c \)`
+do
+  src=$file
+  copy=`echo $file | sed "s?$strip/??"`
+  if [ -f $copy ] ; then
+      cp $src $copy
+  else
+      echo "add $copy"
+      cp $src $copy
+      svn add $copy
+  fi
+done

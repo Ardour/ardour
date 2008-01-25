@@ -142,15 +142,35 @@ public:
      * to be mixed down to mono, etc., without having to worry about
      * doing that itself.
      *
-     * ADAPT_ALL - Perform all available adaptations, where meaningful.
+     * ADAPT_BUFFER_SIZE - Wrap the plugin in a PluginBufferingAdapter
+     * permitting the host to provide audio input using any block
+     * size, with no overlap, regardless of the plugin's preferred
+     * block size (suitable for hosts that read from non-seekable
+     * streaming media, for example).  This adapter introduces some
+     * run-time overhead and also changes the semantics of the plugin
+     * slightly (see the PluginBufferingAdapter header documentation
+     * for details).
+     *
+     * ADAPT_ALL_SAFE - Perform all available adaptations that are
+     * meaningful for the plugin and "safe".  Currently this means to
+     * ADAPT_INPUT_DOMAIN if the plugin wants FrequencyDomain input;
+     * ADAPT_CHANNEL_COUNT always; and ADAPT_BUFFER_SIZE never.
      * 
-     * See PluginInputDomainAdapter and PluginChannelAdapter for more
-     * details of the classes that the loader may use if these flags
-     * are set.
+     * ADAPT_ALL - Perform all available adaptations that are
+     * meaningful for the plugin.
+     * 
+     * See PluginInputDomainAdapter, PluginChannelAdapter and
+     * PluginBufferingAdapter for more details of the classes that the
+     * loader may use if these flags are set.
      */
     enum AdapterFlags {
+
         ADAPT_INPUT_DOMAIN  = 0x01,
         ADAPT_CHANNEL_COUNT = 0x02,
+        ADAPT_BUFFER_SIZE   = 0x04,
+
+        ADAPT_ALL_SAFE      = 0x03,
+
         ADAPT_ALL           = 0xff
     };
 

@@ -112,7 +112,7 @@ PluginInputDomainAdapter::process(const float *const *inputBuffers, RealTime tim
     return m_impl->process(inputBuffers, timestamp);
 }
 
-    PluginInputDomainAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
+PluginInputDomainAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
     m_plugin(plugin),
     m_inputSampleRate(inputSampleRate),
     m_channels(0),

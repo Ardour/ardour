@@ -11,6 +11,7 @@ vamp-sdk/RealTime.cpp
 
 vamphostsdk_files = Split ("""
 vamp-sdk/PluginHostAdapter.cpp
+vamp-sdk/hostext/PluginBufferingAdapter.cpp
 vamp-sdk/hostext/PluginChannelAdapter.cpp
 vamp-sdk/hostext/PluginInputDomainAdapter.cpp
 vamp-sdk/hostext/PluginLoader.cpp
