@@ -19,8 +19,6 @@ vamp-sdk/hostext/PluginWrapper.cpp
 vamp-sdk/RealTime.cpp
 """)
 
-plugin_files = glob.glob ("plugins/*.cpp")
-
 Import('env install_prefix libraries')
 vampsdk = env.Copy()
 
@@ -28,22 +26,17 @@ vampsdk.Append (CPPATH='#libs/vamp-sdk/vamp', CXXFLAGS="-Ilibs/vamp-sdk")
 
 libvampsdk = vampsdk.SharedLibrary('vampsdk', vampsdk_files)
 libvamphostsdk = vampsdk.SharedLibrary('vamphostsdk', vamphostsdk_files)
-libvampplugins = vampsdk.SharedLibrary('ardourvampplugins', plugin_files)
 
 Default(libvampsdk)
 Default(libvamphostsdk)
-Default(libvampplugins)
 
 env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libvampsdk))
 env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libvamphostsdk))
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'vamp'), libvampplugins))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'COPYING', 'README' ] +
                                      vampsdk_files +
                                      vamphostsdk_files +
-                                     plugin_files +
                                      glob.glob('vamp/*.h') + 
-                                     glob.glob('plugins/*.h') + 
                                      glob.glob('vamp-sdk/*.h') + 
                                      glob.glob('vamp-sdk/hostext/*.h')))
