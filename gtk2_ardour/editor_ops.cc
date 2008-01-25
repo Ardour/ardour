@@ -5019,7 +5019,7 @@ Editor::define_one_bar (nframes64_t start, nframes64_t end)
 void
 Editor::split_region_at_transients ()
 {
-	list<nframes64_t> transients;
+	vector<nframes64_t> positions;
 
 	if (!session) {
 		return;
@@ -5031,7 +5031,7 @@ Editor::split_region_at_transients ()
 		return;
 	}
 
-#if 0
+	session->begin_reversible_command (_("split regions"));
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ) {
 
@@ -5040,52 +5040,90 @@ Editor::split_region_at_transients ()
 		tmp = i;
 		++tmp;
 
-		cerr << "working on " << (*i)->get_item_name() << endl;
-
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i)->region());
 		
-		if (!ar) {
-			continue;
+		if (ar && (ar->get_transients (positions) == 0)) {
+			split_region_at_points ((*i)->region(), positions);
+			positions.clear ();
 		}
-
-		boost::shared_ptr<Playlist> pl = ar->playlist();
 		
-		if (!pl) {
-			continue;
-		}
-
-		cerr << "getting transients\n";
-		
-		ar->get_transients (transients);
-		nframes64_t start = ar->start();
-		nframes64_t pos = ar->position();
-
-		pl->freeze ();
-		pl->remove_region (ar);
-
-		cerr << "creating new regions from " << transients.size() << " transients\n";
-
-		for (list<nframes64_t>::iterator x = transients.begin(); x != transients.end(); ++x) {
-
-			nframes_t len = (*x) - start;
-
-			string new_name;
-
-			if (session->region_name (new_name, ar->name())) {
-				continue;
-			}
-
-			pl->add_region (RegionFactory::create (ar->get_sources(), start, len, new_name), pos);
-			
-			start = (*x);
-			pos += len;
-		}
-
-		pl->thaw ();
-
-		transients.clear ();
-
 		i = tmp;
 	}
-#endif
+
+	session->commit_reversible_command ();
+
 }
+
+void
+Editor::split_region_at_points (boost::shared_ptr<Region> r, vector<nframes64_t>& positions)
+{
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+	
+	if (!ar) {
+		return;
+	}
+	
+	boost::shared_ptr<Playlist> pl = ar->playlist();
+	
+	if (!pl) {
+		return;
+	}
+	
+	if (positions.empty()) {
+		return;
+	}
+	
+	vector<nframes64_t>::const_iterator x;	
+	
+	nframes64_t pos = ar->position();
+	
+	XMLNode& before (pl->get_state());
+	
+	x = positions.begin();
+	
+	while (x != positions.end()) {
+		if ((*x) > pos) {
+			break;
+		}
+	}
+	
+	if (x == positions.end()) {
+		return;
+	}
+	
+	pl->freeze ();
+	pl->remove_region (ar);
+	
+	do {
+		
+		/* file start = original start + how far we from the initial position ? 
+		 */
+		
+		nframes64_t file_start = ar->start() + (pos - ar->position());
+		
+		/* length = next position - current position
+		 */
+		
+		nframes64_t len = (*x) - pos;
+		
+		string new_name;
+		
+		if (session->region_name (new_name, ar->name())) {
+			continue;
+		}
+		
+		pl->add_region (RegionFactory::create (ar->get_sources(), file_start, len, new_name), pos);
+		
+		pos += len;
+		
+		++x;
+		
+	} while (x != positions.end() && (*x) < ar->last_frame());
+	
+	pl->thaw ();
+	
+	XMLNode& after (pl->get_state());
+	
+	session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));
+}
+

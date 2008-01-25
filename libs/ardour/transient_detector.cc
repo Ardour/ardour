@@ -7,7 +7,7 @@ using namespace ARDOUR;
 using namespace std;
 
 TransientDetector::TransientDetector (float sr)
-	: AudioAnalyser (sr, X_("ardour-vamp-plugins:percussiononsets"))
+	: AudioAnalyser (sr, X_("libardourvampplugins:percussiononsets"))
 {
 }
 
@@ -16,7 +16,7 @@ TransientDetector::~TransientDetector()
 }
 
 int
-TransientDetector::run (const std::string& path, boost::shared_ptr<Readable> src, uint32_t channel, vector<nframes64_t>& results)
+TransientDetector::run (const std::string& path, Readable* src, uint32_t channel, vector<nframes64_t>& results)
 {
 	current_results = &results;
 	int ret = analyse (path, src, channel);
@@ -37,7 +37,7 @@ TransientDetector::use_features (Plugin::FeatureSet& features, ostream* out)
 				(*out) << (*f).timestamp.toString() << endl;
 			} 
 
-			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, sample_rate));
+			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, (nframes_t) floor(sample_rate)));
 		}
 	}
 

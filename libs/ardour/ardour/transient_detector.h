@@ -40,7 +40,7 @@ class TransientDetector : public AudioAnalyser
     float get_threshold () const;
     float get_sensitivity () const;
     
-    int run (const std::string& path, boost::shared_ptr<Readable>, uint32_t channel, std::vector<nframes64_t>& results);
+    int run (const std::string& path, Readable*, uint32_t channel, std::vector<nframes64_t>& results);
 
  protected:
     std::vector<nframes64_t>* current_results;

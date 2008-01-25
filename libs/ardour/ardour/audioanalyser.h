@@ -43,7 +43,7 @@ class AudioAnalyser {
 
 	/* analysis object should provide a run method
 	   that accepts a path to write the results to (optionally empty)
-	   a boost::shared_ptr<Readable> to read data from
+	   a Readable* to read data from
 	   and a reference to a type-specific container to return the
 	   results.
 	*/
@@ -59,7 +59,7 @@ class AudioAnalyser {
 	nframes64_t stepsize;
 	
 	int initialize_plugin (AnalysisPluginKey name, float sample_rate);
-	int analyse (const std::string& path, boost::shared_ptr<Readable>, uint32_t channel);
+	int analyse (const std::string& path, Readable*, uint32_t channel);
 
 	/* instances of an analysis object will have this method called
 	   whenever there are results to process. if out is non-null,

@@ -43,6 +43,7 @@
 #include <ardour/audiofilter.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
+#include <ardour/transient_detector.h>
 
 #include "i18n.h"
 #include <locale.h>
@@ -1501,6 +1502,68 @@ AudioRegion::set_playlist (boost::weak_ptr<Playlist> wpl)
 		}
 	}
 }
+
+int
+AudioRegion::get_transients (vector<nframes64_t>& results)
+{
+	if (!playlist()) {
+		return -1;
+	}
+
+	TransientDetector t (playlist()->session().frame_rate());
+	bool existing_results = !results.empty();
+
+	for (uint32_t i = 0; i < n_channels(); ++i) {
+
+		vector<nframes64_t> these_results;
+
+		t.reset ();
+
+		if (t.run ("", this, i, these_results)) {
+			return -1;
+		}
+
+		/* translate all transients to give absolute position */
+		
+		for (vector<nframes64_t>::iterator i = these_results.begin(); i != these_results.end(); ++i) {
+			(*i) += _position;
+		}
+
+		/* merge */
+		
+		results.insert (results.end(), these_results.begin(), these_results.end());
+	}
+		
+	if (!results.empty() && (existing_results || n_channels() > 1)) {
+		
+		/* now resort to bring transients from different channels together */
+		
+		sort (results.begin(), results.end());
+
+		/* remove duplicates or other things that are too close */
+
+		vector<nframes64_t>::iterator i = results.begin();
+		nframes64_t curr = (*i);
+
+		/* XXX force a 3msec gap - use a config variable */
+
+		nframes64_t gap_frames = (nframes64_t) floor (3.0 * (playlist()->session().frame_rate() / 1000.0));
+
+		++i;
+
+		while (i != results.end()) {
+			if (((*i) == curr) || (((*i) - curr) < gap_frames)) {
+				    i = results.erase (i);
+			} else {
+				++i;
+				curr = *i;
+			}
+		}
+	}
+
+	return 0;
+}
+
 
 extern "C" {
 

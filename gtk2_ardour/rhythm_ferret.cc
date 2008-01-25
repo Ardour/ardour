@@ -207,7 +207,7 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 		t.set_threshold (detection_threshold_adjustment.get_value());
 		t.set_sensitivity (sensitivity_adjustment.get_value());
 
-		if (t.run ("", readable, i, these_results)) {
+		if (t.run ("", readable.get(), i, these_results)) {
 			continue;
 		}
 
@@ -289,83 +289,13 @@ RhythmFerret::do_split_action ()
 
 		(*i)->get_time_axis_view().hide_temporary_lines ();
 
-		do_region_split ((*i), current_results);
+		editor.split_region_at_points ((*i)->region(), current_results);
 
 		/* i is invalid at this point */
 
 		i = tmp;
 	}
 
-	session->commit_reversible_command ();
-}
-
-void
-RhythmFerret::do_region_split (RegionView* rv, const vector<nframes64_t>& positions)
-{
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (rv->region());
-	
-	if (!ar) {
-		return;
-	}
-	
-	boost::shared_ptr<Playlist> pl = ar->playlist();
-	
-	if (!pl) {
-		return;
-	}
-	
-	vector<nframes64_t>::const_iterator x;	
-
-	nframes64_t pos = ar->position();
-
-	XMLNode& before (pl->get_state());
-	
-	x = positions.begin();
-
-	while (x != positions.end()) {
-		if ((*x) > pos) {
-			break;
-		}
-	}
-
-	if (x == positions.end()) {
-		return;
-	}
-
-	pl->freeze ();
-	pl->remove_region (ar);
-
-	do {
-
-		/* file start = original start + how far we from the initial position ? 
-		 */
-		
-		nframes64_t file_start = ar->start() + (pos - ar->position());
-
-		/* length = next position - current position
-		 */
-
-		nframes64_t len = (*x) - pos;
-		
-		string new_name;
-		
-		if (session->region_name (new_name, ar->name())) {
-			continue;
-		}
-
-		pl->add_region (RegionFactory::create (ar->get_sources(), file_start, len, new_name), pos);
-		
-		pos += len;
-
-		++x;
-		
-	} while (x != positions.end() && (*x) < ar->last_frame());
-	
-	pl->thaw ();
-
-	XMLNode& after (pl->get_state());
-	
-	session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));
 }
 
 void

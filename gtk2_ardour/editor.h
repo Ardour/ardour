@@ -959,6 +959,8 @@ class Editor : public PublicEditor
 	void split_region ();
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
+	void split_region_at_transients ();
+	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, std::vector<nframes64_t>&);
 	void crop_region_to_selection ();
 	void crop_region_to (nframes_t start, nframes_t end);
 	void set_sync_point (nframes64_t, const RegionSelection&);
@@ -984,7 +986,6 @@ class Editor : public PublicEditor
 	void normalize_region ();
 	void denormalize_region ();
 	void adjust_region_scale_amplitude (bool up);
-	void split_region_at_transients ();
 
 	void use_region_as_bar ();
 	void use_range_as_bar ();

@@ -37,6 +37,7 @@ AudioAnalyser::initialize_plugin (AnalysisPluginKey key, float sr)
 	plugin = loader->loadPlugin (key, sr, PluginLoader::ADAPT_ALL);
 
 	if (!plugin) {
+		error << string_compose (_("VAMP Plugin \"%1\" could not be loaded"), key) << endmsg;
 		return -1;
 	} 
 
@@ -69,7 +70,7 @@ AudioAnalyser::reset ()
 }
 	
 int
-AudioAnalyser::analyse (const string& path, boost::shared_ptr<Readable> src, uint32_t channel)
+AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 {
 	ofstream ofile;
 	Plugin::FeatureSet onsets;

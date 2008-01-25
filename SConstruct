@@ -1012,6 +1012,7 @@ if env['SYSLIBS']:
         'libs/midi++2',
         'libs/ardour',
         'libs/vamp-sdk',
+        'libs/vamp-plugins/',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set
@@ -1077,6 +1078,7 @@ else:
         'libs/midi++2',
         'libs/ardour',
         'libs/vamp-sdk',
+        'libs/vamp-plugins/',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set

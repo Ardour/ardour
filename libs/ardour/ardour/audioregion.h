@@ -148,6 +148,8 @@ class AudioRegion : public Region
 
 	void set_playlist (boost::weak_ptr<Playlist>);
 
+	int get_transients (std::vector<nframes64_t>&);
+
   private:
 	friend class RegionFactory;
 
