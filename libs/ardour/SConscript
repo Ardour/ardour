@@ -93,6 +93,7 @@ sndfilesource.cc
 source.cc
 source_factory.cc
 tempo.cc
+transient_detector.cc
 utils.cc
 version.cc
 mix.cc
@@ -267,11 +268,15 @@ ardour.Merge ([
 	     libraries['pbd'],
 	     libraries['midi++2'],
 	     libraries['glib2'],
-	     libraries['glibmm2']
+	     libraries['glibmm2'],
+	     libraries['vamp'],
+	     libraries['vamphost'],
+	     libraries['fftw3f'],
+	     libraries['fftw3'],
 	     ])
 
 if ardour['RUBBERBAND']:
-	ardour.Merge ([ libraries['rubberband'],  libraries['vamp'], libraries['fftw3f'] ])
+	ardour.Merge ([ libraries['rubberband']])
 	timefx_sources += [ 'rb_effect.cc' ]
 else:
 	ardour.Merge ([ libraries['soundtouch'] ])

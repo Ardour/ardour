@@ -469,19 +469,14 @@ Session::setup_raid_path (string path)
 }
 
 int
-Session::create (bool& new_session, const string& mix_template, nframes_t initial_length)
+Session::ensure_subdirs ()
 {
 	string dir;
-
-	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session dir \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
-		return -1;
-	}
 
 	dir = peak_dir ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -492,7 +487,7 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 		dir = sound_dir ();
 		
 		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-			error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create session sounds folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 			return -1;
 		}
 	}
@@ -500,17 +495,39 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 	dir = dead_sound_dir ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session dead sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		error << string_compose(_("Session: cannot create session dead sounds folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
 	dir = export_dir ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session export dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		error << string_compose(_("Session: cannot create session export folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
+	dir = analysis_dir ();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session analysis folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	return 0;
+}
+
+int
+Session::create (bool& new_session, const string& mix_template, nframes_t initial_length)
+{
+
+	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session folder \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	if (ensure_subdirs ()) {
+		return -1;
+	}
 
 	/* check new_session so we don't overwrite an existing one */
 
@@ -558,7 +575,6 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 	_locations.add (end_location);
 
 	_state_of_the_state = Clean;
-
 
 	save_state ("");
 
@@ -2045,6 +2061,14 @@ Session::automation_dir () const
 }
 
 string
+Session::analysis_dir () const
+{
+	string res = _path;
+	res += "analysis/";
+	return res;
+}
+
+string
 Session::template_dir ()
 {
 	string path = get_user_ardour_path();
@@ -2808,7 +2832,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		newpath += dead_sound_dir_name;
 
 		if (g_mkdir_with_parents (newpath.c_str(), 0755) < 0) {
-			error << string_compose(_("Session: cannot create session peakfile dir \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
 			return -1;
 		}
 

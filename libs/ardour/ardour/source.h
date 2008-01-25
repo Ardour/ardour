@@ -28,13 +28,14 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
+#include <ardour/readable.h>
 
 namespace ARDOUR {
 
 class Session;
 class Playlist;
 
-class Source : public PBD::StatefulDestructible
+class Source : public PBD::StatefulDestructible, public ARDOUR::Readable
 {
   public:
 	Source (Session&, std::string name);

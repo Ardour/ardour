@@ -50,6 +50,10 @@ gtkardour.Merge ([
     libraries['xml'],
     libraries['xslt'],
     libraries['samplerate'],
+    libraries['vamp'],
+    libraries['vamphost'],
+    libraries['fftw3f'],
+    libraries['fftw3'],
     libraries['jack']
 ])
 
@@ -75,7 +79,7 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
 if gtkardour['RUBBERBAND']:
-	gtkardour.Merge ([ libraries['rubberband'],  libraries['vamp'], libraries['fftw3f'], libraries['fftw3'] ])
+	gtkardour.Merge ([ libraries['rubberband'] ])
 else:
 	gtkardour.Merge ([ libraries['soundtouch'] ])
 
@@ -188,7 +192,6 @@ new_session_dialog.cc
 option_editor.cc
 opts.cc
 pan_automation_time_axis.cc
-
 panner.cc
 panner2d.cc
 panner_ui.cc
@@ -200,6 +203,7 @@ public_editor.cc
 redirect_automation_line.cc
 redirect_automation_time_axis.cc
 redirect_box.cc
+rhythm_ferret.cc
 audio_region_editor.cc
 region_gain_line.cc
 region_selection.cc

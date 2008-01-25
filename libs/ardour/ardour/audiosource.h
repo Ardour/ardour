@@ -57,13 +57,23 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 
 	virtual nframes_t natural_position() const { return 0; }
 	
-	/* returns the number of items in this `audio_source' */
+	nframes64_t readable_length() const { return _length; }
+	uint32_t    n_channels() const { return 1; }
 
 	virtual nframes_t length() const {
 		return _length;
 	}
 
 	virtual nframes_t available_peaks (double zoom) const;
+
+	/* stopgap until nframes_t becomes nframes64_t. this function is needed by the Readable interface */
+
+	virtual nframes64_t read (Sample *dst, nframes64_t start, nframes64_t cnt, int channel) const {
+		/* XXX currently ignores channel, assuming that source is always mono, which
+		   historically has been true.
+		*/
+		return read (dst, (nframes_t) start, (nframes_t) cnt);
+	}
 
 	virtual nframes_t read (Sample *dst, nframes_t start, nframes_t cnt) const;
 	virtual nframes_t write (Sample *src, nframes_t cnt);
@@ -112,6 +122,9 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	int prepare_for_peakfile_writes ();
 	void done_with_peakfile_writes (bool done = true);
 
+	std::vector<nframes64_t> transients;
+	std::string get_transients_path() const;
+
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
@@ -145,6 +158,8 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 
 	int compute_and_write_peaks (Sample* buf, nframes_t first_frame, nframes_t cnt, bool force, 
 				     bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);
+
+	int load_transients (const std::string&);
 
   private:
 	int peakfile;

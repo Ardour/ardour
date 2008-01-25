@@ -27,6 +27,7 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
+#include <ardour/readable.h>
 
 class XMLNode;
 
@@ -40,7 +41,7 @@ enum RegionEditState {
 	EditChangesID      = 2
 };
 
-class Region : public PBD::StatefulDestructible, public boost::enable_shared_from_this<Region>
+class Region : public PBD::StatefulDestructible, public Readable, public boost::enable_shared_from_this<Region>
 {
   public:
 	enum Flag {

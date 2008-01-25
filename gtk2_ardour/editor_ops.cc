@@ -43,10 +43,12 @@
 #include <ardour/location.h>
 #include <ardour/named_selection.h>
 #include <ardour/audio_track.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/region_factory.h>
 #include <ardour/playlist_factory.h>
 #include <ardour/reverse.h>
+#include <ardour/transient_detector.h>
 #include <ardour/dB.h>
 
 #include "ardour_ui.h"
@@ -5012,4 +5014,84 @@ Editor::define_one_bar (nframes64_t start, nframes64_t end)
 
 	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();
+}
+
+void
+Editor::split_region_at_transients ()
+{
+	list<nframes64_t> transients;
+
+	if (!session) {
+		return;
+	}
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	show_rhythm_ferret ();
+	return;
+#if 0
+
+	cerr << "selection size is " << selection->regions.size() << endl;
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ) {
+
+		RegionSelection::iterator tmp;
+
+		tmp = i;
+		++tmp;
+
+		cerr << "working on " << (*i)->get_item_name() << endl;
+
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i)->region());
+		
+		if (!ar) {
+			continue;
+		}
+
+		boost::shared_ptr<Playlist> pl = ar->playlist();
+		
+		if (!pl) {
+			continue;
+		}
+
+		cerr << "getting transients\n";
+		
+		ar->get_transients (transients);
+		nframes64_t start = ar->start();
+		nframes64_t pos = ar->position();
+
+		pl->freeze ();
+		pl->remove_region (ar);
+
+		cerr << "creating new regions from " << transients.size() << " transients\n";
+
+		for (list<nframes64_t>::iterator x = transients.begin(); x != transients.end(); ++x) {
+
+			nframes_t len = (*x) - start;
+
+			string new_name;
+
+			if (session->region_name (new_name, ar->name())) {
+				continue;
+			}
+
+			pl->add_region (RegionFactory::create (ar->get_sources(), start, len, new_name), pos);
+			
+			start = (*x);
+			pos += len;
+		}
+
+		pl->thaw ();
+
+		transients.clear ();
+
+		cerr << "done with that one\n";
+
+		i = tmp;
+	}
+#endif
 }

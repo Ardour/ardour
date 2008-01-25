@@ -79,6 +79,7 @@
 #include "actions.h"
 #include "gui_thread.h"
 #include "sfdb_ui.h"
+#include "rhythm_ferret.h"
 
 #ifdef FFT_ANALYSIS
 #include "analysis_window.h"
@@ -328,6 +329,7 @@ Editor::Editor ()
 	_dragging_hscrollbar = false;
 	select_new_marker = false;
 	zoomed_to_region = false;
+	rhythm_ferret = 0;
 
 	scrubbing_direction = 0;
 
@@ -1160,6 +1162,10 @@ Editor::connect_to_session (Session *t)
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
+
+	if (rhythm_ferret) {
+		rhythm_ferret->set_session (session);
+	}
 
 #ifdef FFT_ANALYSIS
 	if (analysis_window != 0)
@@ -4359,3 +4365,15 @@ Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<R
 		}
 	}
 }	
+
+void
+Editor::show_rhythm_ferret ()
+{
+	if (rhythm_ferret == 0) {
+		rhythm_ferret = new RhythmFerret(*this);
+	}
+
+	rhythm_ferret->set_session (session);
+	rhythm_ferret->show ();
+	rhythm_ferret->present ();
+}

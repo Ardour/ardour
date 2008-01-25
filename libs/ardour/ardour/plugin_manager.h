@@ -40,6 +40,8 @@ class PluginManager {
 	PluginManager ();
 	~PluginManager ();
 
+	/* realtime plugin APIs */
+
 	ARDOUR::PluginInfoList &vst_plugin_info ()    { return _vst_plugin_info; }
 	ARDOUR::PluginInfoList &ladspa_plugin_info () { return _ladspa_plugin_info; }
 	ARDOUR::PluginInfoList &lv2_plugin_info ()    { return _lv2_plugin_info; }

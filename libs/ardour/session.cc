@@ -34,6 +34,7 @@
 
 #include <glibmm/thread.h>
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include <pbd/error.h>
 #include <glibmm/thread.h>
@@ -290,7 +291,8 @@ Session::Session (AudioEngine &eng,
 
 	first_stage_init (fullpath, snapshot_name);
 	
-	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	new_session = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+
 	if (new_session) {
 		if (create (new_session, mix_template, compute_initial_length())) {
 			destroy ();

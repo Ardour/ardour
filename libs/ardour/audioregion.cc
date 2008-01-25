@@ -20,6 +20,7 @@
 #include <cmath>
 #include <climits>
 #include <cfloat>
+#include <algorithm>
 
 #include <set>
 
@@ -110,15 +111,15 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	listen_to_my_curves ();
 }
 
-AudioRegion::AudioRegion (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
+AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (start, length, name, layer, flags),
 	  _fade_in (0.0, 2.0, 1.0, false),
 	  _fade_out (0.0, 2.0, 1.0, false),
 	  _envelope (0.0, 2.0, 1.0, false)
 {
 	/* basic AudioRegion constructor */
-
-	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
+	
+	for (SourceList::const_iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		sources.push_back (*i);
 		master_sources.push_back (*i);
 		(*i)->GoingAway.connect (mem_fun (*this, &AudioRegion::source_deleted));
@@ -437,12 +438,20 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 	}
 }
 
+nframes64_t
+AudioRegion::read (Sample* buf, nframes64_t position, nframes64_t cnt, int channel) const
+{
+	/* raw read, no fades, no gain, nada */
+	return _read_at (sources, buf, 0, 0, _position + position, cnt, channel, 0, 0, true);
+}
+
 nframes_t
 AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
 		      nframes_t cnt, 
 		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
-	return _read_at (sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames);
+	/* regular diskstream/butler read complete with fades etc */
+	return _read_at (sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames, false);
 }
 
 nframes_t
@@ -455,13 +464,16 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 nframes_t
 AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		       nframes_t position, nframes_t cnt, 
-		       uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
+		       uint32_t chan_n, 
+		       nframes_t read_frames, 
+		       nframes_t skip_frames,
+		       bool raw) const
 {
 	nframes_t internal_offset;
 	nframes_t buf_offset;
 	nframes_t to_read;
 
-	if (muted()) {
+	if (muted() && !raw) {
 		return 0; /* read nothing */
 	}
 
@@ -484,14 +496,16 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		return 0; /* read nothing */
 	}
 
-	if (opaque()) {
+	if (opaque() || raw) {
 		/* overwrite whatever is there */
 		mixdown_buffer = buf + buf_offset;
 	} else {
 		mixdown_buffer += buf_offset;
 	}
 
-	_read_data_count = 0;
+	if (!raw) {
+		_read_data_count = 0;
+	}
 
 	if (chan_n < n_channels()) {
 
@@ -500,7 +514,9 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 			return 0; /* "read nothing" */
 		}
 		
-		_read_data_count += srcs[chan_n]->read_data_count();
+		if (!raw) {
+			_read_data_count += srcs[chan_n]->read_data_count();
+		}
 
 	} else {
 		
@@ -512,37 +528,41 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 
 		/* no fades required */
 
-		goto merge;
+		if (!raw) {
+			goto merge;
+		}
 	}
 
 	/* fade in */
 
-	if (_flags & FadeIn) {
-
-		nframes_t fade_in_length = (nframes_t) _fade_in.back()->when;
-		
-		/* see if this read is within the fade in */
-
-		if (internal_offset < fade_in_length) {
-		
-			nframes_t limit;
-
-			limit = min (to_read, fade_in_length - internal_offset);
-
-			_fade_in.get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
-
-			for (nframes_t n = 0; n < limit; ++n) {
-				mixdown_buffer[n] *= gain_buffer[n];
+	if (!raw) {
+	
+		if (_flags & FadeIn) {
+			
+			nframes_t fade_in_length = (nframes_t) _fade_in.back()->when;
+			
+			/* see if this read is within the fade in */
+			
+			if (internal_offset < fade_in_length) {
+				
+				nframes_t limit;
+				
+				limit = min (to_read, fade_in_length - internal_offset);
+				
+				_fade_in.get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
+				
+				for (nframes_t n = 0; n < limit; ++n) {
+					mixdown_buffer[n] *= gain_buffer[n];
+				}
 			}
 		}
-	}
-	
-	/* fade out */
-
-	if (_flags & FadeOut) {
-	
-		/* see if some part of this read is within the fade out */
-
+		
+		/* fade out */
+		
+		if (_flags & FadeOut) {
+			
+			/* see if some part of this read is within the fade out */
+			
 		/* .................        >|            REGION
 		                            _length
  					    
@@ -553,65 +573,66 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
                         |--------------|
                         ^internal_offset
                                        ^internal_offset + to_read
-
-                  we need the intersection of [internal_offset,internal_offset+to_read] with
-                  [_length - fade_out_length, _length]
-
+				       
+				       we need the intersection of [internal_offset,internal_offset+to_read] with
+				       [_length - fade_out_length, _length]
+				       
 		*/
 
 	
-		nframes_t fade_out_length = (nframes_t) _fade_out.back()->when;
-		nframes_t fade_interval_start = max(internal_offset, _length-fade_out_length);
-		nframes_t fade_interval_end   = min(internal_offset + to_read, _length);
-
-		if (fade_interval_end > fade_interval_start) {
-			/* (part of the) the fade out is  in this buffer */
+			nframes_t fade_out_length = (nframes_t) _fade_out.back()->when;
+			nframes_t fade_interval_start = max(internal_offset, _length-fade_out_length);
+			nframes_t fade_interval_end   = min(internal_offset + to_read, _length);
 			
-			nframes_t limit = fade_interval_end - fade_interval_start;
-			nframes_t curve_offset = fade_interval_start - (_length-fade_out_length);
-			nframes_t fade_offset = fade_interval_start - internal_offset;
-								       
-			_fade_out.get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
-
-			for (nframes_t n = 0, m = fade_offset; n < limit; ++n, ++m) {
-				mixdown_buffer[m] *= gain_buffer[n];
+			if (fade_interval_end > fade_interval_start) {
+				/* (part of the) the fade out is  in this buffer */
+				
+				nframes_t limit = fade_interval_end - fade_interval_start;
+				nframes_t curve_offset = fade_interval_start - (_length-fade_out_length);
+				nframes_t fade_offset = fade_interval_start - internal_offset;
+				
+				_fade_out.get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
+				
+				for (nframes_t n = 0, m = fade_offset; n < limit; ++n, ++m) {
+					mixdown_buffer[m] *= gain_buffer[n];
+				}
+			} 
+			
+		}
+		
+		/* Regular gain curves */
+		
+		if (envelope_active())  {
+			_envelope.get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
+			
+			if (_scale_amplitude != 1.0f) {
+				for (nframes_t n = 0; n < to_read; ++n) {
+					mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
+				}
+			} else {
+				for (nframes_t n = 0; n < to_read; ++n) {
+					mixdown_buffer[n] *= gain_buffer[n];
+				}
+			}
+		} else if (_scale_amplitude != 1.0f) {
+			Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
+		}
+	
+	  merge:
+		
+		if (!opaque()) {
+			
+			/* gack. the things we do for users.
+			 */
+			
+			buf += buf_offset;
+			
+			for (nframes_t n = 0; n < to_read; ++n) {
+				buf[n] += mixdown_buffer[n];
 			}
 		} 
-
 	}
 
-	/* Regular gain curves */
-
-	if (envelope_active())  {
-		_envelope.get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
-		
-		if (_scale_amplitude != 1.0f) {
-			for (nframes_t n = 0; n < to_read; ++n) {
-				mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
-			}
-		} else {
-			for (nframes_t n = 0; n < to_read; ++n) {
-				mixdown_buffer[n] *= gain_buffer[n];
-			}
-		}
-	} else if (_scale_amplitude != 1.0f) {
-		Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
-	}
-
-  merge:
-
-	if (!opaque()) {
-
-		/* gack. the things we do for users.
-		 */
-
-		buf += buf_offset;
-		
-		for (nframes_t n = 0; n < to_read; ++n) {
-			buf[n] += mixdown_buffer[n];
-		}
-	} 
-	
 	return to_read;
 }
 	

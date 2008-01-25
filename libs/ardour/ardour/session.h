@@ -252,6 +252,9 @@ class Session : public PBD::StatefulDestructible
 	std::string peak_dir () const;
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
+	std::string analysis_dir() const;
+	
+	int ensure_subdirs ();
 
 	Glib::ustring peak_path (Glib::ustring) const;
 

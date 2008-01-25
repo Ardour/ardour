@@ -793,7 +793,14 @@ def prep_libcheck(topenv, libinfo):
 prep_libcheck(env, env)
 
 
+#
+# these are part of the Ardour source tree because they are C++
+# 
+
 libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
+                                 LIBPATH='#libs/vamp-sdk',
+                                 CPPPATH='#libs/vamp-sdk/vamp')
+libraries['vamphost'] = LibraryInfo (LIBS='vamphostsdk',
                                  LIBPATH='#libs/vamp-sdk',
                                  CPPPATH='#libs/vamp-sdk/vamp')
 

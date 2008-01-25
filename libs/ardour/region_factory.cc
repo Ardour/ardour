@@ -90,7 +90,7 @@ RegionFactory::create (Session& session, XMLNode& node, bool yn)
 }
 	
 boost::shared_ptr<Region> 
-RegionFactory::create (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
+RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
 {
 	boost::shared_ptr<AudioRegion> arp (new AudioRegion (srcs, start, length, name, layer, flags));
 	boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));

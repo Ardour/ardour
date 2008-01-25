@@ -364,6 +364,9 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "set-tempo-from-edit-range", _("Set Tempo from Edit Range=Bar"), mem_fun(*this, &Editor::use_range_as_bar));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "split-region-at-transients", _("Other Temporary Label"), mem_fun(*this, &Editor::split_region_at_transients));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "insert-chunk", _("Insert Chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f));

@@ -161,6 +161,7 @@
                    <menuitem action='select-prev-route'/>
 	</menu>
 	<menu name='Regions' action='Regions'>
+                   <menuitem action='split-region-at-transients'/>
                    <menuitem action='crop'/>
                    <menuitem action='duplicate-region'/>
                    <menuitem action='multi-duplicate-region'/>

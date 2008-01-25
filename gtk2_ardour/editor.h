@@ -105,6 +105,7 @@ class StreamView;
 class AudioStreamView;
 class ControlPoint;
 class SoundFileOmega;
+class RhythmFerret;
 #ifdef FFT_ANALYSIS
 class AnalysisWindow;
 #endif
@@ -360,6 +361,8 @@ class Editor : public PublicEditor
 	bool decelerate_mouse_speed ();
 
 	void toggle_meter_updating();
+
+	void show_rhythm_ferret();
 
   protected:
 	void map_transport_state ();
@@ -981,6 +984,7 @@ class Editor : public PublicEditor
 	void normalize_region ();
 	void denormalize_region ();
 	void adjust_region_scale_amplitude (bool up);
+	void split_region_at_transients ();
 
 	void use_region_as_bar ();
 	void use_range_as_bar ();
@@ -2061,6 +2065,8 @@ class Editor : public PublicEditor
 
 	void select_next_route ();
 	void select_prev_route ();
+
+	RhythmFerret* rhythm_ferret;
 };
 
 #endif /* __ardour_editor_h__ */
