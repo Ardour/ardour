@@ -5031,11 +5031,7 @@ Editor::split_region_at_transients ()
 		return;
 	}
 
-	show_rhythm_ferret ();
-	return;
 #if 0
-
-	cerr << "selection size is " << selection->regions.size() << endl;
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ) {
 
@@ -5088,8 +5084,6 @@ Editor::split_region_at_transients ()
 		pl->thaw ();
 
 		transients.clear ();
-
-		cerr << "done with that one\n";
 
 		i = tmp;
 	}

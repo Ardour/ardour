@@ -1122,8 +1122,8 @@ TimeAxisView::show_temporary_lines (const vector<nframes64_t>& pos)
 	list<ArdourCanvas::SimpleLine*>::iterator l;
 
 	for (i = pos.begin(), l = temp_lines.begin(); i != pos.end() && l != temp_lines.end(); ++i, ++l) {
-		(*l)->property_x1() = editor.frame_to_pixel ((double) *i);
-		(*l)->property_x2() = editor.frame_to_pixel ((double) *i);
+		(*l)->property_x1() = editor.frame_to_pixel (*i);
+		(*l)->property_x2() = editor.frame_to_pixel (*i);
 	}
 }
 

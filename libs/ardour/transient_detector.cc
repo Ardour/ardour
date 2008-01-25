@@ -7,9 +7,8 @@ using namespace ARDOUR;
 using namespace std;
 
 TransientDetector::TransientDetector (float sr)
-	: AudioAnalyser (sr, X_("vamp-example-plugins:percussiononsets"))
+	: AudioAnalyser (sr, X_("ardour-vamp-plugins:percussiononsets"))
 {
-	cerr << "plugin in constructor = " << plugin << endl;
 }
 
 TransientDetector::~TransientDetector()

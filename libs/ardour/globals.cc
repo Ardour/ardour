@@ -285,6 +285,17 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 		return -1;
 	}
 #endif
+	
+	/* Make VAMP look in our library ahead of anything else */
+
+	char *p = getenv ("VAMP_PATH");
+	string vamppath = VAMP_DIR;
+	if (p) {
+		vamppath += ':';
+		vamppath += p;
+	} 
+	setenv ("VAMP_PATH", vamppath.c_str(), 1);
+
 
 	setup_hardware_optimization (try_optimization);
 

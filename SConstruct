@@ -799,10 +799,10 @@ prep_libcheck(env, env)
 
 libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
                                  LIBPATH='#libs/vamp-sdk',
-                                 CPPPATH='#libs/vamp-sdk/vamp')
+                                 CPPPATH='#libs/vamp-sdk')
 libraries['vamphost'] = LibraryInfo (LIBS='vamphostsdk',
                                  LIBPATH='#libs/vamp-sdk',
-                                 CPPPATH='#libs/vamp-sdk/vamp')
+                                 CPPPATH='#libs/vamp-sdk')
 
 env['RUBBERBAND'] = False
 

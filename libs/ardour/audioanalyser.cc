@@ -40,13 +40,12 @@ AudioAnalyser::initialize_plugin (AnalysisPluginKey key, float sr)
 		return -1;
 	} 
 
-	if ((bufsize = plugin->getPreferredBlockSize ()) == 0) {
-		bufsize = 65536;
-	}
+	/* we asked for the buffering adapter, so set the blocksize to
+	   something that makes for efficient disk i/o
+	*/
 
-	if ((stepsize = plugin->getPreferredStepSize()) == 0) {
-		stepsize = bufsize;
-	}
+	bufsize = 65536;
+	stepsize = bufsize;
 
 	if (plugin->getMinChannelCount() > 1) {
 		delete plugin;

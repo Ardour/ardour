@@ -793,9 +793,9 @@ Region::state (bool full_state)
 	node->add_property ("length", buf);
 	snprintf (buf, sizeof (buf), "%u", _position);
 	node->add_property ("position", buf);
-	snprintf (buf, sizeof (buf), "%lu", _ancestral_start);
+	snprintf (buf, sizeof (buf), "%Ld", _ancestral_start);
 	node->add_property ("ancestral-start", buf);
-	snprintf (buf, sizeof (buf), "%lu", _ancestral_length);
+	snprintf (buf, sizeof (buf), "%Ld", _ancestral_length);
 	node->add_property ("ancestral-length", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _stretch);
 	node->add_property ("stretch", buf);
