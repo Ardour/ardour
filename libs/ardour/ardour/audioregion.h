@@ -148,7 +148,7 @@ class AudioRegion : public Region
 
 	void set_playlist (boost::weak_ptr<Playlist>);
 
-	int get_transients (std::vector<nframes64_t>&);
+	int get_transients (std::vector<nframes64_t>&, bool force_new = false);
 
   private:
 	friend class RegionFactory;
@@ -207,6 +207,11 @@ class AudioRegion : public Region
 
   protected:
 	int set_live_state (const XMLNode&, Change&, bool send);
+
+	std::vector<nframes64_t> _transients;
+	bool valid_transients;
+	void invalidate_transients ();
+	void cleanup_transients (std::vector<nframes64_t>&);
 };
 
 } /* namespace ARDOUR */

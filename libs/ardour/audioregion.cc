@@ -80,6 +80,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	}
 
 	_scale_amplitude = 1.0;
+	valid_transients = false;
 
 	set_default_fades ();
 	set_default_envelope ();
@@ -105,6 +106,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	}
 
 	_scale_amplitude = 1.0;
+	valid_transients = false;
 
 	set_default_fades ();
 	set_default_envelope ();
@@ -132,6 +134,7 @@ AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t len
 	}
 
 	_scale_amplitude = 1.0;
+	valid_transients = false;
 
 	set_default_fades ();
 	set_default_envelope ();
@@ -200,6 +203,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	}
 
 	_scale_amplitude = other->_scale_amplitude;
+	valid_transients = false;
 
 	listen_to_my_curves ();
 }
@@ -237,6 +241,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	}
 
 	_scale_amplitude = other->_scale_amplitude;
+	valid_transients = false;
 	_envelope = other->_envelope;
 
 	_fade_in_disabled = 0;
@@ -261,6 +266,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 	}
 
 	set_default_fades ();
+	valid_transients = false;
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -301,6 +307,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 	set_default_fades ();
 	_scale_amplitude = 1.0;
+	valid_transients = false;
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -321,6 +328,13 @@ AudioRegion::~AudioRegion ()
 
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
+}
+
+void
+AudioRegion::invalidate_transients ()
+{
+	valid_transients = false;
+	_transients.clear ();
 }
 
 void
@@ -1503,15 +1517,49 @@ AudioRegion::set_playlist (boost::weak_ptr<Playlist> wpl)
 	}
 }
 
+void
+AudioRegion::cleanup_transients (vector<nframes64_t>& t)
+{
+	sort (t.begin(), t.end());
+	
+	/* remove duplicates or other things that are too close */
+	
+	vector<nframes64_t>::iterator i = t.begin();
+	nframes64_t curr = (*i);
+	
+	/* XXX force a 3msec gap - use a config variable */
+	
+	nframes64_t gap_frames = (nframes64_t) floor (3.0 * (playlist()->session().frame_rate() / 1000.0));
+	
+	++i;
+	
+	while (i != t.end()) {
+		if (((*i) == curr) || (((*i) - curr) < gap_frames)) {
+				    i = t.erase (i);
+		} else {
+			++i;
+			curr = *i;
+		}
+	}
+}
+
 int
-AudioRegion::get_transients (vector<nframes64_t>& results)
+AudioRegion::get_transients (vector<nframes64_t>& results, bool force_new)
 {
 	if (!playlist()) {
 		return -1;
 	}
 
+	if (valid_transients && !force_new) {
+		results = _transients;
+		return 0;
+	}
+
 	TransientDetector t (playlist()->session().frame_rate());
 	bool existing_results = !results.empty();
+
+	_transients.clear ();
+	valid_transients = false;
 
 	for (uint32_t i = 0; i < n_channels(); ++i) {
 
@@ -1531,35 +1579,26 @@ AudioRegion::get_transients (vector<nframes64_t>& results)
 
 		/* merge */
 		
-		results.insert (results.end(), these_results.begin(), these_results.end());
+		_transients.insert (_transients.end(), these_results.begin(), these_results.end());
 	}
-		
-	if (!results.empty() && (existing_results || n_channels() > 1)) {
-		
-		/* now resort to bring transients from different channels together */
-		
-		sort (results.begin(), results.end());
+	
+	if (!results.empty()) {
+		if (existing_results) {
+			
+			/* merge our transients into the existing ones, then clean up
+			   those.
+			*/
 
-		/* remove duplicates or other things that are too close */
-
-		vector<nframes64_t>::iterator i = results.begin();
-		nframes64_t curr = (*i);
-
-		/* XXX force a 3msec gap - use a config variable */
-
-		nframes64_t gap_frames = (nframes64_t) floor (3.0 * (playlist()->session().frame_rate() / 1000.0));
-
-		++i;
-
-		while (i != results.end()) {
-			if (((*i) == curr) || (((*i) - curr) < gap_frames)) {
-				    i = results.erase (i);
-			} else {
-				++i;
-				curr = *i;
-			}
+			results.insert (results.end(), _transients.begin(), _transients.end());
+			cleanup_transients (results);
 		}
+
+		/* make sure ours are clean too */
+
+		cleanup_transients (_transients);
 	}
+
+	valid_transients = true;
 
 	return 0;
 }

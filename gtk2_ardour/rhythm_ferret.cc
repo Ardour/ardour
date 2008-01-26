@@ -222,7 +222,7 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 		results.insert (results.end(), these_results.begin(), these_results.end());
 	}
 		
-	if (!results.empty() && (existing_results || readable->n_channels() > 1)) {
+	if (!results.empty()) {
 		
 		/* now resort to bring transients from different channels together */
 		

@@ -44,6 +44,9 @@
                <menuitem action='GotoStart'/>
                <menuitem action='GotoEnd'/>
 	       <separator/>
+               <menuitem action='tab-to-transient-forwards'/>
+               <menuitem action='tab-to-transient-backwards'/>
+	       <separator/>
                <menuitem action='Record'/>
                <separator/> 
                <menuitem action='TransitionToRoll'/>

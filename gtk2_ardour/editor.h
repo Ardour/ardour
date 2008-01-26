@@ -987,6 +987,8 @@ class Editor : public PublicEditor
 	void denormalize_region ();
 	void adjust_region_scale_amplitude (bool up);
 
+	void tab_to_transient (bool forward);
+
 	void use_region_as_bar ();
 	void use_range_as_bar ();
 

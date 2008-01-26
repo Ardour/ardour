@@ -5127,3 +5127,55 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, vector<nframes64_t>
 	session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));
 }
 
+void
+Editor::tab_to_transient (bool forward)
+{
+
+	vector<nframes64_t> positions;
+
+	if (!session) {
+		return;
+	}
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+	
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (selection->regions.front()->region());
+
+	if (!ar) {
+		return;
+	}
+
+	ar->get_transients (positions);
+	nframes64_t pos = session->audible_frame ();
+
+	if (forward) {
+		vector<nframes64_t>::iterator x;
+
+		for (x = positions.begin(); x != positions.end(); ++x) {
+			if ((*x) > pos) {
+				break;
+			}
+		}
+
+		if (x != positions.end ()) {
+			session->request_locate (*x);
+		}
+
+	} else {
+		vector<nframes64_t>::reverse_iterator x;
+
+		for (x = positions.rbegin(); x != positions.rend(); ++x) {
+			if ((*x) < pos) {
+				break;
+			}
+		}
+
+		if (x != positions.rend ()) {
+			session->request_locate (*x);
+		}
+	}
+}
