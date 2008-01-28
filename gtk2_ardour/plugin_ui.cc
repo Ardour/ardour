@@ -67,9 +67,6 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 	bool have_gui = false;
 	non_gtk_gui = false;
 
-	Label* label = manage (new Label());
-	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
-
 	if (insert->plugin()->has_editor()) {
 		switch (insert->type()) {
 		case ARDOUR::VST:
@@ -77,10 +74,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 			break;
 
 		case ARDOUR::AudioUnit:
-			//have_gui = create_audiounit_editor (insert);
-			have_gui = true;
-			get_vbox()->pack_start (*label, false, false);
-			cerr << "#*#*#*#*#*#*#*#*## PACK " << label << " INTO PLUGIN UI\n";
+			have_gui = create_audiounit_editor (insert);
 			break;
 			
 		case ARDOUR::LADSPA:
@@ -120,7 +114,6 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
 	insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
 
-#if 0
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
 
@@ -134,7 +127,6 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 	}
 
 	set_default_size (w, h); 
-#endif
 }
 
 PluginUIWindow::~PluginUIWindow ()

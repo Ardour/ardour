@@ -5,6 +5,8 @@
 
 #include "splash.h"
 
+#include "i18n.h"
+
 using namespace Gtk;
 using namespace Glib;
 using namespace std;
@@ -27,12 +29,17 @@ Splash::Splash ()
 	}
 	
 	darea.set_size_request (pixbuf->get_width(), pixbuf->get_height());
-	set_type_hint (Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
 	darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	layout = create_pango_layout ("");
+	string str = "<b>";
+	string i18n = _("Ardour loading ...");
+	str += i18n;
+	str += "</b>";
+
+	layout->set_markup (str);
 
 	darea.show ();
 	darea.signal_expose_event().connect (mem_fun (*this, &Splash::expose));
@@ -44,6 +51,7 @@ void
 Splash::on_realize ()
 {
 	Window::on_realize ();
+	get_window()->set_decorations (Gdk::WMDecoration(0));
 	layout->set_font_description (get_style()->get_font());
 }
 
