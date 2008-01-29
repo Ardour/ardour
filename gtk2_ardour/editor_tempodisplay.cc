@@ -321,7 +321,7 @@ Editor::mouse_add_new_tempo_event (nframes_t frame)
 	session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 	commit_reversible_command ();
 	
-	map.dump (cerr);
+	//map.dump (cerr);
 }
 
 void
@@ -356,8 +356,6 @@ Editor::mouse_add_new_meter_event (nframes_t frame)
 	BBT_Time requested;
 
 	meter_dialog.get_bbt_time (requested);
-	cerr << "after requested bar: " << requested.bars << " beat " << requested.beats << endl;
-
 
 	begin_reversible_command (_("add meter mark"));
         XMLNode &before = map.get_state();
@@ -365,7 +363,7 @@ Editor::mouse_add_new_meter_event (nframes_t frame)
 	session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
 	commit_reversible_command ();
 	
-	map.dump (cerr);
+	//map.dump (cerr);
 }
 
 void
