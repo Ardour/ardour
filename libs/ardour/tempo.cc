@@ -449,7 +449,7 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 		
 		where.ticks = 0;
 
-		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()), false);
+		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()), true);
 	}
 
 	StateChanged (Change (0));
@@ -460,7 +460,7 @@ TempoMap::add_meter (const Meter& meter, nframes_t where)
 {
 	{
 		Glib::RWLock::WriterLock lm (lock);
-		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()), true);
+		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()), false);
 	}
 
 	StateChanged (Change (0));

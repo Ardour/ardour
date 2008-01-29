@@ -293,7 +293,8 @@ Editor::mouse_add_new_tempo_event (nframes_t frame)
 	TempoDialog tempo_dialog (map, frame, _("add"));
 	
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	tempo_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
+	//this causes compiz to display no border.
+	//tempo_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
 	ensure_float (tempo_dialog);
 
@@ -335,7 +336,9 @@ Editor::mouse_add_new_meter_event (nframes_t frame)
 	MeterDialog meter_dialog (map, frame, _("add"));
 
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
-	meter_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
+
+	//this causes compiz to display no border.. 
+	//meter_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
 	ensure_float (meter_dialog);
 	
@@ -351,9 +354,11 @@ Editor::mouse_add_new_meter_event (nframes_t frame)
 	
 	double note_type = meter_dialog.get_note_type ();
 	BBT_Time requested;
-	
+
 	meter_dialog.get_bbt_time (requested);
-	
+	cerr << "after requested bar: " << requested.bars << " beat " << requested.beats << endl;
+
+
 	begin_reversible_command (_("add meter mark"));
         XMLNode &before = map.get_state();
 	map.add_meter (Meter (bpb, note_type), requested);
