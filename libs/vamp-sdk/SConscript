@@ -22,7 +22,9 @@ vamp-sdk/RealTime.cpp
 Import('env install_prefix libraries')
 vampsdk = env.Copy()
 
-vampsdk.Append (CPPATH='#libs/vamp-sdk/vamp', CXXFLAGS="-Ilibs/vamp-sdk")
+# HAVE_FFTW3 is used to help improve some performance aspects of VAMP's InputDomainAdapter
+
+vampsdk.Append (CPPATH='#libs/vamp-sdk/vamp', CXXFLAGS="-Ilibs/vamp-sdk -DHAVE_FFTW3")
 
 libvampsdk = vampsdk.SharedLibrary('vampsdk', vampsdk_files)
 libvamphostsdk = vampsdk.SharedLibrary('vamphostsdk', vamphostsdk_files)

@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006-2007 Chris Cannam and QMUL.
-    This file by Mark Levy, Copyright 2007 QMUL.
+    This file by Mark Levy and Chris Cannam.
   
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -62,15 +62,168 @@ public:
     FeatureSet getRemainingFeatures();
 		
 protected:
+    class RingBuffer
+    {
+    public:
+        RingBuffer(int n) :
+            m_buffer(new float[n+1]), m_writer(0), m_reader(0), m_size(n+1) { }
+        virtual ~RingBuffer() { delete[] m_buffer; }
+
+        int getSize() const { return m_size-1; }
+        void reset() { m_writer = 0; m_reader = 0; }
+
+        int getReadSpace() const {
+            int writer = m_writer, reader = m_reader, space;
+            if (writer > reader) space = writer - reader;
+            else if (writer < reader) space = (writer + m_size) - reader;
+            else space = 0;
+            return space;
+        }
+
+        int getWriteSpace() const {
+            int writer = m_writer;
+            int reader = m_reader;
+            int space = (reader + m_size - writer - 1);
+            if (space >= m_size) space -= m_size;
+            return space;
+        }
+        
+        int peek(float *destination, int n) const {
+
+            int available = getReadSpace();
+
+            if (n > available) {
+                for (int i = available; i < n; ++i) {
+                    destination[i] = 0.f;
+                }
+                n = available;
+            }
+            if (n == 0) return n;
+
+            int reader = m_reader;
+            int here = m_size - reader;
+            const float *const bufbase = m_buffer + reader;
+
+            if (here >= n) {
+                for (int i = 0; i < n; ++i) {
+                    destination[i] = bufbase[i];
+                }
+            } else {
+                for (int i = 0; i < here; ++i) {
+                    destination[i] = bufbase[i];
+                }
+                float *const destbase = destination + here;
+                const int nh = n - here;
+                for (int i = 0; i < nh; ++i) {
+                    destbase[i] = m_buffer[i];
+                }
+            }
+
+            return n;
+        }
+
+        int skip(int n) {
+            
+            int available = getReadSpace();
+            if (n > available) {
+                n = available;
+            }
+            if (n == 0) return n;
+
+            int reader = m_reader;
+            reader += n;
+            while (reader >= m_size) reader -= m_size;
+            m_reader = reader;
+            return n;
+        }
+        
+        int write(const float *source, int n) {
+
+            int available = getWriteSpace();
+            if (n > available) {
+                n = available;
+            }
+            if (n == 0) return n;
+
+            int writer = m_writer;
+            int here = m_size - writer;
+            float *const bufbase = m_buffer + writer;
+            
+            if (here >= n) {
+                for (int i = 0; i < n; ++i) {
+                    bufbase[i] = source[i];
+                }
+            } else {
+                for (int i = 0; i < here; ++i) {
+                    bufbase[i] = source[i];
+                }
+                const int nh = n - here;
+                const float *const srcbase = source + here;
+                float *const buf = m_buffer;
+                for (int i = 0; i < nh; ++i) {
+                    buf[i] = srcbase[i];
+                }
+            }
+
+            writer += n;
+            while (writer >= m_size) writer -= m_size;
+            m_writer = writer;
+
+            return n;
+        }
+
+        int zero(int n) {
+            
+            int available = getWriteSpace();
+            if (n > available) {
+                n = available;
+            }
+            if (n == 0) return n;
+
+            int writer = m_writer;
+            int here = m_size - writer;
+            float *const bufbase = m_buffer + writer;
+
+            if (here >= n) {
+                for (int i = 0; i < n; ++i) {
+                    bufbase[i] = 0.f;
+                }
+            } else {
+                for (int i = 0; i < here; ++i) {
+                    bufbase[i] = 0.f;
+                }
+                const int nh = n - here;
+                for (int i = 0; i < nh; ++i) {
+                    m_buffer[i] = 0.f;
+                }
+            }
+            
+            writer += n;
+            while (writer >= m_size) writer -= m_size;
+            m_writer = writer;
+
+            return n;
+        }
+
+    protected:
+        float *m_buffer;
+        int    m_writer;
+        int    m_reader;
+        int    m_size;
+
+    private:
+        RingBuffer(const RingBuffer &); // not provided
+        RingBuffer &operator=(const RingBuffer &); // not provided
+    };
+
     Plugin *m_plugin;
     size_t m_inputStepSize;
     size_t m_inputBlockSize;
     size_t m_stepSize;
     size_t m_blockSize;
     size_t m_channels;
-    vector<vector<float> > m_queue;
-    float **m_buffers;    // in fact an array of pointers into the queue
-    size_t m_inputPos;    // start position in the queue of next input block 
+    vector<RingBuffer *> m_queue;
+    float **m_buffers;
     float m_inputSampleRate;
     RealTime m_timestamp;	
     OutputList m_outputs;
@@ -121,8 +274,8 @@ PluginBufferingAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
     m_stepSize(0),
     m_blockSize(0),
     m_channels(0), 
+    m_queue(0),
     m_buffers(0),
-    m_inputPos(0),
     m_inputSampleRate(inputSampleRate),
     m_timestamp()
 {
@@ -132,8 +285,12 @@ PluginBufferingAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
 PluginBufferingAdapter::Impl::~Impl()
 {
     // the adapter will delete the plugin
-    
-    delete [] m_buffers;
+
+    for (size_t i = 0; i < m_channels; ++i) {
+        delete m_queue[i];
+        delete[] m_buffers[i];
+    }
+    delete[] m_buffers;
 }
 
 size_t
@@ -184,9 +341,13 @@ PluginBufferingAdapter::Impl::initialise(size_t channels, size_t stepSize, size_
         std::cerr << "PluginBufferingAdapter::initialise: plugin's preferred stepSize greater than blockSize, giving up!" << std::endl;
         return false;
     }
-    
-    m_queue.resize(m_channels);		
-    m_buffers = new float*[m_channels];		
+
+    m_buffers = new float *[m_channels];
+
+    for (size_t i = 0; i < m_channels; ++i) {
+        m_queue.push_back(new RingBuffer(m_blockSize + m_inputBlockSize));
+        m_buffers[i] = new float[m_blockSize];
+    }
     
     return m_plugin->initialise(m_channels, m_stepSize, m_blockSize);
 }
@@ -212,23 +373,22 @@ PluginBufferingAdapter::Impl::process(const float *const *inputBuffers,
 			
     // queue the new input
     
-    //std::cerr << "unread " << m_queue[0].size() - m_inputPos << " samples" << std::endl; 
-    //std::cerr << "queueing " << m_inputBlockSize - (m_queue[0].size() - m_inputPos) << " samples" << std::endl; 
-    
-    for (size_t i = 0; i < m_channels; ++i)
-        for (size_t j = m_queue[0].size() - m_inputPos; j < m_inputBlockSize; ++j)
-            m_queue[i].push_back(inputBuffers[i][j]);
-    
-    m_inputPos += m_inputStepSize;
+    for (size_t i = 0; i < m_channels; ++i) {
+        int written = m_queue[i]->write(inputBuffers[i], m_inputBlockSize);
+        if (written < int(m_inputBlockSize) && i == 0) {
+            std::cerr << "WARNING: PluginBufferingAdapter::Impl::process: "
+                      << "Buffer overflow: wrote " << written 
+                      << " of " << m_inputBlockSize 
+                      << " input samples (for plugin step size "
+                      << m_stepSize << ", block size " << m_blockSize << ")"
+                      << std::endl;
+        }
+    }    
     
     // process as much as we can
-    while (m_queue[0].size() >= m_blockSize)
-    {
+
+    while (m_queue[0]->getReadSpace() >= int(m_blockSize)) {
         processBlock(allFeatureSets, timestamp);
-        m_inputPos -= m_stepSize;
-	
-        //std::cerr << m_queue[0].size() << " samples still left in queue" << std::endl;
-        //std::cerr << "inputPos = " << m_inputPos << std::endl;
     }	
     
     return allFeatureSets;
@@ -240,67 +400,67 @@ PluginBufferingAdapter::Impl::getRemainingFeatures()
     FeatureSet allFeatureSets;
     
     // process remaining samples in queue
-    while (m_queue[0].size() >= m_blockSize)
-    {
+    while (m_queue[0]->getReadSpace() >= int(m_blockSize)) {
         processBlock(allFeatureSets, m_timestamp);
     }
     
     // pad any last samples remaining and process
-    if (m_queue[0].size() > 0) 
-    {
-        for (size_t i = 0; i < m_channels; ++i)
-            while (m_queue[i].size() < m_blockSize)
-                m_queue[i].push_back(0.0);
+    if (m_queue[0]->getReadSpace() > 0) {
+        for (size_t i = 0; i < m_channels; ++i) {
+            m_queue[i]->zero(m_blockSize - m_queue[i]->getReadSpace());
+        }
         processBlock(allFeatureSets, m_timestamp);
     }			
     
     // get remaining features			
+
     FeatureSet featureSet = m_plugin->getRemainingFeatures();
+
     for (map<int, FeatureList>::iterator iter = featureSet.begin();
-         iter != featureSet.end(); ++iter)
-    {
+         iter != featureSet.end(); ++iter) {
         FeatureList featureList = iter->second;
-        for (size_t i = 0; i < featureList.size(); ++i)
-            allFeatureSets[iter->first].push_back(featureList[i]);				
+        for (size_t i = 0; i < featureList.size(); ++i) {
+            allFeatureSets[iter->first].push_back(featureList[i]);
+        }
     }
     
     return allFeatureSets;
 }
     
 void
-PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets, RealTime timestamp)
+PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets,
+                                           RealTime timestamp)
 {
-    //std::cerr << m_queue[0].size() << " samples left in queue" << std::endl;
-    
-    // point the buffers to the head of the queue
-    for (size_t i = 0; i < m_channels; ++i)
-        m_buffers[i] = &m_queue[i][0];
-    
+    for (size_t i = 0; i < m_channels; ++i) {
+        m_queue[i]->peek(m_buffers[i], m_blockSize);
+    }
+
     FeatureSet featureSet = m_plugin->process(m_buffers, m_timestamp);
     
     for (map<int, FeatureList>::iterator iter = featureSet.begin();
-         iter != featureSet.end(); ++iter)
-    {
+         iter != featureSet.end(); ++iter) {
 	
         FeatureList featureList = iter->second;
         int outputNo = iter->first;
 	
-        for (size_t i = 0; i < featureList.size(); ++i) 
-        {
+        for (size_t i = 0; i < featureList.size(); ++i) {
             
             // make sure the timestamp is set
-            switch (m_outputs[outputNo].sampleType)
-            {
+            switch (m_outputs[outputNo].sampleType) {
+
             case OutputDescriptor::OneSamplePerStep:
 		// use our internal timestamp - OK????
                 featureList[i].timestamp = m_timestamp;
                 break;
+
             case OutputDescriptor::FixedSampleRate:
 		// use our internal timestamp
                 featureList[i].timestamp = m_timestamp;
                 break;
+
             case OutputDescriptor::VariableSampleRate:
                 break;		// plugin must set timestamp
+
             default:
                 break;
             }
@@ -310,14 +470,17 @@ PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets, RealTime 
     }
     
     // step forward
-    for (size_t i = 0; i < m_channels; ++i)
-        m_queue[i].erase(m_queue[i].begin(), m_queue[i].begin() + m_stepSize);
+
+    for (size_t i = 0; i < m_channels; ++i) {
+        m_queue[i]->skip(m_stepSize);
+    }
     
     // fake up the timestamp each time we step forward
-    //std::cerr << m_timestamp;
-    long frame = RealTime::realTime2Frame(m_timestamp, int(m_inputSampleRate + 0.5));
-    m_timestamp = RealTime::frame2RealTime(frame + m_stepSize, int(m_inputSampleRate + 0.5));
-    //std::cerr << "--->" << m_timestamp << std::endl;
+
+    long frame = RealTime::realTime2Frame(m_timestamp,
+                                          int(m_inputSampleRate + 0.5));
+    m_timestamp = RealTime::frame2RealTime(frame + m_stepSize,
+                                           int(m_inputSampleRate + 0.5));
 }
 
 }
