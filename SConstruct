@@ -692,9 +692,9 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
 
 # optimization section
 if env['FPU_OPTIMIZATION']:
-    if env['DIST_TARGET'] == 'tiger':
-        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+    if env['DIST_TARGET'] == 'tiger' or env['DIST_TARGET'] == 'leopard':
+        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
+        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
         libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
     elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
@@ -719,6 +719,9 @@ else:
 
 if env['DIST_TARGET'] in ['panther', 'tiger', 'leopard' ]:
     env['IS_OSX'] = 1
+    # force tiger or later, to avoid issues on PPC which defaults
+    # back to 10.1 if we don't tell it otherwise.
+    env.Append (CCFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
 else:
     env['IS_OSX'] = 0
 
