@@ -17,6 +17,9 @@ gnomecanvasmm.Merge([libraries['glibmm2'],
                      libraries['gtkmm2'],
                      libraries['libgnomecanvas2'] ])
 
+if gnomecanvasmm['IS_OSX']:
+	gnomecanvasmm.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 libgnomecanvasmm = gnomecanvasmm.SharedLibrary('libgnomecanvasmm', gnomecanvasmm_files)
 Default(libgnomecanvasmm)
 
