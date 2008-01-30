@@ -534,6 +534,7 @@ if env['LV2']:
 	if conf.CheckPKGExists ('\"slv2 >= 0.6.0\"'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
+                env.Append (CCFLAGS="-DHAVE_LV2")
 	else:
 		print 'Building Ardour with LV2 support requires SLV2 >= 0.6.0'
 		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'

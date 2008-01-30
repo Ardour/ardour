@@ -38,7 +38,9 @@
 #include <ardour/plugin.h>
 #include <ardour/insert.h>
 #include <ardour/ladspa_plugin.h>
+#ifdef HAVE_LV2
 #include <ardour/lv2_plugin.h>
+#endif
 
 #include <lrdf.h>
 
@@ -385,8 +387,9 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 	if (plugin->parameter_is_input (port_index)) {
 
 		boost::shared_ptr<LadspaPlugin> lp;
+#ifdef HAVE_LV2
 		boost::shared_ptr<LV2Plugin> lv2p;
-
+#endif
 		if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
 
 			// all LADPSA plugins have a numeric unique ID
@@ -410,6 +413,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 				return control_ui;
 			}
 
+#ifdef HAVE_LV2
 		} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
 
 			SLV2Port port = lv2p->slv2_port(port_index);
@@ -429,6 +433,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 				slv2_scale_points_free(points);
 				return control_ui;
 			}
+#endif
 		}
 			
 		if (desc.toggled) {
@@ -766,7 +771,9 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 {
 	vector<string> enums;
 	boost::shared_ptr<LadspaPlugin> lp;
+#ifdef HAVE_LV2
 	boost::shared_ptr<LV2Plugin> lv2p;
+#endif
 
 	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
 		// all LADPSA plugins have a numeric unique ID
@@ -786,6 +793,7 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 			lrdf_free_setting_values(defaults);
 		}
 
+#ifdef HAVE_LV2
 	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
 
 		SLV2Port port = lv2p->slv2_port(port_index);
@@ -806,6 +814,7 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 		}
 
 		slv2_scale_points_free(points);
+#endif
 	}
 	
 
