@@ -28,7 +28,7 @@
 #include <ardour/plugin.h>
 
 #ifdef HAVE_SLV2
-#include <slv2/slv2.h>
+#include <ardour/lv2_plugin.h>
 #endif
 
 namespace ARDOUR {
@@ -61,7 +61,7 @@ class PluginManager {
 	ARDOUR::PluginInfoList _au_plugin_info;
 
 #ifdef HAVE_SLV2
-	SLV2World _lv2_world;
+	LV2World* _lv2_world;
 #endif
 	
 	std::map<uint32_t, std::string> rdf_type;

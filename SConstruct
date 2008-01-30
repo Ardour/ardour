@@ -531,12 +531,14 @@ if env['FFT_ANALYSIS']:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGExists' : CheckPKGExists })
 	
-	if conf.CheckPKGExists ('\"slv2 >= 0.4.4\"'):
+	if conf.CheckPKGExists ('\"slv2 >= 0.6.0\"'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
 	else:
-		print 'Building Ardour with LV2 support requires SLV2 >= 0.4.4'
+		print 'Building Ardour with LV2 support requires SLV2 >= 0.6.0'
 		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
+		print 'Until the 2.3 release, Ardour requires SLV2 out of SVN.'
+		print 'Testing would be very much appreciated!  svn co http://svn.drobilla.net/lad/slv2'
 		env['LV2'] = 0
 	conf.Finish()
 else:

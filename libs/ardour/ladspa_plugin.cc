@@ -470,7 +470,6 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 
 	desc.label = port_names()[which];
 
-
 	return 0;
 }
 
