@@ -392,6 +392,15 @@ ARDOUR_UI::~ARDOUR_UI ()
 	}
 }
 
+void
+ARDOUR_UI::pop_back_splash ()
+{
+	if (Splash::instance()) {
+		// Splash::instance()->pop_back();
+		Splash::instance()->hide ();
+	}
+}
+
 gint
 ARDOUR_UI::configure_timeout ()
 {
@@ -603,6 +612,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
+	pop_back_splash ();
 
 	/* we just don't care about the result, but we want to block */
 
@@ -683,6 +693,8 @@ ARDOUR_UI::check_memory_locking ()
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
 				hbox.show_all ();
+
+				pop_back_splash ();
 				
 				msg.run ();
 			}
@@ -716,6 +728,7 @@ ARDOUR_UI::finish()
 Ardour was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
 \"Just quit\" option."));
+					pop_back_splash();
 					msg.run ();
 					return;
 				}
@@ -1149,6 +1162,7 @@ ARDOUR_UI::check_audioengine ()
 		if (!engine->connected()) {
 			MessageDialog msg (_("Ardour is not connected to JACK\n"
 					     "You cannot open or close sessions in this condition"));
+			pop_back_splash ();
 			msg.run ();
 			return false;
 		}
@@ -1270,6 +1284,7 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 to create a new track or bus.\n\
 You should save Ardour, exit and\n\
 restart JACK with more ports."));
+		pop_back_splash ();
 		msg.run ();
 	}
 }
@@ -1646,6 +1661,7 @@ JACK has either been shutdown or it\n\
 disconnected Ardour because Ardour\n\
 was not fast enough. You can save the\n\
 session and/or try to reconnect to JACK ."));
+	pop_back_splash ();
 	msg.run ();
 }
 
@@ -1993,6 +2009,7 @@ ARDOUR_UI::fontconfig_dialog ()
 				   true,
 				   Gtk::MESSAGE_INFO,
 				   Gtk::BUTTONS_OK);
+		pop_back_splash ();
 		msg.show_all ();
 		msg.present ();
 		msg.run ();
@@ -2083,7 +2100,8 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 	msg.set_name (X_("CleanupDialog"));
 	msg.set_wmclass (X_("existing_session"), "Ardour");
 	msg.set_position (Gtk::WIN_POS_MOUSE);
-	
+	pop_back_splash ();
+
 	switch (msg.run()) {
 	case RESPONSE_YES:
 		return true;
@@ -2402,6 +2420,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS) && ::access (path.c_str(), W_OK)) {
 		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
 					      "This prevents the session from being loaded."));
+		pop_back_splash ();
 		msg.run ();
 		goto out;
 	}
@@ -2425,6 +2444,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		msg.set_title (_("Loading Error"));
 		msg.set_secondary_text (_("Click the OK button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash ();
 		msg.present ();
 
 		int response = msg.run ();
@@ -2450,6 +2470,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		msg.set_title (_("Loading Error"));
 		msg.set_secondary_text (_("Click the OK button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash ();
 		msg.present ();
 
 		int response = msg.run ();
@@ -2522,6 +2543,7 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 	catch (...) {
 
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		pop_back_splash ();
 		msg.run ();
 		return -1;
 	}

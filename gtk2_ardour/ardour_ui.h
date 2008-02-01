@@ -647,7 +647,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	About* about;
 	Splash* splash;
+	void pop_back_splash ();
 	bool shown_flag;
+
 	/* cleanup */
 
 	Gtk::MenuItem *cleanup_item;

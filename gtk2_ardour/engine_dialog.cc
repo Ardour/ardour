@@ -553,10 +553,12 @@ EngineControl::setup_engine ()
 		error << string_compose (_("cannot open JACK rc file %1 to store parameters"), jackdrc_path) << endmsg;
 		return -1;
 	}
-
+	cerr << "JACK COMMAND: ";
 	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
+		cerr << (*i) << ' ';
 		jackdrc << (*i) << ' ';
 	}
+	cerr << endl;
 	jackdrc << endl;
 	jackdrc.close ();
 
@@ -955,6 +957,12 @@ EngineControl::find_jack_servers (vector<string>& strings)
 			path += ":/usr/local/bin:/opt/local/bin";
 		}
 	}
+
+#ifdef __APPLE__
+	// push it back into the environment so that auto-started JACK can find it.
+	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
+	setenv ("PATH", path.c_str(), 1);
+#endif
 
 	jack_servers = scanner (path, jack_server_filter, 0, false, true);
 	
