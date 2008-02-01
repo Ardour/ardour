@@ -1676,8 +1676,6 @@ ARDOUR_UI::setup_theme ()
 void
 ARDOUR_UI::update_clocks ()
 {
-	return;
-
 	if (!editor || !editor->dragging_playhead()) {
 		Clock (session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
 	}
