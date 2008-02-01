@@ -13,6 +13,7 @@
 #include "rhythm_ferret.h"
 #include "audio_region_view.h"
 #include "public_editor.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -57,9 +58,9 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 {
 	upper_hpacker.set_spacing (6);
 
-	upper_hpacker.pack_start (operation_frame, true, true);
-	upper_hpacker.pack_start (selection_frame, true, true);
 	upper_hpacker.pack_start (ferret_frame, true, true);
+	upper_hpacker.pack_start (selection_frame, true, true);
+	upper_hpacker.pack_start (operation_frame, true, true);
 
 	op_packer.pack_start (region_split_button, false, false);
 	op_packer.pack_start (tempo_button, false, false);
@@ -107,15 +108,17 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	analyze_button.signal_clicked().connect (mem_fun (*this, &RhythmFerret::run_analysis));
 	
 	ferret_frame.add (ferret_packer);
-
-	// Glib::RefPtr<Pixbuf> logo_pixbuf ("somefile");
 	
+	logo = manage (new Gtk::Image (::get_icon (X_("ferret_02"))));
+
 	if (logo) {
 		lower_hpacker.pack_start (*logo, false, false);
 	}
 
-	lower_hpacker.pack_start (operation_clarification_label, false, false);
+	lower_hpacker.pack_start (operation_clarification_label, true, true);
 	lower_hpacker.pack_start (action_button, false, false);
+	lower_hpacker.set_border_width (6);
+	lower_hpacker.set_spacing (6);
 
 	action_button.signal_clicked().connect (mem_fun (*this, &RhythmFerret::do_action));
 	
@@ -197,7 +200,6 @@ int
 RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, AnalysisFeatureList& results)
 {
 	TransientDetector t (session->frame_rate());
-	bool existing_results = !results.empty();
 
 	for (uint32_t i = 0; i < readable->n_channels(); ++i) {
 

@@ -909,7 +909,7 @@ EngineControl::find_jack_servers (vector<string>& strings)
 
 	_NSGetExecutablePath (execpath, &pathsz);
 	
-	Glib::ustring path (Glib::path_get_dirname (execpath));
+	string path (Glib::path_get_dirname (execpath));
 	path += "/jackd";
 
 	if (Glib::file_test (path, FILE_TEST_EXISTS)) {
@@ -931,8 +931,30 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	PathScanner scanner;
 	vector<string *> *jack_servers;
 	std::map<string,int> un;
-	
-	path = getenv ("PATH");
+	char *p;
+	bool need_minimal_path = false;
+
+	p = getenv ("PATH");
+
+	if (p && *p) {
+		path = p;
+	} else {
+		need_minimal_path = true;
+	}
+
+#ifdef __APPLE__
+	// many mac users don't have PATH set up to include
+	// likely installed locations of JACK
+	need_minimal_path = true;
+#endif
+
+	if (need_minimal_path) {
+		if (path.empty()) {
+			path = "/usr/bin:/bin:/usr/local/bin:/opt/local/bin";
+		} else {
+			path += ":/usr/local/bin:/opt/local/bin";
+		}
+	}
 
 	jack_servers = scanner (path, jack_server_filter, 0, false, true);
 	
