@@ -9,6 +9,9 @@ Import('env libraries install_prefix')
 midi2 = env.Copy()
 midi2.Merge([ libraries['sigc2'], libraries['xml'], libraries['glibmm2'], libraries['glib2'], libraries['pbd'] ])
 
+if midi2['IS_OSX']:
+	midi2.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 domain = 'midipp'
 
 midi2.Append(DOMAIN=domain,MAJOR=2,MINOR=1,MICRO=1)
