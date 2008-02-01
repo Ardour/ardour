@@ -21,6 +21,7 @@
 #include <cmath>
 #include <climits>
 #include <algorithm>
+#include <sstream>
 
 #include <sigc++/bind.h>
 #include <sigc++/class_slot.h>
@@ -28,10 +29,12 @@
 #include <glibmm/thread.h>
 #include <pbd/xml++.h>
 #include <pbd/stacktrace.h>
+#include <pbd/enumwriter.h>
 
 #include <ardour/region.h>
 #include <ardour/playlist.h>
 #include <ardour/session.h>
+#include <ardour/tempo.h>
 #include <ardour/region_factory.h>
 
 #include "i18n.h"
@@ -56,7 +59,7 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	_read_data_count = 0;
 	_frozen = 0;
 	pending_changed = Change (0);
-
+	valid_transients = false;
 	_name = name;
 	_start = start; 
 	_sync_position = _start;
@@ -72,6 +75,7 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	_read_data_count = 0;
 	_first_edit = EditChangesNothing;
 	_last_layer_op = 0;
+	_positional_lock_style = AudioTime;
 }
 
 Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
@@ -81,6 +85,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	_frozen = 0;
 	pending_changed = Change (0);
 	_read_data_count = 0;
+	valid_transients = false;
 
 	_start = other->_start + offset; 
 	if (other->_sync_position < offset) {
@@ -101,6 +106,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	_flags = Flag (flags & ~(Locked|WholeFile|Hidden));
 	_first_edit = EditChangesNothing;
 	_last_layer_op = 0;
+	_positional_lock_style = AudioTime;
 }
 
 Region::Region (boost::shared_ptr<const Region> other)
@@ -110,6 +116,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_frozen = 0;
 	pending_changed = Change (0);
 	_read_data_count = 0;
+	valid_transients = false;
 
 	_first_edit = EditChangesID;
 	other->_first_edit = EditChangesName;
@@ -134,12 +141,14 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_layer = other->_layer; 
 	_flags = Flag (other->_flags & ~Locked);
 	_last_layer_op = other->_last_layer_op;
+	_positional_lock_style = AudioTime;
 }
 
 Region::Region (const XMLNode& node)
 {
 	_frozen = 0;
 	pending_changed = Change (0);
+	valid_transients = false;
 	_read_data_count = 0;
 	_start = 0; 
 	_sync_position = _start;
@@ -151,6 +160,7 @@ Region::Region (const XMLNode& node)
 	_layer = 0;
 	_flags = Flag (0);
 	_first_edit = EditChangesNothing;
+	_positional_lock_style = AudioTime;
 
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -206,6 +216,7 @@ Region::set_length (nframes_t len, void *src)
 
 		first_edit ();
 		maybe_uncopy ();
+		invalidate_transients ();
 
 		if (!_frozen) {
 			recompute_at_end ();
@@ -283,12 +294,49 @@ Region::special_set_position (nframes_t pos)
 }
 
 void
+Region::set_position_lock_style (PositionLockStyle ps)
+{
+	boost::shared_ptr<Playlist> pl (playlist());
+
+	if (!pl) {
+		return;
+	}
+
+	_positional_lock_style = ps;
+
+	if (_positional_lock_style == MusicTime) {
+		pl->session().tempo_map().bbt_time (_position, _bbt_time);
+	}
+	
+}
+
+void
+Region::update_position_after_tempo_map_change ()
+{
+	boost::shared_ptr<Playlist> pl (playlist());
+	
+	if (!pl || _positional_lock_style != MusicTime) {
+		return;
+	}
+
+	TempoMap& map (pl->session().tempo_map());
+	nframes_t pos = map.frame_time (_bbt_time);
+	set_position_internal (pos, false);
+}
+
+void
 Region::set_position (nframes_t pos, void *src)
 {
 	if (_flags & Locked) {
 		return;
 	}
 
+	set_position_internal (pos, true);
+}
+
+void
+Region::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
+{
 	if (_position != pos) {
 		_last_position = _position;
 		_position = pos;
@@ -303,6 +351,15 @@ Region::set_position (nframes_t pos, void *src)
 			_last_length = _length;
 			_length = max_frames - _position;
 		}
+
+		if (allow_bbt_recompute && _positional_lock_style == MusicTime) {
+			boost::shared_ptr<Playlist> pl (playlist());
+			if (pl) {
+				pl->session().tempo_map().bbt_time (_position, _bbt_time);
+			}
+		}
+
+		invalidate_transients ();
 	}
 
 	/* do this even if the position is the same. this helps out
@@ -396,6 +453,7 @@ Region::set_start (nframes_t pos, void *src)
 		_start = pos;
 		_flags = Region::Flag (_flags & ~WholeFile);
 		first_edit ();
+		invalidate_transients ();
 
 		send_change (StartChanged);
 	}
@@ -793,9 +851,9 @@ Region::state (bool full_state)
 	node->add_property ("length", buf);
 	snprintf (buf, sizeof (buf), "%u", _position);
 	node->add_property ("position", buf);
-	snprintf (buf, sizeof (buf), "%Ld", _ancestral_start);
+	snprintf (buf, sizeof (buf), "%" PRIi64, _ancestral_start);
 	node->add_property ("ancestral-start", buf);
-	snprintf (buf, sizeof (buf), "%Ld", _ancestral_length);
+	snprintf (buf, sizeof (buf), "%" PRIi64, _ancestral_length);
 	node->add_property ("ancestral-length", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _stretch);
 	node->add_property ("stretch", buf);
@@ -825,6 +883,13 @@ Region::state (bool full_state)
 	node->add_property ("layer", buf);
 	snprintf (buf, sizeof (buf), "%" PRIu32, _sync_position);
 	node->add_property ("sync-position", buf);
+
+	if (_positional_lock_style != AudioTime) {
+		node->add_property ("positional-lock-style", enum_2_string (_positional_lock_style));
+		stringstream str;
+		str << _bbt_time;
+		node->add_property ("bbt-position", str.str());
+	}
 
 	return *node;
 }
@@ -906,6 +971,27 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 		}
 	} else {
 		_sync_position = _start;
+	}
+
+	if ((prop = node.property ("positional-lock-style")) != 0) {
+		_positional_lock_style = PositionLockStyle (string_2_enum (prop->value(), _positional_lock_style));
+
+		if (_positional_lock_style == MusicTime) {
+			if ((prop = node.property ("bbt-position")) == 0) {
+				/* missing BBT info, revert to audio time locking */
+				_positional_lock_style = AudioTime;
+			} else {
+				if (sscanf (prop->value().c_str(), "%d|%d|%d", 
+					    &_bbt_time.bars,
+					    &_bbt_time.beats,
+					    &_bbt_time.ticks) != 3) {
+					_positional_lock_style = AudioTime;
+				}
+			}
+		}
+			
+	} else {
+		_positional_lock_style = AudioTime;
 	}
 
 	/* XXX FIRST EDIT !!! */
@@ -1070,3 +1156,11 @@ Region::region_list_equivalent (boost::shared_ptr<const Region> other) const
 {
 	return size_equivalent (other) && source_equivalent (other) && _name == other->_name;
 }
+
+void
+Region::invalidate_transients ()
+{
+	valid_transients = false;
+	_transients.clear ();
+}
+

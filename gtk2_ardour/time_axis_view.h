@@ -176,7 +176,7 @@ class TimeAxisView : public virtual AxisView
 	virtual ARDOUR::RouteGroup* edit_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
-	virtual void show_temporary_lines (const std::vector<nframes64_t>&);
+	virtual void show_temporary_lines (const ARDOUR::AnalysisFeatureList&);
 	virtual void hide_temporary_lines ();
 
 	virtual void set_samples_per_unit (double);

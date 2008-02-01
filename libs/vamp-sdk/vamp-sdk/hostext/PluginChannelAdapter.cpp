@@ -143,7 +143,7 @@ PluginChannelAdapter::Impl::initialise(size_t channels, size_t stepSize, size_t 
 
         m_pluginChannels = minch;
 
-        std::cerr << "PluginChannelAdapter::initialise: expanding " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
+        // std::cerr << "PluginChannelAdapter::initialise: expanding " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
 
     } else if (m_inputChannels > maxch) {
 
@@ -155,18 +155,18 @@ PluginChannelAdapter::Impl::initialise(size_t channels, size_t stepSize, size_t 
             m_buffer = new float *[1];
             m_buffer[0] = new float[blockSize];
 
-            std::cerr << "PluginChannelAdapter::initialise: mixing " << m_inputChannels << " to mono for plugin" << std::endl;
+            // std::cerr << "PluginChannelAdapter::initialise: mixing " << m_inputChannels << " to mono for plugin" << std::endl;
 
         } else {
             
-            std::cerr << "PluginChannelAdapter::initialise: reducing " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
+            // std::cerr << "PluginChannelAdapter::initialise: reducing " << m_inputChannels << " to " << m_pluginChannels << " for plugin" << std::endl;
         }
 
         m_pluginChannels = maxch;
 
     } else {
  
-        std::cerr << "PluginChannelAdapter::initialise: accepting given number of channels (" << m_inputChannels << ")" << std::endl;
+        // std::cerr << "PluginChannelAdapter::initialise: accepting given number of channels (" << m_inputChannels << ")" << std::endl;
         m_pluginChannels = m_inputChannels;
     }
 

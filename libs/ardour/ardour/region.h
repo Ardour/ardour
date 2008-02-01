@@ -67,6 +67,11 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 		range_guarantoor = USHRT_MAX
 	};
 
+	enum PositionLockStyle {
+		AudioTime,
+		MusicTime
+	};
+
  	static const Flag DefaultFlags = Flag (Opaque|DefaultFadeIn|DefaultFadeOut|FadeIn|FadeOut);
 
 	static Change FadeChanged;
@@ -121,6 +126,9 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 	bool whole_file() const { return _flags & WholeFile ; }
 	Flag flags()      const { return _flags; }
 
+	PositionLockStyle positional_lock_style() const { return _positional_lock_style; }
+	void set_position_lock_style (PositionLockStyle ps);
+
 	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
 	void freeze ();
@@ -149,6 +157,7 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 	void set_position (nframes_t, void *src);
 	void set_position_on_top (nframes_t, void *src);
 	void special_set_position (nframes_t);
+	void update_position_after_tempo_map_change ();
 	void nudge_position (nframes64_t, void *src);
 
 	bool at_natural_position () const;
@@ -189,6 +198,13 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);
 
+	virtual int get_transients (AnalysisFeatureList&, bool force_new = false) { 
+		// no transients, but its OK
+		return 0;
+	}
+
+	void invalidate_transients ();	
+
   protected:
 	friend class RegionFactory;
 
@@ -198,13 +214,13 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 	Region (boost::shared_ptr<const Region>);
 	Region (const XMLNode&);
 
-
   protected:
 	XMLNode& get_short_state (); /* used only by Session */
 
 	void send_change (Change);
 
 	void trim_to_internal (nframes_t position, nframes_t length, void *src);
+	void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
 
 	bool copied() const { return _flags & Copied; }
 	void maybe_uncopy ();
@@ -217,27 +233,30 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
 	
-	
-	nframes_t               _start;
-	nframes_t               _length;
-	nframes_t               _last_length;
-	nframes_t               _position;
-	nframes_t               _last_position;
-	Flag                    _flags;
-	nframes_t               _sync_position;
-	layer_t                 _layer;
-	string                  _name;        
-	mutable RegionEditState _first_edit;
-	int                     _frozen;
-	Glib::Mutex             lock;
+	nframes_t                _start;
+	nframes_t                _length;
+	nframes_t                _last_length;
+	nframes_t                _position;
+	nframes_t                _last_position;
+	Flag                     _flags;
+	PositionLockStyle        _positional_lock_style;
+	nframes_t                _sync_position;
+	layer_t                  _layer;
+	string                   _name;        
+	mutable RegionEditState  _first_edit;
+	int                      _frozen;
+	Glib::Mutex               lock;
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
-	mutable uint32_t        _read_data_count; // modified in read()
-	Change                   pending_changed;
-	uint64_t                _last_layer_op; // timestamp
-	nframes64_t             _ancestral_start;
-	nframes64_t             _ancestral_length;
-	float                   _stretch;
-	float                   _shift;
+	mutable uint32_t         _read_data_count; // modified in read()
+	Change                    pending_changed;
+	uint64_t                 _last_layer_op; // timestamp
+	nframes64_t              _ancestral_start;
+	nframes64_t              _ancestral_length;
+	float                    _stretch;
+	float                    _shift;
+	BBT_Time                 _bbt_time;
+	AnalysisFeatureList      _transients;
+	bool valid_transients;
 };
 
 } /* namespace ARDOUR */

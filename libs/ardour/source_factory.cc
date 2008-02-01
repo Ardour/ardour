@@ -115,6 +115,7 @@ boost::shared_ptr<Source>
 SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes, float sr)
 {
 	boost::shared_ptr<Source> ret (new SilentFileSource (s, node, nframes, sr));
+	// no analysis data - the file is non-existent
 	SourceCreated (ret);
 	return ret;
 }
@@ -128,6 +129,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();
 		}
+		ret->check_for_analysis_data_on_disk ();
 		SourceCreated (ret);
 		return ret;
 	} 
@@ -141,6 +143,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();
 		}
+		ret->check_for_analysis_data_on_disk ();
 		SourceCreated (ret);
 		return ret;
 	}
@@ -160,7 +163,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 	if (setup_peakfile (ret, defer_peaks)) {
 		return boost::shared_ptr<Source>();
 	}
-	
+	ret->check_for_analysis_data_on_disk ();
 	SourceCreated (ret);
 	return ret;
 }
@@ -178,6 +181,7 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
 			}
+			ret->check_for_analysis_data_on_disk ();
 			if (announce) {
 				SourceCreated (ret);
 			}
@@ -192,6 +196,7 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
 			}
+			ret->check_for_analysis_data_on_disk ();
 			if (announce) {
 				SourceCreated (ret);
 			}
@@ -204,6 +209,7 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();
 		}
+		ret->check_for_analysis_data_on_disk ();
 		if (announce) {
 			SourceCreated (ret);
 		}
@@ -223,6 +229,8 @@ SourceFactory::createReadable (Session& s, string path, int chn, AudioFileSource
 	if (setup_peakfile (ret, defer_peaks)) {
 		return boost::shared_ptr<Source>();
 	}
+
+	ret->check_for_analysis_data_on_disk ();
 
 	if (announce) {
 		SourceCreated (ret);
@@ -249,6 +257,8 @@ SourceFactory::createWritable (Session& s, std::string path, bool destructive, n
 	if (setup_peakfile (ret, defer_peaks)) {
 		return boost::shared_ptr<Source>();
 	}
+
+	// no analysis data - this is a new file
 
 	if (announce) {
 		SourceCreated (ret);

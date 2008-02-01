@@ -40,7 +40,7 @@ class AudioAnalyser {
 
 	AudioAnalyser (float sample_rate, AnalysisPluginKey key);
 	virtual ~AudioAnalyser();
-
+	
 	/* analysis object should provide a run method
 	   that accepts a path to write the results to (optionally empty)
 	   a Readable* to read data from

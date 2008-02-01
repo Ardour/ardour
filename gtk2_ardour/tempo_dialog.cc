@@ -243,7 +243,6 @@ TempoDialog::get_note_type ()
 		}
 	}
 
-	cerr << "returning " << note_type << " based on " << text << endl;
 	return note_type;
 }
 

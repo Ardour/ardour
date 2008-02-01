@@ -1742,12 +1742,25 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	items.push_back (CheckMenuElem (_("Lock")));
 	CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
-	fooc = region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
 	if (region->locked()) {
-		fooc.block (true);
 		region_lock_item->set_active();
-		fooc.block (false);
 	}
+	region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
+
+	items.push_back (CheckMenuElem (_("Glue to Bars&Beats")));
+	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
+
+	switch (region->positional_lock_style()) {
+	case Region::MusicTime:
+		bbt_glue_item->set_active (true);
+		break;
+	default:
+		bbt_glue_item->set_active (true);
+		break;
+	}
+
+	bbt_glue_item->signal_activate().connect (bind (mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
+
 	items.push_back (CheckMenuElem (_("Mute")));
 	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
 	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
@@ -3140,15 +3153,25 @@ Editor::hide_verbose_canvas_cursor ()
 	verbose_cursor_visible = false;
 }
 
+double
+Editor::clamp_verbose_cursor_x (double x)
+{
+	return min (horizontal_adjustment.get_value() + canvas_width - 75.0, x);
+}
+
+double
+Editor::clamp_verbose_cursor_y (double y)
+{
+	return min (vertical_adjustment.get_value() + canvas_height - 50.0, y);
+}
+
 void
 Editor::set_verbose_canvas_cursor (const string & txt, double x, double y)
 {
-	/* XXX get origin of canvas relative to root window,
-	   add x and y and check compared to gdk_screen_{width,height}
-	*/
 	verbose_canvas_cursor->property_text() = txt.c_str();
-	verbose_canvas_cursor->property_x() = x;
-	verbose_canvas_cursor->property_y() = y;
+	/* don't get too close to the edge */
+	verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (x);
+	verbose_canvas_cursor->property_y() = clamp_verbose_cursor_x (y);
 }
 
 void

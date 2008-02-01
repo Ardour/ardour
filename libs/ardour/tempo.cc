@@ -246,29 +246,49 @@ TempoMap::~TempoMap ()
 int
 TempoMap::move_metric_section (MetricSection& section, const BBT_Time& when)
 {
-	if (when == section.start()) {
+	if (when == section.start() || !section.movable()) {
 		return -1;
-	}
-
-	if (!section.movable()) {
-		return 1;
 	}
 
 	Glib::RWLock::WriterLock  lm (lock);
 	MetricSectionSorter cmp;
-	BBT_Time corrected (when);
-	
-	if (dynamic_cast<MeterSection*>(&section) != 0) {
-		if (corrected.beats > 1) {
-			corrected.beats = 1;
-			corrected.bars++;
-		}
-	}
-	corrected.ticks = 0;
 
-	section.set_start (corrected);
-	metrics->sort (cmp);
-	timestamp_metrics (true);
+	if (when.beats != 1) {
+
+		/* position by audio frame, then recompute BBT timestamps from the audio ones */
+
+		nframes_t frame = frame_time (when);
+		// cerr << "nominal frame time = " << frame << endl;
+
+		nframes_t prev_frame = round_to_type (frame, -1, Beat);
+		nframes_t next_frame = round_to_type (frame, 1, Beat);
+		
+		// cerr << "previous beat at " << prev_frame << " next at " << next_frame << endl;
+
+		/* use the closest beat */
+
+		if ((frame - prev_frame) < (next_frame - frame)) {
+			frame = prev_frame;
+		} else {
+			frame = next_frame;
+		}
+		
+		// cerr << "actual frame time = " << frame << endl;
+		section.set_frame (frame);
+		// cerr << "frame time = " << section.frame() << endl;
+		timestamp_metrics (false);
+		// cerr << "new BBT time = " << section.start() << endl;
+		metrics->sort (cmp);
+
+	} else {
+
+		/* positioned at bar start already, so just put it there */
+
+		section.set_start (when);
+		metrics->sort (cmp);
+		timestamp_metrics (true);
+	}
+
 
 	return 0;
 }
@@ -288,7 +308,6 @@ TempoMap::move_meter (MeterSection& meter, const BBT_Time& when)
 		StateChanged (Change (0));
 	}
 }
-		
 
 void
 TempoMap::remove_tempo (const TempoSection& tempo)
@@ -412,11 +431,12 @@ TempoMap::replace_tempo (TempoSection& existing, const Tempo& replacement)
 			TempoSection *ts;
 
 			if ((ts = dynamic_cast<TempoSection*>(*i)) != 0 && ts == &existing) {
-				
-				*((Tempo *) ts) = replacement;
+
+				 *((Tempo *) ts) = replacement;
 
 				replaced = true;
 				timestamp_metrics (true);
+
 				break;
 			}
 		}
@@ -490,6 +510,21 @@ TempoMap::replace_meter (MeterSection& existing, const Meter& replacement)
 	
 	if (replaced) {
 		StateChanged (Change (0));
+	}
+}
+
+void
+TempoMap::change_initial_tempo (double beats_per_minute, double note_type)
+{
+	Tempo newtempo (beats_per_minute, note_type);
+	TempoSection* t;
+
+	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			*((Tempo*) t) = newtempo;
+			StateChanged (Change (0));
+			break;
+		}
 	}
 }
 
@@ -582,6 +617,8 @@ TempoMap::timestamp_metrics (bool use_bbt)
 
 	if (use_bbt) {
 
+		// cerr << "\n\n\n ######################\nTIMESTAMP via BBT ##############\n" << endl;
+
 		nframes_t current = 0;
 		nframes_t section_frames;
 		BBT_Time start;
@@ -611,42 +648,68 @@ TempoMap::timestamp_metrics (bool use_bbt)
 
 	} else {
 
+		// cerr << "\n\n\n ######################\nTIMESTAMP via AUDIO ##############\n" << endl;
+
 		bool first = true;
+		MetricSection* prev = 0;
 
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
 
 			BBT_Time bbt;
-
-			bbt_time_with_metric ((*i)->frame(), bbt, Metric (*meter, *tempo));
+			Metric metric (*meter, *tempo);
+			
+			if (prev) {
+				metric.set_start (prev->start());
+			} else {
+				// metric will be at frames=0 bbt=1|1|0 by default
+				// which is correct for our purpose
+			}
+		
+			bbt_time_with_metric ((*i)->frame(), bbt, metric);
 
 			// cerr << "timestamp @ " << (*i)->frame() << " with " << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << " => ";
+			
 
 			if (first) {
 				first = false;
 			} else {
-				if (bbt.beats != 1 || bbt.ticks != 0) {
+				
+				if (bbt.ticks > Meter::ticks_per_beat/2) {
+					/* round up to next beat */
+					bbt.beats += 1;
+				} 
+
+				bbt.ticks = 0;
+
+				if (bbt.beats != 1) {
+					/* round up to next bar */
 					bbt.bars += 1;
 					bbt.beats = 1;
-					bbt.ticks = 0;
 				}
 			}
-
-			// cerr << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << endl;
-
+			
+			//s cerr << bbt.bars << "|" << bbt.beats << "|" << bbt.ticks << endl;
+			
 			(*i)->set_start (bbt);
 
 			if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
 				tempo = t;
+				// cerr << "NEW TEMPO, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
 			} else if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
 				meter = m;
+				// cerr << "NEW METER, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
 			} else {
 				fatal << _("programming error: unhandled MetricSection type") << endmsg;
 				/*NOTREACHED*/
 			}
+
+			prev = (*i);
 		}
 	}
 
 	// dump (cerr);
+	// cerr << "###############################################\n\n\n" << endl;
+
 }
 
 TempoMap::Metric
@@ -741,6 +804,8 @@ TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const Metric& me
 	double xtra_beats = 0;
 	double beats = 0;
 
+	// cerr << "---- BBT time for " << frame << " using metric @ " << metric.frame() << " BBT " << metric.start() << endl;
+
 	const double beats_per_bar = metric.meter().beats_per_bar();
 	const double frames_per_bar = metric.meter().frames_per_bar (metric.tempo(), _frame_rate);
 	const double beat_frames = metric.tempo().frames_per_beat (_frame_rate, metric.meter());
@@ -748,11 +813,14 @@ TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const Metric& me
 	/* now compute how far beyond that point we actually are. */
 
 	frame_diff = frame - metric.frame();
+	
+	// cerr << "----\tdelta = " << frame_diff << endl;
 
 	xtra_bars = (uint32_t) floor (frame_diff / frames_per_bar);
 	frame_diff -= (uint32_t) floor (xtra_bars * frames_per_bar);
 	xtra_beats = (double) frame_diff / beat_frames;
 
+	// cerr << "---\tmeaning " << xtra_bars << " xtra bars and " << xtra_beats << " xtra beats\n";
 
 	/* and set the returned value */
 
@@ -765,21 +833,21 @@ TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const Metric& me
 	bbt.bars = metric.start().bars + xtra_bars; 
 
 	beats = (double) metric.start().beats + xtra_beats;
-
+	
 	bbt.bars += (uint32_t) floor(beats/ (beats_per_bar+1) );
 
 	beats = fmod(beats - 1, beats_per_bar )+ 1.0;
 	bbt.ticks = (uint32_t)( round((beats - floor(beats)) *(double) Meter::ticks_per_beat));
 	bbt.beats = (uint32_t) floor(beats);
-
+	
+	// cerr << "-----\t RETURN " << bbt << endl;
 }
-
 
 nframes_t 
 TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) const
 {
         /* for this to work with fractional measure types, start and end have to be "legal" BBT types, 
-        that means that the beats and ticks should be inside a bar
+	   that means that the beats and ticks should be inside a bar
 	*/
 
 	nframes_t frames = 0;
@@ -814,7 +882,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 nframes_t 
 TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, const BBT_Time& start, const BBT_Time& end) const
 {
-        /*this is used in timestamping the metrics by actually counting the beats */ 
+        /* this is used in timestamping the metrics by actually counting the beats */ 
 
 	nframes_t frames = 0;
 	uint32_t bar = start.bars;
@@ -834,16 +902,26 @@ TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, 
 			beat = 1;
 			++bar;
 			++beats_counted;
+
+			if (beat > beats_per_bar) {
+
+				/* this is a fractional beat at the end of a fractional bar
+				   so it should only count for the fraction 
+				*/
+
+				beats_counted -= (ceil(beats_per_bar) - beats_per_bar);
+			}
+
 		} else {
 			++beat;
 			++beats_counted;
-			if (beat > beats_per_bar) {
-				/* this is a fractional beat at the end of a fractional bar
-				   so it should only count for the fraction */
-				beats_counted -= (ceil(beats_per_bar) - beats_per_bar);
-			}
 		}
 	}
+
+	// cerr << "Counted " << beats_counted << " from " << start << " to " << end 
+	// << " bpb were " << beats_per_bar 
+	// << " fpb was " << beat_frames
+	// << endl;
 	
 	frames = (nframes_t) floor (beats_counted * beat_frames);
 
@@ -1052,7 +1130,6 @@ TempoMap::round_to_beat_subdivision (nframes_t fr, int sub_num)
 }
 
 nframes_t
-
 TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 {
 	Metric metric = metric_at (frame);
@@ -1191,7 +1268,9 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 
 		if (i == metrics->end()) {
 			limit = upper;
+			// cerr << "== limit set to end of request @ " << limit << endl;
 		} else {
+ 			// cerr << "== limit set to next metric @ " << (*i)->frame() << endl;
 			limit = (*i)->frame();
 		}
 
@@ -1224,6 +1303,10 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 				beat++;
 			}
 
+			//  cerr << "out of beats, @ end ? " << (i == metrics->end()) << " out of bpb ? "
+			// << (beat > ceil(beats_per_bar))
+			// << endl;
+
 			if (beat > ceil(beats_per_bar) || i != metrics->end()) {
 
 				/* we walked an entire bar. its
@@ -1245,9 +1328,11 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 				if (beat > ceil (beats_per_bar)) {
 					/* next bar goes where the numbers suggest */
 					current -=  beat_frames * (ceil(beats_per_bar)-beats_per_bar);
+					// cerr << "++ next bar from numbers\n";
 				} else {
 					/* next bar goes where the next metric is */
 					current = limit;
+					// cerr << "++ next bar at next metric\n";
 				}
 				bar++;
 				beat = 1;
@@ -1274,6 +1359,9 @@ TempoMap::get_points (nframes_t lower, nframes_t upper) const
 				/* new MeterSection, beat always returns to 1 */
 				beat = 1;
 			}
+
+			current = (*i)->frame ();
+			// cerr << "loop around with current @ " << current << endl;
 
 			beats_per_bar = meter->beats_per_bar ();
 			frames_per_bar = meter->frames_per_bar (*tempo, _frame_rate);
@@ -1419,3 +1507,32 @@ TempoMap::dump (std::ostream& o) const
 	}
 }
 
+int
+TempoMap::n_tempos() const
+{
+	Glib::RWLock::ReaderLock lm (lock);
+	int cnt = 0;
+
+	for (Metrics::const_iterator i = metrics->begin(); i != metrics->end(); ++i) {
+		if (dynamic_cast<const TempoSection*>(*i) != 0) {
+			cnt++;
+		}
+	}
+
+	return cnt;
+}
+
+int
+TempoMap::n_meters() const
+{
+	Glib::RWLock::ReaderLock lm (lock);
+	int cnt = 0;
+
+	for (Metrics::const_iterator i = metrics->begin(); i != metrics->end(); ++i) {
+		if (dynamic_cast<const MeterSection*>(*i) != 0) {
+			cnt++;
+		}
+	}
+
+	return cnt;
+}

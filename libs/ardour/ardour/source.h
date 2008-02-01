@@ -59,12 +59,21 @@ class Source : public PBD::StatefulDestructible, public ARDOUR::Readable
 
 	uint32_t used() const;
 
-  protected:
-	Session&          _session;
-	string            _name;
-	time_t            _timestamp;
+	bool has_been_analysed() const;
+	virtual bool can_be_analysed() const { return false; } 
+	virtual void set_been_analysed (bool yn);
+	virtual bool check_for_analysis_data_on_disk () { return false; }
 
-	Glib::Mutex playlist_lock;
+	sigc::signal<void> AnalysisChanged;
+
+  protected:
+	Session&             _session;
+	string               _name;
+	time_t               _timestamp;
+	bool                 _analysed;
+	mutable Glib::Mutex _analysis_lock;
+	Glib::Mutex           playlist_lock;
+	
 	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;
 	PlaylistMap _playlists;
 

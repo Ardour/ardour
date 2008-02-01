@@ -961,9 +961,37 @@ AudioSource::get_transients_path () const
 
 	s = _id.to_s();
 	s += '.';
-	s += X_("transients");
+	s += TransientDetector::operational_identifier();
 	parts.push_back (s);
 	
 	return Glib::build_filename (parts);
 }
 
+void
+AudioSource::set_been_analysed (bool yn)
+{
+	Source::set_been_analysed (yn);
+
+	if (yn) {
+		load_transients (get_transients_path());
+	}
+}
+
+bool
+AudioSource::check_for_analysis_data_on_disk () 
+{
+	/* looks to see if the analysis files for this source are on disk.
+	   if so, mark us already analysed.
+	*/
+
+	string path = get_transients_path ();
+	bool ok = true;
+
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		ok = false;
+	}
+
+	// XXX add other tests here as appropriate
+
+	set_been_analysed (ok);
+}

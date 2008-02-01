@@ -157,7 +157,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void restore_editing_space() = 0;
 	virtual nframes64_t get_preferred_edit_position (bool ignore_playhead = false) = 0;
 	virtual void toggle_meter_updating() = 0;
-	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, std::vector<nframes64_t>&) = 0;
+	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&) = 0;
 
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;

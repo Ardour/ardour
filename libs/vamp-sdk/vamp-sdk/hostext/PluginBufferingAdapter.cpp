@@ -57,6 +57,8 @@ public:
 
     OutputList getOutputDescriptors() const;
 
+    void reset();
+
     FeatureSet process(const float *const *inputBuffers, RealTime timestamp);
 		
     FeatureSet getRemainingFeatures();
@@ -225,7 +227,8 @@ protected:
     vector<RingBuffer *> m_queue;
     float **m_buffers;
     float m_inputSampleRate;
-    RealTime m_timestamp;	
+    RealTime m_timestamp;
+    bool m_unrun;
     OutputList m_outputs;
 		
     void processBlock(FeatureSet& allFeatureSets, RealTime timestamp);
@@ -253,6 +256,12 @@ PluginBufferingAdapter::getOutputDescriptors() const
 {
     return m_impl->getOutputDescriptors();
 }
+
+void
+PluginBufferingAdapter::reset()
+{
+    m_impl->reset();
+}
 		
 PluginBufferingAdapter::FeatureSet
 PluginBufferingAdapter::process(const float *const *inputBuffers,
@@ -277,7 +286,8 @@ PluginBufferingAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
     m_queue(0),
     m_buffers(0),
     m_inputSampleRate(inputSampleRate),
-    m_timestamp()
+    m_timestamp(RealTime::zeroTime),
+    m_unrun(true)
 {
     m_outputs = plugin->getOutputDescriptors();
 }
@@ -333,8 +343,8 @@ PluginBufferingAdapter::Impl::initialise(size_t channels, size_t stepSize, size_
         }
     }
     
-    std::cerr << "PluginBufferingAdapter::initialise: stepSize " << m_inputStepSize << " -> " << m_stepSize 
-              << ", blockSize " << m_inputBlockSize << " -> " << m_blockSize << std::endl;			
+    // std::cerr << "PluginBufferingAdapter::initialise: stepSize " << m_inputStepSize << " -> " << m_stepSize 
+    // << ", blockSize " << m_inputBlockSize << " -> " << m_blockSize << std::endl;			
     
     // current implementation breaks if step is greater than block
     if (m_stepSize > m_blockSize) {
@@ -365,11 +375,27 @@ PluginBufferingAdapter::Impl::getOutputDescriptors() const
     return outs;
 }
 
+void
+PluginBufferingAdapter::Impl::reset()
+{
+    m_timestamp = RealTime::zeroTime;
+    m_unrun = true;
+
+    for (size_t i = 0; i < m_queue.size(); ++i) {
+        m_queue[i]->reset();
+    }
+}
+
 PluginBufferingAdapter::FeatureSet
 PluginBufferingAdapter::Impl::process(const float *const *inputBuffers,
                                       RealTime timestamp)
 {
     FeatureSet allFeatureSets;
+
+    if (m_unrun) {
+        m_timestamp = timestamp;
+        m_unrun = false;
+    }
 			
     // queue the new input
     

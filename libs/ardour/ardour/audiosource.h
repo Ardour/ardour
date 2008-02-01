@@ -122,19 +122,23 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	int prepare_for_peakfile_writes ();
 	void done_with_peakfile_writes (bool done = true);
 
-	std::vector<nframes64_t> transients;
+	AnalysisFeatureList transients;
 	std::string get_transients_path() const;
+
+	void set_been_analysed (bool yn);
+	bool check_for_analysis_data_on_disk ();
 
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
 
 	bool                 _peaks_built;
+	bool                 _analysed;
 	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	nframes_t            _length;
-	Glib::ustring               peakpath;
-	Glib::ustring              _captured_for;
+	Glib::ustring         peakpath;
+	Glib::ustring        _captured_for;
 
 	mutable uint32_t _read_data_count;  // modified in read()
 	mutable uint32_t _write_data_count; // modified in write()

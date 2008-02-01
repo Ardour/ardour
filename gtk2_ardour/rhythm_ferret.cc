@@ -194,14 +194,14 @@ RhythmFerret::run_analysis ()
 }
 
 int
-RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, vector<nframes64_t>& results)
+RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, AnalysisFeatureList& results)
 {
 	TransientDetector t (session->frame_rate());
 	bool existing_results = !results.empty();
 
 	for (uint32_t i = 0; i < readable->n_channels(); ++i) {
 
-		vector<nframes64_t> these_results;
+		AnalysisFeatureList these_results;
 
 		t.reset ();
 		t.set_threshold (detection_threshold_adjustment.get_value());
@@ -213,38 +213,18 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 
 		/* translate all transients to give absolute position */
 
-		for (vector<nframes64_t>::iterator i = these_results.begin(); i != these_results.end(); ++i) {
-			(*i) += offset;
+		for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
+			(*x) += offset;
 		}
 
 		/* merge */
 		
 		results.insert (results.end(), these_results.begin(), these_results.end());
+		these_results.clear ();
 	}
-		
+
 	if (!results.empty()) {
-		
-		/* now resort to bring transients from different channels together */
-		
-		sort (results.begin(), results.end());
-
-		/* remove duplicates or other things that are too close */
-
-		vector<nframes64_t>::iterator i = results.begin();
-		nframes64_t curr = (*i);
-		nframes64_t gap_frames = (nframes64_t) floor (trigger_gap_adjustment.get_value() * (session->frame_rate() / 1000.0));
-
-		++i;
-
-		while (i != results.end()) {
-			if (((*i) == curr) || (((*i) - curr) < gap_frames)) {
-				    i = results.erase (i);
-			} else {
-				++i;
-				curr = *i;
-			}
-		}
-
+		TransientDetector::cleanup_transients (results, session->frame_rate(), trigger_gap_adjustment.get_value());
 	}
 
 	return 0;

@@ -46,6 +46,7 @@ Source::Source (Session& s, string name)
 	: _session (s)
 {
 	_name = name;
+	_analysed = false;
 	_timestamp = 0;
 	_in_use = 0;
 }
@@ -54,6 +55,7 @@ Source::Source (Session& s, const XMLNode& node)
 	: _session (s)
 {
 	_timestamp = 0;
+	_analysed = false;
 	_in_use = 0;
 
 	if (set_state (node)) {
@@ -151,3 +153,24 @@ Source::used () const
 {
 	return _playlists.size();
 }
+
+bool
+Source::has_been_analysed() const
+{
+	Glib::Mutex::Lock lm (_analysis_lock);
+	return _analysed;
+}
+
+void
+Source::set_been_analysed (bool yn)
+{
+	{
+		Glib::Mutex::Lock lm (_analysis_lock);
+		_analysed = yn;
+	}
+	
+	if (yn) {
+		AnalysisChanged(); // EMIT SIGNAL
+	}
+}
+       

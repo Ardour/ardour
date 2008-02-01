@@ -438,10 +438,14 @@ Editor::edit_tempo_section (TempoSection* section)
 	tempo_dialog.get_bbt_time(when);
 	bpm = max (0.01, bpm);
 	
+	cerr << "Editing tempo section to be at " << when << endl;
+	session->tempo_map().dump (cerr);
 	begin_reversible_command (_("replace tempo mark"));
         XMLNode &before = session->tempo_map().get_state();
 	session->tempo_map().replace_tempo (*section, Tempo (bpm,nt));
+	session->tempo_map().dump (cerr);
 	session->tempo_map().move_tempo (*section, when);
+	session->tempo_map().dump (cerr);
         XMLNode &after = session->tempo_map().get_state();
 	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
 	commit_reversible_command ();

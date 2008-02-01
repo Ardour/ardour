@@ -24,7 +24,7 @@
 #include "ardour_dialog.h"
 #include "keyboard.h"
 #include "ardour_ui.h"
-
+#include "splash.h"
 
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
@@ -65,4 +65,18 @@ void
 ArdourDialog::on_unmap ()
 {
 	Dialog::on_unmap ();
+}
+
+void
+ArdourDialog::on_show ()
+{
+	// never allow the splash screen to obscure any dialog
+
+	Splash* spl = Splash::instance();
+
+	if (spl) {
+		spl->pop_back ();
+	}
+
+	Dialog::on_show ();
 }

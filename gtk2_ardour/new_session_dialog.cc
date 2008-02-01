@@ -993,6 +993,12 @@ NewSessionDialog::reset_recent()
 		        fullpath = fullpath.substr (0, fullpath.length()-1);
 		}
 	    
+		/* check whether session still exists */
+		if (!Glib::file_test(fullpath, Glib::FILE_TEST_EXISTS)) {
+			/* session doesn't exist */
+			continue;
+		}		
+		
 		/* now get available states for this session */
 		  
 		if ((states = ARDOUR::Session::possible_states (fullpath)) == 0) {

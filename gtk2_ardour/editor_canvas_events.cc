@@ -19,6 +19,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 
 #include <pbd/stacktrace.h>
 
@@ -43,6 +44,7 @@
 #include "i18n.h"
 
 using namespace sigc;
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -245,8 +247,8 @@ bool
 Editor::track_canvas_motion (GdkEvent *ev)
 {
 	if (verbose_cursor_visible) {
-		verbose_canvas_cursor->property_x() = ev->motion.x + 20;
-		verbose_canvas_cursor->property_y() = ev->motion.y + 20;
+		verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (ev->motion.x + 20);
+		verbose_canvas_cursor->property_y() = clamp_verbose_cursor_y (ev->motion.y + 20);
 	}
 
 #ifdef GTKOSX

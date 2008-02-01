@@ -231,6 +231,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
+	/* handle sr mismatch with a dialog */
+
+	ARDOUR::Session::AskAboutSampleRateMismatch.connect (mem_fun(*this, &ARDOUR_UI::sr_mismatch_dialog));
+
 	/* lets get this party started */
 
     	try {
@@ -984,6 +988,13 @@ ARDOUR_UI::redisplay_recent_sessions ()
 			fullpath = fullpath.substr (0, fullpath.length()-1);
 		}
 
+		/* check whether session still exists */
+		if (!Glib::file_test(fullpath.c_str(), Glib::FILE_TEST_EXISTS)) {
+			/* session doesn't exist */
+			cerr << "skipping non-existent session " << fullpath << endl;
+			continue;
+		}		
+		
 		/* now get available states for this session */
 
 		if ((states = Session::possible_states (fullpath)) == 0) {
@@ -1665,6 +1676,8 @@ ARDOUR_UI::setup_theme ()
 void
 ARDOUR_UI::update_clocks ()
 {
+	return;
+
 	if (!editor || !editor->dragging_playhead()) {
 		Clock (session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
 	}
@@ -2280,6 +2293,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				session_path = new_session_dialog->session_folder();
 			}
 
+			template_name = Glib::ustring();			
 			switch (new_session_dialog->which_page()) {
 
 			case NewSessionDialog::OpenPage: 
@@ -2329,7 +2343,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		  loadit:
 			new_session_dialog->hide ();
 			
-			if (load_session (session_path, session_name)) {
+			if (load_session (session_path, session_name, template_name)) {
 				/* force a retry */
 				response = Gtk::RESPONSE_NONE;
 			}
@@ -2963,6 +2977,38 @@ what you would like to do.\n"));
 		return 0;
 	}
 }
+
+int
+ARDOUR_UI::sr_mismatch_dialog (nframes_t desired, nframes_t actual)
+{
+ 	HBox* hbox = new HBox();
+	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
+	Label  message (string_compose (_("\
+This session was created with a sample rate of %1 Hz\n\
+\n\
+The audioengine is currently running at %2 Hz\n"), desired, actual));
+
+	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
+	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
+	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
+	dialog.add_button (_("Load session anyway"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Do not load session"), RESPONSE_REJECT);
+	dialog.set_default_response (RESPONSE_ACCEPT);
+	dialog.set_position (WIN_POS_CENTER);
+	message.show();
+	image->show();
+	hbox->show();
+
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		return 0;
+	default:
+		return 1;
+	}
+}
+
 	
 void
 ARDOUR_UI::disconnect_from_jack ()

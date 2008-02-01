@@ -34,13 +34,19 @@ class Splash : public Gtk::Window
 	Splash ();
 	~Splash () {}
 
+	static Splash* instance() { return the_splash; }
+
+	void pop_back ();
+
 	bool expose (GdkEventExpose*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_realize ();
-
+	
 	void message (const std::string& msg);
 	
   private:
+	static Splash* the_splash;
+
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 	Gtk::DrawingArea darea;
 	Glib::RefPtr<Pango::Layout> layout;

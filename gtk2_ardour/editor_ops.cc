@@ -54,6 +54,7 @@
 #include "ardour_ui.h"
 #include "editor.h"
 #include "time_axis_view.h"
+#include "route_time_axis.h"
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "streamview.h"
@@ -1664,7 +1665,6 @@ Editor::temporal_zoom_region ()
 	ensure_entered_region_selected (true);
 
 	if (selection->regions.empty()) {
-		info << _("cannot set loop: no region selected") << endmsg;
 		return;
 	}
 
@@ -3515,13 +3515,11 @@ Editor::cut_copy (CutCopyOp op)
 
 	switch (current_mouse_mode()) {
 	case MouseObject: 
-		cerr << "cutting in object mode\n";
 		if (!selection->regions.empty() || !selection->points.empty()) {
 
 			begin_reversible_command (opname + _(" objects"));
 
 			if (!selection->regions.empty()) {
-				cerr << "have regions to cut" << endl;
 				cut_copy_regions (op);
 				
 				if (op == Cut) {
@@ -3540,7 +3538,6 @@ Editor::cut_copy (CutCopyOp op)
 			commit_reversible_command ();	
 			break; // terminate case statement here
 		} 
-		cerr << "nope, now cutting time range" << endl;
 		if (!selection->time.empty()) {
 			/* don't cause suprises */
 			break;
@@ -3550,9 +3547,7 @@ Editor::cut_copy (CutCopyOp op)
 	case MouseRange:
 		if (selection->time.empty()) {
 			nframes64_t start, end;
-			cerr << "no time selection, get edit op range" << endl;
 			if (!get_edit_op_range (start, end)) {
-				cerr << "no edit op range" << endl;
 				return;
 			}
 			selection->set ((TimeAxisView*) 0, start, end);
@@ -4336,6 +4331,15 @@ Editor::toggle_region_lock ()
 }
 
 void
+Editor::set_region_lock_style (Region::PositionLockStyle ps)
+{
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		(*i)->region()->set_position_lock_style (ps);
+	}
+}
+
+
+void
 Editor::toggle_region_mute ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -4980,31 +4984,70 @@ void
 Editor::define_one_bar (nframes64_t start, nframes64_t end)
 {
 	nframes64_t length = end - start;
-
+	
 	const Meter& m (session->tempo_map().meter_at (start));
 
-	/* region length = 1 bar */
+	/* length = 1 bar */
 
-	/* 1 bar = how many beats per bar */
-	
-	double beats_per_bar = m.beats_per_bar();
-	
 	/* now we want frames per beat.
 	   we have frames per bar, and beats per bar, so ...
 	*/
 
-	double frames_per_beat = length / beats_per_bar;
+	double frames_per_beat = length / m.beats_per_bar();
 	
 	/* beats per minute = */
 
 	double beats_per_minute = (session->frame_rate() * 60.0) / frames_per_beat;
 
+	/* now decide whether to:
+
+	    (a) set global tempo 
+	    (b) add a new tempo marker
+
+	*/
+
 	const TempoSection& t (session->tempo_map().tempo_section_at (start));
+
+	bool do_global = false;
+
+	if ((session->tempo_map().n_tempos() == 1) && (session->tempo_map().n_meters() == 1)) {
+		
+		/* only 1 tempo & 1 meter: ask if the user wants to set the tempo
+		   at the start, or create a new marker
+		*/
+
+		vector<string> options;
+		options.push_back (_("Set global tempo"));
+		options.push_back (_("Add new marker"));
+		options.push_back (_("Cancel"));
+		Choice c (_("Do you want to set the global tempo or add new tempo marker?"),
+			  options);
+
+		switch (c.run()) {
+		case 0:
+			do_global = true;
+			break;
+		case 2:
+			return;
+
+		default:
+			do_global = false;
+		}
+
+	} else {
+
+		/* more than 1 tempo and/or meter section already, go ahead do the "usual":
+		   if the marker is at the region starter, change it, otherwise add
+		   a new tempo marker 
+		*/
+	}
 
 	begin_reversible_command (_("set tempo from region"));
 	XMLNode& before (session->tempo_map().get_state());
 
-	if (t.frame() == start) {
+	if (do_global) {
+		session->tempo_map().change_initial_tempo (beats_per_minute, t.note_type());
+	} else if (t.frame() == start) {
 		session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type());
 	} else {
 		session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), start);
@@ -5019,7 +5062,7 @@ Editor::define_one_bar (nframes64_t start, nframes64_t end)
 void
 Editor::split_region_at_transients ()
 {
-	vector<nframes64_t> positions;
+	AnalysisFeatureList positions;
 
 	if (!session) {
 		return;
@@ -5055,7 +5098,7 @@ Editor::split_region_at_transients ()
 }
 
 void
-Editor::split_region_at_points (boost::shared_ptr<Region> r, vector<nframes64_t>& positions)
+Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList& positions)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 	
@@ -5073,7 +5116,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, vector<nframes64_t>
 		return;
 	}
 	
-	vector<nframes64_t>::const_iterator x;	
+	AnalysisFeatureList::const_iterator x;	
 	
 	nframes64_t pos = ar->position();
 	
@@ -5130,30 +5173,52 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, vector<nframes64_t>
 void
 Editor::tab_to_transient (bool forward)
 {
-
-	vector<nframes64_t> positions;
+	AnalysisFeatureList positions;
 
 	if (!session) {
 		return;
 	}
 
-	ExclusiveRegionSelection esr (*this, entered_regionview);
-
-	if (selection->regions.empty()) {
-		return;
-	}
-	
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (selection->regions.front()->region());
-
-	if (!ar) {
-		return;
-	}
-
-	ar->get_transients (positions);
 	nframes64_t pos = session->audible_frame ();
 
+	if (!selection->tracks.empty()) {
+
+		for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*t);
+
+			if (rtv) {
+				boost::shared_ptr<Diskstream> ds = rtv->get_diskstream();
+				if (ds) {
+					boost::shared_ptr<Playlist> pl = rtv->get_diskstream()->playlist ();
+					if (pl) {
+						nframes64_t result = pl->find_next_transient (pos, forward ? 1 : -1);
+						
+						if (result >= 0) {
+							positions.push_back (result);
+						}
+					}
+				}
+			}
+		}
+
+	} else {
+		
+		ExclusiveRegionSelection esr (*this, entered_regionview);
+	
+		if (selection->regions.empty()) {
+			return;
+		}
+		
+		for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+			(*r)->region()->get_transients (positions);
+		}
+	}
+
+	TransientDetector::cleanup_transients (positions, session->frame_rate(), 3.0);
+
 	if (forward) {
-		vector<nframes64_t>::iterator x;
+		AnalysisFeatureList::iterator x;
 
 		for (x = positions.begin(); x != positions.end(); ++x) {
 			if ((*x) > pos) {
@@ -5166,7 +5231,7 @@ Editor::tab_to_transient (bool forward)
 		}
 
 	} else {
-		vector<nframes64_t>::reverse_iterator x;
+		AnalysisFeatureList::reverse_iterator x;
 
 		for (x = positions.rbegin(); x != positions.rend(); ++x) {
 			if ((*x) < pos) {

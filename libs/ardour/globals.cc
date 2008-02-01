@@ -46,6 +46,7 @@
 #include <midi++/mmc.h>
 
 #include <ardour/ardour.h>
+#include <ardour/analyser.h>
 #include <ardour/audio_library.h>
 #include <ardour/configuration.h>
 #include <ardour/profile.h>
@@ -300,6 +301,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	setup_hardware_optimization (try_optimization);
 
 	SourceFactory::init ();
+	Analyser::init ();
 
 	/* singleton - first object is "it" */
 	new PluginManager ();

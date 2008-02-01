@@ -80,12 +80,12 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	}
 
 	_scale_amplitude = 1.0;
-	valid_transients = false;
 
 	set_default_fades ();
 	set_default_envelope ();
 
 	listen_to_my_curves ();
+	listen_to_my_sources ();
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
@@ -106,12 +106,12 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 	}
 
 	_scale_amplitude = 1.0;
-	valid_transients = false;
 
 	set_default_fades ();
 	set_default_envelope ();
 
 	listen_to_my_curves ();
+	listen_to_my_sources ();
 }
 
 AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
@@ -134,12 +134,12 @@ AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t len
 	}
 
 	_scale_amplitude = 1.0;
-	valid_transients = false;
 
 	set_default_fades ();
 	set_default_envelope ();
 
 	listen_to_my_curves ();
+	listen_to_my_sources ();
 }
 
 
@@ -203,9 +203,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	}
 
 	_scale_amplitude = other->_scale_amplitude;
-	valid_transients = false;
 
 	listen_to_my_curves ();
+	listen_to_my_sources ();
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
@@ -241,13 +241,13 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	}
 
 	_scale_amplitude = other->_scale_amplitude;
-	valid_transients = false;
 	_envelope = other->_envelope;
 
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
 	
 	listen_to_my_curves ();
+	listen_to_my_sources ();
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
@@ -266,13 +266,13 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 	}
 
 	set_default_fades ();
-	valid_transients = false;
 
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
 
 	listen_to_my_curves ();
+	listen_to_my_sources ();
 }
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
@@ -307,13 +307,13 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 	set_default_fades ();
 	_scale_amplitude = 1.0;
-	valid_transients = false;
 
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
 
 	listen_to_my_curves ();
+	listen_to_my_sources ();
 }
 
 AudioRegion::~AudioRegion ()
@@ -331,10 +331,11 @@ AudioRegion::~AudioRegion ()
 }
 
 void
-AudioRegion::invalidate_transients ()
+AudioRegion::listen_to_my_sources ()
 {
-	valid_transients = false;
-	_transients.clear ();
+	for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+		(*i)->AnalysisChanged.connect (mem_fun (*this, &AudioRegion::invalidate_transients));
+	}
 }
 
 void
@@ -1517,36 +1518,12 @@ AudioRegion::set_playlist (boost::weak_ptr<Playlist> wpl)
 	}
 }
 
-void
-AudioRegion::cleanup_transients (vector<nframes64_t>& t)
-{
-	sort (t.begin(), t.end());
-	
-	/* remove duplicates or other things that are too close */
-	
-	vector<nframes64_t>::iterator i = t.begin();
-	nframes64_t curr = (*i);
-	
-	/* XXX force a 3msec gap - use a config variable */
-	
-	nframes64_t gap_frames = (nframes64_t) floor (3.0 * (playlist()->session().frame_rate() / 1000.0));
-	
-	++i;
-	
-	while (i != t.end()) {
-		if (((*i) == curr) || (((*i) - curr) < gap_frames)) {
-				    i = t.erase (i);
-		} else {
-			++i;
-			curr = *i;
-		}
-	}
-}
-
 int
-AudioRegion::get_transients (vector<nframes64_t>& results, bool force_new)
+AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 {
-	if (!playlist()) {
+	boost::shared_ptr<Playlist> pl = playlist();
+
+	if (!pl) {
 		return -1;
 	}
 
@@ -1555,7 +1532,51 @@ AudioRegion::get_transients (vector<nframes64_t>& results, bool force_new)
 		return 0;
 	}
 
-	TransientDetector t (playlist()->session().frame_rate());
+	SourceList::iterator s;
+	
+	for (s = sources.begin() ; s != sources.end(); ++s) {
+		if (!(*s)->has_been_analysed()) {
+			cerr << "For " << name() << " source " << (*s)->name() << " has not been analyzed\n";
+			break;
+		}
+	}
+	
+	if (s == sources.end()) {
+		/* all sources are analyzed, merge data from each one */
+
+		for (s = sources.begin() ; s != sources.end(); ++s) {
+
+			/* find the set of transients within the bounds of this region */
+
+			AnalysisFeatureList::iterator low = lower_bound ((*s)->transients.begin(),
+									 (*s)->transients.end(),
+									 _start);
+
+			AnalysisFeatureList::iterator high = upper_bound ((*s)->transients.begin(),
+									  (*s)->transients.end(),
+									  _start + _length);
+									 
+			/* and add them */
+
+			results.insert (results.end(), low, high);
+		}
+
+		TransientDetector::cleanup_transients (results, pl->session().frame_rate(), 3.0);
+		
+		/* translate all transients to current position */
+
+		for (AnalysisFeatureList::iterator x = results.begin(); x != results.end(); ++x) {
+			(*x) -= _start;
+			(*x) += _position;
+		}
+
+		_transients = results;
+		valid_transients = true;
+
+		return 0;
+	}
+
+	TransientDetector t (pl->session().frame_rate());
 	bool existing_results = !results.empty();
 
 	_transients.clear ();
@@ -1563,7 +1584,7 @@ AudioRegion::get_transients (vector<nframes64_t>& results, bool force_new)
 
 	for (uint32_t i = 0; i < n_channels(); ++i) {
 
-		vector<nframes64_t> these_results;
+		AnalysisFeatureList these_results;
 
 		t.reset ();
 
@@ -1573,7 +1594,7 @@ AudioRegion::get_transients (vector<nframes64_t>& results, bool force_new)
 
 		/* translate all transients to give absolute position */
 		
-		for (vector<nframes64_t>::iterator i = these_results.begin(); i != these_results.end(); ++i) {
+		for (AnalysisFeatureList::iterator i = these_results.begin(); i != these_results.end(); ++i) {
 			(*i) += _position;
 		}
 
@@ -1590,19 +1611,18 @@ AudioRegion::get_transients (vector<nframes64_t>& results, bool force_new)
 			*/
 
 			results.insert (results.end(), _transients.begin(), _transients.end());
-			cleanup_transients (results);
+			TransientDetector::cleanup_transients (results, pl->session().frame_rate(), 3.0);
 		}
 
 		/* make sure ours are clean too */
 
-		cleanup_transients (_transients);
+		TransientDetector::cleanup_transients (_transients, pl->session().frame_rate(), 3.0);
 	}
 
 	valid_transients = true;
 
 	return 0;
 }
-
 
 extern "C" {
 

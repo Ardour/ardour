@@ -669,6 +669,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void disk_underrun_handler ();
 
 	int pending_state_dialog ();
+	int sr_mismatch_dialog (nframes_t, nframes_t);
 	
 	void disconnect_from_jack ();
 	void reconnect_to_jack ();

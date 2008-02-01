@@ -12,6 +12,8 @@ using namespace Glib;
 using namespace std;
 using namespace ARDOUR;
 
+Splash* Splash::the_splash = 0;
+
 Splash::Splash ()
 {
 	string path = find_data_file ("splash.png");
@@ -45,6 +47,14 @@ Splash::Splash ()
 	darea.signal_expose_event().connect (mem_fun (*this, &Splash::expose));
 
 	add (darea);
+
+	the_splash = this;
+}
+
+void
+Splash::pop_back ()
+{
+	set_keep_above (false);
 }
 
 void

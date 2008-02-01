@@ -43,6 +43,7 @@ class ArdourDialog : public Gtk::Dialog
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
 	void on_unmap ();
+	void on_show ();
 
 	ARDOUR::Session *session;
 

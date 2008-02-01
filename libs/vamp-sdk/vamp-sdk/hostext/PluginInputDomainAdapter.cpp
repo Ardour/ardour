@@ -8,6 +8,9 @@
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006-2007 Chris Cannam and QMUL.
   
+    This file is based in part on Don Cross's public domain FFT
+    implementation.
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -38,27 +41,32 @@
 
 #include <cmath>
 
-
 /**
  * If you want to compile using FFTW instead of the built-in FFT
  * implementation for the PluginInputDomainAdapter, define HAVE_FFTW3
  * in the Makefile.
  *
- * Remember that FFTW is licensed under the GPL (unlike this SDK, which
- * is licensed liberally in order to permit closed-source usage), so
- * you should not define this symbol unless your code is also under the
- * GPL.  Also, parties redistributing this SDK for use in other
- * programs should be careful _not_ to define this symbol in order not
- * to affect the stated license of this SDK.
+ * Be aware that FFTW is licensed under the GPL -- unlike this SDK,
+ * which is provided under a more liberal BSD license in order to
+ * permit use in closed source applications.  The use of FFTW would
+ * mean that your code would need to be licensed under the GPL as
+ * well.  Do not define this symbol unless you understand and accept
+ * the implications of this.
+ *
+ * Parties such as Linux distribution packagers who redistribute this
+ * SDK for use in other programs should _not_ define this symbol, as
+ * it would change the effective licensing terms under which the SDK
+ * was available to third party developers.
+ *
+ * The default is not to use FFTW, and to use the built-in FFT instead.
  * 
- * Note: This code uses FFTW_MEASURE, and will perform badly on its
- * first invocation unless the host has saved and restored FFTW wisdom
- * (see the FFTW documentation).
+ * Note: The FFTW code uses FFTW_MEASURE, and so will perform badly on
+ * its first invocation unless the host has saved and restored FFTW
+ * wisdom (see the FFTW documentation).
  */
 #ifdef HAVE_FFTW3
 #include <fftw3.h>
 #endif
-
 
 namespace Vamp {
 

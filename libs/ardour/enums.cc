@@ -80,6 +80,7 @@ setup_enum_writer ()
 	Location::Flags _Location_Flags;
 	RouteGroup::Flag _RouteGroup_Flag;
 	Region::Flag _Region_Flag;
+	Region::PositionLockStyle _Region_PositionLockStyle;
 	Track::FreezeState _Track_FreezeState;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -351,6 +352,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Region, Hidden);
 	REGISTER_CLASS_ENUM (Region, DoNotSaveState);
 	REGISTER_BITS (_Region_Flag);
+
+	REGISTER_CLASS_ENUM (Region, AudioTime);
+	REGISTER_CLASS_ENUM (Region, MusicTime);
+	REGISTER_BITS (_Region_PositionLockStyle);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
 	REGISTER_CLASS_ENUM (Track, Frozen);

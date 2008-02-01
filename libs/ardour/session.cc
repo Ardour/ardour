@@ -46,6 +46,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
 #include <ardour/session.h>
+#include <ardour/analyser.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/audioplaylist.h>
@@ -105,6 +106,7 @@ Session::mix_buffers_with_gain_t	Session::mix_buffers_with_gain 	= 0;
 Session::mix_buffers_no_gain_t		Session::mix_buffers_no_gain 	= 0;
 
 sigc::signal<int> Session::AskAboutPendingState;
+sigc::signal<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
 sigc::signal<void> Session::SendFeedback;
 
 sigc::signal<void> Session::SMPTEOffsetChanged;
@@ -2819,6 +2821,9 @@ Session::add_source (boost::shared_ptr<Source> source)
 			set_dirty();
 		}
 
+		if (Config->get_auto_analyse_audio()) {
+			Analyser::queue_source_for_analysis (source, false);
+		}
 	} 
 }
 
@@ -3606,18 +3611,36 @@ void
 Session::tempo_map_changed (Change ignored)
 {
 	clear_clicks ();
+	
+	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		(*i)->update_after_tempo_map_change ();
+	}
+
+	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		(*i)->update_after_tempo_map_change ();
+	}
+
 	set_dirty ();
 }
 
 void
 Session::ensure_passthru_buffers (uint32_t howmany)
 {
+	if (current_block_size == 0) {
+		return;
+	}
+
 	while (howmany > _passthru_buffers.size()) {
 		Sample *p;
 #ifdef NO_POSIX_MEMALIGN
 		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample));
+		if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample)) != 0) {
+			fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
+						 current_block_size, sizeof (Sample), strerror (errno))
+			      << endmsg;
+			/*NOTREACHED*/
+		}
 #endif			
 		_passthru_buffers.push_back (p);
 
@@ -3626,7 +3649,12 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 #ifdef NO_POSIX_MEMALIGN
 		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * 4);
+		if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * 4) != 0) {
+			fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
+						 current_block_size, sizeof (Sample), strerror (errno))
+			      << endmsg;
+			/*NOTREACHED*/
+		}
 #endif			
 		memset (p, 0, sizeof (Sample) * current_block_size);
 		_silent_buffers.push_back (p);

@@ -34,17 +34,23 @@ class TransientDetector : public AudioAnalyser
     TransientDetector (float sample_rate);
     ~TransientDetector();
 
+    static std::string operational_identifier();
+
     void set_threshold (float);
     void set_sensitivity (float);
 
     float get_threshold () const;
     float get_sensitivity () const;
     
-    int run (const std::string& path, Readable*, uint32_t channel, std::vector<nframes64_t>& results);
+    int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);
 
- protected:
-    std::vector<nframes64_t>* current_results;
+    static void cleanup_transients (AnalysisFeatureList&, float sr, float gap_msecs);
+    
+  protected:
+    AnalysisFeatureList* current_results;
     int use_features (Vamp::Plugin::FeatureSet&, std::ostream*);
+
+    static std::string _op_id;
 };
 
 } /* namespace */

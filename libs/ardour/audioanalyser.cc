@@ -18,13 +18,19 @@ using namespace ARDOUR;
 
 AudioAnalyser::AudioAnalyser (float sr, AnalysisPluginKey key)
 	: sample_rate (sr)
-	, plugin (0)
 	, plugin_key (key)
 {
+	/* create VAMP plugin and initialize */
+	
+	if (initialize_plugin (plugin_key, sample_rate)) {
+		error << string_compose (_("cannot load VAMP plugin \"%1\""), key) << endmsg;
+		throw failed_constructor();
+	} 
 }
 
 AudioAnalyser::~AudioAnalyser ()
 {
+	delete plugin;
 }
 
 int
@@ -73,28 +79,27 @@ int
 AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 {
 	ofstream ofile;
-	Plugin::FeatureSet onsets;
+	Plugin::FeatureSet features;
 	int ret = -1;
 	bool done = false;
 	Sample* data = 0;
 	nframes64_t len = src->readable_length();
 	nframes64_t pos = 0;
 	float* bufs[1] = { 0 };
+	string tmp_path;
 
 	if (!path.empty()) {
-		ofile.open (path.c_str());
+
+		/* store data in tmp file, not the real one */
+		
+		tmp_path = path;
+		tmp_path += ".tmp";
+
+		ofile.open (tmp_path.c_str());
 		if (!ofile) {
 			goto out;
 		}
 	}
-
-	/* create VAMP percussion onset plugin and initialize */
-	
-	if (plugin == 0) {
-		if (initialize_plugin (plugin_key, sample_rate)) {
-			goto out;
-		} 
-	} 
 
 	data = new Sample[bufsize];
 	bufs[0] = data;
@@ -108,7 +113,6 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 		to_read = min ((len - pos), bufsize);
 		
 		if (src->read (data, pos, to_read, channel) != to_read) {
-			cerr << "bad read\n";
 			goto out;
 		}
 
@@ -118,14 +122,14 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 			memset (data + to_read, 0, (bufsize - to_read));
 		}
 		
-		onsets = plugin->process (bufs, RealTime::fromSeconds ((double) pos / sample_rate));
+		features = plugin->process (bufs, RealTime::fromSeconds ((double) pos / sample_rate));
 
-		if (use_features (onsets, (path.empty() ? &ofile : 0))) {
+		if (use_features (features, (path.empty() ? 0 : &ofile))) {
 			goto out;
 		}
 
 		pos += stepsize;
-		
+
 		if (pos >= len) {
 			done = true;
 		}
@@ -133,9 +137,9 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 
 	/* finish up VAMP plugin */
 
-	onsets = plugin->getRemainingFeatures ();
+	features = plugin->getRemainingFeatures ();
 
-	if (use_features (onsets, (path.empty() ? &ofile : 0))) {
+	if (use_features (features, (path.empty() ? &ofile : 0))) {
 		goto out;
 	}
 
@@ -146,10 +150,14 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 	ofile.close ();
 
 	if (ret) {
-		g_remove (path.c_str());
+		g_remove (tmp_path.c_str());
+	} else if (!path.empty()) {
+		/* move the data file to the requested path */
+		g_rename (tmp_path.c_str(), path.c_str());
 	}
+
 	if (data) {
-		delete data;
+		delete [] data;
 	}
 
 	return ret;

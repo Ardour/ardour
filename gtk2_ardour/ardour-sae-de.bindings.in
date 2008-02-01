@@ -14,6 +14,8 @@
 (gtk_accel_path "<Actions>/Editor/toggle-edit-mode" "1")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-mode" "2")
 (gtk_accel_path "<Actions>/Editor/cycle-snap-choice" "3")
+(gtk_accel_path "<Actions>/Editor/tab-to-transient-forwards" "nabla")
+(gtk_accel_path "<Actions>/Editor/tab-to-transient-backwards" "<%TERTIARY%>nabla")
 ; (gtk_accel_path "<Actions>/redirectmenu/copy" "")
 ; (gtk_accel_path "<Actions>/options/MeterFalloffFaster" "")
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>space")

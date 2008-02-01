@@ -380,6 +380,8 @@ namespace ARDOUR {
 	    int   opts; // really RubberBandStretcher::Options
 	};
 
+	typedef std::list<nframes64_t> AnalysisFeatureList;
+
 } // namespace ARDOUR
 
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
