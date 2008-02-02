@@ -780,6 +780,7 @@ style "track_name_display"
 style "active_track_name_display"
 {
 	font_name = "%FONT_NORMAL%"
+	GtkWidget::cursor_color =  {0, 0, 0 }
 	text[NORMAL] = { 0.26, 0.26, 0.26 }
 	base[NORMAL] = { 0.89, 0.89, 0.89 }
 }
