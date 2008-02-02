@@ -5119,7 +5119,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	AnalysisFeatureList::const_iterator x;	
 	
 	nframes64_t pos = ar->position();
-	
+
 	XMLNode& before (pl->get_state());
 	
 	x = positions.begin();
@@ -5137,7 +5137,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	pl->freeze ();
 	pl->remove_region (ar);
 	
-	do {
+	while (x != positions.end()) {
 		
 		/* file start = original start + how far we from the initial position ? 
 		 */
@@ -5148,6 +5148,14 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		 */
 		
 		nframes64_t len = (*x) - pos;
+
+		/* XXX we do we really want to allow even single-sample regions?
+		   shouldn't we have some kind of lower limit on region size?
+		*/
+
+		if (len <= 0) {
+			break;
+		}
 		
 		string new_name;
 		
@@ -5158,11 +5166,13 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		pl->add_region (RegionFactory::create (ar->get_sources(), file_start, len, new_name), pos);
 		
 		pos += len;
-		
 		++x;
-		
-	} while (x != positions.end() && (*x) < ar->last_frame());
-	
+
+		if (*x > ar->last_frame()) {
+			break;
+		}
+	} 
+
 	pl->thaw ();
 	
 	XMLNode& after (pl->get_state());
