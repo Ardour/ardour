@@ -1345,7 +1345,7 @@ Editor::ExclusiveRegionSelection::ExclusiveRegionSelection (Editor& ed, RegionVi
 
 Editor::ExclusiveRegionSelection::~ExclusiveRegionSelection ()
 {
-	if (remove) {
+	if (remove && regionview) {
 		editor.get_selection().remove (regionview);
 	}
 }
