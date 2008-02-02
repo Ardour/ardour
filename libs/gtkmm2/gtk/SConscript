@@ -11,6 +11,9 @@ gtkmm2 = env.Copy()
 gtkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'], libraries['cairomm'], libraries['gtk2-unix-print'] ])
 gtkmm2.Append(CXXFLAGS = ['-DGLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED', '-DGLIBMM_PROPERTIES_ENABLED', '-DGLIBMM_EXCEPTIONS_ENABLED'])
 
+if gtkmm2['IS_OSX']:
+    gtkmm2.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 libgtkmm2 = gtkmm2.SharedLibrary('gtkmm2', gtkmm2_files)
 Default(libgtkmm2)
 

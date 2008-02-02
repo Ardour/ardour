@@ -114,7 +114,7 @@ void
 LatencyGUI::change_latency_from_button (int dir)
 {
 	Glib::ustring unitstr = units_combo.get_active_text();
-	double shift;
+	double shift = 0.0;
 
 	if (unitstr == unit_strings[0]) {
 		shift = 1;

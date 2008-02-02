@@ -27,10 +27,12 @@
 #include <ctime>
 #include <cmath>
 #include <iomanip>
+#include <fstream>
 #include <algorithm>
 #include <vector>
 
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
@@ -38,6 +40,7 @@
 #include <ardour/audiosource.h>
 #include <ardour/cycle_timer.h>
 #include <ardour/session.h>
+#include <ardour/transient_detector.h>
 
 #include "i18n.h"
 
@@ -914,5 +917,52 @@ AudioSource::update_length (nframes_t pos, nframes_t cnt)
 	if (pos + cnt > _length) {
 		_length = pos+cnt;
 	}
+}
+
+int
+AudioSource::load_transients (const string& path)
+{
+	ifstream file (path.c_str());
+
+	if (!file) {
+		return -1;
+	}
+	
+	transients.clear ();
+
+	stringstream strstr;
+	double val;
+
+	while (file.good()) {
+		file >> val;
+
+		if (!file.fail()) {
+			nframes64_t frame = (nframes64_t) floor (val * _session.frame_rate());
+			transients.push_back (frame);
+		}
+	}
+
+	return 0;
+}
+
+string 
+AudioSource::get_transients_path () const
+{
+	vector<string> parts;
+	string s;
+
+	/* old sessions may not have the analysis directory */
+	
+	_session.ensure_subdirs ();
+
+	s = _session.analysis_dir ();
+	parts.push_back (s);
+
+	s = _id.to_s();
+	s += '.';
+	s += X_("transients");
+	parts.push_back (s);
+	
+	return Glib::build_filename (parts);
 }
 

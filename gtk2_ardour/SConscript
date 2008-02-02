@@ -24,7 +24,7 @@ gtkardour.Append(CPPPATH="#/")  # for top level svn_revision.h
 gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
-if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
+if gtkardour['IS_OSX']:
        gtkardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
 
 gtkardour.Merge ([
@@ -50,6 +50,10 @@ gtkardour.Merge ([
     libraries['xml'],
     libraries['xslt'],
     libraries['samplerate'],
+    libraries['vamp'],
+    libraries['vamphost'],
+    libraries['fftw3f'],
+    libraries['fftw3'],
     libraries['jack'],
     libraries['cairomm'],
     libraries['asound']
@@ -77,7 +81,7 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
 if gtkardour['RUBBERBAND']:
-	gtkardour.Merge ([ libraries['rubberband'],  libraries['vamp'], libraries['fftw3f'], libraries['fftw3'] ])
+	gtkardour.Merge ([ libraries['rubberband'] ])
 else:
 	gtkardour.Merge ([ libraries['soundtouch'] ])
 
@@ -101,50 +105,44 @@ x11.cc
 gtkardour_files=Split("""
 about.cc
 actions.cc
-add_route_dialog.cc
 add_midi_cc_track_dialog.cc
+add_route_dialog.cc
 ardour_dialog.cc
-ardour_ui.cc
 ardour_ui2.cc
+ardour_ui.cc
 ardour_ui_dependents.cc
 ardour_ui_dialogs.cc
 ardour_ui_ed.cc
 ardour_ui_mixer.cc
 ardour_ui_options.cc
 audio_clock.cc
-audio_time_axis.cc
 audio_region_editor.cc
-control_point.cc
-automation_line.cc
-automation_time_axis.cc
-automation_streamview.cc
+audio_region_view.cc
+audio_streamview.cc
+audio_time_axis.cc
 automation_controller.cc
+automation_line.cc
 automation_region_view.cc
-bundle_manager.cc
-midi_port_dialog.cc
-midi_time_axis.cc
-midi_scroomer.cc
-midi_streamview.cc
+automation_streamview.cc
+automation_time_axis.cc
 axis_view.cc
-canvas-simpleline.c
-simpleline.cc
-canvas-simplerect.c
-simplerect.cc
-lineset.cc
-canvas-waveview.c
-diamond.cc
+bundle_manager.cc
 canvas-midi-event.cc
+canvas-simpleline.c
+canvas-simplerect.c
+canvas-waveview.c
+control_point.cc
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc
-enums.cc
+diamond.cc
 editing.cc
-editor.cc
 editor_actions.cc
 editor_audio_import.cc
 editor_audiotrack.cc
 editor_canvas.cc
 editor_canvas_events.cc
+editor.cc
 editor_cursors.cc
 editor_edit_groups.cc
 editor_export_audio.cc
@@ -165,66 +163,72 @@ editor_selection_list.cc
 editor_tempodisplay.cc
 editor_timefx.cc
 engine_dialog.cc
+enums.cc
 export_dialog.cc
-export_session_dialog.cc
-export_region_dialog.cc
 export_range_markers_dialog.cc
+export_region_dialog.cc
+export_session_dialog.cc
 gain_meter.cc
 generic_pluginui.cc
 ghostregion.cc
 gtk-custom-hruler.c
 gtk-custom-ruler.c
 io_selector.cc
-port_matrix.cc
 keyboard.cc
 keyeditor.cc
 latency_gui.cc
 level_meter.cc
+lineset.cc
 location_ui.cc
 main.cc
 marker.cc
+midi_port_dialog.cc
+midi_region_view.cc
+midi_scroomer.cc
+midi_streamview.cc
+midi_time_axis.cc
 mixer_strip.cc
 mixer_ui.cc
 new_session_dialog.cc
 option_editor.cc
 opts.cc
-
-panner.cc
 panner2d.cc
+panner.cc
 panner_ui.cc
 piano_roll_header.cc
 playlist_selector.cc
 plugin_selector.cc
 plugin_ui.cc
+port_matrix.cc
+processor_box.cc
 prompter.cc
 public_editor.cc
-processor_box.cc
 region_gain_line.cc
 region_selection.cc
 region_view.cc
-audio_region_view.cc
-midi_region_view.cc
-tape_region_view.cc
+rhythm_ferret.cc
 route_params_ui.cc
 route_processor_selection.cc
+route_time_axis.cc
 route_ui.cc
 selection.cc
-sfdb_ui.cc
 send_ui.cc
+sfdb_ui.cc
+simpleline.cc
+simplerect.cc
 splash.cc
 streamview.cc
-audio_streamview.cc
+tape_region_view.cc
 tempo_dialog.cc
+tempo_lines.cc
 theme_manager.cc
 time_axis_view.cc
 time_axis_view_item.cc
-route_time_axis.cc
 time_selection.cc
 ui_config.cc
 utils.cc
 version.cc
 waveview.cc
-tempo_lines.cc
 """)
 
 fft_analysis_files=Split("""
@@ -315,7 +319,7 @@ tt = gtkmmtests.Program(target = 'tt', source = tt_files)
 
 my_font_dict = { }
 
-if gtkardour['DIST_TARGET'] == 'panther' or gtkardour['DIST_TARGET'] == 'tiger':
+if gtkardour['IS_OSX']:
 	#
 	# OS X font rendering is different even with X11
 	#

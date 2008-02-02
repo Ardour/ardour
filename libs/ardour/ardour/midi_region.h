@@ -50,6 +50,10 @@ class MidiRegion : public Region
 	~MidiRegion();
 
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
+	
+	/* Stub Readable interface */
+	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const { return 0; }
+	virtual nframes64_t readable_length() const { return length(); }
 
 	nframes_t read_at (MidiRingBuffer& dst,
 			   nframes_t position,
@@ -86,11 +90,11 @@ class MidiRegion : public Region
 
 	MidiRegion (boost::shared_ptr<MidiSource>, nframes_t start, nframes_t length);
 	MidiRegion (boost::shared_ptr<MidiSource>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	MidiRegion (SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	MidiRegion (const SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	MidiRegion (boost::shared_ptr<const MidiRegion>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	MidiRegion (boost::shared_ptr<const MidiRegion>);
 	MidiRegion (boost::shared_ptr<MidiSource>, const XMLNode&);
-	MidiRegion (SourceList &, const XMLNode&);
+	MidiRegion (const SourceList &, const XMLNode&);
 
   private:
 	nframes_t _read_at (const SourceList&, MidiRingBuffer& dst,

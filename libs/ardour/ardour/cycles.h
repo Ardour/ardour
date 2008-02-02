@@ -186,17 +186,7 @@ static inline cycles_t get_cycles (void)
 /* begin mach */
 #elif defined(__APPLE__)
 
-#ifdef HAVE_WEAK_COREAUDIO
 #include <CoreAudio/HostTime.h>
-#else // Due to MacTypes.h and libgnomecanvasmm Rect conflict
-typedef unsigned long long              UInt64;
-
-extern UInt64
-AudioGetCurrentHostTime();
-
-extern UInt64
-AudioConvertHostTimeToNanos(UInt64 inHostTime);
-#endif
 
 typedef UInt64 cycles_t;
 static inline cycles_t get_cycles (void)

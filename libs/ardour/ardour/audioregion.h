@@ -21,6 +21,7 @@
 #define __ardour_audio_region_h__
 
 #include <vector>
+#include <list>
 
 #include <pbd/fastlog.h>
 #include <pbd/undo.h>
@@ -75,6 +76,11 @@ class AudioRegion : public Region
 				      nframes_t offset, nframes_t cnt,
 				      uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 	
+	/* Readable interface */
+	
+	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const;
+	virtual nframes64_t readable_length() const { return length(); }
+
 	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,
 			float *gain_buf, nframes_t position, nframes_t cnt, 
 			uint32_t  chan_n      = 0,
@@ -128,12 +134,14 @@ class AudioRegion : public Region
 	void resume_fade_in ();
 	void resume_fade_out ();
 
+	int get_transients (std::vector<nframes64_t>&, bool force_new = false);
+
   private:
 	friend class RegionFactory;
 
 	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length);
 	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
+	AudioRegion (const SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
 	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
 	AudioRegion (SourceList &, const XMLNode&);
@@ -148,10 +156,11 @@ class AudioRegion : public Region
 	void recompute_gain_at_start ();
 
 	nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
-				 float *gain_buffer, nframes_t position, nframes_t cnt, 
-				 uint32_t chan_n = 0,
-				 nframes_t read_frames = 0,
-				 nframes_t skip_frames = 0) const;
+			    float *gain_buffer, nframes_t position, nframes_t cnt, 
+			    uint32_t chan_n = 0,
+			    nframes_t read_frames = 0,
+			    nframes_t skip_frames = 0,
+			    bool raw = false) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
@@ -178,6 +187,11 @@ class AudioRegion : public Region
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
 
 	int set_live_state (const XMLNode&, Change&, bool send);
+
+	std::vector<nframes64_t> _transients;
+	bool valid_transients;
+	void invalidate_transients ();
+	void cleanup_transients (std::vector<nframes64_t>&);
 };
 
 } /* namespace ARDOUR */

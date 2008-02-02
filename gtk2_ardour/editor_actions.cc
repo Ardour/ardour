@@ -356,11 +356,28 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region"), mem_fun(*this, &Editor::normalize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "boost-region-gain", _("Boost Region Gain"), bind (mem_fun(*this, &Editor::adjust_region_scale_amplitude), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "cut-region-gain", _("Cut Region Gain"), bind (mem_fun(*this, &Editor::adjust_region_scale_amplitude), false));
 	ActionManager::session_sensitive_actions.push_back (act);
+	
 	act = ActionManager::register_action (editor_actions, "quantize-region", _("Quantize Region"), mem_fun(*this, &Editor::quantize_region));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "set-tempo-from-region", _("Set Tempo from Region=Bar"), mem_fun(*this, &Editor::use_region_as_bar));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "set-tempo-from-edit-range", _("Set Tempo from Edit Range=Bar"), mem_fun(*this, &Editor::use_range_as_bar));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "split-region-at-transients", _("Split Regions At Percussion Onsets"), mem_fun(*this, &Editor::split_region_at_transients));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret"), mem_fun(*this, &Editor::show_rhythm_ferret));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "tab-to-transient-forwards", _("Move Forward to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "tab-to-transient-backwards", _("Move Forward to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));

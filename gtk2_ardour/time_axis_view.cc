@@ -43,6 +43,7 @@
 #include "public_editor.h"
 #include "time_axis_view.h"
 #include "simplerect.h"
+#include "simpleline.h"
 #include "selection.h"
 #include "keyboard.h"
 #include "rgb_macros.h"
@@ -1100,4 +1101,38 @@ TimeAxisView::covers_y_position (double y)
 	}
 
 	return 0;
+}
+
+void
+TimeAxisView::show_temporary_lines (const vector<nframes64_t>& pos)
+{
+	while (temp_lines.size()< pos.size()) {
+		ArdourCanvas::SimpleLine* l = new ArdourCanvas::SimpleLine (*canvas_display);
+		l->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
+		l->property_y1() = 0;
+		l->property_y2() = height;
+		temp_lines.push_back (l);
+	}
+
+	while (temp_lines.size() > pos.size()) {
+		ArdourCanvas::SimpleLine *line = temp_lines.back();
+		temp_lines.pop_back ();
+		delete line;
+	}
+
+	vector<nframes64_t>::const_iterator i;
+	list<ArdourCanvas::SimpleLine*>::iterator l;
+
+	for (i = pos.begin(), l = temp_lines.begin(); i != pos.end() && l != temp_lines.end(); ++i, ++l) {
+		(*l)->property_x1() = editor.frame_to_pixel (*i);
+		(*l)->property_x2() = editor.frame_to_pixel (*i);
+	}
+}
+
+void
+TimeAxisView::hide_temporary_lines ()
+{
+	for (list<ArdourCanvas::SimpleLine*>::iterator l = temp_lines.begin(); l != temp_lines.end(); ++l) {
+		(*l)->hide ();
+	}
 }

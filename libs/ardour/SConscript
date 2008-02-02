@@ -31,6 +31,7 @@ amp.cc
 audio_buffer.cc
 auto_bundle.cc
 user_bundle.cc
+audioanalyser.cc
 audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
@@ -134,6 +135,7 @@ tape_file_matcher.cc
 template_utils.cc
 tempo.cc
 track.cc
+transient_detector.cc
 utils.cc
 version.cc
 """)
@@ -162,6 +164,7 @@ if ardour['LIBLO']:
 ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 ardour.Append(CXXFLAGS="-DDATA_DIR=\\\"" + os.path.join (final_prefix, 'share') + "\\\"")
 ardour.Append(CXXFLAGS="-DMODULE_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR']) + "\\\"")
+ardour.Append(CXXFLAGS="-DVAMP_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR'], 'ardour2', 'vamp') + "\\\"")
 ardour.Append(CXXFLAGS="-DCONFIG_DIR=\\\"" + final_config_prefix + "\\\"")
 ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\"" + os.path.join (final_prefix, 'share', 'locale') + "\\\"")
 
@@ -304,15 +307,19 @@ ardour.Merge ([
 	     libraries['pbd'],
 	     libraries['midi++2'],
 	     libraries['glib2'],
-	     libraries['glibmm2']
+	     libraries['glibmm2'],
+	     libraries['vamp'],
+	     libraries['vamphost'],
+	     libraries['fftw3f'],
+	     libraries['fftw3'],
 	     ])
 
-#if ardour['RUBBERBAND']:
-#	ardour.Merge ([ libraries['rubberband'],  libraries['vamp'], libraries['fftw3f'] ])
-#	timefx_sources += [ 'rb_effect.cc' ]
-#else:
-ardour.Merge ([ libraries['soundtouch'] ])
-timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
+if ardour['RUBBERBAND']:
+	ardour.Merge ([ libraries['rubberband']])
+	timefx_sources += [ 'rb_effect.cc' ]
+else:
+	ardour.Merge ([ libraries['soundtouch'] ])
+	timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
 	
 if ardour['LV2']:
 	ardour.Merge ([ libraries['slv2'] ])

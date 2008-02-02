@@ -37,20 +37,21 @@
 namespace ARDOUR {
 class AudioEngine;
 class Session;
+struct LV2World;
 
 class LV2Plugin : public ARDOUR::Plugin
 {
   public:
-	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, SLV2Plugin plugin, nframes_t sample_rate);
+	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, ARDOUR::LV2World&, SLV2Plugin plugin, nframes_t sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
 	/* Plugin interface */
 	
 	std::string unique_id() const;
-	const char* label() const           { return slv2_plugin_get_name(_plugin); }
-	const char* name() const            { return slv2_plugin_get_name(_plugin); }
-	const char* maker() const           { return slv2_plugin_get_author_name(_plugin); }
+	const char* label() const           { return slv2_value_as_string(_name); }
+	const char* name() const            { return slv2_value_as_string(_name); }
+	const char* maker() const           { return _author ? slv2_value_as_string(_author) : "Unknown"; }
 	uint32_t    parameter_count() const { return slv2_plugin_get_num_ports(_plugin); }
 	float       default_value (uint32_t port);
 	nframes_t   signal_latency() const;
@@ -58,6 +59,9 @@ class LV2Plugin : public ARDOUR::Plugin
 	float       get_parameter (uint32_t port) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
+
+	SLV2Plugin slv2_plugin()         { return _plugin; }
+	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
 	
 	std::set<Parameter> automatable() const;
 
@@ -105,29 +109,56 @@ class LV2Plugin : public ARDOUR::Plugin
 	
   private:
 	void*                    _module;
+	LV2World&                _world;
 	SLV2Plugin               _plugin;
-	SLV2Template             _template;
+	SLV2Value                _name;
+	SLV2Value                _author;
 	SLV2Instance             _instance;
 	nframes_t                _sample_rate;
 	float*                   _control_data;
 	float*                   _shadow_data;
+	float*                   _defaults;
 	float*                   _latency_control_port;
 	bool                     _was_activated;
 	vector<bool>             _port_is_input;
 
-	void init (SLV2Plugin plugin, nframes_t rate);
+	void init (LV2World& world, SLV2Plugin plugin, nframes_t rate);
 	void run (nframes_t nsamples);
 	void latency_compute_run ();
 };
 
+
+/** The SLV2World, and various cached (as symbols, fast) URIs.
+ *
+ * This object represents everything ardour 'knows' about LV2
+ * (ie understood extensions/features/etc)
+ */
+struct LV2World {
+	LV2World();
+	~LV2World();
+
+	SLV2World world;
+	SLV2Value input_class;
+	SLV2Value output_class;
+	SLV2Value audio_class;
+	SLV2Value control_class;
+	SLV2Value event_class;
+	SLV2Value in_place_broken;
+	SLV2Value integer;
+	SLV2Value toggled;
+	SLV2Value srate;
+};
+
+
 class LV2PluginInfo : public PluginInfo {
 public:	
-	LV2PluginInfo (void* slv2_plugin);;
+	LV2PluginInfo (void* slv2_world, void* slv2_plugin);;
 	~LV2PluginInfo ();;
 	static PluginInfoList discover (void* slv2_world);
 
 	PluginPtr load (Session& session);
 
+	void* _lv2_world;
 	void* _slv2_plugin;
 };
 

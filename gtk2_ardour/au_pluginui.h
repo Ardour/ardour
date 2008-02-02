@@ -3,6 +3,7 @@
 
 #include <AppKit/AppKit.h>
 #include <Carbon/Carbon.h>
+#include <AudioUnit/AudioUnitCarbonView.h>
 #include <AudioUnit/AudioUnit.h>
 
 /* fix up stupid apple macros */

@@ -45,10 +45,12 @@
 #include <ardour/location.h>
 #include <ardour/named_selection.h>
 #include <ardour/audio_track.h>
+#include <ardour/audiofilesource.h>
 #include <ardour/audioplaylist.h>
 #include <ardour/region_factory.h>
 #include <ardour/playlist_factory.h>
 #include <ardour/reverse.h>
+#include <ardour/transient_detector.h>
 #include <ardour/dB.h>
 #include <ardour/quantize.h>
 
@@ -3042,9 +3044,9 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position, const R
 		return;
 	}
 
-	nframes_t distance;
+	nframes_t distance = 0;
 	nframes_t pos = 0;
-	int dir;
+	int dir = 0;
 
 	list<RegionView*> sorted;
 	rs.by_position (sorted);
@@ -4148,7 +4150,7 @@ Editor::adjust_region_scale_amplitude (bool up)
 		return;
 	}
 
-	ExclusiveRegionSelection (*this, entered_regionview);
+	ExclusiveRegionSelection esr (*this, entered_regionview);
 
 	if (selection->regions.empty()) {
 		return;
@@ -4164,10 +4166,6 @@ Editor::adjust_region_scale_amplitude (bool up)
 		
 		double fraction = gain_to_slider_position (arv->audio_region()->scale_amplitude ());
 		
-		cerr << "slider pos for " << arv->audio_region()->scale_amplitude ()
-		     << " = " << fraction
-		     << endl;
-
 		if (up) {
 			fraction += 0.05;
 			fraction = min (fraction, 1.0);
@@ -4180,16 +4178,14 @@ Editor::adjust_region_scale_amplitude (bool up)
 			continue;
 		}
 
-		if (up && fraction >= 1.0) {
-			continue;
-		}
-
 		fraction = slider_position_to_gain (fraction);
 		fraction = coefficient_to_dB (fraction);
 		fraction = dB_to_coefficient (fraction);
-		
-		cerr << "set scale amp for " << arv->audio_region()->name() << " to " << fraction << endl;
 
+		if (up && fraction >= 2.0) {
+			continue;
+		}
+		
 		arv->audio_region()->set_scale_amplitude (fraction);
 		session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
 	}
@@ -4481,7 +4477,7 @@ Editor::toggle_fade_active (bool in)
 
 	const char* cmd = (in ? _("toggle fade in active") : _("toggle fade out active"));
 	bool have_switch = false;
-	bool yn;
+	bool yn = false;
 
 	begin_reversible_command (cmd);
 
@@ -4986,3 +4982,233 @@ Editor::pitch_shift_regions ()
 	pitch_shift (selection->regions, 1.2);
 }
 	
+void
+Editor::use_region_as_bar ()
+{
+	if (!session) {
+		return;
+	}
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	RegionView* rv = selection->regions.front();
+
+	define_one_bar (rv->region()->position(), rv->region()->last_frame() + 1);
+}
+
+void
+Editor::use_range_as_bar ()
+{
+	nframes64_t start, end;
+	if (get_edit_op_range (start, end)) {
+		define_one_bar (start, end);
+	}
+}
+
+void
+Editor::define_one_bar (nframes64_t start, nframes64_t end)
+{
+	nframes64_t length = end - start;
+
+	const Meter& m (session->tempo_map().meter_at (start));
+
+	/* region length = 1 bar */
+
+	/* 1 bar = how many beats per bar */
+	
+	double beats_per_bar = m.beats_per_bar();
+	
+	/* now we want frames per beat.
+	   we have frames per bar, and beats per bar, so ...
+	*/
+
+	double frames_per_beat = length / beats_per_bar;
+	
+	/* beats per minute = */
+
+	double beats_per_minute = (session->frame_rate() * 60.0) / frames_per_beat;
+
+	const TempoSection& t (session->tempo_map().tempo_section_at (start));
+
+	begin_reversible_command (_("set tempo from region"));
+	XMLNode& before (session->tempo_map().get_state());
+
+	if (t.frame() == start) {
+		session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type());
+	} else {
+		session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), start);
+	}
+
+	XMLNode& after (session->tempo_map().get_state());
+
+	session->add_command (new MementoCommand<TempoMap>(session->tempo_map(), &before, &after));
+	commit_reversible_command ();
+}
+
+void
+Editor::split_region_at_transients ()
+{
+	vector<nframes64_t> positions;
+
+	if (!session) {
+		return;
+	}
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+
+	session->begin_reversible_command (_("split regions"));
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ) {
+
+		RegionSelection::iterator tmp;
+
+		tmp = i;
+		++tmp;
+
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i)->region());
+		
+		if (ar && (ar->get_transients (positions) == 0)) {
+			split_region_at_points ((*i)->region(), positions);
+			positions.clear ();
+		}
+		
+		i = tmp;
+	}
+
+	session->commit_reversible_command ();
+
+}
+
+void
+Editor::split_region_at_points (boost::shared_ptr<Region> r, vector<nframes64_t>& positions)
+{
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+	
+	if (!ar) {
+		return;
+	}
+	
+	boost::shared_ptr<Playlist> pl = ar->playlist();
+	
+	if (!pl) {
+		return;
+	}
+	
+	if (positions.empty()) {
+		return;
+	}
+	
+	vector<nframes64_t>::const_iterator x;	
+	
+	nframes64_t pos = ar->position();
+	
+	XMLNode& before (pl->get_state());
+	
+	x = positions.begin();
+	
+	while (x != positions.end()) {
+		if ((*x) > pos) {
+			break;
+		}
+	}
+	
+	if (x == positions.end()) {
+		return;
+	}
+	
+	pl->freeze ();
+	pl->remove_region (ar);
+	
+	do {
+		
+		/* file start = original start + how far we from the initial position ? 
+		 */
+		
+		nframes64_t file_start = ar->start() + (pos - ar->position());
+		
+		/* length = next position - current position
+		 */
+		
+		nframes64_t len = (*x) - pos;
+		
+		string new_name;
+		
+		if (session->region_name (new_name, ar->name())) {
+			continue;
+		}
+		
+		pl->add_region (RegionFactory::create (ar->sources(), file_start, len, new_name), pos);
+		
+		pos += len;
+		
+		++x;
+		
+	} while (x != positions.end() && (*x) < ar->last_frame());
+	
+	pl->thaw ();
+	
+	XMLNode& after (pl->get_state());
+	
+	session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));
+}
+
+void
+Editor::tab_to_transient (bool forward)
+{
+
+	vector<nframes64_t> positions;
+
+	if (!session) {
+		return;
+	}
+
+	ExclusiveRegionSelection esr (*this, entered_regionview);
+
+	if (selection->regions.empty()) {
+		return;
+	}
+	
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (selection->regions.front()->region());
+
+	if (!ar) {
+		return;
+	}
+
+	ar->get_transients (positions);
+	nframes64_t pos = session->audible_frame ();
+
+	if (forward) {
+		vector<nframes64_t>::iterator x;
+
+		for (x = positions.begin(); x != positions.end(); ++x) {
+			if ((*x) > pos) {
+				break;
+			}
+		}
+
+		if (x != positions.end ()) {
+			session->request_locate (*x);
+		}
+
+	} else {
+		vector<nframes64_t>::reverse_iterator x;
+
+		for (x = positions.rbegin(); x != positions.rend(); ++x) {
+			if ((*x) < pos) {
+				break;
+			}
+		}
+
+		if (x != positions.rend ()) {
+			session->request_locate (*x);
+		}
+	}
+}

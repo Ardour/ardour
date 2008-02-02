@@ -373,7 +373,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	str = timeout_combo.get_active_text ();
 	if (str != _("Ignore")) {
-		double secs;
+		double secs = 0;
 		uint32_t msecs;
 		atof (str);
 		msecs = (uint32_t) floor (secs * 1000.0);
@@ -819,7 +819,7 @@ EngineControl::driver_changed ()
 
 	vector<string>& strings = devices[driver];
 
-	if (strings.empty()) {
+	if (strings.empty() && driver != "FFADO") {
 		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
 		return;
 	}
@@ -1096,7 +1096,7 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNodeList          clist;
 	XMLNodeConstIterator citer;
 	XMLNode* child;
-	XMLProperty* prop;
+	XMLProperty* prop = NULL;
 	bool using_dummy = false;
 	
 	int val;
@@ -1112,7 +1112,8 @@ EngineControl::set_state (const XMLNode& root)
 	clist = root.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-
+		if ( prop && (prop->value() == "FFADO" ))
+				continue;
 		child = *citer;
 
 		prop = child->property ("val");

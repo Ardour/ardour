@@ -36,12 +36,11 @@ TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
 	: ArdourDialog (_("edit tempo")),
 	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
 	  bpm_spinner (bpm_adjustment),
-	  bpm_frame (_("Beats per minute")),
-	  note_frame (_("BPM denominator")),
+	  bpm_frame (_("Tempo")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
-	  when_bar_label (_("Bar")),
-	  when_beat_label (_("Beat")),
+	  when_bar_label (_("Bar"), ALIGN_LEFT, ALIGN_CENTER),
+	  when_beat_label (_("Beat"), ALIGN_LEFT, ALIGN_CENTER),
 	  when_table (2, 2),
 	  when_frame (_("Location"))
 {
@@ -56,11 +55,11 @@ TempoDialog::TempoDialog (TempoSection& section, const string & action)
 	: ArdourDialog ("tempo dialog"),
 	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
 	  bpm_spinner (bpm_adjustment),
-	  bpm_frame (_("Beats per minute")),
+	  bpm_frame (_("Tempo")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
-	  when_bar_label (_("Bar")),
-	  when_beat_label (_("Beat")),
+	  when_bar_label (_("Bar"), ALIGN_LEFT, ALIGN_CENTER),
+	  when_beat_label (_("Beat"), ALIGN_LEFT, ALIGN_CENTER),
 	  when_table (2, 2),
 	  when_frame (_("Location"))
 {
@@ -108,18 +107,18 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 	else
 		note_types.set_active_text (_("quarter (4)"));
 
-	hspacer1.set_border_width (5);
-	hspacer1.pack_start (bpm_spinner, false, false);
-	vspacer1.set_border_width (5);
-	vspacer1.pack_start (hspacer1, false, false);
+	Label* bpm_label = manage(new Label(_("Beats Per Minute:"), ALIGN_LEFT, ALIGN_CENTER));
 
-	hspacer2.set_border_width (5);
-	hspacer2.pack_start (note_types, false, false);
-	vspacer2.set_border_width (5);
-	vspacer2.pack_start (hspacer2, false, false);
+	hspacer1.set_border_width (6);
+	hspacer1.pack_end (bpm_spinner, PACK_EXPAND_PADDING);
+	hspacer1.pack_start (*bpm_label, PACK_EXPAND_PADDING);
+	vspacer1.set_border_width (6);
+	vspacer1.pack_start (hspacer1, PACK_EXPAND_PADDING);
+
+	hspacer2.set_border_width (6);
+	hspacer2.pack_start (note_types, PACK_EXPAND_PADDING);
 
 	bpm_frame.add (vspacer1);
-	note_frame.add (vspacer2);
 
 	if (movable) {
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
@@ -139,35 +138,40 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 		when_table.set_homogeneous (true);
 		when_table.set_row_spacings (2);
 		when_table.set_col_spacings (2);
-		when_table.set_border_width (5);
+		when_table.set_border_width (6);
 		
-		when_table.attach (when_bar_label, 0, 1, 0, 1, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
-		when_table.attach (when_bar_entry, 0, 1, 1, 2, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_label, 0, 1, 0, 1, AttachOptions(0), FILL|EXPAND);
+		when_table.attach (when_bar_entry, 1, 2, 0, 1, AttachOptions(0), FILL|EXPAND);
 		
-		when_table.attach (when_beat_label, 1, 2, 0, 1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
-		when_table.attach (when_beat_entry, 1, 2, 1, 2, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
+		when_table.attach (when_beat_label, 0, 1, 1, 2, AttachOptions(0), AttachOptions(0));
+		when_table.attach (when_beat_entry, 1, 2, 1, 2, AttachOptions(0), AttachOptions(0));
 		
-		when_frame.set_name ("MetricDialogFrame");
-		when_frame.add (when_table);
+		HBox* when_hbox = manage (new HBox());
+		Label* when_label = manage(new Label(_("Tempo Begins at:"), ALIGN_LEFT, ALIGN_TOP));
+		when_hbox->pack_end(when_table, PACK_EXPAND_PADDING, 6);
+		when_hbox->pack_start(*when_label, PACK_EXPAND_PADDING, 6);
 
-		get_vbox()->pack_start (when_frame, false, false);
+		when_frame.set_name ("MetricDialogFrame");
+		when_frame.add (*when_hbox);
+
+		get_vbox()->pack_end (when_frame, false, false);
+		when_frame.show_all();
+
 	}
 
 	bpm_frame.set_name ("MetricDialogFrame");
 	bpm_spinner.set_name ("MetricEntry");
-	note_frame.set_name ("MetricDialogFrame");
 
 	get_vbox()->set_border_width (12);
-	get_vbox()->pack_start (bpm_frame, false, false);
-	get_vbox()->pack_start (note_frame, false, false);
+	get_vbox()->pack_end (bpm_frame, false, false);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::APPLY, RESPONSE_ACCEPT);
-	set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+	set_response_sensitive (RESPONSE_ACCEPT, false);
 	set_default_response (RESPONSE_ACCEPT);
 
-	get_vbox()->show_all();
-	bpm_spinner.show();
+	bpm_frame.show_all ();
+	bpm_spinner.show ();
 
 	set_name ("MetricDialog");
 
@@ -188,7 +192,7 @@ TempoDialog::bpm_button_release (GdkEventButton* ev)
 {	
 	/* the value has been modified, accept should work now */
 
-	set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+	set_response_sensitive (RESPONSE_ACCEPT, true);
 	return false;
 }
 
@@ -208,6 +212,8 @@ TempoDialog::get_bbt_time (BBT_Time& requested)
 	if (sscanf (when_beat_entry.get_text().c_str(), "%" PRIu32, &requested.beats) != 1) {
 		return false;
 	}
+
+	requested.ticks = 0;
 
 	return true;
 }
@@ -244,18 +250,17 @@ TempoDialog::get_note_type ()
 void
 TempoDialog::note_types_change ()
 {
-        set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+        set_response_sensitive (RESPONSE_ACCEPT, true);
 }
 
 
 MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
 	: ArdourDialog ("meter dialog"),
-	  note_frame (_("Meter denominator")),
-	  bpb_frame (_("Beats per bar")),
+	  bpb_frame (_("Meter")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
-	  when_bar_label (_("Bar")),
-	  when_beat_label (_("Beat")),
+	  when_bar_label (_("Bar"), ALIGN_LEFT, ALIGN_CENTER),
+	  when_beat_label (_("Beat"), ALIGN_LEFT, ALIGN_CENTER),
 	  when_frame (_("Location"))
 {
 	BBT_Time when;
@@ -268,12 +273,11 @@ MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
 
 MeterDialog::MeterDialog (MeterSection& section, const string & action)
 	: ArdourDialog ("meter dialog"),
-	  note_frame (_("Meter denominator")),
-	  bpb_frame (_("Beats per bar")),
+	  bpb_frame (_("Meter")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
-	  when_bar_label (_("Bar")),
-	  when_beat_label (_("Beat")),
+	  when_bar_label (_("Bar"), ALIGN_LEFT, ALIGN_CENTER),
+	  when_beat_label (_("Beat"), ALIGN_LEFT, ALIGN_CENTER),
 	  when_frame (_("Location"))
 {
 	init (section.start(), section.beats_per_bar(), section.note_divisor(), section.movable());
@@ -320,19 +324,16 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		note_types.set_active_text (_("thirty-second (32)"));
 	else
 		note_types.set_active_text (_("quarter (4)"));
-		
-	hspacer1.set_border_width (5);
-	hspacer1.pack_start (note_types, false, false);
-	vspacer1.set_border_width (5);
-	vspacer1.pack_start (hspacer1, false, false);
 
-	hspacer2.set_border_width (5);
-	hspacer2.pack_start (bpb_entry, false, false);
-	vspacer2.set_border_width (5);
-	vspacer2.pack_start (hspacer2, false, false);
+	Label* note_label = manage(new Label(_("Note Value:"), ALIGN_LEFT, ALIGN_CENTER));
+	Label* bpb_label = manage(new Label(_("Beats Per Bar:"), ALIGN_LEFT, ALIGN_CENTER));
+	Table* bpb_table = manage (new Table(2, 2));
 
-	note_frame.add (vspacer1);
-	bpb_frame.add (vspacer2);
+	bpb_table->attach (*bpb_label, 0, 1, 0, 1, FILL|EXPAND, FILL|EXPAND, 6, 6);
+	bpb_table->attach (bpb_entry, 1, 2, 0, 1, FILL|EXPAND, FILL|EXPAND, 6, 6);
+	bpb_table->attach (*note_label, 0, 1, 1, 2, FILL|EXPAND, FILL|EXPAND, 6, 6);
+	bpb_table->attach (note_types, 1, 2, 1, 2, FILL|EXPAND, SHRINK, 6, 6);
+	bpb_frame.add (*bpb_table);
 
 	if (movable) {
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
@@ -352,26 +353,29 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		when_table.set_homogeneous (true);
 		when_table.set_row_spacings (2);
 		when_table.set_col_spacings (2);
-		when_table.set_border_width (5);
+		when_table.set_border_width (6);
 		
-		when_table.attach (when_bar_label, 0, 1, 0, 1, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
-		when_table.attach (when_bar_entry, 0, 1, 1, 2, Gtk::AttachOptions(0), Gtk::FILL|Gtk::EXPAND);
+		when_table.attach (when_bar_label, 0, 1, 0, 1, AttachOptions(0), FILL|EXPAND);
+		when_table.attach (when_bar_entry, 1, 2, 0, 1, AttachOptions(0), FILL|EXPAND);
 		
-		when_table.attach (when_beat_label, 1, 2, 0, 1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
-		when_table.attach (when_beat_entry, 1, 2, 1, 2, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
-		
+		when_table.attach (when_beat_label, 0, 1, 1, 2, AttachOptions(0), AttachOptions(0));
+		when_table.attach (when_beat_entry, 1, 2, 1, 2, AttachOptions(0), AttachOptions(0));
+
+		HBox* when_hbox = manage (new HBox());
+		Label* when_label = manage(new Label(_("Meter Begins at:"), ALIGN_LEFT, ALIGN_TOP));
+		when_hbox->pack_end(when_table, PACK_EXPAND_PADDING, 6);
+		when_hbox->pack_start(*when_label, PACK_EXPAND_PADDING, 6);
+
 		when_frame.set_name ("MetricDialogFrame");
-		when_frame.add (when_table);
+		when_frame.add (*when_hbox);
 		
-		get_vbox()->pack_start (when_frame, false, false);
+		get_vbox()->pack_end (when_frame, false, false);
 	}
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (bpb_frame, false, false);
-	get_vbox()->pack_start (note_frame, false, false);
-	
+
 	bpb_frame.set_name ("MetricDialogFrame");
-	note_frame.set_name ("MetricDialogFrame");
 	bpb_entry.set_name ("MetricEntry");
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
@@ -380,7 +384,6 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	set_default_response (RESPONSE_ACCEPT);
 
 	get_vbox()->show_all ();
-	bpb_entry.show ();
 
 	set_name ("MetricDialog");
 	bpb_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
@@ -393,48 +396,48 @@ bool
 MeterDialog::bpb_key_press (GdkEventKey* ev)
 {
 
-switch (ev->keyval) { 
+	switch (ev->keyval) { 
 
- case GDK_0:
- case GDK_1:
- case GDK_2:
- case GDK_3:
- case GDK_4:
- case GDK_5:
- case GDK_6:
- case GDK_7:
- case GDK_8:
- case GDK_9:
- case GDK_KP_0:
- case GDK_KP_1:
- case GDK_KP_2:
- case GDK_KP_3:
- case GDK_KP_4:
- case GDK_KP_5:
- case GDK_KP_6:
- case GDK_KP_7:
- case GDK_KP_8:
- case GDK_KP_9:
- case GDK_period:
- case GDK_comma:
- case  GDK_KP_Delete:
- case  GDK_KP_Enter:
- case  GDK_Delete:
- case  GDK_BackSpace:
- case  GDK_Escape:
- case  GDK_Return:
- case  GDK_Home:
- case  GDK_End:
- case  GDK_Left:
- case  GDK_Right:
- case  GDK_Num_Lock:
- case  GDK_Tab:
-    return FALSE;
- default:
-      break;
- }
+	case GDK_0:
+	case GDK_1:
+	case GDK_2:
+	case GDK_3:
+	case GDK_4:
+	case GDK_5:
+	case GDK_6:
+	case GDK_7:
+	case GDK_8:
+	case GDK_9:
+	case GDK_KP_0:
+	case GDK_KP_1:
+	case GDK_KP_2:
+	case GDK_KP_3:
+	case GDK_KP_4:
+	case GDK_KP_5:
+	case GDK_KP_6:
+	case GDK_KP_7:
+	case GDK_KP_8:
+	case GDK_KP_9:
+	case GDK_period:
+	case GDK_comma:
+	case  GDK_KP_Delete:
+	case  GDK_KP_Enter:
+	case  GDK_Delete:
+	case  GDK_BackSpace:
+	case  GDK_Escape:
+	case  GDK_Return:
+	case  GDK_Home:
+	case  GDK_End:
+	case  GDK_Left:
+	case  GDK_Right:
+	case  GDK_Num_Lock:
+	case  GDK_Tab:
+		return FALSE;
+	default:
+		break;
+	}
 
-   return TRUE;
+	return TRUE;
 }
 
 bool
@@ -451,7 +454,7 @@ MeterDialog::bpb_key_release (GdkEventKey* ev)
 void
 MeterDialog::note_types_change ()
 {
-        set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+        set_response_sensitive (RESPONSE_ACCEPT, true);
 }
 
 double
@@ -497,7 +500,6 @@ MeterDialog::get_note_type ()
 bool
 MeterDialog::get_bbt_time (BBT_Time& requested)
 {
-	requested.ticks = 0;
 
 	if (sscanf (when_bar_entry.get_text().c_str(), "%" PRIu32, &requested.bars) != 1) {
 		return false;
@@ -506,6 +508,8 @@ MeterDialog::get_bbt_time (BBT_Time& requested)
 	if (sscanf (when_beat_entry.get_text().c_str(), "%" PRIu32, &requested.beats) != 1) {
 		return false;
 	}
+
+	requested.ticks = 0;
 
 	return true;
 }

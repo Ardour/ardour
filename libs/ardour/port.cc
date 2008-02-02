@@ -296,8 +296,8 @@ PortFacade::disconnect (Port& other)
 int 
 PortFacade::disconnect_all ()
 {
-	int reta;
-	int retb;
+	int reta = 0;
+	int retb = 0;
 
 	if (_ext_port) {
 		reta = _ext_port->disconnect_all ();

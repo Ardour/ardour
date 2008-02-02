@@ -33,7 +33,7 @@ opts.AddOptions(
     BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
-    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'none' ), ignorecase=2),
+    EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
@@ -531,15 +531,19 @@ if env['FFT_ANALYSIS']:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGExists' : CheckPKGExists })
 	
-	if conf.CheckPKGExists ('\"slv2 >= 0.4.4\"'):
+	if conf.CheckPKGExists ('\"slv2 >= 0.6.0\"'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
 	else:
-		print 'Building Ardour with LV2 support requires SLV2 >= 0.4.4'
+		print 'Building Ardour with LV2 support requires SLV2 >= 0.6.0'
 		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
+		print 'Until the 2.3 release, Ardour requires SLV2 out of SVN.'
+		print 'Testing would be very much appreciated!  svn co http://svn.drobilla.net/lad/slv2'
 		env['LV2'] = 0
 	conf.Finish()
-        
+else:
+	print 'LV2 support is not enabled.  Build with \'scons LV2=1\' to enable.'
+
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 
@@ -621,8 +625,10 @@ if env['DIST_TARGET'] == 'auto':
         # The [.] matches to the dot after the major version, "." would match any character
         if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
             env['DIST_TARGET'] = 'panther'
-        else:
+        if re.search ("darwin8[.]", config[config_kernel]) != None:
             env['DIST_TARGET'] = 'tiger'
+        else:
+            env['DIST_TARGET'] = 'leopard'
     else:
         if re.search ("x86_64", config[config_cpu]) != None:
             env['DIST_TARGET'] = 'x86_64'
@@ -688,9 +694,9 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
 
 # optimization section
 if env['FPU_OPTIMIZATION']:
-    if env['DIST_TARGET'] == 'tiger':
-        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
-        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS")
+    if env['DIST_TARGET'] == 'tiger' or env['DIST_TARGET'] == 'leopard':
+        opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
+        debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
         libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
     elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
@@ -708,6 +714,18 @@ if env['DIST_TARGET'] == 'x86_64':
     env['LIBDIR']='lib64'
 else:
     env['LIBDIR']='lib'
+
+#
+# a single way to test if we're on OS X
+#
+
+if env['DIST_TARGET'] in ['panther', 'tiger', 'leopard' ]:
+    env['IS_OSX'] = 1
+    # force tiger or later, to avoid issues on PPC which defaults
+    # back to 10.1 if we don't tell it otherwise.
+    env.Append (CCFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+else:
+    env['IS_OSX'] = 0
 
 #
 # save off guessed arch element in an env
@@ -767,7 +785,7 @@ if env['LIBLO']:
 
 
 def prep_libcheck(topenv, libinfo):
-    if topenv['DIST_TARGET'] == 'panther' or topenv['DIST_TARGET'] == 'tiger':
+    if topenv['IS_OSX']:
 	#
 	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
 	#            All libraries needed should be built against this location
@@ -780,9 +798,16 @@ def prep_libcheck(topenv, libinfo):
 prep_libcheck(env, env)
 
 
+#
+# these are part of the Ardour source tree because they are C++
+# 
+
 libraries['vamp'] = LibraryInfo (LIBS='vampsdk',
                                  LIBPATH='#libs/vamp-sdk',
-                                 CPPPATH='#libs/vamp-sdk/vamp')
+                                 CPPPATH='#libs/vamp-sdk')
+libraries['vamphost'] = LibraryInfo (LIBS='vamphostsdk',
+                                 LIBPATH='#libs/vamp-sdk',
+                                 CPPPATH='#libs/vamp-sdk')
 
 env['RUBBERBAND'] = False
 
@@ -1007,6 +1032,7 @@ if env['SYSLIBS']:
         'libs/midi++2',
         'libs/ardour',
         'libs/vamp-sdk',
+        'libs/vamp-plugins/',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set
@@ -1081,6 +1107,7 @@ else:
         'libs/midi++2',
         'libs/ardour',
         'libs/vamp-sdk',
+        'libs/vamp-plugins/',
     # these are unconditionally included but have
     # tests internally to avoid compilation etc
     # if VST is not set

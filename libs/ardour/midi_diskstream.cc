@@ -933,7 +933,7 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 	assert(!destructive());
 
 	if (record_enabled() && _session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) {
-		if ((!_write_source) || _write_source->write (*_capture_buf, to_write) != to_write) {
+		if ((!_write_source) || _write_source->midi_write (*_capture_buf, to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		} else {

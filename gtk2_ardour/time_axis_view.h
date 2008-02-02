@@ -172,6 +172,9 @@ class TimeAxisView : public virtual AxisView
 	virtual ARDOUR::RouteGroup* edit_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
+	virtual void show_temporary_lines (const std::vector<nframes64_t>&);
+	virtual void hide_temporary_lines ();
+
 	virtual void set_samples_per_unit (double);
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
@@ -309,6 +312,8 @@ class TimeAxisView : public virtual AxisView
 
 	void set_height_pixels (uint32_t h);
 	void color_handler ();
+	list<ArdourCanvas::SimpleLine*> temp_lines;
+
 }; /* class TimeAxisView */
 
 #endif /* __ardour_gtk_time_axis_h__ */

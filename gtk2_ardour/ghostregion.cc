@@ -98,6 +98,7 @@ GhostRegion::set_colors ()
 
     for (uint32_t n=0; n < waves.size(); ++n) {
 	waves[n]->property_wave_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
+	waves[n]->property_fill_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
 
 	waves[n]->property_clip_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWaveClip.get();
 	waves[n]->property_zero_color() = ARDOUR_UI::config()->canvasvar_GhostTrackZeroLine.get();

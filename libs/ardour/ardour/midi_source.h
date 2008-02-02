@@ -49,8 +49,15 @@ class MidiSource : public Source
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 	
-	virtual nframes_t read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const;
-	virtual nframes_t write (MidiRingBuffer& src, nframes_t cnt);
+	/* Stub Readable interface */
+	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const { return 0; }
+	virtual nframes64_t readable_length() const { return length(); }
+	virtual uint32_t    n_channels () const { return 1; }
+	
+	// FIXME: integrate this with the Readable::read interface somehow
+	virtual nframes_t midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const;
+	virtual nframes_t midi_write (MidiRingBuffer& src, nframes_t cnt);
+
 	virtual void append_event_unlocked(const MidiEvent& ev) = 0;
 
 	virtual void mark_for_remove() = 0;

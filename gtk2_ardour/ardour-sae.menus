@@ -133,6 +133,9 @@
 			<menuitem action='cycle-edit-point'/>
 			<menuitem action='cycle-edit-point-with-marker'/>
 			<menuitem action='toggle-edit-mode'/>
+			<separator/>
+			<menuitem action='boost-region-gain'/>
+			<menuitem action='cut-region-gain'/>
 	 	</menu>
         </menu>         
 	<menu name='Regions' action='Regions'>
@@ -164,6 +167,8 @@
 		   <menuitem action='trim-region-to-punch'/>
                    <separator/>       
 		   <menuitem action='pitch-shift-region'/>
+		   <menuitem action='set-tempo-from-region'/>
+		   <menuitem action='set-tempo-from-edit-range'/>
 	</menu>
         <menu name='View' action = 'View'>
 	       <menuitem action='ToggleMaximalEditor'/>

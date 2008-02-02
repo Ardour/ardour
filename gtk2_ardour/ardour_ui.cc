@@ -610,8 +610,6 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
 
-	hide_splash ();
-
 	/* we just don't care about the result, but we want to block */
 
 	win.run ();
@@ -2208,6 +2206,7 @@ ARDOUR_UI::end_loading_messages ()
 void
 ARDOUR_UI::loading_message (const std::string& msg)
 {
+	cerr << "say: " << msg << endl;
 	show_splash ();
 	splash->message (msg);
 	flush_pending ();
@@ -2253,10 +2252,6 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 	new_session_dialog->set_current_page (0);
 	new_session_dialog->set_existing_session (existing_session);
 	new_session_dialog->reset_recent();
-
-	/* get this out of the way */
-
-	hide_splash ();
 
 	do {
 		new_session_dialog->set_have_engine (backend_audio_is_running);
@@ -2622,6 +2617,7 @@ ARDOUR_UI::show_splash ()
 	}
 
 	splash->show ();
+	splash->present ();
 	splash->queue_draw ();
 	splash->get_window()->process_updates (true);
 	flush_pending ();

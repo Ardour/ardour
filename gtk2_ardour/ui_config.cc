@@ -57,10 +57,39 @@ UIConfiguration::~UIConfiguration ()
 }
 
 int
+UIConfiguration::load_defaults ()
+{
+	int found = 0;
+	sys::path default_ui_rc_file;
+	
+	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),
+			"ardour3_ui_default.conf", default_ui_rc_file) )
+	{
+		XMLTree tree;
+		found = 1;
+
+		string rcfile = default_ui_rc_file.to_string();
+
+		cerr << string_compose (_("loading default ui configuration file %1"), rcfile) << endl;
+		
+		if (!tree.read (rcfile.c_str())) {
+			error << string_compose(_("Ardour: cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
+			return -1;
+		}
+
+		if (set_state (*tree.root())) {
+			error << string_compose(_("Ardour: default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+			return -1;
+		}
+	}
+	return found;
+}
+	
+int
 UIConfiguration::load_state ()
 {
 	bool found = false;
-
+	
 	sys::path default_ui_rc_file;
 	
 	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),

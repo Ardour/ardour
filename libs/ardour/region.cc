@@ -99,7 +99,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 }
 
 /** Basic Region constructor (many sources) */
-Region::Region (SourceList& srcs, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
+Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: Automatable(srcs.front()->session(), name)
 	, _type(type)
 	, _flags(flags)
@@ -117,13 +117,13 @@ Region::Region (SourceList& srcs, nframes_t start, nframes_t length, const strin
 	
 	set<boost::shared_ptr<Source> > unique_srcs;
 
-	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
+	for (SourceList::const_iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		_sources.push_back (*i);
 		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		unique_srcs.insert (*i);
 	}
 
-	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
+	for (SourceList::const_iterator i = srcs.begin(); i != srcs.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
 			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
@@ -222,7 +222,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	assert(_sources.size() > 0);
 }
 
-Region::Region (SourceList& srcs, const XMLNode& node)
+Region::Region (const SourceList& srcs, const XMLNode& node)
 	: Automatable(srcs.front()->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL) // to be loaded from XML
 	, _flags(Flag(0))
@@ -239,13 +239,13 @@ Region::Region (SourceList& srcs, const XMLNode& node)
 {
 	set<boost::shared_ptr<Source> > unique_srcs;
 
-	for (SourceList::iterator i=srcs.begin(); i != srcs.end(); ++i) {
+	for (SourceList::const_iterator i=srcs.begin(); i != srcs.end(); ++i) {
 		_sources.push_back (*i);
 		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
 		unique_srcs.insert (*i);
 	}
 
-	for (SourceList::iterator i = srcs.begin(); i != srcs.end(); ++i) {
+	for (SourceList::const_iterator i = srcs.begin(); i != srcs.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
 			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
@@ -974,9 +974,9 @@ Region::state (bool full_state)
 	node->add_property ("length", buf);
 	snprintf (buf, sizeof (buf), "%u", _position);
 	node->add_property ("position", buf);
-	snprintf (buf, sizeof (buf), "%lu", _ancestral_start);
+	snprintf (buf, sizeof (buf), "%Ld", _ancestral_start);
 	node->add_property ("ancestral-start", buf);
-	snprintf (buf, sizeof (buf), "%lu", _ancestral_length);
+	snprintf (buf, sizeof (buf), "%Ld", _ancestral_length);
 	node->add_property ("ancestral-length", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _stretch);
 	node->add_property ("stretch", buf);

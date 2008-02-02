@@ -44,6 +44,9 @@
                <menuitem action='GotoStart'/>
                <menuitem action='GotoEnd'/>
 	       <separator/>
+               <menuitem action='tab-to-transient-forwards'/>
+               <menuitem action='tab-to-transient-backwards'/>
+	       <separator/>
                <menuitem action='Record'/>
                <separator/> 
                <menuitem action='TransitionToRoll'/>
@@ -161,6 +164,7 @@
                    <menuitem action='select-prev-route'/>
 	</menu>
 	<menu name='Regions' action='Regions'>
+                   <menuitem action='split-region-at-transients'/>
                    <menuitem action='crop'/>
                    <menuitem action='duplicate-region'/>
                    <menuitem action='multi-duplicate-region'/>
@@ -194,6 +198,8 @@
 		   <menuitem action='trim-region-to-punch'/>
 		   <separator/>
 		   <menuitem action='pitch-shift-region'/>
+		   <menuitem action='set-tempo-from-region'/>
+		   <menuitem action='set-tempo-from-edit-range'/>
 	</menu>
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>
@@ -302,6 +308,7 @@
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
                <menuitem action='ToggleBundleManager'/>
+               <menuitem action='toggle-rhythm-ferret'/>
    	       <separator/>
         </menu>
         <menu name='Options' action='Options'>

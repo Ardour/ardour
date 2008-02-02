@@ -20,6 +20,9 @@ mackie.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 mackie.Append(PACKAGE = domain)
 mackie.Append(POTFILE = domain + '.pot')
 
+if mackie['IS_OSX']:
+    mackie.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 mackie_files=Split("""
 interface.cc
 midi_byte_array.cc

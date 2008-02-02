@@ -65,7 +65,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nfra
 }
 
 /* Basic MidiRegion constructor (many channels) */
-MidiRegion::MidiRegion (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
+MidiRegion::MidiRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
@@ -100,7 +100,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 	assert(_type == DataType::MIDI);
 }
 
-MidiRegion::MidiRegion (SourceList& srcs, const XMLNode& node)
+MidiRegion::MidiRegion (const SourceList& srcs, const XMLNode& node)
 	: Region (srcs, node)
 {
 	if (set_state (node)) {
@@ -171,7 +171,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t pos
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
 
-	if (src->read (dst, _start + internal_offset, to_read, _position) != to_read) {
+	if (src->midi_read (dst, _start + internal_offset, to_read, _position) != to_read) {
 		return 0; /* "read nothing" */
 	}
 

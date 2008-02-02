@@ -83,6 +83,7 @@
 #include "sfdb_ui.h"
 #include "gui_thread.h"
 #include "simpleline.h"
+#include "rhythm_ferret.h"
 
 #ifdef FFT_ANALYSIS
 #include "analysis_window.h"
@@ -341,6 +342,7 @@ Editor::Editor ()
 	_dragging_hscrollbar = false;
 	select_new_marker = false;
 	zoomed_to_region = false;
+	rhythm_ferret = 0;
 
 	scrubbing_direction = 0;
 
@@ -1189,6 +1191,10 @@ Editor::connect_to_session (Session *t)
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
+
+	if (rhythm_ferret) {
+		rhythm_ferret->set_session (session);
+	}
 
 #ifdef FFT_ANALYSIS
 	if (analysis_window != 0)
@@ -3297,26 +3303,32 @@ Editor::duplicate_dialog (bool with_dialog)
 
 	if (with_dialog) {
 
-		ArdourDialog win ("duplicate dialog");
-		Label  label (_("Duplicate how many times?"));
+		ArdourDialog win ("Duplication Dialog");
+		Label  label (_("Number of Duplications:"));
 		Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
-		SpinButton spinner (adjustment);
+		SpinButton spinner (adjustment, 0.0, 1);
+		HBox hbox;
 		
 		win.get_vbox()->set_spacing (12);
-		win.get_vbox()->pack_start (label);
+		win.get_vbox()->pack_start (hbox);
+		hbox.set_border_width (6);
+		hbox.pack_start (label, PACK_EXPAND_PADDING, 12);
 		
 		/* dialogs have ::add_action_widget() but that puts the spinner in the wrong
 		   place, visually. so do this by hand.
 		*/
 		
-		win.get_vbox()->pack_start (spinner);
+		hbox.pack_start (spinner, PACK_EXPAND_PADDING, 12);
 		spinner.signal_activate().connect (sigc::bind (mem_fun (win, &ArdourDialog::response), RESPONSE_ACCEPT));
-		
+		spinner.grab_focus();
+
+		hbox.show ();
 		label.show ();
 		spinner.show ();
 		
-		win.add_button (Stock::OK, RESPONSE_ACCEPT);
 		win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		win.add_button (_("Duplicate"), RESPONSE_ACCEPT);
+		win.set_default_response (RESPONSE_ACCEPT);
 		
 		win.set_position (WIN_POS_MOUSE);
 		
@@ -4587,3 +4599,15 @@ Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<R
 		}
 	}
 }	
+
+void
+Editor::show_rhythm_ferret ()
+{
+	if (rhythm_ferret == 0) {
+		rhythm_ferret = new RhythmFerret(*this);
+	}
+
+	rhythm_ferret->set_session (session);
+	rhythm_ferret->show ();
+	rhythm_ferret->present ();
+}

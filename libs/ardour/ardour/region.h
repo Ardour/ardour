@@ -29,6 +29,7 @@
 #include <ardour/ardour.h>
 #include <ardour/data_type.h>
 #include <ardour/automatable.h>
+#include <ardour/readable.h>
 
 class XMLNode;
 
@@ -43,7 +44,7 @@ enum RegionEditState {
 	EditChangesID      = 2
 };
 
-class Region : public Automatable, public boost::enable_shared_from_this<Region>
+class Region : public Automatable, public boost::enable_shared_from_this<Region>, public Readable
 {
   public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
@@ -217,13 +218,13 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 
 	Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, 
 		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	Region (SourceList& srcs, nframes_t start, nframes_t length, 
+	Region (const SourceList& srcs, nframes_t start, nframes_t length, 
 		const string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
 	
 	Region (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (boost::shared_ptr<const Region>);
 	Region (boost::shared_ptr<Source> src, const XMLNode&);
-	Region (SourceList& srcs, const XMLNode&);
+	Region (const SourceList& srcs, const XMLNode&);
 
 	/* this one is for derived types of derived types */
 

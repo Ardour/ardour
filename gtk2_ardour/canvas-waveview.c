@@ -368,10 +368,10 @@ gnome_canvas_waveview_init (GnomeCanvasWaveView *waveview)
 	waveview->screen_width = gdk_screen_width ();
 	waveview->reload_cache_in_render = FALSE;
 
- 	waveview->wave_color = RGBA_TO_UINT(44,35,126,255);
- 	waveview->clip_color = RGBA_TO_UINT(44,0,0,100);
- 	waveview->zero_color = RGBA_TO_UINT(44,0,128,100);
- 	waveview->fill_color = RGBA_TO_UINT(44,35,126,128);
+ 	waveview->wave_color = 0;
+ 	waveview->clip_color = 0;
+ 	waveview->zero_color = 0;
+ 	waveview->fill_color = 0;
 }
 
 static void

@@ -30,13 +30,14 @@
 #include <ardour/ardour.h>
 #include <ardour/session_object.h>
 #include <ardour/data_type.h>
+#include <ardour/readable.h>
 
 namespace ARDOUR {
 
 class Session;
 class Playlist;
 
-class Source : public SessionObject
+class Source : public SessionObject, public ARDOUR::Readable
 {
   public:
 	Source (Session&, const std::string& name, DataType type);

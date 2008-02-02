@@ -107,6 +107,7 @@ class StreamView;
 class AudioStreamView;
 class ControlPoint;
 class SoundFileOmega;
+class RhythmFerret;
 #ifdef FFT_ANALYSIS
 class AnalysisWindow;
 #endif
@@ -370,6 +371,8 @@ class Editor : public PublicEditor
 	bool decelerate_mouse_speed ();
 
 	void toggle_meter_updating();
+
+	void show_rhythm_ferret();
 
   protected:
 	void map_transport_state ();
@@ -1024,6 +1027,8 @@ class Editor : public PublicEditor
 	void split_region ();
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
+	void split_region_at_transients ();
+	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, std::vector<nframes64_t>&);
 	void crop_region_to_selection ();
 	void crop_region_to (nframes_t start, nframes_t end);
 	void set_sync_point (nframes64_t, const RegionSelection&);
@@ -1050,6 +1055,13 @@ class Editor : public PublicEditor
 	void denormalize_region ();
 	void adjust_region_scale_amplitude (bool up);
 	void quantize_region ();
+
+	void tab_to_transient (bool forward);
+
+	void use_region_as_bar ();
+	void use_range_as_bar ();
+
+	void define_one_bar (nframes64_t start, nframes64_t end);
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
@@ -2164,6 +2176,8 @@ class Editor : public PublicEditor
 
 	void select_next_route ();
 	void select_prev_route ();
+
+	RhythmFerret* rhythm_ferret;
 };
 
 #endif /* __ardour_editor_h__ */

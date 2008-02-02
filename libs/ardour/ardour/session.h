@@ -261,6 +261,9 @@ class Session : public PBD::StatefulDestructible
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
 	std::string automation_dir () const;
+	std::string analysis_dir() const;
+	
+	int ensure_subdirs ();
 
 	Glib::ustring peak_path (Glib::ustring) const;
 

@@ -38,6 +38,7 @@
 #include <ardour/plugin.h>
 #include <ardour/plugin_insert.h>
 #include <ardour/ladspa_plugin.h>
+#include <ardour/lv2_plugin.h>
 
 #include <lrdf.h>
 
@@ -384,6 +385,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 	if (plugin->parameter_is_input (port_index)) {
 
 		boost::shared_ptr<LadspaPlugin> lp;
+		boost::shared_ptr<LV2Plugin> lv2p;
 
 		if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
 			
@@ -404,6 +406,26 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				update_control_display(control_ui);
 				
 				lrdf_free_setting_values(defaults);
+				return control_ui;
+			}
+
+		} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
+
+			SLV2Port port = lv2p->slv2_port(port_index);
+			SLV2ScalePoints points = slv2_port_get_scale_points(lv2p->slv2_plugin(), port);
+
+			if (points) {
+				control_ui->combo = new Gtk::ComboBoxText;
+				//control_ui->combo->set_value_in_list(true, false);
+				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
+				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
+				mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
+				control_ui->pack_start(control_ui->label, true, true);
+				control_ui->pack_start(*control_ui->combo, false, true);
+				
+				update_control_display(control_ui);
+				
+				slv2_scale_points_free(points);
 				return control_ui;
 			}
 		}
@@ -734,26 +756,49 @@ vector<string>
 GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 {
 	vector<string> enums;
-	boost::shared_ptr<LadspaPlugin> lp = boost::dynamic_pointer_cast<LadspaPlugin> (plugin);
+	boost::shared_ptr<LadspaPlugin> lp;
+	boost::shared_ptr<LV2Plugin> lv2p;
 
-	cui->combo_map = new std::map<string, float>;
-			
-	// FIXME: not all plugins have a numeric unique ID
-	uint32_t id = atol (lp->unique_id().c_str());
-	lrdf_defaults* defaults = lrdf_get_scale_values(id, port_index);
+	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
+		// all LADPSA plugins have a numeric unique ID
+		uint32_t id = atol (lp->unique_id().c_str());
 
-	if (defaults)	{
-		for (uint32_t i = 0; i < defaults->count; ++i) {
-			enums.push_back(defaults->items[i].label);
-			pair<string, float> newpair;
-			newpair.first = defaults->items[i].label;
-			newpair.second = defaults->items[i].value;
-			cui->combo_map->insert(newpair);
+		cui->combo_map = new std::map<string, float>;
+		lrdf_defaults* defaults = lrdf_get_scale_values(id, port_index);
+		if (defaults)	{
+			for (uint32_t i = 0; i < defaults->count; ++i) {
+				enums.push_back(defaults->items[i].label);
+				pair<string, float> newpair;
+				newpair.first = defaults->items[i].label;
+				newpair.second = defaults->items[i].value;
+				cui->combo_map->insert(newpair);
+			}
+
+			lrdf_free_setting_values(defaults);
 		}
 
-		lrdf_free_setting_values(defaults);
+	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
+
+		SLV2Port port = lv2p->slv2_port(port_index);
+		SLV2ScalePoints points = slv2_port_get_scale_points(lv2p->slv2_plugin(), port);
+		cui->combo_map = new std::map<string, float>;
+	
+		for (unsigned i=0; i < slv2_scale_points_size(points); ++i) {
+			SLV2ScalePoint p = slv2_scale_points_get_at(points, i);
+			SLV2Value label = slv2_scale_point_get_label(p);
+			SLV2Value value = slv2_scale_point_get_value(p);
+			if (label && (slv2_value_is_float(value) || slv2_value_is_int(value))) {
+				enums.push_back(slv2_value_as_string(label));
+				pair<string, float> newpair;
+				newpair.first = slv2_value_as_string(label);
+				newpair.second = slv2_value_as_float(value);
+				cui->combo_map->insert(newpair);
+			}
+		}
+
+		slv2_scale_points_free(points);
 	}
+	
 
 	return enums;
 }
-

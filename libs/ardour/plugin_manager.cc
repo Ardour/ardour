@@ -110,8 +110,7 @@ PluginManager::PluginManager ()
 	} 
 
 #ifdef HAVE_SLV2
-	_lv2_world = slv2_world_new();
-	slv2_world_load_all(_lv2_world);
+	_lv2_world = new LV2World();
 #endif
 
 	refresh ();

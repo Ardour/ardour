@@ -982,10 +982,12 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 		
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
 			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
+			(*i)->property_fill_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
 		}
 
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
 			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorWave.get();
+			(*i)->property_fill_color() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorWave.get();
 		}
 
 		fade[In].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorLine.get();
@@ -1005,10 +1007,12 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
 			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorWave.get();
+			(*i)->property_fill_color() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorWave.get();
 		}
 
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[Out].waves.begin(); i != fade[Out].waves.end(); ++i) {
 			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
+			(*i)->property_fill_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
 		}
 
 		fade[Out].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorLine.get();
@@ -1084,6 +1088,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 			waveview->property_samples_per_unit() = spu;
 			waveview->property_amplitude_above_axis() = 2.0;
 			waveview->property_wave_color() = color;
+			waveview->property_fill_color() = color;
 			
 			if (which==In)
 				waveview->property_region_start() = region->start();

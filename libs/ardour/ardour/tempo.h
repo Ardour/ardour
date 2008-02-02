@@ -109,6 +109,9 @@ class MetricSection {
   public:
 	MetricSection (const BBT_Time& start)
 		: _start (start), _frame (0), _movable (true) {}
+	MetricSection (nframes_t start)
+		: _frame (start), _movable (true) {}
+
 	virtual ~MetricSection() {}
 
 	const BBT_Time& start() const { return _start; }
@@ -142,6 +145,8 @@ class MeterSection : public MetricSection, public Meter {
   public:
 	MeterSection (const BBT_Time& start, double bpb, double note_type)
 		: MetricSection (start), Meter (bpb, note_type) {}
+	MeterSection (nframes_t start, double bpb, double note_type)
+		: MetricSection (start), Meter (bpb, note_type) {}
 	MeterSection (const XMLNode&);
 
 	static const string xml_state_node_name;
@@ -152,6 +157,8 @@ class MeterSection : public MetricSection, public Meter {
 class TempoSection : public MetricSection, public Tempo {
   public:
 	TempoSection (const BBT_Time& start, double qpm, double note_type)
+		: MetricSection (start), Tempo (qpm, note_type) {}
+	TempoSection (nframes_t start, double qpm, double note_type)
 		: MetricSection (start), Tempo (qpm, note_type) {}
 	TempoSection (const XMLNode&);
 
@@ -165,7 +172,6 @@ typedef list<MetricSection*> Metrics;
 class TempoMap : public PBD::StatefulDestructible
 {
   public:
-
 	TempoMap (nframes_t frame_rate);
 	~TempoMap();
 
@@ -207,8 +213,13 @@ class TempoMap : public PBD::StatefulDestructible
 	const Tempo& tempo_at (nframes_t);
 	const Meter& meter_at (nframes_t);
 
+	const TempoSection& tempo_section_at (nframes_t);
+
 	void add_tempo(const Tempo&, BBT_Time where);
 	void add_meter(const Meter&, BBT_Time where);
+
+	void add_tempo(const Tempo&, nframes_t where);
+	void add_meter(const Meter&, nframes_t where);
 
 	void move_tempo (TempoSection&, const BBT_Time& to);
 	void move_meter (MeterSection&, const BBT_Time& to);
@@ -267,6 +278,8 @@ class TempoMap : public PBD::StatefulDestructible
 	Metric metric_at (nframes_t) const;
         void bbt_time_with_metric (nframes_t, BBT_Time&, const Metric&) const;
 
+	void change_existing_tempo_at (nframes_t, double bpm, double note_type);
+
 	sigc::signal<void,ARDOUR::Change> StateChanged;
 
   private:
@@ -280,8 +293,7 @@ class TempoMap : public PBD::StatefulDestructible
 	BBT_Time            last_bbt;
 	mutable Glib::RWLock    lock;
 	
-	void timestamp_metrics ();
-
+	void timestamp_metrics (bool use_bbt);
 
 	nframes_t round_to_type (nframes_t fr, int dir, BBTPointType);
 
@@ -298,7 +310,7 @@ class TempoMap : public PBD::StatefulDestructible
 	nframes_t count_frames_between_metrics (const Meter&, const Tempo&, const BBT_Time&, const BBT_Time&) const;
 
 	int move_metric_section (MetricSection&, const BBT_Time& to);
-	void do_insert (MetricSection* section);
+	void do_insert (MetricSection* section, bool with_bbt);
 };
 
 }; /* namespace ARDOUR */

@@ -38,7 +38,7 @@ ResampledImportableSource::ResampledImportableSource (const std::string& path,
 	
 	/* Initialize the sample rate converter. */
 	
-	int src_type;
+	int src_type = SRC_LINEAR;
 
 	switch (srcq) {
 	case SrcBest:

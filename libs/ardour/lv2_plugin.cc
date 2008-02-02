@@ -43,16 +43,18 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, SLV2Plugin plugin, nframes_t rate)
+LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	: Plugin (e, session)
+	, _world(world)
 {
-	init (plugin, rate);
+	init (world, plugin, rate);
 }
 
 LV2Plugin::LV2Plugin (const LV2Plugin &other)
 	: Plugin (other)
+	, _world(other._world)
 {
-	init (other._plugin, other._sample_rate);
+	init (other._world, other._plugin, other._sample_rate);
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		_control_data[i] = other._shadow_data[i];
@@ -61,24 +63,30 @@ LV2Plugin::LV2Plugin (const LV2Plugin &other)
 }
 
 void
-LV2Plugin::init (SLV2Plugin plugin, nframes_t rate)
+LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 {
+	_world = world;
 	_plugin = plugin;
-	_template = slv2_plugin_get_template(plugin);
 	_control_data = 0;
 	_shadow_data = 0;
 	_latency_control_port = 0;
 	_was_activated = false;
 
 	_instance = slv2_plugin_instantiate(plugin, rate, NULL);
+	_name = slv2_plugin_get_name(plugin);
+	assert(_name);
+	_author = slv2_plugin_get_author_name(plugin);
 
 	if (_instance == 0) {
 		error << _("LV2: Failed to instantiate plugin ") << slv2_plugin_get_uri(plugin) << endl;
 		throw failed_constructor();
 	}
 
-	if (slv2_plugin_has_feature(plugin, "http://lv2plug.in/ns/lv2core#inPlaceBroken")) {
-		error << string_compose(_("LV2: \"%1\" cannot be used, since it cannot do inplace processing"), slv2_plugin_get_name(plugin)) << endmsg;
+	if (slv2_plugin_has_feature(plugin, world.in_place_broken)) {
+		error << string_compose(_("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
+				slv2_value_as_string(_name));
+		slv2_value_free(_name);
+		slv2_value_free(_author);
 		throw failed_constructor();
 	}
 
@@ -88,14 +96,21 @@ LV2Plugin::init (SLV2Plugin plugin, nframes_t rate)
 
 	_control_data = new float[num_ports];
 	_shadow_data = new float[num_ports];
+	_defaults = new float[num_ports];
 
 	const bool latent = slv2_plugin_has_latency(plugin);
-	uint32_t latency_port = (latent ? slv2_plugin_get_latency_port(plugin) : 0);
+	uint32_t latency_port = (latent ? slv2_plugin_get_latency_port_index(plugin) : 0);
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		if (parameter_is_control(i)) {
+			SLV2Port port = slv2_plugin_get_port_by_index(plugin, i);
+			SLV2Value def;
+			slv2_port_get_range(plugin, port, &def, NULL, NULL);
+			_defaults[i] = def ? slv2_value_as_float(def) : 0.0f;
+			slv2_value_free(def);
+
 			slv2_instance_connect_port (_instance, i, &_control_data[i]);
-			
+
 			if (latent && i == latency_port) {
 				_latency_control_port = &_control_data[i];
 				*_latency_control_port = 0;
@@ -104,6 +119,8 @@ LV2Plugin::init (SLV2Plugin plugin, nframes_t rate)
 			if (parameter_is_input(i)) {
 				_shadow_data[i] = default_value (i);
 			}
+		} else {
+			_defaults[i] = 0.0f;
 		}
 	}
 
@@ -118,6 +135,8 @@ LV2Plugin::~LV2Plugin ()
 	GoingAway (); /* EMIT SIGNAL */
 	
 	slv2_instance_free(_instance);
+	slv2_value_free(_name);
+	slv2_value_free(_author);
 
 	if (_control_data) {
 		delete [] _control_data;
@@ -131,15 +150,14 @@ LV2Plugin::~LV2Plugin ()
 string
 LV2Plugin::unique_id() const
 {
-	return slv2_plugin_get_uri(_plugin);
+	return slv2_value_as_uri(slv2_plugin_get_uri(_plugin));
 }
 
 
 float
 LV2Plugin::default_value (uint32_t port)
 {
-	return slv2_port_get_default_value(_plugin,
-			slv2_plugin_get_port_by_index(_plugin, port));
+	return _defaults[port];
 }	
 
 void
@@ -276,15 +294,16 @@ LV2Plugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 {
 	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, which);
 
-	#define LV2_URI "http://lv2plug.in/ns/lv2core#"
+	SLV2Value def, min, max;
+	slv2_port_get_range(_plugin, port, &def, &min, &max);
 	
-    desc.integer_step = slv2_port_has_property(_plugin, port, LV2_URI "integer");
-    desc.toggled = slv2_port_has_property(_plugin, port, LV2_URI "toggled");
+    desc.integer_step = slv2_port_has_property(_plugin, port, _world.integer);
+    desc.toggled = slv2_port_has_property(_plugin, port, _world.toggled);
     desc.logarithmic = false; // TODO (LV2 extension)
-    desc.sr_dependent = slv2_port_has_property(_plugin, port, LV2_URI "sampleRate");
-    desc.label = slv2_port_get_name(_plugin, port);
-    desc.lower = slv2_port_get_minimum_value(_plugin, port);
-    desc.upper = slv2_port_get_maximum_value(_plugin, port);
+    desc.sr_dependent = slv2_port_has_property(_plugin, port, _world.srate);
+    desc.label = slv2_value_as_string(slv2_port_get_name(_plugin, port));
+    desc.lower = min ? slv2_value_as_float(min) : 0.0f;
+    desc.upper = max ? slv2_value_as_float(max) : 1.0f;
     desc.min_unbound = false; // TODO (LV2 extension)
     desc.max_unbound = false; // TODO (LV2 extension)
 	
@@ -299,6 +318,10 @@ LV2Plugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.largestep = delta/10.0f;
 	}
 
+	slv2_value_free(def);
+	slv2_value_free(min);
+	slv2_value_free(max);
+
 	return 0;
 }
 
@@ -307,8 +330,11 @@ string
 LV2Plugin::describe_parameter (Parameter which)
 {
 	if (which.type() == PluginAutomation && which.id() < parameter_count()) {
-		return slv2_port_get_name(_plugin,
-				slv2_plugin_get_port_by_index(_plugin, which));
+		SLV2Value name = slv2_port_get_name(_plugin,
+			slv2_plugin_get_port_by_index(_plugin, which));
+		string ret(slv2_value_as_string(name));
+		slv2_value_free(name);
+		return ret;
 	} else {
 		return "??";
 	}
@@ -377,29 +403,29 @@ LV2Plugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_i
 bool
 LV2Plugin::parameter_is_control (uint32_t param) const
 {
-	SLV2PortSignature sig = slv2_template_get_port(_template, param);
-	return (slv2_port_signature_get_type(sig) == SLV2_PORT_DATA_TYPE_CONTROL);
+	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, param);
+	return slv2_port_is_a(_plugin, port, _world.control_class);
 }
 
 bool
 LV2Plugin::parameter_is_audio (uint32_t param) const
 {
-	SLV2PortSignature sig = slv2_template_get_port(_template, param);
-	return (slv2_port_signature_get_type(sig) == SLV2_PORT_DATA_TYPE_AUDIO);
+	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, param);
+	return slv2_port_is_a(_plugin, port, _world.audio_class);
 }
 
 bool
 LV2Plugin::parameter_is_output (uint32_t param) const
 {
-	SLV2PortSignature sig = slv2_template_get_port(_template, param);
-	return (slv2_port_signature_get_direction(sig) == SLV2_PORT_DIRECTION_OUTPUT);
+	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, param);
+	return slv2_port_is_a(_plugin, port, _world.output_class);
 }
 
 bool
 LV2Plugin::parameter_is_input (uint32_t param) const
 {
-	SLV2PortSignature sig = slv2_template_get_port(_template, param);
-	return (slv2_port_signature_get_direction(sig) == SLV2_PORT_DIRECTION_INPUT);
+	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, param);
+	return slv2_port_is_a(_plugin, port, _world.input_class);
 }
 
 void
@@ -418,9 +444,7 @@ void
 LV2Plugin::run (nframes_t nframes)
 {
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
-		SLV2PortSignature sig = slv2_template_get_port(_template, i);
-		if (slv2_port_signature_get_type(sig) == SLV2_PORT_DATA_TYPE_CONTROL
-				&& slv2_port_signature_get_direction(sig) == SLV2_PORT_DIRECTION_INPUT) {
+		if (parameter_is_control(i) && parameter_is_input(i))  {
 			_control_data[i] = _shadow_data[i];
 		}
 	}
@@ -472,8 +496,34 @@ LV2Plugin::latency_compute_run ()
 	deactivate ();
 }
 
-LV2PluginInfo::LV2PluginInfo (void* slv2_plugin)
-	: _slv2_plugin(slv2_plugin)
+LV2World::LV2World()
+	: world(slv2_world_new())
+{
+	slv2_world_load_all(world);
+	input_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_INPUT);
+	output_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_OUTPUT);
+	control_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_CONTROL);
+	audio_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_AUDIO);
+	event_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_EVENT);
+	in_place_broken = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "inPlaceBroken");
+	integer = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
+	toggled = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
+	srate = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
+}
+
+LV2World::~LV2World()
+{
+	slv2_value_free(input_class);
+	slv2_value_free(output_class);
+	slv2_value_free(control_class);
+	slv2_value_free(audio_class);
+	slv2_value_free(event_class);
+	slv2_value_free(in_place_broken);
+}
+
+LV2PluginInfo::LV2PluginInfo (void* lv2_world, void* slv2_plugin)
+	: _lv2_world(lv2_world)
+	, _slv2_plugin(slv2_plugin)
 {
 }
 
@@ -484,12 +534,11 @@ LV2PluginInfo::~LV2PluginInfo()
 PluginPtr
 LV2PluginInfo::load (Session& session)
 {
-	SLV2Plugin p = (SLV2Plugin)_slv2_plugin;
-	
 	try {
 		PluginPtr plugin;
 
-		plugin.reset (new LV2Plugin (session.engine(), session, p, session.frame_rate()));
+		plugin.reset (new LV2Plugin (session.engine(), session,
+				*(LV2World*)_lv2_world, (SLV2Plugin)_slv2_plugin, session.frame_rate()));
 
 		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(*this)));
 		return plugin;
@@ -503,40 +552,42 @@ LV2PluginInfo::load (Session& session)
 }
 
 PluginInfoList
-LV2PluginInfo::discover (void* slv2_world)
+LV2PluginInfo::discover (void* lv2_world)
 {
 	PluginInfoList plugs;
 	
-	SLV2Plugins plugins = slv2_world_get_all_plugins((SLV2World)slv2_world);
+	LV2World* world = (LV2World*)lv2_world;
+	SLV2Plugins plugins = slv2_world_get_all_plugins(world->world);
 
 	for (unsigned i=0; i < slv2_plugins_size(plugins); ++i) {
 		SLV2Plugin p = slv2_plugins_get_at(plugins, i);
-		LV2PluginInfoPtr info (new LV2PluginInfo(p));
+		LV2PluginInfoPtr info (new LV2PluginInfo(lv2_world, p));
 
-		info->name = slv2_plugin_get_name(p);
+		SLV2Value name = slv2_plugin_get_name(p);
+		info->name = string(slv2_value_as_string(name));
+		slv2_value_free(name);
 
 		SLV2PluginClass pclass = slv2_plugin_get_class(p);
-		info->category = slv2_plugin_class_get_label(pclass);
+		SLV2Value label = slv2_plugin_class_get_label(pclass);
+		info->category = slv2_value_as_string(label);
 
-		char* author_name = slv2_plugin_get_author_name(p);
-		info->creator = author_name ? string(author_name) : "Unknown";
-		free(author_name);
+		SLV2Value author_name = slv2_plugin_get_author_name(p);
+		info->creator = author_name ? string(slv2_value_as_string(author_name)) : "Unknown";
+		slv2_value_free(author_name);
 
 		info->path = "/NOPATH"; // Meaningless for LV2
 
-		SLV2Template io = slv2_plugin_get_template(p);
-
-		info->n_inputs.set_audio(slv2_template_get_num_ports_of_type(io,
-				SLV2_PORT_DIRECTION_INPUT, SLV2_PORT_DATA_TYPE_AUDIO));
-		info->n_outputs.set_audio(slv2_template_get_num_ports_of_type(io,
-				SLV2_PORT_DIRECTION_OUTPUT, SLV2_PORT_DATA_TYPE_AUDIO));
+		info->n_inputs.set_audio(slv2_plugin_get_num_ports_of_class(p,
+				world->input_class, world->audio_class, NULL));
+		info->n_inputs.set_midi(slv2_plugin_get_num_ports_of_class(p,
+				world->input_class, world->event_class, NULL));
 		
-		info->n_inputs.set_midi(slv2_template_get_num_ports_of_type(io,
-				SLV2_PORT_DIRECTION_INPUT, SLV2_PORT_DATA_TYPE_MIDI));
-		info->n_outputs.set_midi(slv2_template_get_num_ports_of_type(io,
-				SLV2_PORT_DIRECTION_OUTPUT, SLV2_PORT_DATA_TYPE_MIDI));
+		info->n_outputs.set_audio(slv2_plugin_get_num_ports_of_class(p,
+				world->output_class, world->audio_class, NULL));
+		info->n_outputs.set_midi(slv2_plugin_get_num_ports_of_class(p,
+				world->output_class, world->event_class, NULL));
 
-		info->unique_id = slv2_plugin_get_uri(p);
+		info->unique_id = slv2_value_as_uri(slv2_plugin_get_uri(p));
 		info->index = 0; // Meaningless for LV2
 		
 		plugs.push_back (info);

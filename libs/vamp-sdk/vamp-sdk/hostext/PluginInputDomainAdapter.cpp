@@ -38,6 +38,28 @@
 
 #include <cmath>
 
+
+/**
+ * If you want to compile using FFTW instead of the built-in FFT
+ * implementation for the PluginInputDomainAdapter, define HAVE_FFTW3
+ * in the Makefile.
+ *
+ * Remember that FFTW is licensed under the GPL (unlike this SDK, which
+ * is licensed liberally in order to permit closed-source usage), so
+ * you should not define this symbol unless your code is also under the
+ * GPL.  Also, parties redistributing this SDK for use in other
+ * programs should be careful _not_ to define this symbol in order not
+ * to affect the stated license of this SDK.
+ * 
+ * Note: This code uses FFTW_MEASURE, and will perform badly on its
+ * first invocation unless the host has saved and restored FFTW wisdom
+ * (see the FFTW documentation).
+ */
+#ifdef HAVE_FFTW3
+#include <fftw3.h>
+#endif
+
+
 namespace Vamp {
 
 namespace HostExt {
@@ -58,15 +80,22 @@ public:
 protected:
     Plugin *m_plugin;
     float m_inputSampleRate;
-    size_t m_channels;
-    size_t m_blockSize;
+    int m_channels;
+    int m_blockSize;
     float **m_freqbuf;
+
     double *m_ri;
+    double *m_window;
+
+#ifdef HAVE_FFTW3
+    fftw_plan m_plan;
+    fftw_complex *m_cbuf;
+#else
     double *m_ro;
     double *m_io;
-
     void fft(unsigned int n, bool inverse,
              double *ri, double *ii, double *ro, double *io);
+#endif
 
     size_t makeBlockSizeAcceptable(size_t) const;
 };
@@ -112,12 +141,21 @@ PluginInputDomainAdapter::process(const float *const *inputBuffers, RealTime tim
     return m_impl->process(inputBuffers, timestamp);
 }
 
-    PluginInputDomainAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
+PluginInputDomainAdapter::Impl::Impl(Plugin *plugin, float inputSampleRate) :
     m_plugin(plugin),
     m_inputSampleRate(inputSampleRate),
     m_channels(0),
     m_blockSize(0),
-    m_freqbuf(0)
+    m_freqbuf(0),
+    m_ri(0),
+    m_window(0),
+#ifdef HAVE_FFTW3
+    m_plan(0),
+    m_cbuf(0)
+#else
+    m_ro(0),
+    m_io(0)
+#endif
 {
 }
 
@@ -126,23 +164,38 @@ PluginInputDomainAdapter::Impl::~Impl()
     // the adapter will delete the plugin
 
     if (m_channels > 0) {
-        for (size_t c = 0; c < m_channels; ++c) {
+        for (int c = 0; c < m_channels; ++c) {
             delete[] m_freqbuf[c];
         }
         delete[] m_freqbuf;
+#ifdef HAVE_FFTW3
+        if (m_plan) {
+            fftw_destroy_plan(m_plan);
+            fftw_free(m_ri);
+            fftw_free(m_cbuf);
+            m_plan = 0;
+        }
+#else
         delete[] m_ri;
         delete[] m_ro;
         delete[] m_io;
+#endif
+        delete[] m_window;
     }
 }
+
+// for some visual studii apparently
+#ifndef M_PI
+#define M_PI 3.14159265358979232846
+#endif
     
 bool
 PluginInputDomainAdapter::Impl::initialise(size_t channels, size_t stepSize, size_t blockSize)
 {
     if (m_plugin->getInputDomain() == TimeDomain) {
 
-        m_blockSize = blockSize;
-        m_channels = channels;
+        m_blockSize = int(blockSize);
+        m_channels = int(channels);
 
         return m_plugin->initialise(channels, stepSize, blockSize);
     }
@@ -158,25 +211,48 @@ PluginInputDomainAdapter::Impl::initialise(size_t channels, size_t stepSize, siz
     }
 
     if (m_channels > 0) {
-        for (size_t c = 0; c < m_channels; ++c) {
+        for (int c = 0; c < m_channels; ++c) {
             delete[] m_freqbuf[c];
         }
         delete[] m_freqbuf;
+#ifdef HAVE_FFTW3
+        if (m_plan) {
+            fftw_destroy_plan(m_plan);
+            fftw_free(m_ri);
+            fftw_free(m_cbuf);
+            m_plan = 0;
+        }
+#else
         delete[] m_ri;
         delete[] m_ro;
         delete[] m_io;
+#endif
+        delete[] m_window;
     }
 
-    m_blockSize = blockSize;
-    m_channels = channels;
+    m_blockSize = int(blockSize);
+    m_channels = int(channels);
 
     m_freqbuf = new float *[m_channels];
-    for (size_t c = 0; c < m_channels; ++c) {
+    for (int c = 0; c < m_channels; ++c) {
         m_freqbuf[c] = new float[m_blockSize + 2];
     }
+    m_window = new double[m_blockSize];
+
+    for (int i = 0; i < m_blockSize; ++i) {
+        // Hanning window
+        m_window[i] = (0.50 - 0.50 * cos((2.0 * M_PI * i) / m_blockSize));
+    }
+
+#ifdef HAVE_FFTW3
+    m_ri = (double *)fftw_malloc(blockSize * sizeof(double));
+    m_cbuf = (fftw_complex *)fftw_malloc((blockSize/2 + 1) * sizeof(fftw_complex));
+    m_plan = fftw_plan_dft_r2c_1d(blockSize, m_ri, m_cbuf, FFTW_MEASURE);
+#else
     m_ri = new double[m_blockSize];
     m_ro = new double[m_blockSize];
     m_io = new double[m_blockSize];
+#endif
 
     return m_plugin->initialise(channels, stepSize, blockSize);
 }
@@ -220,7 +296,11 @@ PluginInputDomainAdapter::Impl::makeBlockSizeAcceptable(size_t blockSize) const
         
     } else if (blockSize & (blockSize-1)) {
             
-        // not a power of two, can't handle that with our current fft
+#ifdef HAVE_FFTW3
+        // not an issue with FFTW
+#else
+
+        // not a power of two, can't handle that with our built-in FFT
         // implementation
 
         size_t nearest = blockSize;
@@ -241,15 +321,12 @@ PluginInputDomainAdapter::Impl::makeBlockSizeAcceptable(size_t blockSize) const
         
         std::cerr << "WARNING: Vamp::HostExt::PluginInputDomainAdapter::Impl::initialise: non-power-of-two\nblocksize " << blockSize << " not supported, using blocksize " << nearest << " instead" << std::endl;
         blockSize = nearest;
+
+#endif
     }
 
     return blockSize;
 }
-
-// for some visual studii apparently
-#ifndef M_PI
-#define M_PI 3.14159265358979232846
-#endif
 
 Plugin::FeatureSet
 PluginInputDomainAdapter::Impl::process(const float *const *inputBuffers,
@@ -308,32 +385,44 @@ PluginInputDomainAdapter::Impl::process(const float *const *inputBuffers,
 
 //    std::cerr << " to " << timestamp << std::endl;
 
-    for (size_t c = 0; c < m_channels; ++c) {
+    for (int c = 0; c < m_channels; ++c) {
 
-        for (size_t i = 0; i < m_blockSize; ++i) {
-            // Hanning window
-            m_ri[i] = double(inputBuffers[c][i])
-                * (0.50 - 0.50 * cos((2 * M_PI * i)
-                                     / m_blockSize));
+        for (int i = 0; i < m_blockSize; ++i) {
+            m_ri[i] = double(inputBuffers[c][i]) * m_window[i];
         }
 
-        for (size_t i = 0; i < m_blockSize/2; ++i) {
+        for (int i = 0; i < m_blockSize/2; ++i) {
             // FFT shift
             double value = m_ri[i];
             m_ri[i] = m_ri[i + m_blockSize/2];
             m_ri[i + m_blockSize/2] = value;
         }
 
+#ifdef HAVE_FFTW3
+
+        fftw_execute(m_plan);
+
+        for (int i = 0; i <= m_blockSize/2; ++i) {
+            m_freqbuf[c][i * 2] = float(m_cbuf[i][0]);
+            m_freqbuf[c][i * 2 + 1] = float(m_cbuf[i][1]);
+        }
+
+#else
+
         fft(m_blockSize, false, m_ri, 0, m_ro, m_io);
 
-        for (size_t i = 0; i <= m_blockSize/2; ++i) {
-            m_freqbuf[c][i * 2] = m_ro[i];
-            m_freqbuf[c][i * 2 + 1] = m_io[i];
+        for (int i = 0; i <= m_blockSize/2; ++i) {
+            m_freqbuf[c][i * 2] = float(m_ro[i]);
+            m_freqbuf[c][i * 2 + 1] = float(m_io[i]);
         }
+
+#endif
     }
 
     return m_plugin->process(m_freqbuf, timestamp);
 }
+
+#ifndef HAVE_FFTW3
 
 void
 PluginInputDomainAdapter::Impl::fft(unsigned int n, bool inverse,
@@ -451,6 +540,8 @@ PluginInputDomainAdapter::Impl::fft(unsigned int n, bool inverse,
 	}
     }
 }
+
+#endif
 
 }
         

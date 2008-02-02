@@ -106,7 +106,7 @@ RegionFactory::create (Session& session, XMLNode& node, bool yn)
 }
 	
 boost::shared_ptr<Region> 
-RegionFactory::create (SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
+RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
 {
 	if (srcs.empty()) {
 		return boost::shared_ptr<Region>();
