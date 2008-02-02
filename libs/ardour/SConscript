@@ -28,21 +28,20 @@ ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
 amp.cc
-audio_buffer.cc
-auto_bundle.cc
-user_bundle.cc
 analyser.cc
 audioanalyser.cc
+audio_buffer.cc
 audio_diskstream.cc
+audioengine.cc
+audiofilesource.cc
 audio_library.cc
 audio_playlist.cc
 audio_port.cc
-audio_track.cc
-audioengine.cc
-audiofilesource.cc
 audioregion.cc
 audiosource.cc
+audio_track.cc
 auditioner.cc
+auto_bundle.cc
 automatable.cc
 automation.cc
 automation_control.cc
@@ -72,9 +71,9 @@ globals.cc
 import.cc
 io.cc
 io_processor.cc
-jack_port.cc
 jack_audio_port.cc
 jack_midi_port.cc
+jack_port.cc
 jack_slave.cc
 ladspa_plugin.cc
 location.cc
@@ -112,8 +111,8 @@ reverse.cc
 route.cc
 route_group.cc
 send.cc
-session.cc
 session_butler.cc
+session.cc
 session_click.cc
 session_command.cc
 session_directory.cc
@@ -137,6 +136,7 @@ template_utils.cc
 tempo.cc
 track.cc
 transient_detector.cc
+user_bundle.cc
 utils.cc
 version.cc
 """)
@@ -299,20 +299,20 @@ ardour = conf.Finish ()
 
 ardour.Merge ([
 	     libraries['core'],
-	     libraries['xml'],
-	     libraries['sndfile-ardour'],
-	     libraries['raptor'],
-	     libraries['lrdf'],
-	     libraries['samplerate'],
-	     libraries['sigc2'],
-	     libraries['pbd'],
-	     libraries['midi++2'],
+	     libraries['fftw3'],
+	     libraries['fftw3f'],
 	     libraries['glib2'],
 	     libraries['glibmm2'],
+	     libraries['lrdf'],
+	     libraries['midi++2'],
+	     libraries['pbd'],
+	     libraries['raptor'],
+	     libraries['samplerate'],
+	     libraries['sigc2'],
+	     libraries['sndfile-ardour'],
 	     libraries['vamp'],
 	     libraries['vamphost'],
-	     libraries['fftw3f'],
-	     libraries['fftw3'],
+	     libraries['xml'],
 	     ])
 
 if ardour['RUBBERBAND']:
