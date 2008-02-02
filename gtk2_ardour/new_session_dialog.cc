@@ -978,7 +978,7 @@ NewSessionDialog::reset_recent()
 	sessions = new std::vector<std::string*>;
 	
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-	        sessions->push_back (new string ((*i).second));
+		sessions->push_back (new string ((*i).second));
 	}
 	
 	for (i = sessions->begin(); i != sessions->end(); ++i) {
@@ -990,7 +990,7 @@ NewSessionDialog::reset_recent()
 		/* remove any trailing / */
 		
 		if (fullpath[fullpath.length()-1] == '/') {
-		        fullpath = fullpath.substr (0, fullpath.length()-1);
+			fullpath = fullpath.substr (0, fullpath.length()-1);
 		}
 	    
 		/* check whether session still exists */

@@ -27,19 +27,17 @@ ardour.Append(POTFILE = domain + '.pot')
 ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
 
 ardour_files=Split("""
-diskstream.cc
 analyser.cc
 audioanalyser.cc
 audio_diskstream.cc
-audio_library.cc
-audio_playlist.cc
-track.cc
-audio_track.cc
 audioengine.cc
 audiofilesource.cc
 audiofilter.cc
+audio_library.cc
+audio_playlist.cc
 audioregion.cc
 audiosource.cc
+audio_track.cc
 auditioner.cc
 automation.cc
 automation_event.cc
@@ -50,6 +48,7 @@ crossfade.cc
 curve.cc
 cycle_timer.cc
 default_click.cc
+diskstream.cc
 enums.cc
 gain.cc
 gdither.cc
@@ -60,6 +59,7 @@ io.cc
 jack_slave.cc
 ladspa_plugin.cc
 location.cc
+mix.cc
 mtc_slave.cc
 named_selection.cc
 panner.cc
@@ -78,8 +78,8 @@ reverse.cc
 route.cc
 route_group.cc
 send.cc
-session.cc
 session_butler.cc
+session.cc
 session_click.cc
 session_command.cc
 session_events.cc
@@ -95,10 +95,10 @@ sndfilesource.cc
 source.cc
 source_factory.cc
 tempo.cc
+track.cc
 transient_detector.cc
 utils.cc
 version.cc
-mix.cc
 """)
 
 arch_specific_objects = [ ]
@@ -262,20 +262,20 @@ ardour = conf.Finish ()
 
 ardour.Merge ([
 	     libraries['core'],
-	     libraries['xml'],
-	     libraries['sndfile-ardour'],
-	     libraries['raptor'],
-	     libraries['lrdf'],
-	     libraries['samplerate'],
-	     libraries['sigc2'],
-	     libraries['pbd'],
-	     libraries['midi++2'],
+	     libraries['fftw3'],
+	     libraries['fftw3f'],
 	     libraries['glib2'],
 	     libraries['glibmm2'],
+	     libraries['lrdf'],
+	     libraries['midi++2'],
+	     libraries['pbd'],
+	     libraries['raptor'],
+	     libraries['samplerate'],
+	     libraries['sigc2'],
+	     libraries['sndfile-ardour'],
 	     libraries['vamp'],
 	     libraries['vamphost'],
-	     libraries['fftw3f'],
-	     libraries['fftw3'],
+	     libraries['xml']
 	     ])
 
 if ardour['RUBBERBAND']:

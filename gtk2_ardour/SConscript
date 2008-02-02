@@ -30,44 +30,44 @@ if gtkardour['IS_OSX']:
 gtkardour.Merge ([
     libraries['ardour'],
     libraries['ardour_cp'],
-    libraries['gtkmm2ext'],
-    libraries['midi++2'],
-    libraries['pbd'],
-    libraries['gtkmm2'],
+    libraries['atkmm'],
+    libraries['fftw3'],
+    libraries['fftw3f'],
+    libraries['flac'],
+    libraries['gdkmm2'],
     libraries['glib2'],
+    libraries['glibmm2'],
+    libraries['gtk2'],
+    libraries['gtkmm2'],
+    libraries['gtkmm2ext'],
+    libraries['jack'],
     libraries['libgnomecanvas2'],
     libraries['libgnomecanvasmm'],
-    libraries['sysmidi'],
-    libraries['sndfile-ardour'],
-    libraries['flac'],
     libraries['lrdf'],
-    libraries['glibmm2'],
+    libraries['midi++2'],
     libraries['pangomm'],
-    libraries['atkmm'],
-    libraries['gdkmm2'],
-    libraries['sigc2'],
-    libraries['gtk2'],
-    libraries['xml'],
-    libraries['xslt'],
+    libraries['pbd'],
     libraries['samplerate'],
+    libraries['sigc2'],
+    libraries['sndfile-ardour'],
+    libraries['sysmidi'],
     libraries['vamp'],
     libraries['vamphost'],
-    libraries['fftw3f'],
-    libraries['fftw3'],
-    libraries['jack']
+    libraries['xml'],
+    libraries['xslt']
 ])
 
 gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 
 gtkmmtests.Merge ([
-    libraries['gtkmm2'],
-    libraries['glib2'],
-    libraries['glibmm2'],
-    libraries['pangomm'],
     libraries['atkmm'],
     libraries['gdkmm2'],
-    libraries['sigc2'],
-    libraries['gtk2']
+    libraries['glib2'],
+    libraries['glibmm2'],
+    libraries['gtk2'],
+    libraries['gtkmm2'],
+    libraries['pangomm'],
+    libraries['sigc2']
 ])
 
 if gtkardour['DMALLOC']:
@@ -105,15 +105,17 @@ about.cc
 actions.cc
 add_route_dialog.cc
 ardour_dialog.cc
-ardour_ui.cc
 ardour_ui2.cc
+ardour_ui.cc
 ardour_ui_dependents.cc
 ardour_ui_dialogs.cc
 ardour_ui_ed.cc
 ardour_ui_mixer.cc
 ardour_ui_options.cc
 audio_clock.cc
-route_time_axis.cc
+audio_region_editor.cc
+audio_region_view.cc
+audio_streamview.cc
 audio_time_axis.cc
 automation_gain_line.cc
 automation_line.cc
@@ -123,21 +125,18 @@ axis_view.cc
 boolean_automation_line.cc
 canvas-imageframe.c
 canvas-simpleline.c
-simpleline.cc
 canvas-simplerect.c
-simplerect.cc
 canvas-waveview.c
 crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc
-enums.cc
 editing.cc
-editor.cc
 editor_actions.cc
 editor_audio_import.cc
 editor_audiotrack.cc
 editor_canvas.cc
 editor_canvas_events.cc
+editor.cc
 editor_cursors.cc
 editor_edit_groups.cc
 editor_export_audio.cc
@@ -159,10 +158,11 @@ editor_selection_list.cc
 editor_tempodisplay.cc
 editor_timefx.cc
 engine_dialog.cc
+enums.cc
 export_dialog.cc
-export_session_dialog.cc
-export_region_dialog.cc
 export_range_markers_dialog.cc
+export_region_dialog.cc
+export_session_dialog.cc
 gain_automation_time_axis.cc
 gain_meter.cc
 generic_pluginui.cc
@@ -192,8 +192,8 @@ new_session_dialog.cc
 option_editor.cc
 opts.cc
 pan_automation_time_axis.cc
-panner.cc
 panner2d.cc
+panner.cc
 panner_ui.cc
 playlist_selector.cc
 plugin_selector.cc
@@ -203,21 +203,21 @@ public_editor.cc
 redirect_automation_line.cc
 redirect_automation_time_axis.cc
 redirect_box.cc
-rhythm_ferret.cc
-audio_region_editor.cc
 region_gain_line.cc
 region_selection.cc
 region_view.cc
-audio_region_view.cc
+rhythm_ferret.cc
 route_params_ui.cc
 route_redirect_selection.cc
+route_time_axis.cc
 route_ui.cc
 selection.cc
-sfdb_ui.cc
 send_ui.cc
+sfdb_ui.cc
+simpleline.cc
+simplerect.cc
 splash.cc
 streamview.cc
-audio_streamview.cc
 tape_region_view.cc
 tempo_dialog.cc
 theme_manager.cc
