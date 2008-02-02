@@ -80,6 +80,7 @@
 #include <ardour/filename_extensions.h>
 #include <ardour/session_directory.h>
 #include <ardour/tape_file_matcher.h>
+#include <ardour/analyser.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -107,6 +108,7 @@ Session::mix_buffers_with_gain_t Session::mix_buffers_with_gain = 0;
 Session::mix_buffers_no_gain_t   Session::mix_buffers_no_gain   = 0;
 
 sigc::signal<int> Session::AskAboutPendingState;
+sigc::signal<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
 sigc::signal<void> Session::SendFeedback;
 
 sigc::signal<void> Session::SMPTEOffsetChanged;
@@ -2771,6 +2773,14 @@ Session::add_source (boost::shared_ptr<Source> source)
 		source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
 		set_dirty();
 	}
+	
+	boost::shared_ptr<AudioFileSource> afs;
+
+	if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
+		if (Config->get_auto_analyse_audio()) {
+			Analyser::queue_source_for_analysis (source, false);
+		}
+	} 
 }
 
 void
@@ -3726,6 +3736,15 @@ void
 Session::tempo_map_changed (Change ignored)
 {
 	clear_clicks ();
+	
+	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		(*i)->update_after_tempo_map_change ();
+	}
+
+	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		(*i)->update_after_tempo_map_change ();
+	}
+
 	set_dirty ();
 }
 
@@ -3737,7 +3756,7 @@ Session::ensure_buffers (ChanCount howmany)
 {
 	if (current_block_size == 0)
 		return; // too early? (is this ok?)
-
+	
 	// We need at least 2 MIDI scratch buffers to mix/merge
 	if (howmany.n_midi() < 2)
 		howmany.set_midi(2);

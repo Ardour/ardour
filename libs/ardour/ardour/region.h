@@ -73,6 +73,11 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 		range_guarantoor = USHRT_MAX
 	};
 
+	enum PositionLockStyle {
+		AudioTime,
+		MusicTime
+	};
+
  	static const Flag DefaultFlags = Flag (Opaque|DefaultFadeIn|DefaultFadeOut|FadeIn|FadeOut);
 
 	static Change FadeChanged;
@@ -130,6 +135,9 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	bool captured()   const { return !(_flags & (Region::Flag (Region::Import|Region::External))); }
 	bool can_move()   const { return !(_flags & (Locked|PositionLocked)); }
 
+	PositionLockStyle positional_lock_style() const { return _positional_lock_style; }
+	void set_position_lock_style (PositionLockStyle ps);
+
 	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
 	void freeze ();
@@ -156,6 +164,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	void set_position (nframes_t, void *src);
 	void set_position_on_top (nframes_t, void *src);
 	void special_set_position (nframes_t);
+	void update_position_after_tempo_map_change ();
 	void nudge_position (nframes64_t, void *src);
 
 	bool at_natural_position () const;
@@ -213,6 +222,13 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	virtual bool is_dependent() const { return false; }
 	virtual bool depends_on (boost::shared_ptr<Region> other) const { return false; }
 
+	virtual int get_transients (AnalysisFeatureList&, bool force_new = false) { 
+		// no transients, but its OK
+		return 0;
+	}
+
+	void invalidate_transients ();	
+
   protected:
 	friend class RegionFactory;
 
@@ -226,8 +242,6 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	Region (boost::shared_ptr<Source> src, const XMLNode&);
 	Region (const SourceList& srcs, const XMLNode&);
 
-	/* this one is for derived types of derived types */
-
 	Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
 
   protected:
@@ -236,6 +250,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	void send_change (Change);
 
 	void trim_to_internal (nframes_t position, nframes_t length, void *src);
+	void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
 
 	bool copied() const { return _flags & Copied; }
 	void maybe_uncopy ();
@@ -256,6 +271,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	nframes_t               _last_length;
 	nframes_t               _position;
 	nframes_t               _last_position;
+	PositionLockStyle       _positional_lock_style;
 	nframes_t               _sync_position;
 	layer_t                 _layer;
 	mutable RegionEditState _first_edit;
@@ -264,6 +280,9 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	nframes64_t             _ancestral_length;
 	float                   _stretch;
 	float                   _shift;
+	BBT_Time                _bbt_time;
+	AnalysisFeatureList     _transients;
+	bool                    _valid_transients;
 	mutable uint32_t        _read_data_count;  ///< modified in read()
 	Change                  _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp

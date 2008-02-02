@@ -857,13 +857,16 @@ void
 AudioEngine::halted (void *arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine *> (arg);
+	bool was_running = ae->_running;
 
 	ae->_running = false;
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
 	ae->_jack = 0;
 
-	ae->Halted(); /* EMIT SIGNAL */
+	if (was_running) {
+		ae->Halted(); /* EMIT SIGNAL */
+	}
 }
 
 uint32_t

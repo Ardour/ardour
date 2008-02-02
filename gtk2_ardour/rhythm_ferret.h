@@ -84,17 +84,17 @@ class RhythmFerret : public ArdourDialog {
 
 	std::vector<std::string> analysis_mode_strings;
 
-	std::vector<nframes64_t> current_results;
+	ARDOUR::AnalysisFeatureList current_results;
 
 	AnalysisMode get_analysis_mode () const;
 	Action get_action() const;
 
 	void run_analysis ();
-	int run_percussion_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, nframes64_t offset, std::vector<nframes64_t>& results);
+	int run_percussion_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, nframes64_t offset, ARDOUR::AnalysisFeatureList& results);
 
 	void do_action ();
 	void do_split_action ();
-	void do_region_split (RegionView* rv, const std::vector<nframes64_t>&);
+	void do_region_split (RegionView* rv, const ARDOUR::AnalysisFeatureList&);
 };
 
 #endif /* __gtk2_ardour_rhythm_ferret_h__ */

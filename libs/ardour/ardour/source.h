@@ -78,14 +78,27 @@ class Source : public SessionObject, public ARDOUR::Readable
 	static sigc::signal<void,Source*>             SourceCreated;
 	sigc::signal<void,boost::shared_ptr<Source> > Switched;
 
+	bool has_been_analysed() const;
+	virtual bool can_be_analysed() const { return false; } 
+	virtual void set_been_analysed (bool yn);
+	virtual bool check_for_analysis_data_on_disk();
+
+	sigc::signal<void> AnalysisChanged;
+	
+	AnalysisFeatureList transients;
+	std::string get_transients_path() const;
+	int load_transients (const std::string&);
+
   protected:
 	void update_length (nframes_t pos, nframes_t cnt);
 	
-	DataType  _type;
-	time_t    _timestamp;
-	nframes_t _length;
-
-	Glib::Mutex playlist_lock;
+	DataType            _type;
+	time_t              _timestamp;
+	nframes_t           _length;
+	bool                _analysed;
+	mutable Glib::Mutex _analysis_lock;
+	Glib::Mutex         _playlist_lock;
+	
 	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;
 	PlaylistMap _playlists;
 

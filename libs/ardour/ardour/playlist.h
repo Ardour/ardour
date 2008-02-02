@@ -96,6 +96,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
 	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
 	void shuffle (boost::shared_ptr<Region>, int dir);
+	void update_after_tempo_map_change ();
 
 	boost::shared_ptr<Playlist> cut  (list<AudioRange>&, bool result_is_hidden = true);
 	boost::shared_ptr<Playlist> copy (list<AudioRange>&, bool result_is_hidden = true);
@@ -109,6 +110,8 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
 	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
+
+	nframes64_t find_next_transient (nframes64_t position, int dir);
 
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg);
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>));

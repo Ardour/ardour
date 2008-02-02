@@ -1,5 +1,7 @@
 CANVAS_VARIABLE(canvasvar_WaveForm, "waveform outline")
 CANVAS_VARIABLE(canvasvar_WaveFormFill, "waveform fill")
+CANVAS_VARIABLE(canvasvar_SelectedWaveForm, "selected waveform outline")
+CANVAS_VARIABLE(canvasvar_SelectedWaveFormFill, "selected waveform fill")
 CANVAS_VARIABLE(canvasvar_WaveFormClip, "clipped waveform")
 CANVAS_VARIABLE(canvasvar_FrameBase, "region base")
 CANVAS_VARIABLE(canvasvar_SelectedFrameBase, "selected region base")

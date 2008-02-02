@@ -81,6 +81,8 @@ public:
     
     OutputList getOutputDescriptors() const;
 
+    void reset();
+
     FeatureSet process(const float *const *inputBuffers, RealTime timestamp);
     
     FeatureSet getRemainingFeatures();

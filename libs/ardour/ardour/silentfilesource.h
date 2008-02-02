@@ -35,6 +35,7 @@ class SilentFileSource : public AudioFileSource {
 	void set_length (nframes_t len);
 	
 	bool destructive() const { return false; }
+	bool can_be_analysed() const { return false; } 
 
   protected:
 

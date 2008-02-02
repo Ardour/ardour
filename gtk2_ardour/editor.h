@@ -1019,7 +1019,7 @@ class Editor : public PublicEditor
 	void toggle_region_mute ();
 	void toggle_region_lock ();
 	void toggle_region_opaque ();
-	void toggle_region_position_lock ();
+	void set_region_lock_style (ARDOUR::Region::PositionLockStyle);
 	void raise_region ();
 	void raise_region_to_top ();
 	void lower_region ();
@@ -1028,7 +1028,7 @@ class Editor : public PublicEditor
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
 	void split_region_at_transients ();
-	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, std::vector<nframes64_t>&);
+	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&);
 	void crop_region_to_selection ();
 	void crop_region_to (nframes_t start, nframes_t end);
 	void set_sync_point (nframes64_t, const RegionSelection&);
@@ -1334,6 +1334,8 @@ class Editor : public PublicEditor
 
 	void show_verbose_time_cursor (nframes_t frame, double offset = 0, double xpos=-1, double ypos=-1);
 	void show_verbose_duration_cursor (nframes_t start, nframes_t end, double offset = 0, double xpos=-1, double ypos=-1);
+	double clamp_verbose_cursor_x (double);
+	double clamp_verbose_cursor_y (double);
 
 	/* Canvas event handlers */
 

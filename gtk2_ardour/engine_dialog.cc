@@ -553,10 +553,12 @@ EngineControl::setup_engine ()
 		error << string_compose (_("cannot open JACK rc file %1 to store parameters"), jackdrc_path) << endmsg;
 		return -1;
 	}
-
+	cerr << "JACK COMMAND: ";
 	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
+		cerr << (*i) << ' ';
 		jackdrc << (*i) << ' ';
 	}
+	cerr << endl;
 	jackdrc << endl;
 	jackdrc.close ();
 
@@ -915,7 +917,7 @@ EngineControl::find_jack_servers (vector<string>& strings)
 
 	_NSGetExecutablePath (execpath, &pathsz);
 	
-	Glib::ustring path (Glib::path_get_dirname (execpath));
+	string path (Glib::path_get_dirname (execpath));
 	path += "/jackd";
 
 	if (Glib::file_test (path, FILE_TEST_EXISTS)) {
@@ -937,8 +939,36 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	PathScanner scanner;
 	vector<string *> *jack_servers;
 	std::map<string,int> un;
-	
-	path = getenv ("PATH");
+	char *p;
+	bool need_minimal_path = false;
+
+	p = getenv ("PATH");
+
+	if (p && *p) {
+		path = p;
+	} else {
+		need_minimal_path = true;
+	}
+
+#ifdef __APPLE__
+	// many mac users don't have PATH set up to include
+	// likely installed locations of JACK
+	need_minimal_path = true;
+#endif
+
+	if (need_minimal_path) {
+		if (path.empty()) {
+			path = "/usr/bin:/bin:/usr/local/bin:/opt/local/bin";
+		} else {
+			path += ":/usr/local/bin:/opt/local/bin";
+		}
+	}
+
+#ifdef __APPLE__
+	// push it back into the environment so that auto-started JACK can find it.
+	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
+	setenv ("PATH", path.c_str(), 1);
+#endif
 
 	jack_servers = scanner (path, jack_server_filter, 0, false, true);
 	

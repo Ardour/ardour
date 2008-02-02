@@ -17,12 +17,18 @@
 */
 
 #include <ardour/audio_buffer.h>
+#include <pbd/error.h>
+#include <errno.h>
+
+#include "i18n.h"
 
 #ifdef __x86_64__
 static const int CPU_CACHE_ALIGN = 64;
 #else
 static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
 #endif
+
+using namespace PBD;
 
 namespace ARDOUR {
 
@@ -63,7 +69,10 @@ AudioBuffer::resize (size_t size)
 #ifdef NO_POSIX_MEMALIGN
 	_data =  (Sample *) malloc(sizeof(Sample) * _capacity);
 #else
-	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Sample) * _capacity);
+	if (posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Sample) * _capacity)) {
+		fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
+				CPU_CACHE_ALIGN, sizeof (Sample) * _capacity, strerror (errno)) << endmsg;
+	}
 #endif	
 	
 	_owns_data = true;

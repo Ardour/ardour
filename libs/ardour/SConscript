@@ -31,6 +31,7 @@ amp.cc
 audio_buffer.cc
 auto_bundle.cc
 user_bundle.cc
+analyser.cc
 audioanalyser.cc
 audio_diskstream.cc
 audio_library.cc

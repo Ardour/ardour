@@ -37,6 +37,7 @@
 #include <ardour/region.h>
 #include <ardour/region_factory.h>
 #include <ardour/playlist_factory.h>
+#include <ardour/transient_detector.h>
 
 #include "i18n.h"
 
@@ -1428,6 +1429,65 @@ Playlist::regions_touched (nframes_t start, nframes_t end)
 	return rlist;
 }
 
+nframes64_t
+Playlist::find_next_transient (nframes64_t from, int dir)
+{
+	RegionLock rlock (this);
+	AnalysisFeatureList points;
+	AnalysisFeatureList these_points;
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if (dir > 0) {
+			if ((*i)->last_frame() < from) {
+				continue;
+			}
+		} else {
+			if ((*i)->first_frame() > from) {
+				continue;
+			}
+		}
+
+		(*i)->get_transients (these_points);
+
+		/* add first frame, just, err, because */
+		
+		these_points.push_back ((*i)->first_frame());
+		
+		points.insert (points.end(), these_points.begin(), these_points.end());
+		these_points.clear ();
+	}
+	
+	if (points.empty()) {
+		return -1;
+	}
+
+	TransientDetector::cleanup_transients (points, _session.frame_rate(), 3.0);
+	bool reached = false;
+	
+	if (dir > 0) {
+		for (AnalysisFeatureList::iterator x = points.begin(); x != points.end(); ++x) {
+			if ((*x) >= from) {
+				reached = true;
+			}
+			
+			if (reached && (*x) > from) {
+				return *x;
+			}
+		}
+	} else {
+		for (AnalysisFeatureList::reverse_iterator x = points.rbegin(); x != points.rend(); ++x) {
+			if ((*x) <= from) {
+				reached = true;
+			}
+			
+			if (reached && (*x) < from) {
+				return *x;
+			}
+		}
+	}
+
+	return -1;
+}
 
 boost::shared_ptr<Region>
 Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
@@ -2258,4 +2318,19 @@ Playlist::region_is_shuffle_constrained (boost::shared_ptr<Region>)
 	}
 
 	return false;
+}
+
+void
+Playlist::update_after_tempo_map_change ()
+{
+	RegionLock rlock (const_cast<Playlist*> (this));
+	RegionList copy (regions);
+
+	freeze ();
+	
+	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {	
+		(*i)->update_position_after_tempo_map_change ();
+	}
+
+	thaw ();
 }

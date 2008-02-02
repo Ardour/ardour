@@ -466,6 +466,16 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		int ret = false;
 
 		switch (ev->keyval) {
+		case GDK_Tab:
+			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_nabla, GdkModifierType(ev->state));
+			break;
+
+		// some X and/or GDK implementations do Shift-Tab -> GDK_ISO_Left_Tab
+
+		case GDK_ISO_Left_Tab:
+			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_nabla, GdkModifierType(ev->state));
+			break;
+
 		case GDK_Up:
 			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_uparrow, GdkModifierType(ev->state));
 			break;

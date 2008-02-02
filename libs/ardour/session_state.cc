@@ -141,6 +141,9 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	set_history_depth (Config->get_history_depth());
 
 	_current_frame_rate = _engine.frame_rate ();
+	_nominal_frame_rate = _current_frame_rate;
+	_base_frame_rate = _current_frame_rate;
+
 	_tempo_map = new TempoMap (_current_frame_rate);
 	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
 
@@ -235,9 +238,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	} else {
 		waiting_for_sync_offset = false;
 	}
-
-	_current_frame_rate = 48000;
-	_base_frame_rate = 48000;
 
 	last_smpte_when = 0;
 	_smpte_offset = 0;
@@ -920,16 +920,16 @@ Session::state(bool full_state)
 
 	// store libardour version, just in case
 	char buf[16];
-	snprintf(buf, sizeof(buf)-1, "%d.%d.%d", 
-		 libardour_major_version, libardour_minor_version, libardour_micro_version);
+	snprintf(buf, sizeof(buf), "%d.%d.%d", libardour3_major_version, libardour3_minor_version, libardour3_micro_version);
 	node->add_property("version", string(buf));
 		
 	/* store configuration settings */
 
 	if (full_state) {
 	
-		/* store the name */
 		node->add_property ("name", _name);
+		snprintf (buf, sizeof (buf), "%" PRId32, _nominal_frame_rate);
+		node->add_property ("sample-rate", buf);
 
 		if (session_dirs.size() > 1) {
 
@@ -1148,7 +1148,6 @@ Session::set_state (const XMLNode& node)
 	int ret = -1;
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
-
 	
 	if (node.name() != X_("Session")){
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
@@ -1157,6 +1156,17 @@ Session::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value ();
+	}
+
+	if ((prop = node.property (X_("sample-rate"))) != 0) {
+
+		_nominal_frame_rate = atoi (prop->value());
+
+		if (_nominal_frame_rate != _current_frame_rate) {
+			if (AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate)) {
+				return -1;
+			}
+		}
 	}
 
 	setup_raid_path(_session_dir->root_path().to_string());
@@ -2065,6 +2075,56 @@ void
 Session::auto_save()
 {
 	save_state (_current_snapshot_name);
+}
+
+static bool
+state_file_filter (const string &str, void *arg)
+{
+	return (str.length() > strlen(statefile_suffix) &&
+		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
+}
+
+struct string_cmp {
+	bool operator()(const string* a, const string* b) {
+		return *a < *b;
+	}
+};
+
+static string*
+remove_end(string* state)
+{
+	string statename(*state);
+	
+	string::size_type start,end;
+	if ((start = statename.find_last_of ('/')) != string::npos) {
+		statename = statename.substr (start+1);
+	}
+		
+	if ((end = statename.rfind(".ardour")) == string::npos) {
+		end = statename.length();
+	}
+
+	return new string(statename.substr (0, end));
+}
+
+vector<string *> *
+Session::possible_states (string path) 
+{
+	PathScanner scanner;
+	vector<string*>* states = scanner (path, state_file_filter, 0, false, false);
+	
+	transform(states->begin(), states->end(), states->begin(), remove_end);
+	
+	string_cmp cmp;
+	sort (states->begin(), states->end(), cmp);
+	
+	return states;
+}
+
+vector<string *> *
+Session::possible_states () const
+{
+	return possible_states(_path);
 }
 
 RouteGroup *

@@ -134,7 +134,7 @@ class AudioRegion : public Region
 	void resume_fade_in ();
 	void resume_fade_out ();
 
-	int get_transients (std::vector<nframes64_t>&, bool force_new = false);
+	int get_transients (AnalysisFeatureList&, bool force_new = false);
 
   private:
 	friend class RegionFactory;
@@ -170,6 +170,7 @@ class AudioRegion : public Region
 	void fade_out_changed ();
 	void source_offset_changed ();
 	void listen_to_my_curves ();
+	void listen_to_my_sources ();
 
 	boost::shared_ptr<AutomationList> _fade_in;
 	FadeShape                         _fade_in_shape;
@@ -187,11 +188,6 @@ class AudioRegion : public Region
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
 
 	int set_live_state (const XMLNode&, Change&, bool send);
-
-	std::vector<nframes64_t> _transients;
-	bool valid_transients;
-	void invalidate_transients ();
-	void cleanup_transients (std::vector<nframes64_t>&);
 };
 
 } /* namespace ARDOUR */

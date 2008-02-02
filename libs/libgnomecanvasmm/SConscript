@@ -18,7 +18,8 @@ gnomecanvasmm.Merge([libraries['glibmm2'],
                      libraries['libgnomecanvas2'],
                      libraries['cairomm']])
 
-gnomecanvasmm.Append(CXXFLAGS = ["-DGLIBMM_PROPERTIES_ENABLED", "-DGLIBMM_EXCEPTIONS_ENABLED"])
+if gnomecanvasmm['IS_OSX']:
+	gnomecanvasmm.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
 
 libgnomecanvasmm = gnomecanvasmm.SharedLibrary('libgnomecanvasmm', gnomecanvasmm_files)
 Default(libgnomecanvasmm)

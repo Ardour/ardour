@@ -75,13 +75,8 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 			break;
 		}
 
-		if (!access(newpair.second.c_str(), R_OK)) {
-			rs.push_back (newpair);
-		}
+		rs.push_back (newpair);
 	}
-
-	// This deletes any missing sessions
-	ARDOUR::write_recent_sessions (rs);
 
 	/* display sorting should be done in the GUI, otherwise the
 	 * natural order will be broken

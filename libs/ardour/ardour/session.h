@@ -389,7 +389,10 @@ class Session : public PBD::StatefulDestructible
 	nframes_t get_maximum_extent () const;
 	nframes_t current_end_frame() const { return end_location->start(); }
 	nframes_t current_start_frame() const { return start_location->start(); }
+	// "actual" sample rate of session, set by current audioengine rate, pullup/down etc.
 	nframes_t frame_rate() const   { return _current_frame_rate; }
+	// "native" sample rate of session, regardless of current audioengine rate, pullup/down etc
+	nframes_t nominal_frame_rate() const   { return _nominal_frame_rate; }
 	nframes_t frames_per_hour() const { return _frames_per_hour; }
 
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
@@ -432,6 +435,9 @@ class Session : public PBD::StatefulDestructible
 	
 	sigc::signal<void,string> StateSaved;
 	sigc::signal<void> StateReady;
+	
+	vector<string*>* possible_states() const;
+	static vector<string*>* possible_states(string path);
 
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node); // not idempotent
@@ -623,6 +629,12 @@ class Session : public PBD::StatefulDestructible
 	*/
 	
 	sigc::signal<int,boost::shared_ptr<ARDOUR::Playlist> > AskAboutPlaylistDeletion;
+
+	/* handlers should return 0 for "ignore the rate mismatch"
+	   and !0 for "do not use this session"
+	*/
+
+	static sigc::signal<int,nframes_t, nframes_t> AskAboutSampleRateMismatch;
 
 	/* handlers should return !0 for use pending state, 0 for
 	   ignore it.
@@ -981,6 +993,7 @@ class Session : public PBD::StatefulDestructible
 	bool                     waiting_for_sync_offset;
 	nframes_t               _base_frame_rate;
 	nframes_t               _current_frame_rate;  //this includes video pullup offset
+	nframes_t               _nominal_frame_rate;  //ignores audioengine setting, "native" SR
 	int                      transport_sub_state;
 	mutable gint            _record_status;
 	volatile nframes_t      _transport_frame;

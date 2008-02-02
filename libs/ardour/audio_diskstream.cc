@@ -39,6 +39,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
+#include <ardour/analyser.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
@@ -1569,6 +1570,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			s->update_header (capture_info.front()->start, when, twhen);
 			s->set_captured_for (_name);
 			s->mark_immutable ();
+			Analyser::queue_source_for_analysis (s, true);
 		}
 	}
 

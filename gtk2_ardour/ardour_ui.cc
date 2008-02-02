@@ -242,6 +242,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
+	/* handle sr mismatch with a dialog */
+
+	ARDOUR::Session::AskAboutSampleRateMismatch.connect (mem_fun(*this, &ARDOUR_UI::sr_mismatch_dialog));
+
 	/* lets get this party started */
 
     	try {
@@ -400,6 +404,15 @@ ARDOUR_UI::~ARDOUR_UI ()
 
 	if (new_session_dialog) {
 		delete new_session_dialog;
+	}
+}
+
+void
+ARDOUR_UI::pop_back_splash ()
+{
+	if (Splash::instance()) {
+		// Splash::instance()->pop_back();
+		Splash::instance()->hide ();
 	}
 }
 
@@ -609,6 +622,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
+	pop_back_splash ();
 
 	/* we just don't care about the result, but we want to block */
 
@@ -691,6 +705,8 @@ ARDOUR_UI::check_memory_locking ()
 				cb.show();
 				vbox->show();
 				hbox.show ();
+
+				pop_back_splash ();
 				
 				editor->ensure_float (msg);
 				msg.run ();
@@ -725,6 +741,7 @@ ARDOUR_UI::finish()
 Ardour was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
 \"Just quit\" option."));
+					pop_back_splash();
 					msg.run ();
 					return;
 				}
@@ -997,8 +1014,27 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		get_state_files_in_directory (*i, state_file_paths);
 
-		if (state_file_paths.empty()) {
-			// no state file?
+		vector<string*>* states;
+		vector<const gchar*> item;
+		string fullpath = (*i).to_string();
+		
+		/* remove any trailing / */
+
+		if (fullpath[fullpath.length()-1] == '/') {
+			fullpath = fullpath.substr (0, fullpath.length()-1);
+		}
+
+		/* check whether session still exists */
+		if (!Glib::file_test(fullpath.c_str(), Glib::FILE_TEST_EXISTS)) {
+			/* session doesn't exist */
+			cerr << "skipping non-existent session " << fullpath << endl;
+			continue;
+		}		
+		
+		/* now get available states for this session */
+
+		if ((states = Session::possible_states (fullpath)) == 0) {
+			/* no state file? */
 			continue;
 		}
 	  
@@ -1006,8 +1042,6 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		Gtk::TreeModel::Row row = *(recent_session_model->append());
 
-		const string fullpath = (*i).to_string();
-		
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
 		
@@ -1153,6 +1187,7 @@ ARDOUR_UI::check_audioengine ()
 		if (!engine->connected()) {
 			MessageDialog msg (_("Ardour is not connected to JACK\n"
 					     "You cannot open or close sessions in this condition"));
+			pop_back_splash ();
 			msg.run ();
 			return false;
 		}
@@ -1309,6 +1344,7 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 to create a new track or bus.\n\
 You should save Ardour, exit and\n\
 restart JACK with more ports."));
+		pop_back_splash ();
 		msg.run ();
 	}
 }
@@ -1685,6 +1721,7 @@ JACK has either been shutdown or it\n\
 disconnected Ardour because Ardour\n\
 was not fast enough. You can save the\n\
 session and/or try to reconnect to JACK ."));
+	pop_back_splash ();
 	msg.run ();
 }
 
@@ -2026,6 +2063,7 @@ ARDOUR_UI::fontconfig_dialog ()
 				   true,
 				   Gtk::MESSAGE_INFO,
 				   Gtk::BUTTONS_OK);
+		pop_back_splash ();
 		msg.show_all ();
 		msg.present ();
 		msg.run ();
@@ -2116,7 +2154,8 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 	msg.set_name (X_("CleanupDialog"));
 	msg.set_wmclass (X_("existing_session"), "Ardour");
 	msg.set_position (Gtk::WIN_POS_MOUSE);
-	
+	pop_back_splash ();
+
 	switch (msg.run()) {
 	case RESPONSE_YES:
 		return true;
@@ -2325,6 +2364,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 				session_path = new_session_dialog->session_folder();
 			}
 
+			template_name = Glib::ustring();			
 			switch (new_session_dialog->which_page()) {
 
 			case NewSessionDialog::OpenPage: 
@@ -2374,7 +2414,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		  loadit:
 			new_session_dialog->hide ();
 			
-			if (load_session (session_path, session_name)) {
+			if (load_session (session_path, session_name, template_name)) {
 				/* force a retry */
 				response = Gtk::RESPONSE_NONE;
 			}
@@ -2435,6 +2475,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS) && ::access (path.c_str(), W_OK)) {
 		MessageDialog msg (*editor, _("You do not have write access to this session.\n"
 					      "This prevents the session from being loaded."));
+		pop_back_splash ();
 		msg.run ();
 		goto out;
 	}
@@ -2458,6 +2499,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		msg.set_title (_("Loading Error"));
 		msg.set_secondary_text (_("Click the OK button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash ();
 		msg.present ();
 
 		int response = msg.run ();
@@ -2483,6 +2525,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		msg.set_title (_("Loading Error"));
 		msg.set_secondary_text (_("Click the OK button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash ();
 		msg.present ();
 
 		int response = msg.run ();
@@ -2555,6 +2598,7 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 	catch (...) {
 
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		pop_back_splash ();
 		msg.run ();
 		return -1;
 	}
@@ -3030,6 +3074,38 @@ what you would like to do.\n"));
 		return 0;
 	}
 }
+
+int
+ARDOUR_UI::sr_mismatch_dialog (nframes_t desired, nframes_t actual)
+{
+ 	HBox* hbox = new HBox();
+	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
+	Label  message (string_compose (_("\
+This session was created with a sample rate of %1 Hz\n\
+\n\
+The audioengine is currently running at %2 Hz\n"), desired, actual));
+
+	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
+	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
+	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
+	dialog.add_button (_("Load session anyway"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Do not load session"), RESPONSE_REJECT);
+	dialog.set_default_response (RESPONSE_ACCEPT);
+	dialog.set_position (WIN_POS_CENTER);
+	message.show();
+	image->show();
+	hbox->show();
+
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		return 0;
+	default:
+		return 1;
+	}
+}
+
 	
 void
 ARDOUR_UI::disconnect_from_jack ()

@@ -377,7 +377,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "tab-to-transient-forwards", _("Move Forward to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "tab-to-transient-backwards", _("Move Forward to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), false));
+	act = ActionManager::register_action (editor_actions, "tab-to-transient-backwards", _("Move Backwards to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));

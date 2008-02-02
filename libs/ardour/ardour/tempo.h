@@ -279,6 +279,10 @@ class TempoMap : public PBD::StatefulDestructible
         void bbt_time_with_metric (nframes_t, BBT_Time&, const Metric&) const;
 
 	void change_existing_tempo_at (nframes_t, double bpm, double note_type);
+	void change_initial_tempo (double bpm, double note_type);
+
+	int n_tempos () const;
+	int n_meters () const;
 
 	sigc::signal<void,ARDOUR::Change> StateChanged;
 
@@ -286,12 +290,12 @@ class TempoMap : public PBD::StatefulDestructible
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
 
-	Metrics            *metrics;
-	nframes_t     _frame_rate;
-	nframes_t      last_bbt_when;
-	bool                last_bbt_valid;
-	BBT_Time            last_bbt;
-	mutable Glib::RWLock    lock;
+	Metrics*             metrics;
+	nframes_t           _frame_rate;
+	nframes_t            last_bbt_when;
+	bool                 last_bbt_valid;
+	BBT_Time             last_bbt;
+	mutable Glib::RWLock lock;
 	
 	void timestamp_metrics (bool use_bbt);
 

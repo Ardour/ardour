@@ -1104,7 +1104,7 @@ TimeAxisView::covers_y_position (double y)
 }
 
 void
-TimeAxisView::show_temporary_lines (const vector<nframes64_t>& pos)
+TimeAxisView::show_temporary_lines (const AnalysisFeatureList& pos)
 {
 	while (temp_lines.size()< pos.size()) {
 		ArdourCanvas::SimpleLine* l = new ArdourCanvas::SimpleLine (*canvas_display);
@@ -1120,7 +1120,7 @@ TimeAxisView::show_temporary_lines (const vector<nframes64_t>& pos)
 		delete line;
 	}
 
-	vector<nframes64_t>::const_iterator i;
+	AnalysisFeatureList::const_iterator i;
 	list<ArdourCanvas::SimpleLine*>::iterator l;
 
 	for (i = pos.begin(), l = temp_lines.begin(); i != pos.end() && l != temp_lines.end(); ++i, ++l) {

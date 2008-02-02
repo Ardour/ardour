@@ -27,19 +27,22 @@
 #include <cmath>
 #include <iomanip>
 #include <algorithm>
+#include <fstream>
 
 #include <glibmm/thread.h>
+#include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 #include <pbd/xml++.h>
 #include <pbd/pthread_utils.h>
 
 #include <ardour/source.h>
 #include <ardour/playlist.h>
+#include <ardour/session.h>
+#include <ardour/transient_detector.h>
 
 #include "i18n.h"
 
-using std::min;
-using std::max;
-
+using namespace std;
 using namespace ARDOUR;
 
 Source::Source (Session& s, const string& name, DataType type)
@@ -49,6 +52,7 @@ Source::Source (Session& s, const string& name, DataType type)
 	// not true.. is this supposed to be an assertion?
 	//assert(_name.find("/") == string::npos);
 
+	_analysed = false;
 	_timestamp = 0;
 	_length = 0;
 	_in_use = 0;
@@ -60,6 +64,7 @@ Source::Source (Session& s, const XMLNode& node)
 {
 	_timestamp = 0;
 	_length = 0;
+	_analysed = false;
 	_in_use = 0;
 
 	if (set_state (node) || _type == DataType::NIL) {
@@ -135,7 +140,7 @@ Source::add_playlist (boost::shared_ptr<Playlist> pl)
 {
 	std::pair<PlaylistMap::iterator,bool> res;
 	std::pair<boost::shared_ptr<Playlist>, uint32_t> newpair (pl, 1);
-	Glib::Mutex::Lock lm (playlist_lock);
+	Glib::Mutex::Lock lm (_playlist_lock);
 
 	res = _playlists.insert (newpair);
 
@@ -157,7 +162,7 @@ Source::remove_playlist (boost::weak_ptr<Playlist> wpl)
 	}
 
 	PlaylistMap::iterator x;
-	Glib::Mutex::Lock lm (playlist_lock);
+	Glib::Mutex::Lock lm (_playlist_lock);
 
 	if ((x = _playlists.find (pl)) != _playlists.end()) {
 		if (x->second > 1) {
@@ -172,4 +177,91 @@ uint32_t
 Source::used () const
 {
 	return _playlists.size();
+}
+
+bool
+Source::has_been_analysed() const
+{
+	Glib::Mutex::Lock lm (_analysis_lock);
+	return _analysed;
+}
+
+void
+Source::set_been_analysed (bool yn)
+{
+	{
+		Glib::Mutex::Lock lm (_analysis_lock);
+		_analysed = yn;
+	}
+	
+	if (yn) {
+		AnalysisChanged(); // EMIT SIGNAL
+	}
+}
+
+int
+Source::load_transients (const string& path)
+{
+	ifstream file (path.c_str());
+
+	if (!file) {
+		return -1;
+	}
+	
+	transients.clear ();
+
+	stringstream strstr;
+	double val;
+
+	while (file.good()) {
+		file >> val;
+
+		if (!file.fail()) {
+			nframes64_t frame = (nframes64_t) floor (val * _session.frame_rate());
+			transients.push_back (frame);
+		}
+	}
+
+	return 0;
+}
+
+string 
+Source::get_transients_path () const
+{
+	vector<string> parts;
+	string s;
+
+	/* old sessions may not have the analysis directory */
+	
+	_session.ensure_subdirs ();
+
+	s = _session.analysis_dir ();
+	parts.push_back (s);
+
+	s = _id.to_s();
+	s += '.';
+	s += TransientDetector::operational_identifier();
+	parts.push_back (s);
+	
+	return Glib::build_filename (parts);
+}
+
+bool
+Source::check_for_analysis_data_on_disk () 
+{
+	/* looks to see if the analysis files for this source are on disk.
+	   if so, mark us already analysed.
+	*/
+
+	string path = get_transients_path ();
+	bool ok = true;
+
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		ok = false;
+	}
+
+	// XXX add other tests here as appropriate
+
+	set_been_analysed (ok);
+	return ok;
 }

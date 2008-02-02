@@ -125,6 +125,8 @@ class AudioFileSource : public AudioSource {
 
 	virtual void handle_header_position_change () {}
 
+	bool can_be_analysed() const { return _length > 0; } 
+
   protected:
 	
 	/* constructor to be called for existing external-to-session files */

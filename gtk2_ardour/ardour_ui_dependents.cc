@@ -52,6 +52,7 @@ ARDOUR_UI::shutdown ()
 		session->remove_pending_capture_state ();
 		session = 0;
 	}
+
 	ui_config->save_state();
 }
 

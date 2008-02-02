@@ -1220,14 +1220,15 @@ AudioRegionView::set_frame_color ()
 	uint32_t r,g,b,a;
 	
 	if (_selected && should_show_selection) {
-		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), &r, &g, &b, &a);
+		frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
 
-		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
 		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 			if (_region->muted()) {
-				(*w)->property_wave_color() = RGBA_TO_UINT(r, g, b, MUTED_ALPHA);
+				(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get(), MUTED_ALPHA);
 			} else {
-				(*w)->property_wave_color() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);// Lets still use the theme's opacity value if Opaque is not set
+				(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get();
+				(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_SelectedWaveFormFill.get();
 			}
 		}
 	} else {
