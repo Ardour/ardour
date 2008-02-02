@@ -30,7 +30,7 @@ if gtkardour['IS_OSX']:
 gtkardour.Merge ([
     libraries['ardour'],
     libraries['ardour_cp'],
-    libraries['asound']
+    libraries['asound'],
     libraries['atkmm'],
     libraries['cairomm'],
     libraries['fftw3'],
@@ -56,7 +56,7 @@ gtkardour.Merge ([
     libraries['vamp'],
     libraries['vamphost'],
     libraries['xml'],
-    libraries['xslt'],
+    libraries['xslt']
 ])
 
 gtkmmtests.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
@@ -66,10 +66,10 @@ gtkmmtests.Merge ([
     libraries['gdkmm2'],
     libraries['glib2'],
     libraries['glibmm2'],
-    libraries['gtk2']
+    libraries['gtk2'],
     libraries['gtkmm2'],
     libraries['pangomm'],
-    libraries['sigc2'],
+    libraries['sigc2']
 ])
 
 if gtkardour['DMALLOC']:
