@@ -3297,23 +3297,27 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			nframes_t sync_frame;
 			nframes_t sync_offset;
 			int32_t sync_dir;
-	    
+
 			pending_region_position = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 
 			sync_offset = rv->region()->sync_offset (sync_dir);
-			sync_frame = rv->region()->adjust_to_sync (pending_region_position);
 
-			/* we snap if the snap modifier is not enabled.
+			/* we don't handle a sync point that lies before zero.
 			 */
+			if (sync_dir > 0 || (sync_dir < 0 && pending_region_position >= sync_offset)) {
+				sync_frame = pending_region_position + (sync_dir*sync_offset);
+
+				/* we snap if the snap modifier is not enabled.
+				 */
 	    
-			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-				snap_to (sync_frame);	
-			}
+				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+					snap_to (sync_frame);	
+				}
 	    
-			if (sync_frame - sync_offset <= sync_frame) {
-				pending_region_position = sync_frame - (sync_dir*sync_offset);
+				pending_region_position = rv->region()->adjust_to_sync (sync_frame);
+
 			} else {
-				pending_region_position = 0;
+				pending_region_position = drag_info.last_frame_position;
 			}
 	    
 		} else {

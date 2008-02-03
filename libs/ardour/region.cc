@@ -764,14 +764,14 @@ Region::adjust_to_sync (nframes_t pos)
 	// cerr << "adjusting pos = " << pos << " to sync at " << _sync_position << " offset = " << offset << " with dir = " << sync_dir << endl;
 	
 	if (sync_dir > 0) {
-		if (max_frames - pos > offset) {
-			pos -= offset;
-		}
-	} else {
 		if (pos > offset) {
-			pos += offset;
+			pos -= offset;
 		} else {
 			pos = 0;
+		}
+	} else {
+		if (max_frames - pos > offset) {
+			pos += offset;
 		}
 	}
 
