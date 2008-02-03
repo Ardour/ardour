@@ -3304,7 +3304,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			/* we don't handle a sync point that lies before zero.
 			 */
-			if (sync_dir > 0 || (sync_dir < 0 && pending_region_position >= sync_offset)) {
+			if (sync_dir >= 0 || (sync_dir < 0 && pending_region_position >= sync_offset)) {
 				sync_frame = pending_region_position + (sync_dir*sync_offset);
 
 				/* we snap if the snap modifier is not enabled.
