@@ -91,7 +91,7 @@ style "default_base" = "medium_text"
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
   GtkTreeView::even-row-color = { 0, 0, 0 }
-  GtkTreeView::odd-row-color = {  0.10, 0.10, 0.15 }
+  GtkTreeView::odd-row-color = {  0.08, 0.10, 0.15 }
   
   fg[NORMAL] = { 0.80, 0.80, 0.80 }	
   fg[ACTIVE] = { 0.80, 0.80, 0.80 }	
@@ -99,10 +99,10 @@ style "default_base" = "medium_text"
   fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
   fg[SELECTED] = { 0.80, 0.80, 0.80 }	
   
-  bg[NORMAL] = { 0.35, 0.35, 0.40 }
-  bg[ACTIVE] = { 0.35, 0.35, 0.40 }
-  bg[PRELIGHT] = "#565690"
-  bg[INSENSITIVE] = { 0.10, 0.10, 0.10 }
+  bg[NORMAL] = { 0.31, 0.35, 0.40 }
+  bg[ACTIVE] = { 0.31, 0.35, 0.40 }
+  bg[PRELIGHT] = "#515690"
+  bg[INSENSITIVE] = { 0.06, 0.10, 0.10 }
   bg[SELECTED] = { 0, 0.40, 0.60 }
   
   text[NORMAL] = { 0.80, 0.80, 0.80 }	
@@ -113,13 +113,18 @@ style "default_base" = "medium_text"
   
   base[ACTIVE]     = "#272a2f"
   base[NORMAL]      =  "#1a1e20"
-  base[PRELIGHT]     = { 0.20, 0.20, 0.20 }
+  base[PRELIGHT]     = { 0.18, 0.20, 0.20 }
   base[INSENSITIVE]  = "#4c5159"
-  base[SELECTED]     = { 0.25, 0.25, 0.25 }
+  base[SELECTED]     = { 0.23, 0.25, 0.25 }
 
   engine "clearlooks" 
   {
-    menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
+    menubarstyle       = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
+    style              = GLOSSY
+    colorize_scrollbar = TRUE
+    menubarstyle       = 2 # 0 = flat, 1 = sunken, 2 = flat gradient
+    toolbarstyle       = 0 # 0 = flat, 1 = enable effects
+
   }
 }
 

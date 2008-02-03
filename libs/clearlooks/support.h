@@ -1,110 +1,38 @@
+#ifndef SUPPORT_H
+#define SUPPORT_H
+
 #include <gtk/gtk.h>
 #include <math.h>
 #include <string.h>
 
-/* GTK 2.2 compatibility */
-#ifndef GTK_IS_COMBO_BOX_ENTRY
-	#define GTK_IS_COMBO_BOX_ENTRY(x) 0
-#endif
-#ifndef GTK_IS_COMBO_BOX
-	#define GTK_IS_COMBO_BOX(x) 0
-#endif
+#include "clearlooks_types.h"
 
 #define RADIO_SIZE 13
 #define CHECK_SIZE 13
 
-GtkTextDirection
-get_direction (GtkWidget *widget);
+GE_INTERNAL void              clearlooks_treeview_get_header_index (GtkTreeView  *tv,
+                                                 GtkWidget    *header,
+                                                 gint         *column_index,
+                                                 gint         *columns,
+                                                 gboolean     *resizable);
 
-GdkPixbuf *
-generate_bit (unsigned char alpha[],
-              GdkColor *color,
-              double mult);
+GE_INTERNAL void              clearlooks_clist_get_header_index    (GtkCList     *clist,
+                                                 GtkWidget    *button,
+                                                 gint         *column_index,
+                                                 gint         *columns);
+#ifdef DEVELOPMENT
+#warning clearlooks_get_parent_bg is a bad hack - find out why its needed, and figure out a better way.
+#endif
 
-GdkPixbuf *
-colorize_bit (unsigned char *bit,
-              unsigned char *alpha,
-              GdkColor  *new_color);
+GE_INTERNAL void              clearlooks_get_parent_bg      (const GtkWidget *widget,
+                                                 CairoColor      *color);
 
-GdkPixmap *
-pixbuf_to_pixmap (GtkStyle  *style,
-                  GdkPixbuf *pixbuf,
-                  GdkScreen *screen);
+GE_INTERNAL ClearlooksStepper clearlooks_scrollbar_get_stepper         (GtkWidget       *widget,
+                                                 GdkRectangle    *stepper);
+GE_INTERNAL ClearlooksStepper clearlooks_scrollbar_visible_steppers    (GtkWidget       *widget);
+GE_INTERNAL ClearlooksJunction clearlooks_scrollbar_get_junction       (GtkWidget    *widget);
 
-gboolean
-sanitize_size (GdkWindow      *window,
-               gint           *width,
-               gint           *height);
+GE_INTERNAL void clearlooks_set_toolbar_parameters (ToolbarParameters *toolbar, GtkWidget *widget, GdkWindow *window, gint x, gint y);
+GE_INTERNAL void clearlooks_get_notebook_tab_position (GtkWidget *widget, gboolean *start, gboolean *end);
 
-void
-rgb_to_hls (gdouble *r,
-            gdouble *g,
-            gdouble *b);
-
-void
-hls_to_rgb (gdouble *h,
-            gdouble *l,
-            gdouble *s);
-
-void
-shade (GdkColor * a, GdkColor * b, float k);
-
-void
-draw_hgradient (GdkDrawable *drawable, GdkGC *gc, GtkStyle *style,
-                int x, int y, int width, int height,
-                GdkColor *top_color, GdkColor *bottom_color);
-
-void
-draw_vgradient (GdkDrawable *drawable, GdkGC *gc, GtkStyle *style,
-                int x, int y, int width, int height,
-                GdkColor *left_color, GdkColor *right_color);
-
-void
-arrow_draw_hline (GdkWindow     *window,
-                  GdkGC         *gc,
-                  int            x1,
-                  int            x2,
-                  int            y,
-                  gboolean       last);
-
-void
-arrow_draw_vline (GdkWindow     *window,
-                  GdkGC         *gc,
-                  int            y1,
-                  int            y2,
-                  int            x,
-                  gboolean       last);
-
-void
-draw_arrow (GdkWindow     *window,
-            GdkGC         *gc,
-            GdkRectangle  *area,
-            GtkArrowType   arrow_type,
-            gint           x,
-            gint           y,
-            gint           width,
-            gint           height);
-
-void
-calculate_arrow_geometry (GtkArrowType  arrow_type,
-                          gint         *x,
-                          gint         *y,
-                          gint         *width,
-                          gint         *height);
-						  
-GtkWidget *special_get_ancestor(GtkWidget * widget,
-				       GType widget_type);
-					   
-void blend (GdkColormap *colormap,
-            GdkColor *a, GdkColor *b, GdkColor *c, int alpha);
-			
-GtkWidget *get_parent_window (GtkWidget *widget);
-
-GdkColor *get_parent_bgcolor (GtkWidget *widget);
-
-gboolean is_combo_box (GtkWidget * widget);
-
-GtkWidget *find_combo_box_widget (GtkWidget * widget);
-
-void gtk_clist_get_header_index (GtkCList *clist, GtkWidget *button,
-                                 gint *column_index, gint *columns);
+#endif /* SUPPORT_H */

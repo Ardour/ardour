@@ -1,5 +1,6 @@
 /* Clearlooks Engine
  * Copyright (C) 2005 Richard Stellingwerff.
+ * Copyright (C) 2006 Benjamin Berg
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -22,12 +23,16 @@
  */
 #include <gtk/gtkstyle.h>
 
-#include "clearlooks_draw.h"
+#ifndef CLEARLOOKS_STYLE_H
+#define CLEARLOOKS_STYLE_H
+
+#include "animation.h"
+#include "clearlooks_types.h"
 
 typedef struct _ClearlooksStyle ClearlooksStyle;
 typedef struct _ClearlooksStyleClass ClearlooksStyleClass;
 
-extern GType clearlooks_type_style;
+GE_INTERNAL extern GType clearlooks_type_style;
 
 #define CLEARLOOKS_TYPE_STYLE              clearlooks_type_style
 #define CLEARLOOKS_STYLE(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), CLEARLOOKS_TYPE_STYLE, ClearlooksStyle))
@@ -36,73 +41,30 @@ extern GType clearlooks_type_style;
 #define CLEARLOOKS_IS_STYLE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), CLEARLOOKS_TYPE_STYLE))
 #define CLEARLOOKS_STYLE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), CLEARLOOKS_TYPE_STYLE, ClearlooksStyleClass))
 
-typedef enum
-{
-	CL_BORDER_UPPER = 0,
-	CL_BORDER_LOWER,
-	CL_BORDER_UPPER_ACTIVE,
-	CL_BORDER_LOWER_ACTIVE,
-	CL_BORDER_COUNT
-} ClBorderColorType;
-
-typedef enum
-{
-	CL_SCROLLBUTTON_BEGIN = 0,
-	CL_SCROLLBUTTON_END,
-	CL_SCROLLBUTTON_OTHER
-} ClScrollButtonType;
-
 struct _ClearlooksStyle
 {
 	GtkStyle parent_instance;
-	
-	GdkColor shade[9];
-	
-	GdkColor spot_color;
-	GdkColor spot1;
-	GdkColor spot2;
-	GdkColor spot3;
-	
-	GdkColor border[CL_BORDER_COUNT];
-	
-	/* from light to dark */
-	GdkGC *shade_gc[9];
-	GdkGC *border_gc[CL_BORDER_COUNT];
-	
-	GdkGC *spot1_gc;
-	GdkGC *spot2_gc;
-	GdkGC *spot3_gc;
-	
-	GdkColor inset_light[5];
-	GdkColor inset_dark[5];
-	
-	GdkColor button_g1[5];
-	GdkColor button_g2[5];
-	GdkColor button_g3[5];
-	GdkColor button_g4[5];
-	
-	GdkColor listview_bg[5];
 
-	GdkPixmap *radio_pixmap_nonactive[5];
-	GdkPixmap *radio_pixmap_active[5];
-	GdkPixmap *radio_pixmap_inconsistent[5];
-	GdkBitmap *radio_pixmap_mask; /* All masks are the same */
-	
-	GdkPixmap *check_pixmap_nonactive[5];
-	GdkPixmap *check_pixmap_active[5];
-	GdkPixmap *check_pixmap_inconsistent[5];
-	
-	gboolean sunkenmenubar:1;
+	ClearlooksColors colors;
 
-	guint8   progressbarstyle;
+	ClearlooksStyles style;
+	
 	guint8   menubarstyle;
-	guint8   menuitemstyle;
-	guint8   listviewitemstyle;
+	guint8   toolbarstyle;
+	GdkColor scrollbar_color;
+	gboolean colorize_scrollbar;
+	gboolean has_scrollbar_color;
+	gboolean animation;
+	gfloat   radius;
 };
 
 struct _ClearlooksStyleClass
 {
-  GtkStyleClass parent_class;
+	GtkStyleClass parent_class;
+
+	ClearlooksStyleFunctions style_functions[CL_NUM_STYLES];
 };
 
-void clearlooks_style_register_type (GTypeModule *module);
+GE_INTERNAL void clearlooks_style_register_type (GTypeModule *module);
+
+#endif /* CLEARLOOKS_STYLE_H */
