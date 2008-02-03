@@ -1141,6 +1141,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	Marker * marker;
 	double fraction;
 	
+	if (last_item_entered != item) {
+		last_item_entered = item;
+		last_item_entered_n = 0;
+	}
+
 	switch (item_type) {
 	case GainControlPointItem:
 		if (mouse_mode == MouseGain) {
@@ -1156,11 +1161,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 			fraction = 1.0 - (cp->get_y() / cp->line.height());
 
-			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
-			show_verbose_canvas_cursor ();
-
 			if (is_drawable() && !_scrubbing) {
 			        track_canvas.get_window()->set_cursor (*fader_cursor);
+			}
+
+			last_item_entered_n++;
+			set_verbose_canvas_cursor (cp->line.get_verbose_cursor_string (fraction), at_x, at_y);
+			if (last_item_entered_n < 10) {
+				show_verbose_canvas_cursor ();
 			}
 		}
 		break;

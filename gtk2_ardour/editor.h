@@ -1274,6 +1274,14 @@ class Editor : public PublicEditor
 	bool canvas_fade_in_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
+	
+
+	// These variables are used to detect a feedback loop and break it to avoid a gui hang
+private:
+	ArdourCanvas::Item *last_item_entered;
+	int last_item_entered_n;
+public:
+
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);

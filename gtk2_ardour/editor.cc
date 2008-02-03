@@ -288,6 +288,8 @@ Editor::Editor ()
 	verbose_cursor_on = true;
 	route_removal = false;
 	show_automatic_regions_in_region_list = true;
+	last_item_entered = 0;
+	last_item_entered_n = 0;
 
 	region_list_sort_type = (Editing::RegionListSortType) 0;
 	have_pending_keyboard_selection = false;
