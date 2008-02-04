@@ -488,9 +488,7 @@ sf_error (SNDFILE *sndfile)
 {	SF_PRIVATE	*psf ;
 
 	if (! sndfile)
-	{	if (sf_error != 0)
-			return sf_errno ;
-		return 0 ;
+	{	return sf_errno ;
 		} ;
 
 	VALIDATE_SNDFILE_AND_ASSIGN_PSF (sndfile, psf, 0) ;
