@@ -325,15 +325,15 @@ Editor::track_canvas_size_allocated ()
 	}
 
  	range_marker_drag_rect->property_y1() = y1;
- 	range_marker_drag_rect->property_y2() = y1 + canvas_height;
+ 	range_marker_drag_rect->property_y2() = full_canvas_height;
  	transport_loop_range_rect->property_y1() = y1;
- 	transport_loop_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_loop_range_rect->property_y2() = full_canvas_height;
  	transport_punch_range_rect->property_y1() = y1;
- 	transport_punch_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_punch_range_rect->property_y2() = full_canvas_height;
  	transport_punchin_line->property_y1() = y1;
- 	transport_punchin_line->property_y2() = y1 + canvas_height;
+ 	transport_punchin_line->property_y2() = full_canvas_height;
  	transport_punchout_line->property_y1() = y1;
- 	transport_punchout_line->property_y2() = y1 + canvas_height;
+ 	transport_punchout_line->property_y2() = full_canvas_height;
 	
 	update_fixed_rulers();
 	redisplay_tempo (true);
@@ -694,15 +694,15 @@ Editor::tie_vertical_scrolling ()
 	playhead_cursor->set_y_axis (y1);
 
  	range_marker_drag_rect->property_y1() = y1;
- 	range_marker_drag_rect->property_y2() = y1 + canvas_height;
+ 	range_marker_drag_rect->property_y2() = full_canvas_height;
  	transport_loop_range_rect->property_y1() = y1;
- 	transport_loop_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_loop_range_rect->property_y2() = full_canvas_height;
  	transport_punch_range_rect->property_y1() = y1;
- 	transport_punch_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_punch_range_rect->property_y2() = full_canvas_height;
  	transport_punchin_line->property_y1() = y1;
- 	transport_punchin_line->property_y2() = y1 + canvas_height;
+ 	transport_punchin_line->property_y2() = full_canvas_height;
  	transport_punchout_line->property_y1() = y1;
- 	transport_punchout_line->property_y2() = y1 + canvas_height;
+ 	transport_punchout_line->property_y2() = full_canvas_height;
 
 	if (!selection->markers.empty()) {
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {		

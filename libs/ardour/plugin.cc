@@ -348,6 +348,19 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 			return (*i)->load (session);
 		}
 	}
+
+#ifdef VST_SUPPORT
+	/* hmm, we didn't find it. could be because in older versions of Ardour.
+	   we used to store the name of a VST plugin, not its unique ID. so try
+	   again.
+	*/
+
+	for (i = plugs.begin(); i != plugs.end(); ++i) {
+		if (identifier == (*i)->name){
+			return (*i)->load (session);
+		}
+	}
+#endif
 	
 	return PluginPtr ((Plugin*) 0);
 }
