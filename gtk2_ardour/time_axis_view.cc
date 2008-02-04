@@ -271,6 +271,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 {
+	cerr << "CEB button release\n";
 	switch (ev->button) {
 	case 1:
 		selection_click (ev);

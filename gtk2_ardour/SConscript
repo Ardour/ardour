@@ -405,13 +405,17 @@ keybindings_dict = { }
 
 if gtkardour['GTKOSX'] and gtkardour['NATIVE_OSX_KEYS']:
 	#
-	# Command(Mod1), Alt(Mod5), Ctrl, Shift
+	# Command(Meta), Alt(Mod1), Ctrl, Shift
+	# **** as of february 4th 2008, OUR VERSION OF *****
+	# Gtk/Quartz maps:
+	#  NSCommand (aka "Command" aka "Apple" aka "Cauliflower") -> Meta
+	#  NSAlternate (aka "Option")  -> Mod1
 	#
-	keybindings_dict['%PRIMARY%'] = 'Mod5'
-	keybindings_dict['%SECONDARY%'] = 'Alt'
+	keybindings_dict['%PRIMARY%'] = 'Meta'
+	keybindings_dict['%SECONDARY%'] = 'Mod1'
 	keybindings_dict['%TERTIARY%'] = 'Shift'
 	keybindings_dict['%LEVEL4%'] = 'Ctrl'
-	keybindings_dict['%WINDOW%'] = 'Mod5'
+	keybindings_dict['%WINDOW%'] = 'Mod1'
 else:
 	#
 	# Ctrl, Alt, Shift, Mod3(Meta)

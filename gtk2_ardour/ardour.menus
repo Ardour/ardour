@@ -46,6 +46,8 @@
 	       <separator/>
                <menuitem action='tab-to-transient-forwards'/>
                <menuitem action='tab-to-transient-backwards'/>
+               <menuitem action='nudge-playhead-forward'/>
+               <menuitem action='nudge-playhead-backward'/>
 	       <separator/>
                <menuitem action='Record'/>
                <separator/> 
@@ -118,6 +120,8 @@
     	           <menuitem action='edit-cursor-to-range-start'/>
 	           <menuitem action='edit-cursor-to-range-end'/>
 	       </menu>
+  	      <menuitem action='set-tempo-from-region'/>
+		   <menuitem action='set-tempo-from-edit-range'/>
 	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
 	       		<menuitem action='play-selected-regions'/>
                		<menuitem action='brush-at-mouse'/>
@@ -172,9 +176,7 @@
                	   <menuitem action='normalize-region'/>
                    <separator/>       
 	           <menuitem action="nudge-forward"/>
-         	   <menuitem action="nudge-next-forward"/>
 	           <menuitem action="nudge-backward"/>
-        	   <menuitem action="nudge-next-backward"/>
         	   <menuitem action='split-region'/>
 	       	   <menuitem action='set-region-sync-position'/>
                    <separator/>       
@@ -198,8 +200,6 @@
 		   <menuitem action='trim-region-to-punch'/>
 		   <separator/>
 		   <menuitem action='pitch-shift-region'/>
-		   <menuitem action='set-tempo-from-region'/>
-		   <menuitem action='set-tempo-from-edit-range'/>
 	</menu>
         <menu name='View' action = 'View'>
                <menu name='ZoomFocus' action='ZoomFocus'>

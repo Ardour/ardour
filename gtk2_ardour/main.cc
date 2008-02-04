@@ -122,7 +122,27 @@ fixup_bundle_environment ()
 	path += "/../Plugins";
 	
 	setenv ("LADSPA_PATH", path.c_str(), 1);
+
+	cstr = getenv ("VAMP_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	}
+	path = dir_path;
+	path += "/../Frameworks";
 	
+	setenv ("VAMP_PATH", path.c_str(), 1);
+
+	cstr = getenv ("ARDOUR_CONTROL_SURFACE_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	}
+	path = dir_path;
+	path += "/../Surfaces";
+	
+	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
+
 	cstr = getenv ("LV2_PATH");
 	if (cstr) {
 		path = cstr;

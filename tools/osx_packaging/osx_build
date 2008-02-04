@@ -32,6 +32,7 @@ APPROOT=Ardour2.app/Contents
 Frameworks=$APPROOT/Frameworks
 Resources=$APPROOT/Resources
 Plugins=$APPROOT/Plugins
+Surfaces=$APPROOT/Surfaces
 Shared=$Resources/share
 Etc=$Resources/etc
 
@@ -60,6 +61,7 @@ echo "Building new app directory structure ..."
 mkdir -p $APPROOT/MacOS
 mkdir -p $APPROOT/Resources
 mkdir -p $APPROOT/Plugins
+mkdir -p $APPROOT/Surfaces
 mkdir -p $Frameworks/modules
 mkdir -p $Shared/templates
 mkdir -p $Etc
@@ -140,8 +142,12 @@ mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
 # XXX STILL NEED TO DO PANNERS FOR TRUNK
+cp ../../libs/surfaces/*/libardour_*.dylib $Surfaces
+# hack ... move libardour_cp back into Frameworks
+cp $Surfaces/libardour_cp*.dylib $Frameworks
 
-cp ../../libs/surfaces/*/libardour_*.dylib $Frameworks
+# VAMP plugins that we use
+cp ../../libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
 while [ true ] ; do 
     missing=false
@@ -228,7 +234,7 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so ; do
+for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Surfaces/*.dylib ; do
     # skip symlinks
     if test ! -L $dylib ; then
 	

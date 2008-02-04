@@ -5128,6 +5128,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		if ((*x) > pos) {
 			break;
 		}
+		++x;
 	}
 	
 	if (x == positions.end()) {

@@ -331,6 +331,8 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 		    modifiers |= kMenuShiftModifier;
 		  }
 
+		  /* gdk/quartz maps Alt/Option to Mod1 */
+
 		  if (key->accel_mods & (GDK_MOD1_MASK)) {
 		    modifiers |= kMenuOptionModifier;
 		  }
@@ -338,12 +340,10 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 		  if (key->accel_mods & GDK_CONTROL_MASK) {
 		    modifiers |= kMenuControlModifier;
 		  }
+
+		  /* gdk/quartz maps Command to Meta */
 		  
-		  if (key->accel_mods & GDK_MOD5_MASK) {
-			  /* Mod5 is what ardour's binding file uses to mean "Command"
-			     Nothing needs to be set in modifiers, but we need to notice
-			     that there *is* an implicit modifier
-			  */
+		  if (key->accel_mods & GDK_META_MASK) {
 			  use_command = 1;
 		  }
 		}  

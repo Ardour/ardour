@@ -460,42 +460,51 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		   it does allow.
 		*/
 
+		int fakekey = GDK_VoidSymbol;
 		int ret = false;
 
 		switch (ev->keyval) {
 		case GDK_Tab:
-			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_nabla, GdkModifierType(ev->state));
-			break;
-
-		// some X and/or GDK implementations do Shift-Tab -> GDK_ISO_Left_Tab
-
 		case GDK_ISO_Left_Tab:
-			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_nabla, GdkModifierType(ev->state));
+			fakekey = GDK_nabla;
 			break;
 
 		case GDK_Up:
-			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_uparrow, GdkModifierType(ev->state));
+			fakekey = GDK_uparrow;
 			break;
 
 		case GDK_Down:
-			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_downarrow, GdkModifierType(ev->state));
+			fakekey = GDK_downarrow;
 			break;
 
 		case GDK_Right:
-			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_rightarrow, GdkModifierType(ev->state));
+			fakekey = GDK_rightarrow;
 			break;
 
 		case GDK_Left:
-			ret = gtk_accel_groups_activate(G_OBJECT(win), GDK_leftarrow, GdkModifierType(ev->state));
+			fakekey = GDK_leftarrow;
 			break;
 
 		default:
 			break;
 		}
 
-		if (ret) {
-			return true;
+		if (fakekey != GDK_VoidSymbol) {
+			ret = gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state));
+			
+			if (ret) {
+				return true;
+			}
+
+#ifdef GTKOSX
+			int oldval = ev->keyval;
+			ev->keyval = fakekey;
+			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
+				return true;
+			}
+			ev->keyval = oldval;
 		}
+#endif
 	}
 
 	/* consider all relevant modifiers but not LOCK or SHIFT */

@@ -3,6 +3,7 @@
 #include <ardour/profile.h>
 
 #include <gtkmm/stock.h>
+#include <gtkmm/label.h>
 #include <gtkmm/accelkey.h>
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
@@ -50,17 +51,23 @@ KeyEditor::KeyEditor ()
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	unbind_box.pack_start (unbind_button, false, false);
-
-	unbind_button.signal_clicked().connect (mem_fun (*this, &KeyEditor::unbind));
 
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (scroller);
 
 	if (!ARDOUR::Profile->get_sae()) {
+
+		Label* hint = manage (new Label (_("Select an action, then press the key(s) to (re)set its shortcut")));
+		hint->show ();
+		unbind_box.set_spacing (6);
+		unbind_box.pack_start (*hint, false, true);
+		unbind_box.pack_start (unbind_button, false, false);
+		unbind_button.signal_clicked().connect (mem_fun (*this, &KeyEditor::unbind));
+
 		get_vbox()->pack_start (unbind_box, false, false);
 		unbind_box.show ();
 		unbind_button.show ();
+		
 	}
 
 	get_vbox()->set_border_width (12);
@@ -248,9 +255,16 @@ KeyEditor::populate ()
 
 #ifdef GTKOSX
 			string label = (*k);
-			replace_all (label, "<Mod5>", _("Command-"));
+
+			/* Gtk/Quartz maps:
+			   NSAlternate/NSOption key to Mod1
+			   NSCommand key to Meta 
+			*/
+
+			replace_all (label, "<Meta>", _("Command-"));
 			replace_all (label, "<Alt>", _("Option-"));
 			replace_all (label, "<Shift>", _("Shift-"));
+			replace_all (label, "<Control>", _("Control-"));
 			row[columns.binding] = label;
 #else		
 			row[columns.binding] = (*k);

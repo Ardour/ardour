@@ -203,6 +203,11 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "nudge-next-backward", _("Nudge Next Backward"), bind (mem_fun(*this, &Editor::nudge_backward), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "nudge-playhead-forward", _("Nudge Playhead Forward"), bind (mem_fun(*this, &Editor::nudge_forward), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "nudge-playhead-backward", _("Nudge Playhead Backward"), bind (mem_fun(*this, &Editor::nudge_backward), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 
 	act = ActionManager::register_action (editor_actions, "temporal-zoom-out", _("Zoom Out"), bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	ActionManager::session_sensitive_actions.push_back (act);

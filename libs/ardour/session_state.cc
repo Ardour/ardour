@@ -2139,6 +2139,10 @@ Session::template_path ()
 string
 Session::control_protocol_path ()
 {
+	char *p = getenv ("ARDOUR_CONTROL_SURFACE_PATH");
+	if (p && *p) {
+		return p;
+	}
 	return suffixed_search_path (X_("surfaces"), false);
 }
 
