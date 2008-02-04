@@ -144,7 +144,7 @@ mkdir -p $Frameworks/clearlooks/engines
 # XXX STILL NEED TO DO PANNERS FOR TRUNK
 cp ../../libs/surfaces/*/libardour_*.dylib $Surfaces
 # hack ... move libardour_cp back into Frameworks
-cp $Surfaces/libardour_cp*.dylib $Frameworks
+mv $Surfaces/libardour_cp.dylib $Frameworks
 
 # VAMP plugins that we use
 cp ../../libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
