@@ -503,8 +503,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 				return true;
 			}
 			ev->keyval = oldval;
-		}
 #endif
+		}
 	}
 
 	/* consider all relevant modifiers but not LOCK or SHIFT */
