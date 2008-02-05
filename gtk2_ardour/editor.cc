@@ -3080,12 +3080,12 @@ Editor::duplicate_dialog (bool with_dialog)
 		}
 	}
 
+	RegionSelection rs;
+	get_regions_for_action (rs);
 	
 	if (mouse_mode != MouseRange) {
 
-		ensure_entered_region_selected (true);
-
-		if (selection->regions.empty()) {
+		if (rs.empty()) {
 			return;
 		}
 	}
@@ -3136,7 +3136,7 @@ Editor::duplicate_dialog (bool with_dialog)
 	if (mouse_mode == MouseRange) {
 		duplicate_selection (times);
 	} else {
-		duplicate_some_regions (selection->regions, times);
+		duplicate_some_regions (rs, times);
 	}
 }
 
@@ -4268,10 +4268,9 @@ Editor::set_punch_range (nframes_t start, nframes_t end, string cmd)
 	commit_reversible_command ();
 }
 
-RegionSelection
-Editor::get_regions_at (nframes64_t where, const TrackSelection& ts) const
+void
+Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelection& ts) const
 {
-	RegionSelection rs;
 	const TrackSelection* tracks;
 
 	if (ts.empty()) {
@@ -4305,15 +4304,11 @@ Editor::get_regions_at (nframes64_t where, const TrackSelection& ts) const
 			}
 		}
 	}
-
-	return rs;
 }
 
-
-RegionSelection
-Editor::get_regions_after (nframes64_t where, const TrackSelection& ts) const
+void
+Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSelection& ts) const
 {
-	RegionSelection rs;
 	const TrackSelection* tracks;
 
 	if (ts.empty()) {
@@ -4347,20 +4342,51 @@ Editor::get_regions_after (nframes64_t where, const TrackSelection& ts) const
 			}
 		}
 	}
-
-	return rs;
 }
 
-RegionSelection&
-Editor::get_regions_for_action ()
+void
+Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 {
-	if (!selection->regions.empty()) {
-		return selection->regions;
-	} 
+	bool use_regions_at = true;
 
-	nframes64_t where = get_preferred_edit_position();
-	tmp_regions = get_regions_at (where, selection->tracks);
-	return tmp_regions;
+	if (selection->regions.empty()) {
+
+		if (selection->tracks.empty()) {
+
+			/* no regions or tracks selected, but entered regionview is valid
+			   and we're in object mode - just use entered regionview
+			*/
+			
+			if (entered_regionview && (mouse_mode == Editing::MouseObject)) {
+				rs.add (entered_regionview);
+				return;
+			}
+		}
+	} else {
+		use_regions_at = false;
+	}
+
+	rs = selection->regions;
+
+	/* consider adding the entered regionview */
+
+	if (allow_entered && entered_regionview && (mouse_mode == Editing::MouseObject)) {
+		if (!selection->selected (entered_regionview)) {
+			rs.add (entered_regionview);
+		}
+	}
+
+	if (use_regions_at) {
+
+		/* nothing selected, so get all regions at the edit point across
+		   all selected tracks
+		*/
+		
+		if (!selection->tracks.empty()) {
+			nframes64_t where = get_preferred_edit_position();
+			get_regions_at (rs, where, selection->tracks);
+		}
+	}
 }
 
 void

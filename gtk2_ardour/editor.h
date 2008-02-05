@@ -2009,18 +2009,7 @@ public:
 	TimeAxisView* entered_track;
 	RegionView*   entered_regionview;
 
-	class ExclusiveRegionSelection {
-	  public:
-		ExclusiveRegionSelection (Editor&, RegionView*);
-		~ExclusiveRegionSelection ();
 
-	  private:
-		Editor& editor;
-		RegionView* regionview;
-		bool remove;
-	};
-
-	void ensure_entered_region_selected (bool op_acts_on_objects = false);
 	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
 	gint left_track_canvas (GdkEventCrossing*);
@@ -2065,12 +2054,10 @@ public:
 
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 
-	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
-	RegionSelection get_regions_after (nframes64_t where, const TrackSelection& ts) const;
+	void get_regions_at (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
+	void get_regions_after (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
 	
-	RegionSelection tmp_regions;
-	
-	RegionSelection& get_regions_for_action ();
+	void get_regions_for_action (RegionSelection&, bool allowed_entered_regionview = true);
 
 	sigc::connection fast_screen_update_connection;
 	gint start_updating ();

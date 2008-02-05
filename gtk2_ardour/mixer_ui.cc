@@ -202,10 +202,6 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 							 static_cast<Gtk::Paned*> (&list_hpane)));
 	
-
-	rhs_pane1.set_data ("collapse-direction", (gpointer) 0);
-	list_hpane.set_data ("collapse-direction", (gpointer) 1);
-
 	global_vpacker.pack_start (list_hpane, true, true);
 
 	add (global_vpacker);

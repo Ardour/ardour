@@ -1328,27 +1328,4 @@ Editor::deselect_all ()
 	selection->clear ();
 }
 
-Editor::ExclusiveRegionSelection::ExclusiveRegionSelection (Editor& ed, RegionView* rv)
-	: editor (ed),
-	  regionview (rv)
-{
-
-	if (!rv || ed.current_mouse_mode() != Editing::MouseObject) {
-		return;
-	}
-	
-	if (ed.get_selection().regions.empty() && !ed.get_selection().selected (rv)) {
-		ed.get_selection().set (rv, false);
-		remove = true;
-	} else {
-		remove = false;
-	}
-}
-
-Editor::ExclusiveRegionSelection::~ExclusiveRegionSelection ()
-{
-	if (remove && regionview) {
-		editor.get_selection().remove (regionview);
-	}
-}
 
