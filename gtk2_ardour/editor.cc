@@ -1757,7 +1757,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 		bbt_glue_item->set_active (true);
 		break;
 	default:
-		bbt_glue_item->set_active (true);
+		bbt_glue_item->set_active (false);
 		break;
 	}
 

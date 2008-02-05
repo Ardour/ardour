@@ -1917,6 +1917,7 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 		XMLNode &before = alist.get_state();
 
 		tmp->audio_region()->set_fade_in_length (fade_length);
+		tmp->audio_region()->set_fade_in_active (true);
 		
 		XMLNode &after = alist.get_state();
 		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));
@@ -2033,6 +2034,7 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 		XMLNode &before = alist.get_state();
 		
 		tmp->audio_region()->set_fade_out_length (fade_length);
+		tmp->audio_region()->set_fade_out_active (true);
 
 		XMLNode &after = alist.get_state();
 		session->add_command(new MementoCommand<AutomationList>(alist, &before, &after));

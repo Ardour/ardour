@@ -323,74 +323,66 @@ if gtkardour['IS_OSX']:
 	#
 	# OS X font rendering is different even with X11
 	#
-	my_font_dict['%FONT_TINY%'] = 'Lucida Grande 7'
-	my_font_dict['%FONT_SMALLERER%'] = 'Lucida Grande 8'
-	my_font_dict['%FONT_SMALLER%'] = 'Lucida Grande 9'
-	my_font_dict['%FONT_SMALL%'] = 'Lucida Grande 10'
-	my_font_dict['%FONT_NORMAL%'] = 'Lucida Grande 11'
-	my_font_dict['%FONT_BIG%'] = 'Lucida Grande 12'
-	my_font_dict['%FONT_BIGGER%'] = 'Lucida Grande 14'
-	my_font_dict['%FONT_LARGE%'] = 'Lucida Grande 18'
-	my_font_dict['%FONT_LARGER%'] = 'Lucida Grande 28'
-	my_font_dict['%FONT_HUGER%'] = 'Lucida Grande 36'
-	my_font_dict['%FONT_MASSIVE%'] = 'Lucida Grande 60'
-	my_font_dict['%FONT_BOLD_TINY%'] = 'Lucida Grande bold 7'
-	my_font_dict['%FONT_BOLD_SMALLER%'] = 'Lucida Grande bold 9'
-	my_font_dict['%FONT_BOLD_SMALL%'] = 'Lucida Grande bold 10'
-	my_font_dict['%FONT_BOLD_NORMAL%'] = 'Lucida Grande bold 11'
-	my_font_dict['%FONT_BOLD_BIG%'] = 'Lucida Grande bold 13'
-	my_font_dict['%FONT_BOLD_BIGGER%'] = 'Lucida Grande bold 14'
-	my_font_dict['%FONT_BOLD_LARGE%'] = 'Lucida Grande bold 20'
-	my_font_dict['%FONT_BOLD_LARGER%'] = 'Lucida Grande bold 25'
-	my_font_dict['%FONT_BOLD_HUGER%'] = 'Lucida Grande bold 36'
-	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'Lucida Grande bold 60'
-	my_font_dict['%FONT_ITALIC_TINY%'] = 'Lucida Grande italic 7'
-	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'Lucida Grande italic 9'
-	my_font_dict['%FONT_ITALIC_SMALL%'] = 'Lucida Grande italic 10'
-	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'Lucida Grande italic 11'
-	my_font_dict['%FONT_ITALIC_BIG%'] = 'Lucida Grande italic 15'
-	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'Lucida Grande italic 16'
-	my_font_dict['%FONT_ITALIC_LARGE%'] = 'Lucida Grande italic 20'
-	my_font_dict['%FONT_ITALIC_LARGER%'] = 'Lucida Grande italic 28'
-	my_font_dict['%FONT_ITALIC_HUGER%'] = 'Lucida Grande italic 36'
-	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'Lucida Grande italic 60'
+
+	font_sizes = {
+		'TINY' : '7',
+		'SMALLER' : '9',
+		'SMALL' : '10',
+		'NORMAL' : '11',
+		'BIG' : '12',
+		'BIGGER' : '14',
+		'LARGE' : '18',
+		'LARGER' : '28',
+		'HUGER' : '36',
+		'MASSIVE' : '60'
+		}
+	basefont = "Lucida Grande"
+
 else:
 	#
 	# Linux/X11 font rendering
 	#
-	my_font_dict['%FONT_TINY%'] = 'sans 4'
-	my_font_dict['%FONT_SMALLERER%'] = 'sans 6'
-	my_font_dict['%FONT_SMALLER%'] = 'sans 6'
-	my_font_dict['%FONT_SMALL%'] = 'sans 7'
-	my_font_dict['%FONT_NORMAL%'] = 'sans 8'
-	my_font_dict['%FONT_BIG%'] = 'sans 12'
-	my_font_dict['%FONT_BIGGER%'] = 'sans 14'
-	my_font_dict['%FONT_LARGE%'] = 'sans 18'
-	my_font_dict['%FONT_LARGER%'] = 'sans 24'
-	my_font_dict['%FONT_HUGER%'] = 'sans 34'
-	my_font_dict['%FONT_MASSIVE%'] = 'sans 60'
-	my_font_dict['%FONT_BOLD_TINY%'] = 'sans bold 4'
-	my_font_dict['%FONT_BOLD_SMALLER%'] = 'sans bold 6'
-	my_font_dict['%FONT_BOLD_SMALL%'] = 'sans bold 7'
-	my_font_dict['%FONT_BOLD_NORMAL%'] = 'sans bold 8'
-	my_font_dict['%FONT_BOLD_BIG%'] = 'sans bold 12'
-	my_font_dict['%FONT_BOLD_BIGGER%'] = 'sans bold 14'
-	my_font_dict['%FONT_BOLD_LARGE%'] = 'sans bold 18'
-	my_font_dict['%FONT_BOLD_LARGER%'] = 'sans bold 24'
-	my_font_dict['%FONT_BOLD_HUGE%'] = 'sans bold 25'
-	my_font_dict['%FONT_BOLD_HUGER%'] = 'sans bold 34'
-	my_font_dict['%FONT_BOLD_MASSIVE%'] = 'sans bold 60'
-	my_font_dict['%FONT_ITALIC_TINY%'] = 'sans italic 4'
-	my_font_dict['%FONT_ITALIC_SMALLER%'] = 'sans italic 6'
-	my_font_dict['%FONT_ITALIC_SMALL%'] = 'sans italic 7'
-	my_font_dict['%FONT_ITALIC_NORMAL%'] = 'sans italic 8'
-	my_font_dict['%FONT_ITALIC_BIG%'] = 'sans italic 12'
-	my_font_dict['%FONT_ITALIC_BIGGER%'] = 'sans italic 14'
-	my_font_dict['%FONT_ITALIC_LARGE%'] = 'sans italic 18'
-	my_font_dict['%FONT_ITALIC_LARGER%'] = 'sans italic 24'
-	my_font_dict['%FONT_ITALIC_HUGE%'] = 'sans italic 25'
-	my_font_dict['%FONT_ITALIC_HUGER%'] = 'sans italic 34'
-	my_font_dict['%FONT_ITALIC_MASSIVE%'] = 'sans italic 60'
+	
+	if gtkardour['OLDFONTS']:
+		font_sizes = {
+			'TINY' : '4',
+			'SMALLER' : '6',
+			'SMALL' : '7',
+			'NORMAL' : '8',
+			'BIG' : '12',
+			'BIGGER' : '14',
+			'LARGE' : '18',
+			'LARGER' : '24',
+			'HUGER' : '34',
+			'MASSIVE' : '60'
+			}
+	else:
+		font_sizes = {
+			'TINY' : '6',
+			'SMALLER' : '8',
+			'SMALL' : '9',
+			'NORMAL' : '10',
+			'BIG' : '14',
+			'BIGGER' : '16',
+			'LARGE' : '18',
+			'LARGER' : '24',
+			'HUGER' : '34',
+			'MASSIVE' : '60'
+			}
+
+	basefont = "sans"
+
+for style in ['', 'BOLD', 'ITALIC']:
+	for sizename,points in font_sizes.iteritems():
+		if (len (style)):
+			key = "_".join (['FONT',style,sizename])
+			fontstyle = " ".join ([basefont,style.lower(),points])
+		else:
+			key = "_".join (['FONT',sizename])
+			fontstyle = " ".join ([basefont,points])
+
+		key = '%' + key + '%'
+		my_font_dict[key] = fontstyle
 
 ardour_dark_theme = env.SubstInFile ('ardour2_ui_dark.rc', 'ardour2_ui_dark.rc.in', SUBST_DICT = my_font_dict)
 ardour_light_theme = env.SubstInFile ('ardour2_ui_light.rc', 'ardour2_ui_light.rc.in', SUBST_DICT = my_font_dict)

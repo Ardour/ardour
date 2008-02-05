@@ -275,20 +275,20 @@ style "solo_button_active" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_solo_button_alternate" = "solo_button_alternate"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 style "mixer_solo_button_active" = "solo_button_active"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -324,23 +324,16 @@ style "mute_button_active" = "small_button"
 	fg[PRELIGHT] = { 0, 0, 0 }
 }
 
-style "mixer_mute_button" = "mute_button"
-{
-	font_name = "%FONT_SMALLERER%"
-	xthickness = 0
-	ythickness = 0
-}
-
 style "mixer_mute_button_alternate" = "mute_button_alternate"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_active" = "mute_button_active"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -354,7 +347,7 @@ style "multiline_combo" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }

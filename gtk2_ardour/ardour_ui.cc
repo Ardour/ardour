@@ -2191,7 +2191,6 @@ ARDOUR_UI::end_loading_messages ()
 void
 ARDOUR_UI::loading_message (const std::string& msg)
 {
-	cerr << "say: " << msg << endl;
 	show_splash ();
 	splash->message (msg);
 	flush_pending ();

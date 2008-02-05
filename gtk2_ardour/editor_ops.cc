@@ -4425,8 +4425,10 @@ Editor::set_fade_length (bool in)
 
 		if (in) {
 			tmp->audio_region()->set_fade_in_length (len);
+			tmp->audio_region()->set_fade_in_active (true);
 		} else {
 			tmp->audio_region()->set_fade_out_length (len);
+			tmp->audio_region()->set_fade_out_active (true);
 		}
 		
 		XMLNode &after = alist->get_state();
