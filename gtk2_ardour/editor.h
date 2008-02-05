@@ -1550,6 +1550,7 @@ public:
 	void drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
 
+	ArdourCanvas::SimpleRect*  cd_marker_bar_drag_rect;
 	ArdourCanvas::SimpleRect*  range_bar_drag_rect;
 	ArdourCanvas::SimpleRect*  transport_bar_drag_rect;
 	ArdourCanvas::Line*        marker_drag_line;

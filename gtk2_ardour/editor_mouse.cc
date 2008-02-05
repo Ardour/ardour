@@ -4746,7 +4746,23 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	nframes_t start = 0;
 	nframes_t end = 0;
-	ArdourCanvas::SimpleRect *crect = (range_marker_op == CreateRangeMarker) ? range_bar_drag_rect: transport_bar_drag_rect;
+	ArdourCanvas::SimpleRect *crect;
+
+	switch (range_marker_op) {
+	case CreateRangeMarker:
+		crect = range_bar_drag_rect;
+		break;
+	case CreateTransportMarker:
+		crect = transport_bar_drag_rect;
+		break;
+	case CreateCDMarker:
+		crect = cd_marker_bar_drag_rect;
+		break;
+	default:
+		cerr << "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()" << endl;
+		return;
+		break;
+	}
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (drag_info.current_pointer_frame);
@@ -4833,9 +4849,11 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			session->locations()->next_available_name(rangename,"unnamed");
 			if (range_marker_op == CreateCDMarker) {
 				flags =  Location::IsRangeMarker|Location::IsCDMarker;
+				cd_marker_bar_drag_rect->hide();
 			}
 			else {
 				flags =  Location::IsRangeMarker;
+				range_bar_drag_rect->hide();
 			}
 			newloc = new Location(temp_location->start(), temp_location->end(), rangename, (Location::Flags) flags);
 			session->locations()->add (newloc, true);
@@ -4843,7 +4861,6 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 			commit_reversible_command ();
 			
-			range_bar_drag_rect->hide();
 			range_marker_drag_rect->hide();
 			break;
 		    }

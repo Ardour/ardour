@@ -184,6 +184,10 @@ Editor::initialize_canvas ()
 	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	transport_marker_bar->property_outline_pixels() = 0;
 	
+	cd_marker_bar_drag_rect = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+	cd_marker_bar_drag_rect->property_outline_pixels() = 0;
+	cd_marker_bar_drag_rect->hide ();
+
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_bar_drag_rect->property_outline_pixels() = 0;
 	range_bar_drag_rect->hide ();
@@ -772,6 +776,9 @@ Editor::color_handler()
 
 	transport_marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportMarkerBar.get();
 	transport_marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
+
+	cd_marker_bar_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
+	cd_marker_bar_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
 
 	range_bar_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
 	range_bar_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();

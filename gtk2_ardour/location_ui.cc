@@ -421,9 +421,9 @@ LocationEditRow::cd_toggled ()
 		return;
 	}
 	
-	if (cd_check_button.get_active() == location->is_cd_marker()) {
-		return;
-	}
+	//if (cd_check_button.get_active() == location->is_cd_marker()) {
+	//	return;
+	//}
 
 	if (cd_check_button.get_active()) {
 		if (location->start() <= session->current_start_frame()) {
