@@ -5019,18 +5019,20 @@ Editor::define_one_bar (nframes64_t start, nframes64_t end)
 		*/
 
 		vector<string> options;
-		options.push_back (_("Set global tempo"));
-		options.push_back (_("Add new marker"));
 		options.push_back (_("Cancel"));
+		options.push_back (_("Add new marker"));
+		options.push_back (_("Set global tempo"));
 		Choice c (_("Do you want to set the global tempo or add new tempo marker?"),
 			  options);
+		c.set_default_response (2);
 
 		switch (c.run()) {
 		case 0:
+			return;
+
+		case 2:
 			do_global = true;
 			break;
-		case 2:
-			return;
 
 		default:
 			do_global = false;
