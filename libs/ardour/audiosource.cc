@@ -994,4 +994,6 @@ AudioSource::check_for_analysis_data_on_disk ()
 	// XXX add other tests here as appropriate
 
 	set_been_analysed (ok);
+
+	return ok;
 }
