@@ -13,7 +13,19 @@ PRINT_SYSDEPS=
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
     case $1 in
-	--sae) SAE=1 ; shift ;;
+
+	#
+	# top level build targets
+	#
+
+	--sae) SAE=1 ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+	--public) SAE= ; WITH_JACK=; WITH_LADSPA=1; STRIP= ; shift ;;
+	--allinone) SAE= ; WITH_JACK=1; WITH_LADSPA=1; STRIP= ; shift ;;
+
+	#
+	# specific build flags
+	#
+
 	--nojack) WITH_JACK= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;

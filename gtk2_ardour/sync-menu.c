@@ -312,16 +312,50 @@ carbon_menu_item_update_accelerator (CarbonMenuItem *carbon_item,
 	  GdkKeymapKey    *keys;
 	  gint             n_keys;
 	  gint             use_command;
+	  gboolean         add_modifiers = FALSE;
 
 	  if (gdk_keymap_get_entries_for_keyval (keymap, key->accel_key,
-						 &keys, &n_keys))
+						 &keys, &n_keys) == 0)
+            {
+		  gint realkey = -1;
+
+		  switch (key->accel_key) {
+		  case GDK_rightarrow:
+		  case GDK_Right:
+			  realkey = kRightArrowCharCode;
+			  break;
+		  case GDK_leftarrow:
+		  case GDK_Left:
+			  realkey = kLeftArrowCharCode;
+			  break;
+		  case GDK_uparrow:
+		  case GDK_Up:
+			  realkey = kUpArrowCharCode;
+			  break;
+		  case GDK_downarrow:
+		  case GDK_Down:
+			  realkey = kDownArrowCharCode;
+			  break;
+		  default:
+			  break;
+		  }
+	  
+		  if (realkey != -1) {
+			  SetMenuItemCommandKey (carbon_item->menu, carbon_item->index,
+						 false, realkey);
+			  add_modifiers = TRUE;
+		  }
+
+	    } else {
+		  SetMenuItemCommandKey (carbon_item->menu, carbon_item->index,
+					 true, keys[0].keycode);
+		  g_free (keys);
+		  add_modifiers = TRUE;
+	    }
+
+	  if (add_modifiers)
 	    {
   	     UInt8 modifiers = 0; /* implies Command key */
-
-	      SetMenuItemCommandKey (carbon_item->menu, carbon_item->index,
-				     true, keys[0].keycode);
-
-	      g_free (keys);
 
 	      use_command = 0;
 
