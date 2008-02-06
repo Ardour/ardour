@@ -3164,10 +3164,9 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position, const R
 
 	/* move rest by the same amount */
 	
-	RegionSelection::const_iterator i = rs.begin();
-	++i;
-
-	for (; i != rs.end(); ++i) {
+	sorted.pop_front();
+	
+	for (list<RegionView*>::iterator i = sorted.begin(); i != sorted.end(); ++i) {
 
 		boost::shared_ptr<Region> region ((*i)->region());
 
