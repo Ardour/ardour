@@ -963,13 +963,7 @@ Editor::set_selection_from_audio_region ()
 		return;
 	}
 
-	RegionView* rv = *(selection->regions.begin());
-	boost::shared_ptr<Region> region = rv->region();
-	
-	begin_reversible_command (_("set selection from region"));
-	selection->set (0, region->position(), region->last_frame());
-	commit_reversible_command ();
-
+	selection->set (0, selection->regions.start(), selection->regions.end_frame());
 	set_mouse_mode (Editing::MouseRange, false);
 }
 
