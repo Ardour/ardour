@@ -539,7 +539,7 @@ if env['LV2']:
 	else:
 		print 'Building Ardour with LV2 support requires SLV2 >= 0.6.0'
 		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
-		print 'Until the 2.3 release, Ardour requires SLV2 out of SVN.'
+		print 'Until the 2.4 release, Ardour requires SLV2 out of SVN.'
 		print 'Testing would be very much appreciated!  svn co http://svn.drobilla.net/lad/slv2'
 		env['LV2'] = 0
 	conf.Finish()
