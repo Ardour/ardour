@@ -194,8 +194,8 @@ Mixer_UI::Mixer_UI ()
 	global_hpacker.pack_start (scroller, true, true);
 	global_hpacker.pack_start (out_packer, false, false, 12);
 
-	list_hpane.add1(global_hpacker);
-	list_hpane.add2(list_vpacker);
+	list_hpane.add1(list_vpacker);
+	list_hpane.add2(global_hpacker);
 
 	rhs_pane1.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler), 
 							static_cast<Gtk::Paned*> (&rhs_pane1)));
