@@ -343,5 +343,10 @@ env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript', 'i18n.h', 'gettext.h' ] + 
 				     [ 'sse_functions_xmm.cc', 'sse_functions.s', 'sse_functions_64bit.s' ] +
 				     [ 'rb_effect.cc', 'st_stretch.cc', 'st_pitch.cc' ] +
-				     ardour_files + osc_files + vst_files + coreaudio_files + audiounit_files +
+				     ardour_files + 
+				     osc_files + 
+				     vst_files + 
+				     coreaudio_files + 
+				     audiounit_files +
+				     lv2_files +
 				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))
