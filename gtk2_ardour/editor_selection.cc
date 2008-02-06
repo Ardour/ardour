@@ -182,9 +182,6 @@ Editor::set_selected_track_as_side_effect (bool force)
 void
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
 {
-
-	cerr << "set selected track, op = " << op << " selected ? " << selection->selected (&view) << " no remove? " << no_remove << endl;
-
 	switch (op) {
 	case Selection::Toggle:
 		if (selection->selected (&view)) {

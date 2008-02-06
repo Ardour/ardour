@@ -815,7 +815,7 @@ EngineControl::driver_changed ()
 
 	vector<string>& strings = devices[driver];
 
-	if (strings.empty() && driver != "FFADO") {
+	if (strings.empty() && driver != "FFADO" && driver != "Dummy") {
 		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
 		return;
 	}
@@ -835,7 +835,7 @@ EngineControl::driver_changed ()
 		interface_combo.set_active_text (strings.front());
 		input_device_combo.set_active_text (strings.front());
 		output_device_combo.set_active_text (strings.front());
-	}
+	} 
 	
 	if (driver == "ALSA") {
 		soft_mode_button.set_sensitive (true);

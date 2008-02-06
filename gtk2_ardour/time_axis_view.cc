@@ -271,7 +271,6 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 {
-	cerr << "CEB button release\n";
 	switch (ev->button) {
 	case 1:
 		selection_click (ev);
@@ -351,6 +350,16 @@ TimeAxisView::step_height (bool bigger)
                 if (bigger) set_height (Smaller);
                return;
        }
+}
+
+void
+TimeAxisView::set_heights (TrackHeight h)
+{
+	TrackSelection& ts (editor.get_selection().tracks);
+
+	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
+		(*i)->set_height (h);
+	}
 }
 
 void
@@ -586,12 +595,12 @@ TimeAxisView::build_size_menu ()
 	size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = size_menu->items();
 	
-	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_height), Largest)));
-	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_height), Large)));
-	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_height), Larger)));
-	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_height), Normal)));
-	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_height),Smaller)));
-	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_height), Small)));
+	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_heights), Largest)));
+	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_heights), Large)));
+	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_heights), Larger)));
+	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_heights), Normal)));
+	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_heights),Smaller)));
+	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_heights), Small)));
 }
 
 void
