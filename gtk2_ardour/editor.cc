@@ -4371,7 +4371,15 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 	/* consider adding the entered regionview */
 
 	if (allow_entered && entered_regionview && (mouse_mode == Editing::MouseObject)) {
-		if (!selection->selected (entered_regionview)) {
+		
+		/* only add the entered regionview if its not selected OR
+		   (we're not going to use regions at edit point OR its track is not selected)
+
+		   this avoids duplicate regions ending up in "rs"
+		*/
+
+		if (!selection->selected (entered_regionview) && 
+		    (!use_regions_at || !selection->selected (&entered_regionview->get_time_axis_view()))) {
 			rs.add (entered_regionview);
 		}
 	}
