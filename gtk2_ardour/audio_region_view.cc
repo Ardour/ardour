@@ -888,8 +888,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	//Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
-	cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
+	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
+	// cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
 }
 
 void
