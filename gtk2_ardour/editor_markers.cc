@@ -1151,6 +1151,10 @@ Editor::update_punch_range_view (bool visibility)
 void
 Editor::marker_selection_changed ()
 {
+	if (session && session->deletion_in_progress()) {
+		return;
+	}
+
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 		LocationMarkers* lam = i->second;
 
