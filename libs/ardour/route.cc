@@ -184,6 +184,20 @@ Route::sync_order_keys ()
 	}
 }
 
+string
+Route::ensure_track_or_route_name(string name, Session &session)
+{
+	string newname = name;
+
+	while (session.route_by_name (newname)!=NULL)
+	{
+		newname = bump_name_once (newname);
+	}
+
+	return newname;
+}
+
+
 void
 Route::inc_gain (gain_t fraction, void *src)
 {

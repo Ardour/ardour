@@ -32,6 +32,7 @@
 
 #include <ardour/audioengine.h>
 #include <ardour/io.h>
+#include <ardour/route.h>
 #include <ardour/port.h>
 #include <ardour/connection.h>
 #include <ardour/session.h>
@@ -2056,11 +2057,20 @@ IO::parse_gain_string (const string& str, vector<string>& ports)
 }
 
 int
-IO::set_name (string name, void* src)
+IO::set_name (string requested_name, void* src)
 {
-	if (name == _name) {
+	if (requested_name == _name) {
 		return 0;
 	}
+
+	string name;
+	Route *rt;
+	if ( (rt = dynamic_cast<Route *>(this))) {
+		name = Route::ensure_track_or_route_name(requested_name, _session);
+	} else {
+		name = requested_name;
+	}
+
 
 	/* replace all colons in the name. i wish we didn't have to do this */
 
