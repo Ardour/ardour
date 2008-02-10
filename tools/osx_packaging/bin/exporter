@@ -24,10 +24,13 @@ export ARDOUR_MODULE_PATH="$TOP/lib/"
 export ARDOUR_DATA_PATH="$TOP/share"
 export ARDOUR_GLADE_PATH="$TOP/share/ardour2/glade"
 
-export LADSPA_RDF_PATH="$HOME/Library/Audio/Plug-Ins/LADSPA/rdf:/Library/Audio/Plug-Ins/LADSPA/rdf:$TOP/s
-hare/ladspa/rdf:/usr/local/share/ladspa/rdf:/usr/share/ladspa/rdf"
-export LADSPA_PATH="$HOME/Library/Audio/Plug-Ins/LADSPA:/Library/Audio/Plug-Ins/LADSPA:/usr/local/lib/lad
-spa:/usr/lib/ladspa"
+export ARDOUR_PATH="$TOP/share/ardour/icons:$TOP/share/ardour/pixmaps"
+
+
+export LADSPA_RDF_PATH="$HOME/Library/Audio/Plug-Ins/LADSPA/rdf:/Library/Audio/Plug-Ins/LADSPA/rdf:$TOP/share/ladspa/rdf:/usr/local/share/ladspa/rdf:/usr/share/ladspa/rdf"
+export LADSPA_PATH="$HOME/Library/Audio/Plug-Ins/LADSPA:/Library/Audio/Plug-Ins/LADSPA:/usr/local/lib/ladspa:/usr/lib/ladspa"
+
+export VAMP_PATH="$TOP/lib/vamp-plugins" 
 
 mkdir -p "$ETC"
 sed 's|${HOME}|'"$HOME|g" "$TOP/etc/pango/pangorc" > "$ETC/pangorc"

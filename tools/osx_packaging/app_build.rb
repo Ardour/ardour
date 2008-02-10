@@ -53,6 +53,10 @@ if not File.exist?(libdir+"/surfaces") then
    Dir.mkdir(libdir + "/surfaces")
 end
 
+if not File.exist?(libdir+"/vamp-plugins") then
+   Dir.mkdir(libdir + "/vamp-plugins")
+end
+
 
 odir = Dir.getwd
 Dir.chdir("../..")
@@ -65,6 +69,9 @@ result =  `otool -L libs/ardour/libardour.dylib`
 results = results + result.split("\n").slice(1,result.size-1)
 
 result =  `otool -L libs/surfaces/*/*.dylib`
+results = results + result.split("\n").slice(1,result.size-1)
+
+result =  `otool -L libs/vamp-plugins/*.dylib`
 results = results + result.split("\n").slice(1,result.size-1)
 
 results.uniq!
@@ -116,6 +123,9 @@ begin
   Dir.foreach(libdir+"/surfaces") {|x| unless ( x[0] == 46 or x.include?("libardour_cp")) then File.delete(libdir + "/" +x) end}
 rescue
 end
+
+# vamp plugins
+`cp ../../libs/vamp-plugins/*.dylib #{libdir}/vamp-plugins`
 
 
 # copy gtk and pango lib stuff
