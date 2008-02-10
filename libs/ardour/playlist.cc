@@ -282,6 +282,10 @@ Playlist::set_name (string str)
 		return;
 	}
 
+	if (str == _name) {
+		return;
+	}
+
 	string name = str;
 
 	while (_session.playlist_by_name(name) != 0) {
