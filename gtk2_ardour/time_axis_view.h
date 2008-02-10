@@ -61,6 +61,8 @@ class PointSelection;
 class TimeAxisViewItem;
 class Selection;
 class Selectable;
+class RegionView;
+class GhostRegion;
 
 /** Abstract base class for time-axis views (horizontal editor 'strips')
  *
@@ -202,6 +204,12 @@ class TimeAxisView : public virtual AxisView
 	virtual void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results);
 	virtual void get_inverted_selectables (Selection&, list<Selectable *>& results);
 
+	ArdourCanvas::Group* ghost_group;
+
+	void add_ghost (RegionView*);
+	void remove_ghost (RegionView*);
+	void erase_ghost (GhostRegion*);
+
 	/* state/serialization management */
 
 	TimeAxisView* get_parent () { return parent; }
@@ -296,6 +304,8 @@ class TimeAxisView : public virtual AxisView
 
 	ArdourCanvas::Group      *selection_group;
 
+	list<GhostRegion*> ghosts;
+
 	list<SelectionRect*> free_selection_rects;
 	list<SelectionRect*> used_selection_rects;
 
@@ -305,6 +315,7 @@ class TimeAxisView : public virtual AxisView
 
 	bool _hidden;
 	bool _has_state;
+	bool in_destructor;
 	NamePackingBits name_packing;
 
 	static void compute_controls_size_info ();

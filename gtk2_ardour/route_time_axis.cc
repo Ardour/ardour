@@ -95,7 +95,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
 	  visual_button (_("v")),
-	  lm (rt, sess)
+	  lm (rt, sess),
+	  underlay_xml_node (0)
 {
 	lm.set_no_show_all();
 	lm.setup_meters(50);
@@ -302,28 +303,34 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		child_node = *niter;
 
-		if (child_node->name() != AutomationTimeAxisView::state_node_name)
-			continue;
-
-		XMLProperty* prop = child_node->property ("automation-id");
-		if (!prop)
-			continue;
-
-		Parameter param(prop->value());
-		if (!param)
-			continue;
-		
-		bool show = false;
-
-		prop = child_node->property ("shown");
-
-		if (prop && prop->value() == "yes") {
-			show = true;
-			_show_automation.insert(param);
+		if (child_node->name() == AutomationTimeAxisView::state_node_name) {
+			XMLProperty* prop = child_node->property ("automation-id");
+			if (!prop)
+				continue;
+			
+			Parameter param(prop->value());
+			if (!param)
+				continue;
+			
+			bool show = false;
+			
+			prop = child_node->property ("shown");
+			
+			if (prop && prop->value() == "yes") {
+				show = true;
+				_show_automation.insert(param);
+			}
+			
+			if (_automation_tracks.find(param) == _automation_tracks.end()) {
+				create_automation_child(param, show);
+			}
 		}
-		
-		if (_automation_tracks.find(param) == _automation_tracks.end())
-			create_automation_child(param, show);
+		else if (child_node->name() == "Underlays") {
+			underlay_xml_node = child_node;
+			
+			/* Wait for all gui tracks to be loaded as underlays are cross referencing tracks*/
+			Glib::signal_idle().connect(mem_fun(*this, &RouteTimeAxisView::set_underlay_state));
+		}
 	}
 }
 
@@ -1694,19 +1701,20 @@ RouteTimeAxisView::hide_all_automation ()
 void
 RouteTimeAxisView::region_view_added (RegionView* rv)
 {
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		boost::shared_ptr<AutomationTimeAxisView> atv;
-
-		if ((atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*i)) != 0) {
-			rv->add_ghost (*atv.get());
+	/* XXX need to find out if automation children have automationstreamviews. If yes, no ghosts */
+	if(is_audio_track()) {
+		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+			boost::shared_ptr<AutomationTimeAxisView> atv;
+			
+			if ((atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*i)) != 0) {
+				atv->add_ghost(rv);
+			}
 		}
 	}
-}
 
-void
-RouteTimeAxisView::add_ghost_to_processor (RegionView* rv, boost::shared_ptr<AutomationTimeAxisView> atv)
-{
-	rv->add_ghost (*atv.get());
+	for (UnderlayMirrorList::iterator i = _underlay_mirrors.begin(); i != _underlay_mirrors.end(); ++i) {
+		(*i)->add_ghost(rv);
+	}
 }
 
 RouteTimeAxisView::ProcessorAutomationInfo::~ProcessorAutomationInfo ()
@@ -1812,7 +1820,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	add_child (pan->view);
 
 	if (_view) {
-		_view->foreach_regionview (bind (mem_fun(*this, &RouteTimeAxisView::add_ghost_to_processor), pan->view));
+		_view->foreach_regionview (mem_fun(*pan->view.get(), &TimeAxisView::add_ghost));
 	}
 
 	processor->mark_automation_visible (what, true);
@@ -2132,4 +2140,118 @@ void
 RouteTimeAxisView::io_changed (IOChange change, void *src)
 {
 	reset_meter ();
+}
+
+void
+RouteTimeAxisView::build_underlay_menu(Gtk::Menu* parent_menu) {
+	using namespace Menu_Helpers;
+
+	if(!_underlay_streams.empty()) {
+		MenuList& parent_items = parent_menu->items();
+		Menu* gs_menu = manage (new Menu);
+		gs_menu->set_name ("ArdourContextMenu");
+		MenuList& gs_items = gs_menu->items();
+		
+		parent_items.push_back (MenuElem (_("Underlays"), *gs_menu));
+		
+		for(UnderlayList::iterator it = _underlay_streams.begin(); it != _underlay_streams.end(); ++it) {
+			gs_items.push_back(MenuElem(string_compose(_("Remove \"%1\""), (*it)->trackview().name()),
+						    bind(mem_fun(*this, &RouteTimeAxisView::remove_underlay), *it)));
+		}
+	}
+}
+
+bool
+RouteTimeAxisView::set_underlay_state() 
+{
+	if(!underlay_xml_node) {
+		return false;
+	}
+
+	XMLNodeList nlist = underlay_xml_node->children();
+	XMLNodeConstIterator niter;
+	XMLNode *child_node;
+	
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		child_node = *niter;
+
+		if(child_node->name() != "Underlay") {
+			continue;
+		}
+
+		XMLProperty* prop = child_node->property ("id");
+		if(prop) {
+			PBD::ID id(prop->value());
+
+			RouteTimeAxisView* v = editor.get_route_view_by_id(id);
+
+			if(v) {
+				add_underlay(v->view(), false);
+			}
+		}
+	}
+
+	return false;
+}
+
+void
+RouteTimeAxisView::add_underlay(StreamView* v, bool update_xml) 
+{
+	if(!v) {
+		return;
+	}
+
+	RouteTimeAxisView& other = v->trackview();
+
+	if(find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
+		if(find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
+			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
+			/*NOTREACHED*/
+		}
+
+		_underlay_streams.push_back(v);
+		other._underlay_mirrors.push_back(this);
+
+		v->foreach_regionview(mem_fun(*this, &RouteTimeAxisView::add_ghost));
+
+		if(update_xml) {
+			if(!underlay_xml_node) {
+				ensure_xml_node();
+				underlay_xml_node = xml_node->add_child("Underlays");
+			}
+
+			XMLNode* node = underlay_xml_node->add_child("Underlay");
+			XMLProperty* prop = node->add_property("id");
+			prop->set_value(v->trackview().route()->id().to_s());
+		}
+	}
+}
+
+void
+RouteTimeAxisView::remove_underlay(StreamView* v) 
+{
+	if(!v) {
+		return;
+	}
+
+	UnderlayList::iterator it = find(_underlay_streams.begin(), _underlay_streams.end(), v);
+	RouteTimeAxisView& other = v->trackview();
+
+	if(it != _underlay_streams.end()) {
+		UnderlayMirrorList::iterator gm = find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this);
+
+		if(gm == other._underlay_mirrors.end()) {
+			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
+			/*NOTREACHED*/
+		}
+
+		v->foreach_regionview(mem_fun(*this, &RouteTimeAxisView::remove_ghost));
+
+		_underlay_streams.erase(it);
+		other._underlay_mirrors.erase(gm);
+
+		if(underlay_xml_node) {
+			underlay_xml_node->remove_nodes_and_delete("id", v->trackview().route()->id().to_s());
+		}
+	}
 }

@@ -76,7 +76,7 @@ class MidiRegionView : public RegionView
 
 	void redisplay_model();
 
-    GhostRegion* add_ghost (AutomationTimeAxisView&);
+	GhostRegion* add_ghost (TimeAxisView&);
 
 	void add_note(const boost::shared_ptr<ARDOUR::Note> note);
 	void resolve_note(uint8_t note_num, double end_time);

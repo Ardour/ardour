@@ -613,3 +613,20 @@ Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& c
 	cerr << "some other kind of drag\n";
 	context->drag_finish (true, false, time);
 }
+
+
+RouteTimeAxisView*
+Editor::get_route_view_by_id (PBD::ID& id)
+{
+	RouteTimeAxisView* v;
+
+	for(TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		if((v = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+			if(v->route()->id() == id) {
+				return v;
+			}
+		}
+	}
+
+	return 0;
+}

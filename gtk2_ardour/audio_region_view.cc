@@ -348,6 +348,8 @@ AudioRegionView::region_renamed ()
 void
 AudioRegionView::region_resized (Change what_changed)
 {
+	AudioGhostRegion* agr;
+
 	RegionView::region_resized(what_changed);
 
 	if (what_changed & Change (StartChanged|LengthChanged)) {
@@ -357,10 +359,12 @@ AudioRegionView::region_resized (Change what_changed)
 		}
 		
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+			if((agr = dynamic_cast<AudioGhostRegion*>(*i)) != 0) {
 
- 			for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-				(*w)->property_region_start() = _region->start();
- 			}
+				for (vector<WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
+					(*w)->property_region_start() = _region->start();
+				}
+			}
  		}
 	}
 }
@@ -1078,13 +1082,13 @@ AudioRegionView::set_waveform_scale (WaveformScale scale)
 
 
 GhostRegion*
-AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
+AudioRegionView::add_ghost (TimeAxisView& tv)
 {
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
 	assert(rtv);
 
 	double unit_position = _region->position () / samples_per_unit;
-	GhostRegion* ghost = new GhostRegion (atv, unit_position);
+	AudioGhostRegion* ghost = new AudioGhostRegion (tv, trackview, unit_position);
 	uint32_t nchans;
 	
 	nchans = rtv->get_diskstream()->n_channels().n_audio();
@@ -1107,10 +1111,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 		wave->property_x() =  0.0;
 		wave->property_samples_per_unit() =  samples_per_unit;
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
-		wave->property_wave_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
-		wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWave.get();
-		wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWaveClip.get();
-		wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_GhostTrackZeroLine.get();
+
 		wave->property_region_start() = _region->start();
 
 		ghost->waves.push_back(wave);
@@ -1118,6 +1119,7 @@ AudioRegionView::add_ghost (AutomationTimeAxisView& atv)
 
 	ghost->set_height ();
 	ghost->set_duration (_region->length() / samples_per_unit);
+	ghost->set_colors();
 	ghosts.push_back (ghost);
 
 	ghost->GoingAway.connect (mem_fun(*this, &AudioRegionView::remove_ghost));
@@ -1170,7 +1172,7 @@ AudioRegionView::envelope_active_changed ()
 void
 AudioRegionView::set_waveview_data_src()
 {
-
+	AudioGhostRegion* agr;
 	double unit_length= _region->length() / samples_per_unit;
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
@@ -1182,8 +1184,10 @@ AudioRegionView::set_waveview_data_src()
 		
 		(*i)->set_duration (unit_length);
 		
-		for (vector<WaveView*>::iterator w = (*i)->waves.begin(); w != (*i)->waves.end(); ++w) {
-			(*w)->property_data_src() = _region.get();
+		if((agr = dynamic_cast<AudioGhostRegion*>(*i)) != 0) {
+			for (vector<WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
+				(*w)->property_data_src() = _region.get();
+			}
 		}
 	}
 

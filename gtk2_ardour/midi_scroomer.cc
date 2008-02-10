@@ -54,7 +54,7 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev) {
 	double note_width = 0.8 * get_width();
 	double note_height = 1.4 * note2y;
 	double black_shift = 0.1 * note2y;
-	double colors[6];
+	double colors[6] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
 	//cerr << ev->area.y << " " << ev->area.height << endl;
 
@@ -71,8 +71,8 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev) {
 			cc->rectangle(clip_rect.x, clip_rect.y, clip_rect.width, clip_rect.height);
 			cc->set_source_rgb (colors[3], colors[4], colors[5]);
 			cc->fill_preserve();
-			
 			cc->clip();
+
 			cc->set_source_rgb(colors[0], colors[1], colors[2]);
 			cc->set_line_width(note_height);
 
@@ -109,6 +109,13 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev) {
 				}
 			}
 
+			if(i == Handle1 || i == Handle2) {
+				cc->rectangle(comp_rect.x + 0.5f, comp_rect.y + 0.5f, comp_rect.width - 1.0f, comp_rect.height - 1.0f);
+				cc->set_line_width(1.0f);
+				cc->set_source_rgb (1.0f, 1.0f, 1.0f);
+				cc->stroke();
+			}
+
 			cc->reset_clip();
 		}
 	}
@@ -121,29 +128,29 @@ MidiScroomer::get_colors(double color[], Component comp) {
 	switch (comp) {
 	case TopBase:
 	case BottomBase:
-		color[0] = 0.24;
-		color[1] = 0.24;
-		color[2] = 0.24;
-		color[3] = 0.33;
-		color[4] = 0.33;
-		color[5] = 0.33;
+		color[0] = 0.24f;
+		color[1] = 0.24f;
+		color[2] = 0.24f;
+		color[3] = 0.33f;
+		color[4] = 0.33f;
+		color[5] = 0.33f;
 		break;
 	case Handle1:
 	case Handle2:
-		color[0] = 0.38;
-		color[1] = 0.38;
-		color[2] = 0.38;
-		color[3] = 0.91;
-		color[4] = 0.91;
-		color[5] = 0.91;
+		color[0] = 0.91f;
+		color[1] = 0.91f;
+		color[2] = 0.91f;
+		color[3] = 0.0f;
+		color[4] = 0.0f;
+		color[5] = 0.0f;
 		break;
 	case Slider:
-		color[0] = 0.38;
-		color[1] = 0.38;
-		color[2] = 0.38;
-		color[3] = 0.77;
-		color[4] = 0.77;
-		color[5] = 0.77;
+		color[0] = 0.38f;
+		color[1] = 0.38f;
+		color[2] = 0.38f;
+		color[3] = 0.77f;
+		color[4] = 0.77f;
+		color[5] = 0.77f;
 		break;
 	default:
 		break;

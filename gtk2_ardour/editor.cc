@@ -521,9 +521,10 @@ Editor::Editor ()
 	route_list_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	route_list_display.set_headers_visible (true);
 	route_list_display.set_name ("TrackListDisplay");
-	route_list_display.get_selection()->set_mode (SELECTION_NONE);
+	route_list_display.get_selection()->set_mode (SELECTION_SINGLE);
 	route_list_display.set_reorderable (true);
 	route_list_display.set_size_request (100,-1);
+	route_list_display.add_object_drag (route_display_columns.route.index(), "routes");
 
 	CellRendererToggle* route_list_visible_cell = dynamic_cast<CellRendererToggle*>(route_list_display.get_column_cell_renderer (0));
 	route_list_visible_cell->property_activatable() = true;
@@ -1535,6 +1536,10 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 			break;
 		}
 
+	}
+
+	if (item_type == StreamItem && clicked_routeview) {
+		clicked_routeview->build_underlay_menu(menu);
 	}
 
 	menu->popup (button, time);

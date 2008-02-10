@@ -98,6 +98,10 @@ public:
 	void clear_playlist ();
 	
 	void build_playlist_menu (Gtk::Menu *);
+
+	void add_underlay (StreamView*, bool update_xml = true);
+	void remove_underlay (StreamView*);
+	void build_underlay_menu(Gtk::Menu*);
 	
 	/* This is a bit nasty to expose :/ */
 	struct RouteAutomationNode {
@@ -239,8 +243,7 @@ protected:
 	void color_handler ();
 
 	void region_view_added (RegionView*);
-	void add_ghost_to_processor (RegionView*, boost::shared_ptr<AutomationTimeAxisView>);
-	
+
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
 	bool                  no_redraw;
@@ -296,6 +299,14 @@ protected:
 	XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param);
 
 	LevelMeter	lm;
+
+	XMLNode* underlay_xml_node;
+	bool set_underlay_state();
+
+	typedef list<StreamView*> UnderlayList;
+	UnderlayList _underlay_streams;
+	typedef list<RouteTimeAxisView*> UnderlayMirrorList;
+	UnderlayMirrorList _underlay_mirrors;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

@@ -25,26 +25,100 @@
 #include <libgnomecanvasmm.h>
 #include <ardour/configuration.h>
 #include "canvas.h"
-#include "simplerect.h"
 
-class AutomationTimeAxisView;
+namespace Gnome {
+	namespace Canvas {
+		class CanvasMidiEvent;
+		class CanvasNote;
+		class CanvasHit;
+		class Diamond;
+	}
+}
 
-struct GhostRegion : public sigc::trackable
+class MidiStreamView;
+class TimeAxisView;
+
+class GhostRegion : public sigc::trackable 
 {
-    AutomationTimeAxisView& trackview;
-    ArdourCanvas::Group* group;
-    ArdourCanvas::SimpleRect* base_rect;
-    std::vector<ArdourCanvas::WaveView*> waves;
+public:
+	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
+	virtual ~GhostRegion();
 
-    GhostRegion (AutomationTimeAxisView& tv, double initial_unit_pos);
-    ~GhostRegion ();
+	virtual void set_samples_per_unit(double spu) = 0;
+	virtual void set_height();
+	virtual void set_colors();
 
-    void set_samples_per_unit (double spu);
-    void set_duration (double units);
-    void set_height ();
-    void set_colors ();
+	void set_duration(double units);
 
-    sigc::signal<void,GhostRegion*> GoingAway;
+	guint source_track_color(unsigned char alpha = 0xff);
+	bool is_automation_ghost();
+
+	sigc::signal<void,GhostRegion*> GoingAway;
+
+	TimeAxisView& trackview;
+	TimeAxisView& source_trackview;
+	ArdourCanvas::Group* group;
+	ArdourCanvas::SimpleRect* base_rect;
+};
+
+class AudioGhostRegion : public GhostRegion {
+public:
+	AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
+
+	void set_samples_per_unit(double spu);
+	void set_height();
+	void set_colors();
+
+	std::vector<ArdourCanvas::WaveView*> waves;
+};
+
+class MidiGhostRegion : public GhostRegion {
+public:
+	class Event : public sigc::trackable {
+	public:
+		Event(ArdourCanvas::CanvasMidiEvent*);
+		virtual ~Event() {}
+
+		virtual void x_changed() = 0;
+		ArdourCanvas::CanvasMidiEvent* event;
+	};
+
+	class Note : public Event {
+	public:
+		Note(ArdourCanvas::CanvasNote*, ArdourCanvas::Group*);
+		~Note();
+
+		void x_changed();
+		ArdourCanvas::SimpleRect* rect;
+	};
+
+	class Hit : public Event {
+	public:
+		Hit(ArdourCanvas::CanvasHit*, ArdourCanvas::Group*);
+		~Hit();
+
+		void x_changed();
+		ArdourCanvas::Diamond* diamond;
+	};
+	
+	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
+	MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos);
+
+	MidiStreamView* midi_view();
+
+	void set_height();
+	void set_samples_per_unit(double spu);
+	void set_colors();
+
+	void update_range();
+
+	void add_note(ArdourCanvas::CanvasNote*);
+	void add_hit(ArdourCanvas::CanvasHit*);
+
+	void clear_events();
+
+	typedef std::list<MidiGhostRegion::Event*> EventList;
+	EventList events;
 };
 
 #endif /* __ardour_gtk_ghost_region_h__ */

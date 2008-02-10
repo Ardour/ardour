@@ -90,7 +90,7 @@ class AudioRegionView : public RegionView
 	void region_changed (ARDOUR::Change);
 	void envelope_active_changed ();
 	
-	GhostRegion* add_ghost (AutomationTimeAxisView&);
+	GhostRegion* add_ghost (TimeAxisView&);
 	
 	void reset_fade_in_shape_width (nframes_t);
 	void reset_fade_out_shape_width (nframes_t);

@@ -2096,6 +2096,48 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 }
 
 void
+Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
+	double wx, wy;
+	double cx, cy;
+	TimeAxisView *tv;
+	nframes_t where;
+	RouteTimeAxisView *dest_rtv = 0;
+	RouteTimeAxisView *source_rtv = 0;
+
+	track_canvas.window_to_world (x, y, wx, wy);
+	wx += horizontal_adjustment.get_value();
+	wy += vertical_adjustment.get_value();
+
+	GdkEvent event;
+	event.type = GDK_BUTTON_RELEASE;
+	event.button.x = wx;
+	event.button.y = wy;
+
+	where = event_frame (&event, &cx, &cy);
+
+	if ((tv = trackview_by_y_position (cy)) == 0) {
+		return;
+	}
+
+	if ((dest_rtv = dynamic_cast<RouteTimeAxisView*>(tv)) == 0) {
+		return;
+	}
+
+	/* use this drag source to add underlay to a track. But we really don't care 
+	   about the Route, only the view of the route, so find it first */
+	for(TrackViewList::iterator it = track_views.begin(); it != track_views.end(); ++it) {
+		if((source_rtv = dynamic_cast<RouteTimeAxisView*>(*it)) == 0) {
+			continue;
+		}
+		
+		if(source_rtv->route() == route && source_rtv != dest_rtv) {
+			dest_rtv->add_underlay(source_rtv->view());
+			break;
+		}
+	}
+}
+
+void
 Editor::insert_region_list_selection (float times)
 {
 	RouteTimeAxisView *tv = 0;

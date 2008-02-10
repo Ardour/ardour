@@ -165,6 +165,8 @@ class Editor : public PublicEditor
 	TimeAxisView* get_named_time_axis(const std::string & name) ;
 #endif
 
+	RouteTimeAxisView* get_route_view_by_id (PBD::ID& id);
+
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
 	void remove_a_region (boost::shared_ptr<ARDOUR::Region>);
@@ -313,6 +315,7 @@ class Editor : public PublicEditor
 	bool dragging_playhead () const { return _dragging_playhead; }
 
 	void toggle_waveform_visibility ();
+	void toggle_zero_line_visibility ();
 	void toggle_waveforms_while_recording ();
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
@@ -1111,6 +1114,8 @@ class Editor : public PublicEditor
 	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
 	void insert_region_list_selection (float times);
 
+	void insert_route_list_drag (boost::shared_ptr<ARDOUR::Route>, int x, int y);
+
 	/* import & embed */
 	
 	void add_external_audio_action (Editing::ImportMode);
@@ -1869,6 +1874,13 @@ class Editor : public PublicEditor
 			     const Gtk::SelectionData& data,
 			     guint               info,
 			     guint               time);
+
+	void  drop_routes (const Glib::RefPtr<Gdk::DragContext>& context,
+			   gint                x,
+			   gint                y,
+			   const Gtk::SelectionData& data,
+			   guint               info,
+			   guint               time);
 
 	/* audio export */
 

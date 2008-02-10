@@ -31,7 +31,6 @@
 #include "public_editor.h"
 #include "simplerect.h"
 #include "selection.h"
-#include "ghostregion.h"
 #include "rgb_macros.h"
 #include "automation_selectable.h"
 #include "point_selection.h"
@@ -74,7 +73,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	}
 
 	automation_menu = 0;
-	in_destructor = false;
 	auto_off_item = 0;
 	auto_touch_item = 0;
 	auto_write_item = 0;
@@ -228,11 +226,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
 {
-	in_destructor = true;
-
-	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		delete *i;
-	}
 }
 
 void
@@ -397,10 +390,6 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 	if (_view) {
 		_view->set_height(h);
 		_view->update_contents_y_position_and_height();
-	}
-
-	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_height ();
 	}
 
 	TimeAxisView* state_parent = get_parent_with_state ();
@@ -802,30 +791,6 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 }
 
 void
-AutomationTimeAxisView::add_ghost (GhostRegion* gr)
-{
-	ghosts.push_back (gr);
-	gr->GoingAway.connect (mem_fun(*this, &AutomationTimeAxisView::remove_ghost));
-}
-
-void
-AutomationTimeAxisView::remove_ghost (GhostRegion* gr)
-{
-	if (in_destructor) {
-		return;
-	}
-
-	list<GhostRegion*>::iterator i;
-
-	for (i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if ((*i) == gr) {
-			ghosts.erase (i);
-			break;
-		}
-	}
-}
-
-void
 AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results)
 {
 	if (_line && touched (top, bot)) {
@@ -916,7 +881,7 @@ AutomationTimeAxisView::exited ()
 		_line->track_exited();
 }
 
-void
+/*void
 AutomationTimeAxisView::set_colors ()
 {
     for (list<GhostRegion*>::iterator i=ghosts.begin(); i != ghosts.end(); i++ ) {
@@ -925,12 +890,14 @@ AutomationTimeAxisView::set_colors ()
     
 	if (_line)
 		_line->set_colors();
-}
+		}*/
 
 void
 AutomationTimeAxisView::color_handler () 
 {
-	set_colors ();
+	if (_line) {
+		_line->set_colors();
+	}
 }
 
 void

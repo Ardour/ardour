@@ -489,12 +489,6 @@ Lineset::update_bounds() {
 }
 
 /*
- * Some key concepts
- * don't allow modifying line data outside the update function. We don't want any line data outside the visible view range,
- * and view range is only "known" in the update function
- */
-
-/*
  * what to do here?
  * 1. find out if any line data has been modified since last update.
  * N. find out if the item moved. if it moved, the old bbox and the new bbox need to be updated.

@@ -380,6 +380,14 @@ MidiRegionView::clear_events()
 	for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i)
 		delete *i;
 	
+	MidiGhostRegion* gr;
+
+	for(vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
+		if((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
+			gr->clear_events();
+		}
+	}
+
 	_events.clear();
 }
 
@@ -505,11 +513,23 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 		for (std::vector<CanvasMidiEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i) {
 			CanvasNote* note = dynamic_cast<CanvasNote*>(*i);
 			if (note && note->note()) {
-				const double y1 = midi_stream_view()->note_to_y(note->note()->note());
-				const double y2 = y1 + floor(midi_stream_view()->note_height());
+				if(note->note()->note() < midi_stream_view()->lowest_note() ||
+				   note->note()->note() > midi_stream_view()->highest_note()) {
+					if(canvas_item_visible(note)) {
+						note->hide();
+					}
+				}
+				else {
+					const double y1 = midi_stream_view()->note_to_y(note->note()->note());
+					const double y2 = y1 + floor(midi_stream_view()->note_height());
+					
+					if(!canvas_item_visible(note)) {
+						note->show();
+					}
 
-				note->property_y1() = y1;
-				note->property_y2() = y2;
+					note->property_y1() = y1;
+					note->property_y2() = y2;
+				}
 			}
 		}
 		
@@ -522,17 +542,36 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 }
 
 GhostRegion*
-MidiRegionView::add_ghost (AutomationTimeAxisView& atv)
+MidiRegionView::add_ghost (TimeAxisView& tv)
 {
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
+	CanvasNote* note;
 	assert(rtv);
 
 	double unit_position = _region->position () / samples_per_unit;
-	GhostRegion* ghost = new GhostRegion (atv, unit_position);
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);
+	MidiGhostRegion* ghost;
+
+	if(mtv && mtv->midi_view()) {
+		/* if ghost is inserted into midi track, use a dedicated midi ghost canvas group.
+		   this is because it's nice to have midi notes on top of the note lines and
+		   audio waveforms under it.
+		 */
+		ghost = new MidiGhostRegion (*mtv->midi_view(), trackview, unit_position);
+	}
+	else {
+		ghost = new MidiGhostRegion (tv, trackview, unit_position);
+	}
 
 	ghost->set_height ();
 	ghost->set_duration (_region->length() / samples_per_unit);
 	ghosts.push_back (ghost);
+
+	for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		if((note = dynamic_cast<CanvasNote*>(*i)) != 0) {
+			ghost->add_note(note);
+		}
+	}
 
 	ghost->GoingAway.connect (mem_fun(*this, &MidiRegionView::remove_ghost));
 
@@ -637,6 +676,14 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		
 		ev_rect->show();
 		_events.push_back(ev_rect);
+
+		MidiGhostRegion* gr;
+		
+		for(vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
+			if((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
+				gr->add_note(ev_rect);
+			}
+		}
 
 	} else if (midi_view()->note_mode() == Percussive) {
 		

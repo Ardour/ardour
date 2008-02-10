@@ -202,8 +202,6 @@ Scroomer::on_button_press_event (GdkEventButton* ev) {
 	if(ev->button == 1) {
 		Component comp = point_in(ev->y);
 
-		cerr << get_comp_name(comp) << " pressed" << endl;
-
 		if(comp == Total || comp == None) {
 			return false;
 		}

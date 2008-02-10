@@ -127,6 +127,7 @@ Editor::initialize_canvas ()
 	
 	// Drag-N-Drop from the region list can generate this target
 	target_table.push_back (TargetEntry ("regions"));
+	target_table.push_back (TargetEntry ("routes"));
 
 	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("text/uri-list"));
@@ -457,7 +458,11 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 
 	if (data.get_target() == "regions") {
 		drop_regions (context, x, y, data, info, time);
-	} else {
+	}
+	else if(data.get_target() == "routes") {
+		drop_routes (context, x, y, data, info, time);
+	}
+	else {
 		drop_paths (context, x, y, data, info, time);
 	}
 }
@@ -535,6 +540,22 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 		boost::shared_ptr<Region> r = sr->data[i];
 		
 		insert_region_list_drag (r, x, y);
+	}
+
+	context->drag_finish (true, false, time);
+}
+
+void
+Editor::drop_routes (const Glib::RefPtr<Gdk::DragContext>& context,
+		     int x, int y,
+		     const Gtk::SelectionData& data,
+		     guint info, guint time) {
+	const SerializedObjectPointers<boost::shared_ptr<Route> >* sr = 
+		reinterpret_cast<const SerializedObjectPointers<boost::shared_ptr<Route> > *> (data.get_data());
+
+	for (uint32_t i = 0; i < sr->cnt; ++i) {
+		boost::shared_ptr<Route> r = sr->data[i];
+		insert_route_list_drag (r, x, y);
 	}
 
 	context->drag_finish (true, false, time);

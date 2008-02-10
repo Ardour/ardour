@@ -50,7 +50,6 @@ class TimeSelection;
 class RegionSelection;
 class PointSelection;
 class AutomationLine;
-class GhostRegion;
 class Selection;
 class Selectable;
 class AutomationStreamView;
@@ -95,9 +94,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool paste (nframes_t, float times, Selection&, size_t nth);
 	void reset_objects (PointSelection&);
 
-	void add_ghost (GhostRegion*);
-	void remove_ghost (GhostRegion*);
-
 	void set_state (const XMLNode&);
 	
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
@@ -121,7 +117,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 	AutomationStreamView*             _view;
 	
 	string _name;
-	bool    in_destructor;
 	bool    ignore_toggle;
 
 	bool    first_call_to_set_height;
@@ -151,8 +146,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	void build_display_menu ();
 
-	list<GhostRegion*> ghosts;
-
 	bool cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
 	bool cut_copy_clear_objects_one (AutomationLine&, PointSelection&, Editing::CutCopyOp);
 	bool paste_one (AutomationLine&, nframes_t, float times, Selection&, size_t nth);
@@ -173,7 +166,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void entered ();
 	void exited ();
 
-	void set_colors ();
+	//void set_colors ();
 	void color_handler ();
 
 	static Pango::FontDescription* name_font;

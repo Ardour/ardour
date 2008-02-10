@@ -68,6 +68,12 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();
 
+	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
+	midi_underlay_group = new ArdourCanvas::Group (*canvas_group);
+	midi_underlay_group->lower_to_bottom();
+
+	/* put the note lines in the timeaxisview's group, so it 
+	   can be put below ghost regions from MIDI underlays*/
 	_note_lines = new ArdourCanvas::Lineset(*canvas_group, ArdourCanvas::Lineset::Horizontal);
 
 	_note_lines->property_x1() = 0;
@@ -76,6 +82,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	_note_lines->property_y2() = 0;
 
 	_note_lines->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), _note_lines, &_trackview));
+	_note_lines->lower_to_bottom();
 
 	note_range_adjustment.signal_value_changed().connect (mem_fun (*this, &MidiStreamView::note_range_adjustment_changed));
 	ColorsChanged.connect(mem_fun(*this, &MidiStreamView::draw_note_lines));

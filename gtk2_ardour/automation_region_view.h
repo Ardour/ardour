@@ -33,7 +33,7 @@ namespace ARDOUR {
 	class AutomationList;
 };
 
-class AutomationTimeAxisView;
+class TimeAxisView;
 
 class AutomationRegionView : public RegionView
 {
@@ -55,7 +55,7 @@ public:
 	boost::shared_ptr<AutomationLine> line() { return _line; }
 	
 	// We are a ghost.  Meta ghosts?  Crazy talk.
-	virtual GhostRegion* add_ghost(AutomationTimeAxisView&) { return NULL; }
+	virtual GhostRegion* add_ghost(TimeAxisView&) { return NULL; }
 	
 	void reset_width_dependent_items(double pixel_width);
 

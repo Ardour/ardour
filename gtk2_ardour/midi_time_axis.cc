@@ -69,6 +69,7 @@
 #include "utils.h"
 #include "midi_scroomer.h"
 #include "piano_roll_header.h"
+#include "ghostregion.h"
 
 #include <ardour/midi_track.h>
 
@@ -126,13 +127,25 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
 		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
+		midi_view()->NoteRangeChanged.connect (mem_fun(*this, &MidiTimeAxisView::update_range));
+
 		/* ask for notifications of any new RegionViews */
+		_view->RegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
 	}
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()
 {
+	if(_piano_roll_header) {
+		delete _piano_roll_header;
+		_piano_roll_header = 0;
+	}
+
+	if(_range_scroomer) {
+		delete _range_scroomer;
+		_range_scroomer = 0;
+	}
 }
 
 MidiStreamView*
@@ -247,6 +260,17 @@ MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)
 	//}
 }
 
+
+void
+MidiTimeAxisView::update_range() {
+	MidiGhostRegion* mgr;
+
+	for(list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+		if((mgr = dynamic_cast<MidiGhostRegion*>(*i)) != 0) {
+			mgr->update_range();
+		}
+	}
+}
 
 /** Prompt for a controller with a dialog and add an automation track for it
  */

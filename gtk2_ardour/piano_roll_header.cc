@@ -60,7 +60,8 @@ PianoRollHeader::Color::set(const PianoRollHeader::Color& c) {
 PianoRollHeader::PianoRollHeader(MidiStreamView& v) 
 	: _view(v) 
 	, _highlighted_note(no_note)
-	, _clicked_note(no_note) {
+	, _clicked_note(no_note)
+	, _dragging(false) {
 
 	add_events (Gdk::BUTTON_PRESS_MASK |
 		    Gdk::BUTTON_RELEASE_MASK |
@@ -295,7 +296,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev) {
 	}
 
 	cr->select_font_face ("Georgia", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_BOLD);
-	font_size = min(10.0, _note_height);
+	font_size = min((double) 10.0f, _note_height - 4.0f);
 	cr->set_font_size(font_size);
 
 	/* fill the entire rect with the color for non-highlighted white notes.
@@ -445,7 +446,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev) {
 			
 			//cr->get_text_extents(s.str(), te);
 			cr->set_source_rgb(0.30f, 0.30f, 0.30f);
-			cr->move_to(0, y + font_size + (note_height - font_size) / 2.0f);
+			cr->move_to(2.0f, y + note_height - 1.0f - (note_height - font_size) / 2.0f);
 			cr->show_text(s.str());
 		}
 	}
@@ -491,6 +492,9 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev) {
 	int note = _view.y_to_note(ev->y);
 
 	if(ev->type == GDK_BUTTON_PRESS && note >= 0 && note < 128) {
+		add_modal_grab();
+		_dragging = true;
+
 		if(!_active_notes[note]) {
 			_active_notes[note] = true;
 			_clicked_note = note;
@@ -510,12 +514,17 @@ bool
 PianoRollHeader::on_button_release_event (GdkEventButton* ev) {
 	int note = _view.y_to_note(ev->y);
 
-	if(note == _clicked_note) {
-		_active_notes[note] = false;
-		_clicked_note = no_note;
-		send_note_off(note);
-		
-		invalidate_note_range(note, note);
+	if(_dragging) {
+		remove_modal_grab();
+		_dragging = false;
+
+		if(note == _clicked_note) {
+			_active_notes[note] = false;
+			_clicked_note = no_note;
+			send_note_off(note);
+			
+			invalidate_note_range(note, note);
+		}
 	}
 
 	return true;
@@ -524,6 +533,7 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev) {
 bool
 PianoRollHeader::on_enter_notify_event (GdkEventCrossing* ev) {
 	_highlighted_note = _view.y_to_note(ev->y);
+
 	invalidate_note_range(_highlighted_note, _highlighted_note);
 	return true;
 }

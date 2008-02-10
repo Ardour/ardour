@@ -70,6 +70,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	ARDOUR::NoteMode note_mode() const { return _note_mode; }
 
+	void update_range();
+
   private:
 	
 	void append_extra_display_menu_items ();

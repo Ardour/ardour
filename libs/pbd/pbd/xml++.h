@@ -109,6 +109,8 @@ public:
   void remove_nodes(const string &);
   /** Remove and delete all nodes with the name passed to remove_nodes */
   void remove_nodes_and_delete(const string &);
+  /** Remove and delete all nodes with property prop matching val */
+  void remove_nodes_and_delete(const string& propname, const string& val);
 };
 
 class XMLProperty {

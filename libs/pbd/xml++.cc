@@ -379,6 +379,27 @@ XMLNode::remove_nodes_and_delete(const string & n)
 	}
 }
 
+void
+XMLNode::remove_nodes_and_delete(const string& propname, const string& val) 
+{
+	XMLNodeIterator i = _children.begin();
+	XMLNodeIterator tmp;
+	XMLProperty* prop;
+
+	while (i != _children.end()) {
+		tmp = i;
+		++tmp;
+
+		prop = (*i)->property(propname);
+		if(prop && prop->value() == val) {
+			delete *i;
+			_children.erase(i);
+		}
+
+		i = tmp;
+	}
+}
+
 XMLProperty::XMLProperty(const string &n, const string &v)
 	: _name(n), 
 	_value(v) 

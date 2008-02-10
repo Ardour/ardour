@@ -96,6 +96,7 @@ private:
 	uint8_t _highlighted_note;
 	uint8_t _clicked_note;
 	double _grab_y;
+	bool _dragging;
 	
 	double _note_height;
 	double _black_note_width;

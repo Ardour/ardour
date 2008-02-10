@@ -42,6 +42,8 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "time_axis_view.h"
+#include "region_view.h"
+#include "ghostregion.h"
 #include "simplerect.h"
 #include "simpleline.h"
 #include "selection.h"
@@ -83,7 +85,11 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	}
 
 	canvas_display = new Group (*canvas.root(), 0.0, 0.0);
-	
+
+	ghost_group = new Group (*canvas_display);
+	ghost_group->lower_to_bottom();
+	ghost_group->show();
+
 	selection_group = new Group (*canvas_display);
 	selection_group->hide();
 	
@@ -92,6 +98,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	size_menu = 0;
 	_marked_for_display = false;
 	_hidden = false;
+	in_destructor = false;
 	height = 0;
 	effective_height = 0;
 	parent = rent;
@@ -156,6 +163,12 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 TimeAxisView::~TimeAxisView()
 {
+	in_destructor = true;
+
+	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+		delete *i;
+	}
+
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 		delete (*i)->rect;
 		delete (*i)->start_trim;
@@ -356,6 +369,10 @@ TimeAxisView::set_height (TrackHeight h)
 {
 	height_style = h;
 	set_height_pixels (height_to_pixels (h));
+
+	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+		(*i)->set_height ();
+	}
 }
 
 void
@@ -846,6 +863,37 @@ TimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& resul
 	return;
 }
 
+void
+TimeAxisView::add_ghost (RegionView* rv) {
+	GhostRegion* gr = rv->add_ghost (*this);
+	
+	if(gr) {
+		ghosts.push_back(gr);
+		gr->GoingAway.connect (mem_fun(*this, &TimeAxisView::erase_ghost));
+	}
+}
+
+void
+TimeAxisView::remove_ghost (RegionView* rv) {
+	rv->remove_ghost_in (*this);
+}
+
+void
+TimeAxisView::erase_ghost (GhostRegion* gr) {
+	if(in_destructor) {
+		return;
+	}
+
+	list<GhostRegion*>::iterator i;
+
+	for (i = ghosts.begin(); i != ghosts.end(); ++i) {
+		if ((*i) == gr) {
+			ghosts.erase (i);
+			break;
+		}
+	}
+}
+
 bool
 TimeAxisView::touched (double top, double bot)
 {
@@ -1055,7 +1103,10 @@ TimeAxisView::hide_name_entry ()
 void
 TimeAxisView::color_handler ()
 {
-	
+	for (list<GhostRegion*>::iterator i=ghosts.begin(); i != ghosts.end(); i++ ) {
+		(*i)->set_colors();
+	}
+
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
 
 		(*i)->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();

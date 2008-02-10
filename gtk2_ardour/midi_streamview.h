@@ -67,6 +67,7 @@ class MidiStreamView : public StreamView
 	};
 
 	Gtk::Adjustment note_range_adjustment;
+	ArdourCanvas::Group* midi_underlay_group;
 
 	VisibleNoteRange note_range() { return _range; }
 	void set_note_range(VisibleNoteRange r);

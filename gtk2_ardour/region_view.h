@@ -77,8 +77,9 @@ class RegionView : public TimeAxisViewItem
 	
 	virtual void region_changed (ARDOUR::Change);
 	
-	virtual GhostRegion* add_ghost (AutomationTimeAxisView&) = 0;
-	void                 remove_ghost (GhostRegion*);
+	virtual GhostRegion* add_ghost (TimeAxisView&) = 0;
+	void remove_ghost_in (TimeAxisView&);
+	void remove_ghost (GhostRegion*);
 	
 	uint32_t get_fill_color ();
 
