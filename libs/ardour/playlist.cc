@@ -282,7 +282,13 @@ Playlist::set_name (string str)
 		return;
 	}
 
-	_name = str; 
+	string name = str;
+
+	while (_session.playlist_by_name(name) != 0) {
+		name = bump_name_once(name);
+	}
+
+	_name = name; 
 	NameChanged(); /* EMIT SIGNAL */
 }
 
