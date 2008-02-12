@@ -203,6 +203,47 @@ Editor::mouse_mode_toggled (MouseMode m)
 }	
 
 void
+Editor::set_canvas_cursor ()
+{
+	switch (mouse_mode) {
+	case MouseRange:
+		current_canvas_cursor = selector_cursor;
+		break;
+
+	case MouseObject:
+		switch (_edit_point) {
+		case EditAtMouse:
+			current_canvas_cursor = grabber_edit_point_cursor;
+			break;
+		default:
+			current_canvas_cursor = grabber_cursor;
+			break;
+		}
+		break;
+
+	case MouseGain:
+		current_canvas_cursor = cross_hair_cursor;
+		break;
+
+	case MouseZoom:
+		current_canvas_cursor = zoom_cursor;
+		break;
+
+	case MouseTimeFX:
+		current_canvas_cursor = time_fx_cursor; // just use playhead
+		break;
+
+	case MouseAudition:
+		current_canvas_cursor = speaker_cursor;
+		break;
+	}
+
+	if (is_drawable()) {
+	        track_canvas.get_window()->set_cursor(*current_canvas_cursor);
+	}
+}
+
+void
 Editor::set_mouse_mode (MouseMode m, bool force)
 {
 	if (drag_info.item) {
@@ -253,44 +294,32 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	switch (mouse_mode) {
 	case MouseRange:
 		mouse_select_button.set_active (true);
-		current_canvas_cursor = selector_cursor;
 		break;
 
 	case MouseObject:
 		mouse_move_button.set_active (true);
-		if (Profile->get_sae()) {
-			current_canvas_cursor = timebar_cursor;
-		} else {
-			current_canvas_cursor = grabber_cursor;
-		}
 		break;
 
 	case MouseGain:
 		mouse_gain_button.set_active (true);
-		current_canvas_cursor = cross_hair_cursor;
 		break;
 
 	case MouseZoom:
 		mouse_zoom_button.set_active (true);
-		current_canvas_cursor = zoom_cursor;
 		break;
 
 	case MouseTimeFX:
 		mouse_timefx_button.set_active (true);
-		current_canvas_cursor = time_fx_cursor; // just use playhead
 		break;
 
 	case MouseAudition:
 		mouse_audition_button.set_active (true);
-		current_canvas_cursor = speaker_cursor;
 		break;
 	}
 
 	ignore_mouse_mode_toggle = false;
-
-	if (is_drawable()) {
-	        track_canvas.get_window()->set_cursor(*current_canvas_cursor);
-	}
+	
+	set_canvas_cursor ();
 }
 
 void
@@ -806,6 +835,7 @@ bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	nframes_t where = event_frame (event, 0, 0);
+	AutomationTimeAxisView* atv = 0;
 
 	/* no action if we're recording */
 						
@@ -1028,13 +1058,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MouseObject:
 			switch (item_type) {
 			case AutomationTrackItem:
-				AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(clicked_trackview);
+				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_trackview);
 				if (atv) {
 					atv->add_automation_event (item, event, where, event->button.y);
 				}
 				return true;
+				
 				break;
-
+				
 			default:
 				break;
 			}

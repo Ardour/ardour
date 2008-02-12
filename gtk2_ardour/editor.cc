@@ -170,6 +170,7 @@ Gdk::Cursor* Editor::cross_hair_cursor = 0;
 Gdk::Cursor* Editor::selector_cursor = 0;
 Gdk::Cursor* Editor::trimmer_cursor = 0;
 Gdk::Cursor* Editor::grabber_cursor = 0;
+Gdk::Cursor* Editor::grabber_edit_point_cursor = 0;
 Gdk::Cursor* Editor::zoom_cursor = 0;
 Gdk::Cursor* Editor::time_fx_cursor = 0;
 Gdk::Cursor* Editor::fader_cursor = 0;
@@ -1305,20 +1306,13 @@ Editor::build_cursors ()
 		transparent_cursor = new Gdk::Cursor (bits, bits, c, c, 0, 0);
 	}
 	
-	Glib::RefPtr<Gdk::Pixbuf> grabber_edit_point_pixbuf (::get_icon ("grabber_edit_point"));
 
 	grabber_cursor = new Gdk::Cursor (HAND2);
 	
-#ifdef GTKOSX
 	{
-
-		Glib::RefPtr<Gdk::Pixbuf> hand2 (grabber_cursor->get_image());
-		hand2->save ("hand.png", "png");
+		Glib::RefPtr<Gdk::Pixbuf> grabber_edit_point_pixbuf (::get_icon ("grabber_edit_point"));
+		grabber_edit_point_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_edit_point_pixbuf, 5, 17);
 	}
-
-
-	grabber_edit_point_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_edit_point_pixbuf);
-#endif
 
 	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
 	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
@@ -2149,6 +2143,8 @@ Editor::set_edit_point_preference (EditPoint ep)
 		edit_point_selector.set_active_text (str);
 	}
 
+	set_canvas_cursor ();
+
 	if (!changed) {
 		return;
 	}
@@ -2175,7 +2171,7 @@ Editor::set_edit_point_preference (EditPoint ep)
 			break;
 		}
 	} 
-						
+
 	instant_save ();
 }
 

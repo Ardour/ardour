@@ -142,8 +142,6 @@ AudioSource::peaks_ready (sigc::slot<void> the_slot, sigc::connection& conn) con
 	   connect the slot while still holding the lock.
 	*/
 
-	cerr << _name << " @ " << this << " peaks built = " << _peaks_built << endl;
-
 	if (!(ret = _peaks_built)) {
 		conn = PeaksReady.connect (the_slot);
 	}

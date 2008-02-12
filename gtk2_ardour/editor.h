@@ -532,6 +532,7 @@ class Editor : public PublicEditor
 	Gtk::VBox           vpacker;
 
 	Gdk::Cursor*          current_canvas_cursor;
+	void set_canvas_cursor ();
 
 	ArdourCanvas::CanvasAA track_canvas;
 	ArdourCanvas::CanvasAA time_canvas;

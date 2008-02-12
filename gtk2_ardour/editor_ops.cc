@@ -3066,7 +3066,7 @@ Editor::align (RegionPoint what)
 {
 	RegionSelection rs; 
 
-	get_regions_for_action (rs);
+	get_regions_for_action (rs, false);
 	nframes64_t where = get_preferred_edit_position();
 
 	if (!rs.empty()) {
@@ -3085,7 +3085,7 @@ Editor::align_relative (RegionPoint what)
 	nframes64_t where = get_preferred_edit_position();
 	RegionSelection rs; 
 
-	get_regions_for_action (rs);
+	get_regions_for_action (rs, false);
 
 	if (!rs.empty()) {
 		align_selection_relative (what, where, rs);
