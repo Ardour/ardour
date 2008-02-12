@@ -7,6 +7,8 @@
 #include <gtkmm/button.h>
 #include <gdk/gdkquartz.h>
 
+#include <gtkmm2ext/utils.h>
+
 #include "au_pluginui.h"
 #include "gui_thread.h"
 
@@ -20,16 +22,34 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace std;
 using namespace PBD;
 
-static const float kOffsetForAUView_X = 220;
-static const float kOffsetForAUView_Y = 90;
+vector<string> AUPluginUI::automation_mode_strings;
+
+static const gchar* _automation_mode_strings[] = {
+	X_("Manual"),
+	X_("Play"),
+	X_("Write"),
+	X_("Touch"),
+	0
+};
 
 AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	: PlugUIBase (insert)
+	, automation_mode_label (_("Automation"))
+	, preset_label (_("Presets"))
+	
 {
+	if (automation_mode_strings.empty()) {
+		automation_mode_strings = I18N (_automation_mode_strings);
+	}
+	
+	set_popdown_strings (automation_mode_selector, automation_mode_strings);
+	automation_mode_selector.set_active_text (automation_mode_strings.front());
+
 	if ((au = boost::dynamic_pointer_cast<AUPlugin> (insert->plugin())) == 0) {
 		error << _("unknown type of editor-supplying plugin (note: no AudioUnit support in this version of ardour)") << endmsg;
 		throw failed_constructor ();
@@ -37,20 +57,25 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	/* stuff some stuff into the top of the window */
 
-	Gtk::Button* button = manage (new Gtk::Button ("press me"));
-	Gtk::Label* label = manage (new Gtk::Label ("hello, world!"));
-
 	top_box.set_spacing (6);
 	top_box.set_border_width (6);
-	top_box.pack_start (*button, false, false);
-	top_box.pack_start (*label, false, true);
+
+	top_box.pack_end (bypass_button, false, true);
+	top_box.pack_end (automation_mode_selector, false, false);
+	top_box.pack_end (automation_mode_label, false, false);
+	top_box.pack_end (save_button, false, false);
+	top_box.pack_end (preset_combo, false, false);
+	top_box.pack_end (preset_label, false, false);
 
 	set_spacing (6);
 	pack_start (top_box, false, false);
 	pack_start (low_box, false, false);
 
-	button->show ();
-	label->show ();
+	preset_label.show ();
+	preset_combo.show ();
+	automation_mode_label.show ();
+	automation_mode_selector.show ();
+	bypass_button.show ();
 	top_box.show ();
 	low_box.show ();
 
@@ -350,7 +375,6 @@ AUPluginUI::carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event)
 
 	UInt32 eventKind = GetEventKind(event);
 	ClickActivationResult howToHandleClick;
-	Gtk::Container* toplevel = get_toplevel();
 	NSWindow* win = get_nswindow ();
 
 	cerr << "window " << win << " carbon event type " << eventKind << endl;
@@ -389,8 +413,6 @@ AUPluginUI::parent_carbon_window ()
 {
 	NSWindow* win = get_nswindow ();
 	int x, y;
-	int tbx, tby;
-
 
 	if (!win) {
 		return -1;
@@ -602,3 +624,4 @@ AUPluginUI::on_focus_out_event (GdkEventFocus* ev)
 	cerr << "au plugin focus out\n";
 	return false;
 }
+

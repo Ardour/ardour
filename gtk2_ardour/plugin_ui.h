@@ -80,13 +80,14 @@ class PlugUIBase : public virtual sigc::trackable
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
-	Gtk::ComboBoxText combo;
+	Gtk::ComboBoxText preset_combo;
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
 
 	void setting_selected();
 	void save_plugin_setting (void);
 	void bypass_toggled();
+	void redirect_active_changed (ARDOUR::Redirect* r, void* src);
 };
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox 

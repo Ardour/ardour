@@ -1,6 +1,9 @@
 #ifndef __gtk2_ardour_auplugin_ui_h__
 #define __gtk2_ardour_auplugin_ui_h__
 
+#include <vector>
+#include <string>
+
 #include <AppKit/AppKit.h>
 #include <Carbon/Carbon.h>
 #include <AudioUnit/AudioUnitCarbonView.h>
@@ -13,6 +16,10 @@
 #undef verify
 
 #include <gtkmm/box.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+
 #include "plugin_ui.h"
 
 namespace ARDOUR {
@@ -53,6 +60,11 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::HBox     top_box;
 	Gtk::EventBox low_box;
 	Gtk::VBox vpacker;
+	Gtk::Label automation_mode_label;
+	Gtk::ComboBoxText automation_mode_selector;
+	Gtk::Label preset_label;
+
+	static std::vector<std::string> automation_mode_strings;
 
 	/* Cocoa */
 

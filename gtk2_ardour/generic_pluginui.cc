@@ -81,7 +81,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	combo_label->set_use_markup (true);
 
 	smaller_hbox->pack_start (*combo_label, false, false, 10);
-	smaller_hbox->pack_start (combo, false, false);
+	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 
 	constraint_hbox->set_spacing (5);

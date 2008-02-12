@@ -245,28 +245,37 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	  save_button(_("Add")),
 	  bypass_button (_("Bypass"))
 {
-        //combo.set_use_arrows_always(true);
-	set_popdown_strings (combo, plugin->get_presets());
-	combo.set_size_request (100, -1);
-	combo.set_active_text ("");
-	combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
+        //preset_combo.set_use_arrows_always(true);
+	set_popdown_strings (preset_combo, plugin->get_presets());
+	preset_combo.set_size_request (100, -1);
+	preset_combo.set_active_text ("");
+	preset_combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
 
 	save_button.set_name ("PluginSaveButton");
 	save_button.signal_clicked().connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
+
+	insert->active_changed.connect (mem_fun(*this, &PlugUIBase::redirect_active_changed));
+	bypass_button.set_active (!pi->active());
 
 	bypass_button.set_name ("PluginBypassButton");
 	bypass_button.signal_toggled().connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
 }
 
 void
+PlugUIBase::redirect_active_changed (Redirect* r, void* src)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PlugUIBase::redirect_active_changed), r, src));
+	bypass_button.set_active (!r->active());
+}
+
+void
 PlugUIBase::setting_selected()
 {
-	if (combo.get_active_text().length() > 0) {
-		if (!plugin->load_preset(combo.get_active_text())) {
-			warning << string_compose(_("Plugin preset %1 not found"), combo.get_active_text()) << endmsg;
+	if (preset_combo.get_active_text().length() > 0) {
+		if (!plugin->load_preset(preset_combo.get_active_text())) {
+			warning << string_compose(_("Plugin preset %1 not found"), preset_combo.get_active_text()) << endmsg;
 		}
 	}
-
 }
 
 void
@@ -288,8 +297,8 @@ PlugUIBase::save_plugin_setting ()
 
 		if (name.length()) {
 			if(plugin->save_preset(name)){
-				set_popdown_strings (combo, plugin->get_presets());
-				combo.set_active_text (name);
+				set_popdown_strings (preset_combo, plugin->get_presets());
+				preset_combo.set_active_text (name);
 			}
 		}
 		break;
