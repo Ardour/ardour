@@ -202,6 +202,19 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 }	
 
+Gdk::Cursor*
+Editor::which_grabber_cursor ()
+{
+	switch (_edit_point) {
+	case EditAtMouse:
+		return grabber_edit_point_cursor;
+		break;
+	default:
+		return grabber_cursor;
+		break;
+	}
+}
+
 void
 Editor::set_canvas_cursor ()
 {
@@ -211,14 +224,7 @@ Editor::set_canvas_cursor ()
 		break;
 
 	case MouseObject:
-		switch (_edit_point) {
-		case EditAtMouse:
-			current_canvas_cursor = grabber_edit_point_cursor;
-			break;
-		default:
-			current_canvas_cursor = grabber_cursor;
-			break;
-		}
+		current_canvas_cursor = which_grabber_cursor();
 		break;
 
 	case MouseGain:
@@ -1276,7 +1282,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case PlayheadCursorItem:
 		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*grabber_cursor);
+			switch (_edit_point) {
+			case EditAtMouse:
+				track_canvas.get_window()->set_cursor (*grabber_edit_point_cursor);
+				break;
+			default:
+				track_canvas.get_window()->set_cursor (*grabber_cursor);
+				break;
+			}
 		}
 		break;
 
@@ -1737,7 +1750,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	}
 
 	if (cursor == 0) {
-		cursor = grabber_cursor;
+		cursor = which_grabber_cursor ();
 	}
 
         // if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
@@ -1800,7 +1813,7 @@ Editor::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t t
 	drag_info.item = new_item;
 
 	if (cursor == 0) {
-		cursor = grabber_cursor;
+		cursor = which_grabber_cursor ();
 	}
 
 	drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK, *cursor, time);
