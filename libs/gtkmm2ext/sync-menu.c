@@ -27,7 +27,7 @@
 
 #include <Carbon/Carbon.h>
 
-#include "sync-menu.h"
+#include <gtkmm2ext/sync-menu.h>
 
 
 /* TODO
@@ -533,6 +533,14 @@ carbon_menu_item_connect (GtkWidget     *menu_item,
  * carbon event handler
  */
 
+static int _in_carbon_menu_event_handler = 0;
+
+int 
+gdk_quartz_in_carbon_menu_event_handler ()
+{
+	return _in_carbon_menu_event_handler;
+}
+
 static OSStatus
 menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
 			 EventRef             event_ref,
@@ -541,6 +549,9 @@ menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
   UInt32  event_class = GetEventClass (event_ref);
   UInt32  event_kind = GetEventKind (event_ref);
   MenuRef menu_ref;
+  OSStatus ret;
+
+  _in_carbon_menu_event_handler = 1;
 
   switch (event_class)
     {
@@ -572,6 +583,7 @@ menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
 	      if (err == noErr && GTK_IS_WIDGET (widget))
 		{
 		  gtk_menu_item_activate (GTK_MENU_ITEM (widget));
+		  _in_carbon_menu_event_handler = 0;
 		  return noErr;
 		}
 	    }
@@ -617,7 +629,9 @@ menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
       break;
     }
 
-  return CallNextEventHandler (event_handler_call_ref, event_ref);
+  ret = CallNextEventHandler (event_handler_call_ref, event_ref);
+  _in_carbon_menu_event_handler = 0;
+  return ret;
 }
 
 static void

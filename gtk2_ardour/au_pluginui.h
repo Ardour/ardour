@@ -34,7 +34,8 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	
 	virtual void activate ();
 	virtual void deactivate ();
-
+	
+	void lower_box_realized ();
 	void on_realize ();
 	void on_show ();
 	void on_hide ();
@@ -48,6 +49,10 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
 	int prefheight;
 	int prefwidth;
+	
+	Gtk::HBox     top_box;
+	Gtk::EventBox low_box;
+	Gtk::VBox vpacker;
 
 	/* Cocoa */
 
@@ -62,14 +67,11 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	AudioUnitCarbonView  editView;
 	WindowRef            carbon_window;	
  	EventHandlerRef      carbon_event_handler;
-	bool                 carbon_parented;
-	bool                 cocoa_parented;
 	bool                 _activating_from_app;
 
-	void test_view_support (bool&, bool&);
 	bool test_cocoa_view_support ();
 	bool test_carbon_view_support ();
-	int  create_carbon_view (bool generic);
+	int  create_carbon_view ();
 	int  create_cocoa_view ();
 
 	int parent_carbon_window ();

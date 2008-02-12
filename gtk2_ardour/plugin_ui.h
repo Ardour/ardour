@@ -196,7 +196,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
 };
 
-class PluginUIWindow : public ArdourDialog
+class PluginUIWindow : public Gtk::Window
 {
   public:
 	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
@@ -213,6 +213,7 @@ class PluginUIWindow : public ArdourDialog
 
   private:
 	PlugUIBase* _pluginui;
+	Gtk::VBox vbox;
 	bool non_gtk_gui;
 	void app_activated (bool);
 	void plugin_going_away ();

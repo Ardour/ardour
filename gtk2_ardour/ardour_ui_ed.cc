@@ -37,7 +37,10 @@
 #include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
-#include "sync-menu.h"
+
+#ifdef GTKOSX
+#include <gtkmm2ext/sync-menu.h>
+#endif
 
 #include <ardour/session.h>
 #include <ardour/profile.h>

@@ -58,20 +58,10 @@ Editor::handle_audio_region_removed (boost::weak_ptr<AudioRegion> wregion)
 }
 
 void
-Editor::handle_new_audio_region (boost::weak_ptr<AudioRegion> wregion)
+Editor::handle_new_audio_regions (vector<boost::weak_ptr<AudioRegion> >& v)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_region), wregion));
-
-	/* don't copy region - the one we are being notified
-	   about belongs to the session, and so it will
-	   never be edited.
-	*/
-
-	boost::shared_ptr<AudioRegion> region (wregion.lock());
-	
-	if (region) {
-		add_audio_region_to_region_display (region);
-	}
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_audio_regions), v));
+	add_audio_regions_to_region_display (v);
 }
 
 void
@@ -80,6 +70,21 @@ Editor::region_hidden (boost::shared_ptr<Region> r)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::region_hidden), r));	
 
 	redisplay_regions ();
+}
+
+void
+Editor::add_audio_regions_to_region_display (vector<boost::weak_ptr<AudioRegion> >& regions)
+{
+	cerr << "Adding " << regions.size() << " to region list\n";
+
+	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	for (vector<boost::weak_ptr<AudioRegion> >::iterator x = regions.begin(); x != regions.end(); ++x) {
+		boost::shared_ptr<AudioRegion> region ((*x).lock());
+		if (region) {
+			add_audio_region_to_region_display (region);
+		}
+	}
+	region_list_display.set_model (region_list_model);
 }
 
 void

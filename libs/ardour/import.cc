@@ -46,6 +46,7 @@
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
 #include <ardour/resampled_source.h>
+#include <ardour/analyser.h>
 
 #include "i18n.h"
 
@@ -285,11 +286,14 @@ Session::import_audiofiles (import_status& status)
 
 		/* flush the final length(s) to the header(s) */
 
-		for (AudioSources::iterator x = all_new_sources.begin();
-				x != all_new_sources.end(); ++x)
+		for (AudioSources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ++x)
 		{
 			(*x)->update_header(0, *now, xnow);
 			(*x)->done_with_peakfile_writes ();
+			
+			/* now that there is data there, requeue the file for analysis */
+			
+			Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
 		}
 
 		/* save state so that we don't lose these new Sources */

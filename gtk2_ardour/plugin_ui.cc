@@ -62,7 +62,6 @@ using namespace Gtk;
 using namespace sigc;
 
 PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scrollable)
-	: ArdourDialog ("plugin ui")
 {
 	bool have_gui = false;
 	non_gtk_gui = false;
@@ -99,7 +98,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
 		
 		_pluginui = pu;
-		get_vbox()->add (*pu);
+		add (*pu);
 		
 		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 
@@ -107,7 +106,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, bool scr
 		signal_unmap_event().connect (mem_fun (*pu, &GenericPluginUI::stop_updating));
 	}
 
-	set_position (Gtk::WIN_POS_MOUSE);
+	// set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
@@ -138,23 +137,14 @@ PluginUIWindow::on_show ()
 {
 	cerr << "PluginWindow shown\n";
 		
-	ArdourDialog::on_show ();
-	Glib::ListHandle<Widget*> kids (get_vbox()->get_children());
-	
-	cerr << "send show to " << kids.size() << " children of this plugin UI\n";
-
-	for (Glib::ListHandle<Widget*>::iterator x = kids.begin(); x != kids.end(); ++x) {
-		cerr << "\tSend show to " << (*x) << endl;
-		(*x)->show ();
-	}
-	cerr << "!! send done\n";
+	Window::on_show ();
 }
 
 void
 PluginUIWindow::on_hide ()
 {
 	cerr << "PluginWindow hidden\n";
-	ArdourDialog::on_hide ();
+	Window::on_hide ();
 }
 
 bool
@@ -174,7 +164,7 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
 		VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
 	
 		_pluginui = vpu;
-		get_vbox()->add (*vpu);
+		add (*vpu);
 		vpu->package (*this);
 	}
 
@@ -191,8 +181,7 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 #else
 	VBox* box;
 	_pluginui = create_au_gui (insert, &box);
-	cerr << "#*#*#*#*#*#*#*#*## PACK " << box << " INTO PLUGIN UI\n";
-	get_vbox()->add (*box);
+	add (*box);
 	non_gtk_gui = true;
 
 	extern sigc::signal<void,bool> ApplicationActivationChanged;
@@ -206,12 +195,16 @@ void
 PluginUIWindow::app_activated (bool yn)
 {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
-	if (yn) {
-		if (_pluginui) {
-			_pluginui->activate ();
-		}
-	}
 	cerr << "APP activated ? " << yn << endl;
+	if (_pluginui) {
+		if (yn) {
+			_pluginui->activate ();
+			present ();
+		} else {
+			hide ();
+			_pluginui->deactivate ();
+		}
+	} 
 #endif
 }
 

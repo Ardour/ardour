@@ -2568,6 +2568,14 @@ Session::region_name (string& result, string base, bool newlevel) const
 void
 Session::add_region (boost::shared_ptr<Region> region)
 {
+	vector<boost::shared_ptr<Region> > v;
+	v.push_back (region);
+	add_regions (v);
+}
+		
+void
+Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
+{
 	boost::shared_ptr<AudioRegion> ar;
 	boost::shared_ptr<AudioRegion> oar;
 	bool added = false;
@@ -2575,45 +2583,52 @@ Session::add_region (boost::shared_ptr<Region> region)
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		if (region == 0) {
-			error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
-		} else if ((ar = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
+		for (vector<boost::shared_ptr<Region> >::iterator ii = new_regions.begin(); ii != new_regions.end(); ++ii) {
+		
+			boost::shared_ptr<Region> region = *ii;
+			
+			if (region == 0) {
 
-			AudioRegionList::iterator x;
+				error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
 
-			for (x = audio_regions.begin(); x != audio_regions.end(); ++x) {
-
-				oar = boost::dynamic_pointer_cast<AudioRegion> (x->second);
-
-				if (ar->region_list_equivalent (oar)) {
-					break;
-				}
-			}
-
-			if (x == audio_regions.end()) {
-
-				pair<AudioRegionList::key_type,AudioRegionList::mapped_type> entry;
-
-				entry.first = region->id();
-				entry.second = ar;
-
-				pair<AudioRegionList::iterator,bool> x = audio_regions.insert (entry);
-
+			} else if ((ar = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
 				
-				if (!x.second) {
-					return;
+				AudioRegionList::iterator x;
+				
+				for (x = audio_regions.begin(); x != audio_regions.end(); ++x) {
+					
+					oar = boost::dynamic_pointer_cast<AudioRegion> (x->second);
+					
+					if (ar->region_list_equivalent (oar)) {
+						break;
+					}
 				}
+				
+				if (x == audio_regions.end()) {
+					
+					pair<AudioRegionList::key_type,AudioRegionList::mapped_type> entry;
+					
+					entry.first = region->id();
+					entry.second = ar;
+					
+					pair<AudioRegionList::iterator,bool> x = audio_regions.insert (entry);
+					
+					
+					if (!x.second) {
+						return;
+					}
+					
+					added = true;
+				} 
 
-				added = true;
-			} 
-
-		} else {
-
-			fatal << _("programming error: ")
-			      << X_("unknown region type passed to Session::add_region()")
-			      << endmsg;
-			/*NOTREACHED*/
-
+			} else {
+				
+				fatal << _("programming error: ")
+				      << X_("unknown region type passed to Session::add_region()")
+				      << endmsg;
+				/*NOTREACHED*/
+				
+			}
 		}
 	}
 
@@ -2624,9 +2639,34 @@ Session::add_region (boost::shared_ptr<Region> region)
 	set_dirty();
 	
 	if (added) {
-		region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
-		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
-		AudioRegionAdded (ar); /* EMIT SIGNAL */
+
+		vector<boost::weak_ptr<AudioRegion> > v;
+		boost::shared_ptr<AudioRegion> first_ar;
+
+		for (vector<boost::shared_ptr<Region> >::iterator ii = new_regions.begin(); ii != new_regions.end(); ++ii) {
+
+			boost::shared_ptr<Region> region = *ii;
+			boost::shared_ptr<AudioRegion> ar;
+
+			if (region == 0) {
+
+				error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
+
+			} else if ((ar = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
+				v.push_back (ar);
+
+				if (!first_ar) {
+					first_ar = ar;
+				}
+			}
+
+			region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
+			region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+		}
+		
+		if (!v.empty()) {
+			AudioRegionsAdded (v); /* EMIT SIGNAL */
+		}
 	}
 }
 

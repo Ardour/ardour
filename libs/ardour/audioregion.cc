@@ -1576,6 +1576,8 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 		return 0;
 	}
 
+	cerr << "startup analysis of " << _name << endl;
+
 	TransientDetector t (pl->session().frame_rate());
 	bool existing_results = !results.empty();
 
@@ -1588,9 +1590,13 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 
 		t.reset ();
 
+		cerr << "working on channel " << i << endl;
+
 		if (t.run ("", this, i, these_results)) {
 			return -1;
 		}
+
+		cerr << "done\n";
 
 		/* translate all transients to give absolute position */
 		
@@ -1617,6 +1623,11 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 		/* make sure ours are clean too */
 
 		TransientDetector::cleanup_transients (_transients, pl->session().frame_rate(), 3.0);
+
+	} else {
+
+		TransientDetector::cleanup_transients (_transients, pl->session().frame_rate(), 3.0);
+		results = _transients;
 	}
 
 	valid_transients = true;

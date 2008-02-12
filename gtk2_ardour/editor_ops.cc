@@ -5198,7 +5198,7 @@ Editor::split_region_at_transients ()
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i)->region());
 		
 		if (ar && (ar->get_transients (positions) == 0)) {
-			split_region_at_points ((*i)->region(), positions);
+			split_region_at_points ((*i)->region(), positions, true);
 			positions.clear ();
 		}
 		
@@ -5210,10 +5210,11 @@ Editor::split_region_at_transients ()
 }
 
 void
-Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList& positions)
+Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList& positions, bool can_ferret)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-	
+	bool use_rhythmic_rodent = false;
+
 	if (!ar) {
 		return;
 	}
@@ -5227,7 +5228,41 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	if (positions.empty()) {
 		return;
 	}
+
+
+	if (positions.size() > 20) {
+		Glib::ustring msgstr = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time."), ar->name(), positions.size() + 1);
+		MessageDialog msg (msgstr,
+				   false,
+				   Gtk::MESSAGE_INFO,
+				   Gtk::BUTTONS_OK_CANCEL);
+
+		if (can_ferret) {
+			msg.add_button (_("Call for the Ferret!"), RESPONSE_APPLY);
+		}
+
+		msg.set_title (_("Excessive split?"));
+		msg.set_secondary_text (_("Press OK to continue with this split operation\nor ask the Ferret dialog to tune the analysis"));
+		msg.present ();
+
+		int response = msg.run();
+		msg.hide ();
+		switch (response) {
+		case RESPONSE_OK:
+			break;
+		case RESPONSE_APPLY:
+			use_rhythmic_rodent = true;
+			break;
+		default:
+			return;
+		}
+	}
 	
+	if (use_rhythmic_rodent) {
+		show_rhythm_ferret ();
+		return;
+	}
+
 	AnalysisFeatureList::const_iterator x;	
 	
 	nframes64_t pos = ar->position();
@@ -5249,7 +5284,10 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	
 	pl->freeze ();
 	pl->remove_region (ar);
+	vector<boost::shared_ptr<Region> > new_regions;
 	
+	cerr << "about to split using " << positions.size() << " positions" << endl;
+
 	while (x != positions.end()) {
 		
 		/* file start = original start + how far we from the initial position ? 
@@ -5276,8 +5314,14 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 			continue;
 		}
 		
-		pl->add_region (RegionFactory::create (ar->get_sources(), file_start, len, new_name), pos);
-		
+		/* do NOT announce new regions 1 by one, just wait till they are all done */
+
+		boost::shared_ptr<Region> r = RegionFactory::create (ar->get_sources(), file_start, len, new_name, 0, Region::DefaultFlags, false);
+		pl->add_region (r, pos);
+		new_regions.push_back (r);
+
+		cerr << "done at " << pos << endl;
+
 		pos += len;
 		++x;
 
@@ -5287,7 +5331,8 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	} 
 
 	pl->thaw ();
-	
+	session->add_regions (new_regions);
+
 	XMLNode& after (pl->get_state());
 	
 	session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));

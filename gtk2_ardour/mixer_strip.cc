@@ -87,6 +87,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	: AxisView(sess),
 	  RouteUI (rt, sess, _("Mute"), _("Solo"), _("Record")),
 	  _mixer(mx),
+	  _mixer_owned (in_mixer),
 	  pre_redirect_box (PreFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
 	  post_redirect_box (PostFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
 	  gpm (_route, sess),
@@ -661,11 +662,10 @@ MixerStrip::add_connection_to_output_menu (ARDOUR::Connection* c)
 void
 MixerStrip::update_diskstream_display ()
 {
+	map_frozen ();
+	update_input_display ();
+
 	if (is_audio_track()) {
-
-		map_frozen ();
-
-		update_input_display ();
 
 		if (input_selector) {
 			input_selector->hide_all ();
@@ -675,9 +675,6 @@ MixerStrip::update_diskstream_display ()
 
 	} else {
 
-		map_frozen ();
-
-		update_input_display ();
 		show_passthru_color ();
 	}
 }
@@ -1144,9 +1141,11 @@ MixerStrip::map_frozen ()
 			pre_redirect_box.set_sensitive (true);
 			post_redirect_box.set_sensitive (true);
 			speed_spinner.set_sensitive (true);
+			// XXX need some way, maybe, to retoggle redirect editors
 			break;
 		}
 	}
+
 	_route->foreach_redirect (this, &MixerStrip::hide_redirect_editor);
 }
 

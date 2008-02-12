@@ -108,6 +108,8 @@ Analyser::analyse_audio_file_source (boost::shared_ptr<AudioFileSource> src)
 
 	TransientDetector td (src->sample_rate());
 
+	cerr << "analyzing " << src->name () << endl;
+
 	if (td.run (src->get_transients_path(), src.get(), 0, results) == 0) {
 		src->set_been_analysed (true);
 	} else {

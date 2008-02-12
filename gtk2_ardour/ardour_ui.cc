@@ -338,7 +338,11 @@ ARDOUR_UI::post_engine ()
 
 	/* set default clock modes */
 
-	primary_clock.set_mode (AudioClock::SMPTE);
+	if (Profile->get_sae()) {
+		primary_clock.set_mode (AudioClock::MinSec);
+	}  else {
+		primary_clock.set_mode (AudioClock::SMPTE);
+	}
 	secondary_clock.set_mode (AudioClock::BBT);
 
 	/* start the time-of-day-clock */

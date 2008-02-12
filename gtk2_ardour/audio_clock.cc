@@ -28,6 +28,7 @@
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/tempo.h>
+#include <ardour/profile.h>
 #include <sigc++/bind.h>
 
 #include "ardour_ui.h"
@@ -1883,7 +1884,9 @@ AudioClock::build_ops_menu ()
 	MenuList& ops_items = ops_menu->items();
 	ops_menu->set_name ("ArdourContextMenu");
 	
-	ops_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
+	if (!Profile->get_sae()) {
+		ops_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
+	}
 	ops_items.push_back (MenuElem (_("Bars:Beats"), bind (mem_fun(*this, &AudioClock::set_mode), BBT)));
 	ops_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
 	ops_items.push_back (MenuElem (_("Samples"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));

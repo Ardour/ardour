@@ -92,7 +92,6 @@ au_pluginui.mm
 """)
 
 gtkosx_files=Split("""
-sync-menu.c
 cocoacarbon.mm
 """)
 

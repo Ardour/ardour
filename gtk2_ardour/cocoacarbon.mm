@@ -24,7 +24,7 @@
 #include "ardour_ui.h"
 #include "actions.h"
 #include "opts.h"
-#include "sync-menu.h"
+#include <gtkmm2ext/sync-menu.h>
 
 #include <Appkit/Appkit.h>
 

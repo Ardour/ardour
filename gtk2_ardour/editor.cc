@@ -1142,7 +1142,7 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->TransportStateChange.connect (mem_fun(*this, &Editor::map_transport_state)));
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
 	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route)));
-	session_connections.push_back (session->AudioRegionAdded.connect (mem_fun(*this, &Editor::handle_new_audio_region)));
+	session_connections.push_back (session->AudioRegionsAdded.connect (mem_fun(*this, &Editor::handle_new_audio_regions)));
 	session_connections.push_back (session->AudioRegionRemoved.connect (mem_fun(*this, &Editor::handle_audio_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
 	session_connections.push_back (session->edit_group_added.connect (mem_fun(*this, &Editor::add_edit_group)));

@@ -554,7 +554,10 @@ class Session : public PBD::StatefulDestructible
 	
 	/* region info  */
 
+	void add_regions (std::vector<boost::shared_ptr<Region> >&);
+
 	sigc::signal<void,boost::weak_ptr<AudioRegion> > AudioRegionAdded;
+	sigc::signal<void,std::vector<boost::weak_ptr<AudioRegion> >& > AudioRegionsAdded;
 	sigc::signal<void,boost::weak_ptr<AudioRegion> > AudioRegionRemoved;
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;

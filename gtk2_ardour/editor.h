@@ -930,8 +930,10 @@ class Editor : public PublicEditor
 	int ensure_cursor (nframes_t* pos);
 
 	void handle_new_audio_region (boost::weak_ptr<ARDOUR::AudioRegion>);
+	void handle_new_audio_regions (vector<boost::weak_ptr<ARDOUR::AudioRegion> >& );
 	void handle_audio_region_removed (boost::weak_ptr<ARDOUR::AudioRegion>);
 	void add_audio_region_to_region_display (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void add_audio_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::AudioRegion> > & );
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
 	void insert_into_tmp_audio_regionlist(boost::shared_ptr<ARDOUR::AudioRegion>);
@@ -961,7 +963,7 @@ class Editor : public PublicEditor
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
 	void split_region_at_transients ();
-	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&);
+	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret);
 	void crop_region_to_selection ();
 	void crop_region_to (nframes_t start, nframes_t end);
 	void set_sync_point (nframes64_t, const RegionSelection&);

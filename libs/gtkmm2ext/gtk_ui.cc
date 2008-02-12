@@ -572,9 +572,31 @@ UI::popup_error (const char *text)
 	msg.run ();
 }
 
+#ifdef GTKOSX
+extern "C" {
+	int gdk_quartz_in_carbon_menu_event_handler ();
+}
+#endif
+
 void
 UI::flush_pending ()
 {
+#ifdef GTKOSX
+	/* as of february 11th 2008, gtk/osx has a problem in that mac menu events
+	   are handled using Carbon with an "internal" event handling system that 
+	   doesn't pass things back to the glib/gtk main loop. this makes
+	   gtk_main_iteration() block if we call it while in a menu event handler 
+	   because glib gets confused and thinks there are two threads running
+	   g_main_poll_func(). 
+
+	   this hack (relies on code in gtk2_ardour/sync-menu.c) works
+	   around that.
+	*/
+
+	if (gdk_quartz_in_carbon_menu_event_handler()) {
+		return;
+	}
+#endif
 	if (!caller_is_ui_thread()) {
 		error << "non-UI threads cannot call UI::flush_pending()"
 		      << endmsg;

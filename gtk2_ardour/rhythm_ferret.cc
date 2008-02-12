@@ -271,7 +271,7 @@ RhythmFerret::do_split_action ()
 
 		(*i)->get_time_axis_view().hide_temporary_lines ();
 
-		editor.split_region_at_points ((*i)->region(), current_results);
+		editor.split_region_at_points ((*i)->region(), current_results, false);
 
 		/* i is invalid at this point */
 

@@ -27,6 +27,7 @@
 #include <ardour/audiofilter.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
+#include <ardour/analyser.h>
 
 #include "i18n.h"
 
@@ -104,6 +105,10 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs, s
 			afs->update_header (region->position(), *now, xnow);
 			afs->mark_immutable ();
 		}
+		
+		/* now that there is data there, requeue the file for analysis */
+		
+		Analyser::queue_source_for_analysis (*si, false);
 	}
 
 	/* create a new region */
