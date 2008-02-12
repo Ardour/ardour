@@ -48,6 +48,7 @@ Splash::Splash ()
 
 	add (darea);
 
+	set_default_size (pixbuf->get_width(), pixbuf->get_height());
 	the_splash = this;
 }
 
@@ -78,12 +79,17 @@ Splash::expose (GdkEventExpose* ev)
 {
 	RefPtr<Gdk::Window> window = darea.get_window();
 
+	/* note: height & width need to be constrained to the pixbuf size
+	   in case a WM provides us with a screwy allocation
+	*/
+
 	window->draw_pixbuf (get_style()->get_bg_gc (STATE_NORMAL), pixbuf,
 			     ev->area.x, ev->area.y,
 			     ev->area.x, ev->area.y,
-			     ev->area.width, ev->area.height,
+			     min ((pixbuf->get_width() - ev->area.x), ev->area.width), 
+			     min ((pixbuf->get_height() - ev->area.y), ev->area.height),
 			     Gdk::RGB_DITHER_NONE, 0, 0);
-
+	
 	Glib::RefPtr<Gtk::Style> style = darea.get_style();
 	Glib::RefPtr<Gdk::GC> white = style->get_white_gc();
 

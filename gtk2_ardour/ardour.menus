@@ -68,7 +68,7 @@
                <menuitem action='playhead-to-range-start'/>
                <menuitem action='playhead-to-range-end'/>
                <menuitem action='focus-on-clock'/>
-	       <menu action='Markers'>
+	       <menu action='LocateToMarker'>
 			<menuitem action='goto-mark-1'/>
 			<menuitem action='goto-mark-2'/>
 			<menuitem action='goto-mark-3'/>

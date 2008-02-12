@@ -91,7 +91,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
-	ActionManager::register_action (main_actions, X_("Markers"), _("Markers"));
 	ActionManager::register_action (main_actions, X_("Help"), _("Help"));
  	ActionManager::register_action (main_actions, X_("KeyMouse Actions"), _("KeyMouse Actions"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormat"), _("Audio File Format"));

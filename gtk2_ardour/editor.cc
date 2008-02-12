@@ -1304,8 +1304,22 @@ Editor::build_cursors ()
 		Gdk::Color c;
 		transparent_cursor = new Gdk::Cursor (bits, bits, c, c, 0, 0);
 	}
+	
+	Glib::RefPtr<Gdk::Pixbuf> grabber_edit_point_pixbuf (::get_icon ("grabber_edit_point"));
 
 	grabber_cursor = new Gdk::Cursor (HAND2);
+	
+#ifdef GTKOSX
+	{
+
+		Glib::RefPtr<Gdk::Pixbuf> hand2 (grabber_cursor->get_image());
+		hand2->save ("hand.png", "png");
+	}
+
+
+	grabber_edit_point_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_edit_point_pixbuf);
+#endif
+
 	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
 	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
 	selector_cursor = new Gdk::Cursor (XTERM);

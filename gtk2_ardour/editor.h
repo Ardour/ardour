@@ -894,6 +894,7 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* trimmer_cursor;
 	static Gdk::Cursor* selector_cursor;
 	static Gdk::Cursor* grabber_cursor;
+	static Gdk::Cursor* grabber_edit_point_cursor;
 	static Gdk::Cursor* zoom_cursor;
 	static Gdk::Cursor* time_fx_cursor;
 	static Gdk::Cursor* fader_cursor;
