@@ -95,7 +95,7 @@ Analyser::work ()
 
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 
-		if (afs) {
+		if (afs && afs->length()) {
 			analyse_audio_file_source (afs);
 		}
 	}
@@ -107,8 +107,6 @@ Analyser::analyse_audio_file_source (boost::shared_ptr<AudioFileSource> src)
 	AnalysisFeatureList results;
 
 	TransientDetector td (src->sample_rate());
-
-	cerr << "analyzing " << src->name () << endl;
 
 	if (td.run (src->get_transients_path(), src.get(), 0, results) == 0) {
 		src->set_been_analysed (true);

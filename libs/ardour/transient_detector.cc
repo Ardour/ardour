@@ -6,18 +6,20 @@ using namespace Vamp;
 using namespace ARDOUR;
 using namespace std;
 
-string TransientDetector::_op_id;
+/* need a static initializer function for this */
+
+string TransientDetector::_op_id = X_("libardourvampplugins:percussiononsets:2");
 
 TransientDetector::TransientDetector (float sr)
 	: AudioAnalyser (sr, X_("libardourvampplugins:percussiononsets"))
 {
-	if (_op_id.empty()) {
-		_op_id = X_("libardourvampplugins:percussiononsets");
+	/* update the op_id */
 
-		// XXX this should load the above-named plugin and get the current version
-
-		_op_id += ":2";
-	}
+	_op_id = X_("libardourvampplugins:percussiononsets");
+	
+	// XXX this should load the above-named plugin and get the current version
+	
+	_op_id += ":2";
 }
 
 TransientDetector::~TransientDetector()
