@@ -466,6 +466,12 @@ ARDOUR_UI::toggle_StopRecordingOnXrun()
 }
 
 void
+ARDOUR_UI::toggle_CreateXrunMarker()
+{
+	ActionManager::toggle_config_state ("options", "CreateXrunMarker", &Configuration::set_create_xrun_marker, &Configuration::get_create_xrun_marker);
+}
+
+void
 ARDOUR_UI::toggle_sync_order_keys ()
 {
 	ActionManager::toggle_config_state ("options", "SyncEditorAndMixerTrackOrder", &Configuration::set_sync_all_route_ordering, &Configuration::get_sync_all_route_ordering);
@@ -1047,6 +1053,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options",  "PeriodicSafetyBackups", &Configuration::get_periodic_safety_backups);
 	} else if (PARAM_IS ("stop-recording-on-xrun")) {
 		ActionManager::map_some_state ("options",  "StopRecordingOnXrun", &Configuration::get_stop_recording_on_xrun);
+	} else if (PARAM_IS ("create-xrun-marker")) {
+		ActionManager::map_some_state ("options",  "CreateXrunMarker", &Configuration::get_create_xrun_marker);
 	} else if (PARAM_IS ("sync-all-route-ordering")) {
 		ActionManager::map_some_state ("options",  "SyncEditorAndMixerTrackOrder", &Configuration::get_sync_all_route_ordering);
 	} else if (PARAM_IS ("stop-at-session-end")) {

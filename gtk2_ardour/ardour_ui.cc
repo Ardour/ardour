@@ -2917,13 +2917,30 @@ ARDOUR_UI::keyboard_settings () const
 }
 
 void
+ARDOUR_UI::create_xrun_marker(nframes_t where)
+{
+	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::create_xrun_marker), where));
+	editor->mouse_add_new_marker (where, false, true);
+}
+
+void
 ARDOUR_UI::halt_on_xrun_message ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::halt_on_xrun_message));
-
 	MessageDialog msg (*editor,
 			   _("Recording was stopped because your system could not keep up."));
 	msg.run ();
+}
+
+void
+ARDOUR_UI::xrun_handler(nframes_t where)
+{
+	if (Config->get_create_xrun_marker() && session->actively_recording()) {
+		create_xrun_marker(where);
+	}
+
+	if (Config->get_stop_recording_on_xrun() && session->actively_recording()) {
+		halt_on_xrun_message ();
+	}
 }
 
 void

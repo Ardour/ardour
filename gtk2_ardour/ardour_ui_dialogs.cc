@@ -50,7 +50,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 {
 	session = s;
 
-	session->HaltOnXrun.connect (mem_fun(*this, &ARDOUR_UI::halt_on_xrun_message));
+	session->Xrun.connect (mem_fun(*this, &ARDOUR_UI::xrun_handler));
 	session->RecordStateChanged.connect (mem_fun (*this, &ARDOUR_UI::record_state_changed));
 
 	/* sensitize menu bar options that are now valid */

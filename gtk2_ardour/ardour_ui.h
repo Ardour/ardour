@@ -193,6 +193,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void do_transport_locate (nframes_t position);
 	void halt_on_xrun_message ();
+	void xrun_handler (nframes_t);
+	void create_xrun_marker (nframes_t);
 
 	AudioClock primary_clock;
 	AudioClock secondary_clock;
@@ -712,6 +714,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_VerifyRemoveLastCapture();
 	void toggle_PeriodicSafetyBackups();
 	void toggle_StopRecordingOnXrun();
+	void toggle_CreateXrunMarker();
 	void toggle_StopTransportAtEndOfSession();
 	void toggle_GainReduceFastTransport();
 	void toggle_LatchedSolo();

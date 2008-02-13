@@ -456,7 +456,7 @@ class Editor : public PublicEditor
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_marker (nframes_t where, bool is_cd=false);
+	void mouse_add_new_marker (nframes_t where, bool is_cd=false, bool is_xrun=false);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 

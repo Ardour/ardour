@@ -388,13 +388,20 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 }
 
 void
-Editor::mouse_add_new_marker (nframes_t where, bool is_cd)
+Editor::mouse_add_new_marker (nframes_t where, bool is_cd, bool is_xrun)
 {
-	string markername;
+	string markername, markerprefix;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
-	
+
+	if (is_xrun) {
+		markerprefix = "xrun";
+		flags = Location::IsMark;
+	} else {
+		markerprefix = "mark";
+	}
+
 	if (session) {
-		session->locations()->next_available_name(markername,"mark");
+		session->locations()->next_available_name(markername, markerprefix);
 		Location *location = new Location (where, where, markername, (Location::Flags) flags);
 		session->begin_reversible_command (_("add marker"));
                 XMLNode &before = session->locations()->get_state();
