@@ -44,6 +44,8 @@ namespace ARDOUR {
 	class Route;
 }
 
+using namespace ARDOUR;
+
 void
 ARDOUR_UI::shutdown ()
 {
@@ -100,11 +102,14 @@ ARDOUR_UI::setup_keybindings ()
 void
 ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 {
+	BootMessage (_("Setup Editor"));
 	editor->connect_to_session (s);
+	BootMessage (_("Setup Mixer"));
 	mixer->connect_to_session (s);
 
 	/* its safe to do this now */
 	
+	BootMessage (_("Reload Session History"));
 	s->restore_history ("");
 }
 

@@ -667,8 +667,12 @@ Session::when_engine_running ()
 
 	/* we don't want to run execute this again */
 
+	BootMessage (_("Set block size and sample rate"));
+
 	set_block_size (_engine.frames_per_cycle());
 	set_frame_rate (_engine.frame_rate());
+
+	BootMessage (_("Using configuration"));
 
 	Config->map_parameters (mem_fun (*this, &Session::config_changed));
 
@@ -725,6 +729,8 @@ Session::when_engine_running ()
 		error << _("cannot setup Click I/O") << endmsg;
 	}
 
+	BootMessage (_("Compute I/O Latencies"));
+
 	set_worst_io_latencies ();
 
 	if (_clicking) {
@@ -734,6 +740,8 @@ Session::when_engine_running ()
 	/* Create a set of Connection objects that map
 	   to the physical outputs currently available
 	*/
+
+	BootMessage (_("Set up standard connections"));
 
 	/* ONE: MONO */
 
@@ -839,10 +847,14 @@ Session::when_engine_running ()
 		}
 		add_connection (c);
 	} 
+	
+	BootMessage (_("Connect ports"));
 
 	hookup_io ();
 
 	/* catch up on send+insert cnts */
+
+	BootMessage (_("Catch up with send/insert state"));
 
 	insert_cnt = 0;
 	
@@ -871,13 +883,16 @@ Session::when_engine_running ()
 	
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
-
 	/* hook us up to the engine */
+
+	BootMessage (_("Connect to engine"));
 
 	_engine.set_session (this);
 
 #ifdef HAVE_LIBLO
 	/* and to OSC */
+
+	BootMessage (_("OSC startup"));
 
 	osc->set_session (*this);
 #endif

@@ -35,6 +35,7 @@ Splash::Splash ()
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
 	darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	darea.set_double_buffered (false);
 
 	layout = create_pango_layout ("");
 	string str = "<b>";
@@ -96,7 +97,6 @@ Splash::expose (GdkEventExpose* ev)
 	Glib::RefPtr<Gtk::Style> style = darea.get_style();
 	Glib::RefPtr<Gdk::GC> white = style->get_white_gc();
 
-	cerr << "redraw in expose\n";
 	window->draw_layout (white, 10, pixbuf->get_height() - 30, layout);
 
 	return true;
@@ -117,7 +117,7 @@ Splash::message (const string& msg)
 
 	layout->set_markup (str);
 	darea.queue_draw ();
-
+	
 	Glib::RefPtr<Gdk::Window> win = get_window();
 	if (win) {
 		win->process_updates (true);

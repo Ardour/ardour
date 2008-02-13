@@ -637,6 +637,8 @@ ARDOUR_UI::startup ()
 		return;
 	}
 	
+	BootMessage (_("Ardour is ready for use"));
+
 	show ();
 }
 

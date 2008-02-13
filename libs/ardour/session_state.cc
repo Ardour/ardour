@@ -335,10 +335,14 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
+	BootMessage (_("Reset Remote Controls"));
+
 	send_full_time_code ();
 	_engine.transport_locate (0);
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
+
+	BootMessage (_("Reset Control Protocols"));
 
 	ControlProtocolManager::instance().set_session (*this);
 
@@ -349,7 +353,6 @@ Session::second_stage_init (bool new_session)
 	}
 
 	_state_of_the_state = Clean;
-
 	
 	DirtyChanged (); /* EMIT SIGNAL */
 
@@ -359,6 +362,8 @@ Session::second_stage_init (bool new_session)
 		state_was_pending = false;
 	}
 	
+	BootMessage (_("Session loading complete"));
+
 	return 0;
 }
 

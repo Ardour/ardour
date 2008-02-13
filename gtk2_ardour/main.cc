@@ -345,7 +345,11 @@ int main (int argc, char* argv[])
 		exit (1);
 	}
 
+	BootMessage (_("Loading keybindings"));
+
 	setup_keybindings (ui);
+
+	BootMessage (_("Start UI event handler"));
 
 	ui->run (text_receiver);
 	ui = 0;
