@@ -155,6 +155,15 @@ AUPlugin::discover_parameters ()
 			const CAAUParameter* param = param_info.GetParamInfo (d.id);
 			const AudioUnitParameterInfo& info (param->ParamInfo());
 
+			const int len = CFStringGetLength (param->GetName());;
+			char local_buffer[len*2];
+			Boolean good = CFStringGetCString(param->GetName(),local_buffer,len*2,kCFStringEncodingMacRoman);
+			if (!good) {
+				d.label = "???";
+			} else {
+				d.label = local_buffer;
+			}
+
 			d.scope = param_info.GetScope ();
 			d.element = param_info.GetElement ();
 
@@ -210,18 +219,12 @@ AUPlugin::discover_parameters ()
 			d.integer_step = (info.unit & kAudioUnitParameterUnit_Indexed);
 			d.toggled = (info.unit & kAudioUnitParameterUnit_Boolean);
 			d.sr_dependent = (info.unit & kAudioUnitParameterUnit_SampleFrames);
-
-			d.automatable = !(info.flags & kAudioUnitParameterFlag_NonRealTime);
+			d.automatable = !d.toggled && 
+				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
+				(info.flags & kAudioUnitParameterFlag_IsWritable);
+			
 			d.logarithmic = (info.flags & kAudioUnitParameterFlag_DisplayLogarithmic);
-
-			const int len = CFStringGetLength (param->GetName());;
-			char local_buffer[len*2];
-			Boolean good = CFStringGetCString(param->GetName(),local_buffer,len*2,kCFStringEncodingMacRoman);
-			if (!good) {
-				d.label = "???";
-			} else {
-				d.label = local_buffer;
-			}
+			d.unit = info.unit;
 
 			d.lower = info.minValue;
 			d.upper = info.maxValue;

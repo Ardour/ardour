@@ -118,8 +118,9 @@ Splash::message (const string& msg)
 	layout->set_markup (str);
 	darea.queue_draw ();
 	
-	Glib::RefPtr<Gdk::Window> win = get_window();
+	Glib::RefPtr<Gdk::Window> win = darea.get_window();
 	if (win) {
 		win->process_updates (true);
+		gdk_flush ();
 	}
 }

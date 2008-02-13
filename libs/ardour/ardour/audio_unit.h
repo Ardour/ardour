@@ -53,6 +53,7 @@ struct AUParameterDescriptor : public Plugin::ParameterDescriptor {
 	AudioUnitElement element;
 	float default_value;
 	bool automatable;
+	AudioUnitParameterUnit unit;
 };
 
 class AUPlugin : public ARDOUR::Plugin
