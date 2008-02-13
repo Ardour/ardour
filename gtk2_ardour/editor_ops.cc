@@ -5239,10 +5239,12 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		if (can_ferret) {
 			msg.add_button (_("Call for the Ferret!"), RESPONSE_APPLY);
+			msg.set_secondary_text (_("Press OK to continue with this split operation\nor ask the Ferret dialog to tune the analysis"));
+		} else {
+			msg.set_secondary_text (_("Press OK to continue with this split operation"));
 		}
 
 		msg.set_title (_("Excessive split?"));
-		msg.set_secondary_text (_("Press OK to continue with this split operation\nor ask the Ferret dialog to tune the analysis"));
 		msg.present ();
 
 		int response = msg.run();

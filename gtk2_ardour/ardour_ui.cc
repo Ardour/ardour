@@ -2859,6 +2859,8 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	/* XXX do something with name template */
 
+	cerr << "Adding with " << input_chan << " in and " << output_chan << "out\n";
+
 	if (track) {
 		session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), count);
 	} else {
