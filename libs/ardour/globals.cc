@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <locale.h>
+#include <errno.h>
 
 #ifdef VST_SUPPORT
 #include <fst.h>
