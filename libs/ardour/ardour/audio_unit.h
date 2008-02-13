@@ -32,6 +32,7 @@
 #include <ardour/plugin.h>
 
 #include <AudioUnit/AudioUnit.h>
+#include <appleutility/AUParamInfo.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -44,6 +45,14 @@ namespace ARDOUR {
 
 class AudioEngine;
 class Session;
+
+struct AUParameterDescriptor : public Plugin::ParameterDescriptor {
+	// additional fields to make operations more efficient
+	AudioUnitParameterID id;
+	AudioUnitScope scope;
+	AudioUnitElement element;
+	float default_value;
+};
 
 class AUPlugin : public ARDOUR::Plugin
 {
@@ -104,7 +113,8 @@ class AUPlugin : public ARDOUR::Plugin
   private:
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
-	
+	AUParamInfo* param_info;
+
 	AudioStreamBasicDescription streamFormat;
         bool initialized;
         int format_set;
@@ -125,6 +135,8 @@ class AUPlugin : public ARDOUR::Plugin
         nframes_t cb_offset;
         vector<Sample*>* current_buffers;
         nframes_t frames_processed;
+
+	std::vector<AUParameterDescriptor> descriptors;
 };
 	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
