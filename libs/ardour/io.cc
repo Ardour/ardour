@@ -2604,18 +2604,14 @@ IO::end_pan_touch (uint32_t which)
 }
 
 void
-IO::automation_snapshot (nframes_t now)
+IO::automation_snapshot (nframes_t now, bool force)
 {
-	if (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval) {
-
-		if (gain_automation_recording()) {
-			_gain_automation_curve.rt_add (now, gain());
-		}
-		
-		_panner->snapshot (now);
-
-		last_automation_snapshot = now;
+	if (gain_automation_recording()) {
+		_gain_automation_curve.rt_add (now, gain());
 	}
+	
+	_panner->snapshot (now);
+	last_automation_snapshot = now;
 }
 
 void

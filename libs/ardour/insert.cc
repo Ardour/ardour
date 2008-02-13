@@ -320,7 +320,7 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 }
 
 void
-PluginInsert::automation_snapshot (nframes_t now)
+PluginInsert::automation_snapshot (nframes_t now, bool force)
 {
 	map<uint32_t,AutomationList*>::iterator li;
 	

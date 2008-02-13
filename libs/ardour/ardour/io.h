@@ -258,7 +258,10 @@ class IO : public PBD::StatefulDestructible
 	sigc::signal<void> gain_automation_style_changed;
 
 	virtual void transport_stopped (nframes_t now);
-	void automation_snapshot (nframes_t now);
+	bool should_snapshot (nframes_t now) {
+		return (last_automation_snapshot > now || (now - last_automation_snapshot) > _automation_interval);
+	}
+	virtual void automation_snapshot (nframes_t now, bool force);
 
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 

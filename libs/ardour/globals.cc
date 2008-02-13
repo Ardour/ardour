@@ -20,6 +20,8 @@
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <locale.h>
@@ -249,6 +251,33 @@ setup_hardware_optimization (bool try_optimization)
 
 }
 
+static void
+lotsa_files_please ()
+{
+	struct rlimit rl;
+
+	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
+
+		rl.rlim_cur = rl.rlim_max;
+
+		if (setrlimit (RLIMIT_NOFILE, &rl) != 0) {
+			if (rl.rlim_cur == RLIM_INFINITY) {
+				error << _("Could not set system open files limit to \"unlimited\"") << endmsg;
+			} else {
+				error << string_compose (_("Could not set system open files limit to %1"), rl.rlim_cur) << endmsg;
+			}
+		} else {
+			if (rl.rlim_cur == RLIM_INFINITY) {
+				info << _("Removed open file count limit. Excellent!") << endmsg;
+			} else {
+				info << string_compose (_("Ardour will be limited to %1 open files"), rl.rlim_cur) << endmsg;
+			}
+		}
+	} else {
+		error << string_compose (_("Could not get system open files limit (%1)"), strerror (errno)) << endmsg;
+	}
+}
+
 int
 ARDOUR::init (bool use_vst, bool try_optimization)
 {
@@ -257,6 +286,9 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
 	setup_enum_writer ();
+
+	// allow ardour the absolute maximum number of open files
+	lotsa_files_please ();
 
 	lrdf_init();
 	Library = new AudioLibrary;

@@ -539,7 +539,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
 			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (start_frame);
+			automation_snapshot (start_frame, false);
 		}
 	}
 
