@@ -4371,39 +4371,40 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 				rs.add (entered_regionview);
 				return;
 			}
-		}
-	} else {
-		use_regions_at = false;
-	}
 
-	rs = selection->regions;
+		} else {
 
-	/* consider adding the entered regionview */
+			/* no regions selected, so get all regions at the edit point across
+			   all selected tracks. 
+			*/
 
-	if (allow_entered && entered_regionview && (mouse_mode == Editing::MouseObject)) {
-		
-		/* only add the entered regionview if its not selected OR
-		   (we're not going to use regions at edit point OR its track is not selected)
-
-		   this avoids duplicate regions ending up in "rs"
-		*/
-
-		if (!selection->selected (entered_regionview) && 
-		    (!use_regions_at || !selection->selected (&entered_regionview->get_time_axis_view()))) {
-			rs.add (entered_regionview);
-		}
-	}
-
-	if (use_regions_at) {
-
-		/* nothing selected, so get all regions at the edit point across
-		   all selected tracks
-		*/
-		
-		if (!selection->tracks.empty()) {
 			nframes64_t where = get_preferred_edit_position();
 			get_regions_at (rs, where, selection->tracks);
+
+			/* if the entered regionview wasn't selected and neither was its track
+			   then add it.
+			*/
+
+			if (!selection->selected (entered_regionview) && 
+			    !selection->selected (&entered_regionview->get_time_axis_view())) {
+				rs.add (entered_regionview);
+			}
 		}
+
+	} else {
+		
+		/* just use the selected regions */
+
+		rs = selection->regions;
+
+		/* if the entered regionview wasn't selected and we allow this sort of thing,
+		   then add it.
+		*/
+
+		if (allow_entered && entered_regionview && !selection->selected (entered_regionview)) {
+			rs.add (entered_regionview);
+		}
+
 	}
 }
 

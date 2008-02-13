@@ -8,7 +8,7 @@ void
 disable_screen_updates ()
 {
 #ifdef GTKOSX
-	NSDisableScreenUpdates ();
+	// NSDisableScreenUpdates ();
 #endif
 }
 
@@ -16,6 +16,6 @@ void
 enable_screen_updates ()
 {
 #ifdef GTKOSX
-	NSEnableScreenUpdates();
+	// NSEnableScreenUpdates();
 #endif
 }

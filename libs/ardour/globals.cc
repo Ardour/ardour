@@ -94,6 +94,8 @@ Change ARDOUR::PositionChanged = ARDOUR::new_change ();
 Change ARDOUR::NameChanged = ARDOUR::new_change ();
 Change ARDOUR::BoundsChanged = Change (0); // see init(), below
 
+sigc::signal<void,std::string> ARDOUR::BootMessage;
+
 #ifdef HAVE_LIBLO
 static int
 setup_osc ()
@@ -105,6 +107,7 @@ setup_osc ()
 	osc = new OSC (Config->get_osc_port());
 	
 	if (Config->get_use_osc ()) {
+		BootMessage (_("Starting OSC"));
 		return osc->start ();
 	} else {
 		return 0;
@@ -119,6 +122,8 @@ setup_midi ()
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
+
+	BootMessage (_("Configuring MIDI ports"));
 
 	for (std::map<string,XMLNode>::iterator i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
 		MIDI::Manager::instance()->add_port (i->second);
@@ -293,6 +298,8 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	lrdf_init();
 	Library = new AudioLibrary;
+
+	BootMessage (_("Loading configuration"));
 
 	Config = new Configuration;
 

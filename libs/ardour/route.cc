@@ -41,6 +41,7 @@
 #include <ardour/panner.h>
 #include <ardour/dB.h>
 #include <ardour/mix.h>
+#include <ardour/profile.h>
 
 #include "i18n.h"
 
@@ -916,8 +917,8 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		reset_panner ();
 	}
 
-
 	redirects_changed (src); /* EMIT SIGNAL */
+
 	return 0;
 }
 

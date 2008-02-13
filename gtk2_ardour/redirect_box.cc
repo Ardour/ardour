@@ -402,6 +402,7 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 		if (_route->add_redirect (redirect, this, &err_streams)) {
 			weird_plugin_dialog (*plugin, err_streams, _route);
 		} else {
+			redirect->set_active (true, 0);
 			redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
 		}
 	}

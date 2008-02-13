@@ -1380,6 +1380,8 @@ Session::load_routes (const XMLNode& node)
 			return -1;
 		}
 
+		BootMessage (string_compose (_("Loaded track/bus %1"), route->name()));
+
 		new_routes.push_back (route);
 	}
 

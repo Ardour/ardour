@@ -57,10 +57,19 @@ int
 UIConfiguration::load_defaults ()
 {
 	int found = 0;
-	std::string rcfile = find_config_file ("ardour2_ui_default.conf");
-	
-	if (rcfile.length())
-	{
+	std::string rcfile;
+	const char* ui_conf;
+
+	ui_conf = getenv ("ARDOUR_UI_CONF");
+
+	if (ui_conf && ui_conf[0] != '\0') {
+		rcfile = find_config_file (ui_conf);
+	} else {
+		rcfile = find_config_file ("ardour2_ui_default.conf");
+	}
+
+	if (rcfile.length()) {
+
 		XMLTree tree;
 		found = 1;
 

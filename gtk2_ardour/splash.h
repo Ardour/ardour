@@ -50,6 +50,8 @@ class Splash : public Gtk::Window
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 	Gtk::DrawingArea darea;
 	Glib::RefPtr<Pango::Layout> layout;
+
+	void boot_message (std::string);
 };	
 
 #endif /* __ardour_gtk_splash_h__ */

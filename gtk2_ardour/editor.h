@@ -2062,7 +2062,7 @@ public:
 	void get_regions_at (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
 	void get_regions_after (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
 	
-	void get_regions_for_action (RegionSelection&, bool allowed_entered_regionview = true);
+	void get_regions_for_action (RegionSelection&, bool allowed_entered_regionview = false);
 
 	sigc::connection fast_screen_update_connection;
 	gint start_updating ();

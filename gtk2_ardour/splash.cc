@@ -3,6 +3,7 @@
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>
 
+#include "gui_thread.h"
 #include "splash.h"
 
 #include "i18n.h"
@@ -50,6 +51,8 @@ Splash::Splash ()
 
 	set_default_size (pixbuf->get_width(), pixbuf->get_height());
 	the_splash = this;
+
+	ARDOUR::BootMessage.connect (mem_fun (*this, &Splash::boot_message));
 }
 
 void
@@ -93,9 +96,16 @@ Splash::expose (GdkEventExpose* ev)
 	Glib::RefPtr<Gtk::Style> style = darea.get_style();
 	Glib::RefPtr<Gdk::GC> white = style->get_white_gc();
 
+	cerr << "redraw in expose\n";
 	window->draw_layout (white, 10, pixbuf->get_height() - 30, layout);
 
 	return true;
+}
+
+void
+Splash::boot_message (std::string msg)
+{
+	message (msg);
 }
 
 void
@@ -107,5 +117,9 @@ Splash::message (const string& msg)
 
 	layout->set_markup (str);
 	darea.queue_draw ();
-	get_window()->process_updates (true);
+
+	Glib::RefPtr<Gdk::Window> win = get_window();
+	if (win) {
+		win->process_updates (true);
+	}
 }

@@ -52,6 +52,7 @@ struct AUParameterDescriptor : public Plugin::ParameterDescriptor {
 	AudioUnitScope scope;
 	AudioUnitElement element;
 	float default_value;
+	bool automatable;
 };
 
 class AUPlugin : public ARDOUR::Plugin
@@ -113,7 +114,6 @@ class AUPlugin : public ARDOUR::Plugin
   private:
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
-	AUParamInfo* param_info;
 
 	AudioStreamBasicDescription streamFormat;
         bool initialized;
@@ -128,6 +128,7 @@ class AUPlugin : public ARDOUR::Plugin
 	int set_input_format ();
 	int set_stream_format (int scope, uint32_t cnt);
         int _set_block_size (nframes_t nframes);
+	void discover_parameters ();
 
 	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
 	uint32_t current_maxbuf;
@@ -135,7 +136,7 @@ class AUPlugin : public ARDOUR::Plugin
         nframes_t cb_offset;
         vector<Sample*>* current_buffers;
         nframes_t frames_processed;
-
+	
 	std::vector<AUParameterDescriptor> descriptors;
 };
 	

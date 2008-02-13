@@ -162,10 +162,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	_auto_display_errors = false;
 #endif
 
-	if (getenv ("ARDOUR_DEBUG_UPDATES")) {
-		gdk_window_set_debug_updates (true);
-	}
-	
 	about = 0;
 	splash = 0;
 
