@@ -38,7 +38,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 
 	preset_box.pack_end (bypass_button, false, false, 10);
 	preset_box.pack_end (save_button, false, false);
-	preset_box.pack_end (combo, false, false);
+	preset_box.pack_end (preset_combo, false, false);
 
 	bypass_button.set_active (!insert->active());
 	
