@@ -20,6 +20,9 @@ ardour.Append(CXXFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
 ardour.Append(PACKAGE = domain)
 ardour.Append(POTFILE = domain + '.pot')
 
+if ardour['IS_OSX']:
+	ardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 #
 # explicitly reference the control protocol LGPL library for includes
 # 
