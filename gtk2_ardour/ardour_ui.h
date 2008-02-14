@@ -227,9 +227,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_native_file_header_format (ARDOUR::HeaderFormat sf);
 	void set_native_file_data_format (ARDOUR::SampleFormat sf);
 
-	void set_keybindings_path (std::string path);
-	void save_keybindings ();
-
 	void setup_profile ();
 	void setup_theme ();
 
@@ -593,10 +590,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
 	
-	std::string keybindings_path;
-	std::string user_keybindings_path;
-
-	void setup_keybindings ();
 	void setup_session_options ();
 	
 	guint32  last_key_press_time;
@@ -748,7 +741,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_control_protocol (ARDOUR::ControlProtocolInfo*);
 	void toggle_control_protocol_feedback (ARDOUR::ControlProtocolInfo*, const char* group_name, std::string action_name);
 
-	bool can_save_keybindings;
 	bool first_idle ();
 
 	void no_memory_warning ();

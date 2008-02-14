@@ -36,6 +36,7 @@
 #endif
 
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include <lrdf.h>
 
@@ -43,6 +44,7 @@
 #include <pbd/id.h>
 #include <pbd/strsplit.h>
 #include <pbd/fpu.h>
+#include <pbd/pathscanner.h>
 
 #include <midi++/port.h>
 #include <midi++/manager.h>
@@ -499,22 +501,74 @@ find_file (string name, string dir, string subdir = "")
 		return path;
 	}
 
-	/* 3rd attempt: dir/... */
-	
-	path = dir;
-	path += "/ardour2/";
-	
-	if (subdir.length()) {
-		path += subdir + "/";
-	}
-	
-	path += name;
-	
-	if (access (path.c_str(), R_OK) == 0) {
-		return path;
+	if (dir.length()) {
+		/* 3rd attempt: dir/... */
+		
+		path = dir;
+		path += "/ardour2/";
+		
+		if (subdir.length()) {
+			path += subdir + "/";
+		}
+		
+		path += name;
+		
+		if (access (path.c_str(), R_OK) == 0) {
+			return path;
+		}
 	}
 
 	return "";
+}
+
+static bool sae_binding_filter (const string& str, void* arg)
+{
+	/* Not a dotfile, has a prefix before a period, suffix is ".bindings" and contains -sae- */
+	
+	return str[0] != '.' && str.length() > 13 && str.find (".bindings") == (str.length() - 9)
+		&& str.find ("SAE-") != string::npos;
+}
+
+static bool binding_filter (const string& str, void* arg)
+{
+	/* Not a dotfile, has a prefix before a period, suffix is ".bindings" and contains -sae- */
+	
+	return str[0] != '.' && str.length() > 9 && str.find (".bindings") == (str.length() - 9);
+}
+
+void
+ARDOUR::find_bindings_files (map<string,string>& files)
+{
+	PathScanner scanner;
+	vector<string*> *found;
+	string full_path;
+	
+	full_path = get_user_ardour_path ();
+	full_path += ':';
+	full_path = get_system_data_path ();
+
+	if (getenv ("ARDOUR_SAE")) {
+		found = scanner (full_path, sae_binding_filter, 0, false, true);
+	} else {
+		found = scanner (full_path, binding_filter, 0, false, true);
+	}
+
+	if (!found) {
+		return;
+	}
+	
+	for (vector<string*>::iterator x = found->begin(); x != found->end(); ++x) {
+		string path = *(*x);
+		pair<string,string> namepath;
+		namepath.second = path;
+		path = Glib::path_get_basename (path);
+		namepath.first = path.substr (0, path.find_first_of ('.'));
+		
+		files.insert (namepath);
+		delete *x;
+	}
+	
+	delete found;
 }
 
 string

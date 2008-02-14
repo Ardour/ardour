@@ -23,8 +23,6 @@
 
 #include <cstdio>
 
-#include <gtkmm/accelmap.h>
-
 #include <pbd/error.h>
 
 #include "ardour_ui.h"
@@ -33,6 +31,7 @@
 #include "keyboard.h"
 #include "splash.h"
 #include "route_params_ui.h"
+#include "opts.h"
 #include "i18n.h"
 
 using namespace sigc;
@@ -61,42 +60,12 @@ ARDOUR_UI::shutdown ()
 void
 ARDOUR_UI::we_have_dependents ()
 {
-	setup_keybindings ();
-	editor->UpdateAllTransportClocks.connect (mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
-}
-
-static void 
-accel_map_changed (GtkAccelMap* map,
-		   gchar* path,
-		   guint  key,
-		   GdkModifierType mod,
-		   gpointer arg)
-{
-	static_cast<ARDOUR_UI*>(arg)->save_keybindings ();
-}
-
-void
-ARDOUR_UI::setup_keybindings ()
-{
 	install_actions ();
 	RedirectBox::register_actions ();
-	
-	cerr << "loading bindings from " << keybindings_path << endl;
 
-	try {
-		AccelMap::load (keybindings_path);
-	} catch (...) {
-		error << string_compose (_("Ardour key bindings file not found at \"%1\" or contains errors."), keybindings_path)
-		      << endmsg;
-	}
+	Keyboard::setup_keybindings ();
 
-	/* catch changes */
-
-	GtkAccelMap* accelmap = gtk_accel_map_get();
-	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, this);
-
-	
-
+	editor->UpdateAllTransportClocks.connect (mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 }
 
 void

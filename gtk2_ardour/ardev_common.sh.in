@@ -3,6 +3,7 @@ cd `dirname "$0"`/..
 #export G_DEBUG=fatal_criticals
 
 export ARDOUR_PATH=gtk2_ardour/icons:gtk2_ardour/pixmaps:gtk2_ardour:.
+export ARDOUR_DATA_PATH=gtk2_ardour:.
 export GTK_PATH=libs/clearlooks
 export VAMP_PATH=libs/vamp-plugins:$VAMP_PATH
 

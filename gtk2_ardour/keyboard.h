@@ -110,6 +110,13 @@ class Keyboard : public sigc::trackable, Stateful
 	static void magic_widget_grab_focus ();
 	static void magic_widget_drop_focus ();
 
+	static void setup_keybindings ();
+	static void save_keybindings ();
+	static bool load_keybindings (std::string path);
+	static void set_can_save_keybindings (bool yn);
+	static std::string current_binding_name () { return _current_binding_name; }
+	static std::map<std::string,std::string> binding_files;
+
   private:
 	static Keyboard* _the_keyboard;
 
@@ -122,6 +129,9 @@ class Keyboard : public sigc::trackable, Stateful
 	static guint     delete_mod;
 	static guint     snap_mod;
 	static Gtk::Window* current_window;
+	static std::string user_keybindings_path;
+	static bool can_save_keybindings;
+	static std::string _current_binding_name;
 
 	static gint _snooper (GtkWidget*, GdkEventKey*, gpointer);
 	gint snooper (GtkWidget*, GdkEventKey*);

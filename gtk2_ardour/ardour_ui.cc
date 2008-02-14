@@ -199,14 +199,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 
-	keybindings_path = ARDOUR::find_config_file ("ardour.bindings");
-	/* all changes go to the user directory */
-	user_keybindings_path = get_user_ardour_path ();
-	user_keybindings_path += '/';
-	user_keybindings_path += "ardour.bindings";
-
-	can_save_keybindings = false;
-
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
 
@@ -530,7 +522,7 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (mnode, get_user_ardour_path());
 	}
 
-	save_keybindings ();
+	Keyboard::save_keybindings ();
 }
 
 gint
@@ -3173,27 +3165,13 @@ ARDOUR_UI::record_state_changed ()
 	}
 }
 
-void
-ARDOUR_UI::set_keybindings_path (string path)
-{
-	keybindings_path = path;
-}
-
-void
-ARDOUR_UI::save_keybindings ()
-{
-	if (can_save_keybindings) {
-		AccelMap::save (user_keybindings_path);
-	} 
-}
-
 bool
 ARDOUR_UI::first_idle ()
 {
 	if (session) {
 		session->allow_auto_play (true);
 	}
-	can_save_keybindings = true;
+	Keyboard::set_can_save_keybindings (true);
 	return false;
 }
 

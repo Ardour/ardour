@@ -20,8 +20,10 @@
 #ifndef __ardour_ardour_h__
 #define __ardour_ardour_h__
 
-#include <limits.h>
+#include <map>
 #include <string>
+
+#include <limits.h>
 #include <signal.h>
 
 #include <pbd/error.h>
@@ -56,6 +58,7 @@ namespace ARDOUR {
 
 	std::string find_config_file (std::string name);
 	std::string find_data_file (std::string name, std::string subdir = "" );
+	void find_bindings_files (std::map<std::string,std::string>&);
 
 	const layer_t max_layer = UCHAR_MAX;
 
