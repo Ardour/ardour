@@ -417,13 +417,10 @@ else:
 	keybindings_dict['%LEVEL4%'] = 'Mod2'
 	keybindings_dict['%WINDOW%'] = 'Alt'
 
-bindings = { }
-
-for b in [ 'SAE-de', 'SAE-us', 'mnemonic-us', 'ergonomic-us' ]:
+for b in [ 'SAE-de', 'mnemonic-us', 'ergonomic-us' ]:
 	target_file = b + '.bindings'
 	src_file = target_file + '.in'
-	bindings[b] = env.SubstInFile (target_file, src_file, SUBST_DICT = keybindings_dict);
-	Default (bindings[b])
+	Default (env.SubstInFile (target_file, src_file, SUBST_DICT = keybindings_dict))
 
 my_subst_dict['%INSTALL_PREFIX%'] = final_prefix
 my_subst_dict['%LIBDIR%'] = env['LIBDIR']

@@ -405,6 +405,8 @@ Keyboard::setup_keybindings ()
 	std::string path;
 	vector<string> strs;
 
+	binding_files.clear ();
+
 	ARDOUR::find_bindings_files (binding_files);
 
 	/* set up the per-user bindings path */
@@ -414,6 +416,13 @@ Keyboard::setup_keybindings ()
 	strs.push_back ("ardour.bindings");
 
 	user_keybindings_path = Glib::build_filename (strs);
+
+	if (Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
+		std::pair<string,string> newpair;
+		newpair.first = _("your own");
+		newpair.second = user_keybindings_path;
+		binding_files.insert (newpair);
+	}
 
 	/* check to see if they gave a style name ("SAE", "ergonomic") or
 	   an actual filename (*.bindings)
