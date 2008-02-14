@@ -10,6 +10,9 @@ Import('env libraries install_prefix')
 pangomm = env.Copy()
 pangomm.Merge([libraries['glibmm2'], libraries['pango'], libraries['sigc2']])
 
+if pangomm['IS_OSX']:
+	pangomm.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
 libpangomm = pangomm.SharedLibrary('pangomm', pangomm_files)
 Default(libpangomm)
 
