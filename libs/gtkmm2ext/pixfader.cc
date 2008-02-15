@@ -35,21 +35,28 @@ int PixFader::fine_scale_modifier = GDK_CONTROL_MASK;
 
 int PixFader::extra_fine_scale_modifier = GDK_MOD1_MASK;
 
-PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj)
+PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orientation)
+
 	: adjustment (adj),
-	  pixbuf (belt)
+	  pixbuf (belt),
+	  _orien(orientation)
 {
 	dragging = false;
 	default_value = adjustment.get_value();
 	last_drawn = -1;
-	pixheight = pixbuf->get_height();
 
 	view.x = 0;
 	view.y = 0;
-	view.width = pixbuf->get_width();
-	view.height = pixheight / 2;
 
-	unity_y = (int) rint (view.height - (default_value * view.height)) - 1;
+	if (orientation == 1) {
+		view.width = girth = pixbuf->get_width();
+		view.height = span = pixbuf->get_height() / 2;
+		unity_loc = (int) rint (view.height - (default_value * view.height)) - 1;
+	} else {
+		view.width = span = pixbuf->get_width () / 2;
+		view.height = girth = pixbuf->get_height();
+		unity_loc = (int) rint (default_value * view.width) - 1;
+	}	
 
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
@@ -65,28 +72,37 @@ bool
 PixFader::on_expose_event (GdkEventExpose* ev)
 {
 	GdkRectangle intersection;
-	int dh = display_height ();
-	int offset_into_pixbuf = (int) floor (view.height / ((float) view.height / dh));
+	int srcx, srcy, ds = display_span ();
+	int offset_into_pixbuf = (int) floor (span / ((float) span / ds));
 	Glib::RefPtr<Gdk::GC> fg_gc (get_style()->get_fg_gc(get_state()));
 
 	if (gdk_rectangle_intersect (&view, &ev->area, &intersection)) {
+		if (_orien == VERT) {
+			srcx = intersection.x;
+			srcy = offset_into_pixbuf + intersection.y;
+		} else {
+			srcx = offset_into_pixbuf + intersection.x;
+			srcy = intersection.y;
+		}
 		get_window()->draw_pixbuf (fg_gc, pixbuf, 
-					   intersection.x, offset_into_pixbuf + intersection.y,
+					   srcx, srcy,
 					   intersection.x, intersection.y,
 					   intersection.width, intersection.height,
 					   Gdk::RGB_DITHER_NONE, 0, 0);
 		
-                get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, view.width - 1, 0); /* top */
+		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, view.width - 1, 0); /* top */
 		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, 0, view.height - 1); /* left */
 		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), view.width - 1, 0, view.width - 1, view.height - 1); /* right */
 		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), 0, view.height - 1, view.width - 1, view.height - 1); /* bottom */
 	}
 
 	/* always draw the line */
-
-	get_window()->draw_line (fg_gc, 1, unity_y, view.width - 2, unity_y);
-
-	last_drawn = dh;
+	if (_orien == VERT) {
+		get_window()->draw_line (fg_gc, 1, unity_loc, girth - 2, unity_loc);
+	} else {
+		get_window()->draw_line (fg_gc, unity_loc, 1, unity_loc, girth - 2);
+	}
+	last_drawn = ds;
 	return true;
 }
 
@@ -104,8 +120,8 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 	case 1:
 	case 2:
 		add_modal_grab();
-		grab_y = ev->y;
-		grab_start = ev->y;
+		grab_loc = (_orien == VERT) ? ev->y : ev->x;
+		grab_start = (_orien == VERT) ? ev->y : ev->x;
 		grab_window = ev->window;
 		dragging = true;
 		break;
@@ -120,15 +136,17 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 bool
 PixFader::on_button_release_event (GdkEventButton* ev)
 {
-	double fract;
-	
+	double fract, ev_pos;
+
+	(_orien == VERT) ? ev_pos = ev->y : ev->x;
+
 	switch (ev->button) {
 	case 1:
 		if (dragging) {
 			remove_modal_grab();
 			dragging = false;
 
-			if (ev->y == grab_start) {
+			if (ev_pos == grab_start) {
 
 				/* no motion - just a click */
 
@@ -136,7 +154,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 					adjustment.set_value (default_value);
 				} else if (ev->state & fine_scale_modifier) {
 					adjustment.set_value (adjustment.get_lower());
-				} else if (ev->y < view.height - display_height()) {
+				} else if (ev_pos < span - display_span()) {
 					/* above the current display height, remember X Window coords */
 					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
 				} else {
@@ -152,7 +170,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			remove_modal_grab();
 			dragging = false;
 			
-			fract = 1.0 - (ev->y / view.height); // inverted X Window coordinates, grrr
+			fract = 1.0 - (ev_pos / span); // inverted X Window coordinates, grrr
 			
 			fract = min (1.0, fract);
 			fract = max (0.0, fract);
@@ -183,18 +201,34 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 		scale = 0.25;
 	}
 
-	switch (ev->direction) {
+	if (_orien == VERT) {
+		switch (ev->direction) {
 
-	case GDK_SCROLL_UP:
-		/* wheel up */
-		adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
-		break;
-	case GDK_SCROLL_DOWN:
-		/* wheel down */
-		adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
-		break;
-	default:
-		break;
+		case GDK_SCROLL_UP:
+			/* wheel up */
+			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
+			break;
+		case GDK_SCROLL_DOWN:
+			/* wheel down */
+			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
+			break;
+		default:
+			break;
+		}
+	} else {
+		switch (ev->direction) {
+
+		case GDK_SCROLL_RIGHT:
+			/* wheel right */
+			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
+			break;
+		case GDK_SCROLL_LEFT:
+			/* wheel left */
+			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
+			break;
+		default:
+			break;
+		}
 	}
 	return false;
 }
@@ -203,12 +237,11 @@ bool
 PixFader::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (dragging) {
-		double fract;
-		double delta;
-		double scale;
-
+		double fract, delta, scale, ev_pos;
+		(_orien == VERT) ? ev_pos = ev->y : ev_pos = ev->x;
+		cerr << "PixFader::on_motion_notify_event() called x:y = " << ev->x << ":" << ev->y;
 		if (ev->window != grab_window) {
-			grab_y = ev->y;
+			grab_loc = ev_pos;
 			grab_window = ev->window;
 			return true;
 		}
@@ -222,20 +255,23 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 		} else {
 			scale = 1.0;
 		}
+		cerr << " ev_pos=" << ev_pos << " grab_loc=" << grab_loc;
+		delta = ev_pos - grab_loc;
+		grab_loc = ev_pos;
 
-		delta = ev->y - grab_y;
-		grab_y = ev->y;
-
-		fract = (delta / view.height);
+		fract = (delta / span);
 
 		fract = min (1.0, fract);
 		fract = max (-1.0, fract);
 
 		// X Window is top->bottom for 0..Y
 		
-		fract = -fract;
+		if (_orien == VERT) {
+			fract = -fract;
+		}
 
 		adjustment.set_value (adjustment.get_value() + scale * fract * (adjustment.get_upper() - adjustment.get_lower()));
+		cerr << " adj=" << adjustment.get_value() << " fract=" << fract << " delta=" << delta << " scale=" << scale << endl;
 	}
 
 	return true;
@@ -244,14 +280,15 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 void
 PixFader::adjustment_changed ()
 {
-	if (display_height() != last_drawn) {
+	if (display_span() != last_drawn) {
 		queue_draw ();
 	} 
 }
 
 int
-PixFader::display_height ()
+PixFader::display_span ()
 {
 	float fract = (adjustment.get_upper() - adjustment.get_value ()) / ((adjustment.get_upper() - adjustment.get_lower()));
-	return (int) floor (view.height * (1.0 - fract));
+	return (_orien == VERT) ? (int)floor (span * (1.0 - fract)) : (int)floor (span * fract);
 }
+

@@ -338,7 +338,6 @@ Editor::session_going_away ()
 	editor_mixer_button.set_active(false);
 	editor_mixer_button.set_sensitive(false);
 	/* clear tempo/meter rulers */
-
 	remove_metric_marks ();
 	hide_measures ();
 	clear_marker_display ();

@@ -77,6 +77,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 			if (atv->route()->order_key(N_("editor")) == -1) {
 				atv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
 			}
+			atv->effective_gain_display ();
 		}
 
 		tv->set_old_order_key (route_display_model->children().size() - 1);

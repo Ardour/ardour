@@ -79,9 +79,19 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Editing;
+using namespace std;
 
+Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
+
+int
+RouteTimeAxisView::setup_slider_pix ()
+{
+	slider = ::get_icon ("fader_belt_h");
+	return 0;
+}
 
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess),
@@ -94,9 +104,14 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
 	  visual_button (_("v")),
-	  lm (rt, sess)
-
+	  lm (rt, sess),
+	  gain_slider (0),
+	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
 {
+	if (slider == 0) {
+		setup_slider_pix ();
+	}
+
 	lm.set_no_show_all();
 	lm.setup_meters(50);
 	_has_state = true;
@@ -108,6 +123,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	no_redraw = false;
 	destructive_track_mode_item = 0;
 	normal_track_mode_item = 0;
+
+	gain_slider = manage (new HSliderController (slider, &gain_adjustment, _route->gain_control(), false));
 
 	ignore_toggle = false;
 
@@ -150,7 +167,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
 		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
-		controls_table.attach (*rec_enable_button, 4, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 
 	}
@@ -160,10 +177,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	_route->input_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
 	_route->output_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
 
-	controls_table.attach (*mute_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (*solo_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
-	controls_table.attach (edit_group_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (edit_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*gain_slider, 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
 	ARDOUR_UI::instance()->tooltips().set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->tooltips().set_tip(*mute_button,_("Mute"));
@@ -187,11 +205,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	} else {
 
-		controls_table.attach (automation_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (automation_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	}
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
-		controls_table.attach (playlist_button, 4, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	}
 
 	y_position = -1;
@@ -213,6 +231,15 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	ColorsChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
+
+	gain_slider->signal_button_press_event().connect (mem_fun(*this, &RouteTimeAxisView::start_gain_touch));
+	gain_slider->signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::end_gain_touch));
+	gain_slider->set_name ("TrackGainFader");
+
+	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &RouteTimeAxisView::gain_adjusted));
+	_route->gain_changed.connect (mem_fun(*this, &RouteTimeAxisView::gain_changed));
+
+	gain_slider->show_all();
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -1861,4 +1888,37 @@ void
 RouteTimeAxisView::io_changed (IOChange change, void *src)
 {
 	reset_meter ();
+}
+
+gint
+RouteTimeAxisView::start_gain_touch (GdkEventButton* ev)
+{
+	_route->start_gain_touch ();
+	return FALSE;
+}
+
+gint
+RouteTimeAxisView::end_gain_touch (GdkEventButton* ev)
+{
+	_route->end_gain_touch ();
+	return FALSE;
+}
+
+void
+RouteTimeAxisView::gain_adjusted ()
+{
+	_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+}
+
+void
+RouteTimeAxisView::gain_changed (void *src)
+{
+	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &RouteTimeAxisView::effective_gain_display));
+}
+
+void
+RouteTimeAxisView::effective_gain_display ()
+{
+	gfloat value = gain_to_slider_position (_route->effective_gain());
+	gain_adjustment.set_value (value);
 }

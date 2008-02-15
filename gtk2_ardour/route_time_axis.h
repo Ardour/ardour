@@ -27,8 +27,10 @@
 #include <gtkmm/menuitem.h>
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/checkmenuitem.h>
+#include <gtkmm/adjustment.h>
 
 #include <gtkmm2ext/selector.h>
+#include <gtkmm2ext/slider_controller.h>
 #include <list>
 
 #include <ardour/types.h>
@@ -108,6 +110,7 @@ public:
 	void clear_meter ();
 	void io_changed (ARDOUR::IOChange, void *);
 	void meter_changed (void *);
+	void effective_gain_display ();
 
 protected:
 	friend class StreamView;
@@ -255,6 +258,16 @@ protected:
 	void post_construct ();
 	
 	LevelMeter	lm;
+
+	Gtkmm2ext::HSliderController *gain_slider;
+	Gtk::Adjustment              gain_adjustment;
+	static Glib::RefPtr<Gdk::Pixbuf> slider;
+	static int setup_slider_pix ();
+	void gain_adjusted();
+
+	gint start_gain_touch (GdkEventButton*);
+	gint end_gain_touch (GdkEventButton*);
+	void gain_changed (void *);
 };
 
 #endif /* __ardour_route_time_axis_h__ */

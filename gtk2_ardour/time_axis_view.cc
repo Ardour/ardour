@@ -72,7 +72,7 @@ bool TimeAxisView::need_size_info = true;
 TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& canvas) 
 	: AxisView (sess), 
 	  editor (ed),
-	  controls_table (2, 7)
+	  controls_table (2, 8)
 {
 	if (need_size_info) {
 		compute_controls_size_info ();
@@ -126,7 +126,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_col_spacings (0);
 	controls_table.set_homogeneous (true);
 
-	controls_table.attach (name_hbox, 0, 4, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+	controls_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
@@ -146,6 +146,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	controls_frame.add (controls_hbox);
 	controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
+	controls_vbox.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	ColorsChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
@@ -562,7 +563,7 @@ TimeAxisView::set_selected (bool yn)
 	if (_selected) {
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_frame.set_name (controls_base_selected_name);
-		
+		controls_vbox.set_name (controls_base_selected_name);
 		/* propagate any existing selection, if the mode is right */
 
 		if (editor.current_mouse_mode() == Editing::MouseRange && !editor.get_selection().time.empty()) {
@@ -572,7 +573,7 @@ TimeAxisView::set_selected (bool yn)
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
 		controls_frame.set_name (controls_base_unselected_name);
-
+		controls_vbox.set_name (controls_base_unselected_name);
 		hide_selection ();
 
 		/* children will be set for the yn=true case. but when deselecting
