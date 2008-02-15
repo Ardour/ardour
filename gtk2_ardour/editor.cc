@@ -4391,7 +4391,8 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 			   then add it.
 			*/
 
-			if (!selection->selected (entered_regionview) && 
+			if (entered_regionview != 0 &&
+			    !selection->selected (entered_regionview) && 
 			    !selection->selected (&entered_regionview->get_time_axis_view())) {
 				rs.add (entered_regionview);
 			}
