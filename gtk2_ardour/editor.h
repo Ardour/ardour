@@ -1050,6 +1050,8 @@ class Editor : public PublicEditor
 
 	void add_external_audio_action (Editing::ImportMode);
 	void external_audio_dialog ();
+
+	int  check_whether_and_how_to_import(string, bool all_or_nothing = true);
 	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
 	SoundFileOmega* sfbrowser;
@@ -1062,7 +1064,7 @@ class Editor : public PublicEditor
 	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
 	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
-			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
+			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool);
 	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
 

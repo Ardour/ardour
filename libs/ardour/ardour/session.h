@@ -577,10 +577,10 @@ class Session : public PBD::StatefulDestructible
 	    string doing_what;
 	    
 	    /* control info */
-	    bool sample_convert;
 	    SrcQuality quality;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;
+	    bool replace_existing_source;
 	    
 	    /* result */
 	    SourceList sources;
@@ -1493,6 +1493,12 @@ class Session : public PBD::StatefulDestructible
 	typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
 
 	AudioSourceList audio_sources;
+
+  public:
+	AudioSourceList get_audio_sources() { return audio_sources; }
+    
+  private:
+
 
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();

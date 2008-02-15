@@ -66,7 +66,7 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 }
 
 static std::string
-get_non_existent_filename (const std::string& basename, uint channel, uint channels)
+get_non_existent_filename (const bool allow_replacing, const std::string destdir, const std::string& basename, uint channel, uint channels)
 {
 	char buf[PATH_MAX+1];
 	bool goodfile = false;
@@ -85,7 +85,9 @@ get_non_existent_filename (const std::string& basename, uint channel, uint chann
 			snprintf (buf, sizeof(buf), "%s.wav", base.c_str());
 		}
 		
-		if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+
+		string tempname = destdir + "/" + buf;
+		if (!allow_replacing && Glib::file_test (tempname, Glib::FILE_TEST_EXISTS)) {
 
 			/* if the file already exists, we must come up with
 			 *  a new name for it.  for now we just keep appending
@@ -105,7 +107,7 @@ get_non_existent_filename (const std::string& basename, uint channel, uint chann
 }
 
 static vector<string>
-get_paths_for_new_sources (const string& import_file_path, const string& session_dir, uint channels)
+get_paths_for_new_sources (const bool allow_replacing, const string& import_file_path, const string& session_dir, uint channels)
 {
 	vector<string> new_paths;
 	const string basename = basename_nosuffix (import_file_path);
@@ -116,12 +118,31 @@ get_paths_for_new_sources (const string& import_file_path, const string& session
 
 		filepath = session_dir;
 		filepath += '/';
-		filepath += get_non_existent_filename (basename, n, channels); 
+		filepath += get_non_existent_filename (allow_replacing, session_dir, basename, n, channels); 
 
 		new_paths.push_back (filepath);
 	}
 
 	return new_paths;
+}
+
+static bool
+map_existing_mono_sources (const vector<string>& new_paths, Session& sess,
+		           uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles, Session *session)
+{
+	for (vector<string>::const_iterator i = new_paths.begin();
+			i != new_paths.end(); ++i)
+	{
+		boost::shared_ptr<Source> source = session->source_by_path_and_channel(*i, 0);
+
+		if (source == 0) {
+			error << string_compose(_("Could not find a source for %1 even though we are updating this file!"), (*i)) << endl;
+			return false;
+		}
+
+		newfiles.push_back(boost::dynamic_pointer_cast<AudioFileSource>(source));
+	}
+	return true;
 }
 
 static bool
@@ -228,6 +249,10 @@ remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
 	::unlink (file_source->path().c_str());
 }
 
+// This function is still unable to cleanly update an existing source, even though
+// it is possible to set the import_status flag accordingly. The functinality
+// is disabled at the GUI until the Source implementations are able to provide
+// the necessary API.
 void
 Session::import_audiofiles (import_status& status)
 {
@@ -254,13 +279,19 @@ Session::import_audiofiles (import_status& status)
 			return;
 		}
 
-		vector<string> new_paths = get_paths_for_new_sources (*p,
+		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source,
+								      *p,
 								      discover_best_sound_dir (),
 								      source->channels());
 		
 		AudioSources newfiles;
 
-		status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles);
+		if (status.replace_existing_source) {
+			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endl;
+			status.cancel = !map_existing_mono_sources (new_paths, *this, frame_rate(), newfiles, this);
+		} else {
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles);
+		}
 
 		// copy on cancel/failure so that any files that were created will be removed below
 		std::copy (newfiles.begin(), newfiles.end(), std::back_inserter(all_new_sources));
