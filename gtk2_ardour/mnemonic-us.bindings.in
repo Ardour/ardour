@@ -79,6 +79,7 @@
 (gtk_accel_path "<Actions>/Editor/duplicate-region" "d")
 (gtk_accel_path "<Actions>/Editor/select-all-in-punch-range" "<%PRIMARY%>d")
 (gtk_accel_path "<Actions>/Editor/toggle-follow-playhead" "f")
+(gtk_accel_path "<Actions>/Editor/toggle-rhythm-ferret" "<%WINDOW%>f")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-gain" "g")
 (gtk_accel_path "<Actions>/Editor/play-selected-regions" "h")
 (gtk_accel_path "<Actions>/Editor/trim-front" "j")

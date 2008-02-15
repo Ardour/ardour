@@ -5286,17 +5286,14 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	
 	pl->freeze ();
 	pl->remove_region (ar);
-	vector<boost::shared_ptr<Region> > new_regions;
 	
-	cerr << "about to split using " << positions.size() << " positions" << endl;
-
 	while (x != positions.end()) {
 		
 		/* file start = original start + how far we from the initial position ? 
 		 */
 		
 		nframes64_t file_start = ar->start() + (pos - ar->position());
-		
+
 		/* length = next position - current position
 		 */
 		
@@ -5313,27 +5310,32 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		string new_name;
 		
 		if (session->region_name (new_name, ar->name())) {
-			continue;
+			break;
 		}
 		
 		/* do NOT announce new regions 1 by one, just wait till they are all done */
 
 		boost::shared_ptr<Region> r = RegionFactory::create (ar->get_sources(), file_start, len, new_name, 0, Region::DefaultFlags, false);
 		pl->add_region (r, pos);
-		new_regions.push_back (r);
-
-		cerr << "done at " << pos << endl;
 
 		pos += len;
 		++x;
 
 		if (*x > ar->last_frame()) {
+
+			/* add final fragment */
+			
+			file_start = ar->start() + (pos - ar->position());
+			len = ar->last_frame() - pos;
+
+			boost::shared_ptr<Region> r = RegionFactory::create (ar->get_sources(), file_start, len, new_name, 0, Region::DefaultFlags);
+			pl->add_region (r, pos);
+
 			break;
 		}
 	} 
 
 	pl->thaw ();
-	session->add_regions (new_regions);
 
 	XMLNode& after (pl->get_state());
 	

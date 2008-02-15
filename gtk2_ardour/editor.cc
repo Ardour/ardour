@@ -334,6 +334,7 @@ Editor::Editor ()
 	zoomed_to_region = false;
 	rhythm_ferret = 0;
 
+	_scrubbing = false;
 	scrubbing_direction = 0;
 
 	sfbrowser = 0;
