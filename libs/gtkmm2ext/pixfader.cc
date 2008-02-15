@@ -27,6 +27,14 @@ using namespace Gtk;
 using namespace Gdk;
 using namespace std;
 
+#ifdef GTKOSX
+uint PixFader::fine_scale_modifier = GDK_META_MASK;
+#else
+uint PixFader::fine_scale_modifier = GDK_CONTROL_MASK;
+#endif
+
+uint PixFader::extra_fine_scale_modifier = GDK_MOD1_MASK;
+
 PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj)
 	: adjustment (adj),
 	  pixbuf (belt)
@@ -205,8 +213,8 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 			return true;
 		}
 		
-		if (ev->state & GDK_CONTROL_MASK) {
-			if (ev->state & GDK_MOD1_MASK) {
+		if (ev->state & fine_scale_modifier) {
+			if (ev->state & extra_fine_scale_modifier) {
 				scale = 0.05;
 			} else {
 				scale = 0.1;
