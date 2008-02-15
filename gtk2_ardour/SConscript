@@ -357,13 +357,13 @@ else:
 			}
 	else:
 		font_sizes = {
-			'TINY' : '5',
-			'SMALLER' : '6',
-			'SMALL' : '7',
-			'NORMAL' : '7',
-			'BIG' : '8',
-			'BIGGER' : '10',
-			'LARGE' : '12',
+			'TINY' : '6',
+			'SMALLER' : '8',
+			'SMALL' : '9',
+			'NORMAL' : '10',
+			'BIG' : '14',
+			'BIGGER' : '16',
+			'LARGE' : '18',
 			'LARGER' : '24',
 			'HUGER' : '34',
 			'MASSIVE' : '60'
@@ -464,9 +464,9 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_default.conf'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae.menus'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae-ansi.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae-de.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ergonomic-us.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'mnemonic-us.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de.bindings'))
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
