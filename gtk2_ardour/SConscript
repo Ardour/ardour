@@ -464,8 +464,8 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_default.conf'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae.menus'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ergonomic.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'mnemonic.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ergonomic-us.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'mnemonic-us.bindings'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de.bindings'))
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
