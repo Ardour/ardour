@@ -377,7 +377,9 @@ PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 		} else {
 			connect_and_run (bufs, nbufs, nframes, offset, false);
 		}
+
 	} else {
+
 		uint32_t in = _plugins[0]->get_info()->n_inputs;
 		uint32_t out = _plugins[0]->get_info()->n_outputs;
 

@@ -115,6 +115,9 @@ cp -R Resources $APPROOT
 
 echo "Copying ardour executable ...."
 cp ../../gtk2_ardour/ardour-$version $APPROOT/MacOS/Ardour2
+if test x$SAE != x ; then
+    cp ../../gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
+fi
 if test x$STRIP != x ; then
     strip $APPROOT/MacOS/Ardour2
 fi
@@ -196,9 +199,9 @@ echo
 
 echo "Copying other stuff to Ardour2.app  ..."
 
-cp ../../gtk2_ardour/ardour.bindings  $Resources
-cp ../../gtk2_ardour/ardour-sae-ansi.bindings  $Resources
-cp ../../gtk2_ardour/ardour-sae-de.bindings  $Resources
+cp ../../gtk2_ardour/ergonomic-us.bindings  $Resources
+cp ../../gtk2_ardour/mnemonic-us.bindings  $Resources
+cp ../../gtk2_ardour/sae-de.bindings  $Resources
 cp ../../gtk2_ardour/ardour.menus $Resources
 cp ../../gtk2_ardour/ardour-sae.menus $Resources
 cp ../../ardour_system.rc $Resources
@@ -225,6 +228,9 @@ echo "Fixing up executable dependency names ..."
 executables="Ardour2"
 if test x$WITH_JACK != x ; then
     executables="$executables jackd"
+fi
+if test x$SAE != x ; then
+    executables="$executables gtkevents"
 fi
 
 for exe in $executables; do

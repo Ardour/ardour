@@ -541,6 +541,13 @@ gdk_quartz_in_carbon_menu_event_handler ()
 	return _in_carbon_menu_event_handler;
 }
 
+static gboolean
+dummy_gtk_menu_item_activate (gpointer *arg)
+{
+	gtk_menu_item_activate (GTK_MENU_ITEM(arg));
+	return FALSE;
+}
+
 static OSStatus
 menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
 			 EventRef             event_ref,
@@ -582,7 +589,8 @@ menu_event_handler_func (EventHandlerCallRef  event_handler_call_ref,
 					 sizeof (widget), 0, &widget);
 	      if (err == noErr && GTK_IS_WIDGET (widget))
 		{
-		  gtk_menu_item_activate (GTK_MENU_ITEM (widget));
+		  g_idle_add (dummy_gtk_menu_item_activate, widget);
+		  // gtk_menu_item_activate (GTK_MENU_ITEM (widget));
 		  _in_carbon_menu_event_handler = 0;
 		  return noErr;
 		}

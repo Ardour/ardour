@@ -342,7 +342,7 @@ void
 AUPluginUI::activate ()
 {
 	cerr << "AUPluginUI:: activate!\n";
-
+	return;
 	if (carbon_window && cocoa_parent) {
 		cerr << "APP activated, activate carbon window " << insert->name() << endl;
 		_activating_from_app = true;
@@ -355,6 +355,7 @@ AUPluginUI::activate ()
 void
 AUPluginUI::deactivate ()
 {
+	return;
 	cerr << "APP DEactivated, for " << insert->name() << endl;
 	_activating_from_app = true;
 	ActivateWindow (carbon_window, FALSE);

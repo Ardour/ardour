@@ -216,8 +216,13 @@ AUPlugin::discover_parameters ()
 			  kAudioUnitParameterFlag_IsWritable          = (1L << 31)
 			*/
 
+			d.lower = info.minValue;
+			d.upper = info.maxValue;
+			d.default_value = info.defaultValue;
+
 			d.integer_step = (info.unit & kAudioUnitParameterUnit_Indexed);
-			d.toggled = (info.unit & kAudioUnitParameterUnit_Boolean);
+			d.toggled = (info.unit & kAudioUnitParameterUnit_Boolean) ||
+				(d.integer_step && ((d.upper - d.lower) == 1.0));
 			d.sr_dependent = (info.unit & kAudioUnitParameterUnit_SampleFrames);
 			d.automatable = !d.toggled && 
 				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
@@ -226,9 +231,6 @@ AUPlugin::discover_parameters ()
 			d.logarithmic = (info.flags & kAudioUnitParameterFlag_DisplayLogarithmic);
 			d.unit = info.unit;
 
-			d.lower = info.minValue;
-			d.upper = info.maxValue;
-			d.default_value = info.defaultValue;
 			d.step = 1.0;
 			d.smallstep = 0.1;
 			d.largestep = 10.0;
@@ -278,17 +280,21 @@ AUPlugin::latency () const
 void
 AUPlugin::set_parameter (uint32_t which, float val)
 {
-	// unit->SetParameter (id, 0, val);
+	if (which < descriptors.size()) {
+		const AUParameterDescriptor& d (descriptors[which]);
+		unit->SetParameter (d.id, d.scope, d.element, val);
+	}
 }
 
 float
 AUPlugin::get_parameter (uint32_t which) const
 {
-	float outValue = 0.0;
-	
-	// unit->GetParameter(parameter_map[which].first, parameter_map[which].second, 0, outValue);
-	
-	return outValue;
+	float val = 0.0;
+	if (which < descriptors.size()) {
+		const AUParameterDescriptor& d (descriptors[which]);
+		unit->GetParameter(d.id, d.scope, d.element, val);
+	}
+	return val;
 }
 
 int

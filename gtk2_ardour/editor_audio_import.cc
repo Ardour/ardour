@@ -196,7 +196,7 @@ typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
 int
 Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 {
-	string wave_name (basename(path.c_str()));
+	string wave_name (Glib::path_get_basename(path));
 
 	AudioSourceList all_sources = session->get_audio_sources();
 	bool wave_name_exists = false;
@@ -204,7 +204,7 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 	for (AudioSourceList::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(i->second);
 
-		string tmp (basename(afs->path().c_str()));
+		string tmp (Glib::path_get_basename (afs->path()));
 
 		if (tmp == wave_name) {
 			wave_name_exists = true;
