@@ -28,12 +28,12 @@ using namespace Gdk;
 using namespace std;
 
 #ifdef GTKOSX
-uint PixFader::fine_scale_modifier = GDK_META_MASK;
+int PixFader::fine_scale_modifier = GDK_META_MASK;
 #else
-uint PixFader::fine_scale_modifier = GDK_CONTROL_MASK;
+int PixFader::fine_scale_modifier = GDK_CONTROL_MASK;
 #endif
 
-uint PixFader::extra_fine_scale_modifier = GDK_MOD1_MASK;
+int PixFader::extra_fine_scale_modifier = GDK_MOD1_MASK;
 
 PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj)
 	: adjustment (adj),
@@ -134,7 +134,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 
 				if (ev->state & Gdk::SHIFT_MASK) {
 					adjustment.set_value (default_value);
-				} else if (ev->state & GDK_CONTROL_MASK) {
+				} else if (ev->state & fine_scale_modifier) {
 					adjustment.set_value (adjustment.get_lower());
 				} else if (ev->y < view.height - display_height()) {
 					/* above the current display height, remember X Window coords */
@@ -172,15 +172,15 @@ bool
 PixFader::on_scroll_event (GdkEventScroll* ev)
 {
 	double scale;
-	
-	if (ev->state & GDK_CONTROL_MASK) {
-		if (ev->state & GDK_MOD1_MASK) {
-			scale = 0.05;
+
+	if (ev->state & fine_scale_modifier) {
+		if (ev->state & extra_fine_scale_modifier) {
+			scale = 0.01;
 		} else {
-			scale = 0.1;
+			scale = 0.05;
 		}
 	} else {
-		scale = 0.5;
+		scale = 0.25;
 	}
 
 	switch (ev->direction) {

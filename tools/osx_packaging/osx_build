@@ -201,7 +201,7 @@ echo "Copying other stuff to Ardour2.app  ..."
 
 cp ../../gtk2_ardour/ergonomic-us.bindings  $Resources
 cp ../../gtk2_ardour/mnemonic-us.bindings  $Resources
-cp ../../gtk2_ardour/sae-de.bindings  $Resources
+cp ../../gtk2_ardour/SAE-de.bindings  $Resources
 cp ../../gtk2_ardour/ardour.menus $Resources
 cp ../../gtk2_ardour/ardour-sae.menus $Resources
 cp ../../ardour_system.rc $Resources

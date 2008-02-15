@@ -62,8 +62,8 @@ class PixFader : public Gtk::DrawingArea {
 
 	int display_height ();
 
-	static uint fine_scale_modifier;
-	static uint extra_fine_scale_modifier;
+	static int fine_scale_modifier;
+	static int extra_fine_scale_modifier;
 };
 
 
