@@ -247,7 +247,8 @@ namespace ARDOUR {
 
 	enum EditMode {
 		Slide,
-		Splice
+		Splice,
+		Lock
 	};
 
 	enum RegionPoint { 

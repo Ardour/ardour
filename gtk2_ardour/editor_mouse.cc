@@ -3343,7 +3343,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	   the region would be if we moved it by that much.
 	*/
 
-	if (drag_info.move_threshold_passed) {
+	if ( drag_info.move_threshold_passed ) {
 
 		if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 
@@ -3383,7 +3383,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	  
 		// printf ("3: pending_region_position= %lu    %lu\n", pending_region_position, drag_info.last_frame_position );
 	  
-		if (pending_region_position != drag_info.last_frame_position && !drag_info.x_constrained) {
+		bool x_move_allowed = ( !drag_info.x_constrained && (Config->get_edit_mode() != Lock)) || ( drag_info.x_constrained && (Config->get_edit_mode() == Lock)) ;
+		if ( pending_region_position != drag_info.last_frame_position && x_move_allowed ) {
 
 			/* now compute the canvas unit distance we need to move the regionview
 			   to make it appear at the new location.
@@ -3406,7 +3407,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		x_delta = 0;
 	}
-
+	
 	/*************************************************************
                         PREPARE TO MOVE
 	************************************************************/

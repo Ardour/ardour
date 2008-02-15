@@ -439,6 +439,7 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), bind (mem_fun (*this, &Editor::set_edit_mode), Splice));
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), bind (mem_fun (*this, &Editor::set_edit_mode), Slide));
+	ActionManager::register_action (editor_actions, "set-edit-lock", _("Lock"), bind (mem_fun (*this, &Editor::set_edit_mode), Lock));
 	ActionManager::register_action (editor_actions, "toggle-edit-mode", _("Toggle Edit Mode"), mem_fun (*this, &Editor::cycle_edit_mode));
 
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap To"));

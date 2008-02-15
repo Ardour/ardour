@@ -2684,8 +2684,9 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box.set_homogeneous(true);
 
 	vector<string> edit_mode_strings;
-	edit_mode_strings.push_back (edit_mode_to_string (Splice));
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
+	edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	edit_mode_strings.push_back (edit_mode_to_string (Lock));
 
 	edit_mode_selector.set_name ("EditModeSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, longest (edit_mode_strings).c_str(), 2+FUDGE, 10);
@@ -3206,6 +3207,9 @@ Editor::cycle_edit_mode ()
 		Config->set_edit_mode (Splice);
 		break;
 	case Splice:
+		Config->set_edit_mode (Lock);
+		break;
+	case Lock:
 		Config->set_edit_mode (Slide);
 		break;
 	}
@@ -3225,6 +3229,8 @@ Editor::edit_mode_selection_done ()
 		mode = Splice;
 	} else if (choice == _("Slide Edit")) {
 		mode = Slide;
+	} else if (choice == _("Lock Edit")) {
+		mode = Lock;
 	}
 
 	Config->set_edit_mode (mode);

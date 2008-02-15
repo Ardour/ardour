@@ -387,6 +387,8 @@ string_to_edit_mode (string str)
 		return Splice;
 	} else if (str == _("Slide Edit")) {
 		return Slide;
+	} else if (str == _("Lock Edit")) {
+		return Lock;
 	}
 	fatal << string_compose (_("programming error: unknown edit mode string \"%1\""), str) << endmsg;
 	/*NOTREACHED*/
@@ -399,6 +401,9 @@ edit_mode_to_string (EditMode mode)
 	switch (mode) {
 	case Slide:
 		return _("Slide Edit");
+
+	case Lock:
+		return _("Lock Edit");
 
 	default:
 	case Splice:
