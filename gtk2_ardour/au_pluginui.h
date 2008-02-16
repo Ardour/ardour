@@ -1,6 +1,9 @@
 #ifndef __gtk2_ardour_auplugin_ui_h__
 #define __gtk2_ardour_auplugin_ui_h__
 
+#include <vector>
+#include <string>
+
 #include <AppKit/AppKit.h>
 #include <Carbon/Carbon.h>
 #include <AudioUnit/AudioUnitCarbonView.h>
@@ -13,6 +16,10 @@
 #undef verify
 
 #include <gtkmm/box.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+
 #include "plugin_ui.h"
 
 namespace ARDOUR {
@@ -34,7 +41,8 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	
 	virtual void activate ();
 	virtual void deactivate ();
-
+	
+	void lower_box_realized ();
 	void on_realize ();
 	void on_show ();
 	void on_hide ();
@@ -49,6 +57,15 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
 	int prefheight;
 	int prefwidth;
+	
+	Gtk::HBox     top_box;
+	Gtk::EventBox low_box;
+	Gtk::VBox vpacker;
+	Gtk::Label automation_mode_label;
+	Gtk::ComboBoxText automation_mode_selector;
+	Gtk::Label preset_label;
+
+	static std::vector<std::string> automation_mode_strings;
 
 	/* Cocoa */
 
@@ -63,14 +80,11 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	AudioUnitCarbonView  editView;
 	WindowRef            carbon_window;	
  	EventHandlerRef      carbon_event_handler;
-	bool                 carbon_parented;
-	bool                 cocoa_parented;
 	bool                 _activating_from_app;
 
-	void test_view_support (bool&, bool&);
 	bool test_cocoa_view_support ();
 	bool test_carbon_view_support ();
-	int  create_carbon_view (bool generic);
+	int  create_carbon_view ();
 	int  create_cocoa_view ();
 
 	int parent_carbon_window ();

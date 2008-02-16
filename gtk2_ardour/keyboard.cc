@@ -17,22 +17,32 @@
 
 */
 
+#include <ardour/ardour.h>
+
 #include "ardour_ui.h"
 
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 
 #include <ctype.h>
 
+#include <gtkmm/accelmap.h>
+
 #include <gdk/gdkkeysyms.h>
 #include <pbd/error.h>
+#include <pbd/file_utils.h>
+
+#include <ardour/filesystem_paths.h>
 
 #include "keyboard.h"
 #include "gui_thread.h"
+#include "opts.h"
 
 #include "i18n.h"
 
 using namespace PBD;
+using namespace ARDOUR;
 
 #define KBD_DEBUG 1
 bool debug_keyboard = false;
@@ -44,10 +54,10 @@ guint Keyboard::delete_mod = GDK_SHIFT_MASK;
 guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
 #ifdef GTKOSX
-guint Keyboard::PrimaryModifier = GDK_MOD1_MASK;   // Command
-guint Keyboard::SecondaryModifier = GDK_MOD5_MASK; // Alt/Option
+guint Keyboard::PrimaryModifier = GDK_META_MASK;   // Command
+guint Keyboard::SecondaryModifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
-guint Keyboard::CopyModifier = GDK_MOD5_MASK;      // Alt/Option
+guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
 #else
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
@@ -60,6 +70,11 @@ guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
 bool         Keyboard::_some_magic_widget_has_focus = false;
+
+std::string Keyboard::user_keybindings_path;
+bool Keyboard::can_save_keybindings = false;
+map<string,string> Keyboard::binding_files;
+std::string Keyboard::_current_binding_name = _("Unknown");
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 
@@ -359,3 +374,192 @@ Keyboard::selection_type (guint state)
 		return Selection::Set;
 	}
 }
+
+
+static void 
+accel_map_changed (GtkAccelMap* map,
+		   gchar* path,
+		   guint  key,
+		   GdkModifierType mod,
+		   gpointer arg)
+{
+	Keyboard::save_keybindings ();
+}
+
+void
+Keyboard::set_can_save_keybindings (bool yn)
+{
+	can_save_keybindings = yn;
+}
+
+void
+Keyboard::save_keybindings ()
+{
+	if (can_save_keybindings) {
+		Gtk::AccelMap::save (user_keybindings_path);
+	} 
+}
+
+void
+Keyboard::setup_keybindings ()
+{
+	using namespace ARDOUR_COMMAND_LINE;
+	std::string default_bindings = "mnemonic-us.bindings";
+	std::string path;
+	vector<string> strs;
+
+	binding_files.clear ();
+
+	ARDOUR::find_bindings_files (binding_files);
+
+	/* set up the per-user bindings path */
+	
+	strs.push_back (Glib::get_home_dir());
+	strs.push_back (".ardour2");
+	strs.push_back ("ardour.bindings");
+
+	user_keybindings_path = Glib::build_filename (strs);
+
+	if (Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
+		std::pair<string,string> newpair;
+		newpair.first = _("your own");
+		newpair.second = user_keybindings_path;
+		binding_files.insert (newpair);
+	}
+
+	/* check to see if they gave a style name ("SAE", "ergonomic") or
+	   an actual filename (*.bindings)
+	*/
+
+	if (!keybindings_path.empty() && keybindings_path.find (".bindings") == string::npos) {
+		
+		// just a style name - allow user to
+		// specify the layout type. 
+		
+		char* layout;
+		
+		if ((layout = getenv ("ARDOUR_KEYBOARD_LAYOUT")) != 0 && layout[0] != '\0') {
+			
+			/* user-specified keyboard layout */
+			
+			keybindings_path += '-';
+			keybindings_path += layout;
+
+		} else {
+
+			/* default to US/ANSI - we have to pick something */
+
+			keybindings_path += "-us";
+		}
+		
+		keybindings_path += ".bindings";
+	} 
+
+	if (keybindings_path.empty()) {
+
+		/* no path or binding name given: check the user one first */
+
+		if (!Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
+			
+			keybindings_path = "";
+
+		} else {
+			
+			keybindings_path = user_keybindings_path;
+		}
+	} 
+
+	/* if we still don't have a path at this point, use the default */
+
+	if (keybindings_path.empty()) {
+		keybindings_path = default_bindings;
+	}
+
+	while (true) {
+
+		if (!Glib::path_is_absolute (keybindings_path)) {
+			
+			/* not absolute - look in the usual places */
+			sys::path keybindings_file;
+
+			SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
+
+			find_file_in_search_path (spath, keybindings_path, keybindings_file);
+			
+			if (path.empty()) {
+				
+				if (keybindings_path == default_bindings) {
+					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
+					return;
+				} else {
+					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
+								   keybindings_path)
+						<< endmsg;
+					keybindings_path = default_bindings;
+				}
+
+			} else {
+
+				/* use it */
+
+				keybindings_path = path;
+				break;
+				
+			}
+
+		} else {
+			
+			/* path is absolute already */
+
+			if (!Glib::file_test (keybindings_path, Glib::FILE_TEST_EXISTS)) {
+				if (keybindings_path == default_bindings) {
+					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
+					return;
+				} else {
+					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
+								   keybindings_path)
+						<< endmsg;
+					keybindings_path = default_bindings;
+				}
+
+			} else {
+				break;
+			}
+		}
+	}
+
+	load_keybindings (keybindings_path);
+
+	/* catch changes */
+
+	GtkAccelMap* accelmap = gtk_accel_map_get();
+	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, 0);
+}
+
+bool
+Keyboard::load_keybindings (string path)
+{
+	try {
+		cerr << "loading bindings from " << path << endl;
+
+		Gtk::AccelMap::load (path);
+
+		_current_binding_name = _("Unknown");
+
+		for (map<string,string>::iterator x = binding_files.begin(); x != binding_files.end(); ++x) {
+			if (path == x->second) {
+				_current_binding_name = x->first;
+				break;
+			}
+		}
+
+		return true;
+
+	} catch (...) {
+		error << string_compose (_("Ardour key bindings file not found at \"%1\" or contains errors."), path)
+		      << endmsg;
+		return false;
+	}
+}
+
+

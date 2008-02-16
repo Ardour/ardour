@@ -116,6 +116,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 			if (rtv->route()->order_key(N_("editor")) == -1) {
 				rtv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
 			}
+			rtv->effective_gain_display ();
 		}
 		
 		ignore_route_list_reorder = false;

@@ -400,6 +400,7 @@ ProcessorBox::processor_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 			weird_plugin_dialog (*plugin, err, _route);
 			// XXX SHAREDPTR delete plugin here .. do we even need to care? 
 		} else {
+			processor->set_active(true);
 			processor->ActiveChanged.connect (bind (mem_fun (*this, &ProcessorBox::show_processor_active), boost::weak_ptr<Processor>(processor)));
 		}
 	}
@@ -1137,13 +1138,20 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 					plugin_ui = reinterpret_cast<AUPluginUI*> (plugin_processor->get_gui());
 				}
 				
-				if (plugin_ui->is_visible()) {
-					plugin_ui->get_window()->raise ();
-				} else {
-					plugin_ui->show_all ();
-					plugin_ui->present ();
-				}
-#endif				
+				plugin_ui = new PluginUIWindow (plugin_insert);
+				
+				// plugin_ui->set_keep_above (true);
+
+				WindowTitle title(Glib::get_application_name());
+				title += generate_redirect_title (plugin_insert);
+				plugin_ui->set_title (title.get_string());
+				
+				plugin_insert->set_gui (plugin_ui);
+				
+				// change window title when route name is changed
+				_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
+#endif
+				
 			} else {
 				warning << "Unsupported plugin sent to ProcessorBox::edit_processor()" << endmsg;
 				return;

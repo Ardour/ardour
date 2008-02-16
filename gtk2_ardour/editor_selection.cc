@@ -183,7 +183,6 @@ Editor::set_selected_track_as_side_effect (bool force)
 void
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
 {
-
 	switch (op) {
 	case Selection::Toggle:
 		if (selection->selected (&view)) {
@@ -961,13 +960,7 @@ Editor::set_selection_from_region ()
 		return;
 	}
 
-	RegionView* rv = *(selection->regions.begin());
-	boost::shared_ptr<Region> region = rv->region();
-	
-	begin_reversible_command (_("set selection from region"));
-	selection->set (0, region->position(), region->last_frame());
-	commit_reversible_command ();
-
+	selection->set (0, selection->regions.start(), selection->regions.end_frame());
 	set_mouse_mode (Editing::MouseRange, false);
 }
 
@@ -1323,27 +1316,4 @@ Editor::deselect_all ()
 	selection->clear ();
 }
 
-Editor::ExclusiveRegionSelection::ExclusiveRegionSelection (Editor& ed, RegionView* rv)
-	: editor (ed),
-	  regionview (rv)
-{
-
-	if (!rv || ed.current_mouse_mode() != Editing::MouseObject) {
-		return;
-	}
-	
-	if (ed.get_selection().regions.empty() && !ed.get_selection().selected (rv)) {
-		ed.get_selection().set (rv, false);
-		remove = true;
-	} else {
-		remove = false;
-	}
-}
-
-Editor::ExclusiveRegionSelection::~ExclusiveRegionSelection ()
-{
-	if (remove) {
-		editor.get_selection().remove (regionview);
-	}
-}
 

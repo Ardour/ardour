@@ -254,7 +254,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void restore_editing_space () = 0;
 	virtual nframes64_t get_preferred_edit_position (bool ignore_playhead = false) = 0;
 	virtual void toggle_meter_updating() = 0;
-	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&) = 0;
+	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret) = 0;
+	virtual void mouse_add_new_marker (nframes_t where, bool is_cd=false, bool is_xrun=false) = 0;
 
 #ifdef WITH_CMT
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;

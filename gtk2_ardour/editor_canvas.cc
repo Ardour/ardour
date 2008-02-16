@@ -203,6 +203,10 @@ Editor::initialize_canvas ()
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 	transport_marker_bar->property_outline_pixels() = 1;
 
+	cd_marker_bar_drag_rect = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+	cd_marker_bar_drag_rect->property_outline_pixels() = 0;
+	cd_marker_bar_drag_rect->hide ();
+
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_bar_drag_rect->property_outline_pixels() = 0;
 	range_bar_drag_rect->hide ();
@@ -343,16 +347,16 @@ Editor::track_canvas_size_allocated ()
 		(*x)->set_line_vpos (y1, canvas_height);
 	}
 
-	range_marker_drag_rect->property_y1() = 0.0;
-	range_marker_drag_rect->property_y2() = canvas_height;
-	transport_loop_range_rect->property_y1() = 0.0;
-	transport_loop_range_rect->property_y2() = canvas_height;
-	transport_punch_range_rect->property_y1() = 0.0;
-	transport_punch_range_rect->property_y2() = canvas_height;
-	transport_punchin_line->property_y1() = 0.0;
-	transport_punchin_line->property_y2() = canvas_height;
-	transport_punchout_line->property_y1() = 0.0;
-	transport_punchout_line->property_y2() = canvas_height;
+ 	range_marker_drag_rect->property_y1() = y1;
+ 	range_marker_drag_rect->property_y2() = full_canvas_height;
+ 	transport_loop_range_rect->property_y1() = y1;
+ 	transport_loop_range_rect->property_y2() = full_canvas_height;
+ 	transport_punch_range_rect->property_y1() = y1;
+ 	transport_punch_range_rect->property_y2() = full_canvas_height;
+ 	transport_punchin_line->property_y1() = y1;
+ 	transport_punchin_line->property_y2() = full_canvas_height;
+ 	transport_punchout_line->property_y1() = y1;
+ 	transport_punchout_line->property_y2() = full_canvas_height;
 	
 	update_fixed_rulers();
 	redisplay_tempo (true);
@@ -730,15 +734,15 @@ Editor::tie_vertical_scrolling ()
 	playhead_cursor->set_y_axis (y1);
 
  	range_marker_drag_rect->property_y1() = y1;
- 	range_marker_drag_rect->property_y2() = y1 + canvas_height;
+ 	range_marker_drag_rect->property_y2() = full_canvas_height;
  	transport_loop_range_rect->property_y1() = y1;
- 	transport_loop_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_loop_range_rect->property_y2() = full_canvas_height;
  	transport_punch_range_rect->property_y1() = y1;
- 	transport_punch_range_rect->property_y2() = y1 + canvas_height;
+ 	transport_punch_range_rect->property_y2() = full_canvas_height;
  	transport_punchin_line->property_y1() = y1;
- 	transport_punchin_line->property_y2() = y1 + canvas_height;
+ 	transport_punchin_line->property_y2() = full_canvas_height;
  	transport_punchout_line->property_y1() = y1;
- 	transport_punchout_line->property_y2() = y1 + canvas_height;
+ 	transport_punchout_line->property_y2() = full_canvas_height;
 
 	if (!selection->markers.empty()) {
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {		
@@ -808,6 +812,9 @@ Editor::color_handler()
 
 	transport_marker_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TransportMarkerBar.get();
 	transport_marker_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
+
+	cd_marker_bar_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
+	cd_marker_bar_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
 
 	range_bar_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();
 	range_bar_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragBarRect.get();

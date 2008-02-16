@@ -86,7 +86,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	smaller_hbox->pack_start (*latency_label, false, false, 10);
 	smaller_hbox->pack_start (latency_gui, false, false, 10);
-	smaller_hbox->pack_start (combo, false, false);
+	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 
 	constraint_hbox->set_spacing (5);

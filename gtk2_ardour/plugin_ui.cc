@@ -62,7 +62,6 @@ using namespace Gtk;
 using namespace sigc;
 
 PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes64_t sr, nframes64_t period, bool scrollable)
-	: ArdourDialog ("plugin ui")
 {
 	bool have_gui = false;
 	non_gtk_gui = false;
@@ -77,10 +76,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 			break;
 
 		case ARDOUR::AudioUnit:
-			//have_gui = create_audiounit_editor (insert);
-			have_gui = true;
-			get_vbox()->pack_start (*label, false, false);
-			cerr << "#*#*#*#*#*#*#*#*## PACK " << label << " INTO PLUGIN UI\n";
+			have_gui = create_audiounit_editor (insert);
 			break;
 			
 		case ARDOUR::LADSPA:
@@ -105,7 +101,7 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
 		
 		_pluginui = pu;
-		get_vbox()->add (*pu);
+		add (*pu);
 		
 		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 
@@ -113,14 +109,13 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 		signal_unmap_event().connect (mem_fun (*pu, &GenericPluginUI::stop_updating));
 	}
 
-	set_position (Gtk::WIN_POS_MOUSE);
+	// set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
 	insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
 
-#if 0
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
 
@@ -134,7 +129,6 @@ PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes6
 	}
 
 	set_default_size (w, h); 
-#endif
 }
 
 PluginUIWindow::~PluginUIWindow ()
@@ -146,23 +140,14 @@ PluginUIWindow::on_show ()
 {
 	cerr << "PluginWindow shown\n";
 		
-	ArdourDialog::on_show ();
-	Glib::ListHandle<Widget*> kids (get_vbox()->get_children());
-	
-	cerr << "send show to " << kids.size() << " children of this plugin UI\n";
-
-	for (Glib::ListHandle<Widget*>::iterator x = kids.begin(); x != kids.end(); ++x) {
-		cerr << "\tSend show to " << (*x) << endl;
-		(*x)->show ();
-	}
-	cerr << "!! send done\n";
+	Window::on_show ();
 }
 
 void
 PluginUIWindow::on_hide ()
 {
 	cerr << "PluginWindow hidden\n";
-	ArdourDialog::on_hide ();
+	Window::on_hide ();
 }
 
 bool
@@ -182,7 +167,7 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
 		VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
 	
 		_pluginui = vpu;
-		get_vbox()->add (*vpu);
+		add (*vpu);
 		vpu->package (*this);
 	}
 
@@ -199,8 +184,7 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 #else
 	VBox* box;
 	_pluginui = create_au_gui (insert, &box);
-	cerr << "#*#*#*#*#*#*#*#*## PACK " << box << " INTO PLUGIN UI\n";
-	get_vbox()->add (*box);
+	add (*box);
 	non_gtk_gui = true;
 
 	extern sigc::signal<void,bool> ApplicationActivationChanged;
@@ -214,12 +198,16 @@ void
 PluginUIWindow::app_activated (bool yn)
 {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
-	if (yn) {
-		if (_pluginui) {
-			_pluginui->activate ();
-		}
-	}
 	cerr << "APP activated ? " << yn << endl;
+	if (_pluginui) {
+		if (yn) {
+			_pluginui->activate ();
+			present ();
+		} else {
+			hide ();
+			_pluginui->deactivate ();
+		}
+	} 
 #endif
 }
 
@@ -261,28 +249,43 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	  bypass_button (_("Bypass")),
 	  latency_gui (*pi, pi->session().frame_rate(), pi->session().get_block_size())
 {
-        //combo.set_use_arrows_always(true);
-	set_popdown_strings (combo, plugin->get_presets());
-	combo.set_size_request (100, -1);
-	combo.set_active_text ("");
-	combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
+        //preset_combo.set_use_arrows_always(true);
+	set_popdown_strings (preset_combo, plugin->get_presets());
+	preset_combo.set_size_request (100, -1);
+	preset_combo.set_active_text ("");
+	preset_combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
 
 	save_button.set_name ("PluginSaveButton");
 	save_button.signal_clicked().connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
+
+	insert->ActiveChanged.connect (bind(
+			mem_fun(*this, &PlugUIBase::processor_active_changed),
+			boost::weak_ptr<Processor>(insert)));
+	
+	bypass_button.set_active (!pi->active());
 
 	bypass_button.set_name ("PluginBypassButton");
 	bypass_button.signal_toggled().connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
 }
 
 void
+PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PlugUIBase::processor_active_changed), weak_p));
+	boost::shared_ptr<Processor> p (weak_p);
+	if (p) {
+		bypass_button.set_active (!p->active());
+	}
+}
+
+void
 PlugUIBase::setting_selected()
 {
-	if (combo.get_active_text().length() > 0) {
-		if (!plugin->load_preset(combo.get_active_text())) {
-			warning << string_compose(_("Plugin preset %1 not found"), combo.get_active_text()) << endmsg;
+	if (preset_combo.get_active_text().length() > 0) {
+		if (!plugin->load_preset(preset_combo.get_active_text())) {
+			warning << string_compose(_("Plugin preset %1 not found"), preset_combo.get_active_text()) << endmsg;
 		}
 	}
-
 }
 
 void
@@ -304,8 +307,8 @@ PlugUIBase::save_plugin_setting ()
 
 		if (name.length()) {
 			if(plugin->save_preset(name)){
-				set_popdown_strings (combo, plugin->get_presets());
-				combo.set_active_text (name);
+				set_popdown_strings (preset_combo, plugin->get_presets());
+				preset_combo.set_active_text (name);
 			}
 		}
 		break;

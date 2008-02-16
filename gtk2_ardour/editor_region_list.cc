@@ -58,20 +58,10 @@ Editor::handle_region_removed (boost::weak_ptr<Region> wregion)
 }
 
 void
-Editor::handle_new_region (boost::weak_ptr<Region> wregion)
+Editor::handle_new_regions (vector<boost::weak_ptr<Region> >& v)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_region), wregion));
-
-	/* don't copy region - the one we are being notified
-	   about belongs to the session, and so it will
-	   never be edited.
-	*/
-
-	boost::shared_ptr<Region> region (wregion.lock());
-	
-	if (region) {
-		add_region_to_region_display (region);
-	}
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::handle_new_regions), v));
+	add_regions_to_region_display (v);
 }
 
 void
@@ -80,6 +70,21 @@ Editor::region_hidden (boost::shared_ptr<Region> r)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::region_hidden), r));	
 
 	redisplay_regions ();
+}
+
+void
+Editor::add_regions_to_region_display (vector<boost::weak_ptr<Region> >& regions)
+{
+	cerr << "Adding " << regions.size() << " to region list\n";
+
+	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	for (vector<boost::weak_ptr<Region> >::iterator x = regions.begin(); x != regions.end(); ++x) {
+		boost::shared_ptr<Region> region ((*x).lock());
+		if (region) {
+			add_region_to_region_display (region);
+		}
+	}
+	region_list_display.set_model (region_list_model);
 }
 
 void

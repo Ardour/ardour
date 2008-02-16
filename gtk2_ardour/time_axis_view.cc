@@ -77,7 +77,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	  height_style(Small),
 	  y_position(0),
 	  order(0),
-	  controls_table (2, 7)
+	  controls_table (2, 8)
 {
 	if (need_size_info) {
 		compute_controls_size_info ();
@@ -136,7 +136,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_col_spacings (0);
 	controls_table.set_homogeneous (true);
 
-	controls_table.attach (name_hbox, 0, 4, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+	controls_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
@@ -156,6 +156,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	//controls_frame.add (controls_hbox);
 	//controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
+	//controls_vbox.set_name ("TimeAxisViewControlsBaseUnselected");
 	//controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	ColorsChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
@@ -365,6 +366,16 @@ TimeAxisView::step_height (bool bigger)
 }
 
 void
+TimeAxisView::set_heights (TrackHeight h)
+{
+	TrackSelection& ts (editor.get_selection().tracks);
+
+	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
+		(*i)->set_height (h);
+	}
+}
+
+void
 TimeAxisView::set_height (TrackHeight h)
 {
 	height_style = h;
@@ -568,7 +579,7 @@ TimeAxisView::set_selected (bool yn)
 	if (_selected) {
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_hbox.set_name (controls_base_selected_name);
-		
+		controls_vbox.set_name (controls_base_selected_name);
 		/* propagate any existing selection, if the mode is right */
 
 		if (editor.current_mouse_mode() == Editing::MouseRange && !editor.get_selection().time.empty()) {
@@ -578,7 +589,7 @@ TimeAxisView::set_selected (bool yn)
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
 		controls_hbox.set_name (controls_base_unselected_name);
-
+		controls_vbox.set_name (controls_base_unselected_name);
 		hide_selection ();
 
 		/* children will be set for the yn=true case. but when deselecting
@@ -601,12 +612,12 @@ TimeAxisView::build_size_menu ()
 	size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = size_menu->items();
 	
-	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_height), Largest)));
-	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_height), Large)));
-	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_height), Larger)));
-	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_height), Normal)));
-	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_height),Smaller)));
-	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_height), Small)));
+	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_heights), Largest)));
+	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_heights), Large)));
+	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_heights), Larger)));
+	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_heights), Normal)));
+	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_heights),Smaller)));
+	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_heights), Small)));
 }
 
 void

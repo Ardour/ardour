@@ -1,3 +1,6 @@
+#ifndef __gtk_ardour_option_editor_h__
+#define __gtk_ardour_option_editor_h__
+
 /*
     Copyright (C) 2001 Paul Davis 
 
@@ -17,8 +20,7 @@
 
 */
 
-#ifndef __gtk_ardour_option_editor_h__
-#define __gtk_ardour_option_editor_h__
+#include <vector>
 
 #include <gtkmm/notebook.h>
 #include <gtkmm/checkbutton.h>
@@ -203,6 +205,7 @@ class OptionEditor : public ArdourDialog
 	/* keyboard/mouse */
 
 	Gtk::Table keyboard_mouse_table;
+	Gtk::ComboBoxText keyboard_layout_selector;
 	Gtk::ComboBoxText edit_modifier_combo;
 	Gtk::ComboBoxText delete_modifier_combo;
 	Gtk::ComboBoxText snap_modifier_combo;
@@ -211,12 +214,15 @@ class OptionEditor : public ArdourDialog
 	Gtk::Adjustment edit_button_adjustment;
 	Gtk::SpinButton edit_button_spin;
 
+	std::map<std::string,std::string> bindings_files;
+
 	void setup_keyboard_options ();
 	void delete_modifier_chosen ();
 	void edit_modifier_chosen ();
 	void snap_modifier_chosen ();
 	void edit_button_changed ();
 	void delete_button_changed ();
+	void bindings_changed ();
 
 	void fixup_combo_size (Gtk::ComboBoxText&, std::vector<std::string>& strings);
 };

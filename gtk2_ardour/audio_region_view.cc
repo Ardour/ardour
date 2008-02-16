@@ -123,7 +123,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
 	
-	RegionView::init(basic_color, false);
+	RegionView::init (basic_color, wfd);
 	
 	XMLNode *node;
 
@@ -808,7 +808,7 @@ AudioRegionView::create_waves ()
 	}
 
 	ChanCount nchans = atv.get_diskstream()->n_channels();
-	
+
 	/* in tmp_waves, set up null pointers for each channel so the vector is allocated */
 	for (uint32_t n = 0; n < nchans.n_audio(); ++n) {
 		tmp_waves.push_back (0);
@@ -823,6 +823,14 @@ AudioRegionView::create_waves ()
 		wave_caches.push_back (WaveView::create_cache ());
 
 		if (wait_for_data) {
+			if (audio_region()->audio_source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+				create_one_wave (n, true);
+			} else {
+				// we'll get a PeaksReady signal from the source in the future
+				// and will call create_one_wave(n) then.
+			}
+			
+		} else {
 			create_one_wave (n, true);
 		}
 
@@ -917,8 +925,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	//Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
-	cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
+	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
+	// cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
 }
 
 void

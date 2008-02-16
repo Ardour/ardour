@@ -175,6 +175,7 @@ Gdk::Cursor* Editor::cross_hair_cursor = 0;
 Gdk::Cursor* Editor::selector_cursor = 0;
 Gdk::Cursor* Editor::trimmer_cursor = 0;
 Gdk::Cursor* Editor::grabber_cursor = 0;
+Gdk::Cursor* Editor::grabber_edit_point_cursor = 0;
 Gdk::Cursor* Editor::zoom_cursor = 0;
 Gdk::Cursor* Editor::time_fx_cursor = 0;
 Gdk::Cursor* Editor::fader_cursor = 0;
@@ -300,6 +301,8 @@ Editor::Editor ()
 	verbose_cursor_on = true;
 	route_removal = false;
 	show_automatic_regions_in_region_list = true;
+	last_item_entered = 0;
+	last_item_entered_n = 0;
 
 	region_list_sort_type = (Editing::RegionListSortType) 0;
 	have_pending_keyboard_selection = false;
@@ -344,6 +347,7 @@ Editor::Editor ()
 	zoomed_to_region = false;
 	rhythm_ferret = 0;
 
+	_scrubbing = false;
 	scrubbing_direction = 0;
 
 	sfbrowser = 0;
@@ -1170,7 +1174,7 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->TransportStateChange.connect (mem_fun(*this, &Editor::map_transport_state)));
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
 	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route)));
-	session_connections.push_back (session->RegionAdded.connect (mem_fun(*this, &Editor::handle_new_region)));
+	session_connections.push_back (session->RegionsAdded.connect (mem_fun(*this, &Editor::handle_new_regions)));
 	session_connections.push_back (session->RegionRemoved.connect (mem_fun(*this, &Editor::handle_region_removed)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
 	session_connections.push_back (session->edit_group_added.connect (mem_fun(*this, &Editor::add_edit_group)));
@@ -1340,8 +1344,15 @@ Editor::build_cursors ()
 		Gdk::Color c;
 		transparent_cursor = new Gdk::Cursor (bits, bits, c, c, 0, 0);
 	}
+	
 
 	grabber_cursor = new Gdk::Cursor (HAND2);
+	
+	{
+		Glib::RefPtr<Gdk::Pixbuf> grabber_edit_point_pixbuf (::get_icon ("grabber_edit_point"));
+		grabber_edit_point_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_edit_point_pixbuf, 5, 17);
+	}
+
 	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
 	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
 	selector_cursor = new Gdk::Cursor (XTERM);
@@ -1821,7 +1832,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		bbt_glue_item->set_active (true);
 		break;
 	default:
-		bbt_glue_item->set_active (true);
+		bbt_glue_item->set_active (false);
 		break;
 	}
 
@@ -2212,6 +2223,8 @@ Editor::set_edit_point_preference (EditPoint ep)
 		edit_point_selector.set_active_text (str);
 	}
 
+	set_canvas_cursor ();
+
 	if (!changed) {
 		return;
 	}
@@ -2238,7 +2251,7 @@ Editor::set_edit_point_preference (EditPoint ep)
 			break;
 		}
 	} 
-						
+
 	instant_save ();
 }
 
@@ -2817,8 +2830,9 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box.set_homogeneous(true);
 
 	vector<string> edit_mode_strings;
-	edit_mode_strings.push_back (edit_mode_to_string (Splice));
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
+	edit_mode_strings.push_back (edit_mode_to_string (Splice));
+	edit_mode_strings.push_back (edit_mode_to_string (Lock));
 
 	edit_mode_selector.set_name ("EditModeSelector");
 	Gtkmm2ext::set_size_request_to_display_given_text (edit_mode_selector, longest (edit_mode_strings).c_str(), 2+FUDGE, 10);
@@ -3309,12 +3323,12 @@ Editor::duplicate_dialog (bool with_dialog)
 		}
 	}
 
+	RegionSelection rs;
+	get_regions_for_action (rs);
 	
 	if (mouse_mode != MouseRange) {
 
-		ensure_entered_region_selected (true);
-
-		if (selection->regions.empty()) {
+		if (rs.empty()) {
 			return;
 		}
 	}
@@ -3365,7 +3379,7 @@ Editor::duplicate_dialog (bool with_dialog)
 	if (mouse_mode == MouseRange) {
 		duplicate_selection (times);
 	} else {
-		duplicate_some_regions (selection->regions, times);
+		duplicate_some_regions (rs, times);
 	}
 }
 
@@ -3425,6 +3439,9 @@ Editor::cycle_edit_mode ()
 		Config->set_edit_mode (Splice);
 		break;
 	case Splice:
+		Config->set_edit_mode (Lock);
+		break;
+	case Lock:
 		Config->set_edit_mode (Slide);
 		break;
 	}
@@ -3444,6 +3461,8 @@ Editor::edit_mode_selection_done ()
 		mode = Splice;
 	} else if (choice == _("Slide Edit")) {
 		mode = Slide;
+	} else if (choice == _("Lock Edit")) {
+		mode = Lock;
 	}
 
 	Config->set_edit_mode (mode);
@@ -4499,10 +4518,9 @@ Editor::set_punch_range (nframes_t start, nframes_t end, string cmd)
 	commit_reversible_command ();
 }
 
-RegionSelection
-Editor::get_regions_at (nframes64_t where, const TrackSelection& ts) const
+void
+Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelection& ts) const
 {
-	RegionSelection rs;
 	const TrackSelection* tracks;
 
 	if (ts.empty()) {
@@ -4536,15 +4554,11 @@ Editor::get_regions_at (nframes64_t where, const TrackSelection& ts) const
 			}
 		}
 	}
-
-	return rs;
 }
 
-
-RegionSelection
-Editor::get_regions_after (nframes64_t where, const TrackSelection& ts) const
+void
+Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSelection& ts) const
 {
-	RegionSelection rs;
 	const TrackSelection* tracks;
 
 	if (ts.empty()) {
@@ -4578,20 +4592,61 @@ Editor::get_regions_after (nframes64_t where, const TrackSelection& ts) const
 			}
 		}
 	}
-
-	return rs;
 }
 
-RegionSelection&
-Editor::get_regions_for_action ()
+void
+Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 {
-	if (!selection->regions.empty()) {
-		return selection->regions;
-	} 
+	bool use_regions_at = true;
 
-	nframes64_t where = get_preferred_edit_position();
-	tmp_regions = get_regions_at (where, selection->tracks);
-	return tmp_regions;
+	if (selection->regions.empty()) {
+
+		if (selection->tracks.empty()) {
+
+			/* no regions or tracks selected, but entered regionview is valid
+			   and we're in object mode - just use entered regionview
+			*/
+			
+			if (entered_regionview && (mouse_mode == Editing::MouseObject)) {
+				rs.add (entered_regionview);
+				return;
+			}
+
+		} else {
+
+			/* no regions selected, so get all regions at the edit point across
+			   all selected tracks. 
+			*/
+
+			nframes64_t where = get_preferred_edit_position();
+			get_regions_at (rs, where, selection->tracks);
+
+			/* if the entered regionview wasn't selected and neither was its track
+			   then add it.
+			*/
+
+			if (entered_regionview != 0 &&
+			    !selection->selected (entered_regionview) && 
+			    !selection->selected (&entered_regionview->get_time_axis_view())) {
+				rs.add (entered_regionview);
+			}
+		}
+
+	} else {
+		
+		/* just use the selected regions */
+
+		rs = selection->regions;
+
+		/* if the entered regionview wasn't selected and we allow this sort of thing,
+		   then add it.
+		*/
+
+		if (allow_entered && entered_regionview && !selection->selected (entered_regionview)) {
+			rs.add (entered_regionview);
+		}
+
+	}
 }
 
 void

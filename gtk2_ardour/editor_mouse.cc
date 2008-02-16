@@ -215,6 +215,57 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 }	
 
+Gdk::Cursor*
+Editor::which_grabber_cursor ()
+{
+	switch (_edit_point) {
+	case EditAtMouse:
+		return grabber_edit_point_cursor;
+		break;
+	default:
+		return grabber_cursor;
+		break;
+	}
+}
+
+void
+Editor::set_canvas_cursor ()
+{
+	switch (mouse_mode) {
+	case MouseRange:
+		current_canvas_cursor = selector_cursor;
+		break;
+
+	case MouseObject:
+		current_canvas_cursor = which_grabber_cursor();
+		break;
+
+	case MouseGain:
+		current_canvas_cursor = cross_hair_cursor;
+		break;
+
+	case MouseZoom:
+		current_canvas_cursor = zoom_cursor;
+		break;
+
+	case MouseTimeFX:
+		current_canvas_cursor = time_fx_cursor; // just use playhead
+		break;
+
+	case MouseAudition:
+		current_canvas_cursor = speaker_cursor;
+		break;
+	
+	case MouseNote:
+		set_midi_edit_cursor (current_midi_edit_mode());
+		break;
+	}
+
+	if (is_drawable()) {
+		track_canvas.get_window()->set_cursor(*current_canvas_cursor);
+	}
+}
+
 void
 Editor::set_mouse_mode (MouseMode m, bool force)
 {
@@ -266,36 +317,26 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	switch (mouse_mode) {
 	case MouseRange:
 		mouse_select_button.set_active (true);
-		current_canvas_cursor = selector_cursor;
 		break;
 
 	case MouseObject:
 		mouse_move_button.set_active (true);
-		if (Profile->get_sae()) {
-			current_canvas_cursor = timebar_cursor;
-		} else {
-			current_canvas_cursor = grabber_cursor;
-		}
 		break;
 
 	case MouseGain:
 		mouse_gain_button.set_active (true);
-		current_canvas_cursor = cross_hair_cursor;
 		break;
 
 	case MouseZoom:
 		mouse_zoom_button.set_active (true);
-		current_canvas_cursor = zoom_cursor;
 		break;
 
 	case MouseTimeFX:
 		mouse_timefx_button.set_active (true);
-		current_canvas_cursor = time_fx_cursor; // just use playhead
 		break;
 
 	case MouseAudition:
 		mouse_audition_button.set_active (true);
-		current_canvas_cursor = speaker_cursor;
 		break;
 	
 	case MouseNote:
@@ -310,10 +351,8 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		midi_toolbar_frame.hide();
 
 	ignore_mouse_mode_toggle = false;
-
-	if (is_drawable()) {
-		track_canvas.get_window()->set_cursor(*current_canvas_cursor);
-	}
+	
+	set_canvas_cursor ();
 }
 
 void
@@ -904,6 +943,7 @@ bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	nframes_t where = event_frame (event, 0, 0);
+	AutomationTimeAxisView* atv = 0;
 
 	/* no action if we're recording */
 						
@@ -1119,14 +1159,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MouseObject:
 			switch (item_type) {
 			case AutomationTrackItem:
-				dynamic_cast<AutomationTimeAxisView*>(clicked_axisview)->add_automation_event 
-					(item,
-					 event,
-					 where,
-					 event->button.y);
+				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_routeview);
+				if (atv) {
+					atv->add_automation_event (item, event, where, event->button.y);
+				}
 				return true;
+				
 				break;
-
+				
 			default:
 				break;
 			}
@@ -1232,6 +1272,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	Marker * marker;
 	double fraction;
 	
+	if (last_item_entered != item) {
+		last_item_entered = item;
+		last_item_entered_n = 0;
+	}
+
 	switch (item_type) {
 	case ControlPointItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
@@ -1247,11 +1292,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 			fraction = 1.0 - (cp->get_y() / cp->line().height());
 
-			set_verbose_canvas_cursor (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
-			show_verbose_canvas_cursor ();
-
 			if (is_drawable() && !_scrubbing) {
 			        track_canvas.get_window()->set_cursor (*fader_cursor);
+			}
+
+			last_item_entered_n++;
+			set_verbose_canvas_cursor (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
+			if (last_item_entered_n < 10) {
+				show_verbose_canvas_cursor ();
 			}
 		}
 		break;
@@ -1303,7 +1351,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case PlayheadCursorItem:
 		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*grabber_cursor);
+			switch (_edit_point) {
+			case EditAtMouse:
+				track_canvas.get_window()->set_cursor (*grabber_edit_point_cursor);
+				break;
+			default:
+				track_canvas.get_window()->set_cursor (*grabber_cursor);
+				break;
+			}
 		}
 		break;
 
@@ -1755,7 +1810,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	}
 
 	if (cursor == 0) {
-		cursor = grabber_cursor;
+		cursor = which_grabber_cursor ();
 	}
 
 	// if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
@@ -1818,7 +1873,7 @@ Editor::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t t
 	drag_info.item = new_item;
 
 	if (cursor == 0) {
-		cursor = grabber_cursor;
+		cursor = which_grabber_cursor ();
 	}
 
 	drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK, *cursor, time);
@@ -1965,6 +2020,7 @@ Editor::fade_in_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* even
 		XMLNode &before = alist->get_state();
 
 		tmp->audio_region()->set_fade_in_length (fade_length);
+		tmp->audio_region()->set_fade_in_active (true);
 		
 		XMLNode &after = alist->get_state();
 		session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -2081,6 +2137,7 @@ Editor::fade_out_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* eve
 		XMLNode &before = alist->get_state();
 		
 		tmp->audio_region()->set_fade_out_length (fade_length);
+		tmp->audio_region()->set_fade_out_active (true);
 
 		XMLNode &after = alist->get_state();
 		session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -3361,30 +3418,34 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	   the region would be if we moved it by that much.
 	*/
 
-	if (drag_info.move_threshold_passed) {
+	if ( drag_info.move_threshold_passed ) {
 
 		if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
 
 			nframes_t sync_frame;
 			nframes_t sync_offset;
 			int32_t sync_dir;
-	    
+
 			pending_region_position = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 
 			sync_offset = rv->region()->sync_offset (sync_dir);
-			sync_frame = rv->region()->adjust_to_sync (pending_region_position);
 
-			/* we snap if the snap modifier is not enabled.
+			/* we don't handle a sync point that lies before zero.
 			 */
+			if (sync_dir >= 0 || (sync_dir < 0 && pending_region_position >= sync_offset)) {
+				sync_frame = pending_region_position + (sync_dir*sync_offset);
+
+				/* we snap if the snap modifier is not enabled.
+				 */
 	    
-			if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-				snap_to (sync_frame);	
-			}
+				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+					snap_to (sync_frame);	
+				}
 	    
-			if (sync_frame - sync_offset <= sync_frame) {
-				pending_region_position = sync_frame - (sync_dir*sync_offset);
+				pending_region_position = rv->region()->adjust_to_sync (sync_frame);
+
 			} else {
-				pending_region_position = 0;
+				pending_region_position = drag_info.last_frame_position;
 			}
 	    
 		} else {
@@ -3397,7 +3458,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	  
 		// printf ("3: pending_region_position= %lu    %lu\n", pending_region_position, drag_info.last_frame_position );
 	  
-		if (pending_region_position != drag_info.last_frame_position && !drag_info.x_constrained) {
+		bool x_move_allowed = ( !drag_info.x_constrained && (Config->get_edit_mode() != Lock)) || ( drag_info.x_constrained && (Config->get_edit_mode() == Lock)) ;
+		if ( pending_region_position != drag_info.last_frame_position && x_move_allowed ) {
 
 			/* now compute the canvas unit distance we need to move the regionview
 			   to make it appear at the new location.
@@ -3420,7 +3482,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 		x_delta = 0;
 	}
-
+	
 	/*************************************************************
 	    PREPARE TO MOVE
 	************************************************************/
@@ -4150,7 +4212,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	/* lets try to create new Region for the selection */
 
-	vector<boost::shared_ptr<AudioRegion> > new_regions;
+	vector<boost::shared_ptr<Region> > new_regions;
 	create_region_from_selection (new_regions);
 
 	if (new_regions.empty()) {
@@ -4904,7 +4966,23 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	nframes_t start = 0;
 	nframes_t end = 0;
-	ArdourCanvas::SimpleRect *crect = (range_marker_op == CreateRangeMarker) ? range_bar_drag_rect: transport_bar_drag_rect;
+	ArdourCanvas::SimpleRect *crect;
+
+	switch (range_marker_op) {
+	case CreateRangeMarker:
+		crect = range_bar_drag_rect;
+		break;
+	case CreateTransportMarker:
+		crect = transport_bar_drag_rect;
+		break;
+	case CreateCDMarker:
+		crect = cd_marker_bar_drag_rect;
+		break;
+	default:
+		cerr << "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()" << endl;
+		return;
+		break;
+	}
 	
 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
 		snap_to (drag_info.current_pointer_frame);
@@ -4991,9 +5069,11 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			session->locations()->next_available_name(rangename,"unnamed");
 			if (range_marker_op == CreateCDMarker) {
 				flags =  Location::IsRangeMarker|Location::IsCDMarker;
+				cd_marker_bar_drag_rect->hide();
 			}
 			else {
 				flags =  Location::IsRangeMarker;
+				range_bar_drag_rect->hide();
 			}
 			newloc = new Location(temp_location->start(), temp_location->end(), rangename, (Location::Flags) flags);
 			session->locations()->add (newloc, true);
@@ -5001,7 +5081,6 @@ Editor::end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
 			commit_reversible_command ();
 			
-			range_bar_drag_rect->hide();
 			range_marker_drag_rect->hide();
 			break;
 		    }

@@ -156,7 +156,27 @@ fixup_bundle_environment ()
 	path += "/../Plugins";
 	
 	setenv ("LADSPA_PATH", path.c_str(), 1);
+
+	cstr = getenv ("VAMP_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	}
+	path = dir_path;
+	path += "/../Frameworks";
 	
+	setenv ("VAMP_PATH", path.c_str(), 1);
+
+	cstr = getenv ("ARDOUR_CONTROL_SURFACE_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	}
+	path = dir_path;
+	path += "/../Surfaces";
+	
+	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
+
 	cstr = getenv ("LV2_PATH");
 	if (cstr) {
 		path = cstr;
@@ -224,63 +244,6 @@ fixup_bundle_environment ()
 }
 
 #endif
-
-static void
-setup_keybindings (ARDOUR_UI* ui)
-{
-	Glib::ustring path;
-
-	if (keybindings_path.empty()) {
-		keybindings_path = "ardour";
-	}
-
-	std::string kbpath;
-	
-	if (keybindings_path.find (".bindings") == string::npos) {
-
-		// just a style name - allow user to
-		// specify the layout type. 
-		
-		char* layout;
-		
-		if ((layout = getenv ("ARDOUR_KEYBOARD_LAYOUT")) != 0) {
-			keybindings_path += '-';
-			keybindings_path += layout;
-		}
-
-		keybindings_path += ".bindings";
-	} 
-
-	
-	// XXX timbyr - we need a portable test for "is-absolute" here 
-	
-	if (keybindings_path[0] != '/' && keybindings_path[0] != '.') {
-
-		/* not absolute - look in the usual places */
-		
-		sys::path key_bindings_file;
-
-		find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-				keybindings_path, key_bindings_file);
-
-		path = key_bindings_file.to_string();
-
-		if (path.empty()) {
-			warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
-					keybindings_path) << endmsg;
-		}
-
-	} else {
-
-		// absolute path from user - use it as is
-
-		path = keybindings_path;
-	}
-
-	if (!path.empty()) {
-		ui->set_keybindings_path (path);
-	}
-}
 
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
@@ -362,8 +325,6 @@ int main (int argc, char *argv[])
 		error << _("could not create ARDOUR GUI") << endmsg;
 		exit (1);
 	}
-
-	setup_keybindings (ui);
 
 	ui->run (text_receiver);
 	ui = 0;

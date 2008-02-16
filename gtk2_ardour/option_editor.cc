@@ -19,6 +19,7 @@
 
 #include <pbd/whitespace.h>
 
+#include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
@@ -100,7 +101,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* kbd/mouse */
 
-	  keyboard_mouse_table (3, 4),
+	  keyboard_mouse_table (4, 4),
 	  delete_button_adjustment (3, 1, 5),
 	  delete_button_spin (delete_button_adjustment),
 	  edit_button_adjustment (3, 1, 5),
@@ -1082,14 +1083,14 @@ static const struct {
 
 #ifdef GTKOSX 
 
-	/* Command = Mod1
-	   Option/Alt = Mod5
+	/* Command = Meta
+	   Option/Alt = Mod1
 	*/
 
 	{ "Shift", GDK_SHIFT_MASK },
-	{ "Command", GDK_MOD1_MASK },
+	{ "Command", GDK_META_MASK },
 	{ "Control", GDK_CONTROL_MASK },
-	{ "Option", GDK_MOD5_MASK },
+	{ "Option", GDK_MOD1_MASK },
 	{ "Command-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
 	{ "Command-Option", GDK_MOD1_MASK|GDK_MOD5_MASK },
 	{ "Shift-Option", GDK_SHIFT_MASK|GDK_MOD5_MASK },
@@ -1197,6 +1198,39 @@ OptionEditor::setup_keyboard_options ()
 	
 	keyboard_mouse_table.attach (*label, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
 	keyboard_mouse_table.attach (snap_modifier_combo, 1, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
+
+	vector<string> strs;
+	
+	for (std::map<std::string,std::string>::iterator bf = Keyboard::binding_files.begin(); bf != Keyboard::binding_files.end(); ++bf) {
+		strs.push_back (bf->first);
+	}
+	
+	set_popdown_strings (keyboard_layout_selector, strs);
+	keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
+	keyboard_layout_selector.signal_changed().connect (mem_fun (*this, &OptionEditor::bindings_changed));
+
+	label = manage (new Label (_("Keyboard layout")));
+	label->set_name ("OptionsLabel");
+	label->set_alignment (1.0, 0.5);
+
+	keyboard_mouse_table.attach (*label, 0, 1, 3, 4, Gtk::FILL|Gtk::EXPAND, FILL);
+	keyboard_mouse_table.attach (keyboard_layout_selector, 1, 2, 3, 4, Gtk::FILL|Gtk::EXPAND, FILL);
+}
+
+void
+OptionEditor::bindings_changed ()
+{
+	string txt;
+	
+	txt = keyboard_layout_selector.get_active_text();
+
+	for (std::map<string,string>::iterator i = Keyboard::binding_files.begin(); i != Keyboard::binding_files.end(); ++i) {
+		if (txt == i->first) {
+			if (Keyboard::load_keybindings (i->second)) {
+				Keyboard::save_keybindings ();
+			}
+		}
+	}
 }
 
 void

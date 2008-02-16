@@ -43,6 +43,11 @@
                <menuitem action='GotoStart'/>
                <menuitem action='GotoEnd'/>
 	       <separator/>
+               <menuitem action='tab-to-transient-forwards'/>
+               <menuitem action='tab-to-transient-backwards'/>
+               <menuitem action='nudge-playhead-forward'/>
+               <menuitem action='nudge-playhead-backward'/>
+	       <separator/>
                <menuitem action='Record'/>
                <separator/> 
                <menuitem action='TransitionToRoll'/>
@@ -61,7 +66,6 @@
                <menuitem action='playhead-to-edit'/>
                <menuitem action='focus-on-clock'/>
 	       <separator/>
-	       <menuitem action='ToggleTimeMaster'/>
                <menuitem action='TogglePunchIn'/>
                <menuitem action='TogglePunchOut'/>
                <menuitem action='ToggleAutoInput'/>
@@ -143,6 +147,7 @@
                    <menuitem action='duplicate-region'/>
                    <menuitem action='insert-region'/>
                	   <menuitem action='normalize-region'/>
+                   <menuitem action='split-region-at-transients'/>
                    <separator/>       
 	           <menuitem action="nudge-forward"/>
 	           <menuitem action="nudge-backward"/>
@@ -235,6 +240,7 @@
                <menuitem action='ToggleKeyEditor'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
+               <menuitem action='toggle-rhythm-ferret'/>
         </menu>
         <menu name='Options' action='Options'>
                <menu action='Monitoring'>

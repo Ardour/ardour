@@ -58,7 +58,7 @@ class AudioRegionView : public RegionView
 
 	~AudioRegionView ();
 	
-	virtual void init (Gdk::Color& base_color, bool wait_for_data = false);
+	virtual void init (Gdk::Color& base_color, bool wait_for_data);
 	
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region() const;
 	

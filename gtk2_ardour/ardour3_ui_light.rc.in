@@ -148,7 +148,19 @@ style "black_mackie_menu_bar"
   bg[NORMAL] = { 0, 0, 0 }
 }
 */
-style "default_buttons_menus" 
+style "default_button" 
+{
+  font_name = "%FONT_SMALL%"
+  fg[ACTIVE] = { 1.0, 1.0, 1.0 }
+  
+  bg[NORMAL] = { 0.80, 0.80, 0.80 }
+  bg[ACTIVE] = "#565690"
+  bg[PRELIGHT] = { 0.70, 0.70, 0.90 }
+  bg[INSENSITIVE] = { 0.70, 0.70, 0.90 }
+  bg[SELECTED] = { 0.70, 0.70, 0.90 }
+}
+
+style "default_menu" 
 {
   font_name = "%FONT_NORMAL%"
   fg[ACTIVE] = { 1.0, 1.0, 1.0 }
@@ -160,14 +172,26 @@ style "default_buttons_menus"
   bg[SELECTED] = { 0.70, 0.70, 0.90 }
 }
 
-style "very_small_button" = "default_buttons_menus"
+style "default_generic" 
+{
+  font_name = "%FONT_NORMAL%"
+  fg[ACTIVE] = { 1.0, 1.0, 1.0 }
+  
+  bg[NORMAL] = { 0.80, 0.80, 0.80 }
+  bg[ACTIVE] = "#565690"
+  bg[PRELIGHT] = { 0.70, 0.70, 0.90 }
+  bg[INSENSITIVE] = { 0.70, 0.70, 0.90 }
+  bg[SELECTED] = { 0.70, 0.70, 0.90 }
+}
+
+style "very_small_button" = "default_button"
 {
 	font_name = "%FONT_SMALLER%"
 	ythickness = 0
 	xthickness = 0
 }
 
-style "small_button" = "default_buttons_menus"
+style "small_button" = "default_button"
 {
 }
 
@@ -275,20 +299,20 @@ style "solo_button_active" = "small_button"
 
 style "mixer_solo_button" = "solo_button"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_solo_button_alternate" = "solo_button_alternate"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 style "mixer_solo_button_active" = "solo_button_active"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -324,23 +348,16 @@ style "mute_button_active" = "small_button"
 	fg[PRELIGHT] = { 0, 0, 0 }
 }
 
-style "mixer_mute_button" = "mute_button"
-{
-	font_name = "%FONT_SMALLERER%"
-	xthickness = 0
-	ythickness = 0
-}
-
 style "mixer_mute_button_alternate" = "mute_button_alternate"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
 
 style "mixer_mute_button_active" = "mute_button_active"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -354,7 +371,7 @@ style "multiline_combo" = "small_button"
 
 style "mixer_mute_button" = "mute_button"
 {
-	font_name = "%FONT_SMALLERER%"
+	font_name = "%FONT_SMALLER%"
 	xthickness = 0
 	ythickness = 0
 }
@@ -375,9 +392,9 @@ style "mixer_red_active_button" = "very_small_button"
  	bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
 }
 
-style "time_button" = "default_buttons_menus"
+style "time_button" = "default_button"
 {
-	font_name = "%FONT_NORMAL%"
+	font_name = "%FONT_SMALL%"
 }
 
 style "transport_button"
@@ -432,7 +449,7 @@ style "shuttle_control" = "very_small_text"
 	bg[SELECTED] = { 1.0, 0.04, 0.04 }
 }
 
-style "ardour_adjusters" = "default_buttons_menus"
+style "ardour_adjusters" = "default_generic"
 {
 	bg[NORMAL] = { 0.60, 0.60, 0.60 }
 	bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
@@ -451,7 +468,7 @@ style "editor_hscrollbar" = "ardour_adjusters"
 	GtkScrollbar::slider_width = 27
 }
 
-style "ardour_progressbars" = "default_buttons_menus"
+style "ardour_progressbars" = "default_generic"
 { 
   bg[NORMAL] = { 0, 0, 0 }
   bg[PRELIGHT] = { 0.00, 0.36, 0.40 }
@@ -1134,7 +1151,7 @@ style "tearoff_arrow" = "medium_bold_entry"
 	bg[PRELIGHT] = { 0.30, 0.30, 0.30 }
 }
 
-style "location_row_button" = "default_buttons_menus"
+style "location_row_button" = "default_button"
 {
 	font_name = "%FONT_SMALL%"
 }
@@ -1176,7 +1193,7 @@ style "pan_slider"
 
 }
 
-style "ardour_button" ="default_buttons_menus"
+style "ardour_button" ="default_button"
 {
 	xthickness = 1
 	ythickness = 1
@@ -1186,7 +1203,7 @@ style "ardour_button" ="default_buttons_menus"
 
 class "GtkWidget" style:highest "default_base"
 class "GtkScrollbar" style:highest "ardour_adjusters"
-class "GtkLabel" style:highest "default_buttons_menus"
+class "GtkLabel" style:highest "default_generic"
 class "GtkButton" style:highest "ardour_button"
 class "GtkArrow" style:highest "tearoff_arrow"
 class "GtkProgressBar" style:highest "ardour_progressbars"
@@ -1195,7 +1212,7 @@ widget "*FirstActionMessage" style:highest "first_action_message"
 widget "*VerboseCanvasCursor" style:highest "verbose_canvas_cursor"
 widget "*MarkerText" style:highest "marker_text"
 widget "*TimeAxisViewItemName*" style:highest "time_axis_view_item_name"
-#widget "*ExportProgress" style:highest "default_buttons_menus"
+#widget "*ExportProgress" style:highest "default_generic"
 widget "*ExportFileLabel" style:highest "small_bold_text"
 widget "*ExportFormatLabel" style:highest "medium_bold_text"
 widget "*ExportHeader" style:highest "small_bold_text"
@@ -1207,33 +1224,33 @@ widget "*EditModeSelector" style:highest "medium_bold_entry"
 widget "*SnapTypeSelector" style:highest "medium_bold_entry"
 widget "*SnapModeSelector" style:highest "medium_bold_entry"
 widget "*ZoomFocusSelector" style:highest "medium_bold_entry"
-widget "*ArdourContextMenu*" style:highest "default_buttons_menus"
-widget "*EditGroupTitleButton*" style:highest "default_buttons_menus"
-widget "*MixerGroupTitleButton*" style:highest "default_buttons_menus"
-widget "*ErrorLogCloseButton" style:highest "default_buttons_menus"
-widget "*EditorGTKButton*" style:highest "default_buttons_menus" 
-widget "*ToolbarButton" style:highest "default_buttons_menus"
-widget "*ToolbarButton*" style:highest "default_buttons_menus"
-widget "*CrossfadeEditButton" style:highest "default_buttons_menus"
-widget "*CrossfadeEditButton*" style:highest "default_buttons_menus"
-widget "*TrackHistoryButton*" style:highest "default_buttons_menus"
-widget "*TrackSizeButton*" style:highest "default_buttons_menus"
-widget "*TrackPlaylistButton*" style:highest "default_buttons_menus"
-widget "*TrackAutomationButton*" style:highest "default_buttons_menus"
-widget "*TrackGroupButton*" style:highest "default_buttons_menus"
-widget "*TrackMixButton*" style:highest "default_buttons_menus"
-widget "*TrackVisualButton*" style:highest "default_buttons_menus"
-widget "*TrackRemoveButton*" style:highest "default_buttons_menus"
-widget "*BaseButton" style:highest "default_buttons_menus"
-widget "*TakeButtonLabel" style:highest "default_buttons_menus"
-widget "*MixerWidthButton" style:highest "default_buttons_menus"
-widget "*MixerHideButton" style:highest "default_buttons_menus"
-widget "*MixerSendButton" style:highest "default_buttons_menus"
-widget "*MixerSendButtonLabel" style:highest "default_buttons_menus"
-widget "*MixerSendSwitch" style:highest "default_buttons_menus"
-widget "*MixerInsertButton" style:highest "default_buttons_menus"
-widget "*MixerInsertButtonLabel" style:highest "default_buttons_menus"
-widget "*MixerInsertSwitch" style:highest "default_buttons_menus"
+widget "*ArdourContextMenu*" style:highest "default_menu"
+widget "*EditGroupTitleButton*" style:highest "default_button"
+widget "*MixerGroupTitleButton*" style:highest "default_button"
+widget "*ErrorLogCloseButton" style:highest "default_button"
+widget "*EditorGTKButton*" style:highest "default_button" 
+widget "*ToolbarButton" style:highest "default_button"
+widget "*ToolbarButton*" style:highest "default_button"
+widget "*CrossfadeEditButton" style:highest "default_button"
+widget "*CrossfadeEditButton*" style:highest "default_button"
+widget "*TrackHistoryButton*" style:highest "default_button"
+widget "*TrackSizeButton*" style:highest "default_button"
+widget "*TrackPlaylistButton*" style:highest "default_button"
+widget "*TrackAutomationButton*" style:highest "default_button"
+widget "*TrackGroupButton*" style:highest "default_button"
+widget "*TrackMixButton*" style:highest "default_button"
+widget "*TrackVisualButton*" style:highest "default_button"
+widget "*TrackRemoveButton*" style:highest "default_button"
+widget "*BaseButton" style:highest "default_button"
+widget "*TakeButtonLabel" style:highest "default_generic"
+widget "*MixerWidthButton" style:highest "default_button"
+widget "*MixerHideButton" style:highest "default_button"
+widget "*MixerSendButton" style:highest "default_button"
+widget "*MixerSendButtonLabel" style:highest "default_button"
+widget "*MixerSendSwitch" style:highest "default_button"
+widget "*MixerInsertButton" style:highest "default_button"
+widget "*MixerInsertButtonLabel" style:highest "default_button"
+widget "*MixerInsertSwitch" style:highest "default_button"
 widget "*MixerMonitorInputButton*" style:highest "very_small_button"
 widget "*MixerMonitorInputButton.*" style:highest "very_small_button"
 widget "*MixerIOButton" style:highest "very_small_button"
@@ -1337,7 +1354,7 @@ widget "*TakeTagLabel" style:highest "small_bold_text"
 widget "*ToolBarLabel" style:highest "small_bold_text"
 widget "*EditorDisplayLabel" style:highest "small_bold_text"
 widget "*NewSessionLabel" style:highest "large_text"
-widget "*GlobalButtonLabel" style:highest "default_buttons_menus"
+widget "*GlobalButtonLabel" style:highest "default_generic"
 widget "*ClickButton" style:highest "medium_entry"
 widget "*RegionNameDisplay" style:highest "medium_entry"
 widget "*PluginDisplay" style:highest "medium_entry"
@@ -1390,8 +1407,8 @@ widget "*CrossfadeEditCurveButton" style:highest "red_when_active"
 widget "*CrossfadeEditCurveButton*" style:highest "red_when_active"
 widget "*CrossfadeEditLabel" style:highest "medium_text"
 widget "*CrossfadeEditFrame" style:highest "base_frame"
-widget "*MouseModeButton" style:highest "default_buttons_menus"
-widget "*MouseModeButton*" style:highest "default_buttons_menus"
+widget "*MouseModeButton" style:highest "default_button"
+widget "*MouseModeButton*" style:highest "default_button"
 widget "*EditorMainCanvas" style:highest "main_canvas_area"
 widget "*AudioTrackControlsBaseInactiveUnselected" style:highest "track_controls_inactive"
 widget "*BusControlsBaseInactiveUnselected" style:highest "track_controls_inactive"
@@ -1461,8 +1478,8 @@ widget "*TransportAuditioningAlert" style:highest "flashing_alert"
 widget "*TransportAuditioningAlert.*" style:highest "flashing_alert"
 widget "*FadeCurve" style:highest "medium_bold_entry"
 widget "*FadeCurve*" style:highest "medium_bold_entry"
-widget "*IOSelectorButton" style:highest "default_buttons_menus"
-widget "*IOSelectorButton*" style:highest "default_buttons_menus"
+widget "*IOSelectorButton" style:highest "default_button"
+widget "*IOSelectorButton*" style:highest "default_button"
 widget "*IOSelectorList" style:highest "medium_entry_noselection_fg"
 widget "*IOSelectorPortList" style:highest "io_selector_port_list"
 widget "*IOSelectorPortList.*" style:highest "io_selector_port_list"
@@ -1471,8 +1488,8 @@ widget "*IOSelectorPortListSelected.*" style:highest "selected_io_selector_port_
 widget "*IOSelectorNotebook" style:highest "io_selector_notebook"
 widget "*IOSelectorNotebookTab" style:highest "io_selector_notebook"
 widget "*IOSelectorFrame" style:highest "base_frame"
-widget "*ConnectionEditorButton" style:highest "default_buttons_menus"
-widget "*ConnectionEditorButton*" style:highest "default_buttons_menus"
+widget "*ConnectionEditorButton" style:highest "default_button"
+widget "*ConnectionEditorButton*" style:highest "default_button"
 widget "*ConnectionEditorList" style:highest "medium_entry_noselection_fg"
 widget "*ConnectionEditorConnectionList" style:highest "medium_entry"
 widget "*ConnectionEditorPortList" style:highest "io_selector_port_list"
@@ -1499,18 +1516,18 @@ widget "*PluginLoadButton*" style:highest "small_button"
 
 widget "*MetricDialogFrame" style:highest "base_frame"
 widget "*MetricEntry" style:highest "medium_bold_entry"
-widget "*MetricButton" style:highest "default_buttons_menus"
-widget "*MetricButton.*" style:highest "default_buttons_menus"
+widget "*MetricButton" style:highest "default_button"
+widget "*MetricButton.*" style:highest "default_button"
 widget "*MetricLabel" style:highest "medium_text"
-widget "*TimeStretchButton" style:highest "default_buttons_menus"
-widget "*TimeStretchButton.*" style:highest "default_buttons_menus"
-widget "*TimeStretchProgress" style:highest "default_buttons_menus"
-widget "*ChoiceWindow" style:highest "default_buttons_menus"
-widget "*ChoicePrompt" style:highest "default_buttons_menus"
-widget "*ChoiceButton" style:highest "default_buttons_menus"
-widget "*ChoiceButton*" style:highest "default_buttons_menus"
-widget "*SelectionModeButton" style:highest "default_buttons_menus"
-widget "*SelectionModeButton*" style:highest "default_buttons_menus"
+widget "*TimeStretchButton" style:highest "default_button"
+widget "*TimeStretchButton.*" style:highest "default_button"
+widget "*TimeStretchProgress" style:highest "default_button"
+widget "*ChoiceWindow" style:highest "default_generic"
+widget "*ChoicePrompt" style:highest "default_generic"
+widget "*ChoiceButton" style:highest "default_button"
+widget "*ChoiceButton*" style:highest "default_button"
+widget "*SelectionModeButton" style:highest "default_button"
+widget "*SelectionModeButton*" style:highest "default_button"
 widget "*TrackLabel" style:highest "medium_text"
 widget "*TrackPlugName" style:highest "medium_text"
 widget "*TrackParameterName" style:highest "small_text"
@@ -1520,7 +1537,7 @@ widget "*AddRouteDialogChannelChoice" style:highest "medium_bold_entry"
 widget "*AddRouteDialogSpinner" style:highest "medium_bold_entry"
 widget "*AddRouteDialogSpinner*" style:highest "medium_bold_entry"
 widget "*AddRouteDialogRadioButton" style:highest "red_when_active"
-widget "*AddRouteDialogButton" style:highest "default_buttons_menus"
+widget "*AddRouteDialogButton" style:highest "default_button"
 widget "*AddRouteDialogNameTemplateEntry" style:highest "medium_bold_entry"
 widget "*NewSessionIOLabel" style:highest "larger_bold_text"
 widget "*NewSessionSR1Label" style:highest "red_medium_text"
@@ -1543,10 +1560,10 @@ widget "*LocationEditNumberLabel" style:highest "small_text"
 widget "*LocationLocEditorFrame" style:highest "base_frame"
 widget "*LocationRangeEditorFrame" style:highest "base_frame"
 widget "*LocationEditNameEntry" style:highest "option_entry"
-widget "*LocationAddLocationButton" style:highest "default_buttons_menus"
-widget "*LocationAddLocationButton*" style:highest "default_buttons_menus"
-widget "*LocationAddRangeButton" style:highest "default_buttons_menus"
-widget "*LocationAddRangeButton*" style:highest "default_buttons_menus"
+widget "*LocationAddLocationButton" style:highest "default_button"
+widget "*LocationAddLocationButton*" style:highest "default_button"
+widget "*LocationAddRangeButton" style:highest "default_button"
+widget "*LocationAddRangeButton*" style:highest "default_button"
 widget "*LocationEditRemoveButton" style:highest "location_row_button"
 widget "*LocationEditRemoveButton*" style:highest "location_row_button"
 widget "*PanSlider" style:highest "pan_slider"
@@ -1555,7 +1572,7 @@ widget "*PanningLinkButton.*" style:highest "mixer_red_active_button"
 widget "*PanningLinkDirectionButton" style:highest "very_small_button"
 widget "*PanningLinkDirectionButton.*" style:highest "very_small_button"
 widget "*ChannelCountSelector" style:highest "medium_bold_entry"
-widget "*ChannelCountSelector.GtkArrow" style:highest "default_buttons_menus"
+widget "*ChannelCountSelector.GtkArrow" style:highest "default_generic"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
 

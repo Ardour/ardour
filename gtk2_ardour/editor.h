@@ -472,7 +472,7 @@ class Editor : public PublicEditor
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_marker (nframes_t where, bool is_cd=false);
+	void mouse_add_new_marker (nframes_t where, bool is_cd=false, bool is_xrun=false);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 
@@ -555,6 +555,8 @@ class Editor : public PublicEditor
 	Gtk::VBox           vpacker;
 
 	Gdk::Cursor*          current_canvas_cursor;
+	void set_canvas_cursor ();
+	Gdk::Cursor* which_grabber_cursor ();
 
 	ArdourCanvas::CanvasAA track_canvas;
 	ArdourCanvas::CanvasAA time_canvas;
@@ -960,6 +962,7 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* trimmer_cursor;
 	static Gdk::Cursor* selector_cursor;
 	static Gdk::Cursor* grabber_cursor;
+	static Gdk::Cursor* grabber_edit_point_cursor;
 	static Gdk::Cursor* zoom_cursor;
 	static Gdk::Cursor* time_fx_cursor;
 	static Gdk::Cursor* fader_cursor;
@@ -999,8 +1002,10 @@ class Editor : public PublicEditor
 	int ensure_cursor (nframes_t* pos);
 
 	void handle_new_region (boost::weak_ptr<ARDOUR::Region>);
+	void handle_new_regions (vector<boost::weak_ptr<ARDOUR::Region> >& );
 	void handle_region_removed (boost::weak_ptr<ARDOUR::Region>);
 	void add_region_to_region_display (boost::shared_ptr<ARDOUR::Region>);
+	void add_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::Region> > & );
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
 	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
@@ -1031,7 +1036,7 @@ class Editor : public PublicEditor
 	void split_region_at (nframes_t);
 	void split_regions_at (nframes_t, RegionSelection&);
 	void split_region_at_transients ();
-	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&);
+	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret);
 	void crop_region_to_selection ();
 	void crop_region_to (nframes_t start, nframes_t end);
 	void set_sync_point (nframes64_t, const RegionSelection&);
@@ -1088,7 +1093,7 @@ class Editor : public PublicEditor
 	void keyboard_insert_region_list_selection ();
 
 	void region_from_selection ();
-	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::AudioRegion> >&);
+	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::Region> >&);
 
 	void play_from_start ();
 	void play_from_edit_point ();
@@ -1120,6 +1125,8 @@ class Editor : public PublicEditor
 	
 	void add_external_audio_action (Editing::ImportMode);
 	void external_audio_dialog ();
+
+	int  check_whether_and_how_to_import(string, bool all_or_nothing = true);
 	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
 	SoundFileOmega* sfbrowser;
@@ -1132,7 +1139,7 @@ class Editor : public PublicEditor
 	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
 	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
-			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
+			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool);
 	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
 
@@ -1354,6 +1361,14 @@ class Editor : public PublicEditor
 	bool canvas_fade_in_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
+	
+
+	// These variables are used to detect a feedback loop and break it to avoid a gui hang
+private:
+	ArdourCanvas::Item *last_item_entered;
+	int last_item_entered_n;
+public:
+
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
@@ -1652,6 +1667,7 @@ class Editor : public PublicEditor
 	void drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event);
 
+	ArdourCanvas::SimpleRect*  cd_marker_bar_drag_rect;
 	ArdourCanvas::SimpleRect*  range_bar_drag_rect;
 	ArdourCanvas::SimpleRect*  transport_bar_drag_rect;
 	ArdourCanvas::Line*        marker_drag_line;
@@ -2120,18 +2136,7 @@ class Editor : public PublicEditor
 	TimeAxisView* entered_track;
 	RegionView*   entered_regionview;
 
-	class ExclusiveRegionSelection {
-	  public:
-		ExclusiveRegionSelection (Editor&, RegionView*);
-		~ExclusiveRegionSelection ();
 
-	  private:
-		Editor& editor;
-		RegionView* regionview;
-		bool remove;
-	};
-
-	void ensure_entered_region_selected (bool op_acts_on_objects = false);
 	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
 	gint left_track_canvas (GdkEventCrossing*);
@@ -2175,12 +2180,10 @@ class Editor : public PublicEditor
 
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 
-	RegionSelection get_regions_at (nframes64_t where, const TrackSelection& ts) const;
-	RegionSelection get_regions_after (nframes64_t where, const TrackSelection& ts) const;
+	void get_regions_at (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
+	void get_regions_after (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
 	
-	RegionSelection tmp_regions;
-	
-	RegionSelection& get_regions_for_action ();
+	void get_regions_for_action (RegionSelection&, bool allowed_entered_regionview = false);
 
 	sigc::connection fast_screen_update_connection;
 	gint start_updating ();

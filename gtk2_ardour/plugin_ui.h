@@ -82,7 +82,7 @@ class PlugUIBase : public virtual sigc::trackable
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
-	Gtk::ComboBoxText combo;
+	Gtk::ComboBoxText preset_combo;
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
 	LatencyGUI latency_gui;
@@ -90,6 +90,7 @@ class PlugUIBase : public virtual sigc::trackable
 	void setting_selected();
 	void save_plugin_setting (void);
 	void bypass_toggled();
+	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 };
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox 
@@ -200,7 +201,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
 };
 
-class PluginUIWindow : public ArdourDialog
+class PluginUIWindow : public Gtk::Window
 {
   public:
 	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert, nframes64_t sample_rate, nframes64_t period_size, bool scrollable = false);
@@ -217,6 +218,7 @@ class PluginUIWindow : public ArdourDialog
 
   private:
 	PlugUIBase* _pluginui;
+	Gtk::VBox vbox;
 	bool non_gtk_gui;
 	void app_activated (bool);
 	void plugin_going_away ();

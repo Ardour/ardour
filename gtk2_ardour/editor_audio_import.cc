@@ -43,6 +43,7 @@
 #include <ardour/audiofilesource.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
+#include <ardour/session.h>
 #include <pbd/memento_command.h>
 
 #include "ardour_ui.h"
@@ -115,60 +116,139 @@ Editor::external_audio_dialog ()
 
 	sfbrowser->show_all ();
 
-  again:
-	int response = sfbrowser->run ();
 
-	switch (response) {
-	case RESPONSE_APPLY:
-		// leave the dialog open
-		break;
+	bool keepRunning;
 
-	case RESPONSE_OK:
-		sfbrowser->hide ();
-		break;
+	do {
+		keepRunning = false;
 
-	default:
-		// cancel from the browser - we are done
-		sfbrowser->hide ();
-		return;
+		int response = sfbrowser->run ();
+
+		switch (response) {
+			case RESPONSE_APPLY:
+				// leave the dialog open
+				break;
+
+			case RESPONSE_OK:
+				sfbrowser->hide ();
+				break;
+
+			default:
+				// cancel from the browser - we are done
+				sfbrowser->hide ();
+				return;
+		}
+
+		/* lets do it */
+
+		paths = sfbrowser->get_paths ();
+
+		ImportPosition pos = sfbrowser->get_position ();
+		ImportMode mode = sfbrowser->get_mode ();
+		ImportDisposition chns = sfbrowser->get_channel_disposition ();
+		nframes64_t where;
+
+		switch (pos) {
+			case ImportAtEditPoint:
+				where = get_preferred_edit_position ();
+				break;
+			case ImportAtTimestamp:
+				where = -1;
+				break;
+			case ImportAtPlayhead:
+				where = playhead_cursor->current_frame;
+				break;
+			case ImportAtStart:
+				where = session->current_start_frame();
+				break;
+		}
+
+		SrcQuality quality = sfbrowser->get_src_quality();
+
+
+		if (sfbrowser->copy_files_btn.get_active()) {
+			do_import (paths, chns, mode, quality, where);
+		} else {
+			do_embed (paths, chns, mode, where);
+		}
+
+		if (response == RESPONSE_APPLY) {
+			sfbrowser->clear_selection ();
+			keepRunning = true;
+		}
+
+	} while (keepRunning);
+}
+
+typedef std::map<PBD::ID,boost::shared_ptr<ARDOUR::Source> > SourceMap;
+
+/**
+ * Updating is still disabled, see note in libs/ardour/import.cc Session::import_audiofiles()
+ *
+ * all_or_nothing:
+ *   true  = show "Update", "Import" and "Skip"
+ *   false = show "Import", and "Cancel"
+ *
+ * Returns:
+ *     0  To update an existing source of the same name
+ *     1  To import/embed the file normally (make sure the new name will be unique)
+ *     2  If the user wants to skip this file
+ **/
+int
+Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
+{
+	string wave_name (Glib::path_get_basename(path));
+
+	SourceMap all_sources = session->get_sources();
+	bool wave_name_exists = false;
+
+	for (SourceMap::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(i->second);
+
+		string tmp (Glib::path_get_basename (afs->path()));
+
+		if (tmp == wave_name) {
+			wave_name_exists = true;
+			break;
+		}
 	}
 
-	/* lets do it */
-	
-	paths = sfbrowser->get_paths ();
+	int function = 1;
 
-	ImportPosition pos = sfbrowser->get_position ();
-	ImportMode mode = sfbrowser->get_mode ();
-	ImportDisposition chns = sfbrowser->get_channel_disposition ();
-	nframes64_t where;
 
-	switch (pos) {
-	case ImportAtEditPoint:
-		where = get_preferred_edit_position ();
-		break;
-	case ImportAtTimestamp:
-		where = -1;
-		break;
-	case ImportAtPlayhead:
-		where = playhead_cursor->current_frame;
-		break;
-	case ImportAtStart:
-		where = session->current_start_frame();
-		break;
+	if (wave_name_exists) {
+		string message;
+		if (all_or_nothing) {
+			// updating is still disabled
+			//message = string_compose(_("The session already contains a source file named %1. Do you want to update that file (and thus all regions using the file) or import this file as a new file?"),wave_name);
+			message = string_compose(_("The session already contains a source file named %1. This file will be imported as a new file, please confirm."),wave_name);
+		} else {
+			message = _("Lorem ipsum. Do you want to skidaddle?");
+
+		}
+		MessageDialog dialog(message, false,Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
+
+		if (all_or_nothing) {
+			// disabled
+			//dialog.add_button("Update", 0);
+			dialog.add_button("Import", 1);
+			dialog.add_button("Skip",   2);
+		} else {
+			dialog.add_button("Import", 1);
+			dialog.add_button("Cancel", 2);
+		}
+		
+		
+		//dialog.add_button("Skip all", 4); // All or rest?
+
+		dialog.show();
+
+		function = dialog.run ();
+
+		dialog.hide();
 	}
 
-	SrcQuality quality = sfbrowser->get_src_quality();
-
-	if (sfbrowser->copy_files_btn.get_active()) {
-		do_import (paths, chns, mode, quality, where);
-	} else {
-		do_embed (paths, chns, mode, where);
-	}
-
-	if (response == RESPONSE_APPLY) {
-		sfbrowser->clear_selection ();
-		goto again;
-	}
+	return function;
 }
 
 boost::shared_ptr<AudioTrack>
@@ -206,79 +286,107 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 {
 	boost::shared_ptr<AudioTrack> track;
 	vector<ustring> to_import;
-	bool ok = false;
+	bool ok = true;
 	int nth = 0;
 
 	if (interthread_progress_window == 0) {
 		build_interthread_progress_window ();
 	}
 
-	switch (chns) {
-	case Editing::ImportDistinctFiles:
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
-			to_import.clear ();
-			to_import.push_back (*a);
-
-			if (mode == Editing::ImportToTrack) {
-				track = get_nth_selected_audio_track (nth++);
-			}
-			
-			if (import_sndfiles (to_import, mode, quality, pos, 1, -1, track)) {
-				goto out;
-			}
-
-		}
-		break;
-
-	case Editing::ImportDistinctChannels:
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
-
-			to_import.clear ();
-			to_import.push_back (*a);
-
-			if (import_sndfiles (to_import, mode, quality, pos, -1, -1, track)) {
-				goto out;
-			}
-
-		}
-		break;
-
-	case Editing::ImportMergeFiles:
+	if (chns == Editing::ImportMergeFiles) {
 		/* create 1 region from all paths, add to 1 track,
 		   ignore "track"
 		*/
-		if (import_sndfiles (paths, mode, quality, pos, 1, 1, track)) {
-			goto out;
+		bool cancel = false;
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end() && ok; ++a) {
+			int check = check_whether_and_how_to_import(*a, false);
+			if (check == 2) {
+				cancel = true;
+				break;
+			}
 		}
-		break;
 
-	case Editing::ImportSerializeFiles:
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+		if (!cancel) {
+			if (import_sndfiles (paths, mode, quality, pos, 1, 1, track, false)) {
+				ok = false;
+			}
+		}
 
-			to_import.clear ();
-			to_import.push_back (*a);
-			
-			/* create 1 region from this path, add to 1 track,
-			   reuse "track" across paths
-			*/
+	} else {
+		bool replace = false;
 
-			if (import_sndfiles (to_import, mode, quality, pos, 1, 1, track)) {
-				goto out;
+		for (vector<ustring>::iterator a = paths.begin(); a != paths.end() && ok; ++a) {
+
+			int check = check_whether_and_how_to_import(*a, true);
+
+			if (check == 2 ) { 
+				// skip
+				continue;
 			}
 
+			if (check == 0) {
+				fatal << "Updating existing sources should be disabled!" << endl;
+				replace = true;
+			} else if (check == 1) {
+				replace = false;
+			}
+			
+
+			switch (chns) {
+				case Editing::ImportDistinctFiles:
+
+					to_import.clear ();
+					to_import.push_back (*a);
+
+					if (mode == Editing::ImportToTrack) {
+						track = get_nth_selected_audio_track (nth++);
+					}
+
+					if (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace)) {
+						ok = false;
+					}
+
+					break;
+
+				case Editing::ImportDistinctChannels:
+
+					to_import.clear ();
+					to_import.push_back (*a);
+
+					if (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace)) {
+						ok = false;
+					}
+
+					break;
+
+				case Editing::ImportSerializeFiles:
+
+					to_import.clear ();
+					to_import.push_back (*a);
+
+					/* create 1 region from this path, add to 1 track,
+					   reuse "track" across paths
+					   */
+
+					if (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace)) {
+						ok = false;
+					}
+
+					break;
+
+				case Editing::ImportMergeFiles:
+					// Not entered
+					break;
+			}
 		}
-		break;
-	}
 
-	ok = true;
-	
-  out:	
-	if (ok) {
-		session->save_state ("");
-	}
+		if (ok) {
+			session->save_state ("");
+		}
 
-	interthread_progress_window->hide_all ();
+		interthread_progress_window->hide_all ();
+	}
 }
 
 bool
@@ -366,7 +474,7 @@ Editor::_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 
 int
 Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos, 
-			 int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track)
+			 int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track, bool replace)
 {
 	WindowTitle title = string_compose (_("importing %1"), paths.front());
 
@@ -383,6 +491,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	import_status.freeze = false;
 	import_status.done = 0.0;
 	import_status.quality = quality;
+	import_status.replace_existing_source = replace;
 
 	interthread_progress_connection = Glib::signal_timeout().connect 
 		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);

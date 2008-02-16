@@ -172,6 +172,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 #ifdef TOP_MENUBAR
 	_auto_display_errors = false;
 #endif
+
 	about = 0;
 	splash = 0;
 
@@ -209,18 +210,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	last_speed_displayed = -1.0f;
 	
 	sys::path key_bindings_file;
-
-	find_file_in_search_path (ardour_search_path() + system_config_search_path(),
-			"ardour.bindings", key_bindings_file);
-
-	keybindings_path = key_bindings_file.to_string();
-
-	/* store all bindings changes in per-user file, no matter where they were loaded from */
- 	user_keybindings_path = user_config_directory().to_string ();
-	user_keybindings_path += '/';
- 	user_keybindings_path += "ardour.bindings";
-
-	can_save_keybindings = false;
 
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
@@ -354,7 +343,11 @@ ARDOUR_UI::post_engine ()
 
 	/* set default clock modes */
 
-	primary_clock.set_mode (AudioClock::SMPTE);
+	if (Profile->get_sae()) {
+		primary_clock.set_mode (AudioClock::MinSec);
+	}  else {
+		primary_clock.set_mode (AudioClock::SMPTE);
+	}
 	secondary_clock.set_mode (AudioClock::BBT);
 
 	/* start the time-of-day-clock */
@@ -540,7 +533,7 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (mnode);
 	}
 
-	save_keybindings ();
+	Keyboard::save_keybindings ();
 }
 
 gint
@@ -647,6 +640,8 @@ ARDOUR_UI::startup ()
 		return;
 	}
 	
+	BootMessage (_("Ardour is ready for use"));
+
 	show ();
 }
 
@@ -2245,7 +2240,6 @@ ARDOUR_UI::end_loading_messages ()
 void
 ARDOUR_UI::loading_message (const std::string& msg)
 {
-	cerr << "say: " << msg << endl;
 	show_splash ();
 	splash->message (msg);
 	flush_pending ();
@@ -2921,6 +2915,8 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	}
 
 	/* XXX do something with name template */
+	
+	cerr << "Adding with " << input_chan << " in and " << output_chan << "out\n";
 
 	if (add_route_dialog->type() == ARDOUR::DataType::MIDI) {
 		if (track) {
@@ -2989,13 +2985,30 @@ ARDOUR_UI::keyboard_settings () const
 }
 
 void
+ARDOUR_UI::create_xrun_marker(nframes_t where)
+{
+	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::create_xrun_marker), where));
+	editor->mouse_add_new_marker (where, false, true);
+}
+
+void
 ARDOUR_UI::halt_on_xrun_message ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::halt_on_xrun_message));
-
 	MessageDialog msg (*editor,
 			   _("Recording was stopped because your system could not keep up."));
 	msg.run ();
+}
+
+void
+ARDOUR_UI::xrun_handler(nframes_t where)
+{
+	if (Config->get_create_xrun_marker() && session->actively_recording()) {
+		create_xrun_marker(where);
+	}
+
+	if (Config->get_stop_recording_on_xrun() && session->actively_recording()) {
+		halt_on_xrun_message ();
+	}
 }
 
 void
@@ -3090,8 +3103,8 @@ The audioengine is currently running at %2 Hz\n"), desired, actual));
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
-	dialog.add_button (_("Load session anyway"), RESPONSE_ACCEPT);
 	dialog.add_button (_("Do not load session"), RESPONSE_REJECT);
+	dialog.add_button (_("Load session anyway"), RESPONSE_ACCEPT);
 	dialog.set_default_response (RESPONSE_ACCEPT);
 	dialog.set_position (WIN_POS_CENTER);
 	message.show();
@@ -3230,27 +3243,13 @@ ARDOUR_UI::record_state_changed ()
 	}
 }
 
-void
-ARDOUR_UI::set_keybindings_path (string path)
-{
-	keybindings_path = path;
-}
-
-void
-ARDOUR_UI::save_keybindings ()
-{
-	if (can_save_keybindings) {
-		AccelMap::save (user_keybindings_path);
-	} 
-}
-
 bool
 ARDOUR_UI::first_idle ()
 {
 	if (session) {
 		session->allow_auto_play (true);
 	}
-	can_save_keybindings = true;
+	Keyboard::set_can_save_keybindings (true);
 	return false;
 }
 

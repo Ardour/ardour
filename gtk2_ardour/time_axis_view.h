@@ -321,6 +321,7 @@ class TimeAxisView : public virtual AxisView
 	static void compute_controls_size_info ();
 	static bool need_size_info;
 
+	void set_heights (TrackHeight);
 	void set_height_pixels (uint32_t h);
 	void color_handler ();
 	list<ArdourCanvas::SimpleLine*> temp_lines;

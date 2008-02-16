@@ -952,7 +952,9 @@ NewSessionDialog::reset_template()
 void
 NewSessionDialog::reset_recent()
 {
-	std::vector<sys::path> session_directories;
+	/* Shamelessly ripped from ardour_ui.cc */
+	std::vector<string *> *sessions;
+	std::vector<string *>::iterator i;
 	RecentSessionsSorter cmp;
 	
 	recent_model->clear ();
@@ -960,27 +962,24 @@ NewSessionDialog::reset_recent()
 	ARDOUR::RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 	
-	// sort them alphabetically
+	/* sort them alphabetically */
 	sort (rs.begin(), rs.end(), cmp);
+	sessions = new std::vector<std::string*>;
 	
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-	        session_directories.push_back ((*i).second);
+		sessions->push_back (new string ((*i).second));
 	}
 	
-	for (vector<sys::path>::const_iterator i = session_directories.begin();
-			i != session_directories.end(); ++i)
-	{
-		std::vector<sys::path> state_file_paths;
+	for (i = sessions->begin(); i != sessions->end(); ++i) {
+
 		std::vector<std::string*>* states;
-		const string fullpath = (*i).to_string();
-	    
-		// now get available states for this session
-
-		get_state_files_in_directory (*i, state_file_paths);
-
-		if (state_file_paths.empty()) {
-			// no state file?
-			continue;
+		std::vector<const gchar*> item;
+		std::string fullpath = *(*i);
+		
+		/* remove any trailing / */
+		
+		if (fullpath[fullpath.length()-1] == '/') {
+			fullpath = fullpath.substr (0, fullpath.length()-1);
 		}
 	    
 		/* check whether session still exists */
@@ -992,8 +991,8 @@ NewSessionDialog::reset_recent()
 		/* now get available states for this session */
 		  
 		if ((states = ARDOUR::Session::possible_states (fullpath)) == 0) {
-			/* no state file? */
-			continue;
+		        /* no state file? */
+		        continue;
 		}
 	    
 		Gtk::TreeModel::Row row = *(recent_model->append());
@@ -1015,7 +1014,10 @@ NewSessionDialog::reset_recent()
 				delete *i2;
 			}
 		}
+
+		delete states;
 	}
+	delete sessions;
 }
 
 void

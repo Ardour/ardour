@@ -62,7 +62,11 @@ TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTime
 void
 TapeAudioRegionView::init (Gdk::Color& basic_color, bool wfw)
 {
-	AudioRegionView::init(basic_color, wfw);
+	/* never wait for data: always just create the waves, connect once and then
+	   we'll update whenever we need to.
+	*/
+
+	AudioRegionView::init(basic_color, false);
 
 	/* every time the wave data changes and peaks are ready, redraw */
 	

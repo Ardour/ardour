@@ -107,6 +107,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	bool  _embedded;
 	bool  _packed;
+	bool  _mixer_owned;
 	Width _width;
 	void*  _width_owner;
 

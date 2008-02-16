@@ -222,7 +222,7 @@ LocationEditRow::set_location (Location *loc)
 		name_label.set_size_request (80, -1);
 
 		if (!name_label.get_parent()) {
-			item_table.attach (name_label, 1, 2, 0, 1, FILL, Gtk::FILL, 4, 0);
+			item_table.attach (name_label, 1, 2, 0, 1, FILL, FILL, 4, 0);
 		}
 		
 		name_label.show();
@@ -240,10 +240,10 @@ LocationEditRow::set_location (Location *loc)
 		name_entry.show();
 
 		if (!cd_check_button.get_parent()) {
-			item_table.attach (cd_check_button, 5, 6, 0, 1, FILL, Gtk::FILL, 4, 0);
+			item_table.attach (cd_check_button, 5, 6, 0, 1, FILL, FILL, 4, 0);
 		}
 		if (!remove_button.get_parent()) {
-			item_table.attach (remove_button, 7, 8, 0, 1, FILL, Gtk::FILL, 4, 0);
+			item_table.attach (remove_button, 7, 8, 0, 1, FILL, FILL, 4, 0);
 		}
 
 		/* XXX i can't find a way to hide the button without messing up 
@@ -267,7 +267,7 @@ LocationEditRow::set_location (Location *loc)
 	}
 
 	start_clock.set (location->start(), true);
-	
+
 
 	if (!location->is_mark()) {
 		if (!end_hbox.get_parent()) {
@@ -421,9 +421,9 @@ LocationEditRow::cd_toggled ()
 		return;
 	}
 	
-	if (cd_check_button.get_active() == location->is_cd_marker()) {
-		return;
-	}
+	//if (cd_check_button.get_active() == location->is_cd_marker()) {
+	//	return;
+	//}
 
 	if (cd_check_button.get_active()) {
 		if (location->start() <= session->current_start_frame()) {
@@ -793,10 +793,12 @@ LocationUI::map_locations (Locations::LocationList& locations)
 		else if (location->is_auto_punch()) {
 			punch_edit_row.set_session (session);
 			punch_edit_row.set_location (location);
+			punch_edit_row.show_all();
 		}
 		else if (location->is_auto_loop()) {
 			loop_edit_row.set_session (session);
 			loop_edit_row.set_location (location);
+			loop_edit_row.show_all();
 		}
 		else {
 			erow = manage (new LocationEditRow(session, location));
