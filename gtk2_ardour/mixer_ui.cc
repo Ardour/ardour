@@ -64,7 +64,7 @@ Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 {
 	session = 0;
-	Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
+	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
 	track_menu = 0;
 	mix_group_context_menu = 0;
 	no_track_list_redisplay = false;

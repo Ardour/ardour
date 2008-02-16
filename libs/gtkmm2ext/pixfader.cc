@@ -138,8 +138,8 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 {
 	double fract, ev_pos;
 
-	(_orien == VERT) ? ev_pos = ev->y : ev->x;
-
+	ev_pos = (_orien == VERT) ? ev->y : 0; // Don't step if we are horizontal
+	
 	switch (ev->button) {
 	case 1:
 		if (dragging) {
@@ -238,7 +238,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (dragging) {
 		double fract, delta, scale, ev_pos;
-		(_orien == VERT) ? ev_pos = ev->y : ev_pos = ev->x;
+		 ev_pos = (_orien == VERT) ? ev->y : ev->x;
 		//cerr << "PixFader::on_motion_notify_event() called x:y = " << ev->x << ":" << ev->y;
 		if (ev->window != grab_window) {
 			grab_loc = ev_pos;
