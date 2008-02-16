@@ -48,7 +48,7 @@ PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orienta
 	view.x = 0;
 	view.y = 0;
 
-	if (orientation == 1) {
+	if (orientation == VERT) {
 		view.width = girth = pixbuf->get_width();
 		view.height = span = pixbuf->get_height() / 2;
 		unity_loc = (int) rint (view.height - (default_value * view.height)) - 1;
@@ -239,7 +239,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 	if (dragging) {
 		double fract, delta, scale, ev_pos;
 		(_orien == VERT) ? ev_pos = ev->y : ev_pos = ev->x;
-		cerr << "PixFader::on_motion_notify_event() called x:y = " << ev->x << ":" << ev->y;
+		//cerr << "PixFader::on_motion_notify_event() called x:y = " << ev->x << ":" << ev->y;
 		if (ev->window != grab_window) {
 			grab_loc = ev_pos;
 			grab_window = ev->window;
@@ -255,7 +255,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 		} else {
 			scale = 1.0;
 		}
-		cerr << " ev_pos=" << ev_pos << " grab_loc=" << grab_loc;
+		//cerr << " ev_pos=" << ev_pos << " grab_loc=" << grab_loc;
 		delta = ev_pos - grab_loc;
 		grab_loc = ev_pos;
 
@@ -271,7 +271,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 		}
 
 		adjustment.set_value (adjustment.get_value() + scale * fract * (adjustment.get_upper() - adjustment.get_lower()));
-		cerr << " adj=" << adjustment.get_value() << " fract=" << fract << " delta=" << delta << " scale=" << scale << endl;
+		//cerr << " adj=" << adjustment.get_value() << " fract=" << fract << " delta=" << delta << " scale=" << scale << endl;
 	}
 
 	return true;
