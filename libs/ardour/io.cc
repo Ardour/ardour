@@ -32,6 +32,7 @@
 
 #include <ardour/audioengine.h>
 #include <ardour/io.h>
+#include <ardour/route.h>
 #include <ardour/port.h>
 #include <ardour/audio_port.h>
 #include <ardour/midi_port.h>
@@ -1800,14 +1801,22 @@ IO::parse_gain_string (const string& str, vector<string>& ports)
 }
 
 bool
-IO::set_name (const string& str)
+IO::set_name (const string& requested_name)
 {
-	if (str == _name) {
+	if (requested_name == _name) {
 		return true;
 	}
 	
+	string name;
+	Route *rt;
+	if ( (rt = dynamic_cast<Route *>(this))) {
+		name = Route::ensure_track_or_route_name(requested_name, _session);
+	} else {
+		name = requested_name;
+	}
+
+
 	/* replace all colons in the name. i wish we didn't have to do this */
-	string name = str;
 
 	if (replace_all (name, ":", "-")) {
 		warning << _("you cannot use colons to name objects with I/O connections") << endmsg;
@@ -2224,13 +2233,16 @@ IO::end_pan_touch (uint32_t which)
 }
 
 void
-IO::automation_snapshot (nframes_t now)
+IO::automation_snapshot (nframes_t now, bool force)
 {
-	Automatable::automation_snapshot (now);
+	Automatable::automation_snapshot (now, force);
 
 	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
 		_panner->snapshot (now);
 	}
+	
+	_panner->snapshot (now);
+	_last_automation_snapshot = now;
 }
 
 void

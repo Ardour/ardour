@@ -38,7 +38,7 @@ class SliderController : public Gtkmm2ext::PixFader
 {
   public:
 	SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
-			  Gtk::Adjustment* adj,
+			  Gtk::Adjustment* adj, int orientation,
 			  PBD::Controllable&,
 			  bool with_numeric = true);
 

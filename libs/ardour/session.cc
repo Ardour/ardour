@@ -504,8 +504,12 @@ Session::when_engine_running ()
 
 	/* we don't want to run execute this again */
 
+	BootMessage (_("Set block size and sample rate"));
+
 	set_block_size (_engine.frames_per_cycle());
 	set_frame_rate (_engine.frame_rate());
+
+	BootMessage (_("Using configuration"));
 
 	Config->map_parameters (mem_fun (*this, &Session::config_changed));
 
@@ -562,6 +566,8 @@ Session::when_engine_running ()
 		error << _("cannot setup Click I/O") << endmsg;
 	}
 
+	BootMessage (_("Compute I/O Latencies"));
+
 	set_worst_io_latencies ();
 
 	if (_clicking) {
@@ -571,6 +577,8 @@ Session::when_engine_running ()
 	/* Create a set of Bundle objects that map
 	   to the physical outputs currently available
 	*/
+
+	BootMessage (_("Set up standard connections"));
 
 	/* ONE: MONO */
 
@@ -672,10 +680,14 @@ Session::when_engine_running ()
  		}
  		add_bundle (c);
 	} 
+	
+	BootMessage (_("Connect ports"));
 
 	hookup_io ();
 
 	/* catch up on send+insert cnts */
+
+	BootMessage (_("Catch up with send/insert state"));
 
 	insert_cnt = 0;
 	
@@ -704,13 +716,16 @@ Session::when_engine_running ()
 	
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
-
 	/* hook us up to the engine */
+
+	BootMessage (_("Connect to engine"));
 
 	_engine.set_session (this);
 
 #ifdef HAVE_LIBLO
 	/* and to OSC */
+
+	BootMessage (_("OSC startup"));
 
 	osc->set_session (*this);
 #endif
@@ -2546,41 +2561,54 @@ Session::region_name (string& result, string base, bool newlevel) const
 void
 Session::add_region (boost::shared_ptr<Region> region)
 {
+	vector<boost::shared_ptr<Region> > v;
+	v.push_back (region);
+	add_regions (v);
+}
+		
+void
+Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
+{
 	bool added = false;
 
 	{ 
 		Glib::Mutex::Lock lm (region_lock);
 
-		if (region == 0) {
-			error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
-		} else {
+		for (vector<boost::shared_ptr<Region> >::iterator ii = new_regions.begin(); ii != new_regions.end(); ++ii) {
+		
+			boost::shared_ptr<Region> region = *ii;
+			
+			if (region == 0) {
 
-			RegionList::iterator x;
+				error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
 
-			for (x = regions.begin(); x != regions.end(); ++x) {
-
-				if (region->region_list_equivalent (x->second)) {
-					break;
-				}
-			}
-
-			if (x == regions.end()) {
-
-				pair<RegionList::key_type,RegionList::mapped_type> entry;
-
-				entry.first = region->id();
-				entry.second = region;
-
-				pair<RegionList::iterator,bool> x = regions.insert (entry);
-
+			} else {
 				
-				if (!x.second) {
-					return;
+				RegionList::iterator x;
+				
+				for (x = regions.begin(); x != regions.end(); ++x) {
+					
+					if (region->region_list_equivalent (x->second)) {
+						break;
+					}
 				}
-
-				added = true;
-			} 
-
+				
+				if (x == regions.end()) {
+					
+					pair<RegionList::key_type,RegionList::mapped_type> entry;
+					
+					entry.first = region->id();
+					entry.second = region;
+					
+					pair<RegionList::iterator,bool> x = regions.insert (entry);
+					
+					if (!x.second) {
+						return;
+					}
+					
+					added = true;
+				} 
+			}
 		}
 	}
 
@@ -2591,9 +2619,33 @@ Session::add_region (boost::shared_ptr<Region> region)
 	set_dirty();
 	
 	if (added) {
-		region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
-		region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
-		RegionAdded (region); /* EMIT SIGNAL */
+
+		vector<boost::weak_ptr<Region> > v;
+		boost::shared_ptr<Region> first_r;
+
+		for (vector<boost::shared_ptr<Region> >::iterator ii = new_regions.begin(); ii != new_regions.end(); ++ii) {
+
+			boost::shared_ptr<Region> region = *ii;
+
+			if (region == 0) {
+
+				error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
+
+			} else {
+				v.push_back (region);
+
+				if (!first_r) {
+					first_r = region;
+				}
+			}
+
+			region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
+			region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+		}
+		
+		if (!v.empty()) {
+			RegionsAdded (v); /* EMIT SIGNAL */
+		}
 	}
 }
 
@@ -2680,18 +2732,12 @@ Session::destroy_region (boost::shared_ptr<Region> region)
 	vector<boost::shared_ptr<Source> > srcs;
 		
 	{
-		boost::shared_ptr<AudioRegion> aregion;
-		
-		if ((aregion = boost::dynamic_pointer_cast<AudioRegion> (region)) == 0) {
-			return 0;
+		if (region->playlist()) {
+			region->playlist()->destroy_region (region);
 		}
 		
-		if (aregion->playlist()) {
-			aregion->playlist()->destroy_region (region);
-		}
-		
-		for (uint32_t n = 0; n < aregion->n_channels(); ++n) {
-			srcs.push_back (aregion->source (n));
+		for (uint32_t n = 0; n < region->n_channels(); ++n) {
+			srcs.push_back (region->source (n));
 		}
 	}
 
@@ -2699,17 +2745,10 @@ Session::destroy_region (boost::shared_ptr<Region> region)
 
 	for (vector<boost::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
 
-		if (!(*i)->used()) {
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*i);
-			
-			if (afs) {
-				(afs)->mark_for_remove ();
-			}
-			
+			(*i)->mark_for_remove ();
 			(*i)->drop_references ();
 			
 			cerr << "source was not used by any playlist\n";
-		}
 	}
 
 	return 0;

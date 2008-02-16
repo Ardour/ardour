@@ -45,6 +45,8 @@ static inline float f_max(float x, float a) {
 	return (x);
 }
 
+std::string bump_name_once(std::string s);
+
 int cmp_nocase (const std::string& s, const std::string& s2);
 
 int touch_file(Glib::ustring path);

@@ -353,7 +353,7 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void> TransportStateChange; /* generic */
 	sigc::signal<void,nframes_t> PositionChanged; /* sent after any non-sequential motion */
 	sigc::signal<void> DurationChanged;
-	sigc::signal<void> HaltOnXrun;
+	sigc::signal<void,nframes_t> Xrun;
 	sigc::signal<void> TransportLooped;
 
 	sigc::signal<void,RouteList&> RouteAdded;
@@ -563,8 +563,11 @@ class Session : public PBD::StatefulDestructible
 	
 	/* region info  */
 
-	sigc::signal<void,boost::shared_ptr<Region> > RegionAdded;
-	sigc::signal<void,boost::shared_ptr<Region> > RegionRemoved;
+	void add_regions (std::vector<boost::shared_ptr<Region> >&);
+	
+	sigc::signal<void,boost::weak_ptr<Region> > RegionAdded;
+	sigc::signal<void,std::vector<boost::weak_ptr<Region> >& > RegionsAdded;
+	sigc::signal<void,boost::weak_ptr<Region> > RegionRemoved;
 
 	int region_name (string& result, string base = string(""), bool newlevel = false) const;
 	string new_region_name (string);
@@ -586,10 +589,10 @@ class Session : public PBD::StatefulDestructible
 	    string doing_what;
 	    
 	    /* control info */
-	    bool sample_convert;
 	    SrcQuality quality;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;
+	    bool replace_existing_source;
 	    
 	    /* result */
 	    SourceList sources;
@@ -1479,6 +1482,12 @@ class Session : public PBD::StatefulDestructible
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
 	SourceMap sources;
+
+  public:
+	SourceMap get_sources() { return sources; }
+    
+  private:
+
 
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();

@@ -30,7 +30,7 @@ namespace Gtkmm2ext {
 
 class PixFader : public Gtk::DrawingArea {
   public:
-	PixFader (Glib::RefPtr<Gdk::Pixbuf> belt_image, Gtk::Adjustment& adjustment);
+	PixFader (Glib::RefPtr<Gdk::Pixbuf> belt_image, Gtk::Adjustment& adjustment, int orientation);
 	virtual ~PixFader ();
 	
   protected:
@@ -44,23 +44,32 @@ class PixFader : public Gtk::DrawingArea {
 	bool on_motion_notify_event (GdkEventMotion*);
 	bool on_scroll_event (GdkEventScroll* ev);
 
-  private:  
+	enum Orientation {
+		VERT=1,
+		HORIZ=2,
+	};
+
+  private:
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-	gint pixheight;
+	int span, girth;
+	int _orien;
 
 	GdkRectangle view;
 
 	GdkWindow* grab_window;
-	double grab_y;
+	double grab_loc;
 	double grab_start;
 	int last_drawn;
 	bool dragging;
 	float default_value;
-	int unity_y;
+	int unity_loc;
 
 	void adjustment_changed ();
 
-	int display_height ();
+	int display_span ();
+
+	static int fine_scale_modifier;
+	static int extra_fine_scale_modifier;
 };
 
 

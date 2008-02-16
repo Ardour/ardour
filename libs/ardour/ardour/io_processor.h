@@ -65,7 +65,7 @@ class IOProcessor : public Processor
 	boost::shared_ptr<IO>       io()       { return _io; }
 	boost::shared_ptr<const IO> io() const { return _io; }
 	
-	virtual void automation_snapshot (nframes_t now) { _io->automation_snapshot(now); }
+	virtual void automation_snapshot (nframes_t now, bool force) { _io->automation_snapshot(now, force); }
 
 	virtual void run_in_place (BufferSet& in, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset) = 0;
 

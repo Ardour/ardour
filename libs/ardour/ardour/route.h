@@ -75,6 +75,8 @@ class Route : public IO
 	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
+	static std::string ensure_track_or_route_name(std::string, Session &);
+
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
@@ -247,7 +249,7 @@ class Route : public IO
 		return _mute_control;
 	}
 	
-	void automation_snapshot (nframes_t now);
+	void automation_snapshot (nframes_t now, bool force=false);
 	void protect_automation ();
 	
 	void set_remote_control_id (uint32_t id);

@@ -28,6 +28,7 @@
 #include <ardour/filter.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
+#include <ardour/analyser.h>
 
 #include "i18n.h"
 
@@ -101,6 +102,10 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 			smfs->set_timeline_position (region->position());
 			smfs->flush_footer ();
 		}
+		
+		/* now that there is data there, requeue the file for analysis */
+		
+		Analyser::queue_source_for_analysis (*si, false);
 	}
 
 	/* create a new region */

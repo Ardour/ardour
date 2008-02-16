@@ -32,6 +32,8 @@ gtkmm2ext.Append(CXXFLAGS=["-DLIBSIGC_DISABLE_DEPRECATED", "-DGLIBMM_DEFAULT_SIG
 gtkmm2ext.Append(PACKAGE=domain)
 gtkmm2ext.Append(POTFILE=domain + '.pot')
 
+extra_sources = []
+
 gtkmm2ext_files = Split("""
 auto_spin.cc
 barcontroller.cc
@@ -61,12 +63,21 @@ version.cc
 window_title.cc
 """)
 
+gtkosx_files=Split("""
+sync-menu.c
+""")
+
+if gtkmm2ext['GTKOSX']:
+    extra_sources += gtkosx_files
+    gtkmm2ext.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
+    gtkmm2ext.Append (LINKFLAGS="-framework Carbon")
+
 gtkmm2ext.VersionBuild(['version.cc','gtkmm2ext/version.h'], [])
 
 gtkmm2ext.Append(CCFLAGS="-D_REENTRANT")
 gtkmm2ext.Append(CCFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
-libgtkmm2ext = gtkmm2ext.SharedLibrary('gtkmm2ext', gtkmm2ext_files)
+libgtkmm2ext = gtkmm2ext.SharedLibrary('gtkmm2ext', gtkmm2ext_files + extra_sources)
 
 Default(libgtkmm2ext)
 
@@ -78,5 +89,6 @@ env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ar
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'i18n.h', 'gettext.h'] +
                                      gtkmm2ext_files +
+				     gtkosx_files + 
                                      glob.glob('po/*.po') +
                                      glob.glob('gtkmm2ext/*.h')))

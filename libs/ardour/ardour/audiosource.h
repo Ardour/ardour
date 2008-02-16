@@ -116,7 +116,6 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 	static bool _build_peakfiles;
 
 	bool                 _peaks_built;
-	bool                 _analysed;
 	mutable Glib::Mutex  _lock;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	Glib::ustring         peakpath;

@@ -677,20 +677,18 @@ bool
 AudioFileSource::safe_file_extension(ustring file)
 {
 	return !(file.rfind(".wav") == ustring::npos &&
-		 file.rfind(".aiff")== ustring::npos &&
-		 file.rfind(".aif") == ustring::npos &&
-		 file.rfind(".snd") == ustring::npos &&
-		 file.rfind(".au")  == ustring::npos &&
-		 file.rfind(".raw") == ustring::npos &&
-		 file.rfind(".sf")  == ustring::npos &&
-		 file.rfind(".cdr") == ustring::npos &&
-		 file.rfind(".smp") == ustring::npos &&
-		 file.rfind(".maud")== ustring::npos &&
-		 file.rfind(".vwe") == ustring::npos &&
-		 file.rfind(".paf") == ustring::npos &&
-		 /* protools convention */
-		 file.rfind(".L") == ustring::npos &&
-		 file.rfind(".R") == ustring::npos &&
+		file.rfind(".aiff")== ustring::npos &&
+		file.rfind(".aif") == ustring::npos &&
+		file.rfind(".amb") == ustring::npos &&
+		file.rfind(".snd") == ustring::npos &&
+		file.rfind(".au")  == ustring::npos &&
+		file.rfind(".raw") == ustring::npos &&
+		file.rfind(".sf")  == ustring::npos &&
+		file.rfind(".cdr") == ustring::npos &&
+		file.rfind(".smp") == ustring::npos &&
+		file.rfind(".maud")== ustring::npos &&
+		file.rfind(".vwe") == ustring::npos &&
+		file.rfind(".paf") == ustring::npos &&
 #ifdef HAVE_FLAC
 		 file.rfind(".flac")== ustring::npos &&
 #endif // HAVE_FLAC

@@ -29,11 +29,11 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
-				    Gtk::Adjustment *adj,
+				    Gtk::Adjustment *adj,  int orientation,
 				    Controllable& c,
 				    bool with_numeric)
 
-	: PixFader (image, *adj),
+	: PixFader (image, *adj, orientation),
 	  binding_proxy (c),
 	  spin (*adj, 0, 2)
 {			  
@@ -63,7 +63,7 @@ VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Controllable& control,
 				      bool with_numeric)
 
-	: SliderController (image, adj, control, with_numeric)
+	: SliderController (image, adj, VERT, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -79,7 +79,7 @@ HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Controllable& control,
 				      bool with_numeric)
 	
-	: SliderController (image, adj, control, with_numeric)
+	: SliderController (image, adj, HORIZ, control, with_numeric)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);

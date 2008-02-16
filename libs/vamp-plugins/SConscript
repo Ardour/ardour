@@ -21,6 +21,6 @@ Default(libvampplugins)
 env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'vamp'), libvampplugins))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
-                                     [ 'SConscript', 'COPYING', 'README' ] +
+                                     [ 'SConscript' ] +
                                      plugin_files +
                                      glob.glob('*.h')))

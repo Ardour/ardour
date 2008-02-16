@@ -195,6 +195,7 @@ Source::set_been_analysed (bool yn)
 	}
 	
 	if (yn) {
+		load_transients (get_transients_path());
 		AnalysisChanged(); // EMIT SIGNAL
 	}
 }
@@ -265,3 +266,4 @@ Source::check_for_analysis_data_on_disk ()
 	set_been_analysed (ok);
 	return ok;
 }
+

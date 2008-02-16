@@ -422,9 +422,9 @@ Automatable::protect_automation ()
 }
 
 void
-Automatable::automation_snapshot (nframes_t now)
+Automatable::automation_snapshot (nframes_t now, bool force)
 {
-	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
+	if (force || _last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
 
 		for (Controls::iterator i = _controls.begin(); i != _controls.end(); ++i) {
 			if (i->second->list()->automation_write()) {

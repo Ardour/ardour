@@ -57,7 +57,10 @@ public:
 
 	virtual void add_control(boost::shared_ptr<AutomationControl>);
 
-	virtual void automation_snapshot(nframes_t now);
+	virtual void automation_snapshot(nframes_t now, bool force);
+	bool should_snapshot (nframes_t now) {
+		return (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval);
+	}
 	virtual void transport_stopped(nframes_t now);
 
 	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;

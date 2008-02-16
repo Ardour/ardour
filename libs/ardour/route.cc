@@ -46,6 +46,9 @@
 #include <ardour/amp.h>
 #include <ardour/meter.h>
 #include <ardour/buffer_set.h>
+#include <ardour/mix.h>
+#include <ardour/profile.h>
+
 #include "i18n.h"
 
 using namespace std;
@@ -189,6 +192,20 @@ Route::sync_order_keys ()
 		x->second = key;
 	}
 }
+
+string
+Route::ensure_track_or_route_name(string name, Session &session)
+{
+	string newname = name;
+
+	while (session.route_by_name (newname)!=NULL)
+	{
+		newname = bump_name_once (newname);
+	}
+
+	return newname;
+}
+
 
 void
 Route::inc_gain (gain_t fraction, void *src)
@@ -843,8 +860,8 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		reset_panner ();
 	}
 
-
 	processors_changed (); /* EMIT SIGNAL */
+	
 	return 0;
 }
 
@@ -2291,7 +2308,7 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 
 		if (!did_locate) {
-			automation_snapshot (now);
+			automation_snapshot (now, true);
 		}
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -2398,7 +2415,7 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		if (lm.locked()) {
 			// automation snapshot can also be called from the non-rt context
 			// and it uses the processor list, so we take the lock out here
-			automation_snapshot (_session.transport_frame());
+			automation_snapshot (_session.transport_frame(), false);
 		}
 	}
 
@@ -2569,12 +2586,15 @@ Route::set_latency_delay (nframes_t longest_session_latency)
 }
 
 void
-Route::automation_snapshot (nframes_t now)
+Route::automation_snapshot (nframes_t now, bool force)
 {
-	IO::automation_snapshot (now);
+	if (!force && !should_snapshot(now)) {
+		return;
+	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->automation_snapshot (now);
+		// IO::automation_snapshot (now, force);  ?
+		(*i)->automation_snapshot (now, force);
 	}
 }
 

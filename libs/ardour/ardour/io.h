@@ -251,8 +251,8 @@ class IO : public Automatable, public Latent
 	
 	void set_parameter_automation_state (Parameter, AutoState);
 
-	virtual void transport_stopped (nframes_t now); // interface: matches Insert
-	void automation_snapshot (nframes_t now); // interface: matches Automatable
+	virtual void transport_stopped (nframes_t now);
+	virtual void automation_snapshot (nframes_t now, bool force);
 
 	void start_pan_touch (uint32_t which);
 	void end_pan_touch (uint32_t which);

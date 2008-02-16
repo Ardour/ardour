@@ -126,7 +126,6 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 	sigc::signal<void>      LengthChanged;
 
 	static string bump_name (string old_name, Session&);
-	static string bump_name_once (string old_name);
 
 	void freeze ();
 	void thaw ();

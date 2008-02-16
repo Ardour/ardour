@@ -1267,9 +1267,9 @@ Session::engine_halted ()
 void
 Session::xrun_recovery ()
 {
-	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
+	Xrun (transport_frame()); //EMIT SIGNAL
 
-		 HaltOnXrun (); /* EMIT SIGNAL */
+	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
 
 		/* it didn't actually halt, but we need
 		   to handle things in the same way.

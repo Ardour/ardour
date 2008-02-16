@@ -70,6 +70,7 @@ AudioSource::AudioSource (Session& s, ustring name)
 AudioSource::AudioSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
 {
+	
 	_peaks_built = false;
 	_peak_byte_max = 0;
 	peakfile = -1;
@@ -213,7 +214,7 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 		
 		/* we found it in the peaks dir, so check it out */
 		
-		if (statbuf.st_size == 0) {
+		if (statbuf.st_size == 0 || (statbuf.st_size < ((length() / _FPP) * sizeof (PeakData)))) {
 			// empty
 			_peaks_built = false;
 		} else {
@@ -221,12 +222,22 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 			struct stat stat_file;
 			int err = stat (audio_path.c_str(), &stat_file);
 			
-			if (!err && stat_file.st_mtime > statbuf.st_mtime){
+			if (err) {
 				_peaks_built = false;
 				_peak_byte_max = 0;
 			} else {
-				_peaks_built = true;
-				_peak_byte_max = statbuf.st_size;
+
+				/* allow 6 seconds slop on checking peak vs. file times because of various
+				   disk action "races"
+				*/
+
+				if (stat_file.st_mtime > statbuf.st_mtime && (stat_file.st_mtime - statbuf.st_mtime > 6)) {
+					_peaks_built = false;
+					_peak_byte_max = 0;
+				} else {
+					_peaks_built = true;
+					_peak_byte_max = statbuf.st_size;
+				}
 			}
 		}
 	}

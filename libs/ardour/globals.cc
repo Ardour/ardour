@@ -19,9 +19,12 @@
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <locale.h>
+#include <errno.h>
 
 #ifdef VST_SUPPORT
 #include <fst.h>
@@ -31,12 +34,16 @@
 #include <xmmintrin.h>
 #endif
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include <lrdf.h>
 
 #include <pbd/error.h>
 #include <pbd/id.h>
 #include <pbd/strsplit.h>
 #include <pbd/fpu.h>
+#include <pbd/file_utils.h>
 
 #include <midi++/port.h>
 #include <midi++/manager.h>
@@ -54,6 +61,7 @@
 #include <ardour/source_factory.h>
 #include <ardour/control_protocol_manager.h>
 #include <ardour/audioengine.h>
+#include <ardour/filesystem_paths.h>
 
 #ifdef HAVE_LIBLO
 #include <ardour/osc.h>
@@ -96,6 +104,8 @@ apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
 mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
+sigc::signal<void,std::string> ARDOUR::BootMessage;
+
 #ifdef HAVE_LIBLO
 static int
 setup_osc ()
@@ -107,6 +117,7 @@ setup_osc ()
 	osc = new OSC (Config->get_osc_port());
 	
 	if (Config->get_use_osc ()) {
+		BootMessage (_("Starting OSC"));
 		return osc->start ();
 	} else {
 		return 0;
@@ -121,6 +132,8 @@ setup_midi ()
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
+
+	BootMessage (_("Configuring MIDI ports"));
 
 	for (std::map<string,XMLNode>::iterator i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
 		MIDI::Manager::instance()->add_port (i->second);
@@ -253,6 +266,33 @@ setup_hardware_optimization (bool try_optimization)
 	}
 }
 
+static void
+lotsa_files_please ()
+{
+	struct rlimit rl;
+
+	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
+
+		rl.rlim_cur = rl.rlim_max;
+
+		if (setrlimit (RLIMIT_NOFILE, &rl) != 0) {
+			if (rl.rlim_cur == RLIM_INFINITY) {
+				error << _("Could not set system open files limit to \"unlimited\"") << endmsg;
+			} else {
+				error << string_compose (_("Could not set system open files limit to %1"), rl.rlim_cur) << endmsg;
+			}
+		} else {
+			if (rl.rlim_cur == RLIM_INFINITY) {
+				info << _("Removed open file count limit. Excellent!") << endmsg;
+			} else {
+				info << string_compose (_("Ardour will be limited to %1 open files"), rl.rlim_cur) << endmsg;
+			}
+		}
+	} else {
+		error << string_compose (_("Could not get system open files limit (%1)"), strerror (errno)) << endmsg;
+	}
+}
+
 int
 ARDOUR::init (bool use_vst, bool try_optimization)
 {
@@ -262,8 +302,13 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	setup_enum_writer ();
 
+	// allow ardour the absolute maximum number of open files
+	lotsa_files_please ();
+
 	lrdf_init();
 	Library = new AudioLibrary;
+
+	BootMessage (_("Loading configuration"));
 
 	Config = new Configuration;
 
@@ -365,6 +410,34 @@ string
 ARDOUR::get_ardour_revision ()
 {
 	return "$Rev$";
+}
+
+void
+ARDOUR::find_bindings_files (map<string,string>& files)
+{
+	vector<sys::path> found;
+
+	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
+
+	if (getenv ("ARDOUR_SAE")) {
+		Glib::PatternSpec pattern("*SAE-*.bindings");
+		find_matching_files_in_search_path (spath, pattern, found);
+	} else {
+		Glib::PatternSpec pattern("*.bindings");
+		find_matching_files_in_search_path (spath, pattern, found);
+	}
+
+	if (found.empty()) {
+		return;
+	}
+	
+	for (vector<sys::path>::iterator x = found.begin(); x != found.end(); ++x) {
+		sys::path path = *x;
+		pair<string,string> namepath;
+		namepath.second = path.to_string();
+		namepath.first = path.leaf().substr (0, path.leaf().find_first_of ('.'));
+		files.insert (namepath);
+	}
 }
 
 ARDOUR::LocaleGuard::LocaleGuard (const char* str)

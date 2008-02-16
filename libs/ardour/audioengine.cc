@@ -126,6 +126,8 @@ AudioEngine::start ()
 		if (session) {
 			nframes_t blocksize = jack_get_buffer_size (_jack);
 
+			BootMessage (_("Connect session to engine"));
+
 			session->set_block_size (blocksize);
 			session->set_frame_rate (jack_get_sample_rate (_jack));
 

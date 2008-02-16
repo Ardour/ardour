@@ -20,8 +20,10 @@
 #ifndef __ardour_ardour_h__
 #define __ardour_ardour_h__
 
-#include <limits.h>
+#include <map>
 #include <string>
+
+#include <limits.h>
 #include <signal.h>
 
 #include <pbd/error.h>
@@ -43,11 +45,14 @@ namespace ARDOUR {
 	extern OSC* osc;
 
 	static const nframes_t max_frames = JACK_MAX_FRAMES;
+	extern sigc::signal<void,std::string> BootMessage;
 
 	int init (bool with_vst, bool try_optimization);
 	int cleanup ();
 
 	std::string get_ardour_revision ();
+	
+	void find_bindings_files (std::map<std::string,std::string>&);
 	
 	const layer_t max_layer = UCHAR_MAX;
 

@@ -95,7 +95,7 @@ Analyser::work ()
 
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 
-		if (afs) {
+		if (afs && afs->length()) {
 			analyse_audio_file_source (afs);
 		}
 	}

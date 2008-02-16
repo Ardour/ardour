@@ -32,6 +32,7 @@
 #include <ardour/utils.h>
 
 #include <appleutility/CAAudioUnit.h>
+#include <appleutility/CAAUParameter.h>
 
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
@@ -83,6 +84,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 		throw failed_constructor();
 	}
 
+	unit->GetElementCount (kAudioUnitScope_Global, global_elements);
 	unit->GetElementCount (kAudioUnitScope_Input, input_elements);
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
@@ -106,6 +108,10 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 		error << _("AUPlugin: cannot set processing block size") << endmsg;
 		throw failed_constructor();
 	}
+
+	discover_parameters ();
+
+	Plugin::setup_controls ();
 }
 
 AUPlugin::~AUPlugin ()
@@ -118,6 +124,124 @@ AUPlugin::~AUPlugin ()
 		free (buffers);
 	}
 }
+
+void
+AUPlugin::discover_parameters ()
+{
+	/* discover writable parameters */
+	
+	cerr << "get param info, there are " << global_elements << " global elements\n";
+
+	AudioUnitScope scopes[] = { 
+		kAudioUnitScope_Global,
+		kAudioUnitScope_Output,
+		kAudioUnitScope_Input
+	};
+
+	descriptors.clear ();
+
+	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
+
+		AUParamInfo param_info (unit->AU(), false, false, scopes[i]);
+		
+		cerr << "discovered " << param_info.NumParams() << " parameters in scope " << i << endl;
+		
+		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
+
+			AUParameterDescriptor d;
+
+			d.id = param_info.ParamID (i);
+
+			const CAAUParameter* param = param_info.GetParamInfo (d.id);
+			const AudioUnitParameterInfo& info (param->ParamInfo());
+
+			const int len = CFStringGetLength (param->GetName());;
+			char local_buffer[len*2];
+			Boolean good = CFStringGetCString(param->GetName(),local_buffer,len*2,kCFStringEncodingMacRoman);
+			if (!good) {
+				d.label = "???";
+			} else {
+				d.label = local_buffer;
+			}
+
+			d.scope = param_info.GetScope ();
+			d.element = param_info.GetElement ();
+
+			/* info.units to consider */
+			/*
+			  kAudioUnitParameterUnit_Generic             = 0
+			  kAudioUnitParameterUnit_Indexed             = 1
+			  kAudioUnitParameterUnit_Boolean             = 2
+			  kAudioUnitParameterUnit_Percent             = 3
+			  kAudioUnitParameterUnit_Seconds             = 4
+			  kAudioUnitParameterUnit_SampleFrames        = 5
+			  kAudioUnitParameterUnit_Phase               = 6
+			  kAudioUnitParameterUnit_Rate                = 7
+			  kAudioUnitParameterUnit_Hertz               = 8
+			  kAudioUnitParameterUnit_Cents               = 9
+			  kAudioUnitParameterUnit_RelativeSemiTones   = 10
+			  kAudioUnitParameterUnit_MIDINoteNumber      = 11
+			  kAudioUnitParameterUnit_MIDIController      = 12
+			  kAudioUnitParameterUnit_Decibels            = 13
+			  kAudioUnitParameterUnit_LinearGain          = 14
+			  kAudioUnitParameterUnit_Degrees             = 15
+			  kAudioUnitParameterUnit_EqualPowerCrossfade = 16
+			  kAudioUnitParameterUnit_MixerFaderCurve1    = 17
+			  kAudioUnitParameterUnit_Pan                 = 18
+			  kAudioUnitParameterUnit_Meters              = 19
+			  kAudioUnitParameterUnit_AbsoluteCents       = 20
+			  kAudioUnitParameterUnit_Octaves             = 21
+			  kAudioUnitParameterUnit_BPM                 = 22
+			  kAudioUnitParameterUnit_Beats               = 23
+			  kAudioUnitParameterUnit_Milliseconds        = 24
+			  kAudioUnitParameterUnit_Ratio               = 25
+			*/
+
+			/* info.flags to consider */
+
+			/*
+
+			  kAudioUnitParameterFlag_CFNameRelease       = (1L << 4)
+			  kAudioUnitParameterFlag_HasClump            = (1L << 20)
+			  kAudioUnitParameterFlag_HasName             = (1L << 21)
+			  kAudioUnitParameterFlag_DisplayLogarithmic  = (1L << 22)
+			  kAudioUnitParameterFlag_IsHighResolution    = (1L << 23)
+			  kAudioUnitParameterFlag_NonRealTime         = (1L << 24)
+			  kAudioUnitParameterFlag_CanRamp             = (1L << 25)
+			  kAudioUnitParameterFlag_ExpertMode          = (1L << 26)
+			  kAudioUnitParameterFlag_HasCFNameString     = (1L << 27)
+			  kAudioUnitParameterFlag_IsGlobalMeta        = (1L << 28)
+			  kAudioUnitParameterFlag_IsElementMeta       = (1L << 29)
+			  kAudioUnitParameterFlag_IsReadable          = (1L << 30)
+			  kAudioUnitParameterFlag_IsWritable          = (1L << 31)
+			*/
+
+			d.lower = info.minValue;
+			d.upper = info.maxValue;
+			d.default_value = info.defaultValue;
+
+			d.integer_step = (info.unit & kAudioUnitParameterUnit_Indexed);
+			d.toggled = (info.unit & kAudioUnitParameterUnit_Boolean) ||
+				(d.integer_step && ((d.upper - d.lower) == 1.0));
+			d.sr_dependent = (info.unit & kAudioUnitParameterUnit_SampleFrames);
+			d.automatable = !d.toggled && 
+				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
+				(info.flags & kAudioUnitParameterFlag_IsWritable);
+			
+			d.logarithmic = (info.flags & kAudioUnitParameterFlag_DisplayLogarithmic);
+			d.unit = info.unit;
+
+			d.step = 1.0;
+			d.smallstep = 0.1;
+			d.largestep = 10.0;
+			d.min_unbound = 0; // lower is bound
+			d.max_unbound = 0; // upper is bound
+
+			descriptors.push_back (d);
+		}
+	}
+}
+
 
 string
 AUPlugin::unique_id () const
@@ -134,13 +258,16 @@ AUPlugin::label () const
 uint32_t
 AUPlugin::parameter_count () const
 {
-	return 0;
+	return descriptors.size();
 }
 
 float
 AUPlugin::default_value (uint32_t port)
 {
-	// AudioUnits don't have default values.  Maybe presets though?
+	if (port < descriptors.size()) {
+		return descriptors[port].default_value;
+	}
+
 	return 0;
 }
 
@@ -157,28 +284,41 @@ AUPlugin::signal_latency () const
 void
 AUPlugin::set_parameter (uint32_t which, float val)
 {
-	// unit->SetParameter (parameter_map[which].first, parameter_map[which].second, 0, val);
+	if (which < descriptors.size()) {
+		const AUParameterDescriptor& d (descriptors[which]);
+		unit->SetParameter (d.id, d.scope, d.element, val);
+	}
 }
 
 float
 AUPlugin::get_parameter (uint32_t which) const
 {
-	float outValue = 0.0;
-	
-	// unit->GetParameter(parameter_map[which].first, parameter_map[which].second, 0, outValue);
-	
-	return outValue;
+	float val = 0.0;
+	if (which < descriptors.size()) {
+		const AUParameterDescriptor& d (descriptors[which]);
+		unit->GetParameter(d.id, d.scope, d.element, val);
+	}
+	return val;
 }
 
 int
-AUPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const
+AUPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& pd) const
 {
-	return 0;
+	if (which < descriptors.size()) {
+		pd = descriptors[which];
+		return 0;
+	} 
+	return -1;
 }
 
 uint32_t
 AUPlugin::nth_parameter (uint32_t which, bool& ok) const
 {
+	if (which < descriptors.size()) {
+		ok = true;
+		return which;
+	}
+	ok = false;
 	return 0;
 }
 
@@ -397,20 +537,26 @@ set<uint32_t>
 AUPlugin::automatable() const
 {
 	set<uint32_t> automates;
-	
+
+	for (uint32_t i = 0; i < descriptors.size(); ++i) {
+		if (descriptors[i].automatable) {
+			automates.insert (i);
+		}
+	}
+
 	return automates;
 }
 
 string
-AUPlugin::describe_parameter (uint32_t)
+AUPlugin::describe_parameter (uint32_t param)
 {
-	return "";
+	return descriptors[param].label;
 }
 
 void
-AUPlugin::print_parameter (uint32_t, char*, uint32_t len) const
+AUPlugin::print_parameter (uint32_t param, char* buf, uint32_t len) const
 {
-	
+	// NameValue stuff here
 }
 
 bool
@@ -422,7 +568,7 @@ AUPlugin::parameter_is_audio (uint32_t) const
 bool
 AUPlugin::parameter_is_control (uint32_t) const
 {
-	return false;
+	return true;
 }
 
 bool

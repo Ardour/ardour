@@ -86,6 +86,45 @@ legalize_for_path (string str)
 }
 #endif
 
+string bump_name_once(std::string name)
+{
+	string::size_type period;
+	string newname;
+
+	if ((period = name.find_last_of ('.')) == string::npos) {
+		newname  = name;
+		newname += ".1";
+	} else {
+		int isnumber = 1;
+		const char *last_element = name.c_str() + period + 1;
+		for (size_t i = 0; i < strlen(last_element); i++) {
+			if (!isdigit(last_element[i])) {
+				isnumber = 0;
+				break;
+			}
+		}
+
+		errno = 0;
+		long int version = strtol (name.c_str()+period+1, (char **)NULL, 10);
+
+		if (isnumber == 0 || errno != 0) {
+			// last_element is not a number, or is too large
+			newname  = name;
+			newname += ".1";
+		} else {
+			char buf[32];
+
+			snprintf (buf, sizeof(buf), "%ld", version+1);
+		
+			newname  = name.substr (0, period+1);
+			newname += buf;
+		}
+	}
+
+	return newname;
+
+}
+
 ostream&
 operator<< (ostream& o, const BBT_Time& bbt)
 {
@@ -289,6 +328,8 @@ string_to_edit_mode (string str)
 		return Splice;
 	} else if (str == _("Slide Edit")) {
 		return Slide;
+	} else if (str == _("Lock Edit")) {
+		return Lock;
 	}
 	fatal << string_compose (_("programming error: unknown edit mode string \"%1\""), str) << endmsg;
 	/*NOTREACHED*/
@@ -301,6 +342,9 @@ edit_mode_to_string (EditMode mode)
 	switch (mode) {
 	case Slide:
 		return _("Slide Edit");
+
+	case Lock:
+		return _("Lock Edit");
 
 	default:
 	case Splice:

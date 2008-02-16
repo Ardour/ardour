@@ -809,6 +809,8 @@ AudioRegionView::create_waves ()
 
 	ChanCount nchans = atv.get_diskstream()->n_channels();
 
+	cerr << "creating waves for " << _region->name() << " with wfd = " << wait_for_data << " and channels = " << nchans << endl;
+	
 	/* in tmp_waves, set up null pointers for each channel so the vector is allocated */
 	for (uint32_t n = 0; n < nchans.n_audio(); ++n) {
 		tmp_waves.push_back (0);
@@ -822,15 +824,20 @@ AudioRegionView::create_waves ()
 		
 		wave_caches.push_back (WaveView::create_cache ());
 
+		cerr << "\tchannel " << n << endl;
+
 		if (wait_for_data) {
 			if (audio_region()->audio_source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+				cerr << "\tData is ready\n";
 				create_one_wave (n, true);
 			} else {
+				cerr << "\tdata is not ready\n";
 				// we'll get a PeaksReady signal from the source in the future
 				// and will call create_one_wave(n) then.
 			}
 			
 		} else {
+			cerr << "\tdon't delay, display today!\n";
 			create_one_wave (n, true);
 		}
 
