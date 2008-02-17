@@ -367,10 +367,12 @@
                    <menuitem action='RemoteMixerDefined'/>
                    <menuitem action='RemoteEditorDefined'/>
                </menu>
-                   <menu action='Monitoring'>
+               <menu action='Monitoring'>
                    <menuitem action='UseHardwareMonitoring'/>
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
+    	           <separator/>
+               	   <menuitem action='ToggleTapeMachineMode'/>
                </menu>
                <menu action='Plugins'>
 	           <menuitem action='DisableAllPlugins'/>
@@ -442,8 +444,9 @@
 			<menuitem action='ShowTrackMeters'/>
 	       <menuitem action='OnlyCopyImportedFiles'/>
     	       <menuitem action='ShowTrackMeters'/>
-			<menuitem action='DefaultNarrowMS'/>
+	       <menuitem action='DefaultNarrowMS'/>
                <menuitem action='link-region-and-track-selection'/>
+               <menuitem action='RubberbandingSnapsToGrid'/>
 			
 	       <separator/>
          </menu>

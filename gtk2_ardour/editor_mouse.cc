@@ -5246,7 +5246,7 @@ Editor::drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
- 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+ 	if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier()) && Config->get_rubberbanding_snaps_to_grid()) {
  		if (drag_info.first_move) {
  			snap_to (drag_info.grab_frame);
 		} 

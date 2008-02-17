@@ -66,6 +66,7 @@ private:
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
 	bool bpm_button_release (GdkEventButton* );
+	bool entry_key_release (GdkEventKey* );
 	void note_types_change ();
 };
 
@@ -78,10 +79,6 @@ struct MeterDialog : public ArdourDialog
 	Gtk::Button  ok_button;
 	Gtk::Button  cancel_button;
 	Gtk::Entry   when_bar_entry;
-	Gtk::Entry   when_beat_entry;
-	Gtk::Label   when_bar_label;
-	Gtk::Label   when_beat_label;
-	Gtk::Table   when_table;
 	Gtk::Frame   when_frame;
 	char buf[64];
     
@@ -94,8 +91,8 @@ struct MeterDialog : public ArdourDialog
 
 private:
 	void init (const ARDOUR::BBT_Time&, double, double, bool);
-	bool bpb_key_press (GdkEventKey* );
-	bool bpb_key_release (GdkEventKey* );
+	bool entry_key_press (GdkEventKey* );
+	bool entry_key_release (GdkEventKey* );
 	void note_types_change ();
 };
 

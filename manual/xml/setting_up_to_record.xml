@@ -38,32 +38,87 @@
 
   <section id="setup-monitoring">
     <title>Monitoring</title>
-    <para></para>
+    <para>
+      While monitoring is a broad term, here we use it to refer to the 
+      signal a track delivers to its channel for further processing.
+      There are two available monitoring states.
+      These are 
+      'input' (the signal being delivered to a track for potential recording), and 
+      'off-disk' (material you have already recorded, or silence in the absence of a region).
+    </para>
   </section>
 
   <section id="setup-hardware-monitoring">
     <title>Hardware Monitoring</title>
-    <para></para>
+    <para>
+      Some multichannel audio interfaces have the ability to route an input signal 
+      directly to an output with very low or no latency. This is useful if your computer hardware 
+      is connected to the tape sends and returns of a mixing console. 
+      Whenever monitoring is set to input on a track, the track's input port is connected to its 
+      output in hardware (as would happen on a multitrack tape recorder). 
+      Hardware monitoring provides the best quality assurance for an engineer, as the signal path 
+      is exactly the same for input and off-disk monitoring. 
+      Level differences can be heard immediately, as can other gremlins that may ruin your recording. 
+      The hardware monitoring setting is only useful for interfaces supporting this feature.
+    </para>
   </section>
-
+  
   <section id="setup-software-monitoring">
     <title>Software Monitoring</title>
-    <para></para>
+    <para>
+      Software monitoring uses software to perform input monitoring.
+      When set to monitor input, a tracks input signal is passed to its channel 
+      as if it were coming from disk, allowing plugins to be heard while recording.
+      This introduces an inevitable processing delay, or latency, to the input signal. 
+      The size of the delay depends on the current JACK configuration, which should 
+      be set to as short as possible while recording. 
+    </para>
   </section>
-
+  
   <section id="setup-latency">
     <title>Latency</title>
     <para></para>
   </section>
-
+  
   <section id="setup-external-monitoring">
     <title>External Monitoring</title>
-    <para></para>
+    <para>
+      External Monitoring will silence the output of a track whenever the track is set 
+      to monitor input. It is useful if you are listening to the input signal
+      using a path outside your computer (eg a mixing console). 
+    </para>
+  </section>
+  
+  <section id="setup-external-monitoring">
+    <title>Tape Machine Mode</title>
+    <para>
+      Nearly all traditional tape recorders use the same monitoring model. 
+      Normally only tracks that are record-enabled will monitor input with the 
+      transport stopped. 
+      Tape machine mode emulates this behaviour.
+      Some simpler machines (like a famous product by Alesis) switch all tracks to 
+      input on stop when auto-input is enabled, regardless of record-enable state.
+      Disabling Tape Machine Mode switches to a behaviour that mimics this type of recorder.
+      Be warned that if you disable Tape Machine Mode, many tracks sharing the same input 
+      (in software monitoring mode) will sum that input through the master buss 
+      (potentially including several plugins) whenever the transport is stopped. 
+      Since setting up a sound usually involves listening to the input with the transport 
+      stopped, you might not be hearing the sound you are about to record!
+      Disabling this mode can also lead to surprising acoustic feedback.
+      Tape Machine Mode is off by default.
+    </para>
   </section>
 
   <section id="setup-auto-input">
     <title>Auto-Input</title>
-    <para></para>
+    <para>
+      When a track is record-enabled, it is set to monitor input
+      regardless of the transport state. Auto input switches to off-disk monitoring 
+      when play is engaged. When Ardour is actually recording, the track will be set to 
+      monitor input again. 
+      Auto-Input is useful for performing punch-ins. Disable auto-input when performing 
+      'dry runs' of an overdub to allow a performer to hear themselves while the transport is rolling.
+    </para>
   </section>
 
   <section id="setup-track-naming">
@@ -206,6 +261,18 @@
 
   <section id="setup-punch-recording">
     <title>Punch Recording</title>
+    <para>
+      Once you have recorded material onto a track, the simplest way to punch in 
+      (or drop in as it is known elsewhere) is to roll the transport and press the 
+      master record button at the desired in point. Assuming the desired track is 
+      record enabled, its monitoring state will be switched and recording will begin.
+      Pressing it again disengages record. 
+      If repeatable punch-ins are required, you may use auto punch.
+    </para>
+  </section>
+
+  <section id="setup-auto-punch">
+    <title>Auto Punch</title>
     <para></para>
   </section>
 

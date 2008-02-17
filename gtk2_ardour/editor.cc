@@ -4597,8 +4597,6 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSe
 void
 Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 {
-	bool use_regions_at = true;
-
 	if (selection->regions.empty()) {
 
 		if (selection->tracks.empty()) {

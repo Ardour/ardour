@@ -138,7 +138,7 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 		when_table.set_homogeneous (true);
 		when_table.set_row_spacings (2);
 		when_table.set_col_spacings (2);
-		when_table.set_border_width (6);
+		when_table.set_border_width (0);
 		
 		when_table.attach (when_bar_label, 0, 1, 0, 1, AttachOptions(0), FILL|EXPAND);
 		when_table.attach (when_bar_entry, 1, 2, 0, 1, AttachOptions(0), FILL|EXPAND);
@@ -178,6 +178,10 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 	bpm_spinner.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	bpm_spinner.signal_button_press_event().connect (mem_fun (*this, &TempoDialog::bpm_button_press), false);
 	bpm_spinner.signal_button_release_event().connect (mem_fun (*this, &TempoDialog::bpm_button_release), false);
+	when_bar_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
+	when_bar_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::entry_key_release), false);
+	when_beat_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
+	when_beat_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::entry_key_release), false);
 	note_types.signal_changed().connect (mem_fun (*this, &TempoDialog::note_types_change));
 }
 
@@ -193,6 +197,17 @@ TempoDialog::bpm_button_release (GdkEventButton* ev)
 	/* the value has been modified, accept should work now */
 
 	set_response_sensitive (RESPONSE_ACCEPT, true);
+	return false;
+}
+
+bool
+TempoDialog::entry_key_release (GdkEventKey* ev)
+{	
+	if (when_beat_entry.get_text() != "" && when_bar_entry.get_text() != "") {
+	        set_response_sensitive (RESPONSE_ACCEPT, true);
+	} else {
+	        set_response_sensitive (RESPONSE_ACCEPT, false);
+	}
 	return false;
 }
 
@@ -258,8 +273,6 @@ MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
 	  bpb_frame (_("Meter")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
-	  when_bar_label (_("Bar"), ALIGN_LEFT, ALIGN_CENTER),
-	  when_beat_label (_("Beat"), ALIGN_LEFT, ALIGN_CENTER),
 	  when_frame (_("Location"))
 {
 	BBT_Time when;
@@ -275,8 +288,6 @@ MeterDialog::MeterDialog (MeterSection& section, const string & action)
 	  bpb_frame (_("Meter")),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
-	  when_bar_label (_("Bar"), ALIGN_LEFT, ALIGN_CENTER),
-	  when_beat_label (_("Beat"), ALIGN_LEFT, ALIGN_CENTER),
 	  when_frame (_("Location"))
 {
 	init (section.start(), section.beats_per_bar(), section.note_divisor(), section.movable());
@@ -337,32 +348,14 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	if (movable) {
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
 		when_bar_entry.set_text (buf);
-		snprintf (buf, sizeof (buf), "%" PRIu32, when.beats);
-		when_beat_entry.set_text (buf);
 		
 		when_bar_entry.set_name ("MetricEntry");
-		when_beat_entry.set_name ("MetricEntry");
-		
-		when_bar_label.set_name ("MetricLabel");
-		when_beat_label.set_name ("MetricLabel");
 		
 		Gtkmm2ext::set_size_request_to_display_given_text (when_bar_entry, "999g", 5, 7);
-		Gtkmm2ext::set_size_request_to_display_given_text (when_beat_entry, "999g", 5, 7);
 		
-		when_table.set_homogeneous (true);
-		when_table.set_row_spacings (2);
-		when_table.set_col_spacings (2);
-		when_table.set_border_width (6);
-		
-		when_table.attach (when_bar_label, 0, 1, 0, 1, AttachOptions(0), FILL|EXPAND);
-		when_table.attach (when_bar_entry, 1, 2, 0, 1, AttachOptions(0), FILL|EXPAND);
-		
-		when_table.attach (when_beat_label, 0, 1, 1, 2, AttachOptions(0), AttachOptions(0));
-		when_table.attach (when_beat_entry, 1, 2, 1, 2, AttachOptions(0), AttachOptions(0));
-
 		HBox* when_hbox = manage (new HBox());
-		Label* when_label = manage(new Label(_("Meter Begins at:"), ALIGN_LEFT, ALIGN_TOP));
-		when_hbox->pack_end(when_table, PACK_EXPAND_PADDING, 6);
+		Label* when_label = manage(new Label(_("Meter Begins at Bar:"), ALIGN_LEFT, ALIGN_TOP));
+		when_hbox->pack_end(when_bar_entry, PACK_EXPAND_PADDING, 6);
 		when_hbox->pack_start(*when_label, PACK_EXPAND_PADDING, 6);
 
 		when_frame.set_name ("MetricDialogFrame");
@@ -386,13 +379,17 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 
 	set_name ("MetricDialog");
 	bpb_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
-	bpb_entry.signal_key_press_event().connect (mem_fun (*this, &MeterDialog::bpb_key_press), false);
-	bpb_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::bpb_key_release));
+	bpb_entry.signal_key_press_event().connect (mem_fun (*this, &MeterDialog::entry_key_press), false);
+	bpb_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::entry_key_release));
+	when_bar_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
+	when_bar_entry.signal_key_press_event().connect (mem_fun (*this, &MeterDialog::entry_key_press), false);
+	when_bar_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::entry_key_release));
+
 	note_types.signal_changed().connect (mem_fun (*this, &MeterDialog::note_types_change));
 }
 
 bool
-MeterDialog::bpb_key_press (GdkEventKey* ev)
+MeterDialog::entry_key_press (GdkEventKey* ev)
 {
 
 	switch (ev->keyval) { 
@@ -440,9 +437,9 @@ MeterDialog::bpb_key_press (GdkEventKey* ev)
 }
 
 bool
-MeterDialog::bpb_key_release (GdkEventKey* ev)
+MeterDialog::entry_key_release (GdkEventKey* ev)
 {
-        if (bpb_entry.get_text() != "") {
+        if (when_bar_entry.get_text() != "" && bpb_entry.get_text() != "") {
 	        set_response_sensitive (RESPONSE_ACCEPT, true);
 	} else {
 	        set_response_sensitive (RESPONSE_ACCEPT, false);
@@ -504,9 +501,7 @@ MeterDialog::get_bbt_time (BBT_Time& requested)
 		return false;
 	}
 	
-	if (sscanf (when_beat_entry.get_text().c_str(), "%" PRIu32, &requested.beats) != 1) {
-		return false;
-	}
+	requested.beats = 1;
 
 	requested.ticks = 0;
 

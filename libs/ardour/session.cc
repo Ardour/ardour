@@ -1147,11 +1147,11 @@ Session::step_back_from_record ()
 	if (g_atomic_int_get (&_record_status) == Recording) {
 		g_atomic_int_set (&_record_status, Enabled);
 
-		if (Config->get_monitoring_model() == HardwareMonitoring) {
+		if (Config->get_monitoring_model() == HardwareMonitoring && Config->get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 			
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if (Config->get_auto_input() && (*i)->record_enabled ()) {
+				if ((*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
 					(*i)->monitor_input (false);   
 				}
