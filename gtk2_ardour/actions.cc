@@ -75,7 +75,8 @@ ActionManager::init ()
 		ui_manager->add_ui_from_file (ui_file);
 		loaded = true;
 	} catch (Glib::MarkupError& err) {
-		error << _("badly formatted UI definition file") << endmsg;
+		error << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endmsg;
+		cerr << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endl;
 	} catch (...) {
 		error << _("Ardour menu definition file not found") << endmsg;
 	}

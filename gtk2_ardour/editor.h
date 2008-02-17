@@ -178,6 +178,8 @@ class Editor : public PublicEditor
 	void new_region_from_selection ();
 	void separate_regions_between (const TimeSelection&);
 	void separate_region_from_selection ();
+	void separate_region_from_punch ();
+	void separate_region_from_loop ();
 	void separate_regions_using_location (ARDOUR::Location&);
 	void toggle_playback (bool with_abort);
 	void transition_to_rolling (bool forward);
@@ -1111,6 +1113,8 @@ class Editor : public PublicEditor
 	void center_edit_point ();
 	void edit_cursor_backward ();
 	void edit_cursor_forward ();
+	void playhead_forward_to_grid ();
+	void playhead_backward_to_grid ();
 	void playhead_backward ();
 	void playhead_forward ();
 	void scroll_playhead (bool forward);
@@ -2074,6 +2078,8 @@ public:
 
 	void select_next_route ();
 	void select_prev_route ();
+
+	void snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
 
 	RhythmFerret* rhythm_ferret;
 };

@@ -797,6 +797,27 @@ Editor::region_selection_changed ()
 		(*i)->set_selected_regionviews (selection->regions);
 	}
 	
+	bool have_selected_regions = !selection->regions.empty();
+
+	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::region_selection_sensitive_actions.begin();
+	     x != ActionManager::region_selection_sensitive_actions.end(); ++x) {
+
+		string accel_path = (*x)->get_accel_path ();
+		AccelKey key;
+
+		/* if there is an accelerator, it should always be sensitive
+		   to allow for keyboard ops on entered regions.
+		*/
+
+		bool known = ActionManager::lookup_entry (accel_path, key);
+
+		if (known && ((key.get_key() != GDK_VoidSymbol) && (key.get_key() != 0))) {
+			(*x)->set_sensitive (true);
+		} else {
+			(*x)->set_sensitive (have_selected_regions);
+		}
+	}
+
 	zoomed_to_region = false;
 }
 

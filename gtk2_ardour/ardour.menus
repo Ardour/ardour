@@ -123,7 +123,7 @@
 	       </menu>
   	      <menuitem action='set-tempo-from-region'/>
 		   <menuitem action='set-tempo-from-edit-range'/>
-	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
+	       <menu action='KeyMouseActions'>
 	       		<menuitem action='play-selected-regions'/>
                		<menuitem action='brush-at-mouse'/>
                		<menuitem action='set-edit-point'/>

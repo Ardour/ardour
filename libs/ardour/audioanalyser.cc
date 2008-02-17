@@ -119,7 +119,7 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 		/* zero fill buffer if necessary */
 
 		if (to_read != bufsize) {
-			memset (data + to_read, 0, (bufsize - to_read));
+			memset (data + to_read, 0, (bufsize - to_read) * sizeof (Sample));
 		}
 		
 		features = plugin->process (bufs, RealTime::fromSeconds ((double) pos / sample_rate));
@@ -128,7 +128,7 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 			goto out;
 		}
 
-		pos += stepsize;
+		pos += min (stepsize, to_read);
 
 		if (pos >= len) {
 			done = true;
