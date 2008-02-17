@@ -26,6 +26,8 @@ import string
 import sys
 import xml.dom.minidom
 
+v2paths = True
+
 def get_header_size(filename):
 	size = 0
 	file = open(filename, 'r')
@@ -111,7 +113,7 @@ class Data(object):
 		sessions[session_name]['collabs'][collab_name]['sounds'] = []
 		sessions[session_name]['collabs'][collab_name]['ip'] = ip_address
 		sessions[session_name]['collabs'][collab_name]['port'] = port
-		sessions[session_name]['collabs'][collab_name]['v2paths'] = true
+		sessions[session_name]['collabs'][collab_name]['v2paths'] = True
 		self._data['sessions'] = sessions
 		
 		client = ExchangeClientFactory(session_name, collab_name, None, self.debug_mode)
@@ -130,10 +132,11 @@ class Data(object):
 		sessions[session_name]['collabs'][self._data['user']] = {}
 		sessions[session_name]['collabs'][self._data['user']]['snaps'] = []
 		sessions[session_name]['collabs'][self._data['user']]['sounds'] = []
-		if os.path.test (os.path.join (session_path,'sounds')):
-			sessions[session_name]['collabs'][collab_name]['v2paths'] = False
+		if os.path.isdir (os.path.join (session_path,'sounds')):
+			sessions[session_name]['collabs'][self._data['user']]['v2paths'] = False
+			v2paths = False
 		else:
-			sessions[session_name]['collabs'][collab_name]['v2paths'] = True
+			sessions[session_name]['collabs'][self._data['user']]['v2paths'] = True
 		
 		self._data['sessions'] = sessions
 		
@@ -144,7 +147,7 @@ class Data(object):
 		
 		session_path = sessions[session_name]['path']
 		sessions[session_name]['collabs'][self._data['user']]['snaps'] = self._scan_snapshots(session_path)
-		sessions[session_name]['collabs'][self._data['user']]['sounds'] = self._scan_sounds(session_path)
+		sessions[session_name]['collabs'][self._data['user']]['sounds'] = self._scan_sounds(session_name)
 		
 		self._data['sessions'] = sessions
 		
@@ -153,17 +156,18 @@ class Data(object):
 		print self._data['sessions']
 	
 	def create_session(self, session_path):
+		sessions = self._data['sessions']
+
+		session_name = session_path[session_path.rfind('/', 0, len(session_path)-2)+1: ]
 		try:
 			os.mkdir(session_path)
+			os.mkdir(os.path.join (session_path,'interchange'))
+			os.mkdir(os.path.join (session_path,'interchange',session_name))
 			os.mkdir(os.path.join (session_path,'interchange',session_name,'audiofiles'))
-
 		except OSError:
 			raise_error("Could not create session directory", g_display.window)
 			return
 		
-		sessions = self._data['sessions']
-		
-		session_name = session_path[session_path.rfind('/', 0, len(session_path)-2)+1: ]
 		sessions[session_name] = {}
 		sessions[session_name]['path'] = session_path
 		sessions[session_name]['collabs'] = {}
@@ -235,9 +239,13 @@ class Data(object):
 		return snaps
 	
 	def _scan_sounds(self, session):
+		sessions = self._data['sessions']
+
 		sounds = []
 		if v2paths:
-			files = os.listdir(os.path.join (session,'interchange', session, 'audiofiles'))
+			print session
+			print os.path.join (sessions[session]['path'],'interchange', session, 'audiofiles')
+			files = os.listdir(os.path.join (sessions[session]['path'],'interchange', session, 'audiofiles'))
 		else:
 			files = os.listdir(os.path.join (session,'sounds'))
 		pattern = re.compile(r'\.peak$')
@@ -322,7 +330,7 @@ class ExchangeServer (LineReceiver):
 				self.error("snapshot: " + data + " doesn't exist on server")
 		elif self.state == "SOUNDFILE" or self.state == "SOUNDFILE_HEADER":
 			if g_data.get_sounds(self.session_name, g_data.get_user()).count(data):
-				filename = g_data.get_session_path(self.session_name)+"/sounds/"+data
+				filename = g_data.get_session_path(self.session_name)+"/interchange/"+self.session_name+"/audiofiles/"+data
 				print filename
 				if self.state == "SOUNDFILE":
 					self.sendLine(str(os.stat(filename).st_size))
@@ -450,7 +458,7 @@ class ExchangeClient (LineReceiver):
 				self.received = 0
 			elif self.state == "SOUNDFILE" or self.state == "SOUNDFILE_HEADER":
 				self.setRawMode()
-				self.filename = g_data.get_session_path(self.session_name)+'/sounds/'+self.sounds[self.sound_index]
+				self.filename = g_data.get_session_path(self.session_name)+"/interchange/"+self.session_name+"/audiofiles/"+self.sounds[self.sound_index]
 				self.file = open(self.filename, 'w')
 				self.received = 0
 		elif self.state == "ERROR":
