@@ -531,7 +531,7 @@ static bool sae_binding_filter (const string& str, void* arg)
 
 static bool binding_filter (const string& str, void* arg)
 {
-	/* Not a dotfile, has a prefix before a period, suffix is ".bindings" and contains -sae- */
+	/* Not a dotfile, has a prefix before a period, suffix is ".bindings" */
 	
 	return str[0] != '.' && str.length() > 9 && str.find (".bindings") == (str.length() - 9);
 }
