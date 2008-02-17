@@ -134,7 +134,7 @@ class ExportDialog : public ArdourDialog
 
 	Gtk::Entry  file_entry;
 	Gtk::HBox   file_hbox;
-	Gtk::FileChooserWidget file_chooser;
+	Gtk::Button file_browse_button;
 
 	Gtk::Button* ok_button;
 	Gtk::Button* cancel_button;
@@ -159,7 +159,6 @@ class ExportDialog : public ArdourDialog
 	void bitdepth_chosen ();
 	void sample_rate_chosen ();
 	void cue_file_type_chosen();
-	void file_chooser_selection_changed();
 
 	void fill_lists();
 	void write_track_and_master_selection_to_spec();
@@ -171,6 +170,8 @@ class ExportDialog : public ArdourDialog
 	gint window_closed (GdkEventAny *ignored);
 
 	void track_selector_button_click ();
+
+	void browse ();
 
 	void set_state();
 	void save_state();
