@@ -720,7 +720,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_ShowTrackMeters ();
 	void toggle_use_narrow_ms();
 	void toggle_rubberbanding_snaps_to_grid ();
-	void toggle_AdatMonitorMode();
+	void toggle_TapeMachineMode();
 
 	void mtc_port_changed ();
 	void map_solo_model ();

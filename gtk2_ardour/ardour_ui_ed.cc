@@ -414,7 +414,7 @@ ARDOUR_UI::install_actions ()
 #ifndef HAVE_LIBLO
 	act->set_sensitive (false);
 #endif
-	act = ActionManager::register_toggle_action (option_actions, X_("ToggleAdatMonitorMode"), _("ADAT Monitor mode"), mem_fun (*this, &ARDOUR_UI::toggle_AdatMonitorMode));
+	act = ActionManager::register_toggle_action (option_actions, X_("ToggleTapeMachineMode"), _("Tape Machine mode"), mem_fun (*this, &ARDOUR_UI::toggle_TapeMachineMode));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (option_actions, X_("SyncEditorAndMixerTrackOrder"), _("Sync Editor and Mixer track order"), mem_fun (*this, &ARDOUR_UI::toggle_sync_order_keys));

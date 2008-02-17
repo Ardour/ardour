@@ -520,9 +520,9 @@ ARDOUR_UI::toggle_ShowTrackMeters()
 }
 
 void
-ARDOUR_UI::toggle_AdatMonitorMode ()
+ARDOUR_UI::toggle_TapeMachineMode ()
 {
-	ActionManager::toggle_config_state ("options", "ToggleAdatMonitorMode", &Configuration::set_adat_monitor_mode, &Configuration::get_adat_monitor_mode);
+	ActionManager::toggle_config_state ("options", "ToggleTapeMachineMode", &Configuration::set_tape_machine_mode, &Configuration::get_tape_machine_mode);
 }
 
 void
@@ -1047,8 +1047,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", &Configuration::get_auto_return);
 	} else if (PARAM_IS ("auto-input")) {
 		ActionManager::map_some_state ("Transport", "ToggleAutoInput", &Configuration::get_auto_input);
-	} else if (PARAM_IS ("adat-monitor-mode")) {
-		ActionManager::map_some_state ("options", "ToggleAdatMonitorMode", &Configuration::get_adat_monitor_mode);
+	} else if (PARAM_IS ("tape-machine-mode")) {
+		ActionManager::map_some_state ("options", "ToggleTapeMachineMode", &Configuration::get_tape_machine_mode);
 	} else if (PARAM_IS ("punch-out")) {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", &Configuration::get_punch_out);
 	} else if (PARAM_IS ("punch-in")) {

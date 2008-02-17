@@ -370,7 +370,7 @@
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
     	           <separator/>
-               	   <menuitem action='ToggleAdatMonitorMode'/>
+               	   <menuitem action='ToggleTapeMachineMode'/>
                </menu>
 	       <menu action='Metering'>
                    <menu action='MeteringFallOffRate'>

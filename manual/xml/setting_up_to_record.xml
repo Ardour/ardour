@@ -90,21 +90,22 @@
   </section>
   
   <section id="setup-external-monitoring">
-    <title>ADAT Monitor Mode</title>
+    <title>Tape Machine Mode</title>
     <para>
       Nearly all traditional tape recorders use the same monitoring model. 
       Normally only tracks that are record-enabled will monitor input with the 
       transport stopped. 
-      ADAT machines switch all tracks to input on stop when auto-input is enabled, 
-      regardless of record-enable state..
-      ADAT monitor mode emulates this behaviour.
-      Be warned that many tracks sharing the same input (in software monitoring mode) 
-      will sum that input through the master buss (potentially including several plugins) 
-      whenever the transport is stopped. Since setting up a sound
-      usually involves listening to the input with the transport stopped, you might not be 
-      hearing the sound you are about to record!
-      Using this mode can also lead to surprising acoustic feedback.
-      ADAT Monitor Mode is on by default.
+      Tape machine mode emulates this behaviour.
+      Some simpler machines (like a famous product by Alesis) switch all tracks to 
+      input on stop when auto-input is enabled, regardless of record-enable state.
+      Disabling Tape Machine Mode switches to a behaviour that mimics this type of recorder.
+      Be warned that if you disable Tape Machine Mode, many tracks sharing the same input 
+      (in software monitoring mode) will sum that input through the master buss 
+      (potentially including several plugins) whenever the transport is stopped. 
+      Since setting up a sound usually involves listening to the input with the transport 
+      stopped, you might not be hearing the sound you are about to record!
+      Disabling this mode can also lead to surprising acoustic feedback.
+      Tape Machine Mode is off by default.
     </para>
   </section>
 
