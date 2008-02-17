@@ -88,6 +88,7 @@ CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
 CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", false)
+CONFIG_VARIABLE (bool, adat_monitor_mode, "adat-monitor-mode", true)
 
 /* click */
 
@@ -155,6 +156,7 @@ CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", tru
 CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
+CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
 
 /* denormal management */
 

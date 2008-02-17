@@ -477,19 +477,24 @@ AudioTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fra
 		send_silence = true;
 	} else {
 
-		if (Config->get_auto_input()) {
-			if (Config->get_monitoring_model() == SoftwareMonitoring) {
+		if (Config->get_adat_monitor_mode()) {
+			/* 
+			   ADATs work in a strange way.. 
+			   they monitor input always when stopped.and auto-input is engaged. 
+			*/
+			if (Config->get_monitoring_model() == SoftwareMonitoring && Config->get_auto_input()) {
 				send_silence = false;
 			} else {
 				send_silence = true;
 			}
 		} else {
-			if (_diskstream->record_enabled()) {
-				if (Config->get_monitoring_model() == SoftwareMonitoring) {
-					send_silence = false;
-				} else {
-					send_silence = true;
-				}
+			/* 
+			   Other machines switch to input on stop if the track is record enabled,
+			   regardless of the auto input setting (auto input only changes the 
+			   monitoring state when the transport is rolling) 
+			*/
+			if ((Config->get_monitoring_model() == SoftwareMonitoring) && _diskstream->record_enabled()) {
+				send_silence = false;
 			} else {
 				send_silence = true;
 			}

@@ -1862,8 +1862,8 @@ AudioDiskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
 	boost::shared_ptr<ChannelList> c = channels.reader();
-	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		if (Config->get_monitoring_model() == HardwareMonitoring) {
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			if ((*chan)->source) {
 				(*chan)->source->ensure_monitor_input (false);
 			}

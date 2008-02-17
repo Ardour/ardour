@@ -414,6 +414,8 @@ ARDOUR_UI::install_actions ()
 #ifndef HAVE_LIBLO
 	act->set_sensitive (false);
 #endif
+	act = ActionManager::register_toggle_action (option_actions, X_("ToggleAdatMonitorMode"), _("ADAT Monitor mode"), mem_fun (*this, &ARDOUR_UI::toggle_AdatMonitorMode));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (option_actions, X_("SyncEditorAndMixerTrackOrder"), _("Sync Editor and Mixer track order"), mem_fun (*this, &ARDOUR_UI::toggle_sync_order_keys));
 	ActionManager::register_toggle_action (option_actions, X_("StopPluginsWithTransport"), _("Stop plugins with transport"), mem_fun (*this, &ARDOUR_UI::toggle_StopPluginsWithTransport));
@@ -428,7 +430,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("PrimaryClockDeltaEditCursor"), _("Primary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor));
 	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));	
 	ActionManager::register_toggle_action (option_actions, X_("ShowTrackMeters"), _("Enable Editor Meters"), mem_fun (*this, &ARDOUR_UI::toggle_ShowTrackMeters));
-	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));	
+	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));
+	ActionManager::register_toggle_action (option_actions, X_("RubberbandingSnapsToGrid"), _("Rubberbanding Snaps to Grid"), mem_fun (*this, &ARDOUR_UI::toggle_rubberbanding_snaps_to_grid));
+
 	ActionManager::register_toggle_action (option_actions, X_("DefaultNarrowMS"), _("Use narrow mixer strips"), mem_fun (*this, &ARDOUR_UI::toggle_use_narrow_ms));
 
 	RadioAction::Group denormal_group;
