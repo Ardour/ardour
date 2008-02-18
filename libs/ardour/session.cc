@@ -130,6 +130,7 @@ Session::Session (AudioEngine &eng,
 	  _session_dir (new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  //midi_requests (128), // the size of this should match the midi request pool size
+	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),

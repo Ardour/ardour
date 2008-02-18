@@ -289,12 +289,6 @@ write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 			if (source->read_event(4, ev.buffer(), &size, &delta_t) < 0)
 				break;
 
-			// FIXME: kluuudge
-			if (ev.channel() != 0) {
-				cout << "Skipping event with channel " << ev.channel() << endl;
-				continue;
-			}
-			
 			t += delta_t;
 			ev.time() = t * (double)source->ppqn();
 			ev.size() = size;

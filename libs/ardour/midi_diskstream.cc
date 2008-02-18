@@ -304,6 +304,7 @@ MidiDiskstream::set_destructive (bool yn)
 void
 MidiDiskstream::set_note_mode (NoteMode m)
 {
+	cout << "MDS: SET NOTE MODE: " << m << endl;
 	_note_mode = m;
 	midi_playlist()->set_note_mode(m);
 	if (_write_source && _write_source->model())

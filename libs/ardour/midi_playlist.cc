@@ -42,6 +42,7 @@ using namespace std;
 
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 		: Playlist (session, node, DataType::MIDI, hidden)
+		, _note_mode(Sustained)
 {
 	const XMLProperty* prop = node.property("type");
 	assert(prop && DataType(prop->value()) == DataType::MIDI);

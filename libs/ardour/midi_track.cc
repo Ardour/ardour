@@ -80,6 +80,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	: Track (sess, node)
 	, _immediate_events(1024) // FIXME: size?
+	, _note_mode(Sustained)
 {
 	_set_state(node, false);
 	
@@ -690,6 +691,7 @@ MidiTrack::unfreeze ()
 void
 MidiTrack::set_note_mode (NoteMode m)
 {
+	cout << _name << " SET NOTE MODE " << m << endl;
 	_note_mode = m;
 	midi_diskstream()->set_note_mode(m);
 }

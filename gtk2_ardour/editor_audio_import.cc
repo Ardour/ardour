@@ -760,6 +760,9 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 			
 			region_name = region_name_from_path ((*x)->path(), false, true, sources.size(), n);
 
+			cout << "REGION NAME: " << region_name << endl;
+			cout << "SOURCE LENGTH: " << (*x)->length() << endl;
+
 			regions.push_back (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
 								   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 

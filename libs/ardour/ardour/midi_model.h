@@ -191,9 +191,9 @@ private:
 	bool is_sorted() const;
 #endif
 
-	void append_note_on_unlocked(double time, uint8_t note, uint8_t velocity);
-	void append_note_off_unlocked(double time, uint8_t note);
-	void append_cc_unlocked(double time, uint8_t number, uint8_t value);
+	void append_note_on_unlocked(uint8_t chan, double time, uint8_t note, uint8_t velocity);
+	void append_note_off_unlocked(uint8_t chan, double time, uint8_t note);
+	void append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t value);
 
 	mutable Glib::RWLock _lock;
 
@@ -201,7 +201,7 @@ private:
 	NoteMode _note_mode;
 	
 	typedef std::vector<size_t> WriteNotes;
-	WriteNotes _write_notes;
+	WriteNotes _write_notes[16];
 	bool       _writing;
 	bool       _edited;
 

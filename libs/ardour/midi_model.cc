@@ -331,7 +331,8 @@ MidiModel::start_write()
 	//cerr << "MM " << this << " START WRITE, MODE = " << enum_2_string(_note_mode) << endl;
 	write_lock();
 	_writing = true;
-	_write_notes.clear();
+	for (int i = 0; i < 16; ++i)
+		_write_notes[i].clear();
 	write_unlock();
 }
 
@@ -362,7 +363,14 @@ MidiModel::end_write(bool delete_stuck)
 		}
 	}
 
-	_write_notes.clear();
+	for (int i = 0; i < 16; ++i) {
+		if (!_write_notes[i].empty()) {
+			cerr << "WARNING: MidiModel::end_write: Channel " << i << " has "
+					<< _write_notes[i].size() << " stuck notes" << endl;
+		}
+		_write_notes[i].clear();
+	}
+	
 	_writing = false;
 	write_unlock();
 }
@@ -383,11 +391,11 @@ MidiModel::append(const MidiEvent& ev)
 	assert(_writing);
 
 	if (ev.is_note_on())
-		append_note_on_unlocked(ev.time(), ev.note(), ev.velocity());
+		append_note_on_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
 	else if (ev.is_note_off())
-		append_note_off_unlocked(ev.time(), ev.note());
+		append_note_off_unlocked(ev.channel(), ev.time(), ev.note());
 	else if (ev.is_cc())
-		append_cc_unlocked(ev.time(), ev.cc_number(), ev.cc_value());
+		append_cc_unlocked(ev.channel(), ev.time(), ev.cc_number(), ev.cc_value());
 	else
 		printf("MM Unknown event type %X\n", ev.type());
 	
@@ -396,32 +404,36 @@ MidiModel::append(const MidiEvent& ev)
 
 
 void
-MidiModel::append_note_on_unlocked(double time, uint8_t note_num, uint8_t velocity)
+MidiModel::append_note_on_unlocked(uint8_t chan, double time, uint8_t note_num, uint8_t velocity)
 {
-	//cerr << "MidiModel " << this << " note " << (int)note_num << " on @ " << time << endl;
+	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
+			" note " << (int)note_num << " on @ " << time << endl;*/
 
+	assert(chan < 16);
 	assert(_writing);
+
 	_notes.push_back(boost::shared_ptr<Note>(new Note(time, 0, note_num, velocity)));
 	if (_note_mode == Sustained) {
 		//cerr << "MM Sustained: Appending active note on " << (unsigned)(uint8_t)note_num << endl;
-		_write_notes.push_back(_notes.size() - 1);
-	} else {
-		//cerr << "MM Percussive: NOT appending active note on" << endl;
-	}
+		_write_notes[chan].push_back(_notes.size() - 1);
+	}/* else {
+		cerr << "MM Percussive: NOT appending active note on" << endl;
+	}*/
 }
 
 
 void
-MidiModel::append_note_off_unlocked(double time, uint8_t note_num)
+MidiModel::append_note_off_unlocked(uint8_t chan, double time, uint8_t note_num)
 {
-	//cerr << "MidiModel " << this << " note " << (int)note_num << " off @ " << time << endl;
+	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
+			" note " << (int)note_num << " off @ " << time << endl;*/
 
+	assert(chan < 16);
 	assert(_writing);
+
 	if (_note_mode == Percussive) {
-		//cerr << "MM Ignoring note off (percussive mode)" << endl;
+		cerr << "MidiModel Ignoring note off (percussive mode)" << endl;
 		return;
-	} else {
-		//cerr << "MM Attempting to resolve note off " << (unsigned)(uint8_t)note_num << endl;
 	}
 
 	/* FIXME: make _write_notes fixed size (127 noted) for speed */
@@ -429,28 +441,42 @@ MidiModel::append_note_off_unlocked(double time, uint8_t note_num)
 	/* FIXME: note off velocity for that one guy out there who actually has
 	 * keys that send it */
 
-	for (WriteNotes::iterator n = _write_notes.begin(); n != _write_notes.end(); ++n) {
+	bool resolved = false;
+
+	for (WriteNotes::iterator n = _write_notes[chan].begin(); n != _write_notes[chan].end(); ++n) {
 		Note& note = *_notes[*n].get();
 		//cerr << (unsigned)(uint8_t)note.note() << " ? " << (unsigned)note_num << endl;
 		if (note.note() == note_num) {
 			assert(time >= note.time());
 			note.set_duration(time - note.time());
-			_write_notes.erase(n);
+			_write_notes[chan].erase(n);
 			//cerr << "MM resolved note, duration: " << note.duration() << endl;
+			resolved = true;
 			break;
 		}
 	}
+
+	if (!resolved)
+		cerr << "MidiModel " << this << " spurious note off chan " << (int)chan
+			<< ", note " << (int)note_num << " @ " << time << endl;
 }
 
 
 void
-MidiModel::append_cc_unlocked(double time, uint8_t number, uint8_t value)
+MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t value)
 {
+	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
+			" CC " << (int)number << " = " << (int)value << " @ " << time << endl;*/
+	
+	assert(chan < 16);
+	assert(_writing);
+	
+	if (chan != 0) // FIXME
+		cerr << "WARNING: CC on non-0 channel, channel information lost!" << endl;
+
 	Parameter param(MidiCCAutomation, number);
 	
 	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
-	//cerr << "MidiModel " << this << "(" << control.get() << ") add CC " << (int)number << " = " << (int)value
-	//	<< " @ " << time << endl;
 	control->list()->fast_simple_add(time, (double)value);
 }
 

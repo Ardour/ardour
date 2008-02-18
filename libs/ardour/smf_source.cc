@@ -444,14 +444,14 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(const MidiEvent& ev)
 {
-	/*printf("SMF %s - writing event, time = %lf, size = %u, data = ", _path.c_str(), ev.time(), ev.size());
+	printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(),
+			(unsigned)ev.channel(), ev.time(), ev.size());
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
-	printf("\n");*/
+	printf("\n");
 
 	assert(ev.time() >= 0);
-
 	assert(ev.time() >= _last_ev_time);
 	
 	// FIXME: assumes tempo never changes after start
