@@ -50,6 +50,7 @@
 #include <ardour/stretch.h>
 #include <ardour/location.h>
 #include <ardour/audioregion.h>
+#include <ardour/track.h>
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -1139,16 +1140,17 @@ class Editor : public PublicEditor
 	bool idle_do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
 	int  import_sndfiles (vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
-			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool);
+			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
 	int  embed_sndfiles (vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
-			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&);
+			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
 	int add_sources (vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
-			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::AudioTrack>&, bool add_channel_suffix);
-	int finish_bringing_in_audio (boost::shared_ptr<ARDOUR::AudioRegion> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
-				      boost::shared_ptr<ARDOUR::AudioTrack>& existing_track);
+			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
+	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
+				      boost::shared_ptr<ARDOUR::Track>& existing_track);
 
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
+	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
 
 	/* generic interthread progress window */
 	

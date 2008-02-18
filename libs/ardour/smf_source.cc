@@ -70,7 +70,7 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 		throw failed_constructor ();
 	}
 
-	//cerr << "SMF Source path: " << path << endl;
+	cerr << "SMF Source path: " << path << endl;
 	
 	assert(_name.find("/") == string::npos);
 }
@@ -99,7 +99,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 		throw failed_constructor ();
 	}
 	
-	//cerr << "SMF Source name: " << _name << endl;
+	cerr << "SMF Source name: " << _name << endl;
 	
 	assert(_name.find("/") == string::npos);
 }
@@ -184,7 +184,7 @@ SMFSource::flush_header ()
 
 	const uint16_t type     = GUINT16_TO_BE(0);     // SMF Type 0 (single track)
 	const uint16_t ntracks  = GUINT16_TO_BE(1);     // Number of tracks (always 1 for Type 0)
-	const uint16_t division = GUINT16_TO_BE(_ppqn); // Pulses per beat
+	const uint16_t division = GUINT16_TO_BE(_ppqn); // Pulses per quarter note (beat)
 
 	char data[6];
 	memcpy(data, &type, 2);
@@ -195,9 +195,7 @@ SMFSource::flush_header ()
 	assert(_fd);
 	fseek(_fd, 0, 0);
 	write_chunk("MThd", 6, data);
-	//if (_track_size > 0) {
-		write_chunk_header("MTrk", _track_size); 
-	//}
+	write_chunk_header("MTrk", _track_size); 
 
 	fflush(_fd);
 
@@ -446,7 +444,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(const MidiEvent& ev)
 {
-	/*printf("SMF - writing event, time = %lf, size = %u, data = ", ev.time(), ev.size());
+	/*printf("SMF %s - writing event, time = %lf, size = %u, data = ", _path.c_str(), ev.time(), ev.size());
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
@@ -634,6 +632,12 @@ SMFSource::move_to_trash (const string trash_dir_name)
 	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
 
 	return 0;
+}
+
+bool
+SMFSource::safe_file_extension(const Glib::ustring& file)
+{
+	return (file.rfind(".mid") != Glib::ustring::npos);
 }
 
 // FIXME: Merge this with audiofilesource somehow (make a generic filesource?)

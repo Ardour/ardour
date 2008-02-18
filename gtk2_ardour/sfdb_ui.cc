@@ -39,6 +39,8 @@
 #include <ardour/auditioner.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
+#include <ardour/smf_source.h>
+#include <ardour/smf_reader.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
 #include <ardour/session.h>
@@ -433,13 +435,17 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	found_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 	found_list_view.signal_row_activated().connect (mem_fun (*this, &SoundFileBrowser::found_list_view_activated));
 
-	custom_filter.add_custom (FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_custom));
-	custom_filter.set_name (_("Audio files"));
+	audio_filter.add_custom (FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_audio_filter));
+	audio_filter.set_name (_("Audio files"));
+	
+	midi_filter.add_custom (FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_midi_filter));
+	midi_filter.set_name (_("MIDI files"));
 
 	matchall_filter.add_pattern ("*.*");
 	matchall_filter.set_name (_("All files"));
 
-	chooser.add_filter (custom_filter);
+	chooser.add_filter (audio_filter);
+	chooser.add_filter (midi_filter);
 	chooser.add_filter (matchall_filter);
 	chooser.set_select_multiple (true);
 	chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
@@ -552,9 +558,15 @@ SoundFileBrowser::meter ()
 }
 
 bool
-SoundFileBrowser::on_custom (const FileFilter::Info& filter_info)
+SoundFileBrowser::on_audio_filter (const FileFilter::Info& filter_info)
 {
 	return AudioFileSource::safe_file_extension (filter_info.filename);
+}
+
+bool
+SoundFileBrowser::on_midi_filter (const FileFilter::Info& filter_info)
+{
+	return SMFSource::safe_file_extension (filter_info.filename);
 }
 
 void
@@ -894,6 +906,14 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 				src_needed = true;
 			}
 
+		} else if (SMFSource::safe_file_extension (*i)) {
+			SMFReader reader(*i);
+			if (reader.num_tracks() > 1) {
+				cout << *i << " MULTI CHANNEL" << endl;
+				multichannel = true;
+			} else {
+				cout << *i << " SINGLE CHANNEL" << endl;
+			}
 		} else {
 			err = true;
 		}

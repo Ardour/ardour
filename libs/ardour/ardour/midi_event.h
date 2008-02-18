@@ -86,7 +86,7 @@ struct MidiEvent {
 		if (_owns_buffer) {
 			if (copy._buffer) {
 				if (!_buffer || _size < copy._size)
-					_buffer = (Byte*)realloc(_buffer, copy._size);
+					_buffer = (Byte*)::realloc(_buffer, copy._size);
 				memcpy(_buffer, copy._buffer, copy._size);
 			} else {
 				free(_buffer);
@@ -128,6 +128,11 @@ struct MidiEvent {
 		}
 		_buffer = buf;
 		_owns_buffer = own;
+	}
+
+	inline void realloc(size_t size) {
+		assert(_owns_buffer);
+		_buffer = (Byte*) ::realloc(_buffer, size);
 	}
 
 #else

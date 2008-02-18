@@ -63,8 +63,10 @@ class SMFSource : public MidiSource {
 
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 	int set_source_name (string newname, bool destructive);
+	
+	static bool safe_file_extension (const Glib::ustring& path);
 
-	string path() const { return _path; }
+	Glib::ustring path() const { return _path; }
 
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
@@ -120,7 +122,7 @@ class SMFSource : public MidiSource {
 	static const uint16_t _ppqn = 19200;
 
 	uint16_t       _channel;
-	string         _path;
+	Glib::ustring  _path;
 	Flag           _flags;
 	string         _take_id;
 	bool           _allow_remove_if_empty;

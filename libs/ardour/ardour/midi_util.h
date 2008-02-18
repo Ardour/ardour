@@ -28,7 +28,7 @@ namespace ARDOUR {
 /** Return the size of the given event NOT including the status byte,
  * or -1 if unknown (eg sysex)
  */
-int
+static inline int
 midi_event_size(unsigned char status)
 {
 	if (status >= 0x80 && status <= 0xE0) {

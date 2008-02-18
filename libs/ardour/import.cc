@@ -39,7 +39,9 @@
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
+#include <ardour/session_directory.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/audioengine.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/audioregion.h>
@@ -47,6 +49,9 @@
 #include <ardour/source_factory.h>
 #include <ardour/resampled_source.h>
 #include <ardour/analyser.h>
+#include <ardour/smf_reader.h>
+#include <ardour/smf_source.h>
+#include <ardour/tempo.h>
 
 #include "i18n.h"
 
@@ -66,23 +71,25 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 }
 
 static std::string
-get_non_existent_filename (const bool allow_replacing, const std::string destdir, const std::string& basename, uint channel, uint channels)
+get_non_existent_filename (DataType type, const bool allow_replacing, const std::string destdir, const std::string& basename, uint channel, uint channels)
 {
 	char buf[PATH_MAX+1];
 	bool goodfile = false;
 	string base(basename);
+	const char* ext = (type == DataType::AUDIO) ? "wav" : "mid";
 
 	do {
-		if (channels == 2) {
+
+		if (type == DataType::AUDIO && channels == 2) {
 			if (channel == 0) {
 				snprintf (buf, sizeof(buf), "%s-L.wav", base.c_str());
 			} else {
 				snprintf (buf, sizeof(buf), "%s-R.wav", base.c_str());
 			}
 		} else if (channels > 1) {
-			snprintf (buf, sizeof(buf), "%s-c%d.wav", base.c_str(), channel+1);
+			snprintf (buf, sizeof(buf), "%s-c%d.%s", base.c_str(), channel, ext);
 		} else {
-			snprintf (buf, sizeof(buf), "%s.wav", base.c_str());
+			snprintf (buf, sizeof(buf), "%s.%s", base.c_str(), ext);
 		}
 		
 
@@ -112,13 +119,20 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 	vector<string> new_paths;
 	const string basename = basename_nosuffix (import_file_path);
 
+	SessionDirectory sdir(session_dir);
+
 	for (uint n = 0; n < channels; ++n) {
 
-		std::string filepath;
+		const DataType type = (import_file_path.rfind(".mid") != string::npos)
+				? DataType::MIDI : DataType::AUDIO;
 
-		filepath = session_dir;
+		std::string filepath = (type == DataType::MIDI)
+				? sdir.midi_path().to_string() : sdir.sound_path().to_string();
+
 		filepath += '/';
-		filepath += get_non_existent_filename (allow_replacing, session_dir, basename, n, channels); 
+		filepath += get_non_existent_filename (type, allow_replacing, filepath, basename, n, channels); 
+
+		cout << "NEW SOURCE PATH: " << filepath << endl;
 
 		new_paths.push_back (filepath);
 	}
@@ -128,7 +142,7 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 
 static bool
 map_existing_mono_sources (const vector<string>& new_paths, Session& sess,
-		           uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles, Session *session)
+		           uint samplerate, vector<boost::shared_ptr<Source> >& newfiles, Session *session)
 {
 	for (vector<string>::const_iterator i = new_paths.begin();
 			i != new_paths.end(); ++i)
@@ -140,14 +154,14 @@ map_existing_mono_sources (const vector<string>& new_paths, Session& sess,
 			return false;
 		}
 
-		newfiles.push_back(boost::dynamic_pointer_cast<AudioFileSource>(source));
+		newfiles.push_back(boost::dynamic_pointer_cast<Source>(source));
 	}
 	return true;
 }
 
 static bool
 create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
-		uint samplerate, vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+		uint samplerate, vector<boost::shared_ptr<Source> >& newfiles)
 {
 	for (vector<string>::const_iterator i = new_paths.begin();
 			i != new_paths.end(); ++i)
@@ -156,13 +170,16 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 
 		try
 		{
+			const DataType type = ((*i).rfind(".mid") != string::npos)
+				? DataType::MIDI : DataType::AUDIO;
+				
 			source = SourceFactory::createWritable (
-				DataType::AUDIO,
-				sess,
-				i->c_str(),
-				false, // destructive
-				samplerate
-				);
+					type,
+					sess,
+					i->c_str(),
+					false, // destructive
+					samplerate
+					);
 		}
 		catch (const failed_constructor& err)
 		{
@@ -170,7 +187,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 			return false;
 		}
 
-		newfiles.push_back(boost::dynamic_pointer_cast<AudioFileSource>(source));
+		newfiles.push_back(boost::dynamic_pointer_cast<Source>(source));
 	}
 	return true;
 }
@@ -197,9 +214,10 @@ compose_status_message (const string& path,
 
 static void
 write_audio_data_to_new_files (ImportableSource* source, Session::import_status& status,
-			       vector<boost::shared_ptr<AudioFileSource> >& newfiles)
+			       vector<boost::shared_ptr<Source> >& newfiles)
 {
 	const nframes_t nframes = ResampledImportableSource::blocksize;
+	boost::shared_ptr<AudioFileSource> afs;
 	uint channels = source->channels();
 
 	boost::scoped_array<float> data(new float[nframes * channels]);
@@ -236,7 +254,9 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 		/* flush to disk */
 
 		for (chn = 0; chn < channels; ++chn) {
-			newfiles[chn]->write (channel_data[chn].get(), nfread);
+			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(newfiles[chn])) != 0) {
+				afs->write (channel_data[chn].get(), nfread);
+			}
 		}
 
 		read_count += nread;
@@ -245,9 +265,71 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 }
 
 static void
-remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
+write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
+			       vector<boost::shared_ptr<Source> >& newfiles)
 {
-	::unlink (file_source->path().c_str());
+	MidiEvent ev(0.0, 4, NULL, true);
+
+	uint64_t t       = 0;
+	uint32_t delta_t = 0;
+	uint32_t size    = 0;
+
+	status.progress = 0.0f;
+
+	try {
+
+	for (unsigned i = 1; i <= source->num_tracks(); ++i) {
+	
+		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(newfiles[i-1]);
+		
+		source->seek_to_track(i);
+		
+		while (!status.cancel) {
+
+			if (source->read_event(4, ev.buffer(), &size, &delta_t) < 0)
+				break;
+
+			// FIXME: kluuudge
+			if (ev.channel() != 0) {
+				cout << "Skipping event with channel " << ev.channel() << endl;
+				continue;
+			}
+			
+			t += delta_t;
+			ev.time() = t * (double)source->ppqn();
+			ev.size() = size;
+
+			smfs->append_event_unlocked(ev);
+			if (status.progress < 0.99)
+				status.progress += 0.01;
+		}
+			
+		nframes_t timeline_position = 0; // FIXME: ?
+
+		// FIXME: kluuuuudge: assumes tempo never changes after start
+		const double frames_per_beat = smfs->session().tempo_map().tempo_at(
+				timeline_position).frames_per_beat(
+					smfs->session().engine().frame_rate(),
+					smfs->session().tempo_map().meter_at(timeline_position));
+
+		smfs->update_length(0, (t * source->ppqn()) * frames_per_beat);
+
+		smfs->flush_header();
+		smfs->flush_footer();
+
+		if (status.cancel)
+			break;
+	}
+
+	} catch (...) {
+		error << "Corrupt MIDI file " << source->filename() << endl;
+	}
+}
+
+static void
+remove_file_source (boost::shared_ptr<Source> source)
+{
+	::unlink (source->path().c_str());
 }
 
 // This function is still unable to cleanly update an existing source, even though
@@ -258,8 +340,10 @@ void
 Session::import_audiofiles (import_status& status)
 {
 	uint32_t cnt = 1;
-	typedef vector<boost::shared_ptr<AudioFileSource> > AudioSources;
-	AudioSources all_new_sources;
+	typedef vector<boost::shared_ptr<Source> > Sources;
+	Sources all_new_sources;
+	boost::shared_ptr<AudioFileSource> afs;
+	uint channels = 0;
 
 	status.sources.clear ();
 	
@@ -268,24 +352,44 @@ Session::import_audiofiles (import_status& status)
 			++p, ++cnt)
 	{
 		std::auto_ptr<ImportableSource> source;
+		std::auto_ptr<SMFReader>        smf_reader;
+		
+		const DataType type = ((*p).rfind(".mid") != string::npos)
+				? DataType::MIDI : DataType::AUDIO;
 
-		try
-		{
-			source = open_importable_source (*p, frame_rate(), status.quality);
-		}
-		catch (const failed_constructor& err)
-		{
-			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
-			status.done = status.cancel = true;
-			return;
+		if (type == DataType::AUDIO) {
+			try
+			{
+				source = open_importable_source (*p, frame_rate(), status.quality);
+				channels = source->channels();
+			} catch (const failed_constructor& err)
+			{
+				error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
+				status.done = status.cancel = true;
+				return;
+			}
+		} else {
+			try
+			{
+				smf_reader = std::auto_ptr<SMFReader>(new SMFReader(*p));
+				channels = smf_reader->num_tracks();
+			} catch (const SMFReader::UnsupportedTime& err) {
+				error << _("Import: unsupported MIDI time stamp format") << endmsg;
+				status.done = status.cancel = true;
+				return;
+			} catch (...) {
+				error << _("Import: error reading MIDI file") << endmsg;
+				status.done = status.cancel = true;
+				return;
+			}
 		}
 
 		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source,
 								      *p,
 				get_best_session_directory_for_new_source (),
-				source->channels());
+				channels);
 		
-		AudioSources newfiles;
+		Sources newfiles;
 
 		if (status.replace_existing_source) {
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endl;
@@ -299,14 +403,20 @@ Session::import_audiofiles (import_status& status)
 
 		if (status.cancel) break;
 
-		for (AudioSources::iterator i = newfiles.begin(); i != newfiles.end(); ++i) {
-			(*i)->prepare_for_peakfile_writes ();
+		for (Sources::iterator i = newfiles.begin(); i != newfiles.end(); ++i) {
+			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(*i)) != 0) {
+				afs->prepare_for_peakfile_writes ();
+			}
 		}
 
-		status.doing_what = compose_status_message (*p, source->samplerate(),
-				frame_rate(), cnt, status.paths.size());
-
-		write_audio_data_to_new_files (source.get(), status, newfiles);
+		if (source.get()) { // audio
+			status.doing_what = compose_status_message (*p, source->samplerate(),
+					frame_rate(), cnt, status.paths.size());
+			write_audio_data_to_new_files (source.get(), status, newfiles);
+		} else if (smf_reader.get()) { // midi
+			status.doing_what = string_compose(_("loading MIDI file %1"), *p);
+			write_midi_data_to_new_files (smf_reader.get(), status, newfiles);
+		}
 	}
 
 	if (!status.cancel) {
@@ -318,10 +428,14 @@ Session::import_audiofiles (import_status& status)
 
 		/* flush the final length(s) to the header(s) */
 
-		for (AudioSources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ++x)
+		for (Sources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ++x)
 		{
-			(*x)->update_header(0, *now, xnow);
-			(*x)->done_with_peakfile_writes ();
+			cout << "NEW SOURCE: " << (*x)->path() << endl;
+
+			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
+				afs->update_header(0, *now, xnow);
+				afs->done_with_peakfile_writes ();
+			}
 			
 			/* now that there is data there, requeue the file for analysis */
 			

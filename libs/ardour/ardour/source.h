@@ -50,8 +50,9 @@ class Source : public SessionObject, public ARDOUR::Readable
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 	
-	/** @return the number of items in this source */
 	nframes_t length() const { return _length; }
+	
+	virtual Glib::ustring path() const = 0;
 
 	virtual nframes_t natural_position() const { return 0; }
 
@@ -88,10 +89,10 @@ class Source : public SessionObject, public ARDOUR::Readable
 	AnalysisFeatureList transients;
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
+	
+	void update_length (nframes_t pos, nframes_t cnt);
 
   protected:
-	void update_length (nframes_t pos, nframes_t cnt);
-	
 	DataType            _type;
 	time_t              _timestamp;
 	nframes_t           _length;

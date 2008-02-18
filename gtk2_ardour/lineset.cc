@@ -33,7 +33,7 @@ namespace Canvas {
 
 LinesetClass Lineset::lineset_class;
 
-static const char* overlap_error_str = "Lineset error: Line overlap";
+//static const char* overlap_error_str = "Lineset error: Line overlap";
 
 Lineset::Line::Line(double c, double w, uint32_t color)
 	: coord(c)
@@ -142,7 +142,7 @@ Lineset::change_line_width(double coord, double width) {
 
 		if(it != lines.end()) {
 			if(l.coord + width > it->coord) {
-				cerr << overlap_error_str << endl;
+				//cerr << overlap_error_str << endl;
 				return;
 			}
 		}
@@ -171,14 +171,14 @@ Lineset::add_line(double coord, double width, uint32_t color) {
 	/* overlap checking */
 	if(it != lines.end()) {
 		if(l.coord + l.width > it->coord) {
-			cerr << overlap_error_str << endl;
+			//cerr << overlap_error_str << endl;
 			return;
 		}
 	}
 	if(it != lines.begin()) {
 		--it;
 		if(l.coord < it->coord + it->width) {
-			cerr << overlap_error_str << endl;
+			//cerr << overlap_error_str << endl;
 			return;
 		}
 		++it;

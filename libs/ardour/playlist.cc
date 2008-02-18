@@ -522,6 +522,8 @@ Playlist::set_region_ownership ()
 void
 Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t position)
 {
+	assert(region->data_type() == _type);
+
 	RegionSortByPosition cmp;
 	nframes_t old_length = 0;
 

@@ -670,7 +670,7 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 int
 MidiDiskstream::overwrite_existing_buffers ()
 {
-	cerr << "MDS: overwrite_existing_buffers() (does nothing)" << endl;
+	//cerr << "MDS: overwrite_existing_buffers() (does nothing)" << endl;
 	return 0;
 }
 

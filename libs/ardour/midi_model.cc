@@ -433,7 +433,7 @@ MidiModel::append_note_off_unlocked(double time, uint8_t note_num)
 		Note& note = *_notes[*n].get();
 		//cerr << (unsigned)(uint8_t)note.note() << " ? " << (unsigned)note_num << endl;
 		if (note.note() == note_num) {
-			assert(time > note.time());
+			assert(time >= note.time());
 			note.set_duration(time - note.time());
 			_write_notes.erase(n);
 			//cerr << "MM resolved note, duration: " << note.duration() << endl;
