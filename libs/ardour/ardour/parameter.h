@@ -48,85 +48,32 @@ namespace ARDOUR {
 class Parameter
 {
 public:
-	inline Parameter(AutomationType type = NullAutomation, uint32_t id=0) : _type(type), _id(id) {}
+	Parameter(AutomationType type = NullAutomation, uint32_t id=0, uint8_t channel=0)
+		: _type(type), _id(id), _channel(channel)
+	{}
 	
-	/** Construct an Parameter from a string returned from Parameter::to_string
-	 * (AutomationList automation-id property)
-	 */
-	Parameter(const std::string& str) : _type(NullAutomation), _id(0) {
-		if (str == "gain") {
-			_type = GainAutomation;
-		} else if (str == "solo") {
-			_type = SoloAutomation;
-		} else if (str == "mute") {
-			_type = MuteAutomation;
-		} else if (str == "fadein") {
-			_type = FadeInAutomation;
-		} else if (str == "fadeout") {
-			_type = FadeOutAutomation;
-		} else if (str == "envelope") {
-			_type = EnvelopeAutomation;
-		} else if (str == "pan") {
-			_type = PanAutomation;
-		} else if (str.length() > 4 && str.substr(0, 4) == "pan-") {
-			_type = PanAutomation;
-			_id = atoi(str.c_str()+4);
-		} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
-			_type = PluginAutomation;
-			_id = atoi(str.c_str()+10);
-		} else if (str.length() > 7 && str.substr(0, 7) == "midicc-") {
-			_type = MidiCCAutomation;
-			_id = atoi(str.c_str()+7);
-		} else {
-			PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
-		}
+	Parameter(const std::string& str);
+
+	inline AutomationType type()    const { return _type; }
+	inline uint32_t       id()      const { return _id; }
+	inline uint8_t        channel() const { return _channel; }
+
+	inline bool operator==(const Parameter& id) const {
+		return (_type == id._type && _id == id._id);
 	}
-
-	inline AutomationType type() const { return _type; }
-	inline uint32_t       id()   const { return _id; }
-
-	inline bool operator==(const Parameter& id) const
-		{ return (_type == id._type && _id == id._id); }
 	
-	/** Arbitrary but fixed ordering, so we're comparable (usable in std::map) */
+	/** Arbitrary but fixed ordering (for use in e.g. std::map) */
 	inline bool operator<(const Parameter& id) const {
 #ifndef NDEBUG
 		if (_type == NullAutomation)
 			PBD::warning << "Uninitialized Parameter compared." << endmsg;
 #endif
-		return (_type < id._type || _id < id._id);
+		return (_channel < id._channel || _type < id._type || _id < id._id);
 	}
 	
 	inline operator bool() const { return (_type != 0); }
 
-	/** Unique string representation, suitable as an XML property value.
-	 * e.g. <AutomationList automation-id="whatthisreturns">
-	 */
-	inline std::string to_string() const {
-		if (_type == GainAutomation) {
-			return "gain";
-		} else if (_type == PanAutomation) {
-			return string_compose("pan-%1", _id);
-		} else if (_type == SoloAutomation) {
-			return "solo";
-		} else if (_type == MuteAutomation) {
-			return "mute";
-		} else if (_type == FadeInAutomation) {
-			return "fadein";
-		} else if (_type == FadeOutAutomation) {
-			return "fadeout";
-		} else if (_type == EnvelopeAutomation) {
-			return "envelope";
-		} else if (_type == PluginAutomation) {
-			return string_compose("parameter-%1", _id);
-		} else if (_type == MidiCCAutomation) {
-			return string_compose("midicc-%1", _id);
-		} else {
-			assert(false);
-			PBD::warning << "Uninitialized Parameter to_string() called." << endmsg;
-			return "";
-		}
-	}
+	std::string to_string() const;
 
 	/* The below properties are only used for CC right now, but unchanging properties
 	 * of parameters (rather than changing parameters of automation lists themselves)
@@ -154,6 +101,7 @@ private:
 	// default copy constructor is ok
 	AutomationType _type;
 	uint32_t       _id;
+	uint8_t        _channel;
 };
 
 

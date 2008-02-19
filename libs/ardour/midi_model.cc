@@ -304,9 +304,10 @@ MidiModel::control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter)
 			ev.set_buffer((Byte*)malloc(3), true);
 
 		assert(iter.first);
+		assert(iter.first->parameter().channel() < 16);
 		assert(iter.first->parameter().id() <= INT8_MAX);
 		assert(iter.second.second <= INT8_MAX);
-		ev.buffer()[0] = MIDI_CMD_CONTROL;
+		ev.buffer()[0] = MIDI_CMD_CONTROL + iter.first->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.first->parameter().id();
 		ev.buffer()[2] = (Byte)iter.second.second;
 		ev.time() = iter.second.first; // x
@@ -412,7 +413,7 @@ MidiModel::append_note_on_unlocked(uint8_t chan, double time, uint8_t note_num, 
 	assert(chan < 16);
 	assert(_writing);
 
-	_notes.push_back(boost::shared_ptr<Note>(new Note(time, 0, note_num, velocity)));
+	_notes.push_back(boost::shared_ptr<Note>(new Note(chan, time, 0, note_num, velocity)));
 	if (_note_mode == Sustained) {
 		//cerr << "MM Sustained: Appending active note on " << (unsigned)(uint8_t)note_num << endl;
 		_write_notes[chan].push_back(_notes.size() - 1);
@@ -471,10 +472,7 @@ MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t
 	assert(chan < 16);
 	assert(_writing);
 	
-	if (chan != 0) // FIXME
-		cerr << "WARNING: CC on non-0 channel, channel information lost!" << endl;
-
-	Parameter param(MidiCCAutomation, number);
+	Parameter param(MidiCCAutomation, number, chan);
 	
 	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
 	control->list()->fast_simple_add(time, (double)value);

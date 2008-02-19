@@ -22,15 +22,17 @@
 
 namespace ARDOUR {
 
-Note::Note(double t, double d, uint8_t n, uint8_t v)
+Note::Note(uint8_t chan, double t, double d, uint8_t n, uint8_t v)
 	: _on_event(t, 3, NULL, true)
 	, _off_event(t + d, 3, NULL, true)
 {
-	_on_event.buffer()[0] = MIDI_CMD_NOTE_ON;
+	assert(chan < 16);
+
+	_on_event.buffer()[0] = MIDI_CMD_NOTE_ON + chan;
 	_on_event.buffer()[1] = n;
 	_on_event.buffer()[2] = v;
 	
-	_off_event.buffer()[0] = MIDI_CMD_NOTE_OFF;
+	_off_event.buffer()[0] = MIDI_CMD_NOTE_OFF + chan;
 	_off_event.buffer()[1] = n;
 	_off_event.buffer()[2] = 0x40;
 	

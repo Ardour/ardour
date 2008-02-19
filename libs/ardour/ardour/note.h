@@ -34,7 +34,7 @@ namespace ARDOUR {
  */
 class Note {
 public:
-	Note(double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
+	Note(uint8_t chan=0, double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note& copy);
 
 	const Note& operator=(const Note& copy);

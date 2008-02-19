@@ -37,6 +37,8 @@ class AddMidiCCTrackDialog : public Gtk::Dialog
 	ARDOUR::Parameter parameter ();
 
   private:
+	Gtk::Adjustment _chan_adjustment;
+	Gtk::SpinButton _chan_spinner;
 	Gtk::Adjustment _cc_num_adjustment;
 	Gtk::SpinButton _cc_num_spinner;
 };

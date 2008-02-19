@@ -95,6 +95,7 @@ mtc_slave.cc
 named_selection.cc
 note.cc
 panner.cc
+parameter.cc
 pcm_utils.cc
 playlist.cc
 playlist_factory.cc

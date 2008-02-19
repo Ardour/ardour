@@ -36,40 +36,50 @@ using namespace PBD;
 using namespace ARDOUR;
 
 AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
-	: Dialog (_("ardour: add midi controller track")),
-	  _cc_num_adjustment (1, 0, 127, 1, 10),
-	  _cc_num_spinner (_cc_num_adjustment)
+	: Dialog (_("ardour: add midi controller track"))
+	, _chan_adjustment (1, 1, 16, 8)
+	, _chan_spinner (_chan_adjustment)
+	, _cc_num_adjustment (1, 0, 127, 1, 10)
+	, _cc_num_spinner (_cc_num_adjustment)
 {
 	set_name ("AddMidiCCTrackDialog");
 	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_resizable (false);
 
-
+	_chan_spinner.set_name ("AddMidiCCTrackDialogSpinner");
 	_cc_num_spinner.set_name ("AddMidiCCTrackDialogSpinner");
 	
-	HBox *hbox = manage (new HBox());
-	Label *label = manage(new Label("Controller Number: "));
+	HBox *chan_box = manage (new HBox());
+	Label *chan_label = manage(new Label("Channel: "));
+	chan_box->pack_start(*chan_label, true, true, 4);
+	chan_box->pack_start(_chan_spinner, false, false, 4);
+	get_vbox()->pack_start(*chan_box, true, true, 4);
 
-	hbox->pack_start(*label, true, true, 4);
-	hbox->pack_start(_cc_num_spinner, false, false, 4);
-
-	get_vbox()->pack_start(*hbox, true, true, 4);
+	HBox* num_box = manage (new HBox());
+	Label *num_label = manage(new Label("Controller: "));
+	num_box->pack_start(*num_label, true, true, 4);
+	num_box->pack_start(_cc_num_spinner, false, false, 4);
+	get_vbox()->pack_start(*num_box, true, true, 4);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);
-
+	
+	_chan_spinner.show();
+	chan_box->show();
+	chan_label->show();
 	_cc_num_spinner.show();
-	hbox->show();
-	label->show();
+	num_box->show();
+	num_label->show();
 }
 
 
 ARDOUR::Parameter
 AddMidiCCTrackDialog::parameter ()
 {
+	int chan   = _chan_spinner.get_value_as_int() - 1;
 	int cc_num = _cc_num_spinner.get_value_as_int();
 
-	return Parameter(MidiCCAutomation, cc_num);
+	return Parameter(MidiCCAutomation, cc_num, chan);
 }
 
