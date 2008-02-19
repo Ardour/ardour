@@ -57,7 +57,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static int
-convert_spec_to_info (AudioExportSpecification& spec, SF_INFO& sfinfo)
+convert_spec_to_info (ExportSpecification& spec, SF_INFO& sfinfo)
 {
 	if (spec.path.length() == 0) {
 		error << _("Export: no output file specified") << endmsg;
@@ -76,18 +76,18 @@ convert_spec_to_info (AudioExportSpecification& spec, SF_INFO& sfinfo)
 	return 0;
 }
 
-AudioExportSpecification::AudioExportSpecification ()
+ExportSpecification::ExportSpecification ()
 {
 	init ();
 }
 
-AudioExportSpecification::~AudioExportSpecification ()
+ExportSpecification::~ExportSpecification ()
 {
 	clear ();
 }
 
 void
-AudioExportSpecification::init ()
+ExportSpecification::init ()
 {
 	src_state = 0;
 	pos = 0;
@@ -113,7 +113,7 @@ AudioExportSpecification::init ()
 }
 
 void
-AudioExportSpecification::clear ()
+ExportSpecification::clear ()
 {
 	if (out) {
 		sf_close (out);
@@ -153,7 +153,7 @@ AudioExportSpecification::clear ()
 }
 
 int
-AudioExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
+ExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
 {
 	char errbuf[256];
 	GDitherSize dither_size;
@@ -161,7 +161,7 @@ AudioExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
 	frame_rate = frate;
 
 	if (channels == 0) {
-		error << _("illegal frame range in export specification") << endmsg;
+		error << _("illegal channel count in export specification") << endmsg;
 		return -1;
 	}
 
@@ -258,7 +258,7 @@ AudioExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
 }
 
 int
-AudioExportSpecification::process (nframes_t nframes)
+ExportSpecification::process (nframes_t nframes)
 {
 	float* float_buffer = 0;
 	uint32_t chn;
@@ -426,7 +426,7 @@ AudioExportSpecification::process (nframes_t nframes)
 }
 
 int
-Session::start_audio_export (AudioExportSpecification& spec)
+Session::start_export (ExportSpecification& spec)
 {
 	if (!_engine.connected()) {
 		return -1;
@@ -448,7 +448,7 @@ Session::start_audio_export (AudioExportSpecification& spec)
 }
 
 int
-Session::stop_audio_export (AudioExportSpecification& spec)
+Session::stop_export (ExportSpecification& spec)
 {
 	/* don't stop freewheeling but do stop paying attention to it for now */
 
@@ -459,7 +459,7 @@ Session::stop_audio_export (AudioExportSpecification& spec)
 }
 
 int 
-Session::prepare_to_export (AudioExportSpecification& spec)
+Session::prepare_to_export (ExportSpecification& spec)
 {
 	int ret = -1;
 
@@ -521,7 +521,7 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 }
 
 int
-Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
+Session::process_export (nframes_t nframes, ExportSpecification* spec)
 {
 	uint32_t chn;
 	uint32_t x;
@@ -551,7 +551,7 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 		
 	if (!spec->running || spec->stop || (this_nframes = min ((spec->end_frame - spec->pos), nframes)) == 0) {
 		process_without_events (nframes);
-		return stop_audio_export (*spec);
+		return stop_export (*spec);
 	}
 
 	/* make sure we've caught up with disk i/o, since
@@ -574,7 +574,7 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 	
 	for (chn = 0; chn < spec->channels; ++chn) {
 		
-		AudioExportPortMap::iterator mi = spec->port_map.find (chn);
+		ExportPortMap::iterator mi = spec->port_map.find (chn);
 		
 		if (mi == spec->port_map.end()) {
 			/* no ports exported to this channel */
@@ -588,17 +588,18 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 			/* OK, this port's output is supposed to appear on this channel 
 			 */
 
-			AudioPort* const port = dynamic_cast<AudioPort*>((*t).first);
-			if (port == 0) {
-				cerr << "FIXME: Non-audio export" << endl;
-				continue;
-			}
-			Sample* port_buffer = port->get_audio_buffer().data();
+			AudioPort* const aport = dynamic_cast<AudioPort*>((*t).first);
+			MidiPort* const mport = dynamic_cast<MidiPort*>((*t).first);
+			if (aport != 0) {
+				Sample* port_buffer = aport->get_audio_buffer().data();
 
-			/* now interleave the data from the channel into the float buffer */
-				
-			for (x = 0; x < nframes; ++x) {
-				spec->dataF[chn+(x*spec->channels)] += (float) port_buffer[x];
+				/* now interleave the data from the channel into the float buffer */
+
+				for (x = 0; x < nframes; ++x) {
+					spec->dataF[chn+(x*spec->channels)] += (float) port_buffer[x];
+				}
+			} else if (mport != 0) {
+				cerr << "EXPORT MIDI PORT" << endl;
 			}
 		}
 	}

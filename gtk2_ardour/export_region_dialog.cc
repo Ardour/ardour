@@ -28,14 +28,14 @@
 #include "i18n.h"
 
 
-ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::Region> region) 
+ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::Region> reg) 
 	: ExportDialog(editor)
+	, region(reg)
 {
-	set_title (_("ardour: export region"));
-	file_frame.set_label (_("Export to File")),
+	assert(region);
 
-	audio_region = boost::dynamic_pointer_cast<ARDOUR::AudioRegion>(region);
-	assert(audio_region);
+	set_title (_("Ardour: Export Region"));
+	file_frame.set_label (_("Export to File")),
 
 	do_not_allow_track_and_master_selection();
 	do_not_allow_channel_count_selection();
@@ -43,7 +43,7 @@ ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, boost::shared_ptr<
 
 
 void
-ExportRegionDialog::export_audio_data()
+ExportRegionDialog::export_data()
 {
 	pthread_t thr;
 	pthread_create_and_store ("region export", &thr, 0, ExportRegionDialog::_export_region_thread, this);
@@ -71,5 +71,6 @@ ExportRegionDialog::_export_region_thread (void *arg)
 void
 ExportRegionDialog::export_region ()
 {
-	audio_region->exportme (getSession(), spec);
+	region->exportme (getSession(), spec);
 }
+

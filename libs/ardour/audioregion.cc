@@ -1022,7 +1022,7 @@ AudioRegion::read_raw_internal (Sample* buf, nframes_t pos, nframes_t cnt) const
 
 
 int
-AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
+AudioRegion::exportme (Session& session, ARDOUR::ExportSpecification& spec)
 {
 	const nframes_t blocksize = 4096;
 	nframes_t to_read;

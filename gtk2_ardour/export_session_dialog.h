@@ -30,7 +30,7 @@ class ExportSessionDialog : public ExportDialog
   	void set_range (nframes_t start, nframes_t end);
   
   protected:
-	void export_audio_data();
+	void export_data();
 };
 
 

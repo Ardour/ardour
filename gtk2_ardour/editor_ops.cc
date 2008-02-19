@@ -2821,6 +2821,24 @@ Editor::separate_region_from_selection ()
 }
 
 void
+Editor::separate_region_from_punch ()
+{
+	Location* loc  = session->locations()->auto_punch_location();
+	if (loc) {
+		separate_regions_using_location (*loc);
+	}
+}
+
+void
+Editor::separate_region_from_loop ()
+{
+	Location* loc  = session->locations()->auto_loop_location();
+	if (loc) {
+		separate_regions_using_location (*loc);
+	}
+}
+
+void
 Editor::separate_regions_using_location (Location& loc)
 {
 	if (loc.is_mark()) {
@@ -5487,3 +5505,29 @@ Editor::tab_to_transient (bool forward)
 		}
 	}
 }
+
+void
+Editor::playhead_forward_to_grid ()
+{
+	if (!session) return;
+	nframes64_t pos = playhead_cursor->current_frame;
+	if (pos < max_frames) {
+		pos++;
+		snap_to_internal (pos, 1, false);
+		session->request_locate (pos);
+	}
+}
+
+
+void
+Editor::playhead_backward_to_grid ()
+{
+	if (!session) return;
+	nframes64_t pos = playhead_cursor->current_frame;
+	if (pos > 1) {
+		pos--;
+		snap_to_internal (pos, -1, false);
+		session->request_locate (pos);
+	}
+}
+

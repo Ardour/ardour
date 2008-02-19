@@ -54,7 +54,7 @@ ExportRangeMarkersDialog::browse_action () const
 }
 	
 void 
-ExportRangeMarkersDialog::export_audio_data ()
+ExportRangeMarkersDialog::export_data ()
 {
 	getSession().locations()->apply(*this, &ExportRangeMarkersDialog::process_range_markers_export);
 }
@@ -83,7 +83,7 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 
 			getSession().request_locate(spec.start_frame, false);
 
-			if (getSession().start_audio_export(spec)){
+			if (getSession().start_export(spec)){
 				// if export fails			
 				return;
 			}

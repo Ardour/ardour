@@ -975,7 +975,7 @@ ExportDialog::do_export ()
 	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
 	cancel_label.set_text (_("Stop Export"));
 
-	export_audio_data();
+	export_data();
 	
   	progress_connection.disconnect ();
 	end_dialog ();

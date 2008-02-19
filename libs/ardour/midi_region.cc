@@ -310,6 +310,12 @@ MidiRegion::separate_by_channel (Session& session, vector<MidiRegion*>& v) const
 	return -1;
 }
 
+int
+MidiRegion::exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&)
+{
+	return -1;
+}
+
 boost::shared_ptr<MidiSource>
 MidiRegion::midi_source (uint32_t n) const
 {

@@ -30,9 +30,9 @@ ExportSessionDialog::ExportSessionDialog (PublicEditor& editor)
 }
 	
 void 
-ExportSessionDialog::export_audio_data ()
+ExportSessionDialog::export_data ()
 {
-	if (getSession().start_audio_export (spec)) {
+	if (getSession().start_export (spec)) {
 		return;
 	}
 

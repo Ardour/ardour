@@ -84,6 +84,8 @@ class MidiRegion : public Region
 
 	boost::shared_ptr<const AutomationControl> control(Parameter id) const
 			{ return midi_source()->model()->control(id); }
+	
+	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
 
   private:
 	friend class RegionFactory;

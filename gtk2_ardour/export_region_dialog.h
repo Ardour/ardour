@@ -33,10 +33,10 @@ class ExportRegionDialog : public ExportDialog
 	void export_region ();
 
   protected:
-	void export_audio_data();
+	void export_data();
   
   private:
-	boost::shared_ptr<ARDOUR::AudioRegion> audio_region;
+	boost::shared_ptr<ARDOUR::Region> region;
 };
 
 

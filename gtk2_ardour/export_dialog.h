@@ -48,7 +48,7 @@ class ExportDialog : public ArdourDialog
 	virtual Gtk::FileChooserAction browse_action() const { return Gtk::FILE_CHOOSER_ACTION_SAVE; }
 
   protected:
-	ARDOUR::AudioExportSpecification spec;
+	ARDOUR::ExportSpecification spec;
 	Gtk::Frame  file_frame;
 
     struct ExportModelColumns : public Gtk::TreeModel::ColumnRecord
@@ -77,7 +77,7 @@ class ExportDialog : public ArdourDialog
 	// Gets called from within do_export. Is responsible for exporting the
 	// audio data. spec has already been filled with user input before calling
 	// this method. The dialog will be closed after this function exited.
-	virtual void export_audio_data() = 0;
+	virtual void export_data() = 0;
 
 	virtual bool wants_dir() { return false; }
 	

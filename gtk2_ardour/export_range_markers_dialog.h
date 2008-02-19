@@ -35,7 +35,7 @@ class ExportRangeMarkersDialog : public ExportDialog
   protected:
 	virtual bool is_filepath_valid(string &filepath);
 
-  	void export_audio_data();
+  	void export_data();
 
 	bool wants_dir() { return true; }
   

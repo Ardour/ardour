@@ -38,7 +38,7 @@
 
 namespace ARDOUR {
 	class Session;
-	class AudioExportSpecification;
+	class ExportSpecification;
 	class Region;
 	class Playlist;
 	class RouteGroup;

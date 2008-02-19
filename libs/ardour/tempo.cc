@@ -1141,16 +1141,16 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 	case Bar:
 		if (dir < 0) {
 			/* relax */
-
 		} else if (dir > 0) {
 			if (bbt.beats > 0) {
+				bbt.bars++;
+			} else if (metric.frame() < frame) {
 				bbt.bars++;
 			}
 		} else {
 			if (bbt.beats > metric.meter().beats_per_bar()/2) {
 				bbt.bars++;
 			}
-
 		}
 		bbt.beats = 1;
 		bbt.ticks = 0;
@@ -1161,6 +1161,8 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 			/* relax */
 		} else if (dir > 0) {
 			if (bbt.ticks > 0) {
+				bbt.beats++;
+			} else if (metric.frame() < frame) {
 				bbt.beats++;
 			}
 		} else {
@@ -1177,11 +1179,9 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 	
 	}
 
-	/* 
-	   cerr << "for " << frame << " round to " << bbt << " using "
-	   << metric.start()
-	   << endl;
-	*/
+	cerr << "for " << frame << " round to " << bbt << " using "
+	     << metric.start()
+	     << endl;
 
 	return metric.frame() + count_frames_between (metric.start(), bbt);
 }

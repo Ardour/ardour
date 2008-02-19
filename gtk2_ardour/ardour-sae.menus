@@ -1,12 +1,11 @@
 <ui>
-
     <menubar name='Main' action='MainMenu'>
+
         <menu name='Session' action='Session'>
            <menuitem action='New'/>
            <menuitem action='Open'/>
            <menuitem action='Recent'/>
            <menuitem action='Close'/>
-           <menuitem action='Quit'/>
            <separator/>
            <menuitem action='Save'/>
            <menuitem action='Snapshot'/>
@@ -18,6 +17,7 @@
               <menuitem action='addExistingAudioFiles'/>
               <separator/>
 	      <menuitem action='ExportSession'/>
+	      <menuitem action='export-region'/>
 	   </menu>
 
            <separator/>
@@ -28,43 +28,78 @@
            <menuitem action='ToggleOptionsEditor'/>
            <menuitem action='About'/>
         </menu>
+
         <menu name='Transport' action='Transport'>
                <menuitem action='ToggleRoll'/>
-               <menuitem action='play-from-edit-point-and-return'/>
-               <menuitem action='play-edit-range'/>
+	       <menu action="PlayMenu">
+	       	     <menuitem action='play-selected-regions'/>
+		     <menuitem action='play-edit-range'/>
+                     <menuitem action='play-from-edit-point-and-return'/>
+		     <menuitem action='Loop'/>
+  	       </menu>
                <menuitem action='record-roll'/>
+               <menuitem action='Record'/>
                <menuitem action='ToggleRollForgetCapture'/>
-               <menuitem action='Loop'/>
-               <menuitem action='loop-region'/>
-               <menuitem action='set-playhead'/>
+	       <menuitem action='remove-last-capture'/>
+	       <menu action="SetLoopMenu">
+	       	       <menuitem action='set-loop-from-edit-range'/>
+		       <menuitem action='set-loop-from-region'/>
+               </menu>
+	       <menu action="SetPunchMenu">
+	       		<menuitem action='set-punch-from-edit-range'/>
+	       		<menuitem action='set-punch-from-region'/>
+               </menu>
+
                <menuitem action='Forward'/>
                <menuitem action='Rewind'/>
-               <menuitem action='GotoZero'/>
-               <menuitem action='GotoStart'/>
-               <menuitem action='GotoEnd'/>
-	       <separator/>
-               <menuitem action='tab-to-transient-forwards'/>
-               <menuitem action='tab-to-transient-backwards'/>
-               <menuitem action='nudge-playhead-forward'/>
-               <menuitem action='nudge-playhead-backward'/>
-	       <separator/>
-               <menuitem action='Record'/>
-               <separator/> 
                <menuitem action='TransitionToRoll'/>
                <menuitem action='TransitionToReverse'/>
-               <separator/> 
-               <menuitem action='jump-forward-to-mark'/>
-               <menuitem action='jump-backward-to-mark'/>
-               <menuitem action='add-location-from-playhead'/>
-               <separator/> 
-               <menuitem action='playhead-to-next-region-boundary'/>
-               <menuitem action='playhead-to-previous-region-boundary'/>
-               <menuitem action='playhead-to-next-region-sync'/>
-               <menuitem action='playhead-to-previous-region-sync'/>
-               <menuitem action='center-playhead'/>
-	       <separator/>
+	       <menuitem action='center-playhead'/>
+	       <menuitem action='set-playhead'/>
                <menuitem action='playhead-to-edit'/>
-               <menuitem action='focus-on-clock'/>
+               <menuitem action='nudge-playhead-forward'/>
+               <menuitem action='nudge-playhead-backward'/>
+
+	       <menu action="MovePlayHeadMenu">
+                   <menuitem action='tab-to-transient-forwards'/>
+                   <menuitem action='tab-to-transient-backwards'/>
+	           <separator/>
+		   <menuitem action='playhead-forward-to-grid'/>
+		   <menuitem action='playhead-backward-to-grid'/>
+	           <separator/>
+		   <menuitem action='playhead-to-next-region-boundary'/>
+		   <menuitem action='playhead-to-previous-region-boundary'/>
+		   <menuitem action='playhead-to-next-region-sync'/>
+		   <menuitem action='playhead-to-previous-region-sync'/>
+		   <separator/>
+		   <menuitem action='jump-forward-to-mark'/>
+		   <menuitem action='jump-backward-to-mark'/>
+	       </menu>
+
+	       <menu action="MoveActiveMarkMenu">
+                   <menuitem action='selected-marker-to-next-region-boundary'/>
+    	           <menuitem action='selected-marker-to-previous-region-boundary'/>
+	           <menuitem action='edit-cursor-to-next-region-sync'/>
+    	           <menuitem action='edit-cursor-to-previous-region-sync'/>
+		   <separator/>
+            	   <menuitem action='edit-to-playhead'/>
+		   <menuitem action='set-edit-point'/>
+	       </menu>
+
+	       <menu action="MarkerMenu">
+	       	   <menuitem action='add-location-from-playhead'/>
+		   <separator/>
+		   <menuitem action='goto-mark-1'/>
+		   <menuitem action='goto-mark-2'/>
+		   <menuitem action='goto-mark-3'/>
+		   <menuitem action='goto-mark-4'/>
+		   <menuitem action='goto-mark-5'/>
+		   <menuitem action='goto-mark-6'/>
+		   <menuitem action='goto-mark-7'/>
+		   <menuitem action='goto-mark-8'/>
+		   <menuitem action='goto-mark-9'/>
+	       </menu>
+
 	       <separator/>
                <menuitem action='TogglePunchIn'/>
                <menuitem action='TogglePunchOut'/>
@@ -74,182 +109,191 @@
                <menuitem action='ToggleClick'/>
                <menuitem action='toggle-follow-playhead'/>
 	       <separator/>
-	       <menuitem action='set-loop-from-edit-range'/>
-	       <menuitem action='set-loop-from-region'/>
-	       <menuitem action='set-punch-from-edit-range'/>
-	       <menuitem action='set-punch-from-region'/>
 	       <menu action='LocateToMarker'>
-		     <menuitem action='goto-mark-1'/>
-		     <menuitem action='goto-mark-2'/>
-		     <menuitem action='goto-mark-3'/>
-		     <menuitem action='goto-mark-4'/>
-		     <menuitem action='goto-mark-5'/>
-		     <menuitem action='goto-mark-6'/>
-		     <menuitem action='goto-mark-7'/>
-		     <menuitem action='goto-mark-8'/>
-		     <menuitem action='goto-mark-9'/>
 		</menu>
        </menu>
-       <menu name='Edit' action='Edit'>
+
+       <menu action='Edit'>
                <menuitem action='undo'/>
                <menuitem action='redo'/>
                <menuitem action='editor-cut'/>
-               <menuitem action='editor-delete'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
-               <menuitem action='set-edit-point'/>
-               <menuitem action='editor-separate'/>
                <separator/>       
-	       <menuitem action='remove-last-capture'/>
+               <menuitem action='editor-delete'/>
+	       <menuitem action='split-region'/>
+	       <menu action="SeparateMenu">
+	            <menuitem action='editor-separate'/>
+	            <menuitem action='separate-from-loop'/>
+	            <menuitem action='separate-from-punch'/>
+               </menu>
                <separator/>       
-               <menuitem action='select-all'/>
-               <menuitem action='deselect-all'/>
-               <menuitem action='invert-selection'/>
-               <menuitem action='select-all-after-edit-cursor'/>
-               <menuitem action='select-all-before-edit-cursor'/>
-               <menuitem action='select-all-between-cursors'/>
-               <menuitem action='select-all-within-cursors'/>
-               <menuitem action='select-all-in-punch-range'/>
-               <menuitem action='select-all-in-loop-range'/>
-	       <separator/>
-               <menuitem action='select-next-route'/>
-               <menuitem action='select-prev-route'/>
-	       <separator/>
-	       <menu action='EditCursorMovementOptions'>
-                   <menuitem action='selected-marker-to-next-region-boundary'/>
-    	           <menuitem action='selected-marker-to-previous-region-boundary'/>
-	           <menuitem action='edit-cursor-to-next-region-sync'/>
-    	           <menuitem action='edit-cursor-to-previous-region-sync'/>
-        	   <menuitem action='center-edit-cursor'/>
-            	   <menuitem action='edit-to-playhead'/>
-	       </menu>
-	       <menu name='KeyMouse Actions' action='KeyMouse Actions'>
-	       		<menuitem action='play-selected-regions'/>
-               		<menuitem action='brush-at-mouse'/>
-               		<menuitem action='mute-unmute-region'/>
-			<separator/>
-			<menuitem action='set-mouse-mode-object'/>
-			<menuitem action='set-mouse-mode-range'/>
-			<menuitem action='set-mouse-mode-gain'/>
-			<menuitem action='set-mouse-mode-zoom'/>
-			<menuitem action='set-mouse-mode-timefx'/>
-			<separator/>
-			<menuitem action='cycle-edit-point'/>
-			<menuitem action='cycle-edit-point-with-marker'/>
-			<menuitem action='toggle-edit-mode'/>
-			<separator/>
-			<menuitem action='boost-region-gain'/>
-			<menuitem action='cut-region-gain'/>
-	 	</menu>
-        </menu>         
-	<menu name='Regions' action='Regions'>
-                   <menuitem action='crop'/>
-                   <menuitem action='duplicate-region'/>
-                   <menuitem action='insert-region'/>
-               	   <menuitem action='normalize-region'/>
-                   <menuitem action='split-region-at-transients'/>
-                   <separator/>       
-	           <menuitem action="nudge-forward"/>
-	           <menuitem action="nudge-backward"/>
-        	   <menuitem action='split-region'/>
-	       	   <menuitem action='set-region-sync-position'/>
-                   <separator/>       
+	       <menuitem action='duplicate-region'/>
+	       <menuitem action='multi-duplicate-region'/>
+	       <menuitem action='region-fill-track'/>
+	       <menu action="AlignMenu">
 		   <menuitem action='align-regions-start'/>
 		   <menuitem action='align-regions-start-relative'/>
 		   <menuitem action='align-regions-end'/>
 		   <menuitem action='align-regions-end-relative'/>
 		   <menuitem action='align-regions-sync'/>
 		   <menuitem action='align-regions-sync-relative'/>
-                   <separator/>       
+               </menu>
+	       <menu action="NudgeRegionMenu">
+	           <menuitem action="nudge-forward"/>
+	           <menuitem action="nudge-backward"/>
+               </menu>
+	       <menu action="TrimMenu">
+		   <menuitem action='trim-front'/>
+		   <menuitem action='trim-back'/>
+		   <menuitem action='crop'/>
+		   <menuitem action='trim-region-to-loop'/>
+		   <menuitem action='trim-region-to-punch'/>
+	       </menu>
+	       <menu action="FadeMenu">
 		   <menuitem action='set-fade-in-length'/>
 		   <menuitem action='toggle-fade-in-active'/>
 		   <menuitem action='set-fade-out-length'/>
 		   <menuitem action='toggle-fade-out-active'/>
-                   <separator/>       
-		   <menuitem action='trim-front'/>
-		   <menuitem action='trim-back'/>
-		   <menuitem action='trim-region-to-loop'/>
-		   <menuitem action='trim-region-to-punch'/>
-                   <separator/>       
-		   <menuitem action='pitch-shift-region'/>
-		   <menuitem action='set-tempo-from-region'/>
-		   <menuitem action='set-tempo-from-edit-range'/>
-	</menu>
+               </menu>
+	       <menu action="SelectMenu">	   
+	           <menuitem action='select-all'/>
+		   <menuitem action='deselect-all'/>
+		   <menuitem action='invert-selection'/>
+		   <menuitem action='select-all-after-edit-cursor'/>
+		   <menuitem action='select-all-before-edit-cursor'/>
+		   <menuitem action='select-all-between-cursors'/>
+		   <menuitem action='select-all-within-cursors'/>
+		   <menuitem action='select-all-in-punch-range'/>
+		   <menuitem action='select-all-in-loop-range'/>
+	       </menu>	   
+        </menu>
+
+	<menu name='Regions' action='Regions'>
+	      <menuitem action='insert-region'/>
+	      <menuitem action='rename-region'/>
+	      <menuitem action='auto-rename-region'/>
+	      <menuitem action='raise-region'/>
+	      <menuitem action='lower-region'/>
+	      <menuitem action='naturalize-region'/>
+	      <menuitem action='lock-region'/>
+	      <menuitem action='set-region-sync-position'/>
+	      <menuitem action='remove-region-sync'/>
+              <menuitem action='mute-unmute-region'/>
+	      <separator/>       
+              <menuitem action='monoize-region'/>
+	      <menuitem action='normalize-region'/>
+	      <menuitem action='split-region-at-transients'/>
+	      <separator/>       
+	      <menu action="RegionGainMenu">
+			<menuitem action='boost-region-gain'/>
+			<menuitem action='cut-region-gain'/>
+	      </menu>	      		   
+	      <menuitem action='pitch-shift-region'/>
+	      <menuitem action='reverse-region'/>
+        </menu>         
+
         <menu name='View' action = 'View'>
 	       <menuitem action='ToggleMaximalEditor'/>
-	       <separator/>
-               <menu name='ZoomFocus' action='ZoomFocus'>
-                   <menuitem action='zoom-focus-playhead'/>
-                   <menuitem action='zoom-focus-edit'/>
-                   <menuitem action='zoom-focus-mouse'/>
-               </menu>
-	       <menu name='SnapMode' action='SnapMode'>
-		   <menuitem action='snap-off'/>
-		   <menuitem action='snap-normal'/>
-		   <menuitem action='snap-magnetic'/>
-		   <separator/>
-		   <menuitem action='cycle-snap-mode'/>
-	       </menu>
-               <menu name='SnapTo' action='SnapTo'>
-		   <menuitem action='snap-to-cd-frame'/>
-		   <menuitem action='snap-to-smpte-frame'/>
-		   <menuitem action='snap-to-smpte-seconds'/>
-		   <menuitem action='snap-to-smpte-minutes'/>
-		   <menuitem action='snap-to-seconds'/>
-		   <menuitem action='snap-to-minutes'/>
-		   <menuitem action='snap-to-thirtyseconds'/>
-		   <menuitem action='snap-to-asixteenthbeat'/>
-		   <menuitem action='snap-to-eighths'/>
-		   <menuitem action='snap-to-quarters'/>
-		   <menuitem action='snap-to-thirds'/>
-		   <menuitem action='snap-to-beat'/>
-		   <menuitem action='snap-to-bar'/>
-		   <menuitem action='snap-to-mark'/>
-		   <menuitem action='snap-to-region-start'/>
-		   <menuitem action='snap-to-region-end'/>
-		   <menuitem action='snap-to-region-sync'/>
-		   <menuitem action='snap-to-region-boundary'/>
-		   <menuitem action='cycle-snap-choice'/>
-               </menu>
-               <separator/>
-               <menuitem action='temporal-zoom-in'/>
-               <menuitem action='temporal-zoom-out'/>
-               <menuitem action='zoom-to-session'/>
-               <menuitem action='zoom-to-region'/>
-               <menuitem action='toggle-zoom'/>
-               <menuitem action='scroll-tracks-down'/>
-               <menuitem action='scroll-tracks-up'/>
-               <menuitem action='scroll-tracks-down'/>
-               <menuitem action='step-tracks-up'/>
-               <menuitem action='step-tracks-down'/>
-   	       <separator/>
-               <menuitem action='scroll-forward'/>
-               <menuitem action='scroll-backward'/>
-   	       <separator/>
-               <menuitem action='scroll-playhead-forward'/>
-               <menuitem action='scroll-playhead-backward'/>
-   	       <separator/>
 	       <menuitem action='show-editor-mixer'/>
-	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
                <menuitem action='ToggleMeasureVisibility'/>
 	       <menuitem action='ToggleLogoVisibility'/>
+	       <menu action="PrimaryClockMenu">
+	       	     <menuitem action="primary-clock-bbt"/>
+	       	     <menuitem action="primary-clock-minsec"/>
+	       	     <menuitem action="primary-clock-samples"/>
+	       	     <menuitem action="primary-clock-off"/>
+	       </menu>
+	       <menu action="SecondaryClockMenu">
+	       	     <menuitem action="secondary-clock-bbt"/>
+	       	     <menuitem action="secondary-clock-minsec"/>
+	       	     <menuitem action="secondary-clock-samples"/>
+	       	     <menuitem action="secondary-clock-off"/>
+	       </menu>
+	       <menu action="RulerMenu">
+	       	     <menuitem action="toggle-bbt-ruler"/>
+	       	     <menuitem action="toggle-minsec-ruler"/>
+	       	     <menuitem action="toggle-samples-ruler"/>
+		     <separator/>
+	       	     <menuitem action="toggle-meter-ruler"/>
+	       	     <menuitem action="toggle-tempo-ruler"/>
+	       	     <menuitem action="toggle-range-ruler"/>
+	       	     <menuitem action="toggle-cd-marker-ruler"/>
+	       	     <menuitem action="toggle-loop-punch-ruler"/>
+	       </menu>
+	       <menu action="ZoomMenu">
+               	     <menuitem action='temporal-zoom-in'/>
+               	     <menuitem action='temporal-zoom-out'/>
+               	     <menuitem action='zoom-to-session'/>
+               	     <menuitem action='zoom-to-region'/>
+               	     <menuitem action='toggle-zoom'/>
+	       </menu>
+	       <menu action="ScrollMenu">
+               	     <menuitem action='scroll-tracks-down'/>
+               	     <menuitem action='scroll-tracks-up'/>
+               	     <menuitem action='scroll-forward'/>
+               	     <menuitem action='scroll-backward'/>
+	       </menu>
 	       <separator/>
-               <menuitem action='goto-editor'/>
-               <menuitem action='goto-mixer'/>
-               <menuitem action='ToggleLocations'/>
-               <menuitem action='ToggleKeyEditor'/>
-               <menuitem action='ToggleThemeManager'/>
-               <menuitem action='ToggleBigClock'/>
-               <menuitem action='toggle-rhythm-ferret'/>
+	       <menu action="Windows">
+                     <menuitem action='goto-editor'/>
+		     <menuitem action='goto-mixer'/>
+		     <menuitem action='ToggleLocations'/>
+		     <menuitem action='ToggleKeyEditor'/>
+		     <menuitem action='ToggleThemeManager'/>
+		     <menuitem action='ToggleBigClock'/>
+		     <menuitem action='toggle-rhythm-ferret'/>
+		</menu>
         </menu>
+
         <menu name='Options' action='Options'>
                <menu action='Monitoring'>
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
-               <menuitem action='LatchedSolo'/>
-               <menuitem action='link-region-and-track-selection'/>
-         </menu>
+	       <menu action="TempoMenu">
+	       	      <menuitem action='set-tempo-from-region'/>
+		      <menuitem action='set-tempo-from-edit-range'/>
+	       </menu>
+	       <menu action="LatchMenu">
+                     <menuitem action='LatchedSolo'/>
+	       </menu>
+	       <menu action="Link">
+	       	     <menuitem action='link-region-and-track-selection'/> 
+	       </menu>
+               <menu action='ZoomFocusMenu'>
+                   <menuitem action='zoom-focus-playhead'/>
+                   <menuitem action='zoom-focus-edit'/>
+                   <menuitem action='zoom-focus-mouse'/>
+               </menu>
+	       <menu action="EditPointMenu">
+	           <menuitem action='edit-point-playhead'/>
+	           <menuitem action='edit-point-mouse'/>
+	           <menuitem action='edit-point-marker'/>
+	       </menu>
+	       <menu action='KeyMouseActions'>
+		   <menuitem action='select-next-route'/>
+		   <menuitem action='select-prev-route'/>
+		   <menuitem action='focus-on-clock'/>
+		   <menuitem action='GotoZero'/>
+		   <menuitem action='GotoStart'/>
+		   <menuitem action='GotoEnd'/>
+		   <menuitem action='set-mouse-mode-object'/>
+		   <menuitem action='set-mouse-mode-range'/>
+		   <menuitem action='set-mouse-mode-gain'/>
+		   <menuitem action='set-mouse-mode-zoom'/>
+		   <menuitem action='set-mouse-mode-timefx'/>
+		   <menuitem action='cycle-edit-point'/>
+		   <menuitem action='cycle-edit-point-with-marker'/>
+		   <menuitem action='toggle-edit-mode'/>
+		   <menuitem action='snap-off'/>
+		   <menuitem action='snap-normal'/>
+		   <menuitem action='snap-magnetic'/>
+		   <menuitem action='cycle-snap-mode'/>
+		   <menuitem action='cycle-snap-choice'/>
+               </menu>
+	  </menu>
+
      </menubar>
 
      <popup name='redirectmenu'>

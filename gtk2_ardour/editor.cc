@@ -153,7 +153,7 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Center"),
 	N_("Playhead"),
  	N_("Mouse"),
- 	N_("Edit Point"),
+ 	N_("Active Mark"),
 	0
 };
 
@@ -1288,12 +1288,23 @@ Editor::connect_to_session (Session *t)
 		no_route_list_redisplay = false;
 		redisplay_route_list ();
 	}
+	
+	switch (snap_type) {
+	case SnapToRegionStart:
+	case SnapToRegionEnd:
+	case SnapToRegionSync:
+	case SnapToRegionBoundary:
+		build_region_boundary_cache ();
+		break;
+
+	default:
+		break;
+	}
 
 	/* register for undo history */
-
 	session->register_with_memento_command_factory(_id, this);
 
-		start_updating ();
+	start_updating ();
 }
 
 void
@@ -2163,19 +2174,17 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
 
-/* CURSOR SETTING AND MARKS AND STUFF */
-
 void
 Editor::set_snap_to (SnapType st)
 {	
-   unsigned int snap_ind = (unsigned int)st;
+	unsigned int snap_ind = (unsigned int)st;
 	snap_type = st;
-
-   if ( snap_ind > snap_type_strings.size() - 1 ) {
-      snap_ind = 0;
-      snap_type = (SnapType)snap_ind;
-   }
-
+	
+	if (snap_ind > snap_type_strings.size() - 1) {
+		snap_ind = 0;
+		snap_type = (SnapType)snap_ind;
+	}
+	
 	string str = snap_type_strings[snap_ind];
 
 	if (str != snap_type_selector.get_active_text()) {
@@ -2190,9 +2199,17 @@ Editor::set_snap_to (SnapType st)
 	case SnapToAEighthBeat:
 	case SnapToAQuarterBeat:
 	case SnapToAThirdBeat:
-                compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
-                update_tempo_based_rulers ();
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
+		update_tempo_based_rulers ();
 		break;
+
+	case SnapToRegionStart:
+	case SnapToRegionEnd:
+	case SnapToRegionSync:
+	case SnapToRegionBoundary:
+		build_region_boundary_cache ();
+		break;
+
 	default:
 		/* relax */
 		break;
@@ -2229,28 +2246,25 @@ Editor::set_edit_point_preference (EditPoint ep)
 		return;
 	}
 
-	if (Profile->get_sae()) {
-
-		switch (zoom_focus) {
-		case ZoomFocusMouse:
-		case ZoomFocusPlayhead:
-		case ZoomFocusEdit:
-			switch (_edit_point) {
-			case EditAtMouse:
-				set_zoom_focus (ZoomFocusMouse);
-				break;
-			case EditAtPlayhead:
-				set_zoom_focus (ZoomFocusPlayhead);
-				break;
-			case EditAtSelectedMarker:
-				set_zoom_focus (ZoomFocusEdit);
-				break;
-			}
+	switch (zoom_focus) {
+	case ZoomFocusMouse:
+	case ZoomFocusPlayhead:
+	case ZoomFocusEdit:
+		switch (_edit_point) {
+		case EditAtMouse:
+			set_zoom_focus (ZoomFocusMouse);
 			break;
-		default:
+		case EditAtPlayhead:
+			set_zoom_focus (ZoomFocusPlayhead);
+			break;
+		case EditAtSelectedMarker:
+			set_zoom_focus (ZoomFocusEdit);
 			break;
 		}
-	} 
+		break;
+	default:
+		break;
+	}
 
 	instant_save ();
 }
@@ -2527,12 +2541,18 @@ Editor::trackview_by_y_position (double y)
 void
 Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 {
-	Location* before = 0;
-	Location* after = 0;
-
 	if (!session || snap_mode == SnapOff) {
 		return;
 	}
+
+	snap_to_internal (start, direction, for_mark);
+}
+
+void
+Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
+{
+	Location* before = 0;
+	Location* after = 0;
 
 	const nframes64_t one_second = session->frame_rate();
 	const nframes64_t one_minute = session->frame_rate() * 60;
@@ -2542,7 +2562,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 
 	switch (snap_type) {
 	case SnapToCDFrame:
-		if (direction) {
+		if (((direction == 0) && (start % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
 			start = (nframes_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
 		} else {
 			start = (nframes_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
@@ -2550,7 +2570,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 
 	case SnapToSMPTEFrame:
-	        if (fmod((double)start, (double)session->frames_per_smpte_frame()) > (session->frames_per_smpte_frame() / 2)) {
+	        if (((direction == 0) && (fmod((double)start, (double)session->frames_per_smpte_frame()) > (session->frames_per_smpte_frame() / 2))) || (direction > 0)) {
 			start = (nframes_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
 		} else {
 			start = (nframes_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
@@ -2564,7 +2584,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		} else {
 			start -= session->smpte_offset ();
 		}    
-		if (start % one_smpte_second > one_smpte_second / 2) {
+		if (((direction == 0) && (start % one_smpte_second > one_smpte_second / 2)) || direction > 0) {
 			start = (nframes_t) ceil ((double) start / one_smpte_second) * one_smpte_second;
 		} else {
 			start = (nframes_t) floor ((double) start / one_smpte_second) * one_smpte_second;
@@ -2585,7 +2605,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		} else {
 			start -= session->smpte_offset ();
 		}
-		if (start % one_smpte_minute > one_smpte_minute / 2) {
+		if (((direction == 0) && (start % one_smpte_minute > one_smpte_minute / 2)) || direction > 0) {
 			start = (nframes_t) ceil ((double) start / one_smpte_minute) * one_smpte_minute;
 		} else {
 			start = (nframes_t) floor ((double) start / one_smpte_minute) * one_smpte_minute;
@@ -2599,7 +2619,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 		
 	case SnapToSeconds:
-		if (start % one_second > one_second / 2) {
+		if (((direction == 0) && (start % one_second > one_second / 2)) || (direction > 0)) {
 			start = (nframes_t) ceil ((double) start / one_second) * one_second;
 		} else {
 			start = (nframes_t) floor ((double) start / one_second) * one_second;
@@ -2607,7 +2627,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 		
 	case SnapToMinutes:
-		if (start % one_minute > one_minute / 2) {
+		if (((direction == 0) && (start % one_minute > one_minute / 2)) || (direction > 0)) {
 			start = (nframes_t) ceil ((double) start / one_minute) * one_minute;
 		} else {
 			start = (nframes_t) floor ((double) start / one_minute) * one_minute;
@@ -2696,11 +2716,19 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 			}
 			
 			if (i != region_boundary_cache.end()) {
+
+				/* lower bound doesn't quite to the right thing for our purposes */
+
+				if (direction < 0 && i != region_boundary_cache.begin()) {
+					--i;
+				}
+
 				start = *i;
+
 			} else {
 				start = region_boundary_cache.back();
 			}
-		}
+		} 
 		break;
 	}
 
@@ -3596,7 +3624,7 @@ Editor::zoom_focus_selection_done ()
 		focus_type = ZoomFocusPlayhead;
 	} else if (choice == _("Edit")) {
 		focus_type = ZoomFocusEdit;
-	} else if (choice == _("Edit Point")) {
+	} else if (choice == _("Active Mark")) {
 		focus_type = ZoomFocusEdit;
 	} else {
 		focus_type = ZoomFocusMouse;
@@ -4375,9 +4403,9 @@ Editor::idle_visual_changer ()
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
 
-	        compute_fixed_ruler_scale ();
-	        compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
-	        compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
+		compute_fixed_ruler_scale ();
+		compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
+		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {

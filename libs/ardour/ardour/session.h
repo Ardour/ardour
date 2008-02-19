@@ -109,7 +109,7 @@ class SMFSource;
 
 class SessionDirectory;
 
-struct AudioExportSpecification;
+struct ExportSpecification;
 struct RouteGroup;
 
 using std::vector;
@@ -606,8 +606,8 @@ class Session : public PBD::StatefulDestructible
 	SlaveSource post_export_slave;
 	nframes_t post_export_position;
 
-	int start_audio_export (ARDOUR::AudioExportSpecification&);
-	int stop_audio_export (ARDOUR::AudioExportSpecification&);
+	int start_export (ARDOUR::ExportSpecification&);
+	int stop_export (ARDOUR::ExportSpecification&);
 	void finalize_audio_export ();
 
 	void add_source (boost::shared_ptr<Source>);
@@ -1037,7 +1037,7 @@ class Session : public PBD::StatefulDestructible
 	void process_without_events (nframes_t);
 	void process_with_events    (nframes_t);
 	void process_audition       (nframes_t);
-	int  process_export         (nframes_t, ARDOUR::AudioExportSpecification*);
+	int  process_export         (nframes_t, ARDOUR::ExportSpecification*);
 	
 	/* slave tracking */
 
@@ -1062,7 +1062,7 @@ class Session : public PBD::StatefulDestructible
 	void set_slave_source (SlaveSource);
 
 	bool _exporting;
-	int prepare_to_export (ARDOUR::AudioExportSpecification&);
+	int prepare_to_export (ARDOUR::ExportSpecification&);
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);

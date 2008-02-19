@@ -37,6 +37,7 @@ namespace ARDOUR {
 
 class Playlist;
 class Filter;
+class ExportSpecification;
 
 enum RegionEditState {
 	EditChangesNothing = 0,
@@ -221,6 +222,8 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 
 	virtual bool is_dependent() const { return false; }
 	virtual bool depends_on (boost::shared_ptr<Region> other) const { return false; }
+
+	virtual int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&) = 0;
 
 	virtual int get_transients (AnalysisFeatureList&, bool force_new = false) { 
 		// no transients, but its OK

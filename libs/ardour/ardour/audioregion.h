@@ -125,7 +125,7 @@ class AudioRegion : public Region
 
 	/* export */
 
-	int exportme (ARDOUR::Session&, ARDOUR::AudioExportSpecification&);
+	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
 
 	/* xfade/fade interactions */
 
