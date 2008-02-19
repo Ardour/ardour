@@ -276,12 +276,6 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 		//cerr << "Using cached iterator at " << _next_read << endl;
 	}
 
-	if (_read_iter == end()) {
-		//cerr << this << " MM::read: at end @ " << _read_iter->time() << endl;
-	} else {
-		//cerr << this << " MM::read: at " << _read_iter->time() << endl;
-	}
-
 	_next_read = start + nframes;
 
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {

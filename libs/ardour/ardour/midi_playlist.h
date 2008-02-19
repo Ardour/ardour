@@ -25,6 +25,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/playlist.h>
+#include <ardour/parameter.h>
 
 namespace ARDOUR
 {
@@ -55,6 +56,8 @@ public:
 	bool destroy_region (boost::shared_ptr<Region>);
 	
 	void set_note_mode (NoteMode m) { _note_mode = m; }
+
+	std::set<Parameter> contained_automation();
 
 protected:
 

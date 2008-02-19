@@ -270,10 +270,6 @@ write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 {
 	MidiEvent ev(0.0, 4, NULL, true);
 
-	uint64_t t       = 0;
-	uint32_t delta_t = 0;
-	uint32_t size    = 0;
-
 	status.progress = 0.0f;
 
 	try {
@@ -283,6 +279,10 @@ write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(newfiles[i-1]);
 		
 		source->seek_to_track(i);
+	
+		uint64_t t       = 0;
+		uint32_t delta_t = 0;
+		uint32_t size    = 0;
 		
 		while (!status.cancel) {
 

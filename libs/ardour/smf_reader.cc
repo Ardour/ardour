@@ -194,7 +194,7 @@ SMFReader::read_event(size_t    buf_len,
 	static uint8_t  last_status = 0;
 	static uint32_t last_size   = 0;
 
-	*delta_time = read_var_len();
+	*delta_time = read_var_len(_fd);
 	int status = fgetc(_fd);
 	if (status == EOF)
 		throw PrematureEOF();
@@ -222,7 +222,7 @@ SMFReader::read_event(size_t    buf_len,
 		if (feof(_fd))
 			throw PrematureEOF();
 		uint8_t type = fgetc(_fd);
-		const uint32_t size = read_var_len();
+		const uint32_t size = read_var_len(_fd);
 		/*cerr.flags(ios::hex);
 		cerr << "SMF - meta 0x" << (int)type << ", size = ";
 		cerr.flags(ios::dec);
@@ -269,20 +269,20 @@ SMFReader::close()
 
 
 uint32_t
-SMFReader::read_var_len() const throw(PrematureEOF)
+SMFReader::read_var_len(FILE* fd) throw (PrematureEOF)
 {
-	if (feof(_fd))
+	if (feof(fd))
 		throw PrematureEOF();
 
 	uint32_t value;
 	uint8_t  c;
 
-	if ( (value = getc(_fd)) & 0x80 ) {
+	if ( (value = getc(fd)) & 0x80 ) {
 		value &= 0x7F;
 		do {
-			if (feof(_fd))
+			if (feof(fd))
 				throw PrematureEOF();
-			value = (value << 7) + ((c = getc(_fd)) & 0x7F);
+			value = (value << 7) + ((c = getc(fd)) & 0x7F);
 		} while (c & 0x80);
 	}
 

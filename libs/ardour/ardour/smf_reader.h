@@ -65,12 +65,12 @@ public:
 		throw (std::logic_error, PrematureEOF, CorruptFile);
 	
 	void close();
+	
+	static uint32_t read_var_len(FILE* fd) throw (PrematureEOF);
 
 protected:
 	/** size of SMF header, including MTrk chunk header */
 	static const uint32_t HEADER_SIZE = 22;
-
-	uint32_t read_var_len() const throw(PrematureEOF);
 
 	std::string _filename;
 	FILE*       _fd;

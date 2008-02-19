@@ -38,6 +38,7 @@
 #include <ardour/midi_util.h>
 #include <ardour/tempo.h>
 #include <ardour/audioengine.h>
+#include <ardour/smf_reader.h>
 
 #include "i18n.h"
 
@@ -272,20 +273,31 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 	assert(size);
 	assert(buf);
 
-	*delta_t = read_var_len();
-	assert(!feof(_fd));
+	try {
+		*delta_t = SMFReader::read_var_len(_fd);
+	} catch (...) {
+		return -1; // Premature EOF
+	}
+	
+	if (feof(_fd)) {
+		return -1; // Premature EOF
+	}
 
 	const int status = fgetc(_fd);
-	assert(status != EOF); // FIXME die gracefully
+
+	if (status == EOF) {
+		return -1; // Premature EOF
+	}
 
 	//printf("Status @ %X = %X\n", (unsigned)ftell(_fd) - 1, status);
 
 	if (status == 0xFF) {
-		assert(!feof(_fd));
+		if (feof(_fd)) {
+			return -1; // Premature EOF
+		}
 		const int type = fgetc(_fd);
 		if ((unsigned char)type == 0x2F) {
-			//cerr << _name << " hit EOT" << endl;
-			return -1;
+			return -1; // hit end of track
 		} else {
 			*size = 0;
 			return 0;
@@ -444,12 +456,12 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(const MidiEvent& ev)
 {
-	printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(),
+	/*printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(),
 			(unsigned)ev.channel(), ev.time(), ev.size());
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 
 	assert(ev.time() >= 0);
 	assert(ev.time() >= _last_ev_time);
@@ -836,25 +848,6 @@ SMFSource::write_var_len(uint32_t value)
 	}
 
 	return ret;
-}
-
-uint32_t
-SMFSource::read_var_len() const
-{
-	assert(!feof(_fd));
-
-	uint32_t value;
-	unsigned char c;
-
-	if ( (value = getc(_fd)) & 0x80 ) {
-		value &= 0x7F;
-		do {
-			assert(!feof(_fd));
-			value = (value << 7) + ((c = getc(_fd)) & 0x7F);
-		} while (c & 0x80);
-	}
-
-	return value;
 }
 
 void

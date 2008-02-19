@@ -1029,9 +1029,9 @@ AutomationList::build_search_cache_if_necessary(double start, double end) const
 {
 	/* Only do the range lookup if x is in a different range than last time
 	 * this was called (or if the search cache has been marked "dirty" (left<0) */
-	if ((_search_cache.left < 0) ||
+	if (!_events.empty() && ((_search_cache.left < 0) ||
 			((_search_cache.left > start) ||
-			 (_search_cache.right < end))) {
+			 (_search_cache.right < end)))) {
 
 		const ControlEvent start_point (start, 0);
 		const ControlEvent end_point (end, 0);
@@ -1140,7 +1140,9 @@ AutomationList::rt_safe_earliest_event_linear_unlocked (double start, double end
 {
 	//cerr << "earliest_event(" << start << ", " << end << ", " << x << ", " << y << ", " << inclusive << endl;
 
-	if (_events.size() < 2)
+	if (_events.size() == 0)
+		return false;
+	else if (_events.size() == 1)
 		return rt_safe_earliest_event_discrete_unlocked(start, end, x, y, inclusive);
 
 	// Hack to avoid infinitely repeating the same event

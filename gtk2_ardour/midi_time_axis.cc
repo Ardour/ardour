@@ -262,7 +262,8 @@ MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)
 
 
 void
-MidiTimeAxisView::update_range() {
+MidiTimeAxisView::update_range()
+{
 	MidiGhostRegion* mgr;
 
 	for(list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -270,6 +271,20 @@ MidiTimeAxisView::update_range() {
 			mgr->update_range();
 		}
 	}
+}
+
+void
+MidiTimeAxisView::show_existing_automation ()
+{
+	if (midi_track()) {
+		const set<Parameter> params = midi_track()->midi_diskstream()->
+				midi_playlist()->contained_automation();
+
+		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i)
+			create_automation_child(*i, true);
+	}
+
+	RouteTimeAxisView::show_existing_automation ();
 }
 
 /** Prompt for a controller with a dialog and add an automation track for it
@@ -298,7 +313,8 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 {
 	if (param.type() == MidiCCAutomation) {
 	
-		/* FIXME: don't create AutomationList for track itself */
+		/* FIXME: don't create AutomationList for track itself
+		 * (not actually needed or used, since the automation is region-ey) */
 
 		boost::shared_ptr<AutomationControl> c = _route->control(param);
 
@@ -307,6 +323,10 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 			c = boost::shared_ptr<AutomationControl>(_route->control_factory(al));
 			_route->add_control(c);
 		}
+
+		AutomationTracks::iterator existing = _automation_tracks.find(param);
+		if (existing != _automation_tracks.end())
+			return;
 
 		boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
 				_route, _route, c,

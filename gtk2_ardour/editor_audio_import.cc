@@ -734,7 +734,9 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		}
 	}
 
-	cout << "TARGET REGIONS: " << target_regions << endl;
+	// kludge (for MIDI we're abusing "channel" for "track" here)
+	if (paths.front().rfind(".mid") != Glib::ustring::npos)
+		target_regions = -1;
 
 	if (target_regions == 1) {
 

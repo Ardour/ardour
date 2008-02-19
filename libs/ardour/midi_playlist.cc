@@ -265,6 +265,30 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	return changed;
 }
 
+set<Parameter>
+MidiPlaylist::contained_automation()
+{
+	/* this function is never called from a realtime thread, so
+	   its OK to block (for short intervals).
+	*/
+
+	Glib::Mutex::Lock rm (region_lock);
+
+	set<Parameter> ret;
+
+	for (RegionList::const_iterator r = regions.begin(); r != regions.end(); ++r) {
+		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*r);
+
+		for (Automatable::Controls::iterator c = mr->controls().begin();
+				c != mr->controls().end(); ++c) {
+			ret.insert(c->first);
+		}
+	}
+
+	return ret;
+}
+
+
 bool
 MidiPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 {

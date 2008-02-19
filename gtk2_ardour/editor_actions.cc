@@ -529,7 +529,7 @@ Editor::register_actions ()
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 
-	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Media"), mem_fun (*this, &Editor::external_audio_dialog));
+	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Import Existing Media"), mem_fun (*this, &Editor::external_audio_dialog));
 
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Add External Media"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
