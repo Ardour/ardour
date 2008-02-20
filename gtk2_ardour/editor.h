@@ -59,6 +59,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
+#include "time_axis_view.h"
 #include "draginfo.h"
 
 namespace Gtkmm2ext {
@@ -572,7 +573,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      transport_marker_group;
 	ArdourCanvas::Group*      cd_marker_group;
 	
-	enum {
+	enum RulerType {
 		ruler_metric_smpte = 0,
 		ruler_metric_bbt = 1,
 		ruler_metric_frames = 2,
@@ -587,7 +588,16 @@ class Editor : public PublicEditor
 	};
 
 	static GtkCustomMetric ruler_metrics[4];
-	bool                   ruler_shown[10];
+	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
 	bool                   no_ruler_shown_update;
 	
 	gint ruler_button_press (GdkEventButton*);
@@ -604,6 +614,8 @@ class Editor : public PublicEditor
 	void update_tempo_based_rulers (); 
 	void popup_ruler_menu (nframes_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
+	void set_ruler_visible (RulerType, bool);
+	void toggle_ruler_visibility (RulerType rt);
 	void ruler_toggled (int);
 	gint ruler_label_button_release (GdkEventButton*);
 	void store_ruler_visibility ();
@@ -2082,6 +2094,17 @@ public:
 	void snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
 
 	RhythmFerret* rhythm_ferret;
+
+	void set_track_height (TimeAxisView::TrackHeight h);
+	void set_track_height_largest ();
+	void set_track_height_large ();
+	void set_track_height_larger ();
+	void set_track_height_normal ();
+	void set_track_height_smaller ();
+	void set_track_height_small ();
+
+	void remove_tracks ();
+	void toggle_tracks_active ();
 };
 
 #endif /* __ardour_editor_h__ */

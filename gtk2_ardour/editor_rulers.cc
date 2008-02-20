@@ -22,12 +22,15 @@
 
 #include <string>
 
+#include <gtk/gtkaction.h>
+
 #include <ardour/tempo.h>
 #include <ardour/profile.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "editor.h"
 #include "editing.h"
+#include "actions.h"
 #include "gtk-custom-hruler.h"
 #include "gui_thread.h"
 
@@ -65,14 +68,12 @@ Editor::initialize_rulers ()
 	smpte_ruler->set_name ("SMPTERuler");
 	smpte_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
-	ruler_shown[ruler_metric_smpte] = true;
 	
 	_bbt_ruler = gtk_custom_hruler_new ();
 	bbt_ruler = Glib::wrap (_bbt_ruler);
 	bbt_ruler->set_name ("BBTRuler");
 	bbt_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
-	ruler_shown[ruler_metric_bbt] = true;
 
 	_frames_ruler = gtk_custom_hruler_new ();
 	frames_ruler = Glib::wrap (_frames_ruler);
@@ -86,19 +87,6 @@ Editor::initialize_rulers ()
 	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
-	ruler_shown[ruler_time_meter] = true;
-	ruler_shown[ruler_time_tempo] = true;
-	ruler_shown[ruler_time_marker] = true;
-	ruler_shown[ruler_time_range_marker] = true;
-	ruler_shown[ruler_time_transport_marker] = true;
-	if (Profile->get_sae()) {
-		ruler_shown[ruler_time_cd_marker] = false;
-	} else {
-		ruler_shown[ruler_time_cd_marker] = true;
-	}
-	ruler_shown[ruler_metric_frames] = false;
-	ruler_shown[ruler_metric_minsec] = false;
-	
 	visible_timebars = 7; /* 4 here, 3 in time_canvas */
 	ruler_pressed_button = 0;
 }
@@ -260,9 +248,11 @@ Editor::ruler_button_release (GdkEventButton* ev)
 gint
 Editor::ruler_label_button_release (GdkEventButton* ev)
 {
-	if (ev->button == 3)
-	{
-		popup_ruler_menu();
+	if (ev->button == 3) {
+		Gtk::Menu* m= dynamic_cast<Gtk::Menu*> (ActionManager::get_widget (X_("/RulerMenuPopup")));
+		if (m) {
+			m->popup (1, ev->time);
+		}
 	}
 	
 	return TRUE;
@@ -357,10 +347,6 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 	editor_ruler_menu->set_name ("ArdourContextMenu");
 	ruler_items.clear();
 
-	CheckMenuItem * mitem;
-
-	no_ruler_shown_update = true;
-
 	switch (t) {
 	case MarkerBarItem:
 		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, false, false)));
@@ -400,97 +386,57 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 	default:
 		break;
 	}
-	
-	ruler_items.push_back (CheckMenuElem (_("Min:Secs"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_minsec)));
-	mitem = (CheckMenuItem *) &ruler_items.back(); 
-	if (ruler_shown[ruler_metric_minsec]) {
-		mitem->set_active(true);
+
+	Glib::RefPtr<Action> action;
+
+	action = ActionManager::get_action ("Rulers", "toggle-minsec-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
-
-	ruler_items.push_back (CheckMenuElem (_("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte)));
-	mitem = (CheckMenuItem *) &ruler_items.back(); 
-	if (ruler_shown[ruler_metric_smpte]) {
-		mitem->set_active(true);
-	}
-
-	ruler_items.push_back (CheckMenuElem (_("Samples"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames)));
-	mitem = (CheckMenuItem *) &ruler_items.back(); 
-	if (ruler_shown[ruler_metric_frames]) {
-		mitem->set_active(true);
-	}
-
-	ruler_items.push_back (CheckMenuElem (_("Bars:Beats"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_bbt)));
-	mitem = (CheckMenuItem *) &ruler_items.back(); 
-	if (ruler_shown[ruler_metric_bbt]) {
-		mitem->set_active(true);
-	}
-
-	ruler_items.push_back (SeparatorElem ());
-
-	ruler_items.push_back (CheckMenuElem (_("Meter"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_meter)));
-	mitem = (CheckMenuItem *) &ruler_items.back(); 
-	if (ruler_shown[ruler_time_meter]) {
-		mitem->set_active(true);
-	}
-
-	ruler_items.push_back (CheckMenuElem (_("Tempo"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_tempo)));
-	mitem = (CheckMenuItem *) &ruler_items.back(); 
-	if (ruler_shown[ruler_time_tempo]) {
-		mitem->set_active(true);
-	}
-
-	ruler_items.push_back (CheckMenuElem (_("Location Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_marker)));
-	mitem = (CheckMenuItem *) &ruler_items.back(); 
-	if (ruler_shown[ruler_time_marker]) {
-		mitem->set_active(true);
-	}
-
 	if (!Profile->get_sae()) {
-		ruler_items.push_back (CheckMenuElem (_("Range Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker)));
-		mitem = (CheckMenuItem *) &ruler_items.back(); 
-		if (ruler_shown[ruler_time_range_marker]) {
-			mitem->set_active(true);
+		action = ActionManager::get_action ("Rulers", "toggle-timecode-ruler");
+		if (action) {
+			ruler_items.push_back (MenuElem (*action->create_menu_item()));
 		}
 	}
+	action = ActionManager::get_action ("Rulers", "toggle-samples-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
+	action = ActionManager::get_action ("Rulers", "toggle-bbt-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
+	action = ActionManager::get_action ("Rulers", "toggle-meter-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
+	action = ActionManager::get_action ("Rulers", "toggle-tempo-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
+	action = ActionManager::get_action ("Rulers", "toggle-marker-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
+	if (!Profile->get_sae()) {
+		action = ActionManager::get_action ("Rulers", "toggle-range-ruler");
+		if (action) {
+			ruler_items.push_back (MenuElem (*action->create_menu_item()));
+		}
+	}
+	action = ActionManager::get_action ("Rulers", "toggle-cd-marker-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
+	action = ActionManager::get_action ("Rulers", "toggle-loop-punch-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
 
- 	ruler_items.push_back (CheckMenuElem (_("CD Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_cd_marker)));
- 	mitem = (CheckMenuItem *) &ruler_items.back(); 
- 	if (ruler_shown[ruler_time_cd_marker]) {
- 		mitem->set_active(true);
- 	}
-
- 	ruler_items.push_back (CheckMenuElem (_("Loop/Punch Ranges"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_transport_marker)));
- 	mitem = (CheckMenuItem *) &ruler_items.back(); 
- 	if (ruler_shown[ruler_time_transport_marker]) {
- 		mitem->set_active(true);
- 	}
-	
         editor_ruler_menu->popup (1, gtk_get_current_event_time());
 
 	no_ruler_shown_update = false;
-}
-
-void
-Editor::ruler_toggled (int ruler)
-{
-	if (!session) return;
-	if (ruler < 0 || ruler >= (int) sizeof(ruler_shown)) return;
-
-	if (no_ruler_shown_update) return;
-
-	if (ruler_shown[ruler]) {
-		if (visible_timebars <= 1) {
-			// must always have 1 visible
-			return;
-		}
-	}
-	
-	ruler_shown[ruler] = !ruler_shown[ruler];
-
-	update_ruler_visibility ();
-
-	// update session extra RulerVisibility
-	store_ruler_visibility ();
 }
 
 void
@@ -498,16 +444,16 @@ Editor::store_ruler_visibility ()
 {
 	XMLNode* node = new XMLNode(X_("RulerVisibility"));
 
-	node->add_property (X_("smpte"), ruler_shown[ruler_metric_smpte] ? "yes": "no");
-	node->add_property (X_("bbt"), ruler_shown[ruler_metric_bbt] ? "yes": "no");
-	node->add_property (X_("frames"), ruler_shown[ruler_metric_frames] ? "yes": "no");
-	node->add_property (X_("minsec"), ruler_shown[ruler_metric_minsec] ? "yes": "no");
-	node->add_property (X_("tempo"), ruler_shown[ruler_time_tempo] ? "yes": "no");
-	node->add_property (X_("meter"), ruler_shown[ruler_time_meter] ? "yes": "no");
-	node->add_property (X_("marker"), ruler_shown[ruler_time_marker] ? "yes": "no");
-	node->add_property (X_("rangemarker"), ruler_shown[ruler_time_range_marker] ? "yes": "no");
-	node->add_property (X_("transportmarker"), ruler_shown[ruler_time_transport_marker] ? "yes": "no");
-	node->add_property (X_("cdmarker"), ruler_shown[ruler_time_cd_marker] ? "yes": "no");
+	node->add_property (X_("smpte"), ruler_timecode_action->get_active() ? "yes": "no");
+	node->add_property (X_("bbt"), ruler_bbt_action->get_active() ? "yes": "no");
+	node->add_property (X_("frames"), ruler_samples_action->get_active() ? "yes": "no");
+	node->add_property (X_("minsec"), ruler_minsec_action->get_active() ? "yes": "no");
+	node->add_property (X_("tempo"), ruler_tempo_action->get_active() ? "yes": "no");
+	node->add_property (X_("meter"), ruler_meter_action->get_active() ? "yes": "no");
+	node->add_property (X_("marker"), ruler_marker_action->get_active() ? "yes": "no");
+	node->add_property (X_("rangemarker"), ruler_range_action->get_active() ? "yes": "no");
+	node->add_property (X_("transportmarker"), ruler_loop_punch_action->get_active() ? "yes": "no");
+	node->add_property (X_("cdmarker"), ruler_cd_marker_action->get_active() ? "yes": "no");
 
 	session->add_extra_xml (*node);
 	session->set_dirty ();
@@ -519,91 +465,91 @@ Editor::restore_ruler_visibility ()
 	XMLProperty* prop;
 	XMLNode * node = session->extra_xml (X_("RulerVisibility"));
 
+	no_ruler_shown_update = true;
+
 	if (node) {
 		if ((prop = node->property ("smpte")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_metric_smpte] = true;
+				ruler_timecode_action->set_active (true);
 			else 
-				ruler_shown[ruler_metric_smpte] = false;
+				ruler_timecode_action->set_active (false);
 		}
 		if ((prop = node->property ("bbt")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_metric_bbt] = true;
+				ruler_bbt_action->set_active (true);
 			else 
-				ruler_shown[ruler_metric_bbt] = false;
+				ruler_bbt_action->set_active (false);
 		}
 		if ((prop = node->property ("frames")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_metric_frames] = true;
+				ruler_samples_action->set_active (true);
 			else 
-				ruler_shown[ruler_metric_frames] = false;
+				ruler_samples_action->set_active (false);
 		}
 		if ((prop = node->property ("minsec")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_metric_minsec] = true;
+				ruler_minsec_action->set_active (true);
 			else 
-				ruler_shown[ruler_metric_minsec] = false;
+				ruler_minsec_action->set_active (false);
 		}
 		if ((prop = node->property ("tempo")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_time_tempo] = true;
+				ruler_tempo_action->set_active (true);
 			else 
-				ruler_shown[ruler_time_tempo] = false;
+				ruler_tempo_action->set_active (false);
 		}
 		if ((prop = node->property ("meter")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_time_meter] = true;
+				ruler_meter_action->set_active (true);
 			else 
-				ruler_shown[ruler_time_meter] = false;
+				ruler_meter_action->set_active (false);
 		}
 		if ((prop = node->property ("marker")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_time_marker] = true;
+				ruler_marker_action->set_active (true);
 			else 
-				ruler_shown[ruler_time_marker] = false;
+				ruler_marker_action->set_active (false);
 		}
 		if ((prop = node->property ("rangemarker")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_time_range_marker] = true;
+				ruler_range_action->set_active (true);
 			else 
-				ruler_shown[ruler_time_range_marker] = false;
+				ruler_range_action->set_active (false);
 		}
 
 		if ((prop = node->property ("transportmarker")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_time_transport_marker] = true;
+				ruler_loop_punch_action->set_active (true);
 			else 
-				ruler_shown[ruler_time_transport_marker] = false;
+				ruler_loop_punch_action->set_active (false);
 		}
 
 		if ((prop = node->property ("cdmarker")) != 0) {
 			if (prop->value() == "yes") 
-				ruler_shown[ruler_time_cd_marker] = true;
+				ruler_cd_marker_action->set_active (true);
 			else 
-				ruler_shown[ruler_time_cd_marker] = false;
-
-			cerr << "cd marker ruler set to " << ruler_shown[ruler_time_cd_marker] << endl;
+				ruler_cd_marker_action->set_active (false);
 
 		} else {
 			// this session doesn't yet know about the cdmarker ruler
 			// as a benefit to the user who doesn't know the feature exists, show the ruler if 
 			// any cd marks exist
-			ruler_shown[ruler_time_cd_marker] = false;
+			ruler_cd_marker_action->set_active (false);
 			const Locations::LocationList & locs = session->locations()->list();
 			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
 				if ((*i)->is_cd_marker()) {
-					ruler_shown[ruler_time_cd_marker] = true;
+					ruler_cd_marker_action->set_active (true);
 					break;
 				}
 			}
-			cerr << "cd marker ruler default to " << ruler_shown[ruler_time_cd_marker] << endl;
 		}
 
 	}
 
+	no_ruler_shown_update = false;
+
 	update_ruler_visibility ();
 }
-
 
 void
 Editor::update_ruler_visibility ()
@@ -611,6 +557,10 @@ Editor::update_ruler_visibility ()
 	using namespace Box_Helpers;
 	BoxList & lab_children =  time_button_vbox.children();
 	BoxList & ruler_children =  time_canvas_vbox.children();
+
+	if (no_ruler_shown_update) {
+		return;
+	}
 
 	visible_timebars = 0;
 
@@ -674,25 +624,25 @@ Editor::update_ruler_visibility ()
 
 	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
 	
-	if (ruler_shown[ruler_metric_minsec]) {
+	if (ruler_minsec_action->get_active()) {
 		lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
 	}
 
-	if (ruler_shown[ruler_metric_smpte]) {
+	if (ruler_timecode_action->get_active()) {
 		lab_children.push_back (Element(smpte_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*smpte_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
 	}
 
-	if (ruler_shown[ruler_metric_frames]) {
+	if (ruler_samples_action->get_active()) {
 		lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*frames_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
 	}
 
-	if (ruler_shown[ruler_metric_bbt]) {
+	if (ruler_bbt_action->get_active()) {
 		lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
 		visible_timebars++;
@@ -701,7 +651,7 @@ Editor::update_ruler_visibility ()
 	double tbpos = 1.0;
 	double old_unit_pos ;
 	
-	if (ruler_shown[ruler_time_meter]) {
+	if (ruler_meter_action->get_active()) {
 		lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 
 		old_unit_pos = meter_group->property_y();
@@ -716,7 +666,7 @@ Editor::update_ruler_visibility ()
 		meter_group->hide();
 	}
 	
-	if (ruler_shown[ruler_time_tempo]) {
+	if (ruler_tempo_action->get_active()) {
 		lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = tempo_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -730,7 +680,7 @@ Editor::update_ruler_visibility ()
 		tempo_group->hide();
 	}
 	
-	if (!Profile->get_sae() && ruler_shown[ruler_time_range_marker]) {
+	if (!Profile->get_sae() && ruler_range_action->get_active()) {
 		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = range_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -743,7 +693,7 @@ Editor::update_ruler_visibility ()
 		range_marker_group->hide();
 	}
 
-	if (ruler_shown[ruler_time_transport_marker]) {
+	if (ruler_loop_punch_action->get_active()) {
 		lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = transport_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -757,7 +707,7 @@ Editor::update_ruler_visibility ()
 		transport_marker_group->hide();
 	}
 
-	if (ruler_shown[ruler_time_cd_marker]) {
+	if (ruler_cd_marker_action->get_active()) {
 		lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = cd_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -775,7 +725,7 @@ Editor::update_ruler_visibility ()
 		update_cd_marker_display();
 	}
 	
-	if (ruler_shown[ruler_time_marker]) {
+	if (ruler_marker_action->get_active()) {
 		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -811,7 +761,7 @@ Editor::update_just_smpte ()
 
 	nframes_t rightmost_frame = leftmost_frame + current_page_frames();
 
-	if (ruler_shown[ruler_metric_smpte]) {
+	if (ruler_timecode_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_smpte_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
@@ -836,17 +786,17 @@ Editor::update_fixed_rulers ()
 	   to compute the relevant ticks to display.
 	*/
 
-	if (ruler_shown[ruler_metric_smpte]) {
+	if (ruler_timecode_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_smpte_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
 	
-	if (ruler_shown[ruler_metric_frames]) {
+	if (ruler_samples_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_frames_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
 	
-	if (ruler_shown[ruler_metric_minsec]) {
+	if (ruler_minsec_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_minsec_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
@@ -861,7 +811,7 @@ Editor::update_tempo_based_rulers ()
 
 	ruler_metrics[ruler_metric_bbt].units_per_pixel = frames_per_unit;
 
-	if (ruler_shown[ruler_metric_bbt]) {
+	if (ruler_bbt_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+current_page_frames(),
 					    leftmost_frame, session->current_end_frame());
 	}

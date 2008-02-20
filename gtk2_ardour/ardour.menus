@@ -448,6 +448,21 @@
 	</menu>
      </menubar>
 
+     <popup action="RulerMenuPopup">
+	   <menuitem action="toggle-minsec-ruler"/>
+	   <menuitem action="toggle-timecode-ruler"/>
+	   <menuitem action="toggle-samples-ruler"/>
+     	   <menuitem action="toggle-bbt-ruler"/>
+	   <separator/>
+	   <menuitem action="toggle-meter-ruler"/>
+	   <menuitem action="toggle-timecode-ruler"/>
+	   <menuitem action="toggle-tempo-ruler"/>
+	   <menuitem action="toggle-range-ruler"/>
+	   <menuitem action="toggle-marker-ruler"/>
+	   <menuitem action="toggle-cd-marker-ruler"/>
+	   <menuitem action="toggle-loop-punch-ruler"/>
+     </popup>
+
      <popup name='redirectmenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>

@@ -18,6 +18,7 @@
 */
 
 #include <ardour/ardour.h>
+#include <ardour/profile.h>
 
 #include "utils.h"
 #include "editor.h"
@@ -81,6 +82,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Subframes"), _("Subframes"));
 	ActionManager::register_action (editor_actions, X_("TempoMenu"), _("Tempo"));
 	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
+	ActionManager::register_action (editor_actions, X_("TrackHeightMenu"), _("Height"));
+	ActionManager::register_action (editor_actions, X_("TrackMenu"), _("Tracks"));
 	ActionManager::register_action (editor_actions, X_("Tools"), _("Tools"));
 	ActionManager::register_action (editor_actions, X_("TrimMenu"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
@@ -499,6 +502,24 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("Remove Last Capture"), (mem_fun(*this, &Editor::remove_last_capture)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "toggle-track-active", _("Toggle Active"), (mem_fun(*this, &Editor::toggle_tracks_active)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "remove-track", _("Remove"), (mem_fun(*this, &Editor::remove_tracks)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), (mem_fun(*this, &Editor::set_track_height_largest)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-larger", _("Larger"), (mem_fun(*this, &Editor::set_track_height_large)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-large", _("Large"), (mem_fun(*this, &Editor::set_track_height_larger)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-normal", _("Normal"), (mem_fun(*this, &Editor::set_track_height_normal)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-small", _("Small"), (mem_fun(*this, &Editor::set_track_height_smaller)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-smaller", _("Smaller"), (mem_fun(*this, &Editor::set_track_height_small)));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;
 
@@ -577,17 +598,36 @@ Editor::register_actions ()
 	/* RULERS */
 	
 	Glib::RefPtr<ActionGroup> ruler_actions = ActionGroup::create (X_("Rulers"));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_tempo));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_meter));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_cd_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_transport_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_bbt));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_minsec));
+	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_tempo)));
+	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_meter)));
+	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_range_marker)));
+	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Markers"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_marker)));
+	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_cd_marker)));
+	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_transport_marker)));
+	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_frames)));
+	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_bbt)));
+	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_smpte)));
+	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_minsec)));
 
+	/* set defaults here */
+
+	no_ruler_shown_update = true;
+	ruler_meter_action->set_active (true);
+	ruler_tempo_action->set_active (true);
+	ruler_marker_action->set_active (true);
+	ruler_range_action->set_active (true);
+	if (Profile->get_sae()) {
+		ruler_cd_marker_action->set_active (false);
+		ruler_timecode_action->set_active (false);
+		ruler_minsec_action->set_active (true);
+	} else {
+		ruler_cd_marker_action->set_active (true);
+		ruler_timecode_action->set_active (true);
+		ruler_minsec_action->set_active (false);
+	}
+	ruler_samples_action->set_active (false);
+	no_ruler_shown_update = false;
+	
 	/* REGION LIST */
 
 	Glib::RefPtr<ActionGroup> rl_actions = ActionGroup::create (X_("RegionList"));
@@ -694,6 +734,56 @@ Editor::register_actions ()
 	ActionManager::add_action_group (mouse_mode_actions);
 	ActionManager::add_action_group (snap_actions);
 	ActionManager::add_action_group (editor_actions);
+}
+
+void
+Editor::toggle_ruler_visibility (RulerType rt)
+{
+	char* action = 0;
+
+	if (no_ruler_shown_update) {
+		return;
+	}
+
+	switch (rt) {
+	case ruler_metric_smpte:
+		action = "toggle-timecode-ruler";
+		break;
+	case ruler_metric_bbt:
+		action = "toggle-bbt-ruler";
+		break;
+	case ruler_metric_frames:
+		action = "toggle-samples-ruler";
+		break;
+	case ruler_metric_minsec:
+		action = "toggle-minsec-ruler";
+		break;
+	case ruler_time_tempo:
+		action = "toggle-tempo-ruler";
+		break;
+	case ruler_time_meter:
+		action = "toggle-meter-ruler";
+		break;
+	case ruler_time_marker:
+		action = "toggle-marker-ruler";
+		break;
+	case ruler_time_range_marker:
+		action = "toggle-range-ruler";
+		break;
+	case ruler_time_transport_marker:
+		action = "toggle-loop-punch-ruler";
+		break;
+	case ruler_time_cd_marker:
+		action = "toggle-cd-marker-ruler";
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), action);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		update_ruler_visibility ();
+		store_ruler_visibility ();
+	}
 }
 
 void

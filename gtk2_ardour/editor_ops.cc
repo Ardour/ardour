@@ -5462,3 +5462,151 @@ Editor::playhead_backward_to_grid ()
 	}
 }
 
+void
+Editor::set_track_height (TimeAxisView::TrackHeight h)
+{
+	TrackSelection& ts (selection->tracks);
+
+	if (ts.empty()) {
+		return;
+	}
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		(*x)->set_height (h);
+	}
+}
+
+void
+Editor::set_track_height_largest ()
+{
+	set_track_height (TimeAxisView::Largest);
+}
+void
+Editor::set_track_height_large ()
+{
+	set_track_height (TimeAxisView::Large);
+}
+void
+Editor::set_track_height_larger ()
+{
+	set_track_height (TimeAxisView::Larger);
+}
+void
+Editor::set_track_height_normal ()
+{
+	set_track_height (TimeAxisView::Normal);
+}
+void
+Editor::set_track_height_smaller ()
+{
+	set_track_height (TimeAxisView::Smaller);
+}
+void
+Editor::set_track_height_small ()
+{
+	set_track_height (TimeAxisView::Small);
+}
+
+void
+Editor::toggle_tracks_active ()
+{
+	TrackSelection& ts (selection->tracks);
+	bool first = true;
+	bool target = false;
+
+	if (ts.empty()) {
+		return;
+	}
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*x);
+
+		if (rtv) {
+			if (first) {
+				target = !rtv->_route->active();
+				first = false;
+			}
+			rtv->_route->set_active (target);
+		}
+	}
+}
+
+void
+Editor::remove_tracks ()
+{
+	TrackSelection& ts (selection->tracks);
+
+	if (ts.empty()) {
+		return;
+	}
+
+	vector<string> choices;
+	string prompt;
+	int ntracks = 0;
+	int nbusses = 0;
+	const char* trackstr;
+	const char* busstr;
+	vector<boost::shared_ptr<Route> > routes;
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*x);
+		if (rtv) {
+			if (rtv->is_track()) {
+				ntracks++;
+			} else {
+				nbusses++;
+			}
+		}
+		routes.push_back (rtv->_route);
+	}
+	
+	if (ntracks + nbusses == 0) {
+ 		return;
+	}
+
+	if (ntracks > 1) {
+		trackstr = _("tracks");
+	} else {
+		trackstr = _("track");
+	}
+
+	if (nbusses > 1) {
+		busstr = _("busses");
+	} else {
+		busstr = _("bus");
+	}
+
+	if (ntracks) {
+		if (nbusses) {
+			prompt  = string_compose (_("Do you really want to remove %1 %2 and %3 %4?\n"
+						    "(You may also lose the playlists associated with the %2)\n\n"
+						    "This action cannot be undone!"),
+						  ntracks, trackstr, nbusses, busstr);
+		} else {
+			prompt  = string_compose (_("Do you really want to remove %1 %2?\n"
+						    "(You may also lose the playlists associated with the %2)\n\n"
+						    "This action cannot be undone!"),
+						  ntracks, trackstr);
+		}
+	} else if (nbusses) {
+		prompt  = string_compose (_("Do you really want to remove %1 %2?"),
+					  nbusses, busstr);
+	}
+
+	choices.push_back (_("No, do nothing."));
+	if (ntracks + nbusses > 1) {
+		choices.push_back (_("Yes, remove them."));
+	} else {
+		choices.push_back (_("Yes, remove it."));
+	}
+
+	Choice prompter (prompt, choices);
+
+	if (prompter.run () != 1) {
+		return;
+	}
+
+	for (vector<boost::shared_ptr<Route> >::iterator x = routes.begin(); x != routes.end(); ++x) {
+		session->remove_route (*x);
+	}
+}

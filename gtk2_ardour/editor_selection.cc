@@ -25,6 +25,7 @@
 #include <ardour/diskstream.h>
 #include <ardour/playlist.h>
 #include <ardour/route_group.h>
+#include <ardour/profile.h>
 
 #include "editor.h"
 #include "actions.h"
@@ -768,6 +769,10 @@ Editor::track_selection_changed ()
 void
 Editor::time_selection_changed ()
 {
+	if (Profile->get_sae()) {
+		return;
+	}
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
@@ -985,7 +990,9 @@ Editor::set_selection_from_audio_region ()
 	}
 
 	selection->set (0, selection->regions.start(), selection->regions.end_frame());
-	set_mouse_mode (Editing::MouseRange, false);
+	if (!Profile->get_sae()) {
+		set_mouse_mode (Editing::MouseRange, false);
+	}
 }
 
 void
@@ -1018,7 +1025,9 @@ Editor::set_selection_from_range (Location& loc)
 	selection->set (0, loc.start(), loc.end());
 	commit_reversible_command ();
 
-	set_mouse_mode (Editing::MouseRange, false);
+	if (!Profile->get_sae()) {
+		set_mouse_mode (Editing::MouseRange, false);
+	}
 }
 
 void

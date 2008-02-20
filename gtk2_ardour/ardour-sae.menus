@@ -27,6 +27,7 @@
            </menu>
            <menuitem action='ToggleOptionsEditor'/>
            <menuitem action='About'/>
+           <menuitem action='Quit'/>
         </menu>
 
         <menu name='Transport' action='Transport'>
@@ -169,7 +170,20 @@
 	       </menu>	   
         </menu>
 
-	<menu name='Regions' action='Regions'>
+        <menu action='TrackMenu'>
+	        <menu action='TrackHeightMenu'>
+		     <menuitem action='track-height-largest'/>
+		     <menuitem action='track-height-large'/>
+		     <menuitem action='track-height-larger'/>
+		     <menuitem action='track-height-normal'/>
+		     <menuitem action='track-height-smaller'/>
+		     <menuitem action='track-height-small'/>
+		</menu>
+		<menuitem action='toggle-track-active'/>	
+		<menuitem action='remove-track'/>	
+	</menu>
+
+	<menu action='Regions'>
 	      <menuitem action='insert-region'/>
 	      <menuitem action='rename-region'/>
 	      <menuitem action='auto-rename-region'/>
@@ -218,6 +232,7 @@
 	       	     <menuitem action="toggle-meter-ruler"/>
 	       	     <menuitem action="toggle-tempo-ruler"/>
 	       	     <menuitem action="toggle-range-ruler"/>
+	       	     <menuitem action="toggle-marker-ruler"/>
 	       	     <menuitem action="toggle-cd-marker-ruler"/>
 	       	     <menuitem action="toggle-loop-punch-ruler"/>
 	       </menu>
@@ -295,6 +310,19 @@
 	  </menu>
 
      </menubar>
+
+     <popup action="RulerMenuPopup">
+          <menuitem action="toggle-bbt-ruler"/>
+     	  <menuitem action="toggle-minsec-ruler"/>
+	  <menuitem action="toggle-samples-ruler"/>
+	  <separator/>
+	  <menuitem action="toggle-meter-ruler"/>
+	  <menuitem action="toggle-tempo-ruler"/>
+	  <menuitem action="toggle-range-ruler"/>
+	  <menuitem action="toggle-marker-ruler"/>
+	  <menuitem action="toggle-cd-marker-ruler"/>
+	  <menuitem action="toggle-loop-punch-ruler"/>
+     </popup>
 
      <popup name='redirectmenu'>
 	 <menuitem action='newplugin'/>
