@@ -77,6 +77,8 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual void activate () {}
 	virtual void deactivate () {}
 
+	virtual void update_presets ();
+
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;

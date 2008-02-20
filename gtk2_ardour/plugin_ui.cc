@@ -135,15 +135,15 @@ PluginUIWindow::~PluginUIWindow ()
 void
 PluginUIWindow::on_show ()
 {
-	cerr << "PluginWindow shown\n";
-		
+	if (_pluginui) {
+		_pluginui->update_presets ();
+	}
 	Window::on_show ();
 }
 
 void
 PluginUIWindow::on_hide ()
 {
-	cerr << "PluginWindow hidden\n";
 	Window::on_hide ();
 }
 
@@ -320,3 +320,8 @@ PlugUIBase::bypass_toggled ()
 	}
 }
 
+void
+PlugUIBase::update_presets ()
+{
+	set_popdown_strings (preset_combo, plugin->get_presets());
+}
