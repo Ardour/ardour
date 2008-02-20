@@ -75,6 +75,11 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
+static gboolean __idler (gpointer arg)
+{
+	((AudioTimeAxisView*)arg)->first_idle ();
+	return FALSE;
+}
 
 AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess)
@@ -114,14 +119,21 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (mem_fun(*this, &AudioTimeAxisView::region_view_added));
-		_view->attach ();
+		g_idle_add (__idler, this);
+	} else {
+		post_construct ();
 	}
-
-	post_construct ();
 }
 
 AudioTimeAxisView::~AudioTimeAxisView ()
 {
+}
+
+void
+AudioTimeAxisView::first_idle ()
+{
+	_view->attach ();
+	post_construct ();
 }
 
 AudioStreamView*

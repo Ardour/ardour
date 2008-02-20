@@ -84,6 +84,8 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void set_state (const XMLNode&);
 	XMLNode* get_child_xml_node (const string & childname);
 
+	void first_idle ();
+
   private:
 	friend class AudioStreamView;
 	friend class AudioRegionView;
