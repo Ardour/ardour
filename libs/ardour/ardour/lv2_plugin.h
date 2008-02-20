@@ -95,6 +95,7 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	bool parameter_is_audio(uint32_t) const;
 	bool parameter_is_control(uint32_t) const;
+	bool parameter_is_midi(uint32_t) const;
 	bool parameter_is_input(uint32_t) const;
 	bool parameter_is_output(uint32_t) const;
 	bool parameter_is_toggled(uint32_t) const;
@@ -138,11 +139,12 @@ struct LV2World {
 	~LV2World();
 
 	SLV2World world;
-	SLV2Value input_class;
-	SLV2Value output_class;
-	SLV2Value audio_class;
-	SLV2Value control_class;
-	SLV2Value event_class;
+	SLV2Value input_class; ///< Input port
+	SLV2Value output_class; ///< Output port
+	SLV2Value audio_class; ///< Audio port
+	SLV2Value control_class; ///< Control port
+	SLV2Value event_class; ///< Event port
+	SLV2Value midi_class; ///< MIDI event
 	SLV2Value in_place_broken;
 	SLV2Value integer;
 	SLV2Value toggled;

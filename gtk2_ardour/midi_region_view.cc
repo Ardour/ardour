@@ -362,7 +362,7 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 	//double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
 
 	// Add a 1 beat long note (for now)
-	const boost::shared_ptr<Note> new_note(new Note(stamp, dur, (uint8_t)note, 0x40));
+	const boost::shared_ptr<Note> new_note(new Note(0, stamp, dur, (uint8_t)note, 0x40));
 	
 	view->update_bounds(new_note->note());
 

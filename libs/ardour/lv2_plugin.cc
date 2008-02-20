@@ -389,6 +389,23 @@ LV2Plugin::connect_and_run (BufferSet& bufs, uint32_t& in_index, uint32_t& out_i
 						bufs.get_audio(index).data(nframes, offset));
 				out_index++;
 			}
+		} else if (parameter_is_midi(port_index)) {
+			// FIXME: Switch MIDI buffer format to LV2 event buffer
+			if (parameter_is_input(port_index)) {
+				//const size_t index = min(in_index, nbufs - 1);
+				//slv2_instance_connect_port(_instance, port_index,
+				//		bufs.get_midi(index).data(nframes, offset));
+				// FIXME: hope it's connection optional...
+				slv2_instance_connect_port(_instance, port_index, NULL);
+				in_index++;
+			} else if (parameter_is_output(port_index)) {
+				//const size_t index = min(out_index,nbufs - 1);
+				//slv2_instance_connect_port(_instance, port_index,
+				//		bufs.get_midi(index).data(nframes, offset));
+				// FIXME: hope it's connection optional...
+				slv2_instance_connect_port(_instance, port_index, NULL);
+				out_index++;
+			}
 		}
 		port_index++;
 	}
@@ -412,6 +429,14 @@ LV2Plugin::parameter_is_audio (uint32_t param) const
 {
 	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, param);
 	return slv2_port_is_a(_plugin, port, _world.audio_class);
+}
+
+bool
+LV2Plugin::parameter_is_midi (uint32_t param) const
+{
+	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, param);
+	return slv2_port_is_a(_plugin, port, _world.event_class)
+		&& slv2_port_supports_event(_plugin, port, _world.midi_class);
 }
 
 bool
@@ -505,6 +530,7 @@ LV2World::LV2World()
 	control_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_CONTROL);
 	audio_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_AUDIO);
 	event_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_EVENT);
+	midi_class = slv2_value_new_uri(world, SLV2_EVENT_CLASS_MIDI);
 	in_place_broken = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "inPlaceBroken");
 	integer = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
 	toggled = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
@@ -518,6 +544,7 @@ LV2World::~LV2World()
 	slv2_value_free(control_class);
 	slv2_value_free(audio_class);
 	slv2_value_free(event_class);
+	slv2_value_free(midi_class);
 	slv2_value_free(in_place_broken);
 }
 

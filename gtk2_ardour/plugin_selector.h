@@ -61,16 +61,20 @@ class PluginSelector : public ArdourDialog
 			add (type_name);
 			add (category);
 			add (creator);
-			add (ins);
-			add (outs);
+			add (audio_ins);
+			add (audio_outs);
+			add (midi_ins);
+			add (midi_outs);
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> type_name;
 		Gtk::TreeModelColumn<std::string> category;
 		Gtk::TreeModelColumn<std::string> creator;
-		Gtk::TreeModelColumn<std::string> ins;
-		Gtk::TreeModelColumn<std::string> outs;
+		Gtk::TreeModelColumn<std::string> audio_ins;
+		Gtk::TreeModelColumn<std::string> audio_outs;
+		Gtk::TreeModelColumn<std::string> midi_ins;
+		Gtk::TreeModelColumn<std::string> midi_outs;
 		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	PluginColumns plugin_columns;
