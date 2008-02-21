@@ -802,8 +802,8 @@ Editor::update_ruler_visibility ()
 	time_canvas_event_box.show_all();
 	time_button_frame.show_all();
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
-	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit));
+	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit));
 
 	redisplay_tempo (false);
 }
@@ -833,11 +833,11 @@ Editor::compute_fixed_ruler_scale ()
 	}
 
 	if (ruler_shown[ruler_metric_smpte]) {
-		set_smpte_ruler_scale (leftmost_frame, leftmost_frame + (canvas_width * frames_per_unit) );
+		set_smpte_ruler_scale (leftmost_frame, leftmost_frame + (edit_packer.get_width() * frames_per_unit) );
 	}
 	
 	if (ruler_shown[ruler_metric_minsec]) {
-		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + (canvas_width * frames_per_unit) );
+		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + (edit_packer.get_width() * frames_per_unit) );
 	}
 }
 

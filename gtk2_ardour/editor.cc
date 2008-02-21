@@ -2199,7 +2199,7 @@ Editor::set_snap_to (SnapType st)
 	case SnapToAEighthBeat:
 	case SnapToAQuarterBeat:
 	case SnapToAThirdBeat:
-		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit));
 		update_tempo_based_rulers ();
 		break;
 
@@ -4404,8 +4404,8 @@ Editor::idle_visual_changer ()
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
 
 		compute_fixed_ruler_scale ();
-		compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
-		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(canvas_width * pending_visual_change.frames_per_unit));
+		compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(edit_packer.get_width() * pending_visual_change.frames_per_unit));
+		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(edit_packer.get_width() * pending_visual_change.frames_per_unit));
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {

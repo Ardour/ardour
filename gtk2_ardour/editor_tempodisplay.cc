@@ -99,9 +99,9 @@ Editor::tempo_map_changed (Change ignored)
 		return;
 	}
 
-        ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored));
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored));
 
-	compute_current_bbt_points(leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit));
+	compute_current_bbt_points(leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	update_tempo_based_rulers ();
 	if (tempo_map_change_idle_handler_id  < 0) {
@@ -116,7 +116,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 		return;
 	}
 	
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + (nframes_t)(canvas_width * frames_per_unit)); // redraw rulers and measures
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit)); // redraw rulers and measures
 
 	if (immediate_redraw) {
 
