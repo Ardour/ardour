@@ -152,6 +152,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
+		cout << "KEY" << endl;
 		if (ev->key.keyval == GDK_Delete && !delete_mod) {
 			delete_mod = true;
 			original_mode = trackview.editor.current_midi_edit_mode();

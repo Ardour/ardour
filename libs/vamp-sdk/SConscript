@@ -34,8 +34,8 @@ libvamphostsdk = vampsdk.SharedLibrary('vamphostsdk', vamphostsdk_files)
 Default(libvampsdk)
 Default(libvamphostsdk)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libvampsdk))
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libvamphostsdk))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libvampsdk))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libvamphostsdk))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'COPYING', 'README' ] +

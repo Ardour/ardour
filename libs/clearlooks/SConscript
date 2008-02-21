@@ -33,7 +33,7 @@ usable_libclearlooks = clearlooks.Install ('engines', libclearlooks)
 Default (usable_libclearlooks)
 
 env.Alias('install',
-          env.Install(os.path.join(install_prefix,env['LIBDIR'], 'ardour2', 'engines'),
+          env.Install(os.path.join(install_prefix,env['LIBDIR'], 'ardour3', 'engines'),
                       libclearlooks))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],

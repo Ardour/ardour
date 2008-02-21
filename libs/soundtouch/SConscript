@@ -23,7 +23,7 @@ libst = st.SharedLibrary('soundtouch', soundtouch_files)
 
 Default(libst)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libst))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libst))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 	[ 'SConscript'] + soundtouch_files + glob.glob('*.h')))

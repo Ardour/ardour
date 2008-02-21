@@ -405,7 +405,6 @@ Keyboard::setup_keybindings ()
 {
 	using namespace ARDOUR_COMMAND_LINE;
 	std::string default_bindings = "mnemonic-us.bindings";
-	std::string path;
 	vector<string> strs;
 
 	binding_files.clear ();
@@ -415,7 +414,7 @@ Keyboard::setup_keybindings ()
 	/* set up the per-user bindings path */
 	
 	strs.push_back (Glib::get_home_dir());
-	strs.push_back (".ardour2");
+	strs.push_back (".ardour3");
 	strs.push_back ("ardour.bindings");
 
 	user_keybindings_path = Glib::build_filename (strs);
@@ -484,9 +483,7 @@ Keyboard::setup_keybindings ()
 
 			SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
 
-			find_file_in_search_path (spath, keybindings_path, keybindings_file);
-			
-			if (path.empty()) {
+			if ( ! find_file_in_search_path (spath, keybindings_path, keybindings_file)) {
 				
 				if (keybindings_path == default_bindings) {
 					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
@@ -502,7 +499,7 @@ Keyboard::setup_keybindings ()
 
 				/* use it */
 
-				keybindings_path = path;
+				keybindings_path = keybindings_file.to_string();
 				break;
 				
 			}

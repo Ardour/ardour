@@ -74,7 +74,7 @@ if tranzport['TRANZPORT']:
         i18n (tranzport, tranzport_files, env)
 #    if env['HAVE_TRANZPORT_KERNEL_DRIVER']:
 #        tranzport.Merge([ libraries['usb'] ])
-    env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_tranzport))
+    env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3', 'surfaces'), libardour_tranzport))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                      [ 'SConscript' ] +

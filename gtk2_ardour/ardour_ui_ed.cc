@@ -225,8 +225,6 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (common_actions, X_("RemoveLastCapture"), _("Remove Last Capture"), mem_fun(*this, &ARDOUR_UI::remove_last_capture));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_splash));
-	
 	Glib::RefPtr<ActionGroup> transport_actions = ActionGroup::create (X_("Transport"));
 
 	/* do-nothing action for the "transport" menu bar item */

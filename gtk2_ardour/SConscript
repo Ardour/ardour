@@ -461,12 +461,12 @@ if env['NLS']:
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_dark_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_light_theme))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour3_ui_default.conf'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour3_ui_default.conf'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour-sae.menus'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ergonomic-us.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'mnemonic-us.bindings'))
-env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ergonomic-us.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'mnemonic-us.bindings'))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'SAE-de.bindings'))
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3', 'pixmaps'), pixmap_files))

@@ -17,7 +17,7 @@ libcairomm = cairomm.SharedLibrary('cairomm', cairomm_files)
 
 Default([libcairomm])
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libcairomm))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libcairomm))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript',

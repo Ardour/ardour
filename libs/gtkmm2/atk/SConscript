@@ -13,7 +13,7 @@ atkmm.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'] ])
 libatkmm = atkmm.SharedLibrary('atkmm', atkmm_files)
 Default(libatkmm)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libatkmm))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libatkmm))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'atkmm.h'] + 

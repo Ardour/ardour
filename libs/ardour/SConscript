@@ -170,7 +170,7 @@ if ardour['LIBLO']:
 ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 ardour.Append(CXXFLAGS="-DDATA_DIR=\\\"" + os.path.join (final_prefix, 'share') + "\\\"")
 ardour.Append(CXXFLAGS="-DMODULE_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR']) + "\\\"")
-ardour.Append(CXXFLAGS="-DVAMP_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR'], 'ardour2', 'vamp') + "\\\"")
+ardour.Append(CXXFLAGS="-DVAMP_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR'], 'ardour3', 'vamp') + "\\\"")
 ardour.Append(CXXFLAGS="-DCONFIG_DIR=\\\"" + final_config_prefix + "\\\"")
 ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\"" + os.path.join (final_prefix, 'share', 'locale') + "\\\"")
 

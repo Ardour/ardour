@@ -84,7 +84,7 @@ Default(libgtkmm2ext)
 if env['NLS']:
     i18n (gtkmm2ext, gtkmm2ext_files, env)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libgtkmm2ext))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libgtkmm2ext))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'i18n.h', 'gettext.h'] +

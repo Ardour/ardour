@@ -17,7 +17,7 @@ if gtkmm2['IS_OSX']:
 libgtkmm2 = gtkmm2.SharedLibrary('gtkmm2', gtkmm2_files)
 Default(libgtkmm2)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libgtkmm2))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libgtkmm2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'gtkmmconfig.h', 'gtkmm.h'] + 

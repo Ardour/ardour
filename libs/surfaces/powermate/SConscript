@@ -50,7 +50,7 @@ if env['POWERMATE']:
 	if env['NLS']:
 		i18n (powermate, powermate_files, env)
 	      
-	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2', 'surfaces'), libardour_powermate))
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3', 'surfaces'), libardour_powermate))
 
 	env.Alias('tarball', env.Distribute (env['DISTTREE'],
 					     [ 'SConscript' ] +

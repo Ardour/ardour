@@ -69,7 +69,7 @@ if mackie['SURFACES']:
 	Default(libardour_mackie)
 	if env['NLS']:
 		i18n (mackie, mackie_files, env)
-	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2','surfaces'), libardour_mackie))
+	env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3','surfaces'), libardour_mackie))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
 				     [ 'SConscript' ] +

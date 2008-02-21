@@ -16,7 +16,7 @@ if pangomm['IS_OSX']:
 libpangomm = pangomm.SharedLibrary('pangomm', pangomm_files)
 Default(libpangomm)
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libpangomm))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libpangomm))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'pangomm.h'] + 
