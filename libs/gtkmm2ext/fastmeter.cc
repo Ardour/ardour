@@ -481,8 +481,16 @@ FastMeter::set (float lvl)
 		return;
 	}
 
-	/* now carefully compute the part we really want updated */
+	if (orientation == Vertical) {
+		queue_vertical_redraw (win, old_level);
+	} else {
+		queue_horizontal_redraw (win, old_level);
+	}
+}
 
+void
+FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float old_level)
+{
 	GdkRectangle rect;
 	
 	gint new_top = (gint) floor (pixheight * current_level);
@@ -510,31 +518,39 @@ FastMeter::set (float lvl)
 	}
 
 	GdkRegion* region;
+	bool queue = false;
 
 	if (rect.height != 0) {
 
 		/* ok, first region to draw ... */
 		
 		region = gdk_region_rectangle (&rect);
-	} else {
-		region = gdk_region_new ();
+		queue = true;
 	}
 
-	/* redraw the last place where the peak hold bar was;
-	   the expose will draw the new one whether its part of
+	/* redraw the last place where the last peak hold bar was;
+	   the next expose will draw the new one whether its part of
 	   expose region or not.
 	*/
 	
 	if (last_peak_rect.width * last_peak_rect.height != 0) {
+		if (!queue) {
+			region = gdk_region_new ();
+			queue = true; 
+		}
 		gdk_region_union_with_rect (region, &last_peak_rect);
-	}
+	} 
 
-	if (rect.height == 0 && !hold_state) {
-		/* nothing to do */
-		return;
+	if (queue) {
+		gdk_window_invalidate_region (win->gobj(), region, true);
 	}
-	
-	gdk_window_invalidate_region (win->gobj(), region, true);
+}
+
+void
+FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& win, float old_level)
+{
+	/* XXX OPTIMIZE (when we have some horizontal meters) */
+	queue_draw ();
 }
 
 void
