@@ -909,10 +909,7 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 		} else if (SMFSource::safe_file_extension (*i)) {
 			SMFReader reader(*i);
 			if (reader.num_tracks() > 1) {
-				cout << *i << " MULTI CHANNEL" << endl;
-				multichannel = true;
-			} else {
-				cout << *i << " SINGLE CHANNEL" << endl;
+				multichannel = true; // "channel" == track here...
 			}
 		} else {
 			err = true;

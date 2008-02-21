@@ -660,7 +660,7 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 			const boost::shared_ptr<const Note> earliest_off = active_notes.top();
 			const MidiEvent& off_ev = earliest_off->off_event();
 			if (off_ev.time() <= (*n)->time()) {
-				source->append_event_unlocked(off_ev);
+				source->append_event_unlocked(Frames, off_ev);
 				active_notes.pop();
 			} else {
 				break;
@@ -668,14 +668,14 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 		}
 
 		// Write this note on
-		source->append_event_unlocked((*n)->on_event());
+		source->append_event_unlocked(Frames, (*n)->on_event());
 		if ((*n)->duration() > 0)
 			active_notes.push(*n);
 	}
 		
 	// Write any trailing note offs
 	while ( ! active_notes.empty() ) {
-		source->append_event_unlocked(active_notes.top()->off_event());
+		source->append_event_unlocked(Frames, active_notes.top()->off_event());
 		active_notes.pop();
 	}
 

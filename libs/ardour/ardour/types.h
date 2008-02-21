@@ -132,6 +132,11 @@ namespace ARDOUR {
 		Sustained,
 		Percussive
 	};
+
+	enum EventTimeUnit {
+		Frames,
+		Beats
+	};
 	
 	struct BBT_Time {
 	    uint32_t bars;

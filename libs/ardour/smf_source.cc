@@ -435,7 +435,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		time -= _timeline_position;
 
 		const MidiEvent ev(time, size, buf);
-		append_event_unlocked(ev);
+		append_event_unlocked(Frames, ev);
 
 		if (_model)
 			_model->append(ev);
@@ -454,7 +454,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		
 
 void
-SMFSource::append_event_unlocked(const MidiEvent& ev)
+SMFSource::append_event_unlocked(EventTimeUnit unit, const MidiEvent& ev)
 {
 	/*printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(),
 			(unsigned)ev.channel(), ev.time(), ev.size());
@@ -466,12 +466,19 @@ SMFSource::append_event_unlocked(const MidiEvent& ev)
 	assert(ev.time() >= 0);
 	assert(ev.time() >= _last_ev_time);
 	
-	// FIXME: assumes tempo never changes after start
-	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
-			_session.engine().frame_rate(),
-			_session.tempo_map().meter_at(_timeline_position));
+	uint32_t delta_time = 0;
 	
-	const uint32_t delta_time = (uint32_t)((ev.time() - _last_ev_time) / frames_per_beat * _ppqn);
+	if (unit == Frames) {
+		// FIXME: assumes tempo never changes after start
+		const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
+				_session.engine().frame_rate(),
+				_session.tempo_map().meter_at(_timeline_position));
+
+		delta_time = (uint32_t)((ev.time() - _last_ev_time) / frames_per_beat * _ppqn);
+	} else {
+		assert(unit == Beats);
+		delta_time = (uint32_t)((ev.time() - _last_ev_time) * _ppqn);
+	}
 
 	const size_t stamp_size = write_var_len(delta_time);
 	fwrite(ev.buffer(), 1, ev.size(), _fd);

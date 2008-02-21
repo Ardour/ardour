@@ -48,6 +48,10 @@ typedef std::pair<boost::shared_ptr<const AutomationList>, std::pair<double,doub
  * note events (ie with a start time and a duration) rather than separate
  * note on and off events (controller data is not here since it's represented
  * as an AutomationList)
+ *
+ * FIXME: Currently this stores event time stamps in frames.  This is almost
+ * certainly wrong, or at least wrong most of the time (if we add an option).
+ * This reeeeeeally needs fixing, but frame time runs deep in Ardour...
  */
 class MidiModel : public boost::noncopyable, public Automatable {
 public:

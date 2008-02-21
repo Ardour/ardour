@@ -290,10 +290,10 @@ write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 				break;
 
 			t += delta_t;
-			ev.time() = t * (double)source->ppqn();
+			ev.time() = (double)t / (double)source->ppqn();
 			ev.size() = size;
 
-			smfs->append_event_unlocked(ev);
+			smfs->append_event_unlocked(Beats, ev);
 			if (status.progress < 0.99)
 				status.progress += 0.01;
 		}
