@@ -132,10 +132,9 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			ARDOUR::Session::set_disable_all_loaded_plugins (true);
 			break;
 
- 
-                case 'm':
-                        menus_file = optarg;
-                        break;
+		case 'm':
+			menus_file = optarg;
+			break;
 
 		case 'n':
 			no_splash = false;
