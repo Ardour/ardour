@@ -95,7 +95,7 @@
 (gtk_accel_path "<Actions>/Editor/undo" "<%PRIMARY%>z")
 (gtk_accel_path "<Actions>/Editor/toggle-zoom" "<%TERTIARY%>z")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-zoom" "z")
-(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-note" "<%TERTIARY%>n")
+(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-note" "n")
 (gtk_accel_path "<Actions>/Editor/editor-cut" "<%PRIMARY%>x")
 (gtk_accel_path "<Actions>/Editor/editor-copy" "<%PRIMARY%>c")
 (gtk_accel_path "<Actions>/Common/ToggleColorManager" "<%WINDOW%>c")
@@ -103,8 +103,8 @@
 (gtk_accel_path "<Actions>/Editor/editor-paste" "<%PRIMARY%>v")
 (gtk_accel_path "<Actions>/Editor/brush-at-mouse" "<%PRIMARY%>b")
 (gtk_accel_path "<Actions>/Common/ToggleBigClock" "<%WINDOW%>b")
-(gtk_accel_path "<Actions>/Editor/normalize-region" "n")
-(gtk_accel_path "<Actions>/Editor/mute-unmute-region" "m")
+(gtk_accel_path "<Actions>/Editor/normalize-region" "<%SECONDARY%>n")
+(gtk_accel_path "<Actions>/Editor/mute-unmute-region" "<%SECONDARY%>m")
 (gtk_accel_path "<Actions>/Common/goto-mixer" "<%WINDOW%>m")
 
 ;; arrow keys, navigation etc.
