@@ -36,6 +36,7 @@
 #include "ardour_dialog.h"
 #include "route_ui.h"
 #include "enums.h"
+#include "editing.h"
 #include "route_time_axis.h"
 #include "canvas.h"
 
@@ -86,6 +87,9 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void first_idle ();
 
+	void set_waveform_shape (Editing::WaveformShape);
+	void set_waveform_scale (Editing::WaveformScale);
+
   private:
 	friend class AudioStreamView;
 	friend class AudioRegionView;
@@ -96,9 +100,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void append_extra_display_menu_items ();
 	
 	void toggle_show_waveforms ();
-	void set_waveform_shape (WaveformShape);
 	void toggle_waveforms ();
-	void set_waveform_scale (WaveformScale);
 
 	void show_all_automation ();
 	void show_existing_automation ();

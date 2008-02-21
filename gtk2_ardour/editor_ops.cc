@@ -5610,3 +5610,21 @@ Editor::remove_tracks ()
 		session->remove_route (*x);
 	}
 }
+
+void
+Editor::set_waveform_scale (WaveformScale ws)
+{
+	TrackSelection& ts (selection->tracks);
+
+	if (ts.empty()) {
+		return;
+	}
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (*x);
+		if (atv) {
+			atv->set_waveform_scale (ws);
+		}
+	}
+}	
+				

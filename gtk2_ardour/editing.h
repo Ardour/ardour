@@ -36,6 +36,8 @@
 #define IMPORTPOSITION(a) /*empty*/
 #define IMPORTDISPOSITION(a) /*empty*/
 #define EDITPOINT(a) /*empty*/
+#define WAVEFORMSCALE(a) /*empty*/
+#define WAVEFORMSHAPE(a) /*empty*/
 
 namespace Editing {
 
@@ -162,6 +164,27 @@ enum EditPoint {
 
 #undef EDITPOINT
 #define EDITPOINT(a) /*empty*/
+
+// WAVEFORMSCALE
+#undef WAVEFORMSCALE
+#define WAVEFORMSCALE(a) a,
+enum WaveformScale {
+	#include "editing_syms.h"
+};
+
+#undef WAVEFORMSCALE
+#define WAVEFORMSCALE(a) /*empty*/
+
+
+// WAVEFORMSHAPE
+#undef WAVEFORMSHAPE
+#define WAVEFORMSHAPE(a) a,
+enum WaveformShape {
+	#include "editing_syms.h"
+};
+
+#undef WAVEFORMSHAPE
+#define WAVEFORMSHAPE(a) /*empty*/
 
 /////////////////////
 // These don't need their state saved. yet...

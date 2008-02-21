@@ -11,7 +11,6 @@
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
            <separator/>
-           <menuitem action='AddTrackBus'/>	
 
 	   <menu name='Files' action='Files'>
               <menuitem action='addExistingAudioFiles'/>
@@ -171,6 +170,7 @@
         </menu>
 
         <menu action='TrackMenu'>
+	        <menuitem action='AddTrackBus'/>	
 	        <menu action='TrackHeightMenu'>
 		     <menuitem action='track-height-largest'/>
 		     <menuitem action='track-height-large'/>
@@ -179,11 +179,16 @@
 		     <menuitem action='track-height-smaller'/>
 		     <menuitem action='track-height-small'/>
 		</menu>
+		<menu action='WaveformMenu'>
+		      <menuitem action='toggle-waveform-visible'/>
+		      <menuitem action='linear-waveforms'/>
+		      <menuitem action='logarithmic-waveforms'/>
+		</menu>
 		<menuitem action='toggle-track-active'/>	
 		<menuitem action='remove-track'/>	
 	</menu>
 
-	<menu action='Regions'>
+	<menu action='RegionMenu'>
 	      <menuitem action='insert-region'/>
 	      <menuitem action='rename-region'/>
 	      <menuitem action='auto-rename-region'/>
@@ -225,16 +230,15 @@
 	       	     <menuitem action="secondary-clock-off"/>
 	       </menu>
 	       <menu action="RulerMenu">
-	       	     <menuitem action="toggle-bbt-ruler"/>
 	       	     <menuitem action="toggle-minsec-ruler"/>
 	       	     <menuitem action="toggle-samples-ruler"/>
+	       	     <menuitem action="toggle-bbt-ruler"/>
 		     <separator/>
 	       	     <menuitem action="toggle-meter-ruler"/>
 	       	     <menuitem action="toggle-tempo-ruler"/>
-	       	     <menuitem action="toggle-range-ruler"/>
-	       	     <menuitem action="toggle-marker-ruler"/>
-	       	     <menuitem action="toggle-cd-marker-ruler"/>
 	       	     <menuitem action="toggle-loop-punch-ruler"/>
+	       	     <menuitem action="toggle-cd-marker-ruler"/>
+	       	     <menuitem action="toggle-marker-ruler"/>
 	       </menu>
 	       <menu action="ZoomMenu">
                	     <menuitem action='temporal-zoom-in'/>
@@ -250,16 +254,17 @@
                	     <menuitem action='scroll-backward'/>
 	       </menu>
 	       <separator/>
-	       <menu action="Windows">
-                     <menuitem action='goto-editor'/>
-		     <menuitem action='goto-mixer'/>
-		     <menuitem action='ToggleLocations'/>
-		     <menuitem action='ToggleKeyEditor'/>
-		     <menuitem action='ToggleThemeManager'/>
-		     <menuitem action='ToggleBigClock'/>
-		     <menuitem action='toggle-rhythm-ferret'/>
-		</menu>
         </menu>
+
+	<menu action="WindowMenu">
+	      <menuitem action='goto-editor'/>
+	      <menuitem action='goto-mixer'/>
+	      <menuitem action='ToggleLocations'/>
+	      <menuitem action='ToggleKeyEditor'/>
+	      <menuitem action='ToggleThemeManager'/>
+	      <menuitem action='ToggleBigClock'/>
+	      <menuitem action='toggle-rhythm-ferret'/>
+	</menu>
 
         <menu name='Options' action='Options'>
                <menu action='Monitoring'>
@@ -312,16 +317,15 @@
      </menubar>
 
      <popup action="RulerMenuPopup">
-          <menuitem action="toggle-bbt-ruler"/>
      	  <menuitem action="toggle-minsec-ruler"/>
 	  <menuitem action="toggle-samples-ruler"/>
+          <menuitem action="toggle-bbt-ruler"/>
 	  <separator/>
 	  <menuitem action="toggle-meter-ruler"/>
 	  <menuitem action="toggle-tempo-ruler"/>
-	  <menuitem action="toggle-range-ruler"/>
-	  <menuitem action="toggle-marker-ruler"/>
-	  <menuitem action="toggle-cd-marker-ruler"/>
 	  <menuitem action="toggle-loop-punch-ruler"/>
+	  <menuitem action="toggle-cd-marker-ruler"/>
+	  <menuitem action="toggle-marker-ruler"/>
      </popup>
 
      <popup name='redirectmenu'>

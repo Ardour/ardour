@@ -764,6 +764,8 @@ Editor::track_selection_changed ()
 			(*i)->set_selected (false);
 		}
 	}
+
+	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
 }
 
 void
@@ -796,14 +798,8 @@ Editor::time_selection_changed ()
 }
 
 void
-Editor::region_selection_changed ()
+Editor::sensitize_the_right_region_actions (bool have_selected_regions)
 {
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_selected_regionviews (selection->regions);
-	}
-	
-	bool have_selected_regions = !selection->regions.empty();
-
 	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::region_selection_sensitive_actions.begin();
 	     x != ActionManager::region_selection_sensitive_actions.end(); ++x) {
 
@@ -822,6 +818,17 @@ Editor::region_selection_changed ()
 			(*x)->set_sensitive (have_selected_regions);
 		}
 	}
+}
+
+
+void
+Editor::region_selection_changed ()
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->set_selected_regionviews (selection->regions);
+	}
+	
+	sensitize_the_right_region_actions (!selection->regions.empty());
 
 	zoomed_to_region = false;
 }

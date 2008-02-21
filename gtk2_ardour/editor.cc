@@ -1120,6 +1120,10 @@ Editor::connect_to_session (Session *t)
 {
 	session = t;
 
+	/* there are never any selected regions at startup */
+
+	sensitize_the_right_region_actions (false);
+
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
 
@@ -2277,7 +2281,7 @@ Editor::set_state (const XMLNode& node)
 	if ((prop = node.property ("show-waveforms"))) {
 		bool yn = (prop->value() == "yes");
 		_show_waveforms = !yn;
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-visible"));
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 			/* do it twice to force the change */
@@ -4488,4 +4492,28 @@ Editor::show_rhythm_ferret ()
 	rhythm_ferret->set_session (session);
 	rhythm_ferret->show ();
 	rhythm_ferret->present ();
+}
+
+void
+Editor::first_idle ()
+{
+	MessageDialog* dialog = 0;
+
+	if (track_views.size() > 1) { 
+		dialog = new MessageDialog (*this, 
+					    _("Please wait while Ardour loads visual data"),
+					    true,
+					    Gtk::MESSAGE_INFO,
+					    Gtk::BUTTONS_NONE);
+		dialog->present ();
+		ARDOUR_UI::instance()->flush_pending ();
+	}
+
+	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
+		(*t)->first_idle();
+	}
+	
+	if (dialog) {
+		delete dialog;
+	}
 }

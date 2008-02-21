@@ -117,7 +117,7 @@ class GainMeter : public Gtk::VBox
 	std::string short_astyle_string (ARDOUR::AutoStyle);
 	std::string _astyle_string (ARDOUR::AutoStyle, bool);
 
-	Width                       _width;
+	Width _width;
 
 	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
 	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget&);

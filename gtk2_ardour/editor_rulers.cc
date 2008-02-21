@@ -415,21 +415,21 @@ Editor::popup_ruler_menu (nframes_t where, ItemType t)
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
-	action = ActionManager::get_action ("Rulers", "toggle-marker-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
 	if (!Profile->get_sae()) {
 		action = ActionManager::get_action ("Rulers", "toggle-range-ruler");
 		if (action) {
 			ruler_items.push_back (MenuElem (*action->create_menu_item()));
 		}
 	}
+	action = ActionManager::get_action ("Rulers", "toggle-loop-punch-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
 	action = ActionManager::get_action ("Rulers", "toggle-cd-marker-ruler");
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
-	action = ActionManager::get_action ("Rulers", "toggle-loop-punch-ruler");
+	action = ActionManager::get_action ("Rulers", "toggle-marker-ruler");
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}

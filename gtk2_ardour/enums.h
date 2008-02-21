@@ -22,17 +22,6 @@
 
 #include <ardour/types.h>
 
-enum WaveformShape {
-	Traditional,
-	Rectified
-};
-
-enum WaveformScale {
-	LinearWaveform=0,
-	LogWaveform,
-};
-
-
 enum Width {
 	Wide,
 	Narrow,

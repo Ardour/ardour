@@ -130,6 +130,7 @@ class Editor : public PublicEditor
 
 	void             connect_to_session (ARDOUR::Session *);
 	ARDOUR::Session* current_session() const { return session; }
+	void             first_idle ();
 
 	nframes_t leftmost_position() const { return leftmost_frame; }
 	nframes_t current_page_frames() const {
@@ -170,6 +171,8 @@ class Editor : public PublicEditor
 
 	void set_show_waveforms (bool yn);
 	bool show_waveforms() const { return _show_waveforms; }
+
+	void set_waveform_scale (Editing::WaveformScale);
 
 	void set_show_waveforms_recording (bool yn);
 	bool show_waveforms_recording() const { return _show_waveforms_recording; }
@@ -1541,6 +1544,7 @@ public:
 	void time_selection_changed ();
 	void track_selection_changed ();
 	void region_selection_changed ();
+	void sensitize_the_right_region_actions (bool have_selected_regions);
 	void point_selection_changed ();
 	void marker_selection_changed ();
 
@@ -2105,6 +2109,7 @@ public:
 
 	void remove_tracks ();
 	void toggle_tracks_active ();
+	void waveform_scale_chosen (Editing::WaveformScale);
 };
 
 #endif /* __ardour_editor_h__ */

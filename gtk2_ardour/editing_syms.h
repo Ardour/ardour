@@ -94,3 +94,11 @@ IMPORTDISPOSITION(ImportDistinctChannels=3)
 EDITPOINT(EditAtPlayhead)
 EDITPOINT(EditAtSelectedMarker)
 EDITPOINT(EditAtMouse)
+
+WAVEFORMSCALE(LinearWaveform)
+WAVEFORMSCALE(LogWaveform)
+
+WAVEFORMSHAPE(Traditional)
+WAVEFORMSHAPE(Rectified)
+
+

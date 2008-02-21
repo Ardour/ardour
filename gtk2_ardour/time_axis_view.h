@@ -206,6 +206,12 @@ class TimeAxisView : public virtual AxisView
 	virtual void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results);
 	virtual void get_inverted_selectables (Selection&, list<Selectable *>& results);
 
+	/* called at load time when first GUI idle occurs. put
+	   expensive data loading/redisplay code in here.
+	*/
+	
+	virtual void first_idle () {}
+
 	/* state/serialization management */
 
 	void set_parent (TimeAxisView& p);

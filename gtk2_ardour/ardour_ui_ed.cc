@@ -86,7 +86,6 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
 	ActionManager::register_action (main_actions, X_("Files"), _("Import/Export"));
-	ActionManager::register_action (main_actions, X_("Regions"), _("Regions"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
@@ -192,7 +191,7 @@ ARDOUR_UI::install_actions ()
 	/* these actions are intended to be shared across all windows */
 	
 	common_actions = ActionGroup::create (X_("Common"));
-	ActionManager::register_action (main_actions, X_("Windows"), _("Windows"));
+	ActionManager::register_action (main_actions, X_("WindowMenu"), _("Window"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
 
         /* windows visibility actions */

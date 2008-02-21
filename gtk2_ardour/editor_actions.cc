@@ -68,6 +68,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("PlayMenu"), _("Play"));
 	ActionManager::register_action (editor_actions, X_("PrimaryClockMenu"), _("Primary Clock"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
+	ActionManager::register_action (editor_actions, X_("RegionMenu"), _("Region"));
 	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_actions, X_("RegionGainMenu"), _("Gain"));
 	ActionManager::register_action (editor_actions, X_("RulerMenu"), _("Rulers"));
@@ -83,10 +84,11 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("TempoMenu"), _("Tempo"));
 	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_actions, X_("TrackHeightMenu"), _("Height"));
-	ActionManager::register_action (editor_actions, X_("TrackMenu"), _("Tracks"));
+	ActionManager::register_action (editor_actions, X_("TrackMenu"), _("Track"));
 	ActionManager::register_action (editor_actions, X_("Tools"), _("Tools"));
 	ActionManager::register_action (editor_actions, X_("TrimMenu"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
+	ActionManager::register_action (editor_actions, X_("WaveformMenu"), _("Waveforms"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom"));
 	ActionManager::register_action (editor_actions, X_("ZoomMenu"), _("Zoom"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
@@ -504,21 +506,30 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "toggle-track-active", _("Toggle Active"), (mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "remove-track", _("Remove"), (mem_fun(*this, &Editor::remove_tracks)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), (mem_fun(*this, &Editor::set_track_height_largest)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-larger", _("Larger"), (mem_fun(*this, &Editor::set_track_height_large)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-large", _("Large"), (mem_fun(*this, &Editor::set_track_height_larger)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-normal", _("Normal"), (mem_fun(*this, &Editor::set_track_height_normal)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-small", _("Small"), (mem_fun(*this, &Editor::set_track_height_smaller)));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-smaller", _("Smaller"), (mem_fun(*this, &Editor::set_track_height_small)));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;
@@ -680,9 +691,17 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Add External Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
+	ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
+
+
+	RadioAction::Group waveform_scale_group;
+	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("linear-waveforms"), _("Linear"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LinearWaveform));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("logarithmic-waveforms"), _("Logarithmic"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LogWaveform));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	/* if there is a logo in the editor canvas, its always visible at startup */
 
@@ -789,7 +808,7 @@ Editor::toggle_ruler_visibility (RulerType rt)
 void
 Editor::toggle_waveform_visibility ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-visible"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_waveforms (tact->get_active());
@@ -829,6 +848,33 @@ Editor::toggle_logo_visibility ()
 			} else {
 				logo_item->hide ();
 			}
+		}
+	}
+}
+
+void
+Editor::waveform_scale_chosen (Editing::WaveformScale ws)
+{
+	RefPtr<Action> act;
+
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	switch (ws) {
+	case LinearWaveform:
+		act = ActionManager::get_action (X_("Editor"), X_("linear-waveforms"));
+		break;
+	case LogWaveform:
+		act = ActionManager::get_action (X_("Editor"), X_("logarithmic-waveforms"));
+		break;
+	}
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active()) {
+			set_waveform_scale (ws);
 		}
 	}
 }

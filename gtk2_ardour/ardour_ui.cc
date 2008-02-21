@@ -3171,6 +3171,11 @@ ARDOUR_UI::first_idle ()
 	if (session) {
 		session->allow_auto_play (true);
 	}
+
+	if (editor) {
+		editor->first_idle();
+	}
+
 	Keyboard::set_can_save_keybindings (true);
 	return false;
 }

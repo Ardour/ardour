@@ -26,7 +26,7 @@
 #include <boost/weak_ptr.hpp>
 
 #include <ardour/location.h>
-#include "enums.h"
+#include "editing.h"
 #include "simplerect.h"
 #include "streamview.h"
 
@@ -57,10 +57,10 @@ class AudioStreamView : public StreamView
 	AudioStreamView (AudioTimeAxisView&);
 	~AudioStreamView ();
 
-	void set_waveform_shape (WaveformShape);
-	WaveformShape get_waveform_shape () const { return _waveform_shape; }
-	void set_waveform_scale (WaveformScale);
-	WaveformScale get_waveform_scale () const { return _waveform_scale; }
+	void set_waveform_shape (Editing::WaveformShape);
+	Editing::WaveformShape get_waveform_shape () const { return _waveform_shape; }
+	void set_waveform_scale (Editing::WaveformScale);
+	Editing::WaveformScale get_waveform_scale () const { return _waveform_scale; }
 
 	int set_height (gdouble h);
 	int set_samples_per_unit (gdouble spp);
@@ -109,8 +109,8 @@ class AudioStreamView : public StreamView
 	nframes_t             last_rec_peak_frame;
 	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_peak_ready_map;
 
-	WaveformShape     _waveform_shape;
-	WaveformScale     _waveform_scale;
+	Editing::WaveformShape     _waveform_shape;
+	Editing::WaveformScale     _waveform_scale;
 };
 
 #endif /* __ardour_audio_streamview_h__ */

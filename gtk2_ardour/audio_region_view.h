@@ -72,8 +72,8 @@ class AudioRegionView : public RegionView
 	
 	void set_envelope_visible (bool);
 	void set_waveform_visible (bool yn);
-	void set_waveform_shape (WaveformShape);
-	void set_waveform_scale (WaveformScale);
+	void set_waveform_shape (Editing::WaveformShape);
+	void set_waveform_scale (Editing::WaveformScale);
 	
 	bool waveform_rectified() const { return _flags & WaveformRectified; }
 	bool waveform_logscaled() const { return _flags & WaveformLogScaled; }
