@@ -84,6 +84,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	virtual void             connect_to_session (ARDOUR::Session*) = 0;
 	virtual ARDOUR::Session* current_session() const = 0;
+	virtual bool have_idled() const = 0;
 	virtual void first_idle() = 0;
 	virtual void set_snap_to (Editing::SnapType) = 0;
 	virtual void set_snap_mode (Editing::SnapMode) = 0;

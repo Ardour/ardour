@@ -131,6 +131,7 @@ class Editor : public PublicEditor
 	void             connect_to_session (ARDOUR::Session *);
 	ARDOUR::Session* current_session() const { return session; }
 	void             first_idle ();
+	virtual bool have_idled() const { return _have_idled; }
 
 	nframes_t leftmost_position() const { return leftmost_frame; }
 	nframes_t current_page_frames() const {
@@ -2110,6 +2111,8 @@ public:
 	void remove_tracks ();
 	void toggle_tracks_active ();
 	void waveform_scale_chosen (Editing::WaveformScale);
+
+	bool _have_idled;
 };
 
 #endif /* __ardour_editor_h__ */

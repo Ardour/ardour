@@ -235,6 +235,7 @@ Editor::Editor ()
 	PublicEditor::_instance = this;
 
 	session = 0;
+	_have_idled = false;
 
 	selection = new Selection;
 	cut_buffer = new Selection;
@@ -4516,4 +4517,6 @@ Editor::first_idle ()
 	if (dialog) {
 		delete dialog;
 	}
+
+	_have_idled = true;
 }

@@ -113,7 +113,12 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (mem_fun(*this, &AudioTimeAxisView::region_view_added));
-		/* first idle will do the rest */
+
+		if (!editor.have_idled()) {
+			/* first idle will do the rest */
+		} else {
+			first_idle ();
+		}
 
 	} else {
 		post_construct ();
