@@ -60,7 +60,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 	rgb1 = clr1;
 	rgb2 = clr2;
 	rgb3 = clr3;
-	
+
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
 	pixrect.x = 0;
@@ -445,6 +445,9 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 void
 FastMeter::set (float lvl)
 {
+	float old_level = current_level;
+	float old_peak = current_peak;
+
 	current_level = lvl;
 	
 	if (lvl > current_peak) {
@@ -458,7 +461,84 @@ FastMeter::set (float lvl)
 		}
 	}
 
+	if (current_level == old_level && current_peak == old_peak && hold_state == 0) {
+		return;
+	}
+
 	queue_draw ();
+
+#if 0
+	Glib::Refptr<Gdk::Window> win;
+
+	if ((win = get_window()) == 0) {
+		queue_draw ();
+		return;
+	}
+
+	/* now carefully compute the part we really want updated */
+
+	GdkRectangle rect;
+	
+	gint new_top = (gint) floor (pixheight * current_level);
+	
+	rect.x = 0;
+	rect.width = pixwidth;
+	rect.height = newtop;
+	rect.y = pixheight - new_top;
+
+	background.x = 0;
+	background.y = 0;
+	background.width = pixrect.width;
+	background.height = pixheight - top_of_meter;
+
+	if (current_level > old_level) {
+		/* colored/pixbuf got larger, just draw the new section */
+		/* rect.y stays where it is because of X coordinates */
+		/* height of invalidated area is between new.y (smaller) and old.y
+		   (larger).
+		   X coordinates just make my brain hurt.
+		*/
+		rect.height = pixrect.y - rect.y;
+	} else {
+		/* it got smaller, compute the difference */
+		/* rect.y becomes old.y (the smaller value)
+		rect.y = pixrect.y;
+		/* rect.height is the old.y (smaller) minus the new.y (larger)
+		*/
+		rect.height = pixrect.height - rect.height;
+	}
+
+	GdkRegion* region;
+
+	if (rect.height != 0) {
+
+		/* ok, first region to draw ... */
+		
+		region = gdk_region_rect (&rect);
+	} else {
+		region = gdk_region_new ();
+	}
+
+	if (hold_state) {
+		rect.x = 0;
+		rect.width = pixwidth;
+
+		/* redraw the last place where the peak hold bar was */
+
+		rect.y = pixheight - (gint) floor (pixheight * old_peak);
+		rect.height = min(3, pixheight - y);
+		
+		gdk_region_union_rect (region, &rect);
+	}
+
+	if (rect.height == 0 && !hold_state) {
+		/* nothing to do */
+		return;
+	}
+	
+	gdk_window_invalidate_region (win->gobj(), &region);
+#endif
+
 }
 
 void
