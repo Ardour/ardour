@@ -241,6 +241,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void update_speed_display ();
 	void map_frozen ();
 	void hide_redirect_editor (boost::shared_ptr<ARDOUR::Redirect> redirect);
+	void hide_redirect_editors ();
 
 	bool ignore_speed_adjustment;
 

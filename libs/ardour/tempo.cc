@@ -1178,11 +1178,12 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 		break;
 	
 	}
-
+	
+	/* 
 	cerr << "for " << frame << " round to " << bbt << " using "
 	     << metric.start()
 	     << endl;
-
+	*/
 	return metric.frame() + count_frames_between (metric.start(), bbt);
 }
 
