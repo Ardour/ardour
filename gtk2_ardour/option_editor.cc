@@ -251,19 +251,24 @@ OptionEditor::add_session_paths ()
 }
 
 static void
+font_scale_changed ()
+{
+	gtk_settings_set_long_property (gtk_settings_get_default(),
+					"gtk-xft-dpi", Config->get_font_scale(), "ardour");
+}
+
+static void
 reset_dpi (Gtk::Adjustment* adj)
 {
-	float val = adj->get_value();
-	long dpi = (long) floor (val * 1024);
-	gtk_settings_set_long_property (gtk_settings_get_default(),
-					"gtk-xft-dpi", dpi, "ardour");
+	Config->set_font_scale((long)floor (adj->get_value() * 1024));
+	font_scale_changed();
 }
 
 void
 OptionEditor::setup_misc_options ()
 {
 	Gtk::HBox* hbox;
-	Gtk::Adjustment* dpi_adj = new Gtk::Adjustment (75, 50, 250, 1, 10);
+	Gtk::Adjustment* dpi_adj = new Gtk::Adjustment ((double)Config->get_font_scale() / 1024, 50, 250, 1, 10);
 	Gtk::HScale * dpi_range = new Gtk::HScale (*dpi_adj);
 
 	Label* label = manage (new Label (_("Font Scaling")));
@@ -1368,5 +1373,7 @@ OptionEditor::parameter_changed (const char* parameter_name)
 
 		save_history_button.set_active (x);
 		saved_history_depth_spinner.set_sensitive (x);
+	} else if (PARAM_IS ("font-scale")) {
+		font_scale_changed();
 	}
 }

@@ -244,6 +244,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	keyboard = new Keyboard;
 
+	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-xft-dpi", Config->get_font_scale(), "ardour");
+
 	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
 
