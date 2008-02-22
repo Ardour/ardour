@@ -334,6 +334,8 @@ Session::destroy ()
 
 	AudioDiskstream::free_working_buffers();
 	
+	Route::SyncOrderKeys.clear();
+	
 #undef TRACK_DESTRUCTION
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete named selections\n";
@@ -396,7 +398,7 @@ Session::destroy ()
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete routes\n";
 #endif /* TRACK_DESTRUCTION */
-        {
+	{
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {

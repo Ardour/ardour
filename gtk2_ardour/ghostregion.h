@@ -103,6 +103,7 @@ public:
 	
 	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos);
+	~MidiGhostRegion();
 
 	MidiStreamView* midi_view();
 

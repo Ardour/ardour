@@ -137,15 +137,11 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 
 MidiTimeAxisView::~MidiTimeAxisView ()
 {
-	if(_piano_roll_header) {
-		delete _piano_roll_header;
-		_piano_roll_header = 0;
-	}
+	delete _piano_roll_header;
+	_piano_roll_header = 0;
 
-	if(_range_scroomer) {
-		delete _range_scroomer;
-		_range_scroomer = 0;
-	}
+	delete _range_scroomer;
+	_range_scroomer = 0;
 }
 
 MidiStreamView*
@@ -267,7 +263,7 @@ MidiTimeAxisView::update_range()
 	MidiGhostRegion* mgr;
 
 	for(list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if((mgr = dynamic_cast<MidiGhostRegion*>(*i)) != 0) {
+		if ((mgr = dynamic_cast<MidiGhostRegion*>(*i)) != 0) {
 			mgr->update_range();
 		}
 	}

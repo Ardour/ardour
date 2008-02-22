@@ -530,7 +530,8 @@ RegionView::move (double x_delta, double y_delta)
 }
 
 void
-RegionView::remove_ghost_in (TimeAxisView& tv) {
+RegionView::remove_ghost_in (TimeAxisView& tv)
+{
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		if (&(*i)->trackview == &tv) {
 			delete *i;

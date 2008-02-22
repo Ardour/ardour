@@ -46,7 +46,7 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 	base_rect->property_y2() = (double) trackview.height;
 	base_rect->property_outline_what() = (guint32) 0;
 
-	if(!is_automation_ghost()) {
+	if (!is_automation_ghost()) {
 		base_rect->hide();
 	}
 
@@ -59,15 +59,15 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 
 GhostRegion::~GhostRegion ()
 {
-	GoingAway (this);
+	/*GoingAway (this);
 	delete base_rect;
-	delete group;
+	delete group;*/
 }
 
 void
 GhostRegion::set_duration (double units)
 {
-        base_rect->property_x2() = units;
+	base_rect->property_x2() = units;
 }
 
 void
@@ -79,7 +79,7 @@ GhostRegion::set_height ()
 void
 GhostRegion::set_colors ()
 {
-	if(is_automation_ghost()) {
+	if (is_automation_ghost()) {
 		base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
 		base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
 	}
@@ -136,7 +136,7 @@ AudioGhostRegion::set_colors ()
 	GhostRegion::set_colors();
 	guint fill_color;
 
-	if(is_automation_ghost()) {
+	if (is_automation_ghost()) {
 		fill_color = ARDOUR_UI::config()->canvasvar_GhostTrackWaveFill.get();
 	}
 	else {
@@ -157,47 +157,59 @@ AudioGhostRegion::set_colors ()
  * no range controller in these tracks. maybe show the whole range.
  */
 MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(tv.ghost_group, tv, source_tv, initial_unit_pos) {
+	: GhostRegion(tv.ghost_group, tv, source_tv, initial_unit_pos)
+{
 
 	base_rect->lower_to_bottom();
 }
 
 MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(msv.midi_underlay_group, msv.trackview(), source_tv, initial_unit_pos) {
-
+	: GhostRegion(msv.midi_underlay_group, msv.trackview(), source_tv, initial_unit_pos)
+{
 	base_rect->lower_to_bottom();	
 }
 
+MidiGhostRegion::~MidiGhostRegion()
+{
+	//clear_events();
+}
+
 MidiGhostRegion::Event::Event(ArdourCanvas::CanvasMidiEvent* e)
-	: event(e) {
+	: event(e)
+{
 }
 
 MidiGhostRegion::Note::Note(ArdourCanvas::CanvasNote* n, ArdourCanvas::Group* g)
-	: Event(n) {
-
+	: Event(n)
+{
 	rect = new ArdourCanvas::SimpleRect(*g, n->x1(), n->y1(), n->x2(), n->y2());
 }
 
-MidiGhostRegion::Note::~Note() {
-	delete rect;
+MidiGhostRegion::Note::~Note()
+{
+	//delete rect;
 }
 
 void
-MidiGhostRegion::Note::x_changed() {
+MidiGhostRegion::Note::x_changed()
+{
 	rect->property_x1() = event->x1();
 	rect->property_x2() = event->x2();
 }
 
 MidiGhostRegion::Hit::Hit(ArdourCanvas::CanvasHit* h, ArdourCanvas::Group*)
-	: Event(h) {
+	: Event(h)
+{
 	cerr << "Hit ghost item does not work yet" << endl;
 }
 
-MidiGhostRegion::Hit::~Hit() {
+MidiGhostRegion::Hit::~Hit()
+{
 }
 
 void
-MidiGhostRegion::Hit::x_changed() {
+MidiGhostRegion::Hit::x_changed()
+{
 }
 
 void
@@ -206,10 +218,11 @@ MidiGhostRegion::set_samples_per_unit (double spu)
 }
 
 MidiStreamView*
-MidiGhostRegion::midi_view() {
+MidiGhostRegion::midi_view()
+{
 	MidiTimeAxisView* mtv;
 
-	if((mtv = dynamic_cast<MidiTimeAxisView*>(&trackview)) != 0) {
+	if ((mtv = dynamic_cast<MidiTimeAxisView*>(&trackview)) != 0) {
 		return mtv->midi_view();
 	}
 	else {
@@ -218,20 +231,22 @@ MidiGhostRegion::midi_view() {
 }
 
 void
-MidiGhostRegion::set_height() {
+MidiGhostRegion::set_height()
+{
 	GhostRegion::set_height();
 	update_range();
 }
 
 void
-MidiGhostRegion::set_colors() {
+MidiGhostRegion::set_colors()
+{
 	MidiGhostRegion::Note* note;
 	guint fill = source_track_color(200);
 
 	GhostRegion::set_colors();
 
-	for(EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		if((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
+	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+		if ((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
 			note->rect->property_fill_color_rgba() = fill;
 			note->rect->property_outline_color_rgba() =  ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get();
 		}
@@ -239,10 +254,11 @@ MidiGhostRegion::set_colors() {
 }
 
 void
-MidiGhostRegion::update_range() {
+MidiGhostRegion::update_range()
+{
 	MidiStreamView* mv = midi_view();
 
-	if(!mv) {
+	if (!mv) {
 		return;
 	}
 
@@ -250,11 +266,11 @@ MidiGhostRegion::update_range() {
 	uint8_t note_num;
 	double y;
 	
-	for(EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		if((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
+	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
+		if ((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
 			note_num = note->event->note()->note();
 
-			if(note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+			if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 				note->rect->hide();
 			}
 			else {
@@ -268,7 +284,8 @@ MidiGhostRegion::update_range() {
 }
 
 void
-MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n) {
+MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n)
+{
 	Note* note = new Note(n, group);
 	events.push_back(note);
 
@@ -277,15 +294,13 @@ MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n) {
 
 	MidiStreamView* mv = midi_view();
 
-	if(mv) {
-		uint8_t note_num = n->note()->note();
-		double y;
+	if (mv) {
+		const uint8_t note_num = n->note()->note();
 
-		if(note_num < mv->lowest_note() || note_num > mv->highest_note()) {
+		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 			note->rect->hide();
-		}
-		else {
-			y = mv->note_to_y(note_num);
+		} else {
+			const double y = mv->note_to_y(note_num);
 			note->rect->property_y1() = y;
 			note->rect->property_y2() = y + mv->note_height();
 		}
@@ -293,15 +308,18 @@ MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n) {
 }
 
 void
-MidiGhostRegion::add_hit(ArdourCanvas::CanvasHit* h) {
+MidiGhostRegion::add_hit(ArdourCanvas::CanvasHit* h)
+{
 	//events.push_back(new Hit(h, group));
 }
 
 void
-MidiGhostRegion::clear_events() {
-	for(EventList::iterator it = events.begin(); it != events.end(); ++it) {
+MidiGhostRegion::clear_events()
+{
+	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		delete *it;
 	}
 
 	events.clear();
 }
+

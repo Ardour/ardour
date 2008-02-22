@@ -89,7 +89,6 @@ class RegionView : public TimeAxisViewItem
 	void enable_display(bool yn) { _enable_display = yn; }
 	
 	static sigc::signal<void,RegionView*> RegionViewGoingAway;
-	sigc::signal<void>                    GoingAway;
 	
   protected:
 	

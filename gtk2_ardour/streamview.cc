@@ -47,6 +47,7 @@ using namespace Editing;
 
 StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	: _trackview (tv)
+	, owns_canvas_group(group == 0)
 	, canvas_group(group ? group : new ArdourCanvas::Group(*_trackview.canvas_display))
 	, canvas_rect(new ArdourCanvas::SimpleRect (*canvas_group))
 	, _samples_per_unit(_trackview.editor.get_current_zoom())
@@ -85,7 +86,12 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 StreamView::~StreamView ()
 {
 	undisplay_diskstream ();
-	delete canvas_group;
+	
+	delete canvas_rect;
+	
+	if (owns_canvas_group) {
+		delete canvas_group;
+	}
 }
 
 void
@@ -170,8 +176,9 @@ StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if (((*i)->region()) == r) {
-			delete *i;
+			RegionView* rv = *i;
 			region_views.erase (i);
+			delete rv;
 			break;
 		}
 	}
@@ -180,8 +187,11 @@ StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 void
 StreamView::undisplay_diskstream ()
 {
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end() ; ) {
+		RegionViewList::iterator next = i;
+		++next;
 		delete *i;
+		i = next;
 	}
 
 	region_views.clear();

@@ -127,6 +127,7 @@ protected:
 	virtual void color_handler () = 0;
 
 	RouteTimeAxisView&        _trackview;
+	bool                      owns_canvas_group;
 	ArdourCanvas::Group*      canvas_group;
 	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
 
