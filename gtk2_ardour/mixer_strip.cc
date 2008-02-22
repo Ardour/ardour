@@ -361,7 +361,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	whvbox->show();
 	hide_icon->show();
 	width_icon->show();
-	gain_meter_alignment->show();
+	gain_meter_alignment->show_all();
 
 	pre_processor_box.show();
 
