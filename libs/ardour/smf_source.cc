@@ -100,8 +100,6 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 		throw failed_constructor ();
 	}
 	
-	cerr << "SMF Source name: " << _name << endl;
-	
 	assert(_name.find("/") == string::npos);
 }
 
