@@ -250,12 +250,36 @@ OptionEditor::add_session_paths ()
 	session_raid_entry.set_text(session->raid_path());
 }
 
+static void
+reset_dpi (Gtk::Adjustment* adj)
+{
+	float val = adj->get_value();
+	long dpi = (long) floor (val * 1024);
+	gtk_settings_set_long_property (gtk_settings_get_default(),
+					"gtk-xft-dpi", dpi, "ardour");
+}
+
 void
 OptionEditor::setup_misc_options ()
 {
 	Gtk::HBox* hbox;
-	
-	Label* label = manage (new Label (_("Short crossfade length (msecs)")));
+	Gtk::Adjustment* dpi_adj = new Gtk::Adjustment (75, 50, 250, 1, 10);
+	Gtk::HScale * dpi_range = new Gtk::HScale (*dpi_adj);
+
+	Label* label = manage (new Label (_("Font Scaling")));
+	label->set_name ("OptionsLabel");
+
+	dpi_range->set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+	dpi_adj->signal_value_changed().connect (bind (sigc::ptr_fun (reset_dpi), dpi_adj));
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (*dpi_range, true, true);
+	misc_packer.pack_start (*hbox, false, false);
+
+	label = manage (new Label (_("Short crossfade length (msecs)")));
 	label->set_name ("OptionsLabel");
 	
 	hbox = manage (new HBox);
