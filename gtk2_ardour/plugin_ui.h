@@ -213,7 +213,7 @@ class PluginUIWindow : public Gtk::Window
 	bool on_key_release_event (GdkEventKey*);
 	void on_show ();
 	void on_hide ();
-
+	void on_map ();
   private:
 	PlugUIBase* _pluginui;
 	Gtk::VBox vbox;

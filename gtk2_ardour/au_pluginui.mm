@@ -341,7 +341,6 @@ AUPluginUI::get_nswindow ()
 void
 AUPluginUI::activate ()
 {
-	cerr << "AUPluginUI:: activate!\n";
 	return;
 	if (carbon_window && cocoa_parent) {
 		cerr << "APP activated, activate carbon window " << insert->name() << endl;

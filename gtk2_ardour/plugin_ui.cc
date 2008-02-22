@@ -133,6 +133,13 @@ PluginUIWindow::~PluginUIWindow ()
 }
 
 void
+PluginUIWindow::on_map ()
+{
+	Window::on_map ();
+	set_keep_above (true);
+}
+
+void
 PluginUIWindow::on_show ()
 {
 	if (_pluginui) {

@@ -130,8 +130,6 @@ AUPlugin::discover_parameters ()
 {
 	/* discover writable parameters */
 	
-	cerr << "get param info, there are " << global_elements << " global elements\n";
-
 	AudioUnitScope scopes[] = { 
 		kAudioUnitScope_Global,
 		kAudioUnitScope_Output,
@@ -143,8 +141,6 @@ AUPlugin::discover_parameters ()
 	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
 
 		AUParamInfo param_info (unit->AU(), false, false, scopes[i]);
-		
-		cerr << "discovered " << param_info.NumParams() << " parameters in scope " << i << endl;
 		
 		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
 

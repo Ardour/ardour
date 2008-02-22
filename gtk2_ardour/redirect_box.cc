@@ -1090,8 +1090,6 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				
 				plugin_ui = new PluginUIWindow (plugin_insert);
 				
-				// plugin_ui->set_keep_above (true);
-
 				WindowTitle title(Glib::get_application_name());
 				title += generate_redirect_title (plugin_insert);
 				plugin_ui->set_title (title.get_string());
