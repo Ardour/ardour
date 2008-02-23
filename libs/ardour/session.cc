@@ -4088,9 +4088,37 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 vector<Sample*>&
 Session::get_silent_buffers (uint32_t howmany)
 {
+	if (howmany > _silent_buffers.size()) {
+
+		error << string_compose (_("Programming error: get_silent_buffers() called for %1 buffers but only %2 exist"),
+					 howmany, _silent_buffers.size()) << endmsg;
+
+		if (howmany > 1000) {
+			cerr << "ABSURD: more than 1000 silent buffers requested!\n";
+			abort ();
+		}
+		
+		while (howmany > _silent_buffers.size()) {
+			Sample *p = 0;
+			
+#ifdef NO_POSIX_MEMALIGN
+			p =  (Sample *) malloc(current_block_size * sizeof(Sample));
+#else
+			if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * 4) != 0) {
+				fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
+							 current_block_size, sizeof (Sample), strerror (errno))
+				      << endmsg;
+				/*NOTREACHED*/
+			}
+#endif			
+			_silent_buffers.push_back (p);
+		}
+	}
+
 	for (uint32_t i = 0; i < howmany; ++i) {
 		memset (_silent_buffers[i], 0, sizeof (Sample) * current_block_size);
 	}
+
 	return _silent_buffers;
 }
 
