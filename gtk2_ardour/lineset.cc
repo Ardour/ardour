@@ -37,23 +37,27 @@ LinesetClass Lineset::lineset_class;
 
 Lineset::Line::Line(double c, double w, uint32_t color)
 	: coord(c)
-	, width(w) {
+	, width(w)
+{
 	UINT_TO_RGBA (color, &r, &g, &b, &a);
 }
 
 /* Constructor for dummy lines that are used only with the coordinate */
 Lineset::Line::Line(double c)
-	: coord(c) {
+	: coord(c)
+{
 }
 
 void
-Lineset::Line::set_color(uint32_t color) {
+Lineset::Line::set_color(uint32_t color)
+{
 	UINT_TO_RGBA (color, &r, &g, &b, &a);
 }
 
 const Glib::Class&
-LinesetClass::init() {
-	if(!gtype_) {
+LinesetClass::init()
+{
+	if (!gtype_) {
 		class_init_func_ = &LinesetClass::class_init_function;
 		register_derived_type(Item::get_type());
 	}
@@ -62,7 +66,8 @@ LinesetClass::init() {
 }
 
 void
-LinesetClass::class_init_function(void* g_class, void* class_data) {
+LinesetClass::class_init_function(void* g_class, void* class_data)
+{
 }
 
 Lineset::Lineset(Group& parent, Orientation o)
@@ -79,7 +84,8 @@ Lineset::Lineset(Group& parent, Orientation o)
 	, update_region2(0.0)
 	, bounds_changed(false)
 	, covered1(1.0) // covered1 > covered2 ==> nothing's covered
-	, covered2(0.0) {
+	, covered2(0.0)
+{
 
 	item_construct(parent);
 
@@ -89,31 +95,35 @@ Lineset::Lineset(Group& parent, Orientation o)
 	property_y2().signal_changed().connect(mem_fun(*this, &Lineset::bounds_need_update));
 }
 
-Lineset::~Lineset() {
+Lineset::~Lineset()
+{
 }
 
 bool
-Lineset::line_compare(const Line& a, const Line& b) {
+Lineset::line_compare(const Line& a, const Line& b)
+{
 	return a.coord < b.coord;
 }
 
 void
-Lineset::print_lines() {
-	for(Lines::iterator it = lines.begin(); it != lines.end(); ++it) {
+Lineset::print_lines()
+{
+	for (Lines::iterator it = lines.begin(); it != lines.end(); ++it)
+{
 		cerr << "   " << it->coord << " " << it->width << " " << (int)it->r << " " << (int)it->g << " " << (int)it->b << " " << (int)it->a << endl;
 	}
 }
 
 void
-Lineset::move_line(double coord, double dest) {
-	if(coord == dest) {
+Lineset::move_line(double coord, double dest)
+{
+	if (coord == dest) {
 		return;
 	}
 
 	Lines::iterator it = line_at(coord);
 
-	if(it != lines.end()) {
-		
+	if (it != lines.end()) {
 
 		double width = it->width;
 		it->coord = dest;
@@ -123,25 +133,25 @@ Lineset::move_line(double coord, double dest) {
 		lines.insert(ins, *it);
 		lines.erase(it);
 
-		if(coord > dest) {
+		if (coord > dest) {
 			region_needs_update(dest, coord + width);
-		}
-		else {
+		} else {
 			region_needs_update(coord, dest + width);
 		}
 	}
 }
 
 void
-Lineset::change_line_width(double coord, double width) {
+Lineset::change_line_width(double coord, double width)
+{
 	Lines::iterator it = line_at(coord);
 
-	if(it != lines.end()) {
+	if (it != lines.end()) {
 		Line& l = *it;
 		++it;
 
-		if(it != lines.end()) {
-			if(l.coord + width > it->coord) {
+		if (it != lines.end()) {
+			if (l.coord + width > it->coord) {
 				//cerr << overlap_error_str << endl;
 				return;
 			}
@@ -153,31 +163,33 @@ Lineset::change_line_width(double coord, double width) {
 }
 
 void
-Lineset::change_line_color(double coord, uint32_t color) {
+Lineset::change_line_color(double coord, uint32_t color)
+{
 	Lines::iterator it = line_at(coord);
 
-	if(it != lines.end()) {
+	if (it != lines.end()) {
 		it->set_color(color);
 		region_needs_update(it->coord, it->coord + it->width);
 	}
 }
 
 void
-Lineset::add_line(double coord, double width, uint32_t color) {
+Lineset::add_line(double coord, double width, uint32_t color)
+{
 	Line l(coord, width, color);
 
 	Lines::iterator it = std::lower_bound(lines.begin(), lines.end(), l, line_compare);
 	
 	/* overlap checking */
-	if(it != lines.end()) {
-		if(l.coord + l.width > it->coord) {
+	if (it != lines.end()) {
+		if (l.coord + l.width > it->coord) {
 			//cerr << overlap_error_str << endl;
 			return;
 		}
 	}
-	if(it != lines.begin()) {
+	if (it != lines.begin()) {
 		--it;
-		if(l.coord < it->coord + it->width) {
+		if (l.coord < it->coord + it->width) {
 			//cerr << overlap_error_str << endl;
 			return;
 		}
@@ -189,10 +201,11 @@ Lineset::add_line(double coord, double width, uint32_t color) {
 }
 
 void
-Lineset::remove_line(double coord) {
+Lineset::remove_line(double coord)
+{
 	Lines::iterator it = line_at(coord);
 
-	if(it != lines.end()) {
+	if (it != lines.end()) {
 		double start = it->coord;
 		double end = start + it->width;
 
@@ -203,15 +216,17 @@ Lineset::remove_line(double coord) {
 }
 
 void
-Lineset::remove_lines(double c1, double c2) {
-	if(!lines.empty()) {
+Lineset::remove_lines(double c1, double c2)
+{
+	if (!lines.empty()) {
 		region_needs_update(c1, c2);
 	}
 }
 
 void
-Lineset::remove_until(double coord) {
-	if(!lines.empty()) {
+Lineset::remove_until(double coord)
+{
+	if (!lines.empty()) {
 		double first = lines.front().coord;
 		
 		// code
@@ -221,8 +236,9 @@ Lineset::remove_until(double coord) {
 }
 	
 void
-Lineset::remove_from(double coord) {
-	if(!lines.empty()) {
+Lineset::remove_from(double coord)
+{
+	if (!lines.empty()) {
 		double last = lines.back().coord + lines.back().width;
 
 		// code
@@ -232,8 +248,9 @@ Lineset::remove_from(double coord) {
 }
 
 void
-Lineset::clear() {
-	if(!lines.empty()) {
+Lineset::clear()
+{
+	if (!lines.empty()) {
 		double coord1 = lines.front().coord;
 		double coord2 = lines.back().coord + lines.back().width;
 			
@@ -247,41 +264,38 @@ Lineset::clear() {
  * so if a large number of lines are modified, it is wise to modify them in sorted order.
  */
 Lineset::Lines::iterator
-Lineset::line_at(double coord) {
-	if(cached_pos != lines.end()) {
-		if(coord < cached_pos->coord) {
+Lineset::line_at(double coord)
+{
+	if (cached_pos != lines.end()) {
+		if (coord < cached_pos->coord) {
 			/* backward search */
 			while(--cached_pos != lines.end()) {
-				if(cached_pos->coord <= coord) {
-					if(cached_pos->coord + cached_pos->width < coord) {
+				if (cached_pos->coord <= coord) {
+					if (cached_pos->coord + cached_pos->width < coord) {
 						/* coord is between two lines */
 						return lines.end();
-					}
-					else {
+					} else {
 						return cached_pos;
 					}
 				}
 			}
-		}
-		else {
+		} else {
 			/* forward search */
 			while(cached_pos != lines.end()) {
-				if(cached_pos->coord > coord) {
+				if (cached_pos->coord > coord) {
 					/* we searched past the line that we want, so now see
 					   if the previous line includes the coordinate */
 					--cached_pos;
-					if(cached_pos->coord + cached_pos->width >= coord) {
+					if (cached_pos->coord + cached_pos->width >= coord) {
 						return cached_pos;
-					}
-					else {
+					} else {
 						return lines.end();
 					}
 				}
 				++cached_pos;
 			}
 		}
-	}
-	else {
+	} else {
 		/* initialize the cached position */
 		Line dummy(coord);
 
@@ -290,20 +304,17 @@ Lineset::line_at(double coord) {
 		/* The iterator found should point to the element after the one we want. */
 		--cached_pos;
 		
-		if(cached_pos != lines.end()) {
-			if(cached_pos->coord <= coord) {
-				if(cached_pos->coord + cached_pos->width >= coord) {
+		if (cached_pos != lines.end()) {
+			if (cached_pos->coord <= coord) {
+				if (cached_pos->coord + cached_pos->width >= coord) {
 					return cached_pos;
-				}
-				else {
+				} else {
 					return lines.end();
 				}
-			}
-			else {
+			} else {
 				return lines.end();
 			}
-		}
-		else {
+		} else {
 			return lines.end();
 		}
 	}
@@ -312,12 +323,14 @@ Lineset::line_at(double coord) {
 }
 
 void
-Lineset::redraw_request(ArtIRect& r) {
+Lineset::redraw_request(ArtIRect& r)
+{
 	get_canvas()->request_redraw(r.x0, r.y0, r.x1, r.y1);
 }
 
 void
-Lineset::redraw_request(ArtDRect& r) {
+Lineset::redraw_request(ArtDRect& r)
+{
 	int x0, y0, x1, y1;
 	Canvas& cv = *get_canvas();
 
@@ -329,25 +342,25 @@ Lineset::redraw_request(ArtDRect& r) {
 }
 
 void
-Lineset::update_lines(bool need_redraw) {
+Lineset::update_lines(bool need_redraw)
+{
 	//cerr << "update_lines need_redraw=" << need_redraw << endl;
-	if(!need_redraw) {
+	if (!need_redraw) {
 		update_region1 = 1.0;
 		update_region2 = 0.0;
 		return;
 	}
 
-	if(update_region2 > update_region1) {
+	if (update_region2 > update_region1) {
 		ArtDRect redraw;
 		Lineset::bounds_vfunc(&redraw.x0, &redraw.y0, &redraw.x1, &redraw.y1);
 		i2w(redraw.x0, redraw.y0);
 		i2w(redraw.x1, redraw.y1);
 		
-		if(orientation == Vertical) {
+		if (orientation == Vertical) {
 			redraw.x1 = redraw.x0 + update_region2;
 			redraw.x0 += update_region1;
-		}
-		else {
+		} else {
 			redraw.y1 = redraw.y0 + update_region2;
 			redraw.y0 += update_region1;
 		}
@@ -366,7 +379,8 @@ Lineset::update_lines(bool need_redraw) {
  * return true if nothing or only parts of the rect area has been requested for redraw
  */
 bool
-Lineset::update_bounds() {
+Lineset::update_bounds()
+{
 	GnomeCanvasItem* item = GNOME_CANVAS_ITEM(gobj());
 	ArtDRect old_b;
 	ArtDRect new_b;
@@ -397,17 +411,17 @@ Lineset::update_bounds() {
 	 * because lines are positioned relative to this coordinate. Please excuse the confusion resulting from
 	 * gnome canvas coordinate numbering (1, 2) and libart's (0, 1).
 	 */
-	if(orientation == Vertical) {
-		if(new_b.x0 == old_b.x0) {
+	if (orientation == Vertical) {
+		if (new_b.x0 == old_b.x0) {
 			/* No need to update everything */
-			if(new_b.y0 != old_b.y0) {
+			if (new_b.y0 != old_b.y0) {
 				redraw.x0 = old_b.x0;
 				redraw.y0 = min(old_b.y0, new_b.y0);
 				redraw.x1 = old_b.x1;
 				redraw.y1 = max(old_b.y0, new_b.y0);
 				redraw_request(redraw);
 			}
-			if(new_b.y1 != old_b.y1) {
+			if (new_b.y1 != old_b.y1) {
 				redraw.x0 = old_b.x0;
 				redraw.y0 = min(old_b.y1, new_b.y1);
 				redraw.x1 = old_b.x1;
@@ -415,7 +429,7 @@ Lineset::update_bounds() {
 				redraw_request(redraw);
 			}
 			
-			if(new_b.x1 > old_b.x1) {
+			if (new_b.x1 > old_b.x1) {
 				// we have a larger area ==> possibly more lines
 				request_lines(old_b.x1, new_b.x1);
 				redraw.x0 = old_b.x1;
@@ -423,8 +437,7 @@ Lineset::update_bounds() {
 				redraw.x1 = new_b.x1;
 				redraw.y1 = max(old_b.y1, new_b.y1);
 				redraw_request(redraw);
-			}
-			else if(new_b.x1 < old_b.x1) {
+			} else if (new_b.x1 < old_b.x1) {
 				remove_lines(new_b.x1, old_b.x1);
 				redraw.x0 = new_b.x1;
 				redraw.y0 = min(old_b.y0, new_b.y0);
@@ -433,26 +446,24 @@ Lineset::update_bounds() {
 				redraw_request(redraw);
 			}
 			return true;
-		}
-		else {
+		} else {
 			/* update everything */
 			//cerr << "update everything" << endl;
 			art_drect_union(&redraw, &old_b, &new_b);
 			redraw_request(redraw);
 			return false;
 		}
-	}
-	else {
-		if(new_b.y0 == old_b.y0) {
+	} else {
+		if (new_b.y0 == old_b.y0) {
 			/* No need to update everything */
-			if(new_b.x0 != old_b.x0) {
+			if (new_b.x0 != old_b.x0) {
 				redraw.y0 = old_b.y0;
 				redraw.x0 = min(old_b.x0, new_b.x0);
 				redraw.y1 = old_b.y1;
 				redraw.x1 = max(old_b.x0, new_b.x0);
 				redraw_request(redraw);
 			}
-			if(new_b.x1 != old_b.x1) {
+			if (new_b.x1 != old_b.x1) {
 				redraw.y0 = old_b.y0;
 				redraw.x0 = min(old_b.x1, new_b.x1);
 				redraw.y1 = old_b.y1;
@@ -460,7 +471,7 @@ Lineset::update_bounds() {
 				redraw_request(redraw);
 			}
 			
-			if(new_b.y1 > old_b.y1) {
+			if (new_b.y1 > old_b.y1) {
 				// we have a larger area ==> possibly more lines
 				request_lines(old_b.y1, new_b.y1);
 				redraw.y0 = old_b.y1;
@@ -468,8 +479,7 @@ Lineset::update_bounds() {
 				redraw.y1 = new_b.y1;
 				redraw.x1 = max(old_b.x1, new_b.x1);
 				redraw_request(redraw);
-			}
-			else if(new_b.y1 < old_b.y1) {
+			} else if (new_b.y1 < old_b.y1) {
 				remove_lines(new_b.y1, old_b.y1);
 				redraw.y0 = new_b.y1;
 				redraw.x0 = min(old_b.x0, new_b.x0);
@@ -478,8 +488,7 @@ Lineset::update_bounds() {
 				redraw_request(redraw);
 			}
 			return true;
-		}
-		else {
+		} else {
 			/* update everything */
 			art_drect_union(&redraw, &old_b, &new_b);
 			redraw_request(redraw);
@@ -494,7 +503,8 @@ Lineset::update_bounds() {
  * N. find out if the item moved. if it moved, the old bbox and the new bbox need to be updated.
  */
 void
-Lineset::update_vfunc(double* affine, ArtSVP* clip_path, int flags) {
+Lineset::update_vfunc(double* affine, ArtSVP* clip_path, int flags)
+{
 	GnomeCanvasItem* item = GNOME_CANVAS_ITEM(gobj());
 	bool lines_need_redraw = true;
 
@@ -517,7 +527,7 @@ Lineset::update_vfunc(double* affine, ArtSVP* clip_path, int flags) {
 	// ahh. We must update bounds no matter what. If the group position changed,
 	// there is no way that we are notified of that.
 
-	//if(bounds_changed) {
+	//if (bounds_changed) {
 	lines_need_redraw = update_bounds();
 	bounds_changed = false;
 		//}
@@ -529,33 +539,35 @@ Lineset::update_vfunc(double* affine, ArtSVP* clip_path, int flags) {
 }
 
 void
-Lineset::draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height) {
+Lineset::draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height)
+{
 	cerr << "please don't use the GnomeCanvasLineset item in a non-aa Canvas" << endl;
 	abort();
 }
 
 inline void
-Lineset::paint_vert(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2) {
-	if(line.width == 1.0) {
+Lineset::paint_vert(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2)
+{
+	if (line.width == 1.0) {
 		PAINT_VERTA(buf, line.r, line.g, line.b, line.a, x1, y1, y2);
-	}
-	else {
+	} else {
 		PAINT_BOX(buf, line.r, line.g, line.b, line.a, x1, y1, x2, y2);
 	}
 }
 
 inline void
-Lineset::paint_horiz(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2) {
-	if(line.width == 1.0) {
+Lineset::paint_horiz(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2)
+{
+	if (line.width == 1.0) {
 		PAINT_HORIZA(buf, line.r, line.g, line.b, line.a, x1, x2, y1);
-	}
-	else {
+	} else {
 		PAINT_BOX(buf, line.r, line.g, line.b, line.a, x1, y1, x2, y2);
 	}
 }
 
 void
-Lineset::render_vfunc(GnomeCanvasBuf* buf) {
+Lineset::render_vfunc(GnomeCanvasBuf* buf)
+{
 	ArtIRect rect;
 	int pos0, pos1, offset;
 
@@ -583,7 +595,7 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf) {
 	PAINT_BOX(buf, r, g, b, 0x33, rect.x0, rect.y0, rect.x1, rect.y1);
 #endif
 
-	if(lines.empty()) {
+	if (lines.empty()) {
 		return;
 	}
 
@@ -595,16 +607,16 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf) {
 	 * may be cut off at the ends. 
 	 */
 
-	if(orientation == Vertical) {
+	if (orientation == Vertical) {
 		offset = bbox.x0;
 
 		// skip parts of lines that are to the right of the buffer, and paint the last line visible
-		for(; end != lines.end(); --end) {
+		for (; end != lines.end(); --end) {
 			pos0 = ((int) floor(end->coord)) + offset;
 
-			if(pos0 < rect.x1) {
+			if (pos0 < rect.x1) {
 				pos1 = min((pos0 + (int) floor(end->width)), rect.x1);
-				if(pos0 < rect.x0 && pos1 < rect.x0) {
+				if (pos0 < rect.x0 && pos1 < rect.x0) {
 					return;
 				}
 
@@ -613,16 +625,16 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf) {
 			}
 		}
 
-		if(end == lines.end()) {
+		if (end == lines.end()) {
 			return;
 		}
 
 		// skip parts of lines that are to the left of the buffer
-		for(; it != end; ++it) {
+		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
 			pos1 = pos0 + ((int) floor(it->width));
 			
-			if(pos1 > rect.x0) {
+			if (pos1 > rect.x0) {
 				pos0 = max(pos0, rect.x0);
 				paint_vert(buf, *it, pos0, rect.y0, pos1, rect.y1);
 				++it;
@@ -631,23 +643,22 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf) {
 		}
 		
 		// render what's between the first and last lines
-		for(; it != end; ++it) {
+		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
 			pos1 = pos0 + ((int) floor(it->width));
 
 			paint_vert(buf, *it, pos0, rect.y0, pos1, rect.y1);
 		}
-	}
-	else {
+	} else {
 		offset = bbox.y0;
 
 		// skip parts of lines that are to the right of the buffer, and paint the last line visible
-		for(; end != lines.end(); --end) {
+		for (; end != lines.end(); --end) {
 			pos0 = ((int) floor(end->coord)) + offset;
 
-			if(pos0 < rect.y1) {
+			if (pos0 < rect.y1) {
 				pos1 = min((pos0 + (int) floor(end->width)), rect.y1);
-				if(pos0 < rect.y0 && pos1 < rect.y0) {
+				if (pos0 < rect.y0 && pos1 < rect.y0) {
 					return;
 				}
 
@@ -656,16 +667,16 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf) {
 			}
 		}
 
-		if(end == lines.end()) {
+		if (end == lines.end()) {
 			return;
 		}
 
 		// skip parts of lines that are to the left of the buffer
-		for(; it != end; ++it) {
+		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
 			pos1 = pos0 + ((int) floor(it->width));
 			
-			if(pos1 > rect.y0) {
+			if (pos1 > rect.y0) {
 				pos0 = max(pos0, rect.y0);
 				paint_horiz(buf, *it, rect.x0, pos0, rect.x1, pos1);
 				++it;
@@ -674,7 +685,7 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf) {
 		}
 		
 		// render what's between the first and last lines
-		for(; it != end; ++it) {
+		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
 			pos1 = pos0 + ((int) floor(it->width));
 			paint_horiz(buf, *it, rect.x0, pos0, rect.x1, pos1);
@@ -683,7 +694,8 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf) {
 }
 
 void
-Lineset::bounds_vfunc(double* _x1, double* _y1, double* _x2, double* _y2) {
+Lineset::bounds_vfunc(double* _x1, double* _y1, double* _x2, double* _y2)
+{
 	*_x1 = x1;
 	*_y1 = y1;
 	*_x2 = x2 + 1;
@@ -692,7 +704,8 @@ Lineset::bounds_vfunc(double* _x1, double* _y1, double* _x2, double* _y2) {
 
 
 double
-Lineset::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actual_item) {
+Lineset::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actual_item)
+{
 	double x1, y1, x2, y2;
 	double dx, dy;
 
@@ -702,26 +715,21 @@ Lineset::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actua
 
 	if (x < x1) {
 		dx = x1 - x;
-	}
-	else if(x > x2) {
+	} else if (x > x2) {
 		dx = x - x2;
-	}
-	else {
+	} else {
 		dx = 0.0;
 	}
 
 	if (y < y1) {
 		dy = y1 - y;
-	}
-	else if(y > y2) {
+	} else if (y > y2) {
 		dy = y - y2;
-	}
-	else {
+	} else {
 		if (dx == 0.0) {
 			// point is inside
 			return 0.0;
-		}
-		else {
+		} else {
 			dy = 0.0;
 		}
 	}
@@ -731,31 +739,33 @@ Lineset::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actua
 
 /* If not overrided emit the signal */
 void
-Lineset::request_lines(double c1, double c2) {
+Lineset::request_lines(double c1, double c2)
+{
 	signal_request_lines(*this, c1, c2);
 }
 
 void
-Lineset::bounds_need_update() {
+Lineset::bounds_need_update()
+{
 	bounds_changed = true;
 
-	if(!in_update) {
+	if (!in_update) {
 		request_update();
 	}
 }
 
 void
-Lineset::region_needs_update(double coord1, double coord2) {
-	if(update_region1 > update_region2) {
+Lineset::region_needs_update(double coord1, double coord2)
+{
+	if (update_region1 > update_region2) {
 		update_region1 = coord1;
 		update_region2 = coord2;
-	}
-	else {
+	} else {
 		update_region1 = min(update_region1, coord1);
 		update_region2 = max(update_region2, coord2);
 	}
 
-	if(!in_update) {
+	if (!in_update) {
 		request_update();
 	}
 }
@@ -764,9 +774,11 @@ Lineset::region_needs_update(double coord1, double coord2) {
  * These have been defined to avoid endless recursion with gnomecanvasmm.
  * Don't know why this happens
  */
-bool Lineset::on_event(GdkEvent* p1) { 
+bool Lineset::on_event(GdkEvent* p1)
+{ 
 	return false;
 }
+
 void Lineset::realize_vfunc() { }
 void Lineset::unrealize_vfunc() { }
 void Lineset::map_vfunc() { }
