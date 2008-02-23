@@ -47,6 +47,7 @@
 #include <ardour/ladspa_plugin.h>
 #include <ardour/connection.h>
 #include <ardour/session_connection.h>
+#include <ardour/profile.h>
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
