@@ -848,7 +848,7 @@ Session::when_engine_running ()
 		add_connection (c);
 	} 
 	
-	BootMessage (_("Connect ports"));
+	BootMessage (_("Setup signal flow and plugins"));
 
 	hookup_io ();
 

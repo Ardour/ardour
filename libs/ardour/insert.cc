@@ -356,12 +356,11 @@ PluginInsert::silence (nframes_t nframes, nframes_t offset)
 {
 	int32_t in_index = 0;
 	int32_t out_index = 0;
-
-	uint32_t n;
+	int32_t n;
 
 	if (active()) {
 		for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			n = (*i) -> get_info()->n_inputs;
+			n = input_streams();
 			(*i)->connect_and_run (_session.get_silent_buffers (n), n, in_index, out_index, nframes, offset);
 		}
 	}
@@ -380,20 +379,17 @@ PluginInsert::run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, nf
 
 	} else {
 
-		uint32_t in = _plugins[0]->get_info()->n_inputs;
-		uint32_t out = _plugins[0]->get_info()->n_outputs;
+		uint32_t in = input_streams ();
+		uint32_t out = output_streams ();
 
-		if (in < 0 || out < 0) {
+		if (out > in) {
 			
-		} else {
-
-			if (out > in) {
-				
-				/* not active, but something has make up for any channel count increase */
-				
-				for (uint32_t n = out - in; n < out; ++n) {
-					memcpy (bufs[n], bufs[in - 1], sizeof (Sample) * nframes);
-				}
+			/* not active, but something has make up for any channel count increase,
+			   so copy the last buffer to the extras.
+			*/
+			
+			for (uint32_t n = out - in; n < out && n < nbufs; ++n) {
+				memcpy (bufs[n], bufs[in - 1], sizeof (Sample) * nframes);
 			}
 		}
 	}

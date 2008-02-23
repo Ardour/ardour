@@ -268,10 +268,15 @@ void
 OptionEditor::setup_misc_options ()
 {
 	Gtk::HBox* hbox;
+	Label* label;
+
+#ifndef GTKOSX
+	/* font scaling does nothing with GDK/Quartz */
+
 	Gtk::Adjustment* dpi_adj = new Gtk::Adjustment ((double)Config->get_font_scale() / 1024, 50, 250, 1, 10);
 	Gtk::HScale * dpi_range = new Gtk::HScale (*dpi_adj);
 
-	Label* label = manage (new Label (_("Font Scaling")));
+	label = manage (new Label (_("Font Scaling")));
 	label->set_name ("OptionsLabel");
 
 	dpi_range->set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
@@ -283,6 +288,7 @@ OptionEditor::setup_misc_options ()
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (*dpi_range, true, true);
 	misc_packer.pack_start (*hbox, false, false);
+#endif
 
 	label = manage (new Label (_("Short crossfade length (msecs)")));
 	label->set_name ("OptionsLabel");

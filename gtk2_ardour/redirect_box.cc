@@ -1088,10 +1088,15 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
 			
 			PluginUIWindow *plugin_ui;
+
+			/* these are both allowed to be null */
+			
+			Container* toplevel = get_toplevel();
+			Window* win = dynamic_cast<Gtk::Window*>(toplevel);
 			
 			if (plugin_insert->get_gui() == 0) {
-				
-				plugin_ui = new PluginUIWindow (plugin_insert);
+
+				plugin_ui = new PluginUIWindow (win, plugin_insert);
 				
 				WindowTitle title(Glib::get_application_name());
 				title += generate_redirect_title (plugin_insert);
@@ -1102,9 +1107,9 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 				// change window title when route name is changed
 				_route->name_changed.connect (bind (mem_fun(*this, &RedirectBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_insert)));
 				
-				
 			} else {
 				plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
+				plugin_ui->set_parent (win);
 			}
 			
 			if (plugin_ui->is_visible()) {

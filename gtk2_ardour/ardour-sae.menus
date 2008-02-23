@@ -54,13 +54,14 @@
                <menuitem action='Rewind'/>
                <menuitem action='TransitionToRoll'/>
                <menuitem action='TransitionToReverse'/>
-	       <menuitem action='center-playhead'/>
-	       <menuitem action='set-playhead'/>
-               <menuitem action='playhead-to-edit'/>
                <menuitem action='nudge-playhead-forward'/>
                <menuitem action='nudge-playhead-backward'/>
 
 	       <menu action="MovePlayHeadMenu">
+ 	           <menuitem action='set-playhead'/>
+                   <menuitem action='playhead-to-edit'/>
+  	           <menuitem action='center-playhead'/>
+	           <separator/>
                    <menuitem action='tab-to-transient-forwards'/>
                    <menuitem action='tab-to-transient-backwards'/>
 	           <separator/>
@@ -107,7 +108,6 @@
                <menuitem action='ToggleAutoPlay'/>
                <menuitem action='ToggleAutoReturn'/>
                <menuitem action='ToggleClick'/>
-               <menuitem action='toggle-follow-playhead'/>
 	       <separator/>
 	       <menu action='LocateToMarker'>
 		</menu>
@@ -287,9 +287,9 @@
                    <menuitem action='zoom-focus-mouse'/>
                </menu>
 	       <menu action="EditPointMenu">
-	           <menuitem action='edit-point-playhead'/>
-	           <menuitem action='edit-point-mouse'/>
-	           <menuitem action='edit-point-marker'/>
+	           <menuitem action='edit-at-playhead'/>
+	           <menuitem action='edit-at-mouse'/>
+	           <menuitem action='edit-at-selected-marker'/>
 	       </menu>
 	       <menu action='KeyMouseActions'>
 		   <menuitem action='select-next-route'/>
@@ -312,6 +312,7 @@
 		   <menuitem action='cycle-snap-mode'/>
 		   <menuitem action='cycle-snap-choice'/>
                </menu>
+               <menuitem action='toggle-follow-playhead'/>
 	  </menu>
 
      </menubar>

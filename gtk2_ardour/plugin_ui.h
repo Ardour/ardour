@@ -202,12 +202,13 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 class PluginUIWindow : public Gtk::Window
 {
   public:
-	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
+	PluginUIWindow (Gtk::Window*, boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
 	~PluginUIWindow ();
 
 	PlugUIBase& pluginui() { return *_pluginui; }
 
 	void resize_preferred();
+	void set_parent (Gtk::Window*);
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
@@ -216,6 +217,7 @@ class PluginUIWindow : public Gtk::Window
 	void on_map ();
   private:
 	PlugUIBase* _pluginui;
+	Gtk::Window* parent;
 	Gtk::VBox vbox;
 	bool non_gtk_gui;
 	void app_activated (bool);

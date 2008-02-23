@@ -2068,7 +2068,7 @@ public:
 
 	Gtk::ComboBoxText edit_point_selector;
 
-	void set_edit_point_preference (Editing::EditPoint ep);
+	void set_edit_point_preference (Editing::EditPoint ep, bool force = false);
 	void cycle_edit_point (bool with_marker);
 	void set_edit_point ();
 	void edit_point_selection_done ();

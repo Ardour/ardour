@@ -811,7 +811,6 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		info->n_inputs = -1;
 		info->n_outputs = -1;
 
-
 		plugs.push_back (info);
 		
 		comp = FindNextComponent (comp, &desc);

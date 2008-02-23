@@ -267,32 +267,32 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "goto", _("goto"), mem_fun(*this, &Editor::goto_frame));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "center-playhead", _("to Center"), mem_fun(*this, &Editor::center_playhead));
+	act = ActionManager::register_action (editor_actions, "center-playhead", _("Center Playhead"), mem_fun(*this, &Editor::center_playhead));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "center-edit-cursor", _("to Center"), mem_fun(*this, &Editor::center_edit_point));
+	act = ActionManager::register_action (editor_actions, "center-edit-cursor", _("Center Active Marker"), mem_fun(*this, &Editor::center_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "scroll-playhead-forward", _("Playhead forward"), bind (mem_fun(*this, &Editor::scroll_playhead), true));;
+	act = ActionManager::register_action (editor_actions, "scroll-playhead-forward", _("Playhead Forward"), bind (mem_fun(*this, &Editor::scroll_playhead), true));;
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "scroll-playhead-backward", _("Playhead Backward"), bind (mem_fun(*this, &Editor::scroll_playhead), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "playhead-to-edit", _("to Edit"), bind (mem_fun(*this, &Editor::cursor_align), true));
+	act = ActionManager::register_action (editor_actions, "playhead-to-edit", _("Playhead To Active Mark"), bind (mem_fun(*this, &Editor::cursor_align), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("to Playhead"), bind (mem_fun(*this, &Editor::cursor_align), false));
+	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("Active Mark To Playhead"), bind (mem_fun(*this, &Editor::cursor_align), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "trim-front", _("Trim start at edit point"), mem_fun(*this, &Editor::trim_region_front));
+	act = ActionManager::register_action (editor_actions, "trim-front", _("Trim Start At Edit Point"), mem_fun(*this, &Editor::trim_region_front));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-back", _("Trim end at edit point"), mem_fun(*this, &Editor::trim_region_back));
+	act = ActionManager::register_action (editor_actions, "trim-back", _("Trim End At Edit Point"), mem_fun(*this, &Editor::trim_region_back));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "trim-from-start", _("Start to edit point"), mem_fun(*this, &Editor::trim_region_from_edit_point));
+	act = ActionManager::register_action (editor_actions, "trim-from-start", _("Start To Edit Point"), mem_fun(*this, &Editor::trim_region_from_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-to-end", _("Edit point to end"), mem_fun(*this, &Editor::trim_region_to_edit_point));
+	act = ActionManager::register_action (editor_actions, "trim-to-end", _("Edit Point To End"), mem_fun(*this, &Editor::trim_region_to_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "trim-region-to-loop", _("Trim To Loop"), mem_fun(*this, &Editor::trim_region_to_loop));
@@ -359,9 +359,9 @@ Editor::register_actions ()
         act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), mem_fun(*this, &Editor::kbd_brush));
         ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "set-playhead", _("Set Playhead"), mem_fun(*this, &Editor::set_playhead_cursor));
+	act = ActionManager::register_action (editor_actions, "set-playhead", _("Playhead to Mouse"), mem_fun(*this, &Editor::set_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-edit-point", _("Set Edit Point"), mem_fun(*this, &Editor::set_edit_point));
+	act = ActionManager::register_action (editor_actions, "set-edit-point", _("Edit Point to Mouse"), mem_fun(*this, &Editor::set_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), bind (mem_fun(*this, &Editor::duplicate_dialog), false));
@@ -560,10 +560,6 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-selected-marker"), _("Marker"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
-
-	ActionManager::register_action (editor_actions, "edit-point-marker", _("Marker"), bind (mem_fun (*this, &Editor::set_edit_point_preference), EditAtSelectedMarker));
-	ActionManager::register_action (editor_actions, "edit-point-playhead", _("Playhead"), bind (mem_fun (*this, &Editor::set_edit_point_preference), EditAtPlayhead));
-	ActionManager::register_action (editor_actions, "edit-point-mouse", _("Mouse"), bind (mem_fun (*this, &Editor::set_edit_point_preference), EditAtMouse));
 
 	ActionManager::register_action (editor_actions, "cycle-edit-point", _("Change edit point"), bind (mem_fun (*this, &Editor::cycle_edit_point), false));
 	ActionManager::register_action (editor_actions, "cycle-edit-point-with-marker", _("Change edit point (w/Marker)"), bind (mem_fun (*this, &Editor::cycle_edit_point), true));

@@ -723,8 +723,7 @@ Editor::Editor ()
 	set_snap_to (snap_type);
 	snap_mode = SnapOff;
 	set_snap_mode (snap_mode);
-	_edit_point = EditAtMouse;
-	set_edit_point_preference (_edit_point);
+	set_edit_point_preference (EditAtMouse, true);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
@@ -2157,9 +2156,9 @@ Editor::set_snap_mode (SnapMode mode)
 	instant_save ();
 }
 void
-Editor::set_edit_point_preference (EditPoint ep)
+Editor::set_edit_point_preference (EditPoint ep, bool force)
 {
-	bool changed = _edit_point != ep;
+	bool changed = (_edit_point != ep);
 
 	_edit_point = ep;
 	string str = edit_point_strings[(int)ep];
@@ -2170,7 +2169,7 @@ Editor::set_edit_point_preference (EditPoint ep)
 
 	set_canvas_cursor ();
 
-	if (!changed) {
+	if (!force && !changed) {
 		return;
 	}
 
@@ -2192,6 +2191,25 @@ Editor::set_edit_point_preference (EditPoint ep)
 		break;
 	default:
 		break;
+	}
+
+	const char* action;
+
+	switch (_edit_point) {
+	case EditAtPlayhead:
+		action = "edit-at-playhead";
+		break;
+	case EditAtSelectedMarker:
+		action = "edit-at-marker";
+		break;
+	case EditAtMouse:
+		action = "edit-at-mouse";
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Editor", action);
+	if (act) {
+		Glib::RefPtr<RadioAction>::cast_dynamic(act)->set_active (true);
 	}
 
 	instant_save ();
@@ -2267,7 +2285,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("edit-point"))) {
-		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point));
+		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
 	}
 
 	if ((prop = node.property ("mouse-mode"))) {

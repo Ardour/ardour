@@ -341,7 +341,6 @@ AUPluginUI::get_nswindow ()
 void
 AUPluginUI::activate ()
 {
-	return;
 	if (carbon_window && cocoa_parent) {
 		cerr << "APP activated, activate carbon window " << insert->name() << endl;
 		_activating_from_app = true;
@@ -391,7 +390,7 @@ AUPluginUI::carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event)
 		break;
 
 	case kEventWindowHandleDeactivate:
-		cerr << "carbon window for " << insert->name() << " deactivated\n";
+		cerr << "carbon window for " << insert->name() << " would have been deactivated\n";
 		// never deactivate the carbon window
 		return noErr;
 		break;
