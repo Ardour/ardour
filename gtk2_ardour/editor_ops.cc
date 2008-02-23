@@ -2273,13 +2273,19 @@ Editor::play_from_edit_point_and_return ()
 	nframes64_t start_frame;
 	nframes64_t return_frame;
 
+	start_frame = get_preferred_edit_position (true);
+
+	if (session->transport_rolling()) {
+		/* go to edit point and stop */
+		session->request_locate (start_frame, false);
+		return;
+	}
+
 	/* don't reset the return frame if its already set */
 
 	if ((return_frame = session->requested_return_frame()) < 0) {
 		return_frame = session->audible_frame();
 	}
-
-	start_frame = get_preferred_edit_position (true);
 
 	if (start_frame >= 0) {
 		session->request_roll_at_and_return (start_frame, return_frame);
@@ -2675,8 +2681,8 @@ Editor::separate_regions_between (const TimeSelection& ts)
 		}
 
 		if (tmptracks.empty()) {
-			/* no regions selected: use all tracks */
-			tmptracks = track_views;
+			/* no regions selected: do nothing */
+			return;
 		}
 
 	} else {
@@ -3084,7 +3090,7 @@ Editor::align (RegionPoint what)
 {
 	RegionSelection rs; 
 
-	get_regions_for_action (rs, false);
+	get_regions_for_action (rs);
 	nframes64_t where = get_preferred_edit_position();
 
 	if (!rs.empty()) {
@@ -3103,7 +3109,7 @@ Editor::align_relative (RegionPoint what)
 	nframes64_t where = get_preferred_edit_position();
 	RegionSelection rs; 
 
-	get_regions_for_action (rs, false);
+	get_regions_for_action (rs);
 
 	if (!rs.empty()) {
 		align_selection_relative (what, where, rs);
@@ -3588,7 +3594,11 @@ Editor::cut_copy (CutCopyOp op)
 
 	RegionSelection rs; 
 
-	get_regions_for_action (rs);
+	/* we only want to cut regions if some are selected */
+
+	if (!selection->regions.empty()) {
+		get_regions_for_action (rs);
+	}
 
 	switch (current_mouse_mode()) {
 	case MouseObject: 
@@ -3597,7 +3607,7 @@ Editor::cut_copy (CutCopyOp op)
 			begin_reversible_command (opname + _(" objects"));
 
 			if (!rs.empty()) {
-				cut_copy_regions (op);
+				cut_copy_regions (op, rs);
 				
 				if (op == Cut) {
 					selection->clear_regions ();
@@ -3677,7 +3687,7 @@ struct PlaylistMapping {
 };
 
 void
-Editor::cut_copy_regions (CutCopyOp op)
+Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 {
 	/* we can't use a std::map here because the ordering is important, and we can't trivially sort
 	   a map when we want ordered access to both elements. i think.
@@ -3692,9 +3702,6 @@ Editor::cut_copy_regions (CutCopyOp op)
 	
 	/* get ordering correct before we cut/copy */
 	
-	RegionSelection rs; 
-
-	get_regions_for_action (rs);
 	rs.sort_by_position_and_track ();
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
@@ -3817,9 +3824,14 @@ void
 Editor::cut_copy_ranges (CutCopyOp op)
 {
 	TrackSelection* ts;
+	TrackSelection entered;
 
 	if (selection->tracks.empty()) {
-		ts = &track_views;
+		if (!entered_track) {
+			return;
+		}
+		entered.push_back (entered_track);
+		ts = &entered;
 	} else {
 		ts = &selection->tracks;
 	}

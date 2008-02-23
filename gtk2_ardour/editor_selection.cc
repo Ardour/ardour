@@ -1347,6 +1347,12 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 		swap (start, end);
 	}
 
+	/* turn range into one delimited by start...end,
+	   not start...end-1
+	*/
+
+	end++;
+
 	return true;
 }
 

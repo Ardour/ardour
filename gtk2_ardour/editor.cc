@@ -4403,14 +4403,19 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 
 		if (selection->tracks.empty()) {
 
-			/* no regions or tracks selected, but entered regionview is valid
-			   and we're in object mode - just use entered regionview
+			/* no regions or tracks selected
 			*/
 			
-			if (entered_regionview && (mouse_mode == Editing::MouseObject)) {
+			if (entered_regionview && mouse_mode == Editing::MouseObject) {
+
+				/*  entered regionview is valid and we're in object mode - 
+				    just use entered regionview
+				*/
+
 				rs.add (entered_regionview);
-				return;
 			}
+
+			return;
 
 		} else {
 

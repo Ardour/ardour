@@ -694,18 +694,27 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 			++tmp;
 			
 			current = *i;
-			
-			if (current->first_frame() == start && current->last_frame() == end) {
+
+			if (current->first_frame() >= start && current->last_frame() < end) {
 				if (cutting) {
 					remove_region_internal (current);
 				}
 				continue;
 			}
-		
+			
+			/* coverage will return OverlapStart if the start coincides
+			   with the end point. we do not partition such a region,
+			   so catch this special case.
+			*/
+
+			if (current->first_frame() >= end) {
+				continue;
+			}
+
 			if ((overlap = current->coverage (start, end)) == OverlapNone) {
 				continue;
 			}
-			
+
 			pos1 = current->position();
 			pos2 = start;
 			pos3 = end;
@@ -840,6 +849,10 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				}
 				new_regions.push_back (current);
 			}
+		}
+		
+		if (current->first_frame() >= current->last_frame()) {
+			PBD::stacktrace (cerr);
 		}
 
 		in_partition = false;

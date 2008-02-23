@@ -963,7 +963,7 @@ class Editor : public PublicEditor
 
 	void cut_copy (Editing::CutCopyOp);
 	void cut_copy_points (Editing::CutCopyOp);
-	void cut_copy_regions (Editing::CutCopyOp);
+	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 
 	void mouse_paste ();

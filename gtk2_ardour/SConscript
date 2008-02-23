@@ -409,12 +409,12 @@ if gtkardour['GTKOSX'] and gtkardour['NATIVE_OSX_KEYS']:
 	keybindings_dict['%WINDOW%'] = 'Mod1'
 else:
 	#
-	# Ctrl, Alt, Shift, Mod3(Meta)
+	# Ctrl, Alt, Shift, Mod4(Super/Windows/Hyper)
 	#
 	keybindings_dict['%PRIMARY%'] = 'Ctrl'
 	keybindings_dict['%SECONDARY%'] = 'Alt'
 	keybindings_dict['%TERTIARY%'] = 'Shift'
-	keybindings_dict['%LEVEL4%'] = 'Mod2'
+	keybindings_dict['%LEVEL4%'] = env['WINDOWS_KEY']
 	keybindings_dict['%WINDOW%'] = 'Alt'
 
 for b in [ 'SAE-de', 'mnemonic-us', 'ergonomic-us' ]:

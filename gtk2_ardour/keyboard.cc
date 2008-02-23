@@ -54,12 +54,14 @@ guint Keyboard::snap_mod = GDK_MOD3_MASK;
 guint Keyboard::PrimaryModifier = GDK_META_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
+guint Keyboard::Level4Modifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
 #else
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
+guint Keyboard::Level4Modifier = GDK_MOD4_MASK;     // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;    
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
 #endif
@@ -106,8 +108,11 @@ Keyboard::Keyboard ()
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | PrimaryModifier);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | SecondaryModifier);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | TertiaryModifier);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | Level4Modifier);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | CopyModifier);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | RangeSelectModifier);
+
+	gtk_accelerator_set_default_mod_mask (RelevantModifierKeyMask);
 
 	snooper_id = gtk_key_snooper_install (_snooper, (gpointer) this);
 
