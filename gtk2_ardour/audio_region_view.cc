@@ -142,7 +142,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	}
 
 	compute_colors (basic_color);
-
+	
 	create_waves ();
 
 	fade_in_shape = new ArdourCanvas::Polygon (*group);
@@ -763,7 +763,7 @@ AudioRegionView::set_envelope_visible (bool yn)
 void
 AudioRegionView::create_waves ()
 {
-	//cerr << "AudioRegionView::create_waves() called on " << this << endl;//DEBUG
+	// cerr << "AudioRegionView::create_waves() called on " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 
 	if (!atv.get_diskstream()) {

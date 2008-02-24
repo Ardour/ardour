@@ -62,6 +62,8 @@ class AudioRegionView : public RegionView
 	
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region() const;
 	
+	void create_waves ();
+
 	void set_height (double);
 	void set_samples_per_unit (double);
 	
@@ -132,7 +134,6 @@ class AudioRegionView : public RegionView
     void region_muted ();
     void region_scale_amplitude_changed ();
 
-    void create_waves ();
     void create_one_wave (uint32_t, bool);
     void manage_zero_line ();
     void peaks_ready_handler (uint32_t);

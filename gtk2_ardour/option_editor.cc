@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
+#include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
 #include <pbd/whitespace.h>
 
@@ -253,8 +255,20 @@ OptionEditor::add_session_paths ()
 static void
 reset_dpi ()
 {
+	long val = Config->get_font_scale();
+
+	/* FT2 rendering */
+
+	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_for_display(), val/1024, val/1024);
+
+	/* Cairo rendering, in case there is any */
+	
+	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
+	
+	/* Xft rendering */
+
 	gtk_settings_set_long_property (gtk_settings_get_default(),
-					"gtk-xft-dpi", Config->get_font_scale(), "ardour");
+					"gtk-xft-dpi", val, "ardour");
 }
 
 static void

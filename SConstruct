@@ -562,6 +562,9 @@ libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gmodule-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gthread-2.0')
 
+libraries['freetype2'] = LibraryInfo()
+libraries['freetype2'].ParseConfig ('pkg-config --cflags --libs freetype2')
+
 libraries['gtk2'] = LibraryInfo()
 libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
 

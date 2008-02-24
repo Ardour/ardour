@@ -23,6 +23,7 @@
 #include <pbd/error.h>
 #include <pbd/convert.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/source_factory.h>
 #include <ardour/sndfilesource.h>

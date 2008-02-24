@@ -605,6 +605,12 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		double tx = points[pi].x;
 		double ty = points[pi].y;
+		
+		if (isnan (tx) || isnan (ty)) {
+			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
+						   _name) << endmsg;
+			continue;
+		}
 
 		/* now ensure that the control_points vector reflects the current curve
 		   state, but don't plot control points too close together. also, don't
@@ -1198,7 +1204,7 @@ AutomationLine::reset_callback (const AutomationList& events)
 	AutomationList::const_iterator ai;
 
 	for (ai = events.const_begin(); ai != events.const_end(); ++ai) {
-
+		
 		double translated_y = (*ai)->value;
 		model_to_view_y (translated_y);
 

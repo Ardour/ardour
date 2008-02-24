@@ -1638,7 +1638,8 @@ Session::XMLSourceFactory (const XMLNode& node)
 	}
 
 	try {
-		return SourceFactory::create (*this, node);
+		/* note: do peak building in another thread when loading session state */
+		return SourceFactory::create (*this, node, true);
 	}
 
 	catch (failed_constructor& err) {
