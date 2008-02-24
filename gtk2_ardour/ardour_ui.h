@@ -98,6 +98,7 @@ namespace ALSA {
 #define FRAME_NAME "BaseFrame"
 
 extern sigc::signal<void>  ColorsChanged;
+extern sigc::signal<void>  DPIReset;
 
 class ARDOUR_UI : public Gtkmm2ext::UI
 {

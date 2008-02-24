@@ -192,8 +192,9 @@ class GainMeter : public Gtk::VBox
 
 	void on_theme_changed ();
 	bool style_changed;
+	bool dpi_changed;
 	bool color_changed;
-	void color_handler();
+	void color_handler(bool);
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */

@@ -59,7 +59,7 @@ AudioRegionGainLine::view_to_model_y (double& y)
 void
 AudioRegionGainLine::model_to_view_y (double& y)
 {
-	if (y < 0) y == 0;
+	if (y < 0) y = 0;
 
 	y = gain_to_slider_position (y);
 }

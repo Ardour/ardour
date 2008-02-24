@@ -206,7 +206,8 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeter::reset_group_peak_display));
 
 	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeter::on_theme_changed));
-	ColorsChanged.connect (mem_fun (*this, &GainMeter::color_handler));
+	ColorsChanged.connect (bind(mem_fun (*this, &GainMeter::color_handler), false));
+	DPIReset.connect (bind(mem_fun (*this, &GainMeter::color_handler), true));
 	//hide_all();
 }
 
@@ -288,7 +289,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	Glib::RefPtr<Gdk::Pixmap> pixmap;
 	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
 
-	if (i == metric_pixmaps.end() || style_changed) {
+	if (i == metric_pixmaps.end() || style_changed || dpi_changed) {
 		pixmap = render_metrics (meter_metric_area);
 	} else {
 		pixmap = i->second;
@@ -965,8 +966,9 @@ void GainMeter::clear_meters ()
 	}
 }
 
-void GainMeter::color_handler()
+void GainMeter::color_handler(bool dpi)
 {
 	color_changed = true;
+	dpi_changed = (dpi) ? true : false;
 	setup_meters();
 }
