@@ -50,6 +50,7 @@ opts.AddOptions(
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
+    BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
 )
 
@@ -925,6 +926,26 @@ else:
     have_libdmalloc = False
 
 libraries['dmalloc'] = conf.Finish ()
+
+#
+# ensure FREEDESKTOP target is doable..
+#
+
+conf = env.Configure ()
+if env['FREEDESKTOP']:
+	have_update_mime_database = conf.TryAction (Action ('update-mime-database -v'))
+	if have_update_mime_database[0] != 1:
+		print "Warning. You have no update-mime-database command in your PATH. FREEDESKTOP is now disabled."
+		env['FREEDESKTOP'] = 0
+	have_gtk_update_icon_cache = conf.TryAction (Action ('gtk-update-icon-cache -?'))
+	if have_gtk_update_icon_cache[0] != 1:
+		print "Warning. You have no gtk-update-icon-cache command in your PATH. FREEDESKTOP is now disabled."
+		env['FREEDESKTOP'] = 0
+	have_update_desktop_database = conf.TryAction (Action ('update-desktop-database -?'))
+	if have_update_desktop_database[0] != 1:
+		print "Warning. You have no update-desktop-database command in your PATH. FREEDESKTOP is now disabled."
+		env['FREEDESKTOP'] = 0
+env = conf.Finish()
 
 #
 # Audio/MIDI library (needed for MIDI, since audio is all handled via JACK)

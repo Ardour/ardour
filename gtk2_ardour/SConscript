@@ -471,10 +471,43 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
-env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'icons'), icon_files))
-
+if not env['FREEDESKTOP']:
+	env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'icons'), icon_files))
 env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], []))
-		
+
+# This will install icons and MIME type as per freedesktop.org specs. #
+if env['FREEDESKTOP']:
+	desktop_icon_install_prefix = install_prefix + '/share/icons/hicolor'
+	# Install the desktop icons to the default locations #
+	env.Alias('install', env.InstallAs(os.path.join(desktop_icon_install_prefix, '16x16', 'apps', 'ardour2.png'), 'icons/ardour_icon_16px.png'))
+	env.Alias('install', env.InstallAs(os.path.join(desktop_icon_install_prefix, '22x22', 'apps', 'ardour2.png'), 'icons/ardour_icon_22px.png'))
+	env.Alias('install', env.InstallAs(os.path.join(desktop_icon_install_prefix, '32x32', 'apps', 'ardour2.png'), 'icons/ardour_icon_32px.png'))
+	env.Alias('install', env.InstallAs(os.path.join(desktop_icon_install_prefix, '48x48', 'apps', 'ardour2.png'), 'icons/ardour_icon_48px.png'))
+	# Install the mime type xml file and its icon #
+        env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'mime', 'packages'), 'ardour2.xml'))
+	env.Alias('install', env.InstallAs(os.path.join(desktop_icon_install_prefix, '48x48', 'mimetypes','application-x-ardour2.png'), 'icons/ardour_icon_48px.png'))
+	env.Alias('install', env.Command (os.path.join(install_prefix, 'share', 'mime'), [], 'update-mime-database $TARGET'))
+	# Update the icon cache #
+	env.Alias('install', env.Command (desktop_icon_install_prefix, [], 'touch --no-create $TARGET'))
+	env.Alias('install', env.Command (desktop_icon_install_prefix, [], 'gtk-update-icon-cache $TARGET'))
+	# Make the ardour2.desktop file and install it #
+	env.Alias('install', env.Command ('ardour2.desktop', 'ardour2.desktop.in', 'cat $SOURCES  > $TARGET'))
+	env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'applications'), 'ardour2.desktop'))
+	env.Alias('install', env.Command (os.path.join(install_prefix, 'share', 'applications'), [], 'update-desktop-database $TARGET'))
+	# uninstall target.. needed to run  update-mime-database and update-desktop-database after removal. #`
+	remove_desktop_files = env.Command ('another_frobnicatory_decoy', [],
+                             [ Delete (install_prefix + '/share/mime/packages/ardour2.xml'),
+			       Delete (install_prefix + '/share/applications/ardour2.desktop'),
+			       Delete (desktop_icon_install_prefix + '/16x16/apps/ardour2.png'),
+			       Delete (desktop_icon_install_prefix + '/22x22/apps/ardour2.png'),
+			       Delete (desktop_icon_install_prefix + '/32x32/apps/ardour2.png'),
+			       Delete (desktop_icon_install_prefix + '/48x48/apps/ardour2.png'),
+			       Delete (desktop_icon_install_prefix + '/48x48/mimetypes/application-x-ardour2.png'),
+                               Action ('update-mime-database ' + install_prefix + '/share/mime'),
+                               Action ('gtk-update-icon-cache ' + desktop_icon_install_prefix),
+                               Action ('update-desktop-database ' + install_prefix + '/share/applications')])
+	env.Alias('uninstall', remove_desktop_files)
+
 #dist
 env.Alias ('tarball', env.Distribute (env['DISTTREE'],
                                       [ 'SConscript',
@@ -488,7 +521,9 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour-sae-ansi.bindings.in', 
 					'ardour-sae-de.bindings.in', 
 					'ardour2_ui_default.conf',
-					'editor_xpms'
+					'editor_xpms',
+					'ardour2.xml',
+					'ardour2.desktop.in'
                                         ] +
                                       gtkardour_files +
 				      vst_files +
