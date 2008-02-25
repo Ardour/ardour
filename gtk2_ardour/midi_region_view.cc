@@ -820,7 +820,10 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 	if (_selection.find(ev) != _selection.end()) {
 		start_delta_command();
 
-		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
+			Selection::iterator next = i;
+			++next;
+
 			command_remove_note(*i);
 			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get())); 
 
@@ -828,6 +831,9 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			copy->set_note((*i)->note()->note() + dnote);
 
 			command_add_note(copy);
+
+			_selection.erase(i);
+			i = next;
 		}
 		apply_command();
 	}
