@@ -1279,7 +1279,8 @@ the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
 remove_ardour = env.Command ('frobnicatory_decoy2', [],
                              [ Delete ('$PREFIX/etc/ardour2'),
                                Delete ('$PREFIX/lib/ardour2'),
-                               Delete ('$PREFIX/bin/ardour2')])
+                               Delete ('$PREFIX/bin/ardour2'),
+                               Delete ('$PREFIX/share/ardour2')])
 
 env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour_system.rc'))

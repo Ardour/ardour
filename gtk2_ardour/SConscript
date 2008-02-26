@@ -471,8 +471,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'SAE-de
 # data files
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'pixmaps'), pixmap_files))
-if not env['FREEDESKTOP']:
-	env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'icons'), icon_files))
+env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour2', 'icons'), icon_files))
 env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], []))
 
 # This will install icons and MIME type as per freedesktop.org specs. #
