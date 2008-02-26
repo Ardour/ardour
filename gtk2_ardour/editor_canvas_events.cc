@@ -67,8 +67,8 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			   if we're in mid zoom, so we have to get the damn mouse 
 			   pointer again
 			*/
-			track_canvas.get_pointer (x, y);
-			track_canvas.window_to_world (x, y, wx, wy);
+			track_canvas->get_pointer (x, y);
+			track_canvas->window_to_world (x, y, wx, wy);
 			wx += horizontal_adjustment.get_value();
 			wy += vertical_adjustment.get_value();
 			
@@ -102,8 +102,8 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
-			track_canvas.get_pointer (x, y);
-			track_canvas.window_to_world (x, y, wx, wy);
+			track_canvas->get_pointer (x, y);
+			track_canvas->window_to_world (x, y, wx, wy);
 			wx += horizontal_adjustment.get_value();
 			wy += vertical_adjustment.get_value();
 			
@@ -163,7 +163,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 bool
 Editor::track_canvas_scroll_event (GdkEventScroll *event)
 {
-	track_canvas.grab_focus();
+	track_canvas->grab_focus();
 	track_canvas_scroll (event);
 	return false;
 }
@@ -212,7 +212,7 @@ Editor::time_canvas_scroll (GdkEventScroll* ev)
 bool
 Editor::time_canvas_scroll_event (GdkEventScroll *event)
 {
-	time_canvas.grab_focus();
+	time_canvas->grab_focus();
 	time_canvas_scroll (event);
 	return false;
 }
@@ -221,7 +221,7 @@ bool
 Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
 	selection->clear ();
-	track_canvas.grab_focus();
+	track_canvas->grab_focus();
 	return false;
 }
 
@@ -239,7 +239,7 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion *event)
 {
 	int x, y;
 	/* keep those motion events coming */
-	track_canvas.get_pointer (x, y);
+	track_canvas->get_pointer (x, y);
 	return false;
 }
 

@@ -219,14 +219,14 @@ class Editor : public PublicEditor
 		*/
 
 		if (pixel >= 0) {
-			return (nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit);
+			return (nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit);
 		} else {
 			return 0;
 		}
 	}
 
 	gulong frame_to_pixel (nframes64_t frame) const {
-		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
+		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit)));
 	}
 
 	void flush_canvas ();
@@ -542,8 +542,8 @@ class Editor : public PublicEditor
 	void set_canvas_cursor ();
 	Gdk::Cursor* which_grabber_cursor ();
 
-	ArdourCanvas::CanvasAA track_canvas;
-	ArdourCanvas::CanvasAA time_canvas;
+	ArdourCanvas::Canvas* track_canvas;
+	ArdourCanvas::Canvas* time_canvas;
 
 	ArdourCanvas::Text* first_action_message;
 	ArdourCanvas::Text* verbose_canvas_cursor;

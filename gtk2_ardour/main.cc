@@ -271,7 +271,7 @@ int main (int argc, char* argv[])
 	}
 
 	if (no_splash) {
-		cerr << _("Copyright (C) 1999-2007 Paul Davis") << endl
+		cerr << _("Copyright (C) 1999-2008 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker") << endl
 		     << endl
 		     << _("Ardour comes with ABSOLUTELY NO WARRANTY") << endl

@@ -501,15 +501,21 @@ AudioClock::set_frames (nframes_t when, bool force)
 			sprintf (buf, "%.3fK", rate/1000.0f);
 		}
 		
-		frames_upper_info_label->set_text (buf);
+		if (frames_upper_info_label->get_text() != buf) {
+			frames_upper_info_label->set_text (buf);
+		}
 		
 		float vid_pullup = Config->get_video_pullup();
 		
 		if (vid_pullup == 0.0) {
-			frames_lower_info_label->set_text(_("none"));
+			if (frames_lower_info_label->get_text () != _("none")) {
+				frames_lower_info_label->set_text(_("none"));
+			}
 		} else {
 			sprintf (buf, "%-6.4f", vid_pullup);
-			frames_lower_info_label->set_text (buf);
+			if (frames_lower_info_label->get_text() != buf) {
+				frames_lower_info_label->set_text (buf);
+			}
 		}
 	}
 }	
@@ -599,7 +605,9 @@ AudioClock::set_smpte (nframes_t when, bool force)
 			sprintf (buf, "%.2f", smpte_frames);
 		}
 		
-		smpte_upper_info_label->set_text (buf);
+		if (smpte_upper_info_label->get_text() != buf) {
+			smpte_upper_info_label->set_text (buf);
+		}
 		
 		if ((fabs(smpte_frames - 29.97) < 0.0001) || smpte_frames == 30) {
 			if (session->smpte_drop_frames()) {
@@ -612,7 +620,9 @@ AudioClock::set_smpte (nframes_t when, bool force)
 			buf[0] = '\0';
 		}
 		
-		smpte_lower_info_label->set_text (buf);
+		if (smpte_lower_info_label->get_text() != buf) {
+			smpte_lower_info_label->set_text (buf);
+		}
 	}
 }
 
@@ -633,9 +643,13 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	if (bbt_upper_info_label) {
 		TempoMap::Metric m (session->tempo_map().metric_at (when));
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
-		bbt_lower_info_label->set_text (buf);
+		if (bbt_lower_info_label->get_text() != buf) {
+			bbt_lower_info_label->set_text (buf);
+		}
 		sprintf (buf, "%g|%g", m.meter().beats_per_bar(), m.meter().note_divisor());
-		bbt_upper_info_label->set_text (buf);
+		if (bbt_upper_info_label->get_text() != buf) {
+			bbt_upper_info_label->set_text (buf);
+		}
 	}
 }
 

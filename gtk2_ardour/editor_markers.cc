@@ -1113,7 +1113,7 @@ Editor::update_punch_range_view (bool visibility)
 		double x2 = frame_to_pixel (tpl->end());
 		
 		guint track_canvas_width,track_canvas_height;
-		track_canvas.get_size(track_canvas_width,track_canvas_height);
+		track_canvas->get_size(track_canvas_width,track_canvas_height);
 		
 		transport_punch_range_rect->property_x1() = x1;
 		transport_punch_range_rect->property_x2() = x2;

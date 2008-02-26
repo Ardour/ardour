@@ -368,12 +368,12 @@ Editor::Editor ()
 	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled), false);
 	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	
-	track_canvas.set_hadjustment (horizontal_adjustment);
-	track_canvas.set_vadjustment (vertical_adjustment);
-	time_canvas.set_hadjustment (horizontal_adjustment);
+	track_canvas->set_hadjustment (horizontal_adjustment);
+	track_canvas->set_vadjustment (vertical_adjustment);
+	time_canvas->set_hadjustment (horizontal_adjustment);
 
-	track_canvas.signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
-	time_canvas.signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
+	track_canvas->signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
+	time_canvas->signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
 	
 	controls_layout.add (edit_controls_vbox);
 	controls_layout.set_name ("EditControlsBase");
@@ -403,7 +403,7 @@ Editor::Editor ()
 	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
-	time_canvas_vbox.pack_start (time_canvas, true, true);
+	time_canvas_vbox.pack_start (*time_canvas, true, true);
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
 
 	bbt_label.set_name ("EditorTimeButton");
@@ -468,7 +468,7 @@ Editor::Editor ()
 	   for the canvas areas.
 	*/
 
-	track_canvas_event_box.add (track_canvas);
+	track_canvas_event_box.add (*track_canvas);
 
 	time_canvas_event_box.add (time_canvas_vbox);
 	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -807,6 +807,16 @@ Editor::~Editor()
 		image_socket_listener = 0 ;
 	}
 	/* </CMT Additions> */
+
+	if (track_canvas) {
+		delete track_canvas;
+		track_canvas = 0;
+	}
+
+	if (time_canvas) {
+		delete time_canvas;
+		time_canvas = 0;
+	}
 }
 
 void
@@ -4292,14 +4302,15 @@ Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
 	Location* tll;
 
 	if ((tll = transport_loop_location()) == 0) {
+		cerr << "Set new\n";
 		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoLoop);
                 XMLNode &before = session->locations()->get_state();
 		session->locations()->add (loc, true);
 		session->set_auto_loop_location (loc);
                 XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	}
-	else {
+	} else {
+		cerr << "Set existing\n";
                 XMLNode &before = tll->get_state();
 		tll->set_hidden (false, this);
 		tll->set (start, end);

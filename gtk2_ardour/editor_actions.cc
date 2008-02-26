@@ -1656,5 +1656,5 @@ Editor::parameter_changed (const char* parameter_name)
 void
 Editor::reset_focus ()
 {
-	track_canvas.grab_focus();
+	track_canvas->grab_focus();
 }

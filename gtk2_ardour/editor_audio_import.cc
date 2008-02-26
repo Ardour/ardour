@@ -495,7 +495,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	interthread_progress_connection = Glib::signal_timeout().connect 
 		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
 	
-	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
 
 	/* start import thread for this spec. this will ultimately call Session::import_audiofile()
@@ -527,7 +527,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	}
 
   out:
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 	return 0;
 }
 
@@ -542,7 +542,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 	SoundFileInfo finfo;
 	int ret = 0;
 
-	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
 
 	for (vector<Glib::ustring>::iterator p = paths.begin(); p != paths.end(); ++p) {
@@ -643,7 +643,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 			}
 		}
 		
-		track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+		track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 
 		for (int n = 0; n < finfo.channels; ++n) {
 			try {
@@ -682,7 +682,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 	ret = add_sources (paths, sources, pos, mode, target_regions, target_tracks, track, true);
 
   out:
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 	return ret;
 }
 

@@ -39,7 +39,7 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 	double worldx, worldy;
 	GdkEvent ev;
 	Gdk::ModifierType mask;
-	Glib::RefPtr<Gdk::Window> evw = track_canvas.get_window()->get_pointer (x, y, mask);
+	Glib::RefPtr<Gdk::Window> evw = track_canvas->get_window()->get_pointer (x, y, mask);
 	bool doit = false;
 
 	if (use_track_canvas && track_canvas_event_box.get_window()->get_pointer(x, y, mask) != 0) {
@@ -62,7 +62,7 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 			selection->set (entered_regionview);
 		}
 
-		track_canvas.window_to_world (x, y, worldx, worldy);
+		track_canvas->window_to_world (x, y, worldx, worldy);
 		worldx += horizontal_adjustment.get_value();
 		worldy += vertical_adjustment.get_value();
 

@@ -143,7 +143,7 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	set_colors ();
 
 	ColorsChanged.connect (mem_fun (*this, &RegionView::color_handler));
-	set_pango_fontsize();
+	// set_pango_fontsize();
 	/* XXX sync mark drag? */
 }
 

@@ -2098,7 +2098,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<AudioRegion> region, int x, i
 	AudioTimeAxisView *atv = 0;
 	boost::shared_ptr<Playlist> playlist;
 	
-	track_canvas.window_to_world (x, y, wx, wy);
+	track_canvas->window_to_world (x, y, wx, wy);
 	wx += horizontal_adjustment.get_value();
 	wy += vertical_adjustment.get_value();
 
@@ -2276,7 +2276,6 @@ Editor::play_from_edit_point_and_return ()
 	start_frame = get_preferred_edit_position (true);
 
 	if (session->transport_rolling()) {
-		/* go to edit point and stop */
 		session->request_locate (start_frame, false);
 		return;
 	}
@@ -3489,7 +3488,7 @@ Editor::freeze_route ()
 
 	pthread_attr_destroy(&attr);
 
-	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -3498,7 +3497,7 @@ Editor::freeze_route ()
 	interthread_progress_connection.disconnect ();
 	interthread_progress_window->hide_all ();
 	current_interthread_info = 0;
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void
@@ -4161,7 +4160,7 @@ Editor::normalize_region ()
 
 	begin_reversible_command (_("normalize"));
 
-	track_canvas.get_window()->set_cursor (*wait_cursor);
+	track_canvas->get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
@@ -4174,7 +4173,7 @@ Editor::normalize_region ()
 	}
 
 	commit_reversible_command ();
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 }
 
 
@@ -4284,7 +4283,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 
 	begin_reversible_command (command);
 
-	track_canvas.get_window()->set_cursor (*wait_cursor);
+	track_canvas->get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
@@ -4316,7 +4315,7 @@ Editor::apply_filter (AudioFilter& filter, string command)
 	rs.clear ();
 
   out:
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void

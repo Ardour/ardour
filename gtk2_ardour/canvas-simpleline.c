@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <cairo.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 
 #include "canvas-simpleline.h"
@@ -400,15 +401,54 @@ gnome_canvas_simpleline_draw (GnomeCanvasItem *item,
 			    int width, int height)
 {
 	GnomeCanvasSimpleLine *simpleline;
+	cairo_t* cr;
+	double ulx;
+	double uly;
+	double lrx;
+	double lry;
 
 	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
-	if (parent_class->draw) {
-		(* parent_class->draw) (item, drawable, x, y, width, height);
+	cr = gdk_cairo_create (drawable);
+
+	if (x > simpleline->bbox_ulx) {
+		ulx = x;
+	} else {
+		ulx = simpleline->bbox_ulx;
 	}
 
-	fprintf (stderr, "please don't use the CanvasSimpleLine item in a non-aa Canvas\n");
-	abort ();
+	if (y > simpleline->bbox_uly) {
+		uly = y;
+	} else {
+		uly = simpleline->bbox_uly;
+	}
+
+	if (x + width > simpleline->bbox_lrx) {
+		lrx = simpleline->bbox_lrx;
+	} else {
+		lrx = x + width;
+	}
+
+	if (y + height > simpleline->bbox_lry) {
+		lry = simpleline->bbox_lry;
+	} else {
+		lry = y + height;
+	}
+
+	ulx -= x;
+	uly -= y;
+	lrx -= x;
+	lry -= y;
+
+	cairo_set_source_rgba (cr, 
+			       simpleline->r/255.0, 
+			       simpleline->g/255.0, 
+			       simpleline->b/255.0, 
+			       simpleline->a/255.0);
+	cairo_set_line_width (cr, 1);
+	cairo_move_to (cr, ulx+0.5, uly+0.5);
+	cairo_line_to (cr, lrx+0.5, lry+0.5);
+	cairo_stroke (cr);
 }
 
 static void
@@ -433,17 +473,17 @@ gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx
 
 	*actual_item = item;
 
-	/* Find the bounds for the rectangle plus its outline width */
+	/* Find the bounds for the line plus its outline width */
 
 	gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
 
-	/* Is point inside rectangle */
+	/* Is point inside line */
 	
 	if ((x >= x1) && (y >= y1) && (x <= x2) && (y <= y2)) {
 		return 0.0;
 	}
 
-	/* Point is outside rectangle */
+	/* Point is outside line */
 
 	if (x < x1)
 		dx = x1 - x;

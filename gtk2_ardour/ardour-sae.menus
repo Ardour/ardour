@@ -50,18 +50,24 @@
 	       		<menuitem action='set-punch-from-region'/>
                </menu>
 
+	       <separator/>
                <menuitem action='Forward'/>
                <menuitem action='Rewind'/>
                <menuitem action='TransitionToRoll'/>
                <menuitem action='TransitionToReverse'/>
-               <menuitem action='nudge-playhead-forward'/>
-               <menuitem action='nudge-playhead-backward'/>
+	       <separator/>
+
+              
+	       <menuitem action='set-playhead'/>
 
 	       <menu action="MovePlayHeadMenu">
- 	           <menuitem action='set-playhead'/>
+ 	           
                    <menuitem action='playhead-to-edit'/>
   	           <menuitem action='center-playhead'/>
 	           <separator/>
+ 		   <menuitem action='nudge-playhead-forward'/>
+                   <menuitem action='nudge-playhead-backward'/>
+		   <separator/>
                    <menuitem action='tab-to-transient-forwards'/>
                    <menuitem action='tab-to-transient-backwards'/>
 	           <separator/>
@@ -126,11 +132,14 @@
 	            <menuitem action='editor-separate'/>
 	            <menuitem action='separate-from-loop'/>
 	            <menuitem action='separate-from-punch'/>
+		    <separator/>
+		    <menuitem action='split-region-at-transients'/>
                </menu>
                <separator/>       
 	       <menuitem action='duplicate-region'/>
 	       <menuitem action='multi-duplicate-region'/>
 	       <menuitem action='region-fill-track'/>
+	       <separator/>
 	       <menu action="AlignMenu">
 		   <menuitem action='align-regions-start'/>
 		   <menuitem action='align-regions-start-relative'/>
@@ -200,16 +209,13 @@
 	      <menuitem action='remove-region-sync'/>
               <menuitem action='mute-unmute-region'/>
 	      <separator/>       
-              <menuitem action='monoize-region'/>
+              <menuitem action='reverse-region'/>    
+	      <menuitem action='monoize-region'/>
 	      <menuitem action='normalize-region'/>
-	      <menuitem action='split-region-at-transients'/>
-	      <separator/>       
-	      <menu action="RegionGainMenu">
-			<menuitem action='boost-region-gain'/>
-			<menuitem action='cut-region-gain'/>
-	      </menu>	      		   
+	      <menuitem action='boost-region-gain'/>
+	      <menuitem action='cut-region-gain'/>      		   
 	      <menuitem action='pitch-shift-region'/>
-	      <menuitem action='reverse-region'/>
+	      
         </menu>         
 
         <menu name='View' action = 'View'>
@@ -217,6 +223,7 @@
 	       <menuitem action='show-editor-mixer'/>
                <menuitem action='ToggleMeasureVisibility'/>
 	       <menuitem action='ToggleLogoVisibility'/>
+	       <separator/>
 	       <menu action="PrimaryClockMenu">
 	       	     <menuitem action="primary-clock-bbt"/>
 	       	     <menuitem action="primary-clock-minsec"/>

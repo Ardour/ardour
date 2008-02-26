@@ -222,7 +222,7 @@ Editor::draw_measures ()
 		return;
 	}
 
-	track_canvas.get_scroll_region (x1, y1, x2, y2);
+	track_canvas->get_scroll_region (x1, y1, x2, y2);
 	y2 = TimeAxisView::hLargest*5000; // five thousand largest tracks should be enough.. :)
 
 	/* get the first bar spacing */
@@ -232,7 +232,7 @@ Editor::draw_measures ()
 	bars = (*i).bar - (*current_bbt_points->begin()).bar;
 	beats = current_bbt_points->size() - bars;
 
-	beat_density =  (beats * 10.0f) / track_canvas.get_width ();
+	beat_density =  (beats * 10.0f) / track_canvas->get_width ();
 
 	if (beat_density > 4.0f) {
 		/* if the lines are too close together, they become useless

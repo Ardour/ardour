@@ -276,8 +276,8 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
 
-	track_canvas.c2w (x, y, wcx, wcy);
-	track_canvas.w2c (wcx, wcy, cx, cy);
+	track_canvas->c2w (x, y, wcx, wcy);
+	track_canvas->w2c (wcx, wcy, cx, cy);
 	
 	nframes_t where = leftmost_frame + pixel_to_frame (x);
 
@@ -687,6 +687,7 @@ Editor::update_ruler_visibility ()
 			range_marker_group->move (0.0, tbpos - old_unit_pos);
 		}
 		range_marker_group->show();
+		cerr << "range_marker_group now at " << range_marker_group->property_y() << endl;
 		tbpos += timebar_height;
 		visible_timebars++;
 	} else {

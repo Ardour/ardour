@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <cairo.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 
 #include "canvas-simplerect.h"
@@ -287,7 +288,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x1, y1, &simplerect->bbox_ulx, &simplerect->bbox_uly);
 	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simplerect->bbox_lrx, &simplerect->bbox_lry);
 
-	/* now queue redraws for changed areas */
+        /* now queue redraws for changed areas */
 
 	if (item->x1 == old_x1 && item->x2 == old_x2) {
 
@@ -714,12 +715,111 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
 static void
 gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
-			    GdkDrawable *drawable,
-			    int x, int y,
-			    int width, int height)
+			      GdkDrawable *drawable,
+			      int x, int y,
+			      int width, int height)
 {
-	fprintf (stderr, "please don't use the CanvasSimpleRect item in a non-aa Canvas\n");
-	abort ();
+	GnomeCanvasSimpleRect *simplerect;
+	cairo_t* cr;
+	double ulx;
+	double uly;
+	double lrx;
+	double lry;
+
+	simplerect = GNOME_CANVAS_SIMPLERECT (item);
+
+	cr = gdk_cairo_create (drawable);	
+
+	if (x > simplerect->bbox_ulx) {
+		ulx = x;
+	} else {
+		ulx = simplerect->bbox_ulx;
+	}
+
+	if (y > simplerect->bbox_uly) {
+		uly = y;
+	} else {
+		uly = simplerect->bbox_uly;
+	}
+
+	if (x + width > simplerect->bbox_lrx) {
+		lrx = simplerect->bbox_lrx;
+	} else {
+		lrx = x + width;
+	}
+
+	if (y + height > simplerect->bbox_lry) {
+		lry = simplerect->bbox_lry;
+	} else {
+		lry = y + height;
+	}
+
+	ulx -= x;
+	uly -= y;
+	lrx -= x;
+	lry -= y;
+
+	cairo_rectangle (cr, ulx, uly, lrx - ulx, lry - uly);
+
+	if (simplerect->fill) {
+		cairo_set_source_rgba (cr,
+				       simplerect->fill_r/255.0, 
+				       simplerect->fill_g/255.0, 
+				       simplerect->fill_b/255.0, 
+				       simplerect->fill_a/255.0);
+		cairo_fill (cr);
+	}
+	
+	if (simplerect->outline_what && simplerect->outline_pixels) {
+
+#define x_in_range(a) (x <= (a) && (a) < x + width)
+#define y_in_range(a) (y <= (a) && (a) < y + height)
+
+		cairo_set_line_width (cr, simplerect->outline_pixels);
+		
+		cairo_set_source_rgb (cr,
+				      simplerect->outline_r/255.0, 
+				      simplerect->outline_g/255.0, 
+				      simplerect->outline_b/255.0);
+
+		if (simplerect->outline_what & 0x1) {
+			/* left edge, if visible */
+			if (x_in_range (simplerect->bbox_ulx)) {
+				cairo_move_to (cr, ulx+0.5, uly+0.5);
+				cairo_line_to (cr, ulx+0.5, lry+0.5);
+				cairo_stroke (cr);
+			}
+		}
+		
+		if (simplerect->outline_what & 0x2) {
+			/* right edge, if visible */
+			if (x_in_range (simplerect->bbox_lrx)) {
+				cairo_move_to (cr, lrx+0.5, uly+0.5);
+				cairo_line_to (cr, lrx+0.5, lry+0.5);
+				cairo_stroke (cr);
+			}
+		}
+		
+		if (simplerect->outline_what & 0x4) {
+			/* top edge */
+			if (y_in_range (simplerect->bbox_uly)) {
+				cairo_move_to (cr, ulx+0.5, uly+0.5);
+				cairo_line_to (cr, lrx+0.5, uly+0.5);
+				cairo_stroke (cr);
+			}
+		}
+		
+		if (simplerect->outline_what & 0x8) {
+			/* bottom edge */
+			if (y_in_range (simplerect->bbox_lry)) {
+				cairo_move_to (cr, ulx+0.5, lry+0.5);
+				cairo_line_to (cr, lrx+0.5, lry+0.5);
+				cairo_stroke (cr);
+			}
+		}
+	}
+
+	cairo_destroy (cr);
 }
 
 static double

@@ -283,6 +283,7 @@ Marker::~Marker ()
 
 	if (line) {
 		delete line;
+		line = 0;
 	}
 }
 

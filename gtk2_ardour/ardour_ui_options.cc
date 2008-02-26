@@ -388,6 +388,17 @@ ARDOUR_UI::toggle_session_auto_loop ()
 }
 
 void
+ARDOUR_UI::toggle_punch ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "TogglePunchIn");
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		Config->set_punch_in (tact->get_active());
+		Config->set_punch_out (tact->get_active());
+	}
+}
+
+void
 ARDOUR_UI::toggle_punch_in ()
 {
 	ActionManager::toggle_config_state ("Transport", "TogglePunchIn", &Configuration::set_punch_in, &Configuration::get_punch_in);
