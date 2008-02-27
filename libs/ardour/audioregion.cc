@@ -1201,7 +1201,7 @@ AudioRegion::master_source_names ()
 }
 
 void
-AudioRegion::set_master_sources (SourceList& srcs)
+AudioRegion::set_master_sources (const SourceList& srcs)
 {
 	master_sources = srcs;
 }

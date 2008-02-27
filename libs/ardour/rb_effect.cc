@@ -74,6 +74,9 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	nframes_t pos = 0;
 	int avail = 0;
 
+	// note: this_time_fraction is a ratio of original length. 1.0 = no change, 
+	// 0.5 is half as long, 2.0 is twice as long, etc.
+
 	double this_time_fraction = tsr.time_fraction * region->stretch ();
 	double this_pitch_fraction = tsr.pitch_fraction * region->shift ();
 
@@ -81,14 +84,14 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 				       (RubberBandStretcher::Options) tsr.opts,
 				       this_time_fraction, this_pitch_fraction);
 	
-	stretcher.setExpectedInputDuration(region->length());
-	stretcher.setDebugLevel(1);
-
 	tsr.progress = 0.0f;
 	tsr.done = false;
 
 	uint32_t channels = region->n_channels();
-	nframes_t duration = region->length();
+	nframes_t duration = region->ancestral_length();
+
+	stretcher.setExpectedInputDuration(duration);
+	stretcher.setDebugLevel(1);
 
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
 	   digits just to disambiguate close but not identical FX
@@ -149,8 +152,8 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 				
 				if (this_read != this_time) {
 					error << string_compose
-						(_("tempoize: error reading data from %1"),
-						 nsrcs[i]->name()) << endmsg;
+						(_("tempoize: error reading data from %1 at %2 (wanted %3, got %4)"),
+						 region->name(), pos + region->position(), this_time, this_read) << endmsg;
 					goto out;
 				}
 			}
@@ -187,8 +190,8 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 				
 				if (this_read != this_time) {
 					error << string_compose
-						(_("tempoize: error reading data from %1"),
-						 nsrcs[i]->name()) << endmsg;
+						(_("tempoize: error reading data from %1 at %2 (wanted %3, got %4)"),
+						 region->name(), pos + region->position(), this_time, this_read) << endmsg;
 					goto out;
 				}
 			}
@@ -257,21 +260,12 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<AudioRegion> >::iterator x = results.begin(); x != results.end(); ++x) {
-		nframes64_t astart = (*x)->ancestral_start();
-		nframes64_t alength = (*x)->ancestral_length();
-		nframes_t start;
-		nframes_t length;
 
-		// note: this_time_fraction is a ratio of original length. 1.0 = no change, 
-		// 0.5 is half as long, 2.0 is twice as long, etc.
-		
-		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
-		float shift = (*x)->shift() * tsr.pitch_fraction;
-
-		start = (nframes_t) floor (astart + ((astart - (*x)->start()) / stretch));
-		length = (nframes_t) floor (alength / stretch);
-
-		(*x)->set_ancestral_data (start, length, stretch, shift);
+		(*x)->set_ancestral_data (region->ancestral_start(),
+					  region->ancestral_length(),
+					  this_time_fraction,
+					  this_pitch_fraction );
+		(*x)->set_master_sources (region->get_master_sources());
 	}
 
   out:
