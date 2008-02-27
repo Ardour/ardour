@@ -458,7 +458,7 @@ nframes64_t
 AudioRegion::read (Sample* buf, nframes64_t position, nframes64_t cnt, int channel) const
 {
 	/* raw read, no fades, no gain, nada */
-	return _read_at (sources, buf, 0, 0, _position + position, cnt, channel, 0, 0, true);
+	return _read_at (sources, _length, buf, 0, 0, _position + position, cnt, channel, 0, 0, true);
 }
 
 nframes_t
@@ -467,18 +467,19 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, n
 		      uint32_t chan_n, nframes_t read_frames, nframes_t skip_frames) const
 {
 	/* regular diskstream/butler read complete with fades etc */
-	return _read_at (sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames, false);
+	return _read_at (sources, _length, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, read_frames, skip_frames, false);
 }
 
 nframes_t
 AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t position, 
 			     nframes_t cnt, uint32_t chan_n) const
 {
-	return _read_at (master_sources, buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
+	return _read_at (master_sources, master_sources.front()->length(), buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0);
 }
 
 nframes_t
-AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
+		       Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		       nframes_t position, nframes_t cnt, 
 		       uint32_t chan_n, 
 		       nframes_t read_frames, 
@@ -504,11 +505,11 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 		buf_offset = 0;
 	}
 
-	if (internal_offset >= _length) {
+	if (internal_offset >= limit) {
 		return 0; /* read nothing */
 	}
 
-	if ((to_read = min (cnt, _length - internal_offset)) == 0) {
+	if ((to_read = min (cnt, limit - internal_offset)) == 0) {
 		return 0; /* read nothing */
 	}
 
@@ -580,31 +581,31 @@ AudioRegion::_read_at (const SourceList& srcs, Sample *buf, Sample *mixdown_buff
 			/* see if some part of this read is within the fade out */
 			
 		/* .................        >|            REGION
-		                            _length
+		                            limit
  					    
                                  {           }            FADE
 				             fade_out_length
                                  ^					     
-                               _length - fade_out_length
+                                limit - fade_out_length
                         |--------------|
                         ^internal_offset
                                        ^internal_offset + to_read
 				       
 				       we need the intersection of [internal_offset,internal_offset+to_read] with
-				       [_length - fade_out_length, _length]
+				       [limit - fade_out_length, limit]
 				       
 		*/
 
 	
 			nframes_t fade_out_length = (nframes_t) _fade_out.back()->when;
-			nframes_t fade_interval_start = max(internal_offset, _length-fade_out_length);
-			nframes_t fade_interval_end   = min(internal_offset + to_read, _length);
+			nframes_t fade_interval_start = max(internal_offset, limit-fade_out_length);
+			nframes_t fade_interval_end   = min(internal_offset + to_read, limit);
 			
 			if (fade_interval_end > fade_interval_start) {
 				/* (part of the) the fade out is  in this buffer */
 				
 				nframes_t limit = fade_interval_end - fade_interval_start;
-				nframes_t curve_offset = fade_interval_start - (_length-fade_out_length);
+				nframes_t curve_offset = fade_interval_start - (limit-fade_out_length);
 				nframes_t fade_offset = fade_interval_start - internal_offset;
 				
 				_fade_out.get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
