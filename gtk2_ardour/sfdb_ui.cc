@@ -859,10 +859,10 @@ SoundFileOmega::bad_file_message()
 bool
 SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool& src_needed, bool& multichannel)
 {
-	SNDFILE* sf;
-	SF_INFO info;
+	SoundFileInfo info;
 	nframes64_t sz = 0;
 	bool err = false;
+	string errmsg;
 
 	same_size = true;
 	src_needed = false;
@@ -870,29 +870,24 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 
 	for (vector<ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
-		info.format = 0; // libsndfile says to clear this before sf_open().
-		
-		if ((sf = sf_open ((char*) (*i).c_str(), SFM_READ, &info)) != 0) { 
-			sf_close (sf);
-
-			if (info.channels > 1) {
-				multichannel = true;
-			}
-
-			if (sz == 0) {
-				sz = info.frames;
-			} else {
-				if (sz != info.frames) {
-					same_size = false;
-				}
-			}
-
-			if ((nframes_t) info.samplerate != session->frame_rate()) {
-				src_needed = true;
-			}
-
-		} else {
+		if (!AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
 			err = true;
+		}
+		
+		if (info.channels > 1) {
+			multichannel = true;
+		}
+		
+		if (sz == 0) {
+			sz = info.length;
+		} else {
+			if (sz != info.length) {
+				same_size = false;
+			}
+		}
+
+		if ((nframes_t) info.samplerate != session->frame_rate()) {
+			src_needed = true;
 		}
 	}
 

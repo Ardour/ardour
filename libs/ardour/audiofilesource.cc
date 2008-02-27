@@ -682,6 +682,7 @@ AudioFileSource::safe_file_extension(ustring file)
 {
 	return !(file.rfind(".wav") == ustring::npos &&
 		file.rfind(".aiff")== ustring::npos &&
+		file.rfind(".caf")== ustring::npos &&
 		file.rfind(".aif") == ustring::npos &&
 		file.rfind(".amb") == ustring::npos &&
 		file.rfind(".snd") == ustring::npos &&
