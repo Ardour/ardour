@@ -93,6 +93,15 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	streamFormat.mSampleRate = session.frame_rate();
 	streamFormat.mFormatID = kAudioFormatLinearPCM;
 	streamFormat.mFormatFlags = kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked|kAudioFormatFlagIsNonInterleaved;
+#ifdef __LITTLE_ENDIAN__
+	/* relax, for now */
+#else
+	/* it is ridiculous that this flag is needed when its
+	   opposite flag is not.
+	*/
+	streamFormat.mFormatFlags |= kAudioFormatFlagIsBigEndian;
+#endif
+
 	streamFormat.mBitsPerChannel = 32;
 	streamFormat.mFramesPerPacket = 1;
 
