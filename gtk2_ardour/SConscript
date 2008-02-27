@@ -484,7 +484,7 @@ if env['FREEDESKTOP']:
 	env.Alias('install', env.InstallAs(os.path.join(desktop_icon_install_prefix, '48x48', 'apps', 'ardour2.png'), 'icons/ardour_icon_48px.png'))
 	# Install the mime type xml file and its icon #
         env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'mime', 'packages'), 'ardour2.xml'))
-	env.Alias('install', env.InstallAs(os.path.join(desktop_icon_install_prefix, '48x48', 'mimetypes','application-x-ardour2.png'), 'icons/ardour_icon_48px.png'))
+	env.Alias('install', env.Install(os.path.join(desktop_icon_install_prefix, '48x48', 'mimetypes'), 'icons/application-x-ardour2.png'))
 	env.Alias('install', env.Command (os.path.join(install_prefix, 'share', 'mime'), [], 'update-mime-database $TARGET'))
 	# Update the icon cache #
 	env.Alias('install', env.Command (desktop_icon_install_prefix, [], 'touch --no-create $TARGET'))
