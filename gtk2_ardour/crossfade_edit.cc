@@ -925,17 +925,6 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (1, 0));
 	fade_out_presets->push_back (p);
 	
-	// p = new Preset ("regout.xpm");
-	p = new Preset ("crossfade_out_constant");
-	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (0.228111, 0.988889));
-	p->push_back (PresetPoint (0.347926, 0.972222));
-	p->push_back (PresetPoint (0.529954, 0.886111));
-	p->push_back (PresetPoint (0.753456, 0.658333));
-	p->push_back (PresetPoint (0.9262673, 0.308333));
-	p->push_back (PresetPoint (1, 0));
-	fade_out_presets->push_back (p);
-
 	// p = new Preset ("loout.xpm");
 	p = new Preset ("crossfade_out_transition");
 	p->push_back (PresetPoint (0, 1));
@@ -944,6 +933,17 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (0.170507, 0.233333));
 	p->push_back (PresetPoint (0.370968, 0.0861111));
 	p->push_back (PresetPoint (0.610599, 0.0333333));
+	p->push_back (PresetPoint (1, 0));
+	fade_out_presets->push_back (p);
+
+	// p = new Preset ("regout.xpm");
+	p = new Preset ("crossfade_out_constant");
+	p->push_back (PresetPoint (0, 1));
+	p->push_back (PresetPoint (0.228111, 0.988889));
+	p->push_back (PresetPoint (0.347926, 0.972222));
+	p->push_back (PresetPoint (0.529954, 0.886111));
+	p->push_back (PresetPoint (0.753456, 0.658333));
+	p->push_back (PresetPoint (0.9262673, 0.308333));
 	p->push_back (PresetPoint (1, 0));
 	fade_out_presets->push_back (p);
 

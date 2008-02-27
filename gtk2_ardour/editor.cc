@@ -4302,7 +4302,6 @@ Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
 	Location* tll;
 
 	if ((tll = transport_loop_location()) == 0) {
-		cerr << "Set new\n";
 		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoLoop);
                 XMLNode &before = session->locations()->get_state();
 		session->locations()->add (loc, true);
@@ -4310,7 +4309,6 @@ Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
                 XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
 	} else {
-		cerr << "Set existing\n";
                 XMLNode &before = tll->get_state();
 		tll->set_hidden (false, this);
 		tll->set (start, end);

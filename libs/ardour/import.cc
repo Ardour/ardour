@@ -46,23 +46,63 @@
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
 #include <ardour/resampled_source.h>
+#include <ardour/sndfileimportable.h>
 #include <ardour/analyser.h>
+
+#ifdef HAVE_COREAUDIO
+#include <ardour/caimportable.h>
+#endif
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 
-static std::auto_ptr<ImportableSource>
+
+static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
-	std::auto_ptr<ImportableSource> source(new ImportableSource(path));
+#ifdef HAVE_COREAUDIO
 
-	if (source->samplerate() == samplerate) {
-		return source;
-	}
+	/* see if we can use CoreAudio to handle the IO */
 	
-	return std::auto_ptr<ImportableSource>(new ResampledImportableSource(path, samplerate, quality));
+	try { 
+		boost::shared_ptr<CAImportableSource> source(new CAImportableSource(path));
+		
+		if (source->samplerate() == samplerate) {
+			return source;
+		}
+		
+		/* rewrap as a resampled source */
+
+		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+	}
+
+	catch (...) {
+
+		/* fall back to SndFile */
+
+#endif	
+
+		try { 
+			boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
+			
+			if (source->samplerate() == samplerate) {
+				return source;
+			}
+
+			/* rewrap as a resampled source */
+			
+			return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+		}
+		
+		catch (...) {
+			throw; // rethrow
+		}
+		
+#ifdef HAVE_COREAUDIO		
+	}
+#endif
 }
 
 static std::string
@@ -266,12 +306,13 @@ Session::import_audiofiles (import_status& status)
 			p != status.paths.end() && !status.cancel;
 			++p, ++cnt)
 	{
-		std::auto_ptr<ImportableSource> source;
-
+		boost::shared_ptr<ImportableSource> source;
+		
 		try
 		{
 			source = open_importable_source (*p, frame_rate(), status.quality);
 		}
+		
 		catch (const failed_constructor& err)
 		{
 			error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;

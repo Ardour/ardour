@@ -28,13 +28,12 @@ using namespace PBD;
 
 const uint32_t ResampledImportableSource::blocksize = 4096U;
 
-ResampledImportableSource::ResampledImportableSource (const std::string& path,
-		nframes_t rate, SrcQuality srcq)
-	: ImportableSource (path) 
+ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, nframes_t rate, SrcQuality srcq)
+	: source (src)
 {
 	int err;
 	
-	sf_seek (in.get(), 0, SEEK_SET) ;
+	source->seek (0);
 	
 	/* Initialize the sample rate converter. */
 	
@@ -58,7 +57,7 @@ ResampledImportableSource::ResampledImportableSource (const std::string& path,
 		break;
 	}
 	
-	if ((src_state = src_new (src_type, sf_info.channels, &err)) == 0) {	
+	if ((src_state = src_new (src_type, source->channels(), &err)) == 0) {	
 		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
 		throw failed_constructor ();
 	}
@@ -70,7 +69,7 @@ ResampledImportableSource::ResampledImportableSource (const std::string& path,
 	src_data.input_frames = 0 ;
 	src_data.data_in = input ;
 	
-	src_data.src_ratio = ((float) rate) / sf_info.samplerate ;
+	src_data.src_ratio = ((float) rate) / source->samplerate();
 	
 	input = new float[blocksize];
 }
@@ -90,22 +89,22 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 	
 	if (src_data.input_frames == 0) {	
 
-		src_data.input_frames = ImportableSource::read (input, blocksize);
+		src_data.input_frames = source->read (input, blocksize);
 
 		/* The last read will not be a full buffer, so set end_of_input. */
 
 		if ((nframes_t) src_data.input_frames < blocksize) {
-			src_data.end_of_input = SF_TRUE ;
+			src_data.end_of_input = true;
 		}		
 
-		src_data.input_frames /= sf_info.channels;
-		src_data.data_in = input ;
+		src_data.input_frames /= source->channels();
+		src_data.data_in = input;
 	} 
 	
 	src_data.data_out = output;
 
 	if (!src_data.end_of_input) {
-		src_data.output_frames = nframes / sf_info.channels ;
+		src_data.output_frames = nframes / source->channels();
 	} else {
 		src_data.output_frames = src_data.input_frames;
 	}
@@ -121,9 +120,9 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 		return 0;
 	}
 	
-	src_data.data_in += src_data.input_frames_used * sf_info.channels ;
+	src_data.data_in += src_data.input_frames_used * source->channels();
 	src_data.input_frames -= src_data.input_frames_used ;
 
-	return src_data.output_frames_gen * sf_info.channels;
+	return src_data.output_frames_gen * source->channels();
 }
 

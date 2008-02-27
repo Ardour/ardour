@@ -95,6 +95,7 @@ session_transport.cc
 silentfilesource.cc
 sndfile_helpers.cc
 sndfilesource.cc
+sndfileimportable.cc
 source.cc
 source_factory.cc
 tempo.cc

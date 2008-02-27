@@ -17,39 +17,34 @@
 
 */
 
-#ifndef __ardour_resampled_source_h__
-#define __ardour_resampled_source_h__
+#ifndef __ardour_sndfile_importable_source_h__
+#define __ardour_sndfile_importable_source_h__
 
-#include <samplerate.h>
-
+#include <boost/shared_ptr.hpp>
+#include <sndfile.h>
+#include <pbd/failed_constructor.h>
 #include <ardour/types.h>
 #include <ardour/importable_source.h>
 
 namespace ARDOUR {
 
-class ResampledImportableSource : public ImportableSource 
-{
-  public:
-	ResampledImportableSource (boost::shared_ptr<ImportableSource>, nframes_t rate, SrcQuality);
+class SndFileImportableSource : public ImportableSource {
+    public:
+	SndFileImportableSource (const std::string& path);
+	virtual ~SndFileImportableSource();
 
-	~ResampledImportableSource ();
-	
 	nframes_t read (Sample* buffer, nframes_t nframes);
-	float ratio() const { return src_data.src_ratio; }
-	uint32_t channels() const { return source->channels(); }
-	nframes_t length() const { return source->length(); }
-	nframes_t samplerate() const { return source->samplerate(); }
-	void      seek (nframes_t pos) { source->seek (pos); }
-	
-	static const uint32_t blocksize;
-	
-   private:
-	boost::shared_ptr<ImportableSource> source;
-        float* input;
-	SRC_STATE*	src_state;
-	SRC_DATA	src_data;
+	uint32_t  channels() const;
+	nframes_t length() const;
+	nframes_t samplerate() const;
+	void      seek (nframes_t pos);
+
+   protected:
+	SF_INFO sf_info;
+	boost::shared_ptr<SNDFILE> in;
+
 };
 
 }
 
-#endif /* __ardour_resampled_source_h__ */
+#endif /* __ardour_sndfile_importable_source_h__ */
