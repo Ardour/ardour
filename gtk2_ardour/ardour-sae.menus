@@ -108,6 +108,7 @@
 	       </menu>
 
 	       <separator/>
+               <menuitem action='TogglePunch'/>
                <menuitem action='TogglePunchIn'/>
                <menuitem action='TogglePunchOut'/>
                <menuitem action='ToggleAutoInput'/>

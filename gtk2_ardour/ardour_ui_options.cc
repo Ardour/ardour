@@ -388,13 +388,48 @@ ARDOUR_UI::toggle_session_auto_loop ()
 }
 
 void
+ARDOUR_UI::unset_dual_punch ()
+{
+	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
+	
+	if (action) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
+		if (tact) {
+			ignore_dual_punch = true;
+			tact->set_active (false);
+			ignore_dual_punch = false;
+		}
+	}
+}
+
+void
 ARDOUR_UI::toggle_punch ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "TogglePunchIn");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		Config->set_punch_in (tact->get_active());
-		Config->set_punch_out (tact->get_active());
+	if (ignore_dual_punch) {
+		return;
+	}
+
+	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
+
+	if (action) {
+
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
+
+		if (!tact) {
+			return;
+		}
+
+		/* drive the other two actions from this one */
+
+		Glib::RefPtr<Action> in_action = ActionManager::get_action ("Transport", "TogglePunchIn");
+		Glib::RefPtr<Action> out_action = ActionManager::get_action ("Transport", "TogglePunchOut");
+
+		if (in_action && out_action) {
+			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(in_action);
+			Glib::RefPtr<ToggleAction> toact = Glib::RefPtr<ToggleAction>::cast_dynamic(out_action);
+			tiact->set_active (tact->get_active());
+			toact->set_active (tact->get_active());
+		}
 	}
 }
 
@@ -1062,8 +1097,14 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "ToggleTapeMachineMode", &Configuration::get_tape_machine_mode);
 	} else if (PARAM_IS ("punch-out")) {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", &Configuration::get_punch_out);
+		if (!Config->get_punch_out()) {
+			unset_dual_punch ();
+		}
 	} else if (PARAM_IS ("punch-in")) {
 		ActionManager::map_some_state ("Transport", "TogglePunchIn", &Configuration::get_punch_in);
+		if (!Config->get_punch_in()) {
+			unset_dual_punch ();
+		}
 	} else if (PARAM_IS ("clicking")) {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &Configuration::get_clicking);
 	} else if (PARAM_IS ("jack-time-master")) {

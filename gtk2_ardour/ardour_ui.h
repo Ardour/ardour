@@ -240,6 +240,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_auto_play ();
 	void toggle_auto_input ();
 	void toggle_punch ();
+	void unset_dual_punch ();
+	bool ignore_dual_punch;
 	void toggle_punch_in ();
 	void toggle_punch_out ();
 	void toggle_auto_return ();

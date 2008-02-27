@@ -198,6 +198,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	_will_create_new_session_automatically = false;
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
+	ignore_dual_punch = false;
 
 	last_configure_time.tv_sec = 0;
 	last_configure_time.tv_usec = 0;
