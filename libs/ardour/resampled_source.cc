@@ -26,7 +26,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-const uint32_t ResampledImportableSource::blocksize = 4096U;
+const uint32_t ResampledImportableSource::blocksize = 16384U;
 
 ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, nframes_t rate, SrcQuality srcq)
 	: source (src)

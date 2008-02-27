@@ -280,8 +280,25 @@ Editor::get_nth_selected_audio_track (int nth) const
 	return atv->audio_track();
 }	
 
+bool
+Editor::idle_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
+{
+	_do_import (paths, chns, mode, quality, pos);
+	return false;
+}
+
 void
 Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
+{
+#ifdef GTKOSX
+	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_import), paths, chns, mode, quality, pos));
+#else
+	_do_import (paths, chns, mode, quality, pos);
+#endif
+}
+
+void
+Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
 {
 	boost::shared_ptr<AudioTrack> track;
 	vector<ustring> to_import;
@@ -653,6 +670,9 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				boost::shared_ptr<Source> s;
 
 				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
+
+					cerr << "add embed/import source with defer_peaks = true\n";
+
 					source = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createReadable 
 											       (*session, path,  n,
 												(mode == ImportAsTapeTrack ? 

@@ -482,7 +482,7 @@ Session::destroy ()
 
 	// auditioner.reset ();
 	
-#undef TRACK_DESTRUCTION
+#define TRACK_DESTRUCTION
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete named selections\n";
 #endif /* TRACK_DESTRUCTION */
@@ -577,14 +577,19 @@ Session::destroy ()
 
 		tmp = i;
 		++tmp;
+		
+		cerr << "Drop refs to " << i->second->name() << endl;
 
 		i->second->drop_references ();
 
+		cerr << "move on\n";
+		
 		i = tmp;
 	}
-
+	
+	cerr << "clear audio sources\n";
 	audio_sources.clear ();
-
+	
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete mix groups\n";
 #endif /* TRACK_DESTRUCTION */
@@ -2891,6 +2896,8 @@ Session::remove_source (boost::weak_ptr<Source> src)
 	if (!source) {
 		return;
 	} 
+
+	cerr << "remove source for " << source->name() << endl;
 
 	{ 
 		Glib::Mutex::Lock lm (audio_source_lock);

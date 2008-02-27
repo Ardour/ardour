@@ -168,6 +168,8 @@ class AudioFileSource : public AudioSource {
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
 
+	static Sample* get_interleave_buffer (nframes_t size);
+
   private:
 	Glib::ustring old_peak_path (Glib::ustring audio_path);
 	Glib::ustring broken_peak_path (Glib::ustring audio_path);

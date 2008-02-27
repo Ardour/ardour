@@ -334,7 +334,6 @@ Playlist::release_notifications ()
 	} 
 }
 
-
 void
 Playlist::notify_modified ()
 {

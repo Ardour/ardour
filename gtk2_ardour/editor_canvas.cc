@@ -498,7 +498,11 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 		frame = 0;
 
-		do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
+		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame); 
+		} else {
+			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
+		}
 		
 	} else if ((tv = dynamic_cast<AudioTimeAxisView*>(tvp)) != 0) {
 
@@ -507,7 +511,12 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		if (tv->get_diskstream()) {
 			/* select the track, then embed */
 			selection->set (tv);
-			do_embed (paths, Editing::ImportDistinctFiles, ImportToTrack, frame);
+
+			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+				do_import (paths, Editing::ImportDistinctFiles, Editing::ImportToTrack, SrcBest, frame); 
+			} else {
+				do_embed (paths, Editing::ImportDistinctFiles, ImportToTrack, frame);
+			}
 		}
 	}
 

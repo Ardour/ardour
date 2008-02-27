@@ -39,6 +39,7 @@
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
+#include <glibmm/thread.h>
 
 #include <ardour/audiofilesource.h>
 #include <ardour/sndfile_helpers.h>
@@ -68,6 +69,21 @@ uint64_t           AudioFileSource::header_position_offset = 0;
 
 /* XXX maybe this too */
 char   AudioFileSource::bwf_serial_number[13] = "000000000000";
+
+struct SizedSampleBuffer {
+    nframes_t size;
+    Sample* buf;
+
+    SizedSampleBuffer (nframes_t sz) : size (sz) { 
+	    buf = new Sample[size];
+    }
+
+    ~SizedSampleBuffer() {
+	    delete [] buf;
+    }
+};
+
+Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
 AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 	: AudioSource (s, path), _flags (flags),
@@ -715,4 +731,23 @@ AudioFileSource::mark_immutable ()
 	if (!(_flags & Destructive)) {
 		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
 	}
+}
+
+
+Sample*
+AudioFileSource::get_interleave_buffer (nframes_t size)
+{
+	SizedSampleBuffer* ssb;
+
+	if ((ssb = thread_interleave_buffer.get()) == 0) {
+		ssb = new SizedSampleBuffer (size);
+		thread_interleave_buffer.set (ssb);
+	}
+
+	if (ssb->size < size) {
+		ssb = new SizedSampleBuffer (size);
+		thread_interleave_buffer.set (ssb);
+	}
+
+	return ssb->buf;
 }
