@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <unistd.h>
+#include <algorithm>
 
 #include <sndfile.h>
 
@@ -309,7 +310,6 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 		build_interthread_progress_window ();
 	}
 
-
 	if (chns == Editing::ImportMergeFiles) {
 		/* create 1 region from all paths, add to 1 track,
 		   ignore "track"
@@ -496,7 +496,6 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 
 	interthread_progress_window->set_title (title.get_string());
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
-	interthread_progress_window->show_all ();
 	interthread_progress_bar.set_fraction (0.0f);
 	interthread_cancel_label.set_text (_("Cancel Import"));
 	current_interthread_info = &import_status;
@@ -510,7 +509,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	import_status.replace_existing_source = replace;
 
 	interthread_progress_connection = Glib::signal_timeout().connect 
-		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
+		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
 	
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	ARDOUR_UI::instance()->flush_pending ();
@@ -880,6 +879,13 @@ Editor::import_thread ()
 gint
 Editor::import_progress_timeout (void *arg)
 {
+	bool reset = false;
+
+	if (!interthread_progress_window->is_visible()) {
+		interthread_progress_window->show_all ();
+		reset = true;
+	}
+
 	interthread_progress_label.set_text (import_status.doing_what);
 
 	if (import_status.freeze) {
@@ -892,9 +898,20 @@ Editor::import_progress_timeout (void *arg)
 		interthread_progress_bar.pulse ();
 		return FALSE;
 	} else {
-		interthread_progress_bar.set_fraction (import_status.progress);
+		float val = import_status.progress;
+		interthread_progress_bar.set_fraction (min (max (0.0f, val), 1.0f));
 	}
 
-	return !(import_status.done || import_status.cancel);
+	if (reset) {
+
+		/* the window is now visible, speed up the updates */
+		
+		interthread_progress_connection.disconnect ();
+		interthread_progress_connection = Glib::signal_timeout().connect 
+			(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
+		return false;
+	} else {
+		return !(import_status.done || import_status.cancel);
+	}
 }
 

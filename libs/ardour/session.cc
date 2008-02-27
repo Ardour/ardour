@@ -482,7 +482,7 @@ Session::destroy ()
 
 	// auditioner.reset ();
 	
-#define TRACK_DESTRUCTION
+#undef TRACK_DESTRUCTION
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete named selections\n";
 #endif /* TRACK_DESTRUCTION */

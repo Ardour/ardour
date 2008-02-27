@@ -218,13 +218,21 @@ SndFileSource::open ()
 	if ((sf = sf_open (_path.c_str(), (writable() ? SFM_RDWR : SFM_READ), &_info)) == 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
+#ifndef HAVE_COREAUDIO
+		/* if we have CoreAudio, we will be falling back to that if libsndfile fails,
+		   so we don't want to see this message.
+		*/
+
 		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"), 
 					_path, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
+#endif
 		return -1;
 	}
 
 	if (_channel >= _info.channels) {
+#ifndef HAVE_COREAUDIO
 		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, _channel) << endmsg;
+#endif
 		sf_close (sf);
 		sf = 0;
 		return -1;
