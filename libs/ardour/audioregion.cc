@@ -577,7 +577,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 		/* fade out */
 		
 		if (_flags & FadeOut) {
-			
+
 			/* see if some part of this read is within the fade out */
 			
 		/* .................        >|            REGION
@@ -600,17 +600,17 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 			nframes_t fade_out_length = (nframes_t) _fade_out.back()->when;
 			nframes_t fade_interval_start = max(internal_offset, limit-fade_out_length);
 			nframes_t fade_interval_end   = min(internal_offset + to_read, limit);
-			
+
 			if (fade_interval_end > fade_interval_start) {
 				/* (part of the) the fade out is  in this buffer */
-				
-				nframes_t limit = fade_interval_end - fade_interval_start;
+
+				nframes_t fo_limit = fade_interval_end - fade_interval_start;
 				nframes_t curve_offset = fade_interval_start - (limit-fade_out_length);
 				nframes_t fade_offset = fade_interval_start - internal_offset;
 				
-				_fade_out.get_vector (curve_offset,curve_offset+limit, gain_buffer, limit);
+				_fade_out.get_vector (curve_offset,curve_offset+fo_limit, gain_buffer, fo_limit);
 				
-				for (nframes_t n = 0, m = fade_offset; n < limit; ++n, ++m) {
+				for (nframes_t n = 0, m = fade_offset; n < fo_limit; ++n, ++m) {
 					mixdown_buffer[m] *= gain_buffer[n];
 				}
 			} 
