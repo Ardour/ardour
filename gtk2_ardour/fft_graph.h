@@ -54,27 +54,34 @@ class FFTGraph : public Gtk::DrawingArea
 		void on_size_allocate(Gtk::Allocation & alloc);
 		FFTResult *prepareResult(Gdk::Color color, std::string trackname);
 		
+		const void set_show_minmax     (bool v) { _show_minmax     = v; redraw(); };
+		const void set_show_normalized (bool v) { _show_normalized = v; redraw(); };
+
 	private:
+
+		void update_size();
 
 		void setWindowSize_internal(int windowSize);
 
 		void draw_scales(Glib::RefPtr<Gdk::Window> window);
 		
-		static const int scaleWidth = 512;
-		static const int scaleHeight = 420;
+		static const int minScaleWidth = 512;
+		static const int minScaleHeight = 420;
+
+		int currentScaleWidth;
+		int currentScaleHeight;
 
 		static const int h_margin = 20;
 		static const int v_margin = 20;
+		Glib::RefPtr<Gdk::GC> graph_gc;
 
 		int width;
 		int height;
 		
-		void analyze(float *window, float *composite);
 		int _windowSize;
 		int _dataSize;
 
 		Glib::RefPtr<Pango::Layout> layout;
-		Glib::RefPtr<Gdk::GC> graph_gc;
 		AnalysisWindow *_a_window;
 
 		fftwf_plan _plan;
@@ -83,6 +90,9 @@ class FFTGraph : public Gtk::DrawingArea
 		float *_in;
 		float *_hanning;
 		int *_logScale;
+
+		bool _show_minmax;
+		bool _show_normalized;
 
 	friend class FFTResult;
 };

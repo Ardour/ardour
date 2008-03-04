@@ -51,6 +51,9 @@ FFTGraph::FFTGraph(int windowSize)
 
 	_a_window = 0;
 
+	_show_minmax     = false;
+	_show_normalized = false;
+
 	setWindowSize(windowSize);
 }
 
@@ -151,23 +154,6 @@ FFTGraph::prepareResult(Gdk::Color color, string trackname)
 	return res;
 }
 
-void
-FFTGraph::analyze(float *window, float *composite)
-{	
-	int i;
-	// Copy the data and apply the hanning window
-	for (i = 0; i < _windowSize; i++) {
-		_in[i] = window[ i ] * _hanning[ i ];
-	}
-
-	fftwf_execute(_plan);
-
-	composite[0] += (_out[0] * _out[0]);
-	
-	for (i=1; i < _dataSize - 1; i++) { // TODO: check with Jesse whether this is really correct
-		composite[i] += (_out[i] * _out[i]) + (_out[_windowSize-i] * _out[_windowSize-i]);
-	}
-}
 
 void
 FFTGraph::set_analysis_window(AnalysisWindow *a_window)
@@ -198,17 +184,18 @@ FFTGraph::draw_scales(Glib::RefPtr<Gdk::Window> window)
 	window->draw_line(white, h_margin, v_margin, h_margin, height - v_margin );
 
 	// Line 2
-	window->draw_line(white, width - h_margin, v_margin, width - h_margin, height - v_margin );
+	window->draw_line(white, width - h_margin + 1, v_margin, width - h_margin + 1, height - v_margin );
 
 	// Line 3
 	window->draw_line(white, h_margin, height - v_margin, width - h_margin, height - v_margin );
 
 #define DB_METRIC_LENGTH 8
-	// Line 5
+	// Line 4
 	window->draw_line(white, h_margin - DB_METRIC_LENGTH, v_margin, h_margin, v_margin );
 	
-	// Line 6
-	window->draw_line(white, width - h_margin, v_margin, width - h_margin + DB_METRIC_LENGTH, v_margin );
+	// Line 5
+	window->draw_line(white, width - h_margin + 1, v_margin, width - h_margin + DB_METRIC_LENGTH, v_margin );
+
 
 
 	if (graph_gc == 0) {
@@ -229,8 +216,24 @@ FFTGraph::draw_scales(Glib::RefPtr<Gdk::Window> window)
 	// Draw logscale
 	int logscale_pos = 0;
 	int position_on_scale;
+
+
+/* TODO, write better scales and change the log function so that octaves are of equal pixel length
+	float scale_points[10] = { 55.0, 110.0, 220.0, 440.0, 880.0, 1760.0, 3520.0, 7040.0, 14080.0, 28160.0 };
+
+	for (int x = 0; x < 10; x++) {
+		
+		// i = 0.. _dataSize-1
+		float freq_at_bin = (SR/2.0) * ((double)i / (double)_dataSize);
+
+
+
+			freq_at_pixel = FFT_START * exp( FFT_RANGE * pixel / (double)(currentScaleWidth - 1) );
+	}
+	*/
+
 	for (int x = 1; x < 8; x++) {
-		position_on_scale = (int)floor( (double)scaleWidth*(double)x/8.0);
+		position_on_scale = (int)floor( (double)currentScaleWidth*(double)x/8.0);
 
 		while (_logScale[logscale_pos] < position_on_scale)
 			logscale_pos++;
@@ -251,7 +254,7 @@ FFTGraph::draw_scales(Glib::RefPtr<Gdk::Window> window)
 		
 		layout->set_text(label);
 		
-		window->draw_line(graph_gc, coord, v_margin, coord, height - v_margin);
+		window->draw_line(graph_gc, coord, v_margin, coord, height - v_margin - 1);
 
 		int width, height;
 		layout->get_pixel_size (width, height);
@@ -268,12 +271,19 @@ FFTGraph::redraw()
 	Glib::Mutex::Lock lm  (_a_window->track_list_lock);
 
 	draw_scales(get_window());
+
 	
 	if (_a_window == 0)
 		return;
 
 	if (!_a_window->track_list_ready)
 		return;
+
+	cairo_t *cr;
+	cr = gdk_cairo_create(GDK_DRAWABLE(get_window()->gobj()));
+	cairo_set_line_width(cr, 1.5);
+	cairo_translate(cr, (float)v_margin + 1.0, (float)h_margin);
+
 	
 	
 	// Find "session wide" min & max
@@ -300,17 +310,24 @@ FFTGraph::redraw()
 			max = res->maximum();
 		}
 	}
-	
-	int graph_height = height - 2 * h_margin;
 
-	if (graph_gc == 0) {
-		graph_gc = GC::create( get_window() );
+	if (!_show_normalized) {
+		min = -150.0f;
+		max = 0.0f;
 	}
 	
+	//int graph_height = height - 2 * h_margin;
+
 	
-	double pixels_per_db = (double)graph_height / (double)(max - min);
 	
-	
+	float fft_pane_size_w = (float)(width  - 2*v_margin) - 1.0;
+	float fft_pane_size_h = (float)(height - 2*h_margin);
+
+	double pixels_per_db = (double)fft_pane_size_h / (double)(max - min);
+
+	cairo_rectangle(cr, 0.0, 0.0, fft_pane_size_w, fft_pane_size_h);
+	cairo_clip(cr);
+
 	for (TreeIter i = track_rows.begin(); i != track_rows.end(); i++) {
 		
 		TreeModel::Row row = *i;
@@ -326,72 +343,104 @@ FFTGraph::redraw()
 		if (res->minimum() == res->maximum()) {
 			continue;
 		}
+	
+		float mpp;
 		
-		std::string name = row[_a_window->tlcols.trackname];
+		if (_show_minmax) {
+			mpp = -1000000.0;
+
+			cairo_set_source_rgba(cr, res->get_color().get_red_p(), res->get_color().get_green_p(), res->get_color().get_blue_p(), 0.30);
+			cairo_move_to(cr, 0.5f + (float)_logScale[0], 0.5f + (float)( fft_pane_size_h - (int)floor( (res->maxAt(0) - min) * pixels_per_db) ));
+
+			// Draw the line of maximum values
+			for (int x = 1; x < res->length(); x++) {
+				if (res->maxAt(x) > mpp)
+					mpp = res->maxAt(x);
+				mpp = fmax(mpp, min);
+				mpp = fmin(mpp, max);
+
+				// If the next point on the log scale is at the same location,
+				// don't draw yet
+				if (x + 1 < res->length() && _logScale[x] == _logScale[x + 1]) {
+					continue;
+				}
+
+				float X = 0.5f + (float)_logScale[x];
+				float Y = 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - min) * pixels_per_db) );
+
+				cairo_line_to(cr, X, Y);
+
+				mpp = -1000000.0;
+			}
+
+			mpp = +10000000.0;
+			// Draw back to the start using the minimum value
+			for (int x = res->length()-1; x >= 0; x--) {
+				if (res->minAt(x) < mpp)
+					mpp = res->minAt(x);
+				mpp = fmax(mpp, min);
+				mpp = fmin(mpp, max);
+
+				// If the next point on the log scale is at the same location,
+				// don't draw yet
+				if (x - 1 > 0 && _logScale[x] == _logScale[x - 1]) {
+					continue;
+				}
+
+				float X = 0.5f + (float)_logScale[x];
+				float Y = 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - min) * pixels_per_db) );
+
+				cairo_line_to(cr, X, Y );
+
+				mpp = +10000000.0;
+			}
+
+			cairo_close_path(cr);
+
+			cairo_fill(cr);
+		}
+
+
 
 		// Set color from track
-		graph_gc->set_rgb_fg_color( res->get_color() );
+		cairo_set_source_rgb(cr, res->get_color().get_red_p(), res->get_color().get_green_p(), res->get_color().get_blue_p());
 
-		float mpp = -1000000.0;
-		int prevx = 0;
-		float prevSample = min;
-		
-		for (int x = 0; x < res->length() - 1; x++) {
+		mpp = -1000000.0;
+
+		cairo_move_to(cr, 0.5, fft_pane_size_h-0.5);
+	
+		for (int x = 0; x < res->length(); x++) {
 			
-			if (res->sampleAt(x) > mpp)
-				mpp = res->sampleAt(x);
+
+			if (res->avgAt(x) > mpp)
+				mpp = res->avgAt(x);
+			mpp = fmax(mpp, min);
+			mpp = fmin(mpp, max);
 			
 			// If the next point on the log scale is at the same location,
 			// don't draw yet
-			if (x + 1 < res->length() && 
-				_logScale[x] == _logScale[x + 1]) {
+			if (x + 1 < res->length() && _logScale[x] == _logScale[x + 1]) {
 				continue;
 			}
 
-			get_window()->draw_line(
-					graph_gc,
-					v_margin + 1 + prevx,
-					graph_height - (int)floor( (prevSample - min) * pixels_per_db) + h_margin - 1,
-					v_margin + 1 + _logScale[x],
-					graph_height - (int)floor( (mpp        - min) * pixels_per_db) + h_margin - 1);
-			
-			prevx = _logScale[x];
-			prevSample = mpp;
-			
+			cairo_line_to(cr, 0.5f + (float)_logScale[x], 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - min) * pixels_per_db) ));
 
 			mpp = -1000000.0;
-			
 		}
+
+		cairo_stroke(cr);
 	}
 
+	cairo_destroy(cr);
 }
 
 void
 FFTGraph::on_size_request(Gtk::Requisition* requisition)
 {
-	width  = scaleWidth  + h_margin * 2;
-	height = scaleHeight + 2 + v_margin * 2;
+	width  = max(requisition->width,  minScaleWidth  + h_margin * 2);
+	height = max(requisition->height, minScaleHeight + 2 + v_margin * 2);
 
-	if (_logScale != 0) {
-		free(_logScale);
-	}
-	_logScale = (int *) malloc(sizeof(int) * _dataSize);
-
-	float SR = 44100;
-	float FFT_START = SR/(double)_dataSize;
-	float FFT_END = SR/2.0;
-	float FFT_RANGE = log( FFT_END / FFT_START);
-	float pixel = 0;
-	for (int i = 0; i < _dataSize; i++) {
-		float freq_at_bin = (SR/2.0) * ((double)i / (double)_dataSize);
-		float freq_at_pixel = FFT_START * exp( FFT_RANGE * pixel / (double)scaleWidth );
-		while (freq_at_bin > freq_at_pixel) {
-			pixel++;
-			freq_at_pixel = FFT_START * exp( FFT_RANGE * pixel / (double)scaleWidth );
-		}
-		_logScale[i] = (int)floor(pixel);
-//printf("logscale at %d = %3.3f, freq_at_pixel %3.3f, freq_at_bin %3.3f, scaleWidth %d\n", i, pixel, freq_at_pixel, freq_at_bin, scaleWidth);
-	}
+	update_size();
 
 	requisition->width  = width;;
 	requisition->height = height;
@@ -403,7 +452,32 @@ FFTGraph::on_size_allocate(Gtk::Allocation & alloc)
 	width = alloc.get_width();
 	height = alloc.get_height();
 	
-	DrawingArea::on_size_allocate (alloc);
+	update_size();
 
+	DrawingArea::on_size_allocate (alloc);
+}
+
+void
+FFTGraph::update_size()
+{
+	currentScaleWidth  = width - h_margin*2;
+	currentScaleHeight = height - 2 - v_margin*2; 
+
+	float SR = 44100;
+	float FFT_START = SR/(double)_dataSize;
+	float FFT_END = SR/2.0;
+	float FFT_RANGE = log( FFT_END / FFT_START);
+	float pixel = 0;
+	for (int i = 0; i < _dataSize; i++) {
+		float freq_at_bin = (SR/2.0) * ((double)i / (double)_dataSize);
+		float freq_at_pixel;
+		pixel--;
+		do {
+			pixel++;
+			freq_at_pixel = FFT_START * exp( FFT_RANGE * pixel / (double)(currentScaleWidth - 1) );
+		} while (freq_at_bin > freq_at_pixel);
+
+		_logScale[i] = (int)floor(pixel);
+	}
 }
 

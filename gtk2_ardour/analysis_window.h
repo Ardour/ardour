@@ -31,6 +31,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/separator.h>
+#include <gtkmm/window.h>
 
 #include <gtkmm2ext/dndtreeview.h>
 
@@ -42,7 +43,7 @@
 #include "fft_result.h"
 
 
-class AnalysisWindow : public ArdourDialog
+class AnalysisWindow : public Gtk::Window
 {
   public:
 	  AnalysisWindow  ();
@@ -55,12 +56,18 @@ class AnalysisWindow : public ArdourDialog
 
 	  void analyze ();
 
+	  const void set_session(ARDOUR::Session *session) { _session = session; };
+
   private:
 	  
+	  ARDOUR::Session *_session;
+
 	  void clear_tracklist();
 
 	  void source_selection_changed (Gtk::RadioButton *);
 	  void display_model_changed    (Gtk::RadioButton *);
+	  void show_minmax_changed	();
+	  void show_normalized_changed	();
 
 	  void analyze_data				(Gtk::Button *);
 	  
@@ -88,7 +95,8 @@ class AnalysisWindow : public ArdourDialog
 	  Gtk::TreeView track_list;
 	  
 	  Gtk::Label source_selection_label;
-	  
+
+
 	  Gtk::RadioButton source_selection_ranges_rb;
 	  Gtk::RadioButton source_selection_regions_rb;
 
@@ -98,9 +106,13 @@ class AnalysisWindow : public ArdourDialog
 	  Gtk::RadioButton display_model_composite_separate_rb;
 	  Gtk::RadioButton display_model_composite_all_tracks_rb;
 	  
-	  Gtk::HSeparator hseparator2;
-
 	  Gtk::Button refresh_button;
+
+
+	  Gtk::CheckButton show_minmax_button;
+	  Gtk::CheckButton show_normalized_button;
+
+	  
 	  
 	  // The graph
 	  FFTGraph fft_graph;

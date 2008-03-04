@@ -41,7 +41,9 @@ class FFTResult
 
 		const int length() { return _dataSize; }
 
-		float sampleAt(int x);
+		float avgAt(int x);
+		float maxAt(int x);
+		float minAt(int x);
 		
 		const float minimum() { return _minimum; }
 		const float maximum() { return _maximum; }
@@ -53,10 +55,13 @@ class FFTResult
 		
 		int 	_averages;
 
-		float*	_data;
+		float*	_data_avg;
+		float*  _data_max;
+		float*  _data_min;
+
 		float*	_work;
 
-		int		_windowSize;
+		int	_windowSize;
 		int 	_dataSize;
 
 		float 	_minimum;
