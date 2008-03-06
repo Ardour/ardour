@@ -517,7 +517,7 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 		rect.height = pixrect.height - rect.height;
 	}
 
-	GdkRegion* region;
+	GdkRegion* region = 0;
 	bool queue = false;
 
 	if (rect.height != 0) {
@@ -543,6 +543,10 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 
 	if (queue) {
 		gdk_window_invalidate_region (win->gobj(), region, true);
+	}
+	if (region) {
+		gdk_region_destroy(region);
+		region = 0;
 	}
 }
 
