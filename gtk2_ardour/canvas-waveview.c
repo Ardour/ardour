@@ -1765,7 +1765,6 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 
 	for (--xoff, --cache_index; xoff >= ulx; --xoff) {
 		double min;
-		int clip_min;
 
 		min = waveview->cache->data[cache_index].min;
 

@@ -631,7 +631,7 @@ void
 ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
 {
 	Glib::RefPtr<Action> action;
-	char* action_name = 0;
+	const char* action_name = 0;
 
 	switch (nframes) {
 	case 32:

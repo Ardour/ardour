@@ -1598,7 +1598,7 @@ ARDOUR_UI::engine_running ()
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, false);
 
 	Glib::RefPtr<Action> action;
-	char* action_name = 0;
+	const char* action_name = 0;
 
 	switch (engine->frames_per_cycle()) {
 	case 32:
@@ -3228,7 +3228,7 @@ ARDOUR_UI::TransportControllable::set_value (float val)
 		return;
 	}
 
-	char *action = 0;
+	const char *action = 0;
 
 	switch (type) {
 	case Roll:

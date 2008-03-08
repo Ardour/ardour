@@ -754,7 +754,7 @@ Editor::register_actions ()
 void
 Editor::toggle_ruler_visibility (RulerType rt)
 {
-	char* action = 0;
+	const char* action = 0;
 
 	if (no_ruler_shown_update) {
 		return;

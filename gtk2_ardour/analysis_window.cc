@@ -43,9 +43,6 @@ using namespace PBD;
 
 AnalysisWindow::AnalysisWindow() :
 
-	  show_minmax_button	 (_("Show frequency power range")),
-	  show_normalized_button (_("Normalize values")),
-	
 	  source_selection_label       (_("Signal source")),
 	  source_selection_ranges_rb   (_("Selected ranges")),
 	  source_selection_regions_rb  (_("Selected regions")),
@@ -53,6 +50,9 @@ AnalysisWindow::AnalysisWindow() :
 	  display_model_label                   (_("Display model")),
 	  display_model_composite_separate_rb   (_("Composite graphs for each track")),
 	  display_model_composite_all_tracks_rb (_("Composite graph of all tracks")),
+	  
+	  show_minmax_button	 (_("Show frequency power range")),
+	  show_normalized_button (_("Normalize values")),
 
 	  fft_graph (16384)
 {
