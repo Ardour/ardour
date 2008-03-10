@@ -156,7 +156,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			delete_mod = true;
 			original_mode = trackview.editor.current_midi_edit_mode();
 			trackview.editor.set_midi_edit_mode(MidiEditErase);
-			start_remove_command();
+			start_delta_command();
 			_mouse_state = EraseTouchDragging;
 			return true;
 		} else if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {

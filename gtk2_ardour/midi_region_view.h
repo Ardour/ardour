@@ -91,11 +91,6 @@ class MidiRegionView : public RegionView
 
 	/* This stuff is a bit boilerplatey ATM.  Work in progress. */
 
-	inline void start_remove_command() {
-		if (!_delta_command)
-			_delta_command = _model->new_delta_command();
-	}
-	
 	inline void start_delta_command() {
 		if (!_delta_command)
 			_delta_command = _model->new_delta_command();

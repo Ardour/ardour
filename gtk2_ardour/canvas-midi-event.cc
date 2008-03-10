@@ -79,7 +79,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		if (_note && ev->key.keyval == GDK_Delete) {
 			cerr << "EV DELETE KEY\n";
 			selected(true);
-			_region.start_remove_command();
+			_region.start_delta_command();
 			_region.command_remove_note(this);
 		}
 		break;
@@ -188,7 +188,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				else
 					_region.note_selected(this, select_mod);
 			} else if (_region.midi_view()->editor.current_midi_edit_mode() == Editing::MidiEditErase) {
-				_region.start_remove_command();
+				_region.start_delta_command();
 				_region.command_remove_note(this);
 				_region.apply_command();
 			}
