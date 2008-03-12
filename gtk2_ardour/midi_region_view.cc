@@ -381,6 +381,8 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 void
 MidiRegionView::clear_events()
 {
+	clear_selection();
+
 	MidiGhostRegion* gr;
 	for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 		if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
