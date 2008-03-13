@@ -413,13 +413,13 @@ string
 ARDOUR::get_user_ardour_path ()
 {
 	string path;
-	char* envvar;
-	
-	if ((envvar = getenv ("HOME")) == 0 || strlen (envvar) == 0) {
+		
+	path = Glib::get_home_dir();
+
+	if (path.empty()) {
 		return "/";
 	}
-		
-	path = envvar;
+
 	path += "/.ardour2/";
 
 	/* create it if necessary */

@@ -163,10 +163,12 @@ fixup_bundle_environment ()
 	
 	localedir = strdup (path.c_str());
 
-	/* write a pango.rc file and tell pango to use it */
+	/* write a pango.rc file and tell pango to use it. we'd love
+	   to put this into the Ardour.app bundle and leave it there,
+	   but the user may not have write permission. so ...
+	*/
 
-	path = dir_path;
-	path += "/../Resources/pango.rc";
+	path = Glib::build_filename (ARDOUR::get_user_ardour_path(), "pango.rc");
 
 	std::ofstream pangorc (path.c_str());
 	if (!pangorc) {
