@@ -159,6 +159,7 @@ class Editor : public PublicEditor
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
 	TimeAxisView* get_named_time_axis(const std::string & name) ;
+	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);

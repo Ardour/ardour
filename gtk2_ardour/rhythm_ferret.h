@@ -41,6 +41,9 @@ class RhythmFerret : public ArdourDialog {
 	~RhythmFerret ();
 
 	void set_session (ARDOUR::Session*);
+
+  protected:
+	void on_hide ();
 	
   private:
 	PublicEditor& editor;

@@ -566,3 +566,11 @@ Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& c
 	cerr << "some other kind of drag\n";
 	context->drag_finish (true, false, time);
 }
+
+void
+Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		theslot (**i);
+	}
+}
