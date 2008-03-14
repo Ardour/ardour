@@ -578,16 +578,10 @@ Session::destroy ()
 		tmp = i;
 		++tmp;
 		
-		cerr << "Drop refs to " << i->second->name() << endl;
-
 		i->second->drop_references ();
-
-		cerr << "move on\n";
 		
 		i = tmp;
 	}
-	
-	cerr << "clear audio sources\n";
 	audio_sources.clear ();
 	
 #ifdef TRACK_DESTRUCTION

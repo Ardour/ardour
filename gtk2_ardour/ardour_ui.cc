@@ -35,7 +35,6 @@
 #include <pbd/error.h>
 #include <pbd/basename.h>
 #include <pbd/compose.h>
-#include <pbd/misc.h>
 #include <pbd/pathscanner.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/enumwriter.h>
@@ -2192,6 +2191,28 @@ ARDOUR_UI::loading_message (const std::string& msg)
 	flush_pending ();
 }
 	
+void
+ARDOUR_UI::idle_load (const Glib::ustring& path)
+{
+	if (session) {
+		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+			/* /path/to/foo => /path/to/foo, foo */
+			load_session (path, basename_nosuffix (path));
+		} else {
+			/* /path/to/foo/foo.ardour => /path/to/foo, foo */
+			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+		}
+	} else {
+		ARDOUR_COMMAND_LINE::session_name = path;
+		if (new_session_dialog) {
+			/* make it break out of Dialog::run() and
+			   start again.
+			 */
+			new_session_dialog->response (1);
+		}
+	}
+}
+
 bool
 ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be_new)
 {
@@ -2199,8 +2220,10 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 	Glib::ustring session_name;
 	Glib::ustring session_path;
 	Glib::ustring template_name;
+	int response;
 
-	int response = Gtk::RESPONSE_NONE;
+  begin:
+	response = Gtk::RESPONSE_NONE;
 
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 
@@ -2243,6 +2266,13 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		/* handle possible negative responses */
 
 		switch (response) {
+		case 1:
+			/* sent by idle_load, meaning restart the whole process again */
+			new_session_dialog->hide();
+			new_session_dialog->reset();
+			goto begin;
+			break;
+
 		case Gtk::RESPONSE_CANCEL:
 		case Gtk::RESPONSE_DELETE_EVENT:
 			if (!session) {
@@ -2421,7 +2451,6 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	}
 
 	loading_message (_("Please wait while Ardour loads your session"));
-	disable_screen_updates ();
 
 	try {
 		new_session = new Session (*engine, path, snap_name, mix_template);
@@ -2493,7 +2522,6 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		session->set_clean ();
 	}
 
-	enable_screen_updates ();
 	flush_pending ();
 	retval = 0;
 

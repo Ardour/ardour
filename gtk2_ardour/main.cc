@@ -225,7 +225,7 @@ int main (int argc, char* argv[])
 #endif
 {
 	vector<Glib::ustring> null_file_list;
-
+	
 #ifdef __APPLE__
 	fixup_bundle_environment ();
 #endif

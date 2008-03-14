@@ -115,7 +115,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_about ();
 	void hide_about ();
 	
-	int load_session (const Glib::ustring & path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
+	void idle_load (const Glib::ustring& path);
+	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
 	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, 
 			   uint32_t ctl_chns, 

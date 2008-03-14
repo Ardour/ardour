@@ -81,6 +81,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("SetPunchMenu"), _("Punch"));
 	ActionManager::register_action (editor_actions, X_("Solo"), _("Solo"));
 	ActionManager::register_action (editor_actions, X_("Subframes"), _("Subframes"));
+	ActionManager::register_action (editor_actions, X_("SyncMenu"), _("Sync"));
 	ActionManager::register_action (editor_actions, X_("TempoMenu"), _("Tempo"));
 	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_actions, X_("TrackHeightMenu"), _("Height"));

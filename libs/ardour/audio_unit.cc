@@ -93,12 +93,10 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	streamFormat.mSampleRate = session.frame_rate();
 	streamFormat.mFormatID = kAudioFormatLinearPCM;
 	streamFormat.mFormatFlags = kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked|kAudioFormatFlagIsNonInterleaved;
+
 #ifdef __LITTLE_ENDIAN__
-	/* relax, for now */
+	/* relax */
 #else
-	/* it is ridiculous that this flag is needed when its
-	   opposite flag is not.
-	*/
 	streamFormat.mFormatFlags |= kAudioFormatFlagIsBigEndian;
 #endif
 
@@ -329,7 +327,7 @@ AUPlugin::activate ()
 	if (!initialized) {
 		OSErr err;
 		if ((err = unit->Initialize()) != noErr) {
-			error << string_compose (_("AUPlugin: cannot initialize plugin (err = %1)"), err) << endmsg;
+			error << string_compose (_("AUPlugin: %1 cannot initialize plugin (err = %2)"), name(), err) << endmsg;
 		} else {
 			frames_processed = 0;
 			initialized = true;
@@ -454,9 +452,10 @@ uint32_t
 AUPlugin::output_streams() const
 {
 	if (!(format_set & 0x2)) {
-		warning << _("AUPlugin: output_streams() called without any format set!") << endmsg;
+		warning << string_compose (_("AUPlugin: %1 output_streams() called without any format set!"), name()) << endmsg;
 		return 1;
 	}
+
 	return streamFormat.mChannelsPerFrame;
 }
 

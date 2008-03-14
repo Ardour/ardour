@@ -279,6 +279,11 @@
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
+	       <menu action="SyncMenu">
+	            <menuitem action='SendMMC'/>
+		    <menuitem action='UseMMC'/>
+                    <menuitem action='SendMTC'/>
+	      </menu>
 	       <menu action="TempoMenu">
 	       	      <menuitem action='set-tempo-from-region'/>
 		      <menuitem action='set-tempo-from-edit-range'/>

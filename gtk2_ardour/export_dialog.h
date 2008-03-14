@@ -47,8 +47,6 @@ class ExportDialog : public ArdourDialog
 
 	virtual Gtk::FileChooserAction browse_action() const { return Gtk::FILE_CHOOSER_ACTION_SAVE; }
 
-	bool on_event (GdkEvent* ev);
-
   protected:
 	ARDOUR::AudioExportSpecification spec;
 	Gtk::Frame  file_frame;

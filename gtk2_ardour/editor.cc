@@ -589,6 +589,10 @@ Editor::Editor ()
 
 	region_list_display.set_size_request (100, -1);
 	region_list_display.set_name ("RegionListDisplay");
+	/* Try to prevent single mouse presses from initiating edits.
+	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()
+	*/
+	region_list_display.set_data ("mouse-edits-require-mod1", (gpointer) 0x1);
 
 	region_list_model = TreeStore::create (region_list_columns);
 	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));

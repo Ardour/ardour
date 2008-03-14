@@ -127,7 +127,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	set_title (title.get_string());
 	set_wmclass (X_("ardour_export"), "Ardour");
 	set_name ("ExportWindow");
-	set_events (get_events()|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	
 	spec.running = false;
 
@@ -386,13 +386,6 @@ ExportDialog::ExportDialog(PublicEditor& e)
 
 ExportDialog::~ExportDialog()
 {
-}
-
-bool
-ExportDialog::on_event (GdkEvent* ev)
-{
-	cerr << "ED event type " << ev->type << endl;
-	return false;
 }
 
 void

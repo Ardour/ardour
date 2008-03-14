@@ -861,6 +861,14 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
 
+		_redirects.push_back (redirect);
+
+		if (_reset_plugin_counts (err_streams)) {
+			_redirects.pop_back ();
+			_reset_plugin_counts (0); // it worked before we tried to add it ...
+			return -1;
+		}
+
 		uint32_t potential_max_streams = 0;
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
@@ -899,14 +907,6 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		}
 		while (_max_peak_power.size() < potential_max_streams) {
 			_max_peak_power.push_back(-INFINITY);
-		}
-
-		_redirects.push_back (redirect);
-
-		if (_reset_plugin_counts (err_streams)) {
-			_redirects.pop_back ();
-			_reset_plugin_counts (0); // it worked before we tried to add it ...
-			return -1;
 		}
 
 		redirect->activate ();
@@ -1129,14 +1129,14 @@ int
 Route::_reset_plugin_counts (uint32_t* err_streams)
 {
 	RedirectList::iterator r;
-	uint32_t i_cnt;
-	uint32_t s_cnt;
+	uint32_t insert_cnt = 0;
+	uint32_t send_cnt = 0;
 	map<Placement,list<InsertCount> > insert_map;
+	RedirectList::iterator prev;
 	nframes_t initial_streams;
+	int ret = -1;
 
 	redirect_max_outs = 0;
-	i_cnt = 0;
-	s_cnt = 0;
 
 	/* divide inserts up by placement so we get the signal flow
 	   properly modelled. we need to do this because the _redirects
@@ -1148,14 +1148,8 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 		boost::shared_ptr<Insert> insert;
 
-		/* do this here in case we bomb out before we get to the end of
-		   this function.
-		*/
-
-		redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
-
 		if ((insert = boost::dynamic_pointer_cast<Insert>(*r)) != 0) {
-			++i_cnt;
+			++insert_cnt;
 			insert_map[insert->placement()].push_back (InsertCount (insert));
 
 			/* reset plugin counts back to one for now so
@@ -1170,15 +1164,16 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 			}
 
 		} else if (boost::dynamic_pointer_cast<Send> (*r) != 0) {
-			++s_cnt;
+			++send_cnt;
 		}
 	}
 	
-	if (i_cnt == 0) {
-		if (s_cnt) {
+	if (insert_cnt == 0) {
+		if (send_cnt) {
 			goto recompute;
 		} else {
-			return 0;
+			ret = 0;
+			goto streamcount;
 		}
 	}
 
@@ -1189,7 +1184,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	/* A: PreFader */
 	
 	if (check_some_plugin_counts (insert_map[PreFader], n_inputs (), err_streams)) {
-		return -1;
+		goto streamcount;
 	}
 
 	/* figure out the streams that will feed into PreFader */
@@ -1204,7 +1199,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	/* B: PostFader */
 
 	if (check_some_plugin_counts (insert_map[PostFader], initial_streams, err_streams)) {
-		return -1;
+		goto streamcount;
 	}
 
 	/* OK, everything can be set up correctly, so lets do it */
@@ -1217,7 +1212,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
   recompute:
 
 	redirect_max_outs = 0;
-	RedirectList::iterator prev = _redirects.end();
+	prev = _redirects.end();
 
 	for (r = _redirects.begin(); r != _redirects.end(); prev = r, ++r) {
 		boost::shared_ptr<Send> s;
@@ -1241,8 +1236,13 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	}
 
 	/* we're done */
-
 	return 0;
+
+  streamcount:
+	for (r = _redirects.begin(); r != _redirects.end(); ++r) {
+		redirect_max_outs = max ((*r)->output_streams (), redirect_max_outs);
+	}
+	return ret;
 }				   
 
 int32_t
