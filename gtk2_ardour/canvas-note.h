@@ -1,6 +1,7 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
+    Author: Hans Baier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,16 +39,34 @@ public:
 		: SimpleRect(group), CanvasMidiEvent(region, this, note)
 	{
 	}
-	
+
 	double x1() { return property_x1(); }
 	double y1() { return property_y1(); }
 	double x2() { return property_x2(); }
 	double y2() { return property_y2(); }
-	
+
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
 	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }
-	
-	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }
+
+	bool on_event(GdkEvent* ev);
+
+	enum NoteEnd {
+		NOTE_ON,
+		NOTE_OFF
+	};
+
+	enum Mouse2State {
+		None,
+		RelativeResize,
+		AbsoluteResize
+	};
+
+protected:
+	Mouse2State _mouse2_state;
+
+private:
+	// single click resizing with mouse-2
+	void resize_note(double pressed_x, double event_x, double middle_point);
 };
 
 } // namespace Gnome

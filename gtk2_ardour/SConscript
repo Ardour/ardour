@@ -127,6 +127,7 @@ automation_time_axis.cc
 axis_view.cc
 bundle_manager.cc
 canvas-midi-event.cc
+canvas-note.cc
 canvas-simpleline.c
 canvas-simplerect.c
 canvas-waveview.c

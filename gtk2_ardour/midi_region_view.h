@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2007 Paul Davis 
+    Copyright (C) 2001-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,16 +51,16 @@ class AutomationRegionView;
 class MidiRegionView : public RegionView
 {
   public:
-	MidiRegionView (ArdourCanvas::Group *, 
+	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double initial_samples_per_unit,
 	                Gdk::Color& basic_color);
 
 	~MidiRegionView ();
-	
+
 	virtual void init (Gdk::Color& basic_color, bool wfd);
-	
+
 	inline const boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const
 		{ return boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region); }
 
@@ -69,9 +69,9 @@ class MidiRegionView : public RegionView
 
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
-	
+
 	void set_y_position_and_height (double, double);
-	
+
 	void set_frame_color();
 
 	void redisplay_model();
@@ -95,7 +95,7 @@ class MidiRegionView : public RegionView
 		if (!_delta_command)
 			_delta_command = _model->new_delta_command();
 	}
-	
+
 	void command_add_note(const boost::shared_ptr<ARDOUR::Note> note) {
 		if (_delta_command)
 			_delta_command->add(note);
@@ -121,7 +121,7 @@ class MidiRegionView : public RegionView
 		}
 		midi_view()->midi_track()->diskstream()->playlist_modified();
 	}
-	
+
 	void   note_entered(ArdourCanvas::CanvasMidiEvent* ev);
 	void   unique_select(ArdourCanvas::CanvasMidiEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
@@ -131,29 +131,39 @@ class MidiRegionView : public RegionView
 
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasMidiEvent* ev, double dt, uint8_t dnote);
-	
+
+	void  begin_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end);
+	void update_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double dx, bool relative);
+	void commit_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double event_x, bool relative);
+
 	enum MouseState { None, Pressed, SelectTouchDragging, SelectRectDragging, AddDragging, EraseTouchDragging };
 	MouseState mouse_state() const { return _mouse_state; }
-	
+
+	struct NoteResizeData {
+		ArdourCanvas::CanvasNote  *canvas_note;
+		ArdourCanvas::SimpleRect  *resize_rect;
+		double                     current_x;
+	};
+
   protected:
 
     /* this constructor allows derived types
        to specify their visibility requirements
        to the TimeAxisViewItem parent class
     */
-    
-    MidiRegionView (ArdourCanvas::Group *, 
+
+    MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double samples_per_unit,
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
-    
+
     void region_resized (ARDOUR::Change);
 
     void set_flags (XMLNode *);
     void store_flags ();
-    
+
 	void reset_width_dependent_items (double pixel_width);
 
   private:
@@ -163,10 +173,11 @@ class MidiRegionView : public RegionView
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
-	
+
 	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
 	void update_drag_selection(double last_x, double x, double last_y, double y);
+	double snap_to(double x);
 
 	double _default_note_length;
 
@@ -175,12 +186,14 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNote**                  _active_notes;
 	ArdourCanvas::Group*                        _note_group;
 	ARDOUR::MidiModel::DeltaCommand*            _delta_command;
-		
+
 	MouseState _mouse_state;
 	int _pressed_button;
 
 	typedef std::set<ArdourCanvas::CanvasMidiEvent*> Selection;
 	Selection _selection;
+
+	std::vector<NoteResizeData *> _resize_data;
 };
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

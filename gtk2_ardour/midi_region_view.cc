@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2007 Paul Davis 
+    Copyright (C) 2001-2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,6 @@
 #include "midi_region_view.h"
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
-#include "simplerect.h"
 #include "simpleline.h"
 #include "canvas-hit.h"
 #include "public_editor.h"
@@ -92,7 +91,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 {
 	if (wfd)
 		midi_region()->midi_source(0)->load_model();
-	
+
 	const Meter& m = trackview.session().tempo_map().meter_at(_region->position());
 	const Tempo& t = trackview.session().tempo_map().tempo_at(_region->position());
 	_default_note_length = m.frames_per_bar(t, trackview.session().frame_rate())
@@ -100,7 +99,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
-	
+
 	RegionView::init(basic_color, false);
 
 	compute_colors (basic_color);
@@ -127,7 +126,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 	}
 
 	midi_region()->midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegionView::switch_source));
-	
+
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 
 }
@@ -144,12 +143,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	nframes_t event_frame = 0;
 
 	static ArdourCanvas::SimpleRect* drag_rect = NULL;
-	
+
 	if (trackview.editor.current_mouse_mode() != MouseNote)
 		return false;
 
 	// Mmmm, spaghetti
-	
+
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
 		if (ev->key.keyval == GDK_Delete && !delete_mod) {
@@ -164,7 +163,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			return true;
 		}
 		return false;
-	
+
 	case GDK_KEY_RELEASE:
 		if (ev->key.keyval == GDK_Delete) {
 			if (_mouse_state == EraseTouchDragging) {
@@ -187,18 +186,18 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			_mouse_state = Pressed;
 		_pressed_button = ev->button.button;
 		return true;
-	
+
 	case GDK_ENTER_NOTIFY:
 		/* FIXME: do this on switch to note tool, too, if the pointer is already in */
 		Keyboard::magic_widget_grab_focus();
 		group->grab_focus();
 		break;
-	
+
 	case GDK_MOTION_NOTIFY:
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
-				
+
 		event_frame = trackview.editor.pixel_to_frame(event_x);
 		trackview.editor.snap_to(event_frame);
 
@@ -239,7 +238,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 				drag_rect = new ArdourCanvas::SimpleRect(*group);
 				drag_rect->property_x1() = trackview.editor.frame_to_pixel(event_frame);
-				
+
 				drag_rect->property_y1() = midi_stream_view()->note_to_y(midi_stream_view()->y_to_note(event_y));
 				drag_rect->property_x2() = event_x;
 				drag_rect->property_y2() = drag_rect->property_y1() + floor(midi_stream_view()->note_height());
@@ -279,7 +278,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 					drag_rect->property_y2() = event_y;
 				else
 					drag_rect->property_y1() = event_y;
-				
+
 				update_drag_selection(drag_start_x, event_x, drag_start_y, event_y);
 			}
 
@@ -294,7 +293,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			break;
 		}
 		break;
-	
+
 	case GDK_BUTTON_RELEASE:
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
@@ -336,7 +335,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		default:
 			break;
 		}
-	
+
 	default:
 		break;
 	}
@@ -367,13 +366,13 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 
 	// Add a 1 beat long note (for now)
 	const boost::shared_ptr<Note> new_note(new Note(0, stamp, dur, (uint8_t)note, 0x40));
-	
+
 	view->update_bounds(new_note->note());
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
 	cmd->add(new_note);
 	_model->apply_command(cmd);
-	
+
 	//add_note(new_note);
 }
 
@@ -413,12 +412,12 @@ MidiRegionView::redisplay_model()
 	// Don't redisplay the model if we're currently recording and displaying that
 	if (_active_notes)
 		return;
-	
+
 	if (_model) {
 
 		clear_events();
 		begin_write();
-		
+
 		_model->read_lock();
 
 		for (size_t i=0; i < _model->n_notes(); ++i)
@@ -437,7 +436,7 @@ MidiRegionView::redisplay_model()
 				continue;
 
 			Gdk::Color col = midi_stream_view()->get_region_color();
-				
+
 			boost::shared_ptr<AutomationRegionView> arv;
 
 			{
@@ -454,7 +453,7 @@ MidiRegionView::redisplay_model()
 
 			_automation_children.insert(std::make_pair(i->second->parameter(), arv));
 		}*/
-		
+
 		_model->read_unlock();
 
 	} else {
@@ -466,9 +465,9 @@ MidiRegionView::redisplay_model()
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
-	
+
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
-	
+
 	if (_active_notes)
 		end_write();
 
@@ -485,18 +484,18 @@ MidiRegionView::region_resized (Change what_changed)
 	RegionView::region_resized(what_changed);
 
 	if (what_changed & ARDOUR::PositionChanged) {
-	
+
 		if (_enable_display)
 			redisplay_model();
-	
+
 	} else if (what_changed & Change (StartChanged)) {
 
 		//cerr << "MIDI RV START CHANGED" << endl;
 
 	} else if (what_changed & Change (LengthChanged)) {
-		
+
 		//cerr << "MIDI RV LENGTH CHANGED" << endl;
-	
+
 	}
 }
 
@@ -505,7 +504,7 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 {
 	RegionView::reset_width_dependent_items(pixel_width);
 	assert(_pixel_width == pixel_width);
-		
+
 	if (_enable_display)
 		redisplay_model();
 }
@@ -516,7 +515,7 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 	RegionView::set_y_position_and_height(y, h - 1);
 
 	if (_enable_display) {
-		
+
 		_model->read_lock();
 
 		for (std::vector<CanvasMidiEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -531,7 +530,7 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 				else {
 					const double y1 = midi_stream_view()->note_to_y(note->note()->note());
 					const double y2 = y1 + floor(midi_stream_view()->note_height());
-					
+
 					if (!canvas_item_visible(note)) {
 						note->show();
 					}
@@ -541,7 +540,7 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 				}
 			}
 		}
-		
+
 		_model->read_unlock();
 	}
 
@@ -654,9 +653,9 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
 
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
-	
+
 	if (midi_view()->note_mode() == Sustained) {
-	
+
 		//cerr << "MRV::add_note sustained " << note->note() << " @ " << note->time()
 		//	<< " .. " << note->end_time() << endl;
 
@@ -682,12 +681,12 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 			/* outline all edges */
 			ev_rect->property_outline_what() = (guint32) 0xF;
 		}
-		
+
 		ev_rect->show();
 		_events.push_back(ev_rect);
 
 		MidiGhostRegion* gr;
-		
+
 		for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 			if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
 				gr->add_note(ev_rect);
@@ -695,10 +694,10 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		}
 
 	} else if (midi_view()->note_mode() == Percussive) {
-		
+
 		//cerr << "MRV::add_note percussive " << note->note() << " @ " << note->time()
 		//	<< " .. " << note->end_time() << endl;
-		
+
 		const double diamond_size = midi_stream_view()->note_height() / 2.0;
 		const double x = trackview.editor.frame_to_pixel((nframes_t)note->time());
 		const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
@@ -709,7 +708,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		ev_diamond->property_fill_color_rgba() = note_fill_color(note->velocity());
 		ev_diamond->property_outline_color_rgba() = note_outline_color(note->velocity());
 		_events.push_back(ev_diamond);
-	
+
 	}
 }
 
@@ -744,19 +743,19 @@ MidiRegionView::unique_select(ArdourCanvas::CanvasMidiEvent* ev)
 
 	_selection.clear();
 	_selection.insert(ev);
-	
+
 	if ( ! ev->selected())
 		ev->selected(true);
 }
-	
+
 void
 MidiRegionView::note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
 {
 	if ( ! add)
 		clear_selection_except(ev);
-	
+
 	_selection.insert(ev);
-	
+
 	if ( ! ev->selected())
 		ev->selected(true);
 }
@@ -767,9 +766,9 @@ MidiRegionView::note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
 {
 	if ( ! add)
 		clear_selection_except(ev);
-	
+
 	_selection.erase(ev);
-	
+
 	if (ev->selected())
 		ev->selected(false);
 }
@@ -780,7 +779,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 {
 	const double last_y = std::min(y1, y2);
 	const double y      = std::max(y1, y2);
-	
+
 	// FIXME: so, so, so much slower than this should be
 
 	if (x1 < x2) {
@@ -806,7 +805,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 	}
 }
 
-	
+
 void
 MidiRegionView::move_selection(double dx, double dy)
 {
@@ -827,7 +826,7 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			++next;
 
 			command_remove_note(*i);
-			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get())); 
+			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get()));
 
 			copy->set_time((*i)->note()->time() + dt);
 			copy->set_note((*i)->note()->note() + dnote);
@@ -840,7 +839,123 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 		apply_command();
 	}
 }
-	
+
+void
+MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
+{
+	_resize_data.clear();
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		CanvasNote *note = dynamic_cast<CanvasNote *> (*i);
+
+		// only insert CanvasNotes into the map
+		if(note) {
+			NoteResizeData *resize_data = new NoteResizeData();
+			resize_data->canvas_note = note;
+
+			SimpleRect *resize_rect = new SimpleRect(*group, note->x1(), note->y1(), note->x2(), note->y2());
+
+			uint fill_color = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(), 128);
+			fill_color = UINT_INTERPOLATE(fill_color, 0xFFFFFF40, 0.5);
+
+			resize_rect->property_fill_color_rgba() =
+				UINT_INTERPOLATE(
+					note_fill_color(note->note()->velocity()),
+					fill_color,
+					0.85);
+
+			resize_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
+			resize_data->resize_rect = resize_rect;
+
+			if(note_end == CanvasNote::NOTE_ON) {
+				resize_data->current_x = note->x1();
+			} else { // NOTE_OFF
+				resize_data->current_x = note->x2();
+			}
+
+			_resize_data.push_back(resize_data);
+		}
+	}
+}
+
+double
+MidiRegionView::snap_to(double x)
+{
+	PublicEditor &editor = trackview.editor;
+
+	nframes_t frame = editor.pixel_to_frame(x);
+	editor.snap_to(frame);
+	return (double) editor.frame_to_pixel(frame);
+}
+
+void
+MidiRegionView::update_resizing(CanvasNote::NoteEnd note_end, double dx, bool relative)
+{
+
+
+	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
+		SimpleRect     *resize_rect = (*i)->resize_rect;
+		CanvasNote     *canvas_note = (*i)->canvas_note;
+
+		if(relative) {
+			(*i)->current_x = (*i)->current_x + dx;
+		} else {
+			(*i)->current_x = dx;
+		}
+
+		double current_x = (*i)->current_x;
+
+		if(note_end == CanvasNote::NOTE_ON) {
+			resize_rect->property_x1() = snap_to(current_x);
+			resize_rect->property_x2() = canvas_note->x2();
+		} else {
+			resize_rect->property_x2() = snap_to(current_x);
+			resize_rect->property_x1() = canvas_note->x1();
+		}
+	}
+}
+
+void
+MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bool relative)
+{
+	start_delta_command();
+
+	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
+		CanvasNote *canvas_note = (*i)->canvas_note;
+		SimpleRect *resize_rect = (*i)->resize_rect;
+		double      current_x   = (*i)->current_x;
+
+
+		if(!relative) {
+			current_x = event_x;
+		}
+
+		nframes_t current_frame = trackview.editor.pixel_to_frame(current_x);
+		trackview.editor.snap_to(current_frame);
+
+		const boost::shared_ptr<Note> copy(new Note(*(canvas_note->note().get())));
+
+		// resize beginning of note
+		if (note_end == CanvasNote::NOTE_ON && current_frame < copy->end_time()) {
+			command_remove_note(canvas_note);
+			copy->on_event().time() = current_frame;
+			command_add_note(copy);
+		}
+		// resize end of note
+		if (note_end == CanvasNote::NOTE_OFF && current_frame > copy->time()) {
+			command_remove_note(canvas_note);
+			copy->off_event().time() = current_frame;
+			command_add_note(copy);
+		}
+
+		delete resize_rect;
+		delete (*i);
+	}
+
+	_resize_data.clear();
+	apply_command();
+	clear_selection();
+}
 
 void
 MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)
@@ -853,7 +968,7 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)
 		note_selected(ev, true);
 	}
 }
-	
+
 
 void
 MidiRegionView::switch_source(boost::shared_ptr<Source> src)

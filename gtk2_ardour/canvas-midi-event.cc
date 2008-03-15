@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item,
 	, _state(None)
 	, _note(note)
 	, _selected(false)
-{	
+{
 }
 
 
@@ -75,22 +75,19 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_KEY_PRESS:
-		cerr << "EV KEY PRESS\n";
 		if (_note && ev->key.keyval == GDK_Delete) {
-			cerr << "EV DELETE KEY\n";
 			selected(true);
 			_region.start_delta_command();
 			_region.command_remove_note(this);
 		}
 		break;
-	
+
 	case GDK_KEY_RELEASE:
-		cerr << "EV KEY RELEASE\n";
 		if (ev->key.keyval == GDK_Delete) {
 			_region.apply_command();
 		}
 		break;
-	
+
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered(this);
 		_item->grab_focus();
@@ -103,13 +100,14 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		break;
 
 	case GDK_BUTTON_PRESS:
-		_state = Pressed;
+		if (ev->button.button == 1) {
+			_state = Pressed;
+		}
 		return true;
 
 	case GDK_MOTION_NOTIFY:
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
-		//cerr << "MOTION @ " << event_x << ", " << event_y << endl;
 		_item->property_parent().get_value()->w2i(event_x, event_y);
 
 		switch (_state) {
@@ -135,7 +133,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				event_x = t_x;
 				event_y = t_y;
 			}
-			
+
 			// Snap
 			event_frame = _region.midi_view()->editor.pixel_to_frame(event_x);
 			_region.midi_view()->editor.snap_to(event_frame);
@@ -143,7 +141,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 
 			dx = event_x - last_x;
 			dy = event_y - last_y;
-			
+
 			last_x = event_x;
 
 			drag_delta_x += dx;
@@ -169,7 +167,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			break;
 		}
 		break;
-	
+
 	case GDK_BUTTON_RELEASE:
 		select_mod = (ev->motion.state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK));
 		event_x = ev->button.x;
