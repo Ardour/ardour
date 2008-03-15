@@ -165,22 +165,31 @@ fixup_bundle_environment ()
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the Ardour.app bundle and leave it there,
-	   but the user may not have write permission. so ...
+	   but the user may not have write permission. so ... 
+
+	   we also have to make sure that the user ardour directory
+	   actually exists ...
 	*/
 
-	path = Glib::build_filename (ARDOUR::get_user_ardour_path(), "pango.rc");
-
-	std::ofstream pangorc (path.c_str());
-	if (!pangorc) {
-		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
+	if (g_mkdir_with_parents (ARDOUR::get_user_ardour_path().c_str(), 0755) < 0) {
+		error << string_compose (_("cannot create user ardour folder %1 (%2)"), ARDOUR::get_user_ardour_path(), strerror (errno))
+		      << endmsg;
 	} else {
-		pangorc << "[Pango]\nModuleFiles=";
-		Glib::ustring mpath = dir_path;
-		mpath += "/../Resources/pango.modules";
-		pangorc << mpath << endl;
+
+		path = Glib::build_filename (ARDOUR::get_user_ardour_path(), "pango.rc");
 		
-		pangorc.close ();
-		setenv ("PANGO_RC_FILE", path.c_str(), 1);
+		std::ofstream pangorc (path.c_str());
+		if (!pangorc) {
+			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
+		} else {
+			pangorc << "[Pango]\nModuleFiles=";
+			Glib::ustring mpath = dir_path;
+			mpath += "/../Resources/pango.modules";
+			pangorc << mpath << endl;
+			
+			pangorc.close ();
+			setenv ("PANGO_RC_FILE", path.c_str(), 1);
+		}
 	}
 
 	// gettext charset aliases
