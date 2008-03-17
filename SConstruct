@@ -34,6 +34,7 @@ opts.AddOptions(
     BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
     BoolOption('OLDFONTS', 'Old school font sizes', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
+    BoolOption('STL_DEBUG', 'Set to build with Standard Template Library Debugging', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
@@ -766,9 +767,13 @@ else:
     env.Append(CCFLAGS=" ".join (opt_flags))
     env.Append(LINKFLAGS=" ".join (opt_flags))
 
+if env['STL_DEBUG'] == 1:
+    env.Append(CXXFLAGS="-D_GLIBCXX_DEBUG")
+
 if env['UNIVERSAL'] == 1:
     env.Append(CCFLAGS="-arch i386 -arch ppc")
     env.Append(LINKFLAGS="-arch i386 -arch ppc")
+
 
 #
 # warnings flags
