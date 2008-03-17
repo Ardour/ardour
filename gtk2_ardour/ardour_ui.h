@@ -100,6 +100,7 @@ namespace ALSA {
 #define FRAME_NAME "BaseFrame"
 
 extern sigc::signal<void>  ColorsChanged;
+extern sigc::signal<void>  DPIReset;
 
 class ARDOUR_UI : public Gtkmm2ext::UI
 {
@@ -116,7 +117,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_about ();
 	void hide_about ();
 	
-	int load_session (const Glib::ustring & path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
+	void idle_load (const Glib::ustring& path);
+	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
 	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, 
 			   uint32_t ctl_chns, 
@@ -249,6 +251,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_clocking ();
 	void toggle_auto_play ();
 	void toggle_auto_input ();
+	void toggle_punch ();
+	void unset_dual_punch ();
+	bool ignore_dual_punch;
 	void toggle_punch_in ();
 	void toggle_punch_out ();
 	void toggle_auto_return ();

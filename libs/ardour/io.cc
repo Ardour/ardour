@@ -2119,9 +2119,8 @@ IO::setup_peak_meters()
 void
 IO::update_meters()
 {
-    Glib::Mutex::Lock guard (m_meter_signal_lock);
-    
-    Meter(); /* EMIT SIGNAL */
+	Glib::Mutex::Lock guard (m_meter_signal_lock);
+	Meter(); /* EMIT SIGNAL */
 }
 
 void

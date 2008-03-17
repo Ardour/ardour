@@ -41,6 +41,7 @@
     <Option name="show-track-meters" value="1"/>
 	<Option name="default-narrow_ms" value="0"/>
     <Option name="smpte-format" value="6"/>
+	<Option name="font-scale" value="102400"/>
   </Config>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>

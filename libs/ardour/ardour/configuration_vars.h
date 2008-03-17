@@ -33,8 +33,8 @@ CONFIG_VARIABLE (std::string, midi_port_name, "midi-port-name", "default")
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
 CONFIG_VARIABLE (bool, trace_midi_output, "trace-midi-output", false)
 CONFIG_VARIABLE (bool, send_mtc, "send-mtc", false)
-CONFIG_VARIABLE (bool, send_mmc, "send-mmc", false)
-CONFIG_VARIABLE (bool, mmc_control, "mmc-control", false)
+CONFIG_VARIABLE (bool, send_mmc, "send-mmc", true)
+CONFIG_VARIABLE (bool, mmc_control, "mmc-control", true)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (uint8_t, mmc_receive_device_id, "mmc-receive-device-id", 0)
 CONFIG_VARIABLE (uint8_t, mmc_send_device_id, "mmc-send-device-id", 0)
@@ -157,6 +157,7 @@ CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
+CONFIG_VARIABLE (long, font_scale, "font-scale", 102400)
 
 /* denormal management */
 

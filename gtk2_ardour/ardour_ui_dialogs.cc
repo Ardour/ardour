@@ -80,7 +80,6 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	/* there are never any selections on startup */
 
-	ActionManager::set_sensitive (ActionManager::region_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::line_selection_sensitive_actions, false);
@@ -182,6 +181,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	if (hide_stuff) {
 		editor->hide ();
 		mixer->hide ();
+		theme_manager->hide ();
 	}
 
 	second_connection.disconnect ();

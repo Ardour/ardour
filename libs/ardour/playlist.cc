@@ -331,7 +331,6 @@ Playlist::release_notifications ()
 	} 
 }
 
-
 void
 Playlist::notify_modified ()
 {
@@ -676,53 +675,64 @@ Playlist::partition (nframes_t start, nframes_t end, bool just_top_level)
 void
 Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, RegionList& thawlist)
 {
-	RegionLock rlock (this);
-	boost::shared_ptr<Region> region;
-	boost::shared_ptr<Region> current;
-	string new_name;
-	RegionList::iterator tmp;
-	OverlapType overlap;
-	nframes_t pos1, pos2, pos3, pos4;
 	RegionList new_regions;
 
-	in_partition = true;
-
-	/* need to work from a copy, because otherwise the regions we add during the process
-	   get operated on as well.
-	*/
-
-	RegionList copy = regions;
-
-	for (RegionList::iterator i = copy.begin(); i != copy.end(); i = tmp) {
+	{
+		RegionLock rlock (this);
+		boost::shared_ptr<Region> region;
+		boost::shared_ptr<Region> current;
+		string new_name;
+		RegionList::iterator tmp;
+		OverlapType overlap;
+		nframes_t pos1, pos2, pos3, pos4;
 		
-		tmp = i;
-		++tmp;
-
-		current = *i;
+		in_partition = true;
 		
-		if (current->first_frame() == start && current->last_frame() == end) {
-			if (cutting) {
-				remove_region_internal (current);
+		/* need to work from a copy, because otherwise the regions we add during the process
+		   get operated on as well.
+		*/
+		
+		RegionList copy = regions;
+		
+		for (RegionList::iterator i = copy.begin(); i != copy.end(); i = tmp) {
+			
+			tmp = i;
+			++tmp;
+			
+			current = *i;
+
+			if (current->first_frame() >= start && current->last_frame() < end) {
+				if (cutting) {
+					remove_region_internal (current);
+				}
+				continue;
 			}
-			continue;
-		}
-		
-		if ((overlap = current->coverage (start, end)) == OverlapNone) {
-			continue;
-		}
-		
-		pos1 = current->position();
-		pos2 = start;
-		pos3 = end;
-		pos4 = current->last_frame();
-
-		if (overlap == OverlapInternal) {
 			
-			/* split: we need 3 new regions, the front, middle and end.
-			   cut:   we need 2 regions, the front and end.
+			/* coverage will return OverlapStart if the start coincides
+			   with the end point. we do not partition such a region,
+			   so catch this special case.
 			*/
+
+			if (current->first_frame() >= end) {
+				continue;
+			}
+
+			if ((overlap = current->coverage (start, end)) == OverlapNone) {
+				continue;
+			}
+
+			pos1 = current->position();
+			pos2 = start;
+			pos3 = end;
+			pos4 = current->last_frame();
 			
-			/*
+			if (overlap == OverlapInternal) {
+			
+				/* split: we need 3 new regions, the front, middle and end.
+				   cut:   we need 2 regions, the front and end.
+				*/
+				
+				/*
 			                 start                 end
 			  ---------------*************************------------
 			                 P1  P2              P3  P4
@@ -731,37 +741,37 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 			  CUT
 			  ---------------*****----------------====------------
 			  
-			*/
+				*/
 
-			if (!cutting) {
+				if (!cutting) {
 				
-				/* "middle" ++++++ */
+					/* "middle" ++++++ */
+					
+					_session.region_name (new_name, current->name(), false);
+					region = RegionFactory::create (current, pos2 - pos1, pos3 - pos2, new_name,
+									regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::LeftOfSplit|Region::RightOfSplit));
+					add_region_internal (region, start);
+					new_regions.push_back (region);
+				}
 				
+				/* "end" ====== */
+			
 				_session.region_name (new_name, current->name(), false);
-				region = RegionFactory::create (current, pos2 - pos1, pos3 - pos2, new_name,
-						       regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::LeftOfSplit|Region::RightOfSplit));
-				add_region_internal (region, start);
-				new_regions.push_back (region);
-			}
-			
-			/* "end" ====== */
-			
-			_session.region_name (new_name, current->name(), false);
-			region = RegionFactory::create (current, pos3 - pos1, pos4 - pos3, new_name, 
-					       regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
-
-			add_region_internal (region, end);
-			new_regions.push_back (region);
-
-		        /* "front" ***** */
+				region = RegionFactory::create (current, pos3 - pos1, pos4 - pos3, new_name, 
+								regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
 				
-			current->freeze ();
-			thawlist.push_back (current);
-			current->trim_end (pos2, this);
-
-		} else if (overlap == OverlapEnd) {
-
-			/*
+				add_region_internal (region, end);
+				new_regions.push_back (region);
+				
+				/* "front" ***** */
+				
+				current->freeze ();
+				thawlist.push_back (current);
+				current->trim_end (pos2, this);
+				
+			} else if (overlap == OverlapEnd) {
+				
+				/*
 				                              start           end
 				    ---------------*************************------------
 				                   P1           P2         P4   P3
@@ -769,33 +779,32 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				    ---------------**************+++++++++++------------
                                     CUT:						   
 				    ---------------**************-----------------------
-
-			*/
-
-			if (!cutting) {
+				*/
 				
-				/* end +++++ */
+				if (!cutting) {
+					
+					/* end +++++ */
+					
+					_session.region_name (new_name, current->name(), false);
+					region = RegionFactory::create (current, pos2 - pos1, pos4 - pos2, new_name, (layer_t) regions.size(),
+									Region::Flag(current->flags()|Region::Automatic|Region::LeftOfSplit));
+					add_region_internal (region, start);
+					new_regions.push_back (region);
+				}
 				
-				_session.region_name (new_name, current->name(), false);
-				region = RegionFactory::create (current, pos2 - pos1, pos4 - pos2, new_name, (layer_t) regions.size(),
-						       Region::Flag(current->flags()|Region::Automatic|Region::LeftOfSplit));
-				add_region_internal (region, start);
-				new_regions.push_back (region);
-			}
-
-			/* front ****** */
-
-			current->freeze ();
-			thawlist.push_back (current);
-			current->trim_end (pos2, this);
-
-		} else if (overlap == OverlapStart) {
-
-			/* split: we need 2 regions: the front and the end.
-			   cut: just trim current to skip the cut area
-			*/
+				/* front ****** */
 				
-			/*
+				current->freeze ();
+				thawlist.push_back (current);
+				current->trim_end (pos2, this);
+				
+			} else if (overlap == OverlapStart) {
+				
+				/* split: we need 2 regions: the front and the end.
+				   cut: just trim current to skip the cut area
+				*/
+				
+				/*
 				                        start           end
 				    ---------------*************************------------
 				       P2          P1 P3                   P4          
@@ -805,31 +814,31 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				    CUT:
 				    -------------------*********************------------
 				    
-			*/
+				*/
 
-			if (!cutting) {
+				if (!cutting) {
 				
-				/* front **** */
-				 _session.region_name (new_name, current->name(), false);
-				 region = RegionFactory::create (current, 0, pos3 - pos1, new_name,
-							regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
-				 add_region_internal (region, pos1);
-				 new_regions.push_back (region);
-			} 
-			
-			/* end */
-			
-			current->freeze ();
-			thawlist.push_back (current);
-			current->trim_front (pos3, this);
-
-		} else if (overlap == OverlapExternal) {
-
-			/* split: no split required.
-			   cut: remove the region.
-			*/
+					/* front **** */
+					_session.region_name (new_name, current->name(), false);
+					region = RegionFactory::create (current, 0, pos3 - pos1, new_name,
+									regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
+					add_region_internal (region, pos1);
+					new_regions.push_back (region);
+				} 
 				
-			/*
+				/* end */
+				
+				current->freeze ();
+				thawlist.push_back (current);
+				current->trim_front (pos3, this);
+				
+			} else if (overlap == OverlapExternal) {
+				
+				/* split: no split required.
+				   cut: remove the region.
+				*/
+				
+				/*
 				       start                                      end
 				    ---------------*************************------------
 				       P2          P1 P3                   P4          
@@ -839,16 +848,21 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				    CUT:
 				    ----------------------------------------------------
 				    
-			*/
-
-			if (cutting) {
-				remove_region_internal (current);
+				*/
+				
+				if (cutting) {
+					remove_region_internal (current);
+				}
+				new_regions.push_back (current);
 			}
-			new_regions.push_back (current);
 		}
-	}
+		
+		if (current->first_frame() >= current->last_frame()) {
+			PBD::stacktrace (cerr);
+		}
 
-	in_partition = false;
+		in_partition = false;
+	}
 
 	for (RegionList::iterator i = new_regions.begin(); i != new_regions.end(); ++i) {
 		check_dependents (*i, false);

@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
+#include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
 #include <pbd/whitespace.h>
 
@@ -44,6 +46,7 @@
 #include "option_editor.h"
 #include "midi_port_dialog.h"
 #include "gui_thread.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -250,12 +253,40 @@ OptionEditor::add_session_paths ()
 	session_raid_entry.set_text(session->raid_path());
 }
 
+static void
+font_scale_changed (Gtk::Adjustment* adj)
+{
+	Config->set_font_scale((long)floor (adj->get_value() * 1024));
+	reset_dpi();
+}
+
 void
 OptionEditor::setup_misc_options ()
 {
 	Gtk::HBox* hbox;
-	
-	Label* label = manage (new Label (_("Short crossfade length (msecs)")));
+	Label* label;
+
+#ifndef GTKOSX
+	/* font scaling does nothing with GDK/Quartz */
+
+	Gtk::Adjustment* dpi_adj = new Gtk::Adjustment ((double)Config->get_font_scale() / 1024, 50, 250, 1, 10);
+	Gtk::HScale * dpi_range = new Gtk::HScale (*dpi_adj);
+
+	label = manage (new Label (_("Font Scaling")));
+	label->set_name ("OptionsLabel");
+
+	dpi_range->set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+	dpi_adj->signal_value_changed().connect (bind (sigc::ptr_fun (font_scale_changed), dpi_adj));
+
+	hbox = manage (new HBox);
+	hbox->set_border_width (5);
+	hbox->set_spacing (10);
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (*dpi_range, true, true);
+	misc_packer.pack_start (*hbox, false, false);
+#endif
+
+	label = manage (new Label (_("Short crossfade length (msecs)")));
 	label->set_name ("OptionsLabel");
 	
 	hbox = manage (new HBox);
@@ -1345,5 +1376,7 @@ OptionEditor::parameter_changed (const char* parameter_name)
 
 		save_history_button.set_active (x);
 		saved_history_depth_spinner.set_sensitive (x);
+	} else if (PARAM_IS ("font-scale")) {
+		reset_dpi();
 	}
 }

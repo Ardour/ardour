@@ -25,6 +25,7 @@
 #include <ardour/diskstream.h>
 #include <ardour/playlist.h>
 #include <ardour/route_group.h>
+#include <ardour/profile.h>
 
 #include "editor.h"
 #include "actions.h"
@@ -761,11 +762,17 @@ Editor::track_selection_changed ()
 			(*i)->set_selected (false);
 		}
 	}
+
+	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
 }
 
 void
 Editor::time_selection_changed ()
 {
+	if (Profile->get_sae()) {
+		return;
+	}
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
@@ -789,14 +796,8 @@ Editor::time_selection_changed ()
 }
 
 void
-Editor::region_selection_changed ()
+Editor::sensitize_the_right_region_actions (bool have_selected_regions)
 {
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_selected_regionviews (selection->regions);
-	}
-	
-	bool have_selected_regions = !selection->regions.empty();
-
 	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::region_selection_sensitive_actions.begin();
 	     x != ActionManager::region_selection_sensitive_actions.end(); ++x) {
 
@@ -815,6 +816,17 @@ Editor::region_selection_changed ()
 			(*x)->set_sensitive (have_selected_regions);
 		}
 	}
+}
+
+
+void
+Editor::region_selection_changed ()
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->set_selected_regionviews (selection->regions);
+	}
+	
+	sensitize_the_right_region_actions (!selection->regions.empty());
 
 	zoomed_to_region = false;
 }
@@ -982,7 +994,9 @@ Editor::set_selection_from_region ()
 	}
 
 	selection->set (0, selection->regions.start(), selection->regions.end_frame());
-	set_mouse_mode (Editing::MouseRange, false);
+	if (!Profile->get_sae()) {
+		set_mouse_mode (Editing::MouseRange, false);
+	}
 }
 
 void
@@ -1015,7 +1029,9 @@ Editor::set_selection_from_range (Location& loc)
 	selection->set (0, loc.start(), loc.end());
 	commit_reversible_command ();
 
-	set_mouse_mode (Editing::MouseRange, false);
+	if (!Profile->get_sae()) {
+		set_mouse_mode (Editing::MouseRange, false);
+	}
 }
 
 void
@@ -1327,6 +1343,12 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 	if (start > end) {
 		swap (start, end);
 	}
+
+	/* turn range into one delimited by start...end,
+	   not start...end-1
+	*/
+
+	end++;
 
 	return true;
 }

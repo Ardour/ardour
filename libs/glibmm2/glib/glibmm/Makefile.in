@@ -42,18 +42,13 @@ DIST_COMMON = $(am__sublib_include_HEADERS_DIST) \
 	$(top_srcdir)/build_shared/Makefile_gensrc_platform.am_fragment
 subdir = glib/glibmm
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/scripts/c_std.m4 \
-	$(top_srcdir)/scripts/cxx.m4 $(top_srcdir)/scripts/cxx_std.m4 \
-	$(top_srcdir)/scripts/docgen.m4 \
-	$(top_srcdir)/scripts/glibmm_check_perl.m4 \
-	$(top_srcdir)/scripts/macros.m4 \
-	$(top_srcdir)/scripts/reduced.m4 $(top_srcdir)/scripts/sun.m4 \
-	$(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h \
-	$(top_builddir)/glib/glibmmconfig.h
+	$(top_builddir)/glib/glibmmconfig.h \
+	$(top_builddir)/gio/giommconfig.h
 CONFIG_CLEAN_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -165,7 +160,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@ $(strip $(extra_defines))
 DEPDIR = @DEPDIR@
-DISABLE_DEPRECATED_API_CFLAGS = @DISABLE_DEPRECATED_API_CFLAGS@
 DISABLE_DEPRECATED_CFLAGS = @DISABLE_DEPRECATED_CFLAGS@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
@@ -176,6 +170,8 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
+GIOMM_CFLAGS = @GIOMM_CFLAGS@
+GIOMM_LIBS = @GIOMM_LIBS@
 GLIBMM_CFLAGS = @GLIBMM_CFLAGS@
 GLIBMM_LIBS = @GLIBMM_LIBS@
 GLIBMM_MAJOR_VERSION = @GLIBMM_MAJOR_VERSION@
@@ -183,11 +179,10 @@ GLIBMM_MICRO_VERSION = @GLIBMM_MICRO_VERSION@
 GLIBMM_MINOR_VERSION = @GLIBMM_MINOR_VERSION@
 GLIBMM_RELEASE = @GLIBMM_RELEASE@
 GLIBMM_VERSION = @GLIBMM_VERSION@
+GMMPROC_DIR = @GMMPROC_DIR@
 GREP = @GREP@
 GTHREAD_CFLAGS = @GTHREAD_CFLAGS@
 GTHREAD_LIBS = @GTHREAD_LIBS@
-GTKMMPROC_MERGECDOCS = @GTKMMPROC_MERGECDOCS@
-GTKMM_DOXYGEN_INPUT = @GTKMM_DOXYGEN_INPUT@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -200,7 +195,6 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-M4 = @M4@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
@@ -213,9 +207,9 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PERL_PATH = @PERL_PATH@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@

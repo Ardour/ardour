@@ -98,28 +98,36 @@ static void ardour_canvas_type_init()
 void
 Editor::initialize_canvas ()
 {
+	if (getenv ("ARDOUR_NON_AA_CANVAS")) {
+		track_canvas = new ArdourCanvas::Canvas ();
+		time_canvas = new ArdourCanvas::Canvas ();
+	} else {
+		track_canvas = new ArdourCanvas::CanvasAA ();
+		time_canvas = new ArdourCanvas::CanvasAA ();
+	}
+	
 	ArdourCanvas::init ();
 	ardour_canvas_type_init ();
 
 	/* don't try to center the canvas */
 
-	track_canvas.set_center_scroll_region (false);
-	track_canvas.set_dither  	(Gdk::RGB_DITHER_NONE);
+	track_canvas->set_center_scroll_region (false);
+	track_canvas->set_dither  	(Gdk::RGB_DITHER_NONE);
 
 	/* need to handle 4 specific types of events as catch-alls */
 
-	track_canvas.signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
-	track_canvas.signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
-	track_canvas.signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
-	track_canvas.signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
+	track_canvas->signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
+	track_canvas->signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
+	track_canvas->signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
+	track_canvas->signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
 
 	/* just scroll stuff for the timecanvas */
-	time_canvas.signal_scroll_event().connect (mem_fun (*this, &Editor::time_canvas_scroll_event));
+	time_canvas->signal_scroll_event().connect (mem_fun (*this, &Editor::time_canvas_scroll_event));
 
-	track_canvas.set_name ("EditorMainCanvas");
-	track_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
-	track_canvas.signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
-	track_canvas.set_flags (CAN_FOCUS);
+	track_canvas->set_name ("EditorMainCanvas");
+	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
+	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
+	track_canvas->set_flags (CAN_FOCUS);
 
 	/* set up drag-n-drop */
 
@@ -133,14 +141,14 @@ Editor::initialize_canvas ()
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
-	track_canvas.drag_dest_set (target_table);
-	track_canvas.signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
+	track_canvas->drag_dest_set (target_table);
+	track_canvas->signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
 
 	/* stuff for the verbose canvas cursor */
 
 	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
 
-	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas.root());
+	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas->root());
 	verbose_canvas_cursor->property_font_desc() = *font;
 	verbose_canvas_cursor->property_anchor() = ANCHOR_NW;
 	
@@ -150,7 +158,7 @@ Editor::initialize_canvas ()
 	
 	if (Profile->get_sae()) {
 		Image img (::get_icon (X_("saelogo")));
-		logo_item = new ArdourCanvas::Pixbuf (*track_canvas.root(), 0.0, 0.0, img.get_pixbuf());
+		logo_item = new ArdourCanvas::Pixbuf (*track_canvas->root(), 0.0, 0.0, img.get_pixbuf());
 		// logo_item->property_height_in_pixels() = true;
 		// logo_item->property_width_in_pixels() = true;
 		// logo_item->property_height_set() = true;
@@ -160,34 +168,38 @@ Editor::initialize_canvas ()
 	
 	/* a group to hold time (measure) lines */
 	
-	time_line_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
-	tempo_lines = new TempoLines(track_canvas, time_line_group);
-	cursor_group = new ArdourCanvas::Group (*track_canvas.root(), 0.0, 0.0);
-	time_canvas.set_name ("EditorTimeCanvas");
-	time_canvas.add_events (Gdk::POINTER_MOTION_HINT_MASK);
-	time_canvas.set_flags (CAN_FOCUS);
-	time_canvas.set_center_scroll_region (false);
-	time_canvas.set_dither  	(Gdk::RGB_DITHER_NONE);
+	time_line_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
+	tempo_lines = new TempoLines(*track_canvas, time_line_group);
+	cursor_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
+
+	time_canvas->set_name ("EditorTimeCanvas");
+	time_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK);
+	time_canvas->set_flags (CAN_FOCUS);
+	time_canvas->set_center_scroll_region (false);
+	time_canvas->set_dither (Gdk::RGB_DITHER_NONE);
 	
-	marker_time_line_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
-	marker_tempo_lines = new TempoLines(time_canvas, marker_time_line_group);
+	marker_time_line_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, 0.0);
+	marker_tempo_lines = new TempoLines(*time_canvas, marker_time_line_group);
 	
-	meter_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, 0.0);
-	tempo_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height);
-	range_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 2.0);
-	transport_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 3.0);
-	marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 4.0);
-	cd_marker_group = new ArdourCanvas::Group (*time_canvas.root(), 0.0, timebar_height * 5.0);
+	meter_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, 0.0);
+	tempo_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height);
+	range_marker_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height * 2.0);
+	transport_marker_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height * 3.0);
+	marker_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height * 4.0);
+	cd_marker_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height * 5.0);
 	
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 	tempo_bar->property_outline_pixels() = 1;
 	
 	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 	meter_bar->property_outline_pixels() = 1;
 	
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 1;
 
@@ -200,11 +212,12 @@ Editor::initialize_canvas ()
 	range_marker_bar->property_outline_pixels() = 1;
 	
 	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 	transport_marker_bar->property_outline_pixels() = 1;
-
+	
 	cd_marker_bar_drag_rect = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	cd_marker_bar_drag_rect->property_outline_pixels() = 0;
+	// cd_marker_bar_drag_rect->property_outline_pixels() = 0;
 	cd_marker_bar_drag_rect->hide ();
 
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
@@ -218,12 +231,12 @@ Editor::initialize_canvas ()
 	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
 	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
 
-	marker_drag_line = new ArdourCanvas::Line (*track_canvas.root());
+	marker_drag_line = new ArdourCanvas::Line (*track_canvas->root());
 	marker_drag_line->property_width_pixels() = 1;
 	marker_drag_line->property_points() = marker_drag_line_points;
 	marker_drag_line->hide();
 
-	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*track_canvas->root(), 0.0, 0.0, 0.0, 0.0);
 	range_marker_drag_rect->hide ();
 	
 	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
@@ -251,14 +264,14 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming
-	zoom_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	zoom_rect = new ArdourCanvas::SimpleRect (*track_canvas->root(), 0.0, 0.0, 0.0, 0.0);
 	zoom_rect->property_outline_pixels() = 1;
 	zoom_rect->hide();
 	
 	zoom_rect->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 	
 	// used as rubberband rect
-	rubberband_rect = new ArdourCanvas::SimpleRect (*track_canvas.root(), 0.0, 0.0, 0.0, 0.0);
+	rubberband_rect = new ArdourCanvas::SimpleRect (*track_canvas->root(), 0.0, 0.0, 0.0, 0.0);
 	rubberband_rect->property_outline_pixels() = 1;
 	rubberband_rect->hide();
 	
@@ -274,12 +287,12 @@ Editor::initialize_canvas ()
 	
 	double time_height = timebar_height * 5;
 	double time_width = FLT_MAX/frames_per_unit;
-	time_canvas.set_scroll_region(0.0, 0.0, time_width, time_height);
+	time_canvas->set_scroll_region(0.0, 0.0, time_width, time_height);
 
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
 
 	initial_ruler_update_required = true;
-	track_canvas.signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
+	track_canvas->signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
@@ -382,10 +395,10 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 
 	double last_canvas_unit =  max ((last_canvas_frame / frames_per_unit), canvas_width);
 
-	track_canvas.set_scroll_region (0.0, 0.0, last_canvas_unit, pos);
+	track_canvas->set_scroll_region (0.0, 0.0, last_canvas_unit, pos);
 
 	// XXX what is the correct height value for the time canvas ? this overstates it
-	time_canvas.set_scroll_region ( 0.0, 0.0, last_canvas_unit, canvas_height);
+	time_canvas->set_scroll_region ( 0.0, 0.0, last_canvas_unit, canvas_height);
 
 	range_marker_drag_rect->property_y2() = canvas_height;
 	transport_loop_range_rect->property_y2() = canvas_height;
@@ -441,14 +454,14 @@ Editor::controls_layout_size_request (Requisition* req)
 bool
 Editor::track_canvas_map_handler (GdkEventAny* ev)
 {
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 	return false;
 }
 
 bool
 Editor::time_canvas_map_handler (GdkEventAny* ev)
 {
-	time_canvas.get_window()->set_cursor (*timebar_cursor);
+	time_canvas->get_window()->set_cursor (*timebar_cursor);
 	return false;
 }
 
@@ -495,7 +508,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	double wx;
 	double wy;
 
-	track_canvas.window_to_world (x, y, wx, wy);
+	track_canvas->window_to_world (x, y, wx, wy);
 	wx += horizontal_adjustment.get_value();
 	wy += vertical_adjustment.get_value();
 	
@@ -511,7 +524,11 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 		/* drop onto canvas background: create new tracks */
 
-		do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
+		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame); 
+		} else {
+			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
+		}
 		
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*>(tvp)) != 0) {
 
@@ -522,7 +539,12 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		if (tv->get_diskstream()) {
 			/* select the track, then embed */
 			selection->set (tv);
-			do_embed (paths, Editing::ImportDistinctFiles, ImportToTrack, frame);
+
+			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+				do_import (paths, Editing::ImportDistinctFiles, Editing::ImportToTrack, SrcBest, frame); 
+			} else {
+				do_embed (paths, Editing::ImportDistinctFiles, ImportToTrack, frame);
+			}
 		}
 	}
 
@@ -855,3 +877,12 @@ Editor::color_handler()
 		session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 }
 
+
+void
+Editor::flush_canvas ()
+{
+	if (is_mapped()) {
+		track_canvas->update_now ();
+		// gdk_window_process_updates (GTK_LAYOUT(track_canvas->gobj())->bin_window, true);
+	}
+}

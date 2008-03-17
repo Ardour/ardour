@@ -305,6 +305,8 @@ Editor::current_mixer_strip_hidden ()
 void
 Editor::session_going_away ()
 {
+	_have_idled = false;
+	
 	for (vector<sigc::connection>::iterator i = session_connections.begin(); i != session_connections.end(); ++i) {
 		(*i).disconnect ();
 	}

@@ -466,8 +466,9 @@ AudioStreamView::set_show_waveforms (bool yn)
 {
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
+		if (arv) {
 			arv->set_waveform_visible (yn);
+		}
 	}
 }
 

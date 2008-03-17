@@ -21,6 +21,7 @@
 #include <pbd/error.h>
 #include <pbd/convert.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/source_factory.h>
 #include <ardour/sndfilesource.h>
@@ -28,9 +29,14 @@
 #include <ardour/configuration.h>
 #include <ardour/smf_source.h>
 
-#ifdef HAVE_COREAUDIO
+#ifdef  HAVE_COREAUDIO
+#define USE_COREAUDIO_FOR_FILES
+#endif
+
+#ifdef USE_COREAUDIO_FOR_FILES
 #include <ardour/coreaudiosource.h>
 #endif
+
 
 #include "i18n.h"
 
@@ -68,6 +74,7 @@ peak_thread_work ()
 		if (!as) {
 			continue;
 		}
+
 		as->setup_peakfile ();
 	}
 }
@@ -128,48 +135,36 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 	if (type == DataType::AUDIO) {
 
-#ifdef HAVE_COREAUDIO
-
 		try {
-			boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
-
+			
+			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
 			}
-
 			ret->check_for_analysis_data_on_disk ();
 			SourceCreated (ret);
 			return ret;
 		} 
-
-
+		
 		catch (failed_constructor& err) {
 
+#ifdef USE_COREAUDIO_FOR_FILES
+		
 			/* this is allowed to throw */
-
-			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-
+			
+			boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
+			
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
 			}
-
+			
 			ret->check_for_analysis_data_on_disk ();
 			SourceCreated (ret);
 			return ret;
-		}
 #else
-		/* this is allowed to throw */
-
-		boost::shared_ptr<Source> ret (new SndFileSource (s, node));
-
-		if (setup_peakfile (ret, defer_peaks)) {
-			return boost::shared_ptr<Source>();
-		}
-
-		ret->check_for_analysis_data_on_disk ();
-		SourceCreated (ret);
-		return ret;
+			throw; // rethrow 
 #endif
+		}
 
 	} else if (type == DataType::MIDI) {
 		boost::shared_ptr<Source> ret (new SMFSource (s, node));
@@ -185,59 +180,57 @@ boost::shared_ptr<Source>
 SourceFactory::createReadable (DataType type, Session& s, string path, int chn, AudioFileSource::Flag flags, bool announce, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
-	
-#ifdef HAVE_COREAUDIO
-		try {
-			boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
 
-			if (setup_peakfile (ret, defer_peaks)) {
-				return boost::shared_ptr<Source>();
+		if (!(flags & Destructive)) {
+			
+			try {
+				
+				boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
+				
+				if (setup_peakfile (ret, defer_peaks)) {
+					return boost::shared_ptr<Source>();
+				}
+				
+				ret->check_for_analysis_data_on_disk ();
+				if (announce) {
+					SourceCreated (ret);
+				}
+				return ret;
 			}
-
-			ret->check_for_analysis_data_on_disk ();
-			if (announce) {
-				SourceCreated (ret);
-			}
-			return ret;
-		}
-		
-		catch (failed_constructor& err) {
-			boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
-			if (setup_peakfile (ret, defer_peaks)) {
-				return boost::shared_ptr<Source>();
-			}
-			ret->check_for_analysis_data_on_disk ();
-			if (announce) {
-				SourceCreated (ret);
-			}
-			return ret;
-		}
+			
+			catch (failed_constructor& err) {
+#ifdef USE_COREAUDIO_FOR_FILES
+				
+				boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, chn, flags));
+				if (setup_peakfile (ret, defer_peaks)) {
+					return boost::shared_ptr<Source>();
+				}
+				ret->check_for_analysis_data_on_disk ();
+				if (announce) {
+					SourceCreated (ret);
+				}
+				return ret;
+				
 #else
-		boost::shared_ptr<Source> ret (new SndFileSource (s, path, chn, flags));
-
-		if (setup_peakfile (ret, defer_peaks)) {
-			return boost::shared_ptr<Source>();
-		}
-
-		ret->check_for_analysis_data_on_disk ();
-		if (announce) {
-			SourceCreated (ret);
-		}
-
-		return ret;
+				throw; // rethrow
 #endif
-		
-	} else if (type == DataType::MIDI) {
+			}
 
+		} else {
+			// eh?
+		}
+	
+	} else if (type == DataType::MIDI) {
+		
 		// FIXME: flags?
 		boost::shared_ptr<Source> ret (new SMFSource (s, path, SMFSource::Flag(0)));
-
-		ret->check_for_analysis_data_on_disk ();
+		
 		if (announce) {
 			SourceCreated (ret);
 		}
 
 		return ret;
+
 	}
 
 	return boost::shared_ptr<Source>();

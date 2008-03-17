@@ -39,6 +39,7 @@
 
 #include <gtkmm2ext/window_title.h>
 
+using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
@@ -50,14 +51,14 @@ NewSessionDialog::NewSessionDialog()
 	: ArdourDialog ("session control")
 {
 	in_destructor = false;
-	session_name_label = Gtk::manage(new class Gtk::Label(_("Name :")));
-	m_name = Gtk::manage(new class Gtk::Entry());
+	session_name_label = new Gtk::Label(_("Name :"));
+	m_name = new Gtk::Entry();
 	m_name->set_text(ARDOUR_COMMAND_LINE::session_name);
 
-	chan_count_label_1 = Gtk::manage(new class Gtk::Label(_("channels")));
-	chan_count_label_2 = Gtk::manage(new class Gtk::Label(_("channels")));
-	chan_count_label_3 = Gtk::manage(new class Gtk::Label(_("channels")));
-	chan_count_label_4 = Gtk::manage(new class Gtk::Label(_("channels")));
+	chan_count_label_1 = new Gtk::Label(_("channels"));
+	chan_count_label_2 = new Gtk::Label(_("channels"));
+	chan_count_label_3 = new Gtk::Label(_("channels"));
+	chan_count_label_4 = new Gtk::Label(_("channels"));
 
 	chan_count_label_1->set_alignment(0,0.5);
 	chan_count_label_1->set_padding(0,0);
@@ -75,64 +76,64 @@ NewSessionDialog::NewSessionDialog()
 	chan_count_label_4->set_padding(0,0);
 	chan_count_label_4->set_line_wrap(false);
 
-	bus_label = Gtk::manage(new class Gtk::Label(_("<b>Busses</b>")));
-	input_label = Gtk::manage(new class Gtk::Label(_("<b>Inputs</b>")));
-	output_label = Gtk::manage(new class Gtk::Label(_("<b>Outputs</b>")));
+	bus_label = new Gtk::Label(_("<b>Busses</b>"));
+	input_label = new Gtk::Label(_("<b>Inputs</b>"));
+	output_label = new Gtk::Label(_("<b>Outputs</b>"));
 
-	session_location_label = Gtk::manage(new class Gtk::Label(_("Create Folder In :")));
-	m_folder = Gtk::manage(new class Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER));
-	session_template_label = Gtk::manage(new class Gtk::Label(_("Template :")));
-	m_template = Gtk::manage(new class Gtk::FileChooserButton());
-	m_create_control_bus = Gtk::manage(new class Gtk::CheckButton(_("Create Monitor Bus")));
+	session_location_label = new Gtk::Label(_("Create Folder In :"));
+	m_folder = new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	session_template_label = new Gtk::Label(_("Template :"));
+	m_template = new Gtk::FileChooserButton();
+	m_create_control_bus = new Gtk::CheckButton(_("Create Monitor Bus"));
 	
-	Gtk::Adjustment *m_control_bus_channel_count_adj = Gtk::manage(new class Gtk::Adjustment(2, 0, 100, 1, 10, 10));
-	m_control_bus_channel_count = Gtk::manage(new class Gtk::SpinButton(*m_control_bus_channel_count_adj, 1, 0));
+	Gtk::Adjustment *m_control_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 10));
+	m_control_bus_channel_count = new Gtk::SpinButton(*m_control_bus_channel_count_adj, 1, 0);
 	
-	Gtk::Adjustment *m_master_bus_channel_count_adj = Gtk::manage(new class Gtk::Adjustment(2, 0, 100, 1, 10, 10));
-	m_master_bus_channel_count = Gtk::manage(new class Gtk::SpinButton(*m_master_bus_channel_count_adj, 1, 0));
-	m_create_master_bus = Gtk::manage(new class Gtk::CheckButton(_("Create Master Bus")));
-	advanced_table = Gtk::manage(new class Gtk::Table(2, 2, true));
-	m_connect_inputs = Gtk::manage(new class Gtk::CheckButton(_("Automatically Connect to Physical Inputs")));
-	m_limit_input_ports = Gtk::manage(new class Gtk::CheckButton(_("Use only")));
+	Gtk::Adjustment *m_master_bus_channel_count_adj = Gtk::manage(new Gtk::Adjustment(2, 0, 100, 1, 10, 10));
+	m_master_bus_channel_count = new Gtk::SpinButton(*m_master_bus_channel_count_adj, 1, 0);
+	m_create_master_bus = new Gtk::CheckButton(_("Create Master Bus"));
+	advanced_table = new Gtk::Table(2, 2, true);
+	m_connect_inputs = new Gtk::CheckButton(_("Automatically Connect to Physical Inputs"));
+	m_limit_input_ports = new Gtk::CheckButton(_("Use only"));
 	
-	Gtk::Adjustment *m_input_limit_count_adj = Gtk::manage(new class Gtk::Adjustment(1, 0, 100, 1, 10, 10));
-	m_input_limit_count = Gtk::manage(new class Gtk::SpinButton(*m_input_limit_count_adj, 1, 0));
-	input_port_limit_hbox = Gtk::manage(new class Gtk::HBox(false, 0));
-	input_port_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
-	input_table = Gtk::manage(new class Gtk::Table(2, 2, false));
+	Gtk::Adjustment *m_input_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 10));
+	m_input_limit_count = new Gtk::SpinButton(*m_input_limit_count_adj, 1, 0);
+	input_port_limit_hbox = new Gtk::HBox(false, 0);
+	input_port_vbox = new Gtk::VBox(false, 0);
+	input_table = new Gtk::Table(2, 2, false);
 
-	bus_frame = Gtk::manage(new class Gtk::Frame());
-	bus_table = Gtk::manage (new Gtk::Table (2, 3, false));
-
-	input_frame = Gtk::manage(new class Gtk::Frame());
-	m_connect_outputs = Gtk::manage(new class Gtk::CheckButton(_("Automatically Connect Outputs")));
-	m_limit_output_ports = Gtk::manage(new class Gtk::CheckButton(_("Use only")));
+	bus_frame = new Gtk::Frame();
+	bus_table = new Gtk::Table (2, 3, false);
 	
-	Gtk::Adjustment *m_output_limit_count_adj = Gtk::manage(new class Gtk::Adjustment(1, 0, 100, 1, 10, 10));
-	m_output_limit_count = Gtk::manage(new class Gtk::SpinButton(*m_output_limit_count_adj, 1, 0));
-	output_port_limit_hbox = Gtk::manage(new class Gtk::HBox(false, 0));
-	output_port_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
+	input_frame = new Gtk::Frame();
+	m_connect_outputs = new Gtk::CheckButton(_("Automatically Connect Outputs"));
+	m_limit_output_ports = new Gtk::CheckButton(_("Use only"));
+	
+	Gtk::Adjustment *m_output_limit_count_adj = Gtk::manage(new Gtk::Adjustment(1, 0, 100, 1, 10, 10));
+	m_output_limit_count = new Gtk::SpinButton(*m_output_limit_count_adj, 1, 0);
+	output_port_limit_hbox = new Gtk::HBox(false, 0);
+	output_port_vbox = new Gtk::VBox(false, 0);
 	
 	Gtk::RadioButton::Group _RadioBGroup_m_connect_outputs_to_master;
-	m_connect_outputs_to_master = Gtk::manage(new class Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to Master Bus")));
-	m_connect_outputs_to_physical = Gtk::manage(new class Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to Physical Outputs")));
-	output_conn_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
-	output_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
+	m_connect_outputs_to_master = new Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to Master Bus"));
+	m_connect_outputs_to_physical = new Gtk::RadioButton(_RadioBGroup_m_connect_outputs_to_master, _("... to Physical Outputs"));
+	output_conn_vbox = new Gtk::VBox(false, 0);
+	output_vbox = new Gtk::VBox(false, 0);
 
-	output_frame = Gtk::manage(new class Gtk::Frame());
-	advanced_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
-	advanced_label = Gtk::manage(new class Gtk::Label(_("Advanced Options")));
-	advanced_expander = Gtk::manage(new class Gtk::Expander());
-	new_session_table = Gtk::manage(new class Gtk::Table(2, 2, false));
-	m_open_filechooser = Gtk::manage(new class Gtk::FileChooserButton());
-	open_session_hbox = Gtk::manage(new class Gtk::HBox(false, 0));
-	m_treeview = Gtk::manage(new class Gtk::TreeView());
-	recent_scrolledwindow = Gtk::manage(new class Gtk::ScrolledWindow());
+	output_frame = new Gtk::Frame();
+	advanced_vbox = new Gtk::VBox(false, 0);
+	advanced_label = new Gtk::Label(_("Advanced Options"));
+	advanced_expander = new Gtk::Expander();
+	new_session_table = new Gtk::Table(2, 2, false);
+	m_open_filechooser = new Gtk::FileChooserButton();
+	open_session_hbox = new Gtk::HBox(false, 0);
+	m_treeview = new Gtk::TreeView();
+	recent_scrolledwindow = new Gtk::ScrolledWindow();
 
-	recent_sesion_label = Gtk::manage(new class Gtk::Label(_("Recent:")));
-	recent_frame = Gtk::manage(new class Gtk::Frame());
-	open_session_vbox = Gtk::manage(new class Gtk::VBox(false, 0));
-	m_notebook = Gtk::manage(new class Gtk::Notebook());
+	recent_sesion_label = new Gtk::Label(_("Recent:"));
+	recent_frame = new Gtk::Frame();
+	open_session_vbox = new Gtk::VBox(false, 0);
+	m_notebook = new Gtk::Notebook();
 	session_name_label->set_alignment(0, 0.5);
 	session_name_label->set_padding(6,0);
 	session_name_label->set_line_wrap(false);
@@ -166,7 +167,7 @@ NewSessionDialog::NewSessionDialog()
 	m_master_bus_channel_count->set_numeric(true);
 	m_master_bus_channel_count->set_digits(0);
 	m_master_bus_channel_count->set_wrap(false);
-	open_session_file_label = Gtk::manage(new class Gtk::Label(_("Browse:")));
+	open_session_file_label = new Gtk::Label(_("Browse:"));
 	open_session_file_label->set_alignment(0, 0.5);
 	m_create_master_bus->set_flags(Gtk::CAN_FOCUS);
 	m_create_master_bus->set_relief(Gtk::RELIEF_NORMAL);
@@ -175,7 +176,7 @@ NewSessionDialog::NewSessionDialog()
 	m_create_master_bus->set_border_width(0);
 	advanced_table->set_row_spacings(0);
 	advanced_table->set_col_spacings(0);
-
+	
 	m_connect_inputs->set_flags(Gtk::CAN_FOCUS);
 	m_connect_inputs->set_relief(Gtk::RELIEF_NORMAL);
 	m_connect_inputs->set_mode(true);
@@ -194,7 +195,7 @@ NewSessionDialog::NewSessionDialog()
 	m_input_limit_count->set_wrap(false);
 	m_input_limit_count->set_sensitive(false);
 
-	bus_hbox = Gtk::manage (new Gtk::HBox (false, 0));
+	bus_hbox = new Gtk::HBox (false, 0);
 	bus_hbox->pack_start (*bus_table, Gtk::PACK_SHRINK, 18);
 
 	bus_label->set_alignment(0, 0.5);
@@ -225,7 +226,7 @@ NewSessionDialog::NewSessionDialog()
 	input_table->set_col_spacings(0);
 	input_table->attach(*input_port_vbox, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 6);
 
-	input_hbox = Gtk::manage (new Gtk::HBox (false, 0));
+	input_hbox = new Gtk::HBox (false, 0);
 	input_hbox->pack_start (*input_table, Gtk::PACK_SHRINK, 18);
 
 	input_label->set_alignment(0, 0.5);
@@ -285,7 +286,7 @@ NewSessionDialog::NewSessionDialog()
 	output_frame->set_shadow_type(Gtk::SHADOW_NONE);
 	output_frame->set_label_align(0,0.5);
 
-	output_hbox = Gtk::manage (new Gtk::HBox (false, 0));
+	output_hbox = new Gtk::HBox (false, 0);
 	output_hbox->pack_start (*output_vbox, Gtk::PACK_SHRINK, 18);
 
 	output_frame->add(*output_hbox);

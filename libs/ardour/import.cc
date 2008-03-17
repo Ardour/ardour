@@ -48,26 +48,66 @@
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
 #include <ardour/resampled_source.h>
+#include <ardour/sndfileimportable.h>
 #include <ardour/analyser.h>
 #include <ardour/smf_reader.h>
 #include <ardour/smf_source.h>
 #include <ardour/tempo.h>
+
+#ifdef HAVE_COREAUDIO
+#include <ardour/caimportable.h>
+#endif
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 
-static std::auto_ptr<ImportableSource>
+
+static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
-	std::auto_ptr<ImportableSource> source(new ImportableSource(path));
+#ifdef HAVE_COREAUDIO
 
-	if (source->samplerate() == samplerate) {
-		return source;
-	}
+	/* see if we can use CoreAudio to handle the IO */
 	
-	return std::auto_ptr<ImportableSource>(new ResampledImportableSource(path, samplerate, quality));
+	try { 
+		boost::shared_ptr<CAImportableSource> source(new CAImportableSource(path));
+		
+		if (source->samplerate() == samplerate) {
+			return source;
+		}
+		
+		/* rewrap as a resampled source */
+
+		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+	}
+
+	catch (...) {
+
+		/* fall back to SndFile */
+
+#endif	
+
+		try { 
+			boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
+			
+			if (source->samplerate() == samplerate) {
+				return source;
+			}
+
+			/* rewrap as a resampled source */
+			
+			return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+		}
+		
+		catch (...) {
+			throw; // rethrow
+		}
+		
+#ifdef HAVE_COREAUDIO		
+	}
+#endif
 }
 
 static std::string
@@ -306,7 +346,7 @@ write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 					smfs->session().engine().frame_rate(),
 					smfs->session().tempo_map().meter_at(timeline_position));
 
-		smfs->update_length(0, (t * source->ppqn()) * frames_per_beat);
+		smfs->update_length(0, (nframes_t) floor ((t * source->ppqn()) * frames_per_beat));
 
 		smfs->flush_header();
 		smfs->flush_footer();
@@ -345,26 +385,24 @@ Session::import_audiofiles (import_status& status)
 			p != status.paths.end() && !status.cancel;
 			++p, ++cnt)
 	{
-		std::auto_ptr<ImportableSource> source;
-		std::auto_ptr<SMFReader>        smf_reader;
-		
-		const DataType type = ((*p).rfind(".mid") != string::npos)
-				? DataType::MIDI : DataType::AUDIO;
 
+		boost::shared_ptr<ImportableSource> source;
+		std::auto_ptr<SMFReader>        smf_reader;
+		const DataType type = ((*p).rfind(".mid") != string::npos) ? 
+			DataType::MIDI : DataType::AUDIO;
+		
 		if (type == DataType::AUDIO) {
-			try
-			{
+			try {
 				source = open_importable_source (*p, frame_rate(), status.quality);
 				channels = source->channels();
-			} catch (const failed_constructor& err)
-			{
+			} catch (const failed_constructor& err) {
 				error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
 				status.done = status.cancel = true;
 				return;
 			}
+
 		} else {
-			try
-			{
+			try {
 				smf_reader = std::auto_ptr<SMFReader>(new SMFReader(*p));
 				channels = smf_reader->num_tracks();
 			} catch (const SMFReader::UnsupportedTime& err) {
@@ -378,11 +416,9 @@ Session::import_audiofiles (import_status& status)
 			}
 		}
 
-		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source,
-								      *p,
-				get_best_session_directory_for_new_source (),
-				channels);
-		
+		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p,
+								      get_best_session_directory_for_new_source (),
+								      channels);
 		Sources newfiles;
 
 		if (status.replace_existing_source) {
@@ -403,9 +439,9 @@ Session::import_audiofiles (import_status& status)
 			}
 		}
 
-		if (source.get()) { // audio
+		if (source) { // audio
 			status.doing_what = compose_status_message (*p, source->samplerate(),
-					frame_rate(), cnt, status.paths.size());
+								    frame_rate(), cnt, status.paths.size());
 			write_audio_data_to_new_files (source.get(), status, newfiles);
 		} else if (smf_reader.get()) { // midi
 			status.doing_what = string_compose(_("loading MIDI file %1"), *p);

@@ -39,6 +39,8 @@ setup_gtk_ardour_enums ()
 	Width width;
 	ImportMode import_mode;
 	EditPoint edit_point;
+	WaveformScale waveform_scale;
+	WaveformShape waveform_shape;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -66,4 +68,12 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (EditAtMouse);
 	REGISTER_ENUM (EditAtSelectedMarker);
 	REGISTER (edit_point);
+
+	REGISTER_ENUM (LinearWaveform);
+	REGISTER_ENUM (LogWaveform);
+	REGISTER (waveform_scale);
+
+	REGISTER_ENUM (Traditional);
+	REGISTER_ENUM (Rectified);
+	REGISTER (waveform_shape);
 }

@@ -1080,7 +1080,7 @@ void
 Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* src)
 {
 	ImageFrameTimeAxis* iftav ;
-	iftav = new ImageFrameTimeAxis(track_name, *this, *session, track_canvas) ;
+	iftav = new ImageFrameTimeAxis(track_name, *this, *session, *track_canvas) ;
 	iftav->set_time_axis_name(track_name, this) ;
 	track_views.push_back(iftav) ;
 
@@ -1097,7 +1097,7 @@ Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* sr
 void
 Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, TimeAxisView* marked_track)
 {
-	MarkerTimeAxis* mta = new MarkerTimeAxis (*this, *this->current_session(), track_canvas, track_name, marked_track) ;
+	MarkerTimeAxis* mta = new MarkerTimeAxis (*this, *this->current_session(), *track_canvas, track_name, marked_track) ;
 	((ImageFrameTimeAxis*)marked_track)->add_marker_time_axis(mta, this) ;
 	track_views.push_back(mta) ;
 

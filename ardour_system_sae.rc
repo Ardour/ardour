@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ardour>
+  <MIDI-port tag="ardour" device="ardour" type="coremidi" mode="duplex"/>
+  <MIDI-port tag="mcu" device="ardour" type="coremidi" mode="duplex"/>
+  <Config>
+    <Option name="minimum-disk-io-bytes" value="262144"/>
+    <Option name="track-buffer-seconds" value="5.000000"/>
+    <Option name="mute-affects-pre-fader" value="yes"/>
+    <Option name="mute-affects-post-fader" value="yes"/>
+    <Option name="mute-affects-control-outs" value="yes"/>
+    <Option name="mute-affects-main-outs" value="yes"/>
+    <Option name="solo-latch" value="yes"/>
+    <Option name="mtc-port" value="ardour"/>
+    <Option name="mmc-port" value="ardour"/>
+    <Option name="midi-port" value="ardour"/>
+    <Option name="use-mmc" value="yes"/>
+    <Option name="send-mmc" value="yes"/>
+    <Option name="jack-time-master" value="yes"/>
+    <Option name="trace-midi-input" value="no"/>
+    <Option name="trace-midi-output" value="no"/>
+    <Option name="plugins-stop-with-transport" value="no"/>
+    <Option name="no-sw-monitoring" value="no"/>
+    <Option name="stop-recording-on-xrun" value="no"/>
+    <Option name="create-xrun-marker" value="yes"/>
+    <Option name="stop-at-session-end" value="no"/>
+    <Option name="auto-xfade" value="yes"/>
+    <Option name="crossfades-active" value="1"/>
+    <Option name="crossfades-visible" value="1"/>
+    <Option name="xfade-model" value="0"/>
+    <Option name="no-new-session-dialog" value="yes"/>
+    <Option name="timecode-source-is-synced" value="yes"/>
+    <Option name="auditioner-left-out" value="coreaudio:Built-in Audio:in1"/>
+    <Option name="auditioner-right-out" value="coreaudio:Built-in Audio:in2"/>
+    <Option name="quieten-at-speed" value="1.000000"/>
+    <Option name="use-vst" value="yes"/>
+    <Option name="use-tranzport" value="yes"/>
+    <Option name="disk-choice-space-threshold" value="57600000"/>
+    <Option name="destructive-xfade-msecs" value="20"/>
+    <Option name="periodic-safety-backups" value="1"/>
+    <Option name="periodic-safety-backup-interval" value="120"/>
+    <Option name="show-track-meters" value="1"/>
+	<Option name="default-narrow_ms" value="0"/>
+    <Option name="smpte-format" value="6"/>
+	<Option name="font-scale" value="102400"/>
+  </Config>
+  <extra>
+    <RulerVisibility smpte="yes" bbt="yes" frames="no" minsec="no" tempo="yes" meter="yes" marker="yes" rangemarker="no" transportmarker="yes" cdmarker="no"/>
+    <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
+  </extra>
+</Ardour>
+

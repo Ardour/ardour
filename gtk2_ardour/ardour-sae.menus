@@ -11,7 +11,6 @@
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
            <separator/>
-           <menuitem action='AddTrackBus'/>	
 
 	   <menu name='Files' action='Files'>
               <menuitem action='addExistingAudioFiles'/>
@@ -27,6 +26,7 @@
            </menu>
            <menuitem action='ToggleOptionsEditor'/>
            <menuitem action='About'/>
+           <menuitem action='Quit'/>
         </menu>
 
         <menu name='Transport' action='Transport'>
@@ -50,17 +50,24 @@
 	       		<menuitem action='set-punch-from-region'/>
                </menu>
 
+	       <separator/>
                <menuitem action='Forward'/>
                <menuitem action='Rewind'/>
                <menuitem action='TransitionToRoll'/>
                <menuitem action='TransitionToReverse'/>
-	       <menuitem action='center-playhead'/>
+	       <separator/>
+
+              
 	       <menuitem action='set-playhead'/>
-               <menuitem action='playhead-to-edit'/>
-               <menuitem action='nudge-playhead-forward'/>
-               <menuitem action='nudge-playhead-backward'/>
 
 	       <menu action="MovePlayHeadMenu">
+ 	           
+                   <menuitem action='playhead-to-edit'/>
+  	           <menuitem action='center-playhead'/>
+	           <separator/>
+ 		   <menuitem action='nudge-playhead-forward'/>
+                   <menuitem action='nudge-playhead-backward'/>
+		   <separator/>
                    <menuitem action='tab-to-transient-forwards'/>
                    <menuitem action='tab-to-transient-backwards'/>
 	           <separator/>
@@ -101,13 +108,13 @@
 	       </menu>
 
 	       <separator/>
+               <menuitem action='TogglePunch'/>
                <menuitem action='TogglePunchIn'/>
                <menuitem action='TogglePunchOut'/>
                <menuitem action='ToggleAutoInput'/>
                <menuitem action='ToggleAutoPlay'/>
                <menuitem action='ToggleAutoReturn'/>
                <menuitem action='ToggleClick'/>
-               <menuitem action='toggle-follow-playhead'/>
 	       <separator/>
 	       <menu action='LocateToMarker'>
 		</menu>
@@ -126,11 +133,14 @@
 	            <menuitem action='editor-separate'/>
 	            <menuitem action='separate-from-loop'/>
 	            <menuitem action='separate-from-punch'/>
+		    <separator/>
+		    <menuitem action='split-region-at-transients'/>
                </menu>
                <separator/>       
 	       <menuitem action='duplicate-region'/>
 	       <menuitem action='multi-duplicate-region'/>
 	       <menuitem action='region-fill-track'/>
+	       <separator/>
 	       <menu action="AlignMenu">
 		   <menuitem action='align-regions-start'/>
 		   <menuitem action='align-regions-start-relative'/>
@@ -169,7 +179,26 @@
 	       </menu>	   
         </menu>
 
-	<menu name='Regions' action='Regions'>
+        <menu action='TrackMenu'>
+	        <menuitem action='AddTrackBus'/>	
+	        <menu action='TrackHeightMenu'>
+		     <menuitem action='track-height-largest'/>
+		     <menuitem action='track-height-large'/>
+		     <menuitem action='track-height-larger'/>
+		     <menuitem action='track-height-normal'/>
+		     <menuitem action='track-height-smaller'/>
+		     <menuitem action='track-height-small'/>
+		</menu>
+		<menu action='WaveformMenu'>
+		      <menuitem action='toggle-waveform-visible'/>
+		      <menuitem action='linear-waveforms'/>
+		      <menuitem action='logarithmic-waveforms'/>
+		</menu>
+		<menuitem action='toggle-track-active'/>	
+		<menuitem action='remove-track'/>	
+	</menu>
+
+	<menu action='RegionMenu'>
 	      <menuitem action='insert-region'/>
 	      <menuitem action='rename-region'/>
 	      <menuitem action='auto-rename-region'/>
@@ -181,16 +210,13 @@
 	      <menuitem action='remove-region-sync'/>
               <menuitem action='mute-unmute-region'/>
 	      <separator/>       
-              <menuitem action='monoize-region'/>
+              <menuitem action='reverse-region'/>    
+	      <menuitem action='monoize-region'/>
 	      <menuitem action='normalize-region'/>
-	      <menuitem action='split-region-at-transients'/>
-	      <separator/>       
-	      <menu action="RegionGainMenu">
-			<menuitem action='boost-region-gain'/>
-			<menuitem action='cut-region-gain'/>
-	      </menu>	      		   
+	      <menuitem action='boost-region-gain'/>
+	      <menuitem action='cut-region-gain'/>      		   
 	      <menuitem action='pitch-shift-region'/>
-	      <menuitem action='reverse-region'/>
+	      
         </menu>         
 
         <menu name='View' action = 'View'>
@@ -198,6 +224,7 @@
 	       <menuitem action='show-editor-mixer'/>
                <menuitem action='ToggleMeasureVisibility'/>
 	       <menuitem action='ToggleLogoVisibility'/>
+	       <separator/>
 	       <menu action="PrimaryClockMenu">
 	       	     <menuitem action="primary-clock-bbt"/>
 	       	     <menuitem action="primary-clock-minsec"/>
@@ -211,15 +238,15 @@
 	       	     <menuitem action="secondary-clock-off"/>
 	       </menu>
 	       <menu action="RulerMenu">
-	       	     <menuitem action="toggle-bbt-ruler"/>
 	       	     <menuitem action="toggle-minsec-ruler"/>
 	       	     <menuitem action="toggle-samples-ruler"/>
+	       	     <menuitem action="toggle-bbt-ruler"/>
 		     <separator/>
 	       	     <menuitem action="toggle-meter-ruler"/>
 	       	     <menuitem action="toggle-tempo-ruler"/>
-	       	     <menuitem action="toggle-range-ruler"/>
-	       	     <menuitem action="toggle-cd-marker-ruler"/>
 	       	     <menuitem action="toggle-loop-punch-ruler"/>
+	       	     <menuitem action="toggle-cd-marker-ruler"/>
+	       	     <menuitem action="toggle-marker-ruler"/>
 	       </menu>
 	       <menu action="ZoomMenu">
                	     <menuitem action='temporal-zoom-in'/>
@@ -235,22 +262,28 @@
                	     <menuitem action='scroll-backward'/>
 	       </menu>
 	       <separator/>
-	       <menu action="Windows">
-                     <menuitem action='goto-editor'/>
-		     <menuitem action='goto-mixer'/>
-		     <menuitem action='ToggleLocations'/>
-		     <menuitem action='ToggleKeyEditor'/>
-		     <menuitem action='ToggleThemeManager'/>
-		     <menuitem action='ToggleBigClock'/>
-		     <menuitem action='toggle-rhythm-ferret'/>
-		</menu>
         </menu>
+
+	<menu action="WindowMenu">
+	      <menuitem action='goto-editor'/>
+	      <menuitem action='goto-mixer'/>
+	      <menuitem action='ToggleLocations'/>
+	      <menuitem action='ToggleKeyEditor'/>
+	      <menuitem action='ToggleThemeManager'/>
+	      <menuitem action='ToggleBigClock'/>
+	      <menuitem action='toggle-rhythm-ferret'/>
+	</menu>
 
         <menu name='Options' action='Options'>
                <menu action='Monitoring'>
                    <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
                </menu>
+	       <menu action="SyncMenu">
+	            <menuitem action='SendMMC'/>
+		    <menuitem action='UseMMC'/>
+                    <menuitem action='SendMTC'/>
+	      </menu>
 	       <menu action="TempoMenu">
 	       	      <menuitem action='set-tempo-from-region'/>
 		      <menuitem action='set-tempo-from-edit-range'/>
@@ -267,9 +300,9 @@
                    <menuitem action='zoom-focus-mouse'/>
                </menu>
 	       <menu action="EditPointMenu">
-	           <menuitem action='edit-point-playhead'/>
-	           <menuitem action='edit-point-mouse'/>
-	           <menuitem action='edit-point-marker'/>
+	           <menuitem action='edit-at-playhead'/>
+	           <menuitem action='edit-at-mouse'/>
+	           <menuitem action='edit-at-selected-marker'/>
 	       </menu>
 	       <menu action='KeyMouseActions'>
 		   <menuitem action='select-next-route'/>
@@ -292,9 +325,22 @@
 		   <menuitem action='cycle-snap-mode'/>
 		   <menuitem action='cycle-snap-choice'/>
                </menu>
+               <menuitem action='toggle-follow-playhead'/>
 	  </menu>
 
      </menubar>
+
+     <popup action="RulerMenuPopup">
+     	  <menuitem action="toggle-minsec-ruler"/>
+	  <menuitem action="toggle-samples-ruler"/>
+          <menuitem action="toggle-bbt-ruler"/>
+	  <separator/>
+	  <menuitem action="toggle-meter-ruler"/>
+	  <menuitem action="toggle-tempo-ruler"/>
+	  <menuitem action="toggle-loop-punch-ruler"/>
+	  <menuitem action="toggle-cd-marker-ruler"/>
+	  <menuitem action="toggle-marker-ruler"/>
+     </popup>
 
      <popup name='redirectmenu'>
 	 <menuitem action='newplugin'/>

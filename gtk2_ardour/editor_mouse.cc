@@ -82,21 +82,21 @@ Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
 	int x, y;
 	double wx, wy;
 	Gdk::ModifierType mask;
-	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas.get_window();
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas->get_window();
 	Glib::RefPtr<const Gdk::Window> pointer_window;
 	
 	pointer_window = canvas_window->get_pointer (x, y, mask);
 
-	if (pointer_window == track_canvas.get_bin_window()) {
+	if (pointer_window == track_canvas->get_bin_window()) {
 
-		track_canvas.window_to_world (x, y, wx, wy);
+		track_canvas->window_to_world (x, y, wx, wy);
 		in_track_canvas = true;
 
 	} else {
 		in_track_canvas = false;
 
-		if (pointer_window == time_canvas.get_bin_window()) {
-			time_canvas.window_to_world (x, y, wx, wy);
+		if (pointer_window == time_canvas->get_bin_window()) {
+			time_canvas->window_to_world (x, y, wx, wy);
 		} else {
 			return false;
 		}
@@ -134,18 +134,18 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
-		track_canvas.w2c(event->button.x, event->button.y, *pcx, *pcy);
+		track_canvas->w2c(event->button.x, event->button.y, *pcx, *pcy);
 		break;
 	case GDK_MOTION_NOTIFY:
-		track_canvas.w2c(event->motion.x, event->motion.y, *pcx, *pcy);
+		track_canvas->w2c(event->motion.x, event->motion.y, *pcx, *pcy);
 		break;
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
-		track_canvas.w2c(event->crossing.x, event->crossing.y, *pcx, *pcy);
+		track_canvas->w2c(event->crossing.x, event->crossing.y, *pcx, *pcy);
 		break;
 	case GDK_KEY_PRESS:
 	case GDK_KEY_RELEASE:
-		// track_canvas.w2c(event->key.x, event->key.y, *pcx, *pcy);
+		// track_canvas->w2c(event->key.x, event->key.y, *pcx, *pcy);
 		break;
 	default:
 		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;
@@ -262,7 +262,7 @@ Editor::set_canvas_cursor ()
 	}
 
 	if (is_drawable()) {
-		track_canvas.get_window()->set_cursor(*current_canvas_cursor);
+	        track_canvas->get_window()->set_cursor(*current_canvas_cursor);
 	}
 }
 
@@ -463,7 +463,7 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 	set_midi_edit_cursor (current_midi_edit_mode());
 
 	if (is_drawable()) {
-		track_canvas.get_window()->set_cursor(*current_canvas_cursor);
+		track_canvas->get_window()->set_cursor(*current_canvas_cursor);
 	}
 }
 
@@ -581,7 +581,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	track_canvas.grab_focus();
+	track_canvas->grab_focus();
 
 	if (session && session->actively_recording()) {
 		return true;
@@ -851,7 +851,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 			scrub_reverse_distance = 0;
 			last_scrub_x = event->button.x;
 			scrubbing_direction = 0;
-			track_canvas.get_window()->set_cursor (*transparent_cursor);
+			track_canvas->get_window()->set_cursor (*transparent_cursor);
 			/* rest handled in motion & release */
 			break;
 
@@ -1197,7 +1197,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			
 		case MouseAudition:
 			_scrubbing = false;
-			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
 				switch (item_type) {
@@ -1293,7 +1293,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			fraction = 1.0 - (cp->get_y() / cp->line().height());
 
 			if (is_drawable() && !_scrubbing) {
-			        track_canvas.get_window()->set_cursor (*fader_cursor);
+			        track_canvas->get_window()->set_cursor (*fader_cursor);
 			}
 
 			last_item_entered_n++;
@@ -1310,7 +1310,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (line)
 				line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredGainLine.get();
 			if (is_drawable()) {
-				track_canvas.get_window()->set_cursor (*fader_cursor);
+				track_canvas->get_window()->set_cursor (*fader_cursor);
 			}
 		}
 		break;
@@ -1323,14 +1323,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 					line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredAutomationLine.get();
 			}
 			if (is_drawable()) {
-				track_canvas.get_window()->set_cursor (*fader_cursor);
+				track_canvas->get_window()->set_cursor (*fader_cursor);
 			}
 		}
 		break;
 		
 	case RegionViewNameHighlight:
 		if (is_drawable() && mouse_mode == MouseObject) {
-			track_canvas.get_window()->set_cursor (*trimmer_cursor);
+			track_canvas->get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
 
@@ -1345,7 +1345,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 #endif
 
 		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*trimmer_cursor);
+			track_canvas->get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
 
@@ -1353,10 +1353,10 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (is_drawable()) {
 			switch (_edit_point) {
 			case EditAtMouse:
-				track_canvas.get_window()->set_cursor (*grabber_edit_point_cursor);
+				track_canvas->get_window()->set_cursor (*grabber_edit_point_cursor);
 				break;
 			default:
-				track_canvas.get_window()->set_cursor (*grabber_cursor);
+				track_canvas->get_window()->set_cursor (*grabber_cursor);
 				break;
 			}
 		}
@@ -1368,7 +1368,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (mouse_mode == MouseObject && is_drawable()) {
-				track_canvas.get_window()->set_cursor (*trimmer_cursor);
+				track_canvas->get_window()->set_cursor (*trimmer_cursor);
 			}
 		} 
 		break;
@@ -1389,7 +1389,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				break;
 			}
 
-			track_canvas.get_window()->set_cursor (*cursor);
+			track_canvas->get_window()->set_cursor (*cursor);
 
 			AutomationTimeAxisView* atv;
 			if ((atv = static_cast<AutomationTimeAxisView*>(item->get_data ("trackview"))) != 0) {
@@ -1406,7 +1406,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterBarItem:
 	case TempoBarItem:
 		if (is_drawable()) {
-			time_canvas.get_window()->set_cursor (*timebar_cursor);
+			time_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 
@@ -1420,7 +1420,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		if (is_drawable()) {
-			time_canvas.get_window()->set_cursor (*timebar_cursor);
+			time_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 	case FadeInHandleItem:
@@ -1481,7 +1481,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		
 		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 		}
 
 		hide_verbose_canvas_cursor ();
@@ -1500,7 +1500,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 #endif
 
 		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 		}
 		break;
 
@@ -1513,7 +1513,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				line->property_fill_color_rgba() = al->get_line_color();
 		}
 		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 		}
 		break;
 
@@ -1521,7 +1521,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		/* see enter_handler() for notes */
 		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
-				track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+				track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 			}
 		}
 		break;
@@ -1533,7 +1533,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case TempoBarItem:
 	case MarkerBarItem:
 		if (is_drawable()) {
-			time_canvas.get_window()->set_cursor (*timebar_cursor);
+			time_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 		
@@ -1550,7 +1550,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case TempoMarkerItem:
 		
 		if (is_drawable()) {
-			time_canvas.get_window()->set_cursor (*timebar_cursor);
+			time_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 
 		break;
@@ -1569,7 +1569,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case AutomationTrackItem:
 		if (is_drawable()) {
-			track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 			clear_entered_track = true;
 			Glib::signal_idle().connect (mem_fun(*this, &Editor::left_automation_track));
 		}
@@ -1607,7 +1607,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		   event might do, its a good tradeoff.  
 		*/
 		
-		track_canvas.get_pointer (x, y);
+		track_canvas->get_pointer (x, y);
 	}
 	
 	if (current_stepping_trackview) {
@@ -2750,8 +2750,9 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	// the point doesn't 'jump' to the mouse after the first drag
 	drag_info.grab_x = control_point->get_x();
 	drag_info.grab_y = control_point->get_y();
+
 	control_point->line().parent_group().i2w(drag_info.grab_x, drag_info.grab_y);
-	track_canvas.w2c(drag_info.grab_x, drag_info.grab_y, drag_info.grab_x, drag_info.grab_y);
+	track_canvas->w2c(drag_info.grab_x, drag_info.grab_y, drag_info.grab_x, drag_info.grab_y);
 
 	drag_info.grab_frame = pixel_to_frame(drag_info.grab_x);
 
@@ -4080,7 +4081,15 @@ Editor::show_verbose_time_cursor (nframes_t frame, double offset, double xpos, d
 		return;
 	}
 
-	switch (Profile->get_small_screen() ? ARDOUR_UI::instance()->primary_clock.mode () : ARDOUR_UI::instance()->secondary_clock.mode ()) {
+	AudioClock::Mode m;
+
+	if (Profile->get_sae() || Profile->get_small_screen()) {
+		m = ARDOUR_UI::instance()->primary_clock.mode();
+	} else {
+		m = ARDOUR_UI::instance()->secondary_clock.mode();
+	}
+
+	switch (m) {
 	case AudioClock::BBT:
 		session->bbt_time (frame, bbt);
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
@@ -4132,7 +4141,15 @@ Editor::show_verbose_duration_cursor (nframes_t start, nframes_t end, double off
 		return;
 	}
 
-	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
+	AudioClock::Mode m;
+
+	if (Profile->get_sae() || Profile->get_small_screen()) {
+		m = ARDOUR_UI::instance()->primary_clock.mode ();
+	} else {
+		m = ARDOUR_UI::instance()->secondary_clock.mode ();
+	}
+
+	switch (m) {
 	case AudioClock::BBT:
 		session->bbt_time (start, sbbt);
 		session->bbt_time (end, ebbt);
@@ -4187,6 +4204,7 @@ Editor::show_verbose_duration_cursor (nframes_t start, nframes_t end, double off
 	else {
 		set_verbose_canvas_cursor (buf, drag_info.current_pointer_x + offset, drag_info.current_pointer_y + offset);
 	}
+
 	show_verbose_canvas_cursor ();
 }
 

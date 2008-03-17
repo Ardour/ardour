@@ -1097,17 +1097,17 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 			ARDOUR::PluginType type = plugin_processor->type();
 
 			if (type == ARDOUR::LADSPA || type == ARDOUR::VST) {
+
 				PluginUIWindow *plugin_ui;
 			
+				/* these are both allowed to be null */
+				
+				Container* toplevel = get_toplevel();
+				Window* win = dynamic_cast<Gtk::Window*>(toplevel);
+				
 				if (plugin_processor->get_gui() == 0) {
 								
-					plugin_ui = new PluginUIWindow (plugin_processor, _session.frame_rate(), _session.engine().frames_per_cycle());
-
-					if (_owner_is_mixer) {
-						ARDOUR_UI::instance()->the_mixer()->ensure_float (*plugin_ui);
-					} else {
-						ARDOUR_UI::instance()->the_editor().ensure_float (*plugin_ui);
-					}
+					plugin_ui = new PluginUIWindow (win, plugin_processor);
 
 					WindowTitle title(Glib::get_application_name());
 					title += generate_processor_title (plugin_processor);
@@ -1117,7 +1117,6 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 					
 					// change window title when route name is changed
 					_route->NameChanged.connect (bind (mem_fun(*this, &ProcessorBox::route_name_changed), plugin_ui, boost::weak_ptr<PluginInsert> (plugin_processor)));
-					
 				
 				} else {
 					plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_processor->get_gui());

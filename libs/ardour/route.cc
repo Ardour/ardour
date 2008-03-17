@@ -828,7 +828,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
 			pi->set_count (1);
-
+			
 			if (pi->natural_input_streams() == ChanCount::ZERO) {
 				/* generator plugin */
 				_have_internal_generator = true;
@@ -1198,6 +1198,8 @@ Route::_reset_plugin_counts (ProcessorStreams* err)
 	ProcessorList::iterator r;
 	map<Placement,list<ProcessorCount> > processor_map;
 	ChanCount initial_streams;
+	ChanCount post_fader_input;
+	int ret = -1;
 
 	/* Process each placement in order, checking to see if we 
 	   can really do what has been requested.
@@ -1205,7 +1207,8 @@ Route::_reset_plugin_counts (ProcessorStreams* err)
 	
 	/* divide processors up by placement so we get the signal flow
 	   properly modelled. we need to do this because the _processors
-	   list is not sorted by placement
+	   list is not sorted by placement, and because other reasons may 
+	   exist now or in the future for this separate treatment.
 	*/
 
 	/* ... but it should/will be... */
@@ -1219,19 +1222,18 @@ Route::_reset_plugin_counts (ProcessorStreams* err)
 		}
 	}
 	
-
 	/* A: PreFader */
 	
 	if ( ! check_some_plugin_counts (processor_map[PreFader], n_inputs (), err)) {
-		return -1;
+		goto streamcount;
 	}
 
-	ChanCount post_fader_input = (err ? err->count : n_inputs());
+	post_fader_input = (err ? err->count : n_inputs());
 
 	/* B: PostFader */
 
 	if ( ! check_some_plugin_counts (processor_map[PostFader], post_fader_input, err)) {
-		return -1;
+		goto streamcount;
 	}
 
 	/* OK, everything can be set up correctly, so lets do it */
@@ -1241,14 +1243,14 @@ Route::_reset_plugin_counts (ProcessorStreams* err)
 
 	/* recompute max outs of any processor */
 
-	processor_max_outs.reset();
-	ProcessorList::iterator prev = _processors.end();
+	ret = 0;
 
-	for (r = _processors.begin(); r != _processors.end(); prev = r, ++r) {
+  streamcount:
+	processor_max_outs.reset();
+
+	for (r = _processors.begin(); r != _processors.end(); ++r) {
 		processor_max_outs = max ((*r)->output_streams (), processor_max_outs);
 	}
-
-	/* we're done */
 
 	return 0;
 }				   

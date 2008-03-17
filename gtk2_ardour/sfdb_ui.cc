@@ -874,10 +874,10 @@ SoundFileOmega::bad_file_message()
 bool
 SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool& src_needed, bool& multichannel)
 {
-	SNDFILE* sf;
-	SF_INFO info;
+	SoundFileInfo info;
 	nframes64_t sz = 0;
 	bool err = false;
+	string errmsg;
 
 	same_size = true;
 	src_needed = false;
@@ -885,19 +885,16 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 
 	for (vector<ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
-		info.format = 0; // libsndfile says to clear this before sf_open().
+		if (AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
 		
-		if ((sf = sf_open ((char*) (*i).c_str(), SFM_READ, &info)) != 0) { 
-			sf_close (sf);
-
 			if (info.channels > 1) {
 				multichannel = true;
 			}
-
+			
 			if (sz == 0) {
-				sz = info.frames;
+				sz = info.length;
 			} else {
-				if (sz != info.frames) {
+				if (sz != info.length) {
 					same_size = false;
 				}
 			}
@@ -907,10 +904,16 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 			}
 
 		} else if (SMFSource::safe_file_extension (*i)) {
+
 			SMFReader reader(*i);
 			if (reader.num_tracks() > 1) {
 				multichannel = true; // "channel" == track here...
 			}
+
+			/* XXX we need err = true handling here in case 
+			   we can't check the file
+			*/
+
 		} else {
 			err = true;
 		}

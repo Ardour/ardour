@@ -197,21 +197,32 @@ fixup_bundle_environment ()
 	
 	localedir = strdup (path.c_str());
 
-	/* write a pango.rc file and tell pango to use it */
+	/* write a pango.rc file and tell pango to use it. we'd love
+	   to put this into the Ardour.app bundle and leave it there,
+	   but the user may not have write permission. so ... 
 
-	path = dir_path;
-	path += "/../Resources/pango.rc";
+	   we also have to make sure that the user ardour directory
+	   actually exists ...
+	*/
+
+	sys::path pangopath = user_config_directory();
+	pangopath /= "pango.rc";
+	path = pangopath.to_string();
 
 	std::ofstream pangorc (path.c_str());
 	if (!pangorc) {
 		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
 	} else {
 		pangorc << "[Pango]\nModuleFiles=";
-		Glib::ustring mpath = dir_path;
-		mpath += "/../Resources/pango.modules";
-		pangorc << mpath << endl;
-		
+
+		pangopath = dir_path;
+		pangopath /= '..';
+		pangopath /= 'Resources';
+		pangopath /= 'pango.modules';
+			
+		pangorc << pangopath.to_string() << endl;
 		pangorc.close ();
+
 		setenv ("PANGO_RC_FILE", path.c_str(), 1);
 	}
 
@@ -257,7 +268,7 @@ int main (int argc, char *argv[])
 #endif
 {
 	vector<Glib::ustring> null_file_list;
-
+	
 #ifdef __APPLE__
 	fixup_bundle_environment ();
 #endif
@@ -305,7 +316,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (no_splash) {
-		cerr << _("Copyright (C) 1999-2007 Paul Davis") << endl
+		cerr << _("Copyright (C) 1999-2008 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker") << endl
 		     << endl
 		     << _("Ardour comes with ABSOLUTELY NO WARRANTY") << endl

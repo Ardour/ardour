@@ -169,7 +169,7 @@
                    <menuitem action='select-next-route'/>
                    <menuitem action='select-prev-route'/>
 	</menu>
-	<menu name='Regions' action='Regions'>
+	<menu action='RegionMenu'>
                    <menuitem action='split-region-at-transients'/>
                    <menuitem action='crop'/>
                    <menuitem action='duplicate-region'/>
@@ -275,7 +275,7 @@
                <menuitem action='scroll-playhead-forward'/>
                <menuitem action='scroll-playhead-backward'/>
    	       <separator/>
-               <menuitem action='ToggleWaveformVisibility'/>
+               <menuitem action='toggle-waveform-visible'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
                <menuitem action='ToggleMeasureVisibility'/>
 	       <separator/>
@@ -298,7 +298,7 @@
                    <menuitem action='JACKLatency8192'/>
                </menu>
         </menu>
-        <menu name='Windows' action = 'Windows'>
+        <menu action = 'WindowMenu'>
 	       <menuitem action='ToggleMaximalEditor'/>
 	       <separator/>
                <menuitem action='goto-editor'/>
@@ -455,6 +455,21 @@
 	     <menuitem action='About'/>
 	</menu>
      </menubar>
+
+     <popup action="RulerMenuPopup">
+	   <menuitem action="toggle-minsec-ruler"/>
+	   <menuitem action="toggle-timecode-ruler"/>
+	   <menuitem action="toggle-samples-ruler"/>
+     	   <menuitem action="toggle-bbt-ruler"/>
+	   <separator/>
+	   <menuitem action="toggle-meter-ruler"/>
+	   <menuitem action="toggle-timecode-ruler"/>
+	   <menuitem action="toggle-tempo-ruler"/>
+	   <menuitem action="toggle-range-ruler"/>
+	   <menuitem action="toggle-marker-ruler"/>
+	   <menuitem action="toggle-cd-marker-ruler"/>
+	   <menuitem action="toggle-loop-punch-ruler"/>
+     </popup>
 
      <popup name='processormenu'>
 	 <menuitem action='newplugin'/>

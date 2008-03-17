@@ -32,6 +32,9 @@ gtkmm2ext.Append(CXXFLAGS=["-DLIBSIGC_DISABLE_DEPRECATED", "-DGLIBMM_DEFAULT_SIG
 gtkmm2ext.Append(PACKAGE=domain)
 gtkmm2ext.Append(POTFILE=domain + '.pot')
 
+if gtkmm2ext['IS_OSX']:
+	gtkmm2ext.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+	
 extra_sources = []
 
 gtkmm2ext_files = Split("""

@@ -79,7 +79,7 @@ Editor::add_new_location (Location *location)
 
 	if (location->is_mark()) {
 
-		if (location->is_cd_marker() && ruler_shown[ruler_time_cd_marker]) {
+		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
 			lam->start = new Marker (*this, *cd_marker_group, color, location->name(), Marker::Mark, location->start());
 		}
 		else {
@@ -103,7 +103,7 @@ Editor::add_new_location (Location *location)
 		
 	} else {
 		// range marker
-		if (location->is_cd_marker() && ruler_shown[ruler_time_cd_marker]) {
+		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
 			lam->start = new Marker (*this, *cd_marker_group, color, 
 						 location->name(), Marker::Start, location->start());
 			lam->end   = new Marker (*this, *cd_marker_group, color, 
@@ -212,7 +212,7 @@ void Editor::update_cd_marker_display ()
 void Editor::ensure_cd_marker_updated (LocationMarkers * lam, Location * location)
 {
 	if (location->is_cd_marker()
-	    && (ruler_shown[ruler_time_cd_marker] &&  lam->start->get_parent() != cd_marker_group))
+	    && (ruler_cd_marker_action->get_active() &&  lam->start->get_parent() != cd_marker_group))
 	{
 		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
 		if (lam->start) {
@@ -222,7 +222,7 @@ void Editor::ensure_cd_marker_updated (LocationMarkers * lam, Location * locatio
 			lam->end->reparent (*cd_marker_group);
 		}
 	}
-	else if ( (!location->is_cd_marker() || !ruler_shown[ruler_time_cd_marker]) 
+	else if ( (!location->is_cd_marker() || !ruler_cd_marker_action->get_active()) 
 		  && (lam->start->get_parent() == cd_marker_group))  
 	{
 		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
@@ -1113,7 +1113,7 @@ Editor::update_punch_range_view (bool visibility)
 		double x2 = frame_to_pixel (tpl->end());
 		
 		guint track_canvas_width,track_canvas_height;
-		track_canvas.get_size(track_canvas_width,track_canvas_height);
+		track_canvas->get_size(track_canvas_width,track_canvas_height);
 		
 		transport_punch_range_rect->property_x1() = x1;
 		transport_punch_range_rect->property_x2() = x2;

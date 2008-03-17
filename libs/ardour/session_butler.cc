@@ -29,6 +29,7 @@
 
 #include <pbd/error.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/configuration.h>
 #include <ardour/audioengine.h>
@@ -130,6 +131,7 @@ Session::summon_butler ()
 {
 	char c = ButlerRequest::Run;
 	::write (butler_request_pipe[1], &c, 1);
+	// PBD::stacktrace (cerr);
 }
 
 void

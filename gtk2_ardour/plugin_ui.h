@@ -79,6 +79,8 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual void activate () {}
 	virtual void deactivate () {}
 
+	virtual void update_presets ();
+
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
@@ -204,20 +206,22 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 class PluginUIWindow : public Gtk::Window
 {
   public:
-	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert, nframes64_t sample_rate, nframes64_t period_size, bool scrollable = false);
+	PluginUIWindow (Gtk::Window*, boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
 	~PluginUIWindow ();
 
 	PlugUIBase& pluginui() { return *_pluginui; }
 
 	void resize_preferred();
+	void set_parent (Gtk::Window*);
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 	void on_show ();
 	void on_hide ();
-
+	void on_map ();
   private:
 	PlugUIBase* _pluginui;
+	Gtk::Window* parent;
 	Gtk::VBox vbox;
 	bool non_gtk_gui;
 	void app_activated (bool);
@@ -231,7 +235,7 @@ class PluginUIWindow : public Gtk::Window
 class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
-	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>, nframes64_t sample_rate, nframes64_t period_size);
+	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
 	~VSTPluginUI ();
 
 	gint get_preferred_height ();

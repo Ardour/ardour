@@ -247,6 +247,7 @@ Editor::Editor ()
 	PublicEditor::_instance = this;
 
 	session = 0;
+	_have_idled = false;
 
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
@@ -382,12 +383,12 @@ Editor::Editor ()
 	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled), false);
 	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	
-	track_canvas.set_hadjustment (horizontal_adjustment);
-	track_canvas.set_vadjustment (vertical_adjustment);
-	time_canvas.set_hadjustment (horizontal_adjustment);
+	track_canvas->set_hadjustment (horizontal_adjustment);
+	track_canvas->set_vadjustment (vertical_adjustment);
+	time_canvas->set_hadjustment (horizontal_adjustment);
 
-	track_canvas.signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
-	time_canvas.signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
+	track_canvas->signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
+	time_canvas->signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
 	
 	controls_layout.add (edit_controls_vbox);
 	controls_layout.set_name ("EditControlsBase");
@@ -425,7 +426,7 @@ Editor::Editor ()
 	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
-	time_canvas_vbox.pack_start (time_canvas, true, true);
+	time_canvas_vbox.pack_start (*time_canvas, true, true);
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 5);
 
 	bbt_label.set_name ("EditorTimeButton");
@@ -492,7 +493,7 @@ Editor::Editor ()
 	   for the canvas areas.
 	*/
 
-	track_canvas_event_box.add (track_canvas);
+	track_canvas_event_box.add (*track_canvas);
 
 	time_canvas_event_box.add (time_canvas_vbox);
 	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -613,6 +614,10 @@ Editor::Editor ()
 
 	region_list_display.set_size_request (100, -1);
 	region_list_display.set_name ("RegionListDisplay");
+	/* Try to prevent single mouse presses from initiating edits.
+	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()
+	*/
+	region_list_display.set_data ("mouse-edits-require-mod1", (gpointer) 0x1);
 
 	region_list_model = TreeStore::create (region_list_columns);
 	region_list_model->set_sort_func (0, mem_fun (*this, &Editor::region_list_sorter));
@@ -748,8 +753,7 @@ Editor::Editor ()
 	set_snap_to (snap_type);
 	snap_mode = SnapOff;
 	set_snap_mode (snap_mode);
-	_edit_point = EditAtMouse;
-	set_edit_point_preference (_edit_point);
+	set_edit_point_preference (EditAtMouse, true);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
@@ -833,6 +837,16 @@ Editor::~Editor()
 		image_socket_listener = 0 ;
 	}
 #endif
+
+	if (track_canvas) {
+		delete track_canvas;
+		track_canvas = 0;
+	}
+
+	if (time_canvas) {
+		delete time_canvas;
+		time_canvas = 0;
+	}
 }
 
 void
@@ -1149,6 +1163,10 @@ void
 Editor::connect_to_session (Session *t)
 {
 	session = t;
+
+	/* there are never any selected regions at startup */
+
+	sensitize_the_right_region_actions (false);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node);
@@ -2229,9 +2247,9 @@ Editor::set_snap_mode (SnapMode mode)
 	instant_save ();
 }
 void
-Editor::set_edit_point_preference (EditPoint ep)
+Editor::set_edit_point_preference (EditPoint ep, bool force)
 {
-	bool changed = _edit_point != ep;
+	bool changed = (_edit_point != ep);
 
 	_edit_point = ep;
 	string str = edit_point_strings[(int)ep];
@@ -2242,7 +2260,7 @@ Editor::set_edit_point_preference (EditPoint ep)
 
 	set_canvas_cursor ();
 
-	if (!changed) {
+	if (!force && !changed) {
 		return;
 	}
 
@@ -2264,6 +2282,25 @@ Editor::set_edit_point_preference (EditPoint ep)
 		break;
 	default:
 		break;
+	}
+
+	const char* action;
+
+	switch (_edit_point) {
+	case EditAtPlayhead:
+		action = "edit-at-playhead";
+		break;
+	case EditAtSelectedMarker:
+		action = "edit-at-marker";
+		break;
+	case EditAtMouse:
+		action = "edit-at-mouse";
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Editor", action);
+	if (act) {
+		Glib::RefPtr<RadioAction>::cast_dynamic(act)->set_active (true);
 	}
 
 	instant_save ();
@@ -2339,7 +2376,7 @@ Editor::set_state (const XMLNode& node)
 	}
 
 	if ((prop = node.property ("edit-point"))) {
-		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point));
+		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
 	}
 
 	if ((prop = node.property ("mouse-mode"))) {
@@ -2354,7 +2391,7 @@ Editor::set_state (const XMLNode& node)
 	if ((prop = node.property ("show-waveforms"))) {
 		bool yn = (prop->value() == "yes");
 		_show_waveforms = !yn;
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-visible"));
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 			/* do it twice to force the change */
@@ -4506,8 +4543,7 @@ Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
 		session->set_auto_loop_location (loc);
                 XMLNode &after = session->locations()->get_state();
 		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	}
-	else {
+	} else {
                 XMLNode &before = tll->get_state();
 		tll->set_hidden (false, this);
 		tll->set (start, end);
@@ -4629,14 +4665,19 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered)
 
 		if (selection->tracks.empty()) {
 
-			/* no regions or tracks selected, but entered regionview is valid
-			   and we're in object mode - just use entered regionview
+			/* no regions or tracks selected
 			*/
 			
-			if (entered_regionview && (mouse_mode == Editing::MouseObject)) {
+			if (entered_regionview && mouse_mode == Editing::MouseObject) {
+
+				/*  entered regionview is valid and we're in object mode - 
+				    just use entered regionview
+				*/
+
 				rs.add (entered_regionview);
-				return;
 			}
+
+			return;
 
 		} else {
 
@@ -4719,4 +4760,30 @@ Editor::show_rhythm_ferret ()
 	rhythm_ferret->set_session (session);
 	rhythm_ferret->show ();
 	rhythm_ferret->present ();
+}
+
+void
+Editor::first_idle ()
+{
+	MessageDialog* dialog = 0;
+
+	if (track_views.size() > 1) { 
+		dialog = new MessageDialog (*this, 
+					    _("Please wait while Ardour loads visual data"),
+					    true,
+					    Gtk::MESSAGE_INFO,
+					    Gtk::BUTTONS_NONE);
+		dialog->present ();
+		ARDOUR_UI::instance()->flush_pending ();
+	}
+
+	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
+		(*t)->first_idle();
+	}
+	
+	if (dialog) {
+		delete dialog;
+	}
+
+	_have_idled = true;
 }

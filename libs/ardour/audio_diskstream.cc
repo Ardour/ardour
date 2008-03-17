@@ -2220,7 +2220,7 @@ AudioDiskstream::add_channel (uint32_t how_many)
 int
 AudioDiskstream::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
-	while (--how_many && !c->empty()) {
+	while (how_many-- && !c->empty()) {
 		delete c->back();
 		c->pop_back();
 	}

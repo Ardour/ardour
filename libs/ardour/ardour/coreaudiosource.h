@@ -21,7 +21,6 @@
 #define __coreaudio_source_h__
 
 #include <appleutility/CAAudioFile.h>
-
 #include <ardour/audiofilesource.h>
 
 namespace ARDOUR {
@@ -48,11 +47,8 @@ class CoreAudioSource : public AudioFileSource {
 	mutable CAAudioFile af;
 	uint16_t n_channels;
 
-	mutable float *tmpbuf;
-	mutable nframes_t tmpbufsize;
-	mutable Glib::Mutex _tmpbuf_lock;
-
 	void init ();
+	int safe_read (Sample*, nframes_t start, nframes_t cnt, AudioBufferList&) const;
 };
 
 }; /* namespace ARDOUR */

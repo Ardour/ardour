@@ -86,7 +86,6 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
 	ActionManager::register_action (main_actions, X_("Files"), _("Import/Export"));
-	ActionManager::register_action (main_actions, X_("Regions"), _("Regions"));
 	ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("Options"), _("Options"));
@@ -189,7 +188,7 @@ ARDOUR_UI::install_actions ()
 	/* these actions are intended to be shared across all windows */
 	
 	common_actions = ActionGroup::create (X_("Common"));
-	ActionManager::register_action (main_actions, X_("Windows"), _("Windows"));
+	ActionManager::register_action (main_actions, X_("WindowMenu"), _("Window"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
 
         /* windows visibility actions */
@@ -330,6 +329,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunchOut"), _("Punch Out"), mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (transport_actions, X_("TogglePunch"), _("Punch In/Out"), mem_fun(*this, &ARDOUR_UI::toggle_punch));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleClick"), _("Click"), mem_fun(*this, &ARDOUR_UI::toggle_click));

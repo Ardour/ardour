@@ -82,9 +82,6 @@ AudioEngine::AudioEngine (string client_name)
 	if (connect_to_jack (client_name)) {
 		throw NoBackendAvailable ();
 	}
-
-	start_metering_thread();
-
 	Port::set_engine (this);
 }
 
@@ -169,6 +166,8 @@ AudioEngine::start ()
 		} else {
 			// error << _("cannot activate JACK client") << endmsg;
 		}
+
+		start_metering_thread();
 	}
 
 	return _running ? 0 : -1;
@@ -179,11 +178,11 @@ AudioEngine::stop (bool forever)
 {
 	if (_running) {
 		_running = false;
+		stop_metering_thread ();
 		if (forever) {
 			jack_client_t* foo = _jack;
 			_jack = 0;
 			jack_client_close (foo);
-			stop_metering_thread ();
 		} else {
 			jack_deactivate (_jack);
 		}
@@ -455,8 +454,9 @@ void
 AudioEngine::start_metering_thread ()
 {
 	if (m_meter_thread == 0) {
+		g_atomic_int_set (&m_meter_exit, 0);
 		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread),
-				500000, true, true, Glib::THREAD_PRIORITY_NORMAL);
+						       500000, true, true, Glib::THREAD_PRIORITY_NORMAL);
 	}
 }
 
@@ -861,6 +861,8 @@ AudioEngine::halted (void *arg)
 	AudioEngine* ae = static_cast<AudioEngine *> (arg);
 	bool was_running = ae->_running;
 
+	ae->stop_metering_thread ();
+
 	ae->_running = false;
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
@@ -1178,6 +1180,7 @@ AudioEngine::disconnect_from_jack ()
 	_frame_rate = 0;
 
 	if (_running) {
+		stop_metering_thread ();
 		_running = false;
 		Stopped(); /* EMIT SIGNAL */
 	}
@@ -1254,6 +1257,8 @@ AudioEngine::reconnect_to_jack ()
 	}
 
 	Running (); /* EMIT SIGNAL*/
+
+	start_metering_thread ();
 
 	return 0;
 }

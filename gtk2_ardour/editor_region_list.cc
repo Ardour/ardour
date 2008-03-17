@@ -75,8 +75,6 @@ Editor::region_hidden (boost::shared_ptr<Region> r)
 void
 Editor::add_regions_to_region_display (vector<boost::weak_ptr<Region> >& regions)
 {
-	cerr << "Adding " << regions.size() << " to region list\n";
-
 	region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	for (vector<boost::weak_ptr<Region> >::iterator x = regions.begin(); x != regions.end(); ++x) {
 		boost::shared_ptr<Region> region ((*x).lock());
@@ -414,7 +412,7 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	int cellx;
 	int celly;
 
-	cerr << "Button press release, button = " << ev->button << endl;
+	// cerr << "Button press release, button = " << ev->button << endl;
 
 	if (region_list_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = region_list_model->get_iter (path))) {

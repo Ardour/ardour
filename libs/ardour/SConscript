@@ -134,6 +134,7 @@ smf_reader.cc
 smf_source.cc
 sndfile_helpers.cc
 sndfilesource.cc
+sndfileimportable.cc
 source.cc
 source_factory.cc
 tape_file_matcher.cc
@@ -152,7 +153,7 @@ osc_files = [ 'osc.cc' ]
 vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
 lv2_files = [ 'lv2_plugin.cc' ]
 audiounit_files = [ 'audio_unit.cc' ]
-coreaudio_files = [ 'coreaudiosource.cc' ]
+coreaudio_files = [ 'coreaudiosource.cc', 'caimportable.cc' ]
 extra_sources = [ ]
 timefx_sources = [ ]
 

@@ -61,7 +61,8 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 
-PluginUIWindow::PluginUIWindow (boost::shared_ptr<PluginInsert> insert, nframes64_t sr, nframes64_t period, bool scrollable)
+PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert> insert, bool scrollable)
+	: parent (win)
 {
 	bool have_gui = false;
 	non_gtk_gui = false;
@@ -136,17 +137,36 @@ PluginUIWindow::~PluginUIWindow ()
 }
 
 void
+PluginUIWindow::set_parent (Gtk::Window* win)
+{
+	parent = win;
+}
+
+void
+PluginUIWindow::on_map ()
+{
+	Window::on_map ();
+	set_keep_above (true);
+}
+
+void
 PluginUIWindow::on_show ()
 {
-	cerr << "PluginWindow shown\n";
-		
+	if (_pluginui) {
+		_pluginui->update_presets ();
+	}
+
 	Window::on_show ();
+
+	if (parent) {
+		cerr << "plugin becomes transient for " << parent << endl;
+		// set_transient_for (*parent);
+	}
 }
 
 void
 PluginUIWindow::on_hide ()
 {
-	cerr << "PluginWindow hidden\n";
 	Window::on_hide ();
 }
 
@@ -328,4 +348,10 @@ PlugUIBase::bypass_toggled ()
 			bypass_button.set_label (_("Active"));
 		}
 	}
+}
+
+void
+PlugUIBase::update_presets ()
+{
+	set_popdown_strings (preset_combo, plugin->get_presets());
 }

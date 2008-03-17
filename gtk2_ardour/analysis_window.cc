@@ -41,9 +41,8 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-AnalysisWindow::AnalysisWindow()
-	: ArdourDialog(_("analysis window")),
-	
+AnalysisWindow::AnalysisWindow() :
+
 	  source_selection_label       (_("Signal source")),
 	  source_selection_ranges_rb   (_("Selected ranges")),
 	  source_selection_regions_rb  (_("Selected regions")),
@@ -51,9 +50,15 @@ AnalysisWindow::AnalysisWindow()
 	  display_model_label                   (_("Display model")),
 	  display_model_composite_separate_rb   (_("Composite graphs for each track")),
 	  display_model_composite_all_tracks_rb (_("Composite graph of all tracks")),
+	  
+	  show_minmax_button	 (_("Show frequency power range")),
+	  show_normalized_button (_("Normalize values")),
 
-	  fft_graph (2048)
+	  fft_graph (16384)
 {
+	set_name(_("FFT analysis window"));
+	set_title(_("FFT analysis window"));
+
 	track_list_ready = false;
 	
 	// Left side: track list + controls
@@ -124,17 +129,31 @@ AnalysisWindow::AnalysisWindow()
 				bind ( mem_fun(*this, &AnalysisWindow::display_model_changed), &display_model_composite_all_tracks_rb));
 	}
 
-	vbox.pack_start(hseparator2, false, false);
+	// Analyze button
 
 	refresh_button.set_name("EditorGTKButton");
-	refresh_button.set_label(_("Analyze data"));
+	refresh_button.set_label(_("Re-analyze data"));
 
 	refresh_button.signal_clicked().connect ( bind ( mem_fun(*this, &AnalysisWindow::analyze_data), &refresh_button)); 
 
 	vbox.pack_start(refresh_button, false, false, 10);
+
+
+	// Feature checkboxes
+
+	// minmax
+	show_minmax_button.signal_toggled().connect( mem_fun(*this, &AnalysisWindow::show_minmax_changed));
+	vbox.pack_start(show_minmax_button, false, false);
+
+	// normalize
+	show_normalized_button.signal_toggled().connect( mem_fun(*this, &AnalysisWindow::show_normalized_changed));
+	vbox.pack_start(show_normalized_button, false, false);
+
+	
+
 	
 	
-	hbox.pack_start(vbox);
+	hbox.pack_start(vbox, Gtk::PACK_SHRINK);
 	
 	// Analysis window on the right
 	fft_graph.ensure_style();
@@ -144,27 +163,26 @@ AnalysisWindow::AnalysisWindow()
 	
 
 	// And last we pack the hbox
-	get_vbox()->pack_start(hbox);
-
-	hbox.show();
-	vbox.show();
-	track_list.show();
-	source_selection_label.show();
-	source_selection_ranges_rb.show();
-	source_selection_regions_rb.show();
-	hseparator1.show();
-	display_model_label.show();
-	display_model_composite_separate_rb.show();
-	display_model_composite_all_tracks_rb.show();
-	hseparator2.show();
-	refresh_button.show();
-
-	//get_vbox()->show();
+	add(hbox);
+	show_all();
+	track_list.show_all();
 }
 
 AnalysisWindow::~AnalysisWindow()
 {
 
+}
+
+void
+AnalysisWindow::show_minmax_changed()
+{
+	fft_graph.set_show_minmax(show_minmax_button.get_active());
+}
+
+void
+AnalysisWindow::show_normalized_changed()
+{
+	fft_graph.set_show_normalized(show_normalized_button.get_active());
 }
 
 void

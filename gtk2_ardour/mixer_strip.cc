@@ -1206,6 +1206,14 @@ MixerStrip::map_frozen ()
 			break;
 		}
 	}
+
+	
+	hide_redirect_editors ();
+}
+
+void
+MixerStrip::hide_redirect_editors ()
+{
 	_route->foreach_processor (this, &MixerStrip::hide_processor_editor);
 }
 

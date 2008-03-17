@@ -59,6 +59,7 @@ class FastMeter : public Gtk::DrawingArea {
 
 	Orientation orientation;
 	GdkRectangle pixrect;
+	GdkRectangle last_peak_rect;
 	gint request_width;
 	gint request_height;
 	unsigned long hold_cnt;
@@ -69,7 +70,9 @@ class FastMeter : public Gtk::DrawingArea {
 	
 	bool vertical_expose (GdkEventExpose*);
 	bool horizontal_expose (GdkEventExpose*);
-	
+	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
+	void queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>&, float);
+
 	static Glib::RefPtr<Gdk::Pixbuf> request_vertical_meter(int w, int h);
 
 	static Glib::RefPtr<Gdk::Pixbuf> *v_pixbuf_cache;

@@ -25,7 +25,6 @@
 #include <sys/stat.h>
 
 #include <glibmm/miscutils.h>
-#include <glibmm/thread.h>
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/utils.h>
@@ -44,22 +43,6 @@ const AudioFileSource::Flag SndFileSource::default_writable_flags = AudioFileSou
 											   AudioFileSource::Removable|
 											   AudioFileSource::RemovableIfEmpty|
 											   AudioFileSource::CanRename);
-
-struct SizedSampleBuffer {
-    nframes_t size;
-    Sample* buf;
-
-    SizedSampleBuffer (nframes_t sz) : size (sz) { 
-	    buf = new Sample[size];
-    }
-
-    ~SizedSampleBuffer() {
-	    delete [] buf;
-    }
-};
-
-Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
-
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	: AudioFileSource (s, node)
 {
@@ -95,7 +78,7 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 	*/
 
 	file_is_new = true;
-	
+
 	switch (hf) {
 	case CAF:
 		fmt = SF_FORMAT_CAF;
@@ -189,9 +172,8 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 			_flags = Flag (_flags & ~Broadcast);
 			delete _broadcast_info;
 			_broadcast_info = 0;
-		}
-		
-	}
+		} 
+	} 
 }
 
 void 
@@ -234,13 +216,21 @@ SndFileSource::open ()
 	if ((sf = sf_open (_path.c_str(), (writable() ? SFM_RDWR : SFM_READ), &_info)) == 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
+#ifndef HAVE_COREAUDIO
+		/* if we have CoreAudio, we will be falling back to that if libsndfile fails,
+		   so we don't want to see this message.
+		*/
+
 		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"), 
 					_path, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
+#endif
 		return -1;
 	}
 
 	if (_channel >= _info.channels) {
+#ifndef HAVE_COREAUDIO
 		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, _channel) << endmsg;
+#endif
 		sf_close (sf);
 		sf = 0;
 		return -1;
@@ -255,7 +245,7 @@ SndFileSource::open ()
 
 	set_timeline_position (get_timecode_info (sf, _broadcast_info, timecode_info_exists));
 
-	if (!timecode_info_exists) {
+	if (_length != 0 && !timecode_info_exists) {
 		delete _broadcast_info;
 		_broadcast_info = 0;
 		_flags = Flag (_flags & ~Broadcast);
@@ -327,6 +317,11 @@ SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 		file_cnt = cnt;
 	}
 	
+	if (file_cnt != cnt) {
+		nframes_t delta = cnt - file_cnt;
+		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
+	}
+
 	if (file_cnt) {
 
 		if (sf_seek (sf, (sf_count_t) start, SEEK_SET|SFM_READ) != (sf_count_t) start) {
@@ -341,11 +336,6 @@ SndFileSource::read_unlocked (Sample *dst, nframes_t start, nframes_t cnt) const
 			_read_data_count = cnt * sizeof(float);
 			return ret;
 		}
-	}
-
-	if (file_cnt != cnt) {
-		nframes_t delta = cnt - file_cnt;
-		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
 	}
 
 	real_cnt = cnt * _info.channels;
@@ -907,20 +897,3 @@ SndFileSource::one_of_several_channels () const
 	return _info.channels > 1;
 }
 
-Sample*
-SndFileSource::get_interleave_buffer (nframes_t size)
-{
-	SizedSampleBuffer* ssb;
-
-	if ((ssb = thread_interleave_buffer.get()) == 0) {
-		ssb = new SizedSampleBuffer (size);
-		thread_interleave_buffer.set (ssb);
-	}
-
-	if (ssb->size < size) {
-		ssb = new SizedSampleBuffer (size);
-		thread_interleave_buffer.set (ssb);
-	}
-
-	return ssb->buf;
-}

@@ -118,10 +118,11 @@ Splash::message (const string& msg)
 	str += "</b>";
 
 	layout->set_markup (str);
-	darea.queue_draw ();
-	
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
+
 	if (win) {
+		win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30,
+						      darea.get_width(), 30), true);
 		win->process_updates (true);
 		gdk_flush ();
 	}

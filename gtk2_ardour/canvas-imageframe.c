@@ -456,8 +456,6 @@ static void
 gnome_canvas_imageframe_draw (GnomeCanvasItem *item, GdkDrawable *drawable,
 			 int x, int y, int width, int height)
 {
-	fprintf(stderr, "please don't use the CanvasImageFrame item in a non-aa Canvas\n") ;
-	abort() ;
 }
 
 static double

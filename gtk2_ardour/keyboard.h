@@ -49,6 +49,7 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static uint32_t PrimaryModifier;
 	static uint32_t SecondaryModifier;
 	static uint32_t TertiaryModifier;
+	static uint32_t Level4Modifier;
 	static uint32_t CopyModifier;
 	static uint32_t RangeSelectModifier;
 
@@ -60,6 +61,9 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	}
 	static void set_tertiary_modifier (uint32_t newval) {
 		set_modifier (newval, TertiaryModifier);
+	}
+	static void set_level4_modifier (uint32_t newval) {
+		set_modifier (newval, Level4Modifier);
 	}
 	static void set_copy_modifier (uint32_t newval) {
 		set_modifier (newval, CopyModifier);

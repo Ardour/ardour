@@ -431,14 +431,13 @@ Session::destroy ()
 
 		tmp = i;
 		++tmp;
-
+		
 		i->second->drop_references ();
-
+		
 		i = tmp;
 	}
-
 	sources.clear ();
-
+	
 #ifdef TRACK_DESTRUCTION
 	cerr << "delete mix groups\n";
 #endif /* TRACK_DESTRUCTION */
@@ -684,7 +683,7 @@ Session::when_engine_running ()
  		add_bundle (c);
 	} 
 	
-	BootMessage (_("Connect ports"));
+	BootMessage (_("Setup signal flow and plugins"));
 
 	hookup_io ();
 
@@ -2835,6 +2834,8 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		return;
 	} 
 
+	cerr << "remove source for " << source->name() << endl;
+
 	{ 
 		Glib::Mutex::Lock lm (source_lock);
 
@@ -4165,7 +4166,7 @@ Session::get_silent_buffers (ChanCount count)
 	_silent_buffers->set_count(count);
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		for (size_t i=0; i < count.get(*t); ++i) {
+		for (size_t i= 0; i < count.get(*t); ++i) {
 			_silent_buffers->get(*t, i).clear();
 		}
 	}

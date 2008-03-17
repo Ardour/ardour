@@ -93,6 +93,13 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	streamFormat.mSampleRate = session.frame_rate();
 	streamFormat.mFormatID = kAudioFormatLinearPCM;
 	streamFormat.mFormatFlags = kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked|kAudioFormatFlagIsNonInterleaved;
+
+#ifdef __LITTLE_ENDIAN__
+	/* relax */
+#else
+	streamFormat.mFormatFlags |= kAudioFormatFlagIsBigEndian;
+#endif
+
 	streamFormat.mBitsPerChannel = 32;
 	streamFormat.mFramesPerPacket = 1;
 
@@ -130,8 +137,6 @@ AUPlugin::discover_parameters ()
 {
 	/* discover writable parameters */
 	
-	cerr << "get param info, there are " << global_elements << " global elements\n";
-
 	AudioUnitScope scopes[] = { 
 		kAudioUnitScope_Global,
 		kAudioUnitScope_Output,
@@ -143,8 +148,6 @@ AUPlugin::discover_parameters ()
 	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
 
 		AUParamInfo param_info (unit->AU(), false, false, scopes[i]);
-		
-		cerr << "discovered " << param_info.NumParams() << " parameters in scope " << i << endl;
 		
 		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
 
@@ -328,7 +331,7 @@ AUPlugin::activate ()
 	if (!initialized) {
 		OSErr err;
 		if ((err = unit->Initialize()) != noErr) {
-			error << string_compose (_("AUPlugin: cannot initialize plugin (err = %1)"), err) << endmsg;
+			error << string_compose (_("AUPlugin: %1 cannot initialize plugin (err = %2)"), name(), err) << endmsg;
 		} else {
 			frames_processed = 0;
 			initialized = true;
@@ -453,9 +456,10 @@ uint32_t
 AUPlugin::output_streams() const
 {
 	if (!(format_set & 0x2)) {
-		warning << _("AUPlugin: output_streams() called without any format set!") << endmsg;
+		warning << string_compose (_("AUPlugin: %1 output_streams() called without any format set!"), name()) << endmsg;
 		return 1;
 	}
+
 	return streamFormat.mChannelsPerFrame;
 }
 
@@ -818,7 +822,6 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		
 		info->n_inputs = -1;
 		info->n_outputs = -1;
-
 
 		plugs.push_back (info);
 		

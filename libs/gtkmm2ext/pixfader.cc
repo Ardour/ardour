@@ -138,7 +138,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 {
 	double fract, ev_pos;
 
-	ev_pos = (_orien == VERT) ? ev->y : 0; // Don't step if we are horizontal
+	ev_pos = (_orien == VERT) ? ev->y : ev->x;
 	
 	switch (ev->button) {
 	case 1:
@@ -154,7 +154,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 					adjustment.set_value (default_value);
 				} else if (ev->state & fine_scale_modifier) {
 					adjustment.set_value (adjustment.get_lower());
-				} else if (ev_pos < span - display_span()) {
+				} else if ((_orien == VERT && ev_pos < span - display_span()) || (_orien == HORIZ && ev_pos > span - display_span())) {
 					/* above the current display height, remember X Window coords */
 					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
 				} else {
@@ -190,6 +190,7 @@ bool
 PixFader::on_scroll_event (GdkEventScroll* ev)
 {
 	double scale;
+	bool ret = false;
 
 	if (ev->state & fine_scale_modifier) {
 		if (ev->state & extra_fine_scale_modifier) {
@@ -202,35 +203,49 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 	}
 
 	if (_orien == VERT) {
+
+		/* should left/right scroll affect vertical faders ? */
+
 		switch (ev->direction) {
 
 		case GDK_SCROLL_UP:
 			/* wheel up */
 			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
+			ret = true;
 			break;
 		case GDK_SCROLL_DOWN:
 			/* wheel down */
 			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
+			ret = true;
 			break;
 		default:
 			break;
 		}
 	} else {
+
+		/* up/down scrolls should definitely affect horizontal faders
+		   because they are so much easier to use
+		*/
+
 		switch (ev->direction) {
 
 		case GDK_SCROLL_RIGHT:
+		case GDK_SCROLL_UP:
 			/* wheel right */
 			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
+			ret = true;
 			break;
 		case GDK_SCROLL_LEFT:
+		case GDK_SCROLL_DOWN:
 			/* wheel left */
 			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
+			ret = true;
 			break;
 		default:
 			break;
 		}
 	}
-	return false;
+	return ret;
 }
 
 bool

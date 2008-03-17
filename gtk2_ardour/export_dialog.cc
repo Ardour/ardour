@@ -129,7 +129,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	set_wmclass (X_("ardour_export"), "Ardour");
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-
+	
 	spec.running = false;
 
 	file_entry.set_name ("ExportFileNameEntry");
@@ -143,7 +143,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	master_selector.append_column_editable(_("Left"), exp_cols.left);
 	master_selector.append_column_editable(_("Right"), exp_cols.right);
 	master_selector.get_column(0)->set_min_width(100);
-	
+
 	master_selector.get_column(1)->set_min_width(40);
 	master_selector.get_column(1)->set_sizing(Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
 	master_selector.get_column(2)->set_min_width(40);

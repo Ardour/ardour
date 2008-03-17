@@ -73,7 +73,7 @@ class LevelMeter : public Gtk::HBox
 	boost::shared_ptr<ARDOUR::IO> _io;
 	ARDOUR::Session& _session;
 
-	Width                       _width;
+	Width _width;
 
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;

@@ -155,7 +155,8 @@ class AudioRegion : public Region
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
 
-	nframes_t _read_at (const SourceList&, Sample *buf, Sample *mixdown_buffer, 
+	nframes_t _read_at (const SourceList&, nframes_t limit,
+			    Sample *buf, Sample *mixdown_buffer, 
 			    float *gain_buffer, nframes_t position, nframes_t cnt, 
 			    uint32_t chan_n = 0,
 			    nframes_t read_frames = 0,

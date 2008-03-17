@@ -63,6 +63,8 @@ class AudioRegionView : public RegionView
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region() const;
 	
 	void set_y_position_and_height (double, double);
+	void create_waves ();
+
 	void set_samples_per_unit (double);
 	
 	void set_amplitude_above_axis (gdouble spp);
@@ -72,8 +74,8 @@ class AudioRegionView : public RegionView
 	
 	void set_envelope_visible (bool);
 	void set_waveform_visible (bool yn);
-	void set_waveform_shape (WaveformShape);
-	void set_waveform_scale (WaveformScale);
+	void set_waveform_shape (Editing::WaveformShape);
+	void set_waveform_scale (Editing::WaveformScale);
 	
 	bool waveform_rectified() const { return _flags & WaveformRectified; }
 	bool waveform_logscaled() const { return _flags & WaveformLogScaled; }
@@ -150,7 +152,6 @@ class AudioRegionView : public RegionView
     void region_scale_amplitude_changed ();
 	void region_renamed ();
 
-    void create_waves ();
     void create_one_wave (uint32_t, bool);
     void manage_zero_line ();
     void peaks_ready_handler (uint32_t);

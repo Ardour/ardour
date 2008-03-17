@@ -90,6 +90,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	/** @return Singleton PublicEditor instance */
 	static PublicEditor& instance () { return *_instance; }
 
+	virtual bool have_idled() const = 0;
+	virtual void first_idle() = 0;
+
 	/** Attach this editor to a Session.
 	 * @param s Session to connect to.
 	 */
@@ -256,6 +259,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret) = 0;
 	virtual void mouse_add_new_marker (nframes_t where, bool is_cd=false, bool is_xrun=false) = 0;
+	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 
 #ifdef WITH_CMT
 	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;

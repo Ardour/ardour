@@ -17,6 +17,9 @@
 
 */
 
+#include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
+#include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
+
 #include <cstdlib>
 #include <cctype>
 #include <fstream>
@@ -32,6 +35,7 @@
 #include <pbd/file_utils.h>
 
 #include <gtkmm2ext/utils.h>
+#include <ardour/configuration.h>
 
 #include <ardour/filesystem_paths.h>
 
@@ -47,6 +51,8 @@ using namespace Gtk;
 using namespace sigc;
 using namespace Glib;
 using namespace PBD;
+
+sigc::signal<void>  DPIReset;
 
 int
 pixel_width (const ustring& str, Pango::FontDescription& font)
@@ -706,6 +712,29 @@ key_is_legal_for_numeric_entry (guint keyval)
 
 	return false;
 }
+void
+set_pango_fontsize ()
+{
+	long val = ARDOUR::Config->get_font_scale();
 
+	/* FT2 rendering */
 
+	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_for_display(), val/1024, val/1024);
+
+	/* Cairo rendering, in case there is any */
+	
+	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
+}
+
+void
+reset_dpi ()
+{
+	long val = ARDOUR::Config->get_font_scale();
+	set_pango_fontsize ();
+	/* Xft rendering */
+
+	gtk_settings_set_long_property (gtk_settings_get_default(),
+					"gtk-xft-dpi", val, "ardour");
+	DPIReset();//Emit Signal
+}
 

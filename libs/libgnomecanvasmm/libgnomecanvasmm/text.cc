@@ -25,6 +25,22 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <gtk/gtksettings.h>
+#include <glib-object.h>
+
+static void 
+_catch_xft_dpi (GObject* thing, gpointer val, gpointer arg)
+{
+	GnomeCanvasText* text = (GnomeCanvasText*) arg;
+	gchar *txt;
+
+	g_object_get (G_OBJECT(text), "text", &txt, NULL);
+
+	if (txt && txt[0] != '\0') {
+		g_object_set (G_OBJECT(text), "text", txt, NULL);
+	}
+}
+
 namespace Gnome
 {
 
@@ -36,12 +52,14 @@ Text::Text(Group& parentx, double x, double y, const Glib::ustring& text)
 {
   item_construct(parentx);
   set("x", x, "y", y, "text", text.c_str(), 0);
+  g_signal_connect (gtk_settings_get_default(), "notify::gtk-xft-dpi", (GCallback) _catch_xft_dpi, gobj());
 }
 
 Text::Text(Group& parentx)
   : Item(GNOME_CANVAS_ITEM(g_object_new(get_type(), 0)))
 {
   item_construct(parentx);
+  g_signal_connect (gtk_settings_get_default(), "notify::gtk-xft-dpi", (GCallback) _catch_xft_dpi, gobj());
 }
 
 } /* namespace Canvas */
@@ -113,13 +131,13 @@ Text::Text(const Glib::ConstructParams& construct_params)
 :
   Item(construct_params)
 {
-  }
+}
 
 Text::Text(GnomeCanvasText* castitem)
 :
   Item((GnomeCanvasItem*)(castitem))
 {
-  }
+}
 
 Text::~Text()
 {

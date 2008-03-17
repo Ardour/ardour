@@ -66,11 +66,12 @@ Editor::handle_new_route (Session::RouteList& routes)
 		}
 		
 		if (route->default_type() == ARDOUR::DataType::AUDIO)
-			tv = new AudioTimeAxisView (*this, *session, route, track_canvas);
+			tv = new AudioTimeAxisView (*this, *session, route, *track_canvas);
 		else if (route->default_type() == ARDOUR::DataType::MIDI)
-			tv = new MidiTimeAxisView (*this, *session, route, track_canvas);
+			tv = new MidiTimeAxisView (*this, *session, route, *track_canvas);
 		else
 			throw unknown_type();
+
 		//cerr << "Editor::handle_new_route() called on " << route->name() << endl;//DEBUG
 #if 0
 		if (route_display_model->children().size() == 0) {
@@ -630,4 +631,12 @@ Editor::get_route_view_by_id (PBD::ID& id)
 	}
 
 	return 0;
+}
+
+void
+Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		theslot (**i);
+	}
 }

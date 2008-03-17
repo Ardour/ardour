@@ -392,6 +392,52 @@ ARDOUR_UI::toggle_session_auto_loop ()
 }
 
 void
+ARDOUR_UI::unset_dual_punch ()
+{
+	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
+	
+	if (action) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
+		if (tact) {
+			ignore_dual_punch = true;
+			tact->set_active (false);
+			ignore_dual_punch = false;
+		}
+	}
+}
+
+void
+ARDOUR_UI::toggle_punch ()
+{
+	if (ignore_dual_punch) {
+		return;
+	}
+
+	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
+
+	if (action) {
+
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
+
+		if (!tact) {
+			return;
+		}
+
+		/* drive the other two actions from this one */
+
+		Glib::RefPtr<Action> in_action = ActionManager::get_action ("Transport", "TogglePunchIn");
+		Glib::RefPtr<Action> out_action = ActionManager::get_action ("Transport", "TogglePunchOut");
+
+		if (in_action && out_action) {
+			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(in_action);
+			Glib::RefPtr<ToggleAction> toact = Glib::RefPtr<ToggleAction>::cast_dynamic(out_action);
+			tiact->set_active (tact->get_active());
+			toact->set_active (tact->get_active());
+		}
+	}
+}
+
+void
 ARDOUR_UI::toggle_punch_in ()
 {
 	ActionManager::toggle_config_state ("Transport", "TogglePunchIn", &Configuration::set_punch_in, &Configuration::get_punch_in);
@@ -1015,10 +1061,13 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("send-mtc")) {
 
 		ActionManager::map_some_state ("options", "SendMTC", &Configuration::get_send_mtc);
+		cerr << "Send MMC = " << Config->get_send_mmc() << endl;
 
 	} else if (PARAM_IS ("send-mmc")) {
 
+
 		ActionManager::map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
+		cerr << "Send MMC = " << Config->get_send_mmc() << endl;
 
 	} else if (PARAM_IS ("use-osc")) {
 
@@ -1034,6 +1083,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		
 	} else if (PARAM_IS ("mmc-control")) {
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
+		cerr << "Use MMC = " << Config->get_mmc_control() << endl;
+
 	} else if (PARAM_IS ("midi-feedback")) {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
 	} else if (PARAM_IS ("do-not-record-plugins")) {
@@ -1056,8 +1107,14 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "ToggleTapeMachineMode", &Configuration::get_tape_machine_mode);
 	} else if (PARAM_IS ("punch-out")) {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", &Configuration::get_punch_out);
+		if (!Config->get_punch_out()) {
+			unset_dual_punch ();
+		}
 	} else if (PARAM_IS ("punch-in")) {
 		ActionManager::map_some_state ("Transport", "TogglePunchIn", &Configuration::get_punch_in);
+		if (!Config->get_punch_in()) {
+			unset_dual_punch ();
+		}
 	} else if (PARAM_IS ("clicking")) {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &Configuration::get_clicking);
 	} else if (PARAM_IS ("jack-time-master")) {

@@ -41,6 +41,7 @@ class PluginSelector : public ArdourDialog
 	int run (); // XXX should we try not to overload the non-virtual Gtk::Dialog::run() ?
 
 	void set_session (ARDOUR::Session*);
+	void on_show ();
 
   private:
 	ARDOUR::Session* session;

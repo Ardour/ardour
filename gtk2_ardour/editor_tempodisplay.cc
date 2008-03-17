@@ -190,8 +190,8 @@ Editor::redraw_measures ()
 void
 Editor::draw_measures ()
 {
-	if (session == 0 || _show_measures == false
-			|| !current_bbt_points || current_bbt_points->empty()) {
+	if (session == 0 || _show_measures == false || 
+	    !current_bbt_points || current_bbt_points->empty()) {
 		return;
 	}
 
@@ -202,7 +202,7 @@ Editor::draw_measures ()
 	time_line_group->lower(1);*/
 	marker_time_line_group->raise_to_top();
 	//marker_time_line_group->lower(1);
-
+	
 	/* the cursors are always on top of everything */
 	cursor_group->raise_to_top();
 

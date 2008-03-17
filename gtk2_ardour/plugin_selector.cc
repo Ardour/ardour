@@ -435,3 +435,9 @@ PluginSelector::filter_mode_changed ()
 	refill ();
 }
 
+void
+PluginSelector::on_show ()
+{
+	ArdourDialog::on_show ();
+	filter_entry.grab_focus ();
+}

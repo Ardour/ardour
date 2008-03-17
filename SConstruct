@@ -27,6 +27,7 @@ subst_dict = { }
 opts = Options('scache.conf')
 opts.AddOptions(
     ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
+    ('WINDOWS_KEY', 'Set X Modifier (Mod1,Mod2,Mod3,Mod4,Mod5) for "Windows" key', 'Mod4'),
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
@@ -37,7 +38,7 @@ opts.AddOptions(
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
-    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 0),
+    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 1),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
@@ -49,6 +50,7 @@ opts.AddOptions(
     BoolOption('VST', 'Compile with support for VST', 0),
     BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
+    BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
 )
 
@@ -441,7 +443,7 @@ deps = \
 	'samplerate'           : '0.1.0',
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
-	'jack'                 : '0.101.1',
+	'jack'                 : '0.109.0',
 	'libgnomecanvas-2.0'   : '2.0'
 }
 
@@ -525,7 +527,7 @@ if env['FFT_ANALYSIS']:
         conf = Configure(libraries['fftw3'])
 
         if conf.CheckHeader ('fftw3.h') == False:
-            print ('FFT Analysis cannot be compiled without the FFTW3 headers, which do not seem to be installed')
+            print ('Ardour cannot be compiled without the FFTW3 headers, which do not seem to be installed')
             sys.exit (1)            
         conf.Finish()
 
@@ -560,6 +562,9 @@ libraries['glib2'].ParseConfig ('pkg-config --cflags --libs glib-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gobject-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gmodule-2.0')
 libraries['glib2'].ParseConfig ('pkg-config --cflags --libs gthread-2.0')
+
+libraries['freetype2'] = LibraryInfo()
+libraries['freetype2'].ParseConfig ('pkg-config --cflags --libs freetype2')
 
 libraries['gtk2'] = LibraryInfo()
 libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
@@ -923,6 +928,26 @@ else:
 libraries['dmalloc'] = conf.Finish ()
 
 #
+# ensure FREEDESKTOP target is doable..
+#
+
+conf = env.Configure ()
+if env['FREEDESKTOP']:
+	have_update_mime_database = conf.TryAction (Action ('update-mime-database -v'))
+	if have_update_mime_database[0] != 1:
+		print "Warning. You have no update-mime-database command in your PATH. FREEDESKTOP is now disabled."
+		env['FREEDESKTOP'] = 0
+	have_gtk_update_icon_cache = conf.TryAction (Action ('gtk-update-icon-cache -?'))
+	if have_gtk_update_icon_cache[0] != 1:
+		print "Warning. You have no gtk-update-icon-cache command in your PATH. FREEDESKTOP is now disabled."
+		env['FREEDESKTOP'] = 0
+	have_update_desktop_database = conf.TryAction (Action ('update-desktop-database -?'))
+	if have_update_desktop_database[0] != 1:
+		print "Warning. You have no update-desktop-database command in your PATH. FREEDESKTOP is now disabled."
+		env['FREEDESKTOP'] = 0
+env = conf.Finish()
+
+#
 # Audio/MIDI library (needed for MIDI, since audio is all handled via JACK)
 #
 
@@ -1279,7 +1304,8 @@ the_revision = env.Command ('frobnicatory_decoy', [], create_stored_revision)
 remove_ardour = env.Command ('frobnicatory_decoy2', [],
                              [ Delete ('$PREFIX/etc/ardour3'),
                                Delete ('$PREFIX/lib/ardour3'),
-                               Delete ('$PREFIX/bin/ardour3')])
+                               Delete ('$PREFIX/bin/ardour3'),
+                               Delete ('$PREFIX/share/ardour3')])
 
 env.Alias('revision', the_revision)
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'ardour_system.rc'))

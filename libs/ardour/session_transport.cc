@@ -415,6 +415,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				do_locate = true;
 			} else {
 				_transport_frame = last_stop_frame;
+				_requested_return_frame = -1;
 			}
 
 			if (synced_to_jack() && !play_loop) {
@@ -451,7 +452,18 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 #endif
 
-	last_stop_frame = _transport_frame;
+        if (_requested_return_frame < 0) {
+		last_stop_frame = _transport_frame;
+	} else {
+		last_stop_frame = _requested_return_frame;
+		_requested_return_frame = -1;
+	}
+
+/* MISSING IN 3.0 ... move into realtime_stop() */
+//        send_full_time_code ();
+//	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
+//	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
+/* END WHY */
 
 	if (did_record) {
 
@@ -1226,8 +1238,8 @@ Session::setup_auto_play ()
 void
 Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
 {
-	request_locate (start, false);
  	Event *ev = new Event (Event::LocateRollLocate, Event::Add, Event::Immediate, return_to, 1.0);
+	ev->target2_frame = start;
 	queue_event (ev);
 }
 

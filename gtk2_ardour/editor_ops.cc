@@ -2093,7 +2093,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	RouteTimeAxisView *rtv = 0;
 	boost::shared_ptr<Playlist> playlist;
 	
-	track_canvas.window_to_world (x, y, wx, wy);
+	track_canvas->window_to_world (x, y, wx, wy);
 	wx += horizontal_adjustment.get_value();
 	wy += vertical_adjustment.get_value();
 
@@ -2139,7 +2139,7 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 	RouteTimeAxisView *dest_rtv = 0;
 	RouteTimeAxisView *source_rtv = 0;
 
-	track_canvas.window_to_world (x, y, wx, wy);
+	track_canvas->window_to_world (x, y, wx, wy);
 	wx += horizontal_adjustment.get_value();
 	wy += vertical_adjustment.get_value();
 
@@ -2310,13 +2310,18 @@ Editor::play_from_edit_point_and_return ()
 	nframes64_t start_frame;
 	nframes64_t return_frame;
 
+	start_frame = get_preferred_edit_position (true);
+
+	if (session->transport_rolling()) {
+		session->request_locate (start_frame, false);
+		return;
+	}
+
 	/* don't reset the return frame if its already set */
 
 	if ((return_frame = session->requested_return_frame()) < 0) {
 		return_frame = session->audible_frame();
 	}
-
-	start_frame = get_preferred_edit_position (true);
 
 	if (start_frame >= 0) {
 		session->request_roll_at_and_return (start_frame, return_frame);
@@ -2710,8 +2715,8 @@ Editor::separate_regions_between (const TimeSelection& ts)
 		}
 
 		if (tmptracks.empty()) {
-			/* no regions selected: use all tracks */
-			tmptracks = track_views;
+			/* no regions selected: do nothing */
+			return;
 		}
 
 	} else {
@@ -3119,7 +3124,7 @@ Editor::align (RegionPoint what)
 {
 	RegionSelection rs; 
 
-	get_regions_for_action (rs, false);
+	get_regions_for_action (rs);
 	nframes64_t where = get_preferred_edit_position();
 
 	if (!rs.empty()) {
@@ -3138,7 +3143,7 @@ Editor::align_relative (RegionPoint what)
 	nframes64_t where = get_preferred_edit_position();
 	RegionSelection rs; 
 
-	get_regions_for_action (rs, false);
+	get_regions_for_action (rs);
 
 	if (!rs.empty()) {
 		align_selection_relative (what, where, rs);
@@ -3518,7 +3523,7 @@ Editor::freeze_route ()
 
 	pthread_attr_destroy(&attr);
 
-	track_canvas.get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -3527,7 +3532,7 @@ Editor::freeze_route ()
 	interthread_progress_connection.disconnect ();
 	interthread_progress_window->hide_all ();
 	current_interthread_info = 0;
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void
@@ -3655,7 +3660,11 @@ Editor::cut_copy (CutCopyOp op)
 
 	RegionSelection rs; 
 
-	get_regions_for_action (rs);
+	/* we only want to cut regions if some are selected */
+
+	if (!selection->regions.empty()) {
+		get_regions_for_action (rs);
+	}
 
 	switch (current_mouse_mode()) {
 	case MouseObject: 
@@ -3664,7 +3673,7 @@ Editor::cut_copy (CutCopyOp op)
 			begin_reversible_command (opname + _(" objects"));
 
 			if (!rs.empty()) {
-				cut_copy_regions (op);
+				cut_copy_regions (op, rs);
 				
 				if (op == Cut) {
 					selection->clear_regions ();
@@ -3751,7 +3760,7 @@ struct PlaylistMapping {
  * @param op Operation (Cut, Copy or Clear)
  */
 void
-Editor::cut_copy_regions (CutCopyOp op)
+Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 {	
 	/* we can't use a std::map here because the ordering is important, and we can't trivially sort
 	   a map when we want ordered access to both elements. i think.
@@ -3766,9 +3775,6 @@ Editor::cut_copy_regions (CutCopyOp op)
 	
 	/* get ordering correct before we cut/copy */
 	
-	RegionSelection rs; 
-
-	get_regions_for_action (rs);
 	rs.sort_by_position_and_track ();
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
@@ -3889,9 +3895,14 @@ void
 Editor::cut_copy_ranges (CutCopyOp op)
 {
 	TrackSelection* ts;
+	TrackSelection entered;
 
 	if (selection->tracks.empty()) {
-		ts = &track_views;
+		if (!entered_track) {
+			return;
+		}
+		entered.push_back (entered_track);
+		ts = &entered;
 	} else {
 		ts = &selection->tracks;
 	}
@@ -4220,7 +4231,7 @@ Editor::normalize_region ()
 
 	begin_reversible_command (_("normalize"));
 
-	track_canvas.get_window()->set_cursor (*wait_cursor);
+	track_canvas->get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
@@ -4233,7 +4244,7 @@ Editor::normalize_region ()
 	}
 
 	commit_reversible_command ();
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 }
 
 
@@ -4356,7 +4367,7 @@ Editor::apply_filter (Filter& filter, string command)
 
 	begin_reversible_command (command);
 
-	track_canvas.get_window()->set_cursor (*wait_cursor);
+	track_canvas->get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
@@ -4392,7 +4403,7 @@ Editor::apply_filter (Filter& filter, string command)
 	rs.clear ();
 
   out:
-	track_canvas.get_window()->set_cursor (*current_canvas_cursor);
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 }
 
 void
@@ -5531,3 +5542,169 @@ Editor::playhead_backward_to_grid ()
 	}
 }
 
+void
+Editor::set_track_height (TimeAxisView::TrackHeight h)
+{
+	TrackSelection& ts (selection->tracks);
+
+	if (ts.empty()) {
+		return;
+	}
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		(*x)->set_height (h);
+	}
+}
+
+void
+Editor::set_track_height_largest ()
+{
+	set_track_height (TimeAxisView::Largest);
+}
+void
+Editor::set_track_height_large ()
+{
+	set_track_height (TimeAxisView::Large);
+}
+void
+Editor::set_track_height_larger ()
+{
+	set_track_height (TimeAxisView::Larger);
+}
+void
+Editor::set_track_height_normal ()
+{
+	set_track_height (TimeAxisView::Normal);
+}
+void
+Editor::set_track_height_smaller ()
+{
+	set_track_height (TimeAxisView::Smaller);
+}
+void
+Editor::set_track_height_small ()
+{
+	set_track_height (TimeAxisView::Small);
+}
+
+void
+Editor::toggle_tracks_active ()
+{
+	TrackSelection& ts (selection->tracks);
+	bool first = true;
+	bool target = false;
+
+	if (ts.empty()) {
+		return;
+	}
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*x);
+
+		if (rtv) {
+			if (first) {
+				target = !rtv->_route->active();
+				first = false;
+			}
+			rtv->_route->set_active (target);
+		}
+	}
+}
+
+void
+Editor::remove_tracks ()
+{
+	TrackSelection& ts (selection->tracks);
+
+	if (ts.empty()) {
+		return;
+	}
+
+	vector<string> choices;
+	string prompt;
+	int ntracks = 0;
+	int nbusses = 0;
+	const char* trackstr;
+	const char* busstr;
+	vector<boost::shared_ptr<Route> > routes;
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*x);
+		if (rtv) {
+			if (rtv->is_track()) {
+				ntracks++;
+			} else {
+				nbusses++;
+			}
+		}
+		routes.push_back (rtv->_route);
+	}
+	
+	if (ntracks + nbusses == 0) {
+ 		return;
+	}
+
+	if (ntracks > 1) {
+		trackstr = _("tracks");
+	} else {
+		trackstr = _("track");
+	}
+
+	if (nbusses > 1) {
+		busstr = _("busses");
+	} else {
+		busstr = _("bus");
+	}
+
+	if (ntracks) {
+		if (nbusses) {
+			prompt  = string_compose (_("Do you really want to remove %1 %2 and %3 %4?\n"
+						    "(You may also lose the playlists associated with the %2)\n\n"
+						    "This action cannot be undone!"),
+						  ntracks, trackstr, nbusses, busstr);
+		} else {
+			prompt  = string_compose (_("Do you really want to remove %1 %2?\n"
+						    "(You may also lose the playlists associated with the %2)\n\n"
+						    "This action cannot be undone!"),
+						  ntracks, trackstr);
+		}
+	} else if (nbusses) {
+		prompt  = string_compose (_("Do you really want to remove %1 %2?"),
+					  nbusses, busstr);
+	}
+
+	choices.push_back (_("No, do nothing."));
+	if (ntracks + nbusses > 1) {
+		choices.push_back (_("Yes, remove them."));
+	} else {
+		choices.push_back (_("Yes, remove it."));
+	}
+
+	Choice prompter (prompt, choices);
+
+	if (prompter.run () != 1) {
+		return;
+	}
+
+	for (vector<boost::shared_ptr<Route> >::iterator x = routes.begin(); x != routes.end(); ++x) {
+		session->remove_route (*x);
+	}
+}
+
+void
+Editor::set_waveform_scale (WaveformScale ws)
+{
+	TrackSelection& ts (selection->tracks);
+
+	if (ts.empty()) {
+		return;
+	}
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (*x);
+		if (atv) {
+			atv->set_waveform_scale (ws);
+		}
+	}
+}	
+				

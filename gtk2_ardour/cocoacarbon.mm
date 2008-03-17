@@ -27,6 +27,7 @@
 #include <gtkmm2ext/sync-menu.h>
 
 #include <Appkit/Appkit.h>
+#include <gdk/gdkquartz.h>
 
 sigc::signal<void,bool> ApplicationActivationChanged;
 static EventHandlerRef  application_event_handler_ref;
@@ -40,18 +41,51 @@ handle_reopen_application (const AppleEvent *inAppleEvent,
                            AppleEvent       *outAppleEvent, 
                            long              inHandlerRefcon)
 {
-	cerr << "reopen app\n";
+        return noErr;
+}
+
+
+static OSErr
+handle_print_documents (const AppleEvent *inAppleEvent, 
+                           AppleEvent       *outAppleEvent, 
+                           long              inHandlerRefcon)
+{
+        return noErr;
+}
+
+
+static OSErr
+handle_open_documents (const AppleEvent *inAppleEvent, 
+		       AppleEvent       *outAppleEvent, 
+		       long              inHandlerRefcon)
+{
+	AEDescList docs;
+
+        if (AEGetParamDesc(inAppleEvent, keyDirectObject, typeAEList, &docs) == noErr) {
+		long n = 0;
+		AECountItems(&docs, &n);
+		UInt8 strBuffer[PATH_MAX+1];
+
+		/* ardour only opens 1 session at a time */
+
+		FSRef ref;
+
+		if (AEGetNthPtr(&docs, 1, typeFSRef, 0, 0, &ref, sizeof(ref), 0) == noErr) {
+			if (FSRefMakePath(&ref, strBuffer, sizeof(strBuffer)) == noErr) {
+				Glib::ustring utf8_path ((const char*) strBuffer);
+				ARDOUR_UI::instance()->idle_load (utf8_path);
+			}
+		}
+	}
+
         return noErr;
 }
 
 static OSErr
-handle_quit_application (const AppleEvent *inAppleEvent, 
+handle_open_application (const AppleEvent *inAppleEvent, 
                          AppleEvent       *outAppleEvent, 
                          long              inHandlerRefcon)
 {
-	cerr << "quit app\n";
-	ARDOUR_UI::instance()->quit ();
-
         return noErr;
 }
 
@@ -79,12 +113,6 @@ application_event_handler (EventHandlerCallRef nextHandlerRef, EventRef event, v
 void
 ARDOUR_UI::platform_specific ()
 {
-        AEInstallEventHandler (kCoreEventClass, kAEReopenApplication, 
-                               handle_reopen_application, 0, true);
-
-        AEInstallEventHandler (kCoreEventClass, kAEQuitApplication, 
-                               handle_quit_application, 0, true);
-
 	Gtk::Widget* widget = ActionManager::get_widget ("/ui/Main/Session/Quit");
 	if (widget) {
 		ige_mac_menu_set_quit_menu_item ((GtkMenuItem*) widget->gobj());
@@ -97,9 +125,26 @@ ARDOUR_UI::platform_specific ()
 		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
 	}
 	widget = ActionManager::get_widget ("/ui/Main/Session/ToggleOptionsEditor");
+
 	if (widget) {
 		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
 	}
+}
+
+void
+ARDOUR_UI::platform_setup ()
+{
+        AEInstallEventHandler (kCoreEventClass, kAEOpenDocuments, 
+                               handle_open_documents, 0, true);
+
+        AEInstallEventHandler (kCoreEventClass, kAEOpenApplication, 
+                               handle_open_application, 0, true);
+
+        AEInstallEventHandler (kCoreEventClass, kAEReopenApplication, 
+                               handle_reopen_application, 0, true);
+
+        AEInstallEventHandler (kCoreEventClass, kAEPrintDocuments, 
+                               handle_print_documents, 0, true);
 
 	EventTypeSpec applicationEventTypes[] = {
 		{kEventClassApplication, kEventAppActivated },
@@ -110,11 +155,6 @@ ARDOUR_UI::platform_specific ()
 	
 	InstallApplicationEventHandler (ehUPP, sizeof(applicationEventTypes) / sizeof(EventTypeSpec), 
 					applicationEventTypes, 0, &application_event_handler_ref);
-}
-
-void
-ARDOUR_UI::platform_setup ()
-{
 	if (!ARDOUR_COMMAND_LINE::finder_invoked_ardour) {
 		
 		/* if invoked from the command line, make sure we're visible */
@@ -122,3 +162,4 @@ ARDOUR_UI::platform_setup ()
 		[NSApp activateIgnoringOtherApps:1];
 	} 
 }
+

@@ -25,6 +25,7 @@ namespace Gnome {
 		class Item;
 		class Group;
 		class Canvas;
+		class Rect;
 		class SimpleRect;
 		class SimpleLine;
 		class Polygon;

@@ -158,6 +158,7 @@ static const char* authors[] = {
 	N_("Colin Fletcher"),
 	N_("Roland Stigge"),
 	N_("Audun Halland"),
+	N_("Armand Klenk"),
 	0
 };
 

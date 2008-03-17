@@ -18,6 +18,7 @@
 */
 
 #include <ardour/ardour.h>
+#include <ardour/profile.h>
 
 #include "utils.h"
 #include "editor.h"
@@ -67,6 +68,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("PlayMenu"), _("Play"));
 	ActionManager::register_action (editor_actions, X_("PrimaryClockMenu"), _("Primary Clock"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
+	ActionManager::register_action (editor_actions, X_("RegionMenu"), _("Region"));
 	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_actions, X_("RegionGainMenu"), _("Gain"));
 	ActionManager::register_action (editor_actions, X_("RulerMenu"), _("Rulers"));
@@ -79,11 +81,15 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("SetPunchMenu"), _("Punch"));
 	ActionManager::register_action (editor_actions, X_("Solo"), _("Solo"));
 	ActionManager::register_action (editor_actions, X_("Subframes"), _("Subframes"));
+	ActionManager::register_action (editor_actions, X_("SyncMenu"), _("Sync"));
 	ActionManager::register_action (editor_actions, X_("TempoMenu"), _("Tempo"));
 	ActionManager::register_action (editor_actions, X_("Timecode"), _("Timecode fps"));
+	ActionManager::register_action (editor_actions, X_("TrackHeightMenu"), _("Height"));
+	ActionManager::register_action (editor_actions, X_("TrackMenu"), _("Track"));
 	ActionManager::register_action (editor_actions, X_("Tools"), _("Tools"));
 	ActionManager::register_action (editor_actions, X_("TrimMenu"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
+	ActionManager::register_action (editor_actions, X_("WaveformMenu"), _("Waveforms"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom"));
 	ActionManager::register_action (editor_actions, X_("ZoomMenu"), _("Zoom"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
@@ -265,32 +271,32 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "goto", _("goto"), mem_fun(*this, &Editor::goto_frame));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "center-playhead", _("to Center"), mem_fun(*this, &Editor::center_playhead));
+	act = ActionManager::register_action (editor_actions, "center-playhead", _("Center Playhead"), mem_fun(*this, &Editor::center_playhead));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "center-edit-cursor", _("to Center"), mem_fun(*this, &Editor::center_edit_point));
+	act = ActionManager::register_action (editor_actions, "center-edit-cursor", _("Center Active Marker"), mem_fun(*this, &Editor::center_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "scroll-playhead-forward", _("Playhead forward"), bind (mem_fun(*this, &Editor::scroll_playhead), true));;
+	act = ActionManager::register_action (editor_actions, "scroll-playhead-forward", _("Playhead Forward"), bind (mem_fun(*this, &Editor::scroll_playhead), true));;
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "scroll-playhead-backward", _("Playhead Backward"), bind (mem_fun(*this, &Editor::scroll_playhead), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "playhead-to-edit", _("to Edit"), bind (mem_fun(*this, &Editor::cursor_align), true));
+	act = ActionManager::register_action (editor_actions, "playhead-to-edit", _("Playhead To Active Mark"), bind (mem_fun(*this, &Editor::cursor_align), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("to Playhead"), bind (mem_fun(*this, &Editor::cursor_align), false));
+	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("Active Mark To Playhead"), bind (mem_fun(*this, &Editor::cursor_align), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "trim-front", _("Trim start at edit point"), mem_fun(*this, &Editor::trim_region_front));
+	act = ActionManager::register_action (editor_actions, "trim-front", _("Trim Start At Edit Point"), mem_fun(*this, &Editor::trim_region_front));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-back", _("Trim end at edit point"), mem_fun(*this, &Editor::trim_region_back));
+	act = ActionManager::register_action (editor_actions, "trim-back", _("Trim End At Edit Point"), mem_fun(*this, &Editor::trim_region_back));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "trim-from-start", _("Start to edit point"), mem_fun(*this, &Editor::trim_region_from_edit_point));
+	act = ActionManager::register_action (editor_actions, "trim-from-start", _("Start To Edit Point"), mem_fun(*this, &Editor::trim_region_from_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-to-end", _("Edit point to end"), mem_fun(*this, &Editor::trim_region_to_edit_point));
+	act = ActionManager::register_action (editor_actions, "trim-to-end", _("Edit Point To End"), mem_fun(*this, &Editor::trim_region_to_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "trim-region-to-loop", _("Trim To Loop"), mem_fun(*this, &Editor::trim_region_to_loop));
@@ -357,9 +363,9 @@ Editor::register_actions ()
         act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), mem_fun(*this, &Editor::kbd_brush));
         ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "set-playhead", _("Set Playhead"), mem_fun(*this, &Editor::set_playhead_cursor));
+	act = ActionManager::register_action (editor_actions, "set-playhead", _("Playhead to Mouse"), mem_fun(*this, &Editor::set_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-edit-point", _("Set Edit Point"), mem_fun(*this, &Editor::set_edit_point));
+	act = ActionManager::register_action (editor_actions, "set-edit-point", _("Edit Point to Mouse"), mem_fun(*this, &Editor::set_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), bind (mem_fun(*this, &Editor::duplicate_dialog), false));
@@ -505,6 +511,33 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("Remove Last Capture"), (mem_fun(*this, &Editor::remove_last_capture)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "toggle-track-active", _("Toggle Active"), (mem_fun(*this, &Editor::toggle_tracks_active)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "remove-track", _("Remove"), (mem_fun(*this, &Editor::remove_tracks)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), (mem_fun(*this, &Editor::set_track_height_largest)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-larger", _("Larger"), (mem_fun(*this, &Editor::set_track_height_large)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-large", _("Large"), (mem_fun(*this, &Editor::set_track_height_larger)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-normal", _("Normal"), (mem_fun(*this, &Editor::set_track_height_normal)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-small", _("Small"), (mem_fun(*this, &Editor::set_track_height_smaller)));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "track-height-smaller", _("Smaller"), (mem_fun(*this, &Editor::set_track_height_small)));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;
 
@@ -535,10 +568,6 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-selected-marker"), _("Marker"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
-
-	ActionManager::register_action (editor_actions, "edit-point-marker", _("Marker"), bind (mem_fun (*this, &Editor::set_edit_point_preference), EditAtSelectedMarker));
-	ActionManager::register_action (editor_actions, "edit-point-playhead", _("Playhead"), bind (mem_fun (*this, &Editor::set_edit_point_preference), EditAtPlayhead));
-	ActionManager::register_action (editor_actions, "edit-point-mouse", _("Mouse"), bind (mem_fun (*this, &Editor::set_edit_point_preference), EditAtMouse));
 
 	ActionManager::register_action (editor_actions, "cycle-edit-point", _("Change edit point"), bind (mem_fun (*this, &Editor::cycle_edit_point), false));
 	ActionManager::register_action (editor_actions, "cycle-edit-point-with-marker", _("Change edit point (w/Marker)"), bind (mem_fun (*this, &Editor::cycle_edit_point), true));
@@ -584,17 +613,36 @@ Editor::register_actions ()
 	/* RULERS */
 	
 	Glib::RefPtr<ActionGroup> ruler_actions = ActionGroup::create (X_("Rulers"));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_tempo));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_meter));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_range_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_cd_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_time_transport_marker));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_frames));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_bbt));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_smpte));
-	ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::ruler_toggled), (int)ruler_metric_minsec));
+	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_tempo)));
+	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_meter)));
+	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_range_marker)));
+	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Markers"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_marker)));
+	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_cd_marker)));
+	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_transport_marker)));
+	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_frames)));
+	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_bbt)));
+	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_smpte)));
+	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_minsec)));
 
+	/* set defaults here */
+
+	no_ruler_shown_update = true;
+	ruler_meter_action->set_active (true);
+	ruler_tempo_action->set_active (true);
+	ruler_marker_action->set_active (true);
+	ruler_range_action->set_active (true);
+	if (Profile->get_sae()) {
+		ruler_cd_marker_action->set_active (false);
+		ruler_timecode_action->set_active (false);
+		ruler_minsec_action->set_active (true);
+	} else {
+		ruler_cd_marker_action->set_active (true);
+		ruler_timecode_action->set_active (true);
+		ruler_minsec_action->set_active (false);
+	}
+	ruler_samples_action->set_active (false);
+	no_ruler_shown_update = false;
+	
 	/* REGION LIST */
 
 	Glib::RefPtr<ActionGroup> rl_actions = ActionGroup::create (X_("RegionList"));
@@ -647,10 +695,18 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Add External Media"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformVisibility"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
+	ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), mem_fun (*this, &Editor::toggle_waveforms_while_recording));
 	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
 	
+
+	RadioAction::Group waveform_scale_group;
+	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("linear-waveforms"), _("Linear"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LinearWaveform));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_radio_action (editor_actions, waveform_scale_group, X_("logarithmic-waveforms"), _("Logarithmic"), bind (mem_fun (*this, &Editor::waveform_scale_chosen), Editing::LogWaveform));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+
 	/* if there is a logo in the editor canvas, its always visible at startup */
 
 	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleLogoVisibility"), _("Show Logo"), mem_fun (*this, &Editor::toggle_logo_visibility));
@@ -704,9 +760,59 @@ Editor::register_actions ()
 }
 
 void
+Editor::toggle_ruler_visibility (RulerType rt)
+{
+	const char* action = 0;
+
+	if (no_ruler_shown_update) {
+		return;
+	}
+
+	switch (rt) {
+	case ruler_metric_smpte:
+		action = "toggle-timecode-ruler";
+		break;
+	case ruler_metric_bbt:
+		action = "toggle-bbt-ruler";
+		break;
+	case ruler_metric_frames:
+		action = "toggle-samples-ruler";
+		break;
+	case ruler_metric_minsec:
+		action = "toggle-minsec-ruler";
+		break;
+	case ruler_time_tempo:
+		action = "toggle-tempo-ruler";
+		break;
+	case ruler_time_meter:
+		action = "toggle-meter-ruler";
+		break;
+	case ruler_time_marker:
+		action = "toggle-marker-ruler";
+		break;
+	case ruler_time_range_marker:
+		action = "toggle-range-ruler";
+		break;
+	case ruler_time_transport_marker:
+		action = "toggle-loop-punch-ruler";
+		break;
+	case ruler_time_cd_marker:
+		action = "toggle-cd-marker-ruler";
+		break;
+	}
+
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), action);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		update_ruler_visibility ();
+		store_ruler_visibility ();
+	}
+}
+
+void
 Editor::toggle_waveform_visibility ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformVisibility"));
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-waveform-visible"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		set_show_waveforms (tact->get_active());
@@ -746,6 +852,33 @@ Editor::toggle_logo_visibility ()
 			} else {
 				logo_item->hide ();
 			}
+		}
+	}
+}
+
+void
+Editor::waveform_scale_chosen (Editing::WaveformScale ws)
+{
+	RefPtr<Action> act;
+
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	switch (ws) {
+	case LinearWaveform:
+		act = ActionManager::get_action (X_("Editor"), X_("linear-waveforms"));
+		break;
+	case LogWaveform:
+		act = ActionManager::get_action (X_("Editor"), X_("logarithmic-waveforms"));
+		break;
+	}
+	
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		if (ract && ract->get_active()) {
+			set_waveform_scale (ws);
 		}
 	}
 }
@@ -1523,7 +1656,6 @@ Editor::parameter_changed (const char* parameter_name)
 		update_just_smpte ();
 	} else if (PARAM_IS ("show-track-meters")) {
 		toggle_meter_updating();
-		track_canvas_allocate(track_canvas.get_allocation());
 	} else if (PARAM_IS ("link-region-and-track-selection")) {
 		ActionManager::map_some_state ("Editor", "link-region-and-track-selection", &Configuration::get_link_region_and_track_selection);
 	}
@@ -1534,5 +1666,5 @@ Editor::parameter_changed (const char* parameter_name)
 void
 Editor::reset_focus ()
 {
-	track_canvas.grab_focus();
+	track_canvas->grab_focus();
 }

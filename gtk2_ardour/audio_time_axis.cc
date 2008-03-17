@@ -73,7 +73,6 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
-
 AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess)
 	, RouteTimeAxisView(ed, sess, rt, canvas)
@@ -115,14 +114,27 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (mem_fun(*this, &AudioTimeAxisView::region_view_added));
-		_view->attach ();
-	}
 
-	post_construct ();
+		if (!editor.have_idled()) {
+			/* first idle will do what we need */
+		} else {
+			first_idle ();
+		} 
+
+	} else {
+		post_construct ();
+	}
 }
 
 AudioTimeAxisView::~AudioTimeAxisView ()
 {
+}
+
+void
+AudioTimeAxisView::first_idle ()
+{
+	_view->attach ();
+	post_construct ();
 }
 
 AudioStreamView*
@@ -457,24 +469,26 @@ AudioTimeAxisView::update_control_names ()
 {
 	if (is_audio_track()) {
 		if (_route->active()) {
-			controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 			controls_base_selected_name = "AudioTrackControlsBaseSelected";
 			controls_base_unselected_name = "AudioTrackControlsBaseUnselected";
 		} else {
-			controls_ebox.set_name ("AudioTrackControlsBaseInactiveUnselected");
 			controls_base_selected_name = "AudioTrackControlsBaseInactiveSelected";
 			controls_base_unselected_name = "AudioTrackControlsBaseInactiveUnselected";
 		}
 	} else {
 		if (_route->active()) {
-			controls_ebox.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
 			controls_base_unselected_name = "BusControlsBaseUnselected";
 		} else {
-			controls_ebox.set_name ("BusControlsBaseInactiveUnselected");
 			controls_base_selected_name = "BusControlsBaseInactiveSelected";
 			controls_base_unselected_name = "BusControlsBaseInactiveUnselected";
 		}
+	}
+
+	if (get_selected()) {
+		controls_ebox.set_name (controls_base_selected_name);
+	} else {
+		controls_ebox.set_name (controls_base_unselected_name);
 	}
 }
 

@@ -175,6 +175,7 @@ class Session : public PBD::StatefulDestructible
 	    union {
 			void*                ptr;
 			bool                 yes_or_no;
+		        nframes_t            target2_frame;
 			SlaveSource slave;
 			Route*               route;
 	    };

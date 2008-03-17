@@ -56,11 +56,13 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 	hold_state = 0;
 	current_peak = 0;
 	current_level = 0;
+	last_peak_rect.width = 0;
+	last_peak_rect.height = 0;
 	_clr0 = clr0;
 	_clr1 = clr1;
 	_clr2 = clr2;
 	_clr3 = clr3;
-	
+
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
 	pixrect.x = 0;
@@ -381,15 +383,21 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	}
 
 	// draw peak bar 
-	if (hold_state && intersection.width > 0) {
-		gint y = pixheight - (gint) floor (pixheight * current_peak);
-		int h = min(3, pixheight - y);
+
+	if (hold_state) {
+		last_peak_rect.x = 0;
+		last_peak_rect.width = pixwidth;
+		last_peak_rect.y = pixheight - (gint) floor (pixheight * current_peak);
+		last_peak_rect.height = min(3, pixheight - last_peak_rect.y);
 
 		get_window()->draw_pixbuf (get_style()->get_fg_gc(get_state()), pixbuf,
-					   intersection.x, y,
-					   intersection.x, y,
-					   intersection.width, h,
+					   0, last_peak_rect.y,
+					   0, last_peak_rect.y,
+					   pixwidth, last_peak_rect.height,
 					   Gdk::RGB_DITHER_NONE, 0, 0);
+	} else {
+		last_peak_rect.width = 0;
+		last_peak_rect.height = 0;
 	}
 
 	return TRUE;
@@ -445,6 +453,9 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 void
 FastMeter::set (float lvl)
 {
+	float old_level = current_level;
+	float old_peak = current_peak;
+
 	current_level = lvl;
 	
 	if (lvl > current_peak) {
@@ -458,6 +469,91 @@ FastMeter::set (float lvl)
 		}
 	}
 
+	if (current_level == old_level && current_peak == old_peak && hold_state == 0) {
+		return;
+	}
+
+
+	Glib::RefPtr<Gdk::Window> win;
+
+	if ((win = get_window()) == 0) {
+		queue_draw ();
+		return;
+	}
+
+	if (orientation == Vertical) {
+		queue_vertical_redraw (win, old_level);
+	} else {
+		queue_horizontal_redraw (win, old_level);
+	}
+}
+
+void
+FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float old_level)
+{
+	GdkRectangle rect;
+	
+	gint new_top = (gint) floor (pixheight * current_level);
+	
+	rect.x = 0;
+	rect.width = pixwidth;
+	rect.height = new_top;
+	rect.y = pixheight - new_top;
+
+	if (current_level > old_level) {
+		/* colored/pixbuf got larger, just draw the new section */
+		/* rect.y stays where it is because of X coordinates */
+		/* height of invalidated area is between new.y (smaller) and old.y
+		   (larger).
+		   X coordinates just make my brain hurt.
+		*/
+		rect.height = pixrect.y - rect.y;
+	} else {
+		/* it got smaller, compute the difference */
+		/* rect.y becomes old.y (the smaller value) */
+		rect.y = pixrect.y;
+		/* rect.height is the old.y (smaller) minus the new.y (larger)
+		*/
+		rect.height = pixrect.height - rect.height;
+	}
+
+	GdkRegion* region = 0;
+	bool queue = false;
+
+	if (rect.height != 0) {
+
+		/* ok, first region to draw ... */
+		
+		region = gdk_region_rectangle (&rect);
+		queue = true;
+	}
+
+	/* redraw the last place where the last peak hold bar was;
+	   the next expose will draw the new one whether its part of
+	   expose region or not.
+	*/
+	
+	if (last_peak_rect.width * last_peak_rect.height != 0) {
+		if (!queue) {
+			region = gdk_region_new ();
+			queue = true; 
+		}
+		gdk_region_union_with_rect (region, &last_peak_rect);
+	} 
+
+	if (queue) {
+		gdk_window_invalidate_region (win->gobj(), region, true);
+	}
+	if (region) {
+		gdk_region_destroy(region);
+		region = 0;
+	}
+}
+
+void
+FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& win, float old_level)
+{
+	/* XXX OPTIMIZE (when we have some horizontal meters) */
 	queue_draw ();
 }
 

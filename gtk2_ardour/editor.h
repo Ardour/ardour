@@ -61,6 +61,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
+#include "time_axis_view.h"
 #include "draginfo.h"
 #include "tempo_lines.h"
 
@@ -132,6 +133,8 @@ class Editor : public PublicEditor
 
 	void             connect_to_session (ARDOUR::Session *);
 	ARDOUR::Session* current_session() const { return session; }
+	void             first_idle ();
+	virtual bool have_idled() const { return _have_idled; }
 
 	nframes_t leftmost_position() const { return leftmost_frame; }
 	nframes_t current_page_frames() const {
@@ -163,8 +166,10 @@ class Editor : public PublicEditor
 	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
 	void connect_to_image_compositor() ;
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
-	TimeAxisView* get_named_time_axis(const std::string & name) ;
 #endif
+
+	TimeAxisView* get_named_time_axis(const std::string & name) ;
+	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 
 	RouteTimeAxisView* get_route_view_by_id (PBD::ID& id);
 
@@ -180,6 +185,8 @@ class Editor : public PublicEditor
 
 	void set_show_waveforms (bool yn);
 	bool show_waveforms() const { return _show_waveforms; }
+
+	void set_waveform_scale (Editing::WaveformScale);
 
 	void set_show_waveforms_recording (bool yn);
 	bool show_waveforms_recording() const { return _show_waveforms_recording; }
@@ -225,14 +232,14 @@ class Editor : public PublicEditor
 		*/
 
 		if (pixel >= 0) {
-			return (nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit);
+			return (nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit);
 		} else {
 			return 0;
 		}
 	}
 
 	gulong frame_to_pixel (nframes64_t frame) const {
-		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas.gobj())->pixels_per_unit)));
+		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit)));
 	}
 
 	void flush_canvas ();
@@ -561,8 +568,8 @@ class Editor : public PublicEditor
 	void set_canvas_cursor ();
 	Gdk::Cursor* which_grabber_cursor ();
 
-	ArdourCanvas::CanvasAA track_canvas;
-	ArdourCanvas::CanvasAA time_canvas;
+	ArdourCanvas::Canvas* track_canvas;
+	ArdourCanvas::Canvas* time_canvas;
 
 	ArdourCanvas::Text* first_action_message;
 	ArdourCanvas::Text* verbose_canvas_cursor;
@@ -596,7 +603,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group      *transport_marker_group;
 	ArdourCanvas::Group*      cd_marker_group;
 	
-	enum {
+	enum RulerType {
 		ruler_metric_smpte = 0,
 		ruler_metric_bbt = 1,
 		ruler_metric_frames = 2,
@@ -611,7 +618,16 @@ class Editor : public PublicEditor
 	};
 
 	static GtkCustomMetric ruler_metrics[4];
-	bool                   ruler_shown[10];
+	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
 	bool                   no_ruler_shown_update;
 	
 	gint ruler_button_press (GdkEventButton*);
@@ -629,6 +645,8 @@ class Editor : public PublicEditor
 	void update_tempo_based_rulers (); 
 	void popup_ruler_menu (nframes_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
+	void set_ruler_visible (RulerType, bool);
+	void toggle_ruler_visibility (RulerType rt);
 	void ruler_toggled (int);
 	gint ruler_label_button_release (GdkEventButton*);
 	void store_ruler_visibility ();
@@ -1018,7 +1036,7 @@ class Editor : public PublicEditor
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
 	void cut_copy_points (Editing::CutCopyOp);
-	void cut_copy_regions (Editing::CutCopyOp);
+	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 
 	void mouse_paste ();
@@ -1135,7 +1153,10 @@ class Editor : public PublicEditor
 	SoundFileOmega* sfbrowser;
 	
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
+
+	void _do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
 	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+	bool idle_do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
 
 	void _do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 	void do_embed (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
@@ -1641,6 +1662,7 @@ public:
 	void time_selection_changed ();
 	void track_selection_changed ();
 	void region_selection_changed ();
+	void sensitize_the_right_region_actions (bool have_selected_regions);
 	void point_selection_changed ();
 	void marker_selection_changed ();
 
@@ -2172,7 +2194,7 @@ public:
 
 	Gtk::ComboBoxText edit_point_selector;
 
-	void set_edit_point_preference (Editing::EditPoint ep);
+	void set_edit_point_preference (Editing::EditPoint ep, bool force = false);
 	void cycle_edit_point (bool with_marker);
 	void set_edit_point ();
 	void edit_point_selection_done ();
@@ -2203,6 +2225,20 @@ public:
 	void snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
 
 	RhythmFerret* rhythm_ferret;
+
+	void set_track_height (TimeAxisView::TrackHeight h);
+	void set_track_height_largest ();
+	void set_track_height_large ();
+	void set_track_height_larger ();
+	void set_track_height_normal ();
+	void set_track_height_smaller ();
+	void set_track_height_small ();
+
+	void remove_tracks ();
+	void toggle_tracks_active ();
+	void waveform_scale_chosen (Editing::WaveformScale);
+
+	bool _have_idled;
 };
 
 #endif /* __ardour_editor_h__ */

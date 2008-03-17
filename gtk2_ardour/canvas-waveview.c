@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <libgnomecanvas/libgnomecanvas.h>
+#include <cairo.h>
 #include <string.h>
 #include <limits.h>
 
@@ -1600,21 +1601,227 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 
 static void
 gnome_canvas_waveview_draw (GnomeCanvasItem *item,
-			  GdkDrawable *drawable,
-			  int x, int y,
-			  int width, int height)
+			    GdkDrawable *drawable,
+			    int x, int y,
+			    int width, int height)
 {
 	GnomeCanvasWaveView *waveview;
+	cairo_t* cr;
+	gulong s1, s2;
+	int cache_index;
+	double zbegin, zend;
+	gboolean rectify;
+	double n;
+	double origin;
+	double clip_length;
+	double xoff;
+	double yoff;
+	double ulx;
+	double uly;
+	double lrx;
+	double lry;
 
 	waveview = GNOME_CANVAS_WAVEVIEW (item);
 
-	if (parent_class->draw) {
-		(* parent_class->draw) (item, drawable, x, y, width, height);
+	/* compute intersection of Drawable area and waveview,
+	   in canvas coordinate space
+	*/
+
+	if (x > waveview->bbox_ulx) {
+		ulx = x;
+		zbegin = ulx;
+	} else {
+		ulx = waveview->bbox_ulx;
+		zbegin = ulx + 1;
 	}
 
-	fprintf (stderr, "please don't use the CanvasWaveView item in a non-aa Canvas\n");
-	abort ();
+	if (y > waveview->bbox_uly) {
+		uly = y;
+	} else {
+		uly = waveview->bbox_uly;
+	}
+
+	if (x + width > waveview->bbox_lrx) {
+		lrx = waveview->bbox_lrx;
+		zend = lrx - 1;
+	} else {
+		lrx = x + width;
+		zend = lrx;
+	}
+
+	if (y + height > waveview->bbox_lry) {
+		lry = waveview->bbox_lry;
+	} else {
+		lry = y + height;
+	}
+
+	/* figure out which samples we need for the resulting intersection */
+
+	s1 = floor ((ulx - waveview->bbox_ulx) * waveview->samples_per_unit) ;
+
+	if (lrx == waveview->bbox_lrx) {
+		/* This avoids minor rounding errors when we have the
+		   entire region visible.
+		*/
+		s2 = waveview->samples;
+	} else {
+		s2 = s1 + floor ((lrx - ulx) * waveview->samples_per_unit);
+	}
+
+	/* translate back to buffer coordinate space */
+
+	ulx -= x;
+	uly -= y;
+	lrx -= x;
+	lry -= y;
+	zbegin -= x;
+	zend -= x;
+
+	/* don't rectify at single-sample zoom */
+	if(waveview->rectified && waveview->samples_per_unit > 1.0) {
+		rectify = TRUE;
+	} else {
+		rectify = FALSE;
+	}
+
+	clip_length = MIN(5,(waveview->height/4));
+
+	cr = gdk_cairo_create (drawable);
+	cairo_set_line_width (cr, 0.5);
+
+	origin = waveview->bbox_uly - y + waveview->half_height;
+
+	cairo_rectangle (cr, ulx, uly, lrx - ulx, lry - uly);
+	cairo_clip (cr);
+
+	if (waveview->cache_updater && waveview->reload_cache_in_render) {
+		waveview->cache->start = 0;
+		waveview->cache->end = 0;
+		waveview->reload_cache_in_render = FALSE;
+	}
+
+	cache_index = gnome_canvas_waveview_ensure_cache (waveview, s1, s2);
+
+#if 0
+	printf ("%p r (%d,%d)(%d,%d)[%d x %d] bbox (%d,%d)(%d,%d)[%d x %d]"
+		" draw (%.1f,%.1f)(%.1f,%.1f)[%.1f x %.1f] s= %lu..%lu\n",
+		waveview,
+		x, y, 
+		x + width,
+		y + height,
+		width,
+		height,
+		waveview->bbox_ulx,
+		waveview->bbox_uly,
+		waveview->bbox_lrx,
+		waveview->bbox_lry,
+		waveview->bbox_lrx - waveview->bbox_ulx,
+		waveview->bbox_lry - waveview->bbox_uly,
+		ulx, uly,
+		lrx, lry,
+		lrx - ulx,
+		lry - uly,
+		s1, s2);
+#endif
+
+	/* draw the top half */
+	
+	for (xoff = ulx; xoff < lrx; xoff++) {
+		double max, min;
+
+		max = waveview->cache->data[cache_index].max;
+		min = waveview->cache->data[cache_index].min;
+
+		if (min <= -1.0) {
+			min = -1.0;
+		}
+		
+		if (max >= 1.0) {
+			max = 1.0;
+		}
+		
+		if (rectify) {
+			if (fabs (min) > fabs (max)) {
+				max = fabs (min);
+			} 
+		} 
+		
+		yoff = origin - (waveview->half_height * max) + 0.5;
+		
+		if (n == ulx) {
+			cairo_move_to (cr, xoff+0.5, yoff);
+		} else {
+			cairo_line_to (cr, xoff+0.5, yoff);
+		}
+
+		cache_index++;
+	}
+
+	/* from the final top point, move out of the clip zone */
+	
+	cairo_line_to (cr, xoff + 10, yoff);
+	
+	/* now draw the bottom half */
+
+	for (--xoff, --cache_index; xoff >= ulx; --xoff) {
+		double min;
+
+		min = waveview->cache->data[cache_index].min;
+
+		if (min <= -1.0) {
+			min = -1.0;
+		}
+
+		yoff = origin - (waveview->half_height * min) + 0.5;
+
+		cairo_line_to (cr, xoff+0.5, yoff);
+		cache_index--;
+	}
+
+	/* from the final lower point, move out of the clip zone */
+
+	cairo_line_to (cr, xoff - 10, yoff);
+	
+	/* close path to fill */
+
+	cairo_close_path (cr);
+
+	/* fill and stroke */
+
+	cairo_set_source_rgba (cr, 
+			       (waveview->fill_r/255.0), 
+			       (waveview->fill_g/255.0), 
+			       (waveview->fill_b/255.0), 
+			       (waveview->fill_a/255.0));
+	cairo_fill_preserve (cr);
+	cairo_set_source_rgba (cr, 
+			       (waveview->wave_r/255.0), 
+			       (waveview->wave_g/255.0), 
+			       (waveview->wave_b/255.0), 
+			       (waveview->wave_a/255.0));
+	cairo_stroke (cr);
+
+	cairo_destroy (cr);
 }
+
+#if 0
+		if (clip_max || clip_min) {
+			cairo_set_source_rgba (cr, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a);
+		}
+
+		if (clip_max) {
+			cairo_move_to (cr, xoff, yoff1);
+			cairo_line_to (cr, xoff, yoff1 + clip_length);
+			cairo_stroke (cr);
+		}
+		
+		if (clip_min) {
+			cairo_move_to (cr, xoff, yoff2);
+			cairo_line_to (cr, xoff, yoff2 - clip_length);
+			cairo_stroke (cr);
+		}
+		
+#endif
 
 static void
 gnome_canvas_waveview_bounds (GnomeCanvasItem *item, double *x1, double *y1, double *x2, double *y2)
