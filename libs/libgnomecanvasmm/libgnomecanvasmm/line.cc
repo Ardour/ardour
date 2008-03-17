@@ -40,7 +40,9 @@ Points::Points(size_type nbpoints)
 Points::Points(GnomeCanvasPoints *castitem)
 : points_(castitem),owned_(false)
 {
-  reserve(points_->num_points);
+  while (size() < points_->num_points) {
+       push_back (Art::Point());
+  }
 
   //GnomeCanvasPoints has an array of doubles, used 2 at a time:
   int i = 0;
