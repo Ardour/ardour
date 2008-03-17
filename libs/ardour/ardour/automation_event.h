@@ -69,6 +69,7 @@ class AutomationList : public PBD::StatefulDestructible
   public:
 	typedef std::list<ControlEvent*,ControlEventAllocator> AutomationEventList;
 	typedef AutomationEventList::iterator iterator;
+	typedef AutomationEventList::reverse_iterator reverse_iterator;
 	typedef AutomationEventList::const_iterator const_iterator;
 
 	AutomationList (double default_value);

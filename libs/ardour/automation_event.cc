@@ -674,7 +674,7 @@ AutomationList::truncate_end (double last_coordinate)
 	{
 		Glib::Mutex::Lock lm (lock);
 		ControlEvent cp (last_coordinate, 0);
-		list<ControlEvent*>::reverse_iterator i;
+		AutomationList::reverse_iterator i;
 		double last_val;
 
 		if (events.empty()) {
@@ -743,7 +743,7 @@ AutomationList::truncate_end (double last_coordinate)
 			uint32_t sz = events.size();
 			
 			while (i != events.rend() && sz > 2) {
-				list<ControlEvent*>::reverse_iterator tmp;
+				AutomationList::reverse_iterator tmp;
 				
 				tmp = i;
 				++tmp;
@@ -840,7 +840,7 @@ AutomationList::truncate_start (double overall_length)
 			i = events.begin();
 			
 			while (i != events.end() && !events.empty()) {
-				list<ControlEvent*>::iterator tmp;
+				AutomationList::iterator tmp;
 				
 				tmp = i;
 				++tmp;
@@ -940,6 +940,9 @@ AutomationList::shared_eval (double x)
 		return multipoint_eval (x);
 		break;
 	}
+
+	/*NOTREACHED*/ /* stupid gcc */
+	return 0.0;
 }
 
 double
