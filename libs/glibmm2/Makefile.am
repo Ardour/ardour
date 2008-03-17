@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS	= -I scripts
 
-SUBDIRS		= tools glib examples scripts tests MSVC_Net2003
+SUBDIRS		= tools glib scripts 
 DIST_SUBDIRS	= $(SUBDIRS)
 
 EXTRA_DIST	= build_shared/Makefile_build.am_fragment \
@@ -27,7 +27,7 @@ dist-hook:
 	echo; echo
 
 
-include $(top_srcdir)/docs/Makefile_web.am_fragment
+# include $(top_srcdir)/docs/Makefile_web.am_fragment
 
 doc_tarball_files = \
 	docs/images/*.gif \

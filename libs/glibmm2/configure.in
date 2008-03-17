@@ -122,7 +122,18 @@ AC_CHECK_FUNCS([flockfile funlockfile getc_unlocked mkfifo])
 gtkmm_min_sigc_version=2.0.0
 gtkmm_min_glib_version=2.14.0
 
-PKG_CHECK_MODULES(GLIBMM, sigc++-2.0 >= ${gtkmm_min_sigc_version} glib-2.0 >= ${gtkmm_min_glib_version} gobject-2.0 >= ${gtkmm_min_glib_version} gmodule-2.0 >= ${gtkmm_min_glib_version})
+#
+#
+# !!! Ardour note: we don't need to look for sigc++
+# because it is inside our tree and handled by SCons.
+# We do, however, need to check on glib
+# 
+#
+#PKG_CHECK_MODULES(GLIBMM, sigc++-2.0 >= ${gtkmm_min_sigc_version} glib-2.0 >= ${gtkmm_min_glib_version} gobject-2.0 >= ${gtkmm_min_glib_version} gmodule-2.0 >= ${gtkmm_min_glib_version})
+#AC_SUBST(GLIBMM_CFLAGS)
+#AC_SUBST(GLIBMM_LIBS)
+
+PKG_CHECK_MODULES(GLIBMM, glib-2.0 >= ${gtkmm_min_glib_version} gobject-2.0 >= ${gtkmm_min_glib_version} gmodule-2.0 >= ${gtkmm_min_glib_version})
 AC_SUBST(GLIBMM_CFLAGS)
 AC_SUBST(GLIBMM_LIBS)
 
@@ -250,54 +261,6 @@ AC_CONFIG_FILES([
 
   glib/Makefile
   glib/glibmm-2.4.pc
-    glib/src/Makefile
-    glib/glibmm/Makefile
-      glib/glibmm/private/Makefile
-
-  tools/Makefile
-  tools/gmmproc
-  tools/generate_wrap_init.pl
-    tools/m4/Makefile
-    tools/pm/Makefile
-    tools/extra_defs_gen/Makefile
-])
-
-AC_CONFIG_FILES([
-  tests/Makefile
-    tests/glibmm_value/Makefile
-
-  examples/Makefile
-    examples/markup/Makefile
-    examples/options/Makefile
-    examples/thread/Makefile
-    examples/iochannel_stream/Makefile
-    examples/child_watch/Makefile
-    examples/regex/Makefile
-
-  scripts/Makefile
-
-  docs/Makefile
-    docs/images/Makefile
-    docs/reference/Makefile
-    docs/reference/Doxyfile
-    docs/reference/beautify_docs.pl
-    docs/internal/Makefile
-])
-
-AC_CONFIG_FILES([
-  MSVC_Net2003/Makefile
-    MSVC_Net2003/gendef/Makefile
-    MSVC_Net2003/glibmm/Makefile
-    MSVC_Net2003/glibmm/glibmm.rc
-    MSVC_Net2003/examples/Makefile
-      MSVC_Net2003/examples/dispatcher/Makefile
-      MSVC_Net2003/examples/dispatcher2/Makefile
-      MSVC_Net2003/examples/markup/Makefile
-      MSVC_Net2003/examples/options/Makefile
-      MSVC_Net2003/examples/thread/Makefile      
-      MSVC_Net2003/examples/thread_pool/Makefile
-    MSVC_Net2003/tests/Makefile
-      MSVC_Net2003/tests/glibmm_value/Makefile
 ])
 
 AC_OUTPUT()

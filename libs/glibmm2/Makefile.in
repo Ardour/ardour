@@ -31,12 +31,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/configure \
-	$(top_srcdir)/docs/Makefile_web.am_fragment AUTHORS COPYING \
-	ChangeLog INSTALL NEWS
-subdir = .
+	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
+	scripts/README scripts/config.guess scripts/config.sub \
+	scripts/depcomp scripts/install-sh scripts/ltmain.sh \
+	scripts/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/scripts/c_std.m4 \
 	$(top_srcdir)/scripts/cxx.m4 $(top_srcdir)/scripts/cxx_std.m4 \
@@ -147,6 +148,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL_PATH = @PERL_PATH@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -203,7 +205,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I scripts
-SUBDIRS = tools glib examples docs scripts tests MSVC_Net2003
+SUBDIRS = tools glib scripts 
 DIST_SUBDIRS = $(SUBDIRS)
 EXTRA_DIST = build_shared/Makefile_build.am_fragment \
 		  build_shared/Makefile_build_gensrc.am_fragment \
@@ -212,12 +214,8 @@ EXTRA_DIST = build_shared/Makefile_build.am_fragment \
 		  build_shared/Makefile_build_extra.am_fragment \
 		  CHANGES README.win32
 
-web_host = gtkmm.org
-web_path_gtkmm = /home/murrayc/gtkmm.org/docs/glibmm-2.4/
-#web_path_gtkmm = /home/groups/g/gt/gtkmm/htdocs/docs/glibmm-2.4/
-web_path_docs = $(web_path_gtkmm)docs/
-rsync_args = -vz --rsh ssh
-gtkmm_docdir = $(datadir)/doc/glibmm-2.4/docs
+
+# include $(top_srcdir)/docs/Makefile_web.am_fragment
 doc_tarball_files = \
 	docs/images/*.gif \
 	docs/internal/*.txt docs/internal/*.dia docs/reference/html
@@ -228,7 +226,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/docs/Makefile_web.am_fragment $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
