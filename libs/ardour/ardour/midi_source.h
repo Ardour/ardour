@@ -58,7 +58,7 @@ class MidiSource : public Source
 	virtual nframes_t midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const;
 	virtual nframes_t midi_write (MidiRingBuffer& src, nframes_t cnt);
 
-	virtual void append_event_unlocked(EventTimeUnit unit, const MidiEvent& ev) = 0;
+	virtual void append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev) = 0;
 
 	virtual void mark_for_remove() = 0;
 	virtual void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);

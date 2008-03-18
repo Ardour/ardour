@@ -91,7 +91,7 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 		const double new_time = i->time() * _request.time_fraction;
 		
 		// FIXME: double copy
-		MidiEvent ev = MidiEvent(*i, true);
+		MIDI::Event ev = MIDI::Event(*i, true);
 		ev.time() = new_time;
 		new_model->append(ev);
 	}
@@ -101,7 +101,7 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 	
 	const int ret = finish (region, nsrcs, new_name);
 	
-	results[0]->set_length(r->length() * _request.time_fraction, NULL);
+	results[0]->set_length((nframes_t) floor (r->length() * _request.time_fraction), NULL);
 
 	return ret;
 }

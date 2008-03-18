@@ -432,7 +432,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		assert(time >= _timeline_position);
 		time -= _timeline_position;
 
-		const MidiEvent ev(time, size, buf);
+		const MIDI::Event ev(time, size, buf);
 		append_event_unlocked(Frames, ev);
 
 		if (_model)
@@ -452,7 +452,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		
 
 void
-SMFSource::append_event_unlocked(EventTimeUnit unit, const MidiEvent& ev)
+SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 {
 	/*printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(),
 			(unsigned)ev.channel(), ev.time(), ev.size());
@@ -886,7 +886,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	fseek(_fd, _header_size, 0);
 
 	uint64_t time = 0; /* in SMF ticks */
-	MidiEvent ev;
+	MIDI::Event ev;
 	
 	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
 	

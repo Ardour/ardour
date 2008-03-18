@@ -308,7 +308,7 @@ static void
 write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
-	MidiEvent ev(0.0, 4, NULL, true);
+	MIDI::Event ev(0.0, 4, NULL, true);
 
 	status.progress = 0.0f;
 

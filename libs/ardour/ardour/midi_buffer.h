@@ -20,8 +20,8 @@
 #ifndef __ardour_midi_buffer_h__
 #define __ardour_midi_buffer_h__
 
+#include <midi++/event.h>
 #include <ardour/buffer.h>
-#include <ardour/midi_event.h>
 
 namespace ARDOUR {
 
@@ -39,7 +39,7 @@ public:
 	
 	void copy(const MidiBuffer& copy);
 
-	bool  push_back(const ARDOUR::MidiEvent& event);
+	bool  push_back(const MIDI::Event& event);
 	bool  push_back(const jack_midi_event_t& event);
 	Byte* reserve(double time, size_t size);
 
@@ -50,7 +50,7 @@ public:
 	struct iterator {
 		iterator(MidiBuffer& b, size_t i) : buffer(b), index(i) {}
 
-		inline MidiEvent& operator*() const { return buffer[index]; }
+		inline MIDI::Event& operator*() const { return buffer[index]; }
 		inline iterator& operator++() { ++index; return *this; } // prefix
 		inline bool operator!=(const iterator& other) const { return index != other.index; }
 		
@@ -61,7 +61,7 @@ public:
 	struct const_iterator {
 		const_iterator(const MidiBuffer& b, size_t i) : buffer(b), index(i) {}
 
-		inline const MidiEvent& operator*() const { return buffer[index]; }
+		inline const MIDI::Event& operator*() const { return buffer[index]; }
 		inline const_iterator& operator++() { ++index; return *this; } // prefix
 		inline bool operator!=(const const_iterator& other) const { return index != other.index; }
 		
@@ -80,8 +80,8 @@ private:
 	friend class iterator;
 	friend class const_iterator;
 	
-	const MidiEvent& operator[](size_t i) const { assert(i < _size); return _events[i]; }
-	MidiEvent& operator[](size_t i) { assert(i < _size); return _events[i]; }
+	const MIDI::Event& operator[](size_t i) const { assert(i < _size); return _events[i]; }
+	MIDI::Event& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
 	// FIXME: Eliminate this
 	static const size_t MAX_EVENT_SIZE = 4; // bytes
@@ -92,7 +92,7 @@ private:
 
 	/* FIXME: this is utter crap.  rewrite as a flat/packed buffer like MidiRingBuffer */
 
-	MidiEvent* _events; ///< Event structs that point to offsets in _data
+	MIDI::Event* _events; ///< Event structs that point to offsets in _data
 	Byte*      _data;   ///< MIDI, straight up.  No time stamps.
 };
 

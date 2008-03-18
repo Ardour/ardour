@@ -75,7 +75,7 @@ public:
 	size_t read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const;
 
 	/** Resizes vector if necessary (NOT realtime safe) */
-	void append(const MidiEvent& ev);
+	void append(const MIDI::Event& ev);
 	
 	inline const boost::shared_ptr<const Note> note_at(unsigned i) const { return _notes[i]; }
 	inline const boost::shared_ptr<Note>       note_at(unsigned i)       { return _notes[i]; }
@@ -151,8 +151,8 @@ public:
 
 		inline bool locked() const { return _locked; }
 
-		const MidiEvent& operator*()  const { return _event; }
-		const MidiEvent* operator->() const { return &_event; }
+		const MIDI::Event& operator*()  const { return _event; }
+		const MIDI::Event* operator->() const { return &_event; }
 
 		const const_iterator& operator++(); // prefix only
 		bool operator==(const const_iterator& other) const;
@@ -164,7 +164,7 @@ public:
 		friend class MidiModel;
 
 		const MidiModel* _model;
-		MidiEvent        _event;
+		MIDI::Event        _event;
 
 		typedef std::priority_queue<
 				boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,
@@ -189,7 +189,7 @@ private:
 	void remove_note_unlocked(const boost::shared_ptr<const Note> note);
 
 	friend class const_iterator;
-	bool control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter) const;
+	bool control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& iter) const;
 
 #ifndef NDEBUG
 	bool is_sorted() const;

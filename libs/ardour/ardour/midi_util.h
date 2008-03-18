@@ -21,7 +21,7 @@
 #ifndef __ardour_midi_util_h__ 
 #define __ardour_midi_util_h__
 
-#include <ardour/midi_events.h>
+#include <midi++/events.h>
 
 namespace ARDOUR {
 

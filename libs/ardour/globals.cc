@@ -412,21 +412,6 @@ ARDOUR::get_ardour_revision ()
 	return "$Rev$";
 }
 
-static bool sae_binding_filter (const string& str, void* arg)
-{
-	/* Not a dotfile, has a prefix before a period, suffix is ".bindings" and contains -sae- */
-	
-	return str[0] != '.' && str.length() > 13 && str.find (".bindings") == (str.length() - 9)
-		&& str.find ("SAE-") != string::npos;
-}
-
-static bool binding_filter (const string& str, void* arg)
-{
-	/* Not a dotfile, has a prefix before a period, suffix is ".bindings" */
-	
-	return str[0] != '.' && str.length() > 9 && str.find (".bindings") == (str.length() - 9);
-}
-
 void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {

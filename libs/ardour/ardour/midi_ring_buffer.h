@@ -307,7 +307,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 	if (read_space() == 0)
 		return 0;
 
-	MidiEvent ev;
+	MIDI::Event ev;
 
 	size_t count = 0;
 

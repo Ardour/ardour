@@ -18,19 +18,24 @@
 
 */
 
-#ifndef __ardour_midi_event_h__
-#define __ardour_midi_event_h__
+#ifndef __libmidipp_midi_event_h__
+#define __libmidipp_midi_event_h__
 
-#include <ardour/types.h>
-#include <ardour/midi_events.h>
 #include <stdint.h>
+#include <cstdlib>
+#include <cstring>
+#include <assert.h>
+
+#include <midi++/types.h>
+#include <midi++/events.h>
 
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
- * may not be usable in STL containers, signals, etc. */
+ * may not be usable in STL containers, signals, etc. 
+ */
 #define MIDI_EVENT_ALLOW_ALLOC 1
 
-namespace ARDOUR {
+namespace MIDI {
 
 
 /** Identical to jack_midi_event_t, but with double timestamp
@@ -38,16 +43,16 @@ namespace ARDOUR {
  * time is either a frame time (from/to Jack) or a beat time (internal
  * tempo time, used in MidiModel) depending on context.
  */
-struct MidiEvent {
+struct Event {
 #ifdef MIDI_EVENT_ALLOW_ALLOC
-	MidiEvent(double t=0, uint32_t s=0, Byte* b=NULL, bool owns_buffer=false)
+	Event(double t=0, uint32_t s=0, uint8_t* b=NULL, bool owns_buffer=false)
 		: _time(t)
 		, _size(s)
 		, _buffer(b)
 		, _owns_buffer(owns_buffer)
 	{
 		if (owns_buffer) {
-			_buffer = (Byte*)malloc(_size);
+			_buffer = (uint8_t*)malloc(_size);
 			if (b)
 				memcpy(_buffer, b, _size);
 			else
@@ -61,14 +66,14 @@ struct MidiEvent {
 	 * is NOT REALTIME SAFE.  Otherwise both events share a buffer and
 	 * memory management semantics are the caller's problem.
 	 */
-	MidiEvent(const MidiEvent& copy, bool owns_buffer)
+	Event(const Event& copy, bool owns_buffer)
 		: _time(copy._time)
 		, _size(copy._size)
 		, _buffer(copy._buffer)
 		, _owns_buffer(owns_buffer)
 	{
 		if (owns_buffer) {
-			_buffer = (Byte*)malloc(_size);
+			_buffer = (uint8_t*)malloc(_size);
 			if (copy._buffer)
 				memcpy(_buffer, copy._buffer, _size);
 			else
@@ -76,17 +81,17 @@ struct MidiEvent {
 		}
 	}
 	
-	~MidiEvent() {
+	~Event() {
 		if (_owns_buffer)
 			free(_buffer);
 	}
 
-	inline const MidiEvent& operator=(const MidiEvent& copy) {
+	inline const Event& operator=(const Event& copy) {
 		_time = copy._time;
 		if (_owns_buffer) {
 			if (copy._buffer) {
 				if (!_buffer || _size < copy._size)
-					_buffer = (Byte*)::realloc(_buffer, copy._size);
+					_buffer = (uint8_t*)::realloc(_buffer, copy._size);
 				memcpy(_buffer, copy._buffer, copy._size);
 			} else {
 				free(_buffer);
@@ -100,7 +105,22 @@ struct MidiEvent {
 		return *this;
 	}
 	
-	inline bool operator==(const MidiEvent& other) const {
+	inline void set (uint8_t* msg, size_t msglen, timestamp_t t) {
+		if (_owns_buffer) {
+			if (_size < msglen) {
+				free (_buffer);
+				_buffer = (uint8_t*) malloc (msglen);
+			}
+		} else {
+			_buffer = (uint8_t*) malloc (msglen);
+			_owns_buffer = true;
+		}
+
+		memcpy (_buffer, msg, msglen);
+		_time = t;
+	}
+
+	inline bool operator==(const Event& other) const {
 		if (_time != other._time)
 			return false;
 
@@ -117,11 +137,11 @@ struct MidiEvent {
 		return true;
 	}
 	
-	inline bool operator!=(const MidiEvent& other) const { return ! operator==(other); }
+	inline bool operator!=(const Event& other) const { return ! operator==(other); }
 
 	inline bool owns_buffer() const { return _owns_buffer; }
 	
-	inline void set_buffer(Byte* buf, bool own) {
+	inline void set_buffer(uint8_t* buf, bool own) {
 		if (_owns_buffer) {
 			free(_buffer);
 			_buffer = NULL;
@@ -132,12 +152,12 @@ struct MidiEvent {
 
 	inline void realloc(size_t size) {
 		assert(_owns_buffer);
-		_buffer = (Byte*) ::realloc(_buffer, size);
+		_buffer = (uint8_t*) ::realloc(_buffer, size);
 	}
 
 #else
 
-	inline void set_buffer(Byte* buf) { _buffer = buf; }
+	inline void set_buffer(uint8_t* buf) { _buffer = buf; }
 
 #endif // MIDI_EVENT_ALLOW_ALLOC
 
@@ -147,21 +167,21 @@ struct MidiEvent {
 	inline uint32_t&   size()              { return _size; }
 	inline uint8_t     type()        const { return (_buffer[0] & 0xF0); }
 	inline uint8_t     channel()     const { return (_buffer[0] & 0x0F); }
-	inline bool        is_note_on()  const { return (type() == MIDI_CMD_NOTE_ON); }
-	inline bool        is_note_off() const { return (type() == MIDI_CMD_NOTE_OFF); }
-	inline bool        is_cc()       const { return (type() == MIDI_CMD_CONTROL); }
+        inline bool        is_note_on()  const { return (type() == MIDI_CMD_NOTE_ON); }
+        inline bool        is_note_off() const { return (type() == MIDI_CMD_NOTE_OFF); }
+        inline bool        is_cc()       const { return (type() == MIDI_CMD_CONTROL); }
 	inline bool        is_note()     const { return (is_note_on() || is_note_off()); }
 	inline uint8_t     note()        const { return (_buffer[1]); }
 	inline uint8_t     velocity()    const { return (_buffer[2]); }
 	inline uint8_t     cc_number()   const { return (_buffer[1]); }
 	inline uint8_t     cc_value()    const { return (_buffer[2]); }
-	inline const Byte* buffer()      const { return _buffer; }
-	inline Byte*&      buffer()            { return _buffer; }
+	inline const uint8_t* buffer()      const { return _buffer; }
+	inline uint8_t*&      buffer()            { return _buffer; }
 
 private:
 	double   _time;   /**< Sample index (or beat time) at which event is valid */
-	uint32_t _size;   /**< Number of bytes of data in \a buffer */
-	Byte*    _buffer; /**< Raw MIDI data */
+	uint32_t _size;   /**< Number of uint8_ts of data in \a buffer */
+	uint8_t*    _buffer; /**< Raw MIDI data */
 
 #ifdef MIDI_EVENT_ALLOW_ALLOC
 	bool _owns_buffer; /**< Whether buffer is locally allocated */
@@ -169,6 +189,6 @@ private:
 };
 
 
-} // namespace ARDOUR
+}
 
-#endif /* __ardour_midi_event_h__ */
+#endif /* __libmidipp_midi_event_h__ */

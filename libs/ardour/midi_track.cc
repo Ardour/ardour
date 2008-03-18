@@ -22,6 +22,7 @@
 #include <sigc++/bind.h>
 
 #include <pbd/enumwriter.h>
+#include <midi++/events.h>
 
 #include <ardour/midi_track.h>
 #include <ardour/midi_diskstream.h>
@@ -36,7 +37,7 @@
 #include <ardour/utils.h>
 #include <ardour/buffer_set.h>
 #include <ardour/meter.h>
-#include <ardour/midi_events.h>
+
 
 #include "i18n.h"
 
@@ -587,7 +588,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 	
 	Byte buf[3]; // CC = 3 bytes
 	buf[0] = MIDI_CMD_CONTROL;
-	MidiEvent ev(0, 3, buf, false);
+	MIDI::Event ev(0, 3, buf, false);
 
 	// Write track controller automation
 #if 0

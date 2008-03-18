@@ -22,14 +22,14 @@
 #define __ardour_note_h__
 
 #include <stdint.h>
-#include <ardour/midi_event.h>
+#include <midi++/event.h>
 
 namespace ARDOUR {
 
 
 /** A MIDI Note.
  *
- * A note is (unfortunately) special and not just another MidiEvent as it
+ * A note is (unfortunately) special and not just another MIDI::Event as it
  * has a duration and two separate MIDI events (on and off).
  */
 class Note {
@@ -53,16 +53,16 @@ public:
 	inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
 	inline void set_duration(double d)  { _off_event.time() = _on_event.time() + d; }
 
-	inline MidiEvent& on_event()  { return _on_event; }
-	inline MidiEvent& off_event() { return _off_event; }
+	inline MIDI::Event& on_event()  { return _on_event; }
+	inline MIDI::Event& off_event() { return _off_event; }
 
-	inline const MidiEvent& on_event()  const { return _on_event; }
-	inline const MidiEvent& off_event() const { return _off_event; }
+	inline const MIDI::Event& on_event()  const { return _on_event; }
+	inline const MIDI::Event& off_event() const { return _off_event; }
 
 private:
 	// Event buffers are self-contained
-	MidiEvent _on_event;
-	MidiEvent _off_event;
+	MIDI::Event _on_event;
+	MIDI::Event _off_event;
 };
 
 

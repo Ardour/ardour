@@ -30,12 +30,15 @@ using namespace std;
 using namespace MIDI;
 using namespace PBD;
 
+pthread_t JACK_MidiPort::_process_thread;
+
 JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 	: Port(node)
 	, _jack_client(jack_client)
 	, _jack_input_port(NULL)
 	, _jack_output_port(NULL)
 	, _last_read_index(0)
+	, non_process_thread_fifo (5 * 1024)
 {
 	int err = create_ports (node);
 
@@ -55,23 +58,85 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 	Port::cycle_start(nframes);
 	assert(_nframes_this_cycle == nframes);
 	_last_read_index = 0;
-	jack_midi_clear_buffer(jack_port_get_buffer(_jack_output_port, nframes));
+
+	void *buffer = jack_port_get_buffer (_jack_output_port, nframes);
+	jack_midi_clear_buffer (buffer);
+	flush (buffer);
 }
 
 int
 JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 {
-	if (!_currently_in_cycle) {
-		error << "JACK MIDI write ignored - not in cycle ... FIX ME PAUL!" << endmsg;
-		return msglen;
-	}
-	assert(timestamp < _nframes_this_cycle);
-	assert(_jack_output_port);
+	if (!is_process_thread()) {
 
-	// FIXME: return value correct?
-	return jack_midi_event_write (
-		jack_port_get_buffer(_jack_output_port, _nframes_this_cycle),
-		timestamp, msg, msglen);
+		Glib::Mutex::Lock lm (non_process_thread_fifo_lock);
+		RingBuffer<Event>::rw_vector vec;
+		
+		non_process_thread_fifo.get_write_vector (&vec);
+
+		cerr << "Non-process thread writes " << msglen << " to " << name() << endl;
+
+		if (vec.len[0] + vec.len[1] < 1) {
+			error << "no space in FIFO for non-process thread MIDI write"
+			      << endmsg;
+			return 0;
+		}
+
+		if (vec.len[0]) {
+			vec.buf[0]->set (msg, msglen, timestamp);
+		} else {
+			vec.buf[1]->set (msg, msglen, timestamp);
+		}
+
+		non_process_thread_fifo.increment_write_idx (1);
+
+		return msglen;
+				
+	} else {
+
+		assert(_currently_in_cycle);
+		assert(timestamp < _nframes_this_cycle);
+		assert(_jack_output_port);
+
+		// FIXME: return value correct?
+		return jack_midi_event_write (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle), 
+					      timestamp, msg, msglen);
+	}
+}
+
+void
+JACK_MidiPort::flush (void* jack_port_buffer)
+{
+	RingBuffer<Event>::rw_vector vec;
+	size_t written;
+
+	non_process_thread_fifo.get_read_vector (&vec);
+
+	if (vec.len[0] + vec.len[1]) {
+		cerr << "Flush " << vec.len[0] + vec.len[1] << "events from non-process FIFO\n";
+	}
+
+	if (vec.len[0]) {
+		Event* evp = vec.buf[0];
+		
+		for (size_t n = 0; n < vec.len[0]; ++n, ++evp) {
+			jack_midi_event_write (jack_port_buffer,
+					       (timestamp_t) evp->time(), evp->buffer(), evp->size());
+		}
+	}
+	
+	if (vec.len[1]) {
+		Event* evp = vec.buf[1];
+
+		for (size_t n = 0; n < vec.len[1]; ++n, ++evp) {
+			jack_midi_event_write (jack_port_buffer,
+					       (timestamp_t) evp->time(), evp->buffer(), evp->size());
+		}
+	}
+	
+	if ((written = vec.len[0] + vec.len[1]) != 0) {
+		non_process_thread_fifo.increment_read_idx (written);
+	}
 }
 
 int
@@ -136,4 +201,16 @@ JACK_MidiPort::get_state () const
 void
 JACK_MidiPort::set_state (const XMLNode& node)
 {
+}
+
+void
+JACK_MidiPort::set_process_thread (pthread_t thr)
+{
+	_process_thread = thr;
+}
+
+bool
+JACK_MidiPort::is_process_thread()
+{
+	return (pthread_self() == _process_thread);
 }

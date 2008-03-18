@@ -25,8 +25,9 @@
 #include <stdexcept>
 #include <stdint.h>
 #include <pbd/enumwriter.h>
+#include <midi++/events.h>
+
 #include <ardour/midi_model.h>
-#include <ardour/midi_events.h>
 #include <ardour/midi_source.h>
 #include <ardour/types.h>
 #include <ardour/session.h>
@@ -92,7 +93,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	}
 
 	if (_note_iter != model.notes().end()) {
-		_event = MidiEvent((*_note_iter)->on_event(), false);
+		_event = MIDI::Event((*_note_iter)->on_event(), false);
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	}
@@ -182,12 +183,12 @@ MidiModel::const_iterator::operator++()
 
 	if (type == NOTE_ON) {
 		//cerr << "********** MIDI Iterator = note on" << endl;
-		_event = MidiEvent((*_note_iter)->on_event(), false);
+		_event = MIDI::Event((*_note_iter)->on_event(), false);
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
 		//cerr << "********** MIDI Iterator = note off" << endl;
-		_event = MidiEvent(_active_notes.top()->off_event(), false);
+		_event = MIDI::Event(_active_notes.top()->off_event(), false);
 		_active_notes.pop();
 	} else if (type == CC) {
 		//cerr << "********** MIDI Iterator = CC" << endl;
@@ -291,7 +292,7 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 	
 
 bool
-MidiModel::control_to_midi_event(MidiEvent& ev, const MidiControlIterator& iter) const
+MidiModel::control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& iter) const
 {
 	if (iter.first->parameter().type() == MidiCCAutomation) {
 		if (ev.size() < 3)
@@ -378,7 +379,7 @@ MidiModel::end_write(bool delete_stuck)
  * and MUST be >= the latest event currently in the model.
  */
 void
-MidiModel::append(const MidiEvent& ev)
+MidiModel::append(const MIDI::Event& ev)
 {
 	write_lock();
 
@@ -643,7 +644,7 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 
 	/* Percussive 
 	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-		const MidiEvent& ev = n->on_event();
+		const MIDI::Event& ev = n->on_event();
 		source->append_event_unlocked(ev);
 	}*/
 
@@ -658,7 +659,7 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 		// Write any pending note offs earlier than this note on
 		while ( ! active_notes.empty() ) {
 			const boost::shared_ptr<const Note> earliest_off = active_notes.top();
-			const MidiEvent& off_ev = earliest_off->off_event();
+			const MIDI::Event& off_ev = earliest_off->off_event();
 			if (off_ev.time() <= (*n)->time()) {
 				source->append_event_unlocked(Frames, off_ev);
 				active_notes.pop();

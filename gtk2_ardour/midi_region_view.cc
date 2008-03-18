@@ -32,7 +32,6 @@
 #include <ardour/midi_region.h>
 #include <ardour/midi_source.h>
 #include <ardour/midi_diskstream.h>
-#include <ardour/midi_events.h>
 #include <ardour/midi_model.h>
 
 #include "streamview.h"

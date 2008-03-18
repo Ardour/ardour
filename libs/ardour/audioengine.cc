@@ -29,6 +29,8 @@
 #include <pbd/stacktrace.h>
 #include <pbd/unknown_type.h>
 
+#include <midi++/jack.h>
+
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
 #include <ardour/port.h>
@@ -113,6 +115,7 @@ _thread_init_callback (void *arg)
 	*/
 
 	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("Audioengine"), 4096);
+	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
 }
 
 int

@@ -29,7 +29,6 @@
 #include <ardour/midi_source.h>
 #include <ardour/midi_diskstream.h>
 #include <ardour/midi_track.h>
-#include <ardour/midi_events.h>
 #include <ardour/smf_source.h>
 #include <ardour/region_factory.h>
 

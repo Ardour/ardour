@@ -21,8 +21,9 @@
 #include <cassert>
 #include <iostream>
 #include <glibmm/miscutils.h>
+#include <midi++/events.h>
+
 #include <ardour/smf_reader.h>
-#include <ardour/midi_events.h>
 #include <ardour/midi_util.h>
 
 using namespace std;

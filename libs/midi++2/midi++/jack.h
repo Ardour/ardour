@@ -28,9 +28,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <glibmm/thread.h>
+
+#include <pbd/ringbuffer.h>
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <midi++/port.h>
+#include <midi++/event.h>
 
 namespace MIDI
 {
@@ -52,6 +56,8 @@ public:
 	virtual XMLNode& get_state () const;
 	virtual void set_state (const XMLNode&);
 
+	static void set_process_thread (pthread_t);
+
   protected:
 	std::string get_typestring () const {
 		return typestring;
@@ -69,6 +75,14 @@ private:
 	jack_port_t*   _jack_input_port;
 	jack_port_t*   _jack_output_port;
 	nframes_t      _last_read_index;
+
+	void flush (void* jack_port_buffer);
+
+	static pthread_t _process_thread;
+	static bool is_process_thread();
+
+	RingBuffer<MIDI::Event> non_process_thread_fifo;
+	Glib::Mutex non_process_thread_fifo_lock;
 };
 
 
