@@ -21,11 +21,14 @@
 #include <cerrno>
 #include <cassert>
 
+#include <pbd/error.h>
+
 #include <midi++/types.h>
 #include <midi++/jack.h>
 
 using namespace std;
 using namespace MIDI;
+using namespace PBD;
 
 JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 	: Port(node)
@@ -58,7 +61,10 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 int
 JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 {
-	assert(_currently_in_cycle);
+	if (!_currently_in_cycle) {
+		error << "JACK MIDI write ignored - not in cycle ... FIX ME PAUL!" << endmsg;
+		return msglen;
+	}
 	assert(timestamp < _nframes_this_cycle);
 	assert(_jack_output_port);
 
