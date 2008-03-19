@@ -336,7 +336,7 @@ Session::process_with_events (nframes_t nframes)
 		}
 	
 		if (!_exporting) {
-			send_midi_time_code_for_cycle(nframes);
+			send_midi_time_code_for_cycle (nframes);
 		}
 
 		if (actively_recording()) {
@@ -764,7 +764,7 @@ Session::process_without_events (nframes_t nframes)
 	}
 		
 	if (!_exporting) {
-		send_midi_time_code_for_cycle(nframes);
+		send_midi_time_code_for_cycle (nframes);
 	}
 
 	if (actively_recording()) {

@@ -143,6 +143,8 @@ Parser::trace_event (Parser &p, byte *msg, size_t len)
 	eventType type;
 	ostream *o;
 
+	cerr << "TRACE\n";
+
 	if ((o = trace_stream) == NULL) { /* can be asynchronously removed */
 		return;
 	}

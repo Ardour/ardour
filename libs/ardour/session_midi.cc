@@ -726,7 +726,7 @@ Session::send_full_time_code(nframes_t nframes)
 	cerr << "MTC: Sending full time code at " << outbound_mtc_smpte_frame << endl;
 
 	// Send message at offset 0, sent time is for the start of this cycle
-	if (!_mtc_port->midimsg (msg, sizeof (msg), 0)) {
+	if (_mtc_port->midimsg (msg, sizeof (msg), 0)) {
 		error << _("Session: could not send full MIDI time code") << endmsg;
 		return -1;
 	}
@@ -808,9 +808,9 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 		nframes_t out_stamp = msg_time - _transport_frame;
 		assert(out_stamp < nframes);
 
-		if (!_mtc_port->midimsg (mtc_msg, 2, out_stamp)) {
+		if (_mtc_port->midimsg (mtc_msg, 2, out_stamp)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno)) 
-				<< endmsg;
+			      << endmsg;
 			return -1;
 		}
 
@@ -846,11 +846,6 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
  OUTBOUND MMC STUFF
 **********************************************************************/
 
-/** Send an MMC command at the given absolute timestamp (@a where).
- *
- * This must be called in the process thread, and @a where must fall within
- * this process cycle or horrible things will happen.
- */
 void
 Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 {
@@ -859,13 +854,13 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 	SMPTE::Time smpte;
 
 	if (_mmc_port == 0 || !session_send_mmc) {
-		//cerr << "Not delivering MMC " << _mmc_port << " - " << send_mmc << endl;
+		// cerr << "Not delivering MMC " << _mmc_port << " - " << session_send_mmc << endl;
 		return;
 	}
 
 	mmc_buffer[nbytes++] = cmd;
 
-	//cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
+	// cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
 	
 	switch (cmd) {
 	case MachineControl::cmdLocate:
@@ -909,13 +904,9 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 
 		mmc_buffer[nbytes++] = 0xf7; // terminate SysEx/MMC message
 
-		assert(where >= _transport_frame);
-
-		if (!_mmc_port->midimsg (mmc_buffer, sizeof (mmc_buffer), 0)) {
+		if (_mmc_port->midimsg (mmc_buffer, nbytes, 0)) {
 			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
-		} /*else {
-			cerr << "Sending MMC\n";
-		}*/
+		} 
 	}
 }
 

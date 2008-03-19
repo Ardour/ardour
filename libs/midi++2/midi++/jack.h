@@ -73,6 +73,7 @@ private:
 	jack_port_t*   _jack_input_port;
 	jack_port_t*   _jack_output_port;
 	nframes_t      _last_read_index;
+	timestamp_t    _last_write_timestamp;
 
 	void flush (void* jack_port_buffer);
 

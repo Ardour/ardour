@@ -58,6 +58,7 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 	Port::cycle_start(nframes);
 	assert(_nframes_this_cycle == nframes);
 	_last_read_index = 0;
+	_last_write_timestamp = 0;
 
 	void *buffer = jack_port_get_buffer (_jack_output_port, nframes);
 	jack_midi_clear_buffer (buffer);
@@ -67,14 +68,14 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 int
 JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 {
+	int ret = 0;
+
 	if (!is_process_thread()) {
 
 		Glib::Mutex::Lock lm (non_process_thread_fifo_lock);
 		RingBuffer<Event>::rw_vector vec;
 		
 		non_process_thread_fifo.get_write_vector (&vec);
-
-		cerr << "Non-process thread writes " << msglen << " to " << name() << endl;
 
 		if (vec.len[0] + vec.len[1] < 1) {
 			error << "no space in FIFO for non-process thread MIDI write"
@@ -89,19 +90,41 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 		}
 
 		non_process_thread_fifo.increment_write_idx (1);
-
-		return msglen;
+		
+		ret = msglen;
 				
 	} else {
 
 		assert(_currently_in_cycle);
-		assert(timestamp < _nframes_this_cycle);
 		assert(_jack_output_port);
+		assert(timestamp < _nframes_this_cycle);
 
-		// FIXME: return value correct?
-		return jack_midi_event_write (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle), 
-					      timestamp, msg, msglen);
+		if (timestamp == 0) {
+			timestamp = _last_write_timestamp;
+		} 
+
+		if (jack_midi_event_write (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle), 
+					   timestamp, msg, msglen) == 0) {
+			ret = msglen;
+			_last_write_timestamp = timestamp;
+
+		} else {
+			ret = 0;
+			cerr << "write of " << msglen << " failed, port holds "
+			     << jack_midi_get_event_count (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle))
+			     << endl;
+		}
 	}
+
+	if (ret > 0 && output_parser) {
+		output_parser->raw_preparse (*output_parser, msg, ret);
+		for (int i = 0; i < ret; i++) {
+			output_parser->scanner (msg[i]);
+		}
+		output_parser->raw_postparse (*output_parser, msg, ret);
+	}	
+
+	return ret;
 }
 
 void
@@ -156,6 +179,15 @@ JACK_MidiPort::read(byte * buf, size_t bufsize)
 	if (!err) {
 		size_t limit = min (bufsize, ev.size);
 		memcpy(buf, ev.buffer, limit);
+
+		if (input_parser) {
+			input_parser->raw_preparse (*input_parser, buf, limit);
+			for (size_t i = 0; i < limit; i++) {
+				input_parser->scanner (buf[i]);
+			}	
+			input_parser->raw_postparse (*input_parser, buf, limit);
+		}
+
 		return limit;
 	} else {
 		return 0;
