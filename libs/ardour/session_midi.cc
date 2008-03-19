@@ -748,22 +748,17 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	assert (next_quarter_frame_to_send >= 0);
 	assert (next_quarter_frame_to_send <= 7);
 	
-	if (next_quarter_frame_to_send < 0)
-	{
-		printf("Negative????\n");
-	}
-
 	if (_mtc_port == 0 || !session_send_mtc || transmitting_smpte_time.negative
-			/*|| (next_quarter_frame_to_send < 0)*/ ) {
-		//printf("(MTC) Not sending MTC\n");
+	    /*|| (next_quarter_frame_to_send < 0)*/ ) {
+		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
 	
 	/* Duration of one quarter frame */
 	nframes_t quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
 	
-	//cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_smpte_frame
-	//<< " - NQ: " << next_quarter_frame_to_send << " - FD" << quarter_frame_duration << endl;
+	// cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_smpte_frame
+	// << " - NQ: " << next_quarter_frame_to_send << " - FD" << quarter_frame_duration << endl;
 		
 	// FIXME: this should always be true
 	//assert((outbound_mtc_smpte_frame + (next_quarter_frame_to_send * quarter_frame_duration))
@@ -773,8 +768,8 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	// Send quarter frames for this cycle
 	while (_transport_frame + nframes > (outbound_mtc_smpte_frame +
 				(next_quarter_frame_to_send * quarter_frame_duration))) {
-
-		//cerr << "(MTC) Next frame to send: " << next_quarter_frame_to_send << endl;
+		
+		// cerr << "(MTC) Next frame to send: " << next_quarter_frame_to_send << endl;
 
 		switch (next_quarter_frame_to_send) {
 			case 0:

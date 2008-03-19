@@ -335,7 +335,9 @@ Session::process_with_events (nframes_t nframes)
 			return;
 		}
 	
-		send_midi_time_code_for_cycle(nframes);
+		if (!_exporting) {
+			send_midi_time_code_for_cycle(nframes);
+		}
 
 		if (actively_recording()) {
 			stop_limit = max_frames;
@@ -754,8 +756,6 @@ Session::process_without_events (nframes_t nframes)
 		if (!follow_slave (nframes, 0)) {
 			return;
 		}
-	
-		send_midi_time_code_for_cycle(nframes);
 	} 
 
 	if (_transport_speed == 0) {
@@ -763,6 +763,10 @@ Session::process_without_events (nframes_t nframes)
 		return;
 	}
 		
+	if (!_exporting) {
+		send_midi_time_code_for_cycle(nframes);
+	}
+
 	if (actively_recording()) {
 		stop_limit = max_frames;
 	} else {

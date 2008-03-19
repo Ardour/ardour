@@ -352,7 +352,7 @@ Session::second_stage_init (bool new_session)
 
 	BootMessage (_("Reset Remote Controls"));
 
-	//send_full_time_code ();
+	send_full_time_code (0);
 	_engine.transport_locate (0);
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);

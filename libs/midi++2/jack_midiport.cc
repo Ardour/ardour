@@ -113,7 +113,7 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 	non_process_thread_fifo.get_read_vector (&vec);
 
 	if (vec.len[0] + vec.len[1]) {
-		cerr << "Flush " << vec.len[0] + vec.len[1] << "events from non-process FIFO\n";
+		cerr << "Flush " << vec.len[0] + vec.len[1] << " events from non-process FIFO\n";
 	}
 
 	if (vec.len[0]) {
