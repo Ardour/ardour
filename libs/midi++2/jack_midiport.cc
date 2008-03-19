@@ -38,7 +38,7 @@ JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 	, _jack_input_port(NULL)
 	, _jack_output_port(NULL)
 	, _last_read_index(0)
-	, non_process_thread_fifo (5 * 1024)
+	, non_process_thread_fifo (512)
 {
 	int err = create_ports (node);
 
