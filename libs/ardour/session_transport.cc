@@ -459,12 +459,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_requested_return_frame = -1;
 	}
 
-/* MISSING IN 3.0 ... move into realtime_stop() */
-//        send_full_time_code ();
-//	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
-//	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
-/* END WHY */
-
 	if (did_record) {
 
 		/* XXX its a little odd that we're doing this here

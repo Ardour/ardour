@@ -771,10 +771,6 @@ class Session : public PBD::StatefulDestructible
 	bool get_trace_midi_input(MIDI::Port *port = 0);
 	bool get_trace_midi_output(MIDI::Port *port = 0);
 	
-	void send_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
-
-	void deliver_midi (MIDI::Port*, MIDI::byte*, int32_t size);
-
 	void set_mmc_receive_device_id (uint32_t id);
 	void set_mmc_send_device_id (uint32_t id);
 	
@@ -1255,7 +1251,7 @@ class Session : public PBD::StatefulDestructible
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
-	//int  midi_read (MIDI::Port *);
+	int  midi_read (MIDI::Port *);
 
 	void enable_record ();
 	
@@ -1286,8 +1282,6 @@ class Session : public PBD::StatefulDestructible
 	/* MIDI Machine Control */
 
 	void deliver_mmc (MIDI::MachineControl::Command, nframes_t);
-	//void deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t, MIDI::EventTwoBytes);
-	//void deliver_data (MIDI::Port* port, MIDI::byte*, int32_t size);
 
 	void spp_start (MIDI::Parser&);
 	void spp_continue (MIDI::Parser&);
@@ -1353,52 +1347,29 @@ class Session : public PBD::StatefulDestructible
 	struct MIDIRequest {
 	    
 	    enum Type {
-		    SendFullMTC,
-		    SendMTC,
-		    SendMMC,
 		    PortChange,
-		    SendMessage,
-		    Deliver,
 		    Quit
 	    };
 	    
 	    Type type;
-	    MIDI::MachineControl::Command mmc_cmd;
-	    nframes_t locate_frame;
-
-	    // for SendMessage type
-
-	    MIDI::Port * port;
-	    MIDI::channel_t chan;
-	    union {
-		MIDI::EventTwoBytes data;
-		MIDI::byte* buf;
-	    };
-
-	    union { 
-		MIDI::eventType ev;
-		int32_t size;
-	    };
 
 	    MIDIRequest () {}
-	    
-	    void *operator new(size_t ignored) {
-		    return pool.alloc ();
-	    };
-
-	    void operator delete(void *ptr, size_t size) {
-		    pool.release (ptr);
-	    }
-
-	  private:
-	    static MultiAllocSingleReleasePool pool;
 	};
 
-	mutable  gint   butler_active;
-	
+	Glib::Mutex  midi_lock;
+	pthread_t    midi_thread;
+	int          midi_request_pipe[2];
+	RingBuffer<MIDIRequest*> midi_requests;
+
+	int           start_midi_thread ();
+	void          terminate_midi_thread ();
+	void          poke_midi_thread ();
+	static void *_midi_thread_work (void *arg);
+	void          midi_thread_work ();
 	void          change_midi_ports ();
 	int           use_config_midi_ports ();
 
+	mutable  gint   butler_active;
 	bool waiting_to_start;
 
 	void set_play_loop (bool yn);

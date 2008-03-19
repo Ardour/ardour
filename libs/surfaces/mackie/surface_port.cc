@@ -79,7 +79,7 @@ MidiByteArray SurfacePort::read()
 	if ( !active() ) return retval;
 	
 	// read port and copy to return value
-	int nread = port().read( buf, sizeof (buf), 0 );
+	int nread = port().read (buf, sizeof (buf));
 
 	if (nread >= 0) {
 		retval.copy( nread, buf );

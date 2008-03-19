@@ -375,10 +375,6 @@
     	           <separator/>
                	   <menuitem action='ToggleTapeMachineMode'/>
                </menu>
-               <menu action='Plugins'>
-	           <menuitem action='DisableAllPlugins'/>
-                   <menuitem action='ABAllPlugins'/>
-               </menu>
 	       <menu action='Metering'>
                    <menu action='MeteringFallOffRate'>
 		        <menuitem action='MeterFalloffOff'/>

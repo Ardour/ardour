@@ -37,6 +37,9 @@ class ALSA_SequencerMidiPort : public Port
 	ALSA_SequencerMidiPort (const XMLNode&);
 	virtual ~ALSA_SequencerMidiPort ();
 
+	int write (byte *msg, size_t msglen, timestamp_t timestamp);	
+	int read (byte *buf, size_t max);
+
 	/* select(2)/poll(2)-based I/O */
 
 	virtual int selectable() const;
@@ -48,10 +51,6 @@ class ALSA_SequencerMidiPort : public Port
 	void set_state (const XMLNode&);
 
   protected:
-	/* Direct I/O */
-	
-	int write (byte *msg, size_t msglen, timestamp_t timestamp);	
-	int read (byte *buf, size_t max, timestamp_t timestamp);
 
 	std::string get_typestring () const {
 		return typestring;

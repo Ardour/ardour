@@ -137,7 +137,7 @@ ALSA_SequencerMidiPort::write (byte *msg, size_t msglen, timestamp_t ignored)
 }
 
 int 
-ALSA_SequencerMidiPort::read (byte *buf, size_t max, timestamp_t ignored)
+ALSA_SequencerMidiPort::read (byte *buf, size_t max)
 {
 	TR_FN();
 	int err;

@@ -620,8 +620,6 @@ Editor::update_ruler_visibility ()
 	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	
-	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
-
 	smpte_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
 	bbt_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
 	frames_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));

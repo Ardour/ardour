@@ -504,10 +504,10 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	/*act = ActionManager::register_action (option_actions, X_("DisableAllPlugins"), _("Disable All Plugins"), mem_fun (*this, &ARDOUR_UI::disable_all_plugins));
+	/* act = ActionManager::register_action (option_actions, X_("DisableAllPlugins"), _("Disable All Plugins"), mem_fun (*this, &ARDOUR_UI::disable_all_plugins));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (option_actions, X_("ABAllPlugins"), _("A/B All Plugins"), mem_fun (*this, &ARDOUR_UI::ab_all_plugins));
-	ActionManager::session_sensitive_actions.push_back (act);*/
+	ActionManager::session_sensitive_actions.push_back (act); */
 
 	/* !!! REMEMBER THAT RADIO ACTIONS HAVE TO BE HANDLED WITH MORE FINESSE THAN SIMPLE TOGGLES !!! */
 

@@ -79,7 +79,7 @@ class FD_MidiPort : public Port
 		return nwritten;
 	}
 
-	virtual int read (byte *buf, size_t max, timestamp_t ignored);
+	int read (byte *buf, size_t max);
 
   private:
 	static std::string *midi_dirpath;

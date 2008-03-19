@@ -49,7 +49,7 @@ class Null_MidiPort : public Port
 		return msglen;
 	}
 
-	int read (byte *buf, size_t max, timestamp_t timestamp) {
+	int read (byte *buf, size_t max) {
 		return 0;
 	}
 	

@@ -140,21 +140,23 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 }
 
 int
-JACK_MidiPort::read(byte * buf, size_t max, timestamp_t timestamp)
+JACK_MidiPort::read(byte * buf, size_t bufsize)
 {
 	assert(_currently_in_cycle);
-	assert(timestamp < _nframes_this_cycle);
 	assert(_jack_input_port);
 
 	jack_midi_event_t ev;
 
 	int err = jack_midi_event_get (&ev,
-		jack_port_get_buffer(_jack_input_port, _nframes_this_cycle),
-		_last_read_index++);
+				       jack_port_get_buffer(_jack_input_port, _nframes_this_cycle),
+				       _last_read_index++);
 	
+	// XXX this doesn't handle ev.size > max
+
 	if (!err) {
-		memcpy(buf, ev.buffer, ev.size);
-		return ev.size;
+		size_t limit = min (bufsize, ev.size);
+		memcpy(buf, ev.buffer, limit);
+		return limit;
 	} else {
 		return 0;
 	}

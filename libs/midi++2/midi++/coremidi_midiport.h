@@ -38,6 +38,11 @@ namespace MIDI {
 	CoreMidi_MidiPort(const XMLNode& node);
 	virtual ~ CoreMidi_MidiPort();
 
+	int write (byte * msg, size_t msglen, timestamp_t timestamp);
+	int read (byte * buf, size_t max) {
+	    return 0;
+	} 
+
 	virtual int selectable() const {
 	    return -1;
 	}
@@ -46,12 +51,6 @@ namespace MIDI {
 	static std::string typestring;
 
       protected:
-	/* Direct I/O */
-	int write (byte * msg, size_t msglen, timestamp_t timestamp);
-
-	int read (byte * buf, size_t max, timestamp_t timestamp) {
-	    return 0;
-	} 
 
         /* CoreMidi callback */
 	static void read_proc(const MIDIPacketList * pktlist,

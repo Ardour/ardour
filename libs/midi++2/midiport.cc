@@ -20,8 +20,10 @@
 #include <iostream>
 #include <cstdio>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <pbd/xml++.h>
+#include <pbd/error.h>
 #include <pbd/failed_constructor.h>
 
 #include <midi++/types.h>
@@ -31,6 +33,7 @@
 
 using namespace MIDI;
 using namespace std;
+using namespace PBD;
 
 size_t Port::nports = 0;
 
@@ -87,6 +90,40 @@ Port::~Port ()
 	}
 }
 
+void
+Port::parse ()
+{
+	byte buf[512];
+
+	/* parsing is done (if at all) by initiating a read from 
+	   the port.
+	*/
+
+	while (1) {
+		
+		// cerr << "+++ READ ON " << name() << endl;
+
+		int nread = read (buf, sizeof (buf));
+
+		// cerr << "-- READ (" << nread << " ON " << name() << endl;
+		
+		if (nread > 0) {
+			if ((size_t) nread < sizeof (buf)) {
+				break;
+			} else {
+				continue;
+			}
+		} else if (nread == 0) {
+			break;
+		} else if (errno == EAGAIN) {
+			break;
+		} else {
+			fatal << "Error reading from MIDI port " << name() << endmsg;
+			/*NOTREACHED*/
+		}
+	}
+}
+
 /** Send a clock tick message.
  * \return true on success.
  */
@@ -138,13 +175,11 @@ void
 Port::gtk_read_callback (void *ptr, int fd, int cond)
 {
 	byte buf[64];
-	
-	((Port *)ptr)->read (buf, sizeof (buf), 0);
+	((Port *)ptr)->read (buf, sizeof (buf));
 }
 
 void
 Port::write_callback (byte *msg, unsigned int len, void *ptr)
-	
 {
 	((Port *)ptr)->write (msg, len, 0);
 }

@@ -67,14 +67,15 @@ class Port : public sigc::trackable {
 	 */
 	virtual int write (byte *msg, size_t msglen, timestamp_t timestamp) = 0;	
 
-	/** Read a message from port.
-	 * @param buf Raw MIDI message to send
-	 * @param max Max size to write to @a buf
-	 * @param timestamp Time stamp in frames of this message (relative to cycle start)
-	 * @return number of bytes successfully written to \a buf
+	/** Read raw bytes from a port.
+	 * @param buf memory to store read data in
+	 * @param bufsize size of @a buf
+	 * @return number of bytes successfully read, negative if error
 	 */
-	virtual int read (byte *buf, size_t max, timestamp_t timestamp) = 0;
+	virtual int read (byte *buf, size_t bufsize) = 0;
 
+	void parse ();
+	
 	/** Write a message to port.
 	 * @return true on success.
 	 * FIXME: describe semantics here

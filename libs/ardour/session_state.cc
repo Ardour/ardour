@@ -296,9 +296,9 @@ Session::second_stage_init (bool new_session)
 		return -1;
 	}
 
-	/*if (start_midi_thread ()) {
+	if (start_midi_thread ()) {
 		return -1;
-	}*/
+	}
 
 	// set_state() will call setup_raid_path(), but if it's a new session we need
 	// to call setup_raid_path() here.

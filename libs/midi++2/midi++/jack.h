@@ -46,6 +46,9 @@ public:
 	JACK_MidiPort (const XMLNode& node, jack_client_t* jack_client);
 	virtual ~JACK_MidiPort ();
 
+	int write(byte *msg, size_t msglen, timestamp_t timestamp);
+	int read(byte *buf, size_t max);
+
 	/* No select(2)/poll(2)-based I/O */
 	virtual int selectable() const { return -1; }
 	
@@ -62,11 +65,6 @@ public:
 	std::string get_typestring () const {
 		return typestring;
 	}
-
-protected:
-	/* Direct I/O */
-	int write(byte *msg, size_t msglen, timestamp_t timestamp);
-	int read(byte *buf, size_t max, timestamp_t timestamp);
 
 private:
 	int create_ports(const XMLNode&);

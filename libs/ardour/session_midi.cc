@@ -52,8 +52,6 @@ using namespace MIDI;
 MachineControl::CommandSignature MMC_CommandSignature;
 MachineControl::ResponseSignature MMC_ResponseSignature;
 
-MultiAllocSingleReleasePool Session::MIDIRequest::pool ("midi", sizeof (Session::MIDIRequest), 1024);
-
 int
 Session::use_config_midi_ports ()
 {
@@ -262,7 +260,6 @@ Session::set_midi_port (string port_tag)
 void
 Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 {
-#if 0
 	MIDI::Parser* input_parser;
 
 	if (port) {
@@ -289,7 +286,6 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 			}
 		}
 	}
-#endif
 
 	Config->set_trace_midi_input (yn);
 }
@@ -297,7 +293,6 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 void
 Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 {
-#if 0
 	MIDI::Parser* output_parser;
 
 	if (port) {
@@ -324,7 +319,6 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 		}
 
 	}
-#endif
 
 	Config->set_trace_midi_output (yn);
 }
@@ -332,7 +326,6 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 bool
 Session::get_trace_midi_input(MIDI::Port *port)
 {
-#if 0
 	MIDI::Parser* input_parser;
 	if (port) {
 		if ((input_parser = port->input()) != 0) {
@@ -358,7 +351,6 @@ Session::get_trace_midi_input(MIDI::Port *port)
 			}
 		}
 	}
-#endif
 
 	return false;
 }
@@ -366,7 +358,6 @@ Session::get_trace_midi_input(MIDI::Port *port)
 bool
 Session::get_trace_midi_output(MIDI::Port *port)
 {
-#if 0
 	MIDI::Parser* output_parser;
 	if (port) {
 		if ((output_parser = port->output()) != 0) {
@@ -392,7 +383,6 @@ Session::get_trace_midi_output(MIDI::Port *port)
 			}
 		}
 	}
-#endif
 
 	return false;
 
@@ -422,46 +412,6 @@ Session::setup_midi_control ()
 	mtc_msg[12] = 0xf1;
 	mtc_msg[14] = 0xf1;
 }
-
-#if 0
-int
-Session::midi_read (MIDI::Port* port)
-{
-	MIDI::byte buf[512];
-	
-	/* reading from the MIDI port activates the Parser
-	   that in turn generates signals that we care
-	   about. the port is already set to NONBLOCK so that
-	   can read freely here.
-	*/
-	
-	while (1) {
-		
-		// cerr << "+++ READ ON " << port->name() << endl;
-		
-		int nread = port->read (buf, sizeof (buf));
-
-		// cerr << "-- READ (" << nread << " ON " << port->name() << endl;
-		
-		if (nread > 0) {
-			if ((size_t) nread < sizeof (buf)) {
-				break;
-			} else {
-				continue;
-			}
-		} else if (nread == 0) {
-			break;
-		} else if (errno == EAGAIN) {
-			break;
-		} else {
-			fatal << string_compose(_("Error reading from MIDI port %1"), port->name()) << endmsg;
-			/*NOTREACHED*/
-		}
-	}
-
-	return 0;
-}
-#endif
 
 void
 Session::spp_start (Parser& ignored)
@@ -712,26 +662,21 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 	}
 }
 
-
 void
 Session::change_midi_ports ()
 {
-/*
 	MIDIRequest* request = new MIDIRequest;
 
 	request->type = MIDIRequest::PortChange;
 	midi_requests.write (&request, 1);
 	poke_midi_thread ();
-*/
 }
 
 /** Send MTC Full Frame message (complete SMPTE time) for the start of this cycle.
  * This resets the MTC code, the next quarter frame message that is sent will be
  * the first one with the beginning of this cycle as the new start point.
- *
- * Audio thread only, realtime safe.  MIDI::Manager::cycle_start must
- * have been called with the appropriate nframes parameter this cycle.
  */
+
 int
 Session::send_full_time_code(nframes_t nframes)
 {
@@ -905,25 +850,6 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 /***********************************************************************
  OUTBOUND MMC STUFF
 **********************************************************************/
-/*
-void
-Session::send_mmc_in_another_thread (MIDI::MachineControl::Command cmd, nframes_t target_frame)
-{
-	MIDIRequest* request;
-
-	if (_mtc_port == 0 || !session_send_mmc) {
-		return;
-	}
-
-	request = new MIDIRequest;
-	request->type = MIDIRequest::SendMMC;
-	request->mmc_cmd = cmd;
-	request->locate_frame = target_frame;
-
-	midi_requests.write (&request, 1);
-	poke_midi_thread ();
-}
-*/
 
 /** Send an MMC command at the given absolute timestamp (@a where).
  *
@@ -990,8 +916,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 
 		assert(where >= _transport_frame);
 
-		// FIXME: timestamp correct? [DR]
-		if (!_mmc_port->midimsg (mmc_buffer, sizeof (mmc_buffer), where - _transport_frame)) {
+		if (!_mmc_port->midimsg (mmc_buffer, sizeof (mmc_buffer), 0)) {
 			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
 		} /*else {
 			cerr << "Sending MMC\n";
@@ -1028,80 +953,10 @@ Session::mmc_step_timeout ()
 	return true;
 }
 
-
-void
-Session::send_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t ch, MIDI::EventTwoBytes data)
-{
-	// in another thread, really
-	/*
-	MIDIRequest* request = new MIDIRequest;
-
-	request->type = MIDIRequest::SendMessage;
-	request->port = port;
-	request->ev = ev;
-	request->chan = ch;
-	request->data = data;
-	
-	midi_requests.write (&request, 1);
-	poke_midi_thread ();
-	*/
-}
-
-void
-Session::deliver_midi (MIDI::Port * port, MIDI::byte* buf, int32_t bufsize)
-{
-	// in another thread, really
-	/*
-	MIDIRequest* request = new MIDIRequest;
-
-	request->type = MIDIRequest::Deliver;
-	request->port = port;
-	request->buf = buf;
-	request->size = bufsize;
-	
-	midi_requests.write (&request, 1);
-	poke_midi_thread ();
-	*/
-}
-
-#if 0
-
-This is aaalll gone. 
-
-
-void
-Session::deliver_midi_message (MIDI::Port * port, MIDI::eventType ev, MIDI::channel_t ch, MIDI::EventTwoBytes data)
-{
-	if (port == 0 || ev == MIDI::none) {
-		return;
-	}
-
-	midi_msg[0] = (ev & 0xF0) | (ch & 0xF); 
-	midi_msg[1] = data.controller_number;
-	midi_msg[2] = data.value;
-
-	port->write (midi_msg, 3);
-}
-
-void
-Session::deliver_data (MIDI::Port * port, MIDI::byte* buf, int32_t size)
-{
-	if (port) {
-		port->write (buf, size);
-	}
-
-	/* this is part of the semantics of the Deliver request */
-
-	delete [] buf;
-}
-#endif
-
-
 /*---------------------------------------------------------------------------
   MIDI THREAD 
   ---------------------------------------------------------------------------*/
 
-#if 0
 int
 Session::start_midi_thread ()
 {
@@ -1125,8 +980,6 @@ Session::start_midi_thread ()
 		return -1;
 	}
 
-	// pthread_detach (midi_thread);
-
 	return 0;
 }
 
@@ -1134,6 +987,7 @@ void
 Session::terminate_midi_thread ()
 {
 	if (midi_thread) {
+
 		MIDIRequest* request = new MIDIRequest;
 		void* status;
 		
@@ -1141,7 +995,7 @@ Session::terminate_midi_thread ()
 		
 		midi_requests.write (&request, 1);
 		poke_midi_thread ();
-		
+
 		pthread_join (midi_thread, &status);
 	}
 }
@@ -1190,10 +1044,7 @@ Session::midi_thread_work ()
 
 	/* set up the port vector; 4 is the largest possible size for now */
 
-	ports.push_back (0);
-	ports.push_back (0);
-	ports.push_back (0);
-	ports.push_back (0);
+	ports.assign (4, (MIDI::Port*) 0);
 
 	while (1) {
 
@@ -1202,10 +1053,6 @@ Session::midi_thread_work ()
 		pfd[nfds].fd = midi_request_pipe[0];
 		pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 		nfds++;
-
-		/* if we are using MMC control, we obviously have to listen
-		   on the appropriate port.
-		*/
 
 		if (Config->get_mmc_control() && _mmc_port && _mmc_port->selectable() >= 0) {
 			pfd[nfds].fd = _mmc_port->selectable();
@@ -1225,6 +1072,10 @@ Session::midi_thread_work ()
 			ports[nfds] = _mtc_port;
 			nfds++;
 		}
+
+		/* if we are using MMC control, we obviously have to listen
+		   the relevant port.
+		*/
 
 		if (_midi_port && (_midi_port != _mmc_port || !Config->get_mmc_control()) && (_midi_port != _mtc_port) && _midi_port->selectable() >= 0) {
 			pfd[nfds].fd = _midi_port->selectable();
@@ -1254,7 +1105,6 @@ Session::midi_thread_work ()
 		// cerr << "MIDI thread wakes at " << get_cycles () << endl;
 
 		fds_ready = 0;
-		restart = false;
 
 		/* check the transport request pipe */
 
@@ -1294,37 +1144,6 @@ Session::midi_thread_work ()
 			while (midi_requests.read (&request, 1) == 1) {
 
 				switch (request->type) {
-					
-				case MIDIRequest::SendFullMTC:
-					// cerr << "send full MTC\n";
-					send_full_time_code ();
-					// cerr << "... done\n";
-					break;
-					
-				case MIDIRequest::SendMTC:
-					// cerr << "send qtr MTC\n";
-					send_midi_time_code ();
-					// cerr << "... done\n";
-					break;
-					
-				case MIDIRequest::SendMMC:
-					// cerr << "send MMC\n";
-					deliver_mmc (request->mmc_cmd, request->locate_frame);
-					// cerr << "... done\n";
-					break;
-
-				case MIDIRequest::SendMessage:
-					// cerr << "send Message\n";
-					deliver_midi_message (request->port, request->ev, request->chan, request->data);
-					// cerr << "... done\n";
-					break;
-					
-				case MIDIRequest::Deliver:
-					// cerr << "deliver\n";
-					deliver_data (_midi_port, request->buf, request->size);
-					// cerr << "... done\n";
-					break;
-						
 				case MIDIRequest::PortChange:
 					/* restart poll with new ports */
 					// cerr << "rebind\n";
@@ -1361,7 +1180,7 @@ Session::midi_thread_work ()
 			
 			if (pfd[p].revents & POLLIN) {
 				fds_ready++;
-				midi_read (ports[p]);
+				ports[p]->parse ();
 			}
 		}
 
@@ -1384,5 +1203,4 @@ Session::midi_thread_work ()
 		}
 	}
 }
-#endif
 
