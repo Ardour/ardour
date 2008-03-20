@@ -38,6 +38,7 @@
 #include <gtkmm2ext/slider_controller.h>
 
 #include "enums.h"
+#include "level_meter.h"
 
 namespace ARDOUR {
 	class IO;
@@ -62,7 +63,6 @@ class GainMeter : public Gtk::VBox
 	void update_gain_sensitive ();
 
 	void update_meters ();
-	void update_meters_falloff ();
 
 	void effective_gain_display ();
 
@@ -73,8 +73,6 @@ class GainMeter : public Gtk::VBox
 
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
-
-	void clear_meters ();
 
   private:
 
@@ -92,6 +90,7 @@ class GainMeter : public Gtk::VBox
 	Gtk::HBox                    gain_display_box;
 	Gtk::HBox                    fader_box;
 	Gtk::DrawingArea             meter_metric_area;
+	LevelMeter					 *level_meter;
 
 	sigc::connection gain_watching;
 
@@ -128,28 +127,10 @@ class GainMeter : public Gtk::VBox
 	void gain_activated ();
 	bool gain_focused (GdkEventFocus*);
 
-	struct MeterInfo {
-	    Gtkmm2ext::FastMeter *meter;
-	    gint16          width;
-		int				length;   
-	    bool            packed;
-	    
-	    MeterInfo() { 
-		    meter = 0;
-		    width = 0;
-			length = 0;
-		    packed = false;
-	    }
-	};
-
-	guint16 regular_meter_width;
-	static const guint16 thin_meter_width = 2;
-	vector<MeterInfo>    meters;
 	float       max_peak;
 	
 	Gtk::VBox*   fader_vbox;
 	Gtk::HBox   hbox;
-	Gtk::HBox   meter_packer;
 
 	void gain_adjusted ();
 	void gain_changed (void *);

@@ -66,6 +66,7 @@ LevelMeter::LevelMeter (boost::shared_ptr<IO> io, Session& s)
 	Config->ParameterChanged.connect (mem_fun (*this, &LevelMeter::parameter_changed));
 	UI::instance()->theme_changed.connect (mem_fun(*this, &LevelMeter::on_theme_changed));
 	ColorsChanged.connect (mem_fun (*this, &LevelMeter::color_handler));
+	max_peak = minus_infinity();
 }
 
 void
@@ -83,7 +84,7 @@ LevelMeter::~LevelMeter ()
 	}
 }
 
-void
+float
 LevelMeter::update_meters ()
 {
 	vector<MeterInfo>::iterator i;
@@ -95,8 +96,12 @@ LevelMeter::update_meters ()
 			peak = _io->peak_input_power (n);
 			(*i).meter->set (log_meter (peak));
 			mpeak = _io->max_peak_power(n);
+			if (mpeak > max_peak) {
+				max_peak = mpeak;
+			}
 		}
 	}
+	return max_peak;
 }
 
 void
@@ -133,8 +138,9 @@ LevelMeter::hide_all_meters ()
 }
 
 void
-LevelMeter::setup_meters (int len)
+LevelMeter::setup_meters (int len, int initial_width)
 {
+	regular_meter_width = initial_width;
 	uint32_t nmeters = _io->n_outputs();
 	guint16 width;
 

@@ -73,8 +73,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	  // 0.781787 is the value needed for gain to be set to 0.
 	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
 	  gain_automation_style_button (""),
-	  gain_automation_state_button (""),
-	  regular_meter_width(5)
+	  gain_automation_state_button ("")
 	
 {
 	if (slider == 0) {
@@ -90,6 +89,8 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 						     &gain_adjustment,
 						     _io->gain_control(),
 						     false));
+
+	level_meter = new LevelMeter(_io, _session);
 
 	gain_slider->signal_button_press_event().connect (mem_fun(*this, &GainMeter::start_gain_touch));
 	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
@@ -116,8 +117,6 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
 	set_size_request_to_display_given_text (meter_metric_area, "-50", 0, 0);
-
-	meter_packer.set_spacing (2);
 
 	gain_automation_style_button.set_name ("MixerAutomationModeButton");
 	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
@@ -151,7 +150,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 		*/
 
 		gain_display_box.pack_end (peak_display, true, true);
-		hbox.pack_end (meter_packer, true, true);
+		hbox.pack_end (*level_meter, true, true);
 
 		if (!r->hidden()) {
 
@@ -195,8 +194,6 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeter::peak_button_release), false);
 	gain_display.signal_key_press_event().connect (mem_fun(*this, &GainMeter::gain_key_press), false);
 
-	Config->ParameterChanged.connect (mem_fun (*this, &GainMeter::parameter_changed));
-
 	gain_changed (0);
 	show_gain ();
 
@@ -215,7 +212,7 @@ void
 GainMeter::set_width (Width w, int len)
 {
 	_width = w;
-	setup_meters (len);
+	level_meter->setup_meters (len);
 }
 
 Glib::RefPtr<Gdk::Pixmap>
@@ -316,66 +313,9 @@ GainMeter::~GainMeter ()
 		delete meter_menu;
 	}
 
-	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
-		if ((*i).meter) {
-			delete (*i).meter;
-		}
+	if (level_meter) {
+		delete level_meter;
 	}
-}
-
-void
-GainMeter::update_meters ()
-{
-	vector<MeterInfo>::iterator i;
-	uint32_t n;
-	float peak, mpeak;
-	char buf[32];
-	
-	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-		if ((*i).packed) {
-			peak = _io->peak_input_power (n);
-			
-			(*i).meter->set (log_meter (peak));
-
-			mpeak = _io->max_peak_power(n);
-			
-			if (mpeak > max_peak) {
-				max_peak = mpeak;
-				/* set peak display */
-				if (max_peak <= -200.0f) {
-					peak_display.set_label (_("-inf"));
-				} else {
-					snprintf (buf, sizeof(buf), "%.1f", max_peak);
-					peak_display.set_label (buf);
-				}
-
-				if (max_peak >= 0.0f) {
-					peak_display.set_name ("MixerStripPeakDisplayPeak");
-				}
-			}
-		}
-	}
-}
-
-void
-GainMeter::parameter_changed(const char* parameter_name)
-{
-#define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &GainMeter::parameter_changed), parameter_name));
-
-	if (PARAM_IS ("meter-hold")) {
-	
-		vector<MeterInfo>::iterator i;
-		uint32_t n;
-		
-		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-			
-			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
-		}
-	}
-
-#undef PARAM_IS
 }
 
 void
@@ -383,17 +323,11 @@ GainMeter::hide_all_meters ()
 {
 	bool remove_metric_area = false;
 
-	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); ++i) {
-		if ((*i).packed) {
-			remove_metric_area = true;
-			meter_packer.remove (*((*i).meter));
-			(*i).packed = false;
-		}
-	}
+	level_meter->hide_meters();
 
 	if (remove_metric_area) {
 		if (meter_metric_area.get_parent()) {
-			meter_packer.remove (meter_metric_area);
+			level_meter->remove (meter_metric_area);
 		}
 	}
 }
@@ -401,74 +335,11 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters (int len)
 {
-	uint32_t nmeters = _io->n_outputs();
-	guint16 width;
-
-	hide_all_meters ();
-
-	Route* r;
-
-	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
-
-		switch (r->meter_point()) {
-		case MeterPreFader:
-		case MeterInput:
-			nmeters = r->n_inputs();
-			break;
-		case MeterPostFader:
-			nmeters = r->n_outputs();
-			break;
-		}
-
-	} else {
-
-		nmeters = _io->n_outputs();
-
-	}
-
-	if (nmeters == 0) {
-		return;
-	}
-
-	if (nmeters <= 2) {
-		width = regular_meter_width;
-	} else {
-		width = thin_meter_width;
-	}
-
-	while (meters.size() < nmeters) {
-		meters.push_back (MeterInfo());
-	}
-
-	/* pack them backwards */
-
-	meter_packer.pack_end (meter_metric_area, false, false);
+	level_meter->pack_end (meter_metric_area, false, false);
 	meter_metric_area.show_all ();
-
-	int b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
-	int m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
-	int t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
-	int c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
-
-	//cerr << "GainMeter::setup_meters() called color_changed = " << color_changed << " colors: " << hex << b << " " << m << " " << t << " " << c << endl;//DEBUG
-
-	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
-		if (meters[n].width != width || meters[n].length != len || color_changed) {
-			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
-			//cerr << "GainMeter::setup_meters() w:l = " << width << ":" << len << endl;//DEBUG
-			meters[n].width = width;
-			meters[n].length = len;
-			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &GainMeter::meter_button_release), n));
-		}
-
-		meter_packer.pack_end (*meters[n].meter, false, false);
-		meters[n].meter->show_all ();
-		meters[n].packed = true;
-	}
-	color_changed = false;
-}	
+	level_meter->setup_meters(len, 5);
+	
+}
 
 int
 GainMeter::get_gm_width ()
@@ -537,7 +408,7 @@ GainMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
 {
 	switch (ev->button) {
 	case 1:
-		meters[which].meter->clear();
+		level_meter->clear_meters();
 		max_peak = minus_infinity();
 		peak_display.set_label (_("-inf"));
 		peak_display.set_name ("MixerStripPeakDisplay");
@@ -959,10 +830,21 @@ GainMeter::gain_automation_state_changed ()
 	}
 }
 
-void GainMeter::clear_meters ()
+void
+GainMeter::update_meters()
 {
-	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
-		(*i).meter->clear();
+	char buf[32];
+	float mpeak = level_meter->update_meters();
+
+	if (mpeak <= -200.0f) {
+		peak_display.set_label (_("-inf"));
+	} else {
+		snprintf (buf, sizeof(buf), "%.1f", mpeak);
+		peak_display.set_label (buf);
+	}
+
+	if (mpeak >= 0.0f) {
+		peak_display.set_name ("MixerStripPeakDisplayPeak");
 	}
 }
 
