@@ -1392,6 +1392,7 @@ ARDOUR_UI::remove_last_capture()
 void
 ARDOUR_UI::transport_record (bool roll)
 {
+	
 	if (session) {
 		switch (session->record_status()) {
 		case Session::Disabled:
@@ -1417,6 +1418,7 @@ ARDOUR_UI::transport_record (bool roll)
 			session->disable_record (false, true);
 		}
 	}
+	cerr << "ARDOUR_UI::transport_record () called roll = " << roll << " session->record_status() = " << session->record_status() << endl;
 }
 
 void
@@ -1429,6 +1431,8 @@ ARDOUR_UI::transport_roll ()
 	}
 
 	rolling = session->transport_rolling ();
+
+	cerr << "ARDOUR_UI::transport_roll () called session->record_status() = " << session->record_status() << endl;
 
 	if (session->get_play_loop()) {
 		session->request_play_loop (false);
