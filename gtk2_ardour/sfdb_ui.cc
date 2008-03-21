@@ -68,13 +68,13 @@ ustring SoundFileBrowser::persistent_folder;
 static ImportMode
 string2importmode (string str)
 {
-	if (str == "as new tracks") {
+	if (str == _("as new tracks")) {
 		return ImportAsTrack;
-	} else if (str == "to selected tracks") {
+	} else if (str == _("to selected tracks")) {
 		return ImportToTrack;
-	} else if (str == "to region list") {
+	} else if (str == _("to region list")) {
 		return ImportAsRegion;
-	} else if (str == "as new tape tracks") {
+	} else if (str == _("as new tape tracks")) {
 		return ImportAsTapeTrack;
 	}
 
