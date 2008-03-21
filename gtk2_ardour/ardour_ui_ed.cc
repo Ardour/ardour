@@ -37,6 +37,7 @@
 #include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
+#include "mixer_ui.h"
 
 #ifdef GTKOSX
 #include <gtkmm2ext/sync-menu.h>
@@ -572,6 +573,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteEditorDefined"), _("Remote ID follows order of Editor"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), EditorOrdered)));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("AutoRebinding"), _("Auto Rebind Controls"), mem_fun (*(this->mixer), &Mixer_UI::toggle_auto_rebinding));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);

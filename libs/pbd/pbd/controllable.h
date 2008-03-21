@@ -44,6 +44,8 @@ class Controllable : public PBD::StatefulDestructible {
 	virtual bool can_send_feedback() const { return true; }
 
 	sigc::signal<void> LearningFinished;
+	static sigc::signal<void,PBD::Controllable*,int,int> CreateBinding;
+	static sigc::signal<void,PBD::Controllable*> DeleteBinding;
 
 	static sigc::signal<bool,PBD::Controllable*> StartLearning;
 	static sigc::signal<void,PBD::Controllable*> StopLearning;

@@ -55,6 +55,7 @@ class AudioRegionView : public RegionView
 			 Gdk::Color& basic_color);
 
         AudioRegionView (const AudioRegionView& other);
+        AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	~AudioRegionView ();
 	

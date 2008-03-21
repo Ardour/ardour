@@ -430,7 +430,8 @@ Editor::start_imageframe_grab(ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.finished_callback = &Editor::timeaxis_item_drag_finished_callback;
 	drag_info.last_frame_position = ifv->get_position() ;
  
-	drag_info.last_trackview = &ifv->get_time_axis_view() ;
+	drag_info.source_trackview = &ifv->get_time_axis_view() ;
+	drag_info.dest_trackview = drag_info.source_trackview;
 	
 	/* this is subtle. raising the regionview itself won't help,
 	   because raise_to_top() just puts the item on the top of
@@ -442,7 +443,7 @@ Editor::start_imageframe_grab(ArdourCanvas::Item* item, GdkEvent* event)
 	*/
 
 	drag_info.item->raise_to_top();
-	drag_info.last_trackview->canvas_display->raise_to_top();
+	drag_info.source_trackview->canvas_display->raise_to_top();
 	//time_line_group->raise_to_top();
 	cursor_group->raise_to_top ();
 
@@ -463,7 +464,8 @@ Editor::start_markerview_grab(ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.finished_callback = &Editor::timeaxis_item_drag_finished_callback;
 	drag_info.last_frame_position = mv->get_position() ;
 
-	drag_info.last_trackview = &mv->get_time_axis_view() ;
+	drag_info.source_trackview = &mv->get_time_axis_view() ;
+	drag_info.dest_trackview = drag_info.source_trackview;
 
 	/* this is subtle. raising the regionview itself won't help,
 	   because raise_to_top() just puts the item on the top of
@@ -475,7 +477,7 @@ Editor::start_markerview_grab(ArdourCanvas::Item* item, GdkEvent* event)
 	*/
 
 	drag_info.item->raise_to_top();
-	drag_info.last_trackview->canvas_display->raise_to_top();
+	drag_info.source_trackview->canvas_display->raise_to_top();
 	//time_line_group->raise_to_top();
 	cursor_group->raise_to_top ();
 

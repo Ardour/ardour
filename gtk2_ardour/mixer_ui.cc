@@ -223,6 +223,8 @@ Mixer_UI::Mixer_UI ()
 	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
 	_selection.RoutesChanged.connect (mem_fun(*this, &Mixer_UI::follow_strip_selection));
+
+	auto_rebinding = FALSE;
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -712,7 +714,96 @@ Mixer_UI::redisplay_track_list ()
 		Route::SyncOrderKeys (); // EMIT SIGNAL
 		ignore_sync = false;
 	}
+
+	// Rebind all of the midi controls automatically
+	
+	if (auto_rebinding)
+		auto_rebind_midi_controls ();
+
 }
+
+void
+Mixer_UI::set_auto_rebinding( bool val )
+{
+	if( val == TRUE )
+	{
+		auto_rebinding = TRUE;
+		Session::AutoBindingOff();
+	}
+	else
+	{
+		auto_rebinding = FALSE;
+		Session::AutoBindingOn();
+	}
+}
+
+void 
+Mixer_UI::toggle_auto_rebinding() 
+{
+	if (auto_rebinding)
+	{
+		set_auto_rebinding( FALSE );
+	}
+	
+	else
+	{
+		set_auto_rebinding( TRUE );
+	}
+
+	auto_rebind_midi_controls();
+}
+
+void 
+Mixer_UI::auto_rebind_midi_controls () 
+{
+	TreeModel::Children rows = track_model->children();
+	TreeModel::Children::iterator i;
+	int pos;
+
+	// Create bindings for all visible strips and remove those that are not visible
+	pos = 1;  // 0 is reserved for the master strip
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		MixerStrip* strip = (*i)[track_columns.strip];
+    
+		if ( (*i)[track_columns.visible] == true ) {  // add bindings for
+			// make the actual binding
+			//cout<<"Auto Binding:  Visible Strip Found: "<<strip->name()<<endl;
+
+			int controlValue = pos;
+			if( strip->route()->master() ) {
+				controlValue = 0;
+			}
+			else {
+				pos++;
+			}
+
+			PBD::Controllable::CreateBinding ( strip->solo_button->get_controllable(), controlValue, 0);
+			PBD::Controllable::CreateBinding ( strip->mute_button->get_controllable(), controlValue, 1);
+
+			if( strip->is_audio_track() ) {
+				PBD::Controllable::CreateBinding ( strip->rec_enable_button->get_controllable(), controlValue, 2);
+			}
+
+			PBD::Controllable::CreateBinding ( &(strip->gpm.get_controllable()), controlValue, 3);
+			PBD::Controllable::CreateBinding ( strip->panners.get_controllable(), controlValue, 4);
+
+		}
+		else {  // Remove any existing binding
+			PBD::Controllable::DeleteBinding ( strip->solo_button->get_controllable() );
+			PBD::Controllable::DeleteBinding ( strip->mute_button->get_controllable() );
+
+			if( strip->is_audio_track() ) {
+				PBD::Controllable::DeleteBinding ( strip->rec_enable_button->get_controllable() );
+			}
+
+			PBD::Controllable::DeleteBinding ( &(strip->gpm.get_controllable()) );
+			PBD::Controllable::DeleteBinding ( strip->panners.get_controllable() ); // This only takes the first panner if there are multiples...
+		}
+
+	} // for
+  
+}
+
 
 struct SignalOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
@@ -1069,6 +1160,7 @@ Mixer_UI::mix_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::Tree
 	if (name != group->name()) {
 		group->set_name (name);
 	}
+
 }
 
 void

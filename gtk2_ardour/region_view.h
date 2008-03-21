@@ -47,6 +47,7 @@ class RegionView : public TimeAxisViewItem
 	            Gdk::Color&          basic_color);
 
 	RegionView (const RegionView& other);
+	RegionView (const RegionView& other, boost::shared_ptr<ARDOUR::Region> other_region);
 
 	~RegionView ();
 	

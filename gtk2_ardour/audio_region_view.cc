@@ -116,6 +116,28 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other)
 	init (c, true);
 }
 
+AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_ptr<AudioRegion> other_region)
+	: RegionView (other, boost::shared_ptr<Region> (other_region))
+	, zero_line(0)
+	, fade_in_shape(0)
+	, fade_out_shape(0)
+	, fade_in_handle(0)
+	, fade_out_handle(0)
+	, gain_line(0)
+	, _amplitude_above_axis(1.0)
+	, _flags(0)
+	, fade_color(0)
+
+{
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+	
+	init (c, true);
+}
+
 void
 AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 {

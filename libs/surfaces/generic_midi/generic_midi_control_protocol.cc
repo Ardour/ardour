@@ -56,9 +56,17 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_feedback_interval = 10000; // microseconds
 	last_feedback_time = 0;
 
+	auto_binding = FALSE;
+
 	Controllable::StartLearning.connect (mem_fun (*this, &GenericMidiControlProtocol::start_learning));
 	Controllable::StopLearning.connect (mem_fun (*this, &GenericMidiControlProtocol::stop_learning));
 	Session::SendFeedback.connect (mem_fun (*this, &GenericMidiControlProtocol::send_feedback));
+	
+	Controllable::CreateBinding.connect (mem_fun (*this, &GenericMidiControlProtocol::create_binding));
+	Controllable::DeleteBinding.connect (mem_fun (*this, &GenericMidiControlProtocol::delete_binding));
+
+	Session::AutoBindingOn.connect (mem_fun (*this, &GenericMidiControlProtocol::auto_binding_on));
+	Session::AutoBindingOff.connect (mem_fun (*this, &GenericMidiControlProtocol::auto_binding_off));
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
@@ -225,6 +233,71 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 	}
 }
 
+void
+GenericMidiControlProtocol::delete_binding ( PBD::Controllable* control )
+{
+	if( control != 0 ) {
+		Glib::Mutex::Lock lm2 (controllables_lock);
+		
+		for( MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+			MIDIControllable* existingBinding = (*iter);
+			
+			if( control == &(existingBinding->get_controllable()) ) {
+				delete existingBinding;
+				controllables.erase (iter);
+			}
+			
+		} // end for midi controllables
+	} // end null check
+}
+void
+GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos, int control_number)
+{
+	if( control != NULL ) {
+		Glib::Mutex::Lock lm2 (controllables_lock);
+		
+		MIDI::channel_t channel = (pos & 0xf);
+		MIDI::byte value = control_number;
+		
+		// Create a MIDIControllable::
+		MIDIControllable* mc = new MIDIControllable (*_port, *control);
+		
+		// Remove any old binding for this midi channel/type/value pair
+		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
+		for( MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+			MIDIControllable* existingBinding = (*iter);
+			
+			if( (existingBinding->get_control_channel() & 0xf ) == channel &&
+			    existingBinding->get_control_additional() == value &&
+			    (existingBinding->get_control_type() & 0xf0 ) == MIDI::controller ) {
+				
+				delete existingBinding;
+				controllables.erase (iter);
+			}
+			
+		} // end for midi controllables
+		
+		
+		// Update the MIDI Controllable based on the the pos param
+		// Here is where a table lookup for user mappings could go; for now we'll just wing it...
+		mc->bind_midi( channel, MIDI::controller, value );
+		
+		controllables.insert (mc);
+	} // end null test
+}
+
+void
+GenericMidiControlProtocol::auto_binding_on()
+{
+	auto_binding = TRUE;
+}
+
+void
+GenericMidiControlProtocol::auto_binding_off()
+{
+	auto_binding = FALSE;
+}
+
 XMLNode&
 GenericMidiControlProtocol::get_state () 
 {
@@ -269,46 +342,47 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 		_feedback_interval = 10000;
 	}
 
-	Controllable* c;
-
-	{
-		Glib::Mutex::Lock lm (pending_lock);
-		pending_controllables.clear ();
-	}
-
-	Glib::Mutex::Lock lm2 (controllables_lock);
-
-	controllables.clear ();
-
-	nlist = node.children(); // "controls"
-
-	if (nlist.empty()) {
-		return 0;
-	}
-
-	nlist = nlist.front()->children ();
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		if ((prop = (*niter)->property ("id")) != 0) {
+	// Are we using the autobinding feature?  If so skip this part
+	if ( !auto_binding ) {
+		
+		Controllable* c;
+		
+		{
+			Glib::Mutex::Lock lm (pending_lock);
+			pending_controllables.clear ();
+		}
+		
+		Glib::Mutex::Lock lm2 (controllables_lock);
+		controllables.clear ();
+		nlist = node.children(); // "controls"
+		
+		if (nlist.empty()) {
+			return 0;
+		}
+		
+		nlist = nlist.front()->children ();
+		
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			
-			ID id = prop->value ();
-			
-			c = Controllable::by_id (id);
-			
-			if (c) {
-				MIDIControllable* mc = new MIDIControllable (*_port, *c);
-				if (mc->set_state (**niter) == 0) {
-					controllables.insert (mc);
-				}
+			if ((prop = (*niter)->property ("id")) != 0) {
+
+				ID id = prop->value ();
+				c = session->controllable_by_id (id);
 				
-			} else {
-				warning << string_compose (_("Generic MIDI control: controllable %1 not found (ignored)"), id)
-					<< endmsg;
+				if (c) {
+					MIDIControllable* mc = new MIDIControllable (*_port, *c);
+					if (mc->set_state (**niter) == 0) {
+						controllables.insert (mc);
+					}
+					
+				} else {
+					warning << string_compose (_("Generic MIDI control: controllable %1 not found in session (ignored)"),
+								   id)
+						<< endmsg;
+				}
 			}
 		}
-	}
-
+	} // end autobinding check
 	return 0;
 }
 

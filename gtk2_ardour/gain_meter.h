@@ -73,6 +73,7 @@ class GainMeter : public Gtk::VBox
 
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
+	PBD::Controllable& get_controllable() { return _io->gain_control(); }
 
 	void clear_meters ();
 

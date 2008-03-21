@@ -40,6 +40,7 @@ class BindingProxy : public sigc::trackable
 
 	bool button_press_handler (GdkEventButton *);
 
+	PBD::Controllable* get_controllable() { return &controllable; }
   protected:
 
 	Gtkmm2ext::PopUp*  prompter;

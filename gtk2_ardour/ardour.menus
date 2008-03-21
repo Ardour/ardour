@@ -364,6 +364,8 @@
                    <menuitem action='RemoteUserDefined'/>
                    <menuitem action='RemoteMixerDefined'/>
                    <menuitem action='RemoteEditorDefined'/>
+    	           <separator/>
+                   <menuitem action='AutoRebinding'/>
                </menu>
                <menu action='Monitoring'>
                    <menuitem action='UseHardwareMonitoring'/>

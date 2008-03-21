@@ -113,6 +113,10 @@ sigc::signal<void> Session::SMPTEOffsetChanged;
 sigc::signal<void> Session::StartTimeChanged;
 sigc::signal<void> Session::EndTimeChanged;
 
+sigc::signal<void> Session::AutoBindingOn;
+sigc::signal<void> Session::AutoBindingOff;
+
+
 int
 Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 {

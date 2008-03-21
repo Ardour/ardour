@@ -44,6 +44,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	ARDOUR::microseconds_t last_feedback_time;
 
 	bool  do_feedback;
+	bool  auto_binding;
 	void _send_feedback ();
 	void  send_feedback ();
 
@@ -59,6 +60,13 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void stop_learning (PBD::Controllable*);
 
 	void learning_stopped (MIDIControllable*);
+
+	void create_binding (PBD::Controllable*, int, int);
+	void delete_binding (PBD::Controllable*);
+
+	void auto_binding_on();
+	void auto_binding_off();
+
 };
 
 #endif /* ardour_generic_midi_control_protocol_h */

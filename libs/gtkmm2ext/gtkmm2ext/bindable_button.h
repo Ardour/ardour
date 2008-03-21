@@ -47,7 +47,8 @@ class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
 			return true;
 		}
 	}
-
+	
+	PBD::Controllable* get_controllable() { return binding_proxy.get_controllable(); }
   private:
 	BindingProxy binding_proxy;
 };
@@ -70,6 +71,8 @@ class BindableButton : public Gtkmm2ext::StatefulButton
 			return true;
 		}
 	}
+
+	PBD::Controllable* get_controllable() { return binding_proxy.get_controllable(); }
 
   private:
 	BindingProxy binding_proxy;
