@@ -3059,9 +3059,15 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 			return;
 		}
 
-		/* reset selection to new regionviews */
+		/* reset selection to new regionviews. This will not set selection visual status for 
+		   these regionviews since they don't belong to a track, so do that by hand too.
+		 */
 		
 		selection->set (new_regionviews);
+
+		for (vector<RegionView*>::iterator i = new_regionviews.begin(); i != new_regionviews.end(); ++i) {
+			(*i)->set_selected (true);
+		}
 
 		/* reset drag_info data to reflect the fact that we are dragging the copies */
 		
@@ -3395,7 +3401,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	  
 		// printf ("3: pending_region_position= %lu    %lu\n", pending_region_position, drag_info.last_frame_position );
 	  
-		bool x_move_allowed = ( !drag_info.x_constrained && (Config->get_edit_mode() != Lock)) || ( drag_info.x_constrained && (Config->get_edit_mode() == Lock)) ;
+		bool x_move_allowed = ( drag_info.copy || !drag_info.x_constrained && (Config->get_edit_mode() != Lock)) || ( drag_info.x_constrained && (Config->get_edit_mode() == Lock)) ;
+
 		if ( pending_region_position != drag_info.last_frame_position && x_move_allowed ) {
 
 			/* now compute the canvas unit distance we need to move the regionview
@@ -3618,7 +3625,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	RouteTimeAxisView* tvp1;
 	boost::shared_ptr<Diskstream> ds;
 	boost::shared_ptr<Playlist> from_playlist;
-	bool axis_motion;
 
 	/* first_move is set to false if the regionview has been moved in the 
 	   motion handler. 
@@ -3757,6 +3763,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 				rv->hide_region_editor();
 				rv->fake_set_opaque (false);
 
+				/* remove the region from the old playlist */
+
+
 				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
 				from_playlist->remove_region ((rv->region()));
 				session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));	
@@ -3819,7 +3828,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		if (drag_info.copy) {
 			selection->clear_regions();
 		}
-		
+
 		for (list<RegionView*>::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 			rv = (*i);
@@ -3896,7 +3905,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	}
 
   out:
-	
 	if (!nocommit) {
 		commit_reversible_command ();
 	}
