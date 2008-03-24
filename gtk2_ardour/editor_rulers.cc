@@ -687,7 +687,6 @@ Editor::update_ruler_visibility ()
 			range_marker_group->move (0.0, tbpos - old_unit_pos);
 		}
 		range_marker_group->show();
-		cerr << "range_marker_group now at " << range_marker_group->property_y() << endl;
 		tbpos += timebar_height;
 		visible_timebars++;
 	} else {

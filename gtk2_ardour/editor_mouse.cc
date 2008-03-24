@@ -3400,10 +3400,19 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 	  
 		// printf ("3: pending_region_position= %lu    %lu\n", pending_region_position, drag_info.last_frame_position );
-	  
-		bool x_move_allowed = ((drag_info.copy && !drag_info.x_constrained) || 
-				       (!drag_info.x_constrained && (Config->get_edit_mode() != Lock)) || 
-				       (drag_info.x_constrained && (Config->get_edit_mode() == Lock)));
+
+		bool x_move_allowed;
+		
+		if (Config->get_edit_mode() == Lock) {
+			if (drag_info.copy) {
+				x_move_allowed = !drag_info.x_constrained;
+			} else {
+				/* in locked edit mode, reverse the usual meaning of x_constrained */
+				x_move_allowed = drag_info.x_constrained;
+			}
+		} else {
+			x_move_allowed = !drag_info.x_constrained;
+		}
 
 		if ( pending_region_position != drag_info.last_frame_position && x_move_allowed ) {
 

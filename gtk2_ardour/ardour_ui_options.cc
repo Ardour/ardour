@@ -1056,13 +1056,11 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("send-mtc")) {
 
 		ActionManager::map_some_state ("options", "SendMTC", &Configuration::get_send_mtc);
-		cerr << "Send MMC = " << Config->get_send_mmc() << endl;
 
 	} else if (PARAM_IS ("send-mmc")) {
 
 
 		ActionManager::map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
-		cerr << "Send MMC = " << Config->get_send_mmc() << endl;
 
 	} else if (PARAM_IS ("use-osc")) {
 
@@ -1078,7 +1076,6 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		
 	} else if (PARAM_IS ("mmc-control")) {
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
-		cerr << "Use MMC = " << Config->get_mmc_control() << endl;
 
 	} else if (PARAM_IS ("midi-feedback")) {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
