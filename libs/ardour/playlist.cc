@@ -850,10 +850,6 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 			}
 		}
 		
-		if (current->first_frame() >= current->last_frame()) {
-			PBD::stacktrace (cerr);
-		}
-
 		in_partition = false;
 	}
 

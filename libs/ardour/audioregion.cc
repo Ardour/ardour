@@ -324,6 +324,9 @@ AudioRegion::~AudioRegion ()
 		for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 			(*i)->remove_playlist (pl);
 		}
+		for (SourceList::const_iterator i = master_sources.begin(); i != master_sources.end(); ++i) {
+			(*i)->remove_playlist (pl);
+		}
 	}
 
 	notify_callbacks ();
@@ -1505,14 +1508,24 @@ AudioRegion::set_playlist (boost::weak_ptr<Playlist> wpl)
 				(*i)->remove_playlist (_playlist);	
 				(*i)->add_playlist (pl);
 			}
+			for (SourceList::const_iterator i = master_sources.begin(); i != master_sources.end(); ++i) {
+				(*i)->remove_playlist (_playlist);	
+				(*i)->add_playlist (pl);
+			}
 		} else {
 			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+				(*i)->add_playlist (pl);
+			}
+			for (SourceList::const_iterator i = master_sources.begin(); i != master_sources.end(); ++i) {
 				(*i)->add_playlist (pl);
 			}
 		}
 	} else {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+				(*i)->remove_playlist (old_playlist);
+			}
+			for (SourceList::const_iterator i = master_sources.begin(); i != master_sources.end(); ++i) {
 				(*i)->remove_playlist (old_playlist);
 			}
 		}
