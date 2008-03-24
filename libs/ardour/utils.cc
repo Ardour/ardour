@@ -92,13 +92,13 @@ ustring
 legalize_for_path (ustring str)
 {
 	ustring::size_type pos;
-	ustring legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
+	ustring illegal_chars = "/\\*";
 	ustring legal;
 
 	legal = str;
 	pos = 0;
 
-	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
+	while ((pos = legal.find_first_of (illegal_chars, pos)) != string::npos) {
 		legal.replace (pos, 1, "_");
 		pos += 1;
 	}
