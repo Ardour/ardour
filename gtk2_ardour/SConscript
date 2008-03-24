@@ -79,6 +79,10 @@ if gtkardour['FFT_ANALYSIS']:
 	gtkardour.Merge ([libraries['fftw3f']])
 	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
 
+if gtkardour['FREESOUND']:
+	gtkardour.Merge ([libraries['curl']])
+	gtkardour.Append(CCFLAGS='-DFREESOUND')
+
 if gtkardour['RUBBERBAND']:
 	gtkardour.Merge ([ libraries['rubberband'] ])
 else:
@@ -237,6 +241,10 @@ fft_graph.cc
 fft_result.cc
 """)
 
+freesound_files=Split("""
+sfdb_freesound_mootcher.cc
+""")
+
 pixmap_files = glob.glob('pixmaps/*.xpm')
 icon_files = glob.glob ('icons/*.png')
 
@@ -296,6 +304,9 @@ else:
  
 if env['FFT_ANALYSIS']:
 	extra_sources += fft_analysis_files
+
+if env['FREESOUND']:
+	extra_sources += freesound_files
 
 intl_files += extra_sources
 
@@ -533,6 +544,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      gtkosx_files +
 				      x11_files +
 				      fft_analysis_files +
+				      freesound_files +
 				      glob.glob('po/*.po') + glob.glob('*.h')))
 
 # generate a prototype full-featured ardour_ui.rc file
