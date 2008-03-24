@@ -2343,8 +2343,8 @@ void
 Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) {
-		marker_drag_motion_callback (item, event);
-
+		/* just a click, do nothing but whatever selection occured */
+		return;
 	}
 
 	_dragging_edit_point = false;
@@ -3613,18 +3613,12 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	nframes_t where;
-	RegionView* rv = reinterpret_cast<RegionView *> (drag_info.data);
-	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	bool nocommit = true;
-	double speed;
-	RouteTimeAxisView* atv;
-	bool regionview_y_movement;
-	bool regionview_x_movement;
 	vector<RegionView*> copies;
-	RouteTimeAxisView* tvp1;
+	RouteTimeAxisView* source_tv;
 	boost::shared_ptr<Diskstream> ds;
 	boost::shared_ptr<Playlist> from_playlist;
+	vector<RegionView*> new_selection;
 
 	/* first_move is set to false if the regionview has been moved in the 
 	   motion handler. 
@@ -3660,41 +3654,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		goto out;
 	}
 
-	/* get the playlist where this drag started. we can't use rv->region()->playlist()
-	   because we may have copied the region and it has not been attached to a playlist.
-	*/
-
-	assert ((tvp1 = dynamic_cast<RouteTimeAxisView*> (drag_info.source_trackview)));
-	assert ((ds = tvp1->get_diskstream()));
-	assert ((from_playlist = ds->playlist()));
-
-	/* adjust for track speed */
-	speed = 1.0;
-
-	atv = dynamic_cast<AudioTimeAxisView*> (drag_info.dest_trackview);
-
-	if (atv && atv->get_diskstream()) {
-		speed = atv->get_diskstream()->speed();
-	}
-
-	/* check all regions for motion because some might have been locked */
-	
-	regionview_x_movement = false;
-	regionview_y_movement = false;
-
-	for (list<RegionView*>::const_iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		if (drag_info.last_frame_position != (nframes_t) ((*i)->region()->position()/speed)) {
-			regionview_x_movement = true;
-		}
-		
-		if (drag_info.dest_trackview != &(*i)->get_time_axis_view()) {
-			regionview_y_movement = true;
-		}
-	}
-
-	//printf ("last_frame: %s position is %lu  %g\n", rv->get_time_axis_view().name().c_str(), drag_info.last_frame_position, speed); 
-	//printf ("last_rackview: %s \n", drag_info.dest_trackview->name().c_str()); 
-	
 	char* op_string;
 
 	if (drag_info.copy) {
@@ -3713,84 +3672,111 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	begin_reversible_command (op_string);
 
-	if (regionview_y_movement) {
+	for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
+			
+		RegionView* rv = (*i);	    	    
+		double ix1, ix2, iy1, iy2;
+		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+		rv->get_canvas_group()->i2w (ix1, iy1);
+		TimeAxisView* dest_tv = trackview_by_y_position (iy1);
+		AudioTimeAxisView* dest_atv = dynamic_cast<AudioTimeAxisView*>(dest_tv);
+		double speed;
+		bool changed_tracks;
+		bool changed_position;
+		nframes_t where;
 
-		/* moved to a different audio track. */
+		if (rv->region()->locked()) {
+			++i;
+			selection->regions.remove (rv);
+			continue;
+		}
+
+		/* adjust for track speed */
+
+		speed = 1.0;
 		
-		vector<RegionView*> new_selection;
+		if (dest_atv && dest_atv->get_diskstream()) {
+			speed = dest_atv->get_diskstream()->speed();
+		}
+		
+		changed_position = (drag_info.last_frame_position != (nframes_t) (rv->region()->position()/speed));
+		changed_tracks = (dest_tv != &rv->get_time_axis_view());
 
-		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
-			
-			RegionView* rv = (*i);	    	    
-			
-			if (rv->region()->locked()) {
-				++i;
-				continue;
-			}
-
-			double ix1, ix2, iy1, iy2;
-			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			rv->get_canvas_group()->i2w (ix1, iy1);
-			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
-			AudioTimeAxisView* atv2 = dynamic_cast<AudioTimeAxisView*>(tvp2);
-
-			boost::shared_ptr<Playlist> to_playlist = atv2->playlist();
-
+		if (changed_position) {
 			where = (nframes_t) (unit_to_frame (ix1) * speed);
-			boost::shared_ptr<Region> new_region;
+		} else {
+			where = rv->region()->position();
+		}
+			
+		/* undo the previous hide_dependent_views so that xfades don't
+		   disappear on copying regions 
+		*/
+		
+		rv->get_time_axis_view().reveal_dependent_views (*rv);
+		
+		boost::shared_ptr<Region> new_region;
 
-			if (drag_info.copy) {
-				/* we already made a copy */
-				new_region = rv->region();
-			} else {
-				new_region = RegionFactory::create (rv->region());
-			}
+		if (drag_info.copy) {
+			/* we already made a copy */
+			new_region = rv->region();
+		} else {
+			new_region = RegionFactory::create (rv->region());
+		}
 
-			/* undo the previous hide_dependent_views so that xfades don't
-			   disappear on copying regions 
-			*/
+		if (changed_tracks || drag_info.copy) {
 
-			rv->get_time_axis_view().reveal_dependent_views (*rv);
-
-			if (!drag_info.copy) {
-				
-				/* the region that used to be in the old playlist is not
-				   moved to the new one - we make a copy of it. as a result,
-				   any existing editor for the region should no longer be
-				   visible.
-				*/ 
-	    
-				rv->hide_region_editor();
-				rv->fake_set_opaque (false);
-
-				/* remove the region from the old playlist */
-
-
-				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
-				from_playlist->remove_region ((rv->region()));
-				session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));	
-
-			} else {
-
-				/* the regionview we dragged around is a temporary copy, queue it for deletion */
-				
-				copies.push_back (rv);
-			}
+			boost::shared_ptr<Playlist> to_playlist = dest_atv->playlist();
 
 			latest_regionviews.clear ();
-			
-			sigc::connection c = atv2->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+
+			sigc::connection c = dest_atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 			session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	
 			to_playlist->add_region (new_region, where);
 			session->add_command (new MementoCommand<Playlist>(*to_playlist, 0, &to_playlist->get_state()));	
 			c.disconnect ();
 							      
 			if (!latest_regionviews.empty()) {
-				new_selection.insert (new_selection.end(), latest_regionviews.begin(), latest_regionviews.end());
+				// XXX why just the first one ? we only expect one
+				dest_atv->reveal_dependent_views (*latest_regionviews.front());
+				new_selection.push_back (latest_regionviews.front());
 			}
 
+		} else {
+				
+			/* just change the model */
+			
+			rv->region()->set_position (where, (void*) this);
+		}
+
+		if (changed_tracks && !drag_info.copy) {
+
+			/* get the playlist where this drag started. we can't use rv->region()->playlist()
+			   because we may have copied the region and it has not been attached to a playlist.
+			*/
+			
+			assert ((source_tv = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view())));
+			assert ((ds = source_tv->get_diskstream()));
+			assert ((from_playlist = ds->playlist()));
+
+			/* moved to a different audio track, without copying */
+
+			/* the region that used to be in the old playlist is not
+			   moved to the new one - we use a copy of it. as a result,
+			   any existing editor for the region should no longer be
+			   visible.
+			*/ 
+	    
+			rv->hide_region_editor();
+			rv->fake_set_opaque (false);
+			
+			/* remove the region from the old playlist */
+
+			session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
+			from_playlist->remove_region ((rv->region()));
+			session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));	
+			
 			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
-			   was selected in all of them, then removing it from the playlist will have removed all
+			   was selected in all of them, then removing it from a playlist will have removed all
 			   trace of it from the selection (i.e. there were N regions selected, we removed 1,
 			   but since its the same playlist for N tracks, all N tracks updated themselves, removed the
 			   corresponding regionview, and the selection is now empty).
@@ -3806,104 +3792,36 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			   we can just iterate.
 			*/
 
-			if (drag_info.copy) {
-				++i;
-			} else {
-				if (selection->regions.empty()) {
-					break;
-				} else { 
-					i = selection->regions.by_layer().begin();
-				}
+			if (selection->regions.empty()) {
+				break;
+			} else { 
+				i = selection->regions.by_layer().begin();
 			}
-		} 
 
-		selection->set (new_selection);
-
-	} else {
-
-		/* motion within a single track */
-
-		list<RegionView*> regions = selection->regions.by_layer();
-
-		if (drag_info.copy) {
-			selection->clear_regions();
+		} else {
+			++i;
 		}
-
-		for (list<RegionView*>::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-			rv = (*i);
-
-			if (rv->region()->locked()) {
-				continue;
-			}
-			
-
-			if (regionview_x_movement) {
-				double ownspeed = 1.0;
-				atv = dynamic_cast<AudioTimeAxisView*> (&(rv->get_time_axis_view()));
-
-				if (atv && atv->get_diskstream()) {
-					ownspeed = atv->get_diskstream()->speed();
-				}
-				
-				/* base the new region position on the current position of the regionview.*/
-				
-				double ix1, ix2, iy1, iy2;
-				
-				rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-				rv->get_canvas_group()->i2w (ix1, iy1);
-				where = (nframes_t) (unit_to_frame (ix1) * ownspeed);
-				
-			} else {
-				
-				where = rv->region()->position();
-			}
-
-			/* add the undo */
-
-			session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
-			
-			if (drag_info.copy) {
-
-				/* we already made a copy of the region */
-
-				boost::shared_ptr<Region> newregion = rv->region();
-
-				/* add it */
-
-				latest_regionviews.clear ();
-				sigc::connection c = atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
-				from_playlist->add_region (newregion, (nframes_t) (where * atv->get_diskstream()->speed()));
-				c.disconnect ();
-
-				if (!latest_regionviews.empty()) {
-					// XXX why just the first one ? we only expect one
-					atv->reveal_dependent_views (*latest_regionviews.front());
-					selection->add (latest_regionviews);
-				}
-				
-				/* if the original region was locked, we don't care for the new one */
-				
-				newregion->set_locked (false);			
-
-			} else {
-
-				/* just change the model */
-
-				rv->region()->set_position (where, (void*) this);
-
-			}
-
-			/* add the redo */
-
-			session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));
-
-			if (drag_info.copy) {
-				copies.push_back (rv);
-			}
+		
+		if (drag_info.copy) {
+			copies.push_back (rv);
 		}
 	}
-
+	
+	if (new_selection.empty()) {
+		if (drag_info.copy) {
+			/* the region(view)s that are selected and being dragged around
+			   are copies and do not belong to any track. remove them
+			   from the selection right here.
+			*/
+			selection->clear_regions();
+		}
+	} else {
+		/* this will clear any existing selection that would have been
+		   cleared in the other clause above
+		*/
+		selection->set (new_selection);
+	}
+			
   out:
 	if (!nocommit) {
 		commit_reversible_command ();
