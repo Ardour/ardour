@@ -40,6 +40,7 @@ opts.AddOptions(
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 1),
+    BoolOption('FREESOUND', 'Include Freesound database lookup', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
@@ -518,6 +519,9 @@ if conf.CheckPKGExists ('fftw3'):
     libraries['fftw3'] = LibraryInfo()
     libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
 
+libraries['curl'] = LibraryInfo()
+libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
+
 env = conf.Finish ()
 
 if env['FFT_ANALYSIS']:
@@ -529,6 +533,18 @@ if env['FFT_ANALYSIS']:
 
         if conf.CheckHeader ('fftw3.h') == False:
             print ('Ardour cannot be compiled without the FFTW3 headers, which do not seem to be installed')
+            sys.exit (1)            
+        conf.Finish()
+
+if env['FREESOUND']:
+        #
+        # Check for curl header as well as the library
+        #
+
+        conf = Configure(libraries['curl'])
+
+        if conf.CheckHeader ('curl/curl.h') == False:
+            print ('Ardour cannot be compiled without the curl headers, which do not seem to be installed')
             sys.exit (1)            
         conf.Finish()
 
