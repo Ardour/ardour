@@ -391,7 +391,8 @@ RouteTimeAxisView::playlist_click ()
 	playlist_action_menu->set_name ("ArdourContextMenu");
 	
  	build_playlist_menu (playlist_action_menu);
-	editor.set_selected_track (*this, Selection::Add);
+
+	conditionally_add_to_selection ();
 	playlist_action_menu->popup (1, gtk_get_current_event_time());
 }
 
@@ -404,7 +405,7 @@ RouteTimeAxisView::automation_click ()
 		*/
 		build_display_menu ();
 	}
-	editor.set_selected_track (*this, Selection::Add);
+	conditionally_add_to_selection ();
 	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
