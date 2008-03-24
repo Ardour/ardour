@@ -519,9 +519,6 @@ if conf.CheckPKGExists ('fftw3'):
     libraries['fftw3'] = LibraryInfo()
     libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
 
-libraries['curl'] = LibraryInfo()
-libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
-
 env = conf.Finish ()
 
 if env['FFT_ANALYSIS']:
@@ -546,6 +543,11 @@ if env['FREESOUND']:
         if conf.CheckHeader ('curl/curl.h') == False:
             print ('Ardour cannot be compiled without the curl headers, which do not seem to be installed')
             sys.exit (1)            
+
+	else:
+	    libraries['curl'] = LibraryInfo()
+	    libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
+
         conf.Finish()
 
 if env['LV2']:
