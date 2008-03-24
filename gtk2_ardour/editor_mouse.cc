@@ -3401,7 +3401,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	  
 		// printf ("3: pending_region_position= %lu    %lu\n", pending_region_position, drag_info.last_frame_position );
 	  
-		bool x_move_allowed = ( drag_info.copy || !drag_info.x_constrained && (Config->get_edit_mode() != Lock)) || ( drag_info.x_constrained && (Config->get_edit_mode() == Lock)) ;
+		bool x_move_allowed = ((drag_info.copy && !drag_info.x_constrained) || 
+				       (!drag_info.x_constrained && (Config->get_edit_mode() != Lock)) || 
+				       (drag_info.x_constrained && (Config->get_edit_mode() == Lock)));
 
 		if ( pending_region_position != drag_info.last_frame_position && x_move_allowed ) {
 
@@ -3701,7 +3703,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		changed_position = (drag_info.last_frame_position != (nframes_t) (rv->region()->position()/speed));
 		changed_tracks = (dest_tv != &rv->get_time_axis_view());
 
-		if (changed_position) {
+		if (changed_position && !drag_info.x_constrained) {
 			where = (nframes_t) (unit_to_frame (ix1) * speed);
 		} else {
 			where = rv->region()->position();
