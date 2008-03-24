@@ -3687,7 +3687,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		if (rv->region()->locked()) {
 			++i;
-			selection->regions.remove (rv);
 			continue;
 		}
 
