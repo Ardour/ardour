@@ -1,46 +1,43 @@
-<?xml version="1.0" standalone="no"?>
-
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
-
-]>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter id="ch-using-existing-audio">
   <title>Using Existing Audio</title>
-  <para>
-    There are two primary ways to bring data into Ardour: recording it
-    within a session from a live sound source or importing pre-existing
-    audio files. This section covers the various ways to import audio into a
-    session.
-  </para>
+
+  <para>There are two primary ways to bring data into Ardour: recording it
+  within a session from a live sound source or importing pre-existing audio
+  files. This section covers the various ways to import audio into a
+  session.</para>
 
   <section id="importing-and-embedding">
     <title>Importing and Embedding</title>
-    <para>
-      Importing and embedding are two different methods of using existing
-      audio files on your computer (or network file system) within a
-      session. They differ in one key respect:
-    </para>
+
+    <para>Importing and embedding are two different methods of using existing
+    audio files on your computer (or network file system) within a session.
+    They differ in one key respect:</para>
 
     <variablelist>
-      <title></title>
       <varlistentry>
         <term>Importing</term>
+
         <listitem>
-          <para>
-            An existing audio file is copied to the session's sounds folder,
-            and is converted into the session's native format (WAVE or
-            Broadcast WAVE depending on your choice) and sample rate.
-          </para>
+          <para>An existing audio file is copied to the session's sounds
+          folder, and is converted into the session's native format (WAVE or
+          Broadcast WAVE depending on your choice) and sample rate. At this
+          time, no control over the conversion process is offered. If sample
+          rate conversion is required, it will be carried out at the highest
+          quality that Ardour can provide. This means that it can be rather
+          slow (many minutes to import an audio file lasting a few
+          minutes).</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
         <term>Embedding</term>
+
         <listitem>
-          <para>
-            An existing audio file is used as a the source for a region, but
-            is not copied or modified in any way.
-          </para>
+          <para>An existing audio file is used as a the source for a region,
+          but is not copied or modified in any way.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -48,394 +45,266 @@
 
   <section id="supported-external-audio-file-formats">
     <title>Supported External Audio File Formats</title>
-    <para>
-      The list of audio file formats that Ardour can import/embed is quite
-      long. It is based on the functionality offered by libsndfile, an
-      excellent and widely used software library by Australian programmer
-      Erik de Castro Lopo. As libsndfile's capabilities expand, so will
-      Ardour's abilities to import (and export) new formats. Ogg/Vorbis (an
-      excellent, unpatented and license free audio compression format
-      similar to MP3) is planned for the near future. Currently, supported
-      formats include:
-    </para>
+
+    <para>The list of audio file formats that Ardour can import/embed is quite
+    long. It is based on the functionality offered by libsndfile, an excellent
+    and widely used software library by Australian programmer Erik de Castro
+    Lopo. As libsndfile's capabilities expand, so will Ardour's abilities to
+    import (and export) new formats. Ogg/Vorbis (an excellent, unpatented and
+    license free audio compression format similar to MP3) is planned for the
+    near future. Currently, supported formats include:</para>
 
     <itemizedlist>
       <listitem>
-        <para>
-          Microsoft WAV
-        </para>
+        <para>Microsoft WAV</para>
       </listitem>
 
       <listitem>
-        <para>
-          SGI/Apple AIFF/AIFC
-        </para>
+        <para>SGI/Apple AIFF/AIFC</para>
       </listitem>
 
       <listitem>
-        <para>
-          Sun AU/Snd
-        </para>
+        <para>Sun AU/Snd</para>
       </listitem>
 
       <listitem>
-        <para>
-          Raw (headerless)
-        </para>
+        <para>Raw (headerless)</para>
       </listitem>
 
       <listitem>
-        <para>
-          Paris Audio File (PAF)
-        </para>
+        <para>Paris Audio File (PAF)</para>
       </listitem>
 
       <listitem>
-        <para>
-          Commodore IFF/SVX
-        </para>
+        <para>Commodore IFF/SVX</para>
       </listitem>
 
       <listitem>
-        <para>
-          Sphere/NIST WAV
-        </para>
+        <para>Sphere/NIST WAV</para>
       </listitem>
 
       <listitem>
-        <para>
-          IRCAM SF
-        </para>
+        <para>IRCAM SF</para>
       </listitem>
 
       <listitem>
-        <para>
-          Creative VOC
-        </para>
+        <para>Creative VOC</para>
       </listitem>
 
       <listitem>
-        <para>
-          SoundForge W64
-        </para>
+        <para>SoundForge W64</para>
       </listitem>
 
       <listitem>
-        <para>
-          GNU Octave MAT4.4
-        </para>
+        <para>GNU Octave MAT4.4</para>
       </listitem>
 
       <listitem>
-        <para>
-          Portable Voice Format
-        </para>
+        <para>Portable Voice Format</para>
       </listitem>
 
       <listitem>
-        <para>
-          Fasttracker 2 XI
-        </para>
+        <para>Fasttracker 2 XI</para>
       </listitem>
 
       <listitem>
-        <para>
-          HMM Tool Kit HTK
-        </para>
+        <para>HMM Tool Kit HTK</para>
       </listitem>
     </itemizedlist>
 
-    <para>
-      Sample encodings supported include:
-    </para>
+    <para>Sample encodings supported include:</para>
 
     <itemizedlist>
       <listitem>
-        <para>
-          Unsigned and signed 8, 16, 24 and 32 bit PCM
-        </para>
+        <para>Unsigned and signed 8, 16, 24 and 32 bit PCM</para>
       </listitem>
 
       <listitem>
-        <para>
-          IEEE 32 and 64 floating point
-        </para>
+        <para>IEEE 32 and 64 floating point</para>
       </listitem>
 
       <listitem>
-        <para>
-          U-LAW
-        </para>
+        <para>U-LAW</para>
       </listitem>
 
       <listitem>
-        <para>
-          A-LAW
-        </para>
+        <para>A-LAW</para>
       </listitem>
 
       <listitem>
-        <para>
-          IMA ADPCM
-        </para>
+        <para>IMA ADPCM</para>
       </listitem>
 
       <listitem>
-        <para>
-          MS ADPCM
-        </para>
+        <para>MS ADPCM</para>
       </listitem>
 
       <listitem>
-        <para>
-          GSM 6.10
-        </para>
+        <para>GSM 6.10</para>
       </listitem>
 
       <listitem>
-        <para>
-          G721/723 ADPCM
-        </para>
+        <para>G721/723 ADPCM</para>
       </listitem>
 
       <listitem>
-        <para>
-          12/16/24 bit DWVW
-        </para>
+        <para>12/16/24 bit DWVW</para>
       </listitem>
 
       <listitem>
-        <para>
-          OK Dialogic ADPCM
-        </para>
+        <para>OK Dialogic ADPCM</para>
       </listitem>
 
       <listitem>
-        <para>
-          8/16 DPCM
-        </para>
+        <para>8/16 DPCM</para>
       </listitem>
     </itemizedlist>
   </section>
 
   <section id="using-audio-files">
-    <title> Using audio files as tracks or regions? </title>
-    <para>
-      When you want to use existing audio files in an Ardour session, the
-      first choice you need to make is whether you want to bring the files
-      in as tracks or as new regions. Consider the two following scenarios:
-    </para>
+    <title>Using audio files as tracks or regions?</title>
+
+    <para>When you want to use existing audio files in an Ardour session, the
+    first choice you need to make is whether you want to bring the files in as
+    tracks or as new regions. Consider the two following scenarios:</para>
 
     <itemizedlist>
       <listitem>
-        <para>
-          you have an 8 track recording of existing material, with 1 audio
-          file per track
-        </para>
+        <para>you have an 8 track recording of existing material, with 1 audio
+        file per track</para>
       </listitem>
 
       <listitem>
-        <para>
-          you have a sample library containing 500 small audio files
-        </para>
+        <para>you have a sample library containing 500 small audio
+        files</para>
       </listitem>
     </itemizedlist>
 
-    <para>
-      In the first case, your goal is probably to have 8 tracks (at least),
-      with each track containing a single audio file. In the second case,
-      its a lot more likely that you simply want to be able to use any of
-      the samples easily, but do not want any tracks created as a direct
-      result of the import/embed. It is very important that you understand
-      this distinction: many new users think there should be a "simple" way
-      to import existing audio without understanding that the goal of
-      importing/embedding is not always the same.
-    </para>
+    <para>In the first case, your goal is probably to have 8 tracks (at
+    least), with each track containing a single audio file. In the second
+    case, its a lot more likely that you simply want to be able to use any of
+    the samples easily, but do not want any tracks created as a direct result
+    of the import/embed. It is very important that you understand this
+    distinction: many new users think there should be a "simple" way to import
+    existing audio without understanding that the goal of importing/embedding
+    is not always the same.</para>
 
-    <para>
-      Ardour provides two different options when importing. You can
-      import/embed audio files as new tracks, or you can import/embed them
-      into the region list, where they will be available as regions to put
-      into new or existing tracks. You can also insert import/embed audio
-      files directly into an existing track.
-    </para>
-  </section>
-
-  <section id="importing-an-audio-file-as-a-new-track">
-    <title> How to import an audio file as a new track </title>
-    <para>
-      Click on the <guimenuitem>Edit</guimenuitem> item in the editor's menu
-      bar. From the popup menu that appears, choose <menuchoice>
-      <guimenu>Import</guimenu> <guisubmenu>...as new tracks</guisubmenu>
-      </menuchoice>. The Audio Library/File Chooser window will appear.
-      After you have made your selection of files to import, click the
-      button at the bottom of that window (it will say something like
-      "Import selected regions as new tracks").
-    </para>
-  </section>
-
-  <section id="embedding-an-audio-file-as-a-new-track">
-    <title> How to embed an audio file as a new track </title>
-    <section id="embedding-an-audio-file-drag-and-drop">
-      <title> Drag-n-Drop </title>
-      <para>
-        If you use a file manager such as Nautilus or Konqueror ((basically,
-        any tool that uses standard "list-of-URL's" encoding for
-        drag-n-drop)), the simplest method to import files as tracks is to
-        drag-n-drop. Select the files you want to embed in the file manager,
-        drag the selection into Ardour and drop it over an area of the
-        editor's track/arrange display where there are no tracks. The files
-        will be embedded as 1 new track per file.
-      </para>
-    </section>
-
-    <section id="embedding-audio-file-using-edit-menu">
-      <title> Edit menu </title>
-      <para>
-        Click on the <guimenuitem>Edit</guimenuitem> item in the editor's
-        menu bar. From the popup menu that appears, choose <menuchoice>
-        <guimenu>Embed</guimenu> <guisubmenu>...as new tracks</guisubmenu>
-        </menuchoice>. The Audio Library/File Chooser window will appear.
-        After you have made your selection of files to embed, click the
-        button at the bottom of that window (it will say something like
-        "Embed selected regions as new tracks"). 1 new track will be created
-        for each file.
-      </para>
-    </section>
-  </section>
-
-  <section id="importing-audio-as-a-new-region">
-    <title> Importing as a new region </title>
-    <para></para>
-  </section>
-
-  <section id="embedding-audio-as-a-new-region">
-    <title> Embedding as a new region </title>
-    <para></para>
-
-    <section id="embedding-audio-drag-and-drop">
-      <title> Drag-n-Drop </title>
-      <para></para>
-    </section>
-
-    <section id="embedding-audio-region-list-menu">
-      <title> Region List Menu </title>
-      <para></para>
-    </section>
+    <para>Ardour provides two different options when importing. You can
+    import/embed audio files as new tracks, or you can import/embed them into
+    the region list, where they will be available as regions to put into new
+    or existing tracks. You can also insert import/embed audio files directly
+    into an existing track.</para>
   </section>
 
   <section id="how-to-import-embed">
     <title>How to import/embed</title>
-    <para>
-      Begin by clicking on the titlebar of the region list in the editor
-      window. Select <guimenuitem>Import</guimenuitem> from the menu that
-      appears, and the Sound File Database will be displayed. See sfdb for
-      more details on using this dialog.
-    </para>
 
-    <para>
-      Once you have found and selected the files you want to import, click
-      the "Import Selected" button on the SFDB dialog. Each selected audio
-      file will be copied into the session's sounds folder, converted into
-      the session's native format and sample rate. One or more new regions
-      will be placed in the "External" section of the region list, either
-      one per channel of each file or, if "create multichannel regions" was
-      selected in the SFBD dialog, one per file.
-    </para>
+    <para>There are three pathways for importing/embedding an audio file into
+    a session. One is initiated from the File menu, one is initiated from the
+    track context menu, and one is initiated from the region list. These
+    methods are all equivalent: they open the file import dialog. Once the
+    dialog is open, you can choose to add new audio as new tracks, as regions
+    in the region list, or as audio in the selected track. You can change this
+    behavior once the dialog is opened.</para>
 
-    <para>
-      If you use Nautilus as your file manager, you can easily import files
-      into your project by dragging them onto the desired track, then
-      releasing the mouse button. The file will then be
-      <link linkend="gt-embed">embedded</link> into your session.
-    </para>
-
-    <para>
-      At this time, no control over the conversion process is offered. If
-      sample rate conversion is required, it will be carried out at the
-      highest quality that Ardour can provide. This means that it can be
-      rather slow (many minutes to import an audio file lasting a few
-      minutes).
-    </para>
+    <para><caution>
+        <para>If you want to import a file directly into an existing track,
+        you must have the track selected in the editor before beginning the
+        import. </para>
+      </caution>If you use Nautilus as your file manager, you can easily
+    import files into your project by dragging them onto the desired track,
+    then releasing the mouse button. The file will then be <link
+    linkend="gt-embed">embedded</link> into your session.</para>
   </section>
 
   <section id="how-to-embed-a-file">
-    <title> How to embed a file </title>
-    <para>
-      There are two pathways for embedding an audio file into a session. One
-      is initiated from the region list, and simply creates one or more new
-      regions. The other is initiated from a specific track, and not only
-      adds regions to the region list, but also inserts them into the
-      track's playlist.
-    </para>
+    <title>Working with Tags</title>
+
+    <para>A "tag" is bit of information, or <emphasis>metadata</emphasis>,
+    that is associated with a data file. Specifically, tags are keywords or
+    terms that you feel have some relevance to a particular soundfile. Ardour
+    can store these tags in a seachable database so that you can quickly
+    search for sounds based on the tags that you have assigned to them. For
+    example you can assign the term "120bpm" to a sound, and then when you
+    search for this tag, the file will appear in the search list. Tags are
+    independent of the filename or anything else about the file. Tags, and the
+    file paths that they are associated with, are stored in a file called
+    "sfdb" in your Ardour user folder. </para>
 
     <section id="embedding-via-the-region-list">
-      <title>Embedding via the region list</title>
+      <title>Adding tags to a file</title>
+
       <orderedlist>
         <listitem>
-          <para>
-            click with 1 on the region list title bar.
-          </para>
+          <para>Select a file in the import dialog.</para>
         </listitem>
+
         <listitem>
-          <para>
-            Select Import audio file from the menu that appears.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            The SFDB dialog appears.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Select the files you want to import
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            then click on the <guibutton>Embed Selected</guibutton> button.
-          </para>
+          <para>Enter the tags in the box to the right labeled "Tags".</para>
         </listitem>
       </orderedlist>
-      <para>
-        New regions are added to the External section of the region list.
-      </para>
+
+      <para>Tags are stored when the input box loses focus, there is no reason
+      to explicitly "save" them.</para>
     </section>
 
     <section id="embedding-from-a-track">
-      <title>Embedding from a track</title>
+      <title>Searching for files using tags</title>
+
       <orderedlist>
         <listitem>
-          <para>
-            in the track you want to add the audiofile to.The track context
-            menu will appear.
-          </para>
+          <para>Select the "Search Tags" tab on the import dialog.</para>
         </listitem>
+
         <listitem>
-          <para>
-            Select EditInsert external sndfile from this menu. The SFDB
-            dialog appears.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Select the files you want to import
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            then click on the <guibutton>Embed Selected</guibutton> button.
-          </para>
+          <para>Enter the tag(s) to search for and press "Search".</para>
         </listitem>
       </orderedlist>
-      <para>
-        New regions are added to the "External" section of the region list,
-        and one is inserted into the track from which the embed was started.
-      </para>
+
+      <para>Files which have been "tagged" with the input terms will appear in
+      the results window. You can audition these files and apply tags to them
+      from this window.</para>
     </section>
   </section>
-<!--
+
+  <section id="how-to-embed-a-file">
+    <title>Searching Freesound for soundfiles (optional)</title>
+
+    <para>Freesound (http://freesound.iua.upf.edu/) is an online database with
+    thousands of soundfiles which can be freely used in many projects (visit
+    Freesound for the exact licensing terms). Ardour has an option to download
+    files directly from freesound directly from the import dialog. Freesound
+    files are tagged with metadata which you can use to search for relevant
+    sounds.</para>
+
+    <para>To enable the Freesound search engine inside Ardour, you must build
+    Ardour with the option FREESOUND=yes, and you must have the "curl" library
+    installed. This is currently optional but may later become a standard
+    feature of Ardour.</para>
+
+    <para>To download files from Freesound, you must first register for a
+    username and password on the freesound website. Enter this information
+    into the text entry boxes, enter your tags to search for, and then click
+    "Start Downloading". Ardour will begin downloading files, and the "Start
+    Downloading" button will change to say "Cancel". Clicking the "Cancel"
+    button will wait until the currently downloading file is finished, then
+    the button will switch back to "Start Downloading". The button will also
+    say "Start Downloading" once Ardour has downloaded all of the files that
+    match the given tag. In the future there may be better indication of the
+    file progress and better filtering on the filetypes that are
+    downloaded.</para>
+
+    <para>If you later search for the same terms, you will see that the files
+    appear in the list more quickly, because any files in the search set that
+    are already downloaded won't have to be downloaded again.</para>
+
+    <para>Sounds that are downloaded from Freesound will automatically be
+    given tags in Ardour that match their tags in the Freesound database. This
+    means that once they are downloaded, Ardour can search for the local files
+    very quickly using the "Search Tags" tab.</para>
+  </section>
+
+  <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />
 	-->
