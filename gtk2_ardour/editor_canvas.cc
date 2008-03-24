@@ -175,30 +175,35 @@ Editor::initialize_canvas ()
 	cd_marker_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height * 5.0);
 	
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	// tempo_bar->property_outline_pixels() = 0;
+	tempo_bar->property_outline_what() = (0x1 | 0x8);
+	tempo_bar->property_outline_pixels() = 0;
 	
 	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	// meter_bar->property_outline_pixels() = 0;
+	meter_bar->property_outline_what() = (0x1 | 0x8);
+	meter_bar->property_outline_pixels() = 0;
 	
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	// marker_bar->property_outline_pixels() = 0;
+	marker_bar->property_outline_what() = (0x1 | 0x8);
+	marker_bar->property_outline_pixels() = 0;
 
 	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
- 	// cd_marker_bar->property_outline_pixels() = 0;
+ 	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
+ 	cd_marker_bar->property_outline_pixels() = 0;
 	
 	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	// range_marker_bar->property_outline_pixels() = 0;
+	range_marker_bar->property_outline_what() = (0x1 | 0x8);
+	range_marker_bar->property_outline_pixels() = 0;
 	
 	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	// transport_marker_bar->property_outline_pixels() = 0;
+	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
+	transport_marker_bar->property_outline_pixels() = 0;
 	
 	cd_marker_bar_drag_rect = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
-	// cd_marker_bar_drag_rect->property_outline_pixels() = 0;
+	cd_marker_bar_drag_rect->property_outline_pixels() = 0;
 	cd_marker_bar_drag_rect->hide ();
 
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_bar_drag_rect->property_outline_pixels() = 0;
-	range_bar_drag_rect->hide ();
 	
 	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	transport_bar_drag_rect->property_outline_pixels() = 0;
