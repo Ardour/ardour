@@ -77,9 +77,7 @@ Plugin::setup_controls ()
 	   we'll fill this in on an as-needed basis.
 	*/
 
-	for (uint32_t i = 0; i < port_cnt; ++i) {
-		controls.push_back (0);
-	}
+	controls.assign (port_cnt, (PortControllable*) 0);
 }
 
 Plugin::~Plugin ()
