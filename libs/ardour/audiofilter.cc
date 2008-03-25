@@ -108,7 +108,9 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs, s
 		
 		/* now that there is data there, requeue the file for analysis */
 		
-		Analyser::queue_source_for_analysis (*si, false);
+		if (Config->get_auto_analyse_audio()) {
+			Analyser::queue_source_for_analysis (*si, false);
+		}
 	}
 
 	/* create a new region */

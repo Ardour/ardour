@@ -53,7 +53,7 @@ CONFIG_VARIABLE (float, track_buffer_seconds, "track-buffer-seconds", 5.0)
 CONFIG_VARIABLE (uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE (SampleFormat, native_file_data_format,  "native-file-data-format", ARDOUR::FormatFloat)
 CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
-CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", true)
+CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
 
 /* OSC */
 

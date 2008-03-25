@@ -328,7 +328,9 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 
 		i = tmp;
 	}
-	
+
+	update_punch_range_view (false);
+	update_loop_range_view (false);
 }
 
 void
