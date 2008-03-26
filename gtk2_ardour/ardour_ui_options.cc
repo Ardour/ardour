@@ -584,6 +584,12 @@ ARDOUR_UI::toggle_rubberbanding_snaps_to_grid ()
 }
 
 void
+ARDOUR_UI::toggle_auto_analyse_audio ()
+{
+	ActionManager::toggle_config_state ("options", "AutoAnalyseAudio", &Configuration::set_auto_analyse_audio, &Configuration::get_auto_analyse_audio);
+}
+
+void
 ARDOUR_UI::mtc_port_changed ()
 {
 	bool have_mtc;

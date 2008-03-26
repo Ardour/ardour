@@ -61,6 +61,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("MarkerMenu"), _("Markers"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
 	ActionManager::register_action (editor_actions, X_("MeterHold"), _("Meter hold"));
+	ActionManager::register_action (editor_actions, X_("MiscOptions"), _("Misc Options"));
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
 	ActionManager::register_action (editor_actions, X_("MovePlayHeadMenu"), _("Playhead"));
@@ -94,9 +95,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("ZoomMenu"), _("Zoom"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
 
-	/* add named actions for the editor */
-
 	ActionManager::register_toggle_action (editor_actions, "link-region-and-track-selection", _("Link Region/Track Selection"), mem_fun (*this, &Editor::toggle_link_region_and_track_selection));
+	ActionManager::register_action (editor_actions, "break-drag", _("Break drag"), mem_fun (*this, &Editor::break_drag));
 
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -174,16 +174,12 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "select-all-before-edit-cursor", _("Select All Before Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_using_edit), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "select-all-after-playhead", _("Select All After Playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true));
+	act = ActionManager::register_action (editor_actions, "select-all-between-cursors", _("Select All Overlapping Edit Range"), bind (mem_fun(*this, &Editor::select_all_selectables_between), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-before-playhead", _("Select All Before Playhead"), bind (mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-between-cursors", _("Select All Between Playhead & Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_between), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-all-within-cursors", _("Select All Within Playhead & Edit Point"), bind (mem_fun(*this, &Editor::select_all_selectables_between), true));
+	act = ActionManager::register_action (editor_actions, "select-all-within-cursors", _("Select All Inside Edit Range"), bind (mem_fun(*this, &Editor::select_all_selectables_between), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "select-range-between-cursors", _("Select Range Between Playhead & Edit Point"), mem_fun(*this, &Editor::select_range_between));
+	act = ActionManager::register_action (editor_actions, "select-range-between-cursors", _("Select Edit Range"), mem_fun(*this, &Editor::select_range_between));
 	ActionManager::session_sensitive_actions.push_back (act);
 
        	act = ActionManager::register_action (editor_actions, "select-all-in-punch-range", _("Select All in Punch Range"), mem_fun(*this, &Editor::select_all_selectables_using_punch));
@@ -362,7 +358,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "set-playhead", _("Playhead to Mouse"), mem_fun(*this, &Editor::set_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-edit-point", _("Edit Point to Mouse"), mem_fun(*this, &Editor::set_edit_point));
+	act = ActionManager::register_action (editor_actions, "set-edit-point", _("Active Marker to Mouse"), mem_fun(*this, &Editor::set_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), bind (mem_fun(*this, &Editor::duplicate_dialog), false));
@@ -466,6 +462,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "set-tempo-from-region", _("Set Tempo from Region=Bar"), mem_fun(*this, &Editor::use_region_as_bar));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-tempo-from-edit-range", _("Set Tempo from Edit Range=Bar"), mem_fun(*this, &Editor::use_range_as_bar));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -683,9 +680,9 @@ Editor::register_actions ()
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 
-	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Add Existing Audio"), mem_fun (*this, &Editor::external_audio_dialog));
+	ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Import"), mem_fun (*this, &Editor::external_audio_dialog));
 
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Add External Audio"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));

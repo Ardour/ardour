@@ -1531,6 +1531,85 @@ Editor::left_automation_track ()
 	return false;
 }
 
+void
+Editor::scrub ()
+{
+	double delta;
+	
+	if (scrubbing_direction == 0) {
+		/* first move */
+		session->request_locate (drag_info.current_pointer_frame, false);
+		session->request_transport_speed (0.1);
+		scrubbing_direction = 1;
+		
+	} else {
+		
+		if (last_scrub_x > drag_info.current_pointer_x) {
+			
+			/* pointer moved to the left */
+			
+			if (scrubbing_direction > 0) {
+				
+				/* we reversed direction to go backwards */
+				
+				scrub_reversals++;
+				scrub_reverse_distance += (int) (last_scrub_x - drag_info.current_pointer_x);
+				
+			} else {
+				
+				/* still moving to the left (backwards) */
+				
+				scrub_reversals = 0;
+				scrub_reverse_distance = 0;
+				
+				delta = 0.01 * (last_scrub_x - drag_info.current_pointer_x);
+				session->request_transport_speed (session->transport_speed() - delta);
+			}
+			
+		} else {
+			/* pointer moved to the right */
+			
+			if (scrubbing_direction < 0) {
+				/* we reversed direction to go forward */
+				
+				scrub_reversals++;
+				scrub_reverse_distance += (int) (drag_info.current_pointer_x - last_scrub_x);
+				
+			} else {
+				/* still moving to the right */
+				
+				scrub_reversals = 0;
+				scrub_reverse_distance = 0;
+				
+				delta = 0.01 * (drag_info.current_pointer_x - last_scrub_x);
+				session->request_transport_speed (session->transport_speed() + delta);
+			}
+		}
+		
+		/* if there have been more than 2 opposite motion moves detected, or one that moves
+		   back more than 10 pixels, reverse direction
+		*/
+		
+		if (scrub_reversals >= 2 || scrub_reverse_distance > 10) {
+			
+			if (scrubbing_direction > 0) {
+				/* was forwards, go backwards */
+				session->request_transport_speed (-0.1);
+				scrubbing_direction = -1;
+			} else {
+				/* was backwards, go forwards */
+				session->request_transport_speed (0.1);
+				scrubbing_direction = 1;
+			}
+			
+			scrub_reverse_distance = 0;
+			scrub_reversals = 0;
+		}
+	}
+	
+	last_scrub_x = drag_info.current_pointer_x;
+}
+
 bool
 Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type, bool from_autoscroll)
 {
@@ -1547,7 +1626,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		*/
 		
 		track_canvas->get_pointer (x, y);
-	}
+	} 
 
 	if (current_stepping_trackview) {
 		/* don't keep the persistent stepped trackview if the mouse moves */
@@ -1566,85 +1645,13 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	drag_info.current_pointer_frame = event_frame (event, &drag_info.current_pointer_x,
 						       &drag_info.current_pointer_y);
 
+	
 	switch (mouse_mode) {
 	case MouseAudition:
 		if (_scrubbing) {
-
-			double delta;
-
-			if (scrubbing_direction == 0) {
-				/* first move */
-				session->request_locate (drag_info.current_pointer_frame, false);
-				session->request_transport_speed (0.1);
-				scrubbing_direction = 1;
-
-			} else {
-				
-				if (last_scrub_x > drag_info.current_pointer_x) {
-
-					/* pointer moved to the left */
-					
-					if (scrubbing_direction > 0) {
-
-						/* we reversed direction to go backwards */
-
-						scrub_reversals++;
-						scrub_reverse_distance += (int) (last_scrub_x - drag_info.current_pointer_x);
-
-					} else {
-
-						/* still moving to the left (backwards) */
-						
-						scrub_reversals = 0;
-						scrub_reverse_distance = 0;
-
-						delta = 0.01 * (last_scrub_x - drag_info.current_pointer_x);
-						session->request_transport_speed (session->transport_speed() - delta);
-					}
-					
-				} else {
-					/* pointer moved to the right */
-
-					if (scrubbing_direction < 0) {
-						/* we reversed direction to go forward */
-
-						scrub_reversals++;
-						scrub_reverse_distance += (int) (drag_info.current_pointer_x - last_scrub_x);
-
-					} else {
-						/* still moving to the right */
-
-						scrub_reversals = 0;
-						scrub_reverse_distance = 0;
-						
-						delta = 0.01 * (drag_info.current_pointer_x - last_scrub_x);
-						session->request_transport_speed (session->transport_speed() + delta);
-					}
-				}
-
-				/* if there have been more than 2 opposite motion moves detected, or one that moves
-				   back more than 10 pixels, reverse direction
-				*/
-
-				if (scrub_reversals >= 2 || scrub_reverse_distance > 10) {
-
-					if (scrubbing_direction > 0) {
-						/* was forwards, go backwards */
-						session->request_transport_speed (-0.1);
-						scrubbing_direction = -1;
-					} else {
-						/* was backwards, go forwards */
-						session->request_transport_speed (0.1);
-						scrubbing_direction = 1;
-					}
-					
-					scrub_reverse_distance = 0;
-					scrub_reversals = 0;
-				}
-			}
-
-			last_scrub_x = drag_info.current_pointer_x;
+			scrub ();
 		}
+		break;
 
 	default:
 		break;
@@ -1700,7 +1707,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	  if (drag_info.item && (event->motion.state & Gdk::BUTTON1_MASK ||
 				 (event->motion.state & Gdk::BUTTON2_MASK))) {
 		  if (!from_autoscroll) {
-			  maybe_autoscroll (event);
+			  maybe_autoscroll (&event->motion);
 		  }
 		  (this->*(drag_info.motion_callback)) (item, event);
 		  goto handled;
@@ -1719,7 +1726,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		if (drag_info.item && (event->motion.state & GDK_BUTTON1_MASK ||
 				       (event->motion.state & GDK_BUTTON2_MASK))) {
 			if (!from_autoscroll) {
-				maybe_autoscroll (event);
+				maybe_autoscroll (&event->motion);
 			}
 			(this->*(drag_info.motion_callback)) (item, event);
 			goto handled;
@@ -1738,6 +1745,48 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	
   not_handled:
 	return false;
+}
+
+void
+Editor::break_drag ()
+{
+	stop_canvas_autoscroll ();
+	hide_verbose_canvas_cursor ();
+
+	if (drag_info.item) {
+		drag_info.item->ungrab (0);
+
+		/* put it back where it came from */
+
+		double cxw, cyw;
+		cxw = 0;
+		cyw = 0;
+		drag_info.item->i2w (cxw, cyw);
+		drag_info.item->move (drag_info.original_x - cxw, drag_info.original_y - cyw);
+	}
+
+	finalize_drag ();
+}
+
+void
+Editor::finalize_drag ()
+{
+	drag_info.item = 0;
+	drag_info.copy = false;
+	drag_info.motion_callback = 0;
+	drag_info.finished_callback = 0;
+	drag_info.dest_trackview = 0;
+	drag_info.source_trackview = 0;
+	drag_info.last_frame_position = 0;
+	drag_info.grab_frame = 0;
+	drag_info.last_pointer_frame = 0;
+	drag_info.current_pointer_frame = 0;
+	drag_info.brushing = false;
+
+	if (drag_info.copied_location) {
+		delete drag_info.copied_location;
+		drag_info.copied_location = 0;
+	}
 }
 
 void
@@ -1783,6 +1832,10 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	drag_info.pointer_frame_offset = 0;
 	drag_info.brushing = false;
 	drag_info.copied_location = 0;
+
+	drag_info.original_x = 0;
+	drag_info.original_y = 0;
+	drag_info.item->i2w (drag_info.original_x, drag_info.original_y);
 
 	drag_info.item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
 			      *cursor,
@@ -1842,22 +1895,7 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	hide_verbose_canvas_cursor();
 
-	drag_info.item = 0;
-	drag_info.copy = false;
-	drag_info.motion_callback = 0;
-	drag_info.finished_callback = 0;
-	drag_info.dest_trackview = 0;
-	drag_info.source_trackview = 0;
-	drag_info.last_frame_position = 0;
-	drag_info.grab_frame = 0;
-	drag_info.last_pointer_frame = 0;
-	drag_info.current_pointer_frame = 0;
-	drag_info.brushing = false;
-
-	if (drag_info.copied_location) {
-		delete drag_info.copied_location;
-		drag_info.copied_location = 0;
-	}
+	finalize_drag ();
 
 	return did_drag;
 }
@@ -4275,7 +4313,7 @@ Editor::drag_selection (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	if (event->button.x >= horizontal_adjustment.get_value() + canvas_width) {
-		start_canvas_autoscroll (1);
+		start_canvas_autoscroll (1, 0);
 	}
 
 	if (start != end) {
@@ -4850,7 +4888,7 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 	
 	if (event->button.x >= horizontal_adjustment.get_value() + canvas_width) {
-		start_canvas_autoscroll (1);
+		start_canvas_autoscroll (1, 0);
 	}
 	
 	if (start != end) {

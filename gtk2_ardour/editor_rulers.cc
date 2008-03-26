@@ -287,11 +287,11 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	if (autoscroll_timeout_tag < 0) {
 		if (where > rightmost_frame) {
 			if (rightmost_frame < max_frames) {
-				start_canvas_autoscroll (1);
+				start_canvas_autoscroll (1, 0);
 			}
 		} else if (where <= leftmost_frame) {
 			if (leftmost_frame > 0) {
-				start_canvas_autoscroll (-1);
+				start_canvas_autoscroll (-1, 0);
 			}
 		} 
 	} else {

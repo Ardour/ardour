@@ -552,47 +552,52 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 }
 
 void
-Editor::maybe_autoscroll (GdkEvent* event)
+Editor::maybe_autoscroll (GdkEventMotion* event)
 {
 	nframes_t rightmost_frame = leftmost_frame + current_page_frames();
 	nframes_t frame = drag_info.current_pointer_frame;
 	bool startit = false;
+	double vertical_pos = vertical_adjustment.get_value();
 
-	static int last_autoscroll_direction = 0;
+	autoscroll_y = 0;
+	autoscroll_x = 0;
+
+	if (event->y < vertical_pos) {
+		autoscroll_y = -1;
+		startit = true;
+	}
+
+	if (event->y > vertical_pos + canvas_height) {
+		autoscroll_y = 1;
+		startit = true;
+	}
 
 	if (frame > rightmost_frame) {
 
 		if (rightmost_frame < max_frames) {
-			autoscroll_direction = 1;
+			autoscroll_x = 1;
 			startit = true;
 		}
 
 	} else if (frame < leftmost_frame) {
-
+		
 		if (leftmost_frame > 0) {
-			autoscroll_direction = -1;
+			autoscroll_x = -1;
 			startit = true;
 		}
 
-	} else {
-
-		if (drag_info.last_pointer_frame > drag_info.current_pointer_frame) {
-			autoscroll_direction = -1;
-		} else {
-			autoscroll_direction = 1;
-		}
 	}
 
-
-	if ((autoscroll_direction != last_autoscroll_direction) || (leftmost_frame < frame < rightmost_frame)) {
+	if ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0)) {
 		stop_canvas_autoscroll ();
 	}
 	
 	if (startit && autoscroll_timeout_tag < 0) {
-		start_canvas_autoscroll (autoscroll_direction);
+		start_canvas_autoscroll (autoscroll_x, autoscroll_y);
 	}
 
-	last_autoscroll_direction = autoscroll_direction;
+	last_autoscroll_x = autoscroll_x;
+	last_autoscroll_y = autoscroll_y;
 }
 
 gint
@@ -608,21 +613,64 @@ Editor::autoscroll_canvas ()
 	nframes_t limit = max_frames - current_page_frames();
 	GdkEventMotion ev;
 	nframes_t target_frame;
+	double new_pixel;
+	double target_pixel;
 
-	if (autoscroll_direction < 0) {
-		if (leftmost_frame < autoscroll_distance) {
+	if (autoscroll_x < 0) {
+		if (leftmost_frame < autoscroll_x_distance) {
 			new_frame = 0;
 		} else {
-			new_frame = leftmost_frame - autoscroll_distance;
+			new_frame = leftmost_frame - autoscroll_x_distance;
 		}
-		target_frame = drag_info.current_pointer_frame - autoscroll_distance;
- 	} else {
-		if (leftmost_frame > limit - autoscroll_distance) {
+		target_frame = drag_info.current_pointer_frame - autoscroll_x_distance;
+ 	} else if (autoscroll_x > 0) {
+		if (leftmost_frame > limit - autoscroll_x_distance) {
 			new_frame = limit;
 		} else {
-			new_frame = leftmost_frame + autoscroll_distance;
+			new_frame = leftmost_frame + autoscroll_x_distance;
 		}
-		target_frame = drag_info.current_pointer_frame + autoscroll_distance;
+		target_frame = drag_info.current_pointer_frame + autoscroll_x_distance;
+	} else {
+		target_frame = drag_info.current_pointer_frame;
+		new_frame = leftmost_frame;
+	}
+
+	double vertical_pos = vertical_adjustment.get_value();
+
+	if (autoscroll_y < 0) {
+
+		if (vertical_pos < autoscroll_y_distance) {
+			new_pixel = 0;
+		} else {
+			new_pixel = vertical_pos - autoscroll_y_distance;
+		}
+
+		target_pixel = drag_info.current_pointer_y - autoscroll_y_distance;
+		target_pixel = max (target_pixel, 0.0);
+
+ 	} else if (autoscroll_y > 0) {
+
+		double top_of_bottom_of_canvas = full_canvas_height - canvas_height;
+
+		if (vertical_pos > full_canvas_height - autoscroll_y_distance) {
+			new_pixel = full_canvas_height;
+		} else {
+			new_pixel = vertical_pos + autoscroll_y_distance;
+		}
+
+		new_pixel = min (top_of_bottom_of_canvas, new_pixel);
+
+		target_pixel = drag_info.current_pointer_y + autoscroll_y_distance;
+		
+		/* don't move to the full canvas height because the item will be invisible
+		   (its top edge will line up with the bottom of the visible canvas.
+		*/
+
+		target_pixel = min (target_pixel, full_canvas_height - 10);
+		
+	} else {
+		target_pixel = drag_info.current_pointer_y;
+		new_pixel = vertical_pos;
 	}
 
 	/* now fake a motion event to get the object that is being dragged to move too */
@@ -630,10 +678,10 @@ Editor::autoscroll_canvas ()
 	ev.type = GDK_MOTION_NOTIFY;
 	ev.state &= Gdk::BUTTON1_MASK;
 	ev.x = frame_to_unit (target_frame);
-	ev.y = drag_info.current_pointer_y;
+	ev.y = target_pixel;
 	motion_handler (drag_info.item, (GdkEvent*) &ev, drag_info.item_type, true);
 
-	if (new_frame == 0 || new_frame == limit) {
+	if ((new_frame == 0 || new_frame == limit) && (new_pixel == 0 || new_pixel == DBL_MAX)) {
 		/* we are done */
 		return false;
 	}
@@ -653,29 +701,54 @@ Editor::autoscroll_canvas ()
 		reset_x_origin (new_frame);
 	}
 
-	if (autoscroll_cnt == 50) { /* 0.5 seconds */
-		
-		/* after about a while, speed up a bit by changing the timeout interval */
+	vertical_adjustment.set_value (new_pixel);
 
-		autoscroll_distance = (nframes_t) floor (current_page_frames()/30.0f);
-		
-	} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
+	if (autoscroll_x_distance != 0) {
 
-		autoscroll_distance = (nframes_t) floor (current_page_frames()/20.0f);
+		if (autoscroll_cnt == 50) { /* 0.5 seconds */
+			
+			/* after about a while, speed up a bit by changing the timeout interval */
+			
+			autoscroll_x_distance = (nframes_t) floor (current_page_frames()/30.0f);
+			
+		} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
+			
+			autoscroll_x_distance = (nframes_t) floor (current_page_frames()/20.0f);
+			
+		} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
+			
+			/* after about another while, speed up by increasing the shift per callback */
+			
+			autoscroll_x_distance =  (nframes_t) floor (current_page_frames()/10.0f);
+			
+		} 
+	}
 
-	} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
+	if (autoscroll_y_distance != 0) {
 
-		/* after about another while, speed up by increasing the shift per callback */
-
-		autoscroll_distance =  (nframes_t) floor (current_page_frames()/10.0f);
-
-	} 
+		if (autoscroll_cnt == 50) { /* 0.5 seconds */
+			
+			/* after about a while, speed up a bit by changing the timeout interval */
+			
+			autoscroll_y_distance = 10;
+			
+		} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
+			
+			autoscroll_y_distance = 20;
+			
+		} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
+			
+			/* after about another while, speed up by increasing the shift per callback */
+			
+			autoscroll_y_distance =  40;
+		} 
+	}
 
 	return true;
 }
 
 void
-Editor::start_canvas_autoscroll (int dir)
+Editor::start_canvas_autoscroll (int dx, int dy)
 {
 	if (!session || autoscroll_active) {
 		return;
@@ -684,8 +757,10 @@ Editor::start_canvas_autoscroll (int dir)
 	stop_canvas_autoscroll ();
 
 	autoscroll_active = true;
-	autoscroll_direction = dir;
-	autoscroll_distance = (nframes_t) floor (current_page_frames()/50.0);
+	autoscroll_x = dx;
+	autoscroll_y = dy;
+	autoscroll_x_distance = (nframes_t) floor (current_page_frames()/50.0);
+	autoscroll_y_distance = fabs (dy * 5); /* pixels */
 	autoscroll_cnt = 0;
 	
 	/* do it right now, which will start the repeated callbacks */

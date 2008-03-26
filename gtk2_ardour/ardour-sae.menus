@@ -56,7 +56,6 @@
                <menuitem action='TransitionToRoll'/>
                <menuitem action='TransitionToReverse'/>
 	       <separator/>
-
               
 	       <menuitem action='set-playhead'/>
 
@@ -115,9 +114,6 @@
                <menuitem action='ToggleAutoPlay'/>
                <menuitem action='ToggleAutoReturn'/>
                <menuitem action='ToggleClick'/>
-	       <separator/>
-	       <menu action='LocateToMarker'>
-		</menu>
        </menu>
 
        <menu action='Edit'>

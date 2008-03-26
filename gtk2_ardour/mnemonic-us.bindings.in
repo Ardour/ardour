@@ -168,6 +168,7 @@
 
 ;; F-N keys
 
+(gtk_accel_path "<Actions>/Editor/break-drag" "Escape")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-start" "F1")
 (gtk_accel_path "<Actions>/Editor/edit-cursor-to-range-end" "F2")
 (gtk_accel_path "<Actions>/Editor/crop" "F3")
