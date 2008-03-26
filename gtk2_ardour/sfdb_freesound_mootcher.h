@@ -55,7 +55,6 @@ public:
 private:
 
 	const char*	changeWorkingDir(const char *saveLocation);
-	void		createResourceLocation();
 
 	std::string	getXmlFile(std::string ID, int &length);
 	void		GetXml(std::string ID, struct MemoryStruct &xml_page);

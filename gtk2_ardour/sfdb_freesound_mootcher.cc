@@ -75,17 +75,14 @@ const char* Mootcher::changeWorkingDir(const char *saveLocation)
 	// 
 	int pos2 = basePath.find_last_of("/");
 	if(basePath.length() != (pos2+1)) basePath += "/";
-	// add a check if the given directory exists
-	createResourceLocation();
-	return basePath.c_str();
-}
+	
+	// create Freesound directory and sound dir
+	std::string sndLocation = basePath;
+	mkdir(sndLocation.c_str(), 0x777);        
+	sndLocation += "snd";
+	mkdir(sndLocation.c_str(), 0x777);        
 
-//------------------------------------------------------------------------
-void		Mootcher::createResourceLocation()
-{	
-		// create a snd directory
-		std::string sndLocation = basePath + "snd";
-		mkdir(sndLocation.c_str(), 0x777);        
+	return basePath.c_str();
 }
 
 //------------------------------------------------------------------------
