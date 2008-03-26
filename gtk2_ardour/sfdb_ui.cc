@@ -734,7 +734,7 @@ SoundFileBrowser::freesound_search_clicked ()
 		return;
 	
 	if ( searching ) {
-		freesound_search_btn.set_label(_("Canceling.."));
+		freesound_search_btn.set_label(_("Cancelling.."));
 		canceling = true;
 	} else {
 		searching = true;

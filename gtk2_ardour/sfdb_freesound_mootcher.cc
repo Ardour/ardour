@@ -159,6 +159,8 @@ int			Mootcher::doLogin(std::string login, std::string password)
 		setcUrlOptions();
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback); 
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&xml_page);
+		// save the sessoin id that is given back by the server in a cookie
+		curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookiejar.txt");
 		// use POST for login variables
 		curl_easy_setopt(curl, CURLOPT_POST, TRUE);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postMessage.c_str());
@@ -169,11 +171,14 @@ int			Mootcher::doLogin(std::string login, std::string password)
 		curl_easy_setopt(curl, CURLOPT_URL, login_url.c_str() );
 
 		// perform online request
+		connection = 1;
 		CURLcode res = curl_easy_perform(curl);
-		// if something goes wrong 'connection' is set to '0'
-		if(strcmp(curl_easy_strerror(res), "no error") == 0) connection = 1;
-		else connection = 0;
-
+		if( res != 0 ) {
+			toLog("curl login error\n");
+			toLog(curl_easy_strerror(res));
+			connection = 0;
+		}
+		
 		if (connection == 1){
 			std::string check_page = xml_page.memory;
 			int test = (int)check_page.find("login");   //logged
@@ -238,12 +243,16 @@ std::string	Mootcher::searchText(std::string word)
 			curl_easy_setopt(curl, CURLOPT_URL, search_url.c_str());
 
 			// perform the online search 
- 			CURLcode res = curl_easy_perform(curl);
-			if(strcmp(curl_easy_strerror(res), "no error") == 0) connection = 1;
-			else connection = 0;
+			connection = 1;
+			CURLcode res = curl_easy_perform(curl);
+			if( res != 0 ) {
+				toLog("curl login error\n");
+				toLog(curl_easy_strerror(res));
+				connection = 0;
+			}
 			
 			result = xml_page.memory;
-//printf("%s/n", result.c_str());
+			toLog( result.c_str() );
 
 			// free the memory
 			if(xml_page.memory){
@@ -302,9 +311,13 @@ void		Mootcher::GetXml(std::string ID, struct MemoryStruct &xml_page)
 		curl_easy_setopt(curl, CURLOPT_URL, getxml_url.c_str() );
  		
 		// get it!
+		connection = 1;
 		CURLcode res = curl_easy_perform(curl);
-		if(strcmp(curl_easy_strerror(res), "no error") == 0) connection = 1;
-		else connection = 0;
+		if( res != 0 ) {
+			toLog("curl login error\n");
+			toLog(curl_easy_strerror(res));
+			connection = 0;
+		}
 	}
 }
 //------------------------------------------------------------------------
@@ -459,9 +472,14 @@ std::string	Mootcher::getFile(std::string ID)
 				curl_easy_setopt(curl, CURLOPT_URL, audioURL.c_str() );
 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, audioFileWrite);
 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, theFile);
+
+				connection = 1;
 				CURLcode res = curl_easy_perform(curl);
-				if(strcmp(curl_easy_strerror(res), "no error") == 0) connection = 1;
-				else connection = 0;
+				if( res != 0 ) {
+					toLog("curl login error\n");
+					toLog(curl_easy_strerror(res));
+					connection = 0;
+				}
 
 				fclose(theFile);
 			}
