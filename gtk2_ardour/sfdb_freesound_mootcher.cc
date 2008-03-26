@@ -108,7 +108,7 @@ size_t		Mootcher::WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void
 //------------------------------------------------------------------------
 void		Mootcher::toLog(std::string input)
 {
-//printf("%s", input.c_str());// for debugging
+printf("%s/n", input.c_str());// for debugging
 }
 
 
@@ -179,13 +179,10 @@ int			Mootcher::doLogin(std::string login, std::string password)
 		if (connection == 1){
 			std::string check_page = xml_page.memory;
 			int test = (int)check_page.find("login");   //logged
-			if(	test != -1){
-				sprintf(message, "Login: %s\n", xml_page.memory);
-				toLog(message);
-			}
+			if(	strcmp(xml_page.memory, "login") == 0 )
+				toLog("Logged in./n");
 			else {
-				sprintf(message, "Login: Check username and password\n");
-				toLog(message);
+				toLog("Login failed: Check username and password./n");
 				connection = 0;
 			}
 		}
