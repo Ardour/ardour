@@ -132,8 +132,34 @@ class MidiRegionView : public RegionView
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasMidiEvent* ev, double dt, uint8_t dnote);
 
+	/**
+	 * This function is needed to subtract the region start in pixels
+	 * from world coordinates submitted by the mouse
+	 */
+	double get_position_pixels(void);
+
+	/**
+	 * This function is called by CanvasMidiNote when resizing starts,
+	 * i.e. when the user presses mouse-2 on the note
+	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
+	 */
 	void  begin_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end);
-	void update_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double dx, bool relative);
+
+	/**
+	 * This function is called while the user moves the mouse when resizing notes
+	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
+	 * @param x the difference in mouse motion, ie the motion difference if relative=true
+	 *           or the absolute mouse position (track-relative) if relative is false
+	 * @param relative true if relative resizing is taking place, false if absolute resizing
+	 */
+	void update_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double x, bool relative);
+
+	/**
+	 * This function is called while the user releases the mouse button when resizing notes
+	 * @param note_end which end of the note, NOTE_ON or NOTE_OFF
+	 * @param event_x the absolute mouse position (track-relative)
+	 * @param relative true if relative resizing is taking place, false if absolute resizing
+	 */
 	void commit_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double event_x, bool relative);
 
 	enum MouseState { None, Pressed, SelectTouchDragging, SelectRectDragging, AddDragging, EraseTouchDragging };
@@ -147,11 +173,11 @@ class MidiRegionView : public RegionView
 
   protected:
 
-    /* this constructor allows derived types
-       to specify their visibility requirements
-       to the TimeAxisViewItem parent class
+    /**
+     * this constructor allows derived types
+     * to specify their visibility requirements
+     * to the TimeAxisViewItem parent class
     */
-
     MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
@@ -177,6 +203,11 @@ class MidiRegionView : public RegionView
 	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
 	void update_drag_selection(double last_x, double x, double last_y, double y);
+
+	/**
+	 * This function provides the snap function for pixel units (double)
+	 * instead of nframes_t
+	 */
 	double snap_to(double x);
 
 	double _default_note_length;

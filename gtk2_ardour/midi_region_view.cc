@@ -160,6 +160,9 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		} else if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
 			_mouse_state = SelectTouchDragging;
 			return true;
+		} else if (ev->key.keyval == GDK_Escape) {
+			clear_selection();
+			_mouse_state = None;
 		}
 		return false;
 
@@ -304,6 +307,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		case Pressed: // Clicked
 			switch (trackview.editor.current_midi_edit_mode()) {
 			case MidiEditSelect:
+			case MidiEditResize:
 				clear_selection();
 				break;
 			case MidiEditPencil:
@@ -382,7 +386,7 @@ MidiRegionView::clear_events()
 	clear_selection();
 
 	MidiGhostRegion* gr;
-	for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
+	for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 		if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
 			gr->clear_events();
 		}
@@ -686,7 +690,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 
 		MidiGhostRegion* gr;
 
-		for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
+		for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
 			if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
 				gr->add_note(ev_rect);
 			}
@@ -818,6 +822,38 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 {
 	// TODO: This would be faster/nicer with a MoveCommand that doesn't need to copy...
 	if (_selection.find(ev) != _selection.end()) {
+		uint8_t lowest_note_in_selection  = midi_stream_view()->lowest_note();
+		uint8_t highest_note_in_selection = midi_stream_view()->highest_note();
+		uint8_t highest_note_difference = 0;
+
+		// find highest and lowest notes first
+		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
+			Selection::iterator next = i;
+			++next;
+			
+			uint8_t pitch = (*i)->note()->note();
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, pitch);
+
+			i = next;
+		}
+		
+		/*
+		cerr << "dnote: " << (int) dnote << endl;
+		cerr << "lowest note (streamview): " << int(midi_stream_view()->lowest_note()) 
+		     << " highest note (streamview): " << int(midi_stream_view()->highest_note()) << endl;
+		cerr << "lowest note (selection): " << int(lowest_note_in_selection) << " highest note(selection): " 
+		     << int(highest_note_in_selection) << endl;
+		cerr << "selection size: " << _selection.size() << endl;
+		cerr << "Highest note in selection: " << (int) highest_note_in_selection << endl;
+		*/
+		
+		// Make sure the note pitch does not exceed the MIDI standard range
+		if (dnote <= 127 && (highest_note_in_selection + dnote > 127)) {
+			highest_note_difference = highest_note_in_selection - 127;
+			cerr << "Highest note difference: " << (int) highest_note_difference;
+		}
+		
 		start_delta_command();
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
@@ -828,15 +864,56 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get()));
 
 			copy->set_time((*i)->note()->time() + dt);
-			copy->set_note((*i)->note()->note() + dnote);
+			if(copy->time() < 0) {				
+				copy->set_time(0);
+			}
 
+			uint8_t new_pitch = (*i)->note()->note() + dnote - highest_note_difference;
+			if(new_pitch > 127) {
+				new_pitch = 127;
+			}
+
+			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
+			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+
+			copy->set_note(new_pitch);
+			
 			command_add_note(copy);
 
 			_selection.erase(i);
 			i = next;
 		}
+				
 		apply_command();
+		
+		//cerr << "new lowest note (selection): "  << int(lowest_note_in_selection) << " new highest note(selection): " << int(highest_note_in_selection) << endl;
+
+		// care about notes being moved beyond the upper/lower bounds on the canvas
+		if(lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
+		   highest_note_in_selection > midi_stream_view()->highest_note()
+		) {
+			//cerr << "resetting note range" << endl;
+			midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
 	}
+}
+}
+
+
+double
+MidiRegionView::snap_to(double x)
+{
+	PublicEditor &editor = trackview.editor;
+
+	nframes_t frame = editor.pixel_to_frame(x);
+	editor.snap_to(frame);
+	return (double) editor.frame_to_pixel(frame);
+}
+
+double
+MidiRegionView::get_position_pixels(void)
+{
+	nframes_t  region_frame  = get_position();
+	return trackview.editor.frame_to_pixel(region_frame);
 }
 
 void
@@ -852,18 +929,34 @@ MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
 			NoteResizeData *resize_data = new NoteResizeData();
 			resize_data->canvas_note = note;
 
-			SimpleRect *resize_rect = new SimpleRect(*group, note->x1(), note->y1(), note->x2(), note->y2());
+			// create a new SimpleRect from the note which will be the resize preview
+			SimpleRect *resize_rect =
+				new SimpleRect(
+						*group,
+						note->x1(),
+						note->y1(),
+						note->x2(),
+						note->y2());
 
-			uint fill_color = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(), 128);
+			// calculate the colors: get the color settings
+			uint fill_color =
+				UINT_RGBA_CHANGE_A(
+						ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(),
+						128);
+
+			// make the resize preview notes more transparent and bright
 			fill_color = UINT_INTERPOLATE(fill_color, 0xFFFFFF40, 0.5);
 
+			// calculate color based on note velocity
 			resize_rect->property_fill_color_rgba() =
 				UINT_INTERPOLATE(
 					note_fill_color(note->note()->velocity()),
 					fill_color,
 					0.85);
 
-			resize_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
+			resize_rect->property_outline_color_rgba() =
+				ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
+
 			resize_data->resize_rect = resize_rect;
 
 			if(note_end == CanvasNote::NOTE_ON) {
@@ -877,38 +970,33 @@ MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
 	}
 }
 
-double
-MidiRegionView::snap_to(double x)
-{
-	PublicEditor &editor = trackview.editor;
-
-	nframes_t frame = editor.pixel_to_frame(x);
-	editor.snap_to(frame);
-	return (double) editor.frame_to_pixel(frame);
-}
-
 void
-MidiRegionView::update_resizing(CanvasNote::NoteEnd note_end, double dx, bool relative)
+MidiRegionView::update_resizing(CanvasNote::NoteEnd note_end, double x, bool relative)
 {
-
-
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		SimpleRect     *resize_rect = (*i)->resize_rect;
 		CanvasNote     *canvas_note = (*i)->canvas_note;
 
+		const double region_start = get_position_pixels();
+
 		if(relative) {
-			(*i)->current_x = (*i)->current_x + dx;
+			(*i)->current_x = (*i)->current_x + x;
 		} else {
-			(*i)->current_x = dx;
+			// x is in track relative, transform it to region relative
+			(*i)->current_x = x - region_start;
 		}
 
 		double current_x = (*i)->current_x;
 
 		if(note_end == CanvasNote::NOTE_ON) {
-			resize_rect->property_x1() = snap_to(current_x);
+			// because snapping works on world coordinates we have to transform current_x
+			// to world coordinates before snapping and transform it back afterwards
+			resize_rect->property_x1() = snap_to(region_start + current_x) - region_start;
 			resize_rect->property_x2() = canvas_note->x2();
 		} else {
-			resize_rect->property_x2() = snap_to(current_x);
+			// because snapping works on world coordinates we have to transform current_x
+			// to world coordinates before snapping and transform it back afterwards
+			resize_rect->property_x2() = snap_to(region_start + current_x) - region_start;
 			resize_rect->property_x1() = canvas_note->x1();
 		}
 	}
@@ -923,14 +1011,18 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 		CanvasNote *canvas_note = (*i)->canvas_note;
 		SimpleRect *resize_rect = (*i)->resize_rect;
 		double      current_x   = (*i)->current_x;
-
+		const double region_start = get_position_pixels();
 
 		if(!relative) {
-			current_x = event_x;
+			// event_x is in track relative, transform it to region relative
+			current_x = event_x - region_start;
 		}
 
-		nframes_t current_frame = trackview.editor.pixel_to_frame(current_x);
+		// because snapping works on world coordinates we have to transform current_x
+		// to world coordinates before snapping and transform it back afterwards
+		nframes_t current_frame = trackview.editor.pixel_to_frame(current_x + region_start);
 		trackview.editor.snap_to(current_frame);
+		current_frame -= get_position();
 
 		const boost::shared_ptr<Note> copy(new Note(*(canvas_note->note().get())));
 

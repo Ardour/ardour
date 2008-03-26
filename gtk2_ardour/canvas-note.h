@@ -55,18 +55,17 @@ public:
 		NOTE_OFF
 	};
 
-	enum Mouse2State {
+	enum NoteState {
 		None,
 		RelativeResize,
 		AbsoluteResize
 	};
 
 protected:
-	Mouse2State _mouse2_state;
+	NoteState _note_state;
 
 private:
-	// single click resizing with mouse-2
-	void resize_note(double pressed_x, double event_x, double middle_point);
+
 };
 
 } // namespace Gnome

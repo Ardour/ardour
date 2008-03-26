@@ -414,6 +414,11 @@ Editor::midi_edit_mode_toggled (MidiEditMode m)
 			set_midi_edit_mode (m);
 		break;
 
+	case MidiEditResize:
+		if (midi_tool_resize_button.get_active())
+			set_midi_edit_mode (m);
+		break;
+
 	case MidiEditErase:
 		if (midi_tool_erase_button.get_active())
 			set_midi_edit_mode (m);
@@ -453,6 +458,10 @@ Editor::set_midi_edit_mode (MidiEditMode m, bool force)
 		midi_tool_select_button.set_active (true);
 		break;
 
+	case MidiEditResize:
+		midi_tool_resize_button.set_active (true);
+		break;
+
 	case MidiEditErase:
 		midi_tool_erase_button.set_active (true);
 		break;
@@ -477,6 +486,10 @@ Editor::set_midi_edit_cursor (MidiEditMode m)
 
 	case MidiEditSelect:
 		current_canvas_cursor = midi_select_cursor;
+		break;
+
+	case MidiEditResize:
+		current_canvas_cursor = midi_resize_cursor;
 		break;
 
 	case MidiEditErase:

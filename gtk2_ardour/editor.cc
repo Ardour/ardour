@@ -182,6 +182,7 @@ Gdk::Cursor* Editor::fader_cursor = 0;
 Gdk::Cursor* Editor::speaker_cursor = 0;
 Gdk::Cursor* Editor::midi_pencil_cursor = 0;
 Gdk::Cursor* Editor::midi_select_cursor = 0;
+Gdk::Cursor* Editor::midi_resize_cursor = 0;
 Gdk::Cursor* Editor::midi_erase_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
@@ -1390,6 +1391,7 @@ Editor::build_cursors ()
 	timebar_cursor = new Gdk::Cursor(LEFT_PTR);
 	midi_pencil_cursor = new Gdk::Cursor (PENCIL);
 	midi_select_cursor = new Gdk::Cursor (CENTER_PTR);
+	midi_resize_cursor = new Gdk::Cursor (SIZING);
 	midi_erase_cursor = new Gdk::Cursor (DRAPED_BOX);
 }
 
@@ -3084,6 +3086,9 @@ Editor::setup_midi_toolbar ()
 	midi_tool_select_button.add (*(manage (new Image (::get_icon("midi_tool_select")))));
 	midi_tool_select_button.set_relief(Gtk::RELIEF_NONE);
 	midi_tool_buttons.push_back (&midi_tool_select_button);
+	midi_tool_resize_button.add (*(manage (new Image (::get_icon("strip_width")))));
+	midi_tool_resize_button.set_relief(Gtk::RELIEF_NONE);
+	midi_tool_buttons.push_back (&midi_tool_resize_button);
 	midi_tool_erase_button.add (*(manage (new Image (::get_icon("midi_tool_erase")))));
 	midi_tool_erase_button.set_relief(Gtk::RELIEF_NONE);
 	midi_tool_buttons.push_back (&midi_tool_erase_button);
@@ -3093,29 +3098,34 @@ Editor::setup_midi_toolbar ()
 	midi_tool_button_set = new GroupedButtons (midi_tool_buttons);
 
 	midi_tool_button_box.set_border_width (2);
-	midi_tool_button_box.set_spacing(4);
 	midi_tool_button_box.set_spacing(1);
 	midi_tool_button_box.pack_start(midi_tool_pencil_button, true, true);
 	midi_tool_button_box.pack_start(midi_tool_select_button, true, true);
+	midi_tool_button_box.pack_start(midi_tool_resize_button, true, true);
 	midi_tool_button_box.pack_start(midi_tool_erase_button, true, true);
 	midi_tool_button_box.set_homogeneous(true);
 
 	midi_tool_pencil_button.set_name ("MouseModeButton");
 	midi_tool_select_button.set_name ("MouseModeButton");
+	midi_tool_resize_button.set_name ("MouseModeButton");
 	midi_tool_erase_button.set_name ("MouseModeButton");
 
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_pencil_button, _("Add/Move/Stretch Notes"));
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_select_button, _("Select/Move Notes"));
+	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_resize_button, _("Resize Notes"));
 	ARDOUR_UI::instance()->tooltips().set_tip (midi_tool_erase_button, _("Erase Notes"));
 
 	midi_tool_pencil_button.unset_flags (CAN_FOCUS);
 	midi_tool_select_button.unset_flags (CAN_FOCUS);
+	midi_tool_resize_button.unset_flags (CAN_FOCUS);
 	midi_tool_erase_button.unset_flags (CAN_FOCUS);
 	
 	midi_tool_pencil_button.signal_toggled().connect (bind (mem_fun(*this,
 				&Editor::midi_edit_mode_toggled), Editing::MidiEditPencil));
 	midi_tool_select_button.signal_toggled().connect (bind (mem_fun(*this,
 				&Editor::midi_edit_mode_toggled), Editing::MidiEditSelect));
+	midi_tool_resize_button.signal_toggled().connect (bind (mem_fun(*this,
+				&Editor::midi_edit_mode_toggled), Editing::MidiEditResize));
 	midi_tool_erase_button.signal_toggled().connect (bind (mem_fun(*this,
 				&Editor::midi_edit_mode_toggled), Editing::MidiEditErase));
 	

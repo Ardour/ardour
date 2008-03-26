@@ -990,6 +990,7 @@ class Editor : public PublicEditor
 	static Gdk::Cursor* speaker_cursor;
 	static Gdk::Cursor* midi_pencil_cursor;
 	static Gdk::Cursor* midi_select_cursor;
+	static Gdk::Cursor* midi_resize_cursor;
 	static Gdk::Cursor* midi_erase_cursor;
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
@@ -1642,6 +1643,7 @@ public:
 	Gtkmm2ext::TearOff*      midi_tool_tearoff;
 	Gtk::ToggleButton        midi_tool_pencil_button;
 	Gtk::ToggleButton        midi_tool_select_button;
+	Gtk::ToggleButton        midi_tool_resize_button;
 	Gtk::ToggleButton        midi_tool_erase_button;
 	GroupedButtons          *midi_tool_button_set;
 	void                     midi_edit_mode_toggled (Editing::MidiEditMode m);

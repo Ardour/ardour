@@ -63,6 +63,7 @@ CanvasMidiEvent::selected(bool yn)
 bool
 CanvasMidiEvent::on_event(GdkEvent* ev)
 {
+	MidiStreamView *streamview = _region.midi_stream_view();
 	static uint8_t drag_delta_note = 0;
 	static double  drag_delta_x = 0;
 	static double last_x, last_y;
@@ -147,16 +148,17 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			drag_delta_x += dx;
 
 			// Snap to note rows
-			if (abs(dy) < _region.midi_stream_view()->note_height()) {
+			if (abs(dy) < streamview->note_height()) {
 				dy = 0.0;
 			} else {
 				int8_t this_delta_note;
-				if (dy > 0)
-					this_delta_note = (int8_t)ceil(dy / _region.midi_stream_view()->note_height() / 2.0);
-				else
-					this_delta_note = (int8_t)floor(dy / _region.midi_stream_view()->note_height() / 2.0);
+				if (dy > 0) {
+					this_delta_note = (int8_t)ceil(dy / streamview->note_height() / 2.0);
+				} else {
+					this_delta_note = (int8_t)floor(dy / streamview->note_height() / 2.0);
+				}
 				drag_delta_note -= this_delta_note;
-				dy = _region.midi_stream_view()->note_height() * this_delta_note;
+				dy = streamview->note_height() * this_delta_note;
 				last_y = last_y + dy;
 			}
 
