@@ -1217,7 +1217,7 @@ CrossfadeEditor::audition_right ()
 
 	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade out", 
 													      0, Region::DefaultFlags, false)));
-					     boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), 0, xfade->length(), "xfade out", 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade out", 
 													       0, Region::DefaultFlags, false)));
 
 	pl.add_region (left, 0);
