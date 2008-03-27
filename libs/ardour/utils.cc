@@ -105,25 +105,6 @@ legalize_for_path (ustring str)
 
 	return legal;
 }
-#if 0
-string 
-legalize_for_path (string str)
-{
-	string::size_type pos;
-	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
-	string legal;
-
-	legal = str;
-	pos = 0;
-
-	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
-		legal.replace (pos, 1, "_");
-		pos += 1;
-	}
-
-	return legal;
-}
-#endif
 
 string bump_name_once(std::string name)
 {
