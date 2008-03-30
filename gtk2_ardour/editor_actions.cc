@@ -512,20 +512,20 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), (mem_fun(*this, &Editor::set_track_height_largest)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "track-height-larger", _("Larger"), (mem_fun(*this, &Editor::set_track_height_large)));
+	act = ActionManager::register_action (editor_actions, "track-height-larger", _("Larger"), (mem_fun(*this, &Editor::set_track_height_larger)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "track-height-large", _("Large"), (mem_fun(*this, &Editor::set_track_height_larger)));
+	act = ActionManager::register_action (editor_actions, "track-height-large", _("Large"), (mem_fun(*this, &Editor::set_track_height_large)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-normal", _("Normal"), (mem_fun(*this, &Editor::set_track_height_normal)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "track-height-small", _("Small"), (mem_fun(*this, &Editor::set_track_height_smaller)));
+	act = ActionManager::register_action (editor_actions, "track-height-small", _("Small"), (mem_fun(*this, &Editor::set_track_height_small)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "track-height-smaller", _("Smaller"), (mem_fun(*this, &Editor::set_track_height_small)));
+	act = ActionManager::register_action (editor_actions, "track-height-smaller", _("Smaller"), (mem_fun(*this, &Editor::set_track_height_smaller)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
