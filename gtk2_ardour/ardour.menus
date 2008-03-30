@@ -210,7 +210,6 @@
 	<menu action='RegionMenu'>
 	      <menuitem action='insert-region'/>
 	      <menuitem action='rename-region'/>
-	      <menuitem action='auto-rename-region'/>
 	      <menuitem action='raise-region'/>
 	      <menuitem action='lower-region'/>
 	      <menuitem action='naturalize-region'/>
