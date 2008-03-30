@@ -739,6 +739,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		show_name_entry ();
 		hide_name_label ();
 
+		gain_slider->show();
 		mute_button->show();
 		solo_button->show();
 		if (rec_enable_button)
@@ -760,6 +761,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		show_name_entry ();
 		hide_name_label ();
 
+		gain_slider->hide();
 		mute_button->show();
 		solo_button->show();
 		if (rec_enable_button)
@@ -781,6 +783,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		hide_name_entry ();
 		show_name_label ();
 
+		gain_slider->hide();
 		mute_button->hide();
 		solo_button->hide();
 		if (rec_enable_button)
