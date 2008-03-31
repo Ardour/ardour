@@ -1776,7 +1776,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
 
 #ifdef FFT_ANALYSIS
-	items.push_back (MenuElem (_("Analyze region"), mem_fun(*this, &Editor::analyze_region_selection)));
+	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_region_selection)));
 #endif
 
 	items.push_back (SeparatorElem());
@@ -1945,7 +1945,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& items)
 
 #ifdef FFT_ANALYSIS
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Analyze range"), mem_fun(*this, &Editor::analyze_range_selection)));
+	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_range_selection)));
 #endif
 	
 	items.push_back (SeparatorElem());
@@ -2227,6 +2227,15 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	if (act) {
 		Glib::RefPtr<RadioAction>::cast_dynamic(act)->set_active (true);
 	}
+
+	nframes64_t foo;
+	bool in_track_canvas;
+
+	if (!mouse_frame (foo, in_track_canvas)) {
+		in_track_canvas = false;
+	}
+
+	reset_canvas_action_sensitivity (in_track_canvas);
 
 	instant_save ();
 }

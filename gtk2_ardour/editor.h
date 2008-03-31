@@ -2051,13 +2051,15 @@ public:
 
 	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
-	gint left_track_canvas (GdkEventCrossing*);
+	bool left_track_canvas (GdkEventCrossing*);
+	bool entered_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);
 	void set_entered_regionview (RegionView*);
 	gint left_automation_track ();
 
 	bool _new_regionviews_show_envelope;
 
+	void reset_canvas_action_sensitivity (bool);
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();

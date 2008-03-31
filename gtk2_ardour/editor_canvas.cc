@@ -116,6 +116,7 @@ Editor::initialize_canvas ()
 	track_canvas->set_name ("EditorMainCanvas");
 	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
 	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
+	track_canvas->signal_enter_notify_event().connect (mem_fun(*this, &Editor::entered_track_canvas));
 	track_canvas->set_flags (CAN_FOCUS);
 
 	/* set up drag-n-drop */
@@ -779,11 +780,19 @@ Editor::stop_canvas_autoscroll ()
 	autoscroll_active = false;
 }
 
-gint
+bool
 Editor::left_track_canvas (GdkEventCrossing *ev)
 {
 	set_entered_track (0);
 	set_entered_regionview (0);
+	reset_canvas_action_sensitivity (false);
+	return false;
+}
+
+bool
+Editor::entered_track_canvas (GdkEventCrossing *ev)
+{
+	reset_canvas_action_sensitivity (true);
 	return FALSE;
 }
 

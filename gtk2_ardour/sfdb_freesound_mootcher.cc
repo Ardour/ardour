@@ -51,7 +51,7 @@
 //------------------------------------------------------------------------
 Mootcher::	Mootcher(const char *saveLocation)
 	: curl( NULL )
-	, connection( NULL )
+	, connection( 0 )
 {
 	changeWorkingDir(saveLocation);
 };
@@ -108,7 +108,7 @@ size_t		Mootcher::WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void
 //------------------------------------------------------------------------
 void		Mootcher::toLog(std::string input)
 {
-//printf("%s\n", input.c_str());// for debugging
+printf("%s\n", input.c_str());// for debugging
 }
 
 
@@ -135,7 +135,7 @@ int			Mootcher::doLogin(std::string login, std::string password)
 	
 	struct MemoryStruct xml_page;
 	xml_page.memory = NULL;
-	xml_page.size = NULL;
+	xml_page.size = 0;
 
 	// create the post message from the login and password
 	std::string postMessage;
@@ -191,9 +191,10 @@ int			Mootcher::doLogin(std::string login, std::string password)
 		if(xml_page.memory){		
 			free( xml_page.memory );
 			xml_page.memory = NULL;
-			xml_page.size = NULL;
+			xml_page.size = 0;
 		}
 
+		std::cerr << "Login was cool, connection = "  << connection << std::endl;
 		return connection;
 	}
 	else return 3; // will be returned if a curl related problem ocurrs
@@ -203,7 +204,7 @@ std::string	Mootcher::searchText(std::string word)
 {
 	struct MemoryStruct xml_page;
 	xml_page.memory = NULL;
-	xml_page.size = NULL;
+	xml_page.size = 0;
 	
 	std::string result;
 
@@ -252,7 +253,7 @@ std::string	Mootcher::searchText(std::string word)
 			if(xml_page.memory){
 				free( xml_page.memory );
 				xml_page.memory = NULL;
-				xml_page.size = NULL;
+				xml_page.size = 0;
 			}
 
 		}

@@ -440,16 +440,16 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "editor-separate", _("Separate"), mem_fun(*this, &Editor::separate_region_from_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
+	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "separate-from-punch", _("Separate Using Punch Range"), mem_fun(*this, &Editor::separate_region_from_punch));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
+	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "separate-from-loop", _("Separate Using Loop Range"), mem_fun(*this, &Editor::separate_region_from_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
+	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-crop", _("Crop"), mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
+	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "editor-cut", _("Cut"), mem_fun(*this, &Editor::cut));
 	ActionManager::session_sensitive_actions.push_back (act);
 	/* Note: for now, editor-delete does the exact same thing as editor-cut */
@@ -1655,4 +1655,17 @@ void
 Editor::reset_focus ()
 {
 	track_canvas->grab_focus();
+}
+
+void
+Editor::reset_canvas_action_sensitivity (bool onoff)
+{
+	if (_edit_point != EditAtMouse) {
+		onoff = true;
+	}
+
+	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::mouse_edit_point_requires_canvas_actions.begin();  
+	     x != ActionManager::mouse_edit_point_requires_canvas_actions.end(); ++x) {
+		(*x)->set_sensitive (onoff);
+	}
 }

@@ -2768,6 +2768,7 @@ Editor::separate_region_from_selection ()
 	   to allow discontiguous operation, since get_edit_op_range() currently
 	   returns a single range.
 	*/
+
 	if (mouse_mode == MouseRange && !selection->time.empty()) {
 
 		separate_regions_between (selection->time);

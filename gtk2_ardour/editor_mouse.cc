@@ -77,6 +77,10 @@ Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
 	Gdk::ModifierType mask;
 	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas->get_window();
 	Glib::RefPtr<const Gdk::Window> pointer_window;
+
+	if (!canvas_window) {
+		return false;
+	}
 	
 	pointer_window = canvas_window->get_pointer (x, y, mask);
 
