@@ -50,7 +50,7 @@ opts.AddOptions(
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
+    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 0),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
