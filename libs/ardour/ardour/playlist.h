@@ -89,6 +89,8 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, nframes_t pos);
 	void split_region (boost::shared_ptr<Region>, nframes_t position);
+	void split (nframes64_t at);
+	void shift (nframes64_t at, nframes64_t distance, bool move_intersected, bool ignore_music_glue);
 	void partition (nframes_t start, nframes_t end, bool just_top_level);
 	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
 	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
@@ -276,6 +278,8 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	void unset_freeze_child (Playlist*);
 
 	void timestamp_layer_op (boost::shared_ptr<Region>);
+
+	void _split_region (boost::shared_ptr<Region>, nframes_t position);
 };
 
 } /* namespace ARDOUR */

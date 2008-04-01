@@ -57,6 +57,7 @@
 (gtk_accel_path "<Actions>/Editor/redo" "<%PRIMARY%>r")
 (gtk_accel_path "<Actions>/Transport/Record" "<%TERTIARY%>r")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-timefx" "t")
+(gtk_accel_path "<Actions>/Editor/insert-time" "<%PRIMARY%>t")
 (gtk_accel_path "<Actions>/Editor/select-all-between-cursors" "u")
 (gtk_accel_path "<Actions>/Editor/insert-region" "i")
 (gtk_accel_path "<Actions>/Editor/invert-selection" "<%TERTIARY%>i")

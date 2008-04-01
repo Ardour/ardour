@@ -5639,4 +5639,118 @@ Editor::set_waveform_scale (WaveformScale ws)
 		}
 	}
 }	
+
+void
+Editor::do_insert_time ()
+{
+	if (selection->tracks.empty()) {
+		return;
+	}
+
+	nframes64_t pos = get_preferred_edit_position ();
+	ArdourDialog d (*this, _("Insert Time"));
+	VButtonBox button_box;
+	VBox option_box;
+	RadioButtonGroup group;
+	RadioButton leave_button (group, _("Stay in position"));
+	RadioButton move_button (group, _("Move"));
+	RadioButton split_button (group, _("Split & Later Section Moves"));
+	Label intersect_option_label (_("Intersected regions should:"));
+	ToggleButton glue_button (_("Move Glued Regions"));
+	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
+	HBox clock_box;
+
+	clock.set (0);
+	clock.set_session (session);
+	clock.set_bbt_reference (pos);
+
+	clock_box.pack_start (clock, false, true);
+
+	option_box.set_spacing (6);
+	option_box.pack_start (intersect_option_label, false, false);
+	option_box.pack_start (button_box, false, false);
+	option_box.pack_start (glue_button, false, false);
+
+	button_box.pack_start (leave_button, false, false);
+	button_box.pack_start (move_button, false, false);
+	button_box.pack_start (split_button, false, false);
+				      
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->pack_start (clock_box, false, false);
+	d.get_vbox()->pack_start (option_box, false, false);
+	
+	leave_button.show ();
+	move_button.show ();
+	split_button.show ();
+	intersect_option_label.show ();
+	option_box.show ();
+	button_box.show ();
+	glue_button.show ();
+	clock.show_all();
+	clock_box.show ();
+
+	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	d.show ();
+
+	int response = d.run ();
+
+	if (response != RESPONSE_OK) {
+		return;
+	}
+	
+	nframes_t distance = clock.current_duration (pos);
+
+	if (distance == 0) {
+		return;
+	}
+
+	InsertTimeOption opt;
+
+	if (leave_button.get_active()) {
+		opt = LeaveIntersected;
+	} else if (move_button.get_active()) {
+		opt = MoveIntersected;
+	} else {
+		opt = SplitIntersected;
+	}
+
+	insert_time (pos, distance, opt, glue_button.get_active());
+}
 				
+void
+Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt, bool ignore_music_glue)
+{
+	bool commit = false;
+
+	if (Config->get_edit_mode() == Lock) {
+		return;
+	}
+
+	begin_reversible_command (_("insert time"));
+
+	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+		boost::shared_ptr<Playlist> pl = (*x)->playlist();
+		
+		if (!pl) {
+			continue;
+		}
+
+		XMLNode &before = pl->get_state();
+
+		if (opt == SplitIntersected) {
+			pl->split (pos);
+		}
+		
+		pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
+
+		XMLNode &after = pl->get_state();
+
+		session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
+		commit = true;
+	}
+
+	if (commit) {
+		commit_reversible_command ();
+	}
+}

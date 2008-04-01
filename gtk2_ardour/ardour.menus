@@ -232,6 +232,7 @@
 
         <menu action='TrackMenu'>
 	        <menuitem action='AddTrackBus'/>	
+		<menuitem action='insert-time'/>
 	        <menu action='TrackHeightMenu'>
 		     <menuitem action='track-height-largest'/>
 		     <menuitem action='track-height-large'/>

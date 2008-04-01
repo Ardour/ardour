@@ -1014,10 +1014,67 @@ Playlist::duplicate (boost::shared_ptr<Region> region, nframes_t position, float
 }
 
 void
+Playlist::shift (nframes64_t at, nframes64_t distance, bool move_intersected, bool ignore_music_glue)
+{
+	RegionLock rlock (this);
+	RegionList copy (regions);
+	RegionList fixup;
+
+	for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
+
+		if ((*r)->last_frame() < at) {
+			/* too early */
+			continue;
+		}
+		
+		if (at > (*r)->first_frame() && at < (*r)->last_frame()) {
+			/* intersected region */
+			if (!move_intersected) {
+				continue;
+			}
+		}
+		
+		/* do not move regions glued to music time - that
+		   has to be done separately.
+		*/
+
+		if (!ignore_music_glue && (*r)->positional_lock_style() != Region::AudioTime) {
+			fixup.push_back (*r);
+			continue;
+		}
+
+		(*r)->set_position ((*r)->position() + distance, this);
+	}
+
+	for (RegionList::iterator r = fixup.begin(); r != fixup.end(); ++r) {
+		(*r)->recompute_position_from_lock_style ();
+	}
+}
+
+void
+Playlist::split (nframes64_t at)
+{
+	RegionLock rlock (this);
+	RegionList copy (regions);
+
+	/* use a copy since this operation can modify the region list
+	 */
+
+	for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
+		_split_region (*r, at);
+	}
+}
+
+void
 Playlist::split_region (boost::shared_ptr<Region> region, nframes_t playlist_position)
 {
 	RegionLock rl (this);
+	_split_region (region, playlist_position);
+}
 
+void
+Playlist::_split_region (boost::shared_ptr<Region> region, nframes_t playlist_position)
+{
 	if (!region->covers (playlist_position)) {
 		return;
 	}

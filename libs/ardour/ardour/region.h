@@ -128,6 +128,7 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 
 	PositionLockStyle positional_lock_style() const { return _positional_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
+	void recompute_position_from_lock_style ();
 
 	virtual bool should_save_state () const { return !(_flags & DoNotSaveState); };
 
