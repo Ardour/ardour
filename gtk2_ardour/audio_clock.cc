@@ -634,6 +634,15 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	BBT_Time bbt;
 
 	session->tempo_map().bbt_time (when, bbt);
+
+	/* handle a common case */
+
+	if (is_duration && when == 0) {
+		bbt.bars = 0;
+		bbt.beats = 0;
+
+	}
+
 	sprintf (buf, "%03" PRIu32, bbt.bars);
 	bars_label.set_text (buf);
 	sprintf (buf, "%02" PRIu32, bbt.beats);
