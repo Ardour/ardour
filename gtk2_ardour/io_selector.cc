@@ -214,6 +214,8 @@ IOSelector::IOSelector (Session& sess, boost::shared_ptr<IO> ior, bool input)
 		io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
 
+	set_button_sensitivity ();
+
 	io->name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
 }
 

@@ -954,7 +954,7 @@ IO::add_input_port (string source, void* src, DataType type)
 		
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
-			
+
 			if (_input_maximum >= 0 && (int) _ninputs == _input_maximum) {
 				return -1;
 			}

@@ -24,6 +24,7 @@
 #include <sigc++/bind.h>
 #include <pbd/xml++.h>
 #include <pbd/enumwriter.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/timestamps.h>
 #include <ardour/buffer.h>

@@ -23,6 +23,7 @@
 
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
+#include <pbd/stacktrace.h>
 
 #include <ardour/insert.h>
 #include <ardour/plugin.h>
@@ -924,15 +925,6 @@ PortInsert::PortInsert (const PortInsert& other)
 void
 PortInsert::init ()
 {
-	if (add_input_port ("", this)) {
-		error << _("PortInsert: cannot add input port") << endmsg;
-		throw failed_constructor();
-	}
-	
-	if (add_output_port ("", this)) {
-		error << _("PortInsert: cannot add output port") << endmsg;
-		throw failed_constructor();
-	}
 }
 
 PortInsert::PortInsert (Session& s, const XMLNode& node)
@@ -1065,7 +1057,7 @@ PortInsert::can_support_input_configuration (int32_t in) const
 
 		/* not configured yet */
 
-		return 1; /* we can support anything the first time we're asked */
+		return in; /* we can support anything the first time we're asked */
 
 	} else {
 
@@ -1074,7 +1066,7 @@ PortInsert::can_support_input_configuration (int32_t in) const
 		*/
 
 		if (output_maximum() == in) {
-			return 1;
+			return in;
 		} 
 	}
 
@@ -1088,8 +1080,12 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	   the last request config. or something like that.
 	*/
 
+	set_output_maximum (in);
+	set_output_minimum (in);
+	set_input_maximum (out);
+	set_input_minimum (out);
 
-	/* this is a bit odd: 
+	/* this can be momentarily confusing: 
 
 	   the number of inputs we are required to handle corresponds 
 	   to the number of output ports we need.
@@ -1097,11 +1093,6 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	   the number of outputs we are required to have corresponds
 	   to the number of input ports we need.
 	*/
-
-	set_output_maximum (in);
-	set_output_minimum (in);
-	set_input_maximum (out);
-	set_input_minimum (out);
 
 	if (in < 0) {
 		in = n_outputs ();
@@ -1117,6 +1108,11 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 int32_t
 PortInsert::compute_output_streams (int32_t cnt) const
 {
+	if (n_inputs() == 0) {
+		/* not configured yet */
+		return cnt;
+	}
+
 	/* puzzling, eh? think about it ... */
 	return n_inputs ();
 }
