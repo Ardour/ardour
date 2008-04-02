@@ -3672,6 +3672,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	boost::shared_ptr<Diskstream> ds;
 	boost::shared_ptr<Playlist> from_playlist;
 	vector<RegionView*> new_selection;
+	typedef set<boost::shared_ptr<Playlist> > PlaylistSet;
+	PlaylistSet modified_playlists;
+	pair<PlaylistSet::iterator,bool> insert_result;
 
 	/* first_move is set to false if the regionview has been moved in the 
 	   motion handler. 
@@ -3708,6 +3711,14 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	}
 
 	char* op_string;
+
+	/* reverse this here so that we have the correct logic to finalize
+	   the drag.
+	*/
+	
+	if (Config->get_edit_mode() == Lock && !drag_info.copy) {
+		drag_info.x_constrained = !drag_info.x_constrained;
+	}
 
 	if (drag_info.copy) {
 		if (drag_info.x_constrained) {
@@ -3782,9 +3793,14 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			latest_regionviews.clear ();
 
 			sigc::connection c = dest_atv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
-			session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	
+			
+			insert_result = modified_playlists.insert (to_playlist);
+			if (insert_result.second) {
+				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	
+			}
+
 			to_playlist->add_region (new_region, where);
-			session->add_command (new MementoCommand<Playlist>(*to_playlist, 0, &to_playlist->get_state()));	
+
 			c.disconnect ();
 							      
 			if (!latest_regionviews.empty()) {
@@ -3794,9 +3810,16 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			}
 
 		} else {
-				
+			
 			/* just change the model */
 			
+			boost::shared_ptr<Playlist> playlist = dest_atv->playlist();
+
+			insert_result = modified_playlists.insert (playlist);
+			if (insert_result.second) {
+				session->add_command (new MementoCommand<Playlist>(*playlist, &playlist->get_state(), 0));	
+			}
+
 			rv->region()->set_position (where, (void*) this);
 		}
 
@@ -3823,9 +3846,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			
 			/* remove the region from the old playlist */
 
-			session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
+			insert_result = modified_playlists.insert (from_playlist);
+			if (insert_result.second) {
+				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
+			}
+
 			from_playlist->remove_region ((rv->region()));
-			session->add_command (new MementoCommand<Playlist>(*from_playlist, 0, &from_playlist->get_state()));	
 			
 			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
 			   was selected in all of them, then removing it from a playlist will have removed all
@@ -3858,6 +3884,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			copies.push_back (rv);
 		}
 	}
+
 	
 	if (new_selection.empty()) {
 		if (drag_info.copy) {
@@ -3876,6 +3903,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			
   out:
 	if (!nocommit) {
+		for (set<boost::shared_ptr<Playlist> >::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
+			session->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));	
+		}
 		commit_reversible_command ();
 	}
 
