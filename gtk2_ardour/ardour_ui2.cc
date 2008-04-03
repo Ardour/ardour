@@ -345,7 +345,7 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
 	auditioning_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
 	midi_panic_button.set_name("TransportMidiPanic");
-	midi_panic_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::midi_panic_toggle));
+	midi_panic_button.signal_pressed().connect (mem_fun(*this, &ARDOUR_UI::midi_panic_toggle));
 
 	tooltips().set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	tooltips().set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
