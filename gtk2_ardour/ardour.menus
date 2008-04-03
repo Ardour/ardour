@@ -442,9 +442,9 @@
                    <menuitem action='AutoRebinding'/>
                </menu>
                <menu action='Monitoring'>
-                   <menuitem action='UseHardwareMonitoring'/>
-                   <menuitem action='UseSoftwareMonitoring'/>
                    <menuitem action='UseExternalMonitoring'/>
+                   <menuitem action='UseSoftwareMonitoring'/>
+                   <menuitem action='UseHardwareMonitoring'/>
     	           <separator/>
                	   <menuitem action='ToggleTapeMachineMode'/>
                </menu>

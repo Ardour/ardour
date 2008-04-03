@@ -533,15 +533,24 @@ ARDOUR_UI::install_actions ()
 
 	RadioAction::Group file_data_group;
 
+
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormatFloat"), X_("32-bit floating point"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatFloat));
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat16bit"), X_("16-bit integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt16));
 
 	RadioAction::Group monitoring_group;
 
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("Hardware monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Software monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("External monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
+	/* it would be nice not to even show this item, but that messes up the 
+	   menus which are not dynamically modified at runtime. so we make it
+	   sensitive only if it makes sense.
+	*/
+
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("JACK does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
+	if (engine->can_request_hardware_monitoring()) {
+		act->set_sensitive (false);
+	}
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Ardour does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("Audio Hardware does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
 
 	RadioAction::Group solo_group;
 

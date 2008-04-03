@@ -813,6 +813,25 @@ AudioEngine::halted (void *arg)
 	}
 }
 
+bool
+AudioEngine::can_request_hardware_monitoring () 
+{
+	const char ** ports;
+
+	if (!_jack) {
+		return 0;
+	}
+
+	if ((ports = jack_get_ports (_jack, NULL, JACK_DEFAULT_AUDIO_TYPE, JackPortCanMonitor)) == 0) {
+		return false;
+	}
+
+	free (ports);
+
+	return true;
+}
+
+
 uint32_t
 AudioEngine::n_physical_audio_outputs () const
 {
@@ -827,10 +846,9 @@ AudioEngine::n_physical_audio_outputs () const
 		return 0;
 	}
 
-	if (ports) {
-		for (i = 0; ports[i]; ++i);
-		free (ports);
-	}
+	for (i = 0; ports[i]; ++i);
+	free (ports);
+
 	return i;
 }
 

@@ -127,6 +127,8 @@ class AudioEngine : public sigc::trackable
 	
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
+	bool can_request_hardware_monitoring ();
+
 	uint32_t n_physical_audio_outputs () const;
 	uint32_t n_physical_audio_inputs () const;
 
