@@ -21,6 +21,7 @@
 #define __gtk_ardour_canvas_midi_event_h__
 
 #include "simplerect.h"
+#include <libgnomecanvasmm/text.h>
 #include <ardour/midi_model.h>
 
 class Editor;
@@ -48,12 +49,17 @@ public:
 			Item*                                 item,
 			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>());
 
-	virtual ~CanvasMidiEvent() {}
+	virtual ~CanvasMidiEvent() { if(_text) delete _text; }
 
 	bool on_event(GdkEvent* ev);
 
 	bool selected() const { return _selected; }
 	void selected(bool yn);
+
+	void move_event(double dx, double dy);
+	
+	void show_velocity();
+	void hide_velocity();
 
 	virtual void set_outline_color(uint32_t c) = 0;
 	virtual void set_fill_color(uint32_t c) = 0;
@@ -63,9 +69,6 @@ public:
 	virtual double x2() = 0;
 	virtual double y2() = 0;
 
-	const Item* item() const { return _item; }
-	Item*       item()       { return _item; }
-
 	const boost::shared_ptr<ARDOUR::Note> note() { return _note; }
 
 protected:
@@ -73,6 +76,7 @@ protected:
 
 	MidiRegionView&                       _region;
 	Item* const                           _item;
+	Text* 		                          _text;
 	State                                 _state;
 	const boost::shared_ptr<ARDOUR::Note> _note;
 	bool                                  _own_note;

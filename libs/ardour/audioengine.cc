@@ -527,7 +527,8 @@ AudioEngine::remove_session ()
 		session = 0;
 	}
 	
-	remove_all_ports ();
+	//FIXME: Preliminary bugfix for  http://tracker.ardour.org/view.php?id=1985
+	//remove_all_ports ();
 }
 
 void
@@ -555,6 +556,7 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input, 
 {
 	Port* newport = 0;
 
+	cerr << "trying to register port with name " << portname << endl;
 	try {
 		if (dtype == DataType::AUDIO) {
 			newport = new AudioPort (portname, (input ? Port::IsInput : Port::IsOutput), publish, frames_per_cycle());
@@ -564,10 +566,16 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input, 
 			throw unknown_type();
 		}
 
+		cerr << "successfully got port " << portname << " with address " << newport << endl;
+
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
+		cerr << "Address of ports list: " << ps << endl
+		     << "Ports set size before insert: " << ps->size() << endl;
 		ps->insert (ps->begin(), newport);
+		cerr << "Ports set size after insert: " << ps->size() << endl;
 		/* writer goes out of scope, forces update */
+
 
 		return newport;
 	}
@@ -608,22 +616,31 @@ AudioEngine::unregister_port (Port& port)
 {
 	/* caller must hold process lock */
 
+	cerr << "about to unregister Port xx  x" << &port << "\n";
+
 	if (!_running) { 
 		/* probably happening when the engine has been halted by JACK,
 		   in which case, there is nothing we can do here.
 		   */
+		cerr << "not running\n";
 		return 0;
 	}
 
 	{
+		cerr << "before getcopy\n";
 		
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		
+		cerr << "Ports set size: " << ps.get()->size() << endl;
+
 		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
+			cerr << "before delete" << endl;
 			if ((*i) == &port) {
+				cerr << "About to delete " << &port << endl;
 				delete *i;
 				ps->erase (i);
+				cerr << "After erasing ports size: " << ps->size();
 				break;
 			}
 		}
@@ -631,6 +648,7 @@ AudioEngine::unregister_port (Port& port)
 		/* writer goes out of scope, forces update */
 	}
 		
+	cerr << "before remove_connections\n";
 	remove_connections_for (port);
 
 	return 0;

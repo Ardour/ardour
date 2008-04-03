@@ -40,7 +40,7 @@ public:
 	const Note& operator=(const Note& copy);
 
 	inline bool operator==(const Note& other)
-	{ return time() == other.time() && note() == other.note(); }
+	{ return time() == other.time() && note() == other.note() && duration() == other.duration(); }
 
 	inline double  time()     const { return _on_event.time(); }
 	inline double  end_time() const { return _off_event.time(); }

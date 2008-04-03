@@ -58,10 +58,10 @@ public:
 	MidiModel(Session& s, size_t size=0);
 	
 	// This is crap.
-	void write_lock()        { _lock.writer_lock(); _automation_lock.lock(); }
-	void write_unlock()      { _lock.writer_unlock(); _automation_lock.unlock(); }
-	void read_lock()   const { _lock.reader_lock(); /*_automation_lock.lock();*/ }
-	void read_unlock() const { _lock.reader_unlock(); /*_automation_lock.unlock();*/ }
+	void write_lock();
+	void write_unlock();
+	void read_lock()   const;
+	void read_unlock() const;
 
 	void clear() { _notes.clear(); }
 

@@ -26,6 +26,8 @@
 #include <fcntl.h>
 #include <poll.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include <midi++/mmc.h>
 #include <midi++/port.h>
 #include <midi++/manager.h>
@@ -37,6 +39,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
 #include <ardour/audio_track.h>
+#include <ardour/midi_track.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/slave.h>
 #include <ardour/cycles.h>
@@ -51,6 +54,22 @@ using namespace MIDI;
 
 MachineControl::CommandSignature MMC_CommandSignature;
 MachineControl::ResponseSignature MMC_ResponseSignature;
+
+
+void
+Session::midi_panic()
+{
+	{
+		boost::shared_ptr<RouteList> r = routes.reader ();
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			MidiTrack *track = dynamic_cast<MidiTrack*>((*i).get());
+			if (track != 0) {
+				track->midi_panic();
+			}
+		}
+	}
+}
 
 int
 Session::use_config_midi_ports ()

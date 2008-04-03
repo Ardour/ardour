@@ -54,5 +54,14 @@ inline static uint32_t note_fill_color(uint8_t vel)
 	}
 }
 
+inline static void clamp_0_to_127(uint8_t &val)
+{
+	if( (127 < val) && (val < 192) ) {
+		val = 127;
+	} else if( (192 <= val) && (val < 255) ) {
+		val = 0;
+	} 
+}
+
 #endif /* __gtk_ardour_midi_util_h__ */
 

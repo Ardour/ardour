@@ -280,8 +280,8 @@ MidiRingBuffer::read_contents(size_t size, Byte* buf)
 inline size_t
 MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 {
-	//printf("MRB - write %#X %d %d with time %lf\n",
-	//		buf[0], buf[1], buf[2], time);
+	printf("MRB - write %#X %d %d with time %lf\n",
+			buf[0], buf[1], buf[2], time);
 
 	assert(size > 0);
 

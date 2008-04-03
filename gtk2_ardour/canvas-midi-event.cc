@@ -35,12 +35,41 @@ CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item,
 		const boost::shared_ptr<ARDOUR::Note> note)
 	: _region(region)
 	, _item(item)
+	, _text(0)
 	, _state(None)
 	, _note(note)
 	, _selected(false)
 {
+	_text = new Text(*(item->property_parent()));
 }
 
+void 
+CanvasMidiEvent::move_event(double dx, double dy)
+{
+	_item->move(dx, dy);
+	_text->move(dx, dy);
+}
+
+void
+CanvasMidiEvent::show_velocity(void)
+{
+	_text->property_x() = (x1() + x2()) /2;
+	_text->property_y() = (y1() + y2()) /2;
+	ostringstream velo(ios::ate);
+	velo << int(_note->velocity());
+	_text->property_text() = velo.str();
+	_text->property_justification() = Gtk::JUSTIFY_CENTER;
+	_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
+	_text->show();
+	_text->lower_to_bottom();
+	_text->raise(2);
+}
+
+void
+CanvasMidiEvent::hide_velocity(void)
+{
+	_text->hide();
+}
 
 void
 CanvasMidiEvent::selected(bool yn)
@@ -49,11 +78,13 @@ CanvasMidiEvent::selected(bool yn)
 		return;
 	} else if (yn) {
 		set_fill_color(UINT_INTERPOLATE(note_fill_color(_note->velocity()),
-					ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(), 0.85));
+					ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(), 0.1));
 		set_outline_color(ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get());
+		show_velocity();
 	} else {
 		set_fill_color(note_fill_color(_note->velocity()));
 		set_outline_color(note_outline_color(_note->velocity()));
+		hide_velocity();
 	}
 
 	_selected = yn;
@@ -70,11 +101,38 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	double event_x, event_y, dx, dy;
 	nframes_t event_frame;
 	bool select_mod;
+	uint8_t d_velocity = 10;
 
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
 
 	switch (ev->type) {
+	case GDK_SCROLL:
+		if (Keyboard::modifier_state_equals (ev->scroll.state, Keyboard::Level4Modifier)) {
+			d_velocity = 1;
+		}
+
+		if(ev->scroll.direction == GDK_SCROLL_UP) {
+			_region.note_selected(this, true);
+			if (_region.mouse_state() == MidiRegionView::SelectTouchDragging) {
+				// TODO: absolute velocity
+			} else {
+				_region.change_velocity(d_velocity, true);
+			}
+			return true;
+		} else if(ev->scroll.direction == GDK_SCROLL_DOWN) {
+			
+			_region.note_selected(this, true);
+			if (_region.mouse_state() == MidiRegionView::SelectTouchDragging) {
+				// TODO: absolute velocity
+			} else {
+				_region.change_velocity(-d_velocity, true);
+			}
+			return true;
+		} else {
+			return false;
+		}
+		
 	case GDK_KEY_PRESS:
 		if (_note && ev->key.keyval == GDK_Delete) {
 			selected(true);
@@ -92,11 +150,15 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered(this);
 		_item->grab_focus();
+		show_velocity();
 		Keyboard::magic_widget_grab_focus();
 		break;
 
 	case GDK_LEAVE_NOTIFY:
 		Keyboard::magic_widget_drop_focus();
+		if(! selected()) {
+			hide_velocity();
+		}
 		_region.get_canvas_group()->grab_focus();
 		break;
 

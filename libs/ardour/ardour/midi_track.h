@@ -70,6 +70,7 @@ public:
 
 	int set_state(const XMLNode& node);
 
+	void midi_panic(void);
 	bool write_immediate_event(size_t size, const Byte* buf);
 	
 	struct MidiControl : public AutomationControl {

@@ -697,6 +697,19 @@ MidiTrack::set_note_mode (NoteMode m)
 	midi_diskstream()->set_note_mode(m);
 }
 
+void
+MidiTrack::midi_panic() 
+{
+	for(uint8_t channel = 0; channel <= 0xF; channel++) {
+		Byte ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+		write_immediate_event(3,  ev);
+		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
+		write_immediate_event(3,  ev);
+		ev[1] = MIDI_CTL_RESET_CONTROLLERS;
+		write_immediate_event(3,  ev);
+	}
+}
+
 /** \return true on success, false on failure (no buffer space left)
  */
 bool

@@ -423,8 +423,22 @@ MidiRegionView::redisplay_model()
 
 		_model->read_lock();
 
-		for (size_t i=0; i < _model->n_notes(); ++i)
+		/*
+		MidiModel::Notes notes = _model->notes();
+		cerr << endl << "Model contains " << notes.size() << " Notes:" << endl;
+		for(MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
+			Note note = *(*i).get();
+			cerr << "MODEL: Note time: " << note.time() << " duration: " << note.duration() 
+			     << "   end-time: " << note.end_time() 
+			     << "   velocity: " << int(note.velocity()) 
+			     //<< " Note-on: " << note.on_event(). 
+			     //<< " Note-off: " << note.off_event() 
+			     << endl;
+		}*/
+		
+		for (size_t i=0; i < _model->n_notes(); ++i) {
 			add_note(_model->note_at(i));
+		}
 
 		end_write();
 
@@ -538,10 +552,14 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 						note->show();
 					}
 
+					note->hide_velocity();
 					note->property_y1() = y1;
 					note->property_y2() = y2;
+					if(note->selected()) {
+						note->show_velocity();
 				}
 			}
+		}
 		}
 
 		_model->read_unlock();
@@ -609,6 +627,7 @@ MidiRegionView::end_write()
 {
 	delete[] _active_notes;
 	_active_notes = NULL;
+	_marked_for_selection.clear();
 }
 
 
@@ -657,6 +676,8 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 
+	CanvasMidiEvent *event = 0;
+	
 	if (midi_view()->note_mode() == Sustained) {
 
 		//cerr << "MRV::add_note sustained " << note->note() << " @ " << note->time()
@@ -687,6 +708,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 
 		ev_rect->show();
 		_events.push_back(ev_rect);
+		event = ev_rect;
 
 		MidiGhostRegion* gr;
 
@@ -711,8 +733,18 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		ev_diamond->property_fill_color_rgba() = note_fill_color(note->velocity());
 		ev_diamond->property_outline_color_rgba() = note_outline_color(note->velocity());
 		_events.push_back(ev_diamond);
-
+		event = ev_diamond;
+	} else {
+		event = 0;
 	}
+
+	if(event) {
+		Note *note = event->note().get();
+		
+		if(_marked_for_selection.find(note) != _marked_for_selection.end()) {
+			note_selected(event, true);
+	}
+}
 }
 
 void
@@ -813,7 +845,7 @@ void
 MidiRegionView::move_selection(double dx, double dy)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
-		(*i)->item()->move(dx, dy);
+		(*i)->move_event(dx, dy);
 }
 
 
@@ -851,7 +883,6 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 		// Make sure the note pitch does not exceed the MIDI standard range
 		if (dnote <= 127 && (highest_note_in_selection + dnote > 127)) {
 			highest_note_difference = highest_note_in_selection - 127;
-			cerr << "Highest note difference: " << (int) highest_note_difference;
 		}
 		
 		start_delta_command();
@@ -868,9 +899,15 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 				copy->set_time(0);
 			}
 
-			uint8_t new_pitch = (*i)->note()->note() + dnote - highest_note_difference;
-			if(new_pitch > 127) {
-				new_pitch = 127;
+			uint8_t original_pitch = (*i)->note()->note();
+			uint8_t new_pitch =  original_pitch + dnote - highest_note_difference;
+			
+			// keep notes in standard midi range
+			clamp_0_to_127(new_pitch);
+			
+			//notes which are dragged beyond the standard midi range snap back to their original place
+			if((original_pitch != 0 && new_pitch == 0) || (original_pitch != 127 && new_pitch == 127)) {
+				new_pitch = original_pitch;
 			}
 
 			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
@@ -880,19 +917,16 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			
 			command_add_note(copy);
 
-			_selection.erase(i);
+			_marked_for_selection.insert(copy.get());
 			i = next;
 		}
 				
 		apply_command();
 		
-		//cerr << "new lowest note (selection): "  << int(lowest_note_in_selection) << " new highest note(selection): " << int(highest_note_in_selection) << endl;
-
 		// care about notes being moved beyond the upper/lower bounds on the canvas
 		if(lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
 		   highest_note_in_selection > midi_stream_view()->highest_note()
 		) {
-			//cerr << "resetting note range" << endl;
 			midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
 	}
 }
@@ -1031,12 +1065,15 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 			command_remove_note(canvas_note);
 			copy->on_event().time() = current_frame;
 			command_add_note(copy);
+			_marked_for_selection.insert(copy.get());
 		}
 		// resize end of note
 		if (note_end == CanvasNote::NOTE_OFF && current_frame > copy->time()) {
 			command_remove_note(canvas_note);
+			command_remove_note(canvas_note);
 			copy->off_event().time() = current_frame;
 			command_add_note(copy);
+			_marked_for_selection.insert(copy.get());
 		}
 
 		delete resize_rect;
@@ -1045,8 +1082,44 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 
 	_resize_data.clear();
 	apply_command();
-	clear_selection();
 }
+
+
+void
+MidiRegionView::change_velocity(uint8_t velocity, bool relative)
+{
+	start_delta_command();
+	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
+		Selection::iterator next = i;
+		++next;
+
+		CanvasMidiEvent *event = *i;
+		const boost::shared_ptr<Note> copy(new Note(*(event->note().get())));
+
+		if(relative) {
+			uint8_t new_velocity = copy->velocity() + velocity;
+			clamp_0_to_127(new_velocity);
+				
+			copy->set_velocity(new_velocity);
+		} else { // absolute
+			copy->set_velocity(velocity);			
+		}
+		
+		command_remove_note(event);
+		command_add_note(copy);
+		
+		_marked_for_selection.insert(copy.get());
+		i = next;
+	}
+	
+	// dont keep notes selected if tweaking a single note
+	if(_marked_for_selection.size() == 1) {
+		_marked_for_selection.clear();
+	}
+	
+	apply_command();
+}
+
 
 void
 MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)

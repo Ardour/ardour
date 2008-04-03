@@ -117,7 +117,7 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	for (size_t i=0; i < msrc.size(); ++i) {
 		const MIDI::Event& ev = msrc[i];
 		if (ev.time() >= offset && ev.time() < offset+nframes) {
-			//cout << "MidiBuffer::read_from got event, " << ev.time() << endl;
+			cout << "MidiBuffer::read_from got event, " << int(ev.type()) << " time: " << ev.time() << " buffer size: " << _size << endl;
 			push_back(ev);
 		} else {
 			cerr << "MidiBuffer event out of range, " << ev.time() << endl;
@@ -148,7 +148,7 @@ MidiBuffer::push_back(const MIDI::Event& ev)
 	_events[_size].set_buffer(write_loc, false);
 	++_size;
 
-	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
+	cerr << "MidiBuffer: pushed, size = " << _size << endl;
 
 	_silent = false;
 
@@ -177,7 +177,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 	_events[_size].set_buffer(write_loc, false);
 	++_size;
 
-	//cerr << "MidiBuffer: pushed, size = " << _size << endl;
+	cerr << "MidiBuffer: pushed, size = " << _size << endl;
 
 	_silent = false;
 
@@ -207,7 +207,7 @@ MidiBuffer::reserve(double time, size_t size)
 	_events[_size].set_buffer(write_loc, false);
 	++_size;
 
-	//cerr << "MidiBuffer: reserved, size = " << _size << endl;
+	cerr << "MidiBuffer: reserved, size = " << _size << endl;
 
 	_silent = false;
 

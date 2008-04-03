@@ -479,6 +479,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::ToggleButton auditioning_alert_button;
 	Gtk::ToggleButton solo_alert_button;
 
+	Gtk::ToggleButton midi_panic_button;
+
 	Gtk::VBox alert_box;
 
 	void solo_blink (bool);
@@ -490,6 +492,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void solo_alert_toggle ();
 	void audition_alert_toggle ();
+	void midi_panic_toggle ();
 
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();

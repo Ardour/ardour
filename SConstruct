@@ -534,7 +534,7 @@ if env['FFT_ANALYSIS']:
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGExists' : CheckPKGExists })
 	
-	if conf.CheckPKGExists ('\"slv2 >= 0.6.0\"'):
+	if conf.CheckPKGExists ('slv2'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
                 env.Append (CCFLAGS="-DHAVE_LV2")

@@ -754,6 +754,7 @@ class Session : public PBD::StatefulDestructible
 
 	/* MIDI */
 
+	void midi_panic(void);
 	int set_mtc_port (string port_tag);
 	int set_mmc_port (string port_tag);
 	int set_midi_port (string port_tag);

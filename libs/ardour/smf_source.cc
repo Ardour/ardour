@@ -192,7 +192,7 @@ SMFSource::flush_header ()
 
 	_fd = freopen(path().c_str(), "r+", _fd);
 	assert(_fd);
-	fseek(_fd, 0, 0);
+	fseek(_fd, 0, SEEK_SET);
 	write_chunk("MThd", 6, data);
 	write_chunk_header("MTrk", _track_size); 
 
@@ -204,9 +204,8 @@ SMFSource::flush_header ()
 int
 SMFSource::flush_footer()
 {
-	seek_to_end();
+	fseek(_fd, 0, SEEK_END);
 	write_footer();
-	seek_to_end();
 
 	return 0;
 }
@@ -321,11 +320,11 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 	if (event_size > 1)
 		fread((*buf) + 1, 1, *size - 1, _fd);
 
-	/*printf("%s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
+	printf("%s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
 	for (size_t i=0; i < *size; ++i) {
 		printf("%X ", (*buf)[i]);
 	}
-	printf("\n");*/
+	printf("\n");
 	
 	return (int)*size;
 }
@@ -334,7 +333,7 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 nframes_t
 SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
 {
-	//cerr << "SMF " << name() << " read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
+	cerr << "SMF read_unlocked " << name() << " read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
 	// 64 bits ought to be enough for anybody
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
@@ -349,7 +348,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
 	// FIXME: don't seek to start and search every read (brutal!)
-	fseek(_fd, _header_size, 0);
+	fseek(_fd, _header_size, SEEK_SET);
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(

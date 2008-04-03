@@ -40,6 +40,7 @@
 #include "control_point.h"
 #include "canvas_impl.h"
 #include "simplerect.h"
+#include "canvas-midi-event.h"
 
 #include "i18n.h"
 
@@ -48,6 +49,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace ArdourCanvas;
 
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
@@ -56,6 +58,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	double wx, wy;
 	nframes_t xdelta;
 	int direction = ev->direction;
+	CanvasMidiEvent *midi_event = dynamic_cast<CanvasMidiEvent *>(track_canvas->get_item_at(ev->x, ev->y));
 
   retry:
 	switch (direction) {
@@ -94,6 +97,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (true);
 			return true;
 		} else {
+			if(midi_event) {
+				return midi_event->on_event(reinterpret_cast<GdkEvent *>(ev));
+			}
 			scroll_tracks_up_line ();
 			return true;
 		}
@@ -129,6 +135,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (false);
 			return true;
 		} else {
+			if(midi_event) {
+				return midi_event->on_event(reinterpret_cast<GdkEvent *>(ev));
+			}
 			scroll_tracks_down_line ();
 			return true;
 		}

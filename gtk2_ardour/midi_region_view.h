@@ -103,6 +103,7 @@ class MidiRegionView : public RegionView
 
 	void command_remove_note(ArdourCanvas::CanvasMidiEvent* ev) {
 		if (_delta_command && ev->note()) {
+			_selection.erase(ev);
 			_delta_command->remove(ev->note());
 			ev->selected(true);
 		}
@@ -161,6 +162,14 @@ class MidiRegionView : public RegionView
 	 * @param relative true if relative resizing is taking place, false if absolute resizing
 	 */
 	void commit_resizing(ArdourCanvas::CanvasNote::NoteEnd note_end, double event_x, bool relative);
+
+	/**
+	 * This function is called while the user adjusts the velocity on a selection of notes
+	 * @param velocity the relative or absolute velocity, dependin on the value of relative
+	 * @param relative true if the given velocity represents a delta to be applied to all notes, false
+	 *        if the absolute value of the note shoud be set
+	 */
+	void change_velocity(uint8_t velocity, bool relative=false);
 
 	enum MouseState { None, Pressed, SelectTouchDragging, SelectRectDragging, AddDragging, EraseTouchDragging };
 	MouseState mouse_state() const { return _mouse_state; }
@@ -221,8 +230,16 @@ class MidiRegionView : public RegionView
 	MouseState _mouse_state;
 	int _pressed_button;
 
+	/// currently selected CanvasMidiEvents
 	typedef std::set<ArdourCanvas::CanvasMidiEvent*> Selection;
 	Selection _selection;
+
+	/**
+	 * this enables vanilla notes to be marked for selection
+	 * they are added to _selection when redisplay_model is called
+	 * this is necessary for selecting notes during/after model manipulations 
+	 */
+	std::set<ARDOUR::Note *> _marked_for_selection;
 
 	std::vector<NoteResizeData *> _resize_data;
 };

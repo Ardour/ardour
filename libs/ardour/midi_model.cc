@@ -36,6 +36,34 @@ using namespace std;
 using namespace ARDOUR;
 
 
+void 
+MidiModel::write_lock()        
+{ 
+	_lock.writer_lock(); 
+	_automation_lock.lock(); 
+}
+
+void 
+MidiModel::write_unlock()      
+{ 
+	_lock.writer_unlock(); 
+	_automation_lock.unlock(); 
+}
+
+void 
+MidiModel::read_lock()   const 
+{ 
+	_lock.reader_lock(); 
+	/*_automation_lock.lock();*/ 
+}
+
+void 
+MidiModel::read_unlock() const 
+{ 
+	_lock.reader_unlock(); 
+	/*_automation_lock.unlock();*/ 
+}
+
 // Read iterator (const_iterator)
 
 MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
@@ -51,7 +79,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	model.read_lock();
 	
 	_note_iter = model.notes().end();
-
+	// find first note which begins after t
 	for (MidiModel::Notes::const_iterator i = model.notes().begin(); i != model.notes().end(); ++i) {
 		if ((*i)->time() >= t) {
 			_note_iter = i;
@@ -95,6 +123,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	if (_note_iter != model.notes().end()) {
 		_event = MIDI::Event((*_note_iter)->on_event(), false);
 		_active_notes.push(*_note_iter);
+		cerr << " new const iterator: size active notes: " << _active_notes.size() << " is empty: " << _active_notes.empty() << endl;
 		++_note_iter;
 	}
 
@@ -106,18 +135,21 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	if (_event.size() == 0) {
 		//cerr << "Created MIDI iterator @ " << t << " is at end." << endl;
 		_is_end = true;
+		if(_locked) {
 		_model->read_unlock();
 		_locked = false;
-	} /*else {
+		}
+	} else {
 		printf("MIDI Iterator = %X @ %lf\n", _event.type(), _event.time());
-	}*/
+}
 }
 
 
 MidiModel::const_iterator::~const_iterator()
 {
-	if (_locked)
+	if (_locked) {
 		_model->read_unlock();
+}
 }
 		
 
@@ -168,6 +200,7 @@ MidiModel::const_iterator::operator++()
 		t = (*_note_iter)->time();
 	}
 	
+	cerr << " operator++ before test: size active notes: " << _active_notes.size() << " is empty: " << _active_notes.empty() << endl;
 	// Use the next earliest note off iff it's earlier than the note on
 	if (_model->note_mode() == Sustained && (! _active_notes.empty())) {
 		if (type == NIL || _active_notes.top()->end_time() <= (*_note_iter)->time()) {
@@ -182,22 +215,20 @@ MidiModel::const_iterator::operator++()
 			type = CC;
 
 	if (type == NOTE_ON) {
-		//cerr << "********** MIDI Iterator = note on" << endl;
+		cerr << "********** MIDI Iterator = note on" << endl;
 		_event = MIDI::Event((*_note_iter)->on_event(), false);
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
-		//cerr << "********** MIDI Iterator = note off" << endl;
+		cerr << "********** MIDI Iterator = note off" << endl;
 		_event = MIDI::Event(_active_notes.top()->off_event(), false);
 		_active_notes.pop();
 	} else if (type == CC) {
-		//cerr << "********** MIDI Iterator = CC" << endl;
+		cerr << "********** MIDI Iterator = CC" << endl;
 		_model->control_to_midi_event(_event, *_control_iter);
 	} else {
-		//cerr << "********** MIDI Iterator = END" << endl;
+		cerr << "********** MIDI Iterator = END" << endl;
 		_is_end = true;
-		_model->read_unlock();
-		_locked = false;
 	}
 
 	assert(_is_end || _event.size() > 0);
@@ -226,6 +257,7 @@ MidiModel::const_iterator::operator=(const const_iterator& other)
 
 	_model = other._model;
 	_event = other._event;
+	_active_notes = other._active_notes;
 	_is_end = other._is_end;
 	_locked = other._locked;
 	_note_iter = other._note_iter;
@@ -234,9 +266,6 @@ MidiModel::const_iterator::operator=(const const_iterator& other)
 	
 	assert( ! _event.owns_buffer());
 	
-	if (_locked)
-		_model->read_lock();
-
 	return *this;
 }
 
@@ -265,16 +294,16 @@ MidiModel::MidiModel(Session& s, size_t size)
 size_t
 MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const
 {
-	//cerr << this << " MM::read @ " << start << " * " << nframes << " + " << stamp_offset << endl;
-	//cerr << this << " MM # notes: " << n_notes() << endl;
+	cerr << this << " MM::read @ " << start << " * " << nframes << " + " << stamp_offset << endl;
+	cerr << this << " MM # notes: " << n_notes() << endl;
 
 	size_t read_events = 0;
 
 	if (start != _next_read) {
 		_read_iter = const_iterator(*this, (double)start);
-		//cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
+		cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
 	} else {
-		//cerr << "Using cached iterator at " << _next_read << endl;
+		cerr << "Using cached iterator at " << _next_read << endl;
 	}
 
 	_next_read = start + nframes;
@@ -282,7 +311,11 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
 		assert(_read_iter->size() > 0);
 		dst.write(_read_iter->time() + stamp_offset, _read_iter->size(), _read_iter->buffer());
-		//cerr << this << " MM::read event @ " << _read_iter->time() << endl;
+		cerr << this << " MM::read event @ " << _read_iter->time()  
+		     << " type: " << hex << int(_read_iter->type()) << dec 
+		     << " note: " << int(_read_iter->note()) 
+		     << " velocity: " << int(_read_iter->velocity()) 
+		     << endl;
 		++_read_iter;
 		++read_events;
 	}
