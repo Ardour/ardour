@@ -298,7 +298,7 @@ AUPlugin::default_value (uint32_t port)
 nframes_t
 AUPlugin::latency () const
 {
-	return unit->Latency ();
+	return unit->Latency() * _session.frame_rate();
 }
 
 void
