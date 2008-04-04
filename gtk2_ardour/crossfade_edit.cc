@@ -1116,42 +1116,43 @@ CrossfadeEditor::peaks_ready (boost::shared_ptr<AudioRegion> r, WhichFade which)
 }
 
 void
-CrossfadeEditor::audition_both ()
+CrossfadeEditor::audition (Audition which)
 {
 	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
 	nframes_t preroll;
 	nframes_t postroll;
-	nframes_t length;
 	nframes_t left_start_offset;
 	nframes_t right_length;
 	nframes_t left_length;
 
-	if (preroll_button.get_active()) {
+	if (which != Right && preroll_button.get_active()) {
 		preroll = session.frame_rate() * 2;  //2 second hardcoded preroll for now
 	} else {
 		preroll = 0;
 	}
 
-	if (postroll_button.get_active()) {
+	if (which != Left && postroll_button.get_active()) {
 		postroll = session.frame_rate() * 2;  //2 second hardcoded postroll for now
 	} else {
 		postroll = 0;
 	}
 
- 	if ((left_start_offset = xfade->out()->length() - xfade->length()) >= preroll) {
-  		left_start_offset -= preroll;
-  	} 
+	// Is there enough data for the whole preroll?
+	left_length = xfade->length();
+	if ((left_start_offset = xfade->out()->length() - xfade->length()) > preroll) {
+		left_start_offset -= preroll;
+	} else {
+		preroll = left_start_offset;
+		left_start_offset = 0;
+	}
+	left_length += preroll;
 
-	length = 0;
-
- 	if ((left_length = xfade->length()) < xfade->out()->length() - left_start_offset) {
-  		length += postroll;
-  	}
-
+	// Is there enough data for the whole postroll?
 	right_length = xfade->length();
-
-	if (xfade->in()->length() - right_length < postroll) {
+	if ((xfade->in()->length() - right_length) > postroll) {
 		right_length += postroll;
+	} else {
+		right_length = xfade->in()->length();
 	}
 
 	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), left_start_offset, left_length, "xfade out", 
@@ -1159,14 +1160,31 @@ CrossfadeEditor::audition_both ()
 	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, right_length, "xfade in", 
 													       0, Region::DefaultFlags, false)));
 	
+	//apply a 20ms declicking fade at the start and end of auditioning
+	left->set_fade_in_active(true);
+	left->set_fade_in_length(session.frame_rate() / 50);
+	right->set_fade_out_active(true);
+	right->set_fade_out_length(session.frame_rate() / 50);
+
 	pl.add_region (left, 0);
-	pl.add_region (right, 1+preroll);
+	pl.add_region (right, 1 + preroll);
+	
+	if (which == Left) {
+		right->set_scale_amplitude (0.0);
+	} else if (which == Right) {
+		left->set_scale_amplitude (0.0);
+	}
 
 	/* there is only one ... */
-
 	pl.foreach_crossfade (this, &CrossfadeEditor::setup);
 
 	session.audition_playlist ();
+}
+
+void
+CrossfadeEditor::audition_both ()
+{
+	audition (Both);
 }
 
 void
@@ -1181,25 +1199,7 @@ CrossfadeEditor::audition_left_dry ()
 void
 CrossfadeEditor::audition_left ()
 {
-	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
-
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade left", 
-													      0, Region::DefaultFlags, false)));
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade in", 
-													       0, Region::DefaultFlags, false)));
-
-	pl.add_region (left, 0);
-	pl.add_region (right, 1);
-
-	right->set_muted (true);
-
-	/* there is only one ... */
-
-	pl.foreach_crossfade (this, &CrossfadeEditor::setup);
-
-	session.audition_playlist ();
-
-	/* memory leak for regions */
+	audition (Left);
 }
 
 void
@@ -1213,23 +1213,7 @@ CrossfadeEditor::audition_right_dry ()
 void
 CrossfadeEditor::audition_right ()
 {
-	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
-
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade out", 
-													      0, Region::DefaultFlags, false)));
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade out", 
-													       0, Region::DefaultFlags, false)));
-
-	pl.add_region (left, 0);
-	pl.add_region (right, 1);
-	
-	left->set_muted (true);
-
-	/* there is only one ... */
-
-	pl.foreach_crossfade (this, &CrossfadeEditor::setup);
-
-	session.audition_playlist ();
+	audition (Right);
 }
 	
 void
