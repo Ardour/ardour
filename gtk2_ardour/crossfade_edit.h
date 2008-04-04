@@ -187,13 +187,20 @@ class CrossfadeEditor : public ArdourDialog
 	void setup (boost::shared_ptr<ARDOUR::Crossfade>);
 	void cancel_audition ();
 	void audition_state_changed (bool);
-
+	
+	enum Audition {
+		Both,
+		Left,
+		Right
+	};
+	
 	void audition_toggled ();
 	void audition_right_toggled ();
 	void audition_right_dry_toggled ();
 	void audition_left_toggled ();
 	void audition_left_dry_toggled ();
 
+	void audition (Audition);
 	void audition_both ();
 	void audition_left_dry ();
 	void audition_left ();
