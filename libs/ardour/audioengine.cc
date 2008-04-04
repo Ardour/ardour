@@ -591,6 +591,7 @@ AudioEngine::get_port (const std::string& full_name)
 	boost::shared_ptr<Ports> p = ports.reader();
 	
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		//cerr << "comparing port name '" << (*i)->name() << "' with '" << full_name << "'" << endl;
 		if ((*i)->name() == full_name) {
 			return *i;
 		}
@@ -671,6 +672,8 @@ AudioEngine::connect (const string& source, const string& destination)
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 		
+	//cerr << "Trying to connect source: " << s << " with destination " << d << endl;
+	
 	Port* src = get_port (s);
 	Port* dst = get_port (d);
 
@@ -741,6 +744,8 @@ AudioEngine::disconnect (const string& source, const string& destination)
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
+	//cerr << "trying to disconnect port '" << s << "' from port '" << d << endl;
+	
 	Port* src = get_port (s);
 	Port* dst = get_port (d);
 

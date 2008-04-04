@@ -140,9 +140,9 @@ JackPort::disconnect (const std::string& other)
 	int ret;
 
 	if (_flags & IsInput) {
-		ret = jack_disconnect (engine->jack(), _name.c_str(), other.c_str());
-	} else {
 		ret = jack_disconnect (engine->jack(), other.c_str(), _name.c_str());
+	} else {
+		ret = jack_disconnect (engine->jack(), _name.c_str(), other.c_str());
 	}
 
 	set<string>::iterator i = _named_connections.find (other);

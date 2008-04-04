@@ -37,12 +37,13 @@ MidiPort::MidiPort (const std::string& name, Flags flags, bool external, nframes
 		/* external ports use the same buffer for the jack port (_ext_port)
 		 * and internal ports (this) */
 		_ext_port = new JackMidiPort (name, flags, _buffer);
+		Port::set_name (_ext_port->name());
 	} else {
 		/* internal ports just have a single buffer, no jack port */
 		_ext_port = 0;
+		set_name (name);
 	}
 
-	set_name (name);
 	reset ();
 }
 
