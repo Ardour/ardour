@@ -196,6 +196,7 @@ LevelMeter::setup_meters (int len, int initial_width)
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
+			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &LevelMeter::meter_button_release), n));
 		}
 
 		pack_end (*meters[n].meter, false, false);
@@ -204,13 +205,24 @@ LevelMeter::setup_meters (int len, int initial_width)
 	}
 	show();
 	color_changed = false;
-}	
+}
+
+gint
+LevelMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
+{
+	if (ev->button == 1) {
+		clear_meters();
+	}
+	return true;
+}
+	
 
 void LevelMeter::clear_meters ()
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
 		(*i).meter->clear();
 	}
+	max_peak = minus_infinity();
 }
 
 void LevelMeter::hide_meters ()

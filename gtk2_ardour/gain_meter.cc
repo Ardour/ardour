@@ -387,6 +387,7 @@ GainMeter::reset_peak_display ()
 		r->reset_max_peak_meters();
 	}
 
+	level_meter->clear_meters();
 	max_peak = -INFINITY;
 	peak_display.set_label (_("-Inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
@@ -401,25 +402,6 @@ GainMeter::reset_group_peak_display (RouteGroup* group)
 			reset_peak_display ();
 		}
 	}
-}
-
-gint
-GainMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
-{
-	switch (ev->button) {
-	case 1:
-		level_meter->clear_meters();
-		max_peak = minus_infinity();
-		peak_display.set_label (_("-inf"));
-		peak_display.set_name ("MixerStripPeakDisplay");
-		break;
-
-	case 3:
-		// popup_meter_menu (ev);
-		break;
-	};
-
-	return TRUE;
 }
 
 void

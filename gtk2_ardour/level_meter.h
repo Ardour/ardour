@@ -95,6 +95,7 @@ class LevelMeter : public Gtk::HBox
 	float       max_peak;
 	
 	void hide_all_meters ();
+	gint meter_button_release (GdkEventButton*, uint32_t);
 
 	void parameter_changed (const char*);
 
