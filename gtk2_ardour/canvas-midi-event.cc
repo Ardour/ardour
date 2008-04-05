@@ -102,6 +102,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	nframes_t event_frame;
 	bool select_mod;
 	uint8_t d_velocity = 10;
+	nframes_t midi_region_start = _region.midi_region()->start();
 
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
@@ -198,9 +199,7 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			}
 
 			// Snap
-			event_frame = _region.midi_view()->editor.pixel_to_frame(event_x);
-			_region.midi_view()->editor.snap_to(event_frame);
-			event_x = _region.midi_view()->editor.frame_to_pixel(event_frame);
+			event_x = _region.snap_to_pixel(event_x); 
 
 			dx = event_x - last_x;
 			dy = event_y - last_y;

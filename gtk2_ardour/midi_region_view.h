@@ -179,7 +179,23 @@ class MidiRegionView : public RegionView
 		ArdourCanvas::SimpleRect  *resize_rect;
 		double                     current_x;
 	};
+	
+	/**
+	 * This function provides the snap function for pixel units (double)
+	 * instead of nframes_t
+	 * @param x a pixel coordinate relative to region start
+	 * @return the snapped pixel coordinate relative to region start
+	 */
+	double snap_to_pixel(double x);
 
+	/**
+	 * This function provides the snap function for pixel units (double)
+	 * instead of nframes_t
+	 * @param x a pixel coordinate relative to region start
+	 * @return the snapped nframes_t coordinate relative to region start
+	 */
+	nframes_t snap_to_frame(double x);
+	
   protected:
 
     /**
@@ -212,12 +228,6 @@ class MidiRegionView : public RegionView
 	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
 	void update_drag_selection(double last_x, double x, double last_y, double y);
-
-	/**
-	 * This function provides the snap function for pixel units (double)
-	 * instead of nframes_t
-	 */
-	double snap_to(double x);
 
 	double _default_note_length;
 

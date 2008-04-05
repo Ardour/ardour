@@ -200,8 +200,11 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
 
-		event_frame = trackview.editor.pixel_to_frame(event_x);
+		// convert event_x to global frame
+		event_frame = trackview.editor.pixel_to_frame(event_x) + _region->position();
 		trackview.editor.snap_to(event_frame);
+		// convert event_frame back to local coordinates relative to position
+		event_frame -= _region->position();
 
 		switch (_mouse_state) {
 		case Pressed: // Drag start
@@ -311,6 +314,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				clear_selection();
 				break;
 			case MidiEditPencil:
+				event_frame += _region->start();
 				trackview.editor.snap_to(event_frame, -1);
 				event_x = trackview.editor.frame_to_pixel(event_frame);
 				create_note_at(event_x, event_y, _default_note_length);
@@ -327,9 +331,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		case AddDragging: // Add drag done
 			_mouse_state = None;
 			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
-				create_note_at(drag_rect->property_x1(), drag_rect->property_y1(),
-						trackview.editor.pixel_to_frame(
-						drag_rect->property_x2() - drag_rect->property_x1()));
+				const double x      = 
+					drag_rect->property_x1() + trackview.editor.frame_to_pixel(_region->start());
+				const double length = 
+					trackview.editor.pixel_to_frame(drag_rect->property_x2() - drag_rect->property_x1());
+					
+				create_note_at(x, drag_rect->property_y1(), length);
 			}
 
 			delete drag_rect;
@@ -359,7 +366,7 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 	assert(note >= 0.0);
 	assert(note <= 127.0);
 
-	const nframes_t stamp = trackview.editor.pixel_to_frame (x);
+	nframes_t stamp = trackview.editor.pixel_to_frame (x);
 	assert(stamp >= 0);
 	//assert(stamp <= _region->length());
 
@@ -932,15 +939,23 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 }
 }
 
-
-double
-MidiRegionView::snap_to(double x)
+nframes_t
+MidiRegionView::snap_to_frame(double x)
 {
 	PublicEditor &editor = trackview.editor;
-
-	nframes_t frame = editor.pixel_to_frame(x);
+	// x is region relative
+	// convert x to global frame
+	nframes_t frame = editor.pixel_to_frame(x) + _region->position();
 	editor.snap_to(frame);
-	return (double) editor.frame_to_pixel(frame);
+	// convert event_frame back to local coordinates relative to position
+	frame -= _region->position();
+	return frame;
+}
+
+double
+MidiRegionView::snap_to_pixel(double x)
+{
+	return (double) trackview.editor.frame_to_pixel(snap_to_frame(x));
 }
 
 double
@@ -1023,14 +1038,10 @@ MidiRegionView::update_resizing(CanvasNote::NoteEnd note_end, double x, bool rel
 		double current_x = (*i)->current_x;
 
 		if(note_end == CanvasNote::NOTE_ON) {
-			// because snapping works on world coordinates we have to transform current_x
-			// to world coordinates before snapping and transform it back afterwards
-			resize_rect->property_x1() = snap_to(region_start + current_x) - region_start;
+			resize_rect->property_x1() = snap_to_pixel(current_x);
 			resize_rect->property_x2() = canvas_note->x2();
 		} else {
-			// because snapping works on world coordinates we have to transform current_x
-			// to world coordinates before snapping and transform it back afterwards
-			resize_rect->property_x2() = snap_to(region_start + current_x) - region_start;
+			resize_rect->property_x2() = snap_to_pixel(current_x);
 			resize_rect->property_x1() = canvas_note->x1();
 		}
 	}
@@ -1045,19 +1056,19 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 		CanvasNote *canvas_note = (*i)->canvas_note;
 		SimpleRect *resize_rect = (*i)->resize_rect;
 		double      current_x   = (*i)->current_x;
-		const double region_start = get_position_pixels();
+		const double position = get_position_pixels();
 
 		if(!relative) {
 			// event_x is in track relative, transform it to region relative
-			current_x = event_x - region_start;
+			current_x = event_x - position;
 		}
 
 		// because snapping works on world coordinates we have to transform current_x
 		// to world coordinates before snapping and transform it back afterwards
-		nframes_t current_frame = trackview.editor.pixel_to_frame(current_x + region_start);
-		trackview.editor.snap_to(current_frame);
-		current_frame -= get_position();
-
+		nframes_t current_frame = snap_to_frame(current_x);
+		// transform to region start relative
+		current_frame += _region->start();
+		
 		const boost::shared_ptr<Note> copy(new Note(*(canvas_note->note().get())));
 
 		// resize beginning of note
