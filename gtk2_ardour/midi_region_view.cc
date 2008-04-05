@@ -499,21 +499,11 @@ void
 MidiRegionView::region_resized (Change what_changed)
 {
 	RegionView::region_resized(what_changed);
-
+	
 	if (what_changed & ARDOUR::PositionChanged) {
-
 		if (_enable_display)
 			redisplay_model();
-
-	} else if (what_changed & Change (StartChanged)) {
-
-		//cerr << "MIDI RV START CHANGED" << endl;
-
-	} else if (what_changed & Change (LengthChanged)) {
-
-		//cerr << "MIDI RV LENGTH CHANGED" << endl;
-
-	}
+	} 
 }
 
 void
@@ -671,25 +661,36 @@ void
 MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 {
 	assert(note->time() >= 0);
-	//assert(note->time() < _region->length());
 	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
-
+	
+	// dont display notes beyond the region bounds
+	if(
+			note->time() - _region->start() >= _region->length() ||
+			note->time() <  _region->start()
+	  ) {
+		return;
+	}
+	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 
 	CanvasMidiEvent *event = 0;
+	
+	const double x = trackview.editor.frame_to_pixel((nframes_t)note->time() - _region->start());
 	
 	if (midi_view()->note_mode() == Sustained) {
 
 		//cerr << "MRV::add_note sustained " << note->note() << " @ " << note->time()
 		//	<< " .. " << note->end_time() << endl;
-
+		
 		const double y1 = midi_stream_view()->note_to_y(note->note());
-
+		const double note_endpixel = 
+			trackview.editor.frame_to_pixel((nframes_t)note->end_time() - _region->start());
+		
 		CanvasNote* ev_rect = new CanvasNote(*this, *group, note);
-		ev_rect->property_x1() = trackview.editor.frame_to_pixel((nframes_t)note->time());
+		ev_rect->property_x1() = x;
 		ev_rect->property_y1() = y1;
 		if (note->duration() > 0)
-			ev_rect->property_x2() = trackview.editor.frame_to_pixel((nframes_t)(note->end_time()));
+			ev_rect->property_x2() = note_endpixel;
 		else
 			ev_rect->property_x2() = trackview.editor.frame_to_pixel(_region->length());
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
@@ -724,7 +725,6 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		//	<< " .. " << note->end_time() << endl;
 
 		const double diamond_size = midi_stream_view()->note_height() / 2.0;
-		const double x = trackview.editor.frame_to_pixel((nframes_t)note->time());
 		const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
 
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
@@ -740,11 +740,11 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 
 	if(event) {
 		Note *note = event->note().get();
-		
+			
 		if(_marked_for_selection.find(note) != _marked_for_selection.end()) {
-			note_selected(event, true);
+				note_selected(event, true);
+		}
 	}
-}
 }
 
 void
