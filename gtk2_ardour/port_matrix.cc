@@ -509,20 +509,22 @@ PortMatrix::setup ()
  	/* Checkbutton tables and visibility checkbuttons */
  	int n = 0;
  	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
- 		PortGroupUI* t = new PortGroupUI (*this, **i);
+		if ((*i)->visible) {
+	 		PortGroupUI* t = new PortGroupUI (*this, **i);
 
- 		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
- 		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
- 		alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
- 		if ((n % 2) == 0) {
- 			t->get_table().modify_bg (Gtk::STATE_NORMAL, alt_bg);
- 		}
+	 		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
+	 		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
+	 		alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
+	 		if ((n % 2) == 0) {
+	 			t->get_table().modify_bg (Gtk::STATE_NORMAL, alt_bg);
+	 		}
 
- 		_port_group_ui.push_back (t);
- 		_port_group_hbox.pack_start (t->get_table(), false, false);
+	 		_port_group_ui.push_back (t);
+	 		_port_group_hbox.pack_start (t->get_table(), false, false);
 
-		_visibility_checkbutton_box.pack_start (t->get_visibility_checkbutton(), false, false);
- 		++n;
+			_visibility_checkbutton_box.pack_start (t->get_visibility_checkbutton(), false, false);
+	 		++n;
+	 	}
  	}
 
 	show_all ();
