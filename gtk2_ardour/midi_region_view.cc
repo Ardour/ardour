@@ -314,9 +314,6 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				clear_selection();
 				break;
 			case MidiEditPencil:
-				event_frame += _region->start();
-				trackview.editor.snap_to(event_frame, -1);
-				event_x = trackview.editor.frame_to_pixel(event_frame);
 				create_note_at(event_x, event_y, _default_note_length);
 			default:
 				break;
@@ -331,10 +328,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		case AddDragging: // Add drag done
 			_mouse_state = None;
 			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
-				const double x      = 
-					drag_rect->property_x1() + trackview.editor.frame_to_pixel(_region->start());
-				const double length = 
-					trackview.editor.pixel_to_frame(drag_rect->property_x2() - drag_rect->property_x1());
+				const double x      = drag_rect->property_x1()
+				                      + trackview.editor.frame_to_pixel(_region->start());
+				const double length = trackview.editor.pixel_to_frame(
+				                        drag_rect->property_x2() - drag_rect->property_x1());
 					
 				create_note_at(x, drag_rect->property_y1(), length);
 			}
@@ -356,7 +353,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 /** Add a note to the model, and the view, at a canvas (click) coordinate */
 void
-MidiRegionView::create_note_at(double x, double y, double dur)
+MidiRegionView::create_note_at(double x, double y, double duration)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
@@ -366,17 +363,27 @@ MidiRegionView::create_note_at(double x, double y, double dur)
 	assert(note >= 0.0);
 	assert(note <= 127.0);
 
-	nframes_t stamp = trackview.editor.pixel_to_frame (x);
-	assert(stamp >= 0);
-	//assert(stamp <= _region->length());
+	nframes_t new_note_time = trackview.editor.pixel_to_frame (x);
+	assert(new_note_time >= 0);
 
-	//const Meter& m = trackview.session().tempo_map().meter_at(stamp);
-	//const Tempo& t = trackview.session().tempo_map().tempo_at(stamp);
-	//double dur = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
+	/*
+	const Meter& m = trackview.session().tempo_map().meter_at(new_note_time);
+	const Tempo& t = trackview.session().tempo_map().tempo_at(new_note_time);
+	double duration = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
+	*/
+	
+	// we need to snap here again in nframes_t in order to be sample accurate 
+	// since note time is region-absolute but snap_to_frame expects position-relative
+	// time we have to coordinate transform back and forth here.
+	nframes_t new_note_time_position_relative = new_note_time      - _region->start(); 
+	new_note_time = snap_to_frame(new_note_time_position_relative) + _region->start();
+	
+	// we need to snap the duration too to be sample accurate
+	nframes_t new_note_duration = nframes_t(duration);
+	new_note_duration = snap_to_frame(new_note_time_position_relative + new_note_duration) + _region->start() 
+	                    - new_note_time;
 
-	// Add a 1 beat long note (for now)
-	const boost::shared_ptr<Note> new_note(new Note(0, stamp, dur, (uint8_t)note, 0x40));
-
+	const boost::shared_ptr<Note> new_note(new Note(0, new_note_time, new_note_duration, (uint8_t)note, 0x40));
 	view->update_bounds(new_note->note());
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
@@ -901,10 +908,18 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			command_remove_note(*i);
 			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get()));
 
-			copy->set_time((*i)->note()->time() + dt);
-			if(copy->time() < 0) {				
-				copy->set_time(0);
+			// we need to snap here again in nframes_t in order to be sample accurate 
+			nframes_t new_note_time = nframes_t((*i)->note()->time());
+			new_note_time +=  nframes_t(dt);
+			// since note time is region-absolute but snap_to_frame expects position-relative
+			// time we have to coordinate transform back and forth here.
+			new_note_time = snap_to_frame(new_note_time - _region->start()) + _region->start();
+			
+			if(new_note_time < 0) {				
+				new_note_time = 0;
 			}
+			
+			copy->set_time(new_note_time);
 
 			uint8_t original_pitch = (*i)->note()->note();
 			uint8_t new_pitch =  original_pitch + dnote - highest_note_difference;
@@ -946,6 +961,19 @@ MidiRegionView::snap_to_frame(double x)
 	// x is region relative
 	// convert x to global frame
 	nframes_t frame = editor.pixel_to_frame(x) + _region->position();
+	editor.snap_to(frame);
+	// convert event_frame back to local coordinates relative to position
+	frame -= _region->position();
+	return frame;
+}
+
+nframes_t
+MidiRegionView::snap_to_frame(nframes_t x)
+{
+	PublicEditor &editor = trackview.editor;
+	// x is region relative
+	// convert x to global frame
+	nframes_t frame = x + _region->position();
 	editor.snap_to(frame);
 	// convert event_frame back to local coordinates relative to position
 	frame -= _region->position();

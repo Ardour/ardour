@@ -85,7 +85,7 @@ class MidiRegionView : public RegionView
 	void end_write();
 	void extend_active_notes();
 
-	void create_note_at(double x, double y, double dur);
+	void create_note_at(double x, double y, double duration);
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
@@ -181,20 +181,27 @@ class MidiRegionView : public RegionView
 	};
 	
 	/**
-	 * This function provides the snap function for pixel units (double)
-	 * instead of nframes_t
+	 * This function provides the snap function for region position relative coordinates
+	 * for pixel units (double) instead of nframes_t
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped pixel coordinate relative to region start
 	 */
 	double snap_to_pixel(double x);
 
 	/**
-	 * This function provides the snap function for pixel units (double)
-	 * instead of nframes_t
+	 * This function provides the snap function for region position relative coordinates
+	 * for pixel units (double) instead of nframes_t
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped nframes_t coordinate relative to region start
 	 */
 	nframes_t snap_to_frame(double x);
+
+	/**
+	 * This function provides the snap function for region position relative coordinates
+	 * @param x a pixel coordinate relative to region start
+	 * @return the snapped nframes_t coordinate relative to region start
+	 */
+	nframes_t snap_to_frame(nframes_t x);
 	
   protected:
 

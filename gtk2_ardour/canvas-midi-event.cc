@@ -99,10 +99,8 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	static double  drag_delta_x = 0;
 	static double last_x, last_y;
 	double event_x, event_y, dx, dy;
-	nframes_t event_frame;
 	bool select_mod;
 	uint8_t d_velocity = 10;
-	nframes_t midi_region_start = _region.midi_region()->start();
 
 	if (_region.get_time_axis_view().editor.current_mouse_mode() != Editing::MouseNote)
 		return false;
@@ -172,7 +170,6 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	case GDK_MOTION_NOTIFY:
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
-		_item->property_parent().get_value()->w2i(event_x, event_y);
 
 		switch (_state) {
 		case Pressed: // Drag begin
@@ -180,6 +177,8 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				_state = Dragging;
+				_item->property_parent().get_value()->w2i(event_x, event_y);
+				event_x = _region.snap_to_pixel(event_x); 
 				last_x = event_x;
 				last_y = event_y;
 				drag_delta_x = 0;
@@ -197,7 +196,8 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 				event_x = t_x;
 				event_y = t_y;
 			}
-
+			_item->property_parent().get_value()->w2i(event_x, event_y);
+			
 			// Snap
 			event_x = _region.snap_to_pixel(event_x); 
 
