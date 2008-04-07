@@ -1,5 +1,9 @@
 # -*- python -*-
 
+#
+# just debugging svn bot
+#
+
 import os
 import sys
 import re
