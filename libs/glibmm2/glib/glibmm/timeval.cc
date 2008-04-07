@@ -21,7 +21,7 @@
  */
 
 #include <glib/gmain.h>
-#include <glib/gmessages.h>
+#include <glib.h>
 #include <glib/gtimer.h>
 
 #include <glibmm/timeval.h>

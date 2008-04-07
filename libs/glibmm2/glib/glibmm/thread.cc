@@ -25,7 +25,7 @@
  */
 
 #include <glibmm/exceptionhandler.h>
-#include <glib/gmessages.h>
+#include <glib.h>
 
 
 namespace

@@ -25,7 +25,7 @@
  */
 
 #include <glib/gmem.h>
-#include <glib/gmessages.h>
+#include <glib.h>
 
 #include <ctime>
 #include <algorithm>

@@ -25,7 +25,7 @@
  */
 
 #include <glib/gconvert.h>
-#include <glib/gmessages.h>
+#include <glib.h>
 #include <glib/gunicode.h>
 #include <glibmm/utility.h>
 
