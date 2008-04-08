@@ -1,7 +1,7 @@
 # -*- python -*-
 
 #
-# just debugging svn bot some more and more without pesky trac url mess maybe
+# just debugging svn bot direct to #ardour channel
 #
 
 import os
