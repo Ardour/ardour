@@ -1,0 +1,7940 @@
+# translation of gtk2_ardour.po to Polish
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Piotr Makowski <pzaryk@gmail.com>, 2008.
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk2_ardour\n"
+"Report-Msgid-Bugs-To: Piotr Zaryk <pzaryk@gmail.com>\n"
+"POT-Creation-Date: 2008-04-03 16:18+0200\n"
+"PO-Revision-Date: 2008-04-04 19:03+0100\n"
+"Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
+"Language-Team: Polish <pzaryk@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Poedit-Language: Polish\n"
+"X-Poedit-Country: POLAND\n"
+
+#: gtk2_ardour/about.cc:120
+msgid "Paul Davis"
+msgstr "Paul Davis"
+
+#: gtk2_ardour/about.cc:121
+msgid "Jesse Chappell"
+msgstr "Jesse Chappell"
+
+#: gtk2_ardour/about.cc:122
+msgid "Taybin Rutkin"
+msgstr "Taybin Rutkin"
+
+#: gtk2_ardour/about.cc:123
+msgid "Marcus Andersson"
+msgstr "Marcus Andersson"
+
+#: gtk2_ardour/about.cc:124
+msgid "Jeremy Hall"
+msgstr "Jeremy Hall"
+
+#: gtk2_ardour/about.cc:125
+msgid "Steve Harris"
+msgstr "Steve Harris"
+
+#: gtk2_ardour/about.cc:126
+msgid "Tim Mayberry"
+msgstr "Tim Mayberry"
+
+#: gtk2_ardour/about.cc:127
+msgid "Mark Stewart"
+msgstr "Mark Stewart"
+
+#: gtk2_ardour/about.cc:128
+msgid "Sam Chessman"
+msgstr "Sam Chessman"
+
+#: gtk2_ardour/about.cc:129
+msgid "Jack O'Quin"
+msgstr "Jack O'Quin"
+
+#: gtk2_ardour/about.cc:130
+msgid "Matt Krai"
+msgstr "Matt Krai"
+
+#: gtk2_ardour/about.cc:131
+msgid "Ben Bell"
+msgstr "Ben Bell"
+
+#: gtk2_ardour/about.cc:132
+msgid "Gerard van Dongen"
+msgstr "Gerard van Dongen"
+
+#: gtk2_ardour/about.cc:133
+msgid "Thomas Charbonnel"
+msgstr "Thomas Charbonnel"
+
+#: gtk2_ardour/about.cc:134
+msgid "Nick Mainsbridge"
+msgstr "Nick Mainsbridge"
+
+#: gtk2_ardour/about.cc:135
+msgid "Colin Law"
+msgstr "Colin Law"
+
+#: gtk2_ardour/about.cc:136
+msgid "Sampo Savolainen"
+msgstr "Sampo Savolainen"
+
+#: gtk2_ardour/about.cc:137
+msgid "Joshua Leach"
+msgstr "Joshua Leach"
+
+#: gtk2_ardour/about.cc:138
+msgid "Rob Holland"
+msgstr "Rob Holland"
+
+#: gtk2_ardour/about.cc:139
+msgid "Per Sigmond"
+msgstr "Per Sigmond"
+
+#: gtk2_ardour/about.cc:140
+msgid "Doug Mclain"
+msgstr "Doug Mclain"
+
+#: gtk2_ardour/about.cc:141
+msgid "Petter Sundlöf"
+msgstr "Petter Sundlöf"
+
+#: gtk2_ardour/about.cc:142
+msgid "Thorsten Wilms"
+msgstr "Thorsten Wilms"
+
+#: gtk2_ardour/about.cc:143
+msgid "Ben Loftis"
+msgstr "Ben Loftis"
+
+#: gtk2_ardour/about.cc:144
+msgid "Stefan Kersten"
+msgstr "Stefan Kersten"
+
+#: gtk2_ardour/about.cc:145
+msgid "Christopher George"
+msgstr "Christopher George"
+
+#: gtk2_ardour/about.cc:146
+msgid "Robert Jordens"
+msgstr "Robert Jordens"
+
+#: gtk2_ardour/about.cc:147
+msgid "Dave Robillard"
+msgstr "Dave Robillard"
+
+#: gtk2_ardour/about.cc:148
+msgid "Hans Fugal"
+msgstr "Hans Fugal"
+
+#: gtk2_ardour/about.cc:149
+msgid "Brian Ahr"
+msgstr "Brian Ahr"
+
+#: gtk2_ardour/about.cc:150
+msgid "Nimal Ratnayake"
+msgstr "Nimal Ratnayake"
+
+#: gtk2_ardour/about.cc:151
+msgid "Mike Täht"
+msgstr "Mike Täht"
+
+#: gtk2_ardour/about.cc:152
+msgid "John Anderson"
+msgstr "John Anderson"
+
+#: gtk2_ardour/about.cc:153
+msgid "Nedko Arnaudov"
+msgstr "Nedko Arnaudov"
+
+#: gtk2_ardour/about.cc:154
+msgid "Carl Hetherington"
+msgstr "Carl Hetherington"
+
+#: gtk2_ardour/about.cc:155
+msgid "Colin Fletcher"
+msgstr "Colin Fletcher"
+
+#: gtk2_ardour/about.cc:156
+msgid "Roland Stigge"
+msgstr "Roland Stigge"
+
+#: gtk2_ardour/about.cc:157
+msgid "Audun Halland"
+msgstr "Audun Halland"
+
+#: gtk2_ardour/about.cc:158
+msgid "Armand Klenk"
+msgstr "Armand Klenk"
+
+#: gtk2_ardour/about.cc:163
+msgid ""
+"French:\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
+msgstr ""
+"French:\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
+
+#: gtk2_ardour/about.cc:164
+msgid ""
+"German:\n"
+"\tKarsten Petersen <kapet@kapet.de>\n"
+"\tSebastian Arnold <mail@sebastian-arnold.net>\n"
+msgstr ""
+"German:\n"
+"\tKarsten Petersen <kapet@kapet.de>\n"
+"\tSebastian Arnold <mail@sebastian-arnold.net>\n"
+
+#: gtk2_ardour/about.cc:165
+msgid ""
+"Italian:\n"
+"\tFilippo Pappalardo <filippo@email.it>\n"
+msgstr ""
+"Italian:\n"
+"\tFilippo Pappalardo <filippo@email.it>\n"
+
+#: gtk2_ardour/about.cc:166
+msgid ""
+"Portuguese:\n"
+"\tRui Nuno Capela <rncbc@rncbc.org>\n"
+msgstr ""
+"Portuguese:\n"
+"\tRui Nuno Capela <rncbc@rncbc.org>\n"
+
+#: gtk2_ardour/about.cc:167
+msgid ""
+"Brazilian Portuguese:\n"
+"\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
+"\tChris Ross <chris@tebibyte.org>\n"
+msgstr ""
+"Brazilian Portuguese:\n"
+"\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
+"\tChris Ross <chris@tebibyte.org>\n"
+
+#: gtk2_ardour/about.cc:169
+msgid ""
+"Spanish:\n"
+"\t Alex Krohn <alexkrohn@fastmail.fm>\n"
+msgstr ""
+"Spanish:\n"
+"\t Alex Krohn <alexkrohn@fastmail.fm>\n"
+
+#: gtk2_ardour/about.cc:170
+msgid ""
+"Russian:\n"
+"\t Igor Blinov <pitstop@nm.ru>\n"
+msgstr ""
+"Russian:\n"
+"\t Igor Blinov <pitstop@nm.ru>\n"
+
+#: gtk2_ardour/about.cc:171
+msgid ""
+"Greek:\n"
+"\t Klearchos Gourgourinis <muadib@in.gr>\n"
+msgstr ""
+"Greek:\n"
+"\t Klearchos Gourgourinis <muadib@in.gr>\n"
+
+#: gtk2_ardour/about.cc:199
+msgid "Copyright (C) 1999-2008 Paul Davis\n"
+msgstr "Prawa autorskie (C) 1999-2008 Paul Davis\n"
+
+#: gtk2_ardour/about.cc:200
+msgid ""
+"Ardour comes with ABSOLUTELY NO WARRANTY\n"
+"This is free software, and you are welcome to redistribute it\n"
+"under certain conditions; see the file COPYING for details.\n"
+msgstr ""
+"Na program Ardour nie udziela się ABSOLUTNIE ŻADNEJ GWARANCJI\n"
+"To jest wolne oprogramowanie i wolno Ci je rozpowszechniać\n"
+"na określonych warunkach - zobacz plik COPYING, by dowiedzieć się więcej.\n"
+
+#: gtk2_ardour/about.cc:205
+msgid "visit http://www.ardour.org/"
+msgstr "odwiedź http://www.ardour.org/"
+
+#: gtk2_ardour/about.cc:206
+msgid ""
+"%1\n"
+"(built from revision %2)"
+msgstr ""
+"%1\n"
+"(revision %2)"
+
+#: gtk2_ardour/actions.cc:79
+#: gtk2_ardour/actions.cc:80
+msgid "badly formatted UI definition file: %1"
+msgstr "niepoprawnie sformatowany plik definicji interfejsu użytkownika: %1"
+
+#: gtk2_ardour/actions.cc:82
+msgid "Ardour menu definition file not found"
+msgstr "Nie odnaleziono pliku definicji menu"
+
+#: gtk2_ardour/actions.cc:86
+msgid "ardour will not work without a valid ardour.menus file"
+msgstr "Ardour nie zadziała bez poprawnego pliku ardour.menus"
+
+#: gtk2_ardour/actions.cc:267
+msgid "programmer error: %1 %2"
+msgstr "błąd programisty: %1 %2"
+
+#: gtk2_ardour/actions.cc:286
+msgid "Unknown action name: %1"
+msgstr "Nieznana nazwa czynności: %1"
+
+#: gtk2_ardour/add_route_dialog.cc:41
+#: gtk2_ardour/add_route_dialog.cc:219
+msgid "Mono"
+msgstr "Mono"
+
+#: gtk2_ardour/add_route_dialog.cc:42
+#: gtk2_ardour/add_route_dialog.cc:221
+msgid "Stereo"
+msgstr "Stereo"
+
+#: gtk2_ardour/add_route_dialog.cc:43
+msgid "3 Channels"
+msgstr "3 kanały"
+
+#: gtk2_ardour/add_route_dialog.cc:44
+msgid "4 Channels"
+msgstr "4 kanały"
+
+#: gtk2_ardour/add_route_dialog.cc:45
+msgid "6 Channels"
+msgstr "6 kanałów"
+
+#: gtk2_ardour/add_route_dialog.cc:46
+msgid "8 Channels"
+msgstr "8 kanałów"
+
+#: gtk2_ardour/add_route_dialog.cc:47
+msgid "Manual Setup"
+msgstr "Ręczne Ustawienia"
+
+#: gtk2_ardour/add_route_dialog.cc:52
+#: gtk2_ardour/add_route_dialog.cc:200
+#: gtk2_ardour/editor_actions.cc:525
+#: gtk2_ardour/time_axis_view.cc:618
+msgid "Normal"
+msgstr "Normalny"
+
+#: gtk2_ardour/add_route_dialog.cc:53
+#: gtk2_ardour/add_route_dialog.cc:202
+msgid "Tape"
+msgstr "Taśma"
+
+#: gtk2_ardour/add_route_dialog.cc:62
+msgid "ardour: add track/bus"
+msgstr "Dodawanie ścieżek/szyn"
+
+#: gtk2_ardour/add_route_dialog.cc:63
+msgid "Tracks"
+msgstr "Ścieżki"
+
+#: gtk2_ardour/add_route_dialog.cc:64
+msgid "Busses"
+msgstr "Szyny"
+
+#: gtk2_ardour/add_route_dialog.cc:113
+#: gtk2_ardour/plugin_ui.cc:265
+msgid "Add"
+msgstr "Dodaj"
+
+#: gtk2_ardour/add_route_dialog.cc:131
+msgid "Name (template)"
+msgstr "Nazwa (szablon)"
+
+#: gtk2_ardour/add_route_dialog.cc:137
+msgid "Channel Configuration"
+msgstr "Konfiguracja kanałów"
+
+#: gtk2_ardour/ardour_ui2.cc:62
+msgid "UI: cannot setup editor"
+msgstr "UI: nie można ustawić edytora"
+
+#: gtk2_ardour/ardour_ui2.cc:67
+msgid "UI: cannot setup mixer"
+msgstr "UI: nie można ustawić miksera"
+
+#: gtk2_ardour/ardour_ui2.cc:110
+msgid "[ERROR]: "
+msgstr "[BŁAD]: "
+
+#: gtk2_ardour/ardour_ui2.cc:112
+msgid "[WARNING]: "
+msgstr "[OSTRZEŻENIE]: "
+
+#: gtk2_ardour/ardour_ui2.cc:114
+msgid "[INFO]: "
+msgstr "[INFORMACJA]: "
+
+#: gtk2_ardour/ardour_ui2.cc:282
+msgid "Play from playhead"
+msgstr "Odtwórz od położenia głowicy"
+
+#: gtk2_ardour/ardour_ui2.cc:283
+msgid "Stop playback"
+msgstr "Zatrzymaj odtwarzanie"
+
+#: gtk2_ardour/ardour_ui2.cc:284
+msgid "Play range/selection"
+msgstr "Odtwórz zakres/zaznaczenie"
+
+#: gtk2_ardour/ardour_ui2.cc:285
+msgid "Go to start of session"
+msgstr "Przejdź do początku sesji"
+
+#: gtk2_ardour/ardour_ui2.cc:286
+msgid "Go to end of session"
+msgstr "Przejdź do końca sesji"
+
+#: gtk2_ardour/ardour_ui2.cc:287
+msgid "Play loop range"
+msgstr "Zakres pętli"
+
+#: gtk2_ardour/ardour_ui2.cc:289
+msgid "Return to last playback start when stopped"
+msgstr "Powróć do początku ostatniego odtwarzania przy zatrzymaniu"
+
+#: gtk2_ardour/ardour_ui2.cc:290
+msgid "Start playback after any locate"
+msgstr "Rozpocznij odtwarzanie przy każdym ustaleniu położenia głowicy"
+
+#: gtk2_ardour/ardour_ui2.cc:291
+msgid "Be sensible about input monitoring"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui2.cc:292
+msgid "Start recording at auto-punch start"
+msgstr "Rozpocznij nagrywanie przy napotkaniu przełącznika"
+
+#: gtk2_ardour/ardour_ui2.cc:293
+msgid "Stop recording at auto-punch end"
+msgstr "Zatrzymaj nagrywanie na końcu przełącznika"
+
+#: gtk2_ardour/ardour_ui2.cc:294
+msgid "Enable/Disable audio click"
+msgstr "Włącz/wyłącz metronom"
+
+#: gtk2_ardour/ardour_ui2.cc:295
+msgid "Positional sync source"
+msgstr "Źródło synchronizacji pozycji"
+
+#: gtk2_ardour/ardour_ui2.cc:296
+msgid "Does Ardour control the time?"
+msgstr "Określa, czy Ardour kontroluje czas."
+
+#: gtk2_ardour/ardour_ui2.cc:297
+msgid "Shuttle speed control"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui2.cc:298
+#, c-format
+msgid "Select semitones or %%-age for speed display"
+msgstr "Wybierz półtony lub procenty dla wyświetlania prędkości"
+
+#: gtk2_ardour/ardour_ui2.cc:299
+msgid "Current transport speed"
+msgstr "Aktualna prędkość nagrywania i odtwarzania"
+
+#: gtk2_ardour/ardour_ui2.cc:320
+msgid "Primary clock"
+msgstr "Zegar podstawowy"
+
+#: gtk2_ardour/ardour_ui2.cc:321
+msgid "secondary clock"
+msgstr "zegar dodatkowy"
+
+#: gtk2_ardour/ardour_ui2.cc:347
+msgid ""
+"When active, something is soloed.\n"
+"Click to de-solo everything"
+msgstr ""
+"Gdy aktywne, gdzieś włączone jest solo.\n"
+"Kliknij by wyłączyć solo wszędzie."
+
+#: gtk2_ardour/ardour_ui2.cc:348
+msgid ""
+"When active, auditioning is taking place\n"
+"Click to stop the audition"
+msgstr ""
+"Gdy aktywne, odsłuchiwanie jest włączone\n"
+"Kliknij, by zatrzymać odsłuchiwanie."
+
+#: gtk2_ardour/ardour_ui2.cc:376
+#: gtk2_ardour/ardour_ui2.cc:826
+#: gtk2_ardour/ardour_ui2.cc:882
+#: gtk2_ardour/ardour_ui_options.cc:1152
+msgid "sprung"
+msgstr "sprężyna"
+
+#: gtk2_ardour/ardour_ui2.cc:377
+#: gtk2_ardour/ardour_ui2.cc:828
+#: gtk2_ardour/ardour_ui_options.cc:1163
+msgid "wheel"
+msgstr "koło"
+
+#: gtk2_ardour/ardour_ui2.cc:596
+msgid "Maximum speed"
+msgstr "Maksymalna prędkość"
+
+#: gtk2_ardour/ardour_ui2.cc:838
+#: gtk2_ardour/ardour_ui2.cc:861
+msgid "stop"
+msgstr "zatrz."
+
+#: gtk2_ardour/ardour_ui2.cc:880
+msgid "-0.55"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:114
+msgid ""
+"pre\n"
+"roll"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:115
+msgid ""
+"post\n"
+"roll"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:141
+msgid "% "
+msgstr "% "
+
+#: gtk2_ardour/ardour_ui.cc:143
+#: gtk2_ardour/ardour_ui_ed.cc:327
+msgid "Punch In"
+msgstr "Włącznik"
+
+#: gtk2_ardour/ardour_ui.cc:144
+#: gtk2_ardour/ardour_ui_ed.cc:330
+msgid "Punch Out"
+msgstr "Wyłącznik"
+
+#: gtk2_ardour/ardour_ui.cc:145
+#: gtk2_ardour/ardour_ui_ed.cc:345
+msgid "Auto Return"
+msgstr "Autopowracanie"
+
+#: gtk2_ardour/ardour_ui.cc:146
+#: gtk2_ardour/ardour_ui_ed.cc:342
+msgid "Auto Play"
+msgstr "Autoodtwarzanie"
+
+#: gtk2_ardour/ardour_ui.cc:147
+#: gtk2_ardour/ardour_ui_ed.cc:339
+msgid "Auto Input"
+msgstr "Wejście dźwięku"
+
+#: gtk2_ardour/ardour_ui.cc:148
+#: gtk2_ardour/ardour_ui_ed.cc:336
+#: gtk2_ardour/option_editor.cc:151
+msgid "Click"
+msgstr "Metronom"
+
+#: gtk2_ardour/ardour_ui.cc:149
+msgid ""
+"time\n"
+"master"
+msgstr ""
+"zarządzanie\n"
+"czasem"
+
+#: gtk2_ardour/ardour_ui.cc:151
+msgid "AUDITION"
+msgstr "ODSŁUCH"
+
+#: gtk2_ardour/ardour_ui.cc:152
+msgid "SOLO"
+msgstr "SOLO"
+
+#: gtk2_ardour/ardour_ui.cc:154
+msgid "Errors"
+msgstr "Błędy"
+
+#: gtk2_ardour/ardour_ui.cc:242
+msgid "could not initialize Ardour."
+msgstr "Nie można dokonać inicjalizacji programu."
+
+#: gtk2_ardour/ardour_ui.cc:268
+msgid "Starting audio engine"
+msgstr "Uruchamianie systemu dźwięku"
+
+#: gtk2_ardour/ardour_ui.cc:572
+msgid "Ardour could not start JACK"
+msgstr "Nie można połączyć się z JACK."
+
+#: gtk2_ardour/ardour_ui.cc:574
+msgid "Ardour could not connect to JACK."
+msgstr "Nie można połączyć się z JACK."
+
+#: gtk2_ardour/ardour_ui.cc:583
+msgid ""
+"There are several possible reasons:\n"
+"\n"
+"1) You requested audio parameters that are not supported..\n"
+"2) JACK is running as another user.\n"
+"\n"
+"Please consider the possibilities, and perhaps try different parameters."
+msgstr ""
+"Istnieje kilka możliwych przyczyn:\n"
+"\n"
+"1) Wprowadzono nieobsługiwane parametry dźwięku.\n"
+"2) JACK jest uruchomiony przez innego użytkownika.\n"
+"\n"
+"Należy rozważyć wszystkie możliwości i wypróbować inne ustawienia."
+
+#: gtk2_ardour/ardour_ui.cc:590
+msgid ""
+"There are several possible reasons:\n"
+"\n"
+"1) JACK is not running.\n"
+"2) JACK is running as another user, perhaps root.\n"
+"3) There is already another client called \"ardour\".\n"
+"\n"
+"Please consider the possibilities, and perhaps (re)start JACK."
+msgstr ""
+"Istnieje kilka możliwych przyczyn:\n"
+"\n"
+"1) JACK nie jest uruchomiony.\n"
+"2) JACK został uruchomiony przez innego użytkownika, prawdopodobnie przez administratora.\n"
+"3) Istnieje już inny klient o nazwie \"ardour\".\n"
+"\n"
+"Rozważ wszystkie możliwości i uruchom JACK (ponownie)."
+
+#: gtk2_ardour/ardour_ui.cc:638
+msgid "Ardour is ready for use"
+msgstr "Ardour jest gotowy do użycia"
+
+#: gtk2_ardour/ardour_ui.cc:680
+msgid ""
+"WARNING: Your system has a limit for maximum amount of locked memory. This might cause Ardour to run out of memory before your system runs out of memory. \n"
+"\n"
+"You can view the memory limit with 'ulimit -l', and it is normally controlled by /etc/security/limits.conf"
+msgstr ""
+"OSTRZEŻENIE: System posiada limit maksymalnego rozmiaru zablokowanej pamięci. Może to powodować, iż będzie brakować pamięci prędzej niż faktycznie skończy się ona w systemie. \n"
+"\n"
+"Można sprawdzić limit pamięci przy użyciu 'ulimit -l'. Standardowo limit ten jest kontrolowany przez /etc/security/limits.conf"
+
+#: gtk2_ardour/ardour_ui.cc:688
+msgid "Do not show this window again"
+msgstr "Nie pokazuj tego okna więcej"
+
+#: gtk2_ardour/ardour_ui.cc:717
+msgid "quit"
+msgstr "zakończ"
+
+#: gtk2_ardour/ardour_ui.cc:726
+msgid ""
+"Ardour was unable to save your session.\n"
+"\n"
+"If you still wish to quit, please use the\n"
+"\n"
+"\"Just quit\" option."
+msgstr ""
+"Nie można zapisać sesji.\n"
+"\n"
+"Można ją zakończyć przy użyciu\n"
+"\n"
+"opcji \"Po prostu zakończ\"."
+
+#: gtk2_ardour/ardour_ui.cc:751
+msgid "ardour: save session?"
+msgstr "Pytanie o zapisanie sesji"
+
+#: gtk2_ardour/ardour_ui.cc:758
+msgid "Don't %1"
+msgstr "Nie kończ"
+
+#: gtk2_ardour/ardour_ui.cc:760
+msgid "Just %1"
+msgstr "Po prostu %1"
+
+#: gtk2_ardour/ardour_ui.cc:762
+msgid "Save and %1"
+msgstr "Zapisz i %1"
+
+#: gtk2_ardour/ardour_ui.cc:774
+msgid "session"
+msgstr "Sesja"
+
+#: gtk2_ardour/ardour_ui.cc:776
+msgid "snapshot"
+msgstr "zrzut"
+
+#: gtk2_ardour/ardour_ui.cc:778
+msgid ""
+"The %1\"%2\"\n"
+"has not been saved.\n"
+"\n"
+"Any changes made this time\n"
+"will be lost unless you save it.\n"
+"\n"
+"What do you want to do?"
+msgstr ""
+"%1 \"%2\" nie została zapisana.\n"
+"\n"
+"Wszystkie dokonane zmiany zostaną utracone\n"
+"w przypadku anulowania zapisu.\n"
+"\n"
+"Co zrobić?"
+
+#: gtk2_ardour/ardour_ui.cc:792
+msgid "Prompter"
+msgstr "Prompter"
+
+#: gtk2_ardour/ardour_ui.cc:854
+#, c-format
+msgid "disconnected"
+msgstr "rozłączono"
+
+#: gtk2_ardour/ardour_ui.cc:861
+#, c-format
+msgid "%.1f kHz / %4.1f ms"
+msgstr "%.1f kHz / %4.1f ms"
+
+#: gtk2_ardour/ardour_ui.cc:865
+#, c-format
+msgid "%u kHz / %4.1f ms"
+msgstr "%u kHz / %4.1f ms"
+
+#: gtk2_ardour/ardour_ui.cc:878
+#, c-format
+msgid "DSP: %5.1f%%"
+msgstr "DSP: %5.1f%%"
+
+#: gtk2_ardour/ardour_ui.cc:888
+#, c-format
+msgid "Buffers p:%<PRIu32>%% c:%<PRIu32>%%"
+msgstr "Bufory p:%<PRIu32>%% c:%<PRIu32>%%"
+
+#: gtk2_ardour/ardour_ui.cc:916
+msgid "Disk: 24hrs+"
+msgstr "Dysk: 24hrs+"
+
+#: gtk2_ardour/ardour_ui.cc:936
+#, c-format
+msgid "Disk: %02dh:%02dm:%02ds"
+msgstr "Dysk: %02dh:%02dm:%02ds"
+
+#: gtk2_ardour/ardour_ui.cc:1056
+#: gtk2_ardour/new_session_dialog.cc:391
+msgid "Recent Sessions"
+msgstr "Poprzednie sesje"
+
+#: gtk2_ardour/ardour_ui.cc:1162
+msgid ""
+"Ardour is not connected to JACK\n"
+"You cannot open or close sessions in this condition"
+msgstr ""
+"Ardour nie jest połączony z JACK.\n"
+"W tej sytuacji nie możesz otwierać lub zamykać sesji."
+
+#: gtk2_ardour/ardour_ui.cc:1187
+msgid "open session"
+msgstr "Otwieranie sesji"
+
+#: gtk2_ardour/ardour_ui.cc:1194
+msgid "Ardour sessions"
+msgstr "Sesje Ardour"
+
+#: gtk2_ardour/ardour_ui.cc:1227
+msgid "Patience is a virtue.\n"
+msgstr "Cierpliwość jest cnotą.\n"
+
+#: gtk2_ardour/ardour_ui.cc:1237
+msgid "You cannot add a track or bus without a session already loaded."
+msgstr "Nie możesz dodać ścieżki lub szyny bez otwierania sesji."
+
+#: gtk2_ardour/ardour_ui.cc:1247
+#: gtk2_ardour/ardour_ui.cc:1260
+msgid "could not create a new audio track"
+msgstr "nie można było utworzyć nowej ścieżki dźwiękowej"
+
+#: gtk2_ardour/ardour_ui.cc:1249
+msgid "could only create %1 of %2 new audio %3"
+msgstr "można było utworzyć jedynie %1 z %2 nowego audio %3"
+
+#: gtk2_ardour/ardour_ui.cc:1250
+#: gtk2_ardour/editor_ops.cc:5580
+msgid "tracks"
+msgstr "ścieżki"
+
+#: gtk2_ardour/ardour_ui.cc:1250
+#: gtk2_ardour/editor_ops.cc:5586
+msgid "busses"
+msgstr "szyny"
+
+#: gtk2_ardour/ardour_ui.cc:1262
+msgid "could not create %1 new audio tracks"
+msgstr "nie można było utworzyć %1 nowych ścieżek dźwiękowych"
+
+#: gtk2_ardour/ardour_ui.cc:1282
+msgid ""
+"There are insufficient JACK ports available\n"
+"to create a new track or bus.\n"
+"You should save Ardour, exit and\n"
+"restart JACK with more ports."
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:1404
+msgid ""
+"Please create 1 or more track\n"
+"before trying to record.\n"
+"Check the Session menu."
+msgstr ""
+"Należy utworzyć 1 lub więcej ścieżek\n"
+"przed rozpoczęciem nagrywania.\n"
+"Sprawdź menu Sesji."
+
+#: gtk2_ardour/ardour_ui.cc:1662
+msgid ""
+"JACK has either been shutdown or it\n"
+"disconnected Ardour because Ardour\n"
+"was not fast enough. You can save the\n"
+"session and/or try to reconnect to JACK ."
+msgstr "JACK został wyłączony albo odłączył program Ardour z powodu jego niewystarczającej szybkości. Można zapisać sesję i/lub spróbować połączyć ponownie z JACK."
+
+#: gtk2_ardour/ardour_ui.cc:1680
+msgid "Unable to start the session running"
+msgstr "Nie można wczytać sesji, gdyż jest aktualnie w użyciu."
+
+#: gtk2_ardour/ardour_ui.cc:1771
+#: gtk2_ardour/ardour_ui.cc:1790
+#: gtk2_ardour/audio_clock.cc:512
+#: gtk2_ardour/audio_clock.cc:513
+msgid "none"
+msgstr "brak"
+
+#: gtk2_ardour/ardour_ui.cc:1780
+#: gtk2_ardour/ardour_ui.cc:1799
+msgid "off"
+msgstr "wył"
+
+#: gtk2_ardour/ardour_ui.cc:1825
+msgid "Name of New Snapshot"
+msgstr "Nazwa zrzutu:"
+
+#: gtk2_ardour/ardour_ui.cc:1977
+msgid "Name for mix template:"
+msgstr "Nazwa szablonu miksu:"
+
+#: gtk2_ardour/ardour_ui.cc:1978
+msgid "-template"
+msgstr "-szablon"
+
+#: gtk2_ardour/ardour_ui.cc:2007
+msgid ""
+"Welcome to Ardour.\n"
+"\n"
+"The program will take a bit longer to start up\n"
+"while the system fonts are checked.\n"
+"\n"
+"This will only be done once, and you will\n"
+"not see this message again\n"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:2094
+msgid ""
+"This session\n"
+"%1\n"
+"already exists. Do you want to open it?"
+msgstr ""
+"Sesja\n"
+"%1\n"
+"już istnieje. Otworzyć ją?"
+
+#: gtk2_ardour/ardour_ui.cc:2454
+msgid ""
+"You do not have write access to this session.\n"
+"This prevents the session from being loaded."
+msgstr ""
+"Nie posiadasz dostępu do zapisu tej sesji.\n"
+"Uniemożliwia to wczytanie sesji."
+
+#: gtk2_ardour/ardour_ui.cc:2461
+msgid "Please wait while Ardour loads your session"
+msgstr "Proszę czekać. Trwa wczytywanie sesji..."
+
+#: gtk2_ardour/ardour_ui.cc:2476
+#: gtk2_ardour/ardour_ui.cc:2502
+msgid "Loading Error"
+msgstr "Błąd wczytywania"
+
+#: gtk2_ardour/ardour_ui.cc:2477
+#: gtk2_ardour/ardour_ui.cc:2503
+msgid "Click the OK button to try again."
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:2497
+msgid "Session \"%1 (snapshot %2)\" did not load successfully"
+msgstr "Sesja \"%1 (zrzut %2)\" nie została załadowana poprawnie"
+
+#: gtk2_ardour/ardour_ui.cc:2576
+msgid "Could not create session in \"%1\""
+msgstr "Nie udało się utworzyć sesji w \"%1\""
+
+#: gtk2_ardour/ardour_ui.cc:2663
+msgid "No audio files were ready for cleanup"
+msgstr "Żadne pliki dźwiękowe nie były gotowe do wyczyszczenia"
+
+#: gtk2_ardour/ardour_ui.cc:2667
+msgid ""
+"If this seems suprising, \n"
+"check for any existing snapshots.\n"
+"These may still include regions that\n"
+"require some unused files to continue to exist."
+msgstr ""
+"Jeśli to wydaje się być zaskakujące, \n"
+"sprawdź istniejące zrzuty.\n"
+"Wciąż mogą zawierać obszary\n"
+"wymagające obecności nieużywanych plików."
+
+#: gtk2_ardour/ardour_ui.cc:2676
+msgid "ardour: cleanup"
+msgstr "Czyszczenie"
+
+#: gtk2_ardour/ardour_ui.cc:2712
+#: gtk2_ardour/ardour_ui.cc:2718
+msgid "files were"
+msgstr "pliki były"
+
+#: gtk2_ardour/ardour_ui.cc:2714
+#: gtk2_ardour/ardour_ui.cc:2720
+msgid "file was"
+msgstr "plik był"
+
+#: gtk2_ardour/ardour_ui.cc:2761
+msgid "Are you sure you want to cleanup?"
+msgstr "Na pewno wyczyścić?"
+
+#: gtk2_ardour/ardour_ui.cc:2766
+msgid ""
+"Cleanup is a destructive operation.\n"
+"ALL undo/redo information will be lost if you cleanup.\n"
+"After cleanup, unused audio files will be moved to a \"dead sounds\" location."
+msgstr ""
+"Czyszczenie powoduje usunięcie pewnych informacji.\n"
+"WSZYSTKIE informacje cofnij/powtórz zostaną usunięte w trakcie czyszczenia.\n"
+"Po czyszczeniu nieużywane pliki audio zostaną przeniesione do katalogu \"dead sounds\"."
+
+#: gtk2_ardour/ardour_ui.cc:2772
+msgid "Clean Up"
+msgstr "Wyczyść"
+
+#: gtk2_ardour/ardour_ui.cc:2775
+msgid "CleanupDialog"
+msgstr "Okno dialogowe czyszczenia"
+
+#: gtk2_ardour/ardour_ui.cc:2803
+msgid "cleaned files"
+msgstr "usunięte pliki"
+
+#: gtk2_ardour/ardour_ui.cc:2804
+msgid ""
+"The following %1 %2 not in use and \n"
+"have been moved to:\n"
+"%3. \n"
+"\n"
+"Flushing the wastebasket will \n"
+"release an additional\n"
+"%4 %5bytes of disk space.\n"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:2832
+msgid "deleted file"
+msgstr "usunięty plik"
+
+#: gtk2_ardour/ardour_ui.cc:2833
+msgid ""
+"The following %1 %2 deleted from\n"
+"%3,\n"
+"releasing %4 %5bytes of disk space"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:2958
+msgid "Recording was stopped because your system could not keep up."
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:2981
+msgid ""
+"The disk system on your computer\n"
+"was not able to keep up with Ardour.\n"
+"\n"
+"Specifically, it failed to write data to disk\n"
+"quickly enough to keep up with recording.\n"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:3000
+msgid ""
+"The disk system on your computer\n"
+"was not able to keep up with Ardour.\n"
+"\n"
+"Specifically, it failed to read data from disk\n"
+"quickly enough to keep up with playback.\n"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:3040
+msgid "Crash Recovery"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:3041
+msgid ""
+"This session appears to have been in\n"
+"middle of recording when ardour or\n"
+"the computer was shutdown.\n"
+"\n"
+"Ardour can recover any captured audio for\n"
+"you, or it can ignore it. Please decide\n"
+"what you would like to do.\n"
+msgstr ""
+"Ta sesja była prawdopodobnie w trakcie\n"
+"nagrywania, gdy ardour lub komputer\n"
+"został niespodziewanie wyłączony.\n"
+"\n"
+"Ardour może przywrócić nagranie dla Ciebie.\n"
+"Co chcesz zrobić?\n"
+
+#: gtk2_ardour/ardour_ui.cc:3053
+msgid "Ignore crash data"
+msgstr "Ignorowanie dane z awarii"
+
+#: gtk2_ardour/ardour_ui.cc:3054
+msgid "Recover from crash"
+msgstr "Przywróć dane z awarii"
+
+#: gtk2_ardour/ardour_ui.cc:3074
+msgid "Sample Rate Mismatch"
+msgstr "Błędna częstotliwość próbkowania"
+
+#: gtk2_ardour/ardour_ui.cc:3075
+msgid ""
+"This session was created with a sample rate of %1 Hz\n"
+"\n"
+"The audioengine is currently running at %2 Hz\n"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui.cc:3084
+msgid "Do not load session"
+msgstr "Nie ładuj sesji"
+
+#: gtk2_ardour/ardour_ui.cc:3085
+msgid "Load session anyway"
+msgstr "Załaduj sesję mimo to"
+
+#: gtk2_ardour/ardour_ui.cc:3106
+msgid "Could not disconnect from JACK"
+msgstr "Nie można się rozłączyć z JACK"
+
+#: gtk2_ardour/ardour_ui.cc:3119
+msgid "Could not reconnect to JACK"
+msgstr "Nie udało się połączyć ponownie z JACK"
+
+#: gtk2_ardour/ardour_ui_dependents.cc:74
+msgid "Setup Editor"
+msgstr "Ustawianie edytora"
+
+#: gtk2_ardour/ardour_ui_dependents.cc:76
+msgid "Setup Mixer"
+msgstr "Ustawianie miksera"
+
+#: gtk2_ardour/ardour_ui_dependents.cc:81
+msgid "Reload Session History"
+msgstr "Wczytywanie historii sesji"
+
+#: gtk2_ardour/ardour_ui_dialogs.cc:169
+#: gtk2_ardour/playlist_selector.cc:73
+msgid "close"
+msgstr "zamknij"
+
+#: gtk2_ardour/ardour_ui_ed.cc:88
+msgid "Session"
+msgstr "Sesja"
+
+#: gtk2_ardour/ardour_ui_ed.cc:89
+msgid "Import/Export"
+msgstr "Importuj/Eksportuj"
+
+#: gtk2_ardour/ardour_ui_ed.cc:90
+msgid "Cleanup"
+msgstr "Wyczyść"
+
+#: gtk2_ardour/ardour_ui_ed.cc:91
+#: gtk2_ardour/editor_actions.cc:85
+#: gtk2_ardour/option_editor.cc:148
+msgid "Sync"
+msgstr "Synchronizacja"
+
+#: gtk2_ardour/ardour_ui_ed.cc:92
+#: gtk2_ardour/ardour_ui_ed.cc:93
+#: gtk2_ardour/engine_dialog.cc:343
+msgid "Options"
+msgstr "Opcje"
+
+#: gtk2_ardour/ardour_ui_ed.cc:94
+msgid "Help"
+msgstr "Pomoc"
+
+#: gtk2_ardour/ardour_ui_ed.cc:95
+msgid "Misc. Shortcuts"
+msgstr "Skróty"
+
+#: gtk2_ardour/ardour_ui_ed.cc:96
+msgid "Audio File Format"
+msgstr "Format pliku dźwiękowego"
+
+#: gtk2_ardour/ardour_ui_ed.cc:97
+#: gtk2_ardour/export_dialog.cc:105
+msgid "File Type"
+msgstr "Format pliku"
+
+#: gtk2_ardour/ardour_ui_ed.cc:98
+#: gtk2_ardour/export_dialog.cc:106
+msgid "Sample Format"
+msgstr "Format próbkowania"
+
+#: gtk2_ardour/ardour_ui_ed.cc:99
+msgid "Control Surfaces"
+msgstr "Urządzenia sterujące"
+
+#: gtk2_ardour/ardour_ui_ed.cc:100
+msgid "Metering"
+msgstr "Ustawienia metrum"
+
+#: gtk2_ardour/ardour_ui_ed.cc:101
+msgid "Fall off rate"
+msgstr "Tempo zmniejszania"
+
+#: gtk2_ardour/ardour_ui_ed.cc:102
+msgid "Hold Time"
+msgstr "Czas przytrzymania"
+
+#: gtk2_ardour/ardour_ui_ed.cc:103
+msgid "Denormal Handling"
+msgstr "Obsługa liczb zdenormalizowanych"
+
+#: gtk2_ardour/ardour_ui_ed.cc:107
+#: gtk2_ardour/new_session_dialog.cc:842
+#: gtk2_ardour/route_time_axis.cc:1376
+msgid "New"
+msgstr "Utwórz"
+
+#: gtk2_ardour/ardour_ui_ed.cc:109
+#: gtk2_ardour/new_session_dialog.cc:822
+#: gtk2_ardour/new_session_dialog.cc:834
+msgid "Open"
+msgstr "Otwórz"
+
+#: gtk2_ardour/ardour_ui_ed.cc:110
+msgid "Recent"
+msgstr "Poprzednia"
+
+#: gtk2_ardour/ardour_ui_ed.cc:111
+#: gtk2_ardour/io_selector.cc:59
+#: gtk2_ardour/io_selector.cc:749
+#: gtk2_ardour/connection_editor.cc:58
+msgid "Close"
+msgstr "Zamknij"
+
+#: gtk2_ardour/ardour_ui_ed.cc:114
+#: gtk2_ardour/route_params_ui.cc:513
+msgid "Add Track/Bus"
+msgstr "Dodaj ścieżkę/szynę"
+
+#: gtk2_ardour/ardour_ui_ed.cc:126
+msgid "Connect"
+msgstr "Połącz"
+
+#: gtk2_ardour/ardour_ui_ed.cc:134
+msgid "Snapshot"
+msgstr "Zrzut"
+
+#: gtk2_ardour/ardour_ui_ed.cc:137
+msgid "Save Template..."
+msgstr "Zapisz szablon"
+
+#: gtk2_ardour/ardour_ui_ed.cc:140
+msgid "Export session to audiofile..."
+msgstr "Sesję do pliku dźwiękowego..."
+
+#: gtk2_ardour/ardour_ui_ed.cc:143
+msgid "Export selection to audiofile..."
+msgstr "Zaznaczenie do pliku dźwiękowego..."
+
+#: gtk2_ardour/ardour_ui_ed.cc:147
+msgid "Export range markers to audiofile..."
+msgstr "Znaczniki zakresu do pliku dźwiękowego..."
+
+#: gtk2_ardour/ardour_ui_ed.cc:151
+#: gtk2_ardour/editor.cc:1775
+#: gtk2_ardour/export_dialog.cc:125
+#: gtk2_ardour/export_dialog.cc:374
+#: gtk2_ardour/export_dialog.cc:1122
+#: gtk2_ardour/export_dialog.cc:1126
+msgid "Export"
+msgstr "Eksportuj"
+
+#: gtk2_ardour/ardour_ui_ed.cc:154
+msgid "Cleanup unused sources"
+msgstr "Nieużywane zasoby"
+
+#: gtk2_ardour/ardour_ui_ed.cc:156
+msgid "Flush wastebasket"
+msgstr "Opróżnij kosz"
+
+#: gtk2_ardour/ardour_ui_ed.cc:162
+msgid "JACK"
+msgstr "JACK"
+
+#: gtk2_ardour/ardour_ui_ed.cc:163
+msgid "Latency"
+msgstr "Opóźnienie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:165
+msgid "Reconnect"
+msgstr "Połącz ponownie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:168
+#: gtk2_ardour/mixer_strip.cc:505
+#: gtk2_ardour/mixer_strip.cc:567
+msgid "Disconnect"
+msgstr "Rozłącz"
+
+#: gtk2_ardour/ardour_ui_ed.cc:195
+msgid "Window"
+msgstr "Okno"
+
+#: gtk2_ardour/ardour_ui_ed.cc:196
+msgid "Quit"
+msgstr "Zakończ"
+
+#: gtk2_ardour/ardour_ui_ed.cc:200
+msgid "Maximise Editor Space"
+msgstr "Maksymalizuj edytor"
+
+#: gtk2_ardour/ardour_ui_ed.cc:202
+msgid "Show Editor"
+msgstr "Edytor"
+
+#: gtk2_ardour/ardour_ui_ed.cc:203
+msgid "Show Mixer"
+msgstr "Mikser"
+
+#: gtk2_ardour/ardour_ui_ed.cc:204
+#: gtk2_ardour/option_editor.cc:121
+msgid "Preferences"
+msgstr "Preferencje"
+
+#: gtk2_ardour/ardour_ui_ed.cc:205
+#: gtk2_ardour/route_params_ui.cc:143
+#: gtk2_ardour/route_params_ui.cc:659
+msgid "Track/Bus Inspector"
+msgstr "Kontroler ścieżek/szyn"
+
+#: gtk2_ardour/ardour_ui_ed.cc:207
+#: gtk2_ardour/connection_editor.cc:146
+#: gtk2_ardour/connection_editor.cc:147
+msgid "Connections"
+msgstr "Połączenia"
+
+#: gtk2_ardour/ardour_ui_ed.cc:209
+#: gtk2_ardour/location_ui.cc:611
+msgid "Locations"
+msgstr "Położenia"
+
+#: gtk2_ardour/ardour_ui_ed.cc:211
+msgid "Big Clock"
+msgstr "Duży zegar"
+
+#: gtk2_ardour/ardour_ui_ed.cc:213
+msgid "About"
+msgstr "O programie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:214
+msgid "Theme Manager"
+msgstr "Menedżer motywów"
+
+#: gtk2_ardour/ardour_ui_ed.cc:215
+msgid "Keybindings"
+msgstr "Skróty klawiszowe"
+
+#: gtk2_ardour/ardour_ui_ed.cc:217
+msgid "Add Audio Track"
+msgstr "Dodaj ścieżkę dźwiękową"
+
+#: gtk2_ardour/ardour_ui_ed.cc:219
+msgid "Add Audio Bus"
+msgstr "Dodaj szynę dźwiękową"
+
+#: gtk2_ardour/ardour_ui_ed.cc:221
+msgid "Save"
+msgstr "Zapisz"
+
+#: gtk2_ardour/ardour_ui_ed.cc:223
+#: gtk2_ardour/editor_actions.cc:502
+msgid "Remove Last Capture"
+msgstr "Usuń ostatnie nagranie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:230
+msgid "Transport"
+msgstr "Nagrywanie i odtwarzanie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:236
+#: gtk2_ardour/engine_dialog.cc:59
+#: gtk2_ardour/sfdb_ui.cc:184
+msgid "Stop"
+msgstr "Zatrzymaj"
+
+#: gtk2_ardour/ardour_ui_ed.cc:239
+msgid "Roll"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:243
+msgid "Start/Stop"
+msgstr "Uruchom/Zatrzymaj"
+
+#: gtk2_ardour/ardour_ui_ed.cc:246
+msgid "Stop + Forget Capture"
+msgstr "Zatrzymaj i usuń nagranie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:256
+msgid "Transition To Roll"
+msgstr "Do przodu"
+
+#: gtk2_ardour/ardour_ui_ed.cc:260
+msgid "Transition To Reverse"
+msgstr "Od tyłu"
+
+#: gtk2_ardour/ardour_ui_ed.cc:265
+msgid "Play Loop Range"
+msgstr "Odtwórz zakres pętli"
+
+#: gtk2_ardour/ardour_ui_ed.cc:268
+msgid "Play Selection"
+msgstr "Odtwórz zaznaczenie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:272
+msgid "Enable Record"
+msgstr "Włącz nagrywanie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:274
+msgid "Start Recording"
+msgstr "Rozpocznij nagrywanie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:277
+msgid "Rewind"
+msgstr "Przewiń do tyłu"
+
+#: gtk2_ardour/ardour_ui_ed.cc:280
+msgid "Rewind (Slow)"
+msgstr "Przewiń do tyłu (powoli)"
+
+#: gtk2_ardour/ardour_ui_ed.cc:283
+msgid "Rewind (Fast)"
+msgstr "Przewiń do tyłu (szybko)"
+
+#: gtk2_ardour/ardour_ui_ed.cc:286
+msgid "Forward"
+msgstr "Przewiń do przodu"
+
+#: gtk2_ardour/ardour_ui_ed.cc:289
+msgid "Forward (Slow)"
+msgstr "Przewiń do przodu (powoli)"
+
+#: gtk2_ardour/ardour_ui_ed.cc:292
+msgid "Forward (Fast)"
+msgstr "Przewiń do przodu (szybko)"
+
+#: gtk2_ardour/ardour_ui_ed.cc:295
+msgid "Goto Zero"
+msgstr "Do punktu zerowego"
+
+#: gtk2_ardour/ardour_ui_ed.cc:298
+msgid "Goto Start"
+msgstr "Do początku"
+
+#: gtk2_ardour/ardour_ui_ed.cc:301
+msgid "Goto End"
+msgstr "Do końca"
+
+#: gtk2_ardour/ardour_ui_ed.cc:305
+msgid "Focus On Clock"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:309
+#: gtk2_ardour/ardour_ui_ed.cc:318
+#: gtk2_ardour/editor_actions.cc:616
+msgid "Bars & Beats"
+msgstr "Takty i uderzenia"
+
+#: gtk2_ardour/ardour_ui_ed.cc:311
+#: gtk2_ardour/ardour_ui_ed.cc:320
+msgid "Minutes & Seconds"
+msgstr "Minuty i Sekundy"
+
+#: gtk2_ardour/ardour_ui_ed.cc:313
+#: gtk2_ardour/ardour_ui_ed.cc:322
+#: gtk2_ardour/audio_clock.cc:1925
+#: gtk2_ardour/editor_actions.cc:617
+#: gtk2_ardour/editor.cc:194
+msgid "Samples"
+msgstr "Próbki"
+
+#: gtk2_ardour/ardour_ui_ed.cc:315
+#: gtk2_ardour/ardour_ui_ed.cc:324
+#: gtk2_ardour/ardour_ui_ed.cc:512
+#: gtk2_ardour/ardour_ui_ed.cc:520
+#: gtk2_ardour/audio_clock.cc:1926
+msgid "Off"
+msgstr "Wyłączony"
+
+#: gtk2_ardour/ardour_ui_ed.cc:333
+msgid "Punch In/Out"
+msgstr "Włącznik/wyłącznik"
+
+#: gtk2_ardour/ardour_ui_ed.cc:349
+msgid "Sync startup to video"
+msgstr "Synchronizuj początek z wideo"
+
+#: gtk2_ardour/ardour_ui_ed.cc:350
+msgid "Time master"
+msgstr "Zarządzanie czasem"
+
+#: gtk2_ardour/ardour_ui_ed.cc:353
+msgid "Toggle Record Enable Track1"
+msgstr "Przełącz nagrywanie Ścieżki1"
+
+#: gtk2_ardour/ardour_ui_ed.cc:355
+msgid "Toggle Record Enable Track2"
+msgstr "Przełącz nagrywanie Ścieżki2"
+
+#: gtk2_ardour/ardour_ui_ed.cc:357
+msgid "Toggle Record Enable Track3"
+msgstr "Przełącz nagrywanie Ścieżki3"
+
+#: gtk2_ardour/ardour_ui_ed.cc:359
+msgid "Toggle Record Enable Track4"
+msgstr "Przełącz nagrywanie Ścieżki4"
+
+#: gtk2_ardour/ardour_ui_ed.cc:361
+msgid "Toggle Record Enable Track5"
+msgstr "Przełącz nagrywanie Ścieżki5"
+
+#: gtk2_ardour/ardour_ui_ed.cc:363
+msgid "Toggle Record Enable Track6"
+msgstr "Przełącz nagrywanie Ścieżki6"
+
+#: gtk2_ardour/ardour_ui_ed.cc:365
+msgid "Toggle Record Enable Track7"
+msgstr "Przełącz nagrywanie Ścieżki7"
+
+#: gtk2_ardour/ardour_ui_ed.cc:367
+msgid "Toggle Record Enable Track8"
+msgstr "Przełącz nagrywanie Ścieżki8"
+
+#: gtk2_ardour/ardour_ui_ed.cc:369
+msgid "Toggle Record Enable Track9"
+msgstr "Przełącz nagrywanie Ścieżki9"
+
+#: gtk2_ardour/ardour_ui_ed.cc:371
+msgid "Toggle Record Enable Track10"
+msgstr "Przełącz nagrywanie Ścieżki10"
+
+#: gtk2_ardour/ardour_ui_ed.cc:373
+msgid "Toggle Record Enable Track11"
+msgstr "Przełącz nagrywanie Ścieżki11"
+
+#: gtk2_ardour/ardour_ui_ed.cc:375
+msgid "Toggle Record Enable Track12"
+msgstr "Przełącz nagrywanie Ścieżki12"
+
+#: gtk2_ardour/ardour_ui_ed.cc:377
+msgid "Toggle Record Enable Track13"
+msgstr "Przełącz nagrywanie Ścieżki13"
+
+#: gtk2_ardour/ardour_ui_ed.cc:379
+msgid "Toggle Record Enable Track14"
+msgstr "Przełącz nagrywanie Ścieżki14"
+
+#: gtk2_ardour/ardour_ui_ed.cc:381
+msgid "Toggle Record Enable Track15"
+msgstr "Przełącz nagrywanie Ścieżki15"
+
+#: gtk2_ardour/ardour_ui_ed.cc:383
+msgid "Toggle Record Enable Track16"
+msgstr "Przełącz nagrywanie Ścieżki16"
+
+#: gtk2_ardour/ardour_ui_ed.cc:385
+msgid "Toggle Record Enable Track17"
+msgstr "Przełącz nagrywanie Ścieżki17"
+
+#: gtk2_ardour/ardour_ui_ed.cc:387
+msgid "Toggle Record Enable Track18"
+msgstr "Przełącz nagrywanie Ścieżki18"
+
+#: gtk2_ardour/ardour_ui_ed.cc:389
+msgid "Toggle Record Enable Track19"
+msgstr "Przełącz nagrywanie Ścieżki19"
+
+#: gtk2_ardour/ardour_ui_ed.cc:391
+msgid "Toggle Record Enable Track20"
+msgstr "Przełącz nagrywanie Ścieżki20"
+
+#: gtk2_ardour/ardour_ui_ed.cc:393
+msgid "Toggle Record Enable Track21"
+msgstr "Przełącz nagrywanie Ścieżki21"
+
+#: gtk2_ardour/ardour_ui_ed.cc:395
+msgid "Toggle Record Enable Track22"
+msgstr "Przełącz nagrywanie Ścieżki22"
+
+#: gtk2_ardour/ardour_ui_ed.cc:397
+msgid "Toggle Record Enable Track23"
+msgstr "Przełącz nagrywanie Ścieżki23"
+
+#: gtk2_ardour/ardour_ui_ed.cc:399
+msgid "Toggle Record Enable Track24"
+msgstr "Przełącz nagrywanie Ścieżki24"
+
+#: gtk2_ardour/ardour_ui_ed.cc:401
+msgid "Toggle Record Enable Track25"
+msgstr "Przełącz nagrywanie Ścieżki25"
+
+#: gtk2_ardour/ardour_ui_ed.cc:403
+msgid "Toggle Record Enable Track26"
+msgstr "Przełącz nagrywanie Ścieżki26"
+
+#: gtk2_ardour/ardour_ui_ed.cc:405
+msgid "Toggle Record Enable Track27"
+msgstr "Przełącz nagrywanie Ścieżki27"
+
+#: gtk2_ardour/ardour_ui_ed.cc:407
+msgid "Toggle Record Enable Track28"
+msgstr "Przełącz nagrywanie Ścieżki28"
+
+#: gtk2_ardour/ardour_ui_ed.cc:409
+msgid "Toggle Record Enable Track29"
+msgstr "Przełącz nagrywanie Ścieżki29"
+
+#: gtk2_ardour/ardour_ui_ed.cc:411
+msgid "Toggle Record Enable Track30"
+msgstr "Przełącz nagrywanie Ścieżki30"
+
+#: gtk2_ardour/ardour_ui_ed.cc:413
+msgid "Toggle Record Enable Track31"
+msgstr "Przełącz nagrywanie Ścieżki31"
+
+#: gtk2_ardour/ardour_ui_ed.cc:415
+msgid "Toggle Record Enable Track32"
+msgstr "Przełącz nagrywanie Ścieżki32"
+
+#: gtk2_ardour/ardour_ui_ed.cc:420
+msgid "Percentage"
+msgstr "Procenty"
+
+#: gtk2_ardour/ardour_ui_ed.cc:421
+msgid "Semitones"
+msgstr "Półtony"
+
+#: gtk2_ardour/ardour_ui_ed.cc:425
+msgid "Send MTC"
+msgstr "Wyślij MTC"
+
+#: gtk2_ardour/ardour_ui_ed.cc:427
+msgid "Send MMC"
+msgstr "Wyślij MMC"
+
+#: gtk2_ardour/ardour_ui_ed.cc:429
+msgid "Use MMC"
+msgstr "Użyj MMC"
+
+#: gtk2_ardour/ardour_ui_ed.cc:431
+msgid "Send MIDI feedback"
+msgstr "Sprzężenie zwrotne MIDI"
+
+#: gtk2_ardour/ardour_ui_ed.cc:434
+msgid "Use OSC"
+msgstr "OSC"
+
+#: gtk2_ardour/ardour_ui_ed.cc:438
+msgid "Tape Machine mode"
+msgstr "Tryb taśmowy"
+
+#: gtk2_ardour/ardour_ui_ed.cc:441
+msgid "Sync Editor and Mixer track order"
+msgstr "Synchronizacja kolejności ścieżek miksera i edytora"
+
+#: gtk2_ardour/ardour_ui_ed.cc:442
+msgid "Stop plugins with transport"
+msgstr "Zatrzymanie wtyczek przy zakończeniu nagrywania/odtwarzania"
+
+#: gtk2_ardour/ardour_ui_ed.cc:443
+msgid "Verify remove last capture"
+msgstr "Potwierdzanie usuwania ostatniego nagrania"
+
+#: gtk2_ardour/ardour_ui_ed.cc:444
+msgid "Make periodic safety backups"
+msgstr "Okresowe kopie bezpieczeństwa"
+
+#: gtk2_ardour/ardour_ui_ed.cc:445
+msgid "Stop recording on xrun"
+msgstr "Zatrzymaj nagrywanie przy xrun"
+
+#: gtk2_ardour/ardour_ui_ed.cc:446
+#, fuzzy
+msgid "Create marker at xrun location"
+msgstr "Wyczyść wszystkie położenia"
+
+#: gtk2_ardour/ardour_ui_ed.cc:447
+msgid "Stop transport at session end"
+msgstr "Zatrzymaj nagrywanie i odtwarzanie na końcu sesji"
+
+#: gtk2_ardour/ardour_ui_ed.cc:448
+msgid "-12dB gain reduce ffwd/rewind"
+msgstr "Redukcja wzmocnienia o 12dB podczas przewijania"
+
+#: gtk2_ardour/ardour_ui_ed.cc:449
+msgid "Rec-enable stays engaged at stop"
+msgstr "Ustawienie nagrywania pozostaje włączone po zatrzymaniu"
+
+#: gtk2_ardour/ardour_ui_ed.cc:450
+msgid "Region equivalents overlap"
+msgstr "Nakładanie odpowiedników obszarów"
+
+#: gtk2_ardour/ardour_ui_ed.cc:451
+#, fuzzy
+msgid "Primary Clock delta to edit point"
+msgstr "Zegar podstawowy wyświetla odstęp od wskaźnika"
+
+#: gtk2_ardour/ardour_ui_ed.cc:452
+#, fuzzy
+msgid "Secondary Clock delta to edit point"
+msgstr "Zegar dodatkowy wyświetla odstęp od wskaźnika"
+
+#: gtk2_ardour/ardour_ui_ed.cc:453
+msgid "Enable Editor Meters"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:454
+msgid "Always copy imported files"
+msgstr "Kopiowanie importowanych plików"
+
+#: gtk2_ardour/ardour_ui_ed.cc:455
+msgid "Rubberbanding Snaps to Grid"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:456
+msgid "Auto-analyse new audio"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:458
+msgid "Use narrow mixer strips"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:462
+msgid "Use DC bias"
+msgstr "Użyj DC bias"
+
+#: gtk2_ardour/ardour_ui_ed.cc:464
+msgid "No processor handling"
+msgstr "Nieobsługiwane przez procesor"
+
+#: gtk2_ardour/ardour_ui_ed.cc:473
+#: gtk2_ardour/ardour_ui_ed.cc:484
+msgid "Use FlushToZero"
+msgstr "Użyj FlushToZero"
+
+#: gtk2_ardour/ardour_ui_ed.cc:475
+#: gtk2_ardour/ardour_ui_ed.cc:489
+msgid "Use DenormalsAreZero"
+msgstr "Użyj DenormalsAreZero"
+
+#: gtk2_ardour/ardour_ui_ed.cc:477
+#: gtk2_ardour/ardour_ui_ed.cc:494
+msgid "Use FlushToZero & DenormalsAreZero"
+msgstr "Użyj FlushToZero & DenormalsAreZero"
+
+#: gtk2_ardour/ardour_ui_ed.cc:500
+msgid "Do not run plugins while recording"
+msgstr "Brak uruchamiania wtyczek podczas nagrywania"
+
+#: gtk2_ardour/ardour_ui_ed.cc:502
+msgid "Latched solo"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:504
+msgid "Show solo muting"
+msgstr "Wyświetlanie wyciszania solo"
+
+#: gtk2_ardour/ardour_ui_ed.cc:513
+#: gtk2_ardour/editor.cc:1386
+#: gtk2_ardour/editor.cc:1389
+#: gtk2_ardour/editor.cc:1408
+#: gtk2_ardour/editor.cc:1411
+msgid "Slowest"
+msgstr "Najwolniej"
+
+#: gtk2_ardour/ardour_ui_ed.cc:514
+#: gtk2_ardour/editor.cc:1390
+#: gtk2_ardour/editor.cc:1412
+msgid "Slow"
+msgstr "Wolno"
+
+#: gtk2_ardour/ardour_ui_ed.cc:515
+#: gtk2_ardour/ardour_ui_ed.cc:522
+msgid "Medium"
+msgstr "Średnio"
+
+#: gtk2_ardour/ardour_ui_ed.cc:516
+#: gtk2_ardour/editor.cc:1391
+#: gtk2_ardour/editor.cc:1413
+#: gtk2_ardour/sfdb_ui.cc:1262
+#: gtk2_ardour/sfdb_ui.cc:1343
+msgid "Fast"
+msgstr "Szybko"
+
+#: gtk2_ardour/ardour_ui_ed.cc:517
+msgid "Faster"
+msgstr "Szybciej"
+
+#: gtk2_ardour/ardour_ui_ed.cc:518
+#: gtk2_ardour/editor.cc:1392
+#: gtk2_ardour/editor.cc:1414
+#: gtk2_ardour/sfdb_ui.cc:1263
+msgid "Fastest"
+msgstr "Najszybciej"
+
+#: gtk2_ardour/ardour_ui_ed.cc:521
+#: gtk2_ardour/editor_actions.cc:108
+msgid "Short"
+msgstr "Krótko"
+
+#: gtk2_ardour/ardour_ui_ed.cc:523
+msgid "Long"
+msgstr "Długo"
+
+#: gtk2_ardour/ardour_ui_ed.cc:542
+msgid "Hardware monitoring"
+msgstr "Sprzętowe"
+
+#: gtk2_ardour/ardour_ui_ed.cc:543
+msgid "Software monitoring"
+msgstr "Programowe"
+
+#: gtk2_ardour/ardour_ui_ed.cc:544
+msgid "External monitoring"
+msgstr "Rozszerzone"
+
+#: gtk2_ardour/ardour_ui_ed.cc:548
+msgid "Solo in-place"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:550
+msgid "Solo via bus"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_ed.cc:555
+msgid "Auto-connect inputs to physical inputs"
+msgstr "Łącz wejścia z wejściami fizycznymi automatycznie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:557
+msgid "Manually connect inputs"
+msgstr "Łącz wejścia ręcznie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:562
+msgid "Auto-connect outputs to physical outs"
+msgstr "Łącz wyjścia z wyjściami fizycznymi automatycznie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:564
+msgid "Auto-connect outputs to master bus"
+msgstr "Łącz wyjścia z główną szyną automatycznie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:566
+msgid "Manually connect outputs"
+msgstr "Łącz wyjścia ręcznie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:571
+msgid "Remote ID assigned by User"
+msgstr "ID urządzenia zdalnego przydzielone ręcznie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:573
+msgid "Remote ID follows order of Mixer"
+msgstr "ID urządzenia zdalnego zgodne z kolejnością miksera"
+
+#: gtk2_ardour/ardour_ui_ed.cc:575
+msgid "Remote ID follows order of Editor"
+msgstr "ID urządzenia zdalnego zgodne z kolejnością edytora"
+
+#: gtk2_ardour/ardour_ui_ed.cc:578
+#, fuzzy
+msgid "Auto Rebind Controls"
+msgstr "Kontrola automatyzacji"
+
+#: gtk2_ardour/ardour_ui_ed.cc:728
+#: gtk2_ardour/generic_pluginui.cc:171
+msgid "Controls"
+msgstr "Sterowanie"
+
+#: gtk2_ardour/ardour_ui_ed.cc:732
+msgid "Feedback"
+msgstr "Sprzężenie zwrotne"
+
+#: gtk2_ardour/ardour_ui_ed.cc:838
+msgid "Clock"
+msgstr "Zegar"
+
+#: gtk2_ardour/ardour_ui_options.cc:119
+#: gtk2_ardour/ardour_ui_options.cc:149
+#: gtk2_ardour/audio_streamview.cc:172
+#: gtk2_ardour/editor_actions.cc:1150
+#: gtk2_ardour/editor_actions.cc:1509
+#: gtk2_ardour/editor_actions.cc:1522
+#: gtk2_ardour/editor_actions.cc:1586
+#: gtk2_ardour/engine_dialog.cc:997
+msgid "programming error: %1"
+msgstr "błąd programowania: %1"
+
+#: gtk2_ardour/ardour_ui_options.cc:228
+msgid "programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:261
+msgid "programming error: unknown remote model in ARDOUR_UI::set_remote_model: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:295
+msgid "programming error: unknown monitor model in ARDOUR_UI::set_monitor_model: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:334
+msgid "programming error: unknown denormal model in ARDOUR_UI::set_denormal_model: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:775
+msgid "programming error: unknown file header format passed to ARDOUR_UI::map_file_data_format: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:811
+msgid "programming error: unknown file data format passed to ARDOUR_UI::map_file_data_format: %1"
+msgstr ""
+
+#: gtk2_ardour/ardour_ui_options.cc:1174
+msgid "ST"
+msgstr "ST"
+
+#: gtk2_ardour/audio_clock.cc:1921
+#: gtk2_ardour/editor_actions.cc:618
+#: gtk2_ardour/editor.cc:193
+msgid "Timecode"
+msgstr "Zegar"
+
+#: gtk2_ardour/audio_clock.cc:1923
+#: gtk2_ardour/editor.cc:192
+msgid "Bars:Beats"
+msgstr "Takty:Uderzenia"
+
+#: gtk2_ardour/audio_clock.cc:1924
+msgid "Minutes:Seconds"
+msgstr "Minuty:Sekundy"
+
+#: gtk2_ardour/audio_region_editor.cc:48
+msgid "NAME:"
+msgstr "NAZWA:"
+
+#: gtk2_ardour/audio_region_editor.cc:49
+msgid "play"
+msgstr "odtwórz"
+
+#: gtk2_ardour/audio_region_editor.cc:68
+msgid "audition this region"
+msgstr "przesłuchaj ten obszar"
+
+#: gtk2_ardour/audio_region_editor.cc:83
+msgid "START:"
+msgstr "POCZĄTEK:"
+
+#: gtk2_ardour/audio_region_editor.cc:85
+msgid "END:"
+msgstr "KONIEC:"
+
+#: gtk2_ardour/audio_region_editor.cc:87
+msgid "LENGTH:"
+msgstr "DŁUGOŚĆ:"
+
+#: gtk2_ardour/audio_region_editor.cc:123
+msgid "Region %1"
+msgstr "Obszar %1"
+
+#: gtk2_ardour/audio_region_editor.cc:204
+msgid "change region start position"
+msgstr "zmień pozycję początkową obszaru"
+
+#: gtk2_ardour/audio_region_editor.cc:221
+msgid "change region end position"
+msgstr "zmień pozycję końcową obszaru"
+
+#: gtk2_ardour/audio_region_editor.cc:242
+msgid "change region length"
+msgstr "zmień długość obszaru"
+
+#: gtk2_ardour/audio_region_view.cc:955
+msgid "add gain control point"
+msgstr "dodaj punkt kontrolny wzmocnienia"
+
+#: gtk2_ardour/audio_time_axis.cc:226
+msgid "Fader"
+msgstr "Wzmocnienie"
+
+#: gtk2_ardour/audio_time_axis.cc:231
+msgid "Pan"
+msgstr "Panorama"
+
+#: gtk2_ardour/audio_time_axis.cc:247
+msgid "Hide all crossfades"
+msgstr "Ukryj wszystkie przejścia krzyżowe"
+
+#: gtk2_ardour/audio_time_axis.cc:248
+msgid "Show all crossfades"
+msgstr "Wyświetlanie wszystkich przejść krzyżowych"
+
+#: gtk2_ardour/audio_time_axis.cc:256
+msgid "Show waveforms"
+msgstr "Wykres fali"
+
+#: gtk2_ardour/audio_time_axis.cc:266
+msgid "Traditional"
+msgstr "Tradycyjny"
+
+#: gtk2_ardour/audio_time_axis.cc:270
+#, fuzzy
+msgid "Rectified"
+msgstr "Poprawiony"
+
+#: gtk2_ardour/audio_time_axis.cc:280
+#: gtk2_ardour/editor_actions.cc:699
+#: gtk2_ardour/editor.cc:1385
+#: gtk2_ardour/editor.cc:1388
+#: gtk2_ardour/editor.cc:1407
+#: gtk2_ardour/editor.cc:1410
+msgid "Linear"
+msgstr "Liniowy"
+
+#: gtk2_ardour/audio_time_axis.cc:283
+#: gtk2_ardour/editor_actions.cc:701
+msgid "Logarithmic"
+msgstr "Logarytmiczny"
+
+#: gtk2_ardour/audio_time_axis.cc:302
+msgid "Waveform"
+msgstr "Wykres fali"
+
+#: gtk2_ardour/audio_time_axis.cc:374
+msgid "gain"
+msgstr "wzmocnienie"
+
+#: gtk2_ardour/audio_time_axis.cc:414
+msgid "pan"
+msgstr "panorama"
+
+#: gtk2_ardour/automation_line.cc:610
+msgid "Ignoring illegal points on AutomationLine \"%1\""
+msgstr ""
+
+#: gtk2_ardour/automation_line.cc:800
+msgid "automation event move"
+msgstr "przesuń zdarzenie automatyki"
+
+#: gtk2_ardour/automation_line.cc:802
+msgid "automation range drag"
+msgstr "przeciągnij zakres automatyki"
+
+#: gtk2_ardour/automation_line.cc:1027
+#: gtk2_ardour/region_gain_line.cc:85
+msgid "remove control point"
+msgstr "usuń punkt kontrolny"
+
+#: gtk2_ardour/automation_time_axis.cc:55
+#: gtk2_ardour/route_time_axis.cc:104
+#: gtk2_ardour/visual_time_axis.cc:73
+msgid "h"
+msgstr ""
+
+#: gtk2_ardour/automation_time_axis.cc:56
+#: gtk2_ardour/editor_ops.cc:3575
+msgid "clear"
+msgstr "wyczyść"
+
+#: gtk2_ardour/automation_time_axis.cc:97
+msgid "track height"
+msgstr "rozmiar wyświetlania"
+
+#: gtk2_ardour/automation_time_axis.cc:98
+msgid "automation state"
+msgstr "stan automatyki"
+
+#: gtk2_ardour/automation_time_axis.cc:99
+msgid "clear track"
+msgstr "wyczyść ścieżkę"
+
+#: gtk2_ardour/automation_time_axis.cc:100
+msgid "hide track"
+msgstr "ukryj ścieżkę"
+
+#: gtk2_ardour/automation_time_axis.cc:207
+#: gtk2_ardour/automation_time_axis.cc:236
+#: gtk2_ardour/automation_time_axis.cc:461
+#: gtk2_ardour/gain_meter.cc:160
+#: gtk2_ardour/generic_pluginui.cc:335
+#: gtk2_ardour/generic_pluginui.cc:606
+#: gtk2_ardour/panner_ui.cc:88
+msgid "Manual"
+msgstr "Ręcznie"
+
+#: gtk2_ardour/automation_time_axis.cc:209
+#: gtk2_ardour/automation_time_axis.cc:247
+#: gtk2_ardour/automation_time_axis.cc:465
+#: gtk2_ardour/editor_actions.cc:69
+#: gtk2_ardour/editor.cc:1995
+#: gtk2_ardour/editor.cc:2078
+#: gtk2_ardour/gain_meter.cc:162
+#: gtk2_ardour/generic_pluginui.cc:338
+#: gtk2_ardour/generic_pluginui.cc:608
+#: gtk2_ardour/panner_ui.cc:90
+msgid "Play"
+msgstr "Odtwórz"
+
+#: gtk2_ardour/automation_time_axis.cc:211
+#: gtk2_ardour/automation_time_axis.cc:258
+#: gtk2_ardour/automation_time_axis.cc:469
+#: gtk2_ardour/gain_meter.cc:164
+#: gtk2_ardour/generic_pluginui.cc:341
+#: gtk2_ardour/generic_pluginui.cc:610
+#: gtk2_ardour/panner_ui.cc:92
+msgid "Write"
+msgstr "Zapisz"
+
+#: gtk2_ardour/automation_time_axis.cc:213
+#: gtk2_ardour/automation_time_axis.cc:269
+#: gtk2_ardour/automation_time_axis.cc:473
+#: gtk2_ardour/gain_meter.cc:166
+#: gtk2_ardour/generic_pluginui.cc:344
+#: gtk2_ardour/generic_pluginui.cc:612
+#: gtk2_ardour/panner_ui.cc:94
+msgid "Touch"
+msgstr "Porusz"
+
+#: gtk2_ardour/automation_time_axis.cc:280
+#: gtk2_ardour/generic_pluginui.cc:347
+msgid "???"
+msgstr "???"
+
+#: gtk2_ardour/automation_time_axis.cc:294
+msgid "clear automation"
+msgstr "wyczyść automatyzację"
+
+#: gtk2_ardour/automation_time_axis.cc:450
+#: gtk2_ardour/editor_actions.cc:88
+#: gtk2_ardour/imageframe_time_axis.cc:254
+#: gtk2_ardour/marker_time_axis.cc:210
+#: gtk2_ardour/route_time_axis.cc:451
+msgid "Height"
+msgstr "Rozmiar"
+
+#: gtk2_ardour/automation_time_axis.cc:452
+#: gtk2_ardour/editor_actions.cc:651
+#: gtk2_ardour/editor_markers.cc:597
+msgid "Hide"
+msgstr "Ukryj"
+
+#: gtk2_ardour/automation_time_axis.cc:454
+#: gtk2_ardour/crossfade_edit.cc:77
+#: gtk2_ardour/redirect_box.cc:1181
+#: gtk2_ardour/connection_editor.cc:56
+msgid "Clear"
+msgstr "Wyczyść"
+
+#: gtk2_ardour/automation_time_axis.cc:477
+msgid "State"
+msgstr "Stan"
+
+#: gtk2_ardour/canvas-imageframe.c:104
+msgid "pixbuf"
+msgstr ""
+
+#: gtk2_ardour/canvas-imageframe.c:105
+msgid "the pixbuf"
+msgstr ""
+
+#: gtk2_ardour/canvas-imageframe.c:110
+msgid "x"
+msgstr ""
+
+#: gtk2_ardour/canvas-imageframe.c:111
+#: gtk2_ardour/canvas-simpleline.c:112
+#: gtk2_ardour/canvas-simplerect.c:108
+msgid "x coordinate of upper left corner of rect"
+msgstr ""
+
+#: gtk2_ardour/canvas-imageframe.c:120
+msgid "y"
+msgstr ""
+
+#: gtk2_ardour/canvas-imageframe.c:121
+#: gtk2_ardour/canvas-simpleline.c:122
+#: gtk2_ardour/canvas-simplerect.c:118
+msgid "y coordinate of upper left corner of rect "
+msgstr ""
+
+#: gtk2_ardour/canvas-imageframe.c:129
+msgid "width"
+msgstr "szerokość"
+
+#: gtk2_ardour/canvas-imageframe.c:130
+msgid "the width"
+msgstr "szerokość"
+
+#: gtk2_ardour/canvas-imageframe.c:139
+msgid "drawwidth"
+msgstr "szerokość rysowania"
+
+#: gtk2_ardour/canvas-imageframe.c:140
+#, fuzzy
+msgid "drawn width"
+msgstr "zarysowana szerokość"
+
+#: gtk2_ardour/canvas-imageframe.c:148
+msgid "height"
+msgstr "wysokość"
+
+#: gtk2_ardour/canvas-imageframe.c:149
+msgid "the height"
+msgstr "wysokość"
+
+#: gtk2_ardour/canvas-imageframe.c:157
+msgid "anchor"
+msgstr "kotwica"
+
+#: gtk2_ardour/canvas-imageframe.c:158
+msgid "the anchor"
+msgstr "kotwica"
+
+#: gtk2_ardour/canvas-simpleline.c:111
+#: gtk2_ardour/canvas-simplerect.c:107
+msgid "x1"
+msgstr ""
+
+#: gtk2_ardour/canvas-simpleline.c:121
+#: gtk2_ardour/canvas-simplerect.c:117
+msgid "y1"
+msgstr ""
+
+#: gtk2_ardour/canvas-simpleline.c:132
+#: gtk2_ardour/canvas-simplerect.c:128
+msgid "x2"
+msgstr ""
+
+#: gtk2_ardour/canvas-simpleline.c:133
+#: gtk2_ardour/canvas-simplerect.c:129
+msgid "x coordinate of lower right corner of rect"
+msgstr ""
+
+#: gtk2_ardour/canvas-simpleline.c:142
+#: gtk2_ardour/canvas-simplerect.c:138
+msgid "y2"
+msgstr ""
+
+#: gtk2_ardour/canvas-simpleline.c:143
+#: gtk2_ardour/canvas-simplerect.c:139
+msgid "y coordinate of lower right corner of rect "
+msgstr ""
+
+#: gtk2_ardour/canvas-simpleline.c:151
+msgid "color rgba"
+msgstr "kolor rgba"
+
+#: gtk2_ardour/canvas-simpleline.c:152
+msgid "color of line"
+msgstr "kolor linii"
+
+#: gtk2_ardour/canvas-simplerect.c:149
+msgid "outline pixels"
+msgstr "piksele konturu"
+
+#: gtk2_ardour/canvas-simplerect.c:150
+msgid "width in pixels of outline"
+msgstr "szerokość konturu w pikselach"
+
+#: gtk2_ardour/canvas-simplerect.c:160
+#, fuzzy
+msgid "outline what"
+msgstr "kontur czego"
+
+#: gtk2_ardour/canvas-simplerect.c:161
+#, fuzzy
+msgid "which boundaries to outline (mask)"
+msgstr "które granice do konturu (maska)"
+
+#: gtk2_ardour/canvas-simplerect.c:172
+msgid "fill"
+msgstr "wypełnij"
+
+#: gtk2_ardour/canvas-simplerect.c:173
+msgid "fill rectangle"
+msgstr "wypełnij prostokąt"
+
+#: gtk2_ardour/canvas-simplerect.c:180
+msgid "draw"
+msgstr "rysuj"
+
+#: gtk2_ardour/canvas-simplerect.c:181
+msgid "draw rectangle"
+msgstr "rysuj prostokąt"
+
+#: gtk2_ardour/canvas-simplerect.c:189
+msgid "outline color rgba"
+msgstr "kolor rgba konturu"
+
+#: gtk2_ardour/canvas-simplerect.c:190
+msgid "color of outline"
+msgstr "kolor konturu"
+
+#: gtk2_ardour/canvas-simplerect.c:200
+#, fuzzy
+msgid "fill color rgba"
+msgstr "kolor rgba wypełnienia"
+
+#: gtk2_ardour/canvas-simplerect.c:201
+msgid "color of fill"
+msgstr "kolor wypełnienia"
+
+#: gtk2_ardour/crossfade_edit.cc:74
+msgid "ardour: x-fade edit"
+msgstr "Zmiana płynnego przejścia"
+
+#: gtk2_ardour/crossfade_edit.cc:78
+#: gtk2_ardour/panner_ui.cc:426
+msgid "Reset"
+msgstr "Zresetuj"
+
+#: gtk2_ardour/crossfade_edit.cc:79
+#: gtk2_ardour/editor_actions.cc:56
+msgid "Fade"
+msgstr ""
+
+#: gtk2_ardour/crossfade_edit.cc:80
+msgid "Out (dry)"
+msgstr "Wyjście (suche)"
+
+#: gtk2_ardour/crossfade_edit.cc:81
+msgid "Out"
+msgstr "Wyjście"
+
+#: gtk2_ardour/crossfade_edit.cc:82
+msgid "In (dry)"
+msgstr "Wejście (suche)"
+
+#: gtk2_ardour/crossfade_edit.cc:83
+msgid "In"
+msgstr "Wejście"
+
+#: gtk2_ardour/crossfade_edit.cc:85
+#, fuzzy
+msgid "With Pre-roll"
+msgstr "Z Pre-roll"
+
+#: gtk2_ardour/crossfade_edit.cc:86
+#, fuzzy
+msgid "With Post-roll"
+msgstr "Z Post-roll"
+
+#: gtk2_ardour/crossfade_edit.cc:94
+msgid "Fade In"
+msgstr "Stopniowe wzmocnienie"
+
+#: gtk2_ardour/crossfade_edit.cc:95
+msgid "Fade Out"
+msgstr "Stopniowe wyciszenie"
+
+#: gtk2_ardour/crossfade_edit.cc:171
+#: gtk2_ardour/editor_actions.cc:649
+#: gtk2_ardour/editor.cc:1774
+#: gtk2_ardour/option_editor.cc:152
+msgid "Audition"
+msgstr "Odsłuch"
+
+#: gtk2_ardour/editor_actions.cc:48
+#: gtk2_ardour/editor.cc:2035
+msgid "Align"
+msgstr "Wyrównaj"
+
+#: gtk2_ardour/editor_actions.cc:49
+msgid "Autoconnect"
+msgstr "Automatyczne łączenie"
+
+#: gtk2_ardour/editor_actions.cc:50
+msgid "Crossfades"
+msgstr "Przejścia krzyżowe"
+
+#: gtk2_ardour/editor_actions.cc:51
+#: gtk2_ardour/editor.cc:1704
+#: gtk2_ardour/editor.cc:2042
+#: gtk2_ardour/editor_markers.cc:660
+#: gtk2_ardour/mixer_strip.cc:503
+#: gtk2_ardour/mixer_strip.cc:565
+#: gtk2_ardour/redirect_box.cc:1207
+msgid "Edit"
+msgstr "Edycja"
+
+#: gtk2_ardour/editor_actions.cc:52
+msgid "Move Selected Marker"
+msgstr "Przenieś znacznik"
+
+#: gtk2_ardour/editor_actions.cc:53
+#, fuzzy
+msgid "Select Range Operations"
+msgstr "Operacje na zakresach"
+
+#: gtk2_ardour/editor_actions.cc:54
+#, fuzzy
+msgid "Select Regions"
+msgstr "Zaznacz obszary"
+
+#: gtk2_ardour/editor_actions.cc:55
+msgid "Edit Point"
+msgstr "Punkt edycji"
+
+#: gtk2_ardour/editor_actions.cc:57
+#, fuzzy
+msgid "Latch"
+msgstr "Opóźnienie"
+
+#: gtk2_ardour/editor_actions.cc:58
+msgid "Layering"
+msgstr "Warstwy"
+
+#: gtk2_ardour/editor_actions.cc:59
+#, fuzzy
+msgid "Link"
+msgstr "łącze"
+
+#: gtk2_ardour/editor_actions.cc:60
+#, fuzzy
+msgid "Locate To Markers"
+msgstr "Znaczniki położenia"
+
+#: gtk2_ardour/editor_actions.cc:61
+#: gtk2_ardour/editor_actions.cc:613
+msgid "Markers"
+msgstr "Znaczniki"
+
+#: gtk2_ardour/editor_actions.cc:62
+msgid "Meter falloff"
+msgstr "Zmniejszanie metrum"
+
+#: gtk2_ardour/editor_actions.cc:63
+msgid "Meter hold"
+msgstr "Przytrzymanie metrum"
+
+#: gtk2_ardour/editor_actions.cc:64
+msgid "Misc Options"
+msgstr "Różne"
+
+#: gtk2_ardour/editor_actions.cc:65
+msgid "Monitoring"
+msgstr "Monitorowanie"
+
+#: gtk2_ardour/editor_actions.cc:66
+#: gtk2_ardour/editor.cc:151
+#: gtk2_ardour/editor.cc:3446
+#, fuzzy
+msgid "Active Mark"
+msgstr "Aktywne"
+
+#: gtk2_ardour/editor_actions.cc:67
+#: gtk2_ardour/editor_actions.cc:562
+#: gtk2_ardour/editor.cc:139
+#: gtk2_ardour/editor.cc:149
+#: gtk2_ardour/editor.cc:2847
+#: gtk2_ardour/editor.cc:2873
+#: gtk2_ardour/editor.cc:3417
+#: gtk2_ardour/editor.cc:3442
+msgid "Playhead"
+msgstr "Głowica"
+
+#: gtk2_ardour/editor_actions.cc:68
+#: gtk2_ardour/editor.cc:1891
+#: gtk2_ardour/editor.cc:2062
+#: gtk2_ardour/editor.cc:2118
+msgid "Nudge"
+msgstr "Pchnij"
+
+#: gtk2_ardour/editor_actions.cc:70
+msgid "Primary Clock"
+msgstr "Zegar podstawowy"
+
+#: gtk2_ardour/editor_actions.cc:71
+msgid "Pullup / Pulldown"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:72
+msgid "Region"
+msgstr "Obszar"
+
+#: gtk2_ardour/editor_actions.cc:73
+msgid "Region operations"
+msgstr "Operacje na obszarach"
+
+#: gtk2_ardour/editor_actions.cc:74
+#, fuzzy
+msgid "Gain"
+msgstr "wzmocnienie"
+
+#: gtk2_ardour/editor_actions.cc:75
+msgid "Rulers"
+msgstr "Linijki"
+
+#: gtk2_ardour/editor_actions.cc:76
+msgid "Scroll"
+msgstr "Przewijanie"
+
+#: gtk2_ardour/editor_actions.cc:77
+msgid "Secondary Clock"
+msgstr "Zegar dodatkowy"
+
+#: gtk2_ardour/editor_actions.cc:78
+#: gtk2_ardour/editor_actions.cc:79
+#: gtk2_ardour/editor.cc:2021
+#: gtk2_ardour/editor.cc:2096
+msgid "Select"
+msgstr "Zaznacz"
+
+#: gtk2_ardour/editor_actions.cc:80
+#: gtk2_ardour/editor_actions.cc:441
+msgid "Separate"
+msgstr "Oddziel"
+
+#: gtk2_ardour/editor_actions.cc:81
+#: gtk2_ardour/editor.cc:1201
+#: gtk2_ardour/editor.cc:1209
+#: gtk2_ardour/editor.cc:4320
+#: gtk2_ardour/editor.cc:4347
+msgid "Loop"
+msgstr "Pętla"
+
+#: gtk2_ardour/editor_actions.cc:82
+#: gtk2_ardour/editor.cc:1214
+#: gtk2_ardour/editor.cc:1222
+msgid "Punch"
+msgstr "Przełącznik"
+
+#: gtk2_ardour/editor_actions.cc:83
+#: gtk2_ardour/mixer_strip.cc:88
+#: gtk2_ardour/mixer_strip.cc:423
+#: gtk2_ardour/route_time_axis.cc:186
+msgid "Solo"
+msgstr "Solo"
+
+#: gtk2_ardour/editor_actions.cc:84
+msgid "Subframes"
+msgstr "Podklatki"
+
+#: gtk2_ardour/editor_actions.cc:86
+#: gtk2_ardour/editor_actions.cc:610
+#: gtk2_ardour/editor.cc:195
+#: gtk2_ardour/tempo_dialog.cc:39
+#: gtk2_ardour/tempo_dialog.cc:58
+msgid "Tempo"
+msgstr "Tempo"
+
+#: gtk2_ardour/editor_actions.cc:87
+msgid "Timecode fps"
+msgstr "Klatek na sekundę licznika czasu"
+
+#: gtk2_ardour/editor_actions.cc:89
+#: gtk2_ardour/analysis_window.cc:67
+msgid "Track"
+msgstr "Ścieżka"
+
+#: gtk2_ardour/editor_actions.cc:90
+msgid "Tools"
+msgstr "Narzędzia"
+
+#: gtk2_ardour/editor_actions.cc:91
+#: gtk2_ardour/editor.cc:1903
+#: gtk2_ardour/gain_meter.cc:169
+#: gtk2_ardour/gain_meter.cc:904
+#: gtk2_ardour/panner_ui.cc:97
+#: gtk2_ardour/panner_ui.cc:786
+msgid "Trim"
+msgstr "Przytnij"
+
+#: gtk2_ardour/editor_actions.cc:92
+msgid "View"
+msgstr "Widok"
+
+#: gtk2_ardour/editor_actions.cc:93
+msgid "Waveforms"
+msgstr "Wykres fali"
+
+#: gtk2_ardour/editor_actions.cc:94
+#: gtk2_ardour/editor_actions.cc:95
+msgid "Zoom"
+msgstr "Powiększenie"
+
+#: gtk2_ardour/editor_actions.cc:96
+msgid "Zoom Focus"
+msgstr "Powiększanie do"
+
+#: gtk2_ardour/editor_actions.cc:98
+msgid "Link Region/Track Selection"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:99
+msgid "Break drag"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:101
+msgid "Show Editor Mixer"
+msgstr "Mikser obok edytora"
+
+#: gtk2_ardour/editor_actions.cc:106
+msgid "Span Entire Overlap"
+msgstr "Obejmują wszystkie nakładające się fragmenty"
+
+#: gtk2_ardour/editor_actions.cc:111
+#: gtk2_ardour/editor.cc:526
+#: gtk2_ardour/mixer_strip.cc:977
+#: gtk2_ardour/mixer_ui.cc:116
+#: gtk2_ardour/plugin_ui.cc:338
+#: gtk2_ardour/route_time_axis.cc:514
+msgid "Active"
+msgstr "Aktywne"
+
+#: gtk2_ardour/editor_actions.cc:113
+#: gtk2_ardour/editor.cc:500
+#: gtk2_ardour/editor.cc:527
+#: gtk2_ardour/mixer_ui.cc:90
+#: gtk2_ardour/mixer_ui.cc:117
+#: gtk2_ardour/analysis_window.cc:68
+msgid "Show"
+msgstr "Wyświetl"
+
+#: gtk2_ardour/editor_actions.cc:115
+msgid "Created Automatically"
+msgstr "Tworzenie automatyczne"
+
+#: gtk2_ardour/editor_actions.cc:118
+msgid "Playhead to Next Region Boundary"
+msgstr "Do granicy następnego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:120
+msgid "Playhead to Previous Region Boundary"
+msgstr "Do granicy poprzedniego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:123
+msgid "Playhead to Next Region Start"
+msgstr "Do początku następnego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:125
+msgid "Playhead to Next Region End"
+msgstr "Do końca następnego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:127
+msgid "Playhead to Next Region Sync"
+msgstr "Do następnej synchronizacji obszaru"
+
+#: gtk2_ardour/editor_actions.cc:130
+msgid "Playhead to Previous Region Start"
+msgstr "Do początku poprzedniego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:132
+msgid "Playhead to Previous Region End"
+msgstr "Do końca poprzedniego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:134
+msgid "Playhead to Previous Region Sync"
+msgstr "Do poprzedniej synchronizacji obszaru"
+
+#: gtk2_ardour/editor_actions.cc:137
+msgid "to Next Region Boundary"
+msgstr "Do granic następnego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:139
+msgid "to Previous Region Boundary"
+msgstr "Do granic poprzedniego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:142
+msgid "to Next Region Start"
+msgstr "Do początku następnego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:144
+msgid "to Next Region End"
+msgstr "Do końca następnego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:146
+msgid "to Next Region Sync"
+msgstr "Do następnej synchronizacji obszaru"
+
+#: gtk2_ardour/editor_actions.cc:149
+msgid "to Previous Region Start"
+msgstr "Do początku poprzedniego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:151
+msgid "to Previous Region End"
+msgstr "Do końca poprzedniego obszaru"
+
+#: gtk2_ardour/editor_actions.cc:153
+msgid "to Previous Region Sync"
+msgstr "Do poprzedniej synchronizacji obszaru"
+
+#: gtk2_ardour/editor_actions.cc:156
+msgid "to Range Start"
+msgstr "Do początku zakresu"
+
+#: gtk2_ardour/editor_actions.cc:158
+msgid "to Range End"
+msgstr "Do końca zakresu"
+
+#: gtk2_ardour/editor_actions.cc:161
+msgid "Playhead to Range Start"
+msgstr "Głowica do początku zakresu"
+
+#: gtk2_ardour/editor_actions.cc:163
+msgid "Playhead to Range End"
+msgstr "Głowica do końca zakresu"
+
+#: gtk2_ardour/editor_actions.cc:166
+#: gtk2_ardour/editor.cc:2004
+#: gtk2_ardour/editor.cc:2087
+#: gtk2_ardour/redirect_box.cc:1195
+msgid "Select All"
+msgstr "Wszystko"
+
+#: gtk2_ardour/editor_actions.cc:168
+#: gtk2_ardour/redirect_box.cc:1196
+msgid "Deselect All"
+msgstr "Nic"
+
+#: gtk2_ardour/editor_actions.cc:170
+msgid "Invert Selection"
+msgstr "Odwróć zaznaczenie"
+
+#: gtk2_ardour/editor_actions.cc:172
+#: gtk2_ardour/editor.cc:2011
+msgid "Select All After Edit Point"
+msgstr "Wszystko za punktem edycji"
+
+#: gtk2_ardour/editor_actions.cc:174
+#: gtk2_ardour/editor.cc:2012
+msgid "Select All Before Edit Point"
+msgstr "Wszystko przed punktem edycji"
+
+#: gtk2_ardour/editor_actions.cc:177
+#, fuzzy
+msgid "Select All Overlapping Edit Range"
+msgstr "Wszystko w zakresie"
+
+#: gtk2_ardour/editor_actions.cc:179
+#, fuzzy
+msgid "Select All Inside Edit Range"
+msgstr "Wszystko w zakresie"
+
+#: gtk2_ardour/editor_actions.cc:182
+#, fuzzy
+msgid "Select Edit Range"
+msgstr "Zaznacz zakres"
+
+#: gtk2_ardour/editor_actions.cc:185
+msgid "Select All in Punch Range"
+msgstr "Wszystko w zakresie przełącznika"
+
+#: gtk2_ardour/editor_actions.cc:187
+msgid "Select All in Loop Range"
+msgstr "Wszystko w zakresie pętli"
+
+#: gtk2_ardour/editor_actions.cc:190
+msgid "Select Next Track/Bus"
+msgstr "Zaznacz następną ścieżkę/szynę"
+
+#: gtk2_ardour/editor_actions.cc:192
+msgid "Select Previous Track/Bus"
+msgstr "Zaznacz poprzednią ścieżkę/szynę"
+
+#: gtk2_ardour/editor_actions.cc:196
+msgid "Locate to Mark 1"
+msgstr "Przejdź do znacznika 1"
+
+#: gtk2_ardour/editor_actions.cc:198
+msgid "Locate to Mark 2"
+msgstr "Przejdź do znacznika 2"
+
+#: gtk2_ardour/editor_actions.cc:200
+msgid "Locate to Mark 3"
+msgstr "Przejdź do znacznika 3"
+
+#: gtk2_ardour/editor_actions.cc:202
+msgid "Locate to Mark 4"
+msgstr "Przejdź do znacznika 4"
+
+#: gtk2_ardour/editor_actions.cc:204
+msgid "Locate to Mark 5"
+msgstr "Przejdź do znacznika 5"
+
+#: gtk2_ardour/editor_actions.cc:206
+msgid "Locate to Mark 6"
+msgstr "Przejdź do znacznika 6"
+
+#: gtk2_ardour/editor_actions.cc:208
+msgid "Locate to Mark 7"
+msgstr "Przejdź do znacznika 7"
+
+#: gtk2_ardour/editor_actions.cc:210
+msgid "Locate to Mark 8"
+msgstr "Przejdź do znacznika 8"
+
+#: gtk2_ardour/editor_actions.cc:212
+msgid "Locate to Mark 9"
+msgstr "Przejdź do znacznika 9"
+
+#: gtk2_ardour/editor_actions.cc:215
+msgid "Jump Forward to Mark"
+msgstr "Do następnego znacznika"
+
+#: gtk2_ardour/editor_actions.cc:217
+msgid "Jump Backward to Mark"
+msgstr "Do poprzedniego znacznika"
+
+#: gtk2_ardour/editor_actions.cc:219
+msgid "Add Mark from Playhead"
+msgstr "Dodaj znacznik w położeniu głowicy"
+
+#: gtk2_ardour/editor_actions.cc:222
+msgid "Nudge Forward"
+msgstr "Do przodu"
+
+#: gtk2_ardour/editor_actions.cc:224
+msgid "Nudge Next Forward"
+msgstr "Pchnij następny do przodu"
+
+#: gtk2_ardour/editor_actions.cc:226
+msgid "Nudge Backward"
+msgstr "Do tyłu"
+
+#: gtk2_ardour/editor_actions.cc:228
+msgid "Nudge Next Backward"
+msgstr "Pchnij następny do tyłu"
+
+#: gtk2_ardour/editor_actions.cc:231
+msgid "Nudge Playhead Forward"
+msgstr "Do przodu"
+
+#: gtk2_ardour/editor_actions.cc:233
+msgid "Nudge Playhead Backward"
+msgstr "Do tyłu"
+
+#: gtk2_ardour/editor_actions.cc:235
+msgid "Forward To Grid"
+msgstr "Do siatki z przodu"
+
+#: gtk2_ardour/editor_actions.cc:237
+msgid "Backward To Grid"
+msgstr "Do siatki z tyłu"
+
+#: gtk2_ardour/editor_actions.cc:241
+#: gtk2_ardour/editor.cc:2838
+msgid "Zoom Out"
+msgstr "Pomniejsz"
+
+#: gtk2_ardour/editor_actions.cc:243
+#: gtk2_ardour/editor.cc:2832
+msgid "Zoom In"
+msgstr "Powiększ"
+
+#: gtk2_ardour/editor_actions.cc:245
+#: gtk2_ardour/editor.cc:2844
+msgid "Zoom to Session"
+msgstr "Dopasuj do sesji"
+
+#: gtk2_ardour/editor_actions.cc:247
+msgid "Zoom to Region"
+msgstr "Powiększanie do obszaru"
+
+#: gtk2_ardour/editor_actions.cc:249
+msgid "Toggle Zoom State"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:252
+msgid "Scroll Tracks Up"
+msgstr "Przewiń ścieżki do góry"
+
+#: gtk2_ardour/editor_actions.cc:254
+msgid "Scroll Tracks Down"
+msgstr "Przewiń ścieżki na dół"
+
+#: gtk2_ardour/editor_actions.cc:256
+msgid "Step Tracks Up"
+msgstr "Przesuń ścieżki w górę"
+
+#: gtk2_ardour/editor_actions.cc:258
+msgid "Step Tracks Down"
+msgstr "Przesuń ścieżki w dół"
+
+#: gtk2_ardour/editor_actions.cc:261
+msgid "Scroll Backward"
+msgstr "Przewiń do tyłu"
+
+#: gtk2_ardour/editor_actions.cc:263
+msgid "Scroll Forward"
+msgstr "Przewiń do przodu"
+
+#: gtk2_ardour/editor_actions.cc:265
+msgid "goto"
+msgstr "przejdź do"
+
+#: gtk2_ardour/editor_actions.cc:267
+msgid "Center Playhead"
+msgstr "Wyśrodkuj"
+
+#: gtk2_ardour/editor_actions.cc:269
+#, fuzzy
+msgid "Center Active Marker"
+msgstr "Usuń znacznik"
+
+#: gtk2_ardour/editor_actions.cc:272
+#, fuzzy
+msgid "Playhead Forward"
+msgstr "Głowica do przodu"
+
+#: gtk2_ardour/editor_actions.cc:274
+msgid "Playhead Backward"
+msgstr "Głowica do tyłu"
+
+#: gtk2_ardour/editor_actions.cc:277
+msgid "Playhead To Active Mark"
+msgstr "Do aktywnego znacznika"
+
+#: gtk2_ardour/editor_actions.cc:279
+#, fuzzy
+msgid "Active Mark To Playhead"
+msgstr "Przesuń znacznik do głowicy"
+
+#: gtk2_ardour/editor_actions.cc:282
+#, fuzzy
+msgid "Trim Start At Edit Point"
+msgstr "Początek do punktu edycji"
+
+#: gtk2_ardour/editor_actions.cc:285
+#, fuzzy
+msgid "Trim End At Edit Point"
+msgstr "Podziel w punkcie edycji"
+
+#: gtk2_ardour/editor_actions.cc:289
+#, fuzzy
+msgid "Start To Edit Point"
+msgstr "Początek do punktu edycji"
+
+#: gtk2_ardour/editor_actions.cc:292
+#, fuzzy
+msgid "Edit Point To End"
+msgstr "Punkt edycji do końca"
+
+#: gtk2_ardour/editor_actions.cc:295
+#: gtk2_ardour/editor.cc:1900
+msgid "Trim To Loop"
+msgstr "Do pętli"
+
+#: gtk2_ardour/editor_actions.cc:298
+#: gtk2_ardour/editor.cc:1901
+msgid "Trim To Punch"
+msgstr "Do przełącznika"
+
+#: gtk2_ardour/editor_actions.cc:302
+msgid "Set Loop From Edit Range"
+msgstr "Ustaw pętlę w zaznaczeniu"
+
+#: gtk2_ardour/editor_actions.cc:304
+msgid "Set Loop From Region"
+msgstr "Ustaw pętlę w obszarze"
+
+#: gtk2_ardour/editor_actions.cc:307
+#: gtk2_ardour/editor.cc:1993
+msgid "Loop Region"
+msgstr "Zapętl obszar"
+
+#: gtk2_ardour/editor_actions.cc:309
+msgid "Set Punch From Edit Range"
+msgstr "Ustaw przełącznik w zaznaczeniu"
+
+#: gtk2_ardour/editor_actions.cc:311
+msgid "Set Punch From Region"
+msgstr "Ustaw przełącznik w obszarze"
+
+#: gtk2_ardour/editor_actions.cc:314
+msgid "Transpose"
+msgstr "Transponuj"
+
+#: gtk2_ardour/editor_actions.cc:318
+msgid "Set Fade In Length"
+msgstr "Zmień długość stopniowego wzmocnienia"
+
+#: gtk2_ardour/editor_actions.cc:320
+#, fuzzy
+msgid "Toggle Fade In Active"
+msgstr "aktywuj stopniowe wzmocnienie"
+
+#: gtk2_ardour/editor_actions.cc:322
+#, fuzzy
+msgid "Set Fade Out Length"
+msgstr "Według długości pliku źródłowego"
+
+#: gtk2_ardour/editor_actions.cc:324
+#, fuzzy
+msgid "Toggle Fade Out Active"
+msgstr "aktywuj stopniowe wyciszenie"
+
+#: gtk2_ardour/editor_actions.cc:327
+msgid "Align Regions Start"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:330
+msgid "Align Regions Start Relative"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:333
+msgid "Align Regions End"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:336
+msgid "Align Regions End Relative"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:340
+msgid "Align Regions Sync"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:343
+msgid "Align Regions Sync Relative"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:347
+msgid "Play From Edit Point"
+msgstr "Od punktu edycji"
+
+#: gtk2_ardour/editor_actions.cc:349
+msgid "Play from Edit Point & Return"
+msgstr "Od punktu edycji i powróć"
+
+#: gtk2_ardour/editor_actions.cc:352
+msgid "Play Edit Range"
+msgstr "Zaznaczenie"
+
+#: gtk2_ardour/editor_actions.cc:353
+msgid "Play Selected Region(s)"
+msgstr "Zaznaczone obszary"
+
+#: gtk2_ardour/editor_actions.cc:356
+msgid "Brush at Mouse"
+msgstr "Pędzel"
+
+#: gtk2_ardour/editor_actions.cc:359
+msgid "Playhead to Mouse"
+msgstr "Do myszy"
+
+#: gtk2_ardour/editor_actions.cc:361
+#, fuzzy
+msgid "Active Marker to Mouse"
+msgstr "Odsłuch w położeniu myszy"
+
+#: gtk2_ardour/editor_actions.cc:364
+msgid "Duplicate Region"
+msgstr "Duplikuj"
+
+#: gtk2_ardour/editor_actions.cc:367
+msgid "Multi-Duplicate Region"
+msgstr "Powiel"
+
+#: gtk2_ardour/editor_actions.cc:370
+msgid "Duplicate Range"
+msgstr "Duplikuj zakres"
+
+#: gtk2_ardour/editor_actions.cc:373
+msgid "Insert Region"
+msgstr "Wstaw"
+
+#: gtk2_ardour/editor_actions.cc:376
+msgid "Normalize Region"
+msgstr "Normalizuj"
+
+#: gtk2_ardour/editor_actions.cc:379
+#: gtk2_ardour/editor.cc:1765
+#: gtk2_ardour/editor.cc:3869
+#: gtk2_ardour/editor_markers.cc:599
+#: gtk2_ardour/editor_markers.cc:1031
+#: gtk2_ardour/editor_mouse.cc:5211
+#: gtk2_ardour/imageframe_time_axis.cc:247
+#: gtk2_ardour/marker_time_axis.cc:207
+#: gtk2_ardour/mixer_strip.cc:975
+#: gtk2_ardour/redirect_box.cc:864
+#: gtk2_ardour/redirect_box.cc:1193
+#: gtk2_ardour/route_time_axis.cc:897
+#: gtk2_ardour/route_time_axis.cc:1373
+#: gtk2_ardour/route_ui.cc:827
+#: gtk2_ardour/visual_time_axis.cc:330
+msgid "Rename"
+msgstr "Zmień nazwę"
+
+#: gtk2_ardour/editor_actions.cc:382
+#, fuzzy
+msgid "Auto-Rename"
+msgstr "Zmień nazwę"
+
+#: gtk2_ardour/editor_actions.cc:385
+msgid "Boost Region Gain"
+msgstr "Zwiększ wzmocnienie"
+
+#: gtk2_ardour/editor_actions.cc:388
+msgid "Cut Region Gain"
+msgstr "Zmniejsz wzmocnienie"
+
+#: gtk2_ardour/editor_actions.cc:391
+#: gtk2_ardour/rhythm_ferret.cc:42
+msgid "Split Region"
+msgstr "Dzielenie obszaru"
+
+#: gtk2_ardour/editor_actions.cc:394
+msgid "Set Region Sync Position"
+msgstr "Ustaw pozycję synchronizacji"
+
+#: gtk2_ardour/editor_actions.cc:397
+msgid "Remove Region Sync"
+msgstr "Usuń synchronizację"
+
+#: gtk2_ardour/editor_actions.cc:400
+#, fuzzy
+msgid "Raise Region"
+msgstr "Zmień nazwę obszaru"
+
+#: gtk2_ardour/editor_actions.cc:403
+#, fuzzy
+msgid "Lower Region"
+msgstr "Zapętl obszar"
+
+#: gtk2_ardour/editor_actions.cc:406
+#, fuzzy
+msgid "Export Region"
+msgstr "Ekspor sesji"
+
+#: gtk2_ardour/editor_actions.cc:409
+msgid "Lock Region"
+msgstr "Zablokuj"
+
+#: gtk2_ardour/editor_actions.cc:412
+#, fuzzy
+msgid "Glue Region To Bars&Beats"
+msgstr "Takty:Uderzenia"
+
+#: gtk2_ardour/editor_actions.cc:415
+msgid "Move To Original Position"
+msgstr "Przenieś do pozycji początkowej"
+
+#: gtk2_ardour/editor_actions.cc:418
+#: gtk2_ardour/editor.cc:1871
+msgid "Reverse"
+msgstr "Odwróć"
+
+#: gtk2_ardour/editor_actions.cc:421
+#: gtk2_ardour/editor.cc:1909
+msgid "Make mono regions"
+msgstr "Ustaw obszary mono"
+
+#: gtk2_ardour/editor_actions.cc:424
+#: gtk2_ardour/editor.cc:1914
+msgid "Fill Track"
+msgstr "Wypełnij ścieżkę"
+
+#: gtk2_ardour/editor_actions.cc:427
+msgid "Mute/Unmute Region"
+msgstr "Wycisz/wyłącz wyciszenie"
+
+#: gtk2_ardour/editor_actions.cc:431
+#: gtk2_ardour/editor.cc:3145
+msgid "Undo"
+msgstr "Cofnij"
+
+#: gtk2_ardour/editor_actions.cc:433
+#: gtk2_ardour/editor.cc:3154
+msgid "Redo"
+msgstr "Powtórz"
+
+#: gtk2_ardour/editor_actions.cc:436
+msgid "Export Session"
+msgstr "Ekspor sesji"
+
+#: gtk2_ardour/editor_actions.cc:438
+msgid "Export Range"
+msgstr "Eksport zakresu"
+
+#: gtk2_ardour/editor_actions.cc:444
+#, fuzzy
+msgid "Separate Using Punch Range"
+msgstr "Oddziel obszar w zakresie"
+
+#: gtk2_ardour/editor_actions.cc:447
+#, fuzzy
+msgid "Separate Using Loop Range"
+msgstr "Oddziel obszar w zakresie"
+
+#: gtk2_ardour/editor_actions.cc:450
+#: gtk2_ardour/editor_actions.cc:480
+msgid "Crop"
+msgstr "Przytnij"
+
+#: gtk2_ardour/editor_actions.cc:453
+#: gtk2_ardour/editor.cc:2029
+#: gtk2_ardour/editor.cc:2104
+#: gtk2_ardour/redirect_box.cc:1184
+msgid "Cut"
+msgstr "Wytnij"
+
+#: gtk2_ardour/editor_actions.cc:456
+#: gtk2_ardour/redirect_box.cc:1189
+#: gtk2_ardour/connection_editor.cc:55
+msgid "Delete"
+msgstr "Usuń"
+
+#: gtk2_ardour/editor_actions.cc:458
+#: gtk2_ardour/editor.cc:2030
+#: gtk2_ardour/editor.cc:2105
+#: gtk2_ardour/redirect_box.cc:1186
+msgid "Copy"
+msgstr "Skopiuj"
+
+#: gtk2_ardour/editor_actions.cc:460
+#: gtk2_ardour/editor.cc:2031
+#: gtk2_ardour/editor.cc:2106
+#: gtk2_ardour/redirect_box.cc:1192
+msgid "Paste"
+msgstr "Wklej"
+
+#: gtk2_ardour/editor_actions.cc:463
+msgid "Set Tempo from Region=Bar"
+msgstr "Ustaw tempo od obszar=takt"
+
+#: gtk2_ardour/editor_actions.cc:466
+msgid "Set Tempo from Edit Range=Bar"
+msgstr "Ustaw tempo od zaznaczenie=takt"
+
+#: gtk2_ardour/editor_actions.cc:469
+msgid "Split Regions At Percussion Onsets"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:472
+#: gtk2_ardour/rhythm_ferret.cc:36
+msgid "Rhythm Ferret"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:475
+msgid "Move Forward to Transient"
+msgstr "Do następnego przejścia"
+
+#: gtk2_ardour/editor_actions.cc:477
+msgid "Move Backwards to Transient"
+msgstr "Do poprzedniego przejścia"
+
+#: gtk2_ardour/editor_actions.cc:482
+msgid "Insert Chunk"
+msgstr "Wstaw fragment"
+
+#: gtk2_ardour/editor_actions.cc:485
+msgid "Split At Edit Point"
+msgstr "Podziel w punkcie edycji"
+
+#: gtk2_ardour/editor_actions.cc:488
+msgid "Start Range"
+msgstr "Rozpocznij zakres"
+
+#: gtk2_ardour/editor_actions.cc:490
+msgid "Finish Range"
+msgstr "Zakończ zakres"
+
+#: gtk2_ardour/editor_actions.cc:492
+msgid "Finish add Range"
+msgstr "Zakończ dodawanie zakresu"
+
+#: gtk2_ardour/editor_actions.cc:495
+#: gtk2_ardour/editor.cc:1952
+msgid "Extend Range to End of Region"
+msgstr "Rozszerz zakres do końca obszaru"
+
+#: gtk2_ardour/editor_actions.cc:497
+#: gtk2_ardour/editor.cc:1953
+msgid "Extend Range to Start of Region"
+msgstr "Rozszerz zakres do początku obszaru "
+
+#: gtk2_ardour/editor_actions.cc:500
+msgid "Follow Playhead"
+msgstr "Podążanie za głowicą"
+
+#: gtk2_ardour/editor_actions.cc:505
+#: gtk2_ardour/editor_ops.cc:5651
+#, fuzzy
+msgid "Insert Time"
+msgstr "Wstaw obszar"
+
+#: gtk2_ardour/editor_actions.cc:509
+msgid "Toggle Active"
+msgstr "Przełącz aktywność"
+
+#: gtk2_ardour/editor_actions.cc:512
+#: gtk2_ardour/editor_actions.cc:653
+#: gtk2_ardour/editor.cc:1916
+#: gtk2_ardour/editor.cc:3864
+#: gtk2_ardour/editor_markers.cc:605
+#: gtk2_ardour/editor_markers.cc:661
+#: gtk2_ardour/imageframe_time_axis.cc:258
+#: gtk2_ardour/location_ui.cc:58
+#: gtk2_ardour/marker_time_axis.cc:214
+#: gtk2_ardour/mixer_strip.cc:996
+#: gtk2_ardour/route_time_axis.cc:519
+msgid "Remove"
+msgstr "Usuń"
+
+#: gtk2_ardour/editor_actions.cc:516
+#: gtk2_ardour/time_axis_view.cc:615
+msgid "Largest"
+msgstr "Największy"
+
+#: gtk2_ardour/editor_actions.cc:519
+#: gtk2_ardour/time_axis_view.cc:617
+msgid "Larger"
+msgstr "Większy"
+
+#: gtk2_ardour/editor_actions.cc:522
+#: gtk2_ardour/time_axis_view.cc:616
+msgid "Large"
+msgstr "Duży"
+
+#: gtk2_ardour/editor_actions.cc:528
+#: gtk2_ardour/time_axis_view.cc:620
+msgid "Small"
+msgstr "Mały"
+
+#: gtk2_ardour/editor_actions.cc:532
+#: gtk2_ardour/time_axis_view.cc:619
+msgid "Smaller"
+msgstr "Mniejszy"
+
+#: gtk2_ardour/editor_actions.cc:539
+msgid "Zoom Focus Left"
+msgstr "Do lewej"
+
+#: gtk2_ardour/editor_actions.cc:541
+msgid "Zoom Focus Right"
+msgstr "Do prawej"
+
+#: gtk2_ardour/editor_actions.cc:543
+msgid "Zoom Focus Center"
+msgstr "Do środka"
+
+#: gtk2_ardour/editor_actions.cc:545
+msgid "Zoom Focus Playhead"
+msgstr "Do głowicy"
+
+#: gtk2_ardour/editor_actions.cc:547
+msgid "Zoom Focus Mouse"
+msgstr "Do myszy"
+
+#: gtk2_ardour/editor_actions.cc:549
+msgid "Zoom Focus Edit"
+msgstr "Do wskaźnika"
+
+#: gtk2_ardour/editor_actions.cc:555
+msgid "Object Tool"
+msgstr "Narzędzie obiektów"
+
+#: gtk2_ardour/editor_actions.cc:556
+msgid "Range Tool"
+msgstr "Narzędzie zakresów"
+
+#: gtk2_ardour/editor_actions.cc:557
+msgid "Gain Tool"
+msgstr "Narzędzie wzmocnienia"
+
+#: gtk2_ardour/editor_actions.cc:558
+msgid "Zoom Tool"
+msgstr "Narzędzie powiększenia"
+
+#: gtk2_ardour/editor_actions.cc:559
+msgid "Timefx Tool"
+msgstr "Narzędzie rozciągania w czasie"
+
+#: gtk2_ardour/editor_actions.cc:563
+#: gtk2_ardour/editor.cc:141
+#: gtk2_ardour/editor.cc:150
+#: gtk2_ardour/editor.cc:3444
+msgid "Mouse"
+msgstr "Mysz"
+
+#: gtk2_ardour/editor_actions.cc:564
+#: gtk2_ardour/editor.cc:140
+#: gtk2_ardour/editor.cc:3415
+#: gtk2_ardour/marker_time_axis.cc:255
+msgid "Marker"
+msgstr "Znacznik"
+
+#: gtk2_ardour/editor_actions.cc:566
+msgid "Change edit point"
+msgstr "Zmień punkt edycji"
+
+#: gtk2_ardour/editor_actions.cc:567
+msgid "Change edit point (w/Marker)"
+msgstr "Zmień punkt edycji (w/Marker)"
+
+#: gtk2_ardour/editor_actions.cc:569
+#, fuzzy
+msgid "Splice"
+msgstr "Podziel"
+
+#: gtk2_ardour/editor_actions.cc:570
+#, fuzzy
+msgid "Slide"
+msgstr "Ukryj"
+
+#: gtk2_ardour/editor_actions.cc:571
+#: gtk2_ardour/editor.cc:1786
+#: gtk2_ardour/editor_markers.cc:600
+msgid "Lock"
+msgstr "Zablokuj"
+
+#: gtk2_ardour/editor_actions.cc:572
+msgid "Toggle Edit Mode"
+msgstr "Przełącz tryb edycji"
+
+#: gtk2_ardour/editor_actions.cc:574
+msgid "Snap To"
+msgstr "Przyciąganie"
+
+#: gtk2_ardour/editor_actions.cc:575
+msgid "Snap Mode"
+msgstr "Tryb przyciągania"
+
+#: gtk2_ardour/editor_actions.cc:578
+#: gtk2_ardour/editor.cc:132
+#: gtk2_ardour/editor.cc:3374
+msgid "No Grid"
+msgstr "Bez siatki"
+
+#: gtk2_ardour/editor_actions.cc:579
+#: gtk2_ardour/editor.cc:133
+#: gtk2_ardour/editor.cc:3376
+msgid "Grid"
+msgstr "Siatka"
+
+#: gtk2_ardour/editor_actions.cc:580
+#: gtk2_ardour/editor.cc:134
+#: gtk2_ardour/editor.cc:3378
+msgid "Magnetic"
+msgstr "Magnetyczny"
+
+#: gtk2_ardour/editor_actions.cc:582
+#, fuzzy
+msgid "Next Snap Mode"
+msgstr "Tryb przyciągania"
+
+#: gtk2_ardour/editor_actions.cc:583
+msgid "Next Snap Choice"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:588
+msgid "Snap to cd frame"
+msgstr "Do klatek cd"
+
+#: gtk2_ardour/editor_actions.cc:589
+msgid "Snap to SMPTE frame"
+msgstr "Do klatek SMPTE"
+
+#: gtk2_ardour/editor_actions.cc:590
+msgid "Snap to SMPTE seconds"
+msgstr "Do sekund SMPTE"
+
+#: gtk2_ardour/editor_actions.cc:591
+msgid "Snap to SMPTE minutes"
+msgstr "Do minut SMPTE"
+
+#: gtk2_ardour/editor_actions.cc:592
+msgid "Snap to seconds"
+msgstr "Do sekund"
+
+#: gtk2_ardour/editor_actions.cc:593
+msgid "Snap to minutes"
+msgstr "Do minut"
+
+#: gtk2_ardour/editor_actions.cc:594
+msgid "Snap to thirtyseconds"
+msgstr "Do trzydziestodwójek"
+
+#: gtk2_ardour/editor_actions.cc:595
+msgid "Snap to asixteenthbeat"
+msgstr "Do szesnastek"
+
+#: gtk2_ardour/editor_actions.cc:596
+msgid "Snap to eighths"
+msgstr "Do ósemek"
+
+#: gtk2_ardour/editor_actions.cc:597
+msgid "Snap to quarters"
+msgstr "Do ćwierćnut"
+
+#: gtk2_ardour/editor_actions.cc:598
+msgid "Snap to thirds"
+msgstr "Do trzeciej części nuty"
+
+#: gtk2_ardour/editor_actions.cc:599
+msgid "Snap to beat"
+msgstr "Do uderzeń"
+
+#: gtk2_ardour/editor_actions.cc:600
+msgid "Snap to bar"
+msgstr "Do taktów"
+
+#: gtk2_ardour/editor_actions.cc:601
+msgid "Snap to mark"
+msgstr "Do znaczników"
+
+#: gtk2_ardour/editor_actions.cc:602
+msgid "Snap to region start"
+msgstr "Do początku obszaru"
+
+#: gtk2_ardour/editor_actions.cc:603
+msgid "Snap to region end"
+msgstr "Do końca obszaru"
+
+#: gtk2_ardour/editor_actions.cc:604
+msgid "Snap to region sync"
+msgstr "Do synchronizacji obszaru"
+
+#: gtk2_ardour/editor_actions.cc:605
+msgid "Snap to region boundary"
+msgstr "Do granic obszaru"
+
+#: gtk2_ardour/editor_actions.cc:611
+#: gtk2_ardour/editor.cc:196
+#: gtk2_ardour/tempo_dialog.cc:273
+#: gtk2_ardour/tempo_dialog.cc:288
+msgid "Meter"
+msgstr "Metrum"
+
+#: gtk2_ardour/editor_actions.cc:612
+#, fuzzy
+msgid "Ranges"
+msgstr " zakres"
+
+#: gtk2_ardour/editor_actions.cc:614
+#: gtk2_ardour/editor.cc:200
+msgid "CD Markers"
+msgstr "Znaczniki CD"
+
+#: gtk2_ardour/editor_actions.cc:615
+#, fuzzy
+msgid "Loop/Punch"
+msgstr "Zakresy pętli/przełącznika"
+
+#: gtk2_ardour/editor_actions.cc:619
+msgid "Min:Sec"
+msgstr "Minuty:sekundy"
+
+#: gtk2_ardour/editor_actions.cc:647
+msgid "Sort"
+msgstr "Sortuj"
+
+#: gtk2_ardour/editor_actions.cc:655
+msgid "Show all"
+msgstr "Wyświetl wszystko"
+
+#: gtk2_ardour/editor_actions.cc:656
+msgid "Show automatic regions"
+msgstr "Wyświetl obszary automatyczne"
+
+#: gtk2_ardour/editor_actions.cc:658
+msgid "Ascending"
+msgstr "Rosnąco"
+
+#: gtk2_ardour/editor_actions.cc:660
+msgid "Descending"
+msgstr "Malejąco"
+
+#: gtk2_ardour/editor_actions.cc:663
+msgid "By Region Name"
+msgstr "Według nazwy obszaru"
+
+#: gtk2_ardour/editor_actions.cc:665
+msgid "By Region Length"
+msgstr "Według długości obszaru"
+
+#: gtk2_ardour/editor_actions.cc:667
+msgid "By Region Position"
+msgstr "Według pozycji obszaru"
+
+#: gtk2_ardour/editor_actions.cc:669
+msgid "By Region Timestamp"
+msgstr "Według timestamp obszaru"
+
+#: gtk2_ardour/editor_actions.cc:671
+msgid "By Region Start in File"
+msgstr "Według początku obszaru w pliku"
+
+#: gtk2_ardour/editor_actions.cc:673
+msgid "By Region End in File"
+msgstr "Według końca obszaru w pliku"
+
+#: gtk2_ardour/editor_actions.cc:675
+msgid "By Source File Name"
+msgstr "Według nazwy pliku źrodłowego"
+
+#: gtk2_ardour/editor_actions.cc:677
+msgid "By Source File Length"
+msgstr "Według długości pliku źródłowego"
+
+#: gtk2_ardour/editor_actions.cc:679
+msgid "By Source File Creation Date"
+msgstr "Według daty utworzenia pliku źródłowego"
+
+#: gtk2_ardour/editor_actions.cc:681
+msgid "By Source Filesystem"
+msgstr "Według systemu plików źródła"
+
+#: gtk2_ardour/editor_actions.cc:687
+msgid "Import"
+msgstr "Importuj"
+
+#: gtk2_ardour/editor_actions.cc:689
+msgid "Import to Region List"
+msgstr "Do początku obszaru"
+
+#: gtk2_ardour/editor_actions.cc:692
+msgid "Show Waveforms"
+msgstr "Wykres fali"
+
+#: gtk2_ardour/editor_actions.cc:694
+msgid "Show Waveforms While Recording"
+msgstr "Wykres fali podczas nagrywania"
+
+#: gtk2_ardour/editor_actions.cc:695
+msgid "Show Measures"
+msgstr "Linie"
+
+#: gtk2_ardour/editor_actions.cc:706
+msgid "Show Logo"
+msgstr "Wyświetlanie logo"
+
+#: gtk2_ardour/editor_actions.cc:712
+msgid "Later is Higher"
+msgstr "Późniejsza jest wyżej"
+
+#: gtk2_ardour/editor_actions.cc:713
+msgid "Most Recently Moved/Added is Higher"
+msgstr "Ostatnio przesunięta/dodana jest wyżej"
+
+#: gtk2_ardour/editor_actions.cc:714
+msgid "Most Recently Added is Higher"
+msgstr "Ostatnio dodana jest wyżej"
+
+#: gtk2_ardour/editor_actions.cc:718
+msgid "23.976"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:719
+msgid "24"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:720
+msgid "24.976"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:721
+msgid "25"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:722
+msgid "29.97"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:723
+msgid "29.97 drop"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:724
+msgid "30"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:725
+msgid "30 drop"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:726
+msgid "59.94"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:727
+msgid "60"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:731
+msgid "+4.1667% + 0.1%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:732
+msgid "+4.1667%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:733
+msgid "+4.1667% - 0.1%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:734
+msgid "+ 0.1%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:735
+#: gtk2_ardour/engine_dialog.cc:101
+#: gtk2_ardour/engine_dialog.cc:106
+#: gtk2_ardour/engine_dialog.cc:495
+#: gtk2_ardour/export_dialog.cc:78
+#: gtk2_ardour/export_dialog.cc:92
+#: gtk2_ardour/export_dialog.cc:956
+#: gtk2_ardour/export_dialog.cc:1294
+#: gtk2_ardour/route_ui.cc:526
+msgid "None"
+msgstr "Brak"
+
+#: gtk2_ardour/editor_actions.cc:736
+msgid "- 0.1%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:737
+msgid "-4.1667% + 0.1%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:738
+msgid "-4.1667%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:739
+msgid "-4.1667% - 0.1%"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:743
+msgid "80 per frame"
+msgstr "80 na klatkę"
+
+#: gtk2_ardour/editor_actions.cc:745
+msgid "100 per frame"
+msgstr "100 na klatkę"
+
+#: gtk2_ardour/editor_actions.cc:1139
+#: gtk2_ardour/editor_actions.cc:1248
+#: gtk2_ardour/editor_actions.cc:1259
+#: gtk2_ardour/editor_actions.cc:1312
+#: gtk2_ardour/editor_actions.cc:1323
+#: gtk2_ardour/editor_actions.cc:1370
+#: gtk2_ardour/editor_actions.cc:1380
+msgid "programming error: %1: %2"
+msgstr "błąd programowania: %1: %2"
+
+#: gtk2_ardour/editor_actions.cc:1541
+msgid "Configuraton is using unhandled subframes per frame value: %1"
+msgstr ""
+
+#: gtk2_ardour/editor_actions.cc:1573
+#: gtk2_ardour/route_time_axis.cc:544
+#: gtk2_ardour/route_time_axis.cc:599
+#: gtk2_ardour/route_time_axis.cc:871
+msgid "programming error: %1 %2"
+msgstr "błąd programowania: %1 %2"
+
+#: gtk2_ardour/editor_audio_import.cc:73
+#: gtk2_ardour/editor_audio_import.cc:94
+msgid "You can't import or embed an audiofile until you have a session loaded."
+msgstr "Nie możesz importować lub osadzać pliku dźwiękowego dopóki nie wczytasz sesji."
+
+#: gtk2_ardour/editor_audio_import.cc:79
+#: gtk2_ardour/editor_audio_import.cc:112
+msgid "Add existing audio"
+msgstr "Dodaj istniejące audio"
+
+#: gtk2_ardour/editor_audio_import.cc:224
+msgid "The session already contains a source file named %1. This file will be imported as a new file, please confirm."
+msgstr ""
+
+#: gtk2_ardour/editor_audio_import.cc:226
+msgid "A source file %1 already exists. This operation will not update that source but import the file %2 as a new source, please confirm."
+msgstr ""
+
+#: gtk2_ardour/editor_audio_import.cc:495
+msgid "importing %1"
+msgstr "importowanie %1"
+
+#: gtk2_ardour/editor_audio_import.cc:500
+msgid "Cancel Import"
+msgstr "Anuluj import"
+
+#: gtk2_ardour/editor_audio_import.cc:604
+msgid "Editor: cannot open file \"%1\", (%2)"
+msgstr "Edytor: nie można otworzyć pliku \"%1\", (%2)"
+
+#: gtk2_ardour/editor_audio_import.cc:612
+msgid "Cancel entire import"
+msgstr "Anuluj cały import"
+
+#: gtk2_ardour/editor_audio_import.cc:613
+msgid "Don't embed it"
+msgstr "Nie osadzaj tego"
+
+#: gtk2_ardour/editor_audio_import.cc:614
+msgid "Embed all without questions"
+msgstr "Osadź wszystko bez zadawania pytań"
+
+#: gtk2_ardour/editor_audio_import.cc:617
+#: gtk2_ardour/editor_audio_import.cc:644
+msgid ""
+"%1\n"
+"This audiofile's sample rate doesn't match the session sample rate!"
+msgstr ""
+"%1\n"
+"Częstotliwość próbkowania tego pliku nie odpowiada częstotliwości próbkowania sesji!"
+
+#: gtk2_ardour/editor_audio_import.cc:640
+#: gtk2_ardour/editor.cc:3718
+#: gtk2_ardour/editor_ops.cc:5158
+#: gtk2_ardour/editor_timefx.cc:88
+#: gtk2_ardour/export_dialog.cc:1034
+#: gtk2_ardour/io_selector.cc:60
+#: gtk2_ardour/io_selector.cc:750
+#: gtk2_ardour/redirect_box.cc:1026
+#: gtk2_ardour/sfdb_ui.cc:741
+#: gtk2_ardour/tempo_dialog.cc:41
+#: gtk2_ardour/tempo_dialog.cc:60
+#: gtk2_ardour/tempo_dialog.cc:275
+#: gtk2_ardour/tempo_dialog.cc:290
+#: gtk2_ardour/connection_editor.cc:59
+msgid "Cancel"
+msgstr "Anuluj"
+
+#: gtk2_ardour/editor_audio_import.cc:641
+msgid "Embed it anyway"
+msgstr "Osadź mimo to"
+
+#: gtk2_ardour/editor_audio_import.cc:689
+msgid "could not open %1"
+msgstr "nie można otworzyć %1"
+
+#: gtk2_ardour/editor_audio_import.cc:819
+msgid "insert sndfile"
+msgstr "wstaw plik dźwiękowy"
+
+#: gtk2_ardour/editor_canvas.cc:138
+msgid "VerboseCanvasCursor"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:110
+#: gtk2_ardour/editor.cc:3348
+msgid "CD Frames"
+msgstr "klatki CD"
+
+#: gtk2_ardour/editor.cc:111
+#: gtk2_ardour/editor.cc:3350
+msgid "SMPTE Frames"
+msgstr "klatki SMPTE"
+
+#: gtk2_ardour/editor.cc:112
+#: gtk2_ardour/editor.cc:2861
+#: gtk2_ardour/editor.cc:3352
+msgid "SMPTE Seconds"
+msgstr "Sekundy SMPTE"
+
+#: gtk2_ardour/editor.cc:113
+#: gtk2_ardour/editor.cc:3354
+msgid "SMPTE Minutes"
+msgstr "Minuty SMPTE"
+
+#: gtk2_ardour/editor.cc:114
+#: gtk2_ardour/editor.cc:3356
+msgid "Seconds"
+msgstr "Sekundy"
+
+#: gtk2_ardour/editor.cc:115
+#: gtk2_ardour/editor.cc:3358
+msgid "Minutes"
+msgstr "Minuty"
+
+#: gtk2_ardour/editor.cc:116
+#: gtk2_ardour/editor.cc:3332
+msgid "Beats/32"
+msgstr "Uderzenia/32"
+
+#: gtk2_ardour/editor.cc:117
+#: gtk2_ardour/editor.cc:3330
+msgid "Beats/16"
+msgstr "Uderzenia/16"
+
+#: gtk2_ardour/editor.cc:118
+#: gtk2_ardour/editor.cc:3328
+msgid "Beats/8"
+msgstr "Uderzenia/8"
+
+#: gtk2_ardour/editor.cc:119
+#: gtk2_ardour/editor.cc:3326
+msgid "Beats/4"
+msgstr "Uderzenia/4"
+
+#: gtk2_ardour/editor.cc:120
+#: gtk2_ardour/editor.cc:3324
+msgid "Beats/3"
+msgstr "Uderzenia/3"
+
+#: gtk2_ardour/editor.cc:121
+#: gtk2_ardour/editor.cc:3334
+msgid "Beats"
+msgstr "Uderzenia"
+
+#: gtk2_ardour/editor.cc:122
+#: gtk2_ardour/editor.cc:3336
+msgid "Bars"
+msgstr "Takty"
+
+#: gtk2_ardour/editor.cc:123
+#: gtk2_ardour/editor.cc:3338
+msgid "Marks"
+msgstr "Znaczniki"
+
+#: gtk2_ardour/editor.cc:124
+#: gtk2_ardour/editor.cc:3340
+msgid "Region starts"
+msgstr "Początek obszaru"
+
+#: gtk2_ardour/editor.cc:125
+#: gtk2_ardour/editor.cc:3342
+msgid "Region ends"
+msgstr "Koniec obszaru"
+
+#: gtk2_ardour/editor.cc:126
+#: gtk2_ardour/editor.cc:3346
+msgid "Region syncs"
+msgstr "Synchronizacja obszaru"
+
+#: gtk2_ardour/editor.cc:127
+#: gtk2_ardour/editor.cc:3344
+msgid "Region bounds"
+msgstr "Granice obszaru"
+
+#: gtk2_ardour/editor.cc:146
+#: gtk2_ardour/editor.cc:3436
+#: gtk2_ardour/export_dialog.cc:142
+#: gtk2_ardour/export_dialog.cc:158
+#: gtk2_ardour/export_dialog.cc:1131
+#: gtk2_ardour/export_dialog.cc:1135
+msgid "Left"
+msgstr "Lewa"
+
+#: gtk2_ardour/editor.cc:147
+#: gtk2_ardour/editor.cc:3438
+#: gtk2_ardour/export_dialog.cc:143
+#: gtk2_ardour/export_dialog.cc:159
+msgid "Right"
+msgstr "Prawa"
+
+#: gtk2_ardour/editor.cc:148
+#: gtk2_ardour/editor.cc:3440
+msgid "Center"
+msgstr "Środek"
+
+#: gtk2_ardour/editor.cc:157
+msgid "Mushy"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:158
+msgid "Smooth"
+msgstr "Płynnie"
+
+#: gtk2_ardour/editor.cc:159
+msgid "Balanced multitimbral mixture"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:160
+msgid "Unpitched percussion with stable notes"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:161
+msgid "Crisp monophonic instrumental"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:162
+msgid "Unpitched solo percussion"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:191
+msgid "Mins:Secs"
+msgstr "min:s"
+
+#: gtk2_ardour/editor.cc:197
+msgid "Location Markers"
+msgstr "Znaczniki położenia"
+
+#: gtk2_ardour/editor.cc:198
+msgid "Range Markers"
+msgstr "Znaczniki zakresu"
+
+#: gtk2_ardour/editor.cc:199
+msgid "Loop/Punch Ranges"
+msgstr "Zakresy pętli/przełącznika"
+
+#: gtk2_ardour/editor.cc:218
+msgid "mode"
+msgstr "tryb"
+
+#: gtk2_ardour/editor.cc:219
+msgid "automation"
+msgstr "automatyka"
+
+#: gtk2_ardour/editor.cc:501
+#: gtk2_ardour/editor.cc:525
+msgid "Name"
+msgstr "Nazwa"
+
+#: gtk2_ardour/editor.cc:604
+#: gtk2_ardour/editor.cc:675
+msgid "Regions"
+msgstr "Obszar"
+
+#: gtk2_ardour/editor.cc:647
+#: gtk2_ardour/editor.cc:689
+msgid "Chunks"
+msgstr "Fragmenty"
+
+#: gtk2_ardour/editor.cc:678
+msgid "Tracks/Busses"
+msgstr "Ścieżki/szyny"
+
+#: gtk2_ardour/editor.cc:681
+msgid "Snapshots"
+msgstr "Zrzuty"
+
+#: gtk2_ardour/editor.cc:684
+msgid "Edit Groups"
+msgstr "Zmiany grup"
+
+#: gtk2_ardour/editor.cc:747
+msgid "Nudge Region/Selection Forwards"
+msgstr "Pchnij obszar/zaznaczenie w przód"
+
+#: gtk2_ardour/editor.cc:748
+msgid "Nudge Region/Selection Backwards"
+msgstr "Pchnij obszar/zaznaczenie w tył"
+
+#: gtk2_ardour/editor.cc:778
+#: gtk2_ardour/editor_mixer.cc:359
+msgid "Editor"
+msgstr "Edytor"
+
+#: gtk2_ardour/editor.cc:1365
+#: gtk2_ardour/editor_mouse.cc:1917
+msgid "programming error: fade in canvas item has no regionview data pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:1377
+#: gtk2_ardour/editor.cc:1399
+#: gtk2_ardour/redirect_box.cc:1201
+msgid "Deactivate"
+msgstr "Dezaktywuj"
+
+#: gtk2_ardour/editor.cc:1379
+#: gtk2_ardour/editor.cc:1401
+#: gtk2_ardour/redirect_box.cc:1199
+msgid "Activate"
+msgstr "Aktywuj"
+
+#: gtk2_ardour/editor.cc:1419
+#: gtk2_ardour/route_time_axis.cc:1587
+#: gtk2_ardour/selection.cc:710
+#: gtk2_ardour/selection.cc:749
+msgid "programming error: "
+msgstr "błąd programowania:"
+
+#: gtk2_ardour/editor.cc:1526
+#: gtk2_ardour/editor.cc:1534
+#: gtk2_ardour/editor_ops.cc:3468
+msgid "Freeze"
+msgstr "Zamroź"
+
+#: gtk2_ardour/editor.cc:1530
+msgid "Unfreeze"
+msgstr "Odmroź"
+
+#: gtk2_ardour/editor.cc:1698
+#: gtk2_ardour/editor.cc:1807
+#: gtk2_ardour/mixer_strip.cc:88
+#: gtk2_ardour/mixer_strip.cc:422
+#: gtk2_ardour/panner_ui.cc:410
+#: gtk2_ardour/route_time_axis.cc:187
+msgid "Mute"
+msgstr "Wyciszenie"
+
+#: gtk2_ardour/editor.cc:1700
+msgid "Unmute"
+msgstr "Wył. wyciszenie"
+
+#: gtk2_ardour/editor.cc:1709
+msgid "Convert to short"
+msgstr "Konwertuj na krótki"
+
+#: gtk2_ardour/editor.cc:1711
+msgid "Convert to full"
+msgstr "Konwertuj na długi"
+
+#: gtk2_ardour/editor.cc:1722
+msgid "Crossfade"
+msgstr "Przejście krzyżowe"
+
+#: gtk2_ardour/editor.cc:1766
+msgid "Popup region editor"
+msgstr "Okno zmiany obszaru"
+
+#: gtk2_ardour/editor.cc:1767
+msgid "Raise to top layer"
+msgstr "Przenieś do najwyższej warstwy"
+
+#: gtk2_ardour/editor.cc:1768
+msgid "Lower to bottom layer"
+msgstr "Przenieś do najniższej warstwy"
+
+#: gtk2_ardour/editor.cc:1770
+msgid "Define sync point"
+msgstr "Zdefiniuj punkt synchronizacji"
+
+#: gtk2_ardour/editor.cc:1771
+msgid "Remove sync point"
+msgstr "Usuń punkt synchronizacji"
+
+#: gtk2_ardour/editor.cc:1776
+msgid "Bounce"
+msgstr "Zgraj"
+
+#: gtk2_ardour/editor.cc:1779
+#: gtk2_ardour/editor.cc:1948
+msgid "Spectral Analysis"
+msgstr "Analiza spektrum"
+
+#: gtk2_ardour/editor.cc:1793
+msgid "Glue to Bars&Beats"
+msgstr "Przyklejenie do taktów i uderzeń"
+
+#: gtk2_ardour/editor.cc:1817
+msgid "Opaque"
+msgstr "Mętna"
+
+#: gtk2_ardour/editor.cc:1827
+msgid "Original position"
+msgstr "Pozycja początkowa"
+
+#: gtk2_ardour/editor.cc:1840
+msgid "Reset Envelope"
+msgstr "Resetuj obwiednię"
+
+#: gtk2_ardour/editor.cc:1842
+msgid "Envelope Visible"
+msgstr "Wyświetl obwiednię"
+
+#: gtk2_ardour/editor.cc:1851
+msgid "Envelope Active"
+msgstr "Aktywuj obwiednię"
+
+#: gtk2_ardour/editor.cc:1865
+msgid "DeNormalize"
+msgstr "Cofnij normalizację"
+
+#: gtk2_ardour/editor.cc:1867
+msgid "Normalize"
+msgstr "Normalizuj"
+
+#: gtk2_ardour/editor.cc:1876
+#: gtk2_ardour/editor.cc:1967
+msgid "Add Range Markers"
+msgstr "Dodaj znaczniki zakresu"
+
+#: gtk2_ardour/editor.cc:1877
+msgid "Set Range Selection"
+msgstr "Ustaw zakres zaznaczenia"
+
+#: gtk2_ardour/editor.cc:1886
+msgid "Nudge fwd"
+msgstr "Pchnij do przodu"
+
+#: gtk2_ardour/editor.cc:1887
+msgid "Nudge bwd"
+msgstr "Pchnij do tyłu"
+
+#: gtk2_ardour/editor.cc:1888
+msgid "Nudge fwd by capture offset"
+msgstr "Do przodu wg wyrównania nagrania"
+
+#: gtk2_ardour/editor.cc:1889
+msgid "Nudge bwd by capture offset"
+msgstr "Do tyłu wg wyrównania nagrania"
+
+#: gtk2_ardour/editor.cc:1898
+msgid "Start to edit point"
+msgstr "Początek do punktu edycji"
+
+#: gtk2_ardour/editor.cc:1899
+msgid "Edit point to end"
+msgstr "Punkt edycji do końca"
+
+#: gtk2_ardour/editor.cc:1906
+msgid "Split"
+msgstr "Podziel"
+
+#: gtk2_ardour/editor.cc:1912
+#: gtk2_ardour/editor.cc:3209
+msgid "Duplicate"
+msgstr "Powiel"
+
+#: gtk2_ardour/editor.cc:1913
+#, fuzzy
+msgid "Multi-Duplicate"
+msgstr "Powiel"
+
+#: gtk2_ardour/editor.cc:1943
+msgid "Play range"
+msgstr "Odtwórz zakres"
+
+#: gtk2_ardour/editor.cc:1944
+msgid "Loop range"
+msgstr "Zapętl zakres"
+
+#: gtk2_ardour/editor.cc:1956
+msgid "Convert to region in-place"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:1957
+msgid "Convert to region in region list"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:1960
+msgid "Select all in range"
+msgstr "Zaznasz cały obszar"
+
+#: gtk2_ardour/editor.cc:1963
+msgid "Set loop from selection"
+msgstr "Ustaw pętlę w miejscu zaznaczenia"
+
+#: gtk2_ardour/editor.cc:1964
+msgid "Set punch from selection"
+msgstr "Ustaw przełącznik w miejscu zaznaczenia"
+
+#: gtk2_ardour/editor.cc:1969
+msgid "Crop region to range"
+msgstr "Przytnij obszar do zakresu"
+
+#: gtk2_ardour/editor.cc:1970
+msgid "Fill range with region"
+msgstr "Wypełnij zakres obszarem"
+
+#: gtk2_ardour/editor.cc:1971
+msgid "Duplicate range"
+msgstr "Duplikuj zakres"
+
+#: gtk2_ardour/editor.cc:1972
+msgid "Create chunk from range"
+msgstr "Utwórz fragment z zakresu"
+
+#: gtk2_ardour/editor.cc:1974
+msgid "Bounce range"
+msgstr "Zgraj zakres"
+
+#: gtk2_ardour/editor.cc:1975
+msgid "Export range"
+msgstr "Eksportuj zakres"
+
+#: gtk2_ardour/editor.cc:1989
+#: gtk2_ardour/editor.cc:2076
+msgid "Play from edit point"
+msgstr "Od punktu edycji"
+
+#: gtk2_ardour/editor.cc:1990
+#: gtk2_ardour/editor.cc:2077
+msgid "Play from start"
+msgstr "Od początku"
+
+#: gtk2_ardour/editor.cc:1991
+msgid "Play region"
+msgstr "Obszar"
+
+#: gtk2_ardour/editor.cc:2003
+#: gtk2_ardour/editor.cc:2086
+msgid "Select All in track"
+msgstr "Całą ścieżkę"
+
+#: gtk2_ardour/editor.cc:2005
+#: gtk2_ardour/editor.cc:2088
+msgid "Invert selection in track"
+msgstr "Odwróć zaznaczenie ścieżki"
+
+#: gtk2_ardour/editor.cc:2006
+#: gtk2_ardour/editor.cc:2089
+msgid "Invert selection"
+msgstr "Odwróć zaznaczenie"
+
+#: gtk2_ardour/editor.cc:2008
+msgid "Set range to loop range"
+msgstr "Ustaw zakres jako zakres pętli"
+
+#: gtk2_ardour/editor.cc:2009
+msgid "Set range to punch range"
+msgstr "Ustaw zakres jako zakres przełącznika"
+
+#: gtk2_ardour/editor.cc:2013
+msgid "Select All After Playhead"
+msgstr "Wszystko za głowicą"
+
+#: gtk2_ardour/editor.cc:2014
+msgid "Select All Before Playhead"
+msgstr "Wszystko przed głowicą"
+
+#: gtk2_ardour/editor.cc:2015
+msgid "Select All Between Playhead & Edit Point"
+msgstr "Wszystko między głowicą a punktem edycji"
+
+#: gtk2_ardour/editor.cc:2016
+msgid "Select All Within Playhead & Edit Point"
+msgstr "Wszystko w obrębie głowicy i punktu edycji"
+
+#: gtk2_ardour/editor.cc:2017
+msgid "Select Range Between Playhead & Edit Point"
+msgstr "Ustaw zakres między głowicą a punktem edycji"
+
+#: gtk2_ardour/editor.cc:2036
+msgid "Align Relative"
+msgstr "Wyrównaj relatywnie"
+
+#: gtk2_ardour/editor.cc:2040
+msgid "Insert chunk"
+msgstr "Wstaw fragment"
+
+#: gtk2_ardour/editor.cc:2047
+msgid "Insert Selected Region"
+msgstr "Wstaw zaznaczony obszar"
+
+#: gtk2_ardour/editor.cc:2048
+msgid "Insert Existing Audio"
+msgstr "Wstaw istniejący plik"
+
+#: gtk2_ardour/editor.cc:2057
+#: gtk2_ardour/editor.cc:2113
+msgid "Nudge entire track fwd"
+msgstr "Pchnij całą ścieżkę do przodu"
+
+#: gtk2_ardour/editor.cc:2058
+#: gtk2_ardour/editor.cc:2114
+#, fuzzy
+msgid "Nudge track after edit point fwd"
+msgstr "Pchnij ścieżkę za wskaźnikiem do przodu"
+
+#: gtk2_ardour/editor.cc:2059
+#: gtk2_ardour/editor.cc:2115
+msgid "Nudge entire track bwd"
+msgstr "Pchnij całą ścieżkę do tyłu"
+
+#: gtk2_ardour/editor.cc:2060
+#: gtk2_ardour/editor.cc:2116
+#, fuzzy
+msgid "Nudge track after edit point bwd"
+msgstr "Pchnij ścieżkę za wskaźnikiem do tyłu"
+
+#: gtk2_ardour/editor.cc:2091
+msgid "Select all after edit point"
+msgstr "Wszystko za punktem edycji"
+
+#: gtk2_ardour/editor.cc:2092
+msgid "Select all before edit point"
+msgstr "Wszystko przed punktem edycji"
+
+#: gtk2_ardour/editor.cc:2093
+msgid "Select all after playhead"
+msgstr "Wszystko za głowicą"
+
+#: gtk2_ardour/editor.cc:2094
+msgid "Select all before playhead"
+msgstr "Wszystko przed głowicą"
+
+#: gtk2_ardour/editor.cc:2797
+msgid "Select/Move Objects"
+msgstr "Zaznacz/przesuń obiekt"
+
+#: gtk2_ardour/editor.cc:2798
+msgid "Select/Move Ranges"
+msgstr "Zaznacz/przesuń zakres"
+
+#: gtk2_ardour/editor.cc:2799
+msgid "Draw Gain Automation"
+msgstr "Reguluj automatyzację ręcznie"
+
+#: gtk2_ardour/editor.cc:2800
+msgid "Select Zoom Range"
+msgstr "Ustaw zakres powiększania"
+
+#: gtk2_ardour/editor.cc:2801
+msgid "Stretch/Shrink Regions"
+msgstr "Rozciągnij/skurcz obszary"
+
+#: gtk2_ardour/editor.cc:2802
+msgid "Listen to Specific Regions"
+msgstr "Słuchaj określonych obszarów"
+
+#: gtk2_ardour/editor.cc:2850
+msgid "Zoom focus"
+msgstr "Powiększanie do"
+
+#: gtk2_ardour/editor.cc:2864
+msgid "Snap/Grid Units"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:2867
+msgid "Magnetic Snap"
+msgstr "Przyciąganie magnetyczne"
+
+#: gtk2_ardour/editor.cc:2870
+msgid "Snap/Grid Mode"
+msgstr "Tryb przyciągania"
+
+#: gtk2_ardour/editor.cc:2876
+msgid "Edit point"
+msgstr "Punkt edycji"
+
+#: gtk2_ardour/editor.cc:3026
+msgid "malformed URL passed to drag-n-drop code"
+msgstr ""
+
+#: gtk2_ardour/editor.cc:3147
+msgid "Undo (%1)"
+msgstr "Cofnij (%1)"
+
+#: gtk2_ardour/editor.cc:3156
+msgid "Redo (%1)"
+msgstr "Powtórz (%1)"
+
+#: gtk2_ardour/editor.cc:3186
+msgid "Number of Duplications:"
+msgstr "Liczba duplikatów:"
+
+#: gtk2_ardour/editor.cc:3307
+msgid "Splice Edit"
+msgstr "Edycja klockowa"
+
+#: gtk2_ardour/editor.cc:3309
+msgid "Slide Edit"
+msgstr "Edycja ślizgowa"
+
+#: gtk2_ardour/editor.cc:3311
+#, fuzzy
+msgid "Lock Edit"
+msgstr "Do edycji"
+
+#: gtk2_ardour/editor.cc:3706
+msgid ""
+"Playlist %1 is currently unused.\n"
+"If left alone, no audio files used by it will be cleaned.\n"
+"If deleted, audio files used by it alone by will cleaned."
+msgstr ""
+
+#: gtk2_ardour/editor.cc:3716
+msgid "Delete playlist"
+msgstr "Usuń listę odtwarzania"
+
+#: gtk2_ardour/editor.cc:3717
+msgid "Keep playlist"
+msgstr "Zachowaj listę odtwarzania"
+
+#: gtk2_ardour/editor.cc:3886
+msgid "New name of snapshot"
+msgstr "Nazwa zrzutu"
+
+#: gtk2_ardour/editor.cc:3904
+msgid ""
+"Do you really want to remove snapshot \"%1\" ?\n"
+"(cannot be undone)"
+msgstr ""
+"Usunąć zrzut \"%1\" ?\n"
+"(tej operacji nie można cofnąć)"
+
+#: gtk2_ardour/editor.cc:3906
+#: gtk2_ardour/editor_ops.cc:215
+#: gtk2_ardour/editor_ops.cc:4133
+#: gtk2_ardour/editor_ops.cc:5608
+#: gtk2_ardour/route_ui.cc:803
+#: gtk2_ardour/visual_time_axis.cc:282
+msgid "No, do nothing."
+msgstr "Nie usuwaj niczego"
+
+#: gtk2_ardour/editor.cc:3907
+#: gtk2_ardour/editor_ops.cc:5612
+#: gtk2_ardour/route_ui.cc:804
+#: gtk2_ardour/visual_time_axis.cc:283
+msgid "Yes, remove it."
+msgstr "Tak, usuń."
+
+#: gtk2_ardour/editor.cc:4017
+msgid "new playlists"
+msgstr "nowe listy odtwarzania"
+
+#: gtk2_ardour/editor.cc:4032
+msgid "copy playlists"
+msgstr "skopiuj listy odtwarzania"
+
+#: gtk2_ardour/editor.cc:4047
+msgid "clear playlists"
+msgstr "wyczyść listy odtwarzania"
+
+#: gtk2_ardour/editor.cc:4552
+#, fuzzy
+msgid "Please wait while Ardour loads visual data"
+msgstr "Proszę czekać. Trwa wczytywanie sesji..."
+
+#: gtk2_ardour/editor_edit_groups.cc:52
+#: gtk2_ardour/mixer_ui.cc:937
+msgid "Activate All"
+msgstr "Aktywuj wszystko"
+
+#: gtk2_ardour/editor_edit_groups.cc:53
+#: gtk2_ardour/mixer_ui.cc:938
+msgid "Disable All"
+msgstr "Wyłącz wszystko"
+
+#: gtk2_ardour/editor_edit_groups.cc:55
+#: gtk2_ardour/mixer_ui.cc:940
+msgid "Add group"
+msgstr "Dodaj grupę"
+
+#: gtk2_ardour/editor_edit_groups.cc:228
+#: gtk2_ardour/mixer_ui.cc:1182
+msgid "unnamed"
+msgstr "bez nazwy"
+
+#: gtk2_ardour/editor_edit_groups.cc:257
+#: gtk2_ardour/mixer_ui.cc:1035
+msgid "-all-"
+msgstr "-wszystko-"
+
+#: gtk2_ardour/editor_export_audio.cc:66
+msgid ""
+"There is no selection to export.\n"
+"\n"
+"Select a selection using the range mouse mode"
+msgstr ""
+
+#: gtk2_ardour/editor_export_audio.cc:109
+msgid ""
+"There are no ranges to export.\n"
+"\n"
+"Create 1 or more ranges by dragging the mouse in the range bar"
+msgstr ""
+
+#: gtk2_ardour/editor_imageframe.cc:624
+#: gtk2_ardour/editor_imageframe.cc:654
+msgid "programming error: no ImageFrameView selected"
+msgstr ""
+
+#: gtk2_ardour/editor_imageframe.cc:847
+#: gtk2_ardour/editor_imageframe.cc:869
+msgid "programming error: no MarkerView selected"
+msgstr ""
+
+#: gtk2_ardour/editor_keyboard.cc:82
+msgid "mute region"
+msgstr "wycisz obszar"
+
+#: gtk2_ardour/editor_markers.cc:408
+#: gtk2_ardour/editor_ops.cc:1858
+#: gtk2_ardour/editor_ops.cc:1875
+#: gtk2_ardour/editor_ops.cc:1904
+#: gtk2_ardour/location_ui.cc:823
+msgid "add marker"
+msgstr "dodaj znacznik"
+
+#: gtk2_ardour/editor_markers.cc:432
+#: gtk2_ardour/editor_markers.cc:500
+#: gtk2_ardour/editor_markers.cc:685
+#: gtk2_ardour/editor_markers.cc:703
+#: gtk2_ardour/editor_markers.cc:721
+#: gtk2_ardour/editor_markers.cc:740
+#: gtk2_ardour/editor_markers.cc:759
+#: gtk2_ardour/editor_markers.cc:789
+#: gtk2_ardour/editor_markers.cc:817
+#: gtk2_ardour/editor_markers.cc:845
+#: gtk2_ardour/editor_markers.cc:883
+#: gtk2_ardour/editor_markers.cc:908
+#: gtk2_ardour/editor_markers.cc:935
+#: gtk2_ardour/editor_markers.cc:958
+#: gtk2_ardour/editor_markers.cc:978
+#: gtk2_ardour/editor_markers.cc:1002
+#: gtk2_ardour/editor_mouse.cc:2235
+#: gtk2_ardour/editor_mouse.cc:4783
+msgid "programming error: marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor_markers.cc:450
+#: gtk2_ardour/location_ui.cc:699
+msgid "remove marker"
+msgstr "usuń znacznik"
+
+#: gtk2_ardour/editor_markers.cc:591
+msgid "Locate to here"
+msgstr "Przenieś tutaj"
+
+#: gtk2_ardour/editor_markers.cc:592
+msgid "Play from here"
+msgstr "Odtwórz stąd"
+
+#: gtk2_ardour/editor_markers.cc:593
+msgid "Move Mark to Playhead"
+msgstr "Przesuń znacznik do głowicy"
+
+#: gtk2_ardour/editor_markers.cc:601
+msgid "Unlock"
+msgstr "Odblokuj"
+
+#: gtk2_ardour/editor_markers.cc:623
+msgid "Play Range"
+msgstr "Odtwórz zakres"
+
+#: gtk2_ardour/editor_markers.cc:624
+msgid "Locate to Range Mark"
+msgstr "Przenieś głowicę do znacznika zakresu"
+
+#: gtk2_ardour/editor_markers.cc:625
+msgid "Play from Range Mark"
+msgstr "Odtwórz od znacznika zakresu"
+
+#: gtk2_ardour/editor_markers.cc:627
+msgid "Loop Range"
+msgstr "Zapętl zakres"
+
+#: gtk2_ardour/editor_markers.cc:629
+msgid "Set Range Mark from Playhead"
+msgstr "Przenieś znacznik zakresu do głowicy"
+
+#: gtk2_ardour/editor_markers.cc:631
+msgid "Set Range from Range Selection"
+msgstr "Ustaw zakres według zaznaczenia"
+
+#: gtk2_ardour/editor_markers.cc:637
+msgid "Hide Range"
+msgstr "Ukryj zakres"
+
+#: gtk2_ardour/editor_markers.cc:638
+#: gtk2_ardour/editor_markers.cc:1022
+msgid "Rename Range"
+msgstr "Zmień nazwę zakresu"
+
+#: gtk2_ardour/editor_markers.cc:639
+msgid "Remove Range"
+msgstr "Usuń zakres"
+
+#: gtk2_ardour/editor_markers.cc:644
+msgid "Separate Regions in Range"
+msgstr "Oddziel obszar w zakresie"
+
+#: gtk2_ardour/editor_markers.cc:645
+msgid "Select All in Range"
+msgstr "Wszystko w zakresie"
+
+#: gtk2_ardour/editor_markers.cc:647
+msgid "Select Range"
+msgstr "Zaznacz zakres"
+
+#: gtk2_ardour/editor_markers.cc:673
+msgid "Set Loop Range"
+msgstr "Ustaw zakres pętli"
+
+#: gtk2_ardour/editor_markers.cc:674
+msgid "Set Punch Range"
+msgstr "Ustaw zakres przełącznika"
+
+#: gtk2_ardour/editor_markers.cc:1016
+msgid "New Name:"
+msgstr "Nazwa:"
+
+#: gtk2_ardour/editor_markers.cc:1020
+msgid "Rename Mark"
+msgstr "Zmień nazwę znacznika"
+
+#: gtk2_ardour/editor_markers.cc:1044
+msgid "rename marker"
+msgstr "zmień nazwę znacznika"
+
+#: gtk2_ardour/editor_markers.cc:1068
+msgid "set loop range"
+msgstr "ustaw zakres pętli"
+
+#: gtk2_ardour/editor_markers.cc:1074
+msgid "set punch range"
+msgstr "ustaw zakres przełącznika"
+
+#: gtk2_ardour/editor_mouse.cc:148
+msgid "Editor::event_frame() used on unhandled event type %1"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:1800
+msgid "programming error: start_grab called without drag item"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:1992
+msgid "change fade in length"
+msgstr "zmień długość stopniowego wzmocnienia"
+
+#: gtk2_ardour/editor_mouse.cc:2025
+msgid "programming error: fade out canvas item has no regionview data pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2109
+msgid "change fade out length"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2142
+msgid "programming error: cursor canvas item has no cursor data pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2397
+msgid "move marker"
+msgstr "przesuń znacznik"
+
+#: gtk2_ardour/editor_mouse.cc:2430
+#: gtk2_ardour/editor_mouse.cc:2462
+#: gtk2_ardour/editor_tempodisplay.cc:512
+msgid "programming error: meter marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2530
+msgid "copy meter mark"
+msgstr "skopiuj oznaczenie metrum"
+
+#: gtk2_ardour/editor_mouse.cc:2541
+msgid "move meter mark"
+msgstr "przesuń oznaczenie metrum"
+
+#: gtk2_ardour/editor_mouse.cc:2557
+#: gtk2_ardour/editor_mouse.cc:2591
+#: gtk2_ardour/editor_tempodisplay.cc:376
+#: gtk2_ardour/editor_tempodisplay.cc:461
+#: gtk2_ardour/editor_tempodisplay.cc:480
+msgid "programming error: tempo marker canvas item has no marker object pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2562
+#: gtk2_ardour/editor_mouse.cc:2596
+#: gtk2_ardour/editor_tempodisplay.cc:381
+#: gtk2_ardour/editor_tempodisplay.cc:466
+msgid "programming error: marker for tempo is not a tempo marker!"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2663
+msgid "copy tempo mark"
+msgstr "kopiuj znacznik tempa"
+
+#: gtk2_ardour/editor_mouse.cc:2674
+msgid "move tempo mark"
+msgstr "przesuń znacznik tempa"
+
+#: gtk2_ardour/editor_mouse.cc:2689
+#: gtk2_ardour/editor_mouse.cc:2708
+#: gtk2_ardour/editor_mouse.cc:2721
+msgid "programming error: control point canvas item has no control point object pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2857
+msgid "programming error: line canvas item has no line pointer!"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:2997
+msgid "move region(s)"
+msgstr "przesuń obszar(y)"
+
+#: gtk2_ardour/editor_mouse.cc:3063
+msgid "Drag region brush"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:3714
+msgid "fixed time region copy"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:3716
+msgid "region copy"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:3720
+msgid "fixed time region drag"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:3722
+msgid "region drag"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:4103
+msgid "selection grab"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:4254
+msgid "range selection"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:4270
+msgid "trim selection start"
+msgstr "początek przycięcia"
+
+#: gtk2_ardour/editor_mouse.cc:4286
+msgid "trim selection end"
+msgstr "koniec przycięcia"
+
+#: gtk2_ardour/editor_mouse.cc:4303
+msgid "move selection"
+msgstr "przesuń zaznaczenie"
+
+#: gtk2_ardour/editor_mouse.cc:4692
+msgid "Start point trim"
+msgstr "Punkt początkowy przycięcia"
+
+#: gtk2_ardour/editor_mouse.cc:4724
+msgid "End point trim"
+msgstr "Punkt końcowy przycięcia"
+
+#: gtk2_ardour/editor_mouse.cc:4767
+msgid "trimmed region"
+msgstr "przycięty obszar"
+
+#: gtk2_ardour/editor_mouse.cc:4930
+msgid "new range marker"
+msgstr "nowy znacznik zakresu"
+
+#: gtk2_ardour/editor_mouse.cc:5179
+msgid "rubberband selection"
+msgstr ""
+
+#: gtk2_ardour/editor_mouse.cc:5209
+msgid "Name for region:"
+msgstr "Nazwa obszaru:"
+
+#: gtk2_ardour/editor_mouse.cc:5282
+msgid "timestretch"
+msgstr "rozciąganie w czasie"
+
+#: gtk2_ardour/editor_ops.cc:123
+msgid "split"
+msgstr "podziel"
+
+#: gtk2_ardour/editor_ops.cc:189
+msgid "remove region"
+msgstr "usuń obszar"
+
+#: gtk2_ardour/editor_ops.cc:209
+msgid ""
+" This is destructive, will possibly delete audio files\n"
+"It cannot be undone\n"
+"Do you really want to destroy %1 ?"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:213
+msgid "these regions"
+msgstr "te obszary"
+
+#: gtk2_ardour/editor_ops.cc:213
+msgid "this region"
+msgstr "ten obszar"
+
+#: gtk2_ardour/editor_ops.cc:218
+msgid "Yes, destroy them."
+msgstr "Tak, usuń je."
+
+#: gtk2_ardour/editor_ops.cc:220
+#: gtk2_ardour/editor_ops.cc:4134
+msgid "Yes, destroy it."
+msgstr "Tak, usuń go."
+
+#: gtk2_ardour/editor_ops.cc:306
+#: gtk2_ardour/editor_ops.cc:334
+msgid "extend selection"
+msgstr "rozszerz zanaczenie"
+
+#: gtk2_ardour/editor_ops.cc:375
+msgid "nudge regions forward"
+msgstr "pchnij obszary do przodu"
+
+#: gtk2_ardour/editor_ops.cc:402
+#: gtk2_ardour/editor_ops.cc:482
+msgid "nudge location forward"
+msgstr "pchnij pozycję do przodu"
+
+#: gtk2_ardour/editor_ops.cc:451
+msgid "nudge regions backward"
+msgstr "pchnij obszar do tyłu"
+
+#: gtk2_ardour/editor_ops.cc:537
+#: gtk2_ardour/editor_ops.cc:567
+msgid "nudge forward"
+msgstr "pchnij do przodu"
+
+#: gtk2_ardour/editor_ops.cc:634
+msgid "build_region_boundary_cache called with snap_type = %1"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:2025
+msgid "clear markers"
+msgstr "wyczyść znaczniki"
+
+#: gtk2_ardour/editor_ops.cc:2038
+msgid "clear ranges"
+msgstr "wyczyść zakresy"
+
+#: gtk2_ardour/editor_ops.cc:2058
+msgid "clear locations"
+msgstr "wyczyść położenia"
+
+#: gtk2_ardour/editor_ops.cc:2131
+msgid "insert dragged region"
+msgstr "wstaw przeciągnięty obszar"
+
+#: gtk2_ardour/editor_ops.cc:2178
+msgid "insert region"
+msgstr "wstaw obszar"
+
+#: gtk2_ardour/editor_ops.cc:2402
+msgid "Rename Region"
+msgstr "Zmień nazwę obszaru"
+
+#: gtk2_ardour/editor_ops.cc:2406
+msgid "New name:"
+msgstr "Nazwa:"
+
+#: gtk2_ardour/editor_ops.cc:2739
+msgid "separate"
+msgstr "oddziel"
+
+#: gtk2_ardour/editor_ops.cc:2887
+msgid "trim to selection"
+msgstr "przytnij do zaznaczenia"
+
+#: gtk2_ardour/editor_ops.cc:2935
+msgid "region fill"
+msgstr "wypełnienie obszaru"
+
+#: gtk2_ardour/editor_ops.cc:2999
+msgid "fill selection"
+msgstr "wypełnij zaznaczenie"
+
+#: gtk2_ardour/editor_ops.cc:3038
+msgid "set sync point"
+msgstr "ustaw punkt synchronizacji"
+
+#: gtk2_ardour/editor_ops.cc:3058
+msgid "remove sync"
+msgstr "usuń synchronizację"
+
+#: gtk2_ardour/editor_ops.cc:3078
+msgid "naturalize"
+msgstr "naturalizuj"
+
+#: gtk2_ardour/editor_ops.cc:3180
+msgid "align selection (relative)"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:3220
+msgid "align selection"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:3232
+msgid "align region"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:3269
+msgid "trim to loop"
+msgstr "przytnij do pętli"
+
+#: gtk2_ardour/editor_ops.cc:3279
+msgid "trim to punch"
+msgstr "przytnij do przełącznika"
+
+#: gtk2_ardour/editor_ops.cc:3342
+msgid "trim region start to edit point"
+msgstr "przytnij początek obszaru do punktu edycji"
+
+#: gtk2_ardour/editor_ops.cc:3387
+msgid "trim region end to edit point"
+msgstr "przytnij koniec obszaru do punktu edycji"
+
+#: gtk2_ardour/editor_ops.cc:3474
+msgid "Cancel Freeze"
+msgstr "Anuluj zamrożenie"
+
+#: gtk2_ardour/editor_ops.cc:3517
+msgid "bounce range"
+msgstr "zgraj zakres"
+
+#: gtk2_ardour/editor_ops.cc:3569
+msgid "cut"
+msgstr "wytnij"
+
+#: gtk2_ardour/editor_ops.cc:3572
+msgid "copy"
+msgstr "skopiuj"
+
+#: gtk2_ardour/editor_ops.cc:3607
+msgid " objects"
+msgstr "obiekty"
+
+#: gtk2_ardour/editor_ops.cc:3643
+msgid " range"
+msgstr " zakres"
+
+#: gtk2_ardour/editor_ops.cc:3877
+msgid "paste"
+msgstr "wklej"
+
+#: gtk2_ardour/editor_ops.cc:3926
+msgid "paste chunk"
+msgstr "wklej fragment"
+
+#: gtk2_ardour/editor_ops.cc:3970
+msgid "duplicate region"
+msgstr "duplikuj obszar"
+
+#: gtk2_ardour/editor_ops.cc:4018
+msgid "duplicate selection"
+msgstr "duplikuj zaznaczenie"
+
+#: gtk2_ardour/editor_ops.cc:4072
+msgid "clear playlist"
+msgstr "wyczyść listę odtwarzania"
+
+#: gtk2_ardour/editor_ops.cc:4102
+msgid "nudge track"
+msgstr "pchnij ścieżkę"
+
+#: gtk2_ardour/editor_ops.cc:4130
+msgid ""
+"Do you really want to destroy the last capture?\n"
+"(This is destructive and cannot be undone)"
+msgstr ""
+"Na pewno usunąć ostatnie nagranie?\n"
+"(Ta operacja nie może zostać cofnięta)"
+
+#: gtk2_ardour/editor_ops.cc:4162
+msgid "normalize"
+msgstr "normalizuj"
+
+#: gtk2_ardour/editor_ops.cc:4271
+msgid "reverse regions"
+msgstr "odwróć obszary"
+
+#: gtk2_ardour/editor_ops.cc:4390
+msgid "reset region gain"
+msgstr "zresetuj wzmocnienie obszaru"
+
+#: gtk2_ardour/editor_ops.cc:4528
+msgid "set fade in length"
+msgstr "zmień długość stopniowego wzmocnienia"
+
+#: gtk2_ardour/editor_ops.cc:4535
+msgid "set fade out length"
+msgstr "zmień długość stopniowego wyciszenia"
+
+#: gtk2_ardour/editor_ops.cc:4583
+msgid "toggle fade in active"
+msgstr "aktywuj stopniowe wzmocnienie"
+
+#: gtk2_ardour/editor_ops.cc:4583
+msgid "toggle fade out active"
+msgstr "aktywuj stopniowe wyciszenie"
+
+#: gtk2_ardour/editor_ops.cc:4633
+msgid "set fade in shape"
+msgstr "ustaw kształt stopniowego wzmocnienia"
+
+#: gtk2_ardour/editor_ops.cc:4666
+msgid "set fade out shape"
+msgstr "ustaw kształt stopniowego wyciszenia"
+
+#: gtk2_ardour/editor_ops.cc:4698
+msgid "set fade in active"
+msgstr "aktywuj stopniowe wzmocnienie"
+
+#: gtk2_ardour/editor_ops.cc:4732
+msgid "set fade out active"
+msgstr "aktywuj stopniowe wyciszenie"
+
+#: gtk2_ardour/editor_ops.cc:4879
+msgid "trim front"
+msgstr "przytnij przód"
+
+#: gtk2_ardour/editor_ops.cc:4879
+msgid "trim back"
+msgstr "przytnij tył"
+
+#: gtk2_ardour/editor_ops.cc:4961
+msgid "set loop range from selection"
+msgstr "ustaw zakres pętli w miejscu zaznaczenia"
+
+#: gtk2_ardour/editor_ops.cc:4983
+msgid "set loop range from edit range"
+msgstr "ustaw zakres pętli w zaznaczeniu"
+
+#: gtk2_ardour/editor_ops.cc:5014
+msgid "set loop range from region"
+msgstr "ustaw zakres pętli w obszarze"
+
+#: gtk2_ardour/editor_ops.cc:5032
+msgid "set punch range from selection"
+msgstr "ustaw zakres przełącznika w miejscu zaznaczenia"
+
+#: gtk2_ardour/editor_ops.cc:5049
+msgid "set punch range from edit range"
+msgstr "ustaw zakres przełącznika w zaznaczeniu"
+
+#: gtk2_ardour/editor_ops.cc:5075
+msgid "set punch range from region"
+msgstr "ustaw zakres przełącznika w obszarze"
+
+#: gtk2_ardour/editor_ops.cc:5159
+msgid "Add new marker"
+msgstr "Dodaj nowy znacznik"
+
+#: gtk2_ardour/editor_ops.cc:5160
+msgid "Set global tempo"
+msgstr "Ustaw ogólne tempo"
+
+#: gtk2_ardour/editor_ops.cc:5161
+msgid "Do you want to set the global tempo or add new tempo marker?"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:5185
+msgid "set tempo from region"
+msgstr "Ustaw tempo dla obszaru"
+
+#: gtk2_ardour/editor_ops.cc:5219
+msgid "split regions"
+msgstr "podziel obszary"
+
+#: gtk2_ardour/editor_ops.cc:5264
+msgid ""
+"You are about to split\n"
+"%1\n"
+"into %2 pieces.\n"
+"This could take a long time."
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:5271
+msgid "Call for the Ferret!"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:5272
+msgid ""
+"Press OK to continue with this split operation\n"
+"or ask the Ferret dialog to tune the analysis"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:5274
+msgid "Press OK to continue with this split operation"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:5277
+msgid "Excessive split?"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:5582
+msgid "track"
+msgstr "ścieżka"
+
+#: gtk2_ardour/editor_ops.cc:5588
+msgid "bus"
+msgstr "szyna"
+
+#: gtk2_ardour/editor_ops.cc:5593
+msgid ""
+"Do you really want to remove %1 %2 and %3 %4?\n"
+"(You may also lose the playlists associated with the %2)\n"
+"\n"
+"This action cannot be undone!"
+msgstr ""
+"Na pewno usunąć %1 %2 i %3 %4?\n"
+"\n"
+"Można również utracić listy odtwarzania powiązane z %2)\n"
+"\n"
+"Tej operacji nie można cofnąć!"
+
+#: gtk2_ardour/editor_ops.cc:5598
+msgid ""
+"Do you really want to remove %1 %2?\n"
+"(You may also lose the playlists associated with the %2)\n"
+"\n"
+"This action cannot be undone!"
+msgstr ""
+"Na pewno usunąć %1 %2?\n"
+"\n"
+"Można również utracić listy odtwarzania powiązane z %2)\n"
+"\n"
+"Tej operacji nie można cofnąć!"
+
+#: gtk2_ardour/editor_ops.cc:5604
+msgid "Do you really want to remove %1 %2?"
+msgstr "Na pewno usunąć %1 %2?"
+
+#: gtk2_ardour/editor_ops.cc:5610
+msgid "Yes, remove them."
+msgstr "Tak, usuń je."
+
+#: gtk2_ardour/editor_ops.cc:5655
+#, fuzzy
+msgid "Stay in position"
+msgstr "Według pozycji obszaru"
+
+#: gtk2_ardour/editor_ops.cc:5656
+#, fuzzy
+msgid "Move"
+msgstr "Tryb"
+
+#: gtk2_ardour/editor_ops.cc:5657
+msgid "Split & Later Section Moves"
+msgstr ""
+
+#: gtk2_ardour/editor_ops.cc:5658
+#, fuzzy
+msgid "Intersected regions should:"
+msgstr "Zaznaczone obszary"
+
+#: gtk2_ardour/editor_ops.cc:5659
+#, fuzzy
+msgid "Move Glued Regions"
+msgstr "Zaznacz obszary"
+
+#: gtk2_ardour/editor_ops.cc:5730
+#, fuzzy
+msgid "insert time"
+msgstr "wstaw plik dźwiękowy"
+
+#: gtk2_ardour/editor_region_list.cc:112
+#: gtk2_ardour/editor_region_list.cc:116
+#: gtk2_ardour/editor_region_list.cc:119
+#: gtk2_ardour/location_ui.cc:57
+msgid "Hidden"
+msgstr "Ukryte"
+
+#: gtk2_ardour/editor_region_list.cc:162
+msgid " (MISSING)"
+msgstr "(BRAK)"
+
+#: gtk2_ardour/editor_route_list.cc:77
+#: gtk2_ardour/editor_route_list.cc:78
+#: gtk2_ardour/editor_route_list.cc:265
+msgid "editor"
+msgstr "edytor"
+
+#: gtk2_ardour/editor_route_list.cc:339
+#: gtk2_ardour/mixer_ui.cc:900
+msgid "Show All"
+msgstr "Wyświetl wszystko"
+
+#: gtk2_ardour/editor_route_list.cc:340
+#: gtk2_ardour/mixer_ui.cc:901
+msgid "Hide All"
+msgstr "Ukryj wszystko"
+
+#: gtk2_ardour/editor_route_list.cc:341
+#: gtk2_ardour/mixer_ui.cc:902
+msgid "Show All Audio Tracks"
+msgstr "Wyświetl wszystkie ścieżki audio"
+
+#: gtk2_ardour/editor_route_list.cc:342
+#: gtk2_ardour/mixer_ui.cc:903
+msgid "Hide All Audio Tracks"
+msgstr "Ukryj wszystkie ścieżki audio"
+
+#: gtk2_ardour/editor_route_list.cc:343
+#: gtk2_ardour/mixer_ui.cc:904
+msgid "Show All Audio Busses"
+msgstr "Wyświetl wszystkie szyny audio"
+
+#: gtk2_ardour/editor_route_list.cc:344
+#: gtk2_ardour/mixer_ui.cc:905
+msgid "Hide All Audio Busses"
+msgstr "Ukryj wszystkie szyny audio"
+
+#: gtk2_ardour/editor_rulers.cc:352
+msgid "New location marker"
+msgstr "Nowy znacznik położenia"
+
+#: gtk2_ardour/editor_rulers.cc:353
+msgid "Clear all locations"
+msgstr "Wyczyść wszystkie położenia"
+
+#: gtk2_ardour/editor_rulers.cc:354
+msgid "Unhide locations"
+msgstr "Wyświetl położenia"
+
+#: gtk2_ardour/editor_rulers.cc:359
+msgid "Clear all ranges"
+msgstr "Wyczyść wszystkie zakresy"
+
+#: gtk2_ardour/editor_rulers.cc:360
+msgid "Unhide ranges"
+msgstr "Wyświetl zakresy"
+
+#: gtk2_ardour/editor_rulers.cc:370
+msgid "New CD track marker"
+msgstr "Nowy znacznik zakresu (ścieżka CD)"
+
+#: gtk2_ardour/editor_rulers.cc:375
+msgid "New Tempo"
+msgstr "Nowe tempo"
+
+#: gtk2_ardour/editor_rulers.cc:376
+msgid "Clear tempo"
+msgstr "Wyczyść tempo"
+
+#: gtk2_ardour/editor_rulers.cc:381
+msgid "New Meter"
+msgstr "Nowe metrum"
+
+#: gtk2_ardour/editor_rulers.cc:382
+msgid "Clear meter"
+msgstr "Wyczyść metrum"
+
+#: gtk2_ardour/editor_selection.cc:727
+msgid "set selected regions"
+msgstr "ustaw zaznaczone obszary"
+
+#: gtk2_ardour/editor_selection.cc:869
+msgid "select all"
+msgstr "Zaznacz wszystko"
+
+#: gtk2_ardour/editor_selection.cc:958
+msgid "select all within"
+msgstr "zaznacz wszystko wewnątrz"
+
+#: gtk2_ardour/editor_selection.cc:1018
+msgid "set selection from range"
+msgstr ""
+
+#: gtk2_ardour/editor_selection.cc:1058
+msgid "select all from range"
+msgstr ""
+
+#: gtk2_ardour/editor_selection.cc:1089
+msgid "select all from punch"
+msgstr ""
+
+#: gtk2_ardour/editor_selection.cc:1120
+msgid "select all from loop"
+msgstr ""
+
+#: gtk2_ardour/editor_selection.cc:1134
+msgid "select all after cursor"
+msgstr ""
+
+#: gtk2_ardour/editor_selection.cc:1139
+msgid "select all before cursor"
+msgstr ""
+
+#: gtk2_ardour/editor_selection.cc:1174
+msgid "select all after edit"
+msgstr "Zaznacz wszystko za edycją"
+
+#: gtk2_ardour/editor_selection.cc:1179
+msgid "select all before edit"
+msgstr "Zaznacz wszystko przed edycją"
+
+#: gtk2_ardour/editor_selection.cc:1306
+msgid "No edit range defined"
+msgstr ""
+
+#: gtk2_ardour/editor_selection.cc:1312
+msgid ""
+"the edit point is Selected Marker\n"
+"but there is no selected marker."
+msgstr ""
+
+#: gtk2_ardour/editor_selection_list.cc:180
+msgid "Name for Chunk:"
+msgstr "Nazwa fragmentu:"
+
+#: gtk2_ardour/editor_selection_list.cc:183
+msgid "Create Chunk"
+msgstr "Utwórz fragment"
+
+#: gtk2_ardour/editor_selection_list.cc:183
+msgid "Forget it"
+msgstr "Zapomnij"
+
+#: gtk2_ardour/editor_selection_list.cc:206
+msgid "No selectable material found in the currently selected time range"
+msgstr ""
+
+#: gtk2_ardour/editor_tempodisplay.cc:293
+#: gtk2_ardour/editor_tempodisplay.cc:336
+msgid "add"
+msgstr "dodaj"
+
+#: gtk2_ardour/editor_tempodisplay.cc:317
+msgid "add tempo mark"
+msgstr "dodaj znacznik tempa"
+
+#: gtk2_ardour/editor_tempodisplay.cc:360
+msgid "add meter mark"
+msgstr "dodaj oznaczenie metrum"
+
+#: gtk2_ardour/editor_tempodisplay.cc:393
+#: gtk2_ardour/editor_tempodisplay.cc:422
+msgid "done"
+msgstr "ukończono"
+
+#: gtk2_ardour/editor_tempodisplay.cc:411
+#: gtk2_ardour/editor_tempodisplay.cc:443
+msgid "replace tempo mark"
+msgstr "zamień znacznik tempa"
+
+#: gtk2_ardour/editor_tempodisplay.cc:485
+#: gtk2_ardour/editor_tempodisplay.cc:517
+msgid "programming error: marker for meter is not a meter marker!"
+msgstr ""
+
+#: gtk2_ardour/editor_tempodisplay.cc:495
+#: gtk2_ardour/editor_tempodisplay.cc:529
+msgid "remove tempo mark"
+msgstr "usuń znacznik tempa"
+
+#: gtk2_ardour/editor_timefx.cc:71
+msgid "Quick but Ugly"
+msgstr "Szybko i niedokładnie"
+
+#: gtk2_ardour/editor_timefx.cc:72
+msgid "Skip Anti-aliasing"
+msgstr "Pomiń anti-aliasing"
+
+#: gtk2_ardour/editor_timefx.cc:73
+msgid "Contents:"
+msgstr "Zawartość:"
+
+#: gtk2_ardour/editor_timefx.cc:74
+#, fuzzy
+msgid "Strict Linear"
+msgstr "Liniowy"
+
+#: gtk2_ardour/editor_timefx.cc:78
+msgid "TimeFXDialog"
+msgstr "Okno rozciągania w czasie"
+
+#: gtk2_ardour/editor_timefx.cc:82
+msgid "Pitch Shift"
+msgstr ""
+
+#: gtk2_ardour/editor_timefx.cc:84
+msgid "Time Stretch"
+msgstr "Rozciąganie w czasie"
+
+#: gtk2_ardour/editor_timefx.cc:100
+msgid "Octaves"
+msgstr "Oktawy"
+
+#: gtk2_ardour/editor_timefx.cc:104
+msgid "Semitones (12TET)"
+msgstr "Półtony (12TET)"
+
+#: gtk2_ardour/editor_timefx.cc:108
+#, fuzzy
+msgid "Cents"
+msgstr "Komentarze"
+
+#: gtk2_ardour/editor_timefx.cc:114
+#, fuzzy
+msgid "Shift"
+msgstr "Krótko"
+
+#: gtk2_ardour/editor_timefx.cc:143
+#: gtk2_ardour/editor_timefx.cc:144
+msgid "TimeFXButton"
+msgstr ""
+
+#: gtk2_ardour/editor_timefx.cc:149
+msgid "Stretch/Shrink"
+msgstr "Rozciągnij/skurcz"
+
+#: gtk2_ardour/editor_timefx.cc:154
+msgid "TimeFXProgress"
+msgstr ""
+
+#: gtk2_ardour/editor_timefx.cc:326
+msgid "timefx cannot be started - thread creation error"
+msgstr ""
+
+#: gtk2_ardour/editor_timefx.cc:407
+msgid "pitch shift"
+msgstr ""
+
+#: gtk2_ardour/editor_timefx.cc:407
+msgid "time stretch"
+msgstr "rozciąganie w czasie"
+
+#: gtk2_ardour/engine_dialog.cc:49
+msgid "Realtime"
+msgstr "Tryb czasu rzeczywistego"
+
+#: gtk2_ardour/engine_dialog.cc:50
+msgid "Do not lock memory"
+msgstr "Bez blokowania pamięci"
+
+#: gtk2_ardour/engine_dialog.cc:51
+msgid "Unlock memory"
+msgstr "Odblokowanie pamięci"
+
+#: gtk2_ardour/engine_dialog.cc:52
+msgid "No zombies"
+msgstr "Brak zombi"
+
+#: gtk2_ardour/engine_dialog.cc:53
+msgid "Provide monitor ports"
+msgstr "Monitorowanie portów"
+
+#: gtk2_ardour/engine_dialog.cc:54
+msgid "Force 16 bit"
+msgstr "Wymuszanie 16 bitów"
+
+#: gtk2_ardour/engine_dialog.cc:55
+msgid "H/W monitoring"
+msgstr "Monitorowanie H/W"
+
+#: gtk2_ardour/engine_dialog.cc:56
+msgid "H/W metering"
+msgstr "Odmierzanie H/W"
+
+#: gtk2_ardour/engine_dialog.cc:57
+msgid "Verbose output"
+msgstr "Złożone wyjście"
+
+#: gtk2_ardour/engine_dialog.cc:58
+msgid "Start"
+msgstr ""
+
+#: gtk2_ardour/engine_dialog.cc:77
+msgid "8000Hz"
+msgstr "8000Hz"
+
+#: gtk2_ardour/engine_dialog.cc:78
+msgid "22050Hz"
+msgstr "22050Hz"
+
+#: gtk2_ardour/engine_dialog.cc:79
+msgid "44100Hz"
+msgstr "44100Hz"
+
+#: gtk2_ardour/engine_dialog.cc:80
+msgid "48000Hz"
+msgstr "48000Hz"
+
+#: gtk2_ardour/engine_dialog.cc:81
+msgid "88200Hz"
+msgstr "88200Hz"
+
+#: gtk2_ardour/engine_dialog.cc:82
+msgid "96000Hz"
+msgstr "96000Hz"
+
+#: gtk2_ardour/engine_dialog.cc:83
+msgid "192000Hz"
+msgstr "192000Hz"
+
+#: gtk2_ardour/engine_dialog.cc:102
+#: gtk2_ardour/engine_dialog.cc:496
+#: gtk2_ardour/export_dialog.cc:81
+#: gtk2_ardour/export_dialog.cc:1298
+msgid "Triangular"
+msgstr "Triangular"
+
+#: gtk2_ardour/engine_dialog.cc:103
+#: gtk2_ardour/engine_dialog.cc:498
+#: gtk2_ardour/export_dialog.cc:79
+#: gtk2_ardour/export_dialog.cc:1296
+msgid "Rectangular"
+msgstr "Rectangular"
+
+#: gtk2_ardour/engine_dialog.cc:104
+#: gtk2_ardour/engine_dialog.cc:500
+msgid "Shaped"
+msgstr "Shaped"
+
+#: gtk2_ardour/engine_dialog.cc:129
+#: gtk2_ardour/engine_dialog.cc:449
+#: gtk2_ardour/engine_dialog.cc:883
+msgid "Playback/Recording on 1 Device"
+msgstr "Odtwarzanie/nagrywanie przy użyciu 1 urządzenia"
+
+#: gtk2_ardour/engine_dialog.cc:130
+#: gtk2_ardour/engine_dialog.cc:453
+#: gtk2_ardour/engine_dialog.cc:480
+#: gtk2_ardour/engine_dialog.cc:886
+msgid "Playback/Recording on 2 Devices"
+msgstr "Odtwarzanie/nagrywanie przy użyciu 2 urządzeń"
+
+#: gtk2_ardour/engine_dialog.cc:131
+#: gtk2_ardour/engine_dialog.cc:460
+#: gtk2_ardour/engine_dialog.cc:889
+msgid "Playback only"
+msgstr "Tylko odtwarzanie"
+
+#: gtk2_ardour/engine_dialog.cc:132
+#: gtk2_ardour/engine_dialog.cc:462
+#: gtk2_ardour/engine_dialog.cc:891
+msgid "Recording only"
+msgstr "Tylko nagrywanie"
+
+#: gtk2_ardour/engine_dialog.cc:141
+msgid "Driver"
+msgstr "Sterownik"
+
+#: gtk2_ardour/engine_dialog.cc:146
+msgid "Interface"
+msgstr "Interfejs"
+
+#: gtk2_ardour/engine_dialog.cc:151
+#: gtk2_ardour/export_dialog.cc:108
+msgid "Sample Rate"
+msgstr "Częstotliwość próbkowania"
+
+#: gtk2_ardour/engine_dialog.cc:156
+msgid "Buffer size"
+msgstr "Rozmiar bufora"
+
+#: gtk2_ardour/engine_dialog.cc:162
+msgid "Number of buffers"
+msgstr "Liczba buforów"
+
+#: gtk2_ardour/engine_dialog.cc:169
+msgid "Approximate latency"
+msgstr "Przybliżone opóźnienie"
+
+#: gtk2_ardour/engine_dialog.cc:183
+msgid "Audio Mode"
+msgstr "Tryb dźwięku"
+
+#: gtk2_ardour/engine_dialog.cc:222
+msgid "Realtime Priority"
+msgstr "Priorytet"
+
+#: gtk2_ardour/engine_dialog.cc:251
+#: gtk2_ardour/engine_dialog.cc:375
+msgid "Ignore"
+msgstr "Ignorowanie"
+
+#: gtk2_ardour/engine_dialog.cc:259
+msgid "Client timeout"
+msgstr "Limit czasu na opowiedź klienta"
+
+#: gtk2_ardour/engine_dialog.cc:265
+msgid "Number of ports"
+msgstr "Liczba portów"
+
+#: gtk2_ardour/engine_dialog.cc:272
+msgid "Dither"
+msgstr ""
+
+#: gtk2_ardour/engine_dialog.cc:282
+msgid "No JACK server found anywhere on this system. Please install JACK and restart"
+msgstr "Nie znaleziono serwera JACK w systemie. Proszę zainstalować JACK i spróbować ponownie."
+
+#: gtk2_ardour/engine_dialog.cc:290
+msgid "Server:"
+msgstr "Serwer:"
+
+#: gtk2_ardour/engine_dialog.cc:303
+msgid "Input device"
+msgstr "Urządzenie wejściowe"
+
+#: gtk2_ardour/engine_dialog.cc:308
+msgid "Output device"
+msgstr "Urządzenie wyjściowe"
+
+#: gtk2_ardour/engine_dialog.cc:314
+msgid "Input channels"
+msgstr "Kanały wejściowe"
+
+#: gtk2_ardour/engine_dialog.cc:319
+msgid "Output channels"
+msgstr "Kanały wyjściowe"
+
+#: gtk2_ardour/engine_dialog.cc:324
+msgid "Hardware input latency (samples)"
+msgstr "Sprzętowe opóźnienie dla wejścia (próbki)"
+
+#: gtk2_ardour/engine_dialog.cc:329
+msgid "Hardware output latency (samples)"
+msgstr "Sprzętowe opóźnienie dla wyjścia (próbki)"
+
+#: gtk2_ardour/engine_dialog.cc:342
+msgid "Device"
+msgstr "Urządzenie"
+
+#: gtk2_ardour/engine_dialog.cc:344
+msgid "Advanced"
+msgstr "Zaawansowane"
+
+#: gtk2_ardour/engine_dialog.cc:553
+msgid "cannot open JACK rc file %1 to store parameters"
+msgstr ""
+
+#: gtk2_ardour/engine_dialog.cc:694
+msgid ""
+"You do not have any audio devices capable of\n"
+"simultaneous playback and recording.\n"
+"\n"
+"Please use Applications -> Utilities -> Audio MIDI Setup\n"
+"to create an \"aggregrate\" device, or install a suitable\n"
+"audio interface.\n"
+"\n"
+"Please send email to Apple and ask them why new Macs\n"
+"have no duplex audio device.\n"
+"\n"
+"Alternatively, if you really want just playback\n"
+"or recording but not both, start JACK before running\n"
+"Ardour and choose the relevant device then."
+msgstr ""
+
+#: gtk2_ardour/engine_dialog.cc:707
+msgid "No suitable audio devices"
+msgstr ""
+
+#: gtk2_ardour/engine_dialog.cc:819
+msgid "No devices found for driver \"%1\""
+msgstr "Brak urządzeń sterownika \"%1\""
+
+#: gtk2_ardour/engine_dialog.cc:924
+msgid "JACK appears to be missing from the Ardour bundle"
+msgstr ""
+
+#: gtk2_ardour/engine_dialog.cc:1148
+msgid "AudioSetup value for %1 is missing data"
+msgstr ""
+
+#: gtk2_ardour/engine_dialog.cc:1228
+msgid "configuration files contain a JACK server path that doesn't exist (%1)"
+msgstr "pliki konfiguracyjne zawierają nieistniejące położenie serwera JACK (%1)"
+
+#: gtk2_ardour/export_dialog.cc:59
+#: gtk2_ardour/export_dialog.cc:423
+#: gtk2_ardour/export_dialog.cc:1090
+#: gtk2_ardour/export_dialog.cc:1260
+msgid "22.05kHz"
+msgstr "22.05kHz"
+
+#: gtk2_ardour/export_dialog.cc:60
+#: gtk2_ardour/export_dialog.cc:426
+#: gtk2_ardour/export_dialog.cc:441
+#: gtk2_ardour/export_dialog.cc:1092
+#: gtk2_ardour/export_dialog.cc:1262
+msgid "44.1kHz"
+msgstr "44.1kHz"
+
+#: gtk2_ardour/export_dialog.cc:61
+#: gtk2_ardour/export_dialog.cc:429
+#: gtk2_ardour/export_dialog.cc:1094
+#: gtk2_ardour/export_dialog.cc:1264
+msgid "48kHz"
+msgstr "48kHz"
+
+#: gtk2_ardour/export_dialog.cc:62
+#: gtk2_ardour/export_dialog.cc:432
+#: gtk2_ardour/export_dialog.cc:1096
+#: gtk2_ardour/export_dialog.cc:1266
+msgid "88.2kHz"
+msgstr "88.2kHz"
+
+#: gtk2_ardour/export_dialog.cc:63
+#: gtk2_ardour/export_dialog.cc:435
+#: gtk2_ardour/export_dialog.cc:1098
+#: gtk2_ardour/export_dialog.cc:1268
+msgid "96kHz"
+msgstr "96kHz"
+
+#: gtk2_ardour/export_dialog.cc:64
+#: gtk2_ardour/export_dialog.cc:438
+#: gtk2_ardour/export_dialog.cc:1100
+#: gtk2_ardour/export_dialog.cc:1270
+msgid "192kHz"
+msgstr "192kHz"
+
+#: gtk2_ardour/export_dialog.cc:69
+msgid "best"
+msgstr "najlepsza"
+
+#: gtk2_ardour/export_dialog.cc:70
+#: gtk2_ardour/export_dialog.cc:1280
+msgid "fastest"
+msgstr "najszybsza"
+
+#: gtk2_ardour/export_dialog.cc:71
+#: gtk2_ardour/export_dialog.cc:1282
+msgid "linear"
+msgstr "linearna"
+
+#: gtk2_ardour/export_dialog.cc:72
+#: gtk2_ardour/export_dialog.cc:1284
+msgid "better"
+msgstr "lepsza"
+
+#: gtk2_ardour/export_dialog.cc:73
+#: gtk2_ardour/export_dialog.cc:1286
+msgid "intermediate"
+msgstr "średnia"
+
+#: gtk2_ardour/export_dialog.cc:80
+msgid "Shaped Noise"
+msgstr ""
+
+#: gtk2_ardour/export_dialog.cc:86
+msgid "stereo"
+msgstr "stereo"
+
+#: gtk2_ardour/export_dialog.cc:87
+#: gtk2_ardour/export_dialog.cc:510
+#: gtk2_ardour/export_dialog.cc:1118
+#: gtk2_ardour/export_dialog.cc:1240
+msgid "mono"
+msgstr "mono"
+
+#: gtk2_ardour/export_dialog.cc:93
+msgid "CUE"
+msgstr "CUE"
+
+#: gtk2_ardour/export_dialog.cc:94
+#: gtk2_ardour/export_dialog.cc:926
+msgid "TOC"
+msgstr "TOC"
+
+#: gtk2_ardour/export_dialog.cc:102
+msgid "Format"
+msgstr "Format"
+
+#: gtk2_ardour/export_dialog.cc:103
+msgid "CD Marker File Type"
+msgstr ""
+
+#: gtk2_ardour/export_dialog.cc:104
+msgid "Channels"
+msgstr "Kanały"
+
+#: gtk2_ardour/export_dialog.cc:107
+msgid "Sample Endianness"
+msgstr ""
+
+#: gtk2_ardour/export_dialog.cc:109
+msgid "Conversion Quality"
+msgstr "Jakość konwersji"
+
+#: gtk2_ardour/export_dialog.cc:110
+msgid "Dither Type"
+msgstr "Rodzaj ditheringu"
+
+#: gtk2_ardour/export_dialog.cc:111
+msgid "Export CD Marker File Only"
+msgstr ""
+
+#: gtk2_ardour/export_dialog.cc:112
+#: gtk2_ardour/option_editor.cc:102
+#: gtk2_ardour/option_editor.cc:103
+msgid "Browse"
+msgstr "Przeglądaj"
+
+#: gtk2_ardour/export_dialog.cc:113
+msgid "Specific tracks ..."
+msgstr "Określone ścieżki..."
+
+#: gtk2_ardour/export_dialog.cc:141
+#: gtk2_ardour/export_dialog.cc:157
+#: gtk2_ardour/mixer_strip.cc:128
+#: gtk2_ardour/mixer_strip.cc:730
+msgid "Output"
+msgstr "Wyjście"
+
+#: gtk2_ardour/export_dialog.cc:656
+msgid "Editor: cannot open \"%1\" as export file for CD toc file"
+msgstr ""
+
+#: gtk2_ardour/export_dialog.cc:790
+msgid "Editor: cannot open \"%1\" as export file for CD cue file"
+msgstr ""
+
+#: gtk2_ardour/export_dialog.cc:809
+msgid "WAV"
+msgstr "WAV"
+
+#: gtk2_ardour/export_dialog.cc:941
+msgid "Not connected to audioengine"
+msgstr "Brak połączenia z silnikiem dźwięku"
+
+#: gtk2_ardour/export_dialog.cc:945
+msgid "Ardour cannot export audio when disconnected"
+msgstr ""
+
+#: gtk2_ardour/export_dialog.cc:975
+msgid "Stop Export"
+msgstr "Zatrzymaj eksport"
+
+#: gtk2_ardour/export_dialog.cc:1194
+msgid "Please enter a valid filename."
+msgstr "Wpisz poprawną nazwę pliku."
+
+#: gtk2_ardour/export_dialog.cc:1204
+msgid "Please specify a complete filename for the audio file."
+msgstr "Określ kompletną nazwę dla pliku dźwiękowego."
+
+#: gtk2_ardour/export_dialog.cc:1210
+msgid "File already exists, do you want to overwrite it?"
+msgstr "Plik już istnieje. Zastąpić go?"
+
+#: gtk2_ardour/export_dialog.cc:1222
+#: gtk2_ardour/export_range_markers_dialog.cc:160
+msgid "Cannot write file in: "
+msgstr "Nie można zapisać pliku w: "
+
+#: gtk2_ardour/export_range_markers_dialog.cc:41
+msgid "ardour: export ranges"
+msgstr "Eksportowanie zakresów"
+
+#: gtk2_ardour/export_range_markers_dialog.cc:42
+msgid "Export to Directory"
+msgstr "Eksport do katalogu"
+
+#: gtk2_ardour/export_range_markers_dialog.cc:143
+msgid "Please enter a valid target directory."
+msgstr "Określ poprawny katalog docelowy."
+
+#: gtk2_ardour/export_range_markers_dialog.cc:151
+msgid "Please select an existing target directory. Files are not allowed!"
+msgstr "Wybierz istniejący katalog docelowy."
+
+#: gtk2_ardour/export_region_dialog.cc:34
+msgid "ardour: export region"
+msgstr "Eksportowanie obszaru"
+
+#: gtk2_ardour/export_region_dialog.cc:35
+#: gtk2_ardour/export_session_dialog.cc:29
+msgid "Export to File"
+msgstr "Eksport do pliku"
+
+#: gtk2_ardour/gain_automation_time_axis.cc:64
+msgid "add gain automation event"
+msgstr "dodaj zdarzenie automatyki wzmocnienia"
+
+#: gtk2_ardour/gain_meter.cc:114
+#: gtk2_ardour/gain_meter.cc:346
+#: gtk2_ardour/gain_meter.cc:542
+#: gtk2_ardour/gain_meter.cc:613
+msgid "-inf"
+msgstr ""
+
+#: gtk2_ardour/gain_meter.cc:125
+msgid "Fader automation mode"
+msgstr "Tryb automatyzacji wzmocnienia"
+
+#: gtk2_ardour/gain_meter.cc:126
+msgid "Fader automation type"
+msgstr "Rodzaj automatyzacji wzmocnienia"
+
+#: gtk2_ardour/gain_meter.cc:170
+#: gtk2_ardour/gain_meter.cc:908
+#: gtk2_ardour/panner_ui.cc:98
+#: gtk2_ardour/panner_ui.cc:790
+msgid "Abs"
+msgstr ""
+
+#: gtk2_ardour/gain_meter.cc:520
+msgid "-Inf"
+msgstr ""
+
+#: gtk2_ardour/gain_meter.cc:724
+#: gtk2_ardour/gain_meter.cc:739
+msgid "meter point change"
+msgstr "miejsce zmiany metrum"
+
+#: gtk2_ardour/gain_meter.cc:872
+#: gtk2_ardour/mixer_strip.cc:444
+#: gtk2_ardour/panner_ui.cc:754
+msgid "M"
+msgstr ""
+
+#: gtk2_ardour/gain_meter.cc:875
+#: gtk2_ardour/panner_ui.cc:757
+msgid "P"
+msgstr ""
+
+#: gtk2_ardour/gain_meter.cc:878
+#: gtk2_ardour/panner_ui.cc:760
+msgid "T"
+msgstr ""
+
+#: gtk2_ardour/gain_meter.cc:881
+#: gtk2_ardour/panner_ui.cc:763
+msgid "W"
+msgstr ""
+
+#: gtk2_ardour/generic_pluginui.cc:80
+msgid "<span size=\"large\">Presets</span>"
+msgstr ""
+
+#: gtk2_ardour/generic_pluginui.cc:208
+msgid "Plugin Editor: could not build control element for port %1"
+msgstr ""
+
+#: gtk2_ardour/generic_pluginui.cc:298
+msgid "Automation control"
+msgstr "Kontrola automatyzacji"
+
+#: gtk2_ardour/generic_pluginui.cc:305
+msgid "Mgnual"
+msgstr ""
+
+#: gtk2_ardour/gtk-custom-ruler.c:126
+msgid "Lower"
+msgstr ""
+
+#: gtk2_ardour/gtk-custom-ruler.c:127
+msgid "Lower limit of ruler"
+msgstr ""
+
+#: gtk2_ardour/gtk-custom-ruler.c:136
+msgid "Upper"
+msgstr ""
+
+#: gtk2_ardour/gtk-custom-ruler.c:137
+msgid "Upper limit of ruler"
+msgstr ""
+
+#: gtk2_ardour/gtk-custom-ruler.c:146
+msgid "Position"
+msgstr "Pozycja"
+
+#: gtk2_ardour/gtk-custom-ruler.c:147
+msgid "Position of mark on the ruler"
+msgstr ""
+
+#: gtk2_ardour/gtk-custom-ruler.c:156
+msgid "Max Size"
+msgstr "Największy rozmiar"
+
+#: gtk2_ardour/gtk-custom-ruler.c:157
+msgid "Maximum size of the ruler"
+msgstr ""
+
+#: gtk2_ardour/gtk-custom-ruler.c:166
+msgid "Show Position"
+msgstr "Wyświetl pozycję"
+
+#: gtk2_ardour/gtk-custom-ruler.c:167
+msgid "Draw current ruler position"
+msgstr ""
+
+#: gtk2_ardour/imageframe_socket_handler.cc:126
+msgid "Image Compositor Socket has been shutdown/closed"
+msgstr ""
+
+#: gtk2_ardour/imageframe_time_axis.cc:255
+#: gtk2_ardour/marker_time_axis.cc:211
+#: gtk2_ardour/route_time_axis.cc:452
+#: gtk2_ardour/theme_manager.cc:53
+msgid "Color"
+msgstr "Kolor"
+
+#: gtk2_ardour/imageframe_time_axis.cc:285
+msgid "0.5 seconds"
+msgstr "0.5 sekundy"
+
+#: gtk2_ardour/imageframe_time_axis.cc:286
+#: gtk2_ardour/marker_time_axis.cc:241
+msgid "1 seconds"
+msgstr "1 sekunda"
+
+#: gtk2_ardour/imageframe_time_axis.cc:287
+#: gtk2_ardour/marker_time_axis.cc:242
+msgid "1.5 seconds"
+msgstr "1.5 sekundy"
+
+#: gtk2_ardour/imageframe_time_axis.cc:288
+#: gtk2_ardour/marker_time_axis.cc:243
+msgid "2 seconds"
+msgstr "2 sekundy"
+
+#: gtk2_ardour/imageframe_time_axis.cc:289
+#: gtk2_ardour/marker_time_axis.cc:244
+msgid "2.5 seconds"
+msgstr "2.5 sekundy"
+
+#: gtk2_ardour/imageframe_time_axis.cc:290
+#: gtk2_ardour/marker_time_axis.cc:245
+msgid "3 seconds"
+msgstr "3 sekundy"
+
+#: gtk2_ardour/imageframe_time_axis.cc:295
+#: gtk2_ardour/marker_time_axis.cc:250
+msgid "Duration (sec)"
+msgstr "Czas trwania (s)"
+
+#: gtk2_ardour/imageframe_time_axis.cc:300
+msgid "Remove Frame"
+msgstr "Usuń klatkę"
+
+#: gtk2_ardour/imageframe_time_axis.cc:303
+msgid "Image Frame"
+msgstr ""
+
+#: gtk2_ardour/imageframe_time_axis.cc:304
+#: gtk2_ardour/marker_time_axis.cc:256
+msgid "Rename Track"
+msgstr "Zmień nazwę ścieżki"
+
+#: gtk2_ardour/io_selector.cc:59
+#: gtk2_ardour/io_selector.cc:749
+#: gtk2_ardour/connection_editor.cc:85
+msgid "OK"
+msgstr "OK"
+
+#: gtk2_ardour/io_selector.cc:61
+#: gtk2_ardour/io_selector.cc:751
+#: gtk2_ardour/connection_editor.cc:60
+#: gtk2_ardour/connection_editor.cc:109
+msgid "Rescan"
+msgstr "Skanuj ponownie"
+
+#: gtk2_ardour/io_selector.cc:69
+msgid "%1 input"
+msgstr "%1 wejście"
+
+#: gtk2_ardour/io_selector.cc:71
+msgid "%1 output"
+msgstr "%1 wyjście"
+
+#: gtk2_ardour/io_selector.cc:143
+#: gtk2_ardour/route_params_ui.cc:103
+msgid "Inputs"
+msgstr "Wejścia"
+
+#: gtk2_ardour/io_selector.cc:143
+#: gtk2_ardour/route_params_ui.cc:104
+msgid "Outputs"
+msgstr "Wyjścia"
+
+#: gtk2_ardour/io_selector.cc:144
+msgid "Add Input"
+msgstr "Dodaj"
+
+#: gtk2_ardour/io_selector.cc:144
+msgid "Add Output"
+msgstr "Dodaj"
+
+#: gtk2_ardour/io_selector.cc:145
+msgid "Remove Input"
+msgstr "Usuń"
+
+#: gtk2_ardour/io_selector.cc:145
+msgid "Remove Output"
+msgstr "Usuń"
+
+#: gtk2_ardour/io_selector.cc:146
+msgid "Disconnect All"
+msgstr "Rozłącz wszystkie"
+
+#: gtk2_ardour/io_selector.cc:160
+msgid "Available connections"
+msgstr "Dostępne połączenia"
+
+#: gtk2_ardour/io_selector.cc:550
+#: gtk2_ardour/io_selector.cc:561
+msgid "There are no more JACK ports available."
+msgstr "Nie ma więcej dostępnych portów JACK."
+
+#: gtk2_ardour/io_selector.cc:755
+msgid "ardour: "
+msgstr "ardour: "
+
+#: gtk2_ardour/keyboard.cc:76
+#: gtk2_ardour/keyboard.cc:546
+msgid "Unknown"
+msgstr ""
+
+#: gtk2_ardour/keyboard.cc:427
+msgid "your own"
+msgstr ""
+
+#: gtk2_ardour/keyboard.cc:491
+#: gtk2_ardour/keyboard.cc:515
+msgid "Default keybindings not found - Ardour will be hard to use!"
+msgstr ""
+
+#: gtk2_ardour/keyboard.cc:494
+#: gtk2_ardour/keyboard.cc:518
+msgid "Key bindings file \"%1\" not found. Default bindings used instead"
+msgstr ""
+
+#: gtk2_ardour/keyboard.cc:558
+msgid "Ardour key bindings file not found at \"%1\" or contains errors."
+msgstr "Nie znaleziono pliku strótów klawiaturowych w \"%1\" lub zawierał on błędy."
+
+#: gtk2_ardour/keyeditor.cc:28
+msgid "Shortcut Editor"
+msgstr "Edytor skrótów"
+
+#: gtk2_ardour/keyeditor.cc:29
+msgid "Remove shortcut"
+msgstr "Usuń skrót"
+
+#: gtk2_ardour/keyeditor.cc:39
+msgid "Action"
+msgstr "Czynność"
+
+#: gtk2_ardour/keyeditor.cc:40
+msgid "Shortcut"
+msgstr "Skrót"
+
+#: gtk2_ardour/keyeditor.cc:60
+msgid "Select an action, then press the key(s) to (re)set its shortcut"
+msgstr ""
+
+#: gtk2_ardour/keyeditor.cc:264
+msgid "Command-"
+msgstr "Komenda "
+
+#: gtk2_ardour/keyeditor.cc:265
+msgid "Option-"
+msgstr "Opcja "
+
+#: gtk2_ardour/keyeditor.cc:266
+msgid "Shift-"
+msgstr ""
+
+#: gtk2_ardour/keyeditor.cc:267
+msgid "Control-"
+msgstr "Sterowanie "
+
+#: gtk2_ardour/location_ui.cc:49
+#: gtk2_ardour/location_ui.cc:52
+msgid "Set"
+msgstr "Ustaw"
+
+#: gtk2_ardour/location_ui.cc:50
+#: gtk2_ardour/location_ui.cc:53
+msgid "Go"
+msgstr "Przejdź"
+
+#: gtk2_ardour/location_ui.cc:56
+msgid "CD"
+msgstr "CD"
+
+#: gtk2_ardour/location_ui.cc:59
+msgid "SCMS"
+msgstr "SCMS"
+
+#: gtk2_ardour/location_ui.cc:60
+msgid "Pre-Emphasis"
+msgstr "Przed naciskiem"
+
+#: gtk2_ardour/location_ui.cc:430
+msgid "You cannot put a CD marker at the start of the session"
+msgstr ""
+
+#: gtk2_ardour/location_ui.cc:605
+msgid "Add New Location"
+msgstr "Dodaj nowe położenie"
+
+#: gtk2_ardour/location_ui.cc:606
+msgid "Add New Range"
+msgstr "Dodaj nowy zakres"
+
+#: gtk2_ardour/location_ui.cc:642
+msgid "Location (CD Index) Markers"
+msgstr "Znaczniki położenia (CD Index)"
+
+#: gtk2_ardour/location_ui.cc:662
+msgid "Range (CD Track) Markers"
+msgstr "Znaczniki zakresu (CD Track)"
+
+#: gtk2_ardour/location_ui.cc:842
+msgid "add range marker"
+msgstr "dodaj znacznik zakresu"
+
+#: gtk2_ardour/main.cc:175
+msgid "cannot create user ardour folder %1 (%2)"
+msgstr ""
+
+#: gtk2_ardour/main.cc:183
+msgid "cannot open pango.rc file %1"
+msgstr "nie można otworzyć pliku pango.rc %1"
+
+#: gtk2_ardour/main.cc:270
+msgid "Ardour/GTK "
+msgstr "Ardour/GTK "
+
+#: gtk2_ardour/main.cc:272
+msgid ""
+"\n"
+"   (built using "
+msgstr ""
+"\n"
+"   (skompilowany przy użyciu "
+
+#: gtk2_ardour/main.cc:275
+msgid " and GCC version "
+msgstr " oraz GCC w wesji "
+
+#: gtk2_ardour/main.cc:285
+msgid "Copyright (C) 1999-2008 Paul Davis"
+msgstr "Copyright (C) 1999-2008 Paul Davis"
+
+#: gtk2_ardour/main.cc:286
+msgid "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker"
+msgstr "Prawa autorskie do niektórych fragmentów (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker"
+
+#: gtk2_ardour/main.cc:288
+msgid "Ardour comes with ABSOLUTELY NO WARRANTY"
+msgstr "Na program Ardour nie udziela się ABSOLUTNIE ŻADNEJ GWARANCJI"
+
+#: gtk2_ardour/main.cc:289
+msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr ""
+
+#: gtk2_ardour/main.cc:290
+msgid "This is free software, and you are welcome to redistribute it "
+msgstr "To jest oprogramowanie darmowe i możesz je rozpowszechniać"
+
+#: gtk2_ardour/main.cc:291
+msgid "under certain conditions; see the source for copying conditions."
+msgstr "na ściśle określonych zasadach; zobacz plik COPYING by dowiedzieć się więcej."
+
+#: gtk2_ardour/main.cc:302
+msgid "could not create ARDOUR GUI"
+msgstr "Nie można utworzyć Ardour GUI"
+
+#: gtk2_ardour/marker.cc:245
+msgid "MarkerText"
+msgstr "Tekst znacznika"
+
+#: gtk2_ardour/marker_time_axis.cc:253
+msgid "Remove Marker"
+msgstr "Usuń znacznik"
+
+#: gtk2_ardour/midi_port_dialog.cc:22
+msgid "Port name"
+msgstr "Nazwa portu"
+
+#: gtk2_ardour/mixer_strip.cc:88
+#: gtk2_ardour/route_time_axis.cc:171
+msgid "Record"
+msgstr "Nagrywanie"
+
+#: gtk2_ardour/mixer_strip.cc:98
+#: gtk2_ardour/mixer_strip.cc:144
+#: gtk2_ardour/mixer_strip.cc:1222
+msgid "pre"
+msgstr "przed"
+
+#: gtk2_ardour/mixer_strip.cc:99
+#: gtk2_ardour/mixer_strip.cc:783
+msgid "Comments"
+msgstr "Komentarze"
+
+#: gtk2_ardour/mixer_strip.cc:123
+msgid "Input"
+msgstr "Wejście"
+
+#: gtk2_ardour/mixer_strip.cc:140
+#: gtk2_ardour/mixer_strip.cc:1218
+#: gtk2_ardour/option_editor.cc:739
+msgid "input"
+msgstr "wejście"
+
+#: gtk2_ardour/mixer_strip.cc:148
+#: gtk2_ardour/mixer_strip.cc:1226
+msgid "post"
+msgstr "za"
+
+#: gtk2_ardour/mixer_strip.cc:155
+msgid "tupni"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:203
+msgid "Varispeed"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:229
+#: gtk2_ardour/mixer_strip.cc:799
+msgid "Click to Add/Edit Comments"
+msgstr "Kliknij by dodać/edytować komentarze"
+
+#: gtk2_ardour/mixer_strip.cc:420
+msgid "record"
+msgstr "nagrywanie"
+
+#: gtk2_ardour/mixer_strip.cc:427
+msgid "comments"
+msgstr "komentarze"
+
+#: gtk2_ardour/mixer_strip.cc:430
+msgid "*comments*"
+msgstr "*komentarze*"
+
+#: gtk2_ardour/mixer_strip.cc:442
+msgid "Rec"
+msgstr "Nagr"
+
+#: gtk2_ardour/mixer_strip.cc:445
+msgid "S"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:449
+#: gtk2_ardour/mixer_strip.cc:793
+msgid "Cmt"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:452
+#: gtk2_ardour/mixer_strip.cc:790
+msgid "*Cmt*"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:491
+#: gtk2_ardour/mixer_strip.cc:557
+#: gtk2_ardour/redirect_box.cc:1125
+msgid "Not connected to JACK - no I/O changes are possible"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:591
+#: gtk2_ardour/mixer_strip.cc:607
+msgid "could not register new ports required for that connection"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:710
+msgid " Input"
+msgstr " Wejście"
+
+#: gtk2_ardour/mixer_strip.cc:713
+msgid "I"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:733
+msgid "O"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:780
+msgid "*Comments*"
+msgstr "*Komentarze*"
+
+#: gtk2_ardour/mixer_strip.cc:835
+msgid ": comment editor"
+msgstr ": edytor komentarzy"
+
+#: gtk2_ardour/mixer_strip.cc:904
+#: gtk2_ardour/route_time_axis.cc:311
+msgid "No group"
+msgstr "Brak grupy"
+
+#: gtk2_ardour/mixer_strip.cc:930
+msgid "Grp"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:933
+msgid "~G"
+msgstr ""
+
+#: gtk2_ardour/mixer_strip.cc:981
+msgid "Invert Polarity"
+msgstr "Odwróć polaryzację"
+
+#: gtk2_ardour/mixer_strip.cc:984
+msgid "Protect against denormals"
+msgstr "Chroń przed liczbami zdenormalizowanymi"
+
+#: gtk2_ardour/mixer_strip.cc:992
+#: gtk2_ardour/route_time_axis.cc:460
+msgid "Remote Control ID"
+msgstr "ID zdalnego sterowania"
+
+#: gtk2_ardour/mixer_ui.cc:89
+msgid "Strips"
+msgstr "Pas"
+
+#: gtk2_ardour/mixer_ui.cc:115
+msgid "Group"
+msgstr "Grupa"
+
+#: gtk2_ardour/mixer_ui.cc:211
+#: gtk2_ardour/mixer_ui.cc:425
+#: gtk2_ardour/mixer_ui.cc:457
+msgid "Mixer"
+msgstr "Mikser"
+
+#: gtk2_ardour/mixer_ui.cc:924
+msgid "track display list item for renamed strip not found!"
+msgstr ""
+
+#: gtk2_ardour/new_session_dialog.cc:51
+msgid "Name :"
+msgstr "Nazwa:"
+
+#: gtk2_ardour/new_session_dialog.cc:55
+#: gtk2_ardour/new_session_dialog.cc:56
+#: gtk2_ardour/new_session_dialog.cc:57
+#: gtk2_ardour/new_session_dialog.cc:58
+msgid "channels"
+msgstr ""
+
+#: gtk2_ardour/new_session_dialog.cc:76
+msgid "<b>Busses</b>"
+msgstr "<b>Szyny</b>"
+
+#: gtk2_ardour/new_session_dialog.cc:77
+msgid "<b>Inputs</b>"
+msgstr "<b>Wejścia</b>"
+
+#: gtk2_ardour/new_session_dialog.cc:78
+msgid "<b>Outputs</b>"
+msgstr "<b>Wyjścia</b>"
+
+#: gtk2_ardour/new_session_dialog.cc:80
+msgid "Create Folder In :"
+msgstr "Położenie folderu:"
+
+#: gtk2_ardour/new_session_dialog.cc:82
+msgid "Template :"
+msgstr "Szablon:"
+
+#: gtk2_ardour/new_session_dialog.cc:84
+msgid "Create Monitor Bus"
+msgstr "Tworzenie szyny monitorowania"
+
+#: gtk2_ardour/new_session_dialog.cc:91
+msgid "Create Master Bus"
+msgstr "Tworzenie głównej szyny"
+
+#: gtk2_ardour/new_session_dialog.cc:93
+msgid "Automatically Connect to Physical Inputs"
+msgstr "Automatyczne łączenie do wejść fizycznych"
+
+#: gtk2_ardour/new_session_dialog.cc:94
+#: gtk2_ardour/new_session_dialog.cc:107
+msgid "Use only"
+msgstr "Ilość używanych kanałów:"
+
+#: gtk2_ardour/new_session_dialog.cc:106
+msgid "Automatically Connect Outputs"
+msgstr "Automatyczne łączenie wyjść"
+
+#: gtk2_ardour/new_session_dialog.cc:115
+msgid "... to Master Bus"
+msgstr "do głównej szyny"
+
+#: gtk2_ardour/new_session_dialog.cc:116
+msgid "... to Physical Outputs"
+msgstr "do wyjść fizycznych"
+
+#: gtk2_ardour/new_session_dialog.cc:122
+msgid "Advanced Options"
+msgstr "Opcje zaawansowane"
+
+#: gtk2_ardour/new_session_dialog.cc:130
+msgid "Recent:"
+msgstr "Poprzednie:"
+
+#: gtk2_ardour/new_session_dialog.cc:167
+msgid "Browse:"
+msgstr "Położenie:"
+
+#: gtk2_ardour/new_session_dialog.cc:379
+msgid "Session Control"
+msgstr "Kontrola sesji"
+
+#: gtk2_ardour/new_session_dialog.cc:419
+msgid "select template"
+msgstr "Wybieranie szablonu"
+
+#: gtk2_ardour/new_session_dialog.cc:425
+msgid "select session file"
+msgstr "Wybieranie pliku sesji"
+
+#: gtk2_ardour/new_session_dialog.cc:434
+msgid "select directory"
+msgstr "Wybieranie folderu"
+
+#: gtk2_ardour/new_session_dialog.cc:493
+msgid "Audio Setup"
+msgstr "Ustawienia dźwięku"
+
+#: gtk2_ardour/new_session_dialog.cc:517
+msgid "New Session"
+msgstr "Nowa Sesja"
+
+#: gtk2_ardour/new_session_dialog.cc:522
+msgid "Open Session"
+msgstr "Otwieranie sesji"
+
+#: gtk2_ardour/option_editor.cc:81
+msgid "Limit undo history"
+msgstr "Limit historii operacji"
+
+#: gtk2_ardour/option_editor.cc:82
+msgid "Save undo history"
+msgstr "Zapisywanie historii operacji"
+
+#: gtk2_ardour/option_editor.cc:87
+msgid "SMPTE offset is negative"
+msgstr "Ujemne"
+
+#: gtk2_ardour/option_editor.cc:88
+msgid "Timecode source is sample-clock synced"
+msgstr ""
+
+#: gtk2_ardour/option_editor.cc:97
+msgid "Add new MIDI port"
+msgstr "Dodaj port"
+
+#: gtk2_ardour/option_editor.cc:149
+msgid "Paths/Files"
+msgstr "Położenia/Pliki"
+
+#: gtk2_ardour/option_editor.cc:150
+msgid "Kbd/Mouse"
+msgstr "Klawiatura/Mysz"
+
+#: gtk2_ardour/option_editor.cc:153
+msgid "Misc"
+msgstr "Różne"
+
+#: gtk2_ardour/option_editor.cc:156
+msgid "MIDI"
+msgstr "MIDI"
+
+#: gtk2_ardour/option_editor.cc:226
+msgid "session RAID path"
+msgstr "Położenie sesji RAID"
+
+#: gtk2_ardour/option_editor.cc:242
+#: gtk2_ardour/option_editor.cc:248
+#: gtk2_ardour/option_editor.cc:965
+#: gtk2_ardour/option_editor.cc:985
+msgid "internal"
+msgstr "wewnętrzny"
+
+#: gtk2_ardour/option_editor.cc:275
+msgid "Font Scaling"
+msgstr "Skalowanie czcionki"
+
+#: gtk2_ardour/option_editor.cc:289
+msgid "Short crossfade length (msecs)"
+msgstr "Długość krótkiego przejścia krzyżowego (ms)"
+
+#: gtk2_ardour/option_editor.cc:301
+msgid "Destructive crossfade length (msecs)"
+msgstr "Długość destruktywnego przejścia krzyżowego (ms)"
+
+#: gtk2_ardour/option_editor.cc:320
+msgid "History depth (commands)"
+msgstr "Ilość operacji:"
+
+#: gtk2_ardour/option_editor.cc:341
+msgid "Saved history depth (commands)"
+msgstr "Ilość zapisywanych operacji:"
+
+#: gtk2_ardour/option_editor.cc:439
+msgid "SMPTE Offset"
+msgstr "Wyrównanie SMPTE"
+
+#: gtk2_ardour/option_editor.cc:512
+msgid "Inbound MMC Device ID"
+msgstr "ID przychodzącego sygnału MMC"
+
+#: gtk2_ardour/option_editor.cc:522
+msgid "Outbound MMC Device ID"
+msgstr "ID wychodzącego sygnału MMC"
+
+#: gtk2_ardour/option_editor.cc:554
+msgid "Port"
+msgstr "Port"
+
+#: gtk2_ardour/option_editor.cc:558
+msgid "Offline"
+msgstr "Połączenie"
+
+#: gtk2_ardour/option_editor.cc:562
+msgid ""
+"Trace\n"
+"Input"
+msgstr ""
+"Namierzanie\n"
+"wejścia"
+
+#: gtk2_ardour/option_editor.cc:566
+msgid ""
+"Trace\n"
+"Output"
+msgstr ""
+"Namierzanie\n"
+"wyjścia"
+
+#: gtk2_ardour/option_editor.cc:570
+msgid "MTC"
+msgstr "MTC"
+
+#: gtk2_ardour/option_editor.cc:574
+msgid "MMC"
+msgstr "MMC"
+
+#: gtk2_ardour/option_editor.cc:578
+msgid ""
+"MIDI Parameter\n"
+"Control"
+msgstr "Kontrola parametrów"
+
+#: gtk2_ardour/option_editor.cc:617
+#: gtk2_ardour/option_editor.cc:624
+#: gtk2_ardour/option_editor.cc:627
+#: gtk2_ardour/option_editor.cc:840
+msgid "online"
+msgstr "połączono"
+
+#: gtk2_ardour/option_editor.cc:624
+#: gtk2_ardour/option_editor.cc:625
+#: gtk2_ardour/option_editor.cc:837
+msgid "offline"
+msgstr "rozłączono"
+
+#: gtk2_ardour/option_editor.cc:741
+msgid "output"
+msgstr "wyjście"
+
+#: gtk2_ardour/option_editor.cc:912
+msgid "Choose Click"
+msgstr "Wybór dźwięku"
+
+#: gtk2_ardour/option_editor.cc:934
+msgid "Choose Click Emphasis"
+msgstr "Wybór dźwięku akcentowanego uderzenia"
+
+#: gtk2_ardour/option_editor.cc:1037
+msgid "Click audio file"
+msgstr "Plik dźwiękowy uderzenia"
+
+#: gtk2_ardour/option_editor.cc:1043
+msgid "Click emphasis audiofile"
+msgstr "Plik dźwiękowy akcentowanego uderzenia"
+
+#: gtk2_ardour/option_editor.cc:1080
+msgid ""
+"The auditioner is a dedicated mixer strip used\n"
+"for listening to specific regions outside the context\n"
+"of the overall mix. It can be connected just like any\n"
+"other mixer strip."
+msgstr ""
+"Odsłuch to specjalny pas miksera używany do\n"
+"słuchania konkretnych obszarów poza kontekstem\n"
+"całego miksu. Może być połączony jak każdy inny\n"
+"pas miksera."
+
+#: gtk2_ardour/option_editor.cc:1171
+msgid "Edit using"
+msgstr "Zmienianie przy użyciu:"
+
+#: gtk2_ardour/option_editor.cc:1178
+#: gtk2_ardour/option_editor.cc:1205
+msgid "+ button"
+msgstr "i przycisk:"
+
+#: gtk2_ardour/option_editor.cc:1198
+msgid "Delete using"
+msgstr "Usuwanie przy użyciu:"
+
+#: gtk2_ardour/option_editor.cc:1225
+msgid "Ignore snap using"
+msgstr "Ignorowanie przyciągania przy użyciu:"
+
+#: gtk2_ardour/option_editor.cc:1242
+msgid "Keyboard layout"
+msgstr "Układ klawiatury"
+
+#: gtk2_ardour/opts.cc:50
+msgid "Usage: "
+msgstr "Użycie:"
+
+#: gtk2_ardour/opts.cc:51
+msgid "  -v, --version                    Show version information\n"
+msgstr "  -v, --version                    Wyświetl informacje o wersji\n"
+
+#: gtk2_ardour/opts.cc:52
+msgid "  -h, --help                       Print this message\n"
+msgstr "  -h, --help                       Wyświetl tę wiadomość\n"
+
+#: gtk2_ardour/opts.cc:53
+msgid "  -b, --bindings                   Print all possible keyboard binding names\n"
+msgstr "  -b, --bindings                   Wyświetl wszystkie możliwe nazwy skrótów klawiaturowych\n"
+
+#: gtk2_ardour/opts.cc:54
+msgid "  -c, --name  name                 Use a specific jack client name, default is ardour\n"
+msgstr "  -c, --name nazwa                 Użyj określonej nazwy klienta jack, domyślna to ardour\n"
+
+#: gtk2_ardour/opts.cc:55
+msgid "  -d, --disable-plugins            Disable all plugins in an existing session\n"
+msgstr ""
+
+#: gtk2_ardour/opts.cc:56
+msgid "  -n, --show-splash                Show splash screen\n"
+msgstr "  -n, --show-splash                Wyświetl splash screen\n"
+
+#: gtk2_ardour/opts.cc:57
+msgid "  -m, --menus file                 Use \"file\" for Ardour menus\n"
+msgstr "  -m, --menus plik                 Użyj \"pliku\" dla menu Ardoura\n"
+
+#: gtk2_ardour/opts.cc:58
+msgid "  -N, --new session-name           Create a new session from the command line\n"
+msgstr "  -N, --new nazwa-sesji            Stwórz nową sesję z linii komend\n"
+
+#: gtk2_ardour/opts.cc:59
+msgid "  -O, --no-hw-optimizations        Disable h/w specific optimizations\n"
+msgstr "  -O, --no-hw-optimizations        Wyłącz określone optymalizacje h/w\n"
+
+#: gtk2_ardour/opts.cc:60
+msgid "  -S, --sync\t                      Draw the gui synchronously \n"
+msgstr "  -S, --sync\t                   Rysuj graficzny interfejs synchronicznie \n"
+
+#: gtk2_ardour/opts.cc:62
+msgid "  -V, --novst                      Do not use VST support\n"
+msgstr "  -V, --novst                      Nie używaj obsługi VST\n"
+
+#: gtk2_ardour/opts.cc:64
+msgid "  [session-name]                   Name of session to load\n"
+msgstr "  [nazwa-sesji]                    Nazwa sesji do wczytania\n"
+
+#: gtk2_ardour/opts.cc:65
+msgid "  -C, --curvetest filename         Curve algorithm debugger\n"
+msgstr "  -C, --curvetest nazwa-pliku      Algorytm krzywej debugera\n"
+
+#: gtk2_ardour/opts.cc:66
+msgid "  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour2/ardour.bindings)\n"
+msgstr "  -k, --keybindings nazwa-pliku    Nazwa pliku skrótów klawiaturowych do wczytania (domyślna to~/.ardour2/ardour.bindings)\n"
+
+#: gtk2_ardour/pan_automation_time_axis.cc:69
+msgid "You need to select which line to edit"
+msgstr "Musisz wybrać linię do edycji"
+
+#: gtk2_ardour/pan_automation_time_axis.cc:90
+msgid "add pan automation event"
+msgstr "dodaj zdarzanie automatyzacji panoramy"
+
+#: gtk2_ardour/panner2d.cc:588
+#: gtk2_ardour/panner_ui.cc:418
+#: gtk2_ardour/plugin_ui.cc:266
+#: gtk2_ardour/plugin_ui.cc:336
+msgid "Bypass"
+msgstr "Pomiń"
+
+#: gtk2_ardour/panner_ui.cc:58
+#: gtk2_ardour/panner_ui.cc:223
+msgid "link"
+msgstr "łącze"
+
+#: gtk2_ardour/panner_ui.cc:69
+msgid "Pan automation mode"
+msgstr "Tryb automatyzacji panoramy"
+
+#: gtk2_ardour/panner_ui.cc:70
+msgid "Pan automation type"
+msgstr "Rodzaj automatyzacji panoramy"
+
+#: gtk2_ardour/panner_ui.cc:80
+msgid "panning link control"
+msgstr "kontrola łączenia panoramowania"
+
+#: gtk2_ardour/panner_ui.cc:82
+msgid "panning link direction"
+msgstr "kierunek łączenia panoramowania"
+
+#: gtk2_ardour/panner_ui.cc:226
+msgid "L"
+msgstr ""
+
+#: gtk2_ardour/panner_ui.cc:339
+#, c-format
+msgid "panner for channel %zu"
+msgstr "panorama kanału %zu"
+
+#: gtk2_ardour/panner_ui.cc:428
+msgid "Reset all"
+msgstr "Resetuj wszystko"
+
+#: gtk2_ardour/playlist_selector.cc:58
+msgid "Playlists"
+msgstr "Listy odtwarzania"
+
+#: gtk2_ardour/playlist_selector.cc:63
+msgid "Playlists grouped by track"
+msgstr "Listy odtwarzania ułożone wg ścieżek"
+
+#: gtk2_ardour/playlist_selector.cc:112
+msgid "Playlist for %1"
+msgstr "Lista odtwarzania dla %1"
+
+#: gtk2_ardour/playlist_selector.cc:126
+msgid "Other tracks"
+msgstr "Inne ścieżki"
+
+#: gtk2_ardour/playlist_selector.cc:143
+msgid "unassigned"
+msgstr "nieokreślono"
+
+#: gtk2_ardour/plugin_selector.cc:50
+#: gtk2_ardour/plugin_selector.cc:190
+msgid "Name contains"
+msgstr "Nazwa zawiera"
+
+#: gtk2_ardour/plugin_selector.cc:51
+#: gtk2_ardour/plugin_selector.cc:192
+msgid "Type contains"
+msgstr "Rodzaj zawiera"
+
+#: gtk2_ardour/plugin_selector.cc:52
+#: gtk2_ardour/plugin_selector.cc:194
+msgid "Author contains"
+msgstr "Autor zawiera"
+
+#: gtk2_ardour/plugin_selector.cc:53
+#: gtk2_ardour/plugin_selector.cc:196
+msgid "Library contains"
+msgstr "Biblioteka zawiera"
+
+#: gtk2_ardour/plugin_selector.cc:58
+msgid "ardour: plugins"
+msgstr "Wtyczki"
+
+#: gtk2_ardour/plugin_selector.cc:70
+msgid "Available Plugins"
+msgstr "Dostępne wtyczki"
+
+#: gtk2_ardour/plugin_selector.cc:71
+msgid "Type"
+msgstr "Rodzaj"
+
+#: gtk2_ardour/plugin_selector.cc:72
+msgid "Category"
+msgstr "Kategoria"
+
+#: gtk2_ardour/plugin_selector.cc:73
+msgid "Creator"
+msgstr "Kreator"
+
+#: gtk2_ardour/plugin_selector.cc:74
+msgid "# Inputs"
+msgstr "# Wejść"
+
+#: gtk2_ardour/plugin_selector.cc:75
+msgid "# Outputs"
+msgstr "# Wyjść"
+
+#: gtk2_ardour/plugin_selector.cc:85
+msgid "Plugins to be connected"
+msgstr "Wtyczki do podłączenia"
+
+#: gtk2_ardour/plugin_selector.cc:98
+msgid "Add a plugin to the effect list"
+msgstr "Dodaj wtyczke do listy efektów"
+
+#: gtk2_ardour/plugin_selector.cc:102
+msgid "Remove a plugin from the effect list"
+msgstr "Usuń wtyczkę z listy efektów"
+
+#: gtk2_ardour/plugin_selector.cc:104
+msgid "Update available plugins"
+msgstr "Odśwież listę dostępnych wtyczek"
+
+#: gtk2_ardour/plugin_selector.cc:141
+#, fuzzy
+msgid "Insert Plugin(s)"
+msgstr "Wstaw obszar"
+
+#: gtk2_ardour/plugin_ui.cc:81
+msgid "Eh? LADSPA plugins don't have editors!"
+msgstr ""
+
+#: gtk2_ardour/plugin_ui.cc:86
+#: gtk2_ardour/plugin_ui.cc:180
+msgid "unknown type of editor-supplying plugin (note: no VST support in this version of ardour)"
+msgstr ""
+
+#: gtk2_ardour/plugin_ui.cc:89
+msgid "unknown type of editor-supplying plugin"
+msgstr ""
+
+#: gtk2_ardour/plugin_ui.cc:296
+msgid "Plugin preset %1 not found"
+msgstr ""
+
+#: gtk2_ardour/plugin_ui.cc:305
+msgid "Name of New Preset:"
+msgstr ""
+
+#: gtk2_ardour/redirect_automation_line.cc:53
+msgid "redirect automation created for non-plugin"
+msgstr ""
+
+#: gtk2_ardour/redirect_automation_time_axis.cc:95
+msgid "add automation event to "
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:238
+msgid "New send"
+msgstr "Nowy wysył"
+
+#: gtk2_ardour/redirect_box.cc:239
+msgid "Show send controls"
+msgstr "Wyświetl ustawienia wysyłu"
+
+#: gtk2_ardour/redirect_box.cc:417
+#: gtk2_ardour/redirect_box.cc:712
+msgid "ardour: weird plugin dialog"
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:424
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"The plugin has %2 inputs\n"
+"but at the insertion point, there are\n"
+"%3 active signal streams.\n"
+"\n"
+"This makes no sense - you are throwing away\n"
+"part of the signal."
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:436
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"The plugin has %2 inputs\n"
+"but at the insertion point there are\n"
+"only %3 active signal streams.\n"
+"\n"
+"This makes no sense - unless the plugin supports\n"
+"side-chain inputs. A future version of Ardour will\n"
+"support this type of configuration."
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:449
+msgid ""
+"You attempted to add a plugin (%1).\n"
+"\n"
+"The I/O configuration doesn't make sense:\n"
+"\n"
+"The plugin has %2 inputs and %3 outputs.\n"
+"The track/bus has %4 inputs and %5 outputs.\n"
+"The insertion point, has %6 active signals.\n"
+"\n"
+"Ardour does not understand what to do in such situations.\n"
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:546
+msgid "Pre-fader inserts, sends & plugins:"
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:549
+msgid "Post-fader inserts, sends & plugins:"
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:715
+msgid ""
+"You cannot reorder this set of redirects\n"
+"in that way because the inputs and\n"
+"outputs do not work correctly."
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:862
+msgid "rename redirect"
+msgstr "zmień nazwę przekierowania"
+
+#: gtk2_ardour/redirect_box.cc:938
+#: gtk2_ardour/redirect_box.cc:987
+msgid ""
+"Copying the set of redirects on the clipboard failed,\n"
+"probably because the I/O configuration of the plugins\n"
+"could not match the configuration of this track."
+msgstr ""
+
+#: gtk2_ardour/redirect_box.cc:1010
+msgid ""
+"Do you really want to remove all pre-fader redirects from this track?\n"
+"(this cannot be undone)"
+msgstr ""
+"Na pewno sunąć wszystkie przekierowania przed potencjometrem z tej ścieżki?\n"
+"(tej operacji nie można cofnąć)"
+
+#: gtk2_ardour/redirect_box.cc:1013
+msgid ""
+"Do you really want to remove all post-fader redirects from this track?\n"
+"(this cannot be undone)"
+msgstr ""
+"Na pewno sunąć wszystkie przekierowania za potencjometrem z tej ścieżki?\n"
+"(tej operacji nie można cofnąć)"
+
+#: gtk2_ardour/redirect_box.cc:1018
+msgid ""
+"Do you really want to remove all pre-fader redirects from this bus?\n"
+"(this cannot be undone)"
+msgstr ""
+"Na pewno usunąć wszystkie przekierowania przed potencjometrem z tej szyny?\n"
+"(tej operacji nie można cofnąć)"
+
+#: gtk2_ardour/redirect_box.cc:1021
+msgid ""
+"Do you really want to remove all post-fader redirects from this bus?\n"
+"(this cannot be undone)"
+msgstr ""
+"Na pewno sunąć wszystkie przekierowania za potencjometrem z tej szyny?\n"
+"(tej operacji nie można cofnąć)"
+
+#: gtk2_ardour/redirect_box.cc:1027
+msgid "Yes, remove them all"
+msgstr "Tak, usuń je wszystkie"
+
+#: gtk2_ardour/redirect_box.cc:1174
+msgid "New Plugin ..."
+msgstr "Nowa wtyczka..."
+
+#: gtk2_ardour/redirect_box.cc:1176
+msgid "New Insert"
+msgstr "Nowy przysył"
+
+#: gtk2_ardour/redirect_box.cc:1178
+msgid "New Send ..."
+msgstr "Nowy wysył..."
+
+#: gtk2_ardour/redirect_box.cc:1203
+msgid "Activate all"
+msgstr "Aktywuj wszystko"
+
+#: gtk2_ardour/redirect_box.cc:1204
+msgid "Deactivate all"
+msgstr "Dezaktywuj wszystko"
+
+#: gtk2_ardour/redirect_box.cc:1397
+msgid "%1: %2 (by %3)"
+msgstr ""
+
+#: gtk2_ardour/rhythm_ferret.cc:30
+msgid "Percussive Onset"
+msgstr "Wystąpienie perkusji"
+
+#: gtk2_ardour/rhythm_ferret.cc:31
+msgid "Note Onset"
+msgstr "Wystąpienie nuty"
+
+#: gtk2_ardour/rhythm_ferret.cc:38
+msgid "Operation"
+msgstr "Operacja"
+
+#: gtk2_ardour/rhythm_ferret.cc:39
+msgid "Selection"
+msgstr "Zaznaczenie"
+
+#: gtk2_ardour/rhythm_ferret.cc:40
+msgid "Analysis"
+msgstr "Analiza"
+
+#: gtk2_ardour/rhythm_ferret.cc:43
+msgid "Set Tempo Map"
+msgstr "Ustawienie mapy tempa"
+
+#: gtk2_ardour/rhythm_ferret.cc:44
+msgid "Conform Region"
+msgstr "Dostosowanie obszaru"
+
+#: gtk2_ardour/rhythm_ferret.cc:45
+msgid "Mode"
+msgstr "Tryb"
+
+#: gtk2_ardour/rhythm_ferret.cc:48
+msgid "Threshold"
+msgstr "Wartość progowa"
+
+#: gtk2_ardour/rhythm_ferret.cc:51
+msgid "Sensitivity"
+msgstr "Czułość"
+
+#: gtk2_ardour/rhythm_ferret.cc:52
+msgid "Analyze"
+msgstr "Analizuj"
+
+#: gtk2_ardour/rhythm_ferret.cc:55
+msgid "Trigger gap (msecs)"
+msgstr "Przerwa wywołania (ms)"
+
+#: gtk2_ardour/rhythm_ferret.cc:263
+msgid "split regions (rhythm ferret)"
+msgstr ""
+
+#: gtk2_ardour/route_params_ui.cc:85
+msgid "Tracks/Buses"
+msgstr "Ścieżki/szyny"
+
+#: gtk2_ardour/route_params_ui.cc:105
+msgid "Pre-fader Redirects"
+msgstr "Przekierowania przed potencjometrem"
+
+#: gtk2_ardour/route_params_ui.cc:106
+msgid "Post-fader Redirects"
+msgstr "Przekierowania za potencjometrem"
+
+#: gtk2_ardour/route_params_ui.cc:205
+msgid "route display list item for renamed route not found!"
+msgstr ""
+
+#: gtk2_ardour/route_params_ui.cc:452
+msgid "NO TRACK"
+msgstr "BRAK ŚCIEŻKI"
+
+#: gtk2_ardour/route_params_ui.cc:682
+#: gtk2_ardour/route_params_ui.cc:683
+msgid "No Route Selected"
+msgstr "Brak zaznaczonego szlaku"
+
+#: gtk2_ardour/route_time_axis.cc:98
+msgid "m"
+msgstr "w"
+
+#: gtk2_ardour/route_time_axis.cc:98
+msgid "s"
+msgstr "s"
+
+#: gtk2_ardour/route_time_axis.cc:98
+msgid "r"
+msgstr "n"
+
+#: gtk2_ardour/route_time_axis.cc:102
+msgid "g"
+msgstr "g"
+
+#: gtk2_ardour/route_time_axis.cc:103
+msgid "p"
+msgstr "L"
+
+#: gtk2_ardour/route_time_axis.cc:105
+msgid "a"
+msgstr "a"
+
+#: gtk2_ardour/route_time_axis.cc:106
+#: gtk2_ardour/visual_time_axis.cc:72
+msgid "v"
+msgstr "v"
+
+#: gtk2_ardour/route_time_axis.cc:188
+msgid "Edit Group"
+msgstr "Edycja grupy"
+
+#: gtk2_ardour/route_time_axis.cc:189
+#: gtk2_ardour/visual_time_axis.cc:91
+msgid "Display Height"
+msgstr "Rozmiar wyświetlania"
+
+#: gtk2_ardour/route_time_axis.cc:190
+msgid "Playlist"
+msgstr "Lista odtwarzania"
+
+#: gtk2_ardour/route_time_axis.cc:191
+#: gtk2_ardour/route_time_axis.cc:461
+msgid "Automation"
+msgstr "Automatyka"
+
+#: gtk2_ardour/route_time_axis.cc:192
+#: gtk2_ardour/visual_time_axis.cc:92
+msgid "Visual options"
+msgstr "Opcje wizualne"
+
+#: gtk2_ardour/route_time_axis.cc:193
+#: gtk2_ardour/visual_time_axis.cc:93
+msgid "Hide this track"
+msgstr "Ukryj tę ścieżkę"
+
+#: gtk2_ardour/route_time_axis.cc:421
+msgid "Show all automation"
+msgstr "Wyświetl całą automatykę"
+
+#: gtk2_ardour/route_time_axis.cc:424
+msgid "Show existing automation"
+msgstr "Wyświetl istniejącą automatykę"
+
+#: gtk2_ardour/route_time_axis.cc:427
+msgid "Hide all automation"
+msgstr "Ukryj całą automatykę"
+
+#: gtk2_ardour/route_time_axis.cc:430
+msgid "Plugins"
+msgstr "Wtyczki"
+
+#: gtk2_ardour/route_time_axis.cc:477
+msgid "Align with existing material"
+msgstr "Do istniejącego materiału"
+
+#: gtk2_ardour/route_time_axis.cc:483
+msgid "Align with capture time"
+msgstr "Z czasem nagrania"
+
+#: gtk2_ardour/route_time_axis.cc:490
+msgid "Alignment"
+msgstr "Wyrównanie"
+
+#: gtk2_ardour/route_time_axis.cc:494
+msgid "Normal mode"
+msgstr "Tryb standardowy"
+
+#: gtk2_ardour/route_time_axis.cc:497
+msgid "Tape mode"
+msgstr "Tryb taśmowy"
+
+#: gtk2_ardour/route_time_axis.cc:895
+msgid "Name for playlist"
+msgstr "Nazwa listy odtwarzania"
+
+#: gtk2_ardour/route_time_axis.cc:939
+#: gtk2_ardour/route_time_axis.cc:985
+msgid "Name for Playlist"
+msgstr "Nazwa listy odtwarzania"
+
+#: gtk2_ardour/route_time_axis.cc:1188
+#: gtk2_ardour/visual_time_axis.cc:340
+#: gtk2_ardour/visual_time_axis.cc:387
+msgid "A track already exists with that name"
+msgstr "Ścieżka o tej nazwie już istnieje"
+
+#: gtk2_ardour/route_time_axis.cc:1377
+msgid "New Copy"
+msgstr "Nowa kopia"
+
+#: gtk2_ardour/route_time_axis.cc:1379
+msgid "Clear Current"
+msgstr "Wyczyść aktualną"
+
+#: gtk2_ardour/route_time_axis.cc:1382
+msgid "Select from all ..."
+msgstr "Wybierz spośród wszystkich..."
+
+#: gtk2_ardour/route_ui.cc:160
+msgid "mute change"
+msgstr "zmiana ustawienia wyciszenia"
+
+#: gtk2_ardour/route_ui.cc:244
+#: gtk2_ardour/route_ui.cc:255
+msgid "solo change"
+msgstr "zmiana ustawienia solo"
+
+#: gtk2_ardour/route_ui.cc:316
+msgid "Not connected to JACK - cannot engage record"
+msgstr "Brak połączenia z JACK - nie można rozpocząć nagrywania"
+
+#: gtk2_ardour/route_ui.cc:330
+msgid "rec-enable change"
+msgstr "zmiana ustawienia nagrywania"
+
+#: gtk2_ardour/route_ui.cc:568
+msgid "Solo-safe"
+msgstr "Bezpieczne solo"
+
+#: gtk2_ardour/route_ui.cc:590
+msgid "Pre Fader"
+msgstr "Przed potencjometrem"
+
+#: gtk2_ardour/route_ui.cc:597
+msgid "Post Fader"
+msgstr "Za potencjometrem"
+
+#: gtk2_ardour/route_ui.cc:604
+msgid "Control Outs"
+msgstr ""
+
+#: gtk2_ardour/route_ui.cc:611
+msgid "Main Outs"
+msgstr "Główne wyjścia"
+
+#: gtk2_ardour/route_ui.cc:648
+msgid "mix group solo  change"
+msgstr ""
+
+#: gtk2_ardour/route_ui.cc:687
+msgid "mix group mute change"
+msgstr ""
+
+#: gtk2_ardour/route_ui.cc:704
+msgid "mix group rec-enable change"
+msgstr ""
+
+#: gtk2_ardour/route_ui.cc:722
+#: gtk2_ardour/visual_time_axis.cc:241
+msgid "ardour: color selection"
+msgstr "Wybieranie koloru"
+
+#: gtk2_ardour/route_ui.cc:798
+msgid ""
+"Do you really want to remove track \"%1\" ?\n"
+"\n"
+"You may also lose the playlist used by this track.\n"
+"(cannot be undone)"
+msgstr ""
+"Na pewno usunąć tę ścieżkę \"%1\" ?\n"
+"\n"
+"Można również utracić listę odtwarzania używaną przez tę ścieżkę.\n"
+"(tej operacji nie można cofnąć)"
+
+#: gtk2_ardour/route_ui.cc:800
+msgid ""
+"Do you really want to remove bus \"%1\" ?\n"
+"(cannot be undone)"
+msgstr ""
+
+#: gtk2_ardour/route_ui.cc:825
+msgid "New Name: "
+msgstr "Nazwa: "
+
+#: gtk2_ardour/sfdb_ui.cc:77
+#: gtk2_ardour/sfdb_ui.cc:97
+#: gtk2_ardour/sfdb_ui.cc:106
+msgid "as new tracks"
+msgstr "jako nowe ścieżki"
+
+#: gtk2_ardour/sfdb_ui.cc:79
+#: gtk2_ardour/sfdb_ui.cc:99
+msgid "to selected tracks"
+msgstr "do zaznaczonych ścieżek"
+
+#: gtk2_ardour/sfdb_ui.cc:81
+#: gtk2_ardour/sfdb_ui.cc:101
+msgid "to region list"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:83
+#: gtk2_ardour/sfdb_ui.cc:103
+msgid "as new tape tracks"
+msgstr "jako nowe ścieżki taśmowe"
+
+#: gtk2_ardour/sfdb_ui.cc:87
+msgid "programming error: unknown import mode string %1"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:115
+msgid "Auto-play"
+msgstr "Autoodtwarzanie"
+
+#: gtk2_ardour/sfdb_ui.cc:124
+#: gtk2_ardour/sfdb_ui.cc:234
+msgid "<b>Soundfile Info</b>"
+msgstr "<b>Informacje o pliku dźwiękowym</b>"
+
+#: gtk2_ardour/sfdb_ui.cc:135
+msgid "Length:"
+msgstr "Długość:"
+
+#: gtk2_ardour/sfdb_ui.cc:136
+msgid "Timestamp:"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:137
+msgid "Format:"
+msgstr "Format:"
+
+#: gtk2_ardour/sfdb_ui.cc:138
+msgid "Channels:"
+msgstr "Kanały:"
+
+#: gtk2_ardour/sfdb_ui.cc:139
+#: gtk2_ardour/sfdb_ui.cc:254
+#: gtk2_ardour/sfdb_ui.cc:259
+msgid "Sample rate:"
+msgstr "Częstotliwość próbkowania:"
+
+#: gtk2_ardour/sfdb_ui.cc:171
+#: gtk2_ardour/sfdb_ui.cc:494
+msgid "Tags:"
+msgstr "Etykiety:"
+
+#: gtk2_ardour/sfdb_ui.cc:181
+msgid "Play (double click)"
+msgstr "Odtwórz"
+
+#: gtk2_ardour/sfdb_ui.cc:235
+#: gtk2_ardour/sfdb_ui.cc:236
+#: gtk2_ardour/sfdb_ui.cc:237
+msgid "n/a"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:312
+msgid "Could not read file: %1 (%2)."
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:332
+msgid "Could not access soundfile: "
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:378
+msgid "SoundFileBox: Could not tokenize string: "
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:400
+msgid "Search"
+msgstr "Szukaj"
+
+#: gtk2_ardour/sfdb_ui.cc:401
+#: gtk2_ardour/sfdb_ui.cc:795
+#, fuzzy
+msgid "Start Downloading"
+msgstr "Rozpocznij nagrywanie"
+
+#: gtk2_ardour/sfdb_ui.cc:416
+msgid "Audio files"
+msgstr "Pliki dźwiękowe"
+
+#: gtk2_ardour/sfdb_ui.cc:419
+msgid "All files"
+msgstr "Wszystkie pliki"
+
+#: gtk2_ardour/sfdb_ui.cc:430
+msgid "Browse Files"
+msgstr "Przeglądanie plików"
+
+#: gtk2_ardour/sfdb_ui.cc:456
+#: gtk2_ardour/sfdb_ui.cc:509
+msgid "Paths"
+msgstr "Ścieżki"
+
+#: gtk2_ardour/sfdb_ui.cc:465
+msgid "Search Tags"
+msgstr "Wyszukiwanie etykiet"
+
+#: gtk2_ardour/sfdb_ui.cc:486
+msgid "User:"
+msgstr "Użytkownik:"
+
+#: gtk2_ardour/sfdb_ui.cc:490
+msgid "Password:"
+msgstr "Hasło:"
+
+#: gtk2_ardour/sfdb_ui.cc:519
+msgid "Search Freesound"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:701
+msgid "SoundFileBrowser: Could not tokenize string: "
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:737
+msgid "Cancelling.."
+msgstr "Anulowanie..."
+
+#: gtk2_ardour/sfdb_ui.cc:962
+#: gtk2_ardour/sfdb_ui.cc:1241
+#: gtk2_ardour/sfdb_ui.cc:1283
+msgid "one track per file"
+msgstr "jedna ścieżka na plik"
+
+#: gtk2_ardour/sfdb_ui.cc:965
+#: gtk2_ardour/sfdb_ui.cc:1284
+msgid "one track per channel"
+msgstr "jedna ścieżka na kanał"
+
+#: gtk2_ardour/sfdb_ui.cc:973
+#: gtk2_ardour/sfdb_ui.cc:1286
+msgid "sequence files"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:976
+#: gtk2_ardour/sfdb_ui.cc:990
+#: gtk2_ardour/sfdb_ui.cc:1290
+msgid "all files in one region"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:982
+#: gtk2_ardour/sfdb_ui.cc:1288
+msgid "one region per file"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:985
+#: gtk2_ardour/sfdb_ui.cc:1289
+msgid "one region per channel"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:1043
+msgid ""
+"One or more of the selected files\n"
+"cannot be used by Ardour"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:1170
+msgid "Copy files to session"
+msgstr "Skopiuj pliki do sesji"
+
+#: gtk2_ardour/sfdb_ui.cc:1186
+#: gtk2_ardour/sfdb_ui.cc:1321
+msgid "use file timestamp"
+msgstr ""
+
+#: gtk2_ardour/sfdb_ui.cc:1187
+#: gtk2_ardour/sfdb_ui.cc:1323
+msgid "at edit point"
+msgstr "od punktu edycji"
+
+#: gtk2_ardour/sfdb_ui.cc:1188
+#: gtk2_ardour/sfdb_ui.cc:1325
+msgid "at playhead"
+msgstr "od głowicy"
+
+#: gtk2_ardour/sfdb_ui.cc:1189
+msgid "at session start"
+msgstr "od początku sesji"
+
+#: gtk2_ardour/sfdb_ui.cc:1194
+msgid "Add files:"
+msgstr "Dodaj pliki:"
+
+#: gtk2_ardour/sfdb_ui.cc:1216
+msgid "Insert:"
+msgstr "Wstaw:"
+
+#: gtk2_ardour/sfdb_ui.cc:1229
+msgid "Mapping:"
+msgstr "Mapowanie:"
+
+#: gtk2_ardour/sfdb_ui.cc:1247
+msgid "Conversion Quality:"
+msgstr "Jakość konwersji:"
+
+#: gtk2_ardour/sfdb_ui.cc:1259
+#: gtk2_ardour/sfdb_ui.cc:1337
+msgid "Best"
+msgstr "Najlepsza"
+
+#: gtk2_ardour/sfdb_ui.cc:1260
+#: gtk2_ardour/sfdb_ui.cc:1339
+msgid "Good"
+msgstr "Dobra"
+
+#: gtk2_ardour/sfdb_ui.cc:1261
+#: gtk2_ardour/sfdb_ui.cc:1341
+msgid "Quick"
+msgstr "Szybka"
+
+#: gtk2_ardour/sfdb_ui.cc:1285
+msgid "merge files"
+msgstr "połącz pliki"
+
+#: gtk2_ardour/sfdb_ui.cc:1362
+msgid "programming error: %1 (%2)"
+msgstr ""
+
+#: gtk2_ardour/splash.cc:42
+msgid "Ardour loading ..."
+msgstr "Wczytywanie..."
+
+#: gtk2_ardour/tempo_dialog.cc:36
+msgid "edit tempo"
+msgstr "zmień tempo"
+
+#: gtk2_ardour/tempo_dialog.cc:42
+#: gtk2_ardour/tempo_dialog.cc:61
+msgid "Bar"
+msgstr "Takt"
+
+#: gtk2_ardour/tempo_dialog.cc:43
+#: gtk2_ardour/tempo_dialog.cc:62
+msgid "Beat"
+msgstr "Uderzenie"
+
+#: gtk2_ardour/tempo_dialog.cc:45
+#: gtk2_ardour/tempo_dialog.cc:64
+#: gtk2_ardour/tempo_dialog.cc:276
+#: gtk2_ardour/tempo_dialog.cc:291
+msgid "Location"
+msgstr "Położenie"
+
+#: gtk2_ardour/tempo_dialog.cc:77
+#: gtk2_ardour/tempo_dialog.cc:94
+#: gtk2_ardour/tempo_dialog.cc:304
+#: gtk2_ardour/tempo_dialog.cc:322
+msgid "whole (1)"
+msgstr "cała nuta (1)"
+
+#: gtk2_ardour/tempo_dialog.cc:78
+#: gtk2_ardour/tempo_dialog.cc:96
+#: gtk2_ardour/tempo_dialog.cc:305
+#: gtk2_ardour/tempo_dialog.cc:324
+msgid "second (2)"
+msgstr "półnuta (2)"
+
+#: gtk2_ardour/tempo_dialog.cc:79
+#: gtk2_ardour/tempo_dialog.cc:98
+#: gtk2_ardour/tempo_dialog.cc:306
+#: gtk2_ardour/tempo_dialog.cc:326
+msgid "third (3)"
+msgstr "trzecia część nuty (3)"
+
+#: gtk2_ardour/tempo_dialog.cc:80
+#: gtk2_ardour/tempo_dialog.cc:100
+#: gtk2_ardour/tempo_dialog.cc:108
+#: gtk2_ardour/tempo_dialog.cc:307
+#: gtk2_ardour/tempo_dialog.cc:328
+#: gtk2_ardour/tempo_dialog.cc:336
+msgid "quarter (4)"
+msgstr "ćwierćnuta (4)"
+
+#: gtk2_ardour/tempo_dialog.cc:81
+#: gtk2_ardour/tempo_dialog.cc:102
+#: gtk2_ardour/tempo_dialog.cc:308
+#: gtk2_ardour/tempo_dialog.cc:330
+msgid "eighth (8)"
+msgstr "ósemka (8)"
+
+#: gtk2_ardour/tempo_dialog.cc:82
+#: gtk2_ardour/tempo_dialog.cc:104
+#: gtk2_ardour/tempo_dialog.cc:309
+#: gtk2_ardour/tempo_dialog.cc:332
+msgid "sixteenth (16)"
+msgstr "szesnastka (16)"
+
+#: gtk2_ardour/tempo_dialog.cc:83
+#: gtk2_ardour/tempo_dialog.cc:106
+#: gtk2_ardour/tempo_dialog.cc:310
+#: gtk2_ardour/tempo_dialog.cc:334
+msgid "thirty-second (32)"
+msgstr "trzydziestodwójka (32)"
+
+#: gtk2_ardour/tempo_dialog.cc:110
+msgid "Beats Per Minute:"
+msgstr "Uderzeń na minutę:"
+
+#: gtk2_ardour/tempo_dialog.cc:150
+msgid "Tempo Begins at:"
+msgstr ""
+
+#: gtk2_ardour/tempo_dialog.cc:246
+#: gtk2_ardour/tempo_dialog.cc:478
+msgid "garbaged note type entry (%1)"
+msgstr ""
+
+#: gtk2_ardour/tempo_dialog.cc:256
+#: gtk2_ardour/tempo_dialog.cc:488
+msgid "incomprehensible note type entry (%1)"
+msgstr ""
+
+#: gtk2_ardour/tempo_dialog.cc:317
+msgid "thirtq-second (32)"
+msgstr "trzydziestodwójka (32)"
+
+#: gtk2_ardour/tempo_dialog.cc:338
+msgid "Note Value:"
+msgstr "Wartość nuty:"
+
+#: gtk2_ardour/tempo_dialog.cc:339
+msgid "Beats Per Bar:"
+msgstr "Uderzeń na takt:"
+
+#: gtk2_ardour/tempo_dialog.cc:357
+#, fuzzy
+msgid "Meter Begins at Bar:"
+msgstr "Początek metrum:"
+
+#: gtk2_ardour/theme_manager.cc:52
+msgid "Object"
+msgstr "Obiekt"
+
+#: gtk2_ardour/theme_manager.cc:185
+msgid "Unable to find UI style file %1. Ardour will look strange"
+msgstr ""
+
+#: gtk2_ardour/time_axis_view.cc:112
+msgid "gTortnam"
+msgstr ""
+
+#: gtk2_ardour/time_axis_view.cc:943
+msgid "unknown track height name \"%1\" in XML GUI information"
+msgstr ""
+
+#: gtk2_ardour/time_axis_view_item.cc:80
+msgid "TimeAxisViewItemName"
+msgstr ""
+
+#: gtk2_ardour/time_axis_view_item.cc:332
+msgid "new duration %1 frames is out of bounds for %2"
+msgstr ""
+
+#: gtk2_ardour/time_selection.cc:40
+msgid "programming error: request for non-existent audio range (%1)!"
+msgstr ""
+
+#: gtk2_ardour/ui_config.cc:76
+msgid "loading default ui configuration file %1"
+msgstr ""
+
+#: gtk2_ardour/ui_config.cc:79
+msgid "Ardour: cannot read default ui configuration file \"%1\""
+msgstr ""
+
+#: gtk2_ardour/ui_config.cc:84
+msgid "Ardour: default ui configuration file \"%1\" not loaded successfully."
+msgstr ""
+
+#: gtk2_ardour/ui_config.cc:102
+msgid "loading user ui configuration file %1"
+msgstr ""
+
+#: gtk2_ardour/ui_config.cc:105
+msgid "Ardour: cannot read ui configuration file \"%1\""
+msgstr ""
+
+#: gtk2_ardour/ui_config.cc:110
+msgid "Ardour: user ui configuration file \"%1\" not loaded successfully."
+msgstr ""
+
+#: gtk2_ardour/ui_config.cc:134
+msgid "UI config file %1 not saved"
+msgstr ""
+
+#: gtk2_ardour/utils.cc:138
+#: gtk2_ardour/utils.cc:181
+msgid "bad XPM header %1"
+msgstr ""
+
+#: gtk2_ardour/utils.cc:320
+msgid "missing RGBA style for \"%1\""
+msgstr ""
+
+#: gtk2_ardour/utils.cc:343
+msgid "no style found for %1, using red"
+msgstr ""
+
+#: gtk2_ardour/utils.cc:382
+msgid "unknown style attribute %1 requested for color; using \"red\""
+msgstr ""
+
+#: gtk2_ardour/utils.cc:606
+msgid "cannot find icon image for %1"
+msgstr ""
+
+#: gtk2_ardour/visual_time_axis.cc:280
+msgid ""
+"Do you really want to remove track \"%1\" ?\n"
+"(cannot be undone)"
+msgstr ""
+
+#: gtk2_ardour/visual_time_axis.cc:329
+msgid "new name: "
+msgstr "nazwa:"
+
+#: gtk2_ardour/connection_editor.cc:50
+msgid "ardour: connections"
+msgstr "Połączenia"
+
+#: gtk2_ardour/connection_editor.cc:51
+msgid "Input Connections"
+msgstr "Połączenia wejściowe"
+
+#: gtk2_ardour/connection_editor.cc:52
+msgid "Output Connections"
+msgstr "Połączenia wyjściowe"
+
+#: gtk2_ardour/connection_editor.cc:53
+msgid "New Input"
+msgstr "Nowe wejście"
+
+#: gtk2_ardour/connection_editor.cc:54
+msgid "New Output"
+msgstr "Nowe wyjście"
+
+#: gtk2_ardour/connection_editor.cc:57
+#: gtk2_ardour/connection_editor.cc:100
+msgid "Add Port"
+msgstr "Dodaj port"
+
+#: gtk2_ardour/connection_editor.cc:105
+msgid "Available Ports"
+msgstr "Dostępne porty"
+
+#: gtk2_ardour/connection_editor.cc:500
+msgid "Connection \""
+msgstr "Połączenie \""
+
+#: gtk2_ardour/connection_editor.cc:502
+msgid "\""
+msgstr ""
+
+#: gtk2_ardour/connection_editor.cc:531
+#, c-format
+msgid "in %d"
+msgstr "wejście %d"
+
+#: gtk2_ardour/connection_editor.cc:533
+#, c-format
+msgid "out %d"
+msgstr "wyjście %d"
+
+#: gtk2_ardour/connection_editor.cc:657
+msgid "Name for new connection:"
+msgstr "Nazwa nowego połączenia:"
+
+#: gtk2_ardour/analysis_window.cc:46
+msgid "Signal source"
+msgstr "Źródło sygnału"
+
+#: gtk2_ardour/analysis_window.cc:47
+msgid "Selected ranges"
+msgstr "Zaznaczone zakresy"
+
+#: gtk2_ardour/analysis_window.cc:48
+msgid "Selected regions"
+msgstr "Zaznaczone obszary"
+
+#: gtk2_ardour/analysis_window.cc:50
+msgid "Display model"
+msgstr "Tryb wyświetlania"
+
+#: gtk2_ardour/analysis_window.cc:51
+msgid "Composite graphs for each track"
+msgstr ""
+
+#: gtk2_ardour/analysis_window.cc:52
+msgid "Composite graph of all tracks"
+msgstr ""
+
+#: gtk2_ardour/analysis_window.cc:54
+msgid "Show frequency power range"
+msgstr ""
+
+#: gtk2_ardour/analysis_window.cc:55
+msgid "Normalize values"
+msgstr "Normalizacja wartości"
+
+#: gtk2_ardour/analysis_window.cc:59
+#: gtk2_ardour/analysis_window.cc:60
+msgid "FFT analysis window"
+msgstr "Okno analizy FFT"
+
+#: gtk2_ardour/analysis_window.cc:135
+msgid "Re-analyze data"
+msgstr "Analizuj ponownie"
+
+#~ msgid "KeyMouse Actions"
+#~ msgstr "Czynności myszy i klawiatury"
+#~ msgid "to Center"
+#~ msgstr "Do środka"
+#~ msgid "to Playhead"
+#~ msgstr "Do głowicy"
+#~ msgid "Set Playhead"
+#~ msgstr "Ustaw głowicę"
+#~ msgid "Set Edit Point"
+#~ msgstr "Ustaw punkt edycji"
+#~ msgid "Reverse Region"
+#~ msgstr "Odwróć obszar"
+#~ msgid "Add Existing Audio"
+#~ msgstr "Dodaj istniejący plik dźwiękowy"
+#~ msgid "Add External Audio"
+#~ msgstr "Dodaj zewnętrzne audio"
+#~ msgid "Analyze region"
+#~ msgstr "Analizuj obszar"
+#~ msgid "Analyze range"
+#~ msgstr "Analizuj zakres"
+#~ msgid "Copyright (C) 1999-2007 Paul Davis"
+#~ msgstr "Prawa autorskie (C) 1999-2007 Paul Davis"
+#~ msgid "Could not connect to JACK server as  \"%1\""
+#~ msgstr "Nie można się połączyć z serwerem JACK jako  \"%1\""
+#~ msgid ""
+#~ "\n"
+#~ "\n"
+#~ "No session named \"%1\" exists.\n"
+#~ "To create it from the command line, start ardour as \"ardour --new %1"
+#~ msgstr ""
+#~ "\n"
+#~ "\n"
+#~ "Sesja o nazwie \"%1\" nie istnieje.\n"
+#~ "By utworzyć ją z linii komend, uruchom ardoura poprzez polecenie: "
+#~ "\"ardour --new %1"
+#~ msgid "Files"
+#~ msgstr "Pliki"
+#~ msgid "Setup"
+#~ msgstr "Ustawienia"
+#~ msgid "Audio Frames"
+#~ msgstr "Klatki audio"
+#~ msgid "Edit Cursor"
+#~ msgstr "Wskaźnik"
+#~ msgid "Frames"
+#~ msgstr "Klatki"
+#~ msgid "Select all between cursors"
+#~ msgstr "Zaznacz wszystko między głowicą a wskaźnikiem"
+#~ msgid "Paste at edit cursor"
+#~ msgstr "Wklej w położeniu wskaźnika"
+#~ msgid "Paste at mouse"
+#~ msgstr "Wklej w położeniu kursora"
+#~ msgid "Duplicate how many times?"
+#~ msgstr "Ile razy powielić?"
+#~ msgid "Move edit cursor"
+#~ msgstr "Przesuń wskaźnik"
+#~ msgid "Edit Cursor to Next Region Start"
+#~ msgstr "Wskaźnik do początku następnego obszaru"
+#~ msgid "Edit Cursor to Next Region End"
+#~ msgstr "Wskaźnik do końca następnego obszaru"
+#~ msgid "Edit Cursor to Next Region Sync"
+#~ msgstr "Wskaźnik do następnej synchronizacji obszaru"
+#~ msgid "Edit Cursor to Previous Region Start"
+#~ msgstr "Wskaźnik do początku poprzedniego obszaru"
+#~ msgid "Edit Cursor to Previous Region End"
+#~ msgstr "Wskaźnik do końca poprzedniego obszaru"
+#~ msgid "Edit Cursor to Previous Region Sync"
+#~ msgstr "Wskaźnik do poprzedniej synchronizacji obszaru"
+#~ msgid "Edit Cursor to Range Start"
+#~ msgstr "Wskaźnik do początku zakresu"
+#~ msgid "Edit Cursor to Range End"
+#~ msgstr "Wskaźnik do końca zakresu"
+#~ msgid "Select All Between Cursors"
+#~ msgstr "Zaznacz wszystko między głowicą a wskaźnikiem"
+#~ msgid "Center Edit Cursor"
+#~ msgstr "Wyśrodkuj wskaźnik"
+#~ msgid "Edit to Playhead"
+#~ msgstr "Kursor edycji do głowicy"
+#~ msgid "crop"
+#~ msgstr "Przytnij"
+#~ msgid "Snap to frame"
+#~ msgstr "Przyciągaj do klatek"
+#~ msgid "Snap to edit cursor"
+#~ msgstr "Przyciągaj do wskaźnika"
+#~ msgid "Hide Mark"
+#~ msgstr "Ukryj znak"
+#~ msgid "Remove Mark"
+#~ msgstr "Usuń znak"
+#~ msgid "cancel selection"
+#~ msgstr "anuluj zaznaczenie"
+#~ msgid "set region sync position"
+#~ msgstr "ustaw pozycję synchronizacji obszaru"
+#~ msgid "Place the edit cursor at the desired sync point"
+#~ msgstr "Umieść wskaźnik w pożądanym punkcie synchronizacji"
+#~ msgid "set sync from edit cursor"
+#~ msgstr "ustaw synchronizację wg położenia wskaźnika"
+#~ msgid "could not start JACK server: "
+#~ msgstr "nie można było uruchomić serwera JACK: "
+#~ msgid "Available LADSPA Plugins"
+#~ msgstr "Dostępne wtyczki LADSPA"
+#~ msgid "LADSPA"
+#~ msgstr "LADSPA"
+#~ msgid "VST"
+#~ msgstr "VST"
+#~ msgid "AudioUnit"
+#~ msgstr "Jednostka audio"
+
