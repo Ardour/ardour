@@ -335,10 +335,11 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters (int len)
 {
-	level_meter->pack_end (meter_metric_area, false, false);
-	meter_metric_area.show_all ();
+	if (!meter_metric_area.get_parent()) {
+		level_meter->pack_end (meter_metric_area, false, false);
+		meter_metric_area.show_all ();
+	}
 	level_meter->setup_meters(len, 5);
-	
 }
 
 int
