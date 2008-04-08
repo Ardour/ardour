@@ -256,7 +256,7 @@ class MidiRegionView : public RegionView
 	 * they are added to _selection when redisplay_model is called
 	 * this is necessary for selecting notes during/after model manipulations 
 	 */
-	std::set<ARDOUR::Note *> _marked_for_selection;
+	std::set< boost::shared_ptr<ARDOUR::Note> > _marked_for_selection;
 
 	std::vector<NoteResizeData *> _resize_data;
 };

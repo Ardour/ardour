@@ -680,7 +680,9 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 	// dont display notes beyond the region bounds
 	if(
 			note->time() - _region->start() >= _region->length() ||
-			note->time() <  _region->start()
+			note->time() <  _region->start() ||
+			note->note() < midi_stream_view()->lowest_note() ||
+			note->note() > midi_stream_view()->highest_note()
 	  ) {
 		return;
 	}
@@ -752,10 +754,8 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		event = 0;
 	}
 
-	if(event) {
-		Note *note = event->note().get();
-			
-		if(_marked_for_selection.find(note) != _marked_for_selection.end()) {
+	if(event) {			
+		if(_marked_for_selection.find(event->note()) != _marked_for_selection.end()) {
 				note_selected(event, true);
 		}
 	}
@@ -939,7 +939,7 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			
 			command_add_note(copy);
 
-			_marked_for_selection.insert(copy.get());
+			_marked_for_selection.insert(copy);
 			i = next;
 		}
 				
@@ -1104,7 +1104,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 			command_remove_note(canvas_note);
 			copy->on_event().time() = current_frame;
 			command_add_note(copy);
-			_marked_for_selection.insert(copy.get());
+			_marked_for_selection.insert(copy);
 		}
 		// resize end of note
 		if (note_end == CanvasNote::NOTE_OFF && current_frame > copy->time()) {
@@ -1112,7 +1112,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 			command_remove_note(canvas_note);
 			copy->off_event().time() = current_frame;
 			command_add_note(copy);
-			_marked_for_selection.insert(copy.get());
+			_marked_for_selection.insert(copy);
 		}
 
 		delete resize_rect;
@@ -1147,7 +1147,7 @@ MidiRegionView::change_velocity(uint8_t velocity, bool relative)
 		command_remove_note(event);
 		command_add_note(copy);
 		
-		_marked_for_selection.insert(copy.get());
+		_marked_for_selection.insert(copy);
 		i = next;
 	}
 	
