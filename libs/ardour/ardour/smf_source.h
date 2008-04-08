@@ -102,7 +102,7 @@ class SMFSource : public MidiSource {
 
 	int init (string idstr, bool must_exist);
 
-	nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cn, nframes_t stamp_offset) const;
+	nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cn, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
 	nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);

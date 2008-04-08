@@ -292,9 +292,9 @@ MidiModel::MidiModel(Session& s, size_t size)
  * \return number of events written to \a dst
  */
 size_t
-MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const
+MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
-	cerr << this << " MM::read @ " << start << " * " << nframes << " + " << stamp_offset << endl;
+	cerr << this << " MM::read @ " << start << " frames: " << nframes << " -> " << stamp_offset << endl;
 	cerr << this << " MM # notes: " << n_notes() << endl;
 
 	size_t read_events = 0;
@@ -310,7 +310,7 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
 		assert(_read_iter->size() > 0);
-		dst.write(_read_iter->time() + stamp_offset, _read_iter->size(), _read_iter->buffer());
+		dst.write(_read_iter->time() + stamp_offset - negative_stamp_offset, _read_iter->size(), _read_iter->buffer());
 		cerr << this << " MM::read event @ " << _read_iter->time()  
 		     << " type: " << hex << int(_read_iter->type()) << dec 
 		     << " note: " << int(_read_iter->note()) 

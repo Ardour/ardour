@@ -55,7 +55,7 @@ class MidiSource : public Source
 	virtual uint32_t    n_channels () const { return 1; }
 	
 	// FIXME: integrate this with the Readable::read interface somehow
-	virtual nframes_t midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const;
+	virtual nframes_t midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
 	virtual nframes_t midi_write (MidiRingBuffer& src, nframes_t cnt);
 
 	virtual void append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev) = 0;
@@ -98,7 +98,7 @@ class MidiSource : public Source
 	virtual int flush_header() = 0;
 	virtual int flush_footer() = 0;
 	
-	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const = 0;
+	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
 	virtual nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt) = 0;
 	
 	mutable Glib::Mutex _lock;

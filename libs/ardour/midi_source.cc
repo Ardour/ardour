@@ -101,15 +101,15 @@ MidiSource::set_state (const XMLNode& node)
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
+MidiSource::midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	if (_model) {
-		const size_t n_events = _model->read(dst, start, cnt, stamp_offset);
+		const size_t n_events = _model->read(dst, start, cnt, stamp_offset, negative_stamp_offset);
 		cout << "Read " << n_events << " events from model." << endl;
 		return cnt;
 	} else {
-		return read_unlocked (dst, start, cnt, stamp_offset);
+		return read_unlocked (dst, start, cnt, stamp_offset, negative_stamp_offset);
 	}
 }
 

@@ -331,7 +331,7 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset) const
+SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
 	cerr << "SMF read_unlocked " << name() << " read " << start << ", count=" << cnt << ", offset=" << stamp_offset << endl;
 
@@ -377,7 +377,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 					((time / (double)_ppqn) * frames_per_beat)) + stamp_offset;
 
 			if (ev_frame_time <= start + cnt)
-				dst.write(ev_frame_time, ev_size, ev_buffer);
+				dst.write(ev_frame_time - negative_stamp_offset, ev_size, ev_buffer);
 			else
 				break;
 		}

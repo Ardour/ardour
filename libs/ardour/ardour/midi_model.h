@@ -72,7 +72,7 @@ public:
 	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
-	size_t read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset) const;
+	size_t read (MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
 
 	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const MIDI::Event& ev);

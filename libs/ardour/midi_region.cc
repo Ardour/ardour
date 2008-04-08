@@ -131,7 +131,8 @@ MidiRegion::master_read_at (MidiRingBuffer& out, nframes_t position, nframes_t d
 nframes_t
 MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
-	//cerr << _name << "._read_at(" << position << ") - " << _position << " duration: " << dur << endl;
+	cerr << "reading from region " << _name << " position: " << _position << " start: " << _start << endl;
+	cerr << _name << "._read_at(" << position << ") - " << position << " duration: " << dur << endl;
 
 	nframes_t internal_offset = 0;
 	nframes_t src_offset      = 0;
@@ -171,6 +172,17 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t pos
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
 
+	nframes_t output_buffer_position = 0;
+	nframes_t negative_output_buffer_position = 0;
+	if(_position >= _start) {
+		// handle resizing of beginnings of regions correctly
+		output_buffer_position = _position - _start;
+	} else {
+		// when _start is greater than _position, we have to subtract
+		// _start from the note times in the midi source
+		negative_output_buffer_position = _start; 
+	}
+	
 	if (src->midi_read (
 			// the destination buffer
 			dst,  
@@ -179,7 +191,9 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t pos
 			// how many bytes
 			to_read, 
 			// the offset in the output buffer
-			_position - _start
+			output_buffer_position,
+			// what to substract from note times written in the output buffer
+			negative_output_buffer_position
 		) != to_read) {
 		return 0; /* "read nothing" */
 	}
