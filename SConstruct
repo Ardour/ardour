@@ -1,7 +1,7 @@
 # -*- python -*-
 
 #
-# just debugging svn bot some more and more without pesky trac url mess
+# just debugging svn bot some more and more without pesky trac url mess maybe
 #
 
 import os
