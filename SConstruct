@@ -1,7 +1,7 @@
 # -*- python -*-
 
 #
-# just debugging svn bot
+# just debugging svn bot some more
 #
 
 import os
