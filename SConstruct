@@ -1,7 +1,7 @@
 # -*- python -*-
 
 #
-# just debugging svn bot direct to #ardour channel
+# just debugging svn bot now with wholesome loggy goodness
 #
 
 import os
