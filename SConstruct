@@ -1,7 +1,7 @@
 # -*- python -*-
 
 #
-# and there we have it
+# and there we have it, or do we?
 #
 
 import os
