@@ -3359,6 +3359,11 @@ ARDOUR_UI::TransportControllable::set_id (const string& str)
 void
 ARDOUR_UI::setup_profile ()
 {
+	cerr << "GDK screen dimensions: "
+	     << gdk_screen_width() << " x " 
+	     << gdk_screen_height()
+	     << endl;
+
 	if (gdk_screen_width() < 1200) {
 		Profile->set_small_screen ();
 	}
