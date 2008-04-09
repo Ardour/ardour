@@ -272,8 +272,8 @@ MidiModel::const_iterator::operator=(const const_iterator& other)
 	
 // MidiModel
 
-MidiModel::MidiModel(Session& s, size_t size)
-	: Automatable(s, "midi model")
+MidiModel::MidiModel(MidiSource& s, size_t size)
+	: Automatable(s.session(), "midi model")
 	, _notes(size)
 	, _note_mode(Sustained)
 	, _writing(false)
@@ -281,6 +281,7 @@ MidiModel::MidiModel(Session& s, size_t size)
 	, _end_iter(*this, DBL_MAX)
 	, _next_read(UINT32_MAX)
 	, _read_iter(*this, DBL_MAX)
+	, _midi_source(s)
 {
 	assert(_end_iter._is_end);
 	assert( ! _end_iter._locked);
@@ -657,6 +658,118 @@ MidiModel::DeltaCommand::undo()
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
 
+XMLNode *
+MidiModel::DeltaCommand::NoteMarshaller::operator()(const boost::shared_ptr<Note> note)
+{
+	XMLNode *xml_note = new XMLNode("note");
+	ostringstream note_str(ios::ate);
+	note_str << int(note->note());
+	xml_note->add_property("note", note_str.str());
+
+	ostringstream channel_str(ios::ate);
+	channel_str << int(note->channel());
+	xml_note->add_property("channel", channel_str.str());	
+	
+	ostringstream time_str(ios::ate);
+	time_str << int(note->time());
+	xml_note->add_property("time", time_str.str());
+
+	ostringstream duration_str(ios::ate);
+	duration_str <<(unsigned int) note->duration();
+	xml_note->add_property("duration", duration_str.str());
+
+	ostringstream velocity_str(ios::ate);
+	velocity_str << (unsigned int) note->velocity();
+	xml_note->add_property("velocity", velocity_str.str());
+	
+	return xml_note;
+}
+
+boost::shared_ptr<Note> 
+MidiModel::DeltaCommand::NoteUnmarshaller::operator()(XMLNode *xml_note) 
+{
+	unsigned int note;
+	istringstream note_str(xml_note->property("note")->value());
+	note_str >> note;
+
+	unsigned int channel;
+	istringstream channel_str(xml_note->property("channel")->value());
+	channel_str >> channel;
+
+	unsigned int time;
+	istringstream time_str(xml_note->property("time")->value());
+	time_str >> time;
+
+	unsigned int duration;
+	istringstream duration_str(xml_note->property("duration")->value());
+	duration_str >> duration;
+
+	unsigned int velocity;
+	istringstream velocity_str(xml_note->property("velocity")->value());
+	velocity_str >> velocity;
+	
+	cerr << "creating note channel: " << channel_str.str() << " time " << time_str.str() << " duration " << duration_str.str() << " pitch " << note_str.str() << " velo " << velocity_str.str() <<endl;
+	cerr << "creating note channel: " << channel << " time " << time << " duration " << duration << " pitch " << note << " velo " << velocity <<endl;
+
+	boost::shared_ptr<Note> note_ptr(new Note(channel, time, duration, note, velocity));
+	return note_ptr;
+}
+
+#define ADDED_NOTES_ELEMENT "added_notes"
+#define REMOVED_NOTES_ELEMENT "removed_notes"
+#define DELTA_COMMAND_ELEMENT "DeltaCommand"
+
+int 
+MidiModel::DeltaCommand::set_state (const XMLNode& delta_command)
+{
+
+	cerr << "Unmarshalling Deltacommand" << endl;
+	
+	if(delta_command.name() != string(DELTA_COMMAND_ELEMENT)) {
+		return 1;
+	}
+	
+	_added_notes.clear();
+	XMLNode *added_notes = delta_command.child(ADDED_NOTES_ELEMENT);
+	XMLNodeList notes = added_notes->children();
+	transform(notes.begin(), notes.end(), back_inserter(_added_notes), 
+	          MidiModel::DeltaCommand::NoteUnmarshaller());
+	
+	_removed_notes.clear();
+	XMLNode *removed_notes = delta_command.child(REMOVED_NOTES_ELEMENT);
+	notes = removed_notes->children();
+	transform(notes.begin(), notes.end(), back_inserter(_removed_notes), 
+	          MidiModel::DeltaCommand::NoteUnmarshaller());
+	
+	return 0;
+}
+
+XMLNode& 
+MidiModel::DeltaCommand::get_state () 
+{
+	XMLNode *delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
+	delta_command->add_property("midi_source", _model.midi_source().id().to_s());
+	
+	XMLNode *added_notes   = delta_command->add_child(ADDED_NOTES_ELEMENT);
+	for (std::list< boost::shared_ptr<Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
+		NoteMarshaller marshaller;
+		added_notes->add_child_nocopy(*marshaller(*i));
+	}
+	
+	XMLNode *removed_notes = delta_command->add_child(REMOVED_NOTES_ELEMENT);
+	for (std::list< boost::shared_ptr<Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
+		NoteMarshaller marshaller;
+		removed_notes->add_child_nocopy(*marshaller(*i));		
+	}
+	
+	return *delta_command;
+}
+
+MidiModel::DeltaCommand::DeltaCommand (MidiModel& m, const XMLNode& node)
+	: _model(m)
+{
+	set_state(node);
+}
 
 bool
 MidiModel::write_to(boost::shared_ptr<MidiSource> source)

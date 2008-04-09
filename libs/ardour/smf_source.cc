@@ -872,7 +872,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	if (! _model) {
-		_model = boost::shared_ptr<MidiModel>(new MidiModel(_session));
+		_model = boost::shared_ptr<MidiModel>(new MidiModel(*this));
 		cerr << _name << " loaded new model " << _model.get() << endl;
 	} else {
 		cerr << _name << " reloading model " << _model.get()

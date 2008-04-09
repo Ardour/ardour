@@ -47,11 +47,13 @@ public:
 	inline uint8_t note()     const { return _on_event.note(); }
 	inline uint8_t velocity() const { return _on_event.velocity(); }
 	inline double  duration() const { return _off_event.time() - _on_event.time(); }
+	inline uint8_t channel()  const { return _on_event.channel(); }
 
 	inline void set_time(double t)      { _off_event.time() = t + duration(); _on_event.time() = t; }
 	inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
 	inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
 	inline void set_duration(double d)  { _off_event.time() = _on_event.time() + d; }
+	inline void set_channel(uint8_t channel)  { _on_event.set_channel(channel);  _off_event.set_channel(channel); }
 
 	inline MIDI::Event& on_event()  { return _on_event; }
 	inline MIDI::Event& off_event() { return _off_event; }

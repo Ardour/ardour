@@ -55,7 +55,7 @@ typedef std::pair<boost::shared_ptr<const AutomationList>, std::pair<double,doub
  */
 class MidiModel : public boost::noncopyable, public Automatable {
 public:
-	MidiModel(Session& s, size_t size=0);
+	MidiModel(MidiSource& s, size_t size=0);
 	
 	// This is crap.
 	void write_lock();
@@ -110,20 +110,30 @@ public:
 	public:
 		DeltaCommand (MidiModel& m, const std::string& name)
 			: Command(name), _model(m), _name(name) {}
-		//DeltaCommand (MidiModel&, const XMLNode& node);
+		DeltaCommand (MidiModel&, const XMLNode& node);
 
 		const std::string& name() const { return _name; }
 		
 		void operator()();
 		void undo();
 		
-		/*int set_state (const XMLNode&);
-		XMLNode& get_state ();*/
+		int set_state (const XMLNode&);
+		XMLNode& get_state ();
 
 		void add(const boost::shared_ptr<Note> note);
 		void remove(const boost::shared_ptr<Note> note);
 
 	private:
+		class NoteMarshaller {
+		public:
+			XMLNode *operator()(const boost::shared_ptr<Note> note);
+		};
+		
+		class NoteUnmarshaller {
+		public:
+			boost::shared_ptr<Note> operator()(XMLNode *xml_note);
+		};
+				
 		MidiModel&                           _model;
 		const std::string                    _name;
 		std::list< boost::shared_ptr<Note> > _added_notes;
@@ -164,7 +174,7 @@ public:
 		friend class MidiModel;
 
 		const MidiModel* _model;
-		MIDI::Event        _event;
+		MIDI::Event      _event;
 
 		typedef std::priority_queue<
 				boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,
@@ -182,6 +192,8 @@ public:
 	
 	const_iterator        begin() const { return const_iterator(*this, 0); }
 	const const_iterator& end()   const { return _end_iter; }
+	
+	const MidiSource& midi_source() const { return _midi_source; }
 	
 private:
 	friend class DeltaCommand;
@@ -218,6 +230,8 @@ private:
 			boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,
 			LaterNoteEndComparator>
 		ActiveNotes;
+	
+	MidiSource& _midi_source;
 };
 
 } /* namespace ARDOUR */
