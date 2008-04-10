@@ -124,20 +124,16 @@ public:
 		void remove(const boost::shared_ptr<Note> note);
 
 	private:
-		class NoteMarshaller {
-		public:
-			XMLNode *operator()(const boost::shared_ptr<Note> note);
-		};
+		XMLNode &marshal_note(const boost::shared_ptr<Note> note);
+		boost::shared_ptr<Note> unmarshal_note(XMLNode *xml_note);
 		
-		class NoteUnmarshaller {
-		public:
-			boost::shared_ptr<Note> operator()(XMLNode *xml_note);
-		};
-				
 		MidiModel&                           _model;
 		const std::string                    _name;
-		std::list< boost::shared_ptr<Note> > _added_notes;
-		std::list< boost::shared_ptr<Note> > _removed_notes;
+		
+		typedef std::list< boost::shared_ptr<Note> > NoteList;
+		
+		NoteList _added_notes;
+		NoteList _removed_notes;
 	};
 
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");

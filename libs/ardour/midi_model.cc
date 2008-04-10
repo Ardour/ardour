@@ -658,8 +658,8 @@ MidiModel::DeltaCommand::undo()
 	_model.ContentsChanged(); /* EMIT SIGNAL */
 }
 
-XMLNode *
-MidiModel::DeltaCommand::NoteMarshaller::operator()(const boost::shared_ptr<Note> note)
+XMLNode &
+MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr<Note> note)
 {
 	XMLNode *xml_note = new XMLNode("note");
 	ostringstream note_str(ios::ate);
@@ -682,11 +682,11 @@ MidiModel::DeltaCommand::NoteMarshaller::operator()(const boost::shared_ptr<Note
 	velocity_str << (unsigned int) note->velocity();
 	xml_note->add_property("velocity", velocity_str.str());
 	
-	return xml_note;
+	return *xml_note;
 }
 
 boost::shared_ptr<Note> 
-MidiModel::DeltaCommand::NoteUnmarshaller::operator()(XMLNode *xml_note) 
+MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note) 
 {
 	unsigned int note;
 	istringstream note_str(xml_note->property("note")->value());
@@ -722,9 +722,6 @@ MidiModel::DeltaCommand::NoteUnmarshaller::operator()(XMLNode *xml_note)
 int 
 MidiModel::DeltaCommand::set_state (const XMLNode& delta_command)
 {
-
-	cerr << "Unmarshalling Deltacommand" << endl;
-	
 	if(delta_command.name() != string(DELTA_COMMAND_ELEMENT)) {
 		return 1;
 	}
@@ -733,13 +730,13 @@ MidiModel::DeltaCommand::set_state (const XMLNode& delta_command)
 	XMLNode *added_notes = delta_command.child(ADDED_NOTES_ELEMENT);
 	XMLNodeList notes = added_notes->children();
 	transform(notes.begin(), notes.end(), back_inserter(_added_notes), 
-	          MidiModel::DeltaCommand::NoteUnmarshaller());
+	          sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
 	
 	_removed_notes.clear();
 	XMLNode *removed_notes = delta_command.child(REMOVED_NOTES_ELEMENT);
 	notes = removed_notes->children();
 	transform(notes.begin(), notes.end(), back_inserter(_removed_notes), 
-	          MidiModel::DeltaCommand::NoteUnmarshaller());
+			sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
 	
 	return 0;
 }
@@ -749,19 +746,18 @@ MidiModel::DeltaCommand::get_state ()
 {
 	XMLNode *delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
 	delta_command->add_property("midi_source", _model.midi_source().id().to_s());
+	delta_command->add_property("midi_source_name", _model.midi_source().name());
 	
 	XMLNode *added_notes   = delta_command->add_child(ADDED_NOTES_ELEMENT);
-	for (std::list< boost::shared_ptr<Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
-		NoteMarshaller marshaller;
-		added_notes->add_child_nocopy(*marshaller(*i));
-	}
+	for_each(_added_notes.begin(), _added_notes.end(), 
+		sigc::compose(sigc::mem_fun(*added_notes, &XMLNode::add_child_nocopy),
+		              sigc::mem_fun(*this, &DeltaCommand::marshal_note))); 
 	
-	XMLNode *removed_notes = delta_command->add_child(REMOVED_NOTES_ELEMENT);
-	for (std::list< boost::shared_ptr<Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
-		NoteMarshaller marshaller;
-		removed_notes->add_child_nocopy(*marshaller(*i));		
-	}
-	
+	XMLNode *removed_notes   = delta_command->add_child(REMOVED_NOTES_ELEMENT);
+	for_each(_removed_notes.begin(), _removed_notes.end(), 
+		sigc::compose(sigc::mem_fun(*removed_notes, &XMLNode::add_child_nocopy),
+		              sigc::mem_fun(*this, &DeltaCommand::marshal_note))); 
+
 	return *delta_command;
 }
 
