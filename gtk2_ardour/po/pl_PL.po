@@ -2,13 +2,13 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Piotr Makowski <pzaryk@gmail.com>, 2008.
+# Piotr Zaryk <pzaryk@gmail.com>, 2008.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: Piotr Zaryk <pzaryk@gmail.com>\n"
 "POT-Creation-Date: 2008-04-03 16:18+0200\n"
-"PO-Revision-Date: 2008-04-04 19:03+0100\n"
+"PO-Revision-Date: 2008-04-10 10:47+0100\n"
 "Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
 "Language-Team: Polish <pzaryk@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -516,12 +516,12 @@ msgstr "% "
 #: gtk2_ardour/ardour_ui.cc:143
 #: gtk2_ardour/ardour_ui_ed.cc:327
 msgid "Punch In"
-msgstr "Włącznik"
+msgstr "Wejście przełącznika"
 
 #: gtk2_ardour/ardour_ui.cc:144
 #: gtk2_ardour/ardour_ui_ed.cc:330
 msgid "Punch Out"
-msgstr "Wyłącznik"
+msgstr "Wyjście przełącznika"
 
 #: gtk2_ardour/ardour_ui.cc:145
 #: gtk2_ardour/ardour_ui_ed.cc:345
@@ -1222,7 +1222,7 @@ msgstr "Zakończ"
 
 #: gtk2_ardour/ardour_ui_ed.cc:200
 msgid "Maximise Editor Space"
-msgstr "Maksymalizuj edytor"
+msgstr "Maksymalizacja edytora"
 
 #: gtk2_ardour/ardour_ui_ed.cc:202
 msgid "Show Editor"
@@ -1402,7 +1402,7 @@ msgstr "Wyłączony"
 
 #: gtk2_ardour/ardour_ui_ed.cc:333
 msgid "Punch In/Out"
-msgstr "Włącznik/wyłącznik"
+msgstr "We/wy przełącznika"
 
 #: gtk2_ardour/ardour_ui_ed.cc:349
 msgid "Sync startup to video"
@@ -1550,15 +1550,15 @@ msgstr "Półtony"
 
 #: gtk2_ardour/ardour_ui_ed.cc:425
 msgid "Send MTC"
-msgstr "Wyślij MTC"
+msgstr "Wysyłanie MTC"
 
 #: gtk2_ardour/ardour_ui_ed.cc:427
 msgid "Send MMC"
-msgstr "Wyślij MMC"
+msgstr "Wysyłanie MMC"
 
 #: gtk2_ardour/ardour_ui_ed.cc:429
 msgid "Use MMC"
-msgstr "Użyj MMC"
+msgstr "Używanie MMC"
 
 #: gtk2_ardour/ardour_ui_ed.cc:431
 msgid "Send MIDI feedback"
@@ -1593,9 +1593,8 @@ msgid "Stop recording on xrun"
 msgstr "Zatrzymaj nagrywanie przy xrun"
 
 #: gtk2_ardour/ardour_ui_ed.cc:446
-#, fuzzy
 msgid "Create marker at xrun location"
-msgstr "Wyczyść wszystkie położenia"
+msgstr "Tworzenie znacznika w położeniu xrun"
 
 #: gtk2_ardour/ardour_ui_ed.cc:447
 msgid "Stop transport at session end"
@@ -1614,12 +1613,10 @@ msgid "Region equivalents overlap"
 msgstr "Nakładanie odpowiedników obszarów"
 
 #: gtk2_ardour/ardour_ui_ed.cc:451
-#, fuzzy
 msgid "Primary Clock delta to edit point"
 msgstr "Zegar podstawowy wyświetla odstęp od wskaźnika"
 
 #: gtk2_ardour/ardour_ui_ed.cc:452
-#, fuzzy
 msgid "Secondary Clock delta to edit point"
 msgstr "Zegar dodatkowy wyświetla odstęp od wskaźnika"
 
@@ -1645,7 +1642,7 @@ msgstr ""
 
 #: gtk2_ardour/ardour_ui_ed.cc:462
 msgid "Use DC bias"
-msgstr "Użyj DC bias"
+msgstr "Używanie DC bias"
 
 #: gtk2_ardour/ardour_ui_ed.cc:464
 msgid "No processor handling"
@@ -1847,7 +1844,7 @@ msgstr "Takty:Uderzenia"
 
 #: gtk2_ardour/audio_clock.cc:1924
 msgid "Minutes:Seconds"
-msgstr "Minuty:Sekundy"
+msgstr "Minuty i sekundy"
 
 #: gtk2_ardour/audio_region_editor.cc:48
 msgid "NAME:"
@@ -1918,7 +1915,6 @@ msgid "Traditional"
 msgstr "Tradycyjny"
 
 #: gtk2_ardour/audio_time_axis.cc:270
-#, fuzzy
 msgid "Rectified"
 msgstr "Poprawiony"
 
@@ -2033,7 +2029,7 @@ msgstr "Zapisz"
 #: gtk2_ardour/generic_pluginui.cc:612
 #: gtk2_ardour/panner_ui.cc:94
 msgid "Touch"
-msgstr "Porusz"
+msgstr "Dotyk"
 
 #: gtk2_ardour/automation_time_axis.cc:280
 #: gtk2_ardour/generic_pluginui.cc:347
@@ -2110,7 +2106,6 @@ msgid "drawwidth"
 msgstr "szerokość rysowania"
 
 #: gtk2_ardour/canvas-imageframe.c:140
-#, fuzzy
 msgid "drawn width"
 msgstr "zarysowana szerokość"
 
@@ -2177,14 +2172,12 @@ msgid "width in pixels of outline"
 msgstr "szerokość konturu w pikselach"
 
 #: gtk2_ardour/canvas-simplerect.c:160
-#, fuzzy
 msgid "outline what"
-msgstr "kontur czego"
+msgstr "kontur"
 
 #: gtk2_ardour/canvas-simplerect.c:161
-#, fuzzy
 msgid "which boundaries to outline (mask)"
-msgstr "które granice do konturu (maska)"
+msgstr "granice do konturu (maska)"
 
 #: gtk2_ardour/canvas-simplerect.c:172
 msgid "fill"
@@ -2211,7 +2204,6 @@ msgid "color of outline"
 msgstr "kolor konturu"
 
 #: gtk2_ardour/canvas-simplerect.c:200
-#, fuzzy
 msgid "fill color rgba"
 msgstr "kolor rgba wypełnienia"
 
@@ -2231,7 +2223,7 @@ msgstr "Zresetuj"
 #: gtk2_ardour/crossfade_edit.cc:79
 #: gtk2_ardour/editor_actions.cc:56
 msgid "Fade"
-msgstr ""
+msgstr "Przejścia"
 
 #: gtk2_ardour/crossfade_edit.cc:80
 msgid "Out (dry)"
@@ -2250,12 +2242,10 @@ msgid "In"
 msgstr "Wejście"
 
 #: gtk2_ardour/crossfade_edit.cc:85
-#, fuzzy
 msgid "With Pre-roll"
 msgstr "Z Pre-roll"
 
 #: gtk2_ardour/crossfade_edit.cc:86
-#, fuzzy
 msgid "With Post-roll"
 msgstr "Z Post-roll"
 
@@ -2302,12 +2292,10 @@ msgid "Move Selected Marker"
 msgstr "Przenieś znacznik"
 
 #: gtk2_ardour/editor_actions.cc:53
-#, fuzzy
 msgid "Select Range Operations"
 msgstr "Operacje na zakresach"
 
 #: gtk2_ardour/editor_actions.cc:54
-#, fuzzy
 msgid "Select Regions"
 msgstr "Zaznacz obszary"
 
@@ -2325,9 +2313,8 @@ msgid "Layering"
 msgstr "Warstwy"
 
 #: gtk2_ardour/editor_actions.cc:59
-#, fuzzy
 msgid "Link"
-msgstr "łącze"
+msgstr "Łącze"
 
 #: gtk2_ardour/editor_actions.cc:60
 #, fuzzy
@@ -2358,9 +2345,8 @@ msgstr "Monitorowanie"
 #: gtk2_ardour/editor_actions.cc:66
 #: gtk2_ardour/editor.cc:151
 #: gtk2_ardour/editor.cc:3446
-#, fuzzy
 msgid "Active Mark"
-msgstr "Aktywne"
+msgstr "Wskaźnik"
 
 #: gtk2_ardour/editor_actions.cc:67
 #: gtk2_ardour/editor_actions.cc:562
@@ -2397,9 +2383,8 @@ msgid "Region operations"
 msgstr "Operacje na obszarach"
 
 #: gtk2_ardour/editor_actions.cc:74
-#, fuzzy
 msgid "Gain"
-msgstr "wzmocnienie"
+msgstr "Wzmocnienie"
 
 #: gtk2_ardour/editor_actions.cc:75
 msgid "Rulers"
@@ -2808,12 +2793,10 @@ msgid "Center Playhead"
 msgstr "Wyśrodkuj"
 
 #: gtk2_ardour/editor_actions.cc:269
-#, fuzzy
 msgid "Center Active Marker"
-msgstr "Usuń znacznik"
+msgstr "Wyśrodkuj wskaźnik"
 
 #: gtk2_ardour/editor_actions.cc:272
-#, fuzzy
 msgid "Playhead Forward"
 msgstr "Głowica do przodu"
 
@@ -2823,12 +2806,11 @@ msgstr "Głowica do tyłu"
 
 #: gtk2_ardour/editor_actions.cc:277
 msgid "Playhead To Active Mark"
-msgstr "Do aktywnego znacznika"
+msgstr "Do wskaźnika"
 
 #: gtk2_ardour/editor_actions.cc:279
-#, fuzzy
 msgid "Active Mark To Playhead"
-msgstr "Przesuń znacznik do głowicy"
+msgstr "Do głowicy"
 
 #: gtk2_ardour/editor_actions.cc:282
 #, fuzzy
@@ -2890,19 +2872,16 @@ msgid "Set Fade In Length"
 msgstr "Zmień długość stopniowego wzmocnienia"
 
 #: gtk2_ardour/editor_actions.cc:320
-#, fuzzy
 msgid "Toggle Fade In Active"
-msgstr "aktywuj stopniowe wzmocnienie"
+msgstr "Przełącz stopniowe wzmocnienie"
 
 #: gtk2_ardour/editor_actions.cc:322
-#, fuzzy
 msgid "Set Fade Out Length"
-msgstr "Według długości pliku źródłowego"
+msgstr "Zmień długość stopniowego wyciszenia"
 
 #: gtk2_ardour/editor_actions.cc:324
-#, fuzzy
 msgid "Toggle Fade Out Active"
-msgstr "aktywuj stopniowe wyciszenie"
+msgstr "Przełącz stopniowe wyciszenie"
 
 #: gtk2_ardour/editor_actions.cc:327
 msgid "Align Regions Start"
@@ -2950,12 +2929,11 @@ msgstr "Pędzel"
 
 #: gtk2_ardour/editor_actions.cc:359
 msgid "Playhead to Mouse"
-msgstr "Do myszy"
+msgstr "Do kursora myszy"
 
 #: gtk2_ardour/editor_actions.cc:361
-#, fuzzy
 msgid "Active Marker to Mouse"
-msgstr "Odsłuch w położeniu myszy"
+msgstr "Do kursora myszy"
 
 #: gtk2_ardour/editor_actions.cc:364
 msgid "Duplicate Region"
@@ -2967,7 +2945,7 @@ msgstr "Powiel"
 
 #: gtk2_ardour/editor_actions.cc:370
 msgid "Duplicate Range"
-msgstr "Duplikuj zakres"
+msgstr "Duplikuj"
 
 #: gtk2_ardour/editor_actions.cc:373
 msgid "Insert Region"
@@ -2996,9 +2974,8 @@ msgid "Rename"
 msgstr "Zmień nazwę"
 
 #: gtk2_ardour/editor_actions.cc:382
-#, fuzzy
 msgid "Auto-Rename"
-msgstr "Zmień nazwę"
+msgstr "Automatyczna zmiana nazwy"
 
 #: gtk2_ardour/editor_actions.cc:385
 msgid "Boost Region Gain"
@@ -3022,19 +2999,16 @@ msgid "Remove Region Sync"
 msgstr "Usuń synchronizację"
 
 #: gtk2_ardour/editor_actions.cc:400
-#, fuzzy
 msgid "Raise Region"
-msgstr "Zmień nazwę obszaru"
+msgstr "Przesuń do przodu"
 
 #: gtk2_ardour/editor_actions.cc:403
-#, fuzzy
 msgid "Lower Region"
-msgstr "Zapętl obszar"
+msgstr "Przesuń do tyłu"
 
 #: gtk2_ardour/editor_actions.cc:406
-#, fuzzy
 msgid "Export Region"
-msgstr "Ekspor sesji"
+msgstr "Eksportuj obszar"
 
 #: gtk2_ardour/editor_actions.cc:409
 msgid "Lock Region"
@@ -3189,9 +3163,8 @@ msgstr "Podążanie za głowicą"
 
 #: gtk2_ardour/editor_actions.cc:505
 #: gtk2_ardour/editor_ops.cc:5651
-#, fuzzy
 msgid "Insert Time"
-msgstr "Wstaw obszar"
+msgstr "Czas wstawienia"
 
 #: gtk2_ardour/editor_actions.cc:509
 msgid "Toggle Active"
@@ -3254,7 +3227,7 @@ msgstr "Do głowicy"
 
 #: gtk2_ardour/editor_actions.cc:547
 msgid "Zoom Focus Mouse"
-msgstr "Do myszy"
+msgstr "Do kursora myszy"
 
 #: gtk2_ardour/editor_actions.cc:549
 msgid "Zoom Focus Edit"
@@ -3285,7 +3258,7 @@ msgstr "Narzędzie rozciągania w czasie"
 #: gtk2_ardour/editor.cc:150
 #: gtk2_ardour/editor.cc:3444
 msgid "Mouse"
-msgstr "Mysz"
+msgstr "Wskaźnik myszy"
 
 #: gtk2_ardour/editor_actions.cc:564
 #: gtk2_ardour/editor.cc:140
@@ -3303,14 +3276,12 @@ msgid "Change edit point (w/Marker)"
 msgstr "Zmień punkt edycji (w/Marker)"
 
 #: gtk2_ardour/editor_actions.cc:569
-#, fuzzy
 msgid "Splice"
-msgstr "Podziel"
+msgstr "Klocek"
 
 #: gtk2_ardour/editor_actions.cc:570
-#, fuzzy
 msgid "Slide"
-msgstr "Ukryj"
+msgstr "Ślizg"
 
 #: gtk2_ardour/editor_actions.cc:571
 #: gtk2_ardour/editor.cc:1786
@@ -3346,7 +3317,7 @@ msgstr "Siatka"
 #: gtk2_ardour/editor.cc:134
 #: gtk2_ardour/editor.cc:3378
 msgid "Magnetic"
-msgstr "Magnetyczny"
+msgstr "Przyciąganie"
 
 #: gtk2_ardour/editor_actions.cc:582
 #, fuzzy
@@ -3437,9 +3408,8 @@ msgid "Meter"
 msgstr "Metrum"
 
 #: gtk2_ardour/editor_actions.cc:612
-#, fuzzy
 msgid "Ranges"
-msgstr " zakres"
+msgstr "Zakresy"
 
 #: gtk2_ardour/editor_actions.cc:614
 #: gtk2_ardour/editor.cc:200
@@ -3447,13 +3417,12 @@ msgid "CD Markers"
 msgstr "Znaczniki CD"
 
 #: gtk2_ardour/editor_actions.cc:615
-#, fuzzy
 msgid "Loop/Punch"
-msgstr "Zakresy pętli/przełącznika"
+msgstr "Pętla/przełącznik"
 
 #: gtk2_ardour/editor_actions.cc:619
 msgid "Min:Sec"
-msgstr "Minuty:sekundy"
+msgstr "Minuty i sekundy"
 
 #: gtk2_ardour/editor_actions.cc:647
 msgid "Sort"
@@ -3553,59 +3522,59 @@ msgstr "Ostatnio dodana jest wyżej"
 
 #: gtk2_ardour/editor_actions.cc:718
 msgid "23.976"
-msgstr ""
+msgstr "23.976"
 
 #: gtk2_ardour/editor_actions.cc:719
 msgid "24"
-msgstr ""
+msgstr "24"
 
 #: gtk2_ardour/editor_actions.cc:720
 msgid "24.976"
-msgstr ""
+msgstr "24.976"
 
 #: gtk2_ardour/editor_actions.cc:721
 msgid "25"
-msgstr ""
+msgstr "25"
 
 #: gtk2_ardour/editor_actions.cc:722
 msgid "29.97"
-msgstr ""
+msgstr "29.97"
 
 #: gtk2_ardour/editor_actions.cc:723
 msgid "29.97 drop"
-msgstr ""
+msgstr "29.97 drop"
 
 #: gtk2_ardour/editor_actions.cc:724
 msgid "30"
-msgstr ""
+msgstr "30"
 
 #: gtk2_ardour/editor_actions.cc:725
 msgid "30 drop"
-msgstr ""
+msgstr "30 drop"
 
 #: gtk2_ardour/editor_actions.cc:726
 msgid "59.94"
-msgstr ""
+msgstr "59.94"
 
 #: gtk2_ardour/editor_actions.cc:727
 msgid "60"
-msgstr ""
+msgstr "60"
 
 #: gtk2_ardour/editor_actions.cc:731
 msgid "+4.1667% + 0.1%"
-msgstr ""
+msgstr "+4.1667% + 0.1%"
 
 #: gtk2_ardour/editor_actions.cc:732
 msgid "+4.1667%"
-msgstr ""
+msgstr "+4.1667%"
 
 #: gtk2_ardour/editor_actions.cc:733
 msgid "+4.1667% - 0.1%"
-msgstr ""
+msgstr "+4.1667% - 0.1%"
 
 #: gtk2_ardour/editor_actions.cc:734
 msgid "+ 0.1%"
-msgstr ""
+msgstr "+ 0.1%"
 
 #: gtk2_ardour/editor_actions.cc:735
 #: gtk2_ardour/engine_dialog.cc:101
@@ -3621,19 +3590,19 @@ msgstr "Brak"
 
 #: gtk2_ardour/editor_actions.cc:736
 msgid "- 0.1%"
-msgstr ""
+msgstr "- 0.1%"
 
 #: gtk2_ardour/editor_actions.cc:737
 msgid "-4.1667% + 0.1%"
-msgstr ""
+msgstr "-4.1667% + 0.1%"
 
 #: gtk2_ardour/editor_actions.cc:738
 msgid "-4.1667%"
-msgstr ""
+msgstr "-4.1667%"
 
 #: gtk2_ardour/editor_actions.cc:739
 msgid "-4.1667% - 0.1%"
-msgstr ""
+msgstr "-4.1667% - 0.1%"
 
 #: gtk2_ardour/editor_actions.cc:743
 msgid "80 per frame"
@@ -3751,12 +3720,12 @@ msgstr ""
 #: gtk2_ardour/editor.cc:110
 #: gtk2_ardour/editor.cc:3348
 msgid "CD Frames"
-msgstr "klatki CD"
+msgstr "Klatki CD"
 
 #: gtk2_ardour/editor.cc:111
 #: gtk2_ardour/editor.cc:3350
 msgid "SMPTE Frames"
-msgstr "klatki SMPTE"
+msgstr "Klatki SMPTE"
 
 #: gtk2_ardour/editor.cc:112
 #: gtk2_ardour/editor.cc:2861
@@ -3957,13 +3926,13 @@ msgstr ""
 #: gtk2_ardour/editor.cc:1399
 #: gtk2_ardour/redirect_box.cc:1201
 msgid "Deactivate"
-msgstr "Dezaktywuj"
+msgstr "Wyłącz"
 
 #: gtk2_ardour/editor.cc:1379
 #: gtk2_ardour/editor.cc:1401
 #: gtk2_ardour/redirect_box.cc:1199
 msgid "Activate"
-msgstr "Aktywuj"
+msgstr "Włącz"
 
 #: gtk2_ardour/editor.cc:1419
 #: gtk2_ardour/route_time_axis.cc:1587
@@ -4013,11 +3982,11 @@ msgstr "Okno zmiany obszaru"
 
 #: gtk2_ardour/editor.cc:1767
 msgid "Raise to top layer"
-msgstr "Przenieś do najwyższej warstwy"
+msgstr "Przenieś na wierzch"
 
 #: gtk2_ardour/editor.cc:1768
 msgid "Lower to bottom layer"
-msgstr "Przenieś do najniższej warstwy"
+msgstr "Przenieś na spód"
 
 #: gtk2_ardour/editor.cc:1770
 msgid "Define sync point"
@@ -4058,7 +4027,7 @@ msgstr "Wyświetl obwiednię"
 
 #: gtk2_ardour/editor.cc:1851
 msgid "Envelope Active"
-msgstr "Aktywuj obwiednię"
+msgstr "Włącz obwiednię"
 
 #: gtk2_ardour/editor.cc:1865
 msgid "DeNormalize"
@@ -4079,11 +4048,11 @@ msgstr "Ustaw zakres zaznaczenia"
 
 #: gtk2_ardour/editor.cc:1886
 msgid "Nudge fwd"
-msgstr "Pchnij do przodu"
+msgstr "Do przodu"
 
 #: gtk2_ardour/editor.cc:1887
 msgid "Nudge bwd"
-msgstr "Pchnij do tyłu"
+msgstr "Do tyłu"
 
 #: gtk2_ardour/editor.cc:1888
 msgid "Nudge fwd by capture offset"
@@ -4111,7 +4080,6 @@ msgid "Duplicate"
 msgstr "Powiel"
 
 #: gtk2_ardour/editor.cc:1913
-#, fuzzy
 msgid "Multi-Duplicate"
 msgstr "Powiel"
 
@@ -4247,9 +4215,8 @@ msgstr "Pchnij całą ścieżkę do przodu"
 
 #: gtk2_ardour/editor.cc:2058
 #: gtk2_ardour/editor.cc:2114
-#, fuzzy
 msgid "Nudge track after edit point fwd"
-msgstr "Pchnij ścieżkę za wskaźnikiem do przodu"
+msgstr "Pchnij ścieżkę za punktem edycji do przodu"
 
 #: gtk2_ardour/editor.cc:2059
 #: gtk2_ardour/editor.cc:2115
@@ -4258,9 +4225,8 @@ msgstr "Pchnij całą ścieżkę do tyłu"
 
 #: gtk2_ardour/editor.cc:2060
 #: gtk2_ardour/editor.cc:2116
-#, fuzzy
 msgid "Nudge track after edit point bwd"
-msgstr "Pchnij ścieżkę za wskaźnikiem do tyłu"
+msgstr "Pchnij ścieżkę za punktem edycji do tyłu"
 
 #: gtk2_ardour/editor.cc:2091
 msgid "Select all after edit point"
@@ -4280,27 +4246,27 @@ msgstr "Wszystko przed głowicą"
 
 #: gtk2_ardour/editor.cc:2797
 msgid "Select/Move Objects"
-msgstr "Zaznacz/przesuń obiekt"
+msgstr "Zaznacza i przesuwa obiekty"
 
 #: gtk2_ardour/editor.cc:2798
 msgid "Select/Move Ranges"
-msgstr "Zaznacz/przesuń zakres"
+msgstr "Zaznacza przesuwa zakresy"
 
 #: gtk2_ardour/editor.cc:2799
 msgid "Draw Gain Automation"
-msgstr "Reguluj automatyzację ręcznie"
+msgstr "Reguluje automatyzację wzmocnienia"
 
 #: gtk2_ardour/editor.cc:2800
 msgid "Select Zoom Range"
-msgstr "Ustaw zakres powiększania"
+msgstr "Ustawia zakres powiększania"
 
 #: gtk2_ardour/editor.cc:2801
 msgid "Stretch/Shrink Regions"
-msgstr "Rozciągnij/skurcz obszary"
+msgstr "Rozciąga i kurczy obszary"
 
 #: gtk2_ardour/editor.cc:2802
 msgid "Listen to Specific Regions"
-msgstr "Słuchaj określonych obszarów"
+msgstr "Odtwarza określone obszary"
 
 #: gtk2_ardour/editor.cc:2850
 msgid "Zoom focus"
@@ -4347,9 +4313,8 @@ msgid "Slide Edit"
 msgstr "Edycja ślizgowa"
 
 #: gtk2_ardour/editor.cc:3311
-#, fuzzy
 msgid "Lock Edit"
-msgstr "Do edycji"
+msgstr "Edycja zablokowana"
 
 #: gtk2_ardour/editor.cc:3706
 msgid ""
@@ -4407,14 +4372,13 @@ msgid "clear playlists"
 msgstr "wyczyść listy odtwarzania"
 
 #: gtk2_ardour/editor.cc:4552
-#, fuzzy
 msgid "Please wait while Ardour loads visual data"
-msgstr "Proszę czekać. Trwa wczytywanie sesji..."
+msgstr "Proszę czekać na wczytanie danych wizualnych"
 
 #: gtk2_ardour/editor_edit_groups.cc:52
 #: gtk2_ardour/mixer_ui.cc:937
 msgid "Activate All"
-msgstr "Aktywuj wszystko"
+msgstr "Włącz wszystko"
 
 #: gtk2_ardour/editor_edit_groups.cc:53
 #: gtk2_ardour/mixer_ui.cc:938
@@ -4959,11 +4923,11 @@ msgstr "zmień długość stopniowego wyciszenia"
 
 #: gtk2_ardour/editor_ops.cc:4583
 msgid "toggle fade in active"
-msgstr "aktywuj stopniowe wzmocnienie"
+msgstr "włącz stopniowe wzmocnienie"
 
 #: gtk2_ardour/editor_ops.cc:4583
 msgid "toggle fade out active"
-msgstr "aktywuj stopniowe wyciszenie"
+msgstr "włącz stopniowe wyciszenie"
 
 #: gtk2_ardour/editor_ops.cc:4633
 msgid "set fade in shape"
@@ -4975,11 +4939,11 @@ msgstr "ustaw kształt stopniowego wyciszenia"
 
 #: gtk2_ardour/editor_ops.cc:4698
 msgid "set fade in active"
-msgstr "aktywuj stopniowe wzmocnienie"
+msgstr "włącz stopniowe wzmocnienie"
 
 #: gtk2_ardour/editor_ops.cc:4732
 msgid "set fade out active"
-msgstr "aktywuj stopniowe wyciszenie"
+msgstr "włącz stopniowe wyciszenie"
 
 #: gtk2_ardour/editor_ops.cc:4879
 msgid "trim front"
@@ -5102,14 +5066,12 @@ msgid "Yes, remove them."
 msgstr "Tak, usuń je."
 
 #: gtk2_ardour/editor_ops.cc:5655
-#, fuzzy
 msgid "Stay in position"
-msgstr "Według pozycji obszaru"
+msgstr "Pozostanie w pozycji"
 
 #: gtk2_ardour/editor_ops.cc:5656
-#, fuzzy
 msgid "Move"
-msgstr "Tryb"
+msgstr "Przesuń"
 
 #: gtk2_ardour/editor_ops.cc:5657
 msgid "Split & Later Section Moves"
@@ -5121,14 +5083,12 @@ msgid "Intersected regions should:"
 msgstr "Zaznaczone obszary"
 
 #: gtk2_ardour/editor_ops.cc:5659
-#, fuzzy
 msgid "Move Glued Regions"
-msgstr "Zaznacz obszary"
+msgstr "Przenieś przyklejone obszary"
 
 #: gtk2_ardour/editor_ops.cc:5730
-#, fuzzy
 msgid "insert time"
-msgstr "wstaw plik dźwiękowy"
+msgstr "wstaw czas"
 
 #: gtk2_ardour/editor_region_list.cc:112
 #: gtk2_ardour/editor_region_list.cc:116
@@ -5333,9 +5293,8 @@ msgid "Contents:"
 msgstr "Zawartość:"
 
 #: gtk2_ardour/editor_timefx.cc:74
-#, fuzzy
 msgid "Strict Linear"
-msgstr "Liniowy"
+msgstr "Liniowe"
 
 #: gtk2_ardour/editor_timefx.cc:78
 msgid "TimeFXDialog"
@@ -5358,14 +5317,12 @@ msgid "Semitones (12TET)"
 msgstr "Półtony (12TET)"
 
 #: gtk2_ardour/editor_timefx.cc:108
-#, fuzzy
 msgid "Cents"
-msgstr "Komentarze"
+msgstr ""
 
 #: gtk2_ardour/editor_timefx.cc:114
-#, fuzzy
 msgid "Shift"
-msgstr "Krótko"
+msgstr ""
 
 #: gtk2_ardour/editor_timefx.cc:143
 #: gtk2_ardour/editor_timefx.cc:144
@@ -6074,11 +6031,11 @@ msgstr "ardour: "
 #: gtk2_ardour/keyboard.cc:76
 #: gtk2_ardour/keyboard.cc:546
 msgid "Unknown"
-msgstr ""
+msgstr "Nieznany"
 
 #: gtk2_ardour/keyboard.cc:427
 msgid "your own"
-msgstr ""
+msgstr "własny"
 
 #: gtk2_ardour/keyboard.cc:491
 #: gtk2_ardour/keyboard.cc:515
@@ -6398,7 +6355,7 @@ msgstr "Nazwa:"
 #: gtk2_ardour/new_session_dialog.cc:57
 #: gtk2_ardour/new_session_dialog.cc:58
 msgid "channels"
-msgstr ""
+msgstr " "
 
 #: gtk2_ardour/new_session_dialog.cc:76
 msgid "<b>Busses</b>"
@@ -6866,9 +6823,8 @@ msgid "Update available plugins"
 msgstr "Odśwież listę dostępnych wtyczek"
 
 #: gtk2_ardour/plugin_selector.cc:141
-#, fuzzy
 msgid "Insert Plugin(s)"
-msgstr "Wstaw obszar"
+msgstr "Wstaw wtyczkę"
 
 #: gtk2_ardour/plugin_ui.cc:81
 msgid "Eh? LADSPA plugins don't have editors!"
@@ -7025,11 +6981,11 @@ msgstr "Nowy wysył..."
 
 #: gtk2_ardour/redirect_box.cc:1203
 msgid "Activate all"
-msgstr "Aktywuj wszystko"
+msgstr "Włącz wszystko"
 
 #: gtk2_ardour/redirect_box.cc:1204
 msgid "Deactivate all"
-msgstr "Dezaktywuj wszystko"
+msgstr "Wyłącz wszystko"
 
 #: gtk2_ardour/redirect_box.cc:1397
 msgid "%1: %2 (by %3)"
@@ -7381,11 +7337,11 @@ msgstr ""
 
 #: gtk2_ardour/sfdb_ui.cc:312
 msgid "Could not read file: %1 (%2)."
-msgstr ""
+msgstr "Nie można odczytać pliku: %1 (%2)."
 
 #: gtk2_ardour/sfdb_ui.cc:332
 msgid "Could not access soundfile: "
-msgstr ""
+msgstr "Nie można uzyskać dostępu do pliku:"
 
 #: gtk2_ardour/sfdb_ui.cc:378
 msgid "SoundFileBox: Could not tokenize string: "
@@ -7397,9 +7353,8 @@ msgstr "Szukaj"
 
 #: gtk2_ardour/sfdb_ui.cc:401
 #: gtk2_ardour/sfdb_ui.cc:795
-#, fuzzy
 msgid "Start Downloading"
-msgstr "Rozpocznij nagrywanie"
+msgstr "Rozpocznij pobieranie"
 
 #: gtk2_ardour/sfdb_ui.cc:416
 msgid "Audio files"
@@ -7649,9 +7604,8 @@ msgid "Beats Per Bar:"
 msgstr "Uderzeń na takt:"
 
 #: gtk2_ardour/tempo_dialog.cc:357
-#, fuzzy
 msgid "Meter Begins at Bar:"
-msgstr "Początek metrum:"
+msgstr "Początek metrum w takcie:"
 
 #: gtk2_ardour/theme_manager.cc:52
 msgid "Object"
