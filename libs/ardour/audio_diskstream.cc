@@ -527,7 +527,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	commit_should_unlock = false;
 
-	if (!_io->active()) {
+	if (!_io || !_io->active()) {
 		_processed = true;
 		return 0;
 	}
@@ -832,7 +832,7 @@ AudioDiskstream::commit (nframes_t nframes)
 {
 	bool need_butler = false;
 
-	if (!_io->active()) {
+	if (!_io || !_io->active()) {
 		return false;
 	}
 
