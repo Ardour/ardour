@@ -154,7 +154,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			delete_mod = true;
 			original_mode = trackview.editor.current_midi_edit_mode();
 			trackview.editor.set_midi_edit_mode(MidiEditErase);
-			start_delta_command();
+			start_delta_command(_("erase notes"));
 			_mouse_state = EraseTouchDragging;
 			return true;
 		} else if (ev->key.keyval == GDK_Shift_L || ev->key.keyval == GDK_Control_L) {
@@ -899,7 +899,7 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			highest_note_difference = highest_note_in_selection - 127;
 		}
 		
-		start_delta_command();
+		start_delta_command(_("move notes"));
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
 			Selection::iterator next = i;
@@ -909,15 +909,17 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get()));
 
 			// we need to snap here again in nframes_t in order to be sample accurate 
-			nframes_t new_note_time = nframes_t((*i)->note()->time());
-			new_note_time +=  nframes_t(dt);
+			double new_note_time = (*i)->note()->time();
+			new_note_time +=  dt;
+
+			// keep notes inside region if dragged beyond left region bound
+			if(new_note_time < _region->start()) {				
+				new_note_time = _region->start();
+			}
+			
 			// since note time is region-absolute but snap_to_frame expects position-relative
 			// time we have to coordinate transform back and forth here.
-			new_note_time = snap_to_frame(new_note_time - _region->start()) + _region->start();
-			
-			if(new_note_time < 0) {				
-				new_note_time = 0;
-			}
+			new_note_time = snap_to_frame(nframes_t(new_note_time) - _region->start()) + _region->start();
 			
 			copy->set_time(new_note_time);
 
@@ -1078,7 +1080,7 @@ MidiRegionView::update_resizing(CanvasNote::NoteEnd note_end, double x, bool rel
 void
 MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bool relative)
 {
-	start_delta_command();
+	start_delta_command(_("resize notes"));
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		CanvasNote *canvas_note = (*i)->canvas_note;
@@ -1127,7 +1129,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 void
 MidiRegionView::change_velocity(uint8_t velocity, bool relative)
 {
-	start_delta_command();
+	start_delta_command(_("change velocity"));
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
 		Selection::iterator next = i;
 		++next;
@@ -1164,7 +1166,7 @@ void
 MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)
 {
 	if (ev->note() && _mouse_state == EraseTouchDragging) {
-		start_delta_command();
+		start_delta_command(_("note entered"));
 		ev->selected(true);
 		_delta_command->remove(ev->note());
 	} else if (_mouse_state == SelectTouchDragging) {

@@ -49,7 +49,7 @@ sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 MidiSource::MidiSource (Session& s, string name)
 	: Source (s, name, DataType::MIDI)
 	, _timeline_position(0)
-	, _model(new MidiModel(*this))
+	, _model(new MidiModel(this))
 	, _writing (false)
 {
 	_read_data_count = 0;
@@ -59,7 +59,7 @@ MidiSource::MidiSource (Session& s, string name)
 MidiSource::MidiSource (Session& s, const XMLNode& node) 
 	: Source (s, node)
 	, _timeline_position(0)
-	, _model(new MidiModel(*this))
+	, _model(new MidiModel(this))
 	, _writing (false)
 {
 	_read_data_count = 0;
@@ -192,12 +192,13 @@ MidiSource::session_saved()
 		newsrc->set_timeline_position(_timeline_position);
 		_model->write_to(newsrc);
 
+		// cyclic dependency here, ugly :(
 		newsrc->set_model(_model);
-		_model.reset();
+		_model->set_midi_source(newsrc.get());
 		
 		newsrc->flush_header();
 		newsrc->flush_footer();
-		
+
 		Switched.emit(newsrc);
 	}
 }

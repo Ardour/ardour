@@ -55,7 +55,7 @@ typedef std::pair<boost::shared_ptr<const AutomationList>, std::pair<double,doub
  */
 class MidiModel : public boost::noncopyable, public Automatable {
 public:
-	MidiModel(MidiSource& s, size_t size=0);
+	MidiModel(MidiSource *s,  size_t size=0);
 	
 	// This is crap.
 	void write_lock();
@@ -108,9 +108,8 @@ public:
 	class DeltaCommand : public Command
 	{
 	public:
-		DeltaCommand (MidiModel& m, const std::string& name)
-			: Command(name), _model(m), _name(name) {}
-		DeltaCommand (MidiModel&, const XMLNode& node);
+		DeltaCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
+		DeltaCommand (boost::shared_ptr<MidiModel>,   const XMLNode& node);
 
 		const std::string& name() const { return _name; }
 		
@@ -127,7 +126,7 @@ public:
 		XMLNode &marshal_note(const boost::shared_ptr<Note> note);
 		boost::shared_ptr<Note> unmarshal_note(XMLNode *xml_note);
 		
-		MidiModel&                           _model;
+		boost::shared_ptr<MidiModel>         _model;
 		const std::string                    _name;
 		
 		typedef std::list< boost::shared_ptr<Note> > NoteList;
@@ -189,7 +188,8 @@ public:
 	const_iterator        begin() const { return const_iterator(*this, 0); }
 	const const_iterator& end()   const { return _end_iter; }
 	
-	const MidiSource& midi_source() const { return _midi_source; }
+	const MidiSource *midi_source() const { return _midi_source; }
+	void set_midi_source(MidiSource *source) { _midi_source = source; } 
 	
 private:
 	friend class DeltaCommand;
@@ -227,7 +227,8 @@ private:
 			LaterNoteEndComparator>
 		ActiveNotes;
 	
-	MidiSource& _midi_source;
+	// We cannot use a boost::shared_ptr here to avoid a retain cycle
+	MidiSource *_midi_source;
 };
 
 } /* namespace ARDOUR */

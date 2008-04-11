@@ -40,14 +40,22 @@ public:
 	const Note& operator=(const Note& copy);
 
 	inline bool operator==(const Note& other)
-	{ return time() == other.time() && note() == other.note() && duration() == other.duration(); }
+	{ return time() == other.time() && 
+	         note() == other.note() && 
+	         duration() == other.duration() &&
+	         velocity() == other.velocity() &&
+	         channel()  == other.channel();
+	}
 
 	inline double  time()     const { return _on_event.time(); }
 	inline double  end_time() const { return _off_event.time(); }
 	inline uint8_t note()     const { return _on_event.note(); }
 	inline uint8_t velocity() const { return _on_event.velocity(); }
 	inline double  duration() const { return _off_event.time() - _on_event.time(); }
-	inline uint8_t channel()  const { return _on_event.channel(); }
+	inline uint8_t channel()  const { 
+		assert(_on_event.channel() == _off_event.channel()); 
+	    return _on_event.channel(); 
+	}
 
 	inline void set_time(double t)      { _off_event.time() = t + duration(); _on_event.time() = t; }
 	inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }

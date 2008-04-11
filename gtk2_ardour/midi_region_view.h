@@ -91,9 +91,9 @@ class MidiRegionView : public RegionView
 
 	/* This stuff is a bit boilerplatey ATM.  Work in progress. */
 
-	inline void start_delta_command() {
+	inline void start_delta_command(string name = "midi edit") {
 		if (!_delta_command)
-			_delta_command = _model->new_delta_command();
+			_delta_command = _model->new_delta_command(name);
 	}
 
 	void command_add_note(const boost::shared_ptr<ARDOUR::Note> note) {

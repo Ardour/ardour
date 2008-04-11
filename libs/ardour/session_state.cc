@@ -2994,7 +2994,7 @@ Session::restore_history (string snapshot_name)
 	    		 boost::shared_ptr<MidiSource> midi_source = 
 	    			 boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
 		    	 if(midi_source) {
-		    		 ut->add_command(new MidiModel::DeltaCommand(*(midi_source->model()), *n));		    		 
+		    		 ut->add_command(new MidiModel::DeltaCommand(midi_source->model(), *n));		    		 
 		    	 } else {
 		    		 error << "FIXME: Failed to downcast MidiSource for DeltaCommand" << endmsg;
 		    	 }

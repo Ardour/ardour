@@ -272,8 +272,8 @@ MidiModel::const_iterator::operator=(const const_iterator& other)
 	
 // MidiModel
 
-MidiModel::MidiModel(MidiSource& s, size_t size)
-	: Automatable(s.session(), "midi model")
+MidiModel::MidiModel(MidiSource *s, size_t size)
+	: Automatable(s->session(), "midi model")
 	, _notes(size)
 	, _note_mode(Sustained)
 	, _writing(false)
@@ -286,7 +286,6 @@ MidiModel::MidiModel(MidiSource& s, size_t size)
 	assert(_end_iter._is_end);
 	assert( ! _end_iter._locked);
 }
-
 
 /** Read events in frame range \a start .. \a start+cnt into \a dst,
  * adding \a stamp_offset to each event's timestamp.
@@ -521,9 +520,12 @@ void
 MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 {
 	//cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
-	Notes::iterator n = find(_notes.begin(), _notes.end(), note);
-	if (n != _notes.end())
-		_notes.erase(n);
+	for(Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
+		if(**n == *note) {
+			_notes.erase(n);
+		}
+	}
+	
 }
 
 /** Slow!  for debugging only. */
@@ -551,7 +553,7 @@ MidiModel::is_sorted() const
 MidiModel::DeltaCommand*
 MidiModel::new_delta_command(const string name)
 {
-	DeltaCommand* cmd =  new DeltaCommand(*this, name);
+	DeltaCommand* cmd =  new DeltaCommand(_midi_source->model(), name);
 	return cmd;
 }
 
@@ -574,6 +576,17 @@ MidiModel::apply_command(Command* cmd)
 
 // MidiEditCommand
 
+MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
+	: Command(name), _model(m), _name(name) 
+{
+	
+}
+
+MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
+	: _model(m)
+{
+	set_state(node);
+}
 
 void
 MidiModel::DeltaCommand::add(const boost::shared_ptr<Note> note)
@@ -602,28 +615,28 @@ MidiModel::DeltaCommand::operator()()
 	// removed notes (or sort here), and doing a single iteration over _model
 	
 	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
-	const bool   reset_iter = (_model._read_iter.locked());
-	const double iter_time  = _model._read_iter->time();
+	const bool   reset_iter = (_model->_read_iter.locked());
+	const double iter_time  = _model->_read_iter->time();
 
 	if (reset_iter)
-		_model._read_iter = _model.end(); // drop read lock
+		_model->_read_iter = _model->end(); // drop read lock
 
-	assert( ! _model._read_iter.locked());
+	assert( ! _model->_read_iter.locked());
 
-	_model.write_lock();
+	_model->write_lock();
 	
 	for (std::list< boost::shared_ptr<Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
-		_model.add_note_unlocked(*i);
+		_model->add_note_unlocked(*i);
 	
 	for (std::list< boost::shared_ptr<Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
-		_model.remove_note_unlocked(*i);
+		_model->remove_note_unlocked(*i);
 	
-	_model.write_unlock();
+	_model->write_unlock();
 
 	if (reset_iter)
-		_model._read_iter = const_iterator(_model, iter_time);
+		_model->_read_iter = const_iterator(*_model.get(), iter_time);
 	
-	_model.ContentsChanged(); /* EMIT SIGNAL */
+	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 
@@ -634,28 +647,28 @@ MidiModel::DeltaCommand::undo()
 	// removed notes (or sort here), and doing a single iteration over _model
 	
 	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
-	const bool   reset_iter = (_model._read_iter.locked());
-	const double iter_time  = _model._read_iter->time();
+	const bool   reset_iter = (_model->_read_iter.locked());
+	const double iter_time  = _model->_read_iter->time();
 
 	if (reset_iter)
-		_model._read_iter = _model.end(); // drop read lock
+		_model->_read_iter = _model->end(); // drop read lock
 	
-	assert( ! _model._read_iter.locked());
+	assert( ! _model->_read_iter.locked());
 
-	_model.write_lock();
+	_model->write_lock();
 
 	for (std::list< boost::shared_ptr<Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
-		_model.remove_note_unlocked(*i);
+		_model->remove_note_unlocked(*i);
 	
 	for (std::list< boost::shared_ptr<Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
-		_model.add_note_unlocked(*i);
+		_model->add_note_unlocked(*i);
 	
-	_model.write_unlock();
+	_model->write_unlock();
 	
 	if (reset_iter)
-		_model._read_iter = const_iterator(_model, iter_time);
+		_model->_read_iter = const_iterator(*_model.get(), iter_time);
 	
-	_model.ContentsChanged(); /* EMIT SIGNAL */
+	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 XMLNode &
@@ -708,9 +721,6 @@ MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 	istringstream velocity_str(xml_note->property("velocity")->value());
 	velocity_str >> velocity;
 	
-	cerr << "creating note channel: " << channel_str.str() << " time " << time_str.str() << " duration " << duration_str.str() << " pitch " << note_str.str() << " velo " << velocity_str.str() <<endl;
-	cerr << "creating note channel: " << channel << " time " << time << " duration " << duration << " pitch " << note << " velo " << velocity <<endl;
-
 	boost::shared_ptr<Note> note_ptr(new Note(channel, time, duration, note, velocity));
 	return note_ptr;
 }
@@ -745,8 +755,7 @@ XMLNode&
 MidiModel::DeltaCommand::get_state () 
 {
 	XMLNode *delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
-	delta_command->add_property("midi_source", _model.midi_source().id().to_s());
-	delta_command->add_property("midi_source_name", _model.midi_source().name());
+	delta_command->add_property("midi_source", _model->midi_source()->id().to_s());
 	
 	XMLNode *added_notes   = delta_command->add_child(ADDED_NOTES_ELEMENT);
 	for_each(_added_notes.begin(), _added_notes.end(), 
@@ -761,11 +770,6 @@ MidiModel::DeltaCommand::get_state ()
 	return *delta_command;
 }
 
-MidiModel::DeltaCommand::DeltaCommand (MidiModel& m, const XMLNode& node)
-	: _model(m)
-{
-	set_state(node);
-}
 
 bool
 MidiModel::write_to(boost::shared_ptr<MidiSource> source)
