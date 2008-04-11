@@ -469,7 +469,9 @@ Session::import_audiofiles (import_status& status)
 			
 			/* now that there is data there, requeue the file for analysis */
 			
-			Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
+			if (Config->get_auto_analyse_audio()) {
+				Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
+			}
 		}
 
 		/* save state so that we don't lose these new Sources */

@@ -50,7 +50,8 @@ class AudioClock : public Gtk::HBox
 
 	void set (nframes_t, bool force = false, nframes_t offset = 0, char which = 0);
 	void set_mode (Mode);
-	
+	void set_bbt_reference (nframes64_t);
+
 	void set_widget_name (std::string);
 
 	std::string name() const { return _name; }
@@ -154,6 +155,7 @@ class AudioClock : public Gtk::HBox
 	Gtk::EventBox  clock_base;
 	Gtk::Frame     clock_frame;
 
+	nframes64_t bbt_reference_time;
 	nframes_t last_when;
 	bool last_pdelta;
 	bool last_sdelta;

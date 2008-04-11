@@ -63,6 +63,10 @@ class MIDIControllable : public PBD::Stateful
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
+	void bind_midi (MIDI::channel_t, MIDI::eventType, MIDI::byte);
+	MIDI::channel_t get_control_channel () { return control_channel; }
+	MIDI::eventType get_control_type () { return control_type; }
+	MIDI::byte get_control_additional () { return control_additional; }
   private:
 	PBD::Controllable& controllable;
 	MIDI::Port&     _port;
@@ -86,8 +90,6 @@ class MIDIControllable : public PBD::Stateful
 	void midi_sense_controller (MIDI::Parser &, MIDI::EventTwoBytes *);
 	void midi_sense_program_change (MIDI::Parser &, MIDI::byte);
 	void midi_sense_pitchbend (MIDI::Parser &, MIDI::pitchbend_t);
-
-	void bind_midi (MIDI::channel_t, MIDI::eventType, MIDI::byte);
 };
 
 #endif // __gm_midicontrollable_h__

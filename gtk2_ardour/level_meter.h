@@ -61,11 +61,11 @@ class LevelMeter : public Gtk::HBox
 
 	void update_gain_sensitive ();
 
-	void update_meters ();
+	float update_meters ();
 	void update_meters_falloff ();
 	void clear_meters ();
 	void hide_meters ();
-	void setup_meters (int len=0);
+	void setup_meters (int len=0, int width=3);
 
   private:
 
@@ -89,13 +89,13 @@ class LevelMeter : public Gtk::HBox
 	    }
 	};
 
-	static const guint16 regular_meter_width = 3;
+	guint16 regular_meter_width;
 	static const guint16 thin_meter_width = 2;
 	vector<MeterInfo>    meters;
-
-	//Gtk::HBox   meter_packer;
+	float       max_peak;
 	
 	void hide_all_meters ();
+	gint meter_button_release (GdkEventButton*, uint32_t);
 
 	void parameter_changed (const char*);
 

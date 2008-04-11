@@ -109,3 +109,6 @@ WAVEFORMSHAPE(Traditional)
 WAVEFORMSHAPE(Rectified)
 
 
+INSERTTIMEOPT(LeaveIntersected)
+INSERTTIMEOPT(MoveIntersected)
+INSERTTIMEOPT(SplitIntersected)

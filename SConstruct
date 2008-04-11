@@ -1,5 +1,9 @@
 # -*- python -*-
 
+#
+# and there we have it, or do we?
+#
+
 import os
 import sys
 import re
@@ -34,11 +38,13 @@ opts.AddOptions(
     BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
     BoolOption('OLDFONTS', 'Old school font sizes', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
+    BoolOption('STL_DEBUG', 'Set to build with Standard Template Library Debugging', 0),
     PathOption('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
     BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 1),
+    BoolOption('FREESOUND', 'Include Freesound database lookup', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
     BoolOption('NLS', 'Set to turn on i18n support', 1),
@@ -48,7 +54,7 @@ opts.AddOptions(
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
+    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 0),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
@@ -531,6 +537,24 @@ if env['FFT_ANALYSIS']:
             sys.exit (1)            
         conf.Finish()
 
+if env['FREESOUND']:
+        #
+        # Check for curl header as well as the library
+        #
+
+	libraries['curl'] = LibraryInfo()
+
+	conf = Configure(libraries['curl'])
+
+	if conf.CheckHeader ('curl/curl.h') == False:
+		print ('Ardour cannot be compiled without the curl headers, which do not seem to be installed')
+		sys.exit (1)            
+	else:
+		libraries['curl'].ParseConfig('pkg-config --cflags --libs libcurl')
+	conf.Finish()
+else:
+	print 'FREESOUND support is not enabled.  Build with \'scons FREESOUND=1\' to enable.'
+
 if env['LV2']:
 	conf = env.Configure(custom_tests = { 'CheckPKGExists' : CheckPKGExists })
 	
@@ -766,9 +790,13 @@ else:
     env.Append(CCFLAGS=" ".join (opt_flags))
     env.Append(LINKFLAGS=" ".join (opt_flags))
 
+if env['STL_DEBUG'] == 1:
+    env.Append(CXXFLAGS="-D_GLIBCXX_DEBUG")
+
 if env['UNIVERSAL'] == 1:
     env.Append(CCFLAGS="-arch i386 -arch ppc")
     env.Append(LINKFLAGS="-arch i386 -arch ppc")
+
 
 #
 # warnings flags

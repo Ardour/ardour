@@ -544,20 +544,32 @@ TimeAxisView::name_entry_button_release (GdkEventButton *ev)
 }
 
 void
+TimeAxisView::conditionally_add_to_selection ()
+{
+	Selection& s (editor.get_selection());
+
+	if (!s.selected (this)) {
+		cerr << "set selected track\n";
+		editor.set_selected_track (*this, Selection::Set);
+	}
+}
+
+
+void
 TimeAxisView::popup_display_menu (guint32 when)
 {
 	if (display_menu == 0) {
 		build_display_menu ();
 	}
 
-	editor.set_selected_track (*this, Selection::Add);
+	conditionally_add_to_selection ();
 	display_menu->popup (1, when);	
 }
 
 gint
 TimeAxisView::size_click (GdkEventButton *ev)
 {
-	editor.set_selected_track (*this, Selection::Add);
+	conditionally_add_to_selection ();
 	popup_size_menu (ev->time);
 	return TRUE;
 }

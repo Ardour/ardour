@@ -63,6 +63,7 @@ class BarController : public Gtk::Frame
 	/* export this to allow direct connection to button events */
 
 	Gtk::Widget& event_widget() { return darea; }
+	PBD::Controllable* get_controllable() { return binding_proxy.get_controllable(); }
 
   protected:
 	Gtk::Adjustment&    adjustment;

@@ -224,6 +224,8 @@ class PluginUIWindow : public Gtk::Window
 	Gtk::Window* parent;
 	Gtk::VBox vbox;
 	bool non_gtk_gui;
+	bool was_visible;
+
 	void app_activated (bool);
 	void plugin_going_away ();
 

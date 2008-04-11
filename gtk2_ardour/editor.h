@@ -1086,6 +1086,9 @@ class Editor : public PublicEditor
 	void adjust_region_scale_amplitude (bool up);
 	void quantize_region ();
 
+	void do_insert_time ();
+	void insert_time (nframes64_t pos, nframes64_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue);
+
 	void tab_to_transient (bool forward);
 
 	void use_region_as_bar ();
@@ -1273,6 +1276,7 @@ class Editor : public PublicEditor
 	int scrubbing_direction;
 	int scrub_reversals;
 	int scrub_reverse_distance;
+	void scrub ();
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
@@ -1299,6 +1303,8 @@ class Editor : public PublicEditor
 	void start_grab (GdkEvent*, Gdk::Cursor* cursor = 0);
 	bool end_grab (ArdourCanvas::Item*, GdkEvent*);
 	void swap_grab (ArdourCanvas::Item*, Gdk::Cursor* cursor, uint32_t time);
+	void break_drag ();
+	void finalize_drag ();
 
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
@@ -1843,15 +1849,19 @@ public:
 
 	bool autoscroll_active;
 	int autoscroll_timeout_tag;
-	int autoscroll_direction;
+	int autoscroll_x;
+	int autoscroll_y;
+	int last_autoscroll_x;
+	int last_autoscroll_y;
 	uint32_t autoscroll_cnt;
-	nframes_t autoscroll_distance;
+	nframes_t autoscroll_x_distance;
+	double autoscroll_y_distance;
      
 	static gint _autoscroll_canvas (void *);
 	bool autoscroll_canvas ();
-	void start_canvas_autoscroll (int direction);
+	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
-	void maybe_autoscroll (GdkEvent*);
+	void maybe_autoscroll (GdkEventMotion*);
 
 	/* trimming */
 	enum TrimOp {
@@ -2169,13 +2179,15 @@ public:
 
 	void ensure_entered_track_selected (bool op_acts_on_objects = false);
 	bool clear_entered_track;
-	gint left_track_canvas (GdkEventCrossing*);
+	bool left_track_canvas (GdkEventCrossing*);
+	bool entered_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);
 	void set_entered_regionview (RegionView*);
 	gint left_automation_track ();
 
 	bool _new_regionviews_show_envelope;
 
+	void reset_canvas_action_sensitivity (bool);
 	void toggle_gain_envelope_visibility ();
 	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();

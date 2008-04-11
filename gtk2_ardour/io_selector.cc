@@ -45,6 +45,13 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	} else {
 		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
+
+#ifdef FIXME
+	/* these got lost in a merge from 2.0 */
+	set_button_sensitivity ();
+	io->name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
+#endif
+
 }
 
 
@@ -88,7 +95,6 @@ IOSelector::get_state (int r, std::string const & p) const
 	}
 
 	int k = 0;
-
 	for (vector<string>::iterator i = connections.begin(); i != connections.end(); ++i) {
 
 		if ((*i)== p) {

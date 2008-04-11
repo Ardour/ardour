@@ -94,6 +94,23 @@ RegionView::RegionView (const RegionView& other)
 	_pixel_width = other._pixel_width;
 }
 
+RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
+	: TimeAxisViewItem (other)
+{
+	/* this is a pseudo-copy constructor used when dragging regions 
+	   around on the canvas.
+	*/
+
+	/* derived concrete type will call init () */
+
+	_region = other_region;
+	editor = other.editor;
+	current_visible_sync_position = other.current_visible_sync_position;
+	valid = false;
+	_pixel_width = other._pixel_width;
+	_height = other._height;
+}
+
 RegionView::RegionView (ArdourCanvas::Group*         parent, 
                         TimeAxisView&                tv,
                         boost::shared_ptr<ARDOUR::Region> r,

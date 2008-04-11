@@ -27,6 +27,9 @@
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
 
+#include <boost/pool/pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
+
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
 #include <pbd/statefuldestructible.h> 
@@ -67,12 +70,21 @@ struct ControlEvent {
     double* coeff; ///< double[4] allocated by Curve as needed
 };
 
+/* automation lists use a pool allocator that does not use a lock and 
+   allocates 8k of new pointers at a time
+*/
+
+typedef boost::fast_pool_allocator<ControlEvent*,
+	boost::default_user_allocator_new_delete,
+	boost::details::pool::null_mutex,
+	8192> ControlEventAllocator;
 
 class AutomationList : public PBD::StatefulDestructible
 {
   public:
-	typedef std::list<ControlEvent*> EventList;
+	typedef std::list<ControlEvent*,ControlEventAllocator> EventList;
 	typedef EventList::iterator iterator;
+	typedef EventList::reverse_iterator reverse_iterator;
 	typedef EventList::const_iterator const_iterator;
 
 	AutomationList (Parameter id, double min_val, double max_val, double default_val);

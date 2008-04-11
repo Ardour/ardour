@@ -316,6 +316,9 @@ Region::~Region ()
 		for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 			(*i)->remove_playlist (pl);
 		}
+		for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+			(*i)->remove_playlist (pl);
+		}
 	}
 	
 	notify_callbacks ();
@@ -341,14 +344,24 @@ Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 				(*i)->remove_playlist (_playlist);	
 				(*i)->add_playlist (pl);
 			}
+			for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+				(*i)->remove_playlist (_playlist);	
+				(*i)->add_playlist (pl);
+			}
 		} else {
 			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+				(*i)->add_playlist (pl);
+			}
+			for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
 				(*i)->add_playlist (pl);
 			}
 		}
 	} else {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+				(*i)->remove_playlist (old_playlist);
+			}
+			for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
 				(*i)->remove_playlist (old_playlist);
 			}
 		}
@@ -532,11 +545,8 @@ Region::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 			_length = max_frames - _position;
 		}
 
-		if (allow_bbt_recompute && _positional_lock_style == MusicTime) {
-			boost::shared_ptr<Playlist> pl (playlist());
-			if (pl) {
-				pl->session().tempo_map().bbt_time (_position, _bbt_time);
-			}
+		if (allow_bbt_recompute) {
+			recompute_position_from_lock_style ();
 		}
 
 		invalidate_transients ();
@@ -574,6 +584,17 @@ Region::set_position_on_top (nframes_t pos, void *src)
 	send_change (PositionChanged);
 }
 
+void
+Region::recompute_position_from_lock_style ()
+{
+	if (_positional_lock_style == MusicTime) {
+		boost::shared_ptr<Playlist> pl (playlist());
+		if (pl) {
+			pl->session().tempo_map().bbt_time (_position, _bbt_time);
+		}
+	}
+}
+		
 void
 Region::nudge_position (nframes64_t n, void *src)
 {

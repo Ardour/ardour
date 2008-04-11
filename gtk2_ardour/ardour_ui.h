@@ -686,6 +686,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
 
+	void session_dialog (std::string);
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (nframes_t, nframes_t);
 	
@@ -741,6 +742,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_only_copy_imported_files ();
 	void toggle_use_narrow_ms();
 	void toggle_rubberbanding_snaps_to_grid ();
+	void toggle_auto_analyse_audio ();
 	void toggle_TapeMachineMode();
 
 	void mtc_port_changed ();

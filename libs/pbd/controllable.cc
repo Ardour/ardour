@@ -28,6 +28,8 @@ using namespace PBD;
 sigc::signal<void,Controllable*> Controllable::Destroyed;
 sigc::signal<bool,Controllable*> Controllable::StartLearning;
 sigc::signal<void,Controllable*> Controllable::StopLearning;
+sigc::signal<void,Controllable*,int,int> Controllable::CreateBinding;
+sigc::signal<void,Controllable*> Controllable::DeleteBinding;
 
 Glib::Mutex* Controllable::registry_lock = 0;
 Controllable::Controllables Controllable::registry;

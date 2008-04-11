@@ -44,6 +44,7 @@ struct DragInfo {
     nframes64_t grab_frame;
     nframes64_t last_pointer_frame;
     nframes64_t current_pointer_frame;
+    double original_x, original_y;
     double grab_x, grab_y;
     double cumulative_x_drag;
     double cumulative_y_drag;
@@ -53,7 +54,8 @@ struct DragInfo {
     double last_pointer_y;
     void (Editor::*motion_callback)(ArdourCanvas::Item*, GdkEvent*);
     void (Editor::*finished_callback)(ArdourCanvas::Item*, GdkEvent*);
-    TimeAxisView* last_trackview;
+    TimeAxisView* source_trackview;
+    TimeAxisView* dest_trackview;
     bool x_constrained;
     bool y_constrained;
     bool copy;

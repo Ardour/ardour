@@ -166,6 +166,12 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	show();
 }
 
+PBD::Controllable* 
+PannerUI::get_controllable() 
+{ 
+	return pan_bars[0]->get_controllable();
+}
+
 bool
 PannerUI::panning_link_button_press (GdkEventButton* ev)
 {

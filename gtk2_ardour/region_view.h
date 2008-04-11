@@ -48,6 +48,7 @@ class RegionView : public TimeAxisViewItem
 	            Gdk::Color&          basic_color);
 
 	RegionView (const RegionView& other);
+	RegionView (const RegionView& other, boost::shared_ptr<ARDOUR::Region> other_region);
 
 	~RegionView ();
 	
@@ -135,6 +136,7 @@ class RegionView : public TimeAxisViewItem
     bool    valid; ///< see StreamView::redisplay_diskstream() 
     bool    _enable_display; ///< see StreamView::redisplay_diskstream() 
     double  _pixel_width;
+    double  _height;
     bool    in_destructor;
     
     bool             wait_for_data;

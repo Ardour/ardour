@@ -37,6 +37,7 @@
 #include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
+#include "mixer_ui.h"
 
 #ifdef GTKOSX
 #include <gtkmm2ext/sync-menu.h>
@@ -93,8 +94,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Help"), _("Help"));
  	ActionManager::register_action (main_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
 	ActionManager::register_action (main_actions, X_("AudioFileFormat"), _("Audio File Format"));
-	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("Header"));
-	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Data"));
+	ActionManager::register_action (main_actions, X_("AudioFileFormatHeader"), _("File Type"));
+	ActionManager::register_action (main_actions, X_("AudioFileFormatData"), _("Sample Format"));
 	ActionManager::register_action (main_actions, X_("ControlSurfaces"), _("Control Surfaces"));
 	ActionManager::register_action (main_actions, X_("Plugins"), _("Plugins"));
 	ActionManager::register_action (main_actions, X_("Metering"), _("Metering"));
@@ -454,6 +455,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("ShowTrackMeters"), _("Enable Editor Meters"), mem_fun (*this, &ARDOUR_UI::toggle_ShowTrackMeters));
 	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));
 	ActionManager::register_toggle_action (option_actions, X_("RubberbandingSnapsToGrid"), _("Rubberbanding Snaps to Grid"), mem_fun (*this, &ARDOUR_UI::toggle_rubberbanding_snaps_to_grid));
+	ActionManager::register_toggle_action (option_actions, X_("AutoAnalyseAudio"), _("Auto-analyse new audio"), mem_fun (*this, &ARDOUR_UI::toggle_auto_analyse_audio));
 
 	ActionManager::register_toggle_action (option_actions, X_("DefaultNarrowMS"), _("Use narrow mixer strips"), mem_fun (*this, &ARDOUR_UI::toggle_use_narrow_ms));
 
@@ -538,15 +540,24 @@ ARDOUR_UI::install_actions ()
 
 	RadioAction::Group file_data_group;
 
+
 	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormatFloat"), X_("32-bit floating point"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatFloat));
-	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit signed integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
-	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat16bit"), X_("16-bit signed integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt16));
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat24bit"), X_("24-bit integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt24));
+	act = ActionManager::register_radio_action (option_actions, file_data_group, X_("FileDataFormat16bit"), X_("16-bit integer"), bind (mem_fun (*this, &ARDOUR_UI::set_native_file_data_format), ARDOUR::FormatInt16));
 
 	RadioAction::Group monitoring_group;
 
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("Hardware monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Software monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("External monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
+	/* it would be nice not to even show this item, but that messes up the 
+	   menus which are not dynamically modified at runtime. so we make it
+	   sensitive only if it makes sense.
+	*/
+
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("JACK does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
+	if (engine->can_request_hardware_monitoring()) {
+		act->set_sensitive (false);
+	}
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Ardour does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("Audio Hardware does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
 
 	RadioAction::Group solo_group;
 
@@ -579,6 +590,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (option_actions, remote_group, X_("RemoteEditorDefined"), _("Remote ID follows order of Editor"), hide_return (bind (mem_fun (*this, &ARDOUR_UI::set_remote_model), EditorOrdered)));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("AutoRebinding"), _("Auto Rebind Controls"), mem_fun (*(this->mixer), &Mixer_UI::toggle_auto_rebinding));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);

@@ -1316,7 +1316,17 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 		return 0;
 	}
 
-	cerr << "startup analysis of " << _name << endl;
+	/* no existing/complete transient info */
+
+	if (!Config->get_auto_analyse_audio()) {
+		pl->session().Dialog (_("\
+You have requested an operation that requires audio analysis.\n\n\
+You currently have \"auto-analyse-audio\" disabled, which means\n\
+that transient data must be generated every time it is required.\n\n\
+If you are doing work that will require transient data on a\n\
+regular basis, you should probably enable \"auto-analyse-audio\"\n\
+then quit ardour and restart."));
+	}
 
 	TransientDetector t (pl->session().frame_rate());
 	bool existing_results = !results.empty();
@@ -1330,13 +1340,9 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 
 		t.reset ();
 
-		cerr << "working on channel " << i << endl;
-
 		if (t.run ("", this, i, these_results)) {
 			return -1;
 		}
-
-		cerr << "done\n";
 
 		/* translate all transients to give absolute position */
 		

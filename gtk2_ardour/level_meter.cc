@@ -67,6 +67,7 @@ LevelMeter::LevelMeter (boost::shared_ptr<IO> io, Session& s)
 	Config->ParameterChanged.connect (mem_fun (*this, &LevelMeter::parameter_changed));
 	UI::instance()->theme_changed.connect (mem_fun(*this, &LevelMeter::on_theme_changed));
 	ColorsChanged.connect (mem_fun (*this, &LevelMeter::color_handler));
+	max_peak = minus_infinity();
 }
 
 void
@@ -84,7 +85,7 @@ LevelMeter::~LevelMeter ()
 	}
 }
 
-void
+float
 LevelMeter::update_meters ()
 {
 	vector<MeterInfo>::iterator i;
@@ -96,8 +97,12 @@ LevelMeter::update_meters ()
 			peak = _io->peak_meter().peak_power (n);
 			(*i).meter->set (log_meter (peak));
 			mpeak = _io->peak_meter().max_peak_power(n);
+			if (mpeak > max_peak) {
+				max_peak = mpeak;
+			}
 		}
 	}
+	return max_peak;
 }
 
 void
@@ -134,9 +139,10 @@ LevelMeter::hide_all_meters ()
 }
 
 void
-LevelMeter::setup_meters (int len)
+LevelMeter::setup_meters (int len, int initial_width)
 {
 	uint32_t nmeters = _io->n_outputs().n_total();
+	regular_meter_width = initial_width;
 	guint16 width;
 
 	hide_all_meters ();
@@ -191,6 +197,7 @@ LevelMeter::setup_meters (int len)
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
+			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &LevelMeter::meter_button_release), n));
 		}
 
 		pack_end (*meters[n].meter, false, false);
@@ -199,13 +206,24 @@ LevelMeter::setup_meters (int len)
 	}
 	show();
 	color_changed = false;
-}	
+}
+
+gint
+LevelMeter::meter_button_release (GdkEventButton* ev, uint32_t which)
+{
+	if (ev->button == 1) {
+		clear_meters();
+	}
+	return true;
+}
+	
 
 void LevelMeter::clear_meters ()
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
 		(*i).meter->clear();
 	}
+	max_peak = minus_infinity();
 }
 
 void LevelMeter::hide_meters ()

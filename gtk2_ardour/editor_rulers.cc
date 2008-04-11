@@ -290,11 +290,11 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	if (autoscroll_timeout_tag < 0) {
 		if (frame > rightmost_frame) {
 			if (rightmost_frame < max_frames) {
-				start_canvas_autoscroll (1);
+				start_canvas_autoscroll (1, 0);
 			}
 		} else if (frame < leftmost_frame) {
 			if (leftmost_frame > 0) {
-				start_canvas_autoscroll (-1);
+				start_canvas_autoscroll (-1, 0);
 			}
 		} 
 	} else {
@@ -690,7 +690,6 @@ Editor::update_ruler_visibility ()
 			range_marker_group->move (0.0, tbpos - old_unit_pos);
 		}
 		range_marker_group->show();
-		cerr << "range_marker_group now at " << range_marker_group->property_y() << endl;
 		tbpos += timebar_height;
 		visible_timebars++;
 	} else {

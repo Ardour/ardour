@@ -133,6 +133,8 @@ class AudioEngine : public sigc::trackable
 	uint32_t n_physical_outputs () const;
 	uint32_t n_physical_inputs () const;
 
+	bool can_request_hardware_monitoring ();
+
 	void get_physical_outputs (std::vector<std::string>&);
 	void get_physical_inputs (std::vector<std::string>&);
 

@@ -55,17 +55,49 @@ _render_callback(void *userData,
 }
 
 AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> _comp)
-	:
-	Plugin (engine, session),
-	comp (_comp),
-	unit (new CAAudioUnit),
-	initialized (false),
-	buffers (0),
-	current_maxbuf (0),
-	current_offset (0),
-	current_buffers (0),
+	: Plugin (engine, session),
+	  comp (_comp),
+	  unit (new CAAudioUnit),
+	  initialized (false),
+	  buffers (0),
+	  current_maxbuf (0),
+	  current_offset (0),
+	  current_buffers (0),
 	frames_processed (0)
 {			
+	init ();
+}
+
+AUPlugin::AUPlugin (const AUPlugin& other)
+	: Plugin (other)
+	, comp (other.get_comp())
+	, unit (new CAAudioUnit)
+	, initialized (false)
+	, buffers (0)
+	, current_maxbuf (0)
+	, current_offset (0)
+	, current_buffers (0)
+	, frames_processed (0)
+	  
+{
+	init ();
+}
+
+AUPlugin::~AUPlugin ()
+{
+	if (unit) {
+		unit->Uninitialize ();
+	}
+
+	if (buffers) {
+		free (buffers);
+	}
+}
+
+
+void
+AUPlugin::init ()
+{
 	OSErr err = CAAudioUnit::Open (*(comp.get()), *unit);
 
 	if (err != noErr) {
@@ -90,7 +122,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 
 	// set up the basic stream format. these fields do not change
 			    
-	streamFormat.mSampleRate = session.frame_rate();
+	streamFormat.mSampleRate = _session.frame_rate();
 	streamFormat.mFormatID = kAudioFormatLinearPCM;
 	streamFormat.mFormatFlags = kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked|kAudioFormatFlagIsNonInterleaved;
 
@@ -119,17 +151,6 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	discover_parameters ();
 
 	Plugin::setup_controls ();
-}
-
-AUPlugin::~AUPlugin ()
-{
-	if (unit) {
-		unit->Uninitialize ();
-	}
-
-	if (buffers) {
-		free (buffers);
-	}
 }
 
 void
@@ -281,7 +302,7 @@ AUPlugin::signal_latency () const
 		return _user_latency;
 	}
 
-	return unit->Latency ();
+	return unit->Latency() * _session.frame_rate();
 }
 
 void

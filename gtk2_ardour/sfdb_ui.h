@@ -117,6 +117,9 @@ class SoundFileBrowser : public ArdourDialog
 	FoundTagColumns found_list_columns;
 	Glib::RefPtr<Gtk::ListStore> found_list;
 
+	FoundTagColumns freesound_list_columns;
+	Glib::RefPtr<Gtk::ListStore> freesound_list;
+
   public:
 	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
@@ -127,7 +130,20 @@ class SoundFileBrowser : public ArdourDialog
 	void clear_selection ();
 
 	Gtk::FileChooserWidget chooser;
+
+	SoundFileBox preview;
+
+	Gtk::Entry found_entry;
+	Gtk::Button found_search_btn;
 	Gtk::TreeView found_list_view;
+
+	Gtk::Entry freesound_name_entry;
+	Gtk::Entry freesound_pass_entry;
+	Gtk::Entry freesound_entry;
+	Gtk::Button freesound_search_btn;
+	Gtk::TreeView freesound_list_view;
+
+	void freesound_search_thread();
 
   protected:
 	bool resetting_ourselves;
@@ -135,13 +151,10 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::FileFilter audio_filter;
 	Gtk::FileFilter midi_filter;
 	Gtk::FileFilter matchall_filter;
-	SoundFileBox preview;
 	Gtk::HBox hpacker;
 
 	static Glib::ustring persistent_folder;
 
-	Gtk::Entry found_entry;
-	Gtk::Button found_search_btn;
 	Gtk::Notebook notebook;
 
 	GainMeter* gm;
@@ -154,10 +167,15 @@ class SoundFileBrowser : public ArdourDialog
 	sigc::connection metering_connection;
 
 	void update_preview ();
+
 	void found_list_view_selected ();
 	void found_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 	void found_search_clicked ();
 
+	void freesound_list_view_selected ();
+	void freesound_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
+	void freesound_search_clicked ();
+	
 	void chooser_file_activated ();
 	
 	bool on_audio_filter (const Gtk::FileFilter::Info& filter_info);

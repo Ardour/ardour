@@ -467,7 +467,8 @@ RouteTimeAxisView::playlist_click ()
 	playlist_action_menu->set_name ("ArdourContextMenu");
 	
  	build_playlist_menu (playlist_action_menu);
-	editor.set_selected_track (*this, Selection::Add);
+
+	conditionally_add_to_selection ();
 	playlist_action_menu->popup (1, gtk_get_current_event_time());
 }
 
@@ -480,7 +481,7 @@ RouteTimeAxisView::automation_click ()
 		*/
 		build_display_menu ();
 	}
-	editor.set_selected_track (*this, Selection::Add);
+	conditionally_add_to_selection ();
 	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
@@ -854,6 +855,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		show_name_entry ();
 		hide_name_label ();
 
+		gain_slider->show();
 		mute_button->show();
 		solo_button->show();
 		if (rec_enable_button)
@@ -875,6 +877,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		show_name_entry ();
 		hide_name_label ();
 
+		gain_slider->hide();
 		mute_button->show();
 		solo_button->show();
 		if (rec_enable_button)
@@ -895,6 +898,7 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		hide_name_entry ();
 		show_name_label ();
 
+		gain_slider->hide();
 		mute_button->hide();
 		solo_button->hide();
 		if (rec_enable_button)

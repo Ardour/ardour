@@ -41,6 +41,12 @@ class RegionFactory {
 	*/
 	static sigc::signal<void,boost::shared_ptr<Region> > CheckNewRegion;
 
+	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region>);
+
+	/* note: both of the first two should use const shared_ptr as well, but
+	   gcc 4.1 doesn't seem to be able to disambiguate them if they do.
+	*/
+
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, nframes_t start, 
 						 nframes_t length, std::string name, 
 						 layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
@@ -49,7 +55,6 @@ class RegionFactory {
 						 layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	static boost::shared_ptr<Region> create (const SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>);
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
 	static boost::shared_ptr<Region> create (SourceList &, const XMLNode&);
 };

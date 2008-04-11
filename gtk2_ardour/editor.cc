@@ -281,6 +281,8 @@ Editor::Editor ()
 	bbt_beat_subdivision = 4;
 	canvas_width = 0;
 	canvas_height = 0;
+	last_autoscroll_x = 0;
+	last_autoscroll_y = 0;
 	autoscroll_active = false;
 	autoscroll_timeout_tag = -1;
 	interthread_progress_window = 0;
@@ -1840,8 +1842,9 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
 
 #ifdef FFT_ANALYSIS
-	if (ar)
-		items.push_back (MenuElem (_("Analyze region"), mem_fun(*this, &Editor::analyze_region_selection)));
+	if (ar) {
+		items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_region_selection)));
+	}
 #endif
 
 	items.push_back (SeparatorElem());
@@ -2020,7 +2023,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 
 #ifdef FFT_ANALYSIS
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Analyze range"), mem_fun(*this, &Editor::analyze_range_selection)));
+	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_range_selection)));
 #endif
 	
 	items.push_back (SeparatorElem());
@@ -2304,6 +2307,15 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	if (act) {
 		Glib::RefPtr<RadioAction>::cast_dynamic(act)->set_active (true);
 	}
+
+	nframes64_t foo;
+	bool in_track_canvas;
+
+	if (!mouse_frame (foo, in_track_canvas)) {
+		in_track_canvas = false;
+	}
+
+	reset_canvas_action_sensitivity (in_track_canvas);
 
 	instant_save ();
 }

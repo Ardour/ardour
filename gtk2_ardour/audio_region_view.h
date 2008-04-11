@@ -55,6 +55,7 @@ class AudioRegionView : public RegionView
 			 Gdk::Color& basic_color);
 
         AudioRegionView (const AudioRegionView& other);
+        AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	~AudioRegionView ();
 	
@@ -134,7 +135,6 @@ class AudioRegionView : public RegionView
 
     double _amplitude_above_axis;
     double _y_position;
-    double _height;
 
     uint32_t _flags;
     uint32_t fade_color;

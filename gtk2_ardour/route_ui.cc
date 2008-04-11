@@ -135,6 +135,10 @@ RouteUI::~RouteUI()
 bool
 RouteUI::mute_press(GdkEventButton* ev)
 {
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		return true;
+	}
+
 	if (!ignore_toggle) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
@@ -212,6 +216,12 @@ RouteUI::mute_release(GdkEventButton* ev)
 bool
 RouteUI::solo_press(GdkEventButton* ev)
 {
+	/* ignore double clicks */
+
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		return true;
+	}
+
 	if (!ignore_toggle) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
@@ -281,7 +291,6 @@ RouteUI::solo_press(GdkEventButton* ev)
 				} else {
 
 					/* click: solo this route */
-					
 					reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
 				}
 			}
@@ -310,6 +319,10 @@ RouteUI::solo_release(GdkEventButton* ev)
 bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		return true;
+	}
+
 	if (!_session.engine().connected()) {
 	        MessageDialog msg (_("Not connected to JACK - cannot engage record"));
 		msg.run ();
@@ -378,7 +391,7 @@ RouteUI::update_solo_display ()
 		ignore_toggle = true;
 		solo_button->set_active(x);
 		ignore_toggle = false;
-	}
+	} 
 	
 	if (_route->solo_safe()) {
 		solo_button->set_visual_state (2);

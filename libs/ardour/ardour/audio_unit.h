@@ -60,6 +60,7 @@ class AUPlugin : public ARDOUR::Plugin
 {
   public:
 	AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> comp);
+	AUPlugin (const AUPlugin& other);
 	virtual ~AUPlugin ();
 	
         std::string unique_id () const;
@@ -106,7 +107,7 @@ class AUPlugin : public ARDOUR::Plugin
 	uint32_t input_streams() const;
 
 	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
-	boost::shared_ptr<CAComponent> get_comp () { return comp; }
+	boost::shared_ptr<CAComponent> get_comp () const { return comp; }
     
         OSStatus render_callback(AudioUnitRenderActionFlags *ioActionFlags,
 				 const AudioTimeStamp    *inTimeStamp,
@@ -140,6 +141,7 @@ class AUPlugin : public ARDOUR::Plugin
         nframes_t frames_processed;
 	
 	std::vector<AUParameterDescriptor> descriptors;
+	void init ();
 };
 	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;

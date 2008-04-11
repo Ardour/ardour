@@ -39,6 +39,7 @@
 #define EDITPOINT(a) /*empty*/
 #define WAVEFORMSCALE(a) /*empty*/
 #define WAVEFORMSHAPE(a) /*empty*/
+#define INSERTTIMEOPT(a) /*empty*/
 
 namespace Editing {
 
@@ -201,6 +202,18 @@ enum WaveformShape {
 
 #undef WAVEFORMSHAPE
 #define WAVEFORMSHAPE(a) /*empty*/
+
+
+// INSERTTIMEOPT
+#undef INSERTTIMEOPT
+#define INSERTTIMEOPT(a) a,
+enum InsertTimeOption {
+	#include "editing_syms.h"
+};
+
+#undef INSERTTIMEOPT
+#define INSERTTIMEOPT(a) /*empty*/
+
 
 /////////////////////
 // These don't need their state saved. yet...

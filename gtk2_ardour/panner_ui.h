@@ -68,9 +68,11 @@ class PannerUI : public Gtk::HBox
 	void effective_pan_display ();
 
 	void set_meter_strip_name (string name);
+	PBD::Controllable* get_controllable();
 
   private:
 	friend class MixerStrip;
+
 	boost::shared_ptr<ARDOUR::IO> _io;
 	ARDOUR::Session& _session;
 

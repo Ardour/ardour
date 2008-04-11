@@ -39,9 +39,9 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
 	
-	virtual void activate ();
-	virtual void deactivate ();
-	
+	void activate ();
+	void deactivate ();
+
 	void lower_box_realized ();
 	void on_realize ();
 	void on_show ();
@@ -57,7 +57,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
 	int prefheight;
 	int prefwidth;
-	
+
 	Gtk::HBox     top_box;
 	Gtk::EventBox low_box;
 	Gtk::VBox vpacker;
@@ -81,6 +81,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	WindowRef            carbon_window;	
  	EventHandlerRef      carbon_event_handler;
 	bool                 _activating_from_app;
+	NSView*              packView;
 
 	bool test_cocoa_view_support ();
 	bool test_carbon_view_support ();

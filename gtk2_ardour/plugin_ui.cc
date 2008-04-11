@@ -66,6 +66,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 {
 	bool have_gui = false;
 	non_gtk_gui = false;
+	was_visible = false;
 
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
@@ -159,7 +160,6 @@ PluginUIWindow::on_show ()
 	Window::on_show ();
 
 	if (parent) {
-		cerr << "plugin becomes transient for " << parent << endl;
 		// set_transient_for (*parent);
 	}
 }
@@ -221,9 +221,13 @@ PluginUIWindow::app_activated (bool yn)
 	cerr << "APP activated ? " << yn << endl;
 	if (_pluginui) {
 		if (yn) {
-			_pluginui->activate ();
-			present ();
+			if (was_visible) {
+				_pluginui->activate ();
+				present ();
+				was_visible = true;
+			}
 		} else {
+			was_visible = is_visible();
 			hide ();
 			_pluginui->deactivate ();
 		}

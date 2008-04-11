@@ -226,6 +226,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
+	/* handle dialog requests */
+
+	ARDOUR::Session::Dialog.connect (mem_fun(*this, &ARDOUR_UI::session_dialog));
+
 	/* handle pending state with a dialog */
 
 	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
@@ -1452,6 +1456,7 @@ ARDOUR_UI::remove_last_capture()
 void
 ARDOUR_UI::transport_record (bool roll)
 {
+	
 	if (session) {
 		switch (session->record_status()) {
 		case Session::Disabled:
@@ -1477,6 +1482,7 @@ ARDOUR_UI::transport_record (bool roll)
 			session->disable_record (false, true);
 		}
 	}
+	//cerr << "ARDOUR_UI::transport_record () called roll = " << roll << " session->record_status() = " << session->record_status() << endl;
 }
 
 void
@@ -1489,6 +1495,8 @@ ARDOUR_UI::transport_roll ()
 	}
 
 	rolling = session->transport_rolling ();
+
+	//cerr << "ARDOUR_UI::transport_roll () called session->record_status() = " << session->record_status() << endl;
 
 	if (session->get_play_loop()) {
 		session->request_play_loop (false);
@@ -3082,6 +3090,24 @@ ARDOUR_UI::disk_speed_dialog_gone (int ignored_response, MessageDialog* msg)
 	have_disk_speed_dialog_displayed = false;
 	delete msg;
 }
+
+void
+ARDOUR_UI::session_dialog (std::string msg)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::session_dialog), msg));
+	
+	MessageDialog* d;
+
+	if (editor) {
+		d = new MessageDialog (*editor, msg, false, MESSAGE_INFO, BUTTONS_OK, true);
+	} else {
+		d = new MessageDialog (msg, false, MESSAGE_INFO, BUTTONS_OK, true);
+	}
+
+	d->show_all ();
+	d->run ();
+	delete d;
+}	
 
 int
 ARDOUR_UI::pending_state_dialog ()

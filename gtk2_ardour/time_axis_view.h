@@ -334,6 +334,8 @@ class TimeAxisView : public virtual AxisView
 	ARDOUR::AnalysisFeatureList analysis_features;
 	void reshow_feature_lines ();
 
+	void conditionally_add_to_selection ();
+
 }; /* class TimeAxisView */
 
 #endif /* __ardour_gtk_time_axis_h__ */

@@ -75,6 +75,8 @@ class Mixer_UI : public Gtk::Window
 	void hide_strip (MixerStrip *);
 
 	void ensure_float (Gtk::Window&);
+	void toggle_auto_rebinding ();
+	void set_auto_rebinding(bool);
 
 	RouteRedirectSelection& selection() { return _selection; }
 
@@ -128,6 +130,9 @@ class Mixer_UI : public Gtk::Window
 	void select_all_audiotrack_strips ();
 	void unselect_all_audiobus_strips ();
 	void select_all_audiobus_strips ();
+
+	void auto_rebind_midi_controls ();
+	bool auto_rebinding;
 
 	void strip_select_op (bool audiotrack, bool select);
 	void select_strip_op (MixerStrip*, bool select);

@@ -261,6 +261,14 @@ class Session : public PBD::StatefulDestructible
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
+	static sigc::signal<void> AutoBindingOn;
+	static sigc::signal<void> AutoBindingOff;
+
+	static sigc::signal<void,std::string> Dialog;
+	
+	std::string sound_dir (bool with_path = true) const;
+	std::string peak_dir () const;
+	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
 	std::string analysis_dir() const;
 	

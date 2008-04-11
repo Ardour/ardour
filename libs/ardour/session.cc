@@ -107,6 +107,7 @@ Session::apply_gain_to_buffer_t  Session::apply_gain_to_buffer  = 0;
 Session::mix_buffers_with_gain_t Session::mix_buffers_with_gain = 0;
 Session::mix_buffers_no_gain_t   Session::mix_buffers_no_gain   = 0;
 
+sigc::signal<void,std::string> Session::Dialog;
 sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
 sigc::signal<void> Session::SendFeedback;
@@ -114,6 +115,9 @@ sigc::signal<void> Session::SendFeedback;
 sigc::signal<void> Session::SMPTEOffsetChanged;
 sigc::signal<void> Session::StartTimeChanged;
 sigc::signal<void> Session::EndTimeChanged;
+
+sigc::signal<void> Session::AutoBindingOn;
+sigc::signal<void> Session::AutoBindingOff;
 
 Session::Session (AudioEngine &eng,
 		  const string& fullpath,
@@ -957,7 +961,6 @@ Session::auto_loop_changed (Location* location)
 	}	
 
 	last_loopend = location->end();
-	
 }
 
 void
@@ -995,6 +998,10 @@ Session::set_auto_punch_location (Location* location)
 	auto_punch_changed_connection = location->changed.connect (mem_fun (this, &Session::auto_punch_changed));
 
 	location->set_auto_punch (true, this);
+
+
+	auto_punch_changed (location);
+
 	auto_punch_location_changed (location);
 }
 
@@ -1034,6 +1041,13 @@ Session::set_auto_loop_location (Location* location)
 	auto_loop_changed_connection = location->changed.connect (mem_fun (this, &Session::auto_loop_changed));
 
 	location->set_auto_loop (true, this);
+
+	/* take care of our stuff first */
+
+	auto_loop_changed (location);
+
+	/* now tell everyone else */
+
 	auto_loop_location_changed (location);
 }
 
@@ -2834,8 +2848,6 @@ Session::remove_source (boost::weak_ptr<Source> src)
 	if (!source) {
 		return;
 	} 
-
-	cerr << "remove source for " << source->name() << endl;
 
 	{ 
 		Glib::Mutex::Lock lm (source_lock);

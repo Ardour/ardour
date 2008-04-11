@@ -83,7 +83,8 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 	key_entry_state = 0;
 	ops_menu = 0;
 	dragging = false;
-	
+	bbt_reference_time = -1;
+
 	if (with_info) {
 		frames_upper_info_label = manage (new Label);
 		frames_lower_info_label = manage (new Label);
@@ -632,6 +633,15 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	BBT_Time bbt;
 
 	session->tempo_map().bbt_time (when, bbt);
+
+	/* handle a common case */
+
+	if (is_duration && when == 0) {
+		bbt.bars = 0;
+		bbt.beats = 0;
+
+	}
+
 	sprintf (buf, "%03" PRIu32, bbt.bars);
 	bars_label.set_text (buf);
 	sprintf (buf, "%02" PRIu32, bbt.beats);
@@ -640,7 +650,16 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	ticks_label.set_text (buf);
 	
 	if (bbt_upper_info_label) {
-		TempoMap::Metric m (session->tempo_map().metric_at (when));
+		nframes64_t pos;
+
+		if (bbt_reference_time < 0) {
+			pos = when;
+		} else {
+			pos = bbt_reference_time;
+		}
+
+		TempoMap::Metric m (session->tempo_map().metric_at (pos));
+
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
 		if (bbt_lower_info_label->get_text() != buf) {
 			bbt_lower_info_label->set_text (buf);
@@ -1993,4 +2012,10 @@ AudioClock::set_size_requests ()
 		break;
 		
 	}
+}
+
+void
+AudioClock::set_bbt_reference (nframes64_t pos)
+{
+	bbt_reference_time = pos;
 }

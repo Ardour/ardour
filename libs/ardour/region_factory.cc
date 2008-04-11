@@ -37,8 +37,8 @@ sigc::signal<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start, 
-			     nframes_t length, std::string name, 
-			     layer_t layer, Region::Flag flags, bool announce)
+		       nframes_t length, std::string name, 
+		       layer_t layer, Region::Flag flags, bool announce)
 {
 	boost::shared_ptr<const AudioRegion> other_a;
 	boost::shared_ptr<const MidiRegion> other_m;
@@ -68,16 +68,16 @@ RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start,
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region)
+RegionFactory::create (boost::shared_ptr<const Region> region)
 {
-	boost::shared_ptr<AudioRegion> ar;
-	boost::shared_ptr<MidiRegion> mr;
+	boost::shared_ptr<const AudioRegion> ar;
+	boost::shared_ptr<const MidiRegion> mr;
 	
-	if ((ar = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
+	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 		boost::shared_ptr<Region> ret (new AudioRegion (ar));
 		/* pure copy constructor - no CheckNewRegion emitted */
 		return ret;
-	} else if ((mr = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
+	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
 		boost::shared_ptr<Region> ret (new MidiRegion (mr));
 		/* pure copy constructor - no CheckNewRegion emitted */
 		return ret;
@@ -91,8 +91,8 @@ RegionFactory::create (boost::shared_ptr<Region> region)
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<AudioRegion> region, nframes_t start, 
-			     nframes_t length, std::string name, 
-			     layer_t layer, Region::Flag flags, bool announce)
+		       nframes_t length, std::string name, 
+		       layer_t layer, Region::Flag flags, bool announce)
 {
 	return create (boost::static_pointer_cast<Region> (region), start, length, name, layer, flags, announce);
 }

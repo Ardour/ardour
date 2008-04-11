@@ -692,29 +692,39 @@ AudioFileSource::setup_peakfile ()
 bool
 AudioFileSource::safe_file_extension(ustring file)
 {
-	return !(file.rfind(".wav") == ustring::npos &&
-		file.rfind(".aiff")== ustring::npos &&
-		file.rfind(".caf")== ustring::npos &&
-		file.rfind(".aif") == ustring::npos &&
-		file.rfind(".amb") == ustring::npos &&
-		file.rfind(".snd") == ustring::npos &&
-		file.rfind(".au")  == ustring::npos &&
-		file.rfind(".raw") == ustring::npos &&
-		file.rfind(".sf")  == ustring::npos &&
-		file.rfind(".cdr") == ustring::npos &&
-		file.rfind(".smp") == ustring::npos &&
-		file.rfind(".maud")== ustring::npos &&
-		file.rfind(".vwe") == ustring::npos &&
-		file.rfind(".paf") == ustring::npos &&
+	const char* suffixes[] = {
+		".wav", ".WAV",
+		".aiff", ".AIFF",
+		".caf", ".CAF",
+		".aif", ".AIF",
+		".amb", ".AMB",
+		".snd", ".SND",
+		".au", ".AU",
+		".raw", ".RAW",
+		".sf", ".SF",
+		".cdr", ".CDR",
+		".smp", ".SMP",
+		".maud", ".MAUD",
+		".vwe", ".VWE",
+		".paf", ".PAF",
+		".voc", ".VOC",
 #ifdef HAVE_FLAC
-		 file.rfind(".flac")== ustring::npos &&
+		".flac", ".FLAC",
 #endif // HAVE_FLAC
 #ifdef HAVE_COREAUDIO
-		 file.rfind(".mp3") == ustring::npos &&
-		 file.rfind(".aac") == ustring::npos &&
-		 file.rfind(".mp4") == ustring::npos &&
+		".mp3", ".MP3",
+		".aac", ".AAC",
+		".mp4", ".MP4",
 #endif // HAVE_COREAUDIO
-		 file.rfind(".voc") == ustring::npos);
+	};
+
+	for (size_t n = 0; n < sizeof(suffixes)/sizeof(suffixes[0]); ++n) {
+		if (file.rfind (suffixes[n]) == file.length() - strlen (suffixes[n])) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void
