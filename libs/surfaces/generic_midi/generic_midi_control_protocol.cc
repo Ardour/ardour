@@ -349,7 +349,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node)
 	// Are we using the autobinding feature?  If so skip this part
 	if ( !auto_binding ) {
 		
-		Controllable* c;
+		boost::shared_ptr<Controllable> c;
 		
 		{
 			Glib::Mutex::Lock lm (pending_lock);
