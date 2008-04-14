@@ -184,10 +184,15 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return false;
 
 	case GDK_BUTTON_PRESS:
-		if (_mouse_state != SelectTouchDragging && _mouse_state != EraseTouchDragging)
+		if (_mouse_state != SelectTouchDragging && 
+			_mouse_state != EraseTouchDragging &&
+			ev->button.button == 1	) {
+			_pressed_button = ev->button.button;
 			_mouse_state = Pressed;
+			return true;
+		}
 		_pressed_button = ev->button.button;
-		return true;
+		return false;
 
 	case GDK_ENTER_NOTIFY:
 		/* FIXME: do this on switch to note tool, too, if the pointer is already in */
@@ -306,6 +311,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		group->ungrab(ev->button.time);
 		event_frame = trackview.editor.pixel_to_frame(event_x);
 
+		if(_pressed_button != 1) {
+			return false;
+		}
+			
 		switch (_mouse_state) {
 		case Pressed: // Clicked
 			switch (trackview.editor.current_midi_edit_mode()) {
@@ -328,8 +337,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		case AddDragging: // Add drag done
 			_mouse_state = None;
 			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
-				const double x      = drag_rect->property_x1()
-				                      + trackview.editor.frame_to_pixel(_region->start());
+				const double x      = drag_rect->property_x1();
 				const double length = trackview.editor.pixel_to_frame(
 				                        drag_rect->property_x2() - drag_rect->property_x1());
 					
@@ -365,6 +373,7 @@ MidiRegionView::create_note_at(double x, double y, double duration)
 
 	nframes_t new_note_time = trackview.editor.pixel_to_frame (x);
 	assert(new_note_time >= 0);
+	new_note_time += _region->start();
 
 	/*
 	const Meter& m = trackview.session().tempo_map().meter_at(new_note_time);
@@ -1145,6 +1154,34 @@ MidiRegionView::change_velocity(uint8_t velocity, bool relative)
 		} else { // absolute
 			copy->set_velocity(velocity);			
 		}
+		
+		command_remove_note(event);
+		command_add_note(copy);
+		
+		_marked_for_selection.insert(copy);
+		i = next;
+	}
+	
+	// dont keep notes selected if tweaking a single note
+	if(_marked_for_selection.size() == 1) {
+		_marked_for_selection.clear();
+	}
+	
+	apply_command();
+}
+
+void
+MidiRegionView::change_channel(uint8_t channel)
+{
+	start_delta_command(_("change channel"));
+	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
+		Selection::iterator next = i;
+		++next;
+
+		CanvasMidiEvent *event = *i;
+		const boost::shared_ptr<Note> copy(new Note(*(event->note().get())));
+
+		copy->set_channel(channel);
 		
 		command_remove_note(event);
 		command_add_note(copy);

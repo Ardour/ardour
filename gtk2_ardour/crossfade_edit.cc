@@ -433,12 +433,12 @@ CrossfadeEditor::canvas_event (GdkEvent* event)
 	case GDK_BUTTON_PRESS:
 		add_control_point ((event->button.x - canvas_border)/effective_width(),
 				   1.0 - ((event->button.y - canvas_border)/effective_height()));
-		return TRUE;
+		return true;
 		break;
 	default:
 		break;
 	}
-	return FALSE;
+	return false;
 }
 
 CrossfadeEditor::Point::~Point()

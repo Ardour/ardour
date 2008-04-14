@@ -21,7 +21,9 @@
 #define __gtk_ardour_canvas_midi_event_h__
 
 #include "simplerect.h"
+#include "midi_channel_selector.h"
 #include <libgnomecanvasmm/text.h>
+#include <libgnomecanvasmm/widget.h>
 #include <ardour/midi_model.h>
 
 class Editor;
@@ -49,7 +51,7 @@ public:
 			Item*                                 item,
 			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>());
 
-	virtual ~CanvasMidiEvent() { if(_text) delete _text; }
+	virtual ~CanvasMidiEvent();
 
 	bool on_event(GdkEvent* ev);
 
@@ -60,6 +62,15 @@ public:
 	
 	void show_velocity();
 	void hide_velocity();
+	
+	/**
+	 * This slot is called, when a new channel is selected for the event
+	 * */
+	void on_channel_change(uint8_t channel);
+	
+	void show_channel_selector();
+	
+	void hide_channel_selector();
 
 	virtual void set_outline_color(uint32_t c) = 0;
 	virtual void set_fill_color(uint32_t c) = 0;
@@ -76,7 +87,8 @@ protected:
 
 	MidiRegionView&                       _region;
 	Item* const                           _item;
-	Text* 		                          _text;
+	Text*                                 _text;
+	Widget*                               _channel_selector_widget;
 	State                                 _state;
 	const boost::shared_ptr<ARDOUR::Note> _note;
 	bool                                  _own_note;

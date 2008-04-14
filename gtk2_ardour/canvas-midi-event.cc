@@ -36,11 +36,18 @@ CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item,
 	: _region(region)
 	, _item(item)
 	, _text(0)
+	, _channel_selector_widget()
 	, _state(None)
 	, _note(note)
 	, _selected(false)
 {
 	_text = new Text(*(item->property_parent()));
+}
+
+CanvasMidiEvent::~CanvasMidiEvent() 
+{ 
+	if(_text) delete _text;
+	if(_channel_selector_widget) delete _channel_selector_widget;
 }
 
 void 
@@ -69,6 +76,50 @@ void
 CanvasMidiEvent::hide_velocity(void)
 {
 	_text->hide();
+}
+
+void 
+CanvasMidiEvent::on_channel_change(uint8_t channel)
+{
+	_region.note_selected(this, true);
+	hide_channel_selector();
+	_region.change_channel(channel);
+}
+
+void
+CanvasMidiEvent::show_channel_selector(void)
+{
+	if(_channel_selector_widget == 0) {
+		cerr << "Note has channel: " << int(_note->channel()) << endl;
+		SingleMidiChannelSelector* _channel_selector = new SingleMidiChannelSelector(_note->channel());
+		_channel_selector->show_all();
+		_channel_selector->channel_selected.connect(
+			sigc::mem_fun(this, &CanvasMidiEvent::on_channel_change));
+
+		_channel_selector_widget = 
+			new Widget(*(_item->property_parent()), 
+			           x1(), 
+			           y2() + 2, 
+			           (Gtk::Widget &) *_channel_selector);
+		
+		_channel_selector_widget->hide();
+		_channel_selector_widget->property_height() = 100;
+		_channel_selector_widget->property_width() = 100;
+		_channel_selector_widget->raise_to_top();
+		_channel_selector_widget->show();
+	} else {
+		hide_channel_selector();
+	}
+}
+
+void
+CanvasMidiEvent::hide_channel_selector(void)
+{
+	if(_channel_selector_widget) {
+		_channel_selector_widget->hide();
+		delete _channel_selector_widget;
+		_channel_selector_widget = 0;
+	}
 }
 
 void
@@ -120,7 +171,6 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 			}
 			return true;
 		} else if(ev->scroll.direction == GDK_SCROLL_DOWN) {
-			
 			_region.note_selected(this, true);
 			if (_region.mouse_state() == MidiRegionView::SelectTouchDragging) {
 				// TODO: absolute velocity
@@ -164,6 +214,8 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 1) {
 			_state = Pressed;
+		} else if (ev->button.button == 3) {
+			show_channel_selector();
 		}
 		return true;
 
@@ -236,7 +288,11 @@ CanvasMidiEvent::on_event(GdkEvent* ev)
 		event_x = ev->button.x;
 		event_y = ev->button.y;
 		_item->property_parent().get_value()->w2i(event_x, event_y);
-
+		
+		if(ev->button.button == 3) {
+			return true;
+		}
+		
 		switch (_state) {
 		case Pressed: // Clicked
 			if (_region.midi_view()->editor.current_midi_edit_mode() == Editing::MidiEditSelect) {

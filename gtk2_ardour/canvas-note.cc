@@ -47,8 +47,8 @@ CanvasNote::on_event(GdkEvent* ev)
 			last_x = event_x;
 
 			return true;
-		}
-
+		} 
+		
 	case GDK_MOTION_NOTIFY:
 		event_x = ev->motion.x;
 

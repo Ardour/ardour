@@ -165,11 +165,17 @@ class MidiRegionView : public RegionView
 
 	/**
 	 * This function is called while the user adjusts the velocity on a selection of notes
-	 * @param velocity the relative or absolute velocity, dependin on the value of relative
+	 * @param velocity the relative or absolute velocity, depending on the value of relative
 	 * @param relative true if the given velocity represents a delta to be applied to all notes, false
 	 *        if the absolute value of the note shoud be set
 	 */
 	void change_velocity(uint8_t velocity, bool relative=false);
+	
+	/**
+	 * This function is called when the user adjusts the midi channel of a selection of notes
+	 * @param channel - the channel number of the new channel, zero-based
+	 */
+	void change_channel(uint8_t channel);
 
 	enum MouseState { None, Pressed, SelectTouchDragging, SelectRectDragging, AddDragging, EraseTouchDragging };
 	MouseState mouse_state() const { return _mouse_state; }

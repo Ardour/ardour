@@ -192,6 +192,7 @@ midi_region_view.cc
 midi_scroomer.cc
 midi_streamview.cc
 midi_time_axis.cc
+midi_channel_selector.cc
 mixer_strip.cc
 mixer_ui.cc
 new_session_dialog.cc
