@@ -83,7 +83,6 @@ public:
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && _controls.size() == 0; }
 
-	/* FIXME: use better data structure */
 	typedef std::vector< boost::shared_ptr<Note> > Notes;
 	
 	inline static bool note_time_comparator (const boost::shared_ptr<const Note> a,
@@ -188,8 +187,8 @@ public:
 	const_iterator        begin() const { return const_iterator(*this, 0); }
 	const const_iterator& end()   const { return _end_iter; }
 	
-	const MidiSource *midi_source() const { return _midi_source; }
-	void set_midi_source(MidiSource *source) { _midi_source = source; } 
+	const MidiSource *midi_source() const;
+	void set_midi_source(MidiSource *source); 
 	
 private:
 	friend class DeltaCommand;

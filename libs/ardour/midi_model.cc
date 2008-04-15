@@ -386,6 +386,8 @@ MidiModel::end_write(bool delete_stuck)
 			if ((*n)->duration() == 0) {
 				cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
 				n = _notes.erase(n);
+				// we have to break here because erase invalidates the iterator
+				break;
 			} else {
 				++n;
 			}
@@ -521,11 +523,19 @@ MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 {
 	//cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
 	for(Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
-		if(**n == *note) {
+		Note _n = *(*n);
+		Note _note =*note;
+		cerr << "======================================= " << endl;
+		cerr << int(_n.note()) << "@" << int(_n.time()) << "[" << int(_n.channel()) << "] --" << int(_n.duration()) << "-- #" << int(_n.velocity())  << endl;
+		cerr << int(_note.note()) << "@" << int(_note.time()) << "[" << int(_note.channel()) << "] --" << int(_note.duration()) << "-- #" << int(_note.velocity())  << endl;
+		cerr << "Equal: " << bool(_n == _note) << endl;
+		cerr << endl << endl;
+		if(_n == _note) {
 			_notes.erase(n);
-		}
+			// we have to break here, because erase invalidates all iterators, ie. n itself
+			break;
+		}		
 	}
-	
 }
 
 /** Slow!  for debugging only. */
@@ -840,3 +850,14 @@ MidiModel::get_state()
 	return *node;
 }
 
+const MidiSource * 
+MidiModel::midi_source() const
+{ 
+	return _midi_source; 
+}
+
+void 
+MidiModel::set_midi_source(MidiSource *source) 
+{ 
+	_midi_source = source; 
+} 

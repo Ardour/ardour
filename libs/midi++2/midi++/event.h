@@ -167,10 +167,10 @@ struct Event {
 	inline uint32_t&   size()              { return _size; }
 	inline uint8_t     type()        const { return (_buffer[0] & 0xF0); }
 	inline uint8_t     channel()     const { return (_buffer[0] & 0x0F); }
-	inline void        set_channel(uint8_t channel)   { _buffer[0] = (0xF0 & _buffer[0]) | channel; }
-        inline bool        is_note_on()  const { return (type() == MIDI_CMD_NOTE_ON); }
-        inline bool        is_note_off() const { return (type() == MIDI_CMD_NOTE_OFF); }
-        inline bool        is_cc()       const { return (type() == MIDI_CMD_CONTROL); }
+	inline void        set_channel(uint8_t channel)   { _buffer[0] = (0xF0 & _buffer[0]) | (0x0F & channel); }
+	inline bool        is_note_on()  const { return (type() == MIDI_CMD_NOTE_ON); }
+	inline bool        is_note_off() const { return (type() == MIDI_CMD_NOTE_OFF); }
+	inline bool        is_cc()       const { return (type() == MIDI_CMD_CONTROL); }
 	inline bool        is_note()     const { return (is_note_on() || is_note_off()); }
 	inline uint8_t     note()        const { return (_buffer[1]); }
 	inline uint8_t     velocity()    const { return (_buffer[2]); }

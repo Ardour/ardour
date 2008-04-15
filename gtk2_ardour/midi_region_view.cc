@@ -914,7 +914,6 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 			Selection::iterator next = i;
 			++next;
 
-			command_remove_note(*i);
 			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get()));
 
 			// we need to snap here again in nframes_t in order to be sample accurate 
@@ -948,12 +947,12 @@ MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
 
 			copy->set_note(new_pitch);
 			
+			command_remove_note(*i);
 			command_add_note(copy);
 
 			_marked_for_selection.insert(copy);
 			i = next;
 		}
-				
 		apply_command();
 		
 		// care about notes being moved beyond the upper/lower bounds on the canvas
