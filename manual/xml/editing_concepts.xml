@@ -65,10 +65,10 @@
     </para>
 
     <para>
-      Regions are a somewhat special case in that they may contain <emphasis>
-      sync points</emphasis>. If a region contains a sync point, the region start
-      position is ignored and the sync point is aligned to the grid. This allows
-      you to align a 'hit point' to the desitred grid.
+      Regions are a somewhat special case in that they may contain
+      <emphasis> sync points</emphasis>. If a region contains a sync point,
+      the region start position is ignored and the sync point is aligned to
+      the grid. This allows you to align a 'hit point' to the desitred grid.
     </para>
 
     <variablelist>
