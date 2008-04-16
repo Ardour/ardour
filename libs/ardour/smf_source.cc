@@ -477,6 +477,7 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 		delta_time = (uint32_t)((ev.time() - _last_ev_time) * _ppqn);
 	}
 
+	
 	const size_t stamp_size = write_var_len(delta_time);
 	fwrite(ev.buffer(), 1, ev.size(), _fd);
 

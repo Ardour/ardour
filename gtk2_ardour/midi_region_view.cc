@@ -174,6 +174,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			}
 			if (delete_mod) {
 				trackview.editor.set_midi_edit_mode(original_mode);
+				_mouse_state = None;
 				delete_mod = false;
 			}
 			return true;

@@ -523,8 +523,8 @@ MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 {
 	//cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
 	for(Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
-		Note _n = *(*n);
-		Note _note =*note;
+		Note& _n = *(*n);
+		const Note& _note = *note;
 		cerr << "======================================= " << endl;
 		cerr << int(_n.note()) << "@" << int(_n.time()) << "[" << int(_n.channel()) << "] --" << int(_n.duration()) << "-- #" << int(_n.velocity())  << endl;
 		cerr << int(_note.note()) << "@" << int(_note.time()) << "[" << int(_note.channel()) << "] --" << int(_note.duration()) << "-- #" << int(_note.velocity())  << endl;
