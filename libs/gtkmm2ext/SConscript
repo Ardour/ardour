@@ -47,9 +47,7 @@ fastmeter.cc
 focus_entry.cc
 grouped_buttons.cc
 gtk_ui.cc
-hexentry.cc
 idle_adjustment.cc
-pathlist.cc
 pixfader.cc
 pixscroller.cc
 popup.cc

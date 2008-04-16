@@ -65,7 +65,6 @@ UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr, true)
 {
 	theMain = new Main (argc, argv);
-	tips = new Tooltips;
 
 	_active = false;
 	_auto_display_errors = true;

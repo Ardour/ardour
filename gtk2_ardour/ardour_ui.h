@@ -148,7 +148,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	int  save_state_canfail (string state_name = "");
 	void save_state (const string & state_name = "");
-	void restore_state (string state_name = "");
 
 	static double gain_to_slider_position (ARDOUR::gain_t g);
         static ARDOUR::gain_t slider_position_to_gain (double pos);
@@ -175,12 +174,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
 	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
-
-	/* this is a helper function to centralize the (complex) logic for
-	   blinking rec-enable buttons.
-	*/
-
-	void rec_enable_button_blink (bool onoff, ARDOUR::AudioDiskstream *, Gtk::Widget *w);
 
 	void name_io_setup (ARDOUR::AudioEngine&, string&, ARDOUR::IO& io, bool in);
 
@@ -284,10 +277,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void                     goto_editor_window ();
 	void                     goto_mixer_window ();
-	
-	Gtk::Table               adjuster_table;
-	Gtk::Frame               adjuster_frame;
-	Gtk::Fixed               adjuster_base;
 
 	GlobalClickBox     *online_control_button;
 	vector<string>      online_control_strings;
@@ -297,9 +286,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::ToggleButton   preroll_button;
 	Gtk::ToggleButton   postroll_button;
-
-	Gtk::Table          transport_table;
-	Gtk::Table          option_table;
 
 	int  setup_windows ();
 	void setup_transport ();
@@ -313,7 +299,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void finish();
 	int  ask_about_saving_session (const string & why);
-	int  save_the_session;
 
 	/* periodic safety backup, to be precise */
 	gint autosave_session();
@@ -351,7 +336,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void manage_window (Gtk::Window&);
 	
 	AudioClock   big_clock;
-	Gtk::Frame   big_clock_frame;
 	Gtk::Window* big_clock_window;
 
 	void update_transport_clocks (nframes_t pos);
@@ -681,9 +665,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
 	Gtk::Menu*     jack_bufsize_menu;
-
-	int make_session_clean ();
-	bool filter_ardour_session_dirs (const Gtk::FileFilter::Info&);
 
 	Glib::RefPtr<Gtk::ActionGroup> common_actions;
 

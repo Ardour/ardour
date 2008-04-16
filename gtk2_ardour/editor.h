@@ -732,8 +732,6 @@ class Editor : public PublicEditor
 	vector<nframes_t> region_boundary_cache;
 	void build_region_boundary_cache ();
 
-	Gtk::VBox           trackview_vpacker;
-
 	Gtk::HBox           top_hbox;
 	Gtk::HBox           bottom_hbox;
 	

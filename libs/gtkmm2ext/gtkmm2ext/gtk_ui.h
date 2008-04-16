@@ -31,7 +31,6 @@
 #include <gtkmm/style.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/main.h>
-#include <gtkmm/tooltips.h>
 #include <gdkmm/color.h>
 #include <pbd/abstract_ui.h>
 #include <pbd/ringbufferNPT.h>
@@ -153,7 +152,6 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	static pthread_t gui_thread;
 	bool _active;
 	Gtk::Main *theMain;
-	Gtk::Tooltips *tips;
 	TextViewer *errors;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> error_ptag;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> error_mtag;

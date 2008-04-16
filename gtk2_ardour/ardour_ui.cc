@@ -105,10 +105,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, true),
 	  postroll_clock (X_("postroll"), false, X_("PostRollClock"), true, true),
 
-	  /* adjuster table */
-
-	  adjuster_table (3, 3),
-
 	  /* preroll stuff */
 
 	  preroll_button (_("pre\nroll")),
@@ -795,8 +791,6 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	window.set_resizable (false);
 	window.show_all ();
 
-	save_the_session = 0;
-
 	window.set_keep_above (true);
 	window.present ();
 
@@ -1125,33 +1119,6 @@ ARDOUR_UI::open_recent_session ()
 
 		can_return = false;
 	}
-}
-
-bool
-ARDOUR_UI::filter_ardour_session_dirs (const FileFilter::Info& info) 
-{
-	struct stat statbuf;
-
-	if (stat (info.filename.c_str(), &statbuf) != 0) {
-		return false;
-	}
-
-	if (!S_ISDIR(statbuf.st_mode)) {
-		return false;
-	}
-
-        // XXX Portability
-        
-	string session_file = info.filename;
-	session_file += '/';
-	session_file += Glib::path_get_basename (info.filename);
-	session_file += ".ardour";
-	
-	if (stat (session_file.c_str(), &statbuf) != 0) {
-		return false;
-	}
-
-	return S_ISREG (statbuf.st_mode);
 }
 
 bool
@@ -1863,17 +1830,6 @@ ARDOUR_UI::save_state_canfail (string name)
 }
 
 void
-ARDOUR_UI::restore_state (string name)
-{
-	if (session) {
-		if (name.length() == 0) {
-			name = session->name();
-		}
-		session->restore_state (name);
-	}
-}
-
-void
 ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (session) {
@@ -1894,37 +1850,6 @@ ARDOUR_UI::secondary_clock_value_changed ()
 {
 	if (session) {
 		session->request_locate (secondary_clock.current_time ());
-	}
-}
-
-void
-ARDOUR_UI::rec_enable_button_blink (bool onoff, AudioDiskstream *dstream, Widget *w)
-{
-	if (session && dstream && dstream->record_enabled()) {
-
-		Session::RecordState rs;
-		
-		rs = session->record_status ();
-
-		switch (rs) {
-		case Session::Disabled:
-		case Session::Enabled:
-			if (w->get_state() != STATE_SELECTED) {
-				w->set_state (STATE_SELECTED);
-			}
-			break;
-
-		case Session::Recording:
-			if (w->get_state() != STATE_ACTIVE) {
-				w->set_state (STATE_ACTIVE);
-			}
-			break;
-		}
-
-	} else {
-		if (w->get_state() != STATE_NORMAL) {
-			w->set_state (STATE_NORMAL);
-		}
 	}
 }
 
