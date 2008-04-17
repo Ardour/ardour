@@ -80,6 +80,7 @@
 #include "gui_thread.h"
 #include "sfdb_ui.h"
 #include "rhythm_ferret.h"
+#include "actions.h"
 
 #ifdef FFT_ANALYSIS
 #include "analysis_window.h"
@@ -791,6 +792,7 @@ Editor::Editor ()
 	ControlProtocol::ZoomIn.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), false));
 	ControlProtocol::ZoomOut.connect (bind (mem_fun (*this, &Editor::temporal_zoom_step), true));
 	ControlProtocol::ScrollTimeline.connect (mem_fun (*this, &Editor::control_scroll));
+	BasicUI::AccessAction.connect (mem_fun (*this, &Editor::access_action));
 
 	Config->ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed));
 	Route::SyncOrderKeys.connect (mem_fun (*this, &Editor::sync_order_keys));
@@ -1019,6 +1021,23 @@ Editor::deferred_control_scroll (nframes_t target)
 	_control_scroll_target = boost::none;
 	_dragging_playhead = false;
 	return false;
+}
+
+void
+Editor::access_action (std::string action_group, std::string action_item)
+{
+	if (!session) {
+		return;
+	}
+
+	cout<< "OSC: Recieved: "<< action_item << endl;
+
+	RefPtr<Action> act;
+	act = ActionManager::get_action( action_group.c_str(), action_item.c_str() );
+
+	if( act )
+		act->activate();
+
 }
 
 void

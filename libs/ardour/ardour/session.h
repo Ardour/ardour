@@ -603,6 +603,7 @@ class Session : public PBD::StatefulDestructible
 	int start_audio_export (ARDOUR::AudioExportSpecification&);
 	int stop_audio_export (ARDOUR::AudioExportSpecification&);
 	void finalize_audio_export ();
+	static sigc::signal<void, std::string, std::string> Exported;
 
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);

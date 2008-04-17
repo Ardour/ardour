@@ -772,6 +772,7 @@ class Editor : public PublicEditor
 	Gtk::HBox           edit_controls_hbox;
 
 	void control_scroll (float);
+	void access_action (std::string,std::string);
 	bool deferred_control_scroll (nframes_t);
 	sigc::connection control_scroll_connection;
 

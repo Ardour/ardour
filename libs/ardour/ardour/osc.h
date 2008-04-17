@@ -54,12 +54,13 @@ class OSC : public BasicUI, public sigc::trackable
 	lo_server _osc_server;
 	lo_server _osc_unix_server;
 	std::string _osc_unix_socket_path;
-   std::string _osc_url_file;
+	std::string _osc_url_file;
 	pthread_t _osc_thread;
 	int _request_pipe[2];
 
 	static void * _osc_receiver(void * arg);
 	void osc_receiver();
+	void send(); // This should accept an OSC payload
 
 	bool init_osc_thread ();
 	void terminate_osc_thread ();
@@ -68,6 +69,11 @@ class OSC : public BasicUI, public sigc::trackable
 	void register_callbacks ();
 
 	void session_going_away ();
+
+	// Handlers for "Application Hook" signals
+	void session_loaded( ARDOUR::Session& );
+	void session_exported( std::string, std::string );
+	// end "Application Hook" handles
 
 	std::string get_server_url ();
 	std::string get_unix_server_url ();
@@ -101,18 +107,19 @@ class OSC : public BasicUI, public sigc::trackable
 	PATH_CALLBACK(rec_enable_toggle);
 	PATH_CALLBACK(toggle_all_rec_enables);
 
-#define PATH_CALLBACK1(name,type) \
+#define PATH_CALLBACK1(name,type,optional)					\
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
         int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
-                if (argc > 0) { \
-			name (argv[0]->type); \
-                }\
-		return 0; \
+                if (argc > 0) {						\
+			name (optional argv[0]->type);		\
+                }							\
+		return 0;						\
 	}
 
-	PATH_CALLBACK1(set_transport_speed,f);
+	PATH_CALLBACK1(set_transport_speed,f,);
+	PATH_CALLBACK1(access_action,s,&);
 };
 
 }

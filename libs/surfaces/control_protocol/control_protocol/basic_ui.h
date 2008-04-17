@@ -42,6 +42,8 @@ class BasicUI {
 	/* transport control */
 
 	void loop_toggle ();
+	void access_action ( std::string action_path );
+	static sigc::signal<void,std::string,std::string> AccessAction;
 	void goto_start ();
 	void goto_end ();
 	void rewind ();

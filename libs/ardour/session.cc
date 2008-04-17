@@ -118,6 +118,8 @@ sigc::signal<void> Session::AutoBindingOn;
 sigc::signal<void> Session::AutoBindingOff;
 
 
+sigc::signal<void, std::string, std::string> Session::Exported;
+
 int
 Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 {

@@ -454,6 +454,8 @@ Session::stop_audio_export (AudioExportSpecification& spec)
 	spec.freewheel_connection.disconnect ();
 	spec.clear (); /* resets running/stop etc */
 
+	Exported( spec.path, name() );
+
 	return 0;
 }
 
