@@ -39,11 +39,10 @@ public:
 	{
 	}
 	
-	// FIXME
-	double x1() { return 0.0; }
-	double y1() { return 0.0; }
-	double x2() { return 0.0; }
-	double y2() { return 0.0; }
+	double x1() { double x1, y1, x2, y2; get_bounds(x1,y1,x2,y2); return x1; }
+	double y1() { double x1, y1, x2, y2; get_bounds(x1,y1,x2,y2); return y1; }
+	double x2() { double x1, y1, x2, y2; get_bounds(x1,y1,x2,y2); return x2; }
+	double y2() { double x1, y1, x2, y2; get_bounds(x1,y1,x2,y2); return y2; }
 	
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
 	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }

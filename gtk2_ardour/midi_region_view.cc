@@ -753,7 +753,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		const double diamond_size = midi_stream_view()->note_height() / 2.0;
 		const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
 
-		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size);
+		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size, note);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
 		ev_diamond->property_fill_color_rgba() = note_fill_color(note->velocity());

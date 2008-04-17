@@ -43,6 +43,8 @@ public:
 	MidiMultipleChannelSelector(uint16_t initial_selection = 1);
 	
 	const uint16_t get_selected_channels() const { return _selected_channels; }
+	
+	sigc::signal<void, uint16_t> selection_changed;
 
 protected:
 	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr);
