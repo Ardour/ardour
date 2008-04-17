@@ -600,6 +600,12 @@ LocationEditRow::flags_changed (ARDOUR::Location *loc, void *src)
 	i_am_the_modifier--;
 }
 
+void
+LocationEditRow::focus_name() {
+	name_entry.grab_focus();
+}
+
+
 LocationUI::LocationUI ()
 	: ArdourDialog ("locations dialog"),
 	  add_location_button (_("Add New Location")),
@@ -628,6 +634,8 @@ LocationUI::LocationUI ()
 	location_rows_scroller.set_name ("LocationLocRowsScroller");
 	location_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	location_rows_scroller.set_size_request (-1, 130);
+	
+	newest_location = 0;
 
 	loc_frame_box.set_spacing (5);
 	loc_frame_box.set_border_width (5);
@@ -789,6 +797,10 @@ LocationUI::map_locations (Locations::LocationList& locations)
 			erow->remove_requested.connect (mem_fun(*this, &LocationUI::location_remove_requested));
  			erow->redraw_ranges.connect (mem_fun(*this, &LocationUI::location_redraw_ranges));
 			loc_children.push_back(Box_Helpers::Element(*erow, PACK_SHRINK, 1, PACK_START));
+			if (location == newest_location) {
+				newest_location = 0;
+				erow->focus_name();
+			}
 		}
 		else if (location->is_auto_punch()) {
 			punch_edit_row.set_session (session);
@@ -820,6 +832,9 @@ LocationUI::add_new_location()
 		nframes_t where = session->audible_frame();
 		session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (where, where, markername, Location::IsMark);
+		if (Config->get_name_new_markers()) {
+			newest_location = location;			
+		}
 		session->begin_reversible_command (_("add marker"));
 		XMLNode &before = session->locations()->get_state();
 		session->locations()->add (location, true);

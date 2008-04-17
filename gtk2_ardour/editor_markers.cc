@@ -404,6 +404,9 @@ Editor::mouse_add_new_marker (nframes_t where, bool is_cd, bool is_xrun)
 
 	if (session) {
 		session->locations()->next_available_name(markername, markerprefix);
+		if (!is_xrun && !choose_new_marker_name(markername)) {
+		    	return;
+		}		
 		Location *location = new Location (where, where, markername, (Location::Flags) flags);
 		session->begin_reversible_command (_("add marker"));
                 XMLNode &before = session->locations()->get_state();

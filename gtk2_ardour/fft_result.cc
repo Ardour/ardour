@@ -21,6 +21,7 @@
 #include <fft_result.h>
 #include <fft_graph.h>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <cmath>
 

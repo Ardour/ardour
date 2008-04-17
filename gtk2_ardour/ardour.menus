@@ -511,6 +511,7 @@
     	       	     <menuitem action='ShowTrackMeters'/>
 	       	     <menuitem action='DefaultNarrowMS'/>
                	     <menuitem action='link-region-and-track-selection'/>
+	             <menuitem action='NameNewMarkers'/>
                	     <menuitem action='RubberbandingSnapsToGrid'/>
                	     <menuitem action='AutoAnalyseAudio'/>
 		</menu>

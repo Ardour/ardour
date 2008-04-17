@@ -1836,6 +1836,46 @@ Editor::temporal_zoom_to_frame (bool coarser, nframes_t frame)
 	reposition_and_zoom (new_leftmost, new_fpu);
 }
 
+
+bool
+Editor::choose_new_marker_name(string &name) {
+
+	if (!Config->get_name_new_markers()) {
+		/* don't prompt user for a new name */
+		return true;
+	}
+
+	ArdourPrompter dialog (true);
+
+	dialog.set_prompt (_("New Name:"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Name New Location Marker");
+
+	dialog.set_title(title.get_string());
+
+	dialog.set_name ("MarkNameWindow");
+	dialog.set_size_request (250, -1);
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
+
+	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	dialog.set_initial_text (name);
+
+	dialog.show ();
+
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return false;
+	}
+	
+	dialog.get_result(name);
+	return true;
+
+}
+
+
 void
 Editor::add_location_from_selection ()
 {
@@ -1871,6 +1911,9 @@ Editor::add_location_mark (nframes64_t where)
 	select_new_marker = true;
 
 	session->locations()->next_available_name(markername,"mark");
+	if (!choose_new_marker_name(markername)) {
+		return;
+	}
 	Location *location = new Location (where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
         XMLNode &before = session->locations()->get_state();
@@ -2015,6 +2058,9 @@ Editor::set_mark ()
 	}
 
 	session->locations()->next_available_name(markername,"mark");
+	if (!choose_new_marker_name(markername)) {
+		return;
+	}
 	session->locations()->add (new Location (pos, 0, markername, Location::IsMark), true);
 }
 

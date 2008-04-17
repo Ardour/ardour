@@ -456,6 +456,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("AutoAnalyseAudio"), _("Auto-analyse new audio"), mem_fun (*this, &ARDOUR_UI::toggle_auto_analyse_audio));
 
 	ActionManager::register_toggle_action (option_actions, X_("DefaultNarrowMS"), _("Use narrow mixer strips"), mem_fun (*this, &ARDOUR_UI::toggle_use_narrow_ms));
+	ActionManager::register_toggle_action (option_actions, X_("NameNewMarkers"), _("Name New Markers"), mem_fun (*this, &ARDOUR_UI::toggle_NameNewMarkers));
 
 	RadioAction::Group denormal_group;
 
