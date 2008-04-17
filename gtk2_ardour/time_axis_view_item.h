@@ -316,8 +316,6 @@ class TimeAxisViewItem : public Selectable
     /** Emitted when the mionimum item duration is changed */
     sigc::signal<void,nframes_t,void*> MinDurationChanged ;
     
-  protected:
-    
     enum Visibility {
 	    ShowFrame = 0x1,
 	    ShowNameHighlight = 0x2,
@@ -328,7 +326,7 @@ class TimeAxisViewItem : public Selectable
 	    HideFrameTB = 0x40,
 	    FullWidthNameHighlight = 0x80
     };
-
+  protected:
     /**
      * Constructs a new TimeAxisViewItem.
      *
@@ -341,7 +339,7 @@ class TimeAxisViewItem : public Selectable
      * @param duration the duration of this item
      */
     TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
-		     nframes_t start, nframes_t duration, Visibility v = Visibility (0));
+		     nframes_t start, nframes_t duration, bool recording = false, Visibility v = Visibility (0));
 
     TimeAxisViewItem (const TimeAxisViewItem& other);
 
@@ -466,6 +464,8 @@ class TimeAxisViewItem : public Selectable
     std::map<Glib::ustring::size_type,int> name_text_size_cache;
     
     Visibility visibility;
+	bool _recregion;
+
 
 }; /* class TimeAxisViewItem */
 

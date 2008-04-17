@@ -62,8 +62,9 @@ RegionView::RegionView (ArdourCanvas::Group* parent,
                         TimeAxisView&        tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double               spu,
-                        Gdk::Color&          basic_color)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(),
+                        Gdk::Color&          basic_color
+						)
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false,
 			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
 							  TimeAxisViewItem::ShowNameHighlight|
 							  TimeAxisViewItem::ShowFrame))
@@ -115,8 +116,9 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
                         Gdk::Color&                  basic_color,
+						bool recording,
                         TimeAxisViewItem::Visibility visibility)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), visibility)
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, visibility)
 	, _region (r)
 	, sync_mark(0)
 	, sync_line(0)
@@ -142,7 +144,10 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	compute_colors (basic_color);
 
-	name_highlight->set_data ("regionview", this);
+	if (name_highlight) {
+		name_highlight->set_data ("regionview", this);
+		name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
+	}
 
 	if (name_text) {
 		name_text->set_data ("regionview", this);
@@ -155,12 +160,10 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 
 	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
-	name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 
 	set_colors ();
 
 	ColorsChanged.connect (mem_fun (*this, &RegionView::color_handler));
-	// set_pango_fontsize();
 	/* XXX sync mark drag? */
 }
 

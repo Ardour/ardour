@@ -52,7 +52,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			      
 
 	: TimeAxisViewItem ("xfade" /*xf.name()*/, *parent, tv, spu, basic_color, xf->position(), 
-			    xf->length(), TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
+			    xf->length(), false, TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
 	  right_view (rview)

@@ -69,9 +69,9 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
  * @param duration the duration of this item
  */
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
-				   nframes_t start, nframes_t duration,
+				   nframes_t start, nframes_t duration, bool recording,
 				   Visibility vis)
-	: trackview (tv)
+	: trackview (tv), _recregion(recording)
 {
 	if (!have_name_font) {
 
@@ -798,8 +798,13 @@ TimeAxisViewItem::set_frame_color()
 			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), &r, &g, &b, &a); 
 			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);// Lets still use the theme's opacity value if Opaque is not set
 		} else {
-			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
-			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+			if (_recregion) {
+				UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_RecordingRect.get(), &r, &g, &b, &a);
+				frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
+			} else {
+				UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
+				frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+			}
 		}
 	}
 }
@@ -1043,3 +1048,4 @@ TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 	item = 0;
 	return false;
 }
+

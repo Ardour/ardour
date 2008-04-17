@@ -77,9 +77,10 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 {
 }
 
+
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu, 
-				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
-	: RegionView (parent, tv, r, spu, basic_color, visibility)
+				  Gdk::Color& basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
+	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
 	, zero_line(0)
 	, fade_in_shape(0)
@@ -265,7 +266,7 @@ void
 AudioRegionView::region_changed (Change what_changed)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionView::region_changed), what_changed));
-
+	cerr << "AudioRegionView::region_changed() called" << endl;
 	RegionView::region_changed(what_changed);
 
 	if (what_changed & AudioRegion::ScaleAmplitudeChanged) {
@@ -861,8 +862,15 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_height() =  (double) ht;
 	wave->property_samples_per_unit() =  samples_per_unit;
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
-	wave->property_wave_color() = _region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_WaveForm.get();
-	wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+
+	if (_recregion) {
+		wave->property_wave_color() = _region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
+		wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
+	} else {
+		wave->property_wave_color() = _region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_WaveForm.get();
+		wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+	}
+
 	wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
 	wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 	wave->property_region_start() = _region->start();
@@ -1227,16 +1235,32 @@ AudioRegionView::set_frame_color ()
 			}
 		}
 	} else {
-		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
-		frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+		if (_recregion) {
+			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_RecordingRect.get(), &r, &g, &b, &a);
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
+			cerr << "Was a recregion" << endl;
 
-		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-			if (_region->muted()) {
-				(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
-			} else {
-				(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
-				(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+				if (_region->muted()) {
+					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA);
+				} else {
+					(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
+					(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
+				}
+			}
+		} else {
+			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+
+			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+				if (_region->muted()) {
+					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
+				} else {
+					(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+					(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+				}
 			}
 		}
 	}
 }
+

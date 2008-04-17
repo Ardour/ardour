@@ -129,7 +129,7 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 }
 
 void
-AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves)
+AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves, bool recording)
 {
 	AudioRegionView *region_view = 0;
 
@@ -161,8 +161,13 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	switch (_trackview.audio_track()->mode()) {
 	case Normal:
-		region_view = new AudioRegionView (canvas_group, _trackview, region, 
+		if (recording) {
+			region_view = new AudioRegionView (canvas_group, _trackview, region, 
+						   _samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
+		} else {
+			region_view = new AudioRegionView (canvas_group, _trackview, region, 
 						   _samples_per_unit, region_color);
+		}
 		break;
 	case Destructive:
 		region_view = new TapeAudioRegionView (canvas_group, _trackview, region, 
@@ -178,7 +183,6 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_views.push_front (region_view);
 
-	
 	/* if its the special single-sample length that we use for rec-regions, make it 
 	   insensitive to events 
 	*/
@@ -542,7 +546,8 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
 			rec_rect->property_y2() = (double) _trackview.height - 1;
-			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
+			rec_rect->property_outline_what() = 0x4 | 0x8; // Draw top and bottom outline to blend with region
 			rec_rect->property_fill_color_rgba() = fill_color;
 			
 			RecBoxInfo recbox;
@@ -689,7 +694,7 @@ AudioStreamView::update_rec_regions ()
 
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false);
+							add_region_view_internal (region, false, true);
 						}
 
 						/* also update rect */
@@ -714,7 +719,7 @@ AudioStreamView::update_rec_regions ()
 						
 						if (origlen == 1) {
 							/* our special initial length */
-							add_region_view_internal (region, false);
+							add_region_view_internal (region, false, true);
 						}
 						
 						/* also hide rect */
