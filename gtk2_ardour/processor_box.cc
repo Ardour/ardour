@@ -352,6 +352,7 @@ Menu *
 ProcessorBox::build_processor_menu ()
 {
 	processor_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/processormenu") );
+	assert(processor_menu != 0);
 	processor_menu->set_name ("ArdourContextMenu");
 
 	show_all_children();

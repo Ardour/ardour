@@ -1,8 +1,10 @@
 #ifndef __ardour_ui_midi_channel_selector_h__
 #define __ardour_ui_midi_channel_selector_h__
 
+#include "boost/shared_ptr.hpp"
 #include "gtkmm/table.h"
 #include "sigc++/trackable.h"
+#include "gtkmm/button.h"
 #include "gtkmm/togglebutton.h"
 #include "gtkmm/label.h"
 #include <set>
@@ -10,7 +12,7 @@
 class MidiChannelSelector : public Gtk::Table
 {
 public:
-	MidiChannelSelector();
+	MidiChannelSelector(int no_rows = 4, int no_columns = 4, int start_row = 0, int start_column = 0);
 	virtual ~MidiChannelSelector() = 0;
 	
 protected:
@@ -38,12 +40,20 @@ protected:
 class MidiMultipleChannelSelector : public MidiChannelSelector
 {
 public:
-	const std::set<uint8_t>& get_selected_channels() const { return _selected_channels; }
+	MidiMultipleChannelSelector(uint16_t initial_selection = 1);
+	
+	const uint16_t get_selected_channels() const { return _selected_channels; }
 
 protected:
 	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr);
 	
-	std::set<uint8_t> _selected_channels;
+	void select_all(bool on);
+	void invert_selection(void);
+	
+	Gtk::Button            _select_all;
+	Gtk::Button            _select_none;
+	Gtk::Button            _invert_selection;
+	uint16_t               _selected_channels;
 };
 
 #endif /*__ardour_ui_midi_channel_selector_h__*/
