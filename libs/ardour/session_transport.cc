@@ -1258,6 +1258,11 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 
 	_worst_track_latency = 0;
 
+#define DEBUG_LATENCY
+#ifdef DEBUG_LATENCY
+	cerr << "\n---------------------------------\nUPDATE LATENCY\n";
+#endif
+
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -1277,6 +1282,10 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 			_worst_track_latency = max (_worst_track_latency, track_latency);
 		}
 	}
+
+#ifdef DEBUG_LATENCY
+	cerr << "\tworst was " << _worst_track_latency << endl;
+#endif
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->set_latency_delay (_worst_track_latency);

@@ -2419,6 +2419,10 @@ Route::update_total_latency ()
 		}
 	}
 
+#ifdef DEBUG_LATENCY
+	cerr << _name << ": internal redirect latency = " << _own_latency << endl;
+#endif
+
 	set_port_latency (_own_latency);
 
 	/* this (virtual) function is used for pure Routes,
@@ -2429,6 +2433,11 @@ Route::update_total_latency ()
 	*/
 
 	_own_latency += input_latency ();
+
+#ifdef DEBUG_LATENCY
+	cerr << _name << ": input latency = " << input_latency() << " total = "
+	     << _own_latency << endl;
+#endif
 
 	return _own_latency;
 }
