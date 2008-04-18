@@ -156,6 +156,7 @@ CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", tru
 CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
+CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
 CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
 CONFIG_VARIABLE (long, font_scale, "font-scale", 102400)
 
