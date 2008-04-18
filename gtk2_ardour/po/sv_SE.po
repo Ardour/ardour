@@ -7103,7 +7103,6 @@ msgstr "EJ tonhöjdsändrat soloslagverk"
 msgid "Contents:"
 msgstr "Innehåll"
 
-
 #: gtk2_ardour/editor_actions.cc:359
 msgid "Playhead to Mouse"
 msgstr "Startmarkören till mus"
@@ -7421,7 +7420,7 @@ msgstr "Visningsmodell"
 
 #: gtk2_ardour/analysis_window.cc:51
 msgid "Composite graphs for each track"
-msgstr ""
+msgstr "Sammansatt graf för varje spår"
 
 #: gtk2_ardour/analysis_window.cc:52
 msgid "Composite graph of all tracks"
@@ -7442,3 +7441,24 @@ msgstr "FFT-analysfönster"
 #: gtk2_ardour/analysis_window.cc:135
 msgid "Re-analyze data"
 msgstr "Återanalysera data"
+
+#: gtk2_ardour/ardour_ui_ed.cc:195
+msgid "Window"
+msgstr "Fönster"
+
+#: gtk2_ardour/ardour_ui_dependents.cc:74
+msgid "Setup Editor"
+msgstr "Förbereder redigeraren..."
+
+#: gtk2_ardour/ardour_ui_dependents.cc:76
+msgid "Setup Mixer"
+msgstr "Förbereder mixern..."
+
+#: gtk2_ardour/ardour_ui_dependents.cc:81
+msgid "Reload Session History"
+msgstr "Laddar sessionshistoriken..."
+
+#: gtk2_ardour/editor.cc:4571
+msgid "Please wait while Ardour loads visual data"
+msgstr "Var god vänta medan Ardour laddar visuell data..."
+
