@@ -344,15 +344,12 @@ ARDOUR_UI::setup_transport ()
 	solo_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
 	auditioning_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
-	midi_panic_button.set_name("TransportMidiPanic");
-	midi_panic_button.signal_pressed().connect (mem_fun(*this, &ARDOUR_UI::midi_panic_toggle));
 
 	tooltips().set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	tooltips().set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
 
 	alert_box.pack_start (solo_alert_button, false, false);
 	alert_box.pack_start (auditioning_alert_button, false, false);
-	alert_box.pack_start (midi_panic_button, false, false);
 
 	transport_tearoff_hbox.set_border_width (3);
 
@@ -453,6 +450,13 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
+	
+	VBox* panic_box = manage (new VBox);
+	midi_panic_button.set_name("TransportMidiPanic");
+	midi_panic_button.signal_pressed().connect (mem_fun(*this, &ARDOUR_UI::midi_panic_toggle));
+	panic_box->pack_start (midi_panic_button, true, true);
+	transport_tearoff_hbox.pack_start(*panic_box, true, true, 4);
+
 
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
