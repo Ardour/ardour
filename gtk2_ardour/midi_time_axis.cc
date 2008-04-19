@@ -90,6 +90,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	, _note_mode(Sustained)
 	, _note_mode_item(NULL)
 	, _percussion_mode_item(NULL)
+	, _channel_selector(0)
+	, _midi_expander("MIDI")
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -99,18 +101,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 
 	mute_button->set_active (false);
 	solo_button->set_active (false);
-	
-	// add channel selection button
-	_channel_selection_button.add(*manage(new Label("c")));
-	controls_table.property_n_rows() = 3;
-	controls_table.attach(_channel_selection_button, 1, 2, 2, 3);
-	_channel_selection_button.show_all();
-	
-	// add channel selector
-	controls_vbox.pack_end(_channel_selector);
-	_channel_selector.selection_changed.connect(
-		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mask));
-	_channel_selector.show_all();
 	
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
@@ -146,6 +136,18 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		_view->RegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
 	}
+		
+	// add channel selector
+	_channel_selector = manage(new MidiMultipleChannelSelector(0xFFFF));
+	HBox *channel_selector_box = manage(new HBox());
+	channel_selector_box->pack_start(*_channel_selector, SHRINK, 0);
+	_midi_expander.add(*channel_selector_box);
+	_midi_expander.property_expanded().signal_changed().connect(
+			mem_fun(this, &MidiTimeAxisView::channel_selector_toggled));
+	controls_vbox.pack_end(_midi_expander, SHRINK, 0);
+	_channel_selector->selection_changed.connect(
+		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mask));
+	
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()
@@ -382,3 +384,20 @@ MidiTimeAxisView::route_active_changed ()
 		}
 	}
 }
+
+void 
+MidiTimeAxisView::channel_selector_toggled()
+{
+	static TimeAxisView::TrackHeight previous_height;
+	assert(_channel_selector);
+	
+	if(_midi_expander.property_expanded()) {
+		previous_height = height_style;
+		if(previous_height != TimeAxisView::Largest) {
+			TimeAxisView::set_height(TimeAxisView::Large);
+		}
+	} else {
+		TimeAxisView::set_height(previous_height);
+	}
+}
+

@@ -4,9 +4,11 @@
 #include <sstream>
 
 using namespace std;
+using namespace Gtk;
+using namespace sigc;
 
 MidiChannelSelector::MidiChannelSelector(int no_rows, int no_columns, int start_row, int start_column) :
-	Gtk::Table(no_rows, no_columns, true)
+	Table(no_rows, no_columns, true)
 {	
 	assert(no_rows >= 4);
 	assert(no_rows >= start_row + 4);
@@ -22,11 +24,11 @@ MidiChannelSelector::MidiChannelSelector(int no_rows, int no_columns, int start_
 			ostringstream channel;
 			channel << int(++channel_nr);
 			_button_labels[row][column].set_text(channel.str());
-			_button_labels[row][column].set_justify(Gtk::JUSTIFY_RIGHT);
+			_button_labels[row][column].set_justify(JUSTIFY_RIGHT);
 			_buttons[row][column].add(_button_labels[row][column]);
 			_buttons[row][column].signal_toggled().connect(
-				sigc::bind(
-					sigc::mem_fun(this, &MidiChannelSelector::button_toggled),
+				bind(
+					mem_fun(this, &MidiChannelSelector::button_toggled),
 					&_buttons[row][column],
 					channel_nr - 1));
 
@@ -45,14 +47,14 @@ SingleMidiChannelSelector::SingleMidiChannelSelector(uint8_t active_channel)
 	: MidiChannelSelector()
 {
 	_active_button = 0;
-	Gtk::ToggleButton *button = &_buttons[active_channel / 4][active_channel % 4];
+	ToggleButton *button = &_buttons[active_channel / 4][active_channel % 4];
 	button->set_active(true);
 	_active_button = button;
 	_active_channel = active_channel;
 }
 
 void
-SingleMidiChannelSelector::button_toggled(Gtk::ToggleButton *button, uint8_t channel)
+SingleMidiChannelSelector::button_toggled(ToggleButton *button, uint8_t channel)
 {
 	if(button->get_active()) {
 		if(_active_button) {
@@ -65,30 +67,33 @@ SingleMidiChannelSelector::button_toggled(Gtk::ToggleButton *button, uint8_t cha
 }
 
 MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_selection)
-	: MidiChannelSelector(6, 4, 0, 0)
+	: MidiChannelSelector(4, 6, 0, 0)
 {
-	_select_all.add(*Gtk::manage(new Gtk::Label(_("All"))));
+	_select_all.add(*manage(new Label(_("All"))));
 	_select_all.signal_clicked().connect(
-			sigc::bind(sigc::mem_fun(this, &MidiMultipleChannelSelector::select_all), true));
+			bind(mem_fun(this, &MidiMultipleChannelSelector::select_all), true));
 	
-	_select_none.add(*Gtk::manage(new Gtk::Label(_("None"))));
+	_select_none.add(*manage(new Label(_("None"))));
 	_select_none.signal_clicked().connect(
-			sigc::bind(sigc::mem_fun(this, &MidiMultipleChannelSelector::select_all), false));
+			bind(mem_fun(this, &MidiMultipleChannelSelector::select_all), false));
 	
-	_invert_selection.add(*Gtk::manage(new Gtk::Label(_("Invert"))));
+	_invert_selection.add(*manage(new Label(_("Invert"))));
 	_invert_selection.signal_clicked().connect(
-			sigc::mem_fun(this, &MidiMultipleChannelSelector::invert_selection));
+			mem_fun(this, &MidiMultipleChannelSelector::invert_selection));
+	
+	_force_channel.add(*manage(new Label(_("Force"))));
 
 	set_homogeneous(false);
-	attach(*Gtk::manage(new Gtk::HSeparator()), 0, 4, 4, 5, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	set_col_spacing(4, -5);
-	attach(_select_all,       0, 2, 5, 6);
-	attach(_select_none,      2, 4, 5, 6);
-	attach(_invert_selection, 0, 4, 6, 7);
+	attach(*manage(new VSeparator()), 4, 5, 0, 4, SHRINK, FILL, 0, 0);
+	//set_row_spacing(4, -5);
+	attach(_select_all,       5, 6, 0, 1);
+	attach(_select_none,      5, 6, 1, 2);
+	attach(_invert_selection, 5, 6, 2, 3);
+	attach(_force_channel,    5, 6, 3, 4);
 	
 	_selected_channels = 0;
 	for(uint16_t i = 0; i < 16; i++) {
-		Gtk::ToggleButton *button = &_buttons[i / 4][i % 4];
+		ToggleButton *button = &_buttons[i / 4][i % 4];
 		if(initial_selection & (1L << i)) {
 			button->set_active(true);
 		} else {
@@ -98,7 +103,7 @@ MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_select
 }
 
 void
-MidiMultipleChannelSelector::button_toggled(Gtk::ToggleButton *button, uint8_t channel)
+MidiMultipleChannelSelector::button_toggled(ToggleButton *button, uint8_t channel)
 {
 	_selected_channels = _selected_channels ^ (1L << channel); 
 	selection_changed.emit(_selected_channels);
@@ -108,7 +113,7 @@ void
 MidiMultipleChannelSelector::select_all(bool on)
 {
 	for(uint16_t i = 0; i < 16; i++) {
-		Gtk::ToggleButton *button = &_buttons[i / 4][i % 4];
+		ToggleButton *button = &_buttons[i / 4][i % 4];
 		button->set_active(on);
 	}
 	selection_changed.emit(_selected_channels);
@@ -118,7 +123,7 @@ void
 MidiMultipleChannelSelector::invert_selection(void)
 {
 	for(uint16_t i = 0; i < 16; i++) {
-		Gtk::ToggleButton *button = &_buttons[i / 4][i % 4];
+		ToggleButton *button = &_buttons[i / 4][i % 4];
 		if(button->get_active()) {
 			button->set_active(false);
 		} else {

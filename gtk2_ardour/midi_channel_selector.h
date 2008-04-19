@@ -55,6 +55,7 @@ protected:
 	Gtk::Button            _select_all;
 	Gtk::Button            _select_none;
 	Gtk::Button            _invert_selection;
+	Gtk::ToggleButton      _force_channel;
 	uint16_t               _selected_channels;
 };
 

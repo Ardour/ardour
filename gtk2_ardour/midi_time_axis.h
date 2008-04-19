@@ -87,6 +87,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void add_insert_to_subplugin_menu (ARDOUR::Processor *);
 	
+	void channel_selector_toggled();
+	
 	Gtk::Menu _subplugin_menu;
 
 	MidiScroomer* _range_scroomer;
@@ -94,8 +96,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	ARDOUR::NoteMode    _note_mode;
 	Gtk::RadioMenuItem* _note_mode_item;
 	Gtk::RadioMenuItem* _percussion_mode_item;
-	Gtk::ToggleButton _channel_selection_button;
-	MidiMultipleChannelSelector _channel_selector;
+	Gtk::Expander                _midi_expander;
+	MidiMultipleChannelSelector* _channel_selector;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */
