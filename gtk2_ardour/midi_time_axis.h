@@ -39,6 +39,7 @@
 #include "route_time_axis.h"
 #include "canvas.h"
 #include "midi_streamview.h"
+#include "midi_channel_selector.h"
 
 namespace ARDOUR {
 	class Session;
@@ -93,6 +94,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	ARDOUR::NoteMode    _note_mode;
 	Gtk::RadioMenuItem* _note_mode_item;
 	Gtk::RadioMenuItem* _percussion_mode_item;
+	Gtk::ToggleButton _channel_selection_button;
+	MidiMultipleChannelSelector _channel_selector;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

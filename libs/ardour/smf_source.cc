@@ -53,7 +53,6 @@ uint64_t                              SMFSource::header_position_offset;
 
 SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	: MidiSource (s, region_name_from_path(path, false))
-	, _channel(0)
 	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
 	, _allow_remove_if_empty(true)
 	, _fd (0)
@@ -78,7 +77,6 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 
 SMFSource::SMFSource (Session& s, const XMLNode& node)
 	: MidiSource (s, node)
-	, _channel(0)
 	, _flags (Flag (Writable|CanRename))
 	, _allow_remove_if_empty(true)
 	, _fd (0)

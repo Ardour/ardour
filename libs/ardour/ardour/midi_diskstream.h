@@ -89,6 +89,18 @@ class MidiDiskstream : public Diskstream
 	int set_destructive (bool yn); // doom!
 	
 	void set_note_mode (NoteMode m);
+	
+	void set_channel_mask(uint16_t channel_mask) { 
+		_playback_buf->set_channel_mask(channel_mask); 
+		_capture_buf->set_channel_mask(channel_mask); 
+	}
+	
+	uint16_t get_channel_mask() { 
+		uint16_t playback_mask = _playback_buf->get_channel_mask();
+		uint16_t capture_mask  = _capture_buf->get_channel_mask();
+		assert(playback_mask == capture_mask);
+		return playback_mask;
+	}
 
   protected:
 	friend class Session;

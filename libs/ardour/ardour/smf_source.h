@@ -121,7 +121,6 @@ class SMFSource : public MidiSource {
 
 	static const uint16_t _ppqn = 19200;
 
-	uint16_t       _channel;
 	Glib::ustring  _path;
 	Flag           _flags;
 	string         _take_id;

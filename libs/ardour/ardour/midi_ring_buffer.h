@@ -227,7 +227,7 @@ public:
 	/** @param size Size in bytes.
 	 */
 	MidiRingBuffer(size_t size)
-		: MidiRingBufferBase<Byte>(size)
+		: MidiRingBufferBase<Byte>(size), _channel_mask(0xFFFF)
 	{}
 
 	size_t write(double time, size_t size, const Byte* buf);
@@ -237,6 +237,20 @@ public:
 	bool   read_contents(size_t size, Byte* buf);
 
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
+	
+	void      set_channel_mask(uint16_t channel_mask) { _channel_mask = channel_mask; }
+	uint16_t  get_channel_mask() { return _channel_mask; }
+	
+protected:
+	inline bool is_channel_event(Byte event_type_byte) {
+		// mask out channel information
+		event_type_byte &= 0xF0;
+		// midi channel events range from 0x80 to 0xE0
+		return (0x80 <= event_type_byte) && (event_type_byte <= 0xE0);
+	}
+	
+private:
+	uint16_t _channel_mask;
 };
 
 
@@ -284,6 +298,14 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 			buf[0], buf[1], buf[2], time);
 
 	assert(size > 0);
+	
+	// filter events for channels
+	if(is_channel_event(buf[0])) {
+		Byte channel_nr = buf[0] & 0x0F;
+		if( !(_channel_mask & (1L << channel_nr)) )  {
+			return 0;
+		}
+	}
 
 	if (write_space() < (sizeof(double) + sizeof(size_t) + size)) {
 		return 0;
@@ -293,6 +315,7 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 		MidiRingBufferBase<Byte>::write(size, buf);
 		return size;
 	}
+
 }
 
 
@@ -311,7 +334,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 	size_t count = 0;
 
-	//printf("MRB - read %u .. %u + %u\n", start, end, offset);
+	printf("MRB - read %u .. %u + %u\n", start, end, offset);
 
 	while (read_space() > sizeof(double) + sizeof(size_t)) {
 	
@@ -319,14 +342,32 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 	
 		if (ev.time() > end)
 			break;
-
+		
 		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)&ev.time());
 		if (success)
 			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev.size());
-		
+
 		if (!success) {
 			std::cerr << "MRB: READ ERROR (time/size)" << std::endl;
 			continue;
+		}
+		
+		Byte first_event_byte;
+		if(success)
+			success = full_peek(sizeof(Byte), &first_event_byte);
+				
+		// could this ever happen???
+		if (!success) {
+			std::cerr << "MRB: PEEK ERROR (first event byte)" << std::endl;
+			continue;
+		}
+		
+		// filter events for channels
+		if(is_channel_event(first_event_byte)) {
+			Byte channel_nr = first_event_byte & 0x0F;
+			if( !(_channel_mask & (1L << channel_nr)) )  {
+				return 0;
+			}
 		}
 
 		if (ev.time() >= start) {
@@ -336,7 +377,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		
 			if (success) {
 				++count;
-				//printf("MRB - read event at time %lf\n", ev.time);
+				printf("MRB - read event at time %lf\n", ev.time());
 			} else {
 				std::cerr << "MRB: READ ERROR (data)" << std::endl;
 			}

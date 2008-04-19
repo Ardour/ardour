@@ -78,6 +78,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace sigc;
 using namespace Editing;
 
 
@@ -98,6 +99,18 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 
 	mute_button->set_active (false);
 	solo_button->set_active (false);
+	
+	// add channel selection button
+	_channel_selection_button.add(*manage(new Label("c")));
+	controls_table.property_n_rows() = 3;
+	controls_table.attach(_channel_selection_button, 1, 2, 2, 3);
+	_channel_selection_button.show_all();
+	
+	// add channel selector
+	controls_vbox.pack_end(_channel_selector);
+	_channel_selector.selection_changed.connect(
+		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mask));
+	_channel_selector.show_all();
 	
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");

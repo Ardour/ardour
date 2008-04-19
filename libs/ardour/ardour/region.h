@@ -98,6 +98,16 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 
 	const DataType& data_type() const { return _type; }
 
+	/**
+	 * Thats how the region parameters play together:
+	 * <PRE>
+	 * |------------------------------------------------------------------- track
+	 *                    |..........[------------------].....| region
+	 * |-----------------------------| _position
+	 *                               |------------------| _length
+	 *                    |----------| _start
+	 * </PRE>
+	 */
 	nframes_t position () const { return _position; }
 	nframes_t start ()    const { return _start; }
 	nframes_t length()    const { return _length; }
