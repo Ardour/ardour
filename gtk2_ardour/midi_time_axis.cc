@@ -90,8 +90,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	, _note_mode(Sustained)
 	, _note_mode_item(NULL)
 	, _percussion_mode_item(NULL)
-	, _channel_selector(0)
 	, _midi_expander("MIDI")
+	, _channel_selector(0)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -394,10 +394,10 @@ MidiTimeAxisView::channel_selector_toggled()
 	if(_midi_expander.property_expanded()) {
 		previous_height = height_style;
 		if(previous_height != TimeAxisView::Largest) {
-			TimeAxisView::set_height(TimeAxisView::Large);
+			set_height(TimeAxisView::Large);
 		}
 	} else {
-		TimeAxisView::set_height(previous_height);
+		set_height(previous_height);
 	}
 }
 
