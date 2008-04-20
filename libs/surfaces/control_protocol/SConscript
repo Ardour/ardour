@@ -38,7 +38,6 @@ cp.Merge ([
     libraries['pbd'],
     libraries['midi++2'],
     libraries['xml'],
-    libraries['usb'],
     libraries['glib2'],
     libraries['glibmm2']
 	])
