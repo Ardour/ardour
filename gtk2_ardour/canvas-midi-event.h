@@ -44,7 +44,7 @@ namespace Canvas {
  *
  * A newer, better canvas should remove the need for all the ugly here.
  */
-class CanvasMidiEvent {
+class CanvasMidiEvent : public sigc::trackable {
 public:
 	CanvasMidiEvent(
 			MidiRegionView&                       region,
@@ -64,9 +64,10 @@ public:
 	void hide_velocity();
 	
 	/**
-	 * This slot is called, when a new channel is selected for the event
+	 * This slot is called, when a new channel is selected for the single event
 	 * */
 	void on_channel_change(uint8_t channel);
+	void on_channel_selection_change(uint16_t selection);
 	
 	void show_channel_selector();
 	

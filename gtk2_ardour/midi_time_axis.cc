@@ -91,7 +91,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	, _note_mode_item(NULL)
 	, _percussion_mode_item(NULL)
 	, _midi_expander("MIDI")
-	, _channel_selector(0)
+	, _channel_selector(0xFFFF)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -137,15 +137,14 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 		_view->attach ();
 	}
 		
-	// add channel selector
-	_channel_selector = manage(new MidiMultipleChannelSelector(0xFFFF));
+	// add channel selector expander
 	HBox *channel_selector_box = manage(new HBox());
-	channel_selector_box->pack_start(*_channel_selector, SHRINK, 0);
+	channel_selector_box->pack_start(_channel_selector, SHRINK, 0);
 	_midi_expander.add(*channel_selector_box);
 	_midi_expander.property_expanded().signal_changed().connect(
 			mem_fun(this, &MidiTimeAxisView::channel_selector_toggled));
 	controls_vbox.pack_end(_midi_expander, SHRINK, 0);
-	_channel_selector->selection_changed.connect(
+	_channel_selector.selection_changed.connect(
 		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mask));
 	
 }
@@ -389,7 +388,6 @@ void
 MidiTimeAxisView::channel_selector_toggled()
 {
 	static TimeAxisView::TrackHeight previous_height;
-	assert(_channel_selector);
 	
 	if(_midi_expander.property_expanded()) {
 		previous_height = height_style;
@@ -400,4 +398,6 @@ MidiTimeAxisView::channel_selector_toggled()
 		set_height(previous_height);
 	}
 }
+
+
 

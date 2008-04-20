@@ -79,6 +79,22 @@ CanvasMidiEvent::hide_velocity(void)
 }
 
 void 
+CanvasMidiEvent::on_channel_selection_change(uint16_t selection)
+{
+	// make note change its color if its channel is not marked active
+	if( (selection & (1 << _note->channel())) == 0 ) {
+		set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteFillInactiveChannel.get());
+		set_outline_color(ARDOUR_UI::config()->canvasvar_MidiNoteOutlineInactiveChannel.get());
+	} else {
+		set_fill_color(note_fill_color(_note->velocity()));
+		set_outline_color(note_outline_color(_note->velocity()));
+	}
+	// this forces the item to update..... maybe slow...
+	_item->hide();
+	_item->show();
+}
+
+void 
 CanvasMidiEvent::on_channel_change(uint8_t channel)
 {
 	_region.note_selected(this, true);

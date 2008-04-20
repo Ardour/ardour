@@ -73,6 +73,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	ARDOUR::NoteMode note_mode() const { return _note_mode; }
 
 	void update_range();
+	
+	sigc::signal<void, uint16_t>& signal_channel_selection_changed() { return _channel_selector.selection_changed; }
 
   private:
 	
@@ -89,15 +91,15 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	
 	void channel_selector_toggled();
 	
-	Gtk::Menu _subplugin_menu;
+	Gtk::Menu                    _subplugin_menu;
 
-	MidiScroomer* _range_scroomer;
-	PianoRollHeader* _piano_roll_header;
-	ARDOUR::NoteMode    _note_mode;
-	Gtk::RadioMenuItem* _note_mode_item;
-	Gtk::RadioMenuItem* _percussion_mode_item;
+	MidiScroomer*                _range_scroomer;
+	PianoRollHeader*             _piano_roll_header;
+	ARDOUR::NoteMode             _note_mode;
+	Gtk::RadioMenuItem*          _note_mode_item;
+	Gtk::RadioMenuItem*          _percussion_mode_item;
 	Gtk::Expander                _midi_expander;
-	MidiMultipleChannelSelector* _channel_selector;
+	MidiMultipleChannelSelector  _channel_selector;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

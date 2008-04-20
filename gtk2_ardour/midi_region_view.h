@@ -237,6 +237,9 @@ class MidiRegionView : public RegionView
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
+	
+	uint16_t last_channel_selection;
+	void midi_channel_selection_changed(uint16_t selection);
 
 	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }

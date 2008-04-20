@@ -60,6 +60,7 @@ using namespace ArdourCanvas;
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
+	, last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
@@ -75,12 +76,14 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
+	, last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(NULL)
 	, _mouse_state(None)
 	, _pressed_button(0)
+	
 {
 	_note_group->raise_to_top();
 }
@@ -128,6 +131,8 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 
+	midi_view()->signal_channel_selection_changed().connect(
+			mem_fun(this, &MidiRegionView::midi_channel_selection_changed));
 }
 
 bool
@@ -721,9 +726,6 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 			ev_rect->property_x2() = trackview.editor.frame_to_pixel(_region->length());
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
-		ev_rect->property_fill_color_rgba() = note_fill_color(note->velocity());
-		ev_rect->property_outline_color_rgba() = note_outline_color(note->velocity());
-
 		if (note->duration() == 0) {
 			_active_notes[note->note()] = ev_rect;
 			/* outline all but right edge */
@@ -756,8 +758,6 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		CanvasHit* ev_diamond = new CanvasHit(*this, *group, diamond_size, note);
 		ev_diamond->move(x, y);
 		ev_diamond->show();
-		ev_diamond->property_fill_color_rgba() = note_fill_color(note->velocity());
-		ev_diamond->property_outline_color_rgba() = note_outline_color(note->velocity());
 		_events.push_back(ev_diamond);
 		event = ev_diamond;
 	} else {
@@ -768,6 +768,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		if(_marked_for_selection.find(event->note()) != _marked_for_selection.end()) {
 				note_selected(event, true);
 		}
+		event->on_channel_selection_change(last_channel_selection);
 	}
 }
 
@@ -1230,4 +1231,15 @@ MidiRegionView::set_frame_color()
 			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiFrameBase.get();
 		}
 	}
+}
+
+void 
+MidiRegionView::midi_channel_selection_changed(uint16_t selection)
+{
+	for(std::vector<ArdourCanvas::CanvasMidiEvent*>::iterator i = _events.begin();
+		i != _events.end();
+		++i) {
+		(*i)->on_channel_selection_change(selection);
+	}
+	last_channel_selection = selection;
 }
