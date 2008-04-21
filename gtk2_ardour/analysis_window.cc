@@ -262,7 +262,8 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 				continue;
 
 			RouteUI *rui = dynamic_cast<RouteUI *>(*i);
-			
+			int n_inputs = rui->route()->n_inputs();
+
 			// Busses don't have playlists, so we need to check that we actually are working with a playlist
 			if (!pl || !rui)
 				continue;
@@ -275,29 +276,31 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 				
 				for (std::list<AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
 
-					nframes_t i = 0;
 					int n;
-			
-					while ( i < (*j).length() ) {
-						// TODO: What about stereo+ channels? composite all to one, I guess
+					for (int channel = 0; channel < n_inputs; channel++) {
+						nframes_t x = 0;
 
-						n = fft_graph.windowSize();
+						while ( x < (*j).length() ) {
+							// TODO: What about stereo+ channels? composite all to one, I guess
 
-						if (i + n >= (*j).length() ) {
-							n = (*j).length() - i;
-						}
-				
-						n = pl->read(buf, mixbuf, gain, (*j).start + i, n);
-	
-						if ( n < fft_graph.windowSize()) {
-							for (int j = n; j < fft_graph.windowSize(); j++) {
-								buf[j] = 0.0;
+							n = fft_graph.windowSize();
+
+							if (x + n >= (*j).length() ) {
+								n = (*j).length() - x;
 							}
+
+							n = pl->read(buf, mixbuf, gain, (*j).start + x, n, channel);
+
+							if ( n < fft_graph.windowSize()) {
+								for (int j = n; j < fft_graph.windowSize(); j++) {
+									buf[j] = 0.0;
+								}
+							}
+
+							res->analyzeWindow(buf);
+
+							x += n;
 						}
-	
-						res->analyzeWindow(buf);
-				
-						i += n;
 					}
 				}
 			} else if (source_selection_regions_rb.get_active()) {
@@ -316,28 +319,36 @@ AnalysisWindow::analyze_data (Gtk::Button *button)
 						continue;
 
 //					cerr << " - " << (*j)->region().name() << ": " << (*j)->region().length() << " samples starting at " << (*j)->region().position() << endl;
-					nframes_t i = 0;
 					int n;
+					for (int channel = 0; channel < n_inputs; channel++) {
 
-					while ( i < arv->region()->length() ) {
-						// TODO: What about stereo+ channels? composite all to one, I guess
+						nframes_t x = 0;
 
-						n = fft_graph.windowSize();
-						if (i + n >= arv->region()->length() ) {
-							n = arv->region()->length() - i;
-						}
+						nframes_t length = arv->region()->length();
 
-						n = arv->audio_region()->read_at(buf, mixbuf, gain, arv->region()->position() + i, n);
-	
-						if ( n < fft_graph.windowSize()) {
-							for (int j = n; j < fft_graph.windowSize(); j++) {
-								buf[j] = 0.0;
+						while ( x < length ) {
+							// TODO: What about stereo+ channels? composite all to one, I guess
+
+							n = fft_graph.windowSize();
+							if (x + n >= length ) {
+								n = length - x;
 							}
+
+							n = arv->audio_region()->read_at(buf, mixbuf, gain, arv->region()->position() + x, n, channel);
+
+							if (n == 0)
+								break;
+
+							if ( n < fft_graph.windowSize()) {
+								for (int j = n; j < fft_graph.windowSize(); j++) {
+									buf[j] = 0.0;
+								}
+							}
+
+							res->analyzeWindow(buf);
+
+							x += n;
 						}
-	
-						res->analyzeWindow(buf);
-				
-						i += n;
 					}
 //					cerr << "Found: " << (*j)->get_item_name() << endl;
 
