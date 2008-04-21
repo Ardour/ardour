@@ -30,6 +30,8 @@ namespace Canvas {
 class Diamond : public Polygon {
 public:
 	Diamond(Group& group, double height);
+	
+	void set_height(double height);
 };
 
 

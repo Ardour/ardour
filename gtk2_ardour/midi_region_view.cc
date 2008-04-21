@@ -40,6 +40,7 @@
 #include "midi_time_axis.h"
 #include "simpleline.h"
 #include "canvas-hit.h"
+#include "canvas-note.h"
 #include "public_editor.h"
 #include "ghostregion.h"
 #include "midi_time_axis.h"
@@ -559,30 +560,45 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 		_model->read_lock();
 
 		for (std::vector<CanvasMidiEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i) {
-			CanvasNote* note = dynamic_cast<CanvasNote*>(*i);
-			if (note && note->note()) {
-				if (note->note()->note() < midi_stream_view()->lowest_note() ||
-				   note->note()->note() > midi_stream_view()->highest_note()) {
-					if (canvas_item_visible(note)) {
-						note->hide();
+			CanvasMidiEvent* event = *i;
+			Item* item = dynamic_cast<Item*>(event);
+			assert(item);
+			if (event && event->note()) {
+				if (event->note()->note() < midi_stream_view()->lowest_note() ||
+				   event->note()->note() > midi_stream_view()->highest_note()) {
+					
+					if (canvas_item_visible(item)) {
+						item->hide();
 					}
-				}
-				else {
-					const double y1 = midi_stream_view()->note_to_y(note->note()->note());
-					const double y2 = y1 + floor(midi_stream_view()->note_height());
-
-					if (!canvas_item_visible(note)) {
-						note->show();
+				} else {
+					if (!canvas_item_visible(item)) {
+						item->show();
 					}
 
-					note->hide_velocity();
-					note->property_y1() = y1;
-					note->property_y2() = y2;
-					if(note->selected()) {
-						note->show_velocity();
+					event->hide_velocity();
+					if(CanvasNote* note = dynamic_cast<CanvasNote*>(event)) {
+						const double y1 = midi_stream_view()->note_to_y(event->note()->note());
+						const double y2 = y1 + floor(midi_stream_view()->note_height());
+
+						note->property_y1() = y1;
+						note->property_y2() = y2;
+					}
+					if(CanvasHit* hit = dynamic_cast<CanvasHit*>(event)) {
+						double x = trackview.editor.frame_to_pixel((nframes_t)
+								event->note()->time() - _region->start());
+						const double diamond_size = midi_stream_view()->note_height() / 2.0;
+						double y = midi_stream_view()->note_to_y(event->note()->note()) 
+						                 + ((diamond_size-2.0) / 4.0);
+						
+						hit->set_height(diamond_size);
+						hit->move(x-hit->x1(), y-hit->y1());
+						hit->show();
+					}
+					if(event->selected()) {
+						event->show_velocity();
+					}
 				}
 			}
-		}
 		}
 
 		_model->read_unlock();

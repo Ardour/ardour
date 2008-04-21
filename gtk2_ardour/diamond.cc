@@ -25,11 +25,17 @@ using namespace Gnome::Art;
 Diamond::Diamond(Group& group, double height)
 	: Polygon(group)
 {
+	set_height(height);
+}
+
+void
+Diamond::set_height(double height)
+{
 	Points points;
 	points.push_back(Point(0, height*2.0));
 	points.push_back(Point(height, height));
 	points.push_back(Point(0, 0));
 	points.push_back(Point(-height, height));
-	property_points() = points;
+	property_points() = points;	
 }
 
