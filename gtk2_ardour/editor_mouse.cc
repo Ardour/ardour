@@ -467,6 +467,25 @@ const static double ZERO_GAIN_FRACTION = gain_to_slider_position(dB_to_coefficie
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas->get_window();
+	
+	if (canvas_window) {
+		Glib::RefPtr<const Gdk::Window> pointer_window;
+		int x, y;
+		double wx, wy;
+		Gdk::ModifierType mask;
+
+		pointer_window = canvas_window->get_pointer (x, y, mask);
+		
+		if (pointer_window == track_canvas->get_bin_window()) {
+			
+			track_canvas->window_to_world (x, y, wx, wy);
+			allow_vertical_scroll = true;
+		} else {
+			allow_vertical_scroll = false;
+		}
+	}
+
 	track_canvas->grab_focus();
 
 	if (session && session->actively_recording()) {

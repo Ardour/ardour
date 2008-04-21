@@ -590,6 +590,10 @@ Editor::maybe_autoscroll (GdkEventMotion* event)
 
 	}
 
+	if (!allow_vertical_scroll) {
+		autoscroll_y = 0;
+	}
+
 	if ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0)) {
 		stop_canvas_autoscroll ();
 	}

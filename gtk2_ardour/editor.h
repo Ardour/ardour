@@ -1746,6 +1746,7 @@ public:
 	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
 	void maybe_autoscroll (GdkEventMotion*);
+	bool allow_vertical_scroll;
 
 	/* trimming */
 	enum TrimOp {

@@ -337,6 +337,7 @@ Editor::Editor ()
 	select_new_marker = false;
 	zoomed_to_region = false;
 	rhythm_ferret = 0;
+	allow_vertical_scroll = false;
 
 	_scrubbing = false;
 	scrubbing_direction = 0;
