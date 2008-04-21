@@ -102,6 +102,18 @@ class MidiDiskstream : public Diskstream
 		return playback_mask;
 	}
 
+	void set_force_channel(int8_t force_channel) { 
+		_playback_buf->set_force_channel(force_channel); 
+		_capture_buf->set_force_channel(force_channel); 
+	}
+	
+	int8_t get_force_channel() { 
+		int8_t playback_force_channel = _playback_buf->get_force_channel();
+		int8_t capture_force_channel  = _capture_buf->get_force_channel();
+		assert(playback_force_channel == capture_force_channel);
+		return playback_force_channel;
+	}
+
   protected:
 	friend class Session;
 

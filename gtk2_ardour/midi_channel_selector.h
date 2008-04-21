@@ -19,6 +19,7 @@ protected:
 	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr) = 0;
 	Gtk::Label        _button_labels[4][4];
 	Gtk::ToggleButton _buttons[4][4];
+	int               _recursion_counter;
 };
 
 class SingleMidiChannelSelector : public MidiChannelSelector
@@ -33,7 +34,7 @@ public:
 protected:
 	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr);
 
-	Gtk::ToggleButton *_active_button;
+	Gtk::ToggleButton *_last_active_button;
 	uint8_t _active_channel;
 };
 
@@ -41,13 +42,30 @@ class MidiMultipleChannelSelector : public MidiChannelSelector
 {
 public:
 	MidiMultipleChannelSelector(uint16_t initial_selection = 1);
+	virtual ~MidiMultipleChannelSelector();
 	
-	const uint16_t get_selected_channels() const { return _selected_channels; }
+	/**
+	 * @return each bit in the returned word represents a midi channel, eg. 
+	 *         bit 0 represents channel 0 and bit 15 represents channel 15
+	 *          
+	 */
+	const uint16_t get_selected_channels() const;
+	void set_selected_channels(uint16_t selected_channels);
 	
 	sigc::signal<void, uint16_t> selection_changed;
-
+	sigc::signal<void, int8_t>   force_channel_changed;
+	
+	const int8_t get_force_channel() const;
 protected:
+	enum Mode {
+		FILTERING_MULTIPLE_CHANNELS,
+		FORCING_SINGLE_CHANNEL
+	}; 
+
+	Mode _mode;
+	
 	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr);
+	void force_channels_button_toggled();
 	
 	void select_all(bool on);
 	void invert_selection(void);
@@ -56,7 +74,6 @@ protected:
 	Gtk::Button            _select_none;
 	Gtk::Button            _invert_selection;
 	Gtk::ToggleButton      _force_channel;
-	uint16_t               _selected_channels;
 };
 
 #endif /*__ardour_ui_midi_channel_selector_h__*/

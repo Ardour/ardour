@@ -8,7 +8,7 @@ using namespace Gtk;
 using namespace sigc;
 
 MidiChannelSelector::MidiChannelSelector(int no_rows, int no_columns, int start_row, int start_column) :
-	Table(no_rows, no_columns, true)
+	Table(no_rows, no_columns, true), _recursion_counter(0)
 {	
 	assert(no_rows >= 4);
 	assert(no_rows >= start_row + 4);
@@ -46,28 +46,37 @@ MidiChannelSelector::~MidiChannelSelector()
 SingleMidiChannelSelector::SingleMidiChannelSelector(uint8_t active_channel)
 	: MidiChannelSelector()
 {
-	_active_button = 0;
+	_last_active_button = 0;
 	ToggleButton *button = &_buttons[active_channel / 4][active_channel % 4];
-	button->set_active(true);
-	_active_button = button;
 	_active_channel = active_channel;
+	button->set_active(true);
+	_last_active_button = button;
 }
 
 void
 SingleMidiChannelSelector::button_toggled(ToggleButton *button, uint8_t channel)
-{
-	if(button->get_active()) {
-		if(_active_button) {
-			_active_button->set_active(false);
+{	
+	++_recursion_counter;
+	if(_recursion_counter == 1) {
+		// if the current button is active it must 
+		// be different from the first one
+		if(button->get_active()) {
+			if(_last_active_button) {
+				_last_active_button->set_active(false);
+				_active_channel = channel;
+				_last_active_button = button;
+			}
+		} else {
+			// if not, the user pressed the already active button
+			button->set_active(true);
+			_active_channel = channel;
 		}
-		_active_button = button;
-		_active_channel = channel;
-		channel_selected.emit(channel);
-	} 
+	}
+	--_recursion_counter;
 }
 
 MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_selection)
-	: MidiChannelSelector(4, 6, 0, 0)
+	: MidiChannelSelector(4, 6, 0, 0), _mode(FILTERING_MULTIPLE_CHANNELS)
 {
 	_select_all.add(*manage(new Label(_("All"))));
 	_select_all.signal_clicked().connect(
@@ -82,6 +91,8 @@ MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_select
 			mem_fun(this, &MidiMultipleChannelSelector::invert_selection));
 	
 	_force_channel.add(*manage(new Label(_("Force"))));
+	_force_channel.signal_toggled().connect(
+			mem_fun(this, &MidiMultipleChannelSelector::force_channels_button_toggled));
 
 	set_homogeneous(false);
 	attach(*manage(new VSeparator()), 4, 5, 0, 4, SHRINK, FILL, 0, 0);
@@ -91,10 +102,53 @@ MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_select
 	attach(_invert_selection, 5, 6, 2, 3);
 	attach(_force_channel,    5, 6, 3, 4);
 	
-	_selected_channels = 0;
+	set_selected_channels(initial_selection);
+}
+
+MidiMultipleChannelSelector::~MidiMultipleChannelSelector()
+{
+	selection_changed.clear();
+	force_channel_changed.clear();
+}
+
+const int8_t 
+MidiMultipleChannelSelector::get_force_channel() const
+{
+	if(_mode == FORCING_SINGLE_CHANNEL) {
+		for(int8_t i = 0; i < 16; i++) {
+			const ToggleButton *button = &_buttons[i / 4][i % 4];
+			if(button->get_active()) {
+				return i;
+			} 
+		}
+		
+		// this point should not be reached.
+		assert(false);
+	} 
+	
+	return -1;
+}
+
+const uint16_t 
+MidiMultipleChannelSelector::get_selected_channels() const 
+{ 
+	uint16_t selected_channels = 0;
+	for(uint16_t i = 0; i < 16; i++) {
+		const ToggleButton *button = &_buttons[i / 4][i % 4];
+		if(button->get_active()) {
+			selected_channels |= (1L << i);
+		} 
+	}
+	
+	return selected_channels; 
+}
+
+void 
+MidiMultipleChannelSelector::set_selected_channels(uint16_t selected_channels)
+{
 	for(uint16_t i = 0; i < 16; i++) {
 		ToggleButton *button = &_buttons[i / 4][i % 4];
-		if(initial_selection & (1L << i)) {
+		if(selected_channels & (1L << i)) {
 			button->set_active(true);
 		} else {
 			button->set_active(false);
@@ -105,23 +159,73 @@ MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_select
 void
 MidiMultipleChannelSelector::button_toggled(ToggleButton *button, uint8_t channel)
 {
-	_selected_channels = _selected_channels ^ (1L << channel); 
-	selection_changed.emit(_selected_channels);
+	++_recursion_counter;
+	if(_recursion_counter == 1) {
+		if(_mode == FORCING_SINGLE_CHANNEL) {
+			set_selected_channels(1 << channel);
+		}
+	
+		force_channel_changed.emit(get_force_channel());
+		selection_changed.emit(get_selected_channels());
+	}
+	--_recursion_counter;
+}
+
+void 
+MidiMultipleChannelSelector::force_channels_button_toggled()
+{
+	if(_force_channel.get_active()) {
+		_mode = FORCING_SINGLE_CHANNEL;
+		bool found_first_active = false;
+		// leave only the first button enabled
+		for(int i = 0; i <= 15; i++) {
+			ToggleButton *button = &_buttons[i / 4][i % 4];
+			if(button->get_active()) {
+				if(found_first_active) {
+					++_recursion_counter;
+					button->set_active(false);
+					--_recursion_counter;
+				} else {
+					found_first_active = true;
+				}
+			} 
+		}
+		
+		if(!found_first_active) {
+			_buttons[0][0].set_active(true);
+		}
+		
+		_select_all.set_sensitive(false);
+		_select_none.set_sensitive(false);
+		_invert_selection.set_sensitive(false);
+		force_channel_changed.emit(get_force_channel());
+		selection_changed.emit(get_selected_channels());
+	} else {
+		_mode = FILTERING_MULTIPLE_CHANNELS;
+		_select_all.set_sensitive(true);
+		_select_none.set_sensitive(true);
+		_invert_selection.set_sensitive(true);
+		force_channel_changed.emit(get_force_channel());
+		selection_changed.emit(get_selected_channels());
+	}
 }
 
 void 
 MidiMultipleChannelSelector::select_all(bool on)
 {
+	++_recursion_counter;
 	for(uint16_t i = 0; i < 16; i++) {
 		ToggleButton *button = &_buttons[i / 4][i % 4];
 		button->set_active(on);
 	}
-	selection_changed.emit(_selected_channels);
+	--_recursion_counter;
+	selection_changed.emit(get_selected_channels());
 }
 
 void 
 MidiMultipleChannelSelector::invert_selection(void)
 {
+	++_recursion_counter;
 	for(uint16_t i = 0; i < 16; i++) {
 		ToggleButton *button = &_buttons[i / 4][i % 4];
 		if(button->get_active()) {
@@ -130,6 +234,7 @@ MidiMultipleChannelSelector::invert_selection(void)
 			button->set_active(true);
 		}
 	}
-	selection_changed.emit(_selected_channels);
+	--_recursion_counter;
+	selection_changed.emit(get_selected_channels());
 }
 

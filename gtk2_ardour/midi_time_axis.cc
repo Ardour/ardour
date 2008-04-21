@@ -146,7 +146,9 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	controls_vbox.pack_end(_midi_expander, SHRINK, 0);
 	_channel_selector.selection_changed.connect(
 		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mask));
-	
+	_channel_selector.force_channel_changed.connect(
+		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_force_channel));
+
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()

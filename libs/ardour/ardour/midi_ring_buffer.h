@@ -227,7 +227,7 @@ public:
 	/** @param size Size in bytes.
 	 */
 	MidiRingBuffer(size_t size)
-		: MidiRingBufferBase<Byte>(size), _channel_mask(0xFFFF)
+		: MidiRingBufferBase<Byte>(size), _channel_mask(0xFFFF), _force_channel(-1)
 	{}
 
 	size_t write(double time, size_t size, const Byte* buf);
@@ -238,8 +238,21 @@ public:
 
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
 	
-	void      set_channel_mask(uint16_t channel_mask) { _channel_mask = channel_mask; }
-	uint16_t  get_channel_mask() { return _channel_mask; }
+	/**
+	 * @param channel_mask each bit in channel_mask represents a midi channel: bit 0 = channel 0,
+	 *                     bit 1 = channel 1 etc. the read and write methods will only allow
+	 *                     events to pass, whose channel bit is 1.
+	 */
+	void      set_channel_mask(uint16_t channel_mask) { g_atomic_int_set(&channel_mask, channel_mask); }
+	uint16_t  get_channel_mask() { return g_atomic_int_get(&_channel_mask); }
+	
+	/**
+	 * @param channel if negative, forcing channels is deactivated and filtering channels
+	 *                is activated, if positive, the LSB of channel is the channel number
+	 *                of the channel all events are forced into and filtering is deactivated
+	 */
+	void      set_force_channel(int8_t channel) { g_atomic_int_set(&_force_channel, channel); }
+	int8_t    get_force_channel() { return g_atomic_int_get(&_force_channel); }
 	
 protected:
 	inline bool is_channel_event(Byte event_type_byte) {
@@ -250,7 +263,8 @@ protected:
 	}
 	
 private:
-	uint16_t _channel_mask;
+	volatile uint16_t _channel_mask;
+	volatile int8_t   _force_channel;
 };
 
 
@@ -296,13 +310,13 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 {
 	printf("MRB - write %#X %d %d with time %lf\n",
 			buf[0], buf[1], buf[2], time);
-
+	
 	assert(size > 0);
 	
-	// filter events for channels
-	if(is_channel_event(buf[0])) {
+	if(is_channel_event(buf[0]) && (g_atomic_int_get(&_force_channel) < 0)) {
+		// filter events for channels
 		Byte channel_nr = buf[0] & 0x0F;
-		if( !(_channel_mask & (1L << channel_nr)) )  {
+		if( !(g_atomic_int_get(&_channel_mask) & (1L << channel_nr)) )  {
 			return 0;
 		}
 	}
@@ -312,7 +326,17 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 	} else {
 		MidiRingBufferBase<Byte>::write(sizeof(double), (Byte*)&time);
 		MidiRingBufferBase<Byte>::write(sizeof(size_t), (Byte*)&size);
-		MidiRingBufferBase<Byte>::write(size, buf);
+		if(is_channel_event(buf[0]) && (g_atomic_int_get(&_force_channel) >= 0)) {
+			assert(size == 3);
+			Byte tmp_buf[3];
+			//force event into channel
+			tmp_buf[0] = (buf[0] & 0xF0) | (g_atomic_int_get(&_force_channel) & 0x0F);
+			tmp_buf[1] = buf[1];
+			tmp_buf[2] = buf[2];
+			MidiRingBufferBase<Byte>::write(size, tmp_buf);
+		} else {
+			MidiRingBufferBase<Byte>::write(size, buf);
+		}
 		return size;
 	}
 
@@ -363,9 +387,10 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		}
 		
 		// filter events for channels
-		if(is_channel_event(first_event_byte)) {
+		// filtering is only active, if forcing channels is not active
+		if(is_channel_event(first_event_byte) && (g_atomic_int_get(&_force_channel) < 0)) {
 			Byte channel_nr = first_event_byte & 0x0F;
-			if( !(_channel_mask & (1L << channel_nr)) )  {
+			if( !(g_atomic_int_get(&_channel_mask) & (1L << channel_nr)) )  {
 				return 0;
 			}
 		}
@@ -376,6 +401,9 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			success = MidiRingBufferBase<Byte>::full_read(ev.size(), write_loc);
 		
 			if (success) {
+				if(is_channel_event(first_event_byte) && (g_atomic_int_get(&_force_channel) >= 0)) {
+					write_loc[0] = (write_loc[0] & 0xF0) | (g_atomic_int_get(&_force_channel) & 0x0F);
+				}
 				++count;
 				printf("MRB - read event at time %lf\n", ev.time());
 			} else {

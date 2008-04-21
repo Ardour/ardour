@@ -60,6 +60,7 @@ using namespace ArdourCanvas;
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
+	, force_channel(-1)
 	, last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
 	, _active_notes(0)
@@ -76,6 +77,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, visibility)
+	, force_channel(-1)
 	, last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
 	, _active_notes(0)
@@ -131,6 +133,8 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 
+	midi_view()->signal_force_channel_changed().connect(
+			mem_fun(this, &MidiRegionView::midi_force_channel_changed));
 	midi_view()->signal_channel_selection_changed().connect(
 			mem_fun(this, &MidiRegionView::midi_channel_selection_changed));
 }
@@ -1234,8 +1238,18 @@ MidiRegionView::set_frame_color()
 }
 
 void 
+MidiRegionView::midi_force_channel_changed(int8_t channel)
+{
+	force_channel = channel;
+}
+
+void 
 MidiRegionView::midi_channel_selection_changed(uint16_t selection)
 {
+	if(force_channel >= 0) {
+		selection = 0xFFFF;
+	}
+		
 	for(std::vector<ArdourCanvas::CanvasMidiEvent*>::iterator i = _events.begin();
 		i != _events.end();
 		++i) {

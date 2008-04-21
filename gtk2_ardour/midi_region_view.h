@@ -238,6 +238,8 @@ class MidiRegionView : public RegionView
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 	
+	int8_t force_channel;
+	void midi_force_channel_changed(int8_t channel);
 	uint16_t last_channel_selection;
 	void midi_channel_selection_changed(uint16_t selection);
 
