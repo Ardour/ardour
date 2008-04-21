@@ -243,7 +243,7 @@ public:
 	 *                     bit 1 = channel 1 etc. the read and write methods will only allow
 	 *                     events to pass, whose channel bit is 1.
 	 */
-	void      set_channel_mask(uint16_t channel_mask) { g_atomic_int_set(&channel_mask, channel_mask); }
+	void      set_channel_mask(uint16_t channel_mask) { g_atomic_int_set(&_channel_mask, channel_mask); }
 	uint16_t  get_channel_mask() { return g_atomic_int_get(&_channel_mask); }
 	
 	/**
