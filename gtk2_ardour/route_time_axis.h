@@ -261,6 +261,7 @@ protected:
 
 	Gtkmm2ext::HSliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
+	bool                         ignore_gain_adjustment;
 	static Glib::RefPtr<Gdk::Pixbuf> slider;
 	static int setup_slider_pix ();
 	void gain_adjusted();

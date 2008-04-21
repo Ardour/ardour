@@ -106,7 +106,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  visual_button (_("v")),
 	  lm (rt, sess),
 	  gain_slider (0),
-	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
+	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
+	  ignore_gain_adjustment (false)
 {
 	if (slider == 0) {
 		setup_slider_pix ();
@@ -1911,6 +1912,10 @@ RouteTimeAxisView::end_gain_touch (GdkEventButton* ev)
 void
 RouteTimeAxisView::gain_adjusted ()
 {
+	if (ignore_gain_adjustment) {
+		return;
+	}
+
 	_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
 }
 
@@ -1924,5 +1929,7 @@ void
 RouteTimeAxisView::effective_gain_display ()
 {
 	gfloat value = gain_to_slider_position (_route->effective_gain());
+	ignore_gain_adjustment = true;
 	gain_adjustment.set_value (value);
+	ignore_gain_adjustment = false;
 }
