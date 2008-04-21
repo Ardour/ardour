@@ -1229,6 +1229,9 @@ MidiDiskstream::get_state ()
 	snprintf (buf, sizeof(buf), "0x%x", get_channel_mask());
 	node->add_property("channel_mask", buf);
 
+	snprintf (buf, sizeof(buf), "%d", get_force_channel());
+	node->add_property("force_channel", buf);
+	
 	node->add_property ("playlist", _playlist->name());
 	
 	snprintf (buf, sizeof(buf), "%f", _visible_speed);
@@ -1311,6 +1314,12 @@ MidiDiskstream::set_state (const XMLNode& node)
 		unsigned int channel_mask;
 		sscanf (prop->value().c_str(), "0x%x", &channel_mask);
 		set_channel_mask(channel_mask);
+	}
+	
+	if ((prop = node.property ("force_channel")) != 0) {
+		int force_channel;
+		sscanf (prop->value().c_str(), "%d", &force_channel);
+		set_force_channel(force_channel);
 	}
 
 	if ((prop = node.property ("channels")) != 0) {

@@ -41,7 +41,7 @@ protected:
 class MidiMultipleChannelSelector : public MidiChannelSelector
 {
 public:
-	MidiMultipleChannelSelector(uint16_t initial_selection = 1);
+	MidiMultipleChannelSelector(uint16_t initial_selection = 0xFFFF, int8_t force_channel = -1);
 	virtual ~MidiMultipleChannelSelector();
 	
 	/**
@@ -56,6 +56,7 @@ public:
 	sigc::signal<void, int8_t>   force_channel_changed;
 	
 	const int8_t get_force_channel() const;
+	void set_force_channel(int8_t force_channel);
 protected:
 	enum Mode {
 		FILTERING_MULTIPLE_CHANNELS,

@@ -75,7 +75,7 @@ SingleMidiChannelSelector::button_toggled(ToggleButton *button, uint8_t channel)
 	--_recursion_counter;
 }
 
-MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_selection)
+MidiMultipleChannelSelector::MidiMultipleChannelSelector(uint16_t initial_selection, int8_t force_channel)
 	: MidiChannelSelector(4, 6, 0, 0), _mode(FILTERING_MULTIPLE_CHANNELS)
 {
 	_select_all.add(*manage(new Label(_("All"))));
@@ -128,6 +128,24 @@ MidiMultipleChannelSelector::get_force_channel() const
 	
 	return -1;
 }
+
+void 
+MidiMultipleChannelSelector::set_force_channel(int8_t channel)
+{
+	if(channel < 0) {
+		// if forcing is already activated, deactivate
+		if(_mode == FORCING_SINGLE_CHANNEL) {
+			_force_channel.toggled();
+		} 
+		// if not, nothing to do
+	} else {
+		// otherwise simulate activating force channels by pressing the
+		// two buttons the user would press
+		_force_channel.toggled();
+		_buttons[channel / 4][channel % 4].toggled();
+	}
+}
+
 
 const uint16_t 
 MidiMultipleChannelSelector::get_selected_channels() const 
