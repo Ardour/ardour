@@ -182,12 +182,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	bottom_button_table.attach (group_button, 0, 1, 0, 1);
 	
 	if (is_audio_track()) {
-		
-		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
-		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
-
-		rec_enable_button->set_name ("MixerRecordEnableButton");
-
 		boost::shared_ptr<AudioTrack> at = audio_track();
 
 		at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen));
@@ -206,9 +200,16 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 		button_table.attach (speed_frame, 0, 2, 5, 6);
 #endif /* VARISPEED_IN_MIXER_STRIP */
 
+	}
+	
+	if(rec_enable_button) {
+		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
+		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
+	
+		rec_enable_button->set_name ("MixerRecordEnableButton");
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 	}
-
+	
 	name_button.add (name_label);
 	name_button.set_name ("MixerNameButton");
 	Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);

@@ -308,8 +308,8 @@ MidiRingBuffer::read_contents(size_t size, Byte* buf)
 inline size_t
 MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 {
-	printf("MRB - write %#X %d %d with time %lf\n",
-			buf[0], buf[1], buf[2], time);
+	//printf("MRB - write %#X %d %d with time %lf\n",
+	//		buf[0], buf[1], buf[2], time);
 	
 	assert(size > 0);
 	
@@ -358,7 +358,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 	size_t count = 0;
 
-	printf("MRB - read %u .. %u + %u\n", start, end, offset);
+	//printf("MRB - read %u .. %u + %u\n", start, end, offset);
 
 	while (read_space() > sizeof(double) + sizeof(size_t)) {
 	
@@ -405,7 +405,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 					write_loc[0] = (write_loc[0] & 0xF0) | (g_atomic_int_get(&_force_channel) & 0x0F);
 				}
 				++count;
-				printf("MRB - read event at time %lf\n", ev.time());
+				//printf("MRB - read event at time %lf\n", ev.time());
 			} else {
 				std::cerr << "MRB: READ ERROR (data)" << std::endl;
 			}
