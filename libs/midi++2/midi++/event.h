@@ -161,23 +161,31 @@ struct Event {
 
 #endif // MIDI_EVENT_ALLOW_ALLOC
 
-	inline double      time()        const { return _time; }
-	inline double&     time()              { return _time; }
-	inline uint32_t    size()        const { return _size; }
-	inline uint32_t&   size()              { return _size; }
-	inline uint8_t     type()        const { return (_buffer[0] & 0xF0); }
-	inline uint8_t     channel()     const { return (_buffer[0] & 0x0F); }
+	inline double      time()                  const { return _time; }
+	inline double&     time()                        { return _time; }
+	inline uint32_t    size()                  const { return _size; }
+	inline uint32_t&   size()                        { return _size; }
+	inline uint8_t     type()                  const { return (_buffer[0] & 0xF0); }
+	inline uint8_t     channel()               const { return (_buffer[0] & 0x0F); }
 	inline void        set_channel(uint8_t channel)   { _buffer[0] = (0xF0 & _buffer[0]) | (0x0F & channel); }
-	inline bool        is_note_on()  const { return (type() == MIDI_CMD_NOTE_ON); }
-	inline bool        is_note_off() const { return (type() == MIDI_CMD_NOTE_OFF); }
-	inline bool        is_cc()       const { return (type() == MIDI_CMD_CONTROL); }
-	inline bool        is_note()     const { return (is_note_on() || is_note_off()); }
-	inline uint8_t     note()        const { return (_buffer[1]); }
-	inline uint8_t     velocity()    const { return (_buffer[2]); }
-	inline uint8_t     cc_number()   const { return (_buffer[1]); }
-	inline uint8_t     cc_value()    const { return (_buffer[2]); }
-	inline const uint8_t* buffer()      const { return _buffer; }
-	inline uint8_t*&      buffer()            { return _buffer; }
+	inline bool        is_note_on()            const { return (type() == MIDI_CMD_NOTE_ON); }
+	inline bool        is_note_off()           const { return (type() == MIDI_CMD_NOTE_OFF); }
+	inline bool        is_cc()                 const { return (type() == MIDI_CMD_CONTROL); }
+	inline bool        is_pitch_bender()       const { return (type() == MIDI_CMD_BENDER); }
+	inline bool        is_pgm_change()         const { return (type() == MIDI_CMD_PGM_CHANGE); }
+	inline bool        is_note()               const { return (is_note_on() || is_note_off()); }
+	inline bool        is_aftertouch()         const { return (type() == MIDI_CMD_NOTE_PRESSURE); }
+	inline bool        is_channel_aftertouch() const { return (type() == MIDI_CMD_CHANNEL_PRESSURE); }
+	inline uint8_t     note()                  const { return (_buffer[1]); }
+	inline uint8_t     velocity()              const { return (_buffer[2]); }
+	inline uint8_t     cc_number()             const { return (_buffer[1]); }
+	inline uint8_t     cc_value()              const { return (_buffer[2]); }
+	inline uint16_t    pitch_bender_value()    const { return ((_buffer[1] << 8) | _buffer[2]); }
+	inline uint8_t     pgm_number()            const { return (_buffer[1]); }
+	inline uint8_t     aftertouch()            const { return (_buffer[1]); }
+	inline uint8_t     channel_aftertouch()    const { return (_buffer[1]); }
+	inline const uint8_t* buffer()             const { return _buffer; }
+	inline uint8_t*&      buffer()                   { return _buffer; }
 
 private:
 	double   _time;   /**< Sample index (or beat time) at which event is valid */
