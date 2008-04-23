@@ -39,8 +39,18 @@ class Session;
 class MidiSource;
 	
 //                                                                     x   ,  y
-typedef std::pair<boost::shared_ptr<const AutomationList>, std::pair<double,double> >
-		MidiControlIterator;
+class MidiControlIterator {
+public:
+	boost::shared_ptr<const AutomationList> automation_list;
+	double x;
+	double y;
+	
+	MidiControlIterator(
+		boost::shared_ptr<const AutomationList> the_automation_list,
+		double my_x,
+		double my_y) : automation_list(the_automation_list), x(my_x), y(my_y)
+		{}
+};
 
 
 /** This is a slightly higher level (than MidiBuffer) model of MIDI note data.
@@ -57,7 +67,6 @@ class MidiModel : public boost::noncopyable, public Automatable {
 public:
 	MidiModel(MidiSource *s,  size_t size=0);
 	
-	// This is crap.
 	void write_lock();
 	void write_unlock();
 	void read_lock()   const;

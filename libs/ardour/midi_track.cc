@@ -428,6 +428,9 @@ MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fram
 		passthru (start_frame, end_frame, nframes, offset, 0, (_meter_point == MeterInput));
 	}
 
+	// stop all sounds
+	midi_panic();
+	
 	return 0;
 }
 

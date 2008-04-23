@@ -87,8 +87,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		}
 	}
 			
-	MidiControlIterator earliest_control = make_pair(boost::shared_ptr<AutomationList>(),
-			make_pair(DBL_MAX, 0.0));
+	MidiControlIterator earliest_control(boost::shared_ptr<AutomationList>(), DBL_MAX, 0.0);
 
 	_control_iters.reserve(model.controls().size());
 	for (Automatable::Controls::const_iterator i = model.controls().begin();
@@ -108,12 +107,12 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		assert(y >= 0);
 		assert(y <= UINT8_MAX);
 		
-		const MidiControlIterator new_iter = make_pair(i->second->list(), make_pair(x, y));
+		const MidiControlIterator new_iter(i->second->list(), x, y);
 		
 		//cerr << "MIDI Iterator: CC " << i->first.id() << " added (" << x << ", " << y << ")" << endl;
 		_control_iters.push_back(new_iter);
 
-		if (x < earliest_control.second.first) {
+		if (x < earliest_control.x) {
 			earliest_control = new_iter;
 			_control_iter = _control_iters.end();
 			--_control_iter;
@@ -127,7 +126,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		++_note_iter;
 	}
 
-	if (earliest_control.first && earliest_control.second.first < _event.time())
+	if (earliest_control.automation_list && earliest_control.x < _event.time())
 		model.control_to_midi_event(_event, earliest_control);
 	else
 		_control_iter = _control_iters.end();
@@ -151,7 +150,6 @@ MidiModel::const_iterator::~const_iterator()
 		_model->read_unlock();
 }
 }
-		
 
 const MidiModel::const_iterator&
 MidiModel::const_iterator::operator++()
@@ -161,20 +159,25 @@ MidiModel::const_iterator::operator++()
 
 	assert(_event.is_note() || _event.is_cc());
 
+	// TODO: This code crashes at the marked section
+	/*
 	// Increment past current control event
-	if (_control_iter != _control_iters.end() && _control_iter->first && _event.is_cc()) {
+	if (_control_iter != _control_iters.end() && _control_iter->automation_list && _event.is_cc()) {
 		double x, y;
-		const bool ret = _control_iter->first->rt_safe_earliest_event_unlocked(
-				_control_iter->second.first, DBL_MAX, x, y, false);
+		cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
+		// v--- this crashes because of a null pointer in the stl containers linked list chain
+		//      the crash occurs in _control_iter->automation_list->size();
+		const bool ret = _control_iter->automation_list->rt_safe_earliest_event_unlocked(
+		                     _control_iter->x, DBL_MAX, x, y, false);
 
 		if (ret) {
-			//cerr << "Incremented " << _control_iter->first->parameter().id() << " to " << x << endl;
-			_control_iter->second.first = x;
-			_control_iter->second.second = y;
+			//cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;
+			_control_iter->x = x;
+			_control_iter->x = y;
 		} else {
-			//cerr << "Hit end of " << _control_iter->first->parameter().id() << endl;
-			_control_iter->first.reset();
-			_control_iter->second.first = DBL_MAX;
+			//cerr << "Hit end of " << _control_iter->automation_list->parameter().id() << endl;
+			_control_iter->automation_list.reset();
+			_control_iter->x = DBL_MAX;
 		}
 	}
 
@@ -184,10 +187,12 @@ MidiModel::const_iterator::operator++()
 
 	for (std::vector<MidiControlIterator>::iterator i = _control_iters.begin();
 			i != _control_iters.end(); ++i) {
-		if (i->second.first < _control_iter->second.first) {
+		if (i->x < _control_iter->x) {
 			_control_iter = i;
 		}
 	}
+	
+	*/
 	
 	enum Type { NIL, NOTE_ON, NOTE_OFF, CC };
 	
@@ -200,7 +205,6 @@ MidiModel::const_iterator::operator++()
 		t = (*_note_iter)->time();
 	}
 	
-	cerr << " operator++ before test: size active notes: " << _active_notes.size() << " is empty: " << _active_notes.empty() << endl;
 	// Use the next earliest note off iff it's earlier than the note on
 	if (_model->note_mode() == Sustained && (! _active_notes.empty())) {
 		if (type == NIL || _active_notes.top()->end_time() <= (*_note_iter)->time()) {
@@ -209,10 +213,12 @@ MidiModel::const_iterator::operator++()
 		}
 	}
 	
+	/* disabled for above mentioned reason, this loops endlessly otherwise
 	// Use the next earliest controller iff it's earlier than the note event
-	if (_control_iter != _control_iters.end() && _control_iter->second.first != DBL_MAX)
-		if (type == NIL || _control_iter->second.first < t)
+	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX)
+		if (type == NIL || _control_iter->x < t)
 			type = CC;
+	*/
 
 	if (type == NOTE_ON) {
 		cerr << "********** MIDI Iterator = note on" << endl;
@@ -327,18 +333,18 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 bool
 MidiModel::control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& iter) const
 {
-	if (iter.first->parameter().type() == MidiCCAutomation) {
+	if (iter.automation_list->parameter().type() == MidiCCAutomation) {
 		if (ev.size() < 3)
 			ev.set_buffer((Byte*)malloc(3), true);
 
-		assert(iter.first);
-		assert(iter.first->parameter().channel() < 16);
-		assert(iter.first->parameter().id() <= INT8_MAX);
-		assert(iter.second.second <= INT8_MAX);
-		ev.buffer()[0] = MIDI_CMD_CONTROL + iter.first->parameter().channel();
-		ev.buffer()[1] = (Byte)iter.first->parameter().id();
-		ev.buffer()[2] = (Byte)iter.second.second;
-		ev.time() = iter.second.first; // x
+		assert(iter.automation_list);
+		assert(iter.automation_list->parameter().channel() < 16);
+		assert(iter.automation_list->parameter().id() <= INT8_MAX);
+		assert(iter.y <= INT8_MAX);
+		ev.buffer()[0] = MIDI_CMD_CONTROL + iter.automation_list->parameter().channel();
+		ev.buffer()[1] = (Byte)iter.automation_list->parameter().id();
+		ev.buffer()[2] = (Byte)iter.y;
+		ev.time() = iter.x;
 		ev.size() = 3;
 		return true;
 	} else {
@@ -417,6 +423,7 @@ void
 MidiModel::append(const MIDI::Event& ev)
 {
 	write_lock();
+	_edited = true;
 
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
@@ -442,6 +449,7 @@ MidiModel::append_note_on_unlocked(uint8_t chan, double time, uint8_t note_num, 
 
 	assert(chan < 16);
 	assert(_writing);
+	_edited = true;
 
 	_notes.push_back(boost::shared_ptr<Note>(new Note(chan, time, 0, note_num, velocity)));
 	if (_note_mode == Sustained) {
@@ -461,6 +469,7 @@ MidiModel::append_note_off_unlocked(uint8_t chan, double time, uint8_t note_num)
 
 	assert(chan < 16);
 	assert(_writing);
+	_edited = true;
 
 	if (_note_mode == Percussive) {
 		cerr << "MidiModel Ignoring note off (percussive mode)" << endl;
@@ -496,11 +505,12 @@ MidiModel::append_note_off_unlocked(uint8_t chan, double time, uint8_t note_num)
 void
 MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t value)
 {
-	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
-			" CC " << (int)number << " = " << (int)value << " @ " << time << endl;*/
+	cerr << "MidiModel " << this << " chan " << (int)chan <<
+			" CC " << (int)number << " = " << (int)value << " @ " << time << endl;
 	
 	assert(chan < 16);
 	assert(_writing);
+	_edited = true;
 	
 	Parameter param(MidiCCAutomation, number, chan);
 	
@@ -513,6 +523,7 @@ void
 MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note)
 {
 	//cerr << "MidiModel " << this << " add note " << (int)note.note() << " @ " << note.time() << endl;
+	_edited = true;
 	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note, note_time_comparator);
 	_notes.insert(i, note);
 }
@@ -521,6 +532,7 @@ MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note)
 void
 MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 {
+	_edited = true;
 	//cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
 	for(Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
 		Note& _n = *(*n);
