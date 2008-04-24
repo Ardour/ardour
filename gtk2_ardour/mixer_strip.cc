@@ -261,8 +261,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	global_vpacker.pack_start (*gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (post_processor_box, true, true);
-	if (!is_midi_track())
+	if (!is_midi_track()) {
 		global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
+	}
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
 

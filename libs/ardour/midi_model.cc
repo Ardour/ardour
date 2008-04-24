@@ -131,16 +131,33 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	else
 		_control_iter = _control_iters.end();
 
+	_pgm_change_iter = model.pgm_changes().end();
+	// find first program change which begins after t
+	for (vector<MIDI::Event>::const_iterator i = model.pgm_changes().begin(); i != model.pgm_changes().end(); ++i) {
+		if (i->time() >= t) {
+			_pgm_change_iter = i;
+			break;
+		}
+	}
+	
+	if(_pgm_change_iter != model.pgm_changes().end()) {
+		if(_pgm_change_iter->time() <= _event.time()) {
+			_event = MIDI::Event((*_pgm_change_iter), true);
+		}
+	}
+	
 	if (_event.size() == 0) {
 		//cerr << "Created MIDI iterator @ " << t << " is at end." << endl;
 		_is_end = true;
+		
+		// FIXME: possible race condition here....
 		if(_locked) {
-		_model->read_unlock();
-		_locked = false;
+			_model->read_unlock();
+			_locked = false;
 		}
 	} else {
 		printf("MIDI Iterator = %X @ %lf\n", _event.type(), _event.time());
-}
+	}
 }
 
 
@@ -194,7 +211,7 @@ MidiModel::const_iterator::operator++()
 	
 	*/
 	
-	enum Type { NIL, NOTE_ON, NOTE_OFF, CC };
+	enum Type { NIL, NOTE_ON, NOTE_OFF, CC, PGM_CHANGE, PITCH_BENDER };
 	
 	Type   type = NIL;
 	double t    = 0;
@@ -219,6 +236,12 @@ MidiModel::const_iterator::operator++()
 		if (type == NIL || _control_iter->x < t)
 			type = CC;
 	*/
+	if(_pgm_change_iter != _model->pgm_changes().end()) {
+		if(_pgm_change_iter->time() <= t) {
+			type = PGM_CHANGE;
+			t = _pgm_change_iter->time();
+		}
+	}
 
 	if (type == NOTE_ON) {
 		cerr << "********** MIDI Iterator = note on" << endl;
@@ -232,6 +255,9 @@ MidiModel::const_iterator::operator++()
 	} else if (type == CC) {
 		cerr << "********** MIDI Iterator = CC" << endl;
 		_model->control_to_midi_event(_event, *_control_iter);
+	} else if (type == PGM_CHANGE) {
+		cerr << "********** MIDI Iterator = program change" << endl;
+		_event = MIDI::Event(*_pgm_change_iter, true);
 	} else {
 		cerr << "********** MIDI Iterator = END" << endl;
 		_is_end = true;
@@ -269,6 +295,7 @@ MidiModel::const_iterator::operator=(const const_iterator& other)
 	_note_iter = other._note_iter;
 	_control_iters = other._control_iters;
 	_control_iter = other._control_iter;
+	_pgm_change_iter = other._pgm_change_iter;
 	
 	assert( ! _event.owns_buffer());
 	

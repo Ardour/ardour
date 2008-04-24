@@ -92,7 +92,6 @@ public:
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && _controls.size() == 0; }
 
-	typedef std::vector< boost::shared_ptr<Note> > Notes;
 	
 	inline static bool note_time_comparator (const boost::shared_ptr<const Note> a,
 	                                         const boost::shared_ptr<const Note> b) { 
@@ -107,9 +106,14 @@ public:
 		}
 	};
 
+	typedef std::vector< boost::shared_ptr<Note> > Notes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
-	
+
+	typedef std::vector<MIDI::Event> PgmChanges;
+	inline       PgmChanges& pgm_changes()       { return _pgm_changes; }
+	inline const PgmChanges& pgm_changes() const { return _pgm_changes; }
+
 	/** Add/Remove notes.
 	 * Technically all operations can be implemented as one of these.
 	 */
@@ -191,6 +195,7 @@ public:
 		Notes::const_iterator                      _note_iter;
 		std::vector<MidiControlIterator>           _control_iters;
 		std::vector<MidiControlIterator>::iterator _control_iter;
+		PgmChanges::const_iterator                 _pgm_change_iter;
 	};
 	
 	const_iterator        begin() const { return const_iterator(*this, 0); }
@@ -217,7 +222,9 @@ private:
 
 	mutable Glib::RWLock _lock;
 
-	Notes    _notes;
+	Notes      _notes;
+	PgmChanges _pgm_changes;
+	
 	NoteMode _note_mode;
 	
 	typedef std::vector<size_t> WriteNotes;
