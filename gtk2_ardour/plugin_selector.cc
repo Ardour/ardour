@@ -452,6 +452,24 @@ PluginSelector::on_show ()
 	filter_entry.grab_focus ();
 }
 
+struct PluginMenuCompare {
+    bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+	    int cmp;
+
+	    cmp = strcasecmp (a->creator.c_str(), b->creator.c_str());
+
+	    if (cmp < 0) {
+		    return true;
+	    } else if (cmp == 0) {
+		    /* same creator ... compare names */
+		    if (strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
+			    return true;
+		    } 
+	    }
+	    return false;
+    }
+};
+
 Gtk::Menu&
 PluginSelector::plugin_menu()
 {
@@ -484,6 +502,9 @@ PluginSelector::plugin_menu()
 #ifdef HAVE_SLV2
 	all_plugs.insert (all_plugs.end(), manager->lv2_plugin_info().begin(), manager->lv2_plugin_info().end());
 #endif
+
+	PluginMenuCompare cmp;
+	all_plugs.sort (cmp);
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 		SubmenuMap::iterator x;
