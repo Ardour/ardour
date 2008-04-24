@@ -873,7 +873,6 @@ Route::add_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_t* 
 		uint32_t potential_max_streams = 0;
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redirect)) != 0) {
-			pi->set_count (1);
 
 			if (pi->input_streams() == 0) {
 				/* instrument plugin */
