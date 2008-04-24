@@ -385,10 +385,9 @@ RedirectBox::deselect_all_redirects ()
 void
 RedirectBox::choose_plugin ()
 {
-	sigc::connection newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
-	_plugin_selector.show_all();
-	_plugin_selector.run ();
-	newplug_connection.disconnect();
+	newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
+	Gtk::Menu& m = _plugin_selector.plugin_menu();
+	m.popup (1, 0);
 }
 
 void
@@ -409,6 +408,8 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 			redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
 		}
 	}
+
+	newplug_connection.disconnect();
 }
 
 void

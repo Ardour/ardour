@@ -145,6 +145,7 @@ class RedirectBox : public Gtk::HBox
 	void choose_insert ();
 	void choose_plugin ();
 	void insert_plugin_chosen (boost::shared_ptr<ARDOUR::Plugin>);
+	sigc::connection newplug_connection;
 
 	bool no_redirect_redisplay;
 	bool ignore_delete;

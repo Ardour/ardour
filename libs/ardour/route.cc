@@ -2419,6 +2419,7 @@ Route::update_total_latency ()
 		}
 	}
 
+#define DEBUG_LATENCY
 #ifdef DEBUG_LATENCY
 	cerr << _name << ": internal redirect latency = " << _own_latency << endl;
 #endif

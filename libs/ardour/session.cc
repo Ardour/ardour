@@ -284,6 +284,7 @@ Session::Session (AudioEngine &eng,
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
+	  _total_free_4k_blocks (0),
 	  _click_io ((IO*) 0),
 	  main_outs (0)
 {
@@ -346,6 +347,7 @@ Session::Session (AudioEngine &eng,
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
+	  _total_free_4k_blocks (0),
 	  main_outs (0)
 
 {

@@ -21,6 +21,8 @@
 #include <cstdio>
 #include <lrdf.h>
 #include <dlfcn.h>
+#include <cstdlib>
+#include <fstream>
 
 #ifdef VST_SUPPORT
 #include <fst.h>
@@ -56,6 +58,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace std;
 
 PluginManager* PluginManager::_manager = 0;
 
@@ -63,6 +66,8 @@ PluginManager::PluginManager ()
 {
 	char* s;
 	string lrdf_path;
+
+	load_favorites ();
 
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
@@ -484,3 +489,111 @@ PluginManager::vst_discover (string path)
 }
 
 #endif // VST_SUPPORT
+
+bool
+PluginManager::is_a_favorite_plugin (const PluginInfoPtr& pi)
+{
+	FavoritePlugin fp (pi->type, pi->unique_id);
+	return find (favorites.begin(), favorites.end(), fp) !=  favorites.end();
+}
+
+void
+PluginManager::save_favorites ()
+{
+	Glib::ustring path = get_user_ardour_path ();
+	path += '/';
+	path += "favorite_plugins";
+
+	ofstream ofs;
+
+	ofs.open (path.c_str(), ios_base::openmode (ios::out|ios::trunc));
+
+	if (!ofs) {
+		return;
+	}
+
+	for (FavoritePluginList::iterator i = favorites.begin(); i != favorites.end(); ++i) {
+		switch ((*i).type) {
+		case LADSPA:
+			ofs << "LADSPA";
+			break;
+		case AudioUnit:
+			ofs << "AudioUnit";
+			break;
+		case LV2:
+			ofs << "LV2";
+			break;
+		case VST:
+			ofs << "VST";
+			break;
+		}
+		
+		ofs << ' ' << (*i).unique_id << endl;
+	}
+
+	ofs.close ();
+}
+
+void
+PluginManager::load_favorites ()
+{
+	Glib::ustring path = get_user_ardour_path ();
+	path += '/';
+	path += "favorite_plugins";
+
+	ifstream ifs (path.c_str());
+
+	if (!ifs) {
+		return;
+	}
+	
+	std::string stype;
+	std::string id;
+	PluginType type;
+
+	while (ifs) {
+
+		ifs >> stype;
+		if (!ifs) {
+			break;
+
+		}
+		ifs >> id;
+		if (!ifs) {
+			break;
+		}
+
+		if (stype == "LADSPA") {
+			type = LADSPA;
+		} else if (stype == "AudioUnit") {
+			type = AudioUnit;
+		} else if (stype == "LV2") {
+			type = LV2;
+		} else if (stype == "VST") {
+			type = VST;
+		} else {
+			error << string_compose (_("unknown favorite plugin type \"%1\" - ignored"), stype)
+			      << endmsg;
+			continue;
+		}
+		
+		add_favorite (type, id);
+	}
+	
+	ifs.close ();
+}
+
+void
+PluginManager::add_favorite (PluginType t, string id)
+{
+	FavoritePlugin fp (t, id);
+	pair<FavoritePluginList::iterator,bool> res = favorites.insert (fp);
+	cerr << "Added " << t << " " << id << " success ? " << res.second << endl;
+}
+
+void
+PluginManager::remove_favorite (PluginType t, string id)
+{
+	FavoritePlugin fp (t, id);
+	favorites.erase (fp);
+}

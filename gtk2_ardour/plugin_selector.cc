@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <lrdf.h>
+#include <map>
 
 #include <algorithm>
 
@@ -64,9 +65,15 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	manager = mgr;
 	session = 0;
-	
+	_menu = 0;
+	in_row_change = false;
+
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);
+	/* XXX translators: try to convert "Fav" into a short term
+	   related to "favorite"
+	*/
+	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
 	plugin_display.append_column (_("Available Plugins"), plugin_columns.name);
 	plugin_display.append_column (_("Type"), plugin_columns.type_name);
 	plugin_display.append_column (_("Category"), plugin_columns.category);
@@ -76,6 +83,13 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	plugin_display.set_headers_visible (true);
 	plugin_display.set_headers_clickable (true);
 	plugin_display.set_reorderable (false);
+	plugin_display.set_rules_hint (true);
+
+	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
+	fav_cell->property_activatable() = true;
+	fav_cell->property_radio() = false;
+	fav_cell->signal_toggled().connect (mem_fun (*this, &PluginSelector::favorite_changed));
+
 	scroller.set_border_width(10);
 	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	scroller.add(plugin_display);
@@ -222,6 +236,8 @@ PluginSelector::refill ()
 {
 	std::string filterstr;
 
+	in_row_change = true;
+
 	plugin_model->clear ();
 
 	setup_filter_string (filterstr);
@@ -230,6 +246,8 @@ PluginSelector::refill ()
 	lv2_refiller (filterstr);
 	vst_refiller (filterstr);
 	au_refiller (filterstr);
+
+	in_row_change = false;
 }
 
 void
@@ -242,10 +260,10 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 		if (show_this_plugin (*i, filterstr)) {
 
 			TreeModel::Row newrow = *(plugin_model->append());
+			newrow[plugin_columns.favorite] = manager->is_a_favorite_plugin (*i);
 			newrow[plugin_columns.name] = (*i)->name;
 			newrow[plugin_columns.type_name] = type;
 			newrow[plugin_columns.category] = (*i)->category;
-
 
 			string creator = (*i)->creator;
 			string::size_type pos = 0;
@@ -432,4 +450,116 @@ PluginSelector::on_show ()
 {
 	ArdourDialog::on_show ();
 	filter_entry.grab_focus ();
+}
+
+Gtk::Menu&
+PluginSelector::plugin_menu()
+{
+	using namespace Menu_Helpers;
+
+	typedef std::map<Glib::ustring,Gtk::Menu*> SubmenuMap;
+	SubmenuMap submenu_map;
+
+	if (!_menu) {
+		_menu = new Menu();
+	} 
+
+	MenuList& items = _menu->items();
+	Menu* favs = new Menu();
+
+	items.clear ();
+	items.push_back (MenuElem (_("Favorites"), *favs));
+	items.push_back (MenuElem (_("Plugin Manager"), mem_fun (*this, &PluginSelector::show_manager)));
+	items.push_back (SeparatorElem ());
+
+	PluginInfoList all_plugs;
+
+	all_plugs.insert (all_plugs.end(), manager->ladspa_plugin_info().begin(), manager->ladspa_plugin_info().end());
+#ifdef VST_SUPPORT
+	all_plugs.insert (all_plugs.end(), manager->vst_plugin_info().begin(), manager->vst_plugin_info().end());
+#endif
+#ifdef HAVE_AUDIOUNITS
+	all_plugs.insert (all_plugs.end(), manager->au_plugin_info().begin(), manager->au_plugin_info().end());
+#endif
+#ifdef HAVE_SLV2
+	all_plugs.insert (all_plugs.end(), manager->lv2_plugin_info().begin(), manager->lv2_plugin_info().end());
+#endif
+
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+		SubmenuMap::iterator x;
+		Gtk::Menu* submenu;
+
+		string creator = (*i)->creator;
+		string::size_type pos = 0;
+
+		if (manager->is_a_favorite_plugin (*i)) {
+			favs->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+		}
+		
+		/* stupid LADSPA creator strings */
+		
+		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+		creator = creator.substr (0, pos);
+
+		if ((x = submenu_map.find (creator)) != submenu_map.end()) {
+			submenu = x->second;
+		} else {
+			submenu = new Gtk::Menu;
+			items.push_back (MenuElem (creator, *submenu));
+			submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
+		}
+		
+		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+	}
+	
+	return *_menu;
+}
+
+void
+PluginSelector::plugin_chosen_from_menu (const PluginInfoPtr& pi)
+{
+	use_plugin (pi);
+}
+
+void 
+PluginSelector::favorite_changed (const Glib::ustring& path)
+{
+	PluginInfoPtr pi;
+
+	if (in_row_change) {
+		return;
+	}
+
+	in_row_change = true;
+	
+	TreeModel::iterator iter = plugin_model->get_iter (path);
+	
+	if (iter) {
+
+		bool favorite = !(*iter)[plugin_columns.favorite];
+
+		/* change state */
+
+		(*iter)[plugin_columns.favorite] = favorite;
+
+		/* save new favorites list */
+
+		pi = (*iter)[plugin_columns.plugin];
+		
+		if (favorite) {
+			manager->add_favorite (pi->type, pi->unique_id);
+		} else {
+			manager->remove_favorite (pi->type, pi->unique_id);
+		}
+		
+		manager->save_favorites ();
+	}
+	in_row_change = false;
+}
+
+void
+PluginSelector::show_manager ()
+{
+	show_all();
+	run ();
 }

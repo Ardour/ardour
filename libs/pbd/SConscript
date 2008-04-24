@@ -6,7 +6,7 @@ import glob
 
 Import('env libraries i18n install_prefix')
 
-pbd = env.Copy()
+pbd = env.Clone()
 
 domain = 'libpbd'
 

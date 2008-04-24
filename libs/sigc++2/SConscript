@@ -7,7 +7,7 @@ import glob
 sigc2_files = glob.glob('sigc++/*.cc') + glob.glob('sigc++/functors/*.cc') + glob.glob('sigc++/adaptors/lambda/*.cc')
 
 Import('env install_prefix')
-sigc2 = env.Copy()
+sigc2 = env.Clone()
 
 libsigc2 = sigc2.SharedLibrary('sigc++2', sigc2_files)
 

@@ -43,6 +43,8 @@ class PluginSelector : public ArdourDialog
 	void set_session (ARDOUR::Session*);
 	void on_show ();
 
+	Gtk::Menu& plugin_menu ();
+
   private:
 	ARDOUR::Session* session;
 	Gtk::ScrolledWindow scroller;  // Available plugins
@@ -58,6 +60,7 @@ class PluginSelector : public ArdourDialog
 	
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
+			add (favorite);
 			add (name);
 			add (type_name);
 			add (category);
@@ -66,6 +69,7 @@ class PluginSelector : public ArdourDialog
 			add (outs);
 			add (plugin);
 		}
+		Gtk::TreeModelColumn<bool> favorite;
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> type_name;
 		Gtk::TreeModelColumn<std::string> category;
@@ -112,6 +116,13 @@ class PluginSelector : public ArdourDialog
 	void cleanup ();
 	bool show_this_plugin (const ARDOUR::PluginInfoPtr&, const std::string&);
 	void setup_filter_string (std::string&);
+
+	void favorite_changed (const Glib::ustring& path);
+	bool in_row_change;
+
+	void plugin_chosen_from_menu (const ARDOUR::PluginInfoPtr&);
+	Gtk::Menu* _menu;
+	void show_manager ();
 };
 
 #endif // __ardour_plugin_selector_h__
