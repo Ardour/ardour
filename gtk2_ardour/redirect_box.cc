@@ -258,6 +258,12 @@ RedirectBox::show_redirect_menu (gint arg)
 		redirect_menu = build_redirect_menu ();
 	}
 
+	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/redirectmenu/newplugin"));
+
+	if (plugin_menu_item) {
+		plugin_menu_item->set_submenu (_plugin_selector.plugin_menu());
+	}
+
 	paste_action->set_sensitive (!_rr_selection.redirects.empty());
 
 	redirect_menu->popup (1, arg);
@@ -386,8 +392,8 @@ void
 RedirectBox::choose_plugin ()
 {
 	newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
-	Gtk::Menu& m = _plugin_selector.plugin_menu();
-	m.popup (1, 0);
+	// Gtk::Menu& m = _plugin_selector.plugin_menu();
+	// m.popup (1, 0);
 }
 
 void
@@ -1172,7 +1178,7 @@ RedirectBox::register_actions ()
 	Glib::RefPtr<Action> act;
 
 	/* new stuff */
-	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin ..."),  sigc::ptr_fun (RedirectBox::rb_choose_plugin));
+	ActionManager::register_action (popup_act_grp, X_("newplugin"), _("New Plugin"),  sigc::ptr_fun (RedirectBox::rb_choose_plugin));
 
 	act = ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),  sigc::ptr_fun (RedirectBox::rb_choose_insert));
 	ActionManager::jack_sensitive_actions.push_back (act);
