@@ -451,12 +451,12 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 {
-	/*printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(),
+	printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(),
 			(unsigned)ev.channel(), ev.time(), ev.size());
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
-	printf("\n");*/
+	printf("\n");
 
 	assert(ev.time() >= 0);
 	assert(ev.time() >= _last_ev_time);

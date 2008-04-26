@@ -122,7 +122,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	if (_note_iter != model.notes().end()) {
 		_event = MIDI::Event((*_note_iter)->on_event(), false);
 		_active_notes.push(*_note_iter);
-		cerr << " new const iterator: size active notes: " << _active_notes.size() << " is empty: " << _active_notes.empty() << endl;
+		//cerr << " new const iterator: size active notes: " << _active_notes.size() << " is empty: " << _active_notes.empty() << endl;
 		++_note_iter;
 	}
 
@@ -133,16 +133,16 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 
 	_pgm_change_iter = model.pgm_changes().end();
 	// find first program change which begins after t
-	for (vector<MIDI::Event>::const_iterator i = model.pgm_changes().begin(); i != model.pgm_changes().end(); ++i) {
-		if (i->time() >= t) {
+	for (PgmChanges::const_iterator i = model.pgm_changes().begin(); i != model.pgm_changes().end(); ++i) {
+		if ((*i)->time() >= t) {
 			_pgm_change_iter = i;
 			break;
 		}
 	}
 	
 	if(_pgm_change_iter != model.pgm_changes().end()) {
-		if(_pgm_change_iter->time() <= _event.time()) {
-			_event = MIDI::Event((*_pgm_change_iter), true);
+		if((*_pgm_change_iter)->time() <= _event.time()) {
+			_event = MIDI::Event(*(*_pgm_change_iter), false);
 		}
 	}
 	
@@ -174,7 +174,15 @@ MidiModel::const_iterator::operator++()
 	if (_is_end)
 		throw std::logic_error("Attempt to iterate past end of MidiModel");
 
-	assert(_event.is_note() || _event.is_cc());
+	cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event.type()) 
+	     << "   buffer: 0x" << int(_event.buffer()[0]) << " 0x" << int(_event.buffer()[1]) 
+	     << " 0x" << int(_event.buffer()[2]) << endl;
+
+	if(! (_event.is_note() || _event.is_cc() || _event.is_pgm_change())) {
+		cerr << "FAILED pgm change vector size: " << _model->pgm_changes().size() << endl;
+		cerr << "FAILED event buffer: " << hex << int(_event.buffer()[0]) << int(_event.buffer()[1]) << int(_event.buffer()[2]) << endl;
+	}
+	assert(_event.is_note() || _event.is_cc() || _event.is_pgm_change());
 
 	// TODO: This code crashes at the marked section
 	/*
@@ -237,9 +245,12 @@ MidiModel::const_iterator::operator++()
 			type = CC;
 	*/
 	if(_pgm_change_iter != _model->pgm_changes().end()) {
-		if(_pgm_change_iter->time() <= t) {
+		if((*_pgm_change_iter)->time() <= t) {
 			type = PGM_CHANGE;
-			t = _pgm_change_iter->time();
+			t = (*_pgm_change_iter)->time();
+			cerr << "operator++ got PGM CHANGE with time " << t << " and type " << hex
+			<< int((*_pgm_change_iter)->type()) << " and channel " << int((*_pgm_change_iter)->channel()) 
+			<< " and program " << int((*_pgm_change_iter)->pgm_number()) << endl;
 		}
 	}
 
@@ -257,7 +268,8 @@ MidiModel::const_iterator::operator++()
 		_model->control_to_midi_event(_event, *_control_iter);
 	} else if (type == PGM_CHANGE) {
 		cerr << "********** MIDI Iterator = program change" << endl;
-		_event = MIDI::Event(*_pgm_change_iter, true);
+		_event = MIDI::Event(*(*_pgm_change_iter), false);
+		++_pgm_change_iter;
 	} else {
 		cerr << "********** MIDI Iterator = END" << endl;
 		_is_end = true;
@@ -327,16 +339,16 @@ MidiModel::MidiModel(MidiSource *s, size_t size)
 size_t
 MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
 {
-	cerr << this << " MM::read @ " << start << " frames: " << nframes << " -> " << stamp_offset << endl;
-	cerr << this << " MM # notes: " << n_notes() << endl;
+	//cerr << this << " MM::read @ " << start << " frames: " << nframes << " -> " << stamp_offset << endl;
+	//cerr << this << " MM # notes: " << n_notes() << endl;
 
 	size_t read_events = 0;
 
 	if (start != _next_read) {
 		_read_iter = const_iterator(*this, (double)start);
-		cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
+		//cerr << "Repositioning iterator from " << _next_read << " to " << start << endl;
 	} else {
-		cerr << "Using cached iterator at " << _next_read << endl;
+		//cerr << "Using cached iterator at " << _next_read << endl;
 	}
 
 	_next_read = start + nframes;
@@ -344,11 +356,13 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
 		assert(_read_iter->size() > 0);
 		dst.write(_read_iter->time() + stamp_offset - negative_stamp_offset, _read_iter->size(), _read_iter->buffer());
-		cerr << this << " MM::read event @ " << _read_iter->time()  
+		
+		cerr << this << " MidiModel::read event @ " << _read_iter->time()  
 		     << " type: " << hex << int(_read_iter->type()) << dec 
 		     << " note: " << int(_read_iter->note()) 
 		     << " velocity: " << int(_read_iter->velocity()) 
 		     << endl;
+		
 		++_read_iter;
 		++read_events;
 	}
@@ -451,18 +465,23 @@ MidiModel::append(const MIDI::Event& ev)
 {
 	write_lock();
 	_edited = true;
+	
+	cerr << "MidiModel::append event type: " << hex << "0x" << int(ev.type()) << endl;
 
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
 
-	if (ev.is_note_on())
+	if (ev.is_note_on()) {
 		append_note_on_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
-	else if (ev.is_note_off())
+	} else if (ev.is_note_off()) {
 		append_note_off_unlocked(ev.channel(), ev.time(), ev.note());
-	else if (ev.is_cc())
+	} else if (ev.is_cc()) {
 		append_cc_unlocked(ev.channel(), ev.time(), ev.cc_number(), ev.cc_value());
-	else
+	} else if (ev.is_pgm_change()) {
+		append_pgm_change_unlocked(ev.channel(), ev.time(), ev.pgm_number());
+	} else { 
 		printf("MM Unknown event type %X\n", ev.type());
+	}
 	
 	write_unlock();
 }
@@ -532,8 +551,8 @@ MidiModel::append_note_off_unlocked(uint8_t chan, double time, uint8_t note_num)
 void
 MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t value)
 {
-	cerr << "MidiModel " << this << " chan " << (int)chan <<
-			" CC " << (int)number << " = " << (int)value << " @ " << time << endl;
+	//cerr << "MidiModel " << this << " chan " << (int)chan <<
+	//		" CC " << (int)number << " = " << (int)value << " @ " << time << endl;
 	
 	assert(chan < 16);
 	assert(_writing);
@@ -545,6 +564,25 @@ MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t
 	control->list()->fast_simple_add(time, (double)value);
 }
 
+void
+MidiModel::append_pgm_change_unlocked(uint8_t chan, double time, uint8_t number) 
+{
+	cerr << "MidiModel::append_pgm_change_unlocked: channel " << int(chan) << " time: " << time << " program number: " << int(number) <<endl; 
+	assert(chan < 16);
+	assert(_writing);
+	_edited = true;
+	
+	boost::shared_ptr<MIDI::Event> event_ptr(new MIDI::Event(time, 3, 0, true));
+	event_ptr->set_type(MIDI_CMD_PGM_CHANGE);
+	event_ptr->set_channel(chan);
+	event_ptr->set_pgm_number(number);
+	_pgm_changes.push_back(event_ptr);
+	cerr << "MidiModel::append_pgm_change_unlocked: appended pgm change" << endl;
+	for(PgmChanges::iterator i = _pgm_changes.begin(); i != _pgm_changes.end(); ++i) {
+		cerr << "_pgm_changes contents: channel " << int((*i)->channel()) << dec << " time: " << int((*i)->time()) << hex << " program number: " << int(int((*i)->pgm_number())) <<endl;
+	}
+	//<< int(_pgm_changes.) << " time: " << time << " program number: " << int(number) <<endl;
+}
 
 void
 MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note)
@@ -820,10 +858,18 @@ MidiModel::DeltaCommand::get_state ()
 }
 
 
+struct EventTimeComparator {
+	typedef const MIDI::Event* value_type;
+	inline bool operator()(const MIDI::Event* a,
+	                       const MIDI::Event* b) const { 
+		return a->time() >= b->time();
+	}
+};
+
 bool
 MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 {
-	//cerr << "Writing model to " << source->name() << endl;
+	cerr << "Writing model to " << source->name() << endl;
 
 	/* This could be done using a temporary MidiRingBuffer and using
 	 * MidiModel::read and MidiSource::write, but this is more efficient
@@ -845,9 +891,39 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 
 	read_lock();
 
-	LaterNoteEndComparator cmp;
-	ActiveNotes active_notes(cmp);
+	//LaterNoteEndComparator cmp;
+	//ActiveNotes active_notes(cmp);
+	
+	EventTimeComparator comp;
+	typedef std::priority_queue<
+				MIDI::Event*, 
+				std::deque<MIDI::Event*>,
+				EventTimeComparator> MidiEvents;
+	
+	MidiEvents events(comp);
+	
+
+	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
+		events.push(&(*n)->on_event());
+		events.push(&(*n)->off_event());
+	}
+	
+	for (PgmChanges::const_iterator p = _pgm_changes.begin(); p != _pgm_changes.end(); ++p) {
+		events.push((*p).get());		
+	}
+
+	while(!events.empty()) {
+		source->append_event_unlocked(Frames, *events.top());
+		cerr << "MidiModel::write_to appending event with time:" << dec << int(events.top()->time()) << hex 
+		     << "   buffer: 0x" << int(events.top()->buffer()[0]) << " 0x" << int(events.top()->buffer()[1]) 
+		     << " 0x" << int(events.top()->buffer()[2]) << endl;
+		events.pop();
+	}
+	
 		
+	/* Why sort manyally, when a priority queue does the job for us,
+	 * or am I missing something???
+	 * 
 	// Foreach note
 	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
 
@@ -862,6 +938,13 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 				break;
 			}
 		}
+		
+		// Write program changes preceding this note on
+		if(p != _pgm_changes.end() && ((*p)->time() <= (*n)->time())) {
+			const MIDI::Event& pgm_change_event = *(*p);
+			source->append_event_unlocked(Frames, pgm_change_event);
+			++p;
+		}
 
 		// Write this note on
 		source->append_event_unlocked(Frames, (*n)->on_event());
@@ -874,7 +957,8 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 		source->append_event_unlocked(Frames, active_notes.top()->off_event());
 		active_notes.pop();
 	}
-
+	*/
+	
 	_edited = false;
 	
 	read_unlock();

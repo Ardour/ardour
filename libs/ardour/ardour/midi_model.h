@@ -110,7 +110,7 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
-	typedef std::vector<MIDI::Event> PgmChanges;
+	typedef std::vector< boost::shared_ptr<MIDI::Event> > PgmChanges;
 	inline       PgmChanges& pgm_changes()       { return _pgm_changes; }
 	inline const PgmChanges& pgm_changes() const { return _pgm_changes; }
 
@@ -219,6 +219,7 @@ private:
 	void append_note_on_unlocked(uint8_t chan, double time, uint8_t note, uint8_t velocity);
 	void append_note_off_unlocked(uint8_t chan, double time, uint8_t note);
 	void append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t value);
+	void append_pgm_change_unlocked(uint8_t chan, double time, uint8_t number); 
 
 	mutable Glib::RWLock _lock;
 
