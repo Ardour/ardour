@@ -52,6 +52,7 @@ static const char* _filter_mode_strings[] = {
 	N_("Type contains"),
 	N_("Author contains"),
 	N_("Library contains"),
+	N_("Favorites only"),
 	0
 };
 
@@ -199,6 +200,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	std::string compstr;
 	std::string mode = filter_mode.get_active_text ();
 
+	if (mode == _("Favorites only")) {
+		return manager->is_a_favorite_plugin (info);
+	}
+
 	if (!filterstr.empty()) {
 		
 		if (mode == _("Name contains")) {
@@ -209,8 +214,8 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 			compstr = info->creator;
 		} else if (mode == _("Library contains")) {
 			compstr = info->path;
-		}
-		
+		} 
+
 		transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
 
 		if (compstr.find (filterstr) != string::npos) {
@@ -218,7 +223,6 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		} else {
 			return false;
 		}
-		
 	}
 
 	return true;
@@ -442,6 +446,14 @@ PluginSelector::filter_entry_changed ()
 void 
 PluginSelector::filter_mode_changed ()
 {
+	std::string mode = filter_mode.get_active_text ();
+
+	if (mode == _("Favorites only")) {
+		filter_entry.set_sensitive (false);
+	} else {
+		filter_entry.set_sensitive (true);
+	}
+
 	refill ();
 }
 
