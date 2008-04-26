@@ -166,8 +166,9 @@ struct Event {
 	inline uint32_t    size()                  const { return _size; }
 	inline uint32_t&   size()                        { return _size; }
 	inline uint8_t     type()                  const { return (_buffer[0] & 0xF0); }
+	inline void        set_type(uint8_t type     )   { _buffer[0] = (0x0F & _buffer[0]) | (0xF0 & type); }
 	inline uint8_t     channel()               const { return (_buffer[0] & 0x0F); }
-	inline void        set_channel(uint8_t channel)   { _buffer[0] = (0xF0 & _buffer[0]) | (0x0F & channel); }
+	inline void        set_channel(uint8_t channel)  { _buffer[0] = (0xF0 & _buffer[0]) | (0x0F & channel); }
 	inline bool        is_note_on()            const { return (type() == MIDI_CMD_NOTE_ON); }
 	inline bool        is_note_off()           const { return (type() == MIDI_CMD_NOTE_OFF); }
 	inline bool        is_cc()                 const { return (type() == MIDI_CMD_CONTROL); }
@@ -182,6 +183,7 @@ struct Event {
 	inline uint8_t     cc_value()              const { return (_buffer[2]); }
 	inline uint16_t    pitch_bender_value()    const { return ((_buffer[1] << 8) | _buffer[2]); }
 	inline uint8_t     pgm_number()            const { return (_buffer[1]); }
+	inline void        set_pgm_number(uint8_t number){ _buffer[1] = number; }
 	inline uint8_t     aftertouch()            const { return (_buffer[1]); }
 	inline uint8_t     channel_aftertouch()    const { return (_buffer[1]); }
 	inline const uint8_t* buffer()             const { return _buffer; }
