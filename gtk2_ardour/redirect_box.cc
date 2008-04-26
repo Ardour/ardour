@@ -147,6 +147,10 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event), false);
 	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button_release_event));
 
+	using_plugin_selector = false;
+	_plugin_selector.signal_hide().connect (mem_fun (*this, &RedirectBox::plugin_selector_hidden));
+	_plugin_selector.signal_show().connect (mem_fun (*this, &RedirectBox::plugin_selector_shown));
+
 	/* start off as a passthru strip. we'll correct this, if necessary,
 	   in update_diskstream_display().
 	*/
@@ -415,7 +419,9 @@ RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
 		}
 	}
 
-	newplug_connection.disconnect();
+	if (!using_plugin_selector) {
+		newplug_connection.disconnect();
+	}
 }
 
 void
@@ -1404,3 +1410,15 @@ RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
 	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);	
 }
 
+void
+RedirectBox::plugin_selector_hidden ()
+{
+	newplug_connection.disconnect();
+	using_plugin_selector = false;
+}
+
+void
+RedirectBox::plugin_selector_shown ()
+{
+	using_plugin_selector = true;
+}
