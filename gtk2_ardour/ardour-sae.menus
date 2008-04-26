@@ -338,7 +338,7 @@
 	  <menuitem action="toggle-marker-ruler"/>
      </popup>
 
-     <popup name='redirectmenu'>
+     <popup name='processormenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
