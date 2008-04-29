@@ -41,6 +41,7 @@
 #include "simpleline.h"
 #include "canvas-hit.h"
 #include "canvas-note.h"
+#include "canvas-program-change.h"
 #include "public_editor.h"
 #include "ghostregion.h"
 #include "midi_time_axis.h"
@@ -474,6 +475,16 @@ MidiRegionView::redisplay_model()
 			add_note(_model->note_at(i));
 		}
 
+		MidiModel::PgmChanges& pgm_changes = _model->pgm_changes();
+		/*
+		for (MidiModel::PgmChanges::const_iterator i = pgm_changes.begin(); 
+		     i != pgm_changes.end(); 
+		     ++i) {
+			add_pgm_change()
+		}
+		*/
+		for_each(pgm_changes.begin(), pgm_changes.end(), sigc::mem_fun(this, &MidiRegionView::add_pgm_change));
+
 		end_write();
 
 		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
@@ -790,6 +801,27 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		}
 		event->on_channel_selection_change(last_channel_selection);
 	}
+}
+
+void
+MidiRegionView::add_pgm_change(boost::shared_ptr<MIDI::Event> event)
+{
+	assert(event->time() >= 0);
+	
+	// dont display notes beyond the region bounds
+	if(
+			event->time() - _region->start() >= _region->length() ||
+			event->time() <  _region->start() 
+	  ) {
+		return;
+	}
+	
+	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
+	const double x = trackview.editor.frame_to_pixel((nframes_t)event->time() - _region->start());
+	
+	double height = midi_stream_view()->contents_height();
+	new CanvasProgramChange(*this, *group, event, height, x, 1.0);
+	//TODO : keep track of pgm changes
 }
 
 void

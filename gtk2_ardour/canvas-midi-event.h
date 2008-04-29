@@ -44,14 +44,14 @@ namespace Canvas {
  *
  * A newer, better canvas should remove the need for all the ugly here.
  */
-class CanvasMidiEvent : public sigc::trackable {
+class CanvasNoteEvent : public sigc::trackable {
 public:
 	CanvasMidiEvent(
 			MidiRegionView&                       region,
 			Item*                                 item,
 			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>());
 
-	virtual ~CanvasMidiEvent();
+	virtual ~CanvasNoteEvent();
 
 	bool on_event(GdkEvent* ev);
 

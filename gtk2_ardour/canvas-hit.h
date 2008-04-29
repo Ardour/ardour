@@ -27,7 +27,7 @@
 namespace Gnome {
 namespace Canvas {
 
-class CanvasHit : public Diamond, public CanvasMidiEvent {
+class CanvasHit : public Diamond, public CanvasNoteEvent {
 public:
 	CanvasHit(
 			MidiRegionView&                       region,
@@ -47,7 +47,7 @@ public:
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; }
 	void set_fill_color(uint32_t c) { property_fill_color_rgba() = c; }
 
-	bool on_event(GdkEvent* ev) { return CanvasMidiEvent::on_event(ev); }
+	bool on_event(GdkEvent* ev) { return CanvasNoteEvent::on_event(ev); }
 };
 
 } // namespace Gnome

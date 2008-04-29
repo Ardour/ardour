@@ -80,11 +80,11 @@ CanvasNote::on_event(GdkEvent* ev)
 			return true;
 
 		default:
-			return CanvasMidiEvent::on_event(ev);
+			return CanvasNoteEvent::on_event(ev);
 		}
 
 	default:
-		return CanvasMidiEvent::on_event(ev);
+		return CanvasNoteEvent::on_event(ev);
 	}
 }
 

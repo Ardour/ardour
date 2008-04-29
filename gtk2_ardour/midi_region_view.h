@@ -37,6 +37,7 @@
 #include "canvas.h"
 #include "canvas-note.h"
 #include "canvas-midi-event.h"
+#include "canvas-program-change.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -80,6 +81,8 @@ class MidiRegionView : public RegionView
 
 	void add_note(const boost::shared_ptr<ARDOUR::Note> note);
 	void resolve_note(uint8_t note_num, double end_time);
+	
+	void add_pgm_change(boost::shared_ptr<MIDI::Event> event);
 
 	void begin_write();
 	void end_write();
@@ -101,7 +104,7 @@ class MidiRegionView : public RegionView
 			_delta_command->add(note);
 	}
 
-	void command_remove_note(ArdourCanvas::CanvasMidiEvent* ev) {
+	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev) {
 		if (_delta_command && ev->note()) {
 			_selection.erase(ev);
 			_delta_command->remove(ev->note());
@@ -123,15 +126,15 @@ class MidiRegionView : public RegionView
 		midi_view()->midi_track()->diskstream()->playlist_modified();
 	}
 
-	void   note_entered(ArdourCanvas::CanvasMidiEvent* ev);
-	void   unique_select(ArdourCanvas::CanvasMidiEvent* ev);
-	void   note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
-	void   note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add);
+	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
+	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
+	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add);
+	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add);
 	void   delete_selection();
 	size_t selection_size() { return _selection.size(); }
 
 	void move_selection(double dx, double dy);
-	void note_dropped(ArdourCanvas::CanvasMidiEvent* ev, double dt, uint8_t dnote);
+	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double dt, uint8_t dnote);
 
 	/**
 	 * This function is needed to subtract the region start in pixels
@@ -243,14 +246,14 @@ class MidiRegionView : public RegionView
 	uint16_t last_channel_selection;
 	void midi_channel_selection_changed(uint16_t selection);
 
-	void clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev);
+	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
 	void update_drag_selection(double last_x, double x, double last_y, double y);
 
 	double _default_note_length;
 
 	boost::shared_ptr<ARDOUR::MidiModel>        _model;
-	std::vector<ArdourCanvas::CanvasMidiEvent*> _events;
+	std::vector<ArdourCanvas::CanvasNoteEvent*> _events;
 	ArdourCanvas::CanvasNote**                  _active_notes;
 	ArdourCanvas::Group*                        _note_group;
 	ARDOUR::MidiModel::DeltaCommand*            _delta_command;
@@ -259,7 +262,7 @@ class MidiRegionView : public RegionView
 	int _pressed_button;
 
 	/// currently selected CanvasMidiEvents
-	typedef std::set<ArdourCanvas::CanvasMidiEvent*> Selection;
+	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
 	Selection _selection;
 
 	/**

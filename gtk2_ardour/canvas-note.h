@@ -29,7 +29,7 @@
 namespace Gnome {
 namespace Canvas {
 
-class CanvasNote : public SimpleRect, public CanvasMidiEvent {
+class CanvasNote : public SimpleRect, public CanvasNoteEvent {
 public:
 	CanvasNote(
 			MidiRegionView&                       region,

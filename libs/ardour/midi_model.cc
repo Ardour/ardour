@@ -87,6 +87,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		}
 	}
 			
+	/* TODO: Disabled for stablility reasons
 	MidiControlIterator earliest_control(boost::shared_ptr<AutomationList>(), DBL_MAX, 0.0);
 
 	_control_iters.reserve(model.controls().size());
@@ -98,8 +99,8 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y);
 		if (!ret) {
-			/*cerr << "MIDI Iterator: CC " << i->first.id() << " (size " << i->second->list()->size()
-				<< ") has no events past " << t << endl;*/
+			//cerr << "MIDI Iterator: CC " << i->first.id() << " (size " << i->second->list()->size()
+			//	<< ") has no events past " << t << endl;
 			continue;
 		} 
 
@@ -118,6 +119,8 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 			--_control_iter;
 		}
 	}
+	*/
+	
 
 	if (_note_iter != model.notes().end()) {
 		_event = MIDI::Event((*_note_iter)->on_event(), false);
@@ -126,10 +129,12 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		++_note_iter;
 	}
 
+	/** TODO: Disabled for stability reasons
 	if (earliest_control.automation_list && earliest_control.x < _event.time())
 		model.control_to_midi_event(_event, earliest_control);
 	else
 		_control_iter = _control_iters.end();
+	 */
 
 	_pgm_change_iter = model.pgm_changes().end();
 	// find first program change which begins after t
@@ -556,12 +561,13 @@ MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t
 	
 	assert(chan < 16);
 	assert(_writing);
+	/** TODO: disabled for now until debugged....
 	_edited = true;
 	
 	Parameter param(MidiCCAutomation, number, chan);
-	
 	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
 	control->list()->fast_simple_add(time, (double)value);
+	*/
 }
 
 void
@@ -577,11 +583,6 @@ MidiModel::append_pgm_change_unlocked(uint8_t chan, double time, uint8_t number)
 	event_ptr->set_channel(chan);
 	event_ptr->set_pgm_number(number);
 	_pgm_changes.push_back(event_ptr);
-	cerr << "MidiModel::append_pgm_change_unlocked: appended pgm change" << endl;
-	for(PgmChanges::iterator i = _pgm_changes.begin(); i != _pgm_changes.end(); ++i) {
-		cerr << "_pgm_changes contents: channel " << int((*i)->channel()) << dec << " time: " << int((*i)->time()) << hex << " program number: " << int(int((*i)->pgm_number())) <<endl;
-	}
-	//<< int(_pgm_changes.) << " time: " << time << " program number: " << int(number) <<endl;
 }
 
 void

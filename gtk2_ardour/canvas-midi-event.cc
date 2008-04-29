@@ -31,7 +31,7 @@ namespace Gnome {
 namespace Canvas {
 
 
-CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item,
+CanvasNoteEvent::CanvasMidiEvent(MidiRegionView& region, Item* item,
 		const boost::shared_ptr<ARDOUR::Note> note)
 	: _region(region)
 	, _item(item)
@@ -44,21 +44,21 @@ CanvasMidiEvent::CanvasMidiEvent(MidiRegionView& region, Item* item,
 	_text = new Text(*(item->property_parent()));
 }
 
-CanvasMidiEvent::~CanvasMidiEvent() 
+CanvasNoteEvent::~CanvasNoteEvent() 
 { 
 	if(_text) delete _text;
 	if(_channel_selector_widget) delete _channel_selector_widget;
 }
 
 void 
-CanvasMidiEvent::move_event(double dx, double dy)
+CanvasNoteEvent::move_event(double dx, double dy)
 {
 	_item->move(dx, dy);
 	_text->move(dx, dy);
 }
 
 void
-CanvasMidiEvent::show_velocity(void)
+CanvasNoteEvent::show_velocity(void)
 {
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
@@ -73,13 +73,13 @@ CanvasMidiEvent::show_velocity(void)
 }
 
 void
-CanvasMidiEvent::hide_velocity(void)
+CanvasNoteEvent::hide_velocity(void)
 {
 	_text->hide();
 }
 
 void 
-CanvasMidiEvent::on_channel_selection_change(uint16_t selection)
+CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
 	if( (selection & (1 << _note->channel())) == 0 ) {
@@ -95,7 +95,7 @@ CanvasMidiEvent::on_channel_selection_change(uint16_t selection)
 }
 
 void 
-CanvasMidiEvent::on_channel_change(uint8_t channel)
+CanvasNoteEvent::on_channel_change(uint8_t channel)
 {
 	_region.note_selected(this, true);
 	hide_channel_selector();
@@ -103,14 +103,14 @@ CanvasMidiEvent::on_channel_change(uint8_t channel)
 }
 
 void
-CanvasMidiEvent::show_channel_selector(void)
+CanvasNoteEvent::show_channel_selector(void)
 {
 	if(_channel_selector_widget == 0) {
 		cerr << "Note has channel: " << int(_note->channel()) << endl;
 		SingleMidiChannelSelector* _channel_selector = new SingleMidiChannelSelector(_note->channel());
 		_channel_selector->show_all();
 		_channel_selector->channel_selected.connect(
-			sigc::mem_fun(this, &CanvasMidiEvent::on_channel_change));
+			sigc::mem_fun(this, &CanvasNoteEvent::on_channel_change));
 
 		_channel_selector_widget = 
 			new Widget(*(_item->property_parent()), 
@@ -129,7 +129,7 @@ CanvasMidiEvent::show_channel_selector(void)
 }
 
 void
-CanvasMidiEvent::hide_channel_selector(void)
+CanvasNoteEvent::hide_channel_selector(void)
 {
 	if(_channel_selector_widget) {
 		_channel_selector_widget->hide();
@@ -139,7 +139,7 @@ CanvasMidiEvent::hide_channel_selector(void)
 }
 
 void
-CanvasMidiEvent::selected(bool yn)
+CanvasNoteEvent::selected(bool yn)
 {
 	if (!_note) {
 		return;
@@ -159,7 +159,7 @@ CanvasMidiEvent::selected(bool yn)
 
 
 bool
-CanvasMidiEvent::on_event(GdkEvent* ev)
+CanvasNoteEvent::on_event(GdkEvent* ev)
 {
 	MidiStreamView *streamview = _region.midi_stream_view();
 	static uint8_t drag_delta_note = 0;

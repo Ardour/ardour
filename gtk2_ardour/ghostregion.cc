@@ -174,7 +174,7 @@ MidiGhostRegion::~MidiGhostRegion()
 	//clear_events();
 }
 
-MidiGhostRegion::Event::Event(ArdourCanvas::CanvasMidiEvent* e)
+MidiGhostRegion::Event::Event(ArdourCanvas::CanvasNoteEvent* e)
 	: event(e)
 {
 }

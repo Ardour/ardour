@@ -28,7 +28,7 @@
 
 namespace Gnome {
 	namespace Canvas {
-		class CanvasMidiEvent;
+		class CanvasNoteEvent;
 		class CanvasNote;
 		class CanvasHit;
 		class Diamond;
@@ -76,11 +76,11 @@ class MidiGhostRegion : public GhostRegion {
 public:
 	class Event : public sigc::trackable {
 	public:
-		Event(ArdourCanvas::CanvasMidiEvent*);
+		Event(ArdourCanvas::CanvasNoteEvent*);
 		virtual ~Event() {}
 
 		virtual void x_changed() = 0;
-		ArdourCanvas::CanvasMidiEvent* event;
+		ArdourCanvas::CanvasNoteEvent* event;
 	};
 
 	class Note : public Event {
