@@ -1,7 +1,8 @@
 #include "canvas-program-change.h"
 #include <iostream>
+#include "ardour_ui.h"
 
-using namespace ArdourCanvas;
+using namespace Gnome::Canvas;
 using namespace std;
 
 CanvasProgramChange::CanvasProgramChange(

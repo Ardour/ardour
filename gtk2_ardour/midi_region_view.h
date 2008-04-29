@@ -36,7 +36,7 @@
 #include "enums.h"
 #include "canvas.h"
 #include "canvas-note.h"
-#include "canvas-midi-event.h"
+#include "canvas-note-event.h"
 #include "canvas-program-change.h"
 
 namespace ARDOUR {
@@ -254,6 +254,7 @@ class MidiRegionView : public RegionView
 
 	boost::shared_ptr<ARDOUR::MidiModel>        _model;
 	std::vector<ArdourCanvas::CanvasNoteEvent*> _events;
+	std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > _pgm_changes;
 	ArdourCanvas::CanvasNote**                  _active_notes;
 	ArdourCanvas::Group*                        _note_group;
 	ARDOUR::MidiModel::DeltaCommand*            _delta_command;

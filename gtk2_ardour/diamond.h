@@ -21,7 +21,7 @@
 #define __ardour_diamond_h__
 
 #include <libgnomecanvasmm/polygon.h>
-#include "canvas-midi-event.h"
+#include "canvas-note-event.h"
 
 namespace Gnome {
 namespace Canvas {

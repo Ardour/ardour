@@ -40,7 +40,7 @@
 #include "control_point.h"
 #include "canvas_impl.h"
 #include "simplerect.h"
-#include "canvas-midi-event.h"
+#include "canvas-note-event.h"
 
 #include "i18n.h"
 

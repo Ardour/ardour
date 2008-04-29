@@ -4,15 +4,14 @@
 #include <libgnomecanvasmm/group.h>
 #include "simplerect.h"
 #include "simpleline.h"
-#include "midi_region_view.h"
 #include <libgnomecanvasmm/text.h>
 #include <libgnomecanvasmm/widget.h>
 #include <ardour/midi_model.h>
 
-namespace Gnome
-{
-namespace Canvas
-{
+class MidiRegionView;
+
+namespace Gnome {
+namespace Canvas {
 
 class CanvasProgramChange : public Group
 {

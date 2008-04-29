@@ -431,6 +431,7 @@ MidiRegionView::clear_events()
 		delete *i;
 
 	_events.clear();
+	_pgm_changes.clear();
 }
 
 
@@ -476,14 +477,8 @@ MidiRegionView::redisplay_model()
 		}
 
 		MidiModel::PgmChanges& pgm_changes = _model->pgm_changes();
-		/*
-		for (MidiModel::PgmChanges::const_iterator i = pgm_changes.begin(); 
-		     i != pgm_changes.end(); 
-		     ++i) {
-			add_pgm_change()
-		}
-		*/
-		for_each(pgm_changes.begin(), pgm_changes.end(), sigc::mem_fun(this, &MidiRegionView::add_pgm_change));
+		for_each(pgm_changes.begin(), pgm_changes.end(), 
+			sigc::mem_fun(this, &MidiRegionView::add_pgm_change));
 
 		end_write();
 
@@ -820,8 +815,9 @@ MidiRegionView::add_pgm_change(boost::shared_ptr<MIDI::Event> event)
 	const double x = trackview.editor.frame_to_pixel((nframes_t)event->time() - _region->start());
 	
 	double height = midi_stream_view()->contents_height();
-	new CanvasProgramChange(*this, *group, event, height, x, 1.0);
-	//TODO : keep track of pgm changes
+	_pgm_changes.push_back(
+		boost::shared_ptr<CanvasProgramChange>(
+			new CanvasProgramChange(*this, *group, event, height, x, 1.0)));
 }
 
 void

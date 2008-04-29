@@ -362,11 +362,13 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 		assert(_read_iter->size() > 0);
 		dst.write(_read_iter->time() + stamp_offset - negative_stamp_offset, _read_iter->size(), _read_iter->buffer());
 		
+		/*
 		cerr << this << " MidiModel::read event @ " << _read_iter->time()  
 		     << " type: " << hex << int(_read_iter->type()) << dec 
 		     << " note: " << int(_read_iter->note()) 
 		     << " velocity: " << int(_read_iter->velocity()) 
 		     << endl;
+		*/
 		
 		++_read_iter;
 		++read_events;
@@ -573,7 +575,7 @@ MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t
 void
 MidiModel::append_pgm_change_unlocked(uint8_t chan, double time, uint8_t number) 
 {
-	cerr << "MidiModel::append_pgm_change_unlocked: channel " << int(chan) << " time: " << time << " program number: " << int(number) <<endl; 
+	//cerr << "MidiModel::append_pgm_change_unlocked: channel " << int(chan) << " time: " << time << " program number: " << int(number) <<endl; 
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;
@@ -603,6 +605,9 @@ MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 	for(Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
 		Note& _n = *(*n);
 		const Note& _note = *note;
+		// TODO: There is still the issue, that after restarting ardour
+		// persisted undo does not work, because of rounding errors in the
+		// event times after saving/restoring to/from MIDI files
 		cerr << "======================================= " << endl;
 		cerr << int(_n.note()) << "@" << int(_n.time()) << "[" << int(_n.channel()) << "] --" << int(_n.duration()) << "-- #" << int(_n.velocity())  << endl;
 		cerr << int(_note.note()) << "@" << int(_note.time()) << "[" << int(_note.channel()) << "] --" << int(_note.duration()) << "-- #" << int(_note.velocity())  << endl;

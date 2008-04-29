@@ -18,7 +18,7 @@
 */
 
 #include <iostream>
-#include "canvas-midi-event.h"
+#include "canvas-note-event.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
 #include "editing_syms.h"

@@ -23,7 +23,7 @@
 
 #include <iostream>
 #include "simplerect.h"
-#include "canvas-midi-event.h"
+#include "canvas-note-event.h"
 #include "midi_util.h"
 
 namespace Gnome {
