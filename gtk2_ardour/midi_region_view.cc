@@ -427,7 +427,7 @@ MidiRegionView::clear_events()
 		}
 	}
 
-	for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i)
+	for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i)
 		delete *i;
 
 	_events.clear();
@@ -570,8 +570,8 @@ MidiRegionView::set_y_position_and_height (double y, double h)
 
 		_model->read_lock();
 
-		for (std::vector<CanvasMidiEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i) {
-			CanvasMidiEvent* event = *i;
+		for (std::vector<CanvasNoteEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i) {
+			CanvasNoteEvent* event = *i;
 			Item* item = dynamic_cast<Item*>(event);
 			assert(item);
 			if (event && event->note()) {
@@ -646,7 +646,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_duration (_region->length() / samples_per_unit);
 	ghosts.push_back (ghost);
 
-	for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+	for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((note = dynamic_cast<CanvasNote*>(*i)) != 0) {
 			ghost->add_note(note);
 		}
@@ -735,7 +735,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 
-	CanvasMidiEvent *event = 0;
+	CanvasNoteEvent *event = 0;
 	
 	const double x = trackview.editor.frame_to_pixel((nframes_t)note->time() - _region->start());
 	
@@ -837,7 +837,7 @@ MidiRegionView::delete_selection()
 }
 
 void
-MidiRegionView::clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev)
+MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
 		if ((*i)->selected() && (*i) != ev)
@@ -847,7 +847,7 @@ MidiRegionView::clear_selection_except(ArdourCanvas::CanvasMidiEvent* ev)
 }
 
 void
-MidiRegionView::unique_select(ArdourCanvas::CanvasMidiEvent* ev)
+MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
 		if ((*i) != ev)
@@ -861,7 +861,7 @@ MidiRegionView::unique_select(ArdourCanvas::CanvasMidiEvent* ev)
 }
 
 void
-MidiRegionView::note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
+MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 {
 	if ( ! add)
 		clear_selection_except(ev);
@@ -874,7 +874,7 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
 
 
 void
-MidiRegionView::note_deselected(ArdourCanvas::CanvasMidiEvent* ev, bool add)
+MidiRegionView::note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 {
 	if ( ! add)
 		clear_selection_except(ev);
@@ -895,7 +895,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 	// FIXME: so, so, so much slower than this should be
 
 	if (x1 < x2) {
-		for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 			if ((*i)->x1() >= x1 && (*i)->x1() <= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
 				(*i)->selected(true);
 				_selection.insert(*i);
@@ -905,7 +905,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 			}
 		}
 	} else {
-		for (std::vector<CanvasMidiEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 			if ((*i)->x2() <= x1 && (*i)->x2() >= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
 				(*i)->selected(true);
 				_selection.insert(*i);
@@ -927,7 +927,7 @@ MidiRegionView::move_selection(double dx, double dy)
 
 
 void
-MidiRegionView::note_dropped(CanvasMidiEvent* ev, double dt, uint8_t dnote)
+MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 {
 	// TODO: This would be faster/nicer with a MoveCommand that doesn't need to copy...
 	if (_selection.find(ev) != _selection.end()) {
@@ -1196,7 +1196,7 @@ MidiRegionView::change_velocity(uint8_t velocity, bool relative)
 		Selection::iterator next = i;
 		++next;
 
-		CanvasMidiEvent *event = *i;
+		CanvasNoteEvent *event = *i;
 		const boost::shared_ptr<Note> copy(new Note(*(event->note().get())));
 
 		if(relative) {
@@ -1231,7 +1231,7 @@ MidiRegionView::change_channel(uint8_t channel)
 		Selection::iterator next = i;
 		++next;
 
-		CanvasMidiEvent *event = *i;
+		CanvasNoteEvent *event = *i;
 		const boost::shared_ptr<Note> copy(new Note(*(event->note().get())));
 
 		copy->set_channel(channel);
@@ -1253,7 +1253,7 @@ MidiRegionView::change_channel(uint8_t channel)
 
 
 void
-MidiRegionView::note_entered(ArdourCanvas::CanvasMidiEvent* ev)
+MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	if (ev->note() && _mouse_state == EraseTouchDragging) {
 		start_delta_command(_("note entered"));
@@ -1298,7 +1298,7 @@ MidiRegionView::midi_channel_selection_changed(uint16_t selection)
 		selection = 0xFFFF;
 	}
 		
-	for(std::vector<ArdourCanvas::CanvasMidiEvent*>::iterator i = _events.begin();
+	for(std::vector<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin();
 		i != _events.end();
 		++i) {
 		(*i)->on_channel_selection_change(selection);

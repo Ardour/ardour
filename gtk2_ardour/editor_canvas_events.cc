@@ -58,7 +58,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	double wx, wy;
 	nframes_t xdelta;
 	int direction = ev->direction;
-	CanvasMidiEvent *midi_event = dynamic_cast<CanvasMidiEvent *>(track_canvas->get_item_at(ev->x, ev->y));
+	CanvasNoteEvent *midi_event = dynamic_cast<CanvasNoteEvent *>(track_canvas->get_item_at(ev->x, ev->y));
 
   retry:
 	switch (direction) {

@@ -46,7 +46,7 @@ namespace Canvas {
  */
 class CanvasNoteEvent : public sigc::trackable {
 public:
-	CanvasMidiEvent(
+	CanvasNoteEvent(
 			MidiRegionView&                       region,
 			Item*                                 item,
 			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>());

@@ -31,7 +31,7 @@ namespace Gnome {
 namespace Canvas {
 
 
-CanvasNoteEvent::CanvasMidiEvent(MidiRegionView& region, Item* item,
+CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 		const boost::shared_ptr<ARDOUR::Note> note)
 	: _region(region)
 	, _item(item)

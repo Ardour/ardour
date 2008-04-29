@@ -35,7 +35,7 @@ public:
 			double                                size,
 			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
 
-		: Diamond(group, size), CanvasMidiEvent(region, this, note)
+		: Diamond(group, size), CanvasNoteEvent(region, this, note)
 	{
 	}
 	

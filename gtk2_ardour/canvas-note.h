@@ -36,7 +36,7 @@ public:
 			Group&                                group,
 			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
 
-		: SimpleRect(group), CanvasMidiEvent(region, this, note)
+		: SimpleRect(group), CanvasNoteEvent(region, this, note)
 	{
 	}
 

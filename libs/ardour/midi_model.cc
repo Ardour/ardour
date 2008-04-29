@@ -884,47 +884,23 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	 * note durations.
 	 */
 
-	/* Percussive 
-	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-		const MIDI::Event& ev = n->on_event();
-		source->append_event_unlocked(ev);
-	}*/
-
 	read_lock();
 
-	//LaterNoteEndComparator cmp;
-	//ActiveNotes active_notes(cmp);
+	LaterNoteEndComparator cmp;
+	ActiveNotes active_notes(cmp);
 	
 	EventTimeComparator comp;
 	typedef std::priority_queue<
-				MIDI::Event*, 
-				std::deque<MIDI::Event*>,
+				const MIDI::Event*, 
+				std::deque<const MIDI::Event*>,
 				EventTimeComparator> MidiEvents;
 	
 	MidiEvents events(comp);
 	
-
-	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-		events.push(&(*n)->on_event());
-		events.push(&(*n)->off_event());
-	}
-	
-	for (PgmChanges::const_iterator p = _pgm_changes.begin(); p != _pgm_changes.end(); ++p) {
-		events.push((*p).get());		
-	}
-
-	while(!events.empty()) {
-		source->append_event_unlocked(Frames, *events.top());
-		cerr << "MidiModel::write_to appending event with time:" << dec << int(events.top()->time()) << hex 
-		     << "   buffer: 0x" << int(events.top()->buffer()[0]) << " 0x" << int(events.top()->buffer()[1]) 
-		     << " 0x" << int(events.top()->buffer()[2]) << endl;
-		events.pop();
-	}
-	
-		
 	/* Why sort manyally, when a priority queue does the job for us,
-	 * or am I missing something???
-	 * 
+	 * (I am probably wrong here, but I needed that to test program
+	 * change code quickly) ???
+	 * 	*/
 	// Foreach note
 	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
 
@@ -933,32 +909,37 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 			const boost::shared_ptr<const Note> earliest_off = active_notes.top();
 			const MIDI::Event& off_ev = earliest_off->off_event();
 			if (off_ev.time() <= (*n)->time()) {
-				source->append_event_unlocked(Frames, off_ev);
+				events.push(&off_ev);
 				active_notes.pop();
 			} else {
 				break;
 			}
 		}
-		
-		// Write program changes preceding this note on
-		if(p != _pgm_changes.end() && ((*p)->time() <= (*n)->time())) {
-			const MIDI::Event& pgm_change_event = *(*p);
-			source->append_event_unlocked(Frames, pgm_change_event);
-			++p;
-		}
 
 		// Write this note on
-		source->append_event_unlocked(Frames, (*n)->on_event());
+		events.push(&(*n)->on_event());
 		if ((*n)->duration() > 0)
 			active_notes.push(*n);
 	}
 		
 	// Write any trailing note offs
 	while ( ! active_notes.empty() ) {
-		source->append_event_unlocked(Frames, active_notes.top()->off_event());
+		events.push(&active_notes.top()->off_event());
 		active_notes.pop();
 	}
-	*/
+	
+	//write program changes
+	for (PgmChanges::const_iterator p = _pgm_changes.begin(); p != _pgm_changes.end(); ++p) {
+		events.push((*p).get());		
+	}
+	
+	while(!events.empty()) {
+		source->append_event_unlocked(Frames, *events.top());
+		cerr << "MidiModel::write_to appending event with time:" << dec << int(events.top()->time()) << hex 
+		     << "   buffer: 0x" << int(events.top()->buffer()[0]) << " 0x" << int(events.top()->buffer()[1]) 
+		     << " 0x" << int(events.top()->buffer()[2]) << endl;
+		events.pop();
+	}
 	
 	_edited = false;
 	

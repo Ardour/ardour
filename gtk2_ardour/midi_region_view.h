@@ -261,7 +261,7 @@ class MidiRegionView : public RegionView
 	MouseState _mouse_state;
 	int _pressed_button;
 
-	/// currently selected CanvasMidiEvents
+	/// currently selected CanvasNoteEvents
 	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
 	Selection _selection;
 
