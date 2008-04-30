@@ -114,7 +114,7 @@ PanAutomationTimeAxisView::add_line (AutomationLine& line)
 		multiline_selector.set_active(0);
 	}
 
-	if (lines.size() + 1 > 1 && (height_style != Small && height_style != Smaller)) {
+	if (lines.size() + 1 > 1 && (height > hSmall)) {
 		multiline_selector.show();
 	} else {
 		multiline_selector.hide();
@@ -125,21 +125,16 @@ PanAutomationTimeAxisView::add_line (AutomationLine& line)
 }
 
 void
-PanAutomationTimeAxisView::set_height (TimeAxisView::TrackHeight th)
+PanAutomationTimeAxisView::set_height (uint32_t h)
 {
-	AutomationTimeAxisView::set_height(th);
+	AutomationTimeAxisView::set_height(h);
 
-	switch (th) {
-		case Largest:
-		case Large:
-		case Larger:
-		case Normal:
-			if (lines.size() > 1) {
-				multiline_selector.show();
-				break;
-			} 
-		default:
-			multiline_selector.hide();
+	if (h >= hNormal) {
+		if (lines.size() > 1) {
+			multiline_selector.show();
+		} 
+	} else {
+		multiline_selector.hide();
 	}
 }
 

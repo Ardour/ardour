@@ -95,6 +95,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	_has_state = false;
 	last_name_entry_key_press_event = 0;
 	name_packing = NamePackingBits (0);
+	resize_drag_start = -1;
+	resize_idle_id = -1;
 
 	/*
 	  Create the standard LHS Controls
@@ -130,7 +132,22 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
+	resizer.set_size_request (5, 5);
+	resizer.signal_expose_event().connect (mem_fun (*this, &TimeAxisView::resizer_expose));
+	resizer.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_press));
+	resizer.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_release));
+	resizer.signal_motion_notify_event().connect (mem_fun (*this, &TimeAxisView::resizer_motion));
+	resizer.set_events (Gdk::BUTTON_PRESS_MASK|
+			    Gdk::BUTTON_RELEASE_MASK|
+			    Gdk::POINTER_MOTION_MASK|
+			    Gdk::SCROLL_MASK);
+
+	resizer_box.pack_start (resizer, false, false);
+	resizer.show ();
+	resizer_box.show();
+
 	controls_vbox.pack_start (controls_table, false, false);
+	controls_vbox.pack_end (resizer_box, false, true);
 	controls_vbox.show ();
 
 	controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
@@ -226,7 +243,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_hidden = false;
 	
 	/* height in pixels depends on _order, so update it now we've changed _order */
-	set_height (height_style);
+	set_height (height);
 	
 	effective_height = height;
 
@@ -326,39 +343,38 @@ TimeAxisView::hide ()
 void
 TimeAxisView::step_height (bool bigger)
 {
-  
        if (height == hLargest) {
-               if (!bigger) set_height (Large);
+               if (!bigger) set_height (hLarge);
                return;
        }
        if (height == hLarge) {
-               if (bigger) set_height (Largest);
-                else set_height (Larger);
+               if (bigger) set_height (hLargest);
+                else set_height (hLarger);
                return;
        }
        if (height == hLarger) {
-                if (bigger) set_height (Large);
-                else set_height (Normal);
+                if (bigger) set_height (hLarge);
+                else set_height (hNormal);
                return;
        }
        if (height == hNormal) {
-                if (bigger) set_height (Larger);
-                else set_height (Smaller);
+                if (bigger) set_height (hLarger);
+                else set_height (hSmaller);
                return;
        }
        if (height == hSmaller) {
-                if (bigger) set_height (Normal);
-                else set_height (Small);
+                if (bigger) set_height (hNormal);
+                else set_height (hSmall);
                return;
        }
        if (height == hSmall) {
-                if (bigger) set_height (Smaller);
+                if (bigger) set_height (hSmaller);
                return;
        }
 }
 
 void
-TimeAxisView::set_heights (TrackHeight h)
+TimeAxisView::set_heights (uint32_t h)
 {
 	TrackSelection& ts (editor.get_selection().tracks);
 
@@ -368,14 +384,7 @@ TimeAxisView::set_heights (TrackHeight h)
 }
 
 void
-TimeAxisView::set_height (TrackHeight h)
-{
-	height_style = h;
-	set_height_pixels (height_to_pixels (h));
-}
-
-void
-TimeAxisView::set_height_pixels (uint32_t h)
+TimeAxisView::set_height(uint32_t h)
 {
 	height = h;
 	controls_frame.set_size_request (-1, height + ((order == 0) ? 1 : 0));
@@ -423,9 +432,9 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 					} while ((*i)->hidden());
 				}
 			}
-
-			if ((*i)->height_style == Small) {
-				(*i)->set_height(Smaller);
+			
+			if ((*i)->height >= hSmall && (*i)->height < hNormal) {
+				(*i)->set_height(hSmaller);
 			}
 			
 			(*i)->name_entry.grab_focus();
@@ -612,12 +621,12 @@ TimeAxisView::build_size_menu ()
 	size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = size_menu->items();
 	
-	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_heights), Largest)));
-	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_heights), Large)));
-	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_heights), Larger)));
-	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_heights), Normal)));
-	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_heights),Smaller)));
-	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_heights), Small)));
+	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_heights), hLargest)));
+	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_heights), hLarge)));
+	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_heights), hLarger)));
+	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_heights), hNormal)));
+	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_heights),hSmaller)));
+	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_heights), hSmall)));
 }
 
 void
@@ -928,60 +937,42 @@ TimeAxisView::set_state (const XMLNode& node)
 	if ((prop = node.property ("track_height")) != 0) {
 
 		if (prop->value() == "largest") {
-			set_height (Largest);
+			set_height (hLargest);
 		} else if (prop->value() == "large") {
-			set_height (Large);
+			set_height (hLarge);
 		} else if (prop->value() == "larger") {
-			set_height (Larger);
+			set_height (hLarger);
 		} else if (prop->value() == "normal") {
-			set_height (Normal);
+			set_height (hNormal);
 		} else if (prop->value() == "smaller") {
-			set_height (Smaller);
+			set_height (hSmaller);
 		} else if (prop->value() == "small") {
-			set_height (Small);
+			set_height (hSmall);
 		} else {
 			error << string_compose(_("unknown track height name \"%1\" in XML GUI information"), prop->value()) << endmsg;
 			set_height (Normal);
 		}
 
+	} else if ((prop = node.property ("height")) != 0) {
+
+		uint32_t h = atoi (prop->value());
+		set_height (h);
+
 	} else {
-		set_height (Normal);
+		set_height (hNormal);
 	}
 }
 
 void
 TimeAxisView::reset_height()
 {
-	set_height_pixels (height);
+	set_height(height);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_height_pixels ((TrackHeight)(*i)->height);
+		(*i)->set_height ((*i)->height);
 	}
 }
 	
-uint32_t
-TimeAxisView::height_to_pixels (TrackHeight h)
-{
-	switch (h) {
-	case Largest:
-		return hLargest;
-	case Large:
-		return hLarge;
-	case Larger:
-		return hLarger;
-	case Normal:
-		return hNormal;
-	case Smaller:
-		return hSmaller;
-	case Small:
-		return hSmall;
-	}
-	
-	// what is wrong with gcc ?
-	
-	return hNormal;
-}
-			
 void
 TimeAxisView::compute_controls_size_info ()
 {
@@ -1179,5 +1170,67 @@ TimeAxisView::reshow_feature_lines ()
 		(*l)->property_x2() = editor.frame_to_pixel (*i);
 		(*l)->show ();
 	}
+}
+
+bool
+TimeAxisView::resizer_button_press (GdkEventButton* event)
+{
+	resize_drag_start = event->y_root;
+	resize_idle_target = height;
+	return true;
+}
+
+bool
+TimeAxisView::resizer_button_release (GdkEventButton* ev)
+{
+	resize_drag_start = -1;
+	return true;
+}
+
+static gboolean
+_idle_resizer (gpointer arg)
+{
+	return ((TimeAxisView*)arg)->idle_resize ();
+}
+
+bool
+TimeAxisView::idle_resize ()
+{
+	set_height (resize_idle_target);
+	resize_idle_id = -1;
+	return false;
+}
+
+bool
+TimeAxisView::resizer_motion (GdkEventMotion* ev)
+{
+	if (resize_drag_start < 0) {
+		return true;
+	}
+
+	int32_t delta = (int32_t) floor (resize_drag_start - ev->y_root);
+
+	resize_idle_target = std::max (resize_idle_target - delta, (int) hSmall);
+
+	if (resize_idle_id < 0) {
+		resize_idle_id = g_idle_add (_idle_resizer, this);
+	}
+
+	resize_drag_start = ev->y_root;
+
+	return true;
+}
+
+
+bool
+TimeAxisView::resizer_expose (GdkEventExpose* event)
+{
+	resizer.get_window()->draw_rectangle (resizer.get_style()->get_bg_gc(resizer.get_state()),
+					      true,
+					      event->area.x,
+					      event->area.y,
+					      event->area.width,
+					      event->area.height);
+	return true;
 }
 

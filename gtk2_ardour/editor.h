@@ -2117,7 +2117,7 @@ public:
 
 	RhythmFerret* rhythm_ferret;
 
-	void set_track_height (TimeAxisView::TrackHeight h);
+	void set_track_height (uint32_t h);
 	void set_track_height_largest ();
 	void set_track_height_large ();
 	void set_track_height_larger ();

@@ -488,7 +488,7 @@ AudioTimeAxisView::toggle_gain_track ()
 		/* now trigger a redisplay */
 		
 		if (!no_redraw) {
-			 _route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
 		}
 	}
 }
@@ -502,7 +502,7 @@ AudioTimeAxisView::gain_hidden ()
 		gain_automation_item->set_active (false);
 	}
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -524,7 +524,7 @@ AudioTimeAxisView::toggle_pan_track ()
 		/* now trigger a redisplay */
 		
 		if (!no_redraw) {
-			 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+			 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 		}
 	}
 }
@@ -538,7 +538,7 @@ AudioTimeAxisView::pan_hidden ()
 		pan_automation_item->set_active (false);
 	}
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -553,7 +553,7 @@ AudioTimeAxisView::show_all_automation ()
 
 	no_redraw = false;
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -568,7 +568,7 @@ AudioTimeAxisView::show_existing_automation ()
 
 	no_redraw = false;
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -582,7 +582,7 @@ AudioTimeAxisView::hide_all_automation ()
 	RouteTimeAxisView::hide_all_automation();
 
 	no_redraw = false;
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void

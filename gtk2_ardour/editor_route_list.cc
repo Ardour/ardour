@@ -104,6 +104,14 @@ Editor::handle_gui_changes (const string & what, void *src)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
 	
 	if (what == "track_height") {
+		/* make tracks change height while it happens, instead 
+		   of on first-idle
+		*/
+		track_canvas->update_now ();
+		redisplay_route_list ();
+	}
+
+	if (what == "visible_tracks") {
 		redisplay_route_list ();
 	}
 }

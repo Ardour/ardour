@@ -692,10 +692,10 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 }
 
 void
-RouteTimeAxisView::set_height (TrackHeight h)
+RouteTimeAxisView::set_height (uint32_t h)
 {
-	int gmlen = (height_to_pixels (h)) - 5;
-	bool height_changed = (height == 0) || (h != height_style);
+	int gmlen = h - 5;
+	bool height_changed = (height == 0) || (h != height);
 	lm.setup_meters (gmlen);
 	TimeAxisView::set_height (h);
 
@@ -705,37 +705,11 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		_view->set_height ((double) height);
 	}
 
-	switch (height_style) {
-	case Largest:
-		xml_node->add_property ("track_height", "largest");
-		break;
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%u", height);
+	xml_node->add_property ("height", buf);
 
-	case Large:
-		xml_node->add_property ("track_height", "large");
-		break;
-
-	case Larger:
-		xml_node->add_property ("track_height", "larger");
-		break;
-
-	case Normal:
-		xml_node->add_property ("track_height", "normal");
-		break;
-
-	case Smaller:
-		xml_node->add_property ("track_height", "smaller");
-		break;
-
-	case Small:
-		xml_node->add_property ("track_height", "small");
-		break;
-	}
-
-	switch (height_style) {
-	case Largest:
-	case Large:
-	case Larger:
-	case Normal:
+	if (height >= hNormal) {
 		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
@@ -755,9 +729,9 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
 			playlist_button.show();
 		}
-		break;
 
-	case Smaller:
+	} else if (height >= hSmaller) {
+
 		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
@@ -777,13 +751,13 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
 			playlist_button.hide ();
 		}
-		break;
 
-	case Small:
+	} else if (height >= hSmall) {
+
 		hide_meter ();
 		hide_name_entry ();
 		show_name_label ();
-
+		
 		gain_slider->hide();
 		mute_button->hide();
 		solo_button->hide();
@@ -797,7 +771,6 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		automation_button.hide ();
 		playlist_button.hide ();
 		name_label.set_text (_route->name());
-		break;
 	}
 
 	if (height_changed) {
@@ -1459,7 +1432,7 @@ RouteTimeAxisView::show_all_automation ()
 
 	no_redraw = false;
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1476,8 +1449,8 @@ RouteTimeAxisView::show_existing_automation ()
 	}
 
 	no_redraw = false;
-
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	
+	_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1492,7 +1465,7 @@ RouteTimeAxisView::hide_all_automation ()
 	}
 
 	no_redraw = false;
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 
@@ -1641,7 +1614,7 @@ RouteTimeAxisView::redirect_automation_track_hidden (RouteTimeAxisView::Redirect
 
 	r->mark_automation_visible (ran->what, false);
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1777,7 +1750,7 @@ RouteTimeAxisView::redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutoma
 
 		/* now trigger a redisplay */
 		
-		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 
 	}
 }
@@ -1815,7 +1788,7 @@ RouteTimeAxisView::redirects_changed (void *src)
 
 	/* change in visibility was possible */
 
-	_route->gui_changed ("track_height", this);
+	_route->gui_changed ("visible_tracks", this);
 }
 
 RedirectAutomationLine *

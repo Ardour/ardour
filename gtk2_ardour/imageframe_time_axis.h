@@ -76,9 +76,9 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		/**
 		 * Sets the height of this TrackView to one of ths TrackHeghts
 		 *
-		 * @param h the TrackHeight value to set
+		 * @param h the number of pixels to set the height too
 		 */	
-		virtual void set_height(TimeAxisView::TrackHeight) ;
+		virtual void set_height(uint32_t h) ;
 		
 		/**
 		 * Sets the number of samples per unit that are used.

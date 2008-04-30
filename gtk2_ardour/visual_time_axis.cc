@@ -101,7 +101,7 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	hide_button.unset_flags(Gtk::CAN_FOCUS) ;
 	visual_button.unset_flags(Gtk::CAN_FOCUS) ;
 	
-	set_height(Normal) ;
+	set_height (hNormal) ;
 }
 
 /**
@@ -144,39 +144,25 @@ VisualTimeAxis::name() const
 /**
  * Sets the height of this TrackView to one of the defined TrackHeghts
  *
- * @param h the TrackHeight value to set
+ * @param h 
  */
 void
-VisualTimeAxis::set_height(TrackHeight h)
+VisualTimeAxis::set_height(uint32_t h)
 {
-	TimeAxisView::set_height(h) ;
+	TimeAxisView::set_height(h);
 	
-	switch (height)
-	{
-		case Largest:
-		case Large:
-		case Larger:
-		case Normal:
-		{
-			hide_name_label ();
-			show_name_entry ();
-			other_button_hbox.show_all() ;
-			break;
-		}
-		case Smaller:
-		{
-			hide_name_label ();
-			show_name_entry ();
-			other_button_hbox.hide_all() ;
-			break;
-		}
-		case Small:
-		{
-			hide_name_entry ();
-			show_name_label ();
-			other_button_hbox.hide_all() ;
-		}
-		break;
+	if (h >= hNormal) {
+		hide_name_label ();
+		show_name_entry ();
+		other_button_hbox.show_all() ;
+	} else if (h >= hSmaller) {
+		hide_name_label ();
+		show_name_entry ();
+		other_button_hbox.hide_all() ;
+	} else if (h >= hSmall) {
+		hide_name_entry ();
+		show_name_label ();
+		other_button_hbox.hide_all() ;
 	}
 }
 

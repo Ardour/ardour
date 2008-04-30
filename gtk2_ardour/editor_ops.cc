@@ -5521,7 +5521,7 @@ Editor::playhead_backward_to_grid ()
 }
 
 void
-Editor::set_track_height (TimeAxisView::TrackHeight h)
+Editor::set_track_height (uint32_t h)
 {
 	TrackSelection& ts (selection->tracks);
 
@@ -5537,32 +5537,32 @@ Editor::set_track_height (TimeAxisView::TrackHeight h)
 void
 Editor::set_track_height_largest ()
 {
-	set_track_height (TimeAxisView::Largest);
+	set_track_height (TimeAxisView::hLargest);
 }
 void
 Editor::set_track_height_large ()
 {
-	set_track_height (TimeAxisView::Large);
+	set_track_height (TimeAxisView::hLarge);
 }
 void
 Editor::set_track_height_larger ()
 {
-	set_track_height (TimeAxisView::Larger);
+	set_track_height (TimeAxisView::hLarger);
 }
 void
 Editor::set_track_height_normal ()
 {
-	set_track_height (TimeAxisView::Normal);
+	set_track_height (TimeAxisView::hNormal);
 }
 void
 Editor::set_track_height_smaller ()
 {
-	set_track_height (TimeAxisView::Smaller);
+	set_track_height (TimeAxisView::hSmaller);
 }
 void
 Editor::set_track_height_small ()
 {
-	set_track_height (TimeAxisView::Small);
+	set_track_height (TimeAxisView::hSmall);
 }
 
 void

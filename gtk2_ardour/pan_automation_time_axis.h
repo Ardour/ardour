@@ -45,7 +45,7 @@ class PanAutomationTimeAxisView : public AutomationTimeAxisView
 
 		void clear_lines ();
 		void add_line (AutomationLine&);
-		void set_height (TimeAxisView::TrackHeight);
+		void set_height (uint32_t h);
 
 	protected:
 		Gtk::ComboBoxText       multiline_selector;

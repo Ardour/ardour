@@ -77,23 +77,12 @@ class TimeAxisView : public virtual AxisView
 	};
 
   public:
-	enum TrackHeight { 
-		Largest,
-		Large,
-		Larger,
-		Normal,
-		Smaller,
-		Small
-	};
-	
 	static uint32_t hLargest;
 	static uint32_t hLarge;
 	static uint32_t hLarger;
 	static uint32_t hNormal;
 	static uint32_t hSmaller;
 	static uint32_t hSmall;
-
-	static uint32_t height_to_pixels (TrackHeight);
 
 	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
@@ -102,7 +91,6 @@ class TimeAxisView : public virtual AxisView
 
 	PublicEditor& editor;
 	
-	TrackHeight height_style; 
 	uint32_t height;  /* in canvas units */
 	uint32_t effective_height;  /* in canvas units */
 	double  y_position;
@@ -118,9 +106,21 @@ class TimeAxisView : public virtual AxisView
 	Gtk::Table    controls_table;
 	Gtk::EventBox controls_ebox;
 	Gtk::VBox     controls_vbox;
+	Gtk::EventBox resizer;
+	Gtk::HBox     resizer_box;
 	Gtk::HBox     name_hbox;
 	Gtk::Frame    name_frame;
  	Gtkmm2ext::FocusEntry name_entry;
+	
+	bool resizer_button_press (GdkEventButton*);
+	bool resizer_button_release (GdkEventButton*);
+	bool resizer_motion (GdkEventMotion*);
+	bool resizer_expose (GdkEventExpose*);
+
+	double resize_drag_start;
+	int32_t resize_idle_target;
+	int32_t resize_idle_id;
+	bool idle_resize();
 
 	void hide_name_label ();
 	void hide_name_entry ();
@@ -154,7 +154,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void entered () {}
 	virtual void exited () {}
 
-	virtual void set_height (TrackHeight h);
+	virtual void set_height (uint32_t h);
 	void reset_height();
 
 	/**
@@ -328,8 +328,7 @@ class TimeAxisView : public virtual AxisView
 	static void compute_controls_size_info ();
 	static bool need_size_info;
 
-	void set_heights (TrackHeight);
-	void set_height_pixels (uint32_t h);
+	void set_heights (uint32_t h);
 	void color_handler ();
 
 	list<ArdourCanvas::SimpleLine*> feature_lines;

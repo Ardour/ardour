@@ -74,7 +74,7 @@ public:
 	void show_selection (TimeSelection&);
 
 	void set_samples_per_unit (double);
- 	void set_height (TimeAxisView::TrackHeight);
+ 	void set_height (uint32_t h);
 	void show_timestretch (nframes_t start, nframes_t end);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);

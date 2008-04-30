@@ -82,7 +82,7 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas&
 	label_view() ;
 		
 	// set the initial height of this time axis
-	set_height(Small) ;
+	set_height(hSmall) ;
 }
 
 /**
@@ -106,13 +106,8 @@ MarkerTimeAxis::~MarkerTimeAxis()
 //---------------------------------------------------------------------------------------//
 // ui methods & data
 	
-/**
- * Sets the height of this TrackView to one of the defined TrackHeights
- *
- * @param h the TrackHeight value to set
- */	
 void
-MarkerTimeAxis::set_height (TrackHeight h)
+MarkerTimeAxis::set_height (uint32_t h)
 {
 	VisualTimeAxis::set_height(h) ;
 	

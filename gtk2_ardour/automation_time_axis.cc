@@ -299,17 +299,15 @@ AutomationTimeAxisView::clear_clicked ()
 }
 
 void
-AutomationTimeAxisView::set_height (TrackHeight ht)
+AutomationTimeAxisView::set_height (uint32_t h)
 {
-	uint32_t h = height_to_pixels (ht);
 	bool changed = (height != (uint32_t) h);
-
-	bool changed_between_small_and_normal = ( (ht == Small || ht == Smaller) ^ (height_style == Small || height_style == Smaller) );
+	bool changed_between_small_and_normal = ( (h == hSmall || h == hSmaller) ^ (height == hSmall || height == hSmaller) );
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	XMLNode* xml_node = state_parent->get_child_xml_node (_state_name);
 
-	TimeAxisView::set_height (ht);
+	TimeAxisView::set_height (h);
 	base_rect->property_y2() = h;
 
 	for (vector<AutomationLine*>::iterator i = lines.begin(); i != lines.end(); ++i) {
@@ -320,91 +318,60 @@ AutomationTimeAxisView::set_height (TrackHeight ht)
 		(*i)->set_height ();
 	}
 
-
-	switch (ht) {
-	case Largest:
-		xml_node->add_property ("track_height", "largest");
-		break;
-
-	case Large:
-		xml_node->add_property ("track_height", "large");
-		break;
-
-	case Larger:
-		xml_node->add_property ("track_height", "larger");
-		break;
-
-	case Normal:
-		xml_node->add_property ("track_height", "normal");
-		break;
-
-	case Smaller:
-		xml_node->add_property ("track_height", "smaller");
-		break;
-
-	case Small:
-		xml_node->add_property ("track_height", "small");
-		break;
-	}
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%u", height);
+	xml_node->add_property ("height", buf);
 
 	if (changed_between_small_and_normal || first_call_to_set_height) {
 		first_call_to_set_height = false;
-		switch (ht) {
-			case Largest:
-			case Large:
-			case Larger:
-			case Normal:
 
-				controls_table.remove (name_hbox);
-
-				if (plugname) {
-					if (plugname_packed) {
-						controls_table.remove (*plugname);
-						plugname_packed = false;
-					}
-					controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-					plugname_packed = true;
-					controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-				} else {
-					controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		if (h >= hNormal) {
+			controls_table.remove (name_hbox);
+			
+			if (plugname) {
+				if (plugname_packed) {
+					controls_table.remove (*plugname);
+					plugname_packed = false;
 				}
-				hide_name_entry ();
-				show_name_label ();
-				name_hbox.show_all ();
-
-				auto_button.show();
-				height_button.show();
-				clear_button.show();
-				hide_button.show_all();
-				break;
-
-			case Smaller:
-			case Small:
-
-				controls_table.remove (name_hbox);
-				if (plugname) {
-					if (plugname_packed) {
-						controls_table.remove (*plugname);
-						plugname_packed = false;
-					}
-				}
+				controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+				plugname_packed = true;
+				controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			} else {
 				controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-				controls_table.hide_all ();
-				hide_name_entry ();
-				show_name_label ();
-				name_hbox.show_all ();
+			}
+			hide_name_entry ();
+			show_name_label ();
+			name_hbox.show_all ();
+			
+			auto_button.show();
+			height_button.show();
+			clear_button.show();
+			hide_button.show_all();
 
-				auto_button.hide();
-				height_button.hide();
-				clear_button.hide();
-				hide_button.hide();
-				break;
+		} else if (h >= hSmall) {
+			controls_table.remove (name_hbox);
+			if (plugname) {
+				if (plugname_packed) {
+					controls_table.remove (*plugname);
+					plugname_packed = false;
+				}
+			}
+			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+			controls_table.hide_all ();
+			hide_name_entry ();
+			show_name_label ();
+			name_hbox.show_all ();
+			
+			auto_button.hide();
+			height_button.hide();
+			clear_button.hide();
+			hide_button.hide();
 		}
 	}
 
 	if (changed) {
 		/* only emit the signal if the height really changed */
-		route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
 
