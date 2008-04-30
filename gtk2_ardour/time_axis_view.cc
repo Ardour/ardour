@@ -132,7 +132,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
-	resizer.set_size_request (5, 5);
+	resizer.set_size_request (10, 10);
 	resizer.signal_expose_event().connect (mem_fun (*this, &TimeAxisView::resizer_expose));
 	resizer.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_press));
 	resizer.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_release));
@@ -981,7 +981,8 @@ TimeAxisView::compute_controls_size_info ()
 	Gtk::Table one_row_table (1, 8);
 	Button* buttons[5];
 	const int border_width = 2;
-	const int extra_height = (2 * border_width) + 2; // 2 pixels for the controls frame
+	const int extra_height = (2 * border_width) + 2 // 2 pixels for the controls frame
+		+ 10; // resizer button
 
 	window.add (one_row_table);
 
@@ -1225,7 +1226,7 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 bool
 TimeAxisView::resizer_expose (GdkEventExpose* event)
 {
-	resizer.get_window()->draw_rectangle (resizer.get_style()->get_bg_gc(resizer.get_state()),
+	resizer.get_window()->draw_rectangle (resizer.get_style()->get_fg_gc(STATE_ACTIVE),
 					      true,
 					      event->area.x,
 					      event->area.y,

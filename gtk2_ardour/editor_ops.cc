@@ -23,6 +23,7 @@
 #include <cmath>
 #include <string>
 #include <map>
+#include <set>
 
 #include <pbd/error.h>
 #include <pbd/basename.h>
@@ -1692,6 +1693,7 @@ Editor::temporal_zoom_region ()
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 	RegionSelection rs; 
+	set<TimeAxisView*> tracks;
 
 	get_regions_for_action (rs);
 
@@ -1706,6 +1708,8 @@ Editor::temporal_zoom_region ()
 		if ((*i)->region()->last_frame() + 1 > end) {
 			end = (*i)->region()->last_frame() + 1;
 		}
+
+		tracks.insert (&((*i)->get_time_axis_view()));
 	}
 
 	/* now comes an "interesting" hack ... make sure we leave a little space
@@ -1733,6 +1737,15 @@ Editor::temporal_zoom_region ()
 	}
 
 	temporal_zoom_by_frame (start, end, "zoom to region");
+
+	uint32_t per_track_height = (uint32_t) floor ((canvas_height - 10.0) / tracks.size());
+
+	for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+		(*t)->set_height (per_track_height);
+	}
+
+	vertical_adjustment.set_value (std::max ((*tracks.begin())->y_position - 5.0, 0.0));
+
 	zoomed_to_region = true;
 }
 
