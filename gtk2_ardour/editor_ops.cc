@@ -5849,7 +5849,7 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 			if ((*i)->start() >= pos) {
 				(*i)->set_start ((*i)->start() + frames);
 				if (!(*i)->is_mark()) {
-					(*i)->set_start ((*i)->end() + frames);
+					(*i)->set_end ((*i)->end() + frames);
 				}
 				moved = true;
 			}
