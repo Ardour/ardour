@@ -68,6 +68,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		row[route_display_columns.route] = route;
 		row[route_display_columns.text] = route->name();
 		row[route_display_columns.visible] = tv->marked_for_display();
+		row[route_display_columns.temporary_visible] = tv->marked_for_display();
 		row[route_display_columns.tv] = tv;
 
 		track_views.push_back (tv);
@@ -176,14 +177,33 @@ Editor::route_name_changed (TimeAxisView *tv)
 }
 
 void
-Editor::hide_track_in_display (TimeAxisView& tv)
+Editor::toggle_temporarily_hidden_tracks (bool yn)
+{
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator i;
+	
+	no_route_list_redisplay = true;
+	
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		(*i)[route_display_columns.temporary_visible] = yn;
+	}
+
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
+}
+
+void
+Editor::hide_track_in_display (TimeAxisView& tv, bool temponly)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
-			(*i)[route_display_columns.visible] = false;
+			if (!temponly) {
+				(*i)[route_display_columns.visible] = false;
+			}
+			(*i)[route_display_columns.temporary_visible] = false;
 			break;
 		}
 	}
@@ -205,6 +225,7 @@ Editor::show_track_in_display (TimeAxisView& tv)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
 			(*i)[route_display_columns.visible] = true;
+			(*i)[route_display_columns.temporary_visible] = true;
 			tv.set_marked_for_display (true);
 			break;
 		}
@@ -279,7 +300,11 @@ Editor::redisplay_route_list ()
 
 		if (visible) {
 			tv->set_marked_for_display (true);
-			position += tv->show_at (position, n, &edit_controls_vbox);
+			if ((*i)[route_display_columns.temporary_visible]) {
+				position += tv->show_at (position, n, &edit_controls_vbox);
+			} else {
+				tv->hide ();
+			}
 		} else {
 			tv->hide ();
 		}
@@ -321,6 +346,7 @@ Editor::hide_all_tracks (bool with_select)
 		}
 		
 		row[route_display_columns.visible] = false;
+		row[route_display_columns.temporary_visible] = false;
 	}
 
 	no_route_list_redisplay = false;
@@ -371,6 +397,7 @@ Editor::set_all_tracks_visibility (bool yn)
 		}
 		
 		(*i)[route_display_columns.visible] = yn;
+		(*i)[route_display_columns.temporary_visible] = yn;
 	}
 
 	no_route_list_redisplay = false;
@@ -398,17 +425,20 @@ Editor::set_all_audio_visibility (int tracks, bool yn)
 			switch (tracks) {
 			case 0:
 				(*i)[route_display_columns.visible] = yn;
+				(*i)[route_display_columns.temporary_visible] = yn;
 				break;
 
 			case 1:
 				if (atv->is_audio_track()) {
 					(*i)[route_display_columns.visible] = yn;
+					(*i)[route_display_columns.temporary_visible] = yn;
 				}
 				break;
 				
 			case 2:
 				if (!atv->is_audio_track()) {
 					(*i)[route_display_columns.visible] = yn;
+					(*i)[route_display_columns.temporary_visible] = yn;
 				}
 				break;
 			}
@@ -478,6 +508,7 @@ Editor::route_list_display_button_press (GdkEventButton* ev)
 			if (tv) {
 				bool visible = (*iter)[route_display_columns.visible];
 				(*iter)[route_display_columns.visible] = !visible;
+				(*iter)[route_display_columns.temporary_visible] = !visible;
 			}
 		}
 		return true;
@@ -556,7 +587,6 @@ Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 	session->set_remote_control_ids();
 	redisplay_route_list ();
 }
-
 
 void  
 Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& context,

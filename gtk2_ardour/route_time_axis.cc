@@ -653,7 +653,7 @@ RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 
 	x1 = start / editor.get_current_zoom();
 	x2 = (end - 1) / editor.get_current_zoom();
-	y2 = height - 2;
+	y2 = current_height() - 2;
 	
 	timestretch_rect->property_x1() = x1;
 	timestretch_rect->property_y1() = 1.0;
@@ -702,7 +702,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 	ensure_xml_node ();
 
 	if (_view) {
-		_view->set_height ((double) height);
+		_view->set_height ((double) current_height());
 	}
 
 	char buf[32];

@@ -1687,13 +1687,14 @@ Editor::temporal_zoom (gdouble fpu)
 }	
 
 void
-Editor::temporal_zoom_region ()
+Editor::temporal_zoom_region (bool both_axes)
 {
 
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 	RegionSelection rs; 
 	set<TimeAxisView*> tracks;
+	double top_y_position = DBL_MAX;
 
 	get_regions_for_action (rs);
 
@@ -1702,14 +1703,20 @@ Editor::temporal_zoom_region ()
 	}
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+
 		if ((*i)->region()->position() < start) {
 			start = (*i)->region()->position();
 		}
+
 		if ((*i)->region()->last_frame() + 1 > end) {
 			end = (*i)->region()->last_frame() + 1;
 		}
 
 		tracks.insert (&((*i)->get_time_axis_view()));
+
+		if ((*i)->get_time_axis_view().y_position < top_y_position) {
+			top_y_position = (*i)->get_time_axis_view().y_position;
+		}
 	}
 
 	/* now comes an "interesting" hack ... make sure we leave a little space
@@ -1738,24 +1745,41 @@ Editor::temporal_zoom_region ()
 
 	temporal_zoom_by_frame (start, end, "zoom to region");
 
-	uint32_t per_track_height = (uint32_t) floor ((canvas_height - 10.0) / tracks.size());
+	if (both_axes) {
+		double per_track_height = (canvas_height - 10.0) / tracks.size();
+		
+		/* set visible track heights appropriately */
+		
+		for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+			(*t)->set_height_scaling_factor (per_track_height/(*t)->height);
+		}
+		
+		/* hide irrelevant tracks */
+		
+		no_route_list_redisplay = true;
 
-	for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-		(*t)->set_height (per_track_height);
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
+				hide_track_in_display (**i, true);
+			}
+		}
+
+		no_route_list_redisplay = false;
+		redisplay_route_list ();
+
+		vertical_adjustment.set_value (std::max (top_y_position - 5.0, 0.0));
 	}
-
-	vertical_adjustment.set_value (std::max ((*tracks.begin())->y_position - 5.0, 0.0));
 
 	zoomed_to_region = true;
 }
 
 void
-Editor::toggle_zoom_region ()
+Editor::toggle_zoom_region (bool both_axes)
 {
 	if (zoomed_to_region) {
 		swap_visual_state ();
 	} else {
-		temporal_zoom_region ();
+		temporal_zoom_region (both_axes);
 	}
 }
 

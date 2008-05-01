@@ -357,7 +357,7 @@ Editor::Editor ()
 	set_mouse_mode (MouseObject, true);
 
 	last_visual_state.frames_per_unit = 0;
-
+	
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
 	reset_hscrollbar_stepping ();
 	
@@ -4134,6 +4134,15 @@ Editor::swap_visual_state ()
 
 	set_zoom_focus (last_visual_state.zoom_focus);
 	reposition_and_zoom (last_visual_state.leftmost_frame, last_visual_state.frames_per_unit);
+
+	if (zoomed_to_region) {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			(*i)->set_height_scaling_factor (1.0);
+		}
+	}
+
+	toggle_temporarily_hidden_tracks (zoomed_to_region);
+
 	zoomed_to_region = false;
 }
 
@@ -4168,7 +4177,7 @@ Editor::set_frames_per_unit (double fpu)
 	last_visual_state.frames_per_unit = frames_per_unit;
 	last_visual_state.leftmost_frame = leftmost_frame;
 	last_visual_state.zoom_focus = zoom_focus;
-
+	
 	frames_per_unit = fpu;
 	post_zoom ();
 }

@@ -330,6 +330,7 @@
                	     <menuitem action='temporal-zoom-out'/>
                	     <menuitem action='zoom-to-session'/>
                	     <menuitem action='zoom-to-region'/>
+               	     <menuitem action='zoom-to-region-both-axes'/>
                	     <menuitem action='toggle-zoom'/>
 	       </menu>
 	       <menu action="ScrollMenu">

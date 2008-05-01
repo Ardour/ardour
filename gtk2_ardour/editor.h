@@ -290,7 +290,7 @@ class Editor : public PublicEditor
 	void maybe_add_mixer_strip_width (XMLNode&);
 	void show_editor_mixer (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
-	void hide_track_in_display (TimeAxisView& tv);
+	void hide_track_in_display (TimeAxisView& tv, bool temporary = false);
 	void show_track_in_display (TimeAxisView& tv);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
@@ -1056,8 +1056,8 @@ class Editor : public PublicEditor
 	void loop_location (ARDOUR::Location&);
 
 	void temporal_zoom_selection ();
-	void temporal_zoom_region ();
-	void toggle_zoom_region ();
+	void temporal_zoom_region (bool both_axes);
+	void toggle_zoom_region (bool both_axes);
 	bool zoomed_to_region;
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
@@ -1637,11 +1637,13 @@ public:
 	    RouteDisplayModelColumns() { 
 		    add (text);
 		    add (visible);
+		    add (temporary_visible);
 		    add (tv);
 		    add (route);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring>  text;
 	    Gtk::TreeModelColumn<bool>           visible;
+	    Gtk::TreeModelColumn<bool>           temporary_visible;
 	    Gtk::TreeModelColumn<TimeAxisView*>  tv;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 	};
@@ -1653,6 +1655,8 @@ public:
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > route_list_display; 
 	Gtk::ScrolledWindow                   route_list_scroller;
 	Gtk::Menu*                            route_list_menu;
+
+	void toggle_temporarily_hidden_tracks (bool yn);
 
 	void sync_order_keys ();
 	bool ignore_route_order_sync;

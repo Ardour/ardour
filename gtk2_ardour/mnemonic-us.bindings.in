@@ -93,7 +93,7 @@
 ;; HOME ROW
 
 (gtk_accel_path "<Actions>/Editor/zoom-to-region" "z")
-;;(gtk_accel_path "<Actions>/Editor/zoom-to-region-both-axes" "<%SECONDARY%>z")
+(gtk_accel_path "<Actions>/Editor/zoom-to-region-both-axes" "<%SECONDARY%>z")
 (gtk_accel_path "<Actions>/Editor/undo" "<%PRIMARY%>z")
 (gtk_accel_path "<Actions>/Editor/toggle-zoom" "<%TERTIARY%>z")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-zoom" "z")

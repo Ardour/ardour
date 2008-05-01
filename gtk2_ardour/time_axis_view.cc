@@ -91,6 +91,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	_hidden = false;
 	height = 0;
 	effective_height = 0;
+	height_scaling_factor = 1.0;
 	parent = rent;
 	_has_state = false;
 	last_name_entry_key_press_event = 0;
@@ -245,7 +246,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	/* height in pixels depends on _order, so update it now we've changed _order */
 	set_height (height);
 	
-	effective_height = height;
+	effective_height = current_height();
 
 	/* now show children */
 	
@@ -341,36 +342,24 @@ TimeAxisView::hide ()
 }
 
 void
+TimeAxisView::set_height_scaling_factor (double hsf)
+{
+	height_scaling_factor = hsf;
+	set_height (height);
+}
+
+void
 TimeAxisView::step_height (bool bigger)
 {
-       if (height == hLargest) {
-               if (!bigger) set_height (hLarge);
-               return;
-       }
-       if (height == hLarge) {
-               if (bigger) set_height (hLargest);
-                else set_height (hLarger);
-               return;
-       }
-       if (height == hLarger) {
-                if (bigger) set_height (hLarge);
-                else set_height (hNormal);
-               return;
-       }
-       if (height == hNormal) {
-                if (bigger) set_height (hLarger);
-                else set_height (hSmaller);
-               return;
-       }
-       if (height == hSmaller) {
-                if (bigger) set_height (hNormal);
-                else set_height (hSmall);
-               return;
-       }
-       if (height == hSmall) {
-                if (bigger) set_height (hSmaller);
-               return;
-       }
+	if (bigger) {
+		set_height (height + 4);
+	} else {
+		if (height > 4) {
+			set_height (std::max (height - 4, hSmall));
+		} else if (height != hSmall) {
+			set_height (hSmall);
+		}
+	}
 }
 
 void
@@ -387,7 +376,7 @@ void
 TimeAxisView::set_height(uint32_t h)
 {
 	height = h;
-	controls_frame.set_size_request (-1, height + ((order == 0) ? 1 : 0));
+	controls_frame.set_size_request (-1, current_height() + ((order == 0) ? 1 : 0));
 	//cerr << "TimeAxisView::set_height_pixels() called h = " << h << endl;//DEBUG
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
@@ -432,9 +421,12 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 					} while ((*i)->hidden());
 				}
 			}
+
+
+			/* resize to show editable name display */
 			
-			if ((*i)->height >= hSmall && (*i)->height < hNormal) {
-				(*i)->set_height(hSmaller);
+			if ((*i)->current_height() >= hSmall && (*i)->current_height() < hNormal) {
+				(*i)->set_height (hSmaller);
 			}
 			
 			(*i)->name_entry.grab_focus();
@@ -709,7 +701,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		
 		x1 = editor.frame_to_unit (start);
 		x2 = editor.frame_to_unit (start + cnt - 1);
-		y2 = height;
+		y2 = current_height();
 
 		rect->rect->property_x1() = x1;
 		rect->rect->property_y1() = 1.0;
@@ -896,7 +888,7 @@ TimeAxisView::touched (double top, double bot)
 	   y_position is the "origin" or "top" of the track.
 	 */
 
-	double mybot = y_position + height;
+	double mybot = y_position + current_height();
 	
 	return ((y_position <= bot && y_position >= top) || 
 		((mybot <= bot) && (top < mybot)) || 
@@ -966,7 +958,7 @@ TimeAxisView::set_state (const XMLNode& node)
 void
 TimeAxisView::reset_height()
 {
-	set_height(height);
+	set_height (height);
 
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_height ((*i)->height);
@@ -1153,7 +1145,7 @@ TimeAxisView::reshow_feature_lines ()
 		ArdourCanvas::SimpleLine* l = new ArdourCanvas::SimpleLine (*canvas_display);
 		l->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 		l->property_y1() = 0;
-		l->property_y2() = height;
+		l->property_y2() = current_height();
 		feature_lines.push_back (l);
 	}
 
@@ -1177,7 +1169,7 @@ bool
 TimeAxisView::resizer_button_press (GdkEventButton* event)
 {
 	resize_drag_start = event->y_root;
-	resize_idle_target = height;
+	resize_idle_target = current_height();
 	return true;
 }
 
