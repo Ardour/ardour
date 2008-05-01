@@ -1013,7 +1013,7 @@ class Editor : public PublicEditor
 	void adjust_region_scale_amplitude (bool up);
 
 	void do_insert_time ();
-	void insert_time (nframes64_t pos, nframes64_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue);
+	void insert_time (nframes64_t pos, nframes64_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too);
 
 	void tab_to_transient (bool forward);
 

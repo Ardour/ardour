@@ -266,7 +266,7 @@ void
 AudioRegionView::region_changed (Change what_changed)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionView::region_changed), what_changed));
-	cerr << "AudioRegionView::region_changed() called" << endl;
+
 	RegionView::region_changed(what_changed);
 
 	if (what_changed & AudioRegion::ScaleAmplitudeChanged) {
