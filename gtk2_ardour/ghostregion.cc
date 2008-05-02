@@ -42,7 +42,7 @@ GhostRegion::GhostRegion (AutomationTimeAxisView& atv, double initial_pos)
 	base_rect = new ArdourCanvas::SimpleRect (*group);
 	base_rect->property_x1() = (double) 0.0;
 	base_rect->property_y1() = (double) 0.0;
-	base_rect->property_y2() = (double) trackview.height;
+	base_rect->property_y2() = (double) trackview.current_height();
 	base_rect->property_outline_what() = (guint32) 0;
 	base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
 	base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackBase.get();
@@ -79,8 +79,8 @@ GhostRegion::set_height ()
 	vector<WaveView*>::iterator i;
 	uint32_t n;
 
-	base_rect->property_y2() = (double) trackview.height;
-	ht = ((trackview.height) / (double) waves.size());
+	base_rect->property_y2() = (double) trackview.current_height();
+	ht = ((trackview.current_height()) / (double) waves.size());
 	
 	for (n = 0, i = waves.begin(); i != waves.end(); ++i, ++n) {
 		gdouble yoff = n * ht;

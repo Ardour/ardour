@@ -215,7 +215,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		gain_line->reset ();
 	}
 
-	set_height (trackview.height);
+	set_height (trackview.current_height());
 
 	region_muted ();
 	region_sync_changed ();
@@ -840,10 +840,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
-	if (trackview.height < NAME_HIGHLIGHT_SIZE) {
-		ht = ((trackview.height) / (double) nchans);
+	if (trackview.current_height() < NAME_HIGHLIGHT_SIZE) {
+		ht = ((trackview.current_height()) / (double) nchans);
 	} else {
-		ht = ((trackview.height - NAME_HIGHLIGHT_SIZE) / (double) nchans);
+		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
 	}
 
 	gdouble yoff = which * ht;
@@ -954,7 +954,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	/* compute vertical fractional position */
 
-	y = 1.0 - (y / (trackview.height - NAME_HIGHLIGHT_SIZE));
+	y = 1.0 - (y / (trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 	
 	/* map using gain line */
 

@@ -32,6 +32,8 @@
 
 #include <gtkmm2ext/focus_entry.h>
 
+#include <pbd/stateful.h>
+
 #include <ardour/types.h>
 #include <ardour/region.h>
 
@@ -68,7 +70,7 @@ class Selectable;
  * extended to create functional time-axis based views.
  *
  */
-class TimeAxisView : public virtual AxisView
+class TimeAxisView : public virtual AxisView, public Stateful
 {
   private:
 	enum NamePackingBits {
@@ -87,11 +89,13 @@ class TimeAxisView : public virtual AxisView
 	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&);
+
 	/* public data: XXX create accessor/mutators for these ?? */
 
 	PublicEditor& editor;
 	
-	uint32_t height;  /* in canvas units */
 	uint32_t effective_height;  /* in canvas units */
 	double   height_scaling_factor; /* used to zoom the track height without changing it */
 	double   y_position;
@@ -221,14 +225,12 @@ class TimeAxisView : public virtual AxisView
 	void set_parent (TimeAxisView& p);
 	bool has_state () const;
 
-	virtual void set_state (const XMLNode&);
-	virtual XMLNode* get_state_node () { return 0; }
-
 	/* call this on the parent */
 
 	virtual XMLNode* get_child_xml_node (const string & childname) { return 0; }
 
   protected:
+	uint32_t height;  /* in canvas units */
 
 	string controls_base_unselected_name;
 	string controls_base_selected_name;

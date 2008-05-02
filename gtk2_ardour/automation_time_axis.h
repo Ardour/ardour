@@ -93,7 +93,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	void show_all_control_points ();
 	void hide_all_but_selected_control_points ();
-	void set_state (const XMLNode&);
+	int  set_state (const XMLNode&);
 	XMLNode* get_state_node ();
 
   protected:

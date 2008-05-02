@@ -388,21 +388,31 @@ class Editor : public PublicEditor
 
 	PlaylistSelector* _playlist_selector;
 
+	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
+
 	struct VisualState {
-	    double    frames_per_unit;
-	    nframes_t leftmost_frame;
-	    Editing::ZoomFocus zoom_focus;
+	    double              y_position;
+	    double              frames_per_unit;
+	    nframes_t           leftmost_frame;
+	    Editing::ZoomFocus  zoom_focus;
+	    bool                zoomed_to_region;
+	    std::list<TAVState> track_states;
 	};
 	
-	VisualState last_visual_state;
+	std::list<VisualState*> undo_visual_stack;
+	std::list<VisualState*> redo_visual_stack;
+	VisualState* current_visual_state (bool with_tracks = true);
+	void undo_visual_state ();
+	void redo_visual_state ();
+	void use_visual_state (VisualState&);
+	bool no_save_visual;
+	void swap_visual_state ();
 
 	nframes_t   leftmost_frame;
 	double      frames_per_unit;
 	Editing::ZoomFocus zoom_focus;
 
-	void use_visual_state (const VisualState&);
 	void set_frames_per_unit (double);
-	void swap_visual_state ();
 	void post_zoom ();
 
 	Editing::MouseMode mouse_mode;
@@ -1656,7 +1666,7 @@ public:
 	Gtk::ScrolledWindow                   route_list_scroller;
 	Gtk::Menu*                            route_list_menu;
 
-	void toggle_temporarily_hidden_tracks (bool yn);
+	void update_route_visibility ();
 
 	void sync_order_keys ();
 	bool ignore_route_order_sync;
@@ -1847,12 +1857,6 @@ public:
         XMLNode *before; /* used in *_reversible_command */
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command ();
-
-	/* visual history */
-
-	UndoHistory visual_history;
-	UndoTransaction current_visual_command;
-
 
 	void update_title ();	
 	void update_title_s (const string & snapshot_name);
@@ -2121,6 +2125,7 @@ public:
 
 	RhythmFerret* rhythm_ferret;
 
+	void fit_tracks ();
 	void set_track_height (uint32_t h);
 	void set_track_height_largest ();
 	void set_track_height_large ();

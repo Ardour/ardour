@@ -234,6 +234,7 @@
 	        <menuitem action='AddTrackBus'/>	
 		<menuitem action='insert-time'/>
 	        <menu action='TrackHeightMenu'>
+		     <menuitem action='fit-tracks'/>
 		     <menuitem action='track-height-largest'/>
 		     <menuitem action='track-height-large'/>
 		     <menuitem action='track-height-larger'/>

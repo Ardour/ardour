@@ -545,7 +545,7 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
-			rec_rect->property_y2() = (double) _trackview.height - 1;
+			rec_rect->property_y2() = (double) _trackview.current_height() - 1;
 			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 			rec_rect->property_outline_what() = 0x1 | 0x2 | 0x4 | 0x8;
 			rec_rect->property_fill_color_rgba() = fill_color;

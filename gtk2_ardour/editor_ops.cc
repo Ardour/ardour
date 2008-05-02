@@ -1729,8 +1729,15 @@ Editor::temporal_zoom_region (bool both_axes)
 	gint mmwidth = gdk_screen_get_width_mm (screen);
 	double pix_per_mm = (double) pixwidth/ (double) mmwidth;
 	double one_centimeter_in_pixels = pix_per_mm * 10.0;
-	nframes_t extra_samples = unit_to_frame (one_centimeter_in_pixels);
-	
+
+	if ((start == 0 && end == 0) || end < start) {
+		return;
+	}
+
+	nframes_t range = end - start;
+	double new_fpu = (double)range / (double)canvas_width;
+	nframes_t extra_samples = one_centimeter_in_pixels * new_fpu;
+
 	if (start > extra_samples) {
 		start -= extra_samples;
 	} else {
@@ -1743,6 +1750,14 @@ Editor::temporal_zoom_region (bool both_axes)
 		end = max_frames;
 	}
 
+	if (both_axes) {
+		/* save visual state with track states included, and prevent
+		   set_frames_per_unit() from doing it again.
+		*/
+		undo_visual_stack.push_back (current_visual_state(true));
+		no_save_visual = true;
+	}
+
 	temporal_zoom_by_frame (start, end, "zoom to region");
 
 	if (both_axes) {
@@ -1751,7 +1766,7 @@ Editor::temporal_zoom_region (bool both_axes)
 		/* set visible track heights appropriately */
 		
 		for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-			(*t)->set_height_scaling_factor (per_track_height/(*t)->height);
+			(*t)->set_height_scaling_factor (per_track_height/(*t)->current_height());
 		}
 		
 		/* hide irrelevant tracks */
@@ -1768,9 +1783,11 @@ Editor::temporal_zoom_region (bool both_axes)
 		redisplay_route_list ();
 
 		vertical_adjustment.set_value (std::max (top_y_position - 5.0, 0.0));
+		no_save_visual = false;
 	}
 
 	zoomed_to_region = true;
+	redo_visual_stack.push_back (current_visual_state());
 }
 
 void
@@ -1820,23 +1837,14 @@ Editor::temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & o
 	nframes_t range = end - start;
 
 	double new_fpu = (double)range / (double)canvas_width;
-// 	double p2 = 1.0;
-
-// 	while (p2 < new_fpu) {
-// 		p2 *= 2.0;
-// 	}
-// 	new_fpu = p2;
 	
 	nframes_t new_page = (nframes_t) floor (canvas_width * new_fpu);
 	nframes_t middle = (nframes_t) floor( (double)start + ((double)range / 2.0f ));
 	nframes_t new_leftmost = (nframes_t) floor( (double)middle - ((double)new_page/2.0f));
 
-	if (new_leftmost > middle) new_leftmost = 0;
-
-//	begin_reversible_command (op);
-//	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
-//	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
-//	commit_reversible_command ();
+	if (new_leftmost > middle) {
+		new_leftmost = 0;
+	}
 
 	reposition_and_zoom (new_leftmost, new_fpu);
 }
@@ -5864,4 +5872,33 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 	if (commit) {
 		commit_reversible_command ();
 	}
+}
+
+void
+Editor::fit_tracks ()
+{
+	if (selection->tracks.empty()) {
+		return;
+	}
+
+	uint32_t child_heights = 0;
+
+	for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+		child_heights += ((*t)->effective_height - (*t)->current_height());
+	}
+
+	uint32_t h = (uint32_t) floor ((canvas_height - child_heights)/selection->tracks.size());
+	double first_y_pos = DBL_MAX;
+
+	undo_visual_stack.push_back (current_visual_state());
+	
+	for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+		(*t)->set_height (h);
+		first_y_pos = std::min ((*t)->y_position, first_y_pos);
+	}
+
+
+	vertical_adjustment.set_value (first_y_pos);
+
+	redo_visual_stack.push_back (current_visual_state());
 }

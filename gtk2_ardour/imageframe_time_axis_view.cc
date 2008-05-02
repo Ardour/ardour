@@ -50,7 +50,7 @@ using namespace Editing;
 ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 	: _trackview (tv),
 	  canvas_group (*_trackview.canvas_display),
-	  canvas_rect (canvas_group, 0.0, 0.0, 1000000.0, tv.height)
+	  canvas_rect (canvas_group, 0.0, 0.0, 1000000.0, tv.current_height())
 {
 	region_color = _trackview.color() ;
 	stream_base_color = ARDOUR_UI::config()->canvasvar_ImageTrack.get() ;

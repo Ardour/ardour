@@ -3293,12 +3293,12 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					tracks = tracks |= (0x01 << atv2->order);
 				}
 	
-				height_list[atv2->order] = (*i)->height;
+				height_list[atv2->order] = (*i)->current_height();
 				children = 1;
 				if ((children_list = atv2->get_child_list()).size() > 0) {
 					for (list<TimeAxisView*>::iterator j = children_list.begin(); j != children_list.end(); ++j) { 
 						tracks = tracks |= (0x01 << (atv2->order + children));
-						height_list[atv2->order + children] =  (*j)->height;		    
+						height_list[atv2->order + children] =  (*j)->current_height();
 						numtracks++;
 						children++;	
 					}
@@ -3615,7 +3615,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		  
 						tvp2 = trackview_by_y_position (iy1 + y_delta);
 						temp_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
-						rv->set_height (temp_atv->height);
+						rv->set_height (temp_atv->current_height());
 	
 						/*   if you un-comment the following, the region colours will follow the track colours whilst dragging,
 						     personally, i think this can confuse things, but never mind.

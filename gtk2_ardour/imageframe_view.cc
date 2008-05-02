@@ -91,9 +91,9 @@ ImageFrameView::ImageFrameView(const string & item_id,
 	
 	//calculate our image width based on the track height
 	double im_ratio = (double)width/(double)height ;
-	double im_width = ((double)(trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio) ;
+	double im_width = ((double)(trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio) ;
 	
-	imageframe = new ImageFrame (*group, pbuf, 1.0, 1.0, ANCHOR_NW, im_width, (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE));
+	imageframe = new ImageFrame (*group, pbuf, 1.0, 1.0, ANCHOR_NW, im_width, (trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE));
 
 	frame_handle_start->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_start_handle_event), frame_handle_start, this));
 	frame_handle_end->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_end_handle_event), frame_handle_end, this));

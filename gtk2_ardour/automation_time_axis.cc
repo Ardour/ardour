@@ -795,10 +795,10 @@ AutomationTimeAxisView::color_handler ()
 
 
 
-void
+int
 AutomationTimeAxisView::set_state (const XMLNode& node)
 {
-	TimeAxisView::set_state (node);
+	return TimeAxisView::set_state (node);
 }
 
 XMLNode*

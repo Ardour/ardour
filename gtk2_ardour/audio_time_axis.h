@@ -82,7 +82,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 	
-	void set_state (const XMLNode&);
+	int set_state (const XMLNode&);
 	XMLNode* get_child_xml_node (const string & childname);
 
 	void first_idle ();

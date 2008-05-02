@@ -338,6 +338,7 @@ Editor::Editor ()
 	zoomed_to_region = false;
 	rhythm_ferret = 0;
 	allow_vertical_scroll = false;
+	no_save_visual = false;
 
 	_scrubbing = false;
 	scrubbing_direction = 0;
@@ -356,8 +357,6 @@ Editor::Editor ()
 	
 	set_mouse_mode (MouseObject, true);
 
-	last_visual_state.frames_per_unit = 0;
-	
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
 	reset_hscrollbar_stepping ();
 	
@@ -4117,33 +4116,98 @@ Editor::reposition_and_zoom (nframes_t frame, double fpu)
 {
 	reset_x_origin (frame);
 	reset_zoom (fpu);
+
+	if (!no_save_visual) {
+		undo_visual_stack.push_back (current_visual_state(false));
+	}
+}
+
+Editor::VisualState*
+Editor::current_visual_state (bool with_tracks)
+{
+	VisualState* vs = new VisualState;
+	vs->y_position = vertical_adjustment.get_value();
+	vs->frames_per_unit = frames_per_unit;
+	vs->leftmost_frame = leftmost_frame;
+	vs->zoom_focus = zoom_focus;
+	vs->zoomed_to_region = zoomed_to_region;
+
+	if (with_tracks) {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			vs->track_states.push_back (TAVState ((*i), &(*i)->get_state()));
+		}
+	}
+	
+	return vs;
+}
+
+void
+Editor::undo_visual_state ()
+{
+	if (undo_visual_stack.empty()) {
+		return;
+	}
+
+	VisualState* vs = undo_visual_stack.back();
+	undo_visual_stack.pop_back();
+	use_visual_state (*vs);
+	redo_visual_stack.push_back (vs);
+}
+
+void
+Editor::redo_visual_state ()
+{
+	if (redo_visual_stack.empty()) {
+		return;
+	}
+
+	VisualState* vs = redo_visual_stack.back();
+	redo_visual_stack.pop_back();
+	use_visual_state (*vs);
+	undo_visual_stack.push_back (vs);
 }
 
 void
 Editor::swap_visual_state ()
 {
-	if (last_visual_state.frames_per_unit == 0) {
-		// never set
-		return;
+	if (undo_visual_stack.empty()) {
+		redo_visual_state ();
+	} else {
+		undo_visual_state ();
 	}
+}
 
-	/* note: the correct functionality here is very dependent on the ordering of 
-	   setting zoom focus, horizontal position and finally zoom. this is because
-	   it is set_frames_per_unit() that overwrites last_visual_state.
-	*/
+void
+Editor::use_visual_state (VisualState& vs)
+{
+	no_save_visual = true;
 
-	set_zoom_focus (last_visual_state.zoom_focus);
-	reposition_and_zoom (last_visual_state.leftmost_frame, last_visual_state.frames_per_unit);
+	vertical_adjustment.set_value (vs.y_position);
 
-	if (zoomed_to_region) {
+	set_zoom_focus (vs.zoom_focus);
+	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
+
+	if (vs.zoomed_to_region) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			(*i)->set_height_scaling_factor (1.0);
 		}
 	}
 
-	toggle_temporarily_hidden_tracks (zoomed_to_region);
+	for (list<TAVState>::iterator i = vs.track_states.begin(); i != vs.track_states.end(); ++i) {
+		TrackViewList::iterator t;
 
-	zoomed_to_region = false;
+		/* check if the track still exists - it could have been deleted */
+
+		if ((t = find (track_views.begin(), track_views.end(), i->first)) != track_views.end()) {
+			(*t)->set_state (*(i->second));
+		}
+	}
+
+	if (!vs.track_states.empty()) {
+		update_route_visibility ();
+	} 
+	
+	no_save_visual = false;
 }
 
 void
@@ -4173,11 +4237,7 @@ Editor::set_frames_per_unit (double fpu)
 	if (fpu == frames_per_unit) {
 		return;
 	}
-	
-	last_visual_state.frames_per_unit = frames_per_unit;
-	last_visual_state.leftmost_frame = leftmost_frame;
-	last_visual_state.zoom_focus = zoom_focus;
-	
+
 	frames_per_unit = fpu;
 	post_zoom ();
 }

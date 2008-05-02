@@ -921,10 +921,33 @@ TimeAxisView::get_parent_with_state ()
 	return parent->get_parent_with_state ();
 }		
 
-void
+
+XMLNode&
+TimeAxisView::get_state ()
+{
+	XMLNode* node = new XMLNode ("TAV-" + name());
+	char buf[32];
+
+	snprintf (buf, sizeof(buf), "%u", height);
+	node->add_property ("height", buf);
+	snprintf (buf, sizeof(buf), "%f", height_scaling_factor);
+	node->add_property ("height_scaling_factor", buf);
+	node->add_property ("marked_for_display", (_marked_for_display ? "1" : "0"));
+	return *node;
+}
+
+int
 TimeAxisView::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
+
+	if ((prop = node.property ("marked_for_display")) != 0) {
+		_marked_for_display = (prop->value() == "1");
+	}
+
+	if ((prop = node.property ("height_scaling_factor")) != 0) {
+		height_scaling_factor = atof (prop->value());
+	} 
 
 	if ((prop = node.property ("track_height")) != 0) {
 
@@ -947,12 +970,14 @@ TimeAxisView::set_state (const XMLNode& node)
 
 	} else if ((prop = node.property ("height")) != 0) {
 
-		uint32_t h = atoi (prop->value());
-		set_height (h);
-
+		set_height (atoi (prop->value()));
+		
 	} else {
+
 		set_height (hNormal);
 	}
+
+	return 0;
 }
 
 void

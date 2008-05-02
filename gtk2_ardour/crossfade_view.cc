@@ -69,7 +69,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	fade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeLine.get();
 	fade_out->property_width_pixels() = 1;
 	
-	set_height (get_time_axis_view().height);
+	set_height (get_time_axis_view().current_height());
 
 	/* no frame around the xfade or overlap rects */
 
@@ -109,11 +109,11 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 void
 CrossfadeView::set_height (double height)
 {
-	if (height == TimeAxisView::hSmaller ||
-	    height == TimeAxisView::hSmall)
-		TimeAxisViewItem::set_height (height - 3 );
-	else
+	if (height <= TimeAxisView::hSmaller) {
+		TimeAxisViewItem::set_height (height - 3);
+	} else {
 		TimeAxisViewItem::set_height (height - NAME_HIGHLIGHT_SIZE - 3 );
+	}
 
 	redraw_curves ();
 }
@@ -160,7 +160,7 @@ CrossfadeView::redraw_curves ()
 	 At "height - 3.0" the bottom of the crossfade touches the name highlight or the bottom of the track (if the
 	 track is either Small or Smaller.
 	 */
-	double tav_height = get_time_axis_view().height;
+	double tav_height = get_time_axis_view().current_height();
 	if (tav_height == TimeAxisView::hSmaller ||
 	    tav_height == TimeAxisView::hSmall) {
 		h = tav_height - 3.0;

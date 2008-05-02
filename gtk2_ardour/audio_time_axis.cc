@@ -160,12 +160,15 @@ AudioTimeAxisView::hide ()
 	TimeAxisView::hide ();
 }
 
-void
+int
 AudioTimeAxisView::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
-	
-	TimeAxisView::set_state (node);
+	int ret;
+
+	if ((ret = TimeAxisView::set_state (node)) != 0) {
+		return ret;
+	}
 	
 	if ((prop = node.property ("shown_editor")) != 0) {
 		if (prop->value() == "no") {
@@ -210,6 +213,8 @@ AudioTimeAxisView::set_state (const XMLNode& node)
 			continue;
 		}
 	}
+
+	return 0;
 }
 
 void
