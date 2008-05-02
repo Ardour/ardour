@@ -387,7 +387,7 @@ void gdither_runf(GDither s, uint32_t channel, uint32_t length,
     }
 
     /* some common case handling code - looks a bit wierd, but it allows
-     * the compiler to optiomise out the branches in the inner loop */
+     * the compiler to optimise out the branches in the inner loop */
     if (s->bit_depth == 8 && s->dither_depth == 8) {
 	switch (s->type) {
 	case GDitherNone:
@@ -411,7 +411,7 @@ void gdither_runf(GDither s, uint32_t channel, uint32_t length,
 				ss, x, y, MAX_U8, MIN_U8);
 	    break;
 	}
-    } else if (s->bit_depth == s->dither_depth == 16) {
+    } else if (s->bit_depth == 16 && s->dither_depth == 16) {
 	switch (s->type) {
 	case GDitherNone:
 	    gdither_innner_loop(GDitherNone, s->channels, 0.0f, SCALE_S16,

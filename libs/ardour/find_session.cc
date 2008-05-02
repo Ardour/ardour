@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include <cstring>
 #include <climits>
 #include <cerrno>
 

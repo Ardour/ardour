@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <cstring>
 #include <string>
 #include <cstdlib>
 #include <midi++/types.h>

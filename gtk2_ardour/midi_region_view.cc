@@ -289,11 +289,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			if (_mouse_state == AddDragging)
 				event_x = trackview.editor.frame_to_pixel(event_frame);
 
-			if (drag_rect)
+			if (drag_rect) {
 				if (event_x > drag_start_x)
 					drag_rect->property_x2() = event_x;
 				else
 					drag_rect->property_x1() = event_x;
+			}
 
 			if (drag_rect && _mouse_state == SelectRectDragging) {
 				if (event_y > drag_start_y)

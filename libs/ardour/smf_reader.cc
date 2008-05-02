@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cstring>
 #include <cstdio>
 #include <cassert>
 #include <iostream>

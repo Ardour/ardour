@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <stdint.h>
+#include <stdlib.h>
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
@@ -101,13 +102,13 @@ short_version (string orig, string::size_type target_length)
 int
 atoi (const string& s)
 {
-	return std::atoi (s.c_str());
+	return ::atoi (s.c_str());
 }
 
 double
 atof (const string& s)
 {
-	return std::atof (s.c_str());
+	return ::atof (s.c_str());
 }
 
 vector<string>

@@ -21,6 +21,7 @@
 #include <stdint.h>
 
 #include <cstdio> /* for sprintf */
+#include <cstring>
 #include <cmath>
 #include <cctype>
 #include <string>

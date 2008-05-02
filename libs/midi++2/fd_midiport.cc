@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <cerrno>
+#include <cstring>
 
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
@@ -65,7 +66,7 @@ FD_MidiPort::FD_MidiPort (const XMLNode& node,
 			midi_filename_pattern = new string (pattern);
 		}
 
-		if (desc.mode & O_NONBLOCK == 0) {
+		if ((desc.mode & O_NONBLOCK) == 0) {
 			/* we unconditionally set O_NONBLOCK during
 			   open, but the request didn't ask for it,
 			   so remove it.

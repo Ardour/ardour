@@ -1210,7 +1210,7 @@ AutomationList::rt_safe_earliest_event_linear_unlocked (double start, double end
 
 		x = first->when + (y - first->value) / (double)slope;
 		
-		while ((inclusive && x < start) || x <= start && y != next->value) {
+		while ((inclusive && x < start) || (x <= start && y != next->value)) {
 			
 			if (first->value < next->value) // ramping up
 				y += 1.0;

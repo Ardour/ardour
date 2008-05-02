@@ -34,6 +34,8 @@
     authorization.
 */
 
+#include <cstring>
+#include <cstdlib>
 #include "PluginAdapter.h"
 
 //#define DEBUG_PLUGIN_ADAPTER 1

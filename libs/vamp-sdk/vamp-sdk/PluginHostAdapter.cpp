@@ -34,6 +34,7 @@
     authorization.
 */
 
+#include <stdlib.h>
 #include "PluginHostAdapter.h"
 
 namespace Vamp

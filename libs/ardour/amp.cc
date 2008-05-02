@@ -16,10 +16,10 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/amp.h>
-
-#include <algorithm>
+#include <cstring>
 #include <cmath>
+#include <algorithm>
+#include <ardour/amp.h>
 #include <ardour/buffer_set.h>
 #include <ardour/audio_buffer.h>
 

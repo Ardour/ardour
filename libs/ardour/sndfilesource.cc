@@ -17,6 +17,7 @@
 
 */
 
+#include <cstring>
 #include <cerrno>
 #include <climits>
 

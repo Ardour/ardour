@@ -339,7 +339,7 @@ MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframe
 
 	/* if per-track or global rec-enable turned on while the other was already on, we've started recording */
 
-	if ((change & track_rec_enabled) && record_enabled() && (!(change & global_rec_enabled) && can_record) || 
+	if (((change & track_rec_enabled) && record_enabled() && (!(change & global_rec_enabled) && can_record)) || 
 	    ((change & global_rec_enabled) && can_record && (!(change & track_rec_enabled) && record_enabled()))) {
 		
 		/* starting to record: compute first+last frames */
@@ -909,7 +909,7 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 
 	total = _session.transport_frame() - _last_flush_frame;
 
-	if (total == 0 || _capture_buf->read_space() == 0  && _session.transport_speed() == 0 || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
+	if (total == 0 || (_capture_buf->read_space() == 0  && _session.transport_speed() == 0) || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
 		goto out;
 	}
 

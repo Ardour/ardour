@@ -20,6 +20,7 @@
 #ifndef __ardour_silentfilesource_h__ 
 #define __ardour_silentfilesource_h__
 
+#include <cstring>
 #include <ardour/audiofilesource.h>
 
 namespace ARDOUR {

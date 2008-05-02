@@ -74,12 +74,13 @@ AutomationController::create(boost::shared_ptr<Automatable> parent, boost::share
 void
 AutomationController::update_label(char* label, int label_len)
 {
-	if (label && label_len)
+	if (label && label_len) {
 		// Hack to display CC rounded to int
 		if (_controllable->parameter().type() == MidiCCAutomation)
 			snprintf(label, label_len, "%d", (int)_controllable->get_value());
 		else
 			snprintf(label, label_len, "%.3f", _controllable->get_value());
+	}
 }
 
 void
