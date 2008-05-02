@@ -164,9 +164,9 @@ MidiModel::const_iterator::operator++()
 	if (_is_end)
 		throw std::logic_error("Attempt to iterate past end of MidiModel");
 
-	cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event.type()) 
+	/*cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event.type()) 
 	     << "   buffer: 0x" << int(_event.buffer()[0]) << " 0x" << int(_event.buffer()[1]) 
-	     << " 0x" << int(_event.buffer()[2]) << endl;
+	     << " 0x" << int(_event.buffer()[2]) << endl;*/
 
 	if(! (_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()) ) {
 		cerr << "FAILED event buffer: " << hex << int(_event.buffer()[0]) << int(_event.buffer()[1]) << int(_event.buffer()[2]) << endl;
@@ -186,7 +186,7 @@ MidiModel::const_iterator::operator++()
 		if (ret) {
 			//cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;
 			_control_iter->x = x;
-			_control_iter->x = y;
+			_control_iter->y = y;
 		} else {
 			//cerr << "Hit end of " << _control_iter->automation_list->parameter().id() << endl;
 			_control_iter->automation_list.reset();
@@ -196,15 +196,17 @@ MidiModel::const_iterator::operator++()
 
 	// Now find and point at the earliest event
 
+
+	const std::vector<MidiControlIterator>::iterator old_control_iter = _control_iter;
 	_control_iter = _control_iters.begin();
 
 	for (std::vector<MidiControlIterator>::iterator i = _control_iters.begin();
 			i != _control_iters.end(); ++i) {
-		if (i->x < _control_iter->x) {
+		if (i->x < _control_iter->x && i != old_control_iter) {
 			_control_iter = i;
 		}
 	}
-	
+
 	enum Type { NIL, NOTE_ON, NOTE_OFF, AUTOMATION };
 	
 	Type   type = NIL;

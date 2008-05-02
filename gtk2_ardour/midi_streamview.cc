@@ -473,18 +473,19 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 			tmp = iter;
 			++tmp;
-
+			
+			boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(iter->first);
+			if (!region || !iter->second) {
+				iter = tmp;
+				continue;
+			}
+			
 			if (!canvas_item_visible (rec_rects[n].rectangle)) {
 				/* rect already hidden, this region is done */
 				iter = tmp;
 				continue;
 			}
 			
-			boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(iter->first);
-			if (!region) {
-				continue;
-			}
-
 			nframes_t origlen = region->length();
 			
 			if (region == rec_regions.back().first && rec_active) {

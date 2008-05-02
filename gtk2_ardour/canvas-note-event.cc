@@ -41,25 +41,29 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 	, _note(note)
 	, _selected(false)
 {
-	_text = new Text(*(item->property_parent()));
 }
 
 CanvasNoteEvent::~CanvasNoteEvent() 
 { 
-	if(_text) delete _text;
-	if(_channel_selector_widget) delete _channel_selector_widget;
+	if (_text)
+		delete _text;
+	
+	if (_channel_selector_widget)
+		delete _channel_selector_widget;
 }
 
 void 
 CanvasNoteEvent::move_event(double dx, double dy)
 {
 	_item->move(dx, dy);
-	_text->move(dx, dy);
+	if (_text)
+		_text->move(dx, dy);
 }
 
 void
 CanvasNoteEvent::show_velocity(void)
 {
+	_text = new Text(*(_item->property_parent()));
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
 	ostringstream velo(ios::ate);
@@ -75,14 +79,15 @@ CanvasNoteEvent::show_velocity(void)
 void
 CanvasNoteEvent::hide_velocity(void)
 {
-	_text->hide();
+	delete _text;
+	_text = NULL;
 }
 
 void 
 CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
-	if( (selection & (1 << _note->channel())) == 0 ) {
+	if ( (selection & (1 << _note->channel())) == 0 ) {
 		set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteFillInactiveChannel.get());
 		set_outline_color(ARDOUR_UI::config()->canvasvar_MidiNoteOutlineInactiveChannel.get());
 	} else {
@@ -105,7 +110,7 @@ CanvasNoteEvent::on_channel_change(uint8_t channel)
 void
 CanvasNoteEvent::show_channel_selector(void)
 {
-	if(_channel_selector_widget == 0) {
+	if (_channel_selector_widget == 0) {
 		cerr << "Note has channel: " << int(_note->channel()) << endl;
 		SingleMidiChannelSelector* _channel_selector = new SingleMidiChannelSelector(_note->channel());
 		_channel_selector->show_all();
@@ -131,7 +136,7 @@ CanvasNoteEvent::show_channel_selector(void)
 void
 CanvasNoteEvent::hide_channel_selector(void)
 {
-	if(_channel_selector_widget) {
+	if (_channel_selector_widget) {
 		_channel_selector_widget->hide();
 		delete _channel_selector_widget;
 		_channel_selector_widget = 0;
@@ -178,7 +183,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 			d_velocity = 1;
 		}
 
-		if(ev->scroll.direction == GDK_SCROLL_UP) {
+		if (ev->scroll.direction == GDK_SCROLL_UP) {
 			_region.note_selected(this, true);
 			if (_region.mouse_state() == MidiRegionView::SelectTouchDragging) {
 				// TODO: absolute velocity
@@ -186,7 +191,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 				_region.change_velocity(d_velocity, true);
 			}
 			return true;
-		} else if(ev->scroll.direction == GDK_SCROLL_DOWN) {
+		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
 			_region.note_selected(this, true);
 			if (_region.mouse_state() == MidiRegionView::SelectTouchDragging) {
 				// TODO: absolute velocity
@@ -221,7 +226,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 	case GDK_LEAVE_NOTIFY:
 		Keyboard::magic_widget_drop_focus();
-		if(! selected()) {
+		if (! selected()) {
 			hide_velocity();
 		}
 		_region.get_canvas_group()->grab_focus();
@@ -305,7 +310,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		event_y = ev->button.y;
 		_item->property_parent().get_value()->w2i(event_x, event_y);
 		
-		if(ev->button.button == 3) {
+		if (ev->button.button == 3) {
 			return true;
 		}
 		
