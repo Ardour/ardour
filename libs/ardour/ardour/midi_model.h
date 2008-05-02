@@ -32,13 +32,13 @@
 #include <ardour/midi_ring_buffer.h>
 #include <ardour/automatable.h>
 #include <ardour/note.h>
+#include <ardour/types.h>
 
 namespace ARDOUR {
 
 class Session;
 class MidiSource;
 	
-//                                                                     x   ,  y
 class MidiControlIterator {
 public:
 	boost::shared_ptr<const AutomationList> automation_list;
@@ -109,10 +109,6 @@ public:
 	typedef std::vector< boost::shared_ptr<Note> > Notes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
-
-	typedef std::vector< boost::shared_ptr<MIDI::Event> > PgmChanges;
-	inline       PgmChanges& pgm_changes()       { return _pgm_changes; }
-	inline const PgmChanges& pgm_changes() const { return _pgm_changes; }
 
 	/** Add/Remove notes.
 	 * Technically all operations can be implemented as one of these.
@@ -195,7 +191,6 @@ public:
 		Notes::const_iterator                      _note_iter;
 		std::vector<MidiControlIterator>           _control_iters;
 		std::vector<MidiControlIterator>::iterator _control_iter;
-		PgmChanges::const_iterator                 _pgm_change_iter;
 	};
 	
 	const_iterator        begin() const { return const_iterator(*this, 0); }
@@ -218,13 +213,12 @@ private:
 
 	void append_note_on_unlocked(uint8_t chan, double time, uint8_t note, uint8_t velocity);
 	void append_note_off_unlocked(uint8_t chan, double time, uint8_t note);
-	void append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t value);
+	void append_automation_event_unlocked(AutomationType type, uint8_t chan, double time, uint8_t first_byte, uint8_t second_byte);
 	void append_pgm_change_unlocked(uint8_t chan, double time, uint8_t number); 
 
 	mutable Glib::RWLock _lock;
 
 	Notes      _notes;
-	PgmChanges _pgm_changes;
 	
 	NoteMode _note_mode;
 	

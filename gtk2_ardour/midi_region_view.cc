@@ -477,12 +477,11 @@ MidiRegionView::redisplay_model()
 			add_note(_model->note_at(i));
 		}
 
-		MidiModel::PgmChanges& pgm_changes = _model->pgm_changes();
-		for_each(pgm_changes.begin(), pgm_changes.end(), 
-			sigc::mem_fun(this, &MidiRegionView::add_pgm_change));
+		// TODO: Add program changes here
 
 		end_write();
 
+		// Is this necessary ??????????
 		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
 				i != _model->controls().end(); ++i) {
 

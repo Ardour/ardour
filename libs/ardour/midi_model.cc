@@ -87,14 +87,18 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		}
 	}
 			
-	/* TODO: Disabled for stablility reasons
 	MidiControlIterator earliest_control(boost::shared_ptr<AutomationList>(), DBL_MAX, 0.0);
 
 	_control_iters.reserve(model.controls().size());
 	for (Automatable::Controls::const_iterator i = model.controls().begin();
 			i != model.controls().end(); ++i) {
 
-		assert(i->first.type() == MidiCCAutomation);
+		assert(
+			i->first.type() == MidiCCAutomation ||
+			i->first.type() == MidiPgmChangeAutomation ||
+			i->first.type() == MidiPitchBenderAutomation ||
+			i->first.type() == MidiChannelAftertouchAutomation
+		);
 
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y);
@@ -119,8 +123,6 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 			--_control_iter;
 		}
 	}
-	*/
-	
 
 	if (_note_iter != model.notes().end()) {
 		_event = MIDI::Event((*_note_iter)->on_event(), false);
@@ -129,27 +131,10 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		++_note_iter;
 	}
 
-	/** TODO: Disabled for stability reasons
 	if (earliest_control.automation_list && earliest_control.x < _event.time())
 		model.control_to_midi_event(_event, earliest_control);
 	else
 		_control_iter = _control_iters.end();
-	 */
-
-	_pgm_change_iter = model.pgm_changes().end();
-	// find first program change which begins after t
-	for (PgmChanges::const_iterator i = model.pgm_changes().begin(); i != model.pgm_changes().end(); ++i) {
-		if ((*i)->time() >= t) {
-			_pgm_change_iter = i;
-			break;
-		}
-	}
-	
-	if(_pgm_change_iter != model.pgm_changes().end()) {
-		if((*_pgm_change_iter)->time() <= _event.time()) {
-			_event = MIDI::Event(*(*_pgm_change_iter), false);
-		}
-	}
 	
 	if (_event.size() == 0) {
 		//cerr << "Created MIDI iterator @ " << t << " is at end." << endl;
@@ -183,14 +168,12 @@ MidiModel::const_iterator::operator++()
 	     << "   buffer: 0x" << int(_event.buffer()[0]) << " 0x" << int(_event.buffer()[1]) 
 	     << " 0x" << int(_event.buffer()[2]) << endl;
 
-	if(! (_event.is_note() || _event.is_cc() || _event.is_pgm_change())) {
-		cerr << "FAILED pgm change vector size: " << _model->pgm_changes().size() << endl;
+	if(! (_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()) ) {
 		cerr << "FAILED event buffer: " << hex << int(_event.buffer()[0]) << int(_event.buffer()[1]) << int(_event.buffer()[2]) << endl;
 	}
-	assert(_event.is_note() || _event.is_cc() || _event.is_pgm_change());
+	assert((_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()));
 
 	// TODO: This code crashes at the marked section
-	/*
 	// Increment past current control event
 	if (_control_iter != _control_iters.end() && _control_iter->automation_list && _event.is_cc()) {
 		double x, y;
@@ -222,9 +205,7 @@ MidiModel::const_iterator::operator++()
 		}
 	}
 	
-	*/
-	
-	enum Type { NIL, NOTE_ON, NOTE_OFF, CC, PGM_CHANGE, PITCH_BENDER };
+	enum Type { NIL, NOTE_ON, NOTE_OFF, AUTOMATION };
 	
 	Type   type = NIL;
 	double t    = 0;
@@ -243,21 +224,10 @@ MidiModel::const_iterator::operator++()
 		}
 	}
 	
-	/* disabled for above mentioned reason, this loops endlessly otherwise
 	// Use the next earliest controller iff it's earlier than the note event
 	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX)
 		if (type == NIL || _control_iter->x < t)
-			type = CC;
-	*/
-	if(_pgm_change_iter != _model->pgm_changes().end()) {
-		if((*_pgm_change_iter)->time() <= t) {
-			type = PGM_CHANGE;
-			t = (*_pgm_change_iter)->time();
-			cerr << "operator++ got PGM CHANGE with time " << t << " and type " << hex
-			<< int((*_pgm_change_iter)->type()) << " and channel " << int((*_pgm_change_iter)->channel()) 
-			<< " and program " << int((*_pgm_change_iter)->pgm_number()) << endl;
-		}
-	}
+			type = AUTOMATION;
 
 	if (type == NOTE_ON) {
 		cerr << "********** MIDI Iterator = note on" << endl;
@@ -268,13 +238,9 @@ MidiModel::const_iterator::operator++()
 		cerr << "********** MIDI Iterator = note off" << endl;
 		_event = MIDI::Event(_active_notes.top()->off_event(), false);
 		_active_notes.pop();
-	} else if (type == CC) {
-		cerr << "********** MIDI Iterator = CC" << endl;
+	} else if (type == AUTOMATION) {
+		cerr << "********** MIDI Iterator = AUTOMATION" << endl;
 		_model->control_to_midi_event(_event, *_control_iter);
-	} else if (type == PGM_CHANGE) {
-		cerr << "********** MIDI Iterator = program change" << endl;
-		_event = MIDI::Event(*(*_pgm_change_iter), false);
-		++_pgm_change_iter;
 	} else {
 		cerr << "********** MIDI Iterator = END" << endl;
 		_is_end = true;
@@ -312,7 +278,6 @@ MidiModel::const_iterator::operator=(const const_iterator& other)
 	_note_iter = other._note_iter;
 	_control_iters = other._control_iters;
 	_control_iter = other._control_iter;
-	_pgm_change_iter = other._pgm_change_iter;
 	
 	assert( ! _event.owns_buffer());
 	
@@ -381,7 +346,8 @@ MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes, nframes
 bool
 MidiModel::control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& iter) const
 {
-	if (iter.automation_list->parameter().type() == MidiCCAutomation) {
+	switch(iter.automation_list->parameter().type()) {
+	case MidiCCAutomation:
 		if (ev.size() < 3)
 			ev.set_buffer((Byte*)malloc(3), true);
 
@@ -395,7 +361,53 @@ MidiModel::control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& ite
 		ev.time() = iter.x;
 		ev.size() = 3;
 		return true;
-	} else {
+		
+	case MidiPgmChangeAutomation:
+		if (ev.size() < 3)
+			ev.set_buffer((Byte*)malloc(3), true);
+
+		assert(iter.automation_list);
+		assert(iter.automation_list->parameter().channel() < 16);
+		assert(iter.automation_list->parameter().id() <= INT8_MAX);
+		assert(iter.y <= INT8_MAX);
+		ev.buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
+		ev.buffer()[1] = (Byte)iter.y;
+		ev.buffer()[2] = 0;
+		ev.time() = iter.x;
+		ev.size() = 3;
+		return true;
+		
+	case MidiPitchBenderAutomation:
+		if (ev.size() < 3)
+			ev.set_buffer((Byte*)malloc(3), true);
+
+		assert(iter.automation_list);
+		assert(iter.automation_list->parameter().channel() < 16);
+		assert(iter.automation_list->parameter().id() <= INT8_MAX);
+		assert(iter.y <= INT8_MAX);
+		ev.buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
+		ev.buffer()[1] = ((Byte)iter.y) & 0x7F; // LSB
+		ev.buffer()[2] = (((Byte)iter.y) >> 7) & 0x7F; // MSB
+		ev.time() = iter.x;
+		ev.size() = 3;
+		return true;		
+
+	case MidiChannelAftertouchAutomation:
+		if (ev.size() < 3)
+			ev.set_buffer((Byte*)malloc(3), true);
+
+		assert(iter.automation_list);
+		assert(iter.automation_list->parameter().channel() < 16);
+		assert(iter.automation_list->parameter().id() <= INT8_MAX);
+		assert(iter.y <= INT8_MAX);
+		ev.buffer()[0] = MIDI_CMD_CHANNEL_PRESSURE + iter.automation_list->parameter().channel();
+		ev.buffer()[1] = (Byte)iter.y;
+		ev.buffer()[2] = 0;
+		ev.time() = iter.x;
+		ev.size() = 3;
+		return true;
+		
+	default:
 		return false;
 	}
 }
@@ -483,9 +495,13 @@ MidiModel::append(const MIDI::Event& ev)
 	} else if (ev.is_note_off()) {
 		append_note_off_unlocked(ev.channel(), ev.time(), ev.note());
 	} else if (ev.is_cc()) {
-		append_cc_unlocked(ev.channel(), ev.time(), ev.cc_number(), ev.cc_value());
+		append_automation_event_unlocked(MidiCCAutomation, ev.channel(), ev.time(), ev.cc_number(), ev.cc_value());
 	} else if (ev.is_pgm_change()) {
-		append_pgm_change_unlocked(ev.channel(), ev.time(), ev.pgm_number());
+		append_automation_event_unlocked(MidiPgmChangeAutomation, ev.channel(), ev.time(), ev.pgm_number(), 0);
+	} else if (ev.is_pitch_bender()) {
+		append_automation_event_unlocked(MidiPitchBenderAutomation, ev.channel(), ev.time(), ev.pitch_bender_lsb(), ev.pitch_bender_msb());
+	} else if (ev.is_channel_aftertouch()) {
+		append_automation_event_unlocked(MidiChannelAftertouchAutomation, ev.channel(), ev.time(), ev.channel_aftertouch(), 0);
 	} else { 
 		printf("MM Unknown event type %X\n", ev.type());
 	}
@@ -556,35 +572,39 @@ MidiModel::append_note_off_unlocked(uint8_t chan, double time, uint8_t note_num)
 
 
 void
-MidiModel::append_cc_unlocked(uint8_t chan, double time, uint8_t number, uint8_t value)
+MidiModel::append_automation_event_unlocked(AutomationType type, uint8_t chan, double time, uint8_t first_byte, uint8_t second_byte)
 {
 	//cerr << "MidiModel " << this << " chan " << (int)chan <<
 	//		" CC " << (int)number << " = " << (int)value << " @ " << time << endl;
 	
 	assert(chan < 16);
 	assert(_writing);
-	/** TODO: disabled for now until debugged....
 	_edited = true;
+	double value;
 	
-	Parameter param(MidiCCAutomation, number, chan);
+	uint32_t id = 0;
+	
+	switch(type) {
+	case MidiCCAutomation:
+		id = first_byte;
+		value = double(second_byte);
+		break;
+	case MidiChannelAftertouchAutomation:
+	case MidiPgmChangeAutomation:
+		id = 0;
+		value = double(first_byte);
+		break;
+	case MidiPitchBenderAutomation:
+		id = 0;
+		value = double((0x7F & second_byte) << 7 | (0x7F & first_byte));
+		break;		
+	default:
+		assert(false);
+	}
+	
+	Parameter param(type, id, chan);
 	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
-	control->list()->fast_simple_add(time, (double)value);
-	*/
-}
-
-void
-MidiModel::append_pgm_change_unlocked(uint8_t chan, double time, uint8_t number) 
-{
-	//cerr << "MidiModel::append_pgm_change_unlocked: channel " << int(chan) << " time: " << time << " program number: " << int(number) <<endl; 
-	assert(chan < 16);
-	assert(_writing);
-	_edited = true;
-	
-	boost::shared_ptr<MIDI::Event> event_ptr(new MIDI::Event(time, 3, 0, true));
-	event_ptr->set_type(MIDI_CMD_PGM_CHANGE);
-	event_ptr->set_channel(chan);
-	event_ptr->set_pgm_number(number);
-	_pgm_changes.push_back(event_ptr);
+	control->list()->fast_simple_add(time, value);
 }
 
 void
@@ -931,11 +951,6 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	while ( ! active_notes.empty() ) {
 		events.push(&active_notes.top()->off_event());
 		active_notes.pop();
-	}
-	
-	//write program changes
-	for (PgmChanges::const_iterator p = _pgm_changes.begin(); p != _pgm_changes.end(); ++p) {
-		events.push((*p).get());		
 	}
 	
 	while(!events.empty()) {

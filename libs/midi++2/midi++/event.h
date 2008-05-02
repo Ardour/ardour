@@ -181,7 +181,9 @@ struct Event {
 	inline uint8_t     velocity()              const { return (_buffer[2]); }
 	inline uint8_t     cc_number()             const { return (_buffer[1]); }
 	inline uint8_t     cc_value()              const { return (_buffer[2]); }
-	inline uint16_t    pitch_bender_value()    const { return ((_buffer[1] << 8) | _buffer[2]); }
+	inline uint16_t    pitch_bender_value()    const { return (((0x7F & _buffer[1]) << 7) | (0x7F & _buffer[2])); }
+	inline uint8_t     pitch_bender_lsb()      const { return (_buffer[1]); }
+	inline uint8_t     pitch_bender_msb()      const { return (_buffer[2]); }
 	inline uint8_t     pgm_number()            const { return (_buffer[1]); }
 	inline void        set_pgm_number(uint8_t number){ _buffer[1] = number; }
 	inline uint8_t     aftertouch()            const { return (_buffer[1]); }

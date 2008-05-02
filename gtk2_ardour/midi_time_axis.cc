@@ -326,7 +326,12 @@ MidiTimeAxisView::add_controller_track()
 void
 MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 {
-	if (param.type() == MidiCCAutomation) {
+	if (
+			param.type() == MidiCCAutomation ||
+			param.type() == MidiPgmChangeAutomation ||
+			param.type() == MidiPitchBenderAutomation ||
+			param.type() == MidiChannelAftertouchAutomation
+	   ) {
 	
 		/* FIXME: don't create AutomationList for track itself
 		 * (not actually needed or used, since the automation is region-ey) */

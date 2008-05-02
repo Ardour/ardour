@@ -80,21 +80,34 @@ public:
 	 * should be moved here */
 
 	inline double min() const {
-		if (_type == MidiCCAutomation)
+		switch(_type) {
+		case MidiCCAutomation:
+		case MidiPgmChangeAutomation:
+		case MidiPitchBenderAutomation:
+		case MidiChannelAftertouchAutomation:
 			return 0.0;
-		else
+			
+		default:
 			return DBL_MIN;
+		}
 	}
 	
 	inline double max() const {
-		if (_type == MidiCCAutomation)
+		switch(_type) {
+		case MidiCCAutomation:
+		case MidiPgmChangeAutomation:
+		case MidiChannelAftertouchAutomation:
 			return 127.0;
-		else
+		case MidiPitchBenderAutomation:
+			return 16383.0;
+			
+		default:
 			return DBL_MAX;
+		}
 	}
 
 	inline bool is_integer() const {
-		return (_type == MidiCCAutomation);
+		return (_type >= MidiCCAutomation && _type <= MidiChannelAftertouchAutomation);
 	}
 
 private:
