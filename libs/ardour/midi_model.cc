@@ -109,8 +109,8 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		} 
 
 		assert(x >= 0);
-		assert(y >= 0);
-		assert(y <= UINT8_MAX);
+		assert(y >= i->first.min());
+		assert(y <= i->first.max());
 		
 		const MidiControlIterator new_iter(i->second->list(), x, y);
 		
@@ -202,7 +202,7 @@ MidiModel::const_iterator::operator++()
 
 	for (std::vector<MidiControlIterator>::iterator i = _control_iters.begin();
 			i != _control_iters.end(); ++i) {
-		if (i->x < _control_iter->x && i != old_control_iter) {
+		if (i->x < _control_iter->x) {
 			_control_iter = i;
 		}
 	}
@@ -227,7 +227,9 @@ MidiModel::const_iterator::operator++()
 	}
 	
 	// Use the next earliest controller iff it's earlier than the note event
-	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX)
+	if (_control_iter != _control_iters.end()
+			&& _control_iter->x != DBL_MAX
+			&& _control_iter != old_control_iter)
 		if (type == NIL || _control_iter->x < t)
 			type = AUTOMATION;
 
@@ -386,7 +388,7 @@ MidiModel::control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& ite
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() <= INT8_MAX);
-		assert(iter.y <= INT8_MAX);
+		assert(iter.y < (1<<14));
 		ev.buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = ((Byte)iter.y) & 0x7F; // LSB
 		ev.buffer()[2] = (((Byte)iter.y) >> 7) & 0x7F; // MSB

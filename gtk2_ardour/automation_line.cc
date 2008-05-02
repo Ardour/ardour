@@ -1169,6 +1169,7 @@ AutomationLine::set_state (const XMLNode &node)
 void
 AutomationLine::view_to_model_y (double& y)
 {
+	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation) {
 		y = slider_position_to_gain (y);
 		y = max (0.0, y);
@@ -1176,25 +1177,26 @@ AutomationLine::view_to_model_y (double& y)
 	} else if (alist->parameter().type() == PanAutomation) {
 		// vertical coordinate axis reversal
 		y = 1.0 - y;
-	} else if (alist->parameter().type() == MidiCCAutomation) {
-		y = (int)(y * 127.0);
 	} else if (alist->parameter().type() == PluginAutomation) {
 		y = y * (double)(alist->get_max_y()- alist->get_min_y()) + alist->get_min_y();
+	} else {
+		y = (int)(y * alist->parameter().max());
 	}
 }
 
 void
 AutomationLine::model_to_view_y (double& y)
 {
+	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation) {
 		y = gain_to_slider_position (y);
 	} else if (alist->parameter().type() == PanAutomation) {
 		// vertical coordinate axis reversal
 		y = 1.0 - y;
-	} else if (alist->parameter().type() == MidiCCAutomation) {
-		y = y / 127.0;
 	} else if (alist->parameter().type() == PluginAutomation) {
 		y = (y - alist->get_min_y()) / (double)(alist->get_max_y()- alist->get_min_y());
+	} else {
+		y = y / (double)alist->parameter().max(); /* ... like this */
 	}
 }
 

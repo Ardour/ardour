@@ -55,6 +55,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 }
 #endif
 
+/* XXX: min_val max_val redundant? (param.min() param.max()) */
 AutomationList::AutomationList (Parameter id, double min_val, double max_val, double default_val)
 	: _parameter(id)
 	, _interpolation(Linear)

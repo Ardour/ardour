@@ -339,7 +339,8 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 		boost::shared_ptr<AutomationControl> c = _route->control(param);
 
 		if (!c) {
-			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param, 0, 127, 64));
+			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param,
+						param.min(), param.max(), (param.max() - param.min() / 2)));
 			c = boost::shared_ptr<AutomationControl>(_route->control_factory(al));
 			_route->add_control(c);
 		}
