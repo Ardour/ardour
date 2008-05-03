@@ -724,11 +724,35 @@ MidiTrack::write_immediate_event(size_t size, const Byte* buf)
 void
 MidiTrack::MidiControl::set_value(float val)
 {
-	assert(val >= 0);
-	assert(val <= 127.0);
+	assert(val >= _list->parameter().min());
+	assert(val <= _list->parameter().max());
 
 	if ( ! _list->automation_playback()) {
-		Byte ev[3] = { MIDI_CMD_CONTROL, _list->parameter().id(), (int)val };
+		Byte ev[3] = { _list->parameter().channel(), int(val), 0.0 };
+		switch(AutomationType type = _list->parameter().type()) {
+		case MidiCCAutomation:
+			ev[0] += MIDI_CMD_CONTROL;
+			ev[1] = _list->parameter().id();
+			ev[2] = int(val);
+			break;
+			
+		case MidiPgmChangeAutomation:
+			ev[0] += MIDI_CMD_PGM_CHANGE;
+			break;
+			
+		case MidiChannelAftertouchAutomation:
+			ev[0] += MIDI_CMD_CHANNEL_PRESSURE;
+			break;
+			
+		case MidiPitchBenderAutomation:
+			ev[0] += MIDI_CMD_BENDER;
+			ev[1] = 0x7F & int(val);
+			ev[2] = 0x7F & (int(val) >> 7);
+			break;
+			
+		default:
+			assert(false);
+		}
 		_route->write_immediate_event(3,  ev);
 	}
 

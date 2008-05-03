@@ -87,13 +87,13 @@ Parameter::to_string() const
 	} else if (_type == PluginAutomation) {
 		return string_compose("parameter-%1", _id);
 	} else if (_type == MidiCCAutomation) {
-		return string_compose("midicc-%1-%2", _channel, _id);
+		return string_compose("midicc-%1-%2", int(_channel), _id);
 	} else if (_type == MidiPgmChangeAutomation) {
-		return string_compose("midi_pgm_change-%1", _channel);
+		return string_compose("midi-pgm-change-%1", int(_channel));
 	} else if (_type == MidiPitchBenderAutomation) {
-		return string_compose("midi_pitch_bender-%1", _channel);
+		return string_compose("midi-pitch-bender-%1", int(_channel));
 	} else if (_type == MidiChannelAftertouchAutomation) {
-		return string_compose("midi_channel_aftertouch-%1", _channel);
+		return string_compose("midi-channel-aftertouch-%1", int(_channel));
 	} else {
 		PBD::warning << "Uninitialized Parameter to_string() called." << endmsg;
 		return "";

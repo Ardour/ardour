@@ -226,6 +226,9 @@ private:
 	WriteNotes _write_notes[16];
 	bool       _writing;
 	bool       _edited;
+	
+	typedef std::vector< boost::shared_ptr<const ARDOUR::AutomationList> > AutomationLists;
+	AutomationLists _dirty_automations;
 
 	const const_iterator _end_iter;
 

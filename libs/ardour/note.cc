@@ -40,6 +40,7 @@ Note::Note(uint8_t chan, double t, double d, uint8_t n, uint8_t v)
 	assert(duration() == d);
 	assert(note() == n);
 	assert(velocity() == v);
+	assert(_on_event.channel() == _off_event.channel()); 
 }
 
 
@@ -64,6 +65,8 @@ Note::Note(const Note& copy)
 	assert(note() == copy.note());
 	assert(velocity() == copy.velocity());
 	assert(duration() == copy.duration());
+	assert(_on_event.channel() == _off_event.channel());
+	assert(channel() == copy.channel());
 }
 
 
@@ -86,7 +89,9 @@ Note::operator=(const Note& copy)
 	assert(note() == copy.note());
 	assert(velocity() == copy.velocity());
 	assert(duration() == copy.duration());
-
+	assert(_on_event.channel() == _off_event.channel());
+	assert(channel() == copy.channel());
+	
 	return *this;
 }
 

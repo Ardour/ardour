@@ -198,14 +198,21 @@ Automatable::describe_parameter (Parameter param)
 {
 	/* derived classes like PluginInsert should override this */
 
-	if (param == Parameter(GainAutomation))
+	if (param == Parameter(GainAutomation)) {
 		return _("Fader");
-	else if (param.type() == PanAutomation)
+	} else if (param.type() == PanAutomation) {
 		return (string_compose(_("Pan %1"), param.id()));
-	else if (param.type() == MidiCCAutomation)
-		return string_compose("CC %1", param.id());
-	else
+	} else if (param.type() == MidiCCAutomation) {
+		return string_compose("CC %1 [%2]", param.id(), int(param.channel()) + 1);
+	} else if (param.type() == MidiPgmChangeAutomation) {
+		return string_compose("Program [%1]", int(param.channel()) + 1);
+	} else if (param.type() == MidiPitchBenderAutomation) {
+		return string_compose("Bender [%1]", int(param.channel()) + 1);
+	} else if (param.type() == MidiChannelAftertouchAutomation) {
+		return string_compose("Aftertouch [%1]", int(param.channel()) + 1);
+	} else {
 		return param.to_string();
+	}
 }
 
 void
@@ -455,7 +462,11 @@ Automatable::transport_stopped (nframes_t now)
 boost::shared_ptr<AutomationControl>
 Automatable::control_factory(boost::shared_ptr<AutomationList> list)
 {
-	if (list->parameter().type() == MidiCCAutomation) {
+	if (
+			list->parameter().type() == MidiCCAutomation ||
+			list->parameter().type() == MidiPgmChangeAutomation ||
+			list->parameter().type() == MidiChannelAftertouchAutomation 
+	   ) {
 		// FIXME: this will die horribly if this is not a MidiTrack
 		return boost::shared_ptr<AutomationControl>(new MidiTrack::MidiControl((MidiTrack*)this, list));
 	} else {

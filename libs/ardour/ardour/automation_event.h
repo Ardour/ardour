@@ -238,7 +238,7 @@ class AutomationList : public PBD::StatefulDestructible
 	Glib::Mutex& lock() const { return _lock; }
 	LookupCache& lookup_cache() const { return _lookup_cache; }
 	SearchCache& search_cache() const { return _search_cache; }
-	
+
 	/** Called by locked entry point and various private
 	 * locations where we already hold the lock.
 	 * 
