@@ -870,7 +870,7 @@ bool MidiModel::write_to(boost::shared_ptr<MidiSource> source) {
 
 	MidiEvents events(comp);
 
-	/* Why sort manyally, when a priority queue does the job for us,
+	/* Why sort manually, when a priority queue does the job for us,
 	 * (I am probably wrong here, but I needed that to test program
 	 * change code quickly) ???
 	 * 	*/
