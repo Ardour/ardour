@@ -57,9 +57,11 @@ void MidiModel::read_unlock() const {
 
 // Read iterator (const_iterator)
 
-MidiModel::const_iterator::const_iterator(const MidiModel& model, double t) :
-	_model(&model), _is_end( (t == DBL_MAX) || model.empty()),
-			_locked( !_is_end) {
+MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
+	: _model(&model)
+	, _is_end( (t == DBL_MAX) || model.empty())
+	, _locked( !_is_end)
+{
 	//cerr << "Created MIDI iterator @ " << t << " (is end: " << _is_end << ")" << endl;
 
 	if (_is_end)
@@ -80,14 +82,13 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t) :
 
 	_control_iters.reserve(model.controls().size());
 	for (Automatable::Controls::const_iterator i = model.controls().begin();
-	i != model.controls().end(); ++i) {
+			i != model.controls().end(); ++i) {
 
 		assert(
-		i->first.type() == MidiCCAutomation ||
-		i->first.type() == MidiPgmChangeAutomation ||
-		i->first.type() == MidiPitchBenderAutomation ||
-		i->first.type() == MidiChannelAftertouchAutomation
-		);
+			i->first.type() == MidiCCAutomation ||
+			i->first.type() == MidiPgmChangeAutomation ||
+			i->first.type() == MidiPitchBenderAutomation ||
+			i->first.type() == MidiChannelAftertouchAutomation);
 
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y);
@@ -121,16 +122,16 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t) :
 	}
 
 	if (earliest_control.automation_list && earliest_control.x < _event.time())
-	model.control_to_midi_event(_event, earliest_control);
+		model.control_to_midi_event(_event, earliest_control);
 	else
-	_control_iter = _control_iters.end();
+		_control_iter = _control_iters.end();
 
 	if (_event.size() == 0) {
 		//cerr << "Created MIDI iterator @ " << t << " is at end." << endl;
 		_is_end = true;
 
 		// FIXME: possible race condition here....
-		if(_locked) {
+		if (_locked) {
 			_model->read_unlock();
 			_locked = false;
 		}
@@ -139,33 +140,30 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t) :
 	}
 }
 
-MidiModel::const_iterator::~const_iterator() {
-	if (_locked) {
+MidiModel::const_iterator::~const_iterator()
+{
+	if (_locked)
 		_model->read_unlock();
-	}
 }
 
 const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 {
 	if (_is_end)
-	throw std::logic_error("Attempt to iterate past end of MidiModel");
+		throw std::logic_error("Attempt to iterate past end of MidiModel");
 
 	/*cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event.type()) 
 	 << "   buffer: 0x" << int(_event.buffer()[0]) << " 0x" << int(_event.buffer()[1]) 
 	 << " 0x" << int(_event.buffer()[2]) << endl;*/
 
-	if(! (_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()) ) {
+	if (! (_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()) ) {
 		cerr << "FAILED event buffer: " << hex << int(_event.buffer()[0]) << int(_event.buffer()[1]) << int(_event.buffer()[2]) << endl;
 	}
 	assert((_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()));
 
-	// TODO: This code crashes at the marked section
 	// Increment past current control event
 	if (_control_iter != _control_iters.end() && _control_iter->automation_list && _event.is_cc()) {
 		double x, y;
 		cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
-		// v--- this crashes because of a null pointer in the stl containers linked list chain
-		//      the crash occurs in _control_iter->automation_list->size();
 		const bool ret = _control_iter->automation_list->rt_safe_earliest_event_unlocked(
 				_control_iter->x, DBL_MAX, x, y, false);
 
@@ -181,7 +179,6 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	}
 
 	// Now find and point at the earliest event
-
 
 	const std::vector<MidiControlIterator>::iterator old_control_iter = _control_iter;
 	_control_iter = _control_iters.begin();
@@ -216,8 +213,8 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	if (_control_iter != _control_iters.end()
 			&& _control_iter->x != DBL_MAX
 			&& _control_iter != old_control_iter)
-	if (type == NIL || _control_iter->x < t)
-	type = AUTOMATION;
+		if (type == NIL || _control_iter->x < t)
+			type = AUTOMATION;
 
 	if (type == NOTE_ON) {
 		cerr << "********** MIDI Iterator = note on" << endl;
@@ -244,15 +241,15 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 bool MidiModel::const_iterator::operator==(const const_iterator& other) const
 {
 	if (_is_end || other._is_end)
-	return (_is_end == other._is_end);
+		return (_is_end == other._is_end);
 	else
-	return (_event == other._event);
+		return (_event == other._event);
 }
 
 MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iterator& other)
 {
 	if (_locked && _model != other._model)
-	_model->read_unlock();
+		_model->read_unlock();
 
 	assert( ! other._event.owns_buffer());
 
@@ -272,11 +269,17 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 
 // MidiModel
 
-MidiModel::MidiModel(MidiSource *s, size_t size) :
-	Automatable(s->session(), "midi model"), _notes(size),
-			_note_mode(Sustained), _writing(false), _edited(false), _end_iter(
-					*this, DBL_MAX), _next_read(UINT32_MAX), _read_iter(*this,
-					DBL_MAX), _midi_source(s) {
+MidiModel::MidiModel(MidiSource *s, size_t size)
+	: Automatable(s->session(), "midi model")
+	, _notes(size)
+	, _note_mode(Sustained)
+	, _writing(false)
+	, _edited(false)
+	, _end_iter(*this, DBL_MAX)
+	, _next_read(UINT32_MAX)
+	, _read_iter(*this, DBL_MAX)
+	, _midi_source(s)
+{
 	assert(_end_iter._is_end);
 	assert( ! _end_iter._locked);
 }
@@ -286,7 +289,8 @@ MidiModel::MidiModel(MidiSource *s, size_t size) :
  * \return number of events written to \a dst
  */
 size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
-		nframes_t stamp_offset, nframes_t negative_stamp_offset) const {
+		nframes_t stamp_offset, nframes_t negative_stamp_offset) const
+{
 	//cerr << this << " MM::read @ " << start << " frames: " << nframes << " -> " << stamp_offset << endl;
 	//cerr << this << " MM # notes: " << n_notes() << endl;
 
@@ -322,7 +326,8 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 }
 
 bool MidiModel::control_to_midi_event(MIDI::Event& ev,
-		const MidiControlIterator& iter) const {
+		const MidiControlIterator& iter) const
+{
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:
 		if (ev.size() < 3)
@@ -390,6 +395,20 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 	}
 }
 
+
+/** Clear all events from the model.
+ */
+void MidiModel::clear()
+{
+	_lock.writer_lock();
+	_notes.clear();
+	clear_automation();
+	_next_read = 0;
+	_read_iter = end();
+	_lock.writer_unlock();
+}
+
+
 /** Begin a write of events to the model.
  *
  * If \a mode is Sustained, complete notes with duration are constructed as note
@@ -397,7 +416,8 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
  * stored; note off events are discarded entirely and all contained notes will
  * have duration 0.
  */
-void MidiModel::start_write() {
+void MidiModel::start_write()
+{
 	//cerr << "MM " << this << " START WRITE, MODE = " << enum_2_string(_note_mode) << endl;
 	write_lock();
 	_writing = true;
@@ -414,7 +434,8 @@ void MidiModel::start_write() {
  * that were never resolved with a corresonding note off will be deleted.
  * Otherwise they will remain as notes with duration 0.
  */
-void MidiModel::end_write(bool delete_stuck) {
+void MidiModel::end_write(bool delete_stuck)
+{
 	write_lock();
 	assert(_writing);
 
@@ -441,7 +462,7 @@ void MidiModel::end_write(bool delete_stuck) {
 		_write_notes[i].clear();
 	}
 
-	for(AutomationLists::const_iterator i = _dirty_automations.begin(); i != _dirty_automations.end(); ++i) {
+	for (AutomationLists::const_iterator i = _dirty_automations.begin(); i != _dirty_automations.end(); ++i) {
 		(*i)->Dirty.emit();
 		(*i)->lookup_cache().left = -1;
 		(*i)->search_cache().left = -1;
@@ -457,7 +478,8 @@ void MidiModel::end_write(bool delete_stuck) {
  * the start of this model (t=0) and MUST be monotonically increasing
  * and MUST be >= the latest event currently in the model.
  */
-void MidiModel::append(const MIDI::Event& ev) {
+void MidiModel::append(const MIDI::Event& ev)
+{
 	write_lock();
 	_edited = true;
 
@@ -492,7 +514,8 @@ void MidiModel::append(const MIDI::Event& ev) {
 }
 
 void MidiModel::append_note_on_unlocked(uint8_t chan, double time,
-		uint8_t note_num, uint8_t velocity) {
+		uint8_t note_num, uint8_t velocity)
+{
 	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
 	 " note " << (int)note_num << " on @ " << time << endl;*/
 
@@ -510,7 +533,8 @@ void MidiModel::append_note_on_unlocked(uint8_t chan, double time,
 }
 
 void MidiModel::append_note_off_unlocked(uint8_t chan, double time,
-		uint8_t note_num) {
+		uint8_t note_num)
+{
 	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
 	 " note " << (int)note_num << " off @ " << time << endl;*/
 
@@ -550,7 +574,8 @@ void MidiModel::append_note_off_unlocked(uint8_t chan, double time,
 }
 
 void MidiModel::append_automation_event_unlocked(AutomationType type,
-		uint8_t chan, double time, uint8_t first_byte, uint8_t second_byte) {
+		uint8_t chan, double time, uint8_t first_byte, uint8_t second_byte)
+{
 	//cerr << "MidiModel " << this << " chan " << (int)chan <<
 	//		" CC " << (int)number << " = " << (int)value << " @ " << time << endl;
 
@@ -585,7 +610,8 @@ void MidiModel::append_automation_event_unlocked(AutomationType type,
 	cerr << "control list size after fast simple add: " << control->list()->size() << endl;
 }
 
-void MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note) {
+void MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note)
+{
 	//cerr << "MidiModel " << this << " add note " << (int)note.note() << " @ " << note.time() << endl;
 	_edited = true;
 	Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note,
@@ -593,7 +619,8 @@ void MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note) {
 	_notes.insert(i, note);
 }
 
-void MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note) {
+void MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
+{
 	_edited = true;
 	//cerr << "MidiModel " << this << " remove note " << (int)note.note() << " @ " << note.time() << endl;
 	for (Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
@@ -635,7 +662,8 @@ bool MidiModel::is_sorted() const {
  * can be held on to for as long as the caller wishes, or discarded without
  * formality, until apply_command is called and ownership is taken.
  */
-MidiModel::DeltaCommand* MidiModel::new_delta_command(const string name) {
+MidiModel::DeltaCommand* MidiModel::new_delta_command(const string name)
+{
 	DeltaCommand* cmd = new DeltaCommand(_midi_source->model(), name);
 	return cmd;
 }
@@ -645,7 +673,8 @@ MidiModel::DeltaCommand* MidiModel::new_delta_command(const string name) {
  * Ownership of cmd is taken, it must not be deleted by the caller.
  * The command will constitute one item on the undo stack.
  */
-void MidiModel::apply_command(Command* cmd) {
+void MidiModel::apply_command(Command* cmd)
+{
 	_session.begin_reversible_command(cmd->name());
 	(*cmd)();
 	assert(is_sorted());
@@ -656,27 +685,30 @@ void MidiModel::apply_command(Command* cmd) {
 // MidiEditCommand
 
 MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m,
-		const std::string& name) :
-	Command(name), _model(m), _name(name) {
-
+		const std::string& name)
+	: Command(name)
+	, _model(m)
+	, _name(name)
+{
 }
 
 MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m,
-		const XMLNode& node) :
-	_model(m) {
+		const XMLNode& node)
+	: _model(m)
+{
 	set_state(node);
 }
 
-void MidiModel::DeltaCommand::add(const boost::shared_ptr<Note> note) {
+void MidiModel::DeltaCommand::add(const boost::shared_ptr<Note> note)
+{
 	//cerr << "MEC: apply" << endl;
-
 	_removed_notes.remove(note);
 	_added_notes.push_back(note);
 }
 
-void MidiModel::DeltaCommand::remove(const boost::shared_ptr<Note> note) {
+void MidiModel::DeltaCommand::remove(const boost::shared_ptr<Note> note)
+{
 	//cerr << "MEC: remove" << endl;
-
 	_added_notes.remove(note);
 	_removed_notes.push_back(note);
 }
@@ -691,17 +723,17 @@ void MidiModel::DeltaCommand::operator()()
 	const double iter_time = _model->_read_iter->time();
 
 	if (reset_iter)
-	_model->_read_iter = _model->end(); // drop read lock
+		_model->_read_iter = _model->end(); // drop read lock
 
 	assert( ! _model->_read_iter.locked());
 
 	_model->write_lock();
 
 	for (std::list< boost::shared_ptr<Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
-	_model->add_note_unlocked(*i);
+		_model->add_note_unlocked(*i);
 
 	for (std::list< boost::shared_ptr<Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
-	_model->remove_note_unlocked(*i);
+		_model->remove_note_unlocked(*i);
 
 	_model->write_unlock();
 
@@ -711,7 +743,8 @@ void MidiModel::DeltaCommand::operator()()
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
-void MidiModel::DeltaCommand::undo() {
+void MidiModel::DeltaCommand::undo()
+{
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 
@@ -742,8 +775,8 @@ void MidiModel::DeltaCommand::undo() {
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
-XMLNode & MidiModel::DeltaCommand::marshal_note(
-		const boost::shared_ptr<Note> note) {
+XMLNode & MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr<Note> note)
+{
 	XMLNode *xml_note = new XMLNode("note");
 	ostringstream note_str(ios::ate);
 	note_str << int(note->note());
@@ -768,8 +801,8 @@ XMLNode & MidiModel::DeltaCommand::marshal_note(
 	return *xml_note;
 }
 
-boost::shared_ptr<Note> MidiModel::DeltaCommand::unmarshal_note(
-		XMLNode *xml_note) {
+boost::shared_ptr<Note> MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
+{
 	unsigned int note;
 	istringstream note_str(xml_note->property("note")->value());
 	note_str >> note;
@@ -798,7 +831,8 @@ boost::shared_ptr<Note> MidiModel::DeltaCommand::unmarshal_note(
 #define REMOVED_NOTES_ELEMENT "removed_notes"
 #define DELTA_COMMAND_ELEMENT "DeltaCommand"
 
-int MidiModel::DeltaCommand::set_state(const XMLNode& delta_command) {
+int MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
+{
 	if (delta_command.name() != string(DELTA_COMMAND_ELEMENT)) {
 		return 1;
 	}
@@ -818,7 +852,8 @@ int MidiModel::DeltaCommand::set_state(const XMLNode& delta_command) {
 	return 0;
 }
 
-XMLNode& MidiModel::DeltaCommand::get_state() {
+XMLNode& MidiModel::DeltaCommand::get_state()
+{
 	XMLNode *delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
 	delta_command->add_property("midi_source", _model->midi_source()->id().to_s());
 
@@ -842,7 +877,8 @@ struct EventTimeComparator {
 	}
 };
 
-bool MidiModel::write_to(boost::shared_ptr<MidiSource> source) {
+bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
+{
 	cerr << "Writing model to " << source->name() << endl;
 
 	/* This could be done using a temporary MidiRingBuffer and using
@@ -915,15 +951,9 @@ bool MidiModel::write_to(boost::shared_ptr<MidiSource> source) {
 	return true;
 }
 
-XMLNode& MidiModel::get_state() {
+XMLNode& MidiModel::get_state()
+{
 	XMLNode *node = new XMLNode("MidiModel");
 	return *node;
 }
 
-const MidiSource * MidiModel::midi_source() const {
-	return _midi_source;
-}
-
-void MidiModel::set_midi_source(MidiSource *source) {
-	_midi_source = source;
-}

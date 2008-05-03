@@ -728,8 +728,8 @@ MidiTrack::MidiControl::set_value(float val)
 	assert(val <= _list->parameter().max());
 
 	if ( ! _list->automation_playback()) {
-		Byte ev[3] = { _list->parameter().channel(), int(val), 0.0 };
-		switch(AutomationType type = _list->parameter().type()) {
+		Byte ev[3] = { _list->parameter().channel(), (int)val, 0.0 };
+		switch(_list->parameter().type()) {
 		case MidiCCAutomation:
 			ev[0] += MIDI_CMD_CONTROL;
 			ev[1] = _list->parameter().id();

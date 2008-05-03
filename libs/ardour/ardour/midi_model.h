@@ -39,29 +39,27 @@ namespace ARDOUR {
 class Session;
 class MidiSource;
 	
+
 class MidiControlIterator {
 public:
 	boost::shared_ptr<const AutomationList> automation_list;
 	double x;
 	double y;
 	
-	MidiControlIterator(
-		boost::shared_ptr<const AutomationList> the_automation_list,
-		double my_x,
-		double my_y) : automation_list(the_automation_list), x(my_x), y(my_y)
-		{}
+	MidiControlIterator(boost::shared_ptr<const AutomationList> a_list,
+			double a_x,
+			double a_y)
+		: automation_list(a_list)
+		, x(a_x)
+		, y(a_y)
+	{}
 };
 
 
-/** This is a slightly higher level (than MidiBuffer) model of MIDI note data.
- * Currently it only represents note data, which is represented as complete
- * note events (ie with a start time and a duration) rather than separate
- * note on and off events (controller data is not here since it's represented
- * as an AutomationList)
- *
- * FIXME: Currently this stores event time stamps in frames.  This is almost
- * certainly wrong, or at least wrong most of the time (if we add an option).
- * This reeeeeeally needs fixing, but frame time runs deep in Ardour...
+/** This is a higher level (than MidiBuffer) model of MIDI data, with separate
+ * representations for notes (instead of just unassociated note on/off events)
+ * and controller data.  Controller data is represented as part of the
+ * Automatable base (i.e. in a map of AutomationList, keyed by Parameter).
  */
 class MidiModel : public boost::noncopyable, public Automatable {
 public:
@@ -69,10 +67,11 @@ public:
 	
 	void write_lock();
 	void write_unlock();
+
 	void read_lock()   const;
 	void read_unlock() const;
 
-	void clear() { _notes.clear(); }
+	void clear();
 
 	NoteMode note_mode() const            { return _note_mode; }
 	void     set_note_mode(NoteMode mode) { _note_mode = mode; }
@@ -196,8 +195,8 @@ public:
 	const_iterator        begin() const { return const_iterator(*this, 0); }
 	const const_iterator& end()   const { return _end_iter; }
 	
-	const MidiSource *midi_source() const;
-	void set_midi_source(MidiSource *source); 
+	const MidiSource* midi_source() const { return _midi_source; }
+	void set_midi_source(MidiSource* source) { _midi_source = source; } 
 	
 private:
 	friend class DeltaCommand;
@@ -218,7 +217,7 @@ private:
 
 	mutable Glib::RWLock _lock;
 
-	Notes      _notes;
+	Notes _notes;
 	
 	NoteMode _note_mode;
 	
@@ -241,7 +240,7 @@ private:
 		ActiveNotes;
 	
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
-	MidiSource *_midi_source;
+	MidiSource* _midi_source;
 };
 
 } /* namespace ARDOUR */
