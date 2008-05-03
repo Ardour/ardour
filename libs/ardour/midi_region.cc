@@ -131,8 +131,8 @@ MidiRegion::master_read_at (MidiRingBuffer& out, nframes_t position, nframes_t d
 nframes_t
 MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
-	cerr << "reading from region " << _name << " position: " << _position << " start: " << _start << endl;
-	cerr << _name << "._read_at(" << position << ") - " << position << " duration: " << dur << endl;
+	/*cerr << "MidiRegion " << _name << "._read_at(" << position << ") - "
+		<< position << " duration: " << dur << endl;*/
 
 	nframes_t internal_offset = 0;
 	nframes_t src_offset      = 0;
@@ -174,7 +174,7 @@ MidiRegion::_read_at (const SourceList& srcs, MidiRingBuffer& dst, nframes_t pos
 
 	nframes_t output_buffer_position = 0;
 	nframes_t negative_output_buffer_position = 0;
-	if(_position >= _start) {
+	if (_position >= _start) {
 		// handle resizing of beginnings of regions correctly
 		output_buffer_position = _position - _start;
 	} else {

@@ -1436,10 +1436,6 @@ AutomationList::get_state ()
 XMLNode&
 AutomationList::state (bool full)
 {
-	cerr << "getting ";
-	if(full)
-		cerr << "full ";
-	cerr << "state for AutomationList " << _parameter.to_string() << " list size: " << size() << endl; 
 	XMLNode* root = new XMLNode (X_("AutomationList"));
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));

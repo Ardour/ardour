@@ -56,8 +56,6 @@ Parameter::Parameter(const std::string& str)
 		sscanf(str.c_str(), "midicc-%d-%d", &channel, &_id);
 		assert(channel < 16);
 		_channel = channel;
-		cout << "LOADED PARAMETER " << str << " chan " << _channel << " id " << _id << endl; 
-		//_id = atoi(str.c_str()+7);
 	} else {
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}

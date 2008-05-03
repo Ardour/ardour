@@ -133,6 +133,14 @@ SMFSource::init (string pathstr, bool must_exist)
 	return 0;
 }
 
+/** Attempt to open the SMF file for reading and writing.
+ *
+ * Currently SMFSource is always read/write.
+ *
+ * \return  0 on success
+ *         -1 if the file can not be opened for reading,
+ *         -2 if the file can not be opened for writing
+ */
 int
 SMFSource::open()
 {
@@ -153,6 +161,11 @@ SMFSource::open()
 	// We're making a new file
 	} else {
 		_fd = fopen(path().c_str(), "w+");
+		if (_fd == NULL) {
+			cerr << "ERROR: Can not open SMF file " << path() << " for writing: " <<
+				strerror(errno) << endl;
+			return -2;
+		}
 		_track_size = 4;
 
 		// Write a tentative header just to pad things out so writing happens in the right spot
@@ -160,8 +173,19 @@ SMFSource::open()
 		write_footer();
 		seek_to_end();
 	}
-
+		
 	return (_fd == 0) ? -1 : 0;
+}
+
+void
+SMFSource::close()
+{
+	if (_fd) {
+		flush_header();
+		flush_footer();
+		fclose(_fd);
+		_fd = NULL;
+	}
 }
 
 void
@@ -171,7 +195,7 @@ SMFSource::seek_to_end()
 }
 
 int
-SMFSource::flush_header ()
+SMFSource::flush_header()
 {
 	// FIXME: write timeline position somehow?
 	
@@ -211,8 +235,6 @@ SMFSource::flush_footer()
 void
 SMFSource::write_footer()
 {
-	//cerr << "SMF " << name() << " writing EOT at byte " << ftell(_fd) << endl;
-	
 	write_var_len(0);
 	char eot[3] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
 	fwrite(eot, 1, 3, _fd);
@@ -318,11 +340,11 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 	if (event_size > 1)
 		fread((*buf) + 1, 1, *size - 1, _fd);
 
-	printf("%s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
+	/*printf("%s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
 	for (size_t i=0; i < *size; ++i) {
 		printf("%X ", (*buf)[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 	
 	return (int)*size;
 }
@@ -451,12 +473,13 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 {
-	//printf("%s - append chan = %u, time = %lf, size = %u, data = ", _path.c_str(), (unsigned)ev.channel(), ev.time(), ev.size());
+	/*printf("%s - append chan = %u, time = %lf, size = %u, data = ",
+			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size());
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
-	printf("\n");
-
+	printf("\n");*/
+	
 	assert(ev.time() >= 0);
 	assert(ev.time() >= _last_ev_time);
 	
@@ -535,6 +558,7 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_fra
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
 	_last_ev_time = 0;
+	fseek(_fd, _header_size, 0);
 }
 
 void
@@ -546,20 +570,9 @@ SMFSource::mark_streaming_write_completed ()
 		return;
 	}
 	
+	_model->set_edited(false);
 	flush_header();
 	flush_footer();
-
-#if 0
-	Glib::Mutex::Lock lm (_lock);
-
-
-	next_peak_clear_should_notify = true;
-
-	if (_peaks_built || pending_peak_builds.empty()) {
-		_peaks_built = true;
-		 PeaksReady (); /* EMIT SIGNAL */
-	}
-#endif
 }
 
 void
@@ -861,13 +874,8 @@ SMFSource::load_model(bool lock, bool force_reload)
 	if (lock)
 		Glib::Mutex::Lock lm (_lock);
 
-	if (_model && !force_reload && !_model->empty()) {
-		//cerr << _name << " NOT reloading model " << _model.get() << " (" << _model->n_notes()
-		//	<< " notes)" << endl;
+	if (_model && !force_reload && !_model->empty())
 		return;
-	} else {
-		cerr << _name << " loading model" << endl;
-	}
 
 	if (! _model) {
 		_model = boost::shared_ptr<MidiModel>(new MidiModel(this));
@@ -912,6 +920,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 	
 	_model->end_write(false);
+	_model->set_edited(false);
 
 	free(ev.buffer());
 }

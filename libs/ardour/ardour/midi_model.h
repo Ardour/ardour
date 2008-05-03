@@ -63,7 +63,7 @@ public:
  */
 class MidiModel : public boost::noncopyable, public Automatable {
 public:
-	MidiModel(MidiSource *s,  size_t size=0);
+	MidiModel(MidiSource* s, size_t size=0);
 	
 	void write_lock();
 	void write_unlock();
@@ -91,7 +91,6 @@ public:
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && _controls.size() == 0; }
 
-	
 	inline static bool note_time_comparator (const boost::shared_ptr<const Note> a,
 	                                         const boost::shared_ptr<const Note> b) { 
 		return a->time() < b->time();
@@ -149,7 +148,8 @@ public:
 	void set_edited(bool yn) { _edited = yn; }
 	bool write_to(boost::shared_ptr<MidiSource> source);
 		
-	// MidiModel doesn't use the normal AutomationList serialisation code, as CC data is in the .mid
+	// MidiModel doesn't use the normal AutomationList serialisation code
+	// since controller data is stored in the .mid
 	XMLNode& get_state();
 	int set_state(const XMLNode&) { return 0; }
 

@@ -623,7 +623,7 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent
 bool
 AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
-	return cut_copy_clear_one (*_line, selection, op);
+	return (_line ? cut_copy_clear_one (*_line, selection, op) : false);
 }
 
 bool

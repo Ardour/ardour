@@ -556,7 +556,7 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input, 
 {
 	Port* newport = 0;
 
-	cerr << "trying to register port with name " << portname << endl;
+	/*cerr << "trying to register port with name " << portname << endl;*/
 	try {
 		if (dtype == DataType::AUDIO) {
 			newport = new AudioPort (portname, (input ? Port::IsInput : Port::IsOutput), publish, frames_per_cycle());
@@ -566,16 +566,16 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input, 
 			throw unknown_type();
 		}
 
-		cerr << "successfully got port " << portname << " with address " << newport << endl;
+		/*cerr << "successfully got port " << portname << " with address " << newport << endl;*/
 
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
-		cerr << "Address of ports list: " << ps << endl
-		     << "Ports set size before insert: " << ps->size() << endl;
+		/*cerr << "Address of ports list: " << ps << endl
+		     << "Ports set size before insert: " << ps->size() << endl;*/
 		ps->insert (ps->begin(), newport);
-		cerr << "Ports set size after insert: " << ps->size() << endl;
-		/* writer goes out of scope, forces update */
+		/*cerr << "Ports set size after insert: " << ps->size() << endl;*/
 
+		/* writer goes out of scope, forces update */
 
 		return newport;
 	}

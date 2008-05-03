@@ -78,7 +78,6 @@ class SndFileSource : public AudioFileSource {
 
 	void init ();
 	int open();
-	void close();
 	int setup_broadcast_info (nframes_t when, struct tm&, time_t);
 
 	/* destructive */

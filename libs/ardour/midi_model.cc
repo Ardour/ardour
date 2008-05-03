@@ -136,7 +136,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 			_locked = false;
 		}
 	} else {
-		printf("MIDI Iterator = %X @ %lf\n", _event.type(), _event.time());
+		//printf("New MIDI Iterator = %X @ %lf\n", _event.type(), _event.time());
 	}
 }
 
@@ -161,7 +161,7 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	assert((_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()));
 
 	// Increment past current control event
-	if (_control_iter != _control_iters.end() && _control_iter->automation_list && _event.is_cc()) {
+	if (!_event.is_note() && _control_iter != _control_iters.end() && _control_iter->automation_list) {
 		double x, y;
 		cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
 		const bool ret = _control_iter->automation_list->rt_safe_earliest_event_unlocked(
@@ -212,24 +212,24 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	// Use the next earliest controller iff it's earlier than the note event
 	if (_control_iter != _control_iters.end()
 			&& _control_iter->x != DBL_MAX
-			&& _control_iter != old_control_iter)
+	   )//&& _control_iter != old_control_iter)
 		if (type == NIL || _control_iter->x < t)
 			type = AUTOMATION;
 
 	if (type == NOTE_ON) {
-		cerr << "********** MIDI Iterator = note on" << endl;
+		//cerr << "********** MIDI Iterator = note on" << endl;
 		_event = MIDI::Event((*_note_iter)->on_event(), false);
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
-		cerr << "********** MIDI Iterator = note off" << endl;
+		//cerr << "********** MIDI Iterator = note off" << endl;
 		_event = MIDI::Event(_active_notes.top()->off_event(), false);
 		_active_notes.pop();
 	} else if (type == AUTOMATION) {
-		cerr << "********** MIDI Iterator = AUTOMATION" << endl;
+		//cerr << "********** MIDI Iterator = Automation" << endl;
 		_model->control_to_midi_event(_event, *_control_iter);
 	} else {
-		cerr << "********** MIDI Iterator = END" << endl;
+		//cerr << "********** MIDI Iterator = End" << endl;
 		_is_end = true;
 	}
 
@@ -483,7 +483,8 @@ void MidiModel::append(const MIDI::Event& ev)
 	write_lock();
 	_edited = true;
 
-	cerr << "MidiModel::append event type: " << hex << "0x" << int(ev.type()) << endl;
+	/*cerr << "MidiModel append event type: "
+		<< hex << "0x" << (int)ev.type() << endl;*/
 
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
@@ -507,7 +508,7 @@ void MidiModel::append(const MIDI::Event& ev)
 		append_automation_event_unlocked(MidiChannelAftertouchAutomation,
 				ev.channel(), ev.time(), ev.channel_aftertouch(), 0);
 	} else {
-		printf("MM Unknown event type %X\n", ev.type());
+		printf("WARNING: MidiModel: Unknown event type %X\n", ev.type());
 	}
 
 	write_unlock();
@@ -607,7 +608,7 @@ void MidiModel::append_automation_event_unlocked(AutomationType type,
 	Parameter param(type, id, chan);
 	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
 	control->list()->fast_simple_add(time, value);
-	cerr << "control list size after fast simple add: " << control->list()->size() << endl;
+	/*cerr << "control list size after fast simple add: " << control->list()->size() << endl;*/
 }
 
 void MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note)
@@ -877,76 +878,27 @@ struct EventTimeComparator {
 	}
 };
 
+/** Write the model to a MidiSource (i.e. save the model).
+ * This is different from manually using read to write to a source in that
+ * note off events are written regardless of the track mode.  This is so the
+ * user can switch a recorded track (with note durations from some instrument)
+ * to percussive, save, reload, then switch it back to sustained without
+ * destroying the original note durations.
+ */
 bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 {
-	cerr << "Writing model to " << source->name() << endl;
-
-	/* This could be done using a temporary MidiRingBuffer and using
-	 * MidiModel::read and MidiSource::write, but this is more efficient
-	 * and doesn't require any buffer size assumptions (ie it's worth
-	 * the code duplication).
-	 *
-	 * This is also different from read in that note off events are written
-	 * regardless of the track mode.  This is so the user can switch a
-	 * recorded track (with note durations from some instrument) to percussive,
-	 * save, reload, then switch it back to sustained preserving the original
-	 * note durations.
-	 */
-
 	read_lock();
 
-	LaterNoteEndComparator cmp;
-	ActiveNotes active_notes(cmp);
+	const NoteMode old_note_mode = _note_mode;
+	_note_mode = Sustained;
 
-	EventTimeComparator comp;
-	typedef std::priority_queue<
-	const MIDI::Event*,
-	std::deque<const MIDI::Event*>,
-	EventTimeComparator> MidiEvents;
-
-	MidiEvents events(comp);
-
-	/* Why sort manually, when a priority queue does the job for us,
-	 * (I am probably wrong here, but I needed that to test program
-	 * change code quickly) ???
-	 * 	*/
-	// Foreach note
-	for (Notes::const_iterator n = _notes.begin(); n != _notes.end(); ++n) {
-
-		// Write any pending note offs earlier than this note on
-		while ( !active_notes.empty() ) {
-			const boost::shared_ptr<const Note> earliest_off =
-					active_notes.top();
-			const MIDI::Event& off_ev = earliest_off->off_event();
-			if (off_ev.time() <= (*n)->time()) {
-				events.push(&off_ev);
-				active_notes.pop();
-			} else {
-				break;
-			}
-		}
-
-		// Write this note on
-		events.push(&(*n)->on_event());
-		if ((*n)->duration() > 0)
-			active_notes.push(*n);
-	}
-
-	// Write any trailing note offs
-	while ( !active_notes.empty() ) {
-		events.push(&active_notes.top()->off_event());
-		active_notes.pop();
-	}
-
-	while (!events.empty()) {
-		source->append_event_unlocked(Frames, *events.top());
-		//cerr << "MidiModel::write_to appending event with time:" << dec << int(events.top()->time()) << hex << "   buffer: 0x" << int(events.top()->buffer()[0]) << " 0x" << int(events.top()->buffer()[1]) << " 0x" << int(events.top()->buffer()[2]) << endl;
-		events.pop();
-	}
-
-	_edited = false;
-
+	for (const_iterator i = begin(); i != end(); ++i)
+		source->append_event_unlocked(Frames, *i);
+	
+	_note_mode = old_note_mode;
+	
 	read_unlock();
+	_edited = false;
 
 	return true;
 }

@@ -110,6 +110,7 @@ class SMFSource : public MidiSource {
 	bool writable() const { return _flags & Writable; }
 
 	int  open();
+	void close();
 	void seek_to_end();
 	void write_footer();
 
