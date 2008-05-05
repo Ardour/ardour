@@ -4187,12 +4187,6 @@ Editor::use_visual_state (VisualState& vs)
 	set_zoom_focus (vs.zoom_focus);
 	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
 
-	if (vs.zoomed_to_region) {
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			(*i)->set_height_scaling_factor (1.0);
-		}
-	}
-
 	for (list<TAVState>::iterator i = vs.track_states.begin(); i != vs.track_states.end(); ++i) {
 		TrackViewList::iterator t;
 

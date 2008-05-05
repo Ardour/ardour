@@ -73,6 +73,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_actions, X_("RegionGainMenu"), _("Gain"));
 	ActionManager::register_action (editor_actions, X_("RulerMenu"), _("Rulers"));
+	ActionManager::register_action (editor_actions, X_("SavedViewMenu"), _("Views"));
 	ActionManager::register_action (editor_actions, X_("ScrollMenu"), _("Scroll"));
 	ActionManager::register_action (editor_actions, X_("SecondaryClockMenu"), _("Secondary Clock"));
 	ActionManager::register_action (editor_actions, X_("Select"), _("Select"));
@@ -192,6 +193,56 @@ Editor::register_actions ()
        	act = ActionManager::register_action (editor_actions, "select-prev-route", _("Select Previous Track/Bus"), mem_fun(*this, &Editor::select_prev_route));
 	ActionManager::session_sensitive_actions.push_back (act);
 	
+
+	act = ActionManager::register_action (editor_actions, "save-visual-state-1", _("Save View 1"), bind (mem_fun (*this, &Editor::save_visual_state), 0));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-1", _("Goto View 1"), bind (mem_fun (*this, &Editor::goto_visual_state), 0));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-2", _("Save View 2"), bind (mem_fun (*this, &Editor::save_visual_state), 1));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-2", _("Goto View 2"), bind (mem_fun (*this, &Editor::goto_visual_state), 1));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-3", _("Save View 3"), bind (mem_fun (*this, &Editor::save_visual_state), 2));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-3", _("Goto View 3"), bind (mem_fun (*this, &Editor::goto_visual_state), 2));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-4", _("Save View 4"), bind (mem_fun (*this, &Editor::save_visual_state), 3));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-4", _("Goto View 4"), bind (mem_fun (*this, &Editor::goto_visual_state), 3));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-5", _("Save View 5"), bind (mem_fun (*this, &Editor::save_visual_state), 4));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-5", _("Goto View 5"), bind (mem_fun (*this, &Editor::goto_visual_state), 4));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-6", _("Save View 6"), bind (mem_fun (*this, &Editor::save_visual_state), 5));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-6", _("Goto View 6"), bind (mem_fun (*this, &Editor::goto_visual_state), 5));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-7", _("Save View 7"), bind (mem_fun (*this, &Editor::save_visual_state), 6));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-7", _("Goto View 7"), bind (mem_fun (*this, &Editor::goto_visual_state), 6));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-8", _("Save View 8"), bind (mem_fun (*this, &Editor::save_visual_state), 7));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-8", _("Goto View 8"), bind (mem_fun (*this, &Editor::goto_visual_state), 7));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-9", _("Save View 9"), bind (mem_fun (*this, &Editor::save_visual_state), 8));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-9", _("Goto View 9"), bind (mem_fun (*this, &Editor::goto_visual_state), 8));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-10", _("Save View 10"), bind (mem_fun (*this, &Editor::save_visual_state), 9));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-10", _("Goto View 10"), bind (mem_fun (*this, &Editor::goto_visual_state), 9));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-11", _("Save View 11"), bind (mem_fun (*this, &Editor::save_visual_state), 10));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-11", _("Goto View 11"), bind (mem_fun (*this, &Editor::goto_visual_state), 10));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-12", _("Save View 12"), bind (mem_fun (*this, &Editor::save_visual_state), 11));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-12", _("Goto View 12"), bind (mem_fun (*this, &Editor::goto_visual_state), 11));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 
 	act = ActionManager::register_action (editor_actions, "goto-mark-1", _("Locate to Mark 1"), bind (mem_fun (*this, &Editor::goto_nth_marker), 0));
 	ActionManager::session_sensitive_actions.push_back (act);

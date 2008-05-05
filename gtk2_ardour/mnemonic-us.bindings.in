@@ -179,6 +179,33 @@
 (gtk_accel_path "<Actions>/Editor/select-range-between-cursors" "F6")
 (gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
 
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-1" "<%PRIMARY%>F1")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-2" "<%PRIMARY%>F2")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-3" "<%PRIMARY%>F3")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-4" "<%PRIMARY%>F4")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-5" "<%PRIMARY%>F5")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-6" "<%PRIMARY%>F6")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-7" "<%PRIMARY%>F7")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-8" "<%PRIMARY%>F8")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-9" "<%PRIMARY%>F9")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-10" "<%PRIMARY%>F10")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-11" "<%PRIMARY%>F11")
+(gtk_accel_path "<Actions>/Editor/goto-visual-state-12" "<%PRIMARY%>F12")
+
+(gtk_accel_path "<Actions>/Editor/save-visual-state-1" "<%PRIMARY%><%TERTIARY%>F1")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-2" "<%PRIMARY%><%TERTIARY%>F2")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-3" "<%PRIMARY%><%TERTIARY%>F3")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-4" "<%PRIMARY%><%TERTIARY%>F4")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-5" "<%PRIMARY%><%TERTIARY%>F5")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-6" "<%PRIMARY%><%TERTIARY%>F6")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-7" "<%PRIMARY%><%TERTIARY%>F7")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-8" "<%PRIMARY%><%TERTIARY%>F8")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-9" "<%PRIMARY%><%TERTIARY%>F9")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-10" "<%PRIMARY%><%TERTIARY%>F10")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-11" "<%PRIMARY%><%TERTIARY%>F11")
+(gtk_accel_path "<Actions>/Editor/save-visual-state-12" "<%PRIMARY%><%TERTIARY%>F12")
+
+
 ;; numbers
 
 (gtk_accel_path "<Actions>/Editor/toggle-edit-mode" "1")

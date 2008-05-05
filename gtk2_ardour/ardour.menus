@@ -340,6 +340,32 @@
                	     <menuitem action='scroll-forward'/>
                	     <menuitem action='scroll-backward'/>
 	       </menu>
+	       <menu action="SavedViewMenu">
+               	     <menuitem action='save-visual-state-1'/>
+               	     <menuitem action='goto-visual-state-1'/>
+               	     <menuitem action='save-visual-state-2'/>
+               	     <menuitem action='goto-visual-state-2'/>
+               	     <menuitem action='save-visual-state-3'/>
+               	     <menuitem action='goto-visual-state-3'/>
+               	     <menuitem action='save-visual-state-4'/>
+               	     <menuitem action='goto-visual-state-4'/>
+               	     <menuitem action='save-visual-state-5'/>
+               	     <menuitem action='goto-visual-state-5'/>
+               	     <menuitem action='save-visual-state-6'/>
+               	     <menuitem action='goto-visual-state-6'/>
+               	     <menuitem action='save-visual-state-7'/>
+               	     <menuitem action='goto-visual-state-7'/>
+               	     <menuitem action='save-visual-state-8'/>
+               	     <menuitem action='goto-visual-state-8'/>
+               	     <menuitem action='save-visual-state-9'/>
+               	     <menuitem action='goto-visual-state-9'/>
+               	     <menuitem action='save-visual-state-10'/>
+               	     <menuitem action='goto-visual-state-10'/>
+               	     <menuitem action='save-visual-state-11'/>
+               	     <menuitem action='goto-visual-state-11'/>
+               	     <menuitem action='save-visual-state-12'/>
+               	     <menuitem action='goto-visual-state-12'/>
+	       </menu>
 
 	       <menuitem action='ToggleMaximalEditor'/>
 	       <menuitem action='show-editor-mixer'/>

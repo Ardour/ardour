@@ -91,7 +91,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	_hidden = false;
 	height = 0;
 	effective_height = 0;
-	height_scaling_factor = 1.0;
 	parent = rent;
 	_has_state = false;
 	last_name_entry_key_press_event = 0;
@@ -342,13 +341,6 @@ TimeAxisView::hide ()
 }
 
 void
-TimeAxisView::set_height_scaling_factor (double hsf)
-{
-	height_scaling_factor = hsf;
-	set_height (height);
-}
-
-void
 TimeAxisView::step_height (bool bigger)
 {
 	if (bigger) {
@@ -376,8 +368,9 @@ void
 TimeAxisView::set_height(uint32_t h)
 {
 	height = h;
+
 	controls_frame.set_size_request (-1, current_height() + ((order == 0) ? 1 : 0));
-	//cerr << "TimeAxisView::set_height_pixels() called h = " << h << endl;//DEBUG
+
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
@@ -534,7 +527,6 @@ TimeAxisView::conditionally_add_to_selection ()
 	Selection& s (editor.get_selection());
 
 	if (!s.selected (this)) {
-		cerr << "set selected track\n";
 		editor.set_selected_track (*this, Selection::Set);
 	}
 }
@@ -930,8 +922,6 @@ TimeAxisView::get_state ()
 
 	snprintf (buf, sizeof(buf), "%u", height);
 	node->add_property ("height", buf);
-	snprintf (buf, sizeof(buf), "%f", height_scaling_factor);
-	node->add_property ("height_scaling_factor", buf);
 	node->add_property ("marked_for_display", (_marked_for_display ? "1" : "0"));
 	return *node;
 }
@@ -944,10 +934,6 @@ TimeAxisView::set_state (const XMLNode& node)
 	if ((prop = node.property ("marked_for_display")) != 0) {
 		_marked_for_display = (prop->value() == "1");
 	}
-
-	if ((prop = node.property ("height_scaling_factor")) != 0) {
-		height_scaling_factor = atof (prop->value());
-	} 
 
 	if ((prop = node.property ("track_height")) != 0) {
 

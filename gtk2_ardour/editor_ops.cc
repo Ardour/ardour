@@ -1736,7 +1736,7 @@ Editor::temporal_zoom_region (bool both_axes)
 
 	nframes_t range = end - start;
 	double new_fpu = (double)range / (double)canvas_width;
-	nframes_t extra_samples = one_centimeter_in_pixels * new_fpu;
+	nframes_t extra_samples = (nframes_t) floor (one_centimeter_in_pixels * new_fpu);
 
 	if (start > extra_samples) {
 		start -= extra_samples;
@@ -1761,12 +1761,12 @@ Editor::temporal_zoom_region (bool both_axes)
 	temporal_zoom_by_frame (start, end, "zoom to region");
 
 	if (both_axes) {
-		double per_track_height = (canvas_height - 10.0) / tracks.size();
+		uint32_t per_track_height = (uint32_t) floor ((canvas_height - 10.0) / tracks.size());
 		
 		/* set visible track heights appropriately */
 		
 		for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-			(*t)->set_height_scaling_factor (per_track_height/(*t)->current_height());
+			(*t)->set_height (per_track_height);
 		}
 		
 		/* hide irrelevant tracks */
@@ -5884,6 +5884,11 @@ Editor::fit_tracks ()
 	uint32_t child_heights = 0;
 
 	for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+
+		if (!(*t)->marked_for_display()) {
+			continue;
+		}
+
 		child_heights += ((*t)->effective_height - (*t)->current_height());
 	}
 
@@ -5901,4 +5906,60 @@ Editor::fit_tracks ()
 	vertical_adjustment.set_value (first_y_pos);
 
 	redo_visual_stack.push_back (current_visual_state());
+}
+
+void
+Editor::save_visual_state (uint32_t n)
+{
+	while (visual_states.size() <= n) {
+		visual_states.push_back (0);
+	}
+
+	if (visual_states[n] != 0) {
+		delete visual_states[n];
+	}
+
+	visual_states[n] = current_visual_state (true);
+	gdk_beep ();
+}
+
+void
+Editor::goto_visual_state (uint32_t n)
+{
+	if (visual_states.size() < n) {
+		return;
+	}
+
+	if (visual_states[n] == 0) {
+		return;
+	}
+
+	use_visual_state (*visual_states[n]);
+}
+
+void
+Editor::start_visual_state_op (uint32_t n)
+{
+	if (visual_state_op_connection.empty()) {
+		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 2000);
+	} else {
+		cancel_visual_state_op (n);
+	}
+}
+
+void
+Editor::cancel_visual_state_op (uint32_t n)
+{
+	
+	visual_state_op_connection.disconnect();
+	goto_visual_state (n);
+}
+
+bool
+Editor::end_visual_state_op (uint32_t n)
+{
+	visual_state_op_connection.disconnect();
+	save_visual_state (n);
+	// FLASH SCREEN OR SOMETHING
+	return false; // do not call again
 }

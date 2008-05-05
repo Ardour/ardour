@@ -169,15 +169,21 @@ AudioTimeAxisView::set_state (const XMLNode& node)
 	if ((ret = TimeAxisView::set_state (node)) != 0) {
 		return ret;
 	}
-	
-	if ((prop = node.property ("shown_editor")) != 0) {
-		if (prop->value() == "no") {
-			_marked_for_display = false;
+
+	/* if the TimeAxisView had marked this not for display,
+	   then do not allow this to override it.
+	*/
+
+	if ((prop = node.property ("marked_for_display")) == 0) {
+		if ((prop = node.property ("shown_editor")) != 0) {
+			if (prop->value() == "no") {
+				_marked_for_display = false;
+			} else {
+				_marked_for_display = true;
+			}
 		} else {
 			_marked_for_display = true;
 		}
-	} else {
-		_marked_for_display = true;
 	}
 	
 	XMLNodeList nlist = node.children();

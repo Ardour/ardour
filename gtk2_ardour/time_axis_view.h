@@ -97,12 +97,10 @@ class TimeAxisView : public virtual AxisView, public Stateful
 	PublicEditor& editor;
 	
 	uint32_t effective_height;  /* in canvas units */
-	double   height_scaling_factor; /* used to zoom the track height without changing it */
 	double   y_position;
 	int      order;
 	
-	uint32_t current_height() const { return (uint32_t) floor (height * height_scaling_factor); }
-	void     set_height_scaling_factor (double);
+	uint32_t current_height() const { return height; }
 
 	ArdourCanvas::Group   *canvas_display;
  	Gtk::VBox       *control_parent;

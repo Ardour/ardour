@@ -372,6 +372,9 @@ class Editor : public PublicEditor
 
 	void show_rhythm_ferret();
 
+	void goto_visual_state (uint32_t);
+	void save_visual_state (uint32_t);
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes_t);
@@ -407,6 +410,12 @@ class Editor : public PublicEditor
 	void use_visual_state (VisualState&);
 	bool no_save_visual;
 	void swap_visual_state ();
+	
+	std::vector<VisualState*> visual_states;
+	sigc::connection visual_state_op_connection;
+	void start_visual_state_op (uint32_t n);
+	void cancel_visual_state_op (uint32_t n);
+	bool end_visual_state_op (uint32_t n);
 
 	nframes_t   leftmost_frame;
 	double      frames_per_unit;

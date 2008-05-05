@@ -517,6 +517,7 @@ RouteTimeAxisView::build_display_menu ()
 	route_active_menu_item->set_active (_route->active());
 
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &RouteTimeAxisView::hide_click)));
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
 }
 
@@ -697,6 +698,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 	int gmlen = h - 5;
 	bool height_changed = (height == 0) || (h != height);
 	lm.setup_meters (gmlen);
+
 	TimeAxisView::set_height (h);
 
 	ensure_xml_node ();
@@ -752,7 +754,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 			playlist_button.hide ();
 		}
 
-	} else if (height >= hSmall) {
+	} else {
 
 		hide_meter ();
 		hide_name_entry ();
