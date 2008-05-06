@@ -161,18 +161,18 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	assert((_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()));
 
 	// Increment past current control event
-	if (!_event.is_note() && _control_iter != _control_iters.end() && _control_iter->automation_list) {
-		double x, y;
-		cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
+	if (!_event.is_note() && _control_iter != _control_iters.end() && _control_iter->automation_list.get()) {
+		double x = 0.0, y = 0.0;
 		const bool ret = _control_iter->automation_list->rt_safe_earliest_event_unlocked(
 				_control_iter->x, DBL_MAX, x, y, false);
+		cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
 
 		if (ret) {
-			//cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;
+			cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;
 			_control_iter->x = x;
 			_control_iter->y = y;
 		} else {
-			//cerr << "Hit end of " << _control_iter->automation_list->parameter().id() << endl;
+			cerr << "Hit end of " << _control_iter->automation_list->parameter().id() << endl;
 			_control_iter->automation_list.reset();
 			_control_iter->x = DBL_MAX;
 		}
