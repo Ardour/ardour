@@ -20,19 +20,20 @@
 #ifndef __ardour_keyboard_h__
 #define __ardour_keyboard_h__
 
+#include <map>
 #include <vector>
 #include <string>
 
 #include <sigc++/signal.h>
 #include <gtk/gtk.h>
 #include <gtkmm/window.h>
+#include <gtkmm/accelkey.h>
 
 #include <ardour/types.h>
 #include <pbd/stateful.h>
 
 #include "selection.h"
 
-using std::vector;
 using std::string;
 
 class Keyboard : public sigc::trackable, Stateful
@@ -44,7 +45,7 @@ class Keyboard : public sigc::trackable, Stateful
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
-	typedef vector<uint32_t> State;
+	typedef std::vector<uint32_t> State;
 	typedef uint32_t ModifierMask;
 
 	static uint32_t PrimaryModifier;
@@ -121,6 +122,16 @@ class Keyboard : public sigc::trackable, Stateful
 	static std::string current_binding_name () { return _current_binding_name; }
 	static std::map<std::string,std::string> binding_files;
 
+	struct AccelKeyLess {
+	    bool operator() (const Gtk::AccelKey a, const Gtk::AccelKey b) const {
+		    if (a.get_key() != b.get_key()) {
+			    return a.get_key() < b.get_key();
+		    } else {
+			    return a.get_mod() < b.get_mod();
+		    }
+	    }
+	};
+
   private:
 	static Keyboard* _the_keyboard;
 
@@ -136,6 +147,10 @@ class Keyboard : public sigc::trackable, Stateful
 	static std::string user_keybindings_path;
 	static bool can_save_keybindings;
 	static std::string _current_binding_name;
+
+	typedef std::pair<std::string,std::string> two_strings;
+
+	static std::map<Gtk::AccelKey,two_strings,AccelKeyLess> release_keys;
 
 	static gint _snooper (GtkWidget*, GdkEventKey*, gpointer);
 	gint snooper (GtkWidget*, GdkEventKey*);

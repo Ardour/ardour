@@ -17,6 +17,7 @@
 
 */
 
+#include <vector>
 #include <ardour/ardour.h>
 
 #include "ardour_ui.h"
@@ -35,11 +36,14 @@
 #include "keyboard.h"
 #include "gui_thread.h"
 #include "opts.h"
+#include "actions.h"
 
 #include "i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Gtk;
+using namespace std;
 
 #define KBD_DEBUG 0
 bool debug_keyboard = false;
@@ -73,7 +77,8 @@ bool         Keyboard::_some_magic_widget_has_focus = false;
 std::string Keyboard::user_keybindings_path;
 bool Keyboard::can_save_keybindings = false;
 map<string,string> Keyboard::binding_files;
-std::string Keyboard::_current_binding_name = _("Unknown");
+string Keyboard::_current_binding_name = _("Unknown");
+map<AccelKey,pair<string,string>,Keyboard::AccelKeyLess> Keyboard::release_keys;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 
@@ -183,6 +188,7 @@ gint
 Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 {
 	uint32_t keyval;
+	bool ret = false;
 
 #if 0
 	cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 
@@ -212,7 +218,23 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		if (find (state.begin(), state.end(), keyval) == state.end()) {
 			state.push_back (keyval);
 			sort (state.begin(), state.end());
-		} 
+
+		} else {
+
+			/* key is already down. if its also used for release,
+			   prevent auto-repeat events.
+			*/
+
+			for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
+
+				const AccelKey& ak (k->first);
+				
+				if (keyval == ak.get_key() && (Gdk::ModifierType)(event->state | Gdk::RELEASE_MASK) == ak.get_mod()) {
+					ret = true;
+					break;
+				}
+			}
+		}
 
 	} else if (event->type == GDK_KEY_RELEASE) {
 
@@ -223,6 +245,20 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			sort (state.begin(), state.end());
 		} 
 
+		for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
+
+			const AccelKey& ak (k->first);
+			two_strings ts (k->second);
+
+			if (keyval == ak.get_key() && (Gdk::ModifierType)(event->state | Gdk::RELEASE_MASK) == ak.get_mod()) {
+				Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (ts.first.c_str(), ts.second.c_str());
+				if (act) {
+					act->activate();
+					ret = true;
+				}
+				break;
+			}
+		}
 	}
 
 	if (event->type == GDK_KEY_RELEASE && event->keyval == GDK_w && modifier_state_equals (event->state, PrimaryModifier)) {
@@ -232,7 +268,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		}
 	}
 
-	return false;
+	return ret;
 }
 
 bool
@@ -552,13 +588,35 @@ Keyboard::load_keybindings (string path)
 			}
 		}
 
-		return true;
 
 	} catch (...) {
 		error << string_compose (_("Ardour key bindings file not found at \"%1\" or contains errors."), path)
 		      << endmsg;
 		return false;
 	}
+
+	/* now find all release-driven bindings */
+
+	vector<string> groups;
+	vector<string> names;
+	vector<AccelKey> bindings;
+	
+	ActionManager::get_all_actions (groups, names, bindings);
+	
+	vector<string>::iterator g;
+	vector<AccelKey>::iterator b;
+	vector<string>::iterator n;
+
+	release_keys.clear ();
+
+	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
+		if ((*b).get_mod() & Gdk::RELEASE_MASK) {
+			cerr << "Action: " << (*n) << " bound to release of " << (*g) << '+' << (*n) << endl;
+			release_keys.insert (pair<AccelKey,two_strings> (*b, two_strings (*g, *n)));
+		}
+	}
+
+	return true;
 }
 
 

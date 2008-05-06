@@ -70,6 +70,7 @@ class ActionManager
 
 	static Gtk::Widget* get_widget (const char * name);
 	static Glib::RefPtr<Gtk::Action> get_action (const char* group, const char* name);
+	static Glib::RefPtr<Gtk::Action> get_action (const char* path);
 
 	static void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 
@@ -98,6 +99,10 @@ class ActionManager
 	static void get_all_actions (std::vector<std::string>& labels, 
 				     std::vector<std::string>& paths, 
 				     std::vector<std::string>& keys, 
+				     std::vector<Gtk::AccelKey>& bindings);
+
+	static void get_all_actions (std::vector<std::string>& groups, 
+				     std::vector<std::string>& paths, 
 				     std::vector<Gtk::AccelKey>& bindings);
 
 	static void uncheck_toggleaction (const char * actionname);

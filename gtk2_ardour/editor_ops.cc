@@ -5926,7 +5926,7 @@ Editor::save_visual_state (uint32_t n)
 void
 Editor::goto_visual_state (uint32_t n)
 {
-	if (visual_states.size() < n) {
+	if (visual_states.size() <= n) {
 		return;
 	}
 
@@ -5941,25 +5941,31 @@ void
 Editor::start_visual_state_op (uint32_t n)
 {
 	if (visual_state_op_connection.empty()) {
-		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 2000);
-	} else {
-		cancel_visual_state_op (n);
+		cerr << "START pending op, for " << n << endl;
+		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
 	}
 }
 
 void
 Editor::cancel_visual_state_op (uint32_t n)
 {
-	
-	visual_state_op_connection.disconnect();
-	goto_visual_state (n);
+	if (!visual_state_op_connection.empty()) {
+		cerr << "CANCEL pending op, and goto " << n << endl;
+		visual_state_op_connection.disconnect();
+		goto_visual_state (n);
+	} else {
+		cerr << "NOTHING TO DO\n";
+	}
 }
 
 bool
 Editor::end_visual_state_op (uint32_t n)
 {
+	cerr << "TIMEOUT HIT, saveing visual state " << n << endl;
 	visual_state_op_connection.disconnect();
 	save_visual_state (n);
+	cerr << "vsop empty ? " << visual_state_op_connection.empty() << endl;
+	
 	// FLASH SCREEN OR SOMETHING
 	return false; // do not call again
 }

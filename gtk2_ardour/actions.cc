@@ -158,6 +158,50 @@ struct SortActionsByLabel {
 };
 
 void
+ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, vector<AccelKey>& bindings)
+{
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
+	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
+	GList* node;
+	GList* acts;
+
+	for (node = list; node; node = g_list_next (node)) {
+		
+		GtkActionGroup* group = (GtkActionGroup*) node->data;
+		
+		/* first pass: collect them all */
+		
+		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
+		action_list the_acts;
+
+		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
+			GtkAction* action = (GtkAction*) acts->data;
+			the_acts.push_back (Glib::wrap (action, true));
+		}
+		
+		/* now sort by label */
+		
+		SortActionsByLabel cmp;
+		the_acts.sort (cmp);
+
+		for (action_list::iterator a = the_acts.begin(); a != the_acts.end(); ++a) {
+
+			string accel_path = (*a)->get_accel_path ();
+
+			groups.push_back (gtk_action_group_get_name(group));
+			names.push_back (accel_path.substr (accel_path.find_last_of ('/') + 1));
+			
+			AccelKey key;
+			lookup_entry (accel_path, key);
+			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
+		}
+	}
+}
+
+void
 ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
 {
 	/* the C++ API for functions used here appears to be broken in
@@ -220,6 +264,19 @@ Widget*
 ActionManager::get_widget (const char * name)
 {
 	return ui_manager->get_widget (name);
+}
+
+RefPtr<Action>
+ActionManager::get_action (const char* path)
+{
+	GtkAction* _act;
+	RefPtr<Action> act;
+
+	if ((_act = gtk_ui_manager_get_action (ui_manager->gobj(), path)) != 0) {
+		return Glib::wrap (_act, true);
+	}
+
+	return act;
 }
 
 RefPtr<Action>
