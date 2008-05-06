@@ -5545,8 +5545,8 @@ Editor::playhead_forward_to_grid ()
 {
 	if (!session) return;
 	nframes64_t pos = playhead_cursor->current_frame;
-	if (pos < max_frames) {
-		pos++;
+	if (pos < max_frames - 1) {
+		pos += 2;
 		snap_to_internal (pos, 1, false);
 		session->request_locate (pos);
 	}
@@ -5558,8 +5558,8 @@ Editor::playhead_backward_to_grid ()
 {
 	if (!session) return;
 	nframes64_t pos = playhead_cursor->current_frame;
-	if (pos > 1) {
-		pos--;
+	if (pos > 2) {
+		pos -= 2;
 		snap_to_internal (pos, -1, false);
 		session->request_locate (pos);
 	}
