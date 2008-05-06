@@ -92,9 +92,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("TrimMenu"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_actions, X_("WaveformMenu"), _("Waveforms"));
-	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom"));
+	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_actions, X_("ZoomMenu"), _("Zoom"));
-	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
 
 	ActionManager::register_toggle_action (editor_actions, "link-region-and-track-selection", _("Link Region/Track Selection"), mem_fun (*this, &Editor::toggle_link_region_and_track_selection));
 	ActionManager::register_action (editor_actions, "break-drag", _("Break drag"), mem_fun (*this, &Editor::break_drag));

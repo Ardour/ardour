@@ -252,6 +252,14 @@
 	</menu>
 
         <menu name='View' action = 'View'>
+	       <menu action="ZoomMenu">
+               	     <menuitem action='temporal-zoom-in'/>
+               	     <menuitem action='temporal-zoom-out'/>
+               	     <menuitem action='zoom-to-session'/>
+               	     <menuitem action='zoom-to-region'/>
+               	     <menuitem action='zoom-to-region-both-axes'/>
+               	     <menuitem action='toggle-zoom'/>
+	       </menu>
                <menu name='ZoomFocus' action='ZoomFocus'>
                    <menuitem action='zoom-focus-left'/>
                    <menuitem action='zoom-focus-right'/>
@@ -325,14 +333,6 @@
 	       	     <menuitem action="toggle-loop-punch-ruler"/>
 	       	     <menuitem action="toggle-cd-marker-ruler"/>
 	       	     <menuitem action="toggle-marker-ruler"/>
-	       </menu>
-	       <menu action="ZoomMenu">
-               	     <menuitem action='temporal-zoom-in'/>
-               	     <menuitem action='temporal-zoom-out'/>
-               	     <menuitem action='zoom-to-session'/>
-               	     <menuitem action='zoom-to-region'/>
-               	     <menuitem action='zoom-to-region-both-axes'/>
-               	     <menuitem action='toggle-zoom'/>
 	       </menu>
 	       <menu action="ScrollMenu">
                	     <menuitem action='scroll-tracks-down'/>
