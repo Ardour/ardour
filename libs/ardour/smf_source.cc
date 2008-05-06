@@ -170,7 +170,8 @@ SMFSource::open()
 
 		// Write a tentative header just to pad things out so writing happens in the right spot
 		flush_header();
-		flush_footer();
+		// this is the first footer written, so we dont need to seek for the footer
+		write_footer();
 	}
 		
 	return (_fd == 0) ? -1 : 0;
@@ -188,9 +189,24 @@ SMFSource::close()
 }
 
 void
-SMFSource::seek_to_end()
+SMFSource::seek_to_footer_position()
 {
+	uint8_t buffer[4];
+	
+	// lets check if there is a track end marker at the end of the data
 	fseek(_fd, -4, SEEK_END);
+	size_t read_bytes = fread(buffer, sizeof(uint8_t), 4, _fd);
+	if( (read_bytes == 4) && 
+	    buffer[0] == 0x00 && 
+	    buffer[1] == 0xFF && 
+	    buffer[2] == 0x2F && 
+	    buffer[3] == 0x00) {
+		// there is one, so overwrite it
+		fseek(_fd, -4, SEEK_END);
+	} else {
+		// there is none, so append
+		fseek(_fd, 0, SEEK_END);
+	}
 }
 
 int
@@ -198,7 +214,7 @@ SMFSource::flush_header()
 {
 	// FIXME: write timeline position somehow?
 	
-	//cerr << "SMF Flushing header\n";
+	//cerr << path() << " SMF Flushing header\n";
 
 	assert(_fd);
 
@@ -225,7 +241,8 @@ SMFSource::flush_header()
 int
 SMFSource::flush_footer()
 {
-	seek_to_end();
+	//cerr << path() << " SMF Flushing footer\n";
+	seek_to_footer_position();
 	write_footer();
 
 	return 0;
@@ -332,18 +349,15 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 	
 	*size = event_size;
 
-	/*if (ev.buffer == NULL)
-		ev.buffer = (Byte*)malloc(sizeof(Byte) * ev.size);*/
-
 	(*buf)[0] = (unsigned char)status;
 	if (event_size > 1)
 		fread((*buf) + 1, 1, *size - 1, _fd);
 
-	/*printf("%s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
+	/*printf("SMFSource %s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
 	for (size_t i=0; i < *size; ++i) {
 		printf("%X ", (*buf)[i]);
 	}
-	printf("\n");*/
+	printf("\n"); */
 	
 	return (int)*size;
 }
@@ -449,8 +463,13 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		
 		assert(time >= _timeline_position);
 		time -= _timeline_position;
-
+		
 		const MIDI::Event ev(time, size, buf);
+		if (! (ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex()) ) {
+			//cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type " << std::hex << int(ev.buffer()[0]) << endl;
+			continue;
+		}
+		
 		append_event_unlocked(Frames, ev);
 
 		if (_model)
@@ -472,12 +491,12 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 {
-	/*printf("%s - append chan = %u, time = %lf, size = %u, data = ",
-			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size());
+	/*printf("SMFSource: %s - append_event_unlocked chan = %u, time = %lf, size = %u, data = ",
+			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size()); */
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
-	printf("\n");*/
+	printf("\n");
 	
 	assert(ev.time() >= 0);
 	assert(ev.time() >= _last_ev_time);

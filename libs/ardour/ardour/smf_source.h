@@ -111,7 +111,17 @@ class SMFSource : public MidiSource {
 
 	int  open();
 	void close();
-	void seek_to_end();
+	
+	/**
+	 * This method is only used by flush_footer() to find the right seek position 
+	 * for the footer (at the end after recording or -4 offset ro SEEK_END
+	 * if a footer is already present)
+	 */
+	void seek_to_footer_position();
+	
+	/**
+	 * write the track footer at the current seek position
+	 */
 	void write_footer();
 
 	void     write_chunk_header(const char id[4], uint32_t length);
