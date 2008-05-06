@@ -5964,7 +5964,7 @@ Editor::end_visual_state_op (uint32_t n)
 	
 	PopUp* pup = new PopUp (WIN_POS_MOUSE, 1000, true);
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("Saved view %u"), n);
+	snprintf (buf, sizeof (buf), _("Saved view %u"), n+1);
 	pup->set_text (buf);
 	pup->touch();
 
