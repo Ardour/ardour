@@ -34,6 +34,8 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/popup.h>
+
 
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
@@ -5941,7 +5943,6 @@ void
 Editor::start_visual_state_op (uint32_t n)
 {
 	if (visual_state_op_connection.empty()) {
-		cerr << "START pending op, for " << n << endl;
 		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
 	}
 }
@@ -5950,22 +5951,22 @@ void
 Editor::cancel_visual_state_op (uint32_t n)
 {
 	if (!visual_state_op_connection.empty()) {
-		cerr << "CANCEL pending op, and goto " << n << endl;
 		visual_state_op_connection.disconnect();
 		goto_visual_state (n);
-	} else {
-		cerr << "NOTHING TO DO\n";
-	}
+	} 
 }
 
 bool
 Editor::end_visual_state_op (uint32_t n)
 {
-	cerr << "TIMEOUT HIT, saveing visual state " << n << endl;
 	visual_state_op_connection.disconnect();
 	save_visual_state (n);
-	cerr << "vsop empty ? " << visual_state_op_connection.empty() << endl;
 	
-	// FLASH SCREEN OR SOMETHING
+	PopUp* pup = new PopUp (WIN_POS_MOUSE, 1000, true);
+	char buf[32];
+	snprintf (buf, sizeof (buf), _("Saved view %u"), n);
+	pup->set_text (buf);
+	pup->touch();
+
 	return false; // do not call again
 }

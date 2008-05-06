@@ -611,7 +611,6 @@ Keyboard::load_keybindings (string path)
 
 	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
 		if ((*b).get_mod() & Gdk::RELEASE_MASK) {
-			cerr << "Action: " << (*n) << " bound to release of " << (*g) << '+' << (*n) << endl;
 			release_keys.insert (pair<AccelKey,two_strings> (*b, two_strings (*g, *n)));
 		}
 	}
