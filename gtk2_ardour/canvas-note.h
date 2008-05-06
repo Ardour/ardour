@@ -31,15 +31,6 @@ namespace Canvas {
 
 class CanvasNote : public SimpleRect, public CanvasNoteEvent {
 public:
-	CanvasNote(
-			MidiRegionView&                       region,
-			Group&                                group,
-			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
-
-		: SimpleRect(group), CanvasNoteEvent(region, this, note)
-	{
-	}
-
 	double x1() { return property_x1(); }
 	double y1() { return property_y1(); }
 	double x2() { return property_x2(); }
@@ -60,6 +51,15 @@ public:
 		RelativeResize,
 		AbsoluteResize
 	};
+
+	CanvasNote(
+			MidiRegionView&                       region,
+			Group&                                group,
+			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
+
+		: SimpleRect(group), CanvasNoteEvent(region, this, note), _note_state(None)
+	{
+	}
 
 protected:
 	NoteState _note_state;

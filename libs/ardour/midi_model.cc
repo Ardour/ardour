@@ -260,7 +260,8 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	_locked = other._locked;
 	_note_iter = other._note_iter;
 	_control_iters = other._control_iters;
-	_control_iter = other._control_iter;
+	size_t index = other._control_iter - other._control_iters.begin();
+	_control_iter = _control_iters.begin() + index;
 
 	assert( ! _event.owns_buffer());
 
