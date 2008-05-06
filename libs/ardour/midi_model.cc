@@ -121,7 +121,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		++_note_iter;
 	}
 
-	if (earliest_control.automation_list && earliest_control.x < _event.time())
+	if (earliest_control.automation_list.get() && earliest_control.x < _event.time())
 		model.control_to_midi_event(_event, earliest_control);
 	else
 		_control_iter = _control_iters.end();
@@ -328,6 +328,8 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		const MidiControlIterator& iter) const
 {
+	assert(iter.automation_list.get() != 0);
+	
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:
 		if (ev.size() < 3)
