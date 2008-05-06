@@ -170,8 +170,7 @@ SMFSource::open()
 
 		// Write a tentative header just to pad things out so writing happens in the right spot
 		flush_header();
-		// this is the first footer written, so we dont need to seek for the footer
-		write_footer();
+		flush_footer();
 	}
 		
 	return (_fd == 0) ? -1 : 0;
