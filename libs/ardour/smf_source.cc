@@ -170,8 +170,7 @@ SMFSource::open()
 
 		// Write a tentative header just to pad things out so writing happens in the right spot
 		flush_header();
-		write_footer();
-		seek_to_end();
+		flush_footer();
 	}
 		
 	return (_fd == 0) ? -1 : 0;
@@ -226,7 +225,7 @@ SMFSource::flush_header()
 int
 SMFSource::flush_footer()
 {
-	fseek(_fd, 0, SEEK_END);
+	seek_to_end();
 	write_footer();
 
 	return 0;
@@ -558,7 +557,7 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_fra
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
 	_last_ev_time = 0;
-	fseek(_fd, _header_size, 0);
+	fseek(_fd, _header_size, SEEK_SET);
 }
 
 void
@@ -888,7 +887,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 
 	_model->start_write();
 
-	fseek(_fd, _header_size, 0);
+	fseek(_fd, _header_size, SEEK_SET);
 
 	uint64_t time = 0; /* in SMF ticks */
 	MIDI::Event ev;

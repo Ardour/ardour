@@ -483,8 +483,8 @@ void MidiModel::append(const MIDI::Event& ev)
 	write_lock();
 	_edited = true;
 
-	/*cerr << "MidiModel append event type: "
-		<< hex << "0x" << (int)ev.type() << endl;*/
+	cerr << "MidiModel append event type: "
+		<< hex << "0x" << (int)ev.type() << endl;
 
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
@@ -891,10 +891,10 @@ bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 
 	const NoteMode old_note_mode = _note_mode;
 	_note_mode = Sustained;
-
+	
 	for (const_iterator i = begin(); i != end(); ++i)
 		source->append_event_unlocked(Frames, *i);
-	
+		
 	_note_mode = old_note_mode;
 	
 	read_unlock();
