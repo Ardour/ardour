@@ -184,7 +184,6 @@ Editor::update_route_visibility ()
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
-		bool v = (*i)[route_display_columns.visible];
 		(*i)[route_display_columns.visible] = tv->marked_for_display ();
 	}
 

@@ -16,6 +16,7 @@
 #include "actions.h"
 #include "keyboard.h"
 #include "keyeditor.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -166,6 +167,8 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 		if (!(*i)[columns.bindable]) {
 			goto out;
 		} 
+
+		possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
 
 		bool result = AccelMap::change_entry (path,
 						      ev->keyval,

@@ -466,39 +466,10 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		   it does allow.
 		*/
 
-		int fakekey = GDK_VoidSymbol;
-		int ret = false;
+		uint32_t fakekey = ev->keyval;
 
-		switch (ev->keyval) {
-		case GDK_Tab:
-		case GDK_ISO_Left_Tab:
-			fakekey = GDK_nabla;
-			break;
-
-		case GDK_Up:
-			fakekey = GDK_uparrow;
-			break;
-
-		case GDK_Down:
-			fakekey = GDK_downarrow;
-			break;
-
-		case GDK_Right:
-			fakekey = GDK_rightarrow;
-			break;
-
-		case GDK_Left:
-			fakekey = GDK_leftarrow;
-			break;
-
-		default:
-			break;
-		}
-
-		if (fakekey != GDK_VoidSymbol) {
-			ret = gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state));
-			
-			if (ret) {
+		if (possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
+			if (gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
 				return true;
 			}
 
@@ -724,3 +695,42 @@ reset_dpi ()
 	DPIReset();//Emit Signal
 }
 
+bool
+possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
+{
+	int fakekey = GDK_VoidSymbol;
+
+	switch (keyval) {
+	case GDK_Tab:
+	case GDK_ISO_Left_Tab:
+		fakekey = GDK_nabla;
+		break;
+		
+	case GDK_Up:
+		fakekey = GDK_uparrow;
+		break;
+		
+	case GDK_Down:
+		fakekey = GDK_downarrow;
+		break;
+		
+	case GDK_Right:
+		fakekey = GDK_rightarrow;
+		break;
+		
+	case GDK_Left:
+		fakekey = GDK_leftarrow;
+		break;
+		
+	default:
+		break;
+	}
+	
+	if (fakekey != GDK_VoidSymbol) {
+		keyval = fakekey;
+		return true;
+	} 
+
+	return false;
+}
+		
