@@ -121,10 +121,11 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		++_note_iter;
 	}
 
-	if (earliest_control.automation_list.get() && earliest_control.x < _event.time())
+	if (earliest_control.automation_list.get() && earliest_control.x < _event.time()) {
 		model.control_to_midi_event(_event, earliest_control);
-	else
+	} else {
 		_control_iter = _control_iters.end();
+	}
 
 	if (_event.size() == 0) {
 		//cerr << "Created MIDI iterator @ " << t << " is at end." << endl;
@@ -165,7 +166,7 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 		double x = 0.0, y = 0.0;
 		const bool ret = _control_iter->automation_list->rt_safe_earliest_event_unlocked(
 				_control_iter->x, DBL_MAX, x, y, false);
-		cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
+		//cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
 
 		if (ret) {
 			cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;

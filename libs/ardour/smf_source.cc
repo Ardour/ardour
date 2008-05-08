@@ -195,7 +195,7 @@ SMFSource::seek_to_footer_position()
 	// lets check if there is a track end marker at the end of the data
 	fseek(_fd, -4, SEEK_END);
 	size_t read_bytes = fread(buffer, sizeof(uint8_t), 4, _fd);
-	cerr << "SMFSource::seek_to_footer_position: read size: " << read_bytes << endl;
+	//cerr << "SMFSource::seek_to_footer_position: read size: " << read_bytes << endl;
 	if( (read_bytes == 4) && 
 	    buffer[0] == 0x00 && 
 	    buffer[1] == 0xFF && 

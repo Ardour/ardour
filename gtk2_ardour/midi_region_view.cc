@@ -460,7 +460,7 @@ MidiRegionView::redisplay_model()
 
 		_model->read_lock();
 
-		/*
+		
 		MidiModel::Notes notes = _model->notes();
 		cerr << endl << "Model contains " << notes.size() << " Notes:" << endl;
 		for(MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
@@ -471,13 +471,29 @@ MidiRegionView::redisplay_model()
 			     //<< " Note-on: " << note.on_event(). 
 			     //<< " Note-off: " << note.off_event() 
 			     << endl;
-		}*/
+		}
 		
 		for (size_t i=0; i < _model->n_notes(); ++i) {
 			add_note(_model->note_at(i));
 		}
 
-		// TODO: Add program changes here
+		for (Automatable::Controls::iterator 
+		     control = _model->controls().begin();
+				control != _model->controls().end(); ++control) {
+
+			if( control->first.type() == MidiPgmChangeAutomation ) {
+				Glib::Mutex::Lock list_lock (control->second->list()->lock());
+				
+				for(AutomationList::const_iterator event = control->second->list()->begin();
+				event != control->second->list()->end(); ++event) {
+					boost::shared_ptr<MIDI::Event> midi_event(new MIDI::Event());
+					MidiControlIterator iter(control->second->list(), (*event)->when, (*event)->value);
+					_model->control_to_midi_event(*midi_event, iter);
+					add_pgm_change(midi_event);
+				}
+				break;
+			}
+		}
 
 		end_write();
 

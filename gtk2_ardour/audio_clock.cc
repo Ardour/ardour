@@ -74,7 +74,8 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 	  colon4 (":"),
 	  colon5 (":"),
 	  b1 ("|"),
-	  b2 ("|")
+	  b2 ("|"),
+	  last_when(0)
 {
 	session = 0;
 	last_when = 0;

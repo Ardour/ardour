@@ -39,7 +39,9 @@ namespace ARDOUR {
 class Session;
 class MidiSource;
 	
-
+/**
+ * This class keeps track of the current x and y for a control
+ */
 class MidiControlIterator {
 public:
 	boost::shared_ptr<const AutomationList> automation_list;
@@ -197,6 +199,7 @@ public:
 	
 	const MidiSource* midi_source() const { return _midi_source; }
 	void set_midi_source(MidiSource* source) { _midi_source = source; } 
+	bool control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& iter) const;
 	
 private:
 	friend class DeltaCommand;
@@ -204,7 +207,6 @@ private:
 	void remove_note_unlocked(const boost::shared_ptr<const Note> note);
 
 	friend class const_iterator;
-	bool control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& iter) const;
 
 #ifndef NDEBUG
 	bool is_sorted() const;
