@@ -171,7 +171,7 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 		//cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
 
 		if (ret) {
-			cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;
+			//cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;
 			_control_iter->x = x;
 			_control_iter->y = y;
 		} else {
@@ -243,10 +243,11 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 
 bool MidiModel::const_iterator::operator==(const const_iterator& other) const
 {
-	if (_is_end || other._is_end)
+	if (_is_end || other._is_end) {
 		return (_is_end == other._is_end);
-	else
+	} else {
 		return (_event == other._event);
+	}
 }
 
 MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iterator& other)
@@ -352,17 +353,16 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		return true;
 
 	case MidiPgmChangeAutomation:
-		if (ev.size() < 3) {
-			ev.set_buffer((Byte*)malloc(3), true);
+		if (ev.size() < 2) {
+			ev.set_buffer((Byte*)malloc(2), true);
 		}
 
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
-		assert(iter.automation_list->parameter().id() <= INT8_MAX);
+		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
 		ev.buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.y;
-		ev.buffer()[2] = 0;
 		ev.time() = iter.x;
 		ev.size() = 3;
 		return true;
@@ -374,7 +374,7 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
-		assert(iter.automation_list->parameter().id() <= INT8_MAX);
+		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y < (1<<14));
 		ev.buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = ((Byte)iter.y) & 0x7F; // LSB
@@ -384,18 +384,17 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		return true;
 
 	case MidiChannelAftertouchAutomation:
-		if (ev.size() < 3) {
-			ev.set_buffer((Byte*)malloc(3), true);
+		if (ev.size() < 2) {
+			ev.set_buffer((Byte*)malloc(2), true);
 		}
 
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
-		assert(iter.automation_list->parameter().id() <= INT8_MAX);
+		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
 		ev.buffer()[0]
 				= MIDI_CMD_CHANNEL_PRESSURE + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.y;
-		ev.buffer()[2] = 0;
 		ev.time() = iter.x;
 		ev.size() = 3;
 		return true;
@@ -580,9 +579,10 @@ void MidiModel::append_note_off_unlocked(uint8_t chan, double time,
 		}
 	}
 
-	if (!resolved)
+	if (!resolved) {
 		cerr << "MidiModel " << this << " spurious note off chan " << (int)chan
 				<< ", note " << (int)note_num << " @ " << time << endl;
+	}
 }
 
 void MidiModel::append_automation_event_unlocked(AutomationType type,
@@ -618,7 +618,7 @@ void MidiModel::append_automation_event_unlocked(AutomationType type,
 
 	Parameter param(type, id, chan);
 	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
-	control->list()->fast_simple_add(time, value);
+	control->list()->rt_add(time, value);
 	/*cerr << "control list size after fast simple add: " << control->list()->size() << endl;*/
 }
 

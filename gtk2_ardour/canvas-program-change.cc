@@ -21,6 +21,7 @@ CanvasProgramChange::CanvasProgramChange(
 	  _widget(0)
 {
 	_text = new Text(*this);
+	assert(_text);
 	ostringstream pgm(ios::ate);
 	pgm << int(event->pgm_number());
 	_text->property_text() = pgm.str();

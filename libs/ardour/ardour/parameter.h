@@ -59,7 +59,7 @@ public:
 	inline uint8_t        channel() const { return _channel; }
 
 	inline bool operator==(const Parameter& id) const {
-		return (_type == id._type && _id == id._id);
+		return (_type == id._type && _id == id._id && _channel == id._channel);
 	}
 	
 	/** Arbitrary but fixed ordering (for use in e.g. std::map) */

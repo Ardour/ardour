@@ -672,8 +672,9 @@ MidiRegionView::begin_write()
 {
 	assert(!_active_notes);
 	_active_notes = new CanvasNote*[128];
-	for (unsigned i=0; i < 128; ++i)
+	for (unsigned i=0; i < 128; ++i) {
 		_active_notes[i] = NULL;
+	}
 }
 
 
@@ -765,6 +766,8 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 		if (note->duration() == 0) {
+			assert(_active_notes);
+			assert(note->note() < 128);
 			_active_notes[note->note()] = ev_rect;
 			/* outline all but right edge */
 			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);

@@ -31,7 +31,8 @@ namespace ARDOUR {
 static inline int
 midi_event_size(unsigned char status)
 {
-	if (status >= 0x80 && status <= 0xE0) {
+	// if we have a channel event
+	if (status >= 0x80 && status < 0xF0) {
 		status &= 0xF0; // mask off the channel
 	}
 
