@@ -19,6 +19,7 @@
 */
 
 #include <ardour/note.h>
+#include <iostream>
 
 namespace ARDOUR {
 
@@ -40,7 +41,8 @@ Note::Note(uint8_t chan, double t, double d, uint8_t n, uint8_t v)
 	assert(duration() == d);
 	assert(note() == n);
 	assert(velocity() == v);
-	assert(_on_event.channel() == _off_event.channel()); 
+	assert(_on_event.channel() == _off_event.channel());
+	assert(channel() == chan);
 }
 
 
@@ -67,6 +69,16 @@ Note::Note(const Note& copy)
 	assert(duration() == copy.duration());
 	assert(_on_event.channel() == _off_event.channel());
 	assert(channel() == copy.channel());
+}
+
+Note::~Note()
+{
+	std::cerr << "Note::~Note() Note time: " << time()
+		 << " pitch: " << int(note()) 
+	     << " duration: " << duration() 
+	     << "   end-time: " << end_time() 
+	     << "   velocity: " << int(velocity()) 
+	     << std::endl;
 }
 
 

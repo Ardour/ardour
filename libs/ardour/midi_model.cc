@@ -143,14 +143,16 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 
 MidiModel::const_iterator::~const_iterator()
 {
-	if (_locked)
+	if (_locked) {
 		_model->read_unlock();
+	}
 }
 
 const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 {
-	if (_is_end)
+	if (_is_end) {
 		throw std::logic_error("Attempt to iterate past end of MidiModel");
+	}
 
 	/*cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event.type()) 
 	 << "   buffer: 0x" << int(_event.buffer()[0]) << " 0x" << int(_event.buffer()[1]) 
@@ -264,7 +266,7 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	size_t index = other._control_iter - other._control_iters.begin();
 	_control_iter = _control_iters.begin() + index;
 
-	assert( ! _event.owns_buffer());
+	assert( !_event.owns_buffer() );
 
 	return *this;
 }
@@ -312,13 +314,13 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 		dst.write(_read_iter->time() + stamp_offset - negative_stamp_offset,
 				_read_iter->size(), _read_iter->buffer());
 
-		/*
+		
 		 cerr << this << " MidiModel::read event @ " << _read_iter->time()  
 		 << " type: " << hex << int(_read_iter->type()) << dec 
-		 << " note: " << int(_read_iter->note()) 
-		 << " velocity: " << int(_read_iter->velocity()) 
+		 //<< " note: " << int(_read_iter->note()) 
+		 //<< " velocity: " << int(_read_iter->velocity()) 
 		 << endl;
-		 */
+		 
 
 		++_read_iter;
 		++read_events;
@@ -334,8 +336,9 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 	
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:
-		if (ev.size() < 3)
+		if (ev.size() < 3) {
 			ev.set_buffer((Byte*)malloc(3), true);
+		}
 
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
@@ -349,8 +352,9 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		return true;
 
 	case MidiPgmChangeAutomation:
-		if (ev.size() < 3)
+		if (ev.size() < 3) {
 			ev.set_buffer((Byte*)malloc(3), true);
+		}
 
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
@@ -364,8 +368,9 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		return true;
 
 	case MidiPitchBenderAutomation:
-		if (ev.size() < 3)
+		if (ev.size() < 3) {
 			ev.set_buffer((Byte*)malloc(3), true);
+		}
 
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
@@ -379,8 +384,9 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		return true;
 
 	case MidiChannelAftertouchAutomation:
-		if (ev.size() < 3)
+		if (ev.size() < 3) {
 			ev.set_buffer((Byte*)malloc(3), true);
+		}
 
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
@@ -528,7 +534,8 @@ void MidiModel::append_note_on_unlocked(uint8_t chan, double time,
 	assert(_writing);
 	_edited = true;
 
-	_notes.push_back(boost::shared_ptr<Note>(new Note(chan, time, 0, note_num, velocity)));
+	boost::shared_ptr<Note> new_note(new Note(chan, time, 0, note_num, velocity));
+	_notes.push_back(new_note);
 	if (_note_mode == Sustained) {
 		//cerr << "MM Sustained: Appending active note on " << (unsigned)(uint8_t)note_num << endl;
 		_write_notes[chan].push_back(_notes.size() - 1);
@@ -896,8 +903,9 @@ bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	const NoteMode old_note_mode = _note_mode;
 	_note_mode = Sustained;
 	
-	for (const_iterator i = begin(); i != end(); ++i)
+	for (const_iterator i = begin(); i != end(); ++i) {
 		source->append_event_unlocked(Frames, *i);
+	}
 		
 	_note_mode = old_note_mode;
 	

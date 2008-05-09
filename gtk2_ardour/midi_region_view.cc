@@ -456,24 +456,22 @@ MidiRegionView::redisplay_model()
 	if (_model) {
 
 		clear_events();
-		begin_write();
-
 		_model->read_lock();
-
 		
 		MidiModel::Notes notes = _model->notes();
 		cerr << endl << "Model contains " << notes.size() << " Notes:" << endl;
 		for(MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-			Note note = *(*i).get();
-			cerr << "MODEL: Note time: " << note.time() << " duration: " << note.duration() 
-			     << "   end-time: " << note.end_time() 
-			     << "   velocity: " << int(note.velocity()) 
+			cerr << "MODEL: Note time: " << (*i)->time()
+				 << " pitch: " << int((*i)->note()) 
+			     << " duration: " << (*i)->duration() 
+			     << "   end-time: " << (*i)->end_time() 
+			     << "   velocity: " << int((*i)->velocity()) 
 			     //<< " Note-on: " << note.on_event(). 
 			     //<< " Note-off: " << note.off_event() 
 			     << endl;
 		}
 		
-		for (size_t i=0; i < _model->n_notes(); ++i) {
+		for (size_t i = 0; i < _model->n_notes(); ++i) {
 			add_note(_model->note_at(i));
 		}
 
@@ -494,8 +492,6 @@ MidiRegionView::redisplay_model()
 				break;
 			}
 		}
-
-		end_write();
 
 		// Is this necessary ??????????
 		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
@@ -841,9 +837,11 @@ MidiRegionView::delete_selection()
 {
 	assert(_delta_command);
 
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
-		if ((*i)->selected())
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		if ((*i)->selected()) {
 			_delta_command->remove((*i)->note());
+		}
+	}
 
 	_selection.clear();
 }
@@ -851,9 +849,11 @@ MidiRegionView::delete_selection()
 void
 MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 {
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
-		if ((*i)->selected() && (*i) != ev)
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		if ((*i)->selected() && (*i) != ev) {
 			(*i)->selected(false);
+		}
+	}
 
 	_selection.clear();
 }
@@ -861,40 +861,47 @@ MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 void
 MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 {
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i)
-		if ((*i) != ev)
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		if ((*i) != ev) {
 			(*i)->selected(false);
+		}
+	}
 
 	_selection.clear();
 	_selection.insert(ev);
 
-	if ( ! ev->selected())
+	if ( ! ev->selected()) {
 		ev->selected(true);
+	}
 }
 
 void
 MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 {
-	if ( ! add)
+	if ( ! add) {
 		clear_selection_except(ev);
+	}
 
 	_selection.insert(ev);
 
-	if ( ! ev->selected())
+	if ( ! ev->selected()) {
 		ev->selected(true);
+	}
 }
 
 
 void
 MidiRegionView::note_deselected(ArdourCanvas::CanvasNoteEvent* ev, bool add)
 {
-	if ( ! add)
+	if ( ! add) {
 		clear_selection_except(ev);
+	}
 
 	_selection.erase(ev);
 
-	if (ev->selected())
+	if (ev->selected()) {
 		ev->selected(false);
+	}
 }
 
 

@@ -36,6 +36,7 @@ class Note {
 public:
 	Note(uint8_t chan=0, double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note& copy);
+	~Note();
 
 	const Note& operator=(const Note& copy);
 

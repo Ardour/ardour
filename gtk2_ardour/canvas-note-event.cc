@@ -45,8 +45,11 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 
 CanvasNoteEvent::~CanvasNoteEvent() 
 { 
-	if (_text)
+	cerr << "CanvasNoteEvent::~CanvasNoteEvent() " << int(_note->note()) << " velo " << int(_note->velocity()) << endl;
+	if (_text) {
+		_text->hide();
 		delete _text;
+	}
 	
 	if (_channel_selector_widget)
 		delete _channel_selector_widget;
@@ -56,13 +59,17 @@ void
 CanvasNoteEvent::move_event(double dx, double dy)
 {
 	_item->move(dx, dy);
-	if (_text)
+	if (_text) {
+		_text->hide();
 		_text->move(dx, dy);
+		_text->show();
+	}
 }
 
 void
 CanvasNoteEvent::show_velocity(void)
 {
+	hide_velocity();
 	_text = new Text(*(_item->property_parent()));
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
@@ -79,8 +86,11 @@ CanvasNoteEvent::show_velocity(void)
 void
 CanvasNoteEvent::hide_velocity(void)
 {
-	delete _text;
-	_text = NULL;
+	if(_text) {
+		_text->hide();
+		delete _text;
+	}
+	_text = 0;
 }
 
 void 
@@ -91,8 +101,8 @@ CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 		set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteFillInactiveChannel.get());
 		set_outline_color(ARDOUR_UI::config()->canvasvar_MidiNoteOutlineInactiveChannel.get());
 	} else {
-		set_fill_color(note_fill_color(_note->velocity()));
-		set_outline_color(note_outline_color(_note->velocity()));
+		// set the color according to the notes selection state
+		selected(_selected);
 	}
 	// this forces the item to update..... maybe slow...
 	_item->hide();

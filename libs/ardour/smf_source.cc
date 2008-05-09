@@ -194,8 +194,15 @@ SMFSource::seek_to_footer_position()
 	
 	// lets check if there is a track end marker at the end of the data
 	fseek(_fd, -4, SEEK_END);
+	//cerr << "SMFSource::seek_to_footer_position: At position: " << ftell(_fd);
 	size_t read_bytes = fread(buffer, sizeof(uint8_t), 4, _fd);
-	//cerr << "SMFSource::seek_to_footer_position: read size: " << read_bytes << endl;
+	/*cerr << " read size: " << read_bytes << " buffer: ";
+	for (size_t i=0; i < read_bytes; ++i) {
+		printf("%x ", buffer[i]);
+	}
+	printf("\n");
+	*/
+	
 	if( (read_bytes == 4) && 
 	    buffer[0] == 0x00 && 
 	    buffer[1] == 0xFF && 
@@ -244,6 +251,7 @@ SMFSource::flush_footer()
 	//cerr << path() << " SMF Flushing footer\n";
 	seek_to_footer_position();
 	write_footer();
+	seek_to_footer_position();
 
 	return 0;
 }
@@ -491,8 +499,8 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 {
-	/*printf("SMFSource: %s - append_event_unlocked chan = %u, time = %lf, size = %u, data = ",
-			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size()); */
+	printf("SMFSource: %s - append_event_unlocked chan = %u, time = %lf, size = %u, data = ",
+			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size()); 
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}

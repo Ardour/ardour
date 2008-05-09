@@ -53,10 +53,11 @@ struct Event {
 	{
 		if (owns_buffer) {
 			_buffer = (uint8_t*)malloc(_size);
-			if (b)
+			if (b) {
 				memcpy(_buffer, b, _size);
-			else
+			} else {
 				memset(_buffer, 0, _size);
+			}
 		}
 	}
 	
@@ -74,24 +75,27 @@ struct Event {
 	{
 		if (owns_buffer) {
 			_buffer = (uint8_t*)malloc(_size);
-			if (copy._buffer)
+			if (copy._buffer) {
 				memcpy(_buffer, copy._buffer, _size);
-			else
+			} else {
 				memset(_buffer, 0, _size);
+			}
 		}
 	}
 	
 	~Event() {
-		if (_owns_buffer)
+		if (_owns_buffer) {
 			free(_buffer);
+		}
 	}
 
 	inline const Event& operator=(const Event& copy) {
 		_time = copy._time;
 		if (_owns_buffer) {
 			if (copy._buffer) {
-				if (!_buffer || _size < copy._size)
+				if (!_buffer || _size < copy._size) {
 					_buffer = (uint8_t*)::realloc(_buffer, copy._size);
+				}
 				memcpy(_buffer, copy._buffer, copy._size);
 			} else {
 				free(_buffer);

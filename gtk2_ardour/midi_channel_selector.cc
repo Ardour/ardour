@@ -65,6 +65,7 @@ SingleMidiChannelSelector::button_toggled(ToggleButton *button, uint8_t channel)
 				_last_active_button->set_active(false);
 				_active_channel = channel;
 				_last_active_button = button;
+				channel_selected.emit(channel);
 			}
 		} else {
 			// if not, the user pressed the already active button

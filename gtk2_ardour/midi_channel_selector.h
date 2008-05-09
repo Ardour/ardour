@@ -34,8 +34,8 @@ public:
 protected:
 	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr);
 
-	Gtk::ToggleButton *_last_active_button;
-	uint8_t _active_channel;
+	Gtk::ToggleButton* _last_active_button;
+	uint8_t            _active_channel;
 };
 
 class MidiMultipleChannelSelector : public MidiChannelSelector

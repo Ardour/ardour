@@ -368,8 +368,9 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			break;
 		
 		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)&ev.time());
-		if (success)
+		if (success) {
 			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev.size());
+		}
 
 		if (!success) {
 			std::cerr << "MRB: READ ERROR (time/size)" << std::endl;
@@ -377,8 +378,9 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		}
 		
 		Byte first_event_byte;
-		if(success)
+		if(success) {
 			success = full_peek(sizeof(Byte), &first_event_byte);
+		}
 				
 		// could this ever happen???
 		if (!success) {
