@@ -56,6 +56,27 @@ Parameter::Parameter(const std::string& str)
 		sscanf(str.c_str(), "midicc-%d-%d", &channel, &_id);
 		assert(channel < 16);
 		_channel = channel;
+	} else if (str.length() > 16 && str.substr(0, 16) == "midi-pgm-change-") {
+		_type = MidiPgmChangeAutomation;
+		uint32_t channel = 0;
+		sscanf(str.c_str(), "midi-pgm-change-%d", &channel);
+		assert(channel < 16);
+		_id = 0;
+		_channel = channel;
+	} else if (str.length() > 18 && str.substr(0, 18) == "midi-pitch-bender-") {
+		_type = MidiPitchBenderAutomation;
+		uint32_t channel = 0;
+		sscanf(str.c_str(), "midi-pitch-bender-%d", &channel);
+		assert(channel < 16);
+		_id = 0;
+		_channel = channel;
+	} else if (str.length() > 24 && str.substr(0, 24) == "midi-channel-aftertouch-") {
+		_type = MidiChannelAftertouchAutomation;
+		uint32_t channel = 0;
+		sscanf(str.c_str(), "midi-channel-aftertouch-%d", &channel);
+		assert(channel < 16);
+		_id = 0;
+		_channel = channel;
 	} else {
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
