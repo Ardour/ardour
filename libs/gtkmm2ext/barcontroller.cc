@@ -149,7 +149,7 @@ BarController::button_release (GdkEventButton* ev)
 		} else {
 			double scale;
 
-			if (ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+			if ((ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
 				scale = 0.01;
 			} else if (ev->state & GDK_CONTROL_MASK) {
 				scale = 0.1;
@@ -179,7 +179,7 @@ BarController::scroll (GdkEventScroll* ev)
 {
 	double scale;
 
-	if (ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+	if ((ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
 		scale = 0.01;
 	} else if (ev->state & GDK_CONTROL_MASK) {
 		scale = 0.1;
@@ -215,7 +215,7 @@ BarController::motion (GdkEventMotion* ev)
 		return TRUE;
 	}
 
-	if (ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+	if ((ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
 		scale = 0.01;
 	} else if (ev->state & GDK_CONTROL_MASK) {
 		scale = 0.1;

@@ -1,3 +1,4 @@
+#include <cstring>
 #include <vamp-sdk/hostext/PluginLoader.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>

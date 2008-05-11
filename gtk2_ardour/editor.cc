@@ -3510,7 +3510,7 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 			v->push_back (*i);
 		}
 
-	} else if (track != 0 && group == 0 || (track != 0 && group != 0 && !group->is_active())) {
+	} else if ((track != 0 && group == 0) || (track != 0 && group != 0 && !group->is_active())) {
 		
 		/* just the view for this track
 		 */

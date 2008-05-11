@@ -22,6 +22,7 @@
 #include <iostream>
 #include <map>
 #include <cstdio>
+#include <cstdlib>
 #include <vector>
 
 namespace RubberBand {

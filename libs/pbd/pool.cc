@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 #include <pbd/pool.h>
 #include <pbd/error.h>

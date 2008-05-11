@@ -15,6 +15,7 @@
 #ifndef _RUBBERBAND_RINGBUFFER_H_
 #define _RUBBERBAND_RINGBUFFER_H_
 
+#include <cstring>
 #include <sys/types.h>
 
 #ifndef _WIN32

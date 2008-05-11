@@ -15,6 +15,7 @@
 #include "StretchCalculator.h"
 
 #include <math.h>
+#include <algorithm>
 #include <iostream>
 #include <deque>
 #include <set>

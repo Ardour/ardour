@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <cstring>
 #include <midi++/types.h>
 #include <midi++/port.h>
 #include <midi++/channel.h>

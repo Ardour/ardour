@@ -22,6 +22,7 @@
 #define _XOPEN_SOURCE 600
 #include <cstdlib> // for posix_memalign
 #include <cassert>
+#include <cstring>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
 

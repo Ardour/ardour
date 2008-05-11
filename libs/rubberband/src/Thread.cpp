@@ -14,6 +14,7 @@
 
 #include "Thread.h"
 
+#include <cstdlib>
 #include <iostream>
 
 #include <sys/time.h>

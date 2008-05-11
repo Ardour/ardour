@@ -20,6 +20,7 @@
 
 #include <cstdio>
 #include <string>
+#include <cstring>
 #include <limits.h>
 
 #include <pbd/mountpoint.h>

@@ -748,7 +748,7 @@ NewSessionDialog::which_page () const
 	} else if (page_set == EnginePage) {
 		return EnginePage;
 
-	} else if (page_set == NewPage|OpenPage) {
+	} else if (page_set == (NewPage|OpenPage)) {
 		switch (num) {
 		case 0:
 			return NewPage;
@@ -756,7 +756,7 @@ NewSessionDialog::which_page () const
 			return OpenPage;
 		}
 
-	} else if (page_set == NewPage|EnginePage) {
+	} else if (page_set == (NewPage|EnginePage)) {
 		switch (num) {
 		case 0:
 			return NewPage;
@@ -764,7 +764,7 @@ NewSessionDialog::which_page () const
 			return EnginePage;
 		}
 
-	} else if (page_set == NewPage|EnginePage|OpenPage) {
+	} else if (page_set == (NewPage|EnginePage|OpenPage)) {
 		switch (num) {
 		case 0:
 			return NewPage;
@@ -774,7 +774,7 @@ NewSessionDialog::which_page () const
 			return EnginePage;
 		}
 
-	} else if (page_set == OpenPage|EnginePage) {
+	} else if (page_set == (OpenPage|EnginePage)) {
 		switch (num) {
 		case 0:
 			return OpenPage;
@@ -782,6 +782,8 @@ NewSessionDialog::which_page () const
 			return EnginePage;
 		}
 	}
+
+	return NewPage; /* shouldn't get here */
 }
 
 void

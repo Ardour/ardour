@@ -20,6 +20,7 @@
 #ifndef ringbuffer_h
 #define ringbuffer_h
 
+#include <cstring>
 #include <glib.h>
 
 template<class T>

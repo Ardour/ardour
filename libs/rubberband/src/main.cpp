@@ -14,9 +14,11 @@
 
 #include "RubberBandStretcher.h"
 
+#include <cstring>
 #include <iostream>
 #include <sndfile.h>
 #include <cmath>
+#include <cstdlib>
 #include <sys/time.h>
 #include <time.h>
 #include "sysutils.h"

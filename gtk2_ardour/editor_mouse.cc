@@ -384,7 +384,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
 	     (mouse_mode != MouseRange)) ||
 
-	    (event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE || event->button.button > 3)) {
+	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
 		
 		return;
 	}

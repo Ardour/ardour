@@ -394,12 +394,11 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  found_list (ListStore::create(found_list_columns)),
 	  freesound_list (ListStore::create(freesound_list_columns)),
 	  chooser (FILE_CHOOSER_ACTION_OPEN),
-	  found_list_view (found_list),
-	  freesound_list_view (freesound_list),
 	  preview (persistent),
 	  found_search_btn (_("Search")),
-	  freesound_search_btn (_("Start Downloading"))
-
+	  found_list_view (found_list),
+	  freesound_search_btn (_("Start Downloading")),
+	  freesound_list_view (freesound_list)
 {
 	resetting_ourselves = false;
 	gm = 0;

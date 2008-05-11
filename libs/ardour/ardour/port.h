@@ -20,6 +20,7 @@
 #ifndef __ardour_port_h__
 #define __ardour_port_h__
 
+#include <cstring>
 #include <sigc++/signal.h>
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>
