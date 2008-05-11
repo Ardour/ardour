@@ -399,7 +399,15 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 		if (ev.time() >= start) {
 			ev.time() -= start;
+			// TODO: Right now there come MIDI Events with empty buffer
+			if(!ev.buffer()) {
+				std::cerr << "MidiRingBuffer::read WARNING: Skipping MIDI Event with NULL buffer pointer " 
+				     << " and length " << int(ev.size()) << std::endl; 
+				return 0;
+			}
+			
 			Byte* write_loc = dst.reserve(ev.time(), ev.size());
+			
 			success = MidiRingBufferBase<Byte>::full_read(ev.size(), write_loc);
 		
 			if (success) {

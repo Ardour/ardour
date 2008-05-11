@@ -312,6 +312,7 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
 		assert(_read_iter->size()> 0);
+		assert(_read_iter->buffer());
 		dst.write(_read_iter->time() + stamp_offset - negative_stamp_offset,
 				_read_iter->size(), _read_iter->buffer());
 

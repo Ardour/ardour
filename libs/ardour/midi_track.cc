@@ -572,7 +572,10 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 	} else {
 
 		MidiBuffer& output_buf = bufs.get_midi(0);
-		write_controller_messages(output_buf, start_frame, end_frame, nframes, offset);
+		// TODO this crashes: (sends events with NULL buffer pointer)
+		// Is this necessary anyway here? Dont know. 
+		//write_controller_messages(output_buf, start_frame, end_frame, nframes, offset);
+		
 		deliver_output(bufs, start_frame, end_frame, nframes, offset);
 	}
 }
@@ -581,6 +584,7 @@ void
 MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_frame, nframes_t end_frame, 
 			       nframes_t nframes, nframes_t offset)
 {
+#if 0
 	BufferSet& mix_buffers = _session.get_mix_buffers(ChanCount(DataType::MIDI, 2));
 
 	/* FIXME: this could be more realtimey */
@@ -594,7 +598,6 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 	MIDI::Event ev(0, 3, buf, false);
 
 	// Write track controller automation
-#if 0
 	// This now lives in MidiModel.  Any need for track automation like this?
 	// Relative Velocity?
 	if (_session.transport_rolling()) {
