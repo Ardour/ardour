@@ -316,14 +316,12 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 		dst.write(_read_iter->time() + stamp_offset - negative_stamp_offset,
 				_read_iter->size(), _read_iter->buffer());
 
-		
-		 cerr << this << " MidiModel::read event @ " << _read_iter->time()  
-		 << " type: " << hex << int(_read_iter->type()) << dec 
+		 //cerr << this << " MidiModel::read event @ " << _read_iter->time()  
+		 //<< " type: " << hex << int(_read_iter->type()) << dec 
 		 //<< " note: " << int(_read_iter->note()) 
 		 //<< " velocity: " << int(_read_iter->velocity()) 
-		 << endl;
+		 //<< endl;
 		 
-
 		++_read_iter;
 		++read_events;
 	}

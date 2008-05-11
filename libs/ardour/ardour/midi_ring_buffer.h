@@ -393,7 +393,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		if(is_channel_event(first_event_byte) && (g_atomic_int_get(&_force_channel) < 0)) {
 			Byte channel_nr = first_event_byte & 0x0F;
 			if( !(g_atomic_int_get(&_channel_mask) & (1L << channel_nr)) )  {
-				return 0;
+				continue;
 			}
 		}
 
@@ -403,7 +403,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			if(!ev.buffer()) {
 				std::cerr << "MidiRingBuffer::read WARNING: Skipping MIDI Event with NULL buffer pointer " 
 				     << " and length " << int(ev.size()) << std::endl; 
-				return 0;
+				continue;
 			}
 			
 			Byte* write_loc = dst.reserve(ev.time(), ev.size());
