@@ -135,6 +135,12 @@ namespace ARDOUR {
 		Sustained,
 		Percussive
 	};
+	
+	enum ChannelMode {
+		AllChannels = 0, ///< Pass through all channel information unmodified
+		FilterChannels,  ///< Ignore events on certain channels
+		ForceChannel     ///< Force all events to a certain channel
+	};
 
 	enum EventTimeUnit {
 		Frames,

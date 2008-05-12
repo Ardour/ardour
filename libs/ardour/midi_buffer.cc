@@ -195,7 +195,10 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 Byte*
 MidiBuffer::reserve(double time, size_t size)
 {
-	assert(size <= MAX_EVENT_SIZE);
+	if (size > MAX_EVENT_SIZE) {
+		cerr << "WARNING: Failed to reserve " << size << " bytes for event";
+		return 0;
+	}
 
 	if (_size == _capacity)
 		return 0;

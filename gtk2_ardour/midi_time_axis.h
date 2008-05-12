@@ -74,11 +74,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void update_range();
 	
-	sigc::signal<void, uint16_t>& signal_channel_selection_changed() 
-		{ return _channel_selector.selection_changed; }
-	
-	sigc::signal<void, int8_t>& signal_force_channel_changed()  
-		{ return _channel_selector.force_channel_changed; }
+	sigc::signal<void, ARDOUR::ChannelMode, uint16_t>& signal_channel_mode_changed() 
+		{ return _channel_selector.mode_changed; }
 	
   private:
 	

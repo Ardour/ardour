@@ -46,6 +46,7 @@ setup_enum_writer ()
 	MeterPoint _MeterPoint;
 	TrackMode _TrackMode;
 	NoteMode _NoteMode;
+	ChannelMode _ChannelMode;
 	MeterFalloff _MeterFalloff;
 	MeterHold _MeterHold;
 	EditMode _EditMode;
@@ -140,6 +141,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (Sustained);
 	REGISTER_ENUM (Percussive);
 	REGISTER (_NoteMode);
+	
+	REGISTER_ENUM (AllChannels);
+	REGISTER_ENUM (FilterChannels);
+	REGISTER_ENUM (ForceChannel);
+	REGISTER (_ChannelMode);
 
 	REGISTER_ENUM (MeterFalloffOff);
 	REGISTER_ENUM (MeterFalloffSlowest);

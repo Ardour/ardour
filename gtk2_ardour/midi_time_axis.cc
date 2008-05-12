@@ -144,13 +144,11 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 			mem_fun(this, &MidiTimeAxisView::channel_selector_toggled));
 	controls_vbox.pack_end(_midi_expander, SHRINK, 0);
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_track()->midi_diskstream();
+
 	// restore channel selector settings
-	_channel_selector.set_selected_channels(diskstream->get_channel_mask());
-	_channel_selector.set_force_channel(diskstream->get_force_channel());
-	_channel_selector.selection_changed.connect(
-		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mask));
-	_channel_selector.force_channel_changed.connect(
-		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_force_channel));
+	_channel_selector.set_channel_mode(diskstream->get_channel_mode(), diskstream->get_channel_mask());
+	_channel_selector.mode_changed.connect(
+		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mode));
 
 }
 

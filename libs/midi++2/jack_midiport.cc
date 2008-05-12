@@ -95,24 +95,27 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 				
 	} else {
 
-		assert(_currently_in_cycle);
 		assert(_jack_output_port);
 		assert(timestamp < _nframes_this_cycle);
 
-		if (timestamp == 0) {
-			timestamp = _last_write_timestamp;
-		} 
+		if (_currently_in_cycle) {
+			if (timestamp == 0) {
+				timestamp = _last_write_timestamp;
+			} 
 
-		if (jack_midi_event_write (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle), 
-					   timestamp, msg, msglen) == 0) {
-			ret = msglen;
-			_last_write_timestamp = timestamp;
+			if (jack_midi_event_write (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle), 
+						timestamp, msg, msglen) == 0) {
+				ret = msglen;
+				_last_write_timestamp = timestamp;
 
+			} else {
+				ret = 0;
+				cerr << "write of " << msglen << " failed, port holds "
+					<< jack_midi_get_event_count (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle))
+					<< endl;
+			}
 		} else {
-			ret = 0;
-			cerr << "write of " << msglen << " failed, port holds "
-			     << jack_midi_get_event_count (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle))
-			     << endl;
+			cerr << "write to JACK midi port failed: not currently in a process cycle." << endl;
 		}
 	}
 

@@ -241,16 +241,15 @@ class MidiRegionView : public RegionView
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 	
-	int8_t force_channel;
-	void midi_force_channel_changed(int8_t channel);
-	uint16_t last_channel_selection;
-	void midi_channel_selection_changed(uint16_t selection);
+	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
 
 	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
 	void update_drag_selection(double last_x, double x, double last_y, double y);
 
-	double _default_note_length;
+	int8_t   _force_channel;
+	uint16_t _last_channel_selection;
+	double   _default_note_length;
 
 	boost::shared_ptr<ARDOUR::MidiModel>        _model;
 	std::vector<ArdourCanvas::CanvasNoteEvent*> _events;

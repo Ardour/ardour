@@ -491,9 +491,6 @@ void MidiModel::append(const MIDI::Event& ev)
 	write_lock();
 	_edited = true;
 
-	cerr << "MidiModel append event type: "
-		<< hex << "0x" << (int)ev.type() << endl;
-
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());
 	assert(_writing);
 

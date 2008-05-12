@@ -45,7 +45,6 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 
 CanvasNoteEvent::~CanvasNoteEvent() 
 { 
-	cerr << "CanvasNoteEvent::~CanvasNoteEvent() " << int(_note->note()) << " velo " << int(_note->velocity()) << endl;
 	if (_text) {
 		_text->hide();
 		delete _text;

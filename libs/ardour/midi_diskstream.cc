@@ -1227,11 +1227,10 @@ MidiDiskstream::get_state ()
 	snprintf (buf, sizeof(buf), "0x%x", _flags);
 	node->add_property ("flags", buf);
 
+	node->add_property("channel-mode", enum_2_string(get_channel_mode()));
+	
 	snprintf (buf, sizeof(buf), "0x%x", get_channel_mask());
-	node->add_property("channel_mask", buf);
-
-	snprintf (buf, sizeof(buf), "%d", get_force_channel());
-	node->add_property("force_channel", buf);
+	node->add_property("channel-mask", buf);
 	
 	node->add_property ("playlist", _playlist->name());
 	
@@ -1310,19 +1309,21 @@ MidiDiskstream::set_state (const XMLNode& node)
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
-	
-	if ((prop = node.property ("channel_mask")) != 0) {
-		unsigned int channel_mask;
-		sscanf (prop->value().c_str(), "0x%x", &channel_mask);
-		set_channel_mask(channel_mask);
+
+	ChannelMode channel_mode = AllChannels;
+	if ((prop = node.property ("channel-mode")) != 0) {
+		channel_mode = ChannelMode (string_2_enum(prop->value(), channel_mode));
 	}
 	
-	if ((prop = node.property ("force_channel")) != 0) {
-		int force_channel;
-		sscanf (prop->value().c_str(), "%d", &force_channel);
-		set_force_channel(force_channel);
+	unsigned int channel_mask = 0xFFFF;
+	if ((prop = node.property ("channel-mask")) != 0) {
+		sscanf (prop->value().c_str(), "0x%x", &channel_mask);
+		if (channel_mask & 0xFFFF)
+			warning << _("MidiDiskstream: XML property channel-mask out of range") << endmsg;
 	}
 
+	set_channel_mode(channel_mode, channel_mask);
+	
 	if ((prop = node.property ("channels")) != 0) {
 		nchans = atoi (prop->value().c_str());
 	}

@@ -1,13 +1,34 @@
+/*
+    Copyright (C) 2008 Paul Davis 
+    Author: Hans Baier
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #ifndef __ardour_ui_midi_channel_selector_h__
 #define __ardour_ui_midi_channel_selector_h__
 
+#include <set>
 #include "boost/shared_ptr.hpp"
-#include "gtkmm/table.h"
 #include "sigc++/trackable.h"
+#include "gtkmm/table.h"
 #include "gtkmm/button.h"
 #include "gtkmm/togglebutton.h"
 #include "gtkmm/label.h"
-#include <set>
+#include <ardour/types.h>
+
 
 class MidiChannelSelector : public Gtk::Table
 {
@@ -15,8 +36,10 @@ public:
 	MidiChannelSelector(int no_rows = 4, int no_columns = 4, int start_row = 0, int start_column = 0);
 	virtual ~MidiChannelSelector() = 0;
 	
+	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
+	
 protected:
-	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr) = 0;
+	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr) = 0;
 	Gtk::Label        _button_labels[4][4];
 	Gtk::ToggleButton _buttons[4][4];
 	int               _recursion_counter;
@@ -32,7 +55,7 @@ public:
 	sigc::signal<void, uint8_t> channel_selected;
 	
 protected:
-	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr);
+	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr);
 
 	Gtk::ToggleButton* _last_active_button;
 	uint8_t            _active_channel;
@@ -41,40 +64,35 @@ protected:
 class MidiMultipleChannelSelector : public MidiChannelSelector
 {
 public:
-	MidiMultipleChannelSelector(uint16_t initial_selection = 0xFFFF, int8_t force_channel = -1);
+	MidiMultipleChannelSelector(ARDOUR::ChannelMode mode = ARDOUR::FilterChannels,
+	                            uint16_t initial_selection = 0xFFFF);
+	
 	virtual ~MidiMultipleChannelSelector();
 	
+	void set_channel_mode(ARDOUR::ChannelMode mode, uint8_t mask);
+
 	/**
 	 * @return each bit in the returned word represents a midi channel, eg. 
 	 *         bit 0 represents channel 0 and bit 15 represents channel 15
 	 *          
 	 */
 	const uint16_t get_selected_channels() const;
-	void set_selected_channels(uint16_t selected_channels);
+	void           set_selected_channels(uint16_t selected_channels);
 	
-	sigc::signal<void, uint16_t> selection_changed;
-	sigc::signal<void, int8_t>   force_channel_changed;
-	
-	const int8_t get_force_channel() const;
-	void set_force_channel(int8_t force_channel);
 protected:
-	enum Mode {
-		FILTERING_MULTIPLE_CHANNELS,
-		FORCING_SINGLE_CHANNEL
-	}; 
-
-	Mode _mode;
+	ARDOUR::ChannelMode _channel_mode;
+	ARDOUR::NoteMode    _note_mode;
 	
-	virtual void button_toggled(Gtk::ToggleButton *button, uint8_t button_nr);
+	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr);
 	void force_channels_button_toggled();
 	
 	void select_all(bool on);
 	void invert_selection(void);
 	
-	Gtk::Button            _select_all;
-	Gtk::Button            _select_none;
-	Gtk::Button            _invert_selection;
-	Gtk::ToggleButton      _force_channel;
+	Gtk::Button       _select_all;
+	Gtk::Button       _select_none;
+	Gtk::Button       _invert_selection;
+	Gtk::ToggleButton _force_channel;
 };
 
 #endif /*__ardour_ui_midi_channel_selector_h__*/

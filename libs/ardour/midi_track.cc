@@ -428,9 +428,6 @@ MidiTrack::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_fram
 		passthru (start_frame, end_frame, nframes, offset, 0, (_meter_point == MeterInput));
 	}
 
-	// stop all sounds
-	midi_panic();
-	
 	return 0;
 }
 
@@ -571,10 +568,8 @@ MidiTrack::process_output_buffers (BufferSet& bufs,
 		IO::silence(nframes, offset);
 	} else {
 
-		MidiBuffer& output_buf = bufs.get_midi(0);
-		// TODO this crashes: (sends events with NULL buffer pointer)
-		// Is this necessary anyway here? Dont know. 
-		//write_controller_messages(output_buf, start_frame, end_frame, nframes, offset);
+		// Write 'automation' controllers (e.g. CC events from a UI slider)
+		write_controller_messages(bufs.get_midi(0), start_frame, end_frame, nframes, offset);
 		
 		deliver_output(bufs, start_frame, end_frame, nframes, offset);
 	}
@@ -706,13 +701,13 @@ MidiTrack::set_note_mode (NoteMode m)
 void
 MidiTrack::midi_panic() 
 {
-	for(uint8_t channel = 0; channel <= 0xF; channel++) {
+	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 		Byte ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
-		write_immediate_event(3,  ev);
+		write_immediate_event(3, ev);
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
-		write_immediate_event(3,  ev);
+		write_immediate_event(3, ev);
 		ev[1] = MIDI_CTL_RESET_CONTROLLERS;
-		write_immediate_event(3,  ev);
+		write_immediate_event(3, ev);
 	}
 }
 
@@ -721,6 +716,11 @@ MidiTrack::midi_panic()
 bool
 MidiTrack::write_immediate_event(size_t size, const Byte* buf)
 {
+	printf("Write immediate event: ");
+	for (size_t i=0; i < size; ++i) {
+		printf("%X ", buf[i]);
+	}
+	printf("\n");
 	return (_immediate_events.write(0, size, buf) == size);
 }
 

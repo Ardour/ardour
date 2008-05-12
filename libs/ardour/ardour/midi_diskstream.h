@@ -90,28 +90,27 @@ class MidiDiskstream : public Diskstream
 	
 	void set_note_mode (NoteMode m);
 	
-	void set_channel_mask(uint16_t channel_mask) { 
-		_playback_buf->set_channel_mask(channel_mask); 
-		_capture_buf->set_channel_mask(channel_mask); 
-	}
-	
 	uint16_t get_channel_mask() { 
 		uint16_t playback_mask = _playback_buf->get_channel_mask();
+#ifndef NDEBUG
 		uint16_t capture_mask  = _capture_buf->get_channel_mask();
 		assert(playback_mask == capture_mask);
+#endif
 		return playback_mask;
 	}
 
-	void set_force_channel(int8_t force_channel) { 
-		_playback_buf->set_force_channel(force_channel); 
-		_capture_buf->set_force_channel(force_channel); 
+	void set_channel_mode(ChannelMode mode, uint16_t mask) {
+		_playback_buf->set_channel_mode(mode, mask); 
+		_capture_buf->set_channel_mode(mode, mask); 
 	}
 	
-	int8_t get_force_channel() { 
-		int8_t playback_force_channel = _playback_buf->get_force_channel();
-		int8_t capture_force_channel  = _capture_buf->get_force_channel();
-		assert(playback_force_channel == capture_force_channel);
-		return playback_force_channel;
+	ChannelMode get_channel_mode() {
+		ChannelMode playback_mode = _playback_buf->get_channel_mode();
+#ifndef NDEBUG
+		ChannelMode capture_mode  = _capture_buf->get_channel_mode();
+		assert(playback_mode == capture_mode);
+#endif
+		return playback_mode;
 	}
 
   protected:
