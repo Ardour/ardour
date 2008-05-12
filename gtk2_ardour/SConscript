@@ -25,7 +25,7 @@ gtkardour.Append(PACKAGE=domain)
 gtkardour.Append(POTFILE=domain + '.pot')
 
 if gtkardour['IS_OSX']:
-       gtkardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+       gtkardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048 -framework CoreAudio")
 
 gtkardour.Merge ([
     libraries['ardour'],

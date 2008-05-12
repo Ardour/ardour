@@ -967,6 +967,10 @@ protected:
   cobject* m_cobject;
 };
 
+  RefPtr<Surface> get_surface_quartz(cairo_surface_t*);
+  RefPtr<Surface> get_surface_win32(cairo_surface_t*);
+  RefPtr<Surface> get_surface_xlib(cairo_surface_t*);
+
 } // namespace Cairo
 
 #endif //__CAIROMM_CONTEXT_H

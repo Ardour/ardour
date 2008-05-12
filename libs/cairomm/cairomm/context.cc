@@ -17,17 +17,17 @@
  */
 
 #include <cairomm/context.h>
+#include <cairomm/context_private.h>
 #include <cairomm/private.h>
 #include <cairomm/surface.h>
-#include <cairomm/win32_surface.h>
-#include <cairomm/xlib_surface.h>
-#include <cairomm/quartz_surface.h>
 
 /* M_PI is defined in math.h in the case of Microsoft Visual C++ */
 #if defined(_MSC_VER)
 #define _USE_MATH_DEFINES
 #include <math.h>
 #endif 
+
+using namespace Cairo::Private;
 
 namespace Cairo
 {
@@ -674,7 +674,7 @@ RefPtr<Surface> get_surface_wrapper (cairo_surface_t* surface)
 #endif
 #if CAIRO_HAS_XLIB_SURFACE
     case CAIRO_SURFACE_TYPE_XLIB:
-      return RefPtr<XlibSurface>(new XlibSurface(surface, false /* does not have reference */));
+      return wrap_surface_xlib(surface);
       break;
 #endif
 #if CAIRO_HAS_GLITZ_SURFACE
@@ -684,12 +684,12 @@ RefPtr<Surface> get_surface_wrapper (cairo_surface_t* surface)
 #endif
 #if CAIRO_HAS_QUARTZ_SURFACE
     case CAIRO_SURFACE_TYPE_QUARTZ:
-      return RefPtr<QuartzSurface>(new QuartzSurface(surface, false /* does not have reference */));
+      return wrap_surface_quartz(surface);
       break;
 #endif
 #if CAIRO_HAS_WIN32_SURFACE
     case CAIRO_SURFACE_TYPE_WIN32:
-      return RefPtr<Win32Surface>(new Win32Surface(surface, false /* does not have reference */));
+      return wrap_surface_win32(surface);
       break;
 #endif
 #if CAIRO_HAS_SVG_SURFACE

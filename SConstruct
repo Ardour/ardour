@@ -596,6 +596,9 @@ libraries['gtk2'].ParseConfig ('pkg-config --cflags --libs gtk+-2.0')
 libraries['pango'] = LibraryInfo()
 libraries['pango'].ParseConfig ('pkg-config --cflags --libs pango')
 
+libraries['pangocairo'] = LibraryInfo()
+libraries['pangocairo'].ParseConfig ('pkg-config --cflags --libs pangocairo')
+
 libraries['libgnomecanvas2'] = LibraryInfo()
 libraries['libgnomecanvas2'].ParseConfig ('pkg-config --cflags --libs libgnomecanvas-2.0')
 

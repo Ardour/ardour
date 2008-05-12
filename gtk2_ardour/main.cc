@@ -216,9 +216,9 @@ fixup_bundle_environment ()
 		pangorc << "[Pango]\nModuleFiles=";
 
 		pangopath = dir_path;
-		pangopath /= '..';
-		pangopath /= 'Resources';
-		pangopath /= 'pango.modules';
+		pangopath /= "..";
+		pangopath /= "Resources";
+		pangopath /= "pango.modules";
 			
 		pangorc << pangopath.to_string() << endl;
 		pangorc.close ();
