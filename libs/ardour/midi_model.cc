@@ -893,34 +893,14 @@ struct EventTimeComparator {
  */
 bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 {
-	/*
-	EventTimeComparator comp;
-	typedef std::priority_queue<
-				const MIDI::Event*, 
-				std::deque<MIDI::Event>,
-				EventTimeComparator> MidiEvents;
-	
-	MidiEvents events(comp);
-	*/
-	
 	read_lock();
 
 	const NoteMode old_note_mode = _note_mode;
 	_note_mode = Sustained;
 	
 	for (const_iterator i = begin(); i != end(); ++i) {
-		//events.push(*i);
 		source->append_event_unlocked(Frames, *i);
 	}
-	
-	/*
-	// TODO: As of now, this is still necessary, because there are some events appended whose
-	// times are earlier than the preceding events
-	while(!events.empty()) {
-		source->append_event_unlocked(Frames, events.top());
-		events.pop();
-	}
-	*/
 		
 	_note_mode = old_note_mode;
 	
