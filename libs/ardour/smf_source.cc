@@ -507,7 +507,11 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 	printf("\n");
 	
 	assert(ev.time() >= 0);
-	assert(ev.time() >= _last_ev_time);
+	
+	if (ev.time() < _last_ev_time) {
+		cerr << "SMFSource: Warning: Skipping event with ev.time() < _last_ev_time" << endl;
+		return;
+	}
 	
 	uint32_t delta_time = 0;
 	
