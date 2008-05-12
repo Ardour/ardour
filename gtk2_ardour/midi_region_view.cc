@@ -534,8 +534,9 @@ MidiRegionView::~MidiRegionView ()
 
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 
-	if (_active_notes)
+	if (_active_notes) {
 		end_write();
+	}
 
 	_selection.clear();
 	clear_events();
@@ -707,12 +708,15 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 void
 MidiRegionView::extend_active_notes()
 {
-	if (!_active_notes)
+	if (!_active_notes) {
 		return;
+	}
 
-	for (unsigned i=0; i < 128; ++i)
-		if (_active_notes[i])
+	for (unsigned i=0; i < 128; ++i) {
+		if (_active_notes[i]) {
 			_active_notes[i]->property_x2() = trackview.editor.frame_to_pixel(_region->length());
+		}
+	}
 }
 
 

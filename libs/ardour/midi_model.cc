@@ -363,7 +363,7 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		ev.buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.y;
 		ev.time() = iter.x;
-		ev.size() = 3;
+		ev.size() = 2;
 		return true;
 
 	case MidiPitchBenderAutomation:
@@ -395,7 +395,7 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 				= MIDI_CMD_CHANNEL_PRESSURE + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.y;
 		ev.time() = iter.x;
-		ev.size() = 3;
+		ev.size() = 2;
 		return true;
 
 	default:
@@ -615,7 +615,6 @@ void MidiModel::append_automation_event_unlocked(AutomationType type,
 	Parameter param(type, id, chan);
 	boost::shared_ptr<AutomationControl> control = Automatable::control(param, true);
 	control->list()->rt_add(time, value);
-	/*cerr << "control list size after fast simple add: " << control->list()->size() << endl;*/
 }
 
 void MidiModel::add_note_unlocked(const boost::shared_ptr<Note> note)

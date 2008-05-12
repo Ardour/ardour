@@ -348,12 +348,14 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 		MidiRingBufferBase<Byte>::write(sizeof(double), (Byte*)&time);
 		MidiRingBufferBase<Byte>::write(sizeof(size_t), (Byte*)&size);
 		if (is_channel_event(buf[0]) && get_channel_mode() == ForceChannel) {
-			assert(size == 3);
+			assert(size == 2 || size == 3);
 			Byte tmp_buf[3];
 			// Force event to channel
 			tmp_buf[0] = (buf[0] & 0xF0) | (get_channel_mask() & 0x0F);
 			tmp_buf[1] = buf[1];
-			tmp_buf[2] = buf[2];
+			if (size == 3) {
+				tmp_buf[2] = buf[2];
+			}
 			MidiRingBufferBase<Byte>::write(size, tmp_buf);
 		} else {
 			MidiRingBufferBase<Byte>::write(size, buf);

@@ -729,9 +729,10 @@ MidiTrack::MidiControl::set_value(float val)
 {
 	assert(val >= _list->parameter().min());
 	assert(val <= _list->parameter().max());
+	size_t size = 3;
 
 	if ( ! _list->automation_playback()) {
-		Byte ev[3] = { _list->parameter().channel(), (int)val, 0.0 };
+		Byte ev[3] = { _list->parameter().channel(), int(val), 0.0 };
 		switch(_list->parameter().type()) {
 		case MidiCCAutomation:
 			ev[0] += MIDI_CMD_CONTROL;
@@ -740,11 +741,15 @@ MidiTrack::MidiControl::set_value(float val)
 			break;
 			
 		case MidiPgmChangeAutomation:
+			size = 2;
 			ev[0] += MIDI_CMD_PGM_CHANGE;
+			ev[1] = int(val);
 			break;
 			
 		case MidiChannelAftertouchAutomation:
+			size = 2;
 			ev[0] += MIDI_CMD_CHANNEL_PRESSURE;
+			ev[1] = int(val);
 			break;
 			
 		case MidiPitchBenderAutomation:
@@ -756,7 +761,7 @@ MidiTrack::MidiControl::set_value(float val)
 		default:
 			assert(false);
 		}
-		_route->write_immediate_event(3,  ev);
+		_route->write_immediate_event(size,  ev);
 	}
 
 	AutomationControl::set_value(val);
