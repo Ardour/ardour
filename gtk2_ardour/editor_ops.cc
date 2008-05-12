@@ -2603,6 +2603,11 @@ Editor::build_interthread_progress_window ()
 
 	interthread_progress_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 	
+	interthread_progress_window->set_border_width (12);
+	interthread_progress_window->get_vbox()->set_spacing (6);
+
+	interthread_progress_label.set_alignment (0.5, 0.5);
+
 	interthread_progress_window->get_vbox()->pack_start (interthread_progress_label, false, false);
 	interthread_progress_window->get_vbox()->pack_start (interthread_progress_bar,false, false);
 

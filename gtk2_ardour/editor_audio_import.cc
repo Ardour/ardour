@@ -885,7 +885,7 @@ Editor::import_progress_timeout (void *arg)
 		interthread_progress_window->show_all ();
 		reset = true;
 	}
-
+	
 	interthread_progress_label.set_text (import_status.doing_what);
 
 	if (import_status.freeze) {

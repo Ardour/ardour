@@ -209,6 +209,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 
+	static const int window_border_width;
+	static const int container_border_width;
+	static const int vertical_spacing;
+	static const int horizontal_spacing;
+	
 	static PublicEditor* _instance;
 
 	friend class PluginUIWindow;

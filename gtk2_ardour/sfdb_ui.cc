@@ -429,16 +429,17 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		notebook.append_page (chooser, _("Browse Files"));
 	}
 	
+	hpacker.set_spacing (6);
+	hpacker.pack_start (notebook, true, true);
+	hpacker.pack_start (preview, false, false);
+	
+	get_vbox()->pack_start (hpacker, true, true);
+
 	//add tag search
 	{
 		VBox* vbox;
 		HBox* hbox;
 
-		hpacker.set_spacing (6);
-		hpacker.pack_start (notebook, true, true);
-		hpacker.pack_start (preview, false, false);
-
-		get_vbox()->pack_start (hpacker, true, true);
 
 		hbox = manage(new HBox);
 		hbox->pack_start (found_entry);
@@ -470,12 +471,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		VBox* vbox;
 		HBox* passbox;
 		Label* label;
-
-		hpacker.set_spacing (6);
-		hpacker.pack_start (notebook, true, true);
-		hpacker.pack_start (preview, false, false);
-
-		get_vbox()->pack_start (hpacker, true, true);
 
 		passbox = manage(new HBox);
 		passbox->set_border_width (12);
