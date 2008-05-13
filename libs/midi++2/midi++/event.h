@@ -155,8 +155,14 @@ struct Event {
 	}
 
 	inline void realloc(size_t size) {
-		assert(_owns_buffer);
-		_buffer = (uint8_t*) ::realloc(_buffer, size);
+		if (_owns_buffer) {
+			_buffer = (uint8_t*) ::realloc(_buffer, size);
+		} else {
+			_buffer = (uint8_t*) ::malloc(size);
+			_owns_buffer = true;
+		}
+
+		_size = size;
 	}
 
 #else

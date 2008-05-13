@@ -255,8 +255,6 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	if (_locked && _model != other._model)
 		_model->read_unlock();
 
-	assert( ! other._event.owns_buffer());
-
 	_model = other._model;
 	_event = other._event;
 	_active_notes = other._active_notes;
@@ -266,8 +264,6 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	_control_iters = other._control_iters;
 	size_t index = other._control_iter - other._control_iters.begin();
 	_control_iter = _control_iters.begin() + index;
-
-	assert( !_event.owns_buffer() );
 
 	return *this;
 }
@@ -329,6 +325,9 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 	return read_events;
 }
 
+/** Write the controller event pointed to by \a iter to \a ev.
+ * Ev will have a newly allocated buffer containing the event.
+ */
 bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 		const MidiControlIterator& iter) const
 {
@@ -336,66 +335,54 @@ bool MidiModel::control_to_midi_event(MIDI::Event& ev,
 	
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:
-		if (ev.size() < 3) {
-			ev.set_buffer((Byte*)malloc(3), true);
-		}
-
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
+		
+		ev.realloc(3);
 		ev.buffer()[0] = MIDI_CMD_CONTROL + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.automation_list->parameter().id();
 		ev.buffer()[2] = (Byte)iter.y;
 		ev.time() = iter.x;
-		ev.size() = 3;
 		return true;
 
 	case MidiPgmChangeAutomation:
-		if (ev.size() < 2) {
-			ev.set_buffer((Byte*)malloc(2), true);
-		}
-
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
+		
+		ev.realloc(2);
 		ev.buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.y;
 		ev.time() = iter.x;
-		ev.size() = 2;
 		return true;
 
 	case MidiPitchBenderAutomation:
-		if (ev.size() < 3) {
-			ev.set_buffer((Byte*)malloc(3), true);
-		}
-
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y < (1<<14));
+		
+		ev.realloc(3);
 		ev.buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = ((Byte)iter.y) & 0x7F; // LSB
 		ev.buffer()[2] = (((Byte)iter.y) >> 7) & 0x7F; // MSB
 		ev.time() = iter.x;
-		ev.size() = 3;
 		return true;
 
 	case MidiChannelAftertouchAutomation:
-		if (ev.size() < 2) {
-			ev.set_buffer((Byte*)malloc(2), true);
-		}
-
 		assert(iter.automation_list);
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
+
+		ev.realloc(2);
 		ev.buffer()[0]
 				= MIDI_CMD_CHANNEL_PRESSURE + iter.automation_list->parameter().channel();
 		ev.buffer()[1] = (Byte)iter.y;
 		ev.time() = iter.x;
-		ev.size() = 2;
 		return true;
 
 	default:
