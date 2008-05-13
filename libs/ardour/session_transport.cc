@@ -1258,7 +1258,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 
 	_worst_track_latency = 0;
 
-#define DEBUG_LATENCY
+#undef DEBUG_LATENCY
 #ifdef DEBUG_LATENCY
 	cerr << "\n---------------------------------\nUPDATE LATENCY\n";
 #endif

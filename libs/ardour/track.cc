@@ -102,7 +102,7 @@ Track::update_total_latency ()
 		}
 	}
 
-#define DEBUG_LATENCY
+#undef DEBUG_LATENCY
 #ifdef DEBUG_LATENCY
 	cerr << _name << ": internal redirect (final) latency = " << _own_latency << endl;
 #endif

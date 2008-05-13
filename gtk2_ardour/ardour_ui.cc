@@ -813,6 +813,8 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 int
 ARDOUR_UI::every_second ()
 {
+	return TRUE;
+
 	update_cpu_load ();
 	update_buffer_load ();
 	update_disk_space ();
