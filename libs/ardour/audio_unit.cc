@@ -395,6 +395,23 @@ AUPlugin::_set_block_size (nframes_t nframes)
 int32_t 
 AUPlugin::can_support_input_configuration (int32_t in)
 {	
+#ifdef NEWSTUFF
+	CAChannelHelper ch_in;
+	CAChannelHelper ch_out;
+
+	ch_in.nNumEls = input_elements;
+
+	for (uint32_t n = 0; n < input_elements; ++n) {
+		ch_in.mChans[n] = in;
+	}
+
+	/* don't check output */
+
+	ch_out.nNumEls = 0;
+
+	return unit->CanDo (ch_in, ch_out);
+	
+#endif
 	streamFormat.mChannelsPerFrame = in;
 	/* apple says that for non-interleaved data, these
 	   values always refer to a single channel.
@@ -834,16 +851,95 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		info->type = ARDOUR::AudioUnit;
 		info->unique_id = stringify_descriptor (*info->descriptor);
-
-		/* mark the plugin as having flexible i/o */
 		
-		info->n_inputs = -1;
-		info->n_outputs = -1;
+		AUPluginCachedInfo cinfo;
+
+		if (cached_io_configuration (info->unique_id(), *info->descriptor, cinfo)) {
+
+			info->n_inputs = cinfo->in;
+			info->n_outputs = cinfo->out;
+
+		} else {
+			
+			/* mark the plugin as having flexible i/o */
+			
+			info->n_inputs = -1;
+			info->n_outputs = -1;
+		}
 
 		plugs.push_back (info);
 		
 		comp = FindNextComponent (comp, &desc);
 	}
+}
+
+bool
+AUPluginInfo::cached_io_configuration (std::string unique_id, CAComponentDescriptor& descriptor, AUPluginCachedInfo& cinfo)
+{
+	CachedInfoMap::iterator cim = cached_info.find (unique_id);
+
+	if (cim != cached_info.end()) {
+		cinfo = *cim;
+		return true;
+	}
+
+	CAComponent comp (descriptor);	
+	CAAudioUnit unit (comp);
+	AUChannelInfo* channel_info;
+	uint32_t cnt;
+	int ret;
+
+
+	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
+		return false;
+	}
+
+	if (ret > 0) {
+		/* no explicit info available */
+
+		cinfo.io_configs.push_back (pair<int,int> (-1, -1));
+
+	} else {
+		
+		/* store each configuration */
+		
+		for (uint32_t n = 0; n < cnt; ++n) {
+			cinfo.io_configs.push_back (pair<int,int> (channel_info[n].inChannels,
+								   channel_info[n].outChannels));
+		}
+
+		free (channel_info);
+	}
+
+
+	add_cached_info (unique_id, cinfo);
+	save_cached_info ();
+
+	return true;
+}
+
+void
+AUPluginInfo::add_cached_info (std::string id, AUPluginCachedInfo& cinfo)
+{
+	cached_info[id] = cinfo;
+}
+
+void
+AUPluginInfo::save_cached_info ()
+{
+	for (map<string,AUPluginCachedInfo>::iterator i = cached_info.begin(); i != cached_info.end(); ++i) {
+		cerr << i->first << ' ';
+		for (vector<pair<int, int> >::iterator j = i->second.io_configs.begin(); j != i->second.io_configs.end(); ++j) {
+			cerr << j->first << ' ' << j->second;
+		}
+		cerr << endl;
+	}
+}
+
+void
+AUPluginInfo::load_cached_info ()
+{
+
 }
 
 void

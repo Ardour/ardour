@@ -145,6 +145,10 @@ class AUPlugin : public ARDOUR::Plugin
 	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
 
+struct AUPluginCachedInfo { 
+	std::vector<std::pair<int,int> > io_configs;
+};
+
 class AUPluginInfo : public PluginInfo {
   public:	
 	 AUPluginInfo (boost::shared_ptr<CAComponentDescription>);
@@ -162,6 +166,13 @@ class AUPluginInfo : public PluginInfo {
 	static void discover_music (PluginInfoList&);
 	static void discover_fx (PluginInfoList&);
 	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
+
+	static std::map<std::string,AUPluginCachedInfo> cached_info;
+
+	static bool cached_io_configuration (std::string, CAComponentDescription&, AUPluginCachedInfo&);
+	static void add_cached_info (AUPluginCachedInfo&);
+	static void save_cached_info ();
+	static int load_cached_info ();
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
