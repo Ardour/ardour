@@ -81,6 +81,8 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	MidiControlIterator earliest_control(boost::shared_ptr<AutomationList>(), DBL_MAX, 0.0);
 
 	_control_iters.reserve(model.controls().size());
+	
+	// this loop finds the earliest control event available
 	for (Automatable::Controls::const_iterator i = model.controls().begin();
 			i != model.controls().end(); ++i) {
 
@@ -107,37 +109,53 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 		//cerr << "MIDI Iterator: CC " << i->first.id() << " added (" << x << ", " << y << ")" << endl;
 		_control_iters.push_back(new_iter);
 
+		// if the x of the current control is less than earliest_control
+		// we have a new earliest_control
 		if (x < earliest_control.x) {
 			earliest_control = new_iter;
 			_control_iter = _control_iters.end();
 			--_control_iter;
+			// now _control_iter points to the last Element in _control_iters
 		}
 	}
 
 	if (_note_iter != model.notes().end()) {
-		_event = MIDI::Event((*_note_iter)->on_event(), false);
-		_active_notes.push(*_note_iter);
-		//cerr << " new const iterator: size active notes: " << _active_notes.size() << " is empty: " << _active_notes.empty() << endl;
-		++_note_iter;
+		MIDI::Event *new_event = new MIDI::Event((*_note_iter)->on_event(), true);
+		assert(new_event);
+		_event = boost::shared_ptr<MIDI::Event>(new_event);
 	}
 
-	if (earliest_control.automation_list.get() && earliest_control.x < _event.time()) {
-		model.control_to_midi_event(_event, earliest_control);
+	double time = DBL_MAX;
+	// in case we have no notes in the region, we still want to get controller messages
+	if(_event.get()) {
+		time = _event->time();
+		// if the note is going to make it this turn, advance _note_iter
+		if (earliest_control.x > time) {
+			_active_notes.push(*_note_iter);
+			++_note_iter;
+		}
+	}
+	
+	// <=, because we probably would want to send control events first 
+	if (earliest_control.automation_list.get() && earliest_control.x <= time) {
+		_event = model.control_to_midi_event(earliest_control);
 	} else {
 		_control_iter = _control_iters.end();
 	}
 
-	if (_event.size() == 0) {
+	if ( (! _event.get()) || _event->size() == 0) {
 		//cerr << "Created MIDI iterator @ " << t << " is at end." << endl;
 		_is_end = true;
 
-		// FIXME: possible race condition here....
+		// eliminate possible race condition here (ugly)
+		static Glib::Mutex mutex;
+		Glib::Mutex::Lock lock(mutex);
 		if (_locked) {
 			_model->read_unlock();
 			_locked = false;
 		}
 	} else {
-		//printf("New MIDI Iterator = %X @ %lf\n", _event.type(), _event.time());
+		//printf("New MIDI Iterator = %X @ %lf\n", _event->type(), _event->time());
 	}
 }
 
@@ -154,17 +172,17 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 		throw std::logic_error("Attempt to iterate past end of MidiModel");
 	}
 
-	/*cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event.type()) 
-	 << "   buffer: 0x" << int(_event.buffer()[0]) << " 0x" << int(_event.buffer()[1]) 
-	 << " 0x" << int(_event.buffer()[2]) << endl;*/
+	/*cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event->type()) 
+	 << "   buffer: 0x" << int(_event->buffer()[0]) << " 0x" << int(_event->buffer()[1]) 
+	 << " 0x" << int(_event->buffer()[2]) << endl;*/
 
-	if (! (_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()) ) {
-		cerr << "FAILED event buffer: " << hex << int(_event.buffer()[0]) << int(_event.buffer()[1]) << int(_event.buffer()[2]) << endl;
+	if (! (_event->is_note() || _event->is_cc() || _event->is_pgm_change() || _event->is_pitch_bender() || _event->is_channel_aftertouch()) ) {
+		cerr << "FAILED event buffer: " << hex << int(_event->buffer()[0]) << int(_event->buffer()[1]) << int(_event->buffer()[2]) << endl;
 	}
-	assert((_event.is_note() || _event.is_cc() || _event.is_pgm_change() || _event.is_pitch_bender() || _event.is_channel_aftertouch()));
+	assert((_event->is_note() || _event->is_cc() || _event->is_pgm_change() || _event->is_pitch_bender() || _event->is_channel_aftertouch()));
 
 	// Increment past current control event
-	if (!_event.is_note() && _control_iter != _control_iters.end() && _control_iter->automation_list.get()) {
+	if (!_event->is_note() && _control_iter != _control_iters.end() && _control_iter->automation_list.get()) {
 		double x = 0.0, y = 0.0;
 		const bool ret = _control_iter->automation_list->rt_safe_earliest_event_unlocked(
 				_control_iter->x, DBL_MAX, x, y, false);
@@ -181,11 +199,10 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 		}
 	}
 
-	// Now find and point at the earliest event
-
 	const std::vector<MidiControlIterator>::iterator old_control_iter = _control_iter;
 	_control_iter = _control_iters.begin();
 
+	// find the _control_iter with the earliest event time
 	for (std::vector<MidiControlIterator>::iterator i = _control_iters.begin();
 			i != _control_iters.end(); ++i) {
 		if (i->x < _control_iter->x) {
@@ -213,30 +230,34 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	}
 
 	// Use the next earliest controller iff it's earlier than the note event
-	if (_control_iter != _control_iters.end()
-			&& _control_iter->x != DBL_MAX
-	   )//&& _control_iter != old_control_iter)
-		if (type == NIL || _control_iter->x < t)
+	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX /*&& _control_iter != old_control_iter */) {
+		if (type == NIL || _control_iter->x < t) {
 			type = AUTOMATION;
+		}
+	}
 
 	if (type == NOTE_ON) {
 		//cerr << "********** MIDI Iterator = note on" << endl;
-		_event = MIDI::Event((*_note_iter)->on_event(), false);
+		MIDI::Event *new_event = new MIDI::Event((*_note_iter)->on_event(), true);
+		assert(new_event);
+		_event = boost::shared_ptr<MIDI::Event>(new_event);
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
 		//cerr << "********** MIDI Iterator = note off" << endl;
-		_event = MIDI::Event(_active_notes.top()->off_event(), false);
+		MIDI::Event *new_event = new MIDI::Event(_active_notes.top()->off_event(), true);
+		assert(new_event);
+		_event = boost::shared_ptr<MIDI::Event>(new_event);
 		_active_notes.pop();
 	} else if (type == AUTOMATION) {
 		//cerr << "********** MIDI Iterator = Automation" << endl;
-		_model->control_to_midi_event(_event, *_control_iter);
+		_event = _model->control_to_midi_event(*_control_iter);
 	} else {
 		//cerr << "********** MIDI Iterator = End" << endl;
 		_is_end = true;
 	}
 
-	assert(_is_end || _event.size()> 0);
+	assert(_is_end || _event->size() > 0);
 
 	return *this;
 }
@@ -252,18 +273,19 @@ bool MidiModel::const_iterator::operator==(const const_iterator& other) const
 
 MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iterator& other)
 {
-	if (_locked && _model != other._model)
+	if (_locked && _model != other._model) {
 		_model->read_unlock();
+	}
 
-	_model = other._model;
-	_event = other._event;
-	_active_notes = other._active_notes;
-	_is_end = other._is_end;
-	_locked = other._locked;
-	_note_iter = other._note_iter;
+	_model         = other._model;
+	_event         = other._event;
+	_active_notes  = other._active_notes;
+	_is_end        = other._is_end;
+	_locked        = other._locked;
+	_note_iter     = other._note_iter;
 	_control_iters = other._control_iters;
-	size_t index = other._control_iter - other._control_iters.begin();
-	_control_iter = _control_iters.begin() + index;
+	size_t index   = other._control_iter - other._control_iters.begin();
+	_control_iter  = _control_iters.begin() + index;
 
 	return *this;
 }
@@ -307,17 +329,18 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 	_next_read = start + nframes;
 
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
-		assert(_read_iter->size()> 0);
+		assert(_read_iter->size() > 0);
 		assert(_read_iter->buffer());
 		dst.write(_read_iter->time() + stamp_offset - negative_stamp_offset,
-				_read_iter->size(), _read_iter->buffer());
-
+		          _read_iter->size(), 
+		          _read_iter->buffer());
+		
 		 //cerr << this << " MidiModel::read event @ " << _read_iter->time()  
 		 //<< " type: " << hex << int(_read_iter->type()) << dec 
 		 //<< " note: " << int(_read_iter->note()) 
 		 //<< " velocity: " << int(_read_iter->velocity()) 
 		 //<< endl;
-		 
+		
 		++_read_iter;
 		++read_events;
 	}
@@ -328,66 +351,67 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 /** Write the controller event pointed to by \a iter to \a ev.
  * Ev will have a newly allocated buffer containing the event.
  */
-bool MidiModel::control_to_midi_event(MIDI::Event& ev,
-		const MidiControlIterator& iter) const
+boost::shared_ptr<MIDI::Event> 
+MidiModel::control_to_midi_event(const MidiControlIterator& iter) const
 {
-	assert(iter.automation_list.get() != 0);
+	assert(iter.automation_list.get());
+	
+	boost::shared_ptr<MIDI::Event> ev;
 	
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:
-		assert(iter.automation_list);
+		assert(iter.automation_list.get());
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
 		
-		ev.realloc(3);
-		ev.buffer()[0] = MIDI_CMD_CONTROL + iter.automation_list->parameter().channel();
-		ev.buffer()[1] = (Byte)iter.automation_list->parameter().id();
-		ev.buffer()[2] = (Byte)iter.y;
-		ev.time() = iter.x;
-		return true;
+		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 3, (uint8_t *)malloc(3), true));
+		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.automation_list->parameter().channel();
+		ev->buffer()[1] = (Byte)iter.automation_list->parameter().id();
+		ev->buffer()[2] = (Byte)iter.y;
+		break;
 
 	case MidiPgmChangeAutomation:
-		assert(iter.automation_list);
+		assert(iter.automation_list.get());
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
 		
-		ev.realloc(2);
-		ev.buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
-		ev.buffer()[1] = (Byte)iter.y;
-		ev.time() = iter.x;
-		return true;
+		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 2, (uint8_t *)malloc(2), true));
+		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
+		ev->buffer()[1] = (Byte)iter.y;
+		break;
 
 	case MidiPitchBenderAutomation:
-		assert(iter.automation_list);
+		assert(iter.automation_list.get());
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y < (1<<14));
 		
-		ev.realloc(3);
-		ev.buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
-		ev.buffer()[1] = ((Byte)iter.y) & 0x7F; // LSB
-		ev.buffer()[2] = (((Byte)iter.y) >> 7) & 0x7F; // MSB
-		ev.time() = iter.x;
-		return true;
+		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 3, (uint8_t *)malloc(3), true));
+		ev->buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
+		ev->buffer()[1] = ((Byte)iter.y) & 0x7F; // LSB
+		ev->buffer()[2] = (((Byte)iter.y) >> 7) & 0x7F; // MSB
+		break;
 
 	case MidiChannelAftertouchAutomation:
-		assert(iter.automation_list);
+		assert(iter.automation_list.get());
 		assert(iter.automation_list->parameter().channel() < 16);
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
 
-		ev.realloc(2);
-		ev.buffer()[0]
+		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 2, (uint8_t *)malloc(2), true));
+		ev->buffer()[0]
 				= MIDI_CMD_CHANNEL_PRESSURE + iter.automation_list->parameter().channel();
-		ev.buffer()[1] = (Byte)iter.y;
-		ev.time() = iter.x;
-		return true;
+		ev->buffer()[1] = (Byte)iter.y;
+		break;
 
 	default:
-		return false;
+		break;
 	}
+	
+	assert(ev.get());
+	return ev;
 }
 
 
@@ -714,10 +738,16 @@ void MidiModel::DeltaCommand::operator()()
 
 	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
 	const bool reset_iter = (_model->_read_iter.locked());
-	const double iter_time = _model->_read_iter->time();
+	double iter_time = -1.0;
 
-	if (reset_iter)
+	if (reset_iter) {
+		if (_model->_read_iter.get_event_pointer().get()) {
+			iter_time = _model->_read_iter->time();
+		} else {
+			cerr << "MidiModel::DeltaCommand::operator(): WARNING: _read_iter points to no event" << endl;
+		}
 		_model->_read_iter = _model->end(); // drop read lock
+	}
 
 	assert( ! _model->_read_iter.locked());
 
@@ -731,8 +761,9 @@ void MidiModel::DeltaCommand::operator()()
 
 	_model->write_unlock();
 
-	if (reset_iter)
-	_model->_read_iter = const_iterator(*_model.get(), iter_time);
+	if (reset_iter && iter_time != -1.0) {
+		_model->_read_iter = const_iterator(*_model.get(), iter_time);
+	}
 
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -744,10 +775,16 @@ void MidiModel::DeltaCommand::undo()
 
 	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
 	const bool reset_iter = (_model->_read_iter.locked());
-	const double iter_time = _model->_read_iter->time();
+	double iter_time = -1.0;
 
-	if (reset_iter)
+	if (reset_iter) {
+		if (_model->_read_iter.get_event_pointer().get()) {
+			iter_time = _model->_read_iter->time();
+		} else {
+			cerr << "MidiModel::DeltaCommand::undo(): WARNING: _read_iter points to no event" << endl;
+		}
 		_model->_read_iter = _model->end(); // drop read lock
+	}
 
 	assert( ! _model->_read_iter.locked());
 
@@ -763,8 +800,9 @@ void MidiModel::DeltaCommand::undo()
 
 	_model->write_unlock();
 
-	if (reset_iter)
+	if (reset_iter && iter_time != -1.0) {
 		_model->_read_iter = const_iterator(*_model.get(), iter_time);
+	}
 
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }

@@ -481,10 +481,8 @@ MidiRegionView::redisplay_model()
 				
 				for (AutomationList::const_iterator event = control->second->list()->begin();
 				event != control->second->list()->end(); ++event) {
-					boost::shared_ptr<MIDI::Event> midi_event(new MIDI::Event());
 					MidiControlIterator iter(control->second->list(), (*event)->when, (*event)->value);
-					_model->control_to_midi_event(*midi_event, iter);
-					add_pgm_change(midi_event);
+					add_pgm_change(_model->control_to_midi_event(iter));
 				}
 				break;
 			}
@@ -767,9 +765,12 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 		if (note->duration() == 0) {
-			assert(_active_notes);
-			assert(note->note() < 128);
-			_active_notes[note->note()] = ev_rect;
+			cerr << "MidiModel: WARNING: Discovered note with duration 0 and pitch" << note->note() 
+			     << " at time " << note->time() << endl;
+			if (_active_notes) {
+				assert(note->note() < 128);
+				_active_notes[note->note()] = ev_rect;
+			}
 			/* outline all but right edge */
 			ev_rect->property_outline_what() = (guint32) (0x1 & 0x4 & 0x8);
 		} else {

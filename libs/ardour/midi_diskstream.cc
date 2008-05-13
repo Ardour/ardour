@@ -1318,8 +1318,9 @@ MidiDiskstream::set_state (const XMLNode& node)
 	unsigned int channel_mask = 0xFFFF;
 	if ((prop = node.property ("channel-mask")) != 0) {
 		sscanf (prop->value().c_str(), "0x%x", &channel_mask);
-		if (channel_mask & 0xFFFF)
+		if (channel_mask & (~0xFFFF)) {
 			warning << _("MidiDiskstream: XML property channel-mask out of range") << endmsg;
+		}
 	}
 
 	set_channel_mode(channel_mode, channel_mask);

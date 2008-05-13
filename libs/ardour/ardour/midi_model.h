@@ -165,8 +165,9 @@ public:
 
 		inline bool locked() const { return _locked; }
 
-		const MIDI::Event& operator*()  const { return _event; }
-		const MIDI::Event* operator->() const { return &_event; }
+		const MIDI::Event& operator*()  const { return *_event;  }
+		const boost::shared_ptr<MIDI::Event> operator->() const  { return _event; }
+		const boost::shared_ptr<MIDI::Event> get_event_pointer() { return _event; }
 
 		const const_iterator& operator++(); // prefix only
 		bool operator==(const const_iterator& other) const;
@@ -177,8 +178,8 @@ public:
 	private:
 		friend class MidiModel;
 
-		const MidiModel* _model;
-		MIDI::Event      _event;
+		const MidiModel*               _model;
+		boost::shared_ptr<MIDI::Event> _event;
 
 		typedef std::priority_queue<
 				boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,
@@ -199,7 +200,7 @@ public:
 	
 	const MidiSource* midi_source() const { return _midi_source; }
 	void set_midi_source(MidiSource* source) { _midi_source = source; } 
-	bool control_to_midi_event(MIDI::Event& ev, const MidiControlIterator& iter) const;
+	boost::shared_ptr<MIDI::Event> control_to_midi_event(const MidiControlIterator& iter) const;
 	
 private:
 	friend class DeltaCommand;
