@@ -1784,44 +1784,53 @@ IO::ports_became_legal ()
 
 Connection *
 IO::find_possible_connection(const string &desired_name, const string &default_name, const string &connection_type_name) {
+static const string digits = "0123456789";
 
 	Connection* c = _session.connection_by_name (desired_name);
 
 	if (!c) {
-	int connection_number, i, n, p, mask;
+	int connection_number, mask;
 	string possible_name;
 	bool stereo = false;
+	size_t last_non_digit_pos;
 
 		error << string_compose(_("Unknown connection \"%1\" listed for %2 of %3"), desired_name, connection_type_name, _name)
 		      << endmsg;
 
 		// find numeric suffix of desired name
 		connection_number = 0;
-		p = 1;
-		i = desired_name.length();
-		while (n = desired_name[--i], isdigit(n) && i) {
-			connection_number += (n-'0') * p;
-			p *= 10;
+		
+		last_non_digit_pos = desired_name.find_last_not_of(digits);
+		if (last_non_digit_pos != string::npos) {
+			stringstream s;
+			s << desired_name.substr(last_non_digit_pos);
+			s >> connection_number;
+		    
 		}
-		if (i && n == '+') {
-			// see if it's a stereo connection e.g. "in 3+4"
+	
+		// see if it's a stereo connection e.g. "in 3+4"
+		if (last_non_digit_pos > 1 && desired_name[last_non_digit_pos] == '+') {
 			int left_connection_number = 0;
-			p = 1;
-			info << "assuming port " << desired_name << " is stereo" << endmsg;
-			while (n = desired_name[--i], isdigit(n) && i) {
-				left_connection_number += (n-'0') * p;
-				p *= 10;
-			}
-			if (left_connection_number > 0 && left_connection_number + 1 == connection_number) {
-				connection_number--;
-				stereo = true;
+
+			size_t left_last_non_digit_pos;
+			left_last_non_digit_pos = desired_name.find_last_not_of(digits, last_non_digit_pos-1);
+			if (left_last_non_digit_pos != string::npos) {
+				stringstream s;
+				s << desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
+				s >> left_connection_number;
+
+				if (left_connection_number > 0 && left_connection_number + 1 == connection_number) {
+					connection_number--;
+					stereo = true;
+				}
 			}
 		}
 
 		// make 0-based
-		connection_number--;
-		// cerr << "desired_name = " << desired_name << ", connection_number = " << connection_number << endl;
+		if (connection_number)
+			connection_number--;
 
+		cerr << "desired_name = " << desired_name << ", connection_number = " << connection_number << endl;
 		// find highest set bit
 		mask = 1;
 		while ((mask <= connection_number) && (mask <<= 1)) {
@@ -1855,7 +1864,6 @@ IO::find_possible_connection(const string &desired_name, const string &default_n
 	}
 
 	return c;
-
 
 }
 
