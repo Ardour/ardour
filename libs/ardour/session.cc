@@ -1253,6 +1253,12 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 			set_loop = true;
 		}
 		
+		if (location->is_start()) {
+			start_location = location;
+		}
+		if (location->is_end()) {
+			end_location = location;
+		}
 	}
 
 	if (!set_loop) {

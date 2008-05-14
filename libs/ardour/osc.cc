@@ -28,6 +28,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <glibmm/miscutils.h>
+
 #include <pbd/pthread_utils.h>
 
 #include <ardour/osc.h>
@@ -103,18 +105,17 @@ OSC::start ()
 	
 	cerr << "OSC @ " << get_server_url () << endl;
 
-   _osc_url_file = get_user_ardour_path () + "/osc_url";
-   ofstream urlfile;
-   urlfile.open(_osc_url_file.c_str(),ios::trunc);
-   if ( urlfile )
-   {
-      urlfile << get_server_url () << endl;
-      urlfile.close();
-   }
-   else
-   {  
-      cerr << "Couldn't write '" <<  _osc_url_file << "'" <<endl;
-   }
+	_osc_url_file = Glib::build_filename (get_user_ardour_path (), "osc_url");
+
+	ofstream urlfile;
+	urlfile.open(_osc_url_file.c_str(),ios::trunc);
+
+	if (urlfile) {
+		urlfile << get_server_url () << endl;
+		urlfile.close();
+	} else {  
+		cerr << "Couldn't write '" <<  _osc_url_file << "'" <<endl;
+	}
 	
 	register_callbacks();
 	

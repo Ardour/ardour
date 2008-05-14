@@ -155,11 +155,8 @@ VSTPlugin::get_state()
 
 		/* save it to a file */
 
-		string path;
+		Glib::ustring path = Glib::build_ustring (get_user_ardour_path (), "vst");
 		struct stat sbuf;
-
-		path = get_user_ardour_path ();
-		path += "vst";
 
 		if (stat (path.c_str(), &sbuf)) {
 			if (errno == ENOENT) {
@@ -183,7 +180,7 @@ VSTPlugin::get_state()
 			return *root;
 		}
 		
-		path += "something";
+		path = Glib::build_filename (path, "something");
 		
 		/* store information */
 

@@ -2064,44 +2064,31 @@ Session::sound_dir (bool with_path) const
 string
 Session::peak_dir () const
 {
-	string res = _path;
-	res += peak_dir_name;
-	res += '/';
-	return res;
+	return Glib::build_filename (_path, peak_dir_name);
 }
 	
 string
 Session::automation_dir () const
 {
-	string res = _path;
-	res += "automation/";
-	return res;
+	return Glib::build_filename (_path, "automation");
 }
 
 string
 Session::analysis_dir () const
 {
-	string res = _path;
-	res += "analysis/";
-	return res;
+	return Glib::build_filename (_path, "analysis");
 }
 
 string
 Session::template_dir ()
 {
-	string path = get_user_ardour_path();
-	path += "templates/";
-
-	return path;
+	return Glib::build_filename (get_user_ardour_path(), "templates");
 }
 
 string
 Session::export_dir () const
 {
-	string res = _path;
-	res += export_dir_name;
-	res += '/';
-	return res;
+	return Glib::build_filename (_path, export_dir_name);
 }
 
 string
@@ -2515,8 +2502,7 @@ Session::get_template_list (list<string> &template_names)
 int
 Session::read_favorite_dirs (FavoriteDirs & favs)
 {
-	string path = get_user_ardour_path();
-	path += "/favorite_dirs";
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "favorite_dirs");
 
 	ifstream fav (path.c_str());
 
@@ -2550,8 +2536,7 @@ Session::read_favorite_dirs (FavoriteDirs & favs)
 int
 Session::write_favorite_dirs (FavoriteDirs & favs)
 {
-	string path = get_user_ardour_path();
-	path += "/favorite_dirs";
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "favorite_dirs");
 
 	ofstream fav (path.c_str());
 

@@ -22,7 +22,11 @@
 #include <unistd.h>
 #include <fstream>
 #include <algorithm>
+
+#include <glibmm/miscutils.h>
+
 #include <pbd/error.h>
+
 #include <ardour/configuration.h>
 #include <ardour/recent_sessions.h>
 #include <ardour/utils.h>
@@ -35,8 +39,7 @@ using namespace PBD;
 int
 ARDOUR::read_recent_sessions (RecentSessions& rs)
 {
-	string path = get_user_ardour_path();
-	path += "/recent";
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "recent");
 
 	ifstream recent (path.c_str());
 	
@@ -78,8 +81,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 int
 ARDOUR::write_recent_sessions (RecentSessions& rs)
 {
-	string path = get_user_ardour_path();
-	path += "/recent";
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path(), "recent");
 
 	ofstream recent (path.c_str());
 

@@ -68,7 +68,7 @@ Session::memento_command_factory(XMLNode *n)
 	    before = new XMLNode(*n->children().front());
 	    after = new XMLNode(*n->children().back());
 	    child = before;
-    }
+    } 
 		    
     if (!child)
     {

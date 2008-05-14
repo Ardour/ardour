@@ -22,6 +22,7 @@
 #include <libxml/uri.h>
 
 #include <lrdf.h>
+#include <glibmm/miscutils.h>
 
 #include <pbd/compose.h>
 
@@ -37,11 +38,14 @@ static const char* TAG = "http://ardour.org/ontology/Tag";
 
 AudioLibrary::AudioLibrary ()
 {
-	src = "file:" + get_user_ardour_path() + "sfdb";
+	/* XXX URL - '/' is always the separator */
+
+	src = "file:" + get_user_ardour_path() + "/sfdb";
 
 	// workaround for possible bug in raptor that crashes when saving to a
 	// non-existant file.
-	touch_file(get_user_ardour_path() + "sfdb");
+
+	touch_file(Glib::build_filename (get_user_ardour_path(), "sfdb"));
 
 	lrdf_read_file(src.c_str());
 }

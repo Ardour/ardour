@@ -395,6 +395,7 @@ class IO : public PBD::StatefulDestructible
 
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
+	Connection *find_possible_connection(const string &desired_name, const string &default_name, const string &connection_type_name);
 
 	void setup_peak_meters ();
 	void meter ();

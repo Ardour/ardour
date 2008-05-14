@@ -30,6 +30,8 @@
 #include <string.h>
 #endif // VST_SUPPORT
 
+#include <glibmm/miscutils.h>
+
 #include <pbd/pathscanner.h>
 
 #include <ardour/ladspa.h>
@@ -500,10 +502,7 @@ PluginManager::is_a_favorite_plugin (const PluginInfoPtr& pi)
 void
 PluginManager::save_favorites ()
 {
-	Glib::ustring path = get_user_ardour_path ();
-	path += '/';
-	path += "favorite_plugins";
-
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "favorite_plugins");
 	ofstream ofs;
 
 	ofs.open (path.c_str(), ios_base::openmode (ios::out|ios::trunc));
@@ -537,9 +536,7 @@ PluginManager::save_favorites ()
 void
 PluginManager::load_favorites ()
 {
-	Glib::ustring path = get_user_ardour_path ();
-	path += '/';
-	path += "favorite_plugins";
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path (),"favorite_plugins");
 
 	ifstream ifs (path.c_str());
 

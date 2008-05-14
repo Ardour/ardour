@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <cstdio> /* for snprintf, grrr */
 
+#include <glibmm/miscutils.h>
+
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 #include <pbd/error.h>
@@ -125,8 +127,7 @@ UIConfiguration::save_state()
 	XMLTree tree;
 	string rcfile;
 
-	rcfile = get_user_ardour_path ();
-	rcfile += "ardour2_ui.conf";
+	rcfile = Glib::build_filename (get_user_ardour_path (), "ardour2_ui.conf");
 
 	if (rcfile.length()) {
 		tree.set_root (&get_state());

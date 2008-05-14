@@ -493,11 +493,12 @@ find_file (string name, string dir, string subdir = "")
 	path = get_user_ardour_path();
 		
 	if (subdir.length()) {
-		path += subdir + "/";
+		path = Glib::build_filename (path, subdir);
 	}
 		
-	path += name;
-	if (access (path.c_str(), R_OK) == 0) {
+	path = Glib::build_filename (path, name);
+
+	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS)) {
 		return path;
 	}
 
@@ -543,6 +544,8 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 	vector<string*> *found;
 	string full_path;
 	
+	/* XXX building path, so separators are fixed */
+
 	full_path = get_user_ardour_path ();
 	full_path += ':';
 	full_path = get_system_data_path ();

@@ -1782,6 +1782,83 @@ IO::ports_became_legal ()
 	return ret;
 }
 
+Connection *
+IO::find_possible_connection(const string &desired_name, const string &default_name, const string &connection_type_name) {
+
+	Connection* c = _session.connection_by_name (desired_name);
+
+	if (!c) {
+	int connection_number, i, n, p, mask;
+	string possible_name;
+	bool stereo = false;
+
+		error << string_compose(_("Unknown connection \"%1\" listed for %2 of %3"), desired_name, connection_type_name, _name)
+		      << endmsg;
+
+		// find numeric suffix of desired name
+		connection_number = 0;
+		p = 1;
+		i = desired_name.length();
+		while (n = desired_name[--i], isdigit(n) && i) {
+			connection_number += (n-'0') * p;
+			p *= 10;
+		}
+		if (i && n == '+') {
+			// see if it's a stereo connection e.g. "in 3+4"
+			int left_connection_number = 0;
+			p = 1;
+			info << "assuming port " << desired_name << " is stereo" << endmsg;
+			while (n = desired_name[--i], isdigit(n) && i) {
+				left_connection_number += (n-'0') * p;
+				p *= 10;
+			}
+			if (left_connection_number > 0 && left_connection_number + 1 == connection_number) {
+				connection_number--;
+				stereo = true;
+			}
+		}
+
+		// make 0-based
+		connection_number--;
+		// cerr << "desired_name = " << desired_name << ", connection_number = " << connection_number << endl;
+
+		// find highest set bit
+		mask = 1;
+		while ((mask <= connection_number) && (mask <<= 1)) {
+		}
+		
+		// "wrap" connection number into largest possible power of 2 
+		// that works...
+		while (mask && !c) {
+			if (connection_number & mask) {
+				connection_number &= ~mask;
+				
+				stringstream s;
+				s << default_name << " " << connection_number + 1;
+				if (stereo) {
+					s << "+" << connection_number + 2;
+				}
+				
+				possible_name = s.str();
+				c = _session.connection_by_name (possible_name);
+			}
+			mask >>= 1;
+		}
+		if (c) {
+			info << string_compose (_("Connection %1 was not available - \"%2\" used instead"), desired_name, possible_name)
+			     << endmsg;
+		} else {
+			error << string_compose(_("No %1 connections available as a replacement"), connection_type_name)
+			      << endmsg;
+		}
+
+	}
+
+	return c;
+
+
+}
+
 int
 IO::create_ports (const XMLNode& node)
 {
@@ -1791,19 +1868,10 @@ IO::create_ports (const XMLNode& node)
 
 	if ((prop = node.property ("input-connection")) != 0) {
 
-		Connection* c = _session.connection_by_name (prop->value());
+		Connection* c = find_possible_connection(prop->value(), _("in"), _("input"));
 		
 		if (c == 0) {
-			error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
-
-			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
-				error << _("No input connections available as a replacement")
-				      << endmsg;
-				return -1;
-			}  else {
-				info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
-				     << endmsg;
-			}
+			return -1;
 		} 
 
 		num_inputs = c->nports();
@@ -1814,19 +1882,10 @@ IO::create_ports (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("output-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
+		Connection* c = find_possible_connection(prop->value(), _("out"), _("output"));
 
 		if (c == 0) {
-			error << string_compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
-
-			if ((c = _session.connection_by_name (_("out 1"))) == 0) {
-				error << _("No output connections available as a replacement")
-				      << endmsg;
-				return -1;
-			}  else {
-				info << string_compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
-				     << endmsg;
-			}
+			return -1;
 		} 
 
 		num_outputs = c->nports ();
@@ -1857,19 +1916,10 @@ IO::make_connections (const XMLNode& node)
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("input-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
+		Connection* c = find_possible_connection (prop->value(), _("in"), _("input"));
 		
 		if (c == 0) {
-			error << string_compose(_("Unknown connection \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
-
-			if ((c = _session.connection_by_name (_("in 1"))) == 0) {
-				error << _("No input connections available as a replacement")
-				      << endmsg;
-				return -1;
-			} else {
-				info << string_compose (_("Connection %1 was not available - \"in 1\" used instead"), prop->value())
-				     << endmsg;
-			}
+			return -1;
 		} 
 
 		use_input_connection (*c, this);
@@ -1882,19 +1932,10 @@ IO::make_connections (const XMLNode& node)
 	}
 	
 	if ((prop = node.property ("output-connection")) != 0) {
-		Connection* c = _session.connection_by_name (prop->value());
+		Connection* c = find_possible_connection (prop->value(), _("out"), _("output"));
 		
 		if (c == 0) {
-			error << string_compose(_("Unknown connection \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
-
-			if ((c = _session.connection_by_name (_("out 1"))) == 0) {
-				error << _("No output connections available as a replacement")
-				      << endmsg;
-				return -1;
-			}  else {
-				info << string_compose (_("Connection %1 was not available - \"out 1\" used instead"), prop->value())
-				     << endmsg;
-			}
+			return -1;
 		} 
 
 		use_output_connection (*c, this);
