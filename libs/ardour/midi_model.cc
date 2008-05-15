@@ -59,7 +59,6 @@ void MidiModel::read_unlock() const {
 
 MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	: _model(&model)
-	, _event(new MIDI::Event(0.0, 4, NULL, true))
 	, _is_end( (t == DBL_MAX) || model.empty())
 	, _locked( !_is_end)
 {
@@ -83,7 +82,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 
 	_control_iters.reserve(model.controls().size());
 	
-	// this loop finds the earliest control event available
+	// find the earliest control event available
 	for (Automatable::Controls::const_iterator i = model.controls().begin();
 			i != model.controls().end(); ++i) {
 
@@ -121,12 +120,12 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	}
 
 	if (_note_iter != model.notes().end()) {
-		*_event = (*_note_iter)->on_event();
+		_event = boost::shared_ptr<MIDI::Event>(new MIDI::Event((*_note_iter)->on_event(), true));
 	}
 
 	double time = DBL_MAX;
 	// in case we have no notes in the region, we still want to get controller messages
-	if(_event.get()) {
+	if (_event.get()) {
 		time = _event->time();
 		// if the note is going to make it this turn, advance _note_iter
 		if (earliest_control.x > time) {
@@ -156,6 +155,8 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	} else {
 		//printf("New MIDI Iterator = %X @ %lf\n", _event->type(), _event->time());
 	}
+
+	assert(_is_end || (_event->buffer() && _event->buffer()[0] != '\0'));
 }
 
 MidiModel::const_iterator::~const_iterator()
@@ -170,6 +171,8 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	if (_is_end) {
 		throw std::logic_error("Attempt to iterate past end of MidiModel");
 	}
+	
+	assert(_event->buffer() && _event->buffer()[0] != '\0');
 
 	/*cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event->type()) 
 	 << "   buffer: 0x" << int(_event->buffer()[0]) << " 0x" << int(_event->buffer()[1]) 
@@ -236,19 +239,19 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	}
 
 	if (type == NOTE_ON) {
-		//cerr << "********** MIDI Iterator = note on" << endl;
+		cerr << "********** MIDI Iterator = note on" << endl;
 		*_event = (*_note_iter)->on_event();
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
-		//cerr << "********** MIDI Iterator = note off" << endl;
-		*_event = (*_note_iter)->off_event();
+		cerr << "********** MIDI Iterator = note off" << endl;
+		*_event = _active_notes.top()->off_event();
 		_active_notes.pop();
 	} else if (type == AUTOMATION) {
-		//cerr << "********** MIDI Iterator = Automation" << endl;
+		cerr << "********** MIDI Iterator = Automation" << endl;
 		_model->control_to_midi_event(_event, *_control_iter);
 	} else {
-		//cerr << "********** MIDI Iterator = End" << endl;
+		cerr << "********** MIDI Iterator = End" << endl;
 		_is_end = true;
 	}
 
@@ -273,7 +276,6 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	}
 
 	_model         = other._model;
-	_event         = boost::shared_ptr<MIDI::Event>(new MIDI::Event(*other._event, true));
 	_active_notes  = other._active_notes;
 	_is_end        = other._is_end;
 	_locked        = other._locked;
@@ -281,6 +283,9 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	_control_iters = other._control_iters;
 	size_t index   = other._control_iter - other._control_iters.begin();
 	_control_iter  = _control_iters.begin() + index;
+	
+	if (!_is_end)
+		_event =  boost::shared_ptr<MIDI::Event>(new MIDI::Event(*other._event, true));
 
 	return *this;
 }
@@ -351,6 +356,8 @@ bool
 MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event> ev, const MidiControlIterator& iter) const
 {
 	assert(iter.automation_list.get());
+	if (!ev)
+		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(0, 3, NULL, true));
 	
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:
