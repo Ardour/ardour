@@ -3673,6 +3673,19 @@ Editor::cut_copy (CutCopyOp op)
 		opname = _("clear");
 		break;
 	}
+
+	/* if we're deleting something, and the mouse is still pressed,
+	   the thing we started a drag for will be gone when we release
+	   the mouse button(s). avoid this. see part 2 at the end of
+	   this function.
+	*/
+
+	if (op == Cut || op == Clear) {
+		if (drag_info.item) {
+			drag_info.item->ungrab (0);
+			drag_info.item = 0;
+		}
+	}
 	
 	cut_buffer->clear ();
 
@@ -3687,11 +3700,8 @@ Editor::cut_copy (CutCopyOp op)
 			Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
 
-		if (drag_info.item) {
-			drag_info.item->ungrab (0);
-			drag_info.item = 0;
-		}
-		
+		break_drag ();
+
 		return;
 	}
 
@@ -3755,6 +3765,11 @@ Editor::cut_copy (CutCopyOp op)
 		
 	default:
 		break;
+	}
+
+
+	if (op == Cut || op == Clear) {
+		break_drag ();
 	}
 }
 

@@ -476,6 +476,9 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 					 streams));
 	}
 
+	dialog.set_border_width (PublicEditor::window_border_width);
+
+	label.set_alignment (0.5, 0.5);
 	dialog.get_vbox()->pack_start (label);
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 

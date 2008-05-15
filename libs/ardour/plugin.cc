@@ -388,16 +388,19 @@ Plugin::can_do (int32_t in, int32_t& out)
 		   away any existing active streams.
 		*/
 
+		out = outputs;
 		return 1;
 	}
 
 	if (outputs == 1 && inputs == 1) {
 		/* mono plugin, replicate as needed */
+		out = in;
 		return in;
 	}
 
 	if (inputs == in) {
 		/* exact match */
+		out = outputs;
 		return 1;
 	}
 
@@ -407,7 +410,9 @@ Plugin::can_do (int32_t in, int32_t& out)
 		   configuration, so we can replicate.
 		*/
 
-		return in/inputs;
+		int nplugs = in/inputs;
+		out = outputs * nplugs;
+		return nplugs;
 	}
 
 	/* sorry */

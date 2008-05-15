@@ -1138,7 +1138,9 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 	redirect_max_outs = 0;
 
-	/* divide inserts up by placement so we get the signal flow
+	/* Step 1: build a map that links each insert to an in/out channel count 
+
+	   Divide inserts up by placement so we get the signal flow
 	   properly modelled. we need to do this because the _redirects
 	   list is not sorted by placement, and because other reasons may 
 	   exist now or in the future for this separate treatment.
