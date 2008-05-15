@@ -93,9 +93,8 @@ struct Event {
 		_time = copy._time;
 		if (_owns_buffer) {
 			if (copy._buffer) {
-				if (!_buffer || _size < copy._size) {
+				if (copy._size > _size)
 					_buffer = (uint8_t*)::realloc(_buffer, copy._size);
-				}
 				memcpy(_buffer, copy._buffer, copy._size);
 			} else {
 				free(_buffer);
@@ -108,19 +107,31 @@ struct Event {
 		_size = copy._size;
 		return *this;
 	}
-	
-	inline void set (uint8_t* msg, size_t msglen, timestamp_t t) {
+
+	inline void shallow_copy(const Event& copy) {
 		if (_owns_buffer) {
-			if (_size < msglen) {
-				free (_buffer);
-				_buffer = (uint8_t*) malloc (msglen);
+			free(_buffer);
+			_buffer = false;
+			_owns_buffer = false;
+		}
+
+		_time = copy._time;
+		_size = copy._size;
+		_buffer = copy._buffer;
+	}
+	
+	inline void set(uint8_t* buf, size_t size, double t) {
+		if (_owns_buffer) {
+			if (_size < size) {
+				_buffer = (uint8_t*) ::realloc(_buffer, size);
 			}
 		} else {
-			_buffer = (uint8_t*) malloc (msglen);
+			_buffer = (uint8_t*) malloc(size);
 			_owns_buffer = true;
 		}
 
-		memcpy (_buffer, msg, msglen);
+		_size = size;
+		memcpy (_buffer, buf, size);
 		_time = t;
 	}
 
@@ -145,18 +156,20 @@ struct Event {
 
 	inline bool owns_buffer() const { return _owns_buffer; }
 	
-	inline void set_buffer(uint8_t* buf, bool own) {
+	inline void set_buffer(size_t size, uint8_t* buf, bool own) {
 		if (_owns_buffer) {
 			free(_buffer);
 			_buffer = NULL;
 		}
+		_size = size;
 		_buffer = buf;
 		_owns_buffer = own;
 	}
 
 	inline void realloc(size_t size) {
 		if (_owns_buffer) {
-			_buffer = (uint8_t*) ::realloc(_buffer, size);
+			if (size > _size)
+				_buffer = (uint8_t*) ::realloc(_buffer, size);
 		} else {
 			_buffer = (uint8_t*) ::malloc(size);
 			_owns_buffer = true;
@@ -176,7 +189,7 @@ struct Event {
 	inline uint32_t    size()                  const { return _size; }
 	inline uint32_t&   size()                        { return _size; }
 	inline uint8_t     type()                  const { return (_buffer[0] & 0xF0); }
-	inline void        set_type(uint8_t type     )   { _buffer[0] = (0x0F & _buffer[0]) | (0xF0 & type); }
+	inline void        set_type(uint8_t type)        { _buffer[0] = (0x0F & _buffer[0]) | (0xF0 & type); }
 	inline uint8_t     channel()               const { return (_buffer[0] & 0x0F); }
 	inline void        set_channel(uint8_t channel)  { _buffer[0] = (0xF0 & _buffer[0]) | (0x0F & channel); }
 	inline bool        is_note_on()            const { return (type() == MIDI_CMD_NOTE_ON); }

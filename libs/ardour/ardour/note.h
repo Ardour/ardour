@@ -62,7 +62,7 @@ public:
 	inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
 	inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
 	inline void set_duration(double d)  { _off_event.time() = _on_event.time() + d; }
-	inline void set_channel(uint8_t channel)  { _on_event.set_channel(channel);  _off_event.set_channel(channel); }
+	inline void set_channel(uint8_t c)  { _on_event.set_channel(c);  _off_event.set_channel(c); }
 
 	inline MIDI::Event& on_event()  { return _on_event; }
 	inline MIDI::Event& off_event() { return _off_event; }

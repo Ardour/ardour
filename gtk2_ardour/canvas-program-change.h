@@ -33,7 +33,6 @@ private:
 	Text*                             _text;
 	SimpleLine*                       _line;
 	SimpleRect*                       _rect;
-	Widget*                           _widget;
 };
 
 } // namespace Canvas

@@ -59,6 +59,7 @@ void MidiModel::read_unlock() const {
 
 MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	: _model(&model)
+	, _event(new MIDI::Event(0.0, 4, NULL, true))
 	, _is_end( (t == DBL_MAX) || model.empty())
 	, _locked( !_is_end)
 {
@@ -120,9 +121,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	}
 
 	if (_note_iter != model.notes().end()) {
-		MIDI::Event *new_event = new MIDI::Event((*_note_iter)->on_event(), true);
-		assert(new_event);
-		_event = boost::shared_ptr<MIDI::Event>(new_event);
+		*_event = (*_note_iter)->on_event();
 	}
 
 	double time = DBL_MAX;
@@ -138,7 +137,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	
 	// <=, because we probably would want to send control events first 
 	if (earliest_control.automation_list.get() && earliest_control.x <= time) {
-		_event = model.control_to_midi_event(earliest_control);
+		model.control_to_midi_event(_event, earliest_control);
 	} else {
 		_control_iter = _control_iters.end();
 	}
@@ -238,20 +237,16 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 
 	if (type == NOTE_ON) {
 		//cerr << "********** MIDI Iterator = note on" << endl;
-		MIDI::Event *new_event = new MIDI::Event((*_note_iter)->on_event(), true);
-		assert(new_event);
-		_event = boost::shared_ptr<MIDI::Event>(new_event);
+		*_event = (*_note_iter)->on_event();
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
 		//cerr << "********** MIDI Iterator = note off" << endl;
-		MIDI::Event *new_event = new MIDI::Event(_active_notes.top()->off_event(), true);
-		assert(new_event);
-		_event = boost::shared_ptr<MIDI::Event>(new_event);
+		*_event = (*_note_iter)->off_event();
 		_active_notes.pop();
 	} else if (type == AUTOMATION) {
 		//cerr << "********** MIDI Iterator = Automation" << endl;
-		_event = _model->control_to_midi_event(*_control_iter);
+		_model->control_to_midi_event(_event, *_control_iter);
 	} else {
 		//cerr << "********** MIDI Iterator = End" << endl;
 		_is_end = true;
@@ -278,7 +273,7 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	}
 
 	_model         = other._model;
-	_event         = other._event;
+	_event         = boost::shared_ptr<MIDI::Event>(new MIDI::Event(*other._event, true));
 	_active_notes  = other._active_notes;
 	_is_end        = other._is_end;
 	_locked        = other._locked;
@@ -349,14 +344,13 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 }
 
 /** Write the controller event pointed to by \a iter to \a ev.
- * Ev will have a newly allocated buffer containing the event.
+ * The buffer of \a ev will be allocated or resized as necessary.
+ * \return true on success
  */
-boost::shared_ptr<MIDI::Event> 
-MidiModel::control_to_midi_event(const MidiControlIterator& iter) const
+bool
+MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event> ev, const MidiControlIterator& iter) const
 {
 	assert(iter.automation_list.get());
-	
-	boost::shared_ptr<MIDI::Event> ev;
 	
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:
@@ -365,7 +359,8 @@ MidiModel::control_to_midi_event(const MidiControlIterator& iter) const
 		assert(iter.automation_list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
 		
-		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 3, (uint8_t *)malloc(3), true));
+		ev->time() = iter.x;
+		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.automation_list->parameter().channel();
 		ev->buffer()[1] = (Byte)iter.automation_list->parameter().id();
 		ev->buffer()[2] = (Byte)iter.y;
@@ -377,7 +372,8 @@ MidiModel::control_to_midi_event(const MidiControlIterator& iter) const
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
 		
-		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 2, (uint8_t *)malloc(2), true));
+		ev->time() = iter.x;
+		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
 		ev->buffer()[1] = (Byte)iter.y;
 		break;
@@ -388,7 +384,8 @@ MidiModel::control_to_midi_event(const MidiControlIterator& iter) const
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y < (1<<14));
 		
-		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 3, (uint8_t *)malloc(3), true));
+		ev->time() = iter.x;
+		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
 		ev->buffer()[1] = ((Byte)iter.y) & 0x7F; // LSB
 		ev->buffer()[2] = (((Byte)iter.y) >> 7) & 0x7F; // MSB
@@ -400,18 +397,18 @@ MidiModel::control_to_midi_event(const MidiControlIterator& iter) const
 		assert(iter.automation_list->parameter().id() == 0);
 		assert(iter.y <= INT8_MAX);
 
-		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(iter.x, 2, (uint8_t *)malloc(2), true));
+		ev->time() = iter.x;
+		ev->realloc(2);
 		ev->buffer()[0]
 				= MIDI_CMD_CHANNEL_PRESSURE + iter.automation_list->parameter().channel();
 		ev->buffer()[1] = (Byte)iter.y;
 		break;
 
 	default:
-		break;
+		return false;
 	}
-	
-	assert(ev.get());
-	return ev;
+
+	return true;
 }
 
 

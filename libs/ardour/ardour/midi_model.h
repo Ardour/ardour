@@ -200,7 +200,7 @@ public:
 	
 	const MidiSource* midi_source() const { return _midi_source; }
 	void set_midi_source(MidiSource* source) { _midi_source = source; } 
-	boost::shared_ptr<MIDI::Event> control_to_midi_event(const MidiControlIterator& iter) const;
+	bool control_to_midi_event(boost::shared_ptr<MIDI::Event> ev, const MidiControlIterator& iter) const;
 	
 private:
 	friend class DeltaCommand;

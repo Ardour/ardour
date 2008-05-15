@@ -466,29 +466,28 @@ MidiRegionView::redisplay_model()
 			     << "  velocity: " << int((*i)->velocity()) 
 			     << endl;
 		}*/
-
 		
-		for (size_t i = 0; i < _model->n_notes(); ++i) {
+		for (size_t i = 0; i < _model->n_notes(); ++i)
 			add_note(_model->note_at(i));
-		}
 
-		for (Automatable::Controls::iterator 
-		     control = _model->controls().begin();
+		// Draw program change 'flags'
+		for (Automatable::Controls::iterator control = _model->controls().begin();
 				control != _model->controls().end(); ++control) {
-
-			if ( control->first.type() == MidiPgmChangeAutomation ) {
+			if (control->first.type() == MidiPgmChangeAutomation) {
 				Glib::Mutex::Lock list_lock (control->second->list()->lock());
 				
 				for (AutomationList::const_iterator event = control->second->list()->begin();
-				event != control->second->list()->end(); ++event) {
+						event != control->second->list()->end(); ++event) {
 					MidiControlIterator iter(control->second->list(), (*event)->when, (*event)->value);
-					add_pgm_change(_model->control_to_midi_event(iter));
+					boost::shared_ptr<MIDI::Event> event(new MIDI::Event());
+					_model->control_to_midi_event(event, iter);
+					add_pgm_change(event);
 				}
 				break;
 			}
 		}
 
-		// Is this necessary ??????????
+		// Is this necessary?
 		/*for (Automatable::Controls::const_iterator i = _model->controls().begin();
 				i != _model->controls().end(); ++i) {
 
@@ -821,12 +820,8 @@ MidiRegionView::add_pgm_change(boost::shared_ptr<MIDI::Event> event)
 	assert(event->time() >= 0);
 	
 	// dont display notes beyond the region bounds
-	if (
-			event->time() - _region->start() >= _region->length() ||
-			event->time() <  _region->start() 
-	  ) {
+	if (event->time() - _region->start() >= _region->length() || event->time() <  _region->start()) 
 		return;
-	}
 	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 	const double x = trackview.editor.frame_to_pixel((nframes_t)event->time() - _region->start());
