@@ -3687,6 +3687,11 @@ Editor::cut_copy (CutCopyOp op)
 			Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
 
+		if (drag_info.item) {
+			drag_info.item->ungrab (0);
+			drag_info.item = 0;
+		}
+		
 		return;
 	}
 
