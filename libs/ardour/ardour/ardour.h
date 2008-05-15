@@ -32,6 +32,8 @@
 #include <ardour/configuration.h>
 #include <ardour/types.h>
 
+// #include <jack/jack.h> need this to inline jack_get_microseconds
+
 namespace MIDI {
 	class MachineControl;
 	class Port;
@@ -63,7 +65,12 @@ namespace ARDOUR {
 	const layer_t max_layer = UCHAR_MAX;
 
 	microseconds_t get_microseconds ();
-
+/*	{
+        JACK has exported this functionality for a long time now 
+	but inlining this causes problems
+        return (microseconds_t) jack_get_time();
+	}
+*/
 	Change new_change ();
 
 	extern Change StartChanged;

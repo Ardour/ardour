@@ -889,7 +889,7 @@ class Session : public PBD::StatefulDestructible
 	void reset_playback_load_min ();
 	void reset_capture_load_min ();
 	
-	float read_data_rate () const;
+	float read_data_rate () const; // in usec
 	float write_data_rate () const;
 
 	/* ranges */

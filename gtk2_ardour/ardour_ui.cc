@@ -63,6 +63,8 @@
 #include <ardour/port.h>
 #include <ardour/audio_track.h>
 
+typedef uint64_t microseconds_t;
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -195,8 +197,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
 
-	last_configure_time.tv_sec = 0;
-	last_configure_time.tv_usec = 0;
+	last_configure_time= 0;
 
 	shuttle_grabbed = false;
 	shuttle_fract = 0.0;
@@ -205,8 +206,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	shuttle_style_menu = 0;
 	shuttle_unit_menu = 0;
 
-	gettimeofday (&last_peak_grab, 0);
-	gettimeofday (&last_shuttle_request, 0);
+        // We do not have jack linked in yet so;
+        
+	last_shuttle_request = last_peak_grab = 0; //  get_microseconds();
 
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
@@ -398,21 +400,15 @@ ARDOUR_UI::pop_back_splash ()
 gint
 ARDOUR_UI::configure_timeout ()
 {
-	struct timeval now;
-	struct timeval diff;
-
-	if (last_configure_time.tv_sec == 0 && last_configure_time.tv_usec == 0) {
+	if (last_configure_time == 0) {
 		/* no configure events yet */
 		return TRUE;
 	}
 
-	gettimeofday (&now, 0);
-	timersub (&now, &last_configure_time, &diff);
-
 	/* force a gap of 0.5 seconds since the last configure event
 	 */
 
-	if (diff.tv_sec == 0 && diff.tv_usec < 500000) {
+	if (get_microseconds() - last_configure_time < 500000) {
 		return TRUE;
 	} else {
 		have_configure_timeout = false;
@@ -425,7 +421,7 @@ gboolean
 ARDOUR_UI::configure_handler (GdkEventConfigure* conf)
 {
 	if (have_configure_timeout) {
-		gettimeofday (&last_configure_time, 0);
+		last_configure_time = get_microseconds();
 	} else {
 		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
 		have_configure_timeout = true;

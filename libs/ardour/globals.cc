@@ -383,11 +383,7 @@ ARDOUR::cleanup ()
 microseconds_t
 ARDOUR::get_microseconds ()
 {
-	/* XXX need JACK to export its functionality */
-
-	struct timeval now;
-	gettimeofday (&now, 0);
-	return now.tv_sec * 1000000ULL + now.tv_usec;
+	return (microseconds_t) jack_get_time ();
 }
 
 ARDOUR::Change

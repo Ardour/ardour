@@ -5392,13 +5392,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes_t pos)
 gint
 Editor::track_height_step_timeout ()
 {
-	struct timeval now;
-	struct timeval delta;
-	
-	gettimeofday (&now, 0);
-	timersub (&now, &last_track_height_step_timestamp, &delta);
-	
-	if (delta.tv_sec * 1000000 + delta.tv_usec > 250000) { /* milliseconds */
+	if (get_microseconds() - last_track_height_step_timestamp < 250000) {
 		current_stepping_trackview = 0;
 		return false;
 	}
