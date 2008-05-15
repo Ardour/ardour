@@ -4,7 +4,17 @@ import os
 import os.path
 import glob
 
-plugin_files = glob.glob ("*.cpp")
+plugin_files = Split("""
+plugins.cpp
+AmplitudeFollower.cpp
+PercussionOnsetDetector.cpp
+SpectralCentroid.cpp
+ZeroCrossing.cpp
+""")
+
+aubio_files = Split ("""
+Onset.cpp
+""")
 
 Import('env install_prefix libraries')
 vampplugs = env.Copy()
@@ -14,7 +24,13 @@ vampplugs.Merge ([libraries['vamp'],
                   libraries['vamphost']
                   ])
 
-libvampplugins = vampplugs.SharedLibrary('ardourvampplugins', plugin_files)
+sources = plugin_files
+
+if vampplugs['AUBIO']:
+    sources += aubio_files
+    vampplugs.Merge ([libraries['aubio']])
+
+libvampplugins = vampplugs.SharedLibrary('ardourvampplugins', sources)
 
 Default(libvampplugins)
 
@@ -22,5 +38,5 @@ env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ar
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript' ] +
-                                     plugin_files +
+                                     plugin_files + aubio_files +
                                      glob.glob('*.h')))

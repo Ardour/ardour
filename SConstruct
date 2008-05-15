@@ -57,7 +57,9 @@ opts.AddOptions(
     BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 0),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
-    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
+    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
+    BoolOption('AUBIO', "Use Paul Brossier's aubio library for feature detection (if available)", 1)
+    
 )
 
 #----------------------------------------------------------------------
@@ -450,7 +452,8 @@ deps = \
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.101.1',
-	'libgnomecanvas-2.0'   : '2.0'
+	'libgnomecanvas-2.0'   : '2.0',
+        'aubio'                : '0.3.2'
 }
 
 def DependenciesRequiredMessage():
@@ -523,6 +526,10 @@ if conf.CheckPKGExists ('fftw3'):
     libraries['fftw3'] = LibraryInfo()
     libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
 
+if conf.CheckPKGExists ('aubio'):
+    libraries['aubio'] = LibraryInfo()
+    libraries['aubio'].ParseConfig('pkg-config --cflags --libs aubio')
+
 env = conf.Finish ()
 
 if env['FFT_ANALYSIS']:
@@ -535,6 +542,18 @@ if env['FFT_ANALYSIS']:
         if conf.CheckHeader ('fftw3.h') == False:
             print ('Ardour cannot be compiled without the FFTW3 headers, which do not seem to be installed')
             sys.exit (1)            
+        conf.Finish()
+
+if env['AUBIO']:
+        #
+        # Check for aubio header as well as the library
+        #
+
+        conf = Configure(libraries['aubio'])
+
+        if conf.CheckHeader ('aubio/aubio.h') == False:
+            print ('AUBIO-related features be compiled without the aubio headers, which do not seem to be installed')
+            env['AUBIO'] = 0
         conf.Finish()
 
 if env['FREESOUND']:

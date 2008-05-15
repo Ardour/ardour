@@ -224,6 +224,7 @@
 	      <menuitem action='boost-region-gain'/>
 	      <menuitem action='cut-region-gain'/>      		   
 	      <menuitem action='pitch-shift-region'/>
+	      <menuitem action='toggle-opaque-region'/>
 	      <separator/>
 	      <menuitem action='duplicate-region'/>
 	      <menuitem action='multi-duplicate-region'/>

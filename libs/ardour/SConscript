@@ -65,6 +65,7 @@ location.cc
 mix.cc
 mtc_slave.cc
 named_selection.cc
+onset_detector.cc
 panner.cc
 pcm_utils.cc
 playlist.cc

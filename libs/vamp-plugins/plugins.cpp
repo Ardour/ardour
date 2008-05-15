@@ -41,11 +41,13 @@
 #include "SpectralCentroid.h"
 #include "PercussionOnsetDetector.h"
 #include "AmplitudeFollower.h"
+#include "Onset.h"
 
 static Vamp::PluginAdapter<ZeroCrossing> zeroCrossingAdapter;
 static Vamp::PluginAdapter<SpectralCentroid> spectralCentroidAdapter;
 static Vamp::PluginAdapter<PercussionOnsetDetector> percussionOnsetAdapter;
 static Vamp::PluginAdapter<AmplitudeFollower> amplitudeAdapter;
+static Vamp::PluginAdapter<Onset> onsetAdapter;
 
 const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
                                                     unsigned int index)
@@ -57,6 +59,7 @@ const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
     case  1: return spectralCentroidAdapter.getDescriptor();
     case  2: return percussionOnsetAdapter.getDescriptor();
     case  3: return amplitudeAdapter.getDescriptor();
+    case  4: return onsetAdapter.getDescriptor();
     default: return 0;
     }
 }

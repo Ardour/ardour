@@ -4,6 +4,7 @@
 #include <pbd/memento_command.h>
 
 #include <ardour/transient_detector.h>
+#include <ardour/onset_detector.h>
 #include <ardour/audiosource.h>
 #include <ardour/audioregion.h>
 #include <ardour/playlist.h>
@@ -32,6 +33,17 @@ static const gchar * _analysis_mode_strings[] = {
 	0
 };
 
+static const gchar * _onset_function_strings[] = {
+	N_("Energy Based"),
+	N_("Spectral Difference"),
+	N_("High-Frequency Content"),
+	N_("Complex Domain"),
+	N_("Phase Deviation"),
+	N_("Kullback-Liebler"),
+	N_("Modified Kullback-Liebler"),
+	0
+};
+
 RhythmFerret::RhythmFerret (PublicEditor& e)
 	: ArdourDialog (_("Rhythm Ferret"))
 	, editor (e)
@@ -50,6 +62,13 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	, sensitivity_scale (sensitivity_adjustment)
 	, sensitivity_label (_("Sensitivity"))
 	, analyze_button (_("Analyze"))
+	, onset_function_label (_("Detection function"))
+	, peak_picker_threshold_adjustment (0.3, 0.0, 1.0, 0.01, 0.1)
+	, peak_picker_threshold_scale (peak_picker_threshold_adjustment)
+	, peak_picker_label (_("Peak Threshold"))
+	, silence_threshold_adjustment (-90.0, -120.0, 0.0, 1, 10)
+	, silence_threshold_scale (silence_threshold_adjustment)
+	, silence_label (_("Silent Threshold (dB)"))
 	, trigger_gap_adjustment (3, 0, 100, 1, 10)
 	, trigger_gap_spinner (trigger_gap_adjustment)
 	, trigger_gap_label (_("Trigger gap (msecs)"))
@@ -78,6 +97,14 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	analysis_mode_strings = I18N (_analysis_mode_strings);
 	Gtkmm2ext::set_popdown_strings (analysis_mode_selector, analysis_mode_strings);
 	analysis_mode_selector.set_active_text (analysis_mode_strings.front());
+	analysis_mode_selector.signal_changed().connect (mem_fun (*this, &RhythmFerret::analysis_mode_changed));
+
+	onset_function_strings = I18N (_onset_function_strings);
+	Gtkmm2ext::set_popdown_strings (onset_detection_function_selector, onset_function_strings);
+	/* Onset plugin uses complex domain as default function 
+	   XXX there should be a non-hacky way to set this
+	 */
+	onset_detection_function_selector.set_active_text (onset_function_strings[3]);
 
 	box = manage (new HBox);
 	box->set_spacing (6);
@@ -85,17 +112,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	box->pack_start (analysis_mode_selector, true, true);
 	ferret_packer.pack_start (*box, false, false);
 
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (detection_threshold_label, false, false);
-	box->pack_start (detection_threshold_scale, true, true);
-	ferret_packer.pack_start (*box, false, false);
-
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (sensitivity_label, false, false);
-	box->pack_start (sensitivity_scale, true, true);
-	ferret_packer.pack_start (*box, false, false);
+	ferret_packer.pack_start (analysis_packer, false, false);
 
 	box = manage (new HBox);
 	box->set_spacing (6);
@@ -107,6 +124,38 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 
 	analyze_button.signal_clicked().connect (mem_fun (*this, &RhythmFerret::run_analysis));
 	
+	box = manage (new HBox);
+	box->set_spacing (6);
+	box->pack_start (detection_threshold_label, false, false);
+	box->pack_start (detection_threshold_scale, true, true);
+	perc_onset_packer.pack_start (*box, false, false);
+		
+	box = manage (new HBox);
+	box->set_spacing (6);
+	box->pack_start (sensitivity_label, false, false);
+	box->pack_start (sensitivity_scale, true, true);
+	perc_onset_packer.pack_start (*box, false, false);
+
+	box = manage (new HBox);
+	box->set_spacing (6);
+	box->pack_start (onset_function_label, false, false);
+	box->pack_start (onset_detection_function_selector, true, true);
+	note_onset_packer.pack_start (*box, false, false);
+		
+	box = manage (new HBox);
+	box->set_spacing (6);
+	box->pack_start (peak_picker_label, false, false);
+	box->pack_start (peak_picker_threshold_scale, true, true);
+	note_onset_packer.pack_start (*box, false, false);
+	
+	box = manage (new HBox);
+	box->set_spacing (6);
+	box->pack_start (silence_label, false, false);
+	box->pack_start (silence_threshold_scale, true, true);
+	note_onset_packer.pack_start (*box, false, false);
+
+	analysis_mode_changed ();
+
 	ferret_frame.add (ferret_packer);
 	
 	logo = manage (new Gtk::Image (::get_icon (X_("ferret_02"))));
@@ -137,12 +186,30 @@ RhythmFerret::~RhythmFerret()
 	}
 }
 
+void
+RhythmFerret::analysis_mode_changed ()
+{
+	analysis_packer.children().clear ();
+
+	switch (get_analysis_mode()) {
+	case PercussionOnset:
+		analysis_packer.pack_start (perc_onset_packer);
+		break;
+
+	case NoteOnset:
+		analysis_packer.pack_start (note_onset_packer);
+		break;
+	}
+
+	analysis_packer.show_all ();
+}
+
 RhythmFerret::AnalysisMode
 RhythmFerret::get_analysis_mode () const
 {
 	string str = analysis_mode_selector.get_active_text ();
 
-	if (str == _(_analysis_mode_strings[(int) NoteOnset])) {
+	if (str == analysis_mode_strings[(int) NoteOnset]) {
 		return NoteOnset;
 	} 
 
@@ -183,6 +250,9 @@ RhythmFerret::run_analysis ()
 		switch (get_analysis_mode()) {
 		case PercussionOnset:
 			run_percussion_onset_analysis (rd, (*i)->region()->position(), current_results);
+			break;
+		case NoteOnset:
+			run_note_onset_analysis (rd, (*i)->region()->position(), current_results);
 			break;
 		default:
 			break;
@@ -227,6 +297,67 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 
 	if (!results.empty()) {
 		TransientDetector::cleanup_transients (results, session->frame_rate(), trigger_gap_adjustment.get_value());
+	}
+
+	return 0;
+}
+
+int
+RhythmFerret::get_note_onset_function ()
+{
+	string txt = onset_detection_function_selector.get_active_text();
+
+	for (int n = 0; _onset_function_strings[n]; ++n) {
+		/* compare translated versions */
+		if (txt == onset_function_strings[n]) {
+			return n;
+		}
+	}
+	fatal << string_compose (_("programming error: %1 (%2)"), X_("illegal note onset function string"), txt)
+	      << endmsg;
+	/*NOTREACHED*/
+	return -1;
+}
+
+int
+RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, AnalysisFeatureList& results)
+{
+	try {
+		OnsetDetector t (session->frame_rate());
+		
+		for (uint32_t i = 0; i < readable->n_channels(); ++i) {
+			
+			AnalysisFeatureList these_results;
+			
+			t.reset ();
+			
+			t.set_function (get_note_onset_function());
+			t.set_silence_threshold (silence_threshold_adjustment.get_value());
+			t.set_peak_threshold (peak_picker_threshold_adjustment.get_value());
+			
+			if (t.run ("", readable.get(), i, these_results)) {
+				continue;
+			}
+			
+			/* translate all transients to give absolute position */
+			
+			for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
+				(*x) += offset;
+			}
+			
+			/* merge */
+			
+			results.insert (results.end(), these_results.begin(), these_results.end());
+			these_results.clear ();
+		}
+
+	} catch (failed_constructor& err) {
+		error << "Could not load note onset detection plugin" << endmsg;
+		return -1;
+	}
+
+	if (!results.empty()) {
+		OnsetDetector::cleanup_onsets (results, session->frame_rate(), trigger_gap_adjustment.get_value());
 	}
 
 	return 0;
