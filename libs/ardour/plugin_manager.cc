@@ -51,6 +51,7 @@
 
 #ifdef HAVE_AUDIOUNITS
 #include <ardour/audio_unit.h>
+#include <Carbon/Carbon.h>
 #endif
 
 #include <pbd/error.h>
@@ -70,6 +71,14 @@ PluginManager::PluginManager ()
 	string lrdf_path;
 
 	load_favorites ();
+
+#ifdef GTKOSX
+	ProcessSerialNumber psn = { 0, kCurrentProcess }; 
+	OSStatus returnCode = TransformProcessType(& psn, kProcessTransformToForegroundApplication);
+	if( returnCode != 0) {
+		error << _("Cannot become GUI app") << endmsg;
+	}
+#endif
 
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;

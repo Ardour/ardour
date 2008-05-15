@@ -328,7 +328,7 @@ bool		CAAudioUnit::CanDo (	int 				inChannelsIn,
 	return ValidateChannelPair (inChannelsIn, inChannelsOut, info.mChanInfo, (dataSize / sizeof (AUChannelInfo)));
 }
 
-int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, uint32_t& cnt)
+int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 {
 	// this is the default assumption of an audio effect unit
 	Boolean* isWritable = 0;

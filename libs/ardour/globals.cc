@@ -31,6 +31,10 @@
 #include <fst.h>
 #endif
 
+#ifdef HAVE_AUDIOUNITS
+#include <ardour/audio_unit.h>
+#endif
+
 #ifdef __SSE__
 #include <xmmintrin.h>
 #endif
@@ -327,6 +331,10 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	if (Config->get_use_vst() && fst_init ()) {
 		return -1;
 	}
+#endif
+
+#ifdef HAVE_AUDIOUNITS
+	AUPluginInfo::load_cached_info ();
 #endif
 	
 	/* Make VAMP look in our library ahead of anything else */

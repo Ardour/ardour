@@ -218,6 +218,7 @@ public:
 	bool					HasChannelLayouts (AudioUnitScope 		inScope, 
 											AudioUnitElement 		inEl) const;
 		
+	int                                     GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt);
 	bool					GetChannelLayouts (AudioUnitScope 		inScope,
 									AudioUnitElement 				inEl,
 									ChannelTagVector				&outChannelVector) const;

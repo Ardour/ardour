@@ -143,12 +143,11 @@ class Plugin : public PBD::StatefulDestructible
 
 	sigc::signal<void,uint32_t,float> ParameterChanged;
 
-	virtual bool fixed_io() const { return true; }
-	virtual int32_t can_support_input_configuration (int32_t in);
-	virtual int32_t compute_output_streams (int32_t nplugins);
+	virtual int32_t can_do (int32_t in, int32_t& out);
 	virtual uint32_t output_streams() const;
 	virtual uint32_t input_streams() const;
-	
+	virtual int32_t configure_io (int32_t in, int32_t out);
+
 	PBD::Controllable *get_nth_control (uint32_t, bool do_not_create = false);
 	void make_nth_control (uint32_t, const XMLNode&);
 

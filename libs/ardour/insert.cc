@@ -80,11 +80,6 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 	
 	init ();
 
-	if (_plugins[0]->fixed_io()) {
-		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreOutputs (output_streams ());
-	}
-
 	RedirectCreated (this); /* EMIT SIGNAL */
 }
 
@@ -98,11 +93,6 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 	set_automatable ();
 
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
-
-	if (_plugins[0]->fixed_io()) {
-		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::MoreOutputs (output_streams());
-	}
 }
 
 PluginInsert::PluginInsert (const PluginInsert& other)
@@ -200,6 +190,7 @@ uint32_t
 PluginInsert::input_streams() const
 {
 	int32_t in = _plugins[0]->get_info()->n_inputs;
+
 	if (in < 0) {
 		return _plugins[0]->input_streams ();
 	} else {
@@ -552,67 +543,28 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 }
 
 int32_t
-PluginInsert::compute_output_streams (int32_t cnt) const
-{
-	int32_t outputs;
-
-	if ((outputs = _plugins[0]->get_info()->n_outputs) < 0) {
-		// have to ask the plugin itself, because it has flexible I/O
-		return _plugins[0]->compute_output_streams (cnt);
-	}
-
-	return outputs * cnt;
-}
-
-int32_t
 PluginInsert::configure_io (int32_t magic, int32_t in, int32_t out)
 {
-	return set_count (magic);
+	int32_t ret;
+
+	if ((ret = set_count (magic)) < 0) {
+		return ret;
+	}
+
+	/* if we're running replicated plugins, each plugin has
+	   the same i/o configuration and we may need to announce how many
+	   output streams there are.
+
+	   if we running a single plugin, we need to configure it.
+	*/
+
+	return _plugins[0]->configure_io (in, out);
 }
 
 int32_t 
-PluginInsert::can_support_input_configuration (int32_t in) const
+PluginInsert::can_do (int32_t in, int32_t& out)
 {
-	int32_t outputs = _plugins[0]->get_info()->n_outputs;
-	int32_t inputs = _plugins[0]->get_info()->n_inputs;
-
-	if (outputs < 0 || inputs < 0) {
-		/* have to ask the plugin because its got reconfigurable I/O
-		 */
-		return _plugins[0]->can_support_input_configuration (in);
-	}
-
-	if (inputs == 0) {
-
-		/* instrument plugin, always legal, but it throws
-		   away any existing active streams.
-		*/
-
-		return 1;
-	}
-
-	if (outputs == 1 && inputs == 1) {
-		/* mono plugin, replicate as needed */
-		return in;
-	}
-
-	if (inputs == in) {
-		/* exact match */
-		return 1;
-	}
-
-	if ((inputs < in) && (inputs % in == 0)) {
-
-		/* number of inputs is a factor of the requested input
-		   configuration, so we can replicate.
-		*/
-
-		return in/inputs;
-	}
-
-	/* sorry */
-
-	return -1;
+	return _plugins[0]->can_do (in, out);
 }
 
 XMLNode&
@@ -1051,13 +1003,14 @@ PortInsert::latency()
 }
 
 int32_t
-PortInsert::can_support_input_configuration (int32_t in) const
+PortInsert::can_do (int32_t in, int32_t& out) 
 {
 	if (input_maximum() == -1 && output_maximum() == -1) {
 
 		/* not configured yet */
 
-		return in; /* we can support anything the first time we're asked */
+		out = in;
+		return 1;
 
 	} else {
 
@@ -1066,7 +1019,8 @@ PortInsert::can_support_input_configuration (int32_t in) const
 		*/
 
 		if (output_maximum() == in) {
-			return in;
+			out = in;
+			return 1;
 		} 
 	}
 
@@ -1103,18 +1057,6 @@ PortInsert::configure_io (int32_t ignored_magic, int32_t in, int32_t out)
 	}
 
 	return ensure_io (out, in, false, this);
-}
-
-int32_t
-PortInsert::compute_output_streams (int32_t cnt) const
-{
-	if (n_inputs() == 0) {
-		/* not configured yet */
-		return cnt;
-	}
-
-	/* puzzling, eh? think about it ... */
-	return n_inputs ();
 }
 
 uint32_t

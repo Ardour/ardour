@@ -362,21 +362,56 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	
 	return PluginPtr ((Plugin*) 0);
 }
-int32_t
-Plugin::can_support_input_configuration (int32_t in)
+
+int32_t 
+Plugin::configure_io (int32_t in, int32_t out)
 {
-	/* LADSPA & VST should not get here because they do not
-	   return negative i/o counts.
+	/* parent Plugin class assumes static output stream count.
+	   Derived classes can override.
 	*/
-	return -1;
+
+	Glib::Mutex::Lock em (_session.engine().process_lock());
+	IO::MoreOutputs (output_streams());
+
+	return 0;
 }
 
 int32_t
-Plugin::compute_output_streams (int32_t nplugins)
+Plugin::can_do (int32_t in, int32_t& out)
 {
-	/* LADSPA & VST should not get here because they do not
-	   return negative i/o counts.
-	*/
+	int32_t outputs = get_info()->n_outputs;
+	int32_t inputs = get_info()->n_inputs;
+
+	if (inputs == 0) {
+
+		/* instrument plugin, always legal, but it throws
+		   away any existing active streams.
+		*/
+
+		return 1;
+	}
+
+	if (outputs == 1 && inputs == 1) {
+		/* mono plugin, replicate as needed */
+		return in;
+	}
+
+	if (inputs == in) {
+		/* exact match */
+		return 1;
+	}
+
+	if ((inputs < in) && (inputs % in == 0)) {
+
+		/* number of inputs is a factor of the requested input
+		   configuration, so we can replicate.
+		*/
+
+		return in/inputs;
+	}
+
+	/* sorry */
+
 	return -1;
 }
 

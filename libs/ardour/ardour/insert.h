@@ -53,9 +53,8 @@ class Insert : public Redirect
 	virtual void activate () {}
 	virtual void deactivate () {}
 
-	virtual int32_t can_support_input_configuration (int32_t in) const = 0;
+	virtual int32_t can_do (int32_t in, int32_t& out) = 0;
 	virtual int32_t configure_io (int32_t magic, int32_t in, int32_t out) = 0;
-	virtual int32_t compute_output_streams (int32_t cnt) const = 0;
 };
 
 class PortInsert : public Insert 
@@ -78,10 +77,8 @@ class PortInsert : public Insert
 	uint32_t output_streams() const;
 	uint32_t input_streams() const;
 
-	int32_t can_support_input_configuration (int32_t) const;
+	int32_t can_do (int32_t, int32_t& out);
 	int32_t configure_io (int32_t magic, int32_t in, int32_t out);
-	int32_t compute_output_streams (int32_t cnt) const;
-
 	uint32_t bit_slot() const { return bitslot; }
 
   private:
@@ -117,9 +114,8 @@ class PluginInsert : public Insert
 	int      set_count (uint32_t num);
 	uint32_t get_count () const { return _plugins.size(); }
 
-	int32_t can_support_input_configuration (int32_t) const;
+	int32_t can_do (int32_t, int32_t& out);
 	int32_t configure_io (int32_t magic, int32_t in, int32_t out);
-	int32_t compute_output_streams (int32_t cnt) const;
 
 	bool is_generator() const;
 

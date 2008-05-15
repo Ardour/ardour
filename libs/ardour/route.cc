@@ -1133,7 +1133,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	uint32_t send_cnt = 0;
 	map<Placement,list<InsertCount> > insert_map;
 	RedirectList::iterator prev;
-	nframes_t initial_streams;
+	int32_t initial_streams;
 	int ret = -1;
 
 	redirect_max_outs = 0;
@@ -1191,7 +1191,9 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 	if (!insert_map[PreFader].empty()) {
 		InsertCount& ic (insert_map[PreFader].back());
-		initial_streams = ic.insert->compute_output_streams (ic.cnt);
+		if (ic.insert->can_do (n_inputs(), initial_streams) < 0) {
+			goto streamcount;
+		}
 	} else {
 		initial_streams = n_inputs ();
 	}
@@ -1268,8 +1270,8 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inp
 	list<InsertCount>::iterator i;
 	
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
-
-		if (((*i).cnt = (*i).insert->can_support_input_configuration (required_inputs)) < 0) {
+		
+		if (((*i).cnt = (*i).insert->can_do (required_inputs, (*i).out)) < 0) {
 			if (err_streams) {
 				*err_streams = required_inputs;
 			}
@@ -1277,14 +1279,6 @@ Route::check_some_plugin_counts (list<InsertCount>& iclist, int32_t required_inp
 		}
 		
 		(*i).in = required_inputs;
-
-		if (((*i).out = (*i).insert->compute_output_streams ((*i).cnt)) < 0) {
-			if (err_streams) {
-				*err_streams = required_inputs;
-			}
-			return -1;
-		}
-
 		required_inputs = (*i).out;
 	}
 

@@ -99,11 +99,10 @@ class AUPlugin : public ARDOUR::Plugin
     
 	bool has_editor () const;
 	
-	bool fixed_io() const { return false; }
-	int32_t can_support_input_configuration (int32_t in);
-	int32_t compute_output_streams (int32_t nplugins);
+	int32_t can_do (int32_t in, int32_t& out);
 	uint32_t output_streams() const;
 	uint32_t input_streams() const;
+	int32_t configure_io (int32_t in, int32_t out);
 
 	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
 	boost::shared_ptr<CAComponent> get_comp () const { return comp; }
@@ -117,18 +116,19 @@ class AUPlugin : public ARDOUR::Plugin
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
 
-	AudioStreamBasicDescription streamFormat;
         bool initialized;
-        int format_set;
+	int32_t input_channels;
+	int32_t output_channels;
+	std::vector<std::pair<int,int> > io_configs;
 	AudioBufferList* buffers;
 	
 	UInt32 global_elements;
 	UInt32 output_elements;
 	UInt32 input_elements;
 	
-	int set_output_format ();
-	int set_input_format ();
-	int set_stream_format (int scope, uint32_t cnt);
+	int set_output_format (AudioStreamBasicDescription&);
+	int set_input_format (AudioStreamBasicDescription&);
+	int set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescription&);
         int _set_block_size (nframes_t nframes);
 	void discover_parameters ();
 
@@ -156,23 +156,29 @@ class AUPluginInfo : public PluginInfo {
 
 	PluginPtr load (Session& session);
 
+	AUPluginCachedInfo cache;
+
 	static PluginInfoList discover ();
 	static void get_names (CAComponentDescription&, std::string& name, Glib::ustring& maker);
         static std::string stringify_descriptor (const CAComponentDescription&);
 
+	static int load_cached_info ();
+
   private:
 	boost::shared_ptr<CAComponentDescription> descriptor;
+	UInt32 version;
 
 	static void discover_music (PluginInfoList&);
 	static void discover_fx (PluginInfoList&);
 	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
+	static Glib::ustring au_cache_path ();
 
-	static std::map<std::string,AUPluginCachedInfo> cached_info;
-
-	static bool cached_io_configuration (std::string, CAComponentDescription&, AUPluginCachedInfo&);
-	static void add_cached_info (AUPluginCachedInfo&);
+	typedef std::map<std::string,AUPluginCachedInfo> CachedInfoMap;
+	static CachedInfoMap cached_info;
+	
+	static bool cached_io_configuration (const std::string&, UInt32, CAComponent&, AUPluginCachedInfo&, const std::string& name);
+	static void add_cached_info (const std::string&, AUPluginCachedInfo&);
 	static void save_cached_info ();
-	static int load_cached_info ();
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
