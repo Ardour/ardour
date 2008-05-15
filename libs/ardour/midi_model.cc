@@ -239,19 +239,19 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	}
 
 	if (type == NOTE_ON) {
-		cerr << "********** MIDI Iterator = note on" << endl;
+		//cerr << "********** MIDI Iterator = note on" << endl;
 		*_event = (*_note_iter)->on_event();
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
-		cerr << "********** MIDI Iterator = note off" << endl;
+		//cerr << "********** MIDI Iterator = note off" << endl;
 		*_event = _active_notes.top()->off_event();
 		_active_notes.pop();
 	} else if (type == AUTOMATION) {
-		cerr << "********** MIDI Iterator = Automation" << endl;
+		//cerr << "********** MIDI Iterator = Automation" << endl;
 		_model->control_to_midi_event(_event, *_control_iter);
 	} else {
-		cerr << "********** MIDI Iterator = End" << endl;
+		//cerr << "********** MIDI Iterator = End" << endl;
 		_is_end = true;
 	}
 
