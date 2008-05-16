@@ -105,8 +105,9 @@ MidiSource::midi_read (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nfra
 {
 	Glib::Mutex::Lock lm (_lock);
 	if (_model) {
-		const size_t n_events = _model->read(dst, start, cnt, stamp_offset, negative_stamp_offset);
-		cout << "Read " << n_events << " events from model." << endl;
+		//const size_t n_events =
+		_model->read(dst, start, cnt, stamp_offset, negative_stamp_offset);
+		//cout << "Read " << n_events << " events from model." << endl;
 		return cnt;
 	} else {
 		return read_unlocked (dst, start, cnt, stamp_offset, negative_stamp_offset);
