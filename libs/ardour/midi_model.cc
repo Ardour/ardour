@@ -102,7 +102,7 @@ MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 
 		assert(x >= 0);
 
-		if (y <= i->first.min() || y >= i->first.max()) {
+		if (y < i->first.min() || y > i->first.max()) {
 			cerr << "ERROR: Controller (" << i->first.to_string() << ") value '" << y
 				<< "' out of range [" << i->first.min() << "," << i->first.max()
 				<< "], event ignored" << endl;
