@@ -260,7 +260,7 @@ Editor::draw_measures ()
 				}
 			}
 
-			xpos = frame_to_unit ((*i).frame);
+			xpos = frame_to_unit ((nframes64_t) (*i).frame);
 			line = get_time_line ();
 			line->property_x1() = xpos;
 			line->property_x2() = xpos;
@@ -283,7 +283,7 @@ Editor::draw_measures ()
 }
 
 void
-Editor::mouse_add_new_tempo_event (nframes_t frame)
+Editor::mouse_add_new_tempo_event (nframes64_t frame)
 {
 	if (session == 0) {
 		return;
@@ -325,7 +325,7 @@ Editor::mouse_add_new_tempo_event (nframes_t frame)
 }
 
 void
-Editor::mouse_add_new_meter_event (nframes_t frame)
+Editor::mouse_add_new_meter_event (nframes64_t frame)
 {
 	if (session == 0) {
 		return;

@@ -173,7 +173,7 @@ Editor::update_current_screen ()
 {
 	if (session && session->engine().running()) {
 
-		nframes_t frame;
+		nframes64_t frame;
 
 		frame = session->audible_frame();
 
@@ -235,11 +235,7 @@ Editor::update_current_screen ()
 		} else {
 			
 			if (frame != last_update_frame) {
-				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
-					playhead_cursor->canvas_item.hide();
-				} else {
-					playhead_cursor->set_position (frame);
-				}
+				playhead_cursor->set_position (frame);
 			}
 		}
 

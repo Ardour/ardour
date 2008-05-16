@@ -61,7 +61,7 @@ Editor::Cursor::~Cursor ()
 }
 
 void
-Editor::Cursor::set_position (nframes_t frame)
+Editor::Cursor::set_position (nframes64_t frame)
 {
 	double new_pos =  editor.frame_to_unit (frame);
 

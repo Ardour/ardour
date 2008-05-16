@@ -301,6 +301,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (transport_actions, X_("GotoEnd"), _("Goto End"), mem_fun(*this, &ARDOUR_UI::transport_goto_end));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("GotoWallClock"), _("Goto Wall Clock"), mem_fun(*this, &ARDOUR_UI::transport_goto_wallclock));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), mem_fun(primary_clock, &AudioClock::focus));
 	ActionManager::session_sensitive_actions.push_back (act);

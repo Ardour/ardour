@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
+#include <time.h>
 #include <cerrno>
 #include <fstream>
 
@@ -1300,6 +1301,34 @@ ARDOUR_UI::transport_goto_zero ()
 		
 		if (editor) {
 			editor->reset_x_origin (0);
+		}
+	}
+}
+
+void
+ARDOUR_UI::transport_goto_wallclock ()
+{
+	if (session && editor) {
+
+		time_t now;
+		struct tm tmnow;
+		nframes64_t frames;
+		
+		time (&now);
+		localtime_r (&now, &tmnow);
+	
+		frames = tmnow.tm_hour * (60 * 60 * session->frame_rate());
+		frames += tmnow.tm_min * (60 * session->frame_rate());
+		frames += tmnow.tm_sec * session->frame_rate();
+
+		session->request_locate (frames);
+
+		/* force displayed area in editor to start no matter
+		   what "follow playhead" setting is.
+		*/
+		
+		if (editor) {
+			editor->reset_x_origin (frames - (editor->current_page_frames()/2));
 		}
 	}
 }

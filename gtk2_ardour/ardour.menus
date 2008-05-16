@@ -82,6 +82,7 @@
 		   <menuitem action='GotoZero'/>
 		   <menuitem action='GotoStart'/>
 		   <menuitem action='GotoEnd'/>
+		   <menuitem action='GotoWallClock'/>
 	       </menu>
 
 	       <menu action="MoveActiveMarkMenu">

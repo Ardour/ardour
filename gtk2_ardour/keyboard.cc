@@ -76,6 +76,7 @@ bool         Keyboard::_some_magic_widget_has_focus = false;
 
 std::string Keyboard::user_keybindings_path;
 bool Keyboard::can_save_keybindings = false;
+bool Keyboard::bindings_changed_after_save_became_legal = false;
 map<string,string> Keyboard::binding_files;
 string Keyboard::_current_binding_name = _("Unknown");
 map<AccelKey,pair<string,string>,Keyboard::AccelKeyLess> Keyboard::release_keys;
@@ -421,6 +422,16 @@ accel_map_changed (GtkAccelMap* map,
 		   GdkModifierType mod,
 		   gpointer arg)
 {
+	Keyboard::keybindings_changed ();
+}
+
+void
+Keyboard::keybindings_changed ()
+{
+	if (Keyboard::can_save_keybindings) {
+		Keyboard::bindings_changed_after_save_became_legal = true;
+	}
+
 	Keyboard::save_keybindings ();
 }
 
@@ -433,7 +444,7 @@ Keyboard::set_can_save_keybindings (bool yn)
 void
 Keyboard::save_keybindings ()
 {
-	if (can_save_keybindings) {
+	if (can_save_keybindings && bindings_changed_after_save_became_legal) {
 		Gtk::AccelMap::save (user_keybindings_path);
 	} 
 }

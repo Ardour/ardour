@@ -561,6 +561,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_goto_zero ();
 	void transport_goto_start ();
 	void transport_goto_end ();
+	void transport_goto_wallclock ();
 	void transport_stop ();
 	void transport_stop_and_forget_capture ();
 	void transport_record (bool roll);

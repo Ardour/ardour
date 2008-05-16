@@ -942,10 +942,10 @@ Editor::zoom_adjustment_changed ()
 
 	if (fpu < 1.0) {
 		fpu = 1.0;
-		zoom_range_clock.set ((nframes_t) floor (fpu * canvas_width));
+		zoom_range_clock.set ((nframes64_t) floor (fpu * canvas_width));
 	} else if (fpu > session->current_end_frame() / canvas_width) {
 		fpu = session->current_end_frame() / canvas_width;
-		zoom_range_clock.set ((nframes_t) floor (fpu * canvas_width));
+		zoom_range_clock.set ((nframes64_t) floor (fpu * canvas_width));
 	}
 	
 	temporal_zoom (fpu);
@@ -965,7 +965,7 @@ Editor::control_scroll (float fraction)
 	/*
 		_control_scroll_target is an optional<T>
 	
-		it acts like a pointer to an nframes_t, with
+		it acts like a pointer to an nframes64_t, with
 		a operator conversion to boolean to check
 		that it has a value could possibly use
 		playhead_cursor->current_frame to store the
@@ -978,12 +978,12 @@ Editor::control_scroll (float fraction)
 		_dragging_playhead = true;
 	}
 
-	if ((fraction < 0.0f) && (*_control_scroll_target < (nframes_t) fabs(step))) {
+	if ((fraction < 0.0f) && (*_control_scroll_target < (nframes64_t) fabs(step))) {
 		*_control_scroll_target = 0;
 	} else if ((fraction > 0.0f) && (max_frames - *_control_scroll_target < step)) {
 		*_control_scroll_target = max_frames - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
 	} else {
-		*_control_scroll_target += (nframes_t) floor (step);
+		*_control_scroll_target += (nframes64_t) floor (step);
 	}
 
 	/* move visuals, we'll catch up with it later */
@@ -1014,7 +1014,7 @@ Editor::control_scroll (float fraction)
 }
 
 bool
-Editor::deferred_control_scroll (nframes_t target)
+Editor::deferred_control_scroll (nframes64_t target)
 {
 	session->request_locate (*_control_scroll_target, session->transport_rolling());
 	// reset for next stream
@@ -1061,7 +1061,7 @@ Editor::stop_scrolling ()
 }
 
 void
-Editor::map_position_change (nframes_t frame)
+Editor::map_position_change (nframes64_t frame)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::map_position_change), frame));
 
@@ -1074,7 +1074,7 @@ Editor::map_position_change (nframes_t frame)
 }	
 
 void
-Editor::center_screen (nframes_t frame)
+Editor::center_screen (nframes64_t frame)
 {
 	double page = canvas_width * frames_per_unit;
 
@@ -1087,12 +1087,12 @@ Editor::center_screen (nframes_t frame)
 }
 
 void
-Editor::center_screen_internal (nframes_t frame, float page)
+Editor::center_screen_internal (nframes64_t frame, float page)
 {
 	page /= 2;
 		
 	if (frame > page) {
-		frame -= (nframes_t) page;
+		frame -= (nframes64_t) page;
 	} else {
 		frame = 0;
 	}
@@ -1105,7 +1105,7 @@ Editor::handle_new_duration ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::handle_new_duration));
 
-	nframes_t new_end = session->get_maximum_extent() + (nframes_t) floorf (current_page_frames() * 0.10f);
+	nframes64_t new_end = session->get_maximum_extent() + (nframes64_t) floorf (current_page_frames() * 0.10f);
 				  
 	if (new_end > last_canvas_frame) {
 		last_canvas_frame = new_end;
@@ -1445,10 +1445,10 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 }
 
 void
-Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, nframes_t frame)
+Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, nframes64_t frame)
 {
 	using namespace Menu_Helpers;
-	Menu* (Editor::*build_menu_function)(nframes_t);
+	Menu* (Editor::*build_menu_function)(nframes64_t);
 	Menu *menu;
 
 	switch (item_type) {
@@ -1560,7 +1560,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 }
 
 Menu*
-Editor::build_track_context_menu (nframes_t ignored)
+Editor::build_track_context_menu (nframes64_t ignored)
 {
 	using namespace Menu_Helpers;
 
@@ -1572,7 +1572,7 @@ Editor::build_track_context_menu (nframes_t ignored)
 }
 
 Menu*
-Editor::build_track_bus_context_menu (nframes_t ignored)
+Editor::build_track_bus_context_menu (nframes64_t ignored)
 {
 	using namespace Menu_Helpers;
 
@@ -1584,7 +1584,7 @@ Editor::build_track_bus_context_menu (nframes_t ignored)
 }
 
 Menu*
-Editor::build_track_region_context_menu (nframes_t frame)
+Editor::build_track_region_context_menu (nframes64_t frame)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_region_context_menu.items();
@@ -1597,7 +1597,7 @@ Editor::build_track_region_context_menu (nframes_t frame)
 		boost::shared_ptr<Playlist> pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
-			Playlist::RegionList* regions = pl->regions_at ((nframes_t) floor ( (double)frame * ds->speed()));
+			Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)frame * ds->speed()));
 			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 				add_region_context_items (atv->audio_view(), (*i), edit_items);
 			}
@@ -1611,7 +1611,7 @@ Editor::build_track_region_context_menu (nframes_t frame)
 }
 
 Menu*
-Editor::build_track_crossfade_context_menu (nframes_t frame)
+Editor::build_track_crossfade_context_menu (nframes64_t frame)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_crossfade_context_menu.items();
@@ -1691,7 +1691,7 @@ Editor::analyze_range_selection()
 
 
 Menu*
-Editor::build_track_selection_context_menu (nframes_t ignored)
+Editor::build_track_selection_context_menu (nframes64_t ignored)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_selection_context_menu.items();
@@ -2294,7 +2294,7 @@ Editor::set_state (const XMLNode& node)
 	move (x, y);
 
 	if (session && (prop = node.property ("playhead"))) {
-		nframes_t pos = atol (prop->value().c_str());
+		nframes64_t pos = atol (prop->value().c_str());
 		playhead_cursor->set_position (pos);
 	} else {
 		playhead_cursor->set_position (0);
@@ -2469,7 +2469,7 @@ Editor::get_state ()
 
 	node->add_property ("edit-point", enum_2_string (_edit_point));
 
-	snprintf (buf, sizeof (buf), "%" PRIu32, playhead_cursor->current_frame);
+	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame);
 	node->add_property ("playhead", buf);
 
 	node->add_property ("show-waveforms", _show_waveforms ? "yes" : "no");
@@ -2531,17 +2531,17 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	switch (snap_type) {
 	case SnapToCDFrame:
 		if (((direction == 0) && (start % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-			start = (nframes_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
+			start = (nframes64_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
 		} else {
-			start = (nframes_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
+			start = (nframes64_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
 		}
 		break;
 
 	case SnapToSMPTEFrame:
 	        if (((direction == 0) && (fmod((double)start, (double)session->frames_per_smpte_frame()) > (session->frames_per_smpte_frame() / 2))) || (direction > 0)) {
-			start = (nframes_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
+			start = (nframes64_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
 		} else {
-			start = (nframes_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
+			start = (nframes64_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
 		}
 		break;
 
@@ -2553,9 +2553,9 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 			start -= session->smpte_offset ();
 		}    
 		if (((direction == 0) && (start % one_smpte_second > one_smpte_second / 2)) || direction > 0) {
-			start = (nframes_t) ceil ((double) start / one_smpte_second) * one_smpte_second;
+			start = (nframes64_t) ceil ((double) start / one_smpte_second) * one_smpte_second;
 		} else {
-			start = (nframes_t) floor ((double) start / one_smpte_second) * one_smpte_second;
+			start = (nframes64_t) floor ((double) start / one_smpte_second) * one_smpte_second;
 		}
 		
 		if (session->smpte_offset_negative())
@@ -2574,9 +2574,9 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 			start -= session->smpte_offset ();
 		}
 		if (((direction == 0) && (start % one_smpte_minute > one_smpte_minute / 2)) || direction > 0) {
-			start = (nframes_t) ceil ((double) start / one_smpte_minute) * one_smpte_minute;
+			start = (nframes64_t) ceil ((double) start / one_smpte_minute) * one_smpte_minute;
 		} else {
-			start = (nframes_t) floor ((double) start / one_smpte_minute) * one_smpte_minute;
+			start = (nframes64_t) floor ((double) start / one_smpte_minute) * one_smpte_minute;
 		}
 		if (session->smpte_offset_negative())
 		{
@@ -2588,17 +2588,17 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 		
 	case SnapToSeconds:
 		if (((direction == 0) && (start % one_second > one_second / 2)) || (direction > 0)) {
-			start = (nframes_t) ceil ((double) start / one_second) * one_second;
+			start = (nframes64_t) ceil ((double) start / one_second) * one_second;
 		} else {
-			start = (nframes_t) floor ((double) start / one_second) * one_second;
+			start = (nframes64_t) floor ((double) start / one_second) * one_second;
 		}
 		break;
 		
 	case SnapToMinutes:
 		if (((direction == 0) && (start % one_minute > one_minute / 2)) || (direction > 0)) {
-			start = (nframes_t) ceil ((double) start / one_minute) * one_minute;
+			start = (nframes64_t) ceil ((double) start / one_minute) * one_minute;
 		} else {
-			start = (nframes_t) floor ((double) start / one_minute) * one_minute;
+			start = (nframes64_t) floor ((double) start / one_minute) * one_minute;
 		}
 		break;
 
@@ -2675,7 +2675,7 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	case SnapToRegionSync:
 	case SnapToRegionBoundary:
 		if (!region_boundary_cache.empty()) {
-			vector<nframes_t>::iterator i;
+			vector<nframes64_t>::iterator i;
 
 			if (direction > 0) {
 				i = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
@@ -3700,10 +3700,10 @@ Editor::playlist_selector () const
 	return *_playlist_selector;
 }
 
-nframes_t
-Editor::get_nudge_distance (nframes_t pos, nframes_t& next)
+nframes64_t
+Editor::get_nudge_distance (nframes64_t pos, nframes64_t& next)
 {
-	nframes_t ret;
+	nframes64_t ret;
 
 	ret = nudge_clock.current_duration (pos);
 	next = ret + 1; /* XXXX fix me */
@@ -3755,7 +3755,7 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 }
 
 bool
-Editor::audio_region_selection_covers (nframes_t where)
+Editor::audio_region_selection_covers (nframes64_t where)
 {
 	for (RegionSelection::iterator a = selection->regions.begin(); a != selection->regions.end(); ++a) {
 		if ((*a)->region()->covers (where)) {
@@ -4100,7 +4100,7 @@ Editor::on_key_release_event (GdkEventKey* ev)
 }
 
 void
-Editor::reset_x_origin (nframes_t frame)
+Editor::reset_x_origin (nframes64_t frame)
 {
 	queue_visual_change (frame);
 }
@@ -4112,7 +4112,7 @@ Editor::reset_zoom (double fpu)
 }
 
 void
-Editor::reposition_and_zoom (nframes_t frame, double fpu)
+Editor::reposition_and_zoom (nframes64_t frame, double fpu)
 {
 	reset_x_origin (frame);
 	reset_zoom (fpu);
@@ -4241,7 +4241,7 @@ Editor::post_zoom ()
 {
 	// convert fpu to frame count
 
-	nframes_t frames = (nframes_t) floor (frames_per_unit * canvas_width);
+	nframes64_t frames = (nframes64_t) floor (frames_per_unit * canvas_width);
 
 	if (frames_per_unit != zoom_range_clock.current_duration()) {
 		zoom_range_clock.set (frames);
@@ -4270,11 +4270,11 @@ Editor::post_zoom ()
 }
 
 void
-Editor::queue_visual_change (nframes_t where)
+Editor::queue_visual_change (nframes64_t where)
 {
 	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
 	pending_visual_change.time_origin = where;
-	
+
 	if (pending_visual_change.idle_handler_id < 0) {
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
 	}
@@ -4311,9 +4311,18 @@ Editor::idle_visual_changer ()
 
 	if (p & VisualChange::TimeOrigin) {
 		
-		nframes_t time_origin = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+		nframes64_t time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+
+		/* if we seek beyond the current end of the canvas, move the end */
 
 		if (time_origin != pending_visual_change.time_origin) {
+			
+			if (horizontal_adjustment.get_upper() < pending_visual_change.time_origin) {
+				last_canvas_frame = pending_visual_change.time_origin + current_page_frames();
+				horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
+				reset_scrolling_region ();
+			}
+			
 			horizontal_adjustment.set_value (pending_visual_change.time_origin/frames_per_unit);
 		} else {
 			update_fixed_rulers();
@@ -4391,7 +4400,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 }
 
 void
-Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
+Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
 {
 	if (!session) return;
 
@@ -4418,7 +4427,7 @@ Editor::set_loop_range (nframes_t start, nframes_t end, string cmd)
 }
 
 void
-Editor::set_punch_range (nframes_t start, nframes_t end, string cmd)
+Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
 {
 	if (!session) return;
 
@@ -4466,7 +4475,7 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelec
 			
 			if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
 
-				Playlist::RegionList* regions = pl->regions_at ((nframes_t) floor ( (double)where * ds->speed()));
+				Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)where * ds->speed()));
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 
@@ -4504,7 +4513,7 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSe
 			
 			if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
 
-				Playlist::RegionList* regions = pl->regions_touched ((nframes_t) floor ( (double)where * ds->speed()), max_frames);
+				Playlist::RegionList* regions = pl->regions_touched ((nframes64_t) floor ( (double)where * ds->speed()), max_frames);
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 

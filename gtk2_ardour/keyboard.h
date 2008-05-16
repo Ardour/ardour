@@ -116,6 +116,7 @@ class Keyboard : public sigc::trackable, Stateful
 	static void magic_widget_drop_focus ();
 
 	static void setup_keybindings ();
+	static void keybindings_changed ();
 	static void save_keybindings ();
 	static bool load_keybindings (std::string path);
 	static void set_can_save_keybindings (bool yn);
@@ -146,6 +147,7 @@ class Keyboard : public sigc::trackable, Stateful
 	static Gtk::Window* current_window;
 	static std::string user_keybindings_path;
 	static bool can_save_keybindings;
+	static bool bindings_changed_after_save_became_legal;
 	static std::string _current_binding_name;
 
 	typedef std::pair<std::string,std::string> two_strings;

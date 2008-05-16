@@ -53,7 +53,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-/* XXX this is a hack. it ought to be the maximum value of an nframes_t */
+/* XXX this is a hack. it ought to be the maximum value of an nframes64_t */
 
 const double max_canvas_coordinate = (double) JACK_MAX_FRAMES;
 
@@ -329,7 +329,7 @@ Editor::track_canvas_size_allocated ()
 		full_canvas_height = height;
 	}
 
-	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
+	zoom_range_clock.set ((nframes64_t) floor ((canvas_width * frames_per_unit)));
 	playhead_cursor->set_position (playhead_cursor->current_frame);
 
 	reset_hscrollbar_stepping ();
@@ -556,8 +556,8 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (GdkEventMotion* event)
 {
-	nframes_t rightmost_frame = leftmost_frame + current_page_frames();
-	nframes_t frame = drag_info.current_pointer_frame;
+	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
+	nframes64_t frame = drag_info.current_pointer_frame;
 	bool startit = false;
 	double vertical_pos = vertical_adjustment.get_value();
 
@@ -615,10 +615,10 @@ Editor::_autoscroll_canvas (void *arg)
 bool
 Editor::autoscroll_canvas ()
 {
-	nframes_t new_frame;
-	nframes_t limit = max_frames - current_page_frames();
+	nframes64_t new_frame;
+	nframes64_t limit = max_frames - current_page_frames();
 	GdkEventMotion ev;
-	nframes_t target_frame;
+	nframes64_t target_frame;
 	double new_pixel;
 	double target_pixel;
 
@@ -715,17 +715,17 @@ Editor::autoscroll_canvas ()
 			
 			/* after about a while, speed up a bit by changing the timeout interval */
 			
-			autoscroll_x_distance = (nframes_t) floor (current_page_frames()/30.0f);
+			autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/30.0f);
 			
 		} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
 			
-			autoscroll_x_distance = (nframes_t) floor (current_page_frames()/20.0f);
+			autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/20.0f);
 			
 		} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
 			
 			/* after about another while, speed up by increasing the shift per callback */
 			
-			autoscroll_x_distance =  (nframes_t) floor (current_page_frames()/10.0f);
+			autoscroll_x_distance =  (nframes64_t) floor (current_page_frames()/10.0f);
 			
 		} 
 	}
@@ -765,7 +765,7 @@ Editor::start_canvas_autoscroll (int dx, int dy)
 	autoscroll_active = true;
 	autoscroll_x = dx;
 	autoscroll_y = dy;
-	autoscroll_x_distance = (nframes_t) floor (current_page_frames()/50.0);
+	autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/50.0);
 	autoscroll_y_distance = fabs (dy * 5); /* pixels */
 	autoscroll_cnt = 0;
 	
@@ -837,7 +837,7 @@ Editor::tie_vertical_scrolling ()
 void 
 Editor::canvas_horizontally_scrolled ()
 {
-	nframes64_t time_origin = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	nframes64_t time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
 	if (time_origin != leftmost_frame) {
 		canvas_scroll_to (time_origin);
@@ -847,8 +847,9 @@ Editor::canvas_horizontally_scrolled ()
 void
 Editor::canvas_scroll_to (nframes64_t time_origin)
 {
-  	leftmost_frame = time_origin;
-	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
+	leftmost_frame = time_origin;
+
+	nframes64_t rightmost_frame = leftmost_frame + current_page_frames ();
 
 	if (rightmost_frame > last_canvas_frame) {
 		last_canvas_frame = rightmost_frame;

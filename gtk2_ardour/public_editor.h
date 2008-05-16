@@ -108,8 +108,12 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void separate_region_from_selection () = 0;
 	virtual void toggle_playback (bool with_abort) = 0;
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual nframes_t unit_to_frame (double unit) const = 0;
-	virtual double frame_to_unit (nframes_t frame) const = 0;
+	virtual nframes64_t unit_to_frame (double unit) const = 0;
+	// XXX remove me when libardour goes nframes64_t
+	double frame_to_unit (nframes_t frame) const { 
+		return frame_to_unit ((nframes64_t) frame);
+	}
+	virtual double frame_to_unit (nframes64_t frame) const = 0;
 	virtual double frame_to_unit (double frame) const = 0;
 	virtual nframes64_t pixel_to_frame (double pixel) const = 0;
 	virtual gulong frame_to_pixel (nframes64_t frame) const = 0;
@@ -146,21 +150,21 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
 	virtual TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0) = 0;
-	virtual nframes_t leftmost_position() const = 0;
-	virtual nframes_t current_page_frames() const = 0;
+	virtual nframes64_t leftmost_position() const = 0;
+	virtual nframes64_t current_page_frames() const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
 	virtual bool new_regionviews_display_gain () = 0;
 	virtual void prepare_for_cleanup () = 0;
-	virtual void reset_x_origin (nframes_t frame) = 0;
+	virtual void reset_x_origin (nframes64_t frame) = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space() = 0;
 	virtual void restore_editing_space() = 0;
 	virtual nframes64_t get_preferred_edit_position (bool ignore_playhead = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret) = 0;
-	virtual void mouse_add_new_marker (nframes_t where, bool is_cd=false, bool is_xrun=false) = 0;
+	virtual void mouse_add_new_marker (nframes64_t where, bool is_cd=false, bool is_xrun=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 
 	sigc::signal<void> ZoomFocusChanged;
@@ -168,7 +172,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	sigc::signal<void> Resized;
 	sigc::signal<void> Realized;
 	sigc::signal<void> GoingAway;
-	sigc::signal<void,nframes_t> UpdateAllTransportClocks;
+	sigc::signal<void,nframes64_t> UpdateAllTransportClocks;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 

@@ -54,7 +54,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
 	int x, y;
 	double wx, wy;
-	nframes_t xdelta;
+	nframes64_t xdelta;
 	int direction = ev->direction;
 
   retry:
@@ -77,7 +77,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.x = wx;
 			event.button.y = wy;
 			
-			nframes_t where = event_frame (&event, 0, 0);
+			nframes64_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (false, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
@@ -112,7 +112,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.button.x = wx;
 			event.button.y = wy;
 			
-			nframes_t where = event_frame (&event, 0, 0);
+			nframes64_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (true, where);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
@@ -171,7 +171,7 @@ Editor::track_canvas_scroll_event (GdkEventScroll *event)
 bool
 Editor::time_canvas_scroll (GdkEventScroll* ev)
 {
-	nframes_t xdelta;
+	nframes64_t xdelta;
 	int direction = ev->direction;
 
 	switch (direction) {
