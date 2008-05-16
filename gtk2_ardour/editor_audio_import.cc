@@ -779,7 +779,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 			just_one.clear ();
 			just_one.push_back (*x);
 			
-			region_name = region_name_from_path ((*x)->path(), false, true, sources.size(), n);
+			region_name = region_name_from_path ((*x)->path(), false, false, sources.size(), n);
 
 			cout << "REGION NAME: " << region_name << endl;
 			cout << "SOURCE LENGTH: " << (*x)->length() << endl;
