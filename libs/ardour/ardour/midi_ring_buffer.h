@@ -141,13 +141,15 @@ template<typename T>
 bool
 MidiRingBufferBase<T>::full_peek(size_t size, T* dst)
 {
-	if (read_space() < size)
+	if (read_space() < size) {
 		return false;
+	}
 
 	const size_t read_size = peek(size, dst);
 	
-	if (read_size < size)
+	if (read_size < size) {
 		peek(size - read_size, dst + read_size);
+	}
 
 	return true;
 }
@@ -181,13 +183,15 @@ template<typename T>
 bool
 MidiRingBufferBase<T>::full_read(size_t size, T* dst)
 {
-	if (read_space() < size)
+	if (read_space() < size) {
 		return false;
+	}
 
 	const size_t read_size = read(size, dst);
 	
-	if (read_size < size)
+	if (read_size < size) {
 		read(size - read_size, dst + read_size);
+	}
 
 	return true;
 }
@@ -292,11 +296,14 @@ inline bool
 MidiRingBuffer::read(double* time, size_t* size, Byte* buf)
 {
 	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)time);
-	if (success)
+	
+	if (success) {
 		success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)size);
-	if (success)
+	}
+	if (success) {
 		success = MidiRingBufferBase<Byte>::full_read(*size, buf);
-
+	}
+	
 	return success;
 }
 
@@ -308,8 +315,9 @@ inline bool
 MidiRingBuffer::read_prefix(double* time, size_t* size)
 {
 	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)time);
-	if (success)
+	if (success) {
 		success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)size);
+	}
 
 	return success;
 }
@@ -338,8 +346,9 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 	// Don't write event if it doesn't match channel filter
 	if (is_channel_event(buf[0]) && get_channel_mode() == FilterChannels) {
 		Byte channel = buf[0] & 0x0F;
-		if ( !(get_channel_mask() & (1L << channel)) )
+		if ( !(get_channel_mask() & (1L << channel)) ) {
 			return 0;
+		}
 	}
 
 	if (write_space() < (sizeof(double) + sizeof(size_t) + size)) {
@@ -388,8 +397,9 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 	
 		full_peek(sizeof(double), (Byte*)&ev_time);
 	
-		if (ev_time > end)
+		if (ev_time > end) {
 			break;
+		}
 		
 		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)&ev_time);
 		if (success) {

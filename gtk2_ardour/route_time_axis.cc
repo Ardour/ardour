@@ -1619,8 +1619,9 @@ void
 RouteTimeAxisView::automation_track_hidden (Parameter param)
 {
 	RouteAutomationNode* ran = automation_track(param);
-	if (!ran)
+	if (!ran) {
 		return;
+	}
 
 	_show_automation.erase(param);
 	ran->track->get_state_node()->add_property (X_("shown"), X_("no"));

@@ -58,17 +58,61 @@ public:
 	inline uint32_t       id()      const { return _id; }
 	inline uint8_t        channel() const { return _channel; }
 
+	/**
+	 * Equivalence operator
+	 * It is obvious from the definition that this operator
+	 * is transitive, as required by stict weak ordering
+	 * (see: http://www.sgi.com/tech/stl/StrictWeakOrdering.html)
+	 */
 	inline bool operator==(const Parameter& id) const {
 		return (_type == id._type && _id == id._id && _channel == id._channel);
 	}
 	
-	/** Arbitrary but fixed ordering (for use in e.g. std::map) */
+	/** Strict weak ordering 
+	 * (see: http://www.sgi.com/tech/stl/StrictWeakOrdering.html)  
+	 * This is necessary so that std::set works): 
+	 * Sort Parameters first according to type then to id and lastly to channel.
+	 *  
+	 * Proof:
+	 * <ol>
+	 * <li>Irreflexivity: f(x, x) is false because of the irreflexivity of \c < in each branch.</li>
+	 * 
+	 * <li>Antisymmetry: given x != y, f(x, y) implies !f(y, x) because of the same 
+	 *     property of \c < in each branch and the symmetry of operator==. </li>
+	 * 
+	 * <li>Transitivity: let f(x, y) and f(y, z) be true. We prove by assuming the contrary,
+	 *     that f(x, z) does not hold. 
+	 *    That would imply exactly one of the following:
+	 * 	  <ol>
+	 *      <li> x == z which contradicts the assumption f(x, y) and f(y, x)
+	 *                 because of antisymmetry.
+	 *      </li>
+	 *      <li> f(z, x) is true. That would imply that one of the ivars (we call it i) 
+	 *           of x is greater than the same ivar in z while all "previous" ivars
+	 *           are equal. That would imply that also in y all those "previous"
+	 *           ivars are equal and because if x.i > z.i it is impossible
+	 *           that there is an y that satisfies x.i < y.i < z.i at the same
+	 *           time which contradicts the assumption.
+	 *      </li>
+	 *    </ol> 
+	 * </li>
+	 * </ol>
+	 */
+	
 	inline bool operator<(const Parameter& id) const {
 #ifndef NDEBUG
 		if (_type == NullAutomation)
 			PBD::warning << "Uninitialized Parameter compared." << endmsg;
 #endif
-		return (_channel < id._channel || _type < id._type || _id < id._id);
+		if (_type < id._type) {
+			return true;
+		} else if (_type == id._type && _id < id._id) {
+			return true;
+		} else if (_id == id._id && _channel < id._channel) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	inline operator bool() const { return (_type != 0); }
