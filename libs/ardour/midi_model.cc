@@ -584,7 +584,6 @@ void MidiModel::append_note_off_unlocked(uint8_t chan, double time,
 	for (WriteNotes::iterator n = _write_notes[chan].begin(); n
 			!= _write_notes[chan].end(); ++n) {
 		Note& note = *_notes[*n].get();
-		//cerr << (unsigned)(uint8_t)note.note() << " ? " << (unsigned)note_num << endl;
 		if (note.note() == note_num) {
 			assert(time >= note.time());
 			note.set_duration(time - note.time());

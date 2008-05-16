@@ -81,7 +81,7 @@ public:
 	virtual double x2() = 0;
 	virtual double y2() = 0;
 
-	const boost::shared_ptr<ARDOUR::Note> note() { return _note; }
+	const boost::shared_ptr<ARDOUR::Note> note() const { return _note; }
 
 protected:
 	enum State { None, Pressed, Dragging };

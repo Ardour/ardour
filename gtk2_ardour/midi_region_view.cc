@@ -764,10 +764,20 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 		if (note->duration() == 0) {
-			cerr << "MidiModel: WARNING: Discovered note with duration 0 and pitch "
-				<< (int)note->note() << " at time " << note->time() << endl;
+
 			if (_active_notes) {
 				assert(note->note() < 128);
+				// If this note is already active there's a stuck note,
+				// finish the old note rectangle
+				if (_active_notes[note->note()]) {
+					CanvasNote* const old_rect = _active_notes[note->note()];
+					boost::shared_ptr<ARDOUR::Note> old_note = old_rect->note();
+					cerr << "MidiModel: WARNING: Note has duration 0: chan " << old_note->channel()
+						<< "note " << (int)old_note->note() << " @ " << old_note->time() << endl;
+					/* FIXME: How large to make it?  Make it a diamond? */
+					old_rect->property_x2() = old_rect->property_x1() + 2.0;
+					old_rect->property_outline_what() = (guint32) 0xF;
+				}
 				_active_notes[note->note()] = ev_rect;
 			}
 			/* outline all but right edge */
