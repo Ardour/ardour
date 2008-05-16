@@ -764,8 +764,8 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 		if (note->duration() == 0) {
-			cerr << "MidiModel: WARNING: Discovered note with duration 0 and pitch" << note->note() 
-			     << " at time " << note->time() << endl;
+			cerr << "MidiModel: WARNING: Discovered note with duration 0 and pitch"
+				<< (int)note->note() << " at time " << note->time() << endl;
 			if (_active_notes) {
 				assert(note->note() < 128);
 				_active_notes[note->note()] = ev_rect;
