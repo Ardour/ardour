@@ -137,9 +137,10 @@ class SMFSource : public MidiSource {
 	string         _take_id;
 	bool           _allow_remove_if_empty;
 	FILE*          _fd;
-	double         _last_ev_time; // last frame time written, relative to source start
+	double         _last_ev_time; ///< last frame time written, relative to source start
 	uint32_t       _track_size;
-	uint32_t       _header_size; // size of SMF header, including MTrk chunk header
+	uint32_t       _header_size; ///< size of SMF header, including MTrk chunk header
+	bool           _empty; ///< true iff file contains (non-empty) events
 
 	static string _search_path;
 };

@@ -59,6 +59,7 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	, _last_ev_time(0)
 	, _track_size(4) // 4 bytes for the ever-present EOT event
 	, _header_size(22)
+	, _empty(true)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
@@ -83,6 +84,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 	, _last_ev_time(0)
 	, _track_size(4) // 4 bytes for the ever-present EOT event
 	, _header_size(22)
+	, _empty(true)
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -156,6 +158,7 @@ SMFSource::open()
 		uint32_t track_size_be = 0;
 		fread(&track_size_be, 4, 1, _fd);
 		_track_size = GUINT32_FROM_BE(track_size_be);
+		_empty = _track_size > 4;
 		//cerr << "SMF - read track size " << _track_size << endl;
 
 	// We're making a new file
@@ -167,6 +170,7 @@ SMFSource::open()
 			return -2;
 		}
 		_track_size = 4;
+		_empty = true;
 
 		// Write a tentative header just to pad things out so writing happens in the right spot
 		flush_header();
@@ -499,12 +503,12 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 {
-	printf("SMFSource: %s - append_event_unlocked chan = %u, time = %lf, size = %u, data = ",
+	/*printf("SMFSource: %s - append_event_unlocked chan = %u, time = %lf, size = %u, data = ",
 			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size()); 
 	for (size_t i=0; i < ev.size(); ++i) {
 		printf("%X ", ev.buffer()[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 	
 	assert(ev.time() >= 0);
 	
@@ -533,8 +537,10 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 
 	_track_size += stamp_size + ev.size();
 	_write_data_count += ev.size();
-
 	_last_ev_time = ev.time();
+
+	if (ev.size() > 0)
+		_empty = false;
 }
 
 
@@ -844,11 +850,7 @@ SMFSource::set_source_name (string newname, bool destructive)
 bool
 SMFSource::is_empty () const
 {
-	bool ret = (_track_size > 4);
-
-	//cerr << name() << " IS EMPTY: " << ret << endl;
-
-	return ret;
+	return _empty;
 }
 
 

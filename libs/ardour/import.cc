@@ -171,9 +171,6 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 
 		filepath += '/';
 		filepath += get_non_existent_filename (type, allow_replacing, filepath, basename, n, channels); 
-
-		cout << "NEW SOURCE PATH: " << filepath << endl;
-
 		new_paths.push_back (filepath);
 	}
 
@@ -377,6 +374,7 @@ Session::import_audiofiles (import_status& status)
 	typedef vector<boost::shared_ptr<Source> > Sources;
 	Sources all_new_sources;
 	boost::shared_ptr<AudioFileSource> afs;
+	boost::shared_ptr<SMFSource> smfs;
 	uint channels = 0;
 
 	status.sources.clear ();
@@ -385,9 +383,8 @@ Session::import_audiofiles (import_status& status)
 			p != status.paths.end() && !status.cancel;
 			++p, ++cnt)
 	{
-
 		boost::shared_ptr<ImportableSource> source;
-		std::auto_ptr<SMFReader>        smf_reader;
+		std::auto_ptr<SMFReader>            smf_reader;
 		const DataType type = ((*p).rfind(".mid") != string::npos) ? 
 			DataType::MIDI : DataType::AUDIO;
 		
@@ -458,10 +455,7 @@ Session::import_audiofiles (import_status& status)
 
 		/* flush the final length(s) to the header(s) */
 
-		for (Sources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ++x)
-		{
-			cout << "NEW SOURCE: " << (*x)->path() << endl;
-
+		for (Sources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ) {
 			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
 				afs->update_header(0, *now, xnow);
 				afs->done_with_peakfile_writes ();
@@ -471,6 +465,13 @@ Session::import_audiofiles (import_status& status)
 			
 			if (Config->get_auto_analyse_audio()) {
 				Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
+			}
+
+			/* don't create tracks for empty MIDI sources (channels) */
+			if ((smfs = boost::dynamic_pointer_cast<SMFSource>(*x)) != 0 && smfs->is_empty()) {
+				x = all_new_sources.erase(x);
+			} else {
+				++x;
 			}
 		}
 
