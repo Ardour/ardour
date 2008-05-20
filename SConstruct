@@ -937,7 +937,7 @@ prep_libcheck(env, libraries['boost'])
 libraries['boost'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
 conf = Configure (libraries['boost'])
 if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
-        print "Boost header files do not appear to be installed."
+        print "Boost header files do not appear to be installed. You also might be running a buggy version of scons. Try scons 0.97 if you can."
         sys.exit (1)
     
 libraries['boost'] = conf.Finish ()
