@@ -257,11 +257,11 @@ Session::butler_thread_work ()
 
 			/* don't read inactive tracks */
 
-			/*IO* io = ds->io();
+			IO* io = ds->io();
 			
 			if (io && !io->active()) {
 				continue;
-			}*/
+			}
 
 			switch (ds->do_refill ()) {
 			case 0:
