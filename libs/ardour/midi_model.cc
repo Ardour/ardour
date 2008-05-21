@@ -59,13 +59,14 @@ void MidiModel::read_unlock() const {
 
 MidiModel::const_iterator::const_iterator(const MidiModel& model, double t)
 	: _model(&model)
-	, _is_end( (t == DBL_MAX) || model.empty())
-	, _locked( !_is_end)
+	, _is_end( (t == DBL_MAX) || model.empty() )
+	, _locked( !_is_end )
 {
 	//cerr << "Created MIDI iterator @ " << t << " (is end: " << _is_end << ")" << endl;
 
-	if (_is_end)
+	if (_is_end) {
 		return;
+	}
 
 	model.read_lock();
 
@@ -286,8 +287,9 @@ MidiModel::const_iterator& MidiModel::const_iterator::operator=(const const_iter
 	size_t index   = other._control_iter - other._control_iters.begin();
 	_control_iter  = _control_iters.begin() + index;
 	
-	if (!_is_end)
+	if (!_is_end) {
 		_event =  boost::shared_ptr<MIDI::Event>(new MIDI::Event(*other._event, true));
+	}
 
 	return *this;
 }
@@ -355,11 +357,12 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
  * \return true on success
  */
 bool
-MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event> ev, const MidiControlIterator& iter) const
+MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event>& ev, const MidiControlIterator& iter) const
 {
 	assert(iter.automation_list.get());
-	if (!ev)
+	if (!ev) {
 		ev = boost::shared_ptr<MIDI::Event>(new MIDI::Event(0, 3, NULL, true));
+	}
 	
 	switch (iter.automation_list->parameter().type()) {
 	case MidiCCAutomation:

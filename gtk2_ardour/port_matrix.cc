@@ -601,7 +601,7 @@ PortMatrix::set_offer_inputs (bool i)
 
 PortGroupList::PortGroupList (ARDOUR::Session & session, ARDOUR::DataType type, bool offer_inputs, Mask mask)
 	: _session (session), _type (type), _offer_inputs (offer_inputs),
-	  buss (_("Buss"), "ardour:", mask & BUSS),
+	  buss (_("Bus"), "ardour:", mask & BUSS),
 	  track (_("Track"), "ardour:", mask & TRACK),
 	  system (_("System"), "system:", mask & SYSTEM),
 	  other (_("Other"), "", mask & OTHER)

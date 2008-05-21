@@ -40,7 +40,7 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	  _io (io)
 {
 	/* Listen for ports changing on the IO */
-	if (!offer_inputs) {
+	if (_offer_inputs) {
 		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	} else {
 		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
@@ -69,13 +69,13 @@ void
 IOSelector::set_state (int r, std::string const & p, bool s)
 {
 	if (s) {
-		if (!_offer_inputs) {
+		if (_offer_inputs) {
 			_io->connect_input (_io->input(r), p, 0);
 		} else {
 			_io->connect_output (_io->output(r), p, 0);
   		}
   	} else {
-  		if (!_offer_inputs) {
+  		if (_offer_inputs) {
   			_io->disconnect_input (_io->input(r), p, 0);
   		} else {
   			_io->disconnect_output (_io->output(r), p, 0);
@@ -89,9 +89,9 @@ IOSelector::get_state (int r, std::string const & p) const
 	vector<string> connections;
 
 	if (_offer_inputs) {
-		_io->output(r)->get_connections (connections);
-	} else {
 		_io->input(r)->get_connections (connections);
+	} else {
+		_io->output(r)->get_connections (connections);
 	}
 
 	int k = 0;
@@ -110,7 +110,7 @@ IOSelector::get_state (int r, std::string const & p) const
 uint32_t
 IOSelector::n_rows () const
 {
-	if (!_offer_inputs) {
+	if (_offer_inputs) {
 		return _io->inputs().num_ports (_io->default_type());
 	} else {
 		return _io->outputs().num_ports (_io->default_type());
@@ -120,7 +120,7 @@ IOSelector::n_rows () const
 uint32_t
 IOSelector::maximum_rows () const
 {
-	if (!_offer_inputs) {
+	if (_offer_inputs) {
 		return _io->input_maximum ().get (_io->default_type());
 	} else {
 		return _io->output_maximum ().get (_io->default_type());
@@ -131,7 +131,7 @@ IOSelector::maximum_rows () const
 uint32_t
 IOSelector::minimum_rows () const
 {
-	if (!_offer_inputs) {
+	if (_offer_inputs) {
 		return _io->input_minimum ().get (_io->default_type());
 	} else {
 		return _io->output_minimum ().get (_io->default_type());
@@ -141,7 +141,7 @@ IOSelector::minimum_rows () const
 std::string
 IOSelector::row_name (int r) const
 {
-	if (!_offer_inputs) {
+	if (_offer_inputs) {
 		return _io->input(r)->name();
 	} else {
 		return _io->output(r)->name();
@@ -155,7 +155,7 @@ IOSelector::add_row ()
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 
-	if (!_offer_inputs) {
+	if (_offer_inputs) {
 
 		try {
 			_io->add_input_port ("", this);
@@ -186,7 +186,7 @@ IOSelector::remove_row (int r)
 	// The IO selector only works for single typed IOs
 	const ARDOUR::DataType t = _io->default_type ();
 	
-	if (!_offer_inputs) {
+	if (_offer_inputs) {
 		_io->remove_input_port (_io->input (r), this);
 	} else {
 		_io->remove_output_port (_io->output (r), this);
