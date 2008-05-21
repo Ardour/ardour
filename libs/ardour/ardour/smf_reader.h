@@ -53,7 +53,6 @@ public:
 	
 	const std::string& filename() const { return _filename; };
 
-	//TimeUnit unit()       const { return _unit; }
 	uint16_t type()       const { return _type; }
 	uint16_t ppqn()       const { return _ppqn; }
 	uint16_t num_tracks() const { return _num_tracks; }
@@ -74,7 +73,6 @@ protected:
 
 	std::string _filename;
 	FILE*       _fd;
-	//TimeUnit    _unit;
 	uint16_t    _type;
 	uint16_t    _ppqn;
 	uint16_t    _num_tracks;

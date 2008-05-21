@@ -172,7 +172,7 @@ MidiRingBufferBase<T>::read(size_t size, T* dst)
 			: _size - priv_read_ptr;
 	
 	memcpy(dst, &_buf[priv_read_ptr], read_size);
-
+        
 	g_atomic_int_set(&_read_ptr, (priv_read_ptr + read_size) % _size);
 
 	return read_size;
@@ -211,7 +211,6 @@ MidiRingBufferBase<T>::skip(size_t size)
 
 	return true;
 }
-
 
 
 template<typename T>

@@ -66,7 +66,6 @@ public:
 	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
 	
 	virtual string describe_parameter(Parameter param);
-	static  string get_name_for_cc_number (uint32_t cc_number);
 	virtual float  default_parameter_value(Parameter param) { return 1.0f; }
 	
 	virtual void clear_automation();

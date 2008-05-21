@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <pbd/error.h>
 #include <pbd/enumwriter.h>
+#include <midi++/names.h>
 #include <ardour/session.h>
 #include <ardour/automatable.h>
 #include <ardour/midi_track.h>
@@ -192,7 +193,6 @@ Automatable::control (Parameter parameter) const
 	}
 }
 
-
 string
 Automatable::describe_parameter (Parameter param)
 {
@@ -203,12 +203,8 @@ Automatable::describe_parameter (Parameter param)
 	} else if (param.type() == PanAutomation) {
 		return (string_compose(_("Pan %1"), param.id()));
 	} else if (param.type() == MidiCCAutomation) {
-		string name = get_name_for_cc_number(param.id());
-		if(name.length() != 0) {
-			return string_compose("%1 [%2]", name, int(param.channel()) + 1);			
-		} else {
-			return string_compose("CC %1 [%2]", param.id(), int(param.channel()) + 1);
-		}
+		return string_compose("CC %1 (%2) [%3]",
+				param.id(), midi_name(param.id()), int(param.channel()) + 1);			
 	} else if (param.type() == MidiPgmChangeAutomation) {
 		return string_compose("Program [%1]", int(param.channel()) + 1);
 	} else if (param.type() == MidiPitchBenderAutomation) {
@@ -218,185 +214,6 @@ Automatable::describe_parameter (Parameter param)
 	} else {
 		return param.to_string();
 	}
-}
-
-string
-Automatable::get_name_for_cc_number (uint32_t cc_number)
-{
-	string name;
-	
-	switch (cc_number) {
-		case 0:
-			name = "Upper Bank";
-			break;
-			
-		case 32:
-			name = "Lower Bank";
-			break;
-		
-		case 1:
-			name = "Modulation MSB";
-			break;
-			
-		case 2:
-			name = "Breath Controller";
-			break;	
-			
-		case 4:
-			name = "Foot Controller";
-			break;
-			
-		case 5:
-			name = "Portamento Time";
-			break;
-			
-		case 6:
-			name = "RPN Controller";
-			break;
-			
-		case 7:
-			name = "Main Volume";
-			break;
-			
-		case 8:
-			name = "Balance";
-			break;
-			
-		case 10:
-			name = "Panorama";
-			break;
-			
-		case 11:
-			name = "Expression";
-			break;
-			
-		case 12:
-			name = "Effect 1";
-			break;
-			
-		case 13:
-			name = "Effect 2";
-			break;
-			
-		case 16:
-		case 17:
-		case 18:
-		case 19:
-			name = string_compose("General Purpose %1", cc_number - 15);
-			break;
-			
-		case 64:
-			name = "Sustain Pedal";
-			break;
-			
-		case 65:
-			name = "Portamento";
-			break;
-			
-		case 66:
-			name = "Sostenuto";
-			break;
-			
-		case 67:
-			name = "Soft Pedal";
-			break;
-			
-		case 68:
-			name = "Legato Footswitch";
-			break;
-			
-		case 69:
-			name = "Hold 2";
-			break;
-			
-		case 70:
-		case 71:
-		case 72:
-		case 73:
-		case 74:
-			name = string_compose("Sound Controller %1", cc_number - 69);
-			break;
-			
-		case 80:
-		case 81:
-		case 82:
-		case 83:
-			name = string_compose("General Purpose %1", cc_number - 75);
-			break;
-			
-		case 84:
-			name = "Portamento Control";
-			break;
-			
-		case 91:
-		case 92:
-		case 93:
-		case 94:
-		case 95:
-			name = string_compose("Effects %1 Depth", cc_number - 90);
-			break;			
-			
-		case 96:
-			name = "Data Increment RPN/NRPN";
-			break;
-			
-		case 97:
-			name = "Data Decrement RPN/NRPN";
-			break;
-			
-		case 98:
-			name = "NRPN LSB";
-			break;
-			
-		case 99:
-			name = "NRPN MSB";
-			break;
-						
-		case 100:
-			name = "RPN LSB";
-			break;
-			
-		case 101:
-			name = "RPN MSB";
-			break;
-			
-		case 120:
-			name = "all sounds off";
-			break;
-			
-		case 121:
-			name = "Controller Reset";
-			break;
-			
-		case 122:
-			name = "Local Control on/off";
-			break;
-			
-		case 123:
-			name = "all notes off";
-			break;
-			
-		case 124:
-			name = "omni off";
-			break;
-			
-		case 125:
-			name = "omni on";
-			break;
-			
-		case 126:
-			name = "mono on / poly off";
-			break;
-			
-		case 127:
-			name = "poly on / mono off";
-			break;	
-			
-		default:
-			break;
-	}
-	
-	return name;
 }
 
 void

@@ -32,9 +32,8 @@ using namespace std;
 namespace ARDOUR {
 
 
-SMFReader::SMFReader(const std::string filename)
+SMFReader::SMFReader(const string filename)
 	: _fd(NULL)
-	//, _unit(TimeUnit::BEATS, 192)
 	, _ppqn(0)
 	, _track(0)
 	, _track_size(0)
@@ -87,7 +86,6 @@ SMFReader::open(const string& filename) throw (logic_error, UnsupportedTime)
 		_num_tracks = GUINT16_FROM_BE(num_tracks_be);
 
 		// Read PPQN (bytes 12..13)
-
 		uint16_t ppqn_be = 0;
 		fread(&ppqn_be, 2, 1, _fd);
 		_ppqn = GUINT16_FROM_BE(ppqn_be);
@@ -95,8 +93,6 @@ SMFReader::open(const string& filename) throw (logic_error, UnsupportedTime)
 		// TODO: Absolute (SMPTE seconds) time support
 		if ((_ppqn & 0x8000) != 0)
 			throw UnsupportedTime();
-
-		//_unit = TimeUnit::beats(_ppqn);
 
 		seek_to_track(1);
 		
@@ -131,7 +127,6 @@ SMFReader::seek_to_track(unsigned track) throw (std::logic_error)
 
 		if (!strcmp(id, "MTrk")) {
 			++track_pos;
-			//std::cerr << "Found track " << track_pos << endl;
 		} else {
 			std::cerr << "Unknown chunk ID " << id << endl;
 		}
@@ -188,10 +183,6 @@ SMFReader::read_event(size_t    buf_len,
 	assert(ev_size);
 	assert(delta_time);
 
-	//cerr.flags(ios::hex);
-	//cerr << "SMF - Reading event at offset 0x" << ftell(_fd) << endl;
-	//cerr.flags(ios::dec);
-
 	// Running status state
 	static uint8_t  last_status = 0;
 	static uint32_t last_size   = 0;
@@ -209,12 +200,10 @@ SMFReader::read_event(size_t    buf_len,
 		status = last_status;
 		*ev_size = last_size;
 		fseek(_fd, -1, SEEK_CUR);
-		//cerr << "RUNNING STATUS, size = " << *ev_size << endl;
 	} else {
 		last_status = status;
 		*ev_size = midi_event_size(status) + 1;
 		last_size = *ev_size;
-		//cerr << "NORMAL STATUS, size = " << *ev_size << endl;
 	}
 
 	buf[0] = (uint8_t)status;
@@ -231,7 +220,6 @@ SMFReader::read_event(size_t    buf_len,
 		cerr << size << endl;*/
 
 		if ((uint8_t)type == 0x2F) {
-			//cerr << "SMF - hit EOT" << endl;
 			return -1; // we hit the logical EOF anyway...
 		} else {
 			fseek(_fd, size, SEEK_CUR);
@@ -240,7 +228,7 @@ SMFReader::read_event(size_t    buf_len,
 	}
 
 	if (*ev_size > buf_len || *ev_size == 0 || feof(_fd)) {
-		//cerr << "Skipping event" << endl;
+		//cerr << "SMF - Skipping event" << endl;
 		// Skip event, return 0
 		fseek(_fd, *ev_size - 1, SEEK_CUR);
 		return 0;
@@ -248,6 +236,7 @@ SMFReader::read_event(size_t    buf_len,
 		// Read event, return size
 		if (ferror(_fd))
 			throw CorruptFile();
+		
 		fread(buf+1, 1, *ev_size - 1, _fd);
 	
 		if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {

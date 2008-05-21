@@ -18,9 +18,8 @@
  *
  */
 
-#ifndef MIDI_H
-#define MIDI_H
-
+#ifndef __midievents_h__
+#define __midievents_h__
 
 /**
  * \defgroup midi MIDI Definitions
@@ -133,4 +132,4 @@
 
 /** \} */
 
-#endif /* MIDI_H */
+#endif /* __midievents_h__ */
