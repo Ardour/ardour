@@ -818,13 +818,21 @@ MidiDiskstream::do_refill_with_alloc ()
 int
 MidiDiskstream::do_refill ()
 {
-	int32_t        ret = 0;
-	size_t         write_space = _playback_buf->write_space();
-
-	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
+	int     ret         = 0;
+	size_t  write_space = _playback_buf->write_space();
+	bool    reversed    = (_visible_speed * _session.transport_speed()) < 0.0f;
 
 	if (write_space == 0) {
 		return 0;
+	}
+	
+	/* if there are 2+ chunks of disk i/o possible for
+	   this track, let the caller know so that it can arrange
+	   for us to be called again, ASAP.
+	*/
+	
+	if (write_space >= (_slaved?3:2) * disk_io_chunk_frames) {
+		ret = 1;
 	}
 
 	/* if we're running close to normal speed and there isn't enough 
@@ -832,33 +840,27 @@ MidiDiskstream::do_refill ()
 
 	   at higher speeds, just do it because the sync between butler
 	   and audio thread may not be good enough.
-	   */
+	*/
 
 	if ((write_space < disk_io_chunk_frames) && fabs (_actual_speed) < 2.0f) {
-		//cerr << "No refill 1\n";
 		return 0;
 	}
 
 	/* when slaved, don't try to get too close to the read pointer. this
 	   leaves space for the buffer reversal to have something useful to
 	   work with.
-	   */
+	*/
 
 	if (_slaved && write_space < (_playback_buf->capacity() / 2)) {
-		//cerr << "No refill 2\n";
 		return 0;
 	}
 
 	if (reversed) {
-		//cerr << "No refill 3 (reverse)\n";
 		return 0;
 	}
 
+	/* at end: nothing to do */
 	if (file_frame == max_frames) {
-		//cerr << "No refill 4 (EOF)\n";
-
-		/* at end: nothing to do */
-
 		return 0;
 	}
 
@@ -866,19 +868,12 @@ MidiDiskstream::do_refill ()
 	assert(_playback_buf->write_space() > 0); // ... have something to write to, and
 	assert(file_frame <= max_frames); // ... something to write
 
-	nframes_t file_frame_tmp = file_frame;
 	nframes_t to_read = min(disk_io_chunk_frames, (max_frames - file_frame));
 	
-	// FIXME: read count?
-	if (read (file_frame_tmp, to_read, reversed)) {
+	if (read (file_frame, to_read, reversed)) {
 		ret = -1;
-		goto out;
 	}
-
-	file_frame = file_frame_tmp;
-
-out:
-
+		
 	return ret;
 }
 
@@ -897,8 +892,6 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 {
 	uint32_t to_write;
 	int32_t ret = 0;
-	// FIXME: I'd be lying if I said I knew what this thing was
-	//RingBufferNPT<CaptureTransition>::rw_vector transvec;
 	nframes_t total;
 
 	_write_data_count = 0;
@@ -929,7 +922,6 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 		ret = 1;
 	} 
 
-	//to_write = min (disk_io_chunk_frames, (nframes_t) vector.len[0]);
 	to_write = disk_io_chunk_frames;
 
 	assert(!destructive());
@@ -944,8 +936,7 @@ MidiDiskstream::do_flush (Session::RunContext context, bool force_flush)
 	}
 
 out:
-	//return ret;
-	return 0; // FIXME: everything's fine!  always!  honest!
+	return ret;
 }
 
 void
