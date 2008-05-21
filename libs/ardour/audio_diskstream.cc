@@ -861,18 +861,18 @@ AudioDiskstream::commit (nframes_t nframes)
 	}
 	
 	if (_slaved) {
-		/*if (_io && _io->active()) {*/
+		if (_io && _io->active()) {
 			need_butler = c->front()->playback_buf->write_space() >= c->front()->playback_buf->bufsize() / 2;
-		/*} else {
+		} else {
 			need_butler = false;
-		}*/
+		}
 	} else {
-		/*if (_io && _io->active()) {*/
+		if (_io && _io->active()) {
 			need_butler = c->front()->playback_buf->write_space() >= disk_io_chunk_frames
 				|| c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
-		/*} else {
+		} else {
 			need_butler = c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
-		}*/
+		}
 	}
 
 	if (commit_should_unlock) {
@@ -2202,7 +2202,7 @@ int
 AudioDiskstream::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many--) {
-		c->push_back (new ChannelInfo(_session.diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
+		c->push_back (new ChannelInfo(_session.audio_diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
 	}
 
 	_n_channels.set(DataType::AUDIO, c->size());

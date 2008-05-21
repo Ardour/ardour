@@ -69,10 +69,15 @@ int
 Session::start_butler_thread ()
 {
 	/* size is in Samples, not bytes */
-
-	dstream_buffer_size = (uint32_t) floor (Config->get_track_buffer_seconds() * (float) frame_rate());
-
-	Crossfade::set_buffer_size (dstream_buffer_size);
+	audio_dstream_buffer_size = (uint32_t) floor (Config->get_audio_track_buffer_seconds() * (float) frame_rate());
+	
+	/* size is in bytes
+	 * XXX: Jack needs to tell us the MIDI buffer size
+	 * (i.e. how many MIDI bytes we might see in a cycle)
+	 */
+	midi_dstream_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * (float)frame_rate());
+	
+	Crossfade::set_buffer_size (audio_dstream_buffer_size);
 
 	butler_should_run = false;
 

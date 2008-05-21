@@ -193,14 +193,11 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 		double x = 0.0, y = 0.0;
 		const bool ret = _control_iter->automation_list->rt_safe_earliest_event_unlocked(
 				_control_iter->x, DBL_MAX, x, y, false);
-		//cerr << "control_iter x:" << _control_iter->x << " y:" << _control_iter->y << endl;
 
 		if (ret) {
-			//cerr << "Incremented " << _control_iter->automation_list->parameter().id() << " to " << x << endl;
 			_control_iter->x = x;
 			_control_iter->y = y;
 		} else {
-			cerr << "Hit end of " << _control_iter->automation_list->parameter().id() << endl;
 			_control_iter->automation_list.reset();
 			_control_iter->x = DBL_MAX;
 		}
@@ -340,11 +337,11 @@ size_t MidiModel::read(MidiRingBuffer& dst, nframes_t start, nframes_t nframes,
 		          _read_iter->size(), 
 		          _read_iter->buffer());
 		
-		 //cerr << this << " MidiModel::read event @ " << _read_iter->time()  
-		 //<< " type: " << hex << int(_read_iter->type()) << dec 
-		 //<< " note: " << int(_read_iter->note()) 
-		 //<< " velocity: " << int(_read_iter->velocity()) 
-		 //<< endl;
+		 /*cerr << this << " MidiModel::read event @ " << _read_iter->time()  
+		 << " type: " << hex << int(_read_iter->type()) << dec 
+		 << " note: " << int(_read_iter->note()) 
+		 << " velocity: " << int(_read_iter->velocity()) 
+		 << endl;*/
 		
 		++_read_iter;
 		++read_events;

@@ -168,7 +168,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_locate_frame = 0;
 	pending_locate_roll = false;
 	pending_locate_flush = false;
-	dstream_buffer_size = 0;
+	audio_dstream_buffer_size = 0;
+	midi_dstream_buffer_size = 0;
 	state_tree = 0;
 	state_was_pending = false;
 	set_next_event ();

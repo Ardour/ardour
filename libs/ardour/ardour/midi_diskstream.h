@@ -171,13 +171,10 @@ class MidiDiskstream : public Diskstream
 	void engage_record_enable ();
 	void disengage_record_enable ();
 	
-	/* FIXME: too much code duplication in this class because of lack of ChannelInfo */
-
 	MidiRingBuffer*                   _playback_buf;
 	MidiRingBuffer*                   _capture_buf;
 	MidiPort*                         _source_port;
 	boost::shared_ptr<SMFSource>      _write_source;
-	RingBufferNPT<CaptureTransition>* _capture_transition_buf;
 	nframes_t                         _last_flush_frame;
 	NoteMode                          _note_mode;  
 };

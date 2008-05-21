@@ -163,6 +163,7 @@ IO::IO (Session& s, const string& name,
 IO::IO (Session& s, const XMLNode& node, DataType dt)
 	: Automatable (s, "unnamed io"),
       _output_buffers (new BufferSet()),
+	  _active(true),
 	  _default_type (dt)
 {
 	_meter = new PeakMeter (_session);

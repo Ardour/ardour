@@ -61,12 +61,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	: Diskstream(sess, name, flag)
 	, _playback_buf(0)
 	, _capture_buf(0)
-	//, _current_playback_buffer(0)
-	//, _current_capture_buffer(0)
-	//, _playback_wrap_buffer(0)
-	//, _capture_wrap_buffer(0)
 	, _source_port(0)
-	, _capture_transition_buf(0)
 	, _last_flush_frame(0)
 	, _note_mode(Sustained)
 {
@@ -86,12 +81,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
 	, _playback_buf(0)
 	, _capture_buf(0)
-	//, _current_playback_buffer(0)
-	//, _current_capture_buffer(0)
-	//, _playback_wrap_buffer(0)
-	//, _capture_wrap_buffer(0)
 	, _source_port(0)
-	, _capture_transition_buf(0)
 	, _last_flush_frame(0)
 	, _note_mode(Sustained)
 {
@@ -123,9 +113,8 @@ MidiDiskstream::init (Diskstream::Flag f)
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
 
-	_playback_buf = new MidiRingBuffer (_session.diskstream_buffer_size());
-	_capture_buf = new MidiRingBuffer (_session.diskstream_buffer_size());
-	_capture_transition_buf = new RingBufferNPT<CaptureTransition> (128);
+	_playback_buf = new MidiRingBuffer (_session.midi_diskstream_buffer_size());
+	_capture_buf = new MidiRingBuffer (_session.midi_diskstream_buffer_size());
 	
 	_n_channels = ChanCount(DataType::MIDI, 1);
 
@@ -141,10 +130,9 @@ MidiDiskstream::~MidiDiskstream ()
 void
 MidiDiskstream::non_realtime_locate (nframes_t position)
 {
-	//cerr << "MDS: non_realtime_locate: " << position << endl;
 	assert(_write_source);
 	_write_source->set_timeline_position (position);
-	seek(position, true); // correct?
+	seek(position, false);
 }
 
 
@@ -304,7 +292,6 @@ MidiDiskstream::set_destructive (bool yn)
 void
 MidiDiskstream::set_note_mode (NoteMode m)
 {
-	cout << "MDS: SET NOTE MODE: " << m << endl;
 	_note_mode = m;
 	midi_playlist()->set_note_mode(m);
 	if (_write_source && _write_source->model())
@@ -403,21 +390,6 @@ MidiDiskstream::check_record_status (nframes_t transport_frame, nframes_t nframe
 			
 		}
 
-		if (_flags & Recordable) {
-			RingBufferNPT<CaptureTransition>::rw_vector transvec;
-			_capture_transition_buf->get_write_vector(&transvec);
-
-			if (transvec.len[0] > 0) {
-				transvec.buf[0]->type = CaptureStart;
-				transvec.buf[0]->capture_val = capture_start_frame;
-				_capture_transition_buf->increment_write_ptr(1);
-			} else {
-				// bad!
-				fatal << X_("programming error: capture_transition_buf is full on rec start!  inconceivable!") 
-					<< endmsg;
-			}
-		}
-
 	} else if (!record_enabled() || !can_record) {
 		
 		/* stop recording */
@@ -468,7 +440,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 		return 0;
 	}
 
-	/* This lock is held until the end of AudioDiskstream::commit, so these two functions
+	/* This lock is held until the end of ::commit, so these two functions
 	   must always be called as a pair. The only exception is if this function
 	   returns a non-zero value, in which case, ::commit should not be called.
 	   */
@@ -642,12 +614,18 @@ MidiDiskstream::commit (nframes_t nframes)
 		adjust_capture_position = 0;
 	}
 
+	/* what audio does:
+	 * can't do this with midi: write space is in bytes, chunk_frames is in frames
 	if (_slaved) {
 		need_butler = _playback_buf->write_space() >= _playback_buf->capacity() / 2;
 	} else {
 		need_butler = _playback_buf->write_space() >= disk_io_chunk_frames
 			|| _capture_buf->read_space() >= disk_io_chunk_frames;
-	}
+	}*/
+	
+	/* we'll just keep the playback buffer full for now.
+	 * this should be decreased to reduce edit latency */
+	need_butler = _playback_buf->write_space() >= _playback_buf->capacity() / 2;
 	
 	if (commit_should_unlock) {
 		state_lock.unlock();
@@ -664,9 +642,8 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 	
 	pending_overwrite = yn;
-
+	
 	overwrite_frame = playback_sample;
-	//overwrite_offset = channels.front().playback_buf->get_read_ptr();
 }
 
 int
@@ -682,8 +659,6 @@ MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 	Glib::Mutex::Lock lm (state_lock);
 	int ret = -1;
 	
-	//cerr << "MDS: seek: " << frame << endl;
-
 	_playback_buf->reset();
 	_capture_buf->reset();
 
@@ -826,35 +801,6 @@ MidiDiskstream::do_refill ()
 		return 0;
 	}
 	
-	/* if there are 2+ chunks of disk i/o possible for
-	   this track, let the caller know so that it can arrange
-	   for us to be called again, ASAP.
-	*/
-	
-	if (write_space >= (_slaved?3:2) * disk_io_chunk_frames) {
-		ret = 1;
-	}
-
-	/* if we're running close to normal speed and there isn't enough 
-	   space to do disk_io_chunk_frames of I/O, then don't bother.  
-
-	   at higher speeds, just do it because the sync between butler
-	   and audio thread may not be good enough.
-	*/
-
-	if ((write_space < disk_io_chunk_frames) && fabs (_actual_speed) < 2.0f) {
-		return 0;
-	}
-
-	/* when slaved, don't try to get too close to the read pointer. this
-	   leaves space for the buffer reversal to have something useful to
-	   work with.
-	*/
-
-	if (_slaved && write_space < (_playback_buf->capacity() / 2)) {
-		return 0;
-	}
-
 	if (reversed) {
 		return 0;
 	}

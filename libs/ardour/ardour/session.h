@@ -296,7 +296,8 @@ class Session : public PBD::StatefulDestructible
 	bool have_captured() const { return _have_captured; }
 
 	void refill_all_diskstream_buffers ();
-	uint32_t diskstream_buffer_size() const { return dstream_buffer_size; }
+	uint32_t audio_diskstream_buffer_size() const { return audio_dstream_buffer_size; }
+	uint32_t midi_diskstream_buffer_size() const { return midi_dstream_buffer_size; }
 	
 	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
 	uint32_t n_diskstreams() const;
@@ -1420,7 +1421,8 @@ class Session : public PBD::StatefulDestructible
 
 	SerializedRCUManager<DiskstreamList>  diskstreams; 
 
-	uint32_t dstream_buffer_size;
+	uint32_t audio_dstream_buffer_size;
+	uint32_t midi_dstream_buffer_size;
 	int  load_diskstreams (const XMLNode&);
 
 	/* routes stuff */

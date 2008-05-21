@@ -49,7 +49,8 @@ CONFIG_VARIABLE (RemoteModel, remote_model, "remote-model", MixerOrdered)
 /* disk operations */
 
 CONFIG_VARIABLE (uint32_t, minimum_disk_io_bytes,  "minimum-disk-io-bytes", 1024 * 256)
-CONFIG_VARIABLE (float, track_buffer_seconds, "track-buffer-seconds", 5.0)
+CONFIG_VARIABLE (float, audio_track_buffer_seconds, "track-buffer-seconds", 5.0)
+CONFIG_VARIABLE (float, midi_track_buffer_seconds, "midi-track-buffer-seconds", 1.0)
 CONFIG_VARIABLE (uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE (SampleFormat, native_file_data_format,  "native-file-data-format", ARDOUR::FormatFloat)
 CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
