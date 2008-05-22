@@ -343,7 +343,7 @@ write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 					smfs->session().engine().frame_rate(),
 					smfs->session().tempo_map().meter_at(timeline_position));
 
-		smfs->update_length(0, (nframes_t) floor ((t * source->ppqn()) * frames_per_beat));
+		smfs->update_length(0, (nframes_t) floor ((t / source->ppqn()) * frames_per_beat));
 
 		smfs->flush_header();
 		smfs->flush_footer();

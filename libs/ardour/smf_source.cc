@@ -71,8 +71,6 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 		throw failed_constructor ();
 	}
 
-	cerr << "SMF Source path: " << path << endl;
-	
 	assert(_name.find("/") == string::npos);
 }
 
