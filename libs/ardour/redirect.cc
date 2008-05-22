@@ -26,6 +26,8 @@
 
 #include <sigc++/bind.h>
 
+#include <glibmm.h>
+
 #include <pbd/xml++.h>
 #include <pbd/enumwriter.h>
 
@@ -342,8 +344,7 @@ Redirect::load_automation (string path)
 	if (path[0] == '/') { // legacy
 		fullpath = path;
 	} else {
-		fullpath = _session.automation_dir();
-		fullpath += path;
+		fullpath = Glib::build_filename(_session.automation_dir(), path);
 	}
 	ifstream in (fullpath.c_str());
 

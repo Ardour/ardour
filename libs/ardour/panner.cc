@@ -1155,8 +1155,7 @@ Panner::set_state (const XMLNode& node)
 
 		/* automation path is relative */
 		
-		automation_path = _session.automation_dir();
-		automation_path += prop->value ();
+		automation_path = Glib::build_filename(_session.automation_dir(), prop->value ());
 	} 
 
 	return 0;
@@ -1324,11 +1323,8 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 void
 Panner::set_name (string str)
 {
-	automation_path = _session.automation_dir();
-	automation_path += _session.snap_name();
-	automation_path += "-pan-";
-	automation_path += legalize_for_path (str);
-	automation_path += ".automation";
+	automation_path = Glib::build_filename(_session.automation_dir(), 
+		_session.snap_name() + "-pan-" + legalize_for_path (str) + ".automation");
 }
 
 int

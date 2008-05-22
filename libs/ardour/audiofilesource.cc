@@ -222,13 +222,7 @@ AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
 ustring
 AudioFileSource::broken_peak_path (ustring audio_path)
 {
-	ustring res;
-
-	res = _session.peak_dir ();
-	res += PBD::basename_nosuffix (audio_path);
-	res += ".peak";
-
-	return res;
+	return Glib::build_filename(_session.peak_dir (), PBD::basename_nosuffix (audio_path) + ".peak");
 }
 
 ustring

@@ -25,6 +25,7 @@
 
 #include <sigc++/bind.h>
 
+#include <glibmm.h>
 #include <glibmm/thread.h>
 
 #include <pbd/xml++.h>
@@ -1669,16 +1670,12 @@ IO::load_automation (string path)
 	float version;
 	LocaleGuard lg (X_("POSIX"));
 
-	fullpath = _session.automation_dir();
-	fullpath += path;
+	fullpath = Glib::build_filename(_session.automation_dir(), path);
 
 	in.open (fullpath.c_str());
 
 	if (!in) {
-		fullpath = _session.automation_dir();
-		fullpath += _session.snap_name();
-		fullpath += '-';
-		fullpath += path;
+		fullpath = Glib::build_filename(_session.automation_dir(), _session.snap_name() + '-' + path);
 
 		in.open (fullpath.c_str());
 

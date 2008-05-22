@@ -1019,12 +1019,12 @@ ExportDialog::start_export ()
 		string dir = session->export_dir();
 		string::size_type last_slash;
 		
-		if ((last_slash = dir.find_last_of ('/')) != string::npos && last_slash != 0) {
+		if ((last_slash = dir.find_last_of (G_DIR_SEPARATOR_S)) != string::npos && last_slash != 0) {
 			dir = dir.substr (0, last_slash+1);
 		}
 
 		if (!wants_dir()) {
-			dir = dir + "export.wav";
+			dir = dir + "export.wav"; // Glib::build_filename() ?
 		}
 		
 		file_entry.set_text (dir);

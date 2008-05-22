@@ -2970,13 +2970,7 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 Glib::ustring
 Session::peak_path (Glib::ustring base) const
 {
-	Glib::ustring res;
-	
-	res = peak_dir ();
-	res += base;
-	res += ".peak";
-
-	return res;
+	return Glib::build_filename(peak_dir (), base + ".peak");
 }
 
 string
