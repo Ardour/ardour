@@ -158,7 +158,7 @@ VSTPlugin::get_state()
 
 		/* save it to a file */
 
-		Glib::ustring path = Glib::build_ustring (get_user_ardour_path (), "vst");
+		Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "vst");
 		struct stat sbuf;
 
 		if (stat (path.c_str(), &sbuf)) {
