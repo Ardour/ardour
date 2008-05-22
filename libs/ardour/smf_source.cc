@@ -406,14 +406,13 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 			//cerr << "SMF - EOF\n";
 			break;
 		}
+		
+		time += ev_delta_t; // accumulate delta time
 
-		if (ret == 0) { // meta-event (skipped)
+		if (ret == 0) { // meta-event (skipped, just accumulate time)
 			//cerr << "SMF - META\n";
-			time += ev_delta_t; // just accumulate delta time and ignore event
 			continue;
 		}
-
-		time += ev_delta_t; // accumulate delta time
 
 		if (time >= start_ticks) {
 			const nframes_t ev_frame_time = (nframes_t)(
@@ -451,6 +450,8 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	if (_model && ! _model->writing())
 		_model->start_write();
 
+	MIDI::Event ev(0.0, 4, NULL, true);
+
 	while (true) {
 		bool ret = src.full_peek(sizeof(double), (Byte*)&time);
 		if (!ret || time - _timeline_position > _length + cnt)
@@ -474,7 +475,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		assert(time >= _timeline_position);
 		time -= _timeline_position;
 		
-		const MIDI::Event ev(time, size, buf);
+		ev.set(buf, size, time);
 		if (! (ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex()) ) {
 			//cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type " << std::hex << int(ev.buffer()[0]) << endl;
 			continue;
@@ -501,6 +502,9 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 void
 SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
 {
+	if (ev.size() == 0)
+		return;
+
 	/*printf("SMFSource: %s - append_event_unlocked chan = %u, time = %lf, size = %u, data = ",
 			name().c_str(), (unsigned)ev.channel(), ev.time(), ev.size()); 
 	for (size_t i=0; i < ev.size(); ++i) {
@@ -931,15 +935,17 @@ SMFSource::load_model(bool lock, bool force_reload)
 			_session.tempo_map().meter_at(_timeline_position));
 	
 	uint32_t delta_t = 0;
+	uint32_t size    = 0;
+	uint8_t* buf     = NULL;
 	int ret;
-	while ((ret = read_event(&delta_t, &ev.size(), &ev.buffer())) >= 0) {
+	while ((ret = read_event(&delta_t, &size, &buf)) >= 0) {
 		
+		ev.set(buf, size, 0.0);
 		time += delta_t;
 		
 		if (ret > 0) { // didn't skip (meta) event
 			// make ev.time absolute time in frames
 			ev.time() = (double)time * frames_per_beat / (double)_ppqn;
-
 			_model->append(ev);
 		}
 
@@ -952,7 +958,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	_model->end_write(false);
 	_model->set_edited(false);
 
-	free(ev.buffer());
+	free(buf);
 }
 
 

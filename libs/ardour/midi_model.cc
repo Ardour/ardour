@@ -545,6 +545,7 @@ void MidiModel::append_note_on_unlocked(uint8_t chan, double time,
 	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
 	 " note " << (int)note_num << " on @ " << time << endl;*/
 
+	assert(note_num <= 127);
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;
@@ -565,6 +566,7 @@ void MidiModel::append_note_off_unlocked(uint8_t chan, double time,
 	/*cerr << "MidiModel " << this << " chan " << (int)chan <<
 	 " note " << (int)note_num << " off @ " << time << endl;*/
 
+	assert(note_num <= 127);
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;

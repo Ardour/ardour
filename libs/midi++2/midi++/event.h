@@ -125,13 +125,12 @@ struct Event {
 			if (_size < size) {
 				_buffer = (uint8_t*) ::realloc(_buffer, size);
 			}
+			memcpy (_buffer, buf, size);
 		} else {
-			_buffer = (uint8_t*) malloc(size);
-			_owns_buffer = true;
+			_buffer = buf;
 		}
 
 		_size = size;
-		memcpy (_buffer, buf, size);
 		_time = t;
 	}
 
