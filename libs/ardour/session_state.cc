@@ -1672,9 +1672,7 @@ Session::save_template (string template_name)
 
 	tree.set_root (&get_template());
 
-	xml_path = dir;
-	xml_path += template_name;
-	xml_path += _template_suffix;
+	xml_path = Glib::build_filename(dir, template_name + _template_suffix);
 
 	ifstream in(xml_path.c_str());
 	
@@ -1696,8 +1694,8 @@ Session::save_template (string template_name)
 int
 Session::rename_template (string old_name, string new_name) 
 {
-	string old_path = template_dir() + old_name + _template_suffix;
-	string new_path = template_dir() + new_name + _template_suffix;
+	string old_path = Glib::build_filename(template_dir(), old_name + _template_suffix);
+	string new_path = Glib::build_filename(template_dir(), new_name + _template_suffix);
 
 	return rename (old_path.c_str(), new_path.c_str());
 }
@@ -1705,9 +1703,7 @@ Session::rename_template (string old_name, string new_name)
 int
 Session::delete_template (string name) 
 {
-	string template_path = template_dir();
-	template_path += name;
-	template_path += _template_suffix;
+	string template_path = Glib::build_filename(template_dir(), name + _template_suffix);
 
 	return remove (template_path.c_str());
 }
