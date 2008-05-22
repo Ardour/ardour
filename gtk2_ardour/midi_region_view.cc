@@ -967,24 +967,48 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 	const double last_y = std::min(y1, y2);
 	const double y      = std::max(y1, y2);
 
-	// FIXME: so, so, so much slower than this should be
+	// TODO: Make this faster by storing the last updated selection rect, and only
+	// adjusting things that are in the area that appears/disappeared.
+	// We probably need a tree to be able to find events in O(log(n)) time.
+
+#ifndef NDEBUG
+	double last_x1 = 0.0;
+#endif
 
 	if (x1 < x2) {
 		for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+#ifndef NDEBUG
+			// Events should always be sorted by increasing x1() here
+			assert((*i)->x1() >= last_x1);
+			last_x1 = (*i)->x1();
+#endif
+			// Inside rectangle
 			if ((*i)->x1() >= x1 && (*i)->x1() <= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
-				(*i)->selected(true);
-				_selection.insert(*i);
-			} else {
+				if (!(*i)->selected()) {
+					(*i)->selected(true);
+					_selection.insert(*i);
+				}
+			// Not inside rectangle
+			} else if ((*i)->selected()) {
 				(*i)->selected(false);
 				_selection.erase(*i);
 			}
 		}
 	} else {
 		for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+#ifndef NDEBUG
+			// Events should always be sorted by increasing x1() here
+			assert((*i)->x1() >= last_x1);
+			last_x1 = (*i)->x1();
+#endif
+			// Inside rectangle
 			if ((*i)->x2() <= x1 && (*i)->x2() >= x2 && (*i)->y1() >= last_y && (*i)->y1() <= y) {
-				(*i)->selected(true);
-				_selection.insert(*i);
-			} else {
+				if (!(*i)->selected()) {
+					(*i)->selected(true);
+					_selection.insert(*i);
+				}
+			// Not inside rectangle
+			} else if ((*i)->selected()) {
 				(*i)->selected(false);
 				_selection.erase(*i);
 			}
