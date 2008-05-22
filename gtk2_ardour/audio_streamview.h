@@ -109,6 +109,8 @@ class AudioStreamView : public StreamView
 	nframes_t             last_rec_peak_frame;
 	map<boost::shared_ptr<ARDOUR::Source>, bool> rec_peak_ready_map;
 
+	bool outline_region;
+
 	Editing::WaveformShape     _waveform_shape;
 	Editing::WaveformScale     _waveform_scale;
 };

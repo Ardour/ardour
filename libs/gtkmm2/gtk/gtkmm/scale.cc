@@ -31,6 +31,7 @@
 #include <gtk/gtkhscale.h>
 #include <gtk/gtkvscale.h>
 #include <math.h>
+#include <cstring>
 
 namespace Gtk
 {

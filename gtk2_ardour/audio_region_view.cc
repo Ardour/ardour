@@ -266,6 +266,7 @@ void
 AudioRegionView::region_changed (Change what_changed)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionView::region_changed), what_changed));
+	//cerr << "AudioRegionView::region_changed() called" << endl;
 
 	RegionView::region_changed(what_changed);
 
@@ -1238,7 +1239,7 @@ AudioRegionView::set_frame_color ()
 		if (_recregion) {
 			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_RecordingRect.get(), &r, &g, &b, &a);
 			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
-			cerr << "Was a recregion" << endl;
+			cerr << "AudioRegionView::set_frame_color () Was a recregion" << endl;
 
 			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 				if (_region->muted()) {

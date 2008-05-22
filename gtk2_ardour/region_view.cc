@@ -204,6 +204,7 @@ void
 RegionView::region_changed (Change what_changed)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &RegionView::region_changed), what_changed));
+	cerr << "RegionView::region_changed () outline_everything = " << outline_everything << endl;
 
 	if (what_changed & BoundsChanged) {
 		region_resized (what_changed);
@@ -226,6 +227,11 @@ RegionView::region_changed (Change what_changed)
 	}
 	if (what_changed & Region::LockChanged) {
 		region_locked ();
+	}
+	if ((what_changed & LengthChanged) && outline_everything) {
+		frame->property_outline_what() = 0x1 | 0x2 | 0x4 | 0x8;// == 0x15 == all four sides
+		outline_everything = false;
+		cerr << "RegionView::region_changed () what_changed = " << what_changed << endl;
 	}
 }
 

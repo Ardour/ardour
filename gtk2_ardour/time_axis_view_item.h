@@ -296,6 +296,9 @@ class TimeAxisViewItem : public Selectable
      * the destructor, this allows us to capture the source of the deletion
      * event
      */
+
+	void outline_entire_box ();
+
     sigc::signal<void,std::string,void*> ItemRemoved ;
     
     /** Emitted when the name/Id of this item is changed */
@@ -465,6 +468,7 @@ class TimeAxisViewItem : public Selectable
     
     Visibility visibility;
 	bool _recregion;
+	bool outline_everything;
 
 
 }; /* class TimeAxisViewItem */
