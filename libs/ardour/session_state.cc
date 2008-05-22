@@ -411,20 +411,9 @@ Session::setup_raid_path (string path)
 		sp.path = path;
 		sp.blocks = 0;
 		session_dirs.push_back (sp);
-
-		string fspath;
-
 		/* sounds dir */
 
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-
-		fspath += sound_dir (false);
-		
-		AudioFileSource::set_search_path (fspath);
-
+		AudioFileSource::set_search_path (Glib::build_filename(sp.path, sound_dir (false)));
 		return;
 	}
 
@@ -438,11 +427,7 @@ Session::setup_raid_path (string path)
 
 		/* add sounds to file search path */
 
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-		fspath += sound_dir (false);
+		fspath += Glib::build_filename(sp.path, sound_dir (false));
 		fspath += ':';
 
 		remaining = remaining.substr (colon+1);
@@ -454,11 +439,7 @@ Session::setup_raid_path (string path)
 		sp.path = remaining;
 
 		fspath += ':';
-		fspath += sp.path;
-		if (fspath[fspath.length()-1] != '/') {
-			fspath += '/';
-		}
-		fspath += sound_dir (false);
+		fspath += Glib::build_filename(sp.path, sound_dir (false));
 		fspath += ':';
 
 		session_dirs.push_back (sp);
@@ -1747,27 +1728,21 @@ Session::ensure_sound_dir (string path, string& result)
 	
 	/* Ensure that the sounds directory exists */
 	
-	result = path;
-	result += '/';
-	result += sound_dir_name;
+	result = Glib::build_filename(path, sound_dir_name);
 	
 	if (g_mkdir_with_parents (result.c_str(), 0775)) {
 		error << string_compose(_("cannot create sounds directory \"%1\"; ignored"), result) << endmsg;
 		return -1;
 	}
 
-	dead = path;
-	dead += '/';
-	dead += dead_sound_dir_name;
+	dead = Glib::build_filename(path, dead_sound_dir_name);
 	
 	if (g_mkdir_with_parents (dead.c_str(), 0775)) {
 		error << string_compose(_("cannot create dead sounds directory \"%1\"; ignored"), dead) << endmsg;
 		return -1;
 	}
 
-	peak = path;
-	peak += '/';
-	peak += peak_dir_name;
+	peak = Glib::build_filename(path, peak_dir_name);
 	
 	if (g_mkdir_with_parents (peak.c_str(), 0775)) {
 		error << string_compose(_("cannot create peak file directory \"%1\"; ignored"), peak) << endmsg;
@@ -2009,6 +1984,7 @@ Session::sound_dir (bool with_path) const
 {
 	string res;
 	string full;
+	vector<string> parts;
 
 	if (with_path) {
 		res = _path;
@@ -2016,12 +1992,11 @@ Session::sound_dir (bool with_path) const
 		full = _path;
 	}
 
-	res += interchange_dir_name;
-	res += '/';
-	res += legalize_for_path (_name);
-	res += '/';
-	res += sound_dir_name;
+	parts.push_back(interchange_dir_name);
+	parts.push_back(legalize_for_path (_name));
+	parts.push_back(sound_dir_name);
 
+	res += Glib::build_filename(parts);
 	if (with_path) {
 		full = res;
 	} else {
