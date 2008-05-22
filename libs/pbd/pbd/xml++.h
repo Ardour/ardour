@@ -92,6 +92,8 @@ public:
   XMLNode *add_child_copy (const XMLNode&);
   XMLNode *child (const char*) const;
   void add_child_nocopy (XMLNode&);
+  
+  XMLNodeList *find(const std::string xpath) const;
 
   const XMLPropertyList & properties() const { return _proplist; };
   XMLProperty *property(const char * );
@@ -125,6 +127,24 @@ public:
   const string & name() const { return _name; };
   const string & value() const { return _value; };
   const string & set_value(const string &v) { return _value = v; };
+};
+
+class XMLException: public std::exception
+{
+public:
+  explicit XMLException(const string message)
+  : message_(message)
+  {
+  }
+  
+  virtual ~XMLException() throw() {};
+
+  virtual const char* what() const throw() { return message_.c_str(); }
+  virtual void Raise() const { throw *this; }
+  virtual exception * Clone() const { return new exception(*this); }
+
+private:
+  string message_;
 };
 
 #endif /* __XML_H */

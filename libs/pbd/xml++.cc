@@ -6,9 +6,14 @@
 
 #include <pbd/xml++.h>
 #include <libxml/debugXML.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+
+#define XML_VERSION "1.0"
 
 static XMLNode *readnode(xmlNodePtr);
 static void writenode(xmlDocPtr, XMLNode *, xmlNodePtr, int);
+static XMLNodeList *find_impl(xmlXPathContext* ctxt, const string xpath);
 
 XMLTree::XMLTree() 
 	: _filename(), 
@@ -99,6 +104,7 @@ XMLTree::read_buffer(const string & buffer)
 	return true;
 }
 
+
 bool 
 XMLTree::write(void) const
 {
@@ -107,7 +113,7 @@ XMLTree::write(void) const
 	int result;
 	
 	xmlKeepBlanksDefault(0);
-	doc = xmlNewDoc((xmlChar *) "1.0");
+	doc = xmlNewDoc((xmlChar *) XML_VERSION);
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
 	result = xmlSaveFormatFileEnc(_filename.c_str(), doc, "UTF-8", 1);
@@ -127,7 +133,7 @@ XMLTree::debug(FILE* out) const
     XMLNodeList children;
 
     xmlKeepBlanksDefault(0);
-    doc = xmlNewDoc((xmlChar *) "1.0");
+    doc = xmlNewDoc((xmlChar *) XML_VERSION);
     xmlSetDocCompressMode(doc, _compression);
     writenode(doc, _root, doc->children, 1);
     xmlDebugDumpDocument (out, doc);
@@ -144,7 +150,7 @@ XMLTree::write_buffer(void) const
 	XMLNodeList children;
 	
 	xmlKeepBlanksDefault(0);
-	doc = xmlNewDoc((xmlChar *) "1.0");
+	doc = xmlNewDoc((xmlChar *) XML_VERSION);
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
 	xmlDocDumpMemory(doc, (xmlChar **) & ptr, &len);
@@ -277,6 +283,21 @@ XMLNode::add_child_copy(const XMLNode& n)
 	XMLNode *copy = new XMLNode (n);
 	_children.insert(_children.end(), copy);
 	return copy;
+}
+
+XMLNodeList* 
+XMLNode::find(const string xpath) const
+{
+	xmlDocPtr doc = xmlNewDoc((xmlChar *) XML_VERSION);
+	writenode(doc, (XMLNode *) this, doc->children, 1);
+	xmlXPathContext* ctxt = xmlXPathNewContext(doc);
+	
+	XMLNodeList* result = find_impl(ctxt, xpath);
+	
+	xmlXPathFreeContext(ctxt);
+	xmlFreeDoc(doc);
+	
+	return result;
 }
 
 XMLNode *
@@ -474,4 +495,44 @@ writenode(xmlDocPtr doc, XMLNode * n, xmlNodePtr p, int root = 0)
 	for (curchild = children.begin(); curchild != children.end(); ++curchild) {
 		writenode(doc, *curchild, node);
 	}
+}
+
+static XMLNodeList* find_impl(xmlXPathContext* ctxt, const string xpath)
+{
+	xmlXPathObject* result = xmlXPathEval((const xmlChar*)xpath.c_str(), ctxt);
+
+	if(!result)
+	{
+		xmlXPathFreeContext(ctxt);
+		xmlFreeDoc(ctxt->doc);
+
+		throw XMLException("Invalid XPath: " + xpath);
+	}
+
+	if(result->type != XPATH_NODESET)
+	{
+		xmlXPathFreeObject(result);
+		xmlXPathFreeContext(ctxt);
+		xmlFreeDoc(ctxt->doc);
+
+		throw XMLException("Only nodeset result types are supported.");
+	}
+
+	xmlNodeSet* nodeset = result->nodesetval;
+	XMLNodeList* nodes = new XMLNodeList();
+	if( nodeset )
+	{
+		for (int i = 0; i < nodeset->nodeNr; ++i) {
+			XMLNode* node = readnode(nodeset->nodeTab[i]);
+			nodes->push_back(node);
+		}
+	}
+	else
+	{
+		// return empty set
+	}
+
+	xmlXPathFreeObject(result);
+
+	return nodes;
 }
