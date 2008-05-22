@@ -655,11 +655,11 @@ void MidiModel::remove_note_unlocked(const boost::shared_ptr<const Note> note)
 		// TODO: There is still the issue, that after restarting ardour
 		// persisted undo does not work, because of rounding errors in the
 		// event times after saving/restoring to/from MIDI files
-		cerr << "======================================= " << endl;
+		/*cerr << "======================================= " << endl;
 		cerr << int(_n.note()) << "@" << int(_n.time()) << "[" << int(_n.channel()) << "] --" << int(_n.duration()) << "-- #" << int(_n.velocity()) << endl;
 		cerr << int(_note.note()) << "@" << int(_note.time()) << "[" << int(_note.channel()) << "] --" << int(_note.duration()) << "-- #" << int(_note.velocity()) << endl;
 		cerr << "Equal: " << bool(_n == _note) << endl;
-		cerr << endl << endl;
+		cerr << endl << endl;*/
 		if (_n == _note) {
 			_notes.erase(n);
 			// we have to break here, because erase invalidates all iterators, ie. n itself

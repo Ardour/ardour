@@ -196,13 +196,16 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	case GDK_BUTTON_PRESS:
 		if (_mouse_state != SelectTouchDragging && 
 			_mouse_state != EraseTouchDragging &&
-			ev->button.button == 1	) {
+			ev->button.button == 1) {
 			_pressed_button = ev->button.button;
 			_mouse_state = Pressed;
 			return true;
 		}
 		_pressed_button = ev->button.button;
-		return false;
+		return true;
+
+	case GDK_2BUTTON_PRESS:
+		return true;
 
 	case GDK_ENTER_NOTIFY:
 		/* FIXME: do this on switch to note tool, too, if the pointer is already in */
@@ -335,16 +338,15 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				break;
 			case MidiEditPencil:
 				create_note_at(event_x, event_y, _default_note_length);
-			default:
-				break;
+			default: break;
 			}
 			_mouse_state = None;
-			return true;
+			break;
 		case SelectRectDragging: // Select drag done
 			_mouse_state = None;
 			delete drag_rect;
 			drag_rect = NULL;
-			return true;
+			break;
 		case AddDragging: // Add drag done
 			_mouse_state = None;
 			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
@@ -357,13 +359,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 			delete drag_rect;
 			drag_rect = NULL;
-			return true;
-		default:
-			break;
+		default: break;
 		}
 
-	default:
-		break;
+	default: break;
 	}
 
 	return false;
@@ -409,8 +408,6 @@ MidiRegionView::create_note_at(double x, double y, double duration)
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
 	cmd->add(new_note);
 	_model->apply_command(cmd);
-
-	//add_note(new_note);
 }
 
 
@@ -441,6 +438,60 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 
 	if (_enable_display)
 		redisplay_model();
+}
+	
+	
+void
+MidiRegionView::start_delta_command(string name)
+{
+	if (!_delta_command)
+		_delta_command = _model->new_delta_command(name);
+}
+
+void
+MidiRegionView::command_add_note(const boost::shared_ptr<ARDOUR::Note> note, bool selected)
+{
+	if (_delta_command)
+		_delta_command->add(note);
+
+	if (selected)
+		_marked_for_selection.insert(note);
+}
+
+void
+MidiRegionView::command_remove_note(ArdourCanvas::CanvasNoteEvent* ev)
+{
+	if (_delta_command && ev->note()) {
+		_delta_command->remove(ev->note());
+	}
+}
+	
+void
+MidiRegionView::apply_command()
+{
+	if (!_delta_command) {
+		return;
+	}
+
+	// Mark all selected notes for selection when model reloads
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		_marked_for_selection.insert((*i)->note());
+	}
+	
+	_model->apply_command(_delta_command);
+	_delta_command = NULL;
+	midi_view()->midi_track()->diskstream()->playlist_modified();
+
+	_marked_for_selection.clear();
+}
+	
+
+void
+MidiRegionView::abort_command()
+{
+	delete _delta_command;
+	_delta_command = NULL;
+	clear_selection();
 }
 
 
@@ -730,26 +781,21 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
 	
 	// dont display notes beyond the region bounds
-	if (
-			note->time() - _region->start() >= _region->length() ||
-			note->time() <  _region->start() ||
-			note->note() < midi_stream_view()->lowest_note() ||
-			note->note() > midi_stream_view()->highest_note()
-	  ) {
+	if ( note->time() - _region->start() >= _region->length() ||
+		note->time() <  _region->start() ||
+		note->note() < midi_stream_view()->lowest_note() ||
+		note->note() > midi_stream_view()->highest_note() ) {
 		return;
 	}
 	
 	ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 
-	CanvasNoteEvent *event = 0;
+	CanvasNoteEvent* event = 0;
 	
 	const double x = trackview.editor.frame_to_pixel((nframes_t)note->time() - _region->start());
 	
 	if (midi_view()->note_mode() == Sustained) {
 
-		//cerr << "MRV::add_note sustained " << note->note() << " @ " << note->time()
-		//	<< " .. " << note->end_time() << endl;
-		
 		const double y1 = midi_stream_view()->note_to_y(note->note());
 		const double note_endpixel = 
 			trackview.editor.frame_to_pixel((nframes_t)note->end_time() - _region->start());
@@ -817,8 +863,8 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 	}
 
 	if (event) {			
-		if (_marked_for_selection.find(event->note()) != _marked_for_selection.end()) {
-				note_selected(event, true);
+		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
+			note_selected(event, true);
 		}
 		event->on_channel_selection_change(_last_channel_selection);
 	}
@@ -965,15 +1011,10 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 		uint8_t highest_note_difference = 0;
 
 		// find highest and lowest notes first
-		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ) {
-			Selection::iterator next = i;
-			++next;
-			
+		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			uint8_t pitch = (*i)->note()->note();
 			lowest_note_in_selection  = std::min(lowest_note_in_selection,  pitch);
 			highest_note_in_selection = std::max(highest_note_in_selection, pitch);
-
-			i = next;
 		}
 		
 		/*
@@ -1031,20 +1072,19 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 			copy->set_note(new_pitch);
 			
 			command_remove_note(*i);
-			command_add_note(copy);
+			command_add_note(copy, true);
 
-			_marked_for_selection.insert(copy);
 			i = next;
 		}
+
 		apply_command();
 		
 		// care about notes being moved beyond the upper/lower bounds on the canvas
 		if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
-		   highest_note_in_selection > midi_stream_view()->highest_note()
-		) {
+		   highest_note_in_selection > midi_stream_view()->highest_note()) {
 			midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
+		}
 	}
-}
 }
 
 nframes_t
@@ -1109,7 +1149,7 @@ MidiRegionView::begin_resizing(CanvasNote::NoteEnd note_end)
 						note->y2());
 
 			// calculate the colors: get the color settings
-			uint fill_color =
+			uint32_t fill_color =
 				UINT_RGBA_CHANGE_A(
 						ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get(),
 						128);
@@ -1174,10 +1214,10 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 	start_delta_command(_("resize notes"));
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
-		CanvasNote *canvas_note = (*i)->canvas_note;
-		SimpleRect *resize_rect = (*i)->resize_rect;
-		double      current_x   = (*i)->current_x;
-		const double position = get_position_pixels();
+		CanvasNote*  canvas_note = (*i)->canvas_note;
+		SimpleRect*  resize_rect = (*i)->resize_rect;
+		double       current_x   = (*i)->current_x;
+		const double position    = get_position_pixels();
 
 		if (!relative) {
 			// event_x is in track relative, transform it to region relative
@@ -1196,16 +1236,13 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 		if (note_end == CanvasNote::NOTE_ON && current_frame < copy->end_time()) {
 			command_remove_note(canvas_note);
 			copy->on_event().time() = current_frame;
-			command_add_note(copy);
-			_marked_for_selection.insert(copy);
+			command_add_note(copy, _selection.find(canvas_note) != _selection.end());
 		}
 		// resize end of note
 		if (note_end == CanvasNote::NOTE_OFF && current_frame > copy->time()) {
 			command_remove_note(canvas_note);
-			command_remove_note(canvas_note);
 			copy->off_event().time() = current_frame;
-			command_add_note(copy);
-			_marked_for_selection.insert(copy);
+			command_add_note(copy, _selection.find(canvas_note) != _selection.end());
 		}
 
 		delete resize_rect;
@@ -1238,15 +1275,9 @@ MidiRegionView::change_velocity(uint8_t velocity, bool relative)
 		}
 		
 		command_remove_note(event);
-		command_add_note(copy);
+		command_add_note(copy, true);
 		
-		_marked_for_selection.insert(copy);
 		i = next;
-	}
-	
-	// dont keep notes selected if tweaking a single note
-	if (_marked_for_selection.size() == 1) {
-		_marked_for_selection.clear();
 	}
 	
 	apply_command();
@@ -1266,15 +1297,9 @@ MidiRegionView::change_channel(uint8_t channel)
 		copy->set_channel(channel);
 		
 		command_remove_note(event);
-		command_add_note(copy);
+		command_add_note(copy, true);
 		
-		_marked_for_selection.insert(copy);
 		i = next;
-	}
-	
-	// dont keep notes selected if tweaking a single note
-	if (_marked_for_selection.size() == 1) {
-		_marked_for_selection.clear();
 	}
 	
 	apply_command();

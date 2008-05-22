@@ -92,39 +92,12 @@ class MidiRegionView : public RegionView
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
-	/* This stuff is a bit boilerplatey ATM.  Work in progress. */
+	void start_delta_command(string name = "midi edit");
+	void command_add_note(const boost::shared_ptr<ARDOUR::Note> note, bool selected);
+	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
 
-	inline void start_delta_command(string name = "midi edit") {
-		if (!_delta_command)
-			_delta_command = _model->new_delta_command(name);
-	}
-
-	void command_add_note(const boost::shared_ptr<ARDOUR::Note> note) {
-		if (_delta_command)
-			_delta_command->add(note);
-	}
-
-	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev) {
-		if (_delta_command && ev->note()) {
-			_selection.erase(ev);
-			_delta_command->remove(ev->note());
-			ev->selected(true);
-		}
-	}
-
-	void abort_command() {
-		delete _delta_command;
-		_delta_command = NULL;
-		clear_selection();
-	}
-
-	void apply_command() {
-		if (_delta_command) {
-			_model->apply_command(_delta_command);
-			_delta_command = NULL;
-		}
-		midi_view()->midi_track()->diskstream()->playlist_modified();
-	}
+	void apply_command();
+	void abort_command();
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
@@ -261,15 +234,12 @@ class MidiRegionView : public RegionView
 	MouseState _mouse_state;
 	int _pressed_button;
 
-	/// currently selected CanvasNoteEvents
 	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
+	/// Currently selected CanvasNoteEvents
 	Selection _selection;
 
-	/**
-	 * this enables vanilla notes to be marked for selection
-	 * they are added to _selection when redisplay_model is called
-	 * this is necessary for selecting notes during/after model manipulations 
-	 */
+	/** New notes (created in the current command) which should be selected
+	 * when they appear after the command is applied. */
 	std::set< boost::shared_ptr<ARDOUR::Note> > _marked_for_selection;
 
 	std::vector<NoteResizeData *> _resize_data;
