@@ -190,7 +190,7 @@ Region::set_name (string str)
 void
 Region::set_length (nframes_t len, void *src)
 {
-	cerr << "Region::set_length() len = " << len << endl;
+	//cerr << "Region::set_length() len = " << len << endl;
 	if (_flags & Locked) {
 		return;
 	}

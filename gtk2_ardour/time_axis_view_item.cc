@@ -1049,11 +1049,3 @@ TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 	return false;
 }
 
-void
-TimeAxisViewItem::outline_entire_box ()
-{
-	cerr << "TimeAxisViewItem::outline_entire_box () called: " << this << endl;
-	outline_everything = true;
-	//frame->property_outline_what() = 0x1 | 0x2 | 0x3 | 0x4;
-}
-

@@ -57,7 +57,6 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
 {
 	crossfades_visible = true;
-	outline_region = false;
 	_waveform_scale = LinearWaveform;
 	_waveform_shape = Traditional;
 	
@@ -470,7 +469,7 @@ AudioStreamView::set_waveform_scale (WaveformScale scale)
 void
 AudioStreamView::setup_rec_box ()
 {
-	cerr << _trackview.name() << " streamview SRB region_views.size() = " << region_views.size() << endl;
+	//cerr << _trackview.name() << " streamview SRB region_views.size() = " << region_views.size() << endl;
 
 	if (_trackview.session().transport_rolling()) {
 
@@ -479,7 +478,6 @@ AudioStreamView::setup_rec_box ()
 		if (!rec_active && 
 		    _trackview.session().record_status() == Session::Recording && 
 		    _trackview.get_diskstream()->record_enabled()) {
-			cerr << "rec_active = 0" << endl;
 			if (_trackview.audio_track()->mode() == Normal && use_rec_regions && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set use_rec_regions mid-record */
@@ -566,11 +564,9 @@ AudioStreamView::setup_rec_box ()
 		} else if (rec_active &&
 			   (_trackview.session().record_status() != Session::Recording ||
 			    !_trackview.get_diskstream()->record_enabled())) {
-			cerr << "rec_active = 1" << endl;
 			screen_update_connection.disconnect();
 			rec_active = false;
 			rec_updating = false;
-			outline_region = true;
 		}
 		
 	} else {
@@ -657,7 +653,6 @@ void
 AudioStreamView::update_rec_regions ()
 {
 	if (use_rec_regions) {
-		cerr << "AudioStreamView::update_rec_regions () outline_region = " << outline_region << endl;
 		uint32_t n = 0;
 
 		for (list<boost::shared_ptr<Region> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
@@ -688,15 +683,6 @@ AudioStreamView::update_rec_regions ()
 
 					if (nlen != region->length()) {
 
-						if (outline_region) {
-							for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-								if ((*i)->region() == region) {
-									(*i)->outline_entire_box();
-									outline_region = false;
-								}
-							}
-						}
-
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
@@ -705,14 +691,6 @@ AudioStreamView::update_rec_regions ()
 						if (origlen == 1) {
 							/* our special initial length */
 							add_region_view_internal (region, false, true);
-							if (outline_region) {
-								outline_region = false;
-								for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-									if ((*i)->region() == region) {
-										(*i)->outline_entire_box();
-									}
-								}
-							}
 						}
 
 						/* also update rect */
@@ -729,15 +707,6 @@ AudioStreamView::update_rec_regions ()
 				if (nlen != region->length()) {
 
 					if (region->source(0)->length() >= region->start() + nlen) {
-
-						if (outline_region) {
-							for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-								if ((*i)->region() == region) {
-									(*i)->outline_entire_box();
-									outline_region = false;
-								}
-							}
-						}
 
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
