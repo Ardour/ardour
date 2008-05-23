@@ -107,7 +107,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	// See MidiPort::MidiPort
 	// We probably need a map<DataType, size_t> parameter for capacity
 	if (type == DataType::MIDI)
-		buffer_capacity *= 4;
+		buffer_capacity *= 8;
 
 	// The vector of buffers of the type we care about
 	BufferVec& bufs = _buffers[type];

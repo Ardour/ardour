@@ -33,7 +33,7 @@ MidiPort::MidiPort (const std::string& name, Flags flags, bool external, nframes
 {
 	// FIXME: size kludge (see BufferSet::ensure_buffers)
 	// Jack needs to tell us this
-	_buffer = new MidiBuffer (capacity * 4);
+	_buffer = new MidiBuffer (capacity * 8);
 
 	if (external) {
 		/* external ports use the same buffer for the jack port (_ext_port)
