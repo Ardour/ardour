@@ -59,8 +59,6 @@ namespace ARDOUR {
 	typedef uint64_t                    microseconds_t;
 	typedef uint32_t                    nframes_t;
 
-	typedef unsigned char Byte;
-
 	enum IOChange {
 		NoChange = 0,
 		ConfigurationChanged = 0x1,

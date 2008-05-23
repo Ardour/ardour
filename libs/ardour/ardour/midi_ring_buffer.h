@@ -243,19 +243,19 @@ MidiRingBufferBase<T>::write(size_t size, const T* src)
  *
  * [timestamp][size][size bytes of raw MIDI][timestamp][size][etc..]
  */
-class MidiRingBuffer : public MidiRingBufferBase<Byte> {
+class MidiRingBuffer : public MidiRingBufferBase<uint8_t> {
 public:
 	/** @param size Size in bytes.
 	 */
 	MidiRingBuffer(size_t size)
-		: MidiRingBufferBase<Byte>(size), _channel_mask(0x0000FFFF)
+		: MidiRingBufferBase<uint8_t>(size), _channel_mask(0x0000FFFF)
 	{}
 
-	size_t write(double time, size_t size, const Byte* buf);
-	bool   read(double* time, size_t* size, Byte* buf);
+	size_t write(double time, size_t size, const uint8_t* buf);
+	bool   read(double* time, size_t* size, uint8_t* buf);
 
 	bool   read_prefix(double* time, size_t* size);
-	bool   read_contents(size_t size, Byte* buf);
+	bool   read_contents(size_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
 	
@@ -279,7 +279,7 @@ public:
 	}
 	
 protected:
-	inline bool is_channel_event(Byte event_type_byte) {
+	inline bool is_channel_event(uint8_t event_type_byte) {
 		// mask out channel information
 		event_type_byte &= 0xF0;
 		// midi channel events range from 0x80 to 0xE0
@@ -292,15 +292,15 @@ private:
 
 
 inline bool
-MidiRingBuffer::read(double* time, size_t* size, Byte* buf)
+MidiRingBuffer::read(double* time, size_t* size, uint8_t* buf)
 {
-	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)time);
+	bool success = MidiRingBufferBase<uint8_t>::full_read(sizeof(double), (uint8_t*)time);
 	
 	if (success) {
-		success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)size);
+		success = MidiRingBufferBase<uint8_t>::full_read(sizeof(size_t), (uint8_t*)size);
 	}
 	if (success) {
-		success = MidiRingBufferBase<Byte>::full_read(*size, buf);
+		success = MidiRingBufferBase<uint8_t>::full_read(*size, buf);
 	}
 	
 	return success;
@@ -313,9 +313,9 @@ MidiRingBuffer::read(double* time, size_t* size, Byte* buf)
 inline bool
 MidiRingBuffer::read_prefix(double* time, size_t* size)
 {
-	bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)time);
+	bool success = MidiRingBufferBase<uint8_t>::full_read(sizeof(double), (uint8_t*)time);
 	if (success) {
-		success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)size);
+		success = MidiRingBufferBase<uint8_t>::full_read(sizeof(size_t), (uint8_t*)size);
 	}
 
 	return success;
@@ -326,14 +326,14 @@ MidiRingBuffer::read_prefix(double* time, size_t* size)
  * by a call to read_prefix (or the returned even will be garabage).
  */
 inline bool
-MidiRingBuffer::read_contents(size_t size, Byte* buf)
+MidiRingBuffer::read_contents(size_t size, uint8_t* buf)
 {
-	return MidiRingBufferBase<Byte>::full_read(size, buf);
+	return MidiRingBufferBase<uint8_t>::full_read(size, buf);
 }
 
 
 inline size_t
-MidiRingBuffer::write(double time, size_t size, const Byte* buf)
+MidiRingBuffer::write(double time, size_t size, const uint8_t* buf)
 {
 	/*fprintf(stderr, "MRB %p write (t = %f) ", this, time);
 	for (size_t i = 0; i < size; ++i)
@@ -344,7 +344,7 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 	
 	// Don't write event if it doesn't match channel filter
 	if (is_channel_event(buf[0]) && get_channel_mode() == FilterChannels) {
-		Byte channel = buf[0] & 0x0F;
+		uint8_t channel = buf[0] & 0x0F;
 		if ( !(get_channel_mask() & (1L << channel)) ) {
 			return 0;
 		}
@@ -353,20 +353,20 @@ MidiRingBuffer::write(double time, size_t size, const Byte* buf)
 	if (write_space() < (sizeof(double) + sizeof(size_t) + size)) {
 		return 0;
 	} else {
-		MidiRingBufferBase<Byte>::write(sizeof(double), (Byte*)&time);
-		MidiRingBufferBase<Byte>::write(sizeof(size_t), (Byte*)&size);
+		MidiRingBufferBase<uint8_t>::write(sizeof(double), (uint8_t*)&time);
+		MidiRingBufferBase<uint8_t>::write(sizeof(size_t), (uint8_t*)&size);
 		if (is_channel_event(buf[0]) && get_channel_mode() == ForceChannel) {
 			assert(size == 2 || size == 3);
-			Byte tmp_buf[3];
+			uint8_t tmp_buf[3];
 			// Force event to channel
 			tmp_buf[0] = (buf[0] & 0xF0) | (get_channel_mask() & 0x0F);
 			tmp_buf[1] = buf[1];
 			if (size == 3) {
 				tmp_buf[2] = buf[2];
 			}
-			MidiRingBufferBase<Byte>::write(size, tmp_buf);
+			MidiRingBufferBase<uint8_t>::write(size, tmp_buf);
 		} else {
-			MidiRingBufferBase<Byte>::write(size, buf);
+			MidiRingBufferBase<uint8_t>::write(size, buf);
 		}
 		return size;
 	}
@@ -394,15 +394,15 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 	while (read_space() > sizeof(double) + sizeof(size_t)) {
 	
-		full_peek(sizeof(double), (Byte*)&ev_time);
+		full_peek(sizeof(double), (uint8_t*)&ev_time);
 	
 		if (ev_time > end) {
 			break;
 		}
 		
-		bool success = MidiRingBufferBase<Byte>::full_read(sizeof(double), (Byte*)&ev_time);
+		bool success = MidiRingBufferBase<uint8_t>::full_read(sizeof(double), (uint8_t*)&ev_time);
 		if (success) {
-			success = MidiRingBufferBase<Byte>::full_read(sizeof(size_t), (Byte*)&ev_size);
+			success = MidiRingBufferBase<uint8_t>::full_read(sizeof(size_t), (uint8_t*)&ev_size);
 		}
 
 		if (!success) {
@@ -410,13 +410,13 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			continue;
 		}
 		
-		Byte status;
-		success = full_peek(sizeof(Byte), &status);
+		uint8_t status;
+		success = full_peek(sizeof(uint8_t), &status);
 		assert(success); // If this failed, buffer is corrupt, all hope is lost
 		
 		// Ignore event if it doesn't match channel filter
 		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
-			const Byte channel = status & 0x0F;
+			const uint8_t channel = status & 0x0F;
 			if ( !(get_channel_mask() & (1L << channel)) ) {
 				skip(ev_size); // Advance read pointer to next event
 				continue;
@@ -431,13 +431,13 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			
 			ev_time -= start;
 			
-			Byte* write_loc = dst.reserve(ev_time, ev_size);
+			uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 			if (write_loc == NULL) {
 				std::cerr << "MRB: Unable to reserve space in buffer, event skipped";
 				continue;
 			}
 			
-			success = MidiRingBufferBase<Byte>::full_read(ev_size, write_loc);
+			success = MidiRingBufferBase<uint8_t>::full_read(ev_size, write_loc);
 		
 			if (success) {
 				if (is_channel_event(status) && get_channel_mode() == ForceChannel) {

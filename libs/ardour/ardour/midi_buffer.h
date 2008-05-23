@@ -39,9 +39,9 @@ public:
 	
 	void copy(const MidiBuffer& copy);
 
-	bool  push_back(const MIDI::Event& event);
-	bool  push_back(const jack_midi_event_t& event);
-	Byte* reserve(double time, size_t size);
+	bool     push_back(const MIDI::Event& event);
+	bool     push_back(const jack_midi_event_t& event);
+	uint8_t* reserve(double time, size_t size);
 
 	void resize(size_t);
 
@@ -93,7 +93,7 @@ private:
 	/* FIXME: this is utter crap.  rewrite as a flat/packed buffer like MidiRingBuffer */
 
 	MIDI::Event* _events; ///< Event structs that point to offsets in _data
-	Byte*      _data;   ///< MIDI, straight up.  No time stamps.
+	uint8_t*     _data;   ///< MIDI, straight up.  No time stamps.
 };
 
 

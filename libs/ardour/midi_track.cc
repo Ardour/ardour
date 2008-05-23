@@ -588,7 +588,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 	MidiBuffer& cc_buf = mix_buffers.get_midi(0);
 	cc_buf.silence(nframes, offset);
 	
-	Byte buf[3]; // CC = 3 bytes
+	uint8_t buf[3]; // CC = 3 bytes
 	buf[0] = MIDI_CMD_CONTROL;
 	MIDI::Event ev(0, 3, buf, false);
 
@@ -616,8 +616,8 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 				assert(y <= 127.0);
 
 				ev.time() = stamp;
-				ev.buffer()[1] = (Byte)list->parameter().id();
-				ev.buffer()[2] = (Byte)y;
+				ev.buffer()[1] = (uint8_t)list->parameter().id();
+				ev.buffer()[2] = (uint8_t)y;
 
 				cc_buf.push_back(ev);
 
@@ -702,7 +702,7 @@ void
 MidiTrack::midi_panic() 
 {
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
-		Byte ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
+		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
 		write_immediate_event(3, ev);
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 		write_immediate_event(3, ev);
@@ -714,7 +714,7 @@ MidiTrack::midi_panic()
 /** \return true on success, false on failure (no buffer space left)
  */
 bool
-MidiTrack::write_immediate_event(size_t size, const Byte* buf)
+MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 {
 	printf("Write immediate event: ");
 	for (size_t i=0; i < size; ++i) {
@@ -732,7 +732,7 @@ MidiTrack::MidiControl::set_value(float val)
 	size_t size = 3;
 
 	if ( ! _list->automation_playback()) {
-		Byte ev[3] = { _list->parameter().channel(), int(val), 0.0 };
+		uint8_t ev[3] = { _list->parameter().channel(), int(val), 0.0 };
 		switch(_list->parameter().type()) {
 		case MidiCCAutomation:
 			ev[0] += MIDI_CMD_CONTROL;

@@ -306,7 +306,7 @@ SMFSource::find_first_event_after(nframes_t start)
  * skipped (eg a meta event), or -1 on EOF (or end of track).
  */
 int
-SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
+SMFSource::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 {
 	if (feof(_fd)) {
 		return -1;
@@ -355,7 +355,7 @@ SMFSource::read_event(uint32_t* delta_t, uint32_t* size, Byte** buf) const
 	
 	// Make sure we have enough scratch buffer
 	if (*size < (unsigned)event_size)
-		*buf = (Byte*)realloc(*buf, event_size);
+		*buf = (uint8_t*)realloc(*buf, event_size);
 	
 	*size = event_size;
 
@@ -386,7 +386,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	// Output parameters for read_event (which will allocate scratch in buffer as needed)
 	uint32_t ev_delta_t = 0;
 	uint32_t ev_size = 0;
-	Byte*    ev_buffer = 0;
+	uint8_t* ev_buffer = 0;
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
@@ -445,7 +445,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	size_t size;
 
 	size_t buf_capacity = 4;
-	Byte* buf = (Byte*)malloc(buf_capacity);
+	uint8_t* buf = (uint8_t*)malloc(buf_capacity);
 	
 	if (_model && ! _model->writing())
 		_model->start_write();
@@ -453,7 +453,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	MIDI::Event ev(0.0, 4, NULL, true);
 
 	while (true) {
-		bool ret = src.full_peek(sizeof(double), (Byte*)&time);
+		bool ret = src.full_peek(sizeof(double), (uint8_t*)&time);
 		if (!ret || time - _timeline_position > _length + cnt)
 			break;
 
@@ -463,7 +463,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 
 		if (size > buf_capacity) {
 			buf_capacity = size;
-			buf = (Byte*)realloc(buf, size);
+			buf = (uint8_t*)realloc(buf, size);
 		}
 
 		ret = src.read_contents(size, buf);

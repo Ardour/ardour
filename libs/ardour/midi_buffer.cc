@@ -75,10 +75,10 @@ MidiBuffer::resize (size_t size)
 
 #ifdef NO_POSIX_MEMALIGN
 	_events = (MIDI::Event *) malloc(sizeof(MIDI::Event) * _capacity);
-	_data = (Byte *) malloc(sizeof(Byte) * _capacity * MAX_EVENT_SIZE);
+	_data = (uint8_t *) malloc(sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 #else
 	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(MIDI::Event) * _capacity);
-	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(Byte) * _capacity * MAX_EVENT_SIZE);
+	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 #endif	
 	assert(_data);
 	assert(_events);
@@ -141,7 +141,7 @@ MidiBuffer::push_back(const MIDI::Event& ev)
 	if (_size == _capacity)
 		return false;
 
-	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
 	memcpy(write_loc, ev.buffer(), ev.size());
 	_events[_size] = ev;
@@ -169,7 +169,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 	if (_size == _capacity)
 		return false;
 
-	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
 	memcpy(write_loc, ev.buffer, ev.size);
 	_events[_size].time() = (double)ev.time;
@@ -191,7 +191,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
  * This call MUST be immediately followed by a write to the returned data
  * location, or the buffer will be corrupted and very nasty things will happen.
  */
-Byte*
+uint8_t*
 MidiBuffer::reserve(double time, size_t size)
 {
 	if (size > MAX_EVENT_SIZE) {
@@ -202,7 +202,7 @@ MidiBuffer::reserve(double time, size_t size)
 	if (_size == _capacity)
 		return 0;
 
-	Byte* const write_loc = _data + (_size * MAX_EVENT_SIZE);
+	uint8_t* const write_loc = _data + (_size * MAX_EVENT_SIZE);
 
 	_events[_size].time() = time;
 	_events[_size].set_buffer(size, write_loc, false);
@@ -224,7 +224,7 @@ MidiBuffer::silence(nframes_t dur, nframes_t offset)
 		cerr << "WARNING: MidiBuffer::silence w/ offset != 0 (not implemented)" << endl;
 
 	memset(_events, 0, sizeof(MIDI::Event) * _capacity);
-	memset(_data, 0, sizeof(Byte) * _capacity * MAX_EVENT_SIZE);
+	memset(_data, 0, sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 	_size = 0;
 	_silent = true;
 }

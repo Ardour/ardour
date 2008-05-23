@@ -71,7 +71,7 @@ public:
 	int set_state(const XMLNode& node);
 
 	void midi_panic(void);
-	bool write_immediate_event(size_t size, const Byte* buf);
+	bool write_immediate_event(size_t size, const uint8_t* buf);
 	
 	struct MidiControl : public AutomationControl {
 	    MidiControl(MidiTrack* route, boost::shared_ptr<AutomationList> al)
