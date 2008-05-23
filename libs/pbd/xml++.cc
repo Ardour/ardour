@@ -13,7 +13,7 @@
 
 static XMLNode *readnode(xmlNodePtr);
 static void writenode(xmlDocPtr, XMLNode *, xmlNodePtr, int);
-static XMLNodeList *find_impl(xmlXPathContext* ctxt, const string xpath);
+static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string xpath);
 
 XMLTree::XMLTree() 
 	: _filename(), 
@@ -285,14 +285,15 @@ XMLNode::add_child_copy(const XMLNode& n)
 	return copy;
 }
 
-XMLNodeList* 
+boost::shared_ptr<XMLSharedNodeList> 
 XMLNode::find(const string xpath) const
 {
 	xmlDocPtr doc = xmlNewDoc((xmlChar *) XML_VERSION);
 	writenode(doc, (XMLNode *) this, doc->children, 1);
 	xmlXPathContext* ctxt = xmlXPathNewContext(doc);
 	
-	XMLNodeList* result = find_impl(ctxt, xpath);
+	boost::shared_ptr<XMLSharedNodeList> result = 
+		boost::shared_ptr<XMLSharedNodeList>(find_impl(ctxt, xpath));
 	
 	xmlXPathFreeContext(ctxt);
 	xmlFreeDoc(doc);
@@ -497,7 +498,7 @@ writenode(xmlDocPtr doc, XMLNode * n, xmlNodePtr p, int root = 0)
 	}
 }
 
-static XMLNodeList* find_impl(xmlXPathContext* ctxt, const string xpath)
+static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string xpath)
 {
 	xmlXPathObject* result = xmlXPathEval((const xmlChar*)xpath.c_str(), ctxt);
 
@@ -519,12 +520,12 @@ static XMLNodeList* find_impl(xmlXPathContext* ctxt, const string xpath)
 	}
 
 	xmlNodeSet* nodeset = result->nodesetval;
-	XMLNodeList* nodes = new XMLNodeList();
+	XMLSharedNodeList* nodes = new XMLSharedNodeList();
 	if( nodeset )
 	{
 		for (int i = 0; i < nodeset->nodeNr; ++i) {
 			XMLNode* node = readnode(nodeset->nodeTab[i]);
-			nodes->push_back(node);
+			nodes->push_back(boost::shared_ptr<XMLNode>(node));
 		}
 	}
 	else

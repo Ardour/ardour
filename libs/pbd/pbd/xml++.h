@@ -12,6 +12,7 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <boost/shared_ptr.hpp>
 
 #ifndef __XML_H
 #define __XML_H
@@ -25,6 +26,7 @@ class XMLNode;
 class XMLProperty;
 
 typedef list<XMLNode *> XMLNodeList;
+typedef list<boost::shared_ptr<XMLNode> > XMLSharedNodeList;
 typedef XMLNodeList::iterator XMLNodeIterator;
 typedef XMLNodeList::const_iterator XMLNodeConstIterator;
 typedef list<XMLProperty*> XMLPropertyList;
@@ -93,7 +95,7 @@ public:
   XMLNode *child (const char*) const;
   void add_child_nocopy (XMLNode&);
   
-  XMLNodeList *find(const std::string xpath) const;
+  boost::shared_ptr<XMLSharedNodeList> find(const std::string xpath) const;
 
   const XMLPropertyList & properties() const { return _proplist; };
   XMLProperty *property(const char * );
