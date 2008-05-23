@@ -301,6 +301,17 @@ XMLNode::find(const string xpath) const
 	return result;
 }
 
+std::string 
+XMLNode::attribute_value()
+{
+	XMLNodeList children = this->children();
+	assert(!_is_content);
+	assert(children.size() == 1);
+	XMLNode* child = *(children.begin());
+	assert(child->is_content());
+	return child->content();
+}
+
 XMLNode *
 XMLNode::add_content(const string & c)
 {
@@ -537,3 +548,4 @@ static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string xpath)
 
 	return nodes;
 }
+

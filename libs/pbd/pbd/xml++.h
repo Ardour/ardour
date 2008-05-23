@@ -96,7 +96,8 @@ public:
   void add_child_nocopy (XMLNode&);
   
   boost::shared_ptr<XMLSharedNodeList> find(const std::string xpath) const;
-
+  std::string attribute_value();
+  
   const XMLPropertyList & properties() const { return _proplist; };
   XMLProperty *property(const char * );
   XMLProperty *property(const std::string&);

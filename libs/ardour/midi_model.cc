@@ -180,9 +180,7 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	
 	assert(_event->buffer() && _event->buffer()[0] != '\0');
 
-	/*cerr << "const_iterator::operator++: _event type:" << hex << "0x" << int(_event->type()) 
-	 << "   buffer: 0x" << int(_event->buffer()[0]) << " 0x" << int(_event->buffer()[1]) 
-	 << " 0x" << int(_event->buffer()[2]) << endl;*/
+	/*cerr << "const_iterator::operator++: " << _event->to_string() << endl;*/
 
 	if (! (_event->is_note() || _event->is_cc() || _event->is_pgm_change() || _event->is_pitch_bender() || _event->is_channel_aftertouch()) ) {
 		cerr << "FAILED event buffer: " << hex << int(_event->buffer()[0]) << int(_event->buffer()[1]) << int(_event->buffer()[2]) << endl;
@@ -244,6 +242,7 @@ const MidiModel::const_iterator& MidiModel::const_iterator::operator++()
 	if (type == NOTE_ON) {
 		//cerr << "********** MIDI Iterator = note on" << endl;
 		*_event = (*_note_iter)->on_event();
+		cerr << "Event contents on note on: " << _event->to_string() << endl;
 		_active_notes.push(*_note_iter);
 		++_note_iter;
 	} else if (type == NOTE_OFF) {
@@ -401,6 +400,7 @@ MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event>& ev, const MidiC
 		ev->buffer()[0] = MIDI_CMD_BENDER + iter.automation_list->parameter().channel();
 		ev->buffer()[1] = uint16_t(iter.y) & 0x7F; // LSB
 		ev->buffer()[2] = (uint16_t(iter.y) >> 7) & 0x7F; // MSB
+		//cerr << "Pitch bender event: " << ev->to_string() << " value: " << ev->pitch_bender_value() << " original value: " << iter.y << std::endl;
 		break;
 
 	case MidiChannelAftertouchAutomation:

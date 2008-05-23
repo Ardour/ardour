@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 #include <assert.h>
 
 #include <midi++/types.h>
@@ -93,8 +94,9 @@ struct Event {
 		_time = copy._time;
 		if (_owns_buffer) {
 			if (copy._buffer) {
-				if (copy._size > _size)
+				if (copy._size > _size) {
 					_buffer = (uint8_t*)::realloc(_buffer, copy._size);
+				}
 				memcpy(_buffer, copy._buffer, copy._size);
 			} else {
 				free(_buffer);
@@ -216,6 +218,15 @@ struct Event {
 	inline bool        is_sysex()              const { return _buffer[0] == 0xF0 || _buffer[0] == 0xF7; }
 	inline const uint8_t* buffer()             const { return _buffer; }
 	inline uint8_t*&      buffer()                   { return _buffer; }
+	inline std::string      to_string()             const {
+		std::ostringstream result(std::ios::ate);
+		result << "MIDI::Event type:" << std::hex << "0x" << int(type()) << "   buffer: ";
+		
+		for(uint32_t i = 0; i < size(); ++i) {
+			result << " 0x" << int(_buffer[i]); 
+		}
+		return result.str();
+	}
 
 private:
 	double   _time;   /**< Sample index (or beat time) at which event is valid */
