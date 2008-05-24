@@ -89,7 +89,7 @@ private:
 
 	MidiStreamView& _view;
 
-	ARDOUR::Byte _event[3];
+	uint8_t _event[3];
 
 	Cairo::RefPtr<Cairo::Context> cc;
 	bool _active_notes[128];

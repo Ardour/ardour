@@ -373,8 +373,8 @@ MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event>& ev, const MidiC
 		ev->time() = iter.x;
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.automation_list->parameter().channel();
-		ev->buffer()[1] = (Byte)iter.automation_list->parameter().id();
-		ev->buffer()[2] = (Byte)iter.y;
+		ev->buffer()[1] = (uint8_t)iter.automation_list->parameter().id();
+		ev->buffer()[2] = (uint8_t)iter.y;
 		break;
 
 	case MidiPgmChangeAutomation:
@@ -386,7 +386,7 @@ MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event>& ev, const MidiC
 		ev->time() = iter.x;
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.automation_list->parameter().channel();
-		ev->buffer()[1] = (Byte)iter.y;
+		ev->buffer()[1] = (uint8_t)iter.y;
 		break;
 
 	case MidiPitchBenderAutomation:
@@ -413,7 +413,7 @@ MidiModel::control_to_midi_event(boost::shared_ptr<MIDI::Event>& ev, const MidiC
 		ev->realloc(2);
 		ev->buffer()[0]
 				= MIDI_CMD_CHANNEL_PRESSURE + iter.automation_list->parameter().channel();
-		ev->buffer()[1] = (Byte)iter.y;
+		ev->buffer()[1] = (uint8_t)iter.y;
 		break;
 
 	default:
