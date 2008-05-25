@@ -25,12 +25,14 @@ midi2.Append(DOMAIN=domain,MAJOR=2,MINOR=1,MICRO=1)
 sources = Split("""
 fd_midiport.cc
 fifomidi.cc
+event.cc
 midi.cc
 midichannel.cc
 midifactory.cc
 midimanager.cc
 midiparser.cc
 midiport.cc
+midnam_patch.cc
 mmc.cc
 mtc.cc
 version.cc

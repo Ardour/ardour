@@ -29,6 +29,7 @@
 
 #include <midi++/types.h>
 #include <midi++/events.h>
+#include <pbd/xml++.h>
 
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
@@ -46,21 +47,7 @@ namespace MIDI {
  */
 struct Event {
 #ifdef MIDI_EVENT_ALLOW_ALLOC
-	Event(double t=0, uint32_t s=0, uint8_t* b=NULL, bool owns_buffer=false)
-		: _time(t)
-		, _size(s)
-		, _buffer(b)
-		, _owns_buffer(owns_buffer)
-	{
-		if (owns_buffer) {
-			_buffer = (uint8_t*)malloc(_size);
-			if (b) {
-				memcpy(_buffer, b, _size);
-			} else {
-				memset(_buffer, 0, _size);
-			}
-		}
-	}
+	Event(double t=0, uint32_t s=0, uint8_t* b=NULL, bool owns_buffer=false);
 	
 	/** Copy \a copy.
 	 * 
@@ -68,27 +55,14 @@ struct Event {
 	 * is NOT REALTIME SAFE.  Otherwise both events share a buffer and
 	 * memory management semantics are the caller's problem.
 	 */
-	Event(const Event& copy, bool owns_buffer)
-		: _time(copy._time)
-		, _size(copy._size)
-		, _buffer(copy._buffer)
-		, _owns_buffer(owns_buffer)
-	{
-		if (owns_buffer) {
-			_buffer = (uint8_t*)malloc(_size);
-			if (copy._buffer) {
-				memcpy(_buffer, copy._buffer, _size);
-			} else {
-				memset(_buffer, 0, _size);
-			}
-		}
-	}
+	Event(const Event& copy, bool owns_buffer);
 	
-	~Event() {
-		if (_owns_buffer) {
-			free(_buffer);
-		}
-	}
+	/**
+	 * see the MIDI XML specification: http://www.midi.org/dtds/MIDIEvents10.dtd
+	 */
+	Event(const XMLNode &event);
+	
+	~Event();
 
 	inline const Event& operator=(const Event& copy) {
 		_time = copy._time;
@@ -179,6 +153,7 @@ struct Event {
 		_size = size;
 	}
 
+
 #else
 
 	inline void set_buffer(uint8_t* buf) { _buffer = buf; }
@@ -218,15 +193,16 @@ struct Event {
 	inline bool        is_sysex()              const { return _buffer[0] == 0xF0 || _buffer[0] == 0xF7; }
 	inline const uint8_t* buffer()             const { return _buffer; }
 	inline uint8_t*&      buffer()                   { return _buffer; }
-	inline std::string      to_string()             const {
-		std::ostringstream result(std::ios::ate);
-		result << "MIDI::Event type:" << std::hex << "0x" << int(type()) << "   buffer: ";
-		
-		for(uint32_t i = 0; i < size(); ++i) {
-			result << " 0x" << int(_buffer[i]); 
-		}
-		return result.str();
-	}
+	
+	       /**
+	        * mainly used for debugging purposes
+	        */
+	       std::string    to_string()          const;
+	       
+	       /**
+	        * see the MIDI XML specification: http://www.midi.org/dtds/MIDIEvents10.dtd
+	        */
+	       boost::shared_ptr<XMLNode> to_xml() const;
 
 private:
 	double   _time;   /**< Sample index (or beat time) at which event is valid */

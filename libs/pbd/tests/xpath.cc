@@ -83,4 +83,16 @@ int main()
 		cout << "\t found attribute node: " << node->name()  
 		     << " value: " << node->attribute_value() << endl;
 	}	
+	
+	cout << endl << endl << "Test 6: ProtoolsPatchFile.midnam: Find available channels on 'Name Set 1'" << endl;
+	result = doc3.root()->find(
+		"//ChannelNameSet[@Name = 'Name Set 1']//AvailableChannel[@Available = 'true']/@Channel");
+	
+	assert(result->size() == 15);
+	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
+		boost::shared_ptr<XMLNode> node = (*i);
+		cout << "\t found available Channel: " << node->name()  
+		     << " value: " << node->attribute_value() << endl;
+	}	
+	
 }

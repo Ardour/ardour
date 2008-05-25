@@ -39,10 +39,11 @@ private:
   string _filename;
   XMLNode *_root;
   int _compression;
-
+  bool read_internal(bool validate);
+  
 public:
   XMLTree();
-  XMLTree(const string &fn);
+  XMLTree(const string &fn, bool validate = false);
   XMLTree(const XMLTree *);
   ~XMLTree();
 
@@ -55,8 +56,10 @@ public:
   int compression() const { return _compression; };
   int set_compression(int);
 
-  bool read();
-  bool read(const string &fn) { set_filename(fn); return read(); };
+  bool read() { return read_internal(false); };
+  bool read(const string &fn) { set_filename(fn); return read_internal(false); };
+  bool read_and_validate() { return read_internal(true); };
+  bool read_and_validate(const string &fn) { set_filename(fn); return read_internal(true); };
   bool read_buffer(const string &);
 
   bool write() const;
@@ -77,9 +80,9 @@ private:
   XMLPropertyMap _propmap;
 
 public:
-  XMLNode(const string &);
-  XMLNode(const string &, const string &);
-  XMLNode(const XMLNode&);
+  XMLNode(const string& name);
+  XMLNode(const string& name, const string& content);
+  XMLNode(const XMLNode& other);
   ~XMLNode();
 
   const string name() const { return _name; };
@@ -105,8 +108,9 @@ public:
 	{ return ((XMLNode *) this)->property(n); };
   const XMLProperty *property(const std::string& ns) const
 	{ return ((XMLNode *) this)->property(ns); };
-  XMLProperty *add_property(const char *, const string &);
-  XMLProperty *add_property(const char *, const char * = "");
+  XMLProperty *add_property(const char *name, const string& value);
+  XMLProperty *add_property(const char *name, const char *value = "");
+  XMLProperty *add_property(const char *name, const long value);
 
   void remove_property(const string &);
 

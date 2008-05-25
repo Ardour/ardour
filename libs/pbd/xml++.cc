@@ -22,12 +22,12 @@ XMLTree::XMLTree()
 { 
 }
 
-XMLTree::XMLTree(const string &fn)
+XMLTree::XMLTree(const string &fn, bool validate)
 	: _filename(fn), 
 	_root(0), 
 	_compression(0)
 { 
-	read(); 
+	read_internal(validate); 
 }
 
 XMLTree::XMLTree(const XMLTree * from)
@@ -48,9 +48,9 @@ int
 XMLTree::set_compression(int c)
 {
 	if (c > 9) {
-	    	c = 9;
+		c = 9;
 	} else if (c < 0) {
-	    	c = 0;
+		c = 0;
 	}
 	
 	_compression = c;
@@ -59,24 +59,55 @@ XMLTree::set_compression(int c)
 }
 
 bool 
-XMLTree::read(void)
+XMLTree::read_internal(bool validate)
 {
-	xmlDocPtr doc;
-	
+	//shouldnt be used anywhere ATM, remove if so!
+	assert(!validate);
 	if (_root) {
 		delete _root;
 		_root = 0;
 	}
 	
-	xmlKeepBlanksDefault(0);
+	xmlParserCtxtPtr ctxt; /* the parser context */
+	xmlDocPtr doc; /* the resulting document tree */
 	
-	doc = xmlParseFile(_filename.c_str());
-	if (!doc) {
-	 	return false;
+	xmlKeepBlanksDefault(0);
+	/* parse the file, activating the DTD validation option */
+	if(validate) {
+		/* create a parser context */
+		ctxt = xmlNewParserCtxt();
+		if (ctxt == NULL) {
+			return false;
+		}
+		doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_DTDVALID);
+	} else {
+		doc = xmlParseFile(_filename.c_str());
+	}
+	
+	/* check if parsing suceeded */
+	if (doc == NULL) {
+		if(validate) {
+			xmlFreeParserCtxt(ctxt);
+		}
+		return false;
+	} else {
+	/* check if validation suceeded */
+		if (validate && ctxt->valid == 0) {
+			xmlFreeParserCtxt(ctxt);
+			xmlFreeDoc(doc);
+			xmlCleanupParser();
+			throw XMLException("Failed to validate document " + _filename);
+		}
 	}
 	
 	_root = readnode(xmlDocGetRootElement(doc));
+	
+	/* free up the parser context */
+	if(validate) {
+		xmlFreeParserCtxt(ctxt);
+	}
 	xmlFreeDoc(doc);
+	xmlCleanupParser();
 	
 	return true;
 }
@@ -129,15 +160,15 @@ XMLTree::write(void) const
 void
 XMLTree::debug(FILE* out) const
 {
-    xmlDocPtr doc;
-    XMLNodeList children;
+	xmlDocPtr doc;
+	XMLNodeList children;
 
-    xmlKeepBlanksDefault(0);
-    doc = xmlNewDoc((xmlChar *) XML_VERSION);
-    xmlSetDocCompressMode(doc, _compression);
-    writenode(doc, _root, doc->children, 1);
-    xmlDebugDumpDocument (out, doc);
-    xmlFreeDoc(doc);
+	xmlKeepBlanksDefault(0);
+	doc = xmlNewDoc((xmlChar *) XML_VERSION);
+	xmlSetDocCompressMode(doc, _compression);
+	writenode(doc, _root, doc->children, 1);
+	xmlDebugDumpDocument (out, doc);
+	xmlFreeDoc(doc);
 }
 
 const string & 
@@ -202,7 +233,7 @@ XMLNode::~XMLNode()
 	for (curchild = _children.begin(); curchild != _children.end();	++curchild) {
 		delete *curchild;
 	}
-	    
+		
 	for (curprop = _proplist.begin(); curprop != _proplist.end(); ++curprop) {
 		delete *curprop;
 	}
@@ -216,7 +247,7 @@ XMLNode::set_content(const string & c)
 	} else {
 		_is_content = true;
 	}
-	    
+		
 	_content = c;
 	
 	return _content;
@@ -232,13 +263,13 @@ XMLNode::child (const char *name) const
 	if (name == 0) {
 		return 0;
 	}
-	    
+		
 	for (cur = _children.begin(); cur != _children.end(); ++cur) {
 		if ((*cur)->name() == name) {
 			return *cur;
 		}
 	}
-	    
+		
 	return 0;
 }
 
@@ -253,7 +284,7 @@ XMLNode::children(const string& n) const
 	if (n.empty()) {
 		return _children;
 	}
-	    
+		
 	retval.erase(retval.begin(), retval.end());
 	
 	for (cur = _children.begin(); cur != _children.end(); ++cur) {
@@ -261,7 +292,7 @@ XMLNode::children(const string& n) const
 			retval.insert(retval.end(), *cur);
 		}
 	}
-	    
+		
 	return retval;
 }
 
@@ -368,6 +399,14 @@ XMLNode::add_property(const char * n, const char * v)
 {
 	string vs(v);
 	return add_property(n, vs);
+}
+
+XMLProperty *
+XMLNode::add_property(const char *name, const long value)
+{
+	static char str[1024];
+	snprintf(str, 1024, "%ld", value);
+	return add_property(name, str);
 }
 
 void 
@@ -492,7 +531,7 @@ writenode(xmlDocPtr doc, XMLNode * n, xmlNodePtr p, int root = 0)
 	} else {
 		node = xmlNewChild(p, 0, (xmlChar *) n->name().c_str(), 0);
 	}
-	    
+		
 	if (n->is_content()) {
 		node->type = XML_TEXT_NODE;
 		xmlNodeSetContentLen(node, (const xmlChar *) n->content().c_str(), n->content().length());
@@ -502,7 +541,7 @@ writenode(xmlDocPtr doc, XMLNode * n, xmlNodePtr p, int root = 0)
 	for (curprop = props.begin(); curprop != props.end(); ++curprop) {
 		xmlSetProp(node, (xmlChar *) (*curprop)->name().c_str(), (xmlChar *) (*curprop)->value().c_str());
 	}
-	    
+		
 	children = n->children();
 	for (curchild = children.begin(); curchild != children.end(); ++curchild) {
 		writenode(doc, *curchild, node);
