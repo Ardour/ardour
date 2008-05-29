@@ -327,18 +327,14 @@ PluginSelector::au_refiller (const std::string& filterstr)
 #endif
 }
 
-void
-PluginSelector::use_plugin (PluginInfoPtr pi)
+PluginPtr
+PluginSelector::load_plugin (PluginInfoPtr pi)
 {
 	if (session == 0) {
-		return;
+		return PluginPtr();
 	}
 
-	PluginPtr plugin = pi->load (*session);
-
-	if (plugin) {
-		PluginCreated (plugin);
-	}
+	return pi->load (*session);
 }
 
 void
@@ -404,6 +400,7 @@ PluginSelector::run ()
 {
 	ResponseType r;
 	TreeModel::Children::iterator i;
+	SelectedPlugins plugins;
 
 	r = (ResponseType) Dialog::run ();
 
@@ -411,24 +408,26 @@ PluginSelector::run ()
 	case RESPONSE_APPLY:
 		for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
 			PluginInfoPtr pp = (*i)[acols.plugin];
-			use_plugin (pp);
+			PluginPtr p = load_plugin (pp);
+			if (p) {
+				plugins.push_back (p);
+			}
 		}
+		if (interested_object && !plugins.empty()) {
+			interested_object->use_plugins (plugins);
+		}
+		
 		break;
 
 	default:
 		break;
 	}
 
-	cleanup ();
-
-	return (int) r;
-}
-
-void
-PluginSelector::cleanup ()
-{
 	hide();
 	amodel->clear();
+	interested_object = 0;
+
+	return (int) r;
 }
 
 void
@@ -551,7 +550,15 @@ PluginSelector::plugin_menu()
 void
 PluginSelector::plugin_chosen_from_menu (const PluginInfoPtr& pi)
 {
-	use_plugin (pi);
+	PluginPtr p = load_plugin (pi);
+
+	if (p && interested_object) {
+		SelectedPlugins plugins;
+		plugins.push_back (p);
+		interested_object->use_plugins (plugins);
+	}
+
+	interested_object = 0;
 }
 
 void 
@@ -595,4 +602,10 @@ PluginSelector::show_manager ()
 {
 	show_all();
 	run ();
+}
+
+void
+PluginSelector::set_interested_object (PluginInterestedObject& obj)
+{
+	interested_object = &obj;
 }

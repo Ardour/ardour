@@ -26,6 +26,7 @@
 #include <gtkmm2ext/selector.h>
 
 #include <ardour/plugin.h>
+#include "plugin_interest.h"
 
 namespace ARDOUR {
 	class Session;
@@ -36,8 +37,9 @@ class PluginSelector : public ArdourDialog
 {
   public:
 	PluginSelector (ARDOUR::PluginManager *);
-	sigc::signal<void,boost::shared_ptr<ARDOUR::Plugin> > PluginCreated;
 
+	void set_interested_object (PluginInterestedObject&);
+	
 	int run (); // XXX should we try not to overload the non-virtual Gtk::Dialog::run() ?
 
 	void set_session (ARDOUR::Session*);
@@ -46,8 +48,10 @@ class PluginSelector : public ArdourDialog
 	Gtk::Menu& plugin_menu ();
 
   private:
+	PluginInterestedObject* interested_object;
+
 	ARDOUR::Session* session;
-	Gtk::ScrolledWindow scroller;  // Available plugins
+	Gtk::ScrolledWindow scroller;   // Available plugins
 	Gtk::ScrolledWindow ascroller;  // Added plugins
 
 	Gtk::ComboBoxText filter_mode;
@@ -112,8 +116,7 @@ class PluginSelector : public ArdourDialog
 	void added_list_selection_changed();
 	void display_selection_changed();
 	void btn_apply_clicked();
-	void use_plugin (ARDOUR::PluginInfoPtr);
-	void cleanup ();
+	ARDOUR::PluginPtr load_plugin (ARDOUR::PluginInfoPtr);
 	bool show_this_plugin (const ARDOUR::PluginInfoPtr&, const std::string&);
 	void setup_filter_string (std::string&);
 

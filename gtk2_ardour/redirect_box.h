@@ -42,6 +42,7 @@
 
 #include <pbd/fastlog.h>
 
+#include "plugin_interest.h"
 #include "route_ui.h"
 #include "io_selector.h"
 #include "enums.h"
@@ -62,7 +63,7 @@ namespace ARDOUR {
 	class Session;
 }
 
-class RedirectBox : public Gtk::HBox
+class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 {
   public:
 	RedirectBox (ARDOUR::Placement, ARDOUR::Session&, 
@@ -144,11 +145,7 @@ class RedirectBox : public Gtk::HBox
 	void send_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Redirect>, IOSelectorWindow*);
 	void choose_insert ();
 	void choose_plugin ();
-	void insert_plugin_chosen (boost::shared_ptr<ARDOUR::Plugin>);
-	sigc::connection newplug_connection;
-	bool using_plugin_selector;
-	void plugin_selector_hidden ();
-	void plugin_selector_shown ();
+	void use_plugins (const SelectedPlugins&);
 
 	bool no_redirect_redisplay;
 	bool ignore_delete;

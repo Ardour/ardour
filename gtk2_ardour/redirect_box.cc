@@ -147,10 +147,6 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event), false);
 	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button_release_event));
 
-	using_plugin_selector = false;
-	_plugin_selector.signal_hide().connect (mem_fun (*this, &RedirectBox::plugin_selector_hidden));
-	_plugin_selector.signal_show().connect (mem_fun (*this, &RedirectBox::plugin_selector_shown));
-
 	/* start off as a passthru strip. we'll correct this, if necessary,
 	   in update_diskstream_display().
 	*/
@@ -395,32 +391,27 @@ RedirectBox::deselect_all_redirects ()
 void
 RedirectBox::choose_plugin ()
 {
-	newplug_connection = _plugin_selector.PluginCreated.connect (mem_fun(*this,&RedirectBox::insert_plugin_chosen));
-	// Gtk::Menu& m = _plugin_selector.plugin_menu();
-	// m.popup (1, 0);
+	_plugin_selector.set_interested_object (*this);
 }
 
 void
-RedirectBox::insert_plugin_chosen (boost::shared_ptr<Plugin> plugin)
+RedirectBox::use_plugins (const SelectedPlugins& plugins)
 {
-	if (plugin) {
+	for (SelectedPlugins::const_iterator p = plugins.begin(); p != plugins.end(); ++p) {
 
-		boost::shared_ptr<Redirect> redirect (new PluginInsert (_session, plugin, _placement));
-		
+		boost::shared_ptr<Redirect> redirect (new PluginInsert (_session, *p, _placement));
+
 		uint32_t err_streams;
-
+		
 		if (_route->add_redirect (redirect, this, &err_streams)) {
-			weird_plugin_dialog (*plugin, err_streams, _route);
+			weird_plugin_dialog (**p, err_streams, _route);
 		} else {
+			
 			if (Profile->get_sae()) {
 				redirect->set_active (true, 0);
 			}
 			redirect->active_changed.connect (bind (mem_fun (*this, &RedirectBox::show_redirect_active_r), boost::weak_ptr<Redirect>(redirect)));
 		}
-	}
-
-	if (!using_plugin_selector) {
-		newplug_connection.disconnect();
 	}
 }
 
@@ -1413,15 +1404,3 @@ RedirectBox::generate_redirect_title (boost::shared_ptr<PluginInsert> pi)
 	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);	
 }
 
-void
-RedirectBox::plugin_selector_hidden ()
-{
-	newplug_connection.disconnect();
-	using_plugin_selector = false;
-}
-
-void
-RedirectBox::plugin_selector_shown ()
-{
-	using_plugin_selector = true;
-}
