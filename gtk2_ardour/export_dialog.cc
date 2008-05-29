@@ -1016,18 +1016,13 @@ ExportDialog::start_export ()
 	*/
 	
 	if (file_entry.get_text().length() == 0) {
-		string dir = session->export_dir();
-		string::size_type last_slash;
-		
-		if ((last_slash = dir.find_last_of (G_DIR_SEPARATOR_S)) != string::npos && last_slash != 0) {
-			dir = dir.substr (0, last_slash+1);
-		}
+		Glib::ustring export_path = session->export_dir();
 
 		if (!wants_dir()) {
-			dir = dir + "export.wav"; // Glib::build_filename() ?
+			export_path = Glib::build_filename (export_path, "export.wav");
 		}
 		
-		file_entry.set_text (dir);
+		file_entry.set_text (export_path);
 	}
 	
 	progress_bar.set_fraction (0);
