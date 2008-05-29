@@ -113,6 +113,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 {
 	using namespace Notebook_Helpers;
 
+	first_click_setup = true;
 	click_io_selector = 0;
 	auditioner_io_selector = 0;
 	session = 0;
@@ -994,8 +995,8 @@ void
 OptionEditor::clear_click_editor ()
 {
 	if (click_io_selector) {
-		click_packer.remove (*click_io_selector);
-		click_packer.remove (*click_gpm);
+		click_hpacker.remove (*click_io_selector);
+		click_hpacker.remove (*click_gpm);
 		delete click_io_selector;
 		delete click_gpm;
 		click_io_selector = 0;
@@ -1007,51 +1008,58 @@ void
 OptionEditor::setup_click_editor ()
 {
 	Label* label;
-	HBox* hpacker = manage (new HBox);
+
+	if (first_click_setup) {
+		
+		click_path_entry.set_name ("OptionsEntry");
+		click_emphasis_path_entry.set_name ("OptionsEntry");
+		
+		click_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_sound_changed));
+		click_emphasis_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
+		
+		click_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
+		click_emphasis_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
+		
+		click_browse_button.set_name ("EditorGTKButton");
+		click_emphasis_browse_button.set_name ("EditorGTKButton");
+
+		click_browse_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::click_browse_clicked));
+		click_emphasis_browse_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::click_emphasis_browse_clicked));
+
+		click_packer.set_border_width (12);
+		click_packer.set_spacing (5);
+
+		click_table.set_col_spacings (10);
+		
+		label = manage(new Label(_("Click audio file")));
+		label->set_name ("OptionsLabel");
+		click_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
+		click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
+		click_table.attach (click_browse_button, 2, 3, 0, 1, FILL|EXPAND, FILL);
+		
+		label = manage(new Label(_("Click emphasis audiofile")));
+		label->set_name ("OptionsLabel");
+		click_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
+		click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
+		click_table.attach (click_emphasis_browse_button, 2, 3, 1, 2, FILL|EXPAND, FILL);
+
+		click_packer.pack_start (click_table, false, false);
+		click_packer.pack_start (click_hpacker, false, false);
+	
+
+		click_hpacker.set_spacing (10);
+
+		first_click_setup = false;
+	}
 
 	click_path_entry.set_sensitive (true);
 	click_emphasis_path_entry.set_sensitive (true);
 
-	click_path_entry.set_name ("OptionsEntry");
-	click_emphasis_path_entry.set_name ("OptionsEntry");
-	
-	click_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
-
-	click_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_sound_changed));
-	click_emphasis_path_entry.signal_focus_out_event().connect (bind (mem_fun(*this, &OptionEditor::focus_out_event_handler), &OptionEditor::click_emphasis_sound_changed));
-
-	click_browse_button.set_name ("EditorGTKButton");
-	click_emphasis_browse_button.set_name ("EditorGTKButton");
-	click_browse_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::click_browse_clicked));
-	click_emphasis_browse_button.signal_clicked().connect (mem_fun(*this, &OptionEditor::click_emphasis_browse_clicked));
-
-	click_packer.set_border_width (12);
-	click_packer.set_spacing (5);
-
 	click_io_selector = new IOSelector (*session, session->click_io(), false);
 	click_gpm = new GainMeter (session->click_io(), *session);
 
-	click_table.set_col_spacings (10);
-	
-	label = manage(new Label(_("Click audio file")));
-	label->set_name ("OptionsLabel");
-	click_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
-	click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
-	click_table.attach (click_browse_button, 2, 3, 0, 1, FILL|EXPAND, FILL);
-	
-	label = manage(new Label(_("Click emphasis audiofile")));
-	label->set_name ("OptionsLabel");
-	click_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
-	click_table.attach (click_emphasis_path_entry, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
-	click_table.attach (click_emphasis_browse_button, 2, 3, 1, 2, FILL|EXPAND, FILL);
-
-	hpacker->set_spacing (10);
-	hpacker->pack_start (*click_io_selector, false, false);
-	hpacker->pack_start (*click_gpm, false, false);
-
-	click_packer.pack_start (click_table, false, false);
-	click_packer.pack_start (*hpacker, false, false);
+	click_hpacker.pack_start (*click_io_selector, false, false);
+	click_hpacker.pack_start (*click_gpm, false, false);
 
 	click_packer.show_all ();
 }
