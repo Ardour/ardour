@@ -24,6 +24,10 @@
 #define _SIGC_FUNCTORS_MACROS_FUNCTOR_TRAITHM4_
 #include <sigc++/type_traits.h>
 
+#ifdef nil
+/* stupid OS X, defining nil */
+#undef nil
+#endif
 
 namespace sigc {
 
