@@ -254,6 +254,7 @@ Editor::Editor ()
 	clicked_control_point = 0;
 	last_update_frame = 0;
 	drag_info.item = 0;
+	drag_info.copied_location = 0;
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
 	
