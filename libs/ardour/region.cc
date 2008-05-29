@@ -95,10 +95,10 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	}
 	_length = length; 
 	_last_length = length; 
-	_ancestral_start = other->_ancestral_start + offset;
-	_ancestral_length = length; 
-	_stretch = 1.0;
-	_shift = 1.0;
+	_ancestral_start = other->_ancestral_start;
+	_ancestral_length = other->_ancestral_length; 
+	_stretch = other->_stretch;
+	_shift = other->_shift;
 	_name = name;
 	_last_position = 0; 
 	_position = 0; 
@@ -133,8 +133,8 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_last_length = other->_length; 
 	_ancestral_start = _start; 
 	_ancestral_length = _length; 
-	_stretch = 1.0;
-	_shift = 1.0;
+	_stretch = other->_stretch;
+	_shift = other->_shift;
 	_name = other->_name;
 	_last_position = other->_position; 
 	_position = other->_position; 
