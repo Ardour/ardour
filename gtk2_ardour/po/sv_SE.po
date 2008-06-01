@@ -1966,6 +1966,15 @@ msgstr "Tona Ut"
 msgid "Audition"
 msgstr "Avlyssna"
 
+
+#: gtk2_ardour/editor.cc:105 gtk2_ardour/editor.cc:3517
+msgid "Slide Edit"
+msgstr "Glidred."
+
+#: gtk2_ardour/editor.cc:106 gtk2_ardour/editor.cc:3515
+msgid "Splice Edit"
+msgstr "Fogred."
+
 #: gtk2_ardour/editor.cc:111 gtk2_ardour/editor.cc:3572
 #: gtk2_ardour/export_dialog.cc:78 gtk2_ardour/export_dialog.cc:92
 #: gtk2_ardour/export_dialog.cc:893 gtk2_ardour/export_dialog.cc:1225
@@ -7094,6 +7103,7 @@ msgstr "EJ tonhöjdsändrat soloslagverk"
 msgid "Contents:"
 msgstr "Innehåll"
 
+
 #: gtk2_ardour/editor_actions.cc:359
 msgid "Playhead to Mouse"
 msgstr "Startmarkören till mus"
@@ -7411,7 +7421,7 @@ msgstr "Visningsmodell"
 
 #: gtk2_ardour/analysis_window.cc:51
 msgid "Composite graphs for each track"
-msgstr "Sammansatt graf för varje spår"
+msgstr ""
 
 #: gtk2_ardour/analysis_window.cc:52
 msgid "Composite graph of all tracks"
@@ -7432,217 +7442,3 @@ msgstr "FFT-analysfönster"
 #: gtk2_ardour/analysis_window.cc:135
 msgid "Re-analyze data"
 msgstr "Återanalysera data"
-
-#: gtk2_ardour/ardour_ui_ed.cc:195
-msgid "Window"
-msgstr "Fönster"
-
-#: gtk2_ardour/ardour_ui_dependents.cc:74
-msgid "Setup Editor"
-msgstr "Förbereder redigeraren..."
-
-#: gtk2_ardour/ardour_ui_dependents.cc:76
-msgid "Setup Mixer"
-msgstr "Förbereder mixern..."
-
-#: gtk2_ardour/ardour_ui_dependents.cc:81
-msgid "Reload Session History"
-msgstr "Laddar sessionshistoriken..."
-
-#: gtk2_ardour/editor.cc:4571
-msgid "Please wait while Ardour loads visual data"
-msgstr "Vänta medan Ardour laddar visuell data..."
-
-#: gtk2_ardour/editor_actions.cc:368
-msgid "Toggle Opaque"
-msgstr "Växla genomskinligt"
-
-#: gtk2_ardour/editor_actions.cc:570
-msgid "Fit Selected Tracks"
-msgstr "Rym valda spår"
-
-#: gtk2_ardour/editor_actions.cc:299
-msgid "Zoom to Region (W&H)"
-msgstr "Zooma till region (bredd & höjd)"
-
-#: gtk2_ardour/editor_actions.cc:76
-msgid "Views"
-msgstr "Visningslägen"
-
-
-#: gtk2_ardour/editor_actions.cc:196
-msgid "Save View 1"
-msgstr "Spara läge 1"
-
-#: gtk2_ardour/editor_actions.cc:198
-msgid "Goto View 1"
-msgstr "Använd läge 1"
-
-#: gtk2_ardour/editor_actions.cc:200
-msgid "Save View 2"
-msgstr "Spara läge 2"
-
-#: gtk2_ardour/editor_actions.cc:202
-msgid "Goto View 2"
-msgstr "Använd läge 2 "
-
-#: gtk2_ardour/editor_actions.cc:204
-msgid "Save View 3"
-msgstr "Spara läge 3"
-
-#: gtk2_ardour/editor_actions.cc:206
-msgid "Goto View 3"
-msgstr "Använd läge 3"
-
-#: gtk2_ardour/editor_actions.cc:208
-msgid "Save View 4"
-msgstr "Spara läge 4"
-
-#: gtk2_ardour/editor_actions.cc:210
-msgid "Goto View 4"
-msgstr "Använd läge 4"
-
-#: gtk2_ardour/editor_actions.cc:212
-msgid "Save View 5"
-msgstr "Spara läge 5"
-
-#: gtk2_ardour/editor_actions.cc:214
-msgid "Goto View 5"
-msgstr "Använd läge 5"
-
-#: gtk2_ardour/editor_actions.cc:216
-msgid "Save View 6"
-msgstr "Spara läge 6"
-
-#: gtk2_ardour/editor_actions.cc:218
-msgid "Goto View 6"
-msgstr "Använd läge 6"
-
-#: gtk2_ardour/editor_actions.cc:220
-msgid "Save View 7"
-msgstr "Spara läge 7"
-
-#: gtk2_ardour/editor_actions.cc:222
-msgid "Goto View 7"
-msgstr "Använd läge 7"
-
-#: gtk2_ardour/editor_actions.cc:224
-msgid "Save View 8"
-msgstr "Spara läge 8"
-
-#: gtk2_ardour/editor_actions.cc:226
-msgid "Goto View 8"
-msgstr "Använd läge 8"
-
-#: gtk2_ardour/editor_actions.cc:228
-msgid "Save View 9"
-msgstr "Spara läge 9"
-
-#: gtk2_ardour/editor_actions.cc:230
-msgid "Goto View 9"
-msgstr "Använd läge 9"
-
-#: gtk2_ardour/editor_actions.cc:232
-msgid "Save View 10"
-msgstr "Spara läge 10"
-
-#: gtk2_ardour/editor_actions.cc:234
-msgid "Goto View 10"
-msgstr "Använd läge 10"
-
-#: gtk2_ardour/editor_actions.cc:236
-msgid "Save View 11"
-msgstr "Spara läge 11"
-
-#: gtk2_ardour/editor_actions.cc:238
-msgid "Goto View 11"
-msgstr "Använd läge 11"
-
-#: gtk2_ardour/editor_actions.cc:240
-msgid "Save View 12"
-msgstr "Spara läge 12"
-
-#: gtk2_ardour/editor_actions.cc:242
-msgid "Goto View 12"
-msgstr "Använd läge 12"
-
-#: gtk2_ardour/ardour_ui_ed.cc:462
-msgid "Name New Markers"
-msgstr "Namnge nya markörer"
-
-#: gtk2_ardour/editor_ops.cc:1900
-msgid "Name New Location Marker"
-msgstr "Namnge ny platsmarkör"
-
-#: gtk2_ardour/sfdb_ui.cc:513
-msgid "Search Freesound"
-msgstr "Sök i Freesound"
-
-#: gtk2_ardour/sfdb_ui.cc:480
-msgid "User:"
-msgstr "Användarnamn:"
-
-#: gtk2_ardour/sfdb_ui.cc:484
-msgid "Password:"
-msgstr "Lösenord:"
-
-#: gtk2_ardour/sfdb_ui.cc:400 gtk2_ardour/sfdb_ui.cc:789
-msgid "Start Downloading"
-msgstr "Ladda ner"
-
-#: gtk2_ardour/redirect_box.cc:1190
-msgid "New Plugin"
-msgstr "Nytt insticksprogram"
-
-#: gtk2_ardour/plugin_selector.cc:100
-msgid "Plugins to be connected"
-msgstr "Insticksprogram att ansluta"
-
-#: gtk2_ardour/plugin_selector.cc:156
-msgid "Insert Plugin(s)"
-msgstr "Infoga"
-
-#: gtk2_ardour/plugin_selector.cc:501
-msgid "Favorites"
-msgstr "Favoriter"
-
-#: gtk2_ardour/plugin_selector.cc:502
-msgid "Plugin Manager"
-msgstr "Insticksprogram"
-
-#: gtk2_ardour/plugin_selector.cc:77
-msgid "Fav"
-msgstr ""
-
-#: gtk2_ardour/plugin_selector.cc:78
-msgid "Available Plugins"
-msgstr "Tillgängliga insticksprogram"
-
-#: gtk2_ardour/plugin_selector.cc:80
-msgid "Category"
-msgstr "Kategori"
-
-#: gtk2_ardour/plugin_selector.cc:81
-msgid "Creator"
-msgstr "Upphovsperson"
-
-#: gtk2_ardour/plugin_selector.cc:51 gtk2_ardour/plugin_selector.cc:209
-msgid "Name contains"
-msgstr "Namn innehåller"
-
-#: gtk2_ardour/plugin_selector.cc:52 gtk2_ardour/plugin_selector.cc:211
-msgid "Type contains"
-msgstr "Typ innehåller"
-
-#: gtk2_ardour/plugin_selector.cc:53 gtk2_ardour/plugin_selector.cc:213
-msgid "Author contains"
-msgstr "Upphovsperson innehåller"
-
-#: gtk2_ardour/plugin_selector.cc:54 gtk2_ardour/plugin_selector.cc:215
-msgid "Library contains"
-msgstr "Bibliotek innehåller"
-
-#: gtk2_ardour/plugin_selector.cc:55 gtk2_ardour/plugin_selector.cc:203
-#: gtk2_ardour/plugin_selector.cc:451
-msgid "Favorites only"
-msgstr "Endast favoriter"
