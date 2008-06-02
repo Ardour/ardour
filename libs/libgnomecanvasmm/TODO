@@ -1,8 +1,0 @@
-LIBGNOMECANVASMM:
-
-* Rename canvas-*.hg to *.hg.
-* Check that we have all the necessary streams-based properties.
-
-
-
-

@@ -1,5 +1,0 @@
-(include glib_functions.defs)
-(include glib_enums.defs)
-(include gobject_functions.defs)
-(include gmodule_functions.defs)
-(include gmodule_enums.defs)
