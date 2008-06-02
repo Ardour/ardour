@@ -21,7 +21,7 @@
  */
 
 #include <gtkmm/targetentry.h>
-
+#include <cstring>
 
 namespace Gtk
 {

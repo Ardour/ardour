@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+ #include <typeinfo>
 
 using namespace std;
 using namespace Mackie;

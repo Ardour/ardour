@@ -27,6 +27,7 @@
 #include <gobject/gvaluecollector.h>
 
 #include <cstdarg>
+#include <cstring>
 
 //Weak references:
 //I'm not sure what the point of these are apart from being a hacky way out of circular references,
