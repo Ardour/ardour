@@ -1,0 +1,26 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+pangomm_files = glob.glob('pangomm/*.cc')
+
+Import('env libraries install_prefix')
+pangomm = env.Copy()
+pangomm.Merge([libraries['glibmm2'], libraries['pango'], libraries['sigc2'], libraries['cairomm'], libraries['cairo'], libraries['pangocairo'] ])
+
+if pangomm['IS_OSX']:
+	pangomm.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
+libpangomm = pangomm.SharedLibrary('pangomm', pangomm_files)
+Default(libpangomm)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libpangomm))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'pangomm.h'] + 
+				     pangomm_files + 
+				     glob.glob('pangomm/*.h') +
+				     glob.glob('pangomm/private/*.h')
+				     ))

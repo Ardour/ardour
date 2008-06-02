@@ -1,0 +1,372 @@
+<root>
+
+
+<function name="pango_font_face_describe">
+<description>
+Returns the family, style, variant, weight and stretch of
+a #PangoFontFace. The size field of the resulting font description
+will be unset.
+
+
+</description>
+<parameters>
+<parameter name="face">
+<parameter_description> a #PangoFontFace
+</parameter_description>
+</parameter>
+</parameters>
+<return> a  #PangoFontDescription 
+holding the description of the face.
+</return>
+</function>
+
+
+<function name="pango_layout_get_tabs">
+<description>
+Get the current #PangoTabArray used by this layout. If no
+#PangoTabArray has been set, then the default tabs are in use
+and an invalid instance is returned. Default tabs are every 8 spaces.
+
+</description>
+<parameters>
+<parameter name="layout">
+<parameter_description> a #PangoLayout
+</parameter_description>
+</parameter>
+</parameters>
+<return> a copy of the tabs for this layout.
+</return>
+</function>
+
+<function name="pango_context_get_metrics">
+<description>
+Get overall metric information for a font particular font
+description.  Since the metrics may be substantially different for
+different scripts, a language tag can be provided to indicate that
+the metrics should be retrieved that correspond to the script(s)
+used by that language.
+
+The #PangoFontDescription is interpreted in the same way as
+by pango_itemize(), and the family name may be a comma separated
+list of figures. If characters from multiple of these families
+would be used to render the string, then the returned fonts would
+be a composite of the metrics for the fonts loaded for the
+individual families.
+
+
+</description>
+<parameters>
+<parameter name="context">
+<parameter_description> a #PangoContext
+</parameter_description>
+</parameter>
+<parameter name="desc">
+<parameter_description> a #PangoFontDescription structure
+</parameter_description>
+</parameter>
+<parameter name="language">
+<parameter_description> language tag used to determine which script to get the metrics
+for.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #PangoMetrics object.
+</return>
+</function>
+
+<function name="pango_font_get_glyph_extents">
+<description>
+Gets the logical and ink extents of a glyph within a font. The
+coordinate system for each rectangle has its origin at the
+base line and horizontal origin of the character with increasing
+coordinates extending to the right and down. The macros PANGO_ASCENT(),
+PANGO_DESCENT(), PANGO_LBEARING(), and PANGO_RBEARING can be used to convert
+from the extents rectangle to more traditional font metrics. The units
+of the rectangles are in 1/PANGO_SCALE of a device unit.
+
+</description>
+<parameters>
+<parameter name="font">
+<parameter_description> a #PangoFont
+</parameter_description>
+</parameter>
+<parameter name="glyph">
+<parameter_description> the glyph index
+</parameter_description>
+</parameter>
+<parameter name="ink_rect">
+<parameter_description> rectangle used to store the extents of the glyph as drawn.
+</parameter_description>
+</parameter>
+<parameter name="logical_rect">
+<parameter_description> rectangle used to store the logical extents of the glyph.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_glyph_string_extents_range">
+<description>
+Computes the extents of a sub-portion of a glyph string. The extents are
+relative to the start of the glyph string range (the origin of their
+coordinate system is at the start of the range, not at the start of the entire
+glyph string).
+
+</description>
+<parameters>
+<parameter name="glyphs">
+<parameter_description>   a #PangoGlyphString
+</parameter_description>
+</parameter>
+<parameter name="start">
+<parameter_description>    start index
+</parameter_description>
+</parameter>
+<parameter name="end">
+<parameter_description>      end index (the range is the set of bytes with
+              indices such that start &amp;lt;= index &amp;lt; end)
+</parameter_description>
+</parameter>
+<parameter name="font">
+<parameter_description>     a #PangoFont
+</parameter_description>
+</parameter>
+<parameter name="ink_rect">
+<parameter_description> rectangle used to store the extents of the glyph string range as drawn.
+</parameter_description>
+</parameter>
+<parameter name="logical_rect">
+<parameter_description> rectangle used to store the logical extents of the glyph string range.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_layout_get_extents">
+<description>
+Compute the logical and ink extents of @layout. Logical extents
+are usually what you want for positioning things. The extents
+are given in layout coordinates; layout coordinates begin at the
+top left corner of the layout.
+
+</description>
+<parameters>
+<parameter name="layout">
+<parameter_description>   a #PangoLayout
+</parameter_description>
+</parameter>
+<parameter name="ink_rect">
+<parameter_description> rectangle used to store the extents of the layout as drawn.
+</parameter_description>
+</parameter>
+<parameter name="logical_rect">
+<parameter_description> rectangle used to store the logical extents of the layout.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_layout_get_pixel_extents">
+<description>
+Compute the logical and ink extents of @layout in device units.
+See pango_layout_get_extents(); this function just calls
+pango_layout_get_extents() and then converts the extents to
+pixels using the #PANGO_SCALE factor.
+
+</description>
+<parameters>
+<parameter name="layout">
+<parameter_description>   a #PangoLayout
+</parameter_description>
+</parameter>
+<parameter name="ink_rect">
+<parameter_description> rectangle used to store the extents of the layout as drawn.
+</parameter_description>
+</parameter>
+<parameter name="logical_rect">
+<parameter_description> rectangle used to store the logical extents of the
+layout.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_layout_set_font_description">
+<description>
+Set the default font description for the layout. If no font
+description is set on the layout, the font description from
+the layout&apos;s context is used.
+
+</description>
+<parameters>
+<parameter name="layout">
+<parameter_description> a #PangoLayout
+</parameter_description>
+</parameter>
+<parameter name="desc">
+<parameter_description> the new pango font description.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_layout_line_get_extents">
+<description>
+Compute the logical and ink extents of a layout line. See the documentation
+for pango_font_get_glyph_extents() for details about the interpretation
+of the rectangles.
+
+</description>
+<parameters>
+<parameter name="line">
+<parameter_description>     a #PangoLayoutLine
+</parameter_description>
+</parameter>
+<parameter name="ink_rect">
+<parameter_description> rectangle used to store the extents of the glyph string as drawn.
+</parameter_description>
+</parameter>
+<parameter name="logical_rect">
+<parameter_description> rectangle used to store the logical extents of the glyph string.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_layout_line_get_pixel_extents">
+<description>
+Compute the logical and ink extents of a layout line. See the documentation
+for pango_font_get_glyph_extents() for details about the interpretation
+of the rectangles. The returned rectangles are in device units, as
+opposed to pango_layout_line_get_extents(), which returns the extents in
+units of device unit / PANGO_SCALE.
+
+</description>
+<parameters>
+<parameter name="layout_line">
+<parameter_description> a #PangoLayoutLine
+</parameter_description>
+</parameter>
+<parameter name="ink_rect">
+<parameter_description>    rectangle used to store the extents of the glyph string as drawn.
+</parameter_description>
+</parameter>
+<parameter name="logical_rect">
+<parameter_description> rectangle used to store the logical extents of the glyph string.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_font_get_metrics">
+<description>
+Gets overall metric information for a font. Since the metrics may be
+substantially different for different scripts, a language tag can
+be provided to indicate that the metrics should be retrieved that
+correspond to the script(s) used by that language.
+
+
+</description>
+<parameters>
+<parameter name="font">
+<parameter_description> a #PangoFont
+</parameter_description>
+</parameter>
+<parameter name="language">
+<parameter_description> language tag used to determine which script to get the metrics
+for.
+</parameter_description>
+</parameter>
+</parameters>
+<return> a #PangoMetrics object.
+</return>
+</function>
+
+<function name="pango_glyph_string_extents">
+<description>
+Compute the logical and ink extents of a glyph string. See the documentation
+for pango_font_get_glyph_extents() for details about the interpretation
+of the rectangles.
+
+</description>
+<parameters>
+<parameter name="glyphs">
+<parameter_description>   a #PangoGlyphString
+</parameter_description>
+</parameter>
+<parameter name="font">
+<parameter_description>     a #PangoFont
+</parameter_description>
+</parameter>
+<parameter name="ink_rect">
+<parameter_description> rectangle used to store the extents of the glyph string as drawn.
+</parameter_description>
+</parameter>
+<parameter name="logical_rect">
+<parameter_description> rectangle used to store the logical extents of the glyph string.
+</parameter_description>
+</parameter>
+</parameters>
+<return></return>
+</function>
+
+<function name="pango_font_description_to_string">
+<description>
+Creates a string representation of a font description. See
+pango_font_description_from_string() for a description of the
+format of the string representation. The family list in the
+string description will only have a terminating comma if the
+last word of the list is a valid style option.
+
+
+</description>
+<parameters>
+<parameter name="desc">
+<parameter_description> a #PangoFontDescription
+</parameter_description>
+</parameter>
+</parameters>
+<return> The string.
+</return>
+</function>
+
+<function name="pango_font_description_to_filename">
+<description>
+Creates a filename representation of a font description. The
+filename is identical to the result from calling
+pango_font_description_to_string(), but with underscores instead of
+characters that are untypical in filenames, and in lower case only.
+
+
+</description>
+<parameters>
+<parameter name="desc">
+<parameter_description> a #PangoFontDescription
+</parameter_description>
+</parameter>
+</parameters>
+<return> The filename.
+</return>
+</function>
+
+<function name="pango_color_parse">
+<description>
+Fill in the fields of a color from a string specification. The
+string can either one of a large set of standard names. (Taken
+from the X11 &amp;lt;filename&amp;gt;rgb.txt&amp;lt;/filename&amp;gt; file), or it can be a hex value in the
+form &apos;#rgb&apos; &apos;#rrggbb&apos; &apos;#rrrgggbbb&apos; or &apos;#rrrrggggbbbb&apos; where
+&apos;r&apos;, &apos;g&apos; and &apos;b&apos; are hex digits of the red, green, and blue
+components of the color, respectively. (White in the four
+forms is &apos;#fff&apos; &apos;#ffffff&apos; &apos;#fffffffff&apos; and &apos;#ffffffffffff&apos;)
+</description>
+</function>
+
+</root>
+

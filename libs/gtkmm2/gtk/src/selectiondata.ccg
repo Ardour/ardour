@@ -1,0 +1,94 @@
+// -*- c++ -*-
+/* $Id: selectiondata.ccg,v 1.5 2006/07/05 16:59:28 murrayc Exp $ */
+
+/* Copyright 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/textbuffer.h>
+#include <gdkmm/pixbuf.h>
+#include <glibmm/utility.h> //For ScopedPtr<>.
+#include <gtk/gtkselection.h>
+
+
+
+namespace Gtk
+{
+
+void SelectionData::set(const std::string& type, int format, const guint8* data, int length)
+{
+  gtk_selection_data_set(gobj(), gdk_atom_intern(type.c_str(), 0), format, data, length);
+}
+
+void SelectionData::set(int format, const guint8* data, int length)
+{
+  //The C examples do this - that's why I added this method overload. murrayc.
+  set(get_target(), format, data, length);
+}
+
+void SelectionData::set(const std::string& type, const std::string& data)
+{
+  gtk_selection_data_set(gobj(), gdk_atom_intern(type.c_str(), 0),
+                         sizeof(char) * 8, // format is 8 bits per unit
+                         reinterpret_cast<const guint8*>(data.data()), data.size());
+}
+
+bool SelectionData::set_text(const Glib::ustring& data)
+{
+  return gtk_selection_data_set_text(gobj(), data.data(), data.bytes());
+}
+
+Glib::ustring SelectionData::get_text() const
+{
+  return Glib::convert_return_gchar_ptr_to_ustring(
+      reinterpret_cast<char*>(gtk_selection_data_get_text(const_cast<GtkSelectionData*>(gobj()))));
+}
+
+std::string SelectionData::get_data_as_string() const
+{
+  if(gobj()->data && gobj()->length > 0)
+    return std::string(reinterpret_cast<char*>(gobj()->data), gobj()->length);
+  else
+    return std::string();
+}
+
+std::string SelectionData::get_target() const
+{
+  return Glib::convert_return_gchar_ptr_to_stdstring(
+      gdk_atom_name(const_cast<GtkSelectionData*>(gobj())->target));
+}
+
+Gdk::ArrayHandle_AtomString SelectionData::get_targets() const
+{
+  GdkAtom* targets = 0;
+  int    n_targets = 0;
+
+  if(!gtk_selection_data_get_targets(const_cast<GtkSelectionData*>(gobj()), &targets, &n_targets))
+    n_targets = 0; // it's set to -1 otherwise
+
+  //Note that we free the GdkAtom* array, but we don't need to free its items:
+  return Gdk::ArrayHandle_AtomString(targets, n_targets, Glib::OWNERSHIP_SHALLOW);
+}
+
+
+std::string SelectionData::get_data_type() const
+{
+  return Glib::convert_return_gchar_ptr_to_stdstring(
+      gdk_atom_name(const_cast<GtkSelectionData*>(gobj())->type));
+}
+
+} // namespace Gtk
+

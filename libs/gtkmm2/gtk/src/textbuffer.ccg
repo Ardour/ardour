@@ -1,0 +1,600 @@
+// -*- c++ -*-
+/* $Id: textbuffer.ccg,v 1.8 2006/11/20 09:19:49 murrayc Exp $ */
+
+/* Copyright(C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtktextbuffer.h>
+#include <gtk/gtktextbufferrichtext.h>
+#include <glib/gslist.h>
+#include <gtkmm/textmark.h>
+#include <gtkmm/textiter.h>
+
+
+/*
+static guint8* SignalProxy_Serialize(GtkTextBuffer* , GtkTextBuffer* content_buffer,
+                                                   const GtkTextIter* start, const GtkTextIter* end,
+                                                   gsize* length,
+                                                   gpointer user_data)
+{
+  Gtk::TextBuffer::SlotSerialize* the_slot = static_cast<Gtk::TextBuffer::SlotSerialize*>(user_data);
+
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+    return (*the_slot)(Glib::wrap(content_buffer), Glib::wrap(start), Glib::wrap(end), *length);
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    Glib::exception_handlers_invoke();
+  }
+
+  return 0; // arbitrary value
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+}
+
+static void SignalProxy_Serialize_gtk_callback_destroy(void* user_data)
+{
+  delete static_cast<Gtk::TextBuffer::SlotSerialize*>(user_data);
+}
+
+static gboolean SignalProxy_Deserialize(GtkTextBuffer* , GtkTextBuffer* content_buffer,
+                                                   GtkTextIter* iter, const guint8* data,
+                                                   gsize length, gboolean create_tags,
+                                                   gpointer user_data,
+                                                   GError** )
+{
+  Gtk::TextBuffer::SlotDeserialize* the_slot = static_cast<Gtk::TextBuffer::SlotDeserialize*>(user_data);
+
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+    (*the_slot)(Glib::wrap(content_buffer, true), Glib::wrap(iter), data, length, create_tags);
+
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    //TODO: Fill the error parameter.
+    Glib::exception_handlers_invoke();
+  }
+
+  return 0; // arbitrary value
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+}
+
+static void SignalProxy_Deserialize_gtk_callback_destroy(void* user_data)
+{
+  delete static_cast<Gtk::TextBuffer::SlotDeserialize*>(user_data);
+}
+*/
+
+namespace Gtk
+{
+
+typedef TextChildAnchor ChildAnchor; //Help the code-generator so that it does not have to fully qualify this type in the .cc file.
+
+TextBuffer::TextBuffer(const Glib::RefPtr<TagTable>& tag_table)
+:
+  _CONSTRUCT("tag_table", Glib::unwrap(tag_table))
+{}
+
+Glib::RefPtr<TextBuffer::Tag> TextBuffer::create_tag(const Glib::ustring& tag_name)
+{
+  //gtk_text_buffer_create_tag takes a varargs list of property names and values.
+  //gtkmm coders should use the Tag.set_* method instead.
+  return Glib::wrap(gtk_text_buffer_create_tag(gobj(), tag_name.c_str(), (char*)0), true); //true = take_copy.
+  //We have to take a copy because gtk_text_buffer_create_tag() doesn't ref for us, for no real reason.
+}
+
+Glib::RefPtr<TextBuffer::Tag> TextBuffer::create_tag()
+{
+  //gtk_text_buffer_create_tag takes a varargs list of property names and values.
+  //gtkmm coders should use the Tag.set_* method instead.
+  return Glib::wrap(gtk_text_buffer_create_tag(gobj(), (const char*)0, (char*)0), true); //true = take_copy.
+  //We have to take a copy because gtk_text_buffer_create_tag() doesn't ref for us, for no real reason.
+}
+
+Glib::RefPtr<TextBuffer::Mark>
+TextBuffer::create_mark(const TextBuffer::iterator& where, bool left_gravity)
+{
+  return Glib::wrap(gtk_text_buffer_create_mark(
+      gobj(), 0, const_cast<GtkTextIter*>(where.gobj()), left_gravity),
+      true); // acquire reference
+}
+
+TextBuffer::iterator TextBuffer::get_iter_at_line_offset(int line_number, int char_offset)
+{
+  iterator iter;
+  gtk_text_buffer_get_iter_at_line_offset(gobj(), iter.gobj(), line_number, char_offset);
+  return iter;
+}
+
+TextBuffer::iterator TextBuffer::get_iter_at_line_index(int line_number, int byte_index)
+{
+  iterator iter;
+  gtk_text_buffer_get_iter_at_line_index(gobj(), iter.gobj(), line_number, byte_index);
+  return iter;
+}
+
+TextBuffer::iterator TextBuffer::get_iter_at_offset(int char_offset)
+{
+  iterator iter;
+  gtk_text_buffer_get_iter_at_offset(gobj(), iter.gobj(), char_offset);
+  return iter;
+}
+
+TextBuffer::iterator TextBuffer::get_iter_at_line(int line_number)
+{
+  iterator iter;
+  gtk_text_buffer_get_iter_at_line(gobj(), iter.gobj(), line_number);
+  return iter;
+}
+
+TextBuffer::iterator TextBuffer::begin()
+{
+  iterator iter;
+  gtk_text_buffer_get_start_iter(gobj(), iter.gobj());
+  return iter;
+}
+
+TextBuffer::iterator TextBuffer::end()
+{
+  iterator iter;
+  gtk_text_buffer_get_end_iter(gobj(), iter.gobj());
+  return iter;
+}
+
+void TextBuffer::get_bounds(iterator& range_begin, iterator& range_end)
+{
+  gtk_text_buffer_get_bounds(gobj(), range_begin.gobj(), range_end.gobj());
+}
+
+TextBuffer::iterator TextBuffer::get_iter_at_mark(const Glib::RefPtr<Mark>& mark)
+{
+  iterator iter;
+  gtk_text_buffer_get_iter_at_mark(gobj(), iter.gobj(), mark->gobj());
+  return iter;
+}
+
+void TextBuffer::set_text(const Glib::ustring& text)
+{
+  gtk_text_buffer_set_text(gobj(), text.data(), text.bytes());
+}
+
+void TextBuffer::set_text(const char* text_begin, const char* text_end)
+{
+  gtk_text_buffer_set_text(gobj(), text_begin, text_end - text_begin);
+}
+
+_DEPRECATE_IFDEF_START
+void TextBuffer::assign(const Glib::ustring& text)
+{
+  gtk_text_buffer_set_text(gobj(), text.data(), text.bytes());
+}
+
+void TextBuffer::assign(const char* text_begin, const char* text_end)
+{
+  gtk_text_buffer_set_text(gobj(), text_begin, text_end - text_begin);
+}
+_DEPRECATE_IFDEF_END
+
+TextBuffer::iterator TextBuffer::insert(const iterator& pos, const Glib::ustring& text)
+{
+  // gtk_text_buffer_insert() modifies the iterator, but that's not the
+  // STL way so we give it something that we don't mind it modifying.
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert(gobj(), iterCopy.gobj(), text.data(), text.bytes());
+
+  // According to the gtk_text_buffer_insert() docs, the "default signal handler
+  // revalidates it to point to the end of the inserted text".
+  return iterCopy;
+}
+
+TextBuffer::iterator TextBuffer::insert(const iterator& pos, const char* text_begin, const char* text_end)
+{
+  // gtk_text_buffer_insert() modifies the iterator, but that's not the
+  // STL way so we give it something that we don't mind it modifying.
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert(gobj(), iterCopy.gobj(), text_begin, text_end - text_begin);
+
+  // According to the gtk_text_buffer_insert() docs, the "default signal handler
+  // revalidates it to point to the end of the inserted text".
+  return iterCopy;
+}
+
+TextBuffer::iterator TextBuffer::insert_pixbuf(const iterator& pos, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
+{
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert_pixbuf(gobj(), iterCopy.gobj(), pixbuf->gobj());
+  return iterCopy;
+}
+
+TextBuffer::iterator TextBuffer::insert_child_anchor(const iterator& pos,
+                                                     const Glib::RefPtr<ChildAnchor>& anchor)
+{
+  // Copy the iterator. It might be changed because it is used as a signal parameter internally.
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert_child_anchor(gobj(), iterCopy.gobj(), Glib::unwrap(anchor));
+  return iterCopy;
+}
+
+Glib::RefPtr<ChildAnchor> TextBuffer::create_child_anchor(const iterator& pos)
+{
+  // Copy the iterator. It might be changed because it is used as a signal parameter internally.
+  iterator iterCopy (pos);
+  return Glib::wrap(gtk_text_buffer_create_child_anchor(gobj(), iterCopy.gobj()),
+                    true); // The function does not do a ref for us.
+}
+
+void TextBuffer::insert_at_cursor(const Glib::ustring& text)
+{
+  gtk_text_buffer_insert_at_cursor(gobj(), text.data(), text.bytes());
+}
+
+void TextBuffer::insert_at_cursor(const char* text_begin, const char* text_end)
+{
+  gtk_text_buffer_insert_at_cursor(gobj(), text_begin, text_end - text_begin);
+}
+
+std::pair<TextBuffer::iterator,bool>
+TextBuffer::insert_interactive(const iterator& pos, const Glib::ustring& text, bool default_editable)
+{
+  // Since we have to copy the iterator anyway we can as well create the
+  // std::pair now.  That saves another copy later (mind you, TextIter is
+  // a heavy struct), and allows modern compilers to apply the return value
+  // optimization.
+  std::pair<iterator,bool> pair_iter_success (pos, false);
+
+  pair_iter_success.second = gtk_text_buffer_insert_interactive(
+      gobj(), pair_iter_success.first.gobj(), text.data(), text.bytes(), default_editable);
+
+  return pair_iter_success;
+}
+
+std::pair<TextBuffer::iterator,bool>
+TextBuffer::insert_interactive(const iterator& pos, const char* text_begin, const char* text_end,
+                               bool default_editable)
+{
+  // Since we have to copy the iterator anyway we can as well create the
+  // std::pair now.  That saves another copy later (mind you, TextIter is
+  // a heavy struct), and allows modern compilers to apply the return value
+  // optimization.
+  std::pair<iterator,bool> pair_iter_success (pos, false);
+
+  pair_iter_success.second =  gtk_text_buffer_insert_interactive(
+      gobj(), pair_iter_success.first.gobj(), text_begin, text_end - text_begin, default_editable);
+
+  return pair_iter_success;
+}
+
+bool TextBuffer::insert_interactive_at_cursor(const Glib::ustring& text, bool default_editable)
+{
+  return gtk_text_buffer_insert_interactive_at_cursor(
+      gobj(), text.data(), text.bytes(), default_editable);
+}
+
+bool TextBuffer::insert_interactive_at_cursor(const char* text_begin, const char* text_end,
+                                              bool default_editable)
+{
+  return gtk_text_buffer_insert_interactive_at_cursor(
+      gobj(), text_begin, text_end - text_begin, default_editable);
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tag(const iterator& pos, const Glib::ustring& text,
+                                                 const Glib::RefPtr<Tag>& tag)
+{
+  // gtk_text_buffer_insert_with_tags() invalidates the iterator, but this lets us recreate it later.
+  const int offset = pos.get_offset();
+
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert_with_tags(
+      gobj(), iterCopy.gobj(), text.data(), text.bytes(), tag->gobj(), (GtkTextTag*)0);
+
+  return get_iter_at_offset(offset + text.size());
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tag(const iterator& pos,
+                                                 const char* text_begin, const char* text_end,
+                                                 const Glib::RefPtr<Tag>& tag)
+{
+  // gtk_text_buffer_insert_with_tags() invalidates the iterator, but this lets us recreate it later.
+  const int offset = pos.get_offset();
+
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert_with_tags(
+      gobj(), iterCopy.gobj(), text_begin, text_end - text_begin, tag->gobj(), (GtkTextTag*)0);
+
+  return get_iter_at_offset(offset + (text_end - text_begin));
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tag(const iterator& pos, const Glib::ustring& text,
+                                                 const Glib::ustring& tag_name)
+{
+  // gtk_text_buffer_insert_with_tags() invalidates the iterator, but this lets us recreate it later.
+  const int offset = pos.get_offset();
+
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert_with_tags_by_name(
+      gobj(), iterCopy.gobj(), text.data(), text.bytes(), tag_name.c_str(), (char*)0);
+
+  return get_iter_at_offset(offset + text.size());
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tag(const iterator& pos,
+                                                 const char* text_begin, const char* text_end,
+                                                 const Glib::ustring& tag_name)
+{
+  // gtk_text_buffer_insert_with_tags() invalidates the iterator, but this lets us recreate it later.
+  const int offset = pos.get_offset();
+
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert_with_tags_by_name(
+      gobj(), iterCopy.gobj(), text_begin, text_end - text_begin, tag_name.c_str(), (char*)0);
+
+  return get_iter_at_offset(offset + (text_end - text_begin));
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tags(const iterator& pos, const Glib::ustring& text,
+                                                  const Glib::ArrayHandle< Glib::RefPtr<Tag> >& tags)
+{
+  const char *const text_begin = text.data();
+  return insert_with_tags(pos, text_begin, text_begin + text.bytes(), tags);
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tags(const iterator& pos,
+                                                  const char* text_begin, const char* text_end,
+                                                  const Glib::ArrayHandle< Glib::RefPtr<Tag> >& tags)
+{
+  const int start_offset = pos.get_offset();
+  iterator range_end (insert(pos, text_begin, text_end));
+
+  GtkTextIter range_begin;
+  gtk_text_buffer_get_iter_at_offset(gobj(), &range_begin, start_offset);
+
+  //This was GtkTextTag* const * const, but the SUN Forte compiler said that it couldn't convert to that. murrayc
+  const GtkTextTag* const* tags_begin = tags.data();
+  const GtkTextTag* const* tags_end   = tags_begin + tags.size();
+
+  //TODO: Investigate if this const_cast<> is really necessary.
+  //I added it for the SUN Forte compiler. murrayc.
+  for(GtkTextTag *const * ptag = const_cast<GtkTextTag* const *>(tags_begin); ptag != const_cast<GtkTextTag* const *>(tags_end); 
+++ptag)
+  {
+    gtk_text_buffer_apply_tag(gobj(), *ptag, &range_begin, range_end.gobj());
+  }
+
+  return range_end;
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tags_by_name(const iterator& pos, const Glib::ustring& text,
+                                                          const Glib::ArrayHandle<Glib::ustring>& tag_names)
+{
+  const char *const text_begin = text.data();
+  return insert_with_tags_by_name(pos, text_begin, text_begin + text.bytes(), tag_names);
+}
+
+TextBuffer::iterator TextBuffer::insert_with_tags_by_name(const iterator& pos,
+                                                          const char* text_begin, const char* text_end,
+                                                          const Glib::ArrayHandle<Glib::ustring>& tag_names)
+{
+  // gtk_buffer_insert_with_tags_by_name() is a convenience wrapper, so it's kind of OK to reimplement it:
+
+  const int start_offset = pos.get_offset();
+  iterator range_end (insert(pos, text_begin, text_end));
+
+  GtkTextIter range_begin;
+  gtk_text_buffer_get_iter_at_offset(gobj(), &range_begin, start_offset);
+
+  GtkTextTagTable *const tag_table = gtk_text_buffer_get_tag_table(gobj());
+
+  const char *const *const names_begin = tag_names.data();
+  const char *const *const names_end   = names_begin + tag_names.size();
+
+  for(const char *const * pname = names_begin; pname != names_end; ++pname)
+  {
+    if(GtkTextTag *const tag = gtk_text_tag_table_lookup(tag_table, *pname))
+    {
+      gtk_text_buffer_apply_tag(gobj(), tag, &range_begin, range_end.gobj());
+    }
+    else
+    {
+      g_warning("Gtk::TextBuffer::insert_with_tags_by_name(): no tag with name '%s'!", *pname);
+    }
+  }
+
+  return range_end;
+}
+
+TextBuffer::iterator TextBuffer::insert(const iterator& pos,
+                                        const iterator& range_begin, const iterator& range_end)
+{
+  iterator iterCopy (pos);
+  gtk_text_buffer_insert_range(gobj(), iterCopy.gobj(), range_begin.gobj(), range_end.gobj());
+  return iterCopy;
+}
+
+std::pair<TextBuffer::iterator,bool>
+TextBuffer::insert_interactive(const iterator& pos, const iterator& range_begin,
+                               const iterator& range_end, bool default_editable)
+{
+  // Since we have to copy the iterator anyway we can as well create the
+  // std::pair now.  That saves another copy later (mind you, TextIter is
+  // a heavy struct), and allows modern compilers to apply the return value
+  // optimization.
+  std::pair<iterator,bool> pair_iter_success (pos, false);
+
+  pair_iter_success.second = gtk_text_buffer_insert_range_interactive(
+      gobj(), pair_iter_success.first.gobj(), range_begin.gobj(), range_end.gobj(), default_editable);
+
+  return pair_iter_success;
+}
+
+TextBuffer::iterator TextBuffer::erase(const iterator& range_begin, const iterator& range_end)
+{
+  // GTK+ sets the iterators to where the deletion occured. We do it the STL way and therefore need copies.
+  iterator beginCopy (range_begin);
+  iterator endCopy   (range_end);
+  gtk_text_buffer_delete(gobj(), beginCopy.gobj(), endCopy.gobj());
+  return beginCopy;
+}
+
+TextBuffer::iterator TextBuffer::backspace(const iterator& iter, bool interactive, bool default_editable)
+{
+  // GTK+ sets the iterators to where the deletion occured. We do it the STL way and therefore need copies.
+  iterator copy(iter);
+  gtk_text_buffer_backspace(gobj(), copy.gobj(), interactive, default_editable);
+  return copy;
+}
+
+_IGNORE(gtk_text_buffer_backspace)
+
+std::pair<TextBuffer::iterator,bool>
+TextBuffer::erase_interactive(const iterator& range_begin, const iterator& range_end,
+                              bool default_editable)
+{
+  // Since we have to copy the iterator anyway we can as well create the
+  // std::pair now.  That saves another copy later (mind you, TextIter is
+  // a heavy struct), and allows modern compilers to apply the return value
+  // optimization.
+  std::pair<iterator,bool> pair_iter_success (range_begin, false);
+
+  // GTK+ sets the iterators to where the deletion occured.
+  // We do it the STL way and therefore need copies.
+  iterator endCopy (range_end);
+
+  pair_iter_success.second = gtk_text_buffer_delete_interactive(
+      gobj(), pair_iter_success.first.gobj(), endCopy.gobj(), default_editable);
+
+  return pair_iter_success;
+}
+
+void TextBuffer::paste_clipboard(const Glib::RefPtr<Clipboard>& clipboard, const iterator& override_location,
+                                 bool default_editable)
+{
+  gtk_text_buffer_paste_clipboard(gobj(), clipboard->gobj(),
+      const_cast<GtkTextIter*>(override_location.gobj()), default_editable);
+}
+
+void TextBuffer::paste_clipboard(const Glib::RefPtr<Clipboard>& clipboard, bool default_editable)
+{
+  gtk_text_buffer_paste_clipboard(gobj(), clipboard->gobj(), 0, default_editable);
+}
+
+TextBuffer::iterator TextBuffer::get_iter_at_child_anchor(const Glib::RefPtr<ChildAnchor>& anchor)
+{
+  iterator iter;
+  gtk_text_buffer_get_iter_at_child_anchor(gobj(), iter.gobj(), anchor->gobj());
+  return iter;
+}
+
+int TextBuffer::size() const
+{
+  return get_char_count();
+}
+
+//This is not public API:
+//(and it is copy/pasted from clipboard.ccg)
+typedef std::list<Glib::ustring> listStrings;
+static listStrings util_convert_atoms_to_strings(GdkAtom* targets, int n_targets)
+{
+  listStrings listTargets;
+
+  //Add the targets to the C++ container:
+  for(int i = 0; i < n_targets; i++)
+  {
+    //Convert the atom to a string:
+    char* atom_name = gdk_atom_name(targets[i]);
+    if(atom_name)
+    {
+      listTargets.push_back( Glib::ustring(atom_name) );
+      g_free(atom_name);
+    }
+  }
+
+  return listTargets;
+}
+
+Glib::ustring TextBuffer::get_text(bool include_hidden_chars)
+{
+  return get_text(begin(), end(), include_hidden_chars);
+}
+
+Glib::StringArrayHandle TextBuffer::get_serialize_formats() const
+{
+  int n_atoms = 0;
+  GdkAtom* atoms = gtk_text_buffer_get_serialize_formats(const_cast<GtkTextBuffer*>(gobj()), &n_atoms);
+  return util_convert_atoms_to_strings(atoms, n_atoms);
+}
+
+Glib::StringArrayHandle TextBuffer::get_deserialize_formats() const
+{
+  int n_atoms = 0;
+  GdkAtom* atoms = gtk_text_buffer_get_deserialize_formats(const_cast<GtkTextBuffer*>(gobj()), &n_atoms);
+  return util_convert_atoms_to_strings(atoms, n_atoms);
+}
+
+/*
+Glib::ustring TextBuffer::register_serialize_format(const Glib::ustring& mime_type, const SlotSerialize& slot)
+{
+  SlotSerialize* slot_copy = new SlotSerialize(slot);
+  GdkAtom atom = gtk_text_buffer_register_serialize_format(gobj(), mime_type.c_str(), 
+                &SignalProxy_Serialize, slot_copy, &SignalProxy_Serialize_gtk_callback_destroy);
+
+  //Convert the atom to a string:
+  Glib::ustring atom_as_string;
+  char* atom_name = gdk_atom_name(atom);
+  if(atom_name)
+  {
+    atom_as_string = atom_name;
+    g_free(atom_name);
+  }
+
+  return atom_as_string;
+}
+
+Glib::ustring TextBuffer::register_deserialize_format(const Glib::ustring& mime_type, const SlotDeserialize& slot)
+{
+  SlotDeserialize* slot_copy = new SlotDeserialize(slot);
+  GdkAtom atom = gtk_text_buffer_register_deserialize_format(gobj(), mime_type.c_str(), 
+                &SignalProxy_Deserialize, slot_copy, &SignalProxy_Deserialize_gtk_callback_destroy);
+
+  //Convert the atom to a string:
+  Glib::ustring atom_as_string;
+  char* atom_name = gdk_atom_name(atom);
+  if(atom_name)
+  {
+    atom_as_string = atom_name;
+    g_free(atom_name);
+  }
+
+  return atom_as_string;
+}
+*/
+
+#ifdef GTKMM_MAEMO_EXTENSIONS_ENABLED
+void TextBuffer::set_rich_text_format_all()
+{
+  gtk_text_buffer_set_rich_text_format(gobj(), NULL);
+}
+#endif //GTKMM_MAEMO_EXTENSIONS_ENABLED
+
+} // namespace Gtk
+

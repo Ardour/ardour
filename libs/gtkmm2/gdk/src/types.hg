@@ -1,0 +1,147 @@
+/* $Id: types.hg,v 1.6 2005/12/14 15:36:23 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(gdkmm,gdk)
+
+#include <gdk/gdk.h>
+#include <gdkmmconfig.h>
+
+/* Shadow ERROR macro (from wingdi.h).
+ */
+#if defined(ERROR) && !defined(GTKMM_MACRO_SHADOW_ERROR)
+enum { GTKMM_MACRO_DEFINITION_ERROR = ERROR };
+#undef ERROR
+enum { ERROR = GTKMM_MACRO_DEFINITION_ERROR };
+#define ERROR ERROR
+#define GTKMM_MACRO_SHADOW_ERROR 1
+#endif
+
+/*********************************************************************
+***** Version macros
+*********************************************************************/
+
+/* macro for controlling version numbers */
+#ifndef _GDK_VERSION
+
+#define GDK_VERSION_GT(major,minor) ((GTK_MAJOR_VERSION>major)||(GTK_MAJOR_VERSION==major)&&(GTK_MINOR_VERSION>minor))
+#define GDK_VERSION_GE(major,minor) ((GTK_MAJOR_VERSION>major)||(GTK_MAJOR_VERSION==major)&&(GTK_MINOR_VERSION>=minor))
+#define GDK_VERSION_EQ(major,minor) ((GTK_MAJOR_VERSION==major)&&(GTK_MINOR_VERSION==minor))
+#define GDK_VERSION_NE(major,minor) ((GTK_MAJOR_VERSION!=major)||(GTK_MINOR_VERSION!=minor))
+#define GDK_VERSION_LE(major,minor) ((GTK_MAJOR_VERSION<major)||(GTK_MAJOR_VERSION==major)&&(GTK_MINOR_VERSION<=minor))
+#define GDK_VERSION_LT(major,minor) ((GTK_MAJOR_VERSION<major)||(GTK_MAJOR_VERSION==major)&&(GTK_MINOR_VERSION<minor))
+
+//Note: Use GTK_CHECK_VERSION to check that a version is equal or more than (the micro version).
+
+#endif /* _GDK_VERSION */
+
+namespace Gdk
+{
+
+class Bitmap;
+class Colormap;
+class Pixmap;
+class Window;
+class Font;
+class GC;
+class Color;
+class Image;
+
+_CC_INCLUDE(gdk/gdkenumtypes.h)
+_WRAP_ENUM(ByteOrder, GdkByteOrder)
+_WRAP_ENUM(ModifierType, GdkModifierType)
+_WRAP_ENUM(Status, GdkStatus)
+_WRAP_ENUM(InputCondition, GdkInputCondition)
+
+typedef GdkGeometry Geometry; //It's not used enough to justify having a wrapper.
+typedef GdkNativeWindow NativeWindow;
+
+/** This is a simple structure containing an x and y coordinate of a point.
+ */
+class Point
+{
+  _CLASS_GENERIC(Point, GdkPoint)
+
+public:
+  Point();
+  Point(int x, int y);
+
+  void set_x(int x) { gobject_.x = x; }
+  void set_y(int y) { gobject_.y = y; }
+
+  int get_x() const { return gobject_.x; }
+  int get_y() const { return gobject_.y; }
+
+  bool equal(const Gdk::Point& rhs) const;
+
+  /// Provides access to the underlying C GObject.  
+  GdkPoint*       gobj()       { return &gobject_; }
+  /// Provides access to the underlying C GObject.  
+  const GdkPoint* gobj() const { return &gobject_; }
+
+protected:
+  GdkPoint gobject_;
+};
+
+/** @relates Gdk::Point */
+inline bool operator==(const Point& lhs, const Point& rhs)
+  { return lhs.equal(rhs); }
+
+/** @relates Gdk::Point */
+inline bool operator!=(const Point& lhs, const Point& rhs)
+  { return !lhs.equal(rhs); }
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+struct AtomStringTraits
+{
+  typedef std::string CppType;
+  typedef GdkAtom     CType;
+  typedef GdkAtom     CTypeNonConst;
+
+  static GdkAtom to_c_type(GdkAtom atom) { return atom; }
+  static void    release_c_type(GdkAtom) {}
+
+  // These aren't worth to be inlined since doing so
+  // would expose way too much of the implementation.
+  static GdkAtom     to_c_type  (const std::string& atom_name);
+  static std::string to_cpp_type(GdkAtom atom);
+};
+
+// I'm typedef'ing this because when we call to_c_type or to_c_type,
+// we don't want it to look like we're calling a template trait, but
+// a utility function. -Bryan
+typedef AtomStringTraits AtomString;
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
+typedef Glib::ArrayHandle<std::string,AtomStringTraits> ArrayHandle_AtomString;
+typedef Glib::ListHandle<std::string,AtomStringTraits> ListHandle_AtomString;
+
+} // namespace Gdk
+
+
+namespace Glib
+{
+
+/** @relates Gdk::Point */
+Gdk::Point& wrap(GdkPoint* object);
+
+/** @relates Gdk::Point */
+const Gdk::Point& wrap(const GdkPoint* object);
+
+} // namespace Glib
+

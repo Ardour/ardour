@@ -1,0 +1,109 @@
+/* $Id: spawn.hg,v 1.4 2004/03/02 23:29:57 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(glibmm,glib)
+
+#include <string>
+#include <sigc++/sigc++.h>
+#include <glibmm/arrayhandle.h>
+#include <glibmm/error.h>
+
+#include <glibmmconfig.h>
+GLIBMM_USING_STD(string)
+
+
+namespace Glib
+{
+
+typedef GPid Pid;
+
+_WRAP_ENUM(SpawnFlags, GSpawnFlags, NO_GTYPE)
+
+/** @defgroup Spawn Spawning Processes
+ * Process launching with fork()/exec().
+ * @{
+ */
+
+/** Exception class for errors occuring when spawning processes.
+ */
+_WRAP_GERROR(SpawnError, GSpawnError, G_SPAWN_ERROR, NO_GTYPE, s#^2BIG$#TOOBIG#)
+
+
+void spawn_async_with_pipes(const std::string& working_directory,
+                            const Glib::ArrayHandle<std::string>& argv,
+                            const Glib::ArrayHandle<std::string>& envp,
+                            SpawnFlags flags = SpawnFlags(0),
+                            const sigc::slot<void>& child_setup = sigc::slot<void>(),
+                            Pid* child_pid = 0,
+                            int* standard_input = 0,
+                            int* standard_output = 0,
+                            int* standard_error = 0);
+
+void spawn_async_with_pipes(const std::string& working_directory,
+                            const Glib::ArrayHandle<std::string>& argv,
+                            SpawnFlags flags = SpawnFlags(0),
+                            const sigc::slot<void>& child_setup = sigc::slot<void>(),
+                            Pid* child_pid = 0,
+                            int* standard_input = 0,
+                            int* standard_output = 0,
+                            int* standard_error = 0);
+
+void spawn_async(const std::string& working_directory,
+                 const Glib::ArrayHandle<std::string>& argv,
+                 const Glib::ArrayHandle<std::string>& envp,
+                 SpawnFlags flags = SpawnFlags(0),
+                 const sigc::slot<void>& child_setup = sigc::slot<void>(),
+                 Pid* child_pid = 0);
+
+void spawn_async(const std::string& working_directory,
+                 const Glib::ArrayHandle<std::string>& argv,
+                 SpawnFlags flags = SpawnFlags(0),
+                 const sigc::slot<void>& child_setup = sigc::slot<void>(),
+                 Pid* child_pid = 0);
+
+void spawn_sync(const std::string& working_directory,
+                const Glib::ArrayHandle<std::string>& argv,
+                const Glib::ArrayHandle<std::string>& envp,
+                SpawnFlags flags = SpawnFlags(0),
+                const sigc::slot<void>& child_setup = sigc::slot<void>(),
+                std::string* standard_output = 0,
+                std::string* standard_error = 0,
+                int* exit_status = 0);
+
+void spawn_sync(const std::string& working_directory,
+                const Glib::ArrayHandle<std::string>& argv,
+                SpawnFlags flags = SpawnFlags(0),
+                const sigc::slot<void>& child_setup = sigc::slot<void>(),
+                std::string* standard_output = 0,
+                std::string* standard_error = 0,
+                int* exit_status = 0);
+
+void spawn_command_line_async(const std::string& command_line);
+
+void spawn_command_line_sync(const std::string& command_line,
+                             std::string* standard_output = 0,
+                             std::string* standard_error = 0,
+                             int* exit_status = 0);
+
+void spawn_close_pid(Pid pid);                             
+
+/** @} group Spawn */
+
+} // namespace Glib
+

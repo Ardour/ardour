@@ -1,0 +1,10 @@
+2005-12-02 Taybin Rutkin <taybin@earthlink.net>
+	* libpbd now allocates warning, info, error, and fatal itself.
+	* Incremented version to 3.1.
+
+2005-04-01 Taybin Rutkin <taybin@earthlink.net>
+	* Updated to support sigc++-2.0.
+	* Incremented version to 3.0.0.
+
+2004-08-04 Taybin Rutkin <taybin@earthlink.net>
+	* Added support for gcc-3.4

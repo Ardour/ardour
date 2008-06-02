@@ -1,0 +1,148 @@
+/* $Id: toolitem.hg,v 1.14 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* box.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+_CONFIGINCLUDE(gtkmmconfig.h)
+
+#include <gtkmm/bin.h>
+#include <gtkmm/tooltips.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/bin_p.h)
+
+
+namespace Gtk
+{
+
+/** 
+ *
+ * @ingroup Widgets
+ */
+class ToolItem : public Bin
+{
+  _CLASS_GTKOBJECT(ToolItem, GtkToolItem, GTK_TOOL_ITEM, Gtk::Bin, GtkBin)
+public:
+  _CTOR_DEFAULT
+
+  _WRAP_METHOD(void set_homogeneous(bool homogeneous = true), gtk_tool_item_set_homogeneous)
+  _WRAP_METHOD(bool get_homogeneous() const, gtk_tool_item_get_homogeneous)
+
+  _WRAP_METHOD(void set_expand(bool expand = true), gtk_tool_item_set_expand)
+  _WRAP_METHOD(bool get_expand() const, gtk_tool_item_get_expand)
+
+  _WRAP_METHOD(void set_tooltip(Tooltips& tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private = Glib::ustring()), gtk_tool_item_set_tooltip, deprecated "Use set_tooltip_text() or set_tooltip_markup() instead")
+
+  _WRAP_METHOD(void set_tooltip_text(const Glib::ustring& text),  gtk_tool_item_set_tooltip_text)
+  _WRAP_METHOD(void set_tooltip_markup(const Glib::ustring& markup), gtk_tool_item_set_tooltip_markup)
+  
+  _WRAP_METHOD(void set_use_drag_window(bool use_drag_window = true), gtk_tool_item_set_use_drag_window)
+  _WRAP_METHOD(bool get_use_drag_window() const, gtk_tool_item_get_use_drag_window)
+
+  _WRAP_METHOD(void set_visible_horizontal(bool visible_horizontal = true), gtk_tool_item_set_visible_horizontal)
+  _WRAP_METHOD(bool get_visible_horizontal() const, gtk_tool_item_get_visible_horizontal)
+
+  _WRAP_METHOD(void set_visible_vertical(bool visible_vertical = true), gtk_tool_item_set_visible_vertical)
+  _WRAP_METHOD(bool get_visible_vertical() const, gtk_tool_item_get_visible_vertical)
+
+  _WRAP_METHOD(bool get_is_important() const, gtk_tool_item_get_is_important)
+  _WRAP_METHOD(void set_is_important(bool is_important = true), gtk_tool_item_set_is_important)
+
+  _WRAP_METHOD(IconSize get_icon_size () const, gtk_tool_item_get_icon_size)
+  _WRAP_METHOD(Orientation get_orientation() const, gtk_tool_item_get_orientation)
+  _WRAP_METHOD(ToolbarStyle get_toolbar_style() const, gtk_tool_item_get_toolbar_style)
+  _WRAP_METHOD(ReliefStyle get_relief_style() const, gtk_tool_item_get_relief_style)
+
+  _WRAP_METHOD(Widget* retrieve_proxy_menu_item(), gtk_tool_item_retrieve_proxy_menu_item)
+  _WRAP_METHOD(const Widget* retrieve_proxy_menu_item() const, gtk_tool_item_retrieve_proxy_menu_item, constversion)
+  _WRAP_METHOD(Widget* get_proxy_menu_item(const Glib::ustring& menu_item_id), gtk_tool_item_get_proxy_menu_item)
+  _WRAP_METHOD(const Widget* get_proxy_menu_item(const Glib::ustring& menu_item_id) const, gtk_tool_item_get_proxy_menu_item, constversion)
+  _WRAP_METHOD(void set_proxy_menu_item(const Glib::ustring& menu_item_id, Widget& menu_item), gtk_tool_item_set_proxy_menu_item)
+
+  _WRAP_METHOD(void rebuild_menu(), gtk_tool_item_rebuild_menu)
+  
+  //TODO: This suggests calling set_proxy_menu_item() with NULL. but the function asserts against that.
+  /** This signal is emitted when the toolbar needs information from @tool_item
+   * about whether the item should appear in the toolbar overflow menu. In
+   * response the tool item should either
+   * <itemizedlist>
+   * <listitem> call set_proxy_menu_item() with a NULL
+   * pointer and return true to indicate that the item should not appear
+   * in the overflow menu
+   * </listitem>
+   * <listitem> call set_proxy_menu_item() with a new menu
+   * item and return true, or 
+   * </listitem>
+   * <listitem> return false to indicate that the signal was not
+   * handled by the item. This means that
+   * the item will not appear in the overflow menu unless a later handler
+   * installs a menu item.
+   * </listitem>
+   * </itemizedlist>
+   *
+   * The toolbar may cache the result of this signal. When the tool item changes
+   * how it will respond to this signal it must call rebuild_menu()
+   * to invalidate the cache and ensure that the toolbar rebuilds its overflow
+   * menu.
+   *
+   * @result true if the signal was handled, false if not
+   */
+  _WRAP_SIGNAL(bool create_menu_proxy(), create_menu_proxy)
+  
+  /** This signal is emitted when some property of the toolbar that the
+   * item is a child of changes. For custom subclasses of ToolItem,
+   * the default handler of this signal use the functions
+   * <itemizedlist>
+   * <listitem>Toolbar::get_orientation()</listitem>
+   * <listitem>Toolbar::get_style()</listitem>
+   * <listitem>Toolbar::get_icon_size()</listitem>
+   * <listitem>Toolbar::get_relief_style()</listitem>
+   * </itemizedlist>
+   * to find out what the toolbar should look like and change
+   * themselves accordingly.
+   */
+  _WRAP_SIGNAL(void toolbar_reconfigured(), toolbar_reconfigured)
+
+  //We use no_default_handler for this, because we can not add a new vfunc to 2.5 without breaking ABI.
+
+  #ifndef GTKMM_DISABLE_DEPRECATED
+  //Note that we can ifdef this out, only because it doesn't affect class size, because we use no_default_handler:
+  /** This signal is emitted when the toolitem's tooltip changes.
+   * Application developers can use gtk_tool_item_set_tooltip() to
+   * set the item's tooltip.
+   * @deprecated: Use the new Gtk::Tooltip API. This signal will now never be emitted.
+   *
+   * @param tooltips the Tooltips
+   * @param tip_text the tooltip text
+   * @param tip_private the tooltip private text
+   * @result true if the signal was handled, false if not.
+   */
+  Glib::SignalProxy3< bool,Tooltips*,const Glib::ustring&,const Glib::ustring& > signal_set_tooltip();
+  //_WRAP_SIGNAL(bool set_tooltip(Tooltips* tooltips, const Glib::ustring& tip_text, const Glib::ustring& tip_private), set_tooltip, no_default_handler, deprecated) //TODO: Implement deprecated for _WRAP_SIGNAL() to avoid hand-coding this:
+  #endif //GTKMM_DISABLE_DEPRECATED
+
+
+  _WRAP_PROPERTY("visible_horizontal", bool)
+  _WRAP_PROPERTY("visible_vertical", bool)
+  _WRAP_PROPERTY("is_important", bool)
+};
+
+} // namespace Gtk
+

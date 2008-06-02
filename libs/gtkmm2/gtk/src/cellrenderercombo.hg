@@ -1,0 +1,62 @@
+/* $Id: cellrenderercombo.hg,v 1.5 2006/05/10 20:59:27 murrayc Exp $ */
+
+/* cellrenderercombo.h
+ * 
+ * Copyright (C) 2004 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/cellrenderertext.h>
+#include <gtkmm/treemodel.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/cellrenderertext_p.h)
+
+
+namespace Gtk
+{
+
+/**  Renders a combobox in a cell.
+ * CellRendererCombo renders text in a cell like CellRendererText, from which it is derived. But while 
+ * CellRendererText offers a simple entry to edit the text, CellRendererCombo offers a ComboBox or 
+ * ComboBoxEntry widget to edit the text. The values to display in the combo box are taken from the 
+ * tree model specified in the model property.
+ *
+ * The combo cell renderer takes care of adding a text cell renderer to the combo box and sets it to 
+ * display the column specified by its text_column property. Further cell renderers can be added in a 
+ * handler for the editing_started signal. 
+ *
+ * @ingroup TreeView
+ */
+class CellRendererCombo : public CellRendererText
+{
+  _CLASS_GTKOBJECT(CellRendererCombo, GtkCellRendererCombo, GTK_CELL_RENDERER_COMBO, Gtk::CellRendererText, GtkCellRendererText)
+public:
+
+  _CTOR_DEFAULT
+
+  _WRAP_PROPERTY("model", Glib::RefPtr<Gtk::TreeModel>)
+  _WRAP_PROPERTY("text_column", int)
+  _WRAP_PROPERTY("has_entry", bool)
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable();
+#else
+  virtual Glib::ustring _property_renderable();
+#endif
+};
+
+} /* namespace Gtk */
+

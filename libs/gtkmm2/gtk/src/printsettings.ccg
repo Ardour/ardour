@@ -1,0 +1,141 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkprintsettings.h>
+#include <gtk/gtktypebuiltins.h>
+
+#include <vector>
+
+#include <glib/gmem.h>
+
+namespace // anonymous
+{
+
+static void proxy_foreach_callback(const gchar* key, const gchar* value, void* data)
+{
+  typedef Gtk::PrintSettings::SlotForeach SlotType;
+  SlotType& slot = *static_cast<SlotType*>(data);
+
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+    slot(Glib::convert_const_gchar_ptr_to_ustring(key), Glib::convert_const_gchar_ptr_to_ustring(value));
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    Glib::exception_handlers_invoke();
+  }
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+}
+
+} // anonymous namespace
+
+namespace Gtk
+{
+
+//Initialize static members:
+const Glib::ustring PrintSettings::Keys::PRINTER = GTK_PRINT_SETTINGS_PRINTER;
+const Glib::ustring PrintSettings::Keys::ORIENTATION = GTK_PRINT_SETTINGS_ORIENTATION;
+const Glib::ustring PrintSettings::Keys::PAPER_FORMAT = GTK_PRINT_SETTINGS_PAPER_FORMAT;
+const Glib::ustring PrintSettings::Keys::PAPER_WIDTH = GTK_PRINT_SETTINGS_PAPER_WIDTH;
+const Glib::ustring PrintSettings::Keys::PAPER_HEIGHT = GTK_PRINT_SETTINGS_PAPER_HEIGHT;
+const Glib::ustring PrintSettings::Keys::NUM_COPIES = GTK_PRINT_SETTINGS_N_COPIES;
+const Glib::ustring PrintSettings::Keys::DEFAULT_SOURCE = GTK_PRINT_SETTINGS_DEFAULT_SOURCE;
+const Glib::ustring PrintSettings::Keys::QUALITY = GTK_PRINT_SETTINGS_QUALITY;
+const Glib::ustring PrintSettings::Keys::RESOLUTION = GTK_PRINT_SETTINGS_RESOLUTION;
+const Glib::ustring PrintSettings::Keys::USE_COLOR = GTK_PRINT_SETTINGS_USE_COLOR;
+const Glib::ustring PrintSettings::Keys::DUPLEX = GTK_PRINT_SETTINGS_DUPLEX;
+const Glib::ustring PrintSettings::Keys::COLLATE = GTK_PRINT_SETTINGS_COLLATE;
+const Glib::ustring PrintSettings::Keys::REVERSE = GTK_PRINT_SETTINGS_REVERSE;
+const Glib::ustring PrintSettings::Keys::MEDIA_TYPE = GTK_PRINT_SETTINGS_MEDIA_TYPE;
+const Glib::ustring PrintSettings::Keys::DITHER = GTK_PRINT_SETTINGS_DITHER;
+const Glib::ustring PrintSettings::Keys::SCALE = GTK_PRINT_SETTINGS_SCALE;
+const Glib::ustring PrintSettings::Keys::PRINT_PAGES = GTK_PRINT_SETTINGS_PRINT_PAGES;
+const Glib::ustring PrintSettings::Keys::PAGE_RANGES = GTK_PRINT_SETTINGS_PAGE_RANGES;
+const Glib::ustring PrintSettings::Keys::PAGE_SET = GTK_PRINT_SETTINGS_PAGE_SET;
+const Glib::ustring PrintSettings::Keys::FINISHINGS = GTK_PRINT_SETTINGS_FINISHINGS;
+const Glib::ustring PrintSettings::Keys::NUMBER_UP = GTK_PRINT_SETTINGS_NUMBER_UP;
+const Glib::ustring PrintSettings::Keys::OUTPUT_BIN = GTK_PRINT_SETTINGS_OUTPUT_BIN;
+
+const Glib::ustring PrintSettings::Keys::OUTPUT_FILE_FORMAT = GTK_PRINT_SETTINGS_OUTPUT_FILE_FORMAT;
+const Glib::ustring PrintSettings::Keys::OUTPUT_URI = GTK_PRINT_SETTINGS_OUTPUT_URI;
+
+const Glib::ustring PrintSettings::Keys::WIN32_DRIVER_VERSION = GTK_PRINT_SETTINGS_WIN32_DRIVER_VERSION;
+const Glib::ustring PrintSettings::Keys::WIN32_DRIVER_EXTRA = GTK_PRINT_SETTINGS_WIN32_DRIVER_EXTRA;
+
+
+void PrintSettings::setting_foreach(const SlotForeach& slot)
+{
+  SlotForeach slot_copy(slot);
+  gtk_print_settings_foreach(const_cast<GtkPrintSettings*>(gobj()), &proxy_foreach_callback, &slot_copy);
+}
+
+PrintSettings::PageRange::PageRange()
+:
+  start(0),
+  end(0)
+{}
+
+PrintSettings::PageRange::PageRange(int start_, int end_)
+:
+  start(start_),
+  end(end_)
+{}
+
+Glib::ArrayHandle<PrintSettings::PageRange> PrintSettings::get_page_ranges() const
+{
+  int num_ranges;
+  GtkPageRange* page_ranges =
+    gtk_print_settings_get_page_ranges(const_cast<GtkPrintSettings*>(gobj()), &num_ranges);
+  std::vector<PrintSettings::PageRange> v(num_ranges);
+
+  for (int i = 0; i < num_ranges; ++i)
+  {
+    v.push_back(PrintSettings::PageRange(page_ranges[i].start, page_ranges[i].end));
+  }
+
+  g_free(page_ranges);
+
+  Glib::ArrayHandle<PrintSettings::PageRange> ah(v);
+
+  return ah;
+}
+
+void PrintSettings::set_page_ranges(const Glib::ArrayHandle<PrintSettings::PageRange>& page_ranges)
+{
+  int n = page_ranges.size();
+  GtkPageRange* ranges = g_new0(GtkPageRange, n);
+  std::vector<PrintSettings::PageRange> v_ranges(page_ranges);
+
+  for (int i = 0; i < n; ++i)
+  {
+    ranges[i].start = v_ranges[i].start;
+    ranges[i].end = v_ranges[i].end;
+  }
+
+  gtk_print_settings_set_page_ranges(const_cast<GtkPrintSettings*>(gobj()), ranges, n);
+  g_free(ranges);
+}
+
+void PrintSettings::save_to_key_file(Glib::KeyFile& key_file)
+{
+  gtk_print_settings_to_key_file(gobj(), (key_file).gobj(), 0); 
+}
+
+} // namespace Gtk

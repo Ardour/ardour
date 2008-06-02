@@ -1,0 +1,5 @@
+libpbd.pc
+libpbd.spec
+version.cc
+*.os
+*.dylib

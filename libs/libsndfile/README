@@ -1,0 +1,71 @@
+This is libsndfile, 1.0.16
+
+libsndfile is a library of C routines for reading and writing 
+files containing sampled audio data. 
+
+The src/ directory contains the source code for library itself.
+
+The doc/ directory contains the libsndfile documentation.
+
+The examples/ directory contains examples of how to write code using
+libsndfile. 'wav32_aiff24' converts a WAV file containing 32 bit floating 
+point data into a 24 bit PCM AIFF file. 'sndfile2oct' dumps the audio
+data of a file in a human readable format. 'sfconvert' is the beginnings
+of a audio file format conversion utility. 'make_sine' generates a WAV
+file containing one cycle of a sine wave with 4096 sample points in
+32 bit floating point format. 'sfinfo' opens a sound file and prints
+out information about that file.
+
+The tests/ directory contains programs which link against libsndfile
+and test its functionality.
+
+The Win32/ directory contains files and documentation to allow libsndfile
+to compile under Win32 with the Microsoft Visual C++ compiler.
+
+The src/GSM610 directory contains code written by Jutta Degener and Carsten 
+Bormann. Their original code can be found at :
+    http://kbs.cs.tu-berlin.de/~jutta/toast.html
+
+The src/G72x directory contains code written and released by Sun Microsystems
+under a suitably free license.
+
+
+Win32
+-----
+There are detailed instructions for building libsndfile on Win32 in the file
+
+	doc/win32.html
+	
+
+MacOSX
+------
+Building on MacOSX should be the same as building it on any other Unix.
+
+
+OTHER PLATFORMS
+---------------
+To compile libsndfile on platforms which have a Bourne Shell compatible
+shell, an ANSI C compiler and a make utility should require no more that
+the following three commands :
+		./configure
+		make
+		make install
+		
+For platforms without the required shell, it is usually sufficient to 
+create an approriate config.h file in the src/ directory with correct
+values for the following #defines  (this would work for AmigaOS) :
+
+#define HAVE_ENDIAN_H 0
+#define GUESS_BIG_ENDIAN 1
+#define GUESS_LITTLE_ENDIAN 0
+#define FORCE_BROKEN_FLOAT 0
+
+
+CONTACTS
+--------
+
+libsndfile was written by Erik de Castro Lopo (erikd AT mega-nerd DOT com).  
+The libsndfile home page is at :
+
+	http://www.mega-nerd.com/libsndfile/
+

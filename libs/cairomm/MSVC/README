@@ -1,0 +1,12 @@
+Building cairomm-1.0 with Visual Studio .NET 2005
+
+* You will need Visual Studio .NET 2005 (MSVC 8.0).  Earlier versions of the compiler, including 6.0 and 7.0 might also work but have not been tested.
+* Install the latest Win32 GTK+ Development Environment from the Glade for Windows project, http://gladewin32.sourceforge.net.
+* Add libsigc++ to the include and lib paths in Visual Studio.
+* Load the cairomm/MSVC3/cairomm.sln solution.
+* Build the entire solution.
+* Run the tests.
+
+Cedric Gustin
+08/18/2006
+

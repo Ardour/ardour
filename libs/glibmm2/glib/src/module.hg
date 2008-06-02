@@ -1,0 +1,153 @@
+/* $Id: module.hg,v 1.5 2004/04/09 14:49:44 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(glibmm,glib)
+
+#include <glibmmconfig.h>
+#include <string>
+
+GLIBMM_USING_STD(string)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C" { typedef struct _GModule GModule; }
+#endif
+
+
+namespace Glib
+{
+
+_WRAP_ENUM(ModuleFlags, GModuleFlags, NO_GTYPE)
+
+//TODO: Replace get_last_error() with exceptions?
+//Provide operator()?
+
+/** Dynamic Loading of Modules
+ * These functions provide a portable way to dynamically load object
+ *  files (commonly known as 'plug-ins'). The current implementation
+ * supports all systems that provide an implementation of dlopen()
+ * (e.g. Linux/Sun), as well as HP-UX via its shl_load() mechanism,
+ * and Windows platforms via DLLs.
+ */
+class Module
+{
+  _CLASS_GENERIC(Module, GModule)
+  _IGNORE(g_module_open, g_module_close)
+
+public:
+ 
+  /** Opens a module.
+   *
+   * First of all it tries to open file_name as a module. If that
+   * fails and file_name has the ".la"-suffix (and is a libtool
+   * archive) it tries to open the corresponding module. If that fails
+   * and it doesn't have the proper module suffix for the platform
+   * (G_MODULE_SUFFIX), this suffix will be appended and the
+   * corresponding module will be opended. If that fails and file_name
+   * doesn't have the ".la"-suffix, this suffix is appended and
+   * it tries to open the corresponding module.
+   *
+   * Use operator bool() to see whether the operation succeeded. For instance,
+   * @code
+   * Glib::Module module("plugins/helloworld");
+   * if(module)
+   * {
+   *   void* func = 0;
+   *   bool found = get_symbol("some_function", func);
+   * }
+   * @endcode
+   *
+   * @param file_name The library filename to open
+   * @param flags Flags to configure the load process
+   */
+  explicit Module(const std::string& file_name, ModuleFlags flags = ModuleFlags(0));
+
+  /** Close a module. The module will be removed from memory, unless
+   * <tt>make_resident</tt> has been called.
+   */
+  virtual ~Module();
+
+  /** Check whether the module was found.
+   */
+  operator bool() const;
+
+  /** Checks if modules are supported on the current platform.
+   * @returns true if available, false otherwise
+   */
+  _WRAP_METHOD(static bool get_supported(), g_module_supported)
+
+  /** Ensures that a module will never be unloaded. Any calls to the
+   * Glib::Module destructor will not unload the module.
+   */
+  _WRAP_METHOD(void make_resident(), g_module_make_resident)
+
+  /** Gets a string describing the last module error.
+   * @returns The error string
+   */
+  _WRAP_METHOD(static std::string get_last_error(), g_module_error)
+
+  /** Gets a symbol pointer from the module.
+   * @param symbol_name The name of the symbol to lookup
+   * @param symbol A pointer to set to the symbol
+   * @returns True if the symbol was found, false otherwise.
+   */
+  _WRAP_METHOD(bool get_symbol(const std::string& symbol_name, void*& symbol) const, g_module_symbol)
+
+  /** Get the name of the module.
+   * @returns The name of the module
+   */
+  _WRAP_METHOD(std::string get_name() const, g_module_name)
+
+  /** A portable way to build the filename of a module. The
+   * platform-specific prefix and suffix are added to the filename, if
+   * needed, and the result is added to the directory, using the
+   * correct separator character.
+   *
+   * The directory should specify the directory where the module can
+   * be found. It can be an empty string to indicate that the
+   * module is in a standard platform-specific directory, though this
+   * is not recommended since the wrong module may be found.
+   *
+   * For example, calling <tt>g_module_build_path()</tt> on a Linux
+   * system with a directory of <tt>/lib</tt> and a module_name of
+   * "mylibrary" will return <tt>/lib/libmylibrary.so</tt>. On a
+   * Windows system, using <tt>\\Windows</tt> as the directory it will
+   * return <tt>\\Windows\\mylibrary.dll</tt>.
+   *
+   * @param directory The directory the module is in
+   * @param module_name The name of the module
+   * @returns The system-specific filename of the module
+   */
+  // TODO: add an override which doesn't take a directory
+  // TODO: check what happens when directory is ""
+  _WRAP_METHOD(static std::string build_path(const std::string& directory, const std::string& module_name), g_module_build_path)
+
+  GModule*       gobj()       { return gobject_; }
+  const GModule* gobj() const { return gobject_; }
+
+protected:
+  GModule* gobject_;
+
+private:
+  // noncopyable
+  Module(const Module&);
+  Module& operator=(const Module&);
+};
+
+} // namespace Glib
+

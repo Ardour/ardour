@@ -1,0 +1,73 @@
+/* $Id: region.hg,v 1.3 2004/02/03 11:06:48 murrayc Exp $ */
+
+/* region.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+extern "C" { typedef struct _GdkRegion GdkRegion; }
+
+#include <glibmm/arrayhandle.h>
+#include <gdkmm/types.h>
+#include <gdkmm/rectangle.h>
+
+_DEFS(gdkmm,gdk)
+
+namespace Gdk
+{
+
+_CC_INCLUDE(gdk/gdkenumtypes.h)
+_WRAP_ENUM(FillRule, GdkFillRule)
+_WRAP_ENUM(OverlapType, GdkOverlapType)
+
+
+/** This is an opaque data type holding a set of arbitrary pixels, and is usually used for clipping graphical operations
+ * (see Gdk::GC::set_clip_region()).
+ */
+class Region
+{
+  _CLASS_OPAQUE_COPYABLE(Region, GdkRegion, gdk_region_new, gdk_region_copy, gdk_region_destroy)
+  _IGNORE(gdk_region_copy, gdk_region_destroy, gdk_region_get_rectangles, gdk_region_equal)
+
+public:
+
+  Region(const Glib::ArrayHandle<Gdk::Point>& points, FillRule fill_rule);
+  explicit Region(const Rectangle& rectangle);
+
+  _WRAP_METHOD(void get_clipbox(const Rectangle& rectangle), gdk_region_get_clipbox)
+  Glib::ArrayHandle<Rectangle> get_rectangles() const;
+
+  _WRAP_METHOD(bool empty(), gdk_region_empty)
+  _WRAP_METHOD(bool point_in(int x, int y), gdk_region_point_in)
+  _WRAP_METHOD(OverlapType rect_in(const Rectangle& rect), gdk_region_rect_in)
+
+  _WRAP_METHOD(void offset(int dx, int dy), gdk_region_offset)
+  _WRAP_METHOD(void shrink(int dx, int dy), gdk_region_shrink)
+  _WRAP_METHOD(void union_with_rect(const Rectangle& rect), gdk_region_union_with_rect)
+  _WRAP_METHOD(void intersect(const Region& source2), gdk_region_intersect)
+  _WRAP_METHOD(void union_(const Region& source2), gdk_region_union) //union is a keyword.
+  _WRAP_METHOD(void subtract(const Region& source2), gdk_region_subtract)
+  _WRAP_METHOD(void xor_(const Region& source2), gdk_region_xor) //xor is a keyword
+  _WRAP_METHOD(void spans_intersect_foreach(GdkSpan* spans, int n_spans, bool sorted, GdkSpanFunc function, gpointer data), gdk_region_spans_intersect_foreach)
+  
+#m4begin
+  _WRAP_EQUAL(gdk_region_equal, unconst)
+#m4end
+};
+
+} //namespace Gdk
+

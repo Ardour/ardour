@@ -1,0 +1,27 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+gtkmm2_files = glob.glob('gtkmm/*.cc')
+
+Import('env libraries install_prefix')
+gtkmm2 = env.Copy()
+gtkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'], libraries['cairomm'], libraries['gtk2-unix-print'] ])
+gtkmm2.Append(CXXFLAGS = ['-DGLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED', '-DGLIBMM_PROPERTIES_ENABLED', '-DGLIBMM_EXCEPTIONS_ENABLED'])
+
+if gtkmm2['IS_OSX']:
+    gtkmm2.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
+libgtkmm2 = gtkmm2.SharedLibrary('gtkmm2', gtkmm2_files)
+Default(libgtkmm2)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libgtkmm2))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'gtkmmconfig.h', 'gtkmm.h'] + 
+				     gtkmm2_files + 
+				     glob.glob('gtkmm/*.h') +
+				     glob.glob('gtkmm/private/*.h')
+				     ))

@@ -1,0 +1,120 @@
+/* $Id: pixmap.hg,v 1.5 2004/03/10 01:17:36 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/drawable.h>
+#include <gdkmm/color.h>
+#include <gdkmm/colormap.h>
+#include <gdkmm/types.h>
+
+_DEFS(gdkmm,gdk)
+_PINCLUDE(gdkmm/private/drawable_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C" {
+//Custom stuct prototypes, because they aren't what the code-generator expects:
+typedef struct _GdkDrawable GdkPixmap;
+typedef struct _GdkPixmapClass GdkPixmapClass;
+} // extern "C"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Gdk
+{
+
+class Window;
+
+/** Pixmaps are offscreen drawables. They can be drawn upon with the standard drawing primitives, then copied to another
+ * drawable (such as a Gdk::Window) with Gdk::Drawable::draw_drawable(). The depth of a pixmap is the number of bits per
+ * pixels.
+ * Bitmaps are simply pixmaps with a depth of 1. (That is, they are monochrome bitmaps - each pixel can be either on or off).
+ */
+class Pixmap : public Gdk::Drawable
+{
+  // GdkPixmap is a typedef to GdkDrawable, but it's actually a GdkPixmapObject.
+  _CLASS_GOBJECT(Pixmap,GdkPixmap,GDK_PIXMAP,Gdk::Drawable,GdkDrawable,GdkPixmapObject)
+  _CUSTOM_WRAP_NEW // see wrap_new() implementation in pixmap.ccg
+  _STRUCT_NOT_HIDDEN
+
+protected:
+  _CTOR_DEFAULT()
+
+  Pixmap(const Glib::RefPtr<Drawable>& drawable, int width, int height, int depth = -1);
+
+  /// Initialize a Pixmap from data.
+  Pixmap(const Glib::RefPtr<Drawable>& drawable,
+         const char* data, int width, int height, int depth,
+         const Color& fg, const Color& bg);
+
+  Pixmap(const Glib::RefPtr<Display>& display, NativeWindow anid);
+
+public:
+
+  _WRAP_CREATE(const Glib::RefPtr<Drawable>& drawable, int width, int height, int depth = -1)
+  _WRAP_CREATE(const Glib::RefPtr<Drawable>& drawable, const char* data, int width, int height, int depth, const Color& fg, const Color& bg)
+
+  _WRAP_CREATE(const Glib::RefPtr<Display>& display, NativeWindow anid)
+  _IGNORE(gdk_pixmap_foreign_new_for_display)
+  
+  static Glib::RefPtr<Pixmap> create_from_data(const Glib::RefPtr<const Drawable>& drawable,
+                                               const char* data, int width, int height, int depth,
+                                               const Color& fg, const Color& bg);
+
+  /// Create a Pixmap from a xpm file.
+  static Glib::RefPtr<Pixmap> create_from_xpm(const Glib::RefPtr<const Drawable>& drawable,
+                                              const Color& transparent_color,
+                                              const std::string& filename);
+
+  // Create a Pixmap from a xpm file.
+  static Glib::RefPtr<Pixmap> create_from_xpm(const Glib::RefPtr<const Drawable>& drawable,
+                                              Glib::RefPtr<Bitmap>& mask,
+                                              const Color& transparent_color,
+                                              const std::string& filename);
+
+  /// Create a Pixmap from a xpm file with colormap.
+  static Glib::RefPtr<Pixmap> create_from_xpm(const Glib::RefPtr<const Drawable>& drawable,
+                                              const Glib::RefPtr<Colormap>& colormap,
+                                              Glib::RefPtr<Bitmap>& mask,
+                                              const Color& transparent_color,
+                                              const std::string& filename);
+
+  static Glib::RefPtr<Pixmap> create_from_xpm(const Glib::RefPtr<const Drawable>& drawable,
+                                              Glib::RefPtr<Bitmap>& mask,
+                                              const Color& transparent_color,
+                                              const char* const* data);
+
+  static Glib::RefPtr<Pixmap> create_from_xpm(const Glib::RefPtr<const Drawable>& drawable,
+                                              const Glib::RefPtr<Colormap>& colormap,
+                                              Glib::RefPtr<Bitmap>& mask,
+                                              const Color& transparent_color,
+                                              const char* const* data);
+
+  static Glib::RefPtr<Pixmap> create_from_xpm(const Glib::RefPtr<Colormap>& colormap,
+                                              Glib::RefPtr<Bitmap>& mask,
+                                              const Color& transparent_color,
+                                              const char* const* data);
+
+  static Glib::RefPtr<Pixmap> create_from_xpm(const Glib::RefPtr<Colormap>& colormap,
+                                              Glib::RefPtr<Bitmap>& mask,
+                                              const char* const* data);
+
+
+};
+
+} // namespace Gdk
+

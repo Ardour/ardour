@@ -1,0 +1,45 @@
+/* $Id: implementor.hg,v 1.1 2004/04/11 21:00:53 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(atkmm,atk)
+
+#include <atkmm/object.h>
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+  typedef struct _AtkImplementorIface AtkImplementorIface;
+  typedef struct _AtkImplementor      AtkImplementor;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Atk
+{
+
+class Implementor : public Glib::Interface
+{
+  _CLASS_INTERFACE(Implementor, AtkImplementor, ATK_IMPLEMENTOR, AtkImplementorIface)
+
+protected:
+  _WRAP_VFUNC(Glib::RefPtr<Object> ref_accessibile(), ref_accessible, refreturn)
+};
+
+} // namespace Atk
+

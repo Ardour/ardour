@@ -1,0 +1,50 @@
+/* $Id: iconfactory.hg,v 1.1 2003/01/21 13:40:26 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+
+#include <gtkmm/enums.h>
+#include <gtkmm/object.h>
+#include <gtkmm/enums.h>
+#include <gtkmm/iconset.h>
+#include <gtkmm/stockid.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gtk
+{
+
+class IconFactory : public Glib::Object
+{
+   _CLASS_GOBJECT(IconFactory, GtkIconFactory, GTK_ICON_FACTORY, Glib::Object, GObject)
+   _IGNORE(gtk_icon_factory_lookup, gtk_icon_factory_lookup_for_settings)
+protected:
+
+  _CTOR_DEFAULT()
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(void add(const Gtk::StockID& stock_id, const IconSet& icon_set), gtk_icon_factory_add)
+  _WRAP_METHOD(void add_default(), gtk_icon_factory_add_default)
+  _WRAP_METHOD(void remove_default(), gtk_icon_factory_remove_default)
+};
+
+} // namespace Gtk
+

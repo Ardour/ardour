@@ -1,0 +1,135 @@
+/* $Id: editable.hg,v 1.3 2006/05/18 17:53:15 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/interface.h>
+#include <gtk/gtkeditable.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+
+namespace Gtk
+{
+
+/** Base class for text-editing widgets.
+ *
+ * The Gtk::Editable class is a base class for widgets for editing text,
+ * such as Gtk::Entry. It cannot be instantiated by itself. The editable
+ * class contains functions for generically manipulating an editable widget,
+ * a large number of action signals used for key bindings, and several
+ * signals that an application can connect to to modify the behavior of a
+ * widget.
+ *
+ */
+class Editable : public Glib::Interface
+{
+  _CLASS_INTERFACE(Editable,GtkEditable,GTK_EDITABLE,GtkEditableClass)
+
+public:
+  _WRAP_METHOD(void cut_clipboard(), gtk_editable_cut_clipboard)
+  _WRAP_METHOD(void copy_clipboard(), gtk_editable_copy_clipboard)
+  _WRAP_METHOD(void paste_clipboard(), gtk_editable_paste_clipboard)
+  _WRAP_METHOD(void delete_selection(), gtk_editable_delete_selection)
+  _WRAP_METHOD(void set_editable(bool is_editable = true), gtk_editable_set_editable)
+  _WRAP_METHOD(bool get_editable() const, gtk_editable_get_editable)
+
+  _WRAP_METHOD(void insert_text(const Glib::ustring& text, int length, int& position), gtk_editable_insert_text)
+  _WRAP_METHOD(void delete_text(int start_pos, int end_pos), gtk_editable_delete_text)
+
+  _WRAP_METHOD(Glib::ustring get_chars(int start_pos, int end_pos) const, gtk_editable_get_chars)
+
+  _WRAP_METHOD(void select_region(int start_pos, int end_pos), gtk_editable_select_region)
+  _WRAP_METHOD(bool get_selection_bounds(int& start_pos, int& end_pos) const, gtk_editable_get_selection_bounds)
+
+  _WRAP_METHOD(void set_position(int position), gtk_editable_set_position)
+  _WRAP_METHOD(int get_position() const, gtk_editable_get_position)
+
+  _IGNORE_SIGNAL(insert_text)
+
+#m4begin
+dnl // WRAP_SIGNAL "insert_text"
+dnl // C++ prototype: void insert_text(const Glib::ustring& text, int* position)
+dnl // C prototype: void insert_text(const gchar* text, gint length, gint* position)
+
+  _SIGNAL_PROXY(
+      insert_text, void, `const gchar* text, gint length, gint* position',
+      insert_text, void, `const Glib::ustring&, int*',dnl // C++ prototype
+      `Glib::ustring(text, text + length), position',`dnl // C -> C++ conversion
+      /**
+       * @param const Glib::ustring& text
+       * @param int* position
+       * @return void
+       */')
+
+  _SIGNAL_H(insert_text, void, `const Glib::ustring& text, int* position')
+  _SIGNAL_PH(insert_text, void, `GtkEditable* self, const gchar* text, gint length, gint* position')
+
+  _SIGNAL_CC(
+      insert_text, insert_text, void, void,
+      `const Glib::ustring& text, int* position',dnl // C++ arguments
+      `text.data(), text.bytes(), position')dnl // C++ -> C conversion
+
+  _SIGNAL_PCC(
+      insert_text, insert_text, void, void,
+      `GtkEditable* self, const gchar* text, gint length, gint* position',dnl // C arguments
+      `self, text, length, position',dnl // C argument names
+      `Glib::ustring(text, text + length), position',dnl // C -> C++ conversion
+      self)
+#m4end
+
+  _WRAP_SIGNAL(void delete_text(int start_pos, int end_pos), "delete_text")
+  _WRAP_SIGNAL(void changed(), "changed")
+
+protected:
+
+#m4begin
+dnl // WRAP_VFUNC "do_insert_text"
+dnl // C++ prototype: void insert_text_vfunc(const Glib::ustring& text, int& position)
+dnl // C prototype: void do_insert_text(const gchar* text, gint length, gint* position)
+
+  _VFUNC_H(insert_text_vfunc, void, `const Glib::ustring& text, int& position')
+  _VFUNC_PH(do_insert_text, void, `GtkEditable* self, const gchar* text, gint length, gint* position')
+  _VFUNC_CC(
+      insert_text_vfunc, do_insert_text, void, void,
+      `const Glib::ustring& text, int& position',dnl // C++ arguments
+      `text.data(), text.bytes(), &position')dnl // C++ -> C conversion
+  _VFUNC_PCC(
+      insert_text_vfunc, do_insert_text, void, void,
+      `GtkEditable* self, const gchar* text, gint length, gint* position',dnl // C arguments
+      `self, text, length, position',dnl // C argument names
+      `Glib::ustring(text, text + length), *position',dnl // C -> C++ conversion
+      self)
+#m4end
+
+  _WRAP_VFUNC(void delete_text(int start_pos, int end_pos), do_delete_text)
+
+#m4begin
+dnl // This special conversion is not in convert_gtk.m4, because allocating a new
+dnl // string is rarely needed -- probably not a good idea to make this generic.
+  _CONVERSION(`Glib::ustring', `gchar*', `g_strdup(($3).c_str())')
+#m4end
+  _WRAP_VFUNC(Glib::ustring get_chars(int start_pos, int end_pos) const, get_chars)
+
+  _WRAP_VFUNC(void select_region(int start_pos, int end_pos), set_selection_bounds)
+  _WRAP_VFUNC(bool get_selection_bounds(int& start_pos, int& end_pos) const, get_selection_bounds)
+  _WRAP_VFUNC(void set_position(int position), set_position)
+  _WRAP_VFUNC(int get_position() const, get_position)
+};
+
+} // namespace Gtk
+

@@ -1,0 +1,71 @@
+Summary: A high level MIDI handling library.
+%define lib_name midi++
+Name: lib%{lib_name}
+Version: @VERSION@
+Release: 2
+Copyright: GPL
+Source: ftp://ftp.quasimodo.org/pub/libs/midi++/current/%{name}-%{version}.tar.gz
+Url: http://www.quasimodo.org
+Vendor: Paul Barton Davis <pbd@op.net>
+Packager: jfm3 <jfm3@acm.org>
+Group: System Environment/Libraries
+Prefix: %{_prefix}
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+
+%description
+
+libmidi++ is a C++ library that uses libsigc++ to make handling MIDI
+I/O from MIDI hardware trivial.  You can attach "callbacks" to any
+MIDI input or output event, ranging from each individual byte, to a
+particular message type on a particular channel.  It also provides
+channel "state".
+ 
+%prep
+%setup -q
+
+%build
+CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" ./configure $ARCH_FLAGS --prefix=%{prefix}
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+install -d -m 755 $RPM_BUILD_ROOT%{prefix}/{{include,lib}/%{lib_name}}
+make install INSTALL="%(which install) -p" prefix=$RPM_BUILD_ROOT%{prefix}
+
+%post
+/sbin/ldconfig
+
+%postun
+/sbin/ldconfig
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc README AUTHORS NEWS COPYING*
+%{prefix}/lib/libmidipp.so*
+
+%package devel
+Summary: A high level MIDI handling library -- develper version.
+Group: System Environment/Libraries
+
+%description devel
+
+libmidi++ is a C++ library that uses libsigc++ to make handling MIDI
+I/O from MIDI hardware trivial.  You can attach "callbacks" to any
+MIDI input or output event, ranging from each individual byte, to a
+particular message type on a particular channel.  It also provides
+channel "state".
+ 
+This package holds static libraries and headers needed by developers
+who wish to use libmidi++ in their programs.
+
+%files devel
+%defattr(-,root,root)
+%{prefix}/include/midi++/*
+%{prefix}/lib/libmidipp.a
+%{prefix}/lib/libmidipp.la
+%{prefix}/bin/midi++-config
+%{prefix}/share/aclocal/midi++.m4
+%{prefix}/share/aclocal/midi.m4

@@ -1,0 +1,130 @@
+/* $Id: paned.hg,v 1.6 2006/04/12 11:11:25 murrayc Exp $ */
+
+
+/* paned.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/container.h>
+#include <gtkmm/enums.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/container_p.h)
+
+
+namespace Gtk
+{
+
+/** This is the base class for widgets with two panes, arranged either
+ * horizontally (Gtk::HPaned) or vertically (Gtk::VPaned).
+ *
+ * Child widgets are added to the panes of the widget with pack1() and pack2().
+ * The division beween the two children is set by default from the size
+ * requests of the children, but it can be adjusted by the user.
+ *
+ * A paned widget draws a separator between the two child widgets and a small
+ * handle that the user can drag to adjust the division. It does not draw any
+ * relief around the children or around the separator. Often, it is useful to
+ * put each child inside a Gtk::Frame with the shadow type set to Gtk::SHADOW_IN
+ * so that the gutter appears as a ridge.
+ *
+ * Each child has two options that can be set - resize and shrink. If resize is
+ * true, then when the GtkPaned is resized, that child will expand or shrink
+ * along with the paned widget. If shrink is true, then when that child can be
+ * made smaller than it's requisition. Setting shrink to false allows the
+ * application to set a minimum size. If resize is false for both children,
+ * then this is treated as if resize is true for both children.
+ *
+ * The application can set the position of the slider as if it were set by the
+ * user, by calling set_position().
+ *
+ * @ingroup Widgets
+ * @ingroup Containers
+ */
+class Paned : public Container
+{
+  _CLASS_GTKOBJECT(Paned,GtkPaned,GTK_PANED,Gtk::Container,GtkContainer)
+  _IGNORE(gtk_paned_compute_position)
+
+public:
+  _CTOR_DEFAULT()
+
+  _WRAP_METHOD(void add1(Widget& child), gtk_paned_add1)
+  _WRAP_METHOD(void add2(Widget& child), gtk_paned_add2)
+
+  _WRAP_METHOD(void pack1(Widget& child, bool resize, bool shrink), gtk_paned_pack1)
+  void pack1(Widget& child, AttachOptions options = Gtk::EXPAND);
+
+  _WRAP_METHOD(void pack2(Widget& child, bool resize, bool shrink), gtk_paned_pack2)
+  void pack2(Widget& child, AttachOptions options  = Gtk::EXPAND);
+
+  _WRAP_METHOD(int get_position() const, gtk_paned_get_position)
+  _WRAP_METHOD(void set_position(int position), gtk_paned_set_position)
+
+  _WRAP_METHOD(Widget* get_child1(), gtk_paned_get_child1)
+  _WRAP_METHOD(const Widget* get_child1() const, gtk_paned_get_child1, constversion)
+
+  _WRAP_METHOD(Widget* get_child2(), gtk_paned_get_child2)
+  _WRAP_METHOD(const Widget* get_child2() const, gtk_paned_get_child2, constversion)
+ 
+  //Keybinding signals:
+  _IGNORE_SIGNAL("toggle_handle_focus")
+  _IGNORE_SIGNAL("move_handle")
+  _IGNORE_SIGNAL("cycle_handle_focus")
+  _IGNORE_SIGNAL("accept_position")
+  _IGNORE_SIGNAL("cancel_position")
+  _IGNORE_SIGNAL("cycle_child_focus")
+
+
+  _WRAP_PROPERTY("position", int)
+  _WRAP_PROPERTY("position-set", bool)
+  _WRAP_PROPERTY("min-position", int)
+  _WRAP_PROPERTY("max-position", int)
+};
+
+/**
+ * The Gtk::HPaned widget is a container widget with two children arranged
+ * horizontally. The division between the two panes is adjustable by the
+ * user by dragging a handle. See Gtk::Paned for details. 
+ *
+ * @ingroup Widgets
+ */
+class HPaned : public Paned
+{
+  _CLASS_GTKOBJECT(HPaned,GtkHPaned,GTK_HPANED,Gtk::Paned,GtkPaned)
+public:
+  _CTOR_DEFAULT()
+};
+
+/**
+ * The Gtk::VPaned widget is a container widget with two children arranged
+ * horizontally. The division between the two panes is adjustable by the
+ * user by dragging a handle. See Gtk::Paned for details. 
+ *
+ * @ingroup Widgets
+ */
+class VPaned : public Paned
+{
+  _CLASS_GTKOBJECT(VPaned,GtkVPaned,GTK_VPANED,Gtk::Paned,GtkPaned)
+public:
+  _CTOR_DEFAULT()
+
+};
+
+} // namespace Gtk
+

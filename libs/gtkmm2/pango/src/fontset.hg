@@ -1,0 +1,60 @@
+/* $Id: fontset.hg,v 1.3 2005/11/30 14:10:50 murrayc Exp $ */
+
+/* fontset.h
+ *
+ * Copyright 2001      The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+#include <pangomm/language.h>
+#include <pangomm/font.h>
+#include <pangomm/fontmetrics.h>
+#include <pango/pango-fontset.h>
+
+_DEFS(pangomm,pango)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Pango
+{
+
+/** A Pango::Fontset is used to represent a set of fonts.
+ */
+class Fontset : public Glib::Object
+{
+  _CLASS_GOBJECT(Fontset, PangoFontset, PANGO_FONTSET, Glib::Object, GObject)
+
+public:
+  _WRAP_METHOD(Glib::RefPtr<Font> get_font(guint wc) const, pango_fontset_get_font)
+  _WRAP_METHOD(FontMetrics get_metrics() const, pango_fontset_get_metrics)
+
+  /** For instance,
+   * bool on_foreach(const Glib::RefPtr<Pango::Font>& font);
+   */
+  typedef sigc::slot< bool, const Glib::RefPtr<Font>& > ForeachSlot;
+
+  /** Iterates through all the fonts in a fontset, calling @a slot for
+   * each one. If @a slot returns true, that stops the iteration.
+   *
+   * @since-1.4
+   *
+   * @param slot Callback function
+   */
+  void foreach(const ForeachSlot& slot);
+  _IGNORE(pango_fontset_foreach)
+};
+
+} /* namespace Pango */

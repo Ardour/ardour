@@ -1,0 +1,66 @@
+Compatibility:
+
+- Fix compilation for SUN FORTE C++ 5.5.
+
+
+Configure checks and Makefile issues:
+
+- When you use a single Makefile.am for
+  several directories (in sigc++2, all under sigc++/ is ruled by a
+  single Makefile.am with the new build system), you have a problem when
+  you do a build where $(srcdir) != $(builddir), since in the build-tree
+  the necessary subdirectories are not created. So I have to find a
+  place where to create this directories, in case they do not exist. 
+  This is only an issue for clean CVS checkouts, however (Andy)
+
+
+sigc++-1.2 compatibility:
+
+- Verify completeness.
+
+
+documentation:
+
+- Improve documentation: Make groups (see index.html). Exclude stuff to make
+  the html output readable.
+
+- Add documentation for adaptors and accumulators.
+
+
+basic functionality:
+
+- I don't understand what is meant by "stl-pointer-like functions" (Martin):
+
+  slot should have the full set of stl pointer like functions. (Karl Nelson)
+
+
+lambda functionality (I don't understand this (Martin)):
+
+- Add support for _R to force references down into 
+  the stack frame of lambda.  Ie.
+
+  A a;
+  (_1+_2)(1,a);  // fail if no "operator int() const"
+
+- Call groups in lambda.  (Huh, that appears to be in group?)
+
+
+Old TODO's that should be almost finished (Martin):
+
+- Fine-tooth comb the code looking for missing operator =() function
+  and missing copy constructors.
+
+- Improve and expand the test suite.  There are a lot of combinations which
+  should be valid but haven't been tested which are likely to result in
+  wierd compiler errors if something wasn't done consistantly.  
+
+
+Old TODO's that should be finished (Martin):
+
+- Improve signal#, it currently is just barely functional.
+- Add iterator support and stl like functionality to signal.
+
+- Add blocking capablity to slot.
+
+- Deinline/move to .cc where possible to move functions into the
+  library to reduce resulting binary size.

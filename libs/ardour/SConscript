@@ -1,0 +1,395 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env final_prefix install_prefix final_config_prefix libraries i18n')
+
+ardour = env.Copy()
+
+#
+# this defines the version number of libardour
+# 
+
+domain = 'libardour3'
+
+ardour.Append(DOMAIN = domain, MAJOR = 2, MINOR = 0, MICRO = 0)
+ardour.Append(CXXFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+ardour.Append(CXXFLAGS=["-DLIBSIGC_DISABLE_DEPRECATED", "-DGLIBMM_EXCEPTIONS_ENABLED"])
+ardour.Append(PACKAGE = domain)
+ardour.Append(POTFILE = domain + '.pot')
+
+if ardour['IS_OSX']:
+	ardour.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
+#
+# explicitly reference the control protocol LGPL library for includes
+# 
+ 
+ardour.Append(CPPPATH = '#libs/surfaces/control_protocol')
+
+ardour_files=Split("""
+amp.cc
+analyser.cc
+audioanalyser.cc
+audio_buffer.cc
+audio_diskstream.cc
+audioengine.cc
+audiofilesource.cc
+audio_library.cc
+audio_playlist.cc
+audio_port.cc
+audioregion.cc
+audiosource.cc
+audio_track.cc
+auditioner.cc
+auto_bundle.cc
+automatable.cc
+automation.cc
+automation_control.cc
+automation_event.cc
+base_audio_port.cc
+base_midi_port.cc
+buffer.cc
+buffer_set.cc
+chan_count.cc
+configuration.cc
+control_protocol_manager.cc
+control_protocol_search_path.cc
+crossfade.cc
+curve.cc
+cycle_timer.cc
+default_click.cc
+directory_names.cc
+diskstream.cc
+enums.cc
+filename_extensions.cc
+filesystem_paths.cc
+filter.cc
+find_session.cc
+gain.cc
+gdither.cc
+globals.cc
+import.cc
+io.cc
+io_processor.cc
+jack_audio_port.cc
+jack_midi_port.cc
+jack_port.cc
+jack_slave.cc
+ladspa_plugin.cc
+location.cc
+meter.cc
+midi_buffer.cc
+midi_diskstream.cc
+midi_model.cc
+midi_playlist.cc
+midi_port.cc
+midi_region.cc
+midi_source.cc
+midi_stretch.cc
+midi_track.cc
+mix.cc
+mtc_slave.cc
+named_selection.cc
+note.cc
+panner.cc
+parameter.cc
+pcm_utils.cc
+playlist.cc
+playlist_factory.cc
+plugin.cc
+plugin_insert.cc
+plugin_manager.cc
+port.cc
+port_insert.cc
+port_set.cc
+processor.cc
+quantize.cc
+recent_sessions.cc
+region.cc
+region_factory.cc
+resampled_source.cc
+reverse.cc
+route.cc
+route_group.cc
+send.cc
+session_butler.cc
+session.cc
+session_click.cc
+session_command.cc
+session_directory.cc
+session_events.cc
+session_export.cc
+session_midi.cc
+session_process.cc
+session_state.cc
+session_state_utils.cc
+session_time.cc
+session_transport.cc
+session_utils.cc
+silentfilesource.cc
+smf_reader.cc
+smf_source.cc
+sndfile_helpers.cc
+sndfilesource.cc
+sndfileimportable.cc
+source.cc
+source_factory.cc
+tape_file_matcher.cc
+template_utils.cc
+tempo.cc
+track.cc
+transient_detector.cc
+user_bundle.cc
+utils.cc
+version.cc
+""")
+
+arch_specific_objects = [ ]
+
+osc_files = [ 'osc.cc' ]
+vst_files = [ 'vst_plugin.cc', 'session_vst.cc' ]
+lv2_files = [ 'lv2_plugin.cc' ]
+audiounit_files = [ 'audio_unit.cc' ]
+coreaudio_files = [ 'coreaudiosource.cc', 'caimportable.cc' ]
+extra_sources = [ ]
+timefx_sources = [ ]
+
+if ardour['VST']:
+	extra_sources += vst_files
+	ardour.Append(CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
+
+if ardour['LV2']:
+	extra_sources += lv2_files
+	ardour.Append(CCFLAGS="-DHAVE_SLV2")
+
+if ardour['LIBLO']:
+    extra_sources += osc_files
+
+ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+ardour.Append(CXXFLAGS="-DDATA_DIR=\\\"" + os.path.join (final_prefix, 'share') + "\\\"")
+ardour.Append(CXXFLAGS="-DMODULE_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR']) + "\\\"")
+ardour.Append(CXXFLAGS="-DVAMP_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR'], 'ardour3', 'vamp') + "\\\"")
+ardour.Append(CXXFLAGS="-DCONFIG_DIR=\\\"" + final_config_prefix + "\\\"")
+ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\"" + os.path.join (final_prefix, 'share', 'locale') + "\\\"")
+
+ardour.Merge ([ libraries['jack'] ])
+
+#
+# See if JACK supports jack_client_open()
+#
+
+jack_test_source_file = """
+#include <jack/jack.h>
+int main(int argc, char **argv)
+{
+    jack_client_open ("foo", 0, 0);
+    return 0;
+}
+"""
+def CheckJackClientOpen(context):
+        context.Message('Checking for jack_client_open()...')
+        result = context.TryLink(jack_test_source_file, '.c')
+        context.Result(result)
+        return result
+
+#
+# See if JACK supports jack_recompute_total_latencies()
+#
+
+jack_test_source_file = """
+#include <jack/jack.h>
+int main(int argc, char **argv)
+{
+    jack_recompute_total_latencies ((jack_client_t*) 0);
+    return 0;
+}
+"""
+def CheckJackRecomputeLatencies(context):
+        context.Message('Checking for jack_recompute_total_latencies()...')
+        result = context.TryLink(jack_test_source_file, '.c')
+        context.Result(result)
+        return result
+
+jack_video_frame_offset_test = """
+#include <jack/transport.h>
+int main(int argc, char** argv)
+{
+	jack_position_t pos;
+
+	pos.valid & JackVideoFrameOffset;
+	return 0;
+}
+"""
+def CheckJackVideoFrameOffset(context):
+	context.Message('Checking for JackVideoFrameOffset in jack_position_bits_t enum...')
+	result = context.TryLink(jack_video_frame_offset_test, '.c')
+	context.Result(result)
+	return result
+
+
+#
+# See if JACK supports jack_recompute_total_latency() (single port version)
+#
+
+jack_port_latency_test = """
+#include <jack/jack.h>
+int main(int argc, char **argv)
+{
+    jack_recompute_total_latency ((jack_client_t*) 0, (jack_port_t*) 0);
+    return 0;
+}
+"""
+def CheckJackRecomputeLatency(context):
+        context.Message('Checking for jack_recompute_total_latency()...')
+        result = context.TryLink(jack_port_latency_test, '.c')
+        context.Result(result)
+        return result
+
+conf = Configure(ardour, custom_tests = {
+	'CheckJackClientOpen' : CheckJackClientOpen,
+	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies,
+	'CheckJackRecomputeLatency' : CheckJackRecomputeLatency,
+	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset
+})
+
+if conf.CheckJackClientOpen():
+	ardour.Append(CXXFLAGS="-DHAVE_JACK_CLIENT_OPEN")
+
+if conf.CheckJackRecomputeLatencies():
+    ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCIES")
+
+if conf.CheckJackRecomputeLatency():
+    ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCY")
+
+if conf.CheckJackVideoFrameOffset():
+	ardour.Append(CXXFLAGS="-DHAVE_JACK_VIDEO_SUPPORT")
+
+#
+# Optional header files
+#
+
+if conf.CheckCHeader('wordexp.h'):
+    ardour.Append(CXXFLAGS="-DHAVE_WORDEXP")
+
+if conf.CheckCHeader('sys/vfs.h'):
+    ardour.Append(CXXFLAGS="-DHAVE_SYS_VFS_H")
+
+if conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):
+    ardour.Append(LINKFLAGS="-framework CoreMIDI")
+
+if conf.CheckCHeader('/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h'):
+    ardour.Append(LINKFLAGS="-framework AudioToolbox")
+
+if conf.CheckCHeader('/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h'):
+    ardour.Append(CXXFLAGS="-DHAVE_WEAK_COREAUDIO")
+
+if conf.CheckCHeader('/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h') and ardour['AUDIOUNITS']:
+    ardour.Append(CXXFLAGS="-DHAVE_AUDIOUNITS")
+    ardour.Append(LINKFLAGS="-framework AudioUnit")
+    extra_sources += audiounit_files
+ 
+if ardour['COREAUDIO']:
+    ardour.Append(CXXFLAGS="-DHAVE_COREAUDIO")    
+    extra_sources += coreaudio_files
+
+if env['CONFIG_ARCH'] == 'apple':
+    # this next line avoids issues with circular dependencies between libardour and libardour_cp.
+    # it is based on the (entirely reasonable) assumption that a system with CoreAudio is OS X
+    #
+    ardour.Append(LINKFLAGS='-undefined suppress -flat_namespace') 
+
+ardour = conf.Finish ()
+
+ardour.Merge ([
+	     libraries['core'],
+	     libraries['fftw3'],
+	     libraries['fftw3f'],
+	     libraries['glib2'],
+	     libraries['glibmm2'],
+	     libraries['lrdf'],
+	     libraries['midi++2'],
+	     libraries['pbd'],
+	     libraries['raptor'],
+	     libraries['samplerate'],
+	     libraries['sigc2'],
+	     libraries['sndfile-ardour'],
+	     libraries['vamp'],
+	     libraries['vamphost'],
+	     libraries['xml']
+	     ])
+
+if ardour['RUBBERBAND']:
+	ardour.Merge ([ libraries['rubberband']])
+	timefx_sources += [ 'rb_effect.cc' ]
+else:
+	ardour.Merge ([ libraries['soundtouch'] ])
+	timefx_sources += [ 'st_stretch.cc', 'st_pitch.cc' ]
+	
+if ardour['LV2']:
+	ardour.Merge ([ libraries['slv2'] ])
+
+if ardour['LIBLO']:
+	ardour.Merge ([ libraries['lo'] ])
+
+if ardour['COREAUDIO'] or ardour['AUDIOUNITS']:
+	ardour.Merge ([ libraries['appleutility'] ])
+
+def SharedAsmObjectEmitter(target, source, env):
+	for tgt in target:
+		tgt.attributes.shared = 1
+	return (target, source)
+
+
+env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o $TARGET',
+					      emitter = SharedAsmObjectEmitter,
+					      suffix = '$SHOBJSUFFIX',
+					      src_suffix = '.s',
+					      single_source = 1)
+#
+# handle objects that should always be compiled with -msse in their own
+# special environment, which is exactly like "ardour" but unconditionally
+# includes -msse
+# 
+
+
+always_sse_objects = []
+sse_env = ardour.Copy()
+sse_env.Append (CXXFLAGS="-msse")
+
+if env['FPU_OPTIMIZATION']:
+	if env['DIST_TARGET'] == "i386":
+		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
+	if env['DIST_TARGET'] == "i686":
+		arch_specific_objects = env.SharedAsmObject('sse_functions.os', 'sse_functions.s')
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
+	if env['DIST_TARGET'] == "x86_64":
+		arch_specific_objects = env.SharedAsmObject('sse_functions_64bit.os', 'sse_functions_64bit.s')
+		always_sse_objects += [ sse_env.SharedObject (source = 'sse_functions_xmm.cc') ]
+			
+libardour = ardour.SharedLibrary('ardour', ardour_files + always_sse_objects + timefx_sources + extra_sources + arch_specific_objects)
+
+Default(libardour)
+
+if env['NLS']:
+	i18n (ardour, ardour_files + vst_files + coreaudio_files + timefx_sources + audiounit_files, env)
+
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libardour))
+
+env.Alias('version', ardour.VersionBuild(['version.cc', 'ardour/version.h'], []))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+				     [ 'SConscript', 'i18n.h', 'gettext.h' ] + 
+				     [ 'sse_functions_xmm.cc', 'sse_functions.s', 'sse_functions_64bit.s' ] +
+				     [ 'rb_effect.cc', 'st_stretch.cc', 'st_pitch.cc' ] +
+				     ardour_files + 
+				     osc_files + 
+				     vst_files + 
+				     coreaudio_files + 
+				     audiounit_files +
+				     lv2_files +
+				     glob.glob('po/*.po') + glob.glob('ardour/*.h')))

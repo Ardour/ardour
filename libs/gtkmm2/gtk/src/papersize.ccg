@@ -1,0 +1,74 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkpapersize.h>
+#include <gtk/gtktypebuiltins.h>
+
+namespace Gtk
+{
+
+//PaperSize::PaperSize()
+//:
+//  gobject_(gtk_paper_size_new(gtk_paper_size_get_default()))
+//{}
+
+PaperSize::PaperSize(const Glib::ustring& name)
+:
+  gobject_(gtk_paper_size_new(name.c_str()))
+{}
+
+PaperSize::PaperSize(const Glib::ustring& ppd_name, const Glib::ustring& ppd_display_name, double width, double height)
+:
+  gobject_(gtk_paper_size_new_from_ppd(ppd_name.c_str(),
+                                       ppd_display_name.c_str(),
+                                       gdouble(width),
+                                       gdouble(height)))
+{}
+
+PaperSize::PaperSize(const Glib::ustring& name, const Glib::ustring& display_name, double width, double height, Unit unit)
+:
+  gobject_(gtk_paper_size_new_custom(name.c_str(),
+                                     display_name.c_str(),
+                                     gdouble(width),
+                                     gdouble(height),
+                                     GtkUnit(unit)))
+{}
+
+//TODO: Add an operator bool() so we can detect if this succeeded:
+PaperSize::PaperSize(const Glib::KeyFile& key_file, const Glib::ustring& group_name)
+:
+  gobject_(gtk_paper_size_new_from_key_file(const_cast<GKeyFile*>(key_file.gobj()), (group_name.empty() ? NULL : group_name.c_str()) , NULL /* GError */))
+{}
+
+bool PaperSize::equal(const PaperSize& other) const
+{
+  return (static_cast<bool>(gtk_paper_size_is_equal(const_cast<GtkPaperSize*>(this->gobj()),
+                                                    const_cast<GtkPaperSize*>(other.gobj()))));
+}
+
+PaperSize::operator bool() const
+{
+  return (gobj() != NULL);
+}
+
+void PaperSize::save_to_key_file(Glib::KeyFile& key_file)
+{
+  gtk_paper_size_to_key_file( gobj(), (key_file).gobj(), 0); 
+}
+
+
+} // namespace Gtk

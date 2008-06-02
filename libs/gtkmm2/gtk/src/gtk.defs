@@ -1,0 +1,6 @@
+(include gtk_methods.defs)
+(include gtk_signals.defs)
+(include gtk_vfuncs.defs)
+(include gtk_enums.defs)
+(include gtk_other.defs)
+

@@ -1,0 +1,71 @@
+// -*- c++ -*-
+/* $Id: messagedialog.ccg,v 1.7 2005/02/15 10:52:44 murrayc Exp $ */
+
+/* 
+ *
+ * Copyright 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkmessagedialog.h>
+#include <gtk/gtklabel.h>
+
+
+namespace Gtk
+{
+
+MessageDialog::MessageDialog(const Glib::ustring& message, bool use_markup,
+                             MessageType type, ButtonsType buttons,
+                             bool modal)
+:
+  _CONSTRUCT("message_type", (GtkMessageType)type, "buttons", (GtkButtonsType)buttons)
+{
+  set_modal(modal);
+  set_message(message, use_markup);
+}
+
+MessageDialog::MessageDialog(Gtk::Window& parent, const Glib::ustring& message, bool use_markup,
+                             MessageType type, ButtonsType buttons,
+                             bool modal)
+:
+  _CONSTRUCT("message_type", (GtkMessageType)type, "buttons", (GtkButtonsType)buttons)
+{
+  set_modal(modal);
+  set_transient_for(parent);
+  set_message(message, use_markup);
+}
+
+void MessageDialog::set_message(const Glib::ustring& message, bool use_markup)
+{
+  // TODO: GTK+ bug: The label widget is really a <private> struct field.
+  // There should really be a message property.
+
+  if(use_markup)
+    gtk_message_dialog_set_markup(gobj(), message.c_str()); 
+  else
+    gtk_label_set_text(GTK_LABEL(gobj()->label), message.c_str());
+}
+
+void MessageDialog::set_secondary_text(const Glib::ustring& text, bool use_markup)
+{
+  if(use_markup)
+    gtk_message_dialog_format_secondary_markup(gobj(), text.c_str());
+  else
+    gtk_message_dialog_format_secondary_text(gobj(), text.c_str());
+}
+
+} // namespace Gtk
+

@@ -1,0 +1,68 @@
+Summary: extensions to the libgtkmm library
+%define lib_name gtkmm2ext
+Name: lib%{lib_name}
+Version: @VERSION@
+Release: 2
+Copyright: GPL
+Source: ftp://ftp.quasimodo.org/pub/libs/gtkmm2ext/current/%{name}-%{version}.tar.gz
+Url: http://www.quasimodo.org
+Vendor: Paul Barton Davis <pbd@op.net>
+Packager: jfm3 <jfm3@acm.org>
+Group: System Environment/Libraries
+Prefix: %{_prefix}
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+
+%description
+
+libgtkmm2ext provides extensions to Gtk-- useful for audio
+applications.  These include ShapedWindow, MotionFeedback,
+PixmapButton and several more. It also includes the useful Pix class
+for managing sets of pixmaps, with reference counting etc.
+
+%prep
+%setup -q
+
+%build
+CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" ./configure $ARCH_FLAGS --prefix=%{prefix}
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+install -d -m 755 $RPM_BUILD_ROOT%{prefix}/{{include,lib}/%{lib_name}}
+make install INSTALL="%(which install) -p" prefix=$RPM_BUILD_ROOT%{prefix}
+
+%post
+/sbin/ldconfig
+
+%postun
+/sbin/ldconfig
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc README AUTHORS NEWS COPYING*
+%{prefix}/lib/libgtkmm2ext.so*
+
+%package devel
+Summary: extensions to the libgtkmm library -- developer package
+Group: System Environment/Libraries
+
+%description devel
+
+libgtkmm2ext provides extensions to Gtk-- useful for audio
+applications.  These include ShapedWindow, MotionFeedback,
+PixmapButton and several more. It also includes the useful Pix class
+for managing sets of pixmaps, with reference counting etc.
+
+This package holds static libraries and headers needed by developers
+who wish to use libgtkmm2ext in their programs.
+
+%files devel
+%defattr(-,root,root)
+%{prefix}/include/gtkmm2ext/*
+%{prefix}/lib/libgtkmm2ext.a
+%{prefix}/lib/libgtkmm2ext.la
+%{prefix}/bin/gtkmm2ext-config
+%{prefix}/share/aclocal/gtkmm2ext.m4

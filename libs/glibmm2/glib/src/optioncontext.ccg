@@ -1,0 +1,112 @@
+// -*- c++ -*-
+/* $Id: optioncontext.ccg,v 1.4 2004/10/30 14:25:45 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/utility.h>
+#include <glibmm/exceptionhandler.h>
+#include <glib/goption.h>
+
+namespace Glib
+{
+
+  namespace Private
+  {
+    static const gchar* SignalProxy_translate_gtk_callback (const gchar* str, gpointer data)
+    {
+      Glib::ustring translated_str;
+      Glib::OptionContext::SlotTranslate* the_slot =
+        static_cast<Glib::OptionContext::SlotTranslate*>(data);
+
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+      try
+      {
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+        translated_str = (*the_slot)(str);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+      }
+      catch(...)
+      {
+        Glib::exception_handlers_invoke();
+      }
+#endif //GLIBMM_EXCEPTIONS_ENABLED
+      return translated_str.c_str ();
+    }
+
+    static void SignalProxy_translate_gtk_callback_destroy (gpointer data)
+    {
+      delete static_cast<Glib::OptionContext::SlotTranslate*>(data);
+    }
+
+  } //namespace Private
+
+OptionContext::OptionContext(const Glib::ustring& parameter_string)
+: gobject_( g_option_context_new(parameter_string.c_str()) ),
+  has_ownership_(true)
+{
+}
+
+OptionContext::OptionContext(GOptionContext* castitem, bool take_ownership)
+: gobject_(castitem),
+  has_ownership_(take_ownership)
+{
+}
+
+OptionContext::~OptionContext()
+{
+  if(has_ownership_)
+    g_option_context_free(gobj());
+    
+  gobject_ = 0;
+}
+
+void OptionContext::add_group(OptionGroup& group)
+{
+  //Strangely, GObjectContext actually takes ownership of the GOptionGroup, deleting it later.
+  g_option_context_add_group(gobj(), (group).gobj_give_ownership());
+}
+
+void OptionContext::set_main_group(OptionGroup& group)
+{
+  //Strangely, GObjectContext actually takes ownership of the GOptionGroup, deleting it later.
+  g_option_context_set_main_group(gobj(), (group).gobj_give_ownership());
+}
+
+
+/*
+OptionGroup OptionContext::get_main_group() const
+{
+  const GOptionGroup* cobj = g_option_context_get_main_group(const_cast<GOptionContext*>( gobj()) );
+  OptionGroup cppObj(const_cast<GOptionGroup*>(cobj), true); // take_copy
+  return cppObj;
+}
+
+*/
+
+void OptionContext::set_translate_func (const SlotTranslate& slot)
+{
+  //Create a copy of the slot. A pointer to this will be passed through the callback's data parameter.
+  //It will be deleted when SignalProxy_translate_gtk_callback_destroy() is called.
+  SlotTranslate* slot_copy = new SlotTranslate(slot);
+
+  g_option_context_set_translate_func(
+      gobj(), &Private::SignalProxy_translate_gtk_callback, slot_copy,
+      &Private::SignalProxy_translate_gtk_callback_destroy);
+}
+
+} // namespace Glib

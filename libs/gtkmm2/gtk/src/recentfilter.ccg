@@ -1,0 +1,90 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkrecentfilter.h>
+#include <gtk/gtktypebuiltins.h>
+
+#include <glibmm/ustring.h>
+
+// This Signal Proxy allows the C++ coder to specify a sigc::slot instead of a static function.
+
+static gboolean SignalProxy_Custom_gtk_callback(const GtkRecentFilterInfo* filter_info, gpointer data)
+{
+  const Gtk::RecentFilter::SlotCustom* the_slot = static_cast<Gtk::RecentFilter::SlotCustom*>(data);
+
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+    // Create a suitable C++ instance to pass to the C++ method:
+    Gtk::RecentFilter::Info cppInfo;
+    cppInfo.contains = (Gtk::RecentFilterFlags)filter_info->contains;
+    cppInfo.uri = Glib::convert_const_gchar_ptr_to_ustring(filter_info->uri);
+    cppInfo.display_name = Glib::convert_const_gchar_ptr_to_ustring(filter_info->display_name);
+    cppInfo.mime_type = Glib::convert_const_gchar_ptr_to_ustring(filter_info->mime_type);
+    
+    // Create string lists from char**s.
+    
+    for(int i = 0; filter_info->groups[i] != 0; ++i)
+    {
+      cppInfo.groups.push_back( Glib::convert_const_gchar_ptr_to_ustring(filter_info->groups[i]) );
+    }
+    for(int i = 0; filter_info->applications[i] != 0; ++i)
+    {
+      cppInfo.applications.push_back( Glib::convert_const_gchar_ptr_to_ustring(filter_info->applications[i]) );
+    }
+    
+    cppInfo.age = filter_info->age;
+  
+    return (*the_slot)(cppInfo);
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    Glib::exception_handlers_invoke();
+    return false; // arbitrary default;
+  }
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+}
+
+static void SignalProxy_Custom_gtk_callback_destroy(void* data)
+{
+  delete static_cast<Gtk::RecentFilter::SlotCustom*>(data);
+}
+
+namespace Gtk
+{
+
+RecentFilter::Info::Info()
+: contains(Gtk::RECENT_FILTER_MIME_TYPE), //arbitrary default
+  age(0)
+{
+}
+
+void RecentFilter::add_custom(RecentFilterFlags needed, const SlotCustom& slot)
+{
+  // Create a copy of the slot. A pointer to this will be passed through the callback's data parameter.
+  // It will be deleted when SignalProxy_Custom_gtk_callback_destroy() is called.
+  SlotCustom* slot_copy = new SlotCustom(slot);
+      
+  gtk_recent_filter_add_custom(gobj(), (GtkRecentFilterFlags)needed,
+                               &SignalProxy_Custom_gtk_callback,
+                               slot_copy,
+                               &SignalProxy_Custom_gtk_callback_destroy);
+}
+
+} // namespace Gtk

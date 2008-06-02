@@ -1,0 +1,200 @@
+/* $Id: display.hg,v 1.22 2006/04/12 11:11:24 murrayc Exp $ */
+
+/* display.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/screen.h>
+#include <gdkmm/device.h>
+#include <gdkmm/types.h> //For ModifierType
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+_CC_INCLUDE(gdk/gdkenumtypes.h)
+
+class Drawable;
+
+ /** Gdk::Display object's purpose is two fold:
+ *   To grab/ungrab keyboard focus and mouse pointer
+ *   To manage and provide information about the Gdk::Screen(s) available for this Gdk::Display
+ *
+ * Gdk::Display objects are the GDK representation of the X Display which can be described as a workstation consisting
+ * of a keyboard a pointing device (such as a mouse) and one or more screens. It is used to open and keep track of
+ * various Gdk::Screen objects currently instantiated by the application. It is also used to grab and release the keyboard
+ * and the mouse pointer.
+ */
+class Display : public Glib::Object
+{
+  _CLASS_GOBJECT(Display,GdkDisplay,GDK_DISPLAY,Glib::Object,GObject)
+protected:
+  _CTOR_DEFAULT
+
+public:
+  _WRAP_METHOD(static Glib::RefPtr<Display> open(const Glib::ustring& display_name), gdk_display_open, refreturn)
+
+  _WRAP_METHOD(Glib::ustring get_name() const, gdk_display_get_name)
+
+  _WRAP_METHOD(int get_n_screens() const, gdk_display_get_n_screens)
+  _WRAP_METHOD(Glib::RefPtr<Screen> get_screen(int screen_num), gdk_display_get_screen, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Screen> get_screen(int screen_num) const, gdk_display_get_screen, refreturn, constversion)
+  
+  _WRAP_METHOD(Glib::RefPtr<Screen> get_default_screen(), gdk_display_get_default_screen, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Screen> get_default_screen() const, gdk_display_get_default_screen, refreturn, constversion)
+  
+  _WRAP_METHOD(void pointer_ungrab(guint32 timestamp), gdk_display_pointer_ungrab)
+  _WRAP_METHOD(void keyboard_ungrab(guint32 timestamp), gdk_display_keyboard_ungrab)
+  _WRAP_METHOD(bool pointer_is_grabbed() const, gdk_display_pointer_is_grabbed)
+  _WRAP_METHOD(void beep(), gdk_display_beep)
+  _WRAP_METHOD(void sync(), gdk_display_sync)
+  _WRAP_METHOD(void	close(), gdk_display_close)
+
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<Device> > list_devices(), gdk_display_list_devices)
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<const Device> > list_devices() const, gdk_display_list_devices)
+  
+  //TODO: Use C++ Gdk::Event:
+  //TODO: get_event() might remove the event - if so, then there should not be a const version:
+  _WRAP_METHOD(GdkEvent* get_event(), gdk_display_get_event)
+  _WRAP_METHOD(const GdkEvent* get_event() const, gdk_display_get_event, constversion)
+  
+  _WRAP_METHOD(GdkEvent* peek_event(), gdk_display_peek_event)
+  _WRAP_METHOD(GdkEvent* peek_event() const, gdk_display_peek_event, constversion)
+  _WRAP_METHOD(void put_event(GdkEvent* event), gdk_display_put_event)
+
+  //TODO: Use a slot here, though this is probably never used anyway:
+  //Find out whether we can use a string representation for the atom - look for examples of this function's use.
+  _WRAP_METHOD(void add_client_message_filter(Glib::ustring& message_type, GdkFilterFunc func, gpointer data), gdk_display_add_client_message_filter)
+
+  _WRAP_METHOD(void set_double_click_time(guint msec), gdk_display_set_double_click_time)
+  _WRAP_METHOD(void set_double_click_distance(guint distance), gdk_display_set_double_click_distance)
+
+
+  _WRAP_METHOD(static Glib::RefPtr<Display> get_default(), gdk_display_get_default, refreturn)
+
+  _WRAP_METHOD(Glib::RefPtr<Device> get_core_pointer(), gdk_display_get_core_pointer, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Device> get_core_pointer() const, gdk_display_get_core_pointer, refreturn)
+
+  /** Gets the current location of the pointer and the current modifier
+   * mask for a given display.
+   *
+   * @param screen location to store the screen that the cursor is on.
+   * @param x location to store root window X coordinate of pointer.
+   * @param y location to store root window Y coordinate of pointer.
+   * @param mask location to store current modifier mask.
+   *
+   **/
+  void get_pointer(Glib::RefPtr<Screen>& screen, int& x, int& y, ModifierType& mask);
+
+  // In fact, any one of these gdk_display_get_pointer() args can be NULL, but we don't need so many overloads.
+  /**
+   * Gets the current location of the pointer and the current modifier
+   * mask for a given display.
+   *
+   * @param x location to store root window X coordinate of pointer.
+   * @param y location to store root window Y coordinate of pointer.
+   * @param mask location to store current modifier mask.
+   *
+   **/
+  void get_pointer(int& x, int& y, ModifierType& mask); 
+  _IGNORE(gdk_display_get_pointer)
+  
+  _WRAP_METHOD(Glib::RefPtr<Window> get_window_at_pointer(int& win_x, int& win_y), gdk_display_get_window_at_pointer, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Window> get_window_at_pointer(int& win_x, int& win_y) const, gdk_display_get_window_at_pointer, refreturn, constversion)
+
+  /** Obtains the window underneath the mouse pointer. Returns a null RefPtr if the window
+   * under the mouse pointer is not known to GDK (for example, belongs to
+   * another application).
+   * @result The window underneath the mouse pointer.
+   */
+  Glib::RefPtr<Window> get_window_at_pointer();
+
+  /** Obtains the window underneath the mouse pointer. Returns a null RefPtr if the window
+   * under the mouse pointer is not known to GDK (for example, belongs to
+   * another application).
+   * @result The window underneath the mouse pointer.
+   */
+  Glib::RefPtr<const Window> get_window_at_pointer() const;
+  
+  _WRAP_METHOD(void warp_pointer(const Glib::RefPtr<Screen>& screen, int x, int y), gdk_display_warp_pointer)
+
+  _WRAP_METHOD(GdkDisplayPointerHooks* set_pointer_hooks(const GdkDisplayPointerHooks* new_hooks), gdk_display_set_pointer_hooks)
+  GdkDisplayPointerHooks* unset_pointer_hooks();
+  
+  _WRAP_METHOD(static Glib::RefPtr<Display> open_default_libgtk_only(), gdk_display_open_default_libgtk_only, refreturn)
+
+  _WRAP_METHOD(guint32 get_drag_protocol(guint32 xid, GdkDragProtocol& protocol), gdk_drag_get_protocol_for_display)
+
+  _WRAP_METHOD(GdkKeymap* get_keymap(), gdk_keymap_get_for_display)
+  _WRAP_METHOD(const GdkKeymap* get_keymap() const, gdk_keymap_get_for_display, constversion)
+
+  bool set_selection_owner(const Glib::RefPtr<Window>& owner, Glib::ustring& selection, guint32 time_, bool send_event);
+  Glib::RefPtr<Window> get_selection_owner(const Glib::ustring& selection);
+  void selection_send_notify(guint32 requestor, Glib::ustring& selection, Glib::ustring& target, Glib::ustring& property, guint32 time_);
+
+  _WRAP_METHOD(Glib::RefPtr<Pixmap> lookup_pixmap(NativeWindow anid), gdk_pixmap_lookup_for_display)
+  _WRAP_METHOD(Glib::RefPtr<const Pixmap> lookup_pixmap(NativeWindow anid) const, gdk_pixmap_lookup_for_display, constversion)
+
+  _WRAP_METHOD(void flush(), gdk_display_flush)
+  _WRAP_METHOD(bool supports_cursor_alpha() const, gdk_display_supports_cursor_alpha)
+  _WRAP_METHOD(bool supports_cursor_color() const, gdk_display_supports_cursor_color)
+  _WRAP_METHOD(guint get_default_cursor_size() const, gdk_display_get_default_cursor_size)
+  _WRAP_METHOD(void get_maximal_cursor_size(guint& width, guint& height), gdk_display_get_maximal_cursor_size)
+
+  _WRAP_METHOD(Glib::RefPtr<Window> get_default_group(), gdk_display_get_default_group, refreturn) 
+  _WRAP_METHOD(Glib::RefPtr<const Window> get_default_group() const, gdk_display_get_default_group, refreturn, constversion)              
+      
+  //TODO: wrap the vfuncs, though they are not very useful because people will not derive from this class? murrayc.
+  
+
+  _WRAP_METHOD(bool supports_selection_notification() const, gdk_display_supports_selection_notification)
+  _WRAP_METHOD(bool request_selection_notification(const Glib::ustring& selection), gdk_display_request_selection_notification)
+
+  _WRAP_METHOD(bool supports_clipboard_persistence() const, gdk_display_supports_clipboard_persistence)
+
+  /** Issues a request to the clipboard manager to store the clipboard data, 
+   * saving all available targets.
+   * On X11, this is a special program that works according to the freedesktop clipboard specification, 
+   * available at http://www.freedesktop.org/Standards/clipboard-manager-spec.
+   * @newin2p6
+   *
+   * @param clipboard_window A Gdk::Window belonging to the clipboard owner.
+   * @param time_ A timestamp.
+   */
+  void store_clipboard(const Glib::RefPtr<Gdk::Window>& clipboard_window, guint32 time_);
+  
+  void store_clipboard(const Glib::RefPtr<Gdk::Window>& clipboard_window, guint32 time_, const Glib::StringArrayHandle& targets);
+  _IGNORE(gdk_display_store_clipboard)      
+
+  _WRAP_METHOD(bool supports_shapes() const, gdk_display_supports_shapes)
+  _WRAP_METHOD(bool supports_input_shapes() const, gdk_display_supports_input_shapes)
+  _WRAP_METHOD(bool supports_composite() const, gdk_display_supports_composite)
+                                             
+  
+  /** The closed signal is emitted when the connection to the windowing
+   * system for this display is closed.
+   *
+   * @param is_error true if the display was closed due to an error
+   */  
+  _WRAP_SIGNAL(void closed(bool is_error), closed)
+};
+
+} /* namespace Gdk */
+

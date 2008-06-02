@@ -1,0 +1,76 @@
+// -*- c++ -*-
+/* $Id: tabarray.ccg,v 1.2 2006/07/05 18:46:36 markoa Exp $ */
+
+/*
+ *
+ * Copyright 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+namespace Pango
+{
+
+TabArray::TabArray(int initial_size, bool positions_in_pixels)
+{
+  gobject_ = pango_tab_array_new(initial_size, (gboolean)positions_in_pixels);
+}
+
+std::pair<TabAlign,int> TabArray::get_tab(int tab_index) const
+{
+  PangoTabAlign p_alignment;
+  TabAlign alignment;
+  int location;
+  pango_tab_array_get_tab(const_cast<PangoTabArray*>(gobj()), tab_index, &p_alignment, &location);
+  alignment = static_cast<TabAlign>(p_alignment);
+  return std::pair<TabAlign,int>(alignment, location);
+}
+
+Glib::ArrayHandle< std::pair<TabAlign,int> > TabArray::get_tabs() const
+{
+  typedef std::pair<TabAlign,int> PairType;
+
+  PairType* pair_buffer = 0;
+  const int size = pango_tab_array_get_size(const_cast<PangoTabArray*>(gobj()));
+
+  if(size > 0)
+  {
+    // Get arrays
+    PangoTabAlign* pAlignments = 0;
+    int*           pLocations  = 0;
+    pango_tab_array_get_tabs(const_cast<PangoTabArray*>(gobj()), &pAlignments, &pLocations);
+
+    if(pAlignments && pLocations)
+    {
+      // Create temporary C array.  Fortunately, the C++ type is POD,
+      // so we can safely store it in the array.
+      pair_buffer = g_new(PairType, size);
+
+      for(int i = 0; i < size; ++i)
+      {
+        pair_buffer[i].first  = (TabAlign)(pAlignments[i]);
+        pair_buffer[i].second = pLocations[i];
+      }
+    }
+
+    g_free(pAlignments);
+    g_free(pLocations);
+  }
+
+  return Glib::ArrayHandle<PairType>(pair_buffer, size, Glib::OWNERSHIP_SHALLOW);
+}
+
+} /* namespace Pango */
+

@@ -1,0 +1,59 @@
+// -*- c++ -*-
+/* $Id: stockitem.ccg,v 1.3 2004/06/20 22:41:14 daniel Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkstock.h>
+ 
+namespace Gtk
+{
+
+StockItem::StockItem(const Gtk::StockID&  stock_id,
+                     const Glib::ustring& label,
+                     Gdk::ModifierType    modifier,
+                     unsigned int         keyval,
+                     const Glib::ustring& translation_domain)
+{
+  const GtkStockItem stock_item =
+  {
+    const_cast<char*>(stock_id.get_c_str()),
+    const_cast<char*>(label.c_str()),
+    static_cast<GdkModifierType>(unsigned(modifier)),
+    keyval,
+    (translation_domain.empty()) ? 0 : const_cast<char*>(translation_domain.c_str())
+  };
+
+  gobject_ = gtk_stock_item_copy(&stock_item);
+}
+
+// static
+bool StockItem::lookup(const Gtk::StockID& stock_id, Gtk::StockItem& item)
+{
+  GtkStockItem item_gobj = { 0, 0, GdkModifierType(0), 0, 0, };
+  const bool known_id = gtk_stock_lookup(stock_id.get_c_str(), &item_gobj);
+
+  if(item.gobject_)
+    gtk_stock_item_free(item.gobject_);
+
+  item.gobject_ = (known_id) ? gtk_stock_item_copy(&item_gobj) : 0;
+
+  return known_id;
+}
+
+} // namespace Gtk
+

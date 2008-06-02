@@ -1,0 +1,61 @@
+// -*- c++ -*-
+/* $Id: object.ccg,v 1.1 2003/01/21 13:37:06 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <atkmm/noopobject.h>
+#include <atkmm/relation.h>
+#include <atkmm/relationset.h>
+#include <atkmm/stateset.h>
+#include <atk/atkobject.h>
+
+
+namespace Atk
+{
+
+/* AtkObject is actually an abstract base class.  So if this wrap_new()
+ * function is called, it means that no wrapper exists for the real C object.
+ * The problem is that gail (the real accessibility implementation) is
+ * currently not wrapped and will probably never be.  Therefore, code like
+ * in the following example is doomed to fail:
+ *
+ * Gtk::Image image ("icon.png");
+ * Glib::RefPtr<Atk::Image> accessible = Glib::RefPtr<Atk::Image>::cast_dynamic(image.get_accessible());
+ * accessible->set_image_description("my icon");
+ *
+ * This would segfault, even though the accessible object _does_ implement
+ * AtkImage.  But Atk::Image is an interface class that can't be instantiated
+ * as is.  It needs an object.
+ *
+ * The solution is to instantiate a dummy object that implements all of the
+ * ATK interfaces.  Fortunately, ATK already provides us with such a thing,
+ * AtkNoOpObject.  All widget accessible objects are of this type if the gail
+ * module is not loaded (which is the default).
+ *
+ * So what we do here is abusing Atk::NoOpObject to get around the lack of
+ * C++ wrappers for gail.  Instead of instantiating a useless instance of an
+ * abstract base class, we just create a Atk::NoOpObject instance which can
+ * be casted to any of the Atk interface classes.
+ */
+Glib::ObjectBase* Object_Class::wrap_new(GObject* object)
+{
+  return new Atk::NoOpObject((AtkNoOpObject*) object);
+}
+
+} // namespace Atk
+

@@ -1,0 +1,1156 @@
+;; -*- scheme -*-
+; virtual function definitions
+; define-vfunc is gtkmm-specific
+
+; GtkAction
+
+(define-vfunc create_menu_item
+  (of-object "GtkAction")
+  (return-type "GtkWidget*")
+)
+
+(define-vfunc create_tool_item
+  (of-object "GtkAction")
+  (return-type "GtkWidget*")
+)
+
+(define-vfunc connect_proxy
+  (of-object "GtkAction")
+  (return-type "void")
+  (parameters
+    '("GtkWidget*" "proxy")
+  )
+)
+
+(define-vfunc disconnect_proxy
+  (of-object "GtkAction")
+  (return-type "void")
+  (parameters
+    '("GtkWidget*" "proxy")
+  )
+)
+             
+; GtkCellEditable
+
+(define-vfunc start_editing
+  (of-object "GtkCellEditable")
+  (return-type "none")
+  (parameters
+    '("GdkEvent*" "event")
+  )
+)
+
+
+; GtkCellLayout
+
+(define-vfunc pack_start
+  (of-object "GtkCellLayout")
+  (return-type "none")
+  (parameters
+    '("GtkCellRenderer*" "cell")
+    '("gboolean" "expand")
+  )
+)
+
+(define-vfunc pack_end
+  (of-object "GtkCellLayout")
+  (return-type "none")
+  (parameters
+    '("GtkCellRenderer*" "cell")
+    '("gboolean" "expand")
+  )
+)
+
+(define-vfunc clear
+  (of-object "GtkCellLayout")
+  (return-type "none")
+)
+
+(define-vfunc add_attribute
+  (of-object "GtkCellLayout")
+  (return-type "none")
+  (parameters
+    '("GtkCellRenderer*" "cell")
+    '("const-gchar*" "attribute")
+    '("gint" "column")
+  )
+)
+
+;; //TODO:  _WRAP_VFUNC(void set_cell_data_func(GtkCellRenderer* cell, GtkCellLayoutDataFunc func, gpointer func_data, GDestroyNotify destroy), set_cell_data_func)
+
+(define-vfunc clear_attributes
+  (of-object "GtkCellLayout")
+  (return-type "none")
+  (parameters
+    '("GtkCellRenderer*" "cell")
+  )
+)
+
+(define-vfunc reorder
+  (of-object "GtkCellLayout")
+  (return-type "none")
+  (parameters
+    '("GtkCellRenderer*" "cell")
+    '("gint" "position")
+  )
+)
+
+  
+; GtkCellRenderer
+
+(define-vfunc get_size
+  (of-object "GtkCellRenderer")
+  (return-type "none")
+  (parameters
+    '("GtkWidget*" "widget")
+    '("GdkRectangle*" "cell_area")
+    '("gint*" "x_offset")
+    '("gint*" "y_offset")
+    '("gint*" "width")
+    '("gint*" "height")
+  )
+)
+
+(define-vfunc render
+  (of-object "GtkCellRenderer")
+  (return-type "none")
+  (parameters
+    '("GdkDrawable*" "window")
+    '("GtkWidget*" "widget")
+    '("GdkRectangle*" "background_area")
+    '("GdkRectangle*" "cell_area")
+    '("GdkRectangle*" "expose_area")
+    '("GtkCellRendererState" "flags")
+  )
+)
+
+(define-vfunc activate
+  (of-object "GtkCellRenderer")
+  (return-type "gboolean")
+  (parameters
+    '("GdkEvent*" "event")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "path")
+    '("GdkRectangle*" "background_area")
+    '("GdkRectangle*" "cell_area")
+    '("GtkCellRendererState" "flags")
+  )
+)
+
+(define-vfunc start_editing
+  (of-object "GtkCellRenderer")
+  (return-type "GtkCellEditable*")
+  (parameters
+    '("GdkEvent*" "event")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "path")
+    '("GdkRectangle*" "background_area")
+    '("GdkRectangle*" "cell_area")
+    '("GtkCellRendererState" "flags")
+  )
+)
+
+
+
+; GtkCheckButton
+
+(define-vfunc draw_indicator
+  (of-object "GtkCheckButton")
+  (return-type "none")
+  (parameters
+    '("GdkRectangle*" "area")
+  )
+)
+
+; GtkCheckMenuItem
+
+(define-vfunc draw_indicator
+  (of-object "GtkCheckMenuItem")
+  (return-type "none")
+  (parameters
+    '("GdkRectangle*" "area")
+  )
+)
+
+; GtkCList
+
+(define-vfunc sort_list
+  (of-object "GtkCList")
+  (return-type "none")
+)
+
+(define-vfunc insert_row
+  (of-object "GtkCList")
+  (return-type "int")
+  (parameters
+    '("gint" "row")
+    '("gchar**" "text")
+  )
+)
+
+(define-vfunc remove_row
+  (of-object "GtkCList")
+  (return-type "none")
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-vfunc clear
+  (of-object "GtkCList")
+  (return-type "none")
+)
+
+; GtkContainer
+
+(define-vfunc child_type
+  (of-object "GtkContainer")
+  (return-type "GtkType")
+)
+
+
+(define-vfunc forall
+  (of-object "GtkContainer")
+  (return-type "none")
+  (parameters
+     '("gboolean" "include_internals")
+     '("GtkCallback" "callback")
+     '("gpointer" "callback_data")
+   )
+)
+
+(define-vfunc composite_name
+  (of-object "GtkContainer")
+  (return-type "gchar*")
+  (parameters
+    '("GtkWidget*" "child")
+  )
+)
+
+(define-vfunc set_child_property
+  (of-object "GtkContainer")
+  (return-type "none")
+  (parameters
+    '("GtkWidget*" "child")
+    '("guint" "property_id")
+    '("const-GValue*" "value")
+    '("GParamSpec*" "pspec")
+  )
+)
+
+(define-vfunc get_child_property
+  (of-object "GtkContainer")
+  (return-type "none")
+  (parameters
+    '("GtkWidget*" "child")
+    '("guint" "property_id")
+    '("GValue*" "value")
+    '("GParamSpec*" "pspec")
+  )
+)
+
+; GtkEditable
+
+(define-vfunc do_insert_text
+  (of-object "GtkEditable")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "text")
+    '("gint" "length")
+    '("gint*" "position")
+  )
+)
+
+(define-vfunc do_delete_text
+  (of-object "GtkEditable")
+  (return-type "none")
+  (parameters
+    '("gint" "start_pos")
+    '("gint" "end_pos")
+  )
+)
+
+(define-vfunc get_chars
+  (of-object "GtkEditable")
+  (return-type "gchar*")
+  (parameters
+    '("gint" "start_pos")
+    '("gint" "end_pos")
+  )
+)
+
+(define-vfunc set_selection_bounds
+  (of-object "GtkEditable")
+  (return-type "none")
+  (parameters
+    '("gint" "start_pos")
+    '("gint" "end_pos")
+  )
+)
+
+(define-vfunc get_selection_bounds
+  (of-object "GtkEditable")
+  (return-type "gboolean")
+  (parameters
+    '("gint*" "start_pos")
+    '("gint*" "end_pos")
+  )
+)
+
+(define-vfunc set_position
+  (of-object "GtkEditable")
+  (return-type "none")
+  (parameters
+    '("gint" "position")
+  )
+)
+
+(define-vfunc get_position
+  (of-object "GtkEditable")
+  (return-type "gint")
+)
+
+; GtkFrame
+
+(define-vfunc compute_child_allocation
+  (of-object "GtkFrame")
+  (return-type "none")
+  (parameters
+    '("GtkAllocation*" "allocation")
+  )
+)
+
+; GtkRange
+
+(define-vfunc get_range_border
+  (of-object "GtkRange")
+  (return-type "none")
+  (parameters
+    '("GtkBorder*" "border")
+  )
+)
+
+; GtkRuler
+
+(define-vfunc draw_ticks
+  (of-object "GtkRuler")
+  (return-type "none")
+)
+
+(define-vfunc draw_pos
+  (of-object "GtkRuler")
+  (return-type "none")
+)
+
+; GtkScale
+
+(define-vfunc draw_value
+  (of-object "GtkScale")
+  (return-type "none")
+)
+
+; GtkStyle
+
+(define-vfunc get_column_type
+  (of-object "GtkTreeModel")
+  (return-type "GType")
+  (parameters
+    '("gint" "index")
+  )
+)
+
+(define-vfunc realize
+  (of-object "GtkStyle")
+  (return-type "none")
+)
+
+(define-vfunc unrealize
+  (of-object "GtkStyle")
+  (return-type "none")
+)
+
+(define-vfunc copy
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GtkStyle*" "src")
+  )
+)
+		
+(define-vfunc clone
+  (of-object "GtkStyle")
+  (return-type "GtkStyle*")
+)
+
+(define-vfunc init_from_rc
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GtkRcStyle*" "rc_style")
+  )
+)
+
+(define-vfunc set_background
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+  )
+)
+
+(define-vfunc render_icon				
+  (of-object "GtkStyle")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-GtkIconSource*" "source")
+    '("GtkTextDirection" "direction")
+    '("GtkStateType" "state")
+    '("GtkIconSize" "size")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+  )
+)
+
+
+(define-vfunc render_icon				
+  (of-object "GtkStyle")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-GtkIconSource*" "source")
+    '("GtkTextDirection" "direction")
+    '("GtkStateType" "state")
+    '("GtkIconSize" "size")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+  )
+)
+
+(define-vfunc draw_hline
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x1")
+    '("gint" "x2")
+    '("gint" "y")
+  )
+)
+
+(define-vfunc draw_vline
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "y1")
+    '("gint" "y2")
+    '("gint" "x")
+  )
+)
+
+(define-vfunc draw_shadow
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+
+(define-vfunc draw_diamond
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+		
+(define-vfunc draw_string
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("const-gchar*" "string")
+  )
+)
+
+(define-vfunc draw_box
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+
+(define-vfunc draw_flat_box
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-vfunc draw_check
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-vfunc draw_option
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-vfunc draw_tab
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-vfunc draw_shadow_gap
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+    '("GtkPositionType" "gap_side")
+    '("gint" "gap_x")
+    '("gint" "gap_width")
+  )
+)
+
+(define-vfunc draw_box_gap
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+    '("GtkPositionType" "gap_side")
+    '("gint" "gap_x")
+    '("gint" "gap_width")
+  )
+)
+
+(define-vfunc draw_extension
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+    '("GtkPositionType" "gap_side")
+  )
+)
+
+(define-vfunc draw_focus
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-vfunc draw_slider
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+    '("GtkOrientation" "orientation")
+  )
+)
+
+(define-vfunc draw_handle
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+    '("GtkOrientation" "orientation")
+  )
+)
+
+(define-vfunc draw_expander
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("GtkExpanderStyle" "expander_style")
+  )
+)
+
+(define-vfunc draw_layout
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("gboolean" "use_text")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("gint" "x")
+    '("gint" "y")
+    '("PangoLayout*" "layout")
+  )
+)
+	
+(define-vfunc draw_resize_grip
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("GdkWindowEdge" "edge")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-vfunc draw_polygon
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("GdkPoint*" "point")
+    '("gint" "npoints")
+    '("gboolean" "fill")
+  )
+)
+
+(define-vfunc draw_arrow
+  (of-object "GtkStyle")
+  (return-type "none")
+  (parameters
+    '("GdkWindow*" "window")
+    '("GtkStateType" "state_type")
+    '("GtkShadowType" "shadow_type")
+    '("GdkRectangle*" "area")
+    '("GtkWidget*" "widget")
+    '("const-gchar*" "detail")
+    '("GtkArrowType" "arrow_type")
+    '("gboolean" "fill")
+    '("gint" "x")
+    '("gint" "y")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+
+; GtkTreeModel
+
+(define-vfunc get_flags
+  (of-object "GtkTreeModel")
+  (return-type "GtkTreeModelFlags")
+)
+
+(define-vfunc get_n_columns
+  (of-object "GtkTreeModel")
+  (return-type "gint")
+)
+
+(define-vfunc get_column_type
+  (of-object "GtkTreeModel")
+  (return-type "GType")
+  (parameters
+    '("gint" "index")
+  )
+)
+
+(define-vfunc get_iter
+  (of-object "GtkTreeModel")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreeIter*" "iter")
+    '("GtkTreePath*" "path")
+  )
+)
+
+(define-vfunc get_path
+  (of-object "GtkTreeModel")
+  (return-type "GtkTreePath*")
+  (parameters
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-vfunc get_value
+  (of-object "GtkTreeModel")
+  (return-type "none")
+  (parameters
+    '("GtkTreeIter*" "iter")
+    '("gint" "column")
+    '("GValue*" "value")
+  )
+)
+
+(define-vfunc iter_next
+  (of-object "GtkTreeModel")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-vfunc iter_children
+  (of-object "GtkTreeModel")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreeIter*" "iter")
+    '("GtkTreeIter*" "parent")
+  )
+)
+
+(define-vfunc iter_has_child
+  (of-object "GtkTreeModel")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-vfunc iter_n_children
+  (of-object "GtkTreeModel")
+  (return-type "int")
+  (parameters
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-vfunc iter_nth_child
+  (of-object "GtkTreeModel")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreeIter*" "iter")
+    '("GtkTreeIter*" "parent")
+    '("gint" "n")
+  )
+)
+
+(define-vfunc iter_parent
+  (of-object "GtkTreeModel")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreeIter*" "iter")
+    '("GtkTreeIter*" "child")
+  )
+)
+
+(define-vfunc ref_node
+  (of-object "GtkTreeModel")
+  (return-type "none")
+  (parameters
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-vfunc unref_node
+  (of-object "GtkTreeModel")
+  (return-type "none")
+  (parameters
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+; GtkTreeSortable
+
+(define-vfunc get_sort_column_id
+  (of-object "GtkTreeSortable")
+  (return-type "gboolean")
+  (parameters
+    '("int*" "sort_column_id")
+    '("GtkSortType*" "order")
+  )
+)
+
+(define-vfunc set_sort_column_id
+  (of-object "GtkTreeSortable")
+  (return-type "void")
+  (parameters
+    '("int" "sort_column_id")
+    '("GtkSortType" "order")
+  )
+)
+
+(define-vfunc set_sort_func
+  (of-object "GtkTreeSortable")
+  (return-type "void")
+  (parameters
+    '("int" "sort_column_id")
+    '("GtkTreeIterCompareFunc" "func")
+    '("gpointer" "data")
+    '("GtkDestroyNotify" "destroy")
+  )
+)
+
+(define-vfunc set_default_sort_func
+  (of-object "GtkTreeSortable")
+  (return-type "void")
+  (parameters
+    '("GtkTreeIterCompareFunc" "func")
+    '("gpointer" "data")
+    '("GtkDestroyNotify" "destroy")
+  )
+)
+
+(define-vfunc has_default_sort_func
+  (of-object "GtkTreeSortable")
+  (return-type "gboolean")
+)
+
+; GtkTreeDragDest
+
+(define-vfunc drag_data_received
+  (of-object "GtkTreeDragDest")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreePath*" "dest")
+    '("GtkSelectionData*" "selection_data")
+  )
+)
+
+(define-vfunc row_drop_possible
+  (of-object "GtkTreeDragDest")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreePath*" "dest_path")
+    '("GtkSelectionData*" "selection_data")
+  )
+)
+
+; GtkTreeDragSource
+
+(define-vfunc row_draggable
+  (of-object "GtkTreeDragSource")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreePath*" "path")
+  )
+)
+
+(define-vfunc drag_data_get
+  (of-object "GtkTreeDragSource")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreePath*" "path")
+    '("GtkSelectionData*" "selection_data")
+  )
+)
+
+(define-vfunc drag_data_delete
+  (of-object "GtkTreeDragSource")
+  (return-type "gboolean")
+  (parameters
+    '("GtkTreePath*" "path")
+  )
+)
+
+; GtkProgress
+
+(define-vfunc paint
+  (of-object "GtkProgress")
+  (return-type "none")
+)
+
+(define-vfunc update
+  (of-object "GtkProgress")
+  (return-type "none")
+)
+
+(define-vfunc act_mode_enter
+  (of-object "GtkProgress")
+  (return-type "none")
+)
+; GtkViewPort
+
+(define-vfunc set_scroll_adjustments
+  (of-object "GtkViewPort")
+  (return-type "none")
+  (parameters
+    '("GtkAdjustment*" "hadjustment")
+    '("GtkAdjustment*" "vadjustment")
+  )
+)
+
+; GtkWidget
+
+(define-vfunc dispatch_child_properties_changed
+  (of-object "GtkWidget")
+  (return-type "none")
+  (parameters
+    '("guint" "n_pspecs")
+    '("GParamSpec**" "pspecs")
+  )
+)
+
+(define-vfunc show_all
+  (of-object "GtkWidget")
+  (return-type "none")
+)
+
+(define-vfunc hide_all
+  (of-object "GtkWidget")
+  (return-type "none")
+)
+
+(define-vfunc get_accessible
+  (of-object "GtkWidget")
+  (return-type "AtkObject*")
+)
+
+; GtkRecentChooser
+
+(define-vfunc set_current_uri
+  (of-object "GtkRecentChooser")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-vfunc get_current_uri
+  (of-object "GtkRecentChooser")
+  (return-type "gchar*")
+)
+(define-vfunc select_uri
+  (of-object "GtkRecentChooser")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "uri")
+    '("GError**" "error")
+  )
+)
+
+(define-vfunc unselect_uri
+  (of-object "GtkRecentChooser")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "uri")
+  )
+)
+
+(define-vfunc select_all
+  (of-object "GtkRecentChooser")
+  (return-type "none")
+)
+
+(define-vfunc unselect_all
+  (of-object "GtkRecentChooser")
+  (return-type "none")
+)
+
+(define-vfunc get_items
+  (of-object "GtkRecentChooser")
+  (return-type "GList*")
+)
+
+(define-vfunc get_recent_manager
+  (of-object "GtkRecentChooser")
+  (return-type "GtkRecentManager*")
+)
+
+(define-vfunc add_filter
+  (of-object "GtkRecentChooser")
+  (return-type "none")
+  (parameters
+    '("GtkRecentFilter*" "filter")
+  )
+)
+
+(define-vfunc remove_filter
+  (of-object "GtkRecentChooser")
+  (return-type "none")
+  (parameters
+    '("GtkRecentFilter*" "filter")
+  )
+)
+
+(define-vfunc list_filters
+  (of-object "GtkRecentChooser")
+  (return-type "GSList*")
+)
+
+(define-vfunc set_sort_func
+  (of-object "GtkRecentChooser")
+  (return-type "none")
+  (parameters
+    '("GtkRecentSortFunc" "sort_func")
+    '("gpointer" "data")
+    '("GDestroyNotify" "notify")
+  )
+)
+
+; GtkPrintOperationPreview
+
+
+(define-vfunc render_page
+  (of-object "GtkPrintOperationPreview")
+  (return-type "none")
+  (parameters
+    '("gint" "page_nr")
+  )
+)
+
+(define-vfunc end_preview
+  (of-object "GtkPrintOperationPreview")
+  (return-type "none")
+)
+
+(define-vfunc is_selected
+  (of-object "GtkPrintOperationPreview")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "page_nr")
+  )
+)

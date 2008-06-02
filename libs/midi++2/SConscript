@@ -1,0 +1,74 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env libraries install_prefix')
+
+midi2 = env.Copy()
+midi2.Merge([ libraries['sigc2'], 
+	      libraries['xml'], 
+	      libraries['glibmm2'], 
+	      libraries['glib2'], 
+	      libraries['pbd'], 
+	      libraries['jack'] 
+	      ])
+
+if midi2['IS_OSX']:
+	midi2.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
+domain = 'midipp'
+
+midi2.Append(DOMAIN=domain,MAJOR=2,MINOR=1,MICRO=1)
+
+sources = Split("""
+fd_midiport.cc
+fifomidi.cc
+event.cc
+midi.cc
+midichannel.cc
+midifactory.cc
+midimanager.cc
+midiparser.cc
+midiport.cc
+midnam_patch.cc
+mmc.cc
+mtc.cc
+version.cc
+""")
+
+sysdep_sources = Split ("""
+jack_midiport.cc
+alsa_sequencer_midiport.cc
+coremidi_midiport.cc
+""")
+
+if env['SYSMIDI'] == 'JACK MIDI':
+   sysdep_src = [ 'jack_midiport.cc' ]
+   midi2.Append (CCFLAGS="-DWITH_JACK_MIDI")
+elif env['SYSMIDI'] == 'ALSA Sequencer':
+   sysdep_src = [ 'alsa_sequencer_midiport.cc' ]
+   midi2.Append (CCFLAGS="-DWITH_ALSA")
+elif env['SYSMIDI'] == 'CoreMIDI':
+   sysdep_src = [ 'coremidi_midiport.cc' ]
+   midi2.Append (CCFLAGS="-DWITH_COREMIDI")
+   midi2.Append (LINKFLAGS="-framework CoreMIDI")
+   midi2.Append (LINKFLAGS="-framework CoreFoundation")
+
+
+
+midi2.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
+midi2.Append(CCFLAGS="-DLIBSIGC_DISABLE_DEPRECATED")
+
+midi2.VersionBuild(['version.cc','midi++/version.h'],  [])
+
+libmidi2 = midi2.SharedLibrary('midi++', [ sources, sysdep_src ])
+
+Default(libmidi2)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libmidi2))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript' ] + sources + sysdep_sources +
+                                     glob.glob('midi++/*.h')))

@@ -1,0 +1,233 @@
+// -*- c++ -*-
+/* $Id: style.ccg,v 1.5 2006/11/23 14:47:48 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/widget.h>
+#include <gtkmm/rc.h>
+#include <gtk/gtkstyle.h>
+
+
+namespace Gtk
+{
+
+/* 
+Design notes:
+
+Okay these are my notes on how a GtkStyle works.
+They are not meant to be taken as documentation as I didn't
+write the code.  
+
+styles keeps a copy of itself for each color depth.  Thus
+changing a style after it has been attached wont work!
+
+At allocation time a Gtk Style has 
+  - all GC set to 0 as they will be allocated later
+  - has all color values set to default values.
+  - a ref count of 1 and an attach count of 0 (floating?)
+  - a properly referenced font.
+  - colormap and depth are invalid.
+  - The style list and rcstyle are 0. (??? styles wasn't set explicitly!)
+
+It returns to this state if the style is detatched from
+all widgets.
+
+Attach acts to sink the object removing it from the floating state.
+
+attaching a style for the first time initializes it. 
+Initializing a style
+  - sets the colormap and depth.
+  - sets the mid colors. (thus allowing user to set these would be pointless)
+  - gets black and white from the colormap.
+  - allocates all the colors.
+  - uses gtk_gc_get to share a gc if there is a matching one.
+
+Conclusions, we need to rework the concept of Gdk to allow
+for const objects.  
+
+*/
+
+void Style::set_font(const Pango::FontDescription& font_desc)
+{
+  g_return_if_fail(font_desc.gobj() != 0);
+
+  // It will be freed when it goes out of scope.
+  const Pango::FontDescription fontBefore (gobj()->font_desc, false);
+
+  gobj()->font_desc = font_desc.gobj_copy();
+}
+
+Pango::FontDescription Style::get_font() const
+{
+  // Direct struct access seems the only way.
+  return Pango::FontDescription(gobj()->font_desc, true); // true = make a copy.
+}
+
+Glib::RefPtr<Gdk::GC> Style::get_fg_gc(StateType state_type)
+{
+  return Glib::wrap(gobj()->fg_gc[state_type], true);
+}
+
+Glib::RefPtr<const Gdk::GC> Style::get_fg_gc(StateType state_type) const
+{
+  return Glib::wrap(gobj()->fg_gc[state_type], true);
+}
+
+Glib::RefPtr<Gdk::GC> Style::get_bg_gc(StateType state_type)
+{
+  return Glib::wrap(gobj()->bg_gc[state_type], true);
+}
+
+Glib::RefPtr<const Gdk::GC> Style::get_bg_gc(StateType state_type) const
+{
+  return Glib::wrap(gobj()->bg_gc[state_type], true);
+}
+
+Glib::RefPtr<Gdk::GC> Style::get_light_gc(StateType state_type)
+{
+  return Glib::wrap(gobj()->light_gc[state_type], true);
+}
+
+Glib::RefPtr<const Gdk::GC> Style::get_light_gc(StateType state_type) const
+{
+  return Glib::wrap(gobj()->light_gc[state_type], true);
+}
+
+Glib::RefPtr<Gdk::GC> Style::get_dark_gc(StateType state_type)
+{
+  return Glib::wrap(gobj()->dark_gc[state_type], true);
+}
+
+Glib::RefPtr<const Gdk::GC> Style::get_dark_gc(StateType state_type) const
+{
+  return Glib::wrap(gobj()->dark_gc[state_type], true);
+}
+
+Glib::RefPtr<Gdk::GC> Style::get_mid_gc(StateType state_type)
+{
+  return Glib::wrap(gobj()->mid_gc[state_type], true);
+}
+
+Glib::RefPtr<const Gdk::GC> Style::get_mid_gc(StateType state_type) const
+{
+  return Glib::wrap(gobj()->mid_gc[state_type], true);
+}
+
+Glib::RefPtr<Gdk::GC> Style::get_text_gc(StateType state_type)
+{
+  return Glib::wrap(gobj()->text_gc[state_type], true);
+}
+
+Glib::RefPtr<const Gdk::GC> Style::get_text_gc(StateType state_type) const
+{
+  return Glib::wrap(gobj()->text_gc[state_type], true);
+}
+
+Glib::RefPtr<Gdk::GC> Style::get_base_gc(StateType state_type)
+{
+  return Glib::wrap(gobj()->base_gc[state_type], true);
+}
+
+Glib::RefPtr<const Gdk::GC> Style::get_base_gc(StateType state_type) const
+{
+  return Glib::wrap(gobj()->base_gc[state_type], true);
+}
+
+_DEPRECATE_IFDEF_START
+Gdk::Color Style::get_background(StateType state_type) const
+{
+  GdkColor* pGdkColor = const_cast<GdkColor*>(&(gobj()->bg[state_type]));
+  return Glib::wrap(pGdkColor, true); //true = take_copy.
+}
+
+Glib::RefPtr<Gdk::Pixmap> Style::get_background_pixmap(StateType state_type)
+{
+  return Glib::wrap((GdkPixmapObject*) (gobj()->bg_pixmap[state_type]), true); //true = take_copy.
+}
+
+void Style::set_bg_pixmap(StateType state_type, const Glib::RefPtr<Gdk::Pixmap>& pixmap)
+{
+  GdkPixmap *const old_pixmap = gobj()->bg_pixmap[state_type];
+  gobj()->bg_pixmap[state_type] = Glib::unwrap_copy(pixmap);
+
+  if(old_pixmap)
+    g_object_unref(old_pixmap);
+}
+_DEPRECATE_IFDEF_END
+
+void Style::set_bg_pixmap(StateType state_type, const Glib::RefPtr<const Gdk::Pixmap>& pixmap)
+{
+  GdkPixmap *const old_pixmap = gobj()->bg_pixmap[state_type];
+  Glib::RefPtr<Gdk::Pixmap> pixmap_unconst = Glib::RefPtr<Gdk::Pixmap>::cast_const(pixmap);
+  gobj()->bg_pixmap[state_type] = Glib::unwrap_copy(pixmap_unconst); //unwrap_copy() needs a non-const.
+
+  if(old_pixmap)
+    g_object_unref(old_pixmap);
+}
+
+Glib::RefPtr<Gdk::Pixmap> Style::get_bg_pixmap(StateType state_type)
+{
+  return Glib::wrap((GdkPixmapObject*) (gobj()->bg_pixmap[state_type]), true); // true = take_copy
+}
+
+Glib::RefPtr<const Gdk::Pixmap> Style::get_bg_pixmap(StateType state_type) const
+{
+  return Glib::wrap((GdkPixmapObject*) (gobj()->bg_pixmap[state_type]), true); // true = take_copy
+}
+
+void Style::set_xthickness(int xthickness)
+{
+  gobj()->xthickness = xthickness;
+}
+
+void Style::set_ythickness(int ythickness)
+{
+  gobj()->ythickness = ythickness;
+}
+
+void Style::paint_polygon(const Glib::RefPtr<Gdk::Window>&      window,
+                          StateType                             state_type,
+                          ShadowType                            shadow_type,
+                          const Gdk::Rectangle&                 area,
+                          Widget&                               widget,
+                          const Glib::ustring&                  detail,
+                          const Glib::ArrayHandle<Gdk::Point>&  points,
+                          bool                                  fill) const
+{
+  gtk_paint_polygon(
+      const_cast<GtkStyle*>(gobj()),
+      Glib::unwrap(window),
+      (GtkStateType) state_type,
+      (GtkShadowType) shadow_type,
+      const_cast<GdkRectangle*>(area.gobj()),
+      widget.gobj(),
+      detail.c_str(),
+      reinterpret_cast<GdkPoint*>(const_cast<Gdk::Point*>(points.data())),
+      points.size(),
+      fill);
+}
+
+IconSet Style::lookup_icon_set(const Gtk::StockID& stock_id)
+{
+  GtkIconSet* pIconSet = gtk_style_lookup_icon_set(gobj(), stock_id.get_c_str());
+  return IconSet(pIconSet, true); //true = take_copy.
+
+}
+
+} // namespace Gtk
+

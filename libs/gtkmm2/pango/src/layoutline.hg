@@ -1,0 +1,151 @@
+/* $Id: layoutline.hg,v 1.5 2006/05/30 17:14:21 murrayc Exp $ */
+
+/* layoutline.h
+ *
+ * Copyright (C) 1998-1999 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/slisthandle.h> // For the Glib::SListHandle typedef
+#include <pangomm/rectangle.h>
+#include <cairomm/context.h>
+#include <pango/pango-layout.h>
+
+_DEFS(pangomm,pango)
+
+namespace Pango
+{
+
+class Layout;
+
+/** A Pango::LayoutLine represents one of the lines resulting from laying out a paragraph via Pango::Layout.
+ * Pango::LayoutLine objects are obtained by calling Pango::Layout::get_line()
+ * and are only valid until the text, attributes, or settings of the parent Pango::Layout are modified.
+ * Routines for rendering Pango::Layout objects are provided in code specific to each rendering system.
+ */
+class LayoutLine
+{
+  _CLASS_OPAQUE_REFCOUNTED(LayoutLine, PangoLayoutLine, NONE, pango_layout_line_ref, pango_layout_line_unref)
+  _IGNORE(pango_layout_line_ref, pango_layout_line_unref)
+  _IGNORE(pango_layout_line_get_x_ranges)
+public:
+
+  _WRAP_METHOD(bool x_to_index(int x_pos, int& index, int& trailing) const, pango_layout_line_x_to_index)
+
+  /** Converts an index within a line to a @a x position.
+   * @param index Byte offset of a grapheme within the layout.
+   * @param trailing  A boolean indicating the edge of the grapheme to retrieve the position of. If <tt>false</tt>, the trailing edge of the grapheme, if <tt>true</tt> the leading of the grapheme. 
+   * @return The x offset (in thousands of a device unit).
+   */
+  int index_to_x(int index, bool trailing) const;
+  _IGNORE(pango_layout_line_index_to_x)
+
+  /** Get a list of visual ranges corresponding to a given logical range.
+   * This list is not necessarily minimal - there may be consecutive ranges which are adjacent.
+   * The ranges will be sorted from left to right. The ranges are with respect to the
+   * left edge of the entire layout, not with respect to the line.
+   * @param start_index The start byte index of the logical range.
+   * If the value of @a start_index is less than the start index for the line,
+   * then the first range will extend all the way to the leading edge of the layout.
+   * Otherwise it will start at the leading edge of the first character.
+   * @param end_index The end byte index of the logical range.
+   * If the value of @a end_index is greater than the end index for the line,
+   * then the last range will extend all the way to the trailing edge of the layout.
+   * Otherwise, it will end at the trailing edge of the last character.
+   * @return An array of ranges represented by pairs of integers marking the start and end pixel coordinates of the ranges.
+   */
+  Glib::ArrayHandle<std::pair<int,int> > get_x_ranges(int start_index, int end_index) const;
+
+  _WRAP_METHOD(void get_extents(Rectangle& ink_rect, Rectangle& logical_rect) const, pango_layout_line_get_extents)
+
+  /** Compute the ink extents of a layout line.
+   * @return The extents of the layout line as drawn.
+   */
+  Rectangle get_ink_extents() const;
+
+  /** Compute the logical extents of a layout line.
+   * @return The logical extents of the layout line.
+   */
+  Rectangle get_logical_extents() const;
+
+  _WRAP_METHOD(void get_pixel_extents(Rectangle& ink_rect, Rectangle& logical_rect) const, pango_layout_line_get_pixel_extents)
+
+  /** Compute the ink extents of a layout line in device units.
+   * @return The extents of the layout line as drawn.
+   */
+  Rectangle get_pixel_ink_extents() const;
+
+  /** Compute the logical extents of a layout line in device units.
+   * @return The logical extents of the layout line.
+   */
+  Rectangle get_pixel_logical_extents() const;
+
+  /** Draws this LayoutLine in the specified Cairo context.
+   * The origin of the glyphs (the left edge of the line) will
+   * be drawn at the current point of the cairo context.
+   *
+   * @param context A Cairo context.
+   */
+  void show_in_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
+
+  /** Adds the text in this LayoutLine to the current path in the
+   * specified Cairo @a context. The origin of the glyphs (the left edge
+   * of the line) will be at the current point of the cairo context.
+   *
+   * @param context A Cairo context.
+   */
+  void add_to_cairo_context(const Cairo::RefPtr<Cairo::Context>& context);
+
+  _MEMBER_GET_GOBJECT(layout, layout, Pango::Layout, PangoLayout*)
+  //_MEMBER_SET_GOBJECT(layout, layout, Pango::Layout, PangoLayout*)
+  _MEMBER_GET(length, length, int, gint)
+  _MEMBER_GET(start_index, start_index, int, gint)
+    
+};
+
+} // namespace Pango
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+namespace Glib
+{
+// forward declaration needed by LayoutLineTraits
+Glib::RefPtr<Pango::LayoutLine> wrap(PangoLayoutLine* object, bool take_copy /* = false */);
+
+} // namespace Glib
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Pango
+{
+
+struct LayoutLineTraits
+{
+  typedef Glib::RefPtr<LayoutLine>  CppType;
+  typedef PangoLayoutLine *         CType;
+  typedef PangoLayoutLine *         CTypeNonConst;
+
+  static CType   to_c_type      (const CppType& ptr) { return Glib::unwrap(ptr);     }
+  static CType   to_c_type      (CType          ptr) { return ptr;                   }
+  static CppType to_cpp_type    (CType          ptr) { return Glib::wrap(ptr, true); }
+  static void    release_c_type (CType          ptr) { pango_layout_line_unref(ptr); }
+};
+
+typedef Glib::SListHandle< Glib::RefPtr<LayoutLine>, LayoutLineTraits > SListHandle_LayoutLine;
+typedef Glib::SListHandle< Glib::RefPtr<const LayoutLine>, LayoutLineTraits > SListHandle_ConstLayoutLine;
+
+} // namespace Pango
+

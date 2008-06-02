@@ -1,0 +1,60 @@
+// -*- c++ -*-
+/* $Id: pixbufloader.ccg,v 1.6 2006/05/11 11:40:23 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdk/gdkcolor.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+
+namespace
+{
+
+/* We use this helper function in the constructor to be able to throw
+ * before the base class' (Glib::Object) constructor is called.
+ */
+static GdkPixbufLoader* pixbuf_loader_create_with_type(const Glib::ustring& image_type, bool mime_type)
+{
+  GError* error = 0;
+  GdkPixbufLoader* loader = 0;
+
+  if(mime_type)
+    loader = gdk_pixbuf_loader_new_with_mime_type(image_type.c_str(), &error);
+  else
+    loader = gdk_pixbuf_loader_new_with_type(image_type.c_str(), &error);
+
+  if(error)
+    Glib::Error::throw_exception(error);
+
+  return loader;
+}
+
+} // anonymous namespace
+
+
+namespace Gdk
+{
+
+PixbufLoader::PixbufLoader(const Glib::ustring& image_type, bool mime_type)
+:
+  Glib::ObjectBase(0),
+  Glib::Object((GObject*) pixbuf_loader_create_with_type(image_type, mime_type))
+{}
+
+} // namespace Gdk
+

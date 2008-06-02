@@ -1,0 +1,83 @@
+/* $Id: linkbutton.hg,v 1.2 2006/03/22 16:53:22 murrayc Exp $ */
+
+/* linkbutton.h
+ * 
+ * Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/button.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/button_p.h)
+
+
+namespace Gtk
+{
+
+/** Create buttons bound to a URL.
+ *
+ * A Gtk::LinkButton is a Gtk::Button with a hyperlink, similar to the one
+ * used by web browsers, which triggers an action when clicked. It is useful
+ * to show quick links to resources.
+ *
+ * The URI bound to a Gtk::LinkButton can be set specifically using set_uri(), 
+ * and retrieved using get_uri().
+ * Gtk::LinkButton offers a global hook, which is called when the used clicks on it: see set_uri_hook(). 
+ *
+ * @newin2p10
+ * @ingroup Widgets
+ */
+class LinkButton : public Button
+{
+  _CLASS_GTKOBJECT(LinkButton, GtkLinkButton, GTK_LINK_BUTTON, Gtk::Button, GtkButton)
+public:
+  _CTOR_DEFAULT
+  explicit LinkButton(const Glib::ustring& uri);
+  _IGNORE(gtk_link_button_new)
+  _WRAP_CTOR(LinkButton(const Glib::ustring& uri, const Glib::ustring& label),gtk_link_button_new_with_label)
+
+  _WRAP_METHOD(Glib::ustring get_uri() const, gtk_link_button_get_uri)
+  _WRAP_METHOD(void set_uri(const Glib::ustring& uri), gtk_link_button_set_uri)
+
+  /** For instance,
+   * void on_linkbutton_uri(Gtk::LinkButton *button, const Glib::ustring& uri);
+   *
+   * @see set_uri_hook().
+   */
+  typedef sigc::slot<void, Gtk::LinkButton*, const Glib::ustring&> SlotUri;
+
+  /** Sets slot as the function that should be invoked every time a user clicks a LinkButton. 
+   * This function is called before every signal handler registered for the "clicked" signal.
+   *
+   * @param slot A function called each time a LinkButton is clicked.
+   * @newin2p12
+   */
+  static void set_uri_hook(const SlotUri& slot);
+  _IGNORE(gtk_link_button_set_uri_hook)
+
+  /** Unsets any previously set slot as the function that should be invoked every time a user clicks a LinkButton. 
+   * @see set_uri_hook().
+   * @newin2p12
+   */
+  static void unset_uri_hook();
+
+
+  _WRAP_PROPERTY("uri", Glib::ustring)                                           
+};
+
+
+} // namespace Gtk
+

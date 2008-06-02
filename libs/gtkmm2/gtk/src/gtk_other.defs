@@ -1,0 +1,422 @@
+
+; GtkCellEditable  (written by hand because we can't instantiate an interface):
+
+(define-signal editing_done
+  (of-object "GtkCellEditable")
+  (return-type "void")
+  (when "last")
+)
+
+(define-signal remove_widget
+  (of-object "GtkCellEditable")
+  (return-type "void")
+  (when "last")
+)
+
+; GtkEditable
+(define-signal insert_text
+  (of-object "GtkEditable")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("const-gchar*" "text")
+    '("gint" "length")
+    '("gint*" "position")
+  )
+)
+
+(define-signal delete_text
+  (of-object "GtkEditable")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("gint" "start_pos")
+    '("gint" "end_pos")
+  )
+)
+
+(define-signal changed
+  (of-object "GtkEditable")
+  (return-type "void")
+  (when "last")
+)
+
+; GtkTreeModel (written by hand because we can't instantiate an interface):
+
+(define-signal row_changed
+  (of-object "GtkTreeModel")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("GtkTreePath*" "path")
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-signal row_inserted
+  (of-object "GtkTreeModel")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("GtkTreePath*" "path")
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-signal row_has_child_toggled
+  (of-object "GtkTreeModel")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("GtkTreePath*" "path")
+    '("GtkTreeIter*" "iter")
+  )
+)
+
+(define-signal row_deleted
+  (of-object "GtkTreeModel")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("GtkTreePath*" "path")
+  )
+)
+
+(define-signal rows_reordered
+  (of-object "GtkTreeModel")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("GtkTreePath*" "path")
+    '("GtkTreeIter*" "iter")
+    '("gint*" "new_order")
+  )
+)
+
+;; GtkTreeSortable (written by hand because we can't instantiate an interface):
+
+(define-signal sort_column_changed
+  (of-object "GtkTreeSortable")
+  (return-type "void")
+  (when "last")
+)
+
+;; For some reason h2defs.py doesn't provide this:
+
+(define-function gtk_drag_get_data
+  (c-name "gtk_drag_get_data")
+  (return-type "none")
+  (parameters
+    '("GtkWidget*" "widget")
+    '("GdkDragContext*" "context")
+    '("GdkAtom" "target")
+    '("guint32" "time")
+  )
+)
+
+
+;; GtkSettings properties that are only installed when GtkSettings is used by other objects.
+
+(define-property gtk-toolbar-style
+  (of-object "GtkSettings")
+  (prop-type "GParamEnum")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property gtk-toolbar-icon-size
+  (of-object "GtkSettings")
+  (prop-type "GParamEnum")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property gtk-entry-select-on-focus
+  (of-object "GtkSettings")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property gtk-can-change-accels
+  (of-object "GtkSettings")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property gtk-color-palette
+  (of-object "GtkSettings")
+  (prop-type "GParamString")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property gtk-button-images
+  (of-object "GtkSettings")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+; GtkFileChooser (written by hand because we can't instantiate an interface):
+
+(define-signal current_folder_changed
+  (of-object "GtkFileChooser")
+  (return-type "void")
+  (when "last")
+)
+
+(define-signal selection_changed
+  (of-object "GtkFileChooser")
+  (return-type "void")
+  (when "last")
+)
+
+(define-signal update_preview
+  (of-object "GtkFileChooser")
+  (return-type "void")
+  (when "last")
+)
+
+(define-signal file_activated
+  (of-object "GtkFileChooser")
+  (return-type "void")
+  (when "last")
+)
+
+(define-signal confirm-overwrite
+  (of-object "GtkFileChooser")
+  (return-type "GtkFileChooserConfirmation")
+  (when "last")
+)
+
+(define-property action
+  (of-object "GtkFileChooser")
+  (prop-type "GtkFileChooserAction")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property file-system
+  (of-object "GtkFileChooser")
+  (prop-type "GtkFileSystem")
+  (readable #f)
+  (writable #t)
+  (construct-only #t)
+)
+
+(define-property filter
+  (of-object "GtkFileChooser")
+  (prop-type "GtkFileFilter*")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property folder-mode
+  (of-object "GtkFileChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property local-only
+  (of-object "GtkFileChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property preview-widget
+  (of-object "GtkFileChooser")
+  (prop-type "GtkWidget*")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property use-preview-label
+  (of-object "GtkFileChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property preview-widget-active
+  (of-object "GtkFileChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property extra-widget
+  (of-object "GtkFileChooser")
+  (prop-type "GtkWidget*")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property select-multiple
+  (of-object "GtkFileChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property show-hidden
+  (of-object "GtkFileChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property do-overwrite-confirmation
+  (of-object "GtkFileChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+; GtkRecentChooser (written by hand because we can't instantiate an interface):
+
+(define-property recent-manager
+  (of-object "GtkRecentChooser")
+  (prop-type "GtkRecentManager*")
+  (readable #f)
+  (writable #t)
+  (construct-only #t)
+)
+
+(define-property show-private
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property show-tips
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property show-icons
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property show-not-found
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property select-multiple
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property local-only
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamBoolean")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property limit
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamInt")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property sort-type
+  (of-object "GtkRecentChooser")
+  (prop-type "GParamEnum")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+(define-property filter
+  (of-object "GtkRecentChooser")
+  (prop-type "GtkRecentFilter*")
+  (readable #t)
+  (writable #t)
+  (construct-only #f)
+)
+
+
+;; From GtkPrintOperationPreview (TODO: vfuncs):
+
+(define-signal ready
+  (of-object "GtkPrintOperationPreview")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("GtkPrintContext*" "p0")
+  )
+)
+
+(define-signal got-page-size
+  (of-object "GtkPrintOperationPreview")
+  (return-type "void")
+  (when "last")
+  (parameters
+    '("GtkPrintContext*" "p0")
+    '("GtkPageSetup*" "p1")
+  )
+)
+
+
+
+; h2defs.py does not seem to get these:
+
+(define-method get_authors
+  (of-object "GtkAboutDialog")
+  (c-name "gtk_about_dialog_get_authors")
+  (return-type "gchar-const-*-const-*")
+)
+
+(define-method get_documenters
+  (of-object "GtkAboutDialog")
+  (c-name "gtk_about_dialog_get_documenters")
+  (return-type "gchar-const-*-const-*")
+)
+
+(define-method get_artists
+  (of-object "GtkAboutDialog")
+  (c-name "gtk_about_dialog_get_artists")
+  (return-type "gchar-const-*-const-*")
+)
+
+

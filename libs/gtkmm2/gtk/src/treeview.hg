@@ -1,0 +1,1284 @@
+/* $Id: treeview.hg,v 1.45 2006/06/20 18:46:59 murrayc Exp $ */
+
+/* Copyright(C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or(at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+// This is for including the config header before any code (such as
+// the #ifndef GTKMM_DISABLE_DEPRECATED in deprecated classes) is generated:
+_CONFIGINCLUDE(gtkmmconfig.h)
+
+#include <glibmm/listhandle.h>
+#include <gtkmm/container.h>
+#include <gtkmm/adjustment.h>
+#include <gdkmm/pixmap.h>
+#include <gtkmm/treeviewcolumn.h>
+#include <gtkmm/treeselection.h>
+#include <gtkmm/treemodelcolumn.h>
+#include <gtkmm/cellrenderer.h>
+#include <gtkmm/targetentry.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/tooltip.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/container_p.h)
+
+
+namespace Gtk
+{
+
+_CC_INCLUDE(gtk/gtktypebuiltins.h)
+_WRAP_ENUM(TreeViewDropPosition, GtkTreeViewDropPosition)
+_WRAP_ENUM(TreeViewGridLines, GtkTreeViewGridLines)
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+class TreeView;
+
+namespace TreeView_Private
+{
+/* This helper function is not a member of TreeView just for the reason that
+ * there are compilers that have problems compiling it otherwise. E.g. in gcc
+ * 2.95.3 a compiler bug prevents member functions from refering to specialized
+ * member function templates and that's what we do here: In function
+ * _connect_auto_store_editable_signal_handler we build a slot from
+ * TreeView::_auto_store_on_cellrenderer_*_edited. (The latter must be member
+ * functions of TreeView since we connect them to signals and we want the
+ * connections to vanish when the TreeView dies, of course.)
+ */
+  template <class ColumnType> inline
+  void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer, const Gtk::TreeModelColumn<ColumnType>& model_column);
+
+  template<class ColumnType> inline
+  void _auto_store_on_cellrenderer_text_edited_string(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+
+  template <class ColumnType> inline
+  void _auto_store_on_cellrenderer_text_edited_numerical(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model); 
+
+  template <class ColumnType> inline
+  void _auto_cell_data_func(Gtk::CellRenderer* cell, const Gtk::TreeModel::iterator& iter, int model_column, const Glib::ustring& format);
+}
+
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
+
+//class TreeViewColumn;
+class TreeModel;
+
+/** @defgroup TreeView TreeView Classes
+ * These classes are used with the Gtk::TreeView widget.
+ */
+
+/** The TreeView widget displays the model (Gtk::TreeModel) data and allows the user to interact with it.
+ * The View can show all of the model's columns, or just some, and it can show them in various ways.
+ * You must provide the TreeModel in the constructor, or with set_model().
+ *
+ * Add View columns with append_column(), append_column_editable(), insert_column(), or insert_column_editable().
+ *
+ * You can manipulate the selection by obtaining the @link Gtk::TreeSelection Gtk::TreeView::Selection@endlink from get_selection().
+ *
+ * @ingroup Widgets
+ * @ingroup Containers
+ * @ingroup TreeView
+ */
+class TreeView : public Container
+{
+  _CLASS_GTKOBJECT(TreeView, GtkTreeView, GTK_TREE_VIEW, Gtk::Container, GtkContainer)
+  _IGNORE(gtk_tree_view_get_path_at_pos, gtk_tree_view_set_destroy_count_func, gtk_tree_view_get_cursor
+          gtk_tree_view_insert_column_with_data_func, gtk_tree_view_get_drag_dest_row, gtk_tree_view_get_dest_row_at_pos)
+public:
+  /**  A visible column in a Gtk::TreeView widget.
+   */
+  typedef TreeViewColumn Column;
+  
+  /** A selection object for Gtk::TreeView.
+   */
+  typedef TreeSelection Selection;
+  /**
+     Default constructor
+   */
+  _CTOR_DEFAULT()
+  /**
+     Constructor that binds to a TreeModel
+   */
+  _WRAP_CTOR(TreeView(const Glib::RefPtr<TreeModel>& model), gtk_tree_view_new_with_model)
+
+  _WRAP_METHOD(Glib::RefPtr<TreeModel> get_model(), gtk_tree_view_get_model, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const TreeModel> get_model() const, gtk_tree_view_get_model, refreturn)
+  _WRAP_METHOD(void set_model(const Glib::RefPtr<TreeModel>& model), gtk_tree_view_set_model)
+  
+  /** Remove the model from the TreeView.
+   */
+  void unset_model();
+  
+  _WRAP_METHOD(Glib::RefPtr<TreeSelection> get_selection(), gtk_tree_view_get_selection, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const TreeSelection> get_selection() const, gtk_tree_view_get_selection, refreturn, constversion)
+  _WRAP_METHOD(Adjustment* get_hadjustment(), gtk_tree_view_get_hadjustment)
+  _WRAP_METHOD(const Adjustment* get_hadjustment() const, gtk_tree_view_get_hadjustment, constversion)
+  _WRAP_METHOD(void set_hadjustment(Adjustment& adjustment), gtk_tree_view_set_hadjustment)
+  
+  /** This method removes the hadjustment.
+   * @see set_hadjustment().
+   */
+  void unset_hadjustment();
+  
+  _WRAP_METHOD(Adjustment* get_vadjustment(), gtk_tree_view_get_vadjustment)
+  _WRAP_METHOD(const Adjustment* get_vadjustment() const, gtk_tree_view_get_vadjustment, constversion)
+  _WRAP_METHOD(void set_vadjustment(Adjustment& adjustment), gtk_tree_view_set_vadjustment)
+  
+  /** This method removes the vadjustment.
+   * @see set_vadjustment().
+   */
+  void unset_vadjustment();
+  
+  _WRAP_METHOD(bool get_headers_visible() const, gtk_tree_view_get_headers_visible)
+  _WRAP_METHOD(void set_headers_visible(bool headers_visible), gtk_tree_view_set_headers_visible)
+  _WRAP_METHOD(void columns_autosize(), gtk_tree_view_columns_autosize)
+  _WRAP_METHOD(bool get_headers_clickable() const, gtk_tree_view_get_headers_clickable)
+  _WRAP_METHOD(void set_headers_clickable(bool setting = true), gtk_tree_view_set_headers_clickable)
+  _WRAP_METHOD(void set_rules_hint(bool setting = true), gtk_tree_view_set_rules_hint)
+  _WRAP_METHOD(bool get_rules_hint() const, gtk_tree_view_get_rules_hint)
+
+  _WRAP_METHOD(int append_column(TreeViewColumn& column), gtk_tree_view_append_column)
+
+  /** Appends a View column with the appropriate CellRenderer for the Model column.
+   *
+   * The CellRenderer can only be created automatically for some basic
+   * column types, such as Glib::ustring, int, double, bool, and Gdk::Pixbuf. 
+   * If the type is not supported then the following warning will be shown:
+   * GLib-GObject-WARNING **: unable to set property `text' of type
+   * `gchararray' from value of type `glibmm__CustomBoxed_t'.
+   *
+   * If the default formatting is not sufficient, or the numeric type is 
+   * not supported, then you could use append_column_numeric(). Or you 
+   * could create the TreeView::Column and/or CellRenderer
+   * manually and use TreeViewColumn::set_cell_data_func() to provide a callback 
+   * that converts the model value into a string representation with .
+   *
+   * @param title The text to be used in the title header of this column.
+   * @param model_column The column in the TreeModel that will be rendered by this View column.
+   * @result The number of columns in the View after appending.
+   */
+  template <class ColumnType> inline
+  int append_column(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column);
+
+  /** Like append_column(), but only for numeric types, which will be displayed in the specified format.
+   * This convenience template uses TreeView::Column::set_cell_data_func(), so the numeric formatting will 
+   * be deactivated if you specify your own cell_data callback by calling set_cell_data_func() again.
+   *
+   * @param title The text to be used in the title header of this column.
+   * @param model_column The column in the TreeModel that will be rendered by this View column.
+   * @param format A printf-style format, such as "%d", used to create a text representation of the number.
+   * @result The number of columns in the View after appending.
+   */
+  template <class ColumnType> inline
+  int append_column_numeric(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, const Glib::ustring& format);
+  
+  //TODO: danielk suggested use of Glib::Value to simplify/improve this.
+  /** Appends a View column with the appropriate CellRenderer for the Model
+   * column.  The compiler will attempt to instantiate appropriate template
+   * code to automatically store user changes in the model.  To intercept the
+   * user's change and implement non-default logic, or if the compiler can't
+   * instantiate appropriate code for your model type, you could use
+   * append_column() and connect a signal handler to the CellRenderer.
+   *
+   * @see append_column_numeric_editable().
+   *
+   * @param title The text to be used in the title header of this column.
+   * @param model_column The column in the TreeModel that will be rendered by this View column.
+   * @result The number of columns in the View after appending.
+   */
+  template <class ColumnType> inline
+  int append_column_editable(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column);
+
+  /** Like append_column_editable(), but only for numeric types, which will be displayed in the specified format.
+   * This convenience template uses TreeView::Column::set_cell_data_func(), so the numeric formatting will 
+   * be deactivated if you specify your own cell_data callback by calling set_cell_data_func() again.
+   *
+   * Note that the user's input will be interpreted as decimal (base 10), regardless of the @a format.
+   *
+   * @param title The text to be used in the title header of this column.
+   * @param model_column The column in the TreeModel that will be rendered by this View column.
+   * @param format A printf-style format, such as "%d", used to create a text representation of the number.
+   * @result The number of columns in the View after appending.
+   */
+  template <class ColumnType> inline
+  int append_column_numeric_editable(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, const Glib::ustring& format);
+
+  
+  /// Creates a View column containing the CellRenderer, and appends it.
+  int append_column(const Glib::ustring& title, CellRenderer& cell);
+
+  _WRAP_METHOD(int remove_column(TreeViewColumn& column), gtk_tree_view_remove_column)
+
+  /// Removes all View columns.
+  void remove_all_columns();
+
+  _WRAP_METHOD(int insert_column(TreeViewColumn& column, int position), gtk_tree_view_insert_column)
+
+  /** Creates a View column containing the CellRenderer, and inserts it.
+   *
+   * @param title The text to be used in the title header of this column.
+   * @param cell The CellRenderer.
+   * @param position The position at which the CellRenderer should be inserted.
+   * @result The number of columns in the View after inserting.
+   */
+  int insert_column(const Glib::ustring& title, CellRenderer& cell, int position);
+
+  _IGNORE(gtk_tree_view_insert_column_with_attributes)
+
+  /** Inserts a View column with the appropriate CellRenderer for the Model column.
+   *
+   * @param title The text to be used in the title header of this column.
+   * @param model_column The column in the TreeModel that will be rendered by this View column.
+   * @param position The position at which the CellRenderer should be inserted.
+   * @result The number of columns in the View after inserting.
+   */
+  template <class ColumnType> inline
+  int insert_column(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, int position);
+
+  /** Inserts a View column with the appropriate CellRenderer for the Model
+   * column.  The compiler will attempt to instantiate appropriate template
+   * code to automatically store user changes in the model.  To intercept the
+   * user's change and implement non-default logic, or if the compiler can't
+   * instantiate appropriate code for your model type, you should use
+   * append_column() and connect a signal handler to the CellRenderer.
+   *
+   * @param title The text to be used in the title header of this column.
+   * @param model_column The column in the TreeModel that will be rendered by this View column.
+   * @param position The position at which the CellRenderer should be inserted.
+   * @result The number of columns in the View after inserting.
+   */
+  template <class ColumnType> inline
+  int insert_column_editable(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, int position);
+
+  typedef TreeViewColumn::SlotCellData SlotCellData;
+  
+  /**
+   * Inserts a new column into the TreeView with the given cell
+   * renderer and a SlotCellData to set cell renderer attributes
+   * (normally using data from the model). 
+   *
+   * @param position Position to insert, -1 for append
+   * @param title column title
+   * @param cell cell renderer for column
+   * @param slot function to set attributes of cell renderer
+   * @return number of columns in the TreeView after the insert
+   */
+  int insert_column_with_data_func(int position, const Glib::ustring& title, CellRenderer& cell, const SlotCellData& slot);
+
+  _WRAP_METHOD(TreeViewColumn* get_column(int n), gtk_tree_view_get_column)
+  _WRAP_METHOD(const TreeViewColumn* get_column(int n) const, gtk_tree_view_get_column, constversion)
+
+  //The column index is of the view, not the model, so we do not need TreeViewColumn* get_column(TreeViewColumn& base_column).
+
+  /** Gets the CellRenderer for that column.
+    * You should dynamic_cast<> to the expected derived CellRenderer type.
+    * This assumes that the TreeViewColumn contains only one CellRenderer.
+    *
+    * @param n The position of the view column.
+    * @result The CellRenderer.
+    */
+  CellRenderer* get_column_cell_renderer(int n);
+
+ //TODO: Add TreeViewColumn* get_column_cell_renderer(TreeViewColumn& base_column); and a const one.
+
+
+  /** Gets the CellRenderer for that column.
+    * You should dynamic_cast<> to the expected derived CellRenderer type.
+    * This assumes that the TreeViewColumn contains only one CellRenderer.
+    *
+    * @param n The position of the view column.
+    * @result The CellRenderer.
+    */
+  const CellRenderer* get_column_cell_renderer(int n) const;
+
+  _WRAP_METHOD(Glib::ListHandle<TreeViewColumn*> get_columns(), gtk_tree_view_get_columns)
+  _WRAP_METHOD(Glib::ListHandle<const TreeViewColumn*> get_columns() const, gtk_tree_view_get_columns)
+  
+  _WRAP_METHOD(void move_column_after(TreeViewColumn& column, TreeViewColumn& base_column), gtk_tree_view_move_column_after)
+
+  /** This method moves column to the first position in the view.
+   *
+   * @param column The view column that will be moved
+   */
+  void move_column_to_start(TreeViewColumn& column);
+  
+  _WRAP_METHOD(void set_expander_column(TreeViewColumn& column), gtk_tree_view_set_expander_column)
+  
+  /** This method resets the expander arrow to the default - the first visible column.
+   * @see set_expander_column().  
+   */
+  void reset_expander_column();
+  
+  _WRAP_METHOD(TreeViewColumn* get_expander_column(), gtk_tree_view_get_expander_column)
+  _WRAP_METHOD(const TreeViewColumn* get_expander_column() const, gtk_tree_view_get_expander_column, constversion)
+
+  /** For instance,
+   * bool on_column_drop(TreeView*, tree_view, TreeViewColumn* column, TreeViewColumn* prev_column, TreeViewColumn* next_column)
+   *
+   * This function is called on every column pair in turn at the beginning of a column drag to determine where a
+   * drop can take place. The arguments passed to the function are: the tree_view, the view Column being dragged,
+   * and the two view Columns determining the drop spot. If either of the view Column arguments for the drop spot
+   * are 0, then they indicate an edge.
+   */
+  typedef sigc::slot<bool, TreeView*, TreeViewColumn*,  TreeViewColumn*, TreeViewColumn*> SlotColumnDrop;
+
+  /** Sets a callback slot for determining where a column may be dropped when dragged.
+   * This function is called on every column pair in turn at the beginning of a column drag to determine where a
+   * drop can take place. The arguments passed to the function are: the tree_view, the view Column being dragged,
+   * and the two view Columns determining the drop spot. If either of the view Column arguments for the drop spot
+   * are 0, then they indicate an edge.
+   *
+   * See unset_column_drag_function().
+   *
+   * @param slot A callback function to determine which columns are reorderable.
+   */
+  void set_column_drag_function(const SlotColumnDrop& slot);
+  _IGNORE(gtk_tree_view_set_column_drag_function)
+
+  /** See set_column_drag_function(). After this method has been called, the TreeView reverts to the default behavior of
+  * allowing all columns to be dropped everywhere.
+  */
+  void unset_column_drag_function();
+   
+  _WRAP_METHOD(void scroll_to_point(int tree_x, int tree_y), gtk_tree_view_scroll_to_point)
+
+  /** Moves the alignments of tree view to the position specified by @a column and @a path.
+   * @a row_align determines where the row is placed, and @a col_align determines where
+   * column is placed. Both are expected to be between 0.0 and 1.0. 0.0 means left/top
+   * alignment, 1.0 means right/bottom alignment, 0.5 means center.
+   *
+   * This function only works if the model is set, and @a path is a valid row on the model.
+   * If the model changes before the tree view is realized, the centered path will be
+   * modified to reflect this change.
+   *
+   * @param path The path of the row to move to.
+   * @param column The Gtk::TreeViewColumn to move horizontally to.
+   * @param row_align The vertical alignment of the row specified by @a path.
+   * @param col_align The horizontal alignment of the column specified by @a column.
+   */
+  void scroll_to_cell(const TreeModel::Path& path, TreeViewColumn& column, float row_align, float col_align);
+  _IGNORE(gtk_tree_view_scroll_to_cell)
+
+  /** Moves the alignments of tree view to the position specified by @a column and @a path.
+   * The tree does the minimum amount of work to scroll the cell onto the screen. This means
+   * that the cell will be scrolled to the edge closest to it's current position. If the cell
+   * is currently visible on the screen, nothing is done.
+   *
+   * This function only works if the model is set, and @a path is a valid row on the model.
+   * If the model changes before the tree_view is realized, the centered path will be modified
+   * to reflect this change.
+   *
+   * @param path The path of the row to move to.
+   * @param column The Gtk::TreeViewColumn to move horizontally to.
+   */
+  void scroll_to_cell(const TreeModel::Path& path, TreeViewColumn& column);
+
+  /** Moves the alignments of tree view to the position specified by @a path.
+   * @a row_align determines where the row is placed, and is expected to be between 0.0
+   * and 1.0.  0.0 means top alignment, 1.0 means bottom alignment, 0.5 means center.
+   *
+   * This function only works if the model is set, and @a path is a valid row on the model.
+   * If the model changes before the tree view is realized, the centered path will be
+   * modified to reflect this change.
+   *
+   * @param path The path of the row to move to.
+   * @param row_align The vertical alignment of the row specified by @a path.
+   */
+  void scroll_to_row(const TreeModel::Path& path, float row_align);
+
+  /** Moves the alignments of tree view to the position specified by @a path.
+   * The tree does the minimum amount of work to scroll the row onto the screen. This means
+   * that the row will be scrolled to the edge closest to it's current position. If the row
+   * is currently visible on the screen, nothing is done.
+   *
+   * This function only works if the model is set, and @a path is a valid row on the model.
+   * If the model changes before the tree view is realized, the centered path will be
+   * modified to reflect this change.
+   *
+   * @param path The path of the row to move to.
+   */
+  void scroll_to_row(const TreeModel::Path& path);
+
+  /** Moves the alignments of tree view to the position specified by @a column.
+   * @a col_align determines where the column is placed, and is expected to be between 0.0
+   * and 1.0.  0.0 means left alignment, 1.0 means right alignment, 0.5 means center.
+   *
+   * This function only works if the model is set.  If the model changes before the tree
+   * view is realized, the centered path will be modified to reflect this change.
+   *
+   * @param column The Gtk::TreeViewColumn to move horizontally to.
+   * @param col_align The horizontal alignment of the column specified by @a column.
+   */
+  void scroll_to_column(TreeViewColumn& column, float col_align);
+
+  /** Moves the alignments of tree view to the position specified by @a column.
+   * The tree does the minimum amount of work to scroll the column onto the screen. This means
+   * that the column will be scrolled to the edge closest to it's current position. If the column
+   * is currently visible on the screen, nothing is done.
+   *
+   * This function only works if the model is set.  If the model changes before the
+   * tree view is realized, the centered path will be modified to reflect this change.
+   *
+   * @param column The Gtk::TreeViewColumn to move horizontally to.
+   */
+  void scroll_to_column(TreeViewColumn& column);
+
+  _WRAP_METHOD(void row_activated(const TreeModel::Path& path,TreeViewColumn& column), gtk_tree_view_row_activated)
+  _WRAP_METHOD(void expand_all(), gtk_tree_view_expand_all)
+  _WRAP_METHOD(void collapse_all(), gtk_tree_view_collapse_all)
+  _WRAP_METHOD(void expand_to_path(const TreeModel::Path& path), gtk_tree_view_expand_to_path)
+  _WRAP_METHOD(bool expand_row(const TreeModel::Path& path, bool open_all), gtk_tree_view_expand_row)
+  _WRAP_METHOD(bool collapse_row(const TreeModel::Path& path), gtk_tree_view_collapse_row)
+
+  /** For example,
+   * void on_map_expanded_rows(TreeView* tree_view, const TreeModel::Path& path);
+   */
+  typedef sigc::slot<void, TreeView*, const TreeModel::Path&> SlotMapping;
+
+  /** Calls the callback slot on all expanded rows.
+   * @param slot A callback function to be called.
+   */  
+  void map_expanded_rows(const SlotMapping& slot);
+  _IGNORE(gtk_tree_view_map_expanded_rows)
+
+  _WRAP_METHOD(bool row_expanded(const TreeModel::Path& path), gtk_tree_view_row_expanded)
+  _WRAP_METHOD(void set_reorderable(bool reorderable = true), gtk_tree_view_set_reorderable)
+  _WRAP_METHOD(bool get_reorderable() const, gtk_tree_view_get_reorderable)
+
+  //TODO: Add set_cursor(path, ModelColumnBase&, start_editing)?
+  _WRAP_METHOD(void set_cursor(const TreeModel::Path& path, TreeViewColumn& focus_column, bool start_editing = false), gtk_tree_view_set_cursor)
+    
+  _WRAP_METHOD(void set_cursor(const TreeModel::Path& path, TreeViewColumn& focus_column, CellRenderer& focus_cell, bool start_editing = false), gtk_tree_view_set_cursor_on_cell)
+
+ 
+  /** Sets the current keyboard focus to be at path , and selects it.
+   * This is useful when you want to focus the user's attention on a particular row.
+   * This function is often followed by Gtk::widget::grab_focus(tree_view)
+   * in order to give keyboard focus to the widget.
+   *
+   *  @param path A reference to cursor path.
+   */
+  void set_cursor(const TreeModel::Path& path);
+
+  /**  Fills in path and focus_column with the current path and focus column.
+   *
+   *  @param path A reference to be filled with the current cursor path
+   *  @param focus_column A reference to be filled with the current focus column
+   */
+  void get_cursor(TreeModel::Path& path, TreeViewColumn*& focus_column);
+
+/* Layout information */
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Window> get_bin_window(), gtk_tree_view_get_bin_window, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Window> get_bin_window() const, gtk_tree_view_get_bin_window, refreturn, constversion)
+
+  _DEPRECATE_IFDEF_START
+  /** @deprecated Use the const version.
+   */
+  bool get_path_at_pos(int x, int y, TreeModel::Path& path, TreeViewColumn*& column, int& cell_x, int& cell_y);
+  _DEPRECATE_IFDEF_END
+
+  /** Finds the path at the point (x, y), relative to widget
+   * coordinates. It is primarily for things like popup menus.
+   *
+   * @param x The x position to be identified
+   * @param y The y position to be identified
+   * @param path A reference to a TreeModel::Path to be filled in
+   * @param column A reference to a TreeViewColumn pointer to be filled in
+   * @param cell_x A reference where the X coordinate relative to the cell
+   *   can be placed
+   * @param cell_y A reference where the Y coordinate relative to the cell
+   *   can be placed
+   * @return true if a row exists at that coordinate.
+   */
+  bool get_path_at_pos(int x, int y, TreeModel::Path& path, TreeViewColumn*& column, int& cell_x, int& cell_y) const;
+
+  _WRAP_METHOD(void get_cell_area(const TreeModel::Path& path, TreeViewColumn& column, Gdk::Rectangle& rect), gtk_tree_view_get_cell_area, deprecated "Use the const version")
+//We ignore the fact that one of the arguments can be 0 - it does not seem useful.
+
+  _WRAP_METHOD(void get_cell_area(const TreeModel::Path& path, TreeViewColumn& column, Gdk::Rectangle& rect) const, gtk_tree_view_get_cell_area)
+
+   _WRAP_METHOD(void get_background_area(const TreeModel::Path& path, TreeViewColumn& column, Gdk::Rectangle& rect), gtk_tree_view_get_background_area, deprecated "Use the const version.")
+  _WRAP_METHOD(void get_background_area(const TreeModel::Path& path, TreeViewColumn& column, Gdk::Rectangle& rect) const, gtk_tree_view_get_background_area)
+  //We ignore the fact that one of the arguments can be 0 - it does not seem useful.
+
+  _WRAP_METHOD(void get_visible_rect(Gdk::Rectangle&  visible_rect), gtk_tree_view_get_visible_rect, deprecated "Use the const version.")
+  _WRAP_METHOD(void get_visible_rect(Gdk::Rectangle&  visible_rect) const, gtk_tree_view_get_visible_rect)
+
+  _WRAP_METHOD(void widget_to_tree_coords(int wx, int wy, int& tx, int& ty), gtk_tree_view_widget_to_tree_coords, deprecated "Use the const version")
+  _WRAP_METHOD(void widget_to_tree_coords(int wx, int wy, int& tx, int& ty) const, gtk_tree_view_widget_to_tree_coords)
+
+  _WRAP_METHOD(void tree_to_widget_coords(int tx, int ty, int& wx, int& wy), gtk_tree_view_tree_to_widget_coords, deprecated "Use the const version.")
+  _WRAP_METHOD(void tree_to_widget_coords(int tx, int ty, int& wx, int& wy) const, gtk_tree_view_tree_to_widget_coords)
+
+   bool get_visible_range(TreeModel::Path& start_path, TreeModel::Path& end_path) const;
+  _IGNORE(gtk_tree_view_get_visible_range)
+
+/* Drag-and-Drop support */
+  _IGNORE(gtk_tree_view_enable_model_drag_source)
+
+  /**
+   * Turns the TreeView into a drag source for automatic DND.
+   *
+   * @param targets Standard container of targets that the drag will support.
+   * @param start_button_mask Mask of allowed buttons to start drag.
+   * @param actions The bitmask of possible actions for a drag from this widget.
+   */
+  void enable_model_drag_source(const ArrayHandle_TargetEntry& targets,
+                                Gdk::ModifierType start_button_mask = Gdk::MODIFIER_MASK,
+                                Gdk::DragAction actions = Gdk::ACTION_COPY | Gdk::ACTION_MOVE);
+
+  // Uses the default "GTK_TREE_MODEL_ROW" target, which the TreeView can handle automatically.
+
+  /** Turns the TreeView into a drag source for automatic DND.
+   *
+   * @param start_button_mask Mask of allowed buttons to start drag.
+   * @param actions The bitmask of possible actions for a drag from this widget.
+   */
+  void enable_model_drag_source(Gdk::ModifierType start_button_mask = Gdk::MODIFIER_MASK,
+                                Gdk::DragAction actions = Gdk::ACTION_COPY | Gdk::ACTION_MOVE);                                                                                              
+
+  _IGNORE(gtk_tree_view_enable_model_drag_dest)
+    
+  /** Turns the TreeView into a drop destination for automatic DND.
+   *
+   * @param targets The table of targets that the drag will support.
+   * @param actions The bitmask of possible actions for a drag from this widget.
+   */ 
+  void enable_model_drag_dest(const ArrayHandle_TargetEntry& targets, Gdk::DragAction actions = Gdk::ACTION_COPY | Gdk::ACTION_MOVE);
+
+  /** Turns the TreeView into a drop destination for automatic DND.  This uses the default
+    *  "GTK_TREE_MODEL_ROW" target, which the TreeView can handle automatically.
+    *
+    * @param actions The bitmask of possible actions for a drag from this widget.
+   */ 
+  void enable_model_drag_dest(Gdk::DragAction actions = Gdk::ACTION_COPY | Gdk::ACTION_MOVE);
+
+  /** Undoes the effect of enable_model_drag_source()
+   */
+  _WRAP_METHOD(void unset_rows_drag_source(), gtk_tree_view_unset_rows_drag_source)
+
+  /** Undoes the effect of enable_model_drag_source()
+   */
+  _WRAP_METHOD(void unset_rows_drag_dest(), gtk_tree_view_unset_rows_drag_dest)
+
+
+  /* These are useful to implement your own custom stuff. */
+
+  /** Sets the row that is highlighted for feedback.
+   *
+   * @param path The path of the row to highlight
+   * @param pos Specifies whether to drop before, after or into the row
+   */
+  _WRAP_METHOD(void set_drag_dest_row(const TreeModel::Path& path, TreeViewDropPosition pos), gtk_tree_view_set_drag_dest_row)
+    
+  /** Gets information about the row that is highlighted for feedback.
+   *
+   * @param path Return location for the path of the highlighted row
+   * @param pos Return location for the drop position
+   */
+  void get_drag_dest_row(TreeModel::Path& path, TreeViewDropPosition& pos) const;
+
+  /** Determines the destination row for a given position.
+   *
+   * @param drag_x The x position to determine the destination row for
+   * @param drag_y The y position to determine the destination row for
+   * @param path Return location for the path of the highlighted row
+   * @param pos Return location for the drop position
+   */
+  bool get_dest_row_at_pos(int drag_x, int drag_y, TreeModel::Path& path, TreeViewDropPosition& pos) const;
+
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixmap> create_row_drag_icon(const TreeModel::Path& path), gtk_tree_view_create_row_drag_icon)
+
+/* Interactive search */
+  _WRAP_METHOD(void set_enable_search(bool enable_search = true), gtk_tree_view_set_enable_search)
+  _WRAP_METHOD(bool get_enable_search() const, gtk_tree_view_get_enable_search)
+  _WRAP_METHOD(int get_search_column() const, gtk_tree_view_get_search_column)
+  _WRAP_METHOD(void set_search_column(const TreeModelColumnBase& column), gtk_tree_view_set_search_column)
+  _WRAP_METHOD(void set_search_column(int column), gtk_tree_view_set_search_column)
+
+  ///void on_search_equal(const Glib::RefPtr<TreeModel>& model, int column, const Glib::ustring& key, const TreeModel::iterator& iter)
+  typedef sigc::slot<bool, const Glib::RefPtr<TreeModel>&, int, const Glib::ustring&, const TreeModel::iterator&> SlotSearchEqual;
+  //SlotSearchEqual get_search_equal_func();
+  _IGNORE(gtk_tree_view_get_search_equal_func)
+  
+  /** Sets the compare function for the interactive search capabilities.
+   *
+   * @param slot The compare function to use during the search
+   */
+  void set_search_equal_func(const SlotSearchEqual& slot);
+  _IGNORE(gtk_tree_view_set_search_equal_func)
+
+  _WRAP_METHOD(Entry* get_search_entry(), gtk_tree_view_get_search_entry)
+  _WRAP_METHOD(const Entry* get_search_entry() const, gtk_tree_view_get_search_entry, constversion)
+  _WRAP_METHOD(void set_search_entry(Entry& entry), gtk_tree_view_set_search_entry)
+
+  ///void on_search_position(Gtk::Widget* search_dialog)
+  typedef sigc::slot<void, Gtk::Widget* /* search_dialog */> SlotSearchPosition;
+  void set_search_position_func(const SlotSearchPosition& slot);
+  _IGNORE(gtk_tree_view_get_search_position_func, gtk_tree_view_set_search_position_func)
+
+  _WRAP_METHOD(void convert_widget_to_tree_coords(int wx, int wy, int& tx, int& ty) const, gtk_tree_view_convert_widget_to_tree_coords)
+  _WRAP_METHOD(void convert_tree_to_widget_coords(int tx, int ty, int& wx, int& wy) const, gtk_tree_view_convert_tree_to_widget_coords)
+  _WRAP_METHOD(void convert_widget_to_bin_window_coords(int wx, int wy, int& bx, int& by) const, gtk_tree_view_convert_widget_to_bin_window_coords)
+  _WRAP_METHOD(void convert_bin_window_to_widget_coords(int bx, int by, int& wx, int& wy) const, gtk_tree_view_convert_bin_window_to_widget_coords)
+  _WRAP_METHOD(void convert_tree_to_bin_window_coords(int tx, int ty, int& bx, int& by) const, gtk_tree_view_convert_tree_to_bin_window_coords)
+  _WRAP_METHOD(void convert_bin_window_to_tree_coords(int bx, int by, int& tx, int& ty) const, gtk_tree_view_convert_bin_window_to_tree_coords)
+
+
+  _WRAP_METHOD(void set_fixed_height_mode(bool enable = true), gtk_tree_view_set_fixed_height_mode)
+  _WRAP_METHOD(bool get_fixed_height_mode() const, gtk_tree_view_get_fixed_height_mode)
+  _WRAP_METHOD(void set_hover_selection(bool hover = true), gtk_tree_view_set_hover_selection)
+  _WRAP_METHOD(bool get_hover_selection() const, gtk_tree_view_get_hover_selection)
+  _WRAP_METHOD(void set_hover_expand(bool expand = true), gtk_tree_view_set_hover_expand)
+  _WRAP_METHOD(bool get_hover_expand() const, gtk_tree_view_get_hover_expand)
+  _WRAP_METHOD(void set_rubber_banding(bool enable = true), gtk_tree_view_set_rubber_banding)
+  _WRAP_METHOD(bool get_rubber_banding() const, gtk_tree_view_get_rubber_banding)
+
+  //TODO: Rename to get_is?
+  _WRAP_METHOD(bool is_rubber_banding_active() const, gtk_tree_view_is_rubber_banding_active)
+
+  /** For instance,
+   * void on_row_separator(const Gtk::TreeModel& model, const Gtk::TreeModel::iterator& iter);
+   */
+  typedef sigc::slot<bool, const Glib::RefPtr<TreeModel>&, const TreeModel::iterator&> SlotRowSeparator;
+  
+  void set_row_separator_func(const SlotRowSeparator& slot);
+  _IGNORE(gtk_tree_view_set_row_separator_func, gtk_tree_view_get_row_separator_func)
+
+  _WRAP_METHOD(void set_grid_lines(TreeViewGridLines grid_lines), gtk_tree_view_set_grid_lines)
+  _WRAP_METHOD(TreeViewGridLines get_grid_lines() const, gtk_tree_view_get_grid_lines)
+
+  _WRAP_METHOD(void set_enable_tree_lines(bool enable = true), gtk_tree_view_set_enable_tree_lines)
+  _WRAP_METHOD(bool get_enable_tree_lines() const, gtk_tree_view_get_enable_tree_lines)
+
+  _WRAP_METHOD(void set_show_expanders(bool enabled = true), gtk_tree_view_set_show_expanders)
+  _WRAP_METHOD(bool get_show_expanders() const, gtk_tree_view_get_show_expanders)
+  _WRAP_METHOD(void set_level_indentation(int indentation), gtk_tree_view_set_level_indentation)
+  _WRAP_METHOD(int get_level_indentation() const, gtk_tree_view_get_level_indentation)
+
+  _WRAP_METHOD(void set_tooltip_row(const Glib::RefPtr<Tooltip>& tooltip, const TreePath& path), gtk_tree_view_set_tooltip_row)
+
+  //Note that we use pointers instead of references because any one of the 3 arguments may be NULL, and we don't want that many method overloads:
+#m4 _CONVERSION(`const TreeModel::Path*',`GtkTreePath*',`(($3) ? const_cast<GtkTreePath*>(($3)->gobj()) : 0)')
+  _WRAP_METHOD(void set_tooltip_cell(const Glib::RefPtr<Tooltip>& tooltip, const TreeModel::Path* path, TreeViewColumn* column, CellRenderer* cell), gtk_tree_view_set_tooltip_cell)
+
+  _IGNORE(gtk_tree_view_get_tooltip_context)
+
+  /**
+   * @param x: the x coordinate (relative to widget coordinates)
+   * @param y: the y coordinate (relative to widget coordinates)
+   * @param keyboard_tip: whether this is a keyboard tooltip or not
+   * @param path: a reference to receive a Gtk::TreePath
+   *
+   * This function is supposed to be used in a Gtk::Widget::query-tooltip
+   * signal handler for Gtk::TreeView. The x, y and keyboard_tip values
+   * which are received in the signal handler, should be passed to this
+   * function without modification.
+   *
+   * The return value indicates whether there is an tree view row at the given
+   * coordinates (true) or not (false) for mouse tooltips. For keyboard
+   * tooltips the row returned will be the cursor item. When true, then the
+   * path which has been provided will be set to point to
+   * that row and the corresponding model. x and y will always be converted
+   * to be relative to Gtk::TreeView's bin_window if keyboard_tooltip is false.
+   *
+   * Return value: whether or not the given tooltip context points to a row.
+   *
+   * @newin2p12
+   */
+  bool get_tooltip_context_path(int& x, int& y,
+                                bool keyboard_tip,
+                                TreeModel::Path& path);
+
+  /**
+   * @param x: the x coordinate (relative to widget coordinates)
+   * @param y: the y coordinate (relative to widget coordinates)
+   * @param keyboard_tip: whether this is a keyboard tooltip or not
+   * @param iter: a pointer to receive a Gtk::TreeIter
+   *
+   * This function is supposed to be used in a Gtk::Widget::query-tooltip
+   * signal handler for Gtk::TreeView. The x, y and keyboard_tip values
+   * which are received in the signal handler, should be passed to this
+   * function without modification.
+   *
+   * The return value indicates whether there is an tree view row at the given
+   * coordinates (true) or not (false) for mouse tooltips. For keyboard
+   * tooltips the row returned will be the cursor item. When true, then the
+   * iter which has been provided will be set to point to
+   * that row and the corresponding model. x and y will always be converted
+   * to be relative to Gtk::TreeView's bin_window if keyboard_tooltip is false.
+   *
+   * Return value: whether or not the given tooltip context points to a row.
+   *
+   * @newin2p12
+   */
+  bool get_tooltip_context_iter(int& x, int& y,
+                                bool keyboard_tip,
+                                Gtk::TreeModel::iterator& iter);
+
+  _WRAP_METHOD(void set_tooltip_column(int column), gtk_tree_view_set_tooltip_column)
+  _WRAP_METHOD(int get_tooltip_column() const, gtk_tree_view_get_tooltip_column)
+
+
+#m4begin
+dnl // We need this special conversion here since the C++ Gtk::TreeIter carries
+dnl // a pointer to the Gtk::TreeModel, whereas the plain GtkTreeIter struct does
+dnl // not.  Fortunately we can use the `self' parameter to get our hands on the
+dnl // GtkTreeModel*.
+_CONVERSION(`GtkTreeIter*',`const TreeModel::iterator&',`TreeModel::iterator(gtk_tree_view_get_model(self), $3)')
+#m4end
+
+  _WRAP_SIGNAL(void set_scroll_adjustments(Adjustment* hadjustment, Adjustment* vadjustment), "set-scroll-adjustments")
+  _WRAP_SIGNAL(void row_activated(const TreeModel::Path& path, TreeViewColumn* column) , "row-activated")
+  _WRAP_SIGNAL(bool test_expand_row(const TreeModel::iterator& iter, const TreeModel::Path& path), "test-expand-row")
+  _WRAP_SIGNAL(bool test_collapse_row(const TreeModel::iterator& iter, const TreeModel::Path& path), "test-collapse-row")
+  _WRAP_SIGNAL(void row_expanded(const TreeModel::iterator& iter, const TreeModel::Path& path), "row-expanded")
+  _WRAP_SIGNAL(void row_collapsed(const TreeModel::iterator& iter, const TreeModel::Path& path), "row-collapsed")
+  _WRAP_SIGNAL(void cursor_changed(), "cursor-changed")
+  _WRAP_SIGNAL(void columns_changed(), "columns-changed")
+
+  //Don't wrap these. They are keybinding signals, and their API broke for GTK+ 2.2.
+  _IGNORE_SIGNAL("move-cursor")
+  _IGNORE_SIGNAL("select-all")
+  _IGNORE_SIGNAL("unselect-all")
+  _IGNORE_SIGNAL("select-cursor-row")
+  _IGNORE_SIGNAL("toggle-cursor-row")
+  _IGNORE_SIGNAL("expand-collapse-cursor-row")
+  _IGNORE_SIGNAL("select-cursor-parent")
+  _IGNORE_SIGNAL("start-interactive-search")
+
+
+  _WRAP_PROPERTY("model", Glib::RefPtr<TreeModel>)
+  _WRAP_PROPERTY("hadjustment", Adjustment*)
+  _WRAP_PROPERTY("vadjustment", Adjustment*)
+  _WRAP_PROPERTY("headers-visible", bool)
+  _WRAP_PROPERTY("headers-clickable", bool)
+  _WRAP_PROPERTY("expander-column", TreeViewColumn*)
+  _WRAP_PROPERTY("reorderable", bool)
+  _WRAP_PROPERTY("rules-hint", bool)
+  _WRAP_PROPERTY("enable-search", bool)
+  _WRAP_PROPERTY("search-column", int)
+  _WRAP_PROPERTY("fixed-height-mode", bool)
+  _WRAP_PROPERTY("hover-selection", bool)
+  _WRAP_PROPERTY("hover-expand", bool)
+  _WRAP_PROPERTY("show-expanders", bool)
+  _WRAP_PROPERTY("level-indentation", bool)
+  _WRAP_PROPERTY("rubber-banding", bool)
+  _WRAP_PROPERTY("enable-grid-lines", bool)
+  _WRAP_PROPERTY("enable-tree-lines", bool)
+
+  /// Get the treeview's model, but actually get the child model if it's a TreeModelFilter.
+  Glib::RefPtr<Gtk::TreeModel> _get_base_model();
+ 
+protected:
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  template<class ColumnType> friend
+  void _auto_store_on_cellrenderer_text_edited_string(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+
+  template <class ColumnType> friend
+  void _auto_store_on_cellrenderer_text_edited_numerical(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+
+  void _auto_store_on_cellrenderer_toggle_edited_with_model(const Glib::ustring& path_string, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+
+  // This is no longer used, but we must keep it to prevent linker errors with already-compiled applications,
+  // For instance, applications that were compiled with the older versions of the templates that did use this method.
+  // TODO: Remove this when we can break API.
+  void _auto_store_on_cellrenderer_toggle_edited(const Glib::ustring& path_string, int model_column);
+
+  template<class ColumnType> friend
+  void TreeView_Private::_connect_auto_store_editable_signal_handler(TreeView*, CellRenderer*, const TreeModelColumn<ColumnType>&);
+
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+};
+
+
+
+template <class ColumnType> inline
+int TreeView::append_column(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column)
+{
+  // compilation will fail if there is no appropriate TreeViewColumn
+  // constructor for this model column type.
+  TreeViewColumn *const pViewColumn = Gtk::manage( new TreeViewColumn(title, model_column) );
+
+  return append_column(*pViewColumn);
+}
+
+//This is here because sigc::bind once did not work on all platforms, but now it does..
+#define GTKMM_HAVE_SIGC_BIND 1
+
+#ifdef GTKMM_HAVE_SIGC_BIND
+
+template <class ColumnType> inline
+int TreeView::append_column_numeric(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, const Glib::ustring& format)
+{
+  TreeViewColumn* const pViewColumn = Gtk::manage( new TreeViewColumn(title) );
+    
+  //Use a CellRendererText:
+  //We don't use TreeView::Column::append_column(model_column) to generate an appropriate CellRenderer, 
+  //because that uses set_renderer(), which renders the model value using the automatic glib "transformations" (number-string conversions). As well as being unnecessary here, those automatic conversions can't handle all numeric types.
+  CellRenderer* pCellRenderer = manage( new CellRendererText() );
+  pViewColumn->pack_start(*pCellRenderer);
+  
+
+  //Some compilers don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+  typedef void (*type_fptr)(Gtk::CellRenderer* cell, const Gtk::TreeModel::iterator& iter, int model_column, const Glib::ustring& format);
+  type_fptr fptr = TreeView_Private::_auto_cell_data_func<ColumnType>;
+
+  //Connect a cell_data callback, to show the number's text representation in the specified format:
+  //We use sigc::bind<-1> twice here, instead of sigc::bind() once, because some compilers need the extra hint.
+  Gtk::TreeViewColumn::SlotCellData slot = sigc::bind<-1>(
+    sigc::bind<-1>( sigc::ptr_fun(fptr), format),
+    model_column.index()
+  );
+    
+  pViewColumn->set_cell_data_func(*pCellRenderer, slot);
+
+  return append_column(*pViewColumn);
+}
+
+#endif //GTKMM_HAVE_SIGC_BIND
+
+template <class ColumnType> inline
+int TreeView::append_column_numeric_editable(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, const Glib::ustring& format)
+{
+  int cols_count = append_column_numeric(title, model_column, format);
+  
+  //connect signal handlers for auto-storing of edited cell data
+  //Note: This will only work for base-10 (decimal) formatted numbers:
+  CellRenderer *const cell = get_column_cell_renderer(cols_count - 1);
+  if(cell)
+  {
+    TreeView_Private::_connect_auto_store_editable_signal_handler<ColumnType>(this, cell, model_column);
+  }
+   
+  return cols_count;
+}
+
+template <class ColumnType> inline
+int TreeView::append_column_editable(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column)
+{
+  //Don't use this in a header, because it gives warnings when disabled: g_assert(model_column.type() != 0);
+
+  // compilation will fail if there is no appropriate TreeViewColumn
+  // constructor for this model column type.
+  TreeViewColumn *const pViewColumn = Gtk::manage( new TreeViewColumn(title, model_column) );
+
+  //connect signal handlers for auto-storing of edited cell data
+  CellRenderer* pCellRender = pViewColumn->get_first_cell_renderer();
+  TreeView_Private::_connect_auto_store_editable_signal_handler<ColumnType>(this, pCellRender, model_column);
+
+  return append_column(*pViewColumn);
+}
+
+template <class ColumnType> inline
+int TreeView::insert_column(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, int position)
+{
+  // compilation will fail if there is no appropriate TreeViewColumn
+  // constructor for this model column type.
+  TreeViewColumn *const pViewColumn = Gtk::manage( new TreeViewColumn(title, model_column) );
+
+  return insert_column(*pViewColumn, position);
+}
+
+template <class ColumnType> inline
+int TreeView::insert_column_editable(const Glib::ustring& title, const TreeModelColumn<ColumnType>& model_column, int position)
+{
+  // compilation will fail if there is no appropriate TreeViewColumn
+  // constructor for this model column type.
+  TreeViewColumn *const pViewColumn = Gtk::manage( new TreeViewColumn(title, model_column) );
+
+   //connect signal handlers for auto-storing of edited cell data
+  CellRenderer* pCellRender = pViewColumn->get_first_cell_renderer();
+  TreeView_Private::_connect_auto_store_editable_signal_handler(this, pCellRender, model_column);
+
+  return insert_column(*pViewColumn, position);
+}
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+namespace TreeView_Private
+{
+
+//Template specializations, for different model column types:
+//TODO: Move these specializations into the .ccg file - I tried, but the int specialization was not used by the compiler. murrayc.
+
+#ifdef GTKMM_HAVE_SIGC_BIND
+
+//bool specialization:
+template<> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer, const Gtk::TreeModelColumn<bool>& model_column)
+{
+  Gtk::CellRendererToggle* pCellToggle = dynamic_cast<Gtk::CellRendererToggle*>(pCellRenderer);
+  if(pCellToggle)
+  {
+    //Set the appropriate property,
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellToggle->property_activatable() = true;
+    #else
+    pCellToggle->set_property("activatable", true);
+    #endif
+
+    //Connect to the appropriate signal, sending the model_column too
+
+    sigc::slot<void, const Glib::ustring&, int> slot_temp = 
+      sigc::bind<-1>(
+        sigc::mem_fun(*this_p, &Gtk::TreeView::_auto_store_on_cellrenderer_toggle_edited_with_model), 
+        this_p->_get_base_model()
+      );
+
+    pCellToggle->signal_toggled().connect(
+      sigc::bind<-1>( 
+        slot_temp,
+        model_column.index()
+      )
+    );
+
+    //We use bind<1> instead of bind because some compilers need the extra hint.
+  }
+}
+
+//int specialization:
+template<> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer,  const Gtk::TreeModelColumn<int>& model_column)
+{
+  Gtk::CellRendererText* pCellText = dynamic_cast<Gtk::CellRendererText*>(pCellRenderer);
+  if(pCellText)
+  {
+    //Set the appropriate property,
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellText->property_editable() = true;
+    #else
+    pCellText->set_property("editable", true);
+    #endif
+
+    //Some compilers don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+    typedef void (*type_fptr)(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+    type_fptr fptr = _auto_store_on_cellrenderer_text_edited_numerical<int>;
+
+    //Connect to the appropriate signal, sending the model_column too,
+    //We use bind<-1> twice here, instead of using bind() once, because some compilers need the extra hint.
+    pCellText->signal_edited().connect(
+      sigc::bind<-1>(
+        sigc::bind<-1>( 
+          sigc::ptr_fun(fptr),
+          this_p->_get_base_model() ),
+        model_column.index()
+      )
+    );
+
+  }
+}
+
+//unsigned int specialization:
+template<> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer,  const Gtk::TreeModelColumn<unsigned int>& model_column)
+{
+  Gtk::CellRendererText* pCellText = dynamic_cast<Gtk::CellRendererText*>(pCellRenderer);
+  if(pCellText)
+  {
+    //Set the appropriate property,
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellText->property_editable() = true;
+    #else
+    pCellText->set_property("editable", true);
+    #endif
+
+    //Some compilers don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+    typedef void (*type_fptr)(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+    type_fptr fptr = _auto_store_on_cellrenderer_text_edited_numerical<unsigned int>;
+
+    //Connect to the appropriate signal, sending the model_column too,
+    //We use bind<-1> twice here, instead of using bind() once, because some compilers need the extra hint.
+    pCellText->signal_edited().connect(
+      sigc::bind<-1>(
+        sigc::bind<-1>( 
+          sigc::ptr_fun(fptr),
+          this_p->_get_base_model() ),
+        model_column.index()
+      )
+    );
+    
+  }
+}
+
+//long specialization:
+template<> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer,  const Gtk::TreeModelColumn<long>& model_column)
+{
+  Gtk::CellRendererText* pCellText = dynamic_cast<Gtk::CellRendererText*>(pCellRenderer);
+  if(pCellText)
+  {
+    //Set the appropriate property,
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellText->property_editable() = true;
+    #else
+    pCellText->set_property("editable", true);
+    #endif
+
+    //Some compilers don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+    typedef void (*type_fptr)(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+    type_fptr fptr = _auto_store_on_cellrenderer_text_edited_numerical<long>;
+
+    //Connect to the appropriate signal, sending the model_column too,
+    //We use bind<-1> twice here, instead of using bind() once, because some compilers need the extra hint.
+    pCellText->signal_edited().connect(
+      sigc::bind<-1>(
+        sigc::bind<-1>( 
+          sigc::ptr_fun(fptr),
+          this_p->_get_base_model() ),
+        model_column.index()
+      )
+    );
+    
+  }
+}
+
+//unsigned long specialization:
+template<> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer,  const Gtk::TreeModelColumn<unsigned long>& model_column)
+{
+  Gtk::CellRendererText* pCellText = dynamic_cast<Gtk::CellRendererText*>(pCellRenderer);
+  if(pCellText)
+  {
+    //Set the appropriate property,
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellText->property_editable() = true;
+    #else
+    pCellText->set_property("editable", true);
+    #endif
+
+    //Some compilers don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+    typedef void (*type_fptr)(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+    type_fptr fptr = _auto_store_on_cellrenderer_text_edited_numerical<unsigned long>;
+
+    //Connect to the appropriate signal, sending the model_column too,
+    //We use bind<-1> twice here, instead of using bind() once, because some compilers need the extra hint.
+    pCellText->signal_edited().connect(
+      sigc::bind<-1>(
+        sigc::bind<-1>( 
+          sigc::ptr_fun(fptr),
+          this_p->_get_base_model() ),
+        model_column.index()
+      )
+    );
+ 
+  }
+}
+
+//float specialization:
+template<> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer,  const Gtk::TreeModelColumn<float>& model_column)
+{
+  Gtk::CellRendererText* pCellText = dynamic_cast<Gtk::CellRendererText*>(pCellRenderer);
+  if(pCellText)
+  {
+    //Set the appropriate property,
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellText->property_editable() = true;
+    #else
+    pCellText->set_property("editable", true);
+    #endif
+
+    //Some compilers don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+    typedef void (*type_fptr)(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+    type_fptr fptr = _auto_store_on_cellrenderer_text_edited_numerical<float>;
+
+    //Connect to the appropriate signal, sending the model_column too,
+    //We use bind<-1> twice here, instead of using bind() once, because some compilers need the extra hint.
+    pCellText->signal_edited().connect(
+      sigc::bind<-1>(
+        sigc::bind<-1>( 
+          sigc::ptr_fun(fptr),
+          this_p->_get_base_model() ),
+        model_column.index()
+      )
+    );
+  }
+}
+
+//double specialization:
+template<> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer,  const Gtk::TreeModelColumn<double>& model_column)
+{
+  Gtk::CellRendererText* pCellText = dynamic_cast<Gtk::CellRendererText*>(pCellRenderer);
+  if(pCellText)
+  {
+    //Set the appropriate property,
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellText->property_editable() = true;
+    #else
+    pCellText->set_property("editable", true);
+    #endif
+
+    //Some compilers don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+    typedef void (*type_fptr)(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model);
+    type_fptr fptr = _auto_store_on_cellrenderer_text_edited_numerical<double>;
+
+    //Connect to the appropriate signal, sending the model_column too,
+    //We use bind<-1> twice here, instead of using bind() once, because some compilers need the extra hint.
+    pCellText->signal_edited().connect(
+      sigc::bind<-1>(
+        sigc::bind<-1>( 
+          sigc::ptr_fun(fptr),
+          this_p->_get_base_model() ),
+        model_column.index()
+      )
+    );
+  }
+}
+
+#endif //GTKMM_HAVE_SIGC_BIND
+
+} // namespace TreeView_Private
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+namespace TreeView_Private
+{
+
+#ifdef GTKMM_HAVE_SIGC_BIND
+
+template <class ColumnType> inline
+void _connect_auto_store_editable_signal_handler(Gtk::TreeView* this_p, Gtk::CellRenderer* pCellRenderer, const Gtk::TreeModelColumn<ColumnType>& model_column)
+{
+  //Don't use this in a header, because it gives warnings when disabled: g_assert(model_column.type() != 0);
+
+  //The different CellRenderers have different "edited" signals,
+  //and numerical values need to convert the text value to a number,
+  //so there are specializations for this tempate.
+
+  Gtk::CellRendererText* pCellText = dynamic_cast<Gtk::CellRendererText*>(pCellRenderer);
+
+  //Set the appropriate property,
+  //and connect to the appropriate signal, sending the model_column too,
+  if(pCellText)
+  {
+    #ifdef GLIBMM_PROPERTIES_ENABLED
+    pCellText->property_editable() = true;
+    #else
+    pCellText->set_property("editable", true);
+    #endif
+
+    //Some compilers (IRIX MipsPro) don't like us to give the pointer to a template function directly to sigc::ptr_fun():
+    typedef void (*type_func)(const Glib::ustring&, const Glib::ustring&, int, const Glib::RefPtr<Gtk::TreeModel>&);
+    type_func func = &(_auto_store_on_cellrenderer_text_edited_string<ColumnType>);
+    sigc::slot<void, const Glib::ustring&, const Glib::ustring&, int, const Glib::RefPtr<Gtk::TreeModel>&> theslot  =
+      sigc::ptr_fun(func);
+
+    //We use bind<-1> twice here, instead of using bind() once, because some compilers need the extra hint.
+    pCellText->signal_edited().connect(
+      sigc::bind<-1>(
+        sigc::bind<-1>( theslot, this_p->_get_base_model()),
+        model_column.index()
+      )
+    );
+
+    
+  }
+}
+
+#endif //GTKMM_HAVE_SIGC_BIND
+
+template <class ColumnType> inline
+void _auto_store_on_cellrenderer_text_edited_string(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model)
+{
+  Gtk::TreePath path(path_string);
+
+  //Get the row from the path:
+  if(model)
+  {
+    Gtk::TreeModel::iterator iter = model->get_iter(path);
+    if(iter)
+    {
+        //Store the user's new text in the model:
+        Gtk::TreeRow row = *iter;
+        row.set_value(model_column, (ColumnType)new_text);
+    }
+  }
+}
+
+template <class ColumnType> inline
+void _auto_store_on_cellrenderer_text_edited_numerical(const Glib::ustring& path_string, const Glib::ustring& new_text, int model_column, const Glib::RefPtr<Gtk::TreeModel>& model)
+{
+  //This is used on numerical model columns:
+
+  Gtk::TreePath path(path_string);
+
+  //Get the row from the path:
+  if(model)
+  {
+    Gtk::TreeModel::iterator iter = model->get_iter(path);
+    if(iter)
+    {
+      //std::istringstream astream(new_text); //Put it in a stream.
+      //ColumnType new_value = ColumnType();
+      //new_value << astream; //Get it out of the stream as the numerical type.
+
+      //Convert the text to a number, using the same logic used by GtkCellRendererText when it stores numbers.
+      char* pchEnd = 0;
+      ColumnType new_value = static_cast<ColumnType>( strtod(new_text.c_str(), &pchEnd) );
+
+      //Store the user's new text in the model:
+      Gtk::TreeRow row = *iter;
+      row.set_value(model_column, (ColumnType)new_value);
+    }
+  }
+}
+
+template <class ColumnType> inline
+void _auto_cell_data_func(Gtk::CellRenderer* cell, const Gtk::TreeModel::iterator& iter, int model_column, const Glib::ustring& format)
+{
+  Gtk::CellRendererText* pTextRenderer = dynamic_cast<Gtk::CellRendererText*>(cell);
+  if(!pTextRenderer)
+  {
+    g_warning("gtkmm: TextView: append_column_numeric() was used with a non-numeric type.");
+  }
+  else
+  {
+    if(iter)
+    {
+      //Get the value from the model.
+      Gtk::TreeModel::Row row = *iter;
+      ColumnType value = ColumnType();
+      row.get_value(model_column, value);
+
+      //Convert it to a string representation:
+      char buff[20];
+      int used = g_snprintf(buff, sizeof(buff), format.c_str(), value); //value must be a numeric type.
+      if(used > 0)
+      {
+        //Show the text representation in the view:
+        #ifdef GLIBMM_PROPERTIES_ENABLED
+        pTextRenderer->property_text() = buff;
+        #else
+        pTextRenderer->set_property("text", (void*)buff);
+        #endif
+      }
+    }
+  }
+}
+
+} // namespace TreeView_Private
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
+
+} // namespace Gtk
+

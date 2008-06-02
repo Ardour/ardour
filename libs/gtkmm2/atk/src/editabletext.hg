@@ -1,0 +1,67 @@
+/* $Id: editabletext.hg,v 1.2 2004/01/02 09:56:43 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(atkmm,atk)
+
+#include <atkmm/text.h>
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+  typedef struct _AtkEditableTextIface AtkEditableTextIface;
+  typedef struct _AtkEditableText      AtkEditableText;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
+namespace Atk
+{
+
+//TODO: I see no evidence that AtkEditableText is actually a subclass of AtkText, as the C docs say. murrayc.
+/* The ATK interface implemented by components containing user-editable text content.
+ * This should be implemented by UI components which contain text which the user can edit, via the Atk::Object
+ * corresponding to that component (see Atk::Object).
+ * EditableText is a subclass of AtkText, and as such, an object which implements EditableText is by definition
+ * an Atk::Text implementor as well. 
+ */
+class EditableText : public Glib::Interface
+{
+  _CLASS_INTERFACE(EditableText, AtkEditableText, ATK_EDITABLE_TEXT, AtkEditableTextIface)
+
+public:
+  _WRAP_METHOD(bool set_run_attributes(const AttributeSet& attrib_set, int start_offset, int end_offset), atk_editable_text_set_run_attributes)
+  _WRAP_METHOD(void set_text_contents(const Glib::ustring& string), atk_editable_text_set_text_contents)
+  _WRAP_METHOD(void insert_text(const Glib::ustring& string, int length, int& position), atk_editable_text_insert_text)
+  _WRAP_METHOD(void copy_text(int start_pos, int end_pos), atk_editable_text_copy_text)
+  _WRAP_METHOD(void cut_text(int start_pos, int end_pos), atk_editable_text_cut_text)
+  _WRAP_METHOD(void delete_text(int start_pos, int end_pos), atk_editable_text_delete_text)
+  _WRAP_METHOD(void paste_text(int position), atk_editable_text_paste_text)
+
+protected:
+  _WRAP_VFUNC(bool set_run_attributes(AtkAttributeSet* attrib_set, int start_offset, int end_offset), set_run_attributes)
+  _WRAP_VFUNC(void set_text_contents(const Glib::ustring& string), set_text_contents)
+  _WRAP_VFUNC(void insert_text(const Glib::ustring& string, int length, int& position), insert_text)
+  _WRAP_VFUNC(void copy_text(int start_pos, int end_pos), copy_text)
+  _WRAP_VFUNC(void cut_text(int start_pos, int end_pos), cut_text)
+  _WRAP_VFUNC(void delete_text(int start_pos, int end_pos), delete_text)
+  _WRAP_VFUNC(void paste_text(int position), paste_text)
+};
+
+} // namespace Atk
+

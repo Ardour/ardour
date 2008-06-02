@@ -1,0 +1,6 @@
+Base directory for gtkmm - the widget set. 
+
+Here is the layout
+
+  src - actual sources used to build
+  gtkmm - built sources (do not edit)

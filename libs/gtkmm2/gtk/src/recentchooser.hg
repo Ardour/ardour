@@ -1,0 +1,167 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkrecentchooser.h>
+#include <glibmm/interface.h>
+#include <gtkmm/recentinfo.h>
+#include <gtkmm/recentfilter.h>
+#include <gtkmm/recentmanager.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+namespace Gtk
+{
+
+_WRAP_ENUM(RecentSortType, GtkRecentSortType)
+
+/** Exception class for Gtk::RecentChooser errors.
+ */
+_WRAP_GERROR(RecentChooserError,GtkRecentChooserError,GTK_RECENT_CHOOSER_ERROR)
+
+/** RecentChooser is an interface that can be implemented by widgets
+ * displaying the list of recently used files.  In GTK+, the main objects
+ * that implement this interface are RecentChooserWidget, RecentChooserDialog
+ * and RecentChooserMenu.
+ *
+ * @newin2p10
+ *
+ * @ingroup RecentFiles
+ */
+class RecentChooser : public Glib::Interface
+{
+  _CLASS_INTERFACE(RecentChooser, GtkRecentChooser, GTK_RECENT_CHOOSER, GtkRecentChooserIface)
+public:
+
+  _WRAP_METHOD(void set_show_private(bool show_private = true), gtk_recent_chooser_set_show_private)
+  _WRAP_METHOD(bool get_show_private() const, gtk_recent_chooser_get_show_private)
+  _WRAP_METHOD(void set_show_not_found(bool show_not_found = true), gtk_recent_chooser_set_show_not_found)
+  _WRAP_METHOD(bool get_show_not_found() const, gtk_recent_chooser_get_show_not_found)
+  _WRAP_METHOD(void set_select_multiple(bool select_multiple = true), gtk_recent_chooser_set_select_multiple)
+  _WRAP_METHOD(bool get_select_multiple() const, gtk_recent_chooser_get_select_multiple)
+  _WRAP_METHOD(void set_limit(int limit), gtk_recent_chooser_set_limit)
+  void unset_limit();
+  _WRAP_METHOD(int get_limit() const, gtk_recent_chooser_get_limit)
+  _WRAP_METHOD(void set_local_only(bool local_only = true), gtk_recent_chooser_set_local_only)
+  _WRAP_METHOD(bool get_local_only() const, gtk_recent_chooser_get_local_only)
+  _WRAP_METHOD(void set_show_tips(bool show_tips = true), gtk_recent_chooser_set_show_tips)
+  _WRAP_METHOD(bool get_show_tips() const, gtk_recent_chooser_get_show_tips)
+
+  // Deprecated in GTK+ 2.12. murrayc:
+  _IGNORE(gtk_recent_chooser_get_show_numbers, gtk_recent_chooser_set_show_numbers)
+
+  _WRAP_METHOD(void set_show_icons(bool show_icons = true), gtk_recent_chooser_set_show_icons)
+  _WRAP_METHOD(bool get_show_icons() const, gtk_recent_chooser_get_show_icons)
+  _WRAP_METHOD(void set_sort_type(RecentSortType sort_type), gtk_recent_chooser_set_sort_type)
+  _WRAP_METHOD(RecentSortType get_sort_type() const, gtk_recent_chooser_get_sort_type)
+
+
+  /** This callback should return -1 if b compares before a, 0 if they compare
+   * equal and 1 if a compares after b.
+   * For instance, int on_sort_compare(const Glib::RefPtr<Gtk::RecentInfo>& a, const Gtk::RecentInfo& b);
+   */
+  typedef sigc::slot<int, const Glib::RefPtr<RecentInfo>&, const Glib::RefPtr<RecentInfo>&> SlotCompare;
+  _IGNORE(gtk_recent_chooser_set_sort_func)
+
+  /** Sets the comparison function used when sorting the list of recently
+   * used resources and the sort type is #RECENT_SORT_CUSTOM.
+   */
+  void set_sort_func(const SlotCompare& slot);
+
+  // TODO: Return type should be void since it will never return false but
+  // throwing RecentChooserError instead
+  _WRAP_METHOD(bool set_current_uri(const Glib::ustring& uri), gtk_recent_chooser_set_current_uri, errthrow)
+  _WRAP_METHOD(Glib::ustring get_current_uri() const, gtk_recent_chooser_get_current_uri)
+  _WRAP_METHOD(Glib::RefPtr<RecentInfo> get_current_item(), gtk_recent_chooser_get_current_item, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const RecentInfo> get_current_item() const, gtk_recent_chooser_get_current_item, refreturn)
+  // TODO: Same here
+  _WRAP_METHOD(bool select_uri(const Glib::ustring& uri), gtk_recent_chooser_select_uri, errthrow)
+  _WRAP_METHOD(void unselect_uri(const Glib::ustring& uri), gtk_recent_chooser_unselect_uri)
+  _WRAP_METHOD(void select_all(), gtk_recent_chooser_select_all)
+  _WRAP_METHOD(void unselect_all(), gtk_recent_chooser_unselect_all)
+
+  typedef Glib::ListHandle<RecentInfo, RecentInfoTraits> ListHandle_RecentInfos;
+  _CONVERSION(`GList*',`ListHandle_RecentInfos',__FL2H_SHALLOW)
+
+  _WRAP_METHOD(ListHandle_RecentInfos get_items() const, gtk_recent_chooser_get_items)
+
+  /** Gets the URI of the recently used resources.
+   *
+   * The return value of this function is affected by the "sort-type" and
+   * "limit" properties of the recent chooser.
+   */
+  Glib::StringArrayHandle get_uris() const;
+  _IGNORE(gtk_recent_chooser_get_uris)
+
+  _WRAP_METHOD(void add_filter(const RecentFilter& filter), gtk_recent_chooser_add_filter)
+  _WRAP_METHOD(void remove_filter(const RecentFilter& filter), gtk_recent_chooser_remove_filter)
+  _WRAP_METHOD(Glib::SListHandle<RecentFilter*> list_filters(), gtk_recent_chooser_list_filters)
+  _WRAP_METHOD(Glib::SListHandle<const RecentFilter*> list_filters() const, gtk_recent_chooser_list_filters)
+  _WRAP_METHOD(void set_filter(const RecentFilter& filter), gtk_recent_chooser_set_filter)
+  _WRAP_METHOD(RecentFilter* get_filter(), gtk_recent_chooser_get_filter)
+  _WRAP_METHOD(const RecentFilter* get_filter() const, gtk_recent_chooser_get_filter)
+
+  /** This signal is emitted when there is a change in the set of
+   * selected recently used resources.  This can happen when a user
+   * modifies the selection with the mouse or the keyboard, or when
+   * explicitely calling functions to change the selection.
+   */
+  _WRAP_SIGNAL(void selection_changed(), "selection-changed", no_default_handler)
+
+  /** This signal is emitted when the user "activates" a recent item
+   * in the recent chooser.  This can happen by double-clicking on an item
+   * in the recently used resources list, or by pressing
+   * <keycap>Enter</keycap>.
+   */
+  _WRAP_SIGNAL(void item_activated(), "item-activated", no_default_handler)
+
+  _WRAP_PROPERTY("recent-manager", Glib::RefPtr<RecentManager>)
+  _WRAP_PROPERTY("show-private", bool)
+  _WRAP_PROPERTY("show-tips", bool)
+  _WRAP_PROPERTY("show-icons", bool)
+  _WRAP_PROPERTY("show-not-found", bool)
+  _WRAP_PROPERTY("select-multiple", bool)
+  _WRAP_PROPERTY("local-only", bool)
+  _WRAP_PROPERTY("limit", int)
+  _WRAP_PROPERTY("sort-type", RecentSortType)
+  _WRAP_PROPERTY("filter", RecentFilter*)
+
+protected:
+#m4begin
+  // As in editable.hg
+  _CONVERSION(`Glib::ustring', `gchar*', `g_strdup(($3).c_str())')
+#m4end
+  // TODO: How to wrap those vfuncs?
+
+  //_CONVERSION(`ListHandle_RecentInfos', `GList*', `($3).data()')
+  //_CONVERSION(`Glib::SListHandle<RecentFilter*>', `GSList*', `($3).data()')
+
+  //_WRAP_VFUNC(bool set_current_uri(const Glib::ustring& uri), "set_current_uri", errthrow)
+  _WRAP_VFUNC(Glib::ustring get_current_uri() const, "get_current_uri")
+  //_WRAP_VFUNC(bool select_uri(const Glib::ustring& uri), "select_uri", errthrow)
+  _WRAP_VFUNC(void unselect_uri(const Glib::ustring& uri), "unselect_uri")
+  _WRAP_VFUNC(void select_all(), "select_all")
+  _WRAP_VFUNC(void unselect_all(), "unselect_all")
+  //_WRAP_VFUNC(ArrayHandle_RecentInfos get_items() const, "get_items")
+  _WRAP_VFUNC(Glib::RefPtr<RecentManager> get_recent_manager(), "get_recent_manager")
+  _WRAP_VFUNC(void add_filter(const RecentFilter& filter), "add_filter")
+  _WRAP_VFUNC(void remove_filter(const RecentFilter& filter), "remove_filter")
+  //_WRAP_VFUNC(Glib::SListHandle<RecentFilter*> list_filters(), "list_filters")
+  //_WRAP_VFUNC(void set_sort_func(const SlotCompare& slot), "set_sort_func")
+};
+ 
+} // namespace Gtk

@@ -1,0 +1,556 @@
+2.10.0:
+
+2005-02-07  Cedric Gustin  <cedric.gustin@swing.be>
+
+	* build_shared/Makefile_build.am_fragment: added a few LDFLAGS 
+	for win32 DLLs (defined in win32_dlls_ldflags and appended to 
+	common_ldflags).
+
+2005-02-07  Michael Hofmann  <mh21@piware.de>
+
+	* configure.in: Added test of win32 platform and support for
+	MS-style bit alignment.
+	
+2005-02-02  Bradley Bell  <btb@debian.org>
+
+	* libgnomecanvasmm/src/item.ccg: item_construct(): Use an extra 
+	helper function to create an empty va_list, instead of passing 0 to 
+	gnome_canvas_item_construct(). Needed by the alpha platform. 
+	Bug # 136930.
+	
+2.8.0:
+	
+2004-09-12  Murray Cumming  <murrayc@murrayc.com>
+
+	* Increased version for GNOME 2.8 release version.
+
+2.6.1:
+
+2004-05-01  Takashi Takekawa <takekawa@users.sourceforge.jp>
+ 
+         * libgnomecanvas/libgnomecanvas.[h,cc] (GNOMEMM_PROPERTY,
+         GNOMEMM_PROPERTY_IMPL): fixed doubled '>' when T is a template class,
+         for the Intel compiler.
+         * libgnomecanvas/src/line.hg: deleted unnecessary namespace
+         qualification, for the Intel compiler.
+
+2.6.0:
+
+2004-04-12  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* tools/extra_defs_gen/Makefile.am: link against the 2.4 release of glibmm.
+
+2.5.2:
+
+2004-04-07  Bryan Forbes  <bryan@reigndropsfall.net>
+
+	* libgnomecanvas/src/canvas.hg: changed from using GdkRgbDither to
+	Gdk::RgbDither.
+	* libgnomecanvas/src/item.hg: changed from using GdkDrawable* to const
+	Glib::RefPtr<Gdk::Drawable>&.
+	* libgnomecanvas/src/text.hg: changed all C Pango properties to their C++
+	counterparts.
+
+2004-02-07  Alexander Nedotsukov <bland@FreeBSD.org>
+
+ 	* Fixed m4 files installation directory missed after 2.0 -> 2.6 change.
+
+2.5.1:
+ 
+2004-02-13  Murray Cumming  <murrayc@usa.net>
+
+	* Use the new libsigc++ 2 syntax.
+
+2003-12-21  Eric Bourque <ericb@computer.org>
+	* libgnomecanvasmm.spec.in: fixed dependency to gtkmm2 instead of gtkmm
+
+2003-12-19  Murray Cumming  <murrayc@usa.net>
+
+	* libgnomecanvas/src/widget.hg: Use a Gtk::Widget* instead of a
+	Gtk::Widget for the widget property.
+
+2.5.0:
+
+2003-11-03  Murray Cumming  <murrayc@usa.net>
+
+	* This is now libgnomecanvasmm 2.5, which will become libgnomecanvasmm
+	2.6. This is on HEAD, and libgnomecanvasmm 2.0 is on the gnome-2-4
+	branch. This uses gtkmm 2.4 and is parallel-installable.
+
+2003-09-25  Eric Bourque <ericb@computer.org>
+	* libgnomecanvasmm.spec.in: updated for libgnomecanvasmm-2.0
+	
+2.0.1:
+	
+2003-08-22  Murray Cumming  <murrayc@usa.net>
+
+	* examples/Makefile.am: Fixed the distcheck.
+
+
+2003-07-21  Murray Cumming  <murrayc@usa.net>
+
+	* libgnomecanvas/src/canvas.hg: Use the new GMMPROC_PROTECTED_GCLASS
+	macro on the Canvas class so that the CanvasAA class can access
+	canvas_class_.
+	* libgnomecanvas/src/canvas.ccg: Rewrite the CanvasAA constructor to 
+	use the new (and working) gtkmm2-style construction construction. Fixes
+	bug #107686.
+	* configure.in: Now requires gtkmm 2.2.5, which has the new macro.
+
+2.0.0:
+
+2002-12-10  Bradley Bell  <btb@debian.org>
+	
+ 	* scripts/Makefile.am: distribute macros.m4
+	
+2002-12-10  Andreas Holzmann  <Andreas.Holzmann@epost.de>
+
+	* Properties: Files renamed to be more conform with the rest,
+	moved implementation from header into implementation file,
+	some typos fixed, some properties added.
+
+2002-12-09  Andreas Holzmann  <Andreas.Holzmann@epost.de>	
+
+	* libgnomecanvas/src/rich-text.[ccg|hg]: Replaced 
+	void get_iter_at_location(const Gtk::TextIter&, int, int) with
+	iterator get_iter_at_location(int, int) const to be more conform
+	with Gtkmm iterator methods.
+	* libgnomecanvas/src/canvas.[ccg|hg]: The following methods are
+	now const: root(), get_scroll_region(), get_center_scroll_region(),
+	w2c(), and get_color()
+	* libgnomecanvas/libgnomecanvasmm/affinetrans.[cc,h]: Changed
+	bool operator==(AffineTrans&) to 
+	bool operator==(const AffineTrans&) const
+	* demos/primitives.cc: Fixed pack_start() Gtk::AttachOptions.
+	* examples/Makefile.am_fragment: Was missing in CVS (I took it from
+	the release candidate).
+	* libgnomecanvas/src/libgnomecanvas_docs_override.xml: Was missing
+	in CVS (I took it from the release candidate).
+
+2002-12-09  Murray Cumming  <murrayc@usa.net>
+
+	* libgnomecanvas/*.pc.in: Changed LIBS from 1.3 to 2.0.
+
+2002-12-09  Murray Cumming  <murrayc@usa.net>
+
+	* Merging C docs: Added libgnomecavas/src/libgnomecavas_docs.xml and 
+	libgnomecanvas_docs_override.xml, and added --mergecdocs to 
+	build_shared/Makefile_gensrc.am_fragment
+	* examples: Created separated directories for each example, with each
+	Makefile.am including examples/Makefile.am_fragment, like the other
+	*mm projects. Unlike the other projects, the examples build as part
+	of the main build, because there aren't many.
+
+2002-12-09  Murray Cumming <murrayc@usa.net>
+
+	* Increased version to 2.0.0, renamed library from 1.3 to 2.0.
+
+1.3.11:
+	
+2002-09-28  Owen Stenseth  <owen@bonemachine.org>
+
+	* demos/primitives.cc: Set center_scroll_region to false as the
+	libgnomecanvas demo does.
+	
+1.3.10:
+	
+2002-08-15  ERDI Gergo  <cactus@cactus.rulez.org>
+
+	* libgnomecanvas/libgnomecanvasmm/canvas-property.cc
+	(Property<Gdk::Color>::set_value_in_object): Clear color property if input string is ""
+	(Property<Pango::FontDescription>): Moved implementation to .cc file
+
+1.3.9:
+	
+2002-08-08  ERDI Gergo  <cactus@cactus.rulez.org>
+
+	* libgnomecanvas/src/shape.hg: 
+	* libgnomecanvas/src/line.hg: 
+	* libgnomecanvas/src/text.hg: 
+	* libgnomecanvas/libgnomecanvasmm/canvas-property.h: Changed
+	stipple properties to use correct Gdk::Bitmap param type instead
+	of Gdk::Pixmap and Gdk::Drawable
+
+2002-07-25  Michael Babcock <mbabcock@la.creatureshop.henson.com>
+	* libgnomecanvas/libgnomecanvasmm/point.cc: gobj(): Avoid infinite
+	recursion.
+
+2002-07-24  Erwin J. van Eijk  <kojak@oakhill.demon.nl>
+
+	* examples/canvas/canvas_events.cc:
+	One of the examples, canvas_events caused an infinite recursion
+	to occur. I've patched canvas_events to be more like canvas.cc,
+	and not to cause the recursion.
+
+2002-07-19  Murray Cumming  <murrayc@usa.net>
+
+	* Updated examples for latest gtkmm pack_start() method.
+
+1.3.8:
+	
+2002-07-16  Murray Cumming  <murrayc@usa.net>
+
+	* Rebuilt for latest gtkmm.
+
+1.3.7:
+	
+2002-06-23  Murray Cumming  <murrayc@usa.net>
+
+	* Rebuilt for latest gtkmm.
+
+1.3.6:
+	
+2002-06-11  Andreas Holzmann  <Andreas.Holzmann@epost.de>
+
+	* libgnomecanvas/libgnomecanvasmm.h: Add missing include
+	<libgnomecanvasmm/widget.h>
+	(#84704, reported by abes@memlab1.ccs.brandeis.edu)
+
+2002-06-02  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* libgnomecanvas/src/pixbuf.hg (property_pixbuf): Change the
+	property type to Glib::RefPtr<Gdk::Pixbuf>.  (Reported by
+	Ole Laursen <olau@hardworking.dk>.)
+
+2002-05-14  Daniel Elstner  <daniel.elstner@gmx.net>
+
+	* libgnomecanvas/src/line.hg (Canvas::Points::is_null): Remove
+	'virtual' keyword.  There is no need for is_null() to be virtual,
+	and gcc-3.1 issues a warning because the dtor isn't virtual too.
+
+	* libgnomecanvas/libgnomecanvasmm/affinetrans.cc: Remove default
+	method arguments from the implementation prototype -- gcc-3.1
+	doesn't like them at all.  Also, remove the now unnecessary cast
+	to std::string in operator<<().
+
+2002-05-14  Andreas Holzmann  <Andreas.Holzmann@epost.de>
+
+	* demos/*.cc: Use new Gtk::Box::pack_start() API.
+	* configure.in: Require gtkmm version 1.3.14. Require libgnomecanvas
+	version 1.113 because of function set_center_scroll_region().
+
+2002-05-07  Andreas Holzmann  <Andreas.Holzmann@epost.de>
+
+	* demos/canvas.cc: Use new Gtk::Notebook API.
+	* libgnomecanvas/src/line.[ccg|hg]: Add Glib::Value<>
+	specialization for Points class.
+	* configure.in: Require gtkmm version 1.3.13.
+	
+1.3.5:
+	
+2002-04-23  Murray Cumming  <murrayc@usa.net>
+
+	* generated sources are now distributed. The am_fragments in 
+	build_files are now abstracted for all Gnome::Something libraries, 
+	so I can now just copy them into the other libraries.
+
+1.3.4:
+	
+2002-04-04  Andreas Holzmann  <Andreas.Holzmann@epost.de>
+
+	* Use new Glib::Value and Glib::PropertyProxy implementation.
+	* Use new namespace enums.
+	
+2002-04-01  Murray Cumming  <murrayc@usa.net>
+
+	* Use new _DEFS() format in *.hg.
+	
+2002-03-27  Murray Cumming  <murrayc@usa.net>
+
+	* PathDef: Use new _CLASS_OPAQUE_REFCOUNTED macro instead of
+	_CLASS_BOXEDTYPE.
+
+2002-03-17  Murray Cumming  <murrayc@usa.net>
+
+	* Added BoxedType-like methods to Gnome::Points, so that it can
+	be used for Properties.
+
+2002-03-16  Murary Cumming  <murrayc@usa.net>
+
+	* Gnome::Art::AffineTrans and Gnome::Art::Point obj() methods
+	renamed to gobj(), to conform to match everything else.
+
+2002-03-15  Andreas Holzmann <Andreas.Holzmann@epost.de>
+
+	* libgnomecanvas/src/canvas.[hg|ccg] 
+	(set_center_scroll_region,
+	 get_center_scroll_region): New functions wrapped.
+	* libgnomecanvas/src/bpath.[hg|ccg]: New wrapper for GnomeCanvasBpath.
+	* libgnomecanvas/src/path-def.[hg|ccg]: New wrapper for 
+	GnomeCanvasPathDef.
+	* demos/*: Missing curve demos added. More conform to coding standards.
+
+1.3.3:
+2002-03-10  Murray Cumming  <murrayc@usa.net>
+
+	* Changed signal args to C++ types.
+
+2002-02-24  Murray Cumming  <murrayc@usa.net>
+
+	* Renamed canvas-*.[h.cc] to *.[h.cc]. They were previously prefixed
+	by canvas- to make things clearer when they were part of libgnomeui.
+	This means you should probably manually delete any installed 
+	libgnomecanvasmm headers or make uninstall a previous version. 
+
+2002-02-24  Andreas Holzmann  <Andreas.Holzmann@epost.de>
+
+	* docs/reference generation fixed
+	* libgnomecanvas/src/canvas.[hg|ccg]:
+	  + Antialiased canvas constructor fixed
+	  + aa property changed from gulong to bool
+	* libgnomecanvas/src/pixbuf.[hg|ccg]: implemented
+	* libgnomecanvas/src/rich-text.[hg|ccg]: implemented
+	* Added demo, based on the C demo - needs some more
+	classes to be implemented.
+
+1.3.2:
+	
+2002-02-20  Murray Cumming  <murrayc@usa.net>
+
+	* Wrapped remaining methods and signals in Canvas and Item.
+	* Art::Affine(const double[6]) constructor is now explicit, and
+	the arg is const, with a fixed array size.
+	* Increased version number.
+
+2002-02-17  Murray Cumming  <murrayc@usa.net>
+
+	* Removed an if{} check from init(). This would have prevented
+	Gnome::Canvas::init() or Gnome::Conf::init() from working after one 
+	of them had run first.
+
+2002-02-15  Murray Cumming  <murrayc@usa.net>
+
+	* Added GnomeCanvasShape wrapper, and corrected RectEllpise and 
+	Polygon to inherit from it. 
+
+2002-02-15  Andreas Holzmann  <Andreas.Holzmann@epost.de>
+
+	* Fixed name and description in the pkg-config file.
+	* Uncommented Canvas::get_item_at(). Don't know why it was commented.
+
+Release 1:3.1:
+	
+	vfuncs.defs parsing problems solved. Updated for latest gtkmm
+	
+Release 1.3.0:
+
+2002-01-08  Murray Cumming  <murrayc@usa.net>
+
+	* canvas-properties.[h|c]: Properly implemented the shared 
+	streams-based properties, using the gtkmm2 PropertyProxy* templates,
+	and put them in the Gnome::Canvas::Properties namespace instead of
+	Gnome::CanvasHelpers.
+	I think that the implementation is much clearer than before.
+	We probably need to review the properties in case any streams-based
+	properties need to be added.
+
+2002-01-05  Murray Cumming  <murrayc@usa.net>
+
+	* Change properties to normal gtkmm-1.3 properties. The 
+	streams-based shared property objects need more work so they 
+	can deal with BoxedType and Glib::Object properties. However, this
+	streams stuff is separate from normal property proxies.
+
+2002-01-04  Murray Cumming  <murrayc@usa.net>
+
+	* Canvas::CanvasGroup, Canvas::CanvasItem, etc are now 
+	Canvas::Group, Canvas::Item, etc. Canvas::RE is now 
+	Canvas::RectEllipse.
+
+2002-01-03  Murray Cumming  <murrayc@usa.net>
+
+	* Moved things into the Gnome::Canvas namespace. We might want to 
+	rename things such as Gnome::Canvas::CanvasGroup to 
+	Gnome::Canvas::Group.
+
+2002-01-02  ERDI Gergo  <cactus@cactus.rulez.org>
+
+	* libgnomecanvas/src/canvas-text.hg:
+	* libgnomecanvas/src/canvas-polygon.hg:
+	* libgnomecanvas/src/canvas-line.hg: Use Gdk::Bitmaps instead of
+	Gdk::Pixmaps for stipples
+
+2001-12-15  Murray Cumming  <murrayc@usa.net>
+
+	* Committed Paul Davis's first patch to properly wrap the old
+	CanvasItem 'signals' as vfuncs, using his hand-written 
+	libgnomecanvas_vfuncs.defs. He also fixed the canvas/canvas 
+	example, which now runs.
+	* Fixed libgnomecanvasmm.h and added Gnome::canvas_init() which
+	should be used before Gtk::Main, if you are not using libgnomeuimm 
+	and Gnome::Main.
+
+2001-12-12  Murray Cumming  <murrayc@usa.net>
+
+	* Changed build files to use -I instead of --m4 with
+	gtkmmproc, as needed by the latest gtkmm-1.3. The new
+	gtkmmproc doesn't seem to be picking up the libgnomecanvasmm
+	conversions so I had to comment out a _MEMBER_GET in CanvasItem.
+
+2001-12-11  Murray Cumming  <murrayc@usa.net>
+
+	* Gnome::wrap_init() is now Gnome::canvas_wrap_init()
+	to avoid a clash with other wrap_init() functions. This
+	requires the latest gtkmm-1.3.
+
+2001-12-04  Murray Cumming  <murrayc@usa.net>
+
+	* Created libgnomecanvasmm for libgnomeui in GNOME2.
+
+The following notes are from gnome-- 1.2.x, which previously
+contained the GnomeCanvas wrappers:
+
+Release 1.2.2
+  * Gnome::UI::Help fixed: This should be added to the
+    Help menu to automatically add items from the
+    topics.dat file. (Murray Cumming)
+  * gnome-hello example: The About box is now closed
+    and deleted when [Close] is clicked
+    (Murray Cumming)
+	
+Release 1.2.1
+  * App::create_toolbars fixed to use member UI::Array.
+    This allows access to the widgets, as well as
+    properly managing memory for the UI Items.
+    - menu example modified to demonstrate disabling
+      of menu item widgets. (Murray Cumming)
+  * configure.in: Don't add -I$prefix/include to
+    GNOMEMM_INCLUDEDIR if $prefix=/usr. -I/usr/include
+    should never be used because it overrides the order
+    of gcc's implicit include path. gtkmm-config.in has
+    been corrected too. (Daniel Elstner)
+  * Dialog, MessageBox, PropertyBox: Added extra
+    documentation so people know that these are not
+    self-destructed when run() or run_and_close()
+    returns. (Murray Cumming)
+
+Release 1.2.0
+  * Canvas example:
+      Added example.png to test CanvasImage.
+      Items are now deleted in the destructor.
+      (Murray Cumming)
+  * Reference Documentation:
+      Location of perl not hardcoded. (Cedric Gustin)
+  * Some gcc 3.0 std namespace fixes. (Claudio Bley)
+
+Release 1.1.21
+  * CanvasText: set_font(const GdkFont&) conversion
+    fixed and set_font(const string&) added.
+    (Murray Cumming)
+  * CanvasItem: event signal marshalled again. We lost
+    this fix sometime after 1.1.17. (Gergõ Érdi)
+  * Uncommented the CanvasHelper::anchor property,
+    adding the necessary gtkpacker.h #include.
+    (Murray Cumming)
+  * Fixed CanvasHelpers::font for Gdk_Font input and
+    added a string constructor. (Murray Cumming)
+  * Added CanvasText::set_fontset(). (Murray Cumming)
+
+Release 1.1.20
+  Unofficial, with some 1.1.21 changes.
+
+Release 1.1.19
+  * canvas-property.h is installed.
+    (Murray Cumming)
+
+Release 1.1.18
+  * Namespace and other fixes for gcc 3.
+    (Murray Cumming and Joe Yandle)
+  * New Canvas API (KEN)
+      Adds streams-style interface. See examples.
+  * MDIChild:
+      Comments in code.
+      Implemented set_config_string(), remove_view(),
+      and set_active(). (Murray Cumming)
+
+
+Release 1.1.17
+  * Improved configure checks for Gtkmm and libsigc++.
+    (Eric Bourque)
+  * App:
+    create_menus() and create_toolbar() now
+    return UI::Array<>s that provide the widget
+    pointers.
+    Added insert_menus() and remove_menus().
+    Added menu example, to demonstrate access to menu
+    item widgets and insert_menus().
+    (Murray Cumming)
+  * Added Gnome::Pixmap::find_file() as wrapper for
+    gnome_pixmap_file(). (Murray Cumming)
+  * CanvasItem::event()'s propagation can be stopped by
+    returning TRUE in signal handler (Gergõ Érdi)
+
+Release 1.1.16
+  * Fixed AppBar default constructor. (Murray Cumming)
+  * Improved Point and AffineTrans wrappers. Put them in
+    their own point.h/.cc and affinetrans.h/.cc files,
+    in the Gnome::Art namespace.
+    (Agustin Ferrin Pozuelo)
+  * Added canvas_events example. (Agustin Ferrin Pozuelo)
+  * Added canvas_affine example. (Agustin Ferrin Pozuelo)
+  * configure: fixed check for perl. (Agustin Ferrin Pozuelo)
+  * IconList: Removed default constructor. Fixed signals.
+    Added selection() method, with SelectionList.
+    Added examples.
+    (Andreas Holzmann)
+  * Canvas, CanvasItem: Changed some pointer args to
+    references (Andreas Holzmann).
+  * AM_PATH_GNOMEMM() macro installed.
+    (Agustin Ferrin Pozuelo)
+
+Release 1.1.15
+  * Changed AffineTrans::operator[] to return reference.
+    (Falk Hueffner)
+  * Examples now quit when close button is clicked,
+    instead of just hiding their windows.
+    (Murray Cumming)
+  * Fixed Clock constructor problems, and
+    added demo. (Murray Cumming)
+  * CanvasItem sub-classes:
+    - Removed default constructors - there's nothing
+      in libgnomeui for these.
+    - IconTextItem (icon-item.gen_h): Constructors are now
+      like other CanvasItems. (Murray Cumming)
+  * Fixed Druid constructor problems, and
+    added demo. (Murray Cumming)
+  * Fixed MessageBox constructor problems, and
+    added demo. (Murray Cumming)
+  * Fixed Dialog self-destruct by correcting
+    close signal wrapping. (Karl Nelson)
+  * Dialogs (and sub-classes) now use close_hides()
+    as default, to prevent self-destruction.
+    (Murray Cumming)
+  * Reference documentation now builds
+    (Murray Cumming)
+   * Fixes to app-helper to allow Slot1<void,Gtk::Widget*> and
+      Slot0<void> on UI::Info items. (Karl Nelson)
+
+
+==================================================================
+
+Release 1.1.14
+  ?
+
+==================================================================
+
+Release 1.1.13
+  * Static string problem on initialization
+  * gcc 2.96 fixes.
+
+==================================================================
+
+Release 1.1.12
+  * Massive cleanup of internals (Murray Cumming)
+  * Animator and demo (Murray Cumming)
+  * HRef (Murray Cumming)
+  * Fixes to UIInfo (Murray Cumming)
+  * added add_button to dialog (Murray Cumming)
+  * cleanups of types to match GNOME
+  * Canvas fixes (Sebastian Rittau)
+  * MDI fixes (Manuel Clos and Sebastian Rittau)
+  * Complete demo for MDI (Manuel Clos)
+  * Added radio items (Karl)
+  * Improved UIInfo conversions (Karl)
+  * Demos for UIInfo (Karl)
+  * STL name cleanups (Karl)
+

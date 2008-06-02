@@ -1,0 +1,1041 @@
+;; -*- scheme -*-
+; object definitions ...
+(define-object Pixbuf
+  (in-module "Gdk")
+  (parent "GObject")
+  (c-name "GdkPixbuf")
+  (gtype-id "GDK_TYPE_PIXBUF")
+)
+
+(define-object PixbufAnimation
+  (in-module "Gdk")
+  (parent "GObject")
+  (c-name "GdkPixbufAnimation")
+  (gtype-id "GDK_TYPE_PIXBUF_ANIMATION")
+)
+
+(define-object PixbufAniAnim
+  (in-module "Gdk")
+  (parent "GdkPixbufAnimation")
+  (c-name "GdkPixbufAniAnim")
+  (gtype-id "GDK_TYPE_PIXBUF_ANI_ANIM")
+)
+
+(define-object PixbufAnimationIter
+  (in-module "Gdk")
+  (parent "GObject")
+  (c-name "GdkPixbufAnimationIter")
+  (gtype-id "GDK_TYPE_PIXBUF_ANIMATION_ITER")
+)
+
+(define-object PixbufAniAnimIter
+  (in-module "Gdk")
+  (parent "GdkPixbufAnimationIter")
+  (c-name "GdkPixbufAniAnimIter")
+  (gtype-id "GDK_TYPE_PIXBUF_ANI_ANIM_ITER")
+)
+
+(define-object PixbufGifAnim
+  (in-module "Gdk")
+  (parent "GdkPixbufAnimation")
+  (c-name "GdkPixbufGifAnim")
+  (gtype-id "GDK_TYPE_PIXBUF_GIF_ANIM")
+)
+
+(define-object PixbufGifAnimIter
+  (in-module "Gdk")
+  (parent "GdkPixbufAnimationIter")
+  (c-name "GdkPixbufGifAnimIter")
+  (gtype-id "GDK_TYPE_PIXBUF_GIF_ANIM_ITER")
+)
+
+(define-object PixbufLoader
+  (in-module "Gdk")
+  (parent "GObject")
+  (c-name "GdkPixbufLoader")
+  (gtype-id "GDK_TYPE_PIXBUF_LOADER")
+)
+
+;; Enumerations and flags ...
+
+(define-enum PixbufAlphaMode
+  (in-module "Gdk")
+  (c-name "GdkPixbufAlphaMode")
+  (gtype-id "GDK_TYPE_PIXBUF_ALPHA_MODE")
+  (values
+    '("bilevel" "GDK_PIXBUF_ALPHA_BILEVEL")
+    '("full" "GDK_PIXBUF_ALPHA_FULL")
+  )
+)
+
+(define-enum Colorspace
+  (in-module "Gdk")
+  (c-name "GdkColorspace")
+  (gtype-id "GDK_TYPE_COLORSPACE")
+  (values
+    '("b" "GDK_COLORSPACE_RGB")
+  )
+)
+
+(define-enum PixbufError
+  (in-module "Gdk")
+  (c-name "GdkPixbufError")
+  (gtype-id "GDK_TYPE_PIXBUF_ERROR")
+  (values
+    '("corrupt-image" "GDK_PIXBUF_ERROR_CORRUPT_IMAGE")
+    '("insufficient-memory" "GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY")
+    '("bad-option" "GDK_PIXBUF_ERROR_BAD_OPTION")
+    '("unknown-type" "GDK_PIXBUF_ERROR_UNKNOWN_TYPE")
+    '("unsupported-operation" "GDK_PIXBUF_ERROR_UNSUPPORTED_OPERATION")
+    '("failed" "GDK_PIXBUF_ERROR_FAILED")
+  )
+)
+
+(define-flags PixbufFormatFlags
+  (in-module "Gdk")
+  (c-name "GdkPixbufFormatFlags")
+  (gtype-id "GDK_TYPE_PIXBUF_FORMAT_FLAGS")
+  (values
+    '("writable" "GDK_PIXBUF_FORMAT_WRITABLE")
+    '("scalable" "GDK_PIXBUF_FORMAT_SCALABLE")
+    '("threadsafe" "GDK_PIXBUF_FORMAT_THREADSAFE")
+  )
+)
+
+(define-enum InterpType
+  (in-module "Gdk")
+  (c-name "GdkInterpType")
+  (gtype-id "GDK_TYPE_INTERP_TYPE")
+  (values
+    '("nearest" "GDK_INTERP_NEAREST")
+    '("tiles" "GDK_INTERP_TILES")
+    '("bilinear" "GDK_INTERP_BILINEAR")
+    '("hyper" "GDK_INTERP_HYPER")
+  )
+)
+
+(define-enum PixbufRotation
+  (in-module "Gdk")
+  (c-name "GdkPixbufRotation")
+  (gtype-id "GDK_TYPE_PIXBUF_ROTATION")
+  (values
+    '("none" "GDK_PIXBUF_ROTATE_NONE")
+    '("counterclockwise" "GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE")
+    '("upsidedown" "GDK_PIXBUF_ROTATE_UPSIDEDOWN")
+    '("clockwise" "GDK_PIXBUF_ROTATE_CLOCKWISE")
+  )
+)
+
+(define-flags PixdataType
+  (in-module "Gdk")
+  (c-name "GdkPixdataType")
+  (gtype-id "GDK_TYPE_PIXDATA_TYPE")
+  (values
+    '("color-type-rgb" "GDK_PIXDATA_COLOR_TYPE_RGB")
+    '("color-type-rgba" "GDK_PIXDATA_COLOR_TYPE_RGBA")
+    '("color-type-mask" "GDK_PIXDATA_COLOR_TYPE_MASK")
+    '("sample-width-8" "GDK_PIXDATA_SAMPLE_WIDTH_8")
+    '("sample-width-mask" "GDK_PIXDATA_SAMPLE_WIDTH_MASK")
+    '("encoding-raw" "GDK_PIXDATA_ENCODING_RAW")
+    '("encoding-rle" "GDK_PIXDATA_ENCODING_RLE")
+    '("encoding-mask" "GDK_PIXDATA_ENCODING_MASK")
+  )
+)
+
+(define-flags PixdataDumpType
+  (in-module "Gdk")
+  (c-name "GdkPixdataDumpType")
+  (gtype-id "GDK_TYPE_PIXDATA_DUMP_TYPE")
+  (values
+    '("pixdata-stream" "GDK_PIXDATA_DUMP_PIXDATA_STREAM")
+    '("pixdata-struct" "GDK_PIXDATA_DUMP_PIXDATA_STRUCT")
+    '("macros" "GDK_PIXDATA_DUMP_MACROS")
+    '("gtypes" "GDK_PIXDATA_DUMP_GTYPES")
+    '("ctypes" "GDK_PIXDATA_DUMP_CTYPES")
+    '("static" "GDK_PIXDATA_DUMP_STATIC")
+    '("const" "GDK_PIXDATA_DUMP_CONST")
+    '("rle-decoder" "GDK_PIXDATA_DUMP_RLE_DECODER")
+  )
+)
+
+(define-enum PixbufFrameAction
+  (in-module "Gdk")
+  (c-name "GdkPixbufFrameAction")
+  (gtype-id "GDK_TYPE_PIXBUF_FRAME_ACTION")
+  (values
+    '("retain" "GDK_PIXBUF_FRAME_RETAIN")
+    '("dispose" "GDK_PIXBUF_FRAME_DISPOSE")
+    '("revert" "GDK_PIXBUF_FRAME_REVERT")
+  )
+)
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-alias.h
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-animation.h
+
+(define-function gdk_pixbuf_animation_get_type
+  (c-name "gdk_pixbuf_animation_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_animation_new_from_file
+  (c-name "gdk_pixbuf_animation_new_from_file")
+  (return-type "GdkPixbufAnimation*")
+  (parameters
+    '("const-char*" "filename")
+    '("GError**" "error")
+  )
+)
+
+(define-method ref
+  (of-object "GdkPixbufAnimation")
+  (c-name "gdk_pixbuf_animation_ref")
+  (return-type "GdkPixbufAnimation*")
+)
+
+(define-method unref
+  (of-object "GdkPixbufAnimation")
+  (c-name "gdk_pixbuf_animation_unref")
+  (return-type "none")
+)
+
+(define-method get_width
+  (of-object "GdkPixbufAnimation")
+  (c-name "gdk_pixbuf_animation_get_width")
+  (return-type "int")
+)
+
+(define-method get_height
+  (of-object "GdkPixbufAnimation")
+  (c-name "gdk_pixbuf_animation_get_height")
+  (return-type "int")
+)
+
+(define-method is_static_image
+  (of-object "GdkPixbufAnimation")
+  (c-name "gdk_pixbuf_animation_is_static_image")
+  (return-type "gboolean")
+)
+
+(define-method get_static_image
+  (of-object "GdkPixbufAnimation")
+  (c-name "gdk_pixbuf_animation_get_static_image")
+  (return-type "GdkPixbuf*")
+)
+
+(define-method get_iter
+  (of-object "GdkPixbufAnimation")
+  (c-name "gdk_pixbuf_animation_get_iter")
+  (return-type "GdkPixbufAnimationIter*")
+  (parameters
+    '("const-GTimeVal*" "start_time")
+  )
+)
+
+(define-function gdk_pixbuf_animation_iter_get_type
+  (c-name "gdk_pixbuf_animation_iter_get_type")
+  (return-type "GType")
+)
+
+(define-method get_delay_time
+  (of-object "GdkPixbufAnimationIter")
+  (c-name "gdk_pixbuf_animation_iter_get_delay_time")
+  (return-type "int")
+)
+
+(define-method get_pixbuf
+  (of-object "GdkPixbufAnimationIter")
+  (c-name "gdk_pixbuf_animation_iter_get_pixbuf")
+  (return-type "GdkPixbuf*")
+)
+
+(define-method on_currently_loading_frame
+  (of-object "GdkPixbufAnimationIter")
+  (c-name "gdk_pixbuf_animation_iter_on_currently_loading_frame")
+  (return-type "gboolean")
+)
+
+(define-method advance
+  (of-object "GdkPixbufAnimationIter")
+  (c-name "gdk_pixbuf_animation_iter_advance")
+  (return-type "gboolean")
+  (parameters
+    '("const-GTimeVal*" "current_time")
+  )
+)
+
+(define-method non_anim_new
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_non_anim_new")
+  (return-type "GdkPixbufAnimation*")
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-core.h
+
+(define-function gdk_pixbuf_error_quark
+  (c-name "gdk_pixbuf_error_quark")
+  (return-type "GQuark")
+)
+
+(define-function gdk_pixbuf_get_type
+  (c-name "gdk_pixbuf_get_type")
+  (return-type "GType")
+)
+
+(define-method ref
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_ref")
+  (return-type "GdkPixbuf*")
+)
+
+(define-method unref
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_unref")
+  (return-type "none")
+)
+
+(define-method get_colorspace
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_colorspace")
+  (return-type "GdkColorspace")
+)
+
+(define-method get_n_channels
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_n_channels")
+  (return-type "int")
+)
+
+(define-method get_has_alpha
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_has_alpha")
+  (return-type "gboolean")
+)
+
+(define-method get_bits_per_sample
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_bits_per_sample")
+  (return-type "int")
+)
+
+(define-method get_pixels
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_pixels")
+  (return-type "guchar*")
+)
+
+(define-method get_width
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_width")
+  (return-type "int")
+)
+
+(define-method get_height
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_height")
+  (return-type "int")
+)
+
+(define-method get_rowstride
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_rowstride")
+  (return-type "int")
+)
+
+(define-function gdk_pixbuf_new
+  (c-name "gdk_pixbuf_new")
+  (is-constructor-of "GdkPixbuf")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("GdkColorspace" "colorspace")
+    '("gboolean" "has_alpha")
+    '("int" "bits_per_sample")
+    '("int" "width")
+    '("int" "height")
+  )
+)
+
+(define-method copy
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_copy")
+  (return-type "GdkPixbuf*")
+)
+
+(define-method new_subpixbuf
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_new_subpixbuf")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("int" "src_x")
+    '("int" "src_y")
+    '("int" "width")
+    '("int" "height")
+  )
+)
+
+(define-function gdk_pixbuf_new_from_file
+  (c-name "gdk_pixbuf_new_from_file")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-char*" "filename")
+    '("GError**" "error")
+  )
+)
+
+(define-function gdk_pixbuf_new_from_file_at_size
+  (c-name "gdk_pixbuf_new_from_file_at_size")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-char*" "filename")
+    '("int" "width")
+    '("int" "height")
+    '("GError**" "error")
+  )
+)
+
+(define-function gdk_pixbuf_new_from_file_at_scale
+  (c-name "gdk_pixbuf_new_from_file_at_scale")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-char*" "filename")
+    '("int" "width")
+    '("int" "height")
+    '("gboolean" "preserve_aspect_ratio")
+    '("GError**" "error")
+  )
+)
+
+(define-function gdk_pixbuf_new_from_data
+  (c-name "gdk_pixbuf_new_from_data")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-guchar*" "data")
+    '("GdkColorspace" "colorspace")
+    '("gboolean" "has_alpha")
+    '("int" "bits_per_sample")
+    '("int" "width")
+    '("int" "height")
+    '("int" "rowstride")
+    '("GdkPixbufDestroyNotify" "destroy_fn")
+    '("gpointer" "destroy_fn_data")
+  )
+)
+
+(define-function gdk_pixbuf_new_from_xpm_data
+  (c-name "gdk_pixbuf_new_from_xpm_data")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-char**" "data")
+  )
+)
+
+(define-function gdk_pixbuf_new_from_inline
+  (c-name "gdk_pixbuf_new_from_inline")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("gint" "data_length")
+    '("const-guint8*" "data")
+    '("gboolean" "copy_pixels")
+    '("GError**" "error")
+  )
+)
+
+(define-method fill
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_fill")
+  (return-type "none")
+  (parameters
+    '("guint32" "pixel")
+  )
+)
+
+(define-method save
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_save")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "filename")
+    '("const-char*" "type")
+    '("GError**" "error")
+  )
+  (varargs #t)
+)
+
+(define-method savev
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_savev")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "filename")
+    '("const-char*" "type")
+    '("char**" "option_keys")
+    '("char**" "option_values")
+    '("GError**" "error")
+  )
+)
+
+(define-method save_to_callback
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_save_to_callback")
+  (return-type "gboolean")
+  (parameters
+    '("GdkPixbufSaveFunc" "save_func")
+    '("gpointer" "user_data")
+    '("const-char*" "type")
+    '("GError**" "error")
+  )
+  (varargs #t)
+)
+
+(define-method save_to_callbackv
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_save_to_callbackv")
+  (return-type "gboolean")
+  (parameters
+    '("GdkPixbufSaveFunc" "save_func")
+    '("gpointer" "user_data")
+    '("const-char*" "type")
+    '("char**" "option_keys")
+    '("char**" "option_values")
+    '("GError**" "error")
+  )
+)
+
+(define-method save_to_buffer
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_save_to_buffer")
+  (return-type "gboolean")
+  (parameters
+    '("gchar**" "buffer")
+    '("gsize*" "buffer_size")
+    '("const-char*" "type")
+    '("GError**" "error")
+  )
+  (varargs #t)
+)
+
+(define-method save_to_bufferv
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_save_to_bufferv")
+  (return-type "gboolean")
+  (parameters
+    '("gchar**" "buffer")
+    '("gsize*" "buffer_size")
+    '("const-char*" "type")
+    '("char**" "option_keys")
+    '("char**" "option_values")
+    '("GError**" "error")
+  )
+)
+
+(define-method add_alpha
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_add_alpha")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("gboolean" "substitute_color")
+    '("guchar" "r")
+    '("guchar" "g")
+    '("guchar" "b")
+  )
+)
+
+(define-method copy_area
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_copy_area")
+  (return-type "none")
+  (parameters
+    '("int" "src_x")
+    '("int" "src_y")
+    '("int" "width")
+    '("int" "height")
+    '("GdkPixbuf*" "dest_pixbuf")
+    '("int" "dest_x")
+    '("int" "dest_y")
+  )
+)
+
+(define-method saturate_and_pixelate
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_saturate_and_pixelate")
+  (return-type "none")
+  (parameters
+    '("GdkPixbuf*" "dest")
+    '("gfloat" "saturation")
+    '("gboolean" "pixelate")
+  )
+)
+
+(define-method get_option
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_get_option")
+  (return-type "const-gchar*")
+  (parameters
+    '("const-gchar*" "key")
+  )
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-enum-types.h
+
+(define-function gdk_pixbuf_alpha_mode_get_type
+  (c-name "gdk_pixbuf_alpha_mode_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_colorspace_get_type
+  (c-name "gdk_colorspace_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_error_get_type
+  (c-name "gdk_pixbuf_error_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_interp_type_get_type
+  (c-name "gdk_interp_type_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_rotation_get_type
+  (c-name "gdk_pixbuf_rotation_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-features.h
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf.h
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-i18n.h
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-io.h
+
+(define-function gdk_pixbuf_get_formats
+  (c-name "gdk_pixbuf_get_formats")
+  (return-type "GSList*")
+)
+
+(define-method get_name
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_get_name")
+  (return-type "gchar*")
+)
+
+(define-method get_description
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_get_description")
+  (return-type "gchar*")
+)
+
+(define-method get_mime_types
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_get_mime_types")
+  (return-type "gchar**")
+)
+
+(define-method get_extensions
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_get_extensions")
+  (return-type "gchar**")
+)
+
+(define-method is_writable
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_is_writable")
+  (return-type "gboolean")
+)
+
+(define-method is_scalable
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_is_scalable")
+  (return-type "gboolean")
+)
+
+(define-method is_disabled
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_is_disabled")
+  (return-type "gboolean")
+)
+
+(define-method set_disabled
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_set_disabled")
+  (return-type "none")
+  (parameters
+    '("gboolean" "disabled")
+  )
+)
+
+(define-method get_license
+  (of-object "GdkPixbufFormat")
+  (c-name "gdk_pixbuf_format_get_license")
+  (return-type "gchar*")
+)
+
+(define-function gdk_pixbuf_get_file_info
+  (c-name "gdk_pixbuf_get_file_info")
+  (return-type "GdkPixbufFormat*")
+  (parameters
+    '("const-gchar*" "filename")
+    '("gint*" "width")
+    '("gint*" "height")
+  )
+)
+
+(define-method set_option
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_set_option")
+  (return-type "gboolean")
+  (parameters
+    '("const-gchar*" "key")
+    '("const-gchar*" "value")
+  )
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-loader.h
+
+(define-function gdk_pixbuf_loader_get_type
+  (c-name "gdk_pixbuf_loader_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_loader_new
+  (c-name "gdk_pixbuf_loader_new")
+  (is-constructor-of "GdkPixbufLoader")
+  (return-type "GdkPixbufLoader*")
+)
+
+(define-function gdk_pixbuf_loader_new_with_type
+  (c-name "gdk_pixbuf_loader_new_with_type")
+  (return-type "GdkPixbufLoader*")
+  (parameters
+    '("const-char*" "image_type")
+    '("GError**" "error")
+  )
+)
+
+(define-function gdk_pixbuf_loader_new_with_mime_type
+  (c-name "gdk_pixbuf_loader_new_with_mime_type")
+  (return-type "GdkPixbufLoader*")
+  (parameters
+    '("const-char*" "mime_type")
+    '("GError**" "error")
+  )
+)
+
+(define-method set_size
+  (of-object "GdkPixbufLoader")
+  (c-name "gdk_pixbuf_loader_set_size")
+  (return-type "none")
+  (parameters
+    '("int" "width")
+    '("int" "height")
+  )
+)
+
+(define-method write
+  (of-object "GdkPixbufLoader")
+  (c-name "gdk_pixbuf_loader_write")
+  (return-type "gboolean")
+  (parameters
+    '("const-guchar*" "buf")
+    '("gsize" "count")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_pixbuf
+  (of-object "GdkPixbufLoader")
+  (c-name "gdk_pixbuf_loader_get_pixbuf")
+  (return-type "GdkPixbuf*")
+)
+
+(define-method get_animation
+  (of-object "GdkPixbufLoader")
+  (c-name "gdk_pixbuf_loader_get_animation")
+  (return-type "GdkPixbufAnimation*")
+)
+
+(define-method close
+  (of-object "GdkPixbufLoader")
+  (c-name "gdk_pixbuf_loader_close")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method get_format
+  (of-object "GdkPixbufLoader")
+  (c-name "gdk_pixbuf_loader_get_format")
+  (return-type "GdkPixbufFormat*")
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-marshal.h
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-private.h
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-simple-anim.h
+
+(define-function gdk_pixbuf_simple_anim_get_type
+  (c-name "gdk_pixbuf_simple_anim_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_simple_anim_iter_get_type
+  (c-name "gdk_pixbuf_simple_anim_iter_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_simple_anim_new
+  (c-name "gdk_pixbuf_simple_anim_new")
+  (is-constructor-of "GdkPixbufSimpleAnim")
+  (return-type "GdkPixbufSimpleAnim*")
+  (parameters
+    '("gint" "width")
+    '("gint" "height")
+    '("gfloat" "rate")
+  )
+)
+
+(define-method add_frame
+  (of-object "GdkPixbufSimpleAnim")
+  (c-name "gdk_pixbuf_simple_anim_add_frame")
+  (return-type "none")
+  (parameters
+    '("GdkPixbuf*" "pixbuf")
+  )
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixbuf-transform.h
+
+(define-method scale
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_scale")
+  (return-type "none")
+  (parameters
+    '("GdkPixbuf*" "dest")
+    '("int" "dest_x")
+    '("int" "dest_y")
+    '("int" "dest_width")
+    '("int" "dest_height")
+    '("double" "offset_x")
+    '("double" "offset_y")
+    '("double" "scale_x")
+    '("double" "scale_y")
+    '("GdkInterpType" "interp_type")
+  )
+)
+
+(define-method composite
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_composite")
+  (return-type "none")
+  (parameters
+    '("GdkPixbuf*" "dest")
+    '("int" "dest_x")
+    '("int" "dest_y")
+    '("int" "dest_width")
+    '("int" "dest_height")
+    '("double" "offset_x")
+    '("double" "offset_y")
+    '("double" "scale_x")
+    '("double" "scale_y")
+    '("GdkInterpType" "interp_type")
+    '("int" "overall_alpha")
+  )
+)
+
+(define-method composite_color
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_composite_color")
+  (return-type "none")
+  (parameters
+    '("GdkPixbuf*" "dest")
+    '("int" "dest_x")
+    '("int" "dest_y")
+    '("int" "dest_width")
+    '("int" "dest_height")
+    '("double" "offset_x")
+    '("double" "offset_y")
+    '("double" "scale_x")
+    '("double" "scale_y")
+    '("GdkInterpType" "interp_type")
+    '("int" "overall_alpha")
+    '("int" "check_x")
+    '("int" "check_y")
+    '("int" "check_size")
+    '("guint32" "color1")
+    '("guint32" "color2")
+  )
+)
+
+(define-method scale_simple
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_scale_simple")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("int" "dest_width")
+    '("int" "dest_height")
+    '("GdkInterpType" "interp_type")
+  )
+)
+
+(define-method composite_color_simple
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_composite_color_simple")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("int" "dest_width")
+    '("int" "dest_height")
+    '("GdkInterpType" "interp_type")
+    '("int" "overall_alpha")
+    '("int" "check_size")
+    '("guint32" "color1")
+    '("guint32" "color2")
+  )
+)
+
+(define-method rotate_simple
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_rotate_simple")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("GdkPixbufRotation" "angle")
+  )
+)
+
+(define-method flip
+  (of-object "GdkPixbuf")
+  (c-name "gdk_pixbuf_flip")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("gboolean" "horizontal")
+  )
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/gdk-pixdata.h
+
+(define-method serialize
+  (of-object "GdkPixdata")
+  (c-name "gdk_pixdata_serialize")
+  (return-type "guint8*")
+  (parameters
+    '("guint*" "stream_length_p")
+  )
+)
+
+(define-method deserialize
+  (of-object "GdkPixdata")
+  (c-name "gdk_pixdata_deserialize")
+  (return-type "gboolean")
+  (parameters
+    '("guint" "stream_length")
+    '("const-guint8*" "stream")
+    '("GError**" "error")
+  )
+)
+
+(define-method from_pixbuf
+  (of-object "GdkPixdata")
+  (c-name "gdk_pixdata_from_pixbuf")
+  (return-type "gpointer")
+  (parameters
+    '("const-GdkPixbuf*" "pixbuf")
+    '("gboolean" "use_rle")
+  )
+)
+
+(define-function gdk_pixbuf_from_pixdata
+  (c-name "gdk_pixbuf_from_pixdata")
+  (return-type "GdkPixbuf*")
+  (parameters
+    '("const-GdkPixdata*" "pixdata")
+    '("gboolean" "copy_pixels")
+    '("GError**" "error")
+  )
+)
+
+(define-method to_csource
+  (of-object "GdkPixdata")
+  (c-name "gdk_pixdata_to_csource")
+  (return-type "GString*")
+  (parameters
+    '("const-gchar*" "name")
+    '("GdkPixdataDumpType" "dump_type")
+  )
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/io-ani-animation.h
+
+(define-function gdk_pixbuf_ani_anim_get_type
+  (c-name "gdk_pixbuf_ani_anim_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_ani_anim_iter_get_type
+  (c-name "gdk_pixbuf_ani_anim_iter_get_type")
+  (return-type "GType")
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/io-gif-animation.h
+
+(define-function gdk_pixbuf_gif_anim_get_type
+  (c-name "gdk_pixbuf_gif_anim_get_type")
+  (return-type "GType")
+)
+
+(define-function gdk_pixbuf_gif_anim_iter_get_type
+  (c-name "gdk_pixbuf_gif_anim_iter_get_type")
+  (return-type "GType")
+)
+
+(define-method frame_composite
+  (of-object "GdkPixbufGifAnim")
+  (c-name "gdk_pixbuf_gif_anim_frame_composite")
+  (return-type "none")
+  (parameters
+    '("GdkPixbufFrame*" "frame")
+  )
+)
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/stamp-gdk-pixbuf-marshal.h
+
+
+
+;; From /home/murrayc/cvs/gnome212/gtk+/gdk-pixbuf/xpm-color-table.h
+
+

@@ -1,0 +1,118 @@
+2002-11-24  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* configure.ac (AC_OUTPUT): Add intl/Makefile,
+
+2002-11-24  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): New variable.
+
+2001-10-26  Paul Davis  <pbd>
+
+	* playlist.cc (recover_backup): restored the backup recovery code
+	for playlists.
+
+	* diskstream.cc (do_refill): added state_lock to diskstream, just
+	to be safe.
+
+	* session.cc (butler_thread_work): changed Session ISA thread to
+	HASA thread.
+
+2001-10-23  Paul Davis  <pbd>
+
+        merged in marcus' patch for edit/mix group save/restore, and
+	rationalized both it and the existing code for Route::set_state()	
+
+2001-10-20  Paul Davis  <pbd>
+
+	* session.cc (get_state): in get_state, use the public order for routes.
+
+2001-10-18  Paul Davis  <pbd>
+
+	* playlist.cc (read): stop a muted region from causing a playlist
+	read error.
+
+2001-10-17  Paul Davis  <pbd>
+
+	* region.cc (read_at): remove staccato noise caused by not
+		shifting target buffer when !opaque.
+
+2001-10-15  Paul Davis  <pbd>
+
+	* region.cc (set_fade_out_active): made region fade in/out optional.
+
+	* configure.in: patches from Ben related to libxml++
+
+2001-10-12  Paul Davis  <pbd>
+
+	* session.cc (XMLRegionFactory): move most XML-based Region
+	constructor into region.
+		
+
+2001-10-10  Paul Davis  <pbd>
+
+	* session.cc (load_sources): add whole-file regions when loading
+		sources.
+
+2001-10-09  Paul Davis  <pbd>
+
+	* ardour/session.h: fix an  ugly bug with a non-reference return type.
+
+2001-10-04  Paul Davis  <pbd>
+
+	* playlist.cc (split_region): ensure that left region after split
+	is in the right place.
+
+	* auditioner.cc (play_audition): stop existing audition before
+	starting a new one.
+
+2001-10-03  Paul Davis  <pbd>
+
+	* session.cc (process): stop regular process() call from operating
+	on hidden diskstreams and routes. the butler thread still works on
+	all diskstreams, every time, which might be a mistake.
+
+2001-10-02  Paul Davis  <pbd>
+
+	* session.cc (set_auto_play_range): added provisional support
+          for play ranges using session events. added code to use
+	  auditioner. 
+
+	* auditioner.cc: new file/object to support auditioning.
+
+	* route.cc: remove seek() function (didn't exist).
+
+	* session.cc (process): use list<DiskStream *> instead of GList
+	for diskstreams. add auditioner object.
+
+2001-09-30  Paul Davis  <pbd>
+
+	* playlist.cc (split_region): fix problem with region splitting
+	not defining two *smaller* regions of the original.
+
+	* region.cc (set_position): remove RegionTemplate object.
+
+	* playlist.cc (struct RegionSorter ): fix sorting to use position,
+	not start - whatever was i thinking ?
+
+2001-09-28  Paul Davis  <pbd>
+
+	* source.cc: emit source creation signal.
+
+	* session.cc (first_stage_init): catch all source creation events.
+
+	* sndfilesource.cc (init): fix up an off-by-one substr-length
+	error when creating a sndfilesource.
+
+2001-09-27  Paul Davis  <pbd>
+
+	* route.cc (operator): correct loop increment bug that caused a
+ 	hang when an Insert is added to a Route as a Redirect.
+
+2001-09-25  Paul Davis  <pbd>
+
+	* session.cc: make new file sources be partially named for their
+	initial host diskstream.
+		
+ 	peak file construction now carried out en-masse at the 
+        end of capture run.
+

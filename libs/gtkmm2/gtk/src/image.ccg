@@ -1,0 +1,107 @@
+// -*- c++ -*-
+/* $Id: image.ccg,v 1.3 2005/07/10 19:24:22 murrayc Exp $ */
+
+/* 
+ *
+ * Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkimage.h>
+#include <gdkmm/image.h>
+#include <gdkmm/bitmap.h>
+#include <gdkmm/pixmap.h>
+
+namespace Gtk
+{
+
+Image::Image(const Gtk::StockID& stock_id, IconSize size)
+:
+  _CONSTRUCT("stock", stock_id.get_c_str(), "icon-size", (GtkIconSize) int(size))
+{}
+
+Image::Image(IconSet& icon_set, IconSize size)
+:
+  _CONSTRUCT("icon-set", icon_set.gobj(), "icon-size", (GtkIconSize) int(size))
+{}
+
+Image::Image(const Glib::RefPtr<Gdk::PixbufAnimation>& animation)
+:
+  _CONSTRUCT("pixbuf-animation", Glib::unwrap(animation))
+{}
+
+void Image::get_pixmap(Glib::RefPtr<Gdk::Pixmap>& pixmap, Glib::RefPtr<Gdk::Bitmap>& mask) const
+{
+  GdkPixmap* pPixmap = 0;
+  GdkBitmap* pBitmap = 0;
+
+  gtk_image_get_pixmap(const_cast<GtkImage*>(gobj()), &pPixmap, &pBitmap);
+
+  pixmap = Glib::wrap((GdkPixmapObject*) pPixmap, true);
+  mask   = Glib::RefPtr<Gdk::Bitmap>::cast_dynamic(Glib::wrap((GdkPixmapObject*) pBitmap, true));
+}
+
+void Image::get_image(Glib::RefPtr<Gdk::Image>& gdk_image, Glib::RefPtr<Gdk::Bitmap>& mask) const
+{
+  GdkImage* pImage = 0;
+  GdkBitmap* pBitmap = 0;
+
+  gtk_image_get_image(const_cast<GtkImage*>(gobj()), &pImage, &pBitmap);
+
+  gdk_image = Glib::wrap(pImage, true);
+  mask = Glib::RefPtr<Gdk::Bitmap>::cast_dynamic(Glib::wrap((GdkPixmapObject*) pBitmap, true));
+}
+
+void Image::get_stock(Gtk::StockID& stock_id, IconSize& size) const
+{
+  char* pStockID = 0; // GTK+ iconsistency: although not const, it should not be freed.
+  GtkIconSize icon_size = GTK_ICON_SIZE_INVALID;
+
+  gtk_image_get_stock(const_cast<GtkImage*>(gobj()), &pStockID, &icon_size);
+
+  size = IconSize(static_cast<int>(icon_size));
+  stock_id = Gtk::StockID(pStockID); // the StockID ctor checks for 0
+}
+
+void Image::get_icon_set(IconSet& icon_set, IconSize& size) const
+{
+  GtkIconSet* pIconSet = 0;
+  GtkIconSize icon_size = GTK_ICON_SIZE_INVALID;
+
+  gtk_image_get_icon_set(const_cast<GtkImage*>(gobj()), &pIconSet, &icon_size);
+
+  size = IconSize(static_cast<int>(icon_size));
+  icon_set = Glib::wrap(pIconSet, true); //true = take_copy.
+}
+
+Glib::ustring Image::get_icon_name() const
+{
+  const gchar* pchIconName = 0;
+  gtk_image_get_icon_name(const_cast<GtkImage*>(gobj()), &pchIconName, 0);
+  return Glib::convert_const_gchar_ptr_to_ustring(pchIconName);
+}
+
+Glib::ustring Image::get_icon_name(IconSize& size)
+{
+  const gchar* pchIconName = 0;
+  GtkIconSize cIconSize = GTK_ICON_SIZE_INVALID;
+  gtk_image_get_icon_name(const_cast<GtkImage*>(gobj()), &pchIconName, &cIconSize);
+  size = (IconSize)cIconSize;
+  return Glib::convert_const_gchar_ptr_to_ustring(pchIconName);
+}
+
+} // namespace Gtk
+

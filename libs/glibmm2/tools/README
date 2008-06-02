@@ -1,0 +1,4 @@
+This directory contains the gtkmm preprocessor used for wrapping 
+gtk+ objects.
+
+See docs/internal/ for some gtkmmproc documentation.

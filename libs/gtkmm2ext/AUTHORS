@@ -1,0 +1,2 @@
+Written primarily by Paul Davis.
+Porting to gtkmm2 and sigc++2 work done by Taybin Rutkin.

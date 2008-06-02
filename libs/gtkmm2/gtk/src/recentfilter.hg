@@ -1,0 +1,105 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/object.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/object_p.h)
+
+namespace Gtk
+{
+
+_WRAP_ENUM(RecentFilterFlags, GtkRecentFilterFlags)
+
+
+/** RecentFilter can be used to restrict the files being shown
+ * in a RecentChooser.  Files can be filtered based on their name
+ * (with add_pattern()), on their mime type (with add_mime_type()),
+ * on the application that has registered them (with add_application()),
+ * or by a custom filter function (with add_custom()).
+ *
+ * Filtering by mime type handles aliasing and subclassing of mime
+ * types; e.g. a filter for text/plain also matches a file with mime
+ * type application/rtf, since application/rtf is a subclass of text/plain.
+ * Note that RecentFilter allows wildcards for the subtype of a
+ * mime type, so you can e.g. filter for image/ *.
+ *
+ * Normally, filters are used by adding them to a RecentChooser,
+ * see RecentChooser::add_filter(), but it is also possible to
+ * manually use a filter on a file with filter().
+ *
+ * @newin2p10
+ *
+ * @ingroup RecentFiles
+ */
+class RecentFilter : public Gtk::Object
+{
+  _CLASS_GTKOBJECT(RecentFilter, GtkRecentFilter, GTK_RECENT_FILTER, Gtk::Object, GtkObject)
+public:
+  _CTOR_DEFAULT
+
+  _WRAP_METHOD(void set_name(const Glib::ustring& name), gtk_recent_filter_set_name)
+  _WRAP_METHOD(Glib::ustring get_name() const, gtk_recent_filter_get_name)
+
+  _WRAP_METHOD(void add_mime_type(const Glib::ustring& mime_type), gtk_recent_filter_add_mime_type)
+  _WRAP_METHOD(void add_pattern(const Glib::ustring& pattern), gtk_recent_filter_add_pattern)
+  _WRAP_METHOD(void add_pixbuf_formats(), gtk_recent_filter_add_pixbuf_formats)
+  _WRAP_METHOD(void add_application(const Glib::ustring& application), gtk_recent_filter_add_application)
+  _WRAP_METHOD(void add_group(const Glib::ustring& group), gtk_recent_filter_add_group)
+  _WRAP_METHOD(void add_age(int days), gtk_recent_filter_add_age)
+
+  /** A RecentFilter::Info class is used to pass information
+   * about the tested file to filter().
+   *
+   * - contains: Flags indicating which of the following fields need are filled
+   * - uri: the URI of the file being tested
+   * - display_name: the string that will be used to display the file in the recent chooser
+   * - mime_type: the mime type of the file
+   * - applications: the list of applications that have registered the file
+   * - groups: the groups to which the file belongs to
+   * - age: the number of days elapsed since the file has been registered
+   */
+  class Info
+  {
+  public:
+    Info();
+
+    ///This bitmask tells us which of the other variables contain useful information.
+    RecentFilterFlags contains;
+
+    Glib::ustring uri;
+    Glib::ustring display_name;
+    Glib::ustring mime_type;
+    std::list<Glib::ustring> applications;
+    std::list<Glib::ustring> groups;
+    int age;
+  };
+
+  /// For instance, bool on_custom(const Gtk::RecentFilter::Info& filter_info);
+  typedef sigc::slot<bool, const Info&> SlotCustom;
+  
+  void add_custom(RecentFilterFlags needed, const SlotCustom& slot);
+  _IGNORE(gtk_recent_filter_add_custom)
+
+  _WRAP_METHOD(RecentFilterFlags get_needed() const, gtk_recent_filter_get_needed)
+
+  // Method is used by class RecentChooser implementors.
+  _IGNORE(gtk_recent_filter_filter)
+  //_WRAP_METHOD(bool filter(const GtkRecentFilterInfo* filter_info), gtk_recent_filter_filter)
+};
+
+} // namespace Gtk

@@ -1,0 +1,135 @@
+/* $Id: layoutiter.hg,v 1.2 2003/12/14 11:54:05 murrayc Exp $ */
+
+/* layoutiter.h
+ *
+ * Copyright 2001-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <pangomm/layoutline.h>
+#include <pangomm/layoutrun.h>
+#include <pango/pango-layout.h>
+
+_DEFS(pangomm,pango)
+
+namespace Pango
+{
+
+/** A Pango::LayoutIter can be used to iterate over the visual extents of a Pango::Layout.
+ */
+class LayoutIter
+{
+  _CLASS_GENERIC(LayoutIter, PangoLayoutIter)
+  _IGNORE(pango_layout_iter_free, pango_layout_iter_get_char_extents)
+
+public:
+  // There's no other ctor, and the default ctor creates an invalid object.
+  // Therefore, Pango::LayoutIter is usable only as output argument.
+  LayoutIter();
+  ~LayoutIter();
+
+  _WRAP_METHOD(int get_index() const, pango_layout_iter_get_index)
+  _WRAP_METHOD(LayoutRun get_run() const, pango_layout_iter_get_run)
+  //TODO: Use pango_layout_iter_get_run_readonly()?
+
+  _WRAP_METHOD(Glib::RefPtr<LayoutLine> get_line() const, pango_layout_iter_get_line, refreturn)
+  //TODO: We should really have a const and non-const version: _WRAP_METHOD(Glib::RefPtr<const LayoutLine> get_line() const, pango_layout_iter_get_line_readonly, refreturn)
+
+  _WRAP_METHOD(bool at_last_line() const, pango_layout_iter_at_last_line)
+
+  _WRAP_METHOD(bool next_char(), pango_layout_iter_next_char)
+  _WRAP_METHOD(bool next_cluster(), pango_layout_iter_next_cluster)
+  _WRAP_METHOD(bool next_run(), pango_layout_iter_next_run)
+  _WRAP_METHOD(bool next_line(), pango_layout_iter_next_line)
+
+  /** Gets the extents of the current character, in layout coordinates (origin is the top left of the entire layout).
+   * Only logical extents can sensibly be obtained for characters; ink extents make sense only down to the level of clusters.
+   * @return The logical extents of the current character.
+   */
+  Rectangle get_char_extents() const;
+
+  _WRAP_METHOD(void get_cluster_extents(Rectangle& ink_rect, Rectangle& logical_rect) const, pango_layout_iter_get_cluster_extents)
+
+  /** Gets the ink extents of the current cluster, in layout coordinates (origin is the top left of the entire layout).
+   * @return The extents of the current cluster as drawn.
+   */
+  Rectangle get_cluster_ink_extents() const;
+
+  /** Gets the logical extents of the current cluster, in layout coordinates (origin is the top left of the entire layout).
+   * @return The logical extents of the current cluster.
+   */
+  Rectangle get_cluster_logical_extents() const;
+
+  _WRAP_METHOD(void get_run_extents(Rectangle& ink_rect, Rectangle& logical_rect) const, pango_layout_iter_get_run_extents)
+
+  /** Gets the ink extents of the current run in layout coordinates (origin is the top left of the entire layout).
+   * @return The extents of the current run as drawn.
+   */
+  Rectangle get_run_ink_extents() const;
+
+  /** Gets the logical extents of the current run in layout coordinates (origin is the top left of the entire layout).
+   * @return The logical extents of the current run.
+   */
+  Rectangle get_run_logical_extents() const;
+
+  _WRAP_METHOD(void get_line_extents(Rectangle& ink_rect, Rectangle& logical_rect) const, pango_layout_iter_get_line_extents)
+
+  /** Obtains the ink extents of the current line.
+   * @return The extents of the current line as drawn.
+   */
+  Rectangle get_line_ink_extents() const;
+
+  /** Obtains the logical extents of the current line.
+   * @return The logical extents of the current line.
+   */
+  Rectangle get_line_logical_extents() const;
+
+  _WRAP_METHOD(void get_line_yrange(int& y0, int& y1) const, pango_layout_iter_get_line_yrange)
+
+  _WRAP_METHOD(void get_layout_extents(Rectangle& ink_rect, Rectangle& logical_rect) const, pango_layout_iter_get_layout_extents)
+
+  /** Obtains the ink extents of the Pango::Layout being iterated over.
+   * @return The extents of the layout as drawn.
+   */
+  Rectangle get_layout_ink_extents() const;
+
+  /** Obtains the logical extents of the Pango::Layout being iterated over.
+   * @return The logical extents of the layout.
+   */
+  Rectangle get_layout_logical_extents() const;
+
+  _WRAP_METHOD(int get_baseline() const, pango_layout_iter_get_baseline)
+
+  /// Provides access to the underlying C GObject.  
+  PangoLayoutIter*       gobj()       { return gobject_; }
+  /// Provides access to the underlying C GObject.
+  const PangoLayoutIter* gobj() const { return gobject_; }
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  void assign_gobj(PangoLayoutIter* src);
+#endif
+
+protected:
+  PangoLayoutIter* gobject_;
+
+private:
+  // noncopyable
+  LayoutIter(const LayoutIter&);
+  LayoutIter& operator=(const LayoutIter&);
+};
+
+} //namespace Pango
+

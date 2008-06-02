@@ -1,0 +1,191 @@
+SoundTouch sound processing library v1.01
+=========================================
+Copyright (c) Olli Parviainen 2002
+
+A library for changing tempo, pitch and playback rate of digital sound.
+
+
+SoundStretch sound processing application v1.1
+==============================================
+Copyright (c) Olli Parviainen 2002-2003
+
+A command-line application for changing tempo, pitch and playback rates
+of WAV sound files. This program also demonstrates how the "SoundTouch" 
+library can be used to process sound in own programs.
+
+
+SoundStretch Usage Instructions
+===============================
+
+SoundStretch Usage syntax:
+     soundstretch infile.wav outfile.wav [switches]
+
+Where:
+
+   "infile.wav" is the name of the input sound data file (in .WAV audio 
+                file format).
+
+   "outfile.wav" is the name of the output sound file where the resulting
+                 sound is saved (in .WAV audio file format).
+ 
+   [switches] are one or more control switches.
+
+Available control switches are:
+
+  -tempo=n : Change sound tempo by n percents (n = -95.0 .. +5000.0 %)
+
+  -pitch=n : Change sound pitch by n semitones (n = -60.0 .. + 60.0 semitones)
+
+  -rate=n  : Change sound playback rate by n percents (n = -95.0 .. +5000.0 %)
+
+  -bpm=n   : Detect the Beats-Per-Minute (BPM) rate of the sound and adjust the
+             tempo to meet 'n' BPMs. If this switch is defined, the "-tempo=n" 
+             switch value is ignored.
+
+             If "=n" is omitted, i.e. switch "-bpm" is used alone, the 
+             program just calculates and displays the BPM rate but doesn't 
+             adjust tempo according to the BPM value.
+
+  -quick   : Use quicker tempo change algorithm. Gains speed but loses sound
+             quality.
+
+  -naa     : Don't use anti-alias filtering in samplerate transposing. Gains
+             speed but loses sound quality.
+
+  -license : Displays the program license text (GPL)
+
+Notes:
+  * The numerical switch values can be entered using either integer (e.g.
+    "-tempo=123") or decimal (e.g. "-tempo=123.45") numbers.
+
+  * The "-naa" and/or "-quick" switches can be used to reduce CPU usage
+    while compromising some sound quality
+
+  * The BPM detection algorithm works by detecting repeating low-frequency 
+    (<250Hz) sound patterns and thus works mostly with most rock/pop music
+    with bass or drum beat. The BPM detection doesn't work on pieces such
+    as classical music without distinct, repeating bass frequency patterns. 
+    Also pieces with varying tempo, varying bass patterns or very complex 
+    bass patterns (jazz, hiphop) may produce odd BPM readings.
+
+    In cases when the bass pattern drifts a bit around a nominal beat rate 
+    (e.g. drummer is again drunken :), the BPM algorithm may report incorrect
+    harmonic one-halft of one-thirdth of the correct BPM value; in such case
+    the system could for example report BPM value of 50 or 100 instead of 
+    correct BPM value of 150.
+
+
+Usage examples:
+===============
+
+  Example 1
+  =========
+
+  The following command increases tempo of the sound file "originalfile.wav" 
+  by 12.5% and saves result to file "destinationfile.wav":
+
+      soundstretch originalfile.wav destinationfile.wav -tempo=12.5
+
+
+  Example 2
+  =========
+
+  The following command decreases the sound pitch (key) of the sound file
+  "orig.wav" by two semitones and saves the result to file "dest.wav":
+
+      soundstretch orig.wav dest.wav -pitch=-2
+
+
+  Example 3
+  =========
+
+  The following command processes the file "orig.wav" by decreasing the 
+  sound tempo by 25.3% and increasing the sound pitch (key) by 1.5 semitones. 
+  Result is saved to file "dest.wav":
+  
+      soundstretch orig.wav dest.wav -tempo=-25.3 -pitch=1.5
+
+
+  Example 4
+  =========
+
+  The following command detects the BPM rate of the file "orig.wav" and
+  adjusts the tempo to match 100 beats per minute. Result is saved to 
+  file "dest.wav":
+  
+      soundstretch orig.wav dest.wav -bpm=100
+
+
+
+Building Instructions
+=====================
+
+The package contains executable binaries for Win32 platform in the "bin" 
+directory.
+
+To build the library and application executable for other platforms or to 
+re-build the delivered binaries, run either of the scripts in the package
+root directory:
+
+"make-win.bat" for Microsoft Windows environment, or 
+"make-gcc"     for GNU/Linux or Unix environment with a gcc compiler.
+
+
+
+Change History
+==============
+
+
+   SoundTouch library Change History
+   =================================
+
+   v1.01: 
+   - "mmx_gcc.cpp": Added "using namespace std" and removed "return 0" from a 
+     function with void return value to fix compiler errors when compiling
+     the library in Solaris environment.
+
+   - Moved file "FIFOSampleBuffer.h" to "include" directory to allow accessing
+     the FIFOSampleBuffer class from external files.
+
+   v1.0: Initial release
+
+
+   SoundStretch application Change History
+   =======================================
+
+  v1.1: 
+   - Fixed "Release" settings in Microsoft Visual C++ project file (.dsp) 
+
+   - Added beats-per-minute (BPM) detection routine and command-line switch
+     "-bpm"
+
+  v1.01: Initial release
+
+
+Acknowledgements
+================
+
+Many thanks to Stuart Lamble for translating the MMX optimizations from
+MS Visual C++ syntax into gcc syntax for joy of all Linux users.
+
+Thanks also to Manish Bajpai, whose WAV file reading routines I've used
+as base of the WavInFile & WavOutFile classes, that are being used in 
+the soundstrecth program for accessing WAV audio files.
+
+
+LICENSE:
+========
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.\n"
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc., 59
+Temple Place, Suite 330, Boston, MA  02111-1307 USA

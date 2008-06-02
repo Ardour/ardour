@@ -1,0 +1,59 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkprintoperationpreview.h>
+
+#include <glibmm/interface.h>
+
+#include <gtkmm/pagesetup.h>
+#include <gtkmm/printcontext.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/interface_p.h)
+
+namespace Gtk
+{
+
+//TODO: There is no GtkPrintOperationPreview documentation either.
+/** 
+ * @newin2p10
+ *
+ * @ingroup Printing
+ */
+class PrintOperationPreview : public Glib::Interface
+{
+  _CLASS_INTERFACE(PrintOperationPreview, GtkPrintOperationPreview, GTK_PRINT_OPERATION_PREVIEW, GtkPrintOperationPreviewIface)
+public:
+
+  _WRAP_METHOD(void render_page(int page_nr), gtk_print_operation_preview_render_page)
+  _WRAP_METHOD(void end_preview(), gtk_print_operation_preview_end_preview)
+  _WRAP_METHOD(bool is_selected(int page_nr) const, gtk_print_operation_preview_is_selected)
+
+  _WRAP_VFUNC(void render_page(int page_nr), "render_page")
+  _WRAP_VFUNC(void end_preview(), "end_preview")
+  _WRAP_VFUNC(bool is_selected(int page_nr) const, "is_selected")
+
+  #m4 _CONVERSION(`GtkPageSetup*',`const Glib::RefPtr<PageSetup>&',`Glib::wrap($3, true)')
+  #m4 _CONVERSION(`const Glib::RefPtr<PageSetup>&',`GtkPageSetup*',__CONVERT_REFPTR_TO_P($3))
+
+  #m4 _CONVERSION(`GtkPrintContext*',`const Glib::RefPtr<PrintContext>&',`Glib::wrap($3, true)')
+
+  _WRAP_SIGNAL(void ready(const Glib::RefPtr<PrintContext>& context), "ready")
+  _WRAP_SIGNAL(void got_page_size(const Glib::RefPtr<PrintContext>& context, const Glib::RefPtr<PageSetup>& page_setup), "got_page_size")
+};
+
+} // namespace Gtk

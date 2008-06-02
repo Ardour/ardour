@@ -1,0 +1,46 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+vampsdk_files = Split ("""
+vamp-sdk/PluginAdapter.cpp
+vamp-sdk/RealTime.cpp
+""")
+
+vamphostsdk_files = Split ("""
+vamp-sdk/PluginHostAdapter.cpp
+vamp-sdk/hostext/PluginBufferingAdapter.cpp
+vamp-sdk/hostext/PluginChannelAdapter.cpp
+vamp-sdk/hostext/PluginInputDomainAdapter.cpp
+vamp-sdk/hostext/PluginLoader.cpp
+vamp-sdk/hostext/PluginWrapper.cpp
+vamp-sdk/RealTime.cpp
+""")
+
+Import('env install_prefix libraries')
+vampsdk = env.Copy()
+
+vampsdk.Merge ([libraries['fftw3'], libraries['fftw3f']])
+
+# HAVE_FFTW3 is used to help improve some performance aspects of VAMP's InputDomainAdapter
+
+vampsdk.Append (CPPATH='#libs/vamp-sdk/vamp', CXXFLAGS="-Ilibs/vamp-sdk -DHAVE_FFTW3")
+
+libvampsdk = vampsdk.SharedLibrary('vampsdk', vampsdk_files)
+libvamphostsdk = vampsdk.SharedLibrary('vamphostsdk', vamphostsdk_files)
+
+Default(libvampsdk)
+Default(libvamphostsdk)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libvampsdk))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libvamphostsdk))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'COPYING', 'README' ] +
+                                     vampsdk_files +
+                                     vamphostsdk_files +
+                                     glob.glob('vamp/*.h') + 
+                                     glob.glob('vamp-sdk/*.h') + 
+                                     glob.glob('vamp-sdk/hostext/*.h')))

@@ -1,0 +1,133 @@
+/* $Id: bin.hg,v 1.2 2003/03/03 07:49:05 murrayc Exp $ */
+
+/* bin.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/container.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/container_p.h)
+
+
+namespace Gtk
+{
+
+/** A container with just one child.
+ *
+ * This is an abstract base class from which all classes holding
+ * up to 1 widget inside of them derive.  It provides access to methods
+ * relevent to a single object, such as add_label, add_pixmap, etc.
+ *
+ * @ingroup Widgets
+ */
+class Bin : public Container
+{
+  _CLASS_GTKOBJECT(Bin,GtkBin,GTK_BIN,Gtk::Container,GtkContainer)
+protected:
+  _CTOR_DEFAULT
+public:
+  
+
+  // get_child() is a convenience function to get a c++ wrapper of
+  // the contained widget. It may return NULL if such an item is not
+  // available.
+  _MEMBER_GET_PTR(child, child, Widget*, GtkWidget*)
+
+  /** Remove the contained object
+   * Since this can only hold one object it is not necessary to
+   * specify which object to remove like other containers.
+   *
+   * When calling remove() on a Gtk::ScrolledWindow this might not remove the
+   * expected child directly, because Gtk::ScrolledWindow::add() sometimes creates a
+   * Gtk::ViewPort child and places the widget in that.
+   */
+  void remove();
+
+  //Convenience methods that don't correspond to GTK+ functions:
+
+  /** Add a Label object.
+   * This does not correspond to any GTK+ function and is provided purely for
+   * convenience.
+   * @param label The text for the label.
+   * @param mnemonic If <tt>true</tt>, characters preceded by an underscore 
+   * (_) will be underlined and used as a keyboard accelerator (shortcut).
+   * @param x_align The horizontal alignment of the text.  This ranges from 
+   * 0.0 (left aligned) to 1.0 (right aligned).
+   * @param y_align The vertical alignment of the text.  This ranges from 
+   * 0.0 (top aligned) to 1.0 (bottom aligned).
+   */
+  void add_label(const Glib::ustring& label, bool mnemonic = false,
+		 double x_align = 0.5, double y_align = 0.5);
+
+  /** Add a Label object.
+   * This does not correspond to any GTK+ function and is provided purely for
+   * convenience.
+   * @param label The label text.
+   * @param mnemonic If <tt>true</tt>, characters preceded by an underscore
+   * (_) will be underlined and used as a keyboard accelerator (shortcut).
+   * @param x_align The horizontal alignment of the text.  For possible 
+   * values, see Gtk::AlignmentEnum.
+   * @param y_align The vertical alignment of the text.  For possible 
+   * values, see Gtk::AlignmentEnum.
+   */
+  void add_label(const Glib::ustring& label, bool mnemonic,
+		 AlignmentEnum x_align, AlignmentEnum y_align = ALIGN_CENTER);
+
+  /** Add an Image object.
+   * This does not correspond to any GTK+ function and is provided purely for
+   * convenience.
+   * This will create, manage, add, and show a new Image to this Bin.
+   * @param pixmap A Glib::RefPtr to a Gdk::Pixmap.
+   * @param mask A Glib::RefPtr to a Gdk::Bitmap.
+   */
+  void add_pixmap(const Glib::RefPtr<Gdk::Pixmap>& pixmap,
+		  const Glib::RefPtr<Gdk::Bitmap>& mask);
+
+  /** Add Image and Label objects.
+   * This does not correspond to any GTK+ function and is provided purely for
+   * convenience.
+   * This will create, manage, add, and show a new Image and Label (within an 
+   * HBox) to this Bin.
+   * @param pixmap A Glib::RefPtr to a Gdk::Pixmap.
+   * @param mask A Glib::RefPtr to a Gdk::Bitmap.
+   * @param label The text for the label.
+   * @param x_align The horizontal alignment of the text in the label.
+   * @param y_align The vertical alignment of the text in the label.
+   */
+  void add_pixlabel(const Glib::RefPtr<Gdk::Pixmap>& pixmap,
+                    const Glib::RefPtr<Gdk::Bitmap>& mask,
+                    const Glib::ustring& label,
+		                double x_align = 0.5, double y_align = 0.5);
+
+  /** Add Image and Label objects.
+   * This does not correspond to any GTK+ function and is provided purely for
+   * convenience.
+   * This will create, manage, add, and show a new Image and Label (within an 
+   * HBox) to this Bin.
+   * @param pixfile The path to a file to be displayed.
+   * @param label The text for the label.
+   * @param x_align The horizontal alignment of the text in the label.
+   * @param y_align The vertical alignment of the text in the label.
+   */
+  void add_pixlabel(const Glib::ustring& pixfile,
+                    const Glib::ustring& label,
+		                double x_align = 0.5, double y_align = 0.5);
+};
+
+}  /* namespace Gtk */
+

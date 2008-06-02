@@ -1,0 +1,75 @@
+// -*- c++ -*-
+/* $Id: attrlist.ccg,v 1.3 2005/11/22 15:00:17 murrayc Exp $ */
+
+/*
+ *
+ * Copyright 1998-1999 The Gtk-- Development Team
+ * Copyright 2001      Free Software Foundation
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+namespace Pango
+{
+
+AttrList::AttrList(const Glib::ustring& markup_text, gunichar accel_marker)
+{
+  gboolean bTest = pango_parse_markup(markup_text.c_str(), -1 /* means null-terminated */, accel_marker,
+                   	                  &gobject_, 0, 0, 0);
+  if(bTest == FALSE)
+    gobject_ = 0;
+}
+
+AttrList::operator bool()
+{
+  return gobj() != 0;
+}
+
+AttrList::AttrList(const Glib::ustring& markup_text, gunichar accel_marker, Glib::ustring& text, gunichar& accel_char)
+{
+  //initialize output parameters:
+  text.erase();
+  accel_char = 0;
+
+  gchar* pchText = 0;
+  gboolean bTest = pango_parse_markup(markup_text.c_str(), -1 /* means null-terminated */, accel_marker,
+                   	                  &gobject_, &pchText, &accel_char, 0);
+  if(bTest == FALSE)
+  {
+    gobject_ = 0;
+  }
+  else
+  {
+    text = pchText;
+    g_free(pchText);
+  }
+}
+
+void AttrList::insert(Attribute& attr)
+{
+  pango_attr_list_insert(gobj(), pango_attribute_copy(attr.gobj()));
+}
+ 
+void AttrList::insert_before(Attribute& attr)
+{
+  pango_attr_list_insert_before(gobj(), pango_attribute_copy(attr.gobj()));
+}
+
+void AttrList::change(Attribute& attr)
+{
+  pango_attr_list_change(gobj(), pango_attribute_copy(attr.gobj()));
+}
+ 
+} /* namespace Pango */

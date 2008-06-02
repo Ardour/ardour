@@ -1,0 +1,102 @@
+/* $Id: cellrenderertext.hg,v 1.7 2006/05/10 20:59:27 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/cellrenderer.h>
+#include <pangomm/attrlist.h>
+#include <pangomm/fontdescription.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/cellrenderer_p.h)
+
+
+namespace Gtk
+{
+
+/** Renders text in a cell.
+ *
+ * @ingroup TreeView
+ */
+class CellRendererText : public CellRenderer
+{
+  _CLASS_GTKOBJECT(CellRendererText,GtkCellRendererText,GTK_CELL_RENDERER_TEXT,Gtk::CellRenderer,GtkCellRenderer)
+public:
+  _CTOR_DEFAULT()
+
+  _WRAP_METHOD(void set_fixed_height_from_font(int number_of_rows), gtk_cell_renderer_text_set_fixed_height_from_font)
+
+  _WRAP_SIGNAL(void edited(const Glib::ustring& path, const Glib::ustring& new_text), "edited")
+
+  _WRAP_PROPERTY("text", Glib::ustring)
+  _WRAP_PROPERTY("markup", Glib::ustring)
+  _WRAP_PROPERTY("attributes", Pango::AttrList)
+  _WRAP_PROPERTY("background", Glib::ustring)
+  _WRAP_PROPERTY("foreground", Glib::ustring)
+  _WRAP_PROPERTY("background-gdk", Gdk::Color)
+  _WRAP_PROPERTY("foreground-gdk", Gdk::Color)
+  _WRAP_PROPERTY("font", Glib::ustring)
+  _WRAP_PROPERTY("font-desc", Pango::FontDescription)
+  _WRAP_PROPERTY("family", Glib::ustring)
+  _WRAP_PROPERTY("style", Pango::Style)
+  _WRAP_PROPERTY("variant", Pango::Variant)
+  _WRAP_PROPERTY("weight", int)
+  _WRAP_PROPERTY("stretch", Pango::Stretch)
+  _WRAP_PROPERTY("size", int)
+  _WRAP_PROPERTY("size-points", double)
+  _WRAP_PROPERTY("scale", double)
+  _WRAP_PROPERTY("editable", bool)
+  _WRAP_PROPERTY("strikethrough", bool)
+  _WRAP_PROPERTY("underline", Pango::Underline)
+  _WRAP_PROPERTY("rise", int)
+  _WRAP_PROPERTY("language", Glib::ustring)
+  _WRAP_PROPERTY("ellipsize", Pango::EllipsizeMode)
+  _WRAP_PROPERTY("width-chars", int)
+  _WRAP_PROPERTY("wrap-mode", Pango::WrapMode)
+  _WRAP_PROPERTY("wrap-width", int)
+  _WRAP_PROPERTY("alignment", Pango::Alignment)
+  _WRAP_PROPERTY("background-set", bool)
+  _WRAP_PROPERTY("foreground-set", bool)
+  _WRAP_PROPERTY("family-set", bool)
+  _WRAP_PROPERTY("style-set", bool)
+  _WRAP_PROPERTY("variant-set", bool)
+  _WRAP_PROPERTY("weight-set", bool)
+  _WRAP_PROPERTY("stretch-set", bool)
+  _WRAP_PROPERTY("size-set", bool)
+  _WRAP_PROPERTY("scale-set", bool)
+  _WRAP_PROPERTY("editable-set", bool)
+  _WRAP_PROPERTY("strikethrough-set", bool)
+  _WRAP_PROPERTY("underline-set", bool)
+  _WRAP_PROPERTY("rise-set", bool)
+  _WRAP_PROPERTY("language-set", bool)
+  _WRAP_PROPERTY("ellipsize-set", bool)
+  _WRAP_PROPERTY("single-paragraph-mode", bool)
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable();
+#else
+  virtual Glib::ustring _property_renderable();
+#endif
+
+protected:
+  /** Emits the "edited" signal.
+   * This is useful when implementing custom CellRenderers.
+   */
+  void edited(const Glib::ustring& path, const Glib::ustring& new_text);
+};
+
+} // namespace Gtk
+

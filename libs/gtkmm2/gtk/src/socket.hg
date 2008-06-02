@@ -1,0 +1,91 @@
+/* $Id: socket.hg,v 1.2 2004/02/10 17:35:13 mxpxpod Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/container.h>
+#include <gdkmm/types.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/container_p.h)
+
+namespace Gtk
+{
+
+/** Container for widgets from other processes.
+ * Together with Gtk::Plug, Gtk::Socket provides the ability to embed
+ * widgets from one process into another process in a fashion that is
+ * transparent to the user. One process creates a Gtk::Socket widget and,
+ * passes the that widget's window ID to the other process, which then
+ * creates a Gtk::Plug with that window ID. Any widgets contained in the
+ * Gtk::Plug then will appear inside the first applications window.
+ *
+ * The socket's window ID is obtained by using get_id(). Before using this
+ * function, the socket must have been realized, and for hence, have been
+ * added to its parent.
+ *
+ * @code
+ * Gtk::Socket socket;
+ * parent.add(socket);
+ *
+ * // The following call is only necessary if one of the ancestors of the
+ * // socket is not yet visible
+ * socket.realize();
+ *
+ * cout << "The ID of the sockets window is: " << socket.get_id() << endl;
+ *
+ * @endcode
+ *
+ * Note that if you pass the window ID of the socket to another process that
+ * will create a plug in the socket, you must make sure that the socket
+ * widget is not destroyed until that plug is created. Violating this rule
+ * will cause unpredictable consequences, the most likely consequence being
+ * that the plug will appear as a separate toplevel window. You can check if
+ * the plug has been created by examining the plug_window member of the
+ * GtkSocket structure returned by gobj(). If this field is non-NULL, then
+ * the plug has been successfully created inside of the socket.
+ *
+ * When gtkmm is notified that the embedded window has been destroyed, then
+ * it will destroy the socket as well. You should always, therefore, be
+ * prepared for your sockets to be destroyed at any time when the main event
+ * loop is running.
+ *
+ * The communication between a Gtk::Socket and a Gtk::Plug follows the
+ * XEmbed protocol. This protocol has also been implemented in other
+ * toolkits, e.g. Qt, allowing the same level of integration when embedding
+ * a Qt widget in gtkmm or vice versa.
+ *
+ * @ingroup Widgets
+ * @ingroup Containers
+ */
+class Socket : public Container
+{
+  _CLASS_GTKOBJECT(Socket, GtkSocket, GTK_SOCKET, Gtk::Container, GtkContainer)
+  _IGNORE(gtk_socket_steal)
+  _GTKMMPROC_WIN32_NO_WRAP
+public:
+  _CTOR_DEFAULT
+  
+
+  _WRAP_METHOD(void add_id(Gdk::NativeWindow window_id), gtk_socket_add_id)
+  _WRAP_METHOD(Gdk::NativeWindow get_id() const, gtk_socket_get_id)
+
+  _WRAP_SIGNAL(void plug_added(), "plug_added")
+  _WRAP_SIGNAL(bool plug_removed(), "plug_removed")
+};
+
+} // namespace Gtk
+

@@ -1,0 +1,5 @@
+include $(top_srcdir)/tools/m4/Makefile_list_of_sources.am_fragment
+include $(top_srcdir)/tools/pm/Makefile_list_of_sources.am_fragment
+
+files_tools_genwrap = generate_wrap_init.pl
+files_tools_perl = $(files_tools_genwrap) gmmproc.in

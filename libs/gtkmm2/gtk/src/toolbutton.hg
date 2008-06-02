@@ -1,0 +1,98 @@
+/* $Id: toolbutton.hg,v 1.10 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* box.h
+ * 
+ * Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/toolitem.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/toolitem_p.h)
+
+
+namespace Gtk
+{
+
+/** A Gtk::ToolItem subclass that displays buttons.
+ * 
+ * A ToolButton is are Gtk::ToolItem containing a button.
+ * @ingroup Widgets
+ */
+class ToolButton : public ToolItem
+{
+  _CLASS_GTKOBJECT(ToolButton, GtkToolButton, GTK_TOOL_BUTTON, Gtk::ToolItem, GtkToolItem)
+public:
+
+  /** Creates a new ToolButton.
+   */
+  _CTOR_DEFAULT()
+ 
+  /** Creates a new ToolButton from a StockID.
+   *
+   * The ToolButton will be created according to the @a stock_id properties.
+   * 
+   * @param stock_id The StockID which determines the look of the ToolButton.
+   */
+  _WRAP_CTOR(ToolButton(const Gtk::StockID& stock_id), gtk_tool_button_new_from_stock)
+
+  /** Creates a new ToolButton with a label.
+   *
+   * The ToolButton will have the label @a label.
+   *
+   * @param label The string used to display the label for this ToolButton.
+   */
+  explicit ToolButton(const Glib::ustring& label);
+
+  /** Creates a new ToolButton with an image.
+   *
+   * The ToolButton will have the label @a label and an image widget @a icon_widget.
+   *
+   * @param icon_widget The widget placed as the ToolButton's icon.
+   * @param label The string used to display the label for this ToolButton.
+   */
+  _WRAP_CTOR(ToolButton(Widget& icon_widget, const Glib::ustring& label = Glib::ustring()), gtk_tool_button_new)
+
+  _WRAP_METHOD(void set_label(const Glib::ustring& label), gtk_tool_button_set_label)
+  _WRAP_METHOD(Glib::ustring get_label() const, gtk_tool_button_get_label)
+  _WRAP_METHOD(void set_use_underline(bool use_underline = true), gtk_tool_button_set_use_underline)
+  _WRAP_METHOD(bool get_use_underline() const, gtk_tool_button_get_use_underline)
+  _WRAP_METHOD(void set_stock_id(const Gtk::StockID& stock_id), gtk_tool_button_set_stock_id)
+  _WRAP_METHOD(Glib::ustring get_stock_id() const, gtk_tool_button_get_stock_id)
+  _WRAP_METHOD(void set_icon_name(const Glib::ustring& icon_name), gtk_tool_button_set_icon_name)
+  _WRAP_METHOD(Glib::ustring get_icon_name() const, gtk_tool_button_get_icon_name)
+  _WRAP_METHOD(void set_icon_widget(Widget& icon_widget), gtk_tool_button_set_icon_widget)
+  _WRAP_METHOD(Widget* get_icon_widget(), gtk_tool_button_get_icon_widget)
+  _WRAP_METHOD(const Widget* get_icon_widget() const, gtk_tool_button_get_icon_widget, constversion)
+  _WRAP_METHOD(void set_label_widget(Widget& label_widget), gtk_tool_button_set_label_widget)
+  _WRAP_METHOD(Widget* get_label_widget(), gtk_tool_button_get_label_widget)
+  _WRAP_METHOD(const Widget* get_label_widget() const, gtk_tool_button_get_label_widget, constversion)
+
+ /** This signal is emitted when the tool button is clicked with the mouse
+  * or activated with the keyboard.
+  * @deprecated This is an "action" key-binding signal that you should rarely need to use.
+  */
+  _WRAP_SIGNAL(void clicked(), "clicked")
+
+  _WRAP_PROPERTY("label", Glib::ustring)
+  _WRAP_PROPERTY("use_underline", bool)
+  _WRAP_PROPERTY("label_widget", Gtk::Widget*)
+  _WRAP_PROPERTY("stock_id", Glib::ustring)
+  _WRAP_PROPERTY("icon_widget", Gtk::Widget)              
+};
+
+} // namespace Gtk
+

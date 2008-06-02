@@ -1,0 +1,49 @@
+// -*- c++ -*-
+/* $Id: menubar.ccg,v 1.5 2004/04/07 12:49:39 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkmenubar.h>
+
+namespace Gtk
+{
+
+MenuBar::MenuBar()
+:
+  _CONSTRUCT()
+{
+  // Connect to the signal instead of overriding the on_hierarchy_changed()
+  // method because invocation of C++ default signal handlers is skipped
+  // for gtkmmproc-generated classes (a gtkmm-wide optimization).
+
+  signal_realize().connect(sigc::mem_fun(*this, &MenuBar::init_accels_handler_));
+}
+
+void MenuBar::init_accels_handler_()
+{
+  if(gobj())
+  {
+    if(Window *const toplevel = dynamic_cast<Window*>(get_toplevel()))
+    {
+      accelerate(*toplevel);
+    }
+  }
+}
+
+} // namespace Gtk
+

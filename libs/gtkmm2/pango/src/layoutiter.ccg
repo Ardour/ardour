@@ -1,0 +1,112 @@
+// -*- c++ -*-
+/* $Id: layoutiter.ccg,v 1.1 2003/01/21 13:41:06 murrayc Exp $ */
+
+/*
+ *
+ * Copyright 2001-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+namespace Pango
+{
+
+LayoutIter::LayoutIter()
+:
+  gobject_ (0)
+{}
+
+LayoutIter::~LayoutIter()
+{
+  if(gobject_)
+    pango_layout_iter_free(gobject_);
+}
+
+void LayoutIter::assign_gobj(PangoLayoutIter* src)
+{
+  if(src != gobject_)
+  {
+    if(gobject_)
+      pango_layout_iter_free(gobject_);
+
+    gobject_ = src;
+  }
+}
+
+Rectangle LayoutIter::get_char_extents() const
+{
+  Rectangle logical_rect;
+  pango_layout_iter_get_char_extents(const_cast<PangoLayoutIter*>(gobj()), logical_rect.gobj());
+  return logical_rect;
+}
+
+Rectangle LayoutIter::get_cluster_ink_extents() const
+{
+  Rectangle ink_rect;
+  pango_layout_iter_get_cluster_extents(const_cast<PangoLayoutIter*>(gobj()), ink_rect.gobj(), 0);
+  return ink_rect;
+}
+
+Rectangle LayoutIter::get_cluster_logical_extents() const
+{
+  Rectangle logical_rect;
+  pango_layout_iter_get_cluster_extents(const_cast<PangoLayoutIter*>(gobj()), 0, logical_rect.gobj());
+  return logical_rect;
+}
+
+Rectangle LayoutIter::get_run_ink_extents() const
+{
+  Rectangle ink_rect;
+  pango_layout_iter_get_run_extents(const_cast<PangoLayoutIter*>(gobj()), ink_rect.gobj(), 0);
+  return ink_rect;
+}
+
+Rectangle LayoutIter::get_run_logical_extents() const
+{
+  Rectangle logical_rect;
+  pango_layout_iter_get_run_extents(const_cast<PangoLayoutIter*>(gobj()), 0, logical_rect.gobj());
+  return logical_rect;
+}
+
+Rectangle LayoutIter::get_line_ink_extents() const
+{
+  Rectangle ink_rect;
+  pango_layout_iter_get_line_extents(const_cast<PangoLayoutIter*>(gobj()), ink_rect.gobj(), 0);
+  return ink_rect;
+}
+
+Rectangle LayoutIter::get_line_logical_extents() const
+{
+  Rectangle logical_rect;
+  pango_layout_iter_get_line_extents(const_cast<PangoLayoutIter*>(gobj()), 0, logical_rect.gobj());
+  return logical_rect;
+}
+
+Rectangle LayoutIter::get_layout_ink_extents() const
+{
+  Rectangle ink_rect;
+  pango_layout_iter_get_layout_extents(const_cast<PangoLayoutIter*>(gobj()), ink_rect.gobj(), 0);
+  return ink_rect;
+}
+
+Rectangle LayoutIter::get_layout_logical_extents() const
+{
+  Rectangle logical_rect;
+  pango_layout_iter_get_layout_extents(const_cast<PangoLayoutIter*>(gobj()), 0, logical_rect.gobj());
+  return logical_rect;
+}
+
+} // namespace Pango
+

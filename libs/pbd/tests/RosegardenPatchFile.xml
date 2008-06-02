@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rosegarden-data>
+<rosegarden-data version="1.5.1">
+<studio thrufilter="0" recordfilter="0" audioinputpairs="2" mixerdisplayoptions="0" metronomedevice="0">
+
+
+    <device id="0" name="Roland E-09 GM Banks" direction="play" variation="MSB" connection="16:0 ES1371 (duplex)" type="midi">
+
+        <librarian name="Sasha Clarkson" email="sashaclarkson@yahoo.co.uk"/>
+        <metronome instrument="2009" barpitch="37" beatpitch="37" subbeatpitch="37" depth="2" barvelocity="120" beatvelocity="100" subbeatvelocity="80"/>
+
+        <bank name="GM2 Standard" percussion="false" msb="0" lsb="2">
+            <program id="0" name="Piano 1" />
+            <program id="1" name="Piano 2" />
+            <program id="2" name="Piano 3" />
+            <program id="3" name="Honkytonk" />
+            <program id="4" name="E.Piano 1" />
+            <program id="5" name="E.Piano 2" />
+            <program id="6" name="Harpsi 1" />
+            <program id="7" name="Clav" />
+            <program id="8" name="Celesta" />
+            <program id="9" name="Glocken" />
+            <program id="10" name="Music Box" />
+            <program id="11" name="Vibraphone" />
+            <program id="12" name="Marimba" />
+            <program id="13" name="Xylophone" />
+            <program id="14" name="Tublr Bell" />
+            <program id="15" name="Santur 1" />
+            <program id="16" name="Organ 1" />
+            <program id="17" name="Organ 2" />
+            <program id="18" name="Organ 3" />
+            <program id="19" name="ChurchOrg1" />
+            <program id="20" name="Reed Organ" />
+            <program id="21" name="Accrdn Fr" />
+            <program id="22" name="Harmonica1" />
+            <program id="23" name="Bandoneon" />
+            <program id="24" name="Nylon Gt 1" />
+            <program id="25" name="StlStr Gt1" />
+            <program id="26" name="Jazz Gt 1" />
+            <program id="27" name="Clean Gt 1" />
+            <program id="28" name="Muted Gt" />
+            <program id="29" name="Overdrive" />
+            <program id="30" name="Dist Gt 1" />
+            <program id="31" name="E.Gt Harm" />
+            <program id="32" name="Ac.Bass 1" />
+            <program id="33" name="Fingrd Bs1" />
+            <program id="34" name="Pick Bass1" />
+            <program id="35" name="Frtlss Bs1" />
+            <program id="36" name="Slap Bass1" />
+            <program id="37" name="Slap Bass2" />
+            <program id="38" name="Syn Bass 1" />
+            <program id="39" name="Syn Bass 2" />
+            <program id="40" name="Violin 1" />
+            <program id="41" name="Viola 1" />
+            <program id="42" name="Cello 1" />
+            <program id="43" name="Contrabass" />
+            <program id="44" name="Trem Str" />
+            <program id="45" name="Pizz Str" />
+            <program id="46" name="Harp" />
+            <program id="47" name="Timpani" />
+            <program id="48" name="Strings 1" />
+            <program id="49" name="Slow Str 1" />
+            <program id="50" name="SynStrings" />
+            <program id="51" name="Syn Str 2" />
+            <program id="52" name="ChoirAahs1" />
+            <program id="53" name="Voice Doos" />
+            <program id="54" name="Syn Vox" />
+            <program id="55" name="Orch Hit" />
+            <program id="56" name="Trumpet 1" />
+            <program id="57" name="Trombone 1" />
+            <program id="58" name="Tuba 1" />
+            <program id="59" name="Mute Tp 1" />
+            <program id="60" name="Fr.Horns 1" />
+            <program id="61" name="Brass 1" />
+            <program id="62" name="Syn Brass1" />
+            <program id="63" name="Syn Brass2" />
+            <program id="64" name="Sop Sax 1" />
+            <program id="65" name="Alto Sax 1" />
+            <program id="66" name="Tenor Sax1" />
+            <program id="67" name="Baritn Sax" />
+            <program id="68" name="Oboe" />
+            <program id="69" name="EnglshHorn" />
+            <program id="70" name="Bassoon" />
+            <program id="71" name="JzClarinet" />
+            <program id="72" name="Piccolo" />
+            <program id="73" name="Flute" />
+            <program id="74" name="Recorder" />
+            <program id="75" name="Pan Flute" />
+            <program id="76" name="BottleBlow" />
+            <program id="77" name="Shakuhachi" />
+            <program id="78" name="Whistle" />
+            <program id="79" name="Ocarina" />
+            <program id="80" name="SquareWave" />
+            <program id="81" name="Saw Wave 1" />
+            <program id="82" name="SynCalliop" />
+            <program id="83" name="Chiffer Ld" />
+            <program id="84" name="Charang" />
+            <program id="85" name="Solo Vox" />
+            <program id="86" name="5thSawWave" />
+            <program id="87" name="Bass and Lead" />
+            <program id="88" name="Fantasia 1" />
+            <program id="89" name="Warm Pad" />
+            <program id="90" name="Poly Syn" />
+            <program id="91" name="SpaceVoice" />
+            <program id="92" name="BowedGlass" />
+            <program id="93" name="Metal Pad" />
+            <program id="94" name="Halo Pad" />
+            <program id="95" name="Sweep Pad" />
+            <program id="96" name="Ice Rain" />
+            <program id="97" name="Soundtrack" />
+            <program id="98" name="Crystal" />
+            <program id="99" name="Atmosphere" />
+            <program id="100" name="Brightness" />
+            <program id="101" name="Goblin" />
+            <program id="102" name="Echo Drops" />
+            <program id="103" name="StarTheme1" />
+            <program id="104" name="Sitar 1" />
+            <program id="105" name="Banjo 1" />
+            <program id="106" name="Shamisen" />
+            <program id="107" name="Koto" />
+            <program id="108" name="Kalimba 1" />
+            <program id="109" name="Bagpipe" />
+            <program id="110" name="Fiddle" />
+            <program id="111" name="Shehnai 1" />
+            <program id="112" name="TinkleBell" />
+            <program id="113" name="Agogo Bell" />
+            <program id="114" name="SteelDrums" />
+            <program id="115" name="Woodblock" />
+            <program id="116" name="Taiko" />
+            <program id="117" name="Melo Tom 1" />
+            <program id="118" name="Synth Drum" />
+            <program id="119" name="RevCymbal1" />
+            <program id="120" name="Gt Fret Nz" />
+            <program id="121" name="Breath Nz" />
+            <program id="122" name="Seashore" />
+            <program id="123" name="Bird 1" />
+            <program id="124" name="Telephone1" />
+            <program id="125" name="Helicopter" />
+            <program id="126" name="Applause 1" />
+            <program id="127" name="Gun Shot" />
+        </bank>
+
+        <bank name="Alternative 1" percussion="false" msb="1" lsb="2">
+            <program id="2" name="EG+EP 1" />
+            <program id="11" name="Hard Vibe" />
+            <program id="15" name="Santur 2" />
+            <program id="16" name="Organ 101" />
+            <program id="17" name="Organ 201" />
+            <program id="22" name="Harmonica2" />
+            <program id="26" name="Mellow Gt" />
+            <program id="27" name="Clean Gt 2" />
+            <program id="28" name="Mt Dist Bs" />
+            <program id="30" name="Dist Gt 2" />
+            <program id="32" name="Ac.Bass 2" />
+            <program id="33" name="Fingrd Bs2" />
+            <program id="35" name="Frtlss Bs2" />
+            <program id="38" name="Syn Bs 101" />
+            <program id="39" name="Syn Bs 201" />
+            <program id="40" name="Violin 2" />
+            <program id="41" name="Viola 2" />
+            <program id="42" name="Cello 2" />
+            <program id="48" name="Strings 2" />
+            <program id="49" name="Slow Str 2" />
+            <program id="50" name="OB Strings" />
+            <program id="51" name="Syn Str 3" />
+            <program id="55" name="Bass Hit" />
+            <program id="56" name="Trumpet 2" />
+            <program id="57" name="Trombone 2" />
+            <program id="58" name="Tuba 2" />
+            <program id="60" name="Fr.Horns 2" />
+            <program id="61" name="Brass 2" />
+            <program id="62" name="Poly Brass" />
+            <program id="63" name="Soft Brass" />
+            <program id="65" name="Alto Sax 2" />
+            <program id="66" name="Tenor Sax2" />
+            <program id="71" name="Clarinet" />
+            <program id="80" name="Square" />
+            <program id="81" name="P5 Saw" />
+            <program id="82" name="Vent Synth" />
+            <program id="84" name="Wire Lead" />
+            <program id="86" name="Big Fives" />
+            <program id="87" name="Big and Raw" />
+            <program id="88" name="Fantasia 2" />
+            <program id="89" name="Thick Pad" />
+            <program id="90" name="80sPolySyn" />
+            <program id="91" name="Heaven II" />
+            <program id="93" name="Tine Pad" />
+            <program id="95" name="Polar Pad" />
+            <program id="96" name="Harm Rain" />
+            <program id="97" name="Ancestral" />
+            <program id="98" name="Syn Mallet" />
+            <program id="99" name="Warm Atoms" />
+            <program id="102" name="Echo Bell" />
+            <program id="103" name="StarTheme2" />
+            <program id="104" name="Sitar 2" />
+            <program id="105" name="Mute Banjo" />
+            <program id="106" name="Tsugaru" />
+            <program id="111" name="Shehnai 2" />
+            <program id="117" name="Real Tom" />
+            <program id="119" name="RevCymbal2" />
+            <program id="120" name="Gt CutNz 1" />
+            <program id="121" name="FlKeyClick" />
+            <program id="122" name="Rain" />
+            <program id="123" name="Dog" />
+            <program id="124" name="Telephone2" />
+            <program id="125" name="Car Engine" />
+            <program id="126" name="Laughing" />
+            <program id="127" name="MachineGun" />
+        </bank>
+
+        <bank name="Alternative  2" percussion="false" msb="2" lsb="2">
+            <program id="2" name="EG+EP 2" />
+            <program id="26" name="Jazz Gt 2" />
+            <program id="30" name="Dazed Gt" />
+            <program id="32" name="Ac.Bass 3" />
+            <program id="33" name="Jazz Bass" />
+            <program id="35" name="Frtlss Bs3" />
+            <program id="38" name="Juno Bass" />
+            <program id="39" name="Mod Bass" />
+            <program id="50" name="Syn Str 1" />
+            <program id="55" name="6th Hit" />
+            <program id="56" name="Trumpet 3" />
+            <program id="57" name="Trombone 3" />
+            <program id="59" name="Mute Tp 2" />
+            <program id="80" name="Hollow Min" />
+            <program id="81" name="Pulse Saw" />
+            <program id="82" name="PurePan Ld" />
+            <program id="87" name="Fat and Perky" />
+            <program id="89" name="Horn Pad" />
+            <program id="93" name="Panner Pad" />
+            <program id="96" name="African wd" />
+            <program id="97" name="Prologue" />
+            <program id="98" name="Sft Crystl" />
+            <program id="99" name="Nylon Harp" />
+            <program id="101" name="50s Sci-Fi" />
+            <program id="102" name="Echo Pan 1" />
+            <program id="104" name="Dtnd Sitar" />
+            <program id="120" name="Str Slap" />
+            <program id="122" name="Thunder" />
+            <program id="123" name="HorseGallp" />
+            <program id="124" name="Door Creak" />
+            <program id="125" name="Car-Stop" />
+            <program id="126" name="Screaming" />
+            <program id="127" name="Laser Gun" />
+        </bank>
+
+        <bank name="Alternative 8" percussion="false" msb="8" lsb="2">
+            <program id="0" name="St.Piano 1" />
+            <program id="1" name="St.Piano 2" />
+            <program id="2" name="St.Piano 3" />
+            <program id="3" name="OldUpright" />
+            <program id="4" name="St.Soft EP" />
+            <program id="5" name="Detuned EP" />
+            <program id="6" name="CoupledHps" />
+            <program id="7" name="Comp Clav" />
+            <program id="11" name="St.Vibe" />
+            <program id="12" name="St.Marimba" />
+            <program id="14" name="ChurchBell" />
+            <program id="15" name="Cimbalom" />
+            <program id="16" name="Trem Organ" />
+            <program id="17" name="Chorus Org" />
+            <program id="18" name="Rotary Org" />
+            <program id="19" name="ChurchOrg2" />
+            <program id="21" name="Accrdn It" />
+            <program id="24" name="Ukulele" />
+            <program id="25" name="12 Str Gt" />
+            <program id="26" name="PedalSteel" />
+            <program id="27" name="Chorus Gt" />
+            <program id="28" name="Funk Pop" />
+            <program id="30" name="Feedback 1" />
+            <program id="31" name="Feedback 3" />
+            <program id="34" name="Mt Pick Bs" />
+            <program id="35" name="Frtlss Bs5" />
+            <program id="36" name="Reso Slap" />
+            <program id="38" name="Acid Bass" />
+            <program id="39" name="Beef FM Bs" />
+            <program id="40" name="SlowVioln1" />
+            <program id="44" name="Slow Trem" />
+            <program id="48" name="Orchestra1" />
+            <program id="49" name="Legato Str" />
+            <program id="50" name="70s Str 1" />
+            <program id="52" name="St.Choir" />
+            <program id="54" name="Syn Voice" />
+            <program id="55" name="Impact Hit" />
+            <program id="56" name="FlugelHorn" />
+            <program id="60" name="FrHornSolo" />
+            <program id="61" name="Brass 3" />
+            <program id="62" name="Syn Brass3" />
+            <program id="63" name="Syn Brass4" />
+            <program id="64" name="Sop Sax 2" />
+            <program id="65" name="Hyper Alto" />
+            <program id="66" name="Blow Tenor" />
+            <program id="71" name="BsClarinet" />
+            <program id="75" name="Kawala 1" />
+            <program id="80" name="Sine Wave" />
+            <program id="81" name="Dr.Solo" />
+            <program id="84" name="Dist Lead" />
+            <program id="95" name="Converge" />
+            <program id="96" name="Clav Pad" />
+            <program id="97" name="Rave" />
+            <program id="98" name="VibraBells" />
+            <program id="105" name="Rabab 1" />
+            <program id="107" name="TaishoKoto" />
+            <program id="111" name="Pungi" />
+            <program id="112" name="Bonang 1" />
+            <program id="113" name="Atarigane" />
+            <program id="115" name="Castanets" />
+            <program id="116" name="Concert BD" />
+            <program id="117" name="Melo Tom 2" />
+            <program id="118" name="808 Tom" />
+            <program id="119" name="Rev Snare1" />
+            <program id="125" name="Starship" />
+        </bank>
+
+        <bank name="Alternative 16" percussion="false" msb="16" lsb="2">
+            <program id="0" name="EuropeanPf" />
+            <program id="4" name="FM+SA EP" />
+            <program id="5" name="St.FM EP" />
+            <program id="6" name="St.Harpsi" />
+            <program id="12" name="Balafon 1" />
+            <program id="16" name="60s Organ1" />
+            <program id="18" name="RotarySlow" />
+            <program id="19" name="ChurchOrg3" />
+            <program id="20" name="Puff Organ" />
+            <program id="24" name="Nylon Gt 2" />
+            <program id="25" name="Mandolin" />
+            <program id="28" name="Funk Gt" />
+            <program id="30" name="Power Gt 1" />
+            <program id="31" name="Ac.Gt Harm" />
+            <program id="38" name="Reso SH Bs" />
+            <program id="39" name="RubberBass" />
+            <program id="48" name="St.Strings" />
+            <program id="55" name="Lo-Fi Rave" />
+            <program id="60" name="Horn Orch" />
+            <program id="61" name="Brass Fall" />
+            <program id="62" name="OctSynBrss" />
+            <program id="63" name="VeloBrass1" />
+            <program id="80" name="DistSquare" />
+            <program id="81" name="Waspy Syn" />
+            <program id="98" name="Choir and Bell" />
+            <program id="105" name="Gopichant" />
+            <program id="107" name="Kanoon 1" />
+            <program id="111" name="Hichiriki" />
+            <program id="112" name="RamaCymbal" />
+            <program id="119" name="Rev Kick" />
+        </bank>
+
+        <bank name="Standard" percussion="true" msb="0" lsb="2">
+            <program id="0" name="Standard 1" />
+            <program id="1" name="Standard 2" />
+            <program id="2" name="Standard 3" />
+            <program id="8" name="Room" />
+            <program id="9" name="Hip Hop" />
+            <program id="10" name="Drum’n’Bss" />
+            <program id="11" name="Tech and House" />
+            <program id="13" name="R and B" />
+            <program id="16" name="Power" />
+            <program id="24" name="Electronic" />
+            <program id="25" name="TR-808 and 909" />
+            <program id="26" name="Dance" />
+            <program id="30" name="New TR-909" />
+            <program id="32" name="Jazz Kit 1" />
+            <program id="33" name="Jazz Kit 2" />
+            <program id="40" name="Brush Kit" />
+            <program id="48" name="Orchestra" />
+            <program id="49" name="Ethnic" />
+            <program id="50" name="Kick and Snare" />
+            <program id="56" name="SFX" />
+        </bank>
+
+        <bank name="Extra" percussion="true" msb="0" lsb="3">
+            <program id="116" name="OR Kit 2" />
+        </bank>
+
+        <bank name="Ethnic" percussion="true" msb="0" lsb="4">
+            <program id="43" name="China Perc" />
+            <program id="44" name="India Perc" />
+            <program id="45" name="GamelanPrc" />
+            <program id="46" name="Latin Perc" />
+            <program id="66" name="Std Asia" />
+            <program id="67" name="Jazz Asia" />
+            <program id="68" name="TR909 Asia" />
+            <program id="69" name="HipHopAsia" />
+            <program id="70" name="R and B Asia" />
+            <program id="71" name="TechnoAsia" />
+            <program id="72" name="D’n’B Asia" />
+            <program id="74" name="Std Latin" />
+            <program id="75" name="Jazz Latin" />
+            <program id="76" name="TR909Latin" />
+            <program id="77" name="TechnoLatn" />
+            <program id="78" name="D’n’B Latn" />
+            <program id="79" name="HipHopLatn" />
+            <program id="80" name="R and B Latin" />
+            <program id="81" name="Std OR1" />
+            <program id="82" name="Jazz OR1" />
+            <program id="83" name="TR-909 OR1" />
+            <program id="84" name="Techno OR1" />
+            <program id="85" name="D’n’B OR1" />
+            <program id="86" name="HipHop OR1" />
+            <program id="87" name="R and B OR1" />
+            <program id="88" name="MxKit and Latn" />
+            <program id="89" name="MxKt and India" />
+            <program id="90" name="MxKit and Chin" />
+            <program id="91" name="MxKit and OR1" />
+            <program id="92" name="OR Kit 1" />
+            <program id="93" name="India Kit" />
+            <program id="94" name="OrientPerc" />
+            <program id="95" name="Std OR2" />
+            <program id="96" name="Jazz OR2" />
+            <program id="97" name="TR-909 OR2" />
+            <program id="98" name="HipHop OR2" />
+            <program id="99" name="R and B OR2" />
+            <program id="100" name="Techno OR2" />
+            <program id="101" name="D’n’B OR2" />
+            <program id="102" name="MxKit and OR2" />
+        </bank>
+
+        <controls>
+            <control name="Pan" type="controller" description="&lt;none&gt;" min="0" max="127" default="64" controllervalue="10" colourindex="2" ipbposition="0"/>
+            <control name="Chorus" type="controller" description="&lt;none&gt;" min="0" max="127" default="0" controllervalue="93" colourindex="3" ipbposition="1"/>
+            <control name="Volume" type="controller" description="&lt;none&gt;" min="0" max="127" default="0" controllervalue="7" colourindex="1" ipbposition="2"/>
+            <control name="Reverb" type="controller" description="&lt;none&gt;" min="0" max="127" default="0" controllervalue="91" colourindex="3" ipbposition="3"/>
+            <control name="Sustain" type="controller" description="&lt;none&gt;" min="0" max="127" default="0" controllervalue="64" colourindex="4" ipbposition="-1"/>
+            <control name="Expression" type="controller" description="&lt;none&gt;" min="0" max="127" default="100" controllervalue="11" colourindex="2" ipbposition="-1"/>
+            <control name="Modulation" type="controller" description="&lt;none&gt;" min="0" max="127" default="0" controllervalue="1" colourindex="4" ipbposition="-1"/>
+            <control name="PitchBend" type="pitchbend" description="&lt;none&gt;" min="0" max="16383" default="8192" controllervalue="1" colourindex="4" ipbposition="-1"/>
+        </controls>
+
+        <instrument id="2000" channel="0" type="midi">
+            <bank percussion="false" msb="0" lsb="2"/>
+            <program id="0"/>
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2001" channel="1" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2002" channel="2" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2003" channel="3" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2004" channel="4" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2005" channel="5" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2006" channel="6" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2007" channel="7" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2008" channel="8" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2009" channel="9" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2010" channel="10" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2011" channel="11" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2012" channel="12" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2013" channel="13" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2014" channel="14" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+        <instrument id="2015" channel="15" type="midi">
+            <pan value="64"/>
+            <volume value="100"/>
+        </instrument>
+
+    </device>
+
+
+
+
+</studio>
+
+
+</rosegarden-data>

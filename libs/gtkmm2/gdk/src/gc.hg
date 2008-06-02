@@ -1,0 +1,102 @@
+/* $Id: gc.hg,v 1.8 2006/04/12 11:11:24 murrayc Exp $ */
+
+/* gc.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+#include <gdkmm/drawable.h>
+#include <gdkmm/types.h>
+#include <gdkmm/rectangle.h>
+#include <gdkmm/region.h>
+#include <gdkmm/screen.h>
+#include <gdk/gdkgc.h>
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+_CC_INCLUDE(gdk/gdkenumtypes.h)
+_WRAP_ENUM(LineStyle, GdkLineStyle)
+_WRAP_ENUM(CapStyle, GdkCapStyle)
+_WRAP_ENUM(JoinStyle, GdkJoinStyle)
+_WRAP_ENUM(Fill, GdkFill)
+_WRAP_ENUM(Function, GdkFunction)
+_WRAP_ENUM(SubwindowMode, GdkSubwindowMode)
+_WRAP_ENUM(GCValuesMask, GdkGCValuesMask)
+
+
+class Drawable;
+
+/** All drawing operations in GDK take a graphics context (GC) argument.
+ * A graphics context encapsulates information about the way things are drawn, such as the foreground color or line width.
+ * By using graphics contexts, the number of arguments to each drawing call is greatly reduced, and communication overhead
+ * is minimized, since identical arguments do not need to be passed repeatedly.
+ */
+class GC : public Glib::Object
+{
+  _CLASS_GOBJECT(GC,GdkGC,GDK_GC,Glib::Object,GObject)
+  _IGNORE(gdk_gc_unref, gdk_gc_ref, gdk_gc_copy, gdk_gc_set_font, gdk_gc_set_values, gdk_gc_get_values)
+protected:
+  _CTOR_DEFAULT
+  explicit GC(const Glib::RefPtr<Drawable>& drawable);
+
+public:
+  _WRAP_CREATE()
+  _WRAP_CREATE(const Glib::RefPtr<Drawable>& drawable)
+
+  // Custom wrap these?, maybe with a Gdk::GC::Value class. Need to do take care of refcounts of GdkGCValue's fields.
+  // Actually, I don't see the need for these methods. murrayc.
+  //_WRAP_METHOD(void get_values(GdkGCValues& values) const, gdk_gc_get_values)
+  //_WRAP_METHOD(void set_values(const GdkGCValues& values, GCValuesMask values_mask), gdk_gc_set_values)
+  //_IGNORE(gdk_gc_get_values, gdk_gc_set_values)
+
+  _WRAP_METHOD(void set_foreground(const Color& color), gdk_gc_set_foreground)
+  _WRAP_METHOD(void set_background(const Color& color), gdk_gc_set_background)
+  _WRAP_METHOD(void set_function(Function function), gdk_gc_set_function)
+  _WRAP_METHOD(void set_fill(Fill fill), gdk_gc_set_fill)
+  _WRAP_METHOD(void set_tile(const Glib::RefPtr<Pixmap>& tile), gdk_gc_set_tile)
+  _WRAP_METHOD(void set_stipple(const Glib::RefPtr<Pixmap>& stipple), gdk_gc_set_stipple)
+  _WRAP_METHOD(void set_ts_origin(int x, int y), gdk_gc_set_ts_origin)
+  _WRAP_METHOD(void set_clip_origin(int x, int y), gdk_gc_set_clip_origin)
+  _WRAP_METHOD(void set_clip_mask(const Glib::RefPtr<Bitmap>& mask), gdk_gc_set_clip_mask)
+
+  /** @deprecated Use set_clip_rectangle(const Rectangle& rectangle) instead.
+   */
+  _WRAP_METHOD(void set_clip_rectangle(Rectangle& rectangle), gdk_gc_set_clip_rectangle)
+  _WRAP_METHOD(void set_clip_rectangle(const Rectangle& rectangle), gdk_gc_set_clip_rectangle)
+
+  _WRAP_METHOD(void set_clip_region(const Region& region), gdk_gc_set_clip_region)
+  _WRAP_METHOD(void set_subwindow(SubwindowMode mode), gdk_gc_set_subwindow)
+  _WRAP_METHOD(void set_exposures(bool exposures), gdk_gc_set_exposures)
+  _WRAP_METHOD(void set_line_attributes(int line_width, LineStyle line_style, CapStyle cap_style, JoinStyle join_style), gdk_gc_set_line_attributes)
+  _WRAP_METHOD(void set_dashes(int dash_offset, gint8* dash_list, int n), gdk_gc_set_dashes)
+  _WRAP_METHOD(void offset(int x_offset, int y_offset), gdk_gc_offset)
+  _WRAP_METHOD(void set_colormap(const Glib::RefPtr<Colormap>& colormap), gdk_gc_set_colormap)
+  _WRAP_METHOD(Glib::RefPtr<Colormap> get_colormap(), gdk_gc_get_colormap, refreturn)
+  _WRAP_METHOD(void set_rgb_fg_color(const Color& color), gdk_gc_set_rgb_fg_color)
+  _WRAP_METHOD(void set_rgb_bg_color(const Color& color), gdk_gc_set_rgb_bg_color)
+
+  _WRAP_METHOD(Glib::RefPtr<Screen> get_screen(), gdk_gc_get_screen, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Screen> get_screen() const, gdk_gc_get_screen, refreturn, constversion)
+};
+
+} /* namespace Gdk */
+

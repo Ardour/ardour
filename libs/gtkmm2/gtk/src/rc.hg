@@ -1,0 +1,209 @@
+/* $Id: rc.hg,v 1.6 2005/11/30 14:10:49 murrayc Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+#m4begin
+
+m4_define(`_RCSTYLE_MEMBER_COLOR',`dnl
+void set_$1(Gtk::StateType state, const Gdk::Color& color);
+  Gdk::Color get_$1(Gtk::StateType state) const;
+_PUSH(SECTION_CC)
+void RcStyle::set_$1(StateType state, const Gdk::Color& color)
+{
+  gobj()->$1[state] = *color.gobj();
+}
+
+Gdk::Color RcStyle::get_$1(StateType state) const
+{
+  return Gdk::Color(const_cast<GdkColor*>(&gobj()->$1[state]), true);
+}
+
+_POP()
+')dnl
+
+#m4end
+
+//#include <gtkmm/settings.h>
+#include <gtkmm/style.h>
+
+
+namespace Gtk
+{
+
+class Widget;
+class Settings;
+class Style;
+
+_CC_INCLUDE(gtk/gtktypebuiltins.h)
+_WRAP_ENUM(RcFlags, GtkRcFlags)
+
+
+class RcStyle : public Glib::Object
+{
+  _CLASS_GOBJECT(RcStyle, GtkRcStyle, GTK_RC_STYLE, Glib::Object, GObject)
+  _IGNORE(gtk_rc_style_ref, gtk_rc_style_unref)
+
+protected:
+  _CTOR_DEFAULT()
+
+public:
+  _WRAP_CREATE()
+  _WRAP_METHOD(Glib::RefPtr<RcStyle> copy() const, gtk_rc_style_copy)
+
+  void set_name(const Glib::ustring& name);
+  _MEMBER_GET(name, name, Glib::ustring, const char*)
+
+  void set_bg_pixmap_name(Gtk::StateType state, const Glib::ustring& name);
+  Glib::ustring get_bg_pixmap_name(Gtk::StateType state) const;
+
+  void set_font(const Pango::FontDescription& font_desc);
+  Pango::FontDescription get_font() const;
+ 
+  void set_color_flags(Gtk::StateType state, RcFlags flags);
+  void unset_color_flags(Gtk::StateType state, RcFlags flags);
+  RcFlags get_color_flags(Gtk::StateType state) const;
+
+  _RCSTYLE_MEMBER_COLOR(fg)
+  _RCSTYLE_MEMBER_COLOR(bg)
+  _RCSTYLE_MEMBER_COLOR(text)
+  _RCSTYLE_MEMBER_COLOR(base)
+
+  void set_xthickness(int xthickness);
+  _MEMBER_GET(xthickness, xthickness, int, gint)
+
+  void set_ythickness(int ythickness);
+  _MEMBER_GET(ythickness, ythickness, int, gint)
+};
+
+
+class RC
+{
+public:
+  explicit RC(const Glib::ustring& filename);
+
+  /** Finds all matching RC styles for a given widget,
+   * composites them together, and then creates a
+   * Gtk::Style representing the composite appearance.
+   *
+   * @param widget a Gtk::Widget.
+   * @result the resulting style.
+   */
+  static Glib::RefPtr<Style> get_style(const Widget& widget);
+
+  static void parse_string(const Glib::ustring &rc_string);
+
+  /** Adds a file to the list of files to be parsed at the end of gtk_init().
+   *
+   * @param filename the pathname to the file. If @a filename is not absolute, it is searched in the current directory.
+   */
+  static void add_default_file(const Glib::ustring& filename);
+
+  /** Sets the list of files that GTK+ will read at the end of gtk_init().
+   *
+   * @param filenames A list of filenames.
+   */
+  static void set_default_files(const Glib::StringArrayHandle& filenames);
+
+  /** Retrieves the current list of RC files that will be parsed
+   * at the end of gtk_init().
+   *
+   * @result An array of filenames.
+   */
+  static Glib::StringArrayHandle get_default_files();
+
+  /** If the modification time on any previously read file for the
+   * default Gtk::Settings has changed, discard all style information
+   * and then reread all previously read RC files.
+   *
+   * @result true if the files were reread.
+   */
+  static bool reparse_all();
+
+  /** If the modification time on any previously read file
+   * for the given Gtk::Settings has changed, discard all style information
+   * and then reread all previously read RC files.
+   *
+   * @param settings a Gtk::Settings
+   * @param force_load load whether or not anything changed
+   * @result true if the files were reread.
+   */
+  static bool reparse_all(const Glib::RefPtr<Settings>& settings, bool force_load = true);
+
+  /** This method recomputes the styles for all widgets that use a
+   * particular Gtk::Settings object. (There is one Gtk::Settings object
+   * per Gdk::Screen -  see Gtk::Settings::get_for_screen()); It is useful
+   * when some global parameter has changed that affects the appearance
+   * of all widgets, because when a widget gets a new style, it will
+   * both redraw and recompute any cached information about its
+   * appearance. As an example, it is used when the default font size
+   * set by the operating system changes. Note that this function
+   * doesn't affect widgets that have a style set explicitely on them
+   * with Gtk::Widget::set_style().
+   *
+   * @param settings a Gtk::Settings
+   *
+   * @newin2p4
+   */
+  static void reset_styles(const Glib::RefPtr<Settings>& settings);
+
+  /** Looks up a file in pixmap path for the specified Gtk::Settings.
+   * If the file is not found, it outputs a warning message using
+   * g_warning() and returns an empty string.
+   *
+   * @param settings a Gtk::Settings
+   * @param scanner Scanner used to get line number information for the warning message.
+   * @param pixmap_file name of the pixmap file to locate.
+   * @result the filename.
+   */
+  static Glib::ustring find_pixmap_in_path(const Glib::RefPtr<Settings>& settings, GScanner* scanner, const Glib::ustring& pixmap_file);
+
+  /** Looks up a file in pixmap path for the specified Gtk::Settings.
+   * If the file is not found, it outputs a warning message using
+   * g_warning() and returns an empty string.
+   *
+   * @param settings a Gtk::Settings
+   * @param pixmap_file name of the pixmap file to locate.
+   * @result the filename.
+   */
+  static Glib::ustring find_pixmap_in_path(const Glib::RefPtr<Settings>& settings, const Glib::ustring& pixmap_file);
+
+  /** Searches for a theme engine in the GTK+ search path. This function
+   * is not useful for applications and should not be used.
+   *
+   * @param pixmap_file  name of a theme engine.
+   * @result The filename, if found, otherwise an empty string.
+   **/
+  static Glib::ustring find_module_in_path(const Glib::ustring& pixmap_file);
+
+  static Glib::ustring get_theme_dir();
+
+  /** Returns a directory in which GTK+ looks for theme engines.
+   * For full information about the search for theme engines,
+   * see the GTK+ docs.
+   *
+   * @result the directory.
+   **/
+  static Glib::ustring get_module_dir();
+  
+};
+
+} // namespace Gtk
+

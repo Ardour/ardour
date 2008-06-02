@@ -1,0 +1,33 @@
+Changes between glibmm 2.2 (previously part of gtkmm) and glibmm 2.4:
+
+* glibmm is now a separate module, for use with non-GUI software.
+  (Note that glibmm 2.4 and gtkmm 2.4 install in parallel with
+   gtkmm 2.2 - so you can install and use both simultaneously and
+   port to 2.4 whenever you are ready.) 
+* glibmm now uses libsigc++ 2 rather than libsigc++ 1.2.
+  There is a libsigc++ compatibility header. The new, undeprecated, API
+  is slightly improved.
+  - Connecting signal handlers:
+      signal_something().connect( SigC::slot(*this, &Something::on_something) );
+    should become
+      signal_something().connect( sigc::mem_fun(*this, &Something::on_something) );
+    or, for non-member methods:
+      signal_something().connect( sigc::ptr_fun(&Something::on_something) );
+  - Binding extra parameters:
+      SigC::bind(...)
+    should become
+      sigc::bind(...)
+  - Declaring signals:
+      SigC::Signal1<void, int>
+    should become
+      sigc::signal<void, int>
+  - Declaring slots:
+      SigC::Slot1<void, int>
+    should become
+      sigc::slot<void,int>
+  - Inheriting from the libsigc++ base class:
+      class Something : public SigC::Object
+    should become
+      class Something : public sigc::trackable
+
+   

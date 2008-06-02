@@ -1,0 +1,85 @@
+/* $Id: alignment.hg,v 1.5 2004/04/29 19:58:02 murrayc Exp $ */
+
+/* alignment.h
+ * 
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/bin.h>
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/bin_p.h)
+
+namespace Gtk
+{
+
+/** A widget which controls the alignment and size of its child.
+ *
+ * Normally, a widget is allocated at least as much size as it requests, and,
+ * most widgets expand to fill any extra allocated space, but sometimes
+ * this behavior is not desired. The alignment widget allows the
+ * programmer to specify how a widget should expand and position itself
+ * to fill the area it is allocated.
+ *
+ * It has four settings: xscale, yscale, xalign, and yalign:
+ * The scale settings specify how much the child widget should expand to fill the space allocated to the Gtk::Alignment. The values can range from 0 (meaning the child doesn't expand at all) to 1 (meaning the child expands to fill all of the available space).
+ * The align settings place the child widget within the available area. The values range from 0 (top or left) to 1 (bottom or right). Of course, if the scale settings are both set to 1, the alignment settings have no effect.
+ *
+ * @ingroup Widgets
+ * @ingroup Containers
+ */
+class Alignment : public Bin
+{
+  _CLASS_GTKOBJECT(Alignment,GtkAlignment,GTK_ALIGNMENT,Gtk::Bin,GtkBin)
+public:
+
+  /** Constructor to create an Alignment object.
+   * @param xalign The initial horizontal alignment of the child.
+   * @param yalign The initial vertical alignment of the child.
+   * @param xscale The initial amount that the child expands horizontally to fill up unused space.
+   * @param yscale The initial amount that the child expands vertically to fill up unused space.
+   */
+  _WRAP_CTOR(Alignment(float xalign = 0.5, float yalign = 0.5, float xscale = 1.0, float yscale = 1.0), gtk_alignment_new)
+
+  /** Constructor to create an Alignment object.
+   * @param xalign A Gtk::AlignmentEnum describing the initial horizontal alignment of the child.
+   * @param yalign A Gtk::AlignmentEnum describing the initial vertical alignment of the child.
+   * @param xscale The initial amount that the child expands horizontally to fill up unused space.
+   * @param yscale The initial amount that the child expands vertically to fill up unused space.
+   */
+  _WRAP_CTOR(Alignment(AlignmentEnum xalign, AlignmentEnum yalign = Gtk::ALIGN_CENTER, float xscale = 1.0, float yscale = 1.0), gtk_alignment_new)
+
+  _WRAP_METHOD(void set(float xalign = 0.5, float yalign = 0.5, float xscale = 1.0, float yscale=  1.0), gtk_alignment_set)
+  _WRAP_METHOD(void set(AlignmentEnum xalign, AlignmentEnum yalign = Gtk::ALIGN_CENTER, float xscale = 1.0, float yscale=  1.0), gtk_alignment_set)
+
+  //New in GTK+ 2.4
+  _WRAP_METHOD(void set_padding(guint padding_top, guint padding_bottom, guint padding_left, guint padding_right), gtk_alignment_set_padding)
+  _WRAP_METHOD(void get_padding(guint& padding_top, guint& padding_bottom, guint& padding_left, guint& padding_right), gtk_alignment_get_padding)
+              
+  _WRAP_PROPERTY("xalign", float)
+  _WRAP_PROPERTY("yalign", float)
+  _WRAP_PROPERTY("xscale", float)
+  _WRAP_PROPERTY("yscale", float)
+
+  //New in GTK+ 2.4
+  _WRAP_PROPERTY("top_padding", guint)
+  _WRAP_PROPERTY("bottom_padding", guint)
+  _WRAP_PROPERTY("left_padding", guint)
+  _WRAP_PROPERTY("right_padding", guint)
+};
+
+} /* namespace Gtk */
+

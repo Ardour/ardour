@@ -1,0 +1,166 @@
+/* $Id: treestore.hg,v 1.5 2004/04/03 12:53:49 murrayc Exp $ */
+
+/* Copyright(C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or(at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/treeiter.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treesortable.h>
+#include <gtkmm/treedragdest.h>
+#include <gtkmm/treedragsource.h>
+// We couldn't include it in treemodel.h, but doing it here makes it easier for people.
+#include <gtkmm/treepath.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gtk
+{
+
+/**
+ * @ingroup TreeView
+ */
+class TreeStore :
+  public Glib::Object,
+  public Gtk::TreeModel,
+  public TreeSortable,
+  public TreeDragSource,
+  public TreeDragDest
+{
+  _CLASS_GOBJECT(TreeStore, GtkTreeStore, GTK_TREE_STORE, Glib::Object, GObject)
+  _IMPLEMENTS_INTERFACE(TreeModel)
+  _IMPLEMENTS_INTERFACE(TreeSortable)
+  _IMPLEMENTS_INTERFACE(TreeDragSource)
+  _IMPLEMENTS_INTERFACE(TreeDragDest)
+  _IGNORE(gtk_tree_store_set, gtk_tree_store_set_valist,
+          gtk_tree_store_insert, gtk_tree_store_append, gtk_tree_store_prepend,
+          gtk_tree_store_reorder, gtk_tree_store_move_after, gtk_tree_store_move_before)
+
+protected:
+  /** When using this constructor, you must use set_column_types() immediately afterwards.
+   * This can be useful when deriving from this class, with a fixed TreeModelColumnRecord
+   * that is a member of the class.
+   * There is no create() method that corresponds to this constructor, because this
+   * constructor should only be used by derived classes.
+   */
+  _CTOR_DEFAULT
+  
+  explicit TreeStore(const TreeModelColumnRecord& columns);
+
+public:
+  /** Instantiate a new TreeStore.
+   * @param columns The column types for this tree model.
+   * @result The new TreeStore.
+   */
+  _WRAP_CREATE(const TreeModelColumnRecord& columns)
+
+  void set_column_types(const TreeModelColumnRecord& columns);
+  _IGNORE(gtk_tree_store_set_column_types)
+
+  /** Removes the given row from the list store.
+   * @param iter The iterator to the row to be removed.
+   * @result An iterator to the next row, or end() if there is none.
+   */
+  iterator erase(const iterator& iter);
+  _IGNORE(gtk_tree_store_remove)
+
+  //TODO: Make this documentation similar to documentation for Standard C++ insert methods.
+  /** Creates a new row before the position.
+   * If iter is end() then a new row will be appended to the list.
+   * The row will be empty - to fill in values, you need to dereference the returned iterator and use Row::operator[] or Row::set_value().
+   * See also prepend() and append().
+   *
+   * @param iter An iterator to the row before which the new row will be inserted.
+   * @result An iterator to the new row.
+   */
+  iterator insert(const iterator& iter);
+  _IGNORE(gtk_tree_store_insert_before)
+
+  /** Creates a new row after the position.
+   * If iter is end() then a new row will be prepended to the list.
+   * The row will be empty - to fill in values, you need to dereference the returned iterator and use Row::operator[] or Row::set_value().
+   * See also prepend() and append().
+   *
+   * @param iter An iterator to the row after which the new row will be inserted.
+   * @result An iterator to the new row.
+   */
+  iterator insert_after(const iterator& iter);
+  _IGNORE(gtk_tree_store_insert_after)
+
+  /** Creates a new row at the start of the top-level.
+   * The row will be empty - to fill in values, you need to dereference the returned iterator and use Row::operator[] or Row::set_value().
+   * See also insert() and append().
+   *
+   * @result An iterator to the new row.
+   */
+  iterator prepend();
+
+  /** Creates a new row at the start of the row's children.
+   * The row will be empty - to fill in values, you need to dereference the returned iterator and use Row::operator[] or Row::set_value().
+   * See also insert() and append().
+   *
+   * @param node The list of the parent row's children, as returned by Gtk::TreeModel::iterator::children().
+   * @result An iterator to the new row.
+   */
+  iterator prepend(const TreeNodeChildren& node);
+
+
+  /** Creates a new row at the end of the top-level.
+   * The row will be empty - to fill in values, you need to dereference the returned iterator and use Row::operator[] or Row::set_value().
+   * See also insert() and prepend().
+   *
+   * @result An iterator to the new row.
+   */
+  iterator append();
+
+  /** Creates a new row at the end of the row's children.
+   * The row will be empty - to fill in values, you need to dereference the returned iterator and use Row::operator[] or Row::set_value().
+   * See also insert() and prepend().
+   *
+   * @param node The list of the parent row's children, as returned by Gtk::TreeModel::iterator::children().
+   * @result An iterator to the new row.
+   */  
+  iterator append(const TreeNodeChildren& node);
+
+  _WRAP_METHOD(void iter_swap(const iterator& a, const iterator& b), gtk_tree_store_swap)
+
+  /** Moves @a source to the position at @a destination.
+   * @a source and @a destination should be at the same level.
+   * Note that this function only works with unsorted stores.
+   * @param source The row that should be moved.
+   * @param destination The position to move to.
+   */
+  void move(const iterator& source, const iterator& destination);
+
+  /** Reorders the children of @a node to follow the order indicated by @a new_order.
+   * Note that this function only works with unsorted stores.
+   */
+  void reorder(const TreeNodeChildren& node, const Glib::ArrayHandle<int>& new_order);
+
+  _WRAP_METHOD(void clear(), gtk_tree_store_clear)
+  _WRAP_METHOD(bool is_ancestor(const iterator& iter, const iterator& descendant) const, gtk_tree_store_is_ancestor)
+  _WRAP_METHOD(int iter_depth(const iterator& iter) const, gtk_tree_store_iter_depth)
+
+  _WRAP_METHOD(bool iter_is_valid(const iterator& iter) const, gtk_tree_store_iter_is_valid)
+
+protected:
+  virtual void set_value_impl(const iterator& row, int column, const Glib::ValueBase& value);
+  _IGNORE(gtk_tree_store_set_value)
+};
+
+} // namespace Gtk
+

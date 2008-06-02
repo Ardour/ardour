@@ -1,0 +1,62 @@
+/* $Id: cursor.hg,v 1.8 2006/04/12 11:11:24 murrayc Exp $ */
+
+/* drawable.h
+ *
+ * Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/color.h>
+#include <gdkmm/bitmap.h>
+#include <gdkmm/display.h>
+#include <gdkmm/pixbuf.h>
+
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+_CC_INCLUDE(gdk/gdkenumtypes.h)
+_WRAP_ENUM(CursorType, GdkCursorType)
+
+/** This represents a cursor.
+ */
+class Cursor
+{
+  _CLASS_BOXEDTYPE(Cursor, GdkCursor, NONE, gdk_cursor_ref, gdk_cursor_unref)
+  _IGNORE(gdk_cursor_ref, gdk_cursor_unref)
+
+public:
+  explicit Cursor(CursorType cursor_type);
+  Cursor(const Glib::RefPtr<Pixmap>& source, const Glib::RefPtr<Pixmap>& mask,
+         const Color& fg, const Color& bg,
+         int x, int y);
+  explicit Cursor(const Glib::RefPtr<Display>& display, CursorType cursor_type);
+  Cursor(const Glib::RefPtr<Display>& display, const Glib::RefPtr<Pixbuf>& pixbuf, int x, int y);
+  explicit Cursor(const Glib::RefPtr<Display>& display, const Glib::ustring& name);
+
+  _WRAP_METHOD(Glib::RefPtr<Display> get_display(), gdk_cursor_get_display, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Display> get_display() const, gdk_cursor_get_display, refreturn, constversion)
+
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_image(), gdk_cursor_get_image)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_image() const, gdk_cursor_get_image, constversion)
+};
+
+} //namespace Gdk
+
+

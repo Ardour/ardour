@@ -1,0 +1,12 @@
+* streams
+  - Please give more information. murrayc
+
+* Incorporate new GtkDefs parser.
+  What does this mean? murrayc.
+
+* Get gtkmmproc to run outside install directory.
+  What does this mean? It runs for gtkmm and it runs installed for libgnome*mm.
+
+
+
+

@@ -1,0 +1,52 @@
+// -*- c++ -*-
+/* $Id: iconset.ccg,v 1.1 2003/01/21 13:40:26 murrayc Exp $ */
+
+/*
+ *
+ * Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/widget.h>
+#include <gtkmm/style.h>
+#include <gtk/gtkiconfactory.h>
+
+namespace Gtk
+{
+
+IconSet::IconSet(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
+{
+  gobject_ = gtk_icon_set_new_from_pixbuf(pixbuf->gobj());
+}
+
+Glib::ArrayHandle<IconSize> IconSet::get_sizes() const
+{
+  GtkIconSize* pSizes = 0;
+  int n_sizes = 0;
+  gtk_icon_set_get_sizes(const_cast<GtkIconSet*>(gobj()), &pSizes, &n_sizes);
+
+  return Glib::ArrayHandle<IconSize>((IconSize*) pSizes, n_sizes, Glib::OWNERSHIP_SHALLOW);
+}
+
+IconSet IconSet::lookup_default(const Gtk::StockID& stock_id) //static
+{
+  GtkIconSet* pIconSet = gtk_icon_factory_lookup_default(stock_id.get_string().c_str());
+  return IconSet(pIconSet, true); //true = take_copy.
+}
+
+} /* namespace Gtk */
+
+

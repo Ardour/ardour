@@ -1,0 +1,15 @@
+# This file is include by other Makefile.am files, using the new automake include feature.
+# The include happens in Makefile.am, not Makefile.in or Makefile,
+# so it's like copy-and-pasting this into each of those Makefile.am files.
+
+files_posix_hg =
+files_win32_hg =
+files_general_hg = attributes.hg attriter.hg attrlist.hg cairofontmap.hg color.hg context.hg coverage.hg \
+	font.hg fontdescription.hg fontface.hg fontfamily.hg fontmap.hg fontmetrics.hg fontset.hg \
+	glyph.hg glyphstring.hg item.hg language.hg layout.hg layoutiter.hg layoutline.hg layoutrun.hg \
+	rectangle.hg renderer.hg tabarray.hg
+files_general_deprecated_hg =
+
+
+include $(top_srcdir)/build_shared/Makefile_build_gensrc.am_fragment 
+

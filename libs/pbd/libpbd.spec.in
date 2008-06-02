@@ -1,0 +1,70 @@
+Summary: A general purpose programming library
+%define lib_name pbd
+Name: lib%{lib_name}
+Version: @VERSION@
+Release: 2
+Copyright: GPL
+Source: .
+Url: http://www.quasimodo.org
+Vendor: Paul Davis <paul@linuxaudiosystems.com>
+Packager: jfm3 <jfm3@acm.org>
+Group: System Environment/Libraries
+Prefix: %{_prefix}
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+
+%description
+
+This library implements a number of programming utilities used by Paul
+Davis (formerly Paul Barton-Davis, hence the name).  It is used in
+some of his Open Source software projects.  See
+http://ardour.sf.net/ for examples.
+
+%prep
+%setup -q
+
+%build
+CFLAGS="$RPM_OPT_FLAGS" CXXFLAGS="$RPM_OPT_FLAGS" ./configure $ARCH_FLAGS --prefix=%{prefix}
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+install -d -m 755 $RPM_BUILD_ROOT%{prefix}/{{include,lib}/%{lib_name}}
+make install INSTALL="%(which install) -p" prefix=$RPM_BUILD_ROOT%{prefix}
+
+%post
+/sbin/ldconfig
+
+%postun
+/sbin/ldconfig
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc README AUTHORS NEWS COPYING*
+%{prefix}/lib/libpbd.so*
+
+%package devel
+Summary: A general purpose programming library -- developer version.
+Group: System Environment/Libraries
+
+%description devel
+
+This library implements a number of programming utilities used by Paul
+Davis (formerly Paul Barton-Davis, hence the name).  It is used in
+some of his Open Source software projects.  See
+http://ardour.sf.net/ for examples.
+
+This package holds static libraries and headers needed by developers
+who wish to use libpbd in their programs.
+
+%files devel
+%defattr(-,root,root)
+%{prefix}/include/pbd/*
+%{prefix}/lib/libpbd.a
+%{prefix}/lib/libpbd.la
+%{prefix}/bin/pbd-config
+%{prefix}/share/aclocal/pbd.m4
+%{prefix}/share/aclocal/unique_args.m4
+

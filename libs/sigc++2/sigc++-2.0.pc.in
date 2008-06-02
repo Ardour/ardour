@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libsigc++ 2
+Description: Typesafe signal and callback system for C++
+Version: @VERSION@
+Libs: -L${libdir} -lsigc-2.0
+Cflags: -I${includedir}/sigc++-2.0 -I${libdir}/sigc++-2.0/include

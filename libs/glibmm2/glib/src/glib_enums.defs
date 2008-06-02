@@ -1,0 +1,720 @@
+;; From /opt/gnome218/include/glib-2.0/glib/gbookmarkfile.h
+
+(define-enum-extended BookmarkFileError
+  (in-module "G")
+  (c-name "GBookmarkFileError")
+  (values
+    '("invalid-uri" "G_BOOKMARK_FILE_ERROR_INVALID_URI" "0")
+    '("invalid-value" "G_BOOKMARK_FILE_ERROR_INVALID_VALUE" "1")
+    '("app-not-registered" "G_BOOKMARK_FILE_ERROR_APP_NOT_REGISTERED" "2")
+    '("uri-not-found" "G_BOOKMARK_FILE_ERROR_URI_NOT_FOUND" "3")
+    '("read" "G_BOOKMARK_FILE_ERROR_READ" "4")
+    '("unknown-encoding" "G_BOOKMARK_FILE_ERROR_UNKNOWN_ENCODING" "5")
+    '("write" "G_BOOKMARK_FILE_ERROR_WRITE" "6")
+    '("file-not-found" "G_BOOKMARK_FILE_ERROR_FILE_NOT_FOUND" "7")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gconvert.h
+
+(define-enum-extended ConvertError
+  (in-module "G")
+  (c-name "GConvertError")
+  (values
+    '("no-conversion" "G_CONVERT_ERROR_NO_CONVERSION" "0")
+    '("illegal-sequence" "G_CONVERT_ERROR_ILLEGAL_SEQUENCE" "1")
+    '("failed" "G_CONVERT_ERROR_FAILED" "2")
+    '("partial-input" "G_CONVERT_ERROR_PARTIAL_INPUT" "3")
+    '("bad-uri" "G_CONVERT_ERROR_BAD_URI" "4")
+    '("not-absolute-path" "G_CONVERT_ERROR_NOT_ABSOLUTE_PATH" "5")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gdate.h
+
+(define-enum-extended DateDMY
+  (in-module "G")
+  (c-name "GDateDMY")
+  (values
+    '("day" "G_DATE_DAY" "0")
+    '("month" "G_DATE_MONTH" "1")
+    '("year" "G_DATE_YEAR" "2")
+  )
+)
+
+(define-enum-extended DateWeekday
+  (in-module "G")
+  (c-name "GDateWeekday")
+  (values
+    '("bad-weekday" "G_DATE_BAD_WEEKDAY" "0")
+    '("monday" "G_DATE_MONDAY" "1")
+    '("tuesday" "G_DATE_TUESDAY" "2")
+    '("wednesday" "G_DATE_WEDNESDAY" "3")
+    '("thursday" "G_DATE_THURSDAY" "4")
+    '("friday" "G_DATE_FRIDAY" "5")
+    '("saturday" "G_DATE_SATURDAY" "6")
+    '("sunday" "G_DATE_SUNDAY" "7")
+  )
+)
+
+(define-enum-extended DateMonth
+  (in-module "G")
+  (c-name "GDateMonth")
+  (values
+    '("bad-month" "G_DATE_BAD_MONTH" "0")
+    '("january" "G_DATE_JANUARY" "1")
+    '("february" "G_DATE_FEBRUARY" "2")
+    '("march" "G_DATE_MARCH" "3")
+    '("april" "G_DATE_APRIL" "4")
+    '("may" "G_DATE_MAY" "5")
+    '("june" "G_DATE_JUNE" "6")
+    '("july" "G_DATE_JULY" "7")
+    '("august" "G_DATE_AUGUST" "8")
+    '("september" "G_DATE_SEPTEMBER" "9")
+    '("october" "G_DATE_OCTOBER" "10")
+    '("november" "G_DATE_NOVEMBER" "11")
+    '("december" "G_DATE_DECEMBER" "12")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gfileutils.h
+
+(define-enum-extended FileError
+  (in-module "G")
+  (c-name "GFileError")
+  (values
+    '("exist" "G_FILE_ERROR_EXIST" "0")
+    '("isdir" "G_FILE_ERROR_ISDIR" "1")
+    '("acces" "G_FILE_ERROR_ACCES" "2")
+    '("nametoolong" "G_FILE_ERROR_NAMETOOLONG" "3")
+    '("noent" "G_FILE_ERROR_NOENT" "4")
+    '("notdir" "G_FILE_ERROR_NOTDIR" "5")
+    '("nxio" "G_FILE_ERROR_NXIO" "6")
+    '("nodev" "G_FILE_ERROR_NODEV" "7")
+    '("rofs" "G_FILE_ERROR_ROFS" "8")
+    '("txtbsy" "G_FILE_ERROR_TXTBSY" "9")
+    '("fault" "G_FILE_ERROR_FAULT" "10")
+    '("loop" "G_FILE_ERROR_LOOP" "11")
+    '("nospc" "G_FILE_ERROR_NOSPC" "12")
+    '("nomem" "G_FILE_ERROR_NOMEM" "13")
+    '("mfile" "G_FILE_ERROR_MFILE" "14")
+    '("nfile" "G_FILE_ERROR_NFILE" "15")
+    '("badf" "G_FILE_ERROR_BADF" "16")
+    '("inval" "G_FILE_ERROR_INVAL" "17")
+    '("pipe" "G_FILE_ERROR_PIPE" "18")
+    '("again" "G_FILE_ERROR_AGAIN" "19")
+    '("intr" "G_FILE_ERROR_INTR" "20")
+    '("io" "G_FILE_ERROR_IO" "21")
+    '("perm" "G_FILE_ERROR_PERM" "22")
+    '("nosys" "G_FILE_ERROR_NOSYS" "23")
+    '("failed" "G_FILE_ERROR_FAILED" "24")
+  )
+)
+
+(define-flags-extended FileTest
+  (in-module "G")
+  (c-name "GFileTest")
+  (values
+    '("is-regular" "G_FILE_TEST_IS_REGULAR" "1 << 0")
+    '("is-symlink" "G_FILE_TEST_IS_SYMLINK" "1 << 1")
+    '("is-dir" "G_FILE_TEST_IS_DIR" "1 << 2")
+    '("is-executable" "G_FILE_TEST_IS_EXECUTABLE" "1 << 3")
+    '("exists" "G_FILE_TEST_EXISTS" "1 << 4")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/ghook.h
+
+(define-flags-extended HookFlagMask
+  (in-module "G")
+  (c-name "GHookFlagMask")
+  (values
+    '("active" "G_HOOK_FLAG_ACTIVE" "1 << 0")
+    '("in-call" "G_HOOK_FLAG_IN_CALL" "1 << 1")
+    '("mask" "G_HOOK_FLAG_MASK" "0x0f")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/giochannel.h
+
+(define-enum-extended IOError
+  (in-module "G")
+  (c-name "GIOError")
+  (values
+    '("none" "G_IO_ERROR_NONE" "0")
+    '("again" "G_IO_ERROR_AGAIN" "1")
+    '("inval" "G_IO_ERROR_INVAL" "2")
+    '("unknown" "G_IO_ERROR_UNKNOWN" "3")
+  )
+)
+
+(define-enum-extended IOChannelError
+  (in-module "G")
+  (c-name "GIOChannelError")
+  (values
+    '("fbig" "G_IO_CHANNEL_ERROR_FBIG" "0")
+    '("inval" "G_IO_CHANNEL_ERROR_INVAL" "1")
+    '("io" "G_IO_CHANNEL_ERROR_IO" "2")
+    '("isdir" "G_IO_CHANNEL_ERROR_ISDIR" "3")
+    '("nospc" "G_IO_CHANNEL_ERROR_NOSPC" "4")
+    '("nxio" "G_IO_CHANNEL_ERROR_NXIO" "5")
+    '("overflow" "G_IO_CHANNEL_ERROR_OVERFLOW" "6")
+    '("pipe" "G_IO_CHANNEL_ERROR_PIPE" "7")
+    '("failed" "G_IO_CHANNEL_ERROR_FAILED" "8")
+  )
+)
+
+(define-enum-extended IOStatus
+  (in-module "G")
+  (c-name "GIOStatus")
+  (values
+    '("error" "G_IO_STATUS_ERROR" "0")
+    '("normal" "G_IO_STATUS_NORMAL" "1")
+    '("eof" "G_IO_STATUS_EOF" "2")
+    '("again" "G_IO_STATUS_AGAIN" "3")
+  )
+)
+
+(define-enum-extended SeekType
+  (in-module "G")
+  (c-name "GSeekType")
+  (values
+    '("cur" "G_SEEK_CUR" "0")
+    '("set" "G_SEEK_SET" "1")
+    '("end" "G_SEEK_END" "2")
+  )
+)
+
+(define-enum-extended IOCondition
+  (in-module "G")
+  (c-name "GIOCondition")
+  (values
+  )
+)
+
+(define-flags-extended IOFlags
+  (in-module "G")
+  (c-name "GIOFlags")
+  (values
+    '("append" "G_IO_FLAG_APPEND" "1 << 0")
+    '("nonblock" "G_IO_FLAG_NONBLOCK" "1 << 1")
+    '("is-readable" "G_IO_FLAG_IS_READABLE" "1 << 2")
+    '("is-writeable" "G_IO_FLAG_IS_WRITEABLE" "1 << 3")
+    '("is-seekable" "G_IO_FLAG_IS_SEEKABLE" "1 << 4")
+    '("get-mask" "G_IO_FLAG_GET_MASK" "0x0")
+    '("set-mask" "G_IO_FLAG_SET_MASK" "0x1")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gkeyfile.h
+
+(define-enum-extended KeyFileError
+  (in-module "G")
+  (c-name "GKeyFileError")
+  (values
+    '("unknown-encoding" "G_KEY_FILE_ERROR_UNKNOWN_ENCODING" "0")
+    '("parse" "G_KEY_FILE_ERROR_PARSE" "1")
+    '("not-found" "G_KEY_FILE_ERROR_NOT_FOUND" "2")
+    '("key-not-found" "G_KEY_FILE_ERROR_KEY_NOT_FOUND" "3")
+    '("group-not-found" "G_KEY_FILE_ERROR_GROUP_NOT_FOUND" "4")
+    '("invalid-value" "G_KEY_FILE_ERROR_INVALID_VALUE" "5")
+  )
+)
+
+(define-flags-extended KeyFileFlags
+  (in-module "G")
+  (c-name "GKeyFileFlags")
+  (values
+    '("none" "G_KEY_FILE_NONE" "0")
+    '("keep-comments" "G_KEY_FILE_KEEP_COMMENTS" "1 << 0")
+    '("keep-translations" "G_KEY_FILE_KEEP_TRANSLATIONS" "1 << 1")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gmarkup.h
+
+(define-enum-extended MarkupError
+  (in-module "G")
+  (c-name "GMarkupError")
+  (values
+    '("bad-utf8" "G_MARKUP_ERROR_BAD_UTF8" "0")
+    '("empty" "G_MARKUP_ERROR_EMPTY" "1")
+    '("parse" "G_MARKUP_ERROR_PARSE" "2")
+    '("unknown-element" "G_MARKUP_ERROR_UNKNOWN_ELEMENT" "3")
+    '("unknown-attribute" "G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE" "4")
+    '("invalid-content" "G_MARKUP_ERROR_INVALID_CONTENT" "5")
+  )
+)
+
+(define-flags-extended MarkupParseFlags
+  (in-module "G")
+  (c-name "GMarkupParseFlags")
+  (values
+    '("do-not-use-this-unsupported-flag" "G_MARKUP_DO_NOT_USE_THIS_UNSUPPORTED_FLAG" "1 << 0")
+    '("treat-cdata-as-text" "G_MARKUP_TREAT_CDATA_AS_TEXT" "1 << 1")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gmessages.h
+
+(define-flags-extended LogLevelFlags
+  (in-module "G")
+  (c-name "GLogLevelFlags")
+  (values
+    '("flag-recursion" "G_LOG_FLAG_RECURSION" "1 << 0")
+    '("flag-fatal" "G_LOG_FLAG_FATAL" "1 << 1")
+    '("level-error" "G_LOG_LEVEL_ERROR" "1 << 2")
+    '("level-critical" "G_LOG_LEVEL_CRITICAL" "1 << 3")
+    '("level-warning" "G_LOG_LEVEL_WARNING" "1 << 4")
+    '("level-message" "G_LOG_LEVEL_MESSAGE" "1 << 5")
+    '("level-info" "G_LOG_LEVEL_INFO" "1 << 6")
+    '("level-debug" "G_LOG_LEVEL_DEBUG" "1 << 7")
+    '("level-mask" "G_LOG_LEVEL_MASK" "0xFFFFFFFE")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gnode.h
+
+(define-flags-extended TraverseFlags
+  (in-module "G")
+  (c-name "GTraverseFlags")
+  (values
+    '("leaves" "G_TRAVERSE_LEAVES" "1 << 0")
+    '("non-leaves" "G_TRAVERSE_NON_LEAVES" "1 << 1")
+    '("all" "G_TRAVERSE_ALL" "0x1")
+    '("mask" "G_TRAVERSE_MASK" "0x03")
+    '("leafs" "G_TRAVERSE_LEAFS" "0x1")
+    '("non-leafs" "G_TRAVERSE_NON_LEAFS" "0x2")
+  )
+)
+
+(define-enum-extended TraverseType
+  (in-module "G")
+  (c-name "GTraverseType")
+  (values
+    '("in-order" "G_IN_ORDER" "0")
+    '("pre-order" "G_PRE_ORDER" "1")
+    '("post-order" "G_POST_ORDER" "2")
+    '("level-order" "G_LEVEL_ORDER" "3")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/goption.h
+
+(define-flags-extended OptionFlags
+  (in-module "G")
+  (c-name "GOptionFlags")
+  (values
+    '("hidden" "G_OPTION_FLAG_HIDDEN" "1 << 0")
+    '("in-main" "G_OPTION_FLAG_IN_MAIN" "1 << 1")
+    '("reverse" "G_OPTION_FLAG_REVERSE" "1 << 2")
+    '("no-arg" "G_OPTION_FLAG_NO_ARG" "1 << 3")
+    '("filename" "G_OPTION_FLAG_FILENAME" "1 << 4")
+    '("optional-arg" "G_OPTION_FLAG_OPTIONAL_ARG" "1 << 5")
+    '("noalias" "G_OPTION_FLAG_NOALIAS" "1 << 6")
+  )
+)
+
+(define-enum-extended OptionArg
+  (in-module "G")
+  (c-name "GOptionArg")
+  (values
+    '("none" "G_OPTION_ARG_NONE" "0")
+    '("string" "G_OPTION_ARG_STRING" "1")
+    '("int" "G_OPTION_ARG_INT" "2")
+    '("callback" "G_OPTION_ARG_CALLBACK" "3")
+    '("filename" "G_OPTION_ARG_FILENAME" "4")
+    '("string-array" "G_OPTION_ARG_STRING_ARRAY" "5")
+    '("filename-array" "G_OPTION_ARG_FILENAME_ARRAY" "6")
+    '("double" "G_OPTION_ARG_DOUBLE" "7")
+    '("int64" "G_OPTION_ARG_INT64" "8")
+  )
+)
+
+(define-enum-extended OptionError
+  (in-module "G")
+  (c-name "GOptionError")
+  (values
+    '("unknown-option" "G_OPTION_ERROR_UNKNOWN_OPTION" "0")
+    '("bad-value" "G_OPTION_ERROR_BAD_VALUE" "1")
+    '("failed" "G_OPTION_ERROR_FAILED" "2")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gregex.h
+
+(define-enum-extended RegexError
+  (in-module "G")
+  (c-name "GRegexError")
+  (values
+    '("compile" "G_REGEX_ERROR_COMPILE" "0")
+    '("optimize" "G_REGEX_ERROR_OPTIMIZE" "1")
+    '("replace" "G_REGEX_ERROR_REPLACE" "2")
+    '("match" "G_REGEX_ERROR_MATCH" "3")
+  )
+)
+
+(define-flags-extended RegexCompileFlags
+  (in-module "G")
+  (c-name "GRegexCompileFlags")
+  (values
+    '("caseless" "G_REGEX_CASELESS" "1 << 0")
+    '("multiline" "G_REGEX_MULTILINE" "1 << 1")
+    '("dotall" "G_REGEX_DOTALL" "1 << 2")
+    '("extended" "G_REGEX_EXTENDED" "1 << 3")
+    '("anchored" "G_REGEX_ANCHORED" "1 << 4")
+    '("dollar-endonly" "G_REGEX_DOLLAR_ENDONLY" "1 << 5")
+    '("ungreedy" "G_REGEX_UNGREEDY" "1 << 9")
+    '("raw" "G_REGEX_RAW" "1 << 11")
+    '("no-auto-capture" "G_REGEX_NO_AUTO_CAPTURE" "1 << 12")
+    '("optimize" "G_REGEX_OPTIMIZE" "1 << 13")
+    '("dupnames" "G_REGEX_DUPNAMES" "1 << 19")
+    '("newline-cr" "G_REGEX_NEWLINE_CR" "1 << 20")
+    '("newline-lf" "G_REGEX_NEWLINE_LF" "1 << 21")
+    '("newline-crlf" "G_REGEX_NEWLINE_CRLF" "0x100000")
+  )
+)
+
+(define-flags-extended RegexMatchFlags
+  (in-module "G")
+  (c-name "GRegexMatchFlags")
+  (values
+    '("anchored" "G_REGEX_MATCH_ANCHORED" "1 << 4")
+    '("notbol" "G_REGEX_MATCH_NOTBOL" "1 << 7")
+    '("noteol" "G_REGEX_MATCH_NOTEOL" "1 << 8")
+    '("notempty" "G_REGEX_MATCH_NOTEMPTY" "1 << 10")
+    '("partial" "G_REGEX_MATCH_PARTIAL" "1 << 15")
+    '("newline-cr" "G_REGEX_MATCH_NEWLINE_CR" "1 << 20")
+    '("newline-lf" "G_REGEX_MATCH_NEWLINE_LF" "1 << 21")
+    '("newline-crlf" "G_REGEX_MATCH_NEWLINE_CRLF" "0x100000")
+    '("newline-any" "G_REGEX_MATCH_NEWLINE_ANY" "1 << 22")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gscanner.h
+
+(define-enum-extended ErrorType
+  (in-module "G")
+  (c-name "GErrorType")
+  (values
+    '("unknown" "G_ERR_UNKNOWN" "0")
+    '("unexp-eof" "G_ERR_UNEXP_EOF" "1")
+    '("unexp-eof-in-string" "G_ERR_UNEXP_EOF_IN_STRING" "2")
+    '("unexp-eof-in-comment" "G_ERR_UNEXP_EOF_IN_COMMENT" "3")
+    '("non-digit-in-const" "G_ERR_NON_DIGIT_IN_CONST" "4")
+    '("digit-radix" "G_ERR_DIGIT_RADIX" "5")
+    '("float-radix" "G_ERR_FLOAT_RADIX" "6")
+    '("float-malformed" "G_ERR_FLOAT_MALFORMED" "7")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gshell.h
+
+(define-enum-extended ShellError
+  (in-module "G")
+  (c-name "GShellError")
+  (values
+    '("bad-quoting" "G_SHELL_ERROR_BAD_QUOTING" "0")
+    '("empty-string" "G_SHELL_ERROR_EMPTY_STRING" "1")
+    '("failed" "G_SHELL_ERROR_FAILED" "2")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gslice.h
+
+(define-enum-extended SliceConfig
+  (in-module "G")
+  (c-name "GSliceConfig")
+  (values
+    '("always-malloc" "G_SLICE_CONFIG_ALWAYS_MALLOC" "1")
+    '("bypass-magazines" "G_SLICE_CONFIG_BYPASS_MAGAZINES" "2")
+    '("working-set-msecs" "G_SLICE_CONFIG_WORKING_SET_MSECS" "3")
+    '("color-increment" "G_SLICE_CONFIG_COLOR_INCREMENT" "4")
+    '("chunk-sizes" "G_SLICE_CONFIG_CHUNK_SIZES" "5")
+    '("contention-counter" "G_SLICE_CONFIG_CONTENTION_COUNTER" "6")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gspawn.h
+
+(define-enum-extended SpawnError
+  (in-module "G")
+  (c-name "GSpawnError")
+  (values
+    '("fork" "G_SPAWN_ERROR_FORK" "0")
+    '("read" "G_SPAWN_ERROR_READ" "1")
+    '("chdir" "G_SPAWN_ERROR_CHDIR" "2")
+    '("acces" "G_SPAWN_ERROR_ACCES" "3")
+    '("perm" "G_SPAWN_ERROR_PERM" "4")
+    '("2big" "G_SPAWN_ERROR_2BIG" "5")
+    '("noexec" "G_SPAWN_ERROR_NOEXEC" "6")
+    '("nametoolong" "G_SPAWN_ERROR_NAMETOOLONG" "7")
+    '("noent" "G_SPAWN_ERROR_NOENT" "8")
+    '("nomem" "G_SPAWN_ERROR_NOMEM" "9")
+    '("notdir" "G_SPAWN_ERROR_NOTDIR" "10")
+    '("loop" "G_SPAWN_ERROR_LOOP" "11")
+    '("txtbusy" "G_SPAWN_ERROR_TXTBUSY" "12")
+    '("io" "G_SPAWN_ERROR_IO" "13")
+    '("nfile" "G_SPAWN_ERROR_NFILE" "14")
+    '("mfile" "G_SPAWN_ERROR_MFILE" "15")
+    '("inval" "G_SPAWN_ERROR_INVAL" "16")
+    '("isdir" "G_SPAWN_ERROR_ISDIR" "17")
+    '("libbad" "G_SPAWN_ERROR_LIBBAD" "18")
+  )
+)
+
+(define-flags-extended SpawnFlags
+  (in-module "G")
+  (c-name "GSpawnFlags")
+  (values
+    '("leave-descriptors-open" "G_SPAWN_LEAVE_DESCRIPTORS_OPEN" "1 << 0")
+    '("do-not-reap-child" "G_SPAWN_DO_NOT_REAP_CHILD" "1 << 1")
+    '("search-path" "G_SPAWN_SEARCH_PATH" "1 << 2")
+    '("stdout-to-dev-null" "G_SPAWN_STDOUT_TO_DEV_NULL" "1 << 3")
+    '("stderr-to-dev-null" "G_SPAWN_STDERR_TO_DEV_NULL" "1 << 4")
+    '("child-inherits-stdin" "G_SPAWN_CHILD_INHERITS_STDIN" "1 << 5")
+    '("file-and-argv-zero" "G_SPAWN_FILE_AND_ARGV_ZERO" "1 << 6")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gstrfuncs.h
+
+(define-flags-extended AsciiType
+  (in-module "G")
+  (c-name "GAsciiType")
+  (values
+    '("alnum" "G_ASCII_ALNUM" "1 << 0")
+    '("alpha" "G_ASCII_ALPHA" "1 << 1")
+    '("cntrl" "G_ASCII_CNTRL" "1 << 2")
+    '("digit" "G_ASCII_DIGIT" "1 << 3")
+    '("graph" "G_ASCII_GRAPH" "1 << 4")
+    '("lower" "G_ASCII_LOWER" "1 << 5")
+    '("print" "G_ASCII_PRINT" "1 << 6")
+    '("punct" "G_ASCII_PUNCT" "1 << 7")
+    '("space" "G_ASCII_SPACE" "1 << 8")
+    '("upper" "G_ASCII_UPPER" "1 << 9")
+    '("xdigit" "G_ASCII_XDIGIT" "1 << 10")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gthread.h
+
+(define-enum-extended ThreadError
+  (in-module "G")
+  (c-name "GThreadError")
+  (values
+    '("n" "G_THREAD_ERROR_AGAIN" "0")
+  )
+)
+
+(define-enum-extended ThreadPriority
+  (in-module "G")
+  (c-name "GThreadPriority")
+  (values
+    '("low" "G_THREAD_PRIORITY_LOW" "0")
+    '("normal" "G_THREAD_PRIORITY_NORMAL" "1")
+    '("high" "G_THREAD_PRIORITY_HIGH" "2")
+    '("urgent" "G_THREAD_PRIORITY_URGENT" "3")
+  )
+)
+
+(define-enum-extended OnceStatus
+  (in-module "G")
+  (c-name "GOnceStatus")
+  (values
+    '("notcalled" "G_ONCE_STATUS_NOTCALLED" "0")
+    '("progress" "G_ONCE_STATUS_PROGRESS" "1")
+    '("ready" "G_ONCE_STATUS_READY" "2")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gunicode.h
+
+(define-enum-extended UnicodeType
+  (in-module "G")
+  (c-name "GUnicodeType")
+  (values
+    '("control" "G_UNICODE_CONTROL" "0")
+    '("format" "G_UNICODE_FORMAT" "1")
+    '("unassigned" "G_UNICODE_UNASSIGNED" "2")
+    '("private-use" "G_UNICODE_PRIVATE_USE" "3")
+    '("surrogate" "G_UNICODE_SURROGATE" "4")
+    '("lowercase-letter" "G_UNICODE_LOWERCASE_LETTER" "5")
+    '("modifier-letter" "G_UNICODE_MODIFIER_LETTER" "6")
+    '("other-letter" "G_UNICODE_OTHER_LETTER" "7")
+    '("titlecase-letter" "G_UNICODE_TITLECASE_LETTER" "8")
+    '("uppercase-letter" "G_UNICODE_UPPERCASE_LETTER" "9")
+    '("combining-mark" "G_UNICODE_COMBINING_MARK" "10")
+    '("enclosing-mark" "G_UNICODE_ENCLOSING_MARK" "11")
+    '("non-spacing-mark" "G_UNICODE_NON_SPACING_MARK" "12")
+    '("decimal-number" "G_UNICODE_DECIMAL_NUMBER" "13")
+    '("letter-number" "G_UNICODE_LETTER_NUMBER" "14")
+    '("other-number" "G_UNICODE_OTHER_NUMBER" "15")
+    '("connect-punctuation" "G_UNICODE_CONNECT_PUNCTUATION" "16")
+    '("dash-punctuation" "G_UNICODE_DASH_PUNCTUATION" "17")
+    '("close-punctuation" "G_UNICODE_CLOSE_PUNCTUATION" "18")
+    '("final-punctuation" "G_UNICODE_FINAL_PUNCTUATION" "19")
+    '("initial-punctuation" "G_UNICODE_INITIAL_PUNCTUATION" "20")
+    '("other-punctuation" "G_UNICODE_OTHER_PUNCTUATION" "21")
+    '("open-punctuation" "G_UNICODE_OPEN_PUNCTUATION" "22")
+    '("currency-symbol" "G_UNICODE_CURRENCY_SYMBOL" "23")
+    '("modifier-symbol" "G_UNICODE_MODIFIER_SYMBOL" "24")
+    '("math-symbol" "G_UNICODE_MATH_SYMBOL" "25")
+    '("other-symbol" "G_UNICODE_OTHER_SYMBOL" "26")
+    '("line-separator" "G_UNICODE_LINE_SEPARATOR" "27")
+    '("paragraph-separator" "G_UNICODE_PARAGRAPH_SEPARATOR" "28")
+    '("space-separator" "G_UNICODE_SPACE_SEPARATOR" "29")
+  )
+)
+
+(define-enum-extended UnicodeBreakType
+  (in-module "G")
+  (c-name "GUnicodeBreakType")
+  (values
+    '("mandatory" "G_UNICODE_BREAK_MANDATORY" "0")
+    '("carriage-return" "G_UNICODE_BREAK_CARRIAGE_RETURN" "1")
+    '("line-feed" "G_UNICODE_BREAK_LINE_FEED" "2")
+    '("combining-mark" "G_UNICODE_BREAK_COMBINING_MARK" "3")
+    '("surrogate" "G_UNICODE_BREAK_SURROGATE" "4")
+    '("zero-width-space" "G_UNICODE_BREAK_ZERO_WIDTH_SPACE" "5")
+    '("inseparable" "G_UNICODE_BREAK_INSEPARABLE" "6")
+    '("non-breaking-glue" "G_UNICODE_BREAK_NON_BREAKING_GLUE" "7")
+    '("contingent" "G_UNICODE_BREAK_CONTINGENT" "8")
+    '("space" "G_UNICODE_BREAK_SPACE" "9")
+    '("after" "G_UNICODE_BREAK_AFTER" "10")
+    '("before" "G_UNICODE_BREAK_BEFORE" "11")
+    '("before-and-after" "G_UNICODE_BREAK_BEFORE_AND_AFTER" "12")
+    '("hyphen" "G_UNICODE_BREAK_HYPHEN" "13")
+    '("non-starter" "G_UNICODE_BREAK_NON_STARTER" "14")
+    '("open-punctuation" "G_UNICODE_BREAK_OPEN_PUNCTUATION" "15")
+    '("close-punctuation" "G_UNICODE_BREAK_CLOSE_PUNCTUATION" "16")
+    '("quotation" "G_UNICODE_BREAK_QUOTATION" "17")
+    '("exclamation" "G_UNICODE_BREAK_EXCLAMATION" "18")
+    '("ideographic" "G_UNICODE_BREAK_IDEOGRAPHIC" "19")
+    '("numeric" "G_UNICODE_BREAK_NUMERIC" "20")
+    '("infix-separator" "G_UNICODE_BREAK_INFIX_SEPARATOR" "21")
+    '("symbol" "G_UNICODE_BREAK_SYMBOL" "22")
+    '("alphabetic" "G_UNICODE_BREAK_ALPHABETIC" "23")
+    '("prefix" "G_UNICODE_BREAK_PREFIX" "24")
+    '("postfix" "G_UNICODE_BREAK_POSTFIX" "25")
+    '("complex-context" "G_UNICODE_BREAK_COMPLEX_CONTEXT" "26")
+    '("ambiguous" "G_UNICODE_BREAK_AMBIGUOUS" "27")
+    '("unknown" "G_UNICODE_BREAK_UNKNOWN" "28")
+    '("next-line" "G_UNICODE_BREAK_NEXT_LINE" "29")
+    '("word-joiner" "G_UNICODE_BREAK_WORD_JOINER" "30")
+    '("hangul-l-jamo" "G_UNICODE_BREAK_HANGUL_L_JAMO" "31")
+    '("hangul-v-jamo" "G_UNICODE_BREAK_HANGUL_V_JAMO" "32")
+    '("hangul-t-jamo" "G_UNICODE_BREAK_HANGUL_T_JAMO" "33")
+    '("hangul-lv-syllable" "G_UNICODE_BREAK_HANGUL_LV_SYLLABLE" "34")
+    '("hangul-lvt-syllable" "G_UNICODE_BREAK_HANGUL_LVT_SYLLABLE" "35")
+  )
+)
+
+(define-enum-extended UnicodeScript
+  (in-module "G")
+  (c-name "GUnicodeScript")
+  (values
+    '("invalid-code" "G_UNICODE_SCRIPT_INVALID_CODE" "-1")
+    '("common" "G_UNICODE_SCRIPT_COMMON" "0")
+    '("inherited" "G_UNICODE_SCRIPT_INHERITED" "1")
+    '("arabic" "G_UNICODE_SCRIPT_ARABIC" "2")
+    '("armenian" "G_UNICODE_SCRIPT_ARMENIAN" "3")
+    '("bengali" "G_UNICODE_SCRIPT_BENGALI" "4")
+    '("bopomofo" "G_UNICODE_SCRIPT_BOPOMOFO" "5")
+    '("cherokee" "G_UNICODE_SCRIPT_CHEROKEE" "6")
+    '("coptic" "G_UNICODE_SCRIPT_COPTIC" "7")
+    '("cyrillic" "G_UNICODE_SCRIPT_CYRILLIC" "8")
+    '("deseret" "G_UNICODE_SCRIPT_DESERET" "9")
+    '("devanagari" "G_UNICODE_SCRIPT_DEVANAGARI" "10")
+    '("ethiopic" "G_UNICODE_SCRIPT_ETHIOPIC" "11")
+    '("georgian" "G_UNICODE_SCRIPT_GEORGIAN" "12")
+    '("gothic" "G_UNICODE_SCRIPT_GOTHIC" "13")
+    '("greek" "G_UNICODE_SCRIPT_GREEK" "14")
+    '("gujarati" "G_UNICODE_SCRIPT_GUJARATI" "15")
+    '("gurmukhi" "G_UNICODE_SCRIPT_GURMUKHI" "16")
+    '("han" "G_UNICODE_SCRIPT_HAN" "17")
+    '("hangul" "G_UNICODE_SCRIPT_HANGUL" "18")
+    '("hebrew" "G_UNICODE_SCRIPT_HEBREW" "19")
+    '("hiragana" "G_UNICODE_SCRIPT_HIRAGANA" "20")
+    '("kannada" "G_UNICODE_SCRIPT_KANNADA" "21")
+    '("katakana" "G_UNICODE_SCRIPT_KATAKANA" "22")
+    '("khmer" "G_UNICODE_SCRIPT_KHMER" "23")
+    '("lao" "G_UNICODE_SCRIPT_LAO" "24")
+    '("latin" "G_UNICODE_SCRIPT_LATIN" "25")
+    '("malayalam" "G_UNICODE_SCRIPT_MALAYALAM" "26")
+    '("mongolian" "G_UNICODE_SCRIPT_MONGOLIAN" "27")
+    '("myanmar" "G_UNICODE_SCRIPT_MYANMAR" "28")
+    '("ogham" "G_UNICODE_SCRIPT_OGHAM" "29")
+    '("old-italic" "G_UNICODE_SCRIPT_OLD_ITALIC" "30")
+    '("oriya" "G_UNICODE_SCRIPT_ORIYA" "31")
+    '("runic" "G_UNICODE_SCRIPT_RUNIC" "32")
+    '("sinhala" "G_UNICODE_SCRIPT_SINHALA" "33")
+    '("syriac" "G_UNICODE_SCRIPT_SYRIAC" "34")
+    '("tamil" "G_UNICODE_SCRIPT_TAMIL" "35")
+    '("telugu" "G_UNICODE_SCRIPT_TELUGU" "36")
+    '("thaana" "G_UNICODE_SCRIPT_THAANA" "37")
+    '("thai" "G_UNICODE_SCRIPT_THAI" "38")
+    '("tibetan" "G_UNICODE_SCRIPT_TIBETAN" "39")
+    '("canadian-aboriginal" "G_UNICODE_SCRIPT_CANADIAN_ABORIGINAL" "40")
+    '("yi" "G_UNICODE_SCRIPT_YI" "41")
+    '("tagalog" "G_UNICODE_SCRIPT_TAGALOG" "42")
+    '("hanunoo" "G_UNICODE_SCRIPT_HANUNOO" "43")
+    '("buhid" "G_UNICODE_SCRIPT_BUHID" "44")
+    '("tagbanwa" "G_UNICODE_SCRIPT_TAGBANWA" "45")
+    '("braille" "G_UNICODE_SCRIPT_BRAILLE" "46")
+    '("cypriot" "G_UNICODE_SCRIPT_CYPRIOT" "47")
+    '("limbu" "G_UNICODE_SCRIPT_LIMBU" "48")
+    '("osmanya" "G_UNICODE_SCRIPT_OSMANYA" "49")
+    '("shavian" "G_UNICODE_SCRIPT_SHAVIAN" "50")
+    '("linear-b" "G_UNICODE_SCRIPT_LINEAR_B" "51")
+    '("tai-le" "G_UNICODE_SCRIPT_TAI_LE" "52")
+    '("ugaritic" "G_UNICODE_SCRIPT_UGARITIC" "53")
+    '("new-tai-lue" "G_UNICODE_SCRIPT_NEW_TAI_LUE" "54")
+    '("buginese" "G_UNICODE_SCRIPT_BUGINESE" "55")
+    '("glagolitic" "G_UNICODE_SCRIPT_GLAGOLITIC" "56")
+    '("tifinagh" "G_UNICODE_SCRIPT_TIFINAGH" "57")
+    '("syloti-nagri" "G_UNICODE_SCRIPT_SYLOTI_NAGRI" "58")
+    '("old-persian" "G_UNICODE_SCRIPT_OLD_PERSIAN" "59")
+    '("kharoshthi" "G_UNICODE_SCRIPT_KHAROSHTHI" "60")
+    '("unknown" "G_UNICODE_SCRIPT_UNKNOWN" "61")
+    '("balinese" "G_UNICODE_SCRIPT_BALINESE" "62")
+    '("cuneiform" "G_UNICODE_SCRIPT_CUNEIFORM" "63")
+    '("phoenician" "G_UNICODE_SCRIPT_PHOENICIAN" "64")
+    '("phags-pa" "G_UNICODE_SCRIPT_PHAGS_PA" "65")
+    '("nko" "G_UNICODE_SCRIPT_NKO" "66")
+  )
+)
+
+(define-enum-extended NormalizeMode
+  (in-module "G")
+  (c-name "GNormalizeMode")
+  (values
+    '("default" "G_NORMALIZE_DEFAULT" "0")
+    '("nfd" "G_NORMALIZE_NFD" "#error")
+    '("default-compose" "G_NORMALIZE_DEFAULT_COMPOSE" "1")
+    '("nfc" "G_NORMALIZE_NFC" "1")
+    '("all" "G_NORMALIZE_ALL" "2")
+    '("nfkd" "G_NORMALIZE_NFKD" "2")
+    '("all-compose" "G_NORMALIZE_ALL_COMPOSE" "3")
+    '("nfkc" "G_NORMALIZE_NFKC" "3")
+  )
+)
+
+;; From /opt/gnome218/include/glib-2.0/glib/gutils.h
+
+(define-enum-extended UserDirectory
+  (in-module "G")
+  (c-name "GUserDirectory")
+  (values
+    '("directory-desktop" "G_USER_DIRECTORY_DESKTOP" "0")
+    '("directory-documents" "G_USER_DIRECTORY_DOCUMENTS" "1")
+    '("directory-download" "G_USER_DIRECTORY_DOWNLOAD" "2")
+    '("directory-music" "G_USER_DIRECTORY_MUSIC" "3")
+    '("directory-pictures" "G_USER_DIRECTORY_PICTURES" "4")
+    '("directory-public-share" "G_USER_DIRECTORY_PUBLIC_SHARE" "5")
+    '("directory-templates" "G_USER_DIRECTORY_TEMPLATES" "6")
+    '("directory-videos" "G_USER_DIRECTORY_VIDEOS" "7")
+    '("n-directories" "G_USER_N_DIRECTORIES" "8")
+  )
+)
+

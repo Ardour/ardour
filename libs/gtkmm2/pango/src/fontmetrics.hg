@@ -1,0 +1,48 @@
+/* $Id: fontmetrics.hg,v 1.2 2004/12/01 11:46:29 murrayc Exp $ */
+
+/* fontmetrics.h
+ *
+ * Copyright (C) 1998-1999 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <pango/pango-font.h>
+
+_DEFS(pangomm,pango)
+
+namespace Pango
+{
+
+/** A Pango::FontMetrics holds the overall metric information for a font (possibly restricted to a script).
+ */
+class FontMetrics
+{
+  _CLASS_BOXEDTYPE(FontMetrics, PangoFontMetrics, NONE, pango_font_metrics_ref, pango_font_metrics_unref)
+  _IGNORE(pango_font_metrics_unref, pango_font_metrics_ref)
+public:
+  _WRAP_METHOD(int get_ascent() const, pango_font_metrics_get_ascent)
+  _WRAP_METHOD(int get_descent() const, pango_font_metrics_get_descent)
+  _WRAP_METHOD(int get_approximate_char_width() const, pango_font_metrics_get_approximate_char_width)
+  _WRAP_METHOD(int get_approximate_digit_width() const, pango_font_metrics_get_approximate_digit_width)
+
+  _WRAP_METHOD(int get_underline_position() const, pango_font_metrics_get_underline_position)
+  _WRAP_METHOD(int get_underline_thickness() const, pango_font_metrics_get_underline_thickness)
+  _WRAP_METHOD(int get_strikethrough_position() const, pango_font_metrics_get_strikethrough_position)
+  _WRAP_METHOD(int get_strikethrough_thickness() const, pango_font_metrics_get_strikethrough_thickness)
+
+};
+
+} //namespace Pango

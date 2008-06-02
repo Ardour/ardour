@@ -1,0 +1,8 @@
+libardour.la
+libardour.pc
+version.cc
+*.lo
+*.os
+*.mo
+*.pot
+*.dylib

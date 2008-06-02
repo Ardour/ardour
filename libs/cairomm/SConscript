@@ -1,0 +1,33 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+cairomm_files = glob.glob('cairomm/*.cc')
+
+Import('env libraries install_prefix')
+
+cairomm = env.Copy()
+cairomm.Merge([libraries['cairo']])
+
+cairomm.Append(CXXFLAGS='-DHAVE_CONFIG_H')
+
+libcairomm = cairomm.SharedLibrary('cairomm', cairomm_files)
+
+Default([libcairomm])
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libcairomm))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript',
+                                       'cairomm/cairomm.h',
+                                       'configure',
+                                       'Makefile.in',
+                                       'cairomm/cairomm-1.0.pc.in',
+                                       'cairomm/Makefile.in'
+                                       ] +
+				     cairomm_files + 
+				     glob.glob('cairomm/*.h')
+				     ))
+

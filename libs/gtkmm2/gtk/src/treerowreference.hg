@@ -1,0 +1,54 @@
+/* $Id: treerowreference.hg,v 1.7 2006/04/12 11:11:25 murrayc Exp $ */
+
+/* Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+_DEFS(gtkmm,gtk)
+
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treepath.h>
+
+
+namespace Gtk
+{
+
+/** Typedefed as Gtk::TreeModel::RowReference.
+ * This reference will keep pointing to
+ * the node pointed to by the Path, so long as it exists.  It listens to all
+ * signals emitted by the Model, and updates its Path appropriately.
+ * @ingroup TreeView
+*/
+class TreeRowReference
+{
+  _CLASS_BOXEDTYPE(TreeRowReference, GtkTreeRowReference, NONE, gtk_tree_row_reference_copy, gtk_tree_row_reference_free)
+  _IGNORE(gtk_tree_row_reference_new, gtk_tree_row_reference_copy, gtk_tree_row_reference_free)
+public:
+  TreeRowReference(const Glib::RefPtr<TreeModel>& model, const TreeModel::Path& path);
+
+  ///The same as is_valid().
+  operator bool() const;
+
+  _WRAP_METHOD(TreeModel::Path get_path() const,  gtk_tree_row_reference_get_path)
+
+  _WRAP_METHOD(Glib::RefPtr<TreeModel> get_model(), gtk_tree_row_reference_get_model)
+  _WRAP_METHOD(Glib::RefPtr<const TreeModel> get_model() const, gtk_tree_row_reference_get_model, constversion)
+
+  _WRAP_METHOD(bool is_valid() const, gtk_tree_row_reference_valid)
+};
+
+} // namespace Gtk
+

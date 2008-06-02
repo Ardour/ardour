@@ -1,0 +1,55 @@
+/* $Id: document.hg,v 1.3 2004/01/19 19:48:36 murrayc Exp $ */
+
+/* Copyright (C) 2003 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+
+_DEFS(atkmm,atk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+extern "C"
+{
+  typedef struct _AtkDocumentIface AtkDocumentIface;
+  typedef struct _AtkDocument      AtkDocument;
+}
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+namespace Atk
+{
+
+class Object;
+
+/** The ATK interface which allows access to a DOM associated with on object.
+ * This interface should be supported by any object that has an associated document object model (DOM). This interface
+ * provides the standard mechanism allowing an assistive technology access to the DOM.
+ */
+class Document : public Glib::Interface
+{
+  _CLASS_INTERFACE(Document, AtkDocument, ATK_DOCUMENT, AtkDocumentIface)
+public:
+
+  _WRAP_METHOD(Glib::ustring get_document_type() const, atk_document_get_document_type)
+  _WRAP_METHOD(gpointer get_document(), atk_document_get_document)
+
+protected:
+  _WRAP_VFUNC(const gchar* get_document_type(), get_document_type)
+  _WRAP_VFUNC(gpointer get_document() const, get_document)
+};
+
+} // namespace Atk
+

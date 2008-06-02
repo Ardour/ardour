@@ -1,0 +1,61 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/cellrenderertext.h>
+//#include <gtkmm/treemodel.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/cellrenderertext_p.h)
+
+namespace Gtk
+{
+
+/**  Renders a spin button in a cell.
+ *
+ * Gtk::CellRendererSpin renders text in a cell like Gtk::CellRendererText, 
+ * from which it is derived. But while Gtk::CellRendererText offers a simple 
+ * entry to edit the text, Gtk::CellRendererSpin offers a Gtk::SpinButton widget. 
+ * Of course, that means that the text must be parseable as a floating point 
+ * number.
+ *
+ * The range of the spinbutton is taken from the adjustment property of the 
+ * cell renderer, which can be set explicitly or mapped to a column in 
+ * the tree model, like all properties of cell renders. Gtk::CellRendererSpin 
+ * also has properties for the climb rate and the number of digits to display. 
+ * Other Gtk::SpinButton properties can be set in a handler for the start-editing
+ * signal. 
+ *
+ * @ingroup TreeView
+ * @newin2p12
+ */
+class CellRendererSpin : public CellRendererText
+{
+  _CLASS_GTKOBJECT(CellRendererSpin, GtkCellRendererSpin, GTK_CELL_RENDERER_SPIN, Gtk::CellRendererText, GtkCellRendererText)
+public:
+
+  _CTOR_DEFAULT
+  
+  _WRAP_PROPERTY("adjustment", Gtk::Adjustment*)
+  _WRAP_PROPERTY("climb_rate", double)
+  _WRAP_PROPERTY("digits", guint)
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  virtual Glib::PropertyProxy_Base _property_renderable(); //override
+#endif //GLIBMM_PROPERTIES_ENABLED
+};
+
+} // namespace Gtk

@@ -1,0 +1,179 @@
+/* $Id: table.hg,v 1.3 2006/05/16 14:16:08 jjongsma Exp $ */
+
+/* Copyright (C) 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/helperlist.h>
+#include <gtkmm/container.h>
+#include <gtkmm/enums.h>
+#include <gtk/gtktable.h> /* for GtkTableChild */
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/container_p.h)
+
+namespace Gtk
+{
+
+class Table;
+
+namespace Table_Helpers
+{
+
+class Child : protected _GtkTableChild
+{
+private:
+  Child& operator=(const Child&); //Not implemented.
+  Child(const Child&); //Not implemented.
+
+public:
+  inline _GtkTableChild* gobj() {return (this);}
+  inline const _GtkTableChild* gobj() const {return (this);}
+
+  Widget* get_widget() const;
+
+  //TODO: Which of the GtkTableChild's fields are public API?
+  //Maybe we should remove some of these get()s or add some set()s.
+  //If get_widget() is the only accessor, then we should probably make
+  //the STL-style Table list contain Widgets instead of Childs.
+
+  guint16 get_left_attach() const;
+  guint16 get_right_attach() const;
+  guint16 get_top_attach() const;
+  guint16 get_bottom_attach() const;
+  guint16 get_xpadding() const;
+  guint16 get_ypadding() const;
+  bool get_xexpand() const;
+  bool get_yexpand() const;
+  bool get_xshrink() const;
+  bool get_yshrink() const;
+  bool get_xfill() const;
+  bool get_yfill() const;
+
+protected:
+  inline GtkTable* parent()
+    { return (GtkTable*) (gobj()->widget->parent); }
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  friend class Dummy_; // silence the compiler (Child has only private ctors)
+#endif
+};
+
+
+#m4 include(list.m4)
+  GP_LIST(TableList,Table,GtkTable,Child,children)
+  //The standard iterator, instead of List_Cpp_Iterator,
+  //only works because Child is derived from _GtkTableChild.
+
+  GP_LIST_ELEM(Widget)
+  GP_LIST_NOINSERT()
+  GP_LIST_CONTAINER_REMOVE( get_widget )
+  GP_LIST_END()
+
+} // namespace Table_Helpers
+
+
+/** Pack widgets in regular patterns.
+ * @ingroup Widgets
+ * @ingroup Containers
+ * Gtk::Table is one of the primary ways of grouping widgets together.  It
+ * consists of a set of lattice points to to which widgets can be attached.
+ * There are <em>rows</em>&nbsp;+&nbsp;1 lattice points vertically and
+ * <em>columns</em>&nbsp;+&nbsp;1 lattice points horizontally.  Lattice points
+ * start counting from 0.  Lattice points can either be specified to be
+ * <em>homogeneous</em>, meaning equally spaced, or not <em>homogeneous</em>,
+ * meaning each cell should be calculated based on the widgets contained in the
+ * row and column. The <em>homogeneous</em> property defaults to false.
+ *
+ * Widgets can be attached to the table by specifying the top, bottom, left and
+ * right points corresponding to upper, lefthand lattice point and the lower,
+ * righthand lattice point which the widget should span.  Widgets can either be
+ * contained in a cell or may span cells.  A number of options control the
+ * resizing behavior of widgets contained in the table.
+ *
+ * @par Packing options:
+ * There are a number of packing options that can be specified when adding a
+ * widget.  With <tt>Gtk::EXPAND</tt>, the lattice is allowed to grow to fill
+ * space.  With <tt>Gtk::SHRINK</tt>, the lattice is allowed to shrink when
+ * resized.  It is also possible to specify the behaviour of the widgets
+ * allocation within the table.  The flag <tt>Gtk::FILL</tt> declares the
+ * widget should grow to fill lattice.  If this is not set any extra space is
+ * used as padding.  The default is <tt>(Gtk::FILL&nbsp;|&nbsp;Gtk::EXPAND)</tt>.
+ *
+ * @par Table sizing:
+ * The table size is calculated based on the size of the widgets contained
+ * within and the restrictions imposed by specified options.  Padding and
+ * spacing can be used in the table.  Padding is added on either side of a
+ * widget, while spacing is placed between widgets.
+ *
+ * @see Gtk::HBox, Gtk::VBox
+ */
+class Table : public Container
+{
+  _CLASS_GTKOBJECT(Table,GtkTable,GTK_TABLE,Gtk::Container,GtkContainer)
+  _IGNORE(gtk_table_attach_defaults)
+public:
+  _WRAP_CTOR(Table(guint n_rows = 1, guint n_columns = 1, bool homogeneous = false), gtk_table_new)
+
+  _WRAP_METHOD(
+        void attach(Widget& child,
+                    guint left_attach, guint right_attach,
+                    guint top_attach, guint bottom_attach,
+                    AttachOptions xoptions = FILL | EXPAND, AttachOptions yoptions = FILL | EXPAND,
+                    guint xpadding = 0, guint ypadding = 0),
+        gtk_table_attach)
+
+
+  _WRAP_METHOD(void resize(guint rows, guint columns), gtk_table_resize)
+
+
+  _WRAP_METHOD(void set_row_spacing(guint row, guint spacing), gtk_table_set_row_spacing)
+  _WRAP_METHOD(guint get_row_spacing(guint row) const, gtk_table_get_row_spacing)
+
+  _WRAP_METHOD(void set_col_spacing(guint column, guint spacing), gtk_table_set_col_spacing)
+  _WRAP_METHOD(guint get_col_spacing(guint column) const, gtk_table_get_col_spacing)
+
+  _WRAP_METHOD(void set_row_spacings(guint spacing), gtk_table_set_row_spacings)
+
+  _WRAP_METHOD(void set_col_spacings(guint spacing), gtk_table_set_col_spacings)
+
+  void set_spacings(guint spacing);
+
+  _WRAP_METHOD(guint get_default_row_spacing(), gtk_table_get_default_row_spacing)
+  _WRAP_METHOD(guint get_default_col_spacing(), gtk_table_get_default_col_spacing)
+
+  _WRAP_METHOD(void set_homogeneous(bool homogeneous = true), gtk_table_set_homogeneous)
+  _WRAP_METHOD(bool get_homogeneous() const, gtk_table_get_homogeneous)
+
+  typedef Table_Helpers::TableList TableList;
+
+
+  TableList& children();
+  const TableList& children() const;
+
+  _WRAP_PROPERTY("n-rows", guint)
+  _WRAP_PROPERTY("n-columns", guint)
+  _WRAP_PROPERTY("column-spacing", guint)
+  _WRAP_PROPERTY("row-spacing", guint)
+
+protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  mutable TableList children_proxy_;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+};
+
+} // namespace Gtk
+

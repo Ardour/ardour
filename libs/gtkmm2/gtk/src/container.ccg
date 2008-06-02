@@ -1,0 +1,256 @@
+// -*- c++ -*-
+/* $Id: container.ccg,v 1.12 2006/07/19 16:58:50 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/adjustment.h>
+#include <gtk/gtkcontainer.h>
+
+
+namespace
+{
+
+static void container_foreach_callback(GtkWidget* widget_gobj, void* data)
+{
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+    Gtk::Container::ForeachSlot& slot = *static_cast<Gtk::Container::ForeachSlot*>(data);
+    Gtk::Widget *const widget = Glib::wrap(widget_gobj);
+
+    g_return_if_fail(widget != 0);
+
+    slot(*widget);
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    Glib::exception_handlers_invoke();
+  }
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+}
+
+
+//Copy of generated callback:
+static void Container_signal_remove_callback_normal(GtkContainer* self, GtkWidget* p0,void* data)
+{
+  using namespace Gtk;
+  typedef sigc::slot< void,Widget* > SlotType;
+
+  // Do not try to call a signal on a disassociated wrapper.
+  if(Glib::ObjectBase::_get_current_wrapper((GObject*) self))
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    try
+    {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+      if(sigc::slot_base *const slot = Glib::SignalProxyNormal::data_to_slot(data))
+        (*static_cast<SlotType*>(slot))(Glib::wrap(p0)
+);
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    }
+    catch(...)
+    {
+      Glib::exception_handlers_invoke();
+    }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
+}
+
+static void Container_signal_remove_callback(GtkContainer* self, GtkWidget* p0, void* data)
+{
+  //GTKMM_LIFECYCLE
+
+#ifdef GLIBMM_DEBUG_REFCOUNTING
+  g_warning("Container_signal_remove_callback()");
+#endif
+
+  //Don't call wrap() on a GTK+ instance whose gtkmm instance has been deleted - just call the original C callback.
+  const bool gtkmm_child_already_deleted = Glib::_gobject_cppinstance_already_deleted((GObject*)p0);
+
+  if(!gtkmm_child_already_deleted)
+  {
+    //Call the regular, generated callback:
+    Container_signal_remove_callback_normal(self, p0, data);
+  }
+  else
+  {
+    //Do nothing.
+  }
+}
+
+} // anonymous namespace
+
+
+namespace Gtk
+{
+
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+//Copy of generated callback:
+void Container_Class::remove_callback_normal(GtkContainer* self, GtkWidget* p0)
+{
+  CppObjectType *const obj = dynamic_cast<CppObjectType*>(
+      Glib::ObjectBase::_get_current_wrapper((GObject*)self));
+
+  // Non-gtkmmproc-generated custom classes implicitly call the default
+  // Glib::ObjectBase constructor, which sets is_derived_. But gtkmmproc-
+  // generated classes can use this optimisation, which avoids the unnecessary
+  // parameter conversions if there is no possibility of the virtual function
+  // being overridden:
+  if(obj && obj->is_derived_())
+  {
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    try // Trap C++ exceptions which would normally be lost because this is a C callback.
+    {
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+      // Call the virtual member method, which derived classes might override.
+      obj->on_remove(Glib::wrap(p0)
+);
+    #ifdef GLIBMM_EXCEPTIONS_ENABLED
+    }
+    catch(...)
+    {
+      Glib::exception_handlers_invoke();
+    }
+    #endif //GLIBMM_EXCEPTIONS_ENABLED
+  }
+  else
+  {
+    BaseClassType *const base = static_cast<BaseClassType*>(
+        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+    );
+
+    // Call the original underlying C function:
+    if(base && base->remove)
+      (*base->remove)(self, p0);
+  }
+}
+
+//Custom hand-coded callback:
+void Container_Class::remove_callback(GtkContainer* self, GtkWidget* p0)
+{
+  //GTKMM_LIFECYCLE
+
+#ifdef GLIBMM_DEBUG_REFCOUNTING
+  g_warning("Container_Class::remove_callback_custom() C self=%p: C child=%p\n", (void*)self, (void*)p0);
+  g_warning("gtypename self: %s\n, gtypename child: %s", G_OBJECT_TYPE_NAME(G_OBJECT(self)), G_OBJECT_TYPE_NAME(G_OBJECT(p0)));
+#endif
+  
+  //Don't call wrap() on a GTK+ instance whose gtkmm instance has been deleted - just call the original C callback.
+  const bool gtkmm_child_already_deleted = Glib::_gobject_cppinstance_already_deleted((GObject*)p0);
+
+  if(!gtkmm_child_already_deleted)
+  {
+    //Call the regular, generated callback:
+    Container_Class::remove_callback_normal(self, p0);
+  }
+  else
+  {
+    BaseClassType *const base = static_cast<BaseClassType*>(
+        g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)) // Get the parent class of the object class (The original underlying C class).
+    );
+
+    //Call the original underlying C function:
+    if(base && base->remove)
+      (*base->remove)(self, p0);
+  }
+}
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+
+void Container::foreach(const Container::ForeachSlot& slot)
+{
+  ForeachSlot slot_copy (slot);
+  gtk_container_foreach(gobj(), &container_foreach_callback, &slot_copy);
+}
+
+void  Container::add(Widget& widget)
+{
+  gtk_container_add(gobj(), widget.gobj());
+}
+
+bool Container::has_focus_chain() const
+{
+  return gtk_container_get_focus_chain(const_cast<GtkContainer*>(gobj()), 0);
+}
+
+Glib::ListHandle<Widget*> Container::get_focus_chain()
+{
+  GList* list = 0;
+  gtk_container_get_focus_chain(gobj(), &list);
+
+  return Glib::ListHandle<Widget*>(list, Glib::OWNERSHIP_SHALLOW);
+}
+
+Glib::ListHandle<const Widget*> Container::get_focus_chain() const
+{
+  GList* list = 0;
+  gtk_container_get_focus_chain(const_cast<GtkContainer*>(gobj()), &list);
+
+  return Glib::ListHandle<const Widget*>(list, Glib::OWNERSHIP_SHALLOW);
+}
+
+
+void Container::show_all_children(bool recursive)
+{
+  // Plain C version if this turns out to be performance-critical:
+  //GtkCallback callback = (GtkCallback) ((recursive) ? &gtk_widget_show_all : &gtk_widget_show);
+  //gtk_container_foreach(gobj(), callback, 0);
+
+  // This could also be done with get_children() and an explicit loop,
+  // if any problems should arise.  In gtkmm-1.2, foreach() is known to
+  // cause segfaults eventually, but it seems to work now.
+
+  foreach(sigc::mem_fun((recursive) ? &Widget::show_all : &Widget::show));
+}
+
+void Container::remove(Widget& widget)
+{
+  //If this is a managed widget,
+  //then do an extra ref so that it will
+  //not be destroyed when adding to another container
+  //This should leave it in much the same state as when it was instantiated,
+  //before being added to the first container.
+  if(widget.is_managed_())
+    widget.reference();
+    
+  gtk_container_remove(gobj(), widget.gobj());
+}
+
+#ifdef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+// static
+void Container_Class::destroy_callback(GtkObject* self)
+{
+#ifdef GLIBMM_DEBUG_REFCOUNTING
+  g_warning("Container_Class::destroy_callback() gobject_=%10X\n", self);
+  if(self)
+    g_warning("gtypename: %s\n", G_OBJECT_TYPE_NAME(G_OBJECT(self)));
+#endif
+
+  //Call the normal C destroy implementation, such as gtk_button_destroy:
+  //This will chain to gtk_container_destroy(), which will gtk_widget_destroy() any remaining child widgets.
+  GtkObjectClass *const base = static_cast<GtkObjectClass*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)));
+
+  if(base->destroy)
+    (*base->destroy)(self);
+}
+#endif //GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
+
+} // namespace Gtk
+

@@ -1,0 +1,88 @@
+/* $Id: assistant.hg,v 1.4 2006/06/13 17:16:26 murrayc Exp $ */
+
+/* assistant.h
+ *
+ * Copyright (C) 2004 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/window.h>
+#include <gdkmm/pixbuf.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(gtkmm/private/window_p.h)
+
+namespace Gtk
+{
+
+_WRAP_ENUM(AssistantPageType, GtkAssistantPageType)
+
+/** A widget used to guide users through multi-step operations.
+ *
+ * A Gtk::Assistant is a widget used to represent a generally complex 
+ * operation split into several steps, guiding the user through its
+ * pages and controlling the page flow to collect the necessary data.
+ *
+ * @newin2p10
+ * @ingroup Dialogs
+ */
+class Assistant : public Window
+{
+  _CLASS_GTKOBJECT(Assistant, GtkAssistant, GTK_ASSISTANT, Gtk::Window, GtkWindow)
+  _UNMANAGEABLE
+public:
+  _CTOR_DEFAULT()
+
+  _WRAP_METHOD(int get_current_page() const, gtk_assistant_get_current_page)
+  _WRAP_METHOD(void set_current_page(int page_num), gtk_assistant_set_current_page)
+  _WRAP_METHOD(int get_n_pages() const, gtk_assistant_get_n_pages)
+  _WRAP_METHOD(Widget* get_nth_page(int page_num), gtk_assistant_get_nth_page)
+  _WRAP_METHOD(const Widget* get_nth_page(int page_num) const, gtk_assistant_get_nth_page, constversion)
+  _WRAP_METHOD(int prepend_page(Widget& page), gtk_assistant_prepend_page)
+  _WRAP_METHOD(int append_page(Widget& page), gtk_assistant_append_page)
+  _WRAP_METHOD(int insert_page(Widget& page, int position), gtk_assistant_insert_page)
+  
+  typedef sigc::slot<int, int /* current_page */> SlotForwardPage;
+
+  void set_forward_page_func(const SlotForwardPage& slot);
+  _IGNORE(gtk_assistant_set_forward_page_func)
+
+  _WRAP_METHOD(void set_page_type(const Widget& page, AssistantPageType type), gtk_assistant_set_page_type)
+  _WRAP_METHOD(AssistantPageType  get_page_type(const Widget& page) const, gtk_assistant_get_page_type)
+  _WRAP_METHOD(void set_page_title(const Widget& page, const Glib::ustring& title), gtk_assistant_set_page_title)
+  _WRAP_METHOD(Glib::ustring get_page_title(const Widget& page) const, gtk_assistant_get_page_title)
+  _WRAP_METHOD(void set_page_header_image(const Widget& page, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf), gtk_assistant_set_page_header_image)
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_page_header_image(const Widget& page), gtk_assistant_get_page_header_image)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_page_header_image(const Widget& page) const, gtk_assistant_get_page_header_image, constversion)
+  _WRAP_METHOD(void set_page_side_image(const Widget& page, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf), gtk_assistant_set_page_side_image)
+  _WRAP_METHOD(Glib::RefPtr<Gdk::Pixbuf> get_page_side_image(const Widget& page), gtk_assistant_get_page_side_image)
+  _WRAP_METHOD(Glib::RefPtr<const Gdk::Pixbuf> get_page_side_image(const Widget& page) const, gtk_assistant_get_page_side_image, constversion)
+  _WRAP_METHOD(void set_page_complete(const Widget& page, bool complete = true), gtk_assistant_set_page_complete)
+  _WRAP_METHOD(bool get_page_complete(const Widget& page) const, gtk_assistant_get_page_complete)
+  _WRAP_METHOD(void add_action_widget(Widget& child), gtk_assistant_add_action_widget)
+  _WRAP_METHOD(void remove_action_widget(Widget& child), gtk_assistant_remove_action_widget)
+  _WRAP_METHOD(void update_buttons_state(), gtk_assistant_update_buttons_state)
+
+  _WRAP_SIGNAL(void prepare(Gtk::Widget* page), "prepare")
+  _WRAP_SIGNAL(void apply(), "apply")
+  _WRAP_SIGNAL(void close(), "close")
+  _WRAP_SIGNAL(void cancel(), "cancel")
+
+  //TODO: Child properties?
+};
+
+} // namespace Gtk
+

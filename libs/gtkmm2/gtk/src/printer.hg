@@ -1,0 +1,125 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtkmm/pagesetup.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gtk
+{
+
+_WRAP_ENUM(PrintCapabilities, GtkPrintCapabilities)
+
+/** A Printer object represents a printer. You only need to deal directly with printers if you use the 
+ * non-portable PrintUnixDialog API.
+ *
+ * A Printer object allows to get status information about the printer, such as its description, its location, 
+ * the number of queued jobs, etc. Most importantly, a Printer object can be used to create a PrintJob object, 
+ * which lets you print to the printer.
+ *
+ * @newin2p10
+ *
+ * @ingroup Printing
+ */
+class Printer : public Glib::Object
+{
+  _CLASS_GOBJECT(Printer, GtkPrinter, GTK_PRINTER, Glib::Object, GObject)
+  _GTKMMPROC_WIN32_NO_WRAP
+
+public:
+  //TODO: _WRAP_CREATE() - probably not, it's only accessible through PrintUnixDialog + GtkPrintBackend should be ignored
+  //TODO: I think these are not needed as well, and that Printer should generally be read-only - marko.
+  _IGNORE(gtk_printer_is_new, gtk_printer_set_state_message, gtk_printer_set_is_default)
+  _IGNORE(gtk_printer_set_is_active, gtk_printer_set_has_details, gtk_printer_set_description)
+  _IGNORE(gtk_printer_set_icon_name, gtk_printer_set_job_count, gtk_printer_set_is_new, gtk_printer_set_location)
+
+  bool equal(const Glib::RefPtr<Printer>& other) const;
+
+  //GtkPrintBackend is in a "semi-private" header.
+  //_WRAP_METHOD(Glib::RefPtr<PrintBackend> get_backend(), gtk_printer_get_backend, refreturn)
+  //_WRAP_METHOD(Glib::RefPtr<const PrintBackend> get_backend() const, gtk_printer_get_backend, refreturn, constversion)
+  _IGNORE(gtk_printer_new, gtk_printer_get_backend)
+
+  _WRAP_METHOD(Glib::ustring get_name() const, gtk_printer_get_name)
+  _WRAP_METHOD(Glib::ustring get_state_message() const, gtk_printer_get_state_message)
+  _WRAP_METHOD(Glib::ustring get_description() const, gtk_printer_get_description)
+  _WRAP_METHOD(Glib::ustring get_location() const, gtk_printer_get_location)
+  _WRAP_METHOD(Glib::ustring get_icon_name() const, gtk_printer_get_icon_name)
+  _WRAP_METHOD(int get_job_count() const, gtk_printer_get_job_count)
+  _WRAP_METHOD(bool is_active() const, gtk_printer_is_active)
+  _WRAP_METHOD(bool is_virtual() const, gtk_printer_is_virtual)
+  _WRAP_METHOD(bool is_default() const, gtk_printer_is_default)
+  _WRAP_METHOD(bool accepts_pdf() const, gtk_printer_accepts_pdf)
+  _WRAP_METHOD(bool accepts_ps() const, gtk_printer_accepts_ps)
+
+#m4 _CONVERSION(`GList*', `Glib::ListHandle< Glib::RefPtr<PageSetup> >', __FL2H_DEEP)
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<PageSetup> > list_papers(), gtk_printer_list_papers)
+
+#m4 _CONVERSION(`GList*', `Glib::ListHandle< Glib::RefPtr<const PageSetup> >', __FL2H_DEEP)
+  _WRAP_METHOD(Glib::ListHandle< Glib::RefPtr<const PageSetup> > list_papers() const, gtk_printer_list_papers)
+
+  _IGNORE(gtk_printer_compare)
+  _IGNORE(gtk_enumerate_printers)
+
+  _WRAP_METHOD(bool has_details() const, gtk_printer_has_details)
+  _WRAP_METHOD(void request_details(), gtk_printer_request_details)
+  _WRAP_METHOD(PrintCapabilities get_capabilities() const, gtk_printer_get_capabilities)
+
+
+  _WRAP_SIGNAL(void details_acquired(bool success), "details_acquired")
+  
+  _WRAP_PROPERTY("name", Glib::ustring)
+
+  //GtkPrintBackend is in a "semi-private" header:
+  //_WRAP_PROPERTY("backend", Glib::RefPtr<PrintBackend>)
+
+  _WRAP_PROPERTY("is_virtual", bool)
+  _WRAP_PROPERTY("state_message", Glib::ustring)
+  _WRAP_PROPERTY("location", Glib::ustring)
+  _WRAP_PROPERTY("icon_name", Glib::ustring)
+  _WRAP_PROPERTY("job_count", int)
+  _WRAP_PROPERTY("accepts-pdf", bool)
+  _WRAP_PROPERTY("accepts-ps", bool)
+};
+
+/** @relates Gtk::Printer */
+inline bool operator==(const Glib::RefPtr<Printer>& lhs, const Glib::RefPtr<Printer>& rhs)
+  { return lhs->equal(rhs); }
+
+/** @relates Gtk::Printer */
+inline bool operator!=(const Glib::RefPtr<Printer>& lhs, const Glib::RefPtr<Printer>& rhs)
+  { return !lhs->equal(rhs); }
+
+/** For example, 
+ * bool on_enumerate_printers(const Glib::RefPtr<Printer>& printer);
+ * @param printer A printer.
+ * @param result true to stop the enumeration, false to continue. 
+ *
+ * @relates Gtk::Printer
+ */
+typedef sigc::slot< bool, const Glib::RefPtr<Printer>& > SlotPrinterEnumerator;
+
+/** Calls a function for all Printers. If the callback returns true, the enumeration is stopped.
+ * @slot A function to call for each printer
+ * @parm wait If true, wait in a recursive mainloop until all printers are enumerated; otherwise return early.
+ *
+ * @relates Gtk::Printer
+ */
+void enumerate_printers(const SlotPrinterEnumerator& slot, bool wait = true);
+
+} // namespace Gtk

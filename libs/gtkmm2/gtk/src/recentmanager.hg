@@ -1,0 +1,144 @@
+/* Copyright (C) 2006 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/screen.h>
+#include <gdkmm/pixbuf.h>
+
+#include <gtkmm/recentinfo.h>
+
+#include <glibmm/object.h>
+#include <glibmm/containers.h>
+
+_DEFS(gtkmm,gtk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+namespace Gtk
+{
+
+/** Exception class for Gtk::RecentManager errors.
+ */
+_WRAP_GERROR(RecentManagerError, GtkRecentManagerError, GTK_RECENT_MANAGER_ERROR)
+
+/** @defgroup RecentFiles RecentFiles
+ */
+
+/** RecentManager provides a facility for adding, removing and
+ * looking up recently used files.  Each recently used file is
+ * identified by its URI, and has meta-data associated to it, like
+ * the names and command lines of the applications that have
+ * registered it, the number of time each application has registered
+ * the same file, the mime type of the file and whether the file
+ * should be displayed only by the applications that have
+ * registered it.
+ *
+ * The RecentManager acts like a database of all the recently
+ * used files.  You can create new RecentManager objects, but
+ * it is more efficient to use the standard recent manager for
+ * the Gdk::Screen so that informations about the recently used
+ * files is shared with other people using them. Normally, you
+ * retrieve the recent manager for a particular screen using
+ * get_for_screen() and it will contain information about current
+ * recent manager for that screen.
+ *
+ * @newin2p10
+ *
+ * @ingroup RecentFiles
+ */
+class RecentManager : public Glib::Object
+{
+  _CLASS_GOBJECT(RecentManager, GtkRecentManager, GTK_RECENT_MANAGER, Glib::Object, GObject)
+
+protected:
+  _CTOR_DEFAULT
+
+public:
+  _WRAP_CREATE()
+
+  _WRAP_METHOD(static Glib::RefPtr<RecentManager> get_default(), gtk_recent_manager_get_default, refreturn)
+  _WRAP_METHOD(static Glib::RefPtr<RecentManager> get_for_screen(const Glib::RefPtr<Gdk::Screen>& screen), gtk_recent_manager_get_for_screen, refreturn)
+
+  /** Meta-data passed to add_item().  You should
+   * use RecentManager::Data if you want to control the meta-data associated
+   * to an entry of the recently used files list when you are adding
+   * a new file to it.
+   *
+   * - display_name: the string to be used when displaying the file inside a RecentChooser
+   * - description: a user readable description of the file
+   * - mime_type: the mime type of the file
+   * - app_name: the name of the application that is registering the file
+   * - app_exec: the command line that should be used when launching the file
+   * - groups: the list of group names to which the file belongs to
+   * - is_private: whether the file should be displayed only by the applications that have registered it
+  */
+  class Data
+  { 
+  public:
+    Glib::ustring display_name;
+    Glib::ustring description;
+    
+    Glib::ustring mime_type;
+    
+    Glib::ustring app_name;
+    Glib::ustring app_exec;
+
+    std::vector<Glib::ustring> groups;
+  
+    bool is_private;
+  };
+
+  _WRAP_METHOD(void set_screen(const Glib::RefPtr<Gdk::Screen>& screen), gtk_recent_manager_set_screen)
+
+  /** Adds a new resource into the recently used resources list. This function
+   * will try and guess some of the meta-data associated to a URI. If you
+   * know some of meta-data about the document yourself, set the desired
+   * fields of a RecentManager::Data structure and pass it to add_item().
+   */
+  _WRAP_METHOD(bool add_item(const Glib::ustring& uri), gtk_recent_manager_add_item, errthrow)
+
+  /** Adds a new resource into the recently used resources list, taking
+   * meta data from the given Data instead of guessing it from the URI.
+   */
+  bool add_item(const Glib::ustring& uri, const Data& recent_data);
+
+  _WRAP_METHOD(bool remove_item(const Glib::ustring& uri), gtk_recent_manager_remove_item, errthrow)
+  _WRAP_METHOD(Glib::RefPtr<RecentInfo> lookup_item(const Glib::ustring& uri), gtk_recent_manager_lookup_item, errthrow)
+  _WRAP_METHOD(Glib::RefPtr<const RecentInfo> lookup_item(const Glib::ustring& uri) const, gtk_recent_manager_lookup_item, errthrow)
+  _WRAP_METHOD(bool has_item(const Glib::ustring& uri) const, gtk_recent_manager_has_item)
+  _WRAP_METHOD(bool move_item(const Glib::ustring& uri, const Glib::ustring& new_uri), gtk_recent_manager_move_item, errthrow)
+  _WRAP_METHOD(void set_limit(int limit), gtk_recent_manager_set_limit)
+  _WRAP_METHOD(int get_limit() const, gtk_recent_manager_get_limit)
+
+  typedef Glib::ListHandle<RecentInfo, RecentInfoTraits> ListHandle_RecentInfos;
+  _CONVERSION(`GList*',`ListHandle_RecentInfos',__FL2H_SHALLOW)
+
+  _WRAP_METHOD(ListHandle_RecentInfos get_items() const, gtk_recent_manager_get_items)
+
+  _WRAP_METHOD(int purge_items(), gtk_recent_manager_purge_items, errthrow)
+
+  /// For instance, void on_changed();
+  typedef sigc::slot<void> SlotChanged;
+
+  /** The "changed" signal is emitted when an item in the recently used resources list is changed.
+  */
+  _WRAP_SIGNAL(void changed(), "changed")
+
+  _WRAP_PROPERTY("filename", Glib::ustring)
+  _WRAP_PROPERTY("limit", int)
+  _WRAP_PROPERTY("size", int)
+};
+
+} // namespace Gtk

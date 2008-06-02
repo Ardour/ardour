@@ -1,0 +1,88 @@
+*** Changes from gtkmm 2.4 to 2.6:
+
+* Added IconView, FileChooserButton, and CellView widgets.
+
+* New API for existing classes:
+  TODO
+
+*** Changes from gtkmm 2.0/2.2 to gtkmm 2.4:
+
+* Useless signals not wrapped.
+
+* Use of libsigc++ 2 instead of libsigc++ 1.2. See the glibmm CHANGES for details of the syntax.
+
+* It is now easier to see which signal you should handle, because there are less of them.
+  Previously we wrapped key-binding signals, but they were quite useless for gtkmm coders.
+
+* Use of Gdk::Device and Gtk::SelectionData instead of C equivalents
+  (Murray Cumming)
+
+* New classes:
+
+  UIManager: Action-based menu and toolbar items. 
+    - Add Actions to an ActionGroup.
+    - Add the ActionGroup to the UIManager.
+    - Layout the Menus and Toolbars, with an XML string. Toolbar items and menu items can share the same Action.
+    - Add the Layout string to the UIManager.
+    - Get a top-level menu or toolbar from the UIManager and put it in a container.
+
+  ComboBox, ComboBoxText, ComboBoxEntry, CellLayout
+
+  EntryCompletion
+
+  ColorButton, FontButton: Buttons that open selection dialogs when clicked, and show the result inside the button.
+
+  Expander: A disclosure triangle, to hide distracting widgets.
+
+  FileChooser: A new File Selection widget.
+    
+  RadioToolButton, SeparatorToolItem, ToggleToolButton, ToolItem, ToolButton
+
+  IconTheme, IconInfo
+  
+* New API for existing classes:
+  Gtk::AccelMap: lock_path(), unlock_path()
+  Gtk::Alignment: get/set_padding(). Useful for indenting Gtk::Frame contents.
+  Gtk::Button: get/set_focus_on_click() get/set_alignment()
+  Gtk::ButtonBox: get_child_secondary().
+  Gtk::Calendar:
+    - display_options() is now set_display_options().
+    - New properties.
+  Gtk::Clipboard: wait_for_targets(), and a simpler request_targets().
+  Gtk::CheckMenuItem: get/set_draw_as_radio()
+  Gtk::Entry: get/set_completion()
+  Gtk::EventBox: get/set_visible_window(), get/set_above_child()
+  Gtk::IconSource: get/set_icon_name()
+  Gtk::Menu: attach(), set_monitor()
+  Gtk::MenuItem: unset_accel_path()
+  Gtk::MenuShell: cancel()
+  Gtk::MessageDialog:
+    - set_markup()
+    - Constructors: Added bool use_markup paramater after message parameter.
+      This is an API change, and I'd leak to hear suggestions for alternatives.
+  Gtk::TextBuffer: select_range()
+  Gtk::TextIter (also known as Gtk::TextBuffer::iterator):
+    Added *_visible_* versions of forwards/backwards methods.
+  Gtk::TextView:
+  - get/set_overwrite(), get/set_accepts_tab()
+  - Added WRAP_WORD_CHAR wrap mode.
+  Gtk::TreeViewColumn (also known as Gtk::TreeView::Column):
+    Added get/set_expand(), get_cell_position()
+  Gtk::Widget:
+  - queue_resize_no_redraw(), get/set__no_show_all()
+  - Added unset_fg(), unset_bg(), unset_font(), unset_text(), unset_base().
+  - Added add_modal_grab(), remove_modal_grab(), get_current_modal_grab().
+    (Ole Laursen)
+  - Added set_window() and set_allocation() for implementing new native widgets.
+    (Detlef Reichl)
+  Gtk::Window: set_default_icon(), set_keep_above(), set_keep_below()
+
+  Gdk::Cursor: new constructor: Cursor(const Glib::RefPtr<Display>& display, const Glib::RefPtr<Pixbuf>& pixbuf, int x, int y)
+  Gdk::Display: flush(), supports_cursor_alpha(), supports_cursor_color(), get_default_cursor_size(),
+    get_maximal_cursor_size(), set_double_click_distance(), get_default_group().
+  Gdk::Pixbuf: get_formats().
+  Gdk::PixbufLoader: create() now has extra bool mime_type parameter.
+  Gdk::Window: set_keep_above(), set_keep_below().
+
+  Pango:LayoutLine: get_length(), get_start_index(), and get_layout().
+

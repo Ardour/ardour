@@ -1,0 +1,43 @@
+# -*- python -*-
+
+import os.path
+import glob
+
+libclearlooks_files = [
+	'animation.c',
+	'cairo-support.c',
+    'clearlooks_draw.c',
+	'clearlooks_draw_glossy.c',
+	'clearlooks_draw_gummy.c',
+	'clearlooks_draw_inverted.c',
+	'clearlooks_rc_style.c',
+	'clearlooks_style.c',
+	'clearlooks_theme_main.c',
+	'support.c',
+	'widget-information.c'
+	]
+
+Import ('env install_prefix')
+
+clearlooks = env.Copy()
+
+clearlooks.Replace(CCFLAGS = ' `pkg-config --cflags gtk+-2.0 cairo` ',
+                   LINKFLAGS = ' `pkg-config --libs gtk+-2.0 cairo` ')
+
+if env['GTKOSX']:
+    clearlooks.Append (CCFLAGS = '-DGTKOSX')
+
+libclearlooks = clearlooks.SharedLibrary('clearlooks', libclearlooks_files) 
+
+usable_libclearlooks = clearlooks.Install ('engines', libclearlooks)
+Default (usable_libclearlooks)
+
+env.Alias('install',
+          env.Install(os.path.join(install_prefix,env['LIBDIR'], 'ardour3', 'engines'),
+                      libclearlooks))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript', 'bits.c'] +
+                                    libclearlooks_files +
+                                    glob.glob('*.h')
+                                    ))

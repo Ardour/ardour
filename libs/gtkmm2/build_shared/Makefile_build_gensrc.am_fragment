@@ -1,0 +1,86 @@
+## Copyright (c) 2001-2004
+## The gtkmm development team.
+##
+## Included by src/Makefile_list_of_hg.am_fragment
+##
+## This Makefile.am helper transforms lists of source files that are
+## specific to a sublibrary (atkmm, pangomm, gdkmm or gtkmm) into more
+## generic lists. These lists of files are processed by the automake
+## rules contained in Makefile_build.am_fragment (sublib/sublibmm
+## directory) and Makefile_gensrc.am_fragment (sublib/src directory).
+## 
+## The input variables are:
+## 	* defined in sublib/src/Makefile_list_of_hg.am_fragment:
+##		files_posix_hg, files_win32_hg, files_general_hg,
+##		files_general_deprecated_hg.
+##	* defined sublib/sublibmm/Makefile.am:
+##		sublib_files_extra_posix_[cc|h],
+##		sublib_files_extra_win32_[cc|h],
+##		sublib_files_extra_general_[cc|h],
+##		sublib_files_extra_general_deprecated_[cc|h]
+##
+## The output variables are:
+##	files_all_hg: all .hg files (general, all platforms, deprecated)
+##	files_hg: general and platform-specific .hg files
+##	files_built_cc, files_built_h: generated source files that
+##		will be compiled on the target platform 
+##		+ corresponding headers.
+##	files_all_built_cc, files_all_built_h: all generated source
+##		files + corresponding headers.
+##	files_extra_cc, files_extra_h : general and platform-specific
+##		source files and corresponding headers
+##	files_all_extra_cc, files_all_extra_h: all extra source files
+##		and corresponding headers.
+##		 !!! deprecated files not included !!! 
+
+# Built files
+
+files_all_hg = \
+	$(files_posix_hg) \
+	$(files_win32_hg) \
+	$(files_general_hg) \
+	$(files_general_deprecated_hg)
+
+if OS_WIN32
+files_hg = $(files_general_hg) $(files_win32_hg) $(files_general_deprecated_hg)
+else
+files_hg = $(files_general_hg) $(files_posix_hg) $(files_general_deprecated_hg)
+endif
+
+files_built_cc = $(files_hg:.hg=.cc) wrap_init.cc
+files_built_h = $(files_hg:.hg=.h)
+
+files_all_built_cc = $(files_all_hg:.hg=.cc) wrap_init.cc
+files_all_built_h = $(files_all_hg:.hg=.h)
+
+# Extra files
+
+files_all_extra_cc = \
+	$(sublib_files_extra_posix_cc) \
+	$(sublib_files_extra_win32_cc) \
+	$(sublib_files_extra_general_cc) \
+	$(sublib_files_extra_general_deprecated_cc)
+
+files_all_extra_h = \
+	$(sublib_files_extra_posix_h) \
+	$(sublib_files_extra_win32_h) \
+	$(sublib_files_extra_general_h) \
+	$(sublib_files_extra_general_deprecated_h)
+files_all_extra_h += wrap_init.h
+
+if OS_WIN32
+files_extra_cc = \
+	$(sublib_files_extra_win32_cc) \
+	$(sublib_files_extra_general_cc)
+files_extra_h = \
+	$(sublib_files_extra_win32_h) \
+	$(sublib_files_extra_general_h)
+else
+files_extra_cc = \
+	$(sublib_files_extra_posix_cc) \
+	$(sublib_files_extra_general_cc)
+files_extra_h = \
+	$(sublib_files_extra_posix_h) \
+	$(sublib_files_extra_general_h)
+endif
+files_extra_h += wrap_init.h

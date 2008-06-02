@@ -1,0 +1,40 @@
+## Copyright (c) 2001
+## The gtkmm development team.
+##
+## **** Common rules for inclusion in Makefile.am ****
+##
+##
+## Used variable:		Example content:
+##
+## sublib_name			= gtkmm
+## sublib_cflags		= $(GTKMM_CFLAGS)
+## sublib_files_extra_*_cc	= stock_id.cc
+## sublib_files_extra_*_h	= stock_id.h
+##
+## Returned variable:		Usage example:
+##
+## files_extra_cc		libgtkmm_la_SOURCES = $(files_all_cc)
+## files_extra_h		libgtkmm_la_SOURCES = $(files_all_general_cc)
+## files_extra_all_cc		libgtkmm_la_SOURCES = $(files_all_posix_cc)
+## files_extra_all_h		libgtkmm_la_SOURCES = $(files_all_win32_cc)
+
+## The temporary sublib_ variables are needed to workaround
+## a nasty automake problem with escaped newlines and +=.
+
+if OS_WIN32
+files_extra_cc_tmp = $(sublib_files_extra_general_cc) $(sublib_files_extra_win32_cc)
+files_extra_h_tmp  = $(sublib_files_extra_general_h)  $(sublib_files_extra_win32_h)
+else
+files_extra_cc_tmp = $(sublib_files_extra_general_cc) $(sublib_files_extra_posix_cc) 
+files_extra_h_tmp  = $(sublib_files_extra_general_h)  $(sublib_files_extra_posix_h) 
+endif
+
+files_extra_cc = $(files_extra_cc_tmp)
+files_extra_h  = $(files_extra_h_tmp)
+
+files_extra_all_cc = $(sublib_files_extra_general_cc) $(sublib_files_extra_posix_cc) $(sublib_files_extra_win32_cc)
+files_extra_all_h  = $(sublib_files_extra_general_h)  $(sublib_files_extra_posix_h)  $(sublib_files_extra_win32_h)
+
+files_extra_h		+= wrap_init.h
+files_extra_all_h	+= wrap_init.h
+

@@ -1,0 +1,201 @@
+// -*- c++ -*-
+/* $Id: menushell.ccg,v 1.5 2006/05/11 11:40:24 murrayc Exp $ */
+
+/* Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtkmenuitem.h>
+#include <gtk/gtkaccellabel.h>
+
+
+namespace Gtk
+{
+
+// All ctors are manually implemented just to initialize accel_window_.
+
+MenuShell::MenuShell()
+:
+  _CONSTRUCT_SPECIFIC(Gtk::Container, MenuShell),
+  items_proxy_  (gobj()),
+  accel_window_ (0)
+{}
+
+MenuShell::MenuShell(const Glib::ConstructParams& construct_params)
+:
+  Glib::ObjectBase(0),
+  Gtk::Container  (construct_params),
+  items_proxy_    (gobj()),
+  accel_window_   (0)
+{}
+
+MenuShell::MenuShell(GtkMenuShell* castitem)
+:
+  Gtk::Container((GtkContainer*) castitem),
+  items_proxy_  (gobj()),
+  accel_window_ (0)
+{}
+
+// TODO: Why do we need a custom dtor?
+MenuShell::~MenuShell()
+{}
+
+void MenuShell::accelerate(Window& window)
+{
+  // accel_window_ is used by menuitems that are added to the menushell
+  // after it has been accelerated.
+  accel_window_ = &window;
+
+  const MenuList::iterator items_end = items().end();
+
+  for(MenuList::iterator iter = items().begin(); iter != items_end; ++iter)
+    iter->accelerate(window);
+}
+
+void MenuShell::accelerate(Widget& parent)
+{
+  Gtk::Window* toplevel_window 
+      = dynamic_cast<Gtk::Window*>(parent.get_toplevel());
+  if(toplevel_window)
+    accelerate(*toplevel_window);
+}
+
+MenuShell::MenuList& MenuShell::items()
+{
+  return items_proxy_;
+}
+
+const MenuShell::MenuList& MenuShell::items() const
+{
+  return items_proxy_;
+}
+
+void MenuShell_Class::insert_vfunc_callback(GtkMenuShell* self, GtkWidget* child, int position)
+{
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try
+  {
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+    MenuShell *const obj = dynamic_cast<MenuShell*>(
+        Glib::ObjectBase::_get_current_wrapper((GObject*) self));
+
+    // If MenuShell is accelerated initialize accelerators of new MenuItem.
+    if(obj && obj->accel_window_ && GTK_IS_MENU_ITEM(child))
+    {
+      Glib::wrap((GtkMenuItem*) child)->accelerate(*obj->accel_window_);
+    }
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  }
+  catch(...)
+  {
+    Glib::exception_handlers_invoke();
+  }
+  #endif //GLIBMM_EXCEPTIONS_ENABLED
+
+  GtkMenuShellClass *const base = static_cast<GtkMenuShellClass*>(
+      g_type_class_peek_parent(G_OBJECT_GET_CLASS(self)));
+
+  if(base && base->insert)
+    (*base->insert)(self, child, position);
+}
+
+
+namespace Menu_Helpers
+{
+
+// List implementation:
+
+
+MenuList::iterator MenuList::insert(MenuList::iterator position, const Element& element)
+{
+  const Glib::RefPtr<Gtk::MenuItem> item = element.get_child();
+
+  g_return_val_if_fail(item != 0, position);
+  g_return_val_if_fail(gparent() != 0, position);
+
+  int pos = -1;
+
+  if(position.node_)
+    pos = g_list_position(glist(), position.node_);
+
+  gtk_menu_shell_insert(gparent(), item->Widget::gobj(), pos);
+
+  return --position;
+}
+
+void MenuList::remove(const_reference child)
+{
+  const Widget& widget = child;
+  remove(const_cast<Widget&>(widget));
+}
+
+void MenuList::remove(Widget& widget)
+{
+  //This is the same as the standard implementation,
+  //but we also unset the accel_label to avoid leaking its reference.
+
+  //If it is a Bin, (actually we're looking for a MenuItem):
+  if(GTK_IS_BIN(widget.gobj()))
+  {
+    //TODO: There is duplication here, with erase().
+    //If the child's child is an AccelLabel then unset its accel widget:
+    //This can't catch every possible AccelLabel in the hierarchy, but it
+    //will catch the ones that we create in MenuItem::MenuItem() without
+    //people being aware of it. People can take care of their own ones themselves.
+    Gtk::AccelLabel* pAccelLabel = dynamic_cast<Gtk::AccelLabel*>(dynamic_cast<Gtk::Bin&>(widget).get_child());
+    if(pAccelLabel) //If the child is an AccelLabel.
+    {
+      //The unset_accel_widget() method is not implemented in gtkmm until 2.4:
+      gtk_accel_label_set_accel_widget(pAccelLabel->gobj(), 0);
+    }
+  }
+
+  gtk_container_remove(GTK_CONTAINER(gparent_),
+                       (GtkWidget*)(widget.gobj()));
+}
+
+MenuList::iterator MenuList::erase(iterator position)
+{
+  //Check that it is a valid iterator, to a real item:
+  if ( !position.node_|| (position == end()) )
+    return end();
+
+  //Get an iterator the the next item, to return:
+  iterator next = position;
+  next++;
+
+  GtkWidget* pChild = (GtkWidget*)(position->gobj());
+  if(GTK_IS_BIN(pChild)) //A MenuItem is a Bin.
+  {  
+    //If the child's child is an AccelLabel then unset it's accel widget:
+    //This can't catch every possible AccelLabel in the hierarchy, but it
+    //will catch the ones that we create in MenuItem::MenuItem() without
+    //people being aware of it. People can take care of their own ones themselves.
+    GtkWidget* pChildOfChild = (GtkWidget*)gtk_bin_get_child(GTK_BIN(pChild));
+    if(GTK_IS_ACCEL_LABEL(pChildOfChild))
+       gtk_accel_label_set_accel_widget(GTK_ACCEL_LABEL(pChildOfChild), 0);
+  }
+  
+  //Use GTK+ C function to remove it, by providing the GtkWidget*:
+  gtk_container_remove( GTK_CONTAINER(gparent_), pChild );
+  
+  return next;
+}
+
+} // namespace Menu_Helpers
+
+} // namespace Gtk
+

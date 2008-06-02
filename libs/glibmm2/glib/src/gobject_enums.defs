@@ -1,0 +1,80 @@
+;; From gobject/gparam.h
+
+(define-flags-extended ParamFlags
+  (in-module "G")
+  (c-name "GParamFlags")
+  (values
+    '("readable" "G_PARAM_READABLE" "1 << 0")
+    '("writable" "G_PARAM_WRITABLE" "1 << 1")
+    '("construct" "G_PARAM_CONSTRUCT" "1 << 2")
+    '("construct-only" "G_PARAM_CONSTRUCT_ONLY" "1 << 3")
+    '("lax-validation" "G_PARAM_LAX_VALIDATION" "1 << 4")
+    '("private" "G_PARAM_PRIVATE" "1 << 5")
+  )
+)
+
+;; From gobject/gsignal.h
+
+(define-flags-extended SignalFlags
+  (in-module "G")
+  (c-name "GSignalFlags")
+  (values
+    '("run-first" "G_SIGNAL_RUN_FIRST" "1 << 0")
+    '("run-last" "G_SIGNAL_RUN_LAST" "1 << 1")
+    '("run-cleanup" "G_SIGNAL_RUN_CLEANUP" "1 << 2")
+    '("no-recurse" "G_SIGNAL_NO_RECURSE" "1 << 3")
+    '("detailed" "G_SIGNAL_DETAILED" "1 << 4")
+    '("action" "G_SIGNAL_ACTION" "1 << 5")
+    '("no-hooks" "G_SIGNAL_NO_HOOKS" "1 << 6")
+  )
+)
+
+(define-flags-extended ConnectFlags
+  (in-module "G")
+  (c-name "GConnectFlags")
+  (values
+    '("after" "G_CONNECT_AFTER" "1 << 0")
+    '("swapped" "G_CONNECT_SWAPPED" "1 << 1")
+  )
+)
+
+(define-flags-extended SignalMatchType
+  (in-module "G")
+  (c-name "GSignalMatchType")
+  (values
+    '("id" "G_SIGNAL_MATCH_ID" "1 << 0")
+    '("detail" "G_SIGNAL_MATCH_DETAIL" "1 << 1")
+    '("closure" "G_SIGNAL_MATCH_CLOSURE" "1 << 2")
+    '("func" "G_SIGNAL_MATCH_FUNC" "1 << 3")
+    '("data" "G_SIGNAL_MATCH_DATA" "1 << 4")
+    '("unblocked" "G_SIGNAL_MATCH_UNBLOCKED" "1 << 5")
+  )
+)
+
+;; From gobject/gtype.h
+
+(define-flags-extended TypeDebugFlags
+  (in-module "G")
+  (c-name "GTypeDebugFlags")
+  (values
+    '("none" "G_TYPE_DEBUG_NONE" "0")
+    '("objects" "G_TYPE_DEBUG_OBJECTS" "1 << 0")
+    '("signals" "G_TYPE_DEBUG_SIGNALS" "1 << 1")
+    '("mask" "G_TYPE_DEBUG_MASK" "0x03")
+  )
+)
+
+(define-enum-extended TypeFundamentalFlags
+  (in-module "G")
+  (c-name "GTypeFundamentalFlags")
+  (values
+  )
+)
+
+(define-enum-extended TypeFlags
+  (in-module "G")
+  (c-name "GTypeFlags")
+  (values
+  )
+)
+

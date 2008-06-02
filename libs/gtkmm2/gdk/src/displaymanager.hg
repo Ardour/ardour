@@ -1,0 +1,65 @@
+/* $Id: displaymanager.hg,v 1.8 2006/04/12 11:11:24 murrayc Exp $ */
+
+/* displaymanager.h
+ *
+ * Copyright (C) 2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <glibmm/object.h>
+#include <gdkmm/display.h>
+
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+/** The purpose of the GdkDisplayManager singleton object is to offer notification when displays appear or disappear or the
+ * default display changes.
+ */
+class DisplayManager : public Glib::Object
+{
+  _CLASS_GOBJECT(DisplayManager,GdkDisplayManager,GDK_DISPLAY_MANAGER,Glib::Object,GObject)
+protected:
+
+public:
+
+  _WRAP_METHOD(static Glib::RefPtr<DisplayManager> get(), gdk_display_manager_get, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<Display> get_default_display(), gdk_display_manager_get_default_display, refreturn)
+  _WRAP_METHOD(Glib::RefPtr<const Display> get_default_display() const, gdk_display_manager_get_default_display, refreturn, constversion)
+
+  _WRAP_METHOD(void set_default_display(const Glib::RefPtr<Display>& display), gdk_display_manager_set_default_display)
+
+  _WRAP_METHOD(Glib::SListHandle< Glib::RefPtr<Display> > list_displays(), gdk_display_manager_list_displays)
+
+  _WRAP_PROPERTY("default-display", Glib::RefPtr<Display>)
+  
+
+#m4 _CONVERSION(`GdkDisplay*',`const Glib::RefPtr<Display>&', Glib::wrap($3, true))
+
+  /** The display_opened signal is emitted when a display is opened.
+   *
+   * @newin2p2
+   *
+   * @param display the opened display
+   */
+  _WRAP_SIGNAL(void display_opened(const Glib::RefPtr<Display>& display), display-opened)
+};
+
+} /* namespace Gdk */
+

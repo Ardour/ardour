@@ -1,0 +1,120 @@
+// -*- c++ -*-
+/* $Id: table.ccg,v 1.1 2003/01/21 13:40:40 murrayc Exp $ */
+
+/* 
+ *
+ * Copyright 1998-2002 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gtk/gtktable.h>
+
+namespace Gtk
+{
+
+namespace Table_Helpers
+{
+
+Widget* Child::get_widget() const
+{
+  return Glib::wrap(gobj()->widget);
+}
+
+guint16 Child::get_left_attach() const
+{
+  return gobj()->left_attach;
+}
+
+
+guint16 Child::get_right_attach() const
+{
+  return gobj()->right_attach;
+}
+
+guint16 Child::get_top_attach() const
+{
+  return gobj()->top_attach;
+}
+
+guint16 Child::get_bottom_attach() const
+{
+  return gobj()->bottom_attach;
+}
+
+guint16 Child::get_xpadding() const
+{
+  return gobj()->xpadding;
+}
+
+guint16 Child::get_ypadding() const
+{
+  return gobj()->ypadding;
+}
+
+bool Child::get_xexpand() const
+{
+  return (bool)gobj()->xexpand;
+}
+
+bool Child::get_yexpand() const
+{
+  return (bool)gobj()->yexpand;
+}
+
+bool Child::get_xshrink() const
+{
+  return (bool)gobj()->xshrink;
+}
+bool Child::get_yshrink() const
+{
+  return (bool)gobj()->yshrink;
+}
+
+bool Child::get_xfill() const
+{
+  return (bool)gobj()->xfill;
+}
+
+bool Child::get_yfill() const
+{
+  return (bool)gobj()->yfill;
+}
+
+
+} //namespace Table_Helpers
+
+
+void Table::set_spacings(guint spacing)
+{
+  set_row_spacings(spacing);
+  set_col_spacings(spacing);
+}
+
+Table::TableList& Table::children()
+{
+  children_proxy_ = TableList(gobj());
+  return children_proxy_;
+}
+
+const Table::TableList& Table::children() const
+{
+  children_proxy_ = TableList(const_cast<GtkTable*>(gobj()));
+  return children_proxy_;
+}
+
+
+} /* namespace Gtk */
+

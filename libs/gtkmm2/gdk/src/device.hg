@@ -1,0 +1,83 @@
+/* $Id: device.hg,v 1.3 2004/02/10 17:29:54 mxpxpod Exp $ */
+
+/* Copyright (C) 2002-2004 The gtkmm Development Team
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <gdkmm/window.h>
+#include <gdkmm/event.h>
+#include <gdk/gdkinput.h>
+
+
+_DEFS(gdkmm,gdk)
+_PINCLUDE(glibmm/private/object_p.h)
+
+
+namespace Gdk
+{
+
+_WRAP_ENUM(InputMode, GdkInputMode)
+_WRAP_ENUM(InputSource, GdkInputSource)
+
+/** A Gdk::Device instance contains a detailed description of an extended input device.
+ */
+class Device : public Glib::Object
+{
+  _CLASS_GOBJECT(Device,GdkDevice,GDK_DEVICE,Glib::Object,GObject)
+
+protected:
+  _CTOR_DEFAULT()
+
+public:
+
+  _WRAP_METHOD(void set_source(InputSource source), gdk_device_set_source)
+  _WRAP_METHOD(bool set_mode(InputMode mode), gdk_device_set_mode)
+  _WRAP_METHOD(void set_key(guint index_, guint keyval, ModifierType modifiers), gdk_device_set_key)
+  _WRAP_METHOD(void set_axis_use(guint index_, AxisUse use), gdk_device_set_axis_use)
+  _WRAP_METHOD(void get_state(const Glib::RefPtr<Window>& window, double& axes, ModifierType& mask), gdk_device_get_state)
+  _WRAP_METHOD(bool get_history(const Glib::RefPtr<Window>& window, guint32 start, guint32 stop, GdkTimeCoord**& events, int& n_events), gdk_device_get_history)
+  _WRAP_METHOD(bool get_axis(double& axes, AxisUse use, double& value) const, gdk_device_get_axis)
+
+  /** Gets the name of this device.
+   * @result The name of this device.
+   */
+  _MEMBER_GET(name, name, Glib::ustring, gchar*)
+  
+  /** Gets the type of this device.
+   * @result The type of this device.
+   */
+  _MEMBER_GET(source, source, InputSource, GdkInputSource)
+
+  /** Gets the mode of this device.
+   * @result The mode of this device.
+   */
+  _MEMBER_GET(mode, mode, InputMode, GdkInputMode)
+    
+  /** Discover whether the pointer follows device motion.
+   * @result true if the pointer follows device motion.
+   */
+  _MEMBER_GET(has_cursor, has_cursor, bool, gboolean)
+
+  //TODO: Add suitable accessor for the information in these fields. For now, people must use gobj() and access them directly.
+  //gint num_axes	the length of the axes array.
+  //GdkDeviceAxis *axes	an array of GdkDeviceAxis, describing the axes of this device.
+  //
+  //gint num_keys	the length of the keys array.
+  //GdkDeviceKey *keys	an array of GdkDeviceKey, describing the mapped macro buttons of this device.      
+};
+
+} // namespace Gdk
+
