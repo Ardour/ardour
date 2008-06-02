@@ -63,13 +63,12 @@ AudioEngine::AudioEngine (string client_name)
 	last_monitor_check = 0;
 	monitor_check_interval = max_frames;
 	_processed_frames = 0;
-	_freewheeling = false;
 	_usecs_per_cycle = 0;
 	_jack = 0;
 	_frame_rate = 0;
 	_buffer_size = 0;
-	_freewheeling = false;
 	_freewheel_thread_registered = false;
+	_freewheeling = false;
 
 	m_meter_thread = 0;
 	g_atomic_int_set (&m_meter_exit, 0);
@@ -295,8 +294,6 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	if (_freewheeling) {
 		if (Freewheel (nframes)) {
-			cerr << "Freewheeling returned non-zero!\n";
-			_freewheeling = false;
 			jack_set_freewheel (_jack, false);
 		}
 		return 0;
@@ -1025,11 +1022,18 @@ AudioEngine::freewheel (bool onoff)
 {
 	if (_jack) {
 
-		if (onoff) {
-			_freewheel_thread_registered = false;
-		}
+		if (onoff != _freewheeling) {
 
-		return jack_set_freewheel (_jack, onoff);
+			if (onoff) {
+				_freewheel_thread_registered = false;
+			}
+
+			return jack_set_freewheel (_jack, onoff);
+
+		} else {
+			/* already doing what has been asked for */
+			return 0;
+		}
 
 	} else {
 		return -1;

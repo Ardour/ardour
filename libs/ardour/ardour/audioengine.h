@@ -202,24 +202,25 @@ class AudioEngine : public sigc::trackable
 	std::string make_port_name_non_relative (std::string);
 
   private:
-	ARDOUR::Session      *session;
-	jack_client_t       *_jack;
-	std::string           jack_client_name;
-	Glib::Mutex           _process_lock;
-	Glib::Cond            session_removed;
-	bool                  session_remove_pending;
-	bool                 _running;
-	bool                 _has_run;
-	nframes_t       _buffer_size;
-	nframes_t       _frame_rate;
-	nframes_t        monitor_check_interval;
-	nframes_t        last_monitor_check;
-	nframes_t       _processed_frames;
-	bool                 _freewheeling;
-	bool                 _freewheel_thread_registered;
+	ARDOUR::Session*           session;
+	jack_client_t*            _jack;
+	std::string                jack_client_name;
+	Glib::Mutex               _process_lock;
+	Glib::Cond                 session_removed;
+	bool                       session_remove_pending;
+	bool                      _running;
+	bool                      _has_run;
+	nframes_t                 _buffer_size;
+	nframes_t                 _frame_rate;
+	nframes_t                  monitor_check_interval;
+	nframes_t                  last_monitor_check;
+	nframes_t                 _processed_frames;
+	bool                      _freewheeling;
+	bool                      _freewheel_pending;
+	bool                      _freewheel_thread_registered;
 	sigc::slot<int,nframes_t>  freewheel_action;
-	bool                  reconnect_on_halt;
-	int                  _usecs_per_cycle;
+	bool                       reconnect_on_halt;
+	int                       _usecs_per_cycle;
 
 	typedef std::set<Port*> Ports;
 	SerializedRCUManager<Ports> ports;
