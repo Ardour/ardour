@@ -321,6 +321,13 @@ AudioEngine::process_callback (nframes_t nframes)
 		return 0;
 	}
 
+	boost::shared_ptr<Ports> p = ports.reader();
+
+	// Prepare ports (ie read data if necessary)
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		(*i)->cycle_start (nframes, 0);
+	}
+
 	if (_freewheeling) {
 		/* emit the Freewheel signal and stop freewheeling in the event of trouble */
 		if (Freewheel (nframes)) {
@@ -328,24 +335,21 @@ AudioEngine::process_callback (nframes_t nframes)
 			_freewheeling = false;
 			jack_set_freewheel (_jack, false);
 		}
-		return 0;
-	}
 
-	boost::shared_ptr<Ports> p = ports.reader();
-
-	// Prepare ports (ie read data if necessary)
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->cycle_start (nframes, 0);
-	}
-	
-	if (session) {
-		session->process (nframes);
+	} else {
+		if (session) {
+			session->process (nframes);
+		}
 	}
 	
 	// Finalize ports (ie write data if necessary)
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		(*i)->cycle_end (nframes, 0);
+	}
+
+	if (_freewheeling) {
+		return 0;
 	}
 
 	if (!_running) {
