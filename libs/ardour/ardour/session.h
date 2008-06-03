@@ -600,8 +600,9 @@ class Session : public PBD::StatefulDestructible
 	SlaveSource post_export_slave;
 	nframes_t post_export_position;
 
-	int start_audio_export (ARDOUR::AudioExportSpecification&);
-	int stop_audio_export (ARDOUR::AudioExportSpecification&);
+	int  pre_export ();
+	int  start_audio_export (ARDOUR::AudioExportSpecification&);
+	int  stop_audio_export (ARDOUR::AudioExportSpecification&);
 	void finalize_audio_export ();
 	static sigc::signal<void, std::string, std::string> Exported;
 
@@ -1068,7 +1069,7 @@ class Session : public PBD::StatefulDestructible
 	void set_slave_source (SlaveSource);
 
 	bool _exporting;
-	int prepare_to_export (ARDOUR::AudioExportSpecification&);
+	int  prepare_to_export (ARDOUR::AudioExportSpecification&);
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);

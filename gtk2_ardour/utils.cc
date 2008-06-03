@@ -680,7 +680,7 @@ set_pango_fontsize ()
 
 	/* Cairo rendering, in case there is any */
 	
-	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
+	// pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
 }
 
 void

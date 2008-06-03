@@ -974,6 +974,8 @@ ExportDialog::do_export ()
 	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
 	cancel_label.set_text (_("Stop Export"));
 
+	session->pre_export ();
+
 	export_audio_data();
 	
   	progress_connection.disconnect ();
@@ -1228,7 +1230,7 @@ ExportDialog::initSpec(string &filepath)
 {
 	spec.path = filepath;
 	spec.progress = 0;
-	spec.running = true;
+	spec.running = false;
 	spec.stop = false;
 	spec.port_map.clear();
 	

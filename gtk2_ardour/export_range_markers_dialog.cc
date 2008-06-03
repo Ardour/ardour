@@ -81,8 +81,6 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 			spec.start_frame = currentLocation->start();
 			spec.end_frame = currentLocation->end();
 
-			getSession().request_locate(spec.start_frame, false);
-
 			if (getSession().start_audio_export(spec)){
 				// if export fails			
 				return;
@@ -100,6 +98,8 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 			}
 			
 			current_range_marker_index++;
+			
+			getSession().stop_audio_export (spec);
 		}
 	}
 	
