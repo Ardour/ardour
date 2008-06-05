@@ -2447,6 +2447,8 @@ Session::get_maximum_extent () const
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 	for (DiskstreamList::const_iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if ((*i)->destructive())  //ignore tape tracks when getting max extents
+			continue;
 		boost::shared_ptr<Playlist> pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;

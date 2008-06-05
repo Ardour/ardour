@@ -46,10 +46,10 @@ using namespace Gtkmm2ext;
 LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	: location(0), session(0),
 	  item_table (1, 7, false),
-	  start_set_button (_("Set")),
+	  start_set_button (_("Use PH")),
 	  start_go_button (_("Go")),
 	  start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true),
-	  end_set_button (_("Set")),
+	  end_set_button (_("Use PH")),
 	  end_go_button (_("Go")),
 	  end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true),
 	  length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, true),
@@ -82,7 +82,9 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	composer_label.set_name ("LocationEditNumberLabel");
 	composer_entry.set_name ("LocationEditNameEntry");
 
-
+	ARDOUR_UI::instance()->tooltips().set_tip(start_set_button, _("Set value to Playhead"));
+	ARDOUR_UI::instance()->tooltips().set_tip(end_set_button, _("Set value to Playhead"));
+ 
 	isrc_label.set_text ("ISRC: ");
 	isrc_label.set_size_request (30, -1);
 	performer_label.set_text ("Performer: ");
@@ -131,6 +133,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	start_set_button.signal_clicked().connect(bind (mem_fun (*this, &LocationEditRow::set_button_pressed), LocStart));
 	start_go_button.signal_clicked().connect(bind (mem_fun (*this, &LocationEditRow::go_button_pressed), LocStart));
  	start_clock.ValueChanged.connect (bind (mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
+ 	start_clock.ChangeAborted.connect (bind (mem_fun (*this, &LocationEditRow::change_aborted), LocStart));
 
 	
 	end_hbox.pack_start (end_go_button, false, false);
@@ -142,9 +145,11 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	end_set_button.signal_clicked().connect(bind (mem_fun (*this, &LocationEditRow::set_button_pressed), LocEnd));
 	end_go_button.signal_clicked().connect(bind (mem_fun (*this, &LocationEditRow::go_button_pressed), LocEnd));
 	end_clock.ValueChanged.connect (bind (mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
+ 	end_clock.ChangeAborted.connect (bind (mem_fun (*this, &LocationEditRow::change_aborted), LocEnd));
 	
 //	item_table.attach (length_clock, 3, 4, 0, 1, 0, 0, 4, 0);
 	length_clock.ValueChanged.connect (bind ( mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
+ 	length_clock.ChangeAborted.connect (bind (mem_fun (*this, &LocationEditRow::change_aborted), LocLength));
 
 //	item_table.attach (cd_check_button, 4, 5, 0, 1, 0, Gtk::FILL, 4, 0);
 //	item_table.attach (hide_check_button, 5, 6, 0, 1, 0, Gtk::FILL, 4, 0);
@@ -412,6 +417,14 @@ LocationEditRow::clock_changed (LocationPart part)
 		break;
 	}
 
+}
+
+void
+LocationEditRow::change_aborted (LocationPart part)
+{
+	if (i_am_the_modifier || !location) return;
+	
+	set_location(location);
 }
 
 void

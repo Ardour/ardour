@@ -828,13 +828,15 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 		break;
 
 	case GDK_Tab:
+	case GDK_Return:
+	case GDK_KP_Enter:
 		move_on = true;
 		break;
 
 	case GDK_Escape:
-	case GDK_Return:
-	case GDK_KP_Enter:
+		key_entry_state = 0;
 		clock_base.grab_focus ();
+		ChangeAborted();  /*  EMIT SIGNAL  */
 		return true;
 
 	default:
@@ -958,6 +960,13 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 			break;
 		}
 
+	}
+
+	//if user hit Enter, lose focus
+	switch (ev->keyval) {
+	case GDK_Return:
+	case GDK_KP_Enter:
+		clock_base.grab_focus ();
 	}
 
 	return true;

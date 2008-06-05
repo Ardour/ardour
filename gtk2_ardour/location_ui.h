@@ -115,6 +115,7 @@ class LocationEditRow  : public Gtk::HBox
 	void go_button_pressed (LocationPart part);
 
 	void clock_changed (LocationPart part);
+	void change_aborted (LocationPart part);
 
 	void cd_toggled ();
 	void hide_toggled ();

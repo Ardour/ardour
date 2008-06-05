@@ -100,6 +100,7 @@ Location::set_start (nframes_t s)
 			_end = s;
 
 			start_changed(this); /* EMIT SIGNAL */
+			end_changed(this); /* EMIT SIGNAL */
 
 			if ( is_start() ) {
 
@@ -137,7 +138,17 @@ Location::set_end (nframes_t e)
 		if (_start != e) {
 			_start = e;
 			_end = e;
+			start_changed(this); /* EMIT SIGNAL */
 			end_changed(this); /* EMIT SIGNAL */
+
+			if ( is_start() ) {
+				Session::StartTimeChanged (); /* EMIT SIGNAL */
+			}
+
+			if ( is_end() ) {
+				Session::EndTimeChanged (); /* EMIT SIGNAL */
+			}
+
 		}
 		return 0;
 	}
