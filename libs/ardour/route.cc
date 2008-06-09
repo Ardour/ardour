@@ -1186,6 +1186,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	/* A: PreFader */
 	
 	if (check_some_plugin_counts (insert_map[PreFader], n_inputs (), err_streams)) {
+		cerr << "Pre -- going to streamcount, err_streams = " << *err_streams << endl;//DEBUG
 		goto streamcount;
 	}
 
@@ -1193,9 +1194,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 
 	if (!insert_map[PreFader].empty()) {
 		InsertCount& ic (insert_map[PreFader].back());
-		if (ic.insert->can_do (n_inputs(), initial_streams) < 0) {
-			goto streamcount;
-		}
+		initial_streams = ic.insert->output_streams ();
 	} else {
 		initial_streams = n_inputs ();
 	}
@@ -1203,6 +1202,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	/* B: PostFader */
 
 	if (check_some_plugin_counts (insert_map[PostFader], initial_streams, err_streams)) {
+		cerr << "Post -- going to streamcount, err_streams = " << *err_streams << endl;//DEBUG
 		goto streamcount;
 	}
 
