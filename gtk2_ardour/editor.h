@@ -355,6 +355,7 @@ class Editor : public PublicEditor
 
 	bool new_regionviews_display_gain () { return _new_regionviews_show_envelope; }
 	void prepare_for_cleanup ();
+	void finish_cleanup ();
 
 	void maximise_editing_space();
 	void restore_editing_space();
@@ -375,11 +376,16 @@ class Editor : public PublicEditor
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
 
+	void queue_draw_resize_line (int at);
+	void start_resize_line_ops ();
+	void end_resize_line_ops ();
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);
 
 	void on_realize();
+	bool on_expose_event (GdkEventExpose*);
 
   private:
 	
@@ -558,6 +564,10 @@ class Editor : public PublicEditor
 	Gtk::HBox           global_hpacker;
 	Gtk::VBox           global_vpacker;
 	Gtk::VBox           vpacker;
+
+	bool need_resize_line;
+	int  resize_line_y;
+	int  old_resize_line_y;
 
 	Gdk::Cursor*          current_canvas_cursor;
 	void set_canvas_cursor ();
@@ -977,6 +987,7 @@ class Editor : public PublicEditor
 	void add_audio_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::AudioRegion> > & );
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
+	bool no_region_list_redisplay;
 	void insert_into_tmp_audio_regionlist(boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	list<boost::shared_ptr<ARDOUR::AudioRegion> > tmp_audio_region_list;

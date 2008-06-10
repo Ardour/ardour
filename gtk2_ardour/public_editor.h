@@ -157,6 +157,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void scroll_tracks_up_line () = 0;
 	virtual bool new_regionviews_display_gain () = 0;
 	virtual void prepare_for_cleanup () = 0;
+	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (nframes64_t frame) = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space() = 0;
@@ -212,6 +213,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
+
+	virtual void queue_draw_resize_line (int at) = 0;
+	virtual void start_resize_line_ops () = 0;
+	virtual void end_resize_line_ops () = 0;
 
 	static const int window_border_width;
 	static const int container_border_width;

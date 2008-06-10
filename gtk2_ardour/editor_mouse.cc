@@ -1651,6 +1651,12 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		track_canvas->get_pointer (x, y);
 	} 
 
+	if (event->motion.state & GDK_BUTTON1_MASK) {
+		queue_draw_resize_line (event->motion.y);
+	} else {
+		need_resize_line = false;
+	}
+
 	if (current_stepping_trackview) {
 		/* don't keep the persistent stepped trackview if the mouse moves */
 		current_stepping_trackview = 0;

@@ -340,6 +340,10 @@ Editor::Editor ()
 	rhythm_ferret = 0;
 	allow_vertical_scroll = false;
 	no_save_visual = false;
+	need_resize_line = false;
+	resize_line_y = 0;
+	old_resize_line_y = -1;
+	no_region_list_redisplay = false;
 
 	_scrubbing = false;
 	scrubbing_direction = 0;
@@ -3775,6 +3779,15 @@ Editor::prepare_for_cleanup ()
 
 	selection->clear_regions ();
 	selection->clear_playlists ();
+
+	no_region_list_redisplay = true;
+}
+
+void
+Editor::finish_cleanup ()
+{
+	no_region_list_redisplay = false;
+	redisplay_regions ();
 }
 
 Location*
@@ -4659,4 +4672,126 @@ Editor::first_idle ()
 	}
 
 	_have_idled = true;
+}
+
+void
+Editor::start_resize_line_ops ()
+{
+	old_resize_line_y = -1;
+	resize_line_y = -1;
+	need_resize_line = true;
+}
+
+void
+Editor::end_resize_line_ops ()
+{
+	need_resize_line = false;
+
+	if (old_resize_line_y >= 0) {
+		Gdk::Rectangle r (0, old_resize_line_y, (int) canvas_width, 3);
+		Glib::RefPtr<Gdk::Window> win = get_window();
+		cerr << "Final invalidation at " << old_resize_line_y << endl;
+		win->invalidate_rect (r, false);
+	}
+}
+
+void
+Editor::queue_draw_resize_line (int at)
+{
+	Glib::RefPtr<Gdk::Window> win = get_window();
+
+	resize_line_y = at;
+
+	if (win && canvas_width) {
+
+		int controls_width = controls_layout.get_width();
+
+		if (old_resize_line_y >= 0) {
+			
+			/* redraw where it used to be */
+			
+			int xroot, discard;
+
+			controls_layout.get_window()->get_origin (xroot, discard);
+			
+			Gdk::Rectangle r (xroot, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
+			win->invalidate_rect (r, true);
+			cerr << "invalidate " << xroot << ", " << old_resize_line_y - 1 << ' ' 
+			     << controls_width + canvas_width << " x 3\n";
+		}
+
+		/* draw where it is */
+
+		Gdk::Rectangle r (0, at - 1, controls_width + (int) canvas_width, 3);
+		win->invalidate_rect (r, true);
+	}
+}
+
+bool
+Editor::on_expose_event (GdkEventExpose* ev)
+{
+#if 0
+	cerr << "+++ editor expose "
+	     << ev->area.x << ',' << ev->area.y
+	     << ' '
+	     << ev->area.width << " x " << ev->area.height
+	     << endl;
+#endif	
+	bool ret = Window::on_expose_event (ev);
+
+#if 0
+	if (need_resize_line) {
+		
+		int xroot, yroot, discard;
+		int controls_width;
+		int scrollbar_offset;
+
+		/* Our root coordinates for drawing the line will be the left edge 
+		   of the track controls, and the upper left edge of our own window.
+		*/
+
+		get_window()->get_origin (discard, yroot);
+		controls_layout.get_window()->get_origin (xroot, discard);
+		controls_width = controls_layout.get_width();
+		
+		GdkRectangle lr;
+		GdkRectangle intersection;
+
+		lr.x = 0;
+		lr.y = resize_line_y;
+		lr.width = (int) canvas_width;
+		lr.height = 3;
+
+		if (gdk_rectangle_intersect (&lr, &ev->area, &intersection)) {
+			
+			Glib::RefPtr<Gtk::Style> style (get_style());
+			Glib::RefPtr<Gdk::GC> black_gc (style->get_black_gc ());
+			Glib::RefPtr<Gdk::GC> gc = wrap (black_gc->gobj_copy(), false);
+
+			/* draw on root window */
+
+			GdkWindow* win = gdk_get_default_root_window();
+			
+			gc->set_subwindow (Gdk::INCLUDE_INFERIORS);
+			gc->set_line_attributes (3, Gdk::LINE_SOLID, 
+						 Gdk::CAP_NOT_LAST,
+						 Gdk::JOIN_MITER);
+			
+			gdk_draw_line (win, gc->gobj(), 
+				       xroot,
+				       yroot + resize_line_y, 
+				       xroot + (int) canvas_width + controls_width,
+				       yroot + resize_line_y);
+			cerr << "drew line @ " << xroot << ", " << yroot + resize_line_y 
+			     << " to " << xroot + (int) canvas_width + controls_width
+			     << ", " << yroot + resize_line_y
+			     << endl;
+			old_resize_line_y = yroot + resize_line_y;
+			cerr << "NEXT EXPOSE SHOULD BE AT " << old_resize_line_y << endl;
+		} 
+	}
+
+	cerr << "--- editor expose\n";
+#endif
+	return ret;
 }

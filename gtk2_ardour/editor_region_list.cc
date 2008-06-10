@@ -253,6 +253,10 @@ Editor::insert_into_tmp_audio_regionlist(boost::shared_ptr<AudioRegion> region)
 void
 Editor::redisplay_regions ()
 {
+	if (no_region_list_redisplay) {
+		return;
+	}
+		
 	if (session) {
 
 		region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));

@@ -2247,10 +2247,13 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		fontconfig_dialog();
 
 		if (!backend_audio_is_running) {
-			if (new_session_dialog->engine_control.setup_engine ()) {
-				new_session_dialog->hide ();
+			int ret = new_session_dialog->engine_control.setup_engine ();
+			if (ret < 0) {
 				return false;
-			} 
+			} else if (ret > 0) {
+				response = Gtk::RESPONSE_REJECT;
+				goto try_again;
+			}
 		}
 		
 		if (create_engine ()) {
@@ -2354,7 +2357,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			}
 		}
 
-	} while (response == Gtk::RESPONSE_NONE);
+	} while (response == Gtk::RESPONSE_NONE || response == Gtk::RESPONSE_REJECT);
 
   done:
 	show();
@@ -2745,8 +2748,11 @@ After cleanup, unused audio files will be moved to a \
 	}
 
 	if (session->cleanup_sources (rep)) {
+		editor->finish_cleanup ();
 		return;
 	}
+	
+	editor->finish_cleanup ();
 
 	checker.hide();
 	display_cleanup_results (rep, 
@@ -2759,8 +2765,6 @@ Flushing the wastebasket will \n\
 release an additional\n\
 %4 %5bytes of disk space.\n"
 					 ));
-
-
 
 }
 

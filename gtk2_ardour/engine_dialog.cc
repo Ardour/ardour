@@ -452,11 +452,19 @@ EngineControl::build_command_line (vector<string>& cmd)
 			
 		} else if (str == _("Playback/Recording on 2 Devices")) {
 			
+			string input_device = get_device_name (driver, input_device_combo.get_active_text());
+			string output_device = get_device_name (driver, output_device_combo.get_active_text());
+
+			if (input_device.empty() || output_device.empty()) {
+				cmd.clear ();
+				return;
+			}
+
 			cmd.push_back ("-C");
-			cmd.push_back (get_device_name (driver, input_device_combo.get_active_text()));
+			cmd.push_back (input_device);
 			cmd.push_back ("-P");
-			cmd.push_back (get_device_name (driver, output_device_combo.get_active_text()));
-			
+			cmd.push_back (output_device);
+
 		} else if (str == _("Playback only")) {
 			cmd.push_back ("-P");
 		} else if (str == _("Recording only")) {
@@ -478,8 +486,15 @@ EngineControl::build_command_line (vector<string>& cmd)
 	if (using_alsa) {
 		
 		if (audio_mode_combo.get_active_text() != _("Playback/Recording on 2 Devices")) {
+
+			string device = get_device_name (driver, interface_combo.get_active_text());
+			if (device.empty()) {
+				cmd.clear ();
+				return;
+			}
+
 			cmd.push_back ("-d");
-			cmd.push_back (get_device_name (driver, interface_combo.get_active_text()));
+			cmd.push_back (device);
 		} 
 
 		if (hw_meter_button.get_active()) {
@@ -513,8 +528,15 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 #ifdef __APPLE__
 		// note: older versions of the CoreAudio JACK backend use -n instead of -d here
+		
+		string device = get_device_name (driver, interface_combo.get_active_text());
+		if (device.empty()) {
+			cmd.clear ();
+			return;
+		}
+
 		cmd.push_back ("-d");
-		cmd.push_back (get_device_name (driver, interface_combo.get_active_text()));
+		cmd.push_back (device);
 #endif
 
 	} else if (using_oss) {
@@ -544,6 +566,10 @@ EngineControl::setup_engine ()
 	std::string cwd = "/tmp";
 
 	build_command_line (args);
+	
+	if (args.empty()) {
+		return 1; // try again
+	}
 
 	Glib::ustring jackdrc_path = Glib::get_home_dir();
 	jackdrc_path += "/.jackdrc";
@@ -983,6 +1009,15 @@ EngineControl::get_device_name (const string& driver, const string& human_readab
 	vector<string>::iterator n;
 	vector<string>::iterator i;
 
+	if (human_readable.empty()) {
+		/* this can happen if the user's .ardourrc file has a device name from
+		   another computer system in it
+		*/
+		MessageDialog msg (_("You need to choose an audio device first."));
+		msg.run ();
+		return string();
+	}
+
 	if (backend_devs.empty()) {
 		return human_readable;
 	}
@@ -994,11 +1029,8 @@ EngineControl::get_device_name (const string& driver, const string& human_readab
 	}
 	
 	if (i == devices[driver].end()) {
-		fatal << string_compose (_("programming error: %1"), "true hardware name for ID missing") << endmsg;
-		/*NOTREACHED*/
+		warning << string_compose (_("Audio device \"%1\" not known on this computer."), human_readable) << endmsg;
 	}
-
-	/* keep gcc happy */
 
 	return string();
 }
