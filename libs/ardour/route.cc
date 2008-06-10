@@ -1133,7 +1133,8 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	uint32_t send_cnt = 0;
 	map<Placement,list<InsertCount> > insert_map;
 	RedirectList::iterator prev;
-	int32_t initial_streams, previous_initial_streams = -1;
+	int32_t initial_streams = n_inputs ();;
+	int32_t previous_initial_streams = n_inputs ();
 	int ret = -1;
 
 	redirect_max_outs = 0;
@@ -1207,6 +1208,15 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	if (check_some_plugin_counts (insert_map[PostFader], initial_streams, err_streams)) {
 		cerr << "Post -- going to streamcount, err_streams = " << *err_streams << endl;//DEBUG
 		goto streamcount;
+	}
+
+	if (!insert_map[PostFader].empty()) {
+		for (list<InsertCount>::iterator i = insert_map[PostFader].begin(); i != insert_map[PostFader].end(); i++) {
+			if (i->insert->can_do (previous_initial_streams, initial_streams) < 0) {
+				goto streamcount;
+			}
+			previous_initial_streams = initial_streams;
+		}
 	}
 
 	/* OK, everything can be set up correctly, so lets do it */
