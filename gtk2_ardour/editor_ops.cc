@@ -140,7 +140,8 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 	} else {
 		snap_to (where);
 	}
-		
+
+	cerr << "Split " << regions.size() << " at " << where << endl;
 
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 

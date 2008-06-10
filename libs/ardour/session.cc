@@ -2574,9 +2574,12 @@ Session::region_name (string& result, string base, bool newlevel) const
 
 		bool name_taken = true;
 		
+
 		{
 			Glib::Mutex::Lock lm (region_lock);
 			
+			cerr << "Session::region_name() searching over " << audio_regions.size() << " existing regions\n";
+
 			for (int n = 1; n < 5000; ++n) {
 				
 				result = subbase;
