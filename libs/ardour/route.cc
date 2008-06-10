@@ -1133,7 +1133,7 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	uint32_t send_cnt = 0;
 	map<Placement,list<InsertCount> > insert_map;
 	RedirectList::iterator prev;
-	int32_t initial_streams;
+	int32_t initial_streams, previous_initial_streams = -1;
 	int ret = -1;
 
 	redirect_max_outs = 0;
@@ -1193,10 +1193,13 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	/* figure out the streams that will feed into PreFader */
 
 	if (!insert_map[PreFader].empty()) {
-		InsertCount& ic (insert_map[PreFader].back());
-		initial_streams = ic.insert->output_streams ();
-	} else {
-		initial_streams = n_inputs ();
+		previous_initial_streams = n_inputs ();
+		for (list<InsertCount>::iterator i = insert_map[PreFader].begin(); i != insert_map[PreFader].end(); i++) {
+			if (i->insert->can_do (previous_initial_streams, initial_streams) < 0) {
+				goto streamcount;
+			}
+			previous_initial_streams = initial_streams;
+		}
 	}
 
 	/* B: PostFader */
