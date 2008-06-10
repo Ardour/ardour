@@ -2597,7 +2597,7 @@ Session::region_name (string& result, string base, bool newlevel) const
 					}
 				}
 
-				cerr << "\tname search ended after checking " << nxx << " regions, taken ? " << name_taken << endl;
+				cerr << "\tusing " << n << " for " << result << " name search ended after checking " << nxx << " regions, taken ? " << name_taken << endl;
 				
 				if (!name_taken) {
 					break;
