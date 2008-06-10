@@ -2581,6 +2581,8 @@ Session::region_name (string& result, string base, bool newlevel) const
 			cerr << "Session::region_name() searching over " << audio_regions.size() << " existing regions\n";
 
 			for (int n = 1; n < 5000; ++n) {
+
+				int nxx = 0;
 				
 				result = subbase;
 				snprintf (buf, sizeof (buf), ".%d", n);
@@ -2588,12 +2590,14 @@ Session::region_name (string& result, string base, bool newlevel) const
 				
 				name_taken = false;
 				
-				for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i) {
+				for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i, ++nxx) {
 					if (i->second->name() == result) {
 						name_taken = true;
 						break;
 					}
 				}
+
+				cerr << "\tname search ended after checking " << nxx << " regions\n";
 				
 				if (!name_taken) {
 					break;
