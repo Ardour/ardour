@@ -4705,24 +4705,24 @@ Editor::queue_draw_resize_line (int at)
 	if (win && canvas_width) {
 
 		int controls_width = controls_layout.get_width();
+		int xroot, discard;
+		
+		controls_layout.get_window()->get_origin (xroot, discard);
 
 		if (old_resize_line_y >= 0) {
 			
 			/* redraw where it used to be */
 			
-			int xroot, discard;
-
-			controls_layout.get_window()->get_origin (xroot, discard);
 			
 			Gdk::Rectangle r (xroot, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
 			win->invalidate_rect (r, true);
-			cerr << "invalidate " << xroot << ", " << old_resize_line_y - 1 << ' ' 
+			cerr << "invalidate " << xroot << "," << old_resize_line_y - 1 << ' ' 
 			     << controls_width + canvas_width << " x 3\n";
 		}
 
 		/* draw where it is */
 
-		Gdk::Rectangle r (0, at - 1, controls_width + (int) canvas_width, 3);
+		Gdk::Rectangle r (xroot, at - 1, controls_width + (int) canvas_width, 3);
 		win->invalidate_rect (r, true);
 	}
 }
@@ -4730,16 +4730,15 @@ Editor::queue_draw_resize_line (int at)
 bool
 Editor::on_expose_event (GdkEventExpose* ev)
 {
-#if 0
 	cerr << "+++ editor expose "
 	     << ev->area.x << ',' << ev->area.y
 	     << ' '
 	     << ev->area.width << " x " << ev->area.height
+	     << " need reize ? " << need_resize_line
 	     << endl;
-#endif	
+
 	bool ret = Window::on_expose_event (ev);
 
-#if 0
 	if (need_resize_line) {
 		
 		int xroot, yroot, discard;
@@ -4757,9 +4756,9 @@ Editor::on_expose_event (GdkEventExpose* ev)
 		GdkRectangle lr;
 		GdkRectangle intersection;
 
-		lr.x = 0;
+		lr.x = xroot;
 		lr.y = resize_line_y;
-		lr.width = (int) canvas_width;
+		lr.width = controls_width + (int) canvas_width;
 		lr.height = 3;
 
 		if (gdk_rectangle_intersect (&lr, &ev->area, &intersection)) {
@@ -4788,10 +4787,15 @@ Editor::on_expose_event (GdkEventExpose* ev)
 			     << endl;
 			old_resize_line_y = yroot + resize_line_y;
 			cerr << "NEXT EXPOSE SHOULD BE AT " << old_resize_line_y << endl;
-		} 
+		} else {
+			cerr << "no intersect with "
+			     << lr.x << ',' << lr.y
+			     << ' '
+			     << lr.width << " x " << lr.height
+			     << endl;
+		}
 	}
 
 	cerr << "--- editor expose\n";
-#endif
 	return ret;
 }
