@@ -3234,6 +3234,7 @@ Editor::align_selection_relative (RegionPoint point, nframes64_t position, const
 
 	list<RegionView*> sorted;
 	rs.by_position (sorted);
+
 	boost::shared_ptr<Region> r ((*sorted.begin())->region());
 
 	switch (point) {

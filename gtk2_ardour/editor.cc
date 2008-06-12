@@ -4496,7 +4496,7 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelec
 					RegionView* rv = atv->audio_view()->find_view (*i);
 
 					if (rv) {
-						rs.push_back (rv);
+						rs.add (rv);
 					}
 				}
 
