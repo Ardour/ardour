@@ -597,6 +597,8 @@ Editor::build_marker_menu (bool start_or_end)
 
 	items.push_back (SeparatorElem());
 
+	items.push_back (MenuElem (_("Create range to next marker"), mem_fun(*this, &Editor::marker_menu_range_to_next)));
+
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
 	if (start_or_end) return;
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
@@ -633,6 +635,10 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	if (!Profile->get_sae()) {
 		items.push_back (MenuElem (_("Set Range from Range Selection"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 	}
+
+	items.push_back (SeparatorElem());
+
+	items.push_back (MenuElem (_("Export Range"), mem_fun(*this, &Editor::marker_menu_export_range)));
 
 	items.push_back (SeparatorElem());
 
@@ -808,6 +814,57 @@ Editor::marker_menu_set_playhead ()
 				session->request_locate (l->end(), false);
 			}
 		}
+	}
+}
+
+void
+Editor::marker_menu_export_range ()
+{
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if ((l = find_location_from_marker (marker, is_start)) != 0) {
+		if (l->is_range_marker()) {
+			export_range (l->start(), l->end());
+		}
+	}
+}
+
+void
+Editor::marker_menu_range_to_next ()
+{
+	Marker* marker;
+	if (!session) {
+		return;
+	}
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if ((l = find_location_from_marker (marker, is_start)) == 0) {
+		return;
+	}
+		
+	nframes_t end = session->locations()->first_mark_after (marker->position());
+
+	if (end != max_frames) {
+		string range_name = l->name();
+		range_name += "-range";
+
+		Location* newrange = new Location (marker->position(), end, range_name, Location::IsRangeMarker);
+		session->locations()->add (newrange);
 	}
 }
 

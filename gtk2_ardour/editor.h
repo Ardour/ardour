@@ -1454,6 +1454,8 @@ public:
 	void marker_menu_set_playhead ();
 	void marker_menu_set_from_playhead ();
 	void marker_menu_set_from_selection ();
+	void marker_menu_range_to_next ();
+	void marker_menu_export_range ();
 	void new_transport_marker_menu_set_loop ();
 	void new_transport_marker_menu_set_punch ();
 	void update_loop_range_view (bool visibility=false);
