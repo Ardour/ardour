@@ -408,3 +408,24 @@ ARDOUR_UI::handle_locations_change (Location* ignored)
 		}
 	}
 }
+
+bool
+ARDOUR_UI::main_window_state_event_handler (GdkEventWindowState* ev, bool window_was_editor)
+{
+	if (window_was_editor) {
+
+		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) && 
+		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
+			float_big_clock (editor);
+		}
+
+	} else {
+
+		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) && 
+		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
+			float_big_clock (mixer);
+		}
+	}
+
+	return false;
+}

@@ -4006,8 +4006,8 @@ Editor::maximise_editing_space ()
 		post_maximal_pane_position = edit_pane.get_width();
 	}
 
-
 	fullscreen();
+
 	if(post_maximal_editor_width) {
 		edit_pane.set_position (post_maximal_pane_position - 
 			abs(post_maximal_editor_width - pre_maximal_editor_width));

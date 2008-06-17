@@ -339,6 +339,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	AudioClock   big_clock;
 	Gtk::Window* big_clock_window;
 
+	void float_big_clock (Gtk::Window* parent);
+	bool main_window_state_event_handler (GdkEventWindowState*, bool window_was_editor);
+
 	void update_transport_clocks (nframes_t pos);
 	void record_state_changed ();
 

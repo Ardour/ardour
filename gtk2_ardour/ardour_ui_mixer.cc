@@ -41,6 +41,8 @@ ARDOUR_UI::create_mixer ()
 		return -1;
 	}
 
+	mixer->signal_window_state_event().connect (bind (mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
+
 	return 0;
 }
 

@@ -30,6 +30,7 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtk/gtk.h>
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -73,6 +74,7 @@ ARDOUR_UI::create_editor ()
 	}
 
 	editor->Realized.connect (mem_fun (*this, &ARDOUR_UI::editor_realized));
+	editor->signal_window_state_event().connect (sigc::bind (mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
 
 	return 0;
 }
@@ -856,3 +858,16 @@ ARDOUR_UI::setup_clock ()
 
 	manage_window (*big_clock_window);
 }
+
+void
+ARDOUR_UI::float_big_clock (Gtk::Window* parent)
+{
+	if (big_clock_window) {
+		if (parent) {
+			big_clock_window->set_transient_for (*parent);
+		} else {
+			gtk_window_set_transient_for (big_clock_window->gobj(), (GtkWindow*) 0);
+		}
+	}
+}
+
