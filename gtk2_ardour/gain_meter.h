@@ -116,11 +116,6 @@ class GainMeterBase
 
 	Width _width;
 
-	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
-	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget&);
-
-	gint meter_metrics_expose (GdkEventExpose *);
-
 	void show_gain ();
 	void gain_activated ();
 	bool gain_focused (GdkEventFocus*);
@@ -182,6 +177,10 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
   protected:
 	void hide_all_meters ();
 
+	gint meter_metrics_expose (GdkEventExpose *);
+
+	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
+	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget&);
 
   private:
 	Gtk::HBox  gain_display_box;

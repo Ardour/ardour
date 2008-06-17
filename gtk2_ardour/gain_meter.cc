@@ -55,8 +55,8 @@ using namespace std;
 
 sigc::signal<void> GainMeterBase::ResetAllPeakDisplays;
 sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;
-map<string,Glib::RefPtr<Gdk::Pixmap> > GainMeterBase::metric_pixmaps;
 
+map<string,Glib::RefPtr<Gdk::Pixmap> > GainMeter::metric_pixmaps;
 Glib::RefPtr<Gdk::Pixbuf> GainMeter::slider;
 
 
@@ -725,84 +725,6 @@ GainMeterBase::set_width (Width w, int len)
 	level_meter->setup_meters (len);
 }
 
-Glib::RefPtr<Gdk::Pixmap>
-GainMeterBase::render_metrics (Gtk::Widget& w)
-{
-	//cerr << "name: " << w.get_name();//DEBUG
-	//cerr << " bg_red = " << w.get_style()->get_bg(Gtk::STATE_NORMAL).get_red();//DEBUG
-	//cerr << " fg_red = " << w.get_style()->get_fg(Gtk::STATE_NORMAL).get_red();//DEBUG
-	Glib::RefPtr<Gdk::Window> win (w.get_window());
-	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
-	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
-	gint width, height;
-	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
-	char buf[32];
-
-	win->get_size (width, height);
-	
-	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (win, width, height);
-
-	metric_pixmaps[w.get_name()] = pixmap;
-
-	pixmap->draw_rectangle (bg_gc, true, 0, 0, width, height);
-
-	Glib::RefPtr<Pango::Layout> layout = w.create_pango_layout("");
-
-	for (uint32_t i = 0; i < sizeof (db_points)/sizeof (db_points[0]); ++i) {
-
-		float fraction = log_meter (db_points[i]);
-		gint pos = height - (gint) floor (height * fraction);
-
-		snprintf (buf, sizeof (buf), "%d", abs (db_points[i]));
-
-		layout->set_text (buf);
-
-		/* we want logical extents, not ink extents here */
-
-		int width, height;
-		layout->get_pixel_size (width, height);
-
-		pixmap->draw_line (fg_gc, 0, pos, 4, pos);
-		pixmap->draw_layout (fg_gc, 6, pos - (height/2), layout);
-	}
-
-	return pixmap;
-}
-
-gint
-GainMeterBase::meter_metrics_expose (GdkEventExpose *ev)
-{
-	static Glib::RefPtr<Gtk::Style> meter_style;
-	if (style_changed) {
-		meter_style = meter_metric_area.get_style();
-	}
-	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_bg_gc (Gtk::STATE_INSENSITIVE));
-	GdkRectangle base_rect;
-	GdkRectangle draw_rect;
-	gint width, height;
-
-	win->get_size (width, height);
-	
-	base_rect.width = width;
-	base_rect.height = height;
-	base_rect.x = 0;
-	base_rect.y = 0;
-
-	Glib::RefPtr<Gdk::Pixmap> pixmap;
-	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
-
-	if (i == metric_pixmaps.end() || style_changed || dpi_changed) {
-		pixmap = render_metrics (meter_metric_area);
-	} else {
-		pixmap = i->second;
-	}
-
-	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
-	win->draw_drawable (bg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
-	style_changed = false;
-	return true;
-}
 
 void
 GainMeterBase::on_theme_changed()
@@ -875,5 +797,81 @@ GainMeter::get_gm_width ()
 	Gtk::Requisition sz;
 	hbox.size_request (sz);
 	return sz.width;
+}
+
+Glib::RefPtr<Gdk::Pixmap>
+GainMeter::render_metrics (Gtk::Widget& w)
+{
+	Glib::RefPtr<Gdk::Window> win (w.get_window());
+	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
+	gint width, height;
+	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
+	char buf[32];
+
+	win->get_size (width, height);
+	
+	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (win, width, height);
+
+	metric_pixmaps[w.get_name()] = pixmap;
+
+	pixmap->draw_rectangle (bg_gc, true, 0, 0, width, height);
+
+	Glib::RefPtr<Pango::Layout> layout = w.create_pango_layout("");
+
+	for (uint32_t i = 0; i < sizeof (db_points)/sizeof (db_points[0]); ++i) {
+
+		float fraction = log_meter (db_points[i]);
+		gint pos = height - (gint) floor (height * fraction);
+
+		snprintf (buf, sizeof (buf), "%d", abs (db_points[i]));
+
+		layout->set_text (buf);
+
+		/* we want logical extents, not ink extents here */
+
+		int width, height;
+		layout->get_pixel_size (width, height);
+
+		pixmap->draw_line (fg_gc, 0, pos, 4, pos);
+		pixmap->draw_layout (fg_gc, 6, pos - (height/2), layout);
+	}
+
+	return pixmap;
+}
+
+gint
+GainMeter::meter_metrics_expose (GdkEventExpose *ev)
+{
+	static Glib::RefPtr<Gtk::Style> meter_style;
+	if (style_changed) {
+		meter_style = meter_metric_area.get_style();
+	}
+	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
+	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_bg_gc (Gtk::STATE_INSENSITIVE));
+	GdkRectangle base_rect;
+	GdkRectangle draw_rect;
+	gint width, height;
+
+	win->get_size (width, height);
+	
+	base_rect.width = width;
+	base_rect.height = height;
+	base_rect.x = 0;
+	base_rect.y = 0;
+
+	Glib::RefPtr<Gdk::Pixmap> pixmap;
+	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
+
+	if (i == metric_pixmaps.end() || style_changed || dpi_changed) {
+		pixmap = render_metrics (meter_metric_area);
+	} else {
+		pixmap = i->second;
+	}
+
+	gdk_rectangle_intersect (&ev->area, &base_rect, &draw_rect);
+	win->draw_drawable (bg_gc, pixmap, draw_rect.x, draw_rect.y, draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height);
+	style_changed = false;
+	return true;
 }
 
