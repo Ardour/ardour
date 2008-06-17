@@ -40,7 +40,7 @@
 #include "enums.h"
 #include "time_axis_view.h"
 #include "canvas.h"
-#include "level_meter.h"
+#include "gain_meter.h"
 
 
 namespace ARDOUR {
@@ -110,7 +110,9 @@ public:
 	void clear_meter ();
 	void io_changed (ARDOUR::IOChange, void *);
 	void meter_changed (void *);
-	void effective_gain_display ();
+	void effective_gain_display () { gm.effective_gain_display(); }
+
+	static void setup_slider_pix ();
 
 protected:
 	friend class StreamView;
@@ -257,18 +259,9 @@ protected:
 
 	void post_construct ();
 	
-	LevelMeter	lm;
+	GainMeterBase gm;
 
-	Gtkmm2ext::HSliderController *gain_slider;
-	Gtk::Adjustment              gain_adjustment;
-	bool                         ignore_gain_adjustment;
 	static Glib::RefPtr<Gdk::Pixbuf> slider;
-	static int setup_slider_pix ();
-	void gain_adjusted();
-
-	gint start_gain_touch (GdkEventButton*);
-	gint end_gain_touch (GdkEventButton*);
-	void gain_changed (void *);
 };
 
 #endif /* __ardour_route_time_axis_h__ */

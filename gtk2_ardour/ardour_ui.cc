@@ -82,6 +82,8 @@ typedef uint64_t microseconds_t;
 #include "gui_thread.h"
 #include "theme_manager.h"
 #include "engine_dialog.h"
+#include "gain_meter.h"
+#include "route_time_axis.h"
 
 #include "i18n.h"
 
@@ -236,6 +238,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		setup_gtk_ardour_enums ();
 		Config->set_current_owner (ConfigVariableBase::Interface);
 		setup_profile ();
+
+		GainMeter::setup_slider_pix ();
+		RouteTimeAxisView::setup_slider_pix ();
 
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;

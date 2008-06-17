@@ -4743,7 +4743,6 @@ Editor::on_expose_event (GdkEventExpose* ev)
 		
 		int xroot, yroot, discard;
 		int controls_width;
-		int scrollbar_offset;
 
 		/* Our root coordinates for drawing the line will be the left edge 
 		   of the track controls, and the upper left edge of our own window.
