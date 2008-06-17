@@ -156,17 +156,20 @@ Redirect::get_automation_state ()
 		return *node;
 	}
 
-	map<uint32_t,AutomationList*>::iterator li;
+	vector<AutomationList*>::iterator li;
+	uint32_t n;
+
+	for (n = 0, li = parameter_automation.begin(); li != parameter_automation.end(); ++li, ++n) {
 	
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
-	
-		XMLNode* child;
-		
-		char buf[64];
-		stringstream str;
-		snprintf (buf, sizeof (buf), "parameter-%" PRIu32, li->first);
-		child = new XMLNode (buf);
-		child->add_child_nocopy (li->second->get_state ());
+		if (*li) {
+			XMLNode* child;
+			
+			char buf[64];
+			stringstream str;
+			snprintf (buf, sizeof (buf), "parameter-%" PRIu32, n);
+			child = new XMLNode (buf);
+			child->add_child_nocopy ((*li)->get_state ());
+		}
 	}
 
 	return *node;
@@ -384,10 +387,13 @@ void
 Redirect::what_has_automation (set<uint32_t>& s) const
 {
 	Glib::Mutex::Lock lm (_automation_lock);
-	map<uint32_t,AutomationList*>::const_iterator li;
-	
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
-		s.insert  ((*li).first);
+	vector<AutomationList*>::const_iterator li;
+	uint32_t n;
+
+	for (n = 0, li = parameter_automation.begin(); li != parameter_automation.end(); ++li, ++n) {
+		if (*li) {
+			s.insert  (n);
+		}
 	}
 }
 
@@ -401,11 +407,12 @@ Redirect::what_has_visible_automation (set<uint32_t>& s) const
 		s.insert  (*li);
 	}
 }
+
 AutomationList&
 Redirect::automation_list (uint32_t parameter)
 {
 	AutomationList* al = parameter_automation[parameter];
-
+	
 	if (al == 0) {
 		al = parameter_automation[parameter] = new AutomationList (default_parameter_value (parameter));
 		/* let derived classes do whatever they need with this */
@@ -445,24 +452,29 @@ Redirect::mark_automation_visible (uint32_t what, bool yn)
 bool
 Redirect::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_event) const
 {
-	map<uint32_t,AutomationList*>::const_iterator li;	
+	vector<AutomationList*>::const_iterator li;	
 	AutomationList::TimeComparator cmp;
 
 	next_event.when = max_frames;
 	
   	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
+
+ 		const AutomationList* alist = *li;
+		
+		if (!alist) {
+			continue;
+		}
 		
 		AutomationList::const_iterator i;
- 		const AutomationList& alist (*((*li).second));
 		ControlEvent cp (now, 0.0f);
 		
- 		for (i = lower_bound (alist.const_begin(), alist.const_end(), &cp, cmp); i != alist.const_end() && (*i)->when < end; ++i) {
+ 		for (i = lower_bound (alist->const_begin(), alist->const_end(), &cp, cmp); i != alist->const_end() && (*i)->when < end; ++i) {
  			if ((*i)->when > now) {
  				break; 
  			}
  		}
  		
- 		if (i != alist.const_end() && (*i)->when < end) {
+ 		if (i != alist->const_end() && (*i)->when < end) {
 			
  			if ((*i)->when < next_event.when) {
  				next_event.when = (*i)->when;

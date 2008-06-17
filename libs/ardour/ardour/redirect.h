@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <map>
 #include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
 
@@ -35,7 +34,6 @@
 #include <ardour/io.h>
 #include <ardour/automation_event.h>
 
-using std::map;
 using std::set;
 using std::string;
 using std::vector;
@@ -112,7 +110,7 @@ class Redirect : public IO
   protected:
 	/* children may use this stuff as they see fit */
 
-	map<uint32_t,AutomationList*> parameter_automation;
+	std::vector<AutomationList*> parameter_automation;
 	set<uint32_t> visible_parameter_automation;
 
 	mutable Glib::Mutex _automation_lock;

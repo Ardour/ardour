@@ -90,8 +90,6 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	set_automatable ();
-
 	_plugins[0]->ParameterChanged.connect (mem_fun (*this, &PluginInsert::parameter_changed));
 }
 
@@ -149,8 +147,6 @@ void
 PluginInsert::init ()
 {
 	set_automatable ();
-
-	set<uint32_t>::iterator s;
 }
 
 PluginInsert::~PluginInsert ()
@@ -223,6 +219,10 @@ PluginInsert::is_generator() const
 void
 PluginInsert::set_automatable ()
 {
+	/* fill the parameter automation list with null AutomationLists */
+
+	parameter_automation.assign (_plugins.front()->parameter_count(), (AutomationList*) 0);
+
 	set<uint32_t> a;
 	
 	a = _plugins.front()->automatable ();
@@ -283,21 +283,21 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 
 	if (with_auto) {
 
-		map<uint32_t,AutomationList*>::iterator li;
+		vector<AutomationList*>::iterator li;
 		uint32_t n;
 		
 		for (n = 0, li = parameter_automation.begin(); li != parameter_automation.end(); ++li, ++n) {
 			
-			AutomationList& alist (*((*li).second));
+			AutomationList* alist = *li;
 
-			if (alist.automation_playback()) {
+			if (alist && alist->automation_playback()) {
 				bool valid;
 
-				float val = alist.rt_safe_eval (now, valid);				
+				float val = alist->rt_safe_eval (now, valid);				
 
 				if (valid) {
 					/* set the first plugin, the others will be set via signals */
-					_plugins[0]->set_parameter ((*li).first, val);
+					_plugins[0]->set_parameter (n, val);
 				}
 
 			} 
@@ -314,14 +314,16 @@ PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t 
 void
 PluginInsert::automation_snapshot (nframes_t now, bool force)
 {
-	map<uint32_t,AutomationList*>::iterator li;
-	
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
+	vector<AutomationList*>::iterator li;
+	uint32_t n;
+
+	for (n = 0, li = parameter_automation.begin(); li != parameter_automation.end(); ++li, ++n) {
 		
-		AutomationList *alist = ((*li).second);
-		if (alist != 0 && alist->automation_write ()) {
+		AutomationList *alist = *li;
+
+		if (alist && alist->automation_write ()) {
 			
-			float val = _plugins[0]->get_parameter ((*li).first);
+			float val = _plugins[0]->get_parameter (n);
 			alist->rt_add (now, val);
 			last_automation_snapshot = now;
 		}
@@ -331,14 +333,18 @@ PluginInsert::automation_snapshot (nframes_t now, bool force)
 void
 PluginInsert::transport_stopped (nframes_t now)
 {
-	map<uint32_t,AutomationList*>::iterator li;
+	vector<AutomationList*>::iterator li;
+	uint32_t n;
 
-	for (li = parameter_automation.begin(); li != parameter_automation.end(); ++li) {
-		AutomationList& alist (*(li->second));
-		alist.reposition_for_rt_add (now);
+	for (n = 0, li = parameter_automation.begin(); li != parameter_automation.end(); ++li, ++n) {
 
-		if (alist.automation_state() != Off) {
-			_plugins[0]->set_parameter (li->first, alist.eval (now));
+		AutomationList* alist = *li;
+
+		if (alist) {
+			alist->reposition_for_rt_add (now);
+			if (alist->automation_state() != Off) {
+				_plugins[0]->set_parameter (n, alist->eval (now));
+			}
 		}
 	}
 }
@@ -692,7 +698,7 @@ PluginInsert::set_state(const XMLNode& node)
 			_plugins.push_back (plugin_factory (plugin));
 		}
 	}
-	
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == plugin->state_node_name()) {
 			for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
@@ -743,6 +749,8 @@ PluginInsert::set_state(const XMLNode& node)
 		break;
 	}
 		
+	set_automatable ();
+	
 	/* look for port automation node */
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
