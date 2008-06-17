@@ -275,6 +275,7 @@ RouteTimeAxisView::post_construct ()
 	/* map current state of the route */
 
 	update_diskstream_display ();
+	subplugin_menu.items().clear ();
 	_route->foreach_redirect (this, &RouteTimeAxisView::add_redirect_to_subplugin_menu);
 	_route->foreach_redirect (this, &RouteTimeAxisView::add_existing_redirect_automation_curves);
 	reset_redirect_automation_curves ();
@@ -1643,7 +1644,7 @@ RouteTimeAxisView::add_redirect_to_subplugin_menu (boost::shared_ptr<Redirect> r
 	using namespace Menu_Helpers;
 	RedirectAutomationInfo *rai;
 	list<RedirectAutomationInfo*>::iterator x;
-	
+
 	const std::set<uint32_t>& automatable = r->what_can_be_automated ();
 	std::set<uint32_t> has_visible_automation;
 
