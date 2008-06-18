@@ -1228,6 +1228,8 @@ MixerStrip::meter_changed (void *src)
 		}
 
 		gpm.setup_meters ();
+		// reset peak when meter point changes
+		gpm.reset_peak_display();
 		set_width(_width, this);
 }
 
