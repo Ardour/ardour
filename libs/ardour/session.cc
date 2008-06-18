@@ -2540,7 +2540,7 @@ Session::new_region_name (string old)
 }
 
 int
-Session::region_name (string& result, string base, bool newlevel) const
+Session::region_name (string& result, string base, bool newlevel)
 {
 	char buf[16];
 	string subbase;
@@ -2550,15 +2550,11 @@ Session::region_name (string& result, string base, bool newlevel) const
 		Glib::Mutex::Lock lm (region_lock);
 
 		snprintf (buf, sizeof (buf), "%d", (int)audio_regions.size() + 1);
-
-		
 		result = "region.";
 		result += buf;
 
 	} else {
 
-		/* XXX this is going to be slow. optimize me later */
-		
 		if (newlevel) {
 			subbase = base;
 		} else {
@@ -2571,45 +2567,25 @@ Session::region_name (string& result, string base, bool newlevel) const
 			subbase = base.substr (0, pos);
 
 		}
-
-		bool name_taken = true;
 		
-
 		{
 			Glib::Mutex::Lock lm (region_lock);
-			
-			cerr << "Session::region_name() searching over " << audio_regions.size() << " existing regions\n";
 
-			for (int n = 1; n < 5000; ++n) {
+			map<string,uint32_t>::iterator x;
 
-				int nxx = 0;
-				
-				result = subbase;
-				snprintf (buf, sizeof (buf), ".%d", n);
+			result = subbase;
+
+			if ((x = region_name_map.find (subbase)) == region_name_map.end()) {
+				result += ".1";
+				region_name_map[subbase] = 1;
+			} else {
+				x->second++;
+				snprintf (buf, sizeof (buf), ".%d", x->second);
 				result += buf;
-				
-				name_taken = false;
-				
-				for (AudioRegionList::const_iterator i = audio_regions.begin(); i != audio_regions.end(); ++i, ++nxx) {
-					if (i->second->name() == result) {
-						name_taken = true;
-						break;
-					}
-				}
-
-				cerr << "\tusing " << n << " for " << result << " name search ended after checking " << nxx << " regions, taken ? " << name_taken << endl;
-				
-				if (!name_taken) {
-					break;
-				}
 			}
 		}
-			
-		if (name_taken) {
-			fatal << string_compose(_("too many regions with names like %1"), base) << endmsg;
-			/*NOTREACHED*/
-		}
 	}
+
 	return 0;
 }	
 
@@ -2661,7 +2637,6 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 					
 					pair<AudioRegionList::iterator,bool> x = audio_regions.insert (entry);
 					
-					
 					if (!x.second) {
 						return;
 					}
@@ -2684,7 +2659,7 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 	   add the region to the region list.
 	*/
 	
-	set_dirty();
+	set_dirty ();
 	
 	if (added) {
 
@@ -2710,11 +2685,32 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 
 			region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
 			region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+
+			update_region_name_map (region);
 		}
-		
+
 		if (!v.empty()) {
 			AudioRegionsAdded (v); /* EMIT SIGNAL */
 		}
+	}
+}
+
+void
+Session::update_region_name_map (boost::shared_ptr<Region> region)
+{
+	string::size_type last_period = region->name().find_last_of ('.');
+	
+	if (last_period != string::npos && last_period < region->name().length() - 1) {
+		
+		string base = region->name().substr (0, last_period);
+		string number = region->name().substr (last_period+1);
+		map<string,uint32_t>::iterator x;
+		
+		/* note that if there is no number, we get zero from atoi,
+		   which is just fine
+		*/
+		
+		region_name_map[base] = atoi (number);
 	}
 }
 
@@ -2730,6 +2726,10 @@ Session::region_changed (Change what_changed, boost::weak_ptr<Region> weak_regio
 	if (what_changed & Region::HiddenChanged) {
 		/* relay hidden changes */
 		RegionHiddenChange (region);
+	}
+
+	if (what_changed & NameChanged) {
+		update_region_name_map (region);
 	}
 }
 

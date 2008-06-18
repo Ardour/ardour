@@ -17,7 +17,7 @@ Onset.cpp
 """)
 
 Import('env install_prefix libraries')
-vampplugs = env.Copy()
+vampplugs = env.Clone()
 
 vampplugs.Append (CPPATH='#libs/vamp-sdk/vamp', CXXFLAGS="-Ilibs/vamp-sdk")
 vampplugs.Merge ([libraries['vamp'],

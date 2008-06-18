@@ -566,7 +566,7 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void,std::vector<boost::weak_ptr<AudioRegion> >& > AudioRegionsAdded;
 	sigc::signal<void,boost::weak_ptr<AudioRegion> > AudioRegionRemoved;
 
-	int region_name (string& result, string base = string(""), bool newlevel = false) const;
+	int region_name (string& result, string base = string(""), bool newlevel = false);
 	string new_region_name (string);
 	string path_from_region_name (string name, string identifier);
 
@@ -1484,6 +1484,9 @@ class Session : public PBD::StatefulDestructible
 	void strip_portname_for_solo (string& portname);
 
 	/* REGION MANAGEMENT */
+
+	std::map<std::string,uint32_t> region_name_map;
+	void update_region_name_map (boost::shared_ptr<Region>);
 
 	mutable Glib::Mutex region_lock;
 	typedef map<PBD::ID,boost::shared_ptr<AudioRegion> > AudioRegionList;
