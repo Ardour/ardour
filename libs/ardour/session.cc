@@ -3731,7 +3731,7 @@ Session::ensure_passthru_buffers (uint32_t howmany)
 #ifdef NO_POSIX_MEMALIGN
 		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * 4) != 0) {
+		if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample)) != 0) {
 			fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
 						 current_block_size, sizeof (Sample), strerror (errno))
 			      << endmsg;
@@ -4131,7 +4131,7 @@ Session::get_silent_buffers (uint32_t howmany)
 #ifdef NO_POSIX_MEMALIGN
 			p =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-			if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * 4) != 0) {
+			if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample)) != 0) {
 				fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
 							 current_block_size, sizeof (Sample), strerror (errno))
 				      << endmsg;
