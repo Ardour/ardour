@@ -199,46 +199,50 @@ Editor::remove_clicked_region ()
 }
 
 void
-Editor::destroy_clicked_region ()
+Editor::remove_region ()
 {
-	uint32_t selected = selection->regions.size();
 
-	if (!session || !selected) {
+	RegionSelection rs; 
+	get_regions_for_action (rs);
+	
+	if (!session) {
 		return;
 	}
 
-	vector<string> choices;
-	string prompt;
-	
-	prompt  = string_compose (_(" This is destructive, will possibly delete audio files\n\
-It cannot be undone\n\
-Do you really want to destroy %1 ?"),
-			   (selected > 1 ? 
-			    _("these regions") : _("this region")));
-
-	choices.push_back (_("No, do nothing."));
-
-	if (selected > 1) {
-		choices.push_back (_("Yes, destroy them."));
-	} else {
-		choices.push_back (_("Yes, destroy it."));
-	}
-
-	Gtkmm2ext::Choice prompter (prompt, choices);
-	
-	if (prompter.run() == 0) { /* first choice */
+	if (rs.empty()) {
 		return;
 	}
 
-	if (selected) {
-		list<boost::shared_ptr<Region> > r;
+	begin_reversible_command (_("remove region"));
 
-		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-			r.push_back ((*i)->region());
-		}
+	list<boost::shared_ptr<Region> > regions_to_remove;
 
-		session->destroy_regions (r);
-	} 
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		// we can't just remove the region(s) in this loop because
+		// this removes them from the RegionSelection, and they thus
+		// disappear from underneath the iterator, and the ++i above
+		// SEGVs in a puzzling fashion.
+
+		// so, first iterate over the regions to be removed from rs and
+		// add them to the regions_to_remove list, and then
+		// iterate over the list to actually remove them.
+	        
+		regions_to_remove.push_back ((*i)->region());
+	}
+	
+	for (list<boost::shared_ptr<Region> >::iterator rl = regions_to_remove.begin(); rl != regions_to_remove.end(); ++rl) {
+		boost::shared_ptr<Playlist> playlist = (*rl)->playlist();
+	        if (!playlist) {
+			// is this check necessary?
+	        	continue;
+	        }
+
+	        XMLNode &before = playlist->get_state();
+		playlist->remove_region (*rl);
+	        XMLNode &after = playlist->get_state();
+		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+	}
+	commit_reversible_command ();
 }
 
 boost::shared_ptr<Region>
@@ -3152,15 +3156,23 @@ Editor::set_sync_point (nframes64_t where, const RegionSelection& rs)
 void
 Editor::remove_region_sync ()
 {
-	if (clicked_regionview) {
-		boost::shared_ptr<Region> region (clicked_regionview->region());
-		begin_reversible_command (_("remove sync"));
-                XMLNode &before = region->playlist()->get_state();
-		region->clear_sync_position ();
-                XMLNode &after = region->playlist()->get_state();
-		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
-		commit_reversible_command ();
+	RegionSelection rs; 
+
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
 	}
+
+	begin_reversible_command (_("remove sync"));
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+
+                XMLNode &before = (*i)->region()->playlist()->get_state();
+		(*i)->region()->clear_sync_position ();
+                XMLNode &after = (*i)->region()->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*((*i)->region()->playlist()), &before, &after));
+	}
+	commit_reversible_command ();
 }
 
 void
@@ -4470,6 +4482,7 @@ Editor::region_selection_op (void (Region::*pmf)(bool), bool yn)
 void
 Editor::external_edit_region ()
 {
+	// XXX shouldn't this use get_regions_for_action(rs) too?	
 	if (!clicked_regionview) {
 		return;
 	}

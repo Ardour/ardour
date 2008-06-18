@@ -1603,9 +1603,19 @@ Editor::build_track_region_context_menu (nframes64_t frame)
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
 			Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)frame * ds->speed()));
-			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
-				add_region_context_items (atv->audio_view(), (*i), edit_items);
+
+ 			if (selection->regions.size() > 1) {
+ 				// there's already a multiple selection: just add a 
+ 				// single region context menu that will act on all 
+ 				// selected regions
+ 				boost::shared_ptr<Region> dummy_region; // = NULL		
+ 				add_region_context_items (atv->audio_view(), dummy_region, edit_items);			
+ 			} else {
+ 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+ 					add_region_context_items (atv->audio_view(), (*i), edit_items);
+ 				}
 			}
+
 			delete regions;
 		}
 	}
@@ -1642,10 +1652,17 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
 
-			for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
-				add_region_context_items (atv->audio_view(), (*i), edit_items);
+			if (selection->regions.size() > 1) {
+				// there's already a multiple selection: just add a 
+				// single region context menu that will act on all 
+				// selected regions
+				boost::shared_ptr<Region> dummy_region; // = NULL		
+				add_region_context_items (atv->audio_view(), dummy_region, edit_items);			
+			} else {
+				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+					add_region_context_items (atv->audio_view(), (*i), edit_items);
+				}
 			}
-
 			delete regions;
 		}
 	}
@@ -1778,16 +1795,23 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	if (region) {
 		ar = boost::dynamic_pointer_cast<AudioRegion> (region);
+
+		/* when this particular menu pops up, make the relevant region 
+		   become selected.
+		*/
+
+		region_menu->signal_map_event().connect (
+			bind (
+				mem_fun(*this, &Editor::set_selected_regionview_from_map_event), 
+				sv, 
+				boost::weak_ptr<Region>(region)
+			)
+		);
+
+		items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::rename_region)));
+		items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
 	}
 
-	/* when this particular menu pops up, make the relevant region 
-	   become selected.
-	*/
-
-	region_menu->signal_map_event().connect (bind (mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
-
-	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::rename_region)));
-	items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
 	items.push_back (MenuElem (_("Raise to top layer"), mem_fun(*this, &Editor::raise_region_to_top)));
 	items.push_back (MenuElem (_("Lower to bottom layer"), mem_fun  (*this, &Editor::lower_region_to_bottom)));
 	items.push_back (SeparatorElem());
@@ -1807,49 +1831,51 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 
 	sigc::connection fooc;
 
-	items.push_back (CheckMenuElem (_("Lock")));
-	CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
-	if (region->locked()) {
-		region_lock_item->set_active();
-	}
-	region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
+	if (region) {
+		items.push_back (CheckMenuElem (_("Lock")));
+		CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+		if (region->locked()) {
+			region_lock_item->set_active();
+		}
+		region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
 
-	items.push_back (CheckMenuElem (_("Glue to Bars&Beats")));
-	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
+		items.push_back (CheckMenuElem (_("Glue to Bars&Beats")));
+		CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
 
-	switch (region->positional_lock_style()) {
-	case Region::MusicTime:
-		bbt_glue_item->set_active (true);
-		break;
-	default:
-		bbt_glue_item->set_active (false);
-		break;
-	}
+		switch (region->positional_lock_style()) {
+		case Region::MusicTime:
+			bbt_glue_item->set_active (true);
+			break;
+		default:
+			bbt_glue_item->set_active (false);
+			break;
+		}
 
-	bbt_glue_item->signal_activate().connect (bind (mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
+		bbt_glue_item->signal_activate().connect (bind (mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
 
-	items.push_back (CheckMenuElem (_("Mute")));
-	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
-	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
-	if (region->muted()) {
-		fooc.block (true);
-		region_mute_item->set_active();
-		fooc.block (false);
-	}
-	
-	if (!Profile->get_sae()) {
-		items.push_back (CheckMenuElem (_("Opaque")));
-		CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
-		fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
-		if (region->opaque()) {
+		items.push_back (CheckMenuElem (_("Mute")));
+		CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+		fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
+		if (region->muted()) {
 			fooc.block (true);
-			region_opaque_item->set_active();
+			region_mute_item->set_active();
 			fooc.block (false);
+		}
+	
+		if (!Profile->get_sae()) {
+			items.push_back (CheckMenuElem (_("Opaque")));
+			CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+			fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
+			if (region->opaque()) {
+				fooc.block (true);
+				region_opaque_item->set_active();
+				fooc.block (false);
+			}
 		}
 	}
 
 	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
-	if (region->at_natural_position()) {
+	if (region && region->at_natural_position()) {
 		items.back().set_sensitive (false);
 	}
 	
@@ -1937,7 +1963,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Multi-Duplicate"), (bind (mem_fun(*this, &Editor::duplicate_dialog), true))));
 	items.push_back (MenuElem (_("Fill Track"), (mem_fun(*this, &Editor::region_fill_track))));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_clicked_region)));
+	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::remove_region)));
 
 	/* OK, stick the region submenu at the top of the list, and then add
 	   the standard items.
@@ -1948,7 +1974,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	*/
 
 	string::size_type pos = 0;
-	string menu_item_name = region->name();
+	string menu_item_name = (region) ? region->name() : _("Selected regions");
 
 	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
 		menu_item_name.replace (pos, 1, "__");

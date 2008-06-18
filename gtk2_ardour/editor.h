@@ -1025,8 +1025,8 @@ class Editor : public PublicEditor
 	void align_selection_relative (ARDOUR::RegionPoint point, nframes64_t position, const RegionSelection&);
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes64_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes64_t position);
+	void remove_region ();
 	void remove_clicked_region ();
-	void destroy_clicked_region ();
 	void edit_region ();
 	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
