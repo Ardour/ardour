@@ -272,12 +272,18 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			step_height (true);
 			return true;
+		} else if (Keyboard::no_modifiers_active (ev->state)) {
+			editor.scroll_tracks_up_line();
+			return true;
 		}
 		break;
 		
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			step_height (false);
+			return true;
+		} else if (Keyboard::no_modifiers_active (ev->state)) {
+			editor.scroll_tracks_down_line();
 			return true;
 		}
 		break;
@@ -343,11 +349,13 @@ TimeAxisView::hide ()
 void
 TimeAxisView::step_height (bool bigger)
 {
+static const int step = 20;
+
 	if (bigger) {
-		set_height (height + 4);
+		set_height (height + step);
 	} else {
-		if (height > 4) {
-			set_height (std::max (height - 4, hSmall));
+		if (height > step) {
+			set_height (std::max (height - step, hSmall));
 		} else if (height != hSmall) {
 			set_height (hSmall);
 		}
