@@ -51,6 +51,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "public_editor.h"
+#include "keyboard.h"
 
 #include "i18n.h"
 
@@ -145,6 +146,20 @@ PluginUIWindow::on_map ()
 {
 	Window::on_map ();
 	set_keep_above (true);
+}
+
+bool
+PluginUIWindow::on_enter_notify_event (GdkEventCrossing *ev)
+{
+	Keyboard::the_keyboard().enter_window (ev, this);
+	return false;
+}
+
+bool
+PluginUIWindow::on_leave_notify_event (GdkEventCrossing *ev)
+{
+	Keyboard::the_keyboard().leave_window (ev, this);
+	return false;
 }
 
 void
