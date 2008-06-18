@@ -763,19 +763,20 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 	return 0;
 }
 
-void
+boost::shared_ptr<Region>
 AudioTrack::bounce (InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<AudioSource> > srcs;
-	_session.write_one_audio_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
+	return _session.write_one_audio_track (*this, _session.current_start_frame(), _session.current_end_frame(), 
+					       false, srcs, itt);
 }
 
 
-void
+boost::shared_ptr<Region>
 AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<AudioSource> > srcs;
-	_session.write_one_audio_track (*this, start, end, false, srcs, itt);
+	return _session.write_one_audio_track (*this, start, end, false, srcs, itt);
 }
 
 void
@@ -816,7 +817,9 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		return;
 	}
 
-	if (_session.write_one_audio_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt)) {
+	boost::shared_ptr<Region> res;
+
+	if ((res = _session.write_one_audio_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt)) == 0) {
 		return;
 	}
 

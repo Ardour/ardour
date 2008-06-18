@@ -3949,11 +3949,11 @@ Session::freeze (InterThreadInfo& itt)
 	return 0;
 }
 
-int
-Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t len, 	
+boost::shared_ptr<Region>
+Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t end, 	
 			       bool overwrite, vector<boost::shared_ptr<AudioSource> >& srcs, InterThreadInfo& itt)
 {
-	int ret = -1;
+	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<AudioFileSource> fsource;
 	uint32_t x;
@@ -3963,7 +3963,14 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 	nframes_t position;
 	nframes_t this_chunk;
 	nframes_t to_do;
+	nframes_t len = end - start;
 	vector<Sample*> buffers;
+
+	if (end <= start) {
+		error << string_compose (_("Cannot write a range where end <= start (e.g. %1 <= %2)"),
+					 end, start) << endmsg;
+		return result;
+	}
 
 	// any bigger than this seems to cause stack overflows in called functions
 	const nframes_t chunk_size = (128 * 1024)/4;
@@ -4077,21 +4084,19 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 		
 		/* construct a region to represent the bounced material */
 
-		boost::shared_ptr<Region> aregion = RegionFactory::create (srcs, 0, srcs.front()->length(), 
-									   region_name_from_path (srcs.front()->name(), true));
-
-		ret = 0;
+		result = RegionFactory::create (srcs, 0, srcs.front()->length(), 
+						region_name_from_path (srcs.front()->name(), true));
 	}
 		
   out:
-	if (ret) {
+	if (!result) {
 		for (vector<boost::shared_ptr<AudioSource> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
 
 			if (afs) {
 				afs->mark_for_remove ();
 			}
-
+			
 			(*src)->drop_references ();
 		}
 
@@ -4102,14 +4107,14 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 	}
 
 	for (vector<Sample*>::iterator i = buffers.begin(); i != buffers.end(); ++i) {
-		free(*i);
+		free (*i);
 	}
 
 	g_atomic_int_set (&processing_prohibited, 0);
 
 	itt.done = true;
 
-	return ret;
+	return result;
 }
 
 vector<Sample*>&

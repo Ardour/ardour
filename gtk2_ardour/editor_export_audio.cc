@@ -149,7 +149,12 @@ Editor::bounce_region_selection ()
 		itt.cancel = false;
 		itt.progress = 0.0f;
 
-		track->bounce_range (region->position(), region->position() + region->length(), itt);
+		boost::shared_ptr<Region> r = track->bounce_range (region->position(), region->position() + region->length(), itt);
+		cerr << "Result of bounce of "
+		     << region->name() << " len = " << region->length()
+		     << " was "
+		     << r->name() << " len = " << r->length()
+		     << endl;
 	}
 }
 

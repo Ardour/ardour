@@ -3614,7 +3614,7 @@ Editor::freeze_route ()
 }
 
 void
-Editor::bounce_range_selection ()
+Editor::bounce_range_selection (bool replace)
 {
 	if (selection->time.empty()) {
 		return;
@@ -3649,7 +3649,15 @@ Editor::bounce_range_selection ()
 		itt.progress = false;
 
                 XMLNode &before = playlist->get_state();
-		atv->audio_track()->bounce_range (start, cnt, itt);
+		boost::shared_ptr<Region> r = atv->audio_track()->bounce_range (start, start+cnt, itt);
+		
+		if (replace) {
+			list<AudioRange> ranges;
+			ranges.push_back (AudioRange (start, start+cnt, 0));
+			playlist->cut (ranges); // discard result
+			playlist->add_region (r, start);
+		}
+
                 XMLNode &after = playlist->get_state();
 		session->add_command (new MementoCommand<Playlist> (*playlist, &before, &after));
 	}
