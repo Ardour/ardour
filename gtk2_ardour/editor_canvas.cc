@@ -377,7 +377,7 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	}
 
 	double last_canvas_unit =  max ((last_canvas_frame / frames_per_unit), canvas_width);
-
+	//cerr << "Editor::reset_scrolling_region () lcf:fpu:cw:lcu " << last_canvas_frame << ":" << frames_per_unit << ":" << canvas_width << ":" << last_canvas_unit << endl;//DEBUG
 	track_canvas->set_scroll_region (0.0, 0.0, last_canvas_unit, pos);
 
 	// XXX what is the correct height value for the time canvas ? this overstates it

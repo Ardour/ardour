@@ -1119,6 +1119,7 @@ Editor::handle_new_duration ()
 	}
 
 	horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
+	//cerr << "Editor::handle_new_duration () called ha v:l:u:ps:lcf = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << last_canvas_frame << endl;//DEBUG
 }
 
 void
@@ -4155,6 +4156,7 @@ Editor::reset_zoom (double fpu)
 void
 Editor::reposition_and_zoom (nframes64_t frame, double fpu)
 {
+	//cerr << "Editor::reposition_and_zoom () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	reset_x_origin (frame);
 	reset_zoom (fpu);
 
@@ -4342,6 +4344,12 @@ int
 Editor::idle_visual_changer ()
 {
 	VisualChange::Type p = pending_visual_change.pending;
+	nframes64_t csf, cef;
+
+	if (session) {
+		csf = session->current_start_frame();
+		cef = session->current_end_frame() + (current_page_frames() / 24);// Add a little extra so we can see the end marker
+	}
 
 	pending_visual_change.pending = (VisualChange::Type) 0;
 	pending_visual_change.idle_handler_id = -1;
@@ -4359,8 +4367,8 @@ Editor::idle_visual_changer ()
 		if (time_origin != pending_visual_change.time_origin) {
 			
 			if (horizontal_adjustment.get_upper() < pending_visual_change.time_origin) {
-				last_canvas_frame = pending_visual_change.time_origin + current_page_frames();
-				horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
+				last_canvas_frame = (cef > (pending_visual_change.time_origin + current_page_frames())) ? cef : pending_visual_change.time_origin + current_page_frames();
+				horizontal_adjustment.set_upper ((cef - csf) / frames_per_unit);
 				reset_scrolling_region ();
 			}
 			
@@ -4370,7 +4378,7 @@ Editor::idle_visual_changer ()
 			redisplay_tempo (true);
 		}
 	}
-
+	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	return 0; /* this is always a one-shot call */
 }
 
@@ -4757,13 +4765,13 @@ Editor::queue_draw_resize_line (int at)
 bool
 Editor::on_expose_event (GdkEventExpose* ev)
 {
-	cerr << "+++ editor expose "
+	/* cerr << "+++ editor expose "
 	     << ev->area.x << ',' << ev->area.y
 	     << ' '
 	     << ev->area.width << " x " << ev->area.height
 	     << " need reize ? " << need_resize_line
 	     << endl;
-
+	*/
 	bool ret = Window::on_expose_event (ev);
 
 	if (need_resize_line) {
@@ -4822,6 +4830,6 @@ Editor::on_expose_event (GdkEventExpose* ev)
 		}
 	}
 
-	cerr << "--- editor expose\n";
+	//cerr << "--- editor expose\n";
 	return ret;
 }
