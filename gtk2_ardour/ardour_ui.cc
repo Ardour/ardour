@@ -532,6 +532,14 @@ ARDOUR_UI::save_ardour_state ()
 gint
 ARDOUR_UI::autosave_session ()
 {
+	if (g_main_depth() > 1) {
+		/* inside a recursive main loop,
+		   give up because we may not be able to 
+		   take a lock.
+		*/
+		return 1;
+	}
+
         if (!Config->get_periodic_safety_backups())
                 return 1;
         
