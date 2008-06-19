@@ -547,7 +547,7 @@ IOSelector::add_port ()
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
-			MessageDialog msg (0,  _("There are no more JACK ports available."));
+			MessageDialog msg (_("There are no more JACK ports available."));
 			msg.run ();
 		}
 
@@ -558,7 +558,7 @@ IOSelector::add_port ()
 		}
 
 		catch (AudioEngine::PortRegistrationFailure& err) {
-			MessageDialog msg (0, _("There are no more JACK ports available."));
+			MessageDialog msg (_("There are no more JACK ports available."));
 			msg.run ();
 		}
 	}

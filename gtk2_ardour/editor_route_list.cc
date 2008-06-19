@@ -125,6 +125,10 @@ Editor::remove_route (TimeAxisView *tv)
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 
+	if (tv == entered_track) {
+		entered_track = 0;
+	}
+
 	/* Decrement old order keys for tracks `above' the one that is being removed */
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		TimeAxisView* v = (*ri)[route_display_columns.tv];

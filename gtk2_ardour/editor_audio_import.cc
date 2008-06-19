@@ -70,7 +70,7 @@ void
 Editor::add_external_audio_action (ImportMode mode_hint)
 {
 	if (session == 0) {
-		MessageDialog msg (0, _("You can't import or embed an audiofile until you have a session loaded."));
+		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
@@ -91,7 +91,7 @@ Editor::external_audio_dialog ()
 	uint32_t track_cnt;
 
 	if (session == 0) {
-		MessageDialog msg (0, _("You can't import or embed an audiofile until you have a session loaded."));
+		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
