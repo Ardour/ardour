@@ -42,6 +42,8 @@ class SendUI : public Gtk::HBox
 
 	IOSelector* io;
 
+	boost::shared_ptr<ARDOUR::Send>& send() { return _send; }
+
   private:
 	boost::shared_ptr<ARDOUR::Send> _send;
 	ARDOUR::Session& _session;
@@ -70,6 +72,7 @@ class SendUIWindow : public Gtk::Window
 	Gtk::HBox hpacker;
 
 	void send_going_away ();
+	sigc::connection going_away_connection;
 };
 
 #endif /* __ardour_gtk_send_ui_h__ */

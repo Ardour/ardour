@@ -1092,19 +1092,18 @@ Route::remove_redirect (boost::shared_ptr<Redirect> redirect, void *src, uint32_
 			return -1;
 		}
 
-		bool foo = false;
+		_have_internal_generator = false;
 
 		for (i = _redirects.begin(); i != _redirects.end(); ++i) {
 			boost::shared_ptr<PluginInsert> pi;
 			
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->is_generator()) {
-					foo = true;
+					_have_internal_generator = true;
+					break;
 				}
 			}
 		}
-
-		_have_internal_generator = foo;
 	}
 
 	if (old_rmo != redirect_max_outs) {

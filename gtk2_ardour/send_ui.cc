@@ -44,7 +44,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	vbox.pack_start (hbox, false, false, false);
 	vbox.pack_start (panners, false,false);
 
-	io = new IOSelector (se, s, false);
+	io = manage (new IOSelector (se, s, false));
 	
 	pack_start (vbox, false, false);
 
@@ -70,7 +70,7 @@ SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 SendUI::~SendUI ()
 {
 	_send->set_metering (false);
-	
+
 	/* XXX not clear that we need to do this */
 
 	screen_update_connection.disconnect();
@@ -121,8 +121,8 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
 
 	add (vpacker);
 	set_name ("SendUIWindow");
-
-	s->GoingAway.connect (mem_fun (*this, &SendUIWindow::send_going_away));
+	
+	going_away_connection = s->GoingAway.connect (mem_fun (*this, &SendUIWindow::send_going_away));
 
 	signal_delete_event().connect (bind (ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 
@@ -138,5 +138,6 @@ SendUIWindow::send_going_away ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &SendUIWindow::send_going_away));
 	delete_when_idle (this);
+	going_away_connection.disconnect ();
 }
 

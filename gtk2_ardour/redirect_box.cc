@@ -496,7 +496,12 @@ RedirectBox::choose_send ()
 
 	/* XXX need redirect lock on route */
 
-	send->ensure_io (0, _route->max_redirect_outs(), false, this);
+	try {
+		send->ensure_io (0, _route->max_redirect_outs(), false, this);
+	} catch (AudioEngine::PortRegistrationFailure& err) {
+		error << string_compose (_("Cannot set up new send: %1"), err.what()) << endmsg;
+		return;
+	}
 	
 	IOSelectorWindow *ios = new IOSelectorWindow (_session, send, false, true);
 	
@@ -854,6 +859,13 @@ RedirectBox::idle_delete_redirect (boost::weak_ptr<Redirect> weak_redirect)
 	/* NOT copied to _mixer.selection() */
 
 	no_redirect_redisplay = true;
+
+	void* gui = redirect->get_gui ();
+	
+	if (gui) {
+		static_cast<Gtk::Widget*>(gui)->hide ();
+	}
+	
 	_route->remove_redirect (redirect, this);
 	no_redirect_redisplay = false;
 	redisplay_redirects (this);
