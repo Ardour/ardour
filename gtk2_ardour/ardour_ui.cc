@@ -2914,7 +2914,6 @@ ARDOUR_UI::keyboard_settings () const
 void
 ARDOUR_UI::create_xrun_marker(nframes_t where)
 {
-	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::create_xrun_marker), where));
 	editor->mouse_add_new_marker (where, false, true);
 }
 
@@ -2929,6 +2928,8 @@ ARDOUR_UI::halt_on_xrun_message ()
 void
 ARDOUR_UI::xrun_handler(nframes_t where)
 {
+	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::xrun_handler), where));
+
 	if (Config->get_create_xrun_marker() && session->actively_recording()) {
 		create_xrun_marker(where);
 	}
