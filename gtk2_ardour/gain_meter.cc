@@ -129,9 +129,9 @@ GainMeterBase::GainMeterBase (boost::shared_ptr<IO> io, Session& s,
 	gain_automation_state_button.set_size_request(15, 15);
 	gain_automation_style_button.set_size_request(15, 15);
 
-	Route* r;
+	boost::shared_ptr<Route> r;
 
-	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
+	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
 
 		if (!r->hidden()) {
 
@@ -247,8 +247,9 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 		ResetAllPeakDisplays ();
 	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		Route* r;
-		if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
+		boost::shared_ptr<Route> r;
+
+		if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
 			ResetGroupPeakDisplays (r->mix_group());
 		}
 	} else {
@@ -261,8 +262,9 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 void
 GainMeterBase::reset_peak_display ()
 {
-	Route * r;
-	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
+	boost::shared_ptr<Route> r;
+
+	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
 		r->reset_max_peak_meters();
 	}
 
@@ -275,8 +277,9 @@ GainMeterBase::reset_peak_display ()
 void
 GainMeterBase::reset_group_peak_display (RouteGroup* group)
 {
-	Route* r;
-	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
+	boost::shared_ptr<Route> r;
+	
+	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
 		if (group == r->mix_group()) {
 			reset_peak_display ();
 		}
@@ -420,11 +423,11 @@ next_meter_point (MeterPoint mp)
 gint
 GainMeterBase::meter_press(GdkEventButton* ev)
 {
-	Route* _route;
+	boost::shared_ptr<Route> _route;
 
 	wait_for_release = false;
-
-	if ((_route = dynamic_cast<Route*>(_io.get())) == 0) {
+	
+	if ((_route = boost::dynamic_pointer_cast<Route>(_io)) == 0) {
 		return FALSE;
 	}
 
@@ -495,13 +498,18 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 gint
 GainMeterBase::meter_release(GdkEventButton* ev)
 {
-
 	if(!ignore_toggle){
 		if (wait_for_release){
 			wait_for_release = false;
-			set_meter_point (*(dynamic_cast<Route*>(_io.get())), old_meter_point);
+			
+			boost::shared_ptr<Route> r;
+			
+			if ((r = boost::dynamic_pointer_cast<Route>(_io)) != 0) {
+				set_meter_point (*r, old_meter_point);
+			}
 		}
 	}
+
 	return true;
 }
 
@@ -526,10 +534,10 @@ GainMeterBase::set_mix_group_meter_point (Route& route, MeterPoint mp)
 void
 GainMeterBase::meter_point_clicked ()
 {
-	Route* r;
+	boost::shared_ptr<Route> r;
 
-	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
-
+	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
+		/* WHAT? */
 	}
 }
 
@@ -644,7 +652,6 @@ GainMeterBase::_astyle_string (AutoStyle style, bool shrt)
 void
 GainMeterBase::gain_automation_style_changed ()
 {
-  // Route* _route = dynamic_cast<Route*>(&_io);
 	switch (_width) {
 	case Wide:
 	        gain_automation_style_button.set_label (astyle_string(_io->gain_automation_curve().automation_style()));
@@ -765,10 +772,10 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	hbox.set_spacing (2);
 	hbox.pack_start (*fader_vbox, true, true);
 
-	Route* r;
+	boost::shared_ptr<Route> r;
 
-	if ((r = dynamic_cast<Route*> (_io.get())) != 0) {
-
+	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
+		
 		/* 
 		   if we have a non-hidden route (ie. we're not the click or the auditioner), 
 		   pack some route-dependent stuff.

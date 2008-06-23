@@ -87,7 +87,6 @@ RegionView::RegionView (const RegionView& other)
 	/* derived concrete type will call init () */
 
 	_region = other._region;
-	editor = other.editor;
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
@@ -104,7 +103,6 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	/* derived concrete type will call init () */
 
 	_region = other_region;
-	editor = other.editor;
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
@@ -135,6 +133,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 void
 RegionView::init (Gdk::Color& basic_color, bool wfd)
 {
+	editor        = 0;
 	valid         = true;
 	in_destructor = false;
 	_height       = 0;

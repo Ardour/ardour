@@ -1227,8 +1227,16 @@ AudioEngine::reconnect_to_jack ()
 	for (PortConnections::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
 		
 		int err;
+		jack_client_t* j = _jack;
+
+		/* JACK could have zombified us. */
+
+		if (!j) {
+			error << _("Disconnected from JACK while reconnecting. You should quit Ardour now.") << endmsg;
+			return -1;
+		}
 		
-		if ((err = jack_connect (_jack, (*i).first.c_str(), (*i).second.c_str())) != 0) {
+		if ((err = jack_connect (j, (*i).first.c_str(), (*i).second.c_str())) != 0) {
 			if (err != EEXIST) {
 				error << string_compose (_("could not reconnect %1 and %2 (err = %3)"),
 						  (*i).first, (*i).second, err)
