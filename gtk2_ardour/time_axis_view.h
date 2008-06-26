@@ -125,8 +125,7 @@ class TimeAxisView : public virtual AxisView, public Stateful
 
 	double resize_drag_start;
 	int32_t resize_idle_target;
-	int32_t resize_idle_id;
-	bool idle_resize();
+	void idle_resize (uint32_t);
 
 	void hide_name_label ();
 	void hide_name_entry ();

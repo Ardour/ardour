@@ -160,6 +160,7 @@ class Editor : public PublicEditor
 	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
 	TimeAxisView* get_named_time_axis(const std::string & name) ;
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
+	void add_to_idle_resize (TimeAxisView*, uint32_t);
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
@@ -2155,6 +2156,11 @@ public:
 	void waveform_scale_chosen (Editing::WaveformScale);
 
 	bool _have_idled;
+	int resize_idle_id;
+	int32_t resize_idle_target;
+	bool idle_resize();
+	friend gboolean _idle_resize (gpointer);
+	std::vector<TimeAxisView*> pending_resizes;
 };
 
 #endif /* __ardour_editor_h__ */

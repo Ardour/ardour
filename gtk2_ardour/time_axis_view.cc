@@ -96,7 +96,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	last_name_entry_key_press_event = 0;
 	name_packing = NamePackingBits (0);
 	resize_drag_start = -1;
-	resize_idle_id = -1;
 
 	/*
 	  Create the standard LHS Controls
@@ -349,7 +348,7 @@ TimeAxisView::hide ()
 void
 TimeAxisView::step_height (bool bigger)
 {
-static const int step = 20;
+	static const uint32_t step = 20;
 
 	if (bigger) {
 		set_height (height + step);
@@ -1201,18 +1200,10 @@ TimeAxisView::resizer_button_release (GdkEventButton* ev)
 	return true;
 }
 
-static gboolean
-_idle_resizer (gpointer arg)
+void
+TimeAxisView::idle_resize (uint32_t h)
 {
-	return ((TimeAxisView*)arg)->idle_resize ();
-}
-
-bool
-TimeAxisView::idle_resize ()
-{
-	set_height (resize_idle_target);
-	resize_idle_id = -1;
-	return false;
+	set_height (h);
 }
 
 bool
@@ -1233,10 +1224,8 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 
 	resize_idle_target = std::max (resize_idle_target - delta, (int) hSmall);
 
-	if (resize_idle_id < 0) {
-		// resize_idle_id = g_idle_add (_idle_resizer, this);
-	}
-
+	editor.add_to_idle_resize (this, resize_idle_target);
+	
 	resize_drag_start = ev->y_root;
 
 	return true;

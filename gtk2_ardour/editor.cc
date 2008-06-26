@@ -344,6 +344,7 @@ Editor::Editor ()
 	resize_line_y = 0;
 	old_resize_line_y = -1;
 	no_region_list_redisplay = false;
+	resize_idle_id = -1;
 
 	_scrubbing = false;
 	scrubbing_direction = 0;
@@ -1872,6 +1873,16 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 				region_opaque_item->set_active();
 				fooc.block (false);
 			}
+		}
+	} else {
+		// multiple regions selected
+		// how should these act? 
+		// here they toggle the property of all selected regions
+	
+		items.push_back (MenuElem (_("Lock"), mem_fun(*this, &Editor::toggle_region_lock)));
+		items.push_back (MenuElem (_("Mute"), mem_fun(*this, &Editor::toggle_region_mute)));
+		if (!Profile->get_sae()) {
+			items.push_back (MenuElem (_("Opaque"), mem_fun(*this, &Editor::toggle_region_opaque)));
 		}
 	}
 
@@ -4712,14 +4723,17 @@ Editor::first_idle ()
 void
 Editor::start_resize_line_ops ()
 {
+#if 0
 	old_resize_line_y = -1;
 	resize_line_y = -1;
 	need_resize_line = true;
+#endif	
 }
 
 void
 Editor::end_resize_line_ops ()
 {
+#if 0
 	need_resize_line = false;
 
 	if (old_resize_line_y >= 0) {
@@ -4728,11 +4742,13 @@ Editor::end_resize_line_ops ()
 		cerr << "Final invalidation at " << old_resize_line_y << endl;
 		win->invalidate_rect (r, false);
 	}
+#endif
 }
 
 void
 Editor::queue_draw_resize_line (int at)
 {
+#if 0	
 	Glib::RefPtr<Gdk::Window> win = get_window();
 
 	resize_line_y = at;
@@ -4760,6 +4776,7 @@ Editor::queue_draw_resize_line (int at)
 		Gdk::Rectangle r (xroot, at - 1, controls_width + (int) canvas_width, 3);
 		win->invalidate_rect (r, true);
 	}
+#endif
 }
 
 bool
@@ -4774,6 +4791,7 @@ Editor::on_expose_event (GdkEventExpose* ev)
 	*/
 	bool ret = Window::on_expose_event (ev);
 
+#if 0
 	if (need_resize_line) {
 		
 		int xroot, yroot, discard;
@@ -4831,5 +4849,40 @@ Editor::on_expose_event (GdkEventExpose* ev)
 	}
 
 	//cerr << "--- editor expose\n";
+#endif
+
 	return ret;
+}
+
+static gboolean
+_idle_resizer (gpointer arg)
+{
+	return ((Editor*)arg)->idle_resize ();
+}
+
+void
+Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
+{
+	if (resize_idle_id < 0) {
+		resize_idle_id = g_idle_add (_idle_resizer, this);
+	}
+
+	resize_idle_target = h;
+
+	pending_resizes.push_back (view);
+
+	if (!selection->tracks.empty()) {
+		pending_resizes.insert (pending_resizes.end(), selection->tracks.begin(), selection->tracks.end());
+	}
+}
+
+bool
+Editor::idle_resize ()
+{
+	for (vector<TimeAxisView*>::iterator i = pending_resizes.begin(); i != pending_resizes.end(); ++i) {
+		(*i)->idle_resize (resize_idle_target);
+	}
+	pending_resizes.clear();
+	resize_idle_id = -1;
+	return false;
 }
