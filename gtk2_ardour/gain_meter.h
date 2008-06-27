@@ -54,7 +54,7 @@ namespace Gtk {
 	class Menu;
 }
 
-class GainMeterBase
+class GainMeterBase : virtual public sigc::trackable
 {
   public:
 	GainMeterBase (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,

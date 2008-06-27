@@ -83,6 +83,7 @@ GainMeterBase::GainMeterBase (boost::shared_ptr<IO> io, Session& s,
 	meter_menu = 0;
 	next_release_selects = false;
 	style_changed = true;
+	_width = Wide;
 
 	if (horizontal) {
 		gain_slider = manage (new HSliderController (pix,
