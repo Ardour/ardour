@@ -424,14 +424,16 @@ AudioRegionView::set_height (gdouble height)
 	uint32_t wcnt = waves.size();
 
 	// FIXME: ick
-	TimeAxisViewItem::set_height (height - 2);
+	height -= 2;
+	TimeAxisViewItem::set_height (height);
+	
 	
 	_height = height;
 
 	for (uint32_t n=0; n < wcnt; ++n) {
 		gdouble ht;
 
-		if ((height) <= NAME_HIGHLIGHT_THRESH) {
+		if ((height) < NAME_HIGHLIGHT_THRESH) {
 			ht = ((height-2*wcnt) / (double) wcnt);
 		} else {
 			ht = (((height-2*wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
@@ -444,7 +446,7 @@ AudioRegionView::set_height (gdouble height)
 	}
 
 	if (gain_line) {
-		if ((height/wcnt) < NAME_HIGHLIGHT_SIZE) {
+		if ((height/wcnt) < NAME_HIGHLIGHT_THRESH) {
 			gain_line->hide ();
 		} else {
 			if (_flags & EnvelopeVisible) {
@@ -538,7 +540,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 
 	points = get_canvas_points ("fade in shape", npoints+3);
 
-	if (_height > NAME_HIGHLIGHT_THRESH) {
+	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE;
 	} else {
 		h = _height;
@@ -622,7 +624,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	float curve[npoints];
 	audio_region()->fade_out().get_vector (0, audio_region()->fade_out().back()->when, curve, npoints);
 
-	if (_height > NAME_HIGHLIGHT_THRESH) {
+	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE;
 	} else {
 		h = _height;
@@ -841,7 +843,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
-	if (trackview.current_height() < NAME_HIGHLIGHT_SIZE) {
+	if (trackview.current_height() < NAME_HIGHLIGHT_THRESH) {
 		ht = ((trackview.current_height()) / (double) nchans);
 	} else {
 		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
