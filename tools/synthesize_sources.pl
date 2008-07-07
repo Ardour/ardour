@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 # Ardour session synthesizer
-# (c)Sampo Savolainen 2007
+# (c)Sampo Savolainen 2007-2008
 #
 # GPL
 # This reads an Ardour session file and creates zero-signal source files
@@ -13,12 +13,29 @@ use IO::Handle;
 
 use ARDOUR::SourceInfoLoader;
 
+my $usage = "usage: synthesize_sources.pl samplerate [session name, the name must match the directory and the .ardour file in it] [options: -sine for 440hz sine waves in wave files]\n";
 
-my ($samplerate, $sessionName) = @ARGV;
+my ($samplerate, $sessionName, @options) = @ARGV;
 
 if ( ! -d $sessionName || ! -f $sessionName."/".$sessionName.".ardour" ) {
-	print "usage: synthesize_sources.pl samplerate [session name, the name must match the directory and the .ardour file in it]\n";
+	print $usage;
 	exit;
+}
+
+my $waveType = "silent";
+
+foreach my $o (@options) {
+	if ($o eq "-sine") {
+		$waveType = "sine";
+	} elsif ($o eq "-silent") {
+		$waveType = "silent";
+	} else {
+		print "unknown parameter ".$o."\n";
+		print $usage;
+		exit;
+
+	}
+	
 }
 
 my $sessionFile = $sessionName."/".$sessionName.".ardour";
@@ -52,9 +69,10 @@ my %sources = %{$handler->{Sources}};
 
 foreach my $tmp (keys %sources) {
 	
-	print "Generating ".$audioFileDirectory."/".$sources{$tmp}->{name}.".wav\n";
+	print "Generating ".$audioFileDirectory."/".$sources{$tmp}->{name}."\n";
 
-	system("sox", 
+	my @cmd = 
+              ("sox", 
 	       "-t", "raw",        # /dev/zero is raw :)
 	       "-r", $samplerate,  # set sample rate
 	       "-c", "1",	   # 1 channel
@@ -68,7 +86,11 @@ foreach my $tmp (keys %sources) {
 	       "trim", "0", $sources{$tmp}->{calculated_length}."s" # trim silence to wanted sample amount
 	       );
 
+	if ($waveType eq "sine") {
+		@cmd = (@cmd, "synth","sin","%0", "vol", "0.2", "fade","q","0.01s", $sources{$tmp}->{calculated_length}."s" , "0.01s");
+	}
 
+	system(@cmd);
 }
 
 
