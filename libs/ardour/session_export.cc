@@ -443,6 +443,8 @@ Session::start_audio_export (AudioExportSpecification& spec)
 
 	spec.freewheel_connection = _engine.Freewheel.connect (sigc::bind (mem_fun (*this, &Session::process_export), &spec));
 
+	cerr << "Start export at pos = " << spec.pos << endl;
+
 	return _engine.freewheel (true);
 }
 
@@ -510,6 +512,8 @@ Session::prepare_to_export (AudioExportSpecification& spec)
 		}
 	}
 
+	cerr << "Everybdy is at " << spec.start_frame << endl;
+
 	/* we just did the core part of a locate() call above, but
 	   for the sake of any GUI, put the _transport_frame in
 	   the right place too.
@@ -545,6 +549,10 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 	int ret = -1;
 	nframes_t this_nframes;
 
+	cerr << "Export process at pos = " << spec->pos << " _exporting = "
+	     << _exporting << " running = " << spec->running << " stop = "
+	     << spec->stop << endl;
+
 	/* This is not required to be RT-safe because we are running while freewheeling */
 
 	if (spec->do_freewheel == false) {
@@ -562,12 +570,14 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 
 	if (!_exporting) {
 		/* finished, but still freewheeling */
-		process_without_events (nframes);
+		cerr << "\tExport ... not exporting yet, no_roll() for " << nframes <<endl;
+		no_roll (nframes, 0);
 		return 0;
 	}
-		
+	
 	if (!spec->running || spec->stop || (this_nframes = min ((spec->end_frame - spec->pos), nframes)) == 0) {
-		process_without_events (nframes);
+		cerr << "\tExport ... not running or at end, no_roll() for " << nframes <<endl;
+		no_roll (nframes, 0);
 		return stop_audio_export (*spec);
 	}
 
@@ -616,12 +626,16 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 		}
 	}
 
+	cerr << "\tprocess " << nframes << endl;
+
 	if (spec->process (nframes)) {
 		goto out;
 	}
 	
 	spec->pos += nframes;
 	spec->progress = 1.0 - (((float) spec->end_frame - spec->pos) / spec->total_frames);
+
+	cerr << "\t@ " << spec->pos << " prog = " << spec->progress << endl;
 
 	/* and we're good to go */
 

@@ -12,7 +12,7 @@ libclearlooks_files = [
 
 Import ('env install_prefix')
 
-clearlooks = env.Copy()
+clearlooks = env.Clone()
 
 clearlooks.Replace(CCFLAGS = ' `pkg-config --cflags gtk+-2.0` ',
                    LINKFLAGS = ' `pkg-config --libs gtk+-2.0` ')

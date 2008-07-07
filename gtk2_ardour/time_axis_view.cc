@@ -382,7 +382,8 @@ TimeAxisView::set_height(uint32_t h)
 		/* resize the selection rect */
 		show_selection (editor.get_selection().time);
 	}
-	
+
+	reshow_feature_lines ();
 }
 
 bool
@@ -1162,8 +1163,6 @@ TimeAxisView::reshow_feature_lines ()
 	while (feature_lines.size()< analysis_features.size()) {
 		ArdourCanvas::SimpleLine* l = new ArdourCanvas::SimpleLine (*canvas_display);
 		l->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
-		l->property_y1() = 0;
-		l->property_y2() = current_height();
 		feature_lines.push_back (l);
 	}
 
@@ -1179,6 +1178,8 @@ TimeAxisView::reshow_feature_lines ()
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
 		(*l)->property_x1() = editor.frame_to_pixel (*i);
 		(*l)->property_x2() = editor.frame_to_pixel (*i);
+		(*l)->property_y1() = 0;
+		(*l)->property_y2() = current_height();
 		(*l)->show ();
 	}
 }
@@ -1214,16 +1215,8 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 	}
 
 	int32_t delta = (int32_t) floor (resize_drag_start - ev->y_root);
-	int xroot, yroot;
-	Glib::RefPtr<Gdk::Window> win (resizer.get_window());
-
-	if (win) {
-		win->get_origin (xroot, yroot);
-		editor.queue_draw_resize_line (yroot + ev->y);
-	}
 
 	resize_idle_target = std::max (resize_idle_target - delta, (int) hSmall);
-
 	editor.add_to_idle_resize (this, resize_idle_target);
 	
 	resize_drag_start = ev->y_root;

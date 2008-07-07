@@ -761,7 +761,7 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 	   more than once per process cycle.
 	 */
 
-	if (!force && (last_shuttle_request - now) < engine->usecs_per_cycle()) {
+	if (!force && (last_shuttle_request - now) < (microseconds_t) engine->usecs_per_cycle()) {
 		return;
 	}
 	

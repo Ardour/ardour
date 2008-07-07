@@ -8,7 +8,7 @@ Import('env libraries install_prefix')
 
 libglademm_files = glob.glob('libglademm/*.cc')
 
-libglademm = env.Copy()
+libglademm = env.Clone()
 libglademm.Merge([libraries['gtk2'], libraries['glade2'], libraries['sigc2'], libraries['glibmm2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'], libraries['gtkmm2']])
 
 libglade = libglademm.SharedLibrary('libglademm', libglademm_files)

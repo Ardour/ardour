@@ -6,8 +6,8 @@ import glob
 
 Import('env install_prefix final_prefix config_prefix libraries i18n ardour_version')
 
-gtkardour = env.Copy()
-gtkmmtests = env.Copy()
+gtkardour = env.Clone()
+gtkmmtests = env.Clone()
 
 #
 # this defines the version number of the GTK interface to ardour

@@ -7,7 +7,7 @@ import glob
 rubberband_files = glob.glob ('src/*.cpp')
 
 Import('env install_prefix libraries')
-rb = env.Copy()
+rb = env.Clone()
 
 rb.Merge  ([libraries['fftw3f'], 
 	    libraries['fftw3'],

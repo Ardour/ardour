@@ -1780,16 +1780,17 @@ IO::ports_became_legal ()
 }
 
 Connection *
-IO::find_possible_connection(const string &desired_name, const string &default_name, const string &connection_type_name) {
-static const string digits = "0123456789";
+IO::find_possible_connection(const string &desired_name, const string &default_name, const string &connection_type_name) 
+{
+	static const string digits = "0123456789";
 
 	Connection* c = _session.connection_by_name (desired_name);
 
 	if (!c) {
-	int connection_number, mask;
-	string possible_name;
-	bool stereo = false;
-	size_t last_non_digit_pos;
+		int connection_number, mask;
+		string possible_name;
+		bool stereo = false;
+		string::size_type last_non_digit_pos;
 
 		error << string_compose(_("Unknown connection \"%1\" listed for %2 of %3"), desired_name, connection_type_name, _name)
 		      << endmsg;
@@ -1798,19 +1799,21 @@ static const string digits = "0123456789";
 		connection_number = 0;
 		
 		last_non_digit_pos = desired_name.find_last_not_of(digits);
+
 		if (last_non_digit_pos != string::npos) {
 			stringstream s;
 			s << desired_name.substr(last_non_digit_pos);
 			s >> connection_number;
-		    
 		}
 	
 		// see if it's a stereo connection e.g. "in 3+4"
+
 		if (last_non_digit_pos > 1 && desired_name[last_non_digit_pos] == '+') {
 			int left_connection_number = 0;
+			string::size_type left_last_non_digit_pos;
 
-			size_t left_last_non_digit_pos;
 			left_last_non_digit_pos = desired_name.find_last_not_of(digits, last_non_digit_pos-1);
+
 			if (left_last_non_digit_pos != string::npos) {
 				stringstream s;
 				s << desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
@@ -1827,26 +1830,30 @@ static const string digits = "0123456789";
 		if (connection_number)
 			connection_number--;
 
-		cerr << "desired_name = " << desired_name << ", connection_number = " << connection_number << endl;
 		// find highest set bit
 		mask = 1;
-		while ((mask <= connection_number) && (mask <<= 1)) {
-		}
+		while ((mask <= connection_number) && (mask <<= 1));
 		
 		// "wrap" connection number into largest possible power of 2 
 		// that works...
-		while (mask && !c) {
+
+		while (mask) {
+
 			if (connection_number & mask) {
 				connection_number &= ~mask;
 				
 				stringstream s;
 				s << default_name << " " << connection_number + 1;
+
 				if (stereo) {
 					s << "+" << connection_number + 2;
 				}
 				
 				possible_name = s.str();
-				c = _session.connection_by_name (possible_name);
+
+				if ((c = _session.connection_by_name (possible_name)) != 0) {
+					break;
+				}
 			}
 			mask >>= 1;
 		}

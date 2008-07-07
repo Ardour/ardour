@@ -8,7 +8,7 @@ from stat import *
 
 Import('env install_prefix final_prefix config_prefix subst_dict libraries')
 
-ardour_vst = env.Copy()
+ardour_vst = env.Clone()
 
 sources = Split ("""
 winmain.c

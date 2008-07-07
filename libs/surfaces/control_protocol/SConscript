@@ -6,7 +6,7 @@ import glob
 
 Import('env final_prefix install_prefix final_config_prefix libraries i18n')
 
-cp = env.Copy()
+cp = env.Clone()
 
 #
 # this defines the version number of libardour_cp

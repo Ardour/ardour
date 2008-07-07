@@ -8,7 +8,7 @@ import glob
 fst_src = glob.glob('*.c')
 
 Import('env install_prefix')
-fst = env.Copy(CC="winegcc")
+fst = env.Clone(CC="winegcc")
 fst.Append (CPPPATH=".")
 
 if fst['VST']:

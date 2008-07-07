@@ -640,6 +640,25 @@ Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, 
 	}
 }
 
+int
+Session::micro_locate (nframes_t distance)
+{
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if (!(*i)->can_internal_playback_seek (distance)) {
+			return -1;
+		}
+	}
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		(*i)->internal_playback_seek (distance);
+	}
+	
+	_transport_frame += distance;
+	return 0;
+}
+
 void
 Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
 {

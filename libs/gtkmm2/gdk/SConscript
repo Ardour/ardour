@@ -7,7 +7,7 @@ import glob
 gdkmm2_files = glob.glob('gdkmm/*.cc')
 
 Import('env libraries install_prefix')
-gdkmm2 = env.Copy()
+gdkmm2 = env.Clone()
 gdkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm']])
 gdkmm2.Append(CXXFLAGS="-Ilibs/gtkmm2/gtk")
 

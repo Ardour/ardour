@@ -6,7 +6,7 @@ import glob
 
 Import('env final_prefix install_prefix final_config_prefix libraries i18n')
 
-powermate = env.Copy()
+powermate = env.Clone()
 
 #
 # this defines the version number of powermate

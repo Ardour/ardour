@@ -1423,6 +1423,7 @@ class Session : public PBD::StatefulDestructible
 	void set_play_loop (bool yn);
 	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
+	int  micro_locate (nframes_t distance);
 	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (nframes_t frame, bool with_roll = false);

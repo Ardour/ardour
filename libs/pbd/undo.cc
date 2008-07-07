@@ -21,6 +21,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <time.h>
 
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
@@ -34,6 +35,7 @@ using namespace sigc;
 UndoTransaction::UndoTransaction ()
 {
 	_clearing = false;
+	gettimeofday (&_timestamp, 0);
 }
 
 UndoTransaction::UndoTransaction (const UndoTransaction& rhs)

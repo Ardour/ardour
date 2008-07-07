@@ -7,7 +7,7 @@ import glob
 gtkmm2_files = glob.glob('gtkmm/*.cc')
 
 Import('env libraries install_prefix')
-gtkmm2 = env.Copy()
+gtkmm2 = env.Clone()
 gtkmm2.Merge([libraries['glibmm2'], libraries['gtk2'], libraries['sigc2'], libraries['pangomm'], libraries['atkmm'], libraries['gdkmm2'] ])
 
 if gtkmm2['IS_OSX']:
