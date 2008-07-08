@@ -1216,6 +1216,7 @@ Editor::connect_to_session (Session *t)
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
+	nudge_clock.set (session->frame_rate() * 5); // default of 5 seconds
 
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (session);
