@@ -1186,7 +1186,6 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	/* A: PreFader */
 	
 	if (check_some_plugin_counts (insert_map[PreFader], n_inputs (), err_streams)) {
-		cerr << "Pre -- going to streamcount, err_streams = " << *err_streams << endl;//DEBUG
 		goto streamcount;
 	}
 
@@ -1205,7 +1204,6 @@ Route::_reset_plugin_counts (uint32_t* err_streams)
 	/* B: PostFader */
 
 	if (check_some_plugin_counts (insert_map[PostFader], initial_streams, err_streams)) {
-		cerr << "Post -- going to streamcount, err_streams = " << *err_streams << endl;//DEBUG
 		goto streamcount;
 	}
 
