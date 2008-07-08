@@ -4875,7 +4875,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, uint32_t h)
 
 	pending_resizes.push_back (view);
 
-	if (!selection->tracks.empty()) {
+	if (selection->selected (view) && !selection->tracks.empty()) {
 		pending_resizes.insert (pending_resizes.end(), selection->tracks.begin(), selection->tracks.end());
 	}
 }
