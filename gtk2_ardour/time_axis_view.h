@@ -25,6 +25,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/drawingarea.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
@@ -112,7 +113,7 @@ class TimeAxisView : public virtual AxisView, public Stateful
 	Gtk::Table    controls_table;
 	Gtk::EventBox controls_ebox;
 	Gtk::VBox     controls_vbox;
-	Gtk::EventBox resizer;
+	Gtk::DrawingArea resizer;
 	Gtk::HBox     resizer_box;
 	Gtk::HBox     name_hbox;
 	Gtk::Frame    name_frame;

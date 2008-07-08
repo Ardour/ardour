@@ -465,6 +465,12 @@ style "editor_hscrollbar" = "ardour_adjusters"
 	GtkScrollbar::slider_width = 27
 }
 
+style "resizer_handle" 
+{
+	fg[NORMAL] = { 0, 0, 0 }
+	bg[NORMAL] = "#818181"
+}
+
 style "ardour_progressbars" = "default_generic"
 { 
   bg[NORMAL] = { 0, 0, 0 }
@@ -1573,4 +1579,5 @@ widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*ChannelCountSelector.GtkArrow" style:highest "default_generic"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
+widget "*ResizerHandler" style:highest "resizer_handle"
 

@@ -132,6 +132,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_no_show_all ();
 
 	resizer.set_size_request (10, 10);
+	resizer.set_name ("ResizeHandle");
 	resizer.signal_expose_event().connect (mem_fun (*this, &TimeAxisView::resizer_expose));
 	resizer.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_press));
 	resizer.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_release));
@@ -602,6 +603,8 @@ TimeAxisView::set_selected (bool yn)
 			(*i)->set_selected (false);
 		}
 	}
+
+	resizer.queue_draw ();
 }
 
 void
@@ -1227,12 +1230,41 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 bool
 TimeAxisView::resizer_expose (GdkEventExpose* event)
 {
-	resizer.get_window()->draw_rectangle (resizer.get_style()->get_fg_gc(STATE_ACTIVE),
-					      true,
-					      event->area.x,
-					      event->area.y,
-					      event->area.width,
-					      event->area.height);
+	int w, h, x, y, d;
+	Glib::RefPtr<Gdk::Window> win (resizer.get_window());
+	Glib::RefPtr<Gdk::GC> dark (resizer.get_style()->get_fg_gc (STATE_NORMAL));
+	Glib::RefPtr<Gdk::GC> light (resizer.get_style()->get_bg_gc (STATE_NORMAL));
+
+	win->draw_rectangle (controls_ebox.get_style()->get_bg_gc(STATE_NORMAL),
+			     true,
+			     event->area.x,
+			     event->area.y,
+			     event->area.width,
+			     event->area.height);
+
+	win->get_geometry (x, y, w, h, d);
+
+	/* handle/line #1 */
+	
+	win->draw_line (dark, 0, 0, w - 2, 0);
+	win->draw_point (dark, 0, 1);
+	win->draw_line (light, 1, 1, w - 1, 1);
+	win->draw_point (light, w - 1, 0);
+
+	/* handle/line #2 */
+
+	win->draw_line (dark, 0, 4, w - 2, 4);
+	win->draw_point (dark, 0, 5);
+	win->draw_line (light, 1, 5, w - 1, 5);
+	win->draw_point (light, w - 1, 4);
+
+	/* handle/line #3 */
+
+	win->draw_line (dark, 0, 8, w - 2, 8);
+	win->draw_point (dark, 0, 9);
+	win->draw_line (light, 1, 9, w - 1, 9);
+	win->draw_point (light, w - 1, 8);
+
 	return true;
 }
 
