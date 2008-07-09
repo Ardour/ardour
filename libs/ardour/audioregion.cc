@@ -1481,6 +1481,15 @@ AudioRegion::speed_mismatch (float sr) const
 void
 AudioRegion::source_offset_changed ()
 {
+	/* XXX this fixes a crash that should not occur. It does occur
+	   becauses regions are not being deleted when a session
+	   is unloaded. That bug must be fixed.
+	*/
+
+	if (sources.empty()) {
+		return;
+	}
+
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(sources.front());
 
 	if (afs && afs->destructive()) {

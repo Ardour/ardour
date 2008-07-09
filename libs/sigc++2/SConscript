@@ -25,6 +25,7 @@ env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ar
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',
                                        'configure', 'configure.ac', 'Makefile.am', 'SConscript',
+                                       'config.sub', 'config.guess',
                                        'sigc++/Makefile.in', 
                                        'sigc++config.h',
                                        'sigc++config.h.in',
