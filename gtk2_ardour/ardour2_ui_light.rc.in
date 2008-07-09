@@ -95,7 +95,7 @@ style "default_base" = "medium_text"
   
   fg[NORMAL] = { 0.30, 0.30, 0.40 }	
   fg[ACTIVE] = { 0.30, 0.30, 0.40 }	
-  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
+  fg[PRELIGHT] = { 0.10, 0.10, 0.20 }
   fg[INSENSITIVE] = { 0.30, 0.30, 0.40 }	
   fg[SELECTED] = { 0.30, 0.30, 0.40 }	
   

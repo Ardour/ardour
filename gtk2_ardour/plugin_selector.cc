@@ -491,10 +491,12 @@ PluginSelector::plugin_menu()
 
 	if (!_menu) {
 		_menu = new Menu();
+		_menu->set_name("ArdourContextMenu");
 	} 
 
 	MenuList& items = _menu->items();
 	Menu* favs = new Menu();
+	favs->set_name("ArdourContextMenu");
 
 	items.clear ();
 	items.push_back (MenuElem (_("Favorites"), *favs));
@@ -539,6 +541,7 @@ PluginSelector::plugin_menu()
 			submenu = new Gtk::Menu;
 			items.push_back (MenuElem (creator, *submenu));
 			submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
+			submenu->set_name("ArdourContextMenu");
 		}
 		
 		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
