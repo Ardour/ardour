@@ -35,11 +35,21 @@
 
         <row>
           <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>space</keycap></keycombo>
+          </entry>
+
+          <entry>
+            One-touch record (start transport &amp; recording)
+          </entry>
+        </row>
+
+        <row>
+          <entry>
             <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>space</keycap></keycombo>
           </entry>
 
           <entry>
-            Raise the Editor Window
+	    Toggle transport motion, deleting any recorded material if recording
           </entry>
         </row>
 
@@ -55,23 +65,14 @@
 
         <row>
           <entry>
-            <keycombo><keycap>Home</keycap></keycombo>
+            <keycombo><keycap>l</keycap> </keycombo>
           </entry>
 
           <entry>
-            Move playhead to start
+            toggle looping
           </entry>
         </row>
 
-        <row>
-          <entry>
-            <keycombo><keycap>End</keycap></keycombo>
-          </entry>
-
-          <entry>
-            Move playhead to end
-          </entry>
-        </row>
       </tbody>
     </tgroup>
   </table>

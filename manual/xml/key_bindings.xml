@@ -10,15 +10,15 @@
     <title>Key Bindings</title>
     <para>
       Note that all keyboard bindings can be changed in either the system or
-      the user's Ardour configuration file
-      (<filename>$HOME/.ardour/ardour.rc</filename>).
+      the user's Ardour key bindings file
+      (<filename>$HOME/.ardour2/ardour.bindings</filename>).
     </para>
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="general_key_bindings.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
-		href="transport_key_bindings.xml" />
+		href="window_key_bindings.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
-		href="mixer_window_key_bindings.xml" />
+		href="transport_key_bindings.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="editor_window_key_bindings.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
@@ -33,6 +33,8 @@
 		href="editor_aligning_key_bindings.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="editor_standard_editing_key_bindings.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="editor_selection_key_bindings.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="editor_range_operations_key_bindings.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 

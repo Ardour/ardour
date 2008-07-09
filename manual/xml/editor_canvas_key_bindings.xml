@@ -23,85 +23,65 @@
         </row>
       </thead>
       <tbody>
-        <row>
-          <entry>
-            <keycombo><keycap>left arrow</keycap> </keycombo>
-          </entry>
 
-          <entry>
-            move editor timeline earlier
-          </entry>
-        </row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>f</keycap></keycombo>
+	  </entry>
 
-        <row>
-          <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>b</keycap> </keycombo>
-          </entry>
+	  <entry>
+	  fit tracks
+	  </entry>
+	</row>
 
-          <entry>
-            move editor timeline earlier
-          </entry>
-        </row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Up</keycap></keycombo>
+	  </entry>
 
-        <row>
-          <entry>
-            <keycombo><keycap>right arrow</keycap> </keycombo>
-          </entry>
+	  <entry>
+	  step tracks up
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Down</keycap></keycombo>
+	  </entry>
 
-          <entry>
-            move editor timeline later
-          </entry>
-        </row>
+	  <entry>
+	  step tracks down
+	  </entry>
+	</row>
 
-        <row>
-          <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>f</keycap> </keycombo>
-          </entry>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Page_Down</keycap></keycombo>
+	  </entry>
 
-          <entry>
-            move editor timeline later
-          </entry>
-        </row>
+	  <entry>
+	  scroll tracks down
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Page_Up</keycap></keycombo>
+	  </entry>
 
-        <row>
-          <entry>
-            <keycombo><keycap>Page_Up</keycap> </keycombo>
-          </entry>
+	  <entry>
+	  scroll tracks up
+	  </entry>
+	</row>
 
-          <entry>
-            scroll track display up
-          </entry>
-        </row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Shift</keycap><keycap>e</keycap></keycombo>
+	  </entry>
 
-        <row>
-          <entry>
-            <keycombo><keycap>Page_Down</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            scroll track display down
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Up arrow</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            step track display up
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Down arrow</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            step track display down
-          </entry>
-        </row>
+	  <entry>
+	  show editor mixer
+	  </entry>
+	</row>
+	
       </tbody>
     </tgroup>
   </table>

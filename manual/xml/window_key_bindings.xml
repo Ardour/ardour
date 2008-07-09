@@ -4,14 +4,10 @@
 
 ]>
 
-<section id="sn-editor-zoom-key-bindings">
-  <title>Zoom and Visual State Key Bindings</title>
-  <para>
-    By default, 12 function keys (F1-F12) are assigned to visual state
-    management. All of them are represented in the table as "Fn".
-  </para>
-  <table id="tbl-editor-zoom-key-bindings">
-    <title>Editor Zoom Key Bindings</title>
+<section id="sn-window-key-bindings">
+  <title>Window Visibility Key Bindings</title>
+  <table id="tbl-window-key-bindings">
+    <title>Window Visibility Key Bindings</title>
     <tgroup cols = "2">
       <colspec colnum="1" colname="Key Binding" colwidth="1"/>
       <colspec colnum="2" colname="Action" colwidth= "2"/>
@@ -27,83 +23,84 @@
         </row>
       </thead>
       <tbody>
+
         <row>
           <entry>
-            <keycombo><keycap>=</keycap> </keycombo>
+            <keycombo><keycap>Alt</keycap><keycap>e</keycap> </keycombo>
           </entry>
 
           <entry>
-            zoom in on timeline
+            Raise editor window
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>-</keycap> </keycombo>
+            <keycombo><keycap>Alt</keycap><keycap>m</keycap> </keycombo>
           </entry>
 
           <entry>
-            zoom out on timeline
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>z</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            switch zoom focus to playhead
+            Raise mixer window
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>z</keycap> </keycombo>
+            <keycombo><keycap>Alt</keycap><keycap>l</keycap> </keycombo>
           </entry>
 
           <entry>
-            Zoom to fit selected region(s) (time axis only)
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Alt</keycap><keycap>z</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            Zoom to fit selected region(s) (time axis &amp; vertical axis)
+            Toggle locations window
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>Shift</keycap><keycap>z</keycap> </keycombo>
+            <keycombo><keycap>Alt</keycap><keycap>b</keycap> </keycombo>
           </entry>
 
           <entry>
-            Undo zoom change
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>Fn</keycap></keycombo>
-          </entry>
-
-          <entry>
-	    Save current visual state as VS #n (hold for 2 secs)
+            Toggle "big clock" window
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>Fn</keycap></keycombo>
+            <keycombo><keycap>Alt</keycap><keycap>k</keycap> </keycombo>
           </entry>
 
           <entry>
-	    Restore visual state #n (occurs on key release)
+            Toggle key bindings window
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>f</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            Toggle Rhythm Ferret window
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>o</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            Toggle preferences window
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>c</keycap> </keycombo>
+          </entry>
+
+          <entry>
+            Toggle color manager window
           </entry>
         </row>
 

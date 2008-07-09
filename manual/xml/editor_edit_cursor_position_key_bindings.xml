@@ -23,13 +23,109 @@
         </row>
       </thead>
       <tbody>
+
+	<row>
+	  <entry>
+	    <keycombo><keycap>`</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  cycle-edit-point
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Ctrl</keycap><keycap>~</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  cycle-edit-point-with-marker
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>e</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  set-edit-point
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Alt</keycap><keycap>Return</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  edit-to-playhead
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>F1</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  edit-cursor-to-range-start
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>F2</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  edit-cursor-to-range-end
+	  </entry>
+	</row>
+
+
+	<row>
+	  <entry>
+	    <keycombo><keycap>'</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  edit-cursor-to-previous-region-sync
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>;</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  edit-cursor-to-next-region-sync
+	  </entry>
+	</row>
+
+	<row>
+	  <entry>
+	    <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Left</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  selected-marker-to-previous-region-boundary
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Right</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  selected-marker-to-next-region-boundary
+	  </entry>
+	</row>
+
+
         <row>
           <entry>
             <keycombo><keycap>e</keycap> </keycombo>
           </entry>
 
           <entry>
-            position edit cursor at mouse pointer
+            position selected marker at mouse pointer
           </entry>
         </row>
 
@@ -40,7 +136,7 @@
           </entry>
 
           <entry>
-            move edit cursor to playhead
+            move selected marker to playhead
           </entry>
         </row>
 
@@ -50,7 +146,7 @@
           </entry>
 
           <entry>
-            move edit cursor to earlier region start
+            move selected marker to earlier region start
           </entry>
         </row>
 
@@ -60,7 +156,7 @@
           </entry>
 
           <entry>
-            move edit cursor to earlier region end
+            move selected marker to earlier region end
           </entry>
         </row>
 
@@ -70,7 +166,7 @@
           </entry>
 
           <entry>
-            move edit cursor to next region start
+            move selected marker to next region start
           </entry>
         </row>
 
@@ -80,17 +176,17 @@
           </entry>
 
           <entry>
-            move edit cursor to next region end
+            move selected marker to next region end
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>&#8221;&#8221;&#8217;</keycap> </keycombo>
+            <keycombo><keycap>'</keycap> </keycombo>
           </entry>
 
           <entry>
-            move edit cursor to next region sync
+            move selected marker to next region sync
           </entry>
         </row>
 
@@ -100,7 +196,7 @@
           </entry>
 
           <entry>
-            moved edit cursor to previous region sync
+            moved selected marker to previous region sync
           </entry>
         </row>
 
@@ -110,7 +206,7 @@
           </entry>
 
           <entry>
-            move edit cursor to start of range selection (if defined)
+            move selected marker to start of range selection (if defined)
           </entry>
         </row>
 
@@ -120,7 +216,7 @@
           </entry>
 
           <entry>
-            move edit cursor to end of range selection (if defined)
+            move selected marker to end of range selection (if defined)
           </entry>
         </row>
       </tbody>

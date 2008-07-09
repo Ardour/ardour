@@ -23,25 +23,85 @@
         </row>
       </thead>
       <tbody>
+
+	<row>
+	  <entry>
+	    <keycombo><keycap>1</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  toggle edit mode
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>2</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  cycle snap mode
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>3</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  cycle snap choice
+	  </entry>
+	</row>
+
         <row>
           <entry>
-            <keycombo><keycap>l</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            toggle auto loop
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>f</keycap> </keycombo>
+            <keycombo><keycap>Ctrl</keycap><keycap>f</keycap> </keycombo>
           </entry>
 
           <entry>
             toggle follow playhead
           </entry>
         </row>
+
+	<row>
+	  <entry>
+	    <keycombo><keycap>9</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  set tempo from region
+	  </entry>
+	</row>
+	<row>
+	  <entry>
+	    <keycombo><keycap>0</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  set tempo from edit range
+	  </entry>
+	</row>
+
+	<row>
+	  <entry>
+	    <keycombo><keycap>Ctrl</keycap><keycap>t</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  insert time
+	  </entry>
+	</row>
+
+	<row>
+	  <entry>
+	    <keycombo><keycap>Ctrl</keycap><keycap>Delete</keycap></keycombo>
+	  </entry>
+
+	  <entry>
+	  remove last capture
+	  </entry>
+	</row>
+
+
       </tbody>
     </tgroup>
   </table>

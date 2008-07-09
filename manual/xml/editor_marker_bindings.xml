@@ -4,14 +4,10 @@
 
 ]>
 
-<section id="sn-editor-nudging-key-bindings">
-  <title>Nudging Key Bindings</title>
-  <para>
-  Nudging will move selected regions if there are any, otherwise the
-  playhead.
-  </para>
-  <table id="tbl-editor-nudging-key-bindings">
-    <title>Nudging Key Bindings</title>
+<section id="sn-editor-canvas-key-bindings">
+  <title>Mark &amp; Range Key Bindings</title>
+  <table id="tbl-editor-canvas-key-bindings">
+    <title>Editor Canvas Key Bindings</title>
     <tgroup cols = "2">
       <colspec colnum="1" colname="Key Binding" colwidth="1"/>
       <colspec colnum="2" colname="Action" colwidth= "2"/>
@@ -27,27 +23,6 @@
         </row>
       </thead>
       <tbody>
-
-
-	<row>
-	  <entry>
-	    <keycombo><keycap>Keypad +</keycap></keycombo>
-	  </entry>
-
-	  <entry>
-	  nudge forward
-	  </entry>
-	</row>
-
-	<row>
-	  <entry>
-	    <keycombo><keycap>Keypad -</keycap></keycombo>
-	  </entry>
-
-	  <entry>
-	  nudge backward
-	  </entry>
-	</row>
 
 
       </tbody>
