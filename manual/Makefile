@@ -10,6 +10,9 @@ XSLTPROC ?= xsltproc
 #PWD		  = $(shell pwd)
 
 help::
+	@echo " WARNING: The Ardour Scons build script must be run before "
+	@echo " building the manual. "
+	@echo
 	@echo " The Following is a list of supported build targets:"
 	@echo
 	@echo " html:"
