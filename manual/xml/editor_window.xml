@@ -38,7 +38,7 @@
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="editor_window_controls.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
-		href="editor_window_track_list.xml" />
+		href="track_list.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="editor_window_group_list.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
