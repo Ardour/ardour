@@ -11,11 +11,9 @@
     most important objects in Ardour. They represent the fundamental way to
     playback and record audio, MIDI, and image data.
   </para>
-  <mediaobject>
-    <imageobject>
-      <imagedata fileref="images/signal_flow.png"/>
-    </imageobject>
-  </mediaobject>
+
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="signal_flow.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="adding_tracks.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
