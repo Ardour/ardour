@@ -60,6 +60,8 @@ format:: test
 
 clean::
 	@rm -rf $(OUTDIR)
+	@for file in `find xml/ -name '*.bak' -type f`; do \
+		rm $$file; done
 
 .PHONY : clean
 
