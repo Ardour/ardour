@@ -406,7 +406,7 @@ my_subst_dict = { }
 
 keybindings_dict = { }
 
-if gtkardour['GTKOSX'] and gtkardour['NATIVE_OSX_KEYS']:
+if gtkardour['GTKOSX']:
 	#
 	# Command(Meta), Alt(Mod1), Ctrl, Shift
 	# **** as of february 4th 2008, OUR VERSION OF *****

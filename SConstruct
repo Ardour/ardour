@@ -5,6 +5,7 @@
 #
 
 import os
+import os.path
 import sys
 import re
 import shutil
@@ -35,7 +36,6 @@ opts.AddOptions(
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
-    BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
     BoolOption('OLDFONTS', 'Old school font sizes', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     BoolOption('STL_DEBUG', 'Set to build with Standard Template Library Debugging', 0),
@@ -529,6 +529,9 @@ if conf.CheckPKGExists ('fftw3'):
 if conf.CheckPKGExists ('aubio'):
     libraries['aubio'] = LibraryInfo()
     libraries['aubio'].ParseConfig('pkg-config --cflags --libs aubio')
+    env['AUBIO'] = 1
+else:
+    env['AUBIO'] = 0
 
 env = conf.Finish ()
 
@@ -542,18 +545,6 @@ if env['FFT_ANALYSIS']:
         if conf.CheckHeader ('fftw3.h') == False:
             print ('Ardour cannot be compiled without the FFTW3 headers, which do not seem to be installed')
             sys.exit (1)            
-        conf.Finish()
-
-if env['AUBIO']:
-        #
-        # Check for aubio header as well as the library
-        #
-
-        conf = Configure(libraries['aubio'])
-
-        if conf.CheckHeader ('aubio/aubio.h') == False:
-            print ('AUBIO-related features be compiled without the aubio headers, which do not seem to be installed')
-            env['AUBIO'] = 0
         conf.Finish()
 
 if env['FREESOUND']:
@@ -844,8 +835,9 @@ def prep_libcheck(topenv, libinfo):
 	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
 	#            All libraries needed should be built against this location
 	if topenv['GTKOSX']:
-		libinfo.Append(CPPPATH="/opt/gtk/include", LIBPATH="/opt/gtk/lib")
-		libinfo.Append(CXXFLAGS="-I/opt/gtk/include", LINKFLAGS="-L/opt/gtk/lib")
+	        gtkroot = os.path.expanduser ("~");
+		libinfo.Append(CPPPATH="$GTKROOT/include", LIBPATH="$GTKROOT/lib")
+		libinfo.Append(CXXFLAGS="-I$GTKROOT/include", LINKFLAGS="-L$GTKROOT/lib")
 	libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
 	libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
