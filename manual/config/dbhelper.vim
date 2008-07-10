@@ -93,6 +93,7 @@ imap<leader>gs <glossseealso></glossseealso><esc>bba
 
 " index
 imap<leader>it <indexterm><CR><primary></primary><CR></indexterm><esc>k$bba
+imap<leader>is <secondary></secondary><esc>bba
 
 " admonitions
 imap<leader>no <note><CR><para></para><CR></note><esc>k$bba
