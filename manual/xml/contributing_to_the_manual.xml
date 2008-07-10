@@ -7,7 +7,11 @@
 <appendix id="ap-contributing-to-the-manual" label="A" status="ardour-draft">
   <title>Contributing to the Manual</title>
   <para>
-    A paragraph
+    If you are interested in contributing to the manual contact the Ardour
+    developers via the
+    <ulink url="http://lists.ardour.org/listinfo.cgi/ardour-dev-ardour.org">mailing
+    list</ulink> or submit patches in the
+    <ulink url="http://tracker.ardour.org">bug tracker</ulink>
   </para>
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
