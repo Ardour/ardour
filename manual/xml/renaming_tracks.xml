@@ -54,10 +54,4 @@
     new name and press <keycap>Enter</keycap> or click
     <guimenuitem>Rename</guimenuitem> to confirm the name change.
   </para>
-
-  <warning>
-    <para>
-      Changes to track names cannot be undone.
-    </para>
-  </warning>
 </section>
