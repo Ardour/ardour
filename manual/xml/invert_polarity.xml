@@ -23,12 +23,13 @@
     When the polarity of a track is inverted a <literal>Ø</literal> will
     appear before the track name in the Mixer Strip.
   </para>
-
-  <para>
-    This could be used to correct the polarity of an input signal due to
-    incorrect wiring or to prevent two signals that are out of phase with
-    respect to each other resulting in cancellation when mixing.
-  </para>
+  <tip>
+    <para>
+      This could be used to correct the polarity of an input signal due to
+      incorrect wiring or to prevent two signals that are out of phase with
+      respect to each other causing cancellation when mixing.
+    </para>
+  </tip>
 <!--
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="Some_Subsection.xml" />
