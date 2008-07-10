@@ -18,3 +18,5 @@
 
 <!ENTITY TRACK_DISPLAY '<link linkend="sn-track-display">Track Display</link>'>
 <!ENTITY TRACK_CONTROLS '<link linkend="sn-track-controls">Track Controls</link>'>
+
+<!ENTITY PLAYLIST '<glossterm linkend="gt-playlist">Playlist</glossterm>'>

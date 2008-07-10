@@ -93,6 +93,15 @@
         </para>
       </glossdef>
     </glossentry>
+
+    <glossentry id="gt-dsp">
+      <glossterm><acronym>DSP</acronym></glossterm>
+      <glossdef>
+        <para>
+          Some reasonable definition here.
+        </para>
+      </glossdef>
+    </glossentry>
   </glossdiv>
 
   <glossdiv>
