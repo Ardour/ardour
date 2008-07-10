@@ -10,6 +10,7 @@
     By default, 12 function keys (F1-F12) are assigned to visual state
     management. All of them are represented in the table as "Fn".
   </para>
+
   <table id="tbl-editor-zoom-key-bindings">
     <title>Editor Zoom Key Bindings</title>
     <tgroup cols = "2">
@@ -59,7 +60,8 @@
 
         <row>
           <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>z</keycap> </keycombo>
+            <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>z</keycap>
+            </keycombo>
           </entry>
 
           <entry>
@@ -93,7 +95,7 @@
           </entry>
 
           <entry>
-	    Save current visual state as VS #n (hold for 2 secs)
+            Save current visual state as VS #n (hold for 2 secs)
           </entry>
         </row>
 
@@ -103,10 +105,9 @@
           </entry>
 
           <entry>
-	    Restore visual state #n (occurs on key release)
+            Restore visual state #n (occurs on key release)
           </entry>
         </row>
-
       </tbody>
     </tgroup>
   </table>

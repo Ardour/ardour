@@ -49,7 +49,8 @@
           </entry>
 
           <entry>
-	    Toggle transport motion, deleting any recorded material if recording
+            Toggle transport motion, deleting any recorded material if
+            recording
           </entry>
         </row>
 
@@ -72,7 +73,6 @@
             toggle looping
           </entry>
         </row>
-
       </tbody>
     </tgroup>
   </table>

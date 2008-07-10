@@ -23,7 +23,6 @@
         </row>
       </thead>
       <tbody>
-
         <row>
           <entry>
             <keycombo><keycap>Alt</keycap><keycap>e</keycap> </keycombo>
@@ -103,7 +102,6 @@
             Toggle color manager window
           </entry>
         </row>
-
       </tbody>
     </tgroup>
   </table>

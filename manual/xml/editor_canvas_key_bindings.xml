@@ -23,65 +23,65 @@
         </row>
       </thead>
       <tbody>
+        <row>
+          <entry>
+            <keycombo><keycap>f</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>f</keycap></keycombo>
-	  </entry>
+          <entry>
+            fit tracks
+          </entry>
+        </row>
 
-	  <entry>
-	  fit tracks
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Up</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Up</keycap></keycombo>
-	  </entry>
+          <entry>
+            step tracks up
+          </entry>
+        </row>
 
-	  <entry>
-	  step tracks up
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Down</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Down</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  step tracks down
-	  </entry>
-	</row>
+          <entry>
+            step tracks down
+          </entry>
+        </row>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Page_Down</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Page_Down</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  scroll tracks down
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Page_Up</keycap></keycombo>
-	  </entry>
+          <entry>
+            scroll tracks down
+          </entry>
+        </row>
 
-	  <entry>
-	  scroll tracks up
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Page_Up</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Shift</keycap><keycap>e</keycap></keycombo>
-	  </entry>
+          <entry>
+            scroll tracks up
+          </entry>
+        </row>
 
-	  <entry>
-	  show editor mixer
-	  </entry>
-	</row>
-	
+        <row>
+          <entry>
+            <keycombo><keycap>Shift</keycap><keycap>e</keycap></keycombo>
+          </entry>
+
+          <entry>
+            show editor mixer
+          </entry>
+        </row>
       </tbody>
     </tgroup>
   </table>

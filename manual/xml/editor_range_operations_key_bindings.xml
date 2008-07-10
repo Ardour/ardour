@@ -23,36 +23,35 @@
         </row>
       </thead>
       <tbody>
+        <row>
+          <entry>
+            <keycombo><keycap>F6</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>F6</keycap></keycombo>
-	  </entry>
+          <entry>
+            select range using edit range
+          </entry>
+        </row>
 
-	  <entry>
-	  select range using edit range
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>&gt;</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>&gt;</keycap></keycombo>
-	  </entry>
+          <entry>
+            extend range to end of region
+          </entry>
+        </row>
 
-	  <entry>
-	  extend range to end of region
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>&lt;</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>&lt;</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  extend range to start of region
-	  </entry>
-	</row>
-
+          <entry>
+            extend range to start of region
+          </entry>
+        </row>
       </tbody>
     </tgroup>
   </table>

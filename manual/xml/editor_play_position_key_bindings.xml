@@ -23,7 +23,6 @@
         </row>
       </thead>
       <tbody>
-
         <row>
           <entry>
             <keycombo><keycap>Home</keycap></keycombo>
@@ -66,7 +65,8 @@
 
         <row>
           <entry>
-            <keycombo><keycap>Alt</keycap><keycap>Return</keycap> </keycombo>
+            <keycombo><keycap>Alt</keycap><keycap>Return</keycap>
+            </keycombo>
           </entry>
 
           <entry>
@@ -74,117 +74,127 @@
           </entry>
         </row>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>.</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>.</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  playhead to next region boundary
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>.</keycap></keycombo>
-	  </entry>
+          <entry>
+            playhead to next region boundary
+          </entry>
+        </row>
 
-	  <entry>
-	  playhead to next region sync
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>,</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>.</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  playhead to previous region boundary
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>,</keycap></keycombo>
-	  </entry>
+          <entry>
+            playhead to next region sync
+          </entry>
+        </row>
 
-	  <entry>
-	  playhead to previous region sync
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>Right</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>,</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  tab to transient forwards
-	  </entry>
-	</row>
+          <entry>
+            playhead to previous region boundary
+          </entry>
+        </row>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>Left</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>,</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  tab to transient backwards
-	  </entry>
-	</row>
+          <entry>
+            playhead to previous region sync
+          </entry>
+        </row>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Left</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Right</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  playhead to previous region boundary
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Alt</keycap><keycap>Left</keycap></keycombo>
-	  </entry>
+          <entry>
+            tab to transient forwards
+          </entry>
+        </row>
 
-	  <entry>
-	  nudge playhead backward
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Right</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Left</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  playhead to next region boundary
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Alt</keycap><keycap>Right</keycap></keycombo>
-	  </entry>
+          <entry>
+            tab to transient backwards
+          </entry>
+        </row>
 
-	  <entry>
-	  nudge playhead forward
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>Keypad Right</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Left</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  jump forward to mark
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>Keypad Left</keycap></keycombo>
-	  </entry>
+          <entry>
+            playhead to previous region boundary
+          </entry>
+        </row>
 
-	  <entry>
-	  jump backward to mark
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>Left</keycap></keycombo>
+          </entry>
 
+          <entry>
+            nudge playhead backward
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Right</keycap></keycombo>
+          </entry>
+
+          <entry>
+            playhead to next region boundary
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>Right</keycap></keycombo>
+          </entry>
+
+          <entry>
+            nudge playhead forward
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Keypad
+            Right</keycap></keycombo>
+          </entry>
+
+          <entry>
+            jump forward to mark
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Keypad
+            Left</keycap></keycombo>
+          </entry>
+
+          <entry>
+            jump backward to mark
+          </entry>
+        </row>
       </tbody>
     </tgroup>
   </table>

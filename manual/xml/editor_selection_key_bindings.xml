@@ -23,109 +23,115 @@
         </row>
       </thead>
       <tbody>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>a</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>a</keycap></keycombo>
-	  </entry>
+          <entry>
+            select all
+          </entry>
+        </row>
 
-	  <entry>
-	  select all
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>p</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>p</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  select all before playhead
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>p</keycap></keycombo>
-	  </entry>
+          <entry>
+            select all before playhead
+          </entry>
+        </row>
 
-	  <entry>
-	  select all after playhead
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>u</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>p</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  select all within edit range
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Shift</keycap><keycap>i</keycap></keycombo>
-	  </entry>
+          <entry>
+            select all after playhead
+          </entry>
+        </row>
 
-	  <entry>
-	  invert selection
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>e</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>u</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  select all after edit cursor
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>e</keycap></keycombo>
-	  </entry>
+          <entry>
+            select all within edit range
+          </entry>
+        </row>
 
-	  <entry>
-	  select all before edit cursor
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Shift</keycap><keycap>i</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>d</keycap></keycombo>
-	  </entry>
+          <entry>
+            invert selection
+          </entry>
+        </row>
 
-	  <entry>
-	  select all in punch range
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>e</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>l</keycap></keycombo>
-	  </entry>
+          <entry>
+            select all after edit cursor
+          </entry>
+        </row>
 
-	  <entry>
-	  select all in loop range
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Alt</keycap><keycap>Up</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>e</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  select prev route
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>Alt</keycap><keycap>Down</keycap></keycombo>
-	  </entry>
+          <entry>
+            select all before edit cursor
+          </entry>
+        </row>
 
-	  <entry>
-	  select next route
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>d</keycap></keycombo>
+          </entry>
 
+          <entry>
+            select all in punch range
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>l</keycap></keycombo>
+          </entry>
+
+          <entry>
+            select all in loop range
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>Up</keycap></keycombo>
+          </entry>
+
+          <entry>
+            select prev route
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Alt</keycap><keycap>Down</keycap></keycombo>
+          </entry>
+
+          <entry>
+            select next route
+          </entry>
+        </row>
       </tbody>
     </tgroup>
   </table>

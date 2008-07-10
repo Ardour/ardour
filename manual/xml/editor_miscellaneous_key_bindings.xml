@@ -23,34 +23,35 @@
         </row>
       </thead>
       <tbody>
+        <row>
+          <entry>
+            <keycombo><keycap>1</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>1</keycap></keycombo>
-	  </entry>
+          <entry>
+            toggle edit mode
+          </entry>
+        </row>
 
-	  <entry>
-	  toggle edit mode
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>2</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>2</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  cycle snap mode
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>3</keycap></keycombo>
-	  </entry>
+          <entry>
+            cycle snap mode
+          </entry>
+        </row>
 
-	  <entry>
-	  cycle snap choice
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>3</keycap></keycombo>
+          </entry>
+
+          <entry>
+            cycle snap choice
+          </entry>
+        </row>
 
         <row>
           <entry>
@@ -62,46 +63,45 @@
           </entry>
         </row>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>9</keycap></keycombo>
-	  </entry>
+        <row>
+          <entry>
+            <keycombo><keycap>9</keycap></keycombo>
+          </entry>
 
-	  <entry>
-	  set tempo from region
-	  </entry>
-	</row>
-	<row>
-	  <entry>
-	    <keycombo><keycap>0</keycap></keycombo>
-	  </entry>
+          <entry>
+            set tempo from region
+          </entry>
+        </row>
 
-	  <entry>
-	  set tempo from edit range
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>0</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>t</keycap></keycombo>
-	  </entry>
+          <entry>
+            set tempo from edit range
+          </entry>
+        </row>
 
-	  <entry>
-	  insert time
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>t</keycap></keycombo>
+          </entry>
 
-	<row>
-	  <entry>
-	    <keycombo><keycap>Ctrl</keycap><keycap>Delete</keycap></keycombo>
-	  </entry>
+          <entry>
+            insert time
+          </entry>
+        </row>
 
-	  <entry>
-	  remove last capture
-	  </entry>
-	</row>
+        <row>
+          <entry>
+            <keycombo><keycap>Ctrl</keycap><keycap>Delete</keycap></keycombo>
+          </entry>
 
-
+          <entry>
+            remove last capture
+          </entry>
+        </row>
       </tbody>
     </tgroup>
   </table>
