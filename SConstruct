@@ -1082,7 +1082,8 @@ if env['SYSLIBS']:
                                             CPPPATH='#libs/appleutility')
     
     coredirs = [
-        'templates'
+        'templates',
+        'manual'
     ]
     
     subdirs = [
@@ -1147,7 +1148,8 @@ else:
                                             CPPPATH='#libs/appleutility')
 
     coredirs = [
-        'templates'
+        'templates',
+	'manual'
     ]
     
     subdirs = [
