@@ -119,29 +119,8 @@
     </section>
   </section>
 
-  <section id="track-groups">
-    <title>Grouping Tracks</title>
-    <section id="creating-a-track-group">
-      <title>Creating a Group</title>
-      <para></para>
-    </section>
-
-    <section id="renaming-track-group">
-      <title>Renaming a Group</title>
-      <para></para>
-    </section>
-
-    <section id="changing-members-of-a-track-group">
-      <title>Changing members of a group</title>
-      <para></para>
-    </section>
-
-    <section id="deleting-a-track-group">
-      <title>Deleting a Group</title>
-      <para></para>
-    </section>
-  </section>
-
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="track_edit_groups.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="track_controls.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
