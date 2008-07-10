@@ -25,6 +25,7 @@
 #endif /* !__APPLE__, !_WIN32 */
 #endif /* !_WIN32 */
 
+#include <cstdlib>
 #include <iostream>
 #include <stdlib.h>
 
@@ -108,7 +109,9 @@ float *allocFloat(float *ptr, int count)
     if (ptr) free((void *)ptr);
     void *allocated;
 #ifndef _WIN32
+#ifndef __APPLE__
     if (!posix_memalign(&allocated, 16, count * sizeof(float)))
+#endif
 #endif
         allocated = malloc(count * sizeof(float));
     for (int i = 0; i < count; ++i) ((float *)allocated)[i] = 0.f;
@@ -130,7 +133,9 @@ double *allocDouble(double *ptr, int count)
     if (ptr) free((void *)ptr);
     void *allocated;
 #ifndef _WIN32
+#ifndef __APPLE__
     if (!posix_memalign(&allocated, 16, count * sizeof(double)))
+#endif
 #endif
         allocated = malloc(count * sizeof(double));
     for (int i = 0; i < count; ++i) ((double *)allocated)[i] = 0.f;
