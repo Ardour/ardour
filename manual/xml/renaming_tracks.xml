@@ -9,6 +9,10 @@
 
 <section id="renaming-tracks">
   <title>Renaming Tracks</title>
+  <indexterm>
+    <primary>Tracks</primary>
+    <secondary>Renaming</secondary>
+  </indexterm>
   <para>
     Tracks can be renamed from within the &EDIT_WIN; or the &MIX_WIN;.
   </para>
