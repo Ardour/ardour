@@ -41,12 +41,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #include <memory.h>
-#include <limits.h>
-#include <math.h>
-#include <assert.h>
+#include <climits>
+#include <cmath>
+#include <cassert>
 
 #include "STTypes.h"
 #include "cpu_detect.h"

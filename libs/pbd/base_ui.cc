@@ -20,8 +20,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 
 #include <pbd/base_ui.h>
 #include <pbd/error.h>

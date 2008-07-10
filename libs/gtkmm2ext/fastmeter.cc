@@ -25,7 +25,7 @@
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm/style.h>
-#include <string.h>
+#include <cstring>
 
 #define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
 #define UINT_TO_RGBA(u,r,g,b,a) { UINT_TO_RGB(((u)>>8),r,g,b); (*(a)) = (u)&0xff; }

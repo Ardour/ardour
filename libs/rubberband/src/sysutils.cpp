@@ -20,14 +20,13 @@
 #ifdef __APPLE__
 #include <sys/sysctl.h>
 #else /* !__APPLE__, !_WIN32 */
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #endif /* !__APPLE__, !_WIN32 */
 #endif /* !_WIN32 */
 
 #include <cstdlib>
 #include <iostream>
-#include <stdlib.h>
 
 namespace RubberBand {
 

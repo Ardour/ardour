@@ -20,13 +20,13 @@
 #include <algorithm>
 #include <vector>
 #include <string>
-#include <ctype.h>
+#include <cctype>
 
 #include <cstdlib>
 #include <cstdio> // so libraptor doesn't complain
 #include <cmath>
 #include <dirent.h>
-#include <string.h> // for memmove
+#include <cstring> // for memmove
 #include <sys/stat.h>
 #include <cerrno>
 

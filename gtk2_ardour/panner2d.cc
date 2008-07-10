@@ -19,7 +19,7 @@
 
 #include <cmath>
 #include <climits>
-#include <string.h>
+#include <cstring>
 
 #include <gtkmm/menu.h>
 #include <gtkmm/checkmenuitem.h>

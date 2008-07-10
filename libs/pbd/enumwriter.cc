@@ -18,10 +18,10 @@
     $Id$
 */
 
-#include <ctype.h>
+#include <cctype>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 #include <pbd/enumwriter.h>
 #include <pbd/error.h>

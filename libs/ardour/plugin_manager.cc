@@ -27,7 +27,7 @@
 #ifdef VST_SUPPORT
 #include <fst.h>
 #include <pbd/basename.h>
-#include <string.h>
+#include <cstring>
 #endif // VST_SUPPORT
 
 #include <glibmm/miscutils.h>

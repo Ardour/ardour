@@ -39,10 +39,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <memory.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
+#include <cassert>
+#include <cstdlib>
+#include <cstdio>
+#include <climits>
 #include "RateTransposer.h"
 #include "AAFilter.h"
 
