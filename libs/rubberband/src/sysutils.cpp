@@ -26,7 +26,7 @@
 #endif /* !_WIN32 */
 
 #include <iostream>
-
+#include <stdlib.h>
 
 namespace RubberBand {
 
