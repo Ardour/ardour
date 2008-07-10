@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -14,7 +14,10 @@
 
 #include "PercussiveAudioCurve.h"
 
+#include "Profiler.h"
+
 #include <cmath>
+
 
 namespace RubberBand
 {
@@ -22,7 +25,7 @@ namespace RubberBand
 PercussiveAudioCurve::PercussiveAudioCurve(size_t sampleRate, size_t windowSize) :
     AudioCurve(sampleRate, windowSize)
 {
-    m_prevMag = new double[m_windowSize/2 + 1];
+    m_prevMag = new float[m_windowSize/2 + 1];
 
     for (size_t i = 0; i <= m_windowSize/2; ++i) {
         m_prevMag[i] = 0.f;
@@ -45,29 +48,60 @@ PercussiveAudioCurve::reset()
 void
 PercussiveAudioCurve::setWindowSize(size_t newSize)
 {
-    delete[] m_prevMag;
     m_windowSize = newSize;
-    
-    m_prevMag = new double[m_windowSize/2 + 1];
+
+    delete[] m_prevMag;
+    m_prevMag = new float[m_windowSize/2 + 1];
 
     reset();
 }
 
 float
-PercussiveAudioCurve::process(float *mag, size_t increment)
+PercussiveAudioCurve::process(const float *R__ mag, size_t increment)
 {
-    static float threshold = pow(10, 0.3);
-    static float zeroThresh = pow(10, -16);
+    static float threshold = powf(10.f, 0.15f); // 3dB rise in square of magnitude
+    static float zeroThresh = powf(10.f, -8);
 
     size_t count = 0;
     size_t nonZeroCount = 0;
 
-    for (size_t n = 1; n <= m_windowSize / 2; ++n) {
-	float sqrmag = mag[n] * mag[n];
-        bool above = ((sqrmag / m_prevMag[n]) >= threshold);
+    const int sz = m_windowSize / 2;
+
+    for (int n = 1; n <= sz; ++n) {
+        bool above = ((mag[n] / m_prevMag[n]) >= threshold);
         if (above) ++count;
-        if (sqrmag > zeroThresh) ++nonZeroCount;
-	m_prevMag[n] = sqrmag;
+        if (mag[n] > zeroThresh) ++nonZeroCount;
+    }
+
+    for (int n = 1; n <= sz; ++n) {
+	m_prevMag[n] = mag[n];
+    }
+
+    if (nonZeroCount == 0) return 0;
+    else return float(count) / float(nonZeroCount);
+}
+
+float
+PercussiveAudioCurve::process(const double *R__ mag, size_t increment)
+{
+    Profiler profiler("PercussiveAudioCurve::process");
+
+    static double threshold = pow(10.0, 0.15); // 3dB rise in square of magnitude
+    static double zeroThresh = pow(10.0, -8);
+
+    size_t count = 0;
+    size_t nonZeroCount = 0;
+
+    const int sz = m_windowSize / 2;
+
+    for (int n = 1; n <= sz; ++n) {
+        bool above = ((mag[n] / m_prevMag[n]) >= threshold);
+        if (above) ++count;
+        if (mag[n] > zeroThresh) ++nonZeroCount;
+    }
+
+    for (int n = 1; n <= sz; ++n) {
+	m_prevMag[n] = mag[n];
     }
 
     if (nonZeroCount == 0) return 0;

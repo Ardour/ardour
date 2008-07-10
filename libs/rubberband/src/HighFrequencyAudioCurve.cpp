@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -38,12 +38,14 @@ HighFrequencyAudioCurve::setWindowSize(size_t newSize)
 }
 
 float
-HighFrequencyAudioCurve::process(float *mag, size_t increment)
+HighFrequencyAudioCurve::process(const float *R__ mag, size_t increment)
 {
     float result = 0.0;
 
-    for (size_t n = 0; n <= m_windowSize / 2; ++n) {
-        result += mag[n] * n;
+    const int sz = m_windowSize / 2;
+
+    for (int n = 0; n <= sz; ++n) {
+        result = result + mag[n] * n;
     }
 
     return result;

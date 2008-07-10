@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -34,8 +34,7 @@ class StretchCalculator;
 class RubberBandStretcher::Impl
 {
 public:
-    Impl(RubberBandStretcher *stretcher,
-         size_t sampleRate, size_t channels, Options options,
+    Impl(size_t sampleRate, size_t channels, Options options,
          double initialTimeRatio, double initialPitchScale);
     ~Impl();
     
@@ -50,6 +49,8 @@ public:
 
     void setTransientsOption(Options);
     void setPhaseOption(Options);
+    void setFormantOption(Options);
+    void setPitchOption(Options);
 
     void setExpectedInputDuration(size_t samples);
     void setMaxProcessSize(size_t samples);
@@ -83,10 +84,11 @@ public:
     static void setDefaultDebugLevel(int level) { m_defaultDebugLevel = level; }
 
 protected:
-    RubberBandStretcher *m_stretcher;
+    size_t m_sampleRate;
     size_t m_channels;
 
-    size_t consumeChannel(size_t channel, const float *input, size_t samples);
+    size_t consumeChannel(size_t channel, const float *input,
+                          size_t samples, bool final);
     void processChunks(size_t channel, bool &any, bool &last);
     bool processOneChunk(); // across all channels, for real time use
     bool processChunkForChannel(size_t channel, size_t phaseIncrement,
@@ -98,6 +100,7 @@ protected:
                        size_t &shiftIncrement, bool &phaseReset);
     void analyseChunk(size_t channel);
     void modifyChunk(size_t channel, size_t outputIncrement, bool phaseReset);
+    void formantShiftChunk(size_t channel);
     void synthesiseChunk(size_t channel);
     void writeChunk(size_t channel, size_t shiftIncrement, bool last);
 
@@ -109,6 +112,8 @@ protected:
     
     size_t roundUp(size_t value); // to next power of two
 
+    bool resampleBeforeStretching() const;
+    
     double m_timeRatio;
     double m_pitchScale;
 
@@ -161,6 +166,8 @@ protected:
     size_t m_inputDuration;
     std::vector<float> m_phaseResetDf;
     std::vector<float> m_stretchDf;
+    std::vector<bool> m_silence;
+    int m_silentHistory;
 
     class ChannelData; 
     std::vector<ChannelData *> m_channelData;
@@ -172,6 +179,7 @@ protected:
 
     AudioCurve *m_phaseResetAudioCurve;
     AudioCurve *m_stretchAudioCurve;
+    AudioCurve *m_silentAudioCurve;
     StretchCalculator *m_stretchCalculator;
 
     float m_freq0;

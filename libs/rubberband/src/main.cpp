@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -18,15 +18,19 @@
 #include <iostream>
 #include <sndfile.h>
 #include <cmath>
-#include <cstdlib>
-#include <sys/time.h>
 #include <time.h>
+#include <cstdlib>
+#include <cstring>
 #include "sysutils.h"
 
+#ifdef __MSVC__
+#include "bsd-3rdparty/getopt/getopt.h"
+#else
 #include <getopt.h>
+#include <sys/time.h>
+#endif
 
-// for import and export of FFTW wisdom
-#include <fftw3.h>
+#include "Profiler.h"
 
 using namespace std;
 using namespace RubberBand;
@@ -36,23 +40,48 @@ using RubberBand::gettimeofday;
 using RubberBand::usleep;
 #endif
 
+double tempo_convert(const char *str)
+{
+    char *d = strchr((char *)str, ':');
+
+    if (!d || !*d) {
+        double m = atof(str);
+        if (m != 0.0) return 1.0 / m;
+        else return 1.0;
+    }
+
+    char *a = strdup(str);
+    char *b = strdup(d+1);
+    a[d-str] = '\0';
+    double m = atof(a);
+    double n = atof(b);
+    free(a);
+    free(b);
+    if (n != 0.0 && m != 0.0) return m / n;
+    else return 1.0;
+}
+
 int main(int argc, char **argv)
 {
     int c;
 
     double ratio = 1.0;
-    double pitchshift = 1.0;
+    double duration = 0.0;
+    double pitchshift = 0.0;
     double frequencyshift = 1.0;
     int debug = 0;
     bool realtime = false;
     bool precise = false;
     int threading = 0;
-    bool peaklock = true;
+    bool lamination = true;
     bool longwin = false;
     bool shortwin = false;
-    bool softening = true;
+    bool hqpitch = false;
+    bool formant = false;
+    bool crispchanged = false;
     int crispness = -1;
     bool help = false;
+    bool version = false;
     bool quiet = false;
 
     bool haveRatio = false;
@@ -63,17 +92,15 @@ int main(int argc, char **argv)
         Transients
     } transients = Transients;
 
-    float fthresh0 = -1.f;
-    float fthresh1 = -1.f;
-    float fthresh2 = -1.f;
-
     while (1) {
         int optionIndex = 0;
 
         static struct option longOpts[] = {
             { "help",          0, 0, 'h' },
+            { "version",       0, 0, 'V' },
             { "time",          1, 0, 't' },
             { "tempo",         1, 0, 'T' },
+            { "duration",      1, 0, 'D' },
             { "pitch",         1, 0, 'p' },
             { "frequency",     1, 0, 'f' },
             { "crisp",         1, 0, 'c' },
@@ -81,75 +108,81 @@ int main(int argc, char **argv)
             { "debug",         1, 0, 'd' },
             { "realtime",      0, 0, 'R' },
             { "precise",       0, 0, 'P' },
+            { "formant",       0, 0, 'F' },
             { "no-threads",    0, 0, '0' },
             { "no-transients", 0, 0, '1' },
-            { "no-peaklock",   0, 0, '2' },
+            { "no-lamination", 0, 0, '2' },
             { "window-long",   0, 0, '3' },
             { "window-short",  0, 0, '4' },
-            { "thresh0",       1, 0, '5' },
-            { "thresh1",       1, 0, '6' },
-            { "thresh2",       1, 0, '7' },
             { "bl-transients", 0, 0, '8' },
-            { "no-softening",  0, 0, '9' },
+            { "pitch-hq",      0, 0, '%' },
             { "threads",       0, 0, '@' },
             { "quiet",         0, 0, 'q' },
             { 0, 0, 0 }
         };
 
-        c = getopt_long(argc, argv, "t:p:d:RPc:f:qh", longOpts, &optionIndex);
+        c = getopt_long(argc, argv, "t:p:d:RPFc:f:T:D:qhV", longOpts, &optionIndex);
         if (c == -1) break;
 
         switch (c) {
         case 'h': help = true; break;
+        case 'V': version = true; break;
         case 't': ratio *= atof(optarg); haveRatio = true; break;
-        case 'T': { double m = atof(optarg); if (m != 0.0) ratio /= m; }; haveRatio = true; break;
+        case 'T': ratio *= tempo_convert(optarg); haveRatio = true; break;
+        case 'D': duration = atof(optarg); haveRatio = true; break;
         case 'p': pitchshift = atof(optarg); haveRatio = true; break;
         case 'f': frequencyshift = atof(optarg); haveRatio = true; break;
         case 'd': debug = atoi(optarg); break;
         case 'R': realtime = true; break;
         case 'P': precise = true; break;
+	case 'F': formant = true; break;
         case '0': threading = 1; break;
         case '@': threading = 2; break;
-        case '1': transients = NoTransients; break;
-        case '2': peaklock = false; break;
-        case '3': longwin = true; break;
-        case '4': shortwin = true; break;
-        case '5': fthresh0 = atof(optarg); break;
-        case '6': fthresh1 = atof(optarg); break;
-        case '7': fthresh2 = atof(optarg); break;
-        case '8': transients = BandLimitedTransients; break;
-        case '9': softening = false; break;
+        case '1': transients = NoTransients; crispchanged = true; break;
+        case '2': lamination = false; crispchanged = true; break;
+        case '3': longwin = true; crispchanged = true; break;
+        case '4': shortwin = true; crispchanged = true; break;
+        case '8': transients = BandLimitedTransients; crispchanged = true; break;
+        case '%': hqpitch = true; break;
         case 'c': crispness = atoi(optarg); break;
         case 'q': quiet = true; break;
         default:  help = true; break;
         }
     }
 
+    if (version) {
+        cerr << RUBBERBAND_VERSION << endl;
+        return 0;
+    }
+
     if (help || !haveRatio || optind + 2 != argc) {
         cerr << endl;
 	cerr << "Rubber Band" << endl;
         cerr << "An audio time-stretching and pitch-shifting library and utility program." << endl;
-	cerr << "Copyright 2007 Chris Cannam.  Distributed under the GNU General Public License." << endl;
+	cerr << "Copyright 2008 Chris Cannam.  Distributed under the GNU General Public License." << endl;
         cerr << endl;
 	cerr << "   Usage: " << argv[0] << " [options] <infile.wav> <outfile.wav>" << endl;
         cerr << endl;
         cerr << "You must specify at least one of the following time and pitch ratio options." << endl;
         cerr << endl;
         cerr << "  -t<X>, --time <X>       Stretch to X times original duration, or" << endl;
-        cerr << "  -T<X>, --tempo <X>      Change tempo by multiple X (equivalent to --time 1/X)" << endl;
+        cerr << "  -T<X>, --tempo <X>      Change tempo by multiple X (same as --time 1/X), or" << endl;
+        cerr << "  -T<X>, --tempo <X>:<Y>  Change tempo from X to Y (same as --time X/Y), or" << endl;
+        cerr << "  -D<X>, --duration <X>   Stretch or squash to make output file X seconds long" << endl;
         cerr << endl;
         cerr << "  -p<X>, --pitch <X>      Raise pitch by X semitones, or" << endl;
         cerr << "  -f<X>, --frequency <X>  Change frequency by multiple X" << endl;
         cerr << endl;
-        cerr << "The following option provides a simple way to adjust the sound.  See below" << endl;
+        cerr << "The following options provide a simple way to adjust the sound.  See below" << endl;
         cerr << "for more details." << endl;
         cerr << endl;
         cerr << "  -c<N>, --crisp <N>      Crispness (N = 0,1,2,3,4,5); default 4 (see below)" << endl;
+	cerr << "  -F,    --formant        Enable formant preservation when pitch shifting" << endl;
         cerr << endl;
         cerr << "The remaining options fine-tune the processing mode and stretch algorithm." << endl;
         cerr << "These are mostly included for test purposes; the default settings and standard" << endl;
         cerr << "crispness parameter are intended to provide the best sounding set of options" << endl;
-        cerr << "for most situations." << endl;
+        cerr << "for most situations.  The default is to use none of these options." << endl;
         cerr << endl;
         cerr << "  -P,    --precise        Aim for minimal time distortion (implied by -R)" << endl;
         cerr << "  -R,    --realtime       Select realtime mode (implies -P --no-threads)" << endl;
@@ -157,37 +190,42 @@ int main(int argc, char **argv)
         cerr << "         --threads        Assume multi-CPU even if only one CPU is identified" << endl;
         cerr << "         --no-transients  Disable phase resynchronisation at transients" << endl;
         cerr << "         --bl-transients  Band-limit phase resync to extreme frequencies" << endl;
-        cerr << "         --no-peaklock    Disable phase locking to peak frequencies" << endl;
-        cerr << "         --no-softening   Disable large-ratio softening of phase locking" << endl;
+        cerr << "         --no-lamination  Disable phase lamination" << endl;
         cerr << "         --window-long    Use longer processing window (actual size may vary)" << endl;
         cerr << "         --window-short   Use shorter processing window" << endl;
-        cerr << "         --thresh<N> <F>  Set internal freq threshold N (N = 0,1,2) to F Hz" << endl;
+        cerr << "         --pitch-hq       In RT mode, use a slower, higher quality pitch shift" << endl;
         cerr << endl;
         cerr << "  -d<N>, --debug <N>      Select debug level (N = 0,1,2,3); default 0, full 3" << endl;
         cerr << "                          (N.B. debug level 3 includes audible ticks in output)" << endl;
         cerr << "  -q,    --quiet          Suppress progress output" << endl;
         cerr << endl;
+        cerr << "  -V,    --version        Show version number and exit" << endl;
         cerr << "  -h,    --help           Show this help" << endl;
         cerr << endl;
         cerr << "\"Crispness\" levels:" << endl;
-        cerr << "  -c 0   equivalent to --no-transients --no-peaklock --window-long" << endl;
-        cerr << "  -c 1   equivalent to --no-transients --no-peaklock" << endl;
+        cerr << "  -c 0   equivalent to --no-transients --no-lamination --window-long" << endl;
+        cerr << "  -c 1   equivalent to --no-transients --no-lamination" << endl;
         cerr << "  -c 2   equivalent to --no-transients" << endl;
         cerr << "  -c 3   equivalent to --bl-transients" << endl;
         cerr << "  -c 4   default processing options" << endl;
-        cerr << "  -c 5   equivalent to --no-peaklock --window-short (may be suitable for drums)" << endl;
+        cerr << "  -c 5   equivalent to --no-lamination --window-short (may be good for drums)" << endl;
         cerr << endl;
 	return 2;
     }
 
+    if (crispness >= 0 && crispchanged) {
+        cerr << "WARNING: Both crispness option and transients, lamination or window options" << endl;
+        cerr << "         provided -- crispness will override these other options" << endl;
+    }
+
     switch (crispness) {
     case -1: crispness = 4; break;
-    case 0: transients = NoTransients; peaklock = false; longwin = true; shortwin = false; break;
-    case 1: transients = NoTransients; peaklock = false; longwin = false; shortwin = false; break;
-    case 2: transients = NoTransients; peaklock = true; longwin = false; shortwin = false; break;
-    case 3: transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false; break;
-    case 4: transients = Transients; peaklock = true; longwin = false; shortwin = false; break;
-    case 5: transients = Transients; peaklock = false; longwin = false; shortwin = true; break;
+    case 0: transients = NoTransients; lamination = false; longwin = true; shortwin = false; break;
+    case 1: transients = NoTransients; lamination = false; longwin = false; shortwin = false; break;
+    case 2: transients = NoTransients; lamination = true; longwin = false; shortwin = false; break;
+    case 3: transients = BandLimitedTransients; lamination = true; longwin = false; shortwin = false; break;
+    case 4: transients = Transients; lamination = true; longwin = false; shortwin = false; break;
+    case 5: transients = Transients; lamination = false; longwin = false; shortwin = true; break;
     };
 
     if (!quiet) {
@@ -205,7 +243,7 @@ int main(int argc, char **argv)
 
     char *fileName = strdup(argv[optind++]);
     char *fileNameOut = strdup(argv[optind++]);
-    
+
     SNDFILE *sndfile;
     SNDFILE *sndfileOut;
     SF_INFO sfinfo;
@@ -219,6 +257,15 @@ int main(int argc, char **argv)
 	return 1;
     }
 
+    if (duration != 0.0) {
+        if (sfinfo.frames == 0 || sfinfo.samplerate == 0) {
+            cerr << "ERROR: File lacks frame count or sample rate in header, cannot use --duration" << endl;
+            return 1;
+        }
+        double induration = double(sfinfo.frames) / double(sfinfo.samplerate);
+        if (induration != 0.0) ratio = duration / induration;
+    }
+
     sfinfoOut.channels = sfinfo.channels;
     sfinfoOut.format = sfinfo.format;
     sfinfoOut.frames = int(sfinfo.frames * ratio + 0.1);
@@ -228,8 +275,8 @@ int main(int argc, char **argv)
 
     sndfileOut = sf_open(fileNameOut, SFM_WRITE, &sfinfoOut) ;
     if (!sndfileOut) {
-	cerr << "ERROR: Failed to open output file \"" << fileName << "\" for writing: "
-	     << sf_strerror(sndfile) << endl;
+	cerr << "ERROR: Failed to open output file \"" << fileNameOut << "\" for writing: "
+	     << sf_strerror(sndfileOut) << endl;
 	return 1;
     }
     
@@ -239,10 +286,11 @@ int main(int argc, char **argv)
     RubberBandStretcher::Options options = 0;
     if (realtime)    options |= RubberBandStretcher::OptionProcessRealTime;
     if (precise)     options |= RubberBandStretcher::OptionStretchPrecise;
-    if (!peaklock)   options |= RubberBandStretcher::OptionPhaseIndependent;
-    if (!softening)  options |= RubberBandStretcher::OptionPhasePeakLocked;
+    if (!lamination) options |= RubberBandStretcher::OptionPhaseIndependent;
     if (longwin)     options |= RubberBandStretcher::OptionWindowLong;
     if (shortwin)    options |= RubberBandStretcher::OptionWindowShort;
+    if (formant)     options |= RubberBandStretcher::OptionFormantPreserved;
+    if (hqpitch)     options |= RubberBandStretcher::OptionPitchHighQuality;
 
     switch (threading) {
     case 0:
@@ -268,9 +316,12 @@ int main(int argc, char **argv)
         break;
     }
 
-    if (pitchshift != 1.0) {
+    if (pitchshift != 0.0) {
         frequencyshift *= pow(2.0, pitchshift / 12);
     }
+
+    cerr << "Using time ratio " << ratio;
+    cerr << " and frequency ratio " << frequencyshift << endl;
 
 #ifdef _WIN32
     RubberBand::
@@ -470,6 +521,8 @@ int main(int argc, char **argv)
         double sec = double(etv.tv_sec) + (double(etv.tv_usec) / 1000000.0);
         cerr << "elapsed time: " << sec << " sec, in frames/sec: " << countIn/sec << ", out frames/sec: " << countOut/sec << endl;
     }
+
+    Profiler::dump();
 
     return 0;
 }

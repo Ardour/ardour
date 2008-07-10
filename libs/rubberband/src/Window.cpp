@@ -12,21 +12,6 @@
     COPYING included with this distribution for more information.
 */
 
-#include <vamp/vamp.h>
-#include <vamp-sdk/PluginAdapter.h>
+#include "Window.h"
 
-#include "RubberBandVampPlugin.h"
-
-static Vamp::PluginAdapter<RubberBandVampPlugin> rubberBandAdapter;
-
-const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
-                                                    unsigned int index)
-{
-    if (version < 1) return 0;
-
-    switch (index) {
-    case  0: return rubberBandAdapter.getDescriptor();
-    default: return 0;
-    }
-}
 

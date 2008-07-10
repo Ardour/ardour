@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -18,7 +18,10 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <cstdlib>
 #include <map>
+
+#include "sysutils.h"
 
 namespace RubberBand {
 
@@ -41,7 +44,7 @@ public:
     /**
      * Construct a windower of the given type.
      */
-    Window(WindowType type, size_t size) : m_type(type), m_size(size) { encache(); }
+    Window(WindowType type, int size) : m_type(type), m_size(size) { encache(); }
     Window(const Window &w) : m_type(w.m_type), m_size(w.m_size) { encache(); }
     Window &operator=(const Window &w) {
 	if (&w == this) return *this;
@@ -52,21 +55,34 @@ public:
     }
     virtual ~Window() { delete[] m_cache; }
     
-    void cut(T *src) const { cut(src, src); }
-    void cut(T *src, T *dst) const {
-	for (size_t i = 0; i < m_size; ++i) dst[i] = src[i] * m_cache[i];
+    void cut(T *R__ src) const
+    {
+        const int sz = m_size;
+        for (int i = 0; i < sz; ++i) {
+            src[i] *= m_cache[i];
+        }
+    }
+
+    void cut(T *R__ src, T *dst) const {
+        const int sz = m_size;
+	for (int i = 0; i < sz; ++i) {
+            dst[i] = src[i];
+        }
+	for (int i = 0; i < sz; ++i) {
+            dst[i] *= m_cache[i];
+        }
     }
 
     T getArea() { return m_area; }
-    T getValue(size_t i) { return m_cache[i]; }
+    T getValue(int i) { return m_cache[i]; }
 
     WindowType getType() const { return m_type; }
-    size_t getSize() const { return m_size; }
+    int getSize() const { return m_size; }
 
 protected:
     WindowType m_type;
-    size_t m_size;
-    T *m_cache;
+    int m_size;
+    T *R__ m_cache;
     T m_area;
     
     void encache();

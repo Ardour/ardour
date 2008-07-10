@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -20,6 +20,9 @@
 #include <deque>
 #include <set>
 #include <cassert>
+#include <algorithm>
+
+#include "sysutils.h"
 
 namespace RubberBand
 {
@@ -163,9 +166,11 @@ StretchCalculator::calculate(double ratio, size_t inputDuration,
 
 int
 StretchCalculator::calculateSingle(double ratio,
-                                   size_t inputDurationSoFar,
-                                   float df)
+                                   float df,
+                                   size_t increment)
 {
+    if (increment == 0) increment = m_increment;
+
     bool isTransient = false;
 
     // We want to ensure, as close as possible, that the phase reset
@@ -177,10 +182,10 @@ StretchCalculator::calculateSingle(double ratio,
     // from the ratio directly.  For the moment we're happy if it
     // works well in common situations.
 
-    float transientThreshold = 0.35;
-    if (ratio > 1) transientThreshold = 0.25;
+    float transientThreshold = 0.35f;
+    if (ratio > 1) transientThreshold = 0.25f;
 
-    if (m_useHardPeaks && df > m_prevDf * 1.1 && df > transientThreshold) {
+    if (m_useHardPeaks && df > m_prevDf * 1.1f && df > transientThreshold) {
         isTransient = true;
     }
 
@@ -191,39 +196,41 @@ StretchCalculator::calculateSingle(double ratio,
 
     m_prevDf = df;
 
+    bool ratioChanged = (ratio != m_prevRatio);
+    m_prevRatio = ratio;
+
     if (isTransient && m_transientAmnesty == 0) {
         if (m_debugLevel > 1) {
-            std::cerr << "StretchCalculator::calculateSingle: transient found at "
-                      << inputDurationSoFar << std::endl;
+            std::cerr << "StretchCalculator::calculateSingle: transient"
+                      << std::endl;
         }
-        m_divergence += m_increment - (m_increment * ratio);
+        m_divergence += increment - (increment * ratio);
 
         // as in offline mode, 0.05 sec approx min between transients
         m_transientAmnesty =
-            lrint(ceil(double(m_sampleRate) / (20 * double(m_increment))));
+            lrint(ceil(double(m_sampleRate) / (20 * double(increment))));
 
-        m_recovery = m_divergence / ((m_sampleRate / 10.0) / m_increment);
-        return -m_increment;
+        m_recovery = m_divergence / ((m_sampleRate / 10.0) / increment);
+        return -int(increment);
     }
 
-    if (m_prevRatio != ratio) {
-        m_recovery = m_divergence / ((m_sampleRate / 10.0) / m_increment);
-        m_prevRatio = ratio;
+    if (ratioChanged) {
+        m_recovery = m_divergence / ((m_sampleRate / 10.0) / increment);
     }
 
     if (m_transientAmnesty > 0) --m_transientAmnesty;
 
-    int incr = lrint(m_increment * ratio - m_recovery);
+    int incr = lrint(increment * ratio - m_recovery);
     if (m_debugLevel > 2 || (m_debugLevel > 1 && m_divergence != 0)) {
         std::cerr << "divergence = " << m_divergence << ", recovery = " << m_recovery << ", incr = " << incr << ", ";
     }
-    if (incr < lrint((m_increment * ratio) / 2)) {
-        incr = lrint((m_increment * ratio) / 2);
-    } else if (incr > lrint(m_increment * ratio * 2)) {
-        incr = lrint(m_increment * ratio * 2);
+    if (incr < lrint((increment * ratio) / 2)) {
+        incr = lrint((increment * ratio) / 2);
+    } else if (incr > lrint(increment * ratio * 2)) {
+        incr = lrint(increment * ratio * 2);
     }
 
-    double divdiff = (m_increment * ratio) - incr;
+    double divdiff = (increment * ratio) - incr;
 
     if (m_debugLevel > 2 || (m_debugLevel > 1 && m_divergence != 0)) {
         std::cerr << "divdiff = " << divdiff << std::endl;
@@ -233,7 +240,7 @@ StretchCalculator::calculateSingle(double ratio,
     m_divergence -= divdiff;
     if ((prevDivergence < 0 && m_divergence > 0) ||
         (prevDivergence > 0 && m_divergence < 0)) {
-        m_recovery = m_divergence / ((m_sampleRate / 10.0) / m_increment);
+        m_recovery = m_divergence / ((m_sampleRate / 10.0) / increment);
     }
 
     return incr;

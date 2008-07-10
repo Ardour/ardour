@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -15,7 +15,7 @@
 #ifndef _RUBBERBAND_PITCH_SHIFTER_H_
 #define _RUBBERBAND_PITCH_SHIFTER_H_
 
-#include "ladspa.h"
+#include <ladspa.h>
 
 #include "RingBuffer.h"
 
@@ -38,11 +38,13 @@ protected:
 	SemitonesPort    = 2,
 	CentsPort        = 3,
         CrispnessPort    = 4,
-        InputPort1       = 5,
-        OutputPort1      = 6,
+	FormantPort      = 5,
+	FastPort         = 6,
+	InputPort1       = 7,
+        OutputPort1      = 8,
         PortCountMono    = OutputPort1 + 1,
-        InputPort2       = 7,
-        OutputPort2      = 8,
+        InputPort2       = 9,
+        OutputPort2      = 10,
         PortCountStereo  = OutputPort2 + 1
     };
 
@@ -66,9 +68,13 @@ protected:
     static void deactivate(LADSPA_Handle);
     static void cleanup(LADSPA_Handle);
 
+    void activateImpl();
     void runImpl(unsigned long);
+    void runImpl(unsigned long, unsigned long offset);
     void updateRatio();
     void updateCrispness();
+    void updateFormant();
+    void updateFast();
 
     float *m_input[2];
     float *m_output[2];
@@ -77,11 +83,17 @@ protected:
     float *m_semitones;
     float *m_octaves;
     float *m_crispness;
+    float *m_formant;
+    float *m_fast;
     double m_ratio;
     double m_prevRatio;
     int m_currentCrispness;
+    bool m_currentFormant;
+    bool m_currentFast;
 
-    size_t m_extraLatency;
+    size_t m_blockSize;
+    size_t m_reserve;
+    size_t m_minfill;
 
     RubberBand::RubberBandStretcher *m_stretcher;
     RubberBand::RingBuffer<float> *m_outputBuffer[2];

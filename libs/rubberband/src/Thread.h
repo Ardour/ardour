@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -22,6 +22,10 @@
 #endif /* !_WIN32 */
 
 #include <string>
+
+//#define DEBUG_THREAD 1
+//#define DEBUG_MUTEX 1
+//#define DEBUG_CONDITION 1
 
 namespace RubberBand
 {
@@ -73,10 +77,15 @@ public:
 private:
 #ifdef _WIN32
     HANDLE m_mutex;
-    bool m_locked;
+#ifndef NO_THREAD_CHECKS
+    DWORD m_lockedBy;
+#endif
 #else
     pthread_mutex_t m_mutex;
+#ifndef NO_THREAD_CHECKS
+    pthread_t m_lockedBy;
     bool m_locked;
+#endif
 #endif
 };
 
@@ -113,15 +122,17 @@ public:
     void signal();
     
 private:
+
 #ifdef _WIN32
     HANDLE m_mutex;
-    bool m_locked;
     HANDLE m_condition;
-    std::string m_name;
+    bool m_locked;
 #else
     pthread_mutex_t m_mutex;
-    bool m_locked;
     pthread_cond_t m_condition;
+    bool m_locked;
+#endif
+#ifdef DEBUG_CONDITION
     std::string m_name;
 #endif
 };

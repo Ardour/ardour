@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -20,7 +20,7 @@ namespace RubberBand
 SpectralDifferenceAudioCurve::SpectralDifferenceAudioCurve(size_t sampleRate, size_t windowSize) :
     AudioCurve(sampleRate, windowSize)
 {
-    m_prevMag = new double[m_windowSize/2 + 1];
+    m_prevMag = new float[m_windowSize/2 + 1];
 
     for (size_t i = 0; i <= m_windowSize/2; ++i) {
         m_prevMag[i] = 0.f;
@@ -43,11 +43,16 @@ SpectralDifferenceAudioCurve::reset()
 void
 SpectralDifferenceAudioCurve::setWindowSize(size_t newSize)
 {
+    delete[] m_prevMag;
     m_windowSize = newSize;
+    
+    m_prevMag = new float[m_windowSize/2 + 1];
+
+    reset();
 }
 
 float
-SpectralDifferenceAudioCurve::process(float *mag, size_t increment)
+SpectralDifferenceAudioCurve::process(const float *R__ mag, size_t increment)
 {
     float result = 0.0;
 

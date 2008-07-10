@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -45,9 +45,12 @@ public:
      * phase-lock audio curve.  State is retained between calls in the
      * StretchCalculator object; call reset() to reset it.  This uses
      * a less sophisticated method than the offline calculate().
+     *
+     * If increment is non-zero, use it for the input increment for
+     * this block in preference to m_increment.
      */
-    virtual int calculateSingle(double ratio, size_t inputDurationSoFar,
-                                float curveValue);
+    virtual int calculateSingle(double ratio, float curveValue,
+                                size_t increment = 0);
 
     void setUseHardPeaks(bool use) { m_useHardPeaks = use; }
 

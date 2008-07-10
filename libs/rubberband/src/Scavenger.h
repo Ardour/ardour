@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -17,8 +17,11 @@
 
 #include <vector>
 #include <list>
-#include <sys/time.h>
 #include <iostream>
+
+#ifndef WIN32
+#include <sys/time.h>
+#endif
 
 #include "Thread.h"
 #include "sysutils.h"

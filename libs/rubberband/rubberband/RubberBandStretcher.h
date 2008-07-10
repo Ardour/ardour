@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -14,18 +14,44 @@
 
 #ifndef _RUBBERBANDSTRETCHER_H_
 #define _RUBBERBANDSTRETCHER_H_
-
-#include "TimeStretcher.h"
+    
+#define RUBBERBAND_VERSION "1.2.0-gpl"    
+#define RUBBERBAND_API_MAJOR_VERSION 2
+#define RUBBERBAND_API_MINOR_VERSION 0
 
 #include <vector>
+
+/**
+ * @mainpage RubberBand
+ * 
+ * The Rubber Band API is contained in the single class
+ * RubberBand::RubberBandStretcher.
+ *
+ * Threading notes for real-time applications:
+ * 
+ * Multiple instances of RubberBandStretcher may be created and used
+ * in separate threads concurrently.  However, for any single instance
+ * of RubberBandStretcher, you may not call process() more than once
+ * concurrently, and you may not change the time or pitch ratio while
+ * a process() call is being executed (if the stretcher was created in
+ * "real-time mode"; in "offline mode" you can't change the ratios
+ * during use anyway).
+ * 
+ * So you can run process() in its own thread if you like, but if you
+ * want to change ratios dynamically from a different thread, you will
+ * need some form of mutex in your code.  Changing the time or pitch
+ * ratio is real-time safe except in extreme circumstances, so for
+ * most applications that may change these dynamically it probably
+ * makes most sense to do so from the same thread as calls process(),
+ * even if that is a real-time thread.
+ */
 
 namespace RubberBand
 {
 
-class RubberBandStretcher : public TimeStretcher
+class RubberBandStretcher
 {
 public:
-
     /**
      * Processing options for the timestretcher.  The preferred
      * options should normally be set in the constructor, as a bitwise
@@ -102,21 +128,15 @@ public:
      * during non-transient segments.  These options may be changed at
      * any time.
      *
-     *   \li \c OptionPhaseAdaptive - Lock the adjustments of phase
-     *   for frequencies close to peak frequencies to those of the
-     *   peak, but reduce the degree of locking as the stretch ratio
-     *   gets longer.  This, the default setting, should give a good
-     *   balance between clarity and smoothness in most situations.
+     *   \li \c OptionPhaseLaminar - Adjust phases when stretching in
+     *   such a way as to try to retain the continuity of phase
+     *   relationships between adjacent frequency bins whose phases
+     *   are behaving in similar ways.  This, the default setting,
+     *   should give good results in most situations.
      *
-     *   \li \c OptionPhasePeakLocked - Lock the adjustments of phase
-     *   for frequencies close to peak frequencies to those of the
-     *   peak.  This should give a clear result in situations with
-     *   relatively low stretch ratios, but a relatively metallic
-     *   sound at longer stretches.
-     *
-     *   \li \c OptionPhaseIndependent - Do not lock phase adjustments
-     *   to peak frequencies.  This usually results in a softer,
-     *   phasier sound.
+     *   \li \c OptionPhaseIndependent - Adjust the phase in each
+     *   frequency bin independently from its neighbours.  This
+     *   usually results in a slightly softer, phasier sound.
      *
      * 5. Flags prefixed \c OptionThreading control the threading
      * model of the stretcher.  These options may not be changed after
@@ -151,34 +171,79 @@ public:
      *   \li \c OptionWindowLong - Use a longer window.  This is
      *   likely to result in a smoother sound at the expense of
      *   clarity and timing.
+     *
+     * 7. Flags prefixed \c OptionFormant control the handling of
+     * formant shape (spectral envelope) when pitch-shifting.  These
+     * options may be changed at any time.
+     *
+     *   \li \c OptionFormantShifted - Apply no special formant
+     *   processing.  The spectral envelope will be pitch shifted as
+     *   normal.
+     *
+     *   \li \c OptionFormantPreserved - Preserve the spectral
+     *   envelope of the unshifted signal.  This permits shifting the
+     *   note frequency without so substantially affecting the
+     *   perceived pitch profile of the voice or instrument.
+     *
+     * 8. Flags prefixed \c OptionPitch control the method used for
+     * pitch shifting.  These options may be changed at any time.
+     * They are only effective in realtime mode; in offline mode, the
+     * pitch-shift method is fixed.
+     *
+     *   \li \c OptionPitchHighSpeed - Use a method with a CPU cost
+     *   that is relatively moderate and predictable.  This may
+     *   sound less clear than OptionPitchHighQuality, especially
+     *   for large pitch shifts. 
+
+     *   \li \c OptionPitchHighQuality - Use the highest quality
+     *   method for pitch shifting.  This method has a CPU cost
+     *   approximately proportional to the required frequency shift.
+
+     *   \li \c OptionPitchHighConsistency - Use the method that gives
+     *   greatest consistency when used to create small variations in
+     *   pitch around the 1.0-ratio level.  Unlike the previous two
+     *   options, this avoids discontinuities when moving across the
+     *   1.0 pitch scale in real-time; it also consumes more CPU than
+     *   the others in the case where the pitch scale is exactly 1.0.
      */
+    
+    enum Option {
+
+        OptionProcessOffline       = 0x00000000,
+        OptionProcessRealTime      = 0x00000001,
+
+        OptionStretchElastic       = 0x00000000,
+        OptionStretchPrecise       = 0x00000010,
+    
+        OptionTransientsCrisp      = 0x00000000,
+        OptionTransientsMixed      = 0x00000100,
+        OptionTransientsSmooth     = 0x00000200,
+
+        OptionPhaseLaminar         = 0x00000000,
+        OptionPhaseIndependent     = 0x00002000,
+    
+        OptionThreadingAuto        = 0x00000000,
+        OptionThreadingNever       = 0x00010000,
+        OptionThreadingAlways      = 0x00020000,
+
+        OptionWindowStandard       = 0x00000000,
+        OptionWindowShort          = 0x00100000,
+        OptionWindowLong           = 0x00200000,
+
+        OptionFormantShifted       = 0x00000000,
+        OptionFormantPreserved     = 0x01000000,
+
+        OptionPitchHighSpeed       = 0x00000000,
+        OptionPitchHighQuality     = 0x02000000,
+        OptionPitchHighConsistency = 0x04000000
+    };
+
     typedef int Options;
-    
-    static const int OptionProcessOffline   = 0x00000000;
-    static const int OptionProcessRealTime  = 0x00000001;
 
-    static const int OptionStretchElastic   = 0x00000000;
-    static const int OptionStretchPrecise   = 0x00000010;
-    
-    static const int OptionTransientsCrisp  = 0x00000000;
-    static const int OptionTransientsMixed  = 0x00000100;
-    static const int OptionTransientsSmooth = 0x00000200;
-
-    static const int OptionPhaseAdaptive    = 0x00000000;
-    static const int OptionPhasePeakLocked  = 0x00001000;
-    static const int OptionPhaseIndependent = 0x00002000;
-    
-    static const int OptionThreadingAuto    = 0x00000000;
-    static const int OptionThreadingNever   = 0x00010000;
-    static const int OptionThreadingAlways  = 0x00020000;
-
-    static const int OptionWindowStandard   = 0x00000000;
-    static const int OptionWindowShort      = 0x00100000;
-    static const int OptionWindowLong       = 0x00200000;
-
-    static const int DefaultOptions         = 0x00000000;
-    static const int PercussiveOptions      = OptionWindowShort | \
-                                              OptionPhaseIndependent;
+    enum PresetOption {
+        DefaultOptions             = 0x00000000,
+        PercussiveOptions          = 0x00102000
+    };
 
     /**
      * Construct a time and pitch stretcher object to run at the given
@@ -193,14 +258,14 @@ public:
                         Options options = DefaultOptions,
                         double initialTimeRatio = 1.0,
                         double initialPitchScale = 1.0);
-    virtual ~RubberBandStretcher();
+    ~RubberBandStretcher();
 
     /**
      * Reset the stretcher's internal buffers.  The stretcher should
      * subsequently behave as if it had just been constructed
      * (although retaining the current time and pitch ratio).
      */
-    virtual void reset();
+    void reset();
 
     /**
      * Set the time ratio for the stretcher.  This is the ratio of
@@ -223,7 +288,7 @@ public:
      * mechanism to ensure that setTimeRatio and process() cannot be
      * run at once (there is no internal mutex for this purpose).
      */
-    virtual void setTimeRatio(double ratio);
+    void setTimeRatio(double ratio);
 
     /**
      * Set the pitch scaling ratio for the stretcher.  This is the
@@ -250,19 +315,19 @@ public:
      * mechanism to ensure that setPitchScale and process() cannot be
      * run at once (there is no internal mutex for this purpose).
      */
-    virtual void setPitchScale(double scale);
+    void setPitchScale(double scale);
 
     /**
      * Return the last time ratio value that was set (either on
      * construction or with setTimeRatio()).
      */
-    virtual double getTimeRatio() const;
+    double getTimeRatio() const;
 
     /**
      * Return the last pitch scaling ratio value that was set (either
      * on construction or with setPitchScale()).
      */
-    virtual double getPitchScale() const;
+    double getPitchScale() const;
 
     /**
      * Return the processing latency of the stretcher.  This is the
@@ -273,7 +338,7 @@ public:
      * In RealTime mode, the latency may depend on the time and pitch
      * ratio and other options.
      */
-    virtual size_t getLatency() const;
+    size_t getLatency() const;
 
     /**
      * Change an OptionTransients configuration setting.  This may be
@@ -281,7 +346,7 @@ public:
      * Offline mode (for which the transients option is fixed on
      * construction).
      */
-    virtual void setTransientsOption(Options options);
+    void setTransientsOption(Options options);
 
     /**
      * Change an OptionPhase configuration setting.  This may be
@@ -291,7 +356,25 @@ public:
      * may not take effect immediately if processing is already under
      * way when this function is called.
      */
-    virtual void setPhaseOption(Options options);
+    void setPhaseOption(Options options);
+
+    /**
+     * Change an OptionFormant configuration setting.  This may be
+     * called at any time in any mode.
+     *
+     * Note that if running multi-threaded in Offline mode, the change
+     * may not take effect immediately if processing is already under
+     * way when this function is called.
+     */
+    void setFormantOption(Options options);
+
+    /**
+     * Change an OptionPitch configuration setting.  This may be
+     * called at any time in RealTime mode.  It may not be called in
+     * Offline mode (for which the transients option is fixed on
+     * construction).
+     */
+    void setPitchOption(Options options);
 
     /**
      * Tell the stretcher exactly how many input samples it will
@@ -300,7 +383,7 @@ public:
      * exactly correct.  In RealTime mode no such guarantee is
      * possible and this value is ignored.
      */
-    virtual void setExpectedInputDuration(size_t samples);
+    void setExpectedInputDuration(size_t samples);
 
     /**
      * Ask the stretcher how many audio sample frames should be
@@ -314,7 +397,7 @@ public:
      * study() (to which you may pass any number of samples at a time,
      * and from which there is no output).
      */
-     virtual size_t getSamplesRequired() const;
+     size_t getSamplesRequired() const;
 
     /**
      * Tell the stretcher the maximum number of sample frames that you
@@ -331,7 +414,7 @@ public:
      * study() (to which you may pass any number of samples at a time,
      * and from which there is no output).
      */
-    virtual void setMaxProcessSize(size_t samples);
+    void setMaxProcessSize(size_t samples);
 
     /**
      * Provide a block of "samples" sample frames for the stretcher to
@@ -350,7 +433,7 @@ public:
      * Set "final" to true if this is the last block of data that will
      * be provided to study() before the first process() call.
      */
-    virtual void study(const float *const *input, size_t samples, bool final);
+    void study(const float *const *input, size_t samples, bool final);
 
     /**
      * Provide a block of "samples" sample frames for processing.
@@ -358,7 +441,7 @@ public:
      *
      * Set "final" to true if this is the last block of input data.
      */
-    virtual void process(const float *const *input, size_t samples, bool final);
+    void process(const float *const *input, size_t samples, bool final);
 
     /**
      * Ask the stretcher how many audio sample frames of output data
@@ -373,7 +456,7 @@ public:
      * This function returns -1 if all data has been fully processed
      * and all output read, and the stretch process is now finished.
      */
-    virtual int available() const;
+    int available() const;
 
     /**
      * Obtain some processed output data from the stretcher.  Up to
@@ -382,22 +465,91 @@ public:
      * The return value is the actual number of sample frames
      * retrieved.
      */
-    virtual size_t retrieve(float *const *output, size_t samples) const;
+    size_t retrieve(float *const *output, size_t samples) const;
 
-    virtual float getFrequencyCutoff(int n) const;
-    virtual void setFrequencyCutoff(int n, float f);
+    /**
+     * Return the value of internal frequency cutoff value n.
+     *
+     * This function is not for general use.
+     */
+    float getFrequencyCutoff(int n) const;
+
+    /** 
+     * Set the value of internal frequency cutoff n to f Hz.
+     *
+     * This function is not for general use.
+     */
+    void setFrequencyCutoff(int n, float f);
     
-    virtual size_t getInputIncrement() const;
-    virtual std::vector<int> getOutputIncrements() const; //!!! document particular meaning in RT mode
-    virtual std::vector<float> getPhaseResetCurve() const; //!!! document particular meaning in RT mode
-    virtual std::vector<int> getExactTimePoints() const; //!!! meaningless in RT mode
+    /**
+     * Retrieve the value of the internal input block increment value.
+     *
+     * This function is provided for diagnostic purposes only.
+     */
+    size_t getInputIncrement() const;
 
-    virtual size_t getChannelCount() const;
-    
-    virtual void calculateStretch();
+    /**
+     * In offline mode, retrieve the sequence of internal block
+     * increments for output, for the entire audio data, provided the
+     * stretch profile has been calculated.  In realtime mode,
+     * retrieve any output increments that have accumulated since the
+     * last call to getOutputIncrements, to a limit of 16.
+     *
+     * This function is provided for diagnostic purposes only.
+     */
+    std::vector<int> getOutputIncrements() const;
 
-    virtual void setDebugLevel(int level);
+    /**
+     * In offline mode, retrieve the sequence of internal phase reset
+     * detection function values, for the entire audio data, provided
+     * the stretch profile has been calculated.  In realtime mode,
+     * retrieve any phase reset points that have accumulated since the
+     * last call to getPhaseResetCurve, to a limit of 16.
+     *
+     * This function is provided for diagnostic purposes only.
+     */
+    std::vector<float> getPhaseResetCurve() const;
 
+    /**
+     * In offline mode, retrieve the sequence of internal frames for
+     * which exact timing has been sought, for the entire audio data,
+     * provided the stretch profile has been calculated.  In realtime
+     * mode, return an empty sequence.
+     *
+     * This function is provided for diagnostic purposes only.
+     */
+    std::vector<int> getExactTimePoints() const;
+
+    /**
+     * Return the number of channels this stretcher was constructed
+     * with.
+     */
+    size_t getChannelCount() const;
+
+    /**
+     * Force the stretcher to calculate a stretch profile.  Normally
+     * this happens automatically for the first process() call in
+     * offline mode.
+     *
+     * This function is provided for diagnostic purposes only.
+     */
+    void calculateStretch();
+
+    /**
+     * Set the level of debug output.  The value may be from 0 (errors
+     * only) to 3 (very verbose, with audible ticks in the output at
+     * phase reset points).  The default is whatever has been set
+     * using setDefaultDebugLevel, or 0 if that function has not been
+     * called.
+     */
+    void setDebugLevel(int level);
+
+    /**
+     * Set the default level of debug output for subsequently
+     * constructed stretchers.
+     *
+     * @see setDebugLevel
+     */
     static void setDefaultDebugLevel(int level);
 
 protected:

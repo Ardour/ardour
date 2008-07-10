@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -17,6 +17,8 @@
 
 #include <sys/types.h>
 
+#include "sysutils.h"
+
 namespace RubberBand 
 {
 
@@ -28,7 +30,8 @@ public:
 
     virtual void setWindowSize(size_t newSize) = 0;
     
-    virtual float process(float *mag, size_t increment) = 0;
+    virtual float process(const float *R__ mag, size_t increment) = 0;
+    virtual float process(const double *R__ mag, size_t increment);
     virtual void reset() = 0;
 
 protected:

@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -17,12 +17,17 @@
 
 #include <sys/types.h>
 
+#include "sysutils.h"
+
 namespace RubberBand {
+
+class ResamplerImpl;
 
 class Resampler
 {
 public:
     enum Quality { Best, FastestTolerable, Fastest };
+    enum Exception { ImplementationError };
 
     /**
      * Construct a resampler with the given quality level and channel
@@ -30,17 +35,21 @@ public:
      * that may be passed to the resample function before the
      * resampler needs to reallocate its internal buffers.
      */
-    Resampler(Quality quality, size_t channels, size_t maxBufferSize = 0);
+    Resampler(Quality quality, int channels, int maxBufferSize = 0,
+              int debugLevel = 0);
     ~Resampler();
 
-    size_t resample(float **in, float **out,
-                    size_t incount, float ratio, bool final = false);
+    int resample(const float *const R__ *const R__ in,
+                 float *const R__ *const R__ out,
+                 int incount,
+                 float ratio,
+                 bool final = false);
 
     void reset();
 
 protected:
-    class D;
-    D *m_d;
+    ResamplerImpl *d;
+    int m_method;
 };
 
 }

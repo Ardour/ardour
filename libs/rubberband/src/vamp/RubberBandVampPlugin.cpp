@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -15,6 +15,7 @@
 #include "RubberBandVampPlugin.h"
 
 #include "StretchCalculator.h"
+#include "sysutils.h"
 
 #include <cmath>
 
@@ -123,7 +124,7 @@ RubberBandVampPlugin::getDescription() const
 string
 RubberBandVampPlugin::getMaker() const
 {
-    return "Rubber Band"; ///!!!
+    return "Breakfast Quay";
 }
 
 int
@@ -159,7 +160,7 @@ RubberBandVampPlugin::getOutputDescriptors() const
     d.isQuantized = true;
     d.quantizeStep = 1.0;
     d.sampleType = OutputDescriptor::VariableSampleRate;
-    d.sampleRate = rate;
+    d.sampleRate = float(rate);
     m_d->m_incrementsOutput = list.size();
     list.push_back(d);
 
@@ -182,7 +183,7 @@ RubberBandVampPlugin::getOutputDescriptors() const
     d.name = "Phase Reset Detection Function";
     d.description = "Curve whose peaks are used to identify transients for phase reset points";
     d.unit = "";
-    d.sampleRate = rate;
+    d.sampleRate = float(rate);
     m_d->m_phaseResetDfOutput = list.size();
     list.push_back(d);
 
@@ -326,11 +327,11 @@ RubberBandVampPlugin::getParameter(std::string id) const
 {
     if (id == "timeratio") return m_d->m_timeRatio * 100.f;
     if (id == "pitchratio") return m_d->m_pitchRatio * 100.f;
-    if (id == "mode") return m_d->m_realtime ? 1 : 0;
-    if (id == "stretchtype") return m_d->m_elasticTiming ? 0 : 1;
-    if (id == "transientmode") return m_d->m_transientMode;
-    if (id == "phasemode") return m_d->m_phaseIndependent ? 1 : 0;
-    if (id == "windowmode") return m_d->m_windowLength;
+    if (id == "mode") return m_d->m_realtime ? 1.f : 0.f;
+    if (id == "stretchtype") return m_d->m_elasticTiming ? 0.f : 1.f;
+    if (id == "transientmode") return float(m_d->m_transientMode);
+    if (id == "phasemode") return m_d->m_phaseIndependent ? 1.f : 0.f;
+    if (id == "windowmode") return float(m_d->m_windowLength);
     return 0.f;
 }
 
@@ -378,7 +379,7 @@ RubberBandVampPlugin::initialise(size_t channels, size_t stepSize, size_t blockS
 
     if (m_d->m_phaseIndependent) 
          options |= RubberBand::RubberBandStretcher::OptionPhaseIndependent;
-    else options |= RubberBand::RubberBandStretcher::OptionPhasePeakLocked;
+    else options |= RubberBand::RubberBandStretcher::OptionPhaseLaminar;
 
     if (m_d->m_windowLength == 0)
          options |= RubberBand::RubberBandStretcher::OptionWindowStandard;
@@ -565,12 +566,12 @@ RubberBandVampPlugin::Impl::createFeatures(size_t inputIncrement,
         Feature feature;
         feature.hasTimestamp = true;
         feature.timestamp = t;
-        feature.values.push_back(oi);
+        feature.values.push_back(float(oi));
         feature.label = Vamp::RealTime::frame2RealTime(oi, rate).toText();
         features[m_incrementsOutput].push_back(feature);
 
         feature.values.clear();
-        feature.values.push_back(actual);
+        feature.values.push_back(float(actual));
         feature.label = Vamp::RealTime::frame2RealTime(actual, rate).toText();
         features[m_aggregateIncrementsOutput].push_back(feature);
 
@@ -594,7 +595,7 @@ RubberBandVampPlugin::Impl::createFeatures(size_t inputIncrement,
         if (i < phaseResetDf.size()) {
             feature.values.clear();
             feature.values.push_back(phaseResetDf[i]);
-            sprintf(buf, "%d", baseCount + i);
+            sprintf(buf, "%d", int(baseCount + i));
             feature.label = buf;
             features[m_phaseResetDfOutput].push_back(feature);
         }
@@ -626,7 +627,7 @@ RubberBandVampPlugin::Impl::createFeatures(size_t inputIncrement,
         feature.timestamp = t;
         feature.label = Vamp::RealTime::frame2RealTime(actual, rate).toText();
         feature.values.clear();
-        feature.values.push_back(actual);
+        feature.values.push_back(float(actual));
         features[m_aggregateIncrementsOutput].push_back(feature);
 
         float linear = ((baseCount + outputIncrements.size())

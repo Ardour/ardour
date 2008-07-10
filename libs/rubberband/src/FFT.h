@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -14,6 +14,8 @@
 
 #ifndef _RUBBERBAND_FFT_H_
 #define _RUBBERBAND_FFT_H_
+
+#include "sysutils.h"
 
 namespace RubberBand {
 
@@ -36,22 +38,24 @@ class FFT
 public:
     enum Exception { InvalidSize };
 
-    FFT(unsigned int size); // may throw InvalidSize
+    FFT(int size, int debugLevel = 0); // may throw InvalidSize
     ~FFT();
 
-    void forward(double *realIn, double *realOut, double *imagOut);
-    void forwardPolar(double *realIn, double *magOut, double *phaseOut);
-    void forwardMagnitude(double *realIn, double *magOut);
+    void forward(const double *R__ realIn, double *R__ realOut, double *R__ imagOut);
+    void forwardPolar(const double *R__ realIn, double *R__ magOut, double *R__ phaseOut);
+    void forwardMagnitude(const double *R__ realIn, double *R__ magOut);
 
-    void forward(float *realIn, float *realOut, float *imagOut);
-    void forwardPolar(float *realIn, float *magOut, float *phaseOut);
-    void forwardMagnitude(float *realIn, float *magOut);
+    void forward(const float *R__ realIn, float *R__ realOut, float *R__ imagOut);
+    void forwardPolar(const float *R__ realIn, float *R__ magOut, float *R__ phaseOut);
+    void forwardMagnitude(const float *R__ realIn, float *R__ magOut);
 
-    void inverse(double *realIn, double *imagIn, double *realOut);
-    void inversePolar(double *magIn, double *phaseIn, double *realOut);
+    void inverse(const double *R__ realIn, const double *R__ imagIn, double *R__ realOut);
+    void inversePolar(const double *R__ magIn, const double *R__ phaseIn, double *R__ realOut);
+    void inverseCepstral(const double *R__ magIn, double *R__ cepOut);
 
-    void inverse(float *realIn, float *imagIn, float *realOut);
-    void inversePolar(float *magIn, float *phaseIn, float *realOut);
+    void inverse(const float *R__ realIn, const float *R__ imagIn, float *R__ realOut);
+    void inversePolar(const float *R__ magIn, const float *R__ phaseIn, float *R__ realOut);
+    void inverseCepstral(const float *R__ magIn, float *R__ cepOut);
 
     // Calling one or both of these is optional -- if neither is
     // called, the first call to a forward or inverse method will call

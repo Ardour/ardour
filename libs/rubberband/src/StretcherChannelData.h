@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -18,6 +18,8 @@
 #include "StretcherImpl.h"
 
 #include <set>
+
+//#define EXPERIMENT 1
 
 namespace RubberBand
 {
@@ -39,7 +41,7 @@ public:
      * the pitch scale factor and any maximum processing block
      * size specified by the user of the code.
      */
-    ChannelData(size_t windowSize, size_t outbufSize);
+    ChannelData(size_t windowSize, int overSample, size_t outbufSize);
 
     /**
      * Construct a ChannelData structure that can process at
@@ -54,7 +56,7 @@ public:
      * called subsequently.
      */
     ChannelData(const std::set<size_t> &windowSizes,
-                size_t initialWindowSize, size_t outbufSize);
+                int overSample, size_t initialWindowSize, size_t outbufSize);
     ~ChannelData();
 
     /**
@@ -76,6 +78,12 @@ public:
      */
     void setOutbufSize(size_t outbufSize);
 
+    /**
+     * Set the resampler buffer size.  Default if not called is no
+     * buffer allocated at all.
+     */
+    void setResampleBufSize(size_t resamplebufSize);
+    
     RingBuffer<float> *inbuf;
     RingBuffer<float> *outbuf;
 
@@ -83,7 +91,9 @@ public:
     double *phase;
 
     double *prevPhase;
+    double *prevError;
     double *unwrappedPhase;
+
 
     size_t *freqPeak;
 
@@ -93,6 +103,8 @@ public:
 
     float *fltbuf;
     double *dblbuf; // owned by FFT object, only used for time domain FFT i/o
+    double *envelope; // for cepstral formant shift
+    bool unchanged;
 
     size_t prevIncrement; // only used in RT mode
 
@@ -110,6 +122,8 @@ public:
     Resampler *resampler;
     float *resamplebuf;
     size_t resamplebufSize;
+
+    int oversample;
 
 private:
     void construct(const std::set<size_t> &windowSizes,

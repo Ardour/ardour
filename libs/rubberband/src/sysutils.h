@@ -3,7 +3,7 @@
 /*
     Rubber Band
     An audio time-stretching and pitch-shifting library.
-    Copyright 2007 Chris Cannam.
+    Copyright 2007-2008 Chris Cannam.
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
@@ -15,15 +15,47 @@
 #ifndef _RUBBERBAND_SYSINFO_H_
 #define _RUBBERBAND_SYSINFO_H_
 
+#ifdef __MSVC__
+#include "bsd-3rdparty/float_cast/float_cast.h"
+#define R__ __restrict
+#endif
+
+#ifdef __GNUC__
+#define R__ __restrict__
+#endif
+
+#ifndef R__
+#define R__
+#endif
+
+#ifdef __MINGW32__
+#include <malloc.h>
+#endif
+
+#ifdef __MSVC__
+#define alloca _alloca
+#endif
+
 namespace RubberBand {
 
 extern bool system_is_multiprocessor();
 
 #ifdef _WIN32
+
 struct timeval { long tv_sec; long tv_usec; };
-void gettimeofday(struct timeval *p, void *tz);
+int gettimeofday(struct timeval *p, void *tz);
+
 void usleep(unsigned long);
+
 #endif
+
+extern float *allocFloat(int);    
+extern float *allocFloat(float *, int);
+extern void freeFloat(float *);
+
+extern double *allocDouble(int);    
+extern double *allocDouble(double *, int);
+extern void freeDouble(double *);
 
 }
 

@@ -12,33 +12,27 @@
     COPYING included with this distribution for more information.
 */
 
-#include "AudioCurve.h"
+#ifndef _SILENT_AUDIO_CURVE_H_
+#define _SILENT_AUDIO_CURVE_H_
 
-#include <iostream>
-using namespace std;
+#include "AudioCurve.h"
 
 namespace RubberBand
 {
 
-AudioCurve::AudioCurve(size_t sampleRate, size_t windowSize) :
-    m_sampleRate(sampleRate),
-    m_windowSize(windowSize)
+class SilentAudioCurve : public AudioCurve
 {
-}
+public:
+    SilentAudioCurve(size_t sampleRate, size_t windowSize);
+    virtual ~SilentAudioCurve();
 
-AudioCurve::~AudioCurve()
-{
-}
+    virtual void setWindowSize(size_t newSize);
 
-float
-AudioCurve::process(const double *R__ mag, size_t increment)
-{
-    cerr << "WARNING: Using inefficient AudioCurve::process(double)" << endl;
-    float *tmp = new float[m_windowSize];
-    for (int i = 0; i < int(m_windowSize); ++i) tmp[i] = float(mag[i]);
-    float df = process(tmp, increment);
-    delete[] tmp;
-    return df;
-}
+    virtual float process(const float *R__ mag, size_t increment);
+    virtual float process(const double *R__ mag, size_t increment);
+    virtual void reset();
+};
 
 }
+
+#endif
