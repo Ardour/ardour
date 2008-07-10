@@ -255,10 +255,8 @@
     </section>
   </section>
 
-  <section id="track-controls">
-    <title>Track Controls</title>
-    <para></para>
-  </section>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
+		href="track_controls.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" 
 		href="default_track_names.xml" />
 <!--
