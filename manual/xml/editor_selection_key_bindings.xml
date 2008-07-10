@@ -6,7 +6,7 @@
 
 <section id="sn-editor-selection-key-bindings">
   <title>Selection Key Bindings</title>
-  <table id="tbl-window-key-bindings">
+  <table id="tbl-selection-key-bindings">
     <title>Selection Key Bindings</title>
     <tgroup cols = "2">
       <colspec colnum="1" colname="Key Binding" colwidth="1"/>
