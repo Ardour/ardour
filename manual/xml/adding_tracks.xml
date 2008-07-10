@@ -6,6 +6,10 @@
 
 <section id="sn-adding-tracks">
   <title>Adding Tracks</title>
+  <indexterm>
+    <primary>Tracks</primary>
+    <secondary>Adding</secondary>
+  </indexterm>
   <para>
     To add a new Track or Bus activate the New Track Dialog
   </para>
