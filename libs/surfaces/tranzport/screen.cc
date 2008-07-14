@@ -18,6 +18,7 @@
  *  
  *   */
 
+#include <cstring>
 #include <tranzport_control_protocol.h>
 
 void
