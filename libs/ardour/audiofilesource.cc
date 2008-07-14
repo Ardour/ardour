@@ -543,6 +543,17 @@ AudioFileSource::find (ustring& pathstr, bool must_exist, bool& isnew, uint16_t&
 			}
 		}
 
+		/* Current find() is unable to parse relative path names to yet non-existant
+                   sources. QuickFix(tm) */
+                if (keeppath == "") {
+                        if (must_exist) {
+                                error << "AudioFileSource::find(), keeppath = \"\", but the file must exist" << endl;
+                        } else {
+                                keeppath = pathstr;
+                        }
+                        
+                }
+
 		_name = pathstr;
 		_path = keeppath;
 		ret = true;
