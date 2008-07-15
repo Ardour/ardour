@@ -560,7 +560,12 @@ get_xpm (std::string name)
 {
 	cerr << "xpm path = " << ARDOUR::find_data_file(name, "pixmaps") << endl;//DEBUG
 	if (!xpm_map[name]) {
-		xpm_map[name] = Gdk::Pixbuf::create_from_file (ARDOUR::find_data_file(name, "pixmaps"));
+		try {
+			xpm_map[name] = Gdk::Pixbuf::create_from_file (ARDOUR::find_data_file(name, "pixmaps"));
+		}
+		catch(const Glib::Error& e)	{
+    	cerr << e.what() << endl;
+  		}
 	}
 		
 	return (xpm_map[name]);
