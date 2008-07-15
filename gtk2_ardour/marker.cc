@@ -34,6 +34,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	: editor (ed), _parent(&parent), _type(type)
 {
+	cerr << "Marker() constructed";//DEBUG
 	double label_offset = 0;
 	bool annotate_left = false;
 
@@ -243,10 +244,10 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	mark->property_outline_color_rgba() = rgba;
 	mark->property_width_pixels() = 1;
 	Pango::FontDescription* font = get_font_for_style (N_("MarkerText"));
-
+	cerr << " font->get_size() = " << font->get_size() << " family = " << font->get_family() << endl;
 	text = new Text (*group);
-	text->property_text() = annotation.c_str();
 	text->property_font_desc() = *font;
+	text->property_text() = annotation.c_str();
 
 	delete font;
 	
