@@ -451,7 +451,7 @@ deps = \
 	'samplerate'           : '0.1.0',
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
-	'jack'                 : '0.101.1',
+	'jack'                 : '0.109.0',
 	'libgnomecanvas-2.0'   : '2.0',
         'aubio'                : '0.3.2'
 }
