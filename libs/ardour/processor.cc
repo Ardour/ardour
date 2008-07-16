@@ -176,6 +176,8 @@ int
 Processor::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
+	const XMLProperty *legacy_active = 0;
+	const XMLProperty *legacy_placement = 0;
 
 	// may not exist for legacy sessions
 	if ((prop = node.property ("name")) != 0) {
@@ -217,22 +219,39 @@ Processor::set_state (const XMLNode& node)
 
 		} else if ((*niter)->name() == "extra") {
 			_extra_xml = new XMLNode (*(*niter));
+		} else if ((*niter)->name() == "Redirect") {
+			if ( !(legacy_active = (*niter)->property("active"))) {
+				error << string_compose(_("No %1 property flag in element %2"), "active", (*niter)->name()) << endl;
+			}
+			if ( !(legacy_placement = (*niter)->property("placement"))) {
+				error << string_compose(_("No %1 property flag in element %2"), "placement", (*niter)->name()) << endl;
+			}
 		}
 	}
 
 	if ((prop = node.property ("active")) == 0) {
-		error << _("XML node describing a processor is missing the `active' field") << endmsg;
-		return -1;
+		warning << _("XML node describing a processor is missing the `active' field, trying legacy active flag from child node") << endmsg;
+		if (legacy_active) {
+			prop = legacy_active;
+		} else {
+			error << _("No child node with active property") << endmsg;
+			return -1;
+		}
 	}
 
 	if (_active != (prop->value() == "yes")) {
 		_active = !_active;
 		ActiveChanged (); /* EMIT_SIGNAL */
-	}
-	
+	}	
+
 	if ((prop = node.property ("placement")) == 0) {
-		error << _("XML node describing a processor is missing the `placement' field") << endmsg;
-		return -1;
+		warning << _("XML node describing a processor is missing the `placement' field, trying legacy placement flag from child node") << endmsg;
+		if (legacy_placement) {
+			prop = legacy_placement; 
+		} else {
+			error << _("No child node with placement property") << endmsg;
+			return -1;
+		}
 	}
 
 	/* hack to handle older sessions before we only used EnumWriter */

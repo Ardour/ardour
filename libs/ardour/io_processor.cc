@@ -73,26 +73,40 @@ int
 IOProcessor::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
+	const XMLNode *io_node = 0;
 
 	Processor::set_state(node);
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	bool have_io = false;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == IO::state_node_name) {
-			have_io = true;
-			_io->set_state(**niter);
+			io_node = (*niter);
+			break;
+		} else if ((*niter)->name() == "Redirect") {
+			XMLNodeList rlist = (*niter)->children();
+			XMLNodeIterator riter;
 
-			// legacy sessions: use IO name
-			if ((prop = node.property ("name")) == 0) {
-				set_name(_io->name());
+			for (riter = rlist.begin(); riter != rlist.end(); ++riter) {
+				if ( (*riter)->name() == IO::state_node_name) {
+					warning << _("Found legacy IO in a redirect") << endmsg;
+					io_node = (*riter);
+					break;
+				}
 			}
 		}
 	}
 
-	if (!have_io) {
+	if (io_node) {
+		_io->set_state(*io_node);
+
+		// legacy sessions: use IO name
+		if ((prop = node.property ("name")) == 0) {
+			set_name(_io->name());
+		}
+
+	} else {
 		error << _("XML node describing a redirect is missing an IO node") << endmsg;
 		return -1;
 	}
