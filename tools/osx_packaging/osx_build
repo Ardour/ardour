@@ -173,10 +173,10 @@ while [ true ] ; do
 	    continue
 	fi
 	if test x$WITH_JACK != x ; then
-	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)"`
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)"`
 	else
 	    # do not include libjack
-	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | grep -v 'libjack\.'`
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`5D
 	fi
 	echo -n "."
 	for dep in $deps ; do
