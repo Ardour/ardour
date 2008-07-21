@@ -196,7 +196,7 @@ while [ true ] ; do
 	break
     fi
 done
-echo
+5Becho
 
 echo "Copying other stuff to Ardour2.app  ..."
 
@@ -244,12 +244,12 @@ for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
     if test x$WITH_JACK != x ; then
-	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
+	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
 	    base=`basename $lib`
 	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
 	done
     else
-	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	for lib in `otool -L $EXE | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 	    base=`basename $lib`
 	    changes="$changes -change $lib @executable_path/../Frameworks/$base"
 	done
@@ -269,12 +269,12 @@ for dylib in $Frameworks/*.dylib $Frameworks/modules/*.so $Surfaces/*.dylib ; do
 
 	changes=""
 	if test x$WITH_JACK != x ; then
-	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}'` ; do
+	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}'` ; do
 		base=`basename $lib`
 		changes="$changes -change $lib @executable_path/../Frameworks/$base"
 	    done
 	else
-	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	    for lib in `otool -L $dylib | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 		base=`basename $lib`
 		changes="$changes -change $lib @executable_path/../Frameworks/$base"
 	    done
