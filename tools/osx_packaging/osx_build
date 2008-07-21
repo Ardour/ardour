@@ -176,7 +176,7 @@ while [ true ] ; do
 	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)"`
 	else
 	    # do not include libjack
-	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKQUARTZ_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
 	fi
 	echo -n "."
 	for dep in $deps ; do
