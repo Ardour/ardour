@@ -2,7 +2,7 @@
 
 # script for pulling together a MacOSX app bundle.
 
-GTKQUARTZ_ROOT=/opt/gtk
+GTKQUARTZ_ROOT=$HOME/gtk/inst
 
 SAE=
 WITH_JACK=1
