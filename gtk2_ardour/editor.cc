@@ -4770,7 +4770,7 @@ Editor::queue_draw_resize_line (int at)
 			/* redraw where it used to be */
 			
 			
-			Gdk::Rectangle r (xroot, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
+			Gdk::Rectangle r (0, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
 			win->invalidate_rect (r, true);
 			cerr << "invalidate " << xroot << "," << old_resize_line_y - 1 << ' ' 
 			     << controls_width + canvas_width << " x 3\n";
@@ -4778,7 +4778,7 @@ Editor::queue_draw_resize_line (int at)
 
 		/* draw where it is */
 
-		Gdk::Rectangle r (xroot, at - 1, controls_width + (int) canvas_width, 3);
+		Gdk::Rectangle r (0, at - 1, controls_width + (int) canvas_width, 3);
 		win->invalidate_rect (r, true);
 	}
 #endif
@@ -4813,7 +4813,7 @@ Editor::on_expose_event (GdkEventExpose* ev)
 		GdkRectangle lr;
 		GdkRectangle intersection;
 
-		lr.x = xroot;
+		lr.x = 0;
 		lr.y = resize_line_y;
 		lr.width = controls_width + (int) canvas_width;
 		lr.height = 3;
@@ -4834,15 +4834,17 @@ Editor::on_expose_event (GdkEventExpose* ev)
 						 Gdk::JOIN_MITER);
 			
 			gdk_draw_line (win, gc->gobj(), 
-				       xroot,
-				       yroot + resize_line_y, 
-				       xroot + (int) canvas_width + controls_width,
-				       yroot + resize_line_y);
+				       0,
+				       resize_line_y, 
+				       (int) canvas_width + controls_width,
+				       resize_line_y);
+#if 0
 			cerr << "drew line @ " << xroot << ", " << yroot + resize_line_y 
 			     << " to " << xroot + (int) canvas_width + controls_width
 			     << ", " << yroot + resize_line_y
 			     << endl;
-			old_resize_line_y = yroot + resize_line_y;
+#endif
+			old_resize_line_y = resize_line_y;
 			cerr << "NEXT EXPOSE SHOULD BE AT " << old_resize_line_y << endl;
 		} else {
 			cerr << "no intersect with "

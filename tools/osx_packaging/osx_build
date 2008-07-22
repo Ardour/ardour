@@ -196,7 +196,7 @@ while [ true ] ; do
 	break
     fi
 done
-5Becho
+echo
 
 echo "Copying other stuff to Ardour2.app  ..."
 

@@ -1060,10 +1060,19 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	
 	ARDOUR::BootMessage (string_compose (_("Checking AudioUnit: %1"), name));
 	
-	if (CAAudioUnit::Open (comp, unit) != noErr) {
-		return false;
-	}
+	try {
 
+		if (CAAudioUnit::Open (comp, unit) != noErr) {
+			return false;
+		}
+
+	} catch (...) {
+
+		warning << string_compose (_("Could not load AU plugin %1 - ignored"), name) << endmsg;
+		return false;
+
+	}
+		
 	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
 		return false;
 	}

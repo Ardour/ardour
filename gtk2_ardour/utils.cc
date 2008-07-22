@@ -680,7 +680,7 @@ set_pango_fontsize ()
 {
 	long val = ARDOUR::Config->get_font_scale();
 
-	/* FT2 rendering */
+	/* FT2 rendering - used by GnomeCanvas, sigh */
 
 	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_for_display(), val/1024, val/1024);
 
