@@ -18,6 +18,7 @@
 */
 
 #include <cstdlib>
+#include <signal.h>
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
@@ -223,6 +224,12 @@ fixup_bundle_environment ()
 
 #endif
 
+static void
+sigpipe_handler (int sig)
+{
+	cerr << _("SIGPIPE received - JACK has probably died") << endl;
+}
+
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
@@ -299,6 +306,10 @@ int main (int argc, char* argv[])
 	/* some GUI objects need this */
 
 	PBD::ID::init ();
+
+	if (::signal (SIGPIPE, sigpipe_handler)) {
+		cerr << _("Cannot install SIGPIPE error handler") << endl;
+	}
 
         try { 
 		ui = new ARDOUR_UI (&argc, &argv);
