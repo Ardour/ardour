@@ -29,6 +29,7 @@ sources = plugin_files
 if vampplugs['AUBIO']:
     sources += aubio_files
     vampplugs.Merge ([libraries['aubio']])
+    vampplugs.Merge ([libraries['fftw3f']])
 else:
     print 'WARNING: some VAMP plugins will not be built because this machine has no AUBIO support'
 

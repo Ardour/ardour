@@ -30,6 +30,7 @@ genericmidi.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOUR
 genericmidi.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 genericmidi.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 genericmidi.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+genericmidi.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 genericmidi.Merge ([
 	libraries['ardour'],

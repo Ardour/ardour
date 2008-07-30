@@ -765,6 +765,13 @@ if env['DIST_TARGET'] in ['panther', 'tiger', 'leopard' ]:
     # force tiger or later, to avoid issues on PPC which defaults
     # back to 10.1 if we don't tell it otherwise.
     env.Append (CCFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+
+    if env['DIST_TARGET'] == 'leopard':
+        # need this to really build against the 10.4 SDK when building on leopard
+        # ideally this would be configurable, but lets just do that later when we need it
+        env.Append(CCFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+        env.Append(LINKFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+
 else:
     env['IS_OSX'] = 0
 

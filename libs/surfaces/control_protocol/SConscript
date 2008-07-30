@@ -30,6 +30,7 @@ cp.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 cp.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 cp.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 cp.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+cp.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 cp.Merge ([
     libraries['ardour'],
