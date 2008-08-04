@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2006 Paul Davis 
+    Copyright (C) 2001-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	  /* MIDI */
 
-	  midi_port_table (4, 11),
+	  midi_port_table (4, 12),
 	  mmc_receive_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
 	  mmc_receive_device_id_spinner (mmc_receive_device_id_adjustment),
 	  mmc_send_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
@@ -109,14 +109,14 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  delete_button_spin (delete_button_adjustment),
 	  edit_button_adjustment (3, 1, 5),
 	  edit_button_spin (edit_button_adjustment)
-	  
+
 {
 	using namespace Notebook_Helpers;
 
 	click_io_selector = 0;
 	auditioner_io_selector = 0;
 	session = 0;
-	
+
 	WindowTitle title(Glib::get_application_name());
 	title += _("Preferences");
 	set_title(title.get_string());
@@ -126,7 +126,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 
 	set_name ("Preferences");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-	
+
 	VBox *vbox = get_vbox();
 	set_border_width (3);
 
@@ -288,7 +288,7 @@ OptionEditor::setup_misc_options ()
 
 	label = manage (new Label (_("Short crossfade length (msecs)")));
 	label->set_name ("OptionsLabel");
-	
+
 	hbox = manage (new HBox);
 	hbox->set_border_width (5);
 	hbox->set_spacing (10);
@@ -300,14 +300,14 @@ OptionEditor::setup_misc_options ()
 
 	label = manage (new Label (_("Destructive crossfade length (msecs)")));
 	label->set_name ("OptionsLabel");
-	
+
 	hbox = manage (new HBox);
 	hbox->set_border_width (5);
 	hbox->set_spacing (10);
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (destructo_xfade_slider, true, true);
 	misc_packer.pack_start (*hbox, false, false);
-	
+
 
 	destructo_xfade_adjustment.signal_value_changed().connect (mem_fun(*this, &OptionEditor::destructo_xfade_adjustment_changed));
 
@@ -347,7 +347,7 @@ OptionEditor::setup_misc_options ()
 	hbox->pack_start (*label, false, false);
 	hbox->pack_start (saved_history_depth_spinner, false, false);
 	misc_packer.pack_start (*hbox, false, false);
-	
+
 	short_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
 	destructo_xfade_slider.set_update_policy (UPDATE_DISCONTINUOUS);
 
@@ -360,7 +360,7 @@ void
 OptionEditor::limit_history_toggled ()
 {
 	bool x = limit_history_button.get_active();
-	
+
 	if (!x) {
 		Config->set_history_depth (0);
 		history_depth_spinner.set_sensitive (false);
@@ -401,9 +401,9 @@ OptionEditor::short_xfade_adjustment_changed ()
 {
 	if (session) {
 		float val = short_xfade_adjustment.get_value();
-		
+
 		/* val is in msecs */
-		
+
 		Crossfade::set_short_xfade_length ((nframes_t) floor (session->frame_rate() * (val / 1000.0)));
 	}
 }
@@ -415,12 +415,12 @@ OptionEditor::destructo_xfade_adjustment_changed ()
 
 	/* val is in msecs */
 
-	
+
 	Config->set_destructive_xfade_msecs ((uint32_t) floor (val));
 
 	if (session) {
 		SndFileSource::setup_standard_crossfades (session->frame_rate());
-	} 
+	}
 }
 
 void
@@ -431,14 +431,14 @@ OptionEditor::setup_sync_options ()
 
 	smpte_offset_clock.set_mode (AudioClock::SMPTE);
 	smpte_offset_clock.ValueChanged.connect (mem_fun(*this, &OptionEditor::smpte_offset_chosen));
-	
+
 	smpte_offset_negative_button.set_name ("OptionEditorToggleButton");
 
 	smpte_offset_negative_button.unset_flags (Gtk::CAN_FOCUS);
 
 	Label *smpte_offset_label = manage (new Label (_("SMPTE Offset")));
 	smpte_offset_label->set_name("OptionsLabel");
-	
+
 	hbox = manage (new HBox);
 	hbox->set_border_width (5);
 	hbox->set_spacing (10);
@@ -510,17 +510,17 @@ OptionEditor::setup_midi_options ()
 	hbox = manage (new HBox);
 	hbox->set_border_width (6);
 	hbox->set_spacing (6);
-	label = (manage (new Label (_("Inbound MMC Device ID")))); 
+	label = (manage (new Label (_("Inbound MMC Device ID"))));
 	hbox->pack_start (mmc_receive_device_id_spinner, false, false);
 	hbox->pack_start (*label, false, false);
-	midi_packer.pack_start (*hbox, false, false); 
+	midi_packer.pack_start (*hbox, false, false);
 
 	mmc_receive_device_id_spinner.set_value(Config->get_mmc_receive_device_id ());
 
 	hbox = manage (new HBox);
 	hbox->set_border_width (6);
 	hbox->set_spacing (6);
-	label = (manage (new Label (_("Outbound MMC Device ID")))); 
+	label = (manage (new Label (_("Outbound MMC Device ID"))));
 	hbox->pack_start (mmc_send_device_id_spinner, false, false);
 	hbox->pack_start (*label, false, false);
 	midi_packer.pack_start (*hbox, false, false);
@@ -548,52 +548,60 @@ OptionEditor::redisplay_midi_ports ()
 
 	midi_port_table_widgets.clear ();
 
-	midi_port_table.resize (ports.size() + 4, 11);
+	midi_port_table.resize (ports.size() + 4, 12);
 
 	Gtk::Label* label;
 
-	label = (manage (new Label (_("Port")))); 
+	label = (manage (new Label (_("Port"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 0, 1, 0, 1);
-	label = (manage (new Label (_("Offline")))); 
+	label = (manage (new Label (_("Offline"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 1, 2, 0, 1);
-	label = (manage (new Label (_("Trace\nInput")))); 
+	label = (manage (new Label (_("Trace\nInput"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 2, 3, 0, 1);
-	label = (manage (new Label (_("Trace\nOutput")))); 
+	label = (manage (new Label (_("Trace\nOutput"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 3, 4, 0, 1);
-	label = (manage (new Label (_("MTC")))); 
+	label = (manage (new Label (_("MTC"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 4, 5, 0, 1);
-	label = (manage (new Label (_("MMC")))); 
+	label = (manage (new Label (_("MIDI\nClock"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 6, 7, 0, 1);
-	label = (manage (new Label (_("MIDI Parameter\nControl")))); 
+	label = (manage (new Label (_("MMC"))));
 	label->show ();
 	midi_port_table_widgets.push_back (label);
 	midi_port_table.attach (*label, 8, 9, 0, 1);
+	label = (manage (new Label (_("MIDI Parameter\nControl"))));
+	label->show ();
+	midi_port_table_widgets.push_back (label);
+	midi_port_table.attach (*label, 10, 11, 0, 1);
 
-	Gtk::HSeparator* hsep = (manage (new HSeparator())); 
+	Gtk::HSeparator* hsep = (manage (new HSeparator()));
 	hsep->show ();
 	midi_port_table_widgets.push_back (hsep);
-	midi_port_table.attach (*hsep, 0, 9, 1, 2);
-	Gtk::VSeparator* vsep = (manage (new VSeparator())); 
+	midi_port_table.attach (*hsep, 0, 11, 1, 2);
+	Gtk::VSeparator* vsep = (manage (new VSeparator()));
 	vsep->show ();
 	midi_port_table_widgets.push_back (vsep);
 	midi_port_table.attach (*vsep, 5, 6, 0, 8);
-	vsep = (manage (new VSeparator())); 
+	vsep = (manage (new VSeparator()));
 	vsep->show ();
 	midi_port_table_widgets.push_back (vsep);
 	midi_port_table.attach (*vsep, 7, 8, 0, 8);
-	
+	vsep = (manage (new VSeparator()));
+	vsep->show ();
+	midi_port_table_widgets.push_back (vsep);
+	midi_port_table.attach (*vsep, 9, 10, 0, 8);
+
 	for (n = 0, i = ports.begin(); i != ports.end(); ++n, ++i) {
 
 		ToggleButton* tb;
@@ -601,20 +609,20 @@ OptionEditor::redisplay_midi_ports ()
 		Button* bb;
 
 		/* the remove button. create early so we can pass it to various callbacks */
-		
+
 		bb = manage (new Button (Stock::REMOVE));
 		bb->set_name ("OptionEditorToggleButton");
 		bb->show ();
 		midi_port_table_widgets.push_back (bb);
-		midi_port_table.attach (*bb, 9, 10, n+2, n+3, FILL|EXPAND, FILL);
+		midi_port_table.attach (*bb, 11, 12, n+2, n+3, FILL|EXPAND, FILL);
 		bb->signal_clicked().connect (bind (mem_fun(*this, &OptionEditor::remove_midi_port), i->second));
 		bb->set_sensitive (port_removable (i->second));
 
-		label = (manage (new Label (i->first))); 
+		label = (manage (new Label (i->first)));
 		label->show ();
 		midi_port_table_widgets.push_back (label);
 		midi_port_table.attach (*label, 0, 1, n+2, n+3,FILL|EXPAND, FILL );
-		
+
 		tb = manage (new ToggleButton (_("online")));
 		tb->set_name ("OptionEditorToggleButton");
 
@@ -637,6 +645,7 @@ OptionEditor::redisplay_midi_ports ()
 		midi_port_table_widgets.push_back (tb);
 		midi_port_table.attach (*tb, 1, 2, n+2, n+3, FILL|EXPAND, FILL);
 
+		// Trace MIDI Input
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_trace_in_toggled), (*i).second, tb));
@@ -645,6 +654,7 @@ OptionEditor::redisplay_midi_ports ()
 		midi_port_table_widgets.push_back (tb);
 		midi_port_table.attach (*tb, 2, 3, n+2, n+3, FILL|EXPAND, FILL);
 
+		// Trace MIDI Output
 		tb = manage (new ToggleButton ());
 		tb->set_name ("OptionEditorToggleButton");
 		tb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::port_trace_out_toggled), (*i).second, tb));
@@ -653,13 +663,13 @@ OptionEditor::redisplay_midi_ports ()
 		midi_port_table_widgets.push_back (tb);
 		midi_port_table.attach (*tb, 3, 4, n+2, n+3, FILL|EXPAND, FILL);
 
+		// MTC Radio Button
 		rb = manage (new RadioButton ());
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
 			mtc_button_group = rb->get_group();
 		} else {
 			rb->set_group (mtc_button_group);
-
 		}
 		rb->show ();
 		midi_port_table_widgets.push_back (rb);
@@ -669,7 +679,24 @@ OptionEditor::redisplay_midi_ports ()
 		if (session && i->second == session->mtc_port()) {
 			rb->set_active (true);
 		}
-		
+
+		// MIDI Clock Radio Button
+		rb = manage (new RadioButton ());
+		rb->set_name ("OptionEditorToggleButton");
+		if (n == 0) {
+			midi_clock_button_group = rb->get_group();
+		} else {
+			rb->set_group (midi_clock_button_group);
+		}
+		rb->show ();
+		midi_port_table_widgets.push_back (rb);
+		midi_port_table.attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
+		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_clock_port_chosen), (*i).second, rb, bb));
+
+		if (session && i->second == session->midi_clock_port()) {
+			rb->set_active (true);
+		}
+
 		rb = manage (new RadioButton ());
 		rb->set_name ("OptionEditorToggleButton");
 		if (n == 0) {
@@ -679,7 +706,7 @@ OptionEditor::redisplay_midi_ports ()
 		}
 		rb->show ();
 		midi_port_table_widgets.push_back (rb);
-		midi_port_table.attach (*rb, 6, 7, n+2, n+3, FILL|EXPAND, FILL);
+		midi_port_table.attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::mmc_port_chosen), (*i).second, rb, bb));
 
 		if (session && i->second == session->mmc_port()) {
@@ -695,7 +722,7 @@ OptionEditor::redisplay_midi_ports ()
 		}
 		rb->show ();
 		midi_port_table_widgets.push_back (rb);
-		midi_port_table.attach (*rb, 8, 9, n+2, n+3, FILL|EXPAND, FILL);
+		midi_port_table.attach (*rb, 10, 11, n+2, n+3, FILL|EXPAND, FILL);
 		rb->signal_toggled().connect (bind (mem_fun(*this, &OptionEditor::midi_port_chosen), (*i).second, rb, bb));
 
 		if (session && i->second == session->midi_port()) {
@@ -774,7 +801,7 @@ OptionEditor::port_removable (MIDI::Port *port)
 }
 
 void
-OptionEditor::mtc_port_chosen (MIDI::Port *port, Gtk::RadioButton* rb, Gtk::Button* bb) 
+OptionEditor::mtc_port_chosen (MIDI::Port *port, Gtk::RadioButton* rb, Gtk::Button* bb)
 {
 	if (session) {
 		if (rb->get_active()) {
@@ -816,6 +843,20 @@ OptionEditor::midi_port_chosen (MIDI::Port* port, Gtk::RadioButton* rb, Gtk::But
 }
 
 void
+OptionEditor::midi_clock_port_chosen (MIDI::Port *port, Gtk::RadioButton* rb, Gtk::Button* bb)
+{
+	if (session) {
+		if (rb->get_active()) {
+			session->set_midi_clock_port (port->name());
+			Config->set_midi_clock_port_name (port->name());
+		} else {
+			session->set_midi_clock_port ("");
+		}
+		bb->set_sensitive (port_removable (port));
+	}
+}
+
+void
 OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 {
 	bool wanted = tb->get_active();
@@ -823,7 +864,7 @@ OptionEditor::port_online_toggled (MIDI::Port* port, ToggleButton* tb)
 	if (port->input()) {
 		if (wanted != port->input()->offline()) {
 			port->input()->set_offline (wanted);
-		} 
+		}
 	}
 }
 
@@ -831,7 +872,7 @@ void
 OptionEditor::map_port_online (MIDI::Port* port, ToggleButton* tb)
 {
 	bool bstate = tb->get_active ();
-	
+
 	if (port->input()) {
 		if (bstate != port->input()->offline()) {
 			if (port->input()->offline()) {
@@ -911,12 +952,12 @@ void
 OptionEditor::click_browse_clicked ()
 {
 	SoundFileChooser sfdb (*this, _("Choose Click"), session);
-	
+
 	sfdb.show_all ();
 	sfdb.present ();
 
 	int result = sfdb.run ();
- 
+
 	if (result == Gtk::RESPONSE_OK) {
 		click_chosen(sfdb.get_filename());
 	}
@@ -946,7 +987,7 @@ OptionEditor::click_emphasis_browse_clicked ()
 
 void
 OptionEditor::click_emphasis_chosen (const string & path)
-{	
+{
 	click_emphasis_path_entry.set_text (path);
 	click_emphasis_sound_changed ();
 }
@@ -1015,7 +1056,7 @@ OptionEditor::setup_click_editor ()
 
 	click_path_entry.set_name ("OptionsEntry");
 	click_emphasis_path_entry.set_name ("OptionsEntry");
-	
+
 	click_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_sound_changed));
 	click_emphasis_path_entry.signal_activate().connect (mem_fun(*this, &OptionEditor::click_emphasis_sound_changed));
 
@@ -1034,13 +1075,13 @@ OptionEditor::setup_click_editor ()
 	click_gpm = new GainMeter (session->click_io(), *session);
 
 	click_table.set_col_spacings (10);
-	
+
 	label = manage(new Label(_("Click audio file")));
 	label->set_name ("OptionsLabel");
 	click_table.attach (*label, 0, 1, 0, 1, FILL|EXPAND, FILL);
 	click_table.attach (click_path_entry, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 	click_table.attach (click_browse_button, 2, 3, 0, 1, FILL|EXPAND, FILL);
-	
+
 	label = manage(new Label(_("Click emphasis audiofile")));
 	label->set_name ("OptionsLabel");
 	click_table.attach (*label, 0, 1, 1, 2, FILL|EXPAND, FILL);
@@ -1082,7 +1123,7 @@ OptionEditor::setup_auditioner_editor ()
 				   "for listening to specific regions outside the context\n"
 				   "of the overall mix. It can be connected just like any\n"
 				   "other mixer strip."));
-	
+
 	audition_packer.pack_start (audition_label, false, false, 10);
 	audition_packer.pack_start (audition_hpacker, false, false);
 }
@@ -1101,7 +1142,7 @@ OptionEditor::connect_audition_editor ()
 }
 
 bool
-OptionEditor::focus_out_event_handler (GdkEventFocus* ev, void (OptionEditor::*pmf)()) 
+OptionEditor::focus_out_event_handler (GdkEventFocus* ev, void (OptionEditor::*pmf)())
 {
 	(this->*pmf)();
 	return false;
@@ -1112,7 +1153,7 @@ static const struct {
     guint   modifier;
 } modifiers[] = {
 
-#ifdef GTKOSX 
+#ifdef GTKOSX
 
 	/* Command = Meta
 	   Option/Alt = Mod1
@@ -1172,13 +1213,13 @@ OptionEditor::setup_keyboard_options ()
 	label = manage (new Label (_("Edit using")));
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
-		
+
 	keyboard_mouse_table.attach (*label, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 	keyboard_mouse_table.attach (edit_modifier_combo, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	label = manage (new Label (_("+ button")));
 	label->set_name ("OptionsLabel");
-	
+
 	keyboard_mouse_table.attach (*label, 3, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 	keyboard_mouse_table.attach (edit_button_spin, 4, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, FILL);
 
@@ -1199,7 +1240,7 @@ OptionEditor::setup_keyboard_options ()
 	label = manage (new Label (_("Delete using")));
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
-		
+
 	keyboard_mouse_table.attach (*label, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
 	keyboard_mouse_table.attach (delete_modifier_combo, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, FILL);
 
@@ -1215,7 +1256,7 @@ OptionEditor::setup_keyboard_options ()
 
 	set_popdown_strings (snap_modifier_combo, dumb);
 	snap_modifier_combo.signal_changed().connect (mem_fun(*this, &OptionEditor::snap_modifier_chosen));
-	
+
 	for (int x = 0; modifiers[x].name; ++x) {
 		if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
 			snap_modifier_combo.set_active_text (_(modifiers[x].name));
@@ -1226,16 +1267,16 @@ OptionEditor::setup_keyboard_options ()
 	label = manage (new Label (_("Ignore snap using")));
 	label->set_name ("OptionsLabel");
 	label->set_alignment (1.0, 0.5);
-	
+
 	keyboard_mouse_table.attach (*label, 0, 1, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
 	keyboard_mouse_table.attach (snap_modifier_combo, 1, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, FILL);
 
 	vector<string> strs;
-	
+
 	for (std::map<std::string,std::string>::iterator bf = Keyboard::binding_files.begin(); bf != Keyboard::binding_files.end(); ++bf) {
 		strs.push_back (bf->first);
 	}
-	
+
 	set_popdown_strings (keyboard_layout_selector, strs);
 	keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
 	keyboard_layout_selector.signal_changed().connect (mem_fun (*this, &OptionEditor::bindings_changed));
@@ -1252,7 +1293,7 @@ void
 OptionEditor::bindings_changed ()
 {
 	string txt;
-	
+
 	txt = keyboard_layout_selector.get_active_text();
 
 	for (std::map<string,string>::iterator i = Keyboard::binding_files.begin(); i != Keyboard::binding_files.end(); ++i) {
@@ -1268,7 +1309,7 @@ void
 OptionEditor::edit_modifier_chosen ()
 {
 	string txt;
-	
+
 	txt = edit_modifier_combo.get_active_text();
 
 	for (int i = 0; modifiers[i].name; ++i) {
@@ -1283,7 +1324,7 @@ void
 OptionEditor::delete_modifier_chosen ()
 {
 	string txt;
-	
+
 	txt = delete_modifier_combo.get_active_text();
 
 	for (int i = 0; modifiers[i].name; ++i) {
@@ -1298,7 +1339,7 @@ void
 OptionEditor::snap_modifier_chosen ()
 {
 	string txt;
-	
+
 	txt = snap_modifier_combo.get_active_text();
 
 	for (int i = 0; modifiers[i].name; ++i) {
@@ -1356,12 +1397,12 @@ OptionEditor::parameter_changed (const char* parameter_name)
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &OptionEditor::parameter_changed), parameter_name));
 
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-	
+
 	if (PARAM_IS ("timecode-source-is-synced")) {
 		synced_timecode_button.set_active (Config->get_timecode_source_is_synced());
 	} else if (PARAM_IS ("history-depth")) {
 		int32_t depth = Config->get_history_depth();
-		
+
 		history_depth.set_value (depth);
 		history_depth_spinner.set_sensitive (depth != 0);
 		limit_history_button.set_active (depth != 0);

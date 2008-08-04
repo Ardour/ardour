@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 20002-2004 Paul Davis 
+    Copyright (C) 20002-2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -112,11 +112,11 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),  
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus"),
 					      bind (mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	
+
 #ifdef WITH_CMT
 
 	sys::path anicomp_file_path;
@@ -152,7 +152,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush wastebasket"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
 	ActionManager::session_sensitive_actions.push_back (act);
-	
+
 	/* JACK actions for controlling ... JACK */
 
 	Glib::RefPtr<ActionGroup> jack_actions = ActionGroup::create (X_("JACK"));
@@ -164,9 +164,9 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (jack_actions, X_("JACKDisconnect"), _("Disconnect"), mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::disconnect_from_jack));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	
+
 	RadioAction::Group jack_latency_group;
-	
+
 	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency32"), X_("32"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 32));
 	ActionManager::jack_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency64"), X_("64"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 64));
@@ -185,9 +185,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::jack_sensitive_actions.push_back (act);
 	act = ActionManager::register_radio_action (jack_actions, jack_latency_group, X_("JACKLatency8192"), X_("8192"), bind (mem_fun(*this, &ARDOUR_UI::set_jack_buffer_size), (nframes_t) 8192));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	
+
 	/* these actions are intended to be shared across all windows */
-	
+
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (main_actions, X_("WindowMenu"), _("Window"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
@@ -211,7 +211,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Keybindings"), mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
-	
+
 	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal, 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("Add Audio Bus"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1, 1));
@@ -234,7 +234,7 @@ ARDOUR_UI::install_actions ()
 	/* these two are not used by key bindings, instead use ToggleRoll for that. these two do show up in
 	   menus and via button proxies.
 	*/
-	
+
 	act = ActionManager::register_action (transport_actions, X_("Stop"), _("Stop"), mem_fun(*this, &ARDOUR_UI::transport_stop));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
@@ -418,7 +418,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
-	
+
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), hide_return (bind (mem_fun (*Config, &Configuration::set_shuttle_units), Percentage)));
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), hide_return (bind (mem_fun (*Config, &Configuration::set_shuttle_units), Semitones)));
 
@@ -429,6 +429,8 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMMC"), _("Send MMC"), mem_fun (*this, &ARDOUR_UI::toggle_send_mmc));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("UseMMC"), _("Use MMC"), mem_fun (*this, &ARDOUR_UI::toggle_use_mmc));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (option_actions, X_("UseMIDIClock"), _("Use MIDI Clock"), mem_fun (*this, &ARDOUR_UI::toggle_use_midi_clock));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -451,7 +453,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("LatchedRecordEnable"), _("Rec-enable stays engaged at stop"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedRecordEnable));
 	ActionManager::register_toggle_action (option_actions, X_("RegionEquivalentsOverlap"), _("Region equivalents overlap"), mem_fun (*this, &ARDOUR_UI::toggle_RegionEquivalentsOverlap));
 	ActionManager::register_toggle_action (option_actions, X_("PrimaryClockDeltaEditCursor"), _("Primary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_PrimaryClockDeltaEditCursor));
-	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));	
+	ActionManager::register_toggle_action (option_actions, X_("SecondaryClockDeltaEditCursor"), _("Secondary Clock delta to edit point"), mem_fun (*this, &ARDOUR_UI::toggle_SecondaryClockDeltaEditCursor));
 	ActionManager::register_toggle_action (option_actions, X_("ShowTrackMeters"), _("Enable Editor Meters"), mem_fun (*this, &ARDOUR_UI::toggle_ShowTrackMeters));
 	ActionManager::register_toggle_action (option_actions, X_("OnlyCopyImportedFiles"), _("Always copy imported files"), mem_fun (*this, &ARDOUR_UI::toggle_only_copy_imported_files));
 	ActionManager::register_toggle_action (option_actions, X_("RubberbandingSnapsToGrid"), _("Rubberbanding Snaps to Grid"), mem_fun (*this, &ARDOUR_UI::toggle_rubberbanding_snaps_to_grid));
@@ -500,7 +502,7 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_toggle_action (option_actions, X_("DoNotRunPluginsWhileRecording"), _("Do not run plugins while recording"), mem_fun (*this, &ARDOUR_UI::toggle_DoNotRunPluginsWhileRecording));
 	ActionManager::session_sensitive_actions.push_back (act);
-	
+
 	act = ActionManager::register_toggle_action (option_actions, X_("LatchedSolo"), _("Latched solo"), mem_fun (*this, &ARDOUR_UI::toggle_LatchedSolo));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("ShowSoloMutes"), _("Show solo muting"), mem_fun (*this, &ARDOUR_UI::toggle_ShowSoloMutes));
@@ -547,7 +549,7 @@ ARDOUR_UI::install_actions ()
 
 	RadioAction::Group monitoring_group;
 
-	/* it would be nice not to even show this item, but that messes up the 
+	/* it would be nice not to even show this item, but that messes up the
 	   menus which are not dynamically modified at runtime. so we make it
 	   sensitive only if it makes sense.
 	*/
@@ -717,20 +719,20 @@ ARDOUR_UI::build_control_surface_menu ()
 			string action_name = "Toggle";
 			action_name += legalize_for_path ((*i)->name);
 			action_name += "Surface";
-			
+
 			string action_label = (*i)->name;
-			
+
 			Glib::RefPtr<Action> act = ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), action_label.c_str(),
 											  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol), *i)));
-			
+
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
 			with_feedback = false;
-			
+
 			if ((*i)->protocol || (*i)->requested) {
 				tact->set_active ();
 			}
-			
+
 			ui += "<menuitem action='";
 			ui += action_name;
 			ui += "'/>\n";
@@ -738,7 +740,7 @@ ARDOUR_UI::build_control_surface_menu ()
 			if ((*i)->supports_feedback) {
 
 				string submenu_name = action_name;
-				
+
 				submenu_name += "SubMenu";
 
 				ActionManager::register_action (editor->editor_actions, submenu_name.c_str(), _("Controls"));
@@ -746,17 +748,17 @@ ARDOUR_UI::build_control_surface_menu ()
 				action_name += "Feedback";
 
 				Glib::RefPtr<Action> act = ActionManager::register_toggle_action (editor->editor_actions, action_name.c_str(), _("Feedback"),
-												  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback), 
-													 *i, 
+												  (bind (mem_fun (*this, &ARDOUR_UI::toggle_control_protocol_feedback),
+													 *i,
 													 "Editor",
 													 action_name)));
-				
+
 				ui += "<menu action='";
 				ui += submenu_name;
 				ui += "'>\n<menuitem action='";
 				ui += action_name;
 				ui += "'/>\n</menu>\n";
-				
+
 				if ((*i)->protocol) {
 					Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 					tact->set_active ((*i)->protocol->get_feedback ());
@@ -786,7 +788,7 @@ ARDOUR_UI::build_menu_bar ()
 	 * when the first menu instance is created.
 	 */
 	// XXX bug in gtkmm causes this to popup an error message
-	// Gtk::Settings::get_default()->property_gtk_can_change_accels() = true;	
+	// Gtk::Settings::get_default()->property_gtk_can_change_accels() = true;
 	// so use this instead ...
 	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-can-change-accels", 1, "Ardour:designers");
 
@@ -817,7 +819,7 @@ ARDOUR_UI::build_menu_bar ()
 #endif
 
  	if (!Profile->get_small_screen()) {
-#ifndef GTKOSX		
+#ifndef GTKOSX
 		// OSX provides its own wallclock, thank you very much
  		menu_hbox.pack_end (wall_clock_box, false, false, 2);
 #endif
@@ -846,9 +848,9 @@ void
 ARDOUR_UI::setup_clock ()
 {
 	ARDOUR_UI::Clock.connect (bind (mem_fun (big_clock, &AudioClock::set), false));
-	
+
 	big_clock_window = new Window (WINDOW_TOPLEVEL);
-	
+
 	big_clock_window->set_keep_above (true);
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);

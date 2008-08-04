@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,11 +30,13 @@ CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right"
 CONFIG_VARIABLE (std::string, mtc_port_name, "mtc-port-name", "default")
 CONFIG_VARIABLE (std::string, mmc_port_name, "mmc-port-name", "default")
 CONFIG_VARIABLE (std::string, midi_port_name, "midi-port-name", "default")
+CONFIG_VARIABLE (std::string, midi_clock_port_name, "midi-clock-port-name", "default")
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
 CONFIG_VARIABLE (bool, trace_midi_output, "trace-midi-output", false)
 CONFIG_VARIABLE (bool, send_mtc, "send-mtc", false)
 CONFIG_VARIABLE (bool, send_mmc, "send-mmc", true)
 CONFIG_VARIABLE (bool, mmc_control, "mmc-control", true)
+CONFIG_VARIABLE (bool, midi_clock_control, "midi-clock-control", false)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (uint8_t, mmc_receive_device_id, "mmc-receive-device-id", 0)
 CONFIG_VARIABLE (uint8_t, mmc_send_device_id, "mmc-send-device-id", 0)
@@ -139,7 +141,7 @@ CONFIG_VARIABLE (nframes_t, over_length_short, "over-length-short", 2)
 CONFIG_VARIABLE (nframes_t, over_length_long, "over-length-long", 10)
 
 /* miscellany */
-	
+
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)

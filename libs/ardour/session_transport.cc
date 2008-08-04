@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2003 Paul Davis 
+    Copyright (C) 1999-2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ Session::request_input_change_handling ()
 	if (!(_state_of_the_state & (InitialConnecting|Deletion))) {
 		Event* ev = new Event (Event::InputConfigurationChange, Event::Add, Event::Immediate, 0, 0.0);
 		queue_event (ev);
-	} 
+	}
 }
 
 void
@@ -112,7 +112,7 @@ Session::force_locate (nframes_t target_frame, bool with_roll)
 void
 Session::request_play_loop (bool yn)
 {
-	Event* ev;	
+	Event* ev;
 	Location *location = _locations.auto_loop_location();
 
 	if (location == 0 && yn) {
@@ -135,7 +135,7 @@ void
 Session::realtime_stop (bool abort)
 {
 	/* assume that when we start, we'll be moving forwards */
-	
+
 	// FIXME: where should this really be? [DR]
 	//send_full_time_code();
 	deliver_mmc (MIDI::MachineControl::cmdStop, _transport_frame);
@@ -174,7 +174,7 @@ Session::realtime_stop (bool abort)
 	disable_record (true);
 
 	reset_slave_state ();
-		
+
 	_transport_speed = 0;
 
 	if (Config->get_use_video_sync()) {
@@ -221,7 +221,7 @@ Session::butler_transport_work ()
 		/* don't seek if locate will take care of that in non_realtime_stop() */
 
 		if (!(post_transport_work & PostTransportLocate)) {
-			
+
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if (!(*i)->hidden()) {
 					if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
@@ -239,7 +239,7 @@ Session::butler_transport_work ()
 			}
 		}
 	}
-	
+
 	if (post_transport_work & PostTransportLocate) {
 		non_realtime_locate ();
 	}
@@ -263,7 +263,7 @@ Session::butler_transport_work ()
 	if (post_transport_work & PostTransportAudition) {
 		non_realtime_set_audition ();
 	}
-	
+
 	g_atomic_int_dec_and_test (&butler_should_do_transport_work);
 }
 
@@ -293,7 +293,7 @@ Session::non_realtime_overwrite (int on_entry, bool& finished)
 	}
 }
 
-	
+
 void
 Session::non_realtime_locate ()
 {
@@ -317,7 +317,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	saved = false;
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	
+
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if ((*i)->get_captured_frames () != 0) {
 			did_record = true;
@@ -326,7 +326,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	/* stop and locate are merged here because they share a lot of common stuff */
-	
+
 	time (&xnow);
 	now = localtime (&xnow);
 
@@ -340,10 +340,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (did_record) {
 		begin_reversible_command ("capture");
-		
+
 		Location* loc = _locations.end_location();
 		bool change_end = false;
-		
+
 		if (_transport_frame < loc->end()) {
 
 			/* stopped recording before current end */
@@ -353,15 +353,15 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				/* first capture for this session, move end back to where we are */
 
 				change_end = true;
-			} 
+			}
 
 		} else if (_transport_frame > loc->end()) {
-			
+
 			/* stopped recording after the current end, extend it */
 
 			change_end = true;
 		}
-		
+
 		if (change_end) {
                         XMLNode &before = loc->get_state();
                         loc->set_end(_transport_frame);
@@ -376,7 +376,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->transport_stopped (*now, xnow, abort);
 	}
-	
+
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -384,25 +384,25 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			(*i)->set_pending_declick (0);
 		}
 	}
-	
+
 	if (did_record) {
 		commit_reversible_command ();
-	}	
-	
+	}
+
 	if (_engine.running()) {
 		update_latency_compensation (true, abort);
 	}
 
-	if ((Config->get_slave_source() == None && Config->get_auto_return()) || 
-	    (post_transport_work & PostTransportLocate) || 
+	if ((Config->get_slave_source() == None && Config->get_auto_return()) ||
+	    (post_transport_work & PostTransportLocate) ||
 	    (_requested_return_frame >= 0) ||
 	    synced_to_jack()) {
-		
+
 		if (pending_locate_flush) {
 			flush_all_inserts ();
 		}
-		
-		if (((Config->get_slave_source() == None && Config->get_auto_return()) || 
+
+		if (((Config->get_slave_source() == None && Config->get_auto_return()) ||
 		     synced_to_jack() ||
 		     _requested_return_frame >= 0) &&
 		    !(post_transport_work & PostTransportLocate)) {
@@ -421,12 +421,12 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			if (synced_to_jack() && !play_loop) {
 				do_locate = true;
 			}
-			
+
 			if (do_locate) {
 				// cerr << "non-realtimestop: transport locate to " << _transport_frame << endl;
 				_engine.transport_locate (_transport_frame);
 			}
-		} 
+		}
 
 #ifndef LEAVE_TRANSPORT_UNADJUSTED
 	}
@@ -475,7 +475,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		RecordStateChanged (); /* emit signal */
 #endif
 	}
-	
+
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
 		save_state ("", true);
@@ -485,7 +485,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
         /* always try to get rid of this */
 
         remove_pending_capture_state ();
-	
+
 	/* save the current state of things if appropriate */
 
 	if (did_record && !saved) {
@@ -496,11 +496,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		DurationChanged (); /* EMIT SIGNAL */
 	}
 
-	if (post_transport_work & PostTransportStop) { 
+	if (post_transport_work & PostTransportStop) {
 		_play_range = false;
 
 		/* do not turn off autoloop on stop */
-		
+
 	}
 
         nframes_t tf = _transport_frame;
@@ -524,7 +524,7 @@ Session::check_declick_out ()
 	/* this is called after a process() iteration. if PendingDeclickOut was set,
 	   it means that we were waiting to declick the output (which has just been
 	   done) before doing something else. this is where we do that "something else".
-	   
+
 	   note: called from the audio thread.
 	*/
 
@@ -544,11 +544,11 @@ void
 Session::set_play_loop (bool yn)
 {
 	/* Called from event-handling context */
-	
+
 	if ((actively_recording() && yn) || _locations.auto_loop_location() == 0) {
 		return;
 	}
-	
+
 	set_dirty();
 
 	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
@@ -558,12 +558,12 @@ Session::set_play_loop (bool yn)
 		return;
 	}
 
-	
+
 	if ((play_loop = yn)) {
 
 		Location *loc;
 
-		
+
 		if ((loc = _locations.auto_loop_location()) != 0) {
 
 			if (Config->get_seamless_loop()) {
@@ -584,9 +584,9 @@ Session::set_play_loop (bool yn)
 					}
 				}
 			}
-			
+
 			/* stick in the loop event */
-			
+
 			Event* event = new Event (Event::AutoLoop, Event::Replace, loc->end(), loc->start(), 0.0f);
 			merge_event (event);
 
@@ -614,7 +614,7 @@ Session::set_play_loop (bool yn)
 				(*i)->set_loop (0);
 			}
 		}
-		
+
 	}
 }
 
@@ -689,17 +689,17 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 			pending_locate_roll = with_roll;
 			pending_locate_flush = with_flush;
 			return;
-		} 
+		}
 	}
 
 	if (transport_rolling() && (!auto_play_legal || !Config->get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false);
-	} 
+	}
 
 	if ( !with_loop || loop_changing) {
 
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportLocate);
-		
+
 		if (with_roll) {
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportRoll);
 		}
@@ -711,13 +711,13 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		/* this is functionally what clear_clicks() does but with a tentative lock */
 
 		Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
-	
+
 		if (clickm.locked()) {
-			
+
 			for (Clicks::iterator i = clicks.begin(); i != clicks.end(); ++i) {
 				delete *i;
 			}
-		
+
 			clicks.clear ();
 		}
 	}
@@ -752,7 +752,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 	/* cancel looped playback if transport pos outside of loop range */
 	if (play_loop) {
 		Location* al = _locations.auto_loop_location();
-		
+
 		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
 			// cancel looping directly, this is called from event handling context
 			set_play_loop (false);
@@ -762,7 +762,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 				// this is only necessary for seamless looping
 
 				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-				
+
 				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 					if ((*i)->record_enabled ()) {
 						// tell it we've looped, so it can deal with the record state
@@ -774,7 +774,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 			TransportLooped(); // EMIT SIGNAL
 		}
 	}
-	
+
 	loop_changing = false;
 
 	_send_smpte_update = true;
@@ -808,7 +808,7 @@ Session::set_transport_speed (float speed, bool abort)
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (true);	
+					(*i)->monitor_input (true);
 				}
 			}
 		}
@@ -818,7 +818,7 @@ Session::set_transport_speed (float speed, bool abort)
 		} else {
 			stop_transport (abort);
 		}
-		
+
 	} else if (transport_stopped() && speed == 1.0) {
 
 		/* we are stopped and we want to start rolling at speed 1 */
@@ -834,7 +834,7 @@ Session::set_transport_speed (float speed, bool abort)
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if (Config->get_auto_input() && (*i)->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (false);	
+					(*i)->monitor_input (false);
 				}
 			}
 		}
@@ -868,7 +868,7 @@ Session::set_transport_speed (float speed, bool abort)
 		if (speed < 0.0f && _transport_frame == 0) {
 			return;
 		}
-		
+
 		clear_clicks ();
 
 		/* if we are reversing relative to the current speed, or relative to the speed
@@ -878,17 +878,17 @@ Session::set_transport_speed (float speed, bool abort)
 		if ((_transport_speed && speed * _transport_speed < 0.0f) || (_last_transport_speed * speed < 0.0f) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportReverse);
 		}
-		
+
 		_last_transport_speed = _transport_speed;
 		_transport_speed = speed;
-		
+
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);
 			}
 		}
-		
+
 		if (post_transport_work & (PostTransportSpeed|PostTransportReverse)) {
 			schedule_butler_transport_work ();
 		}
@@ -903,11 +903,11 @@ Session::stop_transport (bool abort)
 	if (_transport_speed == 0.0f) {
 		return;
 	}
-	
-	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && 
-	    _worst_output_latency > current_block_size) 
+
+	if (actively_recording() && !(transport_sub_state & StopPendingCapture) &&
+	    _worst_output_latency > current_block_size)
 	{
-		
+
 		/* we need to capture the audio that has still not yet been received by the system
 		   at the time the stop is requested, so we have to roll past that time.
 
@@ -915,16 +915,16 @@ Session::stop_transport (bool abort)
 		   block before the actual end. we'll declick in the subsequent block,
 		   and then we'll really be stopped.
 		*/
-		
-		Event *ev = new Event (Event::StopOnce, Event::Replace, 
+
+		Event *ev = new Event (Event::StopOnce, Event::Replace,
 				       _transport_frame + _worst_output_latency - current_block_size,
 				       0, 0, abort);
-		
+
 		merge_event (ev);
 		transport_sub_state |= StopPendingCapture;
 		pending_abort = abort;
 		return;
-	} 
+	}
 
 
 	if ((transport_sub_state & PendingDeclickOut) == 0) {
@@ -944,7 +944,7 @@ Session::start_transport ()
 	_last_roll_location = _transport_frame;
 
 	/* if record status is Enabled, move it to Recording. if its
-	   already Recording, move it to Disabled. 
+	   already Recording, move it to Disabled.
 	*/
 
 	switch (record_status()) {
@@ -978,7 +978,7 @@ Session::actually_start_transport ()
 
 	transport_sub_state |= PendingDeclickIn;
 	_transport_speed = 1.0;
-	
+
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->realtime_set_speed ((*i)->speed(), true);
@@ -1012,7 +1012,7 @@ Session::post_transport ()
 
 		if (((Config->get_slave_source() == None && (auto_play_legal && Config->get_auto_play())) && !_exporting) || (post_transport_work & PostTransportRoll)) {
 			start_transport ();
-			
+
 		} else {
 			transport_sub_state = 0;
 		}
@@ -1057,7 +1057,7 @@ Session::set_slave_source (SlaveSource src)
 // 	if (src == JACK && Config->get_jack_time_master()) {
 // 		return;
 // 	}
-	
+
 	if (_slave) {
 		delete _slave;
 		_slave = 0;
@@ -1071,7 +1071,7 @@ Session::set_slave_source (SlaveSource src)
 	case None:
 		stop_transport ();
 		break;
-		
+
 	case MTC:
 		if (_mtc_port) {
 			try {
@@ -1088,15 +1088,33 @@ Session::set_slave_source (SlaveSource src)
 		}
 		_desired_transport_speed = _transport_speed;
 		break;
-		
+
+	case MIDIClock:
+		if (_midi_clock_port) {
+			try {
+				_slave = new MIDIClock_Slave (*this, *_midi_clock_port, 24);
+			}
+
+			catch (failed_constructor& err) {
+				return;
+			}
+
+		} else {
+			error << _("No MIDI Clock port defined: MIDI Clock slaving is impossible.") << endmsg;
+			return;
+		}
+		_desired_transport_speed = _transport_speed;
+		break;
+
 	case JACK:
 		_slave = new JACK_Slave (_engine.jack());
 		_desired_transport_speed = _transport_speed;
 		break;
+
 	};
 
 	Config->set_slave_source (src);
-	
+
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -1174,7 +1192,7 @@ Session::setup_auto_play ()
 	/* Called from event-processing context */
 
 	Event* ev;
-	
+
 	_clear_event_type (Event::RangeStop);
 	_clear_event_type (Event::RangeLocate);
 
@@ -1183,48 +1201,48 @@ Session::setup_auto_play ()
 	}
 
 	list<AudioRange>::size_type sz = current_audio_range.size();
-	
+
 	if (sz > 1) {
-		
-		list<AudioRange>::iterator i = current_audio_range.begin(); 
+
+		list<AudioRange>::iterator i = current_audio_range.begin();
 		list<AudioRange>::iterator next;
-		
+
 		while (i != current_audio_range.end()) {
-			
+
 			next = i;
 			++next;
-			
+
 			/* locating/stopping is subject to delays for declicking.
 			 */
-			
+
 			nframes_t requested_frame = (*i).end;
-			
+
 			if (requested_frame > current_block_size) {
 				requested_frame -= current_block_size;
 			} else {
 				requested_frame = 0;
 			}
-			
+
 			if (next == current_audio_range.end()) {
 				ev = new Event (Event::RangeStop, Event::Add, requested_frame, 0, 0.0f);
 			} else {
 				ev = new Event (Event::RangeLocate, Event::Add, requested_frame, (*next).start, 0.0f);
 			}
-			
+
 			merge_event (ev);
-			
+
 			i = next;
 		}
-		
+
 	} else if (sz == 1) {
-		
+
 		ev = new Event (Event::RangeStop, Event::Add, current_audio_range.front().end, 0, 0.0f);
 		merge_event (ev);
-		
-	} 
+
+	}
 
 	/* now start rolling at the right place */
-	
+
 	ev = new Event (Event::LocateRoll, Event::Add, Event::Immediate, current_audio_range.front().start, 0.0f, false);
 	merge_event (ev);
 }
@@ -1254,14 +1272,14 @@ Session::engine_halted ()
 	/* there will be no more calls to process(), so
 	   we'd better clean up for ourselves, right now.
 
-	   but first, make sure the butler is out of 
+	   but first, make sure the butler is out of
 	   the picture.
 	*/
 
 	g_atomic_int_set (&butler_should_do_transport_work, 0);
 	post_transport_work = PostTransportWork (0);
 	stop_butler ();
-	
+
 	realtime_stop (false);
 	non_realtime_stop (false, 0, ignored);
 	transport_sub_state = 0;
@@ -1282,7 +1300,7 @@ Session::xrun_recovery ()
 		*/
 
 		engine_halted();
-	} 
+	}
 }
 
 void
@@ -1299,15 +1317,15 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		
+
 		if (with_stop) {
-			(*i)->handle_transport_stopped (abort, (post_transport_work & PostTransportLocate), 
+			(*i)->handle_transport_stopped (abort, (post_transport_work & PostTransportLocate),
 							(!(post_transport_work & PostTransportLocate) || pending_locate_flush));
 		}
-		
+
 		nframes_t old_latency = (*i)->signal_latency ();
 		nframes_t track_latency = (*i)->update_total_latency ();
-		
+
 		if (old_latency != track_latency) {
 			(*i)->update_port_total_latencies ();
 			update_jack = true;
@@ -1316,7 +1334,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
  		if (!(*i)->is_hidden() && ((*i)->active())) {
 			_worst_track_latency = max (_worst_track_latency, track_latency);
 		}
-	} 
+	}
 
 	if (update_jack) {
 		_engine.update_total_latencies ();
@@ -1330,7 +1348,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 
 	/* reflect any changes in latencies into capture offsets
 	*/
-	
+
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {

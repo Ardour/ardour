@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 1999-2002 Paul Davis 
+  Copyright (C) 1999-2002 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -94,8 +94,14 @@ Session::use_config_midi_ports ()
 		set_midi_port ("");
 	}
 
+	if (default_midi_clock_port) {
+		set_midi_clock_port (default_midi_clock_port->name());
+	} else {
+		set_midi_clock_port ("");
+	}
+
 	return 0;
-}	
+}
 
 
 /***********************************************************************
@@ -190,7 +196,7 @@ Session::set_mmc_port (string port_tag)
 		delete mmc;
 	}
 
-	mmc = new MIDI::MachineControl (*_mmc_port, 1.0, 
+	mmc = new MIDI::MachineControl (*_mmc_port, 1.0,
 					MMC_CommandSignature,
 					MMC_ResponseSignature);
 
@@ -199,29 +205,29 @@ Session::set_mmc_port (string port_tag)
 		mmc->set_send_device_id (old_send_device_id);
 	}
 
-	mmc->Play.connect 
+	mmc->Play.connect
 		(mem_fun (*this, &Session::mmc_deferred_play));
-	mmc->DeferredPlay.connect 
+	mmc->DeferredPlay.connect
 		(mem_fun (*this, &Session::mmc_deferred_play));
-	mmc->Stop.connect 
+	mmc->Stop.connect
 		(mem_fun (*this, &Session::mmc_stop));
-	mmc->FastForward.connect 
+	mmc->FastForward.connect
 		(mem_fun (*this, &Session::mmc_fast_forward));
-	mmc->Rewind.connect 
+	mmc->Rewind.connect
 		(mem_fun (*this, &Session::mmc_rewind));
-	mmc->Pause.connect 
+	mmc->Pause.connect
 		(mem_fun (*this, &Session::mmc_pause));
-	mmc->RecordPause.connect 
+	mmc->RecordPause.connect
 		(mem_fun (*this, &Session::mmc_record_pause));
-	mmc->RecordStrobe.connect 
+	mmc->RecordStrobe.connect
 		(mem_fun (*this, &Session::mmc_record_strobe));
-	mmc->RecordExit.connect 
+	mmc->RecordExit.connect
 		(mem_fun (*this, &Session::mmc_record_exit));
-	mmc->Locate.connect 
+	mmc->Locate.connect
 		(mem_fun (*this, &Session::mmc_locate));
-	mmc->Step.connect 
+	mmc->Step.connect
 		(mem_fun (*this, &Session::mmc_step));
-	mmc->Shuttle.connect 
+	mmc->Shuttle.connect
 		(mem_fun (*this, &Session::mmc_shuttle));
 	mmc->TrackRecordStatusChange.connect
 		(mem_fun (*this, &Session::mmc_record_enable));
@@ -232,7 +238,7 @@ Session::set_mmc_port (string port_tag)
 	_mmc_port->input()->start.connect (mem_fun (*this, &Session::spp_start));
 	_mmc_port->input()->contineu.connect (mem_fun (*this, &Session::spp_continue));
 	_mmc_port->input()->stop.connect (mem_fun (*this, &Session::spp_stop));
-	
+
 	Config->set_mmc_port_name (port_tag);
 
   out:
@@ -261,9 +267,9 @@ Session::set_midi_port (string port_tag)
 	}
 
 	_midi_port = port;
-	
+
 	/* XXX need something to forward this to control protocols ? or just
-	   use the signal below 
+	   use the signal below
 	*/
 
 	Config->set_midi_port_name (port_tag);
@@ -271,6 +277,52 @@ Session::set_midi_port (string port_tag)
   out:
 #endif
 	MIDI_PortChanged(); /* EMIT SIGNAL */
+	change_midi_ports ();
+	set_dirty();
+	return 0;
+}
+
+int
+Session::set_midi_clock_port (string port_tag)
+{
+	MIDIClock_Slave *ms;
+
+	if (port_tag.length() == 0) {
+
+		if (_slave && ((ms = dynamic_cast<MIDIClock_Slave*> (_slave)) != 0)) {
+			error << _("Ardour is slaved to MIDI Clock - port cannot be reset") << endmsg;
+			return -1;
+		}
+
+		if (_midi_clock_port == 0) {
+			return 0;
+		}
+
+		_midi_clock_port = 0;
+		goto out;
+	}
+
+	MIDI::Port* port;
+
+	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
+		error << string_compose (_("unknown port %1 requested for MIDI Clock"), port_tag) << endl;
+		return -1;
+	}
+
+	_midi_clock_port = port;
+
+	if (_slave && ((ms = dynamic_cast<MIDIClock_Slave*> (_slave)) != 0)) {
+		ms->rebind (*port);
+	}
+
+	Config->set_midi_clock_port_name (port_tag);
+
+	_midi_clock_port->input()->start.connect (mem_fun (*this, &Session::midi_clock_start));
+	_midi_clock_port->input()->contineu.connect (mem_fun (*this, &Session::midi_clock_continue));
+	_midi_clock_port->input()->stop.connect (mem_fun (*this, &Session::midi_clock_stop));
+
+  out:
+	MIDIClock_PortChanged(); /* EMIT SIGNAL */
 	change_midi_ports ();
 	set_dirty();
 	return 0;
@@ -292,7 +344,7 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
-		
+
 		if (_mtc_port && _mtc_port != _mmc_port) {
 			if ((input_parser = _mtc_port->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
@@ -324,7 +376,7 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 				output_parser->trace (yn, &cout, "output: ");
 			}
 		}
-		
+
 		if (_mtc_port && _mtc_port != _mmc_port) {
 			if ((output_parser = _mtc_port->output()) != 0) {
 				output_parser->trace (yn, &cout, "output: ");
@@ -357,7 +409,7 @@ Session::get_trace_midi_input(MIDI::Port *port)
 				return input_parser->tracing();
 			}
 		}
-		
+
 		if (_mtc_port) {
 			if ((input_parser = _mtc_port->input()) != 0) {
 				return input_parser->tracing();
@@ -389,7 +441,7 @@ Session::get_trace_midi_output(MIDI::Port *port)
 				return output_parser->tracing();
 			}
 		}
-		
+
 		if (_mtc_port) {
 			if ((output_parser = _mtc_port->output()) != 0) {
 				return output_parser->tracing();
@@ -414,14 +466,14 @@ Session::setup_midi_control ()
 	next_quarter_frame_to_send = 0;
 
 	/* setup the MMC buffer */
-	
+
 	mmc_buffer[0] = 0xf0; // SysEx
 	mmc_buffer[1] = 0x7f; // Real Time SysEx ID for MMC
 	mmc_buffer[2] = (mmc ? mmc->send_device_id() : 0x7f);
 	mmc_buffer[3] = 0x6;  // MCC
 
 	/* Set up the qtr frame message */
-	
+
 	mtc_msg[0] = 0xf1;
 	mtc_msg[2] = 0xf1;
 	mtc_msg[4] = 0xf1;
@@ -455,6 +507,28 @@ Session::spp_stop (Parser& ignored)
 }
 
 void
+Session::midi_clock_start (Parser& ignored)
+{
+	if (Config->get_midi_clock_control() && (Config->get_slave_source() == MIDIClock)) {
+		request_transport_speed (1.0);
+	}
+}
+
+void
+Session::midi_clock_continue (Parser& ignored)
+{
+	midi_clock_start (ignored);
+}
+
+void
+Session::midi_clock_stop (Parser& ignored)
+{
+	if (Config->get_midi_clock_control()) {
+		request_stop ();
+	}
+}
+
+void
 Session::mmc_deferred_play (MIDI::MachineControl &mmc)
 {
 	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
@@ -473,7 +547,7 @@ Session::mmc_record_pause (MIDI::MachineControl &mmc)
 void
 Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 {
-	if (!Config->get_mmc_control()) 
+	if (!Config->get_mmc_control())
 		return;
 
 	/* record strobe does an implicit "Play" command */
@@ -485,11 +559,11 @@ Session::mmc_record_strobe (MIDI::MachineControl &mmc)
 		   its not the same as maybe_enable_record() though, because
 		   that *can* switch to Recording, which we do not want.
 		*/
-		
+
 		save_state ("", true);
 		g_atomic_int_set (&_record_status, Enabled);
 		RecordStateChanged (); /* EMIT SIGNAL */
-		
+
 		request_transport_speed (1.0);
 
 	} else {
@@ -545,7 +619,7 @@ Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 	struct timeval diff = { 0, 0 };
 
 	gettimeofday (&now, 0);
-	
+
 	timersub (&now, &last_mmc_step, &diff);
 
 	gettimeofday (&now, 0);
@@ -554,10 +628,10 @@ Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 	if (last_mmc_step.tv_sec != 0 && (diff.tv_usec + (diff.tv_sec * 1000000)) < _engine.usecs_per_cycle()) {
 		return;
 	}
-	
+
 	double diff_secs = diff.tv_sec + (diff.tv_usec / 1000000.0);
 	double cur_speed = (((steps * 0.5) * smpte_frames_per_second()) / diff_secs) / smpte_frames_per_second();
-	
+
 	if (_transport_speed == 0 || cur_speed * _transport_speed < 0) {
 		/* change direction */
 		step_speed = cur_speed;
@@ -568,13 +642,13 @@ Session::mmc_step (MIDI::MachineControl &mmc, int steps)
 	step_speed *= 0.25;
 
 #if 0
-	cerr << "delta = " << diff_secs 
+	cerr << "delta = " << diff_secs
 	     << " ct = " << _transport_speed
 	     << " steps = " << steps
-	     << " new speed = " << cur_speed 
+	     << " new speed = " << cur_speed
 	     << " speed = " << step_speed
 	     << endl;
-#endif	
+#endif
 
 	request_transport_speed (step_speed);
 	last_mmc_step = now;
@@ -617,10 +691,10 @@ Session::mmc_locate (MIDI::MachineControl &mmc, const MIDI::byte* mmc_tc)
 	smpte.frames = mmc_tc[3];
 	smpte.rate = smpte_frames_per_second();
 	smpte.drop = smpte_drop_frames();
-  
+
 	// Also takes smpte offset into account:
 	smpte_to_sample( smpte, target_frame, true /* use_offset */, false /* use_subframes */ );
-	
+
 	if (target_frame > max_frames) {
 		target_frame = max_frames;
 	}
@@ -667,7 +741,7 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 
 		RouteList::iterator i;
 		boost::shared_ptr<RouteList> r = routes.reader();
-		
+
 		for (i = r->begin(); i != r->end(); ++i) {
 			AudioTrack *at;
 
@@ -710,7 +784,7 @@ Session::send_full_time_code(nframes_t nframes)
 	if (_mtc_port == 0 || !session_send_mtc) {
 		return 0;
 	}
-	
+
 	// Get smpte time for this transport frame
 	sample_to_smpte(_transport_frame, smpte, true /* use_offset */, false /* no subframes */);
 
@@ -763,31 +837,31 @@ Session::send_full_time_code(nframes_t nframes)
  */
 int
 Session::send_midi_time_code_for_cycle(nframes_t nframes)
-{	
+{
 	assert (next_quarter_frame_to_send >= 0);
 	assert (next_quarter_frame_to_send <= 7);
-	
+
 	if (_mtc_port == 0 || !session_send_mtc || transmitting_smpte_time.negative
 	    /*|| (next_quarter_frame_to_send < 0)*/ ) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
-	
+
 	/* Duration of one quarter frame */
 	nframes_t quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
-	
+
 	// cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_smpte_frame
 	// << " - NQ: " << next_quarter_frame_to_send << " - FD" << quarter_frame_duration << endl;
-		
+
 	// FIXME: this should always be true
 	//assert((outbound_mtc_smpte_frame + (next_quarter_frame_to_send * quarter_frame_duration))
 	//		> _transport_frame);
 
-	
+
 	// Send quarter frames for this cycle
 	while (_transport_frame + nframes > (outbound_mtc_smpte_frame +
 				(next_quarter_frame_to_send * quarter_frame_duration))) {
-		
+
 		// cerr << "(MTC) Next frame to send: " << next_quarter_frame_to_send << endl;
 
 		switch (next_quarter_frame_to_send) {
@@ -815,11 +889,11 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			case 7:
 				mtc_msg[1] = 0x70 | (((mtc_smpte_bits|transmitting_smpte_time.hours) & 0xf0) >> 4);
 				break;
-		}			
-		
+		}
+
 		const nframes_t msg_time = (outbound_mtc_smpte_frame
 			+ (quarter_frame_duration * next_quarter_frame_to_send));
-	
+
 		// This message must fall within this block or something is broken
 		assert(msg_time >= _transport_frame);
 		assert(msg_time < _transport_frame + nframes);
@@ -828,7 +902,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 		assert(out_stamp < nframes);
 
 		if (_mtc_port->midimsg (mtc_msg, 2, out_stamp)) {
-			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno)) 
+			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
 			      << endmsg;
 			return -1;
 		}
@@ -840,7 +914,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			<< ", qfm = " << next_quarter_frame_to_send
 			<< ", stamp = " << out_stamp
 			<< ", delta = " << _transport_frame + out_stamp - last_time << endl;*/
-		
+
 		// Increment quarter frame counter
 		next_quarter_frame_to_send++;
 
@@ -849,7 +923,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			next_quarter_frame_to_send = 0;
 			// Increment smpte time twice
 			SMPTE::increment( transmitting_smpte_time );
-			SMPTE::increment( transmitting_smpte_time );        
+			SMPTE::increment( transmitting_smpte_time );
 			// Re-calculate timing of first quarter frame
 			//smpte_to_sample( transmitting_smpte_time, outbound_mtc_smpte_frame, true /* use_offset */, false );
 			outbound_mtc_smpte_frame += 8 * quarter_frame_duration;
@@ -880,7 +954,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 	mmc_buffer[nbytes++] = cmd;
 
 	// cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
-	
+
 	switch (cmd) {
 	case MachineControl::cmdLocate:
 		smpte_time_subframes (where, smpte);
@@ -925,7 +999,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 
 		if (_mmc_port->midimsg (mmc_buffer, nbytes, 0)) {
 			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
-		} 
+		}
 	}
 }
 
@@ -959,7 +1033,7 @@ Session::mmc_step_timeout ()
 }
 
 /*---------------------------------------------------------------------------
-  MIDI THREAD 
+  MIDI THREAD
   ---------------------------------------------------------------------------*/
 
 int
@@ -995,9 +1069,9 @@ Session::terminate_midi_thread ()
 
 		MIDIRequest* request = new MIDIRequest;
 		void* status;
-		
+
 		request->type = MIDIRequest::Quit;
-		
+
 		midi_requests.write (&request, 1);
 		poke_midi_thread ();
 
@@ -1042,14 +1116,14 @@ Session::midi_thread_work ()
 
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-	
+
 	if ((x = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
 		// do we care? not particularly.
-	} 
+	}
 
-	/* set up the port vector; 4 is the largest possible size for now */
+	/* set up the port vector; 5 is the largest possible size for now */
 
-	ports.assign (4, (MIDI::Port*) 0);
+	ports.assign (5, (MIDI::Port*) 0);
 
 	while (1) {
 
@@ -1078,6 +1152,15 @@ Session::midi_thread_work ()
 			nfds++;
 		}
 
+		cerr << "before handling midi clock port" << endl;
+		if (_midi_clock_port && (_midi_clock_port != _mmc_port || !Config->get_mmc_control()) && _midi_clock_port->selectable() >= 0) {
+			cerr << "inside handling midi clock port" << endl;
+			pfd[nfds].fd = _midi_clock_port->selectable();
+			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
+			ports[nfds] = _midi_clock_port;
+			nfds++;
+		}
+
 		/* if we are using MMC control, we obviously have to listen
 		   the relevant port.
 		*/
@@ -1088,7 +1171,7 @@ Session::midi_thread_work ()
 			ports[nfds] = _midi_port;
 			nfds++;
 		}
-		
+
 		if (!midi_timeouts.empty()) {
 			timeout = 100; /* 10msecs */
 		} else {
@@ -1121,7 +1204,7 @@ Session::midi_thread_work ()
 		if (pfd[0].revents & POLLIN) {
 
 			char foo[16];
-			
+
 			// cerr << "MIDI request FIFO ready\n";
 			fds_ready++;
 
@@ -1154,13 +1237,13 @@ Session::midi_thread_work ()
 					// cerr << "rebind\n";
 					restart = true;
 					break;
-						
+
 				case MIDIRequest::Quit:
 					delete request;
 					pthread_exit_pbd (0);
 					/*NOTREACHED*/
 					break;
-					
+
 				default:
 					break;
 				}
@@ -1169,7 +1252,7 @@ Session::midi_thread_work ()
 				delete request;
 			}
 
-		} 
+		}
 
 		if (restart) {
 			continue;
@@ -1182,7 +1265,7 @@ Session::midi_thread_work ()
 				// error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
 				break;
 			}
-			
+
 			if (pfd[p].revents & POLLIN) {
 				fds_ready++;
 				ports[p]->parse ();
@@ -1190,19 +1273,19 @@ Session::midi_thread_work ()
 		}
 
 		/* timeout driven */
-		
+
 		if (fds_ready < 2 && timeout != -1) {
 
 			for (MidiTimeoutList::iterator i = midi_timeouts.begin(); i != midi_timeouts.end(); ) {
-				
+
 				MidiTimeoutList::iterator tmp;
 				tmp = i;
 				++tmp;
-				
+
 				if (!(*i)()) {
 					midi_timeouts.erase (i);
 				}
-				
+
 				i = tmp;
 			}
 		}

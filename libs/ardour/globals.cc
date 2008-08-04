@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@
 #if defined (__APPLE__)
        #include <Carbon/Carbon.h> // For Gestalt
 #endif
-       
+
 #include "i18n.h"
 
 ARDOUR::Configuration* ARDOUR::Config = 0;
@@ -91,6 +91,7 @@ using namespace PBD;
 MIDI::Port *default_mmc_port = 0;
 MIDI::Port *default_mtc_port = 0;
 MIDI::Port *default_midi_port = 0;
+MIDI::Port *default_midi_clock_port = 0;
 
 Change ARDOUR::StartChanged = ARDOUR::new_change ();
 Change ARDOUR::LengthChanged = ARDOUR::new_change ();
@@ -111,11 +112,11 @@ static int
 setup_osc ()
 {
 	/* no real cost to creating this object, and it avoids
-	   conditionals anywhere that uses it 
+	   conditionals anywhere that uses it
 	*/
-	
+
 	osc = new OSC (Config->get_osc_port());
-	
+
 	if (Config->get_use_osc ()) {
 		BootMessage (_("Starting OSC"));
 		return osc->start ();
@@ -125,7 +126,7 @@ setup_osc ()
 }
 #endif
 
-int 
+int
 setup_midi ()
 {
 	if (Config->midi_ports.size() == 0) {
@@ -150,16 +151,20 @@ setup_midi ()
 
 		if (Config->get_mmc_port_name() != N_("default")) {
 			default_mmc_port =  MIDI::Manager::instance()->port (Config->get_mmc_port_name());
-		} 
+		}
 
 		if (Config->get_mtc_port_name() != N_("default")) {
 			default_mtc_port =  MIDI::Manager::instance()->port (Config->get_mtc_port_name());
-		} 
+		}
 
 		if (Config->get_midi_port_name() != N_("default")) {
 			default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_port_name());
-		} 
-		
+		}
+
+		if (Config->get_midi_clock_port_name() != N_("default")) {
+			default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_clock_port_name());
+		}
+
 		/* If that didn't work, just use the first listed port */
 
 		if (default_mmc_port == 0) {
@@ -173,7 +178,11 @@ setup_midi ()
 		if (default_midi_port == 0) {
 			default_midi_port = first;
 		}
-		
+
+		if (default_midi_clock_port == 0) {
+			default_midi_clock_port = first;
+		}
+
 	} else if (ports.size() == 1) {
 
 		first = ports.begin()->second;
@@ -183,21 +192,27 @@ setup_midi ()
 		default_mmc_port = first;
 		default_mtc_port = default_mmc_port;
 		default_midi_port = default_mmc_port;
+		default_midi_clock_port = default_mmc_port;
 	}
 
 	if (default_mmc_port == 0) {
-		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name()) 
+		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name())
 			<< endmsg;
 		return 0;
-	} 
+	}
 
 	if (default_mtc_port == 0) {
-		warning << string_compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name()) 
+		warning << string_compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name())
 			<< endmsg;
 	}
 
 	if (default_midi_port == 0) {
-		warning << string_compose (_("No MIDI parameter support (MIDI port \"%1\" not available)"), Config->get_midi_port_name()) 
+		warning << string_compose (_("No MIDI parameter support (MIDI port \"%1\" not available)"), Config->get_midi_port_name())
+			<< endmsg;
+	}
+
+	if (default_midi_clock_port == 0) {
+		warning << string_compose (_("No MIDI Clock support (MIDI port \"%1\" not available)"), Config->get_midi_clock_port_name())
 			<< endmsg;
 	}
 
@@ -331,7 +346,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 		return -1;
 	}
 #endif
-	
+
 	/* Make VAMP look in our library ahead of anything else */
 
 	char *p = getenv ("VAMP_PATH");
@@ -339,7 +354,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	if (p) {
 		vamppath += ':';
 		vamppath += p;
-	} 
+	}
 	setenv ("VAMP_PATH", vamppath.c_str(), 1);
 
 
@@ -350,7 +365,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	/* singleton - first object is "it" */
 	new PluginManager ();
-	
+
 	/* singleton - first object is "it" */
 	new ControlProtocolManager ();
 	ControlProtocolManager::instance().discover_control_protocols ();
@@ -359,7 +374,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	if ((node = Config->control_protocol_state()) != 0) {
 		ControlProtocolManager::instance().set_state (*node);
 	}
-	
+
 	BoundsChanged = Change (StartChanged|PositionChanged|LengthChanged);
 
 	return 0;
@@ -430,7 +445,7 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 	if (found.empty()) {
 		return;
 	}
-	
+
 	for (vector<sys::path>::iterator x = found.begin(); x != found.end(); ++x) {
 		sys::path path = *x;
 		pair<string,string> namepath;
@@ -445,7 +460,7 @@ ARDOUR::LocaleGuard::LocaleGuard (const char* str)
 	old = strdup (setlocale (LC_NUMERIC, NULL));
 	if (strcmp (old, str)) {
 		setlocale (LC_NUMERIC, str);
-	} 
+	}
 }
 
 ARDOUR::LocaleGuard::~LocaleGuard ()
@@ -472,7 +487,7 @@ ARDOUR::setup_fpu ()
 	/* XXX use real code to determine if the processor supports
 	   DenormalsAreZero and FlushToZero
 	*/
-	
+
 	if (!fpu.has_flush_to_zero() && !fpu.has_denormals_are_zero()) {
 		return;
 	}
@@ -496,7 +511,7 @@ ARDOUR::setup_fpu ()
 			MXCSR |= 0x8000;
 		}
 		break;
-		
+
 	case DenormalFTZDAZ:
 		if (fpu.has_flush_to_zero()) {
 			if (fpu.has_denormals_are_zero()) {
@@ -514,7 +529,7 @@ ARDOUR::setup_fpu ()
 }
 
 ARDOUR::OverlapType
-ARDOUR::coverage (nframes_t sa, nframes_t ea, 
+ARDOUR::coverage (nframes_t sa, nframes_t ea,
 		  nframes_t sb, nframes_t eb)
 {
 	/* OverlapType returned reflects how the second (B)
@@ -539,7 +554,7 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
 	        |-----------------|   B
 
 
-             "B is internal to A"		
+             "B is internal to A"
 
 	*/
 #ifdef OLD_COVERAGE
@@ -555,7 +570,7 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
 	   ----|                      B
            -----------------------|   B
 	   --|                        B
-	   
+
 	     "B overlaps the start of A"
 
 	*/
@@ -563,13 +578,13 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
 	if ((eb >= sa) && (eb <= ea)) {
 		return OverlapStart;
 	}
-	/* 
+	/*
 	     |---------------------|  A
                    |----------------- B
- 	     |----------------------- B	   
+ 	     |----------------------- B
                                    |- B
 
-            "B overlaps the end of A"				   
+            "B overlaps the end of A"
 
 	*/
 	if ((sb > sa) && (sb <= ea)) {
@@ -577,7 +592,7 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
 	}
 	/*
 	     |--------------------|     A
-	   --------------------------  B   
+	   --------------------------  B
 	     |-----------------------  B
 	    ----------------------|    B
              |--------------------|    B

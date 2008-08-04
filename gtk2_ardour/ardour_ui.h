@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2002 Paul Davis 
+    Copyright (C) 1999-2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -110,18 +110,18 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void show ();
 	bool shown() { return shown_flag; }
-	
+
 	void show_splash ();
 	void hide_splash ();
 
 	void show_about ();
 	void hide_about ();
-	
+
 	void idle_load (const Glib::ustring& path);
 	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
-	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, 
-			   uint32_t ctl_chns, 
+	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot,
+			   uint32_t ctl_chns,
 			   uint32_t master_chns,
 			   ARDOUR::AutoConnectOption input_connect,
 			   ARDOUR::AutoConnectOption output_connect,
@@ -145,10 +145,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int  load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session);
 	int  build_session_from_nsd (const Glib::ustring& session_name, const Glib::ustring& session_path);
 	bool ask_about_loading_existing_session (const Glib::ustring& session_path);
-	
+
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false);
-	void close_session(); 
+	void close_session();
 
 	int  save_state_canfail (string state_name = "");
 	void save_state (const string & state_name = "");
@@ -212,7 +212,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void restore_clock_modes ();
 
 	void add_route (Gtk::Window* float_window);
-	
+
 	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many) {
 		session_add_audio_route (true, input_channels, output_channels, mode, how_many);
 	}
@@ -260,7 +260,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_click ();
 
 	void toggle_session_auto_loop ();
-	
+
 	void toggle_options_window ();
 
   private:
@@ -295,7 +295,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void                     goto_editor_window ();
 	void                     goto_mixer_window ();
-	
+
 	Gtk::Table               adjuster_table;
 	Gtk::Frame               adjuster_frame;
 	Gtk::Fixed               adjuster_base;
@@ -334,7 +334,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void queue_transport_change ();
 	void map_transport_state ();
 	int32_t do_engine_start ();
-	
+
 	void engine_halted ();
 	void engine_stopped ();
 	void engine_running ();
@@ -359,7 +359,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void         stop_clocking ();
 
 	void manage_window (Gtk::Window&);
-	
+
 	AudioClock   big_clock;
 	Gtk::Frame   big_clock_frame;
 	Gtk::Window* big_clock_window;
@@ -399,15 +399,15 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		    AutoLoop,
 		    PlaySelection,
 		    ShuttleControl
-		    
+
 	    };
-	    
+
 	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
 	    void set_value (float);
 	    float get_value (void) const;
-	    
+
 	    void set_id (const std::string&);
-	    
+
 	    ARDOUR_UI& ui;
 	    ToggleType type;
 	};
@@ -505,7 +505,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::Menu*        session_popup_menu;
 
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    RecentSessionModelColumns() { 
+	    RecentSessionModelColumns() {
 		    add (visible_name);
 		    add (fullpath);
 	    }
@@ -519,7 +519,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	ArdourDialog*     session_selector_window;
 	Gtk::FileChooserDialog* open_session_selector;
-	
+
 	void build_session_selector();
 	void redisplay_recent_sessions();
 	void recent_session_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
@@ -574,7 +574,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool _will_create_new_session_automatically;
 
 	NewSessionDialog* new_session_dialog;
-	
+
 	void open_session ();
 	void open_recent_session ();
 	void save_template ();
@@ -593,7 +593,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_stop_and_forget_capture ();
 	void transport_record (bool roll);
 	void transport_roll ();
-	void transport_play_selection(); 
+	void transport_play_selection();
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();
@@ -607,16 +607,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void connect_to_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
-	
+
 	void setup_session_options ();
-	
+
 	guint32  last_key_press_time;
 
 	void snapshot_session ();
 
 	Mixer_UI   *mixer;
 	int         create_mixer ();
-	
+
 	PublicEditor     *editor;
 	int         create_editor ();
 
@@ -641,15 +641,15 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	KeyEditor *key_editor;
 
 	/* Options window */
-	
+
 	OptionEditor *option_editor;
-	
+
 	/* route dialog */
 
 	AddRouteDialog *add_route_dialog;
-	
+
 	/* Keyboard Handling */
-	
+
 	Keyboard* keyboard;
 
 	/* Keymap handling */
@@ -689,7 +689,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void session_dialog (std::string);
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (nframes_t, nframes_t);
-	
+
 	void disconnect_from_jack ();
 	void reconnect_to_jack ();
 	void set_jack_buffer_size (nframes_t);
@@ -711,6 +711,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
 	void toggle_send_mtc ();
+	void toggle_use_midi_clock ();
 
 	void toggle_use_osc ();
 
@@ -774,11 +775,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool check_audioengine();
 	void audioengine_setup ();
 
-	void display_message (const char *prefix, gint prefix_len, 
+	void display_message (const char *prefix, gint prefix_len,
 			      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, const char *msg);
 	Gtk::Label status_bar_label;
 	Gtk::ToggleButton error_log_button;
-	
+
 	void loading_message (const std::string& msg);
 	void end_loading_messages ();
 

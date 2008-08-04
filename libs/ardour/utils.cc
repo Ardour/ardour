@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ using namespace std;
 using namespace PBD;
 using Glib::ustring;
 
-ustring 
+ustring
 legalize_for_path (ustring str)
 {
 	ustring::size_type pos;
@@ -97,7 +97,7 @@ string bump_name_once(std::string name)
 			char buf[32];
 
 			snprintf (buf, sizeof(buf), "%ld", version+1);
-		
+
 			newname  = name.substr (0, period+1);
 			newname += buf;
 		}
@@ -140,7 +140,7 @@ cmp_nocase (const string& s, const string& s2)
 {
 	string::const_iterator p = s.begin();
 	string::const_iterator p2 = s2.begin();
-	
+
 	while (p != s.end() && p2 != s2.end()) {
 		if (toupper(*p) != toupper(*p2)) {
 			return (toupper(*p) < toupper(*p2)) ? -1 : 1;
@@ -148,7 +148,7 @@ cmp_nocase (const string& s, const string& s2)
 		++p;
 		++p2;
 	}
-	
+
 	return (s2.size() == s.size()) ? 0 : (s.size() < s2.size()) ? -1 : 1;
 }
 
@@ -171,12 +171,12 @@ region_name_from_path (ustring path, bool strip_channels, bool add_channel_suffi
 	if (strip_channels) {
 
 		/* remove any "?R", "?L" or "?[a-z]" channel identifier */
-		
+
 		ustring::size_type len = path.length();
-		
-		if (len > 3 && (path[len-2] == '%' || path[len-2] == '?' || path[len-2] == '.') && 
+
+		if (len > 3 && (path[len-2] == '%' || path[len-2] == '?' || path[len-2] == '.') &&
 		    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
-			
+
 			path = path.substr (0, path.length() - 2);
 		}
 	}
@@ -184,7 +184,7 @@ region_name_from_path (ustring path, bool strip_channels, bool add_channel_suffi
 	if (add_channel_suffix) {
 
 		path += '%';
-		
+
 		if (total > 2) {
 			path += (char) ('a' + this_one);
 		} else {
@@ -193,7 +193,7 @@ region_name_from_path (ustring path, bool strip_channels, bool add_channel_suffi
 	}
 
 	return path;
-}	
+}
 
 bool
 path_is_paired (ustring path, ustring& pair_base)
@@ -207,7 +207,7 @@ path_is_paired (ustring path, ustring& pair_base)
 	}
 
  	/* remove filename suffixes etc. */
-	
+
 	if ((pos = path.find_last_of ('.')) != string::npos) {
 		path = path.substr (0, pos);
 	}
@@ -216,13 +216,13 @@ path_is_paired (ustring path, ustring& pair_base)
 
 	/* look for possible channel identifier: "?R", "%R", ".L" etc. */
 
-	if (len > 3 && (path[len-2] == '%' || path[len-2] == '?' || path[len-2] == '.') && 
+	if (len > 3 && (path[len-2] == '%' || path[len-2] == '?' || path[len-2] == '.') &&
 	    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
-		
+
 		pair_base = path.substr (0, len-2);
 		return true;
 
-	} 
+	}
 
 	return false;
 }
@@ -253,20 +253,20 @@ path_expand (ustring path)
 	wordfree (&expansion);
 	return ret;
 
-#else 
+#else
 	return path;
 #endif
 }
 
 #if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
-string 
+string
 CFStringRefToStdString(CFStringRef stringRef)
 {
-	CFIndex size = 
-		CFStringGetMaximumSizeForEncoding(CFStringGetLength(stringRef) , 
+	CFIndex size =
+		CFStringGetMaximumSizeForEncoding(CFStringGetLength(stringRef) ,
 		kCFStringEncodingUTF8);
 	    char *buf = new char[size];
-	
+
 	std::string result;
 
 	if(CFStringGetCString(stringRef, buf, size, kCFStringEncodingUTF8)) {
@@ -285,11 +285,11 @@ compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 	step = 1.0/nframes;
 
 	in[0] = 0.0f;
-	
+
 	for (nframes_t i = 1; i < nframes - 1; ++i) {
 		in[i] = in[i-1] + step;
 	}
-	
+
 	in[nframes-1] = 1.0;
 
 	const float pan_law_attenuation = -3.0f;
@@ -340,9 +340,13 @@ string_to_slave_source (string str)
 	if (str == _("Internal")) {
 		return None;
 	}
-	
+
 	if (str == _("MTC")) {
 		return MTC;
+	}
+
+	if (str == _("MIDI Clock")) {
+		return MIDIClock;
 	}
 
 	if (str == _("JACK")) {
@@ -363,11 +367,14 @@ slave_source_to_string (SlaveSource src)
 
 	case MTC:
 		return _("MTC");
-		
+
+	case MIDIClock:
+		return _("MIDI Clock");
+
 	default:
 	case None:
 		return _("Internal");
-		
+
 	}
 }
 
@@ -449,7 +456,7 @@ meter_hold_to_float (MeterHold hold)
 	}
 }
 
-AutoState 
+AutoState
 ARDOUR::string_to_auto_state (std::string str)
 {
 	if (str == X_("Off")) {
@@ -467,7 +474,7 @@ ARDOUR::string_to_auto_state (std::string str)
 	return Touch;
 }
 
-string 
+string
 ARDOUR::auto_state_to_string (AutoState as)
 {
 	/* to be used only for XML serialization, no i18n done */
@@ -491,7 +498,7 @@ ARDOUR::auto_state_to_string (AutoState as)
 	return "";
 }
 
-AutoStyle 
+AutoStyle
 ARDOUR::string_to_auto_style (std::string str)
 {
 	if (str == X_("Absolute")) {
@@ -505,7 +512,7 @@ ARDOUR::string_to_auto_style (std::string str)
 	return Trim;
 }
 
-string 
+string
 ARDOUR::auto_style_to_string (AutoStyle as)
 {
 	/* to be used only for XML serialization, no i18n done */

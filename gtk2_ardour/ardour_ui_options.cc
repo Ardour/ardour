@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2005 Paul Davis 
+    Copyright (C) 2005 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,6 +68,12 @@ ARDOUR_UI::toggle_use_mmc ()
 }
 
 void
+ARDOUR_UI::toggle_use_midi_clock ()
+{
+	ActionManager::toggle_config_state ("options", "UseMIDIClock", &Configuration::set_midi_clock_control, &Configuration::get_midi_clock_control);
+}
+
+void
 ARDOUR_UI::toggle_use_osc ()
 {
 	ActionManager::toggle_config_state ("options", "UseOSC", &Configuration::set_use_osc, &Configuration::get_use_osc);
@@ -121,7 +127,7 @@ ARDOUR_UI::set_native_file_header_format (HeaderFormat hf)
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1"), "illegal file header format in ::set_native_file_header_format") << endmsg;
-		/*NOTREACHED*/	
+		/*NOTREACHED*/
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", action);
@@ -168,7 +174,7 @@ void
 ARDOUR_UI::set_input_auto_connect (AutoConnectOption option)
 {
 	const char* action;
-	
+
 	switch (option) {
 	case AutoConnectPhysical:
 		action = X_("InputAutoConnectPhysical");
@@ -192,7 +198,7 @@ void
 ARDOUR_UI::set_output_auto_connect (AutoConnectOption option)
 {
 	const char* action;
-	
+
 	switch (option) {
 	case AutoConnectPhysical:
 		action = X_("OutputAutoConnectPhysical");
@@ -224,7 +230,7 @@ ARDOUR_UI::set_solo_model (SoloModel model)
 	case SoloBus:
 		action = X_("SoloViaBus");
 		break;
-		
+
 	case InverseMute:
 		action = X_("SoloInPlace");
 		break;
@@ -287,7 +293,7 @@ ARDOUR_UI::set_monitor_model (MonitorModel model)
 	case HardwareMonitoring:
 		action = X_("UseHardwareMonitoring");
 		break;
-		
+
 	case SoftwareMonitoring:
 		action = X_("UseSoftwareMonitoring");
 		break;
@@ -325,7 +331,7 @@ ARDOUR_UI::set_denormal_model (DenormalModel model)
 	case DenormalFTZ:
 		action = X_("DenormalFTZ");
 		break;
-		
+
 	case DenormalDAZ:
 		action = X_("DenormalDAZ");
 		break;
@@ -395,7 +401,7 @@ void
 ARDOUR_UI::unset_dual_punch ()
 {
 	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
-	
+
 	if (action) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
 		if (tact) {
@@ -597,6 +603,7 @@ void
 ARDOUR_UI::mtc_port_changed ()
 {
 	bool have_mtc;
+	bool have_midi_clock;
 
 	if (session) {
 		if (session->mtc_port()) {
@@ -604,8 +611,14 @@ ARDOUR_UI::mtc_port_changed ()
 		} else {
 			have_mtc = false;
 		}
+		if (session->midi_clock_port()) {
+			have_midi_clock = true;
+		} else {
+			have_midi_clock = false;
+		}
 	} else {
 		have_mtc = false;
+		have_midi_clock = false;
 	}
 
 	positional_sync_strings.clear ();
@@ -613,8 +626,11 @@ ARDOUR_UI::mtc_port_changed ()
 	if (have_mtc) {
 		positional_sync_strings.push_back (slave_source_to_string (MTC));
 	}
+	if (have_midi_clock) {
+		positional_sync_strings.push_back (slave_source_to_string (MIDIClock));
+	}
 	positional_sync_strings.push_back (slave_source_to_string (JACK));
-	
+
 	set_popdown_strings (sync_option_combo, positional_sync_strings);
 }
 
@@ -776,7 +792,7 @@ ARDOUR_UI::map_file_header_format ()
 		break;
 
 	default:
-		fatal << string_compose (_("programming error: unknown file header format passed to ARDOUR_UI::map_file_data_format: %1"), 
+		fatal << string_compose (_("programming error: unknown file header format passed to ARDOUR_UI::map_file_data_format: %1"),
 					 Config->get_native_file_header_format()) << endmsg;
 		/*NOTREACHED*/
 	}
@@ -812,7 +828,7 @@ ARDOUR_UI::map_file_data_format ()
 		break;
 
 	default:
-		fatal << string_compose (_("programming error: unknown file data format passed to ARDOUR_UI::map_file_data_format: %1"), 
+		fatal << string_compose (_("programming error: unknown file data format passed to ARDOUR_UI::map_file_data_format: %1"),
 					 Config->get_native_file_data_format()) << endmsg;
 		/*NOTREACHED*/
 	}
@@ -866,7 +882,7 @@ ARDOUR_UI::map_output_auto_connect ()
 	Glib::RefPtr<Action> act = ActionManager::get_action ("options", on);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		
+
 		if (tact && !tact->get_active()) {
 			tact->set_active (true);
 		}
@@ -965,7 +981,7 @@ ARDOUR_UI::map_meter_hold ()
 	}
 }
 
-void 
+void
 ARDOUR_UI::set_meter_hold (MeterHold val)
 {
 	const char* action = 0;
@@ -989,7 +1005,7 @@ ARDOUR_UI::set_meter_hold (MeterHold val)
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), action);
-	
+
 	if (act) {
 		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic(act);
 		if (ract && ract->get_active() && Config->get_meter_hold() != fval) {
@@ -1046,11 +1062,11 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), parameter_name));
 
 #define PARAM_IS(x) (!strcmp (parameter_name, (x)))
-	
+
 	if (PARAM_IS ("slave-source")) {
 
 		sync_option_combo.set_active_text (slave_source_to_string (Config->get_slave_source()));
-		
+
 		switch (Config->get_slave_source()) {
 		case None:
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
@@ -1070,7 +1086,6 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("send-mmc")) {
 
-
 		ActionManager::map_some_state ("options", "SendMMC", &Configuration::get_send_mmc);
 
 	} else if (PARAM_IS ("use-osc")) {
@@ -1084,10 +1099,11 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 #endif
 
 		ActionManager::map_some_state ("options", "UseOSC", &Configuration::get_use_osc);
-		
+
 	} else if (PARAM_IS ("mmc-control")) {
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
-
+	} else if (PARAM_IS ("midi-clock-control")) {
+		ActionManager::map_some_state ("options", "UseMIDIClock", &Configuration::get_midi_clock_control);
 	} else if (PARAM_IS ("midi-feedback")) {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
 	} else if (PARAM_IS ("do-not-record-plugins")) {
@@ -1170,7 +1186,7 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		}
 
 	} else if (PARAM_IS ("shuttle-units")) {
-		
+
 		switch (Config->get_shuttle_units()) {
 		case Percentage:
 			shuttle_units_button.set_label("% ");
@@ -1216,7 +1232,7 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		ActionManager::map_some_state ("options", "RubberbandingSnapsToGrid", &Configuration::get_rubberbanding_snaps_to_grid);
 	}
 
-			   
+
 
 #undef PARAM_IS
 }

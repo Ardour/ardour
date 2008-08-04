@@ -2,7 +2,7 @@
 #define __gtk_ardour_option_editor_h__
 
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -128,6 +128,7 @@ class OptionEditor : public ArdourDialog
 	Gtk::RadioButton::Group mtc_button_group;
 	Gtk::RadioButton::Group mmc_button_group;
 	Gtk::RadioButton::Group midi_button_group;
+	Gtk::RadioButton::Group midi_clock_button_group;
 
 	Gtk::Table      midi_port_table;
 	std::vector<Gtk::Widget*> midi_port_table_widgets;
@@ -144,10 +145,11 @@ class OptionEditor : public ArdourDialog
 	void port_online_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	void port_trace_in_toggled (MIDI::Port*,Gtk::ToggleButton*);
 	void port_trace_out_toggled (MIDI::Port*,Gtk::ToggleButton*);
-	
+
 	void mmc_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
 	void mtc_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
 	void midi_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
+	void midi_clock_port_chosen (MIDI::Port*,Gtk::RadioButton*, Gtk::Button*);
 	bool port_removable (MIDI::Port*);
 
 	void mmc_receive_device_id_adjusted ();
@@ -160,7 +162,8 @@ class OptionEditor : public ArdourDialog
 	enum PortIndex {
 		MtcIndex = 0,
 		MmcIndex = 1,
-		MidiIndex = 2
+		MidiIndex = 2,
+		MidiClockIndex = 3
 	};
 
 	std::map<MIDI::Port*,std::vector<Gtk::RadioButton*> > port_toggle_buttons;
@@ -185,7 +188,7 @@ class OptionEditor : public ArdourDialog
 
 	void click_browse_clicked ();
 	void click_emphasis_browse_clicked ();
-	
+
 	void click_sound_changed ();
 	void click_emphasis_sound_changed ();
 

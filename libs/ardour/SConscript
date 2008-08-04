@@ -92,6 +92,7 @@ midi_stretch.cc
 midi_track.cc
 mix.cc
 mtc_slave.cc
+midi_clock_slave.cc
 named_selection.cc
 note.cc
 panner.cc

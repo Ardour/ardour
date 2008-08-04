@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (OverlapEnd);
 	REGISTER_ENUM (OverlapExternal);
 	REGISTER (_OverlapType);
-	
+
 	REGISTER_ENUM (GainAutomation);
 	REGISTER_ENUM (PanAutomation);
 	REGISTER_ENUM (PluginAutomation);
@@ -126,22 +126,22 @@ setup_enum_writer ()
 	REGISTER_BITS (_AutoStyle);
 
 	REGISTER_ENUM (CaptureTime);
-	REGISTER_ENUM (ExistingMaterial);	
+	REGISTER_ENUM (ExistingMaterial);
 	REGISTER (_AlignStyle);
 
 	REGISTER_ENUM (MeterInput);
 	REGISTER_ENUM (MeterPreFader);
-	REGISTER_ENUM (MeterPostFader);	
+	REGISTER_ENUM (MeterPostFader);
 	REGISTER (_MeterPoint);
 
 	REGISTER_ENUM (Normal);
 	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
-	
+
 	REGISTER_ENUM (Sustained);
 	REGISTER_ENUM (Percussive);
 	REGISTER (_NoteMode);
-	
+
 	REGISTER_ENUM (AllChannels);
 	REGISTER_ENUM (FilterChannels);
 	REGISTER_ENUM (ForceChannel);
@@ -155,7 +155,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterFalloffFaster);
 	REGISTER_ENUM (MeterFalloffFastest);
 	REGISTER (_MeterFalloff);
-	
+
 	REGISTER_ENUM (MeterHoldOff);
 	REGISTER_ENUM (MeterHoldShort);
 	REGISTER_ENUM (MeterHoldMedium);
@@ -163,12 +163,12 @@ setup_enum_writer ()
 	REGISTER (_MeterHold);
 
 	REGISTER_ENUM (Slide);
-	REGISTER_ENUM (Splice);	
+	REGISTER_ENUM (Splice);
 	REGISTER (_EditMode);
 
 	REGISTER_ENUM (Start);
 	REGISTER_ENUM (End);
-	REGISTER_ENUM (SyncPoint);	
+	REGISTER_ENUM (SyncPoint);
 	REGISTER (_RegionPoint);
 
 	REGISTER_ENUM (PreFader);
@@ -197,11 +197,11 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (LaterHigher);
 	REGISTER_ENUM (MoveAddHigher);
-	REGISTER_ENUM (AddHigher);	
+	REGISTER_ENUM (AddHigher);
 	REGISTER (_LayerModel);
 
 	REGISTER_ENUM (InverseMute);
-	REGISTER_ENUM (SoloBus);	
+	REGISTER_ENUM (SoloBus);
 	REGISTER (_SoloModel);
 
 	REGISTER_ENUM (AutoConnectPhysical);
@@ -219,7 +219,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (CAF);
 	REGISTER_ENUM (AIFF);
 	REGISTER_ENUM (iXML);
-	REGISTER_ENUM (RF64);	
+	REGISTER_ENUM (RF64);
 	REGISTER (_HeaderFormat);
 
 	REGISTER_ENUM (AudioUnit);
@@ -229,15 +229,16 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (None);
 	REGISTER_ENUM (MTC);
-	REGISTER_ENUM (JACK);	
+	REGISTER_ENUM (JACK);
+	REGISTER_ENUM (MIDIClock);
 	REGISTER (_SlaveSource);
 
 	REGISTER_ENUM (Sprung);
-	REGISTER_ENUM (Wheel);	
+	REGISTER_ENUM (Wheel);
 	REGISTER (_ShuttleBehaviour);
 
 	REGISTER_ENUM (Percentage);
-	REGISTER_ENUM (Semitones);	
+	REGISTER_ENUM (Semitones);
 	REGISTER (_ShuttleUnits);
 
 	REGISTER_CLASS_ENUM (Session, Disabled);
@@ -379,10 +380,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Track, Frozen);
 	REGISTER_CLASS_ENUM (Track, UnFrozen);
 	REGISTER (_Track_FreezeState);
-	
+
 	REGISTER_CLASS_ENUM (AutomationList, Discrete);
 	REGISTER_CLASS_ENUM (AutomationList, Linear);
 	REGISTER_CLASS_ENUM (AutomationList, Curved);
 	REGISTER (_AutomationList_InterpolationStyle);
-	
+
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
 typedef int intptr_t;
 #endif
 
-/* eventually, we'd like everything (including JACK) to 
+/* eventually, we'd like everything (including JACK) to
    move to this. for now, its a dedicated type.
 */
 
@@ -69,7 +69,7 @@ namespace ARDOUR {
 		OverlapNone,      // no overlap
 		OverlapInternal,  // the overlap is 100% with the object
 		OverlapStart,     // overlap covers start, but ends within
-		OverlapEnd,       // overlap begins within and covers end 
+		OverlapEnd,       // overlap begins within and covers end
 		OverlapExternal   // overlap extends to (at least) begin+end
 	};
 
@@ -128,12 +128,12 @@ namespace ARDOUR {
 		Normal,
 		Destructive
 	};
-	
+
 	enum NoteMode {
 		Sustained,
 		Percussive
 	};
-	
+
 	enum ChannelMode {
 		AllChannels = 0, ///< Pass through all channel information unmodified
 		FilterChannels,  ///< Ignore events on certain channels
@@ -144,7 +144,7 @@ namespace ARDOUR {
 		Frames,
 		Beats
 	};
-	
+
 	struct BBT_Time {
 	    uint32_t bars;
 	    uint32_t beats;
@@ -157,12 +157,12 @@ namespace ARDOUR {
 	    }
 
 	    /* we can't define arithmetic operators for BBT_Time, because
-	       the results depend on a TempoMap, but we can define 
+	       the results depend on a TempoMap, but we can define
 	       a useful check on the less-than condition.
 	    */
 
 	    bool operator< (const BBT_Time& other) const {
-		    return bars < other.bars || 
+		    return bars < other.bars ||
 			    (bars == other.bars && beats < other.beats) ||
 			    (bars == other.bars && beats == other.beats && ticks < other.ticks);
 	    }
@@ -170,7 +170,7 @@ namespace ARDOUR {
 	    bool operator== (const BBT_Time& other) const {
 		    return bars == other.bars && beats == other.beats && ticks == other.ticks;
 	    }
-	    
+
 	};
 	enum SmpteFormat {
 		smpte_23976,
@@ -198,7 +198,7 @@ namespace ARDOUR {
 	    SMPTE::Time    smpte;
 	    BBT_Time       bbt;
 
-	    union { 
+	    union {
 		nframes_t frames;
 		double         seconds;
 	    };
@@ -210,10 +210,10 @@ namespace ARDOUR {
 	    nframes_t start;
 	    nframes_t end;
 	    uint32_t id;
-	    
+
 	    AudioRange (nframes_t s, nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
-	    
-	    nframes_t length() { return end - start + 1; } 
+
+	    nframes_t length() { return end - start + 1; }
 
 	    bool operator== (const AudioRange& other) const {
 		    return start == other.start && end == other.end && id == other.id;
@@ -227,12 +227,12 @@ namespace ARDOUR {
 		    return ARDOUR::coverage (start, end, s, e);
 	    }
 	};
-	
+
 	struct MusicRange {
 	    BBT_Time start;
 	    BBT_Time end;
 	    uint32_t id;
-	    
+
 	    MusicRange (BBT_Time& s, BBT_Time& e, uint32_t i)
 		    : start (s), end (e), id (i) {}
 
@@ -273,7 +273,7 @@ namespace ARDOUR {
 		Lock
 	};
 
-	enum RegionPoint { 
+	enum RegionPoint {
 	    Start,
 	    End,
 	    SyncPoint
@@ -312,7 +312,7 @@ namespace ARDOUR {
 		FullCrossfade,
 		ShortCrossfade
 	};
-	
+
 	enum LayerModel {
 		LaterHigher,
 		MoveAddHigher,
@@ -355,11 +355,11 @@ namespace ARDOUR {
 
 	struct PeakData {
 	    typedef Sample PeakDatum;
-	    
+
 	    PeakDatum min;
 	    PeakDatum max;
 	};
-	
+
 	enum PluginType {
 		AudioUnit,
 		LADSPA,
@@ -370,7 +370,8 @@ namespace ARDOUR {
 	enum SlaveSource {
 		None = 0,
 		MTC,
-		JACK
+		JACK,
+		MIDIClock
 	};
 
 	enum ShuttleBehaviour {
@@ -399,8 +400,8 @@ namespace ARDOUR {
 	    float time_fraction;
 	    float pitch_fraction;
 	    /* SoundTouch */
-	    bool  quick_seek; 
-	    bool  antialias;  
+	    bool  quick_seek;
+	    bool  antialias;
 	    /* RubberBand */
 	    int   opts; // really RubberBandStretcher::Options
 	};

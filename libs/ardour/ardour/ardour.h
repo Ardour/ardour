@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Davis 
+    Copyright (C) 1999 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,9 +51,9 @@ namespace ARDOUR {
 	int cleanup ();
 
 	std::string get_ardour_revision ();
-	
+
 	void find_bindings_files (std::map<std::string,std::string>&);
-	
+
 	const layer_t max_layer = UCHAR_MAX;
 
 	microseconds_t get_microseconds ();
@@ -82,6 +82,7 @@ namespace ARDOUR {
 extern MIDI::Port* default_mmc_port;
 extern MIDI::Port* default_mtc_port;
 extern MIDI::Port* default_midi_port;
+extern MIDI::Port *default_midi_clock_port;
 
 #endif /* __ardour_ardour_h__ */
 
