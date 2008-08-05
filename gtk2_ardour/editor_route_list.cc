@@ -577,7 +577,9 @@ void
 Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
 	session->set_remote_control_ids();
+	ignore_route_list_reorder = true;
 	redisplay_route_list ();
+	ignore_route_list_reorder = false;
 }
 
 void  
