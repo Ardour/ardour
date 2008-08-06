@@ -314,6 +314,7 @@ Parser::trace (bool onoff, ostream *o, const string &prefix)
 	trace_connection.disconnect ();
 
 	if (onoff) {
+		cerr << "enabling tracing for port " << _port.name() << endl;
 		trace_stream = o;
 		trace_prefix = prefix;
 		trace_connection = any.connect (mem_fun (*this, &Parser::trace_event));

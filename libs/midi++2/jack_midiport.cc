@@ -60,9 +60,29 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 	_last_read_index = 0;
 	_last_write_timestamp = 0;
 
+	// output
 	void *buffer = jack_port_get_buffer (_jack_output_port, nframes);
 	jack_midi_clear_buffer (buffer);
 	flush (buffer);
+	
+	// input
+	void* jack_buffer = jack_port_get_buffer(_jack_input_port, nframes);
+	const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
+
+	jack_midi_event_t ev;
+
+	for (nframes_t i=0; i < event_count; ++i) {
+
+		jack_midi_event_get (&ev, jack_buffer, i);
+
+		if (input_parser) {
+			input_parser->raw_preparse (*input_parser, ev.buffer, ev.size);
+			for (size_t i = 0; i < ev.size; i++) {
+				input_parser->scanner (ev.buffer[i]);
+			}	
+			input_parser->raw_postparse (*input_parser, ev.buffer, ev.size);
+		}
+	}
 }
 
 int
@@ -170,7 +190,7 @@ JACK_MidiPort::read(byte * buf, size_t bufsize)
 {
 	assert(_currently_in_cycle);
 	assert(_jack_input_port);
-
+	
 	jack_midi_event_t ev;
 
 	int err = jack_midi_event_get (&ev,

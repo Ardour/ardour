@@ -61,7 +61,6 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 	port = &p;
 
 	std::cerr << "MIDIClock_Slave: connecting to port " << port->name() << std::endl;
-	port->input()->trace(true, &std::cout, string(port->name()));
 
 	connections.push_back (port->input()->timing.connect (mem_fun (*this, &MIDIClock_Slave::update_midi_clock)));
 	connections.push_back (port->input()->start.connect  (mem_fun (*this, &MIDIClock_Slave::start)));
@@ -71,11 +70,11 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 void
 MIDIClock_Slave::update_midi_clock (Parser& parser)
 {
+	// ignore clock events if no start event received
+	if(!_started)
+		return;
 
 	nframes_t now = session.engine().frame_time();
-	_starting = false;
-
-	std::cerr << "got MIDI Clock message at time " << now << std::endl;
 
 	SafeTime last;
 	read_current (&last);
@@ -98,6 +97,12 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 	midi_clock_frame += (long) (one_ppqn_in_frames)
 	                    + session.worst_output_latency();
 
+	/*
+	std::cerr << "got MIDI Clock message at time " << now  
+	          << " result: " << midi_clock_frame 
+	          << " open_ppqn_in_frames: " << one_ppqn_in_frames << std::endl;
+	 */
+	
 	if (first_midi_clock_frame == 0) {
 		first_midi_clock_frame = midi_clock_frame;
 		first_midi_clock_time = now;
@@ -117,7 +122,7 @@ MIDIClock_Slave::start (Parser& parser)
 	std::cerr << "MIDIClock_Slave got start message" << endl;
 
 	midi_clock_speed = 1.0f;
-	_starting = true;
+	_started = true;
 }
 
 void
@@ -126,13 +131,7 @@ MIDIClock_Slave::stop (Parser& parser)
 	std::cerr << "MIDIClock_Slave got stop message" << endl;
 
 	midi_clock_speed = 0.0f;
-	midi_clock_frame = 0;
-	_starting = false;
-
-	current.guard1++;
-	current.position = midi_clock_frame;
-	current.timestamp = 0;
-	current.guard2++;
+	_started = false;
 }
 
 void
@@ -197,6 +196,8 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 
 	speed_now = (float) ((last.position - first_midi_clock_frame) / (double) (now - first_midi_clock_time));
 
+	cerr << "speed_and_position: speed_now: " << speed_now ;
+	
 	accumulator[accumulator_index++] = speed_now;
 
 	if (accumulator_index >= accumulator_size) {
@@ -239,6 +240,8 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 	pos =  elapsed + last.position;
 
 	speed = midi_clock_speed;
+	
+	cerr << " final speed: " << speed << " position: " << pos << endl;
 	return true;
 }
 

@@ -114,7 +114,6 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 
 	bool locked() const;
 	bool ok() const;
-	bool starting() const { return _starting; }
 
 	nframes_t resolution() const;
 	bool requires_seekahead () const { return true; }
@@ -145,7 +144,7 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	void stop (MIDI::Parser& parser);
 	void update_midi_clock (MIDI::Parser& parser);
 	void read_current (SafeTime *) const;
-	bool _starting;
+	bool _started;
 };
 
 class ADAT_Slave : public Slave

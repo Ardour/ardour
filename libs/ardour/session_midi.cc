@@ -333,6 +333,8 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 {
 	MIDI::Parser* input_parser;
 
+	cerr << "enabling tracing: " << yn << " for input port " << port->name() << endl;
+	
 	if (port) {
 		if ((input_parser = port->input()) != 0) {
 			input_parser->trace (yn, &cout, "input: ");
@@ -353,6 +355,15 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 
 		if (_midi_port && _midi_port != _mmc_port && _midi_port != _mtc_port  ) {
 			if ((input_parser = _midi_port->input()) != 0) {
+				input_parser->trace (yn, &cout, "input: ");
+			}
+		}
+		
+		if (_midi_clock_port 
+			&& _midi_clock_port != _mmc_port 
+			&& _midi_clock_port != _mtc_port 
+			&& _midi_clock_port != _midi_port) {
+			if ((input_parser = _midi_clock_port->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
@@ -1152,9 +1163,7 @@ Session::midi_thread_work ()
 			nfds++;
 		}
 
-		cerr << "before handling midi clock port" << endl;
 		if (_midi_clock_port && (_midi_clock_port != _mmc_port || !Config->get_mmc_control()) && _midi_clock_port->selectable() >= 0) {
-			cerr << "inside handling midi clock port" << endl;
 			pfd[nfds].fd = _midi_clock_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _midi_clock_port;
