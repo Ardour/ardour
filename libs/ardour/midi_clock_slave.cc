@@ -82,7 +82,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 	const Tempo& current_tempo = session.tempo_map().tempo_at(now);
 	const Meter& current_meter = session.tempo_map().meter_at(now);
 	double frames_per_beat =
-		current_tempo.frames_per_beat(session.frame_rate(),
+		current_tempo.frames_per_beat(session.nominal_frame_rate(),
 		                              current_meter);
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
@@ -97,11 +97,9 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 	midi_clock_frame += (long) (one_ppqn_in_frames)
 	                    + session.worst_output_latency();
 
-	/*
 	std::cerr << "got MIDI Clock message at time " << now  
-	          << " result: " << midi_clock_frame 
-	          << " open_ppqn_in_frames: " << one_ppqn_in_frames << std::endl;
-	 */
+	          << " midi_clock_frame: " << midi_clock_frame 
+	          << " one_ppqn_in_frames: " << one_ppqn_in_frames << std::endl;
 	
 	if (first_midi_clock_frame == 0) {
 		first_midi_clock_frame = midi_clock_frame;
