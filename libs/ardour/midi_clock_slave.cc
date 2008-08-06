@@ -131,7 +131,13 @@ MIDIClock_Slave::stop (Parser& parser)
 	std::cerr << "MIDIClock_Slave got stop message" << endl;
 
 	midi_clock_speed = 0.0f;
+	midi_clock_frame = 0;
 	_started = false;
+
+	current.guard1++;
+	current.position = midi_clock_frame;
+	current.timestamp = 0;
+	current.guard2++;
 }
 
 void
@@ -168,6 +174,11 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 {
 	//std::cerr << "MIDIClock_Slave speed and position() called" << endl;
 
+	if(_started == false) {
+		speed = 0.0;
+		pos = 0;
+	}
+	
 	nframes_t now = session.engine().frame_time();
 	nframes_t frame_rate = session.frame_rate();
 	nframes_t elapsed;
@@ -198,27 +209,7 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 
 	cerr << "speed_and_position: speed_now: " << speed_now ;
 	
-	accumulator[accumulator_index++] = speed_now;
-
-	if (accumulator_index >= accumulator_size) {
-		have_first_accumulated_speed = true;
-		accumulator_index = 0;
-	}
-
-	if (have_first_accumulated_speed) {
-		float total = 0;
-
-		for (int32_t i = 0; i < accumulator_size; ++i) {
-			total += accumulator[i];
-		}
-
-		midi_clock_speed = total / accumulator_size;
-
-	} else {
-
-		midi_clock_speed = speed_now;
-
-	}
+	midi_clock_speed = speed_now;
 
 	if (midi_clock_speed == 0.0f) {
 

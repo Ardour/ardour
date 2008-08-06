@@ -134,11 +134,6 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	nframes_t   first_midi_clock_frame;
 	nframes_t   first_midi_clock_time;
 
-	static const int32_t accumulator_size = 128;
-	float   accumulator[accumulator_size];
-	int32_t accumulator_index;
-	bool    have_first_accumulated_speed;
-
 	void reset ();
 	void start (MIDI::Parser& parser);
 	void stop (MIDI::Parser& parser);
