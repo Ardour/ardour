@@ -173,12 +173,6 @@ bool
 MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 {
 	//std::cerr << "MIDIClock_Slave speed and position() called" << endl;
-
-	if(_started == false) {
-		speed = 0.0;
-		pos = 0;
-	}
-	
 	nframes_t now = session.engine().frame_time();
 	nframes_t frame_rate = session.frame_rate();
 	nframes_t elapsed;
@@ -258,7 +252,5 @@ MIDIClock_Slave::reset ()
 	first_midi_clock_frame = 0;
 	first_midi_clock_time = 0;
 
-	accumulator_index = 0;
-	have_first_accumulated_speed = false;
 	midi_clock_speed = 0;
 }
