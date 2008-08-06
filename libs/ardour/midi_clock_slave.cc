@@ -82,7 +82,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 	const Tempo& current_tempo = session.tempo_map().tempo_at(now);
 	const Meter& current_meter = session.tempo_map().meter_at(now);
 	double frames_per_beat =
-		current_tempo.frames_per_beat(session.nominal_frame_rate(),
+		current_tempo.frames_per_beat(session.frame_rate(),
 		                              current_meter);
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
@@ -121,8 +121,10 @@ MIDIClock_Slave::start (Parser& parser)
 {
 	std::cerr << "MIDIClock_Slave got start message" << endl;
 
-	midi_clock_speed = 1.0f;
-	_started = true;
+	session.request_transport_speed (1.0);
+	midi_clock_speed = 1.0;
+	_starting = true;
+	_started  = true;
 }
 
 void
@@ -130,14 +132,12 @@ MIDIClock_Slave::stop (Parser& parser)
 {
 	std::cerr << "MIDIClock_Slave got stop message" << endl;
 
+	session.request_transport_speed (0);
 	midi_clock_speed = 0.0f;
 	midi_clock_frame = 0;
+	_starting = false;
 	_started = false;
-
-	current.guard1++;
-	current.position = midi_clock_frame;
-	current.timestamp = 0;
-	current.guard2++;
+	reset();
 }
 
 void
@@ -199,7 +199,12 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		return false;
 	}
 
-	speed_now = (float) ((last.position - first_midi_clock_frame) / (double) (now - first_midi_clock_time));
+	if(_starting) {
+		speed_now = 1.0;
+		_starting = false;
+	} else {
+		speed_now = (float) ((last.position - first_midi_clock_frame) / (double) (now - first_midi_clock_time));
+	}
 
 	cerr << "speed_and_position: speed_now: " << speed_now ;
 	
