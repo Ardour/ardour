@@ -1,13 +1,10 @@
-all: 
-	true
-	#make sconsi
-	#./build-tmp.sh
+all: scons
 
 scons:
-	scons DEBUG=1 DIST_TARGET=i686 -j 3
+	scons
 
 sconsi:
-	scons --implicit-deps-unchanged DEBUG=1 DIST_TARGET=i686 -j 3
+	scons --implicit-deps-unchanged
 
 cscope: cscope.out
 
