@@ -97,10 +97,11 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 	midi_clock_frame += (long) (one_ppqn_in_frames)
 	                    + session.worst_output_latency();
 
+	/*
 	std::cerr << "got MIDI Clock message at time " << now  
 	          << " midi_clock_frame: " << midi_clock_frame 
 	          << " one_ppqn_in_frames: " << one_ppqn_in_frames << std::endl;
-	
+	*/
 	if (first_midi_clock_frame == 0) {
 		first_midi_clock_frame = midi_clock_frame;
 		first_midi_clock_time = now;
@@ -204,9 +205,29 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		speed_now = (float) ((last.position - first_midi_clock_frame) / (double) (now - first_midi_clock_time));
 	}
 
-	cerr << "speed_and_position: speed_now: " << speed_now ;
+	//cerr << "speed_and_position: speed_now: " << speed_now ;
 	
-	midi_clock_speed = speed_now;
+	accumulator[accumulator_index++] = speed_now;
+
+	if (accumulator_index >= accumulator_size) {
+		have_first_accumulated_speed = true;
+		accumulator_index = 0;
+	}
+
+	if (have_first_accumulated_speed) {
+		float total = 0;
+
+		for (int32_t i = 0; i < accumulator_size; ++i) {
+			total += accumulator[i];
+		}
+
+		midi_clock_speed = total / accumulator_size;
+
+	} else {
+
+		midi_clock_speed = speed_now;
+
+	}
 
 	if (midi_clock_speed == 0.0f) {
 
@@ -229,7 +250,7 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 
 	speed = midi_clock_speed;
 	
-	cerr << " final speed: " << speed << " position: " << pos << endl;
+	//cerr << " final speed: " << speed << " position: " << pos << endl;
 	return true;
 }
 
