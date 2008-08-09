@@ -61,6 +61,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
 
 	SLV2Plugin slv2_plugin()         { return _plugin; }
+	SLV2UI     slv2_ui()             { return _ui; }
 	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
 	
 	std::set<uint32_t> automatable() const;
@@ -103,14 +104,13 @@ class LV2Plugin : public ARDOUR::Plugin
 	int      set_state(const XMLNode& node);
 	bool     save_preset(std::string name);
 
-	bool has_editor() const { return false; }
+	bool has_editor() const;
 
-	int require_output_streams (uint32_t);
-	
   private:
 	void*                    _module;
 	LV2World&                _world;
 	SLV2Plugin               _plugin;
+	SLV2UI                   _ui;
 	SLV2Value                _name;
 	SLV2Value                _author;
 	SLV2Instance             _instance;
@@ -146,6 +146,7 @@ struct LV2World {
 	SLV2Value integer;
 	SLV2Value toggled;
 	SLV2Value srate;
+	SLV2Value gtk_gui;
 };
 
 

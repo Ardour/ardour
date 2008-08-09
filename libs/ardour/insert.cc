@@ -844,6 +844,9 @@ PluginInsert::type ()
 #ifdef HAVE_AUDIOUNITS
 	boost::shared_ptr<AUPlugin> ap;
 #endif
+#ifdef HAVE_LV2
+	boost::shared_ptr<LV2Plugin> lv2p;
+#endif
 	
 	PluginPtr other = plugin ();
 
@@ -857,7 +860,12 @@ PluginInsert::type ()
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
 		return ARDOUR::AudioUnit;
 #endif
+#ifdef HAVE_LV2
+	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
+		return ARDOUR::LV2;
+#endif
 	} else {
+		error << "Unknown plugin type" << endmsg;
 		/* NOT REACHED */
 		return (ARDOUR::PluginType) 0;
 	}

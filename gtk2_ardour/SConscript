@@ -283,8 +283,11 @@ if env['VST']:
 	extra_sources += vst_files
 	gtkardour.Append (CCFLAGS="-DVST_SUPPORT", CPPPATH="#libs/fst")
 
+lv2_files = [ 'lv2_plugin_ui.cc' ]
+
 if env['LV2']:
-	gtkardour.Append (CCFLAGS="-DHAVE_SLV2")
+	extra_sources += lv2_files
+	gtkardour.Append (CCFLAGS="-DHAVE_LV2")
 	gtkardour.Merge ([libraries['slv2']])
 
 

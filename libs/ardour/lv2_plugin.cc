@@ -68,6 +68,7 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 {
 	_world = world;
 	_plugin = plugin;
+	_ui = NULL;
 	_control_data = 0;
 	_shadow_data = 0;
 	_latency_control_port = 0;
@@ -122,6 +123,17 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 			}
 		} else {
 			_defaults[i] = 0.0f;
+		}
+	}
+	
+	SLV2UIs uis = slv2_plugin_get_uis(_plugin);
+	if (slv2_uis_size(uis) > 0) {
+		for (unsigned i=0; i < slv2_uis_size(uis); ++i) {
+			SLV2UI ui = slv2_uis_get_at(uis, i);
+			if (slv2_ui_is_a(ui, _world.gtk_gui)) {
+				_ui = ui;
+				break;
+			}
 		}
 	}
 
@@ -242,6 +254,12 @@ bool
 LV2Plugin::save_preset (string name)
 {
 	return Plugin::save_preset (name, "lv2");
+}
+	
+bool
+LV2Plugin::has_editor() const
+{
+	return (_ui != NULL);
 }
 
 int
@@ -505,6 +523,7 @@ LV2World::LV2World()
 	integer = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
 	toggled = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
 	srate = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
+	gtk_gui = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#GtkUI");
 }
 
 LV2World::~LV2World()
