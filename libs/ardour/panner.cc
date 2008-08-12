@@ -1311,10 +1311,12 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 			dst.read_from(inbufs.get_audio(0), nframes, offset);
 			
 			// accumulate starting with the second
-			BufferSet::audio_iterator i = inbufs.audio_begin();
-			for (++i; i != inbufs.audio_end(); ++i) {
-				dst.accumulate_from(*i, nframes, offset);
-			}
+            if (inbufs.count().n_audio() > 0) {
+                BufferSet::audio_iterator i = inbufs.audio_begin();
+                for (++i; i != inbufs.audio_end(); ++i) {
+                    dst.accumulate_from(*i, nframes, offset);
+                }
+            }
 
 		} else {
 
@@ -1324,10 +1326,12 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 			dst.read_from(inbufs.get_audio(0), nframes, offset);
 			
 			// accumulate (with gain) starting with the second
-			BufferSet::audio_iterator i = inbufs.audio_begin();
-			for (++i; i != inbufs.audio_end(); ++i) {
-				dst.accumulate_with_gain_from(*i, nframes, offset, gain_coeff);
-			}
+            if (inbufs.count().n_audio() > 0) {
+		    	BufferSet::audio_iterator i = inbufs.audio_begin();
+			    for (++i; i != inbufs.audio_end(); ++i) {
+    				dst.accumulate_with_gain_from(*i, nframes, offset, gain_coeff);
+    			}
+            }
 
 		}
 
