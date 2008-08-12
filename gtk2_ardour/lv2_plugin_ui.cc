@@ -57,7 +57,7 @@ LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 {
 	_inst = slv2_ui_instantiate(
 			_lv2->slv2_plugin(), _lv2->slv2_ui(), LV2PluginUI::lv2_ui_write, this,
-			/* FEATURES */ NULL);
+			_lv2->features());
 			
 	GtkWidget* c_widget = (GtkWidget*)slv2_ui_instance_get_widget(_inst);
 	_gui_widget = Glib::wrap(c_widget);
