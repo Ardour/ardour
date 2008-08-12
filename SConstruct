@@ -54,7 +54,7 @@ opts.AddOptions(
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 0),
+    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
@@ -566,17 +566,14 @@ else:
 	print 'FREESOUND support is not enabled.  Build with \'scons FREESOUND=1\' to enable.'
 
 if env['LV2']:
-	conf = env.Configure(custom_tests = { 'CheckPKGExists' : CheckPKGExists })
+	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 	
-	if conf.CheckPKGExists ('\"slv2 >= 0.6.0\"'):
+	if conf.CheckPKGVersion('slv2', '0.6.0'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
                 env.Append (CCFLAGS="-DHAVE_LV2")
 	else:
-		print 'Building Ardour with LV2 support requires SLV2 >= 0.6.0'
-		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
-		print 'Until the 2.4 release, Ardour requires SLV2 out of SVN.'
-		print 'Testing would be very much appreciated!  svn co http://svn.drobilla.net/lad/slv2'
+		print 'LV2 support is not enabled (SLV2 not found or older than 0.6.0)'
 		env['LV2'] = 0
 	conf.Finish()
 else:
