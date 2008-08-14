@@ -428,16 +428,25 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
  		connect_and_run (bufs, nbufs, nframes, offset, true, now);
  		return;
  	}
+
+	nframes_t buffer_correct = 0;
+	int i;
+
 	
  	while (nframes) {
+                nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
 
-		nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
-  
+		// This is called first, but nframes = 256
  		connect_and_run (bufs, nbufs, cnt, offset, true, now);
  		
  		nframes -= cnt;
  		offset += cnt;
 		now += cnt;
+		buffer_correct += cnt;
+
+		for (i = 0; i < nbufs; i++) {
+			bufs[i] += cnt;
+		}
 
 		if (!find_next_event (now, end, next_event)) {
 			break;
@@ -449,6 +458,10 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
  	if (nframes) {
  		connect_and_run (bufs, nbufs, nframes, offset, true, now);
   	}
+
+	for (i = 0; i < nbufs; i++) {
+		bufs[i] -= buffer_correct;
+	}
 }	
 
 float
