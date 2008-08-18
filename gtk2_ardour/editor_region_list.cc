@@ -134,8 +134,8 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			
 			boost::shared_ptr<Region> rr = (*i)[region_list_columns.region];
-
-			if (region->region_list_equivalent (rr)) {
+			
+			if (rr && region->region_list_equivalent (rr)) {
 				return;
 			}
 		}
