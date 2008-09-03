@@ -1156,7 +1156,7 @@ style "tearoff_arrow" = "medium_bold_entry"
 
 style "location_row_button" = "default_button"
 {
-	font_name = "%FONT_BIG%"
+	font_name = "%FONT_NORMAL%"
 }
 
 style "location_rows_clock" = "default_clock_display"

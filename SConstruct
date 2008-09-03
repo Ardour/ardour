@@ -838,12 +838,13 @@ def prep_libcheck(topenv, libinfo):
 	#
 	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
 	#            All libraries needed should be built against this location
+	# However.. now jhbuild installs to ~/gtk/inst by default.. changed to accomodate this
 	if topenv['GTKOSX']:
-	        gtkroot = os.path.expanduser ("~");
-		libinfo.Append(CPPPATH="$GTKROOT/include", LIBPATH="$GTKROOT/lib")
-		libinfo.Append(CXXFLAGS="-I$GTKROOT/include", LINKFLAGS="-L$GTKROOT/lib")
-	libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
-	libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+		GTKROOT = os.path.expanduser ('~/gtk/inst')
+		libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
+		libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
+	#libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
+	#libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
 prep_libcheck(env, env)
 

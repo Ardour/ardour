@@ -317,7 +317,7 @@ Editor::redisplay_route_list ()
 
 	cursor_group->raise_to_top ();
 
-	reset_scrolling_region ();
+	//reset_scrolling_region ();
 
 	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {
 		ignore_route_order_sync = true;
@@ -353,7 +353,7 @@ Editor::hide_all_tracks (bool with_select)
 	   otherwise.
 	*/
 
-	reset_scrolling_region ();
+	//reset_scrolling_region ();
 }
 
 void

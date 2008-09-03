@@ -87,7 +87,7 @@ Editor::initialize_rulers ()
 	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
 
-	visible_timebars = 7; /* 4 here, 3 in time_canvas */
+	visible_timebars = 1; /*this will be changed below */
 	ruler_pressed_button = 0;
 }
 
@@ -556,7 +556,9 @@ Editor::update_ruler_visibility ()
 {
 	using namespace Box_Helpers;
 	BoxList & lab_children =  time_button_vbox.children();
+	BoxList & ruler_lab_children =  ruler_label_vbox.children();
 	BoxList & ruler_children =  time_canvas_vbox.children();
+	int visible_rulers = 0;
 
 	if (no_ruler_shown_update) {
 		return;
@@ -565,9 +567,10 @@ Editor::update_ruler_visibility ()
 	visible_timebars = 0;
 
 	lab_children.clear();
+	ruler_lab_children.clear();
 
 	// leave the last one (the time_canvas) intact
-	while (ruler_children.size() > 1) {
+	while (ruler_children.size() > 0) {
 		ruler_children.pop_front();
 	}
 
@@ -625,31 +628,32 @@ Editor::update_ruler_visibility ()
 	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
 	
 	if (ruler_minsec_action->get_active()) {
-		lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
+		ruler_lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
-		visible_timebars++;
+		visible_rulers++;
 	}
 
 	if (ruler_timecode_action->get_active()) {
-		lab_children.push_back (Element(smpte_label, PACK_SHRINK, PACK_START));
+		ruler_lab_children.push_back (Element(smpte_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*smpte_ruler, PACK_SHRINK, PACK_START));
-		visible_timebars++;
+		visible_rulers++;
 	}
 
 	if (ruler_samples_action->get_active()) {
-		lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
+		ruler_lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*frames_ruler, PACK_SHRINK, PACK_START));
-		visible_timebars++;
+		visible_rulers++;
 	}
 
 	if (ruler_bbt_action->get_active()) {
-		lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
+		ruler_lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
 		ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
-		visible_timebars++;
+		visible_rulers++;
 	}
 
 	double tbpos = 1.0;
-	double old_unit_pos ;
+	double tbgpos = 1.0;
+	double old_unit_pos;
 	
 	if (ruler_meter_action->get_active()) {
 		lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
@@ -658,11 +662,17 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			meter_group->move ( 0.0, tbpos - old_unit_pos);
 		}
+		old_unit_pos = meter_bar_group->property_y();
+		if (tbgpos != old_unit_pos) {
+			meter_bar_group->move ( 0.0, tbgpos - old_unit_pos);
+		}
+		meter_bar_group->show();
 		meter_group->show();
 		tbpos += timebar_height;
+		tbgpos += timebar_height;
 		visible_timebars++;
-	}
-	else {
+	} else {
+		meter_bar_group->hide();
 		meter_group->hide();
 	}
 	
@@ -672,11 +682,17 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			tempo_group->move(0.0, tbpos - old_unit_pos);
 		}
+		old_unit_pos = tempo_bar_group->property_y();
+		if (tbgpos != old_unit_pos) {
+			tempo_bar_group->move ( 0.0, tbgpos - old_unit_pos);
+		}
+		tempo_bar_group->show();
 		tempo_group->show();
 		tbpos += timebar_height;
+		tbgpos += timebar_height;
 		visible_timebars++;
-	}
-	else {
+	} else {
+		tempo_bar_group->hide();
 		tempo_group->hide();
 	}
 	
@@ -686,10 +702,17 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			range_marker_group->move (0.0, tbpos - old_unit_pos);
 		}
+		old_unit_pos = range_marker_bar_group->property_y();
+		if (tbgpos != old_unit_pos) {
+			range_marker_bar_group->move (0.0, tbgpos - old_unit_pos);
+		}
+		range_marker_bar_group->show();
 		range_marker_group->show();
 		tbpos += timebar_height;
+		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
+		range_marker_bar_group->hide();
 		range_marker_group->hide();
 	}
 
@@ -699,11 +722,17 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			transport_marker_group->move ( 0.0, tbpos - old_unit_pos);
 		}
+		old_unit_pos = transport_marker_bar_group->property_y();
+		if (tbgpos != old_unit_pos) {
+			transport_marker_bar_group->move ( 0.0, tbgpos - old_unit_pos);
+		}
+		transport_marker_bar_group->show();
 		transport_marker_group->show();
 		tbpos += timebar_height;
+		tbgpos += timebar_height;
 		visible_timebars++;
-	}
-	else {
+	} else {
+		transport_marker_bar_group->hide();
 		transport_marker_group->hide();
 	}
 
@@ -713,13 +742,19 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			cd_marker_group->move (0.0, tbpos - old_unit_pos);
 		}
+		old_unit_pos = cd_marker_bar_group->property_y();
+		if (tbgpos != old_unit_pos) {
+			cd_marker_bar_group->move (0.0, tbgpos - old_unit_pos);
+		}
+		cd_marker_bar_group->show();
 		cd_marker_group->show();
 		tbpos += timebar_height;
+		tbgpos += timebar_height;
 		visible_timebars++;
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
-	}
-	else {
+	} else {
+		cd_marker_bar_group->hide();
 		cd_marker_group->hide();
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
@@ -731,22 +766,41 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			marker_group->move ( 0.0, tbpos - old_unit_pos);
 		}
+		old_unit_pos = marker_bar_group->property_y();
+		if (tbgpos != old_unit_pos) {
+			marker_bar_group->move ( 0.0, tbgpos - old_unit_pos);
+		}
+		marker_bar_group->show();
 		marker_group->show();
 		tbpos += timebar_height;
+		tbgpos += timebar_height;
 		visible_timebars++;
-	}
-	else {
+	} else {
+		marker_bar_group->hide();
 		marker_group->hide();
 	}
 	
-	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
+	gdouble old_canvas_timebars_vsize = canvas_timebars_vsize;
+	canvas_timebars_vsize = (timebar_height * visible_timebars) + 2.0;
+	gdouble vertical_pos_delta = canvas_timebars_vsize - old_canvas_timebars_vsize;
+
+	if (vertical_pos_delta < 0 && (vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
+		/*if we're at the bottom of the canvas, don't move the _trackview_grooup*/
+		vertical_adjustment.set_upper(vertical_adjustment.get_upper() + vertical_pos_delta);
+	} else {
+		vertical_adjustment.set_upper(vertical_adjustment.get_upper() + vertical_pos_delta);
+		_trackview_group->move (0, vertical_pos_delta);
+	}
+	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
+
+	time_canvas_vbox.set_size_request (-1,-1);
 	time_canvas_event_box.queue_resize();
 	
 	update_fixed_rulers();
-	//update_tempo_based_rulers();
 	redisplay_tempo (false);
 
 	time_canvas_event_box.show_all();
+	ruler_label_frame.show_all();
 	time_button_frame.show_all();
 }
 

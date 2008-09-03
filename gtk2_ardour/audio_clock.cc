@@ -103,6 +103,9 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_upper_info_label, "23.98",0,0);
 		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_lower_info_label, "NDF",0,0);
 
+		Gtkmm2ext::set_size_request_to_display_given_text(*bbt_upper_info_label, "88|88",0,0);
+		Gtkmm2ext::set_size_request_to_display_given_text(*bbt_lower_info_label, "888.88",0,0);
+
 		frames_info_box.pack_start (*frames_upper_info_label, true, true);
 		frames_info_box.pack_start (*frames_lower_info_label, true, true);
 		smpte_info_box.pack_start (*smpte_upper_info_label, true, true);
@@ -429,7 +432,6 @@ AudioClock::set (nframes_t when, bool force, nframes_t offset, int which)
 	}
 
 	if (which == 1 && pdelta && !last_pdelta) {
-		cout << "set_widget_name() called" << endl;
 		set_widget_name("TransportClockDisplayDelta");
 		last_pdelta = true;
 	} else if (which == 1 && !pdelta && last_pdelta) {
@@ -644,11 +646,17 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	}
 
 	sprintf (buf, "%03" PRIu32, bbt.bars);
-	bars_label.set_text (buf);
+	if (force || bars_label.get_text () != buf) {
+		bars_label.set_text (buf);
+	}
 	sprintf (buf, "%02" PRIu32, bbt.beats);
-	beats_label.set_text (buf);
+	if (force || beats_label.get_text () != buf) {
+		beats_label.set_text (buf);
+	}
 	sprintf (buf, "%04" PRIu32, bbt.ticks);
-	ticks_label.set_text (buf);
+	if (force || ticks_label.get_text () != buf) {
+		ticks_label.set_text (buf);
+	}
 	
 	if (bbt_upper_info_label) {
 		nframes64_t pos;

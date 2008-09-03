@@ -171,7 +171,7 @@ void
 Editor::hide_measures ()
 {
 	for (TimeLineList::iterator i = used_measure_lines.begin(); i != used_measure_lines.end(); ++i) {
-      		(*i)->hide();
+		(*i)->hide();
 		free_measure_lines.push_back (*i);
 	}
 	used_measure_lines.clear ();
@@ -212,7 +212,7 @@ Editor::draw_measures ()
 	TempoMap::BBTPointList::iterator i;
 	ArdourCanvas::SimpleLine *line;
 	gdouble xpos;
-	double x1, x2, y1, y2, beat_density;
+	double beat_density;
 
         uint32_t beats = 0;
         uint32_t bars = 0;
@@ -221,9 +221,6 @@ Editor::draw_measures ()
 	if (current_bbt_points == 0 || current_bbt_points->empty()) {
 		return;
 	}
-
-	track_canvas->get_scroll_region (x1, y1, x2, y2);
-	y2 = TimeAxisView::hLargest*5000; // five thousand largest tracks should be enough.. :)
 
 	/* get the first bar spacing */
 
@@ -264,7 +261,7 @@ Editor::draw_measures ()
 			line = get_time_line ();
 			line->property_x1() = xpos;
 			line->property_x2() = xpos;
-			line->property_y2() = y2;
+			line->property_y2() = canvas_height;
 			line->property_color_rgba() = color;
 			//line->raise_to_top();
 			line->show();	
@@ -274,7 +271,7 @@ Editor::draw_measures ()
 
 	/* the cursors are always on top of everything */
 
-	cursor_group->raise_to_top();
+	//cursor_group->raise_to_top();
 	time_line_group->lower_to_bottom();
 	if (logo_item) {
 		logo_item->lower_to_bottom ();

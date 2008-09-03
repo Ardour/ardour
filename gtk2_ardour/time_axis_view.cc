@@ -79,7 +79,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 		need_size_info = false;
 	}
 
-	canvas_display = new Group (*canvas.root(), 0.0, 0.0);
+	canvas_display = new Group (*ed.get_trackview_group (), 0.0, 0.0);
 	
 	selection_group = new Group (*canvas_display);
 	selection_group->hide();
@@ -229,6 +229,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	*/
 
 	canvas_display->get_bounds (ix1, iy1, ix2, iy2);
+	iy1 += editor.get_trackview_group_vertical_offset ();
 	Group* pg = canvas_display->property_parent();
 	pg->i2w (ix1, iy1);
 

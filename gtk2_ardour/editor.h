@@ -575,7 +575,6 @@ class Editor : public PublicEditor
 	Gdk::Cursor* which_grabber_cursor ();
 
 	ArdourCanvas::Canvas* track_canvas;
-	ArdourCanvas::Canvas* time_canvas;
 
 	ArdourCanvas::Text* first_action_message;
 	ArdourCanvas::Text* verbose_canvas_cursor;
@@ -595,7 +594,9 @@ class Editor : public PublicEditor
 	Gtk::EventBox      time_canvas_event_box;
 	Gtk::EventBox      track_canvas_event_box;
 	Gtk::EventBox      time_button_event_box;
+	Gtk::EventBox      ruler_label_event_box;
 	Gtk::Frame         time_button_frame;
+	Gtk::Frame         ruler_label_frame;
 
 	ArdourCanvas::Pixbuf*     logo_item;
 	ArdourCanvas::Group*      minsec_group;
@@ -608,6 +609,34 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      range_marker_group;
 	ArdourCanvas::Group*      transport_marker_group;
 	ArdourCanvas::Group*      cd_marker_group;
+
+	ArdourCanvas::Group*      timebar_group;
+
+	/* These bars never need to be scrolled */
+	ArdourCanvas::Group*      meter_bar_group;
+	ArdourCanvas::Group*      tempo_bar_group;
+	ArdourCanvas::Group*      marker_bar_group;
+	ArdourCanvas::Group*      range_marker_bar_group;
+	ArdourCanvas::Group*      transport_marker_bar_group;
+	ArdourCanvas::Group*      cd_marker_bar_group;
+
+	/* 
+	   The _master_group is the group containing all items
+	   that require horizontal scrolling..
+	   It is primarily used to separate canvas items 
+	   that require horizontal scrolling from those that do not. 
+	*/
+	ArdourCanvas::Group* _master_group;
+	/* 
+	   The _trackview_group is the group containing all trackviews.
+	   It is only scrolled vertically.
+	*/
+	ArdourCanvas::Group* _trackview_group;
+	/* 
+	   This canvas group is used for region motion.
+	   It sits on top of the _trackview_group 
+	*/
+	ArdourCanvas::Group* _region_motion_group;
 	
 	enum RulerType {
 		ruler_metric_smpte = 0,
@@ -680,6 +709,7 @@ class Editor : public PublicEditor
 
 	static const double timebar_height;
 	guint32 visible_timebars;
+	gdouble canvas_timebars_vsize;
 	Gtk::Menu          *editor_ruler_menu;
 	
 	ArdourCanvas::SimpleRect* tempo_bar;
@@ -788,15 +818,16 @@ class Editor : public PublicEditor
 	double canvas_width;
 	double canvas_height;
 	double full_canvas_height;
+	double grabbed_vadjustment;
 	nframes64_t last_canvas_frame;
 
 	bool track_canvas_map_handler (GdkEventAny*);
-	bool time_canvas_map_handler (GdkEventAny*);
 
 	gint edit_controls_button_release (GdkEventButton*);
 	Gtk::Menu *edit_controls_left_menu;
 	Gtk::Menu *edit_controls_right_menu;
 
+	Gtk::VBox           ruler_label_vbox;
 	Gtk::VBox           track_canvas_vbox;
 	Gtk::VBox           time_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
@@ -807,7 +838,11 @@ class Editor : public PublicEditor
 	bool deferred_control_scroll (nframes64_t);
 	sigc::connection control_scroll_connection;
 
+	gdouble get_trackview_group_vertical_offset () const { return vertical_adjustment.get_value () - canvas_timebars_vsize;}
+	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
 	void tie_vertical_scrolling ();
+	void scroll_canvas_horizontally ();
+	void scroll_canvas_vertically ();
 	void canvas_horizontally_scrolled ();
 	void canvas_scroll_to (nframes64_t);
 
@@ -1380,14 +1415,11 @@ public:
 
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
-	bool time_canvas_scroll (GdkEventScroll* event);
 
 	bool track_canvas_scroll_event (GdkEventScroll* event);
 	bool track_canvas_button_press_event (GdkEventButton* event);
 	bool track_canvas_button_release_event (GdkEventButton* event);
 	bool track_canvas_motion_notify_event (GdkEventMotion* event);
-
-	bool time_canvas_scroll_event (GdkEventScroll* event);
 
 	Gtk::Allocation canvas_allocation;
 	bool canvas_idle_queued;
@@ -1405,7 +1437,6 @@ public:
 
 	void handle_new_duration ();
 	void initialize_canvas ();
-	void reset_scrolling_region (Gtk::Allocation* alloc = 0);
 
 	/* display control */
 	
@@ -1771,12 +1802,13 @@ public:
 	uint32_t autoscroll_cnt;
 	nframes64_t autoscroll_x_distance;
 	double autoscroll_y_distance;
-     
+
 	static gint _autoscroll_canvas (void *);
 	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
 	void maybe_autoscroll (GdkEventMotion*);
+	void maybe_autoscroll_horizontally (GdkEventMotion*);
 	bool allow_vertical_scroll;
 
 	/* trimming */

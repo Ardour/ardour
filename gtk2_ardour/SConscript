@@ -432,7 +432,7 @@ else:
 	keybindings_dict['%LEVEL4%'] = env['WINDOWS_KEY']
 	keybindings_dict['%WINDOW%'] = 'Alt'
 
-for b in [ 'SAE-de', 'mnemonic-us', 'ergonomic-us' ]:
+for b in [ 'SAE-de',  'SAE-us', 'mnemonic-us', 'ergonomic-us' ]:
 	target_file = b + '.bindings'
 	src_file = target_file + '.in'
 	Default (env.SubstInFile (target_file, src_file, SUBST_DICT = keybindings_dict))
