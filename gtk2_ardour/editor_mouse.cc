@@ -3033,6 +3033,7 @@ void
 Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	_region_motion_group->property_y() = 0;
+	grabbed_vadjustment = vertical_adjustment.get_value ();
 
 	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
