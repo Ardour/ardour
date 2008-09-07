@@ -221,7 +221,7 @@ class TimeAxisViewItem : public Selectable
     /**
      * 
      */
-    ArdourCanvas::Item* get_canvas_group();
+    ArdourCanvas::Group* get_canvas_group();
 
     /**
      * 

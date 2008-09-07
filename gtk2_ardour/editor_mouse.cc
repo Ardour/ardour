@@ -213,10 +213,9 @@ Editor::which_grabber_cursor ()
 		return grabber_edit_point_cursor;
 		break;
 	default:
-	  //return grabber_cursor;
 		break;
 	}
-		return grabber_cursor;
+	return grabber_cursor;
 }
 
 void
@@ -638,8 +637,8 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					
 				case RegionViewName:
 					/* rename happens on edit clicks */
-						start_trim (clicked_regionview->get_name_highlight(), event);
-						return true;
+					start_trim (clicked_regionview->get_name_highlight(), event);
+					return true;
 					break;
 
 				case GainAutomationControlPointItem:
@@ -2980,17 +2979,6 @@ Editor::line_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	/* 
-	   the group containing moved regions may have been 
-	   offset during autoscroll. reset its y offset
-	   (we should really handle this in the same way 
-	   we do with the x axis, but a simple way of achieving that 
-	   eludes me right now). 
-	*/
-
-	_region_motion_group->property_y() = 0;
-	grabbed_vadjustment = vertical_adjustment.get_value ();
-
 	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
@@ -3027,14 +3015,23 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
 
 	begin_reversible_command (_("move region(s)"));
+	/* 
+	   the group containing moved regions may have been 
+	   offset during autoscroll. reset its y offset
+	   (we should really handle this in the same way 
+	   we do with the x axis, but a simple way of achieving that 
+	   eludes me right now). 
+	*/
+
+	_region_motion_group->property_y() = 0;
+
+	/* sync the canvas to what we think is its current state */
+	track_canvas->update_now();
 }
 
 void
 Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	_region_motion_group->property_y() = 0;
-	grabbed_vadjustment = vertical_adjustment.get_value ();
-
 	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
@@ -3062,6 +3059,8 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.motion_callback = &Editor::region_drag_motion_callback;
 	drag_info.finished_callback = &Editor::region_drag_finished_callback;
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
+
+	_region_motion_group->property_y() = 0;
 }
 
 void
@@ -3110,14 +3109,10 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 		vector<RegionView*> new_regionviews;
 		
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-			RegionView* rv;
 			RegionView* nrv;
 			AudioRegionView* arv;
 			
-			rv = (*i);
-
-			
-			if ((arv = dynamic_cast<AudioRegionView*>(rv)) == 0) {
+			if ((arv = dynamic_cast<AudioRegionView*>(*i)) == 0) {
 				/* XXX handle MIDI here */
 				continue;
 			}
@@ -3151,6 +3146,14 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 		drag_info.data = new_regionviews.front();
 
 		swap_grab (new_regionviews.front()->get_canvas_group (), 0, event->motion.time);
+		/* 
+		   sync the canvas to what we think is its current state 
+		   without it, the canvas seems to 
+		   "forget" to update properly after the upcoming reparent() 
+		   ..only if the mouse is in rapid motion at the time of the grab. 
+		   something to do with regionview creation raking so long?
+		 */
+		track_canvas->update_now();
 	}
 }
 
@@ -3270,7 +3273,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	original_pointer_order = drag_info.dest_trackview->order;
-		
+	
 	/************************************************************
                  Y-Delta Computation
 	************************************************************/	
@@ -3582,7 +3585,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			if (drag_info.first_move) {
 
 				// hide any dependent views 
-			
+	
 				rv->get_time_axis_view().hide_dependent_views (*rv);
 
 				/* 
@@ -3592,9 +3595,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				   parent groups have different coordinates.
 				*/
 
+				rv->get_canvas_group()->property_y() =  iy1 - 1;
 				rv->get_canvas_group()->reparent(*_region_motion_group);
 
-				rv->get_canvas_group()->move ( 0, iy1 - 1);
 				rv->fake_set_opaque (true);
 			}
 			/* for evaluation of the track position of iy1, we have to adjust 
@@ -3667,9 +3670,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			if (drag_info.brushing) {
 				mouse_brush_insert_region (rv, pending_region_position);
 			} else {
-
-			  rv->move (x_delta, y_delta);
-
+				rv->move (x_delta, y_delta);
 			}
 
 		} /* foreach region */
@@ -3765,11 +3766,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
 			
 		RegionView* rv = (*i);	    	    
-		double ix1, ix2, iy1, iy2, y_pos;
+		double ix1, ix2, iy1, iy2;
 		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 		rv->get_canvas_group()->i2w (ix1, iy1);
-
-		y_pos = iy1;
 		iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
 		TimeAxisView* dest_tv = trackview_by_y_position (iy1);
@@ -3846,13 +3845,10 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			   back to its original canvas group (its streamview).
 			   No need to do anything for copies as they are fake regions which will be deleted.
 			*/
-			/* account for any vertical autoscrolling that might have happened during the move */
-			double vadjustment_delta = vertical_adjustment.get_value () - grabbed_vadjustment;
-			y_pos += vadjustment_delta;
 
 			RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (dest_atv);
 			rv->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
-			rv->get_canvas_group()->move ( 0, -y_pos + 1);
+			rv->get_canvas_group()->property_y() = 0;
 		  
 			/* just change the model */
 			

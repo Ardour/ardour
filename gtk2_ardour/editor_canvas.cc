@@ -763,7 +763,7 @@ Editor::autoscroll_canvas ()
 	Gdk::ModifierType mask;
 	canvas_window->get_pointer (x, y, mask);
 	ev.type = GDK_MOTION_NOTIFY;
-	ev.state |= Gdk::BUTTON1_MASK;
+	ev.state &= Gdk::BUTTON1_MASK;
 	ev.x = x;
 	ev.y = y;
 

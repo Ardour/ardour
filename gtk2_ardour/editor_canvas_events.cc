@@ -198,10 +198,6 @@ Editor::track_canvas_motion (GdkEvent *ev)
 		verbose_canvas_cursor->property_y() = clamp_verbose_cursor_y (ev->motion.y + 20);
 	}
 
-#ifdef GTKOSX
-	flush_canvas ();
-#endif
-
 	return false;
 }
 
