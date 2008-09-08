@@ -405,8 +405,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	controls_layout.set_size (edit_controls_vbox.get_width(), (gint) pos);
 	controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
 	zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
-	//time_button_frame.set_size_request(edit_controls_vbox.get_width() + edit_vscrollbar.get_width(), -1);
-	time_button_frame.set_size_request(edit_controls_vbox.get_width(), -1);
+	time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
 
 	if ((vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
 		/* 
@@ -874,9 +873,10 @@ Editor::scroll_canvas_vertically ()
 	_trackview_group->move (0, -y_delta);
 	_region_motion_group->move (0, -y_delta);
 
-	/* required to keep the controls_layout in sync with the canvas group */
+#ifndef GTKOSX
+	/* required to keep the controls_layout in lock step with the canvas group */
 	track_canvas->update_now ();
-
+#endif
 }
 
 void 

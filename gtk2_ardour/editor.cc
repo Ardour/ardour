@@ -458,9 +458,7 @@ Editor::Editor ()
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	ruler_label_event_box.set_name ("TimebarLabelBase");
 	ruler_label_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
-	ruler_label_frame.add(ruler_label_event_box);
-	ruler_label_frame.property_shadow_type() = Gtk::SHADOW_OUT;
-	
+
 	time_button_vbox.pack_start (meter_label, false, false);
 	time_button_vbox.pack_start (tempo_label, false, false);
 	time_button_vbox.pack_start (mark_label, false, false);
@@ -470,9 +468,6 @@ Editor::Editor ()
 	time_button_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_button_event_box.set_name ("TimebarLabelBase");
 	time_button_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
-
-	time_button_frame.add(time_button_event_box);
-	time_button_frame.property_shadow_type() = Gtk::SHADOW_OUT;
 
 	/* these enable us to have a dedicated window (for cursor setting, etc.) 
 	   for the canvas areas.
@@ -491,8 +486,8 @@ Editor::Editor ()
 	
 	edit_packer.attach (edit_vscrollbar,         0, 1, 0, 4,    FILL,        FILL|EXPAND, 0, 0);
 
-	edit_packer.attach (ruler_label_frame,       1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
-	edit_packer.attach (time_button_frame,       1, 2, 1, 2,    FILL,        FILL, 0, 0);
+edit_packer.attach (ruler_label_event_box,       1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
+edit_packer.attach (time_button_event_box,       1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
 	edit_packer.attach (controls_layout,         1, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);

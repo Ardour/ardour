@@ -595,8 +595,6 @@ class Editor : public PublicEditor
 	Gtk::EventBox      track_canvas_event_box;
 	Gtk::EventBox      time_button_event_box;
 	Gtk::EventBox      ruler_label_event_box;
-	Gtk::Frame         time_button_frame;
-	Gtk::Frame         ruler_label_frame;
 
 	ArdourCanvas::Pixbuf*     logo_item;
 	ArdourCanvas::Group*      minsec_group;

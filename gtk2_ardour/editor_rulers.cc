@@ -651,8 +651,8 @@ Editor::update_ruler_visibility ()
 		visible_rulers++;
 	}
 
-	double tbpos = 1.0;
-	double tbgpos = 1.0;
+	double tbpos = 0.0;
+	double tbgpos = 0.0;
 	double old_unit_pos;
 	
 	if (ruler_meter_action->get_active()) {
@@ -781,7 +781,7 @@ Editor::update_ruler_visibility ()
 	}
 	
 	gdouble old_canvas_timebars_vsize = canvas_timebars_vsize;
-	canvas_timebars_vsize = (timebar_height * visible_timebars) + 2.0;
+	canvas_timebars_vsize = timebar_height * visible_timebars;
 	gdouble vertical_pos_delta = canvas_timebars_vsize - old_canvas_timebars_vsize;
 
 	if (vertical_pos_delta < 0 && (vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
@@ -800,8 +800,8 @@ Editor::update_ruler_visibility ()
 	redisplay_tempo (false);
 
 	time_canvas_event_box.show_all();
-	ruler_label_frame.show_all();
-	time_button_frame.show_all();
+	ruler_label_event_box.show_all();
+	time_button_event_box.show_all();
 }
 
 void
