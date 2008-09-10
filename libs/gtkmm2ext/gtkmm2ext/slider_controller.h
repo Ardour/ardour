@@ -24,6 +24,8 @@
 #include <gtkmm2ext/pixfader.h>
 #include <gtkmm2ext/binding_proxy.h>
 
+#include <boost/shared_ptr.hpp>
+
 namespace Gtkmm2ext {
 	class Pix;
 }
@@ -39,9 +41,9 @@ class SliderController : public Gtkmm2ext::PixFader
   public:
 	SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			  Gtk::Adjustment* adj, int orientation,
-			  PBD::Controllable&,
+			  boost::shared_ptr<PBD::Controllable>,
 			  bool with_numeric = true);
-
+	
         virtual ~SliderController () {}
 
 	void set_value (float);
@@ -64,7 +66,7 @@ class VSliderController : public SliderController
   public:
 	VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			   Gtk::Adjustment *adj,
-			   PBD::Controllable&,
+			   boost::shared_ptr<PBD::Controllable>,
 			   bool with_numeric = true);
 };
 
@@ -73,7 +75,7 @@ class HSliderController : public SliderController
   public:
 	HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 			   Gtk::Adjustment *adj,
-			   PBD::Controllable&,
+			   boost::shared_ptr<PBD::Controllable>,
 			   bool with_numeric = true);
 };
 

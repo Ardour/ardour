@@ -70,13 +70,12 @@ AudioEngine::AudioEngine (string client_name)
 	last_monitor_check = 0;
 	monitor_check_interval = max_frames;
 	_processed_frames = 0;
-	_freewheeling = false;
 	_usecs_per_cycle = 0;
 	_jack = 0;
 	_frame_rate = 0;
 	_buffer_size = 0;
-	_freewheeling = false;
 	_freewheel_thread_registered = false;
+	_freewheeling = false;
 
 	m_meter_thread = 0;
 	g_atomic_int_set (&m_meter_exit, 0);
@@ -84,6 +83,7 @@ AudioEngine::AudioEngine (string client_name)
 	if (connect_to_jack (client_name)) {
 		throw NoBackendAvailable ();
 	}
+
 	Port::set_engine (this);
 }
 
@@ -331,8 +331,6 @@ AudioEngine::process_callback (nframes_t nframes)
 	if (_freewheeling) {
 		/* emit the Freewheel signal and stop freewheeling in the event of trouble */
 		if (Freewheel (nframes)) {
-			cerr << "Freewheeling returned non-zero!\n";
-			_freewheeling = false;
 			jack_set_freewheel (_jack, false);
 		}
 
@@ -847,7 +845,7 @@ AudioEngine::frames_per_cycle ()
  * Note this can return NULL, it will NOT create a port if it is not found (any more).
  */
 Port *
-AudioEngine::get_port_by_name (const string& portname, bool keep) const
+AudioEngine::get_port_by_name (const string& portname, bool keep)
 {
 	Glib::Mutex::Lock lm (_process_lock);
 
@@ -923,7 +921,7 @@ AudioEngine::can_request_hardware_monitoring ()
 
 
 uint32_t
-AudioEngine::n_physical_outputs () const
+AudioEngine::n_physical_outputs (DataType type) const
 {
 	const char ** ports;
 	uint32_t i = 0;
@@ -932,7 +930,7 @@ AudioEngine::n_physical_outputs () const
 		return 0;
 	}
 
-	if ((ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == 0) {
+	if ((ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsInput)) == 0) {
 		return 0;
 	}
 
@@ -943,7 +941,7 @@ AudioEngine::n_physical_outputs () const
 }
 
 uint32_t
-AudioEngine::n_physical_inputs () const
+AudioEngine::n_physical_inputs (DataType type) const
 {
 	const char ** ports;
 	uint32_t i = 0;
@@ -952,7 +950,7 @@ AudioEngine::n_physical_inputs () const
 		return 0;
 	}
 	
-	if ((ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == 0) {
+	if ((ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
 		return 0;
 	}
 
@@ -964,7 +962,7 @@ AudioEngine::n_physical_inputs () const
 }
 
 void
-AudioEngine::get_physical_inputs (vector<string>& ins)
+AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
 {
 	const char ** ports;
 	uint32_t i = 0;
@@ -973,7 +971,7 @@ AudioEngine::get_physical_inputs (vector<string>& ins)
 		return;
 	}
 	
-	if ((ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == 0) {
+	if ((ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
 		return;
 	}
 
@@ -986,7 +984,7 @@ AudioEngine::get_physical_inputs (vector<string>& ins)
 }
 
 void
-AudioEngine::get_physical_outputs (vector<string>& outs)
+AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 {
 	const char ** ports;
 	uint32_t i = 0;
@@ -995,7 +993,7 @@ AudioEngine::get_physical_outputs (vector<string>& outs)
 		return;
 	}
 	
-	if ((ports = jack_get_ports (_jack, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == 0) {
+	if ((ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsInput)) == 0) {
 		return;
 	}
 
@@ -1123,11 +1121,18 @@ AudioEngine::freewheel (bool onoff)
 {
 	if (_jack) {
 
-		if (onoff) {
-			_freewheel_thread_registered = false;
-		}
+		if (onoff != _freewheeling) {
 
-		return jack_set_freewheel (_jack, onoff);
+			if (onoff) {
+				_freewheel_thread_registered = false;
+			}
+
+			return jack_set_freewheel (_jack, onoff);
+
+		} else {
+			/* already doing what has been asked for */
+			return 0;
+		}
 
 	} else {
 		return -1;

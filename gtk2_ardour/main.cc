@@ -205,6 +205,13 @@ fixup_bundle_environment ()
 	   actually exists ...
 	*/
 
+	try {
+		sys::create_directories (user_config_directory ());
+	}
+	catch (const sys::filesystem_error& ex) {
+		error << _("Could not create user configuration directory") << endmsg;
+	}
+	
 	sys::path pangopath = user_config_directory();
 	pangopath /= "pango.rc";
 	path = pangopath.to_string();
@@ -212,6 +219,7 @@ fixup_bundle_environment ()
 	std::ofstream pangorc (path.c_str());
 	if (!pangorc) {
 		error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
+		return;
 	} else {
 		pangorc << "[Pango]\nModuleFiles=";
 
@@ -221,6 +229,7 @@ fixup_bundle_environment ()
 		pangopath /= "pango.modules";
 			
 		pangorc << pangopath.to_string() << endl;
+
 		pangorc.close ();
 
 		setenv ("PANGO_RC_FILE", path.c_str(), 1);

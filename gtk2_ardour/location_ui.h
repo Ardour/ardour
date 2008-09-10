@@ -50,6 +50,7 @@ class LocationEditRow  : public Gtk::HBox
 	void set_session (ARDOUR::Session *);
 
 	void set_number (int);
+	void focus_name();
 	
 	sigc::signal<void,ARDOUR::Location*> remove_requested;  
 	sigc::signal<void> redraw_ranges;  
@@ -114,6 +115,7 @@ class LocationEditRow  : public Gtk::HBox
 	void go_button_pressed (LocationPart part);
 
 	void clock_changed (LocationPart part);
+	void change_aborted (LocationPart part);
 
 	void cd_toggled ();
 	void hide_toggled ();
@@ -149,6 +151,7 @@ class LocationUI : public ArdourDialog
 
   private:
 	ARDOUR::LocationStack* locations;
+	ARDOUR::Location *newest_location;
         
 	void session_gone();
 

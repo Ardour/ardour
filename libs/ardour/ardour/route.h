@@ -359,8 +359,8 @@ class Route : public IO
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
 
-	int reset_plugin_counts (ProcessorStreams*); /* locked */
-	int _reset_plugin_counts (ProcessorStreams*); /* unlocked */
+	int reset_processor_counts (ProcessorStreams*); /* locked */
+	int _reset_processor_counts (ProcessorStreams*); /* unlocked */
 
 	/* processor I/O channels and plugin count handling */
 
@@ -372,8 +372,8 @@ class Route : public IO
 	    ProcessorCount (boost::shared_ptr<ARDOUR::Processor> ins) : processor(ins) {}
 	};
 	
-	int32_t apply_some_plugin_counts (std::list<ProcessorCount>& iclist);
-	bool    check_some_plugin_counts (std::list<ProcessorCount>& iclist, ChanCount required_inputs, ProcessorStreams* err_streams);
+	int32_t apply_some_processor_counts (std::list<ProcessorCount>& iclist);
+	bool    check_some_processor_counts (std::list<ProcessorCount>& iclist, ChanCount required_inputs, ProcessorStreams* err_streams);
 
 	void set_deferred_state ();
 	void add_processor_from_xml (const XMLNode&);

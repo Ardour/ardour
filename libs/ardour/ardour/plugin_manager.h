@@ -23,6 +23,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <set>
 
 #include <ardour/types.h>
 #include <ardour/plugin.h>
@@ -54,7 +55,31 @@ class PluginManager {
 
 	static PluginManager* the_manager() { return _manager; }
 
+	void load_favorites ();
+	void save_favorites ();
+	void add_favorite (ARDOUR::PluginType type, std::string unique_id);
+	void remove_favorite (ARDOUR::PluginType type, std::string unique_id);
+	bool is_a_favorite_plugin (const PluginInfoPtr&);
+	
   private:
+	struct FavoritePlugin {
+	    ARDOUR::PluginType type;
+	    std::string unique_id;
+
+	    FavoritePlugin (ARDOUR::PluginType t, std::string id) 
+	    : type (t), unique_id (id) {}
+	    
+	    bool operator==(const FavoritePlugin& other) const {
+		    return other.type == type && other.unique_id == unique_id;
+	    }
+
+	    bool operator<(const FavoritePlugin& other) const {
+		    return other.type < type || other.unique_id < unique_id;
+	    }
+	};
+	typedef std::set<FavoritePlugin> FavoritePluginList;
+	FavoritePluginList favorites;
+
 	ARDOUR::PluginInfoList _vst_plugin_info;
 	ARDOUR::PluginInfoList _ladspa_plugin_info;
 	ARDOUR::PluginInfoList _lv2_plugin_info;

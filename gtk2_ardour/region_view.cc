@@ -64,7 +64,8 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
                         Gdk::Color&                       basic_color)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(),
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false,
+
 			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
 							  TimeAxisViewItem::ShowNameHighlight|
 							  TimeAxisViewItem::ShowFrame))
@@ -87,11 +88,10 @@ RegionView::RegionView (const RegionView& other)
 	/* derived concrete type will call init () */
 
 	_region = other._region;
-	editor = 0;
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
-	_enable_display = false;
 	_pixel_width = other._pixel_width;
+	_height = other._height;
 }
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
@@ -104,7 +104,6 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	/* derived concrete type will call init () */
 
 	_region = other_region;
-	editor = other.editor;
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
@@ -116,8 +115,9 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
                         Gdk::Color&                  basic_color,
+						bool recording,
                         TimeAxisViewItem::Visibility visibility)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), visibility)
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, visibility)
 	, _region (r)
 	, sync_mark(0)
 	, sync_line(0)
@@ -134,10 +134,11 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 void
 RegionView::init (Gdk::Color& basic_color, bool wfd)
 {
-	valid           = true;
-	_enable_display = false;
-	in_destructor   = false;
-	wait_for_data   = wfd;
+	editor        = 0;
+	valid         = true;
+	in_destructor = false;
+	_height       = 0;
+	wait_for_data = wfd;
 	sync_mark     = 0;
 	sync_line     = 0;
 	sync_mark     = 0;
@@ -145,7 +146,10 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	compute_colors (basic_color);
 
-	name_highlight->set_data ("regionview", this);
+	if (name_highlight) {
+		name_highlight->set_data ("regionview", this);
+		name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
+	}
 
 	if (name_text) {
 		name_text->set_data ("regionview", this);
@@ -154,17 +158,16 @@ RegionView::init (Gdk::Color& basic_color, bool wfd)
 	if (wfd)
 		_enable_display = true;
 
-	set_y_position_and_height (0, trackview.height - 2);
+	set_height (trackview.current_height());
 
 	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
 
 	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
-	name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 
 	set_colors ();
 
 	ColorsChanged.connect (mem_fun (*this, &RegionView::color_handler));
-	// set_pango_fontsize();
+
 	/* XXX sync mark drag? */
 }
 
@@ -517,7 +520,7 @@ RegionView::region_sync_changed ()
 
 			points.clear ();
 			points.push_back (Gnome::Art::Point (offset, 0));
-			points.push_back (Gnome::Art::Point (offset, trackview.height - NAME_HIGHLIGHT_SIZE));
+			points.push_back (Gnome::Art::Point (offset, trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 
 			sync_line->property_points().set_value (points);
 			sync_line->show ();

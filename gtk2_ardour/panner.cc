@@ -35,7 +35,7 @@ null_label_callback (char* buf, unsigned int bufsize)
 
 
 PannerBar::PannerBar (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable> c)
-	: BarController (adj, *c.get(), sigc::ptr_fun (null_label_callback))
+	: BarController (adj, c, sigc::ptr_fun (null_label_callback))
 {
 	set_style (BarController::Line);
 }

@@ -156,13 +156,13 @@ Send::set_metering (bool yn)
 }
 
 bool
-Send::can_support_input_configuration (ChanCount in) const
+Send::can_support_io_configuration (const ChanCount& in, ChanCount& out_is_ignored) const
 {
 	if (_io->input_maximum() == ChanCount::INFINITE && _io->output_maximum() == ChanCount::INFINITE) {
 
 		/* not configured yet */
 
-		return true; /* we can support anything the first time we're asked */
+		return 1; /* we can support anything the first time we're asked */
 
 	} else {
 
@@ -171,42 +171,35 @@ Send::can_support_input_configuration (ChanCount in) const
 		*/
 
 		if (_io->output_maximum() == in) {
-
-			return true;
+			return 1;
 		} 
 	}
 
-	return false;
-}
-
-ChanCount
-Send::output_for_input_configuration (ChanCount in) const
-{
-	// from the internal (Insert) perspective a Send does not modify its input whatsoever
-	return in;
+	return -1;
 }
 
 bool
 Send::configure_io (ChanCount in, ChanCount out)
 {
 	/* we're transparent no matter what.  fight the power. */
-	if (out != in)
+
+	if (out != in) {
 		return false;
+	}
 
 	_io->set_output_maximum (in);
 	_io->set_output_minimum (in);
 	_io->set_input_maximum (ChanCount::ZERO);
 	_io->set_input_minimum (ChanCount::ZERO);
 
-	bool success = _io->ensure_io (ChanCount::ZERO, in, false, this) == 0;
-
-	if (success) {
-		Processor::configure_io(in, out);
-		_io->reset_panner();
-		return true;
-	} else {
+	if (_io->ensure_io (ChanCount::ZERO, in, false, this) != 0) {
 		return false;
 	}
+
+	Processor::configure_io(in, out);
+	_io->reset_panner();
+
+	return true;
 }
 
 ChanCount
@@ -226,3 +219,11 @@ Send::input_streams() const
 }
 
 
+void
+Send::expect_inputs (const ChanCount& expected)
+{
+	if (expected != expected_inputs) {
+		expected_inputs = expected;
+		_io->reset_panner ();
+	}
+}

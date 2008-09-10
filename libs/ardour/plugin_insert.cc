@@ -162,19 +162,34 @@ PluginInsert::auto_state_changed (Parameter which)
 ChanCount
 PluginInsert::output_streams() const
 {
-	if (_configured)
-		return output_for_input_configuration(_configured_input);
-	else
-		return natural_output_streams();
+	ChanCount out = _plugins.front()->get_info()->n_outputs;
+
+	if (out == ChanCount::INFINITE) {
+
+		return _plugins.front()->output_streams ();
+
+	} else {
+
+		out.set_audio (out.n_audio() * _plugins.size());
+		out.set_midi (out.n_midi() * _plugins.size());
+
+		return out;
+	}
 }
 
 ChanCount
 PluginInsert::input_streams() const
 {
-	if (_configured)
-		return _configured_input;
-	else
-		return natural_input_streams();
+	ChanCount in = _plugins[0]->get_info()->n_inputs;
+	
+	if (in == ChanCount::INFINITE) {
+		return _plugins[0]->input_streams ();
+	} else {
+		in.set_audio (in.n_audio() * _plugins.size());
+		in.set_midi (in.n_midi() * _plugins.size());
+
+		return in;
+	}
 }
 
 ChanCount
@@ -473,31 +488,42 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
-	ChanCount matching_out = output_for_input_configuration(out);
-	if (matching_out != out) {
-		_configured = false;
+	if (set_count (count_for_configuration (in, out)) < 0) {
 		return false;
-	} else {
-		bool success = set_count (count_for_configuration(in, out));
-		if (success)
-			Processor::configure_io(in, out);
-		return success;
 	}
+
+	/* if we're running replicated plugins, each plugin has
+	   the same i/o configuration and we may need to announce how many
+	   output streams there are.
+
+	   if we running a single plugin, we need to configure it.
+	*/
+
+	if (_plugins.front()->configure_io (in, out) < 0) {
+		return false;
+	}
+
+	return Processor::configure_io (in, out);
 }
 
 bool
-PluginInsert::can_support_input_configuration (ChanCount in) const
+PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
+	if (_plugins.front()->reconfigurable_io()) {
+		/* plugin has flexible I/O, so delegate to it */
+		return _plugins.front()->can_support_io_configuration (in, out);
+	}
+
 	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
 	ChanCount inputs = _plugins[0]->get_info()->n_inputs;
 
-	/* see output_for_input_configuration below */
 	if ((inputs.n_total() == 0)
 			|| (inputs.n_total() == 1 && outputs == inputs)
 			|| (inputs.n_total() == 1 && outputs == inputs
 				&& ((inputs.n_audio() == 0 && in.n_audio() == 0)
 					|| (inputs.n_midi() == 0 && in.n_midi() == 0)))
 			|| (inputs == in)) {
+		out = outputs;
 		return true;
 	}
 
@@ -513,60 +539,31 @@ PluginInsert::can_support_input_configuration (ChanCount in) const
 		}
 	}
 
-	if (can_replicate && (in.n_total() % inputs.n_total() == 0)) {
-		return true;
-	} else {
+	if (!can_replicate || (in.n_total() % inputs.n_total() != 0)) {
 		return false;
 	}
-}
-
-ChanCount
-PluginInsert::output_for_input_configuration (ChanCount in) const
-{
-	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
-	ChanCount inputs = _plugins[0]->get_info()->n_inputs;
 
 	if (inputs.n_total() == 0) {
 		/* instrument plugin, always legal, but throws away any existing streams */
-		return outputs;
-	}
-
-	if (inputs.n_total() == 1 && outputs == inputs
+		out = outputs;
+	} else if (inputs.n_total() == 1 && outputs == inputs
 			&& ((inputs.n_audio() == 0 && in.n_audio() == 0)
-				|| (inputs.n_midi() == 0 && in.n_midi() == 0))) {
-		/* mono plugin, replicate as needed to match in */
-		return in;
-	}
-
-	if (inputs == in) {
+			    || (inputs.n_midi() == 0 && in.n_midi() == 0))) {
+		/* mono, single-typed plugin, replicate as needed to match in */
+		out = in;
+	} else if (inputs == in) {
 		/* exact match */
-		return outputs;
-	}
-
-	bool can_replicate = true;
-
-	/* if number of inputs is a factor of the requested input
-	   configuration for every type, we can replicate.
-	*/
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		if (inputs.get(*t) >= in.get(*t) || (in.get(*t) % inputs.get(*t) != 0)) {
-			can_replicate = false;
-			break;
-		}
-	}
-
-	if (can_replicate && (inputs.n_total() % in.n_total() == 0)) {
-		ChanCount output;
-		
+		out = outputs;
+	} else {
+		/* replicate - note that we've already verified that
+		   the replication count is constant across all data types.
+		*/
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			output.set(*t, outputs.get(*t) * (in.get(*t) / inputs.get(*t)));
+			out.set (*t, outputs.get(*t) * (in.get(*t) / inputs.get(*t)));
 		}
-
-		return output;
 	}
-
-	/* sorry */
-	return ChanCount();
+		
+	return true;
 }
 
 /* Number of plugin instances required to support a given channel configuration.
@@ -575,6 +572,12 @@ PluginInsert::output_for_input_configuration (ChanCount in) const
 int32_t
 PluginInsert::count_for_configuration (ChanCount in, ChanCount out) const
 {
+	if (_plugins.front()->reconfigurable_io()) {
+		/* plugin has flexible I/O, so the answer is always 1 */
+		/* this could change if we ever decide to replicate AU's */
+		return 1;
+	}
+
 	// FIXME: take 'out' into consideration
 	
 	ChanCount outputs = _plugins[0]->get_info()->n_outputs;

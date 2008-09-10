@@ -87,11 +87,12 @@ using namespace std;
 
 Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
 
-int
+void
 RouteTimeAxisView::setup_slider_pix ()
 {
-	slider = ::get_icon ("fader_belt_h");
-	return 0;
+	if ((slider = ::get_icon ("fader_belt_h")) == 0) {
+		throw failed_constructor ();
+	}
 }
 
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
@@ -105,18 +106,12 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
 	  visual_button (_("v")),
-	  lm (rt, sess),
-	  underlay_xml_node (0),
-	  gain_slider (0),
-	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
+	  gm (rt, sess, slider, true)
 
 {
-	if (slider == 0) {
-		setup_slider_pix ();
-	}
+	gm.get_level_meter().set_no_show_all();
+	gm.get_level_meter().setup_meters(50);
 
-	lm.set_no_show_all();
-	lm.setup_meters(50);
 	_has_state = true;
 	playlist_menu = 0;
 	playlist_action_menu = 0;
@@ -126,8 +121,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	no_redraw = false;
 	destructive_track_mode_item = 0;
 	normal_track_mode_item = 0;
-
-	gain_slider = manage (new HSliderController (slider, &gain_adjustment, *_route->gain_control().get(), false));
 
 	ignore_toggle = false;
 
@@ -175,7 +168,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	}
 
-	controls_hbox.pack_start(lm, false, false);
+	controls_hbox.pack_start(gm.get_level_meter(), false, false);
 	_route->meter_change.connect (mem_fun(*this, &RouteTimeAxisView::meter_changed));
 	_route->input_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
 	_route->output_changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
@@ -184,7 +177,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
 	controls_table.attach (edit_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (*gain_slider, 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
 	ARDOUR_UI::instance()->tooltips().set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->tooltips().set_tip(*mute_button,_("Mute"));
@@ -239,14 +232,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	ColorsChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
 
-	gain_slider->signal_button_press_event().connect (mem_fun(*this, &RouteTimeAxisView::start_gain_touch));
-	gain_slider->signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::end_gain_touch));
-	gain_slider->set_name ("TrackGainFader");
-
-	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &RouteTimeAxisView::gain_adjusted));
-	_route->gain_control()->Changed.connect (mem_fun(*this, &RouteTimeAxisView::gain_changed));
-
-	gain_slider->show_all();
+	gm.get_gain_slider().signal_scroll_event().connect(mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
+	gm.get_gain_slider().set_name ("TrackGainFader");
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -285,6 +272,7 @@ RouteTimeAxisView::post_construct ()
 	/* map current state of the route */
 
 	update_diskstream_display ();
+
 	subplugin_menu.items().clear ();
 	_route->foreach_processor (this, &RouteTimeAxisView::add_processor_to_subplugin_menu);
 	_route->foreach_processor (this, &RouteTimeAxisView::add_existing_processor_automation_curves);
@@ -304,69 +292,6 @@ RouteTimeAxisView::set_playlist (boost::shared_ptr<Playlist> newplaylist)
 void
 RouteTimeAxisView::playlist_modified ()
 {
-}
-
-void
-RouteTimeAxisView::set_state (const XMLNode& node)
-{
-	const XMLProperty *prop;
-	
-	TimeAxisView::set_state (node);
-	
-	if ((prop = node.property ("shown_editor")) != 0) {
-		if (prop->value() == "no") {
-			_marked_for_display = false;
-		} else {
-			_marked_for_display = true;
-		}
-	} else {
-		_marked_for_display = true;
-	}
-	
-	XMLNodeList nlist = node.children();
-	XMLNodeConstIterator niter;
-	XMLNode *child_node;
-	
-	_show_automation.clear();
-	
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		child_node = *niter;
-
-		if (child_node->name() == AutomationTimeAxisView::state_node_name) {
-			XMLProperty* prop = child_node->property ("automation-id");
-			if (!prop)
-				continue;
-			
-			Parameter param(prop->value());
-			if (!param)
-				continue;
-			
-			bool show = false;
-			
-			prop = child_node->property ("shown");
-			
-			if (prop && prop->value() == "yes") {
-				show = true;
-				_show_automation.insert(param);
-			}
-			
-			if (_automation_tracks.find(param) == _automation_tracks.end()) {
-				create_automation_child(param, show);
-			}
-		}
-		else if (child_node->name() == "Underlays") {
-			underlay_xml_node = child_node;
-			
-			/* Wait for all gui tracks to be loaded as underlays are cross referencing tracks*/
-			Glib::signal_idle().connect(mem_fun(*this, &RouteTimeAxisView::set_underlay_state));
-		}
-	}
-}
-
-XMLNode* 
-RouteTimeAxisView::get_automation_child_xml_node (Parameter param)
-{
-	return RouteUI::get_automation_child_xml_node (param);
 }
 
 gint
@@ -632,6 +557,7 @@ RouteTimeAxisView::build_display_menu ()
 	route_active_menu_item->set_active (_route->active());
 
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &RouteTimeAxisView::hide_click)));
 	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
 }
 
@@ -768,7 +694,7 @@ RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
 
 	x1 = start / editor.get_current_zoom();
 	x2 = (end - 1) / editor.get_current_zoom();
-	y2 = height - 2;
+	y2 = current_height() - 2;
 	
 	timestretch_rect->property_x1() = x1;
 	timestretch_rect->property_y1() = 1.0;
@@ -807,55 +733,30 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 }
 
 void
-RouteTimeAxisView::set_height (TrackHeight h)
+RouteTimeAxisView::set_height (uint32_t h)
 {
-	int gmlen = (height_to_pixels (h)) - 5;
-	bool height_changed = (height == 0) || (h != height_style);
-	lm.setup_meters (gmlen);
+	int gmlen = h - 5;
+	bool height_changed = (height == 0) || (h != height);
+	gm.get_level_meter().setup_meters (gmlen);
+
 	TimeAxisView::set_height (h);
 
 	ensure_xml_node ();
 
 	if (_view) {
-		_view->set_height ((double) height);
+		_view->set_height ((double) current_height());
 	}
 
-	switch (height_style) {
-	case Largest:
-		xml_node->add_property ("track_height", "largest");
-		break;
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%u", height);
+	xml_node->add_property ("height", buf);
 
-	case Large:
-		xml_node->add_property ("track_height", "large");
-		break;
-
-	case Larger:
-		xml_node->add_property ("track_height", "larger");
-		break;
-
-	case Normal:
-		xml_node->add_property ("track_height", "normal");
-		break;
-
-	case Smaller:
-		xml_node->add_property ("track_height", "smaller");
-		break;
-
-	case Small:
-		xml_node->add_property ("track_height", "small");
-		break;
-	}
-
-	switch (height_style) {
-	case Largest:
-	case Large:
-	case Larger:
-	case Normal:
+	if (height >= hNormal) {
 		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
 
-		gain_slider->show();
+		gm.get_gain_slider().show();
 		mute_button->show();
 		solo_button->show();
 		if (rec_enable_button)
@@ -870,14 +771,14 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
 			playlist_button.show();
 		}
-		break;
 
-	case Smaller:
+	} else if (height >= hSmaller) {
+
 		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
 
-		gain_slider->hide();
+		gm.get_gain_slider().hide();
 		mute_button->show();
 		solo_button->show();
 		if (rec_enable_button)
@@ -892,13 +793,13 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
 			playlist_button.hide ();
 		}
-		break;
 
-	case Small:
+	} else {
+
 		hide_name_entry ();
 		show_name_label ();
-
-		gain_slider->hide();
+		
+		gm.get_gain_slider().hide();
 		mute_button->hide();
 		solo_button->hide();
 		if (rec_enable_button)
@@ -911,7 +812,6 @@ RouteTimeAxisView::set_height (TrackHeight h)
 		automation_button.hide ();
 		playlist_button.hide ();
 		name_label.set_text (_route->name());
-		break;
 	}
 
 	if (height_changed) {
@@ -1630,7 +1530,7 @@ RouteTimeAxisView::automation_track_hidden (Parameter param)
 		ran->menu_item->set_active (false);
 	}
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 
@@ -1664,10 +1564,9 @@ RouteTimeAxisView::show_all_automation ()
 
 	no_redraw = false;
 
-
 	/* Redraw */
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1699,8 +1598,8 @@ RouteTimeAxisView::show_existing_automation ()
 	}
 
 	no_redraw = false;
-
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	
+	_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1728,7 +1627,7 @@ RouteTimeAxisView::hide_all_automation ()
 	_show_automation.clear();
 
 	no_redraw = false;
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 
@@ -1869,7 +1768,7 @@ RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::Process
 
 	i->mark_automation_visible (pan->what, false);
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1902,7 +1801,7 @@ RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<Autom
 	track->Hiding.connect (bind (mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
 
 	bool hideit = (!show);
-	
+
 	XMLNode* node;
 
 	if ((node = track->get_state_node()) != 0) {
@@ -1918,8 +1817,11 @@ RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<Autom
 	if (hideit) {
 		track->hide ();
 	} else {
-		_show_automation.insert(param);
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		_show_automation.insert (param);
+
+		if (!no_redraw) {
+			_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+		}
 	}
 
 	build_display_menu();
@@ -2041,7 +1943,7 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 
 		/* now trigger a redisplay */
 		
-		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 
 	}
 }
@@ -2079,7 +1981,7 @@ RouteTimeAxisView::processors_changed ()
 
 	/* change in visibility was possible */
 
-	_route->gui_changed ("track_height", this);
+	_route->gui_changed ("visible_tracks", this);
 }
 
 boost::shared_ptr<AutomationLine>
@@ -2131,14 +2033,14 @@ RouteTimeAxisView::automation_child(ARDOUR::Parameter param)
 void
 RouteTimeAxisView::fast_update ()
 {
-	lm.update_meters ();
+	gm.get_level_meter().update_meters ();
 }
 
 void
 RouteTimeAxisView::hide_meter ()
 {
 	clear_meter ();
-	lm.hide_meters ();
+	gm.get_level_meter().hide_meters ();
 }
 
 void
@@ -2151,7 +2053,7 @@ void
 RouteTimeAxisView::reset_meter ()
 {
 	if (Config->get_show_track_meters()) {
-		lm.setup_meters (height-5);
+		gm.get_level_meter().setup_meters (height-5);
 	} else {
 		hide_meter ();
 	}
@@ -2160,7 +2062,7 @@ RouteTimeAxisView::reset_meter ()
 void
 RouteTimeAxisView::clear_meter ()
 {
-	lm.clear_meters ();
+	gm.get_level_meter().clear_meters ();
 }
 
 void
@@ -2288,38 +2190,5 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 			underlay_xml_node->remove_nodes_and_delete("id", v->trackview().route()->id().to_s());
 		}
 	}
-}
-
-gint
-RouteTimeAxisView::start_gain_touch (GdkEventButton* ev)
-{
-	_route->gain_control()->list()->start_touch ();
-	return FALSE;
-}
-
-gint
-RouteTimeAxisView::end_gain_touch (GdkEventButton* ev)
-{
-	_route->gain_control()->list()->stop_touch ();
-	return FALSE;
-}
-
-void
-RouteTimeAxisView::gain_adjusted ()
-{
-	_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
-}
-
-void
-RouteTimeAxisView::gain_changed ()
-{
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &RouteTimeAxisView::effective_gain_display));
-}
-
-void
-RouteTimeAxisView::effective_gain_display ()
-{
-	gfloat value = gain_to_slider_position (_route->effective_gain());
-	gain_adjustment.set_value (value);
 }
 

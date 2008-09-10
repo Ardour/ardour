@@ -81,7 +81,7 @@ class MidiStreamView : public StreamView
 	void redisplay_diskstream ();
 	
 	inline double contents_height() const
-		{ return (_trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	{ return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 	
 	inline double note_to_y(uint8_t note) const
 		{ return contents_height()
@@ -105,7 +105,7 @@ class MidiStreamView : public StreamView
 	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur, boost::weak_ptr<ARDOUR::Source> src); 
 	void update_rec_regions (boost::shared_ptr<ARDOUR::MidiModel> data, jack_nframes_t start, jack_nframes_t dur);
 	
-	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves);
+	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false);
 	void        display_region(MidiRegionView* region_view, bool load_model);
 	void        display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
 	

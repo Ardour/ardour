@@ -93,9 +93,9 @@ class VisualTimeAxis : public TimeAxisView
 		/**
 		 * Sets the height of this TrackView to one of the defined TrackHeghts
 		 *
-		 * @param h the TrackHeight value to set
+		 * @param h the number of pixels to set the height to
 		 */
-		virtual void set_height (TrackHeight h);	
+		virtual void set_height (uint32_t);	
 
 		//---------------------------------------------------------------------------------------//
 		// Selection Methods

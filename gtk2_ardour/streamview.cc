@@ -66,7 +66,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
 	canvas_rect->property_x2() = _trackview.editor.frame_to_pixel (max_frames);
-	canvas_rect->property_y2() = (double) tv.height;
+	canvas_rect->property_y2() = (double) tv.current_height();
 	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
 	// (Fill/Outline colours set in derived classes)
 

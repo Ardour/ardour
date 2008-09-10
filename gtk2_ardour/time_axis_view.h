@@ -25,12 +25,15 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/drawingarea.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 
 #include <gtkmm2ext/focus_entry.h>
+
+#include <pbd/stateful.h>
 
 #include <ardour/types.h>
 #include <ardour/region.h>
@@ -69,7 +72,7 @@ class GhostRegion;
  * This class provides the basic LHS controls and display methods. This should be
  * extended to create functional time-axis based views.
  */
-class TimeAxisView : public virtual AxisView
+class TimeAxisView : public virtual AxisView, public PBD::Stateful
 {
   private:
 	enum NamePackingBits {
@@ -78,15 +81,6 @@ class TimeAxisView : public virtual AxisView
 	};
 
   public:
-	enum TrackHeight { 
-		Largest,
-		Large,
-		Larger,
-		Normal,
-		Smaller,
-		Small
-	};
-	
 	static uint32_t hLargest;
 	static uint32_t hLarge;
 	static uint32_t hLarger;
@@ -94,23 +88,24 @@ class TimeAxisView : public virtual AxisView
 	static uint32_t hSmaller;
 	static uint32_t hSmall;
 
-	static uint32_t height_to_pixels (TrackHeight);
-
 	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
+
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&);
 
 	/* public data: XXX create accessor/mutators for these ?? */
 
 	PublicEditor& editor;
 	
-	TrackHeight height_style; 
-	uint32_t    height;  /* in canvas units */
-	uint32_t    effective_height;  /* in canvas units */
-	double      y_position;
-	int         order;
+	uint32_t effective_height;  /* in canvas units */
+	double   y_position;
+	int      order;
 	
-	ArdourCanvas::Group *canvas_display;
- 	Gtk::VBox           *control_parent;
+	uint32_t current_height() const { return height; }
+
+	ArdourCanvas::Group   *canvas_display;
+ 	Gtk::VBox       *control_parent;
 
 	/* The Standard LHS Controls */
 	Gtk::Frame    controls_frame;
@@ -119,10 +114,21 @@ class TimeAxisView : public virtual AxisView
 	Gtk::Table    controls_table;
 	Gtk::EventBox controls_ebox;
 	Gtk::VBox     controls_vbox;
+	Gtk::DrawingArea resizer;
+	Gtk::HBox     resizer_box;
 	Gtk::HBox     name_hbox;
 	Gtk::Frame    name_frame;
  	Gtkmm2ext::FocusEntry name_entry;
-	
+
+	bool resizer_button_press (GdkEventButton*);
+	bool resizer_button_release (GdkEventButton*);
+	bool resizer_motion (GdkEventMotion*);
+	bool resizer_expose (GdkEventExpose*);
+
+	double resize_drag_start;
+	int32_t resize_idle_target;
+	void idle_resize (uint32_t);
+
 	void hide_name_label ();
 	void hide_name_entry ();
 	void show_name_label ();
@@ -152,7 +158,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void entered () {}
 	virtual void exited () {}
 
-	virtual void set_height (TrackHeight h);
+	virtual void set_height (uint32_t h);
 	void reset_height();
 
 	/**
@@ -222,9 +228,6 @@ class TimeAxisView : public virtual AxisView
 	void set_parent (TimeAxisView& p);
 	bool has_state () const;
 
-	virtual void set_state (const XMLNode&);
-	virtual XMLNode* get_state_node () { return 0; }
-
 	/* call this on the parent */
 
 	virtual XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param) { return 0; }
@@ -232,6 +235,7 @@ class TimeAxisView : public virtual AxisView
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
   protected:
+	uint32_t height;  /* in canvas units */
 
 	string controls_base_unselected_name;
 	string controls_base_selected_name;
@@ -327,10 +331,11 @@ class TimeAxisView : public virtual AxisView
 	static void compute_controls_size_info ();
 	static bool need_size_info;
 
-	void set_heights (TrackHeight);
-	void set_height_pixels (uint32_t h);
+	void set_heights (uint32_t h);
 	void color_handler ();
-	list<ArdourCanvas::SimpleLine*> feature_lines;
+
+
+	std::list<ArdourCanvas::SimpleLine*> feature_lines;
 	ARDOUR::AnalysisFeatureList analysis_features;
 	void reshow_feature_lines ();
 

@@ -1,5 +1,5 @@
 #define _XOPEN_SOURCE 600
-#include <stdlib.h>
+#include <cstdlib>
 #include <stdint.h>
 
 #include <pbd/fpu.h>

@@ -57,16 +57,17 @@ class Send : public IOProcessor
 	int set_state(const XMLNode& node);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
+	void expect_inputs (const ChanCount&);
 
-	virtual bool      can_support_input_configuration (ChanCount in) const;
-	virtual ChanCount output_for_input_configuration (ChanCount in) const;
-	virtual bool      configure_io (ChanCount in, ChanCount out);
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool configure_io (ChanCount in, ChanCount out);
 
 	static uint32_t how_many_sends();
 
   private:
 	bool      _metering;
-	uint32_t bitslot;
+	ChanCount expected_inputs;
+	uint32_t  bitslot;
 };
 
 } // namespace ARDOUR

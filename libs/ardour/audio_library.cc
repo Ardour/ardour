@@ -22,6 +22,7 @@
 #include <libxml/uri.h>
 
 #include <lrdf.h>
+#include <glibmm/miscutils.h>
 
 #include <glibmm/convert.h>
 
@@ -52,6 +53,7 @@ AudioLibrary::AudioLibrary ()
 	
 	// workaround for possible bug in raptor that crashes when saving to a
 	// non-existant file.
+
 	touch_file(sfdb_file_path.to_string());
 
 	lrdf_read_file(src.c_str());

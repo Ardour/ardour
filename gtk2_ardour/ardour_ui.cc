@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
+#include <time.h>
 #include <cerrno>
 #include <fstream>
 
@@ -72,6 +73,8 @@
 #include <ardour/filesystem_paths.h>
 #include <ardour/filename_extensions.h>
 
+typedef uint64_t microseconds_t;
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -88,6 +91,8 @@
 #include "gui_thread.h"
 #include "theme_manager.h"
 #include "bundle_manager.h"
+#include "gain_meter.h"
+#include "route_time_axis.h"
 
 #include "i18n.h"
 
@@ -114,10 +119,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, true),
 	  postroll_clock (X_("postroll"), false, X_("PostRollClock"), true, true),
 
-	  /* adjuster table */
-
-	  adjuster_table (3, 3),
-
 	  /* preroll stuff */
 
 	  preroll_button (_("pre\nroll")),
@@ -129,14 +130,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  /* transport */
 
-	  roll_controllable ("transport roll", *this, TransportControllable::Roll),
-	  stop_controllable ("transport stop", *this, TransportControllable::Stop),
-	  goto_start_controllable ("transport goto start", *this, TransportControllable::GotoStart),
-	  goto_end_controllable ("transport goto end", *this, TransportControllable::GotoEnd),
-	  auto_loop_controllable ("transport auto loop", *this, TransportControllable::AutoLoop),
-	  play_selection_controllable ("transport play selection", *this, TransportControllable::PlaySelection),
-	  rec_controllable ("transport rec-enable", *this, TransportControllable::RecordEnable),
-	  shuttle_controllable ("shuttle", *this, TransportControllable::ShuttleControl),
+	  roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll)),
+	  stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop)),
+	  goto_start_controllable (new TransportControllable ("transport goto start", *this, TransportControllable::GotoStart)),
+	  goto_end_controllable (new TransportControllable ("transport goto end", *this, TransportControllable::GotoEnd)),
+	  auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop)),
+	  play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection)),
+	  rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable)),
+	  shuttle_controllable (new TransportControllable ("shuttle", *this, TransportControllable::ShuttleControl)),
 	  shuttle_controller_binding_proxy (shuttle_controllable),
 
 	  roll_button (roll_controllable),
@@ -210,8 +211,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
 
-	last_configure_time.tv_sec = 0;
-	last_configure_time.tv_usec = 0;
+	last_configure_time= 0;
 
 	shuttle_grabbed = false;
 	shuttle_fract = 0.0;
@@ -220,8 +220,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	shuttle_style_menu = 0;
 	shuttle_unit_menu = 0;
 
-	gettimeofday (&last_peak_grab, 0);
-	gettimeofday (&last_shuttle_request, 0);
+        // We do not have jack linked in yet so;
+        
+	last_shuttle_request = last_peak_grab = 0; //  get_microseconds();
 
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
@@ -248,6 +249,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		setup_gtk_ardour_enums ();
 		Config->set_current_owner (ConfigVariableBase::Interface);
 		setup_profile ();
+
+		GainMeter::setup_slider_pix ();
+		RouteTimeAxisView::setup_slider_pix ();
 
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;
@@ -417,21 +421,15 @@ ARDOUR_UI::pop_back_splash ()
 gint
 ARDOUR_UI::configure_timeout ()
 {
-	struct timeval now;
-	struct timeval diff;
-
-	if (last_configure_time.tv_sec == 0 && last_configure_time.tv_usec == 0) {
+	if (last_configure_time == 0) {
 		/* no configure events yet */
 		return TRUE;
 	}
 
-	gettimeofday (&now, 0);
-	timersub (&now, &last_configure_time, &diff);
-
 	/* force a gap of 0.5 seconds since the last configure event
 	 */
 
-	if (diff.tv_sec == 0 && diff.tv_usec < 500000) {
+	if (get_microseconds() - last_configure_time < 500000) {
 		return TRUE;
 	} else {
 		have_configure_timeout = false;
@@ -444,7 +442,7 @@ gboolean
 ARDOUR_UI::configure_handler (GdkEventConfigure* conf)
 {
 	if (have_configure_timeout) {
-		gettimeofday (&last_configure_time, 0);
+		last_configure_time = get_microseconds();
 	} else {
 		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
 		have_configure_timeout = true;
@@ -459,28 +457,28 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("roll")) != 0) {
-		roll_controllable.set_id (prop->value());
+		roll_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("stop")) != 0) {
-		stop_controllable.set_id (prop->value());
+		stop_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("goto_start")) != 0) {
-		goto_start_controllable.set_id (prop->value());
+		goto_start_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("goto_end")) != 0) {
-		goto_end_controllable.set_id (prop->value());
+		goto_end_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("auto_loop")) != 0) {
-		auto_loop_controllable.set_id (prop->value());
+		auto_loop_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("play_selection")) != 0) {
-		play_selection_controllable.set_id (prop->value());
+		play_selection_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("rec")) != 0) {
-		rec_controllable.set_id (prop->value());
+		rec_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("shuttle")) != 0) {
-		shuttle_controllable.set_id (prop->value());
+		shuttle_controllable->set_id (prop->value());
 	}
 }
 
@@ -490,21 +488,21 @@ ARDOUR_UI::get_transport_controllable_state ()
 	XMLNode* node = new XMLNode(X_("TransportControllables"));
 	char buf[64];
 
-	roll_controllable.id().print (buf, sizeof (buf));
+	roll_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("roll"), buf);
-	stop_controllable.id().print (buf, sizeof (buf));
+	stop_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("stop"), buf);
-	goto_start_controllable.id().print (buf, sizeof (buf));
+	goto_start_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("goto_start"), buf);
-	goto_end_controllable.id().print (buf, sizeof (buf));
+	goto_end_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("goto_end"), buf);
-	auto_loop_controllable.id().print (buf, sizeof (buf));
+	auto_loop_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("auto_loop"), buf);
-	play_selection_controllable.id().print (buf, sizeof (buf));
+	play_selection_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("play_selection"), buf);
-	rec_controllable.id().print (buf, sizeof (buf));
+	rec_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("rec"), buf);
-	shuttle_controllable.id().print (buf, sizeof (buf));
+	shuttle_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("shuttle"), buf);
 
 	return *node;
@@ -544,12 +542,21 @@ ARDOUR_UI::save_ardour_state ()
 gint
 ARDOUR_UI::autosave_session ()
 {
-	if (!Config->get_periodic_safety_backups())
+	if (g_main_depth() > 1) {
+		/* inside a recursive main loop,
+		   give up because we may not be able to 
+		   take a lock.
+		*/
 		return 1;
-
-	if (session) {
-		session->maybe_write_autosave();
 	}
+
+        if (!Config->get_periodic_safety_backups()) {
+                return 1;
+	}
+
+        if (session) {
+                session->maybe_write_autosave();
+        }
 
 	return 1;
 }
@@ -796,8 +803,7 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	prompt_label.set_name (X_("PrompterLabel"));
 	prompt_label.set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
-	dimage->set_alignment(ALIGN_CENTER, ALIGN_TOP)
-;
+	dimage->set_alignment(ALIGN_CENTER, ALIGN_TOP);
 	dhbox.set_homogeneous (false);
 	dhbox.pack_start (*dimage, false, false, 5);
 	dhbox.pack_start (prompt_label, true, false, 5);
@@ -812,9 +818,6 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	prompt_label.show();
 	dimage->show();
 	window.show();
-
-	save_the_session = 0;
-
 	window.set_keep_above (true);
 	window.present ();
 
@@ -1153,33 +1156,6 @@ ARDOUR_UI::open_recent_session ()
 }
 
 bool
-ARDOUR_UI::filter_ardour_session_dirs (const FileFilter::Info& info) 
-{
-	struct stat statbuf;
-
-	if (stat (info.filename.c_str(), &statbuf) != 0) {
-		return false;
-	}
-
-	if (!S_ISDIR(statbuf.st_mode)) {
-		return false;
-	}
-
-        // XXX Portability
-        
-	string session_file = info.filename;
-	session_file += '/';
-	session_file += Glib::path_get_basename (info.filename);
-	session_file += ".ardour";
-	
-	if (stat (session_file.c_str(), &statbuf) != 0) {
-		return false;
-	}
-
-	return S_ISREG (statbuf.st_mode);
-}
-
-bool
 ARDOUR_UI::check_audioengine ()
 {
 	if (engine) {
@@ -1397,6 +1373,34 @@ ARDOUR_UI::transport_goto_zero ()
 		
 		if (editor) {
 			editor->reset_x_origin (0);
+		}
+	}
+}
+
+void
+ARDOUR_UI::transport_goto_wallclock ()
+{
+	if (session && editor) {
+
+		time_t now;
+		struct tm tmnow;
+		nframes64_t frames;
+		
+		time (&now);
+		localtime_r (&now, &tmnow);
+	
+		frames = tmnow.tm_hour * (60 * 60 * session->frame_rate());
+		frames += tmnow.tm_min * (60 * session->frame_rate());
+		frames += tmnow.tm_sec * session->frame_rate();
+
+		session->request_locate (frames);
+
+		/* force displayed area in editor to start no matter
+		   what "follow playhead" setting is.
+		*/
+		
+		if (editor) {
+			editor->reset_x_origin (frames - (editor->current_page_frames()/2));
 		}
 	}
 }
@@ -1917,17 +1921,6 @@ ARDOUR_UI::save_state_canfail (string name)
 }
 
 void
-ARDOUR_UI::restore_state (string name)
-{
-	if (session) {
-		if (name.length() == 0) {
-			name = session->name();
-		}
-		session->restore_state (name);
-	}
-}
-
-void
 ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (session) {
@@ -1948,37 +1941,6 @@ ARDOUR_UI::secondary_clock_value_changed ()
 {
 	if (session) {
 		session->request_locate (secondary_clock.current_time ());
-	}
-}
-
-void
-ARDOUR_UI::rec_enable_button_blink (bool onoff, AudioDiskstream *dstream, Widget *w)
-{
-	if (session && dstream && dstream->record_enabled()) {
-
-		Session::RecordState rs;
-		
-		rs = session->record_status ();
-
-		switch (rs) {
-		case Session::Disabled:
-		case Session::Enabled:
-			if (w->get_state() != STATE_SELECTED) {
-				w->set_state (STATE_SELECTED);
-			}
-			break;
-
-		case Session::Recording:
-			if (w->get_state() != STATE_ACTIVE) {
-				w->set_state (STATE_ACTIVE);
-			}
-			break;
-		}
-
-	} else {
-		if (w->get_state() != STATE_NORMAL) {
-			w->set_state (STATE_NORMAL);
-		}
 	}
 }
 
@@ -2352,10 +2314,13 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 		fontconfig_dialog();
 
 		if (!backend_audio_is_running) {
-			if (new_session_dialog->engine_control.setup_engine ()) {
-				new_session_dialog->hide ();
+			int ret = new_session_dialog->engine_control.setup_engine ();
+			if (ret < 0) {
 				return false;
-			} 
+			} else if (ret > 0) {
+				response = Gtk::RESPONSE_REJECT;
+				goto try_again;
+			}
 		}
 		
 		if (create_engine ()) {
@@ -2459,7 +2424,7 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			}
 		}
 
-	} while (response == Gtk::RESPONSE_NONE);
+	} while (response == Gtk::RESPONSE_NONE || response == Gtk::RESPONSE_REJECT);
 
   done:
 	show();
@@ -2861,8 +2826,11 @@ After cleanup, unused audio files will be moved to a \
 	}
 
 	if (session->cleanup_sources (rep)) {
+		editor->finish_cleanup ();
 		return;
 	}
+	
+	editor->finish_cleanup ();
 
 	checker.hide();
 	display_cleanup_results (rep, 
@@ -2875,8 +2843,6 @@ Flushing the wastebasket will \n\
 release an additional\n\
 %4 %5bytes of disk space.\n"
 					 ));
-
-
 
 }
 
@@ -3024,7 +2990,6 @@ ARDOUR_UI::keyboard_settings () const
 void
 ARDOUR_UI::create_xrun_marker(nframes_t where)
 {
-	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::create_xrun_marker), where));
 	editor->mouse_add_new_marker (where, false, true);
 }
 
@@ -3039,6 +3004,8 @@ ARDOUR_UI::halt_on_xrun_message ()
 void
 ARDOUR_UI::xrun_handler(nframes_t where)
 {
+	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::xrun_handler), where));
+
 	if (Config->get_create_xrun_marker() && session->actively_recording()) {
 		create_xrun_marker(where);
 	}

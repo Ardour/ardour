@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <cstdio> /* for snprintf, grrr */
 
+#include <glibmm/miscutils.h>
+
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 #include <pbd/filesystem.h>
@@ -148,12 +150,10 @@ UIConfiguration::save_state()
 {
 	XMLTree tree;
 
-	try
-	{
+	try {
 		sys::create_directories (user_config_directory ());
 	}
-	catch (const sys::filesystem_error& ex)
-	{
+	catch (const sys::filesystem_error& ex) {
 		error << "Could not create user configuration directory" << endmsg;
 		return -1;
 	}

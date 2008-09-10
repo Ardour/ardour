@@ -5,6 +5,7 @@
 #
 
 import os
+import os.path
 import sys
 import re
 import shutil
@@ -35,7 +36,6 @@ opts.AddOptions(
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
-    BoolOption('NATIVE_OSX_KEYS', 'Build key bindings file that matches OS X conventions', 0),
     BoolOption('OLDFONTS', 'Old school font sizes', 0),
     BoolOption('DEBUG', 'Set to build with debugging information and no optimizations', 0),
     BoolOption('STL_DEBUG', 'Set to build with Standard Template Library Debugging', 0),
@@ -57,7 +57,8 @@ opts.AddOptions(
     BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 0),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
-    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1)
+    BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
+    BoolOption('AUBIO', "Use Paul Brossier's aubio library for feature detection (if available)", 1)
 )
 
 #----------------------------------------------------------------------
@@ -450,7 +451,8 @@ deps = \
 	'raptor'               : '1.4.2',
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.109.0',
-	'libgnomecanvas-2.0'   : '2.0'
+	'libgnomecanvas-2.0'   : '2.0',
+        'aubio'                : '0.3.2'
 }
 
 def DependenciesRequiredMessage():
@@ -522,6 +524,13 @@ if conf.CheckPKGExists ('fftw3f'):
 if conf.CheckPKGExists ('fftw3'):
     libraries['fftw3'] = LibraryInfo()
     libraries['fftw3'].ParseConfig('pkg-config --cflags --libs fftw3')
+
+if conf.CheckPKGExists ('aubio'):
+    libraries['aubio'] = LibraryInfo()
+    libraries['aubio'].ParseConfig('pkg-config --cflags --libs aubio')
+    env['AUBIO'] = 1
+else:
+    env['AUBIO'] = 0
 
 env = conf.Finish ()
 
@@ -828,8 +837,9 @@ def prep_libcheck(topenv, libinfo):
 	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
 	#            All libraries needed should be built against this location
 	if topenv['GTKOSX']:
-		libinfo.Append(CPPPATH="/opt/gtk/include", LIBPATH="/opt/gtk/lib")
-		libinfo.Append(CXXFLAGS="-I/opt/gtk/include", LINKFLAGS="-L/opt/gtk/lib")
+	        gtkroot = os.path.expanduser ("~");
+		libinfo.Append(CPPPATH="$GTKROOT/include", LIBPATH="$GTKROOT/lib")
+		libinfo.Append(CXXFLAGS="-I$GTKROOT/include", LINKFLAGS="-L$GTKROOT/lib")
 	libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
 	libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
@@ -921,7 +931,7 @@ prep_libcheck(env, libraries['boost'])
 libraries['boost'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
 conf = Configure (libraries['boost'])
 if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
-        print "Boost header files do not appear to be installed."
+        print "Boost header files do not appear to be installed. You also might be running a buggy version of scons. Try scons 0.97 if you can."
         sys.exit (1)
     
 libraries['boost'] = conf.Finish ()
@@ -1081,7 +1091,8 @@ if env['SYSLIBS']:
                                             CPPPATH='#libs/appleutility')
     
     coredirs = [
-        'templates'
+        'templates',
+        'manual'
     ]
     
     subdirs = [
@@ -1155,7 +1166,8 @@ else:
                                             CPPPATH='#libs/appleutility')
 
     coredirs = [
-        'templates'
+        'templates',
+	'manual'
     ]
     
     subdirs = [

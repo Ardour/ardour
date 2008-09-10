@@ -55,33 +55,29 @@ namespace Gtk {
 	class Menu;
 }
 
-class GainMeter : public Gtk::VBox
+class GainMeterBase : virtual public sigc::trackable
 {
   public:
-	GainMeter (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&);
-	~GainMeter ();
+	GainMeterBase (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,
+		       bool horizontal);
+	virtual ~GainMeterBase ();
 
 	void update_gain_sensitive ();
-
 	void update_meters ();
 
 	void effective_gain_display ();
-
 	void set_width (Width, int len=0);
-	void setup_meters (int len=0);
-
-	int get_gm_width ();
-
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
 
-	/* should probably switch to using the shared_ptr that underlies
-	   all this stuff
-	*/
+	virtual void setup_meters (int len=0);
 
-	PBD::Controllable* get_controllable() { return _io->gain_control().get(); }
+	boost::shared_ptr<PBD::Controllable> get_controllable() { return _io->gain_control(); }
 
-  private:
+	LevelMeter& get_level_meter() const { return *level_meter; }
+	Gtkmm2ext::SliderController& get_gain_slider() const { return *gain_slider; }
+
+  protected:
 
 	friend class MixerStrip;
 	boost::shared_ptr<ARDOUR::IO> _io;
@@ -90,14 +86,12 @@ class GainMeter : public Gtk::VBox
 	bool ignore_toggle;
 	bool next_release_selects;
 
-	Gtkmm2ext::VSliderController *gain_slider;
+	Gtkmm2ext::SliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
 	Gtkmm2ext::FocusEntry        gain_display;
 	Gtk::Button                  peak_display;
-	Gtk::HBox                    gain_display_box;
-	Gtk::HBox                    fader_box;
 	Gtk::DrawingArea             meter_metric_area;
-	LevelMeter					 *level_meter;
+	LevelMeter		    *level_meter;
 
 	sigc::connection gain_watching;
 
@@ -125,27 +119,19 @@ class GainMeter : public Gtk::VBox
 
 	Width _width;
 
-	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
-	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget&);
-
-	gint meter_metrics_expose (GdkEventExpose *);
-
 	void show_gain ();
 	void gain_activated ();
 	bool gain_focused (GdkEventFocus*);
 
 	float       max_peak;
 	
-	Gtk::VBox*   fader_vbox;
-	Gtk::HBox   hbox;
-
 	void gain_adjusted ();
 	void gain_changed ();
 	
 	void meter_point_clicked ();
 	void gain_unit_changed ();
 	
-	void hide_all_meters ();
+	virtual void hide_all_meters ();
 
 	gint meter_button_press (GdkEventButton*, uint32_t);
 
@@ -173,15 +159,39 @@ class GainMeter : public Gtk::VBox
 	static sigc::signal<void> ResetAllPeakDisplays;
 	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 
-	static Glib::RefPtr<Gdk::Pixbuf> slider;
-	static Glib::RefPtr<Gdk::Pixbuf> rail;
-	static int setup_slider_pix ();
-
 	void on_theme_changed ();
 	bool style_changed;
 	bool dpi_changed;
 	bool color_changed;
 	void color_handler(bool);
+};
+
+class GainMeter : public GainMeterBase, public Gtk::VBox
+{
+  public:
+	GainMeter (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&);
+	~GainMeter () {}
+
+	int get_gm_width ();
+	void setup_meters (int len=0);
+
+	static void setup_slider_pix ();
+
+  protected:
+	void hide_all_meters ();
+
+	gint meter_metrics_expose (GdkEventExpose *);
+
+	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
+	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget&);
+
+  private:
+	Gtk::HBox  gain_display_box;
+	Gtk::HBox  fader_box;
+	Gtk::VBox* fader_vbox;
+	Gtk::HBox  hbox;
+
+	static Glib::RefPtr<Gdk::Pixbuf> slider;
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */

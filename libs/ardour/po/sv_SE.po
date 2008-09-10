@@ -1972,6 +1972,10 @@ msgstr "Fogredigering"
 msgid "Slide Edit"
 msgstr "Glidredigering"
 
+#: libs/ardour/utils.cc:372 libs/ardour/utils.cc:388
+msgid "Lock Edit"
+msgstr "Låst redigering"
+
 #: libs/ardour/utils.cc:309
 msgid "programming error: unknown edit mode string \"%1\""
 msgstr ""

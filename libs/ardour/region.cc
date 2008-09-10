@@ -185,6 +185,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 		_sync_position = other->_sync_position;
 	}
 
+
 	for (SourceList::const_iterator i = other->_master_sources.begin(); i != other->_master_sources.end(); ++i) {
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
 			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), (*i)));
@@ -388,6 +389,7 @@ Region::set_name (const std::string& str)
 void
 Region::set_length (nframes_t len, void *src)
 {
+	//cerr << "Region::set_length() len = " << len << endl;
 	if (_flags & Locked) {
 		return;
 	}

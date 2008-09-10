@@ -59,6 +59,7 @@
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/configuration.h>
+#include <ardour/types.h>
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"
@@ -152,7 +153,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	int  save_state_canfail (string state_name = "");
 	void save_state (const string & state_name = "");
-	void restore_state (string state_name = "");
 
 	static double gain_to_slider_position (ARDOUR::gain_t g);
 	static ARDOUR::gain_t slider_position_to_gain (double pos);
@@ -180,12 +180,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
 	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
-
-	/* this is a helper function to centralize the (complex) logic for
-	   blinking rec-enable buttons.
-	*/
-
-	void rec_enable_button_blink (bool onoff, ARDOUR::AudioDiskstream *, Gtk::Widget *w);
 
 	void name_io_setup (ARDOUR::AudioEngine&, string&, ARDOUR::IO& io, bool in);
 
@@ -309,9 +303,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::ToggleButton   preroll_button;
 	Gtk::ToggleButton   postroll_button;
 
-	Gtk::Table          transport_table;
-	Gtk::Table          option_table;
-
 	int  setup_windows ();
 	void setup_transport ();
 	void setup_clock ();
@@ -324,7 +315,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void finish();
 	int  ask_about_saving_session (const string & why);
-	int  save_the_session;
 
 	/* periodic safety backup, to be precise */
 	gint autosave_session();
@@ -361,8 +351,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void manage_window (Gtk::Window&);
 
 	AudioClock   big_clock;
-	Gtk::Frame   big_clock_frame;
 	Gtk::Window* big_clock_window;
+
+	void float_big_clock (Gtk::Window* parent);
+	bool main_window_state_event_handler (GdkEventWindowState*, bool window_was_editor);
 
 	void update_transport_clocks (nframes_t pos);
 	void record_state_changed ();
@@ -412,14 +404,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	    ToggleType type;
 	};
 
-	TransportControllable roll_controllable;
-	TransportControllable stop_controllable;
-	TransportControllable goto_start_controllable;
-	TransportControllable goto_end_controllable;
-	TransportControllable auto_loop_controllable;
-	TransportControllable play_selection_controllable;
-	TransportControllable rec_controllable;
-	TransportControllable shuttle_controllable;
+	boost::shared_ptr<TransportControllable> roll_controllable;
+	boost::shared_ptr<TransportControllable> stop_controllable;
+	boost::shared_ptr<TransportControllable> goto_start_controllable;
+	boost::shared_ptr<TransportControllable> goto_end_controllable;
+	boost::shared_ptr<TransportControllable> auto_loop_controllable;
+	boost::shared_ptr<TransportControllable> play_selection_controllable;
+	boost::shared_ptr<TransportControllable> rec_controllable;
+	boost::shared_ptr<TransportControllable> shuttle_controllable;
 	BindingProxy shuttle_controller_binding_proxy;
 
 	void set_transport_controllable_state (const XMLNode&);
@@ -589,6 +581,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_goto_zero ();
 	void transport_goto_start ();
 	void transport_goto_end ();
+	void transport_goto_wallclock ();
 	void transport_stop ();
 	void transport_stop_and_forget_capture ();
 	void transport_record (bool roll);
@@ -675,11 +668,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void flush_trash ();
 
 	bool have_configure_timeout;
-	struct timeval last_configure_time;
+	ARDOUR::microseconds_t last_configure_time;
 	gint configure_timeout ();
 
-	struct timeval last_peak_grab;
-	struct timeval last_shuttle_request;
+	ARDOUR::microseconds_t last_peak_grab;
+	ARDOUR::microseconds_t last_shuttle_request;
 
 	bool have_disk_speed_dialog_displayed;
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
@@ -697,9 +690,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
 	Gtk::Menu*     jack_bufsize_menu;
-
-	int make_session_clean ();
-	bool filter_ardour_session_dirs (const Gtk::FileFilter::Info&);
 
 	Glib::RefPtr<Gtk::ActionGroup> common_actions;
 
@@ -742,6 +732,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_ShowTrackMeters ();
 	void toggle_only_copy_imported_files ();
 	void toggle_use_narrow_ms();
+	void toggle_NameNewMarkers ();
 	void toggle_rubberbanding_snaps_to_grid ();
 	void toggle_auto_analyse_audio ();
 	void toggle_TapeMachineMode();

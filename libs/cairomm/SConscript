@@ -8,7 +8,7 @@ cairomm_files = glob.glob('cairomm/*.cc')
 
 Import('env libraries install_prefix')
 
-cairomm = env.Copy()
+cairomm = env.Clone()
 cairomm.Merge([libraries['cairo']])
 
 cairomm.Append(CXXFLAGS='-DHAVE_CONFIG_H')

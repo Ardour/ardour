@@ -272,3 +272,16 @@ Processor::set_state (const XMLNode& node)
 	return 0;
 }
 
+bool
+Processor::configure_io (ChanCount in, ChanCount out)
+{
+	/* this class assumes static output stream count.
+	   Derived classes must override, and must set "out"
+	   to reflect "in" before calling this.
+	*/
+
+	_configured_input = in; 
+	_configured = true;
+
+	return true;
+}

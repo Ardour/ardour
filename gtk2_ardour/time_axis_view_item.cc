@@ -70,9 +70,9 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
  * @param duration the duration of this item
  */
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color& base_color, 
-				   nframes_t start, nframes_t duration,
+				   nframes_t start, nframes_t duration, bool recording,
 				   Visibility vis)
-	: trackview (tv)
+	: trackview (tv), _recregion(recording)
 {
 	if (!have_name_font) {
 
@@ -151,7 +151,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	vestigial_frame->property_x1() = (double) 0.0;
 	vestigial_frame->property_y1() = (double) 1.0;
 	vestigial_frame->property_x2() = 2.0;
-	vestigial_frame->property_y2() = (double) trackview.height;
+	vestigial_frame->property_y2() = (double) trackview.current_height();
 	vestigial_frame->property_outline_what() = 0xF;
 	vestigial_frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
 	vestigial_frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
@@ -162,7 +162,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame->property_x1() = (double) 0.0;
 		frame->property_y1() = (double) 1.0;
 		frame->property_x2() = (double) trackview.editor.frame_to_pixel(duration);
-		frame->property_y2() = (double) trackview.height;
+		frame->property_y2() = (double) trackview.current_height();
 		frame->property_outline_what() = 0xF;
 		frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
@@ -198,8 +198,8 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 			name_highlight->property_x1() = (double) 1.0;
 			name_highlight->property_x2() = (double) (trackview.editor.frame_to_pixel(item_duration)) - 1;
 		}
-		name_highlight->property_y1() = (double) (trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
-		name_highlight->property_y2() = (double) (trackview.height - 1);
+		name_highlight->property_y1() = (double) (trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
+		name_highlight->property_y2() = (double) (trackview.current_height() - 1);
 		name_highlight->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_NameHighlightFill.get();
 		name_highlight->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_NameHighlightOutline.get();
 
@@ -212,10 +212,10 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (*group);
 		name_text->property_x() = (double) TimeAxisViewItem::NAME_X_OFFSET;
-		/* trackview.height is the bottom of the trackview. subtract 1 to get back to the bottom of the highlight,
+		/* trackview.current_height() is the bottom of the trackview. subtract 1 to get back to the bottom of the highlight,
 		   then NAME_Y_OFFSET to position the text in the vertical center of the highlight
 		*/
-		name_text->property_y() = (double) trackview.height - 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
+		name_text->property_y() = (double) trackview.current_height() - 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
 		name_text->property_font_desc() = *NAME_FONT;
 		name_text->property_anchor() = Gtk::ANCHOR_NW;
 
@@ -804,8 +804,13 @@ TimeAxisViewItem::set_frame_color()
 			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), &r, &g, &b, &a);
 			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
 		} else {
-			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
-			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
+			if (_recregion) {
+				UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_RecordingRect.get(), &r, &g, &b, &a);
+				frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
+			} else {
+				UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
+				frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+			}
 		}
 	}
 }
@@ -1049,3 +1054,4 @@ TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 	item = 0;
 	return false;
 }
+

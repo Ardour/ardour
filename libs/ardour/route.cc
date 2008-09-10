@@ -813,7 +813,7 @@ Route::set_mute (bool yn, void *src)
 int
 Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
 {
-	ChanCount old_rmo = processor_max_outs;
+	ChanCount old_pmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -827,8 +827,15 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 
 		//processor->set_default_type(_default_type);
 
+		_processors.push_back (processor);
+
+		if (_reset_processor_counts (err)) {
+			_processors.pop_back ();
+			_reset_processor_counts (0); // it worked before we tried to add it ...
+			return -1;
+		}
+
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
-			pi->set_count (1);
 			
 			if (pi->natural_input_streams() == ChanCount::ZERO) {
 				/* generator plugin */
@@ -841,15 +848,22 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
-		if (_reset_plugin_counts (err)) {
+		if (_reset_processor_counts (err)) {
 			_processors.pop_back ();
-			_reset_plugin_counts (0); // it worked before we tried to add it ...
+			_reset_processor_counts (0); // it worked before we tried to add it ...
 			return -1;
 		}
 
 		// Ensure peak vector sizes before the plugin is activated
-		ChanCount potential_max_streams = max(processor->input_streams(), processor->output_streams());
-		_meter->configure_io(potential_max_streams, potential_max_streams);
+
+		ChanCount potential_max_streams;
+
+		potential_max_streams.set (DataType::AUDIO, max (processor->input_streams().n_audio(), 
+								 processor->output_streams().n_audio()));
+		potential_max_streams.set (DataType::MIDI, max (processor->input_streams().n_midi(), 
+								processor->output_streams().n_midi()));
+
+		_meter->configure_io (potential_max_streams, potential_max_streams);
 
 		processor->activate ();
 		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
@@ -857,7 +871,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 		_user_latency = 0;
 	}
 	
-	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (processor_max_outs != old_pmo || old_pmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -869,7 +883,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 int
 Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 {
-	ChanCount old_rmo = processor_max_outs;
+	ChanCount old_pmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -896,14 +910,14 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 			}
 
 			// Ensure peak vector sizes before the plugin is activated
-			_meter->configure_io(potential_max_streams, potential_max_streams);
+			_meter->configure_io (potential_max_streams, potential_max_streams);
 
 			_processors.push_back (*i);
 			
-			if (_reset_plugin_counts (err)) {
+			if (_reset_processor_counts (err)) {
 				++existing_end;
 				_processors.erase (existing_end, _processors.end());
-				_reset_plugin_counts (0); // it worked before we tried to add it ...
+				_reset_processor_counts (0); // it worked before we tried to add it ...
 				return -1;
 			}
 			
@@ -914,7 +928,7 @@ Route::add_processors (const ProcessorList& others, ProcessorStreams* err)
 		_user_latency = 0;
 	}
 	
-	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (processor_max_outs != old_pmo || old_pmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -1064,7 +1078,7 @@ Route::pre_fader_streams() const
 void
 Route::clear_processors (Placement p)
 {
-	const ChanCount old_rmo = processor_max_outs;
+	const ChanCount old_pmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return;
@@ -1088,7 +1102,7 @@ Route::clear_processors (Placement p)
 	}
 
 	/* FIXME: can't see how this test can ever fire */
-	if (processor_max_outs != old_rmo) {
+	if (processor_max_outs != old_pmo) {
 		reset_panner ();
 	}
 	
@@ -1100,7 +1114,7 @@ Route::clear_processors (Placement p)
 int
 Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err)
 {
-	ChanCount old_rmo = processor_max_outs;
+	ChanCount old_pmo = processor_max_outs;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -1118,7 +1132,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 				ProcessorList::iterator tmp;
 
-				/* move along, see failure case for reset_plugin_counts()
+				/* move along, see failure case for reset_processor_counts()
 				   where we may need to reprocessor the processor.
 				*/
 
@@ -1152,30 +1166,29 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			return 1;
 		}
 
-		if (_reset_plugin_counts (err)) {
+		if (_reset_processor_counts (err)) {
 			/* get back to where we where */
 			_processors.insert (i, processor);
 			/* we know this will work, because it worked before :) */
-			_reset_plugin_counts (0);
+			_reset_processor_counts (0);
 			return -1;
 		}
 
-		bool foo = false;
+		_have_internal_generator = false;
 
 		for (i = _processors.begin(); i != _processors.end(); ++i) {
 			boost::shared_ptr<PluginInsert> pi;
 			
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->is_generator()) {
-					foo = true;
+					_have_internal_generator = true;
+					break;
 				}
 			}
 		}
-
-		_have_internal_generator = foo;
 	}
 
-	if (old_rmo != processor_max_outs) {
+	if (old_pmo != processor_max_outs) {
 		reset_panner ();
 	}
 
@@ -1186,27 +1199,32 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 }
 
 int
-Route::reset_plugin_counts (ProcessorStreams* err)
+Route::reset_processor_counts (ProcessorStreams* err)
 {
 	Glib::RWLock::WriterLock lm (_processor_lock);
-	return _reset_plugin_counts (err);
+	return _reset_processor_counts (err);
 }
 
 
 int
-Route::_reset_plugin_counts (ProcessorStreams* err)
+Route::_reset_processor_counts (ProcessorStreams* err)
 {
 	ProcessorList::iterator r;
-	map<Placement,list<ProcessorCount> > processor_map;
-	ChanCount initial_streams;
-	ChanCount post_fader_input;
+	uint32_t insert_cnt = 0;
+	uint32_t send_cnt = 0;
+	map<Placement,list<ProcessorCount> > proc_map;
+	ProcessorList::iterator prev;
+	ChanCount initial_streams = n_inputs ();
+	ChanCount previous_initial_streams = n_inputs ();
 	int ret = -1;
+	uint32_t max_audio = 0;
+	uint32_t max_midi = 0;
 
-	/* Process each placement in order, checking to see if we 
-	   can really do what has been requested.
-	*/
+	processor_max_outs.reset ();
 	
-	/* divide processors up by placement so we get the signal flow
+	/* Step 1: build a map that links each insert to an in/out channel count 
+
+	   Divide inserts up by placement so we get the signal flow
 	   properly modelled. we need to do this because the _processors
 	   list is not sorted by placement, and because other reasons may 
 	   exist now or in the future for this separate treatment.
@@ -1216,60 +1234,146 @@ Route::_reset_plugin_counts (ProcessorStreams* err)
 	
 	for (r = _processors.begin(); r != _processors.end(); ++r) {
 
-		boost::shared_ptr<Processor> processor;
+		boost::shared_ptr<PluginInsert> plugin_insert;
+		boost::shared_ptr<PortInsert> port_insert;
 
-		if ((processor = boost::dynamic_pointer_cast<Processor>(*r)) != 0) {
-			processor_map[processor->placement()].push_back (ProcessorCount (processor));
+		if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert>(*r)) != 0) {
+
+			++insert_cnt;
+			proc_map[(*r)->placement()].push_back (ProcessorCount (*r));
+
+			/* reset plugin counts back to one for now so
+			   that we have a predictable, controlled
+			   state to try to configure.
+			*/
+
+			plugin_insert->set_count (1);
+
+		} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert>(*r)) != 0) {
+			
+			++insert_cnt;
+			proc_map[(*r)->placement()].push_back (ProcessorCount (*r));
+
+		} else if (boost::dynamic_pointer_cast<Send> (*r) != 0) {
+			++send_cnt;
 		}
 	}
 	
+	if (insert_cnt == 0) {
+		if (send_cnt) {
+			goto recompute;
+		} else {
+			ret = 0;
+			goto streamcount;
+		}
+	}
+
+	/* Now process each placement in order, checking to see if we 
+	   can really do what has been requested.
+	*/
+
 	/* A: PreFader */
 	
-	if ( ! check_some_plugin_counts (processor_map[PreFader], n_inputs (), err)) {
+	if (check_some_processor_counts (proc_map[PreFader], n_inputs (), err)) {
 		goto streamcount;
 	}
 
-	post_fader_input = (err ? err->count : n_inputs());
+	if (!proc_map[PreFader].empty()) {
+		previous_initial_streams = n_inputs ();
+		for (list<ProcessorCount>::iterator i = proc_map[PreFader].begin(); i != proc_map[PreFader].end(); i++) {
+			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) < 0) {
+				goto streamcount;
+			}
+			previous_initial_streams = initial_streams;
+		}
+	}
 
 	/* B: PostFader */
 
-	if ( ! check_some_plugin_counts (processor_map[PostFader], post_fader_input, err)) {
+	if (check_some_processor_counts (proc_map[PostFader], initial_streams, err)) {
 		goto streamcount;
+	}
+
+	if (!proc_map[PostFader].empty()) {
+		for (list<ProcessorCount>::iterator i = proc_map[PostFader].begin(); i != proc_map[PostFader].end(); i++) {
+			if (i->processor->can_support_io_configuration (previous_initial_streams, initial_streams) < 0) {
+				goto streamcount;
+			}
+			previous_initial_streams = initial_streams;
+		}
 	}
 
 	/* OK, everything can be set up correctly, so lets do it */
 
-	apply_some_plugin_counts (processor_map[PreFader]);
-	apply_some_plugin_counts (processor_map[PostFader]);
+	apply_some_processor_counts (proc_map[PreFader]);
+	apply_some_processor_counts (proc_map[PostFader]);
 
 	/* recompute max outs of any processor */
 
 	ret = 0;
 
-  streamcount:
-	processor_max_outs.reset();
+  recompute:
 
-	for (r = _processors.begin(); r != _processors.end(); ++r) {
-		processor_max_outs = max ((*r)->output_streams (), processor_max_outs);
+	processor_max_outs.reset ();
+	prev = _processors.end();
+
+	for (r = _processors.begin(); r != _processors.end(); prev = r, ++r) {
+		boost::shared_ptr<Send> s;
+
+		if ((s = boost::dynamic_pointer_cast<Send> (*r)) != 0) {
+			if (r == _processors.begin()) {
+				s->expect_inputs (n_inputs());
+			} else {
+				s->expect_inputs ((*prev)->output_streams());
+			}
+
+		} else {
+			
+			/* don't pay any attention to send output configuration, since it doesn't
+			   affect the route.
+			 */
+			
+			max_audio = max ((*r)->output_streams ().n_audio(), max_audio);
+			max_midi = max ((*r)->output_streams ().n_midi(), max_midi);
+		}
 	}
 
+	processor_max_outs.set (DataType::AUDIO, max_audio);
+	processor_max_outs.set (DataType::MIDI, max_midi);
+			
+	/* we're done */
 	return 0;
+
+  streamcount:
+	for (r = _processors.begin(); r != _processors.end(); ++r) {
+		max_audio = max ((*r)->output_streams ().n_audio(), max_audio);
+		max_midi = max ((*r)->output_streams ().n_midi(), max_midi);
+	}
+
+	processor_max_outs.set (DataType::AUDIO, max_audio);
+	processor_max_outs.set (DataType::MIDI, max_midi);
+
+	return ret;
 }				   
 
 int32_t
-Route::apply_some_plugin_counts (list<ProcessorCount>& iclist)
+Route::apply_some_processor_counts (list<ProcessorCount>& iclist)
 {
 	list<ProcessorCount>::iterator i;
-
+	
 	for (i = iclist.begin(); i != iclist.end(); ++i) {
-		
-		cerr << "now applying for " << (*i).processor->name() << " in = " << (*i).in.n_audio() << " out = " << (*i).out.n_audio() << endl;
 
-		if ((*i).processor->configure_io ((*i).in, (*i).out)) {
+		ProcessorCount& pc (*i);
+
+		cerr << "now applying for " << (*i).processor->name() << " in = " << pc.in.n_audio() << " out = " << pc.out.n_audio() << endl;
+
+		if (pc.processor->configure_io (pc.in, pc.out)) {
 			return -1;
 		}
+
 		/* make sure that however many we have, they are all active */
-		(*i).processor->activate ();
+
+		pc.processor->activate ();
 	}
 
 	return 0;
@@ -1281,7 +1385,7 @@ Route::apply_some_plugin_counts (list<ProcessorCount>& iclist)
  * Otherwise, \a err is set to the output of the list.
  */
 bool
-Route::check_some_plugin_counts (list<ProcessorCount>& iclist, ChanCount required_inputs, ProcessorStreams* err)
+Route::check_some_processor_counts (list<ProcessorCount>& iclist, ChanCount required_inputs, ProcessorStreams* err)
 {
 	list<ProcessorCount>::iterator i;
 	size_t index = 0;
@@ -1291,12 +1395,11 @@ Route::check_some_plugin_counts (list<ProcessorCount>& iclist, ChanCount require
 		err->count = required_inputs;
 	}
 
-	for (i = iclist.begin(); i != iclist.end(); ++i) {
-
+	for (i = iclist.begin(); i != iclist.end(); ++i, ++index) {
 
 		cerr << "Checking whether " << (*i).processor->name() << " can support " << required_inputs.n_audio() << " inputs\n";
 
-		if ((*i).processor->can_support_input_configuration (required_inputs) < 0) {
+		if (!(*i).processor->can_support_io_configuration (required_inputs, (*i).out)) {
 			if (err) {
 				err->index = index;
 				err->count = required_inputs;
@@ -1305,20 +1408,7 @@ Route::check_some_plugin_counts (list<ProcessorCount>& iclist, ChanCount require
 		}
 		
 		(*i).in = required_inputs;
-		(*i).out = (*i).processor->output_for_input_configuration (required_inputs);
-
-		cerr << "config looks like " << (*i).processor->name() << " in = " << (*i).in.n_audio() << " out = " << (*i).out.n_audio() << endl;
-
 		required_inputs = (*i).out;
-		
-		++index;
-	}
-			
-	if (err) {
-		if (!iclist.empty()) {
-			err->index = index;
-			err->count = iclist.back().processor->output_for_input_configuration(required_inputs);
-		}
 	}
 
 	return true;
@@ -1327,7 +1417,7 @@ Route::check_some_plugin_counts (list<ProcessorCount>& iclist, ChanCount require
 int
 Route::copy_processors (const Route& other, Placement placement, ProcessorStreams* err)
 {
-	ChanCount old_rmo = processor_max_outs;
+	ChanCount old_pmo = processor_max_outs;
 
 	ProcessorList to_be_deleted;
 
@@ -1362,7 +1452,7 @@ Route::copy_processors (const Route& other, Placement placement, ProcessorStream
 
 		/* reset plugin stream handling */
 
-		if (_reset_plugin_counts (err)) {
+		if (_reset_processor_counts (err)) {
 
 			/* FAILED COPY ATTEMPT: we have to restore order */
 
@@ -1383,7 +1473,7 @@ Route::copy_processors (const Route& other, Placement placement, ProcessorStream
 			/* restore the natural order */
 
 			_processors = the_copy;
-			processor_max_outs = old_rmo;
+			processor_max_outs = old_pmo;
 
 			/* we failed, even though things are OK again */
 
@@ -1397,7 +1487,7 @@ Route::copy_processors (const Route& other, Placement placement, ProcessorStream
 		}
 	}
 
-	if (processor_max_outs != old_rmo || old_rmo == ChanCount::ZERO) {
+	if (processor_max_outs != old_pmo || old_pmo == ChanCount::ZERO) {
 		reset_panner ();
 	}
 
@@ -1457,7 +1547,7 @@ Route::sort_processors (ProcessorStreams* err)
 	{
 		ProcessorSorter comparator;
 		Glib::RWLock::WriterLock lm (_processor_lock);
-		ChanCount old_rmo = processor_max_outs;
+		ChanCount old_pmo = processor_max_outs;
 
 		/* the sweet power of C++ ... */
 
@@ -1465,9 +1555,9 @@ Route::sort_processors (ProcessorStreams* err)
 
 		_processors.sort (comparator);
 	
-		if (_reset_plugin_counts (err)) {
+		if (_reset_processor_counts (err)) {
 			_processors = as_it_was_before;
-			processor_max_outs = old_rmo;
+			processor_max_outs = old_pmo;
 			return -1;
 		} 
 	} 
@@ -2334,7 +2424,7 @@ void
 Route::input_change_handler (IOChange change, void *ignored)
 {
 	if (change & ConfigurationChanged) {
-		reset_plugin_counts (0);
+		reset_processor_counts (0);
 	}
 }
 
@@ -2346,7 +2436,7 @@ Route::output_change_handler (IOChange change, void *ignored)
 			_control_outs->ensure_io (ChanCount::ZERO, ChanCount(DataType::AUDIO, n_outputs().n_audio()), true, this);
 		}
 		
-		reset_plugin_counts (0);
+		reset_processor_counts (0);
 	}
 }
 
@@ -2540,6 +2630,11 @@ Route::update_total_latency ()
 		}
 	}
 
+#undef DEBUG_LATENCY
+#ifdef DEBUG_LATENCY
+	cerr << _name << ": internal redirect latency = " << _own_latency << endl;
+#endif
+
 	set_port_latency (_own_latency);
 	
 	if (!_user_latency) {
@@ -2558,6 +2653,11 @@ Route::update_total_latency ()
 		signal_latency_changed (); /* EMIT SIGNAL */
 	}
 	
+#ifdef DEBUG_LATENCY
+	cerr << _name << ": input latency = " << input_latency() << " total = "
+	     << _own_latency << endl;
+#endif
+
 	return _own_latency;
 }
 

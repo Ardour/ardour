@@ -136,9 +136,9 @@ class Editor : public PublicEditor
 	void             first_idle ();
 	virtual bool have_idled() const { return _have_idled; }
 
-	nframes_t leftmost_position() const { return leftmost_frame; }
-	nframes_t current_page_frames() const {
-		return (nframes_t) floor (canvas_width * frames_per_unit);
+	nframes64_t leftmost_position() const { return leftmost_frame; }
+	nframes64_t current_page_frames() const {
+		return (nframes64_t) floor (canvas_width * frames_per_unit);
 	}
 
 	void cycle_snap_mode ();
@@ -170,6 +170,7 @@ class Editor : public PublicEditor
 
 	TimeAxisView* get_named_time_axis(const std::string & name) ;
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
+	void add_to_idle_resize (TimeAxisView*, uint32_t);
 
 	RouteTimeAxisView* get_route_view_by_id (PBD::ID& id);
 
@@ -204,11 +205,11 @@ class Editor : public PublicEditor
 
 	/* undo related */
 
-	nframes_t unit_to_frame (double unit) const {
-		return (nframes_t) rint (unit * frames_per_unit);
+	nframes64_t unit_to_frame (double unit) const {
+		return (nframes64_t) rint (unit * frames_per_unit);
 	}
 	
-	double frame_to_unit (nframes_t frame) const {
+	double frame_to_unit (nframes64_t frame) const {
 		return rint ((double) frame / (double) frames_per_unit);
 	}
 
@@ -232,7 +233,7 @@ class Editor : public PublicEditor
 		*/
 
 		if (pixel >= 0) {
-			return (nframes_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit);
+			return (nframes64_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit);
 		} else {
 			return 0;
 		}
@@ -304,7 +305,7 @@ class Editor : public PublicEditor
 	void show_editor_mixer (bool yn);
 	void show_editor_list (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
-	void hide_track_in_display (TimeAxisView& tv);
+	void hide_track_in_display (TimeAxisView& tv, bool temporary = false);
 	void show_track_in_display (TimeAxisView& tv);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
@@ -370,13 +371,14 @@ class Editor : public PublicEditor
 
 	bool new_regionviews_display_gain () { return _new_regionviews_show_envelope; }
 	void prepare_for_cleanup ();
+	void finish_cleanup ();
 
 	void maximise_editing_space();
 	void restore_editing_space();
 
-	void reset_x_origin (nframes_t);
+	void reset_x_origin (nframes64_t);
 	void reset_zoom (double);
-	void reposition_and_zoom (nframes_t, double);
+	void reposition_and_zoom (nframes64_t, double);
 
 	nframes64_t get_preferred_edit_position (bool ignore_playhead = false);
 
@@ -387,11 +389,19 @@ class Editor : public PublicEditor
 
 	void show_rhythm_ferret();
 
+	void goto_visual_state (uint32_t);
+	void save_visual_state (uint32_t);
+
+	void queue_draw_resize_line (int at);
+	void start_resize_line_ops ();
+	void end_resize_line_ops ();
+
   protected:
 	void map_transport_state ();
-	void map_position_change (nframes_t);
+	void map_position_change (nframes64_t);
 
 	void on_realize();
+	bool on_expose_event (GdkEventExpose*);
 
   private:
 
@@ -401,25 +411,41 @@ class Editor : public PublicEditor
 	bool                 constructed;
 
 	// to keep track of the playhead position for control_scroll
-	boost::optional<nframes_t> _control_scroll_target;
+	boost::optional<nframes64_t> _control_scroll_target;
  
 	PlaylistSelector* _playlist_selector;
 
+	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
+
 	struct VisualState {
-	    double    frames_per_unit;
-	    nframes_t leftmost_frame;
-	    Editing::ZoomFocus zoom_focus;
+	    double              y_position;
+	    double              frames_per_unit;
+	    nframes64_t         leftmost_frame;
+	    Editing::ZoomFocus  zoom_focus;
+	    bool                zoomed_to_region;
+	    std::list<TAVState> track_states;
 	};
 	
-	VisualState last_visual_state;
+	std::list<VisualState*> undo_visual_stack;
+	std::list<VisualState*> redo_visual_stack;
+	VisualState* current_visual_state (bool with_tracks = true);
+	void undo_visual_state ();
+	void redo_visual_state ();
+	void use_visual_state (VisualState&);
+	bool no_save_visual;
+	void swap_visual_state ();
+	
+	std::vector<VisualState*> visual_states;
+	sigc::connection visual_state_op_connection;
+	void start_visual_state_op (uint32_t n);
+	void cancel_visual_state_op (uint32_t n);
+	bool end_visual_state_op (uint32_t n);
 
-	nframes_t   leftmost_frame;
+	nframes64_t leftmost_frame;
 	double      frames_per_unit;
 	Editing::ZoomFocus zoom_focus;
 
-	void use_visual_state (const VisualState&);
 	void set_frames_per_unit (double);
-	void swap_visual_state ();
 	void post_zoom ();
 
 	Editing::MouseMode mouse_mode;
@@ -469,7 +495,7 @@ class Editor : public PublicEditor
 	    void hide();
 	    void show ();
 	    void set_name (const string&);
-	    void set_position (nframes_t start, nframes_t end = 0);
+	    void set_position (nframes64_t start, nframes64_t end = 0);
 	    void set_color_rgba (uint32_t);
 	};
 
@@ -482,7 +508,8 @@ class Editor : public PublicEditor
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_marker (nframes_t where, bool is_cd=false, bool is_xrun=false);
+	void mouse_add_new_marker (nframes64_t where, bool is_cd=false, bool is_xrun=false);
+	bool choose_new_marker_name(string &name);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 
@@ -542,12 +569,12 @@ class Editor : public PublicEditor
 	Gtk::Menu * track_edit_playlist_submenu;
 	Gtk::Menu * track_selection_edit_playlist_submenu;
 
-	void popup_track_context_menu (int, int, ItemType, bool, nframes_t);
-	Gtk::Menu* build_track_context_menu (nframes_t);
-	Gtk::Menu* build_track_bus_context_menu (nframes_t);
-	Gtk::Menu* build_track_region_context_menu (nframes_t frame);
-	Gtk::Menu* build_track_crossfade_context_menu (nframes_t);
-	Gtk::Menu* build_track_selection_context_menu (nframes_t);
+	void popup_track_context_menu (int, int, ItemType, bool, nframes64_t);
+	Gtk::Menu* build_track_context_menu (nframes64_t);
+	Gtk::Menu* build_track_bus_context_menu (nframes64_t);
+	Gtk::Menu* build_track_region_context_menu (nframes64_t frame);
+	Gtk::Menu* build_track_crossfade_context_menu (nframes64_t);
+	Gtk::Menu* build_track_selection_context_menu (nframes64_t);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_region_context_items (StreamView*, boost::shared_ptr<ARDOUR::Region>, Gtk::Menu_Helpers::MenuList&);
@@ -563,6 +590,10 @@ class Editor : public PublicEditor
 	Gtk::HBox           global_hpacker;
 	Gtk::VBox           global_vpacker;
 	Gtk::VBox           vpacker;
+
+	bool need_resize_line;
+	int  resize_line_y;
+	int  old_resize_line_y;
 
 	Gdk::Cursor*          current_canvas_cursor;
 	void set_canvas_cursor ();
@@ -643,7 +674,7 @@ class Editor : public PublicEditor
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
 	void update_tempo_based_rulers (); 
-	void popup_ruler_menu (nframes_t where = 0, ItemType type = RegionItem);
+	void popup_ruler_menu (nframes64_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
 	void toggle_ruler_visibility (RulerType rt);
@@ -704,7 +735,7 @@ class Editor : public PublicEditor
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-	void compute_bbt_ruler_scale (nframes_t lower, nframes_t upper);
+	void compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper);
 
 	gint metric_get_smpte (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
@@ -752,13 +783,13 @@ class Editor : public PublicEditor
 	    Editor&               editor;
 	    ArdourCanvas::Points  points;
 	    ArdourCanvas::Line    canvas_item;
-	    nframes_t        current_frame;
+	    nframes64_t           current_frame;
 	    double		  length;
 
 	    Cursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	    ~Cursor ();
 
-	    void set_position (nframes_t);
+	    void set_position (nframes64_t);
 	    void set_length (double units);
 	    void set_y_axis (double position);
 	};
@@ -793,13 +824,11 @@ class Editor : public PublicEditor
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes64_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
 	nframes64_t find_next_region_boundary (nframes64_t, int32_t dir, const TrackViewList&);
 
-	vector<nframes_t> region_boundary_cache;
+	vector<nframes64_t> region_boundary_cache;
 	void build_region_boundary_cache ();
-
-	Gtk::VBox           trackview_vpacker;
 
 	Gtk::HBox           top_hbox;
 	Gtk::HBox           bottom_hbox;
@@ -826,7 +855,7 @@ class Editor : public PublicEditor
 	double canvas_width;
 	double canvas_height;
 	double full_canvas_height;
-	nframes_t last_canvas_frame;
+	nframes64_t last_canvas_frame;
 
 	bool track_canvas_map_handler (GdkEventAny*);
 	bool time_canvas_map_handler (GdkEventAny*);
@@ -841,7 +870,8 @@ class Editor : public PublicEditor
 	Gtk::HBox           edit_controls_hbox;
 
 	void control_scroll (float);
-	bool deferred_control_scroll (nframes_t);
+	void access_action (std::string,std::string);
+	bool deferred_control_scroll (nframes64_t);
 	sigc::connection control_scroll_connection;
 
 	void tie_vertical_scrolling ();
@@ -855,7 +885,7 @@ class Editor : public PublicEditor
 	    };
 
 	    Type pending;
-	    nframes_t time_origin;
+	    nframes64_t time_origin;
 	    double frames_per_unit;
 
 	    int idle_handler_id;
@@ -869,7 +899,7 @@ class Editor : public PublicEditor
 	static int _idle_visual_changer (void *arg);
 	int idle_visual_changer ();
 
-	void queue_visual_change (nframes_t);
+	void queue_visual_change (nframes64_t);
 	void queue_visual_change (double);
 
 	void end_location_changed (ARDOUR::Location*);
@@ -999,16 +1029,16 @@ class Editor : public PublicEditor
 	static void build_cursors ();
 
 	sigc::connection scroll_connection;
-	nframes_t last_update_frame;
-	void center_screen (nframes_t);
-	void center_screen_internal (nframes_t, float);
+	nframes64_t last_update_frame;
+	void center_screen (nframes64_t);
+	void center_screen_internal (nframes64_t, float);
 	
 	void update_current_screen ();
 	
 	void session_going_away ();
 
-	nframes_t cut_buffer_start;
-	nframes_t cut_buffer_length;
+	nframes64_t cut_buffer_start;
+	nframes64_t cut_buffer_length;
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
@@ -1021,7 +1051,7 @@ class Editor : public PublicEditor
 
 	void register_actions ();
 
-	int ensure_cursor (nframes_t* pos);
+	int ensure_cursor (nframes64_t* pos);
 
 	void handle_new_region (boost::weak_ptr<ARDOUR::Region>);
 	void handle_new_regions (vector<boost::weak_ptr<ARDOUR::Region> >& );
@@ -1030,6 +1060,7 @@ class Editor : public PublicEditor
 	void add_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::Region> > & );
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
+	bool no_region_list_redisplay;
 	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
 
 	list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
@@ -1041,7 +1072,7 @@ class Editor : public PublicEditor
 	void cut_copy_ranges (Editing::CutCopyOp);
 
 	void mouse_paste ();
-	void paste_internal (nframes_t position, float times);
+	void paste_internal (nframes64_t position, float times);
 
 	/* EDITING OPERATIONS */
 	
@@ -1055,19 +1086,19 @@ class Editor : public PublicEditor
 	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_region ();
-	void split_region_at (nframes_t);
-	void split_regions_at (nframes_t, RegionSelection&);
+	void split_region_at (nframes64_t);
+	void split_regions_at (nframes64_t, RegionSelection&);
 	void split_region_at_transients ();
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret);
 	void crop_region_to_selection ();
-	void crop_region_to (nframes_t start, nframes_t end);
+	void crop_region_to (nframes64_t start, nframes64_t end);
 	void set_sync_point (nframes64_t, const RegionSelection&);
 	void set_region_sync_from_edit_point ();
 	void remove_region_sync();
-	void align_selection (ARDOUR::RegionPoint, nframes_t position, const RegionSelection&);
-	void align_selection_relative (ARDOUR::RegionPoint point, nframes_t position, const RegionSelection&);
-	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
-	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes_t position);
+	void align_selection (ARDOUR::RegionPoint, nframes64_t position, const RegionSelection&);
+	void align_selection_relative (ARDOUR::RegionPoint point, nframes64_t position, const RegionSelection&);
+	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes64_t position);
+	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes64_t position);
 	void remove_selected_regions ();
 	void remove_clicked_region ();
 	void edit_region ();
@@ -1087,7 +1118,7 @@ class Editor : public PublicEditor
 	void quantize_region ();
 
 	void do_insert_time ();
-	void insert_time (nframes64_t pos, nframes64_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue);
+	void insert_time (nframes64_t pos, nframes64_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too);
 
 	void tab_to_transient (bool forward);
 
@@ -1130,13 +1161,13 @@ class Editor : public PublicEditor
 	void loop_location (ARDOUR::Location&);
 
 	void temporal_zoom_selection ();
-	void temporal_zoom_region ();
-	void toggle_zoom_region ();
+	void temporal_zoom_region (bool both_axes);
+	void toggle_zoom_region (bool both_axes);
 	bool zoomed_to_region;
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
-	void temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & op);
-	void temporal_zoom_to_frame (bool coarser, nframes_t frame);
+	void temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string & op);
+	void temporal_zoom_to_frame (bool coarser, nframes64_t frame);
 
 	void amplitude_zoom (gdouble scale);
 	void amplitude_zoom_step (bool in);
@@ -1259,8 +1290,8 @@ class Editor : public PublicEditor
 	void set_loop_from_region (bool play);
 	void set_punch_from_edit_range ();
 
-	void set_loop_range (nframes_t start, nframes_t end, std::string cmd);
-	void set_punch_range (nframes_t start, nframes_t end, std::string cmd);
+	void set_loop_range (nframes64_t start, nframes64_t end, std::string cmd);
+	void set_punch_range (nframes64_t start, nframes64_t end, std::string cmd);
 
 	void add_location_from_playhead_cursor ();
 	bool select_new_marker;
@@ -1281,7 +1312,7 @@ class Editor : public PublicEditor
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
 	bool have_pending_keyboard_selection;
-	nframes_t pending_keyboard_selection_start;
+	nframes64_t pending_keyboard_selection_start;
 
 	boost::shared_ptr<ARDOUR::Region> select_region_for_operation (int dir, TimeAxisView **tv);
 	void extend_selection_to_end_of_region (bool next);
@@ -1375,11 +1406,11 @@ class Editor : public PublicEditor
 	void remove_gain_control_point (ArdourCanvas::Item*, GdkEvent*);
 	void remove_control_point (ArdourCanvas::Item*, GdkEvent*);
 
-	void mouse_brush_insert_region (RegionView*, nframes_t pos);
-	void brush (nframes_t);
+	void mouse_brush_insert_region (RegionView*, nframes64_t pos);
+	void brush (nframes64_t);
 
-	void show_verbose_time_cursor (nframes_t frame, double offset = 0, double xpos=-1, double ypos=-1);
-	void show_verbose_duration_cursor (nframes_t start, nframes_t end, double offset = 0, double xpos=-1, double ypos=-1);
+	void show_verbose_time_cursor (nframes64_t frame, double offset = 0, double xpos=-1, double ypos=-1);
+	void show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double offset = 0, double xpos=-1, double ypos=-1);
 	double clamp_verbose_cursor_x (double);
 	double clamp_verbose_cursor_y (double);
 
@@ -1486,8 +1517,8 @@ public:
 
 	void new_tempo_section ();
 
-	void mouse_add_new_tempo_event (nframes_t where);
-	void mouse_add_new_meter_event (nframes_t where);
+	void mouse_add_new_tempo_event (nframes64_t where);
+	void mouse_add_new_meter_event (nframes64_t where);
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
@@ -1513,6 +1544,8 @@ public:
 	void marker_menu_set_playhead ();
 	void marker_menu_set_from_playhead ();
 	void marker_menu_set_from_selection ();
+	void marker_menu_range_to_next ();
+	void marker_menu_export_range ();
 	void new_transport_marker_menu_set_loop ();
 	void new_transport_marker_menu_set_punch ();
 	void update_loop_range_view (bool visibility=false);
@@ -1548,14 +1581,8 @@ public:
 	void redisplay_tempo (bool immediate_redraw);
 	
 	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
-	void snap_to (nframes_t& first, int32_t direction = 0, bool for_mark = false) {
-		/* XXX remove this function when everything moves to 64 bit frame counts */
-		nframes64_t first64 = first;
-		snap_to (first64, direction, for_mark);
-		first = (nframes_t) first64;
-	}
 	
-	double snap_length_beats (nframes_t start);
+	double snap_length_beats (nframes64_t start);
 
 	uint32_t bbt_beat_subdivision;
 
@@ -1690,7 +1717,7 @@ public:
 	void region_selection_op (void (ARDOUR::Region::*pmf)(void*), void*);
 	void region_selection_op (void (ARDOUR::Region::*pmf)(bool), bool);
 
-	bool audio_region_selection_covers (nframes_t where);
+	bool audio_region_selection_covers (nframes64_t where);
 
 	/* transport range select process */
 	enum RangeMarkerOp {
@@ -1733,7 +1760,7 @@ public:
 	void drag_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 	void end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event);
 
-	bool select_all_within (nframes_t start, nframes_t end, gdouble topy, gdouble boty, const TrackViewList&, Selection::Operation op);
+	bool select_all_within (nframes64_t start, nframes64_t end, gdouble topy, gdouble boty, const TrackViewList&, Selection::Operation op);
 	
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 	
@@ -1744,7 +1771,7 @@ public:
 	void end_mouse_zoom (ArdourCanvas::Item* item, GdkEvent* event);
 
 	ArdourCanvas::SimpleRect   *zoom_rect;
-	void reposition_zoom_rect (nframes_t start, nframes_t end);
+	void reposition_zoom_rect (nframes64_t start, nframes64_t end);
 	
 	/* diskstream/route display management */
 
@@ -1752,11 +1779,13 @@ public:
 	    RouteDisplayModelColumns() { 
 		    add (text);
 		    add (visible);
+		    add (temporary_visible);
 		    add (tv);
 		    add (route);
 	    }
 	    Gtk::TreeModelColumn<Glib::ustring>  text;
 	    Gtk::TreeModelColumn<bool>           visible;
+	    Gtk::TreeModelColumn<bool>           temporary_visible;
 	    Gtk::TreeModelColumn<TimeAxisView*>  tv;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
 	};
@@ -1768,6 +1797,8 @@ public:
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > route_list_display; 
 	Gtk::ScrolledWindow                   route_list_scroller;
 	Gtk::Menu*                            route_list_menu;
+
+	void update_route_visibility ();
 
 	void sync_order_keys ();
 	bool ignore_route_order_sync;
@@ -1854,7 +1885,7 @@ public:
 	int last_autoscroll_x;
 	int last_autoscroll_y;
 	uint32_t autoscroll_cnt;
-	nframes_t autoscroll_x_distance;
+	nframes64_t autoscroll_x_distance;
 	double autoscroll_y_distance;
      
 	static gint _autoscroll_canvas (void *);
@@ -1862,6 +1893,7 @@ public:
 	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
 	void maybe_autoscroll (GdkEventMotion*);
+	bool allow_vertical_scroll;
 
 	/* trimming */
 	enum TrimOp {
@@ -1873,9 +1905,9 @@ public:
 	void start_trim (ArdourCanvas::Item*, GdkEvent*);
 	void point_trim (GdkEvent*);
 	void trim_motion_callback (ArdourCanvas::Item*, GdkEvent*);
-	void single_contents_trim (RegionView&, nframes_t, bool, bool, bool);
-	void single_start_trim (RegionView&, nframes_t, bool, bool);
-	void single_end_trim (RegionView&, nframes_t, bool, bool);
+	void single_contents_trim (RegionView&, nframes64_t, bool, bool, bool);
+	void single_start_trim (RegionView&, nframes64_t, bool, bool);
+	void single_end_trim (RegionView&, nframes64_t, bool, bool);
 
 	void trim_finished_callback (ArdourCanvas::Item*, GdkEvent*);
 	void thaw_region_after_trim (RegionView& rv);
@@ -1943,14 +1975,14 @@ public:
 	ExportDialog *export_dialog;
 	ExportDialog *export_range_markers_dialog;
 	
-	void export_range (nframes_t start, nframes_t end);
+	void export_range (nframes64_t start, nframes64_t end);
 	void export_range_markers ();
 
 	int  write_region_selection(RegionSelection&);
 	bool write_region (string path, boost::shared_ptr<ARDOUR::AudioRegion>);
 	void export_region ();
 	void bounce_region_selection ();
-	void bounce_range_selection ();
+	void bounce_range_selection (bool replace);
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);
@@ -1966,12 +1998,6 @@ public:
 
 	void begin_reversible_command (string cmd_name);
 	void commit_reversible_command ();
-
-	/* visual history */
-
-	UndoHistory visual_history;
-	UndoTransaction current_visual_command;
-
 
 	void update_title ();	
 	void update_title_s (const string & snapshot_name);
@@ -2151,7 +2177,7 @@ public:
 	Gtk::VBox        nudge_vbox;
 	AudioClock       nudge_clock;
 
-	nframes_t get_nudge_distance (nframes_t pos, nframes_t& next);
+	nframes64_t get_nudge_distance (nframes64_t pos, nframes64_t& next);
 
 	bool nudge_forward_release (GdkEventButton*);
 	bool nudge_backward_release (GdkEventButton*);
@@ -2169,7 +2195,7 @@ public:
 	/* tracking step changes of track height */
 
 	TimeAxisView* current_stepping_trackview;
-	struct timeval last_track_height_step_timestamp;
+	ARDOUR::microseconds_t last_track_height_step_timestamp;
 	gint track_height_step_timeout();
 	sigc::connection step_timeout;
 
@@ -2240,7 +2266,8 @@ public:
 
 	RhythmFerret* rhythm_ferret;
 
-	void set_track_height (TimeAxisView::TrackHeight h);
+	void fit_tracks ();
+	void set_track_height (uint32_t h);
 	void set_track_height_largest ();
 	void set_track_height_large ();
 	void set_track_height_larger ();
@@ -2253,6 +2280,11 @@ public:
 	void waveform_scale_chosen (Editing::WaveformScale);
 
 	bool _have_idled;
+	int resize_idle_id;
+	int32_t resize_idle_target;
+	bool idle_resize();
+	friend gboolean _idle_resize (gpointer);
+	std::vector<TimeAxisView*> pending_resizes;
 };
 
 #endif /* __ardour_editor_h__ */

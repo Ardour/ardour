@@ -72,7 +72,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 {
 	boost::shared_ptr<const AudioRegion> ar;
 	boost::shared_ptr<const MidiRegion> mr;
-	
+
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 		boost::shared_ptr<Region> ret (new AudioRegion (ar));
 		/* pure copy constructor - no CheckNewRegion emitted */
@@ -101,7 +101,11 @@ boost::shared_ptr<Region>
 RegionFactory::create (Session& session, XMLNode& node, bool yn)
 {
 	boost::shared_ptr<Region> r = session.XMLRegionFactory (node, yn);
-	CheckNewRegion (r);
+
+	if (r) {
+		CheckNewRegion (r);
+	}
+
 	return r;
 }
 	

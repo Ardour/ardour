@@ -22,6 +22,7 @@
 
 #include <glib.h>  
 #include <glib/gstdio.h> /* for g_stat() */
+#include <glibmm/miscutils.h>
 
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>

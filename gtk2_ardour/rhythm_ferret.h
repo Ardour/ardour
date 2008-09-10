@@ -71,6 +71,9 @@ class RhythmFerret : public ArdourDialog {
 	Gtk::VBox ferret_packer;
 	Gtk::ComboBoxText analysis_mode_selector;
 	Gtk::Label analysis_mode_label;
+
+	/* transient detection widgets */
+
 	Gtk::Adjustment detection_threshold_adjustment;
 	Gtk::HScale detection_threshold_scale;
 	Gtk::Label detection_threshold_label;
@@ -78,22 +81,44 @@ class RhythmFerret : public ArdourDialog {
 	Gtk::HScale sensitivity_scale;
 	Gtk::Label sensitivity_label;
 	Gtk::Button analyze_button;
+	Gtk::VBox perc_onset_packer;
+
+	/* onset detection widgets */
+
+	Gtk::ComboBoxText onset_detection_function_selector;
+	Gtk::Label onset_function_label;
+	Gtk::Adjustment peak_picker_threshold_adjustment;
+	Gtk::HScale peak_picker_threshold_scale;
+	Gtk::Label peak_picker_label;
+	Gtk::Adjustment silence_threshold_adjustment;
+	Gtk::HScale silence_threshold_scale;
+	Gtk::Label silence_label;
+	Gtk::VBox note_onset_packer;
+
+	/* generic stuff */
+
 	Gtk::Adjustment trigger_gap_adjustment;
 	Gtk::SpinButton trigger_gap_spinner;
 	Gtk::Label trigger_gap_label;
+
+	Gtk::VBox analysis_packer;
 
 	Gtk::Label operation_clarification_label;
 	Gtk::Button action_button;
 
 	std::vector<std::string> analysis_mode_strings;
+	std::vector<std::string> onset_function_strings;
 
 	ARDOUR::AnalysisFeatureList current_results;
 
 	AnalysisMode get_analysis_mode () const;
 	Action get_action() const;
+	void analysis_mode_changed ();
+	int get_note_onset_function ();
 
 	void run_analysis ();
 	int run_percussion_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, nframes64_t offset, ARDOUR::AnalysisFeatureList& results);
+	int run_note_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, nframes64_t offset, ARDOUR::AnalysisFeatureList& results);
 
 	void do_action ();
 	void do_split_action ();

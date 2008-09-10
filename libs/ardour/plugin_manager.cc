@@ -24,12 +24,16 @@
 #include <cstdio>
 #include <lrdf.h>
 #include <dlfcn.h>
+#include <cstdlib>
+#include <fstream>
 
 #ifdef VST_SUPPORT
 #include <fst.h>
 #include <pbd/basename.h>
-#include <string.h>
+#include <cstring>
 #endif // VST_SUPPORT
+
+#include <glibmm/miscutils.h>
 
 #include <pbd/pathscanner.h>
 
@@ -38,6 +42,7 @@
 #include <ardour/plugin_manager.h>
 #include <ardour/plugin.h>
 #include <ardour/ladspa_plugin.h>
+#include <ardour/filesystem_paths.h>
 
 #ifdef HAVE_SLV2
 #include <slv2/slv2.h>
@@ -50,6 +55,7 @@
 
 #ifdef HAVE_AUDIOUNITS
 #include <ardour/audio_unit.h>
+#include <Carbon/Carbon.h>
 #endif
 
 #include <pbd/error.h>
@@ -59,6 +65,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace std;
 
 PluginManager* PluginManager::_manager = 0;
 
@@ -66,6 +73,16 @@ PluginManager::PluginManager ()
 {
 	char* s;
 	string lrdf_path;
+
+	load_favorites ();
+
+#ifdef GTKOSX
+	ProcessSerialNumber psn = { 0, kCurrentProcess }; 
+	OSStatus returnCode = TransformProcessType(& psn, kProcessTransformToForegroundApplication);
+	if( returnCode != 0) {
+		error << _("Cannot become GUI app") << endmsg;
+	}
+#endif
 
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
@@ -487,3 +504,107 @@ PluginManager::vst_discover (string path)
 }
 
 #endif // VST_SUPPORT
+
+bool
+PluginManager::is_a_favorite_plugin (const PluginInfoPtr& pi)
+{
+	FavoritePlugin fp (pi->type, pi->unique_id);
+	return find (favorites.begin(), favorites.end(), fp) !=  favorites.end();
+}
+
+void
+PluginManager::save_favorites ()
+{
+	ofstream ofs;
+	sys::path path = user_config_directory();
+	path /= "favorite_plugins";
+
+	ofs.open (path.to_string().c_str(), ios_base::openmode (ios::out|ios::trunc));
+
+	if (!ofs) {
+		return;
+	}
+
+	for (FavoritePluginList::iterator i = favorites.begin(); i != favorites.end(); ++i) {
+		switch ((*i).type) {
+		case LADSPA:
+			ofs << "LADSPA";
+			break;
+		case AudioUnit:
+			ofs << "AudioUnit";
+			break;
+		case LV2:
+			ofs << "LV2";
+			break;
+		case VST:
+			ofs << "VST";
+			break;
+		}
+		
+		ofs << ' ' << (*i).unique_id << endl;
+	}
+
+	ofs.close ();
+}
+
+void
+PluginManager::load_favorites ()
+{
+	sys::path path = user_config_directory();
+	path /= "favorite_plugins";
+	ifstream ifs (path.to_string().c_str());
+
+	if (!ifs) {
+		return;
+	}
+	
+	std::string stype;
+	std::string id;
+	PluginType type;
+
+	while (ifs) {
+
+		ifs >> stype;
+		if (!ifs) {
+			break;
+
+		}
+		ifs >> id;
+		if (!ifs) {
+			break;
+		}
+
+		if (stype == "LADSPA") {
+			type = LADSPA;
+		} else if (stype == "AudioUnit") {
+			type = AudioUnit;
+		} else if (stype == "LV2") {
+			type = LV2;
+		} else if (stype == "VST") {
+			type = VST;
+		} else {
+			error << string_compose (_("unknown favorite plugin type \"%1\" - ignored"), stype)
+			      << endmsg;
+			continue;
+		}
+		
+		add_favorite (type, id);
+	}
+	
+	ifs.close ();
+}
+
+void
+PluginManager::add_favorite (PluginType t, string id)
+{
+	FavoritePlugin fp (t, id);
+	pair<FavoritePluginList::iterator,bool> res = favorites.insert (fp);
+	cerr << "Added " << t << " " << id << " success ? " << res.second << endl;
+}
+
+void
+PluginManager::remove_favorite (PluginType t, string id)
+{
+	FavoritePlugin fp (t, id);
+	favorites.erase (fp);
+}

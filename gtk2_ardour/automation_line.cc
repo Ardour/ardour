@@ -154,17 +154,17 @@ AutomationLine::control_point_box_size ()
 }
 
 void
-AutomationLine::set_y_position_and_height (guint32 y, guint32 h)
+AutomationLine::set_y_position_and_height (double y, double h)
 {
 	bool changed = false;
 	
 	if (y != _y_position) {
-		_y_position = y;
+		_y_position = (guint32) floor (y);
 		changed = true;
 	}
 		
 	if (h != _height) {
-		_height = h;
+		_height = (guint32) floor (h);
 
 		double const bsz = control_point_box_size();
 

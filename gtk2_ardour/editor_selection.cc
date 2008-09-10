@@ -18,7 +18,7 @@
 */
 
 #include <algorithm>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <pbd/stacktrace.h>
 
@@ -235,7 +235,7 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool no_
 	/* select this point and any others that it represents */
 
 	double y1, y2;
-	nframes_t x1, x2;
+	nframes64_t x1, x2;
 
 	x1 = pixel_to_frame (clicked_control_point->get_x() - 10);
 	x2 = pixel_to_frame (clicked_control_point->get_x() + 10);
@@ -449,8 +449,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	} else if (op == Selection::Extend) {
 
 		list<Selectable*> results;
-		nframes_t last_frame;
-		nframes_t first_frame;
+		nframes64_t last_frame;
+		nframes64_t first_frame;
 		bool same_track = false;
 
 		/* 1. find the last selected regionview in the track that was clicked in */
@@ -909,7 +909,7 @@ Editor::invert_selection ()
 }
 
 bool
-Editor::select_all_within (nframes_t start, nframes_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
+Editor::select_all_within (nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
 {
 	list<Selectable*> touched;
 	list<Selectable*>::size_type n = 0;
@@ -1029,8 +1029,8 @@ Editor::select_all_selectables_using_time_selection ()
 		return;
 	}
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 
 	if (end - start < 1)  {
 		return;
@@ -1122,8 +1122,8 @@ Editor::select_all_selectables_using_loop()
 void
 Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 {
-        nframes_t start;
-	nframes_t end;
+        nframes64_t start;
+	nframes64_t end;
 	list<Selectable *> touched;
 
 	if (after) {
@@ -1162,8 +1162,8 @@ Editor::select_all_selectables_using_cursor (Cursor *cursor, bool after)
 void
 Editor::select_all_selectables_using_edit (bool after)
 {
-        nframes_t start;
-	nframes_t end;
+        nframes64_t start;
+	nframes64_t end;
 	list<Selectable *> touched;
 
 	if (after) {

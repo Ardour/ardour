@@ -279,7 +279,6 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	bool realtime = false;
 	bool precise = false;
 	bool peaklock = true;
-	bool softening = true;
 	bool longwin = false;
 	bool shortwin = false;
 	string txt;
@@ -314,7 +313,6 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	if (realtime)    options |= RubberBandStretcher::OptionProcessRealTime;
 	if (precise)     options |= RubberBandStretcher::OptionStretchPrecise;
 	if (!peaklock)   options |= RubberBandStretcher::OptionPhaseIndependent;
-	if (!softening)  options |= RubberBandStretcher::OptionPhasePeakLocked;
 	if (longwin)     options |= RubberBandStretcher::OptionWindowLong;
 	if (shortwin)    options |= RubberBandStretcher::OptionWindowShort;
 		

@@ -6,8 +6,8 @@ import glob
 
 Import('env install_prefix final_prefix config_prefix libraries i18n ardour_version')
 
-gtkardour = env.Copy()
-gtkmmtests = env.Copy()
+gtkardour = env.Clone()
+gtkmmtests = env.Clone()
 
 #
 # this defines the version number of the GTK interface to ardour
@@ -409,7 +409,7 @@ my_subst_dict = { }
 
 keybindings_dict = { }
 
-if gtkardour['GTKOSX'] and gtkardour['NATIVE_OSX_KEYS']:
+if gtkardour['GTKOSX']:
 	#
 	# Command(Meta), Alt(Mod1), Ctrl, Shift
 	# **** as of february 4th 2008, OUR VERSION OF *****
@@ -486,6 +486,7 @@ env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), 'SAE-de
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3'), 'splash.png'))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3', 'pixmaps'), pixmap_files))
 env.Alias('install', env.Install(os.path.join(install_prefix, 'share', 'ardour3', 'icons'), icon_files))
+env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], []))
 env.Alias ('version', gtkardour.VersionBuild(['version.cc','version.h'], []))
 
 # This will install icons and MIME type as per freedesktop.org specs. #

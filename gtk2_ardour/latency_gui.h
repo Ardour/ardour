@@ -35,7 +35,7 @@ class LatencyGUI : public Gtk::VBox
 	nframes64_t initial_value;
 	nframes64_t sample_rate;
 	nframes64_t period_size;
-	PBD::IgnorableControllable ignored;
+	boost::shared_ptr<PBD::IgnorableControllable> ignored;
 
 	Gtk::Adjustment adjustment;
 	Gtkmm2ext::BarController bc;

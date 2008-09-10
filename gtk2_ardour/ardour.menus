@@ -56,7 +56,6 @@
                <menuitem action='TransitionToReverse'/>
 	       <separator/>
 
-              
 	       <menu action="MovePlayHeadMenu">
 		   <menuitem action='set-playhead'/>
                    <menuitem action='playhead-to-edit'/>
@@ -82,6 +81,8 @@
 		   <menuitem action='GotoZero'/>
 		   <menuitem action='GotoStart'/>
 		   <menuitem action='GotoEnd'/>
+		   <menuitem action='GotoWallClock'/>
+
 	       </menu>
 
 	       <menu action="MoveActiveMarkMenu">
@@ -251,6 +252,14 @@
 	</menu>
 
         <menu name='View' action = 'View'>
+	       <menu action="ZoomMenu">
+               	     <menuitem action='temporal-zoom-in'/>
+               	     <menuitem action='temporal-zoom-out'/>
+               	     <menuitem action='zoom-to-session'/>
+               	     <menuitem action='zoom-to-region'/>
+               	     <menuitem action='zoom-to-region-both-axes'/>
+               	     <menuitem action='toggle-zoom'/>
+	       </menu>
                <menu name='ZoomFocus' action='ZoomFocus'>
                    <menuitem action='zoom-focus-left'/>
                    <menuitem action='zoom-focus-right'/>
@@ -325,18 +334,37 @@
 	       	     <menuitem action="toggle-cd-marker-ruler"/>
 	       	     <menuitem action="toggle-marker-ruler"/>
 	       </menu>
-	       <menu action="ZoomMenu">
-               	     <menuitem action='temporal-zoom-in'/>
-               	     <menuitem action='temporal-zoom-out'/>
-               	     <menuitem action='zoom-to-session'/>
-               	     <menuitem action='zoom-to-region'/>
-               	     <menuitem action='toggle-zoom'/>
-	       </menu>
 	       <menu action="ScrollMenu">
                	     <menuitem action='scroll-tracks-down'/>
                	     <menuitem action='scroll-tracks-up'/>
                	     <menuitem action='scroll-forward'/>
                	     <menuitem action='scroll-backward'/>
+	       </menu>
+	       <menu action="SavedViewMenu">
+               	     <menuitem action='save-visual-state-1'/>
+               	     <menuitem action='goto-visual-state-1'/>
+               	     <menuitem action='save-visual-state-2'/>
+               	     <menuitem action='goto-visual-state-2'/>
+               	     <menuitem action='save-visual-state-3'/>
+               	     <menuitem action='goto-visual-state-3'/>
+               	     <menuitem action='save-visual-state-4'/>
+               	     <menuitem action='goto-visual-state-4'/>
+               	     <menuitem action='save-visual-state-5'/>
+               	     <menuitem action='goto-visual-state-5'/>
+               	     <menuitem action='save-visual-state-6'/>
+               	     <menuitem action='goto-visual-state-6'/>
+               	     <menuitem action='save-visual-state-7'/>
+               	     <menuitem action='goto-visual-state-7'/>
+               	     <menuitem action='save-visual-state-8'/>
+               	     <menuitem action='goto-visual-state-8'/>
+               	     <menuitem action='save-visual-state-9'/>
+               	     <menuitem action='goto-visual-state-9'/>
+               	     <menuitem action='save-visual-state-10'/>
+               	     <menuitem action='goto-visual-state-10'/>
+               	     <menuitem action='save-visual-state-11'/>
+               	     <menuitem action='goto-visual-state-11'/>
+               	     <menuitem action='save-visual-state-12'/>
+               	     <menuitem action='goto-visual-state-12'/>
 	       </menu>
 
 	       <menuitem action='ToggleMaximalEditor'/>
@@ -450,6 +478,7 @@
                	   <menuitem action='ToggleTapeMachineMode'/>
                </menu>
 	       <menu action='Metering'>
+			<menuitem action='ShowTrackMeters'/>
                    <menu action='MeteringFallOffRate'>
 		        <menuitem action='MeterFalloffOff'/>
    		        <menuitem action='MeterFalloffSlowest'/>
@@ -536,7 +565,7 @@
 	   <menuitem action="toggle-loop-punch-ruler"/>
      </popup>
 
-     <popup name='processormenu'>
+     <popup name='redirectmenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>

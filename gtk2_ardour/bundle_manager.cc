@@ -61,7 +61,7 @@ BundleEditorMatrix::get_state (int r, std::string const & p) const
 uint32_t
 BundleEditorMatrix::n_rows () const
 {
-	return _bundle->nchannels ();
+	return _bundle->nchannels ().n_total();
 }
 
 uint32_t

@@ -55,7 +55,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-/* XXX this is a hack. it ought to be the maximum value of an nframes_t */
+/* XXX this is a hack. it ought to be the maximum value of an nframes64_t */
 
 const double max_canvas_coordinate = (double) JACK_MAX_FRAMES;
 
@@ -181,7 +181,6 @@ Editor::initialize_canvas ()
 	
 	marker_time_line_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, 0.0);
 	marker_tempo_lines = new TempoLines(*time_canvas, marker_time_line_group);
-	
 	meter_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, 0.0);
 	tempo_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height);
 	range_marker_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height * 2.0);
@@ -190,23 +189,27 @@ Editor::initialize_canvas ()
 	cd_marker_group = new ArdourCanvas::Group (*time_canvas->root(), 0.0, timebar_height * 5.0);
 	
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 	tempo_bar->property_outline_pixels() = 1;
 
-	
 	meter_bar = new ArdourCanvas::SimpleRect (*meter_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 	meter_bar->property_outline_pixels() = 1;
 	
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 1;
 
 	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
 	cd_marker_bar->property_outline_pixels() = 1;
 	
 	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
 	range_marker_bar->property_outline_pixels() = 1;
 	
@@ -220,7 +223,7 @@ Editor::initialize_canvas ()
 
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	range_bar_drag_rect->property_outline_pixels() = 0;
-	
+
 	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	transport_bar_drag_rect->property_outline_pixels() = 0;
 	transport_bar_drag_rect->hide ();
@@ -343,7 +346,7 @@ Editor::track_canvas_size_allocated ()
 		full_canvas_height = height;
 	}
 
-	zoom_range_clock.set ((nframes_t) floor ((canvas_width * frames_per_unit)));
+	zoom_range_clock.set ((nframes64_t) floor ((canvas_width * frames_per_unit)));
 	playhead_cursor->set_position (playhead_cursor->current_frame);
 
 	reset_hscrollbar_stepping ();
@@ -391,7 +394,7 @@ Editor::reset_scrolling_region (Gtk::Allocation* alloc)
 	}
 
 	double last_canvas_unit =  max ((last_canvas_frame / frames_per_unit), canvas_width);
-
+	//cerr << "Editor::reset_scrolling_region () lcf:fpu:cw:lcu " << last_canvas_frame << ":" << frames_per_unit << ":" << canvas_width << ":" << last_canvas_unit << endl;//DEBUG
 	track_canvas->set_scroll_region (0.0, 0.0, last_canvas_unit, pos);
 
 	// XXX what is the correct height value for the time canvas ? this overstates it
@@ -521,6 +524,8 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 		/* drop onto canvas background: create new tracks */
 
+		frame = 0;
+
 		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
 			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame); 
 		} else {
@@ -587,8 +592,8 @@ Editor::drop_routes (const Glib::RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (GdkEventMotion* event)
 {
-	nframes_t rightmost_frame = leftmost_frame + current_page_frames();
-	nframes_t frame = drag_info.current_pointer_frame;
+	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
+	nframes64_t frame = drag_info.current_pointer_frame;
 	bool startit = false;
 	double vertical_pos = vertical_adjustment.get_value();
 
@@ -621,6 +626,10 @@ Editor::maybe_autoscroll (GdkEventMotion* event)
 
 	}
 
+	if (!allow_vertical_scroll) {
+		autoscroll_y = 0;
+	}
+
 	if ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0)) {
 		stop_canvas_autoscroll ();
 	}
@@ -642,10 +651,10 @@ Editor::_autoscroll_canvas (void *arg)
 bool
 Editor::autoscroll_canvas ()
 {
-	nframes_t new_frame;
-	nframes_t limit = max_frames - current_page_frames();
+	nframes64_t new_frame;
+	nframes64_t limit = max_frames - current_page_frames();
 	GdkEventMotion ev;
-	nframes_t target_frame;
+	nframes64_t target_frame;
 	double new_pixel;
 	double target_pixel;
 
@@ -742,17 +751,17 @@ Editor::autoscroll_canvas ()
 			
 			/* after about a while, speed up a bit by changing the timeout interval */
 			
-			autoscroll_x_distance = (nframes_t) floor (current_page_frames()/30.0f);
+			autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/30.0f);
 			
 		} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
 			
-			autoscroll_x_distance = (nframes_t) floor (current_page_frames()/20.0f);
+			autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/20.0f);
 			
 		} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
 			
 			/* after about another while, speed up by increasing the shift per callback */
 			
-			autoscroll_x_distance =  (nframes_t) floor (current_page_frames()/10.0f);
+			autoscroll_x_distance =  (nframes64_t) floor (current_page_frames()/10.0f);
 			
 		} 
 	}
@@ -792,7 +801,7 @@ Editor::start_canvas_autoscroll (int dx, int dy)
 	autoscroll_active = true;
 	autoscroll_x = dx;
 	autoscroll_y = dy;
-	autoscroll_x_distance = (nframes_t) floor (current_page_frames()/50.0);
+	autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/50.0);
 	autoscroll_y_distance = fabs (dy * 5); /* pixels */
 	autoscroll_cnt = 0;
 	
@@ -864,7 +873,7 @@ Editor::tie_vertical_scrolling ()
 void 
 Editor::canvas_horizontally_scrolled ()
 {
-	nframes64_t time_origin = (nframes_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	nframes64_t time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
 	if (time_origin != leftmost_frame) {
 		canvas_scroll_to (time_origin);
@@ -874,8 +883,9 @@ Editor::canvas_horizontally_scrolled ()
 void
 Editor::canvas_scroll_to (nframes64_t time_origin)
 {
-  	leftmost_frame = time_origin;
-	nframes_t rightmost_frame = leftmost_frame + current_page_frames ();
+	leftmost_frame = time_origin;
+
+	nframes64_t rightmost_frame = leftmost_frame + current_page_frames ();
 
 	if (rightmost_frame > last_canvas_frame) {
 		last_canvas_frame = rightmost_frame;

@@ -432,8 +432,9 @@ Session::setup_raid_path (string path)
 	AudioFileSource::set_search_path (sound_search_path.to_string ());
 	SMFSource::set_search_path (midi_search_path.to_string ());
 
+
 	// reset the round-robin soundfile path thingie
-	
+
 	last_rr_session_dir = session_dirs.begin();
 }
 
@@ -1794,6 +1795,43 @@ Session::save_template (string template_name)
 	return 0;
 }
 
+int
+Session::rename_template (string old_name, string new_name) 
+{
+	sys::path old_path (user_template_directory());
+	old_path /= old_name + template_suffix;
+
+	sys::path new_path(user_template_directory());
+	new_path /= new_name + template_suffix;
+
+	if (sys::exists (new_path)) {
+		warning << string_compose(_("Template \"%1\" already exists - template not renamed"),
+					  new_path.to_string()) << endmsg;
+		return -1;
+	}
+
+	try {
+		sys::rename (old_path, new_path);
+		return 0;
+	} catch (...) {
+		return -1;
+	}
+}
+
+int
+Session::delete_template (string name) 
+{
+	sys::path path = user_template_directory();
+	path /= name + template_suffix;
+
+	try {
+		sys::remove (path);
+		return 0;
+	} catch (...) {
+		return -1;
+	}
+}
+
 void
 Session::refresh_disk_space ()
 {
@@ -2009,17 +2047,13 @@ Session::XMLNamedSelectionFactory (const XMLNode& node)
 string
 Session::automation_dir () const
 {
-	string res = _path;
-	res += "automation/";
-	return res;
+	return Glib::build_filename (_path, "automation");
 }
 
 string
 Session::analysis_dir () const
 {
-	string res = _path;
-	res += "analysis/";
-	return res;
+	return Glib::build_filename (_path, "analysis");
 }
 
 int

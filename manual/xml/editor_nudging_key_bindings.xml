@@ -6,6 +6,11 @@
 
 <section id="sn-editor-nudging-key-bindings">
   <title>Nudging Key Bindings</title>
+  <para>
+    Nudging will move selected regions if there are any, otherwise the
+    playhead.
+  </para>
+
   <table id="tbl-editor-nudging-key-bindings">
     <title>Nudging Key Bindings</title>
     <tgroup cols = "2">
@@ -25,7 +30,7 @@
       <tbody>
         <row>
           <entry>
-            <keycombo><keycap>+</keycap> </keycombo> (keypad)
+            <keycombo><keycap>Keypad +</keycap></keycombo>
           </entry>
 
           <entry>
@@ -35,32 +40,11 @@
 
         <row>
           <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>+</keycap> </keycombo>
-            (keypad)
-          </entry>
-
-          <entry>
-            nudge next forward
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>-</keycap> </keycombo> (keypad)
+            <keycombo><keycap>Keypad -</keycap></keycombo>
           </entry>
 
           <entry>
             nudge backward
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>-</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            nudge next backward
           </entry>
         </row>
       </tbody>

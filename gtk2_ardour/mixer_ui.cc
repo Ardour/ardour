@@ -221,7 +221,7 @@ Mixer_UI::Mixer_UI ()
 	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
 	_selection.RoutesChanged.connect (mem_fun(*this, &Mixer_UI::follow_strip_selection));
-	
+
 	mix_group_display_button_box->show();
 	mix_group_add_button->show();
 	mix_group_remove_button->show();
@@ -797,33 +797,32 @@ Mixer_UI::auto_rebind_midi_controls ()
 				pos++;
 			}
 
-			PBD::Controllable::CreateBinding ( strip->solo_button->get_controllable(), controlValue, 0);
-			PBD::Controllable::CreateBinding ( strip->mute_button->get_controllable(), controlValue, 1);
+			PBD::Controllable::CreateBinding ( strip->solo_button->get_controllable().get(), controlValue, 0);
+			PBD::Controllable::CreateBinding ( strip->mute_button->get_controllable().get(), controlValue, 1);
 
 			if( strip->is_audio_track() ) {
-				PBD::Controllable::CreateBinding ( strip->rec_enable_button->get_controllable(), controlValue, 2);
+				PBD::Controllable::CreateBinding ( strip->rec_enable_button->get_controllable().get(), controlValue, 2);
 			}
 
-			PBD::Controllable::CreateBinding ( strip->gpm.get_controllable(), controlValue, 3);
-			PBD::Controllable::CreateBinding ( strip->panners.get_controllable(), controlValue, 4);
+			PBD::Controllable::CreateBinding ( strip->gpm.get_controllable().get(), controlValue, 3);
+			PBD::Controllable::CreateBinding ( strip->panners.get_controllable().get(), controlValue, 4);
 
 		}
 		else {  // Remove any existing binding
-			PBD::Controllable::DeleteBinding ( strip->solo_button->get_controllable() );
-			PBD::Controllable::DeleteBinding ( strip->mute_button->get_controllable() );
+			PBD::Controllable::DeleteBinding ( strip->solo_button->get_controllable().get() );
+			PBD::Controllable::DeleteBinding ( strip->mute_button->get_controllable().get() );
 
 			if( strip->is_audio_track() ) {
-				PBD::Controllable::DeleteBinding ( strip->rec_enable_button->get_controllable() );
+				PBD::Controllable::DeleteBinding ( strip->rec_enable_button->get_controllable().get() );
 			}
 
-			PBD::Controllable::DeleteBinding ( strip->gpm.get_controllable() );
-			PBD::Controllable::DeleteBinding ( strip->panners.get_controllable() ); // This only takes the first panner if there are multiples...
+			PBD::Controllable::DeleteBinding ( strip->gpm.get_controllable().get() );
+			PBD::Controllable::DeleteBinding ( strip->panners.get_controllable().get() ); // This only takes the first panner if there are multiples...
 		}
 
 	} // for
   
 }
-
 
 struct SignalOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {

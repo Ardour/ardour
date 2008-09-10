@@ -396,15 +396,19 @@ MidiTimeAxisView::route_active_changed ()
 void 
 MidiTimeAxisView::channel_selector_toggled()
 {
-	static TimeAxisView::TrackHeight previous_height;
+	static uint32_t previous_height;
 	
 	if(_midi_expander.property_expanded()) {
-		previous_height = height_style;
-		if(previous_height != TimeAxisView::Largest) {
-			set_height(TimeAxisView::Large);
+
+		previous_height = current_height();
+
+		if (previous_height < TimeAxisView::hLargest) {
+			set_height (TimeAxisView::hLarge);
 		}
+
 	} else {
-		set_height(previous_height);
+
+		set_height (previous_height);
 	}
 }
 

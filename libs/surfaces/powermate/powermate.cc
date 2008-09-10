@@ -6,9 +6,9 @@
 
 
 #include <linux/input.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#include <cstring>
+#include <cerrno>
+#include <cstdio>
 #include <unistd.h>
 #include <fcntl.h>
 

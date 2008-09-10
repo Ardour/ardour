@@ -773,17 +773,13 @@ ARDOUR_UI::set_shuttle_fract (double f)
 void
 ARDOUR_UI::use_shuttle_fract (bool force)
 {
-	struct timeval now;
-	struct timeval diff;
+	microseconds_t now = get_microseconds();
 	
 	/* do not attempt to submit a motion-driven transport speed request
 	   more than once per process cycle.
 	 */
 
-	gettimeofday (&now, 0);
-	timersub (&now, &last_shuttle_request, &diff);
-
-	if (!force && (diff.tv_usec + (diff.tv_sec * 1000000)) < engine->usecs_per_cycle()) {
+	if (!force && (last_shuttle_request - now) < (microseconds_t) engine->usecs_per_cycle()) {
 		return;
 	}
 	

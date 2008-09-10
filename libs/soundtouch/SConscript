@@ -16,7 +16,7 @@ cpu_detect_x86_gcc.cpp
 """)
 
 Import('env install_prefix')
-st = env.Copy()
+st = env.Clone()
 st.Append(CCFLAGS="-DHAVE_CONFIG_H -D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 
 libst = st.SharedLibrary('soundtouch', soundtouch_files)

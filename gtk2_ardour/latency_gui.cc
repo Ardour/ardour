@@ -41,6 +41,7 @@ LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
 	  initial_value (_latent.signal_latency()),
 	  sample_rate (sr),
 	  period_size (psz),
+	  ignored (new PBD::IgnorableControllable()),
 	  /* max 1 second, step by frames, page by msecs */
 	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
 	  bc (adjustment, ignored, sigc::mem_fun (*this, &LatencyGUI::latency_printer)),

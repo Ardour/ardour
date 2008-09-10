@@ -171,7 +171,8 @@ Session::butler_thread_work ()
 	uint32_t err = 0;
 	int32_t bytes;
 	bool compute_io;
-	struct timeval begin, end;
+	microseconds_t begin, end;
+
 	struct pollfd pfd[1];
 	bool disk_work_outstanding = false;
 	DiskstreamList::iterator i;
@@ -248,7 +249,7 @@ Session::butler_thread_work ()
 		bytes = 0;
 		compute_io = true;
 
-		gettimeofday (&begin, 0);
+		begin = get_microseconds();
 
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader ();
 
@@ -295,17 +296,16 @@ Session::butler_thread_work ()
 		}
 
 		if (compute_io) {
-			gettimeofday (&end, 0);
-			
-			double b = begin.tv_sec  + (begin.tv_usec/1000000.0);
-			double e = end.tv_sec + (end.tv_usec / 1000000.0);
-			
-			_read_data_rate = bytes / (e - b);
+			end = get_microseconds(); 
+			if(end-begin > 0) {
+			_read_data_rate = (float) bytes / (float) (end - begin);
+			} else { _read_data_rate = 0; // infinity better
+			 }
 		}
 
 		bytes = 0;
 		compute_io = true;
-		gettimeofday (&begin, 0);
+		begin = get_microseconds();
 
 		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
@@ -349,12 +349,13 @@ Session::butler_thread_work ()
 		}
 
 		if (compute_io) {
-			gettimeofday (&end, 0);
-			
-			double b = begin.tv_sec  + (begin.tv_usec/1000000.0);
-			double e = end.tv_sec + (end.tv_usec / 1000000.0);
-			
-			_write_data_rate = bytes / (e - b);
+			// there are no apparent users for this calculation?
+			end = get_microseconds();
+			if(end-begin > 0) {
+			_write_data_rate = (float) bytes / (float) (end - begin);
+			} else {
+			_write_data_rate = 0; // Well, infinity would be better
+			}
 		}
 		
 		if (!disk_work_outstanding) {
@@ -421,7 +422,7 @@ Session::read_data_rate () const
 	/* disk i/o in excess of 10000MB/sec indicate the buffer cache
 	   in action. ignore it.
 	*/
-	return _read_data_rate > 10485760000.0f ? 0.0f : _read_data_rate;
+	return _read_data_rate > 10485.7600000f ? 0.0f : _read_data_rate;
 }
 
 float
@@ -430,7 +431,7 @@ Session::write_data_rate () const
 	/* disk i/o in excess of 10000MB/sec indicate the buffer cache
 	   in action. ignore it.
 	*/
-	return _write_data_rate > 10485760000.0f ? 0.0f : _write_data_rate;
+	return _write_data_rate > 10485.7600000f ? 0.0f : _write_data_rate;
 }
 
 uint32_t

@@ -247,8 +247,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	Pango::FontDescription* font = get_font_for_style (N_("MarkerText"));
 
 	text = new Text (*group);
-	text->property_text() = annotation.c_str();
 	text->property_font_desc() = *font;
+	text->property_text() = annotation.c_str();
 
 	delete font;
 	

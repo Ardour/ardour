@@ -173,6 +173,8 @@ class OptionEditor : public ArdourDialog
 	IOSelector*   click_io_selector;
 	GainMeter* click_gpm;
 	PannerUI*     click_panner;
+	bool          first_click_setup;
+	Gtk::HBox     click_hpacker;
 	Gtk::VBox     click_packer;
 	Gtk::Table    click_table;
 	Gtk::Entry    click_path_entry;

@@ -23,17 +23,17 @@ ARDOUR::UserBundle::UserBundle (XMLNode const & x, bool i)
 	}
 }
 
-uint32_t
+ARDOUR::ChanCount
 ARDOUR::UserBundle::nchannels () const
 {
 	Glib::Mutex::Lock lm (_ports_mutex);
-	return _ports.size ();
+	return ChanCount (type(), _ports.size ());
 }
 
 const ARDOUR::PortList&
 ARDOUR::UserBundle::channel_ports (uint32_t n) const
 {
-	assert (n < nchannels ());
+	assert (n < nchannels ().get (type()));
 
 	Glib::Mutex::Lock lm (_ports_mutex);
 	return _ports[n];
@@ -42,7 +42,7 @@ ARDOUR::UserBundle::channel_ports (uint32_t n) const
 void
 ARDOUR::UserBundle::add_port_to_channel (uint32_t c, std::string const & p)
 {
-	assert (c < nchannels ());
+	assert (c < nchannels ().get (type()));
 	
 	PortsWillChange (c);
 
@@ -57,7 +57,7 @@ ARDOUR::UserBundle::add_port_to_channel (uint32_t c, std::string const & p)
 void
 ARDOUR::UserBundle::remove_port_from_channel (uint32_t c, std::string const & p)
 {
-	assert (c < nchannels ());
+	assert (c < nchannels ().get (type()));
 
 	PortsWillChange (c);
 
@@ -75,7 +75,7 @@ ARDOUR::UserBundle::remove_port_from_channel (uint32_t c, std::string const & p)
 bool
 ARDOUR::UserBundle::port_attached_to_channel (uint32_t c, std::string const & p) const
 {
-	assert (c < nchannels ());
+	assert (c < nchannels ().get (type()));
 
 	Glib::Mutex::Lock lm (_ports_mutex);
 	return std::find (_ports[c].begin(), _ports[c].end(), p) != _ports[c].end();
@@ -110,7 +110,7 @@ ARDOUR::UserBundle::set_channels (uint32_t n)
 void
 ARDOUR::UserBundle::remove_channel (uint32_t r)
 {
-	assert (r < nchannels ());
+	assert (r < nchannels ().get (type()));
 
 	ConfigurationWillChange ();
 

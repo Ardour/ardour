@@ -69,13 +69,12 @@ class PluginInsert : public Processor
 	bool     set_count (uint32_t num);
 	uint32_t get_count () const { return _plugins.size(); }
 
-	virtual bool      can_support_input_configuration (ChanCount in) const;
-	virtual ChanCount output_for_input_configuration (ChanCount in) const;
-	virtual bool      configure_io (ChanCount in, ChanCount out);
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool configure_io (ChanCount in, ChanCount out);
 
 	bool is_generator() const;
 
-	void set_parameter (Parameter param, float val);
+	void  set_parameter (Parameter param, float val);
 	float get_parameter (Parameter param);
 
 	float default_parameter_value (Parameter param);

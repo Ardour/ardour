@@ -20,15 +20,18 @@
 #include <algorithm>
 #include <vector>
 #include <string>
-#include <ctype.h>
+#include <cctype>
 
 #include <cstdlib>
 #include <cstdio> // so libraptor doesn't complain
 #include <cmath>
 #include <dirent.h>
-#include <string.h> // for memmove
+#include <cstring> // for memmove
 #include <sys/stat.h>
 #include <cerrno>
+
+#include <glibmm/ustring.h>
+#include <glibmm/miscutils.h>
 
 #include <lrdf.h>
 #include <fst.h>
@@ -156,13 +159,12 @@ VSTPlugin::get_state()
 
 		/* save it to a file */
 
-		string path;
+		Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "vst");
 		struct stat sbuf;
 
 		sys::path user_vst_directory(user_config_directory());
 	
 		user_vst_directory /= "vst";
-
 		path = user_vst_directory.to_string();
 
 		if (stat (path.c_str(), &sbuf)) {
@@ -187,7 +189,7 @@ VSTPlugin::get_state()
 			return *root;
 		}
 		
-		path += "something";
+		path = Glib::build_filename (path, "something");
 		
 		/* store information */
 

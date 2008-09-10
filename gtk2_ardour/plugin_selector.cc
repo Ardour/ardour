@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <lrdf.h>
+#include <map>
 
 #include <algorithm>
 
@@ -51,6 +52,7 @@ static const char* _filter_mode_strings[] = {
 	N_("Type contains"),
 	N_("Author contains"),
 	N_("Library contains"),
+	N_("Favorites only"),
 	0
 };
 
@@ -64,9 +66,15 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	manager = mgr;
 	session = 0;
-	
+	_menu = 0;
+	in_row_change = false;
+
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);
+	/* XXX translators: try to convert "Fav" into a short term
+	   related to "favorite"
+	*/
+	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
 	plugin_display.append_column (_("Available Plugins"), plugin_columns.name);
 	plugin_display.append_column (_("Type"), plugin_columns.type_name);
 	plugin_display.append_column (_("Category"), plugin_columns.category);
@@ -78,6 +86,13 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	plugin_display.set_headers_visible (true);
 	plugin_display.set_headers_clickable (true);
 	plugin_display.set_reorderable (false);
+	plugin_display.set_rules_hint (true);
+
+	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
+	fav_cell->property_activatable() = true;
+	fav_cell->property_radio() = false;
+	fav_cell->signal_toggled().connect (mem_fun (*this, &PluginSelector::favorite_changed));
+
 	scroller.set_border_width(10);
 	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	scroller.add(plugin_display);
@@ -187,6 +202,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	std::string compstr;
 	std::string mode = filter_mode.get_active_text ();
 
+	if (mode == _("Favorites only")) {
+		return manager->is_a_favorite_plugin (info);
+	}
+
 	if (!filterstr.empty()) {
 		
 		if (mode == _("Name contains")) {
@@ -197,8 +216,8 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 			compstr = info->creator;
 		} else if (mode == _("Library contains")) {
 			compstr = info->path;
-		}
-		
+		} 
+
 		transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
 
 		if (compstr.find (filterstr) != string::npos) {
@@ -206,7 +225,6 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		} else {
 			return false;
 		}
-		
 	}
 
 	return true;
@@ -224,6 +242,8 @@ PluginSelector::refill ()
 {
 	std::string filterstr;
 
+	in_row_change = true;
+
 	plugin_model->clear ();
 
 	setup_filter_string (filterstr);
@@ -232,6 +252,8 @@ PluginSelector::refill ()
 	lv2_refiller (filterstr);
 	vst_refiller (filterstr);
 	au_refiller (filterstr);
+
+	in_row_change = false;
 }
 
 void
@@ -244,10 +266,10 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 		if (show_this_plugin (*i, filterstr)) {
 
 			TreeModel::Row newrow = *(plugin_model->append());
+			newrow[plugin_columns.favorite] = manager->is_a_favorite_plugin (*i);
 			newrow[plugin_columns.name] = (*i)->name;
 			newrow[plugin_columns.type_name] = type;
 			newrow[plugin_columns.category] = (*i)->category;
-
 
 			string creator = (*i)->creator;
 			string::size_type pos = 0;
@@ -313,18 +335,14 @@ PluginSelector::au_refiller (const std::string& filterstr)
 #endif
 }
 
-void
-PluginSelector::use_plugin (PluginInfoPtr pi)
+PluginPtr
+PluginSelector::load_plugin (PluginInfoPtr pi)
 {
 	if (session == 0) {
-		return;
+		return PluginPtr();
 	}
 
-	PluginPtr plugin = pi->load (*session);
-
-	if (plugin) {
-		PluginCreated (plugin);
-	}
+	return pi->load (*session);
 }
 
 void
@@ -390,6 +408,7 @@ PluginSelector::run ()
 {
 	ResponseType r;
 	TreeModel::Children::iterator i;
+	SelectedPlugins plugins;
 
 	r = (ResponseType) Dialog::run ();
 
@@ -397,24 +416,26 @@ PluginSelector::run ()
 	case RESPONSE_APPLY:
 		for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
 			PluginInfoPtr pp = (*i)[acols.plugin];
-			use_plugin (pp);
+			PluginPtr p = load_plugin (pp);
+			if (p) {
+				plugins.push_back (p);
+			}
 		}
+		if (interested_object && !plugins.empty()) {
+			interested_object->use_plugins (plugins);
+		}
+		
 		break;
 
 	default:
 		break;
 	}
 
-	cleanup ();
-
-	return (int) r;
-}
-
-void
-PluginSelector::cleanup ()
-{
 	hide();
 	amodel->clear();
+	interested_object = 0;
+
+	return (int) r;
 }
 
 void
@@ -432,6 +453,14 @@ PluginSelector::filter_entry_changed ()
 void 
 PluginSelector::filter_mode_changed ()
 {
+	std::string mode = filter_mode.get_active_text ();
+
+	if (mode == _("Favorites only")) {
+		filter_entry.set_sensitive (false);
+	} else {
+		filter_entry.set_sensitive (true);
+	}
+
 	refill ();
 }
 
@@ -440,4 +469,154 @@ PluginSelector::on_show ()
 {
 	ArdourDialog::on_show ();
 	filter_entry.grab_focus ();
+}
+
+struct PluginMenuCompare {
+    bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+	    int cmp;
+
+	    cmp = strcasecmp (a->creator.c_str(), b->creator.c_str());
+
+	    if (cmp < 0) {
+		    return true;
+	    } else if (cmp == 0) {
+		    /* same creator ... compare names */
+		    if (strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
+			    return true;
+		    } 
+	    }
+	    return false;
+    }
+};
+
+Gtk::Menu&
+PluginSelector::plugin_menu()
+{
+	using namespace Menu_Helpers;
+
+	typedef std::map<Glib::ustring,Gtk::Menu*> SubmenuMap;
+	SubmenuMap submenu_map;
+
+	if (!_menu) {
+		_menu = new Menu();
+		_menu->set_name("ArdourContextMenu");
+	} 
+
+	MenuList& items = _menu->items();
+	Menu* favs = new Menu();
+	favs->set_name("ArdourContextMenu");
+
+	items.clear ();
+	items.push_back (MenuElem (_("Favorites"), *favs));
+	items.push_back (MenuElem (_("Plugin Manager"), mem_fun (*this, &PluginSelector::show_manager)));
+	items.push_back (SeparatorElem ());
+
+	PluginInfoList all_plugs;
+
+	all_plugs.insert (all_plugs.end(), manager->ladspa_plugin_info().begin(), manager->ladspa_plugin_info().end());
+#ifdef VST_SUPPORT
+	all_plugs.insert (all_plugs.end(), manager->vst_plugin_info().begin(), manager->vst_plugin_info().end());
+#endif
+#ifdef HAVE_AUDIOUNITS
+	all_plugs.insert (all_plugs.end(), manager->au_plugin_info().begin(), manager->au_plugin_info().end());
+#endif
+#ifdef HAVE_SLV2
+	all_plugs.insert (all_plugs.end(), manager->lv2_plugin_info().begin(), manager->lv2_plugin_info().end());
+#endif
+
+	PluginMenuCompare cmp;
+	all_plugs.sort (cmp);
+
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+		SubmenuMap::iterator x;
+		Gtk::Menu* submenu;
+
+		string creator = (*i)->creator;
+		string::size_type pos = 0;
+
+		if (manager->is_a_favorite_plugin (*i)) {
+			favs->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+		}
+		
+		/* stupid LADSPA creator strings */
+		
+		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+		creator = creator.substr (0, pos);
+
+		if ((x = submenu_map.find (creator)) != submenu_map.end()) {
+			submenu = x->second;
+		} else {
+			submenu = new Gtk::Menu;
+			items.push_back (MenuElem (creator, *submenu));
+			submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
+			submenu->set_name("ArdourContextMenu");
+		}
+		
+		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+	}
+	
+	return *_menu;
+}
+
+void
+PluginSelector::plugin_chosen_from_menu (const PluginInfoPtr& pi)
+{
+	PluginPtr p = load_plugin (pi);
+
+	if (p && interested_object) {
+		SelectedPlugins plugins;
+		plugins.push_back (p);
+		interested_object->use_plugins (plugins);
+	}
+
+	interested_object = 0;
+}
+
+void 
+PluginSelector::favorite_changed (const Glib::ustring& path)
+{
+	PluginInfoPtr pi;
+
+	if (in_row_change) {
+		return;
+	}
+
+	in_row_change = true;
+	
+	TreeModel::iterator iter = plugin_model->get_iter (path);
+	
+	if (iter) {
+
+		bool favorite = !(*iter)[plugin_columns.favorite];
+
+		/* change state */
+
+		(*iter)[plugin_columns.favorite] = favorite;
+
+		/* save new favorites list */
+
+		pi = (*iter)[plugin_columns.plugin];
+		
+		if (favorite) {
+			manager->add_favorite (pi->type, pi->unique_id);
+		} else {
+			manager->remove_favorite (pi->type, pi->unique_id);
+		}
+		
+		manager->save_favorites ();
+	}
+	in_row_change = false;
+}
+
+void
+PluginSelector::show_manager ()
+{
+	show_all();
+	run ();
+}
+
+void
+PluginSelector::set_interested_object (PluginInterestedObject& obj)
+{
+	interested_object = &obj;
 }

@@ -682,7 +682,7 @@ MixerStrip::add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, std::vector<b
 
 	MenuList& citems = input_menu.items();
 	
-	if (b->nchannels() == _route->n_inputs().n_total()) {
+	if (b->nchannels() == _route->n_inputs()) {
 
 		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_input_chosen), b)));
 
@@ -705,7 +705,7 @@ MixerStrip::add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, std::vector<
  		return;
  	}
 
-	if (b->nchannels() == _route->n_outputs().n_total()) {
+	if (b->nchannels() == _route->n_outputs()) {
 
 		MenuList& citems = output_menu.items();
 		citems.push_back (CheckMenuElem (b->name(), bind (mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));
@@ -1208,7 +1208,6 @@ MixerStrip::map_frozen ()
 			break;
 		}
 	}
-
 	
 	hide_redirect_editors ();
 }
@@ -1303,6 +1302,8 @@ MixerStrip::meter_changed (void *src)
 	}
 
 	gpm.setup_meters ();
+		// reset peak when meter point changes
+		gpm.reset_peak_display();
 		set_width(_width, this);
 }
 

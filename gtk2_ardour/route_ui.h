@@ -124,10 +124,6 @@ class RouteUI : public virtual AxisView
 
 	int  set_color_from_route ();
 
-	sigc::connection blink_connection;
-
-	void rec_enable_button_blink (bool onoff, ARDOUR::AudioDiskstream *, Gtk::Widget *w);
-	
 	void remove_this_route ();
 	static gint idle_remove_this_route (RouteUI *);
 

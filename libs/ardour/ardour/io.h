@@ -368,6 +368,7 @@ class IO : public Automatable, public Latent
 
 	int create_ports (const XMLNode&);
 	int make_connections (const XMLNode&);
+	boost::shared_ptr<Bundle> find_possible_bundle (const string &desired_name, const string &default_name, const string &connection_type_name);
 
 	void setup_peak_meters ();
 	void meter ();

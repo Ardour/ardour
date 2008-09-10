@@ -254,6 +254,12 @@ ExportSpecification::prepare (nframes_t blocksize, nframes_t frate)
 		output_data = (void*) malloc (sample_bytes * out_samples_max);
 	}
 
+	pos = start_frame;
+	end_frame = end_frame;
+	total_frames = end_frame - start_frame;
+	running = true; 
+	do_freewheel = false; /* force a call to ::prepare_to_export() before proceeding to normal operation */
+
 	return 0;
 }
 
@@ -436,13 +442,9 @@ Session::start_export (ExportSpecification& spec)
 		return -1;
 	}
 
-	spec.pos = spec.start_frame;
-	spec.end_frame = spec.end_frame;
-	spec.total_frames = spec.end_frame - spec.start_frame;
-	spec.running = true; 
-	spec.do_freewheel = false; /* force a call to ::prepare_to_export() before proceeding to normal operation */
-
 	spec.freewheel_connection = _engine.Freewheel.connect (sigc::bind (mem_fun (*this, &Session::process_export), &spec));
+
+	cerr << "Start export at pos = " << spec.pos << endl;
 
 	return _engine.freewheel (true);
 }
@@ -455,14 +457,14 @@ Session::stop_export (ExportSpecification& spec)
 	spec.freewheel_connection.disconnect ();
 	spec.clear (); /* resets running/stop etc */
 
+	Exported (spec.path, name());
+
 	return 0;
 }
 
-int 
-Session::prepare_to_export (ExportSpecification& spec)
+int
+Session::pre_export ()
 {
-	int ret = -1;
-
 	wait_till_butler_finished ();
 
 	/* take everyone out of awrite to avoid disasters */
@@ -474,6 +476,27 @@ Session::prepare_to_export (ExportSpecification& spec)
 			(*i)->protect_automation ();
 		}
 	}
+
+	/* make sure we are actually rolling */
+
+	if (get_record_enabled()) {
+		disable_record (false);
+	}
+
+	/* no slaving */
+
+	post_export_slave = Config->get_slave_source ();
+	post_export_position = _transport_frame;
+
+	Config->set_slave_source (None);
+
+	return 0;
+}
+
+int 
+Session::prepare_to_export (ExportSpecification& spec)
+{
+	int ret = -1;
 
 	/* get everyone to the right position */
 
@@ -490,22 +513,21 @@ Session::prepare_to_export (ExportSpecification& spec)
 		}
 	}
 
-	/* make sure we are actually rolling */
+	cerr << "Everybdy is at " << spec.start_frame << endl;
 
-	if (get_record_enabled()) {
-		disable_record (false);
-	}
+	/* we just did the core part of a locate() call above, but
+	   for the sake of any GUI, put the _transport_frame in
+	   the right place too.
+	*/
 
+	_transport_frame = spec.start_frame;
 	_exporting = true;
-	
-	/* no slaving */
 
-	post_export_slave = Config->get_slave_source ();
-	post_export_position = _transport_frame;
-
-	Config->set_slave_source (None);
-
-	/* get transport ready */
+	/* get transport ready. note how this is calling butler functions
+	   from a non-butler thread. we waited for the butler to stop
+	   what it was doing earlier in Session::pre_export() and nothing
+	   since then has re-awakened it.
+	 */
 
 	set_transport_speed (1.0, false);
 	butler_transport_work ();
@@ -528,6 +550,10 @@ Session::process_export (nframes_t nframes, ExportSpecification* spec)
 	int ret = -1;
 	nframes_t this_nframes;
 
+	cerr << "Export process at pos = " << spec->pos << " _exporting = "
+	     << _exporting << " running = " << spec->running << " stop = "
+	     << spec->stop << endl;
+
 	/* This is not required to be RT-safe because we are running while freewheeling */
 
 	if (spec->do_freewheel == false) {
@@ -545,12 +571,14 @@ Session::process_export (nframes_t nframes, ExportSpecification* spec)
 
 	if (!_exporting) {
 		/* finished, but still freewheeling */
-		process_without_events (nframes);
+		cerr << "\tExport ... not exporting yet, no_roll() for " << nframes <<endl;
+		no_roll (nframes, 0);
 		return 0;
 	}
-		
+	
 	if (!spec->running || spec->stop || (this_nframes = min ((spec->end_frame - spec->pos), nframes)) == 0) {
-		process_without_events (nframes);
+		cerr << "\tExport ... not running or at end, no_roll() for " << nframes <<endl;
+		no_roll (nframes, 0);
 		return stop_export (*spec);
 	}
 
@@ -604,12 +632,16 @@ Session::process_export (nframes_t nframes, ExportSpecification* spec)
 		}
 	}
 
+	cerr << "\tprocess " << nframes << endl;
+
 	if (spec->process (nframes)) {
 		goto out;
 	}
 	
 	spec->pos += nframes;
 	spec->progress = 1.0 - (((float) spec->end_frame - spec->pos) / spec->total_frames);
+
+	cerr << "\t@ " << spec->pos << " prog = " << spec->progress << endl;
 
 	/* and we're good to go */
 
@@ -629,7 +661,7 @@ Session::process_export (nframes_t nframes, ExportSpecification* spec)
 }
 
 void
-Session::finalize_audio_export ()
+Session::finalize_export ()
 {
 	_engine.freewheel (false);
 	_exporting = false;

@@ -53,7 +53,7 @@ TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTime
 					  double spu, 
 					  Gdk::Color& basic_color)
 
-	: AudioRegionView (parent, tv, r, spu, basic_color, 
+	: AudioRegionView (parent, tv, r, spu, basic_color, false,
 			   TimeAxisViewItem::Visibility ((r->position() != 0) ? default_tape_visibility : 
 							 TimeAxisViewItem::Visibility (default_tape_visibility|TimeAxisViewItem::HideFrameLeft)))
 {

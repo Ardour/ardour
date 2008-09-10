@@ -588,6 +588,12 @@ ARDOUR_UI::toggle_use_narrow_ms()
 }
 
 void
+ARDOUR_UI::toggle_NameNewMarkers()
+{
+	ActionManager::toggle_config_state ("options", "NameNewMarkers", &Configuration::set_name_new_markers, &Configuration::get_name_new_markers);
+}
+
+void
 ARDOUR_UI::toggle_rubberbanding_snaps_to_grid ()
 {
 	ActionManager::toggle_config_state ("options", "RubberbandingSnapsToGrid", &Configuration::set_rubberbanding_snaps_to_grid, &Configuration::get_rubberbanding_snaps_to_grid);

@@ -34,7 +34,7 @@ class BarController : public Gtk::Frame
   public:
 	typedef sigc::slot<void,char*,unsigned int> LabelCallback;
 
-	BarController (Gtk::Adjustment& adj, PBD::Controllable&, LabelCallback lc = LabelCallback());
+	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>, LabelCallback lc = LabelCallback());
 
 	virtual ~BarController () {}
 	
@@ -63,7 +63,7 @@ class BarController : public Gtk::Frame
 	/* export this to allow direct connection to button events */
 
 	Gtk::Widget& event_widget() { return darea; }
-	PBD::Controllable* get_controllable() { return binding_proxy.get_controllable(); }
+	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
 
   protected:
 	Gtk::Adjustment&    adjustment;

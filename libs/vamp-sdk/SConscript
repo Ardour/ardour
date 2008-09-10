@@ -20,7 +20,7 @@ vamp-sdk/RealTime.cpp
 """)
 
 Import('env install_prefix libraries')
-vampsdk = env.Copy()
+vampsdk = env.Clone()
 
 vampsdk.Merge ([libraries['fftw3'], libraries['fftw3f']])
 

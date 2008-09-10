@@ -40,6 +40,7 @@ public:
 	void reset ();
 	void reset_max ();
 	
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return true; }
 	bool configure_io (ChanCount in, ChanCount out);
 	
 	/** Compute peaks */

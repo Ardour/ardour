@@ -24,6 +24,7 @@
 #include <string>
 
 #include <gtkmm2ext/popup.h>
+#include <boost/shared_ptr.hpp>
 
 namespace PBD {
 	class Controllable;
@@ -32,7 +33,7 @@ namespace PBD {
 class BindingProxy : public sigc::trackable
 {
    public:
-	BindingProxy (PBD::Controllable&);
+	BindingProxy (boost::shared_ptr<PBD::Controllable>);
 	virtual ~BindingProxy();
 	
 	void set_bind_button_state (guint button, guint statemask);
@@ -40,11 +41,11 @@ class BindingProxy : public sigc::trackable
 
 	bool button_press_handler (GdkEventButton *);
 
-	PBD::Controllable* get_controllable() { return &controllable; }
-  protected:
+	boost::shared_ptr<PBD::Controllable> get_controllable() { return controllable; }
 
+  protected:
 	Gtkmm2ext::PopUp*  prompter;
-	PBD::Controllable& controllable;
+	boost::shared_ptr<PBD::Controllable> controllable;
 	guint bind_button;
 	guint bind_statemask;
 	sigc::connection learning_connection;

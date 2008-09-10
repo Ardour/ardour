@@ -43,7 +43,7 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 	base_rect = new ArdourCanvas::SimpleRect (*group);
 	base_rect->property_x1() = (double) 0.0;
 	base_rect->property_y1() = (double) 0.0;
-	base_rect->property_y2() = (double) trackview.height;
+	base_rect->property_y2() = (double) trackview.current_height();
 	base_rect->property_outline_what() = (guint32) 0;
 
 	if (!is_automation_ghost()) {
@@ -73,7 +73,7 @@ GhostRegion::set_duration (double units)
 void
 GhostRegion::set_height ()
 {
-	base_rect->property_y2() = (double) trackview.height;
+	base_rect->property_y2() = (double) trackview.current_height();
 }
 
 void
@@ -121,7 +121,7 @@ AudioGhostRegion::set_height ()
 
 	GhostRegion::set_height();
 
-	ht = ((trackview.height) / (double) waves.size());
+	ht = ((trackview.current_height()) / (double) waves.size());
 	
 	for (n = 0, i = waves.begin(); i != waves.end(); ++i, ++n) {
 		gdouble yoff = n * ht;

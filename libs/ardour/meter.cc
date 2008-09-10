@@ -95,8 +95,9 @@ bool
 PeakMeter::configure_io (ChanCount in, ChanCount out)
 {
 	/* we're transparent no matter what.  fight the power. */
-	if (out != in)
+	if (out != in) {
 		return false;
+	}
 
 	uint32_t limit = in.n_total();
 
@@ -116,9 +117,7 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 	assert(_visible_peak_power.size() == limit);
 	assert(_max_peak_power.size() == limit);
 
-	Processor::configure_io(in, out);
-
-	return true;
+	return Processor::configure_io (in, out);
 }
 
 /** To be driven by the Meter signal from IO.

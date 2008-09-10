@@ -23,7 +23,7 @@
 #include <set>
 #include <vector>
 #include <string>
-
+#include <cstring>
 #include <sigc++/signal.h>
 #include <pbd/failed_constructor.h>
 #include <ardour/ardour.h>

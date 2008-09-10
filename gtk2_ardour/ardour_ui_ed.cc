@@ -30,6 +30,7 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtk/gtk.h>
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -73,6 +74,7 @@ ARDOUR_UI::create_editor ()
 	}
 
 	editor->Realized.connect (mem_fun (*this, &ARDOUR_UI::editor_realized));
+	editor->signal_window_state_event().connect (sigc::bind (mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
 
 	return 0;
 }
@@ -303,6 +305,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (transport_actions, X_("GotoEnd"), _("Goto End"), mem_fun(*this, &ARDOUR_UI::transport_goto_end));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("GotoWallClock"), _("Goto Wall Clock"), mem_fun(*this, &ARDOUR_UI::transport_goto_wallclock));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), mem_fun(primary_clock, &AudioClock::focus));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -460,6 +465,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (option_actions, X_("AutoAnalyseAudio"), _("Auto-analyse new audio"), mem_fun (*this, &ARDOUR_UI::toggle_auto_analyse_audio));
 
 	ActionManager::register_toggle_action (option_actions, X_("DefaultNarrowMS"), _("Use narrow mixer strips"), mem_fun (*this, &ARDOUR_UI::toggle_use_narrow_ms));
+	ActionManager::register_toggle_action (option_actions, X_("NameNewMarkers"), _("Name New Markers"), mem_fun (*this, &ARDOUR_UI::toggle_NameNewMarkers));
 
 	RadioAction::Group denormal_group;
 
@@ -864,3 +870,16 @@ ARDOUR_UI::setup_clock ()
 
 	manage_window (*big_clock_window);
 }
+
+void
+ARDOUR_UI::float_big_clock (Gtk::Window* parent)
+{
+	if (big_clock_window) {
+		if (parent) {
+			big_clock_window->set_transient_for (*parent);
+		} else {
+			gtk_window_set_transient_for (big_clock_window->gobj(), (GtkWindow*) 0);
+		}
+	}
+}
+

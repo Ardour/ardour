@@ -101,6 +101,7 @@ class RegionView : public TimeAxisViewItem
 		boost::shared_ptr<ARDOUR::Region>,
 		double      samples_per_unit,
 		Gdk::Color& basic_color,
+		bool recording,
 		TimeAxisViewItem::Visibility);
     
     virtual void region_resized (ARDOUR::Change);

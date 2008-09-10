@@ -44,15 +44,11 @@ class FunctorCommand : public Command
 	typedef typename FunctorMap::iterator FunctorMapIterator;
 
 	public:
-	FunctorCommand(
-		std::string functor,
-		obj_type object,
-		arg_type b,
-		arg_type a
-	) : functor_name(functor), 
-		object(object),
-		before(b),
-		after(a) 
+	FunctorCommand(std::string functor, obj_type& object, arg_type b, arg_type a) 
+		: functor_name(functor)
+		, object(object)
+		, before(b)
+		, after(a) 
 	{
 		method = find_functor(functor);
 
@@ -76,6 +72,7 @@ class FunctorCommand : public Command
 		std::stringstream ss;
 		
 		XMLNode *node = new XMLNode("FunctorCommand");
+		node->add_property("type_name", typeid(obj_type).name());
 		node->add_property("functor", functor_name);
 		ss << before;
 		node->add_property("before", ss.str());

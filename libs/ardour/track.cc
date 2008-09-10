@@ -104,6 +104,11 @@ Track::update_total_latency ()
 		}
 	}
 
+#undef DEBUG_LATENCY
+#ifdef DEBUG_LATENCY
+	cerr << _name << ": internal redirect (final) latency = " << _own_latency << endl;
+#endif
+
 	set_port_latency (_own_latency);
 
 	if (old != _own_latency) {

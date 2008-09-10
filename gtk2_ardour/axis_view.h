@@ -52,11 +52,8 @@ class AxisView : public virtual Selectable
 	virtual string name() const = 0;
 
 	virtual bool marked_for_display() const { return _marked_for_display; }
-
 	virtual void set_marked_for_display (bool yn) {
-		if (yn != _marked_for_display) {
-			_marked_for_display = yn;
-		}
+		_marked_for_display = yn;
 	}
 	
 	sigc::signal<void> Hiding;

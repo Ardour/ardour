@@ -399,7 +399,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 	/* if per-track or global rec-enable turned on while the other was already on, we've started recording */
 
 	if (((change & track_rec_enabled) && record_enabled() && (!(change & global_rec_enabled) && can_record)) || 
-	    (((change & global_rec_enabled) && can_record && (!(change & track_rec_enabled) && record_enabled())))) {
+	    ((change & global_rec_enabled) && can_record && (!(change & track_rec_enabled) && record_enabled()))) {
 		
 		/* starting to record: compute first+last frames */
 
@@ -524,7 +524,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_
 
 	commit_should_unlock = false;
 
-	if (!_io->active()) {
+	if (!_io || !_io->active()) {
 		_processed = true;
 		return 0;
 	}
@@ -835,7 +835,7 @@ AudioDiskstream::commit (nframes_t nframes)
 {
 	bool need_butler = false;
 
-	if (!_io->active()) {
+	if (!_io || !_io->active()) {
 		return false;
 	}
 

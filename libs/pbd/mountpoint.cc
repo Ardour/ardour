@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <cstring>
 #include <limits.h>
 
 #include <pbd/mountpoint.h>

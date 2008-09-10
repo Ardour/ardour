@@ -518,6 +518,8 @@ AUPluginUI::parent_cocoa_window ()
 		return -1;
 	}
 
+	[win setAutodisplay:YES]; // turn of GTK stuff for this window
+
 	Gtk::Container* toplevel = get_toplevel();
 
 	if (!toplevel || !toplevel->is_toplevel()) {
@@ -530,6 +532,7 @@ AUPluginUI::parent_cocoa_window ()
 
 	NSView* view = gdk_quartz_window_get_nsview (low_box.get_window()->gobj());
 	
+
 	[view setFrame:packFrame];
 	[view addSubview:packView]; 
 

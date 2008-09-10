@@ -326,6 +326,7 @@
 
      </menubar>
 
+<<<<<<< .working
      <popup action="RulerMenuPopup">
      	  <menuitem action="toggle-minsec-ruler"/>
 	  <menuitem action="toggle-samples-ruler"/>
@@ -339,6 +340,21 @@
      </popup>
 
      <popup name='processormenu'>
+=======
+     <popup action="RulerMenuPopup">
+     	  <menuitem action="toggle-minsec-ruler"/>
+	  <menuitem action="toggle-samples-ruler"/>
+          <menuitem action="toggle-bbt-ruler"/>
+	  <separator/>
+	  <menuitem action="toggle-meter-ruler"/>
+	  <menuitem action="toggle-tempo-ruler"/>
+	  <menuitem action="toggle-loop-punch-ruler"/>
+	  <menuitem action="toggle-cd-marker-ruler"/>
+	  <menuitem action="toggle-marker-ruler"/>
+     </popup>
+
+     <popup name='redirectmenu'>
+>>>>>>> .merge-right.r3622
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>

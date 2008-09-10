@@ -17,7 +17,7 @@
 
 */
 
-#include <string>
+#include <cstring>
 #include <cstring>
 
 #include "editing.h"

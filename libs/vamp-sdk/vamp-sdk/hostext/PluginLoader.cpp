@@ -40,6 +40,8 @@
 #include "PluginChannelAdapter.h"
 #include "PluginBufferingAdapter.h"
 
+#include <string>
+#include <cstring>
 #include <fstream>
 #include <cctype> // tolower
 #include <cstring>

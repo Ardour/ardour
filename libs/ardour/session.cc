@@ -115,9 +115,9 @@ sigc::signal<void> Session::SendFeedback;
 sigc::signal<void> Session::SMPTEOffsetChanged;
 sigc::signal<void> Session::StartTimeChanged;
 sigc::signal<void> Session::EndTimeChanged;
-
 sigc::signal<void> Session::AutoBindingOn;
 sigc::signal<void> Session::AutoBindingOff;
+sigc::signal<void, std::string, std::string> Session::Exported;
 
 Session::Session (AudioEngine &eng,
 		  const string& fullpath,
@@ -140,6 +140,7 @@ Session::Session (AudioEngine &eng,
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  auditioner ((Auditioner*) 0),
+	  _total_free_4k_blocks (0),
 	  _bundle_xml_node (0),
 	  _click_io ((IO*) 0),
 	  main_outs (0)
@@ -152,8 +153,8 @@ Session::Session (AudioEngine &eng,
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
-	n_physical_outputs = _engine.n_physical_outputs();
-	n_physical_inputs =  _engine.n_physical_inputs();
+	n_physical_outputs = _engine.n_physical_outputs(DataType::AUDIO);
+	n_physical_inputs =  _engine.n_physical_inputs(DataType::AUDIO);
 
 	first_stage_init (fullpath, snapshot_name);
 
@@ -210,6 +211,7 @@ Session::Session (AudioEngine &eng,
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
+	  _total_free_4k_blocks (0),
 	  _bundle_xml_node (0),
 	  main_outs (0)
 
@@ -222,8 +224,8 @@ Session::Session (AudioEngine &eng,
 
 	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
-	n_physical_outputs = _engine.n_physical_outputs();
-	n_physical_inputs = _engine.n_physical_inputs();
+	n_physical_outputs = _engine.n_physical_outputs (DataType::AUDIO);
+	n_physical_inputs = _engine.n_physical_inputs (DataType::AUDIO);
 
 	if (n_physical_inputs) {
 		n_physical_inputs = max (requested_physical_in, n_physical_inputs);
@@ -1086,6 +1088,12 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 			set_loop = true;
 		}
 
+		if (location->is_start()) {
+			start_location = location;
+		}
+		if (location->is_end()) {
+			end_location = location;
+		}
 	}
 
 	if (!set_loop) {
@@ -1523,16 +1531,16 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 		}
 	}
 
-	/*
+#if 0	
 	vector<string> physinputs;
 	vector<string> physoutputs;
+
+	_engine.get_physical_outputs (DataType::MIDI, physoutputs);
+	_engine.get_physical_inputs (DataType::MIDI, physinputs);
 	uint32_t nphysical_in;
 	uint32_t nphysical_out;
-
-	_engine.get_physical_outputs (physoutputs);
-	_engine.get_physical_inputs (physinputs);
-	control_id = ntracks() + nbusses() + 1;
-	*/
+	control_id = ntracks() + nbusses();
+#endif
 
 	while (how_many) {
 
@@ -1555,7 +1563,7 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 		} while (track_id < (UINT_MAX-1));
 
 		/*
-		if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+		  if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
 		} else {
 			nphysical_in = 0;
@@ -1703,8 +1711,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	uint32_t nphysical_in;
 	uint32_t nphysical_out;
 
-	_engine.get_physical_outputs (physoutputs);
-	_engine.get_physical_inputs (physinputs);
+	_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
+	_engine.get_physical_inputs (DataType::AUDIO, physinputs);
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
@@ -1889,8 +1897,8 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 	vector<string> physinputs;
 	vector<string> physoutputs;
 
-	_engine.get_physical_outputs (physoutputs);
-	_engine.get_physical_inputs (physinputs);
+	_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
+	_engine.get_physical_inputs (DataType::AUDIO, physinputs);
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
@@ -2418,6 +2426,8 @@ Session::get_maximum_extent () const
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 	for (DiskstreamList::const_iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if ((*i)->destructive())  //ignore tape tracks when getting max extents
+			continue;
 		boost::shared_ptr<Playlist> pl = (*i)->playlist();
 		if ((me = pl->get_maximum_extent()) > max) {
 			max = me;
@@ -2509,7 +2519,7 @@ Session::new_region_name (string old)
 }
 
 int
-Session::region_name (string& result, string base, bool newlevel) const
+Session::region_name (string& result, string base, bool newlevel)
 {
 	char buf[16];
 	string subbase;
@@ -2521,14 +2531,10 @@ Session::region_name (string& result, string base, bool newlevel) const
 		Glib::Mutex::Lock lm (region_lock);
 
 		snprintf (buf, sizeof (buf), "%d", (int)regions.size() + 1);
-
-
 		result = "region.";
 		result += buf;
 
 	} else {
-
-		/* XXX this is going to be slow. optimize me later */
 
 		if (newlevel) {
 			subbase = base;
@@ -2543,37 +2549,25 @@ Session::region_name (string& result, string base, bool newlevel) const
 
 		}
 
-		bool name_taken = true;
-
 		{
 			Glib::Mutex::Lock lm (region_lock);
 
-			for (int n = 1; n < 5000; ++n) {
+			map<string,uint32_t>::iterator x;
 
-				result = subbase;
-				snprintf (buf, sizeof (buf), ".%d", n);
+			result = subbase;
+
+			if ((x = region_name_map.find (subbase)) == region_name_map.end()) {
+				result += ".1";
+				region_name_map[subbase] = 1;
+			} else {
+				x->second++;
+				snprintf (buf, sizeof (buf), ".%d", x->second);
+
 				result += buf;
-
-				name_taken = false;
-
-				for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-					if (i->second->name() == result) {
-						name_taken = true;
-						break;
-					}
-				}
-
-				if (!name_taken) {
-					break;
-				}
 			}
 		}
-
-		if (name_taken) {
-			fatal << string_compose(_("too many regions with names like %1"), base) << endmsg;
-			/*NOTREACHED*/
-		}
 	}
+
 	return 0;
 }
 
@@ -2635,7 +2629,7 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 	   add the region to the region list.
 	*/
 
-	set_dirty();
+	set_dirty ();
 
 	if (added) {
 
@@ -2660,11 +2654,32 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 
 			region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
 			region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+
+			update_region_name_map (region);
 		}
 
 		if (!v.empty()) {
 			RegionsAdded (v); /* EMIT SIGNAL */
 		}
+	}
+}
+
+void
+Session::update_region_name_map (boost::shared_ptr<Region> region)
+{
+	string::size_type last_period = region->name().find_last_of ('.');
+	
+	if (last_period != string::npos && last_period < region->name().length() - 1) {
+		
+		string base = region->name().substr (0, last_period);
+		string number = region->name().substr (last_period+1);
+		map<string,uint32_t>::iterator x;
+		
+		/* note that if there is no number, we get zero from atoi,
+		   which is just fine
+		*/
+		
+		region_name_map[base] = atoi (number);
 	}
 }
 
@@ -2680,6 +2695,10 @@ Session::region_changed (Change what_changed, boost::weak_ptr<Region> weak_regio
 	if (what_changed & Region::HiddenChanged) {
 		/* relay hidden changes */
 		RegionHiddenChange (region);
+	}
+
+	if (what_changed & NameChanged) {
+		update_region_name_map (region);
 	}
 }
 
@@ -4022,11 +4041,11 @@ Session::freeze (InterThreadInfo& itt)
 	return 0;
 }
 
-int
-Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t len,
-			       bool overwrite, vector<boost::shared_ptr<Source> >& srcs, InterThreadInfo& itt)
+boost::shared_ptr<Region>
+Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end, 	
+			  bool overwrite, vector<boost::shared_ptr<Source> >& srcs, InterThreadInfo& itt)
 {
-	int ret = -1;
+	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<AudioFileSource> fsource;
 	uint32_t x;
@@ -4038,6 +4057,13 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 	BufferSet buffers;
 	SessionDirectory sdir(get_best_session_directory_for_new_source ());
 	const string sound_dir = sdir.sound_path().to_string();
+	nframes_t len = end - start;
+
+	if (end <= start) {
+		error << string_compose (_("Cannot write a range where end <= start (e.g. %1 <= %2)"),
+					 end, start) << endmsg;
+		return result;
+	}
 
 	// any bigger than this seems to cause stack overflows in called functions
 	const nframes_t chunk_size = (128 * 1024)/4;
@@ -4142,21 +4168,19 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 
 		/* construct a region to represent the bounced material */
 
-		boost::shared_ptr<Region> aregion = RegionFactory::create (srcs, 0, srcs.front()->length(),
-									   region_name_from_path (srcs.front()->name(), true));
-
-		ret = 0;
+		result = RegionFactory::create (srcs, 0, srcs.front()->length(), 
+						region_name_from_path (srcs.front()->name(), true));
 	}
 
   out:
-	if (ret) {
+	if (!result) {
 		for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
 
 			if (afs) {
 				afs->mark_for_remove ();
 			}
-
+			
 			(*src)->drop_references ();
 		}
 
@@ -4171,7 +4195,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t le
 
 	g_atomic_int_set (&processing_prohibited, 0);
 
-	return ret;
+	return result;
 }
 
 BufferSet&

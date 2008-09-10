@@ -54,6 +54,14 @@ class AudioRegionView : public RegionView
 			 double initial_samples_per_unit,
 			 Gdk::Color& basic_color);
 
+	AudioRegionView (ArdourCanvas::Group *, 
+		     RouteTimeAxisView&,
+		     boost::shared_ptr<ARDOUR::AudioRegion>,
+		     double      samples_per_unit,
+		     Gdk::Color& basic_color,
+			 bool recording,
+		     TimeAxisViewItem::Visibility);
+
         AudioRegionView (const AudioRegionView& other);
         AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
 
@@ -107,13 +115,6 @@ class AudioRegionView : public RegionView
        to specify their visibility requirements
        to the TimeAxisViewItem parent class
     */
-    
-    AudioRegionView (ArdourCanvas::Group *, 
-		     RouteTimeAxisView&,
-		     boost::shared_ptr<ARDOUR::AudioRegion>,
-		     double      samples_per_unit,
-		     Gdk::Color& basic_color,
-		     TimeAxisViewItem::Visibility);
     
     enum Flags {
 	    EnvelopeVisible = 0x1,

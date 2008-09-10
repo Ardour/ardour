@@ -138,7 +138,7 @@ Session::realtime_stop (bool abort)
 
 	// FIXME: where should this really be? [DR]
 	//send_full_time_code();
-	deliver_mmc (MIDI::MachineControl::cmdStop, _transport_frame);
+	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
 	if (_transport_speed < 0.0f) {
@@ -656,6 +656,25 @@ Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, 
 
 		locate (target_frame, with_roll, with_flush, with_loop);
 	}
+}
+
+int
+Session::micro_locate (nframes_t distance)
+{
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if (!(*i)->can_internal_playback_seek (distance)) {
+			return -1;
+		}
+	}
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		(*i)->internal_playback_seek (distance);
+	}
+	
+	_transport_frame += distance;
+	return 0;
 }
 
 void
@@ -1314,6 +1333,11 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 
 	_worst_track_latency = 0;
 
+#undef DEBUG_LATENCY
+#ifdef DEBUG_LATENCY
+	cerr << "\n---------------------------------\nUPDATE LATENCY\n";
+#endif
+
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -1339,6 +1363,10 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	if (update_jack) {
 		_engine.update_total_latencies ();
 	}
+
+#ifdef DEBUG_LATENCY
+	cerr << "\tworst was " << _worst_track_latency << endl;
+#endif
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->set_latency_delay (_worst_track_latency);

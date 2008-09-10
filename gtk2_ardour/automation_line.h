@@ -94,7 +94,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	void    show ();
 	void    hide ();
-	void    set_y_position_and_height (uint32_t, uint32_t);
+	void    set_y_position_and_height (double, double);
 	void    set_verbose_cursor_uses_gain_mapping (bool yn);
 
 	TimeAxisView& trackview;

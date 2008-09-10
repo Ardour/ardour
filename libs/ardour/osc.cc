@@ -28,6 +28,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <glibmm/miscutils.h>
+
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
 
@@ -183,6 +185,7 @@ OSC::register_callbacks()
 #define REGISTER_CALLBACK(serv,path,types, function) lo_server_add_method (serv, path, types, OSC::_ ## function, this)
 		
 		REGISTER_CALLBACK (serv, "/ardour/add_marker", "", add_marker);
+		REGISTER_CALLBACK (serv, "/ardour/access_action", "s", access_action);
 		REGISTER_CALLBACK (serv, "/ardour/loop_toggle", "", loop_toggle);
 		REGISTER_CALLBACK (serv, "/ardour/goto_start", "", goto_start);
 		REGISTER_CALLBACK (serv, "/ardour/goto_end", "", goto_end);
@@ -409,6 +412,10 @@ OSC::set_session (Session& s)
 {
 	session = &s;
 	session->GoingAway.connect (mem_fun (*this, &OSC::session_going_away));
+
+	// "Application Hooks"
+	session_loaded( s );
+	session->Exported.connect( mem_fun( *this, &OSC::session_exported ) );
 }
 
 void
@@ -416,6 +423,21 @@ OSC::session_going_away ()
 {
 	session = 0;
 }
+
+// "Application Hook" Handlers //
+void
+OSC::session_loaded( Session& s ) {
+	lo_address listener = lo_address_new( NULL, "7770" );
+	lo_send( listener, "/session/loaded", "ss", s.path().c_str(), s.name().c_str() );
+}
+
+void
+OSC::session_exported( std::string path, std::string name ) {
+	lo_address listener = lo_address_new( NULL, "7770" );
+	lo_send( listener, "/session/exported", "ss", path.c_str(), name.c_str() );
+}
+
+// end "Application Hook" Handlers //
 
 /* path callbacks */
 

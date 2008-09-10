@@ -81,7 +81,7 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 	label_view() ;
 		
 	// set the initial height of this time axis
-	set_height(Normal) ;
+	set_height(hNormal) ;
 }
 
 /**
@@ -133,10 +133,10 @@ ImageFrameTimeAxis::~ImageFrameTimeAxis ()
 /**
  * Sets the height of this TrackView to one of ths TrackHeghts
  *
- * @param h the TrackHeight value to set
+ * @param h 
  */
 void
-ImageFrameTimeAxis::set_height (TrackHeight h)
+ImageFrameTimeAxis::set_height (uint32_t h)
 {
 	VisualTimeAxis::set_height(h) ;
 	

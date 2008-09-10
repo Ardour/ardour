@@ -20,6 +20,7 @@
 
 #include <cstring>
 #include <string>
+#include <cstring>
 #include <cstdlib>
 #include <midi++/types.h>
 

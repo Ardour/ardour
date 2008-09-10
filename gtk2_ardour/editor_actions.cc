@@ -73,6 +73,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_actions, X_("RegionGainMenu"), _("Gain"));
 	ActionManager::register_action (editor_actions, X_("RulerMenu"), _("Rulers"));
+	ActionManager::register_action (editor_actions, X_("SavedViewMenu"), _("Views"));
 	ActionManager::register_action (editor_actions, X_("ScrollMenu"), _("Scroll"));
 	ActionManager::register_action (editor_actions, X_("SecondaryClockMenu"), _("Secondary Clock"));
 	ActionManager::register_action (editor_actions, X_("Select"), _("Select"));
@@ -91,10 +92,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("TrimMenu"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_actions, X_("WaveformMenu"), _("Waveforms"));
-	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom"));
+	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_actions, X_("ZoomMenu"), _("Zoom"));
-	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
-
 
 	/* add named actions for the editor */
 
@@ -198,6 +197,56 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	
 
+	act = ActionManager::register_action (editor_actions, "save-visual-state-1", _("Save View 1"), bind (mem_fun (*this, &Editor::start_visual_state_op), 0));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-1", _("Goto View 1"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 0));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-2", _("Save View 2"), bind (mem_fun (*this, &Editor::start_visual_state_op), 1));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-2", _("Goto View 2"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 1));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-3", _("Save View 3"), bind (mem_fun (*this, &Editor::start_visual_state_op), 2));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-3", _("Goto View 3"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 2));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-4", _("Save View 4"), bind (mem_fun (*this, &Editor::start_visual_state_op), 3));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-4", _("Goto View 4"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 3));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-5", _("Save View 5"), bind (mem_fun (*this, &Editor::start_visual_state_op), 4));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-5", _("Goto View 5"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 4));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-6", _("Save View 6"), bind (mem_fun (*this, &Editor::start_visual_state_op), 5));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-6", _("Goto View 6"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 5));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-7", _("Save View 7"), bind (mem_fun (*this, &Editor::start_visual_state_op), 6));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-7", _("Goto View 7"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 6));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-8", _("Save View 8"), bind (mem_fun (*this, &Editor::start_visual_state_op), 7));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-8", _("Goto View 8"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 7));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-9", _("Save View 9"), bind (mem_fun (*this, &Editor::start_visual_state_op), 8));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-9", _("Goto View 9"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 8));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-10", _("Save View 10"), bind (mem_fun (*this, &Editor::start_visual_state_op), 9));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-10", _("Goto View 10"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 9));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-11", _("Save View 11"), bind (mem_fun (*this, &Editor::start_visual_state_op), 10));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-11", _("Goto View 11"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 10));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "save-visual-state-12", _("Save View 12"), bind (mem_fun (*this, &Editor::start_visual_state_op), 11));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "goto-visual-state-12", _("Goto View 12"), bind (mem_fun (*this, &Editor::cancel_visual_state_op), 11));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+
 	act = ActionManager::register_action (editor_actions, "goto-mark-1", _("Locate to Mark 1"), bind (mem_fun (*this, &Editor::goto_nth_marker), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "goto-mark-2", _("Locate to Mark 2"), bind (mem_fun (*this, &Editor::goto_nth_marker), 1));
@@ -249,7 +298,9 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "zoom-to-session", _("Zoom to Session"), mem_fun(*this, &Editor::temporal_zoom_session));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "zoom-to-region", _("Zoom to Region"), mem_fun(*this, &Editor::toggle_zoom_region));
+	act = ActionManager::register_action (editor_actions, "zoom-to-region", _("Zoom to Region"), bind (mem_fun(*this, &Editor::toggle_zoom_region), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "zoom-to-region-both-axes", _("Zoom to Region (W&H)"), bind (mem_fun(*this, &Editor::toggle_zoom_region), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-zoom", _("Toggle Zoom State"), mem_fun(*this, &Editor::swap_visual_state));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -317,6 +368,9 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "pitch-shift-region", _("Transpose"), mem_fun(*this, &Editor::pitch_shift_regions));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "toggle-opaque-region", _("Toggle Opaque"), mem_fun(*this, &Editor::toggle_region_opaque));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	
@@ -467,7 +521,8 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "quantize-region", _("Quantize Region"), mem_fun(*this, &Editor::quantize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
-
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+	
 	act = ActionManager::register_action (editor_actions, "set-tempo-from-region", _("Set Tempo from Region=Bar"), mem_fun(*this, &Editor::use_region_as_bar));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
@@ -521,6 +576,8 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "fit-tracks", _("Fit Selected Tracks"), (mem_fun(*this, &Editor::fit_tracks)));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), (mem_fun(*this, &Editor::set_track_height_largest)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
@@ -693,8 +750,9 @@ Editor::register_actions ()
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 
-
 	act = ActionManager::register_action (editor_actions, X_("addExistingAudioFiles"), _("Import"), mem_fun (*this, &Editor::external_audio_dialog));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List"), bind (mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (editor_actions, X_("toggle-waveform-visible"), _("Show Waveforms"), mem_fun (*this, &Editor::toggle_waveform_visibility));

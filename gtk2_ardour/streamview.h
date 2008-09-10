@@ -112,7 +112,7 @@ protected:
 	void         update_rec_box ();
 	//virtual void update_rec_regions () = 0;
 	
-	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data) = 0;
+	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false) = 0;
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	//void         remove_rec_region (boost::shared_ptr<ARDOUR::Region>); (unused)
 

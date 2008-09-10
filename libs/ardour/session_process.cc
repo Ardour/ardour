@@ -867,18 +867,38 @@ Session::maybe_sync_start (nframes_t& nframes, nframes_t& offset)
 
 	if (_engine.get_sync_offset (sync_offset) && sync_offset < nframes) {
 
+		/* generate silence up to the sync point, then
+		   adjust nframes + offset to reflect whatever
+		   is left to do.
+		*/
+
 		no_roll (sync_offset, 0);
 		nframes -= sync_offset;
 		offset += sync_offset;
 		waiting_for_sync_offset = false;
 		
 		if (nframes == 0) {
-			return true; // done
+			return true; // done, nothing left to process
 		}
 		
 	} else {
+
+		/* sync offset point is not within this process()
+		   cycle, so just generate silence. and don't bother 
+		   with any fancy stuff here, just the minimal silence.
+		*/
+
+		g_atomic_int_inc (&processing_prohibited);
 		no_roll (nframes, 0);
-		return true; // done
+		g_atomic_int_dec_and_test (&processing_prohibited);
+
+		if (Config->get_locate_while_waiting_for_sync()) {
+			if (micro_locate (nframes)) {
+				/* XXX ERROR !!! XXX */
+			}
+		}
+
+		return true; // done, nothing left to process
 	}
 
 	return false;

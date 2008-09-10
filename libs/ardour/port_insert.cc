@@ -173,42 +173,11 @@ PortInsert::signal_latency() const
 }
 
 bool
-PortInsert::can_support_input_configuration (ChanCount in) const
-{
-	if (_io->input_maximum() == ChanCount::INFINITE && _io->output_maximum() == ChanCount::INFINITE) {
-
-		/* not configured yet */
-
-		return true; /* we can support anything the first time we're asked */
-
-	} else {
-
-		/* the "input" config for a port insert corresponds to how
-		   many output ports it will have.
-		*/
-
-		if (_io->output_maximum() == in) {
-
-			return true;
-		} 
-	}
-
-	return false;
-}
-
-ChanCount
-PortInsert::output_for_input_configuration (ChanCount in) const
-{
-	return in;
-}
-
-bool
 PortInsert::configure_io (ChanCount in, ChanCount out)
 {
 	/* do not allow configuration to be changed outside the range of
 	   the last request config. or something like that.
 	*/
-
 
 	/* this is a bit odd: 
 
@@ -224,12 +193,11 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 	_io->set_input_maximum (out);
 	_io->set_input_minimum (out);
 
-	bool success = (_io->ensure_io (out, in, false, this) == 0);
-
-	if (success)
-		return Processor::configure_io(in, out);
-	else
+	if (_io->ensure_io (out, in, false, this) != 0) {
 		return false;
+	}
+
+	return Processor::configure_io (in, out);
 }
 
 ChanCount

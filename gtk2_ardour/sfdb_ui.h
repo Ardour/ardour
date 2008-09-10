@@ -150,6 +150,7 @@ class SoundFileBrowser : public ArdourDialog
 	
 	Gtk::FileFilter audio_filter;
 	Gtk::FileFilter midi_filter;
+	Gtk::FileFilter custom_filter;
 	Gtk::FileFilter matchall_filter;
 	Gtk::HBox hpacker;
 

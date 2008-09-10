@@ -25,6 +25,7 @@
 #include <cmath>
 #include <string>
 #include <map>
+#include <set>
 
 #include <pbd/error.h>
 #include <pbd/basename.h>
@@ -35,6 +36,8 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/popup.h>
+
 
 #include <ardour/audioengine.h>
 #include <ardour/session.h>
@@ -109,7 +112,7 @@ Editor::split_region ()
 }
 
 void
-Editor::split_region_at (nframes_t where)
+Editor::split_region_at (nframes64_t where)
 {
 	RegionSelection rs;
 
@@ -118,7 +121,7 @@ Editor::split_region_at (nframes_t where)
 }
 
 void
-Editor::split_regions_at (nframes_t where, RegionSelection& regions)
+Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 {
 	list <boost::shared_ptr<Playlist > > used_playlists;
 
@@ -143,6 +146,8 @@ Editor::split_regions_at (nframes_t where, RegionSelection& regions)
 	} else {
 		snap_to (where);
 	}
+
+	cerr << "Split " << regions.size() << " at " << where << endl;
 
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
 
@@ -219,21 +224,44 @@ Editor::remove_clicked_region ()
 void
 Editor::remove_selected_regions ()
 {
-	if (selection->regions.empty()) {
+	RegionSelection rs; 
+	get_regions_for_action (rs);
+	
+	if (!session) {
 		return;
 	}
 
-	/* XXX: should be called remove regions if we're removing more than one */
+	if (rs.empty()) {
+		return;
+	}
+
 	begin_reversible_command (_("remove region"));
+
+	list<boost::shared_ptr<Region> > regions_to_remove;
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		// we can't just remove the region(s) in this loop because
+		// this removes them from the RegionSelection, and they thus
+		// disappear from underneath the iterator, and the ++i above
+		// SEGVs in a puzzling fashion.
+
+		// so, first iterate over the regions to be removed from rs and
+		// add them to the regions_to_remove list, and then
+		// iterate over the list to actually remove them.
+	        
+		regions_to_remove.push_back ((*i)->region());
+	}
 	
+	for (list<boost::shared_ptr<Region> >::iterator rl = regions_to_remove.begin(); rl != regions_to_remove.end(); ++rl) {
+		boost::shared_ptr<Playlist> playlist = (*rl)->playlist();
+	        if (!playlist) {
+			// is this check necessary?
+	        	continue;
+	        }
 
-	while (!selection->regions.empty()) {
-		boost::shared_ptr<Region> region = selection->regions.front()->region ();
-		boost::shared_ptr<Playlist> playlist = region->playlist ();
-
-		XMLNode &before = playlist->get_state();
-		playlist->remove_region (region);
-		XMLNode &after = playlist->get_state();
+	        XMLNode &before = playlist->get_state();
+		playlist->remove_region (*rl);
+	        XMLNode &after = playlist->get_state();
 		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
 	}
 
@@ -245,7 +273,7 @@ Editor::select_region_for_operation (int dir, TimeAxisView **tv)
 {
 	RegionView* rv;
 	boost::shared_ptr<Region> region;
-	nframes_t start = 0;
+	nframes64_t start = 0;
 
 	if (selection->time.start () == selection->time.end_frame ()) {
 		
@@ -288,7 +316,7 @@ Editor::extend_selection_to_end_of_region (bool next)
 {
 	TimeAxisView *tv;
 	boost::shared_ptr<Region> region;
-	nframes_t start;
+	nframes64_t start;
 
 	if ((region = select_region_for_operation (next ? 1 : 0, &tv)) == 0) {
 		return;
@@ -316,7 +344,7 @@ Editor::extend_selection_to_start_of_region (bool previous)
 {
 	TimeAxisView *tv;
 	boost::shared_ptr<Region> region;
-	nframes_t end;
+	nframes64_t end;
 
 	if ((region = select_region_for_operation (previous ? -1 : 0, &tv)) == 0) {
 		return;
@@ -365,8 +393,8 @@ Editor::nudge_backward_release (GdkEventButton* ev)
 void
 Editor::nudge_forward (bool next, bool force_playhead)
 {
-	nframes_t distance;
-	nframes_t next_distance;
+	nframes64_t distance;
+	nframes64_t next_distance;
 	RegionSelection rs; 
 
 	get_regions_for_action (rs);
@@ -441,8 +469,8 @@ Editor::nudge_forward (bool next, bool force_playhead)
 void
 Editor::nudge_backward (bool next, bool force_playhead)
 {
-	nframes_t distance;
-	nframes_t next_distance;
+	nframes64_t distance;
+	nframes64_t next_distance;
 	RegionSelection rs; 
 
 	get_regions_for_action (rs);
@@ -528,7 +556,7 @@ Editor::nudge_backward (bool next, bool force_playhead)
 void
 Editor::nudge_forward_capture_offset ()
 {
-	nframes_t distance;
+	nframes64_t distance;
 	RegionSelection rs; 
 
 	get_regions_for_action (rs);
@@ -558,7 +586,7 @@ Editor::nudge_forward_capture_offset ()
 void
 Editor::nudge_backward_capture_offset ()
 {
-	nframes_t distance;
+	nframes64_t distance;
 	RegionSelection rs; 
 
 	get_regions_for_action (rs);
@@ -607,7 +635,7 @@ Editor::move_to_end ()
 void
 Editor::build_region_boundary_cache ()
 {
-	nframes_t pos = 0;
+	nframes64_t pos = 0;
 	vector<RegionPoint> interesting_points;
 	boost::shared_ptr<Region> r;
 	TrackViewList tracks;
@@ -650,8 +678,8 @@ Editor::build_region_boundary_cache ()
 
 	while (pos < session->current_end_frame() && !at_end) {
 
-		nframes_t rpos;
-		nframes_t lpos = max_frames;
+		nframes64_t rpos;
+		nframes64_t lpos = max_frames;
 
 		for (vector<RegionPoint>::iterator p = interesting_points.begin(); p != interesting_points.end(); ++p) {
 
@@ -699,7 +727,7 @@ Editor::build_region_boundary_cache ()
 			   to sort later.
 			*/
 
-			vector<nframes_t>::iterator ri; 
+			vector<nframes64_t>::iterator ri; 
 			
 			for (ri = region_boundary_cache.begin(); ri != region_boundary_cache.end(); ++ri) {
 				if (*ri == rpos) {
@@ -721,20 +749,20 @@ Editor::build_region_boundary_cache ()
 }
 
 boost::shared_ptr<Region>
-Editor::find_next_region (nframes_t frame, RegionPoint point, int32_t dir, TrackViewList& tracks, TimeAxisView **ontrack)
+Editor::find_next_region (nframes64_t frame, RegionPoint point, int32_t dir, TrackViewList& tracks, TimeAxisView **ontrack)
 {
 	TrackViewList::iterator i;
-	nframes_t closest = max_frames;
+	nframes64_t closest = max_frames;
 	boost::shared_ptr<Region> ret;
-	nframes_t rpos = 0;
+	nframes64_t rpos = 0;
 
 	float track_speed;
-	nframes_t track_frame;
+	nframes64_t track_frame;
 	RouteTimeAxisView *rtav;
 
 	for (i = tracks.begin(); i != tracks.end(); ++i) {
 
-		nframes_t distance;
+		nframes64_t distance;
 		boost::shared_ptr<Region> r;
 		
 		track_speed = 1.0f;
@@ -866,7 +894,7 @@ void
 Editor::cursor_to_region_point (Cursor* cursor, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Region> r;
-	nframes_t pos = cursor->current_frame;
+	nframes64_t pos = cursor->current_frame;
 
 	if (!session) {
 		return;
@@ -945,7 +973,7 @@ Editor::cursor_to_previous_region_point (Cursor* cursor, RegionPoint point)
 void
 Editor::cursor_to_selection_start (Cursor *cursor)
 {
-	nframes_t pos = 0;
+	nframes64_t pos = 0;
 	RegionSelection rs; 
 
 	get_regions_for_action (rs);
@@ -977,7 +1005,7 @@ Editor::cursor_to_selection_start (Cursor *cursor)
 void
 Editor::cursor_to_selection_end (Cursor *cursor)
 {
-	nframes_t pos = 0;
+	nframes64_t pos = 0;
 	RegionSelection rs; 
 
 	get_regions_for_action (rs);
@@ -1071,7 +1099,7 @@ void
 Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Region> r;
-	nframes_t pos;
+	nframes64_t pos;
 	Location* loc;
 	bool ignored;
 
@@ -1147,7 +1175,7 @@ Editor::selected_marker_to_previous_region_point (RegionPoint point)
 void
 Editor::selected_marker_to_selection_start ()
 {
-	nframes_t pos = 0;
+	nframes64_t pos = 0;
 	Location* loc;
 	bool ignored;
 
@@ -1186,7 +1214,7 @@ Editor::selected_marker_to_selection_start ()
 void
 Editor::selected_marker_to_selection_end ()
 {
-	nframes_t pos = 0;
+	nframes64_t pos = 0;
 	Location* loc;
 	bool ignored;
 
@@ -1225,8 +1253,8 @@ Editor::selected_marker_to_selection_end ()
 void
 Editor::scroll_playhead (bool forward)
 {
-	nframes_t pos = playhead_cursor->current_frame;
-	nframes_t delta = (nframes_t) floor (current_page_frames() / 0.8);
+	nframes64_t pos = playhead_cursor->current_frame;
+	nframes64_t delta = (nframes64_t) floor (current_page_frames() / 0.8);
 
 	if (forward) {
 		if (pos == max_frames) {
@@ -1258,8 +1286,8 @@ Editor::scroll_playhead (bool forward)
 void
 Editor::playhead_backward ()
 {
-	nframes_t pos;
-	nframes_t cnt;
+	nframes64_t pos;
+	nframes64_t cnt;
 	float prefix;
 	bool was_floating;
 
@@ -1267,15 +1295,15 @@ Editor::playhead_backward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes64_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (nframes_t) prefix;
+			cnt = (nframes64_t) prefix;
 		}
 	}
 
 	pos = playhead_cursor->current_frame;
 
-	if ((nframes_t) pos < cnt) {
+	if ((nframes64_t) pos < cnt) {
 		pos = 0;
 	} else {
 		pos -= cnt;
@@ -1292,8 +1320,8 @@ Editor::playhead_backward ()
 void
 Editor::playhead_forward ()
 {
-	nframes_t pos;
-	nframes_t cnt;
+	nframes64_t pos;
+	nframes64_t cnt;
 	bool was_floating;
 	float prefix;
 
@@ -1301,9 +1329,9 @@ Editor::playhead_forward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes64_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (nframes_t) floor (prefix);
+			cnt = (nframes64_t) floor (prefix);
 		}
 	}
 
@@ -1362,9 +1390,9 @@ Editor::edit_cursor_backward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes64_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (nframes_t) prefix;
+			cnt = (nframes64_t) prefix;
 		}
 	}
 
@@ -1384,8 +1412,8 @@ Editor::edit_cursor_backward ()
 void
 Editor::edit_cursor_forward ()
 {
-	//nframes_t pos;
-	nframes_t cnt;
+	//nframes64_t pos;
+	nframes64_t cnt;
 	bool was_floating;
 	float prefix;
 
@@ -1393,9 +1421,9 @@ Editor::edit_cursor_forward ()
 		cnt = 1;
 	} else {
 		if (was_floating) {
-			cnt = (nframes_t) floor (prefix * session->frame_rate ());
+			cnt = (nframes64_t) floor (prefix * session->frame_rate ());
 		} else {
-			cnt = (nframes_t) floor (prefix);
+			cnt = (nframes64_t) floor (prefix);
 		}
 	}
 
@@ -1408,16 +1436,16 @@ Editor::goto_frame ()
 {
 	float prefix;
 	bool was_floating;
-	nframes_t frame;
+	nframes64_t frame;
 
 	if (get_prefix (prefix, was_floating)) {
 		return;
 	}
 
 	if (was_floating) {
-		frame = (nframes_t) floor (prefix * session->frame_rate());
+		frame = (nframes64_t) floor (prefix * session->frame_rate());
 	} else {
-		frame = (nframes_t) floor (prefix);
+		frame = (nframes64_t) floor (prefix);
 	}
 
 	session->request_locate (frame);
@@ -1426,19 +1454,19 @@ Editor::goto_frame ()
 void
 Editor::scroll_backward (float pages)
 {
-	nframes_t frame;
-	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
+	nframes64_t frame;
+	nframes64_t one_page = (nframes64_t) rint (canvas_width * frames_per_unit);
 	bool was_floating;
 	float prefix;
-	nframes_t cnt;
+	nframes64_t cnt;
 	
 	if (get_prefix (prefix, was_floating)) {
-		cnt = (nframes_t) floor (pages * one_page);
+		cnt = (nframes64_t) floor (pages * one_page);
 	} else {
 		if (was_floating) {
-			cnt = (nframes_t) floor (prefix * session->frame_rate());
+			cnt = (nframes64_t) floor (prefix * session->frame_rate());
 		} else {
-			cnt = (nframes_t) floor (prefix * one_page);
+			cnt = (nframes64_t) floor (prefix * one_page);
 		}
 	}
 
@@ -1454,19 +1482,19 @@ Editor::scroll_backward (float pages)
 void
 Editor::scroll_forward (float pages)
 {
-	nframes_t frame;
-	nframes_t one_page = (nframes_t) rint (canvas_width * frames_per_unit);
+	nframes64_t frame;
+	nframes64_t one_page = (nframes64_t) rint (canvas_width * frames_per_unit);
 	bool was_floating;
 	float prefix;
-	nframes_t cnt;
+	nframes64_t cnt;
 	
 	if (get_prefix (prefix, was_floating)) {
-		cnt = (nframes_t) floor (pages * one_page);
+		cnt = (nframes64_t) floor (pages * one_page);
 	} else {
 		if (was_floating) {
-			cnt = (nframes_t) floor (prefix * session->frame_rate());
+			cnt = (nframes64_t) floor (prefix * session->frame_rate());
 		} else {
-			cnt = (nframes_t) floor (prefix * one_page);
+			cnt = (nframes64_t) floor (prefix * one_page);
 		}
 	}
 
@@ -1581,7 +1609,7 @@ Editor::temporal_zoom (gdouble fpu)
 
 	nfpu = fpu;
 	
-	new_page_size = (nframes_t) floor (canvas_width * nfpu);
+	new_page_size = (nframes64_t) floor (canvas_width * nfpu);
 	half_page_size = new_page_size / 2;
 
 	switch (zoom_focus) {
@@ -1681,12 +1709,14 @@ Editor::temporal_zoom (gdouble fpu)
 }	
 
 void
-Editor::temporal_zoom_region ()
+Editor::temporal_zoom_region (bool both_axes)
 {
 
 	nframes64_t start = max_frames;
 	nframes64_t end = 0;
 	RegionSelection rs; 
+	set<TimeAxisView*> tracks;
+	double top_y_position = DBL_MAX;
 
 	get_regions_for_action (rs);
 
@@ -1695,11 +1725,19 @@ Editor::temporal_zoom_region ()
 	}
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+
 		if ((*i)->region()->position() < start) {
 			start = (*i)->region()->position();
 		}
+
 		if ((*i)->region()->last_frame() + 1 > end) {
 			end = (*i)->region()->last_frame() + 1;
+		}
+
+		tracks.insert (&((*i)->get_time_axis_view()));
+
+		if ((*i)->get_time_axis_view().y_position < top_y_position) {
+			top_y_position = (*i)->get_time_axis_view().y_position;
 		}
 	}
 
@@ -1713,8 +1751,15 @@ Editor::temporal_zoom_region ()
 	gint mmwidth = gdk_screen_get_width_mm (screen);
 	double pix_per_mm = (double) pixwidth/ (double) mmwidth;
 	double one_centimeter_in_pixels = pix_per_mm * 10.0;
-	nframes_t extra_samples = unit_to_frame (one_centimeter_in_pixels);
-	
+
+	if ((start == 0 && end == 0) || end < start) {
+		return;
+	}
+
+	nframes64_t range = end - start;
+	double new_fpu = (double)range / (double)canvas_width;
+	nframes64_t extra_samples = (nframes64_t) floor (one_centimeter_in_pixels * new_fpu);
+
 	if (start > extra_samples) {
 		start -= extra_samples;
 	} else {
@@ -1727,17 +1772,53 @@ Editor::temporal_zoom_region ()
 		end = max_frames;
 	}
 
+	if (both_axes) {
+		/* save visual state with track states included, and prevent
+		   set_frames_per_unit() from doing it again.
+		*/
+		undo_visual_stack.push_back (current_visual_state(true));
+		no_save_visual = true;
+	}
+
 	temporal_zoom_by_frame (start, end, "zoom to region");
+
+	if (both_axes) {
+		uint32_t per_track_height = (uint32_t) floor ((canvas_height - 10.0) / tracks.size());
+		
+		/* set visible track heights appropriately */
+		
+		for (set<TimeAxisView*>::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+			(*t)->set_height (per_track_height);
+		}
+		
+		/* hide irrelevant tracks */
+		
+		no_route_list_redisplay = true;
+
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
+				hide_track_in_display (**i, true);
+			}
+		}
+
+		no_route_list_redisplay = false;
+		redisplay_route_list ();
+
+		vertical_adjustment.set_value (std::max (top_y_position - 5.0, 0.0));
+		no_save_visual = false;
+	}
+
 	zoomed_to_region = true;
+	redo_visual_stack.push_back (current_visual_state());
 }
 
 void
-Editor::toggle_zoom_region ()
+Editor::toggle_zoom_region (bool both_axes)
 {
 	if (zoomed_to_region) {
 		swap_visual_state ();
 	} else {
-		temporal_zoom_region ();
+		temporal_zoom_region (both_axes);
 	}
 }
 
@@ -1750,8 +1831,8 @@ Editor::temporal_zoom_selection ()
 		return;
 	}
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 
 	temporal_zoom_by_frame (start, end, "zoom to selection");
 }
@@ -1762,12 +1843,13 @@ Editor::temporal_zoom_session ()
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::temporal_zoom_session));
 
 	if (session) {
+		last_canvas_frame = ((session->current_end_frame() - session->current_start_frame()) + (current_page_frames() / 24));
 		temporal_zoom_by_frame (session->current_start_frame(), session->current_end_frame(), "zoom to session");
 	}
 }
 
 void
-Editor::temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & op)
+Editor::temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string & op)
 {
 	if (!session) return;
 
@@ -1775,32 +1857,23 @@ Editor::temporal_zoom_by_frame (nframes_t start, nframes_t end, const string & o
 		return;
 	}
 
-	nframes_t range = end - start;
+	nframes64_t range = end - start;
 
 	double new_fpu = (double)range / (double)canvas_width;
-// 	double p2 = 1.0;
-
-// 	while (p2 < new_fpu) {
-// 		p2 *= 2.0;
-// 	}
-// 	new_fpu = p2;
 	
-	nframes_t new_page = (nframes_t) floor (canvas_width * new_fpu);
-	nframes_t middle = (nframes_t) floor( (double)start + ((double)range / 2.0f ));
-	nframes_t new_leftmost = (nframes_t) floor( (double)middle - ((double)new_page/2.0f));
+	nframes64_t new_page = (nframes64_t) floor (canvas_width * new_fpu);
+	nframes64_t middle = (nframes64_t) floor( (double)start + ((double)range / 2.0f ));
+	nframes64_t new_leftmost = (nframes64_t) floor( (double)middle - ((double)new_page/2.0f));
 
-	if (new_leftmost > middle) new_leftmost = 0;
-
-//	begin_reversible_command (op);
-//	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
-//	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
-//	commit_reversible_command ();
+	if (new_leftmost > middle) {
+		new_leftmost = 0;
+	}
 
 	reposition_and_zoom (new_leftmost, new_fpu);
 }
 
 void 
-Editor::temporal_zoom_to_frame (bool coarser, nframes_t frame)
+Editor::temporal_zoom_to_frame (bool coarser, nframes64_t frame)
 {
 	if (!session) return;
 	
@@ -1819,7 +1892,7 @@ Editor::temporal_zoom_to_frame (bool coarser, nframes_t frame)
 
 	if (new_fpu == frames_per_unit) return;
 
-	nframes_t new_leftmost = frame - (nframes_t)range_before;
+	nframes64_t new_leftmost = frame - (nframes64_t)range_before;
 
 	if (new_leftmost > frame) new_leftmost = 0;
 
@@ -1830,6 +1903,46 @@ Editor::temporal_zoom_to_frame (bool coarser, nframes_t frame)
 
 	reposition_and_zoom (new_leftmost, new_fpu);
 }
+
+
+bool
+Editor::choose_new_marker_name(string &name) {
+
+	if (!Config->get_name_new_markers()) {
+		/* don't prompt user for a new name */
+		return true;
+	}
+
+	ArdourPrompter dialog (true);
+
+	dialog.set_prompt (_("New Name:"));
+
+	WindowTitle title(Glib::get_application_name());
+	title += _("Name New Location Marker");
+
+	dialog.set_title(title.get_string());
+
+	dialog.set_name ("MarkNameWindow");
+	dialog.set_size_request (250, -1);
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
+
+	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	dialog.set_initial_text (name);
+
+	dialog.show ();
+
+	switch (dialog.run ()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return false;
+	}
+	
+	dialog.get_result(name);
+	return true;
+
+}
+
 
 void
 Editor::add_location_from_selection ()
@@ -1844,8 +1957,8 @@ Editor::add_location_from_selection ()
 		return;
 	}
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 
 	session->locations()->next_available_name(rangename,"selection");
 	Location *location = new Location (start, end, rangename, Location::IsRangeMarker);
@@ -1866,6 +1979,9 @@ Editor::add_location_mark (nframes64_t where)
 	select_new_marker = true;
 
 	session->locations()->next_available_name(markername,"mark");
+	if (!choose_new_marker_name(markername)) {
+		return;
+	}
 	Location *location = new Location (where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
         XMLNode &before = session->locations()->get_state();
@@ -1994,7 +2110,7 @@ Editor::jump_backward_to_mark ()
 void
 Editor::set_mark ()
 {
-	nframes_t pos;
+	nframes64_t pos;
 	float prefix;
 	bool was_floating;
 	string markername;
@@ -2003,13 +2119,16 @@ Editor::set_mark ()
 		pos = session->audible_frame ();
 	} else {
 		if (was_floating) {
-			pos = (nframes_t) floor (prefix * session->frame_rate ());
+			pos = (nframes64_t) floor (prefix * session->frame_rate ());
 		} else {
-			pos = (nframes_t) floor (prefix);
+			pos = (nframes64_t) floor (prefix);
 		}
 	}
 
 	session->locations()->next_available_name(markername,"mark");
+	if (!choose_new_marker_name(markername)) {
+		return;
+	}
 	session->locations()->add (new Location (pos, 0, markername, Location::IsMark), true);
 }
 
@@ -2089,7 +2208,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	double wx, wy;
 	double cx, cy;
 	TimeAxisView *tv;
-	nframes_t where;
+	nframes64_t where;
 	RouteTimeAxisView *rtv = 0;
 	boost::shared_ptr<Playlist> playlist;
 	
@@ -2545,6 +2664,11 @@ Editor::build_interthread_progress_window ()
 
 	interthread_progress_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 	
+	interthread_progress_window->set_border_width (12);
+	interthread_progress_window->get_vbox()->set_spacing (6);
+
+	interthread_progress_label.set_alignment (0.5, 0.5);
+
 	interthread_progress_window->get_vbox()->pack_start (interthread_progress_label, false, false);
 	interthread_progress_window->get_vbox()->pack_start (interthread_progress_bar,false, false);
 
@@ -2577,17 +2701,17 @@ Editor::region_from_selection ()
 		return;
 	}
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 
-	nframes_t selection_cnt = end - start + 1;
+	nframes64_t selection_cnt = end - start + 1;
 	
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		boost::shared_ptr<AudioRegion> current;
 		boost::shared_ptr<Region> current_r;
 		boost::shared_ptr<Playlist> pl;
 
-		nframes_t internal_start;
+		nframes64_t internal_start;
 		string new_name;
 
 		if ((pl = (*i)->playlist()) == 0) {
@@ -2615,8 +2739,8 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 		return;
 	}
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 	
 	sort_track_selection ();
 
@@ -2625,7 +2749,7 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 		boost::shared_ptr<AudioRegion> current;
 		boost::shared_ptr<Region> current_r;
 		boost::shared_ptr<Playlist> playlist;
-		nframes_t internal_start;
+		nframes64_t internal_start;
 		string new_name;
 
 		if ((playlist = (*i)->playlist()) == 0) {
@@ -2762,7 +2886,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 						sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
 						latest_regionviews.clear ();
 
-						playlist->partition ((nframes_t)((*t).start * speed), (nframes_t)((*t).end * speed), true);
+						playlist->partition ((nframes64_t)((*t).start * speed), (nframes64_t)((*t).end * speed), true);
 
 						c.disconnect ();
 
@@ -2879,7 +3003,7 @@ Editor::crop_region_to_selection ()
 }		
 
 void
-Editor::crop_region_to (nframes_t start, nframes_t end)
+Editor::crop_region_to (nframes64_t start, nframes64_t end)
 {
 	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Playlist> playlist;
@@ -2913,9 +3037,9 @@ Editor::crop_region_to (nframes_t start, nframes_t end)
 		return;
 	}
 		
-	nframes_t the_start;
-	nframes_t the_end;
-	nframes_t cnt;
+	nframes64_t the_start;
+	nframes64_t the_end;
+	nframes64_t cnt;
 	
 	begin_reversible_command (_("trim to selection"));
 	
@@ -2933,7 +3057,7 @@ Editor::crop_region_to (nframes_t start, nframes_t end)
 		   if the selection extends beyond the region
 		*/
 		
-		the_start = max (the_start, region->position());
+		the_start = max (the_start, (nframes64_t) region->position());
 		if (max_frames - the_start < region->length()) {
 			the_end = the_start + region->length() - 1;
 		} else {
@@ -2954,7 +3078,7 @@ Editor::crop_region_to (nframes_t start, nframes_t end)
 void
 Editor::region_fill_track ()
 {
-	nframes_t end;
+	nframes64_t end;
 	RegionSelection rs; 
 
 	get_regions_for_action (rs);
@@ -3016,8 +3140,8 @@ Editor::region_fill_selection ()
 	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
 	boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 
 	boost::shared_ptr<Playlist> playlist; 
 
@@ -3025,7 +3149,7 @@ Editor::region_fill_selection ()
 		return;
 	}
 
-	nframes_t selection_length = end - start;
+	nframes64_t selection_length = end - start;
 	float times = (float)selection_length / region->length();
 	
 	begin_reversible_command (_("fill selection"));
@@ -3086,16 +3210,22 @@ Editor::set_sync_point (nframes64_t where, const RegionSelection& rs)
 void
 Editor::remove_region_sync ()
 {
-	begin_reversible_command (_("remove sync"));
+	RegionSelection rs; 
 
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		boost::shared_ptr<Region> r = (*i)->region();
-		XMLNode &before = r->playlist()->get_state();
-		r->clear_sync_position ();
-                XMLNode &after = r->playlist()->get_state();
-		session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
 	}
 
+	begin_reversible_command (_("remove sync"));
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+
+                XMLNode &before = (*i)->region()->playlist()->get_state();
+		(*i)->region()->clear_sync_position ();
+                XMLNode &after = (*i)->region()->playlist()->get_state();
+		session->add_command(new MementoCommand<Playlist>(*((*i)->region()->playlist()), &before, &after));
+	}
 	commit_reversible_command ();
 }
 
@@ -3158,18 +3288,19 @@ struct RegionSortByTime {
 };
 
 void
-Editor::align_selection_relative (RegionPoint point, nframes_t position, const RegionSelection& rs)
+Editor::align_selection_relative (RegionPoint point, nframes64_t position, const RegionSelection& rs)
 {
 	if (rs.empty()) {
 		return;
 	}
 
-	nframes_t distance = 0;
-	nframes_t pos = 0;
+	nframes64_t distance;
+	nframes64_t pos = 0;
 	int dir = 0;
 
 	list<RegionView*> sorted;
 	rs.by_position (sorted);
+
 	boost::shared_ptr<Region> r ((*sorted.begin())->region());
 
 	switch (point) {
@@ -3246,7 +3377,7 @@ Editor::align_selection_relative (RegionPoint point, nframes_t position, const R
 }
 
 void
-Editor::align_selection (RegionPoint point, nframes_t position, const RegionSelection& rs)
+Editor::align_selection (RegionPoint point, nframes64_t position, const RegionSelection& rs)
 {
 	if (rs.empty()) {
 		return;
@@ -3262,7 +3393,7 @@ Editor::align_selection (RegionPoint point, nframes_t position, const RegionSele
 }
 
 void
-Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, nframes_t position)
+Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, nframes64_t position)
 {
 	begin_reversible_command (_("align region"));
 	align_region_internal (region, point, position);
@@ -3270,7 +3401,7 @@ Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, nfram
 }
 
 void
-Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint point, nframes_t position)
+Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint point, nframes64_t position)
 {
 	XMLNode &before = region->playlist()->get_state();
 
@@ -3346,8 +3477,8 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 		}
 
 		float speed = 1.0;
-		nframes_t start;
-		nframes_t end;
+		nframes64_t start;
+		nframes64_t end;
 
 		if (atav->get_diskstream() != 0) {
 			speed = atav->get_diskstream()->speed();
@@ -3537,7 +3668,7 @@ Editor::freeze_route ()
 }
 
 void
-Editor::bounce_range_selection ()
+Editor::bounce_range_selection (bool replace)
 {
 	if (selection->time.empty()) {
 		return;
@@ -3545,9 +3676,9 @@ Editor::bounce_range_selection ()
 
 	TrackSelection views = selection->tracks;
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
-	nframes_t cnt = end - start + 1;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
+	nframes64_t cnt = end - start + 1;
 
 	begin_reversible_command (_("bounce range"));
 
@@ -3571,9 +3702,17 @@ Editor::bounce_range_selection ()
 		itt.cancel = false;
 		itt.progress = false;
 
-		XMLNode &before = playlist->get_state();
-		rtv->track()->bounce_range (start, cnt, itt);
-		XMLNode &after = playlist->get_state();
+                XMLNode &before = playlist->get_state();
+		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt);
+		
+		if (replace) {
+			list<AudioRange> ranges;
+			ranges.push_back (AudioRange (start, start+cnt, 0));
+			playlist->cut (ranges); // discard result
+			playlist->add_region (r, start);
+		}
+
+                XMLNode &after = playlist->get_state();
 		session->add_command (new MementoCommand<Playlist> (*playlist, &before, &after));
 	}
 	
@@ -3642,6 +3781,19 @@ Editor::cut_copy (CutCopyOp op)
 		opname = _("clear");
 		break;
 	}
+
+	/* if we're deleting something, and the mouse is still pressed,
+	   the thing we started a drag for will be gone when we release
+	   the mouse button(s). avoid this. see part 2 at the end of
+	   this function.
+	*/
+
+	if (op == Cut || op == Clear) {
+		if (drag_info.item) {
+			drag_info.item->ungrab (0);
+			drag_info.item = 0;
+		}
+	}
 	
 	cut_buffer->clear ();
 
@@ -3655,6 +3807,8 @@ Editor::cut_copy (CutCopyOp op)
 		if (session && loc) {
 			Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
+
+		break_drag ();
 
 		return;
 	}
@@ -3720,6 +3874,11 @@ Editor::cut_copy (CutCopyOp op)
 	default:
 		break;
 	}
+
+
+	if (op == Cut || op == Clear) {
+		break_drag ();
+	}
 }
 
 /** Cut, copy or clear selected automation points.
@@ -3769,7 +3928,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 	vector<PlaylistMapping> pmap;
 
-	nframes_t first_position = max_frames;
+	nframes64_t first_position = max_frames;
 	
 	set<PlaylistState, lt_playlist> freezelist;
 	pair<set<PlaylistState, lt_playlist>::iterator,bool> insert_result;
@@ -3780,7 +3939,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 
-		first_position = min ((*x)->region()->position(), first_position);
+		first_position = min ((nframes64_t) (*x)->region()->position(), first_position);
 
 		if (op == Cut || op == Clear) {
 			boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
@@ -3934,7 +4093,7 @@ Editor::mouse_paste ()
 }
 
 void
-Editor::paste_internal (nframes_t position, float times)
+Editor::paste_internal (nframes64_t position, float times)
 {
 	bool commit = false;
 
@@ -4152,9 +4311,9 @@ void
 Editor::nudge_track (bool use_edit, bool forwards)
 {
 	boost::shared_ptr<Playlist> playlist; 
-	nframes_t distance;
-	nframes_t next_distance;
-	nframes_t start;
+	nframes64_t distance;
+	nframes64_t next_distance;
+	nframes64_t start;
 
 	if (use_edit) {
 		start = get_preferred_edit_position();
@@ -4442,7 +4601,7 @@ Editor::external_edit_region ()
 }
 
 void
-Editor::brush (nframes_t pos)
+Editor::brush (nframes64_t pos)
 {
 	RegionSelection sel;
 	RegionSelection rs; 
@@ -4586,7 +4745,7 @@ Editor::set_fade_length (bool in)
 	}
 
 	nframes64_t pos = get_preferred_edit_position();
-	nframes_t len;
+	nframes64_t len;
 	char* cmd;
 	
 	if (pos > rv->region()->last_frame() || pos < rv->region()->first_frame()) {
@@ -5029,8 +5188,8 @@ Editor::set_loop_from_selection (bool play)
 		return;
 	}
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 	
 	set_loop_range (start, end,  _("set loop range from selection"));
 
@@ -5100,8 +5259,8 @@ Editor::set_punch_from_selection ()
 		return;
 	}
 
-	nframes_t start = selection->time[clicked_selection].start;
-	nframes_t end = selection->time[clicked_selection].end;
+	nframes64_t start = selection->time[clicked_selection].start;
+	nframes64_t end = selection->time[clicked_selection].end;
 	
 	set_punch_range (start, end,  _("set punch range from selection"));
 }
@@ -5517,14 +5676,13 @@ Editor::tab_to_transient (bool forward)
 		}
 	}
 }
-
 void
 Editor::playhead_forward_to_grid ()
 {
 	if (!session) return;
 	nframes64_t pos = playhead_cursor->current_frame;
-	if (pos < max_frames) {
-		pos++;
+	if (pos < max_frames - 1) {
+		pos += 2;
 		snap_to_internal (pos, 1, false);
 		session->request_locate (pos);
 	}
@@ -5536,15 +5694,15 @@ Editor::playhead_backward_to_grid ()
 {
 	if (!session) return;
 	nframes64_t pos = playhead_cursor->current_frame;
-	if (pos > 1) {
-		pos--;
+	if (pos > 2) {
+		pos -= 2;
 		snap_to_internal (pos, -1, false);
 		session->request_locate (pos);
 	}
 }
 
 void
-Editor::set_track_height (TimeAxisView::TrackHeight h)
+Editor::set_track_height (uint32_t h)
 {
 	TrackSelection& ts (selection->tracks);
 
@@ -5560,32 +5718,32 @@ Editor::set_track_height (TimeAxisView::TrackHeight h)
 void
 Editor::set_track_height_largest ()
 {
-	set_track_height (TimeAxisView::Largest);
+	set_track_height (TimeAxisView::hLargest);
 }
 void
 Editor::set_track_height_large ()
 {
-	set_track_height (TimeAxisView::Large);
+	set_track_height (TimeAxisView::hLarge);
 }
 void
 Editor::set_track_height_larger ()
 {
-	set_track_height (TimeAxisView::Larger);
+	set_track_height (TimeAxisView::hLarger);
 }
 void
 Editor::set_track_height_normal ()
 {
-	set_track_height (TimeAxisView::Normal);
+	set_track_height (TimeAxisView::hNormal);
 }
 void
 Editor::set_track_height_smaller ()
 {
-	set_track_height (TimeAxisView::Smaller);
+	set_track_height (TimeAxisView::hSmaller);
 }
 void
 Editor::set_track_height_small ()
 {
-	set_track_height (TimeAxisView::Small);
+	set_track_height (TimeAxisView::hSmall);
 }
 
 void
@@ -5725,7 +5883,8 @@ Editor::do_insert_time ()
 	RadioButton move_button (group, _("Move"));
 	RadioButton split_button (group, _("Split & Later Section Moves"));
 	Label intersect_option_label (_("Intersected regions should:"));
-	ToggleButton glue_button (_("Move Glued Regions"));
+	CheckButton glue_button (_("Move Glued Regions"));
+	CheckButton marker_button (_("Move Markers"));
 	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
 	HBox clock_box;
 
@@ -5739,6 +5898,7 @@ Editor::do_insert_time ()
 	option_box.pack_start (intersect_option_label, false, false);
 	option_box.pack_start (button_box, false, false);
 	option_box.pack_start (glue_button, false, false);
+	option_box.pack_start (marker_button, false, false);
 
 	button_box.pack_start (leave_button, false, false);
 	button_box.pack_start (move_button, false, false);
@@ -5757,6 +5917,7 @@ Editor::do_insert_time ()
 	glue_button.show ();
 	clock.show_all();
 	clock_box.show ();
+	marker_button.show ();
 
 	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
@@ -5768,7 +5929,7 @@ Editor::do_insert_time ()
 		return;
 	}
 	
-	nframes_t distance = clock.current_duration (pos);
+	nframes64_t distance = clock.current_duration (pos);
 
 	if (distance == 0) {
 		return;
@@ -5784,11 +5945,12 @@ Editor::do_insert_time ()
 		opt = SplitIntersected;
 	}
 
-	insert_time (pos, distance, opt, glue_button.get_active());
+	insert_time (pos, distance, opt, glue_button.get_active(), marker_button.get_active());
 }
-				
+
 void
-Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt, bool ignore_music_glue)
+Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt, 
+		     bool ignore_music_glue, bool markers_too)
 {
 	bool commit = false;
 
@@ -5819,7 +5981,130 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt, 
 		commit = true;
 	}
 
+	if (markers_too) {
+		bool moved = false;
+		XMLNode& before (session->locations()->get_state());
+		Locations::LocationList copy (session->locations()->list());
+
+		for (Locations::LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
+			
+			Locations::LocationList::const_iterator tmp;
+
+			if ((*i)->start() >= pos) {
+				(*i)->set_start ((*i)->start() + frames);
+				if (!(*i)->is_mark()) {
+					(*i)->set_end ((*i)->end() + frames);
+				}
+				moved = true;
+			}
+		}
+
+		if (moved) {
+			XMLNode& after (session->locations()->get_state());
+			session->add_command (new MementoCommand<Locations>(*session->locations(), &before, &after));
+		}
+	}
+
 	if (commit) {
 		commit_reversible_command ();
 	}
+}
+
+void
+Editor::fit_tracks ()
+{
+	if (selection->tracks.empty()) {
+		return;
+	}
+
+	uint32_t child_heights = 0;
+
+	for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+
+		if (!(*t)->marked_for_display()) {
+			continue;
+		}
+
+		child_heights += ((*t)->effective_height - (*t)->current_height());
+	}
+
+	uint32_t h = (uint32_t) floor ((canvas_height - child_heights)/selection->tracks.size());
+	double first_y_pos = DBL_MAX;
+
+	undo_visual_stack.push_back (current_visual_state());
+	
+	for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
+		(*t)->set_height (h);
+		first_y_pos = std::min ((*t)->y_position, first_y_pos);
+	}
+
+
+	vertical_adjustment.set_value (first_y_pos);
+
+	redo_visual_stack.push_back (current_visual_state());
+}
+
+void
+Editor::save_visual_state (uint32_t n)
+{
+	while (visual_states.size() <= n) {
+		visual_states.push_back (0);
+	}
+
+	if (visual_states[n] != 0) {
+		delete visual_states[n];
+	}
+
+	visual_states[n] = current_visual_state (true);
+	gdk_beep ();
+}
+
+void
+Editor::goto_visual_state (uint32_t n)
+{
+	if (visual_states.size() <= n) {
+		return;
+	}
+
+	if (visual_states[n] == 0) {
+		return;
+	}
+
+	use_visual_state (*visual_states[n]);
+}
+
+void
+Editor::start_visual_state_op (uint32_t n)
+{
+	cerr << "Start\n";
+	if (visual_state_op_connection.empty()) {
+		cerr << "\tqueue\n";
+		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
+	}
+}
+
+void
+Editor::cancel_visual_state_op (uint32_t n)
+{
+	cerr << "Cancel\n";
+	if (!visual_state_op_connection.empty()) {
+		cerr << "\tgoto\n";
+		visual_state_op_connection.disconnect();
+		goto_visual_state (n);
+	} 
+}
+
+bool
+Editor::end_visual_state_op (uint32_t n)
+{
+	visual_state_op_connection.disconnect();
+	save_visual_state (n);
+	
+	PopUp* pup = new PopUp (WIN_POS_MOUSE, 1000, true);
+	char buf[32];
+	snprintf (buf, sizeof (buf), _("Saved view %u"), n+1);
+	pup->set_text (buf);
+	pup->touch();
+
+	return false; // do not call again
 }

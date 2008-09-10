@@ -40,7 +40,7 @@
 #include "enums.h"
 #include "time_axis_view.h"
 #include "canvas.h"
-#include "level_meter.h"
+#include "gain_meter.h"
 
 
 namespace ARDOUR {
@@ -74,7 +74,7 @@ public:
 	void show_selection (TimeSelection&);
 
 	void set_samples_per_unit (double);
- 	void set_height (TimeAxisView::TrackHeight);
+ 	void set_height (uint32_t h);
 	void show_timestretch (nframes_t start, nframes_t end);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
@@ -117,6 +117,10 @@ public:
 
 	virtual void create_automation_child (ARDOUR::Parameter param, bool show) = 0;
 	
+	/* make sure we get the right version of this */
+
+	XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param) { return RouteUI::get_automation_child_xml_node (param); }
+	
 	typedef map<ARDOUR::Parameter, RouteAutomationNode*> AutomationTracks;
 	AutomationTracks automation_tracks() { return _automation_tracks; }
 
@@ -134,7 +138,9 @@ public:
 	void clear_meter ();
 	void io_changed (ARDOUR::IOChange, void *);
 	void meter_changed (void *);
-	void effective_gain_display ();
+	void effective_gain_display () { gm.effective_gain_display(); }
+
+	static void setup_slider_pix ();
 
 protected:
 	friend class StreamView;
@@ -297,11 +303,9 @@ protected:
 
 	void post_construct ();
 	
-	void set_state (const XMLNode&);
-	
-	XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param);
+	GainMeterBase gm;
 
-	LevelMeter	lm;
+	static Glib::RefPtr<Gdk::Pixbuf> slider;
 
 	XMLNode* underlay_xml_node;
 	bool set_underlay_state();
@@ -310,16 +314,6 @@ protected:
 	UnderlayList _underlay_streams;
 	typedef list<RouteTimeAxisView*> UnderlayMirrorList;
 	UnderlayMirrorList _underlay_mirrors;
-
-	Gtkmm2ext::HSliderController *gain_slider;
-	Gtk::Adjustment              gain_adjustment;
-	static Glib::RefPtr<Gdk::Pixbuf> slider;
-	static int setup_slider_pix ();
-	void gain_adjusted();
-
-	gint start_gain_touch (GdkEventButton*);
-	gint end_gain_touch (GdkEventButton*);
-	void gain_changed ();
 };
 
 #endif /* __ardour_route_time_axis_h__ */

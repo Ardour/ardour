@@ -459,15 +459,16 @@ Session::import_audiofiles (import_status& status)
 			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
 				afs->update_header(0, *now, xnow);
 				afs->done_with_peakfile_writes ();
+			
+				/* now that there is data there, requeue the file for analysis */
+				
+				if (Config->get_auto_analyse_audio()) {
+					Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
+				}
 			}
 			
-			/* now that there is data there, requeue the file for analysis */
-			
-			if (Config->get_auto_analyse_audio()) {
-				Analyser::queue_source_for_analysis (boost::static_pointer_cast<Source>(*x), false);
-			}
-
 			/* don't create tracks for empty MIDI sources (channels) */
+
 			if ((smfs = boost::dynamic_pointer_cast<SMFSource>(*x)) != 0 && smfs->is_empty()) {
 				x = all_new_sources.erase(x);
 			} else {

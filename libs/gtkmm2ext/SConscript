@@ -6,7 +6,7 @@ import glob
 
 Import('env final_prefix install_prefix libraries i18n')
 
-gtkmm2ext = env.Copy()
+gtkmm2ext = env.Clone()
 gtkmm2ext.Merge ([ 
     libraries['sigc2'], 
     libraries['pbd'],
@@ -48,9 +48,7 @@ fastmeter.cc
 focus_entry.cc
 grouped_buttons.cc
 gtk_ui.cc
-hexentry.cc
 idle_adjustment.cc
-pathlist.cc
 pixfader.cc
 pixscroller.cc
 popup.cc

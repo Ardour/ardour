@@ -164,7 +164,7 @@ class MidiRegionView : public RegionView
 	
 	/**
 	 * This function provides the snap function for region position relative coordinates
-	 * for pixel units (double) instead of nframes_t
+	 * for pixel units (double) instead of nframes64_t
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped pixel coordinate relative to region start
 	 */
@@ -172,18 +172,18 @@ class MidiRegionView : public RegionView
 
 	/**
 	 * This function provides the snap function for region position relative coordinates
-	 * for pixel units (double) instead of nframes_t
+	 * for pixel units (double) instead of nframes64_t
 	 * @param x a pixel coordinate relative to region start
-	 * @return the snapped nframes_t coordinate relative to region start
+	 * @return the snapped nframes64_t coordinate relative to region start
 	 */
-	nframes_t snap_to_frame(double x);
+	nframes64_t snap_to_frame(double x);
 
 	/**
 	 * This function provides the snap function for region position relative coordinates
 	 * @param x a pixel coordinate relative to region start
-	 * @return the snapped nframes_t coordinate relative to region start
+	 * @return the snapped nframes64_t coordinate relative to region start
 	 */
-	nframes_t snap_to_frame(nframes_t x);
+	nframes64_t snap_to_frame(nframes64_t x);
 	
   protected:
 

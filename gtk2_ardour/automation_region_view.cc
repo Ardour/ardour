@@ -53,7 +53,7 @@ AutomationRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
-	set_y_position_and_height (0, trackview.height);
+	set_height (trackview.current_height());
 
 	_region->StateChanged.connect (mem_fun(*this, &AutomationRegionView::region_changed));
 
@@ -90,8 +90,8 @@ AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, dou
 
 	/* compute vertical fractional position */
 
-	const double height = trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
-	y = 1.0 - (y / height);
+	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
+	y = 1.0 - (y / h);
 
 	/* map using line */
 

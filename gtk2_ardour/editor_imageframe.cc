@@ -95,10 +95,10 @@ void
 Editor::scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)
 {
 	// GTK2FIX
-	//nframes_t offset = static_cast<nframes_t>(frames_per_unit * (edit_hscroll_slider_width/2)) ;
-	nframes_t offset = 0;
+	//nframes64_t offset = static_cast<nframes64_t>(frames_per_unit * (edit_hscroll_slider_width/2)) ;
+	nframes64_t offset = 0;
 
-	nframes_t x_pos = 0 ;
+	nframes64_t x_pos = 0 ;
 
 	if (item->get_position() < offset) {
 		x_pos = 0 ;
@@ -493,14 +493,14 @@ Editor::markerview_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 	double cx, cy ;
 
   	MarkerView* mv = reinterpret_cast<MarkerView*>(drag_info.data) ;
-	nframes_t pending_region_position ;
-	nframes_t pointer_frame ;
+	nframes64_t pending_region_position ;
+	nframes64_t pointer_frame ;
 
 	pointer_frame = event_frame(event, &cx, &cy) ;
 
   	snap_to(pointer_frame) ;
 
-	if (pointer_frame > (nframes_t) drag_info.pointer_frame_offset)
+	if (pointer_frame > (nframes64_t) drag_info.pointer_frame_offset)
 	{
 		pending_region_position = pointer_frame - drag_info.pointer_frame_offset ;
 		snap_to(pending_region_position) ;
@@ -541,14 +541,14 @@ Editor::imageframe_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 	
 	ImageFrameView* ifv = reinterpret_cast<ImageFrameView*>(drag_info.data) ;
 	
-	nframes_t pending_region_position;
-	nframes_t pointer_frame;
+	nframes64_t pending_region_position;
+	nframes64_t pointer_frame;
 
 	pointer_frame = event_frame(event, &cx, &cy) ;
 
 	snap_to(pointer_frame) ;
 
-	if (pointer_frame > (nframes_t) drag_info.pointer_frame_offset)
+	if (pointer_frame > (nframes64_t) drag_info.pointer_frame_offset)
 	{
 		pending_region_position = pointer_frame - drag_info.pointer_frame_offset ;
 		snap_to(pending_region_position) ;
@@ -576,7 +576,7 @@ Editor::imageframe_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 void
 Editor::timeaxis_item_drag_finished_callback(ArdourCanvas::Item*, GdkEvent* event)
 {
-	nframes_t where ;
+	nframes64_t where ;
 	TimeAxisViewItem* tavi = reinterpret_cast<TimeAxisViewItem*>(drag_info.data) ;
 
 	bool item_x_movement = (drag_info.last_frame_position != tavi->get_position()) ;
@@ -674,9 +674,9 @@ Editor::imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 {
 	ImageFrameView* ifv = reinterpret_cast<ImageFrameView*> (drag_info.data) ;
 	
-	nframes_t start = 0 ;
-	nframes_t end = 0 ;
-	nframes_t pointer_frame = event_frame(event) ;
+	nframes64_t start = 0 ;
+	nframes64_t end = 0 ;
+	nframes64_t pointer_frame = event_frame(event) ;
 	
 	// chekc th eposition of the item is not locked
 	if(!ifv->get_position_locked()) {
@@ -693,7 +693,7 @@ Editor::imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 			}
 			
 			// are we getting bigger or smaller?
-			nframes_t new_dur_val = end - start ;
+			nframes64_t new_dur_val = end - start ;
 			
 			// start handle, so a smaller pointer frame increases our component size
 			if(pointer_frame <= drag_info.grab_frame) 
@@ -751,10 +751,10 @@ Editor::imageframe_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* eve
 	}
 	else
 	{
-		nframes_t temp = ifv->get_position() + ifv->get_duration() ;
+		nframes64_t temp = ifv->get_position() + ifv->get_duration() ;
 		
-		ifv->set_position((nframes_t) (temp - drag_info.cumulative_x_drag), this) ;
-		ifv->set_duration((nframes_t) drag_info.cumulative_x_drag, this) ;
+		ifv->set_position((nframes64_t) (temp - drag_info.cumulative_x_drag), this) ;
+		ifv->set_duration((nframes64_t) drag_info.cumulative_x_drag, this) ;
 	}
 }
 
@@ -763,10 +763,10 @@ Editor::imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 {
 	ImageFrameView* ifv = reinterpret_cast<ImageFrameView *> (drag_info.data) ;
 	
-	nframes_t start = 0 ;
-	nframes_t end = 0 ;
-	nframes_t pointer_frame = event_frame(event) ;
-	nframes_t new_dur_val = 0 ;
+	nframes64_t start = 0 ;
+	nframes64_t end = 0 ;
+	nframes64_t pointer_frame = event_frame(event) ;
+	nframes64_t new_dur_val = 0 ;
 
 	snap_to(pointer_frame) ;
 	
@@ -828,7 +828,7 @@ Editor::imageframe_end_handle_end_trim (ArdourCanvas::Item* item, GdkEvent* even
 	}
 	else
 	{
-		nframes_t new_duration = (nframes_t)drag_info.cumulative_x_drag ;
+		nframes64_t new_duration = (nframes64_t)drag_info.cumulative_x_drag ;
 		if((new_duration <= ifv->get_max_duration()) && (new_duration >= ifv->get_min_duration()))
 		{
 			ifv->set_duration(new_duration, this) ;
@@ -888,9 +888,9 @@ Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 {
 	MarkerView* mv = reinterpret_cast<MarkerView*> (drag_info.data) ;
 	
-	nframes_t start = 0 ;
-	nframes_t end = 0 ;
-	nframes_t pointer_frame = event_frame(event) ;
+	nframes64_t start = 0 ;
+	nframes64_t end = 0 ;
+	nframes64_t pointer_frame = event_frame(event) ;
 	
 	// chekc th eposition of the item is not locked
 	if(!mv->get_position_locked())
@@ -911,7 +911,7 @@ Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 			}
 			
 			// are we getting bigger or smaller?
-			nframes_t new_dur_val = end - start ;
+			nframes64_t new_dur_val = end - start ;
 			
 			if(pointer_frame <= drag_info.grab_frame)
 			{
@@ -968,10 +968,10 @@ Editor::markerview_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* eve
 	}
 	else
 	{
-		nframes_t temp = mv->get_position() + mv->get_duration() ;
+		nframes64_t temp = mv->get_position() + mv->get_duration() ;
 		
-		mv->set_position((nframes_t) (temp - drag_info.cumulative_x_drag), this) ;
-		mv->set_duration((nframes_t) drag_info.cumulative_x_drag, this) ;
+		mv->set_position((nframes64_t) (temp - drag_info.cumulative_x_drag), this) ;
+		mv->set_duration((nframes64_t) drag_info.cumulative_x_drag, this) ;
 	}
 }
 
@@ -980,10 +980,10 @@ Editor::markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 {
 	MarkerView* mv = reinterpret_cast<MarkerView*> (drag_info.data) ;
 	
-	nframes_t start = 0 ;
-	nframes_t end = 0 ;
-	nframes_t pointer_frame = event_frame(event) ;
-	nframes_t new_dur_val = 0 ;
+	nframes64_t start = 0 ;
+	nframes64_t end = 0 ;
+	nframes64_t pointer_frame = event_frame(event) ;
+	nframes64_t new_dur_val = 0 ;
 
 	snap_to(pointer_frame) ;
 	
@@ -1008,7 +1008,7 @@ Editor::markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 		{
 			// we cant extend beyond the item we are marking
 			ImageFrameView* marked_item = mv->get_marked_item() ;
-			nframes_t marked_end = marked_item->get_position() + marked_item->get_duration() ;
+			nframes64_t marked_end = marked_item->get_position() + marked_item->get_duration() ;
 			
 			if(mv->get_max_duration_active() && (new_dur_val > mv->get_max_duration()))
 			{
@@ -1062,7 +1062,7 @@ Editor::markerview_end_handle_end_trim (ArdourCanvas::Item* item, GdkEvent* even
 	}
 	else
 	{
-		nframes_t new_duration = (nframes_t)drag_info.cumulative_x_drag ;
+		nframes64_t new_duration = (nframes64_t)drag_info.cumulative_x_drag ;
 		mv->set_duration(new_duration, this) ;
 	}
 }

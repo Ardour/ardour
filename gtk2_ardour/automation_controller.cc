@@ -33,7 +33,7 @@ using namespace Gtk;
 
 
 AutomationController::AutomationController(boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
-	: BarController(*adj, *ac)
+	: BarController(*adj, ac)
 	, _ignore_change(false)
 	, _controllable(ac)
 	, _adjustment(adj)

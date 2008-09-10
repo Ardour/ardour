@@ -36,7 +36,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 BarController::BarController (Gtk::Adjustment& adj,
-			      PBD::Controllable& mc,
+			      boost::shared_ptr<PBD::Controllable> mc,
 			      sigc::slot<void,char*,unsigned int> lc) 
 
 	: adjustment (adj),

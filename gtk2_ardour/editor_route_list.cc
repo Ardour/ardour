@@ -148,10 +148,17 @@ Editor::handle_gui_changes (const string & what, void *src)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
 	
 	if (what == "track_height") {
+		/* make tracks change height while it happens, instead 
+		   of on first-idle
+		*/
+		track_canvas->update_now ();
+		redisplay_route_list ();
+	}
+
+	if (what == "visible_tracks") {
 		redisplay_route_list ();
 	}
 }
-
 
 void
 Editor::remove_route (TimeAxisView *tv)
@@ -161,6 +168,10 @@ Editor::remove_route (TimeAxisView *tv)
 	TrackViewList::iterator i;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
+
+	if (tv == entered_track) {
+		entered_track = 0;
+	}
 
 	/* Decrement old order keys for tracks `above' the one that is being removed */
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
@@ -209,11 +220,27 @@ Editor::route_name_changed (TimeAxisView *tv)
 			break;
 		}
 	} 
-
 }
 
 void
-Editor::hide_track_in_display (TimeAxisView& tv)
+Editor::update_route_visibility ()
+{
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator i;
+	
+	no_route_list_redisplay = true;
+
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		TimeAxisView *tv = (*i)[route_display_columns.tv];
+		(*i)[route_display_columns.visible] = tv->marked_for_display ();
+	}
+
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
+}
+
+void
+Editor::hide_track_in_display (TimeAxisView& tv, bool temponly)
 {
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
@@ -221,6 +248,9 @@ Editor::hide_track_in_display (TimeAxisView& tv)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
 			(*i)[route_display_columns.visible] = false;
+			// if (temponly) {
+			tv.set_marked_for_display (false);
+			// }
 			break;
 		}
 	}
@@ -598,7 +628,6 @@ Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 	redisplay_route_list ();
 }
 
-
 void  
 Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
 						int x, int y, 
@@ -615,7 +644,6 @@ Editor::route_list_display_drag_data_received (const RefPtr<Gdk::DragContext>& c
 	cerr << "some other kind of drag\n";
 	context->drag_finish (true, false, time);
 }
-
 
 RouteTimeAxisView*
 Editor::get_route_view_by_id (PBD::ID& id)

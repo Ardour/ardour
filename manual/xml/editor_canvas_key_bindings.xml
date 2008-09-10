@@ -25,81 +25,61 @@
       <tbody>
         <row>
           <entry>
-            <keycombo><keycap>left arrow</keycap> </keycombo>
+            <keycombo><keycap>f</keycap></keycombo>
           </entry>
 
           <entry>
-            move editor timeline earlier
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>b</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            move editor timeline earlier
+            fit tracks
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>right arrow</keycap> </keycombo>
+            <keycombo><keycap>Up</keycap></keycombo>
           </entry>
 
           <entry>
-            move editor timeline later
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>f</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            move editor timeline later
+            step tracks up
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>Page_Up</keycap> </keycombo>
+            <keycombo><keycap>Down</keycap></keycombo>
           </entry>
 
           <entry>
-            scroll track display up
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Page_Down</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            scroll track display down
+            step tracks down
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>Up arrow</keycap> </keycombo>
+            <keycombo><keycap>Page_Down</keycap></keycombo>
           </entry>
 
           <entry>
-            step track display up
+            scroll tracks down
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>Down arrow</keycap> </keycombo>
+            <keycombo><keycap>Page_Up</keycap></keycombo>
           </entry>
 
           <entry>
-            step track display down
+            scroll tracks up
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Shift</keycap><keycap>e</keycap></keycombo>
+          </entry>
+
+          <entry>
+            show editor mixer
           </entry>
         </row>
       </tbody>

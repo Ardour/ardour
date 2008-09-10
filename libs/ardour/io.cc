@@ -24,6 +24,7 @@
 
 #include <sigc++/bind.h>
 
+#include <glibmm.h>
 #include <glibmm/thread.h>
 
 #include <pbd/xml++.h>
@@ -358,14 +359,16 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 	
 	for (std::vector<UserBundleInfo>::iterator i = list.begin(); i != list.end(); ++i) {
 
-		uint32_t const N = i->bundle->nchannels ();
+		ChanCount const N = i->bundle->nchannels ();
 
-		if (ports.num_ports() < N) {
+		if (ports.num_ports (default_type()) < N.get (default_type())) {
 			continue;
 		}
 
 		bool ok = true;
-		for (uint32_t j = 0; j < N; ++j) {
+		uint32_t n = N.get (default_type());
+
+		for (uint32_t j = 0; j < n; ++j) {
 			/* Every port on bundle channel j must be connected to our input j */
 			PortList const pl = i->bundle->channel_ports (j);
 			for (uint32_t k = 0; k < pl.size(); ++k) {
@@ -730,7 +733,7 @@ IO::add_input_port (string source, void* src, DataType type)
 		{ 
 			Glib::Mutex::Lock lm (io_lock);
 
-			if (n_inputs() >= _input_maximum) {
+			if (_input_maximum.get(type) >= 0 && n_inputs().get (type) >= _input_maximum.get (type)) {
 				return -1;
 			}
 
@@ -1460,16 +1463,12 @@ IO::load_automation (string path)
 	float version;
 	LocaleGuard lg (X_("POSIX"));
 
-	fullpath = _session.automation_dir();
-	fullpath += path;
+	fullpath = Glib::build_filename(_session.automation_dir(), path);
 
 	in.open (fullpath.c_str());
 
 	if (!in) {
-		fullpath = _session.automation_dir();
-		fullpath += _session.snap_name();
-		fullpath += '-';
-		fullpath += path;
+		fullpath = Glib::build_filename(_session.automation_dir(), _session.snap_name() + '-' + path);
 
 		in.open (fullpath.c_str());
 
@@ -1573,23 +1572,138 @@ IO::ports_became_legal ()
 	return ret;
 }
 
+boost::shared_ptr<Bundle>
+IO::find_possible_bundle (const string &desired_name, const string &default_name, const string &bundle_type_name) 
+{
+	static const string digits = "0123456789";
+
+	boost::shared_ptr<Bundle> c = _session.bundle_by_name (desired_name);
+
+	if (!c) {
+		int bundle_number, mask;
+		string possible_name;
+		bool stereo = false;
+		string::size_type last_non_digit_pos;
+
+		error << string_compose(_("Unknown bundle \"%1\" listed for %2 of %3"), desired_name, bundle_type_name, _name)
+		      << endmsg;
+
+		// find numeric suffix of desired name
+		bundle_number = 0;
+		
+		last_non_digit_pos = desired_name.find_last_not_of(digits);
+
+		if (last_non_digit_pos != string::npos) {
+			stringstream s;
+			s << desired_name.substr(last_non_digit_pos);
+			s >> bundle_number;
+		}
+	
+		// see if it's a stereo connection e.g. "in 3+4"
+
+		if (last_non_digit_pos > 1 && desired_name[last_non_digit_pos] == '+') {
+			int left_bundle_number = 0;
+			string::size_type left_last_non_digit_pos;
+
+			left_last_non_digit_pos = desired_name.find_last_not_of(digits, last_non_digit_pos-1);
+
+			if (left_last_non_digit_pos != string::npos) {
+				stringstream s;
+				s << desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
+				s >> left_bundle_number;
+
+				if (left_bundle_number > 0 && left_bundle_number + 1 == bundle_number) {
+					bundle_number--;
+					stereo = true;
+				}
+			}
+		}
+
+		// make 0-based
+		if (bundle_number)
+			bundle_number--;
+
+		// find highest set bit
+		mask = 1;
+		while ((mask <= bundle_number) && (mask <<= 1));
+		
+		// "wrap" bundle number into largest possible power of 2 
+		// that works...
+
+		while (mask) {
+
+			if (bundle_number & mask) {
+				bundle_number &= ~mask;
+				
+				stringstream s;
+				s << default_name << " " << bundle_number + 1;
+
+				if (stereo) {
+					s << "+" << bundle_number + 2;
+				}
+				
+				possible_name = s.str();
+
+				if ((c = _session.bundle_by_name (possible_name)) != 0) {
+					break;
+				}
+			}
+			mask >>= 1;
+		}
+		if (c) {
+			info << string_compose (_("Bundle %1 was not available - \"%2\" used instead"), desired_name, possible_name)
+			     << endmsg;
+		} else {
+			error << string_compose(_("No %1 bundles available as a replacement"), bundle_type_name)
+			      << endmsg;
+		}
+
+	}
+
+	return c;
+
+}
+
 int
 IO::create_ports (const XMLNode& node)
 {
 	XMLProperty const * prop;
-	int num_inputs = 0;
-	int num_outputs = 0;
+	ChanCount num_inputs;
+	ChanCount num_outputs;
 
-	if ((prop = node.property ("inputs")) != 0) {
-		num_inputs = count (prop->value().begin(), prop->value().end(), '{');
+	if ((prop = node.property ("input-connection")) != 0) {
+
+		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("in"), _("input"));
+		
+		if (!c) {
+			return -1;
+		} 
+
+		num_inputs = c->nchannels();
+
+	} else if ((prop = node.property ("inputs")) != 0) {
+
+		num_inputs.set (default_type(), count (prop->value().begin(), prop->value().end(), '{'));
+	}
+	
+	if ((prop = node.property ("output-connection")) != 0) {
+
+		boost::shared_ptr<Bundle> c = find_possible_bundle(prop->value(), _("out"), _("output"));
+
+		if (!c) {
+			return -1;
+		} 
+
+		num_outputs = c->nchannels ();
+		
 	} else if ((prop = node.property ("outputs")) != 0) {
-		num_outputs = count (prop->value().begin(), prop->value().end(), '{');
+
+		num_outputs.set (default_type(), count (prop->value().begin(), prop->value().end(), '{'));
 	}
 
 	no_panner_reset = true;
 
-	// FIXME: audio-only
-	if (ensure_io (ChanCount(DataType::AUDIO, num_inputs), ChanCount(DataType::AUDIO, num_outputs), true, this)) {
+	if (ensure_io (num_inputs, num_outputs, true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
 	}
@@ -1606,17 +1720,35 @@ IO::create_ports (const XMLNode& node)
 int
 IO::make_connections (const XMLNode& node)
 {
-	XMLProperty const * prop;
-	
-	if ((prop = node.property ("inputs")) != 0) {
+
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("input-connection")) != 0) {
+		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("in"), _("input"));
+		
+		if (!c) {
+			return -1;
+		} 
+
+		connect_input_ports_to_bundle (c, this);
+
+	} else if ((prop = node.property ("inputs")) != 0) {
 		if (set_inputs (prop->value())) {
 			error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
 			return -1;
 		}
 	}
 
-				
-	if ((prop = node.property ("outputs")) != 0) {
+	if ((prop = node.property ("output-connection")) != 0) {
+		boost::shared_ptr<Bundle> c = find_possible_bundle (prop->value(), _("out"), _("output"));
+		
+		if (!c) {
+			return -1;
+		} 
+		
+		connect_output_ports_to_bundle (c, this);
+		
+	} else if ((prop = node.property ("outputs")) != 0) {
 		if (set_outputs (prop->value())) {
 			error << string_compose(_("improper output channel list in XML node (%1)"), prop->value()) << endmsg;
 			return -1;
@@ -1628,23 +1760,19 @@ IO::make_connections (const XMLNode& node)
 		if ((*i)->name() == "InputBundle") {
 			XMLProperty const * prop = (*i)->property ("name");
 			if (prop) {
-				boost::shared_ptr<Bundle> b = _session.bundle_by_name (prop->value());
+				boost::shared_ptr<Bundle> b = find_possible_bundle (prop->value(), _("in"), _("input"));
 				if (b) {
 					connect_input_ports_to_bundle (b, this);
-				} else {
-					error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
 				}
 			}
 			
 		} else if ((*i)->name() == "OutputBundle") {
 			XMLProperty const * prop = (*i)->property ("name");
 			if (prop) {
-				boost::shared_ptr<Bundle> b = _session.bundle_by_name (prop->value());
+				boost::shared_ptr<Bundle> b = find_possible_bundle (prop->value(), _("out"), _("output"));
 				if (b) {
 					connect_output_ports_to_bundle (b, this);
-				} else {
-					error << string_compose(_("Unknown bundle \"%1\" listed for output of %2"), prop->value(), _name) << endmsg;
-				}
+				} 
 			}
 		}
 	}
@@ -1924,9 +2052,10 @@ IO::connect_input_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		/* Connect to the bundle, not worrying about any connections
 		   that are already made. */
 
-		uint32_t const channels = c->nchannels ();
-		
-		for (uint32_t n = 0; n < channels; ++n) {
+		ChanCount const channels = c->nchannels ();
+		uint32_t cnt = channels.get (default_type());
+
+		for (uint32_t n = 0; n < cnt; ++n) {
 			const PortList& pl = c->channel_ports (n);
 
 			for (PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
@@ -1973,9 +2102,10 @@ IO::connect_output_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		/* Connect to the bundle, not worrying about any connections
 		   that are already made. */
 
-		uint32_t const channels = c->nchannels ();
+		ChanCount const channels = c->nchannels ();
+		uint32_t cnt = channels.get (default_type());
 
-		for (uint32_t n = 0; n < channels; ++n) {
+		for (uint32_t n = 0; n < cnt; ++n) {
 
 			const PortList& pl = c->channel_ports (n);
 
@@ -2105,8 +2235,8 @@ IO::GainControl::get_value (void) const
 void
 IO::setup_peak_meters()
 {
-	ChanCount max_streams = std::max(_inputs.count(), _outputs.count());
-	_meter->configure_io(max_streams, max_streams);
+	ChanCount max_streams = std::max (_inputs.count(), _outputs.count());
+	_meter->configure_io (max_streams, max_streams);
 }
 
 /**
@@ -2496,11 +2626,12 @@ void
 IO::maybe_add_input_bundle_to_list (boost::shared_ptr<Bundle> b, std::vector<boost::shared_ptr<Bundle> >* bundles)
 {
 	boost::shared_ptr<AutoBundle> ab = boost::dynamic_pointer_cast<AutoBundle, Bundle> (b);
+
 	if (ab == 0 || ab->ports_are_outputs() == false) {
 		return;
 	}
-
-	if (ab->nchannels () != n_inputs().n_total ()) {
+	
+	if (ab->nchannels().get (default_type()) != n_inputs().n_total ()) {
 		return;
 	}
 
@@ -2552,7 +2683,7 @@ IO::maybe_add_output_bundle_to_list (boost::shared_ptr<Bundle> b, std::vector<bo
 		return;
 	}
 
-	if (ab->nchannels () != n_outputs().n_total ()) {
+	if (ab->nchannels ().get (default_type()) != n_outputs().n_total ()) {
 		return;
 	}
 

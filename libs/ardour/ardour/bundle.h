@@ -22,7 +22,9 @@
 
 #include <string>
 #include <sigc++/signal.h>
+
 #include "ardour/data_type.h"
+#include "ardour/chan_count.h"
 
 namespace ARDOUR {
 
@@ -37,12 +39,13 @@ class Bundle {
 	Bundle () : _type (DataType::AUDIO) {}
 	Bundle (bool i) : _type (DataType::AUDIO), _ports_are_inputs (i) {}
 	Bundle (std::string const & n, bool i = true) : _name (n), _type (DataType::AUDIO), _ports_are_inputs (i) {}
+
 	virtual ~Bundle() {}
 
 	/**
 	 *  @return Number of channels that this Bundle has.
 	 */
-	virtual uint32_t nchannels () const = 0;
+	virtual ChanCount nchannels () const = 0;
 	virtual const PortList& channel_ports (uint32_t) const = 0;
 
 	void set_name (std::string const & n) {

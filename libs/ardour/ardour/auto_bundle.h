@@ -32,7 +32,7 @@ class AutoBundle : public Bundle {
 	AutoBundle (bool i = true);
 	AutoBundle (std::string const &, bool i = true);
 
-	uint32_t nchannels () const;
+	ChanCount nchannels () const;
 	const PortList& channel_ports (uint32_t) const;
 
 	void set_channels (uint32_t);

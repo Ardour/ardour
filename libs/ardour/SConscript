@@ -6,7 +6,7 @@ import glob
 
 Import('env final_prefix install_prefix final_config_prefix libraries i18n')
 
-ardour = env.Copy()
+ardour = env.Clone()
 
 #
 # this defines the version number of libardour
@@ -95,6 +95,7 @@ mtc_slave.cc
 midi_clock_slave.cc
 named_selection.cc
 note.cc
+onset_detector.cc
 panner.cc
 parameter.cc
 pcm_utils.cc
@@ -357,7 +358,7 @@ env['BUILDERS']['SharedAsmObject'] = Builder (action = '$CXX -c -fPIC $SOURCE -o
 
 
 always_sse_objects = []
-sse_env = ardour.Copy()
+sse_env = ardour.Clone()
 sse_env.Append (CXXFLAGS="-msse")
 
 if env['FPU_OPTIMIZATION']:

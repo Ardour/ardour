@@ -21,8 +21,10 @@
 
 #include <cstdlib>
 #include <cassert>
+#include <cstring>
 #include <iostream>
 #include <boost/utility.hpp>
+
 #include <ardour/types.h>
 #include <ardour/data_type.h>
 #include <ardour/runtime_functions.h>

@@ -17,8 +17,11 @@
 
 */
 
+#include <gtkmm/messagedialog.h>
 #include <glibmm/objectbase.h>
+
 #include <gtkmm2ext/doi.h>
+
 #include <ardour/port_insert.h>
 #include "ardour/session.h"
 #include "ardour/io.h"
@@ -27,10 +30,14 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/data_type.h"
+
 #include "io_selector.h"
 #include "utils.h"
 #include "gui_thread.h"
 #include "i18n.h"
+
+using namespace ARDOUR;
+using namespace Gtk;
 
 IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool offer_inputs)
 	: PortMatrix (
@@ -46,14 +53,12 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
 
-#ifdef FIXME
-	/* these got lost in a merge from 2.0 */
-	set_button_sensitivity ();
-	io->name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
-#endif
+	/* this got lost in a merge from 2.0 */
+
+	// set_button_sensitivity ();
+	// io->name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
 
 }
-
 
 void
 IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
@@ -161,8 +166,8 @@ IOSelector::add_row ()
 			_io->add_input_port ("", this);
 		}
 
-		catch (ARDOUR::AudioEngine::PortRegistrationFailure& err) {
-			Gtk::MessageDialog msg (0,  _("There are no more JACK ports available."));
+		catch (AudioEngine::PortRegistrationFailure& err) {
+			MessageDialog msg (_("There are no more JACK ports available."));
 			msg.run ();
 		}
 
@@ -172,13 +177,12 @@ IOSelector::add_row ()
 			_io->add_output_port ("", this);
 		}
 
-		catch (ARDOUR::AudioEngine::PortRegistrationFailure& err) {
-			Gtk::MessageDialog msg (0, _("There are no more JACK ports available."));
+		catch (AudioEngine::PortRegistrationFailure& err) {
+			MessageDialog msg (_("There are no more JACK ports available."));
 			msg.run ();
 		}
 	}
 }
-
 
 void
 IOSelector::remove_row (int r)
@@ -199,7 +203,54 @@ IOSelector::row_descriptor () const
 	return _("port");
 }
 
+#if 0
+void 
+IOSelector::set_button_sensitivity ()
+{
+	if (for_input) {
 
+		if (io->input_maximum() < 0 || io->input_maximum() > (int) io->n_inputs()) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+
+	} else {
+
+		if (io->output_maximum() < 0 || io->output_maximum() > (int) io->n_outputs()) {
+			add_port_button.set_sensitive (true);
+		} else {
+			add_port_button.set_sensitive (false);
+		}
+			
+	}
+
+	if (for_input) {
+		if (io->n_inputs() && (io->input_minimum() < 0 || io->input_minimum() < (int) io->n_inputs())) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+			
+	} else {
+		if (io->n_outputs() && (io->output_minimum() < 0 || io->output_minimum() < (int) io->n_outputs())) {
+			remove_port_button.set_sensitive (true);
+		} else {
+			remove_port_button.set_sensitive (false);
+		}
+	}
+}
+#endif
+
+#if 0
+void
+IOSelector::name_changed (void* src)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelector::name_changed), src));
+	
+	display_ports ();
+}
+#endif
 
 IOSelectorWindow::IOSelectorWindow (
 	ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel

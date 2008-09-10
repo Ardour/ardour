@@ -434,14 +434,17 @@ class Session : public PBD::StatefulDestructible
 	nframes_t worst_input_latency () const { return _worst_input_latency; }
 	nframes_t worst_track_latency () const { return _worst_track_latency; }
 
-	int save_state (string snapshot_name, bool pending = false);
-	int restore_state (string snapshot_name);
-	int save_template (string template_name);
-	int save_history (string snapshot_name = "");
-	int restore_history (string snapshot_name);
-	void remove_state (string snapshot_name);
-	void rename_state (string old_name, string new_name);
+	int save_state (std::string snapshot_name, bool pending = false);
+	int restore_state (std::string snapshot_name);
+	int save_template (std::string template_name);
+	int save_history (std::string snapshot_name = "");
+	int restore_history (std::string snapshot_name);
+	void remove_state (std::string snapshot_name);
+	void rename_state (std::string old_name, std::string new_name);
 	void remove_pending_capture_state ();
+
+	static int rename_template (std::string old_name, std::string new_name);
+	static int delete_template (std::string name);
 
 	sigc::signal<void,string> StateSaved;
 	sigc::signal<void> StateReady;
@@ -579,7 +582,7 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void,std::vector<boost::weak_ptr<Region> >& > RegionsAdded;
 	sigc::signal<void,boost::weak_ptr<Region> > RegionRemoved;
 
-	int region_name (string& result, string base = string(""), bool newlevel = false) const;
+	int region_name (string& result, string base = string(""), bool newlevel = false);
 	string new_region_name (string);
 	string path_from_region_name (DataType type, string name, string identifier);
 
@@ -616,9 +619,11 @@ class Session : public PBD::StatefulDestructible
 	SlaveSource post_export_slave;
 	nframes_t post_export_position;
 
-	int start_export (ARDOUR::ExportSpecification&);
-	int stop_export (ARDOUR::ExportSpecification&);
-	void finalize_audio_export ();
+	int  pre_export ();
+	int  start_export (ARDOUR::ExportSpecification&);
+	int  stop_export (ARDOUR::ExportSpecification&);
+	void finalize_export ();
+	static sigc::signal<void, std::string, std::string> Exported;
 
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
@@ -706,9 +711,8 @@ class Session : public PBD::StatefulDestructible
 
 	/* flattening stuff */
 
-	int write_one_audio_track (AudioTrack&, nframes_t start, nframes_t cnt, bool overwrite,
-			vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot);
-
+	boost::shared_ptr<Region> write_one_track (AudioTrack&, nframes_t start, nframes_t end, bool overwrite, vector<boost::shared_ptr<Source> >&,
+						   InterThreadInfo& wot);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -910,7 +914,7 @@ class Session : public PBD::StatefulDestructible
 	void reset_playback_load_min ();
 	void reset_capture_load_min ();
 
-	float read_data_rate () const;
+	float read_data_rate () const; // in usec
 	float write_data_rate () const;
 
 	/* ranges */
@@ -1072,6 +1076,7 @@ class Session : public PBD::StatefulDestructible
 	void set_slave_source (SlaveSource);
 
 	bool _exporting;
+
 	int prepare_to_export (ARDOUR::ExportSpecification&);
 
 	void prepare_diskstreams ();
@@ -1393,6 +1398,7 @@ class Session : public PBD::StatefulDestructible
 	void set_play_loop (bool yn);
 	void overwrite_some_buffers (Diskstream*);
 	void flush_all_inserts ();
+	int  micro_locate (nframes_t distance);
 	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
 	void force_locate (nframes_t frame, bool with_roll = false);
@@ -1456,6 +1462,9 @@ class Session : public PBD::StatefulDestructible
 	void strip_portname_for_solo (string& portname);
 
 	/* REGION MANAGEMENT */
+
+	std::map<std::string,uint32_t> region_name_map;
+	void update_region_name_map (boost::shared_ptr<Region>);
 
 	mutable Glib::Mutex region_lock;
 	typedef map<PBD::ID,boost::shared_ptr<Region> > RegionList;

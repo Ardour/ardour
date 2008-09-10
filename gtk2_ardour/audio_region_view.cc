@@ -78,9 +78,10 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 {
 }
 
+
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu, 
-				  Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
-	: RegionView (parent, tv, r, spu, basic_color, visibility)
+				  Gdk::Color& basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
+	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
 	, zero_line(0)
 	, fade_in_shape(0)
@@ -213,7 +214,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	gain_line->reset ();
 
-	set_y_position_and_height (0, trackview.height);
+	set_y_position_and_height (0, trackview.current_height());
 
 	region_muted ();
 	region_sync_changed ();
@@ -264,6 +265,7 @@ void
 AudioRegionView::region_changed (Change what_changed)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionView::region_changed), what_changed));
+	//cerr << "AudioRegionView::region_changed() called" << endl;
 
 	RegionView::region_changed(what_changed);
 
@@ -434,51 +436,6 @@ AudioRegionView::region_muted ()
 }
 
 void
-AudioRegionView::set_y_position_and_height (double y, double h)
-{
-	RegionView::set_y_position_and_height(y, h - 1);
-	
-	const uint32_t wcnt = waves.size();
-
-	_y_position = y;
-	_height = h;
-
-	for (uint32_t n = 0; n < wcnt; ++n) {
-		double ht;
-
-		if (h <= NAME_HIGHLIGHT_THRESH) {
-			ht = ((_height - 2 * wcnt) / (double) wcnt);
-		} else {
-			ht = (((_height - 2 * wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
-		}
-		
-		double const yoff = n * (ht + 1);
-		
-		waves[n]->property_height() = ht;
-		waves[n]->property_y() = _y_position + yoff + 2;
-	}
-
-	if (gain_line) {
-		if ((_height / wcnt) < NAME_HIGHLIGHT_SIZE) {
-			gain_line->hide ();
-		} else {
-			if (_flags & EnvelopeVisible) {
-				gain_line->show ();
-			}
-		}
-		gain_line->set_y_position_and_height ((uint32_t) _y_position, (uint32_t) rint (_height - NAME_HIGHLIGHT_SIZE));
-	}
-
-	setup_fade_handle_positions ();
-	manage_zero_line ();
-	reset_fade_shapes ();
-	
-	if (name_text) {
-		name_text->raise_to_top();
-	}
-}
-
-void
 AudioRegionView::setup_fade_handle_positions()
 {
 	/* position of fade handle offset from the top of the region view */
@@ -494,6 +451,52 @@ AudioRegionView::setup_fade_handle_positions()
 	if (fade_out_handle) {
 		fade_out_handle->property_y1() = _y_position + handle_pos;
 		fade_out_handle->property_y2() = _y_position + handle_pos + handle_height;
+	}
+}
+
+void
+AudioRegionView::set_y_position_and_height (double y, double h)
+{
+	RegionView::set_y_position_and_height (y, h - 1);
+
+	/* XXX why is this code here */
+
+	_y_position = y;
+	_height = h;
+
+	const uint32_t wcnt = waves.size();
+	
+	for (uint32_t n=0; n < wcnt; ++n) {
+		gdouble ht;
+
+		if ((h) < NAME_HIGHLIGHT_THRESH) {
+			ht = ((_height-2*wcnt) / (double) wcnt);
+		} else {
+			ht = (((_height-2*wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
+		}
+		
+		gdouble yoff = n * (ht+1);
+		
+		waves[n]->property_height() = ht;
+		waves[n]->property_y() = yoff + 2;
+	}
+
+	if (gain_line) {
+		if ((_height/wcnt) < NAME_HIGHLIGHT_THRESH) {
+			gain_line->hide ();
+		} else {
+			if (_flags & EnvelopeVisible) {
+				gain_line->show ();
+			}
+		}
+		gain_line->set_y_position_and_height ((uint32_t) _y_position, (uint32_t) rint (_height - NAME_HIGHLIGHT_SIZE));
+	}
+
+	manage_zero_line ();
+	reset_fade_shapes ();
+	
+	if (name_text) {
+		name_text->raise_to_top();
 	}
 }
 
@@ -573,7 +576,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 
 	points = get_canvas_points ("fade in shape", npoints+3);
 
-	if (_height > NAME_HIGHLIGHT_THRESH) {
+	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE;
 	} else {
 		h = _height;
@@ -657,7 +660,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	float curve[npoints];
 	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, curve, npoints);
 
-	if (_height > NAME_HIGHLIGHT_THRESH) {
+	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE;
 	} else {
 		h = _height;
@@ -853,6 +856,7 @@ AudioRegionView::create_waves ()
 			if (audio_region()->audio_source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				// cerr << "\tData is ready\n";
 				cerr << "\tData is ready\n";
+				// cerr << "\tData is ready\n";
 				create_one_wave (n, true);
 			} else {
 				// cerr << "\tdata is not ready\n";
@@ -878,10 +882,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
-	if (trackview.height < NAME_HIGHLIGHT_SIZE) {
-		ht = ((trackview.height) / (double) nchans);
+	if (trackview.current_height() < NAME_HIGHLIGHT_THRESH) {
+		ht = ((trackview.current_height()) / (double) nchans);
 	} else {
-		ht = ((trackview.height - NAME_HIGHLIGHT_SIZE) / (double) nchans);
+		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
 	}
 
 	gdouble yoff = which * ht;
@@ -900,8 +904,15 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 	wave->property_height() =  (double) ht;
 	wave->property_samples_per_unit() =  samples_per_unit;
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
-	wave->property_wave_color() = _region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_WaveForm.get();
-	wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+
+	if (_recregion) {
+		wave->property_wave_color() = _region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
+		wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
+	} else {
+		wave->property_wave_color() = _region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_WaveForm.get();
+		wave->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+	}
+
 	wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
 	wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 	wave->property_region_start() = _region->start();
@@ -986,7 +997,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	/* compute vertical fractional position */
 
-	y = 1.0 - ((y - _y_position) / (_height - NAME_HIGHLIGHT_SIZE));
+	y = 1.0 - (y / (trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 	
 	/* map using gain line */
 
@@ -1275,16 +1286,31 @@ AudioRegionView::set_frame_color ()
 			}
 		}
 	} else {
-		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
-		frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+		if (_recregion) {
+			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_RecordingRect.get(), &r, &g, &b, &a);
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
 
-		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-			if (_region->muted()) {
-				(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
-			} else {
-				(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
-				(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+				if (_region->muted()) {
+					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA);
+				} else {
+					(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
+					(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
+				}
+			}
+		} else {
+			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
+			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+
+			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+				if (_region->muted()) {
+					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
+				} else {
+					(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+					(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+				}
 			}
 		}
 	}
 }
+

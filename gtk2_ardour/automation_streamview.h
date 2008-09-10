@@ -51,15 +51,16 @@ class AutomationStreamView : public StreamView
 
 	void redisplay_diskstream ();
 	
-	inline double contents_height() const
-		{ return (_trackview.height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	inline double contents_height() const { 
+		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
+	}
 	
   private:
 	void setup_rec_box ();
 	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur); 
 	void update_rec_regions (jack_nframes_t start, jack_nframes_t dur);
 	
-	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data);
+	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data, bool recording = false);
 	void        display_region(AutomationRegionView* region_view);
 	
 	void color_handler ();

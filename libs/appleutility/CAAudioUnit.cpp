@@ -328,6 +328,46 @@ bool		CAAudioUnit::CanDo (	int 				inChannelsIn,
 	return ValidateChannelPair (inChannelsIn, inChannelsOut, info.mChanInfo, (dataSize / sizeof (AUChannelInfo)));
 }
 
+int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
+{
+	// this is the default assumption of an audio effect unit
+	Boolean* isWritable = 0;
+	UInt32	dataSize = 0;
+		// lets see if the unit has any channel restrictions
+	OSStatus result = AudioUnitGetPropertyInfo (AU(),
+						    kAudioUnitProperty_SupportedNumChannels,
+						    kAudioUnitScope_Global, 0,
+						    &dataSize, isWritable); //don't care if this is writable
+	
+	// if this property is NOT implemented an FX unit
+	// is expected to deal with same channel valance in and out
+	
+	if (result) 
+	{
+		if (Comp().Desc().IsEffect()) 
+		{
+			return 1;
+		}
+		else 
+		{
+			// the au should either really tell us about this
+			// or we will assume the worst
+			return -1;
+		}
+	}
+
+	*chaninfo = (AUChannelInfo*) malloc (dataSize);
+	cnt = dataSize / sizeof (AUChannelInfo);
+
+	result = GetProperty (kAudioUnitProperty_SupportedNumChannels,
+			      kAudioUnitScope_Global, 0,
+			      *chaninfo, &dataSize);
+
+	if (result) { return -1; }
+	return 0;
+}
+
+
 bool	CAAudioUnit::ValidateChannelPair (int 				inChannelsIn, 
 										int 				inChannelsOut,
 										const AUChannelInfo * info,

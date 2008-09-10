@@ -81,10 +81,10 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
 	_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed));
 
-	mute_button = manage (new BindableToggleButton (*_route->mute_control().get(), m_name ));
+	mute_button = manage (new BindableToggleButton (_route->mute_control(), m_name ));
 	mute_button->set_self_managed (true);
 
-	solo_button = manage (new BindableToggleButton (*_route->solo_control().get(), s_name ));
+	solo_button = manage (new BindableToggleButton (_route->solo_control(), s_name ));
 	solo_button->set_self_managed (true);
 
 	mute_button->set_name ("MuteButton");
@@ -105,7 +105,7 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess, co
 
 		_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed));
 
-		rec_enable_button = manage (new BindableToggleButton (*t->rec_enable_control().get(), r_name ));
+		rec_enable_button = manage (new BindableToggleButton (t->rec_enable_control(), r_name ));
 		rec_enable_button->set_name ("RecordEnableButton");
 		rec_enable_button->set_self_managed (true);
 		

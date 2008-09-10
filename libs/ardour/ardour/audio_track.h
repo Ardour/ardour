@@ -58,8 +58,8 @@ class AudioTrack : public Track
 	void freeze (InterThreadInfo&);
 	void unfreeze ();
 
-	void bounce (InterThreadInfo&);
-	void bounce_range (nframes_t start, nframes_t end, InterThreadInfo&);
+	boost::shared_ptr<Region> bounce (InterThreadInfo&);
+	boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&);
 
 	int set_state(const XMLNode& node);
 

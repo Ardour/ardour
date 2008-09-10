@@ -241,3 +241,22 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	return PluginPtr ((Plugin*) 0);
 }
 
+ChanCount
+Plugin::output_streams () const
+{
+	/* LADSPA & VST should not get here because they do not
+	   return "infinite" i/o counts.
+	*/
+	return ChanCount::ZERO;
+}
+
+ChanCount
+Plugin::input_streams () const
+{
+	/* LADSPA & VST should not get here because they do not
+	   return "infinite" i/o counts.
+	*/
+	return ChanCount::ZERO;
+}
+
+

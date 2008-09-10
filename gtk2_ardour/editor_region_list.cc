@@ -134,6 +134,18 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 
 	} else if (region->whole_file()) {
 
+		TreeModel::iterator i;
+		TreeModel::Children rows = region_list_model->children();
+
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			
+			boost::shared_ptr<Region> rr = (*i)[region_list_columns.region];
+
+			if (region->region_list_equivalent (rr)) {
+				return;
+			}
+		}
+
 		row = *(region_list_model->append());
 		if (missing_source) {
 			c.set_rgb(65535,0,0);     // FIXME: error color from style
@@ -201,6 +213,18 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 					row = *(region_list_model->append ((*i).children()));
 					found_parent = true;
 					break;
+				}
+			}
+
+			TreeModel::iterator ii;
+			TreeModel::Children subrows = (*i).children();
+
+			for (ii = subrows.begin(); ii != subrows.end(); ++ii) {
+				
+				boost::shared_ptr<Region> rrr = (*ii)[region_list_columns.region];
+
+				if (region->region_list_equivalent (rrr)) {
+					return;
 				}
 			}
 		}
@@ -307,6 +331,10 @@ Editor::insert_into_tmp_regionlist(boost::shared_ptr<Region> region)
 void
 Editor::redisplay_regions ()
 {
+	if (no_region_list_redisplay) {
+		return;
+	}
+		
 	if (session) {
 
 		region_list_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));

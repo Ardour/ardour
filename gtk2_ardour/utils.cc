@@ -36,6 +36,7 @@
 
 #include <gtkmm2ext/utils.h>
 #include <ardour/configuration.h>
+#include <ardour/configuration.h>
 
 #include <ardour/filesystem_paths.h>
 
@@ -469,39 +470,10 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		   it does allow.
 		*/
 
-		int fakekey = GDK_VoidSymbol;
-		int ret = false;
+		uint32_t fakekey = ev->keyval;
 
-		switch (ev->keyval) {
-		case GDK_Tab:
-		case GDK_ISO_Left_Tab:
-			fakekey = GDK_nabla;
-			break;
-
-		case GDK_Up:
-			fakekey = GDK_uparrow;
-			break;
-
-		case GDK_Down:
-			fakekey = GDK_downarrow;
-			break;
-
-		case GDK_Right:
-			fakekey = GDK_rightarrow;
-			break;
-
-		case GDK_Left:
-			fakekey = GDK_leftarrow;
-			break;
-
-		default:
-			break;
-		}
-
-		if (fakekey != GDK_VoidSymbol) {
-			ret = gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state));
-			
-			if (ret) {
+		if (possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
+			if (gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
 				return true;
 			}
 
@@ -590,18 +562,30 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 Glib::RefPtr<Gdk::Pixbuf>	
 get_xpm (std::string name)
 {
-	SearchPath spath(ARDOUR::ardour_search_path());
-	spath += ARDOUR::system_data_search_path();
+	if (!xpm_map[name]) {
 
-	spath.add_subdirectory_to_paths("pixmaps");
+		SearchPath spath(ARDOUR::ardour_search_path());
+		spath += ARDOUR::system_data_search_path();
+		
+		spath.add_subdirectory_to_paths("pixmaps");
+		
+		sys::path data_file_path;
+		
+		if (!find_file_in_search_path (spath, name, data_file_path)) {
+			fatal << string_compose (_("cannot find XPM file for %1"), name) << endmsg;
+			/*NOTREACHED*/
+		}
 
-	sys::path data_file_path;
+		try {
+			xpm_map[name] = Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+		}
 
-	if(!find_file_in_search_path (spath, name, data_file_path)) {
-		fatal << string_compose (_("cannot find XPM file for %1"), name) << endmsg;
+		catch(const Glib::Error& e)	{
+			warning << "Caught Glib::Error: " << e.what() << endmsg;
+  		}
 	}
 
-	return Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+	return xpm_map[name];
 }
 
 Glib::RefPtr<Gdk::Pixbuf>	
@@ -738,3 +722,42 @@ reset_dpi ()
 	DPIReset();//Emit Signal
 }
 
+bool
+possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
+{
+	int fakekey = GDK_VoidSymbol;
+
+	switch (keyval) {
+	case GDK_Tab:
+	case GDK_ISO_Left_Tab:
+		fakekey = GDK_nabla;
+		break;
+		
+	case GDK_Up:
+		fakekey = GDK_uparrow;
+		break;
+		
+	case GDK_Down:
+		fakekey = GDK_downarrow;
+		break;
+		
+	case GDK_Right:
+		fakekey = GDK_rightarrow;
+		break;
+		
+	case GDK_Left:
+		fakekey = GDK_leftarrow;
+		break;
+		
+	default:
+		break;
+	}
+	
+	if (fakekey != GDK_VoidSymbol) {
+		keyval = fakekey;
+		return true;
+	} 
+
+	return false;
+}
+		

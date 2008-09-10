@@ -375,8 +375,8 @@ Editor::LocationMarkers::set_name (const string& str)
 }
 
 void
-Editor::LocationMarkers::set_position (nframes_t startf, 
-				       nframes_t endf) 
+Editor::LocationMarkers::set_position (nframes64_t startf, 
+				       nframes64_t endf) 
 {
 	start->set_position (startf);
 	if (end) { end->set_position (endf); }
@@ -390,7 +390,7 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 }
 
 void
-Editor::mouse_add_new_marker (nframes_t where, bool is_cd, bool is_xrun)
+Editor::mouse_add_new_marker (nframes64_t where, bool is_cd, bool is_xrun)
 {
 	string markername, markerprefix;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
@@ -404,6 +404,9 @@ Editor::mouse_add_new_marker (nframes_t where, bool is_cd, bool is_xrun)
 
 	if (session) {
 		session->locations()->next_available_name(markername, markerprefix);
+		if (!is_xrun && !choose_new_marker_name(markername)) {
+		    	return;
+		}		
 		Location *location = new Location (where, where, markername, (Location::Flags) flags);
 		session->begin_reversible_command (_("add marker"));
                 XMLNode &before = session->locations()->get_state();
@@ -594,6 +597,8 @@ Editor::build_marker_menu (bool start_or_end)
 
 	items.push_back (SeparatorElem());
 
+	items.push_back (MenuElem (_("Create range to next marker"), mem_fun(*this, &Editor::marker_menu_range_to_next)));
+
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
 	if (start_or_end) return;
 	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
@@ -631,8 +636,10 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	}
 
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Export Range"), mem_fun(*this, &Editor::marker_menu_export_range)));
+	items.push_back (SeparatorElem());
 
-	if (! loop_or_punch) {
+	if (!loop_or_punch) {
 		items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range"), mem_fun(*this, &Editor::marker_menu_rename)));
 		items.push_back (MenuElem (_("Remove Range"), mem_fun(*this, &Editor::marker_menu_remove)));
@@ -804,6 +811,57 @@ Editor::marker_menu_set_playhead ()
 				session->request_locate (l->end(), false);
 			}
 		}
+	}
+}
+
+void
+Editor::marker_menu_export_range ()
+{
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if ((l = find_location_from_marker (marker, is_start)) != 0) {
+		if (l->is_range_marker()) {
+			export_range (l->start(), l->end());
+		}
+	}
+}
+
+void
+Editor::marker_menu_range_to_next ()
+{
+	Marker* marker;
+	if (!session) {
+		return;
+	}
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if ((l = find_location_from_marker (marker, is_start)) == 0) {
+		return;
+	}
+		
+	nframes_t end = session->locations()->first_mark_after (marker->position());
+
+	if (end != max_frames) {
+		string range_name = l->name();
+		range_name += "-range";
+
+		Location* newrange = new Location (marker->position(), end, range_name, Location::IsRangeMarker);
+		session->locations()->add (newrange);
 	}
 }
 

@@ -661,21 +661,23 @@ MidiTrack::set_latency_delay (nframes_t longest_session_latency)
 	_diskstream->set_roll_delay (_roll_delay);
 }
 
-void
+boost::shared_ptr<Region>
 MidiTrack::bounce (InterThreadInfo& itt)
 {
 	throw;
-	//vector<MidiSource*> srcs;
-	//_session.write_one_midi_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
+	// vector<MidiSource*> srcs;
+	// return _session.write_one_track (*this, 0, _session.current_end_frame(), false, srcs, itt);
+	return boost::shared_ptr<Region> ();
 }
 
 
-void
+boost::shared_ptr<Region>
 MidiTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt)
 {
 	throw;
 	//vector<MidiSource*> srcs;
-	//_session.write_one_midi_track (*this, start, end, false, srcs, itt);
+	//return _session.write_one_track (*this, start, end, false, srcs, itt);
+	return boost::shared_ptr<Region> ();
 }
 
 void
@@ -732,7 +734,7 @@ MidiTrack::MidiControl::set_value(float val)
 	size_t size = 3;
 
 	if ( ! _list->automation_playback()) {
-		uint8_t ev[3] = { _list->parameter().channel(), int(val), 0.0 };
+		uint8_t ev[3] = { _list->parameter().channel(), int(val), 0 };
 		switch(_list->parameter().type()) {
 		case MidiCCAutomation:
 			ev[0] += MIDI_CMD_CONTROL;

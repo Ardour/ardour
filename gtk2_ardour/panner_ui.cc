@@ -166,7 +166,7 @@ PannerUI::PannerUI (boost::shared_ptr<IO> io, Session& s)
 	show();
 }
 
-PBD::Controllable* 
+boost::shared_ptr<PBD::Controllable>
 PannerUI::get_controllable() 
 { 
 	return pan_bars[0]->get_controllable();

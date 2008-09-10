@@ -71,7 +71,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	~AutomationTimeAxisView();
 	
-	void set_height (TimeAxisView::TrackHeight);
+
+	void set_height (uint32_t);
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
 
@@ -94,7 +95,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool paste (nframes_t, float times, Selection&, size_t nth);
 	void reset_objects (PointSelection&);
 
-	void set_state (const XMLNode&);
+	int  set_state (const XMLNode&);
 	
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();

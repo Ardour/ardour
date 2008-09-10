@@ -23,6 +23,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 
 #include <pbd/compose.h>
 #include <pbd/error.h>

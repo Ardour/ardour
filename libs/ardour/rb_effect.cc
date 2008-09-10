@@ -74,21 +74,89 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	nframes_t pos = 0;
 	int avail = 0;
 
-	// note: this_time_fraction is a ratio of original length. 1.0 = no change, 
-	// 0.5 is half as long, 2.0 is twice as long, etc.
+	cerr << "RBEffect: source region: position = " << region->position()
+	     << ", start = " << region->start()
+	     << ", length = " << region->length() 
+	     << ", ancestral_start = " << region->ancestral_start()
+	     << ", ancestral_length = " << region->ancestral_length()
+	     << ", stretch " << region->stretch()
+	     << ", shift " << region->shift() << endl;
 
-	double this_time_fraction = tsr.time_fraction * region->stretch ();
-	double this_pitch_fraction = tsr.pitch_fraction * region->shift ();
+	/*
+	   We have two cases to consider:
+	  
+	   1. The region has not been stretched before.
+	  
+	   In this case, we just want to read region->length() frames
+	   from region->start().
+	  
+	   We will create a new region of region->length() *
+	   tsr.time_fraction frames.  The new region will have its
+	   start set to 0 (because it has a new audio file that begins
+	   at the start of the stretched area) and its ancestral_start
+	   set to region->start() (so that we know where to begin
+	   reading if we want to stretch it again).
+	  
+	   2. The region has been stretched before.
+	  
+	   The region starts at region->start() frames into its
+	   (possibly previously stretched) source file.  But we don't
+	   want to read from its source file; we want to read from the
+	   file it was originally stretched from.
+	   
+	   The region's source begins at region->ancestral_start()
+	   frames into its master source file.  Thus, we need to start
+	   reading at region->ancestral_start() + (region->start() /
+	   region->stretch()) frames into the master source.  This
+	   value will also become the ancestral_start for the new
+	   region.
+	   
+	   We cannot use region->ancestral_length() to establish how
+	   many frames to read, because it won't be up to date if the
+	   region has been trimmed since it was last stretched.  We
+	   must read region->length() / region->stretch() frames and
+	   stretch them by tsr.time_fraction * region->stretch(), for
+	   a new region of region->length() * tsr.time_fraction
+	   frames.
+	  
+	   Case 1 is of course a special case of 2, where
+	   region->ancestral_start() == 0 and region->stretch() == 1.
+	  
+	   When we ask to read from a region, we supply a position on
+	   the global timeline.  The read function calculates the
+	   offset into the source as (position - region->position()) +
+	   region->start().  This calculation is used regardless of
+	   whether we are reading from a master or
+	   previously-stretched region.  In order to read from a point
+	   n frames into the master source, we need to provide n -
+	   region->start() + region->position() as our position
+	   argument to master_read_at().
+	  
+	   Note that region->ancestral_length() is not used.
+	  
+	   I hope this is clear.
+	*/
 
-	RubberBandStretcher stretcher (session.frame_rate(), region->n_channels(),
-				       (RubberBandStretcher::Options) tsr.opts,
-				       this_time_fraction, this_pitch_fraction);
+	double stretch = region->stretch() * tsr.time_fraction;
+	double shift = region->shift() * tsr.pitch_fraction;
+
+	nframes_t read_start = region->ancestral_start() +
+		nframes_t(region->start() / (double)region->stretch());
+
+	nframes_t read_duration =
+		nframes_t(region->length() / (double)region->stretch());
+
+	uint32_t channels = region->n_channels();
+
+	RubberBandStretcher stretcher
+		(session.frame_rate(), channels,
+		 (RubberBandStretcher::Options) tsr.opts, stretch, shift);
 	
 	tsr.progress = 0.0f;
 	tsr.done = false;
 
-	uint32_t channels = region->n_channels();
-	nframes_t duration = region->ancestral_length();
+	stretcher.setExpectedInputDuration(read_duration);
+	stretcher.setDebugLevel(1);
 
 	stretcher.setExpectedInputDuration(duration);
 	stretcher.setDebugLevel(1);
@@ -97,14 +165,14 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	   digits just to disambiguate close but not identical FX
 	*/
 
-	if (this_time_fraction == 1.0) {
-		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (this_pitch_fraction * 100.0f));
-	} else if (this_pitch_fraction == 1.0) {
-		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (this_time_fraction * 100.0f));
+	if (stretch == 1.0) {
+		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (shift * 100.0f));
+	} else if (shift == 1.0) {
+		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (stretch * 100.0f));
 	} else {
 		snprintf (suffix, sizeof (suffix), "@%d-%d", 
-			  (int) floor (this_time_fraction * 100.0f),
-			  (int) floor (this_pitch_fraction * 100.0f));
+			  (int) floor (stretch * 100.0f),
+			  (int) floor (shift * 100.0f));
 	}
 
 	/* create new sources */
@@ -131,22 +199,26 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	done = 0;
 
 	try { 
-		while (pos < duration && !tsr.cancel) {
+		while (pos < read_duration && !tsr.cancel) {
 			
 			nframes_t this_read = 0;
 			
 			for (uint32_t i = 0; i < channels; ++i) {
 				
 				this_read = 0;
+
 				nframes_t this_time;
+				this_time = min(bufsize, read_duration - pos);
 				
-				this_time = min(bufsize, duration - pos);
-				
+				nframes_t this_position;
+				this_position = read_start + pos -
+					region->start() + region->position();
+
 				this_read = region->master_read_at
 					(buffers[i],
 					 buffers[i],
 					 gain_buffer,
-					 pos + region->position(),
+					 this_position,
 					 this_time,
 					 i);
 				
@@ -161,15 +233,15 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 			pos += this_read;
 			done += this_read;
 
-			tsr.progress = ((float) done / duration) * 0.25;
+			tsr.progress = ((float) done / read_duration) * 0.25;
 
-			stretcher.study(buffers, this_read, pos == duration);
+			stretcher.study(buffers, this_read, pos == read_duration);
 		}
 		
 		done = 0;
 		pos = 0;
 
-		while (pos < duration && !tsr.cancel) {
+		while (pos < read_duration && !tsr.cancel) {
 			
 			nframes_t this_read = 0;
 			
@@ -177,14 +249,17 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 				
 				this_read = 0;
 				nframes_t this_time;
-				
-				this_time = min(bufsize, duration - pos);
+				this_time = min(bufsize, read_duration - pos);
+
+				nframes_t this_position;
+				this_position = read_start + pos -
+					region->start() + region->position();
 				
 				this_read = region->master_read_at
 					(buffers[i],
 					 buffers[i],
 					 gain_buffer,
-					 pos + region->position(),
+					 this_position,
 					 this_time,
 					 i);
 				
@@ -199,9 +274,9 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 			pos += this_read;
 			done += this_read;
 
-			tsr.progress = 0.25 + ((float) done / duration) * 0.75;
+			tsr.progress = 0.25 + ((float) done / read_duration) * 0.75;
 
-			stretcher.process(buffers, this_read, pos == duration);
+			stretcher.process(buffers, this_read, pos == read_duration);
 
 			int avail = 0;
 
@@ -261,10 +336,11 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 
 	for (vector<boost::shared_ptr<AudioRegion> >::iterator x = results.begin(); x != results.end(); ++x) {
 
-		(*x)->set_ancestral_data (region->ancestral_start(),
-					  region->ancestral_length(),
-					  this_time_fraction,
-					  this_pitch_fraction );
+
+		(*x)->set_ancestral_data (read_start,
+					  read_duration,
+					  stretch,
+					  shift);
 		(*x)->set_master_sources (region->get_master_sources());
 	}
 

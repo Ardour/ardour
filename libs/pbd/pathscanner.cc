@@ -21,6 +21,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <vector>
 #include <dirent.h>
 

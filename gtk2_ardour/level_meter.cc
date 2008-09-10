@@ -100,6 +100,9 @@ LevelMeter::update_meters ()
 			if (mpeak > max_peak) {
 				max_peak = mpeak;
 			}
+			if (mpeak > max_peak) {
+				max_peak = mpeak;
+			}
 		}
 	}
 	return max_peak;
@@ -143,6 +146,7 @@ LevelMeter::setup_meters (int len, int initial_width)
 {
 	uint32_t nmeters = _io->n_outputs().n_total();
 	regular_meter_width = initial_width;
+
 	guint16 width;
 
 	hide_all_meters ();

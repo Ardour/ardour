@@ -77,7 +77,7 @@ Editor::export_selection ()
 }
 
 void
-Editor::export_range (nframes_t start, nframes_t end)
+Editor::export_range (nframes64_t start, nframes64_t end)
 {
 	if (session) {
 		if (export_dialog == 0) {
@@ -157,7 +157,12 @@ Editor::bounce_region_selection ()
 		itt.cancel = false;
 		itt.progress = 0.0f;
 
-		track->bounce_range (region->position(), region->position() + region->length(), itt);
+		boost::shared_ptr<Region> r = track->bounce_range (region->position(), region->position() + region->length(), itt);
+		cerr << "Result of bounce of "
+		     << region->name() << " len = " << region->length()
+		     << " was "
+		     << r->name() << " len = " << r->length()
+		     << endl;
 	}
 }
 
@@ -165,11 +170,11 @@ bool
 Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 {
 	boost::shared_ptr<AudioFileSource> fs;
-	const nframes_t chunk_size = 4096;
-	nframes_t to_read;
+	const nframes64_t chunk_size = 4096;
+	nframes64_t to_read;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	nframes_t pos;
+	nframes64_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
@@ -234,7 +239,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	pos = region->position();
 
 	while (to_read) {
-		nframes_t this_time;
+		nframes64_t this_time;
 
 		this_time = min (to_read, chunk_size);
 
@@ -312,11 +317,11 @@ bool
 Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<AudioRange>& range)
 {
 	boost::shared_ptr<AudioFileSource> fs;
-	const nframes_t chunk_size = 4096;
-	nframes_t nframes;
+	const nframes64_t chunk_size = 4096;
+	nframes64_t nframes;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	nframes_t pos;
+	nframes64_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
@@ -369,7 +374,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		pos = (*i).start;
 		
 		while (nframes) {
-			nframes_t this_time;
+			nframes64_t this_time;
 			
 			this_time = min (nframes, chunk_size);
 
@@ -401,7 +406,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 
 			while (nframes) {
 
-				nframes_t this_time = min (nframes, chunk_size);
+				nframes64_t this_time = min (nframes, chunk_size);
 				memset (buf, 0, sizeof (Sample) * this_time);
 
 				for (uint32_t n=0; n < channels; ++n) {

@@ -975,8 +975,9 @@ ExportDialog::do_export ()
 	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
 	cancel_label.set_text (_("Stop Export"));
 
+	session->pre_export ();
 	export_data();
-	
+
   	progress_connection.disconnect ();
 	end_dialog ();
 }
@@ -996,7 +997,7 @@ ExportDialog::end_dialog ()
 		}
 	}
 
-	session->finalize_audio_export ();
+	session->finalize_export ();
 
 	hide_all ();
 
@@ -1017,6 +1018,7 @@ ExportDialog::start_export ()
 	*/
 	
 	if (file_entry.get_text().length() == 0) {
+
 		sys::path export_file_path = session->session_directory().export_path();
 
 		if (!wants_dir()) {
@@ -1229,7 +1231,7 @@ ExportDialog::initSpec(string &filepath)
 {
 	spec.path = filepath;
 	spec.progress = 0;
-	spec.running = true;
+	spec.running = false;
 	spec.stop = false;
 	spec.port_map.clear();
 	

@@ -7,7 +7,7 @@ import glob
 appleutility_files = glob.glob('*.cpp') 
 
 Import('env install_prefix')
-appleutility = env.Copy()
+appleutility = env.Clone()
 
 appleutility.Append(LINKFLAGS='-framework AudioToolbox')
 appleutility.Append(LINKFLAGS='-framework AudioUnit')

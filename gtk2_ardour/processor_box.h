@@ -37,24 +37,26 @@
 #include <ardour/types.h>
 #include <ardour/ardour.h>
 #include <ardour/io.h>
+#include <ardour/plugin_insert.h>
+#include <ardour/port_insert.h>
 #include <ardour/processor.h>
-#include <ardour/io_processor.h>
 
 #include <pbd/fastlog.h>
 
+#include "plugin_interest.h"
 #include "route_ui.h"
 #include "io_selector.h"
+#include "send_ui.h"
 #include "enums.h"
 
 class MotionController;
 class PluginSelector;
 class PluginUIWindow;
 class RouteRedirectSelection;
-class SendUIWindow;
 
 namespace ARDOUR {
-	class Bundle;
-	class Processor;
+	class Connection;
+	class Insert;
 	class Plugin;
 	class PluginInsert;
 	class PortInsert;
@@ -63,8 +65,7 @@ namespace ARDOUR {
 	class Session;
 }
 
-
-class ProcessorBox : public Gtk::HBox
+class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 {
   public:
 	ProcessorBox (ARDOUR::Placement, ARDOUR::Session&, 
@@ -78,10 +79,11 @@ class ProcessorBox : public Gtk::HBox
 	void select_all_processors ();
 	void deselect_all_processors ();
 	void select_all_plugins ();
+	void select_all_inserts ();
 	void select_all_sends ();
 	
-	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > InsertSelected;
-	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > InsertUnselected;
+	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
+	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 	
 	static void register_actions();
 
@@ -107,9 +109,9 @@ class ProcessorBox : public Gtk::HBox
 		    add (processor);
 		    add (color);
 	    }
-	    Gtk::TreeModelColumn<std::string>                           text;
+	    Gtk::TreeModelColumn<std::string>       text;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Processor> > processor;
-	    Gtk::TreeModelColumn<Gdk::Color>                            color;
+	    Gtk::TreeModelColumn<Gdk::Color>        color;
 	};
 
 	ModelColumns columns;
@@ -122,7 +124,7 @@ class ProcessorBox : public Gtk::HBox
 	static Gdk::Color* inactive_processor_color;
 	
 	Gtk::EventBox	       processor_eventbox;
-	//Gtk::HBox              processor_hpacker;
+	Gtk::HBox              processor_hpacker;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Processor> > processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 
@@ -143,10 +145,10 @@ class ProcessorBox : public Gtk::HBox
 	void show_processor_menu (gint arg);
 
 	void choose_send ();
-	bool send_io_finished (GdkEventAny*,boost::shared_ptr<ARDOUR::Send>, SendUIWindow*);
-	void choose_processor ();
+	void send_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
+	void choose_insert ();
 	void choose_plugin ();
-	void processor_plugin_chosen (boost::shared_ptr<ARDOUR::Plugin>);
+	void use_plugins (const SelectedPlugins&);
 
 	bool no_processor_redisplay;
 	bool ignore_delete;
@@ -164,8 +166,8 @@ class ProcessorBox : public Gtk::HBox
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
-	vector<sigc::connection> processor_active_connections;
-	vector<sigc::connection> processor_name_connections;
+	std::vector<sigc::connection> processor_active_connections;
+	std::vector<sigc::connection> processor_name_connections;
 	
 	bool processor_drag_in_progress;
 	void processor_drag_begin (GdkDragContext*);
@@ -204,7 +206,7 @@ class ProcessorBox : public Gtk::HBox
 	static bool leave_box (GdkEventCrossing*, ProcessorBox*);
 
 	static void rb_choose_plugin ();
-	static void rb_choose_processor ();
+	static void rb_choose_insert ();
 	static void rb_choose_send ();
 	static void rb_clear ();
 	static void rb_cut ();
@@ -218,9 +220,8 @@ class ProcessorBox : public Gtk::HBox
 	static void rb_deactivate ();
 	static void rb_activate_all ();
 	static void rb_deactivate_all ();
-	static void rb_edit ();
 	static void rb_ab_plugins ();
-	static void rb_deactivate_plugins ();
+	static void rb_edit ();
 	
 	void route_name_changed (PluginUIWindow* plugin_ui, boost::weak_ptr<ARDOUR::PluginInsert> pi);
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);

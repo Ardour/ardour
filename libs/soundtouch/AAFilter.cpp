@@ -41,9 +41,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <memory.h>
-#include <assert.h>
-#include <math.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
 #include "AAFilter.h"
 #include "FIRFilter.h"
 

@@ -145,6 +145,33 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual bool has_editor() const = 0;
 
+	sigc::signal<void,uint32_t,float> ParameterChanged;
+
+	/* NOTE: this block of virtual methods looks like the interface
+	   to a Processor, but Plugin does not inherit from Processor.
+	   It is therefore not required that these precisely match
+	   the interface, but it is likely that they will evolve together.
+	*/
+
+	/* this returns true if the plugin can change its inputs or outputs on demand.
+	   LADSPA, LV2 and VST plugins cannot do this. AudioUnits can.
+	*/
+
+	virtual bool reconfigurable_io() const { return false; }
+
+	/* this is only called if reconfigurable_io() returns true */
+	virtual bool configure_io (ChanCount in, ChanCount out) { return true; }
+
+	/* specific types of plugins can overload this. As of September 2008, only
+	   AUPlugin does this.
+	*/
+	virtual bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return false; }
+	virtual ChanCount output_streams() const;
+	virtual ChanCount input_streams() const;
+
+	PBD::Controllable *get_nth_control (uint32_t, bool do_not_create = false);
+	void make_nth_control (uint32_t, const XMLNode&);
+
 	PluginInfoPtr get_info() { return _info; }
 	void set_info (const PluginInfoPtr inf) { _info = inf; }
 

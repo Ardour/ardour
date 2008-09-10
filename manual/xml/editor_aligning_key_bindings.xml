@@ -25,43 +25,41 @@
       <tbody>
         <row>
           <entry>
-            <keycombo><keycap>a</keycap> </keycombo>
+            <keycombo><keycap>a</keycap></keycombo>
           </entry>
 
           <entry>
-            relative alignment of region sync points or starts
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Meta</keycap><keycap>a</keycap> </keycombo>
-          </entry>
-
-          <entry>
-            absolute alignment of region sync points or starts
+            align regions using sync points and keeping relative positions
           </entry>
         </row>
 
         <row>
           <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>a</keycap>
-            </keycombo>
-          </entry>
-
-          <entry>
-            relative alignment of region ends
-          </entry>
-        </row>
-
-        <row>
-          <entry>
-            <keycombo><keycap>Ctrl</keycap><keycap>Meta</keycap><keycap>a</keycap>
-            </keycombo>
+            <keycombo><keycap>Alt</keycap><keycap>a</keycap></keycombo>
           </entry>
 
           <entry>
             align region ends
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Shift</keycap><keycap>a</keycap></keycombo>
+          </entry>
+
+          <entry>
+            align region sync points without keeping relative positions
+          </entry>
+        </row>
+
+        <row>
+          <entry>
+            <keycombo><keycap>Mod4</keycap><keycap>a</keycap></keycombo>
+          </entry>
+
+          <entry>
+            align region starts and keeping relative positions
           </entry>
         </row>
       </tbody>

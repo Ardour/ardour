@@ -20,15 +20,18 @@
 #include <cstring>
 #include <cerrno>
 #include <climits>
+#include <cstdarg>
 
 #include <pwd.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
 
 #include <glibmm/miscutils.h>
+
 #include <ardour/sndfilesource.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/utils.h>
+#include <ardour/version.h>
 
 #include "i18n.h"
 
@@ -44,6 +47,22 @@ const AudioFileSource::Flag SndFileSource::default_writable_flags = AudioFileSou
 											   AudioFileSource::Removable|
 											   AudioFileSource::RemovableIfEmpty|
 											   AudioFileSource::CanRename);
+
+static void
+snprintf_bounded_null_filled (char* target, size_t target_size, char* fmt, ...)
+{
+	char buf[target_size+1];
+	va_list ap;
+
+	va_start (ap, fmt);
+	vsnprintf (buf, target_size+1, fmt, ap);
+	va_end (ap);
+
+	memset (target, 0, target_size);
+	memcpy (target, buf, target_size);
+
+}
+
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	: AudioFileSource (s, node)
 {
@@ -140,21 +159,8 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 		_broadcast_info = new SF_BROADCAST_INFO;
 		memset (_broadcast_info, 0, sizeof (*_broadcast_info));
 		
-		snprintf (_broadcast_info->description, sizeof (_broadcast_info->description), "BWF %s", _name.c_str());
-		
-		struct utsname utsinfo;
-
-		if (uname (&utsinfo)) {
-			error << string_compose(_("FileSource: cannot get host information for BWF header (%1)"), strerror(errno)) << endmsg;
-			return;
-		}
-		
-		snprintf (_broadcast_info->originator, sizeof (_broadcast_info->originator), "ardour:%s:%s:%s:%s:%s)", 
-			  Glib::get_real_name().c_str(),
-			  utsinfo.nodename,
-			  utsinfo.sysname,
-			  utsinfo.release,
-			  utsinfo.version);
+		snprintf_bounded_null_filled (_broadcast_info->description, sizeof (_broadcast_info->description), "BWF %s", _name.c_str());
+		snprintf_bounded_null_filled (_broadcast_info->originator, sizeof (_broadcast_info->originator), "ardour %s)", Glib::get_real_name().c_str());
 		
 		_broadcast_info->version = 1;  
 		_broadcast_info->time_reference_low = 0;  
@@ -162,7 +168,7 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 		
 		/* XXX do something about this field */
 		
-		snprintf (_broadcast_info->umid, sizeof (_broadcast_info->umid), "%s", "fnord");
+		snprintf_bounded_null_filled (_broadcast_info->umid, sizeof (_broadcast_info->umid), "%s", "fnord");
 		
 		/* coding history is added by libsndfile */
 
@@ -533,25 +539,25 @@ SndFileSource::setup_broadcast_info (nframes_t when, struct tm& now, time_t tnow
 	/* random code is 9 digits */
 	
 	int random_code = random() % 999999999;
+
+	snprintf_bounded_null_filled (_broadcast_info->originator_reference, sizeof (_broadcast_info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
+				      Config->get_bwf_country_code().c_str(),
+				      Config->get_bwf_organization_code().c_str(),
+				      bwf_serial_number,
+				      now.tm_hour,
+				      now.tm_min,
+				      now.tm_sec,
+				      random_code);
 	
-	snprintf (_broadcast_info->originator_reference, sizeof (_broadcast_info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
-		  Config->get_bwf_country_code().c_str(),
-		  Config->get_bwf_organization_code().c_str(),
-		  bwf_serial_number,
-		  now.tm_hour,
-		  now.tm_min,
-		  now.tm_sec,
-		  random_code);
+	snprintf_bounded_null_filled (_broadcast_info->origination_date, sizeof (_broadcast_info->origination_date), "%4d-%02d-%02d",
+				      1900 + now.tm_year,
+				      now.tm_mon + 1, // move from 0..11 to 1..12
+				      now.tm_mday);
 	
-	snprintf (_broadcast_info->origination_date, sizeof (_broadcast_info->origination_date), "%4d-%02d-%02d",
-		  1900 + now.tm_year,
-		  now.tm_mon,
-		  now.tm_mday);
-	
-	snprintf (_broadcast_info->origination_time, sizeof (_broadcast_info->origination_time), "%02d:%02d:%02d",
-		  now.tm_hour,
-		  now.tm_min,
-		  now.tm_sec);
+	snprintf_bounded_null_filled (_broadcast_info->origination_time, sizeof (_broadcast_info->origination_time), "%02d:%02d:%02d",
+				      now.tm_hour,
+				      now.tm_min,
+				      now.tm_sec);
 
 	/* now update header position taking header offset into account */
 	

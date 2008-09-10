@@ -93,7 +93,7 @@ MidiStreamView::~MidiStreamView ()
 
 
 RegionView*
-MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd)
+MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd, bool recording)
 {
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
@@ -384,7 +384,7 @@ MidiStreamView::setup_rec_box ()
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
-			rec_rect->property_y2() = (double) _trackview.height - 1;
+			rec_rect->property_y2() = (double) _trackview.current_height() - 1;
 			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 			rec_rect->property_fill_color_rgba() = fill_color;
 			rec_rect->lower_to_bottom();

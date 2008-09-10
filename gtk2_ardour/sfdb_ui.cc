@@ -404,8 +404,10 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	  found_list_view (found_list),
 	  freesound_search_btn (_("Start Downloading")),
 	  freesound_list_view (freesound_list)
-
 {
+	resetting_ourselves = false;
+	gm = 0;
+
 	resetting_ourselves = false;
 	gm = 0;
 
@@ -414,6 +416,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
 	}
 	
+
 	//add the file chooser
 	{
 		chooser.set_border_width (12);
@@ -426,14 +429,14 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		
 		matchall_filter.add_pattern ("*.*");
 		matchall_filter.set_name (_("All files"));
-		
+
 		chooser.add_filter (audio_filter);
 		chooser.add_filter (midi_filter);
 		chooser.add_filter (matchall_filter);
 		chooser.set_select_multiple (true);
 		chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
 		chooser.signal_file_activated().connect (mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
-		
+
 		if (!persistent_folder.empty()) {
 			chooser.set_current_folder (persistent_folder);
 		}
@@ -445,11 +448,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		VBox* vbox;
 		HBox* hbox;
 
-		hpacker.set_spacing (6);
-		hpacker.pack_start (notebook, true, true);
-		hpacker.pack_start (preview, false, false);
-
-		get_vbox()->pack_start (hpacker, true, true);
 
 		hbox = manage(new HBox);
 		hbox->pack_start (found_entry);
@@ -474,7 +472,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 
 		notebook.append_page (*vbox, _("Search Tags"));
 	}
-	
 
 	//add freesound search
 #ifdef FREESOUND
@@ -482,12 +479,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		VBox* vbox;
 		HBox* passbox;
 		Label* label;
-
-		hpacker.set_spacing (6);
-		hpacker.pack_start (notebook, true, true);
-		hpacker.pack_start (preview, false, false);
-
-		get_vbox()->pack_start (hpacker, true, true);
 
 		passbox = manage(new HBox);
 		passbox->set_border_width (12);
@@ -522,10 +513,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		
 		//freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 		freesound_list_view.signal_row_activated().connect (mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
-
 		freesound_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 		freesound_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
-
 		notebook.append_page (*vbox, _("Search Freesound"));
 	}
 #endif
@@ -1083,11 +1072,9 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 	for (vector<ustring>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
 		if (AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
-		
 			if (info.channels > 1) {
 				multichannel = true;
 			}
-			
 			if (sz == 0) {
 				sz = info.length;
 			} else {

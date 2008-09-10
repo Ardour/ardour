@@ -235,10 +235,10 @@ RouteParams_UI::setup_processor_boxes()
 	        pre_redir_hpane.pack1 (*pre_insert_box);
 		post_redir_hpane.pack1 (*post_insert_box);
 
-		pre_insert_box->InsertSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
-		pre_insert_box->InsertUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
-		post_insert_box->InsertSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
-		post_insert_box->InsertUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
+		pre_insert_box->ProcessorSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
+		pre_insert_box->ProcessorUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PreFader));
+		post_insert_box->ProcessorSelected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
+		post_insert_box->ProcessorUnselected.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_selected), PostFader));
 
 		pre_redir_hpane.show_all();
 		post_redir_hpane.show_all();

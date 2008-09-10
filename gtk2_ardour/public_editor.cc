@@ -22,13 +22,16 @@
 
 PublicEditor* PublicEditor::_instance = 0;
 
-/** PublicEditor constructor */
+const int PublicEditor::window_border_width = 12;
+const int PublicEditor::container_border_width = 12;
+const int PublicEditor::vertical_spacing = 6;
+const int PublicEditor::horizontal_spacing = 6;
+
 PublicEditor::PublicEditor ()
   	: Window (Gtk::WINDOW_TOPLEVEL)
 {
 }
 
-/** PublicEditor destructor */
 PublicEditor::~PublicEditor()
 {
 }

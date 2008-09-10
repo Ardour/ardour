@@ -1966,15 +1966,6 @@ msgstr "Tona Ut"
 msgid "Audition"
 msgstr "Avlyssna"
 
-
-#: gtk2_ardour/editor.cc:105 gtk2_ardour/editor.cc:3517
-msgid "Slide Edit"
-msgstr "Glidred."
-
-#: gtk2_ardour/editor.cc:106 gtk2_ardour/editor.cc:3515
-msgid "Splice Edit"
-msgstr "Fogred."
-
 #: gtk2_ardour/editor.cc:111 gtk2_ardour/editor.cc:3572
 #: gtk2_ardour/export_dialog.cc:78 gtk2_ardour/export_dialog.cc:92
 #: gtk2_ardour/export_dialog.cc:893 gtk2_ardour/export_dialog.cc:1225
@@ -7102,6 +7093,7 @@ msgstr "EJ tonhöjdsändrat soloslagverk"
 #: gtk2_ardour/editor_timefx.cc:73
 msgid "Contents:"
 msgstr "Innehåll"
+<<<<<<< .working
 
 
 #: gtk2_ardour/editor_actions.cc:359
@@ -7442,3 +7434,558 @@ msgstr "FFT-analysfönster"
 #: gtk2_ardour/analysis_window.cc:135
 msgid "Re-analyze data"
 msgstr "Återanalysera data"
+=======
+
+#: gtk2_ardour/editor_actions.cc:359
+msgid "Playhead to Mouse"
+msgstr "Startmarkören till mus"
+
+#: gtk2_ardour/editor_actions.cc:277
+msgid "Playhead To Active Mark"
+msgstr "Startmarkören till aktiv markör"
+
+#: gtk2_ardour/editor_actions.cc:231
+msgid "Nudge Playhead Forward"
+msgstr "Knuffa startmarkören framåt"
+
+#: gtk2_ardour/editor_actions.cc:233
+msgid "Nudge Playhead Backward"
+msgstr "Knuffa startmarkören bakåt"
+
+#: gtk2_ardour/editor_actions.cc:475
+msgid "Move Forward to Transient"
+msgstr "Gå framåt till transient"
+
+#: gtk2_ardour/editor_actions.cc:477
+msgid "Move Backwards to Transient"
+msgstr "Gå bakåt till transient"
+
+#: gtk2_ardour/editor_actions.cc:235
+msgid "Forward To Grid"
+msgstr "Framåt till rutnät"
+
+#: gtk2_ardour/editor_actions.cc:237
+msgid "Backward To Grid"
+msgstr "Bakåt till rutnät"
+
+#: gtk2_ardour/editor_actions.cc:66 gtk2_ardour/editor.cc:151
+#: gtk2_ardour/editor.cc:3446
+msgid "Active Mark"
+msgstr "Aktiv markör"
+
+#: gtk2_ardour/editor_actions.cc:137
+msgid "to Next Region Boundary"
+msgstr "till nästa regionsgränsen"
+
+#: gtk2_ardour/editor_actions.cc:139
+msgid "to Previous Region Boundary"
+msgstr "till förra regionsgränsen"
+
+#: gtk2_ardour/editor_actions.cc:279
+msgid "Active Mark To Playhead"
+msgstr "Aktiv markör till startmarkören"
+
+#: gtk2_ardour/editor_actions.cc:361
+msgid "Active Marker to Mouse"
+msgstr "Aktiv markör till musen"
+
+#: gtk2_ardour/editor_actions.cc:61 gtk2_ardour/editor_actions.cc:613
+msgid "Markers"
+msgstr "Markörer"
+
+#: gtk2_ardour/ardour_ui_ed.cc:333
+msgid "Punch In/Out"
+msgstr "Inslag/utslag"
+
+#: gtk2_ardour/editor_actions.cc:177
+msgid "Select All Overlapping Edit Range"
+msgstr "Välj allt som överlappar redigeringsomfånget"
+
+#: gtk2_ardour/editor_actions.cc:179
+msgid "Select All Inside Edit Range"
+msgstr "Välj allt inom redigeringsomfånget"
+
+#: gtk2_ardour/editor_actions.cc:182
+msgid "Select Edit Range"
+msgstr "Välj redigeringsomfång"
+
+
+#: gtk2_ardour/editor_actions.cc:444
+msgid "Separate Using Punch Range"
+msgstr "Separera utifrån in-/utslagsomfånget"
+
+#: gtk2_ardour/editor_actions.cc:447
+msgid "Separate Using Loop Range"
+msgstr "Separera utifrån loopomfånget"
+
+#: gtk2_ardour/editor_actions.cc:469
+msgid "Split Regions At Percussion Onsets"
+msgstr "Dela regioner vid perkussiva anslag"
+
+#: gtk2_ardour/editor_actions.cc:282
+msgid "Trim Start At Edit Point"
+msgstr "Beskär början vid redigeringspunkten"
+
+#: gtk2_ardour/editor_actions.cc:285
+msgid "Trim End At Edit Point"
+msgstr "Beskär slutet vid redigeringspunkten"
+
+#: gtk2_ardour/ardour_ui_ed.cc:95
+msgid "Misc. Shortcuts"
+msgstr "Diverse kortkommandon"
+
+#: gtk2_ardour/editor_actions.cc:385
+msgid "Boost Region Gain"
+msgstr "Öka regionens volym"
+
+#: gtk2_ardour/editor_actions.cc:388
+msgid "Cut Region Gain"
+msgstr "Sänk regionens volym"
+
+#: gtk2_ardour/editor_actions.cc:99
+msgid "Break drag"
+msgstr "Avbryt dragning"
+
+
+#: gtk2_ardour/editor_actions.cc:400
+msgid "Raise Region"
+msgstr "Höj regionen"
+
+#: gtk2_ardour/editor_actions.cc:403
+msgid "Lower Region"
+msgstr "Sänk regionen"
+
+#: gtk2_ardour/editor_actions.cc:415
+msgid "Move To Original Position"
+msgstr "Flytta till ursprunglig position"
+
+#: gtk2_ardour/editor_actions.cc:409
+msgid "Lock Region"
+msgstr "Lås region"
+
+#: gtk2_ardour/editor_actions.cc:397
+msgid "Remove Region Sync"
+msgstr "Ta bort regionsynk.-punkt"
+
+#: gtk2_ardour/editor_actions.cc:505 gtk2_ardour/editor_ops.cc:5651
+msgid "Insert Time"
+msgstr "Infoga tid"
+
+#: gtk2_ardour/editor_actions.cc:93
+msgid "Waveforms"
+msgstr "Vågformer"
+
+#: gtk2_ardour/editor_actions.cc:509
+msgid "Toggle Active"
+msgstr "Växla aktiv"
+
+#: gtk2_ardour/editor_actions.cc:547
+msgid "Zoom Focus Mouse"
+msgstr "Zoomfokus: mus"
+
+#: gtk2_ardour/editor_actions.cc:582
+msgid "Next Snap Mode"
+msgstr "Nästa fästläge"
+
+#: gtk2_ardour/editor_actions.cc:583
+msgid "Next Snap Choice"
+msgstr "Nästa fästlägealternativ"
+
+#: gtk2_ardour/editor_actions.cc:70
+msgid "Primary Clock"
+msgstr "Primär klocka"
+
+#: gtk2_ardour/editor_actions.cc:77
+msgid "Secondary Clock"
+msgstr "Sekundär klocka"
+
+#: gtk2_ardour/ardour_ui_ed.cc:309 gtk2_ardour/ardour_ui_ed.cc:318
+#: gtk2_ardour/editor_actions.cc:616
+msgid "Bars & Beats"
+msgstr "Takter & slag"
+
+#: gtk2_ardour/ardour_ui_ed.cc:311 gtk2_ardour/ardour_ui_ed.cc:320
+msgid "Minutes & Seconds"
+msgstr "Minuter & sekunder"
+
+#: gtk2_ardour/editor_actions.cc:75
+msgid "Rulers"
+msgstr "Tidslinjevisning"
+
+#: gtk2_ardour/editor_actions.cc:619
+msgid "Min:Sec"
+msgstr "Min:sek"
+
+#: gtk2_ardour/editor_actions.cc:615
+msgid "Loop/Punch"
+msgstr "Loop-/inslagsmarkörer"
+
+#: gtk2_ardour/editor_actions.cc:76
+msgid "Scroll"
+msgstr "Skrollning"
+
+#: gtk2_ardour/rhythm_ferret.cc:40
+msgid "Analysis"
+msgstr "Analys"
+
+#: gtk2_ardour/rhythm_ferret.cc:30
+msgid "Percussive Onset"
+msgstr "Perkussivt anslag"
+
+#: gtk2_ardour/rhythm_ferret.cc:31
+msgid "Note Onset"
+msgstr "Notanslag"
+
+#: gtk2_ardour/rhythm_ferret.cc:48
+msgid "Threshold"
+msgstr "Tröskel"
+
+#: gtk2_ardour/rhythm_ferret.cc:51
+msgid "Sensitivity"
+msgstr "Känslighet"
+
+#: gtk2_ardour/rhythm_ferret.cc:52
+msgid "Analyze"
+msgstr "Analysera"
+
+#: gtk2_ardour/rhythm_ferret.cc:55
+msgid "Trigger gap (msecs)"
+msgstr "Utlösningsmellanrum (msek)"
+
+#: gtk2_ardour/rhythm_ferret.cc:43
+msgid "Set Tempo Map"
+msgstr "Sätt tempokarta"
+
+#: gtk2_ardour/rhythm_ferret.cc:44
+msgid "Conform Region"
+msgstr "Anpassa region"
+
+#: gtk2_ardour/rhythm_ferret.cc:39
+msgid "Selection"
+msgstr "Markering"
+
+
+#: gtk2_ardour/editor_actions.cc:463
+msgid "Set Tempo from Region=Bar"
+msgstr "Sätt tempo från region=takt"
+
+#: gtk2_ardour/editor_actions.cc:466
+msgid "Set Tempo from Edit Range=Bar"
+msgstr "Sätt tempo från redigeringsomfång=takt"
+
+
+#: gtk2_ardour/ardour_ui_ed.cc:548
+msgid "JACK does monitoring"
+msgstr "JACK sköter medhörning"
+
+#: gtk2_ardour/ardour_ui_ed.cc:552
+msgid "Ardour does monitoring"
+msgstr "Ardour sköter medhörning"
+
+#: gtk2_ardour/ardour_ui_ed.cc:553
+msgid "Audio Hardware does monitoring"
+msgstr "Ljudhårdvaran sköter medhörning"
+
+#: gtk2_ardour/ardour_ui_ed.cc:438
+msgid "Tape Machine mode"
+msgstr "Bandmaskinläge"
+
+#: gtk2_ardour/editor_actions.cc:64
+msgid "Misc Options"
+msgstr "Diverse inställningar"
+
+#: gtk2_ardour/ardour_ui_ed.cc:446
+msgid "Create marker at xrun location"
+msgstr "Skapa markör vid xrun-förekomst"
+
+#: gtk2_ardour/ardour_ui_ed.cc:455
+msgid "Rubberbanding Snaps to Grid"
+msgstr "Gummibandning fäster mot rutnätet"
+
+#: gtk2_ardour/ardour_ui_ed.cc:456
+msgid "Auto-analyse new audio"
+msgstr "Autoanalysera nya ljud"
+
+#: gtk2_ardour/editor_actions.cc:689
+msgid "Import to Region List"
+msgstr "Importera till regionslistan"
+
+#: gtk2_ardour/mixer_strip.cc:984
+msgid "Protect against denormals"
+msgstr "Skydda mot denormals"
+
+#: gtk2_ardour/option_editor.cc:1242
+msgid "Keyboard layout"
+msgstr "Tangentbordslayout"
+
+#: gtk2_ardour/option_editor.cc:275
+msgid "Font Scaling"
+msgstr "Typsnittsskalning"
+
+#: gtk2_ardour/option_editor.cc:97
+msgid "Add new MIDI port"
+msgstr "Lägg till ny MIDI-port"
+
+
+#: gtk2_ardour/editor.cc:1779 gtk2_ardour/editor.cc:1948
+msgid "Spectral Analysis"
+msgstr "Spektralanalys"
+
+#: gtk2_ardour/editor.cc:1793
+msgid "Glue to Bars&Beats"
+msgstr "Klistra mot takt&slag"
+
+#: gtk2_ardour/analysis_window.cc:46
+msgid "Signal source"
+msgstr "Signalkälla"
+
+#: gtk2_ardour/analysis_window.cc:47
+msgid "Selected ranges"
+msgstr "Valda omfång"
+
+#: gtk2_ardour/analysis_window.cc:48
+msgid "Selected regions"
+msgstr "Valda regioner"
+
+#: gtk2_ardour/analysis_window.cc:50
+msgid "Display model"
+msgstr "Visningsmodell"
+
+#: gtk2_ardour/analysis_window.cc:51
+msgid "Composite graphs for each track"
+msgstr "Sammansatt graf för varje spår"
+
+#: gtk2_ardour/analysis_window.cc:52
+msgid "Composite graph of all tracks"
+msgstr "Sammansatt graf för alla spår"
+
+#: gtk2_ardour/analysis_window.cc:54
+msgid "Show frequency power range"
+msgstr "Visa frekvenskraftsomfång"
+
+#: gtk2_ardour/analysis_window.cc:55
+msgid "Normalize values"
+msgstr "Normalisera värden"
+
+#: gtk2_ardour/analysis_window.cc:59 gtk2_ardour/analysis_window.cc:60
+msgid "FFT analysis window"
+msgstr "FFT-analysfönster"
+
+#: gtk2_ardour/analysis_window.cc:135
+msgid "Re-analyze data"
+msgstr "Återanalysera data"
+
+#: gtk2_ardour/ardour_ui_ed.cc:195
+msgid "Window"
+msgstr "Fönster"
+
+#: gtk2_ardour/ardour_ui_dependents.cc:74
+msgid "Setup Editor"
+msgstr "Förbereder redigeraren..."
+
+#: gtk2_ardour/ardour_ui_dependents.cc:76
+msgid "Setup Mixer"
+msgstr "Förbereder mixern..."
+
+#: gtk2_ardour/ardour_ui_dependents.cc:81
+msgid "Reload Session History"
+msgstr "Laddar sessionshistoriken..."
+
+#: gtk2_ardour/editor.cc:4571
+msgid "Please wait while Ardour loads visual data"
+msgstr "Vänta medan Ardour laddar visuell data..."
+
+#: gtk2_ardour/editor_actions.cc:368
+msgid "Toggle Opaque"
+msgstr "Växla genomskinligt"
+
+#: gtk2_ardour/editor_actions.cc:570
+msgid "Fit Selected Tracks"
+msgstr "Rym valda spår"
+
+#: gtk2_ardour/editor_actions.cc:299
+msgid "Zoom to Region (W&H)"
+msgstr "Zooma till region (bredd & höjd)"
+
+#: gtk2_ardour/editor_actions.cc:76
+msgid "Views"
+msgstr "Visningslägen"
+
+
+#: gtk2_ardour/editor_actions.cc:196
+msgid "Save View 1"
+msgstr "Spara läge 1"
+
+#: gtk2_ardour/editor_actions.cc:198
+msgid "Goto View 1"
+msgstr "Använd läge 1"
+
+#: gtk2_ardour/editor_actions.cc:200
+msgid "Save View 2"
+msgstr "Spara läge 2"
+
+#: gtk2_ardour/editor_actions.cc:202
+msgid "Goto View 2"
+msgstr "Använd läge 2 "
+
+#: gtk2_ardour/editor_actions.cc:204
+msgid "Save View 3"
+msgstr "Spara läge 3"
+
+#: gtk2_ardour/editor_actions.cc:206
+msgid "Goto View 3"
+msgstr "Använd läge 3"
+
+#: gtk2_ardour/editor_actions.cc:208
+msgid "Save View 4"
+msgstr "Spara läge 4"
+
+#: gtk2_ardour/editor_actions.cc:210
+msgid "Goto View 4"
+msgstr "Använd läge 4"
+
+#: gtk2_ardour/editor_actions.cc:212
+msgid "Save View 5"
+msgstr "Spara läge 5"
+
+#: gtk2_ardour/editor_actions.cc:214
+msgid "Goto View 5"
+msgstr "Använd läge 5"
+
+#: gtk2_ardour/editor_actions.cc:216
+msgid "Save View 6"
+msgstr "Spara läge 6"
+
+#: gtk2_ardour/editor_actions.cc:218
+msgid "Goto View 6"
+msgstr "Använd läge 6"
+
+#: gtk2_ardour/editor_actions.cc:220
+msgid "Save View 7"
+msgstr "Spara läge 7"
+
+#: gtk2_ardour/editor_actions.cc:222
+msgid "Goto View 7"
+msgstr "Använd läge 7"
+
+#: gtk2_ardour/editor_actions.cc:224
+msgid "Save View 8"
+msgstr "Spara läge 8"
+
+#: gtk2_ardour/editor_actions.cc:226
+msgid "Goto View 8"
+msgstr "Använd läge 8"
+
+#: gtk2_ardour/editor_actions.cc:228
+msgid "Save View 9"
+msgstr "Spara läge 9"
+
+#: gtk2_ardour/editor_actions.cc:230
+msgid "Goto View 9"
+msgstr "Använd läge 9"
+
+#: gtk2_ardour/editor_actions.cc:232
+msgid "Save View 10"
+msgstr "Spara läge 10"
+
+#: gtk2_ardour/editor_actions.cc:234
+msgid "Goto View 10"
+msgstr "Använd läge 10"
+
+#: gtk2_ardour/editor_actions.cc:236
+msgid "Save View 11"
+msgstr "Spara läge 11"
+
+#: gtk2_ardour/editor_actions.cc:238
+msgid "Goto View 11"
+msgstr "Använd läge 11"
+
+#: gtk2_ardour/editor_actions.cc:240
+msgid "Save View 12"
+msgstr "Spara läge 12"
+
+#: gtk2_ardour/editor_actions.cc:242
+msgid "Goto View 12"
+msgstr "Använd läge 12"
+
+#: gtk2_ardour/ardour_ui_ed.cc:462
+msgid "Name New Markers"
+msgstr "Namnge nya markörer"
+
+#: gtk2_ardour/editor_ops.cc:1900
+msgid "Name New Location Marker"
+msgstr "Namnge ny platsmarkör"
+
+#: gtk2_ardour/sfdb_ui.cc:513
+msgid "Search Freesound"
+msgstr "Sök i Freesound"
+
+#: gtk2_ardour/sfdb_ui.cc:480
+msgid "User:"
+msgstr "Användarnamn:"
+
+#: gtk2_ardour/sfdb_ui.cc:484
+msgid "Password:"
+msgstr "Lösenord:"
+
+#: gtk2_ardour/sfdb_ui.cc:400 gtk2_ardour/sfdb_ui.cc:789
+msgid "Start Downloading"
+msgstr "Ladda ner"
+
+#: gtk2_ardour/redirect_box.cc:1190
+msgid "New Plugin"
+msgstr "Nytt insticksprogram"
+
+#: gtk2_ardour/plugin_selector.cc:100
+msgid "Plugins to be connected"
+msgstr "Insticksprogram att ansluta"
+
+#: gtk2_ardour/plugin_selector.cc:156
+msgid "Insert Plugin(s)"
+msgstr "Infoga"
+
+#: gtk2_ardour/plugin_selector.cc:501
+msgid "Favorites"
+msgstr "Favoriter"
+
+#: gtk2_ardour/plugin_selector.cc:502
+msgid "Plugin Manager"
+msgstr "Insticksprogram"
+
+#: gtk2_ardour/plugin_selector.cc:77
+msgid "Fav"
+msgstr ""
+
+#: gtk2_ardour/plugin_selector.cc:78
+msgid "Available Plugins"
+msgstr "Tillgängliga insticksprogram"
+
+#: gtk2_ardour/plugin_selector.cc:80
+msgid "Category"
+msgstr "Kategori"
+
+#: gtk2_ardour/plugin_selector.cc:81
+msgid "Creator"
+msgstr "Upphovsperson"
+
+#: gtk2_ardour/plugin_selector.cc:51 gtk2_ardour/plugin_selector.cc:209
+msgid "Name contains"
+msgstr "Namn innehåller"
+
+#: gtk2_ardour/plugin_selector.cc:52 gtk2_ardour/plugin_selector.cc:211
+msgid "Type contains"
+msgstr "Typ innehåller"
+
+#: gtk2_ardour/plugin_selector.cc:53 gtk2_ardour/plugin_selector.cc:213
+msgid "Author contains"
+msgstr "Upphovsperson innehåller"
+
+#: gtk2_ardour/plugin_selector.cc:54 gtk2_ardour/plugin_selector.cc:215
+msgid "Library contains"
+msgstr "Bibliotek innehåller"
+
+#: gtk2_ardour/plugin_selector.cc:55 gtk2_ardour/plugin_selector.cc:203
+#: gtk2_ardour/plugin_selector.cc:451
+msgid "Favorites only"
+msgstr "Endast favoriter"
+>>>>>>> .merge-right.r3622

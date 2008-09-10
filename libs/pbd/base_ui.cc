@@ -21,7 +21,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
+#include <cerrno>
+#include <cstring>
 
 #include <pbd/base_ui.h>
 #include <pbd/error.h>
@@ -85,20 +86,20 @@ BaseUI::setup_signal_pipe ()
 	*/
 
 	if (pipe (signal_pipe)) {
-		error << string_compose (_("%1-UI: cannot create error signal pipe (%2)"), _name, std::strerror (errno))
+		error << string_compose (_("%1-UI: cannot create error signal pipe (%2)"), _name, ::strerror (errno))
 		      << endmsg;
 
 		return -1;
 	}
 
 	if (fcntl (signal_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << string_compose (_("%1-UI: cannot set O_NONBLOCK on signal read pipe (%2)"), _name, std::strerror (errno))
+		error << string_compose (_("%1-UI: cannot set O_NONBLOCK on signal read pipe (%2)"), _name, ::strerror (errno))
 		      << endmsg;
 		return -1;
 	}
 
 	if (fcntl (signal_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << string_compose (_("%1-UI: cannot set O_NONBLOCK on signal write pipe (%2)"), _name, std::strerror (errno))
+		error << string_compose (_("%1-UI: cannot set O_NONBLOCK on signal write pipe (%2)"), _name, ::strerror (errno))
 		      << endmsg;
 		return -1;
 	}

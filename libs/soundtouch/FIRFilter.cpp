@@ -40,9 +40,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <memory.h>
-#include <assert.h>
-#include <math.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
 #include <stdexcept>
 #include "FIRFilter.h"
 #include "cpu_detect.h"

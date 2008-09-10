@@ -70,7 +70,7 @@ AutomationStreamView::~AutomationStreamView ()
 
 
 RegionView*
-AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wfd)
+AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wfd, bool recording)
 {
 	if ( ! region) {
 		cerr << "No region" << endl;

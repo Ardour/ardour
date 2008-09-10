@@ -30,6 +30,8 @@
 using namespace ARDOUR;
 using ARDOUR::nframes_t;
 
+sigc::signal<void,std::string,std::string> BasicUI::AccessAction;
+
 BasicUI::BasicUI (Session& s)
 	: session (&s)
 {
@@ -49,6 +51,17 @@ void
 BasicUI::register_thread (std::string name)
 {
 	PBD::ThreadCreated (pthread_self(), name);
+}
+
+
+void
+BasicUI::access_action ( std::string action_path ) 
+{
+	int split_at = action_path.find( "/" );
+	std::string group = action_path.substr( 0, split_at );
+	std::string item = action_path.substr( split_at + 1 );
+
+	AccessAction( group, item );
 }
 
 void

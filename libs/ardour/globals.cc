@@ -30,6 +30,10 @@
 #include <fst.h>
 #endif
 
+#ifdef HAVE_AUDIOUNITS
+#include <ardour/audio_unit.h>
+#endif
+
 #ifdef __SSE__
 #include <xmmintrin.h>
 #endif
@@ -347,6 +351,10 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	}
 #endif
 
+#ifdef HAVE_AUDIOUNITS
+	AUPluginInfo::load_cached_info ();
+#endif
+
 	/* Make VAMP look in our library ahead of anything else */
 
 	char *p = getenv ("VAMP_PATH");
@@ -393,11 +401,7 @@ ARDOUR::cleanup ()
 microseconds_t
 ARDOUR::get_microseconds ()
 {
-	/* XXX need JACK to export its functionality */
-
-	struct timeval now;
-	gettimeofday (&now, 0);
-	return now.tv_sec * 1000000ULL + now.tv_usec;
+	return (microseconds_t) jack_get_time ();
 }
 
 ARDOUR::Change
@@ -431,7 +435,6 @@ void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {
 	vector<sys::path> found;
-
 	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
 
 	if (getenv ("ARDOUR_SAE")) {

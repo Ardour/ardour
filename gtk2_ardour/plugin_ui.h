@@ -214,11 +214,14 @@ class PluginUIWindow : public Gtk::Window
 	void resize_preferred();
 	void set_parent (Gtk::Window*);
 
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 	void on_show ();
 	void on_hide ();
 	void on_map ();
+
   private:
 	PlugUIBase* _pluginui;
 	Gtk::Window* parent;

@@ -58,9 +58,8 @@ class PortInsert : public IOProcessor
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
 
-	virtual bool      can_support_input_configuration (ChanCount in) const;
-	virtual ChanCount output_for_input_configuration (ChanCount in) const;
-	virtual bool      configure_io (ChanCount in, ChanCount out);
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return true; }
+	bool configure_io (ChanCount in, ChanCount out);
 
 	uint32_t bit_slot() const { return bitslot; }
 

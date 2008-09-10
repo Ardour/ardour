@@ -130,13 +130,13 @@ class AudioEngine : public sigc::trackable
 	
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
-	uint32_t n_physical_outputs () const;
-	uint32_t n_physical_inputs () const;
-
 	bool can_request_hardware_monitoring ();
 
-	void get_physical_outputs (std::vector<std::string>&);
-	void get_physical_inputs (std::vector<std::string>&);
+	uint32_t n_physical_outputs (DataType type) const;
+	uint32_t n_physical_inputs (DataType type) const;
+
+	void get_physical_outputs (DataType type, std::vector<std::string>&);
+	void get_physical_inputs (DataType type, std::vector<std::string>&);
 
 	std::string get_nth_physical_output (DataType type, uint32_t n) {
 		return get_nth_physical (type, n, JackPortIsInput);
@@ -152,7 +152,7 @@ class AudioEngine : public sigc::trackable
 
 	/** Caller may not delete the object pointed to by the return value
 	*/
-	Port *get_port_by_name (const std::string& name, bool keep = true) const;
+	Port *get_port_by_name (const std::string& name, bool keep = true);
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,
@@ -204,27 +204,28 @@ class AudioEngine : public sigc::trackable
 	std::string make_port_name_non_relative (std::string);
 
   private:
-	ARDOUR::Session *session;
-	jack_client_t *_jack;
-	std::string jack_client_name;
-	mutable Glib::Mutex _process_lock;
-	Glib::Cond session_removed;
-	bool session_remove_pending;
-	bool _running;
-	bool _has_run;
-	nframes_t _buffer_size;
-	nframes_t _frame_rate;
+	ARDOUR::Session*           session;
+	jack_client_t*            _jack;
+	std::string                jack_client_name;
+	Glib::Mutex               _process_lock;
+	Glib::Cond                 session_removed;
+	bool                       session_remove_pending;
+	bool                      _running;
+	bool                      _has_run;
+	nframes_t                 _buffer_size;
+	nframes_t                 _frame_rate;
 	/// number of frames between each check for changes in monitor input
-	nframes_t monitor_check_interval;
+	nframes_t                  monitor_check_interval;
 	/// time of the last monitor check in frames
-	nframes_t last_monitor_check;
+	nframes_t                  last_monitor_check;
 	/// the number of frames processed since start() was called
-	nframes_t _processed_frames;
-	bool _freewheeling;
-	bool _freewheel_thread_registered;
-	sigc::slot<int,nframes_t> freewheel_action;
-	bool reconnect_on_halt;
-	int _usecs_per_cycle;
+	nframes_t                 _processed_frames;
+	bool                      _freewheeling;
+	bool                      _freewheel_pending;
+	bool                      _freewheel_thread_registered;
+	sigc::slot<int,nframes_t>  freewheel_action;
+	bool                       reconnect_on_halt;
+	int                       _usecs_per_cycle;
 
 	SerializedRCUManager<Ports> ports;
 

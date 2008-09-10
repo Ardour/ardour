@@ -35,7 +35,7 @@ class UserBundle : public Bundle, public PBD::Stateful {
 	UserBundle (std::string const &);
 	UserBundle (XMLNode const &, bool);
 
-	uint32_t nchannels () const;
+	ChanCount nchannels () const;
 	const ARDOUR::PortList& channel_ports (uint32_t) const;
 
 	void add_channel ();
