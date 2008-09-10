@@ -18,6 +18,7 @@
 */
 
 #include <cstdlib>
+#include <signal.h>
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
@@ -252,6 +253,7 @@ fixup_bundle_environment ()
 	path += "/../Resources/gdk-pixbuf.loaders";
 
 	setenv ("GDK_PIXBUF_MODULE_FILE", path.c_str(), 1);
+	cerr << "Set GDK_PIXBUF_MODULE_FILE to " << path << endl;
 
 	if (getenv ("ARDOUR_WITH_JACK")) {
 		// JACK driver dir
@@ -264,6 +266,12 @@ fixup_bundle_environment ()
 }
 
 #endif
+
+static void
+sigpipe_handler (int sig)
+{
+	cerr << _("SIGPIPE received - JACK has probably died") << endl;
+}
 
 #ifdef VST_SUPPORT
 /* this is called from the entry point of a wine-compiled
@@ -278,9 +286,12 @@ int main (int argc, char *argv[])
 {
 	vector<Glib::ustring> null_file_list;
 	
+	cerr << "here we go\n";
+	
 #ifdef __APPLE__
 	fixup_bundle_environment ();
 #endif
+	cerr << "just did it\n";
 
         Glib::thread_init();
 	gtk_set_locale ();
@@ -338,6 +349,10 @@ int main (int argc, char *argv[])
 	/* some GUI objects need this */
 
 	PBD::ID::init ();
+
+	if (::signal (SIGPIPE, sigpipe_handler)) {
+		cerr << _("Cannot install SIGPIPE error handler") << endl;
+	}
 
         try { 
 		ui = new ARDOUR_UI (&argc, &argv);

@@ -217,7 +217,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	const SourceList& master_sources() const { return _master_sources; }
 
 	std::vector<string> master_source_names();
-	void set_master_sources (SourceList&);
+	void set_master_sources (const SourceList&);
 	
 	/* serialization */
 	

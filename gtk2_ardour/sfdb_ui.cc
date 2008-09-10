@@ -266,8 +266,10 @@ SoundFileBox::setup_labels (const ustring& filename)
 		samplerate.set_name ("NewSessionSR2Label");
 	}
 
-	length_clock.set (sf_info.length, true);
-	timecode_clock.set (sf_info.timecode, true);
+	double src_coef = (double) _session->nominal_frame_rate() / sf_info.samplerate;
+
+	length_clock.set (sf_info.length * src_coef + 0.5, true);
+	timecode_clock.set (sf_info.timecode * src_coef + 0.5, true);
 
 	// this is a hack that is fixed in trunk, i think (august 26th, 2007)
 

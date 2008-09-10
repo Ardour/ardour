@@ -230,7 +230,8 @@ RegionView::region_changed (Change what_changed)
 	*/
 	/*
 	if (what_changed & Region::LayerChanged) {
-		region_layered ();
+		// this is handled by the playlist i believe
+		//region_layered ();
 	}
 	*/
 	if (what_changed & Region::LockChanged) {
@@ -285,7 +286,7 @@ RegionView::region_layered ()
 {
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*>(&get_time_axis_view());
 	assert(rtv);
-	rtv->view()->region_layered (this);
+	//rtv->view()->region_layered (this);
 }
 	
 void

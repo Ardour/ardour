@@ -49,7 +49,6 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	: _trackview (tv)
 	, owns_canvas_group(group == 0)
 	, canvas_group(group ? group : new ArdourCanvas::Group(*_trackview.canvas_display))
-	, canvas_rect(new ArdourCanvas::SimpleRect (*canvas_group))
 	, _samples_per_unit(_trackview.editor.get_current_zoom())
 	, rec_updating(false)
 	, rec_active(false)
@@ -63,11 +62,15 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 {
 	/* set_position() will position the group */
 
+	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = _trackview.editor.frame_to_pixel (max_frames);
+	canvas_rect->property_x2() = _trackview.editor.frame_to_pixel (max_frames - 1);
 	canvas_rect->property_y2() = (double) tv.current_height();
-	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
+
+	// DR-way
+	// canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
+	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
 	// (Fill/Outline colours set in derived classes)
 
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
@@ -294,18 +297,12 @@ StreamView::apply_color (Gdk::Color& color, ColorTarget target)
 void
 StreamView::region_layered (RegionView* rv)
 {
-
-	 /* 
-	    Currently 'layer' has nothing to do with the desired canvas layer.
-            For now, ensure that multiple regionviews passed here in groups are 
-	    ordered by 'layer' (lowest to highest). 
-
-	    (see AudioStreamView::redisplay_diskstream ()).
- 
-	    We move them to the top layer as they arrive. 
-	 */
-
-	rv->get_canvas_group()->raise_to_top();
+	/* don't ever leave it at the bottom, since then it doesn't
+	   get events - the  parent group does instead ...
+	   we need to raise it above the streamview's 
+	   canvas_rect, hence the layer+1 here
+	*/
+	rv->get_canvas_group()->raise (rv->region()->layer() + 1);
 }
 
 void

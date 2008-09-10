@@ -38,8 +38,8 @@ Editor::Cursor::Cursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanv
 	
 	/* "randomly" initialize coords */
 	
-	points.push_back(Gnome::Art::Point(-9383839.0, 0.0));
 	points.push_back(Gnome::Art::Point(1.0, 0.0));
+	points.push_back(Gnome::Art::Point(1.0, 1.0));
 
 	canvas_item.property_points() = points;
 	canvas_item.property_width_pixels() = 1;
@@ -51,7 +51,6 @@ Editor::Cursor::Cursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanv
 
 	canvas_item.set_data ("cursor", this);
 	canvas_item.signal_event().connect (bind (mem_fun (ed, callbck), &canvas_item));
-
 	current_frame = 1; /* force redraw at 0 */
 }
 
@@ -67,23 +66,15 @@ Editor::Cursor::set_position (nframes64_t frame)
 
 	if (editor.session == 0) {
 		canvas_item.hide();
-	} else {
-		canvas_item.show();
 	}
-
 	current_frame = frame;
-
 	if (new_pos != points.front().get_x()) {
 
 		points.front().set_x (new_pos);
 		points.back().set_x (new_pos);
 
 		canvas_item.property_points() = points;
-
-		ArdourCanvas::Points p = canvas_item.property_points();
 	}
-
-	canvas_item.raise_to_top();
 }
 
 void
@@ -92,6 +83,9 @@ Editor::Cursor::set_length (double units)
 	length = units; 
 	points.back().set_y (points.front().get_y() + length);
 	canvas_item.property_points() = points;
+	if (editor.session != 0) {
+		canvas_item.show();
+	}
 }
 
 void 

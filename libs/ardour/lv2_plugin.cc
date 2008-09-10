@@ -43,10 +43,11 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-
+	
 LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	: Plugin (e, session)
 	, _world(world)
+	, _features(NULL)
 {
 	init (world, plugin, rate);
 }
@@ -54,6 +55,7 @@ LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, SLV2Plu
 LV2Plugin::LV2Plugin (const LV2Plugin &other)
 	: Plugin (other)
 	, _world(other._world)
+	, _features(NULL)
 {
 	init (other._world, other._plugin, other._sample_rate);
 
@@ -68,12 +70,13 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 {
 	_world = world;
 	_plugin = plugin;
+	_ui = NULL;
 	_control_data = 0;
 	_shadow_data = 0;
 	_latency_control_port = 0;
 	_was_activated = false;
-
-	_instance = slv2_plugin_instantiate(plugin, rate, NULL);
+	
+	_instance = slv2_plugin_instantiate(plugin, rate, _features);
 	_name = slv2_plugin_get_name(plugin);
 	assert(_name);
 	_author = slv2_plugin_get_author_name(plugin);
@@ -90,6 +93,18 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 		slv2_value_free(_author);
 		throw failed_constructor();
 	}
+	
+	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
+	_instance_access_feature.data = (void*)_instance->lv2_handle;
+
+	_data_access_extension_data.extension_data = _instance->lv2_descriptor->extension_data;
+	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
+	_data_access_feature.data = &_data_access_extension_data;
+	
+	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 3);
+	_features[0] = &_instance_access_feature;
+	_features[1] = &_data_access_feature;
+	_features[2] = NULL;
 
 	_sample_rate = rate;
 
@@ -122,6 +137,17 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 			}
 		} else {
 			_defaults[i] = 0.0f;
+		}
+	}
+	
+	SLV2UIs uis = slv2_plugin_get_uis(_plugin);
+	if (slv2_uis_size(uis) > 0) {
+		for (unsigned i=0; i < slv2_uis_size(uis); ++i) {
+			SLV2UI ui = slv2_uis_get_at(uis, i);
+			if (slv2_ui_is_a(ui, _world.gtk_gui)) {
+				_ui = ui;
+				break;
+			}
 		}
 	}
 
@@ -242,6 +268,12 @@ bool
 LV2Plugin::save_preset (string name)
 {
 	return Plugin::save_preset (name, "lv2");
+}
+	
+bool
+LV2Plugin::has_editor() const
+{
+	return (_ui != NULL);
 }
 
 int
@@ -536,6 +568,7 @@ LV2World::LV2World()
 	integer = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
 	toggled = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
 	srate = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
+	gtk_gui = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#GtkUI");
 }
 
 LV2World::~LV2World()

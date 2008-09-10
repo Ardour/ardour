@@ -160,8 +160,12 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 		memset (_broadcast_info, 0, sizeof (*_broadcast_info));
 		
 		snprintf_bounded_null_filled (_broadcast_info->description, sizeof (_broadcast_info->description), "BWF %s", _name.c_str());
-		snprintf_bounded_null_filled (_broadcast_info->originator, sizeof (_broadcast_info->originator), "ardour %s)", Glib::get_real_name().c_str());
-		
+		snprintf_bounded_null_filled (_broadcast_info->originator, sizeof (_broadcast_info->originator), "ardour %d.%d.%d %s", 
+					      libardour3_major_version,
+					      libardour3_minor_version,
+					      libardour3_micro_version,
+					      Glib::get_real_name().c_str());
+
 		_broadcast_info->version = 1;  
 		_broadcast_info->time_reference_low = 0;  
 		_broadcast_info->time_reference_high = 0;  
@@ -551,14 +555,14 @@ SndFileSource::setup_broadcast_info (nframes_t when, struct tm& now, time_t tnow
 	
 	snprintf_bounded_null_filled (_broadcast_info->origination_date, sizeof (_broadcast_info->origination_date), "%4d-%02d-%02d",
 				      1900 + now.tm_year,
-				      now.tm_mon + 1, // move from 0..11 to 1..12
+				      now.tm_mon + 1, // shift range from 0..11 to 1..12
 				      now.tm_mday);
 	
 	snprintf_bounded_null_filled (_broadcast_info->origination_time, sizeof (_broadcast_info->origination_time), "%02d:%02d:%02d",
 				      now.tm_hour,
 				      now.tm_min,
 				      now.tm_sec);
-
+	
 	/* now update header position taking header offset into account */
 	
 	set_header_timeline_position ();

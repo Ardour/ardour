@@ -209,8 +209,7 @@ Editor::Editor ()
 	  range_mark_label (_("Range Markers")),
 	  transport_mark_label (_("Loop/Punch Ranges")),
 	  cd_mark_label (_("CD Markers")),
-
-	  edit_packer (3, 3, true),
+	  edit_packer (3, 4, true),
 
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
@@ -218,9 +217,6 @@ Editor::Editor ()
 
 	  vertical_adjustment (0.0, 0.0, 10.0, 400.0),
 	  horizontal_adjustment (0.0, 0.0, 20.0, 1200.0),
-
-	  tempo_lines(0),
-	  marker_tempo_lines(0),
 
 	  /* tool bar related */
 
@@ -375,7 +371,6 @@ Editor::Editor ()
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
 	tempo_map_change_idle_handler_id = -1;
-	canvas_hroizontally_scrolled_handler_id = -1;
 	set_midi_edit_mode (MidiEditPencil, true);
 	set_mouse_mode (MouseObject, true);
 
@@ -390,16 +385,10 @@ Editor::Editor ()
 	initialize_canvas ();
 
 	edit_controls_vbox.set_spacing (0);
-	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::canvas_horizontally_scrolled), false);
+	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::scroll_canvas_horizontally), false);
 	vertical_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::tie_vertical_scrolling), true);
-	
-	track_canvas->set_hadjustment (horizontal_adjustment);
-	track_canvas->set_vadjustment (vertical_adjustment);
-	time_canvas->set_hadjustment (horizontal_adjustment);
-
 	track_canvas->signal_map_event().connect (mem_fun (*this, &Editor::track_canvas_map_handler));
-	time_canvas->signal_map_event().connect (mem_fun (*this, &Editor::time_canvas_map_handler));
-	
+
 	controls_layout.add (edit_controls_vbox);
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::SCROLL_MASK);
@@ -436,9 +425,8 @@ Editor::Editor ()
 	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
 	time_canvas_vbox.pack_start (*frames_ruler, false, false);
 	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
-	time_canvas_vbox.pack_start (*time_canvas, true, true);
-	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 5);
-
+	//time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
+	time_canvas_vbox.set_size_request (-1, -1);
 	bbt_label.set_name ("EditorTimeButton");
 	bbt_label.set_size_request (-1, (int)timebar_height);
 	bbt_label.set_alignment (1.0, 0.5);
@@ -455,6 +443,7 @@ Editor::Editor ()
 	frame_label.set_size_request (-1, (int)timebar_height);
 	frame_label.set_alignment (1.0, 0.5);
 	frame_label.set_padding (5,0);
+
 	tempo_label.set_name ("EditorTimeButton");
 	tempo_label.set_size_request (-1, (int)timebar_height);
 	tempo_label.set_alignment (1.0, 0.5);
@@ -479,25 +468,25 @@ Editor::Editor ()
 	transport_mark_label.set_size_request (-1, (int)timebar_height);
 	transport_mark_label.set_alignment (1.0, 0.5);
 	transport_mark_label.set_padding (5,0);
+
+	ruler_label_vbox.pack_start (minsec_label, false, false);
+	ruler_label_vbox.pack_start (smpte_label, false, false);
+	ruler_label_vbox.pack_start (frame_label, false, false);
+	ruler_label_vbox.pack_start (bbt_label, false, false);
 	
-	time_button_vbox.pack_start (minsec_label, false, false);
-	time_button_vbox.pack_start (smpte_label, false, false);
-	time_button_vbox.pack_start (frame_label, false, false);
-	time_button_vbox.pack_start (bbt_label, false, false);
+	ruler_label_event_box.add (ruler_label_vbox);	
+	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	ruler_label_event_box.set_name ("TimebarLabelBase");
+	ruler_label_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
+
 	time_button_vbox.pack_start (meter_label, false, false);
 	time_button_vbox.pack_start (tempo_label, false, false);
 	time_button_vbox.pack_start (mark_label, false, false);
 
 	time_button_event_box.add (time_button_vbox);
 	time_button_event_box.set_name ("TimebarLabelBase");
-	time_button_frame.set_shadow_type (Gtk::SHADOW_NONE);
-	
 	time_button_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_button_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
-
-	time_button_frame.add (time_button_event_box);
-	time_button_frame.set_name ("TimebarLabelBase");
-	time_button_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	/* these enable us to have a dedicated window (for cursor setting, etc.) 
 	   for the canvas areas.
@@ -514,16 +503,16 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 	
-	edit_packer.attach (edit_vscrollbar,         3, 4, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (edit_vscrollbar,         0, 1, 0, 4,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (ruler_label_event_box,       1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (time_button_event_box,       1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
-	edit_packer.attach (time_button_frame,       0, 2, 0, 1,    FILL,        SHRINK, 0, 0);
-	edit_packer.attach (time_canvas_event_box,   2, 4, 0, 1,    FILL|EXPAND, FILL, 0, 0);
+	edit_packer.attach (controls_layout,         1, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
-	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
-	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-
-	edit_packer.attach (zoom_box,                1, 2, 2, 3,    FILL,         FILL, 0, 0);
-	edit_packer.attach (edit_hscrollbar,         2, 3, 2, 3,    FILL|EXPAND,  FILL, 0, 0);
+	edit_packer.attach (zoom_box,                1, 2, 3, 4,    FILL,         FILL, 0, 0);
+	edit_packer.attach (edit_hscrollbar,         2, 3, 3, 4,    FILL|EXPAND,  FILL, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -854,19 +843,9 @@ Editor::~Editor()
 		track_canvas = 0;
 	}
 
-	if (time_canvas) {
-		delete time_canvas;
-		time_canvas = 0;
-	}
-
 	if (track_canvas) {
 		delete track_canvas;
 		track_canvas = 0;
-	}
-
-	if (time_canvas) {
-		delete time_canvas;
-		time_canvas = 0;
 	}
 }
 
@@ -1103,6 +1082,7 @@ Editor::start_scrolling ()
 {
 	scroll_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect 
 		(mem_fun(*this, &Editor::update_current_screen));
+
 }
 
 void
@@ -1161,7 +1141,7 @@ Editor::handle_new_duration ()
 	if (new_end > last_canvas_frame) {
 		last_canvas_frame = new_end;
 		horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
-		reset_scrolling_region ();
+		//reset_scrolling_region ();
 	}
 
 	horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
@@ -3562,13 +3542,23 @@ Editor::hide_verbose_canvas_cursor ()
 double
 Editor::clamp_verbose_cursor_x (double x)
 {
-	return min (horizontal_adjustment.get_value() + canvas_width - 75.0, x);
+	if (x < 0) {
+		x = 0;
+	} else {
+		x = min (canvas_width - 200.0, x);
+	}
+	return x;
 }
 
 double
 Editor::clamp_verbose_cursor_y (double y)
 {
-	return min (vertical_adjustment.get_value() + canvas_height - 50.0, y);
+	if (y < canvas_timebars_vsize) {
+		y = canvas_timebars_vsize;
+	} else {
+		y = min (canvas_height - 50, y);
+	}
+	return y;
 }
 
 void
@@ -3577,7 +3567,7 @@ Editor::set_verbose_canvas_cursor (const string & txt, double x, double y)
 	verbose_canvas_cursor->property_text() = txt.c_str();
 	/* don't get too close to the edge */
 	verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (x);
-	verbose_canvas_cursor->property_y() = clamp_verbose_cursor_x (y);
+	verbose_canvas_cursor->property_y() = clamp_verbose_cursor_y (y);
 }
 
 void
@@ -4014,7 +4004,8 @@ void
 Editor::end_location_changed (Location* location)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::end_location_changed), location));
-	reset_scrolling_region ();
+	//reset_scrolling_region ();
+	horizontal_adjustment.set_upper ( location->start());
 }
 
 int
@@ -4405,6 +4396,7 @@ Editor::on_key_release_event (GdkEventKey* ev)
 void
 Editor::reset_x_origin (nframes64_t frame)
 {
+	//cerr << "resetting x origin" << endl;
 	queue_visual_change (frame);
 }
 
@@ -4532,10 +4524,6 @@ Editor::set_frames_per_unit (double fpu)
 		return;
 	}
 
-	if (fpu == frames_per_unit) {
-		return;
-	}
-
 	frames_per_unit = fpu;
 	post_zoom ();
 }
@@ -4566,9 +4554,11 @@ Editor::post_zoom ()
 	ZoomChanged (); /* EMIT_SIGNAL */
 
 	reset_hscrollbar_stepping ();
-	reset_scrolling_region ();
+	//reset_scrolling_region ();
 
-	if (playhead_cursor) playhead_cursor->set_position (playhead_cursor->current_frame);
+	if (playhead_cursor) {
+		playhead_cursor->set_position (playhead_cursor->current_frame);
+	}
 
 	instant_save ();
 }
@@ -4576,10 +4566,12 @@ Editor::post_zoom ()
 void
 Editor::queue_visual_change (nframes64_t where)
 {
-	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
-	pending_visual_change.time_origin = where;
+//	pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
+//	pending_visual_change.time_origin = where;
 
 	if (pending_visual_change.idle_handler_id < 0) {
+		pending_visual_change.pending = VisualChange::Type (pending_visual_change.pending | VisualChange::TimeOrigin);
+		pending_visual_change.time_origin = where;
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
 	}
 }
@@ -4606,13 +4598,6 @@ int
 Editor::idle_visual_changer ()
 {
 	VisualChange::Type p = pending_visual_change.pending;
-	nframes64_t csf, cef;
-
-	if (session) {
-		csf = session->current_start_frame();
-		cef = session->current_end_frame() + (current_page_frames() / 24);// Add a little extra so we can see the end marker
-	}
-
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
 	if (p & VisualChange::ZoomLevel) {
@@ -4624,26 +4609,29 @@ Editor::idle_visual_changer ()
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {
-		
-		nframes64_t time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+
+		nframes64_t csf, cef;
+		nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+
+		if (session) {
+			csf = session->current_start_frame();
+			cef = session->current_end_frame() + (current_page_frames() / 24);// Add a little extra so we can see the end marker
+		}
 
 		/* if we seek beyond the current end of the canvas, move the end */
 
-		if (time_origin != pending_visual_change.time_origin) {
-			
-			if (horizontal_adjustment.get_upper() < pending_visual_change.time_origin) {
-				last_canvas_frame = (cef > (pending_visual_change.time_origin + current_page_frames())) ? cef : pending_visual_change.time_origin + current_page_frames();
-				horizontal_adjustment.set_upper ((cef - csf) / frames_per_unit);
-				reset_scrolling_region ();
-			}
-			
-			horizontal_adjustment.set_value (pending_visual_change.time_origin/frames_per_unit);
+		if (current_time_origin != pending_visual_change.time_origin) {
+			//if (horizontal_adjustment.get_upper() < pending_visual_change.time_origin) {
+			last_canvas_frame = (cef > (pending_visual_change.time_origin + current_page_frames())) ? cef : pending_visual_change.time_origin + current_page_frames();
+			horizontal_adjustment.set_upper ((cef - csf) / frames_per_unit);
+			//}
+			horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
 		} else {
 			update_fixed_rulers();
 			redisplay_tempo (true);
 		}
 	}
-
+	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;
 	return 0; /* this is always a one-shot call */
 }
@@ -5020,7 +5008,7 @@ Editor::queue_draw_resize_line (int at)
 			/* redraw where it used to be */
 			
 			
-			Gdk::Rectangle r (xroot, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
+			Gdk::Rectangle r (0, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
 			win->invalidate_rect (r, true);
 			cerr << "invalidate " << xroot << "," << old_resize_line_y - 1 << ' ' 
 			     << controls_width + canvas_width << " x 3\n";
@@ -5028,7 +5016,7 @@ Editor::queue_draw_resize_line (int at)
 
 		/* draw where it is */
 
-		Gdk::Rectangle r (xroot, at - 1, controls_width + (int) canvas_width, 3);
+		Gdk::Rectangle r (0, at - 1, controls_width + (int) canvas_width, 3);
 		win->invalidate_rect (r, true);
 	}
 #endif
@@ -5063,7 +5051,7 @@ Editor::on_expose_event (GdkEventExpose* ev)
 		GdkRectangle lr;
 		GdkRectangle intersection;
 
-		lr.x = xroot;
+		lr.x = 0;
 		lr.y = resize_line_y;
 		lr.width = controls_width + (int) canvas_width;
 		lr.height = 3;
@@ -5084,15 +5072,17 @@ Editor::on_expose_event (GdkEventExpose* ev)
 						 Gdk::JOIN_MITER);
 			
 			gdk_draw_line (win, gc->gobj(), 
-				       xroot,
-				       yroot + resize_line_y, 
-				       xroot + (int) canvas_width + controls_width,
-				       yroot + resize_line_y);
+				       0,
+				       resize_line_y, 
+				       (int) canvas_width + controls_width,
+				       resize_line_y);
+#if 0
 			cerr << "drew line @ " << xroot << ", " << yroot + resize_line_y 
 			     << " to " << xroot + (int) canvas_width + controls_width
 			     << ", " << yroot + resize_line_y
 			     << endl;
-			old_resize_line_y = yroot + resize_line_y;
+#endif
+			old_resize_line_y = resize_line_y;
 			cerr << "NEXT EXPOSE SHOULD BE AT " << old_resize_line_y << endl;
 		} else {
 			cerr << "no intersect with "

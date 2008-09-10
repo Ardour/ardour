@@ -278,22 +278,21 @@ XMLNode::children(const string& n) const
 {
 	/* returns all children matching name */
 
-	static XMLNodeList retval;
 	XMLNodeConstIterator cur;
 	
 	if (n.empty()) {
 		return _children;
 	}
-		
-	retval.erase(retval.begin(), retval.end());
+
+	_selected_children.clear();
 	
 	for (cur = _children.begin(); cur != _children.end(); ++cur) {
 		if ((*cur)->name() == n) {
-			retval.insert(retval.end(), *cur);
+			_selected_children.insert(_selected_children.end(), *cur);
 		}
 	}
 		
-	return retval;
+	return _selected_children;
 }
 
 XMLNode *

@@ -150,7 +150,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	vestigial_frame = new ArdourCanvas::SimpleRect (*group);
 	vestigial_frame->property_x1() = (double) 0.0;
 	vestigial_frame->property_y1() = (double) 1.0;
-	vestigial_frame->property_x2() = 2.0;
+	vestigial_frame->property_x2() = (double) 2.0;
 	vestigial_frame->property_y2() = (double) trackview.current_height();
 	vestigial_frame->property_outline_what() = 0xF;
 	vestigial_frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
@@ -644,7 +644,7 @@ TimeAxisViewItem::get_canvas_frame()
 /**
  * 
  */
-ArdourCanvas::Item*
+ArdourCanvas::Group*
 TimeAxisViewItem::get_canvas_group()
 {
 	return (group) ;

@@ -60,8 +60,15 @@ RBEffect::~RBEffect ()
 }
 
 int
-RBEffect::run (boost::shared_ptr<AudioRegion> region)
+RBEffect::run (boost::shared_ptr<Region> r)
 {
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
+
+	if (!region) {
+		error << "RBEffect::run() passed a non-audio region! WTF?" << endmsg;
+		return -1;
+	}
+
 	SourceList nsrcs;
 	nframes_t done;
 	int ret = -1;
@@ -156,9 +163,6 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 	tsr.done = false;
 
 	stretcher.setExpectedInputDuration(read_duration);
-	stretcher.setDebugLevel(1);
-
-	stretcher.setExpectedInputDuration(duration);
 	stretcher.setDebugLevel(1);
 
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
@@ -288,8 +292,12 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 			
 				for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
-					if (nsrcs[i]->write(buffers[i], this_read) !=
-					    this_read) {
+					boost::shared_ptr<AudioSource> asrc = boost::dynamic_pointer_cast<AudioSource>(nsrcs[i]);
+					if (!asrc) {
+						continue;
+					}
+
+					if (asrc->write(buffers[i], this_read) != this_read) {
 						error << string_compose (_("error writing tempo-adjusted data to %1"), nsrcs[i]->name()) << endmsg;
 						goto out;
 					}
@@ -305,7 +313,12 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 
 			for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
-				if (nsrcs[i]->write(buffers[i], this_read) !=
+				boost::shared_ptr<AudioSource> asrc = boost::dynamic_pointer_cast<AudioSource>(nsrcs[i]);
+				if (!asrc) {
+					continue;
+				}
+				
+				if (asrc->write(buffers[i], this_read) !=
 				    this_read) {
 					error << string_compose (_("error writing tempo-adjusted data to %1"), nsrcs[i]->name()) << endmsg;
 					goto out;
@@ -334,14 +347,13 @@ RBEffect::run (boost::shared_ptr<AudioRegion> region)
 
 	/* now reset ancestral data for each new region */
 
-	for (vector<boost::shared_ptr<AudioRegion> >::iterator x = results.begin(); x != results.end(); ++x) {
-
+	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin(); x != results.end(); ++x) {
 
 		(*x)->set_ancestral_data (read_start,
 					  read_duration,
 					  stretch,
 					  shift);
-		(*x)->set_master_sources (region->get_master_sources());
+		(*x)->set_master_sources (region->master_sources());
 	}
 
   out:

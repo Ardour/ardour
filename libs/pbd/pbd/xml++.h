@@ -78,6 +78,7 @@ private:
   XMLNodeList _children;
   XMLPropertyList _proplist;
   XMLPropertyMap _propmap;
+  mutable XMLNodeList _selected_children;
 
 public:
   XMLNode(const string& name);

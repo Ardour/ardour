@@ -54,7 +54,7 @@ opts.AddOptions(
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolOption('VST', 'Compile with support for VST', 0),
-    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 0),
+    BoolOption('LV2', 'Compile with support for LV2 (if slv2 is available)', 1),
     BoolOption('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolOption('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolOption('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
@@ -565,17 +565,14 @@ else:
 	print 'FREESOUND support is not enabled.  Build with \'scons FREESOUND=1\' to enable.'
 
 if env['LV2']:
-	conf = env.Configure(custom_tests = { 'CheckPKGExists' : CheckPKGExists })
+	conf = env.Configure(custom_tests = { 'CheckPKGVersion' : CheckPKGVersion})
 	
-	if conf.CheckPKGExists ('slv2'):
+	if conf.CheckPKGVersion('slv2', '0.6.0'):
 		libraries['slv2'] = LibraryInfo()
 		libraries['slv2'].ParseConfig('pkg-config --cflags --libs slv2')
                 env.Append (CCFLAGS="-DHAVE_LV2")
 	else:
-		print 'Building Ardour with LV2 support requires SLV2 >= 0.6.0'
-		print 'WARNING: SLV2 not found, or too old.  Ardour will be built without LV2 support.'
-		print 'Until the 2.4 release, Ardour requires SLV2 out of SVN.'
-		print 'Testing would be very much appreciated!  svn co http://svn.drobilla.net/lad/slv2'
+		print 'LV2 support is not enabled (SLV2 not found or older than 0.6.0)'
 		env['LV2'] = 0
 	conf.Finish()
 else:
@@ -767,6 +764,13 @@ if env['DIST_TARGET'] in ['panther', 'tiger', 'leopard' ]:
     # force tiger or later, to avoid issues on PPC which defaults
     # back to 10.1 if we don't tell it otherwise.
     env.Append (CCFLAGS="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+
+    if env['DIST_TARGET'] == 'leopard':
+        # need this to really build against the 10.4 SDK when building on leopard
+        # ideally this would be configurable, but lets just do that later when we need it
+        env.Append(CCFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+        env.Append(LINKFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk")
+
 else:
     env['IS_OSX'] = 0
 
@@ -836,12 +840,13 @@ def prep_libcheck(topenv, libinfo):
 	#
 	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
 	#            All libraries needed should be built against this location
+	# However.. now jhbuild installs to ~/gtk/inst by default.. changed to accomodate this
 	if topenv['GTKOSX']:
-	        gtkroot = os.path.expanduser ("~");
-		libinfo.Append(CPPPATH="$GTKROOT/include", LIBPATH="$GTKROOT/lib")
-		libinfo.Append(CXXFLAGS="-I$GTKROOT/include", LINKFLAGS="-L$GTKROOT/lib")
-	libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
-	libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+		GTKROOT = os.path.expanduser ('~/gtk/inst')
+		libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
+		libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
+	#libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
+	#libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
 prep_libcheck(env, env)
 
@@ -859,25 +864,25 @@ libraries['vamphost'] = LibraryInfo (LIBS='vamphostsdk',
 
 env['RUBBERBAND'] = False
 
-#conf = Configure (env)
-#
-#if conf.CheckHeader ('fftw3.h'):
-#    env['RUBBERBAND'] = True
-#    libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
-#                                           LIBPATH='#libs/rubberband',
-#                                           CPPPATH='#libs/rubberband',
-#                                           CCFLAGS='-DUSE_RUBBERBAND')
-#else:
-#    print ""
-#    print "-------------------------------------------------------------------------"
-#    print "You do not have the FFTW single-precision development package installed."
-#    print "This prevents Ardour from using the Rubberband library for timestretching"
-#    print "and pitchshifting. It will fall back on SoundTouch for timestretch, and "
-#    print "pitchshifting will not be available."
-#    print "-------------------------------------------------------------------------"
-#    print ""
-#
-#conf.Finish()
+conf = Configure (env)
+
+if conf.CheckHeader ('fftw3.h'):
+    env['RUBBERBAND'] = True
+    libraries['rubberband'] = LibraryInfo (LIBS='rubberband',
+                                           LIBPATH='#libs/rubberband',
+                                           CPPPATH='#libs/rubberband',
+                                           CCFLAGS='-DUSE_RUBBERBAND')
+else:
+    print ""
+    print "-------------------------------------------------------------------------"
+    print "You do not have the FFTW single-precision development package installed."
+    print "This prevents Ardour from using the Rubberband library for timestretching"
+    print "and pitchshifting. It will fall back on SoundTouch for timestretch, and "
+    print "pitchshifting will not be available."
+    print "-------------------------------------------------------------------------"
+    print ""
+
+conf.Finish()
 
 #
 # Check for libusb

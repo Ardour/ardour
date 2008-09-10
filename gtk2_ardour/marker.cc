@@ -245,7 +245,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	mark->property_outline_color_rgba() = rgba;
 	mark->property_width_pixels() = 1;
 	Pango::FontDescription* font = get_font_for_style (N_("MarkerText"));
-
+	//cerr << " font->get_size() = " << font->get_size() << " is_absolute = " << pango_font_description_get_size_is_absolute(font->gobj()) << " to_string = " << font->to_string() << endl;
 	text = new Text (*group);
 	text->property_font_desc() = *font;
 	text->property_text() = annotation.c_str();

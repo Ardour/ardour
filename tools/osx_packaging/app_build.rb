@@ -81,7 +81,7 @@ $stdout.print("Copying libs to #{libdir} ...\n");
 results.each do |s|
     s = s.split[0]
     # exclude frameworks, system libraries, X11 libraries, and libjack.
-    unless s =~ /System|\/usr\/lib|\/usr\/X11R6|libjack|:$/ then
+    unless s =~ /System|\/usr\/lib|\/usr\/X11|Jackmp|libjack|:$/ then
 	#$stdout.print("Copying #{s}\n")
         `cp #{s} #{odir}/#{libdir}/`
     end
@@ -94,7 +94,7 @@ results.uniq!
 results.each do |s|
     s = s.split[0]
     # exclude frameworks, system libraries, X11 libraries, and libjack.
-    unless s =~ /System|\/usr\/lib|\/usr\/X11R6|libjack|:$/ then
+    unless s =~ /System|\/usr\/lib|\/usr\/X11|Jackmp|libjack|:$/ then
       sbase = File.basename(s)
       targfile = "#{odir}/#{libdir}/#{sbase}"
       #$stdout.print("Targ is : " + targfile + "\n")

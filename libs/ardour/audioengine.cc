@@ -95,6 +95,7 @@ AudioEngine::~AudioEngine ()
 		
 		if (_running) {
 			jack_client_close (_jack);
+			_jack = 0;
 		}
 		
 		stop_metering_thread ();
@@ -121,6 +122,11 @@ _thread_init_callback (void *arg)
 int
 AudioEngine::start ()
 {
+	if (!_jack) {
+		error << _("AudioEngine::start() called while disconnected from JACK") << endmsg;
+		return -1;
+	}
+
 	if (!_running) {
 
 		if (session) {
@@ -179,17 +185,13 @@ AudioEngine::start ()
 int
 AudioEngine::stop (bool forever)
 {
-	if (_running) {
-		_running = false;
-		stop_metering_thread ();
+	if (_jack) {
 		if (forever) {
-			jack_client_t* foo = _jack;
-			_jack = 0;
-			jack_client_close (foo);
+			disconnect_from_jack ();
 		} else {
 			jack_deactivate (_jack);
+			Stopped(); /* EMIT SIGNAL */
 		}
-		Stopped(); /* EMIT SIGNAL */
 	}
 
 	return _running ? -1 : 0;
@@ -204,11 +206,13 @@ AudioEngine::get_sync_offset (nframes_t& offset) const
 
 	jack_position_t pos;
 	
-	(void) jack_transport_query (_jack, &pos);
-
-	if (pos.valid & JackVideoFrameOffset) {
-		offset = pos.video_offset;
-		return true;
+	if (_jack) {
+		(void) jack_transport_query (_jack, &pos);
+		
+		if (pos.valid & JackVideoFrameOffset) {
+			offset = pos.video_offset;
+			return true;
+		}
 	}
 
 #endif
@@ -252,7 +256,7 @@ int
 AudioEngine::_xrun_callback (void *arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
-	if (ae->jack()) {
+	if (ae->connected()) {
 		ae->Xrun (); /* EMIT SIGNAL */
 	}
 	return 0;
@@ -262,7 +266,7 @@ int
 AudioEngine::_graph_order_callback (void *arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
-	if (ae->jack()) {
+	if (ae->connected()) {
 		ae->GraphReordered (); /* EMIT SIGNAL */
 	}
 	return 0;
@@ -894,7 +898,8 @@ AudioEngine::halted (void *arg)
 	ae->_running = false;
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
-	ae->_jack = 0;
+
+	cerr << "!!! HALTED !!!\n";
 
 	if (was_running) {
 		ae->Halted(); /* EMIT SIGNAL */
@@ -1067,7 +1072,6 @@ AudioEngine::update_total_latency (const Port& port)
 void
 AudioEngine::transport_stop ()
 {
-	// cerr << "tell JACK to stop\n";
 	if (_jack) {
 		jack_transport_stop (_jack);
 	}
@@ -1211,7 +1215,7 @@ AudioEngine::connect_to_jack (string client_name)
 {
 	jack_client_name = client_name;
 
-	if ((_jack = jack_client_new (client_name.c_str())) == NULL) {
+	if ((_jack = jack_client_new (client_name.c_str())) == 0) {
 		return -1;
 	}
 
@@ -1223,29 +1227,36 @@ AudioEngine::connect_to_jack (string client_name)
 int 
 AudioEngine::disconnect_from_jack ()
 {
-	if (_jack == 0) {
+	if (!_jack) {
 		return 0;
 	}
 
-	jack_client_close (_jack);
+
+	if (_running) {
+		stop_metering_thread ();
+	}
+
+	{ 
+		Glib::Mutex::Lock lm (_process_lock);
+		jack_client_close (_jack);
+		_jack = 0;
+	}
 
 	_buffer_size = 0;
 	_frame_rate = 0;
 
 	if (_running) {
-		stop_metering_thread ();
 		_running = false;
 		Stopped(); /* EMIT SIGNAL */
 	}
 
-	_jack = 0;
 	return 0;
 }
 
 int
 AudioEngine::reconnect_to_jack ()
 {
-	if (_jack) {
+	if (_running) {
 		disconnect_from_jack ();
 		/* XXX give jackd a chance */
 		Glib::usleep (250000);
@@ -1336,7 +1347,9 @@ void
 AudioEngine::update_total_latencies ()
 {
 #ifdef HAVE_JACK_RECOMPUTE_LATENCIES
-	jack_recompute_total_latencies (_jack);
+	if (_jack) {
+		jack_recompute_total_latencies (_jack);
+	}
 #endif
 }
 		

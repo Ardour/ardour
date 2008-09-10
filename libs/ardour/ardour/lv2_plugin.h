@@ -60,9 +60,14 @@ class LV2Plugin : public ARDOUR::Plugin
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
 
+	const void* extension_data(const char* uri) { return _instance->lv2_descriptor->extension_data(uri); }
+
 	SLV2Plugin slv2_plugin()         { return _plugin; }
+	SLV2UI     slv2_ui()             { return _ui; }
 	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
 	
+	const LV2_Feature* const* features() { return _features; }
+
 	std::set<Parameter> automatable() const;
 
 	void activate () { 
@@ -104,14 +109,14 @@ class LV2Plugin : public ARDOUR::Plugin
 	int      set_state(const XMLNode& node);
 	bool     save_preset(std::string name);
 
-	bool has_editor() const { return false; }
+	bool has_editor() const;
 
-	int require_output_streams (uint32_t);
-	
   private:
 	void*                    _module;
 	LV2World&                _world;
+	LV2_Feature**            _features;
 	SLV2Plugin               _plugin;
+	SLV2UI                   _ui;
 	SLV2Value                _name;
 	SLV2Value                _author;
 	SLV2Instance             _instance;
@@ -122,6 +127,11 @@ class LV2Plugin : public ARDOUR::Plugin
 	float*                   _latency_control_port;
 	bool                     _was_activated;
 	vector<bool>             _port_is_input;
+
+	typedef struct { const void* (*extension_data)(const char* uri); } LV2_DataAccess;
+	LV2_DataAccess _data_access_extension_data;
+	LV2_Feature _data_access_feature;
+	LV2_Feature _instance_access_feature;
 
 	void init (LV2World& world, SLV2Plugin plugin, nframes_t rate);
 	void run (nframes_t nsamples);
@@ -149,6 +159,7 @@ struct LV2World {
 	SLV2Value integer;
 	SLV2Value toggled;
 	SLV2Value srate;
+	SLV2Value gtk_gui;
 };
 
 

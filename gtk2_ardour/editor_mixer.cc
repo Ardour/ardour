@@ -203,7 +203,7 @@ Editor::update_current_screen ()
 
 		if (_follow_playhead && session->requested_return_frame() < 0) {
 
-			playhead_cursor->canvas_item.show();
+			//playhead_cursor->canvas_item.show();
 
 			if (frame != last_update_frame) {
 
@@ -259,7 +259,10 @@ Editor::update_current_screen ()
 
 	  almost_done:
 		last_update_frame = frame;
-
+#ifdef GTKOSX
+		/*XXX in a perfect world we would not have to do this. */
+		track_canvas->update_now();
+#endif
 		if (current_mixer_strip) {
 			current_mixer_strip->fast_update ();
 		}

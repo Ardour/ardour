@@ -44,6 +44,7 @@ mackie.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE")
 mackie.Append(CXXFLAGS="-DDATA_DIR=\\\""+final_prefix+"/share\\\"")
 mackie.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 mackie.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
+mackie.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 mackie.Merge ([
     libraries['ardour'],

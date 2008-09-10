@@ -1406,7 +1406,7 @@ Region::master_source_names ()
 }
 
 void
-Region::set_master_sources (SourceList& srcs)
+Region::set_master_sources (const SourceList& srcs)
 {
 	_master_sources = srcs;
 }

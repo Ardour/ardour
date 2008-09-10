@@ -1344,7 +1344,7 @@ ARDOUR_UI::do_transport_locate (nframes_t new_position)
 }
 
 void
-ARDOUR_UI::transport_goto_start ()
+ARDOUR_UI::transport_goto_start ()  
 {
 	if (session) {
 		session->goto_start();

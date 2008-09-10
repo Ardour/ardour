@@ -1,3 +1,4 @@
+
 /*
     Copyright (C) 2000-2001 Paul Davis 
 
@@ -92,22 +93,14 @@ Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
 	pointer_window = canvas_window->get_pointer (x, y, mask);
 
 	if (pointer_window == track_canvas->get_bin_window()) {
-
-		track_canvas->window_to_world (x, y, wx, wy);
+		wx = x;
+		wy = y;
 		in_track_canvas = true;
 
 	} else {
 		in_track_canvas = false;
-
-		if (pointer_window == time_canvas->get_bin_window()) {
-			time_canvas->window_to_world (x, y, wx, wy);
-		} else {
 			return false;
-		}
 	}
-
-	wx += horizontal_adjustment.get_value();
-	wy += vertical_adjustment.get_value();
 
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
@@ -138,10 +131,16 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
-		track_canvas->w2c(event->button.x, event->button.y, *pcx, *pcy);
+
+		*pcx = event->button.x;
+		*pcy = event->button.y;
+		_trackview_group->w2i(*pcx, *pcy);
 		break;
 	case GDK_MOTION_NOTIFY:
-		track_canvas->w2c(event->motion.x, event->motion.y, *pcx, *pcy);
+	
+		*pcx = event->motion.x;
+		*pcy = event->motion.y;
+		_trackview_group->w2i(*pcx, *pcy);
 		break;
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
@@ -227,9 +226,9 @@ Editor::which_grabber_cursor ()
 		return grabber_edit_point_cursor;
 		break;
 	default:
-		return grabber_cursor;
 		break;
 	}
+	return grabber_cursor;
 }
 
 void
@@ -609,7 +608,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		pointer_window = canvas_window->get_pointer (x, y, mask);
 		
 		if (pointer_window == track_canvas->get_bin_window()) {
-			
 			track_canvas->window_to_world (x, y, wx, wy);
 			allow_vertical_scroll = true;
 		} else {
@@ -770,8 +768,8 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 					
 				case RegionViewName:
 					/* rename happens on edit clicks */
-						start_trim (clicked_regionview->get_name_highlight(), event);
-						return true;
+					start_trim (clicked_regionview->get_name_highlight(), event);
+					return true;
 					break;
 
 				case ControlPointItem:
@@ -1442,7 +1440,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterBarItem:
 	case TempoBarItem:
 		if (is_drawable()) {
-			time_canvas->get_window()->set_cursor (*timebar_cursor);
+			track_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 
@@ -1456,7 +1454,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		if (is_drawable()) {
-			time_canvas->get_window()->set_cursor (*timebar_cursor);
+			track_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 	case FadeInHandleItem:
@@ -1569,7 +1567,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case TempoBarItem:
 	case MarkerBarItem:
 		if (is_drawable()) {
-			time_canvas->get_window()->set_cursor (*timebar_cursor);
+			track_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
 		
@@ -1586,7 +1584,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case TempoMarkerItem:
 		
 		if (is_drawable()) {
-			time_canvas->get_window()->set_cursor (*timebar_cursor);
+			track_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 
 		break;
@@ -1721,7 +1719,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		   where DISPLAY = :0.0, and given the cost of what the motion
 		   event might do, its a good tradeoff.  
 		*/
-		
+
 		track_canvas->get_pointer (x, y);
 	} 
 
@@ -1781,6 +1779,9 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	case PlayheadCursorItem:
 	case MarkerItem:
 	case ControlPointItem:
+	case RangeMarkerBarItem:
+	case TransportMarkerBarItem:
+	case CdMarkerBarItem:
 	case TempoMarkerItem:
 	case MeterMarkerItem:
 	case RegionViewNameHighlight:
@@ -1802,13 +1803,13 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	  if (drag_info.item && (event->motion.state & Gdk::BUTTON1_MASK ||
 				 (event->motion.state & Gdk::BUTTON2_MASK))) {
 		  if (!from_autoscroll) {
-			  maybe_autoscroll (&event->motion);
+			  maybe_autoscroll_horizontally (&event->motion);
 		  }
 		  (this->*(drag_info.motion_callback)) (item, event);
 		  goto handled;
 	  }
 	  goto not_handled;
-	  
+	  break;
 	default:
 		break;
 	}
@@ -2352,7 +2353,7 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		// marker_drag_line->raise_to_top();
 	} else {
 		range_marker_drag_rect->show();
-		range_marker_drag_rect->raise_to_top();
+		//range_marker_drag_rect->raise_to_top();
 	}
 
 	if (is_start) {
@@ -3087,6 +3088,18 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
 
 	begin_reversible_command (_("move region(s)"));
+	/* 
+	   the group containing moved regions may have been 
+	   offset during autoscroll. reset its y offset
+	   (we should really handle this in the same way 
+	   we do with the x axis, but a simple way of achieving that 
+	   eludes me right now). 
+	*/
+
+	_region_motion_group->property_y() = 0;
+
+	/* sync the canvas to what we think is its current state */
+	track_canvas->update_now();
 }
 
 void
@@ -3133,6 +3146,8 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.motion_callback = &Editor::region_drag_motion_callback;
 	drag_info.finished_callback = &Editor::region_drag_finished_callback;
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
+
+	_region_motion_group->property_y() = 0;
 }
 
 void
@@ -3181,7 +3196,6 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 		vector<RegionView*> new_regionviews;
 		
 		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-
 			RegionView* rv;
 			RegionView* nrv;
 
@@ -3197,7 +3211,7 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 			} else {
 				continue;
 			}
-			
+
 			const boost::shared_ptr<const Region> original = arv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original);
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (region_copy);
@@ -3225,6 +3239,14 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 		drag_info.data = new_regionviews.front();
 
 		swap_grab (new_regionviews.front()->get_canvas_group (), 0, event->motion.time);
+		/* 
+		   sync the canvas to what we think is its current state 
+		   without it, the canvas seems to 
+		   "forget" to update properly after the upcoming reparent() 
+		   ..only if the mouse is in rapid motion at the time of the grab. 
+		   something to do with regionview creation raking so long?
+		 */
+		track_canvas->update_now();
 	}
 }
 
@@ -3344,7 +3366,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	original_pointer_order = drag_info.dest_trackview->order;
-		
+	
 	/************************************************************
 	     Y-Delta Computation
 	************************************************************/	
@@ -3427,6 +3449,8 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			rv2->get_canvas_group()->i2w (ix1, iy1);
+			iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
+
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			RouteTimeAxisView* rtv2 = dynamic_cast<RouteTimeAxisView*>(tvp2);
 
@@ -3512,10 +3536,9 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	/* compute the amount of pointer motion in frames, and where
 	   the region would be if we moved it by that much.
 	*/
-
 	if ( drag_info.move_threshold_passed ) {
 
-		if (drag_info.current_pointer_frame > drag_info.pointer_frame_offset) {
+		if (drag_info.current_pointer_frame >= drag_info.pointer_frame_offset) {
 
 			nframes64_t sync_frame;
 			nframes64_t sync_offset;
@@ -3550,7 +3573,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		if (pending_region_position > max_frames - rv->region()->length()) {
 			pending_region_position = drag_info.last_frame_position;
 		}
-	  
+
 		// printf ("3: pending_region_position= %lu    %lu\n", pending_region_position, drag_info.last_frame_position );
 
 		bool x_move_allowed;
@@ -3566,7 +3589,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			x_move_allowed = !drag_info.x_constrained;
 		}
 
-		if ( pending_region_position != drag_info.last_frame_position && x_move_allowed ) {
+		if (( pending_region_position != drag_info.last_frame_position) && x_move_allowed ) {
 
 			/* now compute the canvas unit distance we need to move the regionview
 			   to make it appear at the new location.
@@ -3576,10 +3599,29 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				x_delta = ((double) (pending_region_position - drag_info.last_frame_position) / frames_per_unit);
 			} else {
 				x_delta = -((double) (drag_info.last_frame_position - pending_region_position) / frames_per_unit);
-			}
+				for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
 
+					RegionView* rv2 = (*i);
+
+					// If any regionview is at zero, we need to know so we can stop further leftward motion.
+	
+					double ix1, ix2, iy1, iy2;
+					rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+					rv2->get_canvas_group()->i2w (ix1, iy1);
+			
+					if (-x_delta > ix1 + horizontal_adjustment.get_value()) {
+						//	do_move = false;
+						cerr << "illegal move" << endl;
+						x_delta = 0;
+						pending_region_position = drag_info.last_frame_position;
+						break;
+					}
+				}
+
+			}
+		
 			drag_info.last_frame_position = pending_region_position;
-	    
+
 		} else {
 			x_delta = 0;
 		}
@@ -3599,41 +3641,16 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		   trackviews. nothing to do.
 		*/
 		return;
-	} 
-
-
-	if (x_delta < 0) {
-		for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-
-			RegionView* rv2 = (*i);
-
-			// If any regionview is at zero, we need to know so we can stop further leftward motion.
-			
-			double ix1, ix2, iy1, iy2;
-			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			rv2->get_canvas_group()->i2w (ix1, iy1);
-
-			if (ix1 <= 1) {
-				x_delta = 0;
-				break;
-			}
-		}
 	}
 
 	/*************************************************************
 	    MOTION								      
 	************************************************************/
-
-	bool do_move;
-
+	bool do_move = true;
 	if (drag_info.first_move) {
-		if (drag_info.move_threshold_passed) {
-			do_move = true;
-		} else {
+		if (!drag_info.move_threshold_passed) {
 			do_move = false;
 		}
-	} else {
-		do_move = true;
 	}
 
 	if (do_move) {
@@ -3658,6 +3675,30 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			rv->get_canvas_group()->i2w (ix1, iy1);
+
+			if (drag_info.first_move) {
+
+				// hide any dependent views 
+	
+				rv->get_time_axis_view().hide_dependent_views (*rv);
+
+				/* 
+				   reparent to a non scrolling group so that we can keep the 
+				   region selection above all time axis views.
+				   reparenting means we have to move the rv as the two 
+				   parent groups have different coordinates.
+				*/
+
+				rv->get_canvas_group()->property_y() =  iy1 - 1;
+				rv->get_canvas_group()->reparent(*_region_motion_group);
+
+				rv->fake_set_opaque (true);
+			}
+			/* for evaluation of the track position of iy1, we have to adjust 
+			   to allow for the vertical scrolling adjustment and the height of the timebars.
+			*/
+			iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
+
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			RouteTimeAxisView* canvas_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
 			RouteTimeAxisView* temp_rtv;
@@ -3720,7 +3761,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				}
 			}
 
-
 			/* prevent the regionview from being moved to before 
 			   the zero position on the canvas.
 			*/
@@ -3734,30 +3774,10 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				x_delta = max_frames - rv->region()->last_frame();
 			}
 
-
-			if (drag_info.first_move) {
-
-				/* hide any dependent views */
-			
-				rv->get_time_axis_view().hide_dependent_views (*rv);
-			
-				/* this is subtle. raising the regionview itself won't help,
-				   because raise_to_top() just puts the item on the top of
-				   its parent's stack. so, we need to put the trackview canvas_display group
-				   on the top, since its parent is the whole canvas.
-				*/
-			
-				rv->get_canvas_group()->raise_to_top();
-				rv->get_time_axis_view().canvas_display->raise_to_top();
-				cursor_group->raise_to_top();
-
-				rv->fake_set_opaque (true);
-			}
-
 			if (drag_info.brushing) {
 				mouse_brush_insert_region (rv, pending_region_position);
 			} else {
-				rv->move (x_delta, y_delta);			
+				rv->move (x_delta, y_delta);
 			}
 
 		} /* foreach region */
@@ -3785,7 +3805,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	vector<RegionView*> new_selection;
 	typedef set<boost::shared_ptr<Playlist> > PlaylistSet;
 	PlaylistSet modified_playlists;
-	pair<PlaylistSet::iterator,bool> insert_result;
+	PlaylistSet frozen_playlists;
+	list <sigc::connection> modified_playlist_connections;
+	pair<PlaylistSet::iterator,bool> insert_result, frozen_insert_result;
 
 	/* first_move is set to false if the regionview has been moved in the 
 	   motion handler. 
@@ -3798,11 +3820,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	nocommit = false;
 
-	/* The regionview has been moved at some stage during the grab so we need
+	/* XXX is this true??? i can''t tell the difference.
+	   The regionview has been moved at some stage during the grab so we need
 	   to account for any mouse movement between this event and the last one. 
 	*/	
 
-	region_drag_motion_callback (item, event);
+	//region_drag_motion_callback (item, event);
 
 	if (Config->get_edit_mode() == Splice && !pre_drag_region_selection.empty()) {
 		selection->set (pre_drag_region_selection);
@@ -3853,11 +3876,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		double ix1, ix2, iy1, iy2;
 		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 		rv->get_canvas_group()->i2w (ix1, iy1);
+		iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
+
 		TimeAxisView* dest_tv = trackview_by_y_position (iy1);
 		RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*>(dest_tv);
 		double speed;
-		bool changed_tracks;
-		bool changed_position;
+		bool changed_tracks, changed_position;
 		nframes64_t where;
 
 		if (rv->region()->locked()) {
@@ -3877,24 +3901,26 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		changed_tracks = (dest_tv != &rv->get_time_axis_view());
 
 		if (changed_position && !drag_info.x_constrained) {
+			_master_group->w2i(ix1, iy1);
 			where = (nframes64_t) (unit_to_frame (ix1) * speed);
 		} else {
 			where = rv->region()->position();
 		}
 			
-		/* undo the previous hide_dependent_views so that xfades don't
-		   disappear on copying regions 
-		*/
-		
-		rv->get_time_axis_view().reveal_dependent_views (*rv);
-		
 		boost::shared_ptr<Region> new_region;
 
 
 		if (drag_info.copy) {
 			/* we already made a copy */
 			new_region = rv->region();
-		} else {
+
+			/* undo the previous hide_dependent_views so that xfades don't
+			   disappear on copying regions 
+			*/
+		
+		       	//rv->get_time_axis_view().reveal_dependent_views (*rv);
+		
+		} else if (changed_tracks) {
 			new_region = RegionFactory::create (rv->region());
 		}
 
@@ -3908,7 +3934,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			
 			insert_result = modified_playlists.insert (to_playlist);
 			if (insert_result.second) {
-				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));	
+				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
 			}
 
 			to_playlist->add_region (new_region, where);
@@ -3917,19 +3943,33 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 							      
 			if (!latest_regionviews.empty()) {
 				// XXX why just the first one ? we only expect one
-				dest_rtv->reveal_dependent_views (*latest_regionviews.front());
+				// commented out in nick_m's canvas reworking. is that intended?
+				//dest_atv->reveal_dependent_views (*latest_regionviews.front());
 				new_selection.push_back (latest_regionviews.front());
 			}
 
 		} else {
-			
+			/* 
+			   motion on the same track. plonk the previously reparented region 
+			   back to its original canvas group (its streamview).
+			   No need to do anything for copies as they are fake regions which will be deleted.
+			*/
+
+			rv->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
+			rv->get_canvas_group()->property_y() = 0;
+		  
 			/* just change the model */
 			
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
 			insert_result = modified_playlists.insert (playlist);
 			if (insert_result.second) {
-				session->add_command (new MementoCommand<Playlist>(*playlist, &playlist->get_state(), 0));	
+				session->add_command (new MementoCommand<Playlist>(*playlist, &playlist->get_state(), 0));
+			}
+			/* freeze to avoid lots of relayering in the case of a multi-region drag */
+			frozen_insert_result = frozen_playlists.insert(playlist);
+			if (frozen_insert_result.second) {
+				playlist->freeze();
 			}
 
 			rv->region()->set_position (where, (void*) this);
@@ -3960,7 +4000,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 			insert_result = modified_playlists.insert (from_playlist);
 			if (insert_result.second) {
-				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));	
+				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));
 			}
 
 			from_playlist->remove_region ((rv->region()));
@@ -3996,7 +4036,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			copies.push_back (rv);
 		}
 	}
-
 	
 	if (new_selection.empty()) {
 		if (drag_info.copy) {
@@ -4012,6 +4051,10 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		*/
 		selection->set (new_selection);
 	}
+
+	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
+		(*p)->thaw();
+	}
 			
   out:
 	if (!nocommit) {
@@ -4024,6 +4067,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	for (vector<RegionView*>::iterator x = copies.begin(); x != copies.end(); ++x) {
 		delete *x;
 	}
+
 }
 	
 void
@@ -4167,7 +4211,7 @@ Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos,
 		set_verbose_canvas_cursor (buf, xpos + offset, ypos + offset);
 	}
 	else {
-		set_verbose_canvas_cursor (buf, drag_info.current_pointer_x + offset, drag_info.current_pointer_y + offset);
+		set_verbose_canvas_cursor (buf, drag_info.current_pointer_x + offset - horizontal_adjustment.get_value(), drag_info.current_pointer_y + offset - vertical_adjustment.get_value() + canvas_timebars_vsize);
 	}
 	show_verbose_canvas_cursor ();
 }
@@ -5088,7 +5132,7 @@ Editor::drag_range_markerbar_op (ArdourCanvas::Item* item, GdkEvent* event)
 
 			update_marker_drag_item (temp_location);
 			range_marker_drag_rect->show();
-			range_marker_drag_rect->raise_to_top();
+			//range_marker_drag_rect->raise_to_top();
 			
 		} 
 		break;		
@@ -5369,8 +5413,7 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		if (drag_info.current_pointer_y < drag_info.grab_y) {
 			y1 = drag_info.current_pointer_y;
 			y2 = drag_info.grab_y;
-		}
-		else {
+		} else {
 			y2 = drag_info.current_pointer_y;
 			y1 = drag_info.grab_y;
 		}
@@ -5478,18 +5521,18 @@ Editor::end_time_fx (ArdourCanvas::Item* item, GdkEvent* event)
 	nframes64_t newlen = drag_info.last_pointer_frame - clicked_regionview->region()->position();
 
 	float percentage = (double) newlen / (double) clicked_regionview->region()->length();
-
+	
 #ifndef USE_RUBBERBAND
 	// Soundtouch uses percentage / 100 instead of normal (/ 1) 
 	if (clicked_regionview->region()->data_type() == DataType::AUDIO) {
 		percentage = (float) ((double) newlen - (double) clicked_regionview->region()->length()) / ((double) newlen) * 100.0f;
-#endif	
 	}
-
+#endif	
+	
 	begin_reversible_command (_("timestretch"));
-
+	
 	// XXX how do timeFX on multiple regions ?
-
+	
 	RegionSelection rs;
 	rs.add (clicked_regionview);
 

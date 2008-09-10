@@ -364,7 +364,7 @@ Editor::redisplay_route_list ()
 
 	cursor_group->raise_to_top ();
 
-	reset_scrolling_region ();
+	//reset_scrolling_region ();
 
 	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {
 		ignore_route_order_sync = true;
@@ -401,7 +401,7 @@ Editor::hide_all_tracks (bool with_select)
 	   otherwise.
 	*/
 
-	reset_scrolling_region ();
+	//reset_scrolling_region ();
 }
 
 void
@@ -625,7 +625,9 @@ void
 Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
 	session->set_remote_control_ids();
+	ignore_route_list_reorder = true;
 	redisplay_route_list ();
+	ignore_route_list_reorder = false;
 }
 
 void  

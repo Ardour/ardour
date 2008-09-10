@@ -665,7 +665,9 @@ void
 Mixer_UI::track_list_delete (const Gtk::TreeModel::Path& path)
 {
 	session->set_remote_control_ids();
+	ignore_route_reorder = true;
 	redisplay_track_list ();
+	ignore_route_reorder = false;
 }
 
 void

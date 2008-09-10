@@ -336,7 +336,12 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	static const int vertical_spacing;
 	static const int horizontal_spacing;
 
+
+	virtual gdouble get_trackview_group_vertical_offset () const = 0;
+	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
+
 	static PublicEditor* _instance;
 
 	friend class PluginUIWindow;

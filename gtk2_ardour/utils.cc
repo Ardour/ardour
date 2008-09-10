@@ -571,22 +571,20 @@ get_xpm (std::string name)
 		
 		sys::path data_file_path;
 		
-		if (!find_file_in_search_path (spath, name, data_file_path)) {
+		if(!find_file_in_search_path (spath, name, data_file_path)) {
 			fatal << string_compose (_("cannot find XPM file for %1"), name) << endmsg;
-			/*NOTREACHED*/
 		}
-
+		
 		try {
-			xpm_map[name] = Gdk::Pixbuf::create_from_file (data_file_path.to_string());
-		}
-
-		catch(const Glib::Error& e)	{
+			xpm_map[name] =  Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+		} catch(const Glib::Error& e)	{
 			warning << "Caught Glib::Error: " << e.what() << endmsg;
-  		}
+		}
 	}
 
 	return xpm_map[name];
 }
+
 
 Glib::RefPtr<Gdk::Pixbuf>	
 get_icon (const char* cname)
@@ -608,15 +606,11 @@ get_icon (const char* cname)
 	Glib::RefPtr<Gdk::Pixbuf> img;
 	try {
 		img = Gdk::Pixbuf::create_from_file (data_file_path.to_string());
+	} catch (const Gdk::PixbufError &e) {
+		cerr << "Caught PixbufError: " << e.what() << endl;
+	} catch (...) {
+		g_message("Caught ... ");
 	}
-	catch (const Gdk::PixbufError &e)
-    {
-        cerr << "Caught PixbufError: " << e.what() << endl;
-    }
-    catch (...)
-    {
-        g_message("Caught ... ");
-    }
 
 	return img;
 }
@@ -701,7 +695,7 @@ set_pango_fontsize ()
 {
 	long val = ARDOUR::Config->get_font_scale();
 
-	/* FT2 rendering */
+	/* FT2 rendering - used by GnomeCanvas, sigh */
 
 	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_for_display(), val/1024, val/1024);
 

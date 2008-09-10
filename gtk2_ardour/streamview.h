@@ -74,7 +74,7 @@ public:
 
 	void set_layer_display (LayerDisplay);
 
-	ArdourCanvas::Item* canvas_item() { return canvas_group; }
+	ArdourCanvas::Group* canvas_item() { return canvas_group; }
 
 	enum ColorTarget {
 		RegionColor,

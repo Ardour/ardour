@@ -1549,7 +1549,7 @@ Editor::scroll_tracks_down_line ()
 {
 
         Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
-	double vert_value = adj->get_value() + 20;
+	double vert_value = adj->get_value() + 60;
 
 	if (vert_value>adj->get_upper() - canvas_height) {
 		vert_value = adj->get_upper() - canvas_height;
@@ -1561,7 +1561,7 @@ void
 Editor::scroll_tracks_up_line ()
 {
         Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
-	adj->set_value (adj->get_value() - 20);
+	adj->set_value (adj->get_value() - 60);
 }
 
 /* ZOOM */
@@ -1875,8 +1875,9 @@ Editor::temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const string
 void 
 Editor::temporal_zoom_to_frame (bool coarser, nframes64_t frame)
 {
-	if (!session) return;
-	
+	if (!session) {
+		return;
+	}
 	double range_before = frame - leftmost_frame;
 	double new_fpu;
 	
@@ -1890,12 +1891,15 @@ Editor::temporal_zoom_to_frame (bool coarser, nframes64_t frame)
 		range_before /= 1.61803399;
 	}
 
-	if (new_fpu == frames_per_unit) return;
+	if (new_fpu == frames_per_unit)  {
+		return;
+	}
 
 	nframes64_t new_leftmost = frame - (nframes64_t)range_before;
 
-	if (new_leftmost > frame) new_leftmost = 0;
-
+	if (new_leftmost > frame) {
+		new_leftmost = 0;
+	}
 //	begin_reversible_command (_("zoom to frame"));
 //	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
 //	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
@@ -2213,8 +2217,8 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	boost::shared_ptr<Playlist> playlist;
 	
 	track_canvas->window_to_world (x, y, wx, wy);
-	wx += horizontal_adjustment.get_value();
-	wy += vertical_adjustment.get_value();
+	//wx += horizontal_adjustment.get_value();
+	//wy += vertical_adjustment.get_value();
 
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
@@ -6037,7 +6041,6 @@ Editor::fit_tracks ()
 		(*t)->set_height (h);
 		first_y_pos = std::min ((*t)->y_position, first_y_pos);
 	}
-
 
 	vertical_adjustment.set_value (first_y_pos);
 

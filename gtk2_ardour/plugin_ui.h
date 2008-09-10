@@ -234,6 +234,7 @@ class PluginUIWindow : public Gtk::Window
 
 	bool create_vst_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 	bool create_audiounit_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
+	bool create_lv2_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 };
 
 #ifdef VST_SUPPORT

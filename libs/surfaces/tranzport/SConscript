@@ -52,6 +52,7 @@ tranzport.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 #    tranzport.Append(CXXFLAGS="-DHAVE_TRANZPORT_KERNEL_DRIVER=1")
 
 #merge more into tranzport files for the right io lib
+tranzport.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 tranzport.Merge ([
     libraries['ardour'],

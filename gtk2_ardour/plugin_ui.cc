@@ -42,6 +42,10 @@
 #ifdef VST_SUPPORT
 #include <ardour/vst_plugin.h>
 #endif
+#ifdef HAVE_LV2
+#include <ardour/lv2_plugin.h>
+#include "lv2_plugin_ui.h"
+#endif
 
 #include <lrdf.h>
 
@@ -84,6 +88,10 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 			
 		case ARDOUR::LADSPA:
 			error << _("Eh? LADSPA plugins don't have editors!") << endmsg;
+			break;
+
+		case ARDOUR::LV2:
+			have_gui = create_lv2_editor (insert);
 			break;
 
 		default:
@@ -247,6 +255,30 @@ PluginUIWindow::app_activated (bool yn)
 			_pluginui->deactivate ();
 		}
 	} 
+#endif
+}
+
+bool
+PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
+{
+#ifndef HAVE_LV2
+	return false;
+#else
+
+	boost::shared_ptr<LV2Plugin> vp;
+	
+	if ((vp = boost::dynamic_pointer_cast<LV2Plugin> (insert->plugin())) == 0) {
+		error << _("create_lv2_editor called on non-LV2 plugin") << endmsg;
+		throw failed_constructor ();
+	} else {
+		LV2PluginUI* lpu = new LV2PluginUI (insert, vp);
+		_pluginui = lpu;
+		add (*lpu);
+		lpu->package (*this);
+	}
+
+	non_gtk_gui = false;
+	return true;
 #endif
 }
 
