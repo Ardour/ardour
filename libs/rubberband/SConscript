@@ -1,0 +1,33 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+rubberband_files = glob.glob ('src/*.cpp')
+
+Import('env install_prefix libraries')
+rb = env.Clone()
+
+rb.Merge  ([libraries['fftw3f'], 
+	    libraries['fftw3'],
+            libraries['vamp'],
+            libraries['samplerate'],
+            libraries['sndfile-ardour']
+            ])
+
+rb.Append (CPPATH='#libs/rubberband/rubberband', CXXFLAGS="-Ilibs/rubberband/rubberband")
+
+librb = rb.SharedLibrary('rubberband', rubberband_files)
+
+Default(librb)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), librb))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript'] +
+                                     rubberband_files +
+                                     glob.glob('rubberband/*.h') +
+                                     glob.glob('src/*.h')))
+
+
