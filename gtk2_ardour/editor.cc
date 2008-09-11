@@ -504,8 +504,8 @@ Editor::Editor ()
 	edit_packer.set_name ("EditorWindow");
 	
 	edit_packer.attach (edit_vscrollbar,         0, 1, 0, 4,    FILL,        FILL|EXPAND, 0, 0);
-	edit_packer.attach (ruler_label_event_box,       1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
-	edit_packer.attach (time_button_event_box,       1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (time_button_event_box,   1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 
 	edit_packer.attach (controls_layout,         1, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
@@ -826,8 +826,7 @@ Editor::Editor ()
 Editor::~Editor()
 {
 #ifdef WITH_CMT
-	if(image_socket_listener)
-	{
+	if(image_socket_listener) {
 		if(image_socket_listener->is_connected())
 		{
 			image_socket_listener->close_connection() ;
@@ -837,11 +836,6 @@ Editor::~Editor()
 		image_socket_listener = 0 ;
 	}
 #endif
-
-	if (track_canvas) {
-		delete track_canvas;
-		track_canvas = 0;
-	}
 
 	if (track_canvas) {
 		delete track_canvas;

@@ -1245,8 +1245,8 @@ else:
 #
 
 timefx_subdirs = ['libs/soundtouch']
-#if env['RUBBERBAND']:
-#    timefx_subdirs += ['libs/rubberband']
+if env['RUBBERBAND']:
+    timefx_subdirs += ['libs/rubberband']
 
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
