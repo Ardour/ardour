@@ -18,7 +18,7 @@
 
 */
 
-#include <ardour/insert.h>
+#include <ardour/processor.h>
 #include <ardour/lv2_plugin.h>
 
 #include "lv2_plugin_ui.h"
