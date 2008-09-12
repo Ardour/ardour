@@ -549,10 +549,10 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 	int ret = -1;
 	nframes_t this_nframes;
 
-	cerr << "Export process at pos = " << spec->pos << " _exporting = "
+	/*cerr << "Export process at pos = " << spec->pos << " _exporting = "
 	     << _exporting << " running = " << spec->running << " stop = "
 	     << spec->stop << endl;
-
+	*/
 	/* This is not required to be RT-safe because we are running while freewheeling */
 
 	if (spec->do_freewheel == false) {
