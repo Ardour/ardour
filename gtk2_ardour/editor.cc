@@ -744,6 +744,10 @@ Editor::Editor ()
 	vpacker.pack_end (status_bar_hpacker, false, false);
 	vpacker.pack_end (global_hpacker, true, true);
 
+	edit_controls_vbox.show ();
+	controls_layout.show ();
+	the_notebook.show_all ();
+
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 	
 	register_actions ();

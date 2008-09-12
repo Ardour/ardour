@@ -47,7 +47,7 @@ list<Gdk::Color> AxisView::used_colors;
 AxisView::AxisView (ARDOUR::Session& sess) : _session(sess)
 {
 	_selected = false;
-	_marked_for_display = true;
+	_marked_for_display = false;
 }
 
 AxisView::~AxisView()

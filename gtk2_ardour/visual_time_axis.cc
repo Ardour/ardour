@@ -74,7 +74,6 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 {
 	time_axis_name = name ;
 	_color = unique_random_color() ;
-	_marked_for_display = true;
 	
 	name_entry.signal_activate().connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
 	name_entry.signal_button_press_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;

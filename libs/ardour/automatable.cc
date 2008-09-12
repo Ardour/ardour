@@ -201,7 +201,8 @@ Automatable::describe_parameter (Parameter param)
 	if (param == Parameter(GainAutomation)) {
 		return _("Fader");
 	} else if (param.type() == PanAutomation) {
-		return (string_compose(_("Pan %1"), param.id()));
+		/* ID's are zero-based, present them as 1-based */
+		return (string_compose(_("Pan %1"), param.id() + 1));
 	} else if (param.type() == MidiCCAutomation) {
 		return string_compose("CC %1 (%2) [%3]",
 				param.id(), midi_name(param.id()), int(param.channel()) + 1);			

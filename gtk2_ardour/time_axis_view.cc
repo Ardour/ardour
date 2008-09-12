@@ -95,7 +95,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
    	control_parent = 0;
 	display_menu = 0;
 	size_menu = 0;
-	_marked_for_display = false;
 	_hidden = false;
 	in_destructor = false;
 	height = 0;

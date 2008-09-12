@@ -102,12 +102,14 @@ Editor::handle_new_route (Session::RouteList& routes)
 #else 
 		row = *(route_display_model->append ());
 #endif
+
+		cerr << route->name() << " marked for display ? " << tv->marked_for_display() << endl;
 		
 		row[route_display_columns.text] = route->name();
 		row[route_display_columns.visible] = tv->marked_for_display();
 		row[route_display_columns.tv] = tv;
 		row[route_display_columns.route] = route;
-		
+
 		track_views.push_back (tv);
 		
 		ignore_route_list_reorder = true;
@@ -233,6 +235,7 @@ Editor::update_route_visibility ()
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		(*i)[route_display_columns.visible] = tv->marked_for_display ();
+		cerr << "marked " << tv->name() << " for display = " << tv->marked_for_display() << endl;
 	}
 
 	no_route_list_redisplay = false;
@@ -319,6 +322,8 @@ Editor::redisplay_route_list ()
 	uint32_t position;
 	uint32_t order;
 	int n;
+
+	cerr << "RRL, nrld = " << no_route_list_redisplay << " with " << rows.size() << endl;
 	
 	if (no_route_list_redisplay) {
 		return;
@@ -347,9 +352,12 @@ Editor::redisplay_route_list ()
 
 		bool visible = (*i)[route_display_columns.visible];
 
+		cerr << "\tvisible = " << visible << endl;
+
 		if (visible) {
 			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &edit_controls_vbox);
+			cerr << "packed tv for " << tv->name() << " @ " << position << endl;
 		} else {
 			tv->hide ();
 		}

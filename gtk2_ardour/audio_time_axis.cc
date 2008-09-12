@@ -92,15 +92,11 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	mute_button->set_active (false);
 	solo_button->set_active (false);
 	
-	if (is_audio_track())
-		controls_ebox.set_name ("AudioTimeAxisViewControlsBaseUnselected");
-	else // bus
+	if (is_audio_track()) {
+		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
+	} else { // bus
 		controls_ebox.set_name ("AudioBusControlsBaseUnselected");
-
-	/* map current state of the route */
-
-	processors_changed ();
-	reset_processor_automation_curves ();
+	}
 
 	ensure_xml_node ();
 
@@ -108,6 +104,11 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	
 	_route->panner().Changed.connect (bind (mem_fun(*this, &AudioTimeAxisView::update_pans), false));
 
+	/* map current state of the route */
+
+	processors_changed ();
+	reset_processor_automation_curves ();
+	update_pans (false);
 	update_control_names ();
 
 	if (is_audio_track()) {
@@ -160,6 +161,7 @@ AudioTimeAxisView::hide ()
 
 	TimeAxisView::hide ();
 }
+
 
 void
 AudioTimeAxisView::append_extra_display_menu_items ()

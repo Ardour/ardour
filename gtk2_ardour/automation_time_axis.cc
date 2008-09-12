@@ -376,12 +376,10 @@ void
 AutomationTimeAxisView::set_height (uint32_t h)
 {
 	bool changed = (height != (uint32_t) h) || first_call_to_set_height;
-	
-	if (first_call_to_set_height)
-		first_call_to_set_height = false;
 	bool changed_between_small_and_normal = ( (h == hSmall || h == hSmaller) ^ (height == hSmall || height == hSmaller) );
 
 	TimeAxisView* state_parent = get_parent_with_state ();
+
 	assert(state_parent);
 	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_control->parameter());
 
@@ -401,6 +399,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	xml_node->add_property ("height", buf);
 
 	if (changed_between_small_and_normal || first_call_to_set_height) {
+
 		first_call_to_set_height = false;
 
 		if (h >= hNormal) {
@@ -912,9 +911,9 @@ void
 AutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
 {
 	XMLNode* xml_node = get_state_node();
-//	if (xml_node) {
+	if (xml_node) {
 		xml_node->add_property ("shown", editor_shown ? "yes" : "no");
-//	}
+	}
 }
 
 guint32

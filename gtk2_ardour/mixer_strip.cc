@@ -107,7 +107,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	input_selector = 0;
 	output_selector = 0;
 	group_menu = 0;
-	_marked_for_display = false;
+	if (!_route->is_hidden()) {
+		_marked_for_display = true;
+	}
 	route_ops_menu = 0;
 	ignore_comment_edit = false;
 	ignore_toggle = false;

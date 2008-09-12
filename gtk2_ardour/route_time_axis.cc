@@ -117,6 +117,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	playlist_action_menu = 0;
 	automation_action_menu = 0;
 	_view = 0;
+
+	if (!_route->is_hidden()) {
+		_marked_for_display = true;
+	}
+
 	timestretch_rect = 0;
 	no_redraw = false;
 	destructive_track_mode_item = 0;
@@ -1795,14 +1800,13 @@ RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<Autom
 	using namespace Menu_Helpers;
 
 	XMLProperty* prop;
+	XMLNode* node;
 
 	add_child (track);
 
 	track->Hiding.connect (bind (mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
 
 	bool hideit = (!show);
-
-	XMLNode* node;
 
 	if ((node = track->get_state_node()) != 0) {
 		if  ((prop = node->property ("shown")) != 0) {
@@ -1811,6 +1815,8 @@ RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<Autom
 			}
 		} 
 	}
+
+	cerr << "with show = " << show << " Adding automation child for " << _route->name() << " hideit = " << hideit << " prop = " << prop << endl;
 	
 	_automation_tracks.insert(std::make_pair(param, new RouteAutomationNode(param, NULL, track)));
 
@@ -1818,6 +1824,7 @@ RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<Autom
 		track->hide ();
 	} else {
 		_show_automation.insert (param);
+
 
 		if (!no_redraw) {
 			_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
