@@ -626,7 +626,7 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 		}
 	}
 
-	cerr << "\tprocess " << nframes << endl;
+	//cerr << "\tprocess " << nframes << endl;
 
 	if (spec->process (nframes)) {
 		goto out;
@@ -635,7 +635,7 @@ Session::process_export (nframes_t nframes, AudioExportSpecification* spec)
 	spec->pos += nframes;
 	spec->progress = 1.0 - (((float) spec->end_frame - spec->pos) / spec->total_frames);
 
-	cerr << "\t@ " << spec->pos << " prog = " << spec->progress << endl;
+	//cerr << "\t@ " << spec->pos << " prog = " << spec->progress << endl;
 
 	/* and we're good to go */
 
