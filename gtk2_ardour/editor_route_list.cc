@@ -323,8 +323,6 @@ Editor::redisplay_route_list ()
 	uint32_t order;
 	int n;
 
-	cerr << "RRL, nrld = " << no_route_list_redisplay << " with " << rows.size() << endl;
-	
 	if (no_route_list_redisplay) {
 		return;
 	}
@@ -352,12 +350,9 @@ Editor::redisplay_route_list ()
 
 		bool visible = (*i)[route_display_columns.visible];
 
-		cerr << "\tvisible = " << visible << endl;
-
 		if (visible) {
 			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &edit_controls_vbox);
-			cerr << "packed tv for " << tv->name() << " @ " << position << endl;
 		} else {
 			tv->hide ();
 		}

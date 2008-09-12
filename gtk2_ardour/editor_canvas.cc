@@ -428,8 +428,6 @@ Editor::controls_layout_size_request (Requisition* req)
 	} else {
 		vertical_adjustment.set_upper (pos + canvas_timebars_vsize);
 	}
-
-	cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << endl;//DEBUG	
 }
 
 bool

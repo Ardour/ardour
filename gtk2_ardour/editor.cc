@@ -717,6 +717,7 @@ Editor::Editor ()
 	the_notebook.set_scrollable (true);
 	the_notebook.popup_enable ();
 	the_notebook.set_tab_pos (Gtk::POS_RIGHT);
+	the_notebook.show_all ();
 
 	post_maximal_editor_width = 0;
 	post_maximal_pane_position = 0;
@@ -743,10 +744,6 @@ Editor::Editor ()
 
 	vpacker.pack_end (status_bar_hpacker, false, false);
 	vpacker.pack_end (global_hpacker, true, true);
-
-	edit_controls_vbox.show ();
-	controls_layout.show ();
-	the_notebook.show_all ();
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 	
@@ -3879,7 +3876,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 		} else {
 			pos = atoi (prop->value());
 		}
-		
+
 		if ((done = GTK_WIDGET(edit_pane.gobj())->allocation.width > pos)) {
 			edit_pane.set_position (pos);
 			pre_maximal_pane_position = pos;
@@ -4302,6 +4299,7 @@ Editor::restore_editing_space ()
 	initial_ruler_update_required = true;
 
 	// user changed width of pane during fullscreen
+
 	if(post_maximal_pane_position != edit_pane.get_position()) {
 		post_maximal_pane_position = edit_pane.get_position();
 	}
@@ -4312,10 +4310,7 @@ Editor::restore_editing_space ()
 	tools_tearoff->set_visible (true);
 	post_maximal_editor_width = this->get_width();
 
-
-	edit_pane.set_position (
-		pre_maximal_pane_position + abs(this->get_width() - pre_maximal_editor_width)
-	);
+	edit_pane.set_position (pre_maximal_pane_position + abs(this->get_width() - pre_maximal_editor_width));
 }
 
 /**

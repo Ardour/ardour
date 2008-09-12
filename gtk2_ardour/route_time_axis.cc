@@ -1816,8 +1816,6 @@ RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<Autom
 		} 
 	}
 
-	cerr << "with show = " << show << " Adding automation child for " << _route->name() << " hideit = " << hideit << " prop = " << prop << endl;
-	
 	_automation_tracks.insert(std::make_pair(param, new RouteAutomationNode(param, NULL, track)));
 
 	if (hideit) {
