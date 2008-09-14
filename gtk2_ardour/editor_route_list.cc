@@ -352,6 +352,7 @@ Editor::redisplay_route_list ()
 
 		if (visible) {
 			tv->set_marked_for_display (true);
+			cerr << tv->name() << " will be at " << position << endl;
 			position += tv->show_at (position, n, &edit_controls_vbox);
 		} else {
 			tv->hide ();

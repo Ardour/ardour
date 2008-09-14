@@ -154,7 +154,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	resizer.show ();
 	resizer_box.show();
 
+	HSeparator* separator = manage (new HSeparator());
+
 	controls_vbox.pack_start (controls_table, false, false);
+	controls_vbox.pack_end (*separator, false, false);
 	controls_vbox.pack_end (resizer_box, false, true);
 	controls_vbox.show ();
 	
@@ -169,10 +172,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_hbox.pack_start (controls_ebox,true,true);
 	controls_hbox.show ();
 
-	//controls_frame.add (controls_hbox);
-	//controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
-	//controls_vbox.set_name ("TimeAxisViewControlsBaseUnselected");
-	//controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+	// controls_frame.add (controls_hbox);
+	// controls_frame.set_name ("TimeAxisViewControlsBaseUnselected");
+	// controls_vbox.set_name ("TimeAxisViewControlsBaseUnselected");
+	// controls_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 
 	ColorsChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
 }
@@ -231,6 +234,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		parent->pack_start (controls_hbox, false, false);
 		parent->reorder_child (controls_hbox, nth);
 	}
+	//controls_frame.show ();
 	controls_hbox.show ();
 	controls_ebox.show ();
 	
@@ -254,8 +258,9 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_hidden = false;
 	
 	/* height in pixels depends on _order, so update it now we've changed _order */
+
 	set_height (height);
-	
+
 	effective_height = current_height();
 
 	/* now show children */

@@ -69,8 +69,9 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	canvas_rect->property_y2() = (double) tv.current_height();
 
 	// DR-way
-	// canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
-	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
+	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
+	// 2.0 way
+	//canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
 	// (Fill/Outline colours set in derived classes)
 
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
