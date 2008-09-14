@@ -127,6 +127,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 		_model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
 	}
 
+	group->raise_to_top();
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 
 	midi_view()->signal_channel_mode_changed().connect(
