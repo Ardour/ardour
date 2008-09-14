@@ -636,6 +636,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      timebar_group;
 
 	/* These bars never need to be scrolled */
+	ArdourCanvas::Group*      _bar_group;
 	ArdourCanvas::Group*      meter_bar_group;
 	ArdourCanvas::Group*      tempo_bar_group;
 	ArdourCanvas::Group*      marker_bar_group;
