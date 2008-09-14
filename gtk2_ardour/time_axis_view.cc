@@ -243,7 +243,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	canvas_display->raise_to_top ();
 
-	if (_marked_for_display && _hidden) {
+	if (_marked_for_display) {
 		canvas_display->show();
 		controls_frame.show ();
 		controls_ebox.show ();

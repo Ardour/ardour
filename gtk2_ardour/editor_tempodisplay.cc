@@ -269,10 +269,6 @@ Editor::draw_measures ()
 		}
 	}
 
-	/* the cursors are always on top of everything */
-
-	//cursor_group->raise_to_top();
-	time_line_group->lower_to_bottom();
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
 	}
