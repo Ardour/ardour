@@ -95,6 +95,7 @@ static void ardour_canvas_type_init()
 #endif
 } 
 
+
 void
 Editor::initialize_canvas ()
 {
@@ -163,7 +164,7 @@ Editor::initialize_canvas ()
 	}
 
 	_master_group = new ArdourCanvas::Group (*track_canvas->root());
-	_bar_group = new ArdourCanvas::Group (*track_canvas->root());
+	_bar_group = new ArdourCanvas::Group (*_master_group);
 	_trackview_group = new ArdourCanvas::Group (*_master_group);
 	_region_motion_group = new ArdourCanvas::Group (*_master_group);
 
@@ -201,13 +202,13 @@ Editor::initialize_canvas ()
 
 	/* a group to hold time (measure) lines */
 	
-	time_line_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
+	time_line_group = new ArdourCanvas::Group(*_master_group, 0.0, 0.0);
 
 	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
 	//range_marker_drag_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
 	range_marker_drag_rect->hide ();
 
-	timebar_group =  new ArdourCanvas::Group (*track_canvas->root());
+	timebar_group =  new ArdourCanvas::Group (*_master_group);
 	cursor_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
 
 	meter_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height * 5.0);
@@ -246,7 +247,11 @@ Editor::initialize_canvas ()
 	
 	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 	
-	_bar_group->lower_to_bottom(); // below tempo lines
+	time_line_group->lower_to_bottom();
+	_trackview_group->raise_to_top();
+	_bar_group->raise_to_top();
+	timebar_group->raise_to_top();
+	timebar_group->raise(1);
 
 	transport_punchin_line = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchin_line->property_x1() = 0.0;
@@ -255,7 +260,7 @@ Editor::initialize_canvas ()
 	transport_punchin_line->property_y2() = 0.0;
 	transport_punchin_line->hide ();
 	
-	transport_punchout_line  = new ArdourCanvas::SimpleLine (*_master_group);
+	transport_punchout_line = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchout_line->property_x1() = 0.0;
 	transport_punchout_line->property_y1() = 0.0;
 	transport_punchout_line->property_x2() = 0.0;

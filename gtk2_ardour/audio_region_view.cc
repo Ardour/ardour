@@ -951,7 +951,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 		/* all waves created, don't hook into peaks ready anymore */
 		data_ready_connection.disconnect ();		
 
-		if(0)
+#if 0
 		if (!zero_line) {
 			zero_line = new ArdourCanvas::SimpleLine (*group);
 			zero_line->property_x1() = (gdouble) 1.0;
@@ -959,6 +959,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool direct)
 			zero_line->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
 			manage_zero_line ();
 		}
+#endif
 	}
 }
 

@@ -636,7 +636,6 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      timebar_group;
 
 	/* These bars never need to be scrolled */
-	ArdourCanvas::Group*      _bar_group;
 	ArdourCanvas::Group*      meter_bar_group;
 	ArdourCanvas::Group*      tempo_bar_group;
 	ArdourCanvas::Group*      marker_bar_group;
@@ -644,22 +643,16 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      transport_marker_bar_group;
 	ArdourCanvas::Group*      cd_marker_bar_group;
 
-	/* 
-	   The _master_group is the group containing all items
-	   that require horizontal scrolling..
-	   It is primarily used to separate canvas items 
-	   that require horizontal scrolling from those that do not. 
-	*/
+	/** The group containing all items that require horizontal scrolling. */
 	ArdourCanvas::Group* _master_group;
-	/* 
-	   The _trackview_group is the group containing all trackviews.
-	   It is only scrolled vertically.
-	*/
+
+	/** The group containiner marker bars */
+	ArdourCanvas::Group* _bar_group;
+
+	/* The group containing all trackviews.  Only scrolled vertically. */
 	ArdourCanvas::Group* _trackview_group;
-	/* 
-	   This canvas group is used for region motion.
-	   It sits on top of the _trackview_group 
-	*/
+	
+	/* The group used for region motion.  Sits on top of _trackview_group */
 	ArdourCanvas::Group* _region_motion_group;
 	
 	enum RulerType {
