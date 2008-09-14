@@ -566,7 +566,7 @@
 	   <menuitem action="toggle-loop-punch-ruler"/>
      </popup>
 
-     <popup name='redirectmenu'>
+     <popup name='processormenu'>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
