@@ -214,6 +214,8 @@ MidiStreamView::redisplay_diskstream ()
 		if (!(*i)->is_valid()) {
 			delete *i;
 			region_views.erase (i);
+			i = tmp;
+			continue;
 		} else {
 			(*i)->enable_display(true);
 			(*i)->set_y_position_and_height(0, height); // apply note range

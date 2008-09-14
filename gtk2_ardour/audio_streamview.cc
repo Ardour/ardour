@@ -439,7 +439,6 @@ AudioStreamView::redisplay_diskstream ()
 		}
 
 		i = tmp;
-
 	}
 
 	for (xi = crossfade_views.begin(); xi != crossfade_views.end();) {
