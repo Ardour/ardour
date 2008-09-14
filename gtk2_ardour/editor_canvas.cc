@@ -390,32 +390,30 @@ Editor::controls_layout_size_request (Requisition* req)
 		screen = Gdk::Screen::get_default();
 	}
 
-	edit_controls_vbox.check_resize();
-	req->width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
+	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */
-	
-	req->width = min (req->width, screen->get_width() - 300);
-	req->height = min ((gint) pos, (screen->get_height() - 400));
 
-	/* this one is important: it determines how big the layout thinks it really is, as 
-	   opposed to what it displays on the screen
-	*/
-	
-	controls_layout.set_size (edit_controls_vbox.get_width(), (gint) pos);
-	controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
-	zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
-	time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
+	width =  min (width, screen->get_width() - 300);
 
-	if ((vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
-		/* 
-		   We're increasing the size of the canvas while the bottom is visible.
-		   We scroll down to keep in step with the controls layout.
+	if (req->width != width) {
+		req->width = width;
+	}
+
+	gint height = min ( (gint) pos, (screen->get_height() - 400));
+	if (req->height != height) {
+		req->height = height;
+	}
+
+	if ((width != edit_controls_vbox.get_width()) || height !=  pos) {
+
+		/* this one is important: it determines how big the layout thinks it really is, as 
+		   opposed to what it displays on the screen
 		*/
-		vertical_adjustment.set_upper (pos + canvas_timebars_vsize);
-		vertical_adjustment.set_value (pos + canvas_timebars_vsize - canvas_height);
-	} else {
-		vertical_adjustment.set_upper (pos + canvas_timebars_vsize);
+		controls_layout.set_size (edit_controls_vbox.get_width(), pos );
+		controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
+		time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
+		zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
 	}
 
 	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG	
