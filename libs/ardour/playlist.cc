@@ -518,10 +518,11 @@ Playlist::set_region_ownership ()
 	}
 }
 
-void
+bool
 Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t position)
 {
-	assert(region->data_type() == _type);
+	if (region->data_type() != _type)
+		return false;
 
 	RegionSortByPosition cmp;
 	nframes_t old_length = 0;
@@ -562,6 +563,8 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 
 	region->StateChanged.connect (sigc::bind (mem_fun (this, &Playlist::region_changed_proxy), 
 						  boost::weak_ptr<Region> (region)));
+
+	return true;
 }
 
 void

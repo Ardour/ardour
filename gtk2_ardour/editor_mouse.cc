@@ -3919,13 +3919,17 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		
 			//rv->get_time_axis_view().reveal_dependent_views (*rv);
 		
-		} else if (changed_tracks) {
+		} else if (changed_tracks && dest_rtv->playlist()) {
 			new_region = RegionFactory::create (rv->region());
 		}
 
 		if (changed_tracks || drag_info.copy) {
 
 			boost::shared_ptr<Playlist> to_playlist = dest_rtv->playlist();
+			if (!to_playlist) {
+				++i;
+				continue;
+			}
 
 			latest_regionviews.clear ();
 

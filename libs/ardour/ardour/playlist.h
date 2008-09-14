@@ -255,7 +255,7 @@ class Playlist : public SessionObject, public boost::enable_shared_from_this<Pla
 
 	boost::shared_ptr<Region> region_by_id (PBD::ID);
 
-	void add_region_internal (boost::shared_ptr<Region>, nframes_t position);
+	bool add_region_internal (boost::shared_ptr<Region>, nframes_t position);
 	
 	int remove_region_internal (boost::shared_ptr<Region>);
 	RegionList *find_regions_at (nframes_t frame);

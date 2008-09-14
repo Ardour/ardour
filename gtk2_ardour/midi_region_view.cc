@@ -71,10 +71,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _mouse_state(None)
 	, _pressed_button(0)
 {
-	group->lower_to_bottom();
 	_note_group->raise_to_top();
-
-	frame->property_fill_color_rgba() = 0xff000033;
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color, TimeAxisViewItem::Visibility visibility)
@@ -106,32 +103,29 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
 
-	RegionView::init(basic_color, false);
+	RegionView::init (basic_color, false);
 
 	compute_colors (basic_color);
-
-	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	set_y_position_and_height (0, trackview.current_height());
 
 	region_muted ();
+	region_sync_changed ();
 	region_resized (BoundsChanged);
 	region_locked ();
-
-	_region->StateChanged.connect (mem_fun(*this, &MidiRegionView::region_changed));
+	
+	reset_width_dependent_items (_pixel_width);
+	//reset_width_dependent_items ((double) _region->length() / samples_per_unit);
 
 	set_colors ();
 
 	_enable_display = true;
-
 	if (_model) {
 		if (wfd) {
 			redisplay_model();
 		}
 		_model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
 	}
-
-	midi_region()->midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegionView::switch_source));
 
 	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
 

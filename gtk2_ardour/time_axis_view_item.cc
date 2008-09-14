@@ -163,6 +163,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame->property_y1() = (double) 1.0;
 		frame->property_x2() = (double) trackview.editor.frame_to_pixel(duration);
 		frame->property_y2() = (double) trackview.current_height();
+		frame->property_outline_pixels() = 1;
 		frame->property_outline_what() = 0xF;
 		frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();

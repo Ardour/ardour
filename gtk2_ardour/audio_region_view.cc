@@ -177,12 +177,10 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	fade_out_shape->property_fill_color_rgba() = fade_color;
 	fade_out_shape->set_data ("regionview", this);
 
-
 	{
 		uint32_t r,g,b,a;
 		UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
 	
-
 		fade_in_handle = new ArdourCanvas::SimpleRect (*group);
 		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
 		fade_in_handle->property_outline_pixels() = 0;
