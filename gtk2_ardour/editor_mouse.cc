@@ -3212,9 +3212,8 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 				continue;
 			}
 
-			const boost::shared_ptr<const Region> original = arv->region();
+			const boost::shared_ptr<const Region> original = rv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original);
-			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (region_copy);
 
 			nrv->get_canvas_group()->show ();
 			new_regionviews.push_back (nrv);
@@ -3918,7 +3917,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			   disappear on copying regions 
 			*/
 		
-		       	//rv->get_time_axis_view().reveal_dependent_views (*rv);
+			//rv->get_time_axis_view().reveal_dependent_views (*rv);
 		
 		} else if (changed_tracks) {
 			new_region = RegionFactory::create (rv->region());
@@ -5546,10 +5545,6 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 {
 	/* no brushing without a useful snap setting */
 
-	// FIXME
-	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
-	assert(arv);
-
 	switch (snap_mode) {
 	case SnapMagnetic:
 		return; /* can't work because it allows region to be placed anywhere */
@@ -5571,7 +5566,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 		return;
 	}
 
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&arv->get_time_axis_view());
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&rv->get_time_axis_view());
 
 	if (rtv == 0 || !rtv->is_track()) {
 		return;
@@ -5581,7 +5576,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 	double speed = rtv->get_diskstream()->speed();
 	
 	XMLNode &before = playlist->get_state();
-	playlist->add_region (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (arv->audio_region())), (nframes64_t) (pos * speed));
+	playlist->add_region (RegionFactory::create (rv->region()), (nframes64_t) (pos * speed));
 	XMLNode &after = playlist->get_state();
 	session->add_command(new MementoCommand<Playlist>(*playlist.get(), &before, &after));
 	

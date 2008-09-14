@@ -618,6 +618,10 @@ void
 MidiRegionView::set_y_position_and_height (double y, double h)
 {
 	RegionView::set_y_position_and_height(y, h - 1);
+	
+	/* XXX why is this code here */
+
+	_height = h;
 
 	if (_enable_display) {
 

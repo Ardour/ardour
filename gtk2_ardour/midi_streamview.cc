@@ -190,21 +190,23 @@ MidiStreamView::redisplay_diskstream ()
 		mrv->midi_region()->midi_source(0)->load_model();
 	}
 	
-	//_lowest_note = 60; // middle C
-	//_highest_note = _lowest_note + 11;
-
 	if (_trackview.is_midi_track()) {
-		_trackview.get_diskstream()->playlist()->foreach_region (static_cast<StreamView*>(this), &StreamView::add_region_view);
+		_trackview.get_diskstream()->playlist()->foreach_region (
+				static_cast<StreamView*>(this), &StreamView::add_region_view);
 	}
 
 	/* Always display at least one octave */
 	if (_highest_note == 127) {
-		if (_lowest_note > (127 - 11))
+		if (_lowest_note > (127 - 11)) {
 			_lowest_note = 127 - 11;
+		}
 	} else if (_highest_note < _lowest_note + 11) {
 		_highest_note = _lowest_note + 11;
 	}
 	
+	RegionViewList copy;
+	
+	/* Place regions */
 	for (i = region_views.begin(); i != region_views.end(); ) {
 		tmp = i;
 		tmp++;
@@ -216,16 +218,48 @@ MidiStreamView::redisplay_diskstream ()
 			(*i)->enable_display(true);
 			(*i)->set_y_position_and_height(0, height); // apply note range
 		}
+		
+		/* Sort regionviews by layer so that when we call region_layered ()
+		   the canvas layering works out (in non-stacked mode). */
+
+		if (copy.size() == 0) {
+			copy.push_front((*i));
+			i = tmp;
+			continue;
+		}
+
+		RegionViewList::iterator k = copy.begin();
+		RegionViewList::iterator l = copy.end();
+		l--;
+
+		if ((*i)->region()->layer() <= (*k)->region()->layer()) {
+			copy.push_front((*i));
+			i = tmp;
+			continue;
+		} else if ((*i)->region()->layer() >= (*l)->region()->layer()) {
+			copy.push_back((*i));
+			i = tmp;
+			continue;
+		}
+
+		for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
+			if ((*j)->region()->layer() >= (*i)->region()->layer()) {
+				copy.insert(j, (*i));
+				break;
+			}
+		}
 
 		i = tmp;
 	}
 	
-	/* now fix layering */
-
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		region_layered (*i);
+	/* Fix canvas layering */
+	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
+		(*j)->enable_display(true);
+		(*j)->set_height (height);
+		region_layered (*j);
 	}
 	
+	/* Update note range and draw note lines */
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
 	NoteRangeChanged();

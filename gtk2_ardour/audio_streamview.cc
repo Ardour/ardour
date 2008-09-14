@@ -392,8 +392,9 @@ AudioStreamView::redisplay_diskstream ()
 			apl->foreach_crossfade (this, &AudioStreamView::add_crossfade);
 	}
 
-	RegionViewList  copy;
+	RegionViewList copy;
 
+	/* Place regions */
 	for (i = region_views.begin(); i != region_views.end(); ) {
 		tmp = i;
 		tmp++;
@@ -407,10 +408,8 @@ AudioStreamView::redisplay_diskstream ()
 			(*i)->enable_display(true);
 		}
 
-		/* 
-		   sort regionviews by layer so that when we call region_layered ()
-		   the canvas layering works out (in non-stacked mode).
-		*/
+		/* Sort regionviews by layer so that when we call region_layered ()
+		   the canvas layering works out (in non-stacked mode). */
 
 		if (copy.size() == 0) {
 			copy.push_front((*i));
@@ -433,7 +432,6 @@ AudioStreamView::redisplay_diskstream ()
 		}
 
 		for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-		  
 			if ((*j)->region()->layer() >= (*i)->region()->layer()) {
 				copy.insert(j, (*i));
 				break;
@@ -456,12 +454,11 @@ AudioStreamView::redisplay_diskstream ()
 		xi = tmpx;
 	}
 
-	/* now fix canvas layering */
-	
+	/* Fix canvas layering */
 	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-			(*j)->enable_display(true);
-			(*j)->set_height (height);
-			region_layered (*j);
+		(*j)->enable_display(true);
+		(*j)->set_height (height);
+		region_layered (*j);
 	}
 }
 
