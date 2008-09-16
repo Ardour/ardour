@@ -128,6 +128,12 @@ Editor::show_editor_mixer (bool yn)
 			}
 		}
 	}
+#ifdef GTKOSX
+	/* XXX gtk problem here */
+	ruler_label_event_box.queue_draw ();
+	time_button_event_box.queue_draw ();
+	controls_layout.queue_draw ();
+#endif
 }
 
 void
@@ -241,10 +247,6 @@ Editor::update_current_screen ()
 
 	  almost_done:
 		last_update_frame = frame;
-#ifdef GTKOSX
-		/*XXX in a perfect world we would not have to do this. */
-		track_canvas->update_now();
-#endif
 		if (current_mixer_strip) {
 			current_mixer_strip->fast_update ();
 		}
@@ -334,10 +336,6 @@ Editor::session_going_away ()
 	zoom_range_clock.set_session (0);
 	nudge_clock.set_session (0);
 
-	/* put editor/mixer toggle button in off position and disable until a new session is loaded */
-
-	editor_mixer_button.set_active(false);
-	editor_mixer_button.set_sensitive(false);
 	/* clear tempo/meter rulers */
 	remove_metric_marks ();
 	hide_measures ();

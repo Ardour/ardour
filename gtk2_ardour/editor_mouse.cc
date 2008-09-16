@@ -1213,8 +1213,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			at_x = cp->get_x();
 			at_y = cp->get_y ();
 			cp->item->i2w (at_x, at_y);
-			at_x += 20.0;
-			at_y += 20.0;
+			at_x += 10.0;
+			at_y += 10.0;
 
 			fraction = 1.0 - (cp->get_y() / cp->line.height());
 
@@ -1241,8 +1241,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			at_x = cp->get_x();
 			at_y = cp->get_y ();
 			cp->item->i2w (at_x, at_y);
-			at_x += 20.0;
-			at_y += 20.0;
+			at_x += 10.0;
+			at_y += 10.0;
 
 			fraction = 1.0 - (cp->get_y() / cp->line.height());
 
@@ -2204,10 +2204,13 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	if (adjusted_frame == drag_info.last_pointer_frame) return;
 
 	cursor->set_position (adjusted_frame);
-	
-	UpdateAllTransportClocks (cursor->current_frame);
 
 	show_verbose_time_cursor (cursor->current_frame, 10);
+
+#ifdef GTKOSX
+	track_canvas->update_now ();
+#endif
+	UpdateAllTransportClocks (cursor->current_frame);
 
 	drag_info.last_pointer_frame = adjusted_frame;
 	drag_info.first_move = false;
@@ -2239,8 +2242,7 @@ Editor::update_marker_drag_item (Location *location)
 	        marker_drag_line_points.front().set_x(x1);
 		marker_drag_line_points.back().set_x(x1);
 		marker_drag_line->property_points() = marker_drag_line_points;
-	}
-	else {
+	} else {
 		range_marker_drag_rect->property_x1() = x1;
 		range_marker_drag_rect->property_x2() = x2;
 	}
@@ -2396,9 +2398,11 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	LocationMarkers* lm = find_location_markers (real_location);
 	lm->set_position (copy_location->start(), copy_location->end());
-	edit_point_clock.set (copy_location->start());
-
 	show_verbose_time_cursor (newframe, 10);
+#ifdef GTKOSX
+	track_canvas->update_now ();
+#endif
+	edit_point_clock.set (copy_location->start());
 }
 
 void
@@ -2763,7 +2767,7 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	float fraction = 1.0 - (control_point->get_y() / control_point->line.height());
 	set_verbose_canvas_cursor (control_point->line.get_verbose_cursor_string (fraction), 
-				   drag_info.current_pointer_x + 20, drag_info.current_pointer_y + 20);
+				   drag_info.current_pointer_x + 10, drag_info.current_pointer_y + 10);
 
 	show_verbose_canvas_cursor ();
 }
@@ -2915,7 +2919,7 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 	line->start_drag (0, drag_info.grab_frame, fraction);
 	
 	set_verbose_canvas_cursor (line->get_verbose_cursor_string (fraction),
-				   drag_info.current_pointer_x + 20, drag_info.current_pointer_y + 20);
+				   drag_info.current_pointer_x + 10, drag_info.current_pointer_y + 10);
 	show_verbose_canvas_cursor ();
 }
 

@@ -1522,8 +1522,6 @@ public:
 	uint32_t bbt_beat_subdivision;
 
 	/* toolbar */
-	
-	Gtk::ToggleButton        editor_mixer_button;
 
 	void editor_mixer_button_toggled ();
 

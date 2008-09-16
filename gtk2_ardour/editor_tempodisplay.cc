@@ -160,7 +160,11 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	} else {
 
 		if (session && current_bbt_points) {
+#ifdef GTKOSX
+			lazy_hide_and_draw_measures ();
+#else
 			Glib::signal_idle().connect (mem_fun (*this, &Editor::lazy_hide_and_draw_measures));
+#endif
 		} else {
 			hide_measures ();
 		}
