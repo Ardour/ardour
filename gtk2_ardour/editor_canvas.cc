@@ -353,12 +353,14 @@ Editor::track_canvas_size_allocated ()
 	transport_punchin_line->property_y2() = canvas_height;
 	transport_punchout_line->property_y2() = canvas_height;
 
-	tempo_bar->property_x2() = canvas_width;
-	meter_bar->property_x2() = canvas_width;
-	marker_bar->property_x2() = canvas_width;
-	cd_marker_bar->property_x2() = canvas_width;
-	range_marker_bar->property_x2() = canvas_width;
-	transport_marker_bar->property_x2() = canvas_width;
+	/* a future (larger) allocation will look less ugly if we add extra width */
+	double canvas_width_fudge = canvas_width * 1.5;
+	tempo_bar->property_x2() = canvas_width_fudge;
+	meter_bar->property_x2() = canvas_width_fudge;
+	marker_bar->property_x2() = canvas_width_fudge;
+	cd_marker_bar->property_x2() = canvas_width_fudge;
+	range_marker_bar->property_x2() = canvas_width_fudge;
+	transport_marker_bar->property_x2() = canvas_width_fudge;
 
 	update_fixed_rulers();
 	redisplay_tempo (true);
