@@ -1046,8 +1046,9 @@ TimeAxisView::compute_controls_size_info ()
 	Gtk::Table one_row_table (1, 8);
 	Button* buttons[5];
 	const int border_width = 2;
-	const int extra_height = (2 * border_width) + 2 // 2 pixels for the controls frame
-		+ 10; // resizer button
+	const int extra_height = (2 * border_width) 
+		+ 2   // 2 pixels for the hseparator between TimeAxisView control areas
+		+ 10; // resizer button (3 x 2 pixel elements + 2 x 2 pixel gaps)
 
 	window.add (one_row_table);
 
@@ -1087,9 +1088,11 @@ TimeAxisView::compute_controls_size_info ()
 	two_row_table.show_all ();
 	req = two_row_table.size_request ();
 
+	cerr << "Normal height is " << req.height << " + " << extra_height << endl;
+
 	// height required to show all normal buttons 
 
-	hNormal = req.height + extra_height;
+	hNormal = /*req.height*/ 48 + extra_height;
 
 	// these heights are all just larger than normal. no more 
 	// elements are visible (yet).
@@ -1181,6 +1184,8 @@ TimeAxisView::covers_y_position (double y)
 	if (hidden()) {
 		return 0;
 	}
+
+	cerr << name() << " check for " << y << " within " << y_position << " and + " << height << endl;
 
 	if (y_position <= y && y < (y_position + height)) {
 		return this;
