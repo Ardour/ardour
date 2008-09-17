@@ -18,6 +18,8 @@
 
 */
 
+#include <string.h>
+
 #include <ardour/export_file_io.h>
 #include <ardour/export_failed.h>
 #include <pbd/failed_constructor.h>

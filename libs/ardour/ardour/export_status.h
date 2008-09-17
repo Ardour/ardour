@@ -22,6 +22,7 @@
 #define __ardour_export_status_h__
 
 #include <list>
+#include <stdint.h>
 
 #include <sigc++/signal.h>
 
