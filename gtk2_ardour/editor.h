@@ -643,9 +643,6 @@ class Editor : public PublicEditor
 	/** The group containing all items that require horizontal scrolling. */
 	ArdourCanvas::Group* _master_group;
 
-	/** The group containiner marker bars */
-	ArdourCanvas::Group* _bar_group;
-
 	/* The group containing all trackviews.  Only scrolled vertically. */
 	ArdourCanvas::Group* _trackview_group;
 	

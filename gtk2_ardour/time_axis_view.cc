@@ -224,53 +224,55 @@ TimeAxisView::~TimeAxisView()
 guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
-	gdouble ix1, ix2, iy1, iy2;
-	effective_height = 0;
-	
 	if (control_parent) {
 		control_parent->reorder_child (controls_hbox, nth);
-	} else {
+	} else {	
 		control_parent = parent;
 		parent->pack_start (controls_hbox, false, false);
 		parent->reorder_child (controls_hbox, nth);
 	}
-	//controls_frame.show ();
-	controls_hbox.show ();
-	controls_ebox.show ();
-	
-	/* the coordinates used here are in the system of the
-	   item's parent ...
-	*/
 
-	canvas_display->get_bounds (ix1, iy1, ix2, iy2);
-	iy1 += editor.get_trackview_group_vertical_offset ();
-	Group* pg = canvas_display->property_parent();
-	pg->i2w (ix1, iy1);
+	order = nth;
 
-	if (iy1 < 0) {
-		iy1 = 0;
+	if (y_position != y) {
+		/* the coordinates used here are in the system of the
+		   item's parent ...
+		*/
+		canvas_display->property_y () = y;
+//		canvas_display->move (0.0, 0.0);
+
+		Group* pg;
+		double ix1, iy1, ix2, iy2;
+		canvas_display->get_bounds (ix1, iy1, ix2, iy2);
+		iy1 += editor.get_trackview_group_vertical_offset ();
+		pg = canvas_display->property_parent();
+		pg->i2w (ix1, iy1);
+		
+		if (iy1 < 0) {
+			iy1 = 0;
+		}
+
+		canvas_display->move (0.0, y - iy1);
+
+		y_position = y;
+
 	}
 
-	canvas_display->move (0.0, y - iy1);
-	canvas_display->show();/* XXX not necessary */
-	y_position = y;
-	order = nth;
+	canvas_display->raise_to_top ();
+
+	if (_marked_for_display) {
+		canvas_display->show();
+		controls_hbox.show ();
+		controls_ebox.show ();
+	}
+
 	_hidden = false;
 	
-	/* height in pixels depends on _order, so update it now we've changed _order */
-
-	set_height (height);
-
 	effective_height = current_height();
 
 	/* now show children */
 	
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		
-		if ((*i)->marked_for_display()) {
-			(*i)->canvas_display->show();
-		}
-		
 		if (canvas_item_visible ((*i)->canvas_display)) {
 			++nth;
 			effective_height += (*i)->show_at (y + effective_height, nth, parent);
@@ -391,6 +393,7 @@ TimeAxisView::set_heights (uint32_t h)
 void
 TimeAxisView::set_height(uint32_t h)
 {
+	controls_ebox.property_height_request () = h;
 	height = h;
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -1046,7 +1049,7 @@ TimeAxisView::compute_controls_size_info ()
 	Gtk::Table one_row_table (1, 8);
 	Button* buttons[5];
 	const int border_width = 2;
-	const int extra_height = (2 * border_width) 
+	const int extra_height = (2 * border_width); 
 		+ 2   // 2 pixels for the hseparator between TimeAxisView control areas
 		+ 10; // resizer button (3 x 2 pixel elements + 2 x 2 pixel gaps)
 

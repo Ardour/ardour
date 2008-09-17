@@ -24,6 +24,7 @@
 #include <list>
 #include <stdint.h>
 
+#include <stdint.h>
 #include <sigc++/signal.h>
 
 namespace ARDOUR

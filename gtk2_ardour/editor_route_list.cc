@@ -150,10 +150,10 @@ Editor::handle_gui_changes (const string & what, void *src)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::handle_gui_changes), what, src));
 	
 	if (what == "track_height") {
-		/* make tracks change height while it happens, instead 
+		/* Optional :make tracks change height while it happens, instead 
 		   of on first-idle
 		*/
-		track_canvas->update_now ();
+		//track_canvas->update_now ();
 		redisplay_route_list ();
 	}
 
@@ -364,11 +364,14 @@ Editor::redisplay_route_list ()
 
 	full_canvas_height = position;
 
-	/* make sure the cursors stay on top of every newly added track */
-
-	cursor_group->raise_to_top ();
-
-	//reset_scrolling_region ();
+	vertical_adjustment.set_upper (position + canvas_timebars_vsize);
+	if ((vertical_adjustment.get_value() + canvas_height) > vertical_adjustment.get_upper()) {
+		/* 
+		   We're increasing the size of the canvas while the bottom is visible.
+		   We scroll down to keep in step with the controls layout.
+		*/
+		vertical_adjustment.set_value (position + canvas_timebars_vsize - canvas_height);
+	} 
 
 	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {
 		ignore_route_order_sync = true;

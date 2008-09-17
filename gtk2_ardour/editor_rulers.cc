@@ -90,6 +90,7 @@ Editor::initialize_rulers ()
 
 	visible_timebars = 1; /*this will be changed below */
 	ruler_pressed_button = 0;
+	canvas_timebars_vsize = 0;
 }
 
 bool

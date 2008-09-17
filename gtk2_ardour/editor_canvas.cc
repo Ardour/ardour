@@ -113,34 +113,6 @@ Editor::initialize_canvas ()
 	track_canvas->set_center_scroll_region (false);
 	track_canvas->set_dither (Gdk::RGB_DITHER_NONE);
 
-	/* need to handle 4 specific types of events as catch-alls */
-
-	track_canvas->signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
-	track_canvas->signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
-	track_canvas->signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
-	track_canvas->signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
-
-	track_canvas->set_name ("EditorMainCanvas");
-	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
-	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
-	track_canvas->signal_enter_notify_event().connect (mem_fun(*this, &Editor::entered_track_canvas));
-	track_canvas->set_flags (CAN_FOCUS);
-
-	/* set up drag-n-drop */
-
-	vector<TargetEntry> target_table;
-	
-	// Drag-N-Drop from the region list can generate this target
-	target_table.push_back (TargetEntry ("regions"));
-	target_table.push_back (TargetEntry ("routes"));
-
-	target_table.push_back (TargetEntry ("text/plain"));
-	target_table.push_back (TargetEntry ("text/uri-list"));
-	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
-
-	track_canvas->drag_dest_set (target_table);
-	track_canvas->signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
-
 	/* stuff for the verbose canvas cursor */
 
 	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
@@ -163,52 +135,55 @@ Editor::initialize_canvas ()
 		logo_item->show ();
 	}
 
-	_master_group = new ArdourCanvas::Group (*track_canvas->root());
-	_bar_group = new ArdourCanvas::Group (*_master_group);
-	_trackview_group = new ArdourCanvas::Group (*_master_group);
-	_region_motion_group = new ArdourCanvas::Group (*_master_group);
+	_master_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
+
+	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
+	transport_loop_range_rect->property_outline_pixels() = 1;
+	transport_loop_range_rect->hide();
+
+	/* a group to hold time (measure) lines */
+	time_line_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
+
+	_trackview_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
+	_region_motion_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
 
 	/* el barrio */
 
-	meter_bar_group = new ArdourCanvas::Group (*_bar_group);
+	meter_bar_group = new ArdourCanvas::Group (*track_canvas->root());
 	meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 	meter_bar->property_outline_pixels() = 1;
 
-	tempo_bar_group = new ArdourCanvas::Group (*_bar_group);
+	tempo_bar_group = new ArdourCanvas::Group (*track_canvas->root());
 	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 	tempo_bar->property_outline_pixels() = 1;
 
-	range_marker_bar_group = new ArdourCanvas::Group (*_bar_group);
+	range_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
 	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
 	range_marker_bar->property_outline_pixels() = 1;
 	
-	transport_marker_bar_group = new ArdourCanvas::Group (*_bar_group);
+	transport_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
 	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 	transport_marker_bar->property_outline_pixels() = 1;
 
-	marker_bar_group = new ArdourCanvas::Group (*_bar_group);
+	marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
 	marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 1;
 	
-	cd_marker_bar_group = new ArdourCanvas::Group (*_bar_group);
+	cd_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
 	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
  	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
  	cd_marker_bar->property_outline_pixels() = 1;
-
-	/* a group to hold time (measure) lines */
-	
-	time_line_group = new ArdourCanvas::Group(*_master_group, 0.0, 0.0);
 
 	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
 	//range_marker_drag_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
 	range_marker_drag_rect->hide ();
 
-	timebar_group =  new ArdourCanvas::Group (*_master_group);
+	timebar_group =  new ArdourCanvas::Group (*track_canvas->root());
 	cursor_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
 
 	meter_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height * 5.0);
@@ -237,21 +212,11 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->property_outline_pixels() = 0;
 	transport_bar_drag_rect->hide ();
 
-	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
-	transport_loop_range_rect->property_outline_pixels() = 1;
-	transport_loop_range_rect->hide();
-
 	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
 	transport_punch_range_rect->property_outline_pixels() = 0;
 	transport_punch_range_rect->hide();
 	
-	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
-	
-	time_line_group->lower_to_bottom();
-	_trackview_group->raise_to_top();
-	_bar_group->raise_to_top();
-	timebar_group->raise_to_top();
-	timebar_group->raise(1);
+//	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
 	transport_punchin_line = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchin_line->property_x1() = 0.0;
@@ -293,11 +258,40 @@ Editor::initialize_canvas ()
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
 
 	initial_ruler_update_required = true;
-	track_canvas->signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
 	}
+
+	/* need to handle 4 specific types of events as catch-alls */
+
+	track_canvas->signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
+	track_canvas->signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
+	track_canvas->signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
+	track_canvas->signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
+
+	track_canvas->set_name ("EditorMainCanvas");
+	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
+	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
+	track_canvas->signal_enter_notify_event().connect (mem_fun(*this, &Editor::entered_track_canvas));
+	track_canvas->set_flags (CAN_FOCUS);
+
+	/* set up drag-n-drop */
+
+	vector<TargetEntry> target_table;
+	
+	// Drag-N-Drop from the region list can generate this target
+	target_table.push_back (TargetEntry ("regions"));
+	target_table.push_back (TargetEntry ("routes"));
+
+	target_table.push_back (TargetEntry ("text/plain"));
+	target_table.push_back (TargetEntry ("text/uri-list"));
+	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
+
+	track_canvas->drag_dest_set (target_table);
+	track_canvas->signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
+
+	track_canvas->signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 
 	ColorsChanged.connect (mem_fun (*this, &Editor::color_handler));
 	color_handler();
@@ -407,32 +401,30 @@ Editor::controls_layout_size_request (Requisition* req)
 		screen = Gdk::Screen::get_default();
 	}
 
-	edit_controls_vbox.check_resize();
-	req->width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
+	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */
-	
-	req->width = min (req->width, screen->get_width() - 300);
-	req->height = min ((gint) pos, (screen->get_height() - 400));
 
-	/* this one is important: it determines how big the layout thinks it really is, as 
-	   opposed to what it displays on the screen
-	*/
-	
-	controls_layout.set_size (edit_controls_vbox.get_width(), (gint) pos);
-	controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
-	zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
-	time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
+	width =  min (width, screen->get_width() - 300);
 
-	if ((vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
-		/* 
-		   We're increasing the size of the canvas while the bottom is visible.
-		   We scroll down to keep in step with the controls layout.
+	if (req->width != width) {
+		req->width = width;
+	}
+
+	gint height = min ( (gint) pos, (screen->get_height() - 400));
+	if (req->height != height) {
+		req->height = height;
+	}
+
+	if ((width != edit_controls_vbox.get_width()) || height !=  pos) {
+
+		/* this one is important: it determines how big the layout thinks it really is, as 
+		   opposed to what it displays on the screen
 		*/
-		vertical_adjustment.set_upper (pos + canvas_timebars_vsize);
-		vertical_adjustment.set_value (pos + canvas_timebars_vsize - canvas_height);
-	} else {
-		vertical_adjustment.set_upper (pos + canvas_timebars_vsize);
+		controls_layout.set_size (edit_controls_vbox.get_width(), pos );
+		controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
+		time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
+		zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
 	}
 }
 
