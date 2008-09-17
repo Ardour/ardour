@@ -34,7 +34,7 @@ cp.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 cp.Merge ([
     libraries['ardour'],
-    libraries['sndfile-ardour'],
+    libraries['sndfile'],
     libraries['sigc2'],
     libraries['pbd'],
     libraries['midi++2'],

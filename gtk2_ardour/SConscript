@@ -52,7 +52,7 @@ gtkardour.Merge ([
     libraries['pbd'],
     libraries['samplerate'],
     libraries['sigc2'],
-    libraries['sndfile-ardour'],
+    libraries['sndfile'],
     libraries['taglib'],
     libraries['sysmidi'],
     libraries['vamp'],

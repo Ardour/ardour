@@ -452,7 +452,10 @@ deps = \
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.109.0',
 	'libgnomecanvas-2.0'   : '2.0',
-        'aubio'                : '0.3.2'
+        'aubio'                : '0.3.2',
+        'ogg'                  : '1.1.2',
+        'flac'                 : '1.2.1',
+        'sndfile'              : '1.0.18'
 }
 
 def DependenciesRequiredMessage():
@@ -503,8 +506,14 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-#libraries['sndfile'] = LibraryInfo()
-#libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
+libraries['flac'] = LibraryInfo ()
+libraries['flac'].ParseConfig ('pkg-config --cflags --libs flac')
+
+libraries['ogg'] = LibraryInfo ()
+libraries['ogg'].ParseConfig ('pkg-config --cflags --libs ogg')
+
+libraries['sndfile'] = LibraryInfo()
+libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
 
 libraries['lrdf'] = LibraryInfo()
 libraries['lrdf'].ParseConfig('pkg-config --cflags --libs lrdf')
@@ -838,18 +847,17 @@ if env['LIBLO']:
 def prep_libcheck(topenv, libinfo):
     if topenv['IS_OSX']:
 	#
-	# rationale: GTK-Quartz uses jhbuild and installs to /opt/gtk by default.
+	# rationale: GTK-Quartz uses jhbuild and installs to $HOME/gtk/inst by default.
 	#            All libraries needed should be built against this location
-	# However.. now jhbuild installs to ~/gtk/inst by default.. changed to accomodate this
+
 	if topenv['GTKOSX']:
 		GTKROOT = os.path.expanduser ('~/gtk/inst')
 		libinfo.Append(CPPPATH= GTKROOT + "/include", LIBPATH= GTKROOT + "/lib")
 		libinfo.Append(CXXFLAGS="-I" + GTKROOT + "/include", LINKFLAGS="-L" + GTKROOT + "/lib")
-	#libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
-	#libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
+	        #libinfo.Append(CPPPATH="/opt/local/include", LIBPATH="/opt/local/lib")
+	        #libinfo.Append(CXXFLAGS="-I/opt/local/include", LINKFLAGS="-L/opt/local/lib")
 
 prep_libcheck(env, env)
-
 
 #
 # these are part of the Ardour source tree because they are C++
@@ -903,31 +911,6 @@ else:
     have_linux_input = False
 
 libraries['usb'] = conf.Finish ()
-
-#
-# Check for FLAC
-
-libraries['flac'] = LibraryInfo ()
-prep_libcheck(env, libraries['flac'])
-libraries['flac'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib")
-
-#
-# june 1st 2007: look for a function that is in FLAC 1.1.2 and not in later versions
-#                since the version of libsndfile we have internally does not support
-#                the new API that libFLAC has adopted
-#
-
-conf = Configure (libraries['flac'])
-if conf.CheckLib ('FLAC', 'FLAC__seekable_stream_decoder_init', language='CXX'):
-    conf.env.Append(CCFLAGS='-DHAVE_FLAC')
-    use_flac = True
-else:
-    use_flac = False
-    
-libraries['flac'] = conf.Finish ()
-
-# or if that fails...
-#libraries['flac']    = LibraryInfo (LIBS='FLAC')
 
 # boost (we don't link against boost, just use some header files)
 
@@ -1074,14 +1057,6 @@ if env['SYSLIBS']:
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
 
-#
-# cannot use system one for the time being
-#
-    
-    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
-                                    LIBPATH='#libs/libsndfile',
-                                    CPPPATH=['#libs/libsndfile/src'])
-
 #    libraries['libglademm'] = LibraryInfo()
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
 
@@ -1095,13 +1070,15 @@ if env['SYSLIBS']:
                                             LIBPATH='#libs/appleutility',
                                             CPPPATH='#libs/appleutility')
     
+    libraries['sndfile'] = LibraryInfo()
+    libraries['sndfile'].ParseConfig ('pkg-config --cflags --libs libsndfile')
+
     coredirs = [
         'templates',
         'manual'
     ]
     
     subdirs = [
-        'libs/libsndfile',
         'libs/pbd',
         'libs/midi++2',
         'libs/ardour',
@@ -1160,9 +1137,6 @@ else:
     libraries['soundtouch'] = LibraryInfo(LIBS='soundtouch',
                                           LIBPATH='#libs/soundtouch',
                                           CPPPATH=['#libs', '#libs/soundtouch'])
-    libraries['sndfile-ardour'] = LibraryInfo(LIBS='libsndfile-ardour',
-                                    LIBPATH='#libs/libsndfile',
-                                    CPPPATH=['#libs/libsndfile', '#libs/libsndfile/src'])
     libraries['taglib'] = LibraryInfo(LIBS='libtaglib',
                                       LIBPATH='#libs/taglib',
                                       CPPPATH=['#libs/taglib/headers','#libs/taglib/headers/taglib'])
@@ -1180,7 +1154,6 @@ else:
     
     subdirs = [
         'libs/sigc++2',
-        'libs/libsndfile',
         'libs/taglib',
         'libs/pbd',
         'libs/midi++2',
@@ -1315,7 +1288,7 @@ env = conf.Finish()
 if env['NLS'] == 1:
     env.Append(CCFLAGS="-DENABLE_NLS")
 
-Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n ardour_version subst_dict use_flac')
+Export('env install_prefix final_prefix config_prefix final_config_prefix libraries i18n ardour_version subst_dict')
 
 #
 # the configuration file may be system dependent
