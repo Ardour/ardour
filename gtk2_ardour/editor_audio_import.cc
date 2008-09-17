@@ -228,7 +228,7 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 			message = string_compose(_("A source file %1 already exists. This operation will not update that source but import the file %2 as a new source, please confirm."), wave_name, wave_name);
 
 		}
-		MessageDialog dialog(message, false,Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
+		MessageDialog dialog(message, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
 
 		if (all_or_nothing) {
 			// disabled

@@ -1071,7 +1071,11 @@ if env['SYSLIBS']:
                                             CPPPATH='#libs/appleutility')
     
     libraries['sndfile'] = LibraryInfo()
-    libraries['sndfile'].ParseConfig ('pkg-config --cflags --libs libsndfile')
+    libraries['sndfile'].ParseConfig ('pkg-config --cflags --libs sndfile')
+    
+    libraries['taglib'] = LibraryInfo(LIBS='libtaglib',
+                                      LIBPATH='#libs/taglib',
+                                      CPPPATH=['#libs/taglib/headers','#libs/taglib/headers/taglib'])
 
     coredirs = [
         'templates',
