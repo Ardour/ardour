@@ -48,21 +48,6 @@ const AudioFileSource::Flag SndFileSource::default_writable_flags = AudioFileSou
 											   AudioFileSource::RemovableIfEmpty|
 											   AudioFileSource::CanRename);
 
-static void
-snprintf_bounded_null_filled (char* target, size_t target_size, char* fmt, ...)
-{
-	char buf[target_size+1];
-	va_list ap;
-
-	va_start (ap, fmt);
-	vsnprintf (buf, target_size+1, fmt, ap);
-	va_end (ap);
-
-	memset (target, 0, target_size);
-	memcpy (target, buf, target_size);
-
-}
-
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	: AudioFileSource (s, node)
 {
@@ -156,35 +141,22 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 
 	if (writable() && (_flags & Broadcast)) {
 
-		_broadcast_info = new SF_BROADCAST_INFO;
-		memset (_broadcast_info, 0, sizeof (*_broadcast_info));
-		
-		snprintf_bounded_null_filled (_broadcast_info->description, sizeof (_broadcast_info->description), "BWF %s", _name.c_str());
-		snprintf_bounded_null_filled (_broadcast_info->originator, sizeof (_broadcast_info->originator), "ardour %d.%d.%d %s", 
-					      libardour3_major_version,
-					      libardour3_minor_version,
-					      libardour3_micro_version,
-					      Glib::get_real_name().c_str());
+		if (!_broadcast_info) {
+			_broadcast_info = new BroadcastInfo;
+		}
 
-		_broadcast_info->version = 1;  
-		_broadcast_info->time_reference_low = 0;  
-		_broadcast_info->time_reference_high = 0;  
-		
-		/* XXX do something about this field */
-		
-		snprintf_bounded_null_filled (_broadcast_info->umid, sizeof (_broadcast_info->umid), "%s", "fnord");
-		
-		/* coding history is added by libsndfile */
+		_broadcast_info->set_from_session (s, header_position_offset);
+		_broadcast_info->set_description (string_compose ("BWF %1", _name));
 
-		if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (_broadcast_info)) != SF_TRUE) {
-			char errbuf[256];
-			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"), _path, errbuf) << endmsg;
+		if (!_broadcast_info->write_to_file (sf)) {
+			error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
+			                           _path, _broadcast_info->get_error())
+			      << endmsg;
 			_flags = Flag (_flags & ~Broadcast);
 			delete _broadcast_info;
 			_broadcast_info = 0;
-		} 
-	} 
+		}
+	}
 }
 
 void 
@@ -249,14 +221,15 @@ SndFileSource::open ()
 
 	_length = _info.frames;
 
-	_broadcast_info = new SF_BROADCAST_INFO;
-	memset (_broadcast_info, 0, sizeof (*_broadcast_info));
+	if (!_broadcast_info) {
+		_broadcast_info = new BroadcastInfo;
+	}
 	
-	bool timecode_info_exists;
+	bool bwf_info_exists = _broadcast_info->load_from_file (sf);
 
-	set_timeline_position (get_timecode_info (sf, _broadcast_info, timecode_info_exists));
+	set_timeline_position (bwf_info_exists ? _broadcast_info->get_time_reference() : header_position_offset);
 
-	if (_length != 0 && !timecode_info_exists) {
+	if (_length != 0 && !bwf_info_exists) {
 		delete _broadcast_info;
 		_broadcast_info = 0;
 		_flags = Flag (_flags & ~Broadcast);
@@ -540,39 +513,20 @@ SndFileSource::setup_broadcast_info (nframes_t when, struct tm& now, time_t tnow
 		return 0;
 	}
 
-	/* random code is 9 digits */
-	
-	int random_code = random() % 999999999;
-
-	snprintf_bounded_null_filled (_broadcast_info->originator_reference, sizeof (_broadcast_info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
-				      Config->get_bwf_country_code().c_str(),
-				      Config->get_bwf_organization_code().c_str(),
-				      bwf_serial_number,
-				      now.tm_hour,
-				      now.tm_min,
-				      now.tm_sec,
-				      random_code);
-	
-	snprintf_bounded_null_filled (_broadcast_info->origination_date, sizeof (_broadcast_info->origination_date), "%4d-%02d-%02d",
-				      1900 + now.tm_year,
-				      now.tm_mon + 1, // shift range from 0..11 to 1..12
-				      now.tm_mday);
-	
-	snprintf_bounded_null_filled (_broadcast_info->origination_time, sizeof (_broadcast_info->origination_time), "%02d:%02d:%02d",
-				      now.tm_hour,
-				      now.tm_min,
-				      now.tm_sec);
+	_broadcast_info->set_originator_ref ();
+	_broadcast_info->set_origination_time (&now);
 	
 	/* now update header position taking header offset into account */
 	
 	set_header_timeline_position ();
 
-	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
-		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;
+	if (!_broadcast_info->write_to_file (sf)) {
+		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
+		                           _path, _broadcast_info->get_error())
+		      << endmsg;
 		_flags = Flag (_flags & ~Broadcast);
 		delete _broadcast_info;
 		_broadcast_info = 0;
-		return -1;
 	}
 
 	return 0;
@@ -585,11 +539,12 @@ SndFileSource::set_header_timeline_position ()
 		return;
 	}
 
-	_broadcast_info->time_reference_high = (timeline_position >> 32);
-	_broadcast_info->time_reference_low = (timeline_position & 0xffffffff);
+	_broadcast_info->set_time_reference (timeline_position);
 
-	if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
-		error << string_compose (_("cannot set broadcast info for audio file %1; Dropping broadcast info for this file"), _path) << endmsg;
+	if (!_broadcast_info->write_to_file (sf)) {
+		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
+		                           _path, _broadcast_info->get_error())
+		      << endmsg;
 		_flags = Flag (_flags & ~Broadcast);
 		delete _broadcast_info;
 		_broadcast_info = 0;
@@ -853,8 +808,7 @@ SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, str
 {
 	SNDFILE *sf;
 	SF_INFO sf_info;
-	SF_BROADCAST_INFO binfo;
-	bool timecode_exists;
+	BroadcastInfo binfo;
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
 
@@ -871,35 +825,11 @@ SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, str
 					   sndfile_major_format(sf_info.format),
 					   sndfile_minor_format(sf_info.format));
 
-	memset (&binfo, 0, sizeof (binfo));
-	info.timecode  = get_timecode_info (sf, &binfo, timecode_exists);
+	info.timecode = binfo.load_from_file (sf) ? binfo.get_time_reference() : 0;
 
-	if (!timecode_exists) {
-		info.timecode = 0;
-	}
-	
 	sf_close (sf);
 
 	return true;
-}
-
-int64_t
-SndFileSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& exists)
-{
-	if (sf_command (sf, SFC_GET_BROADCAST_INFO, binfo, sizeof (*binfo)) != SF_TRUE) {
-		exists = false;
-		return (header_position_offset);
-	} 
-	
-	/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
-	   of the time reference.
-	*/
-	
-	exists = true;
-	int64_t ret = (uint32_t) binfo->time_reference_high;
-	ret <<= 32;
-	ret |= (uint32_t) binfo->time_reference_low;
-	return ret;
 }
 
 bool

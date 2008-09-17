@@ -23,6 +23,7 @@
 #include <sndfile.h>
 
 #include <ardour/audiofilesource.h>
+#include <ardour/broadcast_info.h>
 
 namespace ARDOUR {
 
@@ -74,7 +75,7 @@ class SndFileSource : public AudioFileSource {
   private:
 	SNDFILE *sf;
 	SF_INFO _info;
-	SF_BROADCAST_INFO *_broadcast_info;
+	BroadcastInfo *_broadcast_info;
 
 	void init ();
 	int open();
@@ -99,8 +100,6 @@ class SndFileSource : public AudioFileSource {
 	nframes_t destructive_write_unlocked (Sample *dst, nframes_t cnt);
 	nframes_t nondestructive_write_unlocked (Sample *dst, nframes_t cnt);
 	void handle_header_position_change ();
-
-	static int64_t get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& exists);
 };
 
 } // namespace ARDOUR

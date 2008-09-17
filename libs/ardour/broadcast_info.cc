@@ -36,6 +36,21 @@ using namespace PBD;
 namespace ARDOUR
 {
 
+static void
+snprintf_bounded_null_filled (char* target, size_t target_size, char const * fmt, ...)
+{
+	char buf[target_size+1];
+	va_list ap;
+
+	va_start (ap, fmt);
+	vsnprintf (buf, target_size+1, fmt, ap);
+	va_end (ap);
+
+	memset (target, 0, target_size);
+	memcpy (target, buf, target_size);
+
+}
+
 BroadcastInfo::BroadcastInfo () :
   _has_info (false)
 {
@@ -56,10 +71,10 @@ BroadcastInfo::~BroadcastInfo ()
 }
 
 void
-BroadcastInfo::set_from_session (Session const & session, int64_t time)
+BroadcastInfo::set_from_session (Session const & session, int64_t time_ref)
 {
 	set_description (session.name());
-	set_time_reference (time);
+	set_time_reference (time_ref);
 	set_origination_time ();
 	set_originator ();
 	set_originator_ref ();
@@ -181,7 +196,7 @@ BroadcastInfo::set_description (string const & desc)
 {
 	_has_info = true;
 	
-	snprintf (info->description, sizeof (info->description), desc.c_str());
+	snprintf_bounded_null_filled (info->description, sizeof (info->description), desc.c_str());
 }
 
 void
@@ -202,12 +217,12 @@ BroadcastInfo::set_origination_time (struct tm * now)
 		_time = *now;
 	}
 	
-	snprintf (info->origination_date, sizeof (info->origination_date), "%4d-%02d-%02d",
+	snprintf_bounded_null_filled (info->origination_date, sizeof (info->origination_date), "%4d-%02d-%02d",
 		  _time.tm_year + 1900,
 		  _time.tm_mon + 1,
 		  _time.tm_mday);
 	
-	snprintf (info->origination_time, sizeof (info->origination_time), "%02d:%02d:%02d",
+	snprintf_bounded_null_filled (info->origination_time, sizeof (info->origination_time), "%02d:%02d:%02d",
 		  _time.tm_hour,
 		  _time.tm_min,
 		  _time.tm_sec);
@@ -219,11 +234,11 @@ BroadcastInfo::set_originator (string const & str)
 	_has_info = true;
 	
 	if (!str.empty()) {
-		snprintf (info->originator, sizeof (info->originator), str.c_str());
+		snprintf_bounded_null_filled (info->originator, sizeof (info->originator), str.c_str());
 		return;
 	}
 	
-	snprintf (info->originator, sizeof (info->originator), Glib::get_real_name().c_str());
+	snprintf_bounded_null_filled (info->originator, sizeof (info->originator), Glib::get_real_name().c_str());
 }
 
 void
@@ -232,7 +247,7 @@ BroadcastInfo::set_originator_ref (string const & str)
 	_has_info = true;
 	
 	if (!str.empty()) {
-		snprintf (info->originator_reference, sizeof (info->originator_reference), str.c_str());
+		snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), str.c_str());
 		return;
 	}
 	
@@ -245,7 +260,7 @@ BroadcastInfo::set_originator_ref (string const & str)
 	std::ostringstream serial_number;
 	serial_number << "ARDOUR" << "r" <<  std::setfill('0') << std::right << std::setw(5) << svn_revision;
 	
-	snprintf (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
+	snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
 		  Config->get_bwf_country_code().c_str(),
 		  Config->get_bwf_organization_code().c_str(),
 		  serial_number.str().c_str(),

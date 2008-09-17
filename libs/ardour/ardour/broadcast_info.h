@@ -48,7 +48,7 @@ class BroadcastInfo
 	
 	/* Convenience functions */
 	
-	void set_from_session (Session const & session, int64_t time);
+	void set_from_session (Session const & session, int64_t time_ref);
 	
 	/* Reading */
 	
