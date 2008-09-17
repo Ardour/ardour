@@ -47,6 +47,7 @@
 #include <ardour/configuration.h>
 #include <ardour/session.h>
 #include <ardour/session_directory.h>
+#include <ardour/session_metadata.h>
 #include <ardour/utils.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/audioplaylist.h>
@@ -143,7 +144,8 @@ Session::Session (AudioEngine &eng,
 	  _total_free_4k_blocks (0),
 	  _bundle_xml_node (0),
 	  _click_io ((IO*) 0),
-	  main_outs (0)
+	  main_outs (0),
+	  _metadata (new SessionMetadata())
 {
 	bool new_session;
 

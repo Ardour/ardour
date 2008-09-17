@@ -1,0 +1,146 @@
+# -*- python -*-
+
+import os.path
+import os
+import glob
+from shutil import copy
+
+Import('env install_prefix libraries')
+taglib = env.Clone()
+
+taglib_files = glob.glob ('taglib/*.cpp')
+taglib_files += glob.glob ('taglib/flac/*.cpp')
+taglib_files += glob.glob ('taglib/mpc/*.cpp')
+taglib_files += glob.glob ('taglib/mpeg/*.cpp')
+taglib_files += glob.glob ('taglib/mpeg/id3v1/*.cpp')
+taglib_files += glob.glob ('taglib/mpeg/id3v2/*.cpp')
+taglib_files += glob.glob ('taglib/mpeg/id3v2/frames/*.cpp')
+taglib_files += glob.glob ('taglib/ogg/*.cpp')
+taglib_files += glob.glob ('taglib/ogg/vorbis/*.cpp')
+taglib_files += glob.glob ('taglib/ogg/speex/*.cpp')
+taglib_files += glob.glob ('taglib/ogg/flac/*.cpp')
+taglib_files += glob.glob ('taglib/trueaudio/*.cpp')
+taglib_files += glob.glob ('taglib/wavpack/*.cpp')
+taglib_files += glob.glob ('taglib/ape/*.cpp')
+taglib_files += glob.glob ('taglib/toolkit/*.cpp')
+
+
+domain = 'taglib'
+
+taglib.Append(CCFLAGS = "-DPACKAGE=\\\"" + domain + "\\\"")
+# mingw may need this
+#taglib.Append(CCFLAGS="-no-undefined")
+taglib.Append(PACKAGE = domain)
+taglib.Append(POTFILE = domain + '.pot')
+taglib.Append (CPPATH= [ '#libs/taglib/taglib',
+                         '#libs/taglib/taglib/toolkit',
+                         '#libs/taglib/taglib/flac' +
+                         '#libs/taglib/taglib/ape',
+                         '#libs/taglib/taglib/mpc',
+                         '#libs/taglib/taglib/mpeg',
+                         '#libs/taglib/taglib/mpeg/id3v1',
+                         '#libs/taglib/taglib/mpeg/id3v2',
+                         '#libs/taglib/taglib/wavpack',
+                         '#libs/taglib/taglib/trueaudio',
+                         '#libs/taglib/taglib/ogg'
+                         '#libs/taglib/taglib/ogg/vorbis'
+                         '#libs/taglib/taglib/ogg/speex'
+                         '#libs/taglib/taglib/ogg/flac'
+                        ],
+               CXXFLAGS= [ "-Ilibs/taglib/taglib",
+                           "-Ilibs/taglib/taglib/toolkit",
+                           "-Ilibs/taglib/taglib/flac",
+                           "-Ilibs/taglib/taglib/ape",
+                           "-Ilibs/taglib/taglib/mpc",
+                           "-Ilibs/taglib/taglib/mpeg",
+                           "-Ilibs/taglib/taglib/mpeg/id3v1",
+                           "-Ilibs/taglib/taglib/mpeg/id3v2",
+                           "-Ilibs/taglib/taglib/wavpack",
+                           "-Ilibs/taglib/taglib/trueaudio",
+                           "-Ilibs/taglib/taglib/ogg",
+                           "-Ilibs/taglib/taglib/ogg/vorbis",
+                           "-Ilibs/taglib/taglib/ogg/speex",
+                           "-Ilibs/taglib/taglib/ogg/flac"
+                           ]
+               )
+
+
+#conf = Configure(taglib)
+#taglib = conf.finish ()
+
+headers = Split ("""
+taglib/audioproperties.h
+taglib/fileref.h
+taglib/tag.h
+taglib/taglib_export.h
+taglib/tagunion.h
+taglib/ape/apefooter.h
+taglib/ape/apeitem.h
+taglib/ape/apetag.h
+taglib/flac/flacfile.h
+taglib/flac/flacproperties.h
+taglib/mpc/mpcfile.h
+taglib/mpc/mpcproperties.h
+taglib/mpeg/mpegfile.h
+taglib/mpeg/mpegheader.h
+taglib/mpeg/mpegproperties.h
+taglib/mpeg/xingheader.h
+taglib/ogg/oggfile.h
+taglib/ogg/oggpage.h
+taglib/ogg/oggpageheader.h
+taglib/ogg/xiphcomment.h
+taglib/toolkit/taglib.h
+taglib/toolkit/tbytevector.h
+taglib/toolkit/tbytevectorlist.h
+taglib/toolkit/tdebug.h
+taglib/toolkit/tfile.h
+taglib/toolkit/tlist.h
+taglib/toolkit/tlist.tcc
+taglib/toolkit/tmap.h
+taglib/toolkit/tmap.tcc
+taglib/toolkit/tstring.h
+taglib/toolkit/tstringlist.h
+taglib/toolkit/unicode.h
+taglib/trueaudio/trueaudiofile.h
+taglib/trueaudio/trueaudioproperties.h
+taglib/wavpack/wavpackfile.h
+taglib/wavpack/wavpackproperties.h
+""")
+
+libtaglib = taglib.SharedLibrary ('taglib', taglib_files)
+ 
+#
+# the header structure of this library is not very convenient
+# if you don't want to install the library. headers are distributed
+# all over the place, making a simple -Ipath flag for the compiler
+# rather difficult. This hack creates a directory and copies
+# the headers into it, allowing us to use -I#libs/taglib/headers
+#
+
+def headercopy(env, target, source):
+    if os.access (str(target[0]), os.X_OK) != True:
+        os.makedirs (str(target[0]))
+    for file in source : 
+        copy (str(file), str(target[0]))
+        
+header_dir = taglib.Command ('#libs/taglib/headers/taglib', headers, headercopy)
+
+config_h = taglib.Command('config.h', ['config.h.in'], 'cd libs/taglib && ./configure && cd -', ENV=os.environ)
+
+Default([config_h,header_dir,libtaglib])
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libtaglib))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',
+                                       'configure',
+                                       'SConscript',
+                                       'taglib.pc.in'
+                                       'config.sub',
+                                       'config.guess',
+                                       'install-sh'
+                                     ] +
+                                     taglib_files +
+                                     headers
+                                     ))
+                                     

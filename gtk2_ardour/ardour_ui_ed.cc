@@ -136,16 +136,17 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportSession"), _("Export session to audiofile..."),  mem_fun (*editor, &PublicEditor::export_session));
+	act = ActionManager::register_action (main_actions, X_("Metadata"), _("Metadata"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportSelection"), _("Export selection to audiofile..."),  mem_fun (*editor, &PublicEditor::export_selection));
+	act = ActionManager::register_action (main_actions, X_("EditMetadata"), _("Edit Metadata"),  mem_fun(*this, &ARDOUR_UI::edit_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::time_selection_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportRangeMarkers"), _("Export range markers to audiofile..."),  mem_fun (*editor, &PublicEditor::export_range_markers));
+	act = ActionManager::register_action (main_actions, X_("ImportMetadata"), _("Import Metadata"),  mem_fun(*this, &ARDOUR_UI::import_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::range_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export to audiofile(s)..."),  mem_fun (*editor, &PublicEditor::export_audio));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);

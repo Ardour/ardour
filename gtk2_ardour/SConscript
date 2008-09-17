@@ -53,6 +53,7 @@ gtkardour.Merge ([
     libraries['samplerate'],
     libraries['sigc2'],
     libraries['sndfile-ardour'],
+    libraries['taglib'],
     libraries['sysmidi'],
     libraries['vamp'],
     libraries['vamphost'],
@@ -170,10 +171,12 @@ editor_tempodisplay.cc
 editor_timefx.cc
 engine_dialog.cc
 enums.cc
-export_dialog.cc
-export_range_markers_dialog.cc
-export_region_dialog.cc
-export_session_dialog.cc
+export_format_dialog.cc
+export_main_dialog.cc
+export_channel_selector.cc
+export_filename_selector.cc
+export_format_selector.cc
+export_timespan_selector.cc
 gain_meter.cc
 generic_pluginui.cc
 ghostregion.cc
@@ -220,6 +223,7 @@ route_time_axis.cc
 route_ui.cc
 selection.cc
 send_ui.cc
+session_metadata_dialog.cc
 sfdb_ui.cc
 simpleline.cc
 simplerect.cc

@@ -342,6 +342,11 @@ namespace ARDOUR {
 		FormatInt16
 	};
 
+	enum CDMarkerFormat {
+		CDMarkerNone,
+		CDMarkerCUE,
+		CDMarkerTOC
+	};
 
 	enum HeaderFormat {
 		BWF,

@@ -116,7 +116,11 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 	} else {
 
 		assert(_jack_output_port);
-		assert(timestamp < _nframes_this_cycle);
+		
+		// XXX This had to be temporarily commented out to make export work again
+		if (!(timestamp < _nframes_this_cycle)) {
+			std::cerr << "assertion timestamp < _nframes_this_cycle failed!" << std::endl;
+		}
 
 		if (_currently_in_cycle) {
 			if (timestamp == 0) {

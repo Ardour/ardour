@@ -64,6 +64,7 @@
 #include <ardour/session_directory.h>
 #include <ardour/session_utils.h>
 #include <ardour/session_state_utils.h>
+#include <ardour/session_metadata.h>
 #include <ardour/buffer.h>
 #include <ardour/audio_diskstream.h>
 #include <ardour/midi_diskstream.h>
@@ -77,7 +78,6 @@
 #include <ardour/midi_source.h>
 #include <ardour/sndfile_helpers.h>
 #include <ardour/auditioner.h>
-#include <ardour/export.h>
 #include <ardour/io_processor.h>
 #include <ardour/send.h>
 #include <ardour/processor.h>
@@ -200,6 +200,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_play_range = false;
 	waiting_to_start = false;
 	_exporting = false;
+	_exporting_realtime = false;
 	_gain_automation_buffer = 0;
 	_pan_automation_buffer = 0;
 	_npan_buffers = 0;
@@ -537,6 +538,10 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 		}
 
 	}
+	
+	/* Instantiate metadata */
+	
+	_metadata = new SessionMetadata ();
 
 	/* set initial start + end point */
 
@@ -977,6 +982,8 @@ Session::state(bool full_state)
 
 	node->add_child_nocopy (get_options());
 
+	node->add_child_nocopy (_metadata->get_state());
+
 	child = node->add_child ("Sources");
 
 	if (full_state) {
@@ -1202,6 +1209,7 @@ Session::set_state (const XMLNode& node)
 	Path
 	extra
 	Options/Config
+	Metadata
 	Locations
 	Sources
 	AudioRegions
@@ -1227,6 +1235,12 @@ Session::set_state (const XMLNode& node)
 		load_options (*child);
 	} else {
 		error << _("Session: XML state has no options section") << endmsg;
+	}
+
+	if ((child = find_named_node (node, "Metadata")) == 0) {
+		warning << _("Session: XML state has no metadata section (2.0 session?)") << endmsg;
+	} else if (_metadata->set_state (*child)) {
+		goto out;
 	}
 
 	if ((child = find_named_node (node, "Locations")) == 0) {
@@ -2895,10 +2909,12 @@ Session::controllable_by_id (const PBD::ID& id)
 }
 
 void 
-Session::add_instant_xml (XMLNode& node)
+Session::add_instant_xml (XMLNode& node, bool write_to_config)
 {
 	Stateful::add_instant_xml (node, _path);
-	Config->add_instant_xml (node);
+	if (write_to_config) {
+		Config->add_instant_xml (node);
+	}
 }
 
 XMLNode*

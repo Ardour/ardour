@@ -570,6 +570,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void open_session ();
 	void open_recent_session ();
 	void save_template ();
+	
+	void edit_metadata ();
+	void import_metadata ();
 
 	void session_add_audio_route (bool disk, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, uint32_t how_many);
 	void session_add_midi_route (bool disk, uint32_t how_many);

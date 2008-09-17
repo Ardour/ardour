@@ -31,6 +31,7 @@
 
 #include <jack/jack.h>
 
+#include <ardour/svn_revision.h>
 #include <ardour/version.h>
 #include <ardour/ardour.h>
 #include <ardour/audioengine.h>
@@ -41,7 +42,6 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
-#include "../svn_revision.h"
 #include "version.h"
 #include "utils.h"
 #include "ardour_ui.h"
@@ -324,7 +324,7 @@ int main (int argc, char *argv[])
 	cout << _("Ardour/GTK ") 
 	     << VERSIONSTRING
 	     << _("\n   (built using ")
-	     << ardour_svn_revision
+	     << svn_revision
 #ifdef __GNUC__
 	     << _(" and GCC version ") << __VERSION__ 
 #endif

@@ -54,6 +54,9 @@ class ArdourDialog : public Gtk::Dialog
 	virtual void session_gone () {
 		set_session (0);
 	}
+
+  private:
+	void init ();
 };
 
 #endif // __ardour_dialog_h__

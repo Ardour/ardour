@@ -30,11 +30,12 @@
 #include <ardour/region.h>
 #include <ardour/gain.h>
 #include <ardour/logcurve.h>
-#include <ardour/export.h>
 
 class XMLNode;
 
 namespace ARDOUR {
+
+using std::vector;
 
 class Route;
 class Playlist;

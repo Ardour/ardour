@@ -98,8 +98,6 @@ class PlaylistSelector;
 class Marker;
 class GroupedButtons;
 class AutomationLine;
-class UIExportSpecification;
-class ExportDialog;
 class Selection;
 class TimeSelection;
 class TrackSelection;
@@ -272,12 +270,11 @@ class Editor : public PublicEditor
 #endif
 
 	/* export */
-
-	/* these initiate export ... */
 	
-	void export_session();
-	void export_selection();
-
+	void export_audio ();
+	void export_selection ();
+	void export_range ();
+	void export_region ();
 
 	void add_toplevel_controls (Gtk::Container&);
 	Gtk::HBox& get_status_bar_packer()  { return status_bar_hpacker; }
@@ -1566,7 +1563,6 @@ public:
 	void marker_menu_set_from_playhead ();
 	void marker_menu_set_from_selection ();
 	void marker_menu_range_to_next ();
-	void marker_menu_export_range ();
 	void new_transport_marker_menu_set_loop ();
 	void new_transport_marker_menu_set_punch ();
 	void update_loop_range_view (bool visibility=false);
@@ -1994,15 +1990,8 @@ public:
 
 	/* audio export */
 
-	ExportDialog *export_dialog;
-	ExportDialog *export_range_markers_dialog;
-	
-	void export_range (nframes64_t start, nframes64_t end);
-	void export_range_markers ();
-
 	int  write_region_selection(RegionSelection&);
 	bool write_region (string path, boost::shared_ptr<ARDOUR::AudioRegion>);
-	void export_region ();
 	void bounce_region_selection ();
 	void bounce_range_selection (bool replace);
 	void external_edit_region ();

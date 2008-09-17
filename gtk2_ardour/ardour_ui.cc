@@ -91,6 +91,7 @@ typedef uint64_t microseconds_t;
 #include "gui_thread.h"
 #include "theme_manager.h"
 #include "bundle_manager.h"
+#include "session_metadata_dialog.h"
 #include "gain_meter.h"
 #include "route_time_axis.h"
 
@@ -2006,6 +2007,24 @@ ARDOUR_UI::save_template ()
 	default:
 		break;
 	}
+}
+
+void
+ARDOUR_UI::edit_metadata ()
+{
+	SessionMetadataEditor dialog;
+	dialog.set_session (session);
+	editor->ensure_float (dialog);
+	dialog.run ();
+}
+
+void
+ARDOUR_UI::import_metadata ()
+{
+	SessionMetadataImporter dialog;
+	dialog.set_session (session);
+	editor->ensure_float (dialog);
+	dialog.run ();
 }
 
 void

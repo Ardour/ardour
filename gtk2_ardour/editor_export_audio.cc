@@ -24,9 +24,7 @@
 
 #include <gtkmm/messagedialog.h>
 
-#include "export_session_dialog.h"
-#include "export_region_dialog.h"
-#include "export_range_markers_dialog.h"
+#include "export_main_dialog.h"
 #include "editor.h"
 #include "public_editor.h"
 #include "selection.h"
@@ -36,7 +34,6 @@
 
 #include <pbd/pthread_utils.h>
 #include <ardour/types.h>
-#include <ardour/export.h>
 #include <ardour/audio_track.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/audio_diskstream.h>
@@ -55,78 +52,59 @@ using namespace PBD;
 using namespace Gtk;
 
 void
-Editor::export_session()
+Editor::export_audio ()
 {
-	if (session) {
-		export_range (session->current_start_frame(), session->current_end_frame());
-	}
+	ExportMainDialog dialog (*this);
+	dialog.set_session (session);
+	dialog.run();
 }
 
 void
 Editor::export_selection ()
 {
-	if (session) {
-		if (selection->time.empty()) {
-			MessageDialog message (*this, _("There is no selection to export.\n\nSelect a selection using the range mouse mode"));
-			message.run ();
-			return;
-		}
-
-		export_range (selection->time.front().start, selection->time.front().end);
-	}
+	ExportMainDialog dialog (*this);
+	dialog.set_session (session);
+	dialog.select_timespan (X_("selection"));
+	dialog.run();
 }
 
 void
-Editor::export_range (nframes64_t start, nframes64_t end)
+Editor::export_range ()
 {
-	if (session) {
-		if (export_dialog == 0) {
-			export_dialog = new ExportSessionDialog (*this);
-			export_dialog->connect_to_session (session);
-		}
-		
-		export_dialog->set_range (start, end);
-		export_dialog->start_export();
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
 	}
-}	
+
+	Location* l;
+	bool is_start;
+
+	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
+		ExportMainDialog dialog (*this);
+		dialog.set_session (session);
+		dialog.select_timespan (l->id().to_s());
+		dialog.run();
+	}
+}
 
 /** Export the first selected region */
 void
 Editor::export_region ()
 {
-	if (selection->regions.empty()) {
-		return;
-	}
-
-	boost::shared_ptr<Region> r = selection->regions.front()->region();
-	
-	ExportDialog* dialog = new ExportRegionDialog (*this, r);
-		
-	dialog->connect_to_session (session);
-	dialog->set_range (clicked_regionview->region()->first_frame(), clicked_regionview->region()->last_frame());
-	dialog->start_export();
+// 	if (selection->regions.empty()) {
+// 		return;
+// 	}
+// 
+// 	boost::shared_ptr<Region> r = selection->regions.front()->region();
+// 	
+// 	ExportDialog* dialog = new ExportRegionDialog (*this, r);
+// 		
+// 	dialog->connect_to_session (session);
+// 	dialog->set_range (clicked_regionview->region()->first_frame(), clicked_regionview->region()->last_frame());
+// 	dialog->start_export();
 }
-
-void
-Editor::export_range_markers ()
-{
-	if (session) {
-
-		if (session->locations()->num_range_markers() == 0) {
-			MessageDialog message (*this, _("There are no ranges to export.\n\nCreate 1 or more ranges by dragging the mouse in the range bar"));
-			message.run ();
-			return;
-		}
-		
-
-		if (export_range_markers_dialog == 0) {
-			export_range_markers_dialog = new ExportRangeMarkersDialog(*this);
-			export_range_markers_dialog->connect_to_session (session);
-		}
-
-		export_range_markers_dialog->start_export();
-	}
-}	
 
 int
 Editor::write_region_selection (RegionSelection& regions)

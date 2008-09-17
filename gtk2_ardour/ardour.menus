@@ -10,15 +10,17 @@
            <menuitem action='Save'/>
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
+           <menu name='Metadata' action='Metadata'>
+               <menuitem action='EditMetadata'/>
+               <menuitem action='ImportMetadata'/>
+           </menu>
            <separator/>
            <menuitem action='AddTrackBus'/>	
            <separator/>
            <menuitem action='addExistingAudioFiles'/>
            <separator/>
            <menu name='Export' action='Export'>
-               <menuitem action='ExportSession'/>
-               <menuitem action='ExportSelection'/>
-               <menuitem action='ExportRangeMarkers'/>
+               <menuitem action='ExportAudio'/>
            </menu>
            <separator/>
            <menu name='Cleanup' action='Cleanup'>

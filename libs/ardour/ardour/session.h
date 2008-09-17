@@ -51,6 +51,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
+#include <ardour/export_status.h>
 #include <ardour/location.h>
 #include <ardour/gain.h>
 #include <ardour/io.h>
@@ -108,8 +109,9 @@ class MidiRegion;
 class SMFSource;
 
 class SessionDirectory;
+class SessionMetadata;
+class ExportHandler;
 
-struct ExportSpecification;
 struct RouteGroup;
 
 using std::vector;
@@ -457,7 +459,7 @@ class Session : public PBD::StatefulDestructible
 	XMLNode& get_template();
 
 	/// The instant xml file is written to the session directory
-	void add_instant_xml (XMLNode&);
+	void add_instant_xml (XMLNode&, bool write_to_config = true);
 	XMLNode * instant_xml (const std::string& str);
 
 	enum StateOfTheState {
@@ -554,7 +556,7 @@ class Session : public PBD::StatefulDestructible
 	void           set_smpte_offset_negative (bool);
 	bool           smpte_offset_negative () const { return _smpte_offset_negative; }
 
-	nframes_t convert_to_frames_at (nframes_t position, AnyTime&);
+	nframes_t convert_to_frames_at (nframes_t position, AnyTime const &);
 
 	static sigc::signal<void> StartTimeChanged;
 	static sigc::signal<void> EndTimeChanged;
@@ -616,14 +618,27 @@ class Session : public PBD::StatefulDestructible
 	bool sample_rate_convert (import_status&, string infile, string& outfile);
 	string build_tmp_convert_name (string file);
 
+	/* Export stuff */
+
 	SlaveSource post_export_slave;
 	nframes_t post_export_position;
 
+	ExportStatus export_status;
+	
+	boost::shared_ptr<ExportHandler> get_export_handler ();
+	void release_export_handler ();
+
 	int  pre_export ();
-	int  start_export (ARDOUR::ExportSpecification&);
-	int  stop_export (ARDOUR::ExportSpecification&);
-	void finalize_export ();
+	int  start_audio_export (nframes_t position, bool realtime);
+	int  stop_audio_export ();
+	void finalize_audio_export ();
+	void abort_audio_export ();
+
+	sigc::signal<int, nframes_t> ProcessExport;
+	sigc::signal<void> ExportFinished;
 	static sigc::signal<void, std::string, std::string> Exported;
+	sigc::connection export_freewheel_connection;
+	sigc::connection export_abort_connection;
 
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
@@ -1051,7 +1066,8 @@ class Session : public PBD::StatefulDestructible
 	void process_without_events (nframes_t);
 	void process_with_events    (nframes_t);
 	void process_audition       (nframes_t);
-	int  process_export         (nframes_t, ARDOUR::ExportSpecification*);
+	void process_export         (nframes_t);
+	int  process_export_fw      (nframes_t);
 
 	/* slave tracking */
 
@@ -1076,8 +1092,8 @@ class Session : public PBD::StatefulDestructible
 	void set_slave_source (SlaveSource);
 
 	bool _exporting;
-
-	int prepare_to_export (ARDOUR::ExportSpecification&);
+	bool _exporting_realtime;
+	boost::shared_ptr<ExportHandler> export_handler;
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);
@@ -1724,6 +1740,12 @@ class Session : public PBD::StatefulDestructible
 	void sync_order_keys ();
 
 	static bool _disable_all_loaded_plugins;
+	
+	/* Metadata */
+
+	SessionMetadata * _metadata;
+  public:
+	SessionMetadata & metadata () { return *_metadata; }
 };
 
 } // namespace ARDOUR

@@ -636,7 +636,6 @@ LocationUI::LocationUI ()
 
 	get_vbox()->pack_start (location_hpacker);
 
-	location_vpacker.set_border_width (10);
 	location_vpacker.set_spacing (5);
 
 	location_vpacker.pack_start (loop_edit_row, false, false);

@@ -37,6 +37,7 @@ audio_buffer.cc
 audio_diskstream.cc
 audioengine.cc
 audiofilesource.cc
+audiofile_tagger.cc
 audio_library.cc
 audio_playlist.cc
 audio_port.cc
@@ -51,6 +52,7 @@ automation_control.cc
 automation_event.cc
 base_audio_port.cc
 base_midi_port.cc
+broadcast_info.cc
 buffer.cc
 buffer_set.cc
 chan_count.cc
@@ -64,6 +66,19 @@ default_click.cc
 directory_names.cc
 diskstream.cc
 enums.cc
+export_channel_configuration.cc
+export_file_io.cc
+export_filename.cc
+export_format_base.cc
+export_format_manager.cc
+export_formats.cc
+export_format_specification.cc
+export_handler.cc
+export_processor.cc
+export_profile_manager.cc
+export_status.cc
+export_timespan.cc
+export_utilities.cc
 filename_extensions.cc
 filesystem_paths.cc
 filter.cc
@@ -124,6 +139,7 @@ session_command.cc
 session_directory.cc
 session_events.cc
 session_export.cc
+session_metadata.cc
 session_midi.cc
 session_process.cc
 session_state.cc
@@ -139,6 +155,7 @@ sndfilesource.cc
 sndfileimportable.cc
 source.cc
 source_factory.cc
+svn_revision.cc
 tape_file_matcher.cc
 template_utils.cc
 tempo.cc
@@ -318,6 +335,7 @@ ardour.Merge ([
 	     libraries['samplerate'],
 	     libraries['sigc2'],
 	     libraries['sndfile-ardour'],
+	     libraries['taglib'],
 	     libraries['vamp'],
 	     libraries['vamphost'],
 	     libraries['xml']

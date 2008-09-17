@@ -295,8 +295,6 @@ Editor::Editor ()
 	_show_waveforms = true;
 	_show_waveforms_recording = true;
 	first_action_message = 0;
-	export_dialog = 0;
-	export_range_markers_dialog = 0;
 	show_gain_after_trim = false;
 	ignore_route_list_reorder = false;
 	no_route_list_redisplay = false;
@@ -2117,7 +2115,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Consolidate range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true)));
 	items.push_back (MenuElem (_("Bounce range to region list"), bind (mem_fun(*this, &Editor::bounce_range_selection), false)));
-	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_selection)));
+	items.push_back (MenuElem (_("Export range"), mem_fun(*this, &Editor::export_range)));
 }
 
 	

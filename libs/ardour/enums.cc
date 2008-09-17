@@ -29,6 +29,9 @@
 #include <ardour/panner.h>
 #include <ardour/track.h>
 #include <ardour/midi_track.h>
+#include <ardour/export_filename.h>
+#include <ardour/export_format_base.h>
+#include <ardour/export_profile_manager.h>
 
 using namespace std;
 using namespace PBD;
@@ -59,6 +62,7 @@ setup_enum_writer ()
 	LayerModel _LayerModel;
 	SoloModel _SoloModel;
 	SampleFormat _SampleFormat;
+	CDMarkerFormat _CDMarkerFormat;
 	HeaderFormat _HeaderFormat;
 	PluginType _PluginType;
 	SlaveSource _SlaveSource;
@@ -86,6 +90,18 @@ setup_enum_writer ()
 	Region::PositionLockStyle _Region_PositionLockStyle;
 	Track::FreezeState _Track_FreezeState;
 	AutomationList::InterpolationStyle _AutomationList_InterpolationStyle;
+	AnyTime::Type _AnyTime_Type;
+	ExportFilename::TimeFormat _ExportFilename_TimeFormat;
+	ExportFilename::DateFormat _ExportFilename_DateFormat;
+	ExportFormatBase::Type _ExportFormatBase_Type;
+	ExportFormatBase::FormatId _ExportFormatBase_FormatId;
+	ExportFormatBase::Endianness _ExportFormatBase_Endianness;
+	ExportFormatBase::SampleFormat _ExportFormatBase_SampleFormat;
+	ExportFormatBase::DitherType _ExportFormatBase_DitherType;
+	ExportFormatBase::Quality _ExportFormatBase_Quality;
+	ExportFormatBase::SampleRate _ExportFormatBase_SampleRate;
+	ExportFormatBase::SRCQuality _ExportFormatBase_SRCQuality;
+	ExportProfileManager::TimeFormat _ExportProfileManager_TimeFormat;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -212,6 +228,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (FormatInt24);
 	REGISTER_ENUM (FormatInt16);
 	REGISTER (_SampleFormat);
+
+	REGISTER_ENUM (CDMarkerNone);
+	REGISTER_ENUM (CDMarkerCUE);
+	REGISTER_ENUM (CDMarkerTOC);
+	REGISTER (_CDMarkerFormat);
 
 	REGISTER_ENUM (BWF);
 	REGISTER_ENUM (WAVE);
@@ -386,4 +407,89 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (AutomationList, Curved);
 	REGISTER (_AutomationList_InterpolationStyle);
 
+	REGISTER_CLASS_ENUM (AnyTime, SMPTE);
+	REGISTER_CLASS_ENUM (AnyTime, BBT);
+	REGISTER_CLASS_ENUM (AnyTime, Frames);
+	REGISTER_CLASS_ENUM (AnyTime, Seconds);
+	REGISTER (_AnyTime_Type);
+
+	REGISTER_CLASS_ENUM (ExportFilename, D_None);
+	REGISTER_CLASS_ENUM (ExportFilename, D_ISO);
+	REGISTER_CLASS_ENUM (ExportFilename, D_ISOShortY);
+	REGISTER_CLASS_ENUM (ExportFilename, D_BE);
+	REGISTER_CLASS_ENUM (ExportFilename, D_BEShortY);
+	REGISTER (_ExportFilename_DateFormat);
+
+	REGISTER_CLASS_ENUM (ExportFilename, T_None);
+	REGISTER_CLASS_ENUM (ExportFilename, T_NoDelim);
+	REGISTER_CLASS_ENUM (ExportFilename, T_Delim);
+	REGISTER (_ExportFilename_TimeFormat);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, T_None);
+	REGISTER_CLASS_ENUM (ExportFormatBase, T_Sndfile);
+	REGISTER (_ExportFormatBase_Type);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_None);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_WAV);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_W64);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_AIFF);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_AU);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_IRCAM);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_RAW);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_FLAC);
+	REGISTER_CLASS_ENUM (ExportFormatBase, F_Ogg);
+	REGISTER (_ExportFormatBase_FormatId);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, E_FileDefault);
+	REGISTER_CLASS_ENUM (ExportFormatBase, E_Little);
+	REGISTER_CLASS_ENUM (ExportFormatBase, E_Big);
+	REGISTER_CLASS_ENUM (ExportFormatBase, E_Cpu);
+	REGISTER (_ExportFormatBase_Endianness);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_None);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_8);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_16);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_24);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_32);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_U8);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_Float);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_Double);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_Vorbis);
+	REGISTER (_ExportFormatBase_SampleFormat);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, D_None);
+	REGISTER_CLASS_ENUM (ExportFormatBase, D_Rect);
+	REGISTER_CLASS_ENUM (ExportFormatBase, D_Tri);
+	REGISTER_CLASS_ENUM (ExportFormatBase, D_Shaped);
+	REGISTER (_ExportFormatBase_DitherType);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, Q_None);
+	REGISTER_CLASS_ENUM (ExportFormatBase, Q_Any);
+	REGISTER_CLASS_ENUM (ExportFormatBase, Q_LosslessLinear);
+	REGISTER_CLASS_ENUM (ExportFormatBase, Q_LosslessCompression);
+	REGISTER_CLASS_ENUM (ExportFormatBase, Q_LossyCompression);
+	REGISTER (_ExportFormatBase_Quality);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_None);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_22_05);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_44_1);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_48);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_88_2);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_96);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_192);
+	REGISTER (_ExportFormatBase_SampleRate);
+
+	REGISTER_CLASS_ENUM (ExportFormatBase, SRC_SincBest);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SRC_SincMedium);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SRC_SincFast);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SRC_ZeroOrderHold);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SRC_Linear);
+	REGISTER (_ExportFormatBase_SRCQuality);
+
+	REGISTER_CLASS_ENUM (ExportProfileManager, SMPTE);
+	REGISTER_CLASS_ENUM (ExportProfileManager, BBT);
+	REGISTER_CLASS_ENUM (ExportProfileManager, MinSec);
+	REGISTER_CLASS_ENUM (ExportProfileManager, Frames);
+	REGISTER_CLASS_ENUM (ExportProfileManager, Off);
+	REGISTER (_ExportProfileManager_TimeFormat);
 }

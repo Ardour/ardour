@@ -38,7 +38,6 @@
 
 namespace ARDOUR {
 	class Session;
-	class ExportSpecification;
 	class Region;
 	class Playlist;
 	class RouteGroup;
@@ -206,16 +205,15 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool show_measures () const = 0;
 	virtual bool redraw_measures () = 0;
 
-	/** Open an export dialogue for the whole session */
-	virtual void export_session () = 0;
-
-	/** Open an export dialogue for currently selected time range, if there
-	 * is one; if not an error is displayed to the user.
-	 */
+	/** Open main export dialog */
+	virtual void export_audio () = 0;
+	
+	/** Open export dialog with current selection pre-selected */
 	virtual void export_selection () = 0;
+	
+	/** Open export dialog with current range pre-selected */
+	virtual void export_range () = 0;
 
-	/** Open an export dialogue for marked ranges */
-	virtual void export_range_markers () = 0;
 	virtual void register_actions () = 0;
 	virtual void add_toplevel_controls (Gtk::Container&) = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
