@@ -29,7 +29,6 @@
 #include <cstdlib>
 #undef  __USE_SVID
 
-#include <cstring>
 #include <unistd.h>
 #include <inttypes.h>
 #include <float.h>
