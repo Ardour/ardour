@@ -157,8 +157,10 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 
 	if (writable() && (_flags & Broadcast)) {
 
-		_broadcast_info = new SF_BROADCAST_INFO;
-		memset (_broadcast_info, 0, sizeof (*_broadcast_info));
+		if (!_broadcast_info) {
+			_broadcast_info = new SF_BROADCAST_INFO;
+			memset (_broadcast_info, 0, sizeof (*_broadcast_info));
+		}
 		
 		snprintf_bounded_null_filled (_broadcast_info->description, sizeof (_broadcast_info->description), "BWF %s", _name.c_str());
 		snprintf_bounded_null_filled (_broadcast_info->originator, sizeof (_broadcast_info->originator), "ardour %d.%d.%d %s", 
@@ -250,8 +252,10 @@ SndFileSource::open ()
 
 	_length = _info.frames;
 
-	_broadcast_info = new SF_BROADCAST_INFO;
-	memset (_broadcast_info, 0, sizeof (*_broadcast_info));
+	if (!_broadcast_info) {
+		_broadcast_info = new SF_BROADCAST_INFO;
+		memset (_broadcast_info, 0, sizeof (*_broadcast_info));
+	}
 	
 	bool timecode_info_exists;
 
