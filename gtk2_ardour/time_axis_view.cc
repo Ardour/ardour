@@ -238,8 +238,6 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		/* the coordinates used here are in the system of the
 		   item's parent ...
 		*/
-		canvas_display->property_y () = y;
-//		canvas_display->move (0.0, 0.0);
 
 		Group* pg;
 		double ix1, iy1, ix2, iy2;
@@ -257,7 +255,6 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		y_position = y;
 
 	}
-
 	canvas_display->raise_to_top ();
 
 	if (_marked_for_display) {
