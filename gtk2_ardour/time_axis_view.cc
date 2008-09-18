@@ -1046,8 +1046,8 @@ TimeAxisView::compute_controls_size_info ()
 	Gtk::Table one_row_table (1, 8);
 	Button* buttons[5];
 	const int border_width = 2;
-	const int extra_height = (2 * border_width); 
-		+ 2   // 2 pixels for the hseparator between TimeAxisView control areas
+	const int extra_height = (2 * border_width)
+		//+ 2   // 2 pixels for the hseparator between TimeAxisView control areas
 		+ 10; // resizer button (3 x 2 pixel elements + 2 x 2 pixel gaps)
 
 	window.add (one_row_table);
