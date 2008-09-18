@@ -1056,6 +1056,8 @@ if env['SYSLIBS']:
     libraries['pangomm'].ParseConfig ('pkg-config --cflags --libs pangomm-1.4')
     libraries['libgnomecanvasmm'] = LibraryInfo()
     libraries['libgnomecanvasmm'].ParseConfig ('pkg-config --cflags --libs libgnomecanvasmm-2.6')
+    libraries['taglib'] = LibraryInfo()
+    libraries['taglib'].ParseConfig ('pkg-config --cflags --libs taglib')
 
 #    libraries['libglademm'] = LibraryInfo()
 #    libraries['libglademm'].ParseConfig ('pkg-config --cflags --libs libglademm-2.4')
@@ -1073,10 +1075,6 @@ if env['SYSLIBS']:
     libraries['sndfile'] = LibraryInfo()
     libraries['sndfile'].ParseConfig ('pkg-config --cflags --libs sndfile')
     
-    libraries['taglib'] = LibraryInfo(LIBS='libtaglib',
-                                      LIBPATH='#libs/taglib',
-                                      CPPPATH=['#libs/taglib/headers','#libs/taglib/headers/taglib'])
-
     coredirs = [
         'templates',
         'manual'

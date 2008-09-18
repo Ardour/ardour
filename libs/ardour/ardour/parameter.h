@@ -98,7 +98,6 @@ public:
 	 * </li>
 	 * </ol>
 	 */
-	
 	inline bool operator<(const Parameter& id) const {
 #ifndef NDEBUG
 		if (_type == NullAutomation)

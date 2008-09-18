@@ -139,11 +139,11 @@ class AutomationList : public PBD::StatefulDestructible
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _state; }
-	sigc::signal<void> automation_style_changed;
+	sigc::signal<void> automation_state_changed;
 
 	void set_automation_style (AutoStyle m);
 	AutoStyle automation_style() const { return _style; }
-	sigc::signal<void> automation_state_changed;
+	sigc::signal<void> automation_style_changed;
 
 	bool automation_playback() const {
 		return (_state & Play) || ((_state & Touch) && !_touching);
