@@ -26,7 +26,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/radiobutton.h>
 
-#include <ardour/curve.h>
+#include <evoral/Curve.hpp>
 #include "ardour_dialog.h"
 #include "canvas.h"
 

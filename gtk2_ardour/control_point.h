@@ -22,7 +22,7 @@
 
 #include <sys/types.h>
 
-#include <ardour/automation_event.h>
+#include <ardour/automation_list.h>
 
 #include "canvas.h"
 #include "simplerect.h"

@@ -22,7 +22,8 @@
 #include <cfloat>
 #include <unistd.h>
 
-#include <ardour/curve.h>
+#include <ardour/automation_list.h>
+#include <evoral/Curve.hpp>
 
 using namespace std;
 using namespace ARDOUR;

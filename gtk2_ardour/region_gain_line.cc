@@ -17,7 +17,7 @@
 
 */
 
-#include <ardour/curve.h>
+#include <evoral/Curve.hpp>
 #include <ardour/audioregion.h>
 #include <pbd/memento_command.h>
 

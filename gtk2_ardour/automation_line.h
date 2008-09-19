@@ -33,7 +33,7 @@
 #include <pbd/undo.h>
 #include <pbd/statefuldestructible.h> 
 
-#include <ardour/automation_event.h>
+#include <ardour/automation_list.h>
 
 
 using std::vector;

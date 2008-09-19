@@ -26,9 +26,9 @@
 #include <pbd/memento_command.h>
 #include <pbd/stacktrace.h>
 
-#include <ardour/automation_event.h>
-#include <ardour/curve.h>
+#include <ardour/automation_list.h>
 #include <ardour/dB.h>
+#include <evoral/Curve.hpp>
 
 #include "simplerect.h"
 #include "automation_line.h"

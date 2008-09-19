@@ -705,7 +705,7 @@ class Session : public PBD::StatefulDestructible
 	sigc::signal<void> NamedSelectionRemoved;
 
 	/* Curves and AutomationLists (TODO when they go away) */
-	void add_curve(Curve*);
+	void add_curve(Evoral::Curve*);
 	void add_automation_list(AutomationList*);
 
 	/* fade curves */
@@ -1540,7 +1540,7 @@ class Session : public PBD::StatefulDestructible
 	NamedSelection *XMLNamedSelectionFactory (const XMLNode&);
 
 	/* CURVES and AUTOMATION LISTS */
-	std::map<PBD::ID, Curve*> curves;
+	std::map<PBD::ID, Evoral::Curve*> curves;
 	std::map<PBD::ID, AutomationList*> automation_lists;
 
 	/* DEFAULT FADE CURVES */

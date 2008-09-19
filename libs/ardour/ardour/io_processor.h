@@ -34,7 +34,7 @@
 #include <ardour/ardour.h>
 #include <ardour/processor.h>
 #include <ardour/io.h>
-#include <ardour/automation_event.h>
+#include <ardour/automation_list.h>
 
 using std::map;
 using std::set;

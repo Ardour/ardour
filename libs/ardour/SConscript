@@ -49,7 +49,7 @@ auto_bundle.cc
 automatable.cc
 automation.cc
 automation_control.cc
-automation_event.cc
+automation_list.cc
 base_audio_port.cc
 base_midi_port.cc
 broadcast_info.cc
@@ -60,7 +60,6 @@ configuration.cc
 control_protocol_manager.cc
 control_protocol_search_path.cc
 crossfade.cc
-curve.cc
 cycle_timer.cc
 default_click.cc
 directory_names.cc

@@ -25,7 +25,7 @@
 #include <pbd/controllable.h>
 #include <ardour/parameter.h>
 #include <evoral/Control.hpp>
-#include <ardour/automation_event.h>
+#include <ardour/automation_list.h>
 
 namespace ARDOUR {
 

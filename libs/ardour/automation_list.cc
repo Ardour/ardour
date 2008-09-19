@@ -25,8 +25,8 @@
 #include <algorithm>
 #include <sigc++/bind.h>
 #include <ardour/parameter.h>
-#include <ardour/automation_event.h>
-#include <ardour/curve.h>
+#include <ardour/automation_list.h>
+#include <evoral/Curve.hpp>
 #include <pbd/stacktrace.h>
 #include <pbd/enumwriter.h>
 

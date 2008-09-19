@@ -27,8 +27,8 @@
 
 #include <libgnomecanvasmm/line.h>
 
-#include <ardour/automation_event.h>
-#include <ardour/curve.h>
+#include <ardour/automation_list.h>
+#include <evoral/Curve.hpp>
 #include <ardour/crossfade.h>
 #include <ardour/session.h>
 #include <ardour/auditioner.h>

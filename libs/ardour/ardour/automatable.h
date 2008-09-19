@@ -24,7 +24,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include <ardour/session_object.h>
-#include <ardour/automation_event.h>
+#include <ardour/automation_list.h>
 #include <ardour/automation_control.h>
 #include <ardour/parameter.h>
 #include <evoral/ControlSet.hpp>

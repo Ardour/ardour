@@ -21,7 +21,8 @@
 #define __ardour_gain_h__
 
 #include "ardour.h"
-#include "curve.h"
+#include "automation_list.h"
+#include <evoral/Curve.hpp>
 
 namespace ARDOUR {
 

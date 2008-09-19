@@ -36,7 +36,6 @@
 #include <ardour/ardour.h>
 #include <ardour/automatable.h>
 #include <ardour/utils.h>
-#include <ardour/curve.h>
 #include <ardour/types.h>
 #include <ardour/data_type.h>
 #include <ardour/port_set.h>

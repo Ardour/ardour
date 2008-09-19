@@ -104,7 +104,7 @@ Session::memento_command_factory(XMLNode *n)
 	    }
     } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name() || obj_T == typeid(MidiTrack).name()) { 
 	    return new MementoCommand<Route>(*route_by_id(id), before, after);
-    } else if (obj_T == typeid (Curve).name() || obj_T == typeid (AutomationList).name()) {
+    } else if (obj_T == typeid (Evoral::Curve).name() || obj_T == typeid (AutomationList).name()) {
 	    if (automation_lists.count(id))
 		    return new MementoCommand<AutomationList>(*automation_lists[id], before, after);
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits here

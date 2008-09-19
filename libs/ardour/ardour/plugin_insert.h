@@ -27,7 +27,7 @@
 #include <ardour/ardour.h>
 #include <ardour/types.h>
 #include <ardour/processor.h>
-#include <ardour/automation_event.h>
+#include <ardour/automation_list.h>
 
 class XMLNode;
 

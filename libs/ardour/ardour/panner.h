@@ -31,7 +31,6 @@
 #include <pbd/controllable.h>
 
 #include <ardour/types.h>
-#include <ardour/curve.h>
 #include <ardour/automation_control.h>
 
 using std::istream;

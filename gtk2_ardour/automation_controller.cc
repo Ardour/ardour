@@ -19,7 +19,7 @@
 */
 
 #include <pbd/error.h>
-#include "ardour/automation_event.h"
+#include "ardour/automation_list.h"
 #include "ardour/automation_control.h"
 #include "ardour_ui.h"
 #include "utils.h"
