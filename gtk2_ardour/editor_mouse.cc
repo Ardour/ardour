@@ -2394,10 +2394,25 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			if (real_location->is_mark()) {
 				f_delta = newframe - copy_location->start();
-			} else if (newframe < copy_location->end()) {
-				f_delta = newframe - copy_location->end();
 			} else {
-				f_delta = newframe - copy_location->start ();
+
+
+				switch (marker->type()) {
+				case Marker::Start:
+				case Marker::LoopStart:
+				case Marker::PunchIn:
+					f_delta = newframe - copy_location->start();
+					break;
+
+				case Marker::End:
+				case Marker::LoopEnd:
+				case Marker::PunchOut:
+					f_delta = newframe - copy_location->end();
+					break;
+				default:
+					/* what kind of marker is this ? */
+					return;
+				}
 			}
 			break;
 		}
