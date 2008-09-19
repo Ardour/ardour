@@ -572,16 +572,15 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 }
 
 /**
- * Set the y position and height of this item.
+ * Set the height of this item
  *
- * @param y the new y position
  * @param h the new height
  */		
 void
-TimeAxisViewItem::set_y_position_and_height (double y, double h)
+TimeAxisViewItem::set_height (double height)
 {
 	if (name_highlight) {
-		if (h < NAME_HIGHLIGHT_THRESH) {
+		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_highlight->hide();
 			if (name_text) {
 				name_text->hide();
@@ -593,20 +592,20 @@ TimeAxisViewItem::set_y_position_and_height (double y, double h)
 			}
 		}
 
-		if (h > NAME_HIGHLIGHT_SIZE) {
-			name_highlight->property_y1() = (double) y + h + 1 - NAME_HIGHLIGHT_SIZE;
-			name_highlight->property_y2() = (double) y + h;
+		if (height > NAME_HIGHLIGHT_SIZE) {
+			name_highlight->property_y1() = (double) height+1 - NAME_HIGHLIGHT_SIZE;
+			name_highlight->property_y2() = (double) height;
 		}
 		else {
 			/* it gets hidden now anyway */
-			name_highlight->property_y1() = (double) y;
-			name_highlight->property_y2() = (double) y + h;
+			name_highlight->property_y1() = (double) 1.0;
+			name_highlight->property_y2() = (double) height;
 		}
 	}
 
 	if (name_text) {
-		name_text->property_y() = y + h + 1 - NAME_Y_OFFSET;
-		if (h < NAME_HIGHLIGHT_THRESH) {
+		name_text->property_y() = height+1 - NAME_Y_OFFSET;
+		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_text->property_fill_color_rgba() =  fill_color;
 		}
 		else {
@@ -615,12 +614,10 @@ TimeAxisViewItem::set_y_position_and_height (double y, double h)
 	}
 
 	if (frame) {
-		frame->property_y1() = y;
-		frame->property_y2() = y + h + 1;
+		frame->property_y2() = height+1;
 	}
 
-	vestigial_frame->property_y1() = y;
-	vestigial_frame->property_y2() = y + h + 1;
+	vestigial_frame->property_y2() = height+1;
 }
 
 /**

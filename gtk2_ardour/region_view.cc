@@ -585,6 +585,8 @@ RegionView::get_fill_color ()
 void
 RegionView::set_height (double h)
 {
+	TimeAxisViewItem::set_height(h);
+
 	if (sync_line) {
 		Points points;
 		int sync_dir;
@@ -597,3 +599,4 @@ RegionView::set_height (double h)
 		sync_line->property_points().set_value (points);
 	}
 }
+

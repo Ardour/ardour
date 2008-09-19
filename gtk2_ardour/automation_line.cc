@@ -68,7 +68,6 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	no_draw = false;
 	_visible = true;
 	terminal_points_can_slide = true;
-	_y_position = 0;
 	_height = 0;
 
 	group = new ArdourCanvas::Group (parent);
@@ -154,27 +153,17 @@ AutomationLine::control_point_box_size ()
 }
 
 void
-AutomationLine::set_y_position_and_height (double y, double h)
+AutomationLine::set_height (guint32 h)
 {
-	bool changed = false;
-	
-	if (y != _y_position) {
-		_y_position = (guint32) floor (y);
-		changed = true;
-	}
-		
 	if (h != _height) {
-		_height = (guint32) floor (h);
+		_height = h;
 
-		double const bsz = control_point_box_size();
+		double bsz = control_point_box_size();
 
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 			(*i)->set_size (bsz);
 		}
-		changed = true;
-	}
 
-	if (changed) {
 		reset ();
 	}
 }
@@ -222,7 +211,7 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 
 	y = max (0.0, y);
 	y = min (1.0, y);
-	y = _y_position + _height - (y * _height);
+	y = _height - (y * _height);
 
 	if (cp.can_slide()) {
 
@@ -351,7 +340,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	*/
 	
 	mr.xval = (nframes_t) floor (cp.get_x());
-	mr.yval = 1.0 - ( (cp.get_y() - _y_position) / _height);
+	mr.yval = 1.0 - (cp.get_y() / _height);
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
@@ -625,7 +614,7 @@ AutomationLine::get_verbose_cursor_string (double fraction)
 		}
 	} else {
 		view_to_model_y(fraction);
-		if (alist->parameter().type() == MidiCCAutomation)
+		if (((ARDOUR::Parameter)alist->parameter()).is_integer())
 			snprintf (buf, sizeof (buf), "%d", (int)fraction);
 		else
 			snprintf (buf, sizeof (buf), "%.2f", fraction);
@@ -697,7 +686,7 @@ AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool 
 void
 AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_push) 
 {
-	double const ydelta = fraction - last_drag_fraction;
+	double ydelta = fraction - last_drag_fraction;
 
 	did_push = with_push;
 	
@@ -710,7 +699,7 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 
 	for (uint32_t i = i1 ; i <= i2; i++) {
 		cp = nth (i);
-		modify_view_point (*cp, trackview.editor.unit_to_frame (cp->get_x()), ((_height - cp->get_y() + _y_position) /_height) + ydelta, with_push);
+		modify_view_point (*cp, trackview.editor.unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
 	}
 
 	if (line_points.size() > 1) {
@@ -908,8 +897,8 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 
 	/* Curse X11 and its inverted coordinate system! */
 	
-	bot = _y_position + (1.0 - topfrac) * _height;
-	top = _y_position + (1.0 - botfrac) * _height;
+	bot = (1.0 - topfrac) * _height;
+	top = (1.0 - botfrac) * _height;
 	
 	nstart = max_frames;
 	nend = 0;
@@ -975,8 +964,8 @@ AutomationLine::set_selected_points (PointSelection& points)
 
 		/* Curse X11 and its inverted coordinate system! */
 
-		bot = _y_position + (1.0 - (*r).high_fract) * _height;
-		top = _y_position + (1.0 - (*r).low_fract) * _height;
+		bot = (1.0 - (*r).high_fract) * _height;
+		top = (1.0 - (*r).low_fract) * _height;
 
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 			
@@ -1069,11 +1058,18 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		double translated_y = (*ai)->value;
 		model_to_view_y (translated_y);
 
-		tmp_points.push_back (ALPoint (trackview.editor.frame_to_unit ((*ai)->when),
-					       _y_position + _height - (translated_y * _height)));
+		add_model_point (tmp_points, (*ai)->when, translated_y);
 	}
 	
 	determine_visible_control_points (tmp_points);
+}
+
+
+void
+AutomationLine::add_model_point (ALPoints& tmp_points, double frame, double yfract)
+{
+	tmp_points.push_back (ALPoint (trackview.editor.frame_to_unit (frame),
+				       _height - (yfract * _height)));
 }
 
 void

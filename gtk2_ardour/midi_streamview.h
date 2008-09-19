@@ -109,7 +109,7 @@ class MidiStreamView : public StreamView
 	void        display_region(MidiRegionView* region_view, bool load_model);
 	void        display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
 	
-	void update_contents_y_position_and_height ();
+	void update_contents_height ();
 	void draw_note_lines();
 
 	void color_handler ();

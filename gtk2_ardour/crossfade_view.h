@@ -46,7 +46,7 @@ struct CrossfadeView : public TimeAxisViewItem
     AudioRegionView& left_view;    // and these too
     AudioRegionView& right_view;
 
-    void set_y_position_and_height (double, double);
+    void set_height (double);
 
     bool valid() const { return _valid; }
     bool visible() const { return _visible; }

@@ -107,7 +107,7 @@ MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	compute_colors (basic_color);
 
-	set_y_position_and_height (0, trackview.current_height());
+	set_height (trackview.current_height());
 
 	region_muted ();
 	region_sync_changed ();
@@ -611,14 +611,15 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 }
 
 void
-MidiRegionView::set_y_position_and_height (double y, double h)
+MidiRegionView::set_height (gdouble height)
 {
-	RegionView::set_y_position_and_height(y, h - 1);
+	RegionView::set_height(height);
 	
-	/* XXX why is this code here */
-
-	_height = h;
-
+	// FIXME: ick
+	height -= 2;
+	
+	_height = height;
+	
 	if (_enable_display) {
 
 		_model->read_lock();

@@ -128,7 +128,7 @@ StreamView::set_height (double h)
 	}
 
 	height = h;
-	update_contents_y_position_and_height ();
+	update_contents_height ();
 	return 0;
 }
 
@@ -230,7 +230,7 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	/* update layers count and the y positions and heights of our regions */
 	if (ds->playlist()) {
 		layers = ds->playlist()->top_layer() + 1;
-		update_contents_y_position_and_height ();
+		update_contents_height ();
 		redisplay_diskstream ();
 	}
 }
@@ -252,7 +252,7 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* update layers count and the y positions and heights of our regions */
 	layers = ds->playlist()->top_layer() + 1;
-	update_contents_y_position_and_height ();
+	update_contents_height ();
 	
 	/* draw it */
 	redisplay_diskstream ();
@@ -422,7 +422,7 @@ StreamView::get_inverted_selectables (Selection& sel, list<Selectable*>& results
 }
 
 void
-StreamView::update_contents_y_position_and_height ()
+StreamView::update_contents_height ()
 {
 	canvas_rect->property_y2() = height;
 
@@ -431,11 +431,12 @@ StreamView::update_contents_y_position_and_height ()
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		switch (layer_display) {
 		case Overlaid:
-			(*i)->set_y_position_and_height (0, height);
+			(*i)->set_height (height);
 			break;
 		case Stacked:
-			double const y = (*i)->region()->layer() * lh;
-			(*i)->set_y_position_and_height (y, lh);
+			cout << "FIXME: Stacked regions: set y position" << endl;
+			//double const y = (*i)->region()->layer() * lh;
+			(*i)->set_height (lh);
 			break;
 		}
 	}
@@ -449,5 +450,5 @@ void
 StreamView::set_layer_display (LayerDisplay d)
 {
 	layer_display = d;
-	update_contents_y_position_and_height ();
+	update_contents_height ();
 }

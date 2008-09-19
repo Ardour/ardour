@@ -387,11 +387,11 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	_base_rect->property_y2() = h;
 	
 	if (_line)
-		_line->set_y_position_and_height (0, h);
+		_line->set_height(h);
 	
 	if (_view) {
 		_view->set_height(h);
-		_view->update_contents_y_position_and_height();
+		_view->update_contents_height();
 	}
 
 	char buf[32];
@@ -824,7 +824,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	_line = line;
 	//_controller = AutomationController::create(_session, line->the_list(), _control);
 
-	line->set_y_position_and_height (0, height);
+	line->set_height (height);
 
 	/* pick up the current state */
 	automation_state_changed ();

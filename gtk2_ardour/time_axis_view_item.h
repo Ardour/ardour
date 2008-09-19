@@ -38,7 +38,7 @@ class TimeAxisView;
 class TimeAxisViewItem : public Selectable
 {
    public:
-       virtual ~TimeAxisViewItem() ;
+	virtual ~TimeAxisViewItem() ;
     
     /**
      * Set the position of this item upon the timeline to the specified value
@@ -201,7 +201,12 @@ class TimeAxisViewItem : public Selectable
      */
     void set_name_text(const Glib::ustring& new_name) ;
     
-    void    set_y_position_and_height (double, double);    
+    /**
+     * Set the height of this item
+     *
+     * @param h the new height
+     */
+    virtual void set_height(double h) ;
 
     /**
      * 

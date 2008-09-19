@@ -93,7 +93,7 @@ public:
 
 	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
 	void region_layered (RegionView*);
-	virtual void update_contents_y_position_and_height ();
+	virtual void update_contents_height ();
 	
 	virtual void redisplay_diskstream () = 0;
 	

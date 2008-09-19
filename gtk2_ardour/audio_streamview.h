@@ -98,7 +98,7 @@ class AudioStreamView : public StreamView
 
 	void color_handler ();
 
-	void update_contents_y_position_and_height ();
+	void update_contents_height ();
 	
 	double _amplitude_above_axis;
 	

@@ -69,7 +69,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	fade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeLine.get();
 	fade_out->property_width_pixels() = 1;
 	
-	set_y_position_and_height (0, get_time_axis_view().current_height());
+	set_height (get_time_axis_view().current_height());
 
 	/* no frame around the xfade or overlap rects */
 
@@ -107,12 +107,12 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 }
 
 void
-CrossfadeView::set_y_position_and_height (double y, double h)
+CrossfadeView::set_height (double height)
 {
-	if (h <= TimeAxisView::hSmaller) {
-		TimeAxisViewItem::set_y_position_and_height (y, h - 3);
+	if (height <= TimeAxisView::hSmaller) {
+		TimeAxisViewItem::set_height (height - 3);
 	} else {
-		TimeAxisViewItem::set_y_position_and_height (y, h - NAME_HIGHLIGHT_SIZE - 3 );
+		TimeAxisViewItem::set_height (height - NAME_HIGHLIGHT_SIZE - 3 );
 	}
 
 	redraw_curves ();

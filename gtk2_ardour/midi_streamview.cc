@@ -218,7 +218,7 @@ MidiStreamView::redisplay_diskstream ()
 			continue;
 		} else {
 			(*i)->enable_display(true);
-			(*i)->set_y_position_and_height(0, height); // apply note range
+			(*i)->set_height(height); // apply note range
 		}
 		
 		/* Sort regionviews by layer so that when we call region_layered ()
@@ -256,8 +256,7 @@ MidiStreamView::redisplay_diskstream ()
 	
 	/* Fix canvas layering */
 	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-		(*j)->enable_display(true);
-		(*j)->set_height (height);
+		(*j)->enable_display(true); // FIXME: do this?
 		region_layered (*j);
 	}
 	
@@ -270,9 +269,9 @@ MidiStreamView::redisplay_diskstream ()
 
 
 void
-MidiStreamView::update_contents_y_position_and_height ()
+MidiStreamView::update_contents_height ()
 {
-	StreamView::update_contents_y_position_and_height();
+	StreamView::update_contents_height();
 	_note_lines->property_y2() = height;
 	draw_note_lines();
 }
@@ -338,7 +337,7 @@ MidiStreamView::set_note_range(uint8_t lowest, uint8_t highest) {
 
 		list<RegionView *>::iterator i;
 		for (i = region_views.begin(); i != region_views.end(); ++i) {
-			(*i)->set_y_position_and_height(0, height); // apply note range
+			(*i)->set_height(height); // apply note range
 		}
 	}
 
@@ -610,7 +609,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 		}
 
 		if (update_range)
-			update_contents_y_position_and_height();
+			update_contents_height();
 	}
 }
 

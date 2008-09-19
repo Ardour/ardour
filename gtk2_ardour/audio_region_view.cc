@@ -212,7 +212,7 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 
 	gain_line->reset ();
 
-	set_y_position_and_height (0, trackview.current_height());
+	set_height (trackview.current_height());
 
 	region_muted ();
 	region_sync_changed ();
@@ -453,24 +453,24 @@ AudioRegionView::setup_fade_handle_positions()
 }
 
 void
-AudioRegionView::set_y_position_and_height (double y, double h)
+AudioRegionView::set_height (gdouble height)
 {
-	RegionView::set_y_position_and_height (y, h - 1);
+	RegionView::set_height (height);
 
-	/* XXX why is this code here */
+	uint32_t wcnt = waves.size();
 
-	_y_position = y;
-	_height = h;
-
-	const uint32_t wcnt = waves.size();
+	// FIXME: ick
+	height -= 2;
 	
+	_height = height;
+
 	for (uint32_t n=0; n < wcnt; ++n) {
 		gdouble ht;
 
-		if ((h) < NAME_HIGHLIGHT_THRESH) {
-			ht = ((_height-2*wcnt) / (double) wcnt);
+		if ((height) < NAME_HIGHLIGHT_THRESH) {
+			ht = ((height-2*wcnt) / (double) wcnt);
 		} else {
-			ht = (((_height-2*wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
+			ht = (((height-2*wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
 		}
 		
 		gdouble yoff = n * (ht+1);
@@ -480,14 +480,14 @@ AudioRegionView::set_y_position_and_height (double y, double h)
 	}
 
 	if (gain_line) {
-		if ((_height/wcnt) < NAME_HIGHLIGHT_THRESH) {
+		if ((height/wcnt) < NAME_HIGHLIGHT_THRESH) {
 			gain_line->hide ();
 		} else {
 			if (_flags & EnvelopeVisible) {
 				gain_line->show ();
 			}
 		}
-		gain_line->set_y_position_and_height ((uint32_t) _y_position, (uint32_t) rint (_height - NAME_HIGHLIGHT_SIZE));
+		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE));
 	}
 
 	manage_zero_line ();

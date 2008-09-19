@@ -71,7 +71,7 @@ class MidiRegionView : public RegionView
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
 
-	void set_y_position_and_height (double, double);
+	void set_height (double);
 
 	void set_frame_color();
 

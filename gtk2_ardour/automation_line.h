@@ -85,7 +85,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	string  name() const { return _name; }
 	bool    visible() const { return _visible; }
 	guint32 height() const { return _height; }
-	guint32 y_position() const { return _y_position; }
 
 	void     set_line_color (uint32_t);
 	uint32_t get_line_color() const { return _line_color; }
@@ -94,7 +93,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	void    show ();
 	void    hide ();
-	void    set_y_position_and_height (double, double);
+	void    set_height (guint32);
 	void    set_verbose_cursor_uses_gain_mapping (bool yn);
 
 	TimeAxisView& trackview;
@@ -128,7 +127,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
   protected:
 
 	string _name;
-	guint32 _y_position;
 	guint32 _height;
 	uint32_t _line_color;
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
@@ -169,6 +167,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void list_changed ();
 
 	virtual bool event_handler (GdkEvent*);
+	virtual void add_model_point (ALPoints& tmp_points, double frame, double yfract);
 	
   private:
 	uint32_t drags;

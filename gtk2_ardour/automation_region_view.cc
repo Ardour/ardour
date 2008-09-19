@@ -69,8 +69,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->set_colors();
 	_line->show();
 	_line->show_all_control_points();
-	_line->set_y_position_and_height (trackview.y_position,
-		(uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
+	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 }
 
 bool
@@ -125,23 +124,12 @@ AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, dou
 }
 
 void
-AutomationRegionView::set_y_position_and_height (double y, double h)
-{
-	cout << "ARV SET Y POSITION AND HEIGHT: " << y << ", " << h << endl;
-	RegionView::set_y_position_and_height(y, h - 1);
-
-	if (_line)
-		_line->set_y_position_and_height (y, h - NAME_HIGHLIGHT_SIZE);
-}
-
-void
 AutomationRegionView::set_height (double h)
 {
-	cout << "ARV SET HEIGHT: " << h << endl;
 	RegionView::set_height(h);
+
 	if (_line)
-		_line->set_y_position_and_height (trackview.y_position - h,
-				(uint32_t)rint(h - NAME_HIGHLIGHT_SIZE));
+		_line->set_height ((uint32_t)rint(h - NAME_HIGHLIGHT_SIZE));
 }
 
 bool

@@ -452,12 +452,11 @@ AudioStreamView::redisplay_diskstream ()
 
 		xi = tmpx;
 	}
+	
+	/* now fix layering */
 
-	/* Fix canvas layering */
-	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-		(*j)->enable_display(true);
-		(*j)->set_height (height);
-		region_layered (*j);
+	for (RegionViewList::iterator i = copy.begin(); i != copy.end(); ++i) {
+		region_layered (*i);
 	}
 }
 
@@ -814,14 +813,14 @@ AudioStreamView::color_handler ()
 }
 
 void
-AudioStreamView::update_contents_y_position_and_height ()
+AudioStreamView::update_contents_height ()
 {
-	StreamView::update_contents_y_position_and_height ();
+	StreamView::update_contents_height ();
 	
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		if (layer_display == Overlaid) {
 			(*i)->show ();
-			(*i)->set_y_position_and_height (0, height);
+			(*i)->set_height (height);
 		} else {
 			(*i)->hide ();
 		}
