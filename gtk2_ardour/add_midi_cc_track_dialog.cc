@@ -37,9 +37,9 @@ using namespace ARDOUR;
 
 AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
 	: Dialog (_("ardour: add midi controller track"))
-	, _chan_adjustment (1, 1, 16, 8)
+	, _chan_adjustment (1, 1, 16, 1, 8, 8)
 	, _chan_spinner (_chan_adjustment)
-	, _cc_num_adjustment (1, 0, 127, 1, 10)
+	, _cc_num_adjustment (1, 1, 128, 1, 10, 10)
 	, _cc_num_spinner (_cc_num_adjustment)
 {
 	set_name ("AddMidiCCTrackDialog");
@@ -78,8 +78,8 @@ ARDOUR::Parameter
 AddMidiCCTrackDialog::parameter ()
 {
 	int chan   = _chan_spinner.get_value_as_int() - 1;
-	int cc_num = _cc_num_spinner.get_value_as_int();
+	int cc_num = _cc_num_spinner.get_value_as_int() - 1;
 
-	return Parameter(MidiCCAutomation, cc_num, chan);
+	return Parameter(MidiCCAutomation, chan, cc_num);
 }
 

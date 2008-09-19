@@ -287,6 +287,20 @@ MidiTimeAxisView::update_range()
 }
 
 void
+MidiTimeAxisView::show_all_automation ()
+{
+	if (midi_track()) {
+		const set<Parameter> params = midi_track()->midi_diskstream()->
+				midi_playlist()->contained_automation();
+
+		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i)
+			create_automation_child(*i, true);
+	}
+
+	RouteTimeAxisView::show_all_automation ();
+}
+
+void
 MidiTimeAxisView::show_existing_automation ()
 {
 	if (midi_track()) {
@@ -324,8 +338,7 @@ MidiTimeAxisView::add_controller_track()
 void
 MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 {
-	if (
-			param.type() == MidiCCAutomation ||
+	if (	param.type() == MidiCCAutomation ||
 			param.type() == MidiPgmChangeAutomation ||
 			param.type() == MidiPitchBenderAutomation ||
 			param.type() == MidiChannelAftertouchAutomation
@@ -333,6 +346,10 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 	
 		/* FIXME: don't create AutomationList for track itself
 		 * (not actually needed or used, since the automation is region-ey) */
+		
+		AutomationTracks::iterator existing = _automation_tracks.find(param);
+		if (existing != _automation_tracks.end())
+			return;
 
 		boost::shared_ptr<AutomationControl> c
 			= boost::dynamic_pointer_cast<AutomationControl>(_route->control(param));
@@ -342,10 +359,6 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 			c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(al));
 			_route->add_control(c);
 		}
-
-		AutomationTracks::iterator existing = _automation_tracks.find(param);
-		if (existing != _automation_tracks.end())
-			return;
 
 		boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
 				_route, _route, c,

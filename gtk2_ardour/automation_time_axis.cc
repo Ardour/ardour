@@ -868,7 +868,7 @@ AutomationTimeAxisView::color_handler ()
 int
 AutomationTimeAxisView::set_state (const XMLNode& node)
 {
-	return TimeAxisView::set_state (node);
+	TimeAxisView::set_state (node);
 	
 	XMLNodeList kids;
 	XMLNodeConstIterator iter;
@@ -894,6 +894,8 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 
 	if (!_marked_for_display)
 		hide();
+
+	return 0;
 }
 
 XMLNode*

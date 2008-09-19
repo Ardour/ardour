@@ -66,6 +66,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 
+	void show_all_automation ();
 	void show_existing_automation ();
 	void add_controller_track ();
 	void create_automation_child (ARDOUR::Parameter param, bool show);

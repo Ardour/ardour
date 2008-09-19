@@ -105,6 +105,8 @@ public:
 	void remove_underlay (StreamView*);
 	void build_underlay_menu(Gtk::Menu*);
 	
+	int set_state (const XMLNode&);
+	
 	/* This is a bit nasty to expose :/ */
 	struct RouteAutomationNode {
 		ARDOUR::Parameter                         param;

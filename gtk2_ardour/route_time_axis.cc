@@ -415,6 +415,29 @@ RouteTimeAxisView::automation_click ()
 	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
+int
+RouteTimeAxisView::set_state (const XMLNode& node)
+{
+	TimeAxisView::set_state (node);
+
+	XMLNodeList kids = node.children();
+	XMLNodeConstIterator iter;
+	const XMLProperty* prop;
+	
+	for (iter = kids.begin(); iter != kids.end(); ++iter) {
+		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
+			if ((prop = (*iter)->property ("automation-id")) != 0) {
+				Parameter param(prop->value());
+				bool show = ((prop = (*iter)->property ("shown")) != 0) && prop->value() == "yes";
+				create_automation_child(param, show);
+			} else {
+				warning << "Automation child has no ID" << endmsg;
+			}
+		}
+	}
+	return 0;
+}
+
 void
 RouteTimeAxisView::build_automation_action_menu ()
 {
