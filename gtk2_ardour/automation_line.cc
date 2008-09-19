@@ -496,7 +496,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	mr.xval = (nframes_t) floor (cp.get_x());
 	mr.yval = 1.0 - (cp.get_y() / _height);
 
-        /* if xval has not changed, set it directly from the model to avoid rounding errors */
+	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
 	if (mr.xval == trackview.editor.frame_to_unit((*cp.model)->when)) {
 		mr.xval = (nframes_t) (*cp.model)->when;
@@ -1189,7 +1189,7 @@ AutomationLine::list_changed ()
 void
 AutomationLine::reset_callback (const AutomationList& events)
 {
-        ALPoints tmp_points;
+	ALPoints tmp_points;
 	uint32_t npoints = events.size();
 
 	if (npoints == 0) {
