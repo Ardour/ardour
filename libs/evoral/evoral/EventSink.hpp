@@ -28,7 +28,7 @@ namespace Evoral {
  */
 class EventSink {
 public:
-        virtual ~EventSink() {}
+	virtual ~EventSink() {}
 	virtual size_t write(timestamp_t    time,
 	                     uint32_t       size,
 	                     const uint8_t* buf) = 0;

@@ -47,9 +47,9 @@ struct ControlEvent {
 		}
 	}
 
-     ~ControlEvent() { if (coeff) delete[] coeff; }
+	~ControlEvent() { if (coeff) delete[] coeff; }
 	
-     void create_coeffs() {
+	void create_coeffs() {
 		if (!coeff)
 			coeff = new double[4];
 	    

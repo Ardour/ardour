@@ -56,7 +56,7 @@ public:
 		std::cerr << "WARNING: Unable to create parameter from string: " << str << std::endl;
 	}
 
-        virtual ~Parameter() {}
+	virtual ~Parameter() {}
     
 	inline uint32_t type()    const { return _type; }
 	inline uint32_t id()      const { return _id; }
