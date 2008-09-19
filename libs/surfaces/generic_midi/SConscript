@@ -33,6 +33,7 @@ genericmidi.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 genericmidi.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 genericmidi.Merge ([
+	libraries['evoral'],
 	libraries['ardour'],
 	libraries['ardour_cp'],
 	libraries['sndfile'],

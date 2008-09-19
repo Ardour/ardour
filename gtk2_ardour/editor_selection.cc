@@ -362,6 +362,44 @@ Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivale
 	equivalent_regions.push_back (basis);
 }
 
+int
+Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
+{
+	int region_count = 0;
+	
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		
+		RouteTimeAxisView* tatv;
+		
+		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+			
+			boost::shared_ptr<Playlist> pl;
+			vector<boost::shared_ptr<Region> > results;
+			RegionView* marv;
+			boost::shared_ptr<Diskstream> ds;
+			
+			if ((ds = tatv->get_diskstream()) == 0) {
+				/* bus */
+				continue;
+			}
+			
+			if ((pl = (ds->playlist())) != 0) {
+				pl->get_region_list_equivalent_regions (region, results);
+			}
+			
+			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
+				if ((marv = tatv->view()->find_view (*ir)) != 0) {
+					region_count++;
+				}
+			}
+			
+		}
+	}
+	
+	return region_count;
+}
+
+
 bool
 Editor::set_selected_regionview_from_click (bool press, Selection::Operation op, bool no_track_remove)
 {

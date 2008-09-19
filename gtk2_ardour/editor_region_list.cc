@@ -30,6 +30,7 @@
 #include <ardour/silentfilesource.h>
 #include <ardour/session_region.h>
 
+
 #include <gtkmm2ext/stop_signal.h>
 
 #include "editor.h"
@@ -40,6 +41,7 @@
 #include "actions.h"
 #include "region_view.h"
 #include "utils.h"
+
 
 #include "i18n.h"
 
@@ -89,10 +91,18 @@ void
 Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 {
 	string str;
+	char start_str[16];
+	char end_str[16];
+	char length_str[16];
+	char used_str[8];
+	int used;
 	TreeModel::Row row;
 	Gdk::Color c;
 	bool missing_source;
+	BBT_Time bbt;				// FIXME Why do these have to be declared here ?
+	SMPTE::Time smpte;			// FIXME I would like them declared in the case statment where they are used.
 
+	
 	missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
 
 	if (!show_automatic_regions_in_region_list && region->automatic()) {
@@ -100,11 +110,9 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 	}
 
 	if (region->hidden()) {
-
 		TreeModel::iterator iter = region_list_model->get_iter ("0");
 		TreeModel::Row parent;
 		TreeModel::Row child;
-
 
 		if (!iter) {
 
@@ -113,21 +121,16 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 			parent[region_list_columns.name] = _("Hidden");
 			boost::shared_ptr<Region> proxy = parent[region_list_columns.region];
 			proxy.reset ();
-
 		} else {
-
 			if ((*iter)[region_list_columns.name] != _("Hidden")) {
-
 				parent = *(region_list_model->insert(iter));
 				parent[region_list_columns.name] = _("Hidden");
 				boost::shared_ptr<Region> proxy = parent[region_list_columns.region];
 				proxy.reset ();
-
 			} else {
 
 				parent = *iter;
 			}
-
 		}
 
 		row = *(region_list_model->append (parent.children()));
@@ -149,17 +152,16 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		row = *(region_list_model->append());
 		if (missing_source) {
 			c.set_rgb(65535,0,0);     // FIXME: error color from style
+		} else if (region->automatic()){
+			c.set_rgb(0,65535,0);     // FIXME: error color from style
 		} else {
 			set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
 		}
 		row[region_list_columns.color_] = c;
 
 		if (region->source()->name()[0] == '/') { // external file
-
 			if (region->whole_file()) {
-
 				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
-
 				str = ".../";
 
 				if (afs) {
@@ -173,9 +175,7 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 			}
 
 		} else {
-
 			str = region->name();
-
 		}
 
 		if (region->n_channels() > 1) {
@@ -186,14 +186,16 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 			str += ']';
 		}
 
-		if (missing_source) {
-			str += _(" (MISSING)");
-		}
+		//if (missing_source) {
+		//	str += _(" (MISSING)");
+		//}
 
 		row[region_list_columns.name] = str;
 		row[region_list_columns.region] = region;
 
-		return;
+		if (region->automatic()) {
+			return;
+		}
 		
 	} else {
 
@@ -204,7 +206,6 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 		bool found_parent = false;
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
-
 			boost::shared_ptr<Region> rr = (*i)[region_list_columns.region];
 			boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion>(rr);
 
@@ -228,21 +229,101 @@ Editor::add_region_to_region_display (boost::shared_ptr<Region> region)
 				}
 			}
 		}
-
 		if (!found_parent) {
 			row = *(region_list_model->append());
-		}
+		}	
+	}
+	
+	used = get_regionview_count_from_region_list(region);
+	sprintf (used_str, "%4d" , used);
+	
+	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
+	case AudioClock::SMPTE:
+	case AudioClock::Off:												/* If the secondary clock is off, default to SMPTE */
+		session->smpte_time (region->position(), smpte);
+		sprintf (start_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 
+		session->smpte_time (region->position() + region->length() - 1, smpte);
+		sprintf (end_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 		
+		session->smpte_time (region->length(), smpte);
+		sprintf (length_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+		break;
+		
+	case AudioClock::BBT:
+		session->tempo_map().bbt_time (region->position(), bbt);
+		sprintf (start_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		session->tempo_map().bbt_time (region->position() + region->length() - 1, bbt);
+		sprintf (end_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		session->tempo_map().bbt_time (region->length(), bbt);
+		sprintf (length_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		break;
+		
+	case AudioClock::MinSec:
+		nframes_t left;
+		int hrs;
+		int mins;
+		float secs;
+	
+		left = region->position();
+		hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
+		left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (session->frame_rate() * 60.0f));
+		left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
+		secs = left / (float) session->frame_rate();
+		sprintf (start_str, "%02d:%02d:%06.3f", hrs, mins, secs);
+		
+		left = region->position() + region->length() - 1;
+		hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
+		left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (session->frame_rate() * 60.0f));
+		left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
+		secs = left / (float) session->frame_rate();
+		sprintf (end_str, "%02d:%02d:%06.3f", hrs, mins, secs);
+		
+		left = region->length();
+		hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
+		left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (session->frame_rate() * 60.0f));
+		left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
+		secs = left / (float) session->frame_rate();
+		sprintf (length_str, "%02d:%02d:%06.3f", hrs, mins, secs);
+		break;
+		
+	case AudioClock::Frames:
+		snprintf (start_str, sizeof (start_str), "%u", region->position());
+		snprintf (end_str, sizeof (end_str), "%u", (region->position() + region->length() - 1));
+		snprintf (length_str, sizeof (length_str), "%u", region->length());
+		break;
+	
+	default:
+		break;
 	}
 	
 	row[region_list_columns.region] = region;
+	
+	if (used > 1) {
+		row[region_list_columns.start] = "Multiple";
+		row[region_list_columns.end] = "Multiple";
+	} else {
+		row[region_list_columns.start] = start_str;
+		row[region_list_columns.end] = end_str;
+	}
+	
+	row[region_list_columns.length] = length_str;
+	row[region_list_columns.used] = used_str;
+	
+	if (missing_source) {
+		row[region_list_columns.path] = _("(MISSING) ") + region->source()->name();
+	} else {
+		row[region_list_columns.path] = region->source()->name();
+	}
 	
 	if (region->n_channels() > 1) {
 		row[region_list_columns.name] = string_compose("%1  [%2]", region->name(), region->n_channels());
 	} else {
 		row[region_list_columns.name] = region->name();
-	}
+	}	
 }
 
 
@@ -354,6 +435,180 @@ Editor::redisplay_regions ()
 		
 		region_list_display.set_model (region_list_model);
 	}
+}
+
+
+void
+Editor::update_region_row (boost::shared_ptr<Region> region)
+{	
+	if (!region || !session) {
+		return;
+	}
+	
+	char start_str[16];
+	char end_str[16];
+	char length_str[16];
+	char used_str[8];
+	int used;
+	bool missing_source;
+	bool matched_region = false;
+	BBT_Time bbt;
+	SMPTE::Time smpte;
+	
+	missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
+	
+	TreeModel::iterator found_region;
+	
+	if (show_automatic_regions_in_region_list) {
+		
+		TreeModel::iterator i;
+		TreeModel::iterator ii;
+		TreeModel::Children rows = region_list_model->children();
+		
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			
+			cerr << "Parent " << (*i)[region_list_columns.name] << "\n";
+
+			TreeModel::Children subrows = (*i).children();
+			
+			for (ii = subrows.begin(); ii != subrows.end(); ++ii) {
+				
+				cerr << "Compare " << region->name() << " with child " << (*ii)[region_list_columns.name] << "\n";
+				
+				boost::shared_ptr<Region> compared_region = (*ii)[region_list_columns.region];
+
+				if (region == compared_region) {
+					cerr << "Matched\n";
+					matched_region = true;
+					found_region = ii;
+					break;
+				}
+			}
+			
+			if (matched_region) {
+				break;
+			}
+		}
+	
+	} else {	
+		
+		TreeModel::iterator i;
+		TreeModel::Children rows = region_list_model->children();
+		
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			
+			cerr << "Compare " << region->name() << " with " << (*i)[region_list_columns.name] << "\n";
+			
+			boost::shared_ptr<Region> compared_region = (*i)[region_list_columns.region];
+			
+			if (region == compared_region) {
+				cerr << "Matched\n";
+				matched_region = true;
+				found_region = i;
+				break;
+			}
+	
+		}
+	}
+
+	if (!matched_region) {
+		cerr << "Returning - No match\n\n";
+		return;
+	}
+	
+	used = get_regionview_count_from_region_list(region);
+	sprintf (used_str, "%4d" , used);
+
+	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
+	case AudioClock::SMPTE:
+	case AudioClock::Off:												// If the secondary clock is off, default to SMPTE
+		session->smpte_time (region->position(), smpte);
+		sprintf (start_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+
+		session->smpte_time (region->position() + region->length() - 1, smpte);
+		sprintf (end_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+		
+		session->smpte_time (region->length(), smpte);
+		sprintf (length_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+		break;
+		
+	case AudioClock::BBT:
+		session->tempo_map().bbt_time (region->position(), bbt);
+		sprintf (start_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		session->tempo_map().bbt_time (region->position() + region->length() - 1, bbt);
+		sprintf (end_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		session->tempo_map().bbt_time (region->length(), bbt);
+		sprintf (length_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		break;
+		
+	case AudioClock::MinSec:
+		nframes_t left;
+		int hrs;
+		int mins;
+		float secs;
+	
+		left = region->position();
+		hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
+		left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (session->frame_rate() * 60.0f));
+		left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
+		secs = left / (float) session->frame_rate();
+		sprintf (start_str, "%02d:%02d:%06.3f", hrs, mins, secs);
+		
+		left = region->position() + region->length() - 1;
+		hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
+		left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (session->frame_rate() * 60.0f));
+		left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
+		secs = left / (float) session->frame_rate();
+		sprintf (end_str, "%02d:%02d:%06.3f", hrs, mins, secs);
+		
+		left = region->length();
+		hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
+		left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (session->frame_rate() * 60.0f));
+		left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
+		secs = left / (float) session->frame_rate();
+		sprintf (length_str, "%02d:%02d:%06.3f", hrs, mins, secs);
+		break;
+		
+	case AudioClock::Frames:
+		snprintf (start_str, sizeof (start_str), "%u", region->position());
+		snprintf (end_str, sizeof (end_str), "%u", (region->position() + region->length() - 1));
+		snprintf (length_str, sizeof (length_str), "%u", region->length());
+		break;
+	
+	default:
+		break;
+	}
+	
+	cerr << "Updating " << (*found_region)[region_list_columns.name] << "\n";
+	
+	if (used > 1) {
+		(*found_region)[region_list_columns.start] = "Multiple";
+		(*found_region)[region_list_columns.end] = "Multiple";
+	} else {
+		(*found_region)[region_list_columns.start] = start_str;
+		(*found_region)[region_list_columns.end] = end_str;
+	}
+	
+	(*found_region)[region_list_columns.length] = length_str;
+	(*found_region)[region_list_columns.used] = used_str;
+	
+	if (missing_source) {
+		(*found_region)[region_list_columns.path] = _("(MISSING) ") + region->source()->name();
+	} else {
+		(*found_region)[region_list_columns.path] = region->source()->name();
+	}
+	
+	if (region->n_channels() > 1) {
+		(*found_region)[region_list_columns.name] = string_compose("%1  [%2]", region->name(), region->n_channels());
+	} else {
+		(*found_region)[region_list_columns.name] = region->name();
+	}
+	
+	cerr << "Returning after updating\n\n";
+	//return;
 }
 
 void

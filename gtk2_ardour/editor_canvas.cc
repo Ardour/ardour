@@ -207,6 +207,7 @@ Editor::initialize_canvas ()
 
 	range_bar_drag_rect = new ArdourCanvas::SimpleRect (*range_marker_group, 0.0, 0.0, 100, timebar_height);
 	range_bar_drag_rect->property_outline_pixels() = 0;
+	range_bar_drag_rect->hide ();
 
 	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, 100, timebar_height);
 	transport_bar_drag_rect->property_outline_pixels() = 0;

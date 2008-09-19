@@ -609,6 +609,12 @@ Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
 }
 
 bool
+Selection::selected (Marker* m)
+{
+	return find (markers.begin(), markers.end(), m) != markers.end();
+}
+
+bool
 Selection::selected (TimeAxisView* tv)
 {
 	return find (tracks.begin(), tracks.end(), tv) != tracks.end();
@@ -800,4 +806,32 @@ Selection::add (Marker* m)
 		markers.push_back (m);
 		MarkersChanged();
 	}
+}
+
+void
+Selection::add (const list<Marker*>& m)
+{
+	markers.insert (markers.end(), m.begin(), m.end());
+	MarkersChanged ();
+}
+
+void
+MarkerSelection::range (nframes64_t& s, nframes64_t& e)
+{
+	s = max_frames;
+	e = 0;
+
+	for (MarkerSelection::iterator i = begin(); i != end(); ++i) {
+
+		if ((*i)->position() < s) {
+			s = (*i)->position();
+		} 
+
+		if ((*i)->position() > e) {
+			e = (*i)->position();
+		}
+	}
+
+	s = std::min (s, e);
+	e = std::max (s, e);
 }

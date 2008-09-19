@@ -19,6 +19,7 @@
 #define __STDC_LIMIT_MACROS 1
 
 #include <iostream>
+#include <cmath>
 #include <algorithm>
 #include <stdexcept>
 #include <stdint.h>
@@ -313,7 +314,7 @@ size_t Sequence::read(EventSink& dst, timestamp_t start, timestamp_t nframes, ti
 		//cerr << "Using cached iterator at " << _next_read << endl;
 	}
 
-	_next_read = start + nframes;
+	_next_read = (nframes_t) floor (start + nframes);
 
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
 		assert(_read_iter->size() > 0);

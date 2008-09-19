@@ -1994,6 +1994,7 @@ AudioClock::set_mode (Mode m)
 
 	if (!is_transient) {
 		ModeChanged (); /* EMIT SIGNAL */
+		mode_changed (); /* EMIT SIGNAL */
 	}
 }
 

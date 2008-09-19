@@ -224,7 +224,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
         // We do not have jack linked in yet so;
         
 	last_shuttle_request = last_peak_grab = 0; //  get_microseconds();
-
+	
 	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
 	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
@@ -933,15 +933,11 @@ ARDOUR_UI::update_disk_space()
 
 	nframes_t frames = session->available_capture_duration();
 	char buf[64];
-
+	nframes_t fr = session->frame_rate();
+	
 	if (frames == max_frames) {
 		strcpy (buf, _("Disk: 24hrs+"));
 	} else {
-		int hrs;
-		int mins;
-		int secs;
-		nframes_t fr = session->frame_rate();
-		
 		rec_enabled_streams = 0;
 		session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
 		
@@ -949,16 +945,29 @@ ARDOUR_UI::update_disk_space()
 			frames /= rec_enabled_streams;
 		}
 		
+		int hrs;
+		int mins;
+		int secs;
+	
 		hrs  = frames / (fr * 3600);
 		frames -= hrs * fr * 3600;
 		mins = frames / (fr * 60);
 		frames -= mins * fr * 60;
 		secs = frames / fr;
-		
+			
 		snprintf (buf, sizeof(buf), _("Disk: %02dh:%02dm:%02ds"), hrs, mins, secs);
 	}
-
+	
 	disk_space_label.set_text (buf);
+	
+	// An attempt to make the disk space label flash red when space has run out.
+	
+	if (frames < fr * 60 * 5) {
+	/*	disk_space_box.style ("disk_space_label_empty"); */
+	} else {
+	/*	disk_space_box.style ("disk_space_label"); */
+	}
+
 }		  
 
 gint

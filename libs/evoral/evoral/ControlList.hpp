@@ -47,9 +47,9 @@ struct ControlEvent {
 		}
 	}
 
-	~ControlEvent() { if (coeff) delete[] coeff; }
+     ~ControlEvent() { if (coeff) delete[] coeff; }
 	
-	void create_coeffs() {
+     void create_coeffs() {
 		if (!coeff)
 			coeff = new double[4];
 	    
@@ -85,7 +85,7 @@ public:
 
 	ControlList (const Parameter& id);
 	//ControlList (const XMLNode&, Parameter id);
-	~ControlList();
+	virtual ~ControlList();
 	
 	virtual boost::shared_ptr<ControlList> create(Parameter id);
 

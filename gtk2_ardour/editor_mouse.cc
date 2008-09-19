@@ -1879,11 +1879,7 @@ Editor::finalize_drag ()
 	drag_info.last_pointer_frame = 0;
 	drag_info.current_pointer_frame = 0;
 	drag_info.brushing = false;
-
-	if (drag_info.copied_location) {
-		delete drag_info.copied_location;
-		drag_info.copied_location = 0;
-	}
+	drag_info.clear_copied_locations ();
 }
 
 void
@@ -1928,7 +1924,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	drag_info.want_move_threshold = false;
 	drag_info.pointer_frame_offset = 0;
 	drag_info.brushing = false;
-	drag_info.copied_location = 0;
+	drag_info.clear_copied_locations ();
 
 	drag_info.original_x = 0;
 	drag_info.original_y = 0;
@@ -2320,6 +2316,7 @@ Editor::update_marker_drag_item (Location *location)
 	}
 }
 
+
 void
 Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 {
@@ -2343,7 +2340,6 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 
 	_dragging_edit_point = true;
 
-	drag_info.copied_location = new Location (*location);
 	drag_info.pointer_frame_offset = drag_info.grab_frame - (is_start ? location->start() : location->end());	
 
 	update_marker_drag_item (location);
@@ -2369,14 +2365,52 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		selection->toggle (marker);
 		break;
 	case Selection::Set:
-		selection->set (marker);
+		if (!selection->selected (marker)) {
+			selection->set (marker);
+		}
 		break;
 	case Selection::Extend:
-		selection->add (marker);
+	{
+		Locations::LocationList ll;
+		list<Marker*> to_add;
+		nframes64_t s, e;
+		selection->markers.range (s, e);
+		s = min (marker->position(), s);
+		e = max (marker->position(), e);
+		s = min (s, e);
+		e = max (s, e);
+		if (e < max_frames) {
+			++e;
+		}
+		session->locations()->find_all_between (s, e, ll, Location::Flags (0));
+		for (Locations::LocationList::iterator i = ll.begin(); i != ll.end(); ++i) {
+			LocationMarkers* lm = find_location_markers (*i);
+			if (lm) {
+				if (lm->start) {
+					to_add.push_back (lm->start);
+				}
+				if (lm->end) {
+					to_add.push_back (lm->end);
+				}
+			}
+		}
+		if (!to_add.empty()) {
+			selection->add (to_add);
+		}
 		break;
+	}
 	case Selection::Add:
 		selection->add (marker);
 		break;
+	}
+
+	/* set up copies for us to manipulate during the drag */
+
+	drag_info.clear_copied_locations ();
+
+	for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
+		Location  *l = find_location_from_marker (*i, is_start);
+		drag_info.copied_locations.push_back (new Location (*l));
 	}
 }
 
@@ -2384,13 +2418,14 @@ void
 Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	nframes64_t f_delta;	
-	Marker* marker = (Marker *) drag_info.data;
-	Location  *real_location;
-	Location  *copy_location;
+	nframes64_t newframe;
 	bool is_start;
 	bool move_both = false;
+	Marker* dragged_marker = (Marker*) drag_info.data;
+	Marker* marker;
+	Location  *real_location;
+	Location  *copy_location;
 
-	nframes64_t newframe;
 	if (drag_info.pointer_frame_offset <= drag_info.current_pointer_frame) {
 		newframe = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 	} else {
@@ -2407,102 +2442,196 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
-	/* call this to find out if its the start or end */
-	
-	if ((real_location = find_location_from_marker (marker, is_start)) == 0) {
-		return;
-	}
-
-	if (real_location->locked()) {
-		return;
-	}
-
-	/* use the copy that we're "dragging" around */
-	
-	copy_location = drag_info.copied_location;
-
-	f_delta = copy_location->end() - copy_location->start();
-	
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		move_both = true;
 	}
 
-	if (copy_location->is_mark()) {
-		/* just move it */
+	MarkerSelection::iterator i;
+	list<Location*>::iterator x;
 
-		copy_location->set_start (newframe);
+	/* find the marker we're dragging, and compute the delta */
 
-	} else {
+	for (i = selection->markers.begin(), x = drag_info.copied_locations.begin(); 
+	     x != drag_info.copied_locations.end() && i != selection->markers.end(); 
+	     ++i, ++x) {
 
-		if (is_start) { // start-of-range marker
-			
-			if (move_both) {
-				copy_location->set_start (newframe);
-				copy_location->set_end (newframe + f_delta);
-			} else 	if (newframe < copy_location->end()) {
-				copy_location->set_start (newframe);
-			} else { 
-				snap_to (next, 1, true);
-				copy_location->set_end (next);
-				copy_location->set_start (newframe);
+		copy_location = *x;
+		marker = *i;
+
+		if (marker == dragged_marker) {
+
+			if ((real_location = find_location_from_marker (marker, is_start)) == 0) {
+				/* que pasa ?? */
+				return;
 			}
+
+			if (real_location->is_mark()) {
+				f_delta = newframe - copy_location->start();
+			} else {
+
+
+				switch (marker->type()) {
+				case Marker::Start:
+				case Marker::LoopStart:
+				case Marker::PunchIn:
+					f_delta = newframe - copy_location->start();
+					break;
+
+				case Marker::End:
+				case Marker::LoopEnd:
+				case Marker::PunchOut:
+					f_delta = newframe - copy_location->end();
+					break;
+				default:
+					/* what kind of marker is this ? */
+					return;
+				}
+			}
+			break;
+		}
+	}
+
+	if (i == selection->markers.end()) {
+		/* hmm, impossible - we didn't find the dragged marker */
+		return;
+	}
+
+	/* now move them all */
+
+	for (i = selection->markers.begin(), x = drag_info.copied_locations.begin(); 
+	     x != drag_info.copied_locations.end() && i != selection->markers.end(); 
+	     ++i, ++x) {
+
+		copy_location = *x;
+		marker = *i;
+
+		/* call this to find out if its the start or end */
+		
+		if ((real_location = find_location_from_marker (marker, is_start)) == 0) {
+			continue;
+		}
+		
+		if (real_location->locked()) {
+			continue;
+		}
+
+		if (copy_location->is_mark()) {
+
+			/* just move it */
 			
-		} else { // end marker
+			copy_location->set_start (copy_location->start() + f_delta);
+
+		} else {
 			
-			if (move_both) {
-				copy_location->set_end (newframe);
-				copy_location->set_start (newframe - f_delta);
-			} else if (newframe > copy_location->start()) {
-				copy_location->set_end (newframe);
+			nframes64_t new_start = copy_location->start() + f_delta;
+			nframes64_t new_end = copy_location->end() + f_delta;
+			
+			if (is_start) { // start-of-range marker
 				
-			} else if (newframe > 0) {
-				snap_to (next, -1, true);
-				copy_location->set_start (next);
-				copy_location->set_end (newframe);
+				if (move_both) {
+					copy_location->set_start (new_start);
+					copy_location->set_end (new_end);
+				} else 	if (new_start < copy_location->end()) {
+					copy_location->set_start (new_start);
+				} else { 
+					snap_to (next, 1, true);
+					copy_location->set_end (next);
+					copy_location->set_start (newframe);
+				}
+				
+			} else { // end marker
+				
+				if (move_both) {
+					copy_location->set_end (new_end);
+					copy_location->set_start (new_start);
+				} else if (new_end > copy_location->start()) {
+					copy_location->set_end (new_end);
+				} else if (newframe > 0) {
+					snap_to (next, -1, true);
+					copy_location->set_start (next);
+					copy_location->set_end (newframe);
+				}
 			}
+		}
+		update_marker_drag_item (copy_location);
+
+		LocationMarkers* lm = find_location_markers (real_location);
+
+		if (lm) {
+			lm->set_position (copy_location->start(), copy_location->end());
 		}
 	}
 
 	drag_info.last_pointer_frame = drag_info.current_pointer_frame;
 	drag_info.first_move = false;
 
-	update_marker_drag_item (copy_location);
+	if (drag_info.copied_locations.empty()) {
+		abort();
+	}
 
-	LocationMarkers* lm = find_location_markers (real_location);
-	lm->set_position (copy_location->start(), copy_location->end());
-	edit_point_clock.set (copy_location->start());
-
+	edit_point_clock.set (drag_info.copied_locations.front()->start());
 	show_verbose_time_cursor (newframe, 10);
+
+#ifdef GTKOSX
+	track_canvas->update_now ();
+#endif
 }
 
 void
 Editor::marker_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	if (drag_info.first_move) {
-		/* just a click, do nothing but whatever selection occured */
+
+		/* just a click, do nothing but finish
+		   off the selection process
+		*/
+
+		Selection::Operation op = Keyboard::selection_type (event->button.state);
+		Marker* marker = (Marker *) drag_info.data;
+
+		switch (op) {
+		case Selection::Set:
+			if (selection->selected (marker) && selection->markers.size() > 1) {
+				selection->set (marker);
+			}
+			break;
+
+		case Selection::Toggle:
+		case Selection::Extend:
+		case Selection::Add:
+			break;
+		}
+		
 		return;
 	}
 
 	_dragging_edit_point = false;
 	
-	Marker* marker = (Marker *) drag_info.data;
-	bool is_start;
 
 	begin_reversible_command ( _("move marker") );
 	XMLNode &before = session->locations()->get_state();
+
+	MarkerSelection::iterator i;
+	list<Location*>::iterator x;
+	bool is_start;
+
+	for (i = selection->markers.begin(), x = drag_info.copied_locations.begin(); 
+	     x != drag_info.copied_locations.end() && i != selection->markers.end(); 
+	     ++i, ++x) {
 	
-	Location * location = find_location_from_marker (marker, is_start);
-
-	if (location) {
-
-		if (location->locked()) {
-			return;
-		}
-
-		if (location->is_mark()) {
-			location->set_start (drag_info.copied_location->start());
-		} else {
-			location->set (drag_info.copied_location->start(), drag_info.copied_location->end());
+		Location * location = find_location_from_marker ((*i), is_start);
+		
+		if (location) {
+			
+			if (location->locked()) {
+				return;
+			}
+			
+			if (location->is_mark()) {
+				location->set_start ((*x)->start());
+			} else {
+				location->set ((*x)->start(), (*x)->end());
+			}
 		}
 	}
 
@@ -3696,6 +3825,12 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			/* for evaluation of the track position of iy1, we have to adjust 
 			   to allow for the vertical scrolling adjustment and the height of the timebars.
 			*/
+			
+			cerr << "adjust y from " << iy1 << " using "
+			     << vertical_adjustment.get_value() << " - "
+			     << canvas_timebars_vsize
+			     << endl;
+
 			iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);

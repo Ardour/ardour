@@ -8,6 +8,8 @@ Import('env libraries install_prefix')
 
 evoral = env.Clone()
 evoral.Merge([
+	libraries['glib2'],
+	libraries['sigc2'],
 	libraries['glibmm2'],
 	libraries['xml'], 
 	libraries['pbd'],	

@@ -43,7 +43,7 @@ public:
 			boost::shared_ptr<ARDOUR::AutomationList>,
 			std::string name="unnamed controllable");
 	
-	boost::shared_ptr<AutomationList> alist() { return boost::dynamic_pointer_cast<AutomationList>(_list); }
+	boost::shared_ptr<AutomationList> alist() const { return boost::dynamic_pointer_cast<AutomationList>(_list); }
 
 	void set_list(boost::shared_ptr<Evoral::ControlList>);
 
@@ -55,7 +55,7 @@ public:
 		return ((ARDOUR::AutomationList*)_list.get())->automation_write();
 	}
 	
-	inline AutoState automation_state() {
+	inline AutoState automation_state() const {
 		return ((ARDOUR::AutomationList*)_list.get())->automation_state();
 	}
 	

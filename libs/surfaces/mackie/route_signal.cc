@@ -37,7 +37,7 @@ void RouteSignal::connect()
 		_mute_changed_connection = _route.mute_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
 	
 	if ( _strip.has_gain() )
-		_gain_changed_connection = _route.control(ARDOUR::GainAutomation)->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
+		_gain_changed_connection = _route.gain_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this ) );
 		
 	_name_changed_connection = _route.NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	

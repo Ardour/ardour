@@ -53,6 +53,7 @@ Change Region::LockChanged       = ARDOUR::new_change ();
 Change Region::LayerChanged      = ARDOUR::new_change ();
 Change Region::HiddenChanged     = ARDOUR::new_change ();
 
+sigc::signal<void,boost::shared_ptr<ARDOUR::Region> > Region::RegionPropertyChanged;
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
@@ -1350,6 +1351,21 @@ Region::send_change (Change what_changed)
 	}
 
 	StateChanged (what_changed);
+	
+	if (!(_flags & DoNotSaveState)) {
+		
+		/* Try and send a shared_pointer unless this is part of the constructor.
+		   If so, do nothing.
+		*/
+		
+		try {
+			boost::shared_ptr<Region> rptr = shared_from_this();
+			RegionPropertyChanged (rptr);
+		} catch (...) {
+			/* no shared_ptr available, relax; */
+		}
+	}
+	
 }
 
 void

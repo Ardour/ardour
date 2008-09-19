@@ -43,7 +43,7 @@ public:
 	Parameter(uint32_t type, uint8_t channel, uint32_t id=0)
 		: _type(type), _id(id), _channel(channel)
 	{}
-	
+    
 	Parameter(const std::string& str) {
 		int channel;
 		if (sscanf(str.c_str(), "%d_c%d_n%d", &_type, &channel, &_id) == 3) {
@@ -56,6 +56,8 @@ public:
 		std::cerr << "WARNING: Unable to create parameter from string: " << str << std::endl;
 	}
 
+        virtual ~Parameter() {}
+    
 	inline uint32_t type()    const { return _type; }
 	inline uint32_t id()      const { return _id; }
 	inline uint8_t  channel() const { return _channel; }

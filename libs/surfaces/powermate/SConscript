@@ -31,6 +31,7 @@ powermate.Append(CXXFLAGS="-DCONFIG_DIR=\\\""+final_config_prefix+"\\\"")
 powermate.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 
 powermate.Merge ([
+    libraries['evoral'],
     libraries['ardour'],
     libraries['ardour_cp'],
     libraries['sigc2'],

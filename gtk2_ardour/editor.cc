@@ -195,6 +195,15 @@ show_me_the_size (Requisition* r, const char* what)
 	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
 }
 
+void
+DragInfo::clear_copied_locations ()
+{
+	for (list<Location*>::iterator i = copied_locations.begin(); i != copied_locations.end(); ++i) {
+		delete *i;
+	}
+	copied_locations.clear ();
+}
+
 Editor::Editor ()
 	: 
 	  /* time display buttons */
@@ -263,7 +272,6 @@ Editor::Editor ()
 	clicked_control_point = 0;
 	last_update_frame = 0;
 	drag_info.item = 0;
-	drag_info.copied_location = 0;
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
 	
@@ -641,7 +649,12 @@ Editor::Editor ()
 
 	region_list_display.set_model (region_list_model);
 	region_list_display.append_column (_("Regions"), region_list_columns.name);
-	region_list_display.set_headers_visible (false);
+	region_list_display.append_column (_("Start"), region_list_columns.start);
+	region_list_display.append_column (_("End"), region_list_columns.end);
+	region_list_display.append_column (_("Length"), region_list_columns.length);
+	region_list_display.append_column (_("Used"), region_list_columns.used);
+	region_list_display.append_column (_("Path to parent file"), region_list_columns.path);
+	region_list_display.set_headers_visible (true);
 
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
@@ -656,7 +669,7 @@ Editor::Editor ()
 	
 	region_list_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	region_list_display.add_object_drag (region_list_columns.region.index(), "regions");
-
+	
 	/* setup DnD handling */
 	
 	list<TargetEntry> region_list_target_table;
@@ -669,14 +682,17 @@ Editor::Editor ()
 	region_list_display.signal_drag_data_received().connect (mem_fun(*this, &Editor::region_list_display_drag_data_received));
 
 	region_list_scroller.add (region_list_display);
-	region_list_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-
+	region_list_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
+	
 	region_list_display.signal_key_press_event().connect (mem_fun(*this, &Editor::region_list_display_key_press));
 	region_list_display.signal_key_release_event().connect (mem_fun(*this, &Editor::region_list_display_key_release));
 	region_list_display.signal_button_press_event().connect (mem_fun(*this, &Editor::region_list_display_button_press), false);
 	region_list_display.signal_button_release_event().connect (mem_fun(*this, &Editor::region_list_display_button_release));
 	region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
 	// region_list_display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show_region_list_display_context_menu), 1, 0));
+	
+	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::redisplay_regions));
+	ARDOUR::Region::RegionPropertyChanged.connect (mem_fun(*this, &Editor::update_region_row));
 	
 	named_selection_scroller.add (named_selection_display);
 	named_selection_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);

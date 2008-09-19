@@ -55,6 +55,7 @@ tranzport.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 tranzport.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 tranzport.Merge ([
+    libraries['evoral'],
     libraries['ardour'],
     libraries['ardour_cp'],
     libraries['sigc2'],

@@ -90,6 +90,7 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 	static Change HiddenChanged;
 
 	sigc::signal<void,Change> StateChanged;
+	static sigc::signal<void,boost::shared_ptr<ARDOUR::Region> > RegionPropertyChanged;
 
 	virtual ~Region();
 

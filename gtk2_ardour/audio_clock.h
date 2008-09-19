@@ -61,11 +61,12 @@ class AudioClock : public Gtk::HBox
 	void set_session (ARDOUR::Session *s);
 
 	sigc::signal<void> ValueChanged;
+	sigc::signal<void> mode_changed;
 	sigc::signal<void> ChangeAborted;
 
 	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;
-
+	
 	static bool has_focus() { return _has_focus; }
 
   private:

@@ -128,7 +128,7 @@ class Editor : public PublicEditor
   public:
 	Editor ();
 	~Editor ();
-
+	
 	void             connect_to_session (ARDOUR::Session *);
 	ARDOUR::Session* current_session() const { return session; }
 	void             first_idle ();
@@ -545,6 +545,8 @@ class Editor : public PublicEditor
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
 
+	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region> region);
+	
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_as_side_effect (bool force = false);
@@ -926,13 +928,23 @@ class Editor : public PublicEditor
 
 	struct RegionListDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RegionListDisplayModelColumns() {
-		    add (name);
+			add (name);
 		    add (region);
 		    add (color_);
+		    add (start);
+		    add (end);
+		    add (length);
+			add (used);
+		    add (path);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> name;
+		Gtk::TreeModelColumn<Glib::ustring> name;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 	    Gtk::TreeModelColumn<Gdk::Color> color_;
+	    Gtk::TreeModelColumn<Glib::ustring> start;
+	    Gtk::TreeModelColumn<Glib::ustring> end;
+	    Gtk::TreeModelColumn<Glib::ustring> length;
+		Gtk::TreeModelColumn<Glib::ustring> used;
+	    Gtk::TreeModelColumn<Glib::ustring> path;
 	};
 	    
 	RegionListDisplayModelColumns          region_list_columns;
@@ -1080,6 +1092,7 @@ class Editor : public PublicEditor
 	void add_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::Region> > & );
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
+	void update_region_row (boost::shared_ptr<ARDOUR::Region>);
 	bool no_region_list_redisplay;
 	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
 

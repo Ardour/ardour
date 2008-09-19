@@ -47,6 +47,7 @@ mackie.Append(CXXFLAGS="-DLOCALEDIR=\\\""+final_prefix+"/share/locale\\\"")
 mackie.Append(CPPPATH = libraries['jack'].get('CPPPATH', []))
 
 mackie.Merge ([
+    libraries['evoral'],
     libraries['ardour'],
     libraries['ardour_cp'],
     libraries['sigc2'],

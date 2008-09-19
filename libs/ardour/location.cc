@@ -924,3 +924,16 @@ Locations::get_location_by_id(PBD::ID id)
 
     return 0;
 }
+
+void
+Locations::find_all_between (nframes64_t start, nframes64_t end, LocationList& ll, Location::Flags flags)
+{
+	Glib::Mutex::Lock lm (lock);
+
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+		if ((flags == 0 || (*i)->matches (flags)) && 
+		    ((*i)->start() >= start && (*i)->end() < end)) {
+			ll.push_back (*i);
+		}
+	}
+}

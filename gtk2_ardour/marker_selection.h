@@ -26,6 +26,7 @@
 
 struct MarkerSelection : public std::list<Marker*> 
 {
+    void range (nframes64_t& start, nframes64_t& end);
 };
 
 #endif /* __ardour_gtk_marker_selection_h__ */
