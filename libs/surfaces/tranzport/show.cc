@@ -277,7 +277,7 @@ TranzportControlProtocol::show_meter ()
 
 	/* print() requires this */
 
-	buf[21] = '\0';
+	buf[20] = '\0';
 
 	print (0, 0, buf);
 	print (1, 0, buf);
