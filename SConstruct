@@ -453,7 +453,6 @@ deps = \
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.109.0',
 	'libgnomecanvas-2.0'   : '2.0',
-        'aubio'                : '0.3.2'
 }
 
 def DependenciesRequiredMessage():
