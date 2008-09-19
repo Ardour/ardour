@@ -65,8 +65,8 @@ CrossfadeEditor::Presets* CrossfadeEditor::fade_out_presets = 0;
 
 CrossfadeEditor::Half::Half ()
 	: line (0), 
-	  normative_curve (Parameter(GainAutomation), 0.0, 1.0, 1.0), // FIXME: GainAutomation?
-	  gain_curve (Parameter(GainAutomation), 0.0, 2.0, 1.0)
+	  normative_curve (Parameter(GainAutomation, 0.0, 1.0, 1.0)), // FIXME: GainAutomation?
+	  gain_curve (Parameter(GainAutomation))
 {
 }
 
@@ -343,13 +343,13 @@ CrossfadeEditor::set (const ARDOUR::AutomationList& curve, WhichFade which)
 		goto out;
 	}
 	
-	the_end = curve.const_end();
+	the_end = curve.end();
 	--the_end;
 	
-	firstx = (*curve.const_begin())->when;
+	firstx = (*curve.begin())->when;
 	endx = (*the_end)->when;
 
-	for (ARDOUR::AutomationList::const_iterator i = curve.const_begin(); i != curve.const_end(); ++i) {
+	for (ARDOUR::AutomationList::const_iterator i = curve.begin(); i != curve.end(); ++i) {
 		
 		double xfract = ((*i)->when - firstx) / (endx - firstx);
 		double yfract = ((*i)->value - miny) / (maxy - miny);
@@ -771,7 +771,7 @@ CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 	/* IN */
 
 
-	ARDOUR::AutomationList::const_iterator the_end = in.const_end();
+	ARDOUR::AutomationList::const_iterator the_end = in.end();
 	--the_end;
 
 	double firstx = (*in.begin())->when;
@@ -791,7 +791,7 @@ CrossfadeEditor::_apply_to (boost::shared_ptr<Crossfade> xf)
 
 	/* OUT */
 
-	the_end = out.const_end();
+	the_end = out.end();
 	--the_end;
 
 	firstx = (*out.begin())->when;

@@ -39,7 +39,7 @@ public:
 	
 	void copy(const MidiBuffer& copy);
 
-	bool     push_back(const MIDI::Event& event);
+	bool     push_back(const Evoral::Event& event);
 	bool     push_back(const jack_midi_event_t& event);
 	uint8_t* reserve(double time, size_t size);
 
@@ -50,7 +50,7 @@ public:
 	struct iterator {
 		iterator(MidiBuffer& b, size_t i) : buffer(b), index(i) {}
 
-		inline MIDI::Event& operator*() const { return buffer[index]; }
+		inline Evoral::Event& operator*() const { return buffer[index]; }
 		inline iterator& operator++() { ++index; return *this; } // prefix
 		inline bool operator!=(const iterator& other) const { return index != other.index; }
 		
@@ -61,7 +61,7 @@ public:
 	struct const_iterator {
 		const_iterator(const MidiBuffer& b, size_t i) : buffer(b), index(i) {}
 
-		inline const MIDI::Event& operator*() const { return buffer[index]; }
+		inline const Evoral::Event& operator*() const { return buffer[index]; }
 		inline const_iterator& operator++() { ++index; return *this; } // prefix
 		inline bool operator!=(const const_iterator& other) const { return index != other.index; }
 		
@@ -80,8 +80,8 @@ private:
 	friend class iterator;
 	friend class const_iterator;
 	
-	const MIDI::Event& operator[](size_t i) const { assert(i < _size); return _events[i]; }
-	MIDI::Event& operator[](size_t i) { assert(i < _size); return _events[i]; }
+	const Evoral::Event& operator[](size_t i) const { assert(i < _size); return _events[i]; }
+	Evoral::Event& operator[](size_t i) { assert(i < _size); return _events[i]; }
 
 	// FIXME: Eliminate this
 	static const size_t MAX_EVENT_SIZE = 4; // bytes
@@ -92,8 +92,8 @@ private:
 
 	/* FIXME: this is utter crap.  rewrite as a flat/packed buffer like MidiRingBuffer */
 
-	MIDI::Event* _events; ///< Event structs that point to offsets in _data
-	uint8_t*     _data;   ///< MIDI, straight up.  No time stamps.
+	Evoral::Event* _events; ///< Event structs that point to offsets in _data
+	uint8_t*       _data;   ///< MIDI, straight up.  No time stamps.
 };
 
 

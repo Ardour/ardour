@@ -37,7 +37,7 @@ class AutomationController : public Gtkmm2ext::BarController {
 public:
 	static boost::shared_ptr<AutomationController> create(
 			boost::shared_ptr<ARDOUR::Automatable> parent,
-			boost::shared_ptr<ARDOUR::AutomationList> al,
+			boost::shared_ptr<Evoral::ControlList> cl,
 			boost::shared_ptr<ARDOUR::AutomationControl> ac);
 
 	~AutomationController();

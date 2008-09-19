@@ -48,6 +48,7 @@ gtkardour.Merge ([
     libraries['libgnomecanvasmm'],
     libraries['lrdf'],
     libraries['midi++2'],
+    libraries['evoral'],
     libraries['pangomm'],
     libraries['pbd'],
     libraries['samplerate'],

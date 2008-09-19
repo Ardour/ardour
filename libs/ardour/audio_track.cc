@@ -604,9 +604,9 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
-			Glib::Mutex::Lock am (_automation_lock, Glib::TRY_LOCK);
+			Glib::Mutex::Lock am (_control_lock, Glib::TRY_LOCK);
 			
-			if (am.locked() && gain_control()->list()->automation_playback()) {
+			if (am.locked() && gain_control()->automation_playback()) {
 				apply_gain_automation = gain_control()->list()->curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}
 		}
@@ -702,7 +702,7 @@ AudioTrack::export_stuff (BufferSet& buffers, nframes_t start, nframes_t nframes
 		}
 	}
 	
-	if (gain_control()->list()->automation_state() == Play) {
+	if (gain_control()->automation_state() == Play) {
 		
 		gain_control()->list()->curve().get_vector (start, start + nframes, gain_automation, nframes);
 

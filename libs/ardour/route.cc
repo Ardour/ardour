@@ -2528,11 +2528,11 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 	apply_gain_automation = false;
 
 	{ 
-		Glib::Mutex::Lock am (_automation_lock, Glib::TRY_LOCK);
+		Glib::Mutex::Lock am (_control_lock, Glib::TRY_LOCK);
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
-			if (_gain_control->list()->automation_playback()) {
+			if (_gain_control->alist()->automation_playback()) {
 				apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
 						start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}

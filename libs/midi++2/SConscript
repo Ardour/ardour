@@ -9,6 +9,7 @@ Import('env libraries install_prefix')
 midi2 = env.Clone()
 midi2.Merge([ libraries['sigc2'], 
 	      libraries['xml'], 
+	      libraries['evoral'], 
 	      libraries['glibmm2'], 
 	      libraries['glib2'], 
 	      libraries['pbd'], 
@@ -25,7 +26,6 @@ midi2.Append(DOMAIN=domain,MAJOR=2,MINOR=1,MICRO=1)
 sources = Split("""
 fd_midiport.cc
 fifomidi.cc
-event.cc
 midi.cc
 midichannel.cc
 midifactory.cc

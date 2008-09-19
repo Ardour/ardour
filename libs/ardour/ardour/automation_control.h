@@ -24,6 +24,8 @@
 #include <boost/shared_ptr.hpp>
 #include <pbd/controllable.h>
 #include <ardour/parameter.h>
+#include <evoral/Control.hpp>
+#include <ardour/automation_event.h>
 
 namespace ARDOUR {
 
@@ -34,28 +36,42 @@ class Automatable;
 
 /** A PBD:Controllable with associated automation data (AutomationList)
  */
-class AutomationControl : public PBD::Controllable
+class AutomationControl : public PBD::Controllable, public Evoral::Control
 {
 public:
 	AutomationControl(ARDOUR::Session&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
 			std::string name="unnamed controllable");
+	
+	boost::shared_ptr<AutomationList> alist() { return boost::dynamic_pointer_cast<AutomationList>(_list); }
+
+	void set_list(boost::shared_ptr<Evoral::ControlList>);
+
+	inline bool automation_playback() const {
+		return ((ARDOUR::AutomationList*)_list.get())->automation_playback();
+	}
+	
+	inline bool automation_write() const {
+		return ((ARDOUR::AutomationList*)_list.get())->automation_write();
+	}
+	
+	inline AutoState automation_state() {
+		return ((ARDOUR::AutomationList*)_list.get())->automation_state();
+	}
+	
+	inline void start_touch() {
+		return ((ARDOUR::AutomationList*)_list.get())->start_touch();
+	}
+	
+	inline void stop_touch() {
+		return ((ARDOUR::AutomationList*)_list.get())->stop_touch();
+	}
 
 	void set_value(float val);
 	float get_value() const;
-	float user_value() const;
-
-	void set_list(boost::shared_ptr<ARDOUR::AutomationList>);
-
-	boost::shared_ptr<ARDOUR::AutomationList>       list()       { return _list; }
-	boost::shared_ptr<const ARDOUR::AutomationList> list() const { return _list; }
-
-	Parameter parameter() const;
 
 protected:
-	ARDOUR::Session&                          _session;
-	boost::shared_ptr<ARDOUR::AutomationList> _list;
-	float                                     _user_value;
+	ARDOUR::Session& _session;
 };
 
 

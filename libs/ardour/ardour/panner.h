@@ -101,14 +101,16 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	float effective_y;
 	float effective_z;
 
-	bool             _muted;
+	bool _muted;
 
 	struct PanControllable : public AutomationControl {
 	    PanControllable (Session& s, std::string name, StreamPanner& p, Parameter param)
-			: AutomationControl (s, boost::shared_ptr<AutomationList>(new AutomationList(
-					param, 0.0, 1.0, 0.5)), name)
-			, panner (p) { assert(param.type() != NullAutomation); }
+			: AutomationControl (s,
+					boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
+			, panner (p)
+		{ assert(param.type() != NullAutomation); }
 	    
+		AutomationList* alist() { return (AutomationList*)_list.get(); }
 	    StreamPanner& panner;
 	    
 	    void set_value (float);

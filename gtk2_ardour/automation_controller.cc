@@ -61,12 +61,15 @@ AutomationController::~AutomationController()
 }
 
 boost::shared_ptr<AutomationController>
-AutomationController::create(boost::shared_ptr<Automatable> parent, boost::shared_ptr<AutomationList> al, boost::shared_ptr<AutomationControl> ac)
+AutomationController::create(
+		boost::shared_ptr<Automatable> parent,
+		boost::shared_ptr<Evoral::ControlList> cl,
+		boost::shared_ptr<AutomationControl> ac)
 {
-	Gtk::Adjustment* adjustment = manage(new Gtk::Adjustment(al->default_value(), al->get_min_y(), al->get_max_y()));
+	Gtk::Adjustment* adjustment = manage(new Gtk::Adjustment(cl->default_value(), cl->get_min_y(), cl->get_max_y()));
 	if (!ac) {
-		PBD::warning << "Creating AutomationController for " << al->parameter().to_string() << endmsg;
-		ac = parent->control_factory(al);
+		PBD::warning << "Creating AutomationController for " << cl->parameter().symbol() << endmsg;
+		ac = boost::dynamic_pointer_cast<AutomationControl>(parent->control_factory(cl));
 	}
 	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment));
 }
@@ -109,13 +112,13 @@ AutomationController::value_adjusted()
 void
 AutomationController::start_touch()
 {
-	_controllable->list()->start_touch();
+	_controllable->start_touch();
 }
 
 void
 AutomationController::end_touch()
 {
-	_controllable->list()->stop_touch();
+	_controllable->stop_touch();
 }
 
 void
@@ -123,7 +126,7 @@ AutomationController::automation_state_changed ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &AutomationController::automation_state_changed));
 
-	bool x = (_controllable->list()->automation_state() != Off);
+	bool x = (_controllable->automation_state() != Off);
 	
 	/* start watching automation so that things move */
 	

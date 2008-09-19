@@ -520,7 +520,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 		MidiBuffer::iterator port_iter = _source_port->get_midi_buffer().begin();
 
 		for (size_t i=0; i < to_write; ++i) {
-			const MIDI::Event& ev = *port_iter;
+			const Evoral::Event& ev = *port_iter;
 			assert(ev.buffer());
 			_capture_buf->write(ev.time() + transport_frame, ev.size(), ev.buffer());
 			++port_iter;

@@ -450,7 +450,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	if (_model && ! _model->writing())
 		_model->start_write();
 
-	MIDI::Event ev(0.0, 4, NULL, true);
+	Evoral::Event ev(0.0, 4, NULL, true);
 
 	while (true) {
 		bool ret = src.full_peek(sizeof(double), (uint8_t*)&time);
@@ -500,7 +500,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		
 
 void
-SMFSource::append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev)
+SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev)
 {
 	if (ev.size() == 0)
 		return;
@@ -925,7 +925,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	fseek(_fd, _header_size, SEEK_SET);
 
 	uint64_t time = 0; /* in SMF ticks */
-	MIDI::Event ev;
+	Evoral::Event ev;
 	
 	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
 	

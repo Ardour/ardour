@@ -49,7 +49,7 @@ public:
 	CanvasNoteEvent(
 			MidiRegionView&                       region,
 			Item*                                 item,
-			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>());
+			const boost::shared_ptr<Evoral::Note> note = boost::shared_ptr<Evoral::Note>());
 
 	virtual ~CanvasNoteEvent();
 
@@ -81,7 +81,7 @@ public:
 	virtual double x2() = 0;
 	virtual double y2() = 0;
 
-	const boost::shared_ptr<ARDOUR::Note> note() const { return _note; }
+	const boost::shared_ptr<Evoral::Note> note() const { return _note; }
 
 protected:
 	enum State { None, Pressed, Dragging };
@@ -91,7 +91,7 @@ protected:
 	Text*                                 _text;
 	Widget*                               _channel_selector_widget;
 	State                                 _state;
-	const boost::shared_ptr<ARDOUR::Note> _note;
+	const boost::shared_ptr<Evoral::Note> _note;
 	bool                                  _own_note;
 	bool                                  _selected;
 };

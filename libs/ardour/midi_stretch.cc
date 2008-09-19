@@ -91,7 +91,7 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 		const double new_time = i->time() * _request.time_fraction;
 		
 		// FIXME: double copy
-		MIDI::Event ev = MIDI::Event(*i, true);
+		Evoral::Event ev = Evoral::Event(*i, true);
 		ev.time() = new_time;
 		new_model->append(ev);
 	}

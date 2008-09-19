@@ -18,7 +18,7 @@ namespace Name
 class Patch : public PBD::Stateful
 {
 public:
-	typedef std::list<MIDI::Event> PatchMidiCommands;
+	typedef std::list<Evoral::Event> PatchMidiCommands;
 
 	Patch() {};
 	Patch(string a_number, string a_name) : _number(a_number), _name(a_name) {};

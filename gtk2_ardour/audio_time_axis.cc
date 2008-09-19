@@ -345,7 +345,7 @@ AudioTimeAxisView::create_automation_child (Parameter param, bool show)
 		update_pans (show);
 
 	} else {
-		error << "AudioTimeAxisView: unknown automation child " << param.to_string() << endmsg;
+		error << "AudioTimeAxisView: unknown automation child " << param.symbol() << endmsg;
 	}
 }
 

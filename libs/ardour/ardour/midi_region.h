@@ -80,10 +80,10 @@ class MidiRegion : public Region
 	Controls&       controls()       { return midi_source()->model()->controls(); }
 	const Controls& controls() const { return midi_source()->model()->controls(); }
 	
-	boost::shared_ptr<AutomationControl> control(Parameter id, bool create_if_missing=false)
+	boost::shared_ptr<Evoral::Control> control(Evoral::Parameter id, bool create_if_missing=false)
 			{ return midi_source()->model()->control(id, create_if_missing); }
 
-	boost::shared_ptr<const AutomationControl> control(Parameter id) const
+	boost::shared_ptr<const Evoral::Control> control(Evoral::Parameter id) const
 			{ return midi_source()->model()->control(id); }
 	
 	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);

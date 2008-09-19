@@ -33,7 +33,7 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
 { 
 	if (list) {
 		_line = boost::shared_ptr<AutomationLine>(new AutomationLine(
-					list->parameter().to_string(), time_axis, *group, list));
+					list->parameter().symbol(), time_axis, *group, list));
 		_line->set_colors();
 		_line->show();
 		_line->show_all_control_points();

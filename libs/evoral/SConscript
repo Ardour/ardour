@@ -1,0 +1,42 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env libraries install_prefix')
+
+evoral = env.Clone()
+evoral.Merge([
+	libraries['glibmm2'],
+	libraries['xml'], 
+	libraries['pbd'],	
+	])
+
+if evoral['IS_OSX']:
+	evoral.Append (LINKFLAGS="-Xlinker -headerpad -Xlinker 2048")
+
+domain = 'evoral'
+
+evoral.Append(DOMAIN=domain, MAJOR=1, MINOR=0, MICRO=0)
+evoral.Append(CXXFLAGS="-DEVENT_WITH_XML")
+
+sources = Split("""
+src/Control.cpp
+src/ControlList.cpp
+src/ControlSet.cpp
+src/Event.cpp
+src/Note.cpp
+src/Sequence.cpp
+src/Curve.cpp
+""")
+
+libevoral = evoral.SharedLibrary('evoral', [ sources ])
+
+Default(libevoral)
+
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libevoral))
+
+env.Alias('tarball', env.Distribute (env['DISTTREE'],
+                                     [ 'SConscript' ] + sources +
+                                     glob.glob('midi++/*.h')))

@@ -1,27 +1,25 @@
-/*
-    Copyright (C) 2007 Paul Davis
-    Author: Dave Robillard
+/* This file is part of Evoral.
+ * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
+ * Copyright (C) 2000-2008 Paul Davis
+ * 
+ * Evoral is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ * 
+ * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
-
-#include <ardour/note.h>
 #include <iostream>
+#include <evoral/Note.hpp>
 
-namespace ARDOUR {
+namespace Evoral {
 
 Note::Note(uint8_t chan, double t, double d, uint8_t n, uint8_t v)
 	: _on_event(t, 3, NULL, true)
@@ -71,14 +69,9 @@ Note::Note(const Note& copy)
 	assert(channel() == copy.channel());
 }
 
+
 Note::~Note()
 {
-	std::cerr << "Note::~Note() Note time: " << time()
-		 << " pitch: " << int(note()) 
-	     << " duration: " << duration() 
-	     << "   end-time: " << end_time() 
-	     << "   velocity: " << int(velocity()) 
-	     << std::endl;
 }
 
 
@@ -107,4 +100,4 @@ Note::operator=(const Note& copy)
 	return *this;
 }
 
-} // namespace ARDOUR
+} // namespace Evoral

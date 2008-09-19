@@ -93,7 +93,7 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 	if (!is_process_thread()) {
 
 		Glib::Mutex::Lock lm (non_process_thread_fifo_lock);
-		RingBuffer<Event>::rw_vector vec;
+		RingBuffer<Evoral::Event>::rw_vector vec;
 		
 		non_process_thread_fifo.get_write_vector (&vec);
 
@@ -157,7 +157,7 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 void
 JACK_MidiPort::flush (void* jack_port_buffer)
 {
-	RingBuffer<Event>::rw_vector vec;
+	RingBuffer<Evoral::Event>::rw_vector vec;
 	size_t written;
 
 	non_process_thread_fifo.get_read_vector (&vec);
@@ -167,7 +167,7 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 	}
 
 	if (vec.len[0]) {
-		Event* evp = vec.buf[0];
+		Evoral::Event* evp = vec.buf[0];
 		
 		for (size_t n = 0; n < vec.len[0]; ++n, ++evp) {
 			jack_midi_event_write (jack_port_buffer,
@@ -176,7 +176,7 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 	}
 	
 	if (vec.len[1]) {
-		Event* evp = vec.buf[1];
+		Evoral::Event* evp = vec.buf[1];
 
 		for (size_t n = 0; n < vec.len[1]; ++n, ++evp) {
 			jack_midi_event_write (jack_port_buffer,

@@ -554,7 +554,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 							// FIXME: slooooooooow!
 
-							const boost::shared_ptr<Note> note = data->note_at(i);
+							const boost::shared_ptr<Evoral::Note> note = data->note_at(i);
 							
 							if (note->duration() > 0 && note->end_time() + region->position() > start)
 								mrv->resolve_note(note->note(), note->end_time());

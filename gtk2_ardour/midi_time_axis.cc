@@ -334,12 +334,12 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 		/* FIXME: don't create AutomationList for track itself
 		 * (not actually needed or used, since the automation is region-ey) */
 
-		boost::shared_ptr<AutomationControl> c = _route->control(param);
+		boost::shared_ptr<AutomationControl> c
+			= boost::dynamic_pointer_cast<AutomationControl>(_route->control(param));
 
 		if (!c) {
-			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param,
-						param.min(), param.max(), (param.max() - param.min() / 2)));
-			c = boost::shared_ptr<AutomationControl>(_route->control_factory(al));
+			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param));
+			c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(al));
 			_route->add_control(c);
 		}
 
@@ -358,7 +358,7 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 		add_automation_child(param, track, show);
 
 	} else {
-		error << "MidiTimeAxisView: unknown automation child " << param.to_string() << endmsg;
+		error << "MidiTimeAxisView: unknown automation child " << param.symbol() << endmsg;
 	}
 }
 

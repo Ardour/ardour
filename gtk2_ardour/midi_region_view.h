@@ -79,10 +79,10 @@ class MidiRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void add_note(const boost::shared_ptr<ARDOUR::Note> note);
+	void add_note(const boost::shared_ptr<Evoral::Note> note);
 	void resolve_note(uint8_t note_num, double end_time);
 	
-	void add_pgm_change(boost::shared_ptr<MIDI::Event> event);
+	void add_pgm_change(boost::shared_ptr<Evoral::Event> event);
 
 	void begin_write();
 	void end_write();
@@ -93,7 +93,7 @@ class MidiRegionView : public RegionView
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
 	void start_delta_command(string name = "midi edit");
-	void command_add_note(const boost::shared_ptr<ARDOUR::Note> note, bool selected);
+	void command_add_note(const boost::shared_ptr<Evoral::Note> note, bool selected);
 	void command_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
 
 	void apply_command();
@@ -240,7 +240,7 @@ class MidiRegionView : public RegionView
 
 	/** New notes (created in the current command) which should be selected
 	 * when they appear after the command is applied. */
-	std::set< boost::shared_ptr<ARDOUR::Note> > _marked_for_selection;
+	std::set< boost::shared_ptr<Evoral::Note> > _marked_for_selection;
 
 	std::vector<NoteResizeData *> _resize_data;
 };

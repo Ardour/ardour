@@ -397,7 +397,8 @@ MidiRegionView::create_note_at(double x, double y, double duration)
 	new_note_duration = snap_to_frame(new_note_time_position_relative + new_note_duration) + _region->start() 
 	                    - new_note_time;
 
-	const boost::shared_ptr<Note> new_note(new Note(0, new_note_time, new_note_duration, (uint8_t)note, 0x40));
+	const boost::shared_ptr<Evoral::Note> new_note(new Evoral::Note(
+			0, new_note_time, new_note_duration, (uint8_t)note, 0x40));
 	view->update_bounds(new_note->note());
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
@@ -444,7 +445,7 @@ MidiRegionView::start_delta_command(string name)
 }
 
 void
-MidiRegionView::command_add_note(const boost::shared_ptr<ARDOUR::Note> note, bool selected)
+MidiRegionView::command_add_note(const boost::shared_ptr<Evoral::Note> note, bool selected)
 {
 	if (_delta_command)
 		_delta_command->add(note);
@@ -524,8 +525,8 @@ MidiRegionView::redisplay_model()
 				
 				for (AutomationList::const_iterator event = control->second->list()->begin();
 						event != control->second->list()->end(); ++event) {
-					MidiControlIterator iter(control->second->list(), (*event)->when, (*event)->value);
-					boost::shared_ptr<MIDI::Event> event(new MIDI::Event());
+					Evoral::ControlIterator iter(control->second->list(), (*event)->when, (*event)->value);
+					boost::shared_ptr<Evoral::Event> event(new Evoral::Event());
 					_model->control_to_midi_event(event, iter);
 					add_pgm_change(event);
 				}
@@ -774,7 +775,7 @@ MidiRegionView::extend_active_notes()
  * event arrives, to properly display the note.
  */
 void
-MidiRegionView::add_note(const boost::shared_ptr<Note> note)
+MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
 {
 	assert(note->time() >= 0);
 	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
@@ -816,7 +817,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 				// finish the old note rectangle
 				if (_active_notes[note->note()]) {
 					CanvasNote* const old_rect = _active_notes[note->note()];
-					boost::shared_ptr<ARDOUR::Note> old_note = old_rect->note();
+					boost::shared_ptr<Evoral::Note> old_note = old_rect->note();
 					cerr << "MidiModel: WARNING: Note has duration 0: chan " << old_note->channel()
 						<< "note " << (int)old_note->note() << " @ " << old_note->time() << endl;
 					/* FIXME: How large to make it?  Make it a diamond? */
@@ -870,7 +871,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Note> note)
 }
 
 void
-MidiRegionView::add_pgm_change(boost::shared_ptr<MIDI::Event> event)
+MidiRegionView::add_pgm_change(boost::shared_ptr<Evoral::Event> event)
 {
 	assert(event->time() >= 0);
 	
@@ -1061,7 +1062,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 			Selection::iterator next = i;
 			++next;
 
-			const boost::shared_ptr<Note> copy(new Note(*(*i)->note().get()));
+			const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(*i)->note().get()));
 
 			// we need to snap here again in nframes64_t in order to be sample accurate 
 			double new_note_time = (*i)->note()->time();
@@ -1253,7 +1254,7 @@ MidiRegionView::commit_resizing(CanvasNote::NoteEnd note_end, double event_x, bo
 		// transform to region start relative
 		current_frame += _region->start();
 		
-		const boost::shared_ptr<Note> copy(new Note(*(canvas_note->note().get())));
+		const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(canvas_note->note().get())));
 
 		// resize beginning of note
 		if (note_end == CanvasNote::NOTE_ON && current_frame < copy->end_time()) {
@@ -1286,7 +1287,7 @@ MidiRegionView::change_velocity(uint8_t velocity, bool relative)
 		++next;
 
 		CanvasNoteEvent *event = *i;
-		const boost::shared_ptr<Note> copy(new Note(*(event->note().get())));
+		const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(event->note().get())));
 
 		if (relative) {
 			uint8_t new_velocity = copy->velocity() + velocity;
@@ -1315,7 +1316,7 @@ MidiRegionView::change_channel(uint8_t channel)
 		++next;
 
 		CanvasNoteEvent *event = *i;
-		const boost::shared_ptr<Note> copy(new Note(*(event->note().get())));
+		const boost::shared_ptr<Evoral::Note> copy(new Evoral::Note(*(event->note().get())));
 
 		copy->set_channel(channel);
 		

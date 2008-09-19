@@ -8,7 +8,7 @@ using namespace std;
 CanvasProgramChange::CanvasProgramChange(
 		MidiRegionView&                       region,
 		Group&                                parent,
-		boost::shared_ptr<MIDI::Event>        event,
+		boost::shared_ptr<Evoral::Event>      event,
 		double                                height,
 		double                                x,
 		double                                y)

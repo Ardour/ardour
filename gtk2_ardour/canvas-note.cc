@@ -1,7 +1,7 @@
 #include "canvas-note.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
-#include "ardour/note.h"
+#include "evoral/Note.hpp"
 
 using namespace ARDOUR;
 

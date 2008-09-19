@@ -80,7 +80,7 @@ private:
 	static pthread_t _process_thread;
 	static bool is_process_thread();
 
-	RingBuffer<MIDI::Event> non_process_thread_fifo;
+	RingBuffer<Evoral::Event> non_process_thread_fifo;
 	Glib::Mutex non_process_thread_fifo_lock;
 };
 

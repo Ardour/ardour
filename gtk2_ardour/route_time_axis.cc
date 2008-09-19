@@ -1741,7 +1741,8 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	char state_name[256];
 	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (processor->name()).c_str(), what.id());
 
-	boost::shared_ptr<AutomationControl> control = processor->control(what, true);
+	boost::shared_ptr<AutomationControl> control
+			= boost::dynamic_pointer_cast<AutomationControl>(processor->control(what, true));
 
 	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
 			new AutomationTimeAxisView (_session, _route, processor, control,
@@ -1782,7 +1783,7 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<P
 	set<Parameter> s;
 	boost::shared_ptr<AutomationLine> al;
 
-	processor->what_has_visible_automation (s);
+	processor->what_has_visible_data (s);
 
 	for (set<Parameter>::iterator i = s.begin(); i != s.end(); ++i) {
 		
@@ -1843,7 +1844,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 	const std::set<Parameter>& automatable = processor->what_can_be_automated ();
 	std::set<Parameter> has_visible_automation;
 
-	processor->what_has_visible_automation(has_visible_automation);
+	processor->what_has_visible_data(has_visible_automation);
 
 	if (automatable.empty()) {
 		return;

@@ -228,7 +228,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 
 	/* now that we are done loading */
 
-	_control->list()->StateChanged ();
+	((AutomationList*)_control->list().get())->StateChanged ();
 
 	return 0;
 }
@@ -486,7 +486,7 @@ EqualPowerStereoPanner::state (bool full_state)
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
 	XMLNode* autonode = new XMLNode (X_("Automation"));
-	autonode->add_child_nocopy (_control->list()->state (full_state));
+	autonode->add_child_nocopy (((AutomationList*)_control->list().get())->state (full_state));
 	root->add_child_nocopy (*autonode);
 
 	StreamPanner::add_state (*root);
@@ -519,9 +519,9 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 
 		} else if ((*iter)->name() == X_("Automation")) {
 
-			_control->list()->set_state (*((*iter)->children().front()));
+			_control->alist()->set_state (*((*iter)->children().front()));
 
-			if (_control->list()->automation_state() != Off) {
+			if (_control->alist()->automation_state() != Off) {
 				set_position (_control->list()->eval (parent.session().transport_frame()));
 			}
 		}
@@ -917,7 +917,7 @@ void
 Panner::set_automation_style (AutoStyle style)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->pan_control()->list()->set_automation_style (style);
+		((AutomationList*)(*i)->pan_control()->list().get())->set_automation_style (style);
 	}
 	_session.set_dirty ();
 }	
@@ -926,7 +926,7 @@ void
 Panner::set_automation_state (AutoState state)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->pan_control()->list()->set_automation_state (state);
+		((AutomationList*)(*i)->pan_control()->list().get())->set_automation_state (state);
 	}
 	_session.set_dirty ();
 }	
@@ -935,7 +935,7 @@ AutoState
 Panner::automation_state () const
 {
 	if (!empty()) {
-		return front()->pan_control()->list()->automation_state ();
+		return ((AutomationList*)front()->pan_control()->list().get())->automation_state ();
 	} else {
 		return Off;
 	}
@@ -945,7 +945,7 @@ AutoStyle
 Panner::automation_style () const
 {
 	if (!empty()) {
-		return front()->pan_control()->list()->automation_style ();
+		return ((AutomationList*)front()->pan_control()->list().get())->automation_style ();
 	} else {
 		return Absolute;
 	}
@@ -955,7 +955,7 @@ void
 Panner::transport_stopped (nframes_t frame)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->pan_control()->list()->reposition_for_rt_add (frame);
+		((AutomationList*)(*i)->pan_control()->list().get())->reposition_for_rt_add (frame);
 	}
 }	
 
@@ -963,7 +963,7 @@ void
 Panner::snapshot (nframes_t now)
 {
 	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		boost::shared_ptr<AutomationList> list = (*i)->pan_control()->list();
+		AutomationList* list = ((AutomationList*)(*i)->pan_control()->list().get());
 		if (list->automation_write())
 			list->rt_add(now, (*i)->pan_control()->get_value());
 	}
@@ -1127,7 +1127,7 @@ bool
 Panner::touching () const
 {
 	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
-		if ((*i)->pan_control()->list()->touching ()) {
+		if (((AutomationList*)(*i)->pan_control()->list().get())->touching ()) {
 			return true;
 		}
 	}

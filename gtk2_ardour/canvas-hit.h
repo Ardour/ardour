@@ -33,7 +33,7 @@ public:
 			MidiRegionView&                       region,
 			Group&                                group,
 			double                                size,
-			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
+			const boost::shared_ptr<Evoral::Note> note = boost::shared_ptr<Evoral::Note>())
 
 		: Diamond(group, size), CanvasNoteEvent(region, this, note)
 	{

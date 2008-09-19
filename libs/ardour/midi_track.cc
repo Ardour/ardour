@@ -590,7 +590,7 @@ MidiTrack::write_controller_messages(MidiBuffer& output_buf, nframes_t start_fra
 	
 	uint8_t buf[3]; // CC = 3 bytes
 	buf[0] = MIDI_CMD_CONTROL;
-	MIDI::Event ev(0, 3, buf, false);
+	Evoral::Event ev(0, 3, buf, false);
 
 	// Write track controller automation
 	// This now lives in MidiModel.  Any need for track automation like this?
@@ -733,7 +733,7 @@ MidiTrack::MidiControl::set_value(float val)
 	assert(val <= _list->parameter().max());
 	size_t size = 3;
 
-	if ( ! _list->automation_playback()) {
+	if ( ! automation_playback()) {
 		uint8_t ev[3] = { _list->parameter().channel(), int(val), 0 };
 		switch(_list->parameter().type()) {
 		case MidiCCAutomation:

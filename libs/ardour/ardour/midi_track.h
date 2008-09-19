@@ -75,7 +75,7 @@ public:
 	
 	struct MidiControl : public AutomationControl {
 	    MidiControl(MidiTrack* route, boost::shared_ptr<AutomationList> al)
-			: AutomationControl (route->session(), al, al->parameter().to_string())
+			: AutomationControl (route->session(), al, al->parameter().symbol())
 			, _route (route)
 		{}
 	 

@@ -30,10 +30,9 @@ using namespace PBD;
 
 
 AutomationControl::AutomationControl(Session& session, boost::shared_ptr<AutomationList> list, string name)
-	: Controllable((name == "unnamed controllable") ? list->parameter().to_string() : name)
+	: Controllable((name == "unnamed controllable") ? list->parameter().symbol() : name)
+	, Evoral::Control(list)
 	, _session(session)
-	, _list(list)
-	, _user_value(list->default_value())
 {
 }
 
@@ -43,49 +42,27 @@ AutomationControl::AutomationControl(Session& session, boost::shared_ptr<Automat
 float
 AutomationControl::get_value() const
 {
-	if (_list->automation_playback())
-		return _list->eval(_session.transport_frame());
-	else
-		return _user_value;
+	bool from_list = ((AutomationList*)_list.get())->automation_playback();
+	return Control::get_value(from_list, _session.transport_frame());
 }
 
 
 void
 AutomationControl::set_value(float value)
 {
-	_user_value = value;
+	bool to_list = _session.transport_stopped()
+		&& ((AutomationList*)_list.get())->automation_playback();
 	
-	if (_session.transport_stopped() && _list->automation_write())
-		_list->add(_session.transport_frame(), value);
+	Control::set_value(value, to_list, _session.transport_frame());
 
 	Changed(); /* EMIT SIGNAL */
 }
 
 
-/** Get the latest user-set value, which may not equal get_value() when automation
- * is playing back, etc.
- *
- * Automation write/touch works by periodically sampling this value and adding it
- * to the AutomationList.
- */
-float
-AutomationControl::user_value() const
-{
-	return _user_value;
-}
-	
-
 void
-AutomationControl::set_list(boost::shared_ptr<ARDOUR::AutomationList> list)
+AutomationControl::set_list(boost::shared_ptr<Evoral::ControlList> list)
 {
-	_list = list;
-	_user_value = list->default_value();
+	Control::set_list(list);
 	Changed();  /* EMIT SIGNAL */
 }
 
-	
-Parameter
-AutomationControl::parameter() const
-{
-	return _list->parameter();
-}

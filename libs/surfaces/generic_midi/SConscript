@@ -37,6 +37,7 @@ genericmidi.Merge ([
 	libraries['ardour_cp'],
 	libraries['sndfile'],
 	libraries['midi++2'],
+	libraries['evoral'],
 	libraries['pbd'],
 	libraries['sigc2'],
 	libraries['usb'],

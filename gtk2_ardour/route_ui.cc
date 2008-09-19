@@ -776,14 +776,14 @@ RouteUI::get_automation_child_xml_node (Parameter param)
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
 			XMLProperty* type = (*iter)->property("automation-id");
-			if (type && type->value() == param.to_string())
+			if (type && type->value() == param.symbol())
 				return *iter;
 		}
 	}
 
 	// Didn't find it, make a new one
 	XMLNode* child = new XMLNode (AutomationTimeAxisView::state_node_name);
-	child->add_property("automation-id", param.to_string());
+	child->add_property("automation-id", param.symbol());
 	xml_node->add_child_nocopy (*child);
 
 	return child;

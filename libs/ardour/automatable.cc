@@ -92,7 +92,7 @@ Automatable::load_automation (const string& path)
 		return 1;
 	}
 
-	Glib::Mutex::Lock lm (_automation_lock);
+	Glib::Mutex::Lock lm (_control_lock);
 	set<Parameter> tosave;
 	_controls.clear ();
 	
@@ -108,7 +108,7 @@ Automatable::load_automation (const string& path)
 		in >> value; if (!in) goto bad;
 		
 		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
-		boost::shared_ptr<AutomationControl> c = control (Parameter(PluginAutomation, port), true);
+		boost::shared_ptr<Evoral::Control> c = control (Parameter(PluginAutomation, port), true);
 		c->list()->add (when, value);
 		tosave.insert (Parameter(PluginAutomation, port));
 	}
@@ -122,12 +122,10 @@ Automatable::load_automation (const string& path)
 }
 
 void
-Automatable::add_control(boost::shared_ptr<AutomationControl> ac)
+Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 {
 	Parameter param = ac->parameter();
 
-	_controls[param] = ac;
-	
 	_can_automate_list.insert(param);
 
 	// Sync everything (derived classes) up to initial values
@@ -135,61 +133,13 @@ Automatable::add_control(boost::shared_ptr<AutomationControl> ac)
 }
 
 void
-Automatable::what_has_automation (set<Parameter>& s) const
+Automatable::what_has_visible_data (set<Parameter>& s) const
 {
-	Glib::Mutex::Lock lm (_automation_lock);
-	Controls::const_iterator li;
-	
-	// FIXME: correct semantics?
-	for (li = _controls.begin(); li != _controls.end(); ++li) {
-		s.insert  ((*li).first);
-	}
-}
-
-void
-Automatable::what_has_visible_automation (set<Parameter>& s) const
-{
-	Glib::Mutex::Lock lm (_automation_lock);
+	Glib::Mutex::Lock lm (_control_lock);
 	set<Parameter>::const_iterator li;
 	
 	for (li = _visible_controls.begin(); li != _visible_controls.end(); ++li) {
 		s.insert  (*li);
-	}
-}
-
-/** Returns NULL if we don't have an AutomationList for \a parameter.
- */
-boost::shared_ptr<AutomationControl>
-Automatable::control (Parameter parameter, bool create_if_missing)
-{
-	Controls::iterator i = _controls.find(parameter);
-
-	if (i != _controls.end()) {
-		return i->second;
-
-	} else if (create_if_missing) {
-		boost::shared_ptr<AutomationList> al (new AutomationList (
-					parameter, FLT_MIN, FLT_MAX, default_parameter_value (parameter)));
-		boost::shared_ptr<AutomationControl> ac(control_factory(al));
-		add_control(ac);
-		return ac;
-
-	} else {
-		//warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
-		return boost::shared_ptr<AutomationControl>();
-	}
-}
-
-boost::shared_ptr<const AutomationControl>
-Automatable::control (Parameter parameter) const
-{
-	Controls::const_iterator i = _controls.find(parameter);
-
-	if (i != _controls.end()) {
-		return i->second;
-	} else {
-		//warning << "AutomationList " << parameter.to_string() << " not found for " << _name << endmsg;
-		return boost::shared_ptr<AutomationControl>();
 	}
 }
 
@@ -213,7 +163,7 @@ Automatable::describe_parameter (Parameter param)
 	} else if (param.type() == MidiChannelAftertouchAutomation) {
 		return string_compose("Aftertouch [%1]", int(param.channel()) + 1);
 	} else {
-		return param.to_string();
+		return param.symbol();
 	}
 }
 
@@ -237,37 +187,6 @@ Automatable::mark_automation_visible (Parameter what, bool yn)
 	}
 }
 
-bool
-Automatable::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_event) const
-{
-	Controls::const_iterator li;	
-
-	next_event.when = max_frames;
-	
-  	for (li = _controls.begin(); li != _controls.end(); ++li) {
-		
-		AutomationList::const_iterator i;
-		boost::shared_ptr<const AutomationList> alist (li->second->list());
-		ControlEvent cp (now, 0.0f);
-		
- 		for (i = lower_bound (alist->const_begin(), alist->const_end(), &cp, AutomationList::time_comparator);
-				i != alist->const_end() && (*i)->when < end; ++i) {
- 			if ((*i)->when > now) {
- 				break; 
- 			}
- 		}
- 		
- 		if (i != alist->const_end() && (*i)->when < end) {
-			
- 			if ((*i)->when < next_event.when) {
- 				next_event.when = (*i)->when;
- 			}
- 		}
- 	}
-
- 	return next_event.when != max_frames;
-}
-
 /** \a legacy_param is used for loading legacy sessions where an object (IO, Panner)
  * had a single automation parameter, with it's type implicit.  Derived objects should
  * pass that type and it will be used for the untyped AutomationList found.
@@ -275,7 +194,7 @@ Automatable::find_next_event (nframes_t now, nframes_t end, ControlEvent& next_e
 int
 Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 {	
-	Glib::Mutex::Lock lm (_automation_lock);
+	Glib::Mutex::Lock lm (_control_lock);
 
 	/* Don't clear controls, since some may be special derived Controllable classes */
 
@@ -301,11 +220,11 @@ Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 			
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
-					<< "using default: " << legacy_param.to_string() << endmsg;
+					<< "using default: " << legacy_param.symbol() << endmsg;
 				al->set_parameter(legacy_param);
 			}
 
-			boost::shared_ptr<AutomationControl> existing = control(param);
+			boost::shared_ptr<Evoral::Control> existing = control(param);
 			if (existing)
 				existing->set_list(al);
 			else
@@ -324,7 +243,7 @@ Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 XMLNode&
 Automatable::get_automation_state ()
 {
-	Glib::Mutex::Lock lm (_automation_lock);
+	Glib::Mutex::Lock lm (_control_lock);
 	XMLNode* node = new XMLNode (X_("Automation"));
 	
 	if (_controls.empty()) {
@@ -332,30 +251,24 @@ Automatable::get_automation_state ()
 	}
 
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li) {
-		node->add_child_nocopy (li->second->list()->get_state ());
+		boost::shared_ptr<AutomationList> l
+				= boost::dynamic_pointer_cast<AutomationList>(li->second->list());
+		node->add_child_nocopy (l->get_state ());
 	}
 
 	return *node;
 }
 
 void
-Automatable::clear_automation ()
-{
-	Glib::Mutex::Lock lm (_automation_lock);
-
-	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
-		li->second->list()->clear();
-}
-	
-void
 Automatable::set_parameter_automation_state (Parameter param, AutoState s)
 {
-	Glib::Mutex::Lock lm (_automation_lock);
+	Glib::Mutex::Lock lm (_control_lock);
 	
-	boost::shared_ptr<AutomationControl> c = control (param, true);
+	boost::shared_ptr<Evoral::Control> c = control (param, true);
+	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-	if (s != c->list()->automation_state()) {
-		c->list()->set_automation_state (s);
+	if (s != l->automation_state()) {
+		l->set_automation_state (s);
 		_session.set_dirty ();
 	}
 }
@@ -366,15 +279,16 @@ Automatable::get_parameter_automation_state (Parameter param, bool lock)
 	AutoState result = Off;
 
 	if (lock)
-		_automation_lock.lock();
+		_control_lock.lock();
 
-	boost::shared_ptr<AutomationControl> c = control(param);
+	boost::shared_ptr<Evoral::Control> c = control(param);
+	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
 	if (c)
-		result = c->list()->automation_state();
+		result = l->automation_state();
 	
 	if (lock)
-		_automation_lock.unlock();
+		_control_lock.unlock();
 
 	return result;
 }
@@ -382,12 +296,13 @@ Automatable::get_parameter_automation_state (Parameter param, bool lock)
 void
 Automatable::set_parameter_automation_style (Parameter param, AutoStyle s)
 {
-	Glib::Mutex::Lock lm (_automation_lock);
+	Glib::Mutex::Lock lm (_control_lock);
 	
-	boost::shared_ptr<AutomationControl> c = control(param, true);
+	boost::shared_ptr<Evoral::Control> c = control(param, true);
+	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-	if (s != c->list()->automation_style()) {
-		c->list()->set_automation_style (s);
+	if (s != l->automation_style()) {
+		l->set_automation_style (s);
 		_session.set_dirty ();
 	}
 }
@@ -395,12 +310,13 @@ Automatable::set_parameter_automation_style (Parameter param, AutoStyle s)
 AutoStyle
 Automatable::get_parameter_automation_style (Parameter param)
 {
-	Glib::Mutex::Lock lm (_automation_lock);
+	Glib::Mutex::Lock lm (_control_lock);
 
-	boost::shared_ptr<AutomationControl> c = control(param);
+	boost::shared_ptr<Evoral::Control> c = control(param);
+	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
 	if (c) {
-		return c->list()->automation_style();
+		return l->automation_style();
 	} else {
 		return Absolute; // whatever
 	}
@@ -409,20 +325,22 @@ Automatable::get_parameter_automation_style (Parameter param)
 void
 Automatable::protect_automation ()
 {
-	set<Parameter> automated_params;
+	typedef set<Evoral::Parameter> ParameterSet;
+	ParameterSet automated_params;
 
-	what_has_automation (automated_params);
+	what_has_data (automated_params);
 
-	for (set<Parameter>::iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
+	for (ParameterSet::iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
 
-		boost::shared_ptr<AutomationControl> c = control(*i);
+		boost::shared_ptr<Evoral::Control> c = control(*i);
+		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-		switch (c->list()->automation_state()) {
+		switch (l->automation_state()) {
 		case Write:
-			c->list()->set_automation_state (Off);
+			l->set_automation_state (Off);
 			break;
 		case Touch:
-			c->list()->set_automation_state (Play);
+			l->set_automation_state (Play);
 			break;
 		default:
 			break;
@@ -436,8 +354,10 @@ Automatable::automation_snapshot (nframes_t now, bool force)
 	if (force || _last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
 
 		for (Controls::iterator i = _controls.begin(); i != _controls.end(); ++i) {
-			if (i->second->list()->automation_write()) {
-				i->second->list()->rt_add (now, i->second->user_value());
+			boost::shared_ptr<AutomationControl> c
+					= boost::dynamic_pointer_cast<AutomationControl>(i->second);
+			if (c->automation_write()) {
+				c->list()->rt_add (now, i->second->user_value());
 			}
 		}
 		
@@ -450,29 +370,34 @@ Automatable::transport_stopped (nframes_t now)
 {
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li) {
 		
-		boost::shared_ptr<AutomationControl> c = li->second;
+		boost::shared_ptr<AutomationControl> c
+				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		boost::shared_ptr<AutomationList> l
+				= boost::dynamic_pointer_cast<AutomationList>(c->list());
 		
 		c->list()->reposition_for_rt_add (now);
 
-		if (c->list()->automation_state() != Off) {
+		if (c->automation_state() != Off) {
 			c->set_value(c->list()->eval(now));
 		}
 	}
 }
 
-/* FIXME: this probably doesn't belong here */
-boost::shared_ptr<AutomationControl>
-Automatable::control_factory(boost::shared_ptr<AutomationList> list)
+boost::shared_ptr<Evoral::Control>
+Automatable::control_factory(boost::shared_ptr<Evoral::ControlList> list) const
 {
-	if (
-			list->parameter().type() == MidiCCAutomation ||
-			list->parameter().type() == MidiPgmChangeAutomation ||
-			list->parameter().type() == MidiChannelAftertouchAutomation 
-	   ) {
-		// FIXME: this will die horribly if this is not a MidiTrack
-		return boost::shared_ptr<AutomationControl>(new MidiTrack::MidiControl((MidiTrack*)this, list));
+	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(list);
+	assert(l);
+	if (l->parameter().type() >= MidiCCAutomation
+			&& l->parameter().type() <= MidiChannelAftertouchAutomation) {
+		return boost::shared_ptr<Evoral::Control>(new MidiTrack::MidiControl((MidiTrack*)this, l));
 	} else {
-		return boost::shared_ptr<AutomationControl>(new AutomationControl(_session, list));
+		return boost::shared_ptr<Evoral::Control>(new AutomationControl(_session, l));
 	}
 }
 
+boost::shared_ptr<Evoral::ControlList>
+Automatable::control_list_factory(const Evoral::Parameter& param) const
+{
+	return boost::shared_ptr<Evoral::ControlList>(new AutomationList(param));
+}

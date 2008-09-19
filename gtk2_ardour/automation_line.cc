@@ -1048,7 +1048,7 @@ AutomationLine::list_changed ()
 }
 
 void
-AutomationLine::reset_callback (const AutomationList& events)
+AutomationLine::reset_callback (const Evoral::ControlList& events)
 {
 	ALPoints tmp_points;
 	uint32_t npoints = events.size();
@@ -1064,7 +1064,7 @@ AutomationLine::reset_callback (const AutomationList& events)
 
 	AutomationList::const_iterator ai;
 
-	for (ai = events.const_begin(); ai != events.const_end(); ++ai) {
+	for (ai = events.begin(); ai != events.end(); ++ai) {
 		
 		double translated_y = (*ai)->value;
 		model_to_view_y (translated_y);

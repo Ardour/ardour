@@ -32,7 +32,7 @@ namespace Canvas {
 
 
 CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
-		const boost::shared_ptr<ARDOUR::Note> note)
+		const boost::shared_ptr<Evoral::Note> note)
 	: _region(region)
 	, _item(item)
 	, _text(0)

@@ -389,10 +389,17 @@ Selection::replace (uint32_t sid, nframes_t start, nframes_t end)
 }
 
 void
-Selection::add (AutomationList* ac)
+Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 {
-	if (find (lines.begin(), lines.end(), ac) == lines.end()) {
-		lines.push_back (ac);
+	boost::shared_ptr<ARDOUR::AutomationList> al
+		= boost::dynamic_pointer_cast<ARDOUR::AutomationList>(cl);
+	if (!al) {
+		warning << "Programming error: Selected list is not an ARDOUR::AutomationList" << endmsg;
+		return;
+		return;
+	}
+	if (find (lines.begin(), lines.end(), al) == lines.end()) {
+		lines.push_back (al);
 		LinesChanged();
 	}
 }
@@ -493,9 +500,9 @@ Selection::remove (nframes_t start, nframes_t end)
 }
 
 void
-Selection::remove (AutomationList *ac)
+Selection::remove (boost::shared_ptr<ARDOUR::AutomationList> ac)
 {
-	list<AutomationList*>::iterator i;
+	AutomationSelection::iterator i;
 	if ((i = find (lines.begin(), lines.end(), ac)) != lines.end()) {
 		lines.erase (i);
 		LinesChanged();
@@ -595,7 +602,7 @@ Selection::set (TimeAxisView* track, nframes_t start, nframes_t end)
 }
 
 void
-Selection::set (AutomationList *ac)
+Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
 {
 	lines.clear();
 	add (ac);

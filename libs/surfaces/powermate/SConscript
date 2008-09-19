@@ -36,6 +36,7 @@ powermate.Merge ([
     libraries['sigc2'],
     libraries['pbd'],
     libraries['midi++2'],
+    libraries['evoral'],
     libraries['xml'],
     libraries['usb'],
     libraries['glib2'],

@@ -19,7 +19,7 @@ public:
 	CanvasProgramChange(
 		MidiRegionView&                       region,
 		Group&                                parent,
-		boost::shared_ptr<MIDI::Event>        event,
+		boost::shared_ptr<Evoral::Event>      event,
 		double                                height,
 		double                                x = 0.0,
 		double                                y = 0.0
@@ -29,7 +29,7 @@ public:
 	
 private:
 	MidiRegionView&                   _region;
-	boost::shared_ptr<MIDI::Event>    _event;
+	boost::shared_ptr<Evoral::Event>  _event;
 	Text*                             _text;
 	SimpleLine*                       _line;
 	SimpleRect*                       _rect;

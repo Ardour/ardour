@@ -52,6 +52,7 @@ mackie.Merge ([
     libraries['sigc2'],
     libraries['pbd'],
     libraries['midi++2'],
+    libraries['evoral'],
     libraries['xml'],
     libraries['glib2'],
     libraries['glibmm2'],

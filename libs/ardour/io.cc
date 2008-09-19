@@ -137,7 +137,7 @@ IO::IO (Session& s, const string& name,
 	deferred_state = 0;
 
 	boost::shared_ptr<AutomationList> gl(
-			new AutomationList(Parameter(GainAutomation), 0.0, 2.0, 1.0));
+			new AutomationList(Parameter(GainAutomation)));
 
 	_gain_control = boost::shared_ptr<GainControl>(
 			new GainControl(X_("gaincontrol"), *this, gl));
@@ -178,7 +178,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	apply_gain_automation = false;
 	
 	boost::shared_ptr<AutomationList> gl(
-			new AutomationList(Parameter(GainAutomation), 0.0, 2.0, 1.0));
+			new AutomationList(Parameter(GainAutomation)));
 
 	_gain_control = boost::shared_ptr<GainControl>(
 			new GainControl(X_("gaincontrol"), *this, gl));
@@ -1153,7 +1153,7 @@ IO::ensure_outputs (ChanCount count, bool clear, bool lockit, void* src)
 gain_t
 IO::effective_gain () const
 {
-	if (_gain_control->list()->automation_playback()) {
+	if (_gain_control->automation_playback()) {
 		return _gain_control->get_value();
 	} else {
 		return _desired_gain;
@@ -2266,7 +2266,7 @@ IO::meter ()
 void
 IO::clear_automation ()
 {
-	Automatable::clear_automation (); // clears gain automation
+	Automatable::clear (); // clears gain automation
 	_panner->clear_automation ();
 }
 
@@ -2280,9 +2280,10 @@ IO::set_parameter_automation_state (Parameter param, AutoState state)
 		bool changed = false;
 
 		{ 
-			Glib::Mutex::Lock lm (_automation_lock);
+			Glib::Mutex::Lock lm (_control_lock);
 
-			boost::shared_ptr<AutomationList> gain_auto = _gain_control->list();
+			boost::shared_ptr<AutomationList> gain_auto
+				= boost::dynamic_pointer_cast<AutomationList>(_gain_control->list());
 
 			if (state != gain_auto->automation_state()) {
 				changed = true;
@@ -2337,7 +2338,7 @@ IO::set_gain (gain_t val, void *src)
 		_gain = val;
 	}
 	
-	if (_session.transport_stopped() && src != 0 && src != this && _gain_control->list()->automation_write()) {
+	if (_session.transport_stopped() && src != 0 && src != this && _gain_control->automation_write()) {
 		_gain_control->list()->add (_session.transport_frame(), val);
 		
 	}
@@ -2349,7 +2350,7 @@ void
 IO::start_pan_touch (uint32_t which)
 {
 	if (which < _panner->size()) {
-		(*_panner)[which]->pan_control()->list()->start_touch();
+		(*_panner)[which]->pan_control()->start_touch();
 	}
 }
 
@@ -2357,7 +2358,7 @@ void
 IO::end_pan_touch (uint32_t which)
 {
 	if (which < _panner->size()) {
-		(*_panner)[which]->pan_control()->list()->stop_touch();
+		(*_panner)[which]->pan_control()->stop_touch();
 	}
 
 }
@@ -2380,7 +2381,7 @@ IO::transport_stopped (nframes_t frame)
 {
 	_gain_control->list()->reposition_for_rt_add (frame);
 
-	if (_gain_control->list()->automation_state() != Off) {
+	if (_gain_control->automation_state() != Off) {
 		
 		/* the src=0 condition is a special signal to not propagate 
 		   automation gain changes into the mix group when locating.

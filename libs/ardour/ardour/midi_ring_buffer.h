@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <ardour/types.h>
 #include <ardour/buffer.h>
+#include <evoral/EventSink.hpp>
 
 namespace ARDOUR {
 
@@ -243,7 +244,7 @@ MidiRingBufferBase<T>::write(size_t size, const T* src)
  *
  * [timestamp][size][size bytes of raw MIDI][timestamp][size][etc..]
  */
-class MidiRingBuffer : public MidiRingBufferBase<uint8_t> {
+class MidiRingBuffer : public MidiRingBufferBase<uint8_t>, public Evoral::EventSink {
 public:
 	/** @param size Size in bytes.
 	 */
@@ -251,8 +252,8 @@ public:
 		: MidiRingBufferBase<uint8_t>(size), _channel_mask(0x0000FFFF)
 	{}
 
-	size_t write(double time, size_t size, const uint8_t* buf);
-	bool   read(double* time, size_t* size, uint8_t* buf);
+	size_t write(double time, uint32_t size, const uint8_t* buf);
+	bool   read(double* time, uint32_t* size, uint8_t* buf);
 
 	bool   read_prefix(double* time, size_t* size);
 	bool   read_contents(size_t size, uint8_t* buf);
@@ -292,7 +293,7 @@ private:
 
 
 inline bool
-MidiRingBuffer::read(double* time, size_t* size, uint8_t* buf)
+MidiRingBuffer::read(double* time, uint32_t* size, uint8_t* buf)
 {
 	bool success = MidiRingBufferBase<uint8_t>::full_read(sizeof(double), (uint8_t*)time);
 	
@@ -333,7 +334,7 @@ MidiRingBuffer::read_contents(size_t size, uint8_t* buf)
 
 
 inline size_t
-MidiRingBuffer::write(double time, size_t size, const uint8_t* buf)
+MidiRingBuffer::write(double time, uint32_t size, const uint8_t* buf)
 {
 	/*fprintf(stderr, "MRB %p write (t = %f) ", this, time);
 	for (size_t i = 0; i < size; ++i)

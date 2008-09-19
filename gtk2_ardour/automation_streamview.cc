@@ -83,11 +83,13 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 			mr->midi_source()->load_model();
 	}
 
-	const boost::shared_ptr<AutomationControl> control = region->control(_controller->controllable()->parameter());
+	const boost::shared_ptr<AutomationControl> control
+		= boost::dynamic_pointer_cast<AutomationControl>(
+				region->control(_controller->controllable()->parameter()));
 
 	boost::shared_ptr<AutomationList> list;
 	if (control)
-		list = control->list();
+		list = boost::dynamic_pointer_cast<AutomationList>(control->list());
 
 	AutomationRegionView *region_view;
 	std::list<RegionView *>::iterator i;

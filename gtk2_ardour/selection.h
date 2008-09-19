@@ -47,6 +47,10 @@ namespace ARDOUR {
 	class AutomationList;
 }
 
+namespace Evoral {
+	class ControlList;
+}
+
 /// Lists of selected things
 
 /** The Selection class holds lists of selected items (tracks, regions, etc. etc.). */
@@ -105,7 +109,7 @@ class Selection : public sigc::trackable
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (std::vector<RegionView*>&);
 	long set (TimeAxisView*, nframes_t, nframes_t);
-	void set (ARDOUR::AutomationList*);
+	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void set (AutomationSelectable*);
@@ -128,7 +132,7 @@ class Selection : public sigc::trackable
 	void add (RegionView*);
 	void add (std::vector<RegionView*>&);
 	long add (nframes_t, nframes_t);
-	void add (ARDOUR::AutomationList*);
+	void add (boost::shared_ptr<Evoral::ControlList>);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void add (Marker*);
@@ -139,7 +143,7 @@ class Selection : public sigc::trackable
 	void remove (RegionView*);
 	void remove (uint32_t selection_id);
 	void remove (nframes_t, nframes_t);
-	void remove (ARDOUR::AutomationList*);
+	void remove (boost::shared_ptr<ARDOUR::AutomationList>);
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (const list<Selectable*>&);

@@ -82,7 +82,7 @@ JackMidiPort::cycle_end (nframes_t nframes, nframes_t offset)
 	jack_midi_clear_buffer (jack_buffer);
 
 	for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
-		const MIDI::Event& ev = *i;
+		const Evoral::Event& ev = *i;
 		// event times should be frames, relative to cycle start
 		assert(ev.time() >= 0);
 		assert(ev.time() < nframes);

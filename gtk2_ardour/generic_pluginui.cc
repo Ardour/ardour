@@ -209,7 +209,11 @@ GenericPluginUI::build ()
 				}
 			}
 
-			if ((cui = build_control_ui (i, insert->control(Parameter(PluginAutomation, i)))) == 0) {
+			boost::shared_ptr<ARDOUR::AutomationControl> c
+				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
+					insert->control(Parameter(PluginAutomation, i)));
+
+			if ((cui = build_control_ui (i, c)) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
@@ -526,7 +530,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		automation_state_changed (control_ui);
 
 		mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
-		mcontrol->list()->automation_state_changed.connect 
+		mcontrol->alist()->automation_state_changed.connect 
 			(bind (mem_fun(*this, &GenericPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
@@ -584,13 +588,13 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 void
 GenericPluginUI::start_touch (GenericPluginUI::ControlUI* cui)
 {
-	cui->control->list()->start_touch ();
+	cui->control->start_touch ();
 }
 
 void
 GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
 {
-	cui->control->list()->stop_touch ();
+	cui->control->stop_touch ();
 }
 
 void

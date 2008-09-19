@@ -26,6 +26,8 @@
 
 #include <ardour/midi_source.h>
 
+namespace Evoral { class Event; }
+
 namespace ARDOUR {
 
 class MidiRingBuffer;
@@ -71,7 +73,7 @@ class SMFSource : public MidiSource {
 	void set_allow_remove_if_empty (bool yn);
 	void mark_for_remove();
 
-	void append_event_unlocked(EventTimeUnit unit, const MIDI::Event& ev);
+	void append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev);
 
 	int flush_header ();
 	int flush_footer ();

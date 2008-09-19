@@ -208,10 +208,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	} else {
 	
 		boost::shared_ptr<AutomationLine> line(new AutomationLine (
-					_control->parameter().to_string(),
+					_control->parameter().symbol(),
 					*this,
 					*canvas_display,
-					_control->list()));
+					_control->alist()));
 
 		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
 		line->queue_reset ();
@@ -261,7 +261,7 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 					state);
 		}
 
-		_control->list()->set_automation_state(state);
+		_control->alist()->set_automation_state(state);
 
 	}
 }
@@ -276,7 +276,7 @@ AutomationTimeAxisView::automation_state_changed ()
 	if (!_line) {
 		state = Off;
 	} else {
-		state = _control->list()->automation_state ();
+		state = _control->alist()->automation_state ();
 	}
 
 	switch (state & (Off|Play|Touch|Write)) {
@@ -578,12 +578,12 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* item, GdkEvent
 	_line->view_to_model_y (y);
 
 	_session.begin_reversible_command (_("add automation event"));
-	XMLNode& before = _control->list()->get_state();
+	XMLNode& before = _control->alist()->get_state();
 
-	_control->list()->add (when, y);
+	_control->alist()->add (when, y);
 
-	XMLNode& after = _control->list()->get_state();
-	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(*_control->list().get(), &before, &after));
+	XMLNode& after = _control->alist()->get_state();
+	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(*_control->alist(), &before, &after));
 
 	_session.set_dirty ();
 }
@@ -598,7 +598,7 @@ AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 bool
 AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
 {
-	AutomationList* what_we_got = 0;
+	boost::shared_ptr<Evoral::ControlList> what_we_got;
 	boost::shared_ptr<AutomationList> alist (line.the_list());
 	bool ret = false;
 
@@ -621,8 +621,6 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	case Clear:
 		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
 			_session.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-			delete what_we_got;
-			what_we_got = 0;
 			ret = true;
 		}
 		break;
@@ -671,7 +669,7 @@ AutomationTimeAxisView::cut_copy_clear_objects (PointSelection& selection, CutCo
 bool
 AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointSelection& selection, CutCopyOp op)
 {
-	AutomationList* what_we_got = 0;
+	boost::shared_ptr<Evoral::ControlList> what_we_got;
 	boost::shared_ptr<AutomationList> alist(line.the_list());
 	bool ret = false;
 
@@ -700,8 +698,6 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		case Clear:
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
 				_session.add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
-				delete what_we_got;
-				what_we_got = 0;
 				ret = true;
 			}
 			break;
@@ -822,7 +818,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	assert(!_line);
 	assert(line->the_list() == _control->list());
 
-	automation_connection = _control->list()->automation_state_changed.connect
+	automation_connection = _control->alist()->automation_state_changed.connect
 		(mem_fun(*this, &AutomationTimeAxisView::automation_state_changed));
 
 	_line = line;
@@ -884,7 +880,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 		if ((*iter)->name() == state_node_name) {
 			XMLProperty* type = (*iter)->property("automation-id");
 
-			if (type && type->value() == _control->parameter().to_string()) {
+			if (type && type->value() == _control->parameter().symbol()) {
 				XMLProperty *shown = (*iter)->property("shown_editor");
 
 				if (shown && shown->value() == "yes") {

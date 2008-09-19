@@ -26,9 +26,7 @@ using namespace ARDOUR;
  * (AutomationList automation-id property)
  */
 Parameter::Parameter(const std::string& str)
-	: _type(NullAutomation)
-	, _id(0)
-	, _channel(0)
+	: Evoral::Parameter (NullAutomation, 0)
 {
 	if (str == "gain") {
 		_type = GainAutomation;
@@ -80,6 +78,8 @@ Parameter::Parameter(const std::string& str)
 	} else {
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
+
+	init((AutomationType)_type); // set min/max/normal
 }
 
 
@@ -87,7 +87,7 @@ Parameter::Parameter(const std::string& str)
  * e.g. <AutomationList automation-id="whatthisreturns">
  */
 std::string
-Parameter::to_string() const
+Parameter::symbol() const
 {
 	if (_type == GainAutomation) {
 		return "gain";

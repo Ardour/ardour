@@ -109,7 +109,6 @@ mix.cc
 mtc_slave.cc
 midi_clock_slave.cc
 named_selection.cc
-note.cc
 onset_detector.cc
 panner.cc
 parameter.cc
@@ -330,6 +329,7 @@ ardour.Merge ([
 	     libraries['glibmm2'],
 	     libraries['lrdf'],
 	     libraries['midi++2'],
+	     libraries['evoral'],
 	     libraries['pbd'],
 	     libraries['raptor'],
 	     libraries['samplerate'],

@@ -168,8 +168,8 @@ GainMeterBase::GainMeterBase (boost::shared_ptr<IO> io, Session& s,
 			gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false);
 			gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false);
 			
-			r->gain_control()->list()->automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed));
-			r->gain_control()->list()->automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed));
+			r->gain_control()->alist()->automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed));
+			r->gain_control()->alist()->automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed));
 
 			gain_automation_state_changed ();
 		}
@@ -408,7 +408,8 @@ GainMeterBase::set_fader_name (const char * name)
 void
 GainMeterBase::update_gain_sensitive ()
 {
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (!(_io->gain_control()->list()->automation_state() & Play));
+	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (
+			!(_io->gain_control()->alist()->automation_state() & Play));
 }
 
 
@@ -556,14 +557,14 @@ GainMeterBase::meter_point_clicked ()
 gint
 GainMeterBase::start_gain_touch (GdkEventButton* ev)
 {
-	_io->gain_control()->list()->start_touch ();
+	_io->gain_control()->alist()->start_touch ();
 	return FALSE;
 }
 
 gint
 GainMeterBase::end_gain_touch (GdkEventButton* ev)
 {
-	_io->gain_control()->list()->stop_touch ();
+	_io->gain_control()->alist()->stop_touch ();
 	return FALSE;
 }
 
@@ -666,10 +667,10 @@ GainMeterBase::gain_automation_style_changed ()
 {
 	switch (_width) {
 	case Wide:
-	        gain_automation_style_button.set_label (astyle_string(_io->gain_control()->list()->automation_style()));
+		gain_automation_style_button.set_label (astyle_string(_io->gain_control()->alist()->automation_style()));
 		break;
 	case Narrow:
-		gain_automation_style_button.set_label  (short_astyle_string(_io->gain_control()->list()->automation_style()));
+		gain_automation_style_button.set_label  (short_astyle_string(_io->gain_control()->alist()->automation_style()));
 		break;
 	}
 }
@@ -683,14 +684,14 @@ GainMeterBase::gain_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		gain_automation_state_button.set_label (astate_string(_io->gain_control()->list()->automation_state()));
+		gain_automation_state_button.set_label (astate_string(_io->gain_control()->alist()->automation_state()));
 		break;
 	case Narrow:
-		gain_automation_state_button.set_label (short_astate_string(_io->gain_control()->list()->automation_state()));
+		gain_automation_state_button.set_label (short_astate_string(_io->gain_control()->alist()->automation_state()));
 		break;
 	}
 
-	x = (_io->gain_control()->list()->automation_state() != Off);
+	x = (_io->gain_control()->alist()->automation_state() != Off);
 	
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;

@@ -55,7 +55,7 @@ public:
 	CanvasNote(
 			MidiRegionView&                       region,
 			Group&                                group,
-			const boost::shared_ptr<ARDOUR::Note> note = boost::shared_ptr<ARDOUR::Note>())
+			const boost::shared_ptr<Evoral::Note> note = boost::shared_ptr<Evoral::Note>())
 
 		: SimpleRect(group), CanvasNoteEvent(region, this, note), _note_state(None)
 	{

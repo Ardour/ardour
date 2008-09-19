@@ -33,7 +33,7 @@ Patch::set_state (const XMLNode& node)
 	assert(commands);
 	const XMLNodeList events = commands->children();
 	for (XMLNodeList::const_iterator i = events.begin(); i != events.end(); ++i) {
-		_patch_midi_commands.push_back(*(new Event(*(*i))));
+		_patch_midi_commands.push_back(*(new Evoral::Event(*(*i))));
 	}
 
 	return 0;
@@ -132,13 +132,16 @@ ChannelNameSet::set_state (const XMLNode& node)
 }
 
 int
-MIDINameDocument::set_state(const XMLNode & a_node)
+MIDINameDocument::set_state(const XMLNode& a_node)
 {
+	return 0;
 }
 
 XMLNode&
 MIDINameDocument::get_state(void)
 {
+	static XMLNode nothing("<nothing>");
+	return nothing;
 }
 
 

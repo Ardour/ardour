@@ -152,9 +152,10 @@ PluginInsert::auto_state_changed (Parameter which)
 	if (which.type() != PluginAutomation)
 		return;
 
-	boost::shared_ptr<AutomationControl> c = control (which);
+	boost::shared_ptr<AutomationControl> c
+			= boost::dynamic_pointer_cast<AutomationControl>(control (which));
 
-	if (c && c->list()->automation_state() != Off) {
+	if (c && ((AutomationList*)c->list().get())->automation_state() != Off) {
 		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_frame()));
 	}
 }
@@ -225,15 +226,10 @@ PluginInsert::set_automatable ()
 		if (i->type() == PluginAutomation) {
 			can_automate (*i);
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
-			boost::shared_ptr<AutomationList> list(new AutomationList(
-					*i,
-					//(desc.min_unbound ? FLT_MIN : desc.lower),
-					//(desc.max_unbound ? FLT_MAX : desc.upper),
-					desc.lower, desc.upper,
-					_plugins.front()->default_value(i->id())));
-
-			add_control(boost::shared_ptr<AutomationControl>(
-					new PluginControl(*this, list)));
+			Parameter param(*i);
+			param.set_range(desc.lower, desc.upper, _plugins.front()->default_value(i->id()));
+			boost::shared_ptr<AutomationList> list(new AutomationList(param));
+			add_control(boost::shared_ptr<AutomationControl>(new PluginControl(*this, list)));
 		}
 	}
 }
@@ -296,9 +292,10 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 		
 		for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li, ++n) {
 			
-			boost::shared_ptr<AutomationControl> c = li->second;
+			boost::shared_ptr<AutomationControl> c
+				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
 
-			if (c->parameter().type() == PluginAutomation && c->list()->automation_playback()) {
+			if (c->parameter().type() == PluginAutomation && c->automation_playback()) {
 				bool valid;
 
 				const float val = c->list()->rt_safe_eval (now, valid);				
@@ -371,8 +368,7 @@ PluginInsert::set_parameter (Parameter param, float val)
 
 	_plugins[0]->set_parameter (param.id(), val);
 	
-	boost::shared_ptr<AutomationControl> c = control (param);
-	
+	boost::shared_ptr<Evoral::Control> c = control (param);
 	if (c)
 		c->set_value(val);
 
@@ -396,7 +392,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
 	nframes_t now = _session.transport_frame ();
 	nframes_t end = now + nframes;
 
-	Glib::Mutex::Lock lm (_automation_lock, Glib::TRY_LOCK);
+	Glib::Mutex::Lock lm (_control_lock, Glib::TRY_LOCK);
 
 	if (!lm.locked()) {
 		connect_and_run (bufs, nframes, offset, false);
@@ -434,7 +430,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
 }	
 
 float
-PluginInsert::default_parameter_value (Parameter param)
+PluginInsert::default_parameter_value (Evoral::Parameter param)
 {
 	if (param.type() != PluginAutomation)
 		return 1.0;
@@ -640,7 +636,7 @@ PluginInsert::state (bool full)
 		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 		*/
-		autonode->add_child_nocopy (control(*x)->list()->state (full));
+		autonode->add_child_nocopy (((AutomationList*)control(*x)->list().get())->state (full));
 	}
 
 	node.add_child_nocopy (*autonode);
@@ -763,8 +759,11 @@ PluginInsert::set_state(const XMLNode& node)
 				continue;
 			}
 
+			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
+					control(Parameter(PluginAutomation, port_id), true));
+
 			if (!child->children().empty()) {
-				control (Parameter(PluginAutomation, port_id), true)->list()->set_state (*child->children().front());
+				c->alist()->set_state (*child->children().front());
 			} else {
 				if ((cprop = child->property("auto")) != 0) {
 					
@@ -772,13 +771,13 @@ PluginInsert::set_state(const XMLNode& node)
 
 					int x;
 					sscanf (cprop->value().c_str(), "0x%x", &x);
-					control (Parameter(PluginAutomation, port_id), true)->list()->set_automation_state (AutoState (x));
+					c->alist()->set_automation_state (AutoState (x));
 
 				} else {
 					
 					/* missing */
 					
-					control (Parameter(PluginAutomation, port_id), true)->list()->set_automation_state (Off);
+					c->alist()->set_automation_state (Off);
 				}
 			}
 

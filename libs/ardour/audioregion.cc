@@ -77,9 +77,9 @@ AudioRegion::init ()
 /* constructor for use by derived types only */
 AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string name)
 	: Region (s, start, length, name, DataType::AUDIO)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	init ();
 }
@@ -87,9 +87,9 @@ AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string 
 /** Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External))
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -102,9 +102,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -117,9 +117,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (many channels) */
 AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	init ();
 	listen_to_my_sources ();
@@ -128,9 +128,9 @@ AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t len
 /** Create a new AudioRegion, that is part of an existing one */
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	set<boost::shared_ptr<Source> > unique_srcs;
 
@@ -180,9 +180,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	: Region (other)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	assert(_type == DataType::AUDIO);
 	_scale_amplitude = other->_scale_amplitude;
@@ -196,9 +196,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (src, node)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -217,9 +217,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	: Region (srcs, node)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation), 0.0, 2.0, 1.0))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation), 0.0, 2.0, 1.0))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation), 0.0, 2.0, 1.0))
+	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
 {
 	init ();
 

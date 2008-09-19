@@ -74,10 +74,10 @@ MidiBuffer::resize (size_t size)
 	_capacity = size;
 
 #ifdef NO_POSIX_MEMALIGN
-	_events = (MIDI::Event *) malloc(sizeof(MIDI::Event) * _capacity);
+	_events = (Evoral::Event *) malloc(sizeof(Evoral::Event) * _capacity);
 	_data = (uint8_t *) malloc(sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 #else
-	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(MIDI::Event) * _capacity);
+	posix_memalign((void**)&_events, CPU_CACHE_ALIGN, sizeof(Evoral::Event) * _capacity);
 	posix_memalign((void**)&_data, CPU_CACHE_ALIGN, sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 #endif	
 	assert(_data);
@@ -115,7 +115,7 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	
 	// FIXME: slow
 	for (size_t i=0; i < msrc.size(); ++i) {
-		const MIDI::Event& ev = msrc[i];
+		const Evoral::Event& ev = msrc[i];
 		if (ev.time() >= offset && ev.time() < offset+nframes) {
 			//cout << "MidiBuffer::read_from got event, " << int(ev.type()) << " time: " << ev.time() << " buffer size: " << _size << endl;
 			push_back(ev);
@@ -136,7 +136,7 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
  * @return false if operation failed (not enough room)
  */
 bool
-MidiBuffer::push_back(const MIDI::Event& ev)
+MidiBuffer::push_back(const Evoral::Event& ev)
 {
 	if (_size == _capacity)
 		return false;
@@ -223,7 +223,7 @@ MidiBuffer::silence(nframes_t dur, nframes_t offset)
 	if (offset != 0)
 		cerr << "WARNING: MidiBuffer::silence w/ offset != 0 (not implemented)" << endl;
 
-	memset(_events, 0, sizeof(MIDI::Event) * _capacity);
+	memset(_events, 0, sizeof(Evoral::Event) * _capacity);
 	memset(_data, 0, sizeof(uint8_t) * _capacity * MAX_EVENT_SIZE);
 	_size = 0;
 	_silent = true;
@@ -262,8 +262,8 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 			push_back(b[b_index]);
 			++b_index;
 		} else {
-			const MIDI::Event& a_ev = a[a_index];
-			const MIDI::Event& b_ev = b[b_index];
+			const Evoral::Event& a_ev = a[a_index];
+			const Evoral::Event& b_ev = b[b_index];
 
 			if (a_ev.time() <= b_ev.time()) {
 				push_back(a_ev);
