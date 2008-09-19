@@ -39,11 +39,6 @@ namespace ARDOUR
 using namespace PBD;
 using std::string;
 
-/* The id counter is initialized to 1000 so that user created profiles have a id > 1000 
- * while ones shipped with ardour have one < 1000
- */
-uint32_t ExportFormatSpecification::_counter = 1000;
-
 ExportFormatSpecification::Time &
 ExportFormatSpecification::Time::operator= (AnyTime const & other)
 {
@@ -189,8 +184,6 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s) :
 	sample_formats.insert (SF_None);
 	sample_rates.insert (SR_None);
 	qualities.insert (Q_None);
-	
-	_id = ++_counter;
 }
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const & state) :
@@ -210,7 +203,6 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
   _silence_end (other.session)
 {
 	set_name (other.name() + " (copy)");
-	_id = ++_counter;
 
 	_format_name = other._format_name;
 	has_sample_format = other.has_sample_format;
@@ -250,7 +242,7 @@ ExportFormatSpecification::get_state ()
 	XMLNode * root = new XMLNode ("ExportFormatSpecification");
 	
 	root->add_property ("name", _name);
-	root->add_property ("id", to_string (_id, std::dec));
+	root->add_property ("id", _id.to_s());
 	
 	node = root->add_child ("Encoding");
 	node->add_property ("id", enum_2_string (format_id()));
@@ -313,8 +305,7 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 	}
 	
 	if ((prop = root.property ("id"))) {
-		std::istringstream iss (prop->value());
-		iss >> _id;
+		_id = prop->value();
 	}
 	
 	/* Encoding and SRC */

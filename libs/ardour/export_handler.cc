@@ -44,18 +44,12 @@ namespace ARDOUR
 ExportElementFactory::ExportElementFactory (Session & session) :
   session (session)
 {
-	XMLProperty * prop;
-	XMLNode * instant_node = ARDOUR::Config->instant_xml ("ExportFormatSpecification");
-	if (instant_node && (prop = instant_node->property ("id-counter"))) {
-		ExportFormatSpecification::init_counter (atoi (prop->value()));
-	}
+
 }
 
 ExportElementFactory::~ExportElementFactory ()
 {
-	XMLNode * instant_node = new XMLNode ("ExportFormatSpecification");
-	instant_node->add_property ("id-counter", to_string (ExportFormatSpecification::counter(), std::dec));
-	ARDOUR::Config->add_instant_xml (*instant_node);
+
 }
 
 ExportElementFactory::TimespanPtr

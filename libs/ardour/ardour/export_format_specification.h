@@ -23,6 +23,8 @@
 
 #include <glibmm/ustring.h>
 
+#include <pbd/uuid.h>
+
 #include <ardour/types.h>
 #include <ardour/export_format_base.h>
 
@@ -99,7 +101,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 	
 	/* Accessing functions */
 	
-	uint32_t id () { return _id; }
+	PBD::UUID const & id () { return _id; }
 	Glib::ustring const & name () const { return _name; }
 	Glib::ustring description ();
 	
@@ -150,7 +152,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 	/* The variables below have getters and setters */
 	
 	Glib::ustring   _name;
-	uint32_t        _id;
+	PBD::UUID       _id;
 	
 	Type            _type;
 	DitherType      _dither_type;
@@ -170,13 +172,6 @@ class ExportFormatSpecification : public ExportFormatBase {
 	
 	void add_option (XMLNode * node, std::string const & name, std::string const & value);
 	std::string get_option (XMLNode const * node, std::string const & name);
-	
-  /*** Static stuff for id management, ExportElementFactory will have access to these ***/
-
-	static void init_counter (uint32_t val) { if (val > _counter) { _counter = val; } }
-	static uint32_t counter () { return _counter; }
-
-	static uint32_t _counter;
 
 };
 

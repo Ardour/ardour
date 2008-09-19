@@ -73,6 +73,7 @@ export_format_manager.cc
 export_formats.cc
 export_format_specification.cc
 export_handler.cc
+export_preset.cc
 export_processor.cc
 export_profile_manager.cc
 export_status.cc

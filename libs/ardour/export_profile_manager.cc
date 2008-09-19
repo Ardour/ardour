@@ -35,6 +35,7 @@
 #include <ardour/export_timespan.h>
 #include <ardour/export_channel_configuration.h>
 #include <ardour/export_filename.h>
+#include <ardour/export_preset.h>
 #include <ardour/export_handler.h>
 #include <ardour/session.h>
 
@@ -44,143 +45,6 @@ using namespace PBD;
 
 namespace ARDOUR
 {
-
-ExportProfileManager::Preset::Preset (string filename, Session & s) :
-  _id (0), session (s), global (filename), local (0)
-{
-	XMLNode * root;
-	if ((root = global.root())) {
-		XMLProperty * prop;
-		if ((prop = root->property ("id"))) {
-			set_id ((uint32_t) atoi (prop->value()));
-		}
-		if ((prop = root->property ("name"))) {
-			set_name (prop->value());
-		}
-		
-		XMLNode * instant_xml = get_instant_xml ();
-		if (instant_xml) {
-			XMLNode * instant_copy = new XMLNode (*instant_xml);
-			set_local_state (*instant_copy);
-		}
-	}
-}
-
-ExportProfileManager::Preset::~Preset ()
-{
-	if (local) {
-		delete local;
-	}
-}
-
-void
-ExportProfileManager::Preset::set_name (string name)
-{
-	_name = name;
-
-	XMLNode * node;	
-	if ((node = global.root())) {
-		node->add_property ("name", name);
-	}
-	if (local) {
-		local->add_property ("name", name);
-	}
-}
-
-void
-ExportProfileManager::Preset::set_id (uint32_t id)
-{
-	_id = id;
-
-	XMLNode * node;
-	if ((node = global.root())) {
-		node->add_property ("id", id);
-	}
-	if (local) {
-		local->add_property ("id", id);
-	}
-}
-
-void
-ExportProfileManager::Preset::set_global_state (XMLNode & state)
-{
-	delete global.root ();
-	global.set_root (&state);
-	
-	set_id (_id);
-	set_name (_name);
-}
-
-void
-ExportProfileManager::Preset::set_local_state (XMLNode & state)
-{
-	delete local;
-	local = &state;
-	
-	set_id (_id);
-	set_name (_name);
-}
-
-void
-ExportProfileManager::Preset::save () const
-{
-	save_instant_xml ();
-	if (global.root()) {
-		global.write ();
-	}
-}
-
-void
-ExportProfileManager::Preset::remove_local () const
-{
-	remove_instant_xml ();
-}
-
-XMLNode *
-ExportProfileManager::Preset::get_instant_xml () const
-{
-	XMLNode * instant_xml;
-	
-	if ((instant_xml = session.instant_xml ("ExportPresets"))) {
-		XMLNodeList children = instant_xml->children ("ExportPreset");
-		for (XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
-			XMLProperty * prop;
-			if ((prop = (*it)->property ("id")) && _id == (uint32_t) atoi (prop->value())) {
-				return *it;
-			}
-		}
-	}
-	
-	return 0;
-}
-
-void
-ExportProfileManager::Preset::save_instant_xml () const
-{
-	if (!local) { return; }
-
-	/* First remove old, then add new */
-	
-	remove_instant_xml ();
-	
-	XMLNode * instant_xml;
-	if ((instant_xml = session.instant_xml ("ExportPresets"))) {
-		instant_xml->add_child_copy (*local);
-	} else {
-		instant_xml = new XMLNode ("ExportPresets");
-		instant_xml->add_child_copy (*local);
-		session.add_instant_xml (*instant_xml, false);
-	}
-}
-
-void
-ExportProfileManager::Preset::remove_instant_xml () const
-{
-	XMLNode * instant_xml;
-	if ((instant_xml = session.instant_xml ("ExportPresets"))) {
-		instant_xml->remove_nodes_and_delete ("id", to_string (_id, std::dec));
-	}
-}
 
 ExportProfileManager::ExportProfileManager (Session & s) :
   handler (s.get_export_handler()),
@@ -276,12 +140,10 @@ ExportProfileManager::load_preset (PresetPtr preset)
 void
 ExportProfileManager::load_presets ()
 {
-	preset_id_counter = 0;
-	
 	vector<sys::path> found = find_file ("*.preset");
 
 	for (vector<sys::path>::iterator it = found.begin(); it != found.end(); ++it) {
-		preset_id_counter = std::max (preset_id_counter, load_preset_from_disk (*it));
+		load_preset_from_disk (*it);
 	}
 }
 
@@ -289,11 +151,9 @@ ExportProfileManager::PresetPtr
 ExportProfileManager::save_preset (string const & name)
 {
 	if (!current_preset) {
-		++preset_id_counter;
-		string filename = export_config_dir.to_string() + "/" + to_string (preset_id_counter, std::dec) + ".preset";
-		current_preset.reset (new Preset (filename, session));
+		string filename = export_config_dir.to_string() + "/" + name + ".preset";
+		current_preset.reset (new ExportPreset (filename, session));
 		preset_list.push_back (current_preset);
-		current_preset->set_id (preset_id_counter);
 	}
 	
 	XMLNode * global_preset = new XMLNode ("ExportPreset");
@@ -333,18 +193,16 @@ ExportProfileManager::remove_preset ()
 	current_preset.reset();
 }
 
-uint32_t
+void
 ExportProfileManager::load_preset_from_disk (PBD::sys::path const & path)
 {
-	PresetPtr preset (new Preset (path.to_string(), session));
+	PresetPtr preset (new ExportPreset (path.to_string(), session));
 	preset_list.push_back (preset);
 	
 	/* Handle id to filename mapping */
 	
 	FilePair pair (preset->id(), path);
 	preset_file_map.insert (pair);
-	
-	return preset->id();
 }
 
 void
@@ -731,10 +589,10 @@ ExportProfileManager::FormatStatePtr
 ExportProfileManager::deserialize_format (XMLNode & root)
 {
 	XMLProperty * prop;
-	uint32_t id = 0;
+	UUID id;
 	
 	if ((prop = root.property ("id"))) {
-		id = atoi (prop->value());
+		id = prop->value();
 	}
 	
 	for (FormatList::iterator it = format_list->begin(); it != format_list->end(); ++it) {
@@ -751,7 +609,7 @@ ExportProfileManager::serialize_format (FormatStatePtr state)
 {
 	XMLNode * root = new XMLNode ("ExportFormat");
 	
-	string id = state->format ? to_string (state->format->id(), std::dec) : "0";
+	string id = state->format ? state->format->id().to_s() : "";
 	root->add_property ("id", id);
 	
 	return *root;

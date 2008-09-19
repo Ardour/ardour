@@ -31,6 +31,7 @@
 #include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 
+#include <pbd/uuid.h>
 #include <pbd/file_utils.h>
 #include <pbd/xml++.h>
 
@@ -50,6 +51,7 @@ class ExportTimespan;
 class ExportChannelConfiguration;
 class ExportFormatSpecification;
 class ExportFilename;
+class ExportPreset;
 class Location;
 class Session;
 
@@ -57,52 +59,15 @@ class Session;
 class ExportProfileManager
 {
   public:
-	class Preset {
-	  public:
-		Preset (string filename, Session & s);
-		~Preset ();
-	
-		uint32_t id () const { return _id; }
-		string name () const { return _name; }
-	
-		void set_name (string name);
-		void set_id (uint32_t id);
-	
-		// Note: The set_..._state functions take ownership of the XMLNode
-		void set_global_state (XMLNode & state);
-		void set_local_state (XMLNode & state);
-		
-		XMLNode const * get_global_state () const { return global.root(); }
-		XMLNode const * get_local_state () const { return local; }
-		
-		void save () const;
-		void remove_local () const;
-	
-	  private:
-	
-		XMLNode * get_instant_xml () const;
-		void save_instant_xml () const;
-		void remove_instant_xml () const;
-	
-		uint32_t   _id;
-		string     _name;
-	
-		Session &   session;
-		XMLTree     global;
-		XMLNode *   local;
-		
-	};
-
-	typedef boost::shared_ptr<Preset> PresetPtr;
-	typedef std::list<PresetPtr> PresetList;
-
-  public:
 
 	ExportProfileManager (Session & s);
 	~ExportProfileManager ();
 
 	void load_profile ();
 	void prepare_for_export ();
+	
+	typedef boost::shared_ptr<ExportPreset> PresetPtr;
+	typedef std::list<PresetPtr> PresetList;
 	
 	PresetList const & get_presets () { return preset_list; }
 	void load_preset (PresetPtr preset);
@@ -112,14 +77,14 @@ class ExportProfileManager
   private:
 	typedef boost::shared_ptr<ExportHandler> HandlerPtr;
 
-	typedef std::pair<uint32_t, PBD::sys::path> FilePair;
-	typedef std::map<uint32_t, PBD::sys::path> FileMap;
+	typedef std::pair<PBD::UUID, PBD::sys::path> FilePair;
+	typedef std::map<PBD::UUID, PBD::sys::path> FileMap;
 	
 	HandlerPtr  handler;
 	Session &   session;
 	
 	void load_presets ();
-	uint32_t load_preset_from_disk (PBD::sys::path const & path); // Returns preset id
+	void load_preset_from_disk (PBD::sys::path const & path);
 	
 	void set_state (XMLNode const & root);
 	void set_global_state (XMLNode const & root);
@@ -131,7 +96,6 @@ class ExportProfileManager
 	
 	PresetList preset_list;
 	PresetPtr  current_preset;
-	uint32_t   preset_id_counter;
 	FileMap    preset_file_map;
 	
 	std::vector<PBD::sys::path> find_file (std::string const & pattern);

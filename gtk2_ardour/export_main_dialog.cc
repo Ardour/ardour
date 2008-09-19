@@ -30,6 +30,7 @@
 #include <ardour/export_filename.h>
 #include <ardour/export_format_specification.h>
 #include <ardour/export_channel_configuration.h>
+#include <ardour/export_preset.h>
 
 #include "i18n.h"
 
@@ -177,7 +178,7 @@ ExportMainDialog::set_session (ARDOUR::Session* s)
 	file_notebook.set_tab_label_packing (new_file_dummy, true, true, Gtk::PACK_START);
 	new_file_hbox.show_all_children ();
 	
-	file_notebook.signal_switch_page().connect (sigc::mem_fun (*this, &ExportMainDialog::handle_page_change));
+	page_change_connection = file_notebook.signal_switch_page().connect (sigc::mem_fun (*this, &ExportMainDialog::handle_page_change));
 	new_file_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportMainDialog::add_new_file_page));
 	
 	/* Load states */
@@ -217,11 +218,15 @@ ExportMainDialog::close_dialog ()
 void
 ExportMainDialog::sync_with_manager ()
 {
-	/* Clear */
+	/* Clear pages from notebook
+	   The page switch handling has to be disabled during removing all pages due to a gtk bug
+	 */
 
+	page_change_connection.block();
 	while (file_notebook.get_n_pages() > 1) {
 		file_notebook.remove_page (0);
 	}
+	page_change_connection.block(false);
 	
 	page_counter = 1;
 	last_visible_page = 0;
@@ -603,8 +608,6 @@ ExportMainDialog::update_remove_file_page_sensitivity ()
 void
 ExportMainDialog::handle_page_change (GtkNotebookPage*, uint page)
 {
-	if (file_notebook.get_n_pages() == 2 && page == 0) { return; }
-
 	if (page + 1 == (uint32_t) file_notebook.get_n_pages()) {
 		file_notebook.set_current_page (last_visible_page);
 	} else {
