@@ -1181,15 +1181,9 @@ TimeAxisView::color_handler ()
 TimeAxisView*
 TimeAxisView::covers_y_position (double y)
 {
-	if (y_position < 0) {
-		abort ();
-	}
-
 	if (hidden()) {
 		return 0;
 	}
-       
-	cerr << name() << " check for " << y << " within " << y_position << " and + " << height << endl;
 
 	if (y_position <= y && y < (y_position + height)) {
 		return this;
