@@ -197,7 +197,7 @@ private:
 
 	/** FIXME: Make fully dynamic, map to URIs */
 	enum EventTypes {
-		midi_cc_type,
+		midi_cc_type=1,
 		midi_pc_type,
 		midi_pb_type,
 		midi_ca_type
