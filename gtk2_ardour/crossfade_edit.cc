@@ -65,7 +65,8 @@ CrossfadeEditor::Presets* CrossfadeEditor::fade_out_presets = 0;
 
 CrossfadeEditor::Half::Half ()
 	: line (0), 
-	  normative_curve (Parameter(GainAutomation, 0.0, 1.0, 1.0)), // FIXME: GainAutomation?
+	  //normative_curve (Parameter(GainAutomation, 0.0, 1.0, 1.0)), // FIXME: GainAutomation?
+	  normative_curve (Parameter(GainAutomation)),
 	  gain_curve (Parameter(GainAutomation))
 {
 }

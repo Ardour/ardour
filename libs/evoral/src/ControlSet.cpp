@@ -53,7 +53,7 @@ ControlSet::what_has_data (set<Parameter>& s) const
  * for \a parameter does not exist.
  */
 boost::shared_ptr<Control>
-ControlSet::control (Parameter parameter, bool create_if_missing)
+ControlSet::control (const Parameter& parameter, bool create_if_missing)
 {
 	Controls::iterator i = _controls.find(parameter);
 
@@ -73,7 +73,7 @@ ControlSet::control (Parameter parameter, bool create_if_missing)
 }
 
 boost::shared_ptr<const Control>
-ControlSet::control (Parameter parameter) const
+ControlSet::control (const Parameter& parameter) const
 {
 	Controls::const_iterator i = _controls.find(parameter);
 

@@ -414,7 +414,7 @@ Editor::hide_all_tracks (bool with_select)
 void
 Editor::build_route_list_menu ()
 {
-        using namespace Menu_Helpers;
+	using namespace Menu_Helpers;
 	using namespace Gtk;
 
 	route_list_menu = new Menu;
@@ -434,7 +434,7 @@ Editor::build_route_list_menu ()
 void
 Editor::set_all_tracks_visibility (bool yn)
 {
-        TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 
 	no_route_list_redisplay = true;
@@ -458,7 +458,7 @@ Editor::set_all_tracks_visibility (bool yn)
 void
 Editor::set_all_audio_visibility (int tracks, bool yn) 
 {
-        TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 
 	no_route_list_redisplay = true;

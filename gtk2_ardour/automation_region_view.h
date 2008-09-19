@@ -31,6 +31,7 @@
 
 namespace ARDOUR {
 	class AutomationList;
+	class Parameter;
 };
 
 class TimeAxisView;
@@ -41,6 +42,7 @@ public:
 	AutomationRegionView(ArdourCanvas::Group*,
 	                     AutomationTimeAxisView&,
 	                     boost::shared_ptr<ARDOUR::Region>,
+	                     const ARDOUR::Parameter& parameter,
 	                     boost::shared_ptr<ARDOUR::AutomationList>,
 	                     double initial_samples_per_unit,
 	                     Gdk::Color& basic_color);
@@ -57,9 +59,11 @@ public:
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(TimeAxisView&) { return NULL; }
 	
+	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);
 
 protected:
+	void create_line(boost::shared_ptr<ARDOUR::AutomationList> list);
 	bool set_position(nframes_t pos, void* src, double* ignored);
 	void set_y_position_and_height(double y, double h);
 	void region_resized(ARDOUR::Change what_changed);
@@ -69,6 +73,7 @@ protected:
 	void exited();
 
 private:
+	ARDOUR::Parameter                 _parameter;
 	boost::shared_ptr<AutomationLine> _line;
 };
 

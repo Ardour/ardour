@@ -22,6 +22,8 @@
 
 namespace Evoral {
 
+Parameter::TypeMetadata Parameter::_type_metadata;
+
 Control::Control(boost::shared_ptr<ControlList> list)
 	: _list(list)
 	, _user_value(list->default_value())
@@ -72,7 +74,7 @@ Control::set_list(boost::shared_ptr<ControlList> list)
 }
 
 	
-Parameter
+const Parameter&
 Control::parameter() const
 {
 	return _list->parameter();

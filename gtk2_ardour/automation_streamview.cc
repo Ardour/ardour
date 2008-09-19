@@ -88,8 +88,10 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 				region->control(_controller->controllable()->parameter()));
 
 	boost::shared_ptr<AutomationList> list;
-	if (control)
+	if (control) {
 		list = boost::dynamic_pointer_cast<AutomationList>(control->list());
+		assert(!control->list() || list);
+	}
 
 	AutomationRegionView *region_view;
 	std::list<RegionView *>::iterator i;
@@ -107,7 +109,8 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 		}
 	}
 	
-	region_view = new AutomationRegionView (canvas_group, _automation_view, region, list,
+	region_view = new AutomationRegionView (canvas_group, _automation_view, region,
+			_controller->controllable()->parameter(), list,
 			_samples_per_unit, region_color);
 		
 	region_view->init (region_color, false);

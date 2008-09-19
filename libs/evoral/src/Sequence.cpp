@@ -587,7 +587,7 @@ void Sequence::append_note_off_unlocked(uint8_t chan, double time,
 	}
 }
 
-void Sequence::append_control_unlocked(Parameter param, double time, double value)
+void Sequence::append_control_unlocked(const Parameter& param, double time, double value)
 {
 	control(param, true)->list()->rt_add(time, value);
 }

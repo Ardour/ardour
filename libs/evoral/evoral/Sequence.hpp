@@ -177,7 +177,7 @@ private:
 	
 	void append_note_on_unlocked(uint8_t chan, double time, uint8_t note, uint8_t velocity);
 	void append_note_off_unlocked(uint8_t chan, double time, uint8_t note);
-	void append_control_unlocked(Parameter param, double time, double value);
+	void append_control_unlocked(const Parameter& param, double time, double value);
 
 	mutable Glib::RWLock _lock;
 

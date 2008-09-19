@@ -46,7 +46,7 @@ public:
 	boost::shared_ptr<ControlList>       list()       { return _list; }
 	boost::shared_ptr<const ControlList> list() const { return _list; }
 
-	Parameter parameter() const;
+	const Parameter& parameter() const;
 
 protected:
 	boost::shared_ptr<ControlList> _list;

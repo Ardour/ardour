@@ -79,7 +79,7 @@ Parameter::Parameter(const std::string& str)
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
 
-	init((AutomationType)_type); // set min/max/normal
+	init_metadata((AutomationType)_type); // set min/max/normal
 }
 
 
@@ -114,7 +114,7 @@ Parameter::symbol() const
 	} else if (_type == MidiChannelAftertouchAutomation) {
 		return string_compose("midi-channel-aftertouch-%1", int(_channel));
 	} else {
-		PBD::warning << "Uninitialized Parameter to_string() called." << endmsg;
+		PBD::warning << "Uninitialized Parameter symbol() called." << endmsg;
 		return "";
 	}
 }

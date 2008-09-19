@@ -729,7 +729,23 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 void
 MidiTrack::MidiControl::set_value(float val)
 {
-	assert(val >= _list->parameter().min());
+	bool valid = false;
+	if (isinf(val)) {
+		cerr << "MIDIControl value is infinity" << endl;
+	} else if (isnan(val)) {
+		cerr << "MIDIControl value is NaN" << endl;
+	} else if (val < _list->parameter().min()) {
+		cerr << "MIDIControl value is < " << _list->parameter().min() << endl;
+	} else if (val > _list->parameter().max()) {
+		cerr << "MIDIControl value is > " << _list->parameter().max() << endl;
+	} else {
+		valid = true;
+	}
+	
+	if (!valid) {
+		return;
+	}
+
 	assert(val <= _list->parameter().max());
 	size_t size = 3;
 

@@ -85,6 +85,21 @@ AudioEngine::AudioEngine (string client_name)
 	}
 
 	Port::set_engine (this);
+	
+	Parameter::init_metadata(NullAutomation);
+	Parameter::init_metadata(GainAutomation);
+	Parameter::init_metadata(PanAutomation);
+	Parameter::init_metadata(PluginAutomation);
+	Parameter::init_metadata(SoloAutomation);
+	Parameter::init_metadata(MuteAutomation);
+	Parameter::init_metadata(MidiCCAutomation);
+	Parameter::init_metadata(MidiPgmChangeAutomation);
+	Parameter::init_metadata(MidiPitchBenderAutomation);
+	Parameter::init_metadata(MidiChannelAftertouchAutomation);
+	Parameter::init_metadata(FadeInAutomation);
+	Parameter::init_metadata(FadeOutAutomation);
+	Parameter::init_metadata(EnvelopeAutomation);
+	Parameter::init_metadata(MidiCCAutomation);
 }
 
 AudioEngine::~AudioEngine ()

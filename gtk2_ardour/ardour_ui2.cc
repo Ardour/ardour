@@ -115,7 +115,7 @@ ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuff
 	} else if (strcmp (prefix, _("[INFO]: ")) == 0) {
 		text = "<span color=\"green\" weight=\"bold\">";
 	} else {
-		text = "<span color=\"blue\" weight=\"bold\">???";
+		text = "<span color=\"white\" weight=\"bold\">???";
 	}
 
 	text += prefix;

@@ -77,7 +77,7 @@ class PluginInsert : public Processor
 	void  set_parameter (Parameter param, float val);
 	float get_parameter (Parameter param);
 
-	float default_parameter_value (Evoral::Parameter param);
+	float default_parameter_value (const Evoral::Parameter& param);
 	
 	struct PluginControl : public AutomationControl 
 	{

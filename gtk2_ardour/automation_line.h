@@ -143,8 +143,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	ArdourCanvas::Group&  _parent_group;
 	ArdourCanvas::Group*   group;
-	ArdourCanvas::Line*   line; /* line */
-	ArdourCanvas::Points  line_points; /* coordinates for canvas line */
+	ArdourCanvas::Line*    line; /* line */
+	ArdourCanvas::Points   line_points; /* coordinates for canvas line */
 	vector<ControlPoint*>  control_points; /* visible control points */
 
 	struct ALPoint {

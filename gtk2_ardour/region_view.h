@@ -58,7 +58,6 @@ class RegionView : public TimeAxisViewItem
 	
 	bool is_valid() const    { return valid; }
 
-
 	void set_valid (bool yn) { valid = yn; }
 	
 	virtual void set_height (double);

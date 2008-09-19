@@ -33,7 +33,7 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 }
 
 
-ControlList::ControlList (Parameter id)
+ControlList::ControlList (const Parameter& id)
 	: _parameter(id)
 	, _interpolation(Linear)
 	, _curve(new Curve(*this))

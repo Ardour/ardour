@@ -37,8 +37,8 @@ public:
 	ControlSet();
 	virtual ~ControlSet() {}
 
-	virtual boost::shared_ptr<Control> control(Evoral::Parameter id, bool create_if_missing=false);
-	virtual boost::shared_ptr<const Control> control(Evoral::Parameter id) const;
+	virtual boost::shared_ptr<Control> control(const Parameter& id, bool create_if_missing=false);
+	virtual boost::shared_ptr<const Control> control(const Parameter& id) const;
 	
 	virtual boost::shared_ptr<Control> control_factory(boost::shared_ptr<ControlList> list) const;
 	virtual boost::shared_ptr<ControlList> control_list_factory(const Parameter& param) const;
@@ -51,7 +51,7 @@ public:
 
 	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
 	
-	virtual float default_parameter_value(Parameter param) { return 1.0f; }
+	virtual float default_parameter_value(const Parameter& param) { return 1.0f; }
 
 	virtual void clear();
 

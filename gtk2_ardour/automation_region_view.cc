@@ -26,17 +26,16 @@
 AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                      parent,
                                            AutomationTimeAxisView&                   time_axis,
                                            boost::shared_ptr<ARDOUR::Region>         region,
+                                           const ARDOUR::Parameter&                  param,
                                            boost::shared_ptr<ARDOUR::AutomationList> list,
                                            double                                    spu,
                                            Gdk::Color&                               basic_color)
 	: RegionView(parent, time_axis, region, spu, basic_color)
+	, _parameter(param)
 { 
 	if (list) {
-		_line = boost::shared_ptr<AutomationLine>(new AutomationLine(
-					list->parameter().symbol(), time_axis, *group, list));
-		_line->set_colors();
-		_line->show();
-		_line->show_all_control_points();
+		assert(list->parameter() == param);
+		create_line(list);
 	}
 	
 	group->signal_event().connect (mem_fun (this, &AutomationRegionView::canvas_event), false);
@@ -62,6 +61,18 @@ AutomationRegionView::init (Gdk::Color& basic_color, bool wfd)
 	_enable_display = true;
 }
 
+void
+AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> list)
+{
+	_line = boost::shared_ptr<AutomationLine>(new AutomationLine(
+				list->parameter().symbol(), trackview, *get_canvas_group(), list));
+	_line->set_colors();
+	_line->show();
+	_line->show_all_control_points();
+	_line->set_y_position_and_height (trackview.y_position,
+		(uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
+}
+
 bool
 AutomationRegionView::canvas_event(GdkEvent* ev)
 {
@@ -79,9 +90,13 @@ void
 AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, double y)
 {
 	if (!_line) {
-		cerr << "ERROR: AutomationRegionView::add_automation_event called without line" << endl;
-		return;
+		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
+		boost::shared_ptr<ARDOUR::AutomationControl> ac
+				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
+		assert(ac);
+		create_line(ac->alist());
 	}
+	assert(_line);
 
 	double x = 0;
 	AutomationTimeAxisView* const view = automation_view();
@@ -109,14 +124,24 @@ AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, dou
 	view->session().set_dirty ();
 }
 
-
 void
 AutomationRegionView::set_y_position_and_height (double y, double h)
 {
+	cout << "ARV SET Y POSITION AND HEIGHT: " << y << ", " << h << endl;
 	RegionView::set_y_position_and_height(y, h - 1);
 
 	if (_line)
-		_line->set_y_position_and_height ((uint32_t)y, (uint32_t) rint (h - NAME_HIGHLIGHT_SIZE));
+		_line->set_y_position_and_height (y, h - NAME_HIGHLIGHT_SIZE);
+}
+
+void
+AutomationRegionView::set_height (double h)
+{
+	cout << "ARV SET HEIGHT: " << h << endl;
+	RegionView::set_height(h);
+	if (_line)
+		_line->set_y_position_and_height (trackview.y_position - h,
+				(uint32_t)rint(h - NAME_HIGHLIGHT_SIZE));
 }
 
 bool

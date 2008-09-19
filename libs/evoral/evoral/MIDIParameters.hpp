@@ -23,28 +23,33 @@ namespace Evoral {
 namespace MIDI {
 
 struct ContinuousController : public Parameter {
-	ContinuousController(uint32_t cc_type, uint32_t channel, uint32_t controller)
-	   : Parameter(cc_type, controller, channel) { set_range(*this); }
-	static void set_range(Parameter& p) { p.set_range(0.0, 127.0, 0.0); }
+	ContinuousController(uint32_t cc_type, uint8_t channel, uint32_t controller)
+		: Parameter(cc_type, channel, controller) {}
 };
 
 struct ProgramChange : public Parameter {
-	ProgramChange(uint32_t pc_type, uint32_t channel)
-	   : Parameter(pc_type, 0, channel) { set_range(*this); }
-	static void set_range(Parameter& p) { p.set_range(0.0, 127.0, 0.0); }
+	ProgramChange(uint32_t pc_type, uint8_t channel) : Parameter(pc_type, 0, channel) {}
 };
 
 struct ChannelAftertouch : public Parameter {
-	ChannelAftertouch(uint32_t ca_type, uint32_t channel)
-	   : Parameter(ca_type, 0, channel) { set_range(*this); }
-	static void set_range(Parameter& p) { p.set_range(0.0, 127.0, 0.0); }
+	ChannelAftertouch(uint32_t ca_type, uint32_t channel) : Parameter(ca_type, 0, channel) {}
 };
 
 struct PitchBender : public Parameter {
-	PitchBender(uint32_t pb_type, uint32_t channel)
-	   : Parameter(pb_type, 0, channel) { set_range(*this); }
-	static void set_range(Parameter& p) { p.set_range(0.0, 16383.0, 8192.0); }
+	PitchBender(uint32_t pb_type, uint32_t channel) : Parameter(pb_type, 0, channel) {}
 };
+
+inline static void controller_range(double& min, double& max, double& normal) {
+	min = 0.0;
+	normal = 0.0;
+	max = 127.0;
+}
+
+inline static void bender_range(double& min, double& max, double& normal) {
+	min = 0.0;
+	normal = 8192.0;
+	max = 16383.0;
+}
 
 } // namespace MIDI
 } // namespace Evoral

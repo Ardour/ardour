@@ -430,7 +430,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
 }	
 
 float
-PluginInsert::default_parameter_value (Evoral::Parameter param)
+PluginInsert::default_parameter_value (const Evoral::Parameter& param)
 {
 	if (param.type() != PluginAutomation)
 		return 1.0;

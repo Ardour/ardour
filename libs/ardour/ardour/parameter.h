@@ -47,50 +47,58 @@ public:
 	Parameter(AutomationType type = NullAutomation, uint32_t id=0, uint8_t channel=0)
 		: Evoral::Parameter((uint32_t)type, id, channel)
 	{
-		init(type);
+		init_metadata(type);
 	}
 	
+#if 0
 	Parameter(AutomationType type, double min, double max, double normal)
 		: Evoral::Parameter((uint32_t)type, 0, 0, min, max, normal)
 	{}
 	
+	Parameter(const Parameter& copy)
+		: Evoral::Parameter(copy)
+	{
+		_min = copy._min;
+		_max = copy._max;
+		_normal = copy._max;
+	}
+#endif
+
 	Parameter(const Evoral::Parameter& copy)
 		: Evoral::Parameter(copy)
 	{
-		init((AutomationType)_type);
 	}
 	
-	void init(AutomationType type) {
-		_normal = 0.0f;
+	static void init_metadata(AutomationType type) {
+		double min    = 0.0f;
+		double max    = 1.0f;
+		double normal = 0.0f;
 		switch(type) {
 		case NullAutomation:
 		case GainAutomation:
-			_min = 0.0f;
-			_max = 2.0f;
-			_normal = 1.0f;
+			max = 2.0f;
+			normal = 1.0f;
 			break;
 		case PanAutomation:
-			_min = 0.0f;
-			_max = 1.0f;
-			_normal = 0.5f;
+			normal = 0.5f;
+			break;
 		case PluginAutomation:
 		case SoloAutomation:
 		case MuteAutomation:
 		case FadeInAutomation:
 		case FadeOutAutomation:
 		case EnvelopeAutomation:
-			_min = 0.0f;
-			_max = 2.0f;
-			_normal = 1.0f;
+			max = 2.0f;
+			normal = 1.0f;
+			break;
 		case MidiCCAutomation:
-			Evoral::MIDI::ContinuousController::set_range(*this); break;
 		case MidiPgmChangeAutomation:
-			Evoral::MIDI::ProgramChange::set_range(*this); break;
-		case MidiPitchBenderAutomation:
-			Evoral::MIDI::PitchBender::set_range(*this); break;
 		case MidiChannelAftertouchAutomation:
-			Evoral::MIDI::ChannelAftertouch::set_range(*this); break;
+			Evoral::MIDI::controller_range(min, max, normal); break;
+		case MidiPitchBenderAutomation:
+			Evoral::MIDI::bender_range(min, max, normal); break;
 		}
+		set_range(type, min, max, normal);
 	}
 	
 	Parameter(const std::string& str);

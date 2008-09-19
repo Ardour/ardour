@@ -20,7 +20,10 @@
 #define EVORAL_PARAMETER_HPP
 
 #include <string>
+#include <map>
+#include <boost/shared_ptr.hpp>
 #include <boost/format.hpp>
+#include <iostream>
 
 namespace Evoral {
 
@@ -37,19 +40,27 @@ namespace Evoral {
 class Parameter
 {
 public:
-	Parameter(uint32_t type, uint32_t id, int8_t channel=0,
-			double min=0.0f, double max=0.0f, double def=0.0f)
-		: _type(type), _id(id), _channel(channel), _min(min), _max(max), _normal(def)
+	Parameter(uint32_t type, uint8_t channel, uint32_t id=0)
+		: _type(type), _id(id), _channel(channel)
 	{}
 	
-	//Parameter(const std::string& str);
+	Parameter(const std::string& str) {
+		int channel;
+		if (sscanf(str.c_str(), "%d_c%d_n%d", &_type, &channel, &_id) == 3) {
+			if (channel >= 0 && channel <= 127) {
+				_channel = channel;
+			} else {
+				std::cerr << "WARNING: Channel out of range: " << channel << std::endl;
+			}
+		}
+		std::cerr << "WARNING: Unable to create parameter from string: " << str << std::endl;
+	}
 
 	inline uint32_t type()    const { return _type; }
 	inline uint32_t id()      const { return _id; }
 	inline uint8_t  channel() const { return _channel; }
 
-	/**
-	 * Equivalence operator
+	/** Equivalence operator
 	 * It is obvious from the definition that this operator
 	 * is transitive, as required by stict weak ordering
 	 * (see: http://www.sgi.com/tech/stl/StrictWeakOrdering.html)
@@ -101,18 +112,37 @@ public:
 	inline operator bool() const { return (_type != 0); }
 	
 	virtual std::string symbol() const {
-		return (boost::format("%1%_c%2%_n%3%\n") % _type % _channel % _id).str();
+		return (boost::format("%1%_c%2%_n%3%") % _type % (int)_channel % _id).str();
+	}
+
+	/** Not used in indentity/comparison */
+	struct Metadata {
+		Metadata(double low=0.0, double high=1.0, double mid=0.0)
+			: min(low), max(high), normal(mid)
+		{}
+		double min;
+		double max;
+		double normal;
+	};
+	
+	inline static void set_range(uint32_t type, double min, double max, double normal) {
+		_type_metadata[type] = Metadata(min, max, normal);
 	}
 	
 	inline void set_range(double min, double max, double normal) {
-		_min = min;
-		_max = max;
-		_normal = normal;
+		_metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal));
 	}
-	
-	inline const double min()    const { return _min; }
-	inline const double max()    const { return _max; }
-	inline const double normal() const { return _normal; }
+
+	inline Metadata& metadata() const {
+		if (_metadata)
+			return *_metadata.get();
+		else
+			return _type_metadata[_type];
+	}
+
+	inline const double min()    const { return metadata().min; }
+	inline const double max()    const { return metadata().max; }
+	inline const double normal() const { return metadata().normal; }
 
 protected:
 	// Default copy constructor is ok
@@ -121,11 +151,11 @@ protected:
 	uint32_t _type;
 	uint32_t _id;
 	uint8_t  _channel;
+	
+	boost::shared_ptr<Metadata> _metadata;
 
-	// Metadata (not used in comparison)
-	double _min;
-	double _max;
-	double _normal;
+	typedef std::map<uint32_t, Metadata> TypeMetadata;
+	static TypeMetadata _type_metadata;
 };
 
 
