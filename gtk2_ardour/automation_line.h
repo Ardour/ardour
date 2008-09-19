@@ -56,7 +56,7 @@ namespace Gnome {
 class ControlPoint 
 {
   public:
-        ControlPoint (AutomationLine& al);
+	ControlPoint (AutomationLine& al);
 	ControlPoint (const ControlPoint&, bool dummy_arg_to_force_special_copy_constructor);
 	virtual ~ControlPoint ();
 
@@ -98,7 +98,7 @@ class ControlPoint
 class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
 {
   public:
-        AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
+	AutomationLine (const string & name, TimeAxisView&, ArdourCanvas::Group&, ARDOUR::AutomationList&);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -128,7 +128,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	bool    visible() const { return _visible; }
 	guint32 height() const { return _height; }
 
-	void         set_line_color (uint32_t);
+	void     set_line_color (uint32_t);
 	uint32_t get_line_color() const { return _line_color; }
 
 	void    show ();
@@ -145,7 +145,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void show_selection();
 	void hide_selection ();
 
-	virtual string  get_verbose_cursor_string (float);
+	virtual string get_verbose_cursor_string (float);
 	virtual void view_to_model_y (double&) = 0;
 	virtual void model_to_view_y (double&) = 0;
 
@@ -178,8 +178,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	ArdourCanvas::Group&  _parent_group;
 	ArdourCanvas::Group*   group;
-	ArdourCanvas::Line*   line; /* line */
-	ArdourCanvas::Points  line_points; /* coordinates for canvas line */
+	ArdourCanvas::Line*    line; /* line */
+	ArdourCanvas::Points   line_points; /* coordinates for canvas line */
 	vector<ControlPoint*>  control_points; /* visible control points */
 
 	struct ALPoint {
