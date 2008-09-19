@@ -50,7 +50,7 @@ const AudioFileSource::Flag SndFileSource::default_writable_flags = AudioFileSou
 											   AudioFileSource::CanRename);
 
 static void
-snprintf_bounded_null_filled (char* target, size_t target_size, char* fmt, ...)
+snprintf_bounded_null_filled (char* target, size_t target_size, const char* fmt, ...)
 {
 	char buf[target_size+1];
 	va_list ap;

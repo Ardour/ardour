@@ -37,7 +37,7 @@ ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<Importab
 	
 	/* Initialize the sample rate converter. */
 	
-	int src_type;
+	int src_type = SRC_SINC_BEST_QUALITY;
 
 	switch (srcq) {
 	case SrcBest:

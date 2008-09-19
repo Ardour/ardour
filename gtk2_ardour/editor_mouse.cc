@@ -2344,7 +2344,7 @@ Editor::start_marker_grab (ArdourCanvas::Item* item, GdkEvent* event)
 void
 Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	nframes64_t f_delta;	
+	nframes64_t f_delta = 0;
 	nframes64_t newframe;
 	bool is_start;
 	bool move_both = false;

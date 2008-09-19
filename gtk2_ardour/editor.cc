@@ -2278,7 +2278,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		break;
 	}
 
-	const char* action;
+	const char* action=NULL;
 
 	switch (_edit_point) {
 	case EditAtPlayhead:
@@ -4382,7 +4382,7 @@ Editor::idle_visual_changer ()
 
 	if (p & VisualChange::TimeOrigin) {
 
-		nframes64_t csf, cef;
+		nframes64_t csf=0, cef=0;
 		nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
 		if (session) {
