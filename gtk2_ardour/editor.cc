@@ -186,6 +186,15 @@ show_me_the_size (Requisition* r, const char* what)
 	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
 }
 
+void
+DragInfo::clear_copied_locations ()
+{
+	for (list<Location*>::iterator i = copied_locations.begin(); i != copied_locations.end(); ++i) {
+		delete *i;
+	}
+	copied_locations.clear ();
+}
+
 Editor::Editor ()
 	: 
 	  /* time display buttons */
@@ -253,7 +262,6 @@ Editor::Editor ()
 	clicked_control_point = 0;
 	last_update_frame = 0;
 	drag_info.item = 0;
-	drag_info.copied_location = 0;
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
 	

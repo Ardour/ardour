@@ -10,6 +10,8 @@
 #include <ardour/readable.h>
 #include <ardour/readable.h>
 
+#include <cstring>
+
 #include "i18n.h"
 
 using namespace std;

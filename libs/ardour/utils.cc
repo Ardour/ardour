@@ -20,7 +20,6 @@
 #include <cstdio> /* for sprintf */
 #include <cmath>
 #include <cctype>
-#include <string>
 #include <cstring>
 #include <cerrno>
 #include <iostream>

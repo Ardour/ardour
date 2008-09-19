@@ -330,24 +330,27 @@ Editor::_do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mo
 		}
 
 	} else {
-		bool replace;
+		bool replace = false;
 
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end() && ok; ++a) {
 
-			int check = check_whether_and_how_to_import(*a, true);
+			int check = check_whether_and_how_to_import (*a, true);
 
-			if (check == 2 ) { 
+			switch (check) {
+			case 2:
 				// skip
 				continue;
-			}
-
-			if (check == 0) {
-				fatal << "Updating existing sources should be disabled!" << endl;
-				replace = true;
-			} else if (check == 1) {
+			case 0:
+				fatal << "Updating existing sources should be disabled!" << endmsg;
+				/* NOTREACHED*/
+				break;
+			case 1:
 				replace = false;
+				break;
+			default:
+				fatal << "Illegal return " << check <<  " from check_whether_and_how_to_import()!" << endmsg;
+				/* NOTREACHED*/
 			}
-			
 
 			switch (chns) {
 				case Editing::ImportDistinctFiles:

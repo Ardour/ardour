@@ -20,6 +20,8 @@
 #ifndef __gtk2_ardour_drag_info_h_
 #define __gtk2_ardour_drag_info_h_
 
+#include <list>
+
 #include <gdk/gdk.h>
 #include <stdint.h>
 
@@ -64,7 +66,9 @@ struct DragInfo {
     bool move_threshold_passed;
     bool want_move_threshold;
     bool brushing;
-    ARDOUR::Location* copied_location;
+    std::list<ARDOUR::Location*> copied_locations;
+
+    void clear_copied_locations ();
 };
 
 struct LineDragInfo {

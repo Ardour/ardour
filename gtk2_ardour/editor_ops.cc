@@ -403,39 +403,44 @@ Editor::nudge_forward (bool next, bool force_playhead)
 	} else if (!force_playhead && !selection->markers.empty()) {
 
 		bool is_start;
-		Location* loc = find_location_from_marker (selection->markers.front(), is_start);
 
-		if (loc) {
-
-			begin_reversible_command (_("nudge location forward"));
-
-			XMLNode& before (loc->get_state());
-
-			if (is_start) {
-				distance = get_nudge_distance (loc->start(), next_distance);
-				if (next) {
-					distance = next_distance;
-				}
-				if (max_frames - distance > loc->start() + loc->length()) {
-					loc->set_start (loc->start() + distance);
+		begin_reversible_command (_("nudge location forward"));
+		
+		for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
+			
+			Location* loc = find_location_from_marker ((*i), is_start);
+			
+			if (loc) {
+				
+				XMLNode& before (loc->get_state());
+				
+				if (is_start) {
+					distance = get_nudge_distance (loc->start(), next_distance);
+					if (next) {
+						distance = next_distance;
+					}
+					if (max_frames - distance > loc->start() + loc->length()) {
+						loc->set_start (loc->start() + distance);
+					} else {
+						loc->set_start (max_frames - loc->length());
+					}
 				} else {
-					loc->set_start (max_frames - loc->length());
+					distance = get_nudge_distance (loc->end(), next_distance);
+					if (next) {
+						distance = next_distance;
+					}
+					if (max_frames - distance > loc->end()) {
+						loc->set_end (loc->end() + distance);
+					} else {
+						loc->set_end (max_frames);
+					}
 				}
-			} else {
-				distance = get_nudge_distance (loc->end(), next_distance);
-				if (next) {
-					distance = next_distance;
-				}
-				if (max_frames - distance > loc->end()) {
-					loc->set_end (loc->end() + distance);
-				} else {
-					loc->set_end (max_frames);
-				}
+				XMLNode& after (loc->get_state());
+				session->add_command (new MementoCommand<Location>(*loc, &before, &after));
 			}
-			XMLNode& after (loc->get_state());
-			session->add_command (new MementoCommand<Location>(*loc, &before, &after));
-			commit_reversible_command ();
 		}
+		
+		commit_reversible_command ();
 		
 	} else {
 		distance = get_nudge_distance (playhead_cursor->current_frame, next_distance);
@@ -483,41 +488,48 @@ Editor::nudge_backward (bool next, bool force_playhead)
 	} else if (!force_playhead && !selection->markers.empty()) {
 
 		bool is_start;
-		Location* loc = find_location_from_marker (selection->markers.front(), is_start);
 
-		if (loc) {
+		begin_reversible_command (_("nudge location forward"));
 
-			begin_reversible_command (_("nudge location forward"));
-			XMLNode& before (loc->get_state());
+		for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
 
-			if (is_start) {
-				distance = get_nudge_distance (loc->start(), next_distance);
-				if (next) {
-					distance = next_distance;
-				}
-				if (distance < loc->start()) {
-					loc->set_start (loc->start() - distance);
+			Location* loc = find_location_from_marker ((*i), is_start);
+			
+			if (loc) {
+				
+				XMLNode& before (loc->get_state());
+			
+				if (is_start) {
+					distance = get_nudge_distance (loc->start(), next_distance);
+					if (next) {
+						distance = next_distance;
+					}
+					if (distance < loc->start()) {
+						loc->set_start (loc->start() - distance);
+					} else {
+						loc->set_start (0);
+					}
 				} else {
-					loc->set_start (0);
+					distance = get_nudge_distance (loc->end(), next_distance);
+					
+					if (next) {
+						distance = next_distance;
+					}
+					
+					if (distance < loc->end() - loc->length()) {
+						loc->set_end (loc->end() - distance);
+					} else {
+						loc->set_end (loc->length());
+					}
 				}
-			} else {
-				distance = get_nudge_distance (loc->end(), next_distance);
-
-				if (next) {
-					distance = next_distance;
-				}
-
-				if (distance < loc->end() - loc->length()) {
-					loc->set_end (loc->end() - distance);
-				} else {
-					loc->set_end (loc->length());
-				}
+				
+				XMLNode& after (loc->get_state());
+				session->add_command (new MementoCommand<Location>(*loc, &before, &after));
 			}
-
-			XMLNode& after (loc->get_state());
-			session->add_command (new MementoCommand<Location>(*loc, &before, &after));
 		}
-		
+
+		commit_reversible_command ();
+			
 	} else {
 
 		distance = get_nudge_distance (playhead_cursor->current_frame, next_distance);

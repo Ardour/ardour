@@ -410,7 +410,7 @@ Editor::controls_layout_size_request (Requisition* req)
 		/* this one is important: it determines how big the layout thinks it really is, as 
 		   opposed to what it displays on the screen
 		*/
-		controls_layout.set_size (edit_controls_vbox.get_width(), pos );
+		controls_layout.set_size (edit_controls_vbox.get_width(), (guint) floor (pos));
 		controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
 		time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
 		zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
@@ -641,7 +641,6 @@ Editor::autoscroll_canvas ()
 	nframes64_t new_frame;
 	nframes64_t limit = max_frames - current_page_frames();
 	GdkEventMotion ev;
-	bool in_track_canvas;
 	double new_pixel;
 	double target_pixel;
 

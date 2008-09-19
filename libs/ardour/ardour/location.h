@@ -100,14 +100,15 @@ class Location : public PBD::StatefulDestructible
 	void set_is_end (bool yn, void* src);
 	void set_is_start (bool yn, void* src);
 
-	bool is_auto_punch ()  { return _flags & IsAutoPunch; }
-	bool is_auto_loop () { return _flags & IsAutoLoop; }
-	bool is_mark () { return _flags & IsMark; }
-	bool is_hidden () { return _flags & IsHidden; }
-	bool is_cd_marker () { return _flags & IsCDMarker; }
-	bool is_end() { return _flags & IsEnd; }
-	bool is_start() { return _flags & IsStart; }
-	bool is_range_marker() { return _flags & IsRangeMarker; }
+	bool is_auto_punch () const { return _flags & IsAutoPunch; }
+	bool is_auto_loop () const { return _flags & IsAutoLoop; }
+	bool is_mark () const { return _flags & IsMark; }
+	bool is_hidden () const { return _flags & IsHidden; }
+	bool is_cd_marker () const { return _flags & IsCDMarker; }
+	bool is_end() const { return _flags & IsEnd; }
+	bool is_start() const { return _flags & IsStart; }
+	bool is_range_marker() const { return _flags & IsRangeMarker; }
+	bool matches (Flags f) const { return _flags & f; }
 
 	sigc::signal<void,Location*> name_changed;
 	sigc::signal<void,Location*> end_changed;
@@ -174,6 +175,8 @@ class Locations : public PBD::StatefulDestructible
 
 	nframes_t first_mark_before (nframes_t, bool include_special_ranges = false);
 	nframes_t first_mark_after (nframes_t, bool include_special_ranges = false);
+
+	void find_all_between (nframes64_t start, nframes64_t, LocationList&, Location::Flags);
 
 	sigc::signal<void,Location*> current_changed;
 	sigc::signal<void>           changed;

@@ -93,6 +93,7 @@ class Selection : public sigc::trackable
 
 	bool selected (TimeAxisView*);
 	bool selected (RegionView*);
+	bool selected (Marker*);
 
 	void set (std::list<Selectable*>&);
 	void add (std::list<Selectable*>&);
@@ -133,6 +134,7 @@ class Selection : public sigc::trackable
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void add (boost::shared_ptr<ARDOUR::Redirect>);
 	void add (Marker*);
+	void add (const std::list<Marker*>&);
 	void add (const RegionSelection&);
 
 	void remove (TimeAxisView*);

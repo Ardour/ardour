@@ -42,7 +42,7 @@ Editor::Cursor::Cursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanv
 	points.push_back(Gnome::Art::Point(1.0, 1.0));
 
 	canvas_item.property_points() = points;
-	canvas_item.property_width_pixels() = 1.0;
+	canvas_item.property_width_pixels() = 1;
 	canvas_item.property_first_arrowhead() = TRUE;
 	canvas_item.property_last_arrowhead() = TRUE;
 	canvas_item.property_arrow_shape_a() = 11.0;
