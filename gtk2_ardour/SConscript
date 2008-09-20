@@ -35,7 +35,6 @@ gtkardour.Merge ([
     libraries['cairomm'],
     libraries['fftw3'],
     libraries['fftw3f'],
-    libraries['flac'],
     libraries['freetype2'],
     libraries['gdkmm2'],
     libraries['glib2'],

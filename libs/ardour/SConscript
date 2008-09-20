@@ -334,8 +334,6 @@ ardour.Merge ([
 	     libraries['raptor'],
 	     libraries['samplerate'],
 	     libraries['sigc2'],
-	     libraries['ogg'],
-	     libraries['flac'],
 	     libraries['sndfile'],
 	     libraries['taglib'],
 	     libraries['vamp'],
