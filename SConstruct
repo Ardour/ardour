@@ -506,12 +506,6 @@ libraries = { }
 
 libraries['core'] = LibraryInfo (CCFLAGS = '-Ilibs')
 
-libraries['flac'] = LibraryInfo ()
-libraries['flac'].ParseConfig ('pkg-config --cflags --libs flac')
-
-libraries['ogg'] = LibraryInfo ()
-libraries['ogg'].ParseConfig ('pkg-config --cflags --libs ogg')
-
 libraries['sndfile'] = LibraryInfo()
 libraries['sndfile'].ParseConfig('pkg-config --cflags --libs sndfile')
 
