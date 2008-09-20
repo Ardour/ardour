@@ -3576,7 +3576,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			}
 
 			rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			rv2->get_canvas_group()->i2w (ix1, iy1);
+			rv2->get_canvas_frame()->i2w (ix1, iy1);
 			iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
@@ -3735,7 +3735,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	
 					double ix1, ix2, iy1, iy2;
 					rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-					rv2->get_canvas_group()->i2w (ix1, iy1);
+					rv2->get_canvas_frame()->i2w (ix1, iy1);
 			
 					if (-x_delta > ix1 + horizontal_adjustment.get_value()) {
 						//	do_move = false;
@@ -3802,7 +3802,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			*/
 
 			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-			rv->get_canvas_group()->i2w (ix1, iy1);
+			rv->get_canvas_frame()->i2w (ix1, iy1);
 
 			if (drag_info.first_move) {
 
@@ -4009,7 +4009,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		RegionView* rv = (*i);	    	    
 		double ix1, ix2, iy1, iy2;
 		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-		rv->get_canvas_group()->i2w (ix1, iy1);
+		rv->get_canvas_frame()->i2w (ix1, iy1);
 		iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
 		TimeAxisView* dest_tv = trackview_by_y_position (iy1);

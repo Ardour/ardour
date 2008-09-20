@@ -347,7 +347,6 @@ Editor::Editor ()
 	last_canvas_frame = 0;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
-	canvas_idle_queued = false;
 	_dragging_playhead = false;
 	_dragging_edit_point = false;
 	_dragging_hscrollbar = false;
@@ -1266,6 +1265,8 @@ Editor::connect_to_session (Session *t)
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
 	nudge_clock.set (session->frame_rate() * 5); // default of 5 seconds
+
+	playhead_cursor->canvas_item.show ();
 
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (session);
@@ -4304,8 +4305,6 @@ Editor::session_state_saved (string snap_name)
 void
 Editor::maximise_editing_space ()
 {
-	initial_ruler_update_required = true;
-
 	mouse_mode_tearoff->set_visible (false);
 	tools_tearoff->set_visible (false);
 
@@ -4329,8 +4328,6 @@ Editor::maximise_editing_space ()
 void
 Editor::restore_editing_space ()
 {
-	initial_ruler_update_required = true;
-
 	// user changed width of pane during fullscreen
 
 	if(post_maximal_pane_position != edit_pane.get_position()) {

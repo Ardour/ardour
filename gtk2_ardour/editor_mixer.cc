@@ -324,6 +324,8 @@ Editor::session_going_away ()
 	drag_info.item = 0;
 	last_canvas_frame = 0;
 
+	playhead_cursor->canvas_item.hide ();
+
 	/* hide all tracks */
 
 	hide_all_tracks (false);

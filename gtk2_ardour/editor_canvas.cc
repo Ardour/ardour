@@ -258,8 +258,6 @@ Editor::initialize_canvas ()
 
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
 
-	initial_ruler_update_required = true;
-
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
 	}
@@ -303,26 +301,13 @@ void
 Editor::track_canvas_allocate (Gtk::Allocation alloc)
 {
 	canvas_allocation = alloc;
-
-	if (!initial_ruler_update_required) {
-		if (!canvas_idle_queued) {
-			/* call this first so that we do stuff before any pending redraw */
-			Glib::signal_idle().connect (mem_fun (*this, &Editor::track_canvas_size_allocated), false);
-			canvas_idle_queued = true;
-		}
-		return;
-	} 
-
-	initial_ruler_update_required = false;
 	track_canvas_size_allocated ();
 }
 
 bool
 Editor::track_canvas_size_allocated ()
 {
-	if (canvas_idle_queued) {
-		canvas_idle_queued = false;
-	}
+	bool height_changed = canvas_height != canvas_allocation.get_height();
 
 	canvas_width = canvas_allocation.get_width();
 	canvas_height = canvas_allocation.get_height();
@@ -340,45 +325,36 @@ Editor::track_canvas_size_allocated ()
 		}
 		
 		full_canvas_height = height + canvas_timebars_vsize;
+	} else {
+		return true;
 	}
 
-	zoom_range_clock.set ((nframes64_t) floor ((canvas_width * frames_per_unit)));
-	playhead_cursor->set_position (playhead_cursor->current_frame);
-
+	if (height_changed) {
+		if (playhead_cursor) {
+			playhead_cursor->set_length (canvas_height);
+		}
+		
+		vertical_adjustment.set_page_size (canvas_height);
+		
+		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+			(*x)->set_line_vpos (0, canvas_height);
+		}
+		
+		//	marker_drag_line_points.back().set_y(canvas_height);
+		range_marker_drag_rect->property_y2() = canvas_height;
+		transport_loop_range_rect->property_y2() = canvas_height;
+		transport_punch_range_rect->property_y2() = canvas_height;
+		transport_punchin_line->property_y2() = canvas_height;
+		transport_punchout_line->property_y2() = canvas_height;
+	}
 	horizontal_adjustment.set_upper (session->current_end_frame()/frames_per_unit);
 	horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
-
 	reset_hscrollbar_stepping ();
-
-	if (playhead_cursor) {
-		playhead_cursor->set_length (canvas_height);
-	}
-
-	vertical_adjustment.set_page_size (canvas_height);
- 	
-	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->set_line_vpos (0, canvas_height);
-	}
-
-	marker_drag_line_points.back().set_y(canvas_height);
-	range_marker_drag_rect->property_y2() = canvas_height;
-	transport_loop_range_rect->property_y2() = canvas_height;
-	transport_punch_range_rect->property_y2() = canvas_height;
-	transport_punchin_line->property_y2() = canvas_height;
-	transport_punchout_line->property_y2() = canvas_height;
-
-	tempo_bar->property_x2() = canvas_width;
-	meter_bar->property_x2() = canvas_width;
-	marker_bar->property_x2() = canvas_width;
-	cd_marker_bar->property_x2() = canvas_width;
-	range_marker_bar->property_x2() = canvas_width;
-	transport_marker_bar->property_x2() = canvas_width;
-
 	update_fixed_rulers();
-	redisplay_tempo (true);
-
+	redisplay_tempo (false);
+	
 	Resized (); /* EMIT_SIGNAL */
-
+		
 	return false;
 }
 
