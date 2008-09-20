@@ -105,7 +105,7 @@ void MackieControlProtocol::read_ports()
 	for ( int p = 0; p < nfds; ++p )
 	{
 		// this will cause handle_midi_any in the MackiePort to be triggered
-		if ( pfd[p].revents & POLLIN > 0 )
+		if ( (pfd[p].revents & POLLIN) > 0 )
 		{
 			// avoid deadlocking?
 			// doesn't seem to make a difference
