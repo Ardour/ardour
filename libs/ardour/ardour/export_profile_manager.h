@@ -70,7 +70,7 @@ class ExportProfileManager
 	typedef std::list<PresetPtr> PresetList;
 	
 	PresetList const & get_presets () { return preset_list; }
-	void load_preset (PresetPtr preset);
+	bool load_preset (PresetPtr preset);
 	PresetPtr save_preset (string const & name);
 	void remove_preset ();
 
@@ -86,9 +86,9 @@ class ExportProfileManager
 	void load_presets ();
 	void load_preset_from_disk (PBD::sys::path const & path);
 	
-	void set_state (XMLNode const & root);
-	void set_global_state (XMLNode const & root);
-	void set_local_state (XMLNode const & root);
+	bool set_state (XMLNode const & root);
+	bool set_global_state (XMLNode const & root);
+	bool set_local_state (XMLNode const & root);
 	
 	void serialize_profile (XMLNode & root);
 	void serialize_global_profile (XMLNode & root);
@@ -149,7 +149,7 @@ class ExportProfileManager
 
 	TimespanStateList timespans;
 
-	void init_timespans (XMLNodeList nodes);
+	bool init_timespans (XMLNodeList nodes);
 	
 	TimespanStatePtr deserialize_timespan (XMLNode & root);
 	XMLNode & serialize_timespan (TimespanStatePtr state);
@@ -181,10 +181,7 @@ class ExportProfileManager
 
 	ChannelConfigStateList channel_configs;
 
-	void init_channel_configs (XMLNodeList nodes);
-
-	ChannelConfigStatePtr deserialize_channel_config (XMLNode & root);
-	XMLNode & serialize_channel_config (ChannelConfigStatePtr state);
+	bool init_channel_configs (XMLNodeList nodes);
 
 /* Formats */
   public:
@@ -216,7 +213,7 @@ class ExportProfileManager
 
 	FormatStateList formats;
 
-	void init_formats (XMLNodeList nodes);
+	bool init_formats (XMLNodeList nodes);
 	FormatStatePtr deserialize_format (XMLNode & root);
 	XMLNode & serialize_format (FormatStatePtr state);
 
@@ -249,11 +246,7 @@ class ExportProfileManager
 
 	FilenameStateList filenames;
 	
-	void init_filenames (XMLNodeList nodes);
-	
-	FilenameStatePtr deserialize_filename (XMLNode & root);
-	XMLNode & serialize_filename (FilenameStatePtr state);
-
+	bool init_filenames (XMLNodeList nodes);
 	FilenamePtr load_filename (XMLNode & node);
 
 /* Warnings */

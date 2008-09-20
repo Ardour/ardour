@@ -29,7 +29,6 @@
 #include <pbd/xml++.h>
 #include <pbd/convert.h>
 
-#include <ardour/audioengine.h>
 #include <ardour/export_failed.h>
 #include <ardour/export_format_specification.h>
 #include <ardour/export_timespan.h>
@@ -37,6 +36,7 @@
 #include <ardour/export_filename.h>
 #include <ardour/export_preset.h>
 #include <ardour/export_handler.h>
+#include <ardour/filename_extensions.h>
 #include <ardour/session.h>
 
 #include "i18n.h"
@@ -121,26 +121,32 @@ ExportProfileManager::prepare_for_export ()
 	}
 }
 
-void
+bool
 ExportProfileManager::load_preset (PresetPtr preset)
 {
+	bool ok = true;
+
 	current_preset = preset;
-	if (!preset) { return; }
+	if (!preset) { return false; }
 
 	XMLNode const * state;
 	if ((state = preset->get_local_state())) {
 		set_local_state (*state);
-	}
+	} else { ok = false; }
 	
 	if ((state = preset->get_global_state())) {
-		set_global_state (*state);
-	}
+		if (!set_global_state (*state)) {
+			ok = false;
+		}
+	} else { ok = false; }
+	
+	return ok;
 }
 
 void
 ExportProfileManager::load_presets ()
 {
-	vector<sys::path> found = find_file ("*.preset");
+	vector<sys::path> found = find_file (string_compose (X_("*%1"),export_preset_suffix));
 
 	for (vector<sys::path>::iterator it = found.begin(); it != found.end(); ++it) {
 		load_preset_from_disk (*it);
@@ -151,7 +157,7 @@ ExportProfileManager::PresetPtr
 ExportProfileManager::save_preset (string const & name)
 {
 	if (!current_preset) {
-		string filename = export_config_dir.to_string() + "/" + name + ".preset";
+		string filename = export_config_dir.to_string() + "/" + name + export_preset_suffix;
 		current_preset.reset (new ExportPreset (filename, session));
 		preset_list.push_back (current_preset);
 	}
@@ -205,25 +211,24 @@ ExportProfileManager::load_preset_from_disk (PBD::sys::path const & path)
 	preset_file_map.insert (pair);
 }
 
-void
+bool
 ExportProfileManager::set_state (XMLNode const & root)
 {
-	set_global_state (root);
-	set_local_state (root);
+	return set_global_state (root) && set_local_state (root);
 }
 
-void
+bool
 ExportProfileManager::set_global_state (XMLNode const & root)
 {
-	init_formats (root.children ("ExportFormat"));
-	init_filenames (root.children ("ExportFilename"));
+	return init_filenames (root.children ("ExportFilename")) &&
+	       init_formats (root.children ("ExportFormat"));
 }
 
-void
+bool
 ExportProfileManager::set_local_state (XMLNode const & root)
 {
-	init_timespans (root.children ("ExportTimespan"));;
-	init_channel_configs (root.children ("ExportChannelConfiguration"));
+	return init_timespans (root.children ("ExportTimespan")) &&
+	       init_channel_configs (root.children ("ExportChannelConfiguration"));
 }
 
 void
@@ -241,7 +246,7 @@ ExportProfileManager::serialize_global_profile (XMLNode & root)
 	}
 
 	for (FilenameStateList::iterator it = filenames.begin(); it != filenames.end(); ++it) {
-		root.add_child_nocopy (serialize_filename (*it));
+		root.add_child_nocopy ((*it)->filename->get_state());
 	}
 }
 
@@ -253,7 +258,7 @@ ExportProfileManager::serialize_local_profile (XMLNode & root)
 	}
 	
 	for (ChannelConfigStateList::iterator it = channel_configs.begin(); it != channel_configs.end(); ++it) {
-		root.add_child_nocopy (serialize_channel_config (*it));
+		root.add_child_nocopy ((*it)->config->get_state());
 	}
 }
 
@@ -285,7 +290,7 @@ ExportProfileManager::set_selection_range (nframes_t start, nframes_t end)
 	}
 }
 
-void
+bool
 ExportProfileManager::init_timespans (XMLNodeList nodes)
 {
 	timespans.clear ();
@@ -296,12 +301,14 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 		TimespanStatePtr timespan (new TimespanState (session_range, selection_range, ranges));
 	
 		timespans.push_back (timespan);
-		return;
+		return false;
 	}
 
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
 		timespans.push_back (deserialize_timespan (**it));
 	}
+	
+	return true;
 }
 
 ExportProfileManager::TimespanStatePtr
@@ -384,7 +391,7 @@ ExportProfileManager::update_ranges () {
 	}
 }
 
-void
+bool
 ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 {
 	channel_configs.clear();
@@ -392,70 +399,16 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 	if (nodes.empty()) {	
 		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config()));
 		channel_configs.push_back (config);
-		return;
+		return false;
 	}
 	
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
-		channel_configs.push_back (deserialize_channel_config (**it));
-	}
-}
-
-ExportProfileManager::ChannelConfigStatePtr
-ExportProfileManager::deserialize_channel_config (XMLNode & root)
-{
-
-	ChannelConfigStatePtr state (new ChannelConfigState (handler->add_channel_config()));
-	XMLProperty const * prop;
-	
-	if ((prop = root.property ("split"))) {
-		state->config->set_split(!prop->value().compare ("true"));
-	}
-
-	XMLNodeList channels = root.children ("Channel");
-	for (XMLNodeList::iterator it = channels.begin(); it != channels.end(); ++it) {
-		boost::shared_ptr<ExportChannel> channel (new ExportChannel ());
-	
-		XMLNodeList ports = (*it)->children ("Port");
-		for (XMLNodeList::iterator p_it = ports.begin(); p_it != ports.end(); ++p_it) {
-			if ((prop = (*p_it)->property ("name"))) {
-				channel->add_port (dynamic_cast<AudioPort *> (session.engine().get_port_by_name (prop->value())));
-			}
-		}
-	
-		state->config->register_channel (channel);
-	}
-
-	return state;
-}
-
-XMLNode &
-ExportProfileManager::serialize_channel_config (ChannelConfigStatePtr state)
-{
-	XMLNode * root = new XMLNode ("ExportChannelConfiguration");
-	XMLNode * channel;
-	XMLNode * port_node;
-	
-	root->add_property ("split", state->config->get_split() ? "true" : "false");
-	root->add_property ("channels", to_string (state->config->get_n_chans(), std::dec));
-	
-	uint32_t i = 1;
-	ExportChannelConfiguration::ChannelList const & chan_list = state->config->get_channels();
-	for (ExportChannelConfiguration::ChannelList::const_iterator c_it = chan_list.begin(); c_it != chan_list.end(); ++c_it) {
-		channel = root->add_child ("Channel");
-		if (!channel) { continue; }
-		
-		channel->add_property ("number", to_string (i, std::dec));
-		
-		for (ExportChannel::const_iterator p_it = (*c_it)->begin(); p_it != (*c_it)->end(); ++p_it) {
-			if ((port_node = channel->add_child ("Port"))) {
-				port_node->add_property ("name", (*p_it)->name());
-			}
-		}
-		
-		++i;
+		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config()));
+		config->config->set_state (**it);
+		channel_configs.push_back (config);
 	}
 	
-	return *root;
+	return true;
 }
 
 ExportProfileManager::FormatStatePtr
@@ -488,7 +441,7 @@ ExportProfileManager::save_format_to_disk (FormatPtr format)
 	/* Get filename for file */
 
 	Glib::ustring new_name = format->name();
-	new_name += ".format";
+	new_name += export_format_suffix;
 	
 	sys::path new_path (export_config_dir);
 	new_path /= new_name;
@@ -561,21 +514,24 @@ ExportProfileManager::get_new_format (FormatPtr original)
 	return format;
 }
 
-void
+bool
 ExportProfileManager::init_formats (XMLNodeList nodes)
 {
+	bool ok = true;
 	formats.clear();
 
 	if (nodes.empty()) {
 		FormatStatePtr format (new FormatState (format_list, FormatPtr ()));
 		formats.push_back (format);
-		return;
+		return false;
 	}
 	
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
 		FormatStatePtr format;
 		if ((format = deserialize_format (**it))) {
 			formats.push_back (format);
+		} else {
+			ok = false;
 		}
 	}
 	
@@ -583,6 +539,8 @@ ExportProfileManager::init_formats (XMLNodeList nodes)
 		FormatStatePtr format (new FormatState (format_list, FormatPtr ()));
 		formats.push_back (format);
 	}
+	
+	return ok;
 }
 
 ExportProfileManager::FormatStatePtr
@@ -618,7 +576,7 @@ ExportProfileManager::serialize_format (FormatStatePtr state)
 void
 ExportProfileManager::load_formats ()
 {
-	vector<sys::path> found = find_file ("*.format");
+	vector<sys::path> found = find_file (string_compose ("*%1", export_format_suffix));
 
 	for (vector<sys::path>::iterator it = found.begin(); it != found.end(); ++it) {
 		load_format_from_disk (*it);
@@ -659,7 +617,7 @@ ExportProfileManager::remove_filename_state (FilenameStatePtr state)
 	}
 }
 
-void
+bool
 ExportProfileManager::init_filenames (XMLNodeList nodes)
 {
 	filenames.clear ();
@@ -667,26 +625,16 @@ ExportProfileManager::init_filenames (XMLNodeList nodes)
 	if (nodes.empty()) {
 		FilenameStatePtr filename (new FilenameState (handler->add_filename()));
 		filenames.push_back (filename);
-		return;
+		return false;
 	}
 	
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
-		filenames.push_back (deserialize_filename (**it));
+		FilenamePtr filename = handler->add_filename();
+		filename->set_state (**it);
+		filenames.push_back (FilenameStatePtr (new FilenameState (filename)));
 	}
-}
-
-ExportProfileManager::FilenameStatePtr
-ExportProfileManager::deserialize_filename (XMLNode & root)
-{
-	FilenamePtr filename = handler->add_filename();
-	filename->set_state (root);
-	return FilenameStatePtr (new FilenameState (filename));
-}
-
-XMLNode &
-ExportProfileManager::serialize_filename (FilenameStatePtr state)
-{
-	return state->filename->get_state();
+	
+	return true;
 }
 
 boost::shared_ptr<ExportProfileManager::Warnings>

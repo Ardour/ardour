@@ -11,5 +11,7 @@ const char* const peakfile_suffix = X_(".peak");
 const char* const backup_suffix = X_(".bak");
 const char* const temp_suffix = X_(".tmp");
 const char* const history_suffix = X_(".history");
+const char* const export_preset_suffix = X_(".preset");
+const char* const export_format_suffix = X_(".format");
 
 }

@@ -409,11 +409,20 @@ ExportMainDialog::select_preset ()
 {
 	Gtk::ListStore::iterator it = preset_entry.get_active ();
 	Glib::ustring text = preset_entry.get_entry()->get_text();
+	bool preset_name_exists = false;
+	
+	for (PresetList::const_iterator it = profile_manager->get_presets().begin(); it != profile_manager->get_presets().end(); ++it) {
+		if (!(*it)->name().compare (text)) { preset_name_exists = true; }
+	}
 	
 	if (preset_list->iter_is_valid (it)) {
 	
 		previous_preset = current_preset = it->get_value (preset_cols.preset);
-		profile_manager->load_preset (current_preset);
+		if (!profile_manager->load_preset (current_preset)) {
+			Gtk::MessageDialog dialog (_("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
+			                           false, Gtk::MESSAGE_WARNING);
+			dialog.run ();
+		}
 		sync_with_manager ();
 		
 		/* Make an edit, so that signal changed will be emitted on re-selection */
@@ -436,7 +445,7 @@ ExportMainDialog::select_preset ()
 	
 	preset_save_button.set_sensitive (current_preset);
 	preset_remove_button.set_sensitive (current_preset);
-	preset_new_button.set_sensitive (!current_preset && !text.empty());
+	preset_new_button.set_sensitive (!current_preset && !text.empty() && !preset_name_exists);
 }
 
 void

@@ -11,6 +11,8 @@ extern const char* const peakfile_suffix;
 extern const char* const backup_suffix;
 extern const char* const temp_suffix;
 extern const char* const history_suffix;
+extern const char* const export_preset_suffix;
+extern const char* const export_format_suffix;
 
 }
 

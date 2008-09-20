@@ -30,6 +30,8 @@
 #include <ardour/export_status.h>
 #include <ardour/ardour.h>
 
+#include <pbd/xml++.h>
+
 using Glib::ustring;
 
 namespace ARDOUR
@@ -42,13 +44,11 @@ class ExportFormatSpecification;
 class ExportFilename;
 class ExportProcessor;
 class ExportTimespan;
+class Session;
 
 class ExportChannel : public std::set<AudioPort *>
 {
   public:
-	ExportChannel ();
-	~ExportChannel ();
-	
 	void add_port (AudioPort * port) { if (port) { insert (port); } }
 	void read_ports (float * data, nframes_t frames) const;
 };
@@ -80,10 +80,11 @@ class ExportChannelConfiguration
 
   private:
 	friend class ExportElementFactory;
-	ExportChannelConfiguration (ExportStatus & status);
+	ExportChannelConfiguration (ExportStatus & status, Session & session);
 	
   public:
-	~ExportChannelConfiguration ();
+	XMLNode & get_state ();
+	int set_state (const XMLNode &);
 	
 	typedef boost::shared_ptr<ExportChannel const> ChannelPtr;
 	typedef std::list<ChannelPtr> ChannelList;
@@ -113,6 +114,8 @@ class ExportChannelConfiguration
 	void unregister_all ();
 	
   private:
+
+	 Session & session;
 
 	// processor has to be prepared before doing this.
 	void write_file ();

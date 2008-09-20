@@ -28,22 +28,16 @@
 #include <ardour/audio_port.h>
 #include <ardour/export_failed.h>
 #include <ardour/midi_port.h>
+#include <ardour/session.h>
+#include <ardour/audioengine.h>
+
+#include <pbd/convert.h>
 #include <pbd/pthread_utils.h>
 
 namespace ARDOUR
 {
 
 /* ExportChannel */
-
-ExportChannel::ExportChannel ()
-{
-
-}
-
-ExportChannel::~ExportChannel ()
-{
-
-}
 
 void
 ExportChannel::read_ports (float * data, nframes_t frames) const
@@ -63,7 +57,8 @@ ExportChannel::read_ports (float * data, nframes_t frames) const
 
 /* ExportChannelConfiguration */
 
-ExportChannelConfiguration::ExportChannelConfiguration (ExportStatus & status) :
+ExportChannelConfiguration::ExportChannelConfiguration (ExportStatus & status,  Session & session) :
+  session (session),
   writer_thread (*this),
   status (status),
   files_written (false),
@@ -72,9 +67,60 @@ ExportChannelConfiguration::ExportChannelConfiguration (ExportStatus & status) :
 
 }
 
-ExportChannelConfiguration::~ExportChannelConfiguration ()
-{
 
+XMLNode &
+ExportChannelConfiguration::get_state ()
+{
+	XMLNode * root = new XMLNode ("ExportChannelConfiguration");
+	XMLNode * channel;
+	XMLNode * port_node;
+	
+	root->add_property ("split", get_split() ? "true" : "false");
+	root->add_property ("channels", to_string (get_n_chans(), std::dec));
+	
+	uint32_t i = 1;
+	for (ExportChannelConfiguration::ChannelList::const_iterator c_it = channels.begin(); c_it != channels.end(); ++c_it) {
+		channel = root->add_child ("Channel");
+		if (!channel) { continue; }
+		
+		channel->add_property ("number", to_string (i, std::dec));
+		
+		for (ExportChannel::const_iterator p_it = (*c_it)->begin(); p_it != (*c_it)->end(); ++p_it) {
+			if ((port_node = channel->add_child ("Port"))) {
+				port_node->add_property ("name", (*p_it)->name());
+			}
+		}
+		
+		++i;
+	}
+	
+	return *root;
+}
+
+int
+ExportChannelConfiguration::set_state (const XMLNode & root)
+{
+	XMLProperty const * prop;
+	
+	if ((prop = root.property ("split"))) {
+		set_split (!prop->value().compare ("true"));
+	}
+
+	XMLNodeList channels = root.children ("Channel");
+	for (XMLNodeList::iterator it = channels.begin(); it != channels.end(); ++it) {
+		boost::shared_ptr<ExportChannel> channel (new ExportChannel ());
+	
+		XMLNodeList ports = (*it)->children ("Port");
+		for (XMLNodeList::iterator p_it = ports.begin(); p_it != ports.end(); ++p_it) {
+			if ((prop = (*p_it)->property ("name"))) {
+				channel->add_port (dynamic_cast<AudioPort *> (session.engine().get_port_by_name (prop->value())));
+			}
+		}
+	
+		register_channel (channel);
+	}
+
+	return 0;
 }
 
 bool

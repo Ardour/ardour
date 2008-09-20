@@ -61,7 +61,7 @@ ExportElementFactory::add_timespan ()
 ExportElementFactory::ChannelConfigPtr
 ExportElementFactory::add_channel_config ()
 {
-	return ChannelConfigPtr (new ExportChannelConfiguration (session.export_status));
+	return ChannelConfigPtr (new ExportChannelConfiguration (session.export_status, session));
 }
 
 ExportElementFactory::FormatPtr
