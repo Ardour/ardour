@@ -844,10 +844,8 @@ Editor::scroll_canvas_vertically ()
 	_trackview_group->move (0, -y_delta);
 	_region_motion_group->move (0, -y_delta);
 
-#ifndef GTKOSX
 	/* required to keep the controls_layout in lock step with the canvas group */
 	track_canvas->update_now ();
-#endif
 }
 
 void 
