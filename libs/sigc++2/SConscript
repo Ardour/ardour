@@ -20,7 +20,7 @@ else :
 
 Default([sigc2_config_h,libsigc2])
 
-env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour2'), libsigc2))
+env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ardour3'), libsigc2))
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'NEWS', 'README', 'AUTHORS', 'ChangeLog',
