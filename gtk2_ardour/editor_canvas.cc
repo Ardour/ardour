@@ -101,33 +101,6 @@ Editor::initialize_canvas ()
 	track_canvas->set_center_scroll_region (false);
 	track_canvas->set_dither (Gdk::RGB_DITHER_NONE);
 
-	/* need to handle 4 specific types of events as catch-alls */
-
-	track_canvas->signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
-	track_canvas->signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
-	track_canvas->signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
-	track_canvas->signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
-
-	track_canvas->set_name ("EditorMainCanvas");
-	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
-	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
-	track_canvas->signal_enter_notify_event().connect (mem_fun(*this, &Editor::entered_track_canvas));
-	track_canvas->set_flags (CAN_FOCUS);
-
-	/* set up drag-n-drop */
-
-	vector<TargetEntry> target_table;
-	
-	// Drag-N-Drop from the region list can generate this target
-	target_table.push_back (TargetEntry ("regions"));
-
-	target_table.push_back (TargetEntry ("text/plain"));
-	target_table.push_back (TargetEntry ("text/uri-list"));
-	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
-
-	track_canvas->drag_dest_set (target_table);
-	track_canvas->signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
-
 	/* stuff for the verbose canvas cursor */
 
 	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
@@ -161,32 +134,32 @@ Editor::initialize_canvas ()
 	_region_motion_group = new ArdourCanvas::Group (*_master_group);
 
 	meter_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, 100, timebar_height);
+	meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, DBL_MAX, timebar_height);
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 	meter_bar->property_outline_pixels() = 0;
 
 	tempo_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, 100, (timebar_height));
+	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 	tempo_bar->property_outline_pixels() = 0;
 
 	range_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, 100, (timebar_height));
+	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
 	range_marker_bar->property_outline_pixels() = 0;
 	
 	transport_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0, 100, (timebar_height));
+	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 	transport_marker_bar->property_outline_pixels() = 0;
 
 	marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, 100, (timebar_height));
+	marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 0;
 	
 	cd_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, 100, (timebar_height));
+	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
  	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
  	cd_marker_bar->property_outline_pixels() = 0;
 
@@ -273,12 +246,37 @@ Editor::initialize_canvas ()
 
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
 
-	initial_ruler_update_required = true;
-	track_canvas->signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
-
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
 	}
+	/* need to handle 4 specific types of events as catch-alls */
+
+	track_canvas->signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
+	track_canvas->signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
+	track_canvas->signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
+	track_canvas->signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
+
+	track_canvas->set_name ("EditorMainCanvas");
+	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
+	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
+	track_canvas->signal_enter_notify_event().connect (mem_fun(*this, &Editor::entered_track_canvas));
+	track_canvas->set_flags (CAN_FOCUS);
+
+	/* set up drag-n-drop */
+
+	vector<TargetEntry> target_table;
+	
+	// Drag-N-Drop from the region list can generate this target
+	target_table.push_back (TargetEntry ("regions"));
+
+	target_table.push_back (TargetEntry ("text/plain"));
+	target_table.push_back (TargetEntry ("text/uri-list"));
+	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
+
+	track_canvas->drag_dest_set (target_table);
+	track_canvas->signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
+
+	track_canvas->signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
 
 	ColorsChanged.connect (mem_fun (*this, &Editor::color_handler));
 	color_handler();
@@ -289,26 +287,13 @@ void
 Editor::track_canvas_allocate (Gtk::Allocation alloc)
 {
 	canvas_allocation = alloc;
-
-	if (!initial_ruler_update_required) {
-		if (!canvas_idle_queued) {
-			/* call this first so that we do stuff before any pending redraw */
-			Glib::signal_idle().connect (mem_fun (*this, &Editor::track_canvas_size_allocated), false);
-			canvas_idle_queued = true;
-		}
-		return;
-	} 
-
-	initial_ruler_update_required = false;
 	track_canvas_size_allocated ();
 }
 
 bool
 Editor::track_canvas_size_allocated ()
 {
-	if (canvas_idle_queued) {
-		canvas_idle_queued = false;
-	}
+	bool height_changed = canvas_height != canvas_allocation.get_height();
 
 	canvas_width = canvas_allocation.get_width();
 	canvas_height = canvas_allocation.get_height();
@@ -328,42 +313,31 @@ Editor::track_canvas_size_allocated ()
 		full_canvas_height = height + canvas_timebars_vsize;
 	}
 
-	zoom_range_clock.set ((nframes64_t) floor ((canvas_width * frames_per_unit)));
-	playhead_cursor->set_position (playhead_cursor->current_frame);
+	if (height_changed) {
+		if (playhead_cursor) {
+			playhead_cursor->set_length (canvas_height);
+		}
+ 	
+		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+			(*x)->set_line_vpos (0, canvas_height);
+		}
+
+		//	marker_drag_line_points.back().set_y(canvas_height);
+		range_marker_drag_rect->property_y2() = canvas_height;
+		transport_loop_range_rect->property_y2() = canvas_height;
+		transport_punch_range_rect->property_y2() = canvas_height;
+		transport_punchin_line->property_y2() = canvas_height;
+		transport_punchout_line->property_y2() = canvas_height;
+		vertical_adjustment.set_page_size (canvas_height);
+	}
+
+	redisplay_tempo (false);
 
 	horizontal_adjustment.set_upper (session->current_end_frame()/frames_per_unit);
 	horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
-
 	reset_hscrollbar_stepping ();
 
-	if (playhead_cursor) {
-		playhead_cursor->set_length (canvas_height);
-	}
-
-	vertical_adjustment.set_page_size (canvas_height);
- 	
-	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->set_line_vpos (0, canvas_height);
-	}
-
-	marker_drag_line_points.back().set_y(canvas_height);
-	range_marker_drag_rect->property_y2() = canvas_height;
-	transport_loop_range_rect->property_y2() = canvas_height;
-	transport_punch_range_rect->property_y2() = canvas_height;
-	transport_punchin_line->property_y2() = canvas_height;
-	transport_punchout_line->property_y2() = canvas_height;
-
-	/* a future (larger) allocation will look less ugly if we add extra width */
-	double canvas_width_fudge = canvas_width * 1.5;
-	tempo_bar->property_x2() = canvas_width_fudge;
-	meter_bar->property_x2() = canvas_width_fudge;
-	marker_bar->property_x2() = canvas_width_fudge;
-	cd_marker_bar->property_x2() = canvas_width_fudge;
-	range_marker_bar->property_x2() = canvas_width_fudge;
-	transport_marker_bar->property_x2() = canvas_width_fudge;
-
 	update_fixed_rulers();
-	redisplay_tempo (true);
 
 	Resized (); /* EMIT_SIGNAL */
 

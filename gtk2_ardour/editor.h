@@ -251,7 +251,6 @@ class Editor : public PublicEditor
 
 	void set_show_measures (bool yn);
 	bool show_measures () const { return _show_measures; }
-	bool initial_ruler_update_required;
 
 #ifdef FFT_ANALYSIS
 	/* analysis window */
@@ -1419,7 +1418,6 @@ public:
 	bool track_canvas_motion_notify_event (GdkEventMotion* event);
 
 	Gtk::Allocation canvas_allocation;
-	bool canvas_idle_queued;
 	void track_canvas_allocate (Gtk::Allocation alloc);
 	bool track_canvas_size_allocated ();
 

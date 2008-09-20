@@ -64,10 +64,6 @@ Editor::Cursor::set_position (nframes64_t frame)
 {
 	double new_pos =  editor.frame_to_unit (frame);
 
-	if (editor.session == 0) {
-		canvas_item.hide();
-	}
-	current_frame = frame;
 	if (new_pos != points.front().get_x()) {
 
 		points.front().set_x (new_pos);
@@ -75,6 +71,7 @@ Editor::Cursor::set_position (nframes64_t frame)
 
 		canvas_item.property_points() = points;
 	}
+	current_frame = frame;
 }
 
 void
@@ -83,9 +80,6 @@ Editor::Cursor::set_length (double units)
 	length = units; 
 	points.back().set_y (points.front().get_y() + length);
 	canvas_item.property_points() = points;
-	if (editor.session != 0) {
-		canvas_item.show();
-	}
 }
 
 void 
