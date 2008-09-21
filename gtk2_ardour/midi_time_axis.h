@@ -68,8 +68,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void show_all_automation ();
 	void show_existing_automation ();
-	void add_controller_track ();
-	void create_automation_child (ARDOUR::Parameter param, bool show);
+	void add_cc_track ();
+	void add_parameter_track (const ARDOUR::Parameter& param);
+	void create_automation_child (const ARDOUR::Parameter& param, bool show);
 
 	ARDOUR::NoteMode note_mode() const { return _note_mode; }
 

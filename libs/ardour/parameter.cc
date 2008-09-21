@@ -68,10 +68,10 @@ Parameter::Parameter(const std::string& str)
 		assert(channel < 16);
 		_id = 0;
 		_channel = channel;
-	} else if (str.length() > 24 && str.substr(0, 24) == "midi-channel-aftertouch-") {
-		_type = MidiChannelAftertouchAutomation;
+	} else if (str.length() > 24 && str.substr(0, 24) == "midi-channel-pressure-") {
+		_type = MidiChannelPressureAutomation;
 		uint32_t channel = 0;
-		sscanf(str.c_str(), "midi-channel-aftertouch-%d", &channel);
+		sscanf(str.c_str(), "midi-channel-pressure-%d", &channel);
 		assert(channel < 16);
 		_id = 0;
 		_channel = channel;
@@ -111,8 +111,8 @@ Parameter::symbol() const
 		return string_compose("midi-pgm-change-%1", int(_channel));
 	} else if (_type == MidiPitchBenderAutomation) {
 		return string_compose("midi-pitch-bender-%1", int(_channel));
-	} else if (_type == MidiChannelAftertouchAutomation) {
-		return string_compose("midi-channel-aftertouch-%1", int(_channel));
+	} else if (_type == MidiChannelPressureAutomation) {
+		return string_compose("midi-channel-pressure-%1", int(_channel));
 	} else {
 		PBD::warning << "Uninitialized Parameter symbol() called." << endmsg;
 		return "";

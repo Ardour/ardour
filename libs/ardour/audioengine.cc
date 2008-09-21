@@ -95,7 +95,7 @@ AudioEngine::AudioEngine (string client_name)
 	Parameter::init_metadata(MidiCCAutomation);
 	Parameter::init_metadata(MidiPgmChangeAutomation);
 	Parameter::init_metadata(MidiPitchBenderAutomation);
-	Parameter::init_metadata(MidiChannelAftertouchAutomation);
+	Parameter::init_metadata(MidiChannelPressureAutomation);
 	Parameter::init_metadata(FadeInAutomation);
 	Parameter::init_metadata(FadeOutAutomation);
 	Parameter::init_metadata(EnvelopeAutomation);

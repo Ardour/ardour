@@ -89,7 +89,7 @@ namespace ARDOUR {
 		MidiCCAutomation = 0x20,
 		MidiPgmChangeAutomation = 0x21,
 		MidiPitchBenderAutomation = 0x22,
-		MidiChannelAftertouchAutomation = 0x23,
+		MidiChannelPressureAutomation = 0x23,
 		FadeInAutomation = 0x40,
 		FadeOutAutomation = 0x80,
 		EnvelopeAutomation = 0x100

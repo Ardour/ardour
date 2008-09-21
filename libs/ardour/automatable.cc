@@ -161,8 +161,8 @@ Automatable::describe_parameter (Parameter param)
 		return string_compose("Program [%1]", int(param.channel()) + 1);
 	} else if (param.type() == MidiPitchBenderAutomation) {
 		return string_compose("Bender [%1]", int(param.channel()) + 1);
-	} else if (param.type() == MidiChannelAftertouchAutomation) {
-		return string_compose("Aftertouch [%1]", int(param.channel()) + 1);
+	} else if (param.type() == MidiChannelPressureAutomation) {
+		return string_compose("Pressure [%1]", int(param.channel()) + 1);
 	} else {
 		return param.symbol();
 	}
@@ -392,7 +392,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 {
 	boost::shared_ptr<AutomationList> list(new AutomationList(param));
 	Evoral::Control* control = NULL;
-	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelAftertouchAutomation) {
+	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelPressureAutomation) {
 		control = new MidiTrack::MidiControl((MidiTrack*)this, param);
 	} else {
 		control = new AutomationControl(_a_session, param);

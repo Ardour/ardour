@@ -764,7 +764,7 @@ MidiTrack::MidiControl::set_value(float val)
 			ev[1] = int(val);
 			break;
 			
-		case MidiChannelAftertouchAutomation:
+		case MidiChannelPressureAutomation:
 			size = 2;
 			ev[0] += MIDI_CMD_CHANNEL_PRESSURE;
 			ev[1] = int(val);

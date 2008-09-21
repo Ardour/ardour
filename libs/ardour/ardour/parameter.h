@@ -93,7 +93,7 @@ public:
 			break;
 		case MidiCCAutomation:
 		case MidiPgmChangeAutomation:
-		case MidiChannelAftertouchAutomation:
+		case MidiChannelPressureAutomation:
 			Evoral::MIDI::controller_range(min, max, normal); break;
 		case MidiPitchBenderAutomation:
 			Evoral::MIDI::bender_range(min, max, normal); break;
@@ -108,7 +108,7 @@ public:
 	std::string symbol() const;
 
 	inline bool is_integer() const {
-		return (_type >= MidiCCAutomation && _type <= MidiChannelAftertouchAutomation);
+		return (_type >= MidiCCAutomation && _type <= MidiChannelPressureAutomation);
 	}
 
 	inline operator Parameter() { return (Parameter)*this; }

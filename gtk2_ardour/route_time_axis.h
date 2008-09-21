@@ -117,7 +117,7 @@ public:
 		    : param (par), menu_item (mi), track (tr) {}
 	};
 
-	virtual void create_automation_child (ARDOUR::Parameter param, bool show) = 0;
+	virtual void create_automation_child (const ARDOUR::Parameter& param, bool show) = 0;
 	
 	/* make sure we get the right version of this */
 

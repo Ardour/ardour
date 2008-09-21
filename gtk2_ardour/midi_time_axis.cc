@@ -225,9 +225,15 @@ MidiTimeAxisView::build_automation_action_menu ()
 	MenuList& automation_items = automation_action_menu->items();
 	
 	automation_items.push_back (SeparatorElem());
-
 	automation_items.push_back (MenuElem (_("Controller..."), 
-						   mem_fun(*this, &MidiTimeAxisView::add_controller_track)));
+			mem_fun(*this, &MidiTimeAxisView::add_cc_track)));
+	automation_items.push_back (MenuElem (_("Bender"), 
+			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
+				Parameter(MidiPitchBenderAutomation))));
+	automation_items.push_back (MenuElem (_("Pressure"), 
+			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
+				Parameter(MidiChannelPressureAutomation))));
+
 }
 
 Gtk::Menu*
@@ -319,7 +325,7 @@ MidiTimeAxisView::show_existing_automation ()
 /** Prompt for a controller with a dialog and add an automation track for it
  */
 void
-MidiTimeAxisView::add_controller_track()
+MidiTimeAxisView::add_cc_track()
 {
 	int response;
 	Parameter param;
@@ -337,13 +343,22 @@ MidiTimeAxisView::add_controller_track()
 		create_automation_child(param, true);
 }
 
+
+/** Add an automation track for the given parameter (pitch bend, channel pressure).
+ */
 void
-MidiTimeAxisView::create_automation_child (Parameter param, bool show)
+MidiTimeAxisView::add_parameter_track(const Parameter& param)
+{
+	create_automation_child(param, true);
+}
+
+void
+MidiTimeAxisView::create_automation_child (const Parameter& param, bool show)
 {
 	if (	param.type() == MidiCCAutomation ||
 			param.type() == MidiPgmChangeAutomation ||
 			param.type() == MidiPitchBenderAutomation ||
-			param.type() == MidiChannelAftertouchAutomation
+			param.type() == MidiChannelPressureAutomation
 	   ) {
 	
 		/* These controllers are region "automation", so we do not create

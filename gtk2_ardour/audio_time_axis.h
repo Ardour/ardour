@@ -82,7 +82,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 	
-	void create_automation_child (ARDOUR::Parameter param, bool show);
+	void create_automation_child (const ARDOUR::Parameter& param, bool show);
 	
 	void first_idle ();
 

@@ -319,7 +319,7 @@ AudioTimeAxisView::set_waveform_scale (WaveformScale scale)
 }	
 
 void
-AudioTimeAxisView::create_automation_child (Parameter param, bool show)
+AudioTimeAxisView::create_automation_child (const Parameter& param, bool show)
 {
 	if (param.type() == GainAutomation) {
 
