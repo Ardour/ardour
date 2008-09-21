@@ -34,14 +34,15 @@ class Session;
 class Automatable;
 
 
-/** A PBD:Controllable with associated automation data (AutomationList)
+/** A PBD::Controllable with associated automation data (AutomationList)
  */
 class AutomationControl : public PBD::Controllable, public Evoral::Control
 {
 public:
 	AutomationControl(ARDOUR::Session&,
-			boost::shared_ptr<ARDOUR::AutomationList>,
-			std::string name="unnamed controllable");
+			const Parameter& parameter,
+			boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+			const string& name="");
 	
 	boost::shared_ptr<AutomationList> alist() const { return boost::dynamic_pointer_cast<AutomationList>(_list); }
 

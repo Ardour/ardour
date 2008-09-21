@@ -153,7 +153,7 @@ PluginInsert::auto_state_changed (Parameter which)
 		return;
 
 	boost::shared_ptr<AutomationControl> c
-			= boost::dynamic_pointer_cast<AutomationControl>(control (which));
+			= boost::dynamic_pointer_cast<AutomationControl>(data().control (which));
 
 	if (c && ((AutomationList*)c->list().get())->automation_state() != Off) {
 		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_frame()));
@@ -290,7 +290,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 
 		uint32_t n = 0;
 		
-		for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li, ++n) {
+		for (Controls::iterator li = data().controls().begin(); li != data().controls().end(); ++li, ++n) {
 			
 			boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
@@ -368,7 +368,7 @@ PluginInsert::set_parameter (Parameter param, float val)
 
 	_plugins[0]->set_parameter (param.id(), val);
 	
-	boost::shared_ptr<Evoral::Control> c = control (param);
+	boost::shared_ptr<Evoral::Control> c = data().control (param);
 	if (c)
 		c->set_value(val);
 
@@ -392,14 +392,14 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
 	nframes_t now = _session.transport_frame ();
 	nframes_t end = now + nframes;
 
-	Glib::Mutex::Lock lm (_control_lock, Glib::TRY_LOCK);
+	Glib::Mutex::Lock lm (data().control_lock(), Glib::TRY_LOCK);
 
 	if (!lm.locked()) {
 		connect_and_run (bufs, nframes, offset, false);
 		return;
 	}
 	
-	if (!find_next_event (now, end, next_event)) {
+	if (!data().find_next_event (now, end, next_event)) {
 		
  		/* no events have a time within the relevant range */
 		
@@ -417,7 +417,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offs
  		offset += cnt;
 		now += cnt;
 
-		if (!find_next_event (now, end, next_event)) {
+		if (!data().find_next_event (now, end, next_event)) {
 			break;
 		}
   	}
@@ -636,7 +636,7 @@ PluginInsert::state (bool full)
 		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 		*/
-		autonode->add_child_nocopy (((AutomationList*)control(*x)->list().get())->state (full));
+		autonode->add_child_nocopy (((AutomationList*)data().control(*x)->list().get())->state (full));
 	}
 
 	node.add_child_nocopy (*autonode);
@@ -760,7 +760,7 @@ PluginInsert::set_state(const XMLNode& node)
 			}
 
 			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
-					control(Parameter(PluginAutomation, port_id), true));
+					data().control(Parameter(PluginAutomation, port_id), true));
 
 			if (!child->children().empty()) {
 				c->alist()->set_state (*child->children().front());
@@ -847,7 +847,7 @@ PluginInsert::type ()
 }
 
 PluginInsert::PluginControl::PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list)
-	: AutomationControl (p.session(), list, p.describe_parameter(list->parameter()))
+	: AutomationControl (p.session(), list->parameter(), list, p.describe_parameter(list->parameter()))
 	, _plugin (p)
 	, _list (list)
 {

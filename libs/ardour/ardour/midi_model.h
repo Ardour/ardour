@@ -39,7 +39,7 @@ namespace ARDOUR {
 
 class Session;
 class MidiSource;
-	
+
 /** This is a higher level (than MidiBuffer) model of MIDI data, with separate
  * representations for notes (instead of just unassociated note on/off events)
  * and controller data.  Controller data is represented as part of the
@@ -47,7 +47,7 @@ class MidiSource;
  * Because of this MIDI controllers and automatable controllers/widgets/etc
  * are easily interchangeable.
  */
-class MidiModel : public Automatable, public Evoral::Sequence {
+class MidiModel : public AutomatableSequence {
 public:
 	MidiModel(MidiSource* s, size_t size=0);
 	
@@ -55,13 +55,13 @@ public:
 	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
 
 	/** Add/Remove notes.
-	 * Technically all operations can be implemented as one of these.
+	 * Technically all note operations can be implemented as one of these, but
+	 * a custom command can be more efficient.
 	 */
-	class DeltaCommand : public Command
-	{
+	class DeltaCommand : public Command {
 	public:
 		DeltaCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
-		DeltaCommand (boost::shared_ptr<MidiModel>,   const XMLNode& node);
+		DeltaCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
 
 		const std::string& name() const { return _name; }
 		
@@ -78,8 +78,8 @@ public:
 		XMLNode &marshal_note(const boost::shared_ptr<Evoral::Note> note);
 		boost::shared_ptr<Evoral::Note> unmarshal_note(XMLNode *xml_note);
 		
-		boost::shared_ptr<MidiModel>         _model;
-		const std::string                    _name;
+		boost::shared_ptr<MidiModel> _model;
+		const std::string            _name;
 		
 		typedef std::list< boost::shared_ptr<Evoral::Note> > NoteList;
 		
@@ -88,7 +88,7 @@ public:
 	};
 
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
-	void                     apply_command(Command* cmd);
+	void                     apply_command(Session& session, Command* cmd);
 
 	bool write_to(boost::shared_ptr<MidiSource> source);
 		

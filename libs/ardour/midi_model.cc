@@ -37,11 +37,10 @@ using namespace ARDOUR;
 
 
 MidiModel::MidiModel(MidiSource *s, size_t size)
-	: ControlSet()
-	, Automatable(s->session(), "midi model")
-	, Sequence(size)
+	: AutomatableSequence(s->session(), size)
 	, _midi_source(s)
 {
+	cerr << "MidiModel \"" << s->name() << "\" constructed: " << this << endl;
 }
 
 /** Start a new command.
@@ -62,13 +61,13 @@ MidiModel::DeltaCommand* MidiModel::new_delta_command(const string name)
  * The command will constitute one item on the undo stack.
  */
 void
-MidiModel::apply_command(Command* cmd)
+MidiModel::apply_command(Session& session, Command* cmd)
 {
-	_session.begin_reversible_command(cmd->name());
+	session.begin_reversible_command(cmd->name());
 	(*cmd)();
 	assert(is_sorted());
-	_session.commit_reversible_command(cmd);
-	_edited = true;
+	session.commit_reversible_command(cmd);
+	set_edited(true);
 }
 
 
@@ -110,35 +109,22 @@ MidiModel::DeltaCommand::operator()()
 {
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
-
-	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
-	const bool reset_iter = (_model->_read_iter.locked());
-	double iter_time = -1.0;
-
-	if (reset_iter) {
-		if (_model->_read_iter.get_event_pointer().get()) {
-			iter_time = _model->_read_iter->time();
-		} else {
-			cerr << "MidiModel::DeltaCommand::operator(): WARNING: _read_iter points to no event" << endl;
-		}
-		_model->_read_iter = _model->end(); // drop read lock
-	}
-
-	assert( ! _model->_read_iter.locked());
-
+	
 	_model->write_lock();
 
-	for (std::list< boost::shared_ptr<Evoral::Note> >::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
+	// Store the current seek position so we can restore the read iterator
+	// after modifying the contents of the model
+	const double read_time = _model->read_time();
+
+	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model->add_note_unlocked(*i);
 
-	for (std::list< boost::shared_ptr<Evoral::Note> >::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
+	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
 		_model->remove_note_unlocked(*i);
 
 	_model->write_unlock();
-
-	if (reset_iter && iter_time != -1.0) {
-		_model->_read_iter = const_iterator(*_model.get(), iter_time);
-	}
+	// FIXME: race?
+	_model->read_seek(read_time); // restore read position
 
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -148,37 +134,22 @@ MidiModel::DeltaCommand::undo()
 {
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
-
-	// Need to reset iterator to drop the read lock it holds, or we'll deadlock
-	const bool reset_iter = (_model->_read_iter.locked());
-	double iter_time = -1.0;
-
-	if (reset_iter) {
-		if (_model->_read_iter.get_event_pointer().get()) {
-			iter_time = _model->_read_iter->time();
-		} else {
-			cerr << "MidiModel::DeltaCommand::undo(): WARNING: _read_iter points to no event" << endl;
-		}
-		_model->_read_iter = _model->end(); // drop read lock
-	}
-
-	assert( ! _model->_read_iter.locked());
-
+	
 	_model->write_lock();
 
-	for (std::list< boost::shared_ptr<Evoral::Note> >::iterator i = _added_notes.begin(); i
-			!= _added_notes.end(); ++i)
+	// Store the current seek position so we can restore the read iterator
+	// after modifying the contents of the model
+	const double read_time = _model->read_time();
+
+	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i)
 		_model->remove_note_unlocked(*i);
 
-	for (std::list< boost::shared_ptr<Evoral::Note> >::iterator i =
-			_removed_notes.begin(); i != _removed_notes.end(); ++i)
+	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i)
 		_model->add_note_unlocked(*i);
 
 	_model->write_unlock();
-
-	if (reset_iter && iter_time != -1.0) {
-		_model->_read_iter = const_iterator(*_model.get(), iter_time);
-	}
+	// FIXME: race?
+	_model->read_seek(read_time); // restore read position
 
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -300,14 +271,14 @@ bool MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	const bool old_percussive = percussive();
 	set_percussive(false);
 	
-	for (const_iterator i = begin(); i != end(); ++i) {
+	for (Evoral::Sequence::const_iterator i = begin(); i != end(); ++i) {
 		source->append_event_unlocked(Frames, *i);
 	}
 		
 	set_percussive(old_percussive);
 	
 	read_unlock();
-	_edited = false;
+	set_edited(false);
 
 	return true;
 }

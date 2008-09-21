@@ -1107,6 +1107,13 @@ AutomationLine::change_model_range (AutomationList::iterator start, AutomationLi
 }
 
 void
+AutomationLine::set_list(boost::shared_ptr<ARDOUR::AutomationList> list)
+{
+	alist = list;
+	queue_reset();
+}
+
+void
 AutomationLine::show_all_control_points ()
 {
 	points_visible = true;

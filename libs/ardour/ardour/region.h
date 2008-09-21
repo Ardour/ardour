@@ -45,7 +45,10 @@ enum RegionEditState {
 	EditChangesID      = 2
 };
 
-class Region : public Automatable, public boost::enable_shared_from_this<Region>, public Readable
+class Region
+		: public SessionObject
+		, public boost::enable_shared_from_this<Region>
+		, public Readable
 {
   public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
@@ -219,6 +222,14 @@ class Region : public Automatable, public boost::enable_shared_from_this<Region>
 
 	std::vector<string> master_source_names();
 	void set_master_sources (const SourceList&);
+	
+	/* automation */
+	
+	virtual boost::shared_ptr<Evoral::Control>
+	control(const Evoral::Parameter& id, bool create=false) = 0;
+
+	virtual boost::shared_ptr<const Evoral::Control>
+	control(const Evoral::Parameter& id) const = 0;
 	
 	/* serialization */
 	

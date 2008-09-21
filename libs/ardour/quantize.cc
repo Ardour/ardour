@@ -69,7 +69,8 @@ Quantize::run (boost::shared_ptr<Region> r)
 
 	double q_frames = _q * (m.frames_per_bar(t, session.frame_rate()) / (double)m.beats_per_bar());
 
-	for (MidiModel::Notes::iterator i = model->notes().begin(); i != model->notes().end(); ++i) {
+	for (Evoral::Sequence::Notes::iterator i = model->notes().begin();
+			i != model->notes().end(); ++i) {
 		const double new_time = lrint((*i)->time() / q_frames) * q_frames;
 		double new_dur = lrint((*i)->duration() / q_frames) * q_frames;
 		if (new_dur == 0.0)

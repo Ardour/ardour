@@ -29,9 +29,13 @@ using namespace ARDOUR;
 using namespace PBD;
 
 
-AutomationControl::AutomationControl(Session& session, boost::shared_ptr<AutomationList> list, string name)
-	: Controllable((name == "unnamed controllable") ? list->parameter().symbol() : name)
-	, Evoral::Control(list)
+AutomationControl::AutomationControl(
+		ARDOUR::Session& session,
+		const Parameter& parameter,
+		boost::shared_ptr<ARDOUR::AutomationList> list,
+		const string& name)
+	: Controllable((name != "") ? name : parameter.symbol())
+	, Evoral::Control(parameter, list)
 	, _session(session)
 {
 }
@@ -42,7 +46,7 @@ AutomationControl::AutomationControl(Session& session, boost::shared_ptr<Automat
 float
 AutomationControl::get_value() const
 {
-	bool from_list = ((AutomationList*)_list.get())->automation_playback();
+	bool from_list = _list && ((AutomationList*)_list.get())->automation_playback();
 	return Control::get_value(from_list, _session.transport_frame());
 }
 
@@ -50,7 +54,7 @@ AutomationControl::get_value() const
 void
 AutomationControl::set_value(float value)
 {
-	bool to_list = _session.transport_stopped()
+	bool to_list = _list && _session.transport_stopped()
 		&& ((AutomationList*)_list.get())->automation_playback();
 	
 	Control::set_value(value, to_list, _session.transport_frame());

@@ -45,9 +45,7 @@ class AutomationStreamView : public StreamView
 	AutomationStreamView (AutomationTimeAxisView& tv);
 	~AutomationStreamView ();
 
-	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (jack_nframes_t start, jack_nframes_t end, list<Selectable* >&);
-	void get_inverted_selectables (Selection&, list<Selectable* >& results);
+	void set_automation_state (ARDOUR::AutoState state);
 
 	void redisplay_diskstream ();
 	

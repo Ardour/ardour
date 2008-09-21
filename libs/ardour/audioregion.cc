@@ -77,6 +77,7 @@ AudioRegion::init ()
 /* constructor for use by derived types only */
 AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string name)
 	: Region (s, start, length, name, DataType::AUDIO)
+	, _automatable(s)
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
@@ -87,6 +88,7 @@ AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string 
 /** Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External))
+	, _automatable(src->session())
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
@@ -102,6 +104,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (one channel) */
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
+	, _automatable(src->session())
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
@@ -117,6 +120,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 /* Basic AudioRegion constructor (many channels) */
 AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
+	, _automatable(srcs[0]->session())
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
@@ -128,6 +132,7 @@ AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t len
 /** Create a new AudioRegion, that is part of an existing one */
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
+	, _automatable(other->session())
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
@@ -180,6 +185,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	: Region (other)
+	, _automatable(other->session())
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
@@ -196,6 +202,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (src, node)
+	, _automatable(src->session())
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
@@ -217,6 +224,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	: Region (srcs, node)
+	, _automatable(srcs[0]->session())
 	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))

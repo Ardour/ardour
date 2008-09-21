@@ -87,6 +87,8 @@ JACK_Slave::speed_and_position (float& sp, nframes_t& position)
 		_starting = true;
 		// don't adjust speed here, just leave it as it was
 		break;
+	default:
+		cerr << "WARNING: Unknown JACK transport state: " << state << endl;
 	}
 
 	sp = speed;

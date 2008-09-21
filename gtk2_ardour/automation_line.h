@@ -109,6 +109,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	virtual void view_to_model_y (double&);
 	virtual void model_to_view_y (double&);
 
+	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
 
 	void show_all_control_points ();

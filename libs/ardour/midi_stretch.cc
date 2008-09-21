@@ -87,7 +87,7 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 	boost::shared_ptr<MidiModel> new_model = new_src->model();
 	new_model->start_write();
 	
-	for (MidiModel::const_iterator i = old_model->begin(); i != old_model->end(); ++i) {
+	for (Evoral::Sequence::const_iterator i = old_model->begin(); i != old_model->end(); ++i) {
 		const double new_time = i->time() * _request.time_fraction;
 		
 		// FIXME: double copy

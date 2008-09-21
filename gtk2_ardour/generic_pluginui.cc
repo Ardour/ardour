@@ -211,7 +211,7 @@ GenericPluginUI::build ()
 
 			boost::shared_ptr<ARDOUR::AutomationControl> c
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-					insert->control(Parameter(PluginAutomation, i)));
+					insert->data().control(Parameter(PluginAutomation, i)));
 
 			if ((cui = build_control_ui (i, c)) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
@@ -462,7 +462,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		/* create the controller */
 	
-		control_ui->controller = AutomationController::create(insert, mcontrol->list(), mcontrol);
+		control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), mcontrol);
 
 		/* XXX this code is not right yet, because it doesn't handle
 		   the absence of bounds in any sensible fashion.

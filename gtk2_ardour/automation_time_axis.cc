@@ -49,17 +49,21 @@ Pango::FontDescription* AutomationTimeAxisView::name_font = 0;
 bool AutomationTimeAxisView::have_name_font = false;
 const string AutomationTimeAxisView::state_node_name = "AutomationChild";
 
+/** \a a the automatable object this time axis is to display data for.
+ * For route/track automation (e.g. gain) pass the route for both \r and \a.
+ * For route child (e.g. plugin) automation, pass the child for \a.
+ * For region automation (e.g. MIDI CC), pass null for \a.
+ */
 AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r,
 		boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
 		PublicEditor& e, TimeAxisView& parent, bool show_regions,
 		ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
-
 	: AxisView (s), 
 	  TimeAxisView (s, e, &parent, canvas),
 	  _route (r),
 	  _control (c),
 	  _automatable (a),
-	  _controller(AutomationController::create(a, c->list(), c)),
+	  _controller(AutomationController::create(a, c->parameter(), c)),
 	  _base_rect (0),
 	  _view (show_regions ? new AutomationStreamView(*this) : NULL),
 	  _name (nom),
@@ -238,14 +242,14 @@ AutomationTimeAxisView::auto_clicked ()
 		automation_menu->set_name ("ArdourContextMenu");
 		MenuList& items (automation_menu->items());
 
-		items.push_back (MenuElem (_("Manual"), 
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
-		items.push_back (MenuElem (_("Play"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
-		items.push_back (MenuElem (_("Write"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
-		items.push_back (MenuElem (_("Touch"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+		items.push_back (MenuElem (_("Manual"), bind (mem_fun(*this,
+				&AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
+		items.push_back (MenuElem (_("Play"), bind (mem_fun(*this,
+				&AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
+		items.push_back (MenuElem (_("Write"), bind (mem_fun(*this,
+				&AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+		items.push_back (MenuElem (_("Touch"), bind (mem_fun(*this,
+				&AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 	}
 
 	automation_menu->popup (1, gtk_get_current_event_time());
@@ -255,15 +259,14 @@ void
 AutomationTimeAxisView::set_automation_state (AutoState state)
 {
 	if (!ignore_state_request) {
-		if (_route == _automatable) { // FIXME: ew
-			_route->set_parameter_automation_state (
-					_control->parameter(),
-					state);
+		if (_route == _automatable) { // This is a time axis for route (not region) automation
+			_route->set_parameter_automation_state (_control->parameter(), state);
 		}
 
-		_control->alist()->set_automation_state(state);
-
+		if (_control->list())
+			_control->alist()->set_automation_state(state);
 	}
+	_view->set_automation_state (state);
 }
 
 void
@@ -278,7 +281,7 @@ AutomationTimeAxisView::automation_state_changed ()
 	} else {
 		state = _control->alist()->automation_state ();
 	}
-
+	
 	switch (state & (Off|Play|Touch|Write)) {
 	case Off:
 		auto_button.set_label (_("Manual"));

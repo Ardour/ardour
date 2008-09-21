@@ -84,13 +84,12 @@ public:
 	typedef EventList::const_iterator const_iterator;
 
 	ControlList (const Parameter& id);
-	//ControlList (const XMLNode&, Parameter id);
+	ControlList (const ControlList&);
+	ControlList (const ControlList&, double start, double end);
 	virtual ~ControlList();
 	
 	virtual boost::shared_ptr<ControlList> create(Parameter id);
-
-	ControlList (const ControlList&);
-	ControlList (const ControlList&, double start, double end);
+	
 	ControlList& operator= (const ControlList&);
 	bool operator== (const ControlList&);
 	

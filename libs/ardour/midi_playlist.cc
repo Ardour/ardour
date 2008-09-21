@@ -279,8 +279,8 @@ MidiPlaylist::contained_automation()
 	for (RegionList::const_iterator r = regions.begin(); r != regions.end(); ++r) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*r);
 
-		for (Automatable::Controls::iterator c = mr->controls().begin();
-				c != mr->controls().end(); ++c) {
+		for (Automatable::Controls::iterator c = mr->model()->controls().begin();
+				c != mr->model()->controls().end(); ++c) {
 			ret.insert(c->first);
 		}
 	}

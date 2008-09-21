@@ -22,6 +22,7 @@
 #include <set>
 #include <map>
 #include <boost/shared_ptr.hpp>
+#include <boost/utility.hpp>
 #include <glibmm/thread.h>
 #include <evoral/types.hpp>
 #include <evoral/Parameter.hpp>
@@ -32,27 +33,32 @@ class Control;
 class ControlList;
 class ControlEvent;
 
-class ControlSet {
+class ControlSet : public boost::noncopyable {
 public:
 	ControlSet();
 	virtual ~ControlSet() {}
+	
+	virtual boost::shared_ptr<Evoral::Control>
+	control_factory(const Evoral::Parameter& id) = 0;
+	
+	boost::shared_ptr<Control>
+	control (const Parameter& id, bool create_if_missing=false);
 
-	virtual boost::shared_ptr<Control> control(const Parameter& id, bool create_if_missing=false);
-	virtual boost::shared_ptr<const Control> control(const Parameter& id) const;
-	
-	virtual boost::shared_ptr<Control> control_factory(boost::shared_ptr<ControlList> list) const;
-	virtual boost::shared_ptr<ControlList> control_list_factory(const Parameter& param) const;
-	
+	inline boost::shared_ptr<const Control>
+	control (const Parameter& id) const {
+		const Controls::const_iterator i = _controls.find(id);
+		return (i != _controls.end() ? i->second : boost::shared_ptr<Control>());
+	}
+
 	typedef std::map< Parameter, boost::shared_ptr<Control> > Controls;
-	Controls&       controls()       { return _controls; }
-	const Controls& controls() const { return _controls; }
+	inline Controls&       controls()       { return _controls; }
+	inline const Controls& controls() const { return _controls; }
 
 	virtual void add_control(boost::shared_ptr<Control>);
 
-	virtual bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
+	bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
 	
-	virtual float default_parameter_value(const Parameter& param) { return 1.0f; }
-
+	virtual bool empty() const { return _controls.size() == 0; }
 	virtual void clear();
 
 	void what_has_data(std::set<Parameter>&) const;
@@ -63,6 +69,7 @@ protected:
 	mutable Glib::Mutex _control_lock;
 	Controls            _controls;
 };
+
 
 } // namespace Evoral
 

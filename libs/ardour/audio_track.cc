@@ -604,7 +604,7 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
-			Glib::Mutex::Lock am (_control_lock, Glib::TRY_LOCK);
+			Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
 			
 			if (am.locked() && gain_control()->automation_playback()) {
 				apply_gain_automation = gain_control()->list()->curve().rt_safe_get_vector (start_frame, end_frame, _session.gain_automation_buffer(), nframes);

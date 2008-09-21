@@ -103,7 +103,8 @@ static double direct_gain_to_control (gain_t gain) {
 IO::IO (Session& s, const string& name,
 	int input_min, int input_max, int output_min, int output_max,
 	DataType default_type, bool public_ports)
-	: Automatable (s, name),
+	: SessionObject(s, name),
+	  AutomatableControls (s),
   	  _output_buffers (new BufferSet()),
 	  _active(true),
 	  _default_type (default_type),
@@ -162,8 +163,9 @@ IO::IO (Session& s, const string& name,
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
-	: Automatable (s, "unnamed io"),
-      _output_buffers (new BufferSet()),
+	: SessionObject(s, "unnamed io"),
+	  AutomatableControls (s),
+  	  _output_buffers (new BufferSet()),
 	  _active(true),
 	  _default_type (dt)
 {
@@ -2266,7 +2268,7 @@ IO::meter ()
 void
 IO::clear_automation ()
 {
-	Automatable::clear (); // clears gain automation
+	data().clear (); // clears gain automation
 	_panner->clear_automation ();
 }
 
@@ -2280,7 +2282,7 @@ IO::set_parameter_automation_state (Parameter param, AutoState state)
 		bool changed = false;
 
 		{ 
-			Glib::Mutex::Lock lm (_control_lock);
+			Glib::Mutex::Lock lm (control_lock());
 
 			boost::shared_ptr<AutomationList> gain_auto
 				= boost::dynamic_pointer_cast<AutomationList>(_gain_control->list());
@@ -2302,7 +2304,7 @@ IO::set_parameter_automation_state (Parameter param, AutoState state)
 		}
 
 	} else {
-		Automatable::set_parameter_automation_state(param, state);
+		AutomatableControls::set_parameter_automation_state(param, state);
 	}
 }
 
@@ -2366,7 +2368,7 @@ IO::end_pan_touch (uint32_t which)
 void
 IO::automation_snapshot (nframes_t now, bool force)
 {
-	Automatable::automation_snapshot (now, force);
+	AutomatableControls::automation_snapshot (now, force);
 
 	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
 		_panner->snapshot (now);

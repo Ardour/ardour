@@ -109,14 +109,12 @@ ControlList::~ControlList()
 		delete (*x);
 	}
 }
-	
 
 boost::shared_ptr<ControlList>
 ControlList::create(Parameter id)
 {
 	return boost::shared_ptr<ControlList>(new ControlList(id));
 }
-
 
 bool
 ControlList::operator== (const ControlList& other)
@@ -205,7 +203,7 @@ ControlList::reposition_for_rt_add (double when)
 void
 ControlList::rt_add (double when, double value)
 {
-	// cerr << "RT: alist @ " << this << " add " << value << " @ " << when << endl;
+	cerr << "RT: alist " << this << " add " << value << " @ " << when << endl;
 
 	{
 		Glib::Mutex::Lock lm (_lock);

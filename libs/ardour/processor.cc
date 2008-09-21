@@ -59,7 +59,8 @@ sigc::signal<void,Processor*> Processor::ProcessorCreated;
 const string Processor::state_node_name = "Processor";
 
 Processor::Processor(Session& session, const string& name, Placement p)
-	: Automatable(session, name)
+	: SessionObject(session, name)
+	, AutomatableControls(session)
 	, _active(false)
 	, _next_ab_is_active(false)
 	, _configured(false)

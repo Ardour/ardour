@@ -2528,7 +2528,7 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 	apply_gain_automation = false;
 
 	{ 
-		Glib::Mutex::Lock am (_control_lock, Glib::TRY_LOCK);
+		Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
 		
 		if (am.locked() && _session.transport_rolling()) {
 			

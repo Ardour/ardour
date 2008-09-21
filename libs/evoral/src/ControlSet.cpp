@@ -26,6 +26,7 @@ using namespace std;
 
 namespace Evoral {
 
+
 ControlSet::ControlSet()
 {
 }
@@ -40,17 +41,14 @@ void
 ControlSet::what_has_data (set<Parameter>& s) const
 {
 	Glib::Mutex::Lock lm (_control_lock);
-	Controls::const_iterator li;
-	
-	// FIXME: correct semantics?
-	for (li = _controls.begin(); li != _controls.end(); ++li) {
-		s.insert  ((*li).first);
+	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
+		s.insert(li->first);
 	}
 }
 
-/** If \a create_if_missing is true, a control list will be created and returned
- * if one does not already exists.  Otherwise NULL will be returned if a control list
- * for \a parameter does not exist.
+/** If a control for the given parameter does not exist and \a create_if_missing is true,
+ * a control will be created, added to this set, and returned.
+ * If \a create_if_missing is false this function may return null.
  */
 boost::shared_ptr<Control>
 ControlSet::control (const Parameter& parameter, bool create_if_missing)
@@ -61,24 +59,10 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 		return i->second;
 
 	} else if (create_if_missing) {
-		boost::shared_ptr<ControlList> al (control_list_factory(parameter));
-		boost::shared_ptr<Control> ac(control_factory(al));
+		boost::shared_ptr<Control> ac(control_factory(parameter));
 		add_control(ac);
 		return ac;
 
-	} else {
-		//warning << "ControlList " << parameter.to_string() << " not found for " << _name << endmsg;
-		return boost::shared_ptr<Control>();
-	}
-}
-
-boost::shared_ptr<const Control>
-ControlSet::control (const Parameter& parameter) const
-{
-	Controls::const_iterator i = _controls.find(parameter);
-
-	if (i != _controls.end()) {
-		return i->second;
 	} else {
 		//warning << "ControlList " << parameter.to_string() << " not found for " << _name << endmsg;
 		return boost::shared_ptr<Control>();
@@ -121,18 +105,6 @@ ControlSet::clear ()
 
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();
-}
-	
-boost::shared_ptr<Control>
-ControlSet::control_factory(boost::shared_ptr<ControlList> list) const
-{
-	return boost::shared_ptr<Control>(new Control(list));
-}
-
-boost::shared_ptr<ControlList>
-ControlSet::control_list_factory(const Parameter& param) const
-{
-	return boost::shared_ptr<ControlList>(new ControlList(param));
 }
 
 

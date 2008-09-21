@@ -42,7 +42,7 @@ class Session;
 
 /* A mixer strip element - plugin, send, meter, etc.
  */
-class Processor : public Automatable, public Latent
+class Processor : public SessionObject, public AutomatableControls, public Latent
 {
   public:
 	static const string state_node_name;

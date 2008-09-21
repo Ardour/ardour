@@ -99,11 +99,13 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region() == region) {
 			
-			/* great. we already have a MidiRegionView for this Region. use it again. */
+			/* great. we already have an AutomationRegionView for this Region. use it again. */
+			AutomationRegionView* arv = dynamic_cast<AutomationRegionView*>(*i);;
 
+			arv->line()->set_list (list);
 			(*i)->set_valid (true);
 			(*i)->enable_display(wfd);
-			display_region(dynamic_cast<AutomationRegionView*>(*i));
+			display_region(arv);
 
 			return NULL;
 		}
@@ -137,6 +139,17 @@ void
 AutomationStreamView::display_region(AutomationRegionView* region_view)
 {
 	region_view->line().reset();
+}
+
+void
+AutomationStreamView::set_automation_state (AutoState state)
+{
+	std::list<RegionView *>::iterator i;
+	for (i = region_views.begin(); i != region_views.end(); ++i) {
+		boost::shared_ptr<AutomationLine> line = ((AutomationRegionView*)(*i))->line();
+		if (line && line->the_list())
+			line->the_list()->set_automation_state (state);
+	}
 }
 
 void

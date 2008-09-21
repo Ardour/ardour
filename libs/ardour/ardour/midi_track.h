@@ -73,9 +73,11 @@ public:
 	void midi_panic(void);
 	bool write_immediate_event(size_t size, const uint8_t* buf);
 	
+	/** A control that will send "immediate" events to a MIDI track when twiddled */
 	struct MidiControl : public AutomationControl {
-	    MidiControl(MidiTrack* route, boost::shared_ptr<AutomationList> al)
-			: AutomationControl (route->session(), al, al->parameter().symbol())
+	    MidiControl(MidiTrack* route, const Parameter& param,
+				boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>())
+			: AutomationControl (route->session(), param, al)
 			, _route (route)
 		{}
 	 

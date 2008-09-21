@@ -63,13 +63,15 @@ AutomationController::~AutomationController()
 boost::shared_ptr<AutomationController>
 AutomationController::create(
 		boost::shared_ptr<Automatable> parent,
-		boost::shared_ptr<Evoral::ControlList> cl,
+		const Evoral::Parameter& param,
 		boost::shared_ptr<AutomationControl> ac)
 {
-	Gtk::Adjustment* adjustment = manage(new Gtk::Adjustment(cl->default_value(), cl->get_min_y(), cl->get_max_y()));
+	Gtk::Adjustment* adjustment = manage(new Gtk::Adjustment(param.normal(), param.min(), param.max()));
 	if (!ac) {
-		PBD::warning << "Creating AutomationController for " << cl->parameter().symbol() << endmsg;
-		ac = boost::dynamic_pointer_cast<AutomationControl>(parent->control_factory(cl));
+		PBD::warning << "Creating AutomationController for " << param.symbol() << endmsg;
+		ac = boost::dynamic_pointer_cast<AutomationControl>(parent->control_factory(param));
+	} else {
+		assert(ac->parameter() == param);
 	}
 	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment));
 }

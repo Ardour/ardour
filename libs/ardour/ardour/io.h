@@ -69,7 +69,7 @@ class BufferSet;
  * varied combinations of types (eg MIDI and audio) possible.
  */
 
-class IO : public Automatable, public Latent
+class IO : public SessionObject, public AutomatableControls, public Latent
 {
   public:
 	static const string state_node_name;
@@ -229,7 +229,7 @@ class IO : public Automatable, public Latent
 
 	struct GainControl : public AutomationControl {
 	    GainControl (std::string name, IO& i, boost::shared_ptr<AutomationList> al)
-			: AutomationControl (i._session, al, name)
+			: AutomationControl (i._session, al->parameter(), al, name)
 			, _io (i)
 		{}
 	 

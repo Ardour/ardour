@@ -28,22 +28,28 @@
 #include <ardour/automation_control.h>
 #include <ardour/parameter.h>
 #include <evoral/ControlSet.hpp>
+#include <evoral/Sequence.hpp>
 
 namespace ARDOUR {
 
 class Session;
 class AutomationControl;
 
-class Automatable : public SessionObject, virtual public Evoral::ControlSet
+
+/** Note this class is abstract, actual objects must either be
+ * an AutomatableControls or an AutomatableSequence
+ */
+class Automatable : virtual public Evoral::ControlSet
 {
 public:
-	Automatable(Session&, const std::string& name);
+	Automatable(Session&);
+	Automatable();
 
 	virtual ~Automatable() {}
 
-	boost::shared_ptr<Evoral::Control> control_factory(boost::shared_ptr<Evoral::ControlList> list) const;
-	boost::shared_ptr<Evoral::ControlList> control_list_factory(const Evoral::Parameter& param) const;
-	
+	boost::shared_ptr<Evoral::Control>
+	control_factory(const Evoral::Parameter& id);
+
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
 	
 	virtual void automation_snapshot(nframes_t now, bool force);
@@ -74,8 +80,14 @@ public:
 	static jack_nframes_t automation_interval() { 
 		return _automation_interval;
 	}
+	
+	typedef Evoral::ControlSet::Controls Controls;
+	
+	Evoral::ControlSet&       data()       { return *this; }
+	const Evoral::ControlSet& data() const { return *this; }
 
 protected:
+	Session& _a_session;
 
 	void can_automate(Parameter);
 
@@ -90,9 +102,28 @@ protected:
 	std::set<Parameter> _visible_controls;
 	std::set<Parameter> _can_automate_list;
 	
-	nframes_t _last_automation_snapshot;
+	nframes_t        _last_automation_snapshot;
 	static nframes_t _automation_interval;
 };
+
+
+/** Contains notes and controllers */
+class AutomatableSequence : public Automatable, public Evoral::Sequence {
+public:
+	AutomatableSequence(Session& s, size_t size)
+		: Evoral::ControlSet()
+		, Automatable(s)
+		, Evoral::Sequence(size)
+	{}
+};
+
+
+/** Contains only controllers */
+class AutomatableControls : public Automatable {
+public:
+	AutomatableControls(Session& s) : Evoral::ControlSet(), Automatable(s) {}
+};
+
 
 } // namespace ARDOUR
 

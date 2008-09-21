@@ -72,21 +72,27 @@ class MidiRegion : public Region
 	int      set_state (const XMLNode&);
 
 	int separate_by_channel (ARDOUR::Session&, vector<MidiRegion*>&) const;
+	
+	/* automation */
+	
+	boost::shared_ptr<Evoral::Control>
+	control(const Evoral::Parameter& id, bool create=false) {
+		return model()->data().control(id, create);
+	}
+
+	virtual boost::shared_ptr<const Evoral::Control>
+	control(const Evoral::Parameter& id) const {
+		return model()->data().control(id);
+	}
+
+	/* export */
+	
+	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
 
 	UndoAction get_memento() const;
 
-	// Act as a proxy for MidiModel automation stuff (for CC)
-	// Yep, this is pretty ugly...
-	Controls&       controls()       { return midi_source()->model()->controls(); }
-	const Controls& controls() const { return midi_source()->model()->controls(); }
-	
-	boost::shared_ptr<Evoral::Control> control(const Evoral::Parameter& id, bool create=false)
-			{ return midi_source()->model()->control(id, create); }
-
-	boost::shared_ptr<const Evoral::Control> control(const Evoral::Parameter& id) const
-			{ return midi_source()->model()->control(id); }
-	
-	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
+	boost::shared_ptr<MidiModel> model()             { return midi_source()->model(); }
+	boost::shared_ptr<const MidiModel> model() const { return midi_source()->model(); }
 
   private:
 	friend class RegionFactory;

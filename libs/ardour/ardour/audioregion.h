@@ -123,6 +123,18 @@ class AudioRegion : public Region
 	void set_default_envelope ();
 
 	int separate_by_channel (ARDOUR::Session&, vector<boost::shared_ptr<AudioRegion> >&) const;
+	
+	/* automation */
+	
+	boost::shared_ptr<Evoral::Control>
+	control(const Evoral::Parameter& id, bool create=false) {
+		return _automatable.data().control(id, create);
+	}
+
+	virtual boost::shared_ptr<const Evoral::Control>
+	control(const Evoral::Parameter& id) const {
+		return _automatable.data().control(id);
+	}
 
 	/* export */
 
@@ -173,6 +185,8 @@ class AudioRegion : public Region
 	void source_offset_changed ();
 	void listen_to_my_curves ();
 	void listen_to_my_sources ();
+
+	AutomatableControls _automatable;
 
 	boost::shared_ptr<AutomationList> _fade_in;
 	FadeShape                         _fade_in_shape;

@@ -364,7 +364,7 @@ AudioTimeAxisView::update_pans (bool show)
 		}
 
 		boost::shared_ptr<AutomationTimeAxisView> pan_track(new AutomationTimeAxisView (_session,
-					_route, _route/*FIXME*/, pan_control, 
+					_route, _route, pan_control, 
 					editor,
 					*this,
 					false,

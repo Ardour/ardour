@@ -57,7 +57,7 @@ sigc::signal<void,boost::shared_ptr<ARDOUR::Region> > Region::RegionPropertyChan
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
-	: Automatable(s, name)
+	: SessionObject(s, name)
 	, _type(type)
 	, _flags(flags)
 	, _start(start) 
@@ -79,7 +79,7 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 
 /** Basic Region constructor (single source) */
 Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
-	: Automatable(src->session(), name)
+	: SessionObject(src->session(), name)
 	, _type(type)
 	, _flags(flags)
 	, _start(start) 
@@ -112,7 +112,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 
 /** Basic Region constructor (many sources) */
 Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
-	: Automatable(srcs.front()->session(), name)
+	: SessionObject(srcs.front()->session(), name)
 	, _type(type)
 	, _flags(flags)
 	, _start(start) 
@@ -150,7 +150,7 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 
 /** Create a new Region from part of an existing one */
 Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Automatable(other->session(), name)
+	: SessionObject(other->session(), name)
 	, _type(other->data_type())
 	, _flags(Flag(flags & ~(Locked|PositionLocked|WholeFile|Hidden)))
 	, _start(other->_start + offset) 
@@ -199,7 +199,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 
 /** Pure copy constructor */
 Region::Region (boost::shared_ptr<const Region> other)
-	: Automatable(other->session(), other->name())
+	: SessionObject(other->session(), other->name())
 	, _type(other->data_type())
 	, _flags(Flag(other->_flags & ~(Locked|PositionLocked)))
 	, _start(other->_start) 
@@ -247,7 +247,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 }
 
 Region::Region (const SourceList& srcs, const XMLNode& node)
-	: Automatable(srcs.front()->session(), X_("error: XML did not reset this"))
+	: SessionObject(srcs.front()->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL) // to be loaded from XML
 	, _flags(Flag(0))
 	, _start(0) 
@@ -288,7 +288,7 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 }
 
 Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
-	: Automatable(src->session(), X_("error: XML did not reset this"))
+	: SessionObject(src->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL)
 	, _flags(Flag(0))
 	, _start(0) 

@@ -1619,7 +1619,7 @@ RouteTimeAxisView::show_existing_automation ()
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
+			if ((*ii)->view != 0 && (*i)->processor->data().control((*ii)->what)->list()->size() > 0) {
 				(*ii)->menu_item->set_active (true);
 			}
 		}
@@ -1765,7 +1765,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (processor->name()).c_str(), what.id());
 
 	boost::shared_ptr<AutomationControl> control
-			= boost::dynamic_pointer_cast<AutomationControl>(processor->control(what, true));
+			= boost::dynamic_pointer_cast<AutomationControl>(processor->data().control(what, true));
 
 	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
 			new AutomationTimeAxisView (_session, _route, processor, control,

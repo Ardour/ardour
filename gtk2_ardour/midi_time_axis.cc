@@ -293,8 +293,9 @@ MidiTimeAxisView::show_all_automation ()
 		const set<Parameter> params = midi_track()->midi_diskstream()->
 				midi_playlist()->contained_automation();
 
-		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i)
+		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
 			create_automation_child(*i, true);
+		}
 	}
 
 	RouteTimeAxisView::show_all_automation ();
@@ -307,8 +308,9 @@ MidiTimeAxisView::show_existing_automation ()
 		const set<Parameter> params = midi_track()->midi_diskstream()->
 				midi_playlist()->contained_automation();
 
-		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i)
+		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
 			create_automation_child(*i, true);
+		}
 	}
 
 	RouteTimeAxisView::show_existing_automation ();
@@ -344,24 +346,23 @@ MidiTimeAxisView::create_automation_child (Parameter param, bool show)
 			param.type() == MidiChannelAftertouchAutomation
 	   ) {
 	
-		/* FIXME: don't create AutomationList for track itself
-		 * (not actually needed or used, since the automation is region-ey) */
-		
+		/* These controllers are region "automation", so we do not create
+		 * an AutomationList/Line for the track */
+
 		AutomationTracks::iterator existing = _automation_tracks.find(param);
 		if (existing != _automation_tracks.end())
 			return;
 
 		boost::shared_ptr<AutomationControl> c
-			= boost::dynamic_pointer_cast<AutomationControl>(_route->control(param));
+			= boost::dynamic_pointer_cast<AutomationControl>(_route->data().control(param));
 
 		if (!c) {
-			boost::shared_ptr<AutomationList> al(new ARDOUR::AutomationList(param));
-			c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(al));
+			c = boost::dynamic_pointer_cast<AutomationControl>(_route->control_factory(param));
 			_route->add_control(c);
 		}
 
 		boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
-				_route, _route, c,
+				_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
 				editor,
 				*this,
 				true,

@@ -403,7 +403,7 @@ MidiRegionView::create_note_at(double x, double y, double duration)
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
 	cmd->add(new_note);
-	_model->apply_command(cmd);
+	_model->apply_command(trackview.session(), cmd);
 }
 
 
@@ -474,8 +474,8 @@ MidiRegionView::apply_command()
 		_marked_for_selection.insert((*i)->note());
 	}
 	
-	_model->apply_command(_delta_command);
-	_delta_command = NULL;
+	_model->apply_command(trackview.session(), _delta_command);
+	_delta_command = NULL; 
 	midi_view()->midi_track()->diskstream()->playlist_modified();
 
 	_marked_for_selection.clear();
