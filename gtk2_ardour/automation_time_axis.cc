@@ -356,8 +356,8 @@ void
 AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle style)
 {
 	_control->list()->set_interpolation(style);
-		if (_line)
-	_line->set_interpolation(style);
+	if (_line)
+		_line->set_interpolation(style);
 }
 
 void

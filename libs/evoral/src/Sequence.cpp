@@ -58,9 +58,8 @@ struct null_ostream : public std::ostream {
 static null_ostream nullout;
 
 //static ostream& debugout = cout;
-//static ostream& errorout = cerr;
 static ostream& debugout = nullout;
-static ostream& errorout = nullout;
+static ostream& errorout = cerr;
 
 // Read iterator (const_iterator)
 
@@ -206,7 +205,6 @@ Sequence::const_iterator& Sequence::const_iterator::operator++()
 		}
 	}
 
-	const std::vector<ControlIterator>::iterator old_control_iter = _control_iter;
 	_control_iter = _control_iters.begin();
 
 	// find the _control_iter with the earliest event time
@@ -237,8 +235,7 @@ Sequence::const_iterator& Sequence::const_iterator::operator++()
 	}
 
 	// Use the next earliest controller iff it's earlier than the note event
-	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX
-			&& _control_iter != old_control_iter) {
+	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX) {
 		if (type == NIL || _control_iter->x < t) {
 			type = CONTROL;
 		}
