@@ -102,7 +102,8 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 			/* great. we already have an AutomationRegionView for this Region. use it again. */
 			AutomationRegionView* arv = dynamic_cast<AutomationRegionView*>(*i);;
 
-			arv->line()->set_list (list);
+			if (arv->line())
+				arv->line()->set_list (list);
 			(*i)->set_valid (true);
 			(*i)->enable_display(wfd);
 			display_region(arv);

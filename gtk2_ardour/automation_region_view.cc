@@ -116,12 +116,6 @@ AutomationRegionView::add_automation_event (GdkEvent* event, nframes_t when, dou
 
 	_line->the_list()->add (when, y);
 
-	boost::shared_ptr<ARDOUR::MidiRegion> mr = boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region);
-	if (mr) {
-		cout << "ADD TO LIST: " << _line->the_list().get() << " ON " << _region
-			<< " (model " << mr->midi_source(0)->model() << ")" << endl;
-	}
-
 	XMLNode& after = _line->the_list()->get_state();
 	view->session().commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(
 			*_line->the_list(), &before, &after));
