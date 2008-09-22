@@ -636,6 +636,8 @@ ControlList::truncate_end (double last_coordinate)
 			   beyond the new last coordinate.
 			*/
 
+			// FIXME: SLOW! (size() == O(n))
+
 			uint32_t sz = _events.size();
 			
 			while (i != _events.rend() && sz > 2) {
@@ -775,7 +777,10 @@ ControlList::unlocked_eval (double x) const
 	double lval, uval;
 	double fraction;
 
-	npoints = _events.size();
+	const_iterator length_check_iter = _events.begin();
+	for (npoints = 0; npoints < 4; ++npoints, ++length_check_iter)
+		if (length_check_iter == _events.end())
+			break;
 
 	switch (npoints) {
 	case 0:
@@ -1022,9 +1027,10 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 {
 	//cerr << "earliest_event(" << start << ", " << end << ", " << x << ", " << y << ", " << inclusive << endl;
 
-	if (_events.size() == 0)
+	const_iterator length_check_iter = _events.begin();
+	if (_events.empty()) // 0 events
 		return false;
-	else if (_events.size() == 1)
+	else if (_events.end() == ++length_check_iter) // 1 event
 		return rt_safe_earliest_event_discrete_unlocked(start, end, x, y, inclusive);
 
 	// Hack to avoid infinitely repeating the same event
