@@ -445,6 +445,12 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		notebook.append_page (chooser, _("Browse Files"));
 	}
 	
+	hpacker.set_spacing (6);
+	hpacker.pack_start (notebook, true, true);
+	hpacker.pack_start (preview, false, false);
+	
+	get_vbox()->pack_start (hpacker, true, true);
+	
 	//add tag search
 	{
 		VBox* vbox;
