@@ -952,6 +952,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 		if (ret > 0) { // didn't skip (meta) event
 			// make ev.time absolute time in frames
 			ev.time() = (double)time * frames_per_beat / (double)_ppqn;
+			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 			_model->append(ev);
 		}
 

@@ -1100,9 +1100,9 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 			x = first->when + (y - first->value) / (double)slope;
 		}
 
-		cerr << first->value << " @ " << first->when << " ... "
+		/*cerr << first->value << " @ " << first->when << " ... "
 				<< next->value << " @ " << next->when
-				<< " = " << y << " @ " << x << endl;
+				<< " = " << y << " @ " << x << endl;*/
 
 		assert(    (y >= first->value && y <= next->value)
 				|| (y <= first->value && y >= next->value) );
