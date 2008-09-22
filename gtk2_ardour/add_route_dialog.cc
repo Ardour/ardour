@@ -94,6 +94,7 @@ AddRouteDialog::AddRouteDialog ()
 	set_name ("AddRouteDialog");
 	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
 	set_position (Gtk::WIN_POS_MOUSE);
+	set_resizable (false);
 
 	name_template_entry.set_name ("AddRouteDialogNameTemplateEntry");
 	track_button.set_name ("AddRouteDialogRadioButton");
