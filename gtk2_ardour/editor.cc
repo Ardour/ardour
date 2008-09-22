@@ -1839,62 +1839,57 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (SeparatorElem());
 
 	sigc::connection fooc;
+	boost::shared_ptr<Region> region_to_check;
 
 	if (region) {
-		items.push_back (CheckMenuElem (_("Lock")));
-		CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
-		if (region->locked()) {
-			region_lock_item->set_active();
-		}
-		region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
-
-		items.push_back (CheckMenuElem (_("Glue to Bars&Beats")));
-		CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
-
-		switch (region->positional_lock_style()) {
-		case Region::MusicTime:
-			bbt_glue_item->set_active (true);
-			break;
-		default:
-			bbt_glue_item->set_active (false);
-			break;
-		}
-
-		bbt_glue_item->signal_activate().connect (bind (mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
-
-		items.push_back (CheckMenuElem (_("Mute")));
-		CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
-		fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
-		if (region->muted()) {
-			fooc.block (true);
-			region_mute_item->set_active();
-			fooc.block (false);
-		}
-	
-		if (!Profile->get_sae()) {
-			items.push_back (CheckMenuElem (_("Opaque")));
-			CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
-			fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
-			if (region->opaque()) {
-				fooc.block (true);
-				region_opaque_item->set_active();
-				fooc.block (false);
-			}
-		}
+		region_to_check = region;
 	} else {
-		// multiple regions selected
-		// how should these act? 
-		// here they toggle the property of all selected regions
-	
-		items.push_back (MenuElem (_("Lock"), mem_fun(*this, &Editor::toggle_region_lock)));
-		items.push_back (MenuElem (_("Mute"), mem_fun(*this, &Editor::toggle_region_mute)));
-		if (!Profile->get_sae()) {
-			items.push_back (MenuElem (_("Opaque"), mem_fun(*this, &Editor::toggle_region_opaque)));
-		}
+		region_to_check = selection->regions.front()->region();
 	}
 
+	items.push_back (CheckMenuElem (_("Lock")));
+	CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
+	if (region_to_check->locked()) {
+		region_lock_item->set_active();
+	}
+	region_lock_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_lock));
+	
+	items.push_back (CheckMenuElem (_("Glue to Bars&Beats")));
+	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
+	
+	switch (region_to_check->positional_lock_style()) {
+	case Region::MusicTime:
+		bbt_glue_item->set_active (true);
+		break;
+	default:
+		bbt_glue_item->set_active (false);
+		break;
+	}
+	
+	bbt_glue_item->signal_activate().connect (bind (mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
+	
+	items.push_back (CheckMenuElem (_("Mute")));
+	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
+	fooc = region_mute_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_mute));
+	if (region_to_check->muted()) {
+		fooc.block (true);
+		region_mute_item->set_active();
+		fooc.block (false);
+	}
+	
+	if (!Profile->get_sae()) {
+		items.push_back (CheckMenuElem (_("Opaque")));
+		CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
+		fooc = region_opaque_item->signal_activate().connect (mem_fun(*this, &Editor::toggle_region_opaque));
+		if (region_to_check->opaque()) {
+			fooc.block (true);
+			region_opaque_item->set_active();
+			fooc.block (false);
+		}
+	}
+	
 	items.push_back (CheckMenuElem (_("Original position"), mem_fun(*this, &Editor::naturalize)));
-	if (region && region->at_natural_position()) {
+	if (region_to_check->at_natural_position()) {
 		items.back().set_sensitive (false);
 	}
 	
