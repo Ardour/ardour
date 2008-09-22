@@ -48,10 +48,10 @@ extern cycles_t cacheflush_time;
 
 static inline cycles_t get_cycles (void)
 {
-	uint32_t long ret;
+	cycles_t ret;
 
 	rdtscll(ret);
-	return ret;
+	return ret & 0xffffffff;
 }
 
 #elif defined(__powerpc__)
