@@ -93,6 +93,7 @@ AddRouteDialog::AddRouteDialog ()
 	set_name ("AddRouteDialog");
 	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
 	set_position (Gtk::WIN_POS_MOUSE);
+	set_resizable (false);
 
 	name_template_entry.set_name ("AddRouteDialogNameTemplateEntry");
 	track_button.set_name ("AddRouteDialogRadioButton");
@@ -134,7 +135,7 @@ AddRouteDialog::AddRouteDialog ()
 	VBox *dvbox = manage (new VBox);
 	HBox *dhbox = manage (new HBox);
 
-        ccframe.set_label (_("Channel Configuration"));
+	ccframe.set_label (_("Channel Configuration"));
 	ccframe.set_shadow_type (SHADOW_IN);
 
 	dvbox->pack_start (channel_combo, true, false, 5);

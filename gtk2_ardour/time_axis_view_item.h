@@ -38,7 +38,7 @@ class TimeAxisView;
 class TimeAxisViewItem : public Selectable
 {
    public:
-       virtual ~TimeAxisViewItem() ;
+	virtual ~TimeAxisViewItem() ;
     
     /**
      * Set the position of this item upon the timeline to the specified value

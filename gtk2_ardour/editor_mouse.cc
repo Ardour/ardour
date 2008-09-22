@@ -3082,8 +3082,7 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	cy = max (0.0, cy);
 	cy = min ((double) line->height(), cy);
 
-	double fraction;
-	fraction = 1.0 - (cy / line->height());
+	double fraction = 1.0 - (cy / line->height());
 
 	bool push;
 
