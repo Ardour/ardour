@@ -16,53 +16,52 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <evoral/Event.hpp>
+#include <evoral/MIDIEvent.hpp>
 
 namespace Evoral {
 
-#ifdef EVORAL_EVENT_ALLOC
+#ifdef EVORAL_MIDI_XML
 
-Event::Event(uint32_t tid, EventTime t, uint32_t s, uint8_t* b, bool owns_buffer)
-	: _type(tid)
-	, _time(t)
-	, _size(s)
-	, _buffer(b)
-	, _owns_buffer(owns_buffer)
+MIDIEvent::MIDIEvent(const XMLNode& event)
 {
-	if (owns_buffer) {
-		_buffer = (uint8_t*)malloc(_size);
-		if (b) {
-			memcpy(_buffer, b, _size);
-		} else {
-			memset(_buffer, 0, _size);
-		}
+	string name = event.name();
+	
+	if (name == "ControlChange") {
+		
+	} else if (name == "ProgramChange") {
+		
 	}
 }
 
-Event::Event(const Event& copy, bool owns_buffer)
-	: _type(copy._type)
-	, _time(copy._time)
-	, _size(copy._size)
-	, _buffer(copy._buffer)
-	, _owns_buffer(owns_buffer)
+
+boost::shared_ptr<XMLNode> 
+MIDIEvent::to_xml() const
 {
-	if (owns_buffer) {
-		_buffer = (uint8_t*)malloc(_size);
-		if (copy._buffer) {
-			memcpy(_buffer, copy._buffer, _size);
-		} else {
-			memset(_buffer, 0, _size);
-		}
+	XMLNode *result = 0;
+	
+	switch (type()) {
+	case MIDI_CMD_CONTROL:
+		result = new XMLNode("ControlChange");
+		result->add_property("Channel", channel());
+		result->add_property("Control", cc_number());
+		result->add_property("Value",   cc_value());
+		break;
+			
+	case MIDI_CMD_PGM_CHANGE:
+		result = new XMLNode("ProgramChange");
+		result->add_property("Channel", channel());
+		result->add_property("Number",  pgm_number());
+		break;
+		
+	default:
+		// The implementation is continued as needed
+		break;
 	}
+	
+	return boost::shared_ptr<XMLNode>(result);
 }
 
-Event::~Event() {
-	if (_owns_buffer) {
-		free(_buffer);
-	}
-}
-
-#endif // EVORAL_EVENT_ALLOC
+#endif // EVORAL_MIDI_XML
 
 } // namespace MIDI
 

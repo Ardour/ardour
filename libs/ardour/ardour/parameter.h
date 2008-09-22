@@ -50,20 +50,6 @@ public:
 		init_metadata(type);
 	}
 	
-#if 0
-	Parameter(AutomationType type, double min, double max, double normal)
-		: Evoral::Parameter((uint32_t)type, 0, 0, min, max, normal)
-	{}
-	
-	Parameter(const Parameter& copy)
-		: Evoral::Parameter(copy)
-	{
-		_min = copy._min;
-		_max = copy._max;
-		_normal = copy._max;
-	}
-#endif
-
 	Parameter(const Evoral::Parameter& copy)
 		: Evoral::Parameter(copy)
 	{

@@ -170,9 +170,9 @@ MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr<Evoral::Note> note
 	time_str << int(note->time());
 	xml_note->add_property("time", time_str.str());
 
-	ostringstream duration_str(ios::ate);
-	duration_str <<(unsigned int) note->duration();
-	xml_note->add_property("duration", duration_str.str());
+	ostringstream length_str(ios::ate);
+	length_str <<(unsigned int) note->length();
+	xml_note->add_property("length", length_str.str());
 
 	ostringstream velocity_str(ios::ate);
 	velocity_str << (unsigned int) note->velocity();
@@ -195,15 +195,15 @@ boost::shared_ptr<Evoral::Note> MidiModel::DeltaCommand::unmarshal_note(XMLNode 
 	istringstream time_str(xml_note->property("time")->value());
 	time_str >> time;
 
-	unsigned int duration;
-	istringstream duration_str(xml_note->property("duration")->value());
-	duration_str >> duration;
+	unsigned int length;
+	istringstream length_str(xml_note->property("length")->value());
+	length_str >> length;
 
 	unsigned int velocity;
 	istringstream velocity_str(xml_note->property("velocity")->value());
 	velocity_str >> velocity;
 
-	boost::shared_ptr<Evoral::Note> note_ptr(new Evoral::Note(channel, time, duration, note, velocity));
+	boost::shared_ptr<Evoral::Note> note_ptr(new Evoral::Note(channel, time, length, note, velocity));
 	return note_ptr;
 }
 

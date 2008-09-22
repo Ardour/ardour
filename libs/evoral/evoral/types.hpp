@@ -19,6 +19,8 @@
 #ifndef EVORAL_TYPES_HPP
 #define EVORAL_TYPES_HPP
 
+#include <stdint.h>
+
 /** Frame count (i.e. length of time in audio frames) */
 typedef uint32_t nframes_t;
 
@@ -27,5 +29,14 @@ typedef double timestamp_t;
 
 /** Duration of time in timestamp_t units */
 typedef timestamp_t timedur_t;
+
+/** Time stamp of an event */
+typedef double EventTime;
+
+/** Time stamp of an event */
+typedef double EventLength;
+
+/** Type of an event (opaque, mapped by application) */
+typedef uint32_t EventType;
 
 #endif // EVORAL_TYPES_HPP

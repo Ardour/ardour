@@ -17,7 +17,7 @@ Patch::get_state (void)
 	for (PatchMidiCommands::const_iterator event = _patch_midi_commands.begin();
 	    event != _patch_midi_commands.end();
 	    ++event) {
-		commands->add_child_copy(*(event->to_xml()));
+		commands->add_child_copy(*((((Evoral::MIDIEvent&)*event)).to_xml()));
 	}
 
 	return *node;
@@ -33,7 +33,7 @@ Patch::set_state (const XMLNode& node)
 	assert(commands);
 	const XMLNodeList events = commands->children();
 	for (XMLNodeList::const_iterator i = events.begin(); i != events.end(); ++i) {
-		_patch_midi_commands.push_back(*(new Evoral::Event(*(*i))));
+		_patch_midi_commands.push_back(*(new Evoral::MIDIEvent(*(*i))));
 	}
 
 	return 0;

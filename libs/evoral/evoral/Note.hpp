@@ -20,18 +20,18 @@
 #define EVORAL_NOTE_HPP
 
 #include <stdint.h>
-#include <evoral/Event.hpp>
+#include <evoral/MIDIEvent.hpp>
 
 namespace Evoral {
 
 
 /** An abstract (protocol agnostic) note.
  *
- * Currently a note is defined as (on event, duration, off event).
+ * Currently a note is defined as (on event, length, off event).
  */
 class Note {
 public:
-	Note(uint8_t chan=0, double time=0, double dur=0, uint8_t note=0, uint8_t vel=0x40);
+	Note(uint8_t chan=0, EventTime time=0, EventLength len=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note& copy);
 	~Note();
 
@@ -40,26 +40,26 @@ public:
 	inline bool operator==(const Note& other) {
 		return time() == other.time() && 
 	         note() == other.note() && 
-	         duration() == other.duration() &&
+	         length() == other.length() &&
 	         velocity() == other.velocity() &&
 	         channel()  == other.channel();
 	}
 
-	inline double  time()     const { return _on_event.time(); }
-	inline double  end_time() const { return _off_event.time(); }
-	inline uint8_t note()     const { return _on_event.note(); }
-	inline uint8_t velocity() const { return _on_event.velocity(); }
-	inline double  duration() const { return _off_event.time() - _on_event.time(); }
-	inline uint8_t channel()  const { 
+	inline EventTime   time()     const { return _on_event.time(); }
+	inline EventTime   end_time() const { return _off_event.time(); }
+	inline uint8_t     note()     const { return _on_event.note(); }
+	inline uint8_t     velocity() const { return _on_event.velocity(); }
+	inline EventLength length()   const { return _off_event.time() - _on_event.time(); }
+	inline uint8_t     channel()  const {
 		assert(_on_event.channel() == _off_event.channel()); 
 	    return _on_event.channel(); 
 	}
 
-	inline void set_time(double t)      { _off_event.time() = t + duration(); _on_event.time() = t; }
-	inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
-	inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
-	inline void set_duration(double d)  { _off_event.time() = _on_event.time() + d; }
-	inline void set_channel(uint8_t c)  { _on_event.set_channel(c);  _off_event.set_channel(c); }
+	inline void set_time(EventTime t)     { _off_event.time() = t + length(); _on_event.time() = t; }
+	inline void set_note(uint8_t n)       { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
+	inline void set_velocity(uint8_t n)   { _on_event.buffer()[2] = n; }
+	inline void set_length(EventLength l) { _off_event.time() = _on_event.time() + l; }
+	inline void set_channel(uint8_t c)    { _on_event.set_channel(c);  _off_event.set_channel(c); }
 
 	inline       Event& on_event()        { return _on_event; }
 	inline const Event& on_event()  const { return _on_event; }
@@ -68,8 +68,8 @@ public:
 
 private:
 	// Event buffers are self-contained
-	Event _on_event;
-	Event _off_event;
+	MIDIEvent _on_event;
+	MIDIEvent _off_event;
 };
 
 

@@ -20,7 +20,7 @@ CanvasProgramChange::CanvasProgramChange(
 	, _rect(0)
 {
 	char pgm_str[4];
-	snprintf(pgm_str, 4, "%d", (int)event->pgm_number());
+	snprintf(pgm_str, 4, "%d", (int)(((Evoral::MIDIEvent*)event.get())->pgm_number()));
 	_text = new Text(*this, 0.0, 0.0, pgm_str);
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiProgramChangeOutline.get();

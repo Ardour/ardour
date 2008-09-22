@@ -366,7 +366,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 /** Add a note to the model, and the view, at a canvas (click) coordinate */
 void
-MidiRegionView::create_note_at(double x, double y, double duration)
+MidiRegionView::create_note_at(double x, double y, double length)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
@@ -383,7 +383,7 @@ MidiRegionView::create_note_at(double x, double y, double duration)
 	/*
 	const Meter& m = trackview.session().tempo_map().meter_at(new_note_time);
 	const Tempo& t = trackview.session().tempo_map().tempo_at(new_note_time);
-	double duration = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
+	double length = m.frames_per_bar(t, trackview.session().frame_rate()) / m.beats_per_bar();
 	*/
 	
 	// we need to snap here again in nframes64_t in order to be sample accurate 
@@ -392,13 +392,13 @@ MidiRegionView::create_note_at(double x, double y, double duration)
 	nframes64_t new_note_time_position_relative = new_note_time      - _region->start(); 
 	new_note_time = snap_to_frame(new_note_time_position_relative) + _region->start();
 	
-	// we need to snap the duration too to be sample accurate
-	nframes64_t new_note_duration = nframes_t(duration);
-	new_note_duration = snap_to_frame(new_note_time_position_relative + new_note_duration) + _region->start() 
+	// we need to snap the length too to be sample accurate
+	nframes64_t new_note_length = nframes_t(length);
+	new_note_length = snap_to_frame(new_note_time_position_relative + new_note_length) + _region->start() 
 	                    - new_note_time;
 
 	const boost::shared_ptr<Evoral::Note> new_note(new Evoral::Note(
-			0, new_note_time, new_note_duration, (uint8_t)note, 0x40));
+			0, new_note_time, new_note_length, (uint8_t)note, 0x40));
 	view->update_bounds(new_note->note());
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
@@ -508,7 +508,7 @@ MidiRegionView::redisplay_model()
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 			cerr << "NOTE  time: " << (*i)->time()
 				 << "  pitch: " << int((*i)->note()) 
-			     << "  duration: " << (*i)->duration() 
+			     << "  length: " << (*i)->length() 
 			     << "  end-time: " << (*i)->end_time() 
 			     << "  velocity: " << int((*i)->velocity()) 
 			     << endl;
@@ -769,9 +769,9 @@ MidiRegionView::extend_active_notes()
 }
 
 
-/** Add a MIDI note to the view (with duration).
+/** Add a MIDI note to the view (with length).
  *
- * If in sustained mode, notes with duration 0 will be considered active
+ * If in sustained mode, notes with length 0 will be considered active
  * notes, and resolve_note should be called when the corresponding note off
  * event arrives, to properly display the note.
  */
@@ -804,13 +804,13 @@ MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
 		CanvasNote* ev_rect = new CanvasNote(*this, *group, note);
 		ev_rect->property_x1() = x;
 		ev_rect->property_y1() = y1;
-		if (note->duration() > 0)
+		if (note->length() > 0)
 			ev_rect->property_x2() = note_endpixel;
 		else
 			ev_rect->property_x2() = trackview.editor.frame_to_pixel(_region->length());
 		ev_rect->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
-		if (note->duration() == 0) {
+		if (note->length() == 0) {
 
 			if (_active_notes) {
 				assert(note->note() < 128);
@@ -819,7 +819,7 @@ MidiRegionView::add_note(const boost::shared_ptr<Evoral::Note> note)
 				if (_active_notes[note->note()]) {
 					CanvasNote* const old_rect = _active_notes[note->note()];
 					boost::shared_ptr<Evoral::Note> old_note = old_rect->note();
-					cerr << "MidiModel: WARNING: Note has duration 0: chan " << old_note->channel()
+					cerr << "MidiModel: WARNING: Note has length 0: chan " << old_note->channel()
 						<< "note " << (int)old_note->note() << " @ " << old_note->time() << endl;
 					/* FIXME: How large to make it?  Make it a diamond? */
 					old_rect->property_x2() = old_rect->property_x1() + 2.0;

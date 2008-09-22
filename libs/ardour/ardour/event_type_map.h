@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -18,29 +18,26 @@
 
 */
 
-#ifndef __libmidipp_midi_event_h__
-#define __libmidipp_midi_event_h__
+#ifndef __ardour_event_type_map_h__
+#define __ardour_event_type_map_h__
 
-#include <stdint.h>
-#include <cstdlib>
-#include <cstring>
-#include <sstream>
-#include <assert.h>
+#include <evoral/TypeMap.hpp>
 
-#include <midi++/types.h>
-#include <midi++/events.h>
-#include <pbd/xml++.h>
+namespace ARDOUR {
 
-/** If this is not defined, all methods of MidiEvent are RT safe
- * but MidiEvent will never deep copy and (depending on the scenario)
- * may not be usable in STL containers, signals, etc. 
- */
-#define EVORAL_EVENT_ALLOC 1
+class EventTypeMap : public Evoral::TypeMap {
+public:
+	bool     type_is_midi(uint32_t type) const;
+	uint8_t  parameter_midi_type(const Evoral::Parameter& param) const;
+	uint32_t midi_event_type(uint8_t status) const;
 
-/** Support serialisation of MIDI events to/from XML */
-#define EVORAL_MIDI_XML 1
+	static EventTypeMap& instance() { return event_type_map; }
 
-#include <evoral/Event.hpp>
-#include <evoral/MIDIEvent.hpp>
+private:
+	static EventTypeMap event_type_map;
+};
 
-#endif /* __libmidipp_midi_event_h__ */
+} // namespace ARDOUR
+
+#endif /* __ardour_event_type_map_h__ */
+

@@ -115,7 +115,7 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	
 	// FIXME: slow
 	for (size_t i=0; i < msrc.size(); ++i) {
-		const Evoral::Event& ev = msrc[i];
+		const Evoral::MIDIEvent& ev = msrc[i];
 		if (ev.time() >= offset && ev.time() < offset+nframes) {
 			//cout << "MidiBuffer::read_from got event, " << int(ev.type()) << " time: " << ev.time() << " buffer size: " << _size << endl;
 			push_back(ev);
@@ -136,7 +136,7 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
  * @return false if operation failed (not enough room)
  */
 bool
-MidiBuffer::push_back(const Evoral::Event& ev)
+MidiBuffer::push_back(const Evoral::MIDIEvent& ev)
 {
 	if (_size == _capacity)
 		return false;
@@ -262,8 +262,8 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 			push_back(b[b_index]);
 			++b_index;
 		} else {
-			const Evoral::Event& a_ev = a[a_index];
-			const Evoral::Event& b_ev = b[b_index];
+			const Evoral::MIDIEvent& a_ev = a[a_index];
+			const Evoral::MIDIEvent& b_ev = b[b_index];
 
 			if (a_ev.time() <= b_ev.time()) {
 				push_back(a_ev);

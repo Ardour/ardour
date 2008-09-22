@@ -39,6 +39,7 @@
 #include <ardour/tempo.h>
 #include <ardour/audioengine.h>
 #include <ardour/smf_reader.h>
+#include <ardour/event_type_map.h>
 
 #include "i18n.h"
 
@@ -385,6 +386,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 	// Output parameters for read_event (which will allocate scratch in buffer as needed)
 	uint32_t ev_delta_t = 0;
+	uint32_t ev_type = 0;
 	uint32_t ev_size = 0;
 	uint8_t* ev_buffer = 0;
 
@@ -407,6 +409,8 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 			break;
 		}
 		
+		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
+		
 		time += ev_delta_t; // accumulate delta time
 
 		if (ret == 0) { // meta-event (skipped, just accumulate time)
@@ -419,7 +423,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 					((time / (double)_ppqn) * frames_per_beat)) + stamp_offset;
 
 			if (ev_frame_time <= start + cnt)
-				dst.write(ev_frame_time - negative_stamp_offset, ev_size, ev_buffer);
+				dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
 			else
 				break;
 		}
@@ -441,8 +445,9 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 {
 	_write_data_count = 0;
 		
-	double time;
-	size_t size;
+	EventTime time;
+	EventType type;
+	uint32_t  size;
 
 	size_t buf_capacity = 4;
 	uint8_t* buf = (uint8_t*)malloc(buf_capacity);
@@ -450,14 +455,14 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 	if (_model && ! _model->writing())
 		_model->start_write();
 
-	Evoral::Event ev(0.0, 4, NULL, true);
+	Evoral::MIDIEvent ev(0, 0.0, 4, NULL, true);
 
 	while (true) {
-		bool ret = src.full_peek(sizeof(double), (uint8_t*)&time);
+		bool ret = src.peek_time(&time);
 		if (!ret || time - _timeline_position > _length + cnt)
 			break;
 
-		ret = src.read_prefix(&time, &size);
+		ret = src.read_prefix(&time, &type, &size);
 		if (!ret)
 			break;
 
@@ -476,6 +481,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 		time -= _timeline_position;
 		
 		ev.set(buf, size, time);
+		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
 		if (! (ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex()) ) {
 			//cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type " << std::hex << int(ev.buffer()[0]) << endl;
 			continue;

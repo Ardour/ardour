@@ -31,8 +31,8 @@ struct ProgramChange : public Parameter {
 	ProgramChange(uint32_t pc_type, uint8_t channel) : Parameter(pc_type, 0, channel) {}
 };
 
-struct ChannelAftertouch : public Parameter {
-	ChannelAftertouch(uint32_t ca_type, uint32_t channel) : Parameter(ca_type, 0, channel) {}
+struct ChannelPressure : public Parameter {
+	ChannelPressure(uint32_t ca_type, uint32_t channel) : Parameter(ca_type, 0, channel) {}
 };
 
 struct PitchBender : public Parameter {

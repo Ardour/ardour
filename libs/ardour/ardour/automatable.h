@@ -27,6 +27,7 @@
 #include <ardour/automation_list.h>
 #include <ardour/automation_control.h>
 #include <ardour/parameter.h>
+#include <ardour/event_type_map.h>
 #include <evoral/ControlSet.hpp>
 #include <evoral/Sequence.hpp>
 
@@ -53,9 +54,6 @@ public:
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
 	
 	virtual void automation_snapshot(nframes_t now, bool force);
-	bool should_snapshot (nframes_t now) {
-		return (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval);
-	}
 	virtual void transport_stopped(nframes_t now);
 
 	virtual string describe_parameter(Parameter param);
@@ -72,6 +70,11 @@ public:
 	const std::set<Parameter>& what_can_be_automated() const { return _can_automate_list; }
 
 	void mark_automation_visible(Parameter, bool);
+	
+	inline bool should_snapshot (nframes_t now) {
+		return (_last_automation_snapshot > now
+				|| (now - _last_automation_snapshot) > _automation_interval);
+	}
 	
 	static void set_automation_interval (jack_nframes_t frames) {
 		_automation_interval = frames;
@@ -113,7 +116,7 @@ public:
 	AutomatableSequence(Session& s, size_t size)
 		: Evoral::ControlSet()
 		, Automatable(s)
-		, Evoral::Sequence(size)
+		, Evoral::Sequence(EventTypeMap::instance())
 	{}
 };
 

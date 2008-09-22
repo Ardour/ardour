@@ -21,9 +21,10 @@
 
 namespace Evoral {
 
-Note::Note(uint8_t chan, double t, double d, uint8_t n, uint8_t v)
-	: _on_event(t, 3, NULL, true)
-	, _off_event(t + d, 3, NULL, true)
+Note::Note(uint8_t chan, EventTime t, EventLength l, uint8_t n, uint8_t v)
+	// FIXME: types?
+	: _on_event(0xDE, t, 3, NULL, true)
+	, _off_event(0xAD, t + l, 3, NULL, true)
 {
 	assert(chan < 16);
 
@@ -36,7 +37,7 @@ Note::Note(uint8_t chan, double t, double d, uint8_t n, uint8_t v)
 	_off_event.buffer()[2] = 0x40;
 	
 	assert(time() == t);
-	assert(duration() == d);
+	assert(length() == l);
 	assert(note() == n);
 	assert(velocity() == v);
 	assert(_on_event.channel() == _off_event.channel());
@@ -64,7 +65,7 @@ Note::Note(const Note& copy)
 	assert(end_time() == copy.end_time());
 	assert(note() == copy.note());
 	assert(velocity() == copy.velocity());
-	assert(duration() == copy.duration());
+	assert(length() == copy.length());
 	assert(_on_event.channel() == _off_event.channel());
 	assert(channel() == copy.channel());
 }
@@ -80,20 +81,12 @@ Note::operator=(const Note& copy)
 {
 	_on_event = copy._on_event;
 	_off_event = copy._off_event;
-	/*_on_event.time = copy._on_event.time;
-	assert(copy._on_event.size == 3);
-	memcpy(_on_event_buffer, copy._on_event_buffer, 3);
-	
-	_off_event.time = copy._off_event.time;
-	assert(copy._off_event.size == 3);
-	memcpy(_off_event_buffer, copy._off_event_buffer, 3);
-	*/
 	
 	assert(time() == copy.time());
 	assert(end_time() == copy.end_time());
 	assert(note() == copy.note());
 	assert(velocity() == copy.velocity());
-	assert(duration() == copy.duration());
+	assert(length() == copy.length());
 	assert(_on_event.channel() == _off_event.channel());
 	assert(channel() == copy.channel());
 	

@@ -203,7 +203,7 @@ ControlList::reposition_for_rt_add (double when)
 void
 ControlList::rt_add (double when, double value)
 {
-	cerr << "RT: alist " << this << " add " << value << " @ " << when << endl;
+	//cerr << "RT: alist " << this << " add " << value << " @ " << when << endl;
 
 	{
 		Glib::Mutex::Lock lm (_lock);
@@ -1058,6 +1058,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 			 * (Optimize for immediate call this cycle within range) */
 			_search_cache.left = x;
 			//++_search_cache.range.first;
+			assert(inclusive ? x >= start : x > start);
 			return true;
 		}
 			
@@ -1069,6 +1070,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 				 * (Optimize for immediate call this cycle within range) */
 				_search_cache.left = x;
 				//++_search_cache.range.first;
+				assert(inclusive ? x >= start : x > start);
 				return true;
 			} else {
 				return false;
@@ -1098,9 +1100,9 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 			x = first->when + (y - first->value) / (double)slope;
 		}
 
-		/*cerr << first->value << " @ " << first->when << " ... "
+		cerr << first->value << " @ " << first->when << " ... "
 				<< next->value << " @ " << next->when
-				<< " = " << y << " @ " << x << endl;*/
+				<< " = " << y << " @ " << x << endl;
 
 		assert(    (y >= first->value && y <= next->value)
 				|| (y <= first->value && y >= next->value) );
@@ -1111,9 +1113,8 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 			/* Move left of cache to this point
 			 * (Optimize for immediate call this cycle within range) */
 			_search_cache.left = x;
-
+			assert(inclusive ? x >= start : x > start);
 			return true;
-
 		} else {
 			return false;
 		}

@@ -72,12 +72,12 @@ Quantize::run (boost::shared_ptr<Region> r)
 	for (Evoral::Sequence::Notes::iterator i = model->notes().begin();
 			i != model->notes().end(); ++i) {
 		const double new_time = lrint((*i)->time() / q_frames) * q_frames;
-		double new_dur = lrint((*i)->duration() / q_frames) * q_frames;
+		double new_dur = lrint((*i)->length() / q_frames) * q_frames;
 		if (new_dur == 0.0)
 			new_dur = q_frames;
 		
 		(*i)->set_time(new_time);
-		(*i)->set_duration(new_dur);
+		(*i)->set_length(new_dur);
 	}
 
 	model->set_edited(true);

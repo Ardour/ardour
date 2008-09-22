@@ -21,16 +21,17 @@ if evoral['IS_OSX']:
 domain = 'evoral'
 
 evoral.Append(DOMAIN=domain, MAJOR=1, MINOR=0, MICRO=0)
-evoral.Append(CXXFLAGS="-DEVENT_WITH_XML")
+evoral.Append(CXXFLAGS="-DEVORAL_MIDI_XML")
 
 sources = Split("""
 src/Control.cpp
 src/ControlList.cpp
 src/ControlSet.cpp
+src/Curve.cpp
 src/Event.cpp
+src/MIDIEvent.cpp
 src/Note.cpp
 src/Sequence.cpp
-src/Curve.cpp
 """)
 
 libevoral = evoral.SharedLibrary('evoral', [ sources ])

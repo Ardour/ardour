@@ -555,7 +555,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 							const boost::shared_ptr<Evoral::Note> note = data->note_at(i);
 							
-							if (note->duration() > 0 && note->end_time() + region->position() > start)
+							if (note->length() > 0 && note->end_time() + region->position() > start)
 								mrv->resolve_note(note->note(), note->end_time());
 
 							if (note->time() + region->position() < start)

@@ -723,7 +723,8 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 		printf("%X ", buf[i]);
 	}
 	printf("\n");*/
-	return (_immediate_events.write(0, size, buf) == size);
+	const uint32_t type = EventTypeMap::instance().midi_event_type(buf[0]);
+	return (_immediate_events.write(0, type, size, buf) == size);
 }
 
 void

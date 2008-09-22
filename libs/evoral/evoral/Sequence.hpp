@@ -30,30 +30,28 @@
 #include <evoral/Note.hpp>
 #include <evoral/Parameter.hpp>
 #include <evoral/ControlSet.hpp>
+#include <evoral/ControlList.hpp>
 
 namespace Evoral {
 
+class TypeMap;
 class EventSink;
 class Note;
 class Event;
-class ControlList;
 
-
-/** This class keeps track of the current x and y for a control
+/** An iterator over (the x axis of) a 2-d double coordinate space.
  */
 class ControlIterator {
 public:
+	ControlIterator(boost::shared_ptr<const ControlList> al, double ax, double ay)
+		: list(al)
+		, x(ax)
+		, y(ay)
+	{}
+
 	boost::shared_ptr<const ControlList> list;
 	double x;
 	double y;
-	
-	ControlIterator(boost::shared_ptr<const ControlList> a_list,
-			double a_x,
-			double a_y)
-		: list(a_list)
-		, x(a_x)
-		, y(a_y)
-	{}
 };
 
 
@@ -62,7 +60,7 @@ public:
  * Controller data is represented as a list of time-stamped float values. */
 class Sequence : virtual public ControlSet {
 public:
-	Sequence(size_t size=0);
+	Sequence(const TypeMap& type_map, size_t size=0);
 	
 	bool read_locked() { return _read_iter.locked(); }
 
@@ -115,7 +113,7 @@ public:
 	/** Read iterator */
 	class const_iterator {
 	public:
-		const_iterator(const Sequence& seq, double t);
+		const_iterator(const Sequence& seq, EventTime t);
 		~const_iterator();
 
 		inline bool valid() const { return !_is_end && _event; }
@@ -144,18 +142,20 @@ public:
 		
 		mutable ActiveNotes _active_notes;
 
-		bool                                   _is_end;
-		bool                                   _locked;
-		Notes::const_iterator                  _note_iter;
-		std::vector<ControlIterator>           _control_iters;
-		std::vector<ControlIterator>::iterator _control_iter;
+		typedef std::vector<ControlIterator> ControlIterators;
+
+		bool                       _is_end;
+		bool                       _locked;
+		Notes::const_iterator      _note_iter;
+		ControlIterators           _control_iters;
+		ControlIterators::iterator _control_iter;
 	};
 	
-	const_iterator        begin(double t=0) const { return const_iterator(*this, t); }
-	const const_iterator& end()             const { return _end_iter; }
+	const_iterator        begin(EventTime t=0) const { return const_iterator(*this, t); }
+	const const_iterator& end()                const { return _end_iter; }
 	
-	void   read_seek(double t) { _read_iter = begin(t); }
-	double read_time() const   { return _read_iter.valid() ? _read_iter->time() : 0.0; }
+	void      read_seek(EventTime t) { _read_iter = begin(t); }
+	EventTime read_time() const      { return _read_iter.valid() ? _read_iter->time() : 0.0; }
 
 	bool control_to_midi_event(boost::shared_ptr<Event>& ev,
 	                           const ControlIterator&    iter) const;
@@ -177,13 +177,15 @@ protected:
 private:
 	friend class const_iterator;
 	
-	void append_note_on_unlocked(uint8_t chan, double time, uint8_t note, uint8_t velocity);
-	void append_note_off_unlocked(uint8_t chan, double time, uint8_t note);
-	void append_control_unlocked(const Parameter& param, double time, double value);
+	void append_note_on_unlocked(uint8_t chan, EventTime time, uint8_t note, uint8_t velocity);
+	void append_note_off_unlocked(uint8_t chan, EventTime time, uint8_t note);
+	void append_control_unlocked(const Parameter& param, EventTime time, double value);
 
 	mutable Glib::RWLock _lock;
 
-	Notes    _notes;
+	const TypeMap& _type_map;
+	
+	Notes _notes;
 	
 	typedef std::vector<size_t> WriteNotes;
 	WriteNotes _write_notes[16];
@@ -195,14 +197,6 @@ private:
 	const   const_iterator _end_iter;
 	mutable nframes_t      _next_read;
 	bool                   _percussive;
-
-	/** FIXME: Make fully dynamic, map to URIs */
-	enum EventTypes {
-		midi_cc_type=0x20, // FIXME FIXME FIXME eeww
-		midi_pc_type,
-		midi_pb_type,
-		midi_ca_type
-	};
 
 	typedef std::priority_queue<
 			boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,
