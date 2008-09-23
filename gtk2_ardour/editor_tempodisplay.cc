@@ -149,9 +149,9 @@ Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
 	session->bbt_time(rightmost, next_beat);
 
 	if (previous_beat.beats > 1) {
-	        previous_beat.beats -= 1;
+		previous_beat.beats -= 1;
 	} else if (previous_beat.bars > 1) {
- 	        previous_beat.bars--;
+		previous_beat.bars--;
 		previous_beat.beats += 1;
 	}
 	previous_beat.ticks = 0;

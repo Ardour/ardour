@@ -237,7 +237,7 @@ class Editor : public PublicEditor
 	}
 
 	gulong frame_to_pixel (nframes64_t frame) const {
-		return (gulong) rint ((frame / (frames_per_unit *  GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit)));
+		return (gulong) rint ((frame / (frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit)));
 	}
 
 	void flush_canvas ();
