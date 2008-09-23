@@ -98,6 +98,7 @@ class AutomationLine;
 class UIExportSpecification;
 class ExportDialog;
 class Selection;
+class TempoLines;
 class TimeSelection;
 class TrackSelection;
 class AutomationSelection;
@@ -1442,10 +1443,8 @@ public:
 	
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
-	typedef vector<ArdourCanvas::SimpleLine*> TimeLineList;
-	TimeLineList free_measure_lines;
-	TimeLineList used_measure_lines;
-
+	TempoLines* tempo_lines;
+	
 	ArdourCanvas::Group* time_line_group;
 	ArdourCanvas::SimpleLine* get_time_line ();
 	void hide_measures ();

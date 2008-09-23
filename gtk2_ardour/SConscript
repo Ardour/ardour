@@ -109,8 +109,8 @@ about.cc
 actions.cc
 add_route_dialog.cc
 ardour_dialog.cc
-ardour_ui2.cc
 ardour_ui.cc
+ardour_ui2.cc
 ardour_ui_dependents.cc
 ardour_ui_dialogs.cc
 ardour_ui_ed.cc
@@ -135,12 +135,12 @@ crossfade_edit.cc
 crossfade_view.cc
 curvetest.cc
 editing.cc
+editor.cc
 editor_actions.cc
 editor_audio_import.cc
 editor_audiotrack.cc
 editor_canvas.cc
 editor_canvas_events.cc
-editor.cc
 editor_cursors.cc
 editor_edit_groups.cc
 editor_export_audio.cc
@@ -196,8 +196,8 @@ new_session_dialog.cc
 option_editor.cc
 opts.cc
 pan_automation_time_axis.cc
-panner2d.cc
 panner.cc
+panner2d.cc
 panner_ui.cc
 playlist_selector.cc
 plugin_selector.cc
@@ -224,6 +224,7 @@ splash.cc
 streamview.cc
 tape_region_view.cc
 tempo_dialog.cc
+tempo_lines.cc
 theme_manager.cc
 time_axis_view.cc
 time_axis_view_item.cc
