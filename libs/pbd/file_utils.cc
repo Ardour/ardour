@@ -53,6 +53,7 @@ find_matching_files_in_directory (const sys::path& directory,
 	vector<string> tmp_files;
 
 	get_files_in_directory (directory, tmp_files);
+	result.reserve(tmp_files.size());
 
 	for (vector<string>::iterator file_iter = tmp_files.begin();
 			file_iter != tmp_files.end();
@@ -85,9 +86,7 @@ find_matching_files_in_search_path (const SearchPath& search_path,
                                     const Glib::PatternSpec& pattern,
                                     vector<sys::path>& result)
 {
-	vector<sys::path> dirs;
-	std::copy(search_path.begin(), search_path.end(), std::back_inserter(dirs));
-	find_matching_files_in_directories (dirs, pattern, result);    
+	find_matching_files_in_directories (search_path, pattern, result);    
 }
 
 bool

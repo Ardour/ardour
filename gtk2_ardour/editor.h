@@ -1532,7 +1532,6 @@ public:
 	TempoLines* tempo_lines;
 
 	ArdourCanvas::Group* time_line_group;
-	ArdourCanvas::SimpleLine* get_time_line ();
 
 	void hide_measures ();
 	void draw_measures ();

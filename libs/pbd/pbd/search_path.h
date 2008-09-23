@@ -39,14 +39,9 @@ using std::vector;
  * The SearchPath class does not test whether the paths exist
  * or are directories. It is basically just a container.
  */
-class SearchPath {
+class SearchPath : public vector<sys::path>
+{
 public:
-
-	typedef std::vector<sys::path>::iterator         iterator;
-	typedef std::vector<sys::path>::const_iterator   const_iterator;
-
-public:
-
 	/**
 	 * Create an empty SearchPath.
 	 */
@@ -81,59 +76,12 @@ public:
 	SearchPath (const vector<sys::path>& paths);
 
 	/**
-	 * The copy constructor does what you would expect and copies the
-	 * vector of paths contained by the SearchPath.
-	 */
-	SearchPath (const SearchPath& search_path);
-
-	/**
-	 * Indicate whether there are any directory paths in m_dirs.
-	 *
-	 * If SearchPath is initialized with an empty string as the 
-	 * result of for instance the contents of an unset environment
-	 * variable.
-	 *
-	 * @return true if there are any paths in m_paths.
-	 */
-	operator void* () const { return (void*)!m_dirs.empty(); }
-
-	/**
-	 *  @return a read/write iterator that points to the first
-	 *  path in the SearchPath. Iteration is done in ordinary
-	 *  element order.
-	 */
-	iterator begin () { return m_dirs.begin(); }
-	
-	/**
-	 *  @return A read-only (constant) iterator that points to the
-	 *  first path in the SearchPath.
-	 */
-	const_iterator begin () const { return m_dirs.begin(); }
-
-	/**
-	 *  @return A read/write iterator that points one past the last
-	 *  path in the SearchPath.
-	 */
-	iterator end () { return m_dirs.end(); }
-	
-	/**
-	 *  @return A read-only (constant) iterator that points one past 
-	 *  the last path in the SearchPath.
-	 */
-	const_iterator end () const { return m_dirs.end(); }
-
-	/**
 	 * @return a search path string.
 	 *
 	 * The string that is returned contains the platform specific
 	 * path separator.
 	 */
 	const string to_string () const;
-
-	/**
-	 * Assignment of another SearchPath to this.
-	 */
-	SearchPath& operator= (const SearchPath& spath);
 
 	/**
 	 * Add all the directories in path to this.
@@ -162,20 +110,9 @@ public:
 	 */
 	SearchPath& add_subdirectory_to_paths (const string& subdir);
 
-	/**
-	 * Add a sub-directory to each path in the search path.
-	 * @see add_subdirectory_to_paths
-	 */
-	SearchPath& operator/= (const string& subdir);
-
 protected:
-
 	void add_directory (const sys::path& directory_path);
-
 	void add_directories (const vector<sys::path>& paths);
-	
-	vector<sys::path> m_dirs;
-
 };
 
 } // namespace PBD
