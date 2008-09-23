@@ -65,6 +65,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
 	, _default_note_length(0.0)
+	, _current_range_min(0)
+	, _current_range_max(0)
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(NULL)
@@ -399,7 +401,7 @@ MidiRegionView::create_note_at(double x, double y, double length)
 
 	const boost::shared_ptr<Evoral::Note> new_note(new Evoral::Note(
 			0, new_note_time, new_note_length, (uint8_t)note, 0x40));
-	view->update_bounds(new_note->note());
+	view->update_note_range(new_note->note());
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
 	cmd->add(new_note);
@@ -419,7 +421,7 @@ MidiRegionView::clear_events()
 		}
 	}
 
-	for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i)
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i)
 		delete *i;
 
 	_events.clear();
@@ -613,25 +615,41 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 void
 MidiRegionView::set_height (gdouble height)
 {
+	static const double FUDGE = 2;
+	const double old_height = _height;
 	RegionView::set_height(height);
+	_height = height - FUDGE;
 	
-	// FIXME: ick
-	height -= 2;
+	apply_note_range(midi_stream_view()->lowest_note(),
+	                 midi_stream_view()->highest_note(),
+	                 height != old_height + FUDGE);
 	
-	_height = height;
-	
+	if (name_text) {
+		name_text->raise_to_top();
+	}
+}
+
+
+/** Apply the current note range from the stream view
+ * by repositioning/hiding notes as necessary
+ */
+void
+MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
+{
 	if (_enable_display) {
+		if (!force && _current_range_min == min && _current_range_max == max) {
+			return;
+		}
+		
+		_current_range_min = min;
+		_current_range_max = max;
 
-		_model->read_lock();
-
-		for (std::vector<CanvasNoteEvent*>::const_iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (Events::const_iterator i = _events.begin(); i != _events.end(); ++i) {
 			CanvasNoteEvent* event = *i;
 			Item* item = dynamic_cast<Item*>(event);
 			assert(item);
 			if (event && event->note()) {
-				if (event->note()->note() < midi_stream_view()->lowest_note() ||
-				   event->note()->note() > midi_stream_view()->highest_note()) {
-					
+				if (event->note()->note() < _current_range_min || event->note()->note() > _current_range_max) {
 					if (canvas_item_visible(item)) {
 						item->hide();
 					}
@@ -647,8 +665,7 @@ MidiRegionView::set_height (gdouble height)
 
 						note->property_y1() = y1;
 						note->property_y2() = y2;
-					}
-					if (CanvasHit* hit = dynamic_cast<CanvasHit*>(event)) {
+					} else if (CanvasHit* hit = dynamic_cast<CanvasHit*>(event)) {
 						double x = trackview.editor.frame_to_pixel((nframes64_t)
 								event->note()->time() - _region->start());
 						const double diamond_size = midi_stream_view()->note_height() / 2.0;
@@ -666,11 +683,6 @@ MidiRegionView::set_height (gdouble height)
 			}
 		}
 
-		_model->read_unlock();
-	}
-
-	if (name_text) {
-		name_text->raise_to_top();
 	}
 }
 
@@ -700,7 +712,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_duration (_region->length() / samples_per_unit);
 	ghosts.push_back (ghost);
 
-	for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((note = dynamic_cast<CanvasNote*>(*i)) != 0) {
 			ghost->add_note(note);
 		}
@@ -977,7 +989,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 #endif
 
 	if (x1 < x2) {
-		for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 #ifndef NDEBUG
 			// Events should always be sorted by increasing x1() here
 			assert((*i)->x1() >= last_x1);
@@ -996,7 +1008,7 @@ MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2
 			}
 		}
 	} else {
-		for (std::vector<CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 #ifndef NDEBUG
 			// Events should always be sorted by increasing x1() here
 			assert((*i)->x1() >= last_x1);
@@ -1106,7 +1118,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent* ev, double dt, uint8_t dnote)
 		
 		// care about notes being moved beyond the upper/lower bounds on the canvas
 		if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
-		   highest_note_in_selection > midi_stream_view()->highest_note()) {
+				highest_note_in_selection > midi_stream_view()->highest_note()) {
 			midi_stream_view()->set_note_range(MidiStreamView::ContentsRange);
 		}
 	}
@@ -1378,8 +1390,7 @@ MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
 	};
 
 	// Update notes for selection
-	for (std::vector<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin();
-			i != _events.end(); ++i) {
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		(*i)->on_channel_selection_change(mask);
 	}
 

@@ -72,6 +72,7 @@ class MidiRegionView : public RegionView
 		{ return midi_view()->midi_view(); }
 
 	void set_height (double);
+	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
 	void set_frame_color();
 
@@ -223,13 +224,18 @@ class MidiRegionView : public RegionView
 	int8_t   _force_channel;
 	uint16_t _last_channel_selection;
 	double   _default_note_length;
+	uint8_t  _current_range_min;
+	uint8_t  _current_range_max;
 
-	boost::shared_ptr<ARDOUR::MidiModel>        _model;
-	std::vector<ArdourCanvas::CanvasNoteEvent*> _events;
-	std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > _pgm_changes;
-	ArdourCanvas::CanvasNote**                  _active_notes;
-	ArdourCanvas::Group*                        _note_group;
-	ARDOUR::MidiModel::DeltaCommand*            _delta_command;
+	typedef std::vector<ArdourCanvas::CanvasNoteEvent*> Events;
+	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;
+	
+	boost::shared_ptr<ARDOUR::MidiModel> _model;
+	Events                               _events;
+	PgmChanges                           _pgm_changes;
+	ArdourCanvas::CanvasNote**           _active_notes;
+	ArdourCanvas::Group*                 _note_group;
+	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
 
 	MouseState _mouse_state;
 	int _pressed_button;

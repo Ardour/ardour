@@ -69,14 +69,12 @@ class MidiStreamView : public StreamView
 	Gtk::Adjustment note_range_adjustment;
 	ArdourCanvas::Group* midi_underlay_group;
 
-	VisibleNoteRange note_range() { return _range; }
 	void set_note_range(VisibleNoteRange r);
-	void set_note_range(uint8_t lowest, uint8_t highest);
 
-	uint8_t lowest_note()  const { return (_range == FullRange) ? 0 : _lowest_note; }
-	uint8_t highest_note() const { return (_range == FullRange) ? 127 : _highest_note; }
+	inline uint8_t lowest_note()  const { return _lowest_note; }
+	inline uint8_t highest_note() const { return _highest_note; }
 	
-	void update_bounds(uint8_t note_num);
+	void update_note_range(uint8_t note_num);
 	
 	void redisplay_diskstream ();
 	
@@ -85,41 +83,57 @@ class MidiStreamView : public StreamView
 	
 	inline double note_to_y(uint8_t note) const
 		{ return contents_height()
-			- (note + 1 - _lowest_note) * note_height() + 1; }
+			- (note + 1 - lowest_note()) * note_height() + 1; }
 	
 	inline uint8_t y_to_note(double y) const
 		{ return (uint8_t)((contents_height() - y - 1)
 				/ contents_height() * (double)contents_note_range())
-				+ _lowest_note; }
+				+ lowest_note(); }
 	
 	inline double note_height() const
 		{ return contents_height() / (double)contents_note_range(); }
 	
 	inline uint8_t contents_note_range() const
-		{ return _highest_note - _lowest_note + 1; }
+		{ return highest_note() - lowest_note() + 1; }
 	
 	sigc::signal<void> NoteRangeChanged;
 
   private:
 	void setup_rec_box ();
-	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur, boost::weak_ptr<ARDOUR::Source> src); 
-	void update_rec_regions (boost::shared_ptr<ARDOUR::MidiModel> data, jack_nframes_t start, jack_nframes_t dur);
+
+	void rec_data_range_ready (
+			jack_nframes_t start,
+			jack_nframes_t dur,
+			boost::weak_ptr<ARDOUR::Source> src); 
+
+	void update_rec_regions (
+			boost::shared_ptr<ARDOUR::MidiModel> data,
+			jack_nframes_t start,
+			jack_nframes_t dur);
 	
-	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false);
-	void        display_region(MidiRegionView* region_view, bool load_model);
-	void        display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
+	RegionView* add_region_view_internal (
+			boost::shared_ptr<ARDOUR::Region>,
+			bool wait_for_waves,
+			bool recording = false);
+
+	void display_region(MidiRegionView* region_view, bool load_model);
+	void display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
 	
 	void update_contents_height ();
 	void draw_note_lines();
+	void apply_note_range(uint8_t lowest, uint8_t highest);
+	bool update_data_note_range(uint8_t min, uint8_t max);
 
 	void color_handler ();
 
 	void note_range_adjustment_changed();
 
-	VisibleNoteRange          _range;
+	bool                      _range_dirty;
 	double                    _range_sum_cache;
-	uint8_t                   _lowest_note;
-	uint8_t                   _highest_note;
+	uint8_t                   _lowest_note;   ///< currently visible
+	uint8_t                   _highest_note;  ///< currently visible
+	uint8_t                   _data_note_min; ///< in data
+	uint8_t                   _data_note_max; ///< in data
 	ArdourCanvas::Lineset*    _note_lines;
 };
 

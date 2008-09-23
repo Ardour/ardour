@@ -170,6 +170,9 @@ public:
 	void add_note_unlocked(const boost::shared_ptr<Note> note);
 	void remove_note_unlocked(const boost::shared_ptr<const Note> note);
 	
+	uint8_t lowest_note()  const { return _lowest_note; }
+	uint8_t highest_note() const { return _highest_note; }
+	
 protected:
 	mutable const_iterator _read_iter;
 	bool                   _edited;
@@ -197,6 +200,9 @@ private:
 	const   const_iterator _end_iter;
 	mutable nframes_t      _next_read;
 	bool                   _percussive;
+
+	uint8_t _lowest_note;
+	uint8_t _highest_note;
 
 	typedef std::priority_queue<
 			boost::shared_ptr<Note>, std::deque< boost::shared_ptr<Note> >,

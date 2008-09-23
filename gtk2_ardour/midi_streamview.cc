@@ -55,10 +55,12 @@ using namespace Editing;
 MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	: StreamView (tv)
 	, note_range_adjustment(0.0f, 0.0f, 0.0f)
-	, _range(ContentsRange)
+	, _range_dirty(false)
 	, _range_sum_cache(-1.0)
 	, _lowest_note(60)
-	, _highest_note(60)
+	, _highest_note(71)
+	, _data_note_min(60)
+	, _data_note_max(71)
 {
 	if (tv.is_track())
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
@@ -83,14 +85,45 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	_note_lines->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_stream_view_event), _note_lines, &_trackview));
 	_note_lines->lower_to_bottom();
 
-	note_range_adjustment.signal_value_changed().connect (mem_fun (*this, &MidiStreamView::note_range_adjustment_changed));
 	ColorsChanged.connect(mem_fun(*this, &MidiStreamView::draw_note_lines));
+	
+	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
+	note_range_adjustment.set_value(_lowest_note);
+	
+	note_range_adjustment.signal_value_changed().connect (mem_fun (*this, &MidiStreamView::note_range_adjustment_changed));
 }
 
 MidiStreamView::~MidiStreamView ()
 {
 }
 
+static void
+veto_note_range(uint8_t& min, uint8_t& max)
+{
+	/* Legal notes, thanks */
+	if (max > 127)
+		max = 127;
+	if (min > 127)
+		min = 127;
+	
+	/* Always display at least one octave in [0, 127] */
+	if (max == 127) {
+		if (min > (127 - 11)) {
+			min = 127 - 11;
+		}
+	} else if (max < min + 11) {
+		uint8_t d = 11 - (max - min);
+		if (max + d/2 > 127) {
+			min -= d;
+		} else {
+			min -= d / 2;
+			max += d / 2;
+		}
+	}
+	assert(max - min >= 11);
+	assert(max < 127);
+	assert(min < 127);
+}
 
 RegionView*
 MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd, bool recording)
@@ -110,7 +143,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 			/* great. we already have a MidiRegionView for this Region. use it again. */
 
 			(*i)->set_valid (true);
-			(*i)->enable_display(wfd);
+			
 			display_region(dynamic_cast<MidiRegionView*>(*i), wfd);
 
 			return NULL;
@@ -122,19 +155,9 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 		
 	region_view->init (region_color, false);
 	region_views.push_front (region_view);
-	
-	/* follow global waveform setting */
-
-	if (wfd) {
-		region_view->enable_display(true);
-		region_view->midi_region()->midi_source(0)->load_model();
-	}
-
+			
 	/* display events and find note range */
 	display_region(region_view, wfd);
-
-	/* always display at least 1 octave range */
-	_highest_note = max(_highest_note, static_cast<uint8_t>(_lowest_note + 11));
 
 	/* catch regionview going away */
 	region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_region_view), region));
@@ -149,17 +172,18 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 {
 	if ( ! region_view)
 		return;
+			
+	region_view->enable_display(true);
 
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
 
 	if (load_model)
 		source->load_model();
 
-	// Find our note range
-	if (source->model())
-		for (size_t i=0; i < source->model()->n_notes(); ++i)
-			update_bounds(source->model()->note_at(i)->note());
-	
+	_range_dirty = update_data_note_range(
+			source->model()->lowest_note(),
+			source->model()->highest_note());
+
 	// Display region contents
 	region_view->display_model(source->model());
 }
@@ -171,6 +195,21 @@ MidiStreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 	draw_note_lines();
 	NoteRangeChanged();
 }
+			
+bool
+MidiStreamView::update_data_note_range(uint8_t min, uint8_t max)
+{
+	bool dirty = false;
+	if (min < _data_note_min) {
+		_data_note_min = min;
+		dirty = true;
+	}
+	if (max > _data_note_max) {
+		_data_note_max = max;
+		dirty = true;
+	}
+	return dirty;
+}
 
 // FIXME: code duplication with AudioStreamView
 void
@@ -178,32 +217,49 @@ MidiStreamView::redisplay_diskstream ()
 {
 	list<RegionView *>::iterator i, tmp;
 
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->enable_display(true); // FIXME: double display, remove
-		(*i)->set_valid (false);
-		
-		/* FIXME: slow.  MidiRegionView needs a find_note_range method
-		 * that finds the range without wasting time drawing the events */
+	_range_dirty = false;
+	_data_note_min = 127;
+	_data_note_max = 0;
 
+	for (i = region_views.begin(); i != region_views.end(); ++i) {
+		(*i)->set_valid (false);
+		(*i)->enable_display (false);
+		
 		// Load model if it isn't already, to get note range
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
-		mrv->midi_region()->midi_source(0)->load_model();
+		if (mrv) {
+			mrv->midi_region()->midi_source(0)->load_model();
+			_range_dirty = update_data_note_range(
+					mrv->midi_region()->model()->lowest_note(),
+					mrv->midi_region()->model()->highest_note());
+		}
 	}
+
+	// No notes, use default range
+	if (!_range_dirty) {
+		_data_note_min = 60;
+		_data_note_max = 71;
+	}
+	
+	bool range_changed = false;
+
+	// Extend visible range to show newly recorded data, if necessary
+	if (_data_note_min < _lowest_note) {
+		_lowest_note = _data_note_min;
+		range_changed = true;
+	}
+	if (_data_note_max > _highest_note) {
+		_highest_note = _data_note_max;
+		range_changed = true;
+	}
+	
+	veto_note_range(_lowest_note, _highest_note);
 	
 	if (_trackview.is_midi_track()) {
 		_trackview.get_diskstream()->playlist()->foreach_region (
 				static_cast<StreamView*>(this), &StreamView::add_region_view);
 	}
 
-	/* Always display at least one octave */
-	if (_highest_note == 127) {
-		if (_lowest_note > (127 - 11)) {
-			_lowest_note = 127 - 11;
-		}
-	} else if (_highest_note < _lowest_note + 11) {
-		_highest_note = _lowest_note + 11;
-	}
-	
 	RegionViewList copy;
 	
 	/* Place regions */
@@ -256,15 +312,12 @@ MidiStreamView::redisplay_diskstream ()
 	
 	/* Fix canvas layering */
 	for (RegionViewList::iterator j = copy.begin(); j != copy.end(); ++j) {
-		(*j)->enable_display(true); // FIXME: do this?
 		region_layered (*j);
 	}
 	
-	/* Update note range and draw note lines */
-	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
-	note_range_adjustment.set_value(_lowest_note);
+	/* Update note range and re-draw note lines if necessary */
+	apply_note_range(_lowest_note, _highest_note);
 	NoteRangeChanged();
-	draw_note_lines();
 }
 
 
@@ -285,12 +338,12 @@ MidiStreamView::draw_note_lines()
 
 	_note_lines->clear();
 
-	for(int i = _lowest_note; i <= _highest_note; ++i) {
+	for (int i = lowest_note(); i <= highest_note(); ++i) {
 		y = floor(note_to_y(i));
 		
 		_note_lines->add_line(prev_y, 1.0, ARDOUR_UI::config()->canvasvar_PianoRollBlackOutline.get());
 
-		switch(i % 12) {
+		switch (i % 12) {
 		case 1:
 		case 3:
 		case 6:
@@ -303,56 +356,54 @@ MidiStreamView::draw_note_lines()
 			break;
 		}
 
-		if(i == _highest_note) {
+		if (i == highest_note()) {
 			_note_lines->add_line(y, prev_y - y, color);
-		}
-		else {
+		} else {
 			_note_lines->add_line(y + 1.0, prev_y - y - 1.0, color);
 		}
 
 		prev_y = y;
 	}
 }
-	
 
 void
 MidiStreamView::set_note_range(VisibleNoteRange r)
 {
-	_range = r;
 	if (r == FullRange) {
 		_lowest_note = 0;
 		_highest_note = 127;
 	} else {
-		_lowest_note = 60;
-		_highest_note = 60;
+		_lowest_note = _data_note_min;
+		_highest_note = _data_note_max;
 	}
-	redisplay_diskstream();
+
+	apply_note_range(_lowest_note, _highest_note);
 }
 
 void
-MidiStreamView::set_note_range(uint8_t lowest, uint8_t highest) {
-	if(_range == ContentsRange) {
-		_lowest_note = lowest;
-		_highest_note = highest;
-
-		list<RegionView *>::iterator i;
-		for (i = region_views.begin(); i != region_views.end(); ++i) {
-			(*i)->set_height(height); // apply note range
-		}
+MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest)
+{
+	_highest_note = highest;
+	_lowest_note = lowest;
+	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
+	note_range_adjustment.set_value(_lowest_note);
+	draw_note_lines();
+	
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		((MidiRegionView*)(*i))->apply_note_range(lowest, highest);
 	}
 
-	draw_note_lines();
 	NoteRangeChanged();
 }
-	
+
 void 
-MidiStreamView::update_bounds(uint8_t note_num)
+MidiStreamView::update_note_range(uint8_t note_num)
 {
-	_lowest_note = min(_lowest_note, note_num);
-	_highest_note = max(_highest_note, note_num);
+	assert(note_num <= 127);
+	_data_note_min = min(_data_note_min, note_num);
+	_data_note_max = max(_data_note_max, note_num);
 }
-
-
+	
 void
 MidiStreamView::setup_rec_box ()
 {
@@ -628,7 +679,6 @@ MidiStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur, 
 void
 MidiStreamView::color_handler ()
 {
-
 	//case cMidiTrackBase:
 	if (_trackview.is_midi_track()) {
 		//canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
@@ -641,27 +691,30 @@ MidiStreamView::color_handler ()
 }
 
 void
-MidiStreamView::note_range_adjustment_changed() {
+MidiStreamView::note_range_adjustment_changed()
+{
 	double sum = note_range_adjustment.get_value() + note_range_adjustment.get_page_size();
 	int lowest = (int) floor(note_range_adjustment.get_value());
 	int highest;
 
-	if(sum == _range_sum_cache) {
+	if (sum == _range_sum_cache) {
 		//cerr << "cached" << endl;
 		highest = (int) floor(sum);
-	}
-	else {
+	} else {
 		//cerr << "recalc" << endl;
 		highest = lowest + (int) floor(note_range_adjustment.get_page_size());
 		_range_sum_cache = sum;
 	}
 
-	if(lowest == lowest_note() && highest == highest_note()) {
+	if (lowest == _lowest_note && highest == _highest_note) {
 		return;
 	}
 
-	//cerr << "note range changed: " << lowest << " " << highest << endl;
+	//cerr << "note range adjustment changed: " << lowest << " " << highest << endl;
 	//cerr << "  val=" << v_zoom_adjustment.get_value() << " page=" << v_zoom_adjustment.get_page_size() << " sum=" << v_zoom_adjustment.get_value() + v_zoom_adjustment.get_page_size() << endl;
 
-	set_note_range(lowest, highest);
+	_lowest_note = lowest;
+	_highest_note = highest;
+	apply_note_range(lowest, highest);
 }
+

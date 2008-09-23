@@ -314,6 +314,8 @@ Sequence::Sequence(const TypeMap& type_map, size_t size)
 	, _end_iter(*this, DBL_MAX)
 	, _next_read(UINT32_MAX)
 	, _percussive(false)
+	, _lowest_note(127)
+	, _highest_note(0)
 {
 	debugout << "Sequence (size " << size << ") constructed: " << this << endl;
 	assert(_end_iter._is_end);
@@ -567,6 +569,11 @@ Sequence::append_note_on_unlocked(uint8_t chan, EventTime time, uint8_t note_num
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;
+
+	if (note_num < _lowest_note)
+		_lowest_note = note_num;
+	if (note_num > _highest_note)
+		_highest_note = note_num;
 
 	boost::shared_ptr<Note> new_note(new Note(chan, time, 0, note_num, velocity));
 	_notes.push_back(new_note);

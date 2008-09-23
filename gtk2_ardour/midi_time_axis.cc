@@ -83,8 +83,9 @@ using namespace Editing;
 
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
-	: AxisView(sess) // FIXME: won't compile without this, why??
+	: AxisView(sess) // virtually inherited
 	, RouteTimeAxisView(ed, sess, rt, canvas)
+	, _ignore_signals(false)  
 	, _range_scroomer(0)
 	, _piano_roll_header(0)
 	, _note_mode(Sustained)
@@ -200,17 +201,13 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	MenuList& range_items = range_menu->items();
 	range_menu->set_name ("ArdourContextMenu");
 	
-	RadioMenuItem::Group range_group;
-
-	range_items.push_back (RadioMenuElem (range_group, _("Show Full Range"), bind (
+	range_items.push_back (MenuElem (_("Show Full Range"), bind (
 			mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::FullRange)));
 	
-	range_items.push_back (RadioMenuElem (range_group, _("Fit Contents"), bind (
+	range_items.push_back (MenuElem (_("Fit Contents"), bind (
 			mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::ContentsRange)));
-
-	((Gtk::CheckMenuItem&)range_items.back()).set_active(true);
 
 	items.push_back (MenuElem (_("Note range"), *range_menu));
 }
@@ -273,10 +270,8 @@ MidiTimeAxisView::set_note_mode(NoteMode mode)
 void
 MidiTimeAxisView::set_note_range(MidiStreamView::VisibleNoteRange range)
 {
-	//if (midi_view()->note_range() != range) {
+	if (!_ignore_signals)
 		midi_view()->set_note_range(range);
-		midi_view()->redisplay_diskstream();
-	//}
 }
 
 
