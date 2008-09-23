@@ -44,6 +44,7 @@
 #include "gui_thread.h"
 #include "time_axis_view.h"
 #include "ardour_ui.h"
+#include "tempo_lines.h"
 
 #include "i18n.h"
 
@@ -171,36 +172,11 @@ Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
 	current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat) + 1);
 }
 
-ArdourCanvas::SimpleLine *
-Editor::get_time_line ()
-{
-         ArdourCanvas::SimpleLine *line;
-
-	if (free_measure_lines.empty()) {
-	        line = new ArdourCanvas::SimpleLine (*time_line_group);
-		used_measure_lines.push_back (line);
-	} else {
-		line = free_measure_lines.front();
-		free_measure_lines.erase (free_measure_lines.begin());
-		used_measure_lines.push_back (line);
-	}
-
-	return line;
-}
-
 void
 Editor::hide_measures ()
 {
-	// from old pre-merge 3.0
-	// tempo_lines->hide();
-	// marker_tempo_lines->hide();
-
-	for (TimeLineList::iterator i = used_measure_lines.begin(); i != used_measure_lines.end(); ++i) {
-		(*i)->hide();
-		free_measure_lines.push_back (*i);
-	}
-
-	used_measure_lines.clear ();
+	if (tempo_lines)
+		tempo_lines->hide();
 }
 
 bool
@@ -220,70 +196,15 @@ Editor::draw_measures ()
 		return;
 	}
 
-	TempoMap::BBTPointList::iterator i;
-	ArdourCanvas::SimpleLine *line;
-	gdouble xpos;
-	double beat_density;
-
-        uint32_t beats = 0;
-        uint32_t bars = 0;
-	uint32_t color;
-
 	if (current_bbt_points == 0 || current_bbt_points->empty()) {
 		return;
 	}
 
-	/* get the first bar spacing */
-
-	i = current_bbt_points->end();
-	i--;
-	bars = (*i).bar - (*current_bbt_points->begin()).bar;
-	beats = current_bbt_points->size() - bars;
-
-	beat_density =  (beats * 10.0f) / track_canvas->get_width ();
-
-	if (beat_density > 4.0f) {
-		/* if the lines are too close together, they become useless
-		 */
-		return;
+	if (tempo_lines == 0) {
+		tempo_lines = new TempoLines(*track_canvas, time_line_group);
 	}
 
-	for (i = current_bbt_points->begin(); i != current_bbt_points->end(); ++i) {
-
-		switch ((*i).type) {
-		case TempoMap::Bar:
-			break;
-
-		case TempoMap::Beat:
-			
-			if ((*i).beat == 1) {
-				color = ARDOUR_UI::config()->canvasvar_MeasureLineBar.get();
-			} else {
-				color = ARDOUR_UI::config()->canvasvar_MeasureLineBeat.get();
-
-				if (beat_density > 2.0) {
-					/* only draw beat lines if the gaps between beats are large.
-					*/
-					break;
-				}
-			}
-
-			xpos = frame_to_unit ((nframes64_t) (*i).frame);
-			line = get_time_line ();
-			line->property_x1() = xpos;
-			line->property_x2() = xpos;
-			line->property_y2() = canvas_height;
-			line->property_color_rgba() = color;
-			//line->raise_to_top();
-			line->show();	
-			break;
-		}
-	}
-
-	/* the cursors are always on top of everything */
-	//cursor_group->raise_to_top();
-
-	return;
+	tempo_lines->draw(*current_bbt_points, frames_per_unit);
 }
 
 void

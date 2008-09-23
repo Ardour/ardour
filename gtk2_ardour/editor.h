@@ -61,9 +61,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
-#include "time_axis_view.h"
 #include "draginfo.h"
-#include "tempo_lines.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -99,6 +97,7 @@ class Marker;
 class GroupedButtons;
 class AutomationLine;
 class Selection;
+class TempoLines;
 class TimeSelection;
 class TrackSelection;
 class AutomationSelection;
@@ -1530,9 +1529,7 @@ public:
 	
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 	
-	typedef vector<ArdourCanvas::SimpleLine*> TimeLineList;
-	TimeLineList free_measure_lines;
-	TimeLineList used_measure_lines;
+	TempoLines* tempo_lines;
 
 	ArdourCanvas::Group* time_line_group;
 	ArdourCanvas::SimpleLine* get_time_line ();

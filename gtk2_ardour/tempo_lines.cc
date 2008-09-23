@@ -22,7 +22,6 @@
 #include "tempo_lines.h"
 #include "ardour_ui.h"
 
-
 ArdourCanvas::SimpleLine *
 TempoLines::get_line ()
 {
@@ -68,10 +67,6 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	_canvas.get_scroll_region (x1, y1, x2, who_cares);
 	_canvas.root()->get_bounds(who_cares, who_cares, who_cares, y2);
 
-	// FIXME use canvas height
-	//y2 = TimeAxisView::hLargest*5000; // five thousand largest tracks should be enough.. :)
-	//y2 = 500000; // five thousand largest tracks should be enough.. :)
-
 	/* get the first bar spacing */
 
 	i = points.end();
@@ -86,7 +81,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 		 */
 		return;
 	}
-	
+
 	for (i = points.begin(); i != points.end(); ++i) {
 
 		switch ((*i).type) {
@@ -107,7 +102,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 				}
 			}
 
-			xpos = rint((*i).frame / (double)frames_per_unit);
+			xpos = rint(((nframes64_t)(*i).frame) / (double)frames_per_unit);
 			line = get_line ();
 			line->property_x1() = xpos;
 			line->property_x2() = xpos;
@@ -119,4 +114,3 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 		}
 	}
 }
-
