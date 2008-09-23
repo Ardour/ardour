@@ -85,6 +85,7 @@
 #include "simpleline.h"
 #include "rhythm_ferret.h"
 #include "actions.h"
+#include "tempo_lines.h"
 
 #ifdef FFT_ANALYSIS
 #include "analysis_window.h"
@@ -376,7 +377,6 @@ Editor::Editor ()
 
 	range_marker_drag_rect = 0;
 	marker_drag_line = 0;
-	tempo_map_change_idle_handler_id = -1;
 	set_midi_edit_mode (MidiEditPencil, true);
 	set_mouse_mode (MouseObject, true);
 
@@ -3938,6 +3938,8 @@ Editor::set_show_measures (bool yn)
 		hide_measures ();
 
 		if ((_show_measures = yn) == true) {
+			if (tempo_lines)
+				tempo_lines->show();
 			draw_measures ();
 		}
 		instant_save ();
@@ -4542,6 +4544,9 @@ Editor::set_frames_per_unit (double fpu)
 	if (max_frames / fpu < 800.0) {
 		return;
 	}
+	
+	if (tempo_lines)
+		tempo_lines->tempo_map_changed();
 
 	frames_per_unit = fpu;
 	post_zoom ();

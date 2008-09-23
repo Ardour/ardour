@@ -904,7 +904,8 @@ Editor::canvas_scroll_to (nframes64_t time_origin)
 	
 	update_fixed_rulers ();
 
-	redisplay_tempo (!_dragging_hscrollbar);
+	//redisplay_tempo (!_dragging_hscrollbar);
+	redisplay_tempo (true);
 }
 
 void

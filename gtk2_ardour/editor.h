@@ -1597,7 +1597,6 @@ public:
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
 	void compute_current_bbt_points (nframes_t left, nframes_t right);
-	int tempo_map_change_idle_handler_id;
 	void tempo_map_changed (ARDOUR::Change);
 	void redisplay_tempo (bool immediate_redraw);
 	

@@ -27,9 +27,6 @@
 #include <sigc++/signal.h>
 #include <glibmm/thread.h>
 
-#include <boost/pool/pool.hpp>
-#include <boost/pool/pool_alloc.hpp>
-
 #include <pbd/undo.h>
 #include <pbd/xml++.h>
 #include <pbd/statefuldestructible.h> 
