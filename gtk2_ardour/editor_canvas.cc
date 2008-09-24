@@ -364,6 +364,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	double pos;
+	bool changed = false;
 
 	for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
@@ -377,31 +378,39 @@ Editor::controls_layout_size_request (Requisition* req)
 	if (!screen) {
 		screen = Gdk::Screen::get_default();
 	}
-
+	gint height = min ( (gint) pos, (screen->get_height() - 400));
 	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */
 
 	width =  min (width, screen->get_width() - 300);
 
+	if ((req->width != width) || (req->height != height)) {
+		changed = true;
+		controls_layout_size_request_connection.disconnect ();
+	}
+
 	if (req->width != width) {
+		gint vbox_width = edit_controls_vbox.get_width();
 		req->width = width;
-		time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
-		zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
-	}
-
-	gint height = min ( (gint) pos, (screen->get_height() - 400));
-	if (req->height != height) {
-		req->height = height;
-	}
-
-	if (width != edit_controls_vbox.get_width()) {
 
 		/* this one is important: it determines how big the layout thinks it really is, as 
 		   opposed to what it displays on the screen
 		*/
-		controls_layout.set_size (edit_controls_vbox.get_width(), pos );
-		controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
+		controls_layout.property_width () = vbox_width;
+		controls_layout.property_width_request () = vbox_width;
+
+		time_button_event_box.property_width_request () = vbox_width;
+		zoom_box.property_width_request () = vbox_width;
+	}
+
+	if (req->height != height) {
+		req->height = height;
+		controls_layout.property_height () = (guint) floor (pos);
+	}
+
+	if (changed) {
+		controls_layout_size_request_connection = controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
 	}
 }
 

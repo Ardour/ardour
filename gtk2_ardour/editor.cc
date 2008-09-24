@@ -402,7 +402,7 @@ Editor::Editor ()
 	
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	controls_layout.signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
-	controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
+	controls_layout_size_request_connection = controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
 
 	edit_vscrollbar.set_adjustment (vertical_adjustment);
 	edit_hscrollbar.set_adjustment (horizontal_adjustment);
