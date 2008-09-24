@@ -372,6 +372,8 @@ Editor::controls_layout_size_request (Requisition* req)
 
 	if (req->width != width) {
 		req->width = width;
+		time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
+		zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
 	}
 
 	gint height = min ( (gint) pos, (screen->get_height() - 400));
@@ -379,15 +381,13 @@ Editor::controls_layout_size_request (Requisition* req)
 		req->height = height;
 	}
 
-	if ((width != edit_controls_vbox.get_width()) || height !=  pos) {
+	if (width != edit_controls_vbox.get_width()) {
 
 		/* this one is important: it determines how big the layout thinks it really is, as 
 		   opposed to what it displays on the screen
 		*/
 		controls_layout.set_size (edit_controls_vbox.get_width(), (guint) floor (pos));
 		controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
-		time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
-		zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
 	}
 
 	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG	

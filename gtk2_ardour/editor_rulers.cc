@@ -798,7 +798,7 @@ Editor::update_ruler_visibility ()
 	time_canvas_event_box.queue_resize();
 	
 	update_fixed_rulers();
-	redisplay_tempo (false);
+	//redisplay_tempo (false);
 
 	time_canvas_event_box.show_all();
 	ruler_label_event_box.show_all();
