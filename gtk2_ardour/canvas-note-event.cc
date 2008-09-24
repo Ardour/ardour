@@ -66,7 +66,7 @@ CanvasNoteEvent::move_event(double dx, double dy)
 }
 
 void
-CanvasNoteEvent::show_velocity(void)
+CanvasNoteEvent::show_velocity()
 {
 	hide_velocity();
 	_text = new Text(*(_item->property_parent()));
@@ -83,9 +83,9 @@ CanvasNoteEvent::show_velocity(void)
 }
 
 void
-CanvasNoteEvent::hide_velocity(void)
+CanvasNoteEvent::hide_velocity()
 {
-	if(_text) {
+	if (_text) {
 		_text->hide();
 		delete _text;
 	}

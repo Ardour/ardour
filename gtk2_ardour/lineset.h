@@ -23,58 +23,52 @@
 namespace Gnome {
 namespace Canvas {
 
-class LinesetClass : public Glib::Class {
+class LineSetClass : public Glib::Class {
 public:
 	const Glib::Class& init();
 	static void class_init_function(void* g_class, void* class_data);
 };
 
-/**
- * A canvas item that displays a list of lines vertically or horizontally,
+/** A canvas item that displays a set of vertical or horizontal lines,
  * spanning the entire size of the item.
  */
-class Lineset : public Item {
+class LineSet : public Item {
 public:
 	enum Orientation {
 		Vertical,
 		Horizontal
 	};
 
-	Lineset(Group& parent, Orientation);
-	virtual ~Lineset();
+	LineSet(Group& parent, Orientation);
+	virtual ~LineSet();
 
 	Glib::PropertyProxy<double> property_x1() { return x1.get_proxy(); }
 	Glib::PropertyProxy<double> property_y1() { return y1.get_proxy(); }
 	Glib::PropertyProxy<double> property_x2() { return x2.get_proxy(); }
 	Glib::PropertyProxy<double> property_y2() { return y2.get_proxy(); }
 
-	/*
-	 * Note: every line operation takes a coord parameter, as an index to
+	/* Note: every line operation takes a coord parameter, as an index to
 	 * the line it modifies. The index will identify a line if it is between
 	 * line.coord and line.coord + line.width.
 	 */
 
-	/**
-	 * Move a line to a new position
-	 * for this to work (to move the desired line) it is important that
+	/** Move a line to a new position.
+	 * For this to work (to move the desired line) it is important that
 	 * lines have unique coordinates. This also applies to every line
 	 * accessing functions below
 	 */
 	void move_line(double coord, double dest);
 
-	/**
-	 * Change the width of a line. Only allow it if the new width doesn't
-	 * overlap the next line (see below)
+	/** Change the width of a line.
+	 * Only allow if the new width doesn't overlap the next line (see below)
 	 */
 	void change_line_width(double coord, double width);
 
-	/**
-	 * Change the color of a line
+	/** Change the color of a line.
 	 */
 	void change_line_color(double coord, uint32_t color);
 
-	/**
-	 * this function adds a line to draw.
+	/** Add a line to draw.
 	 * width is an offset, so that coord + width specifies the end of the line.
 	 * lines should not overlap, as no layering information is provided.
 	 * however, line_coord[i] + line_width[i] == line_coord[i+1] is
@@ -84,49 +78,41 @@ public:
 	 */
 	void add_line(double coord, double width, uint32_t color);
 
-	/**
-	 * remove the line at coord
+	/** Remove the line at coord
 	 */
 	void remove_line(double coord);
 	
-	/**
-	 * remove all lines in a coordinate range
+	/** Remove all lines in a coordinate range
 	 */
 	void remove_lines(double c1, double c2);
 
-	/**
-	 * remove all lines with a coordinate lower than coord
+	/** Remove all lines with a coordinate lower than coord
 	 */
 	void remove_until(double coord);
 	
-	/**
-	 * remove all lines with a coordinate equal to or higher than coord
+	/** Remove all lines with a coordinate equal to or higher than coord.
 	 */
 	void remove_from(double coord);
 
-	/**
-	 * remove all lines
+	/** Remove all lines.
 	 */
 	void clear();
 
-	/**
-	 * this is a request of information on lines in a coordinate range.
-	 * for every line visible in the provided coordinate range,
-	 * call add_line() on it.
+	/** Add a set of lines in the given range.
+	 * For every line visible in the provided coordinate range, call add_line().
 	 * This is called when the area between c1 and c2 becomes visible, when
-	 * previously outside any possible view. So the number of calls to this
-	 * function will be kept at a minimum.
+	 * previously outside any possible view.
+	 * The number of calls to this function should be kept at a minimum.
 	 */
 	virtual void request_lines(double c1, double c2);
 
-	/**
-	 * instead of overriding the update_lines function one can connect to this
-	 * and add lines externally instead. If add_lines() is overrided, this
-	 * signal will not be emitted.
+	/** Instead of overriding the update_lines function one can connect to this
+	 * and add lines externally instead.
+	 * If add_lines() is overrided, this signal will not be emitted.
 	 */
-	sigc::signal<void, Lineset&, double, double> signal_request_lines;
+	sigc::signal<void, LineSet&, double, double> signal_request_lines;
 
-	/* overrided from Gnome::Canvas::Item */
+	/* overridden from Gnome::Canvas::Item */
 	void update_vfunc(double* affine, ArtSVP* clip_path, int flags);
 	void realize_vfunc();
 	void unrealize_vfunc();
@@ -156,8 +142,8 @@ protected:
 		unsigned char a;
 	};
 
-	static inline void paint_vert(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2);
-	static inline void paint_horiz(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2);
+	static inline void paint_vert(GnomeCanvasBuf* buf, LineSet::Line& line, int x1, int y1, int x2, int y2);
+	static inline void paint_horiz(GnomeCanvasBuf* buf, LineSet::Line& line, int x1, int y1, int x2, int y2);
 
 	static bool line_compare(const Line& a, const Line& b);
 
@@ -171,10 +157,10 @@ protected:
 
 	Lines::iterator line_at(double coord);
 
-	/* store that last accessed line so adjacent lines are found faster */
+	/** Stores last accessed line so adjacent lines are found faster */
 	Lines::iterator cached_pos;
 
-	static LinesetClass lineset_class;
+	static LineSetClass lineset_class;
 	Orientation orientation;
 	Lines lines;
 
@@ -184,12 +170,12 @@ protected:
 	Glib::Property<double> x2;
 	Glib::Property<double> y2;
 
-	/* cached bounding box in canvas coordinates*/
+	/** Cached bounding box in canvas coordinates */
 	ArtIRect bbox;
 
 private:
-	Lineset();
-	Lineset(const Lineset&);
+	LineSet();
+	LineSet(const LineSet&);
 
 	bool in_update;
 

@@ -75,7 +75,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	/* put the note lines in the timeaxisview's group, so it 
 	   can be put below ghost regions from MIDI underlays*/
-	_note_lines = new ArdourCanvas::Lineset(*canvas_group, ArdourCanvas::Lineset::Horizontal);
+	_note_lines = new ArdourCanvas::LineSet(*canvas_group, ArdourCanvas::LineSet::Horizontal);
 
 	_note_lines->property_x1() = 0;
 	_note_lines->property_y1() = 0;

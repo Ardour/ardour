@@ -34,7 +34,7 @@ namespace Gnome {
 		class Line;
 		class Points;
 		class ImageFrame;
-		class Lineset;
+		class LineSet;
 	}
 }
 

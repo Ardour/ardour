@@ -134,7 +134,7 @@ class MidiStreamView : public StreamView
 	uint8_t                   _highest_note;  ///< currently visible
 	uint8_t                   _data_note_min; ///< in data
 	uint8_t                   _data_note_max; ///< in data
-	ArdourCanvas::Lineset*    _note_lines;
+	ArdourCanvas::LineSet*    _note_lines;
 };
 
 #endif /* __ardour_midi_streamview_h__ */

@@ -31,11 +31,11 @@ using namespace std;
 namespace Gnome {
 namespace Canvas {
 
-LinesetClass Lineset::lineset_class;
+LineSetClass LineSet::lineset_class;
 
-//static const char* overlap_error_str = "Lineset error: Line overlap";
+//static const char* overlap_error_str = "LineSet error: Line overlap";
 
-Lineset::Line::Line(double c, double w, uint32_t color)
+LineSet::Line::Line(double c, double w, uint32_t color)
 	: coord(c)
 	, width(w)
 {
@@ -43,22 +43,22 @@ Lineset::Line::Line(double c, double w, uint32_t color)
 }
 
 /* Constructor for dummy lines that are used only with the coordinate */
-Lineset::Line::Line(double c)
+LineSet::Line::Line(double c)
 	: coord(c)
 {
 }
 
 void
-Lineset::Line::set_color(uint32_t color)
+LineSet::Line::set_color(uint32_t color)
 {
 	UINT_TO_RGBA (color, &r, &g, &b, &a);
 }
 
 const Glib::Class&
-LinesetClass::init()
+LineSetClass::init()
 {
 	if (!gtype_) {
-		class_init_func_ = &LinesetClass::class_init_function;
+		class_init_func_ = &LineSetClass::class_init_function;
 		register_derived_type(Item::get_type());
 	}
 
@@ -66,12 +66,12 @@ LinesetClass::init()
 }
 
 void
-LinesetClass::class_init_function(void* g_class, void* class_data)
+LineSetClass::class_init_function(void* g_class, void* class_data)
 {
 }
 
-Lineset::Lineset(Group& parent, Orientation o)
-	: Glib::ObjectBase("GnomeCanvasLineset")
+LineSet::LineSet(Group& parent, Orientation o)
+	: Glib::ObjectBase("GnomeCanvasLineSet")
 	, Item(Glib::ConstructParams(lineset_class.init()))
 	, cached_pos(lines.end())
 	, orientation(o)
@@ -89,24 +89,24 @@ Lineset::Lineset(Group& parent, Orientation o)
 
 	item_construct(parent);
 
-	property_x1().signal_changed().connect(mem_fun(*this, &Lineset::bounds_need_update));
-	property_y1().signal_changed().connect(mem_fun(*this, &Lineset::bounds_need_update));
-	property_x2().signal_changed().connect(mem_fun(*this, &Lineset::bounds_need_update));
-	property_y2().signal_changed().connect(mem_fun(*this, &Lineset::bounds_need_update));
+	property_x1().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
+	property_y1().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
+	property_x2().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
+	property_y2().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
 }
 
-Lineset::~Lineset()
+LineSet::~LineSet()
 {
 }
 
 bool
-Lineset::line_compare(const Line& a, const Line& b)
+LineSet::line_compare(const Line& a, const Line& b)
 {
 	return a.coord < b.coord;
 }
 
 void
-Lineset::print_lines()
+LineSet::print_lines()
 {
 	for (Lines::iterator it = lines.begin(); it != lines.end(); ++it)
 {
@@ -115,7 +115,7 @@ Lineset::print_lines()
 }
 
 void
-Lineset::move_line(double coord, double dest)
+LineSet::move_line(double coord, double dest)
 {
 	if (coord == dest) {
 		return;
@@ -142,7 +142,7 @@ Lineset::move_line(double coord, double dest)
 }
 
 void
-Lineset::change_line_width(double coord, double width)
+LineSet::change_line_width(double coord, double width)
 {
 	Lines::iterator it = line_at(coord);
 
@@ -163,7 +163,7 @@ Lineset::change_line_width(double coord, double width)
 }
 
 void
-Lineset::change_line_color(double coord, uint32_t color)
+LineSet::change_line_color(double coord, uint32_t color)
 {
 	Lines::iterator it = line_at(coord);
 
@@ -174,7 +174,7 @@ Lineset::change_line_color(double coord, uint32_t color)
 }
 
 void
-Lineset::add_line(double coord, double width, uint32_t color)
+LineSet::add_line(double coord, double width, uint32_t color)
 {
 	Line l(coord, width, color);
 
@@ -201,7 +201,7 @@ Lineset::add_line(double coord, double width, uint32_t color)
 }
 
 void
-Lineset::remove_line(double coord)
+LineSet::remove_line(double coord)
 {
 	Lines::iterator it = line_at(coord);
 
@@ -216,7 +216,7 @@ Lineset::remove_line(double coord)
 }
 
 void
-Lineset::remove_lines(double c1, double c2)
+LineSet::remove_lines(double c1, double c2)
 {
 	if (!lines.empty()) {
 		region_needs_update(c1, c2);
@@ -224,7 +224,7 @@ Lineset::remove_lines(double c1, double c2)
 }
 
 void
-Lineset::remove_until(double coord)
+LineSet::remove_until(double coord)
 {
 	if (!lines.empty()) {
 		double first = lines.front().coord;
@@ -236,7 +236,7 @@ Lineset::remove_until(double coord)
 }
 	
 void
-Lineset::remove_from(double coord)
+LineSet::remove_from(double coord)
 {
 	if (!lines.empty()) {
 		double last = lines.back().coord + lines.back().width;
@@ -248,7 +248,7 @@ Lineset::remove_from(double coord)
 }
 
 void
-Lineset::clear()
+LineSet::clear()
 {
 	if (!lines.empty()) {
 		double coord1 = lines.front().coord;
@@ -263,8 +263,8 @@ Lineset::clear()
  * this function is optimized to work faster if we access elements that are adjacent to each other.
  * so if a large number of lines are modified, it is wise to modify them in sorted order.
  */
-Lineset::Lines::iterator
-Lineset::line_at(double coord)
+LineSet::Lines::iterator
+LineSet::line_at(double coord)
 {
 	if (cached_pos != lines.end()) {
 		if (coord < cached_pos->coord) {
@@ -323,13 +323,13 @@ Lineset::line_at(double coord)
 }
 
 void
-Lineset::redraw_request(ArtIRect& r)
+LineSet::redraw_request(ArtIRect& r)
 {
 	get_canvas()->request_redraw(r.x0, r.y0, r.x1, r.y1);
 }
 
 void
-Lineset::redraw_request(ArtDRect& r)
+LineSet::redraw_request(ArtDRect& r)
 {
 	int x0, y0, x1, y1;
 	Canvas& cv = *get_canvas();
@@ -342,7 +342,7 @@ Lineset::redraw_request(ArtDRect& r)
 }
 
 void
-Lineset::update_lines(bool need_redraw)
+LineSet::update_lines(bool need_redraw)
 {
 	//cerr << "update_lines need_redraw=" << need_redraw << endl;
 	if (!need_redraw) {
@@ -353,7 +353,7 @@ Lineset::update_lines(bool need_redraw)
 
 	if (update_region2 > update_region1) {
 		ArtDRect redraw;
-		Lineset::bounds_vfunc(&redraw.x0, &redraw.y0, &redraw.x1, &redraw.y1);
+		LineSet::bounds_vfunc(&redraw.x0, &redraw.y0, &redraw.x1, &redraw.y1);
 		i2w(redraw.x0, redraw.y0);
 		i2w(redraw.x1, redraw.y1);
 		
@@ -379,7 +379,7 @@ Lineset::update_lines(bool need_redraw)
  * return true if nothing or only parts of the rect area has been requested for redraw
  */
 bool
-Lineset::update_bounds()
+LineSet::update_bounds()
 {
 	GnomeCanvasItem* item = GNOME_CANVAS_ITEM(gobj());
 	ArtDRect old_b;
@@ -392,7 +392,7 @@ Lineset::update_bounds()
 	old_b.y0 = item->y1;
 	old_b.x1 = item->x2;
 	old_b.y1 = item->y2;
-	Lineset::bounds_vfunc(&new_b.x0, &new_b.y0, &new_b.x1, &new_b.y1);
+	LineSet::bounds_vfunc(&new_b.x0, &new_b.y0, &new_b.x1, &new_b.y1);
 
 	i2w(new_b.x0, new_b.y0);
 	i2w(new_b.x1, new_b.y1);
@@ -503,7 +503,7 @@ Lineset::update_bounds()
  * N. find out if the item moved. if it moved, the old bbox and the new bbox need to be updated.
  */
 void
-Lineset::update_vfunc(double* affine, ArtSVP* clip_path, int flags)
+LineSet::update_vfunc(double* affine, ArtSVP* clip_path, int flags)
 {
 	GnomeCanvasItem* item = GNOME_CANVAS_ITEM(gobj());
 	bool lines_need_redraw = true;
@@ -539,14 +539,14 @@ Lineset::update_vfunc(double* affine, ArtSVP* clip_path, int flags)
 }
 
 void
-Lineset::draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height)
+LineSet::draw_vfunc(const Glib::RefPtr<Gdk::Drawable>& drawable, int x, int y, int width, int height)
 {
-	cerr << "please don't use the GnomeCanvasLineset item in a non-aa Canvas" << endl;
+	cerr << "please don't use the GnomeCanvasLineSet item in a non-aa Canvas" << endl;
 	abort();
 }
 
 inline void
-Lineset::paint_vert(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2)
+LineSet::paint_vert(GnomeCanvasBuf* buf, LineSet::Line& line, int x1, int y1, int x2, int y2)
 {
 	if (line.width == 1.0) {
 		PAINT_VERTA(buf, line.r, line.g, line.b, line.a, x1, y1, y2);
@@ -556,7 +556,7 @@ Lineset::paint_vert(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, in
 }
 
 inline void
-Lineset::paint_horiz(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, int x2, int y2)
+LineSet::paint_horiz(GnomeCanvasBuf* buf, LineSet::Line& line, int x1, int y1, int x2, int y2)
 {
 	if (line.width == 1.0) {
 		PAINT_HORIZA(buf, line.r, line.g, line.b, line.a, x1, x2, y1);
@@ -566,7 +566,7 @@ Lineset::paint_horiz(GnomeCanvasBuf* buf, Lineset::Line& line, int x1, int y1, i
 }
 
 void
-Lineset::render_vfunc(GnomeCanvasBuf* buf)
+LineSet::render_vfunc(GnomeCanvasBuf* buf)
 {
 	ArtIRect rect;
 	int pos0, pos1, offset;
@@ -694,7 +694,7 @@ Lineset::render_vfunc(GnomeCanvasBuf* buf)
 }
 
 void
-Lineset::bounds_vfunc(double* _x1, double* _y1, double* _x2, double* _y2)
+LineSet::bounds_vfunc(double* _x1, double* _y1, double* _x2, double* _y2)
 {
 	*_x1 = x1;
 	*_y1 = y1;
@@ -704,12 +704,12 @@ Lineset::bounds_vfunc(double* _x1, double* _y1, double* _x2, double* _y2)
 
 
 double
-Lineset::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actual_item)
+LineSet::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actual_item)
 {
 	double x1, y1, x2, y2;
 	double dx, dy;
 
-	Lineset::bounds_vfunc(&x1, &y1, &x2, &y2);
+	LineSet::bounds_vfunc(&x1, &y1, &x2, &y2);
 
 	*actual_item = gobj();
 
@@ -739,13 +739,13 @@ Lineset::point_vfunc(double x, double y, int cx, int cy, GnomeCanvasItem** actua
 
 /* If not overrided emit the signal */
 void
-Lineset::request_lines(double c1, double c2)
+LineSet::request_lines(double c1, double c2)
 {
 	signal_request_lines(*this, c1, c2);
 }
 
 void
-Lineset::bounds_need_update()
+LineSet::bounds_need_update()
 {
 	bounds_changed = true;
 
@@ -755,7 +755,7 @@ Lineset::bounds_need_update()
 }
 
 void
-Lineset::region_needs_update(double coord1, double coord2)
+LineSet::region_needs_update(double coord1, double coord2)
 {
 	if (update_region1 > update_region2) {
 		update_region1 = coord1;
@@ -774,15 +774,15 @@ Lineset::region_needs_update(double coord1, double coord2)
  * These have been defined to avoid endless recursion with gnomecanvasmm.
  * Don't know why this happens
  */
-bool Lineset::on_event(GdkEvent* p1)
+bool LineSet::on_event(GdkEvent* p1)
 { 
 	return false;
 }
 
-void Lineset::realize_vfunc() { }
-void Lineset::unrealize_vfunc() { }
-void Lineset::map_vfunc() { }
-void Lineset::unmap_vfunc() { }
+void LineSet::realize_vfunc() { }
+void LineSet::unrealize_vfunc() { }
+void LineSet::map_vfunc() { }
+void LineSet::unmap_vfunc() { }
 
 } /* namespace Canvas */
 } /* namespace Gnome */
