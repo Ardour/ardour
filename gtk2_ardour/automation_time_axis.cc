@@ -266,7 +266,8 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 		if (_control->list())
 			_control->alist()->set_automation_state(state);
 	}
-	_view->set_automation_state (state);
+	if (_view)
+		_view->set_automation_state (state);
 }
 
 void
