@@ -3329,20 +3329,23 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 			RegionView* nrv;
 
 			rv = (*i);
-
 			AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
-
-			if (arv) {
-				nrv = new AudioRegionView (*arv);
-			} else if (mrv) {
-				nrv = new MidiRegionView (*mrv);
-			} else {
-				continue;
-			}
-
+			
 			const boost::shared_ptr<const Region> original = rv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original);
+
+			if (arv) {
+				boost::shared_ptr<AudioRegion> audioregion_copy
+					= boost::dynamic_pointer_cast<AudioRegion>(region_copy);
+				nrv = new AudioRegionView (*arv, audioregion_copy);
+			} else if (mrv) {
+				boost::shared_ptr<MidiRegion> midiregion_copy
+					= boost::dynamic_pointer_cast<MidiRegion>(region_copy);
+ 				nrv = new MidiRegionView (*mrv, midiregion_copy);
+ 			} else {
+ 				continue;
+ 			}
 
 			nrv->get_canvas_group()->show ();
 			new_regionviews.push_back (nrv);

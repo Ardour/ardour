@@ -62,8 +62,8 @@ class AudioRegionView : public RegionView
 			 bool recording,
 		     TimeAxisViewItem::Visibility);
 
-        AudioRegionView (const AudioRegionView& other);
-        AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
+	AudioRegionView (const AudioRegionView& other);
+	AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	~AudioRegionView ();
 	

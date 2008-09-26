@@ -91,6 +91,47 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 }
 
+
+MidiRegionView::MidiRegionView (const MidiRegionView& other)
+	: RegionView (other)
+	, _force_channel(-1)
+	, _last_channel_selection(0xFFFF)
+	, _default_note_length(0.0)
+	, _active_notes(0)
+	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
+	, _delta_command(NULL)
+	, _mouse_state(None)
+	, _pressed_button(0)
+{
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+	
+	init (c, false);
+}
+
+MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<MidiRegion> other_region)
+	: RegionView (other, boost::shared_ptr<Region> (other_region))
+	, _force_channel(-1)
+	, _last_channel_selection(0xFFFF)
+	, _default_note_length(0.0)
+	, _active_notes(0)
+	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
+	, _delta_command(NULL)
+	, _mouse_state(None)
+	, _pressed_button(0)
+{
+	Gdk::Color c;
+	int r,g,b,a;
+
+	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
+	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
+
+	init (c, true);
+}
+
 void
 MidiRegionView::init (Gdk::Color& basic_color, bool wfd)
 {

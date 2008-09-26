@@ -57,6 +57,9 @@ class MidiRegionView : public RegionView
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double initial_samples_per_unit,
 	                Gdk::Color& basic_color);
+	
+	MidiRegionView (const MidiRegionView& other);
+	MidiRegionView (const MidiRegionView& other, boost::shared_ptr<ARDOUR::MidiRegion>);
 
 	~MidiRegionView ();
 
