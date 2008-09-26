@@ -102,12 +102,6 @@ static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it mat
 
 bool Session::_disable_all_loaded_plugins = false;
 
-Session::compute_peak_t          Session::compute_peak          = 0;
-Session::find_peaks_t            Session::find_peaks            = 0;
-Session::apply_gain_to_buffer_t  Session::apply_gain_to_buffer  = 0;
-Session::mix_buffers_with_gain_t Session::mix_buffers_with_gain = 0;
-Session::mix_buffers_no_gain_t   Session::mix_buffers_no_gain   = 0;
-
 sigc::signal<void,std::string> Session::Dialog;
 sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;

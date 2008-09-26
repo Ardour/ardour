@@ -473,7 +473,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 				}
 			}
 		} else if (_scale_amplitude != 1.0f) {
-			Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
+			ARDOUR::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 		}
 	
 	  merge:
