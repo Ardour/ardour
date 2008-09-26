@@ -131,8 +131,8 @@ Region::Region (boost::shared_ptr<const Region> other)
 	_sync_position = other->_sync_position;
 	_length = other->_length; 
 	_last_length = other->_length; 
-	_ancestral_start = _start; 
-	_ancestral_length = _length; 
+	_ancestral_start = other->_ancestral_start; 
+	_ancestral_length = other->_ancestral_length; 
 	_stretch = other->_stretch;
 	_shift = other->_shift;
 	_name = other->_name;
