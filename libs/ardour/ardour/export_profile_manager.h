@@ -25,6 +25,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <stdexcept>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -143,7 +144,7 @@ class ExportProfileManager
 	typedef std::list<TimespanStatePtr> TimespanStateList;
 	
 	void set_selection_range (nframes_t start = 0, nframes_t end = 0);
-	TimespanStateList const & get_timespans () { return timespans; }
+	TimespanStateList const & get_timespans () { return check_list (timespans); }
 	
   private:
 
@@ -175,7 +176,7 @@ class ExportProfileManager
 	typedef boost::shared_ptr<ChannelConfigState> ChannelConfigStatePtr;
 	typedef std::list<ChannelConfigStatePtr> ChannelConfigStateList;
 	
-	ChannelConfigStateList const & get_channel_configs () { return channel_configs; }
+	ChannelConfigStateList const & get_channel_configs () { return check_list (channel_configs); }
 
   private:
 
@@ -199,7 +200,7 @@ class ExportProfileManager
 	typedef boost::shared_ptr<FormatState> FormatStatePtr;
 	typedef std::list<FormatStatePtr> FormatStateList;
 	
-	FormatStateList const & get_formats () { return formats; }
+	FormatStateList const & get_formats () { return check_list (formats); }
 	FormatStatePtr duplicate_format_state (FormatStatePtr state);
 	void remove_format_state (FormatStatePtr state);
 	
@@ -238,7 +239,7 @@ class ExportProfileManager
 	typedef boost::shared_ptr<FilenameState> FilenameStatePtr;
 	typedef std::list<FilenameStatePtr> FilenameStateList;
 	
-	FilenameStateList const & get_filenames () { return filenames; }
+	FilenameStateList const & get_filenames () { return check_list (filenames); }
 	FilenameStatePtr duplicate_filename_state (FilenameStatePtr state);
 	void remove_filename_state (FilenameStatePtr state);
 
@@ -265,6 +266,20 @@ class ExportProfileManager
 	                   ChannelConfigStatePtr channel_config_state,
 	                   FormatStatePtr format_state,
 	                   FilenameStatePtr filename_state);
+
+ /* Utilities */
+
+	/* Element state lists should never be empty, this is used to check them */
+	template<typename T>
+	std::list<T> const &
+	check_list (std::list<T> const & list)
+	{
+		if (list.empty()) {
+			throw std::runtime_error ("Programming error: Uninitialized list in ExportProfileManager");
+		}
+		return list;
+	}
+
 };
 
 

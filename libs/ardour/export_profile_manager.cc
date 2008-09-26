@@ -80,6 +80,14 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 	
 	load_presets ();
 	load_formats ();
+	
+	/* Initialize all lists with an empty config */
+	
+	XMLNodeList dummy;
+	init_timespans (dummy);
+	init_channel_configs (dummy);
+	init_formats (dummy);
+	init_filenames (dummy);
 }
 
 ExportProfileManager::~ExportProfileManager ()
@@ -294,21 +302,23 @@ bool
 ExportProfileManager::init_timespans (XMLNodeList nodes)
 {
 	timespans.clear ();
-
-	if (nodes.empty()) {
-		update_ranges ();
+	update_ranges ();
 	
+	bool ok = true;
+	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
+		TimespanStatePtr span = deserialize_timespan (**it);
+		if (span) {
+			timespans.push_back (span);
+		} else { ok = false; }
+	}
+	
+	if (timespans.empty()) {
 		TimespanStatePtr timespan (new TimespanState (session_range, selection_range, ranges));
-	
 		timespans.push_back (timespan);
 		return false;
 	}
-
-	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
-		timespans.push_back (deserialize_timespan (**it));
-	}
 	
-	return true;
+	return ok;
 }
 
 ExportProfileManager::TimespanStatePtr
@@ -316,8 +326,6 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 {
 	TimespanStatePtr state (new TimespanState (session_range, selection_range, ranges));
 	XMLProperty const * prop;
-	
-	update_ranges ();
 	
 	XMLNodeList spans = root.children ("Range");
 	for (XMLNodeList::iterator node_it = spans.begin(); node_it != spans.end(); ++node_it) {
@@ -517,27 +525,20 @@ ExportProfileManager::get_new_format (FormatPtr original)
 bool
 ExportProfileManager::init_formats (XMLNodeList nodes)
 {
-	bool ok = true;
 	formats.clear();
 
-	if (nodes.empty()) {
-		FormatStatePtr format (new FormatState (format_list, FormatPtr ()));
-		formats.push_back (format);
-		return false;
-	}
-	
+	bool ok = true;
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
-		FormatStatePtr format;
-		if ((format = deserialize_format (**it))) {
+		FormatStatePtr format = deserialize_format (**it);
+		if (format) {
 			formats.push_back (format);
-		} else {
-			ok = false;
-		}
+		} else { ok = false; }
 	}
 	
 	if (formats.empty ()) {
 		FormatStatePtr format (new FormatState (format_list, FormatPtr ()));
 		formats.push_back (format);
+		return false;
 	}
 	
 	return ok;
@@ -622,16 +623,16 @@ ExportProfileManager::init_filenames (XMLNodeList nodes)
 {
 	filenames.clear ();
 
-	if (nodes.empty()) {
-		FilenameStatePtr filename (new FilenameState (handler->add_filename()));
-		filenames.push_back (filename);
-		return false;
-	}
-	
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
 		FilenamePtr filename = handler->add_filename();
 		filename->set_state (**it);
 		filenames.push_back (FilenameStatePtr (new FilenameState (filename)));
+	}
+	
+	if (filenames.empty()) {
+		FilenameStatePtr filename (new FilenameState (handler->add_filename()));
+		filenames.push_back (filename);
+		return false;
 	}
 	
 	return true;
