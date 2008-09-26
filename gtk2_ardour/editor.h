@@ -1213,6 +1213,7 @@ class Editor : public PublicEditor
 	
 	void add_external_audio_action (Editing::ImportMode);
 	void external_audio_dialog ();
+	void session_import_dialog ();
 
 	int  check_whether_and_how_to_import(string, bool all_or_nothing = true);
 	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);

@@ -31,9 +31,9 @@ class Session;
 class PlaylistFactory {
 
   public:
-	static sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistCreated;
+	static sigc::signal<void,boost::shared_ptr<Playlist>, bool> PlaylistCreated;
 
-	static boost::shared_ptr<Playlist> create (Session&, const XMLNode&, bool hidden = false);
+	static boost::shared_ptr<Playlist> create (Session&, const XMLNode&, bool hidden = false, bool unused = false);
 	static boost::shared_ptr<Playlist> create (DataType type, Session&, string name, bool hidden = false);
 	static boost::shared_ptr<Playlist> create (boost::shared_ptr<const Playlist>, string name, bool hidden = false);
 	static boost::shared_ptr<Playlist> create (boost::shared_ptr<const Playlist>, nframes_t start, nframes_t cnt, string name, bool hidden = false);

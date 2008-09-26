@@ -685,7 +685,8 @@ class Session : public PBD::StatefulDestructible
 	/* playlist management */
 
 	boost::shared_ptr<Playlist> playlist_by_name (string name);
-	void add_playlist (boost::shared_ptr<Playlist>);
+	void unassigned_playlists (std::list<boost::shared_ptr<Playlist> > & list);
+	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
 	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistAdded;
 	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistRemoved;
 

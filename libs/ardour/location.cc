@@ -247,6 +247,14 @@ Location::set_is_start (bool yn, void *src)
 }
 
 void
+Location::set_is_range_marker (bool yn, void *src)
+{
+       if (set_flag_internal (yn, IsRangeMarker)) {
+                FlagsChanged (this, src); /* EMIT SIGNAL */
+       }
+}
+
+void
 Location::set_auto_punch (bool yn, void *src) 
 {
 	if (is_mark() || _start == _end) {

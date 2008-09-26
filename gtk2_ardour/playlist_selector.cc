@@ -183,6 +183,35 @@ PlaylistSelector::show_for (RouteUI* ruix)
 		}
 	}
 
+	// Add unassigned (imported) playlists to the list
+	list<boost::shared_ptr<Playlist> > unassigned;
+	session->unassigned_playlists (unassigned);
+
+	TreeModel::Row row;
+	TreeModel::Row* selected_row = 0;
+	TreePath this_path;
+
+	row = *(model->append (others.children()));
+	row[columns.text] = _("Imported");
+	proxy = row[columns.playlist];
+	proxy.reset ();
+
+	for (list<boost::shared_ptr<Playlist> >::iterator p = unassigned.begin(); p != unassigned.end(); ++p) {
+		TreeModel::Row child_row;
+
+		child_row = *(model->append (row.children()));
+		child_row[columns.text] = (*p)->name();
+		child_row[columns.playlist] = *p;
+
+		if (*p == this_ds->playlist()) {
+			selected_row = &child_row;
+		}
+
+		if (selected_row != 0) {
+			tree.get_selection()->select (*selected_row);
+		}
+	}
+
 	show_all ();
 	select_connection = tree.get_selection()->signal_changed().connect (mem_fun(*this, &PlaylistSelector::selection_changed));
 }

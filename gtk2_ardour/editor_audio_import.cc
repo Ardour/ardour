@@ -55,6 +55,7 @@
 #include "editing.h"
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
+#include "session_import_dialog.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -182,6 +183,14 @@ Editor::external_audio_dialog ()
 		}
 
 	} while (keepRunning);
+}
+
+void
+Editor::session_import_dialog ()
+{
+	SessionImportDialog dialog (*session);
+	ensure_float (dialog);
+	dialog.run ();
 }
 
 typedef std::map<PBD::ID,boost::shared_ptr<ARDOUR::Source> > SourceMap;

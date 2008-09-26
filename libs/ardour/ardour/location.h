@@ -99,6 +99,7 @@ class Location : public PBD::StatefulDestructible
 	void set_cd (bool yn, void *src);
 	void set_is_end (bool yn, void* src);
 	void set_is_start (bool yn, void* src);
+	void set_is_range_marker (bool yn, void* src);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }

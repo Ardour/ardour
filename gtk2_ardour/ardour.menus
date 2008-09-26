@@ -18,6 +18,7 @@
            <menuitem action='AddTrackBus'/>	
            <separator/>
            <menuitem action='addExistingAudioFiles'/>
+           <menuitem action='importFromSession'/>
            <separator/>
            <menu name='Export' action='Export'>
                <menuitem action='ExportAudio'/>

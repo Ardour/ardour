@@ -3368,7 +3368,23 @@ Session::playlist_by_name (string name)
 }
 
 void
-Session::add_playlist (boost::shared_ptr<Playlist> playlist)
+Session::unassigned_playlists (std::list<boost::shared_ptr<Playlist> > & list)
+{
+	Glib::Mutex::Lock lm (playlist_lock);
+	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		if (!(*i)->get_orig_diskstream_id().to_s().compare ("0")) {
+			list.push_back (*i);
+		}
+	}
+	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		if (!(*i)->get_orig_diskstream_id().to_s().compare ("0")) {
+			list.push_back (*i);
+		}
+	}
+}
+
+void
+Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 {
 	if (playlist->hidden()) {
 		return;
@@ -3381,6 +3397,10 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist)
 			playlist->InUse.connect (sigc::bind (mem_fun (*this, &Session::track_playlist), boost::weak_ptr<Playlist>(playlist)));
 			playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
 		}
+	}
+
+	if (unused) {
+		playlist->release();
 	}
 
 	set_dirty();

@@ -223,6 +223,7 @@ route_time_axis.cc
 route_ui.cc
 selection.cc
 send_ui.cc
+session_import_dialog.cc
 session_metadata_dialog.cc
 sfdb_ui.cc
 simpleline.cc

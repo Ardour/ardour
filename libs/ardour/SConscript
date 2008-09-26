@@ -36,6 +36,7 @@ audio_buffer.cc
 audio_diskstream.cc
 audio_library.cc
 audio_playlist.cc
+audio_playlist_importer.cc
 audio_port.cc
 audio_track.cc
 audioanalyser.cc
@@ -43,6 +44,7 @@ audioengine.cc
 audiofile_tagger.cc
 audiofilesource.cc
 audioregion.cc
+audio_region_importer.cc
 audiosource.cc
 auditioner.cc
 auto_bundle.cc
@@ -64,6 +66,8 @@ cycle_timer.cc
 default_click.cc
 directory_names.cc
 diskstream.cc
+element_importer.cc
+element_import_handler.cc
 enums.cc
 event_type_map.cc
 export_channel_configuration.cc
@@ -96,6 +100,7 @@ jack_port.cc
 jack_slave.cc
 ladspa_plugin.cc
 location.cc
+location_importer.cc
 meter.cc
 midi_buffer.cc
 midi_clock_slave.cc
@@ -159,6 +164,7 @@ svn_revision.cc
 tape_file_matcher.cc
 template_utils.cc
 tempo.cc
+tempo_map_importer.cc
 track.cc
 transient_detector.cc
 user_bundle.cc
