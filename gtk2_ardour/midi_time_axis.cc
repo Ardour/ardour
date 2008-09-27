@@ -190,6 +190,43 @@ MidiTimeAxisView::hide ()
 }
 
 void
+MidiTimeAxisView::set_height (uint32_t h)
+{
+	RouteTimeAxisView::set_height (h);
+
+	if (height >= hLarger) {
+		_midi_expander.show();
+		if (is_track() && _range_scroomer)
+			_range_scroomer->show();
+		if (is_track() && _piano_roll_header)
+			_piano_roll_header->show();
+
+	} else if (height >= hLarge) {
+		_midi_expander.show();
+		_midi_expander.set_expanded(FALSE);
+		if (is_track() && _range_scroomer)
+			_range_scroomer->show();
+		if (is_track() && _piano_roll_header)
+			_piano_roll_header->show();
+
+	} else if (height >= hNormal) {
+		_midi_expander.show();
+		_midi_expander.set_expanded(FALSE);
+		if (is_track() && _range_scroomer)
+			_range_scroomer->hide();
+		if (is_track() && _piano_roll_header)
+			_piano_roll_header->hide();
+	} else {
+		_midi_expander.hide();
+		_midi_expander.set_expanded(FALSE);
+		if (is_track() && _range_scroomer)
+			_range_scroomer->hide();
+		if (is_track() && _piano_roll_header)
+			_piano_roll_header->hide();
+	}
+}
+
+void
 MidiTimeAxisView::append_extra_display_menu_items ()
 {
 	using namespace Menu_Helpers;

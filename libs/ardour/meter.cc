@@ -35,9 +35,9 @@ namespace ARDOUR {
 void
 PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {
-	size_t n = 0;
-	size_t meterable = std::min((size_t)bufs.count().n_total(), _peak_power.size());
-	size_t limit = std::min (meterable, bufs.count().n_midi());
+	uint32_t n = 0;
+	uint32_t meterable = std::min(bufs.count().n_total(), (uint32_t)_peak_power.size());
+	uint32_t limit = std::min (meterable, bufs.count().n_midi());
 
 	// Meter what we have (midi)
 	for ( ; n < limit; ++n) {

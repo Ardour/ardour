@@ -64,6 +64,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	/* overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
+	void set_height (uint32_t);
 	void hide ();
 
 	void show_all_automation ();
