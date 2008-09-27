@@ -411,11 +411,11 @@ LV2Plugin::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, int32_t& in_i
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
 				slv2_instance_connect_port(_instance, port_index,
-						bufs[min((uint32_t)in_index, nbufs - 1)] + offset);
+						bufs[min((uint32_t)in_index, nbufs - 1)]);
 				in_index++;
 			} else if (parameter_is_output(port_index)) {
 				slv2_instance_connect_port(_instance, port_index,
-						bufs[min((uint32_t)out_index, nbufs - 1)] + offset);
+						bufs[min((uint32_t)out_index, nbufs - 1)]);
 				out_index++;
 			}
 		}
