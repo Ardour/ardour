@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <stdint.h>
+#include <pbd/error.h>
 #include <pbd/enumwriter.h>
 #include <midi++/events.h>
 
@@ -34,7 +35,7 @@
 
 using namespace std;
 using namespace ARDOUR;
-
+using namespace PBD;
 
 MidiModel::MidiModel(MidiSource *s, size_t size)
 	: AutomatableSequence(s->session(), size)
@@ -184,24 +185,51 @@ MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr<Evoral::Note> note
 boost::shared_ptr<Evoral::Note> MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 {
 	unsigned int note;
-	istringstream note_str(xml_note->property("note")->value());
-	note_str >> note;
-
+	XMLProperty* prop;
 	unsigned int channel;
-	istringstream channel_str(xml_note->property("channel")->value());
-	channel_str >> channel;
-
 	unsigned int time;
-	istringstream time_str(xml_note->property("time")->value());
-	time_str >> time;
-
 	unsigned int length;
-	istringstream length_str(xml_note->property("length")->value());
-	length_str >> length;
-
 	unsigned int velocity;
-	istringstream velocity_str(xml_note->property("velocity")->value());
-	velocity_str >> velocity;
+
+	if ((prop = xml_note->property("note")) != 0) {
+		istringstream note_str(prop->value());
+		note_str >> note;
+	} else {
+		warning << "note information missing note value" << endmsg;
+		note = 127;
+	}
+
+	if ((prop = xml_note->property("channel")) != 0) {
+		istringstream channel_str(prop->value());
+		channel_str >> channel;
+	} else {
+		warning << "note information missing channel" << endmsg;
+		channel = 0;
+	}
+
+	if ((prop = xml_note->property("time")) != 0) {
+		istringstream time_str(prop->value());
+		time_str >> time;
+	} else {
+		warning << "note information missing time" << endmsg;
+		time = 0;
+	}
+
+	if ((prop = xml_note->property("length")) != 0) {
+		istringstream length_str(prop->value());
+		length_str >> length;
+	} else {
+		warning << "note information missing length" << endmsg;
+		note = 1;
+	}
+
+	if ((prop = xml_note->property("velocity")) != 0) {
+		istringstream velocity_str(prop->value());
+		velocity_str >> velocity;
+	} else {
+		warning << "note information missing velocity" << endmsg;
+		velocity = 127;
+	}
 
 	boost::shared_ptr<Evoral::Note> note_ptr(new Evoral::Note(channel, time, length, note, velocity));
 	return note_ptr;
