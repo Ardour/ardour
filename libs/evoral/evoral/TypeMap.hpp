@@ -30,6 +30,8 @@ class Parameter;
  */
 class TypeMap {
 public:
+	virtual ~TypeMap() {}
+
 	/** Return true iff the type is a MIDI event.
 	 * The contents of the event will be used for specific ID
 	 */

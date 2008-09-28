@@ -269,7 +269,7 @@ LineSet::line_at(double coord)
 	if (cached_pos != lines.end()) {
 		if (coord < cached_pos->coord) {
 			/* backward search */
-			while(--cached_pos != lines.end()) {
+			while (--cached_pos != lines.end()) {
 				if (cached_pos->coord <= coord) {
 					if (cached_pos->coord + cached_pos->width < coord) {
 						/* coord is between two lines */
@@ -281,7 +281,7 @@ LineSet::line_at(double coord)
 			}
 		} else {
 			/* forward search */
-			while(cached_pos != lines.end()) {
+			while (cached_pos != lines.end()) {
 				if (cached_pos->coord > coord) {
 					/* we searched past the line that we want, so now see
 					   if the previous line includes the coordinate */

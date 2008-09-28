@@ -24,7 +24,7 @@
 
 using namespace std;
 
-#define MAX_CACHED_LINES 512
+#define MAX_CACHED_LINES 128
 	
 TempoLines::TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group)
 	: _canvas(canvas)
@@ -40,7 +40,7 @@ TempoLines::tempo_map_changed()
 	_clean_left = DBL_MAX;
 	_clean_right = 0.0;
 
-	size_t d = 0;
+	size_t d = 1;
 	// TODO: Dirty/slow, but 'needed' for zoom :(
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++d) {
 		Lines::iterator next = i;
@@ -98,6 +98,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 
 	if (beat_density > 4.0f) {
 		/* if the lines are too close together, they become useless */
+		tempo_map_changed();
 		return;
 	}
 
