@@ -35,7 +35,7 @@ Control::Control(const Parameter& parameter, boost::shared_ptr<ControlList> list
 /** Get the currently effective value (ie the one that corresponds to current output)
  */
 float
-Control::get_value(bool from_list, nframes_t frame) const
+Control::get_float(bool from_list, nframes_t frame) const
 {
 	if (from_list)
 		return _list->eval(frame);
@@ -45,7 +45,7 @@ Control::get_value(bool from_list, nframes_t frame) const
 
 
 void
-Control::set_value(float value, bool to_list, nframes_t frame)
+Control::set_float(float value, bool to_list, nframes_t frame)
 {
 	_user_value = value;
 	
@@ -61,7 +61,7 @@ Control::set_value(float value, bool to_list, nframes_t frame)
  * to the AutomationList.
  */
 float
-Control::user_value() const
+Control::user_float() const
 {
 	return _user_value;
 }

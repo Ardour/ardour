@@ -361,7 +361,7 @@ Automatable::automation_snapshot (nframes_t now, bool force)
 			boost::shared_ptr<AutomationControl> c
 					= boost::dynamic_pointer_cast<AutomationControl>(i->second);
 			if (c->automation_write()) {
-				c->list()->rt_add (now, i->second->user_value());
+				c->list()->rt_add (now, i->second->user_float());
 			}
 		}
 		

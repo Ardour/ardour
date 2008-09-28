@@ -68,7 +68,13 @@ public:
 		return ((ARDOUR::AutomationList*)_list.get())->stop_touch();
 	}
 
+	/** Set the value and do the right thing based on automation state
+	 * (e.g. record if necessary, etc.)
+	 */
 	void set_value(float val);
+
+	/** Get the current effective value based on automation state.
+	 */
 	float get_value() const;
 
 protected:

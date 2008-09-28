@@ -37,9 +37,9 @@ public:
 	Control(const Parameter& parameter, boost::shared_ptr<ControlList>);
 	virtual ~Control() {}
 
-	void  set_value(float val, bool to_list=false, nframes_t frame=0);
-	float get_value(bool from_list=false, nframes_t frame=0) const;
-	float user_value() const;
+	virtual void  set_float(float val, bool to_list=false, nframes_t frame=0);
+	virtual float get_float(bool from_list=false, nframes_t frame=0) const;
+	virtual float user_float() const;
 
 	void set_list(boost::shared_ptr<ControlList>);
 

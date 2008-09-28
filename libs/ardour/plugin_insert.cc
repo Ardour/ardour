@@ -368,9 +368,15 @@ PluginInsert::set_parameter (Parameter param, float val)
 
 	_plugins[0]->set_parameter (param.id(), val);
 	
-	boost::shared_ptr<Evoral::Control> c = data().control (param);
-	if (c)
-		c->set_value(val);
+	boost::shared_ptr<AutomationControl> ac
+			= boost::dynamic_pointer_cast<AutomationControl>(data().control(param));
+	
+	if (ac) {
+		ac->set_value(val);
+	} else {
+		warning << "set_parameter called for nonexistant parameter "
+			<< param.symbol() << endmsg;
+	}
 
 	_session.set_dirty();
 }

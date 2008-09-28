@@ -41,13 +41,11 @@ AutomationControl::AutomationControl(
 }
 
 
-/** Get the currently effective value (ie the one that corresponds to current output)
- */
 float
 AutomationControl::get_value() const
 {
 	bool from_list = _list && ((AutomationList*)_list.get())->automation_playback();
-	return Control::get_value(from_list, _session.transport_frame());
+	return Control::get_float(from_list, _session.transport_frame());
 }
 
 
@@ -57,7 +55,7 @@ AutomationControl::set_value(float value)
 	bool to_list = _list && _session.transport_stopped()
 		&& ((AutomationList*)_list.get())->automation_playback();
 	
-	Control::set_value(value, to_list, _session.transport_frame());
+	Control::set_float(value, to_list, _session.transport_frame());
 
 	Changed(); /* EMIT SIGNAL */
 }

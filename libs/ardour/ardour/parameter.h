@@ -45,7 +45,7 @@ class Parameter : public Evoral::Parameter
 {
 public:
 	Parameter(AutomationType type = NullAutomation, uint32_t id=0, uint8_t channel=0)
-		: Evoral::Parameter((uint32_t)type, id, channel)
+		: Evoral::Parameter((uint32_t)type, channel, id)
 	{
 		init_metadata(type);
 	}
