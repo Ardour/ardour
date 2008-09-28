@@ -47,8 +47,13 @@ struct ExportStatus {
 	volatile bool           running;
 	
 	sigc::signal<void>      Aborting;
-	void abort () { _aborted = true; Aborting(); }
+	void abort (bool error_occurred = false);
 	bool aborted () const { return _aborted; }
+	bool errors () const { return _errors; }
+	
+	sigc::signal<void>      Finished;
+	void finish ();
+	bool finished () const { return _aborted; }
 	
 	/* Progress info */
 	
@@ -66,6 +71,9 @@ struct ExportStatus {
 	
   private:
 	volatile bool          _aborted;
+	volatile bool          _errors;
+	volatile bool          _finished;
+	
 };
 
 } // namespace ARDOUR

@@ -30,7 +30,6 @@
 #include <ardour/export_filename.h>
 #include <ardour/export_status.h>
 #include <ardour/export_format_specification.h>
-#include <ardour/sndfile_helpers.h>
 
 #include "i18n.h"
 
@@ -43,7 +42,7 @@ sigc::signal<void, Glib::ustring> ExportProcessor::WritingFile;
 
 ExportProcessor::ExportProcessor (Session & session) :
   session (session),
-  status (session.export_status),
+  status (session.get_export_status()),
   blocksize (session.get_block_size()),
   frame_rate (session.frame_rate())
 {
@@ -70,7 +69,7 @@ ExportProcessor::reset ()
 int
 ExportProcessor::prepare (FormatPtr format, FilenamePtr fname, uint32_t chans, bool split, nframes_t start)
 {
-	session.export_status.format++;
+	status->format++;
 	temp_file_length = 0;
 
 	/* Reset just to be sure all references are dropped */
@@ -96,7 +95,7 @@ ExportProcessor::prepare (FormatPtr format, FilenamePtr fname, uint32_t chans, b
 	
 	/* Construct export pipe to temp file */
 	
-	status.stage = export_PostProcess;
+	status->stage = export_PostProcess;
 	
 	if (normalize) {
 		/* Normalizing => we need a normalizer, peak reader and tempfile */
@@ -122,27 +121,12 @@ ExportProcessor::prepare (FormatPtr format, FilenamePtr fname, uint32_t chans, b
 		src->pipe_to (temp_file);
 	}
 
-	/* File writer(s) */
-	
-	FloatSinkPtr (ExportProcessor::*prep_function) (FormatPtr, uint32_t, ustring const &);
-	
-	switch (format->type()) {
-	  case ExportFormatBase::T_Sndfile:
-		prep_function = &ExportProcessor::prepare_sndfile_writer;
-		break;
-
-	  default:
-		throw ExportFailed (_("Export failed due to a programming error"), "Invalid format given for ExportProcessor::prepare!");
-		break;
-	
-	}
-	
 	/* Ensure directory exists */
 	
 	sys::path folder (filename->get_folder());
 	if (!sys::exists (folder)) {
 		if (!sys::create_directory (folder)) {
-			throw ExportFailed ("Export could not create the directory you requested for", "sys::create_directory failed for export dir");
+			throw ExportFailed (X_("sys::create_directory failed for export dir"));
 		}
 	}
 	
@@ -152,12 +136,16 @@ ExportProcessor::prepare (FormatPtr format, FilenamePtr fname, uint32_t chans, b
 		filename->include_channel = true;
 		for (uint32_t chn = 1; chn <= channels; ++chn) {
 			filename->set_channel (chn);
-			file_sinks.push_back ((this->*prep_function) (format, 1, filename->get_path (format)));
+			ExportFileFactory::FilePair pair = ExportFileFactory::create (format, 1, filename->get_path (format));
+			file_sinks.push_back (pair.first);
+			writer_list.push_back (pair.second);
 			WritingFile (filename->get_path (format));
 		}
 
 	} else {
-		file_sinks.push_back ((this->*prep_function) (format, channels, filename->get_path (format)));
+		ExportFileFactory::FilePair pair = ExportFileFactory::create (format, channels, filename->get_path (format));
+		file_sinks.push_back (pair.first);
+		writer_list.push_back (pair.second);
 		WritingFile (filename->get_path (format));
 	}
 	
@@ -229,7 +217,7 @@ ExportProcessor::write_files ()
 {
 	/* Write to disk */
 	
-	status.stage = export_Write;
+	status->stage = export_Write;
 	temp_file_position = 0;
 	
 	uint32_t buffer_size = 4096; // TODO adjust buffer size?
@@ -270,9 +258,9 @@ ExportProcessor::write_files ()
 				disk_sink->write (chan_bufs[channel], frames_read);
 			}
 			
-			if (status.aborted()) { break; }
+			if (status->aborted()) { break; }
 			temp_file_position += frames_read;
-			status.progress = (float) temp_file_position / temp_file_length;
+			status->progress = (float) temp_file_position / temp_file_length;
 		}
 		
 		/* Clean up */
@@ -285,9 +273,9 @@ ExportProcessor::write_files ()
 		while ((frames_read = temp_file->read (buf, buffer_size)) > 0) {
 			disk_sink->write (buf, frames_read);
 			
-			if (status.aborted()) { break; }
+			if (status->aborted()) { break; }
 			temp_file_position += frames_read;
-			status.progress = (float) temp_file_position / temp_file_length;
+			status->progress = (float) temp_file_position / temp_file_length;
 		}
 	}
 	
@@ -302,46 +290,6 @@ ExportProcessor::write_files ()
 		}
 		session.Exported ((*it)->filename(), session.name());
 	}
-}
-
-ExportProcessor::FloatSinkPtr
-ExportProcessor::prepare_sndfile_writer (FormatPtr format, uint32_t channels, ustring const & filename)
-{
-	int real_format = format->format_id() | format->sample_format() | format->endianness();
-
-	uint32_t data_width = sndfile_data_width (real_format);
-
-	if (data_width == 8 || data_width == 16) {
-	
-		ShortConverterPtr sfc = ShortConverterPtr (new SampleFormatConverter<short> (channels, format->dither_type(), data_width));
-		ShortWriterPtr sfw = ShortWriterPtr (new SndfileWriter<short> (channels, format->sample_rate(), real_format, filename));
-		
-		writer_list.push_back (boost::static_pointer_cast<ExportFileWriter> (sfw));
-		
-		sfc->pipe_to (sfw);
-		return boost::static_pointer_cast<FloatSink> (sfc);
-
-	} else if (data_width == 24 || data_width == 32) {
-	
-		IntConverterPtr sfc = IntConverterPtr (new SampleFormatConverter<int> (channels, format->dither_type(), data_width));
-		IntWriterPtr sfw = IntWriterPtr (new SndfileWriter<int> (channels, format->sample_rate(), real_format, filename));
-		
-		writer_list.push_back (boost::static_pointer_cast<ExportFileWriter> (sfw));
-		
-		sfc->pipe_to (sfw);
-		return boost::static_pointer_cast<FloatSink> (sfc);
-
-	} else {
-	
-		FloatConverterPtr sfc = FloatConverterPtr (new SampleFormatConverter<float> (channels, format->dither_type(), data_width));
-		FloatWriterPtr sfw = FloatWriterPtr (new SndfileWriter<float> (channels, format->sample_rate(), real_format, filename));
-		
-		writer_list.push_back (boost::static_pointer_cast<ExportFileWriter> (sfw));
-		
-		sfc->pipe_to (sfw);
-		return boost::static_pointer_cast<FloatSink> (sfc);
-	}
-
 }
 
 }; // namespace ARDOUR

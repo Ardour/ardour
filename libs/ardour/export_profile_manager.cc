@@ -30,6 +30,7 @@
 #include <pbd/convert.h>
 
 #include <ardour/export_failed.h>
+#include <ardour/export_file_io.h>
 #include <ardour/export_format_specification.h>
 #include <ardour/export_timespan.h>
 #include <ardour/export_channel_configuration.h>
@@ -691,6 +692,8 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 	/* Check format and maximum channel count */
 	if (!format || !format->type()) {
 		warnings->errors.push_back (_("No format selected!"));
+	} else if (!ExportFileFactory::check (format, channel_config->get_n_chans())) {
+		warnings->errors.push_back (_("One or more of the selected formats is not compatible with this system!"));
 	} else if (format->channel_limit() < channel_config->get_n_chans()) {
 		warnings->errors.push_back
 		  (string_compose (_("%1 supports only %2 channels, but you have %3 channels in your channel configuration"),

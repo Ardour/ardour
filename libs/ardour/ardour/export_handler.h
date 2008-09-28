@@ -93,6 +93,7 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 	typedef std::multimap<TimespanPtr, FileSpec> ConfigMap;
 	
 	typedef boost::shared_ptr<ExportProcessor> ProcessorPtr;
+	typedef boost::shared_ptr<ExportStatus> StatusPtr;
 
   private:
 	/* Session::get_export_handler() should be used to obtain an export handler
@@ -112,6 +113,7 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 
 	Session &          session;
 	ProcessorPtr       processor;
+	StatusPtr          export_status;
 	ConfigMap          config_map;
 	
 	bool               realtime;

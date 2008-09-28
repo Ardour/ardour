@@ -185,11 +185,15 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_extension ("raw");
 	add_format (f_ptr);
 	
-	f_ptr.reset (new ExportFormatOggVorbis ());
-	add_format (f_ptr);
+	if (ExportFormatOggVorbis::check_system_compatibility()) {
+		f_ptr.reset (new ExportFormatOggVorbis ());
+		add_format (f_ptr);
+	}
 	
-	f_ptr.reset (new ExportFormatFLAC ());
-	add_format (f_ptr);
+	if (ExportFormatFLAC::check_system_compatibility()) {
+		f_ptr.reset (new ExportFormatFLAC ());
+		add_format (f_ptr);
+	}
 }
 
 void

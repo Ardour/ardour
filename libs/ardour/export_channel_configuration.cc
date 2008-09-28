@@ -57,10 +57,10 @@ ExportChannel::read_ports (float * data, nframes_t frames) const
 
 /* ExportChannelConfiguration */
 
-ExportChannelConfiguration::ExportChannelConfiguration (ExportStatus & status,  Session & session) :
+ExportChannelConfiguration::ExportChannelConfiguration (Session & session) :
   session (session),
   writer_thread (*this),
-  status (status),
+  status (session.get_export_status ()),
   files_written (false),
   split (false)
 {
@@ -143,7 +143,7 @@ ExportChannelConfiguration::write_files (boost::shared_ptr<ExportProcessor> new_
 	files_written = true;
 
 	if (!timespan) {
-		throw ExportFailed (_("Export failed due to a programming error"), _("No timespan registered to channel configuration when requesting files to be written"));
+		throw ExportFailed (X_("Programming error: No timespan registered to channel configuration when requesting files to be written"));
 	}
 	
 	/* Take a local copy of the processor to be used in the thread that is created below */
@@ -175,7 +175,7 @@ ExportChannelConfiguration::write_file ()
 	uint32_t channel;
 	
 	do {
-		if (status.aborted()) { break; }
+		if (status->aborted()) { break; }
 	
 		channel = 0;
 		for (ChannelList::iterator it = channels.begin(); it != channels.end(); ++it) {
@@ -194,7 +194,7 @@ ExportChannelConfiguration::write_file ()
 		}
 		
 		progress += frames_read;
-		status.progress = (float) progress / timespan_length;
+		status->progress = (float) progress / timespan_length;
 		
 	} while (processor->process (file_buffer, frames_read) > 0);
 	
@@ -211,14 +211,18 @@ ExportChannelConfiguration::_write_files (void *arg)
 	// cc can be trated like 'this'
 	WriterThread & cc (*((WriterThread *) arg));
 	
-	for (FileConfigList::iterator it = cc->file_configs.begin(); it != cc->file_configs.end(); ++it) {
-		if (cc->status.aborted()) {
-			break;
+	try {
+		for (FileConfigList::iterator it = cc->file_configs.begin(); it != cc->file_configs.end(); ++it) {
+			if (cc->status->aborted()) {
+				break;
+			}
+			cc->processor->prepare (it->first, it->second, cc->channels.size(), cc->split, cc->timespan->get_start());
+			cc->write_file (); // Writes tempfile
+			cc->processor->prepare_post_processors ();
+			cc->processor->write_files();
 		}
-		cc->processor->prepare (it->first, it->second, cc->channels.size(), cc->split, cc->timespan->get_start());
-		cc->write_file (); // Writes tempfile
-		cc->processor->prepare_post_processors ();
-		cc->processor->write_files();
+	} catch (ExportFailed & e) {
+		cc->status->abort (true);
 	}
 	
 	cc.running = false;

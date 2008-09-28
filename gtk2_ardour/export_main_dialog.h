@@ -21,6 +21,8 @@
 #ifndef __export_main_dialog_h__
 #define __export_main_dialog_h__
 
+#include <boost/shared_ptr.hpp>
+
 #include <ardour/export_handler.h>
 #include <ardour/export_profile_manager.h>
 
@@ -37,6 +39,7 @@ namespace ARDOUR {
 	class ExportFilename;
 	class ExportFormatSpecification;
 	class ExportChannelConfiguration;
+	class ExportStatus;
 }
 
 class ExportTimespanSelector;
@@ -64,7 +67,8 @@ class ExportMainDialog : public ArdourDialog {
 	};
 
   private:
-	
+
+	void notify_errors ();
 	void close_dialog ();
 	
 	void sync_with_manager ();
@@ -82,6 +86,7 @@ class ExportMainDialog : public ArdourDialog {
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
+	typedef boost::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
 
 	void export_rt ();
 	void export_fw ();
@@ -95,6 +100,7 @@ class ExportMainDialog : public ArdourDialog {
 	PublicEditor &  editor;
 	HandlerPtr      handler;
 	ManagerPtr      profile_manager;
+	StatusPtr       status;
 	
 	/*** GUI components ***/
 	

@@ -70,7 +70,7 @@ SampleRateConverter::SampleRateConverter (uint32_t channels, nframes_t in_rate, 
 	int err;
 
 	if ((src_state = src_new (quality, channels, &err)) == 0) {
-		throw ExportFailed (string_compose (_("cannot initialize sample rate conversion: %1"), src_strerror (err)), "Cannot initialize sample rate conversion");
+		throw ExportFailed (string_compose (X_("Cannot initialize sample rate conversion: %1"), src_strerror (err)));
 	}
 	
 	src_data.src_ratio = out_rate / (double) in_rate;
@@ -109,7 +109,7 @@ SampleRateConverter::process (float * data, nframes_t frames)
 		max_leftover_frames = 4 * frames;
 		leftover_data = (float *) realloc (leftover_data, max_leftover_frames * channels * sizeof (float));
 		if (!leftover_data) {
-			throw ExportFailed (_("A memory allocation error occured during sample rate conversion"), "Samplerate conversion failed");
+			throw ExportFailed (X_("A memory allocation error occured during sample rate conversion"));
 		}
 		
 		data_out_size = out_samples_max;
@@ -161,7 +161,7 @@ SampleRateConverter::process (float * data, nframes_t frames)
 		++cnt;
 
 		if ((err = src_process (src_state, &src_data)) != 0) {
-			throw ExportFailed (_("an error occured during sample rate conversion"), string_compose ("an error occured during sample rate conversion: %1", src_strerror (err)));
+			throw ExportFailed (string_compose ("An error occured during sample rate conversion: %1", src_strerror (err)));
 		}
 	
 		frames_out = src_data.output_frames_gen;

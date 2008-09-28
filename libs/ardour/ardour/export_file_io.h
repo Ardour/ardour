@@ -21,11 +21,20 @@
 #ifndef __ardour_export_file_io_h__
 #define __ardour_export_file_io_h__
 
-#include <sndfile.h>
+#include <stdint.h>
+#include <utility>
+
+#include <boost/shared_ptr.hpp>
+#include <glibmm/ustring.h>
+#include <ardour/sndfile_helpers.h>
 
 #include <ardour/graph.h>
 #include <ardour/types.h>
 #include <ardour/ardour.h>
+#include <ardour/export_format_specification.h>
+#include <ardour/export_utilities.h>
+
+using Glib::ustring;
 
 namespace ARDOUR
 {
@@ -34,15 +43,16 @@ namespace ARDOUR
 class ExportFileWriter
 {
   public:
-	ExportFileWriter (string filename) : _filename (filename) {}
 	virtual ~ExportFileWriter () {}
-	
+
 	string filename () const { return _filename; }
 	nframes_t position () const { return _position; }
 	
 	void set_position (nframes_t position) { _position = position; }
 	
   protected:
+	ExportFileWriter (string filename) : _filename (filename) {}
+
 	string _filename;
 	nframes_t _position;
 };
@@ -51,12 +61,13 @@ class ExportFileWriter
 class SndfileWriterBase : public ExportFileWriter
 {
   public:
-	SndfileWriterBase (int channels, nframes_t samplerate, int format, string const & path);
-	virtual ~SndfileWriterBase ();
 
 	SNDFILE * get_sndfile () const { return sndfile; }
 
   protected:
+	SndfileWriterBase (int channels, nframes_t samplerate, int format, string const & path);
+	virtual ~SndfileWriterBase ();
+
 	SF_INFO        sf_info;
 	SNDFILE *      sndfile;
 };
@@ -66,13 +77,17 @@ class SndfileWriterBase : public ExportFileWriter
 template <typename T>
 class SndfileWriter : public SndfileWriterBase, public GraphSink<T>
 {
-  public:
-	SndfileWriter (int channels, nframes_t samplerate, int format, string const & path);
-	virtual ~SndfileWriter () {}
-	
-	nframes_t write (T * data, nframes_t frames);
-	
   protected:
+	// Should only be created vie ExportFileFactory and derived classes
+	friend class ExportFileFactory;
+	SndfileWriter (int channels, nframes_t samplerate, int format, string const & path);
+
+  public:
+	nframes_t write (T * data, nframes_t frames);
+	virtual ~SndfileWriter () {}
+
+  protected:
+
 	sf_count_t (*write_func)(SNDFILE *, const T *, sf_count_t);
 
   private:
@@ -137,6 +152,25 @@ class ExportTempFile : public SndfileWriter<float>, public GraphSource<float>
 	
 	bool end_set;
 	
+};
+
+class ExportFileFactory
+{
+  public:
+	typedef boost::shared_ptr<ExportFormatSpecification const> FormatPtr;
+	typedef GraphSink<float> FloatSink;
+	typedef boost::shared_ptr<FloatSink> FloatSinkPtr;
+	typedef boost::shared_ptr<ExportFileWriter> FileWriterPtr;
+	
+	typedef std::pair<FloatSinkPtr, FileWriterPtr> FilePair;
+
+	static FilePair create (FormatPtr format, uint32_t channels, ustring const & filename);
+	static bool check (FormatPtr format, uint32_t channels);
+
+  private:
+
+	static FilePair create_sndfile (FormatPtr format, unsigned int channels, ustring const & filename);
+	static bool check_sndfile (FormatPtr format, unsigned int channels);
 };
 
 } // namespace ARDOUR

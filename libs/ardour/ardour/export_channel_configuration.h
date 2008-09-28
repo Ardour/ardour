@@ -80,7 +80,7 @@ class ExportChannelConfiguration
 
   private:
 	friend class ExportElementFactory;
-	ExportChannelConfiguration (ExportStatus & status, Session & session);
+	ExportChannelConfiguration (Session & session);
 	
   public:
 	XMLNode & get_state ();
@@ -115,6 +115,8 @@ class ExportChannelConfiguration
 	
   private:
 
+	typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;
+
 	 Session & session;
 
 	// processor has to be prepared before doing this.
@@ -124,7 +126,7 @@ class ExportChannelConfiguration
 	static void *  _write_files (void *arg);
 	WriterThread    writer_thread;
 	ProcessorPtr    processor;
-	ExportStatus &  status;
+	ExportStatusPtr status;
 
 	bool            files_written;
 

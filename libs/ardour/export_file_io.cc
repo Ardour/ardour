@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include <ardour/export_file_io.h>
+
 #include <ardour/export_failed.h>
 #include <pbd/failed_constructor.h>
 
@@ -43,11 +44,11 @@ SndfileWriterBase::SndfileWriterBase (int channels, nframes_t samplerate, int fo
 	sf_info.format = format;
 	
 	if (!sf_format_check (&sf_info)) {
-		throw ExportFailed (_("Export failed due to a programming error"), "Invalid format given for SndfileWriter!");
+		throw ExportFailed (X_("Invalid format given for SndfileWriter!"));
 	}
 	
 	if (path.length() == 0) {
-		throw ExportFailed (_("Export failed due to a programming error"), "No output file specified for SndFileWriter");
+		throw ExportFailed (X_("No output file specified for SndFileWriter"));
 	}
 
 	/* TODO add checks that the directory path exists, and also 
@@ -58,13 +59,12 @@ SndfileWriterBase::SndfileWriterBase (int channels, nframes_t samplerate, int fo
 	if (path.compare ("temp")) {
 		if ((sndfile = sf_open (path.c_str(), SFM_WRITE, &sf_info)) == 0) {
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			throw ExportFailed (string_compose(_("Export: cannot open output file \"%1\""), path),
-			                    string_compose(_("Export: cannot open output file \"%1\" for SndFileWriter (%2)"), path, errbuf));
+			throw ExportFailed (string_compose(X_("Cannot open output file \"%1\" for SndFileWriter (%2)"), path, errbuf));
 		}
 	} else {
 		FILE * file;
 		if (!(file = tmpfile ())) {
-			throw ExportFailed (_("Export failed due to a programming error"), "Cannot open tempfile");
+			throw ExportFailed (X_("Cannot open tempfile"));
 		}
 		sndfile = sf_open_fd (fileno(file), SFM_RDWR, &sf_info, true);
 	}
@@ -114,7 +114,7 @@ SndfileWriter<T>::write (T * data, nframes_t frames)
 	nframes_t written = (*write_func) (sndfile, data, frames);
 	if (written != frames) {
 		sf_error_str (sndfile, errbuf, sizeof (errbuf) - 1);
-		throw ExportFailed (_("Writing export file failed"), string_compose(_("Could not write data to output file (%1)"), errbuf));
+		throw ExportFailed (string_compose(_("Could not write data to output file (%1)"), errbuf));
 	}
 	
 	if (GraphSink<T>::end_of_input) {
@@ -198,7 +198,7 @@ ExportTempFile::read (float * data, nframes_t frames)
 	/* Check for errors */
 	
 	if (read_status != to_read) {
-		throw ExportFailed (_("Reading export file failed"), _("Error reading temporary export file, export might not be complete!"));
+		throw ExportFailed (X_("Error reading temporary export file, export might not be complete!"));
 	}
 	
 	/* Add silence at end */
@@ -365,4 +365,82 @@ ExportTempFile::_read (float * data, nframes_t frames)
 	return sf_readf_float (sndfile, data, frames);
 }
 
-};
+ExportFileFactory::FilePair
+ExportFileFactory::create (FormatPtr format, uint32_t channels, ustring const & filename)
+{
+	switch (format->type()) {
+	  case ExportFormatBase::T_Sndfile:
+		return create_sndfile (format, channels, filename);
+
+	  default:
+		throw ExportFailed (X_("Invalid format given for ExportFileFactory::create!"));
+	}
+}
+
+bool
+ExportFileFactory::check (FormatPtr format, uint32_t channels)
+{
+	switch (format->type()) {
+	  case ExportFormatBase::T_Sndfile:
+		return check_sndfile (format, channels);
+
+	  default:
+		throw ExportFailed (X_("Invalid format given for ExportFileFactory::check!"));
+	}
+}
+
+ExportFileFactory::FilePair
+ExportFileFactory::create_sndfile (FormatPtr format, unsigned int channels, ustring const & filename)
+{
+	typedef boost::shared_ptr<SampleFormatConverter<short> > ShortConverterPtr;
+	typedef boost::shared_ptr<SampleFormatConverter<int> > IntConverterPtr;
+	typedef boost::shared_ptr<SampleFormatConverter<float> > FloatConverterPtr;
+	
+	typedef boost::shared_ptr<SndfileWriter<short> > ShortWriterPtr;
+	typedef boost::shared_ptr<SndfileWriter<int> > IntWriterPtr;
+	typedef boost::shared_ptr<SndfileWriter<float> > FloatWriterPtr;
+	
+	FilePair ret;
+
+	int real_format = format->format_id() | format->sample_format() | format->endianness();
+
+	uint32_t data_width = sndfile_data_width (real_format);
+
+	if (data_width == 8 || data_width == 16) {
+	
+		ShortConverterPtr sfc = ShortConverterPtr (new SampleFormatConverter<short> (channels, format->dither_type(), data_width));
+		ShortWriterPtr sfw = ShortWriterPtr (new SndfileWriter<short> (channels, format->sample_rate(), real_format, filename));
+		sfc->pipe_to (sfw);
+		
+		return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));
+
+	} else if (data_width == 24 || data_width == 32) {
+	
+		IntConverterPtr sfc = IntConverterPtr (new SampleFormatConverter<int> (channels, format->dither_type(), data_width));
+		IntWriterPtr sfw = IntWriterPtr (new SndfileWriter<int> (channels, format->sample_rate(), real_format, filename));
+		sfc->pipe_to (sfw);
+		
+		return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));
+
+	} else {
+	
+		FloatConverterPtr sfc = FloatConverterPtr (new SampleFormatConverter<float> (channels, format->dither_type(), data_width));
+		FloatWriterPtr sfw = FloatWriterPtr (new SndfileWriter<float> (channels, format->sample_rate(), real_format, filename));
+		sfc->pipe_to (sfw);
+		
+		return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));;
+	}
+}
+
+bool
+ExportFileFactory::check_sndfile (FormatPtr format, unsigned int channels)
+{
+	SF_INFO sf_info;
+	sf_info.channels = channels;
+	sf_info.samplerate = format->sample_rate ();
+	sf_info.format = format->format_id () | format->sample_format ();
+
+	return (sf_format_check (&sf_info) == SF_TRUE ? true : false);
+}
+
+} // namespace ARDOUR

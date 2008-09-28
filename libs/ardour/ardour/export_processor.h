@@ -52,14 +52,6 @@ class ExportProcessor
 	typedef boost::shared_ptr<Normalizer> NormalizerPtr;
 	typedef boost::shared_ptr<ExportTempFile> TempFilePtr;
 	
-	typedef boost::shared_ptr<SampleFormatConverter<short> > ShortConverterPtr;
-	typedef boost::shared_ptr<SampleFormatConverter<int> > IntConverterPtr;
-	typedef boost::shared_ptr<SampleFormatConverter<float> > FloatConverterPtr;
-	
-	typedef boost::shared_ptr<SndfileWriter<short> > ShortWriterPtr;
-	typedef boost::shared_ptr<SndfileWriter<int> > IntWriterPtr;
-	typedef boost::shared_ptr<SndfileWriter<float> > FloatWriterPtr;
-	
 	typedef GraphSink<float> FloatSink;
 	typedef boost::shared_ptr<FloatSink> FloatSinkPtr;
 	typedef std::vector<FloatSinkPtr> FloatSinkVect;
@@ -96,10 +88,9 @@ class ExportProcessor
   private:
 	
 	void reset ();
-	FloatSinkPtr prepare_sndfile_writer (FormatPtr format, uint32_t channels, ustring const & filename);
 	
-	Session &        session;
-	ExportStatus &   status;
+	Session &                       session;
+	boost::shared_ptr<ExportStatus> status;
 	
 	/* these are initalized in prepare() */
 	

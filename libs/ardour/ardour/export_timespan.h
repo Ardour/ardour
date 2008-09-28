@@ -43,10 +43,11 @@ class ExportTimespan : public sigc::trackable
 	typedef boost::shared_ptr<ExportTempFile> TempFilePtr;
 	typedef std::pair<ExportChannel const, TempFilePtr> ChannelFilePair;
 	typedef std::map<ExportChannel const, TempFilePtr> TempFileMap;
+	typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;
 
   private:
 	friend class ExportElementFactory;
-	ExportTimespan (ExportStatus & status, nframes_t frame_rate);
+	ExportTimespan (ExportStatusPtr status, nframes_t frame_rate);
 	
   public:
 	~ExportTimespan ();
@@ -78,7 +79,7 @@ class ExportTimespan : public sigc::trackable
 
   private:
 
-	ExportStatus & status;
+	ExportStatusPtr status;
 
 	nframes_t      start_frame;
 	nframes_t      end_frame;

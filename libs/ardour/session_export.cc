@@ -26,6 +26,7 @@
 #include <ardour/export_file_io.h>
 #include <ardour/export_utilities.h>
 #include <ardour/export_handler.h>
+#include <ardour/export_status.h>
 #include <ardour/timestamps.h>
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -49,17 +50,20 @@ Session::get_export_handler ()
 	return export_handler;
 }
 
-void
-Session::release_export_handler ()
+boost::shared_ptr<ExportStatus>
+Session::get_export_status ()
 {
-	if (!_exporting) {
-		export_handler.reset();
+	if (!export_status) {
+		export_status.reset (new ExportStatus ());
 	}
+	
+	return export_status;
 }
 
 int
 Session::pre_export ()
 {
+	get_export_status (); // Init export_status
 
 	wait_till_butler_finished ();
 
@@ -87,8 +91,8 @@ Session::pre_export ()
 	Config->set_slave_source (None);
 	
 	_exporting = true;
-	export_status.running = true;
-	export_abort_connection = export_status.Aborting.connect (sigc::mem_fun (*this, &Session::abort_audio_export));
+	export_status->running = true;
+	export_abort_connection = export_status->Aborting.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::stop_audio_export)));
 
 	return 0;
 }
@@ -96,6 +100,10 @@ Session::pre_export ()
 int
 Session::start_audio_export (nframes_t position, bool realtime)
 {
+	if (!_exporting) {
+		pre_export ();
+	}
+
 	/* get everyone to the right position */
 
 	{
@@ -119,7 +127,7 @@ Session::start_audio_export (nframes_t position, bool realtime)
 	_transport_frame = position;
 	
 	_exporting_realtime = realtime;
-	export_status.stop = false;
+	export_status->stop = false;
 
 	/* get transport ready. note how this is calling butler functions
 	   from a non-butler thread. we waited for the butler to stop
@@ -154,7 +162,7 @@ Session::process_export (nframes_t nframes)
 {
 	try {
 
-		if (export_status.stop) {
+		if (export_status->stop) {
 			stop_audio_export ();
 			return;
 		}
@@ -176,11 +184,7 @@ Session::process_export (nframes_t nframes)
 		ProcessExport (nframes);
 
 	} catch (ExportFailed e) {
-
-		std::cerr << e.what() << std::endl;
-		stop_audio_export();
-		finalize_audio_export();
-
+		export_status->abort (true);
 	}
 }
 
@@ -208,8 +212,12 @@ Session::stop_audio_export ()
 	realtime_stop (true);
 	schedule_butler_transport_work ();
 
-	if (!export_status.aborted()) {
-		ExportFinished ();
+	if (!export_status->aborted()) {
+		ExportReadFinished ();
+	}
+	
+	if (export_status->finished()) {
+		finalize_audio_export ();
 	}
 	
 	return 0;
@@ -220,7 +228,7 @@ void
 Session::finalize_audio_export ()
 {
 	_exporting = false;
-	export_status.running = false;
+	export_status->running = false;
 
 	if (!_exporting_realtime) {
 		_engine.freewheel (false);
@@ -230,10 +238,11 @@ Session::finalize_audio_export ()
 	/* Clean up */
 	
 	ProcessExport.clear();
-	ExportFinished.clear();
+	ExportReadFinished.clear();
 	export_freewheel_connection.disconnect();
 	export_abort_connection.disconnect();
 	export_handler.reset();
+	export_status.reset();
 
 	/* restart slaving */
 
@@ -242,11 +251,4 @@ Session::finalize_audio_export ()
 	} else {
 		locate (post_export_position, false, false, false);
 	}
-}
-
-void
-Session::abort_audio_export ()
-{
-	stop_audio_export ();
-	finalize_audio_export ();
 }

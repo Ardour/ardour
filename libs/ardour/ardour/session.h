@@ -51,7 +51,6 @@
 
 #include <ardour/ardour.h>
 #include <ardour/configuration.h>
-#include <ardour/export_status.h>
 #include <ardour/location.h>
 #include <ardour/gain.h>
 #include <ardour/io.h>
@@ -111,6 +110,7 @@ class SMFSource;
 class SessionDirectory;
 class SessionMetadata;
 class ExportHandler;
+class ExportStatus;
 
 struct RouteGroup;
 
@@ -618,27 +618,14 @@ class Session : public PBD::StatefulDestructible
 	bool sample_rate_convert (import_status&, string infile, string& outfile);
 	string build_tmp_convert_name (string file);
 
-	/* Export stuff */
-
-	SlaveSource post_export_slave;
-	nframes_t post_export_position;
-
-	ExportStatus export_status;
-	
 	boost::shared_ptr<ExportHandler> get_export_handler ();
-	void release_export_handler ();
+	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int  pre_export ();
-	int  start_audio_export (nframes_t position, bool realtime);
-	int  stop_audio_export ();
-	void finalize_audio_export ();
-	void abort_audio_export ();
+	int  start_audio_export (nframes_t position, bool realtime);	
 
 	sigc::signal<int, nframes_t> ProcessExport;
-	sigc::signal<void> ExportFinished;
+	sigc::signal<void> ExportReadFinished;
 	static sigc::signal<void, std::string, std::string> Exported;
-	sigc::connection export_freewheel_connection;
-	sigc::connection export_abort_connection;
 
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
@@ -1080,9 +1067,21 @@ class Session : public PBD::StatefulDestructible
 	bool follow_slave (nframes_t, nframes_t);
 	void set_slave_source (SlaveSource);
 
+	SlaveSource post_export_slave;
+	nframes_t post_export_position;
+
 	bool _exporting;
 	bool _exporting_realtime;
+	
 	boost::shared_ptr<ExportHandler> export_handler;
+	boost::shared_ptr<ExportStatus>  export_status;
+
+	int  pre_export ();
+	int  stop_audio_export ();
+	void finalize_audio_export ();
+	
+	sigc::connection export_freewheel_connection;
+	sigc::connection export_abort_connection;
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);

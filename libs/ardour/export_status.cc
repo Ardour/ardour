@@ -34,6 +34,8 @@ ExportStatus::init ()
 	stop = false;
 	running = false;
 	_aborted = false;
+	_finished = false;
+	_errors = false;
 	
 	stage = export_None;
 	progress = 0.0;
@@ -46,6 +48,22 @@ ExportStatus::init ()
 	
 	total_formats = 0;
 	format = 0;
+}
+
+void
+ExportStatus::abort (bool error_occurred)
+{
+	_aborted = true;
+	_finished = true;
+	_errors = _errors || error_occurred;
+	Aborting ();
+}
+
+void
+ExportStatus::finish ()
+{
+	_finished = true;
+	Finished();
 }
 
 } // namespace ARDOUR

@@ -252,6 +252,17 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 }
 
 bool
+ExportFormatOggVorbis::check_system_compatibility ()
+{
+	SF_INFO sf_info;
+	sf_info.channels = 2;
+	sf_info.samplerate = SR_44_1;
+	sf_info.format = F_Ogg | SF_Vorbis;
+
+	return (sf_format_check (&sf_info) == SF_TRUE ? true : false);
+}
+
+bool
 ExportFormatOggVorbis::set_compatibility_state (ExportFormatCompatibility const & compatibility)
 {
 	bool compatible = compatibility.has_format (F_Ogg);
@@ -282,6 +293,17 @@ ExportFormatFLAC::ExportFormatFLAC () :
 	
 	set_extension ("flac");
 	set_quality (Q_LosslessCompression);
+}
+
+bool
+ExportFormatFLAC::check_system_compatibility ()
+{
+	SF_INFO sf_info;
+	sf_info.channels = 2;
+	sf_info.samplerate = SR_44_1;
+	sf_info.format = F_FLAC | SF_16;
+
+	return (sf_format_check (&sf_info) == SF_TRUE ? true : false);
 }
 
 bool

@@ -28,7 +28,7 @@
 namespace ARDOUR
 {
 
-ExportTimespan::ExportTimespan (ExportStatus & status, nframes_t frame_rate) :
+ExportTimespan::ExportTimespan (ExportStatusPtr status, nframes_t frame_rate) :
   status (status),
   start_frame (0),
   end_frame (0),
@@ -62,7 +62,7 @@ ExportTimespan::get_data (float * data, nframes_t frames, ExportChannel const & 
 {
 	TempFileMap::iterator it = filemap.find (channel);
 	if (it == filemap.end()) {
-		throw ExportFailed (_("Export failed due to programming error"), _("Trying to get data from ExportTimespan for channel that was never registered!"));
+		throw ExportFailed (X_("Trying to get data from ExportTimespan for channel that was never registered!"));
 	}
 	
 	return it->second->read (data, frames);
@@ -79,7 +79,7 @@ ExportTimespan::set_range (nframes_t start, nframes_t end)
 int
 ExportTimespan::process (nframes_t frames)
 {
-	status.stage = export_ReadTimespan;
+	status->stage = export_ReadTimespan;
 
 	/* update position */
 
@@ -89,11 +89,11 @@ ExportTimespan::process (nframes_t frames)
 		frames_to_read = frames;
 	} else {
 		frames_to_read = end_frame - position;
-		status.stop = true;
+		status->stop = true;
 	}
 	
 	position += frames_to_read;
-	status.progress = (float) (position - start_frame) / (end_frame - start_frame);
+	status->progress = (float) (position - start_frame) / (end_frame - start_frame);
 
 	/* Read channels from ports and save to tempfiles */
 

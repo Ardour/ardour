@@ -55,13 +55,13 @@ ExportElementFactory::~ExportElementFactory ()
 ExportElementFactory::TimespanPtr
 ExportElementFactory::add_timespan ()
 {
-	return TimespanPtr (new ExportTimespan (session.export_status, session.frame_rate()));
+	return TimespanPtr (new ExportTimespan (session.get_export_status(), session.frame_rate()));
 }
 
 ExportElementFactory::ChannelConfigPtr
 ExportElementFactory::add_channel_config ()
 {
-	return ChannelConfigPtr (new ExportChannelConfiguration (session.export_status, session));
+	return ChannelConfigPtr (new ExportChannelConfiguration (session));
 }
 
 ExportElementFactory::FormatPtr
@@ -99,6 +99,7 @@ ExportElementFactory::add_filename_copy (FilenamePtr other)
 ExportHandler::ExportHandler (Session & session) :
   ExportElementFactory (session),
   session (session),
+  export_status (session.get_export_status ()),
   realtime (false)
 {
 	processor.reset (new ExportProcessor (session));
@@ -108,7 +109,7 @@ ExportHandler::ExportHandler (Session & session) :
 
 ExportHandler::~ExportHandler ()
 {
-	if (session.export_status.aborted()) {
+	if (export_status->aborted()) {
 		for (std::list<Glib::ustring>::iterator it = files_written.begin(); it != files_written.end(); ++it) {
 			sys::remove (sys::path (*it));
 		}
@@ -133,7 +134,7 @@ ExportHandler::add_export_config (TimespanPtr timespan, ChannelConfigPtr channel
  * 1. Session is prepared in do_export
  * 2. start_timespan is called, which then registers all necessary channel configs to a timespan
  * 3. The timespan reads each unique channel into a tempfile and calls Session::stop_export when the end is reached
- * 4. stop_export emits ExportFinished after stopping the transport, this ends up calling finish_timespan
+ * 4. stop_export emits ExportReadFinished after stopping the transport, this ends up calling finish_timespan
  * 5. finish_timespan registers all the relevant formats and filenames to relevant channel configurations
  * 6. finish_timespan does a manual call to timespan_thread_finished, which gets the next channel configuration
  *    for the current timespan, calling write_files for it
@@ -148,20 +149,18 @@ ExportHandler::do_export (bool rt)
 {
 	/* Count timespans */
 
-	ExportStatus & status = session.export_status;
-	status.init();
+	export_status->init();
 	std::set<TimespanPtr> timespan_set;
 	for (ConfigMap::iterator it = config_map.begin(); it != config_map.end(); ++it) {
 		timespan_set.insert (it->first);
 	}
-	status.total_timespans = timespan_set.size();
+	export_status->total_timespans = timespan_set.size();
 
 	/* Start export */
 
 	realtime = rt;
 
-	session.ExportFinished.connect (sigc::mem_fun (*this, &ExportHandler::finish_timespan));
-	session.pre_export ();
+	session.ExportReadFinished.connect (sigc::mem_fun (*this, &ExportHandler::finish_timespan));
 	start_timespan ();
 }
 
@@ -442,10 +441,10 @@ ExportHandler::frames_to_cd_frames_string (char* buf, nframes_t when)
 void
 ExportHandler::start_timespan ()
 {
-	session.export_status.timespan++;
+	export_status->timespan++;
 
 	if (config_map.empty()) {
-		session.finalize_audio_export();
+		export_status->finish ();
 		return;
 	}
 
@@ -472,12 +471,12 @@ ExportHandler::finish_timespan ()
 	
 	/* Register formats and filenames to relevant channel configs */
 	
-	session.export_status.total_formats = 0;
-	session.export_status.format = 0;
+	export_status->total_formats = 0;
+	export_status->format = 0;
 	
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
 	
-		session.export_status.total_formats++;
+		export_status->total_formats++;
 	
 		/* Setup filename */
 		

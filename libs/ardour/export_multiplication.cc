@@ -19,7 +19,7 @@ ExportProfileManager::register_all_configs ()
 	
 	        TimespanNodePtr ts_node;
 	        if (!(ts_node = boost::dynamic_pointer_cast<TimespanNode> (*tsl_it))) {
-	        	throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+	        	throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 	        }
 	
 	        TimespanListPtr ts_list = ts_node->data()->timespans;
@@ -30,19 +30,19 @@ ExportProfileManager::register_all_configs ()
 			
 			ChannelConfigNode * cc_node;
 			if (!(cc_node = dynamic_cast<ChannelConfigNode *> (*cc_it))) {
-				throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+				throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 			}
 			ChannelConfigPtr channel_config = cc_node->data()->config;
 			
 			FormatNode * f_node;
 			if (!(f_node = dynamic_cast<FormatNode *> (*f_it))) {
-				throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+				throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 			}
 			FormatPtr format = f_node->data()->format;
 			
 			FilenameNode * fn_node;
 			if (!(fn_node = dynamic_cast<FilenameNode *> (*fn_it))) {
-				throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+				throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 			}
 			FilenamePtr filename = fn_node->data()->filename;
 			
@@ -443,7 +443,7 @@ ExportProfileManager::duplicate_timespan_children (TimespanNodePtr source, Times
 	ChannelConfigNode * node_insertion_ptr;
 	if (!insertion_point) { insertion_point = source->last_child(); }
 	if (!(node_insertion_ptr = dynamic_cast<ChannelConfigNode *> (insertion_point))) {
-		throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+		throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 	}
 	node_insertion_point = node_insertion_ptr->self_ptr();
 	
@@ -460,7 +460,7 @@ ExportProfileManager::duplicate_timespan_children (TimespanNodePtr source, Times
 		ChannelConfigNodePtr new_node;
 		
 		if (!(node = dynamic_cast<ChannelConfigNode *> (*it))) {
-			throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+			throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 		}
 		
 		new_node = duplicate_channel_config_node (node->self_ptr());
@@ -509,7 +509,7 @@ ExportProfileManager::duplicate_channel_config_children (ChannelConfigNodePtr so
 	FormatNode * node_insertion_ptr;
 	if (!insertion_point) { insertion_point = source->last_child(); }
 	if (!(node_insertion_ptr = dynamic_cast<FormatNode *> (insertion_point))) {
-		throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+		throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 	}
 	node_insertion_point = node_insertion_ptr->self_ptr();
 
@@ -526,7 +526,7 @@ ExportProfileManager::duplicate_channel_config_children (ChannelConfigNodePtr so
 		FormatNodePtr new_node;
 		
 		if (!(node = dynamic_cast<FormatNode *> (*it))) {
-			throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+			throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 		}
 		
 		new_node = duplicate_format_node (node->self_ptr());
@@ -573,7 +573,7 @@ ExportProfileManager::duplicate_format_children (FormatNodePtr source, FormatNod
 	FilenameNode * node_insertion_ptr;
 	if (!insertion_point) { insertion_point = source->last_child(); }
 	if (!(node_insertion_ptr = dynamic_cast<FilenameNode *> (insertion_point))) {
-		throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+		throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 	}
 	node_insertion_point = node_insertion_ptr->self_ptr();
 
@@ -584,7 +584,7 @@ ExportProfileManager::duplicate_format_children (FormatNodePtr source, FormatNod
 		FilenameNodePtr new_node;
 		
 		if (!(node = dynamic_cast<FilenameNode *> (*it))) {
-			throw ExportFailed (_("Export failed due to a programming error"), "Invalid pointer cast in ExportProfileManager");
+			throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 		}
 		
 		new_node = duplicate_filename_node (node->self_ptr());

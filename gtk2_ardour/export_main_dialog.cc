@@ -143,9 +143,6 @@ ExportMainDialog::ExportMainDialog (PublicEditor & editor) :
 
 ExportMainDialog::~ExportMainDialog ()
 {
-	if (session) {
-		session->release_export_handler();
-	}
 }
 
 void
@@ -156,6 +153,7 @@ ExportMainDialog::set_session (ARDOUR::Session* s)
 	/* Init handler and profile manager */
 	
 	handler = session->get_export_handler ();
+	status = session->get_export_status ();
 	profile_manager.reset (new ExportProfileManager (*session));
 	
 	/* Selection range  */
@@ -190,6 +188,7 @@ ExportMainDialog::set_session (ARDOUR::Session* s)
 	
 	timespan_selector.CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportMainDialog::update_warnings));
 	channel_selector.CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportMainDialog::update_warnings));
+	status->Aborting.connect (sigc::mem_fun (*this, &ExportMainDialog::notify_errors));
 	
 	update_warnings ();
 }
@@ -202,12 +201,20 @@ ExportMainDialog::select_timespan (Glib::ustring id)
 }
 
 void
+ExportMainDialog::notify_errors ()
+{
+	if (status->errors()) {
+		Glib::ustring txt = _("Export has been aborted due to an error!\nSee the Log for details.");
+		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+		msg.run();
+	}
+}
+
+void
 ExportMainDialog::close_dialog ()
 {
-	ExportStatus & status = session->export_status;
-
-	if (status.running) {
-		status.abort();
+	if (status->running) {
+		status->abort();
 	}
 	
 	hide_all ();
@@ -341,8 +348,7 @@ ExportMainDialog::export_fw ()
 void
 ExportMainDialog::show_progress ()
 {
-	ARDOUR::ExportStatus & status = session->export_status;
-	status.running = true;
+	status->running = true;
 
 	cancel_button->set_label (_("Stop Export"));
 	rt_export_button->set_sensitive (false);
@@ -355,7 +361,7 @@ ExportMainDialog::show_progress ()
 	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportMainDialog::progress_timeout), 100);
 	
 	gtk_main_iteration ();
-	while (status.running) {
+	while (status->running) {
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
@@ -377,30 +383,28 @@ ExportMainDialog::get_nth_format_name (uint32_t n)
 gint
 ExportMainDialog::progress_timeout ()
 {
-	ARDOUR::ExportStatus & status = session->export_status;
-
-	switch (status.stage) {
+	switch (status->stage) {
 	  case export_None:
 		progress_label.set_text ("");
 		break;
 	  case export_ReadTimespan:
-		progress_label.set_text (string_compose (_("Reading timespan %1 of %2"), status.timespan, status.total_timespans));
+		progress_label.set_text (string_compose (_("Reading timespan %1 of %2"), status->timespan, status->total_timespans));
 		break;
 	  case export_PostProcess:
 		progress_label.set_text (string_compose (_("Processing file %2 of %3 (%1) from timespan %4 of %5"),
-		                                         get_nth_format_name (status.format),
-		                                         status.format, status.total_formats,
-		                                         status.timespan, status.total_timespans));
+		                                         get_nth_format_name (status->format),
+		                                         status->format, status->total_formats,
+		                                         status->timespan, status->total_timespans));
 		break;
 	  case export_Write:
 		progress_label.set_text (string_compose (_("Encoding file %2 of %3 (%1) from timespan %4 of %5"),
-		                                         get_nth_format_name (status.format),
-		                                         status.format, status.total_formats,
-		                                         status.timespan, status.total_timespans));
+		                                         get_nth_format_name (status->format),
+		                                         status->format, status->total_formats,
+		                                         status->timespan, status->total_timespans));
 		break;
 	}
 
-	progress_bar.set_fraction (status.progress);
+	progress_bar.set_fraction (status->progress);
 	return TRUE;
 }
 
