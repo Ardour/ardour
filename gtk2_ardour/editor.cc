@@ -652,9 +652,17 @@ Editor::Editor ()
 	region_list_display.append_column (_("Start"), region_list_columns.start);
 	region_list_display.append_column (_("End"), region_list_columns.end);
 	region_list_display.append_column (_("Length"), region_list_columns.length);
+	region_list_display.append_column (_("Sync"), region_list_columns.sync);
+	region_list_display.append_column (_("Fade In"), region_list_columns.fadein);
+	region_list_display.append_column (_("Fade Out"), region_list_columns.fadeout);
+	region_list_display.append_column (_("L"), region_list_columns.locked);
+	region_list_display.append_column (_("G"), region_list_columns.glued);
+	region_list_display.append_column (_("M"), region_list_columns.muted);
+	region_list_display.append_column (_("O"), region_list_columns.opaque);
 	region_list_display.append_column (_("Used"), region_list_columns.used);
 	region_list_display.append_column (_("Path to parent file"), region_list_columns.path);
 	region_list_display.set_headers_visible (true);
+	region_list_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;

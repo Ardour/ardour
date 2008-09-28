@@ -933,16 +933,30 @@ class Editor : public PublicEditor
 		    add (start);
 		    add (end);
 		    add (length);
+			add (sync);
+			add (fadein);
+			add (fadeout);
+			add (locked);
+			add (glued);
+			add (muted);
+			add (opaque);
 			add (used);
 		    add (path);
 	    }
-		Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<Glib::ustring> name;
 	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 	    Gtk::TreeModelColumn<Gdk::Color> color_;
 	    Gtk::TreeModelColumn<Glib::ustring> start;
 	    Gtk::TreeModelColumn<Glib::ustring> end;
 	    Gtk::TreeModelColumn<Glib::ustring> length;
-		Gtk::TreeModelColumn<Glib::ustring> used;
+	    Gtk::TreeModelColumn<Glib::ustring> sync;
+	    Gtk::TreeModelColumn<Glib::ustring> fadein;
+	    Gtk::TreeModelColumn<Glib::ustring> fadeout;
+	    Gtk::TreeModelColumn<bool> locked;
+	    Gtk::TreeModelColumn<bool> glued;
+	    Gtk::TreeModelColumn<bool> muted;
+	    Gtk::TreeModelColumn<bool> opaque;
+	    Gtk::TreeModelColumn<Glib::ustring> used;
 	    Gtk::TreeModelColumn<Glib::ustring> path;
 	};
 	    
@@ -1091,7 +1105,9 @@ class Editor : public PublicEditor
 	void add_regions_to_region_display (std::vector<boost::weak_ptr<ARDOUR::Region> > & );
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
 	void redisplay_regions ();
+	void populate_row (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &);
 	void update_region_row (boost::shared_ptr<ARDOUR::Region>);
+	bool update_region_subrows (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
 	bool no_region_list_redisplay;
 	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
 
