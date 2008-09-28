@@ -287,6 +287,8 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	DataType            _default_type;
 	bool                _public_ports;
 
+	virtual void prepare_inputs (nframes_t nframes, nframes_t offset);
+
 	virtual void set_deferred_state() {}
 
 	void reset_panner ();

@@ -342,11 +342,6 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	boost::shared_ptr<Ports> p = ports.reader();
 
-	// Prepare ports (ie read data if necessary)
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->cycle_start (nframes, 0);
-	}
-
 	if (_freewheeling) {
 		/* emit the Freewheel signal and stop freewheeling in the event of trouble */
 		if (Freewheel (nframes)) {

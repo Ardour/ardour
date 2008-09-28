@@ -74,7 +74,7 @@ public:
 	
 	/** Clear the entire buffer */
 	virtual void clear() { silence(_capacity, 0); }
-
+	
 	virtual void read_from(const Buffer& src, nframes_t offset, nframes_t len) = 0;
 
 protected:

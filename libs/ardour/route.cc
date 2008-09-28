@@ -722,6 +722,312 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 }
 
+#ifdef NEW_POB
+/** Process this route for one (sub) cycle (process thread)
+ *
+ * @param bufs Scratch buffers to use for the signal path
+ * @param start_frame Initial transport frame 
+ * @param end_frame Final transport frame
+ * @param nframes Number of frames to output (to ports)
+ * @param offset Output offset (of port buffers, for split cycles)
+ *
+ * Note that (end_frame - start_frame) may not be equal to nframes when the
+ * transport speed isn't 1.0 (eg varispeed).
+ */
+void
+Route::process_output_buffers (BufferSet& bufs,
+			       nframes_t start_frame, nframes_t end_frame, 
+			       nframes_t nframes, nframes_t offset, bool with_processors, int declick,
+			       bool meter)
+{
+	// This is definitely very audio-only for now
+	assert(_default_type == DataType::AUDIO);
+	
+	ProcessorList::iterator i;
+	bool post_fader_work = false;
+	bool mute_declick_applied = false;
+	gain_t dmg, dsg, dg;
+	IO *co;
+	bool mute_audible;
+	bool solo_audible;
+	bool no_monitor;
+	gain_t* gab = _session.gain_automation_buffer();
+
+	switch (Config->get_monitoring_model()) {
+	case HardwareMonitoring:
+	case ExternalMonitoring:
+		no_monitor = true;
+		break;
+	default:
+		no_monitor = false;
+	}
+
+	declick = _pending_declick;
+
+	{
+		Glib::Mutex::Lock cm (_control_outs_lock, Glib::TRY_LOCK);
+		
+		if (cm.locked()) {
+			co = _control_outs;
+		} else {
+			co = 0;
+		}
+	}
+	
+	{ 
+		Glib::Mutex::Lock dm (declick_lock, Glib::TRY_LOCK);
+		
+		if (dm.locked()) {
+			dmg = desired_mute_gain;
+			dsg = desired_solo_gain;
+			dg = _desired_gain;
+		} else {
+			dmg = mute_gain;
+			dsg = solo_gain;
+			dg = _gain;
+		}
+	}
+
+	/* ----------------------------------------------------------------------------------------------------
+	   GLOBAL DECLICK (for transport changes etc.)
+	   input metering & monitoring (control outs)
+	   denormal control
+	   pre-fader redirects
+	   pre-fader metering & monitoring (control outs)
+	   gain stage
+	   post-fader redirects
+	   global mute
+	   main output
+	   post-fader metering & monitoring (control outs)
+	*/
+
+	{
+		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
+		for (i = processors.begin(); i != processors.end(); ++i) {
+			(*i)->run_in_place (bufs, start_frame, end_frame, nframes, offset);
+		}
+	}
+
+	/* ----------------------------------------------------------------------------------------------------
+	   INPUT METERING & MONITORING
+	   -------------------------------------------------------------------------------------------------- */
+
+	if (meter && (_meter_point == MeterInput)) {
+		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
+	}
+
+	if (!_soloed && _mute_affects_pre_fader && (mute_gain != dmg)) {
+		Amp::run_in_place (bufs, nframes, mute_gain, dmg, false);
+		mute_gain = dmg;
+		mute_declick_applied = true;
+	}
+
+	/* ----------------------------------------------------------------------------------------------------
+	   PRE-FADER REDIRECTS
+	   -------------------------------------------------------------------------------------------------- */
+
+	// This really should already be true...
+	bufs.set_count(pre_fader_streams());
+	
+
+	if ((_meter_point == MeterPreFader) && co) {
+		
+		solo_audible = dsg > 0;
+		mute_audible = dmg > 0 || !_mute_affects_pre_fader;
+		
+		if ( // muted by solo of another track
+			
+			!solo_audible || 
+			
+			// muted by mute of this track 
+			
+			!mute_audible ||
+			
+			// rec-enabled but not s/w monitoring 
+			
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
+
+			) {
+			
+			co->silence (nframes, offset);
+			
+		} else {
+
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
+		} 
+	} 
+	
+	/* ----------------------------------------------------------------------------------------------------
+	   GAIN STAGE
+	   -------------------------------------------------------------------------------------------------- */
+
+	/* if not recording or recording and requiring any monitor signal, then apply gain */
+
+	if ( // not recording 
+
+		!(record_enabled() && _session.actively_recording()) || 
+		
+	    // OR recording 
+		
+		 // AND software monitoring required
+
+		Config->get_monitoring_model() == SoftwareMonitoring) { 
+		
+		if (apply_gain_automation) {
+			
+			if (_phase_invert) {
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
+					
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
+						sp[nx] *= -gab[nx];
+					}
+				}
+			} else {
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
+					
+					for (nframes_t nx = 0; nx < nframes; ++nx) {
+						sp[nx] *= gab[nx];
+					}
+				}
+			}
+			
+			if (apply_gain_automation && _session.transport_rolling() && nframes > 0) {
+				_effective_gain = gab[nframes-1];
+			}
+			
+		} else {
+			
+			/* manual (scalar) gain */
+			
+			if (_gain != dg) {
+				
+				Amp::run_in_place (bufs, nframes, _gain, dg, _phase_invert);
+				_gain = dg;
+				
+			} else if (_gain != 0 && (_phase_invert || _gain != 1.0)) {
+				
+				/* no need to interpolate current gain value,
+				   but its non-unity, so apply it. if the gain
+				   is zero, do nothing because we'll ship silence
+				   below.
+				*/
+
+				gain_t this_gain;
+				
+				if (_phase_invert) {
+					this_gain = -_gain;
+				} else {
+					this_gain = _gain;
+				}
+				
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					Sample* const sp = i->data();
+					apply_gain_to_buffer(sp,nframes,this_gain);
+				}
+
+			} else if (_gain == 0) {
+				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+					i->clear();
+				}
+			}
+		}
+
+	} else {
+
+		/* actively recording, no monitoring required; leave buffers as-is to save CPU cycles */
+
+	}
+
+
+	/* ----------------------------------------------------------------------------------------------------
+	   CONTROL OUTPUT STAGE
+	   -------------------------------------------------------------------------------------------------- */
+
+	if ((_meter_point == MeterPostFader) && co) {
+		
+		solo_audible = solo_gain > 0;
+		mute_audible = dmg > 0 || !_mute_affects_control_outs;
+
+		if ( // silent anyway
+
+			(_gain == 0 && !apply_gain_automation) || 
+		    
+                     // muted by solo of another track
+
+			!solo_audible || 
+		    
+                     // muted by mute of this track 
+
+			!mute_audible ||
+
+		    // recording but not s/w monitoring 
+			
+			(no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording()))
+
+			) {
+			
+			co->silence (nframes, offset);
+			
+		} else {
+
+			co->deliver_output (bufs, start_frame, end_frame, nframes, offset);
+		} 
+	} 
+
+	/* ----------------------------------------------------------------------------------------------------
+	   MAIN OUTPUT STAGE
+	   -------------------------------------------------------------------------------------------------- */
+
+	solo_audible = dsg > 0;
+	mute_audible = dmg > 0 || !_mute_affects_main_outs;
+	
+	if (n_outputs().get(_default_type) == 0) {
+	    
+	    /* relax */
+
+	} else if (no_monitor && record_enabled() && (!Config->get_auto_input() || _session.actively_recording())) {
+		
+		IO::silence (nframes, offset);
+		
+	} else {
+
+		if ( // silent anyway
+
+		    (_gain == 0 && !apply_gain_automation) ||
+		    
+		    // muted by solo of another track, but not using control outs for solo
+
+		    (!solo_audible && (Config->get_solo_model() != SoloBus)) ||
+		    
+		    // muted by mute of this track
+
+		    !mute_audible
+
+			) {
+
+			/* don't use Route::silence() here, because that causes
+			   all outputs (sends, port processors, etc. to be silent).
+			*/
+			
+			if (_meter_point == MeterPostFader) {
+				peak_meter().reset();
+			}
+
+			IO::silence (nframes, offset);
+			
+		} else {
+			
+			deliver_output(bufs, start_frame, end_frame, nframes, offset);
+
+		}
+
+	}
+}
+
+#endif /* NEW_POB */
+
 ChanCount
 Route::n_process_buffers ()
 {
@@ -829,6 +1135,8 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 
 		_processors.push_back (processor);
 
+		// Set up processor list channels.  This will set processor->[input|output]_streams(),
+		// configure redirect ports properly, etc.
 		if (_reset_processor_counts (err)) {
 			_processors.pop_back ();
 			_reset_processor_counts (0); // it worked before we tried to add it ...
@@ -844,16 +1152,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 			
 		}
 		
-		_processors.push_back (processor);
-
-		// Set up processor list channels.  This will set processor->[input|output]_streams(),
-		// configure redirect ports properly, etc.
-		if (_reset_processor_counts (err)) {
-			_processors.pop_back ();
-			_reset_processor_counts (0); // it worked before we tried to add it ...
-			return -1;
-		}
-
 		// Ensure peak vector sizes before the plugin is activated
 
 		ChanCount potential_max_streams;
@@ -1404,14 +1702,14 @@ Route::check_some_processor_counts (list<ProcessorCount>& iclist, ChanCount requ
 				err->index = index;
 				err->count = required_inputs;
 			}
-			return false;
+			return true;
 		}
 		
 		(*i).in = required_inputs;
 		required_inputs = (*i).out;
 	}
 
-	return true;
+	return false;
 }
 
 int
@@ -2774,3 +3072,4 @@ Route::set_pending_declick (int declick)
 	}
 
 }
+

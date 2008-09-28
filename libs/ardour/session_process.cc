@@ -103,6 +103,8 @@ Session::no_roll (nframes_t nframes, nframes_t offset)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		
+		(*i)->prepare_inputs (nframes, offset);
+
 		if ((*i)->is_hidden()) {
 			continue;
 		}
@@ -141,6 +143,8 @@ Session::process_routes (nframes_t nframes, nframes_t offset)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		int ret;
+
+		(*i)->prepare_inputs (nframes, offset);
 
 		if ((*i)->is_hidden()) {
 			continue;

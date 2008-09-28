@@ -2744,3 +2744,12 @@ IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 		);
 }
 
+void
+IO::prepare_inputs (nframes_t nframes, nframes_t offset)
+{
+	/* io_lock, not taken: function must be called from Session::process() calltree */
+
+	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
+		(*i).cycle_start (nframes, offset);
+	}
+}
