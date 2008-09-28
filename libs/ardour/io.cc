@@ -324,7 +324,7 @@ IO::collect_input (BufferSet& outs, nframes_t nframes, nframes_t offset)
 		
 		BufferSet::iterator o = outs.begin(*t);
 		for (PortSet::iterator i = _inputs.begin(*t); i != _inputs.end(*t); ++i, ++o) {
-			(*i)->prepare_inputs (nframes, offset);
+			(*i).cycle_start (nframes, offset);
 			o->read_from(i->get_buffer(), nframes, offset);
 		}
 
