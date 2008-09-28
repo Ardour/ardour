@@ -51,6 +51,9 @@ class JackPort : public virtual Port, public PortConnectableByName {
 	int reconnect ();
 
 	int connect (Port& other) {
+		if( _flags & IsOutput ) {
+		    return 0;
+		}
 		return connect (other.name());
 	}
 
