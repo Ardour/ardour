@@ -1527,16 +1527,13 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 		}
 	}
 
-#if 0	
 	vector<string> physinputs;
 	vector<string> physoutputs;
 
 	_engine.get_physical_outputs (DataType::MIDI, physoutputs);
 	_engine.get_physical_inputs (DataType::MIDI, physinputs);
-	uint32_t nphysical_in;
-	uint32_t nphysical_out;
+
 	control_id = ntracks() + nbusses();
-#endif
 
 	while (how_many) {
 
@@ -1557,20 +1554,6 @@ Session::new_midi_track (TrackMode mode, uint32_t how_many)
 			}
 
 		} while (track_id < (UINT_MAX-1));
-
-		/*
-		  if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
-		} else {
-			nphysical_in = 0;
-		}
-
-		if (Config->get_output_auto_connect() & AutoConnectPhysical) {
-			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
-		} else {
-			nphysical_out = 0;
-		}
-		*/
 
 		shared_ptr<MidiTrack> track;
 
@@ -1704,8 +1687,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 	vector<string> physinputs;
 	vector<string> physoutputs;
-	uint32_t nphysical_in;
-	uint32_t nphysical_out;
 
 	_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
 	_engine.get_physical_inputs (DataType::AUDIO, physinputs);
@@ -1730,18 +1711,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			}
 
 		} while (track_id < (UINT_MAX-1));
-
-		if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-			nphysical_in = min (n_physical_inputs, (uint32_t) physinputs.size());
-		} else {
-			nphysical_in = 0;
-		}
-
-		if (Config->get_output_auto_connect() & AutoConnectPhysical) {
-			nphysical_out = min (n_physical_outputs, (uint32_t) physinputs.size());
-		} else {
-			nphysical_out = 0;
-		}
 
 		shared_ptr<AudioTrack> track;
 
@@ -1770,7 +1739,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				}
 			}
 
-			for (uint32_t x = 0; x < track->n_outputs().n_midi(); ++x) {
+			for (uint32_t x = 0; x < track->n_outputs().n_audio(); ++x) {
 
 				port = "";
 
@@ -1872,6 +1841,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 	char bus_name[32];
 	uint32_t bus_id = 1;
 	uint32_t n = 0;
+	uint32_t channels_used = 0;
 	string port;
 	RouteList ret;
 	uint32_t control_id;
@@ -1882,9 +1852,12 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 		shared_ptr<RouteList> r = routes.reader ();
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (dynamic_cast<AudioTrack*>((*i).get()) == 0) {
+			if (boost::dynamic_pointer_cast<Track*>(*i) == 0) {
+				/* its a bus ? */
 				if (!(*i)->is_hidden() && (*i)->name() != _("master")) {
 					bus_id++;
+					n++;
+					channels_used += (*i)->n_inputs().n_audio();
 				}
 			}
 		}
@@ -1933,7 +1906,7 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 				}
 			}
 
-			for (uint32_t x = 0; n_physical_outputs && x < bus->n_outputs().n_audio(); ++x) {
+			for (uint32_t x = 0; x < bus->n_outputs().n_audio(); ++x) {
 
 				port = "";
 
@@ -1949,6 +1922,8 @@ Session::new_audio_route (int input_channels, int output_channels, uint32_t how_
 					break;
 				}
 			}
+
+			channels_used += bus->n_inputs ().n_audio();
 
 			bus->set_remote_control_id (control_id);
 			++control_id;
