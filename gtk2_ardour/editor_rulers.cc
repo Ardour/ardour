@@ -782,7 +782,7 @@ Editor::update_ruler_visibility ()
 	}
 	
 	gdouble old_canvas_timebars_vsize = canvas_timebars_vsize;
-	canvas_timebars_vsize = timebar_height * visible_timebars;
+	canvas_timebars_vsize = (timebar_height * visible_timebars) - 1;
 	gdouble vertical_pos_delta = canvas_timebars_vsize - old_canvas_timebars_vsize;
 
 	if (vertical_pos_delta < 0 && (vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {

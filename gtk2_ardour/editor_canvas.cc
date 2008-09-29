@@ -127,8 +127,19 @@ Editor::initialize_canvas ()
 
 	_master_group = new ArdourCanvas::Group (*track_canvas->root());
 
+	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
+	transport_loop_range_rect->property_outline_pixels() = 1;
+	transport_loop_range_rect->hide();
+
+	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
+	transport_punch_range_rect->property_outline_pixels() = 0;
+	transport_punch_range_rect->hide();
+
 	/* a group to hold time (measure) lines */	
 	time_line_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
+
+	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	range_marker_drag_rect->hide ();
 
 	_trackview_group = new ArdourCanvas::Group (*_master_group);
 	_region_motion_group = new ArdourCanvas::Group (*_trackview_group);
@@ -163,9 +174,6 @@ Editor::initialize_canvas ()
  	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
  	cd_marker_bar->property_outline_pixels() = 0;
 
-	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	range_marker_drag_rect->hide ();
-
 	timebar_group =  new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
 	cursor_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
 
@@ -195,16 +203,6 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect = new ArdourCanvas::SimpleRect (*transport_marker_group, 0.0, 0.0, 100, timebar_height);
 	transport_bar_drag_rect->property_outline_pixels() = 0;
 	transport_bar_drag_rect->hide ();
-
-	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
-	transport_loop_range_rect->property_outline_pixels() = 1;
-	transport_loop_range_rect->hide();
-
-	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
-	transport_punch_range_rect->property_outline_pixels() = 0;
-	transport_punch_range_rect->hide();
-	
-	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
 	transport_punchin_line = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchin_line->property_x1() = 0.0;

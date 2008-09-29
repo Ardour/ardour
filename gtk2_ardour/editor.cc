@@ -4397,10 +4397,8 @@ Editor::idle_visual_changer ()
 		/* if we seek beyond the current end of the canvas, move the end */
 
 		if (current_time_origin != pending_visual_change.time_origin) {
-			//if (horizontal_adjustment.get_upper() < pending_visual_change.time_origin) {
 			last_canvas_frame = (cef > (pending_visual_change.time_origin + current_page_frames())) ? cef : pending_visual_change.time_origin + current_page_frames();
 			horizontal_adjustment.set_upper ((cef - csf) / frames_per_unit);
-			//}
 			horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
 		} else {
 			update_fixed_rulers();

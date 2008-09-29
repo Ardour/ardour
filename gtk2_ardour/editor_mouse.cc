@@ -1806,6 +1806,7 @@ Editor::finalize_drag ()
 	drag_info.last_pointer_frame = 0;
 	drag_info.current_pointer_frame = 0;
 	drag_info.brushing = false;
+	range_marker_drag_rect->hide();
 	drag_info.clear_copied_locations ();
 }
 
