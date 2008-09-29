@@ -45,6 +45,9 @@ public:
 	/** The type ID for a MIDI event with the given status byte
 	 */
 	virtual uint32_t midi_event_type(uint8_t status) const = 0;
+	
+	/** Return true iff parameter should be locked to integer boundaries */
+	bool is_integer(const Evoral::Parameter& param) const;
 };
 
 } // namespace Evoral

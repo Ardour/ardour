@@ -31,6 +31,8 @@ public:
 	uint8_t  parameter_midi_type(const Evoral::Parameter& param) const;
 	uint32_t midi_event_type(uint8_t status) const;
 
+	bool is_integer(const Evoral::Parameter& param) const;
+
 	static EventTypeMap& instance() { return event_type_map; }
 
 private:

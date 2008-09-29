@@ -93,10 +93,6 @@ public:
 
 	std::string symbol() const;
 
-	inline bool is_integer() const {
-		return (_type >= MidiCCAutomation && _type <= MidiChannelPressureAutomation);
-	}
-
 	inline operator Parameter() { return (Parameter)*this; }
 };
 

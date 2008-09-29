@@ -614,10 +614,11 @@ AutomationLine::get_verbose_cursor_string (double fraction)
 		}
 	} else {
 		view_to_model_y(fraction);
-		if (((ARDOUR::Parameter)alist->parameter()).is_integer())
+		if (EventTypeMap::instance().is_integer(alist->parameter())) {
 			snprintf (buf, sizeof (buf), "%d", (int)fraction);
-		else
+		} else {
 			snprintf (buf, sizeof (buf), "%.2f", fraction);
+		}
 	}
 
 	return buf;

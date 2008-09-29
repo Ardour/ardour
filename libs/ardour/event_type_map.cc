@@ -57,5 +57,12 @@ EventTypeMap::midi_event_type(uint8_t status) const
 	}
 }
 
+bool
+EventTypeMap::is_integer(const Evoral::Parameter& param) const
+{
+	return (   param.type() >= MidiCCAutomation
+			&& param.type() <= MidiChannelPressureAutomation);
+}
+
 } // namespace ARDOUR
 
