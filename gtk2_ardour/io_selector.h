@@ -38,10 +38,9 @@ class IOSelector : public PortMatrix {
 	std::string row_descriptor () const;
 
   private:
-	
-	void ports_changed (ARDOUR::IOChange, void*);
-	
 	boost::shared_ptr<ARDOUR::IO> _io;
+
+	void ports_changed (ARDOUR::IOChange, void*);
 };
 
 class IOSelectorWindow : public ArdourDialog
@@ -60,6 +59,7 @@ class IOSelectorWindow : public ArdourDialog
 
 	/* overall operation buttons */
 
+	Gtk::Button add_button;
 	Gtk::Button ok_button;
 	Gtk::Button cancel_button;
 	Gtk::Button rescan_button;

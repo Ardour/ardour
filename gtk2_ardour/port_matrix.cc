@@ -91,7 +91,7 @@ PortGroupUI::PortGroupUI (PortMatrix& m, PortGroup& g)
 			_table.attach (*b, j, j + 1, i, i + 1);
 		}
 	}
-
+	
 	_table_box.add (_table);
 
  	_ignore_check_button_toggle = true;
@@ -177,10 +177,10 @@ PortGroupUI::setup_visibility ()
 	}
 
 	if (_visibility_checkbutton.get_active () != _port_group.visible) {
+
 		_visibility_checkbutton.set_active (_port_group.visible);
 	}
 }
-
 
 RotatedLabelSet::RotatedLabelSet (PortGroupList& g)
 	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _port_group_list (g), _base_width (128)
@@ -390,7 +390,7 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 	_scrolled_window.add (*Gtk::manage (a));
 	_overall_hbox.pack_start (_scrolled_window);
 	_side_vbox[1].pack_start (*Gtk::manage (new Gtk::Label ("")));
-	_overall_hbox.pack_start (_side_vbox[1]);
+	// _overall_hbox.pack_start (_side_vbox[1]);
 	pack_start (_overall_hbox);
 
 	_port_group_hbox.signal_size_allocate().connect (sigc::hide (sigc::mem_fun (*this, &IOSelector::setup_dimensions)));
@@ -509,23 +509,22 @@ PortMatrix::setup ()
  	/* Checkbutton tables and visibility checkbuttons */
  	int n = 0;
  	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
-		if ((*i)->visible) {
-	 		PortGroupUI* t = new PortGroupUI (*this, **i);
 
-	 		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
-	 		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
-	 		alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
-	 		if ((n % 2) == 0) {
-	 			t->get_table().modify_bg (Gtk::STATE_NORMAL, alt_bg);
-	 		}
-
-	 		_port_group_ui.push_back (t);
-	 		_port_group_hbox.pack_start (t->get_table(), false, false);
-
-			_visibility_checkbutton_box.pack_start (t->get_visibility_checkbutton(), false, false);
-	 		++n;
-	 	}
- 	}
+		PortGroupUI* t = new PortGroupUI (*this, **i);
+		
+		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
+		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
+		alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
+		if ((n % 2) == 0) {
+			t->get_table().modify_bg (Gtk::STATE_NORMAL, alt_bg);
+		}
+		
+		_port_group_ui.push_back (t);
+		_port_group_hbox.pack_start (t->get_table(), false, false);
+		
+		_visibility_checkbutton_box.pack_start (t->get_visibility_checkbutton(), false, false);
+		++n;
+	}
 
 	show_all ();
 
@@ -620,24 +619,23 @@ PortGroupList::refresh ()
 	other.ports.clear ();
 
 	/* Find the ports provided by ardour; we can't derive their type just from their
-	   names, so we'll have to be more devious. */
+	   names, so we'll have to be more devious. 
+	*/
 
 	boost::shared_ptr<ARDOUR::Session::RouteList> routes = _session.get_routes ();
 
 	for (ARDOUR::Session::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
 		PortGroup* g = 0;
-		if (_type == ARDOUR::DataType::AUDIO && dynamic_cast<ARDOUR::AudioTrack*> ((*i).get())) {
-			/* Audio track for an audio IO */
-			g = &track;
-		} else if (_type == ARDOUR::DataType::MIDI && dynamic_cast<ARDOUR::MidiTrack*> ((*i).get())) {
-			/* Midi track for a MIDI IO */
-			g = &track;
-		} else if (_type == ARDOUR::DataType::AUDIO && dynamic_cast<ARDOUR::MidiTrack*> ((*i).get()) == 0) {
-			/* Non-MIDI track for an Audio IO; must be an audio buss */
-			g = &buss;
-		}
 
+		if (_type == ARDOUR::DataType::AUDIO && boost::dynamic_pointer_cast<ARDOUR::AudioTrack> (*i)) {
+			g = &track;
+		} else if (_type == ARDOUR::DataType::MIDI && boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (*i)) {
+			g = &track;
+		} else if (_type == ARDOUR::DataType::AUDIO && boost::dynamic_pointer_cast<ARDOUR::Route> (*i)) {
+			g = &buss;
+		} 
+			
 		if (g) {
 			ARDOUR::PortSet const & p = _offer_inputs ? ((*i)->inputs()) : ((*i)->outputs());
 			for (uint32_t j = 0; j < p.num_ports(); ++j) {
@@ -648,18 +646,22 @@ PortGroupList::refresh ()
 		}
 	}
 	
-
 	/* XXX: inserts, sends, plugin inserts? */
 	
 	/* Now we need to find the non-ardour ports; we do this by first
-	   finding all the ports that we can connect to. */
-	const char **ports = _session.engine().get_ports (
-		"", _type.to_jack_type(), _offer_inputs ? JackPortIsInput : JackPortIsOutput
-		);
+	   finding all the ports that we can connect to. 
+	*/
 
+	const char **ports = _session.engine().get_ports ("", _type.to_jack_type(), _offer_inputs ? 
+							  JackPortIsInput : JackPortIsOutput);
 	if (ports) {
 
 		int n = 0;
+		string client_matching_string;
+
+		client_matching_string = _session.engine().client_name();
+		client_matching_string += ':';
+
 		while (ports[n]) {
 			std::string const p = ports[n];
 
@@ -667,7 +669,7 @@ PortGroupList::refresh ()
 				/* system: prefix */
 				system.add (p);
 			} else {
-				if (p.substr(0, strlen("ardour:")) != "ardour:") {
+				if (p.substr(0, client_matching_string.length()) != client_matching_string) {
 					/* other (non-ardour) prefix */
 					other.add (p);
 				}
@@ -675,11 +677,13 @@ PortGroupList::refresh ()
 
 			++n;
 		}
+
+		free (ports);
 	}
 
+	push_back (&system);
 	push_back (&buss);
 	push_back (&track);
-	push_back (&system);
 	push_back (&other);
 }
 

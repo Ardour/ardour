@@ -41,16 +41,17 @@ using namespace Gtk;
 
 IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool offer_inputs)
 	: PortMatrix (
-		session, io->default_type(), !offer_inputs,
-		PortGroupList::Mask (PortGroupList::BUSS | PortGroupList::SYSTEM | PortGroupList::OTHER)
-		),
+		session, io->default_type(), offer_inputs,
+		PortGroupList::Mask (PortGroupList::BUSS | 
+				     PortGroupList::SYSTEM | 
+				     PortGroupList::OTHER)),
 	  _io (io)
 {
 	/* Listen for ports changing on the IO */
 	if (_offer_inputs) {
-		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
-	} else {
 		_io->output_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
+	} else {
+		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
 
 	/* this got lost in a merge from 2.0 */
@@ -67,8 +68,6 @@ IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
 
 	redisplay ();
 }
-
-
 
 void
 IOSelector::set_state (int r, std::string const & p, bool s)
@@ -146,12 +145,20 @@ IOSelector::minimum_rows () const
 std::string
 IOSelector::row_name (int r) const
 {
+	string n;
+	string::size_type pos;
+
 	if (!_offer_inputs) {
-		return _io->input(r)->name();
+		n =  _io->input(r)->short_name();
 	} else {
-		return _io->output(r)->name();
+		n = _io->output(r)->short_name();
 	}
-		
+	
+	if ((pos = n.find ('/')) != string::npos) {
+		return n.substr (pos+1);
+	} else {
+		return n;
+	}
 }
 
 void
@@ -257,6 +264,7 @@ IOSelectorWindow::IOSelectorWindow (
 	)
 	: ArdourDialog ("I/O selector"),
 	  _selector (session, io, !for_input),
+	  add_button (_("Add Port")),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
 	  cancel_button (_("Cancel")),
 	  rescan_button (_("Rescan"))
@@ -272,23 +280,31 @@ IOSelectorWindow::IOSelectorWindow (
 		title = string_compose(_("%1 output"), io->name());
 	}
 
-	ok_button.set_name ("IOSelectorButton");
-	if (!can_cancel) {
-		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
+	if (_selector.maximum_rows() > _selector.n_rows()) {
+		add_button.set_name ("IOSelectorButton");
+		add_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
+		get_action_area()->pack_start (add_button, false, false);
+		add_button.signal_clicked().connect (sigc::mem_fun (_selector, &IOSelector::add_row));
+	} else {
+		add_button.hide ();
 	}
-	cancel_button.set_name ("IOSelectorButton");
+
 	rescan_button.set_name ("IOSelectorButton");
 	rescan_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::REFRESH, Gtk::ICON_SIZE_BUTTON)));
-
 	get_action_area()->pack_start (rescan_button, false, false);
 
 	if (can_cancel) {
+		cancel_button.set_name ("IOSelectorButton");
 		cancel_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CANCEL, Gtk::ICON_SIZE_BUTTON)));
 		get_action_area()->pack_start (cancel_button, false, false);
 	} else {
 		cancel_button.hide();
 	}
 		
+	ok_button.set_name ("IOSelectorButton");
+	if (!can_cancel) {
+		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
+	}
 	get_action_area()->pack_start (ok_button, false, false);
 
 	get_vbox()->set_spacing (8);
