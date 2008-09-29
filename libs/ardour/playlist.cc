@@ -467,7 +467,6 @@ void
 Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, float times) 
 { 
 	RegionLock rlock (this);
-	delay_notifications();
 	times = fabs (times);
 	
 	int itimes = (int) floor (times);
@@ -503,7 +502,6 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 
 
 	possibly_splice_unlocked (position, (pos + length) - position, boost::shared_ptr<Region>());
-	release_notifications ();
 }
 
 void

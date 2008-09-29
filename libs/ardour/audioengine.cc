@@ -342,6 +342,18 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	boost::shared_ptr<Ports> p = ports.reader();
 
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+
+		/* Only run cycle_start() on output ports, because 
+		   inputs must be done in the correct processing order,
+		   which requires interleaving with route processing.
+		*/
+
+		if ((*i)->sends_output()) {
+			(*i)->cycle_start (nframes, 0);
+		}
+	}
+
 	if (_freewheeling) {
 		/* emit the Freewheel signal and stop freewheeling in the event of trouble */
 		if (Freewheel (nframes)) {
@@ -509,7 +521,9 @@ AudioEngine::set_session (Session *s)
 		boost::shared_ptr<Ports> p = ports.reader();
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			(*i)->cycle_start (blocksize, 0);
+			if ((*i)->sends_output()) {
+				(*i)->cycle_start (blocksize, 0);
+			}
 		}
 
 		s->process (blocksize);
