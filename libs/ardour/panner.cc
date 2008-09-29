@@ -102,18 +102,6 @@ StreamPanner::PanControllable::get_value (void) const
 	return direct_pan_to_control (xpos);
 }
 
-bool
-StreamPanner::PanControllable::can_send_feedback () const
-{
-	AutoState astate = panner.get_parent().automation_state ();
-
-	if ((astate == Play) || (astate == Touch && !panner.get_parent().touching())) {
-		return true;
-	}
-
-	return false;
-}
-
 void
 StreamPanner::set_muted (bool yn)
 {

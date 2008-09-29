@@ -114,7 +114,6 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	    
 	    void set_value (float);
 	    float get_value (void) const;
-	    bool can_send_feedback() const;
 	};
 
 	boost::shared_ptr<PanControllable> _control;

@@ -40,8 +40,6 @@ class Controllable : public PBD::StatefulDestructible {
 	virtual void set_value (float) = 0;
 	virtual float get_value (void) const = 0;
 
-	virtual bool can_send_feedback() const { return true; }
-
 	sigc::signal<void> LearningFinished;
 	static sigc::signal<void,PBD::Controllable*,int,int> CreateBinding;
 	static sigc::signal<void,PBD::Controllable*> DeleteBinding;
@@ -84,7 +82,6 @@ class IgnorableControllable : public Controllable
     
     void set_value (float v){}
     float get_value () const { return 0.0; }
-    bool can_send_feedback () const { return false; }
 };
 
 }
