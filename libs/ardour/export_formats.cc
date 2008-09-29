@@ -234,6 +234,16 @@ ExportFormatLinear::set_compatibility_state (ExportFormatCompatibility const & c
 
 ExportFormatOggVorbis::ExportFormatOggVorbis ()
 {
+	/* Check system compatibility */
+	
+	SF_INFO sf_info;
+	sf_info.channels = 2;
+	sf_info.samplerate = SR_44_1;
+	sf_info.format = F_Ogg | SF_Vorbis;
+	if (sf_format_check (&sf_info) != SF_TRUE) {
+		throw ExportFormatIncompatible();
+	}
+	
 	set_name ("Ogg Vorbis");
 	set_format_id (F_Ogg);
 	sample_formats.insert (SF_Vorbis);
@@ -252,17 +262,6 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 }
 
 bool
-ExportFormatOggVorbis::check_system_compatibility ()
-{
-	SF_INFO sf_info;
-	sf_info.channels = 2;
-	sf_info.samplerate = SR_44_1;
-	sf_info.format = F_Ogg | SF_Vorbis;
-
-	return (sf_format_check (&sf_info) == SF_TRUE ? true : false);
-}
-
-bool
 ExportFormatOggVorbis::set_compatibility_state (ExportFormatCompatibility const & compatibility)
 {
 	bool compatible = compatibility.has_format (F_Ogg);
@@ -275,6 +274,16 @@ ExportFormatOggVorbis::set_compatibility_state (ExportFormatCompatibility const 
 ExportFormatFLAC::ExportFormatFLAC () :
   HasSampleFormat (sample_formats)
 {
+	/* Check system compatibility */
+	
+	SF_INFO sf_info;
+	sf_info.channels = 2;
+	sf_info.samplerate = SR_44_1;
+	sf_info.format = F_FLAC | SF_16;
+	if (sf_format_check (&sf_info) != SF_TRUE) {
+		throw ExportFormatIncompatible();
+	}
+	
 	set_name ("FLAC");
 	set_format_id (F_FLAC);
 	
@@ -293,17 +302,6 @@ ExportFormatFLAC::ExportFormatFLAC () :
 	
 	set_extension ("flac");
 	set_quality (Q_LosslessCompression);
-}
-
-bool
-ExportFormatFLAC::check_system_compatibility ()
-{
-	SF_INFO sf_info;
-	sf_info.channels = 2;
-	sf_info.samplerate = SR_44_1;
-	sf_info.format = F_FLAC | SF_16;
-
-	return (sf_format_check (&sf_info) == SF_TRUE ? true : false);
 }
 
 bool

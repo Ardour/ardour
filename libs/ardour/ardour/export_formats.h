@@ -26,11 +26,15 @@
 
 #include <list>
 #include <boost/weak_ptr.hpp>
+#include <pbd/failed_constructor.h>
 
 namespace ARDOUR
 {
 
-class HasSampleFormat;
+class ExportFormatIncompatible : public failed_constructor {
+  public:
+	virtual const char *what() const throw() { return "Export format constructor failed: Format incompatible with system"; }
+};
 
 /// Base class for formats
 class ExportFormat : public ExportFormatBase, public ExportFormatBase::SelectableCompatible {
@@ -170,8 +174,6 @@ class ExportFormatOggVorbis : public ExportFormat {
 	ExportFormatOggVorbis ();
 	~ExportFormatOggVorbis () {};
 	
-	static bool check_system_compatibility ();
-	
 	bool set_compatibility_state (ExportFormatCompatibility const & compatibility);
 	Type get_type () const { return T_Sndfile; }
 	SampleFormat get_explicit_sample_format () const { return SF_Vorbis; }
@@ -182,8 +184,6 @@ class ExportFormatFLAC : public ExportFormat, public HasSampleFormat {
   public:
 	ExportFormatFLAC ();
 	~ExportFormatFLAC () {};
-	
-	static bool check_system_compatibility ();
 	
 	bool set_compatibility_state (ExportFormatCompatibility const & compatibility);
 	Type get_type () const { return T_Sndfile; }
