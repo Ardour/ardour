@@ -92,7 +92,7 @@ Sequence::const_iterator::const_iterator(const Sequence& seq, EventTime t)
 	
 	// find the earliest control event available
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
-		debugout << "Iterator: control: " << i->first.symbol() << endl;
+		debugout << "Iterator: control: " << seq._type_map.to_symbol(i->first) << endl;
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y);
 		if (!ret) {
@@ -628,7 +628,7 @@ Sequence::append_note_off_unlocked(uint8_t chan, EventTime time, uint8_t note_nu
 void
 Sequence::append_control_unlocked(const Parameter& param, EventTime time, double value)
 {
-	debugout << this << " " << param.symbol() << " @ " << time << " \t= \t" << value
+	debugout << this << " " << _type_map.to_symbol(param) << " @ " << time << " \t= \t" << value
 			<< " # controls: " << _controls.size() << endl;
 	control(param, true)->list()->rt_add(time, value);
 }

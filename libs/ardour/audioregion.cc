@@ -78,9 +78,9 @@ AudioRegion::init ()
 AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string name)
 	: Region (s, start, length, name, DataType::AUDIO)
 	, _automatable(s)
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	init ();
 }
@@ -89,9 +89,9 @@ AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 	, _automatable(src->session())
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -105,9 +105,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
 	, _automatable(src->session())
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -121,9 +121,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
 	, _automatable(srcs[0]->session())
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	init ();
 	listen_to_my_sources ();
@@ -133,9 +133,9 @@ AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t len
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
 	, _automatable(other->session())
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	set<boost::shared_ptr<Source> > unique_srcs;
 
@@ -186,9 +186,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	: Region (other)
 	, _automatable(other->session())
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	assert(_type == DataType::AUDIO);
 	_scale_amplitude = other->_scale_amplitude;
@@ -203,9 +203,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (src, node)
 	, _automatable(src->session())
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
@@ -225,9 +225,9 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	: Region (srcs, node)
 	, _automatable(srcs[0]->session())
-	, _fade_in (new AutomationList(Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Parameter(EnvelopeAutomation)))
+	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
+	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
+	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
 	init ();
 

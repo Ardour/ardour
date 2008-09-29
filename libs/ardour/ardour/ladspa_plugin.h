@@ -58,7 +58,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
 	
-	std::set<Parameter> automatable() const;
+	std::set<Evoral::Parameter> automatable() const;
 
 	void activate () { 
 		if (!_was_activated && _descriptor->activate)
@@ -85,7 +85,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void set_block_size (nframes_t nframes) {}
 	
 	int         connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
-	std::string describe_parameter (Parameter);
+	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "ladspa"; }
 	void        print_parameter (uint32_t, char*, uint32_t len) const;
 

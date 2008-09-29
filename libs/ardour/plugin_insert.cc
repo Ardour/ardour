@@ -147,7 +147,7 @@ PluginInsert::~PluginInsert ()
 }
 
 void
-PluginInsert::auto_state_changed (Parameter which)
+PluginInsert::auto_state_changed (Evoral::Parameter which)
 {
 	if (which.type() != PluginAutomation)
 		return;
@@ -218,15 +218,15 @@ PluginInsert::is_generator() const
 void
 PluginInsert::set_automatable ()
 {
-	set<Parameter> a = _plugins.front()->automatable ();
+	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
 	Plugin::ParameterDescriptor desc;
 
-	for (set<Parameter>::iterator i = a.begin(); i != a.end(); ++i) {
+	for (set<Evoral::Parameter>::iterator i = a.begin(); i != a.end(); ++i) {
 		if (i->type() == PluginAutomation) {
 			can_automate (*i);
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
-			Parameter param(*i);
+			Evoral::Parameter param(*i);
 			param.set_range(desc.lower, desc.upper, _plugins.front()->default_value(i->id()));
 			boost::shared_ptr<AutomationList> list(new AutomationList(param));
 			add_control(boost::shared_ptr<AutomationControl>(new PluginControl(this, *i, list)));
@@ -235,7 +235,7 @@ PluginInsert::set_automatable ()
 }
 
 void
-PluginInsert::parameter_changed (Parameter which, float val)
+PluginInsert::parameter_changed (Evoral::Parameter which, float val)
 {
 	if (which.type() != PluginAutomation)
 		return;
@@ -359,7 +359,7 @@ PluginInsert::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t en
 }
 
 void
-PluginInsert::set_parameter (Parameter param, float val)
+PluginInsert::set_parameter (Evoral::Parameter param, float val)
 {
 	if (param.type() != PluginAutomation)
 		return;
@@ -375,14 +375,14 @@ PluginInsert::set_parameter (Parameter param, float val)
 		ac->set_value(val);
 	} else {
 		warning << "set_parameter called for nonexistant parameter "
-			<< param.symbol() << endmsg;
+			<< EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 
 	_session.set_dirty();
 }
 
 float
-PluginInsert::get_parameter (Parameter param)
+PluginInsert::get_parameter (Evoral::Parameter param)
 {
 	if (param.type() != PluginAutomation)
 		return 0.0;
@@ -394,7 +394,7 @@ PluginInsert::get_parameter (Parameter param)
 void
 PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset)
 {
-	ControlEvent next_event (0, 0.0f);
+	Evoral::ControlEvent next_event (0, 0.0f);
 	nframes_t now = _session.transport_frame ();
 	nframes_t end = now + nframes;
 
@@ -631,9 +631,9 @@ PluginInsert::state (bool full)
 
 	/* add port automation state */
 	XMLNode *autonode = new XMLNode(port_automation_node_name);
-	set<Parameter> automatable = _plugins[0]->automatable();
+	set<Evoral::Parameter> automatable = _plugins[0]->automatable();
 	
-	for (set<Parameter>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
+	for (set<Evoral::Parameter>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
 		
 		/*XMLNode* child = new XMLNode("port");
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
@@ -766,7 +766,7 @@ PluginInsert::set_state(const XMLNode& node)
 			}
 
 			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
-					data().control(Parameter(PluginAutomation, port_id), true));
+					data().control(Evoral::Parameter(PluginAutomation, port_id), true));
 
 			if (!child->children().empty()) {
 				c->alist()->set_state (*child->children().front());
@@ -805,7 +805,7 @@ PluginInsert::set_state(const XMLNode& node)
 }
 
 string
-PluginInsert::describe_parameter (Parameter param)
+PluginInsert::describe_parameter (Evoral::Parameter param)
 {
 	if (param.type() != PluginAutomation)
 		return Automatable::describe_parameter(param);
@@ -852,7 +852,7 @@ PluginInsert::type ()
 	}
 }
 
-PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Parameter &param, boost::shared_ptr<AutomationList> list)
+PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> list)
 	: AutomationControl (p->session(), param, list, p->describe_parameter(param))
 	, _plugin (p)
 {

@@ -68,7 +68,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	
 	const LV2_Feature* const* features() { return _features; }
 
-	std::set<Parameter> automatable() const;
+	std::set<Evoral::Parameter> automatable() const;
 
 	void activate () { 
 		if (!_was_activated) {
@@ -94,7 +94,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	void set_block_size (nframes_t nframes) {}
 	
 	int         connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset);
-	std::string describe_parameter (Parameter);
+	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "lv2"; }
 	void        print_parameter (uint32_t, char*, uint32_t len) const;
 

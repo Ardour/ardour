@@ -67,7 +67,7 @@ Automatable::old_set_automation_state (const XMLNode& node)
 			if (sstr.fail()) {
 				break;
 			}
-			mark_automation_visible (Parameter(PluginAutomation, what), true);
+			mark_automation_visible (Evoral::Parameter(PluginAutomation, what), true);
 		}
 	}
 	
@@ -96,7 +96,7 @@ Automatable::load_automation (const string& path)
 	}
 
 	Glib::Mutex::Lock lm (control_lock());
-	set<Parameter> tosave;
+	set<Evoral::Parameter> tosave;
 	controls().clear ();
 	
 	_last_automation_snapshot = 0;
@@ -110,10 +110,11 @@ Automatable::load_automation (const string& path)
 		in >> when;  if (!in) goto bad;
 		in >> value; if (!in) goto bad;
 		
+		Evoral::Parameter param(PluginAutomation, port);
 		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
-		boost::shared_ptr<Evoral::Control> c = control (Parameter(PluginAutomation, port), true);
+		boost::shared_ptr<Evoral::Control> c = control (param, true);
 		c->list()->add (when, value);
-		tosave.insert (Parameter(PluginAutomation, port));
+		tosave.insert (param);
 	}
 	
 	return 0;
@@ -127,7 +128,7 @@ Automatable::load_automation (const string& path)
 void
 Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 {
-	Parameter param = ac->parameter();
+	Evoral::Parameter param = ac->parameter();
 	
 	ControlSet::add_control(ac);
 	_can_automate_list.insert(param);
@@ -135,10 +136,10 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 }
 
 void
-Automatable::what_has_visible_data(set<Parameter>& s) const
+Automatable::what_has_visible_data(set<Evoral::Parameter>& s) const
 {
 	Glib::Mutex::Lock lm (control_lock());
-	set<Parameter>::const_iterator li;
+	set<Evoral::Parameter>::const_iterator li;
 	
 	for (li = _visible_controls.begin(); li != _visible_controls.end(); ++li) {
 		s.insert  (*li);
@@ -146,11 +147,11 @@ Automatable::what_has_visible_data(set<Parameter>& s) const
 }
 
 string
-Automatable::describe_parameter (Parameter param)
+Automatable::describe_parameter (Evoral::Parameter param)
 {
 	/* derived classes like PluginInsert should override this */
 
-	if (param == Parameter(GainAutomation)) {
+	if (param == Evoral::Parameter(GainAutomation)) {
 		return _("Fader");
 	} else if (param.type() == PanAutomation) {
 		/* ID's are zero-based, present them as 1-based */
@@ -165,23 +166,23 @@ Automatable::describe_parameter (Parameter param)
 	} else if (param.type() == MidiChannelPressureAutomation) {
 		return string_compose("Pressure [%1]", int(param.channel()) + 1);
 	} else {
-		return param.symbol();
+		return EventTypeMap::instance().to_symbol(param);
 	}
 }
 
 void
-Automatable::can_automate (Parameter what)
+Automatable::can_automate (Evoral::Parameter what)
 {
 	_can_automate_list.insert (what);
 }
 
 void
-Automatable::mark_automation_visible (Parameter what, bool yn)
+Automatable::mark_automation_visible (Evoral::Parameter what, bool yn)
 {
 	if (yn) {
 		_visible_controls.insert (what);
 	} else {
-		set<Parameter>::iterator i;
+		set<Evoral::Parameter>::iterator i;
 
 		if ((i = _visible_controls.find (what)) != _visible_controls.end()) {
 			_visible_controls.erase (i);
@@ -194,7 +195,7 @@ Automatable::mark_automation_visible (Parameter what, bool yn)
  * pass that type and it will be used for the untyped AutomationList found.
  */
 int
-Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
+Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy_param)
 {	
 	Glib::Mutex::Lock lm (control_lock());
 
@@ -216,7 +217,10 @@ Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 
 			const XMLProperty* id_prop = (*niter)->property("automation-id");
 
-			Parameter param = (id_prop ? Parameter(id_prop->value()) : legacy_param);
+			Evoral::Parameter param = (id_prop
+					? EventTypeMap::instance().new_parameter(id_prop->value())
+					: legacy_param);
+
 			if (param.type() == NullAutomation) {
 				warning << "Automation has null type" << endl;
 				continue;
@@ -226,7 +230,7 @@ Automatable::set_automation_state (const XMLNode& node, Parameter legacy_param)
 			
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
-					<< "using default: " << legacy_param.symbol() << endmsg;
+					<< "using default: " << EventTypeMap::instance().to_symbol(legacy_param) << endmsg;
 			}
 
 			boost::shared_ptr<Evoral::Control> existing = control(param);
@@ -265,7 +269,7 @@ Automatable::get_automation_state ()
 }
 
 void
-Automatable::set_parameter_automation_state (Parameter param, AutoState s)
+Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState s)
 {
 	Glib::Mutex::Lock lm (control_lock());
 	
@@ -279,7 +283,7 @@ Automatable::set_parameter_automation_state (Parameter param, AutoState s)
 }
 
 AutoState
-Automatable::get_parameter_automation_state (Parameter param, bool lock)
+Automatable::get_parameter_automation_state (Evoral::Parameter param, bool lock)
 {
 	AutoState result = Off;
 
@@ -299,7 +303,7 @@ Automatable::get_parameter_automation_state (Parameter param, bool lock)
 }
 
 void
-Automatable::set_parameter_automation_style (Parameter param, AutoStyle s)
+Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle s)
 {
 	Glib::Mutex::Lock lm (control_lock());
 	
@@ -313,7 +317,7 @@ Automatable::set_parameter_automation_style (Parameter param, AutoStyle s)
 }
 
 AutoStyle
-Automatable::get_parameter_automation_style (Parameter param)
+Automatable::get_parameter_automation_style (Evoral::Parameter param)
 {
 	Glib::Mutex::Lock lm (control_lock());
 

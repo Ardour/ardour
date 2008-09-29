@@ -42,7 +42,7 @@ public:
 	AutomationRegionView(ArdourCanvas::Group*,
 	                     AutomationTimeAxisView&,
 	                     boost::shared_ptr<ARDOUR::Region>,
-	                     const ARDOUR::Parameter& parameter,
+	                     const Evoral::Parameter& parameter,
 	                     boost::shared_ptr<ARDOUR::AutomationList>,
 	                     double initial_samples_per_unit,
 	                     Gdk::Color& basic_color);
@@ -73,7 +73,7 @@ protected:
 	void exited();
 
 private:
-	ARDOUR::Parameter                 _parameter;
+	Evoral::Parameter                 _parameter;
 	boost::shared_ptr<AutomationLine> _line;
 };
 

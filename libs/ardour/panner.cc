@@ -69,7 +69,7 @@ static double direct_pan_to_control (pan_t val) {
 	return val;
 }
 
-StreamPanner::StreamPanner (Panner& p, Parameter param)
+StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	: parent (p)
 	, _control (new PanControllable(p.session(), X_("panner"), *this, param))
 {
@@ -179,7 +179,7 @@ StreamPanner::add_state (XMLNode& node)
 
 /*---------------------------------------------------------------------- */
 
-BaseStereoPanner::BaseStereoPanner (Panner& p, Parameter param)
+BaseStereoPanner::BaseStereoPanner (Panner& p, Evoral::Parameter param)
 	: StreamPanner (p, param)
 {
 }
@@ -336,7 +336,7 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 /*---------------------------------------------------------------------- */
 
-EqualPowerStereoPanner::EqualPowerStereoPanner (Panner& p, Parameter param)
+EqualPowerStereoPanner::EqualPowerStereoPanner (Panner& p, Evoral::Parameter param)
 	: BaseStereoPanner (p, param)
 {
 	update ();
@@ -451,7 +451,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 }
 
 StreamPanner*
-EqualPowerStereoPanner::factory (Panner& parent, Parameter param)
+EqualPowerStereoPanner::factory (Panner& parent, Evoral::Parameter param)
 {
 	return new EqualPowerStereoPanner (parent, param);
 }
@@ -520,7 +520,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 
 /*----------------------------------------------------------------------*/
 
-Multi2dPanner::Multi2dPanner (Panner& p, Parameter param)
+Multi2dPanner::Multi2dPanner (Panner& p, Evoral::Parameter param)
 	: StreamPanner (p, param)
 {
 	update ();
@@ -638,7 +638,7 @@ Multi2dPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs,
 }
 
 StreamPanner*
-Multi2dPanner::factory (Panner& p, Parameter param)
+Multi2dPanner::factory (Panner& p, Evoral::Parameter param)
 {
 	return new Multi2dPanner (p, param);
 }
@@ -788,7 +788,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output (1.0, 0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new EqualPowerStereoPanner (*this, Parameter(PanAutomation, n)));
+			push_back (new EqualPowerStereoPanner (*this, Evoral::Parameter(PanAutomation, n)));
 		}
 		break;
 
@@ -798,7 +798,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (1.0, 1.0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Parameter(PanAutomation, n)));
+			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
 		}
 
 		break; 
@@ -810,7 +810,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (0, 1.0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Parameter(PanAutomation, n)));
+			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
 		}
 
 		break;	
@@ -823,7 +823,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (0.5, 0.75));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Parameter(PanAutomation, n)));
+			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
 		}
 
 		break;
@@ -835,7 +835,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		}
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Parameter(PanAutomation, n)));
+			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
 		}
 
 		break;
@@ -969,7 +969,7 @@ Panner::clear_automation ()
 struct PanPlugins {
     string name;
     uint32_t nouts;
-    StreamPanner* (*factory)(Panner&, Parameter);
+    StreamPanner* (*factory)(Panner&, Evoral::Parameter);
 };
 
 PanPlugins pan_plugins[] = {
@@ -1071,7 +1071,7 @@ Panner::set_state (const XMLNode& node)
 						   assumption, but its still an assumption.
 						*/
 						
-						sp = pan_plugins[i].factory (*this, Parameter(PanAutomation, 0));
+						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0));
 						
 						if (sp->set_state (**niter) == 0) {
 							push_back (sp);

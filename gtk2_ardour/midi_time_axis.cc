@@ -263,10 +263,10 @@ MidiTimeAxisView::build_automation_action_menu ()
 			mem_fun(*this, &MidiTimeAxisView::add_cc_track)));
 	automation_items.push_back (MenuElem (_("Bender"), 
 			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
-				Parameter(MidiPitchBenderAutomation))));
+				Evoral::Parameter(MidiPitchBenderAutomation))));
 	automation_items.push_back (MenuElem (_("Pressure"), 
 			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
-				Parameter(MidiChannelPressureAutomation))));
+				Evoral::Parameter(MidiChannelPressureAutomation))));
 
 }
 
@@ -328,10 +328,10 @@ void
 MidiTimeAxisView::show_all_automation ()
 {
 	if (midi_track()) {
-		const set<Parameter> params = midi_track()->midi_diskstream()->
+		const set<Evoral::Parameter> params = midi_track()->midi_diskstream()->
 				midi_playlist()->contained_automation();
 
-		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
+		for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
 			create_automation_child(*i, true);
 		}
 	}
@@ -343,10 +343,10 @@ void
 MidiTimeAxisView::show_existing_automation ()
 {
 	if (midi_track()) {
-		const set<Parameter> params = midi_track()->midi_diskstream()->
+		const set<Evoral::Parameter> params = midi_track()->midi_diskstream()->
 				midi_playlist()->contained_automation();
 
-		for (set<Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
+		for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
 			create_automation_child(*i, true);
 		}
 	}
@@ -360,7 +360,7 @@ void
 MidiTimeAxisView::add_cc_track()
 {
 	int response;
-	Parameter param;
+	Evoral::Parameter param(0, 0, 0);
 
 	{
 		AddMidiCCTrackDialog dialog;
@@ -371,7 +371,7 @@ MidiTimeAxisView::add_cc_track()
 			param = dialog.parameter();
 	}
 
-	if (response == Gtk::RESPONSE_ACCEPT)
+	if (param.type() != 0 && response == Gtk::RESPONSE_ACCEPT)
 		create_automation_child(param, true);
 }
 
@@ -379,13 +379,13 @@ MidiTimeAxisView::add_cc_track()
 /** Add an automation track for the given parameter (pitch bend, channel pressure).
  */
 void
-MidiTimeAxisView::add_parameter_track(const Parameter& param)
+MidiTimeAxisView::add_parameter_track(const Evoral::Parameter& param)
 {
 	create_automation_child(param, true);
 }
 
 void
-MidiTimeAxisView::create_automation_child (const Parameter& param, bool show)
+MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
 	if (	param.type() == MidiCCAutomation ||
 			param.type() == MidiPgmChangeAutomation ||
@@ -419,7 +419,8 @@ MidiTimeAxisView::create_automation_child (const Parameter& param, bool show)
 		add_automation_child(param, track, show);
 
 	} else {
-		error << "MidiTimeAxisView: unknown automation child " << param.symbol() << endmsg;
+		error << "MidiTimeAxisView: unknown automation child "
+			<< ARDOUR::EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 }
 

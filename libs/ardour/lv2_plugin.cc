@@ -360,7 +360,7 @@ LV2Plugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 
 string
-LV2Plugin::describe_parameter (Parameter which)
+LV2Plugin::describe_parameter (Evoral::Parameter which)
 {
 	if (which.type() == PluginAutomation && which.id() < parameter_count()) {
 		SLV2Value name = slv2_port_get_name(_plugin,
@@ -383,14 +383,14 @@ LV2Plugin::signal_latency () const
 	}
 }
 
-set<Parameter>
+set<Evoral::Parameter>
 LV2Plugin::automatable () const
 {
-	set<Parameter> ret;
+	set<Evoral::Parameter> ret;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
 		if (parameter_is_input(i) && parameter_is_control(i)) {
-			ret.insert (ret.end(), Parameter(PluginAutomation, i));
+			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, i));
 		}
 	}
 

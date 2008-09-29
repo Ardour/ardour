@@ -74,12 +74,12 @@ AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
 }
 
 
-ARDOUR::Parameter
+Evoral::Parameter
 AddMidiCCTrackDialog::parameter ()
 {
 	int chan   = _chan_spinner.get_value_as_int() - 1;
 	int cc_num = _cc_num_spinner.get_value_as_int() - 1;
 
-	return Parameter(MidiCCAutomation, chan, cc_num);
+	return Evoral::Parameter(MidiCCAutomation, chan, cc_num);
 }
 

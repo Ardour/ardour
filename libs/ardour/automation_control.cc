@@ -31,10 +31,10 @@ using namespace PBD;
 
 AutomationControl::AutomationControl(
 		ARDOUR::Session& session,
-		const Parameter& parameter,
+		const Evoral::Parameter& parameter,
 		boost::shared_ptr<ARDOUR::AutomationList> list,
 		const string& name)
-	: Controllable((name != "") ? name : parameter.symbol())
+	: Controllable((name != "") ? name : EventTypeMap::instance().to_symbol(parameter))
 	, Evoral::Control(parameter, list)
 	, _session(session)
 {

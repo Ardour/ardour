@@ -40,22 +40,10 @@ namespace Evoral {
 class Parameter
 {
 public:
-	Parameter(uint32_t type, uint8_t channel, uint32_t id=0)
+	Parameter(uint32_t type, uint8_t channel=0, uint32_t id=0)
 		: _type(type), _id(id), _channel(channel)
 	{}
     
-	Parameter(const std::string& str) {
-		int channel;
-		if (sscanf(str.c_str(), "%d_c%d_n%d", &_type, &channel, &_id) == 3) {
-			if (channel >= 0 && channel <= 127) {
-				_channel = channel;
-			} else {
-				std::cerr << "WARNING: Channel out of range: " << channel << std::endl;
-			}
-		}
-		std::cerr << "WARNING: Unable to create parameter from string: " << str << std::endl;
-	}
-
 	virtual ~Parameter() {}
     
 	inline uint32_t type()    const { return _type; }
@@ -113,10 +101,6 @@ public:
 	
 	inline operator bool() const { return (_type != 0); }
 	
-	virtual std::string symbol() const {
-		return (boost::format("%1%_c%2%_n%3%") % _type % (int)_channel % _id).str();
-	}
-
 	/** Not used in indentity/comparison */
 	struct Metadata {
 		Metadata(double low=0.0, double high=1.0, double mid=0.0)

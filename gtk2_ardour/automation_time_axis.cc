@@ -212,7 +212,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	} else {
 	
 		boost::shared_ptr<AutomationLine> line(new AutomationLine (
-					_control->parameter().symbol(),
+					ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
 					*this,
 					*canvas_display,
 					_control->alist()));
@@ -884,7 +884,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 		if ((*iter)->name() == state_node_name) {
 			XMLProperty* type = (*iter)->property("automation-id");
 
-			if (type && type->value() == _control->parameter().symbol()) {
+			if (type && type->value() == ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter())) {
 				XMLProperty *shown = (*iter)->property("shown_editor");
 
 				if (shown && shown->value() == "yes") {

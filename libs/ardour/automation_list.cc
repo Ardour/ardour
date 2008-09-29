@@ -24,8 +24,8 @@
 #include <sstream>
 #include <algorithm>
 #include <sigc++/bind.h>
-#include <ardour/parameter.h>
 #include <ardour/automation_list.h>
+#include <ardour/event_type_map.h>
 #include <evoral/Curve.hpp>
 #include <pbd/stacktrace.h>
 #include <pbd/enumwriter.h>
@@ -51,7 +51,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 #endif
 
 /* XXX: min_val max_val redundant? (param.min() param.max()) */
-AutomationList::AutomationList (Parameter id)
+AutomationList::AutomationList (Evoral::Parameter id)
 	: ControlList(id)
 {
 	_state = Off;
@@ -86,7 +86,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 /** \a id is used for legacy sessions where the type is not present
  * in or below the <AutomationList> node.  It is used if \a id is non-null.
  */
-AutomationList::AutomationList (const XMLNode& node, Parameter id)
+AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	: ControlList(id)
 {
 	_touching = false;
@@ -127,7 +127,7 @@ AutomationList::operator= (const AutomationList& other)
 		_events.clear ();
 		
 		for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
-			_events.push_back (new ControlEvent (**i));
+			_events.push_back (new Evoral::ControlEvent (**i));
 		}
 		
 		_min_yval = other._min_yval;
@@ -220,7 +220,7 @@ AutomationList::state (bool full)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	root->add_property ("automation-id", _parameter.symbol());
+	root->add_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
 
 	root->add_property ("id", _id.to_s());
 
@@ -388,7 +388,7 @@ AutomationList::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property (X_("automation-id"))) != 0){ 
-		_parameter = Evoral::Parameter(prop->value());
+		_parameter = EventTypeMap::instance().new_parameter(prop->value());
 	} else {
 		warning << "Legacy session: automation list has no automation-id property.";
 	}

@@ -51,7 +51,7 @@
 #include <ardour/session.h>
 #include <ardour/session_playlist.h>
 #include <ardour/utils.h>
-#include <ardour/parameter.h>
+#include <evoral/Parameter.hpp>
 #include <ardour/profile.h>
 
 #include "ardour_ui.h"
@@ -427,7 +427,7 @@ RouteTimeAxisView::set_state (const XMLNode& node)
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
 			if ((prop = (*iter)->property ("automation-id")) != 0) {
-				Parameter param(prop->value());
+				Evoral::Parameter param = ARDOUR::EventTypeMap::instance().new_parameter(prop->value());
 				bool show = ((prop = (*iter)->property ("shown")) != 0) && prop->value() == "yes";
 				create_automation_child(param, show);
 			} else {
@@ -461,7 +461,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 
 	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
 	
-	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i;
+	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 
 		automation_items.push_back (SeparatorElem());
@@ -1187,7 +1187,7 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 }
 
 bool
-RouteTimeAxisView::show_automation(Parameter param)
+RouteTimeAxisView::show_automation(Evoral::Parameter param)
 {
 	return (_show_automation.find(param) != _show_automation.end());
 }
@@ -1195,9 +1195,9 @@ RouteTimeAxisView::show_automation(Parameter param)
 /** Retuns NULL if track for \a param doesn't exist.
  */
 RouteTimeAxisView::RouteAutomationNode*
-RouteTimeAxisView::automation_track(Parameter param)
+RouteTimeAxisView::automation_track(Evoral::Parameter param)
 {
-	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.find(param);
+	map<Evoral::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.find(param);
 
 	if (i != _automation_tracks.end())
 		return i->second;
@@ -1210,7 +1210,7 @@ RouteTimeAxisView::automation_track(Parameter param)
 RouteTimeAxisView::RouteAutomationNode*
 RouteTimeAxisView::automation_track(AutomationType type)
 {
-	return automation_track(Parameter(type));
+	return automation_track(Evoral::Parameter(type));
 }
 
 RouteGroup*
@@ -1515,7 +1515,7 @@ RouteTimeAxisView::color_handler ()
 }
 
 void
-RouteTimeAxisView::toggle_automation_track (Parameter param)
+RouteTimeAxisView::toggle_automation_track (Evoral::Parameter param)
 {
 	RouteAutomationNode* node = automation_track(param);
 
@@ -1544,7 +1544,7 @@ RouteTimeAxisView::toggle_automation_track (Parameter param)
 }
 
 void
-RouteTimeAxisView::automation_track_hidden (Parameter param)
+RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 {
 	RouteAutomationNode* ran = automation_track(param);
 	if (!ran) {
@@ -1569,7 +1569,7 @@ RouteTimeAxisView::show_all_automation ()
 	
 	/* Show our automation */
 
-	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i;
+	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		i->second->track->set_marked_for_display (true);
 		i->second->track->canvas_display->show();
@@ -1604,7 +1604,7 @@ RouteTimeAxisView::show_existing_automation ()
 	
 	/* Show our automation */
 
-	map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i;
+	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		if (i->second->track->line() && i->second->track->line()->npoints() > 0) {
 			i->second->track->set_marked_for_display (true);
@@ -1637,7 +1637,7 @@ RouteTimeAxisView::hide_all_automation ()
 
 	/* Hide our automation */
 
-	for (map<ARDOUR::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+	for (map<Evoral::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		i->second->track->set_marked_for_display (false);
 		i->second->track->hide ();
 		i->second->track->get_state_node()->add_property ("shown", X_("no"));
@@ -1700,7 +1700,7 @@ RouteTimeAxisView::remove_processor_automation_node (ProcessorAutomationNode* pa
 }
 
 RouteTimeAxisView::ProcessorAutomationNode*
-RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> processor, Parameter what)
+RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
 {
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 
@@ -1737,7 +1737,7 @@ legalize_for_xml_node (string str)
 
 
 void
-RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> processor, Parameter what)
+RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
 {
 	string name;
 	ProcessorAutomationNode* pan;
@@ -1803,12 +1803,12 @@ RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::Process
 void
 RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<Processor> processor)
 {
-	set<Parameter> s;
+	set<Evoral::Parameter> s;
 	boost::shared_ptr<AutomationLine> al;
 
 	processor->what_has_visible_data (s);
 
-	for (set<Parameter>::iterator i = s.begin(); i != s.end(); ++i) {
+	for (set<Evoral::Parameter>::iterator i = s.begin(); i != s.end(); ++i) {
 		
 		if ((al = find_processor_automation_curve (processor, *i)) != 0) {
 			al->queue_reset ();
@@ -1819,7 +1819,7 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::shared_ptr<P
 }
 
 void
-RouteTimeAxisView::add_automation_child(Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show)
+RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show)
 {
 	using namespace Menu_Helpers;
 
@@ -1864,8 +1864,8 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 	ProcessorAutomationInfo *rai;
 	list<ProcessorAutomationInfo*>::iterator x;
 	
-	const std::set<Parameter>& automatable = processor->what_can_be_automated ();
-	std::set<Parameter> has_visible_automation;
+	const std::set<Evoral::Parameter>& automatable = processor->what_can_be_automated ();
+	std::set<Evoral::Parameter> has_visible_automation;
 
 	processor->what_has_visible_data(has_visible_automation);
 
@@ -1900,7 +1900,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::shared_ptr<Processor>
 
 	items.clear ();
 
-	for (std::set<Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		ProcessorAutomationNode* pan;
 		CheckMenuItem* mitem;
@@ -2014,7 +2014,7 @@ RouteTimeAxisView::processors_changed ()
 }
 
 boost::shared_ptr<AutomationLine>
-RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor> processor, Parameter what)
+RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
 {
 	ProcessorAutomationNode* pan;
 
@@ -2050,7 +2050,7 @@ RouteTimeAxisView::set_layer_display (LayerDisplay d)
 	
 
 boost::shared_ptr<AutomationTimeAxisView>
-RouteTimeAxisView::automation_child(ARDOUR::Parameter param)
+RouteTimeAxisView::automation_child(Evoral::Parameter param)
 {
 	AutomationTracks::iterator i = _automation_tracks.find(param);
 	if (i != _automation_tracks.end())

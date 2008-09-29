@@ -32,19 +32,16 @@
 #include <pbd/statefuldestructible.h> 
 
 #include <ardour/ardour.h>
-#include <ardour/parameter.h>
 
 #include <evoral/ControlList.hpp>
-
-using Evoral::ControlEvent;
 
 namespace ARDOUR {
 
 class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
 {
   public:
-	AutomationList (Parameter id);
-	AutomationList (const XMLNode&, Parameter id);
+	AutomationList (Evoral::Parameter id);
+	AutomationList (const XMLNode&, Evoral::Parameter id);
 	~AutomationList();
 
 	virtual boost::shared_ptr<Evoral::ControlList> create(Evoral::Parameter id);

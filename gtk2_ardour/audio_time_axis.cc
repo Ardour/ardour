@@ -319,7 +319,7 @@ AudioTimeAxisView::set_waveform_scale (WaveformScale scale)
 }	
 
 void
-AudioTimeAxisView::create_automation_child (const Parameter& param, bool show)
+AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
 	if (param.type() == GainAutomation) {
 
@@ -337,7 +337,7 @@ AudioTimeAxisView::create_automation_child (const Parameter& param, bool show)
 				parent_canvas,
 				_route->describe_parameter(param)));
 
-		add_automation_child(Parameter(GainAutomation), gain_track, show);
+		add_automation_child(Evoral::Parameter(GainAutomation), gain_track, show);
 
 	} else if (param.type() == PanAutomation) {
 
@@ -345,7 +345,7 @@ AudioTimeAxisView::create_automation_child (const Parameter& param, bool show)
 		update_pans (show);
 
 	} else {
-		error << "AudioTimeAxisView: unknown automation child " << param.symbol() << endmsg;
+		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 }
 
@@ -370,7 +370,7 @@ AudioTimeAxisView::update_pans (bool show)
 					false,
 					parent_canvas,
 					_route->describe_parameter(pan_control->parameter())));
-		add_automation_child(Parameter(PanAutomation, i), pan_track, show);
+		add_automation_child(Evoral::Parameter(PanAutomation, i), pan_track, show);
 		++i;
 	}
 }

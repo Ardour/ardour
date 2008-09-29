@@ -23,7 +23,6 @@
 
 #include <boost/shared_ptr.hpp>
 #include <pbd/controllable.h>
-#include <ardour/parameter.h>
 #include <evoral/Control.hpp>
 #include <ardour/automation_list.h>
 
@@ -40,7 +39,7 @@ class AutomationControl : public PBD::Controllable, public Evoral::Control
 {
 public:
 	AutomationControl(ARDOUR::Session&,
-			const Parameter& parameter,
+			const Evoral::Parameter& parameter,
 			boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
 			const string& name="");
 	

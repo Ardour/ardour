@@ -22,7 +22,7 @@
 using namespace ARDOUR;
 
 Gain::Gain ()
-	: AutomationList (Parameter(GainAutomation))   /* XXX yuck; clamps gain to -inf .. +6db */
+	: AutomationList (Evoral::Parameter(GainAutomation))   /* XXX yuck; clamps gain to -inf .. +6db */
 {
 }
 

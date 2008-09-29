@@ -144,7 +144,7 @@ class RegionView : public TimeAxisViewItem
     
     vector<GhostRegion*> ghosts;
 	
-	typedef std::map<const ARDOUR::Parameter, boost::shared_ptr<AutomationRegionView> > AutomationChildren;
+	typedef std::map<const Evoral::Parameter, boost::shared_ptr<AutomationRegionView> > AutomationChildren;
 	AutomationChildren _automation_children;
 };
 

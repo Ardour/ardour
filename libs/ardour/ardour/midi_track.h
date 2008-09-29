@@ -75,7 +75,7 @@ public:
 	
 	/** A control that will send "immediate" events to a MIDI track when twiddled */
 	struct MidiControl : public AutomationControl {
-	    MidiControl(MidiTrack* route, const Parameter& param,
+	    MidiControl(MidiTrack* route, const Evoral::Parameter& param,
 				boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>())
 			: AutomationControl (route->session(), param, al)
 			, _route (route)

@@ -766,24 +766,26 @@ RouteUI::ensure_xml_node ()
 }
 
 XMLNode*
-RouteUI::get_automation_child_xml_node (Parameter param)
+RouteUI::get_automation_child_xml_node (Evoral::Parameter param)
 {
 	ensure_xml_node ();
 	
 	XMLNodeList kids = xml_node->children();
 	XMLNodeConstIterator iter;
 
+	const string sym = ARDOUR::EventTypeMap::instance().to_symbol(param);
+
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
 			XMLProperty* type = (*iter)->property("automation-id");
-			if (type && type->value() == param.symbol())
+			if (type && type->value() == sym)
 				return *iter;
 		}
 	}
 
 	// Didn't find it, make a new one
 	XMLNode* child = new XMLNode (AutomationTimeAxisView::state_node_name);
-	child->add_property("automation-id", param.symbol());
+	child->add_property("automation-id", sym);
 	xml_node->add_child_nocopy (*child);
 
 	return child;

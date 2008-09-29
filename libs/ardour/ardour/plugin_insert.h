@@ -74,14 +74,14 @@ class PluginInsert : public Processor
 
 	bool is_generator() const;
 
-	void  set_parameter (Parameter param, float val);
-	float get_parameter (Parameter param);
+	void  set_parameter (Evoral::Parameter param, float val);
+	float get_parameter (Evoral::Parameter param);
 
 	float default_parameter_value (const Evoral::Parameter& param);
 	
 	struct PluginControl : public AutomationControl 
 	{
- 	    PluginControl (PluginInsert* p, const Parameter &param,
+ 	    PluginControl (PluginInsert* p, const Evoral::Parameter &param,
  		    boost::shared_ptr<AutomationList> list = boost::shared_ptr<AutomationList>());
 	    
 		void set_value (float val);
@@ -103,13 +103,13 @@ class PluginInsert : public Processor
 
 	PluginType type ();
 
-	string describe_parameter (Parameter param);
+	string describe_parameter (Evoral::Parameter param);
 
 	nframes_t signal_latency() const;
 
   private:
 
-	void parameter_changed (Parameter, float);
+	void parameter_changed (Evoral::Parameter, float);
 	
 	std::vector<boost::shared_ptr<Plugin> > _plugins;
 	
@@ -118,7 +118,7 @@ class PluginInsert : public Processor
 
 	void init ();
 	void set_automatable ();
-	void auto_state_changed (Parameter which);
+	void auto_state_changed (Evoral::Parameter which);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 

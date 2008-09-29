@@ -471,7 +471,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 }
 
 string
-LadspaPlugin::describe_parameter (Parameter which)
+LadspaPlugin::describe_parameter (Evoral::Parameter which)
 {
 	if (which.type() == PluginAutomation && which.id() < parameter_count()) {
 		return port_names()[which.id()];
@@ -494,16 +494,16 @@ LadspaPlugin::signal_latency () const
 	}
 }
 
-set<Parameter>
+set<Evoral::Parameter>
 LadspaPlugin::automatable () const
 {
-	set<Parameter> ret;
+	set<Evoral::Parameter> ret;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
 		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
 			
-			ret.insert (ret.end(), Parameter(PluginAutomation, i));
+			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, i));
 		}
 	}
 

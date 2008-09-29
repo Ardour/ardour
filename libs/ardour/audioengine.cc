@@ -86,20 +86,22 @@ AudioEngine::AudioEngine (string client_name)
 
 	Port::set_engine (this);
 	
-	Parameter::init_metadata(NullAutomation);
-	Parameter::init_metadata(GainAutomation);
-	Parameter::init_metadata(PanAutomation);
-	Parameter::init_metadata(PluginAutomation);
-	Parameter::init_metadata(SoloAutomation);
-	Parameter::init_metadata(MuteAutomation);
-	Parameter::init_metadata(MidiCCAutomation);
-	Parameter::init_metadata(MidiPgmChangeAutomation);
-	Parameter::init_metadata(MidiPitchBenderAutomation);
-	Parameter::init_metadata(MidiChannelPressureAutomation);
-	Parameter::init_metadata(FadeInAutomation);
-	Parameter::init_metadata(FadeOutAutomation);
-	Parameter::init_metadata(EnvelopeAutomation);
-	Parameter::init_metadata(MidiCCAutomation);
+	// Initialize parameter metadata (e.g. ranges)
+	Evoral::Parameter p(NullAutomation);
+	p = EventTypeMap::instance().new_parameter(NullAutomation);
+	p = EventTypeMap::instance().new_parameter(GainAutomation);
+	p = EventTypeMap::instance().new_parameter(PanAutomation);
+	p = EventTypeMap::instance().new_parameter(PluginAutomation);
+	p = EventTypeMap::instance().new_parameter(SoloAutomation);
+	p = EventTypeMap::instance().new_parameter(MuteAutomation);
+	p = EventTypeMap::instance().new_parameter(MidiCCAutomation);
+	p = EventTypeMap::instance().new_parameter(MidiPgmChangeAutomation);
+	p = EventTypeMap::instance().new_parameter(MidiPitchBenderAutomation);
+	p = EventTypeMap::instance().new_parameter(MidiChannelPressureAutomation);
+	p = EventTypeMap::instance().new_parameter(FadeInAutomation);
+	p = EventTypeMap::instance().new_parameter(FadeOutAutomation);
+	p = EventTypeMap::instance().new_parameter(EnvelopeAutomation);
+	p = EventTypeMap::instance().new_parameter(MidiCCAutomation);
 }
 
 AudioEngine::~AudioEngine ()

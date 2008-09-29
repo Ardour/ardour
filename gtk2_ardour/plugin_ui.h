@@ -152,7 +152,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 		boost::shared_ptr<ARDOUR::AutomationControl> control;
 
-		ARDOUR::Parameter parameter() { return control->parameter(); }
+		Evoral::Parameter parameter() { return control->parameter(); }
 	    
 	    /* input */
 	    

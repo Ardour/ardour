@@ -265,7 +265,7 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	return changed;
 }
 
-set<Parameter>
+set<Evoral::Parameter>
 MidiPlaylist::contained_automation()
 {
 	/* this function is never called from a realtime thread, so
@@ -274,7 +274,7 @@ MidiPlaylist::contained_automation()
 
 	Glib::Mutex::Lock rm (region_lock);
 
-	set<Parameter> ret;
+	set<Evoral::Parameter> ret;
 
 	for (RegionList::const_iterator r = regions.begin(); r != regions.end(); ++r) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*r);

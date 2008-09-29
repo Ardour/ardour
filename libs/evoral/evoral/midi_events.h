@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef RAUL_MIDI_EVENTS_H
-#define RAUL_MIDI_EVENTS_H
+#ifndef EVORAL_MIDI_EVENTS_H
+#define EVORAL_MIDI_EVENTS_H
 
 
 /**
@@ -130,4 +130,4 @@
 
 /** \} */
 
-#endif /* RAUL_MIDI_EVENTS_H */
+#endif /* EVORAL_MIDI_EVENTS_H */

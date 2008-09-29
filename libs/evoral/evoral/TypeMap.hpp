@@ -47,7 +47,12 @@ public:
 	virtual uint32_t midi_event_type(uint8_t status) const = 0;
 	
 	/** Return true iff parameter should be locked to integer boundaries */
-	bool is_integer(const Evoral::Parameter& param) const;
+	virtual bool is_integer(const Evoral::Parameter& param) const = 0;
+
+	/** Create a parameter with the given type ID */
+	virtual Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const = 0;
+
+	virtual std::string to_symbol(const Parameter& param) const = 0;
 };
 
 } // namespace Evoral

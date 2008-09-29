@@ -82,7 +82,7 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable *>&);
 	void get_inverted_selectables (Selection&, list<Selectable*>&);
-	bool show_automation(ARDOUR::Parameter param);
+	bool show_automation(Evoral::Parameter param);
 	void set_layer_display (LayerDisplay d);
 		
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
@@ -109,24 +109,24 @@ public:
 	
 	/* This is a bit nasty to expose :/ */
 	struct RouteAutomationNode {
-		ARDOUR::Parameter                         param;
+		Evoral::Parameter                         param;
 	    Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> track;
 	    
-		RouteAutomationNode (ARDOUR::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
+		RouteAutomationNode (Evoral::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
 		    : param (par), menu_item (mi), track (tr) {}
 	};
 
-	virtual void create_automation_child (const ARDOUR::Parameter& param, bool show) = 0;
+	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
 	
 	/* make sure we get the right version of this */
 
-	XMLNode* get_automation_child_xml_node (ARDOUR::Parameter param) { return RouteUI::get_automation_child_xml_node (param); }
+	XMLNode* get_automation_child_xml_node (Evoral::Parameter param) { return RouteUI::get_automation_child_xml_node (param); }
 	
-	typedef map<ARDOUR::Parameter, RouteAutomationNode*> AutomationTracks;
+	typedef map<Evoral::Parameter, RouteAutomationNode*> AutomationTracks;
 	AutomationTracks automation_tracks() { return _automation_tracks; }
 
-	boost::shared_ptr<AutomationTimeAxisView> automation_child(ARDOUR::Parameter param);
+	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
 	
 	string              name() const;
 	StreamView*         view() const { return _view; }
@@ -148,12 +148,12 @@ protected:
 	friend class StreamView;
 
 	struct ProcessorAutomationNode {
-		ARDOUR::Parameter                         what;
+		Evoral::Parameter                         what;
 	    Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> view;
 	    RouteTimeAxisView&                        parent;
 
-	    ProcessorAutomationNode (ARDOUR::Parameter w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
+	    ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
 		    : what (w), menu_item (mitem), parent (p) {}
 
 	    ~ProcessorAutomationNode ();
@@ -188,21 +188,21 @@ protected:
 	void processor_automation_track_hidden (ProcessorAutomationNode*,
 	                                       boost::shared_ptr<ARDOUR::Processor>);
 	
-	void automation_track_hidden (ARDOUR::Parameter param);
+	void automation_track_hidden (Evoral::Parameter param);
 
-	RouteAutomationNode* automation_track(ARDOUR::Parameter param);
+	RouteAutomationNode* automation_track(Evoral::Parameter param);
 	RouteAutomationNode* automation_track(ARDOUR::AutomationType type);
 
 	ProcessorAutomationNode*
-	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::Parameter);
+	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 	
 	boost::shared_ptr<AutomationLine>
-	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, ARDOUR::Parameter);
+	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
-	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, ARDOUR::Parameter);
+	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, Evoral::Parameter);
 	void add_existing_processor_automation_curves (boost::shared_ptr<ARDOUR::Processor>);
 
-	void add_automation_child(ARDOUR::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show=true);
+	void add_automation_child(Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show=true);
 	
 	void reset_processor_automation_curves ();
 
@@ -237,7 +237,7 @@ protected:
 	void rename_current_playlist ();
 	
 	void         automation_click ();
-	void         toggle_automation_track (ARDOUR::Parameter param);
+	void         toggle_automation_track (Evoral::Parameter param);
 	virtual void show_all_automation ();
 	virtual void show_existing_automation ();
 	virtual void hide_all_automation ();
@@ -297,7 +297,7 @@ protected:
 	ProcessorAutomationCurves processor_automation_curves;
 	
 	// Set from XML so context menu automation buttons can be correctly initialized
-	set<ARDOUR::Parameter> _show_automation;
+	set<Evoral::Parameter> _show_automation;
 
 	AutomationTracks _automation_tracks;
 

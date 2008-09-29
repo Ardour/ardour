@@ -46,7 +46,7 @@ class AudioBuffer;
 class StreamPanner : public sigc::trackable, public PBD::Stateful
 {
   public:
-	StreamPanner (Panner& p, Parameter param);
+	StreamPanner (Panner& p, Evoral::Parameter param);
 	~StreamPanner ();
 
 	void set_muted (bool yn);
@@ -103,7 +103,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	bool _muted;
 
 	struct PanControllable : public AutomationControl {
-	    PanControllable (Session& s, std::string name, StreamPanner& p, Parameter param)
+	    PanControllable (Session& s, std::string name, StreamPanner& p, Evoral::Parameter param)
 			: AutomationControl (s, param,
 					boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
 			, panner (p)
@@ -125,7 +125,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 class BaseStereoPanner : public StreamPanner
 {
   public:
-	BaseStereoPanner (Panner&, Parameter param);
+	BaseStereoPanner (Panner&, Evoral::Parameter param);
 	~BaseStereoPanner ();
 
 	/* this class just leaves the pan law itself to be defined
@@ -152,7 +152,7 @@ class BaseStereoPanner : public StreamPanner
 class EqualPowerStereoPanner : public BaseStereoPanner
 {
   public:
-	EqualPowerStereoPanner (Panner&, Parameter param);
+	EqualPowerStereoPanner (Panner&, Evoral::Parameter param);
 	~EqualPowerStereoPanner ();
 
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs, 
@@ -161,7 +161,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
 
-	static StreamPanner* factory (Panner&, Parameter param);
+	static StreamPanner* factory (Panner&, Evoral::Parameter param);
 	static string name;
 
 	XMLNode& state (bool full_state); 
@@ -175,14 +175,14 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 class Multi2dPanner : public StreamPanner
 {
   public:
-	Multi2dPanner (Panner& parent, Parameter);
+	Multi2dPanner (Panner& parent, Evoral::Parameter);
 	~Multi2dPanner ();
 
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
 				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
-	static StreamPanner* factory (Panner&, Parameter);
+	static StreamPanner* factory (Panner&, Evoral::Parameter);
 	static string name;
 
 	XMLNode& state (bool full_state); 

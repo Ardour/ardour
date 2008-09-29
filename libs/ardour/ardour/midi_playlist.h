@@ -25,7 +25,7 @@
 
 #include <ardour/ardour.h>
 #include <ardour/playlist.h>
-#include <ardour/parameter.h>
+#include <evoral/Parameter.hpp>
 
 namespace ARDOUR
 {
@@ -57,7 +57,7 @@ public:
 	
 	void set_note_mode (NoteMode m) { _note_mode = m; }
 
-	std::set<Parameter> contained_automation();
+	std::set<Evoral::Parameter> contained_automation();
 
 protected:
 

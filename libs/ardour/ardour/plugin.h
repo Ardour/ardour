@@ -32,7 +32,6 @@
 #include <ardour/chan_count.h>
 #include <ardour/cycles.h>
 #include <ardour/latent.h>
-#include <ardour/parameter.h>
 #include <ardour/plugin_insert.h>
 
 #include <vector>
@@ -129,8 +128,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual int connect_and_run (BufferSet& bufs, uint32_t& in, uint32_t& out, nframes_t nframes, nframes_t offset) = 0;
 	
-	virtual std::set<Parameter> automatable() const = 0;
-	virtual string describe_parameter (Parameter) = 0;
+	virtual std::set<Evoral::Parameter> automatable() const = 0;
+	virtual string describe_parameter (Evoral::Parameter) = 0;
 	virtual string state_node_name() const = 0;
 	virtual void print_parameter (uint32_t, char*, uint32_t len) const = 0;
 

@@ -248,7 +248,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 
 	void clear_automation ();
 	
-	void set_parameter_automation_state (Parameter, AutoState);
+	void set_parameter_automation_state (Evoral::Parameter, AutoState);
 
 	virtual void transport_stopped (nframes_t now);
 	virtual void automation_snapshot (nframes_t now, bool force);

@@ -103,7 +103,7 @@ Send::set_state(const XMLNode& node)
 		if ((*niter)->name() == "IOProcessor") {
 			insert_node = *niter;
 		} else if ((*niter)->name() == X_("Automation")) {
-			_io->set_automation_state (*(*niter), Parameter(GainAutomation));
+			_io->set_automation_state (*(*niter), Evoral::Parameter(GainAutomation));
 		}
 	}
 	

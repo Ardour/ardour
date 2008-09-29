@@ -26,7 +26,6 @@
 #include <ardour/session_object.h>
 #include <ardour/automation_list.h>
 #include <ardour/automation_control.h>
-#include <ardour/parameter.h>
 #include <ardour/event_type_map.h>
 #include <evoral/ControlSet.hpp>
 #include <evoral/Sequence.hpp>
@@ -56,20 +55,20 @@ public:
 	virtual void automation_snapshot(nframes_t now, bool force);
 	virtual void transport_stopped(nframes_t now);
 
-	virtual string describe_parameter(Parameter param);
+	virtual string describe_parameter(Evoral::Parameter param);
 	
-	AutoState get_parameter_automation_state (Parameter param, bool lock = true);
-	virtual void set_parameter_automation_state (Parameter param, AutoState);
+	AutoState get_parameter_automation_state (Evoral::Parameter param, bool lock = true);
+	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
 	
-	AutoStyle get_parameter_automation_style (Parameter param);
-	void set_parameter_automation_style (Parameter param, AutoStyle);
+	AutoStyle get_parameter_automation_style (Evoral::Parameter param);
+	void set_parameter_automation_style (Evoral::Parameter param, AutoStyle);
 
 	void protect_automation ();
 
-	void what_has_visible_data(std::set<Parameter>&) const;
-	const std::set<Parameter>& what_can_be_automated() const { return _can_automate_list; }
+	void what_has_visible_data(std::set<Evoral::Parameter>&) const;
+	const std::set<Evoral::Parameter>& what_can_be_automated() const { return _can_automate_list; }
 
-	void mark_automation_visible(Parameter, bool);
+	void mark_automation_visible(Evoral::Parameter, bool);
 	
 	inline bool should_snapshot (nframes_t now) {
 		return (_last_automation_snapshot > now
@@ -92,18 +91,18 @@ public:
 protected:
 	Session& _a_session;
 
-	void can_automate(Parameter);
+	void can_automate(Evoral::Parameter);
 
-	virtual void auto_state_changed (Parameter which) {}
+	virtual void auto_state_changed (Evoral::Parameter which) {}
 
-	int set_automation_state(const XMLNode&, Parameter default_param);
+	int set_automation_state(const XMLNode&, Evoral::Parameter default_param);
 	XMLNode& get_automation_state();
 	
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);
 
-	std::set<Parameter> _visible_controls;
-	std::set<Parameter> _can_automate_list;
+	std::set<Evoral::Parameter> _visible_controls;
+	std::set<Evoral::Parameter> _can_automate_list;
 	
 	nframes_t        _last_automation_snapshot;
 	static nframes_t _automation_interval;

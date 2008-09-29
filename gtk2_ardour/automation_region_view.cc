@@ -26,7 +26,7 @@
 AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                      parent,
                                            AutomationTimeAxisView&                   time_axis,
                                            boost::shared_ptr<ARDOUR::Region>         region,
-                                           const ARDOUR::Parameter&                  param,
+                                           const Evoral::Parameter&                  param,
                                            boost::shared_ptr<ARDOUR::AutomationList> list,
                                            double                                    spu,
                                            Gdk::Color&                               basic_color)
@@ -65,7 +65,8 @@ void
 AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> list)
 {
 	_line = boost::shared_ptr<AutomationLine>(new AutomationLine(
-				list->parameter().symbol(), trackview, *get_canvas_group(), list));
+				ARDOUR::EventTypeMap::instance().to_symbol(list->parameter()),
+				trackview, *get_canvas_group(), list));
 	_line->set_colors();
 	_line->show();
 	_line->show_all_control_points();

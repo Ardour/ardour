@@ -68,7 +68,7 @@ AutomationController::create(
 {
 	Gtk::Adjustment* adjustment = manage(new Gtk::Adjustment(param.normal(), param.min(), param.max()));
 	if (!ac) {
-		PBD::warning << "Creating AutomationController for " << param.symbol() << endmsg;
+		PBD::warning << "Creating AutomationController for " << EventTypeMap::instance().to_symbol(param) << endmsg;
 		ac = boost::dynamic_pointer_cast<AutomationControl>(parent->control_factory(param));
 	} else {
 		assert(ac->parameter() == param);
