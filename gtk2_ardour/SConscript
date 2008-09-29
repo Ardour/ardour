@@ -172,10 +172,12 @@ editor_timefx.cc
 engine_dialog.cc
 enums.cc
 export_channel_selector.cc
+export_dialog.cc
 export_filename_selector.cc
+export_file_notebook.cc
 export_format_dialog.cc
 export_format_selector.cc
-export_main_dialog.cc
+export_preset_selector.cc
 export_timespan_selector.cc
 gain_meter.cc
 generic_pluginui.cc

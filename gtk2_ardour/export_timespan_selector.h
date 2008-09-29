@@ -41,9 +41,18 @@ namespace ARDOUR {
 
 using ARDOUR::CDMarkerFormat;
 
-/// 
+/// Timespan Selector base
 class ExportTimespanSelector : public Gtk::VBox {
-  private:
+  public:
+
+	ExportTimespanSelector ();
+	virtual ~ExportTimespanSelector ();
+
+	void set_state (ARDOUR::ExportProfileManager::TimespanStatePtr const state_, ARDOUR::Session * session_);
+	
+	sigc::signal<void> CriticalSelectionChanged;
+
+  protected:
 
 	typedef std::list<ARDOUR::Location *> LocationList;
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
@@ -52,40 +61,22 @@ class ExportTimespanSelector : public Gtk::VBox {
 	typedef std::list<TimespanPtr> TimespanList;
 	typedef boost::shared_ptr<TimespanList> TimespanListPtr;
 
-  public:
+	ARDOUR::Session *                              session;
+	ARDOUR::ExportProfileManager::TimespanStatePtr state;
 
-	ExportTimespanSelector ();
-	~ExportTimespanSelector ();
-
-	void set_state (ARDOUR::ExportProfileManager::TimespanStatePtr const state_, ARDOUR::Session * session_);
+	virtual void fill_range_list () = 0;
 	
-	void select_one_range (Glib::ustring id);
-	
-	/* Compatibility with other elements */
-	
-	sigc::signal<void> CriticalSelectionChanged;
-
-  private:
-
-	void fill_range_list ();
-	void set_selection_from_state ();
-
-	void update_selection ();
-	void update_timespans ();
+	void add_range_to_selection (ARDOUR::Location const * loc);
+	void set_time_format_from_state ();
 	
 	void change_time_format ();
 	
-	Glib::ustring construct_label (ARDOUR::Location const * location);
-	
-	Glib::ustring bbt_str (nframes_t frames);
-	Glib::ustring smpte_str (nframes_t frames);
-	Glib::ustring ms_str (nframes_t frames);
+	Glib::ustring construct_label (ARDOUR::Location const * location) const;
+	Glib::ustring bbt_str (nframes_t frames) const;
+	Glib::ustring smpte_str (nframes_t frames) const;
+	Glib::ustring ms_str (nframes_t frames) const;
 
 	void update_range_name (Glib::ustring const & path, Glib::ustring const & new_text);
-
-	ARDOUR::Session * session;
-	
-	ARDOUR::ExportProfileManager::TimespanStatePtr state;
 
 	/*** GUI components ***/
 	
@@ -126,6 +117,34 @@ class ExportTimespanSelector : public Gtk::VBox {
 	Gtk::TreeView                range_view;
 	
 	Gtk::ScrolledWindow          range_scroller;
+};
+
+/// Allows seleting multiple timespans
+class ExportTimespanSelectorMultiple : public ExportTimespanSelector
+{
+  public:
+	ExportTimespanSelectorMultiple ();
+
+  private:
+
+	virtual void fill_range_list ();
+
+	void set_selection_from_state ();
+	void update_selection ();
+	void update_timespans ();
+};
+
+/// Displays one timespan
+class ExportTimespanSelectorSingle : public ExportTimespanSelector
+{
+  public:
+	ExportTimespanSelectorSingle (Glib::ustring range_id);
+
+  private:
+
+	virtual void fill_range_list ();
+	
+	Glib::ustring range_id;
 
 };
 

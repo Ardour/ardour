@@ -47,7 +47,6 @@ ExportTimespanSelector::ExportTimespanSelector () :
 	option_hbox.pack_start (time_format_combo, false, false, 6);
 	
 	range_scroller.add (range_view);
-	range_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	
 	pack_start (option_hbox, false, false, 0);
 	pack_start (range_scroller, true, true, 6);
@@ -87,27 +86,42 @@ ExportTimespanSelector::ExportTimespanSelector () :
 	range_list = Gtk::ListStore::create (range_cols);
 	range_view.set_model (range_list);
 	range_view.set_headers_visible (false);
-	
-	range_view.append_column_editable ("", range_cols.selected);
-	range_view.append_column_editable ("", range_cols.name);
-	
-	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
-	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("", *label_render));
-	label_col->add_attribute (label_render->property_markup(), range_cols.label);
-	range_view.append_column (*label_col);
-
-	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
-		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelector::update_selection)));
-	}
-	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (1))) {
-		renderer->signal_edited().connect (sigc::mem_fun (*this, &ExportTimespanSelector::update_range_name));
-	}
-	
 }
 
 ExportTimespanSelector::~ExportTimespanSelector ()
 {
 
+}
+
+void
+ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc)
+{
+	TimespanPtr span = session->get_export_handler()->add_timespan();
+	
+	Glib::ustring id;
+	if (loc == state->session_range.get()) {
+		id = "session";
+	} else if (loc == state->selection_range.get()) {
+		id = "selection";
+	} else {
+		id = loc->id().to_s();
+	}
+	
+	span->set_range (loc->start(), loc->end());
+	span->set_name (loc->name());
+	span->set_range_id (id);
+	state->timespans->push_back (span);
+}
+
+void
+ExportTimespanSelector::set_time_format_from_state ()
+{
+	Gtk::TreeModel::Children::iterator tree_it;
+	for (tree_it = time_format_list->children().begin(); tree_it != time_format_list->children().end(); ++tree_it) {
+		if (tree_it->get_value (time_format_cols.format) == state->time_format) {
+			time_format_combo.set_active (tree_it);
+		}
+	}
 }
 
 void
@@ -117,125 +131,8 @@ ExportTimespanSelector::set_state (ARDOUR::ExportProfileManager::TimespanStatePt
 	session = session_;
 
 	fill_range_list ();
-	set_selection_from_state ();
 	
 	CriticalSelectionChanged();
-}
-
-void
-ExportTimespanSelector::select_one_range (Glib::ustring id)
-{
-	if (!state) { return; }
-	
-	range_view.remove_column (*range_view.get_column (0));
-	
-	Glib::ustring real_id;
-	
-	if (!id.compare (X_("session"))) {
-		real_id = state->session_range->id().to_s();
-	} else if (!id.compare (X_("selection"))) {
-		real_id = state->selection_range->id().to_s();
-	} else {
-		real_id = id;
-	}
-	
-	for (Gtk::ListStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end();) {
-		if (!it->get_value (range_cols.location)->id().to_s().compare (real_id)) {
-			it->set_value (range_cols.selected, true);
-			++it;
-		} else {
-			Gtk::ListStore::Children::iterator temp = it++;
-			range_list->erase (temp);
-		}
-	}
-	
-	int x_offset, y_offset, width, height;
-	Gtk::CellRenderer * renderer = *range_view.get_column(0)->get_cell_renderers().begin();
-	renderer->get_size (range_view, x_offset, y_offset, width, height);
-	range_scroller.set_size_request (-1, height);
-	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-	
-	update_selection();
-}
-
-void
-ExportTimespanSelector::fill_range_list ()
-{
-	range_list->clear();
-
-	Gtk::TreeModel::iterator iter;
-	Gtk::TreeModel::Row row;
-	for (LocationList::const_iterator it = state->ranges->begin(); it != state->ranges->end(); ++it) {
-		iter = range_list->append();
-		row = *iter;
-		
-		row[range_cols.location] = *it;
-		row[range_cols.selected] = false;
-		row[range_cols.name] = (*it)->name();
-		row[range_cols.label] = construct_label (*it);
-	}
-}
-
-void
-ExportTimespanSelector::set_selection_from_state ()
-{
-	Gtk::TreeModel::Children::iterator tree_it;
-	
-	for (TimespanList::iterator it = state->timespans->begin(); it != state->timespans->end(); ++it) {
-		ustring id = (*it)->range_id();
-		for (tree_it = range_list->children().begin(); tree_it != range_list->children().end(); ++tree_it) {
-			Location * loc = tree_it->get_value (range_cols.location);
-			
-			if ((!id.compare ("session") && loc == state->session_range.get()) ||
-			    (!id.compare ("selection") && loc == state->selection_range.get()) ||
-			    (!id.compare (loc->id().to_s()))) {
-				tree_it->set_value (range_cols.selected, true);
-			}
-		}
-	}
-	
-	for (tree_it = time_format_list->children().begin(); tree_it != time_format_list->children().end(); ++tree_it) {
-		if (tree_it->get_value (time_format_cols.format) == state->time_format) {
-			time_format_combo.set_active (tree_it);
-		}
-	}
-}
-
-void
-ExportTimespanSelector::update_selection ()
-{
-	update_timespans ();
-	CriticalSelectionChanged ();
-}
-
-void
-ExportTimespanSelector::update_timespans ()
-{
-	state->timespans->clear();
-	
-	TimespanPtr span;
-	HandlerPtr handler = session->get_export_handler();
-	
-	for (Gtk::TreeStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
-		if (it->get_value (range_cols.selected)) {
-			span = handler->add_timespan();
-			Location * loc = it->get_value (range_cols.location);
-			
-			Glib::ustring id;
-			if (loc == state->session_range.get()) {
-				id = "session";
-			} else if (loc == state->selection_range.get()) {
-				id = "selection";
-			} else {
-				id = loc->id().to_s();
-			}
-			
-			span->set_range (loc->start(), loc->end());
-			span->set_name (loc->name());
-			span->set_range_id (id);
-			state->timespans->push_back (span);
-		}
-	}
 }
 
 void
@@ -250,7 +147,7 @@ ExportTimespanSelector::change_time_format ()
 }
 
 Glib::ustring
-ExportTimespanSelector::construct_label (ARDOUR::Location const * location)
+ExportTimespanSelector::construct_label (ARDOUR::Location const * location) const
 {
 	Glib::ustring label;
 	Glib::ustring start;
@@ -301,7 +198,7 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location)
 
 
 Glib::ustring
-ExportTimespanSelector::bbt_str (nframes_t frames)
+ExportTimespanSelector::bbt_str (nframes_t frames) const
 {
 	if (!session) {
 		return "Error!";
@@ -324,7 +221,7 @@ ExportTimespanSelector::bbt_str (nframes_t frames)
 }
 
 Glib::ustring
-ExportTimespanSelector::smpte_str (nframes_t frames)
+ExportTimespanSelector::smpte_str (nframes_t frames) const
 {
 	if (!session) {
 		return "Error!";
@@ -349,7 +246,7 @@ ExportTimespanSelector::smpte_str (nframes_t frames)
 }
 
 Glib::ustring
-ExportTimespanSelector::ms_str (nframes_t frames)
+ExportTimespanSelector::ms_str (nframes_t frames) const
 {
 	if (!session) {
 		return "Error!";
@@ -392,3 +289,155 @@ ExportTimespanSelector::update_range_name (Glib::ustring const & path, Glib::ust
 	
 	CriticalSelectionChanged();
 }
+
+/*** ExportTimespanSelectorSingle ***/
+
+ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (Glib::ustring range_id) :
+  ExportTimespanSelector (),
+  range_id (range_id)
+{
+	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+	range_view.append_column_editable ("", range_cols.name);
+	
+	// Adjust selector height
+	int x_offset, y_offset, width, height;
+	Gtk::CellRenderer * renderer = *range_view.get_column(0)->get_cell_renderers().begin();
+	renderer->get_size (range_view, x_offset, y_offset, width, height);
+	range_scroller.set_size_request (-1, height);
+	
+	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (0))) {
+		renderer->signal_edited().connect (sigc::mem_fun (*this, &ExportTimespanSelectorSingle::update_range_name));
+	}
+	
+	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
+	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("", *label_render));
+	label_col->add_attribute (label_render->property_markup(), range_cols.label);
+	range_view.append_column (*label_col);
+
+}
+
+void
+ExportTimespanSelectorSingle::fill_range_list ()
+{
+	if (!state) { return; }
+	
+	Glib::ustring id;
+	if (!range_id.compare (X_("session"))) {
+		id = state->session_range->id().to_s();
+	} else if (!range_id.compare (X_("selection"))) {
+		id = state->selection_range->id().to_s();
+	} else {
+		id = range_id;
+	}
+
+	range_list->clear();
+	state->timespans->clear();
+
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Row row;
+	for (LocationList::const_iterator it = state->ranges->begin(); it != state->ranges->end(); ++it) {
+	
+		if (!(*it)->id().to_s().compare (id)) {
+			iter = range_list->append();
+			row = *iter;
+			
+			row[range_cols.location] = *it;
+			row[range_cols.selected] = true;
+			row[range_cols.name] = (*it)->name();
+			row[range_cols.label] = construct_label (*it);
+			
+			add_range_to_selection (*it);
+			
+			break;
+		}
+	}
+	
+	set_time_format_from_state();
+}
+
+/*** ExportTimespanSelectorMultiple ***/
+
+ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple () :
+  ExportTimespanSelector ()
+{
+	range_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	range_view.append_column_editable ("", range_cols.selected);
+	range_view.append_column_editable ("", range_cols.name);
+	
+	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
+		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorMultiple::update_selection)));
+	}
+	if (Gtk::CellRendererText * renderer = dynamic_cast<Gtk::CellRendererText *> (range_view.get_column_cell_renderer (1))) {
+		renderer->signal_edited().connect (sigc::mem_fun (*this, &ExportTimespanSelectorMultiple::update_range_name));
+	}
+	
+	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
+	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("", *label_render));
+	label_col->add_attribute (label_render->property_markup(), range_cols.label);
+	range_view.append_column (*label_col);
+
+}
+
+void
+ExportTimespanSelectorMultiple::fill_range_list ()
+{
+	if (!state) { return; }
+
+	range_list->clear();
+
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Row row;
+	for (LocationList::const_iterator it = state->ranges->begin(); it != state->ranges->end(); ++it) {
+	
+		iter = range_list->append();
+		row = *iter;
+		
+		row[range_cols.location] = *it;
+		row[range_cols.selected] = false;
+		row[range_cols.name] = (*it)->name();
+		row[range_cols.label] = construct_label (*it);
+	}
+	
+	set_selection_from_state ();
+}
+
+void
+ExportTimespanSelectorMultiple::set_selection_from_state ()
+{
+	Gtk::TreeModel::Children::iterator tree_it;
+	
+	for (TimespanList::iterator it = state->timespans->begin(); it != state->timespans->end(); ++it) {
+		ustring id = (*it)->range_id();
+		for (tree_it = range_list->children().begin(); tree_it != range_list->children().end(); ++tree_it) {
+			Location * loc = tree_it->get_value (range_cols.location);
+			
+			if ((!id.compare ("session") && loc == state->session_range.get()) ||
+			    (!id.compare ("selection") && loc == state->selection_range.get()) ||
+			    (!id.compare (loc->id().to_s()))) {
+				tree_it->set_value (range_cols.selected, true);
+			}
+		}
+	}
+	
+	set_time_format_from_state();
+}
+
+void
+ExportTimespanSelectorMultiple::update_selection ()
+{
+	update_timespans ();
+	CriticalSelectionChanged ();
+}
+
+void
+ExportTimespanSelectorMultiple::update_timespans ()
+{
+	state->timespans->clear();
+	
+	for (Gtk::TreeStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
+		if (it->get_value (range_cols.selected)) {
+			add_range_to_selection (it->get_value (range_cols.location));
+		}
+	}
+}
+

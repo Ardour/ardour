@@ -90,7 +90,7 @@ class Location : public PBD::StatefulDestructible
 
 	int move_to (nframes_t pos);
 
-	const string& name() { return _name; }
+	const string& name() const { return _name; }
 	void set_name (const string &str) { _name = str; name_changed(this); }
 
 	void set_auto_punch (bool yn, void *src);

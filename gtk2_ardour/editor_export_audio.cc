@@ -24,7 +24,7 @@
 
 #include <gtkmm/messagedialog.h>
 
-#include "export_main_dialog.h"
+#include "export_dialog.h"
 #include "editor.h"
 #include "public_editor.h"
 #include "selection.h"
@@ -54,7 +54,7 @@ using namespace Gtk;
 void
 Editor::export_audio ()
 {
-	ExportMainDialog dialog (*this);
+	ExportDialog dialog (*this);
 	dialog.set_session (session);
 	dialog.run();
 }
@@ -62,9 +62,8 @@ Editor::export_audio ()
 void
 Editor::export_selection ()
 {
-	ExportMainDialog dialog (*this);
+	ExportSelectionDialog dialog (*this);
 	dialog.set_session (session);
-	dialog.select_timespan (X_("selection"));
 	dialog.run();
 }
 
@@ -82,9 +81,8 @@ Editor::export_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-		ExportMainDialog dialog (*this);
+		ExportRangeDialog dialog (*this, l->id().to_s());
 		dialog.set_session (session);
-		dialog.select_timespan (l->id().to_s());
 		dialog.run();
 	}
 }
