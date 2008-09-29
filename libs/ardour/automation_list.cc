@@ -388,7 +388,7 @@ AutomationList::set_state (const XMLNode& node)
 	}
 	
 	if ((prop = node.property (X_("automation-id"))) != 0){ 
-		_parameter = Parameter(prop->value());
+		_parameter = Evoral::Parameter(prop->value());
 	} else {
 		warning << "Legacy session: automation list has no automation-id property.";
 	}

@@ -80,7 +80,7 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	// set_automatable ();
+	set_automatable ();
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -229,7 +229,7 @@ PluginInsert::set_automatable ()
 			Parameter param(*i);
 			param.set_range(desc.lower, desc.upper, _plugins.front()->default_value(i->id()));
 			boost::shared_ptr<AutomationList> list(new AutomationList(param));
-			add_control(boost::shared_ptr<AutomationControl>(new PluginControl(*this, list)));
+			add_control(boost::shared_ptr<AutomationControl>(new PluginControl(this, *i, list)));
 		}
 	}
 }
@@ -852,13 +852,12 @@ PluginInsert::type ()
 	}
 }
 
-PluginInsert::PluginControl::PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list)
-	: AutomationControl (p.session(), list->parameter(), list, p.describe_parameter(list->parameter()))
+PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Parameter &param, boost::shared_ptr<AutomationList> list)
+	: AutomationControl (p->session(), param, list, p->describe_parameter(param))
 	, _plugin (p)
-	, _list (list)
 {
 	Plugin::ParameterDescriptor desc;
-	p.plugin(0)->get_parameter_descriptor (list->parameter().id(), desc);
+	p->plugin(0)->get_parameter_descriptor (param.id(), desc);
 	_logarithmic = desc.logarithmic;
 	_toggled = desc.toggled;
 }
@@ -892,8 +891,8 @@ PluginInsert::PluginControl::set_value (float val)
 
 	}
 
-	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugin._plugins.begin();
-			i != _plugin._plugins.end(); ++i) {
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugin->_plugins.begin();
+			i != _plugin->_plugins.end(); ++i) {
 		(*i)->set_parameter (_list->parameter().id(), val);
 	}
 
@@ -905,7 +904,7 @@ PluginInsert::PluginControl::get_value (void) const
 {
 	/* FIXME: probably should be taking out some lock here.. */
 	
-	float val = _plugin.get_parameter (_list->parameter());
+	float val = _plugin->get_parameter (_list->parameter());
 
 	return val;
 

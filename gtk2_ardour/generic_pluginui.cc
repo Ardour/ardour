@@ -218,7 +218,7 @@ GenericPluginUI::build ()
 				continue;
 			}
 				
-			if (cui->control || cui->clickbox || cui->combo) {
+			if (cui->controller || cui->clickbox || cui->combo) {
 
 				box->pack_start (*cui, false, false);
 
@@ -461,9 +461,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		}
 
 		/* create the controller */
-	
-		control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), mcontrol);
 
+		control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), mcontrol);
 		/* XXX this code is not right yet, because it doesn't handle
 		   the absence of bounds in any sensible fashion.
 		*/
@@ -664,7 +663,9 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 		}
 	}
 
-	cui->controller->display_effective_value();
+	if( cui->controller ) {
+	    cui->controller->display_effective_value();
+	}
 
 
 	/*} else {

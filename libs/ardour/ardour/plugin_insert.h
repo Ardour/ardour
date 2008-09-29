@@ -81,14 +81,14 @@ class PluginInsert : public Processor
 	
 	struct PluginControl : public AutomationControl 
 	{
-	    PluginControl (PluginInsert& p, boost::shared_ptr<AutomationList> list);
+ 	    PluginControl (PluginInsert* p, const Parameter &param,
+ 		    boost::shared_ptr<AutomationList> list = boost::shared_ptr<AutomationList>());
 	    
 		void set_value (float val);
 	    float get_value (void) const;
 	
 	  private:
-		PluginInsert& _plugin;
-		boost::shared_ptr<AutomationList> _list;
+ 		PluginInsert* _plugin;
 		bool _logarithmic;
 		bool _toggled;
 	};

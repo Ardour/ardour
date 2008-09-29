@@ -28,6 +28,7 @@
 #include <ardour/session.h>
 #include <ardour/automatable.h>
 #include <ardour/midi_track.h>
+#include <ardour/plugin_insert.h>
 
 #include "i18n.h"
 
@@ -394,6 +395,8 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	Evoral::Control* control = NULL;
 	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelPressureAutomation) {
 		control = new MidiTrack::MidiControl((MidiTrack*)this, param);
+	} else if (param.type() == PluginAutomation) {
+		control = new PluginInsert::PluginControl((PluginInsert*)this, param);
 	} else {
 		control = new AutomationControl(_a_session, param);
 	}

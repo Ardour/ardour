@@ -37,7 +37,7 @@ PeakMeter::run_in_place (BufferSet& bufs, nframes_t start_frame, nframes_t end_f
 {
 	uint32_t n = 0;
 	uint32_t meterable = std::min(bufs.count().n_total(), (uint32_t)_peak_power.size());
-	uint32_t limit = std::min (meterable, bufs.count().n_midi());
+	uint32_t limit = std::min (meterable, (uint32_t)bufs.count().n_midi());
 
 	// Meter what we have (midi)
 	for ( ; n < limit; ++n) {
