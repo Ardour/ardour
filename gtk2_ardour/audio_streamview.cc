@@ -61,15 +61,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	crossfades_visible = true;
 	_waveform_scale = LinearWaveform;
 	_waveform_shape = Traditional;
-	
-	if (tv.is_track())
-		stream_base_color = ARDOUR_UI::config()->canvasvar_AudioTrackBase.get();
-	else
-		stream_base_color = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
-	
-	canvas_rect->property_fill_color_rgba() = stream_base_color;
-	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
-
+	color_handler ();
 	_amplitude_above_axis = 1.0;
 
 	use_rec_regions = tv.editor.show_waveforms_recording ();

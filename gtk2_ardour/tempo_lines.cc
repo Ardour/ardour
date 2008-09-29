@@ -45,10 +45,10 @@ TempoLines::tempo_map_changed()
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++d) {
 		Lines::iterator next = i;
 		++next;
-      	i->second->property_x1() = DBL_MAX - d;
-      	i->second->property_x2() = DBL_MAX - d;
+      	i->second->property_x1() = - d;
+      	i->second->property_x2() = - d;
 		_lines.erase(i);
-		_lines.insert(make_pair(DBL_MAX - d, i->second));
+		_lines.insert(make_pair(- d, i->second));
 		i = next;
 	}
 }

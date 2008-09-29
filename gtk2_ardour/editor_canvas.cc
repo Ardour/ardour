@@ -141,11 +141,18 @@ Editor::initialize_canvas ()
 	transport_loop_range_rect->property_outline_pixels() = 1;
 	transport_loop_range_rect->hide();
 
+	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
+	transport_punch_range_rect->property_outline_pixels() = 0;
+	transport_punch_range_rect->hide();
+
 	/* a group to hold time (measure) lines */
 	time_line_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
 
+	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	range_marker_drag_rect->hide ();
+
 	_trackview_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
-	_region_motion_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
+	_region_motion_group = new ArdourCanvas::Group (*_trackview_group, 0.0, 0.0);
 
 	/* el barrio */
 
@@ -179,10 +186,6 @@ Editor::initialize_canvas ()
  	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
  	cd_marker_bar->property_outline_pixels() = 1;
 
-	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	//range_marker_drag_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
-	range_marker_drag_rect->hide ();
-
 	timebar_group =  new ArdourCanvas::Group (*track_canvas->root());
 	cursor_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
 
@@ -213,11 +216,6 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->property_outline_pixels() = 0;
 	transport_bar_drag_rect->hide ();
 
-	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
-	transport_punch_range_rect->property_outline_pixels() = 0;
-	transport_punch_range_rect->hide();
-	
-//	transport_loop_range_rect->lower_to_bottom (); // loop on the bottom
 
 	transport_punchin_line = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchin_line->property_x1() = 0.0;
@@ -252,9 +250,6 @@ Editor::initialize_canvas ()
 	cd_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
 	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
-	
-	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
-	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
 
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
 
@@ -870,6 +865,8 @@ Editor::scroll_canvas_horizontally ()
 	_master_group->move (-x_delta, 0);
 	timebar_group->move (-x_delta, 0);
 	cursor_group->move (-x_delta, 0);
+	update_fixed_rulers ();
+	redisplay_tempo (true);
 }
 
 void
@@ -879,15 +876,12 @@ Editor::scroll_canvas_vertically ()
 	double x1, x2, y1, y2, y_delta;
 
 	_trackview_group->get_bounds(x1, y1, x2, y2);
-	y_delta = y1 + vertical_adjustment.get_value() - canvas_timebars_vsize;
+	y_delta = y1 + get_trackview_group_vertical_offset ();
 
 	_trackview_group->move (0, -y_delta);
-	_region_motion_group->move (0, -y_delta);
 
-#ifndef GTKOSX
 	/* required to keep the controls_layout in lock step with the canvas group */
 	track_canvas->update_now ();
-#endif
 }
 
 void 
@@ -898,6 +892,7 @@ Editor::canvas_horizontally_scrolled ()
 	if (time_origin != leftmost_frame) {
 		canvas_scroll_to (time_origin);
 	}
+	redisplay_tempo (true);
 }
 
 void
@@ -910,11 +905,6 @@ Editor::canvas_scroll_to (nframes64_t time_origin)
 		last_canvas_frame = rightmost_frame;
 		//reset_scrolling_region ();
 	}
-	
-	update_fixed_rulers ();
-
-	//redisplay_tempo (!_dragging_hscrollbar);
-	redisplay_tempo (true);
 }
 
 void

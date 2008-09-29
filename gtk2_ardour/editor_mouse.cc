@@ -1879,6 +1879,7 @@ Editor::finalize_drag ()
 	drag_info.last_pointer_frame = 0;
 	drag_info.current_pointer_frame = 0;
 	drag_info.brushing = false;
+	range_marker_drag_rect->hide();
 	drag_info.clear_copied_locations ();
 }
 
@@ -3184,7 +3185,7 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
-
+	_region_motion_group->raise_to_top ();
 	drag_info.copy = false;
 	drag_info.item = item;
 	drag_info.data = clicked_regionview;
@@ -3213,19 +3214,9 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.dest_trackview = drag_info.source_trackview;
 	// we want a move threshold
 	drag_info.want_move_threshold = true;
-	
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
 
 	begin_reversible_command (_("move region(s)"));
-	/* 
-	   the group containing moved regions may have been 
-	   offset during autoscroll. reset its y offset
-	   (we should really handle this in the same way 
-	   we do with the x axis, but a simple way of achieving that 
-	   eludes me right now). 
-	*/
-
-	_region_motion_group->property_y() = 0;
 
 	/* sync the canvas to what we think is its current state */
 	track_canvas->update_now();
@@ -3251,7 +3242,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	if (selection->regions.empty() || clicked_regionview == 0) {
 		return;
 	}
-
+	_region_motion_group->raise_to_top ();
 	drag_info.copy = true;
 	drag_info.item = item;
 	drag_info.data = clicked_regionview;	
@@ -3275,8 +3266,6 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.motion_callback = &Editor::region_drag_motion_callback;
 	drag_info.finished_callback = &Editor::region_drag_finished_callback;
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
-
-	_region_motion_group->property_y() = 0;
 }
 
 void
@@ -3400,7 +3389,7 @@ Editor::check_region_drag_possible (RouteTimeAxisView** tv)
 		hide_verbose_canvas_cursor ();
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -3742,7 +3731,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			
 					if (-x_delta > ix1 + horizontal_adjustment.get_value()) {
 						//	do_move = false;
-						cerr << "illegal move" << endl;
 						x_delta = 0;
 						pending_region_position = drag_info.last_frame_position;
 						break;
@@ -3806,6 +3794,13 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			rv->get_canvas_frame()->i2w (ix1, iy1);
+			
+			cerr << "adjust y from " << iy1 << " using "
+			     << vertical_adjustment.get_value() << " - "
+			     << canvas_timebars_vsize
+			     << endl;
+
+			iy1 += get_trackview_group_vertical_offset ();;
 
 			if (drag_info.first_move) {
 
@@ -3825,16 +3820,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 				rv->fake_set_opaque (true);
 			}
-			/* for evaluation of the track position of iy1, we have to adjust 
-			   to allow for the vertical scrolling adjustment and the height of the timebars.
-			*/
-			
-			cerr << "adjust y from " << iy1 << " using "
-			     << vertical_adjustment.get_value() << " - "
-			     << canvas_timebars_vsize
-			     << endl;
-
-			iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			RouteTimeAxisView* canvas_rtv = dynamic_cast<RouteTimeAxisView*>(tvp2);
@@ -3956,13 +3941,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	}
 
 	nocommit = false;
-
-	/* XXX is this true??? i can''t tell the difference.
-	   The regionview has been moved at some stage during the grab so we need
-	   to account for any mouse movement between this event and the last one. 
-	*/	
-
-	//region_drag_motion_callback (item, event);
 
 	if (Config->get_edit_mode() == Splice && !pre_drag_region_selection.empty()) {
 		selection->set (pre_drag_region_selection);
