@@ -19,30 +19,43 @@
 #ifndef __ardour_tempo_lines_h__
 #define __ardour_tempo_lines_h__
 
-#include <vector>
+#include <map>
+#include <boost/pool/pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include <ardour/tempo.h>
 #include "canvas.h"
 #include "simpleline.h"
 
+typedef boost::fast_pool_allocator<
+		std::pair<double, ArdourCanvas::SimpleLine>,
+		boost::default_user_allocator_new_delete,
+		boost::details::pool::null_mutex,
+		8192>
+	MapAllocator;
+
 class TempoLines {
 public:
-	TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group)
-		: _canvas(canvas)
-		, _group(group)
-	{}
- 
-	ArdourCanvas::SimpleLine* get_line();
-
+	TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group);
+	
+	void tempo_map_changed();
+	
 	void draw(ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit);
+	
+	void show();
 	void hide();
 
 private:
-	typedef std::vector<ArdourCanvas::SimpleLine*> Lines;
-	Lines _free_lines;
-	Lines _used_lines;
+#ifdef GTKOSX
+	typedef std::map<double, ArdourCanvas::SimpleLine*, std::less<double> > Lines;
+#else
+	typedef std::map<double, ArdourCanvas::SimpleLine*, std::less<double>, MapAllocator> Lines;
+#endif
+	Lines _lines;
 
 	ArdourCanvas::Canvas& _canvas;
 	ArdourCanvas::Group*  _group;
+	double                _clean_left;
+	double                _clean_right;
 };
 
 #endif /* __ardour_tempo_lines_h__ */

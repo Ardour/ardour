@@ -101,9 +101,15 @@ Editor::tempo_map_changed (Change ignored)
 	}
 
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored));
-	
-	redisplay_tempo (false); // redraw rulers and measures
+
+	if (tempo_lines) {
+		tempo_lines->tempo_map_changed();
+	}
+
+	compute_current_bbt_points(leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
+	redraw_measures ();
+	update_tempo_based_rulers ();
 }
 
 /**
@@ -117,20 +123,40 @@ Editor::redisplay_tempo (bool immediate_redraw)
 		return;
 	}
 
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit)); // redraw rulers and measures
+	if (immediate_redraw) {
+		redraw_measures ();
+	} else {
+#ifdef GTKOSX
+		redraw_measures ();
+#else
+		Glib::signal_idle().connect (mem_fun (*this, &Editor::redraw_measures));
+#endif
+	}
+	update_tempo_based_rulers ();
+}
+
+void
+Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
+{
+	if (!session) {
+		return;
+	}
+
 	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
 
-	session->bbt_time(leftmost_frame, previous_beat);
-	session->bbt_time(leftmost_frame + current_page_frames(), next_beat);
+	session->bbt_time(leftmost, previous_beat);
+	session->bbt_time(rightmost, next_beat);
 
 	if (previous_beat.beats > 1) {
-	        previous_beat.beats -= 1;
+		previous_beat.beats -= 1;
 	} else if (previous_beat.bars > 1) {
- 	        previous_beat.bars--;
+		previous_beat.bars--;
 		previous_beat.beats += 1;
 	}
 	previous_beat.ticks = 0;
 
-	if (session->tempo_map().meter_at(leftmost_frame + current_page_frames()).beats_per_bar () > next_beat.beats + 1) {
+	if (session->tempo_map().meter_at(rightmost).beats_per_bar () > next_beat.beats + 1) {
 		next_beat.beats += 1;
 	} else {
 		next_beat.bars += 1;
@@ -139,50 +165,24 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	next_beat.ticks = 0;
 	
 	if (current_bbt_points) {
-	        delete current_bbt_points;
+		delete current_bbt_points;
 		current_bbt_points = 0;
 	}
 
-	if (session) {
-		current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat));
-		update_tempo_based_rulers ();
-	} else {
-		current_bbt_points = 0;
-	}
-
-	if (immediate_redraw) {
-
-		hide_measures ();
-
-		if (session && current_bbt_points) {
-			draw_measures ();
-		}
-
-	} else {
-
-		if (session && current_bbt_points) {
-#ifdef GTKOSX
-			lazy_hide_and_draw_measures ();
-#else
-			Glib::signal_idle().connect (mem_fun (*this, &Editor::lazy_hide_and_draw_measures));
-#endif
-		} else {
-			hide_measures ();
-		}
-	}
+	current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat) + 1);
 }
 
 void
 Editor::hide_measures ()
 {
-	if (tempo_lines)
+	if (tempo_lines) {
 		tempo_lines->hide();
+	}
 }
 
 bool
-Editor::lazy_hide_and_draw_measures ()
+Editor::redraw_measures ()
 {
-	hide_measures ();
 	draw_measures ();
 	return false;
 }
@@ -192,10 +192,6 @@ Editor::draw_measures ()
 {
 	if (session == 0 || _show_measures == false || 
 	    !current_bbt_points || current_bbt_points->empty()) {
-		return;
-	}
-
-	if (current_bbt_points == 0 || current_bbt_points->empty()) {
 		return;
 	}
 

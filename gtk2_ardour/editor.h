@@ -803,6 +803,7 @@ class Editor : public PublicEditor
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
 	void controls_layout_size_request (Gtk::Requisition*);
+	sigc::connection controls_layout_size_request_connection;
 
 	Gtk::HScrollbar     edit_hscrollbar;
 	bool                _dragging_hscrollbar;
@@ -1449,7 +1450,7 @@ public:
 	ArdourCanvas::SimpleLine* get_time_line ();
 	void hide_measures ();
 	void draw_measures ();
-	bool lazy_hide_and_draw_measures ();
+	bool redraw_measures ();
 
 	void new_tempo_section ();
 
@@ -1511,6 +1512,7 @@ public:
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
+	void compute_current_bbt_points (nframes_t left, nframes_t right);
 	void tempo_map_changed (ARDOUR::Change);
 	void redisplay_tempo (bool immediate_redraw);
 	

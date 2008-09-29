@@ -206,22 +206,6 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		name_highlight = 0;
 	}
 
-	if (visibility & ShowNameText) {
-		name_text = new ArdourCanvas::Text (*group);
-		name_text->property_x() = (double) TimeAxisViewItem::NAME_X_OFFSET;
-		/* trackview.current_height() is the bottom of the trackview. subtract 1 to get back to the bottom of the highlight,
-		   then NAME_Y_OFFSET to position the text in the vertical center of the highlight
-		*/
-		name_text->property_y() = (double) trackview.current_height() - 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
-		name_text->property_font_desc() = *NAME_FONT;
-		name_text->property_anchor() = Gtk::ANCHOR_NW;
-
-		name_text->set_data ("timeaxisviewitem", this);
-		
-	} else {
-		name_text = 0;
-	}
-
 	/* create our grab handles used for trimming/duration etc */
 
 	if (visibility & ShowHandles) {
@@ -246,8 +230,24 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 		frame_handle_end = 0;
 	}
 
-	set_color (base_color) ;
+	if (visibility & ShowNameText) {
+		name_text = new ArdourCanvas::Text (*group);
+		name_text->property_x() = (double) TimeAxisViewItem::NAME_X_OFFSET;
+		/* trackview.current_height() is the bottom of the trackview. subtract 1 to get back to the bottom of the highlight,
+		   then NAME_Y_OFFSET to position the text in the vertical center of the highlight
+		*/
+		name_text->property_y() = (double) trackview.current_height() - 1.0 - TimeAxisViewItem::NAME_Y_OFFSET;
+		name_text->property_font_desc() = *NAME_FONT;
+		name_text->property_anchor() = Gtk::ANCHOR_NW;
 
+		name_text->set_data ("timeaxisviewitem", this);
+		
+	} else {
+		name_text = 0;
+	}
+
+	set_color (base_color) ;
+	
 	set_duration (item_duration, this) ;
 	set_position (start, this) ;
 }
@@ -591,11 +591,10 @@ TimeAxisViewItem::set_height (double height)
 		if (height > NAME_HIGHLIGHT_SIZE) {
 			name_highlight->property_y1() = (double) height+1 - NAME_HIGHLIGHT_SIZE;
 			name_highlight->property_y2() = (double) height;
-		}
-		else {
+		} else {
 			/* it gets hidden now anyway */
-			name_highlight->property_y1() = (double) 1.0;
-			name_highlight->property_y2() = (double) height;
+			//name_highlight->property_y1() = (double) 1.0;
+			//name_highlight->property_y2() = (double) height;
 		}
 	}
 
@@ -603,8 +602,7 @@ TimeAxisViewItem::set_height (double height)
 		name_text->property_y() = height+1 - NAME_Y_OFFSET;
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_text->property_fill_color_rgba() =  fill_color;
-		}
-		else {
+		} else {
 			name_text->property_fill_color_rgba() = label_color;
 		}
 	}
@@ -844,14 +842,7 @@ TimeAxisViewItem::set_samples_per_unit (double spu)
 void
 TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 {
-	if (pixel_width < GRAB_HANDLE_LENGTH * 2) {
-
-		if (frame_handle_start) {
-			frame_handle_start->hide();
-			frame_handle_end->hide();
-		}
-
-	} if (pixel_width < 2.0) {
+	if (pixel_width < 2.0) {
 
 		if (show_vestigial) {
 			vestigial_frame->show();
@@ -910,11 +901,12 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			if (pixel_width < (2*TimeAxisViewItem::GRAB_HANDLE_LENGTH)) {
 				frame_handle_start->hide();
 				frame_handle_end->hide();
+			} else {
+				frame_handle_start->show();
+				frame_handle_end->property_x1() = pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
+				frame_handle_end->property_x2() = pixel_width;
+				frame_handle_end->show();
 			}
-			frame_handle_start->show();
-			frame_handle_end->property_x1() = pixel_width - (TimeAxisViewItem::GRAB_HANDLE_LENGTH);
-			frame_handle_end->show();
-			frame_handle_end->property_x2() = pixel_width;
 		}
 	}
 }

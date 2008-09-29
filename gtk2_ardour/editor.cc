@@ -77,6 +77,7 @@
 #include "crossfade_edit.h"
 #include "canvas_impl.h"
 #include "actions.h"
+#include "tempo_lines.h"
 #include "gui_thread.h"
 #include "sfdb_ui.h"
 #include "rhythm_ferret.h"
@@ -392,7 +393,7 @@ Editor::Editor ()
 	
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	controls_layout.signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
-	controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
+	controls_layout_size_request_connection = controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
 
 	edit_vscrollbar.set_adjustment (vertical_adjustment);
 	edit_hscrollbar.set_adjustment (horizontal_adjustment);
@@ -3681,6 +3682,9 @@ Editor::set_show_measures (bool yn)
 		hide_measures ();
 
 		if ((_show_measures = yn) == true) {
+			if (tempo_lines) {
+				tempo_lines->show();
+			}
 			draw_measures ();
 		}
 		instant_save ();
@@ -4293,6 +4297,10 @@ Editor::set_frames_per_unit (double fpu)
 		return;
 	}
 
+	if (tempo_lines) {
+		tempo_lines->tempo_map_changed();
+	}
+
 	frames_per_unit = fpu;
 	post_zoom ();
 }
@@ -4300,14 +4308,15 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::post_zoom ()
 {
+/*
 	// convert fpu to frame count
 
 	nframes64_t frames = (nframes64_t) floor (frames_per_unit * canvas_width);
-
+	
 	if (frames_per_unit != zoom_range_clock.current_duration()) {
 		zoom_range_clock.set (frames);
 	}
-
+*/
 	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
 		if (!selection->tracks.empty()) {
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
@@ -4319,15 +4328,17 @@ Editor::post_zoom ()
 			}
 		}
 	}
+	update_loop_range_view (false);
+	update_punch_range_view (false);
+
+	if (playhead_cursor) {
+		playhead_cursor->set_position (playhead_cursor->current_frame);
+	}
 
 	ZoomChanged (); /* EMIT_SIGNAL */
 
 	reset_hscrollbar_stepping ();
 	//reset_scrolling_region ();
-
-	if (playhead_cursor) {
-		playhead_cursor->set_position (playhead_cursor->current_frame);
-	}
 
 	instant_save ();
 }

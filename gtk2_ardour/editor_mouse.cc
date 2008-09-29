@@ -3144,15 +3144,8 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
 
 	begin_reversible_command (_("move region(s)"));
-	/* 
-	   the group containing moved regions may have been 
-	   offset during autoscroll. reset its y offset
-	   (we should really handle this in the same way 
-	   we do with the x axis, but a simple way of achieving that 
-	   eludes me right now). 
-	*/
 
-	_region_motion_group->property_y() = 0;
+	_region_motion_group->raise_to_top ();
 
 	/* sync the canvas to what we think is its current state */
 	track_canvas->update_now();
@@ -3188,8 +3181,7 @@ Editor::start_region_copy_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.motion_callback = &Editor::region_drag_motion_callback;
 	drag_info.finished_callback = &Editor::region_drag_finished_callback;
 	show_verbose_time_cursor (drag_info.last_frame_position, 10);
-
-	_region_motion_group->property_y() = 0;
+	_region_motion_group->raise_to_top ();
 }
 
 void
@@ -3645,8 +3637,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					rv2->get_canvas_group()->i2w (ix1, iy1);
 			
 					if (-x_delta > ix1 + horizontal_adjustment.get_value()) {
-						//	do_move = false;
-						cerr << "illegal move" << endl;
 						x_delta = 0;
 						pending_region_position = drag_info.last_frame_position;
 						break;
@@ -3711,6 +3701,11 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 			rv->get_canvas_group()->i2w (ix1, iy1);
 
+			/* for evaluation of the track position of iy1, we have to adjust 
+			   to allow for the vertical scrolling adjustment and the height of the timebars.
+			*/
+
+			iy1 += get_trackview_group_vertical_offset ();
 			if (drag_info.first_move) {
 
 				// hide any dependent views 
@@ -3724,16 +3719,11 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				   parent groups have different coordinates.
 				*/
 
-				rv->get_canvas_group()->property_y() =  iy1 - 1;
+				rv->get_canvas_group()->property_y() = iy1 - 1;
 				rv->get_canvas_group()->reparent(*_region_motion_group);
 
 				rv->fake_set_opaque (true);
 			}
-			/* for evaluation of the track position of iy1, we have to adjust 
-			   to allow for the vertical scrolling adjustment and the height of the timebars.
-			*/
-
-			iy1 += vertical_adjustment.get_value() - canvas_timebars_vsize;
 
 			TimeAxisView* tvp2 = trackview_by_y_position (iy1);
 			AudioTimeAxisView* canvas_atv = dynamic_cast<AudioTimeAxisView*>(tvp2);
@@ -3842,13 +3832,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	}
 
 	nocommit = false;
-
-	/* XXX is this true??? i can''t tell the difference.
-	   The regionview has been moved at some stage during the grab so we need
-	   to account for any mouse movement between this event and the last one. 
-	*/	
-
-	//region_drag_motion_callback (item, event);
 
 	if (Config->get_edit_mode() == Splice && !pre_drag_region_selection.empty()) {
 		selection->set (pre_drag_region_selection);

@@ -131,43 +131,42 @@ Editor::initialize_canvas ()
 	time_line_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
 
 	_trackview_group = new ArdourCanvas::Group (*_master_group);
-	_region_motion_group = new ArdourCanvas::Group (*_master_group);
+	_region_motion_group = new ArdourCanvas::Group (*_trackview_group);
 
-	meter_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, DBL_MAX, timebar_height);
+	meter_bar_group = new ArdourCanvas::Group (*_master_group);
+	meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, max_canvas_coordinate, timebar_height);
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 	meter_bar->property_outline_pixels() = 0;
 
-	tempo_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
+	tempo_bar_group = new ArdourCanvas::Group (*_master_group);
+	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height));
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 	tempo_bar->property_outline_pixels() = 0;
 
-	range_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
+	range_marker_bar_group = new ArdourCanvas::Group (*_master_group);
+	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height));
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
 	range_marker_bar->property_outline_pixels() = 0;
 	
-	transport_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
+	transport_marker_bar_group = new ArdourCanvas::Group (*_master_group);
+	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height));
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 	transport_marker_bar->property_outline_pixels() = 0;
 
-	marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
+	marker_bar_group = new ArdourCanvas::Group (*_master_group);
+	marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height));
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 0;
 	
-	cd_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, DBL_MAX, (timebar_height));
+	cd_marker_bar_group = new ArdourCanvas::Group (*_master_group);
+	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height));
  	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
  	cd_marker_bar->property_outline_pixels() = 0;
 
 	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
-	//range_marker_drag_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
 	range_marker_drag_rect->hide ();
 
-	timebar_group =  new ArdourCanvas::Group (*track_canvas->root());
+	timebar_group =  new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
 	cursor_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
 
 	meter_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height * 5.0);
@@ -240,9 +239,6 @@ Editor::initialize_canvas ()
 	cd_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
 	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
-	
-	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_loop_range_view), false));
-	ZoomChanged.connect (bind (mem_fun(*this, &Editor::update_punch_range_view), false));
 
 	playhead_cursor = new Cursor (*this, &Editor::canvas_playhead_cursor_event);
 
@@ -350,6 +346,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator i;
 	double pos;
+	bool changed = false;
 
 	for (pos = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
@@ -363,33 +360,41 @@ Editor::controls_layout_size_request (Requisition* req)
 	if (!screen) {
 		screen = Gdk::Screen::get_default();
 	}
-
+	gint height = min ( (gint) pos, (screen->get_height() - 400));
 	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */
 
 	width =  min (width, screen->get_width() - 300);
 
+	if ((req->width != width) || (req->height != height)) {
+		changed = true;
+		controls_layout_size_request_connection.disconnect ();
+	}
+
 	if (req->width != width) {
+		gint vbox_width = edit_controls_vbox.get_width();
 		req->width = width;
-		time_button_event_box.set_size_request(edit_controls_vbox.get_width(), -1);
-		zoom_box.set_size_request(edit_controls_vbox.get_width(), -1);
-	}
-
-	gint height = min ( (gint) pos, (screen->get_height() - 400));
-	if (req->height != height) {
-		req->height = height;
-	}
-
-	if (width != edit_controls_vbox.get_width()) {
 
 		/* this one is important: it determines how big the layout thinks it really is, as 
 		   opposed to what it displays on the screen
 		*/
-		controls_layout.set_size (edit_controls_vbox.get_width(), (guint) floor (pos));
-		controls_layout.set_size_request(edit_controls_vbox.get_width(), -1);
+		controls_layout.property_width () = vbox_width;
+		controls_layout.property_width_request () = vbox_width;
+
+		time_button_event_box.property_width_request () = vbox_width;
+		zoom_box.property_width_request () = vbox_width;
 	}
 
+	if (req->height != height) {
+		req->height = height;
+		controls_layout.property_height () = (guint) floor (pos);
+		controls_layout.property_height_request () = height;
+	}
+
+	if (changed) {
+		controls_layout_size_request_connection = controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
+	}
 	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG	
 }
 
@@ -830,19 +835,22 @@ Editor::scroll_canvas_horizontally ()
 	_master_group->move (-x_delta, 0);
 	timebar_group->move (-x_delta, 0);
 	cursor_group->move (-x_delta, 0);
+	update_fixed_rulers ();
+	redisplay_tempo (true);
+
 }
 
 void
 Editor::scroll_canvas_vertically ()
 {
 	/* vertical scrolling only */
+
 	double x1, x2, y1, y2, y_delta;
 
 	_trackview_group->get_bounds(x1, y1, x2, y2);
-	y_delta = y1 + vertical_adjustment.get_value() - canvas_timebars_vsize;
+	y_delta = y1 + get_trackview_group_vertical_offset ();
 
 	_trackview_group->move (0, -y_delta);
-	_region_motion_group->move (0, -y_delta);
 
 	/* required to keep the controls_layout in lock step with the canvas group */
 	track_canvas->update_now ();
@@ -856,6 +864,7 @@ Editor::canvas_horizontally_scrolled ()
 	if (time_origin != leftmost_frame) {
 		canvas_scroll_to (time_origin);
 	}
+	redisplay_tempo (true);
 }
 
 void
@@ -869,9 +878,6 @@ Editor::canvas_scroll_to (nframes64_t time_origin)
 		//reset_scrolling_region ();
 	}
 
-	update_fixed_rulers ();
-
-	redisplay_tempo (!_dragging_hscrollbar);
 }
 
 void

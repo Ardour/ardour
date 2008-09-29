@@ -377,25 +377,10 @@ TimeAxisView::set_heights (uint32_t h)
 void
 TimeAxisView::set_height(uint32_t h)
 {
-	/* XXX suboptimal to give the 0th controls frame a different height.
-	   it would be better to offset the entire controls_frame by one pixel..
-	*/
-	int x,y;
-	controls_frame.get_size_request (x, y);
-	if (order == 0) {
-		if (y != h + 1) {
-			controls_frame.set_size_request (-1, h + 1);
-		}
-	} else {
-		if (y != h) {
-			controls_frame.set_size_request (-1, h);
-		}
-	}
-
 	if (h == height) {
 		return;
 	}
-
+	controls_frame.property_height_request () = h;
 	height = h;
 
  	if (canvas_item_visible (selection_group)) {
