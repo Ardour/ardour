@@ -37,7 +37,6 @@
 #include <ardour/smf_source.h>
 #include <ardour/session.h>
 #include <ardour/midi_ring_buffer.h>
-#include <ardour/midi_util.h>
 #include <ardour/tempo.h>
 #include <ardour/audioengine.h>
 #include <ardour/event_type_map.h>
