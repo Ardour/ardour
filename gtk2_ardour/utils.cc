@@ -1,7 +1,7 @@
 /*
     Copyright (C) 2003 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
+    This program is free software; you an redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
@@ -348,14 +348,11 @@ color_from_style (string widget_style_name, int state, string attr)
 		return Gdk::Color ("red");
 	}
 
-	cerr << "got style for " << widget_style_name << endl;
-
 	if (attr == "fg") {
 		return Gdk::Color (&style->fg[state]);
 	}
 
 	if (attr == "bg") {
-		cerr << "returning color from bg\n";
 		return Gdk::Color (&style->bg[state]);
 	}
 
@@ -386,7 +383,6 @@ color_from_style (string widget_style_name, int state, string attr)
 	error << string_compose (_("unknown style attribute %1 requested for color; using \"red\""), attr) << endmsg;
 	return Gdk::Color ("red");
 }
-
 
 bool 
 canvas_item_visible (ArdourCanvas::Item* item)

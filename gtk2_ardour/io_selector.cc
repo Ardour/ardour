@@ -53,12 +53,6 @@ IOSelector::IOSelector (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> 
 	} else {
 		_io->input_changed.connect (mem_fun(*this, &IOSelector::ports_changed));
 	}
-
-	/* this got lost in a merge from 2.0 */
-
-	// set_button_sensitivity ();
-	// io->name_changed.connect (mem_fun(*this, &IOSelector::name_changed));
-
 }
 
 void
@@ -210,55 +204,6 @@ IOSelector::row_descriptor () const
 	return _("port");
 }
 
-#if 0
-void 
-IOSelector::set_button_sensitivity ()
-{
-	if (for_input) {
-
-		if (io->input_maximum() < 0 || io->input_maximum() > (int) io->n_inputs()) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-
-	} else {
-
-		if (io->output_maximum() < 0 || io->output_maximum() > (int) io->n_outputs()) {
-			add_port_button.set_sensitive (true);
-		} else {
-			add_port_button.set_sensitive (false);
-		}
-			
-	}
-
-	if (for_input) {
-		if (io->n_inputs() && (io->input_minimum() < 0 || io->input_minimum() < (int) io->n_inputs())) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-			
-	} else {
-		if (io->n_outputs() && (io->output_minimum() < 0 || io->output_minimum() < (int) io->n_outputs())) {
-			remove_port_button.set_sensitive (true);
-		} else {
-			remove_port_button.set_sensitive (false);
-		}
-	}
-}
-#endif
-
-#if 0
-void
-IOSelector::name_changed (void* src)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelector::name_changed), src));
-	
-	display_ports ();
-}
-#endif
-
 IOSelectorWindow::IOSelectorWindow (
 	ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool for_input, bool can_cancel
 	)
@@ -273,20 +218,19 @@ IOSelectorWindow::IOSelectorWindow (
 	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	set_name ("IOSelectorWindow2");
 
-	string title;
-	if (for_input) {
-		title = string_compose(_("%1 input"), io->name());
-	} else {
-		title = string_compose(_("%1 output"), io->name());
-	}
+	// io->name_changed.connect (mem_fun(*this, &IOSelectorWindow::io_name_changed));
 
 	if (_selector.maximum_rows() > _selector.n_rows()) {
 		add_button.set_name ("IOSelectorButton");
 		add_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
 		get_action_area()->pack_start (add_button, false, false);
 		add_button.signal_clicked().connect (sigc::mem_fun (_selector, &IOSelector::add_row));
+	} 
+
+	if (!for_input) {
+		io->output_changed.connect (mem_fun(*this, &IOSelectorWindow::ports_changed));
 	} else {
-		add_button.hide ();
+		io->input_changed.connect (mem_fun(*this, &IOSelectorWindow::ports_changed));
 	}
 
 	rescan_button.set_name ("IOSelectorButton");
@@ -314,17 +258,29 @@ IOSelectorWindow::IOSelectorWindow (
 	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
 	rescan_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::rescan));
 
-	set_title (title);
 	set_position (Gtk::WIN_POS_MOUSE);
 
+	io_name_changed (this);
+	ports_changed (IOChange (0), this);
+	
 	show_all ();
 
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
+	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
 }
 
 IOSelectorWindow::~IOSelectorWindow()
 {
 	
+}
+
+void
+IOSelectorWindow::ports_changed (ARDOUR::IOChange change, void *src)
+{
+	if (_selector.maximum_rows() > _selector.n_rows()) {
+		add_button.set_sensitive (true);
+	} else {
+		add_button.set_sensitive (false);
+	}
 }
 
 void
@@ -354,6 +310,21 @@ IOSelectorWindow::on_map ()
 	Window::on_map ();
 }
 
+void
+IOSelectorWindow::io_name_changed (void* src)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelectorWindow::io_name_changed), src));
+	
+	string title;
+
+	if (!_selector.offering_input()) {
+		title = string_compose(_("%1 input"), _selector.io()->name());
+	} else {
+		title = string_compose(_("%1 output"), _selector.io()->name());
+	}
+
+	set_title (title);
+}
 
 PortInsertUI::PortInsertUI (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
 	: input_selector (sess, pi->io(), true),

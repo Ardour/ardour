@@ -81,7 +81,7 @@ std::string
 BundleEditorMatrix::row_name (int r) const
 {
 	std::stringstream s;
-	s << r;
+	s << r + 1; // 1-based counting
 	return s.str();
 }
 

@@ -103,7 +103,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 		row = *(route_display_model->append ());
 #endif
 
-		cerr << route->name() << " marked for display ? " << tv->marked_for_display() << endl;
+		// cerr << route->name() << " marked for display ? " << tv->marked_for_display() << endl;
 		
 		row[route_display_columns.text] = route->name();
 		row[route_display_columns.visible] = tv->marked_for_display();

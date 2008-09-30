@@ -36,10 +36,11 @@ class IOSelector : public PortMatrix {
 	void add_row ();
 	void remove_row (int);
 	std::string row_descriptor () const;
+	boost::shared_ptr<ARDOUR::IO> const io() { return _io; }
 
   private:
 	boost::shared_ptr<ARDOUR::IO> _io;
-
+	
 	void ports_changed (ARDOUR::IOChange, void*);
 };
 
@@ -67,6 +68,9 @@ class IOSelectorWindow : public ArdourDialog
 	void rescan ();
 	void cancel ();
 	void accept ();
+
+	void ports_changed (ARDOUR::IOChange change, void *src);
+	void io_name_changed (void *src);
 };
 
 

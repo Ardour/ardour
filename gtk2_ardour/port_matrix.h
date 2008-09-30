@@ -162,6 +162,7 @@ class PortMatrix : public Gtk::VBox {
 
 	void set_type (ARDOUR::DataType);
 	void set_offer_inputs (bool);
+	bool offering_input() const { return _offer_inputs; }
 
 	virtual void set_state (int, std::string const &, bool) = 0;
 	virtual bool get_state (int, std::string const &) const = 0;
@@ -178,11 +179,6 @@ class PortMatrix : public Gtk::VBox {
 	bool _offer_inputs;
 
   private:
-	void setup ();
-	void clear ();
-	void setup_dimensions ();
-	bool row_label_button_pressed (GdkEventButton*, int);
-
 	PortGroupList _port_group_list;
 	ARDOUR::DataType _type;
 	std::vector<PortGroupUI*> _port_group_ui;
@@ -195,6 +191,12 @@ class PortMatrix : public Gtk::VBox {
 	Gtk::ScrolledWindow _scrolled_window;
 	Gtk::Label* _side_vbox_pad[2];
 	Gtk::HBox _visibility_checkbutton_box;
+
+	void setup ();
+	void clear ();
+	void setup_dimensions ();
+	bool row_label_button_pressed (GdkEventButton*, int);
+	void reset_visibility ();
 };
 
 #endif

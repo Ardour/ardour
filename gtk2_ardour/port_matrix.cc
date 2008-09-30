@@ -41,6 +41,8 @@
 #include "gui_thread.h"
 #include "i18n.h"
 
+using namespace Gtk;
+
 /** Add a port to a group.
  *  @param p Port name, with or without prefix.
  */
@@ -81,7 +83,7 @@ PortGroupUI::PortGroupUI (PortMatrix& m, PortGroup& g)
 
 	for (int i = 0; i < rows; ++i) {
 		for (uint32_t j = 0; j < _port_group.ports.size(); ++j) {
-			Gtk::CheckButton* b = new Gtk::CheckButton;
+			CheckButton* b = new CheckButton;
 			
 			b->signal_toggled().connect (
 				sigc::bind (sigc::mem_fun (*this, &PortGroupUI::port_checkbutton_toggled), b, i, j)
@@ -118,7 +120,6 @@ void
 PortGroupUI::visibility_checkbutton_toggled ()
 {
 	_port_group.visible = _visibility_checkbutton.get_active ();
-	setup_visibility ();
 }
 
 /** @return Width and height of a single checkbutton in a port group table */
@@ -143,14 +144,14 @@ PortGroupUI::unit_size () const
 }
 
 /** @return Table widget containing the port checkbuttons */
-Gtk::Widget&
+Widget&
 PortGroupUI::get_table ()
 {
 	return _table_box;
 }
 
 /** @return Checkbutton used to toggle visibility */
-Gtk::Widget&
+Widget&
 PortGroupUI::get_visibility_checkbutton ()
 {
 	return _visibility_checkbutton;
@@ -159,7 +160,7 @@ PortGroupUI::get_visibility_checkbutton ()
 
 /** Handle a toggle of a port check button */
 void
-PortGroupUI::port_checkbutton_toggled (Gtk::CheckButton* b, int r, int c)
+PortGroupUI::port_checkbutton_toggled (CheckButton* b, int r, int c)
 {
  	if (_ignore_check_button_toggle == false) {
 		_port_matrix.set_state (r, _port_group.prefix + _port_group.ports[c], b->get_active());
@@ -183,9 +184,9 @@ PortGroupUI::setup_visibility ()
 }
 
 RotatedLabelSet::RotatedLabelSet (PortGroupList& g)
-	: Glib::ObjectBase ("RotatedLabelSet"), Gtk::Widget (), _port_group_list (g), _base_width (128)
+	: Glib::ObjectBase ("RotatedLabelSet"), Widget (), _port_group_list (g), _base_width (128)
 {
-	set_flags (Gtk::NO_WINDOW);
+	set_flags (NO_WINDOW);
 	set_angle (30);
 }
 
@@ -209,9 +210,9 @@ RotatedLabelSet::set_angle (int degrees)
 }
 
 void
-RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
+RotatedLabelSet::on_size_request (Requisition* requisition)
 {
-	*requisition = Gtk::Requisition ();
+	*requisition = Requisition ();
 
 	if (_pango_layout == 0) {
 		return;
@@ -238,7 +239,7 @@ RotatedLabelSet::on_size_request (Gtk::Requisition* requisition)
 }
 
 void
-RotatedLabelSet::on_size_allocate (Gtk::Allocation& allocation)
+RotatedLabelSet::on_size_allocate (Allocation& allocation)
 {
 	set_allocation (allocation);
 
@@ -252,15 +253,15 @@ RotatedLabelSet::on_size_allocate (Gtk::Allocation& allocation)
 void
 RotatedLabelSet::on_realize ()
 {
-	Gtk::Widget::on_realize ();
+	Widget::on_realize ();
 
-	Glib::RefPtr<Gtk::Style> style = get_style ();
+	Glib::RefPtr<Style> style = get_style ();
 
 	if (!_gdk_window) {
 		GdkWindowAttr attributes;
 		memset (&attributes, 0, sizeof (attributes));
 
-		Gtk::Allocation allocation = get_allocation ();
+		Allocation allocation = get_allocation ();
 		attributes.x = allocation.get_x ();
 		attributes.y = allocation.get_y ();
 		attributes.width = allocation.get_width ();
@@ -271,13 +272,13 @@ RotatedLabelSet::on_realize ()
 		attributes.wclass = GDK_INPUT_OUTPUT;
 
 		_gdk_window = Gdk::Window::create (get_window (), &attributes, GDK_WA_X | GDK_WA_Y);
-		unset_flags (Gtk::NO_WINDOW);
+		unset_flags (NO_WINDOW);
 		set_window (_gdk_window);
 
-		_bg_colour = style->get_bg (Gtk::STATE_NORMAL );
-		modify_bg (Gtk::STATE_NORMAL, _bg_colour);
-		_fg_colour = style->get_fg (Gtk::STATE_NORMAL);
-;
+		_bg_colour = style->get_bg (STATE_NORMAL );
+		modify_bg (STATE_NORMAL, _bg_colour);
+		_fg_colour = style->get_fg (STATE_NORMAL);
+
 		_gdk_window->set_user_data (gobj ());
 
 		/* Set up Pango stuff */
@@ -297,7 +298,7 @@ RotatedLabelSet::on_unrealize()
 {
 	_gdk_window.clear ();
 
-	Gtk::Widget::on_unrealize ();
+	Widget::on_unrealize ();
 }
 
 
@@ -376,20 +377,21 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 	_row_labels_vbox[0] = _row_labels_vbox[1] = 0;
 	_side_vbox_pad[0] = _side_vbox_pad[1] = 0;
 
+	_visibility_checkbutton_box.pack_start (*(manage (new Label (_("Connections displayed: ")))), false, false, 10);
  	pack_start (_visibility_checkbutton_box, false, false);
 	
-	_side_vbox[0].pack_start (*Gtk::manage (new Gtk::Label ("")));
+	_side_vbox[0].pack_start (*manage (new Label ("")));
 	_overall_hbox.pack_start (_side_vbox[0], false, false);
-	_scrolled_window.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_NEVER);
-	_scrolled_window.set_shadow_type (Gtk::SHADOW_NONE);
-	Gtk::VBox* b = new Gtk::VBox;
+	_scrolled_window.set_policy (POLICY_ALWAYS, POLICY_NEVER);
+	_scrolled_window.set_shadow_type (SHADOW_NONE);
+	VBox* b = new VBox;
 	b->pack_start (_column_labels, false, false);
 	b->pack_start (_port_group_hbox, false, false);
-	Gtk::Alignment* a = new Gtk::Alignment (0, 1, 0, 0);
-	a->add (*Gtk::manage (b));
-	_scrolled_window.add (*Gtk::manage (a));
+	Alignment* a = new Alignment (0, 1, 0, 0);
+	a->add (*manage (b));
+	_scrolled_window.add (*manage (a));
 	_overall_hbox.pack_start (_scrolled_window);
-	_side_vbox[1].pack_start (*Gtk::manage (new Gtk::Label ("")));
+	_side_vbox[1].pack_start (*manage (new Label ("")));
 	// _overall_hbox.pack_start (_side_vbox[1]);
 	pack_start (_overall_hbox);
 
@@ -407,7 +409,7 @@ PortMatrix::clear ()
 {
 	for (int i = 0; i < 2; ++i) {
 
-		for (std::vector<Gtk::EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
+		for (std::vector<EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
 			delete *j;
 		}
 		_row_labels[i].clear ();
@@ -468,7 +470,7 @@ PortMatrix::setup_dimensions ()
 	
 	/* Row labels */
 	for (int i = 0; i < 2; ++i) {
-		for (std::vector<Gtk::EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
+		for (std::vector<EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
 			(*j)->get_child()->set_size_request (-1, unit_size.second);
 		}
 
@@ -489,49 +491,77 @@ PortMatrix::setup ()
 	
  	/* Row labels */
 	for (int i = 0; i < 2; ++i) {
-		_row_labels_vbox[i] = new Gtk::VBox;
+		_row_labels_vbox[i] = new VBox;
 		int const run_rows = std::max (1, rows);
 		for (int j = 0; j < run_rows; ++j) {
-			Gtk::Label* label = new Gtk::Label (rows == 0 ? "Quim" : row_name (j));
-			Gtk::EventBox* b = new Gtk::EventBox;
+
+			/* embolden the port/channel name */
+
+			string s = "<b>";
+			s += row_name (j);
+			s += "</b>";
+
+			Label* label = manage (new Label (s));
+			EventBox* b = manage (new EventBox);
+
+			label->set_use_markup (true);
+
 			b->set_events (Gdk::BUTTON_PRESS_MASK);
 			b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), j));
-			b->add (*Gtk::manage (label));
+			b->add (*label);
+
 			_row_labels[i].push_back (b);
 			_row_labels_vbox[i]->pack_start (*b, false, false);
 		}
 
 		_side_vbox[i].pack_start (*_row_labels_vbox[i], false, false);
-		_side_vbox_pad[i] = new Gtk::Label ("");
+		_side_vbox_pad[i] = new Label ("");
 		_side_vbox[i].pack_start (*_side_vbox_pad[i], false, false);
 	}
 
  	/* Checkbutton tables and visibility checkbuttons */
- 	int n = 0;
  	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
 
 		PortGroupUI* t = new PortGroupUI (*this, **i);
-		
-		/* XXX: this is a bit of a hack; should probably use a configurable colour here */
-		Gdk::Color alt_bg = get_style()->get_bg (Gtk::STATE_NORMAL);
-		alt_bg.set_rgb (alt_bg.get_red() + 4096, alt_bg.get_green() + 4096, alt_bg.get_blue () + 4096);
-		if ((n % 2) == 0) {
-			t->get_table().modify_bg (Gtk::STATE_NORMAL, alt_bg);
-		}
 		
 		_port_group_ui.push_back (t);
 		_port_group_hbox.pack_start (t->get_table(), false, false);
 		
 		_visibility_checkbutton_box.pack_start (t->get_visibility_checkbutton(), false, false);
-		++n;
+
+		CheckButton* chk = dynamic_cast<CheckButton*>(&t->get_visibility_checkbutton());
+		if (chk) { 
+			chk->signal_toggled().connect (sigc::mem_fun (*this, &PortMatrix::reset_visibility));
+		}
 	}
 
 	show_all ();
 
+	reset_visibility ();
+}
+
+void
+PortMatrix::reset_visibility ()
+{
+	/* now adjust visibility and coloring */
+
+	bool even = true;
+	Gdk::Color odd_bg (color_from_style ("OddPortGroups", STATE_NORMAL, "fg"));
+	Gdk::Color even_bg (color_from_style ("EvenPortGroups", STATE_NORMAL, "fg"));
+
 	for (std::vector<PortGroupUI*>::iterator i = _port_group_ui.begin(); i != _port_group_ui.end(); ++i) {
+
 		(*i)->setup_visibility ();
+		
+		if ((*i)->port_group().visible) {
+			if (even) {
+				(*i)->get_table().modify_bg (STATE_NORMAL, even_bg);
+			} else {
+				(*i)->get_table().modify_bg (STATE_NORMAL, odd_bg);
+			}
+			even = !even;
+		}
 	}
-	
 }
 
 void
@@ -550,8 +580,8 @@ PortMatrix::row_label_button_pressed (GdkEventButton* e, int r)
 		return false;
 	}
 
-	Gtk::Menu* menu = Gtk::manage (new Gtk::Menu);
-	Gtk::Menu_Helpers::MenuList& items = menu->items ();
+	Menu* menu = manage (new Menu);
+	Menu_Helpers::MenuList& items = menu->items ();
 	menu->set_name ("ArdourContextMenu");
 
 	bool const can_add = maximum_rows () > n_rows ();
@@ -559,13 +589,13 @@ PortMatrix::row_label_button_pressed (GdkEventButton* e, int r)
 	std::string const name = row_name (r);
 	
 	items.push_back (
-		Gtk::Menu_Helpers::MenuElem (string_compose(_("Add %1"), row_descriptor()), sigc::mem_fun (*this, &PortMatrix::add_row))
+		Menu_Helpers::MenuElem (string_compose(_("Add %1"), row_descriptor()), sigc::mem_fun (*this, &PortMatrix::add_row))
 		);
 
 	items.back().set_sensitive (can_add);
 
 	items.push_back (
-		Gtk::Menu_Helpers::MenuElem (string_compose(_("Remove %1 \"%2\""), row_descriptor(), name), sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_row), r))
+		Menu_Helpers::MenuElem (string_compose(_("Remove %1 \"%2\""), row_descriptor(), name), sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_row), r))
 		);
 
 	items.back().set_sensitive (can_remove);
@@ -628,12 +658,22 @@ PortGroupList::refresh ()
 
 		PortGroup* g = 0;
 
-		if (_type == ARDOUR::DataType::AUDIO && boost::dynamic_pointer_cast<ARDOUR::AudioTrack> (*i)) {
-			g = &track;
-		} else if (_type == ARDOUR::DataType::MIDI && boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (*i)) {
-			g = &track;
-		} else if (_type == ARDOUR::DataType::AUDIO && boost::dynamic_pointer_cast<ARDOUR::Route> (*i)) {
-			g = &buss;
+		if (_type == ARDOUR::DataType::AUDIO) {
+
+			if (boost::dynamic_pointer_cast<ARDOUR::AudioTrack> (*i)) {
+				g = &track;
+			} else if (!boost::dynamic_pointer_cast<ARDOUR::MidiTrack>(*i)) {
+				g = &buss;
+			} 
+
+
+		} else if (_type == ARDOUR::DataType::MIDI) {
+
+			if (boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (*i)) {
+				g = &track;
+			}
+
+			/* No MIDI busses yet */
 		} 
 			
 		if (g) {

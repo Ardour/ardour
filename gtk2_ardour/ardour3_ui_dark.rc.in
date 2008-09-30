@@ -1202,6 +1202,16 @@ style "ardour_button" ="default_button"
 	ythickness = 1
 }
 
+style "odd_port_groups"
+{
+	fg[NORMAL] = { 0.6, 0.6, 0.6 }
+}
+
+style "even_port_groups"
+{
+	fg[NORMAL] = { 0.3, 0.3, 0.3 }
+}
+
 #---------------------------------------------------------------
 
 class "GtkWidget" style:highest "default_base"
@@ -1578,4 +1588,6 @@ widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*ChannelCountSelector.GtkArrow" style:highest "default_generic"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
+widget "*OddPortGroups" style:highest "odd_port_groups"
+widget "*EvenPortGroups" style:highest "even_port_groups"
 
