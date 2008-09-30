@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+import Params
+
+# Variables for 'waf dist'
+VERSION = '0.0.1'
+APPNAME = 'evoral'
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	opt.tool_options('compiler_cxx')
+
+def configure(conf):
+	if not conf.env['GLIBMM']:
+		conf.check_pkg('glibmm-2.4', destvar='GLIBMM', vnum='2.16.0', mandatory=True)
+	if not conf.env['GTHREAD']:
+		conf.check_pkg('gthread-2.0', destvar='GTHREAD', vnum='2.16.0', mandatory=True)
+	if not conf.env['CXX']:
+		conf.check_tool('compiler_cxx')
+
+def build(bld):
+	# Headers (evoral)
+	install_files('PREFIX', 'include/evoral', 'evoral/*.hpp')
+	
+	# Library (src)
+	obj = bld.create_obj('cpp', 'shlib')
+	obj.source = '''
+		src/Control.cpp
+		src/ControlList.cpp
+		src/ControlSet.cpp
+		src/Curve.cpp
+		src/Event.cpp
+		src/MIDIEvent.cpp
+		src/Note.cpp
+		src/SMF.cpp
+		src/SMFReader.cpp
+		src/Sequence.cpp
+	'''
+	obj.includes = '..'
+	obj.name     = 'libevoral'
+	obj.target   = 'evoral'
+	obj.uselib   = 'GLIBMM GTHREAD'
+	obj.vnum     = '0.0.0'
+	
+	# Test (test)
+	obj = bld.create_obj('cpp', 'program')
+	obj.source       = 'test/sequence.cpp'
+	obj.includes     = '..'
+	obj.uselib_local = 'libevoral'
+	obj.target       = 'sequence'
+	obj.inst_var     = 0
+
