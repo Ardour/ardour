@@ -32,13 +32,14 @@
 
 #include <glibmm/miscutils.h>
 
+#include <evoral/SMFReader.hpp>
+
 #include <ardour/smf_source.h>
 #include <ardour/session.h>
 #include <ardour/midi_ring_buffer.h>
 #include <ardour/midi_util.h>
 #include <ardour/tempo.h>
 #include <ardour/audioengine.h>
-#include <ardour/smf_reader.h>
 #include <ardour/event_type_map.h>
 
 #include "i18n.h"
@@ -54,13 +55,9 @@ uint64_t                              SMFSource::header_position_offset;
 
 SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 	: MidiSource (s, region_name_from_path(path, false))
+	, SMF ()
 	, _flags (Flag(flags | Writable)) // FIXME: this needs to be writable for now
 	, _allow_remove_if_empty(true)
-	, _fd (0)
-	, _last_ev_time(0)
-	, _track_size(4) // 4 bytes for the ever-present EOT event
-	, _header_size(22)
-	, _empty(true)
 {
 	/* constructor used for new internal-to-session files. file cannot exist */
 
@@ -68,7 +65,7 @@ SMFSource::SMFSource (Session& s, std::string path, Flag flags)
 		throw failed_constructor ();
 	}
 	
-	if (open()) {
+	if (open(path)) {
 		throw failed_constructor ();
 	}
 
@@ -79,11 +76,6 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 	: MidiSource (s, node)
 	, _flags (Flag (Writable|CanRename))
 	, _allow_remove_if_empty(true)
-	, _fd (0)
-	, _last_ev_time(0)
-	, _track_size(4) // 4 bytes for the ever-present EOT event
-	, _header_size(22)
-	, _empty(true)
 {
 	/* constructor used for existing internal-to-session files. file must exist */
 
@@ -95,7 +87,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node)
 		throw failed_constructor ();
 	}
 	
-	if (open()) {
+	if (open(_path)) {
 		throw failed_constructor ();
 	}
 	
@@ -134,245 +126,6 @@ SMFSource::init (string pathstr, bool must_exist)
 	return 0;
 }
 
-/** Attempt to open the SMF file for reading and writing.
- *
- * Currently SMFSource is always read/write.
- *
- * \return  0 on success
- *         -1 if the file can not be opened for reading,
- *         -2 if the file can not be opened for writing
- */
-int
-SMFSource::open()
-{
-	//cerr << "Opening SMF file " << path() << " writeable: " << writable() << endl;
-
-	assert(writable()); // FIXME;
-
-	_fd = fopen(path().c_str(), "r+");
-
-	// File already exists
-	if (_fd) {
-		fseek(_fd, _header_size - 4, 0);
-		uint32_t track_size_be = 0;
-		fread(&track_size_be, 4, 1, _fd);
-		_track_size = GUINT32_FROM_BE(track_size_be);
-		_empty = _track_size > 4;
-		//cerr << "SMF - read track size " << _track_size << endl;
-
-	// We're making a new file
-	} else {
-		_fd = fopen(path().c_str(), "w+");
-		if (_fd == NULL) {
-			cerr << "ERROR: Can not open SMF file " << path() << " for writing: " <<
-				strerror(errno) << endl;
-			return -2;
-		}
-		_track_size = 4;
-		_empty = true;
-
-		// Write a tentative header just to pad things out so writing happens in the right spot
-		flush_header();
-		flush_footer();
-	}
-		
-	return (_fd == 0) ? -1 : 0;
-}
-
-void
-SMFSource::close()
-{
-	if (_fd) {
-		flush_header();
-		flush_footer();
-		fclose(_fd);
-		_fd = NULL;
-	}
-}
-
-void
-SMFSource::seek_to_footer_position()
-{
-	uint8_t buffer[4];
-	
-	// lets check if there is a track end marker at the end of the data
-	fseek(_fd, -4, SEEK_END);
-	//cerr << "SMFSource::seek_to_footer_position: At position: " << ftell(_fd);
-	size_t read_bytes = fread(buffer, sizeof(uint8_t), 4, _fd);
-	/*cerr << " read size: " << read_bytes << " buffer: ";
-	for (size_t i=0; i < read_bytes; ++i) {
-		printf("%x ", buffer[i]);
-	}
-	printf("\n");
-	*/
-	
-	if( (read_bytes == 4) && 
-	    buffer[0] == 0x00 && 
-	    buffer[1] == 0xFF && 
-	    buffer[2] == 0x2F && 
-	    buffer[3] == 0x00) {
-		// there is one, so overwrite it
-		fseek(_fd, -4, SEEK_END);
-	} else {
-		// there is none, so append
-		fseek(_fd, 0, SEEK_END);
-	}
-}
-
-int
-SMFSource::flush_header()
-{
-	// FIXME: write timeline position somehow?
-	
-	//cerr << path() << " SMF Flushing header\n";
-
-	assert(_fd);
-
-	const uint16_t type     = GUINT16_TO_BE(0);     // SMF Type 0 (single track)
-	const uint16_t ntracks  = GUINT16_TO_BE(1);     // Number of tracks (always 1 for Type 0)
-	const uint16_t division = GUINT16_TO_BE(_ppqn); // Pulses per quarter note (beat)
-
-	char data[6];
-	memcpy(data, &type, 2);
-	memcpy(data+2, &ntracks, 2);
-	memcpy(data+4, &division, 2);
-
-	_fd = freopen(path().c_str(), "r+", _fd);
-	assert(_fd);
-	fseek(_fd, 0, SEEK_SET);
-	write_chunk("MThd", 6, data);
-	write_chunk_header("MTrk", _track_size); 
-
-	fflush(_fd);
-
-	return 0;
-}
-
-int
-SMFSource::flush_footer()
-{
-	//cerr << path() << " SMF Flushing footer\n";
-	seek_to_footer_position();
-	write_footer();
-	seek_to_footer_position();
-
-	return 0;
-}
-
-void
-SMFSource::write_footer()
-{
-	write_var_len(0);
-	char eot[3] = { 0xFF, 0x2F, 0x00 }; // end-of-track meta-event
-	fwrite(eot, 1, 3, _fd);
-	fflush(_fd);
-}
-
-/** Returns the offset of the first event in the file with a time past @a start,
- * relative to the start of the source.
- *
- * Returns -1 if not found.
- */
-/*
-long
-SMFSource::find_first_event_after(nframes_t start)
-{
-	// FIXME: obviously this is slooow
-	
-	fseek(_fd, _header_size, 0);
-
-	while ( ! feof(_fd) ) {
-		const uint32_t delta_time = read_var_len();
-
-		if (delta_time > start)
-			return delta_time;
-	}
-
-	return -1;
-}
-*/
-
-/** Read an event from the current position in file.
- *
- * File position MUST be at the beginning of a delta time, or this will die very messily.
- * ev.buffer must be of size ev.size, and large enough for the event.  The returned event
- * will have it's time field set to it's delta time, in SMF tempo-based ticks, using the
- * rate given by ppqn() (it is the caller's responsibility to calculate a real time).
- *
- * \a size should be the capacity of \a buf.  If it is not large enough, \a buf will
- * be freed and a new buffer allocated in its place, the size of which will be placed
- * in size.
- *
- * Returns event length (including status byte) on success, 0 if event was
- * skipped (eg a meta event), or -1 on EOF (or end of track).
- */
-int
-SMFSource::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
-{
-	if (feof(_fd)) {
-		return -1;
-	}
-
-	assert(delta_t);
-	assert(size);
-	assert(buf);
-
-	try {
-		*delta_t = SMFReader::read_var_len(_fd);
-	} catch (...) {
-		return -1; // Premature EOF
-	}
-	
-	if (feof(_fd)) {
-		return -1; // Premature EOF
-	}
-
-	const int status = fgetc(_fd);
-
-	if (status == EOF) {
-		return -1; // Premature EOF
-	}
-
-	//printf("Status @ %X = %X\n", (unsigned)ftell(_fd) - 1, status);
-
-	if (status == 0xFF) {
-		if (feof(_fd)) {
-			return -1; // Premature EOF
-		}
-		const int type = fgetc(_fd);
-		if ((unsigned char)type == 0x2F) {
-			return -1; // hit end of track
-		} else {
-			*size = 0;
-			return 0;
-		}
-	}
-	
-	const int event_size = midi_event_size((unsigned char)status) + 1;
-	if (event_size <= 0) {
-		*size = 0;
-		return 0;
-	}
-	
-	// Make sure we have enough scratch buffer
-	if (*size < (unsigned)event_size)
-		*buf = (uint8_t*)realloc(*buf, event_size);
-	
-	*size = event_size;
-
-	(*buf)[0] = (unsigned char)status;
-	if (event_size > 1)
-		fread((*buf) + 1, 1, *size - 1, _fd);
-
-	/*printf("SMFSource %s read event: delta = %u, size = %u, data = ", _name.c_str(), *delta_t, *size);
-	for (size_t i=0; i < *size; ++i) {
-		printf("%X ", (*buf)[i]);
-	}
-	printf("\n");*/
-	
-	return (int)*size;
-}
-
 /** All stamps in audio frames */
 nframes_t
 SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const
@@ -393,16 +146,16 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
 	// FIXME: don't seek to start and search every read (brutal!)
-	fseek(_fd, _header_size, SEEK_SET);
+	SMF::seek_to_start();
 	
 	// FIXME: assumes tempo never changes after start
 	const double frames_per_beat = _session.tempo_map().tempo_at(_timeline_position).frames_per_beat(
 			_session.engine().frame_rate(),
 			_session.tempo_map().meter_at(_timeline_position));
 	
-	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * _ppqn);
+	const uint64_t start_ticks = (uint64_t)((start / frames_per_beat) * ppqn());
 
-	while (!feof(_fd)) {
+	while (!SMF::eof()) {
 		int ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
 		if (ret == -1) { // EOF
 			//cerr << "SMF - EOF\n";
@@ -420,7 +173,7 @@ SMFSource::read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, n
 
 		if (time >= start_ticks) {
 			const nframes_t ev_frame_time = (nframes_t)(
-					((time / (double)_ppqn) * frames_per_beat)) + stamp_offset;
+					((time / (double)ppqn()) * frames_per_beat)) + stamp_offset;
 
 			if (ev_frame_time <= start + cnt)
 				dst.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
@@ -493,7 +246,7 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 			_model->append(ev);
 	}
 
-	fflush(_fd);
+	SMF::flush();
 	free(buf);
 
 	const nframes_t oldlen = _length;
@@ -520,8 +273,8 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev)
 	
 	assert(ev.time() >= 0);
 	
-	if (ev.time() < _last_ev_time) {
-		cerr << "SMFSource: Warning: Skipping event with ev.time() < _last_ev_time" << endl;
+	if (ev.time() < last_event_time()) {
+		cerr << "SMFSource: Warning: Skipping event with ev.time() < last.time()" << endl;
 		return;
 	}
 	
@@ -533,22 +286,15 @@ SMFSource::append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev)
 				_session.engine().frame_rate(),
 				_session.tempo_map().meter_at(_timeline_position));
 
-		delta_time = (uint32_t)((ev.time() - _last_ev_time) / frames_per_beat * _ppqn);
+		delta_time = (uint32_t)((ev.time() - last_event_time()) / frames_per_beat * ppqn());
 	} else {
 		assert(unit == Beats);
-		delta_time = (uint32_t)((ev.time() - _last_ev_time) * _ppqn);
+		delta_time = (uint32_t)((ev.time() - last_event_time()) * ppqn());
 	}
 
-	
-	const size_t stamp_size = write_var_len(delta_time);
-	fwrite(ev.buffer(), 1, ev.size(), _fd);
+	SMF::append_event_unlocked(delta_time, ev);
 
-	_track_size += stamp_size + ev.size();
 	_write_data_count += ev.size();
-	_last_ev_time = ev.time();
-
-	if (ev.size() > 0)
-		_empty = false;
 }
 
 
@@ -601,8 +347,7 @@ void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode, nframes_t start_frame)
 {
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
-	_last_ev_time = 0;
-	fseek(_fd, _header_size, SEEK_SET);
+	SMF::begin_write (start_frame);
 }
 
 void
@@ -615,8 +360,7 @@ SMFSource::mark_streaming_write_completed ()
 	}
 	
 	_model->set_edited(false);
-	flush_header();
-	flush_footer();
+	SMF::end_write ();
 }
 
 void
@@ -855,56 +599,6 @@ SMFSource::set_source_name (string newname, bool destructive)
 	return 0;//rename_peakfile (peak_path (_path));
 }
 
-bool
-SMFSource::is_empty () const
-{
-	return _empty;
-}
-
-
-void
-SMFSource::write_chunk_header(const char id[4], uint32_t length)
-{
-	const uint32_t length_be = GUINT32_TO_BE(length);
-
-	fwrite(id, 1, 4, _fd);
-	fwrite(&length_be, 4, 1, _fd);
-}
-
-void
-SMFSource::write_chunk(const char id[4], uint32_t length, void* data)
-{
-	write_chunk_header(id, length);
-	
-	fwrite(data, 1, length, _fd);
-}
-
-/** Returns the size (in bytes) of the value written. */
-size_t
-SMFSource::write_var_len(uint32_t value)
-{
-	size_t ret = 0;
-
-	uint32_t buffer = value & 0x7F;
-
-	while ( (value >>= 7) ) {
-		buffer <<= 8;
-		buffer |= ((value & 0x7F) | 0x80);
-	}
-
-	while (true) {
-		//printf("Writing var len byte %X\n", (unsigned char)buffer);
-		++ret;
-		fputc(buffer, _fd);
-		if (buffer & 0x80)
-			buffer >>= 8;
-		else
-			break;
-	}
-
-	return ret;
-}
-
 void
 SMFSource::load_model(bool lock, bool force_reload)
 {
@@ -927,8 +621,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 	}
 
 	_model->start_write();
-
-	fseek(_fd, _header_size, SEEK_SET);
+	SMF::seek_to_start();
 
 	uint64_t time = 0; /* in SMF ticks */
 	Evoral::Event ev;
@@ -951,7 +644,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 		
 		if (ret > 0) { // didn't skip (meta) event
 			// make ev.time absolute time in frames
-			ev.time() = time * frames_per_beat / (EventTime)_ppqn;
+			ev.time() = time * frames_per_beat / (EventTime)ppqn();
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 			_model->append(ev);
 		}
@@ -974,5 +667,11 @@ SMFSource::destroy_model()
 {
 	//cerr << _name << " destroying model " << _model.get() << endl;
 	_model.reset();
+}
+
+void
+SMFSource::flush_midi()
+{
+	SMF::end_write();
 }
 

@@ -95,8 +95,9 @@ class MidiSource : public Source
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
 
   protected:
-	virtual int flush_header() = 0;
-	virtual int flush_footer() = 0;
+	virtual void flush_midi() = 0;
+	//virtual int flush_header() = 0;
+	//virtual int flush_footer() = 0;
 	
 	virtual nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cnt, nframes_t stamp_offset, nframes_t negative_stamp_offset) const = 0;
 	virtual nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt) = 0;

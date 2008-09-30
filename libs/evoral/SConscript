@@ -31,6 +31,8 @@ src/Curve.cpp
 src/Event.cpp
 src/MIDIEvent.cpp
 src/Note.cpp
+src/SMF.cpp
+src/SMFReader.cpp
 src/Sequence.cpp
 """)
 

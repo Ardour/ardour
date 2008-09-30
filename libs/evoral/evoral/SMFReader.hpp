@@ -1,31 +1,30 @@
-/*
-    Copyright (C) 2008 Paul Davis 
-    Written by Dave Robillard
+/* This file is part of Evoral.
+ * Copyright(C) 2008 Dave Robillard <http://drobilla.net>
+ * Copyright(C) 2000-2008 Paul Davis
+ * 
+ * Evoral is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or(at your option) any later
+ * version.
+ * 
+ * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
-
-#ifndef __ardour_smf_reader_h__ 
-#define __ardour_smf_reader_h__
+#ifndef EVORAL_SMF_READER_HPP
+#define EVORAL_SMF_READER_HPP
 
 #include <exception>
 #include <stdexcept>
 #include <string>
 #include <inttypes.h>
 
-namespace ARDOUR {
+namespace Evoral {
 
 
 /** Standard MIDI File (Type 0) Reader
@@ -44,7 +43,7 @@ public:
 		const char* what() const throw() { return "Unsupported time stamp type (SMPTE)"; }
 	};
 
-	SMFReader(const std::string filename="");
+	SMFReader(const std::string& filename="");
 	~SMFReader();
 
 	bool open(const std::string& filename) throw (std::logic_error, UnsupportedTime);
@@ -81,7 +80,7 @@ protected:
 };
 
 
-} // namespace ARDOUR
+} // namespace Evoral
 
-#endif /* __ardour_smf_reader_h__ */
+#endif // EVORAL_SMF_READER_HPP
 

@@ -37,6 +37,8 @@
 #include <pbd/basename.h>
 #include <pbd/convert.h>
 
+#include <evoral/SMFReader.hpp>
+
 #include <ardour/ardour.h>
 #include <ardour/session.h>
 #include <ardour/session_directory.h>
@@ -50,7 +52,6 @@
 #include <ardour/resampled_source.h>
 #include <ardour/sndfileimportable.h>
 #include <ardour/analyser.h>
-#include <ardour/smf_reader.h>
 #include <ardour/smf_source.h>
 #include <ardour/tempo.h>
 
@@ -302,7 +303,7 @@ write_audio_data_to_new_files (ImportableSource* source, Session::import_status&
 }
 
 static void
-write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
+write_midi_data_to_new_files (Evoral::SMFReader* source, Session::import_status& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
 	Evoral::Event ev(0, 0.0, 4, NULL, true);
@@ -344,9 +345,7 @@ write_midi_data_to_new_files (SMFReader* source, Session::import_status& status,
 					smfs->session().tempo_map().meter_at(timeline_position));
 
 		smfs->update_length(0, (nframes_t) ceil ((t / (double)source->ppqn()) * frames_per_beat));
-
-		smfs->flush_header();
-		smfs->flush_footer();
+		smfs->end_write();
 
 		if (status.cancel)
 			break;
@@ -384,7 +383,7 @@ Session::import_audiofiles (import_status& status)
 			++p, ++cnt)
 	{
 		boost::shared_ptr<ImportableSource> source;
-		std::auto_ptr<SMFReader>            smf_reader;
+		std::auto_ptr<Evoral::SMFReader>    smf_reader;
 		const DataType type = ((*p).rfind(".mid") != string::npos) ? 
 			DataType::MIDI : DataType::AUDIO;
 		
@@ -400,9 +399,9 @@ Session::import_audiofiles (import_status& status)
 
 		} else {
 			try {
-				smf_reader = std::auto_ptr<SMFReader>(new SMFReader(*p));
+				smf_reader = std::auto_ptr<Evoral::SMFReader>(new Evoral::SMFReader(*p));
 				channels = smf_reader->num_tracks();
-			} catch (const SMFReader::UnsupportedTime& err) {
+			} catch (const Evoral::SMFReader::UnsupportedTime& err) {
 				error << _("Import: unsupported MIDI time stamp format") << endmsg;
 				status.done = status.cancel = true;
 				return;

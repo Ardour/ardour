@@ -165,8 +165,7 @@ MidiSource::mark_streaming_write_completed ()
 void
 MidiSource::session_saved()
 {
-	flush_header();
-	flush_footer();
+	flush_midi();
 
 	if (_model && _model->edited()) {
 		string newname;
@@ -197,8 +196,7 @@ MidiSource::session_saved()
 		newsrc->set_model(_model);
 		_model->set_midi_source(newsrc.get());
 		
-		newsrc->flush_header();
-		newsrc->flush_footer();
+		newsrc->flush_midi();
 
 		Switched.emit(newsrc);
 	}

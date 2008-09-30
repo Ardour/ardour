@@ -37,12 +37,13 @@
 
 #include <gtkmm2ext/utils.h>
 
+#include <evoral/SMFReader.hpp>
+
 #include <ardour/audio_library.h>
 #include <ardour/auditioner.h>
 #include <ardour/audioregion.h>
 #include <ardour/audiofilesource.h>
 #include <ardour/smf_source.h>
-#include <ardour/smf_reader.h>
 #include <ardour/region_factory.h>
 #include <ardour/source_factory.h>
 #include <ardour/session.h>
@@ -1097,7 +1098,7 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 
 		} else if (SMFSource::safe_file_extension (*i)) {
 
-			SMFReader reader(*i);
+			Evoral::SMFReader reader(*i);
 			if (reader.num_tracks() > 1) {
 				multichannel = true; // "channel" == track here...
 			}

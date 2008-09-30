@@ -25,6 +25,7 @@
 #include <time.h>
 
 #include <ardour/midi_source.h>
+#include <evoral/SMF.hpp>
 
 namespace Evoral { class Event; }
 
@@ -33,7 +34,7 @@ namespace ARDOUR {
 class MidiRingBuffer;
 
 /** Standard Midi File (Type 0) Source */
-class SMFSource : public MidiSource {
+class SMFSource : public MidiSource, public Evoral::SMF {
   public:
 	enum Flag {
 		Writable = 0x1,
@@ -67,7 +68,7 @@ class SMFSource : public MidiSource {
 	int set_source_name (string newname, bool destructive);
 	
 	static bool safe_file_extension (const Glib::ustring& path);
-
+	
 	Glib::ustring path() const { return _path; }
 
 	void set_allow_remove_if_empty (bool yn);
@@ -75,12 +76,8 @@ class SMFSource : public MidiSource {
 
 	void append_event_unlocked(EventTimeUnit unit, const Evoral::Event& ev);
 
-	int flush_header ();
-	int flush_footer ();
-	
 	int move_to_trash (const string trash_dir_name);
 
-	bool is_empty () const;
 	void mark_streaming_midi_write_started (NoteMode mode, nframes_t start_time);
 	void mark_streaming_write_completed ();
 
@@ -93,56 +90,34 @@ class SMFSource : public MidiSource {
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
-	void seek_to(nframes_t time);
-	
 	void load_model(bool lock=true, bool force_reload=false);
 	void destroy_model();
 
-	uint16_t ppqn() const { return _ppqn; }
+	void flush_midi();
 
   private:
 
 	int init (string idstr, bool must_exist);
 
-	nframes_t read_unlocked (MidiRingBuffer& dst, nframes_t start, nframes_t cn, nframes_t stamp_offset, nframes_t negative_stamp_offset) const;
-	nframes_t write_unlocked (MidiRingBuffer& dst, nframes_t cnt);
+	nframes_t read_unlocked (
+			MidiRingBuffer& dst,
+			nframes_t start,
+			nframes_t cn,
+			nframes_t stamp_offset,
+			nframes_t negative_stamp_offset) const;
+
+	nframes_t write_unlocked (
+			MidiRingBuffer& src,
+			nframes_t cnt);
 
 	bool find (std::string path, bool must_exist, bool& is_new);
 	bool removable() const;
 	bool writable() const { return _flags & Writable; }
 
-	int  open();
-	void close();
-	
-	/**
-	 * This method is only used by flush_footer() to find the right seek position 
-	 * for the footer (at the end after recording or -4 offset ro SEEK_END
-	 * if a footer is already present)
-	 */
-	void seek_to_footer_position();
-	
-	/**
-	 * write the track footer at the current seek position
-	 */
-	void write_footer();
-
-	void     write_chunk_header(const char id[4], uint32_t length);
-	void     write_chunk(const char id[4], uint32_t length, void* data);
-	size_t   write_var_len(uint32_t val);
-	uint32_t read_var_len() const;
-	int      read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
-
-	static const uint16_t _ppqn = 19200;
-
 	Glib::ustring  _path;
 	Flag           _flags;
 	string         _take_id;
 	bool           _allow_remove_if_empty;
-	FILE*          _fd;
-	double         _last_ev_time; ///< last frame time written, relative to source start
-	uint32_t       _track_size;
-	uint32_t       _header_size; ///< size of SMF header, including MTrk chunk header
-	bool           _empty; ///< true iff file contains (non-empty) events
 
 	static string _search_path;
 };

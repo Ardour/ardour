@@ -152,7 +152,6 @@ session_time.cc
 session_transport.cc
 session_utils.cc
 silentfilesource.cc
-smf_reader.cc
 smf_source.cc
 sndfile_helpers.cc
 sndfileimportable.cc
