@@ -1989,8 +1989,12 @@ Session::add_routes (RouteList& new_routes, bool save)
 			_control_out = (*x);
 		}
 
-		add_bundle ((*x)->bundle_for_inputs());
-		add_bundle ((*x)->bundle_for_outputs());
+		/* only busses get automatic bundles formed */
+
+		if (!boost::dynamic_pointer_cast<Track> (*x)) {
+			add_bundle ((*x)->bundle_for_inputs());
+			add_bundle ((*x)->bundle_for_outputs());
+		}
 	}
 
 	if (_control_out && IO::connecting_legal) {

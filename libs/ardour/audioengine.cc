@@ -1212,17 +1212,8 @@ AudioEngine::connect_to_jack (string client_name)
 	_jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
 
 	if (_jack == NULL) {
-
-		if (status & JackServerFailed) {
-			error << _("Unable to connect to JACK server") << endmsg;
-		}
-		
 		// error message is not useful here
 		return -1;
-	}
-
-	if (status & JackServerStarted) {
-		info << _("JACK server started") << endmsg;
 	}
 
 	if (status & JackNameNotUnique) {
