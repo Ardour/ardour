@@ -442,13 +442,13 @@ AudioRegionView::setup_fade_handle_positions()
 	double const handle_height = 5;
 
 	if (fade_in_handle) {
-		fade_in_handle->property_y1() = _y_position + handle_pos;
-		fade_in_handle->property_y2() = _y_position + handle_pos + handle_height;
+		fade_in_handle->property_y1() = handle_pos;
+		fade_in_handle->property_y2() = handle_pos + handle_height;
 	}
 	
 	if (fade_out_handle) {
-		fade_out_handle->property_y1() = _y_position + handle_pos;
-		fade_out_handle->property_y2() = _y_position + handle_pos + handle_height;
+		fade_out_handle->property_y1() = handle_pos;
+		fade_out_handle->property_y2() = handle_pos + handle_height;
 	}
 }
 
@@ -506,7 +506,7 @@ AudioRegionView::manage_zero_line ()
 	}
 
 	if (_height >= 100) {
-		double const wave_midpoint = _y_position + (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
+		double const wave_midpoint = (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
 		zero_line->property_y1() = wave_midpoint;
 		zero_line->property_y2() = wave_midpoint;
 		zero_line->show();
@@ -587,16 +587,16 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
 		(*points)[pi].set_x(1 + (pc * xdelta));
-		(*points)[pi++].set_y(_y_position + 2 + (h - (curve[pc] * h)));
+		(*points)[pi++].set_y(2 + (h - (curve[pc] * h)));
 	}
 	
 	/* fold back */
 
 	(*points)[pi].set_x(pwidth);
-	(*points)[pi++].set_y(_y_position + 2);
+	(*points)[pi++].set_y(2);
 
 	(*points)[pi].set_x(1);
-	(*points)[pi++].set_y(_y_position + 2);
+	(*points)[pi++].set_y(2);
 
 	/* connect the dots ... */
 
@@ -673,16 +673,16 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
 		(*points)[pi].set_x(_pixel_width - 1 - pwidth + (pc*xdelta));
-		(*points)[pi++].set_y(_y_position + 2 + (h - (curve[pc] * h)));
+		(*points)[pi++].set_y(2 + (h - (curve[pc] * h)));
 	}
 	
 	/* fold back */
 
 	(*points)[pi].set_x(_pixel_width);
-	(*points)[pi++].set_y(_y_position + h);
+	(*points)[pi++].set_y(h);
 
 	(*points)[pi].set_x(_pixel_width);
-	(*points)[pi++].set_y(_y_position + 2);
+	(*points)[pi++].set_y(2);
 
 	/* connect the dots ... */
 

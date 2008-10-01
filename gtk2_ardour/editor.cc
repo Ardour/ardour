@@ -660,10 +660,10 @@ Editor::Editor ()
 	region_list_display.append_column (_("M"), region_list_columns.muted);
 	region_list_display.append_column (_("O"), region_list_columns.opaque);
 	region_list_display.append_column (_("Used"), region_list_columns.used);
-	region_list_display.append_column (_("Path to parent file"), region_list_columns.path);
+	region_list_display.append_column (_("Path"), region_list_columns.path);
 	region_list_display.set_headers_visible (true);
 	region_list_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
-
+	
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(region_list_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
 	region_name_cell->signal_edited().connect (mem_fun (*this, &Editor::region_name_edit));
@@ -699,7 +699,8 @@ Editor::Editor ()
 	region_list_display.get_selection()->signal_changed().connect (mem_fun(*this, &Editor::region_list_selection_changed));
 	// region_list_display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show_region_list_display_context_menu), 1, 0));
 	
-	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::redisplay_regions));
+	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::redisplay_regions));
+	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::update_all_region_rows));
 	ARDOUR::Region::RegionPropertyChanged.connect (mem_fun(*this, &Editor::update_region_row));
 	
 	named_selection_scroller.add (named_selection_display);

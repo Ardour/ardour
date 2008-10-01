@@ -135,7 +135,6 @@ class AudioRegionView : public RegionView
     AudioRegionGainLine * gain_line;
 
     double _amplitude_above_axis;
-    double _y_position;
 
     uint32_t _flags;
     uint32_t fade_color;

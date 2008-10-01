@@ -210,6 +210,7 @@ IOSelectorWindow::IOSelectorWindow (
 	: ArdourDialog ("I/O selector"),
 	  _selector (session, io, !for_input),
 	  add_button (_("Add Port")),
+	  disconnect_button (_("Disconnect All")),
 	  ok_button (can_cancel ? _("OK"): _("Close")),
 	  cancel_button (_("Cancel")),
 	  rescan_button (_("Rescan"))
@@ -218,7 +219,9 @@ IOSelectorWindow::IOSelectorWindow (
 	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	set_name ("IOSelectorWindow2");
 
-	// io->name_changed.connect (mem_fun(*this, &IOSelectorWindow::io_name_changed));
+	disconnect_button.set_name ("IOSelectorButton");
+	disconnect_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::DISCONNECT, Gtk::ICON_SIZE_BUTTON)));
+	get_action_area()->pack_start (disconnect_button, false, false);
 
 	if (_selector.maximum_rows() > _selector.n_rows()) {
 		add_button.set_name ("IOSelectorButton");
@@ -254,6 +257,10 @@ IOSelectorWindow::IOSelectorWindow (
 	get_vbox()->set_spacing (8);
 	get_vbox()->pack_start (_selector);
 
+	suggestion.set_alignment (0.5, 0.5);
+	suggestion_box.pack_start (suggestion, true, true);
+	get_vbox()->pack_start (suggestion_box);
+
 	ok_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::accept));
 	cancel_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::cancel));
 	rescan_button.signal_clicked().connect (mem_fun(*this, &IOSelectorWindow::rescan));
@@ -262,15 +269,36 @@ IOSelectorWindow::IOSelectorWindow (
 
 	io_name_changed (this);
 	ports_changed (IOChange (0), this);
-	
+	leave_scroller ((GdkEventCrossing*) 0);
+
 	show_all ();
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
+
+	_selector.scrolled_window().add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	_selector.scrolled_window().signal_enter_notify_event().connect (mem_fun (*this, &IOSelectorWindow::enter_scroller));
+	_selector.scrolled_window().signal_leave_notify_event().connect (mem_fun (*this, &IOSelectorWindow::leave_scroller));
 }
 
 IOSelectorWindow::~IOSelectorWindow()
 {
 	
+}
+
+bool
+IOSelectorWindow::enter_scroller (GdkEventCrossing* ignored)
+{
+	cerr << "IN\n";
+	suggestion.set_text (_("Click to connect. Ctrl-click to disconnect. Shift-click for cross-connect"));
+	return false;
+}
+
+bool
+IOSelectorWindow::leave_scroller (GdkEventCrossing* ignored)
+{
+	cerr << "OUT\n";
+	suggestion.set_text (_("Right-click on individual port names for per-port operations"));
+	return false;
 }
 
 void

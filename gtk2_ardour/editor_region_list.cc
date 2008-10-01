@@ -360,6 +360,7 @@ Editor::update_region_row (boost::shared_ptr<Region> region)
 	if (!region || !session) {
 		return;
 	}
+	
 	TreeModel::iterator i;
 	TreeModel::Children rows = region_list_model->children();
 	
@@ -403,16 +404,61 @@ Editor::update_region_subrows (boost::shared_ptr<Region> region, TreeModel::Row 
 		}
 		
 		if (!(*i).children().empty()) {
-			
 			if (update_region_subrows(region, (*i), level + 1)) {
 				return true;
 			}
-		
 		}
 	}
 	return false;
 }
 
+void
+Editor::update_all_region_rows ()
+{
+	if (!session) {
+		return;
+	}
+
+	TreeModel::iterator i;
+	TreeModel::Children rows = region_list_model->children();
+	
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		
+		boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
+	
+		cerr << "level 1 : Updating " << region->name() << "\n";
+		
+		if (!region->automatic()) {
+			populate_row(region, (*i));
+		}
+		
+		if (!(*i).children().empty()) {
+			update_all_region_subrows((*i), 2);
+		}
+	}
+}
+
+void
+Editor::update_all_region_subrows (TreeModel::Row const &parent_row, int level)
+{
+	TreeModel::iterator i;
+	TreeModel::Children subrows = (*parent_row).children();
+	
+	for (i = subrows.begin(); i != subrows.end(); ++i) {
+		
+		boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
+		
+		cerr << "level " << level << " : Updating " << region->name() << "\n";
+		
+		if (!region->automatic()) {
+			populate_row(region, (*i));
+		}
+			
+		if (!(*i).children().empty()) {
+			update_all_region_subrows((*i), level + 1);
+		}
+	}
+}
 
 void
 Editor::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row)

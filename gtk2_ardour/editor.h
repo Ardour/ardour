@@ -1108,6 +1108,8 @@ class Editor : public PublicEditor
 	void populate_row (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &);
 	void update_region_row (boost::shared_ptr<ARDOUR::Region>);
 	bool update_region_subrows (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
+	void update_all_region_rows ();
+	void update_all_region_subrows (Gtk::TreeModel::Row const &, int);
 	bool no_region_list_redisplay;
 	void insert_into_tmp_regionlist(boost::shared_ptr<ARDOUR::Region>);
 

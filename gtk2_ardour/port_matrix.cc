@@ -171,7 +171,7 @@ PortGroupUI::port_checkbutton_toggled (CheckButton* b, int r, int c)
 void
 PortGroupUI::setup_visibility ()
 {
-	if (_port_group.visible) {
+	if (!_port_group.ports.empty() && _port_group.visible) {
 		_table_box.show ();
 	} else {
 		_table_box.hide ();
@@ -374,25 +374,30 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 	: _offer_inputs (offer_inputs), _port_group_list (session, type, offer_inputs, mask), _type (type),
 	  _column_labels (_port_group_list)
 {
-	_row_labels_vbox[0] = _row_labels_vbox[1] = 0;
-	_side_vbox_pad[0] = _side_vbox_pad[1] = 0;
+	_row_labels_vbox = 0;
+	_side_vbox_pad = 0;
 
 	_visibility_checkbutton_box.pack_start (*(manage (new Label (_("Connections displayed: ")))), false, false, 10);
  	pack_start (_visibility_checkbutton_box, false, false);
 	
-	_side_vbox[0].pack_start (*manage (new Label ("")));
-	_overall_hbox.pack_start (_side_vbox[0], false, false);
-	_scrolled_window.set_policy (POLICY_ALWAYS, POLICY_NEVER);
+	_side_vbox.pack_start (*manage (new Label ("")));
+	_scrolled_window.set_policy (POLICY_ALWAYS, POLICY_AUTOMATIC);
 	_scrolled_window.set_shadow_type (SHADOW_NONE);
-	VBox* b = new VBox;
+	VBox* b = manage (new VBox);
 	b->pack_start (_column_labels, false, false);
 	b->pack_start (_port_group_hbox, false, false);
-	Alignment* a = new Alignment (0, 1, 0, 0);
-	a->add (*manage (b));
-	_scrolled_window.add (*manage (a));
-	_overall_hbox.pack_start (_scrolled_window);
-	_side_vbox[1].pack_start (*manage (new Label ("")));
-	// _overall_hbox.pack_start (_side_vbox[1]);
+	Alignment* a = manage (new Alignment (0, 1, 0, 0));
+	a->add (*b);
+	_scrolled_window.add (*a);
+
+	if (offer_inputs) {
+		_overall_hbox.pack_start (_side_vbox, false, false, 10);
+		_overall_hbox.pack_start (_scrolled_window, true, true);
+	} else {
+		_overall_hbox.pack_start (_scrolled_window, true, true, 10);
+		_overall_hbox.pack_start (_side_vbox, false, false);
+	}
+
 	pack_start (_overall_hbox);
 
 	_port_group_hbox.signal_size_allocate().connect (sigc::hide (sigc::mem_fun (*this, &IOSelector::setup_dimensions)));
@@ -407,25 +412,22 @@ PortMatrix::~PortMatrix ()
 void
 PortMatrix::clear ()
 {
-	for (int i = 0; i < 2; ++i) {
-
-		for (std::vector<EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
-			delete *j;
-		}
-		_row_labels[i].clear ();
-		
-		if (_row_labels_vbox[i]) {
-			_side_vbox[i].remove (*_row_labels_vbox[i]);
-		}
-		delete _row_labels_vbox[i];
-		_row_labels_vbox[i] = 0;
-		
-		if (_side_vbox_pad[i]) {
-			_side_vbox[i].remove (*_side_vbox_pad[i]);
-		}
-		delete _side_vbox_pad[i];
-		_side_vbox_pad[i] = 0;
+	for (std::vector<EventBox*>::iterator j = _row_labels.begin(); j != _row_labels.end(); ++j) {
+		delete *j;
 	}
+	_row_labels.clear ();
+		
+	if (_row_labels_vbox) {
+		_side_vbox.remove (*_row_labels_vbox);
+	}
+	delete _row_labels_vbox;
+	_row_labels_vbox = 0;
+	
+	if (_side_vbox_pad) {
+		_side_vbox.remove (*_side_vbox_pad);
+	}
+	delete _side_vbox_pad;
+	_side_vbox_pad = 0;
 
 	for (std::vector<PortGroupUI*>::iterator i = _port_group_ui.begin(); i != _port_group_ui.end(); ++i) {
 		_port_group_hbox.remove ((*i)->get_table());
@@ -462,21 +464,24 @@ PortMatrix::setup_dimensions ()
 
 	/* Scrolled window */
 	/* XXX: really shouldn't set a minimum horizontal size here, but if we don't
-	   the window starts up very small */
+	   the window starts up very small.
+	   The constant value in the set_size_request() computation will control
+	   how big the scrolled window will be if we fill the port matrix will a gajillion
+	   ports.
+	*/
+
 	_scrolled_window.set_size_request (
-		std::min (_column_labels.get_width(), 640),
+		std::min (_column_labels.get_width(), 400),
 		_column_labels.get_height() + port_group_tables_height + scrollbar_height + 16
 		);
 	
 	/* Row labels */
-	for (int i = 0; i < 2; ++i) {
-		for (std::vector<EventBox*>::iterator j = _row_labels[i].begin(); j != _row_labels[i].end(); ++j) {
-			(*j)->get_child()->set_size_request (-1, unit_size.second);
-		}
-
-		if (_side_vbox_pad[i]) {
-			_side_vbox_pad[i]->set_size_request (-1, scrollbar_height + unit_size.second / 4);
-		}
+	for (std::vector<EventBox*>::iterator j = _row_labels.begin(); j != _row_labels.end(); ++j) {
+		(*j)->get_child()->set_size_request (-1, unit_size.second);
+	}
+	
+	if (_side_vbox_pad) {
+		_side_vbox_pad->set_size_request (-1, scrollbar_height + unit_size.second / 4);
 	}
 }
 
@@ -490,34 +495,34 @@ PortMatrix::setup ()
  	int const rows = n_rows ();
 	
  	/* Row labels */
-	for (int i = 0; i < 2; ++i) {
-		_row_labels_vbox[i] = new VBox;
-		int const run_rows = std::max (1, rows);
-		for (int j = 0; j < run_rows; ++j) {
 
-			/* embolden the port/channel name */
+	_row_labels_vbox = new VBox;
+	int const run_rows = std::max (1, rows);
 
-			string s = "<b>";
-			s += row_name (j);
-			s += "</b>";
-
-			Label* label = manage (new Label (s));
-			EventBox* b = manage (new EventBox);
-
-			label->set_use_markup (true);
-
-			b->set_events (Gdk::BUTTON_PRESS_MASK);
-			b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), j));
-			b->add (*label);
-
-			_row_labels[i].push_back (b);
-			_row_labels_vbox[i]->pack_start (*b, false, false);
-		}
-
-		_side_vbox[i].pack_start (*_row_labels_vbox[i], false, false);
-		_side_vbox_pad[i] = new Label ("");
-		_side_vbox[i].pack_start (*_side_vbox_pad[i], false, false);
+	for (int j = 0; j < run_rows; ++j) {
+		
+		/* embolden the port/channel name */
+		
+		string s = "<b>";
+		s += row_name (j);
+		s += "</b>";
+		
+		Label* label = manage (new Label (s));
+		EventBox* b = manage (new EventBox);
+		
+		label->set_use_markup (true);
+		
+		b->set_events (Gdk::BUTTON_PRESS_MASK);
+		b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &IOSelector::row_label_button_pressed), j));
+		b->add (*label);
+		
+		_row_labels.push_back (b);
+		_row_labels_vbox->pack_start (*b, false, false);
 	}
+
+	_side_vbox.pack_start (*_row_labels_vbox, false, false);
+	_side_vbox_pad = new Label ("");
+	_side_vbox.pack_start (*_side_vbox_pad, false, false);
 
  	/* Checkbutton tables and visibility checkbuttons */
  	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {

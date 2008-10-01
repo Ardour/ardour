@@ -174,6 +174,8 @@ class PortMatrix : public Gtk::VBox {
 	virtual void remove_row (int) = 0;
 	virtual std::string row_descriptor () const = 0;
 
+	Gtk::Widget& scrolled_window() { return _scrolled_window; }
+
   protected:
 
 	bool _offer_inputs;
@@ -182,14 +184,14 @@ class PortMatrix : public Gtk::VBox {
 	PortGroupList _port_group_list;
 	ARDOUR::DataType _type;
 	std::vector<PortGroupUI*> _port_group_ui;
-	std::vector<Gtk::EventBox*> _row_labels[2];
-	Gtk::VBox* _row_labels_vbox[2];
+	std::vector<Gtk::EventBox*> _row_labels;
+	Gtk::VBox* _row_labels_vbox;
 	RotatedLabelSet _column_labels;
 	Gtk::HBox _overall_hbox;
-	Gtk::VBox _side_vbox[2];
+	Gtk::VBox _side_vbox;
 	Gtk::HBox _port_group_hbox;
 	Gtk::ScrolledWindow _scrolled_window;
-	Gtk::Label* _side_vbox_pad[2];
+	Gtk::Label* _side_vbox_pad;
 	Gtk::HBox _visibility_checkbutton_box;
 
 	void setup ();

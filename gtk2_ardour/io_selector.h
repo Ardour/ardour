@@ -61,9 +61,13 @@ class IOSelectorWindow : public ArdourDialog
 	/* overall operation buttons */
 
 	Gtk::Button add_button;
+	Gtk::Button disconnect_button;
 	Gtk::Button ok_button;
 	Gtk::Button cancel_button;
 	Gtk::Button rescan_button;
+
+	Gtk::HBox  suggestion_box;
+	Gtk::Label suggestion;
 
 	void rescan ();
 	void cancel ();
@@ -71,6 +75,8 @@ class IOSelectorWindow : public ArdourDialog
 
 	void ports_changed (ARDOUR::IOChange change, void *src);
 	void io_name_changed (void *src);
+	bool enter_scroller (GdkEventCrossing*);
+	bool leave_scroller (GdkEventCrossing*);
 };
 
 
