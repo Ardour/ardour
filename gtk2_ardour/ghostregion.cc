@@ -59,9 +59,9 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 
 GhostRegion::~GhostRegion ()
 {
-	/*GoingAway (this);
+	GoingAway (this);
 	delete base_rect;
-	delete group;*/
+	delete group;
 }
 
 void
