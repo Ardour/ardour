@@ -3310,9 +3310,9 @@ Editor::align_selection_relative (RegionPoint point, nframes64_t position, const
 		return;
 	}
 
-	nframes64_t distance;
+	nframes64_t distance = 0;
 	nframes64_t pos = 0;
-	int dir = 0;
+	int dir = 1;
 
 	list<RegionView*> sorted;
 	rs.by_position (sorted);
@@ -3324,7 +3324,6 @@ Editor::align_selection_relative (RegionPoint point, nframes64_t position, const
 		pos = position;
 		if (position > r->position()) {
 			distance = position - r->position();
-			dir = 1;
 		} else {
 			distance = r->position() - position;
 			dir = -1;
@@ -3335,7 +3334,6 @@ Editor::align_selection_relative (RegionPoint point, nframes64_t position, const
 		if (position > r->last_frame()) {
 			distance = position - r->last_frame();
 			pos = r->position() + distance;
-			dir = 1;
 		} else {
 			distance = r->last_frame() - position;
 			pos = r->position() - distance;
@@ -3347,7 +3345,6 @@ Editor::align_selection_relative (RegionPoint point, nframes64_t position, const
 		pos = r->adjust_to_sync (position);
 		if (pos > r->position()) {
 			distance = pos - r->position();
-			dir = 1;
 		} else {
 			distance = r->position() - pos;
 			dir = -1;

@@ -139,8 +139,6 @@ Editor::handle_new_route (Session::RouteList& routes)
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);
 	}
-
-	editor_mixer_button.set_sensitive(true);
 	editor_list_button.set_sensitive(true);
 }
 
@@ -198,14 +196,7 @@ Editor::remove_route (TimeAxisView *tv)
 	 * button to inactive and untick the menu option
 	 */
 
-	editor_mixer_button.set_active(false);
 	ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
-
-	/* and disable if all tracks and/or routes are gone */
-
-	if (track_views.size() == 0) {
-		editor_mixer_button.set_sensitive(false);
-	}
 }
 
 void

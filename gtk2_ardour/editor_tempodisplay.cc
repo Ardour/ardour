@@ -158,6 +158,9 @@ Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
 	}
 
 	current_bbt_points = session->tempo_map().get_points (session->tempo_map().frame_time (previous_beat), session->tempo_map().frame_time (next_beat) + 1);
+#ifdef GTKOSX
+			lazy_hide_and_draw_measures ();
+#endif
 }
 
 void

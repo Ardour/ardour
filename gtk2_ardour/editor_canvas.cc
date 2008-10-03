@@ -216,7 +216,6 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->property_outline_pixels() = 0;
 	transport_bar_drag_rect->hide ();
 
-
 	transport_punchin_line = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchin_line->property_x1() = 0.0;
 	transport_punchin_line->property_y1() = 0.0;

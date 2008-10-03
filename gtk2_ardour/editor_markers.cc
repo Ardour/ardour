@@ -1148,7 +1148,6 @@ Editor::update_punch_range_view (bool visibility)
 	Location* tpl;
 
 	if ((Config->get_punch_in() || Config->get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
-
 		guint track_canvas_width,track_canvas_height;
 		track_canvas->get_size(track_canvas_width,track_canvas_height);
 		if (Config->get_punch_in()) {
@@ -1162,35 +1161,9 @@ Editor::update_punch_range_view (bool visibility)
 		if (visibility) {
 		        transport_punch_range_rect->show();
 		}
-	}
-	else if (visibility) {
+	} else if (visibility) {
 	        transport_punch_range_rect->hide();
 	}
-
-// 	if (session->get_punch_in()) {
-// 		double x = frame_to_pixel (transport_punch_location->start());
-// 		gnome_canvas_item_set (transport_punchin_line, "x1", x, "x2", x, NULL);
-		
-// 		if (visibility) {
-// 			gnome_canvas_item_show (transport_punchin_line);
-// 		}
-// 	}
-// 	else if (visibility) {
-// 		gnome_canvas_item_hide (transport_punchin_line);
-// 	}
-	
-// 	if (session->get_punch_out()) {
-// 		double x = frame_to_pixel (transport_punch_location->end());
-		
-// 		gnome_canvas_item_set (transport_punchout_line, "x1", x, "x2", x, NULL);
-		
-// 		if (visibility) {
-// 			gnome_canvas_item_show (transport_punchout_line);
-// 		}
-// 	}
-// 	else if (visibility) {
-// 		gnome_canvas_item_hide (transport_punchout_line);
-// 	}
 }
 
 void

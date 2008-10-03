@@ -848,7 +848,7 @@ Crossfade::set_follow_overlap (bool yn)
 nframes_t
 Crossfade::set_length (nframes_t len)
 {
-	nframes_t limit;
+	nframes_t limit = 0;
 
 	switch (_anchor_point) {
 	case StartOfIn:
