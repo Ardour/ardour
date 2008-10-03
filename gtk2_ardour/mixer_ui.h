@@ -242,9 +242,8 @@ class Mixer_UI : public Gtk::Window
 
 	Width _strip_width;
 
-	void sync_order_keys ();
+	void sync_order_keys (void *src);
 	bool ignore_route_reorder;
-	bool ignore_sync;
 
 	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;

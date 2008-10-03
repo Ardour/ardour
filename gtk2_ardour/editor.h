@@ -1710,7 +1710,7 @@ public:
 
 	void update_route_visibility ();
 
-	void sync_order_keys ();
+	void sync_order_keys (void*);
 	bool ignore_route_order_sync;
 
 	bool route_list_display_button_press (GdkEventButton*);

@@ -71,7 +71,6 @@ Mixer_UI::Mixer_UI ()
 	in_group_row_change = false;
 	_visible = false;
 	ignore_route_reorder = false;
-	ignore_sync = false;
 
 	Route::SyncOrderKeys.connect (mem_fun (*this, &Mixer_UI::sync_order_keys));
 
@@ -355,13 +354,13 @@ Mixer_UI::get_order_key()
 
 
 void
-Mixer_UI::sync_order_keys ()
+Mixer_UI::sync_order_keys (void *src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (ignore_sync || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src == this || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -712,15 +711,14 @@ Mixer_UI::redisplay_track_list ()
 	}
 	
 	if (Config->get_sync_all_route_ordering() && !ignore_route_reorder) {
-		ignore_sync = true;
-		Route::SyncOrderKeys (); // EMIT SIGNAL
-		ignore_sync = false;
+		Route::SyncOrderKeys (this); // EMIT SIGNAL
 	}
 
 	// Rebind all of the midi controls automatically
 	
-	if (auto_rebinding)
+	if (auto_rebinding) {
 		auto_rebind_midi_controls ();
+	}
 
 }
 

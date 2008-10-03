@@ -51,7 +51,6 @@ Editor::handle_new_route (Session::RouteList& routes)
 	TreeModel::Row row;
 
 	ignore_route_list_reorder = true;
-	ignore_route_order_sync = true;
 	no_route_list_redisplay = true;
 
 	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
@@ -86,7 +85,6 @@ Editor::handle_new_route (Session::RouteList& routes)
 	}
 
 	ignore_route_list_reorder = false;
-	ignore_route_order_sync = false;
 	no_route_list_redisplay = false;
 
 	redisplay_route_list ();
@@ -226,13 +224,13 @@ Editor::show_track_in_display (TimeAxisView& tv)
 }
 
 void
-Editor::sync_order_keys ()
+Editor::sync_order_keys (void *src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (ignore_route_order_sync || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src == this || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -240,15 +238,24 @@ Editor::sync_order_keys ()
 		neworder.push_back (0);
 	}
 
+	bool changed = false;
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		TimeAxisView* tv = (*ri)[route_display_columns.tv];
 		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
-		neworder[route->order_key (X_("editor"))] = tv->old_order_key ();
+		int old_key = tv->old_order_key();
+		int new_key = route->order_key (X_("editor"));
+
+		neworder[new_key] = old_key;
+
+		if (new_key != old_key) {
+			changed = true;
+		}
 	}
 
-	ignore_route_list_reorder = true;
-	route_display_model->reorder (neworder);
-	ignore_route_list_reorder = false;
+	if (changed) {
+		route_display_model->reorder (neworder);
+	}
 }
 
 void
@@ -314,9 +321,7 @@ Editor::redisplay_route_list ()
 	} 
 
 	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {
-		ignore_route_order_sync = true;
-		Route::SyncOrderKeys (); // EMIT SIGNAL
-		ignore_route_order_sync = false;
+		Route::SyncOrderKeys (this); // EMIT SIGNAL
 	}
 }
 
@@ -571,9 +576,7 @@ void
 Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
 	session->set_remote_control_ids();
-	ignore_route_list_reorder = true;
 	redisplay_route_list ();
-	ignore_route_list_reorder = false;
 }
 
 void  
