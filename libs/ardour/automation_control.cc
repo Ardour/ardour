@@ -53,7 +53,7 @@ void
 AutomationControl::set_value(float value)
 {
 	bool to_list = _list && _session.transport_stopped()
-		&& ((AutomationList*)_list.get())->automation_playback();
+		&& ((AutomationList*)_list.get())->automation_write();
 	
 	Control::set_float(value, to_list, _session.transport_frame());
 

@@ -2993,8 +2993,9 @@ Route::automation_snapshot (nframes_t now, bool force)
 		return;
 	}
 
+	IO::automation_snapshot (now, force);
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		// IO::automation_snapshot (now, force);  ?
 		(*i)->automation_snapshot (now, force);
 	}
 }
