@@ -304,7 +304,7 @@ PannerUI::setup_pan ()
 	} else if (nouts == 2) {
 
 		vector<Adjustment*>::size_type asz;
-		uint32_t npans = _io->panner().size();
+		uint32_t npans = _io->panner().npanners();
 
 		while (!pan_adjustments.empty()) {
 			delete pan_bars.back();
@@ -321,7 +321,7 @@ PannerUI::setup_pan ()
 			/* initialize adjustment with 0.0 (L) or 1.0 (R) for the first and second panners,
 			   which serves as a default, otherwise use current value */
 
-			_io->panner()[asz]->get_position (rx);
+			rx = _io->panner().pan_control( asz)->get_value();
 
 			if (npans == 1) {
 				x = 0.5;
@@ -334,13 +334,14 @@ PannerUI::setup_pan ()
 			}
 
 			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.05, 0.1));
-			bc = new PannerBar (*pan_adjustments[asz], _io->panner()[asz]->pan_control());
+			bc = new PannerBar (*pan_adjustments[asz],
+				boost::static_pointer_cast<PBD::Controllable>( _io->panner().pan_control( asz )) );
 
 			/* now set adjustment with current value of panner, then connect the signals */
 			pan_adjustments.back()->set_value(rx);
 			pan_adjustments.back()->signal_value_changed().connect (bind (mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
 
-			_io->panner()[asz]->Changed.connect (bind (mem_fun(*this, &PannerUI::pan_value_changed), (uint32_t) asz));
+			_io->panner().pan_control( asz )->Changed.connect (bind (mem_fun(*this, &PannerUI::pan_value_changed), (uint32_t) asz));
 
 			
 			bc->set_name ("PanSlider");
@@ -425,7 +426,7 @@ PannerUI::build_pan_menu (uint32_t which)
 	
 	/* set state first, connect second */
 
-	(dynamic_cast<CheckMenuItem*> (&items.back()))->set_active (_io->panner()[which]->muted());
+	(dynamic_cast<CheckMenuItem*> (&items.back()))->set_active (_io->panner().streampanner(which).muted());
 	(dynamic_cast<CheckMenuItem*> (&items.back()))->signal_toggled().connect
 		(bind (mem_fun(*this, &PannerUI::pan_mute), which));
 
@@ -445,8 +446,8 @@ PannerUI::build_pan_menu (uint32_t which)
 void
 PannerUI::pan_mute (uint32_t which)
 {
-	StreamPanner* sp = _io->panner()[which];
-	sp->set_muted (!sp->muted());
+	StreamPanner& sp = _io->panner().streampanner(which);
+	sp.set_muted (!sp.muted());
 }
 
 void
@@ -492,7 +493,7 @@ PannerUI::pan_changed (void *src)
 		return;
 	}
 
-	switch (_io->panner().size()) {
+	switch (_io->panner().npanners()) {
 	case 0:
 		panning_link_direction_button.set_sensitive (false);
 		panning_link_button.set_sensitive (false);
@@ -527,11 +528,11 @@ PannerUI::pan_changed (void *src)
 void
 PannerUI::pan_adjustment_changed (uint32_t which)
 {
-	if (!in_pan_update && which < _io->panner().size()) {
+	if (!in_pan_update && which < _io->panner().npanners()) {
 
 		float xpos;
 		float val = pan_adjustments[which]->get_value ();
-		_io->panner()[which]->get_position (xpos);
+		xpos = _io->panner().pan_control( which )->get_value();
 
 		/* add a kinda-sorta detent for the middle */
 		
@@ -548,7 +549,7 @@ PannerUI::pan_adjustment_changed (uint32_t which)
 		
 		if (!Panner::equivalent (val, xpos)) {
 
-			_io->panner()[which]->set_position (val);
+			_io->panner().streampanner(which).set_position (val);
 			/* XXX 
 			   the panner objects have no access to the session,
 			   so do this here. ick.
@@ -563,11 +564,11 @@ PannerUI::pan_value_changed (uint32_t which)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &PannerUI::pan_value_changed), which));
 							   
-	if (_io->n_outputs().n_audio() > 1 && which < _io->panner().size()) {
+	if (_io->n_outputs().n_audio() > 1 && which < _io->panner().npanners()) {
 		float xpos;
 		float val = pan_adjustments[which]->get_value ();
 
-		_io->panner()[which]->get_position (xpos);
+		_io->panner().streampanner(which).get_position (xpos);
 
 		if (!Panner::equivalent (val, xpos)) {
 			in_pan_update = true;
@@ -593,14 +594,14 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 		float xpos, val;
 
 		if (only_if_aplay) {
-			boost::shared_ptr<AutomationList> alist (_io->panner()[n]->pan_control()->alist());
+			boost::shared_ptr<AutomationList> alist (_io->panner().streampanner(n).pan_control()->alist());
 			
 			if (!alist->automation_playback()) {
 				continue;
 			}
 		}
 
-		_io->panner()[n]->get_effective_position (xpos);
+		_io->panner().streampanner(n).get_effective_position (xpos);
 		val = (*i)->get_value ();
 		
 		if (!Panner::equivalent (val, xpos)) {
@@ -727,7 +728,7 @@ PannerUI::pan_automation_state_changed ()
 		return;
 	}
 
-	x = (_io->panner().front()->pan_control()->alist()->automation_state() != Off);
+	x = (_io->panner().streampanner(0).pan_control()->alist()->automation_state() != Off);
 
 	if (pan_automation_state_button.get_active() != x) {
 	ignore_toggle = true;

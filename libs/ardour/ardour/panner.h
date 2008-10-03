@@ -32,12 +32,15 @@
 
 #include <ardour/types.h>
 #include <ardour/automation_control.h>
+#include <ardour/processor.h>
+#include <ardour/session.h>
 
 using std::istream;
 using std::ostream;
 
 namespace ARDOUR {
 
+class Route;
 class Session;
 class Panner;
 class BufferSet;
@@ -102,21 +105,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 
 	bool _muted;
 
-	struct PanControllable : public AutomationControl {
-	    PanControllable (Session& s, std::string name, StreamPanner& p, Evoral::Parameter param)
-			: AutomationControl (s, param,
-					boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
-			, panner (p)
-		{ assert(param.type() != NullAutomation); }
-	    
-		AutomationList* alist() { return (AutomationList*)_list.get(); }
-	    StreamPanner& panner;
-	    
-	    void set_value (float);
-	    float get_value (void) const;
-	};
-
-	boost::shared_ptr<PanControllable> _control;
+	boost::shared_ptr<AutomationControl> _control;
 
 	void add_state (XMLNode&);
 	virtual void update () = 0;
@@ -197,7 +186,8 @@ class Multi2dPanner : public StreamPanner
 	void update ();
 };
 
-class Panner : public std::vector<StreamPanner*>, public PBD::Stateful, public sigc::trackable
+
+class Panner : public Processor
 {
   public:
 	struct Output {
@@ -211,37 +201,43 @@ class Panner : public std::vector<StreamPanner*>, public PBD::Stateful, public s
 		    
 	};
 
+	//Panner (std::string name, Session&, int _num_bufs);
 	Panner (string name, Session&);
 	virtual ~Panner ();
 
+	void clear_panners ();
+
+
 	/// The fundamental Panner function
-	void distribute(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes, nframes_t offset);
-
-	bool bypassed() const { return _bypassed; }
-	void set_bypassed (bool yn);
-
-	StreamPanner* add ();
-	void remove (uint32_t which);
-	void clear ();
-	void reset (uint32_t noutputs, uint32_t npans);
-
-	void snapshot (nframes_t now);
-	void transport_stopped (nframes_t frame);
-	
-	void clear_automation ();
-
 	void set_automation_state (AutoState);
 	AutoState automation_state() const;
 	void set_automation_style (AutoStyle);
 	AutoStyle automation_style() const;
 	bool touching() const;
 
+	bool is_in_place () const { return false; }
+	bool is_out_of_place () const { return true; }
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const { return true; };
+
+	void run_out_of_place(BufferSet& src, BufferSet& dest, nframes_t start_frame, nframes_t end_frames, nframes_t nframes, nframes_t offset);
+
+	//void* get_inline_gui() const = 0;
+	//void* get_full_gui() const = 0;
+
+	bool bypassed() const { return _bypassed; }
+	void set_bypassed (bool yn);
+
+	StreamPanner* add ();
+	void remove (uint32_t which);
+	void reset (uint32_t noutputs, uint32_t npans);
+
+	
+
+
 	XMLNode& get_state (void);
 	XMLNode& state (bool full);
 	int      set_state (const XMLNode&);
 
-	sigc::signal<void> Changed;
-	
 	static bool equivalent (pan_t a, pan_t b) {
 		return fabsf (a - b) < 0.002; // about 1 degree of arc for a stereo panner
 	}
@@ -251,7 +247,6 @@ class Panner : public std::vector<StreamPanner*>, public PBD::Stateful, public s
 	Output& output (uint32_t n) { return outputs[n]; }
 
 	std::vector<Output> outputs;
-	Session& session() const { return _session; }
 
 	enum LinkDirection {
 		SameDirection,
@@ -264,6 +259,10 @@ class Panner : public std::vector<StreamPanner*>, public PBD::Stateful, public s
 	bool linked() const { return _linked; }
 	void set_linked (bool yn);
 
+	StreamPanner &streampanner( uint32_t n ) const { assert( n < _streampanners.size() ); return *_streampanners[n]; }
+	uint32_t npanners() const { return _streampanners.size(); }
+
+	sigc::signal<void> Changed;
 	sigc::signal<void> LinkStateChanged;
 	sigc::signal<void> StateChanged; /* for bypass */
 
@@ -277,10 +276,31 @@ class Panner : public std::vector<StreamPanner*>, public PBD::Stateful, public s
 
 	int load ();
 
+	struct PanControllable : public AutomationControl {
+	    PanControllable (Session& s, std::string name, Panner& p, Evoral::Parameter param)
+			: AutomationControl (s, param,
+					boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
+			, panner (p)
+		{ assert(param.type() != NullAutomation); }
+	    
+		AutomationList* alist() { return (AutomationList*)_list.get(); }
+	    Panner& panner;
+	    
+	    void set_value (float);
+	    float get_value (void) const;
+	};
+
+	boost::shared_ptr<AutomationControl> pan_control ( int id, int chan=0 ) {
+	    return boost::dynamic_pointer_cast<AutomationControl>( control( Evoral::Parameter (PanAutomation, chan, id) ));
+	}
+
+	boost::shared_ptr<const AutomationControl> pan_control ( int id, int chan=0 ) const {
+	    return boost::dynamic_pointer_cast<const AutomationControl>( control( Evoral::Parameter (PanAutomation, chan, id) ));
+	}
+
   private:
 	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, nframes_t offset, gain_t gain_coeff);
-
-	Session&         _session;
+	std::vector<StreamPanner*> _streampanners;
 	uint32_t     current_outs;
 	bool             _linked;
 	bool             _bypassed;
@@ -291,7 +311,6 @@ class Panner : public std::vector<StreamPanner*>, public PBD::Stateful, public s
 	/* old school automation handling */
 
 	std::string automation_path;
-	void set_name (std::string);
 };
 
 } // namespace ARDOUR

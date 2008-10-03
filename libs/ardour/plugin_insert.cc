@@ -80,7 +80,10 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	set_automatable ();
+	// XXX: This would dump all automation, which has already been loaded by
+	//      Processor. But this could also have been related to the Parameter change..
+	//      will look into this later.
+	//set_automatable ();
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -630,7 +633,7 @@ PluginInsert::state (bool full)
 	node.add_child_nocopy (_plugins[0]->get_state());
 
 	/* add port automation state */
-	XMLNode *autonode = new XMLNode(port_automation_node_name);
+	//XMLNode *autonode = new XMLNode(port_automation_node_name);
 	set<Evoral::Parameter> automatable = _plugins[0]->automatable();
 	
 	for (set<Evoral::Parameter>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
@@ -642,10 +645,10 @@ PluginInsert::state (bool full)
 		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 		*/
-		autonode->add_child_nocopy (((AutomationList*)data().control(*x)->list().get())->state (full));
+		//autonode->add_child_nocopy (((AutomationList*)data().control(*x)->list().get())->state (full));
 	}
 
-	node.add_child_nocopy (*autonode);
+	//node.add_child_nocopy (*autonode);
 	
 	return node;
 }
@@ -766,7 +769,7 @@ PluginInsert::set_state(const XMLNode& node)
 			}
 
 			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
-					data().control(Evoral::Parameter(PluginAutomation, port_id), true));
+					data().control(Evoral::Parameter(PluginAutomation, 0, port_id), true));
 
 			if (!child->children().empty()) {
 				c->alist()->set_state (*child->children().front());

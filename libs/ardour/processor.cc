@@ -214,7 +214,7 @@ Processor::set_state (const XMLNode& node)
 						break;
 					}
 					// FIXME: other automation types?
-					mark_automation_visible (Evoral::Parameter(PluginAutomation, what), true);
+					mark_automation_visible (Evoral::Parameter(PluginAutomation, 0, what), true);
 				}
 			}
 

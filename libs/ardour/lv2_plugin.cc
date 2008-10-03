@@ -390,7 +390,7 @@ LV2Plugin::automatable () const
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
 		if (parameter_is_input(i) && parameter_is_control(i)) {
-			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, i));
+			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
 		}
 	}
 

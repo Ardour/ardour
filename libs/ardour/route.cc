@@ -1046,7 +1046,9 @@ Route::passthru (nframes_t start_frame, nframes_t end_frame, nframes_t nframes, 
 	if (meter_first) {
 		_meter->run_in_place(bufs, start_frame, end_frame, nframes, offset);
 		meter_first = false;
-	}
+	 } else {
+		meter_first = true;
+	 }
 		
 	process_output_buffers (bufs, start_frame, end_frame, nframes, offset, true, declick, meter_first);
 }
@@ -1163,6 +1165,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* 
 
 		_meter->configure_io (potential_max_streams, potential_max_streams);
 
+		// XXX: do we want to emit the signal here ? change call order.
 		processor->activate ();
 		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
 
@@ -2830,7 +2833,7 @@ Route::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, nfra
 		
 		if (am.locked() && _session.transport_rolling()) {
 			
-			if (_gain_control->alist()->automation_playback()) {
+			if (_gain_control->automation_playback()) {
 				apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
 						start_frame, end_frame, _session.gain_automation_buffer(), nframes);
 			}

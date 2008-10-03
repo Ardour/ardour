@@ -411,7 +411,9 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 
 		if (drag_is_puck) {
 			
-			panner[drag_index]->set_position (drag_target->x, drag_target->y);
+			//panner.streampanner(drag_index).set_position (drag_target->x, drag_target->y);
+			panner.pan_control( drag_index )->set_value( drag_target->x );
+			//panner.control( Evoral::Parameter( PanAutomation, 1, drag_index ) )->set_value( drag_target->y );
 
 		} else {
 

@@ -745,11 +745,13 @@ MixerStrip::connect_to_pan ()
 	panstate_connection.disconnect ();
 	panstyle_connection.disconnect ();
 
-	if (!_route->panner().empty()) {
-		StreamPanner* sp = _route->panner().front();
+		boost::shared_ptr<ARDOUR::AutomationControl> pan_control
+			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
+				_route->panner().data().control(Evoral::Parameter( PanAutomation ) ));
 
-		panstate_connection = sp->pan_control()->alist()->automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
-		panstyle_connection = sp->pan_control()->alist()->automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
+	if (pan_control) {
+		panstate_connection = pan_control->alist()->automation_state_changed.connect (mem_fun(panners, &PannerUI::pan_automation_state_changed));
+		panstyle_connection = pan_control->alist()->automation_style_changed.connect (mem_fun(panners, &PannerUI::pan_automation_style_changed));
 	}
 
 	panners.pan_changed (this);

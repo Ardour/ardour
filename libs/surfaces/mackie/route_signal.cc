@@ -41,9 +41,9 @@ void RouteSignal::connect()
 		
 	_name_changed_connection = _route.NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
 	
-	if ( _route.panner().size() == 1 )
+	if ( _route.panner().npanners() == 1 )
 	{
-		_panner_changed_connection = _route.panner()[0]->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this ) );
+		_panner_changed_connection = _route.panner().pan_control(0)->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this ) );
 	}
 	
 	try

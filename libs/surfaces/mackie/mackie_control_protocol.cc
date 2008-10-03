@@ -862,11 +862,10 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			{
 				if ( route != 0 )
 				{
-					if ( route->panner().size() == 1 )
+					if ( route->panner().npanners() == 1 )
 					{
 						// assume pan for now
-						float xpos;
-						route->panner()[0]->get_effective_position (xpos);
+						float xpos = route->panner().pan_control(0)->get_value ();
 						
 						// calculate new value, and trim
 						xpos += state.delta;
@@ -875,7 +874,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 						else if ( xpos < 0.0 )
 							xpos = 0.0;
 						
-						route->panner()[0]->set_position( xpos );
+						route->panner().pan_control(0)->set_value( xpos );
 					}
 				}
 				else
@@ -999,10 +998,9 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal )
 	{
 		Pot & pot = route_signal->strip().vpot();
 		
-		if ( route_signal->route().panner().size() == 1 )
+		if ( route_signal->route().panner().npanners() == 1 )
 		{
-			float pos;
-			route_signal->route().panner()[0]->get_effective_position( pos);
+			float pos = route_signal->route().panner().pan_control(0)->get_value();
 			route_signal->port().write( builder.build_led_ring( pot, ControlState( on, pos ) ) );
 		}
 		else

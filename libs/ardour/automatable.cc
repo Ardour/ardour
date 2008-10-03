@@ -29,6 +29,7 @@
 #include <ardour/automatable.h>
 #include <ardour/midi_track.h>
 #include <ardour/plugin_insert.h>
+#include <ardour/panner.h>
 
 #include "i18n.h"
 
@@ -67,7 +68,7 @@ Automatable::old_set_automation_state (const XMLNode& node)
 			if (sstr.fail()) {
 				break;
 			}
-			mark_automation_visible (Evoral::Parameter(PluginAutomation, what), true);
+			mark_automation_visible (Evoral::Parameter(PluginAutomation, 0, what), true);
 		}
 	}
 	
@@ -110,7 +111,7 @@ Automatable::load_automation (const string& path)
 		in >> when;  if (!in) goto bad;
 		in >> value; if (!in) goto bad;
 		
-		Evoral::Parameter param(PluginAutomation, port);
+		Evoral::Parameter param(PluginAutomation, 0, port);
 		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
 		boost::shared_ptr<Evoral::Control> c = control (param, true);
 		c->list()->add (when, value);
@@ -234,10 +235,14 @@ Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy
 			}
 
 			boost::shared_ptr<Evoral::Control> existing = control(param);
-			if (existing)
+			if (existing) {
 				existing->set_list(al);
-			else
-				add_control(control_factory(param));
+			} else {
+			    boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
+				add_control(newcontrol);
+				newcontrol->set_list(al);
+				warning << "Control did not exist";
+			}
 
 		} else {
 			error << "Expected AutomationList node, got '" << (*niter)->name() << endmsg;
@@ -401,6 +406,10 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		control = new MidiTrack::MidiControl((MidiTrack*)this, param);
 	} else if (param.type() == PluginAutomation) {
 		control = new PluginInsert::PluginControl((PluginInsert*)this, param);
+	} else if (param.type() == GainAutomation) {
+		control = new IO::GainControl( X_("gaincontrol"), (IO*)this, param);
+	} else if (param.type() == PanAutomation) {
+		control = new Panner::PanControllable( ((Panner *)this)->session(), X_("panner"), *(Panner *)this, param);
 	} else {
 		control = new AutomationControl(_a_session, param);
 	}

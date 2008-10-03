@@ -297,7 +297,7 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 	if (which < _descriptor->PortCount) {
 		_shadow_data[which] = (LADSPA_Data) val;
 #if 0
-		ParameterChanged (Parameter(PluginAutomation, which), val); /* EMIT SIGNAL */
+		ParameterChanged (Parameter(PluginAutomation, 0, which), val); /* EMIT SIGNAL */
 
 		if (which < parameter_count() && controls[which]) {
 			controls[which]->Changed ();
@@ -503,7 +503,7 @@ LadspaPlugin::automatable () const
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
 		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
 			
-			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, i));
+			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
 		}
 	}
 

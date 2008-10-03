@@ -65,19 +65,19 @@ static pan_t direct_control_to_pan (double fract) {
 	return fract;
 }
 
-static double direct_pan_to_control (pan_t val) { 
-	return val;
-}
+
+//static double direct_pan_to_control (pan_t val) { 
+//	return val;
+//}
 
 StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	: parent (p)
-	, _control (new PanControllable(p.session(), X_("panner"), *this, param))
 {
 	assert(param.type() != NullAutomation);
 
 	_muted = false;
 
-	parent.session().add_controllable (_control);
+	_control = boost::dynamic_pointer_cast<AutomationControl>( parent.control( param, true ) );
 
 	x = 0.5;
 	y = 0.5;
@@ -89,17 +89,16 @@ StreamPanner::~StreamPanner ()
 }
 
 void
-StreamPanner::PanControllable::set_value (float val)
+Panner::PanControllable::set_value (float val)
 {
-	panner.set_position (direct_control_to_pan (val));
+	panner.streampanner(parameter().id()).set_position (direct_control_to_pan (val));
+	AutomationControl::set_value(val);
 }
 
 float
-StreamPanner::PanControllable::get_value (void) const
+Panner::PanControllable::get_value (void) const
 {
-	float xpos;
-	panner.get_effective_position (xpos);
-	return direct_pan_to_control (xpos);
+	return AutomationControl::get_value();
 }
 
 void
@@ -376,7 +375,7 @@ EqualPowerStereoPanner::update ()
 	desired_right = panR * (scale * panR + 1.0f - scale);
 
 	effective_x = x;
-	_control->set_value(x);
+	//_control->set_value(x);
 }
 
 void
@@ -404,7 +403,6 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	if (nframes > 0) {
 		effective_x = buffers[0][nframes-1];
-		_control->set_value(effective_x); // signal, update UI
 	}
 
 	if (_muted) {
@@ -473,9 +471,7 @@ EqualPowerStereoPanner::state (bool full_state)
 	root->add_property (X_("x"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
-	XMLNode* autonode = new XMLNode (X_("Automation"));
-	autonode->add_child_nocopy (((AutomationList*)_control->list().get())->state (full_state));
-	root->add_child_nocopy (*autonode);
+	// XXX: dont save automation here... its part of the automatable panner now.
 
 	StreamPanner::add_state (*root);
 
@@ -560,7 +556,6 @@ Multi2dPanner::update ()
 	}
 
 	effective_x = x;
-	_control->set_value(x);
 }
 
 void
@@ -704,8 +699,9 @@ Multi2dPanner::set_state (const XMLNode& node)
 /*---------------------------------------------------------------------- */
 
 Panner::Panner (string name, Session& s)
-	: _session (s)
+	: Processor(s, name, PostFader)
 {
+	//set_name_old_auto (name);
 	set_name (name);
 
 	_linked = false;
@@ -737,6 +733,7 @@ Panner::set_link_direction (LinkDirection ld)
 	}
 }
 
+
 void
 Panner::set_bypassed (bool yn)
 {
@@ -753,12 +750,14 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	uint32_t n;
 	bool changed = false;
 
-	if (nouts < 2 || (nouts == outputs.size() && npans == size())) {
+	//configure_io( ChanCount( DataType::AUDIO, nout ), ChanCount( DataType::AUDIO, nin ) )
+	
+	if (nouts < 2 || (nouts == outputs.size() && npans == _streampanners.size())) {
 		return;
 	} 
 
-	n = size();
-	clear ();
+	n = _streampanners.size();
+	clear_panners ();
 
 	if (n != npans) {
 		changed = true;
@@ -788,7 +787,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output (1.0, 0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new EqualPowerStereoPanner (*this, Evoral::Parameter(PanAutomation, n)));
+			_streampanners.push_back (new EqualPowerStereoPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
 		break;
 
@@ -798,7 +797,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (1.0, 1.0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
+			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
 
 		break; 
@@ -810,7 +809,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (0, 1.0));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
+			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
 
 		break;	
@@ -823,7 +822,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		outputs.push_back (Output  (0.5, 0.75));
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
+			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
 
 		break;
@@ -835,13 +834,13 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		}
 
 		for (n = 0; n < npans; ++n) {
-			push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, n)));
+			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
 
 		break;
 	}
 
-	for (iterator x = begin(); x != end(); ++x) {
+	for (std::vector<StreamPanner*>::iterator x = _streampanners.begin(); x != _streampanners.end(); ++x) {
 		(*x)->update ();
 	}
 
@@ -857,16 +856,16 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		float left;
 		float right;
 
-		front()->get_position (left);
-		back()->get_position (right);
+		_streampanners.front()->get_position (left);
+		_streampanners.back()->get_position (right);
 
 		if (changed || ((left == 0.5) && (right == 0.5))) {
 		
-			front()->set_position (0.0);
-			front()->pan_control()->list()->reset_default (0.0);
+			_streampanners.front()->set_position (0.0);
+			_streampanners.front()->pan_control()->list()->reset_default (0.0);
 			
-			back()->set_position (1.0);
-			back()->pan_control()->list()->reset_default (1.0);
+			_streampanners.back()->set_position (1.0);
+			_streampanners.back()->pan_control()->list()->reset_default (1.0);
 			
 			changed = true;
 		}
@@ -883,28 +882,28 @@ void
 Panner::remove (uint32_t which)
 {
 	vector<StreamPanner*>::iterator i;
-	for (i = begin(); i != end() && which; ++i, --which);
+	for (i = _streampanners.begin(); i != _streampanners.end() && which; ++i, --which);
 
-	if (i != end()) {
+	if (i != _streampanners.end()) {
 		delete *i;
-		erase (i);
+		_streampanners.erase (i);
 	}
 }
 
 void
-Panner::clear ()
+Panner::clear_panners ()
 {
-	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+	for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 		delete *i;
 	}
 
-	vector<StreamPanner*>::clear ();
+	_streampanners.clear ();
 }
 
 void
 Panner::set_automation_style (AutoStyle style)
 {
-	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+	for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 		((AutomationList*)(*i)->pan_control()->list().get())->set_automation_style (style);
 	}
 	_session.set_dirty ();
@@ -913,7 +912,7 @@ Panner::set_automation_style (AutoStyle style)
 void
 Panner::set_automation_state (AutoState state)
 {
-	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+	for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 		((AutomationList*)(*i)->pan_control()->list().get())->set_automation_state (state);
 	}
 	_session.set_dirty ();
@@ -923,7 +922,7 @@ AutoState
 Panner::automation_state () const
 {
 	if (!empty()) {
-		return ((AutomationList*)front()->pan_control()->list().get())->automation_state ();
+		return ((AutomationList*)_streampanners.front()->pan_control()->list().get())->automation_state ();
 	} else {
 		return Off;
 	}
@@ -933,38 +932,12 @@ AutoStyle
 Panner::automation_style () const
 {
 	if (!empty()) {
-		return ((AutomationList*)front()->pan_control()->list().get())->automation_style ();
+		return ((AutomationList*)_streampanners.front()->pan_control()->list().get())->automation_style ();
 	} else {
 		return Absolute;
 	}
 }
 
-void
-Panner::transport_stopped (nframes_t frame)
-{
-	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		((AutomationList*)(*i)->pan_control()->list().get())->reposition_for_rt_add (frame);
-	}
-}	
-
-void
-Panner::snapshot (nframes_t now)
-{
-	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		AutomationList* list = ((AutomationList*)(*i)->pan_control()->list().get());
-		if (list->automation_write())
-			list->rt_add(now, (*i)->pan_control()->get_value());
-	}
-}	
-
-void
-Panner::clear_automation ()
-{
-	for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->pan_control()->list()->clear ();
-	}
-	_session.set_dirty ();
-}	
 
 struct PanPlugins {
     string name;
@@ -987,13 +960,20 @@ Panner::get_state (void)
 XMLNode&
 Panner::state (bool full)
 {
-	XMLNode* root = new XMLNode (X_("Panner"));
+	XMLNode& node = Processor::state(full);
+
+	node.add_property ("type", "panner");
+
 	char buf[32];
 
-	root->add_property (X_("linked"), (_linked ? "yes" : "no"));
-	root->add_property (X_("link_direction"), enum_2_string (_link_direction));
-	root->add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
+	node.add_property (X_("linked"), (_linked ? "yes" : "no"));
+	node.add_property (X_("link_direction"), enum_2_string (_link_direction));
+	node.add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
 
+	snprintf (buf, sizeof (buf), "%d", _streampanners.size());
+	node.add_property (X_("ins"), buf);
+	snprintf (buf, sizeof (buf), "%d", outputs.size());
+	node.add_property (X_("outs"), buf);
 	/* add each output */
 
 	for (vector<Panner::Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
@@ -1002,14 +982,15 @@ Panner::state (bool full)
 		onode->add_property (X_("x"), buf);
 		snprintf (buf, sizeof (buf), "%.12g", (*o).y);
 		onode->add_property (X_("y"), buf);
-		root->add_child_nocopy (*onode);
+		node.add_child_nocopy (*onode);
 	}
 
-	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
-		root->add_child_nocopy ((*i)->state (full));
+	for (vector<StreamPanner*>::const_iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
+		node.add_child_nocopy ((*i)->state (full));
 	}
 
-	return *root;
+
+	return node;
 }
 
 int
@@ -1022,7 +1003,14 @@ Panner::set_state (const XMLNode& node)
 	StreamPanner* sp;
 	LocaleGuard lg (X_("POSIX"));
 
-	clear ();
+	clear_panners ();
+
+	Processor::set_state(node);
+
+	ChanCount ins = ChanCount::ZERO;
+	ChanCount outs = ChanCount::ZERO;
+
+	// XXX: this might not be necessary anymore
 	outputs.clear ();
 
 	if ((prop = node.property (X_("linked"))) != 0) {
@@ -1033,6 +1021,15 @@ Panner::set_state (const XMLNode& node)
 	if ((prop = node.property (X_("bypassed"))) != 0) {
 		set_bypassed (prop->value() == "yes");
 	}
+    
+    if ((prop = node.property (X_("ins"))) != 0) {
+        ins.set_audio(atoi(prop->value().c_str()));
+    }
+    
+    if ((prop = node.property (X_("outs"))) != 0) {
+        outs.set_audio(atoi(prop->value().c_str()));
+    }
+    
 
 	if ((prop = node.property (X_("link_direction"))) != 0) {
 		LinkDirection ld; /* here to provide type information */
@@ -1071,10 +1068,10 @@ Panner::set_state (const XMLNode& node)
 						   assumption, but its still an assumption.
 						*/
 						
-						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0));
+						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, i));
 						
 						if (sp->set_state (**niter) == 0) {
-							push_back (sp);
+							_streampanners.push_back (sp);
 						}
 						
 						break;
@@ -1097,6 +1094,7 @@ Panner::set_state (const XMLNode& node)
 		} 	
 	}
 
+	reset(ins.n_audio(), outs.n_audio());
 	/* don't try to do old-school automation loading if it wasn't marked as existing */
 
 	if ((prop = node.property (X_("automation")))) {
@@ -1109,12 +1107,10 @@ Panner::set_state (const XMLNode& node)
 	return 0;
 }
 
-
-
 bool
 Panner::touching () const
 {
-	for (vector<StreamPanner*>::const_iterator i = begin(); i != end(); ++i) {
+	for (vector<StreamPanner*>::const_iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 		if (((AutomationList*)(*i)->pan_control()->list().get())->touching ()) {
 			return true;
 		}
@@ -1135,7 +1131,7 @@ Panner::set_position (float xpos, StreamPanner& orig)
 	
 	if (_link_direction == SameDirection) {
 
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
 				(*i)->set_position (xpos, true);
 			} else {
@@ -1148,7 +1144,7 @@ Panner::set_position (float xpos, StreamPanner& orig)
 
 	} else {
 
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
 				(*i)->set_position (xpos, true);
 			} else {
@@ -1174,7 +1170,7 @@ Panner::set_position (float xpos, float ypos, StreamPanner& orig)
 	
 	if (_link_direction == SameDirection) {
 
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
 				(*i)->set_position (xpos, ypos, true);
 			} else {
@@ -1192,7 +1188,7 @@ Panner::set_position (float xpos, float ypos, StreamPanner& orig)
 
 	} else {
 
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
 				(*i)->set_position (xpos, ypos, true);
 			} else {
@@ -1224,7 +1220,7 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 
 	if (_link_direction == SameDirection) {
 
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
 				(*i)->set_position (xpos, ypos, zpos, true);
 			} else {
@@ -1245,7 +1241,7 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 
 	} else {
 
-		for (vector<StreamPanner*>::iterator i = begin(); i != end(); ++i) {
+		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
 				(*i)->set_position (xpos, ypos, true);
 			} else {
@@ -1332,13 +1328,13 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 
 	BufferSet::audio_iterator i = inbufs.audio_begin();
 
-	for (iterator pan = begin(); pan != end() && i != inbufs.audio_end(); ++pan, ++i) {
+	for (vector<StreamPanner*>::iterator pan = _streampanners.begin(); pan != _streampanners.end() && i != inbufs.audio_end(); ++pan, ++i) {
 		(*pan)->distribute (*i, outbufs, gain_coeff, nframes);
 	}
 }
 
 void
-Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
+Panner::run_out_of_place (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame, nframes_t end_frame, nframes_t nframes, nframes_t offset)
 {	
 	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug
@@ -1385,7 +1381,7 @@ Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame
 	}
 
 	// More than 1 output, we should have 1 panner for each input
-	assert(size() == inbufs.count().n_audio());
+	//assert(_streampanners.size() == inbufs.count().n_audio());
 	
 	/* the terrible silence ... */
 	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
@@ -1393,19 +1389,21 @@ Panner::distribute (BufferSet& inbufs, BufferSet& outbufs, nframes_t start_frame
 	}
 
 	BufferSet::audio_iterator i = inbufs.audio_begin();
-	for (iterator pan = begin(); pan != end(); ++pan, ++i) {
+	for (vector<StreamPanner*>::iterator pan = _streampanners.begin(); pan != _streampanners.end(); ++pan, ++i) {
 		(*pan)->distribute_automated (*i, outbufs, start_frame, end_frame, nframes, _session.pan_automation_buffer());
 	}
 }
 
 /* old school automation handling */
 
+/*
 void
 Panner::set_name (string str)
 {
 	automation_path = Glib::build_filename(_session.automation_dir(), 
 		_session.snap_name() + "-pan-" + legalize_for_path (str) + ".automation");
 }
+*/
 
 int
 Panner::load ()
@@ -1413,7 +1411,7 @@ Panner::load ()
 	char line[128];
 	uint32_t linecnt = 0;
 	float version;
-	iterator sp;
+	vector<StreamPanner*>::iterator sp;
 	LocaleGuard lg (X_("POSIX"));
 
 	if (automation_path.length() == 0) {
@@ -1433,7 +1431,7 @@ Panner::load ()
 		return -1;
 	}
 
-	sp = begin();
+	sp = _streampanners.begin();
 
 	while (in.getline (line, sizeof(line), '\n')) {
 
@@ -1458,7 +1456,7 @@ Panner::load ()
 
 		if (strcmp (line, "begin") == 0) {
 			
-			if (sp == end()) {
+			if (sp == _streampanners.end()) {
 				error << string_compose (_("too many panner states found in pan automation file %1"),
 						  automation_path)
 				      << endmsg;

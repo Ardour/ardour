@@ -228,15 +228,16 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	/* automation */
 
 	struct GainControl : public AutomationControl {
-	    GainControl (std::string name, IO& i, boost::shared_ptr<AutomationList> al)
-			: AutomationControl (i._session, al->parameter(), al, name)
+	    GainControl (std::string name, IO* i, const Evoral::Parameter &param,
+		    boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>() )
+			: AutomationControl (i->_session, param, al, name )
 			, _io (i)
 		{}
 	 
 	    void set_value (float val);
 	    float get_value (void) const;
    
-	    IO& _io;
+	    IO* _io;
 	};
 
 	boost::shared_ptr<GainControl> gain_control() {

@@ -140,8 +140,7 @@ IO::IO (Session& s, const string& name,
 	boost::shared_ptr<AutomationList> gl(
 			new AutomationList(Evoral::Parameter(GainAutomation)));
 
-	_gain_control = boost::shared_ptr<GainControl>(
-			new GainControl(X_("gaincontrol"), *this, gl));
+	_gain_control = boost::shared_ptr<GainControl>( new GainControl( X_("gaincontrol"), this, Evoral::Parameter(GainAutomation), gl ));
 
 	add_control(_gain_control);
 
@@ -183,7 +182,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 			new AutomationList(Evoral::Parameter(GainAutomation)));
 
 	_gain_control = boost::shared_ptr<GainControl>(
-			new GainControl(X_("gaincontrol"), *this, gl));
+			new GainControl( X_("gaincontrol"), this, Evoral::Parameter(GainAutomation), gl));
 
 	add_control(_gain_control);
 
@@ -265,10 +264,10 @@ IO::deliver_output (BufferSet& bufs, nframes_t start_frame, nframes_t end_frame,
 		if (dg != _gain || dg != 1.0)
 			Amp::run_in_place(bufs, nframes, _gain, dg, _phase_invert);
 	}
-	
+
 	// Use the panner to distribute audio to output port buffers
-	if (_panner && !_panner->empty() && !_panner->bypassed()) {
-		_panner->distribute (bufs, output_buffers(), start_frame, end_frame, nframes, offset);
+	if( _panner && _panner->npanners() && !_panner->bypassed()) {
+		_panner->run_out_of_place(bufs, output_buffers(), start_frame, end_frame, nframes, offset);
 	} else {
 		const DataType type = DataType::AUDIO;
 		
@@ -1402,11 +1401,21 @@ IO::set_state (const XMLNode& node)
 
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
+		// Old school Panner.
 		if ((*iter)->name() == "Panner") {
 			if (_panner == 0) {
 				_panner = new Panner (_name, _session);
 			}
 			_panner->set_state (**iter);
+		}
+
+		if ((*iter)->name() == "Processor") {
+			if ((*iter)->property ("type") && ((*iter)->property ("type")->value() == "panner" ) ) {
+				if (_panner == 0) {
+					_panner = new Panner (_name, _session);
+				}
+				_panner->set_state (**iter);
+			}
 		}
 
 		if ((*iter)->name() == X_("Automation")) {
@@ -1432,6 +1441,8 @@ IO::set_state (const XMLNode& node)
 		port_legal_c = PortsLegal.connect (mem_fun (*this, &IO::ports_became_legal));
 	}
 
+	if( !_panner )
+	    _panner = new Panner( _name, _session );
 	if (panners_legal) {
 		reset_panner ();
 	} else {
@@ -2223,10 +2234,9 @@ IO::GainControl::set_value (float val)
 	if (val > 1.99526231f)
 		val = 1.99526231f;
 
-	_user_value = val;
-	_io.set_gain (val, this);
+	_io->set_gain (val, this);
 	
-	Changed(); /* EMIT SIGNAL */
+	AutomationControl::set_value(val);
 }
 
 float
@@ -2270,7 +2280,7 @@ void
 IO::clear_automation ()
 {
 	data().clear (); // clears gain automation
-	_panner->clear_automation ();
+	_panner->data().clear();
 }
 
 void
@@ -2341,10 +2351,12 @@ IO::set_gain (gain_t val, void *src)
 		_gain = val;
 	}
 	
+	/*
 	if (_session.transport_stopped() && src != 0 && src != this && _gain_control->automation_write()) {
 		_gain_control->list()->add (_session.transport_frame(), val);
 		
 	}
+	*/
 
 	_session.set_dirty();
 }
@@ -2352,16 +2364,16 @@ IO::set_gain (gain_t val, void *src)
 void
 IO::start_pan_touch (uint32_t which)
 {
-	if (which < _panner->size()) {
-		(*_panner)[which]->pan_control()->start_touch();
+	if (which < _panner->npanners()) {
+		(*_panner).pan_control(which)->start_touch();
 	}
 }
 
 void
 IO::end_pan_touch (uint32_t which)
 {
-	if (which < _panner->size()) {
-		(*_panner)[which]->pan_control()->stop_touch();
+	if (which < _panner->npanners()) {
+		(*_panner).pan_control(which)->stop_touch();
 	}
 
 }
@@ -2370,12 +2382,17 @@ void
 IO::automation_snapshot (nframes_t now, bool force)
 {
 	AutomatableControls::automation_snapshot (now, force);
+	// XXX: This seems to be wrong. 
+	// drobilla: shouldnt automation_snapshot for panner be called
+	//           "automagically" because its an Automatable now ?
+	//
+	//           we could dump this whole method then. <3
 
 	if (_last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
-		_panner->snapshot (now);
+		_panner->automation_snapshot (now, force);
 	}
 	
-	_panner->snapshot (now);
+	_panner->automation_snapshot (now, force);
 	_last_automation_snapshot = now;
 }
 
