@@ -306,6 +306,8 @@ class Session : public PBD::StatefulDestructible
 	    bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 	
+	void sync_order_keys (void *src);
+
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
@@ -1751,7 +1753,6 @@ class Session : public PBD::StatefulDestructible
 	XMLNode& get_control_protocol_state ();
 	
 	void set_history_depth (uint32_t depth);
-	void sync_order_keys ();
 
 	static bool _disable_all_loaded_plugins;
 };

@@ -51,7 +51,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 uint32_t Route::order_key_cnt = 0;
-sigc::signal<void> Route::SyncOrderKeys;
+sigc::signal<void,void*> Route::SyncOrderKeys;
 
 Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
 	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
