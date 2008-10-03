@@ -22,7 +22,6 @@
 #include <set>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include <glibmm/thread.h>
 #include <evoral/types.hpp>
 #include <evoral/Parameter.hpp>
 
