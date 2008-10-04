@@ -99,9 +99,9 @@ style "default_base" = "medium_text"
   fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
   fg[SELECTED] = { 0.80, 0.80, 0.80 }	
   
-  bg[NORMAL] = { 0.31, 0.35, 0.38 }
-  bg[ACTIVE] = { 0.31, 0.35, 0.38 }
-  bg[PRELIGHT] = "#515690"
+  bg[NORMAL] = { 0.31, 0.32, 0.38 }
+  bg[ACTIVE] = { 0.31, 0.32, 0.38 }
+  bg[PRELIGHT] = "#515290"
   bg[INSENSITIVE] = { 0.06, 0.10, 0.10 }
   bg[SELECTED] = { 0, 0.40, 0.60 }
   
@@ -111,8 +111,8 @@ style "default_base" = "medium_text"
   text[INSENSITIVE] = { 0.80, 0.80, 0.80}	
   text[SELECTED] = { 1.0, 1.0, 1.0 }
   
-  base[ACTIVE]     = "#272a32"
-  base[NORMAL]      =  "#1a1e24"
+  base[ACTIVE]       = "#272a32"
+  base[NORMAL]       = "#1a1e24"
   base[PRELIGHT]     = { 0.18, 0.20, 0.22 }
   base[INSENSITIVE]  = "#4c5159"
   base[SELECTED]     = { 0.23, 0.25, 0.27 }
@@ -729,6 +729,7 @@ style "audio_track_base" = "default_base"
 {
   font_name = "%FONT_SMALLER%"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  bg[NORMAL] = "#43546e"
   bg[NORMAL] = { 0.18, 0.19, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
   bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
@@ -736,20 +737,11 @@ style "audio_track_base" = "default_base"
   bg[SELECTED] = { 0.20, 0.20, 0.20 }
 }
 
-style "midi_bus_base"
-{
-  font_name = "%FONT_SMALLER%"
-  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
-  fg[NORMAL] = { 0.7, 0.8, 0.2 }	
-  #bg[NORMAL] = {0, 0.36, 0.40 }
-  bg[NORMAL] = "#444466"	
-}
-
 style "midi_track_base" = "default_base"
 {
   font_name = "%FONT_SMALLER%"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
-  bg[NORMAL] = { 0.48, 0.30, 0.32 }
+  bg[NORMAL] = "#546e43"
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
   bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
   bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }

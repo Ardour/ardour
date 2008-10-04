@@ -734,15 +734,6 @@ style "audio_track_base" = "default_base"
   bg[SELECTED] = { 0.80, 0.80, 0.80 }
 }
 
-style "midi_bus_base"
-{
-  font_name = "%FONT_SMALLER%"
-  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
-  fg[NORMAL] = { 0.7, 0.8, 0.2 }	
-  #bg[NORMAL] = {0, 0.36, 0.40 }
-  bg[NORMAL] = "#444466"	
-}
-
 style "midi_track_base" = "default_base"
 {
   font_name = "%FONT_SMALLER%"
