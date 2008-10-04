@@ -344,6 +344,7 @@ Editor::redisplay_route_list ()
 		if (visible) {
 			tv->set_marked_for_display (true);
 			position += tv->show_at (position, n, &edit_controls_vbox);
+			tv->clip_to_viewport ();
 		} else {
 			tv->hide ();
 		}

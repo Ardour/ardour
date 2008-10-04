@@ -346,6 +346,8 @@ Editor::track_canvas_size_allocated ()
 	reset_hscrollbar_stepping ();
 	update_fixed_rulers();
 	redisplay_tempo (false);
+
+	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	
 	Resized (); /* EMIT_SIGNAL */
 		
@@ -364,6 +366,7 @@ Editor::controls_layout_size_request (Requisition* req)
 		TimeAxisView *tv = (*i)[route_display_columns.tv];
 		if (tv != 0) {
 			pos += tv->effective_height;
+			tv->clip_to_viewport ();
 		}
 	}
 
@@ -542,29 +545,17 @@ Editor::drop_routes (const Glib::RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (GdkEventMotion* event)
 {
+
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
 	nframes64_t frame = drag_info.current_pointer_frame;
 	bool startit = false;
-	double vertical_pos = vertical_adjustment.get_value();
-	double upper = vertical_adjustment.get_upper();
-
-	/* 
-	   adjust the event.y to take account of the bounds 
-	   of the _trackview_group 
-	*/
-
-	double vsx1, vsx2, vsy1, vsy2;
-	_trackview_group->get_bounds (vsx1, vsy1, vsx2, vsy2);
 
 	autoscroll_y = 0;
 	autoscroll_x = 0;
-
-	if ((event->y - vsy1) < vertical_pos) {
+	if (event->y < canvas_timebars_vsize) {
 		autoscroll_y = -1;
 		startit = true;
-	}
-
-	if ((event->y - vsy1) > (vertical_pos + canvas_height - canvas_timebars_vsize) && vertical_pos <= upper) {
+	} else if (event->y > canvas_height) {
 		autoscroll_y = 1;
 		startit = true;
 	}
@@ -652,47 +643,20 @@ Editor::autoscroll_canvas ()
 	double new_pixel;
 	double target_pixel;
 
-	if (autoscroll_x_distance != 0) {
-
-		if (autoscroll_cnt == 50) { /* 0.5 seconds */
-			
-			/* after about a while, speed up a bit by changing the timeout interval */
-			
-			autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/30.0f);
-			
-		} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
-			
-			autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/20.0f);
-			
-		} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
-			
-			/* after about another while, speed up by increasing the shift per callback */
-			
-			autoscroll_x_distance =  (nframes64_t) floor (current_page_frames()/10.0f);
-			
-		} 
+	if (autoscroll_x > 0) {
+		autoscroll_x_distance = (unit_to_frame (drag_info.current_pointer_x) - (leftmost_frame + current_page_frames())) / 3;
+	} else if (autoscroll_x < 0) {
+		autoscroll_x_distance = (leftmost_frame - unit_to_frame (drag_info.current_pointer_x)) / 3;
+		
 	}
-
-	if (autoscroll_y_distance != 0) {
-
-		if (autoscroll_cnt == 50) { /* 0.5 seconds */
-			
-			/* after about a while, speed up a bit by changing the timeout interval */
-			
-			autoscroll_y_distance = 10;
-			
-		} else if (autoscroll_cnt == 150) { /* 1.0 seconds */
-			
-			autoscroll_y_distance = 20;
-			
-		} else if (autoscroll_cnt == 300) { /* 1.5 seconds */
-			
-			/* after about another while, speed up by increasing the shift per callback */
-			
-			autoscroll_y_distance =  40;
-		} 
+	
+	if (autoscroll_y > 0) {
+		autoscroll_y_distance = (drag_info.current_pointer_y - (get_trackview_group_vertical_offset() + canvas_height)) / 3;
+	} else if (autoscroll_y < 0) {
+		
+		autoscroll_y_distance = (vertical_adjustment.get_value () - drag_info.current_pointer_y) / 3;
 	}
-
+	
 	if (autoscroll_x < 0) {
 		if (leftmost_frame < autoscroll_x_distance) {
 			new_frame = 0;
@@ -747,8 +711,6 @@ Editor::autoscroll_canvas ()
 		new_pixel = vertical_pos;
 	}
 
-
-
 	if ((new_frame == 0 || new_frame == limit) && (new_pixel == 0 || new_pixel == DBL_MAX)) {
 		/* we are done */
 		return false;
@@ -757,8 +719,6 @@ Editor::autoscroll_canvas ()
 	if (new_frame != leftmost_frame) {
 		reset_x_origin (new_frame);
 	}
-
-	vertical_adjustment.set_value (new_pixel);
 
 	/* fake an event. */
 
@@ -772,6 +732,8 @@ Editor::autoscroll_canvas ()
 	ev.y = y;
 
 	motion_handler (drag_info.item, (GdkEvent*) &ev, drag_info.item_type, true);
+
+	vertical_adjustment.set_value (new_pixel);
 
 	autoscroll_cnt++;
 
@@ -872,13 +834,16 @@ void
 Editor::scroll_canvas_vertically ()
 {
 	/* vertical scrolling only */
-	double x1, x2, y1, y2, y_delta;
+	double y_delta;
 
-	_trackview_group->get_bounds(x1, y1, x2, y2);
-	y_delta = y1 + get_trackview_group_vertical_offset ();
+	y_delta = last_trackview_group_vertical_offset - get_trackview_group_vertical_offset ();
 
-	_trackview_group->move (0, -y_delta);
+	_trackview_group->move (0, y_delta);
 
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->clip_to_viewport ();
+	}
+	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	/* required to keep the controls_layout in lock step with the canvas group */
 	track_canvas->update_now ();
 }
@@ -966,12 +931,13 @@ Editor::color_handler()
 	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
 
 	refresh_location_display ();
+/*
 	redisplay_tempo (true);
 
 	if (session)
 		session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
+*/
 }
-
 
 void
 Editor::flush_canvas ()

@@ -143,6 +143,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	 */
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 
+	void clip_to_viewport ();
+
 	bool touched (double top, double bot);
 
 	/** Hides this TrackView */
