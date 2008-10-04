@@ -838,6 +838,7 @@ class Editor : public PublicEditor
 
 	gdouble get_trackview_group_vertical_offset () const { return vertical_adjustment.get_value () - canvas_timebars_vsize;}
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
+	double last_trackview_group_vertical_offset;
 	void tie_vertical_scrolling ();
 	void scroll_canvas_horizontally ();
 	void scroll_canvas_vertically ();

@@ -222,29 +222,15 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	order = nth;
 
 	if (y_position != y) {
-		/* the coordinates used here are in the system of the
-		   item's parent ...
-		*/
-		Group* pg;
-		double ix1, iy1, ix2, iy2;
-		canvas_display->get_bounds (ix1, iy1, ix2, iy2);
-		iy1 += editor.get_trackview_group_vertical_offset ();
-		pg = canvas_display->property_parent();
-		pg->i2w (ix1, iy1);
-		
-		if (iy1 < 0) {
-			iy1 = 0;
-		}
-		
-		canvas_display->move (0.0, y - iy1);
+		canvas_display->property_y () = y;
+		/* silly canvas */
+		canvas_display->move (0.0, 0.0);
 		y_position = y;
-
 	}
 
 	canvas_display->raise_to_top ();
 
 	if (_marked_for_display) {
-		canvas_display->show();
 		controls_frame.show ();
 		controls_ebox.show ();
 	}
@@ -264,6 +250,19 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	}
 
 	return effective_height;
+}
+
+void
+TimeAxisView::clip_to_viewport ()
+{
+	if (_marked_for_display) {
+		if (y_position  +  effective_height < editor.get_trackview_group_vertical_offset () || y_position > editor.get_trackview_group_vertical_offset () + canvas_display->get_canvas()->get_height()) {
+			canvas_display->hide ();
+			return;
+		}
+		canvas_display->show ();
+	}
+	return;
 }
 
 bool
@@ -380,8 +379,8 @@ TimeAxisView::set_height(uint32_t h)
 	if (h == height) {
 		return;
 	}
-	controls_frame.property_height_request () = h;
 	height = h;
+	controls_frame.property_height_request () = h;
 
  	if (canvas_item_visible (selection_group)) {
 		/* resize the selection rect */

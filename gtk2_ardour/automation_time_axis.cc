@@ -367,11 +367,11 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			clear_button.hide();
 			hide_button.hide();
 		}
-	} else  if (h >= hNormal){
-			auto_button.show();
-			height_button.show();
-			clear_button.show();
-			hide_button.show_all();
+	} else if (h >= hNormal){
+		auto_button.show();
+		height_button.show();
+		clear_button.show();
+		hide_button.show_all();
 	}
 
 	if (changed) {
