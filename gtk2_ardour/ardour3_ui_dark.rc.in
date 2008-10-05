@@ -99,8 +99,8 @@ style "default_base" = "medium_text"
   fg[INSENSITIVE] = { 0.80, 0.80, 0.80 }	
   fg[SELECTED] = { 0.80, 0.80, 0.80 }	
   
-  bg[NORMAL] = { 0.31, 0.32, 0.38 }
-  bg[ACTIVE] = { 0.31, 0.32, 0.38 }
+  bg[NORMAL] = { 0.30, 0.32, 0.38 }
+  bg[ACTIVE] = { 0.30, 0.32, 0.38 }
   bg[PRELIGHT] = "#515290"
   bg[INSENSITIVE] = { 0.06, 0.10, 0.10 }
   bg[SELECTED] = { 0, 0.40, 0.60 }
@@ -720,7 +720,7 @@ style "audio_bus_base"
   font_name = "%FONT_SMALLER%"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   fg[NORMAL] = { 0.7, 0.8, 0.2 }	
-  bg[NORMAL] = { 0.20, 0.20, 0.26 }	
+  bg[NORMAL] = "#363c45"
 }
 
 style "audio_track_base" = "default_base"
@@ -728,7 +728,6 @@ style "audio_track_base" = "default_base"
   font_name = "%FONT_SMALLER%"
   fg[NORMAL] = { 0.77, 0.77, 0.72 }	
   bg[NORMAL] = "#43546e"
-  bg[NORMAL] = { 0.18, 0.19, 0.22 }
   bg[ACTIVE] = { 0.20, 0.20, 0.20 }	
   bg[PRELIGHT] = { 0.20, 0.20, 0.20 }
   bg[INSENSITIVE] = { 0.20, 0.20, 0.20 }
