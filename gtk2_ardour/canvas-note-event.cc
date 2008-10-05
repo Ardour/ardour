@@ -76,7 +76,7 @@ CanvasNoteEvent::show_velocity()
 	velo << int(_note->velocity());
 	_text->property_text() = velo.str();
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
-	_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteSelectedOutline.get();
+	_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteVelocityText.get();
 	_text->show();
 	_text->lower_to_bottom();
 	_text->raise(2);
