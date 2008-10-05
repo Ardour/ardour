@@ -28,6 +28,7 @@
 
 #include <pbd/error.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/tearoff.h>
 #include <pbd/memento_command.h>
 #include <pbd/basename.h>
 
@@ -348,11 +349,14 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		break;
 	}
 
-	if (mouse_mode == MouseNote)
-		midi_toolbar_frame.show();
-	else
-		midi_toolbar_frame.hide();
-
+	if (midi_tools_tearoff) {
+		if (mouse_mode == MouseNote) {
+			midi_tools_tearoff->show();
+		} else {
+			midi_tools_tearoff->hide();
+		}
+	}
+	
 	ignore_mouse_mode_toggle = false;
 	
 	set_canvas_cursor ();

@@ -238,6 +238,9 @@ Editor::Editor ()
 	  automation_mode_button (_("mode")),
 	  global_automation_button (_("automation")),
 
+	  midi_panic_button (_("Panic")),
+	  midi_tools_tearoff (0),
+
 #ifdef WITH_CMT
 	  image_socket_listener(0),
 #endif
@@ -3170,6 +3173,15 @@ Editor::setup_toolbar ()
 	toolbar_frame.add (toolbar_base);
 }
 
+void
+Editor::midi_panic_toggle ()
+{
+	if (session) {
+		session->midi_panic();
+		midi_panic_button.set_active (false);
+		midi_panic_button.set_state (STATE_NORMAL);
+	}
+}
 
 void
 Editor::setup_midi_toolbar ()
@@ -3228,6 +3240,14 @@ Editor::setup_midi_toolbar ()
 				&Editor::midi_edit_mode_toggled), Editing::MidiEditResize));
 	midi_tool_erase_button.signal_toggled().connect (bind (mem_fun(*this,
 				&Editor::midi_edit_mode_toggled), Editing::MidiEditErase));
+
+	/* Panic */
+	
+	VBox* panic_box = manage (new VBox);
+	midi_panic_button.set_name("MidiPanicButton");
+	midi_panic_button.signal_pressed().connect (
+			mem_fun(this, &Editor::midi_panic_toggle));
+	panic_box->pack_start (midi_panic_button, true, true);
 	
 	/* Pack everything in... */
 
@@ -3249,6 +3269,8 @@ Editor::setup_midi_toolbar ()
 	midi_toolbar_hbox.set_border_width (1);
 
 	midi_toolbar_hbox.pack_start (*midi_tools_tearoff, false, true);
+	
+	midi_toolbar_hbox.pack_start(*panic_box, false, true, 4);
 
 	midi_tool_button_box.show_all ();
 	midi_toolbar_hbox.show_all();

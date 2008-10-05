@@ -451,13 +451,6 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
 	
-	VBox* panic_box = manage (new VBox);
-	midi_panic_button.set_name("TransportMidiPanic");
-	midi_panic_button.signal_pressed().connect (mem_fun(*this, &ARDOUR_UI::midi_panic_toggle));
-	panic_box->pack_start (midi_panic_button, true, true);
-	transport_tearoff_hbox.pack_start(*panic_box, true, true, 4);
-
-
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
 		transport_tearoff_hbox.pack_end (*img, false, false, 6);
@@ -522,16 +515,6 @@ ARDOUR_UI::solo_alert_toggle ()
 {
 	if (session) {
 		session->set_all_solo (!session->soloing());
-	}
-}
-
-void
-ARDOUR_UI::midi_panic_toggle ()
-{
-	if (session) {
-		session->midi_panic();
-		midi_panic_button.set_active (false);
-		midi_panic_button.set_state (STATE_NORMAL);
 	}
 }
 

@@ -161,7 +161,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
-	  midi_panic_button (_("Panic")),
 	  shown_flag (false),
 	  error_log_button (_("Errors"))
 
