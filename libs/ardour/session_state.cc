@@ -820,7 +820,7 @@ Session::load_state (string snapshot_name)
 	}
 
 	const XMLProperty* prop;
-	bool is_old = false;
+	bool is_old = false; // session is _very_ old (pre-2.0)
 
 	if ((prop = root.property ("version")) == 0) {
 		/* no version implies very old version of Ardour */
@@ -3013,22 +3013,21 @@ Session::restore_history (string snapshot_name)
 	    struct timeval tv;
 	    
 	    ut->set_name(t->property("name")->value());
-	    stringstream ss(t->property("tv_sec")->value());
+	    stringstream ss(t->property("tv-sec")->value());
 	    ss >> tv.tv_sec;
-	    ss.str(t->property("tv_usec")->value());
+	    ss.str(t->property("tv-usec")->value());
 	    ss >> tv.tv_usec;
 	    ut->set_timestamp(tv);
 	    
 	    for (XMLNodeConstIterator child_it  = t->children().begin();
-		 child_it != t->children().end();
-		 child_it++)
+				child_it != t->children().end(); child_it++)
 	    {
 		    XMLNode *n = *child_it;
 		    Command *c;
 	
 		    if (n->name() == "MementoCommand" ||
-			n->name() == "MementoUndoCommand" ||
-			n->name() == "MementoRedoCommand") {
+					n->name() == "MementoUndoCommand" ||
+					n->name() == "MementoRedoCommand") {
 
 			    if ((c = memento_command_factory(n))) {
 				    ut->add_command(c);
@@ -3041,7 +3040,7 @@ Session::restore_history (string snapshot_name)
 			    }
 			    
 		    } else if (n->name() == "DeltaCommand") {
-		    	 PBD::ID  id(n->property("midi_source")->value());
+		    	 PBD::ID  id(n->property("midi-source")->value());
 	    		 boost::shared_ptr<MidiSource> midi_source = 
 	    			 boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
 		    	 if(midi_source) {

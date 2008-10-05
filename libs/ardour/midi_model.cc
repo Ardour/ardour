@@ -263,7 +263,7 @@ int MidiModel::DeltaCommand::set_state(const XMLNode& delta_command)
 XMLNode& MidiModel::DeltaCommand::get_state()
 {
 	XMLNode *delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
-	delta_command->add_property("midi_source", _model->midi_source()->id().to_s());
+	delta_command->add_property("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode *added_notes = delta_command->add_child(ADDED_NOTES_ELEMENT);
 	for_each(_added_notes.begin(), _added_notes.end(), sigc::compose(

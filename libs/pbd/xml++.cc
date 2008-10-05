@@ -475,6 +475,12 @@ XMLProperty::XMLProperty(const string &n, const string &v)
 	: _name(n), 
 	_value(v) 
 { 
+	// Normalize property name (replace '_' with '-' as old session are inconsistent)
+	for (size_t i = 0; i < _name.length(); ++i) {
+		if (_name[i] == '_') {
+			_name[i] = '-';
+		}
+	}
 }
 
 XMLProperty::~XMLProperty()

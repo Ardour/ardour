@@ -54,7 +54,7 @@ Session::memento_command_factory(XMLNode *n)
     XMLNode *child = 0;
 
     /* get id */
-    id = PBD::ID(n->property("obj_id")->value());
+    id = PBD::ID(n->property("obj-id")->value());
 
     /* get before/after */
 
@@ -81,7 +81,7 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     /* create command */
-    string obj_T = n->property ("type_name")->value();
+    string obj_T = n->property ("type-name")->value();
     if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name() || obj_T == typeid (Region).name()) {
 	    if (regions.count(id)) {
 		    return new MementoCommand<Region>(*regions[id], before, after);

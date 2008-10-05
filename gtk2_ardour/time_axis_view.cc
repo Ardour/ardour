@@ -982,7 +982,7 @@ TimeAxisView::get_state ()
 
 	snprintf (buf, sizeof(buf), "%u", height);
 	node->add_property ("height", buf);
-	node->add_property ("marked_for_display", (_marked_for_display ? "1" : "0"));
+	node->add_property ("marked-for-display", (_marked_for_display ? "1" : "0"));
 	return *node;
 }
 
@@ -991,11 +991,11 @@ TimeAxisView::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
 
-	if ((prop = node.property ("marked_for_display")) != 0) {
+	if ((prop = node.property ("marked-for-display")) != 0) {
 		_marked_for_display = (prop->value() == "1");
 	}
 
-	if ((prop = node.property ("track_height")) != 0) {
+	if ((prop = node.property ("track-height")) != 0) {
 
 		if (prop->value() == "largest") {
 			set_height (hLargest);

@@ -171,7 +171,7 @@ AudioPlaylistImporter::move ()
 	boost::shared_ptr<Playlist> playlist;
 	
 	// Update diskstream id
-	xml_playlist.property ("orig_diskstream_id")->set_value (diskstream_id.to_s());
+	xml_playlist.property ("orig-diskstream-id")->set_value (diskstream_id.to_s());
 	
 	// Update region XML in playlist and prepare sources
 	xml_playlist.remove_nodes("Region");

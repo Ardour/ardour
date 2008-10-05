@@ -2434,12 +2434,12 @@ Editor::set_state (const XMLNode& node)
 
 	} else {
 
-		g.base_width = atoi(geometry->property("x_size")->value());
-		g.base_height = atoi(geometry->property("y_size")->value());
-		x = atoi(geometry->property("x_pos")->value());
-		y = atoi(geometry->property("y_pos")->value());
-		xoff = atoi(geometry->property("x_off")->value());
-		yoff = atoi(geometry->property("y_off")->value());
+		g.base_width = atoi(geometry->property("x-size")->value());
+		g.base_height = atoi(geometry->property("y-size")->value());
+		x = atoi(geometry->property("x-pos")->value());
+		y = atoi(geometry->property("y-pos")->value());
+		xoff = atoi(geometry->property("x-off")->value());
+		yoff = atoi(geometry->property("y-off")->value());
 	}
 
 	set_default_size (g.base_width, g.base_height);
@@ -2607,17 +2607,17 @@ Editor::get_state ()
 		XMLNode* geometry = new XMLNode ("geometry");
 
 		snprintf(buf, sizeof(buf), "%d", width);
-		geometry->add_property("x_size", string(buf));
+		geometry->add_property("x-size", string(buf));
 		snprintf(buf, sizeof(buf), "%d", height);
-		geometry->add_property("y_size", string(buf));
+		geometry->add_property("y-size", string(buf));
 		snprintf(buf, sizeof(buf), "%d", x);
-		geometry->add_property("x_pos", string(buf));
+		geometry->add_property("x-pos", string(buf));
 		snprintf(buf, sizeof(buf), "%d", y);
-		geometry->add_property("y_pos", string(buf));
+		geometry->add_property("y-pos", string(buf));
 		snprintf(buf, sizeof(buf), "%d", xoff);
-		geometry->add_property("x_off", string(buf));
+		geometry->add_property("x-off", string(buf));
 		snprintf(buf, sizeof(buf), "%d", yoff);
-		geometry->add_property("y_off", string(buf));
+		geometry->add_property("y-off", string(buf));
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
 		geometry->add_property("edit_pane_pos", string(buf));
 
@@ -3920,8 +3920,8 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 		width = default_width;
 		height = default_height;
 	} else {
-		width = atoi(geometry->property("x_size")->value());
-		height = atoi(geometry->property("y_size")->value());
+		width = atoi(geometry->property("x-size")->value());
+		height = atoi(geometry->property("y-size")->value());
 	}
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
@@ -3930,7 +3930,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 			return;
 		}
 
-		if (!geometry || (prop = geometry->property ("edit_pane_pos")) == 0) {
+		if (!geometry || (prop = geometry->property ("edit-pane-pos")) == 0) {
 			/* initial allocation is 90% to canvas, 10% to notebook */
 			pos = (int) floor (alloc.get_width() * 0.90f);
 			snprintf (buf, sizeof(buf), "%d", pos);

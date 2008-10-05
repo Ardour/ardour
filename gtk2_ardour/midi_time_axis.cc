@@ -175,7 +175,7 @@ guint32
 MidiTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
 	ensure_xml_node ();
-	xml_node->add_property ("shown_editor", "yes");
+	xml_node->add_property ("shown-editor", "yes");
 		
 	guint32 ret = TimeAxisView::show_at (y, nth, parent);
 	return ret;
@@ -185,7 +185,7 @@ void
 MidiTimeAxisView::hide ()
 {
 	ensure_xml_node ();
-	xml_node->add_property ("shown_editor", "no");
+	xml_node->add_property ("shown-editor", "no");
 
 	TimeAxisView::hide ();
 }

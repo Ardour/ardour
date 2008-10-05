@@ -463,16 +463,16 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 	if ((prop = node.property ("stop")) != 0) {
 		stop_controllable->set_id (prop->value());
 	}
-	if ((prop = node.property ("goto_start")) != 0) {
+	if ((prop = node.property ("goto-start")) != 0) {
 		goto_start_controllable->set_id (prop->value());
 	}
-	if ((prop = node.property ("goto_end")) != 0) {
+	if ((prop = node.property ("goto-end")) != 0) {
 		goto_end_controllable->set_id (prop->value());
 	}
-	if ((prop = node.property ("auto_loop")) != 0) {
+	if ((prop = node.property ("auto-loop")) != 0) {
 		auto_loop_controllable->set_id (prop->value());
 	}
-	if ((prop = node.property ("play_selection")) != 0) {
+	if ((prop = node.property ("play-selection")) != 0) {
 		play_selection_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("rec")) != 0) {

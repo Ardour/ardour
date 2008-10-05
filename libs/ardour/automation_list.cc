@@ -227,11 +227,11 @@ AutomationList::state (bool full)
 	snprintf (buf, sizeof (buf), "%.12g", _default_value);
 	root->add_property ("default", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _min_yval);
-	root->add_property ("min_yval", buf);
+	root->add_property ("min-yval", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _max_yval);
-	root->add_property ("max_yval", buf);
+	root->add_property ("max-yval", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _max_xval);
-	root->add_property ("max_xval", buf);
+	root->add_property ("max-xval", buf);
 	
 	root->add_property ("interpolation-style", enum_2_string (_interpolation));
 

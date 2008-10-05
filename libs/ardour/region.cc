@@ -1098,7 +1098,7 @@ Region::state (bool full_state)
 		break;
 	}
 
-	node->add_property ("first_edit", fe);
+	node->add_property ("first-edit", fe);
 
 	/* note: flags are stored by derived classes */
 

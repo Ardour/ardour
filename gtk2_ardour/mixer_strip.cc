@@ -424,11 +424,11 @@ MixerStrip::set_stuff_from_route ()
 
 	/* if width is not set, it will be set by the MixerUI or editor */
 
-	if ((prop = xml_node->property ("strip_width")) != 0) {
+	if ((prop = xml_node->property ("strip-width")) != 0) {
 		set_width (Width (string_2_enum (prop->value(), _width)), this);
 	}
 
-	if ((prop = xml_node->property ("shown_mixer")) != 0) {
+	if ((prop = xml_node->property ("shown-mixer")) != 0) {
 		if (prop->value() == "no") {
 			_marked_for_display = false;
 		} else {
@@ -459,7 +459,7 @@ MixerStrip::set_width (Width w, void* owner)
 	_width = w;
 
 	if (_width_owner == this) {
-		xml_node->add_property ("strip_width", enum_2_string (_width));
+		xml_node->add_property ("strip-width", enum_2_string (_width));
 	}
 
 	switch (w) {
@@ -526,9 +526,9 @@ MixerStrip::set_packed (bool yn)
 	ensure_xml_node ();
 
 	if (_packed) {
-		xml_node->add_property ("shown_mixer", "yes");
+		xml_node->add_property ("shown-mixer", "yes");
 	} else {
-		xml_node->add_property ("shown_mixer", "no");
+		xml_node->add_property ("shown-mixer", "no");
 	}
 }
 

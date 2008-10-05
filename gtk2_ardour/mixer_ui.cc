@@ -1267,10 +1267,10 @@ Mixer_UI::set_state (const XMLNode& node)
 
 	} else {
 
-		m_width = atoi(geometry->property("x_size")->value().c_str());
-		m_height = atoi(geometry->property("y_size")->value().c_str());
-		m_root_x = atoi(geometry->property("x_pos")->value().c_str());
-		m_root_y = atoi(geometry->property("y_pos")->value().c_str());
+		m_width = atoi(geometry->property("x-size")->value().c_str());
+		m_height = atoi(geometry->property("y-size")->value().c_str());
+		m_root_x = atoi(geometry->property("x-pos")->value().c_str());
+		m_root_y = atoi(geometry->property("y-pos")->value().c_str());
 	}
 
 	set_window_pos_and_size ();
@@ -1350,8 +1350,8 @@ Mixer_UI::pane_allocation_handler (Allocation& alloc, Gtk::Paned* which)
 		width = default_width;
 		height = default_height;
 	} else {
-		width = atoi(geometry->property("x_size")->value());
-		height = atoi(geometry->property("y_size")->value());
+		width = atoi(geometry->property("x-size")->value());
+		height = atoi(geometry->property("y-size")->value());
 	}
 
 	if (which == static_cast<Gtk::Paned*> (&rhs_pane1)) {
@@ -1360,7 +1360,7 @@ Mixer_UI::pane_allocation_handler (Allocation& alloc, Gtk::Paned* which)
 			return;
 		}
 
-		if (!geometry || (prop = geometry->property("mixer_rhs_pane1_pos")) == 0) {
+		if (!geometry || (prop = geometry->property("mixer-rhs-pane1-pos")) == 0) {
 			pos = height / 3;
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {
@@ -1377,7 +1377,7 @@ Mixer_UI::pane_allocation_handler (Allocation& alloc, Gtk::Paned* which)
 			return;
 		}
 
-		if (!geometry || (prop = geometry->property("mixer_list_hpane_pos")) == 0) {
+		if (!geometry || (prop = geometry->property("mixer-list-hpane-pos")) == 0) {
 			pos = 75;
 			snprintf (buf, sizeof(buf), "%d", pos);
 		} else {

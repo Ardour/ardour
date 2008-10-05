@@ -885,7 +885,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 			XMLProperty* type = (*iter)->property("automation-id");
 
 			if (type && type->value() == ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter())) {
-				XMLProperty *shown = (*iter)->property("shown_editor");
+				XMLProperty *shown = (*iter)->property("shown-editor");
 
 				if (shown && shown->value() == "yes") {
 					set_marked_for_display(true);

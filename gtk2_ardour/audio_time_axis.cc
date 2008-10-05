@@ -148,7 +148,7 @@ guint32
 AudioTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
 	ensure_xml_node ();
-	xml_node->add_property ("shown_editor", "yes");
+	xml_node->add_property ("shown-editor", "yes");
 		
 	return TimeAxisView::show_at (y, nth, parent);
 }
@@ -157,7 +157,7 @@ void
 AudioTimeAxisView::hide ()
 {
 	ensure_xml_node ();
-	xml_node->add_property ("shown_editor", "no");
+	xml_node->add_property ("shown-editor", "no");
 
 	TimeAxisView::hide ();
 }
