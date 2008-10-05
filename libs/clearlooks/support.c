@@ -66,14 +66,34 @@ clearlooks_get_parent_bg (const GtkWidget *widget, CairoColor *color)
 	GtkStateType state_type;
 	const GtkWidget *parent;
 	GdkColor *gcolor;
+	gboolean stop;
 	
 	if (widget == NULL)
 		return;
 	
 	parent = widget->parent;
+	stop = FALSE;
 	
-	while (parent && GTK_WIDGET_NO_WINDOW (parent) && !((GTK_IS_NOTEBOOK (parent)) || (GTK_IS_TOOLBAR (parent))))
-		parent = parent->parent;
+	while (parent && !stop)
+	{
+		stop = FALSE;
+
+		stop |= !GTK_WIDGET_NO_WINDOW (parent);
+		stop |= GTK_IS_NOTEBOOK (parent) &&
+		        gtk_notebook_get_show_tabs (GTK_NOTEBOOK (parent)) &&
+		        gtk_notebook_get_show_border (GTK_NOTEBOOK (parent));
+
+		if (GTK_IS_TOOLBAR (parent))
+		{
+			GtkShadowType shadow = GTK_SHADOW_OUT;
+			gtk_widget_style_get (GTK_WIDGET (parent), "shadow-type", &shadow, NULL);
+			
+			stop |= (shadow != GTK_SHADOW_NONE);
+		}
+
+		if (!stop)
+			parent = parent->parent;
+	}
 
 	if (parent == NULL)
 		return;
@@ -151,8 +171,10 @@ clearlooks_scrollbar_visible_steppers (GtkWidget *widget)
 {
 	ClearlooksStepper steppers = 0;
 	
+	/* If this is not a range widget, assume that the primary steppers
+	 * are present. */
 	if (!GE_IS_RANGE (widget))
-		return 0;
+		return CL_STEPPER_A | CL_STEPPER_D;
 	
 	if (GTK_RANGE (widget)->has_stepper_a)
 		steppers |= CL_STEPPER_A;
@@ -183,20 +205,29 @@ clearlooks_scrollbar_get_junction (GtkWidget    *widget)
 	if (adj->value <= adj->lower &&
 		(GTK_RANGE (widget)->has_stepper_a || GTK_RANGE (widget)->has_stepper_b))
 	{
-		junction |= CL_JUNCTION_BEGIN;
+		if (!gtk_range_get_inverted (GTK_RANGE (widget)))
+			junction |= CL_JUNCTION_BEGIN;
+		else
+			junction |= CL_JUNCTION_END;
 	}
 	
 	if (adj->value >= adj->upper - adj->page_size &&
 		(GTK_RANGE (widget)->has_stepper_c || GTK_RANGE (widget)->has_stepper_d))
 	{
-		junction |= CL_JUNCTION_END;
+		if (!gtk_range_get_inverted (GTK_RANGE (widget)))
+			junction |= CL_JUNCTION_END;
+		else
+			junction |= CL_JUNCTION_BEGIN;
 	}
 	
 	return junction;
 }
 
 void
-clearlooks_set_toolbar_parameters (ToolbarParameters *toolbar, GtkWidget *widget, GdkWindow *window, gint x, gint y)
+clearlooks_set_toolbar_parameters (ToolbarParameters *toolbar,
+                                   GtkWidget *widget,
+                                   GdkWindow *window,
+                                   gint x, gint y)
 {
 	toolbar->topmost = FALSE;
 

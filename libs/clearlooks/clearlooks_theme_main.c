@@ -7,8 +7,8 @@
 GE_EXPORT void
 theme_init (GTypeModule *module)
 {
-  clearlooks_rc_style_register_type (module);
-  clearlooks_style_register_type (module);
+  clearlooks_rc_style_register_types (module);
+  clearlooks_style_register_types (module);
 }
 
 GE_EXPORT void

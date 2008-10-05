@@ -33,10 +33,6 @@
 #define SHADE_CENTER_TOP 1.02
 #define SHADE_BOTTOM 0.94
 
-/* Topleft highlight */
-#define TOPLEFT_HIGHLIGHT_SHADE 1.3
-#define TOPLEFT_HIGHLIGHT_ALPHA 0.4
-
 /* Listview */
 #define LISTVIEW_SHADE_TOP 1.06
 #define LISTVIEW_SHADE_CENTER_TOP 1.02
@@ -46,7 +42,6 @@
 #define TOOLBAR_SHADE_TOP 1.04
 #define TOOLBAR_SHADE_CENTER_TOP 1.01
 #define TOOLBAR_SHADE_BOTTOM 0.97
-
 
 static void
 clearlooks_draw_gummy_gradient (cairo_t          *cr,
@@ -77,9 +72,9 @@ clearlooks_draw_gummy_gradient (cairo_t          *cr,
 }
 
 static void
-clearlooks_set_mixed_color (cairo_t          *cr, 
-                            const CairoColor *color1, 
-                            const CairoColor *color2, 
+clearlooks_set_mixed_color (cairo_t          *cr,
+                            const CairoColor *color1,
+                            const CairoColor *color2,
                             gdouble mix_factor)
 {
 	CairoColor composite;
@@ -89,7 +84,7 @@ clearlooks_set_mixed_color (cairo_t          *cr,
 }
 
 static void
-clearlooks_gummy_draw_highlight_and_shade (cairo_t                *cr, 
+clearlooks_gummy_draw_highlight_and_shade (cairo_t                *cr,
                                            const CairoColor       *bg_color,
                                            const ShadowParameters *params,
                                            int width, int height, gdouble radius)
@@ -123,7 +118,7 @@ clearlooks_gummy_draw_highlight_and_shade (cairo_t                *cr,
 		cairo_set_source_rgba (cr, highlight.r, highlight.g, highlight.b, 0.5);
 	else
 		cairo_set_source_rgba (cr, shadow.r, shadow.g, shadow.b, 0.5);
-		
+
 	cairo_stroke (cr);
 
 	/* Bottom/Right highlight -- this includes the corners */
@@ -140,28 +135,6 @@ clearlooks_gummy_draw_highlight_and_shade (cairo_t                *cr,
 	cairo_stroke (cr);
 
 	cairo_restore (cr);
-}
-
-static void
-clearlooks_gummy_draw_top_left_highlight (cairo_t *cr, const CairoColor *color,
-                                          const WidgetParameters *params,
-                                          int width, int height, gdouble radius)
-{
-	CairoColor hilight; 
-
-	double light_top = params->ythickness-1,
-	       light_bottom = height - params->ythickness - 1,
-	       light_left = params->xthickness-1,
-	       light_right = width - params->xthickness - 1;
-
-	ge_shade_color (color, TOPLEFT_HIGHLIGHT_SHADE, &hilight);
-	cairo_move_to (cr, light_left, light_bottom - (int)radius/2);
-
-	ge_cairo_rounded_corner (cr, light_left, light_top, radius, params->corners & CR_CORNER_TOPLEFT);
-
-	cairo_line_to (cr, light_right - (int)radius/2, light_top);
-	cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, TOPLEFT_HIGHLIGHT_ALPHA);
-	cairo_stroke (cr);
 }
 
 static void
@@ -182,33 +155,27 @@ clearlooks_gummy_draw_button (cairo_t                *cr,
 	cairo_translate (cr, x, y);
 	cairo_set_line_width (cr, 1.0);
 
-	/* Shadows and Glow */
-	if (params->xthickness == 3 || params->ythickness == 3)
-	{
-		if (params->xthickness == 3)
-			xoffset = 1;
-		if (params->ythickness == 3)
-			yoffset = 1;
-	}
+	if (params->xthickness == 3)
+		xoffset = 1;
+	if (params->ythickness == 3)
+		yoffset = 1;
 
 	radius = MIN (params->radius, MIN ((width - 2.0 - 2*xoffset) / 2.0, (height - 2.0 - 2*yoffset) / 2.0));
 
 	if (params->xthickness == 3 || params->ythickness == 3)
 	{
-		cairo_translate (cr, 0.5, 0.5);
-
-		if (params->enable_glow && !params->active && !params->disabled && !params->is_default)
+		if (params->enable_shadow && !params->active && !params->disabled && !params->is_default)
 		{
 			CairoColor shadow;
 
 			radius = MIN (params->radius, MIN ((width - 2.0 - 2*xoffset) / 2.0 - 1.0, (height - 2.0 - 2*yoffset) / 2.0 - 1.0));
 
-			ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius+1, params->corners);
+			ge_cairo_inner_rounded_rectangle (cr, 0, 0, width, height, radius+1, params->corners);
 			ge_shade_color (&params->parentbg, 0.97, &shadow);
 			ge_cairo_set_color (cr, &shadow);
 			cairo_stroke (cr);
 
-			ge_cairo_rounded_rectangle (cr, 1, 1, width-2, height-2, radius+1, params->corners);
+			ge_cairo_inner_rounded_rectangle (cr, 1, 1, width-1, height-1, radius+1, params->corners);
 			ge_shade_color (&params->parentbg, 0.93, &shadow);
 			ge_cairo_set_color (cr, &shadow);
 			cairo_stroke (cr);
@@ -220,19 +187,18 @@ clearlooks_gummy_draw_button (cairo_t                *cr,
 
 			radius = MIN (params->radius, MIN ((width - 2.0 - 2*xoffset) / 2.0 - 1.0, (height - 2.0 - 2*yoffset) / 2.0 - 1.0));
 
-			ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius+1, params->corners);
+			ge_cairo_inner_rounded_rectangle (cr, 0, 0, width, height, radius+1, params->corners);
 			clearlooks_set_mixed_color (cr, &params->parentbg, &shadow, 0.5);
 			cairo_stroke (cr);
 		}
 
-		if (!(params->enable_glow && !params->active && !params->disabled))
-			params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, width-1, height-1, params->radius+1, params->corners);
-		cairo_translate (cr, -0.5, -0.5);
+		if (!(params->enable_shadow && !params->active && !params->disabled))
+			params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, width, height, params->radius+1, params->corners);
 	}
 
-	clearlooks_draw_gummy_gradient (cr, xoffset+1, yoffset+1, 
-	                              width-(xoffset*2)-2, height-(yoffset*2)-2, 
-	                              &fill, params->disabled, radius, params->corners);
+	clearlooks_draw_gummy_gradient (cr, xoffset+1, yoffset+1,
+	                                width-(xoffset*2)-2, height-(yoffset*2)-2,
+	                                &fill, params->disabled, radius, params->corners);
 
 	/* Pressed button shadow */
 	if (params->active)
@@ -242,7 +208,7 @@ clearlooks_gummy_draw_button (cairo_t                *cr,
 
 		cairo_save (cr);
 
-		ge_cairo_rounded_rectangle (cr, xoffset+1, yoffset+1, width-(xoffset*2)-2, height, radius, 
+		ge_cairo_rounded_rectangle (cr, xoffset+1, yoffset+1, width-(xoffset*2)-2, height, radius,
 		                            params->corners & (CR_CORNER_TOPLEFT | CR_CORNER_TOPRIGHT | CR_CORNER_BOTTOMLEFT));
 		cairo_clip (cr);
 		cairo_rectangle (cr, xoffset+1, yoffset+1, width-(xoffset*2)-2, 3);
@@ -267,21 +233,22 @@ clearlooks_gummy_draw_button (cairo_t                *cr,
 	}
 
 	/* Border */
-	if (params->is_default) /* || (params->prelight && params->enable_glow)) */
+	if (params->is_default) /* || (params->prelight && params->enable_shadow)) */
 		border_normal = colors->spot[2];
 	if (params->disabled)
 		ge_cairo_set_color (cr, &border_disabled);
 	else
 		clearlooks_set_mixed_color (cr, &border_normal, &fill, 0.2);
 	ge_cairo_rounded_rectangle (cr, xoffset + 0.5, yoffset + 0.5,
-                                  width-(xoffset*2)-1, height-(yoffset*2)-1,
-                                  radius, params->corners);
+	                            width-(xoffset*2)-1, height-(yoffset*2)-1,
+	                            radius, params->corners);
 	cairo_stroke (cr);
 
 	if (!params->active)
 	{
-		cairo_translate (cr, 0.5, 0.5);
-		clearlooks_gummy_draw_top_left_highlight (cr, &fill, params, width, height, radius);
+		params->style_functions->draw_top_left_highlight (cr, &fill, params, 1+xoffset, 1+xoffset,
+		                                                  width-(1+xoffset)*2, height-(1+xoffset)*2,
+		                                                  radius, params->corners);
 	}
 	cairo_restore (cr);
 }
@@ -299,48 +266,44 @@ clearlooks_gummy_draw_entry (cairo_t                *cr,
 	if (params->focus)
 		border = colors->spot[2];
 
-	cairo_translate (cr, x+0.5, y+0.5);
+	cairo_save (cr);
+
+	cairo_translate (cr, x, y);
 	cairo_set_line_width (cr, 1.0);
 
-	/* Fill the background to get the correct corners. */
-	cairo_rectangle (cr, -0.5, -0.5, width, height);
-	ge_cairo_set_color (cr, &params->parentbg);
-	cairo_fill (cr);
-
-	/* Fill with the base color, because it was just cleared above */
-	cairo_rectangle (cr, 1.5, 1.5, width-4, height-4);
+	/* Now fill the area we want to be base[NORMAL]. */
+	ge_cairo_rounded_rectangle (cr, 2, 2, width-4, height-4, MAX(0, radius-1), params->corners);
 	ge_cairo_set_color (cr, base);
 	cairo_fill (cr);
 
-	params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, width-1, height-1, radius+1, params->corners);
+	params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, width, height, radius+1, params->corners);
 
 	/* Draw the inner shadow */
 	if (params->focus)
 	{
-		/* ge_cairo_rounded_rectangle (cr, 2, 2, width-5, height-5, RADIUS-1, params->corners); */
-		ge_cairo_set_color (cr, &colors->spot[0]);
-		ge_cairo_stroke_rectangle (cr, 2, 2, width-5, height-5);
+		clearlooks_set_mixed_color (cr, base, &colors->spot[1], 0.5);
+		ge_cairo_inner_rounded_rectangle (cr, 2, 2, width-4, height-4, MAX(0, radius-1), params->corners);
+		cairo_stroke (cr);
 	}
 	else
 	{
-		CairoColor shadow; 
+		CairoColor shadow;
 		ge_shade_color (&border, 0.92, &shadow);
 
 		cairo_set_source_rgba (cr, shadow.r, shadow.g, shadow.b, params->disabled ? 0.09 : 0.18);
-		/*
-		cairo_move_to (cr, 2, height-3);
-		cairo_arc (cr, params->xthickness+RADIUS-1, params->ythickness+RADIUS-1, RADIUS, G_PI, 270*(G_PI/180));
-		cairo_line_to (cr, width-3, 2);
-		*/
-		cairo_move_to (cr, 2, height-3);
-		cairo_line_to (cr, 2, 2);
-		cairo_line_to (cr, width-3, 2);
+
+		cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+		cairo_move_to (cr, 2.5, height-radius);
+		cairo_arc (cr, 2.5+MAX(0, radius-1), 2.5+MAX(0, radius-1), MAX(0, radius-1), G_PI, 270*(G_PI/180));
+		cairo_line_to (cr, width-radius, 2.5);
 		cairo_stroke (cr);
 	}
 
-	ge_cairo_rounded_rectangle (cr, 1, 1, width-3, height-3, radius, params->corners);
+	ge_cairo_inner_rounded_rectangle (cr, 1, 1, width-2, height-2, radius, params->corners);
 	ge_cairo_set_color (cr, &border);
 	cairo_stroke (cr);
+
+	cairo_restore (cr);
 }
 
 static void
@@ -357,12 +320,6 @@ clearlooks_gummy_draw_progressbar_trough (cairo_t                *cr,
 	cairo_save (cr);
 
 	cairo_set_line_width (cr, 1.0);
-
-	/* Fill with bg color */
-	ge_cairo_set_color (cr, &colors->bg[params->state_type]);
-
-	cairo_rectangle (cr, x, y, width, height);
-	cairo_fill (cr);
 
 	/* Create trough box */
 	ge_cairo_rounded_rectangle (cr, x+1, y+1, width-2, height-2, radius, params->corners);
@@ -408,11 +365,11 @@ clearlooks_gummy_draw_progressbar_fill (cairo_t                     *cr,
                                         const ProgressBarParameters *progressbar,
                                         int x, int y, int width, int height, gint offset)
 {
-	boolean      is_horizontal = progressbar->orientation < 2;
-	double       tile_pos = 0;
-	double       stroke_width;
-	double       radius;
-	int          x_step;
+	boolean is_horizontal = progressbar->orientation < 2;
+	double  tile_pos = 0;
+	double  stroke_width;
+	double  radius;
+	int     x_step;
 
 	cairo_pattern_t *pattern;
 	CairoColor       shade1, shade2, shade3;
@@ -458,14 +415,14 @@ clearlooks_gummy_draw_progressbar_fill (cairo_t                     *cr,
 	cairo_paint (cr);
 	cairo_pattern_destroy (pattern);
 
-	/* Draw the Strokes */
+	/* Draw the strokes */
 	while (tile_pos <= width+x_step)
 	{
 		cairo_move_to (cr, stroke_width/2-x_step, 0);
 		cairo_line_to (cr, stroke_width-x_step,   0);
 		cairo_line_to (cr, stroke_width/2-x_step, height);
 		cairo_line_to (cr, -x_step, height);
-		
+
 		cairo_translate (cr, stroke_width, 0);
 		tile_pos += stroke_width;
 	}
@@ -572,20 +529,21 @@ clearlooks_gummy_scale_draw_gradient (cairo_t          *cr,
 	ge_shade_color (fill, in? 0.95 : 1.1, &f1);
 	ge_shade_color (fill, in? 1.05 : 0.9, &f2);
 
-	pattern = cairo_pattern_create_linear (0, 0, horizontal ? 0 :  width, horizontal ? height : 0);
+	pattern = cairo_pattern_create_linear (0.5, 0.5, horizontal ? 0.5 :  width + 1.0, horizontal ? height + 1.0 : 0.5);
 	cairo_pattern_add_color_stop_rgba (pattern, 0.0, f1.r, f1.g, f1.b, f1.a);
 	cairo_pattern_add_color_stop_rgba (pattern, 1.0, f2.r, f2.g, f2.b, f2.a);
 
-	cairo_rectangle (cr, x+0.5, y+0.5, width-1, height-1);
+	cairo_rectangle (cr, x, y, width, height);
 	cairo_set_source (cr, pattern);
 	cairo_fill (cr);
 	cairo_pattern_destroy (pattern);
 
 	clearlooks_set_mixed_color (cr, border, fill, 0.2);
-	ge_cairo_stroke_rectangle (cr, x, y, width, height);
+	ge_cairo_inner_rectangle (cr, x, y, width, height);
+	cairo_stroke (cr);
 }
 
-#define TROUGH_SIZE 6
+#define TROUGH_SIZE 7
 static void
 clearlooks_gummy_draw_scale_trough (cairo_t                *cr,
                                     const ClearlooksColors *colors,
@@ -593,60 +551,66 @@ clearlooks_gummy_draw_scale_trough (cairo_t                *cr,
                                     const SliderParameters *slider,
                                     int x, int y, int width, int height)
 {
-	int     trough_width, trough_height;
-	double  translate_x, translate_y;
+	int    trough_width, trough_height;
+	double translate_x, translate_y;
+	CairoColor fill, border;
+	gboolean in;
+
+	cairo_save (cr);
 
 	if (slider->horizontal)
 	{
-		trough_width  = width-3;
-		trough_height = TROUGH_SIZE-2;
+		trough_width  = width;
+		trough_height = TROUGH_SIZE;
 
-		translate_x   = x + 0.5;
-		translate_y   = y + 0.5 + (height/2) - (TROUGH_SIZE/2);
+		translate_x   = x;
+		translate_y   = y + (height/2) - (TROUGH_SIZE/2);
 	}
 	else
 	{
-		trough_width  = TROUGH_SIZE-2;
-		trough_height = height-3;
+		trough_width  = TROUGH_SIZE;
+		trough_height = height;
 
-		translate_x   = x + 0.5 + (width/2) - (TROUGH_SIZE/2);
-		translate_y  = y + 0.5;
+		translate_x   = x + (width/2) - (TROUGH_SIZE/2);
+		translate_y   = y;
 	}
 
 	cairo_set_line_width (cr, 1.0);
 	cairo_translate (cr, translate_x, translate_y);
 
 	if (!slider->fill_level)
-		params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, trough_width+2, trough_height+2, 0, 0);
-
-	cairo_translate (cr, 1, 1);
+		params->style_functions->draw_inset (cr, &params->parentbg, 0, 0, trough_width, trough_height, 0, 0);
 
 	if (!slider->lower && !slider->fill_level)
-		clearlooks_gummy_scale_draw_gradient (cr, 
-		                                      &colors->shade[2], /* bottom */
-		                                      &colors->shade[6], /* border */
-		                                      0, 0, trough_width, trough_height,
-		                                      slider->horizontal, TRUE);
+	{
+		ge_shade_color (&params->parentbg, 0.896, &fill);
+		border = colors->shade[6];
+		in = TRUE;
+	}
 	else if (!slider->fill_level)
-		clearlooks_gummy_scale_draw_gradient (cr, 
-		                                      &colors->spot[1], /* bottom */
-		                                      &colors->spot[2], /* border */
-		                                      0, 0, trough_width, trough_height,
-		                                      slider->horizontal, FALSE);
-	else {
-		CairoColor c1 = colors->spot[1];
-		CairoColor c2 = colors->spot[2];
+	{
+		fill = colors->spot[1];
+		border = colors->spot[2];
+		in = FALSE;
+	}
+	else
+	{
+		fill = colors->spot[1];
+		border = colors->spot[2];
 
-		c1.a = 0.25;
-		c2.a = 0.25;
-
-		clearlooks_gummy_scale_draw_gradient (cr, 
-		                                      &c1, /* bottom */
-		                                      &c2, /* border */
-		                                      0, 0, trough_width, trough_height,
-		                                      slider->horizontal, FALSE);
+		fill.a = 0.25;
+		border.a = 0.25;
+		
+		in = FALSE;
 	}
 
+	clearlooks_gummy_scale_draw_gradient (cr,
+	                                      &fill,
+	                                      &border,
+	                                      1, 1, trough_width - 2, trough_height - 2,
+	                                      slider->horizontal, in);
+
+	cairo_restore (cr);
 }
 
 static void
@@ -656,16 +620,19 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
                            const TabParameters    *tab,
                            int x, int y, int width, int height)
 {
+	const CairoColor *border        = &colors->shade[5];
+	const CairoColor *stripe_fill   = &colors->spot[1];
+	const CairoColor *stripe_border = &colors->spot[2];
+	const CairoColor *fill;
 
-	const CairoColor    *border        = &colors->shade[5];
-	const CairoColor    *stripe_fill   = &colors->spot[1];
-	const CairoColor    *stripe_border = &colors->spot[2];
-	const CairoColor    *fill;
+	cairo_pattern_t  *pattern = NULL;
 
-	cairo_pattern_t     *pattern;
+	double            radius;
+	double            stripe_size = 2.0;
+	double            stripe_fill_size;
+	double            stripe_border_pos;
 
-	double               radius;
-	double               strip_size;
+	gboolean horizontal = FALSE;
 
 	radius = MIN (params->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
 
@@ -682,18 +649,28 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
 	/* And calculate the strip size too, while you're at it */
 	if (tab->gap_side == CL_GAP_TOP || tab->gap_side == CL_GAP_BOTTOM)
 	{
+		if (params->ythickness == 3)
+			stripe_size = 3.0;
+
 		height += 3.0;
-		strip_size = 2.0/height; /* 2 pixel high strip */
+		stripe_fill_size = (tab->gap_side == CL_GAP_TOP ? stripe_size/height : stripe_size/(height-2));
+		stripe_border_pos = (tab->gap_side == CL_GAP_TOP ? (stripe_size+1.0)/height : (stripe_size+1.0)/(height-2));
+
+		horizontal = TRUE;
 
 		if (tab->gap_side == CL_GAP_TOP)
 			cairo_translate (cr, 0.0, -3.0); /* gap at the other side */
 	}
 	else
 	{
-		width += 3.0;
-		strip_size = 2.0/width;
+		if (params->xthickness == 3)
+			stripe_size = 3.0;
 
-		if (tab->gap_side == CL_GAP_LEFT) 
+		width += 3.0;
+		stripe_fill_size = (tab->gap_side == CL_GAP_LEFT ? stripe_size/width : stripe_size/(width-2));
+		stripe_border_pos = (tab->gap_side == CL_GAP_LEFT ? (stripe_size+1.0)/width : (stripe_size+1.0)/(width-2));
+
+		if (tab->gap_side == CL_GAP_LEFT)
 			cairo_translate (cr, -3.0, 0.0); /* gap at the other side */
 	}
 
@@ -717,7 +694,7 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
 		shadow.corners = params->corners;
 
 		clearlooks_gummy_draw_highlight_and_shade (cr, &colors->bg[0], &shadow,
-		                                     width, height, radius);
+		                                           width, height, radius);
 	}
 
 	if (params->active)
@@ -725,39 +702,70 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
 		CairoColor hilight;
 		CairoColor shade1, shade2, shade3;
 
-		pattern = cairo_pattern_create_linear (tab->gap_side == CL_GAP_LEFT   ? width-1  : 0,
-		                                       tab->gap_side == CL_GAP_TOP    ? height-2 : 1,
-		                                       tab->gap_side == CL_GAP_RIGHT  ? width    : 0,
-		                                       tab->gap_side == CL_GAP_BOTTOM ? height   : 0);
-
-		ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius, params->corners);
-
-		ge_shade_color (fill, 1.14, &hilight);
+		ge_shade_color (fill, 1.15, &hilight);
 		ge_shade_color (fill, SHADE_TOP, &shade1);
 		ge_shade_color (fill, SHADE_CENTER_TOP, &shade2);
 		ge_shade_color (fill, SHADE_BOTTOM, &shade3);
 
-		cairo_pattern_add_color_stop_rgb (pattern, 0.0,        hilight.r, hilight.g, hilight.b);
-		cairo_pattern_add_color_stop_rgb (pattern, 1.0/height, hilight.r, hilight.g, hilight.b);
-		cairo_pattern_add_color_stop_rgb (pattern, 1.0/height, shade1.r, shade1.g, shade1.b);
-		cairo_pattern_add_color_stop_rgb (pattern, 0.45,       shade2.r, shade2.g, shade2.b);
-		cairo_pattern_add_color_stop_rgb (pattern, 0.45,       fill->r, fill->g, fill->b);
-		cairo_pattern_add_color_stop_rgb (pattern, 1.0,        shade3.r, shade3.g, shade3.b);
+		switch	(tab->gap_side)
+		{
+			case CL_GAP_TOP:
+				pattern = cairo_pattern_create_linear (0, height-2, 0, 0);
+				break;
+			case CL_GAP_BOTTOM:
+				pattern = cairo_pattern_create_linear (0, 1, 0, height);
+				break;
+			case CL_GAP_LEFT:
+				pattern = cairo_pattern_create_linear (width-2, 0, 1, 0);
+				break;
+			case CL_GAP_RIGHT:
+				pattern = cairo_pattern_create_linear (1, 0, width-2, 0);
+				break;
+		}
+
+		ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius, params->corners);
+
+		cairo_pattern_add_color_stop_rgb (pattern, 0.0, hilight.r, hilight.g, hilight.b);
+		cairo_pattern_add_color_stop_rgb (pattern, 1.0/(horizontal ? height : width), hilight.r, hilight.g, hilight.b);
+		cairo_pattern_add_color_stop_rgb (pattern, 1.0/(horizontal ? height : width), shade1.r, shade1.g, shade1.b);
+		cairo_pattern_add_color_stop_rgb (pattern, 0.45, shade2.r, shade2.g, shade2.b);
+		cairo_pattern_add_color_stop_rgb (pattern, 0.45, fill->r, fill->g, fill->b);
+		cairo_pattern_add_color_stop_rgb (pattern, 1.0, shade3.r, shade3.g, shade3.b);
 		cairo_set_source (cr, pattern);
 		cairo_fill (cr);
 		cairo_pattern_destroy (pattern);
 	}
 	else
 	{
-		/* Draw shade */
-		pattern = cairo_pattern_create_linear (tab->gap_side == CL_GAP_LEFT   ? width-2  : 0,
-		                                       tab->gap_side == CL_GAP_TOP    ? height-2 : 0,
-		                                       tab->gap_side == CL_GAP_RIGHT  ? width    : 0,
-		                                       tab->gap_side == CL_GAP_BOTTOM ? height   : 0);
+		CairoColor shade1;
+
+		ge_shade_color (fill, SHADE_TOP, &shade1);
+
+		switch	(tab->gap_side)
+		{
+			case CL_GAP_TOP:
+				pattern = cairo_pattern_create_linear (0, height-2, 0, 0);
+				break;
+			case CL_GAP_BOTTOM:
+				pattern = cairo_pattern_create_linear (0, 0, 0, height);
+				break;
+			case CL_GAP_LEFT:
+				pattern = cairo_pattern_create_linear (width-2, 0, 0, 0);
+				break;
+			case CL_GAP_RIGHT:
+				pattern = cairo_pattern_create_linear (0, 0, width, 0);
+				break;
+		}
 
 		ge_cairo_rounded_rectangle (cr, 0, 0, width-1, height-1, radius, params->corners);
 
-		cairo_pattern_add_color_stop_rgba (pattern, 0.0, stripe_fill->r, stripe_fill->g, stripe_fill->b, 0.5);
+		cairo_pattern_add_color_stop_rgba (pattern, 0.0, stripe_fill->r, stripe_fill->g, stripe_fill->b, 0.6);
+		/* cairo_pattern_add_color_stop_rgba (pattern, 1.0/(horizontal ? height : width), stripe_fill->r, stripe_fill->g, stripe_fill->b, 0.34);
+		   cairo_pattern_add_color_stop_rgba (pattern, 1.0/(horizontal ? height : width), stripe_fill->r, stripe_fill->g, stripe_fill->b, 0.5); */
+		cairo_pattern_add_color_stop_rgb  (pattern, stripe_fill_size, stripe_fill->r, stripe_fill->g, stripe_fill->b);
+		cairo_pattern_add_color_stop_rgba (pattern, stripe_fill_size, stripe_border->r, stripe_border->g, stripe_border->b, 0.72);
+		cairo_pattern_add_color_stop_rgba (pattern, stripe_border_pos, stripe_border->r, stripe_border->g, stripe_border->b, 0.72);
+		cairo_pattern_add_color_stop_rgb  (pattern, stripe_border_pos, shade1.r, shade1.g, shade1.b);
 		cairo_pattern_add_color_stop_rgba (pattern, 0.8, fill->r, fill->g, fill->b, 0.0);
 		cairo_set_source (cr, pattern);
 		cairo_fill (cr);
@@ -773,16 +781,60 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
 	}
 	else
 	{
-		pattern = cairo_pattern_create_linear (tab->gap_side == CL_GAP_LEFT   ? width-2  : 2,
-		                                       tab->gap_side == CL_GAP_TOP    ? height-2 : 2,
-		                                       tab->gap_side == CL_GAP_RIGHT  ? width    : 2,
-		                                       tab->gap_side == CL_GAP_BOTTOM ? height   : 2);
+		switch	(tab->gap_side)
+		{
+			case CL_GAP_TOP:
+				pattern = cairo_pattern_create_linear (2, height-2, 2, 2);
+				break;
+			case CL_GAP_BOTTOM:
+				pattern = cairo_pattern_create_linear (2, 2, 2, height);
+				break;
+			case CL_GAP_LEFT:
+				pattern = cairo_pattern_create_linear (width-2, 2, 2, 2);
+				break;
+			case CL_GAP_RIGHT:
+				pattern = cairo_pattern_create_linear (2, 2, width, 2);
+				break;
+		}
 
 		cairo_pattern_add_color_stop_rgb (pattern, 0.0, stripe_border->r, stripe_border->g, stripe_border->b);
 		cairo_pattern_add_color_stop_rgb (pattern, 0.8, border->r,        border->g,        border->b);
 		cairo_set_source (cr, pattern);
 		cairo_stroke (cr);
 		cairo_pattern_destroy (pattern);
+	}
+
+	/* In current GTK+ focus and active cannot happen together, but we are robust against it. */
+	if (params->focus && !params->active)
+	{
+		CairoColor focus_fill = tab->focus.color;
+		CairoColor fill_shade1, fill_shade2, fill_shade3;
+		CairoColor focus_border;
+
+		double focus_inset_x = ((tab->gap_side == CL_GAP_TOP || tab->gap_side == CL_GAP_BOTTOM) ? 4 : stripe_size + 3);
+		double focus_inset_y = ((tab->gap_side == CL_GAP_TOP || tab->gap_side == CL_GAP_BOTTOM) ? stripe_size + 3 : 4);
+		double border_alpha = 0.54;
+		double fill_alpha = 0.17;
+
+		ge_shade_color (&focus_fill, 0.65, &focus_border);
+		ge_shade_color (&focus_fill, 1.18, &fill_shade1);
+		ge_shade_color (&focus_fill, 1.02, &fill_shade2);
+		ge_shade_color (&focus_fill, 0.84, &fill_shade3);
+
+		ge_cairo_rounded_rectangle (cr, focus_inset_x, focus_inset_y, width-focus_inset_x*2-1, height-focus_inset_y*2-1, radius-1, CR_CORNER_ALL);
+		pattern = cairo_pattern_create_linear (0, 0, 0, height);
+
+		cairo_pattern_add_color_stop_rgba (pattern, 0.0, fill_shade1.r, fill_shade1.g, fill_shade1.b, fill_alpha);
+		cairo_pattern_add_color_stop_rgba (pattern, 0.5, fill_shade2.r, fill_shade2.g, fill_shade2.b, fill_alpha);
+		cairo_pattern_add_color_stop_rgba (pattern, 0.5, focus_fill.r,   focus_fill.g, focus_fill.b,  fill_alpha);
+		cairo_pattern_add_color_stop_rgba (pattern, 1.0, fill_shade3.r, fill_shade3.g, fill_shade3.b, fill_alpha);
+		cairo_set_source (cr, pattern);
+		cairo_fill_preserve (cr);
+
+		cairo_pattern_destroy (pattern);
+
+		clearlooks_set_mixed_color (cr, &params->parentbg, &focus_border, border_alpha);
+		cairo_stroke (cr);
 	}
 }
 
@@ -802,33 +854,33 @@ clearlooks_gummy_draw_separator (cairo_t                   *cr,
 
 	if (separator->horizontal)
 	{
-		cairo_set_line_width  (cr, 1.0);
-		cairo_translate       (cr, x, y+0.5);
+		cairo_set_line_width (cr, 1.0);
+		cairo_translate      (cr, x, y+0.5);
 
-		cairo_move_to         (cr, 0.0,   0.0);
-		cairo_line_to         (cr, width, 0.0);
-		ge_cairo_set_color    (cr, &color);
-		cairo_stroke          (cr);
+		cairo_move_to        (cr, 0.0,   0.0);
+		cairo_line_to        (cr, width, 0.0);
+		ge_cairo_set_color   (cr, &color);
+		cairo_stroke         (cr);
 
-		cairo_move_to         (cr, 0.0,   1.0);
-		cairo_line_to         (cr, width, 1.0);
-		ge_cairo_set_color    (cr, &hilight);
-		cairo_stroke          (cr);
+		cairo_move_to        (cr, 0.0,   1.0);
+		cairo_line_to        (cr, width, 1.0);
+		ge_cairo_set_color   (cr, &hilight);
+		cairo_stroke         (cr);
 	}
 	else
 	{
-		cairo_set_line_width  (cr, 1.0);
-		cairo_translate       (cr, x+0.5, y);
+		cairo_set_line_width (cr, 1.0);
+		cairo_translate      (cr, x+0.5, y);
 
-		cairo_move_to         (cr, 0.0, 0.0);
-		cairo_line_to         (cr, 0.0, height);
-		ge_cairo_set_color    (cr, &color);
-		cairo_stroke          (cr);
+		cairo_move_to        (cr, 0.0, 0.0);
+		cairo_line_to        (cr, 0.0, height);
+		ge_cairo_set_color   (cr, &color);
+		cairo_stroke         (cr);
 
-		cairo_move_to         (cr, 1.0, 0.0);
-		cairo_line_to         (cr, 1.0, height);
-		ge_cairo_set_color    (cr, &hilight);
-		cairo_stroke          (cr);
+		cairo_move_to        (cr, 1.0, 0.0);
+		cairo_line_to        (cr, 1.0, height);
+		ge_cairo_set_color   (cr, &hilight);
+		cairo_stroke         (cr);
 	}
 
 	cairo_restore (cr);
@@ -841,16 +893,14 @@ clearlooks_gummy_draw_slider (cairo_t                *cr,
                               int x, int y, int width, int height)
 {
 	const CairoColor *border = &colors->shade[7];
-	CairoColor  fill;
-	CairoColor  shade1, shade2, shade3;
+	CairoColor fill;
+	CairoColor shade1, shade2, shade3;
 	cairo_pattern_t *pattern;
 	int bar_x, i;
 	int shift_x;
 
-	cairo_set_line_width (cr, 1.0);	
+	cairo_set_line_width (cr, 1.0);
 	cairo_translate      (cr, x, y);
-
-	cairo_translate (cr, -0.5, -0.5);
 
 	ge_shade_color (&colors->bg[params->state_type], 1.0, &fill);
 	if (params->prelight)
@@ -861,10 +911,10 @@ clearlooks_gummy_draw_slider (cairo_t                *cr,
 	ge_shade_color (&fill, SHADE_BOTTOM, &shade3);
 
 	pattern = cairo_pattern_create_linear (1, 1, 1, height-2);
-	cairo_pattern_add_color_stop_rgb(pattern, 0,   shade1.r, shade1.g, shade1.b);
-	cairo_pattern_add_color_stop_rgb(pattern, 0.5, shade2.r, shade2.g, shade2.b);
-	cairo_pattern_add_color_stop_rgb(pattern, 0.5, fill.r, fill.g, fill.b);
-	cairo_pattern_add_color_stop_rgb(pattern, 1.0, shade3.r, shade3.g, shade3.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 0,   shade1.r, shade1.g, shade1.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 0.5, shade2.r, shade2.g, shade2.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 0.5, fill.r, fill.g, fill.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 1.0, shade3.r, shade3.g, shade3.b);
 	cairo_rectangle (cr, 1, 1, width-2, height-2);
 	cairo_set_source (cr, pattern);
 	cairo_fill (cr);
@@ -889,7 +939,7 @@ clearlooks_gummy_draw_slider (cairo_t                *cr,
 	}
 	cairo_stroke (cr);
 
-	clearlooks_gummy_draw_top_left_highlight (cr, &fill, params, width, height, 2.0);
+	params->style_functions->draw_top_left_highlight (cr, &fill, params, 1, 1, width-2, height-2, 2.0, params->corners);
 }
 
 static void
@@ -906,9 +956,9 @@ clearlooks_gummy_draw_slider_button (cairo_t                *cr,
 	if (!slider->horizontal)
 		ge_cairo_exchange_axis (cr, &x, &y, &width, &height);
 
-	cairo_translate (cr, x+0.5, y+0.5);
+	cairo_translate (cr, x, y);
 
-	params->style_functions->draw_shadow (cr, colors, radius, width-1, height-1);
+	params->style_functions->draw_shadow (cr, colors, radius, width, height);
 	params->style_functions->draw_slider (cr, colors, params, 1, 1, width-2, height-2);
 }
 
@@ -925,7 +975,6 @@ clearlooks_gummy_draw_scrollbar_stepper (cairo_t                          *cr,
 	CairoColor fill;
 	CairoColor shade1, shade2, shade3;
 	cairo_pattern_t *pattern;
-	ShadowParameters shadow;
 	double radius = MIN (widget->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
 
 	if (scrollbar->horizontal)
@@ -954,29 +1003,24 @@ clearlooks_gummy_draw_scrollbar_stepper (cairo_t                          *cr,
 		pattern = cairo_pattern_create_linear (0, 0, width, 0);
 
 	fill = colors->bg[widget->state_type];
-	ge_shade_color(&fill, SHADE_TOP, &shade1);
-	ge_shade_color(&fill, SHADE_CENTER_TOP, &shade2); 
-	ge_shade_color(&fill, SHADE_BOTTOM, &shade3); 
+	ge_shade_color (&fill, SHADE_TOP, &shade1);
+	ge_shade_color (&fill, SHADE_CENTER_TOP, &shade2);
+	ge_shade_color (&fill, SHADE_BOTTOM, &shade3);
 
-	cairo_pattern_add_color_stop_rgb(pattern, 0,   shade1.r, shade1.g, shade1.b);
-	cairo_pattern_add_color_stop_rgb(pattern, 0.5, shade2.r, shade2.g, shade2.b);
-	cairo_pattern_add_color_stop_rgb(pattern, 0.5, fill.r, fill.g, fill.b);
-	cairo_pattern_add_color_stop_rgb(pattern, 1.0, shade3.r, shade3.g, shade3.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 0,   shade1.r, shade1.g, shade1.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 0.5, shade2.r, shade2.g, shade2.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 0.5, fill.r, fill.g, fill.b);
+	cairo_pattern_add_color_stop_rgb (pattern, 1.0, shade3.r, shade3.g, shade3.b);
 	cairo_set_source (cr, pattern);
 	cairo_fill (cr);
 	cairo_pattern_destroy (pattern);
 
-	cairo_translate (cr, 0.5, 0.5);
-	clearlooks_gummy_draw_top_left_highlight (cr, &fill, widget, width, height, (stepper->stepper == CL_STEPPER_A) ? radius : 0);
-	cairo_translate (cr, -0.5, -0.5);
+	widget->style_functions->draw_top_left_highlight (cr, &fill, widget, 1, 1, width - 2, height - 2,
+	                                                  radius, corners);
 
 	ge_cairo_rounded_rectangle (cr, 0.5, 0.5, width-1, height-1, radius, corners);
 	clearlooks_set_mixed_color (cr, border, &fill, 0.2);
 	cairo_stroke (cr);
-
-	cairo_translate (cr, 0.5, 0.5);
-	shadow.shadow  = CL_SHADOW_OUT;
-	shadow.corners = corners;
 }
 
 static void
@@ -1044,7 +1088,7 @@ clearlooks_gummy_draw_scrollbar_slider (cairo_t                   *cr,
 
 	cairo_set_line_width (cr, 1);
 
-	ge_shade_color (&fill, TOPLEFT_HIGHLIGHT_SHADE, &hilight);
+	ge_shade_color (&fill, widget->style_constants->topleft_highlight_shade, &hilight);
 	ge_shade_color (&fill, SHADE_TOP, &shade1);
 	ge_shade_color (&fill, SHADE_CENTER_TOP, &shade2);
 	ge_shade_color (&fill, SHADE_BOTTOM, &shade3);
@@ -1059,7 +1103,7 @@ clearlooks_gummy_draw_scrollbar_slider (cairo_t                   *cr,
 	cairo_fill (cr);
 	cairo_pattern_destroy (pattern);
 
-	if (scrollbar->has_color) 
+	if (scrollbar->has_color)
 	{
 		cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, 0.2);
 		ge_cairo_stroke_rectangle (cr, 1.5, 1.5, width-3, height-3);
@@ -1069,8 +1113,8 @@ clearlooks_gummy_draw_scrollbar_slider (cairo_t                   *cr,
 		cairo_move_to (cr, 1.5, height-1.5);
 		cairo_line_to (cr, 1.5, 1.5);
 		cairo_line_to (cr, width-1.5, 1.5);
-		cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, TOPLEFT_HIGHLIGHT_ALPHA);
-		cairo_stroke(cr);
+		cairo_set_source_rgba (cr, hilight.r, hilight.g, hilight.b, widget->style_constants->topleft_highlight_alpha);
+		cairo_stroke (cr);
 	}
 
 	ge_cairo_set_color (cr, &border);
@@ -1130,7 +1174,7 @@ clearlooks_gummy_draw_list_view_header (cairo_t                        *cr,
 	cairo_pattern_destroy (pattern);
 
 	/* Draw highlight */
-	if (header->order == CL_ORDER_FIRST)
+	if (header->order & CL_ORDER_FIRST)
 	{
 		cairo_move_to (cr, 0.5, height-1.5);
 		cairo_line_to (cr, 0.5, 0.5);
@@ -1144,8 +1188,8 @@ clearlooks_gummy_draw_list_view_header (cairo_t                        *cr,
 	cairo_stroke (cr);
 
 	/* Draw resize grip */
-	if ((params->ltr && header->order != CL_ORDER_LAST) ||
-	    (!params->ltr && header->order != CL_ORDER_FIRST) || header->resizable)
+	if ((params->ltr && !(header->order & CL_ORDER_LAST)) ||
+	    (!params->ltr && !(header->order & CL_ORDER_FIRST)) || header->resizable)
 	{
 		SeparatorParameters separator;
 		separator.horizontal = FALSE;
@@ -1206,14 +1250,14 @@ clearlooks_gummy_draw_toolbar (cairo_t                 *cr,
 	{
 		/* Draw highlight */
 		cairo_move_to       (cr, 0, 0.5);
-		cairo_line_to       (cr, width-1, 0.5);
+		cairo_line_to       (cr, width-0.5, 0.5);
 		ge_cairo_set_color  (cr, &light);
 		cairo_stroke        (cr);
 	}
 
 	/* Draw shadow */
 	cairo_move_to       (cr, 0, height-0.5);
-	cairo_line_to       (cr, width-1, height-0.5);
+	cairo_line_to       (cr, width-0.5, height-0.5);
 	ge_cairo_set_color  (cr, dark);
 	cairo_stroke        (cr);
 }
@@ -1243,7 +1287,7 @@ clearlooks_gummy_draw_menuitem (cairo_t                *cr,
 	cairo_pattern_add_color_stop_rgb (pattern, 1,	shade3.r, shade3.g, shade3.b);
 
 	cairo_set_source (cr, pattern);
-	cairo_fill_preserve  (cr);
+	cairo_fill_preserve (cr);
 	cairo_pattern_destroy (pattern);
 
 	ge_cairo_set_color (cr, border);
@@ -1275,7 +1319,7 @@ clearlooks_gummy_draw_menubaritem (cairo_t                *cr,
 	cairo_pattern_add_color_stop_rgb (pattern, 1,	shade3.r, shade3.g, shade3.b);
 
 	cairo_set_source (cr, pattern);
-	cairo_fill_preserve  (cr);
+	cairo_fill_preserve (cr);
 	cairo_pattern_destroy (pattern);
 
 	ge_cairo_set_color (cr, border);
@@ -1337,6 +1381,13 @@ clearlooks_gummy_draw_radiobutton (cairo_t                  *cr,
 	cairo_pattern_t *pt;
 	gboolean inconsistent;
 	gboolean draw_bullet = (checkbox->shadow_type == GTK_SHADOW_IN);
+	gdouble w, h, cx, cy, radius;
+
+	w = (gdouble) width;
+	h = (gdouble) height;
+	cx = width / 2.0;
+	cy = height / 2.0;
+	radius = MIN (width, height) / 2.0;
 
 	inconsistent = (checkbox->shadow_type == GTK_SHADOW_ETCHED_IN);
 	draw_bullet |= inconsistent;
@@ -1358,7 +1409,7 @@ clearlooks_gummy_draw_radiobutton (cairo_t                  *cr,
 	ge_shade_color (&widget->parentbg, 0.9, &shadow);
 	ge_shade_color (&widget->parentbg, 1.1, &highlight);
 
-	pt = cairo_pattern_create_linear (0, 0, 13, 13);
+	pt = cairo_pattern_create_linear (0, 0, radius * 2.0, radius * 2.0);
 	cairo_pattern_add_color_stop_rgb (pt, 0.0, shadow.r, shadow.b, shadow.g);
 	cairo_pattern_add_color_stop_rgba (pt, 0.5, shadow.r, shadow.b, shadow.g, 0.5);
 	cairo_pattern_add_color_stop_rgba (pt, 0.5, highlight.r, highlight.g, highlight.b, 0.5);
@@ -1366,15 +1417,15 @@ clearlooks_gummy_draw_radiobutton (cairo_t                  *cr,
 
 	cairo_translate (cr, x, y);
 
-	cairo_set_line_width (cr, 2);
-	cairo_arc (cr, 7, 7, 6, 0, G_PI*2);
+	cairo_set_line_width (cr, MAX (1.0, floor (radius/3)));
+	cairo_arc (cr, ceil (cx), ceil (cy), floor (radius - 0.1), 0, G_PI*2);
 	cairo_set_source (cr, pt);
 	cairo_stroke (cr);
 	cairo_pattern_destroy (pt);
 
-	cairo_set_line_width (cr, 1);
+	cairo_set_line_width (cr, MAX (1.0, floor (radius/6)));
 
-	cairo_arc (cr, 7, 7, 5.5, 0, G_PI*2);
+	cairo_arc (cr, ceil (cx), ceil (cy), MAX (1.0, ceil (radius) - 1.5), 0, G_PI*2);
 
 	if (!widget->disabled)
 	{
@@ -1393,21 +1444,21 @@ clearlooks_gummy_draw_radiobutton (cairo_t                  *cr,
 		if (inconsistent)
 		{
 			cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-			cairo_set_line_width (cr, 4);
+			cairo_set_line_width (cr, ceil (radius * 2 / 3));
 
-			cairo_move_to(cr, 5, 7);
-			cairo_line_to(cr, 9, 7);
+			cairo_move_to (cr, ceil (cx - radius/3.0), ceil (cy));
+			cairo_line_to (cr, ceil (cx + radius/3.0), ceil (cy));
 
 			ge_cairo_set_color (cr, dot);
 			cairo_stroke (cr);
 		}
 		else
 		{
-			cairo_arc (cr, 7, 7, 3, 0, G_PI*2);
+			cairo_arc (cr, ceil (cx), ceil (cy), floor (radius/2.0), 0, G_PI*2);
 			ge_cairo_set_color (cr, dot);
 			cairo_fill (cr);
 
-			cairo_arc (cr, 6, 6, 1, 0, G_PI*2);
+			cairo_arc (cr, floor (cx - radius/10.0), floor (cy - radius/10.0), floor (radius/6.0), 0, G_PI*2);
 			cairo_set_source_rgba (cr, highlight.r, highlight.g, highlight.b, 0.5);
 			cairo_fill (cr);
 		}
@@ -1422,7 +1473,7 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
                                 int x, int y, int width, int height)
 {
 	const CairoColor *border;
-	const CairoColor *dot; 
+	const CairoColor *dot;
 	gboolean inconsistent = FALSE;
 	gboolean draw_bullet = (checkbox->shadow_type == GTK_SHADOW_IN);
 
@@ -1438,7 +1489,7 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
 	{
 		if (widget->prelight)
 			border = &colors->spot[2];
-		else		
+		else
 			border = &colors->shade[6];
 		dot    = &colors->text[GTK_STATE_NORMAL];
 	}
@@ -1448,25 +1499,25 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
 
 	if (widget->xthickness > 2 && widget->ythickness > 2)
 	{
-		widget->style_functions->draw_inset (cr, &widget->parentbg, 0.5, 0.5, 
-                                  width-1, height-1, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
-		
+		widget->style_functions->draw_inset (cr, &widget->parentbg, 0, 0,
+		                                     width, height, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
+
 		/* Draw the rectangle for the checkbox itself */
-		ge_cairo_rounded_rectangle (cr, 1.5, 1.5, 
-                                  width-3, height-3, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
+		ge_cairo_rounded_rectangle (cr, 1.5, 1.5,
+		                            width-3, height-3, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
 	}
 	else
 	{
 		/* Draw the rectangle for the checkbox itself */
-		ge_cairo_rounded_rectangle (cr, 0.5, 0.5, 
-                                  width-1, height-1, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
+		ge_cairo_rounded_rectangle (cr, 0.5, 0.5,
+		                            width-1, height-1, (widget->radius > 0)? 1 : 0, CR_CORNER_ALL);
 	}
-	
+
 	if (!widget->disabled)
-	{		
+	{
 		if (widget->prelight)
 			clearlooks_set_mixed_color (cr, &colors->base[0], &colors->spot[1], 0.5);
-		else		
+		else
 			ge_cairo_set_color (cr, &colors->base[0]);
 		cairo_fill_preserve (cr);
 	}
@@ -1491,7 +1542,6 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
 			cairo_curve_to (cr, 0.5 + (width*0.4), (height*0.7),
 			                    0.5 + (width*0.5), (height*0.4),
 			                    0.5 + (width*0.70), (height*0.25));
-
 		}
 
 		ge_cairo_set_color (cr, dot);
@@ -1499,26 +1549,160 @@ clearlooks_gummy_draw_checkbox (cairo_t                  *cr,
 	}
 }
 
-void
-clearlooks_register_style_gummy (ClearlooksStyleFunctions *functions)
+static void
+clearlooks_gummy_draw_focus (cairo_t                *cr,
+                             const ClearlooksColors *colors,
+                             const WidgetParameters *widget,
+                             const FocusParameters  *focus,
+                             int x, int y, int width, int height)
 {
-	functions->draw_button              = clearlooks_gummy_draw_button;
-	functions->draw_entry               = clearlooks_gummy_draw_entry;
-	functions->draw_progressbar_trough  = clearlooks_gummy_draw_progressbar_trough;
-	functions->draw_progressbar_fill    = clearlooks_gummy_draw_progressbar_fill;
-	functions->draw_scale_trough        = clearlooks_gummy_draw_scale_trough;
-	functions->draw_tab                 = clearlooks_gummy_draw_tab;
-	functions->draw_separator           = clearlooks_gummy_draw_separator;
-	functions->draw_slider              = clearlooks_gummy_draw_slider;
-	functions->draw_slider_button       = clearlooks_gummy_draw_slider_button;
-	functions->draw_scrollbar_stepper   = clearlooks_gummy_draw_scrollbar_stepper;
-	functions->draw_scrollbar_slider    = clearlooks_gummy_draw_scrollbar_slider;
-	functions->draw_list_view_header    = clearlooks_gummy_draw_list_view_header;
-	functions->draw_toolbar             = clearlooks_gummy_draw_toolbar;
-	functions->draw_menuitem            = clearlooks_gummy_draw_menuitem;
-	functions->draw_menubaritem         = clearlooks_gummy_draw_menubaritem;
-	functions->draw_selected_cell       = clearlooks_gummy_draw_selected_cell;
-	functions->draw_statusbar           = clearlooks_gummy_draw_statusbar;
-	functions->draw_checkbox            = clearlooks_gummy_draw_checkbox;
-	functions->draw_radiobutton         = clearlooks_gummy_draw_radiobutton;
+	CairoColor fill = focus->color;
+	CairoColor fill_shade1, fill_shade2, fill_shade3;
+	CairoColor border;
+	CairoColor parentbg = widget->parentbg;
+
+	/* Default values */
+	double xoffset = 1.5;
+	double yoffset = 1.5;
+	double radius = widget->radius-1.0;
+	double border_alpha = 0.64;
+	double fill_alpha = 0.18;
+	double shadow_alpha = 0.5;
+	boolean focus_fill = TRUE;
+	boolean focus_border = TRUE;
+	boolean focus_shadow = FALSE;
+
+	ge_shade_color (&fill, 0.65, &border);
+	ge_shade_color (&fill, 1.18, &fill_shade1);
+	ge_shade_color (&fill, 1.02, &fill_shade2);
+	ge_shade_color (&fill, 0.84, &fill_shade3);
+
+	/* Do some useful things to adjust focus */
+	switch (focus->type)
+	{
+		case CL_FOCUS_BUTTON:
+			xoffset = -1.5-(focus->padding);
+			yoffset = -1.5-(focus->padding);
+			radius++;
+			border_alpha = 0.9;
+			fill_alpha = 0.12;
+			if (!widget->active)
+				focus_shadow = TRUE;
+			break;
+		case CL_FOCUS_BUTTON_FLAT:
+			xoffset = -1.5-(focus->padding);
+			yoffset = -1.5-(focus->padding);
+			radius++;
+			if (widget->active || widget->prelight)
+			{
+				border_alpha = 0.9;
+				fill_alpha = 0.12;
+				if (!widget->active)
+					focus_shadow = TRUE;
+			}
+			break;
+		case CL_FOCUS_LABEL:
+			xoffset = 0.5;
+			yoffset = 0.5;
+			break;
+		case CL_FOCUS_TREEVIEW:
+			parentbg = colors->base[widget->state_type];
+			xoffset = -1.5;
+			yoffset = -1.5;
+			fill_alpha = 0.08;
+			focus_border = FALSE;
+			break;
+		case CL_FOCUS_TREEVIEW_DND:
+			parentbg = colors->base[widget->state_type];
+			break;
+		case CL_FOCUS_TREEVIEW_HEADER:
+			cairo_translate (cr, -1, 0);
+			break;
+		case CL_FOCUS_TREEVIEW_ROW:
+			parentbg = colors->base[widget->state_type];
+			xoffset = -2.5; /* hack to hide vertical lines */
+			yoffset = 0.5;
+			radius = CLAMP (radius, 0.0, 2.0);
+			border_alpha = 0.7;
+			focus_fill = FALSE;
+			break;
+		case CL_FOCUS_TAB:
+			/* In current GTK+ focus and active cannot happen together, but we are robust against it.
+			 * IF the application sets the state to ACTIVE while drawing the tabs focus. */
+			if (widget->focus && !widget->active)
+				return;
+			break;
+		case CL_FOCUS_SCALE:
+			break;
+		case CL_FOCUS_UNKNOWN:
+			/* Fallback to classic function, dots */
+			clearlooks_draw_focus (cr, colors, widget, focus, x, y, width, height);
+			return;
+			break;
+		default:
+			break;
+	};
+
+	cairo_translate (cr, x, y);
+	cairo_set_line_width (cr, focus->line_width);
+
+	ge_cairo_rounded_rectangle (cr, xoffset, yoffset, width-(xoffset*2), height-(yoffset*2), radius, widget->corners);
+
+	if (focus_fill)
+	{
+		cairo_pattern_t *pattern;
+
+		pattern = cairo_pattern_create_linear (0, 0, 0, height);
+		cairo_pattern_add_color_stop_rgba (pattern, 0.0, fill_shade1.r, fill_shade1.g, fill_shade1.b, fill_alpha);
+		cairo_pattern_add_color_stop_rgba (pattern, 0.5, fill_shade2.r, fill_shade2.g, fill_shade2.b, fill_alpha);
+		cairo_pattern_add_color_stop_rgba (pattern, 0.5, fill.r,        fill.g,        fill.b,        fill_alpha);
+		cairo_pattern_add_color_stop_rgba (pattern, 1.0, fill_shade3.r, fill_shade3.g, fill_shade3.b, fill_alpha);
+		cairo_set_source (cr, pattern);
+		cairo_fill_preserve (cr);
+
+		cairo_pattern_destroy (pattern);
+	}
+
+	if (focus_border)
+	{
+		clearlooks_set_mixed_color (cr, &parentbg, &border, border_alpha);
+		cairo_stroke (cr);
+	}
+
+	if (focus_shadow)
+	{
+		if (radius > 0)
+			radius++;
+		ge_cairo_rounded_rectangle (cr, xoffset-1, yoffset-1, width-(xoffset*2)+2, height-(yoffset*2)+2, radius, widget->corners);
+		clearlooks_set_mixed_color (cr, &parentbg, &fill, shadow_alpha);
+		cairo_stroke (cr);
+	}
+}
+
+void
+clearlooks_register_style_gummy (ClearlooksStyleFunctions *functions, ClearlooksStyleConstants *constants)
+{
+	functions->draw_button             = clearlooks_gummy_draw_button;
+	functions->draw_entry              = clearlooks_gummy_draw_entry;
+	functions->draw_progressbar_trough = clearlooks_gummy_draw_progressbar_trough;
+	functions->draw_progressbar_fill   = clearlooks_gummy_draw_progressbar_fill;
+	functions->draw_scale_trough       = clearlooks_gummy_draw_scale_trough;
+	functions->draw_tab                = clearlooks_gummy_draw_tab;
+	functions->draw_separator          = clearlooks_gummy_draw_separator;
+	functions->draw_slider             = clearlooks_gummy_draw_slider;
+	functions->draw_slider_button      = clearlooks_gummy_draw_slider_button;
+	functions->draw_scrollbar_stepper  = clearlooks_gummy_draw_scrollbar_stepper;
+	functions->draw_scrollbar_slider   = clearlooks_gummy_draw_scrollbar_slider;
+	functions->draw_list_view_header   = clearlooks_gummy_draw_list_view_header;
+	functions->draw_toolbar            = clearlooks_gummy_draw_toolbar;
+	functions->draw_menuitem           = clearlooks_gummy_draw_menuitem;
+	functions->draw_menubaritem        = clearlooks_gummy_draw_menubaritem;
+	functions->draw_selected_cell      = clearlooks_gummy_draw_selected_cell;
+	functions->draw_statusbar          = clearlooks_gummy_draw_statusbar;
+	functions->draw_checkbox           = clearlooks_gummy_draw_checkbox;
+	functions->draw_radiobutton        = clearlooks_gummy_draw_radiobutton;
+	functions->draw_focus              = clearlooks_gummy_draw_focus;
+
+	constants->topleft_highlight_shade = 1.3;
+	constants->topleft_highlight_alpha = 0.4;
 }

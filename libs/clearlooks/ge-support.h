@@ -5,5 +5,4 @@
 #include "cairo-support.h"
 #include "widget-information.h"
 
-
 #endif /* GE_SUPPORT_H */

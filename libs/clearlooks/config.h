@@ -1,8 +1,12 @@
-/* engines/clearlooks/src/config.h.  Generated from config.h.in by configure.  */
-/* engines/clearlooks/src/config.h.in.  Generated from configure.ac by autoheader.  */
+/* engines/support/config.h.  Generated from config.h.in by configure.  */
+/* engines/support/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* always defined to indicate that i18n is enabled */
 #define ENABLE_NLS 1
+
+/* Defines whether to enable runtime widget checks as a fallback to hints from
+   the theme. */
+#define ENABLE_WIDGET_CHECKS 1
 
 /* Gettext package */
 #define GETTEXT_PACKAGE "gtk-engines"
@@ -55,6 +59,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+/* #undef NO_MINUS_C_MINUS_O */
+
 /* Name of package */
 #define PACKAGE "gtk-engines"
 
@@ -65,16 +72,16 @@
 #define PACKAGE_NAME "gtk-engines"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "gtk-engines 2.12.2"
+#define PACKAGE_STRING "gtk-engines 2.16.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gtk-engines"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.12.2"
+#define PACKAGE_VERSION "2.16.0"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "2.12.2"
+#define VERSION "2.16.0"

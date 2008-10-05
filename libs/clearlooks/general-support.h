@@ -1,3 +1,5 @@
+#ifndef __GENERAL_SUPPORT_H
+#define __GENERAL_SUPPORT_H
 
 #include <gmodule.h>
 #include <glib.h>
@@ -37,3 +39,5 @@
 # define GE_EXPORT      __global
 # define GE_INTERNAL    __hidden
 #endif 
+
+#endif /* __GENERAL_SUPPORT_H */

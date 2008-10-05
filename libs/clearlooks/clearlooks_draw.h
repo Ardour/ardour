@@ -9,9 +9,16 @@
 
 #include <cairo.h>
 
-GE_INTERNAL void clearlooks_register_style_classic (ClearlooksStyleFunctions *functions);
-GE_INTERNAL void clearlooks_register_style_glossy  (ClearlooksStyleFunctions *functions);
-GE_INTERNAL void clearlooks_register_style_gummy  (ClearlooksStyleFunctions *functions);
-GE_INTERNAL void clearlooks_register_style_inverted (ClearlooksStyleFunctions *functions);
+GE_INTERNAL void clearlooks_register_style_classic (ClearlooksStyleFunctions *functions, ClearlooksStyleConstants *constants);
+GE_INTERNAL void clearlooks_register_style_glossy (ClearlooksStyleFunctions *functions, ClearlooksStyleConstants *constants);
+GE_INTERNAL void clearlooks_register_style_gummy (ClearlooksStyleFunctions *functions, ClearlooksStyleConstants *constants);
+GE_INTERNAL void clearlooks_register_style_inverted (ClearlooksStyleFunctions *functions, ClearlooksStyleConstants *constants);
+
+/* Fallback focus function */
+GE_INTERNAL void clearlooks_draw_focus (cairo_t *cr,
+                                        const ClearlooksColors *colors,
+                                        const WidgetParameters *widget,
+                                        const FocusParameters  *focus,
+                                        int x, int y, int width, int height);
 
 #endif /* CLEARLOOKS_DRAW_H */

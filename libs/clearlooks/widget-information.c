@@ -2,8 +2,168 @@
 
 #include "general-support.h"
 #include "widget-information.h"
+#include "config.h"
 #include <math.h>
 #include <string.h>
+
+static gchar ge_widget_hints[] = 
+	"treeview\0"
+	"treeview-header\0"
+	"statusbar\0"
+	"comboboxentry\0"
+	"spinbutton\0"
+	"scale\0"
+	"vscale\0"
+	"hscale\0"
+	"scrollbar\0"
+	"vscrollbar\0"
+	"hscrollbar\0"
+	"progressbar\0"
+	"menubar\0";
+
+gboolean
+ge_check_hint (GEHint      hint,
+               GQuark      style_hint,
+               GtkWidget  *widget)
+{
+	static GEHint quark_hint_lookup[GE_HINT_COUNT] = {0};
+
+	g_assert ((hint >= 0) && (hint < GE_HINT_COUNT));
+
+	/* Initilize lookup table */
+	if (G_UNLIKELY (quark_hint_lookup[0] == 0))
+	{
+		guint i = 0;
+		gchar *cur_hint_str = ge_widget_hints;
+		while ((i < GE_HINT_COUNT) && cur_hint_str[0])
+		{
+			/* Can't use _from_static_string as the engine may be unloaded. */
+			quark_hint_lookup[i] = g_quark_from_string (cur_hint_str);
+			cur_hint_str += strlen(cur_hint_str) + 1;
+			i++;
+		}
+		g_assert (i == GE_HINT_COUNT && cur_hint_str[0] == '\0');
+	}
+
+
+	if (quark_hint_lookup[hint] == style_hint)
+		return TRUE;
+
+
+	/* Try to decide based on other hints, eg. hscale is also a scale.  */
+	if (hint == GE_HINT_SCALE)
+		if (ge_check_hint (GE_HINT_VSCALE, style_hint, widget) ||
+		    ge_check_hint (GE_HINT_HSCALE, style_hint, widget))
+		    	return TRUE;
+	if (hint == GE_HINT_SCROLLBAR)
+		if (ge_check_hint (GE_HINT_VSCROLLBAR, style_hint, widget) ||
+		    ge_check_hint (GE_HINT_HSCROLLBAR, style_hint, widget))
+		    	return TRUE;
+	if (hint == GE_HINT_TREEVIEW)
+		if (ge_check_hint (GE_HINT_TREEVIEW_HEADER, style_hint, widget))
+		    	return TRUE;
+
+
+	/* These may be caused by applications so we never want to disable them.
+	 * TODO: This does not catch the case where the theme uses appears-as-list
+	 *       and the application turns it off again. Though this case
+	 *       is even less likely. */
+	switch (hint) {
+		case GE_HINT_COMBOBOX_ENTRY:
+			if (widget && ge_object_is_a (G_OBJECT (widget), "GtkComboBox"))
+			{
+				gboolean appears_as_list = FALSE;
+
+				gtk_widget_style_get (widget, "appears-as-list", &appears_as_list, NULL);
+
+				if (appears_as_list)
+					return TRUE;
+			}
+		break;
+		default:
+		break;
+	}
+
+
+#ifdef ENABLE_WIDGET_CHECKS
+	/* If a style_hint *was* set, and nothing matched, just give up right away.
+	 * A theme shall either support it fully, or not at all. */
+	if (style_hint != 0)
+		return FALSE;
+
+	/* No widget? Just give up. Nothing we can do. */
+	if (widget == NULL)
+		return FALSE;
+
+	/* Try to do something based on the passed in widget pointer. */
+	switch (hint) {
+		case GE_HINT_TREEVIEW:
+			if (widget->parent && (ge_object_is_a (G_OBJECT (widget->parent), "GtkTreeView")))
+				return TRUE;
+		break;
+		case GE_HINT_TREEVIEW_HEADER:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkButton") && widget->parent &&
+			    (ge_object_is_a (G_OBJECT (widget->parent), "GtkTreeView") || ge_object_is_a (G_OBJECT (widget->parent), "GtkCList") ||
+			     ge_object_is_a (G_OBJECT (widget->parent), "GtkCTree")))
+				return TRUE;
+			if (widget->parent && ge_object_is_a (G_OBJECT (widget->parent), "ETreeView"))
+				return TRUE;
+		break;
+		case GE_HINT_COMBOBOX_ENTRY:
+			if (ge_is_in_combo_box (widget))
+				return TRUE;
+		break;
+		case GE_HINT_SPINBUTTON:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkSpinButton"))
+				return TRUE;
+		break;
+		case GE_HINT_STATUSBAR:
+			if (widget->parent && ge_object_is_a (G_OBJECT (widget), "GtkStatusbar"))
+				return TRUE;
+		break;
+		case GE_HINT_SCALE:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkScale"))
+				return TRUE;
+		break;
+		case GE_HINT_HSCALE:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkHScale"))
+				return TRUE;
+		break;
+		case GE_HINT_VSCALE:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkVScale"))
+				return TRUE;
+		break;
+		case GE_HINT_SCROLLBAR:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkScrollbar"))
+				return TRUE;
+		break;
+		case GE_HINT_HSCROLLBAR:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkHScrollbar"))
+				return TRUE;
+		break;
+		case GE_HINT_VSCROLLBAR:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkVScrollbar"))
+				return TRUE;
+		break;
+		case GE_HINT_PROGRESSBAR:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkProgressBar"))
+				return TRUE;
+		break;
+		case GE_HINT_MENUBAR:
+			if (ge_object_is_a (G_OBJECT (widget), "GtkMenuBar") ||
+			    ge_object_is_a (G_OBJECT (widget->parent), "GtkMenuBar"))
+				return TRUE;
+		break;
+
+		default:
+		break;
+	}
+
+#endif
+
+
+	return FALSE;
+}
 
 /* Widget Type Lookups/Macros
    
@@ -40,21 +200,14 @@ ge_is_combo_box_entry (GtkWidget * widget)
     }
   return result;
 }
- 
+
 static gboolean
 ge_combo_box_is_using_list (GtkWidget * widget)
 {
   gboolean result = FALSE;
  
   if (GE_IS_COMBO_BOX (widget))
-    {
-      gboolean *tmp = NULL;
- 
-      gtk_widget_style_get (widget, "appears-as-list", &result, NULL);
-
-      if (tmp)
-	result = *tmp;
-    }
+    gtk_widget_style_get (widget, "appears-as-list", &result, NULL);
  
   return result;
 }
@@ -242,8 +395,8 @@ ge_find_combo_box_widget_parent (GtkWidget * widget)
  ***********************************************/ 
 void
 ge_option_menu_get_props (GtkWidget * widget,
-		       GtkRequisition * indicator_size,
-		       GtkBorder * indicator_spacing)
+                          GtkRequisition * indicator_size,
+                          GtkBorder * indicator_spacing)
 {
   GtkRequisition default_size = { 9, 5 };
   GtkBorder default_spacing = { 7, 5, 2, 2 };
@@ -293,7 +446,6 @@ ge_button_get_default_border (GtkWidget *widget,
 	}
 }
 
-
 gboolean
 ge_widget_is_ltr (GtkWidget *widget)
 {
@@ -310,3 +462,26 @@ ge_widget_is_ltr (GtkWidget *widget)
 	else
 		return TRUE;
 }
+
+guint
+ge_rc_parse_hint (GScanner    *scanner,
+                  GQuark      *quark)
+{
+	guint token;
+
+	/* Skip 'hint' */
+	token = g_scanner_get_next_token(scanner);
+
+	token = g_scanner_get_next_token(scanner);
+	if (token != G_TOKEN_EQUAL_SIGN)
+	   return G_TOKEN_EQUAL_SIGN;
+
+	token = g_scanner_get_next_token(scanner);
+	if (token != G_TOKEN_STRING)
+	   return G_TOKEN_STRING;
+
+	*quark = g_quark_from_string (scanner->value.v_string);
+
+	return G_TOKEN_NONE;
+}
+
