@@ -80,7 +80,10 @@ using namespace PBD;
 using namespace Gtk;
 using namespace sigc;
 using namespace Editing;
-
+	
+// Minimum height at which a control is displayed
+static const uint32_t CHANNEL_MIN_HEIGHT = 80;
+static const uint32_t KEYBOARD_MIN_HEIGHT = 140;
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess) // virtually inherited
@@ -91,7 +94,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	, _note_mode(Sustained)
 	, _note_mode_item(NULL)
 	, _percussion_mode_item(NULL)
-	, _midi_expander("MIDI")
+	, _midi_expander("Channel")
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -143,7 +146,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess, boost::shar
 	_midi_expander.add(*channel_selector_box);
 	_midi_expander.property_expanded().signal_changed().connect(
 			mem_fun(this, &MidiTimeAxisView::channel_selector_toggled));
-	controls_vbox.pack_end(_midi_expander, false, false);
+	controls_vbox.pack_start(_midi_expander, false, false);
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_track()->midi_diskstream();
 
 	// restore channel selector settings
@@ -175,8 +178,6 @@ MidiTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 	xml_node->add_property ("shown_editor", "yes");
 		
 	guint32 ret = TimeAxisView::show_at (y, nth, parent);
-	_piano_roll_header->show();
-	_range_scroomer->show();
 	return ret;
 }
 
@@ -194,34 +195,18 @@ MidiTimeAxisView::set_height (uint32_t h)
 {
 	RouteTimeAxisView::set_height (h);
 
-	static const int EXPANDER_MIN_HEIGHT = 100;
-	static const int KEYBOARD_MIN_HEIGHT = 250;
-
-	if (height >= hLarger) {
+	if (height >= CHANNEL_MIN_HEIGHT) {
 		_midi_expander.show();
-		if (is_track() && _range_scroomer)
-			_range_scroomer->show();
-		if (is_track() && _piano_roll_header)
-			_piano_roll_header->show();
-
-	} else if (height >= hLarge) {
-		_midi_expander.show();
-		_midi_expander.set_expanded(FALSE);
-		if (is_track() && _range_scroomer)
-			_range_scroomer->show();
-		if (is_track() && _piano_roll_header)
-			_piano_roll_header->show();
-
-	} else if (height >= hNormal) {
-		_midi_expander.show();
-		_midi_expander.set_expanded(FALSE);
-		if (is_track() && _range_scroomer)
-			_range_scroomer->hide();
-		if (is_track() && _piano_roll_header)
-			_piano_roll_header->hide();
 	} else {
 		_midi_expander.hide();
-		_midi_expander.set_expanded(FALSE);
+	}
+	
+	if (height >= KEYBOARD_MIN_HEIGHT) {
+		if (is_track() && _range_scroomer)
+			_range_scroomer->show();
+		if (is_track() && _piano_roll_header)
+			_piano_roll_header->show();
+	} else {
 		if (is_track() && _range_scroomer)
 			_range_scroomer->hide();
 		if (is_track() && _piano_roll_header)
@@ -463,16 +448,12 @@ MidiTimeAxisView::channel_selector_toggled()
 {
 	static uint32_t previous_height;
 	
-	if(_midi_expander.property_expanded()) {
-
+	if (_midi_expander.property_expanded()) {
 		previous_height = current_height();
-
 		if (previous_height < TimeAxisView::hLargest) {
 			set_height (TimeAxisView::hLarge);
 		}
-
 	} else {
-
 		set_height (previous_height);
 	}
 }
