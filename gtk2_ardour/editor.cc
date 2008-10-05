@@ -4101,7 +4101,9 @@ void
 Editor::new_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("new playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_new_playlist), v);
+	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	session->get_playlists(playlists);
+	mapover_audio_tracks ( bind(mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v );
 	commit_reversible_command ();
 }
 
@@ -4116,7 +4118,9 @@ void
 Editor::copy_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("copy playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_use_copy_playlist), v);
+	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	session->get_playlists(playlists);
+	mapover_audio_tracks ( bind(mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v );
 	commit_reversible_command ();
 }
 
@@ -4131,20 +4135,22 @@ void
 Editor::clear_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("clear playlists"));
-	mapover_audio_tracks (mem_fun (*this, &Editor::mapped_clear_playlist), v);
+	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	session->get_playlists(playlists);
+	mapover_audio_tracks ( mem_fun (*this, &Editor::mapped_clear_playlist), v );
 	commit_reversible_command ();
 }
 
 void 
-Editor::mapped_use_new_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_use_new_playlist (AudioTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true);
+	atv.use_new_playlist (sz > 1 ? false : true, playlists);
 }
 
 void
-Editor::mapped_use_copy_playlist (AudioTimeAxisView& atv, uint32_t sz)
+Editor::mapped_use_copy_playlist (AudioTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_copy_playlist (sz > 1 ? false : true);
+	atv.use_copy_playlist (sz > 1 ? false : true, playlists);
 }
 
 void 

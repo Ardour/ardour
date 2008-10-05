@@ -33,6 +33,7 @@
 #include <gtkmm2ext/slider_controller.h>
 #include <list>
 
+#include <ardour/playlist.h>
 #include <ardour/types.h>
 
 #include "ardour_dialog.h"
@@ -93,9 +94,13 @@ public:
 	list<TimeAxisView*> get_child_list();
 
 	/* The editor calls these when mapping an operation across multiple tracks */
-	void use_new_playlist (bool prompt);
-	void use_copy_playlist (bool prompt);
+	void use_new_playlist (bool prompt, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void use_copy_playlist (bool prompt, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void clear_playlist ();
+
+	/* group playlist name resolving */
+	std::string resolve_new_group_playlist_name(std::string &, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+
 	
 	void build_playlist_menu (Gtk::Menu *);
 	

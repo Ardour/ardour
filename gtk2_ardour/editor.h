@@ -512,8 +512,8 @@ class Editor : public PublicEditor
 	/* functions to be passed to mapover_audio_tracks(), possibly with sigc::bind()-supplied arguments */
 
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, vector<RegionView*>*);
-	void mapped_use_new_playlist (AudioTimeAxisView&, uint32_t);
-	void mapped_use_copy_playlist (AudioTimeAxisView&, uint32_t);
+	void mapped_use_new_playlist (AudioTimeAxisView&, uint32_t, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_copy_playlist (AudioTimeAxisView&, uint32_t, vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (AudioTimeAxisView&, uint32_t);
 
 	/* end */

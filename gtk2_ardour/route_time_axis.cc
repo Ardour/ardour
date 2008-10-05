@@ -875,8 +875,46 @@ RouteTimeAxisView::rename_current_playlist ()
 	}
 }
 
+std::string 
+RouteTimeAxisView::resolve_new_group_playlist_name(std::string &basename, vector<boost::shared_ptr<Playlist> > const & playlists)
+{
+	std::string ret(basename);
+
+	std::string group_string = "."+edit_group()->name()+".";
+
+	if (basename.find(group_string) == string::npos) {
+		int maxnumber = 0;
+
+		// iterate through all playlists
+	        for (vector<boost::shared_ptr<Playlist> >::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+			std::string tmp = (*i)->name();
+
+			std::string::size_type idx = tmp.find(group_string);			
+			// find those which belong to this group
+			if (idx != string::npos) {
+				tmp = tmp.substr(idx + group_string.length());
+
+				// and find the largest current number
+				int x = atoi(tmp.c_str());
+				if (x > maxnumber) {
+					maxnumber = x;
+				}
+			}
+		}
+
+		maxnumber++;
+
+		char buf[32];
+                snprintf (buf, sizeof(buf), "%d", maxnumber);
+               
+		ret = this->name()+"."+edit_group()->name()+"."+buf;
+	}
+
+	return ret;
+}
+
 void
-RouteTimeAxisView::use_copy_playlist (bool prompt)
+RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const & playlists_before_op)
 {
 	string name;
 	
@@ -889,10 +927,14 @@ RouteTimeAxisView::use_copy_playlist (bool prompt)
 		return;
 
 	name = pl->name();
+	
+	if (edit_group() && edit_group()->is_active()) {
+		name = resolve_new_group_playlist_name(name, playlists_before_op);
+	}
 
-	do {
+	while (_session.playlist_by_name(name)) {
 		name = Playlist::bump_name (name, _session);
-	} while (_session.playlist_by_name(name));
+	}
 
 	// TODO: The prompter "new" button should be de-activated if the user
 	// specifies a playlist name which already exists in the session.
@@ -924,7 +966,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt)
 }
 
 void
-RouteTimeAxisView::use_new_playlist (bool prompt)
+RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const & playlists_before_op)
 {
 	string name;
 	
@@ -937,10 +979,14 @@ RouteTimeAxisView::use_new_playlist (bool prompt)
 		return;
 
 	name = pl->name();
+	
+	if (edit_group() && edit_group()->is_active()) {
+		name = resolve_new_group_playlist_name(name,playlists_before_op);
+	}
 
-	do {
+	while (_session.playlist_by_name(name)) {
 		name = Playlist::bump_name (name, _session);
-	} while (_session.playlist_by_name(name));
+	}
 
 
 	if (prompt) {
@@ -1338,8 +1384,17 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(editor, &PublicEditor::new_playlists), this)));
-	playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(editor, &PublicEditor::copy_playlists), this)));
+	if (!edit_group() || !edit_group()->is_active()) {
+		playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(editor, &PublicEditor::copy_playlists), this)));
+
+	} else {
+		// Use a label which tells the user what is happening
+		playlist_items.push_back (MenuElem (_("New Take"), bind(mem_fun(editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Copy Take"), bind(mem_fun(editor, &PublicEditor::copy_playlists), this)));
+		
+	}
+
 	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem (_("Clear Current"), bind(mem_fun(editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
@@ -1361,7 +1416,51 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
 	
 	if (apl) {
+		if (get_diskstream()->playlist() == apl) {
+			// radio button cotnrols mean this function is called for both the 
+			// old and new playlist
+			return;
+		}
 		get_diskstream()->use_playlist (apl);
+
+
+		if (edit_group() && edit_group()->is_active()) {
+			//PBD::stacktrace(cerr, 20);
+			std::string group_string = "."+edit_group()->name()+".";
+
+			std::string take_name = apl->name();
+			std::string::size_type idx = take_name.find(group_string);
+
+			if (idx == std::string::npos)
+				return;
+
+			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
+			
+			for (list<Route*>::const_iterator i = edit_group()->route_list().begin(); i != edit_group()->route_list().end(); ++i) {
+				if ( (*i) == this->route().get()) {
+					continue;
+				}
+				
+				std::string playlist_name = (*i)->name()+group_string+take_name;
+
+				Track *track = dynamic_cast<Track *>(*i);
+				if (!track) {
+					std::cerr << "route " << (*i)->name() << " is not a Track" << std::endl;
+					continue;
+				}
+
+				boost::shared_ptr<Playlist> ipl = session().playlist_by_name(playlist_name);
+				if (!ipl) {
+					// No playlist for this track for this take yet, make it
+					track->diskstream()->use_new_playlist();
+					track->diskstream()->playlist()->set_name(playlist_name);
+				} else {
+					track->diskstream()->use_playlist(ipl);
+				}
+				
+				//(*i)->get_dis
+			}
+		}
 	}
 }
 
