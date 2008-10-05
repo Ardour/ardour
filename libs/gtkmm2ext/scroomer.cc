@@ -118,8 +118,7 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 		break;
 	}
 
-	/*
-	 * Then we handle zoom, which is dragging horizontally. We zoom around the area that is
+	/* Then we handle zoom, which is dragging horizontally. We zoom around the area that is
 	 * the current y pointer value, not from the area that was the start of the drag.
 	 * the point of zoom must have the same 
 	 */
@@ -269,8 +268,7 @@ Scroomer::on_size_allocate (Allocation& a)
 	update();
 }
 
-/*
- * assumes that x and width are correct, and they will not be altered
+/** Assumes that x and width are correct, and they will not be altered.
  */
 void
 Scroomer::set_comp_rect(GdkRectangle& r, Component c) const

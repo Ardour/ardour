@@ -29,7 +29,8 @@ using namespace std;
 //std::map<int, Glib::RefPtr<Gdk::Pixmap> > MidiScroomer::piano_pixmaps;
 
 MidiScroomer::MidiScroomer(Adjustment& adj)
-	: Gtkmm2ext::Scroomer(adj) {
+	: Gtkmm2ext::Scroomer(adj)
+{
 
 	adj.set_lower(0);
 	adj.set_upper(127);
@@ -38,11 +39,13 @@ MidiScroomer::MidiScroomer(Adjustment& adj)
 	set_min_page_size(12);
 }
 
-MidiScroomer::~MidiScroomer() {
+MidiScroomer::~MidiScroomer()
+{
 }
 
 bool
-MidiScroomer::on_expose_event(GdkEventExpose* ev) {
+MidiScroomer::on_expose_event(GdkEventExpose* ev)
+{
 	Cairo::RefPtr<Cairo::Context> cc = get_window()->create_cairo_context();
 	GdkRectangle comp_rect, clip_rect;
 	Component first_comp = point_in(ev->area.y);
@@ -61,11 +64,11 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev) {
 	comp_rect.x = 0;
 	comp_rect.width = get_width();
 
-	for(int i = first_comp; i <= last_comp; ++i) {
+	for (int i = first_comp; i <= last_comp; ++i) {
 		Component comp = (Component) i;
 		set_comp_rect(comp_rect, comp);
 
-		if(gdk_rectangle_intersect(&comp_rect, &ev->area, &clip_rect)) {
+		if (gdk_rectangle_intersect(&comp_rect, &ev->area, &clip_rect)) {
 			get_colors(colors, comp);
 
 			cc->rectangle(clip_rect.x, clip_rect.y, clip_rect.width, clip_rect.height);
@@ -79,11 +82,11 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev) {
 			lnote = 127 - (int) floor((double) (clip_rect.y + clip_rect.height) * y2note) - 1;
 			hnote = 127 - (int) floor((double) clip_rect.y * y2note) + 1;
 
-			for(int note = lnote; note < hnote + 1; ++note) {
+			for (int note = lnote; note < hnote + 1; ++note) {
 				double y = height - note * note2y;
 				bool draw = false;
 				
-				switch(note % 12) {
+				switch (note % 12) {
 				case 1:
 				case 6:
 					y -= black_shift;
@@ -109,7 +112,7 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev) {
 				}
 			}
 
-			if(i == Handle1 || i == Handle2) {
+			if (i == Handle1 || i == Handle2) {
 				cc->rectangle(comp_rect.x + 0.5f, comp_rect.y + 0.5f, comp_rect.width - 1.0f, comp_rect.height - 1.0f);
 				cc->set_line_width(1.0f);
 				cc->set_source_rgb (1.0f, 1.0f, 1.0f);
@@ -124,7 +127,8 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev) {
 }
 
 void
-MidiScroomer::get_colors(double color[], Component comp) {
+MidiScroomer::get_colors(double color[], Component comp)
+{
 	switch (comp) {
 	case TopBase:
 	case BottomBase:
@@ -158,14 +162,17 @@ MidiScroomer::get_colors(double color[], Component comp) {
 }
 
 void
-MidiScroomer::on_size_request(Gtk::Requisition* r) {
-	r->width = 16;
+MidiScroomer::on_size_request(Gtk::Requisition* r)
+{
+	r->width = 12;
 	r->height = 100;
 	//r->width = 32;
 	//r->height = 512;
 }
 
 void
-MidiScroomer::on_size_allocate(Gtk::Allocation& a) {
+MidiScroomer::on_size_allocate(Gtk::Allocation& a)
+{
 	Scroomer::on_size_allocate(a);
 }
+
