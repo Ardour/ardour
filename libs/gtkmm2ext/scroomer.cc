@@ -46,11 +46,13 @@ Scroomer::Scroomer(Gtk::Adjustment& adjustment)
 	//adjustment.signal_changed().connect (mem_fun (*this, &Scroomer::adjustment_changed));
 }
 
-Scroomer::~Scroomer() {
+Scroomer::~Scroomer()
+{
 }
 
 bool
-Scroomer::on_motion_notify_event (GdkEventMotion* ev) {
+Scroomer::on_motion_notify_event (GdkEventMotion* ev)
+{
 	double range = adj.get_upper() - adj.get_lower();
 	double pixel2val = range / get_height();
 	double val_at_pointer = ((get_height() - ev->y) * pixel2val) + adj.get_lower();
@@ -60,7 +62,7 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev) {
 	double scale, temp, zoom;
 	double val, page;
 
-	if(grab_comp == None || grab_comp == Total) {
+	if (grab_comp == None || grab_comp == Total) {
 		return true;
 	}
 
@@ -122,7 +124,7 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev) {
 	 * the point of zoom must have the same 
 	 */
 	
-	if(ev->x > get_width()) {
+	if (ev->x > get_width()) {
 		zoom = ev->x - get_width();
 		
 		double higher = unzoomed_val + unzoomed_page - half_min_page - val_at_pointer;
@@ -136,17 +138,15 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev) {
 
 		page = max(page, min_page_size);
 
-		if(lower < 0) {
+		if (lower < 0) {
 			val = max(val, val_at_pointer - half_min_page);
-		}
-		else if(lower > 0) {
+		} else if (lower > 0) {
 			val = min(val, val_at_pointer - half_min_page);
 		}
 
 		val = min(val, adj.get_upper() - min_page_size);
 		page = min(page, adj.get_upper() - val);
-	}
-	else if (ev->x < 0) {
+	} else if (ev->x < 0) {
 		/* on zoom out increase the page size as well as moving the range towards the mouse pos*/
 		zoom = abs(ev->x);
 
@@ -161,10 +161,10 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev) {
 
 		page = max(page, min_page_size);
 
-		if(lower < 0) {
+		if (lower < 0) {
 			val = max(val, val_at_pointer - half_min_page);
 		}
-		else if(lower > 0) {
+		else if (lower > 0) {
 			val = min(val, val_at_pointer - half_min_page);
 		}
 
@@ -173,24 +173,22 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev) {
 
 		val = unzoomed_val;
 		page = unzoomed_page;
-	}
-	else {
+	} else {
 		val = unzoomed_val;
 		page = unzoomed_page;
 	}
 
 	adj.set_page_size(page);
 	
-	if(val == adj.get_value()) {
+	if (val == adj.get_value()) {
 		adj.value_changed();
 	}
-	if(val < adj.get_lower()) {
+
+	if (val < adj.get_lower()) {
 		adj.value_changed();
-	}
-	else if(val > adj.get_upper()) {
+	} else if (val > adj.get_upper()) {
 		adj.value_changed();
-	}
-	else {
+	} else {
 		adj.set_value(val);
 	}
 
@@ -198,11 +196,12 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev) {
 }
 
 bool
-Scroomer::on_button_press_event (GdkEventButton* ev) {
-	if(ev->button == 1) {
+Scroomer::on_button_press_event (GdkEventButton* ev)
+{
+	if (ev->button == 1) {
 		Component comp = point_in(ev->y);
 
-		if(comp == Total || comp == None) {
+		if (comp == Total || comp == None) {
 			return false;
 		}
 
@@ -217,8 +216,9 @@ Scroomer::on_button_press_event (GdkEventButton* ev) {
 }
 
 bool
-Scroomer::on_button_release_event (GdkEventButton* ev) {
-	if(grab_comp == None || grab_comp == Total) {
+Scroomer::on_button_release_event (GdkEventButton* ev)
+{
+	if (grab_comp == None || grab_comp == Total) {
 		return true;
 	}
 
@@ -254,12 +254,14 @@ Scroomer::on_button_release_event (GdkEventButton* ev) {
 }
 
 bool
-Scroomer::on_scroll_event (GdkEventScroll*) {
+Scroomer::on_scroll_event (GdkEventScroll*)
+{
 	return true;
 }
 
 void
-Scroomer::on_size_allocate (Allocation& a) {
+Scroomer::on_size_allocate (Allocation& a)
+{
 	Gtk::DrawingArea::on_size_allocate(a);
 
 	position[Total] = a.get_height();
@@ -271,7 +273,8 @@ Scroomer::on_size_allocate (Allocation& a) {
  * assumes that x and width are correct, and they will not be altered
  */
 void
-Scroomer::set_comp_rect(GdkRectangle& r, Component c) const {
+Scroomer::set_comp_rect(GdkRectangle& r, Component c) const
+{
 	int index = (int) c;
 
 	switch(c) {
@@ -289,9 +292,10 @@ Scroomer::set_comp_rect(GdkRectangle& r, Component c) const {
 }
 
 Scroomer::Component
-Scroomer::point_in(double point) const {
-	for(int i = 0; i < Total; ++i) {
-		if(position[i+1] >= point) {
+Scroomer::point_in(double point) const
+{
+	for (int i = 0; i < Total; ++i) {
+		if (position[i+1] >= point) {
 			return (Component) i;
 		}
 	}
@@ -300,7 +304,8 @@ Scroomer::point_in(double point) const {
 }
 
 void
-Scroomer::set_min_page_size(double ps) {
+Scroomer::set_min_page_size(double ps)
+{
 	double coeff = ((double)position[Total]) / (adj.get_upper() - adj.get_lower());
 
 	min_page_size = ps;
@@ -308,14 +313,15 @@ Scroomer::set_min_page_size(double ps) {
 }
 
 void
-Scroomer::update() {
+Scroomer::update()
+{
 	double range = adj.get_upper() - adj.get_lower();
 	//double value = adj.get_value() - adj.get_lower();
 	int height = position[Total];
 	double coeff = ((double) height) / range;
 
 	/* save the old positions to calculate update regions later*/
-	for(int i = Handle1; i < Total; ++i) {
+	for (int i = Handle1; i < Total; ++i) {
 		old_pos[i] = position[i];
 	}
 
@@ -327,37 +333,36 @@ Scroomer::update() {
 }
 
 void
-Scroomer::adjustment_changed() {
+Scroomer::adjustment_changed()
+{
 	//cerr << floor(adj.get_value()) << " " << floor(adj.get_value() + adj.get_page_size()) << endl;
 	Gdk::Rectangle rect;
 	Glib::RefPtr<Gdk::Window> win = get_window();
 
 	update();
 
-	if(!win) {
+	if (!win) {
 		return;
 	}
 
 	rect.set_x(0);
 	rect.set_width(get_width());
 
-	if(position[Handle1] < old_pos[Handle1]) {
+	if (position[Handle1] < old_pos[Handle1]) {
 		rect.set_y(position[Handle1]);
 		rect.set_height(old_pos[Slider] - position[Handle1]);
 		win->invalidate_rect(rect, false);
-	}
-	else if(position[Handle1] > old_pos[Handle1]) {
+	} else if (position[Handle1] > old_pos[Handle1]) {
 		rect.set_y(old_pos[Handle1]);
 		rect.set_height(position[Slider] - old_pos[Handle1]);
 		win->invalidate_rect(rect, false);
 	}
 
-	if(position[Handle2] < old_pos[Handle2]) {
+	if (position[Handle2] < old_pos[Handle2]) {
 		rect.set_y(position[Handle2]);
 		rect.set_height(old_pos[BottomBase] - position[Handle2]);
 		win->invalidate_rect(rect, false);
-	}
-	else if(position[Handle2] > old_pos[Handle2]) {
+	} else if (position[Handle2] > old_pos[Handle2]) {
 		rect.set_y(old_pos[Handle2]);
 		rect.set_height(position[BottomBase] - old_pos[Handle2]);
 		win->invalidate_rect(rect, false);
@@ -367,7 +372,8 @@ Scroomer::adjustment_changed() {
 }
 
 std::string
-Scroomer::get_comp_name(Component c) {
+Scroomer::get_comp_name(Component c)
+{
 	switch(c) {
 	case TopBase:
 		return "TopBase";
