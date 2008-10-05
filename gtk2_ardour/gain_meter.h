@@ -57,9 +57,11 @@ namespace Gtk {
 class GainMeterBase : virtual public sigc::trackable
 {
   public:
-	GainMeterBase (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,
+	GainMeterBase ( ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,
 		       bool horizontal);
 	virtual ~GainMeterBase ();
+
+	virtual void set_io (boost::shared_ptr<ARDOUR::IO>);
 
 	void update_gain_sensitive ();
 	void update_meters ();
@@ -79,6 +81,7 @@ class GainMeterBase : virtual public sigc::trackable
 	friend class MixerStrip;
 	boost::shared_ptr<ARDOUR::IO> _io;
 	ARDOUR::Session& _session;
+	std::vector<sigc::connection> connections;
 
 	bool ignore_toggle;
 	bool next_release_selects;
@@ -166,8 +169,10 @@ class GainMeterBase : virtual public sigc::trackable
 class GainMeter : public GainMeterBase, public Gtk::VBox
 {
   public:
-	GainMeter (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&);
+	GainMeter (ARDOUR::Session&);
 	~GainMeter () {}
+
+	void set_io (boost::shared_ptr<ARDOUR::IO>);
 
 	int get_gm_width ();
 	void setup_meters (int len=0);

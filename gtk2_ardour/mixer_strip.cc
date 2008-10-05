@@ -83,15 +83,15 @@ speed_printer (char buf[32], Gtk::Adjustment& adj, void* arg)
 }
 #endif 
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt, bool in_mixer)
+MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 	: AxisView(sess),
-	  RouteUI (rt, sess, _("Mute"), _("Solo"), _("Record")),
+	  RouteUI (sess, _("Mute"), _("Solo"), _("Record")),
 	  _mixer(mx),
 	  _mixer_owned (in_mixer),
-	  pre_redirect_box (PreFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
-	  post_redirect_box (PostFader, sess, rt, mx.plugin_selector(), mx.selection(), in_mixer),
-	  gpm (_route, sess),
-	  panners (_route, sess),
+	  pre_redirect_box (PreFader, sess, mx.plugin_selector(), mx.selection(), in_mixer),
+	  post_redirect_box (PostFader, sess, mx.plugin_selector(), mx.selection(), in_mixer),
+	  gpm (sess),
+	  panners (sess),
 	  button_table (3, 2),
 	  middle_button_table (1, 2),
 	  bottom_button_table (1, 2),
@@ -101,10 +101,34 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	  speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
 
 {
-	if (set_color_from_route()) {
-		set_color (unique_random_color());
-	}
+	init ();
+}
 
+MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt, bool in_mixer)
+	: AxisView(sess),
+	  RouteUI (sess, _("Mute"), _("Solo"), _("Record")),
+	  _mixer(mx),
+	  _mixer_owned (in_mixer),
+	  pre_redirect_box (PreFader, sess, mx.plugin_selector(), mx.selection(), in_mixer),
+	  post_redirect_box (PostFader, sess, mx.plugin_selector(), mx.selection(), in_mixer),
+	  gpm (sess),
+	  panners (sess),
+	  button_table (3, 2),
+	  middle_button_table (1, 2),
+	  bottom_button_table (1, 2),
+	  meter_point_label (_("pre")),
+	  comment_button (_("Comments")),
+	  speed_adjustment (1.0, 0.001, 4.0, 0.001, 0.1),
+	  speed_spinner (&speed_adjustment, "MixerStripSpeedBase", true)
+
+{
+	init ();
+	set_route (rt);
+}
+
+void
+MixerStrip::init ()
+{
 	input_selector = 0;
 	output_selector = 0;
 	group_menu = 0;
@@ -130,24 +154,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
 
-	_route->meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed));
 	meter_point_button.add (meter_point_label);
 	meter_point_button.set_name ("MixerStripMeterPreButton");
 	meter_point_label.set_name ("MixerStripMeterPreButton");
-	
-	switch (_route->meter_point()) {
-	case MeterInput:
-		meter_point_label.set_text (_("input"));
-		break;
-		
-	case MeterPreFader:
-		meter_point_label.set_text (_("pre"));
-		break;
-		
-	case MeterPostFader:
-		meter_point_label.set_text (_("post"));
-		break;
-	}
 	
 	/* TRANSLATORS: this string should be longest of the strings
 	   used to describe meter points. In english, it's "input".
@@ -180,54 +189,16 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	bottom_button_table.set_homogeneous (true);
 	bottom_button_table.attach (group_button, 0, 1, 0, 1);
 	
-	if (is_audio_track()) {
-		
-		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
-		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
-
-		rec_enable_button->set_name ("MixerRecordEnableButton");
-
-		boost::shared_ptr<AudioTrack> at = audio_track();
-
-		at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen));
-
-#ifdef VARISPEED_IN_MIXER_STRIP
-		speed_adjustment.signal_value_changed().connect (mem_fun(*this, &MixerStrip::speed_adjustment_changed));
-		
-		speed_frame.set_name ("BaseFrame");
-		speed_frame.set_shadow_type (Gtk::SHADOW_IN);
-		speed_frame.add (speed_spinner);
-		
-		speed_spinner.set_print_func (speed_printer, 0);
-
-		ARDOUR_UI::instance()->tooltips().set_tip (speed_spinner, _("Varispeed"));
-
-		button_table.attach (speed_frame, 0, 2, 5, 6);
-#endif /* VARISPEED_IN_MIXER_STRIP */
-
-		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
-	}
-
 	name_button.add (name_label);
 	name_button.set_name ("MixerNameButton");
 	Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 
 	name_label.set_name ("MixerNameButtonLabel");
-	if (_route->phase_invert()) {
-	        name_label.set_text (X_("Ø ") + name_label.get_text());
-	} else {
-	        name_label.set_text (_route->name());
-	}
-
 	group_button.add (group_label);
 	group_button.set_name ("MixerGroupButton");
 	group_label.set_name ("MixerGroupButtonLabel");
 
 	comment_button.set_name ("MixerCommentButton");
-
-	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route->comment()==""	?
-							_("Click to Add/Edit Comments"):
-							_route->comment());
 
 	comment_button.signal_clicked().connect (mem_fun(*this, &MixerStrip::comment_button_clicked));
 	
@@ -263,19 +234,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
 
-	if (route()->master() || route()->control()) {
-		
-		if (scrollbar_height == 0) {
-			HScrollbar scrollbar;
-			Gtk::Requisition requisition(scrollbar.size_request ());
-			scrollbar_height = requisition.height;
-		}
-
-		EventBox* spacer = manage (new EventBox);
-		spacer->set_size_request (-1, scrollbar_height);
-		global_vpacker.pack_start (*spacer, false, false);
-	}
-
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
 	global_frame.set_name ("BaseFrame");
@@ -292,22 +250,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 
 	_session.engine().Stopped.connect (mem_fun(*this, &MixerStrip::engine_stopped));
 	_session.engine().Running.connect (mem_fun(*this, &MixerStrip::engine_running));
-	_route->input_changed.connect (mem_fun(*this, &MixerStrip::input_changed));
-	_route->output_changed.connect (mem_fun(*this, &MixerStrip::output_changed));
-	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route->mix_group_changed.connect (mem_fun(*this, &MixerStrip::mix_group_changed));
-	_route->panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan));
-
-	if (is_audio_track()) {
-		audio_track()->DiskstreamChanged.connect (mem_fun(*this, &MixerStrip::diskstream_changed));
-		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &MixerStrip::speed_changed));
-	}
-
-	_route->name_changed.connect (mem_fun(*this, &RouteUI::name_changed));
-	_route->comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed));
-	_route->gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed));
 
 	input_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::output_press), false);
@@ -317,17 +259,144 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
 
+	/* we don't need this if its not an audio track, but we don't know that yet and it doesn't
+	   hurt (much).
+	*/
+
+	rec_enable_button->set_name ("MixerRecordEnableButton");
+	rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
+	rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release));
+
 	name_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::name_button_button_press), false);
 	group_button.signal_button_press_event().connect (mem_fun(*this, &MixerStrip::select_mix_group), false);
 
 	_width = (Width) -1;
-	set_stuff_from_route ();
 
 	/* start off as a passthru strip. we'll correct this, if necessary,
 	   in update_diskstream_display().
 	*/
 
 	set_name ("AudioTrackStripBase");
+
+	add_events (Gdk::BUTTON_RELEASE_MASK);
+}
+
+MixerStrip::~MixerStrip ()
+{
+	GoingAway(); /* EMIT_SIGNAL */
+
+	if (input_selector) {
+		delete input_selector;
+	}
+
+	if (output_selector) {
+		delete output_selector;
+	}
+}
+
+void
+MixerStrip::set_route (boost::shared_ptr<Route> rt)
+{
+	if (rec_enable_button->get_parent()) {
+		button_table.remove (*rec_enable_button);
+	}
+
+#ifdef VARISPEED_IN_MIXER_STRIP
+	if (speed_frame->get_parent()) {
+		button_table.remove (*speed_frame);
+	}
+#endif
+
+	RouteUI::set_route (rt);
+
+	panners.set_io (rt);
+	gpm.set_io (rt);
+	pre_redirect_box.set_route (rt);
+	post_redirect_box.set_route (rt);
+
+	if (set_color_from_route()) {
+		set_color (unique_random_color());
+	}
+
+	if (_mixer_owned && (route()->master() || route()->control())) {
+		
+		if (scrollbar_height == 0) {
+			HScrollbar scrollbar;
+			Gtk::Requisition requisition(scrollbar.size_request ());
+			scrollbar_height = requisition.height;
+		}
+
+		EventBox* spacer = manage (new EventBox);
+		spacer->set_size_request (-1, scrollbar_height);
+		global_vpacker.pack_start (*spacer, false, false);
+	}
+
+	if (is_audio_track()) {
+
+		boost::shared_ptr<AudioTrack> at = audio_track();
+
+		connections.push_back (at->FreezeChange.connect (mem_fun(*this, &MixerStrip::map_frozen)));
+
+#ifdef VARISPEED_IN_MIXER_STRIP
+		speed_adjustment.signal_value_changed().connect (mem_fun(*this, &MixerStrip::speed_adjustment_changed));
+		
+		speed_frame.set_name ("BaseFrame");
+		speed_frame.set_shadow_type (Gtk::SHADOW_IN);
+		speed_frame.add (speed_spinner);
+		
+		speed_spinner.set_print_func (speed_printer, 0);
+
+		ARDOUR_UI::instance()->tooltips().set_tip (speed_spinner, _("Varispeed"));
+
+		button_table.attach (speed_frame, 0, 2, 5, 6);
+#endif /* VARISPEED_IN_MIXER_STRIP */
+
+		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
+	}
+
+	if (_route->phase_invert()) {
+	        name_label.set_text (X_("Ø ") + name_label.get_text());
+	} else {
+	        name_label.set_text (_route->name());
+	}
+
+	switch (_route->meter_point()) {
+	case MeterInput:
+		meter_point_label.set_text (_("input"));
+		break;
+		
+	case MeterPreFader:
+		meter_point_label.set_text (_("pre"));
+		break;
+		
+	case MeterPostFader:
+		meter_point_label.set_text (_("post"));
+		break;
+	}
+	
+	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route->comment().empty() ?
+						   _("Click to Add/Edit Comments"):
+						   _route->comment());
+
+	connections.push_back (_route->meter_change.connect (mem_fun(*this, &MixerStrip::meter_changed)));
+	connections.push_back (_route->input_changed.connect (mem_fun(*this, &MixerStrip::input_changed)));
+	connections.push_back (_route->output_changed.connect (mem_fun(*this, &MixerStrip::output_changed)));
+	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
+	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
+	connections.push_back (_route->solo_safe_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
+	connections.push_back (_route->mix_group_changed.connect (mem_fun(*this, &MixerStrip::mix_group_changed)));
+	connections.push_back (_route->panner().Changed.connect (mem_fun(*this, &MixerStrip::connect_to_pan)));
+
+	if (is_audio_track()) {
+		connections.push_back (audio_track()->DiskstreamChanged.connect (mem_fun(*this, &MixerStrip::diskstream_changed)));
+		connections.push_back (get_diskstream()->SpeedChanged.connect (mem_fun(*this, &MixerStrip::speed_changed)));
+	}
+
+	connections.push_back (_route->name_changed.connect (mem_fun(*this, &RouteUI::name_changed)));
+	connections.push_back (_route->comment_changed.connect (mem_fun(*this, &MixerStrip::comment_changed)));
+	connections.push_back (_route->gui_changed.connect (mem_fun(*this, &MixerStrip::route_gui_changed)));
+
+	set_stuff_from_route ();
 
 	/* now force an update of all the various elements */
 
@@ -350,21 +419,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	update_diskstream_display ();
 	update_input_display ();
 	update_output_display ();
-
-	add_events (Gdk::BUTTON_RELEASE_MASK);
-}
-
-MixerStrip::~MixerStrip ()
-{
-	GoingAway(); /* EMIT_SIGNAL */
-
-	if (input_selector) {
-		delete input_selector;
-	}
-
-	if (output_selector) {
-		delete output_selector;
-	}
 }
 
 void
@@ -734,6 +788,7 @@ MixerStrip::update_output_display ()
 			break;
 		}
 	}
+
 	gpm.setup_meters ();
 	panners.setup_pan ();
 }
@@ -1213,23 +1268,23 @@ MixerStrip::meter_changed (void *src)
 
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &MixerStrip::meter_changed), src));
 
-		switch (_route->meter_point()) {
-		case MeterInput:
-			meter_point_label.set_text (_("input"));
-			break;
-			
-		case MeterPreFader:
-			meter_point_label.set_text (_("pre"));
-			break;
-			
-		case MeterPostFader:
-			meter_point_label.set_text (_("post"));
-			break;
-		}
-
-		gpm.setup_meters ();
-		// reset peak when meter point changes
-		gpm.reset_peak_display();
-		set_width(_width, this);
+	switch (_route->meter_point()) {
+	case MeterInput:
+		meter_point_label.set_text (_("input"));
+		break;
+		
+	case MeterPreFader:
+		meter_point_label.set_text (_("pre"));
+		break;
+		
+	case MeterPostFader:
+		meter_point_label.set_text (_("post"));
+		break;
+	}
+	
+	gpm.setup_meters ();
+	// reset peak when meter point changes
+	gpm.reset_peak_display();
+	set_width (_width, this);
 }
 

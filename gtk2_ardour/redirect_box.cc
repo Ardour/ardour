@@ -83,10 +83,9 @@ bool RedirectBox::get_colors = true;
 Gdk::Color* RedirectBox::active_redirect_color;
 Gdk::Color* RedirectBox::inactive_redirect_color;
 
-RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Route> rt, PluginSelector &plugsel, 
-			  RouteRedirectSelection & rsel, bool owner_is_mixer)
-	: _route(rt), 
-	  _session(sess), 
+RedirectBox::RedirectBox (Placement pcmnt, Session& sess, PluginSelector &plugsel, 
+			  RouteRedirectSelection& rsel, bool owner_is_mixer)
+	: _session(sess), 
 	  _owner_is_mixer (owner_is_mixer), 
 	  _placement(pcmnt), 
 	  _plugin_selector(plugsel),
@@ -139,25 +138,27 @@ RedirectBox::RedirectBox (Placement pcmnt, Session& sess, boost::shared_ptr<Rout
 
 	pack_start (redirect_eventbox, true, true);
 
-	_route->redirects_changed.connect (mem_fun(*this, &RedirectBox::redisplay_redirects));
-	_route->GoingAway.connect (mem_fun (*this, &RedirectBox::route_going_away));
-
 	redirect_eventbox.signal_enter_notify_event().connect (bind (sigc::ptr_fun (RedirectBox::enter_box), this));
 
 	redirect_display.signal_button_press_event().connect (mem_fun(*this, &RedirectBox::redirect_button_press_event), false);
 	redirect_display.signal_button_release_event().connect (mem_fun(*this, &RedirectBox::redirect_button_release_event));
-
-	/* start off as a passthru strip. we'll correct this, if necessary,
-	   in update_diskstream_display().
-	*/
-
-	/* now force an update of all the various elements */
-
-	redisplay_redirects (0);
 }
 
 RedirectBox::~RedirectBox ()
 {
+}
+
+void
+RedirectBox::set_route (boost::shared_ptr<Route> r)
+{
+	connections.clear ();
+
+	_route = r;
+
+	connections.push_back (_route->redirects_changed.connect (mem_fun(*this, &RedirectBox::redisplay_redirects)));
+	connections.push_back (_route->GoingAway.connect (mem_fun (*this, &RedirectBox::route_going_away)));
+
+	redisplay_redirects (0);
 }
 
 void

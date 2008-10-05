@@ -57,9 +57,8 @@ using namespace std;
 //sigc::signal<void,RouteGroup*> LevelMeter::ResetGroupPeakDisplays;
 
 
-LevelMeter::LevelMeter (boost::shared_ptr<IO> io, Session& s)
-	: _io (io),
-	  _session (s)
+LevelMeter::LevelMeter (Session& s)
+	: _session (s)
 	
 {
 	set_spacing (1);
@@ -82,6 +81,12 @@ LevelMeter::~LevelMeter ()
 			delete (*i).meter;
 		}
 	}
+}
+
+void
+LevelMeter::set_io (boost::shared_ptr<IO> io)
+{
+	_io = io;
 }
 
 float
@@ -140,6 +145,10 @@ LevelMeter::hide_all_meters ()
 void
 LevelMeter::setup_meters (int len, int initial_width)
 {
+	if (!_io) {
+		return; /* do it later */
+	}
+
 	regular_meter_width = initial_width;
 	uint32_t nmeters = _io->n_outputs();
 	guint16 width;

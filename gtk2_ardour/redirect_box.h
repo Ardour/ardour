@@ -67,8 +67,10 @@ class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 {
   public:
 	RedirectBox (ARDOUR::Placement, ARDOUR::Session&, 
-		     boost::shared_ptr<ARDOUR::Route>, PluginSelector &, RouteRedirectSelection &, bool owner_is_mixer = false);
+		     PluginSelector &, RouteRedirectSelection &, bool owner_is_mixer = false);
 	~RedirectBox ();
+
+	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_width (Width);
 
@@ -85,13 +87,11 @@ class RedirectBox : public Gtk::HBox, public PluginInterestedObject
 	
 	static void register_actions();
 
-  protected:
-	void set_stuff_from_route ();
-
   private:
 	boost::shared_ptr<ARDOUR::Route>  _route;
 	ARDOUR::Session &   _session;
 	bool                _owner_is_mixer;
+	std::vector<sigc::connection> connections;
 
 	ARDOUR::Placement   _placement;
 

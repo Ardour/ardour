@@ -54,8 +54,10 @@ namespace Gtk {
 class PannerUI : public Gtk::HBox
 {
   public:
-	PannerUI (boost::shared_ptr<ARDOUR::IO>, ARDOUR::Session&);
+	PannerUI (ARDOUR::Session&);
 	~PannerUI ();
+
+	virtual void set_io (boost::shared_ptr<ARDOUR::IO>);
 
 	void pan_changed (void *);
 
@@ -75,6 +77,7 @@ class PannerUI : public Gtk::HBox
 
 	boost::shared_ptr<ARDOUR::IO> _io;
 	ARDOUR::Session& _session;
+	std::vector<sigc::connection> connections;
 
 	bool ignore_toggle;
 	bool in_pan_update;
@@ -101,8 +104,8 @@ class PannerUI : public Gtk::HBox
 	bool panning_link_button_press (GdkEventButton*);
 	bool panning_link_button_release (GdkEventButton*);
 
-	Gtk::Menu pan_astate_menu;
-	Gtk::Menu pan_astyle_menu;
+	Gtk::Menu* pan_astate_menu;
+	Gtk::Menu* pan_astyle_menu;
 
 	Gtk::Button pan_automation_style_button;
 	Gtk::ToggleButton pan_automation_state_button;
@@ -118,6 +121,8 @@ class PannerUI : public Gtk::HBox
 	void update_pan_bars (bool only_if_aplay);
 	void update_pan_linkage ();
 	void update_pan_state ();
+	void build_astate_menu ();
+	void build_astyle_menu ();
 
 	void panner_changed ();
 	

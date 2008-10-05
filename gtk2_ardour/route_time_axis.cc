@@ -105,8 +105,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	  size_button (_("h")), // height
 	  automation_button (_("a")),
 	  visual_button (_("v")),
-	  gm (rt, sess, slider, true)
+	  gm (sess, slider, true)
 {
+	gm.set_io (rt);
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
 

@@ -1056,7 +1056,8 @@ OptionEditor::setup_click_editor ()
 	click_emphasis_path_entry.set_sensitive (true);
 
 	click_io_selector = new IOSelector (*session, session->click_io(), false);
-	click_gpm = new GainMeter (session->click_io(), *session);
+	click_gpm = new GainMeter (*session);
+	click_gpm->set_io (session->click_io());
 
 	click_hpacker.pack_start (*click_io_selector, false, false);
 	click_hpacker.pack_start (*click_gpm, false, false);
@@ -1098,7 +1099,8 @@ void
 OptionEditor::connect_audition_editor ()
 {
 	auditioner_io_selector = new IOSelector (*session, session->the_auditioner(), false);
-	auditioner_gpm = new GainMeter (session->the_auditioner(), *session);
+	auditioner_gpm = new GainMeter (*session);
+	auditioner_gpm->set_io (session->the_auditioner());
 
 	audition_hpacker.pack_start (*auditioner_io_selector, false, false);
 	audition_hpacker.pack_start (*auditioner_gpm, false, false);

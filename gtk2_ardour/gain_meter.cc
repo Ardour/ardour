@@ -68,17 +68,18 @@ GainMeter::setup_slider_pix ()
 	}
 }
 
-GainMeterBase::GainMeterBase (boost::shared_ptr<IO> io, Session& s, 
+GainMeterBase::GainMeterBase (Session& s, 
 			      const Glib::RefPtr<Gdk::Pixbuf>& pix,
 			      bool horizontal)
-	: _io (io),
-	  _session (s),
+	: _session (s),
 	  // 0.781787 is the value needed for gain to be set to 0.
 	  gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1),
 	  gain_automation_style_button (""),
 	  gain_automation_state_button ("")
 	
 {
+	using namespace Menu_Helpers;
+
 	ignore_toggle = false;
 	meter_menu = 0;
 	next_release_selects = false;
@@ -88,16 +89,14 @@ GainMeterBase::GainMeterBase (boost::shared_ptr<IO> io, Session& s,
 	if (horizontal) {
 		gain_slider = manage (new HSliderController (pix,
 							     &gain_adjustment,
-							     _io->gain_control(),
 							     false));
 	} else {
 		gain_slider = manage (new VSliderController (pix,
 							     &gain_adjustment,
-							     _io->gain_control(),
 							     false));
 	}
 
-	level_meter = new LevelMeter(_io, _session);
+	level_meter = new LevelMeter(_session);
 
 	gain_slider->signal_button_press_event().connect (mem_fun(*this, &GainMeter::start_gain_touch));
 	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
@@ -130,56 +129,23 @@ GainMeterBase::GainMeterBase (boost::shared_ptr<IO> io, Session& s,
 	gain_automation_state_button.set_size_request(15, 15);
 	gain_automation_style_button.set_size_request(15, 15);
 
-	boost::shared_ptr<Route> r;
-
-	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
-
-		if (!r->hidden()) {
-
-			using namespace Menu_Helpers;
-			
-			gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
-			gain_astate_menu.items().push_back (MenuElem (_("Play"),
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
-			gain_astate_menu.items().push_back (MenuElem (_("Write"),
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Write)));
-			gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Touch)));
-			
-			gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
-			gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
-			
-			gain_astate_menu.set_name ("ArdourContextMenu");
-			gain_astyle_menu.set_name ("ArdourContextMenu");
-			
-			gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false);
-			gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false);
-			
-			r->gain_automation_curve().automation_state_changed.connect (mem_fun(*this, &GainMeterBase::gain_automation_state_changed));
-			r->gain_automation_curve().automation_style_changed.connect (mem_fun(*this, &GainMeterBase::gain_automation_style_changed));
-			
-			gain_automation_state_changed ();
-		}
-	}
-
-	_io->gain_changed.connect (mem_fun(*this, &GainMeterBase::gain_changed));
+	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
+	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
+	
+	gain_astate_menu.set_name ("ArdourContextMenu");
+	gain_astyle_menu.set_name ("ArdourContextMenu");
 
 	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &GainMeterBase::gain_adjusted));
 	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeterBase::peak_button_release), false);
 	gain_display.signal_key_press_event().connect (mem_fun(*this, &GainMeterBase::gain_key_press), false);
 
-	gain_changed (0);
-	show_gain ();
-
-	update_gain_sensitive ();
-	
 	ResetAllPeakDisplays.connect (mem_fun(*this, &GainMeterBase::reset_peak_display));
 	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeterBase::reset_group_peak_display));
 
 	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeterBase::on_theme_changed));
 	ColorsChanged.connect (bind(mem_fun (*this, &GainMeterBase::color_handler), false));
 	DPIReset.connect (bind(mem_fun (*this, &GainMeterBase::color_handler), true));
+
 }
 
 GainMeterBase::~GainMeterBase ()
@@ -192,6 +158,53 @@ GainMeterBase::~GainMeterBase ()
 		delete level_meter;
 	}
 }
+
+void
+GainMeterBase::set_io (boost::shared_ptr<IO> io)
+{
+	connections.clear ();
+
+	_io = io;
+
+	level_meter->set_io (_io);
+	gain_slider->set_controllable (&_io->gain_control());
+
+	boost::shared_ptr<Route> r;
+	
+	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
+
+		if (!r->hidden()) {
+
+			using namespace Menu_Helpers;
+
+			gain_astate_menu.items().clear ();
+			
+			gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
+			gain_astate_menu.items().push_back (MenuElem (_("Play"),
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
+			gain_astate_menu.items().push_back (MenuElem (_("Write"),
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Write)));
+			gain_astate_menu.items().push_back (MenuElem (_("Touch"),
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Touch)));
+			
+			connections.push_back (gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
+			connections.push_back (gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
+			
+			connections.push_back (r->gain_automation_curve().automation_state_changed.connect (mem_fun(*this, &GainMeterBase::gain_automation_state_changed)));
+			connections.push_back (r->gain_automation_curve().automation_style_changed.connect (mem_fun(*this, &GainMeterBase::gain_automation_style_changed)));
+			
+			gain_automation_state_changed ();
+		}
+	}
+
+	connections.push_back (_io->gain_changed.connect (mem_fun(*this, &GainMeterBase::gain_changed)));
+
+	gain_changed (0);
+	show_gain ();
+
+	update_gain_sensitive ();
+}	
 
 void
 GainMeterBase::hide_all_meters ()
@@ -740,10 +753,9 @@ GainMeterBase::on_theme_changed()
 	style_changed = true;
 }
 
-GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
-	: GainMeterBase (io, s, slider, false)
+GainMeter::GainMeter (Session& s)
+	: GainMeterBase (s, slider, false)
 {
-
 	gain_display_box.set_homogeneous (true);
 	gain_display_box.set_spacing (2);
 	gain_display_box.pack_start (gain_display, true, true);
@@ -773,6 +785,31 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 	hbox.set_spacing (2);
 	hbox.pack_start (*fader_vbox, true, true);
 
+	set_spacing (2);
+
+	pack_start (gain_display_box, Gtk::PACK_SHRINK);
+	pack_start (hbox, Gtk::PACK_SHRINK);
+
+	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
+}
+
+void
+GainMeter::set_io (boost::shared_ptr<IO> io)
+{
+	if (level_meter->get_parent()) {
+		hbox.remove (*level_meter);
+	}
+
+	if (peak_display.get_parent()) {
+		gain_display_box.remove (peak_display);
+	}
+
+	if (gain_automation_state_button.get_parent()) {
+		fader_vbox->remove (gain_automation_state_button);
+	}
+
+	GainMeterBase::set_io (io);
+
 	boost::shared_ptr<Route> r;
 
 	if ((r = boost::dynamic_pointer_cast<Route> (_io)) != 0) {
@@ -789,15 +826,7 @@ GainMeter::GainMeter (boost::shared_ptr<IO> io, Session& s)
 			fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 		}
 	}
-
-	set_spacing (2);
-
-	pack_start (gain_display_box, Gtk::PACK_SHRINK);
-	pack_start (hbox, Gtk::PACK_SHRINK);
-
-	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
 }
-
 
 int
 GainMeter::get_gm_width ()

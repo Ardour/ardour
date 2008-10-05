@@ -44,8 +44,13 @@ class BindableToggleButton;
 class RouteUI : public virtual AxisView
 {
   public:
+	RouteUI(ARDOUR::Session&, const char*, const char*, const char*);
 	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&, const char*, const char*, const char*);
+
 	virtual ~RouteUI();
+
+	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
+	void set_button_names (const char*, const char*, const char*);
 
 	bool is_track() const;
 	bool is_audio_track() const;
@@ -154,6 +159,15 @@ class RouteUI : public virtual AxisView
 
 	void reversibly_apply_route_boolean (string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
 	void reversibly_apply_audio_track_boolean (string name, void (ARDOUR::AudioTrack::*func)(bool, void*), bool, void *);
+
+  protected:
+	std::vector<sigc::connection> connections;
+	std::string s_name;
+	std::string m_name;
+	std::string r_name;
+
+	void init ();
+	void reset ();
 };
 
 #endif /* __ardour_route_ui__ */

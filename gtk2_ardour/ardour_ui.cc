@@ -131,13 +131,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	  shuttle_controllable ("shuttle", *this, TransportControllable::ShuttleControl),
 	  shuttle_controller_binding_proxy (shuttle_controllable),
 
-	  roll_button (roll_controllable),
-	  stop_button (stop_controllable),
-	  goto_start_button (goto_start_controllable),
-	  goto_end_button (goto_end_controllable),
-	  auto_loop_button (auto_loop_controllable),
-	  play_selection_button (play_selection_controllable),
-	  rec_button (rec_controllable),
+	  roll_button (&roll_controllable),
+	  stop_button (&stop_controllable),
+	  goto_start_button (&goto_start_controllable),
+	  goto_end_button (&goto_end_controllable),
+	  auto_loop_button (&auto_loop_controllable),
+	  play_selection_button (&play_selection_controllable),
+	  rec_button (&rec_controllable),
 	  
 	  shuttle_units_button (_("% ")),
 

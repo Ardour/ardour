@@ -32,9 +32,12 @@ using namespace PBD;
 SendUI::SendUI (boost::shared_ptr<Send> s, Session& se)
 	: _send (s),
 	  _session (se),
-	  gpm (s, se),
-	  panners (s, se)
+	  gpm (se),
+	  panners (se)
 {
+	panners.set_io (s);
+	gpm.set_io (s);
+
 	hbox.pack_start (gpm, true, true);
 	set_name ("SendUIFrame");
 	

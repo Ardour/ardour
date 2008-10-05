@@ -220,8 +220,11 @@ RouteParams_UI::setup_redirect_boxes()
 		cleanup_redirect_boxes();
 		
 		// construct new redirect boxes
-		pre_redirect_box = new RedirectBox(PreFader, *session, _route, *_plugin_selector, _rr_selection);
-		post_redirect_box = new RedirectBox(PostFader, *session, _route, *_plugin_selector, _rr_selection);
+		pre_redirect_box = new RedirectBox(PreFader, *session, *_plugin_selector, _rr_selection);
+		post_redirect_box = new RedirectBox(PostFader, *session, *_plugin_selector, _rr_selection);
+
+		pre_redirect_box->set_route (_route);
+		post_redirect_box->set_route (_route);
 
 	        pre_redir_hpane.pack1 (*pre_redirect_box);
 		post_redir_hpane.pack1 (*post_redirect_box);
