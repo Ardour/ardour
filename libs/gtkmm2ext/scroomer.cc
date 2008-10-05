@@ -28,8 +28,8 @@ using namespace std;
 Scroomer::Scroomer(Gtk::Adjustment& adjustment)
 	: adj(adjustment)
 	, handle_size(0)
-	, grab_comp(None) {
-
+	, grab_comp(None)
+{
 	position[TopBase] = 0;
 	position[Handle1] = 0;
 	position[Slider] = 0;
@@ -88,7 +88,7 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 	fract = max (-1.0, fract);
 	fract = -fract;
 
-	switch(grab_comp) {
+	switch (grab_comp) {
 	case TopBase:
 	case BottomBase:
 		unzoomed_val += scale * fract * range;
@@ -231,7 +231,7 @@ Scroomer::on_button_release_event (GdkEventButton* ev)
 		return true;
 	}
 
-	switch(grab_comp) {
+	switch (grab_comp) {
 	case TopBase:
 		break;
 	case Handle1:
@@ -275,7 +275,7 @@ Scroomer::set_comp_rect(GdkRectangle& r, Component c) const
 {
 	int index = (int) c;
 
-	switch(c) {
+	switch (c) {
 	case None:
 		return;
 	case Total:
@@ -372,7 +372,7 @@ Scroomer::adjustment_changed()
 std::string
 Scroomer::get_comp_name(Component c)
 {
-	switch(c) {
+	switch (c) {
 	case TopBase:
 		return "TopBase";
 	case Handle1:
