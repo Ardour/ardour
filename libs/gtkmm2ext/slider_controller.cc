@@ -30,7 +30,7 @@ using namespace PBD;
 
 SliderController::SliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				    Gtk::Adjustment *adj,  int orientation,
-				    Controllable& c,
+				    Controllable* c,
 				    bool with_numeric)
 
 	: PixFader (image, *adj, orientation),
@@ -60,7 +60,7 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 
 VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
-				      Controllable& control,
+				      Controllable* control,
 				      bool with_numeric)
 
 	: SliderController (image, adj, VERT, control, with_numeric)
@@ -76,7 +76,7 @@ VSliderController::VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 
 HSliderController::HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
 				      Gtk::Adjustment *adj,
-				      Controllable& control,
+				      Controllable* control,
 				      bool with_numeric)
 	
 	: SliderController (image, adj, HORIZ, control, with_numeric)

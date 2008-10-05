@@ -32,6 +32,7 @@ namespace PBD {
 class BindingProxy : public sigc::trackable
 {
    public:
+	BindingProxy (PBD::Controllable*);
 	BindingProxy (PBD::Controllable&);
 	virtual ~BindingProxy();
 	
@@ -40,11 +41,12 @@ class BindingProxy : public sigc::trackable
 
 	bool button_press_handler (GdkEventButton *);
 
-	PBD::Controllable* get_controllable() { return &controllable; }
-  protected:
+	PBD::Controllable* get_controllable() { return controllable; }
+	void set_controllable (PBD::Controllable*);
 
+  protected:
 	Gtkmm2ext::PopUp*  prompter;
-	PBD::Controllable& controllable;
+	PBD::Controllable* controllable;
 	guint bind_button;
 	guint bind_statemask;
 	sigc::connection learning_connection;

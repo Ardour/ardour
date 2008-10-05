@@ -31,9 +31,18 @@ using namespace Gtkmm2ext;
 using namespace std;
 using namespace PBD;
 
-BindingProxy::BindingProxy (Controllable& c)
+BindingProxy::BindingProxy (Controllable* c)
 	: prompter (0),
 	  controllable (c),
+	  bind_button (2),
+	  bind_statemask (Gdk::CONTROL_MASK)
+
+{			  
+}
+
+BindingProxy::BindingProxy (Controllable& c)
+	: prompter (0),
+	  controllable (&c),
 	  bind_button (2),
 	  bind_statemask (Gdk::CONTROL_MASK)
 
@@ -45,6 +54,13 @@ BindingProxy::~BindingProxy ()
 	if (prompter) {
 		delete prompter;
 	}
+}
+
+void
+BindingProxy::set_controllable (Controllable* c)
+{
+	learning_finished ();
+	controllable = c;
 }
 
 void
@@ -65,7 +81,7 @@ bool
 BindingProxy::button_press_handler (GdkEventButton *ev)
 {
 	if ((ev->state & bind_statemask) && ev->button == bind_button) { 
-		if (Controllable::StartLearning (&controllable)) {
+		if (Controllable::StartLearning (controllable)) {
 			string prompt = _("operate controller now");
 			if (prompter == 0) {
 				prompter = new PopUp (Gtk::WIN_POS_MOUSE, 30000, false);
@@ -73,7 +89,7 @@ BindingProxy::button_press_handler (GdkEventButton *ev)
 			}
 			prompter->set_text (prompt);
 			prompter->touch (); // shows popup
-			learning_connection = controllable.LearningFinished.connect (mem_fun (*this, &BindingProxy::learning_finished));
+			learning_connection = controllable->LearningFinished.connect (mem_fun (*this, &BindingProxy::learning_finished));
 		}
 		return true;
 	}
@@ -95,7 +111,7 @@ bool
 BindingProxy::prompter_hiding (GdkEventAny *ev)
 {
 	learning_connection.disconnect ();
-	Controllable::StopLearning (&controllable);
+	Controllable::StopLearning (controllable);
 	return false;
 }
 

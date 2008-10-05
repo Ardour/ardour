@@ -40,7 +40,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 			      sigc::slot<void,char*,unsigned int> lc) 
 
 	: adjustment (adj),
-	  binding_proxy (mc),
+	  binding_proxy (&mc),
 	  label_callback (lc),
 	  spinner (adjustment)
 
