@@ -276,30 +276,21 @@ Editor::region_list_region_changed (Change what_changed, boost::weak_ptr<Region>
 void
 Editor::region_list_selection_changed() 
 {
-	bool selected = false;
-
 	if (region_list_display.get_selection()->count_selected_rows() > 0) {
-		selected = true;
-	}
-	
-	if (selected) {
-		TreeView::Selection::ListHandle_Path rows = region_list_display.get_selection()->get_selected_rows ();
+		
 		TreeIter iter;
-
+		TreeView::Selection::ListHandle_Path rows = region_list_display.get_selection()->get_selected_rows ();
+		
+		deselect_all();
+		
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 			
-			if (iter = region_list_model->get_iter (*i)) {
-				boost::shared_ptr<Region> r = (*iter)[region_list_columns.region];
+			if (iter = region_list_model->get_iter (*i)) {									// they could have clicked on a row that is just a placeholder, like "Hidden"
+				boost::shared_ptr<Region> region = (*iter)[region_list_columns.region];
 				
-				/* they could have clicked on a row that is just a placeholder, like "Hidden" */
-				
-				if (r) {
-						
-						/* just set the first selected region (in fact, the selection model might be SINGLE, which
-						means there can only be one.
-						*/
-						
-						set_selected_regionview_from_region_list (r, Selection::Set);
+				if (region) {
+					set_selected_regionview_from_region_list (region, Selection::Add);
+					
 				}
 			}
 		}
@@ -382,7 +373,7 @@ Editor::update_region_row (boost::shared_ptr<Region> region)
 			}
 		}
 	}
-	cerr << "Returning - No match\n\n";
+	cerr << "Returning - No match\n";
 }
 
 bool
@@ -426,9 +417,8 @@ Editor::update_all_region_rows ()
 		
 		boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
 	
-		cerr << "level 1 : Updating " << region->name() << "\n";
-		
 		if (!region->automatic()) {
+			cerr << "level 1 : Updating " << region->name() << "\n";
 			populate_row(region, (*i));
 		}
 		
@@ -448,9 +438,8 @@ Editor::update_all_region_subrows (TreeModel::Row const &parent_row, int level)
 		
 		boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
 		
-		cerr << "level " << level << " : Updating " << region->name() << "\n";
-		
 		if (!region->automatic()) {
+			cerr << "level " << level << " : Updating " << region->name() << "\n";
 			populate_row(region, (*i));
 		}
 			
@@ -803,7 +792,9 @@ Editor::region_list_display_button_press (GdkEventButton *ev)
 	}
 
 	if (region == 0) {
-		cerr << "\tno region, event not handled\n";
+		region_list_display.get_selection()->unselect_all();
+		deselect_all();
+		cerr << "\tSelection cleared\n";
 		return false;
 	}
 
