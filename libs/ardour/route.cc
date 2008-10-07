@@ -51,7 +51,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 uint32_t Route::order_key_cnt = 0;
-sigc::signal<void,void*> Route::SyncOrderKeys;
+sigc::signal<void,const char*> Route::SyncOrderKeys;
 
 Route::Route (Session& sess, string name, int input_min, int input_max, int output_min, int output_max, Flag flg, DataType default_type)
 	: IO (sess, name, input_min, input_max, output_min, output_max, default_type),
@@ -169,20 +169,32 @@ Route::set_order_key (const char* name, long n)
 }
 
 void
-Route::sync_order_keys ()
+Route::sync_order_keys (const char* base)
 {
-	uint32_t key;
-	
 	if (order_keys.empty()) {
 		return;
 	}
-	
-	OrderKeys::iterator x = order_keys.begin();
-	key = x->second;
-	++x;
 
-	for (; x != order_keys.end(); ++x) {
-		x->second = key;
+	OrderKeys::iterator i;
+	uint32_t key;
+
+	if ((i = order_keys.find (base)) == order_keys.end()) {
+		/* key doesn't exist, use the first existing
+		   key (this is done during session initialization)
+		*/
+		i = order_keys.begin();
+		key = i->second;
+		++i;
+	} else {
+		/* key exists - use it and reset all others
+		   (actually, itself included)
+		*/
+		i = order_keys.begin();
+		key = i->second;
+	}
+
+	for (; i != order_keys.end(); ++i) {
+		i->second = key;
 	}
 }
 

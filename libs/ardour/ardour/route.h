@@ -241,8 +241,8 @@ class Route : public IO
 	uint32_t remote_control_id () const;
 	sigc::signal<void> RemoteControlIDChanged;
 
-	void sync_order_keys ();
-	static sigc::signal<void,void*> SyncOrderKeys;
+	void sync_order_keys (const char* base);
+	static sigc::signal<void,const char*> SyncOrderKeys;
 
   protected:
 	friend class Session;
