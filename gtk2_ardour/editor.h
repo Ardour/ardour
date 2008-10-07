@@ -1711,8 +1711,9 @@ public:
 
 	void update_route_visibility ();
 
-	void sync_order_keys (void*);
-	bool ignore_route_order_sync;
+	void sync_order_keys (const char*);
+	bool route_redisplay_does_not_sync_order_keys;
+	bool route_redisplay_does_not_reset_order_keys;
 
 	bool route_list_display_button_press (GdkEventButton*);
 	void route_list_display_drag_data_received  (const Glib::RefPtr<Gdk::DragContext>& context,

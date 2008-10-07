@@ -40,6 +40,8 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 
+const char* _order_key = N_("editor");
+
 void
 Editor::handle_new_route (Session::RouteList& routes)
 {
@@ -50,7 +52,7 @@ Editor::handle_new_route (Session::RouteList& routes)
 	TreeModel::Row parent;
 	TreeModel::Row row;
 
-	ignore_route_list_reorder = true;
+	route_redisplay_does_not_sync_order_keys = true;
 	no_route_list_redisplay = true;
 
 	for (Session::RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
@@ -73,18 +75,16 @@ Editor::handle_new_route (Session::RouteList& routes)
 		
 		if ((atv = dynamic_cast<AudioTimeAxisView*> (tv)) != 0) {
 			/* added a new fresh one at the end */
-			if (atv->route()->order_key(N_("editor")) == -1) {
-				atv->route()->set_order_key (N_("editor"), route_display_model->children().size()-1);
+			if (atv->route()->order_key(_order_key) == -1) {
+				atv->route()->set_order_key (_order_key, route_display_model->children().size()-1);
 			}
 			atv->effective_gain_display ();
 		}
 
-		tv->set_old_order_key (route_display_model->children().size() - 1);
 		route->gui_changed.connect (mem_fun(*this, &Editor::handle_gui_changes));
 		tv->GoingAway.connect (bind (mem_fun(*this, &Editor::remove_route), tv));
 	}
 
-	ignore_route_list_reorder = false;
 	no_route_list_redisplay = false;
 
 	redisplay_route_list ();
@@ -92,6 +92,8 @@ Editor::handle_new_route (Session::RouteList& routes)
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);
 	}
+	
+	route_redisplay_does_not_sync_order_keys = false;
 }
 
 void
@@ -125,13 +127,11 @@ Editor::remove_route (TimeAxisView *tv)
 		entered_track = 0;
 	}
 
-	/* Decrement old order keys for tracks `above' the one that is being removed */
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		TimeAxisView* v = (*ri)[route_display_columns.tv];
-		if (v->old_order_key() > tv->old_order_key()) {
-			v->set_old_order_key (v->old_order_key() - 1);
-		}
-	}
+	/* the core model has changed, there is no need to sync 
+	   view orders.
+	*/
+
+	route_redisplay_does_not_sync_order_keys = true;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[route_display_columns.tv] == tv) {
@@ -139,6 +139,8 @@ Editor::remove_route (TimeAxisView *tv)
 			break;
 		}
 	}
+
+	route_redisplay_does_not_sync_order_keys = false;
 
 	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
 		track_views.erase (i);
@@ -224,13 +226,13 @@ Editor::show_track_in_display (TimeAxisView& tv)
 }
 
 void
-Editor::sync_order_keys (void *src)
+Editor::sync_order_keys (const char *src)
 {
 	vector<int> neworder;
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (src == this || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if ((strcmp (src, _order_key) == 0) || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
 		return;
 	}
 
@@ -239,12 +241,13 @@ Editor::sync_order_keys (void *src)
 	}
 
 	bool changed = false;
+	int order;
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		TimeAxisView* tv = (*ri)[route_display_columns.tv];
+	for (order = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
-		int old_key = tv->old_order_key();
-		int new_key = route->order_key (X_("editor"));
+
+		int old_key = order;
+		int new_key = route->order_key (_order_key);
 
 		neworder[new_key] = old_key;
 
@@ -254,7 +257,9 @@ Editor::sync_order_keys (void *src)
 	}
 
 	if (changed) {
+		route_redisplay_does_not_reset_order_keys = true;
 		route_display_model->reorder (neworder);
+		route_redisplay_does_not_reset_order_keys = false;
 	}
 }
 
@@ -285,16 +290,14 @@ Editor::redisplay_route_list ()
 			continue;
 		}
 
-		if (!ignore_route_list_reorder) {
+		if (!route_redisplay_does_not_reset_order_keys) {
 			
 			/* this reorder is caused by user action, so reassign sort order keys
 			   to tracks.
 			*/
 			
-			route->set_order_key (N_("editor"), order);
+			route->set_order_key (_order_key, order);
 		}
-
-		tv->set_old_order_key (order);
 
 		bool visible = (*i)[route_display_columns.visible];
 
@@ -321,8 +324,8 @@ Editor::redisplay_route_list ()
 		vertical_adjustment.set_value (position + canvas_timebars_vsize - canvas_height);
 	} 
 
-	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {
-		Route::SyncOrderKeys (this); // EMIT SIGNAL
+	if (!route_redisplay_does_not_reset_order_keys && !route_redisplay_does_not_sync_order_keys) {
+		session->sync_order_keys (_order_key);
 	}
 }
 
@@ -535,7 +538,7 @@ Editor::route_list_selection_filter (const Glib::RefPtr<TreeModel>& model, const
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 	    /* use of ">" forces the correct sort order */
-	    return a->order_key ("editor") < b->order_key ("editor");
+	    return a->order_key (_order_key) < b->order_key (_order_key);
     }
 };
 
@@ -562,20 +565,26 @@ Editor::initial_route_list_display ()
 void
 Editor::track_list_reorder (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter, int* new_order)
 {
+	route_redisplay_does_not_sync_order_keys = true;
 	session->set_remote_control_ids();
 	redisplay_route_list ();
+	route_redisplay_does_not_sync_order_keys = false;
 }
 
 void
 Editor::route_list_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter)
 {
+	/* never reset order keys because of a property change */
+	route_redisplay_does_not_reset_order_keys = true;
 	session->set_remote_control_ids();
 	redisplay_route_list ();
+	route_redisplay_does_not_reset_order_keys = false;
 }
 
 void
 Editor::route_list_delete (const Gtk::TreeModel::Path& path)
 {
+	/* this could require an order reset & sync */
 	session->set_remote_control_ids();
 	redisplay_route_list ();
 }

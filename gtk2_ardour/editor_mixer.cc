@@ -137,6 +137,7 @@ void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
 	AudioTimeAxisView* at;
+	bool show = false;
 
 	if (!session || (at = dynamic_cast<AudioTimeAxisView*>(&view)) == 0) {
 		return;
@@ -150,6 +151,10 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 			return;
 		}
 
+		if (current_mixer_strip->get_parent()) {
+			show = true;
+		}
+
 	} else {
 		
 		current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
@@ -159,7 +164,10 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 
 	current_mixer_strip->set_route (at->route());
-	show_editor_mixer (true);
+
+	if (show) {
+		show_editor_mixer (true);
+	}
 }
 
 double current = 0.0;
