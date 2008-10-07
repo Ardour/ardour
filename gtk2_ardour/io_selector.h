@@ -27,7 +27,7 @@ class IOSelector : public PortMatrix {
   public:
 	IOSelector (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool);
 
-	void set_state (int, std::string const &, bool);
+	void set_state (int, std::string const &, bool, uint32_t);
 	bool get_state (int, std::string const &) const;
 	uint32_t n_rows () const;
 	uint32_t maximum_rows () const;

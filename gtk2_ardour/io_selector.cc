@@ -64,21 +64,21 @@ IOSelector::ports_changed (ARDOUR::IOChange change, void *src)
 }
 
 void
-IOSelector::set_state (int r, std::string const & p, bool s)
+IOSelector::set_state (int r, std::string const & p, bool s, uint32_t keymod)
 {
 	if (s) {
 		if (!_offer_inputs) {
 			_io->connect_input (_io->input(r), p, 0);
 		} else {
 			_io->connect_output (_io->output(r), p, 0);
-  		}
-  	} else {
-  		if (!_offer_inputs) {
-  			_io->disconnect_input (_io->input(r), p, 0);
-  		} else {
-  			_io->disconnect_output (_io->output(r), p, 0);
-  		}
-  	}
+		}
+	} else {
+		if (!_offer_inputs) {
+			_io->disconnect_input (_io->input(r), p, 0);
+		} else {
+			_io->disconnect_output (_io->output(r), p, 0);
+		}
+	}
 }
 
 bool
@@ -276,8 +276,8 @@ IOSelectorWindow::IOSelectorWindow (
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), this));
 
 	_selector.scrolled_window().add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
-	_selector.scrolled_window().signal_enter_notify_event().connect (mem_fun (*this, &IOSelectorWindow::enter_scroller));
-	_selector.scrolled_window().signal_leave_notify_event().connect (mem_fun (*this, &IOSelectorWindow::leave_scroller));
+	_selector.scrolled_window().signal_enter_notify_event().connect (mem_fun (*this, &IOSelectorWindow::enter_scroller), false);
+	_selector.scrolled_window().signal_leave_notify_event().connect (mem_fun (*this, &IOSelectorWindow::leave_scroller), false);
 }
 
 IOSelectorWindow::~IOSelectorWindow()
@@ -296,7 +296,7 @@ IOSelectorWindow::enter_scroller (GdkEventCrossing* ignored)
 bool
 IOSelectorWindow::leave_scroller (GdkEventCrossing* ignored)
 {
-	cerr << "OUT\n";
+	cerr << "OUT, ev = " << ignored << "\n";
 	suggestion.set_text (_("Right-click on individual port names for per-port operations"));
 	return false;
 }

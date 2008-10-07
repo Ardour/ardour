@@ -43,7 +43,7 @@ BundleEditorMatrix::BundleEditorMatrix (
 }
 
 void
-BundleEditorMatrix::set_state (int r, std::string const & p, bool s)
+BundleEditorMatrix::set_state (int r, std::string const & p, bool s, uint32_t keymod)
 {
 	if (s) {
 		_bundle->add_port_to_channel (r, p);

@@ -37,6 +37,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/data_type.h"
 #include "io_selector.h"
+#include "keyboard.h"
 #include "utils.h"
 #include "gui_thread.h"
 #include "i18n.h"
@@ -63,8 +64,10 @@ PortGroup::add (std::string const & p)
  */
 
 PortGroupUI::PortGroupUI (PortMatrix& m, PortGroup& g)
-	: _port_matrix (m), _port_group (g), _ignore_check_button_toggle (false),
-	  _visibility_checkbutton (g.name)
+	: _port_matrix (m)
+	, _port_group (g)
+	, _ignore_check_button_toggle (false)
+	, _visibility_checkbutton (g.name)
 {
 	int const ports = _port_group.ports.size();
 	int const rows = _port_matrix.n_rows ();
@@ -81,15 +84,22 @@ PortGroupUI::PortGroupUI (PortMatrix& m, PortGroup& g)
 		_port_checkbuttons[i].resize (ports);
 	}
 
+
 	for (int i = 0; i < rows; ++i) {
 		for (uint32_t j = 0; j < _port_group.ports.size(); ++j) {
 			CheckButton* b = new CheckButton;
 			
 			b->signal_toggled().connect (
-				sigc::bind (sigc::mem_fun (*this, &PortGroupUI::port_checkbutton_toggled), b, i, j)
-				);
+				sigc::bind (sigc::mem_fun (*this, &PortGroupUI::port_checkbutton_toggled), b, i, j));
 			
+			b->signal_button_release_event().connect (
+				sigc::bind (sigc::mem_fun (*this, &PortGroupUI::port_checkbutton_release), b, i, j), false);
+
 			_port_checkbuttons[i][j] = b;
+
+			cerr << this << " bind to " << &_port_checkbuttons << " via " << b 
+			     << endl;
+
 			_table.attach (*b, j, j + 1, i, i + 1);
 		}
 	}
@@ -163,8 +173,63 @@ void
 PortGroupUI::port_checkbutton_toggled (CheckButton* b, int r, int c)
 {
  	if (_ignore_check_button_toggle == false) {
-		_port_matrix.set_state (r, _port_group.prefix + _port_group.ports[c], b->get_active());
+		_port_matrix.set_state (r, _port_group.prefix + _port_group.ports[c], b->get_active(), 0);
 	}
+}
+
+bool
+PortGroupUI::port_checkbutton_release (GdkEventButton* ev, CheckButton* b, int r, int c)
+{
+	cerr << this << " RELEASE on " << b << " state = " << ev->state << endl;
+
+	if (ev->state == 0) {
+		/* let usual toggle handler take care of it */
+		return false;
+	}
+
+	/* The fun starts here 
+	 */
+
+	int const ports = _port_group.ports.size();
+	int const rows = _port_matrix.n_rows ();
+
+	if (rows == 0 || ports == 0) {
+		return true;
+	}
+
+	/* For each port in the group, change the state of
+	   the connection for the corresponding "connector" port.
+	*/
+	
+	for (uint32_t j = c; j < ports; ++j) {
+
+		/* we've got a port to connect, now lets find the thing to 
+		   connect it too ... (search "down" the rows)
+		*/
+
+		cerr << "we're going to connect port " << j << " of " << ports << endl;
+
+		for (int i = r; i < rows; ++i) {
+
+			cerr << this << " going to connect to row " << i << " of " << rows << endl;
+			cerr << "access [" << i << "][" << j << "]\n";
+			cerr << " @ " << &_port_checkbuttons << endl;
+
+			_port_checkbuttons[i][j]->set_active (!_port_checkbuttons[i][j]->get_active());
+
+			/* next time, get at least as far as this port before looking
+			   for more.
+			*/
+
+			r = i + 1;
+
+			/* changed connection state, stop looking for more */
+
+			break;
+		}
+	}
+
+	return true;
 }
 
 /** Set up visibility of the port group according to PortGroup::visible */
@@ -187,7 +252,7 @@ RotatedLabelSet::RotatedLabelSet (PortGroupList& g)
 	: Glib::ObjectBase ("RotatedLabelSet"), Widget (), _port_group_list (g), _base_width (128)
 {
 	set_flags (NO_WINDOW);
-	set_angle (30);
+	set_angle (atoi (getenv ("AD_ANGLE")));
 }
 
 RotatedLabelSet::~RotatedLabelSet ()
@@ -236,6 +301,8 @@ RotatedLabelSet::on_size_request (Requisition* requisition)
 		std::pair<int, int> const d = setup_layout (_port_group_list.get_port_by_index (n - 1, false));
 		requisition->width += d.first;
 	}
+
+	cerr << "Labels will be " << requisition->width << " x " << requisition->height << endl;
 }
 
 void
@@ -244,9 +311,7 @@ RotatedLabelSet::on_size_allocate (Allocation& allocation)
 	set_allocation (allocation);
 
 	if (_gdk_window) {
-		_gdk_window->move_resize (
-			allocation.get_x(), allocation.get_y(), allocation.get_width(), allocation.get_height()
-			);
+		_gdk_window->move_resize (allocation.get_x(), allocation.get_y(), allocation.get_width(), allocation.get_height());
 	}
 }
 
@@ -319,10 +384,17 @@ RotatedLabelSet::setup_layout (std::string const & s)
 	_pango_layout->get_pixel_size (w, h);
 
 	/* Rotate the width and height as appropriate.  I thought Pango might be able
-	   to do this for us, but I can't find out how... */
+	   to do this for us, but I can't find out how... 
+	*/
+
 	std::pair<int, int> d;
-	d.first = int (w * cos (_angle_radians) - h * sin (_angle_radians));
-	d.second = int (w * sin (_angle_radians) + h * cos (_angle_radians));
+
+	// cerr << "\"" << s << "\" was " << w << " x " << h << endl;
+
+	d.first = int (fabs (w * cos (_angle_radians) + h * sin (_angle_radians)));
+	d.second = int (fabs (w * sin (_angle_radians) + h * cos (_angle_radians)));
+
+	// cerr << "\trotated by " << _angle_degrees << " = " << d.first << " x " << d.second << endl;
 
 	return d;
 }
@@ -343,7 +415,9 @@ RotatedLabelSet::on_expose_event (GdkEventExpose* event)
 		if ((*i)->visible) {
 			for (uint32_t j = 0; j < (*i)->ports.size(); ++j) {
 				std::pair<int, int> const d = setup_layout ((*i)->ports[j]);
-				get_window()->draw_layout (_gc, int ((n + 0.25) * spacing), height - d.second, _pango_layout, _fg_colour, _bg_colour);
+				int x = atoi (getenv ("AD_X_SHIFT"));
+				int y = atoi (getenv ("AD_Y_SHIFT"));
+				get_window()->draw_layout (_gc, int ((n + 0.25) * spacing) + x, height - d.second + y, _pango_layout, _fg_colour, _bg_colour);
 				++n;
 			}
 		}
@@ -380,21 +454,36 @@ PortMatrix::PortMatrix (ARDOUR::Session& session, ARDOUR::DataType type, bool of
 	_visibility_checkbutton_box.pack_start (*(manage (new Label (_("Connections displayed: ")))), false, false, 10);
  	pack_start (_visibility_checkbutton_box, false, false);
 	
-	_side_vbox.pack_start (*manage (new Label ("")));
 	_scrolled_window.set_policy (POLICY_ALWAYS, POLICY_AUTOMATIC);
 	_scrolled_window.set_shadow_type (SHADOW_NONE);
+
 	VBox* b = manage (new VBox);
-	b->pack_start (_column_labels, false, false);
-	b->pack_start (_port_group_hbox, false, false);
-	Alignment* a = manage (new Alignment (0, 1, 0, 0));
+
+	if (offer_inputs) {
+		b->pack_start (_port_group_hbox, false, false);
+		b->pack_start (_column_labels, false, false);
+	} else {
+		b->pack_start (_column_labels, false, false);
+		b->pack_start (_port_group_hbox, false, false);
+	}
+
+	Alignment* a; 
+
+	if (offer_inputs) {
+		a = manage (new Alignment (1, 0, 0, 0));
+	} else {
+		a = manage (new Alignment (0, 1, 0, 0));
+	}
+
 	a->add (*b);
+
 	_scrolled_window.add (*a);
 
 	if (offer_inputs) {
-		_overall_hbox.pack_start (_side_vbox, false, false, 10);
+		_overall_hbox.pack_start (_side_vbox, false, false, 6);
 		_overall_hbox.pack_start (_scrolled_window, true, true);
 	} else {
-		_overall_hbox.pack_start (_scrolled_window, true, true, 10);
+		_overall_hbox.pack_start (_scrolled_window, true, true, 6);
 		_overall_hbox.pack_start (_side_vbox, false, false);
 	}
 
@@ -419,15 +508,18 @@ PortMatrix::clear ()
 		
 	if (_row_labels_vbox) {
 		_side_vbox.remove (*_row_labels_vbox);
+		delete _row_labels_vbox;
+		_row_labels_vbox = 0;
 	}
-	delete _row_labels_vbox;
-	_row_labels_vbox = 0;
 	
+	/* remove lurking, invisible label and padding */
+	
+	_side_vbox.children().clear ();
+
 	if (_side_vbox_pad) {
-		_side_vbox.remove (*_side_vbox_pad);
+		delete _side_vbox_pad;
+		_side_vbox_pad = 0;
 	}
-	delete _side_vbox_pad;
-	_side_vbox_pad = 0;
 
 	for (std::vector<PortGroupUI*>::iterator i = _port_group_ui.begin(); i != _port_group_ui.end(); ++i) {
 		_port_group_hbox.remove ((*i)->get_table());
@@ -481,8 +573,12 @@ PortMatrix::setup_dimensions ()
 	}
 	
 	if (_side_vbox_pad) {
-		_side_vbox_pad->set_size_request (-1, scrollbar_height + unit_size.second / 4);
-	}
+		if (_offer_inputs) {
+			_side_vbox_pad->set_size_request (-1, unit_size.second / 4);
+		} else {
+			_side_vbox_pad->set_size_request (-1, scrollbar_height + unit_size.second / 4);
+		}
+	} 
 }
 
 
@@ -520,9 +616,17 @@ PortMatrix::setup ()
 		_row_labels_vbox->pack_start (*b, false, false);
 	}
 
-	_side_vbox.pack_start (*_row_labels_vbox, false, false);
-	_side_vbox_pad = new Label ("");
-	_side_vbox.pack_start (*_side_vbox_pad, false, false);
+	_side_vbox_pad = new Label (""); /* unmanaged, explicitly deleted */
+
+	if (_offer_inputs) {
+		_side_vbox.pack_start (*_side_vbox_pad, false, false);
+		_side_vbox.pack_start (*_row_labels_vbox, false, false);
+		_side_vbox.pack_start (*manage (new Label ("")));
+	} else {
+		_side_vbox.pack_start (*manage (new Label ("")));
+		_side_vbox.pack_start (*_row_labels_vbox, false, false);
+		_side_vbox.pack_start (*_side_vbox_pad, false, false);
+	}
 
  	/* Checkbutton tables and visibility checkbuttons */
  	for (PortGroupList::iterator i = _port_group_list.begin(); i != _port_group_list.end(); ++i) {
@@ -535,6 +639,7 @@ PortMatrix::setup ()
 		_visibility_checkbutton_box.pack_start (t->get_visibility_checkbutton(), false, false);
 
 		CheckButton* chk = dynamic_cast<CheckButton*>(&t->get_visibility_checkbutton());
+
 		if (chk) { 
 			chk->signal_toggled().connect (sigc::mem_fun (*this, &PortMatrix::reset_visibility));
 		}

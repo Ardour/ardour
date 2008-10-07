@@ -70,6 +70,7 @@ class PortGroupUI
 
   private:
 	void port_checkbutton_toggled (Gtk::CheckButton*, int, int);
+	bool port_checkbutton_release (GdkEventButton* ev, Gtk::CheckButton* b, int r, int c);
 	void visibility_checkbutton_toggled ();
 
 	PortMatrix& _port_matrix; ///< the PortMatrix that we are working for
@@ -164,7 +165,7 @@ class PortMatrix : public Gtk::VBox {
 	void set_offer_inputs (bool);
 	bool offering_input() const { return _offer_inputs; }
 
-	virtual void set_state (int, std::string const &, bool) = 0;
+	virtual void set_state (int, std::string const &, bool, uint32_t) = 0;
 	virtual bool get_state (int, std::string const &) const = 0;
 	virtual uint32_t n_rows () const = 0;
 	virtual uint32_t maximum_rows () const = 0;
