@@ -306,6 +306,7 @@ Editor::redisplay_route_list ()
 			position += tv->show_at (position, n, &edit_controls_vbox);
 			tv->clip_to_viewport ();
 		} else {
+			tv->set_marked_for_display (false);
 			tv->hide ();
 		}
 		
