@@ -166,6 +166,7 @@ class AudioDiskstream : public Diskstream
 	int  rename_write_sources ();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
+	void non_realtime_locate (nframes_t location);
 
   protected:
 	friend class Auditioner;

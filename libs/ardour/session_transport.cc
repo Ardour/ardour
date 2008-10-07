@@ -224,12 +224,7 @@ Session::butler_transport_work ()
 
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if (!(*i)->hidden()) {
-					if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-						(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
-					}
-					else {
-						(*i)->seek (_transport_frame);
-					}
+					(*i)->non_realtime_locate (_transport_frame);
 				}
 				if (on_entry != g_atomic_int_get (&butler_should_do_transport_work)) {
 					/* new request, stop seeking, and start again */
@@ -434,12 +429,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
-				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-					(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
-				}
-				else {
-					(*i)->seek (_transport_frame);
-				}
+				(*i)->non_realtime_locate (_transport_frame);
 			}
 			if (on_entry != g_atomic_int_get (&butler_should_do_transport_work)) {
 				finished = false;

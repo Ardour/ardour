@@ -206,6 +206,18 @@ AudioDiskstream::non_realtime_input_change ()
 }
 
 void
+AudioDiskstream::non_realtime_locate (nframes_t location)
+{
+	/* now refill channel buffers */
+
+	if (speed() != 1.0f || speed() != -1.0f) {
+		seek ((nframes_t) (location * (double) speed()));
+	} else {
+		seek (location);
+	}
+}
+
+void
 AudioDiskstream::get_input_sources ()
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
