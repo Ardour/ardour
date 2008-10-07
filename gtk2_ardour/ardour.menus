@@ -235,6 +235,8 @@
         <menu action='TrackMenu'>
 	        <menuitem action='AddTrackBus'/>	
 		<menuitem action='insert-time'/>
+	        <menuitem action="move-selected-tracks-up"/>
+	        <menuitem action="move-selected-tracks-down"/>
 	        <menu action='TrackHeightMenu'>
 		     <menuitem action='fit-tracks'/>
 		     <menuitem action='track-height-largest'/>
@@ -336,8 +338,6 @@
 	       	     <menuitem action="toggle-cd-marker-ruler"/>
 	       	     <menuitem action="toggle-marker-ruler"/>
 	       </menu>
-	       <menu action="move-selected-tracks-up"/>
-	       <menu action="move-selected-tracks-down"/>
 	       <menu action="ScrollMenu">
                	     <menuitem action='scroll-tracks-down'/>
                	     <menuitem action='scroll-tracks-up'/>

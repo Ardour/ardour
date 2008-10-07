@@ -177,6 +177,8 @@
 
         <menu action='TrackMenu'>
 	        <menuitem action='AddTrackBus'/>	
+	        <menuitem action="move-selected-tracks-up"/>
+	        <menuitem action="move-selected-tracks-down"/>
 	        <menu action='TrackHeightMenu'>
 		     <menuitem action='track-height-largest'/>
 		     <menuitem action='track-height-large'/>
@@ -251,8 +253,6 @@
                	     <menuitem action='zoom-to-region'/>
                	     <menuitem action='toggle-zoom'/>
 	       </menu>
-	       <menu action="move-selected-tracks-up"/>
-	       <menu action="move-selected-tracks-down"/>
 	       <menu action="ScrollMenu">
                	     <menuitem action='scroll-tracks-down'/>
                	     <menuitem action='scroll-tracks-up'/>
