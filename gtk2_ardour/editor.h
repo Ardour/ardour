@@ -354,6 +354,8 @@ class Editor : public PublicEditor
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
 
+	void move_selected_tracks (bool up);
+
 	bool new_regionviews_display_gain () { return _new_regionviews_show_envelope; }
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
@@ -525,7 +527,7 @@ class Editor : public PublicEditor
 
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
-
+	
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_as_side_effect (bool force = false);

@@ -614,3 +614,245 @@ Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
 		theslot (**i);
 	}
 }
+
+static uint32_t
+compute_new_key (uint32_t old_key, bool up, uint32_t distance, uint32_t limit)
+{
+	uint32_t new_key;
+
+	if (up) {
+		if (old_key >= distance) {
+			new_key = old_key - distance; // towards top 
+		} else {
+			new_key = old_key;     // already at top
+		}
+	} else {
+		if (old_key >= limit - distance) {
+			new_key = old_key;     // already at bottom
+		} else {
+			new_key = old_key + distance; // towards bottom
+		}
+	}
+
+	return new_key;
+}
+
+void
+Editor::move_selected_tracks (bool up)
+{
+	if (selection->tracks.empty()) {
+		return;
+	}
+
+	typedef pair<TimeAxisView*,boost::shared_ptr<Route> > ViewRoute;
+	list<ViewRoute> view_routes;
+	vector<int> neworder;
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator ri;
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		TimeAxisView* tv = (*ri)[route_display_columns.tv];
+		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
+
+		view_routes.push_back (ViewRoute (tv, route));
+	}
+
+	list<ViewRoute>::iterator trailing;
+	list<ViewRoute>::iterator leading;
+	
+	if (up) {
+		
+		trailing = view_routes.begin();
+		leading = view_routes.begin();
+		
+		++leading;
+		
+		while (leading != view_routes.end()) {
+			if (selection->selected (leading->first)) {
+				view_routes.insert (trailing, ViewRoute (leading->first, leading->second));
+				leading = view_routes.erase (leading);
+			} else {
+				++leading;
+				++trailing;
+			}
+		}
+
+	} else {
+
+		/* if we could use reverse_iterator in list::insert, this code
+		   would be a beautiful reflection of the code above. but we can't
+		   and so it looks like a bit of a mess.
+		*/
+
+		trailing = view_routes.end();
+		leading = view_routes.end();
+
+		--leading; if (leading == view_routes.begin()) { return; }
+		--leading;
+		--trailing;
+
+		while (1) {
+
+			if (selection->selected (leading->first)) {
+				list<ViewRoute>::iterator tmp;
+
+				/* need to insert *after* trailing, not *before* it,
+				   which is what insert (iter, val) normally does.
+				*/
+
+				tmp = trailing;
+				tmp++;
+
+				view_routes.insert (tmp, ViewRoute (leading->first, leading->second));
+					
+				/* can't use iter = cont.erase (iter); form here, because
+				   we need iter to move backwards.
+				*/
+
+				tmp = leading;
+				--tmp;
+
+				bool done = false;
+
+				if (leading == view_routes.begin()) {
+					/* the one we've just inserted somewhere else
+					   was the first in the list. erase this copy,
+					   and then break, because we're done.
+					*/
+					done = true;
+				}
+
+				view_routes.erase (leading);
+				
+				if (done) {
+					break;
+				}
+
+				leading = tmp;
+
+			} else {
+				if (leading == view_routes.begin()) {
+					break;
+				}
+				--leading;
+				--trailing;
+			}
+		};
+	}
+
+	for (leading = view_routes.begin(); leading != view_routes.end(); ++leading) {
+		neworder.push_back (leading->second->order_key (_order_key));
+	}
+
+	route_display_model->reorder (neworder);
+}
+
+#if 0
+	vector<boost::shared_ptr<Route> > selected_block;
+	boost::shared_ptr<Route> target_unselected_route;
+	bool last_track_was_selected = false;
+	vector<int> neworder;
+	TreeModel::Children rows = route_display_model->children();
+	TreeModel::Children::iterator ri;
+	uint32_t old_key;
+	uint32_t new_key;
+	int n;
+
+	/* preload "neworder" with the current order */
+	
+	for (n = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++n) {
+		neworder.push_back (n);
+	}
+
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+
+		TimeAxisView* tv = (*ri)[route_display_columns.tv];
+		boost::shared_ptr<Route> route = (*ri)[route_display_columns.route];
+
+		if (selection->selected (tv)) {
+
+			selected_block.push_back (route);
+			cerr << "--SAVE as SELECTED " << route->name() << endl;
+			last_track_was_selected = true;
+			continue;
+
+		} else {
+
+			if (!last_track_was_selected) {
+				/* keep moving through unselected tracks, but save this
+				   one in case we need it later as the one that will
+				   move *down* as the selected block moves up.
+				*/
+				target_unselected_route = route;
+				cerr << "--pre-SAVE as UNSELECTED " << route->name() << endl;
+				continue;
+			}
+
+			last_track_was_selected = false;
+
+			if (!up) {
+				/* this is the track immediately after a selected block,
+				   and this is the one that will move *up* as 
+				   the selected block moves down.
+				*/
+
+				target_unselected_route = route;
+				cerr << "--post-SAVE as UNSELECTED " << route->name() << endl;
+			} else {
+				cerr << "--(up) plan to use existing unselected target\n";
+			}
+		}
+
+		cerr << "TRANSITION: sel = " << selected_block.size() << " unsel = " << target_unselected_route << endl;
+
+		/* transitioned between selected/not-selected */
+		
+		uint32_t distance;
+		
+		for (vector<boost::shared_ptr<Route> >::iterator x = selected_block.begin(); x != selected_block.end(); ++x) {
+			old_key = (*x)->order_key (_order_key);
+			new_key = compute_new_key (old_key, up, 1, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--SELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+
+		/* now move the unselected tracks in the opposite direction */
+		
+		if (!selected_block.empty() && target_unselected_route) {
+			distance = selected_block.size();
+			old_key = target_unselected_route->order_key (_order_key);
+			new_key = compute_new_key (old_key, !up, distance, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--UNSELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+
+		selected_block.clear ();
+		target_unselected_route.reset ();
+	}
+
+	cerr << "when done ... sel = " << selected_block.size() << " unsel = " << target_unselected_route << endl;
+	
+	if (!selected_block.empty() || target_unselected_route) {
+		
+		/* left over blocks */
+		
+		uint32_t distance;
+		
+		for (vector<boost::shared_ptr<Route> >::iterator x = selected_block.begin(); x != selected_block.end(); ++x) {
+			old_key = (*x)->order_key (_order_key);
+			new_key = compute_new_key (old_key, up, 1, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--SELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+
+		if (!selected_block.empty() && target_unselected_route) {
+			distance = selected_block.size();
+			old_key = target_unselected_route->order_key (_order_key);
+			new_key = compute_new_key (old_key, !up, distance, rows.size());
+			neworder[new_key] = old_key;
+			cerr << "--UNSELECTED, reorder from " << old_key << " => " << new_key << endl;
+		}
+	}
+
+	route_display_model->reorder (neworder);
+#endif

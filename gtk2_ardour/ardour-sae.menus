@@ -251,6 +251,8 @@
                	     <menuitem action='zoom-to-region'/>
                	     <menuitem action='toggle-zoom'/>
 	       </menu>
+	       <menu action="move-selected-tracks-up"/>
+	       <menu action="move-selected-tracks-down"/>
 	       <menu action="ScrollMenu">
                	     <menuitem action='scroll-tracks-down'/>
                	     <menuitem action='scroll-tracks-up'/>

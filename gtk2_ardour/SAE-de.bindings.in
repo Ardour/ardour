@@ -140,8 +140,10 @@
 
 (gtk_accel_path "<Actions>/Editor/select-prev-route" "uparrow")
 (gtk_accel_path "<Actions>/Transport/TransitionToRoll" "<%PRIMARY%>uparrow")
+(gtk_accel_path "<Actions>/Editor/move-selected-tracks-up" "<%TERTIARY%>uparrow")
 (gtk_accel_path "<Actions>/Editor/select-next-route" "downarrow")
 (gtk_accel_path "<Actions>/Transport/TransitionToReverse" "<%PRIMARY%>downarrow")
+(gtk_accel_path "<Actions>/Editor/move-selected-tracks-down" "<%TERTIARY%>downarrow")
 
 ;; keypad
 
