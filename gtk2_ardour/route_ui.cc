@@ -570,7 +570,7 @@ RouteUI::update_rec_display ()
 void
 RouteUI::build_remote_control_menu ()
 {
-	remote_control_menu = manage (new Menu);
+	remote_control_menu = new Menu;
 	refresh_remote_control_menu ();
 }
 
