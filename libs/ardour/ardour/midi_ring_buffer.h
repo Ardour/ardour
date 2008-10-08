@@ -131,24 +131,27 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 	//std::cerr << "MRB read " << start << " .. " << end << " + " << offset << std::endl;
 
 	while (read_space() > sizeof(EventTime) + sizeof(EventType) + sizeof(uint32_t)) {
-	
+
 		full_peek(sizeof(EventTime), (uint8_t*)&ev_time);
-	
+
 		if (ev_time > end) {
 			//std::cerr << "MRB: PAST END (" << ev_time << " : " << end << ")" << std::endl;
 			break;
+		} else if (ev_time < start) {
+			//std::cerr << "MRB (start " << start << ") - Skipping event at (too early) time " << ev_time << std::endl;
+			break;
 		}
-		
+
 		bool success = read_prefix(&ev_time, &ev_type, &ev_size);
 		if (!success) {
-			//std::cerr << "MRB: READ ERROR (time/type/size)" << std::endl;
+			std::cerr << "WARNING: error reading event prefix from MIDI ring" << std::endl;
 			continue;
 		}
-		
+
 		uint8_t status;
 		success = full_peek(sizeof(uint8_t), &status);
 		assert(success); // If this failed, buffer is corrupt, all hope is lost
-		
+
 		// Ignore event if it doesn't match channel filter
 		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
 			const uint8_t channel = status & 0x0F;
@@ -159,34 +162,29 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			}
 		}
 
-		if (ev_time >= start) {
+		//std::cerr << "MRB " << this << " - Reading event, time = "
+		//	<< ev_time << " - " << start << " => " << ev_time - start
+		//	<< ", size = " << ev_size << std::endl;
 
-			//std::cerr << "MRB " << this << " - Reading event, time = "
-			//	<< ev_time << " - " << start << " => " << ev_time - start
-			//	<< ", size = " << ev_size << std::endl;
-			
-			ev_time -= start;
-			
-			uint8_t* write_loc = dst.reserve(ev_time, ev_size);
-			if (write_loc == NULL) {
-				//std::cerr << "MRB: Unable to reserve space in buffer, event skipped";
-				continue;
+		assert(ev_time >= start);
+		ev_time -= start;
+
+		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
+		if (write_loc == NULL) {
+			//std::cerr << "MRB: Unable to reserve space in buffer, event skipped";
+			continue;
+		}
+
+		success = Evoral::EventRingBuffer::full_read(ev_size, write_loc);
+
+		if (success) {
+			if (is_channel_event(status) && get_channel_mode() == ForceChannel) {
+				write_loc[0] = (write_loc[0] & 0xF0) | (get_channel_mask() & 0x0F);
 			}
-			
-			success = Evoral::EventRingBuffer::full_read(ev_size, write_loc);
-		
-			if (success) {
-				if (is_channel_event(status) && get_channel_mode() == ForceChannel) {
-					write_loc[0] = (write_loc[0] & 0xF0) | (get_channel_mask() & 0x0F);
-				}
-				++count;
-				//std::cerr << "MRB - read event at time " << ev_time << std::endl;
-			} else {
-				//std::cerr << "MRB: READ ERROR (data)" << std::endl;
-			}
-			
+			++count;
+			//std::cerr << "MRB - read event at time " << ev_time << std::endl;
 		} else {
-			//std::cerr << "MRB (start " << start << ") - Skipping event at (too early) time " << ev_time << std::endl;
+			std::cerr << "WARNING: error reading event contents from MIDI ring" << std::endl;
 		}
 	}
 	
