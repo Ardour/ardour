@@ -183,7 +183,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_playback_load_min, 100);
 	g_atomic_int_set (&_capture_load_min, 100);
 	_play_range = false;
-	waiting_to_start = false;
 	_exporting = false;
 	_gain_automation_buffer = 0;
 	_pan_automation_buffer = 0;
@@ -239,7 +238,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* slave stuff */
 
-	average_slave_delta = 1800;
+	average_slave_delta = 1800; // !!! why 1800 ????
 	have_first_delta_accumulator = false;
 	delta_accumulator_cnt = 0;
 	slave_state = Stopped;

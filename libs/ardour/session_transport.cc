@@ -948,18 +948,6 @@ Session::start_transport ()
 		break;
 	}
 
-	if (!synced_to_jack() || _exporting) {
-		actually_start_transport ();
-	} else {
-		waiting_to_start = true;
-	}
-}
-
-void
-Session::actually_start_transport ()
-{
-	waiting_to_start = false;
-
 	transport_sub_state |= PendingDeclickIn;
 	_transport_speed = 1.0;
 	
