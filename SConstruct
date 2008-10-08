@@ -257,25 +257,48 @@ def fetch_svn_revision (path):
     cmd += " | awk '/^Revision:/ { print $2}'"
     return commands.getoutput (cmd)
 
+def fetch_git_revision (path):
+    cmd = "LANG= "
+    cmd += "git log --abbrev HEAD^..HEAD "
+    cmd += path
+    output = commands.getoutput (cmd)
+    output = output.splitlines()
+
+    rev = output[0].replace( "commit", "git")[0:7]
+    for line in output:
+    	try:
+	    if "git-svn-id" in line:
+		line = line.split('@')
+		line = line[1].split(' ')
+		rev = line[0]
+	except:
+	    pass
+
+    return rev
+
 def create_stored_revision (target = None, source = None, env = None):
+    rev = ""
     if os.path.exists('.svn'):    
         rev = fetch_svn_revision ('.');
-        try:
-            text  = "#include <ardour/svn_revision.h>\n"
-            text += "namespace ARDOUR {\n";
-            text += "extern const char* svn_revision = \"" + rev + "\";\n";
-            text += "}\n";
-            print '============> writing svn revision info to libs/ardour/svn_revision.cc\n'
-            o = file ('libs/ardour/svn_revision.cc', 'w')
-            o.write (text)
-            o.close ()
-        except IOError:
-            print "Could not open libs/ardour/svn_revision.cc for writing\n"
-            sys.exit (-1)
+    elif os.path.exists('.git'):
+        rev = fetch_git_revision ('.');
     else:
         print "You cannot use \"scons revision\" on without using a checked out"
         print "copy of the Ardour source code repository"
         sys.exit (-1)
+
+    try:
+	text  = "#include <ardour/svn_revision.h>\n"
+	text += "namespace ARDOUR {\n";
+	text += "extern const char* svn_revision = \"" + rev + "\";\n";
+	text += "}\n";
+	print '============> writing svn revision info to libs/ardour/svn_revision.cc\n'
+	o = file ('libs/ardour/svn_revision.cc', 'w')
+	o.write (text)
+	o.close ()
+    except IOError:
+	print "Could not open libs/ardour/svn_revision.cc for writing\n"
+	sys.exit (-1)
 
 #
 # A generic builder for version.cc files
