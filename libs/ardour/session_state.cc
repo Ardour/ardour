@@ -341,6 +341,8 @@ Session::second_stage_init (bool new_session)
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
 
+	/* initial program change will be delivered later; see ::config_changed() */
+
 	BootMessage (_("Reset Control Protocols"));
 
 	ControlProtocolManager::instance().set_session (*this);
@@ -3345,6 +3347,15 @@ Session::config_changed (const char* parameter_name)
 		set_history_depth (Config->get_history_depth());
 	} else if (PARAM_IS ("sync-all-route-ordering")) {
 		sync_order_keys ("session"); 
+	} else if (PARAM_IS ("initial-program-change")) {
+
+		if (_mmc_port && Config->get_initial_program_change() >= 0) {
+			MIDI::byte* buf = new MIDI::byte[2];
+			
+			buf[0] = MIDI::program; // channel zero by default
+			buf[1] = (Config->get_initial_program_change() & 0x7f);
+			deliver_midi (_mmc_port, buf, 2);
+		}
 	}
 
 	set_dirty ();
