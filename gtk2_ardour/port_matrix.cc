@@ -190,8 +190,8 @@ PortGroupUI::port_checkbutton_release (GdkEventButton* ev, CheckButton* b, int r
 	/* The fun starts here 
 	 */
 
-	int const ports = _port_group.ports.size();
-	int const rows = _port_matrix.n_rows ();
+	const size_t ports = _port_group.ports.size();
+	const size_t rows = _port_matrix.n_rows ();
 
 	if (rows == 0 || ports == 0) {
 		return true;
@@ -201,7 +201,7 @@ PortGroupUI::port_checkbutton_release (GdkEventButton* ev, CheckButton* b, int r
 	   the connection for the corresponding "connector" port.
 	*/
 	
-	for (uint32_t j = c; j < ports; ++j) {
+	for (size_t j = c; j < ports; ++j) {
 
 		/* we've got a port to connect, now lets find the thing to 
 		   connect it too ... (search "down" the rows)
@@ -209,7 +209,7 @@ PortGroupUI::port_checkbutton_release (GdkEventButton* ev, CheckButton* b, int r
 
 		cerr << "we're going to connect port " << j << " of " << ports << endl;
 
-		for (int i = r; i < rows; ++i) {
+		for (size_t i = r; i < rows; ++i) {
 
 			cerr << this << " going to connect to row " << i << " of " << rows << endl;
 			cerr << "access [" << i << "][" << j << "]\n";
