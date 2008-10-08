@@ -39,12 +39,17 @@ class JackMidiPort : public JackPort, public BaseMidiPort {
    public:
 	void cycle_start (nframes_t nframes, nframes_t offset);
 	void cycle_end (nframes_t nframes, nframes_t offset);
+	void flush_buffers (nframes_t nframes, nframes_t offset);
 	void set_buffer (MidiBuffer& buf);
+
+	MidiBuffer& get_midi_buffer( nframes_t nframes, nframes_t offset );
 
   protected:
 	friend class MidiPort;
 
 	JackMidiPort (const std::string&, Flags, MidiBuffer*);
+  private:
+	bool _has_been_mixed_down;
 };
  
 } // namespace ARDOUR

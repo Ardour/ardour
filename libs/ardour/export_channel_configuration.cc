@@ -46,7 +46,7 @@ ExportChannel::read_ports (float * data, nframes_t frames) const
 
 	for (iterator it = begin(); it != end(); ++it) {
 		if (*it != 0) {
-			Sample* port_buffer = (*it)->get_audio_buffer().data();
+			Sample* port_buffer = (*it)->get_audio_buffer( frames, 0).data();
 			
 			for (uint32_t i = 0; i < frames; ++i) {
 				data[i] += (float) port_buffer[i];

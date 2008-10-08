@@ -1000,6 +1000,7 @@ Panner::set_state (const XMLNode& node)
 	XMLNodeConstIterator niter;
 	const XMLProperty *prop;
 	uint32_t i;
+	uint32_t num_panners = 0;
 	StreamPanner* sp;
 	LocaleGuard lg (X_("POSIX"));
 
@@ -1022,15 +1023,6 @@ Panner::set_state (const XMLNode& node)
 		set_bypassed (prop->value() == "yes");
 	}
     
-    if ((prop = node.property (X_("ins"))) != 0) {
-        ins.set_audio(atoi(prop->value().c_str()));
-    }
-    
-    if ((prop = node.property (X_("outs"))) != 0) {
-        outs.set_audio(atoi(prop->value().c_str()));
-    }
-    
-
 	if ((prop = node.property (X_("link_direction"))) != 0) {
 		LinkDirection ld; /* here to provide type information */
 		set_link_direction (LinkDirection (string_2_enum (prop->value(), ld)));
@@ -1068,7 +1060,8 @@ Panner::set_state (const XMLNode& node)
 						   assumption, but its still an assumption.
 						*/
 						
-						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, i));
+						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, num_panners));
+						num_panners++;
 						
 						if (sp->set_state (**niter) == 0) {
 							_streampanners.push_back (sp);
@@ -1094,7 +1087,7 @@ Panner::set_state (const XMLNode& node)
 		} 	
 	}
 
-	reset(ins.n_audio(), outs.n_audio());
+	reset(num_panners, outputs.size());
 	/* don't try to do old-school automation loading if it wasn't marked as existing */
 
 	if ((prop = node.property (X_("automation")))) {

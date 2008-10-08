@@ -35,10 +35,14 @@ class AudioPort : public BaseAudioPort, public PortFacade {
 	void cycle_start (nframes_t nframes, nframes_t offset);
 	void cycle_end (nframes_t nframes, nframes_t offset);
 	
+	AudioBuffer& get_audio_buffer( nframes_t nframes, nframes_t offset );
+
   protected:
 	friend class AudioEngine;
 
 	AudioPort (const std::string&, Flags, bool external, nframes_t); 
+  private:
+	bool _has_been_mixed_down;
 };
  
 } // namespace ARDOUR

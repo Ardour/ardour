@@ -29,6 +29,7 @@ AudioPort::AudioPort (const std::string& name, Flags flags, bool external, nfram
 	: Port (name, flags)
 	, BaseAudioPort (name, flags)
 	, PortFacade (name, flags)
+	, _has_been_mixed_down( false )
 {
 	if (!external || receives_input()) {
 
@@ -55,9 +56,9 @@ AudioPort::AudioPort (const std::string& name, Flags flags, bool external, nfram
 
 		_ext_port = new JackAudioPort (name, flags, 0);
 
-		if (sends_output()) {
-			_buffer = &dynamic_cast<JackAudioPort*>(_ext_port)->get_audio_buffer();
-		} 
+		//if (sends_output()) {
+		//	_buffer = &dynamic_cast<JackAudioPort*>(_ext_port)->get_audio_buffer( nframes, offset );
+		//} 
 
 		Port::set_name (_ext_port->name());
 	}
@@ -92,11 +93,19 @@ AudioPort::cycle_start (nframes_t nframes, nframes_t offset)
 	if (_ext_port) {
 		_ext_port->cycle_start (nframes, offset);
 	}
+	_has_been_mixed_down = false;
+}
+
+AudioBuffer &
+AudioPort::get_audio_buffer( nframes_t nframes, nframes_t offset ) {
+
+	if (_has_been_mixed_down)	
+		return *_buffer;
 
 	if (_flags & IsInput) {
 
 		if (_ext_port) {
-			_buffer->read_from (dynamic_cast<BaseAudioPort*>(_ext_port)->get_audio_buffer(), nframes, offset);
+			_buffer->read_from (dynamic_cast<BaseAudioPort*>(_ext_port)->get_audio_buffer (nframes, offset), nframes, offset);
 
 			if (!_connections.empty()) {
 				(*_mixdown) (_connections, _buffer, nframes, offset, false);
@@ -115,12 +124,20 @@ AudioPort::cycle_start (nframes_t nframes, nframes_t offset)
 		
 		// XXX if we could get the output stage to not purely mix into, but also
 		// to initially overwrite the buffer, we could avoid this silence step.
-		
-		_buffer->silence (nframes, offset);
+		if (_ext_port) {
+			_buffer = & (dynamic_cast<BaseAudioPort*>(_ext_port)->get_audio_buffer( nframes, offset ));
+		}
+		if (nframes)
+			_buffer->silence (nframes, offset);
 	}
+	if (nframes)
+		_has_been_mixed_down = true;
+
+	return *_buffer;
 }
 
 void
 AudioPort::cycle_end (nframes_t nframes, nframes_t offset)
 {
+	_has_been_mixed_down=false;
 }

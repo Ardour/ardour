@@ -64,12 +64,12 @@ BaseAudioPort::default_mixdown (const set<Port*>& ports, AudioBuffer* dest, nfra
 	set<Port*>::const_iterator p = ports.begin();
 
 	if (first_overwrite) {
-		dest->read_from ((dynamic_cast<BaseAudioPort*>(*p))->get_audio_buffer(), cnt, offset);
+		dest->read_from ((dynamic_cast<BaseAudioPort*>(*p))->get_audio_buffer( cnt, offset ), cnt, offset);
 		p++;
 	}
 
 	for (; p != ports.end(); ++p) {
-		dest->accumulate_from ((dynamic_cast<BaseAudioPort*>(*p))->get_audio_buffer(), cnt, offset);
+		dest->accumulate_from ((dynamic_cast<BaseAudioPort*>(*p))->get_audio_buffer( cnt, offset ), cnt, offset);
 	}
 }
 

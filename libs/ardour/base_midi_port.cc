@@ -48,15 +48,15 @@ BaseMidiPort::default_mixdown (const set<Port*>& ports, MidiBuffer* dest, nframe
 
 	if (first_overwrite) {
 		cout << "first overwrite" << endl;
-		dest->read_from ((dynamic_cast<BaseMidiPort*>(*p))->get_midi_buffer(), cnt, offset);
+		dest->read_from ((dynamic_cast<BaseMidiPort*>(*p))->get_midi_buffer(cnt, offset), cnt, offset);
 		p++;
 	}
 
 	// XXX DAVE: this is just a guess
 
 	for (; p != ports.end(); ++p) {
-		cout << "merge" << endl;
-		dest->merge (*dest, (dynamic_cast<BaseMidiPort*>(*p))->get_midi_buffer());
+		//cout << "merge" << endl;
+		dest->merge (*dest, (dynamic_cast<BaseMidiPort*>(*p))->get_midi_buffer(cnt, offset));
 	}
 }
 

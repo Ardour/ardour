@@ -289,6 +289,7 @@ class IO : public SessionObject, public AutomatableControls, public Latent
 	bool                _public_ports;
 
 	virtual void prepare_inputs (nframes_t nframes, nframes_t offset);
+	virtual void flush_outputs (nframes_t nframes, nframes_t offset);
 
 	virtual void set_deferred_state() {}
 

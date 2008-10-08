@@ -231,7 +231,7 @@ IO::silence (nframes_t nframes, nframes_t offset)
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
-		i->get_buffer().silence (nframes, offset);
+		i->get_buffer(nframes,offset).silence (nframes, offset);
 	}
 }
 
@@ -323,8 +323,7 @@ IO::collect_input (BufferSet& outs, nframes_t nframes, nframes_t offset)
 		
 		BufferSet::iterator o = outs.begin(*t);
 		for (PortSet::iterator i = _inputs.begin(*t); i != _inputs.end(*t); ++i, ++o) {
-			(*i).cycle_start (nframes, offset);
-			o->read_from(i->get_buffer(), nframes, offset);
+			o->read_from(i->get_buffer(nframes,offset), nframes, offset);
 		}
 
 	}
@@ -2766,8 +2765,20 @@ void
 IO::prepare_inputs (nframes_t nframes, nframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
+}
 
-	for (PortSet::iterator i = _inputs.begin(); i != _inputs.end(); ++i) {
-		(*i).cycle_start (nframes, offset);
+void
+IO::flush_outputs (nframes_t nframes, nframes_t offset)
+{
+	/* io_lock, not taken: function must be called from Session::process() calltree */
+	for (PortSet::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+
+		/* Only run cycle_start() on output ports, because 
+		   inputs must be done in the correct processing order,
+		   which requires interleaving with route processing.
+		*/
+
+		(*i).flush_buffers (nframes, offset);
 	}
+		
 }

@@ -79,7 +79,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
-	: Track (sess, node)
+	: Track (sess, node, DataType::MIDI )
 	, _immediate_events(1024) // FIXME: size?
 	, _note_mode(Sustained)
 {
@@ -438,6 +438,11 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 	
+	// I guess this is the right place to call cycle_start for our ports.
+	// but it actually sucks, to directly mess with the IO.... oh well.
+	
+	prepare_inputs( nframes, offset );
+
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
@@ -458,6 +463,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 
 	nframes_t transport_frame = _session.transport_frame();
 
+	
 	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
 		   playback distance to zero, thus causing diskstream::commit
@@ -510,6 +516,8 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 				(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));
 	
 	}
+
+	flush_outputs( nframes, offset );
 
 	return 0;
 }

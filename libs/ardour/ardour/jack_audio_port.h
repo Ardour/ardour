@@ -32,11 +32,12 @@ namespace ARDOUR {
 class AudioEngine;
 class JackAudioPort : public JackPort, public BaseAudioPort {
    public:
-	void cycle_start (nframes_t nframes, nframes_t offset) {
-		_buffer->set_data ((Sample*) jack_port_get_buffer (_port, nframes) + offset, nframes);
-	}
+	void cycle_end (nframes_t nframes, nframes_t offset);
+	void cycle_start (nframes_t nframes, nframes_t offset);
 
 	int reestablish ();
+
+	AudioBuffer& get_audio_buffer( nframes_t nframes, nframes_t offset );
 
   protected:
 	friend class AudioPort;
@@ -44,6 +45,8 @@ class JackAudioPort : public JackPort, public BaseAudioPort {
 	JackAudioPort (const std::string& name, Flags flags, AudioBuffer* buf);
 
 	AudioBuffer* _source_buffer;
+  private:
+	bool	_has_been_mixed_down;
 };
  
 } // namespace ARDOUR

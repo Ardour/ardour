@@ -37,15 +37,11 @@ class BaseMidiPort : public virtual Port {
 	
 	DataType type() const { return DataType::MIDI; }
 
-	Buffer& get_buffer() {
-		assert (_buffer);
-		return *_buffer;
+	Buffer& get_buffer( nframes_t nframes, nframes_t offset ) {
+		return get_midi_buffer( nframes, offset );
 	}
 
-	MidiBuffer& get_midi_buffer() {
-		assert (_buffer);
-		return *_buffer;
-	}
+	virtual MidiBuffer& get_midi_buffer (nframes_t nframes, nframes_t offset ) = 0;
 	
 	size_t capacity() { return _buffer->capacity(); }
 	size_t size()     { return _buffer->size(); }

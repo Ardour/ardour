@@ -79,8 +79,9 @@ class Port : public virtual sigc::trackable {
 
 	virtual void cycle_start (nframes_t nframes, nframes_t offset) {}
 	virtual void cycle_end (nframes_t nframes, nframes_t offset) {}
+	virtual void flush_buffers (nframes_t nframes, nframes_t offset ) {}
 	virtual DataType type() const = 0;
-	virtual Buffer& get_buffer() = 0;
+	virtual Buffer& get_buffer( nframes_t nframes, nframes_t offset ) = 0;
 
 	virtual bool connected () const;
 	virtual bool connected_to (const std::string& portname) const;

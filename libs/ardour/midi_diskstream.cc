@@ -514,10 +514,10 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, nframes_t
 
 		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
 		//_capture_buf->write(_source_port->get_midi_buffer(), transport_frame);
-		size_t num_events = _source_port->get_midi_buffer().size();
+		size_t num_events = _source_port->get_midi_buffer( nframes, offset ).size();
 		size_t to_write = std::min(_capture_buf->write_space(), num_events);
 
-		MidiBuffer::iterator port_iter = _source_port->get_midi_buffer().begin();
+		MidiBuffer::iterator port_iter = _source_port->get_midi_buffer( nframes, offset ).begin();
 
 		for (size_t i=0; i < to_write; ++i) {
 			const Evoral::MIDIEvent& ev = *port_iter;

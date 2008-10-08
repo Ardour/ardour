@@ -46,6 +46,7 @@ public:
 	void resize(size_t);
 
 	bool merge(const MidiBuffer& a, const MidiBuffer& b);
+	bool merge_in_place( const MidiBuffer &other );
 	
 	struct iterator {
 		iterator(MidiBuffer& b, size_t i) : buffer(b), index(i) {}

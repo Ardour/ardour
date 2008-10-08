@@ -30,6 +30,7 @@ MidiPort::MidiPort (const std::string& name, Flags flags, bool external, nframes
 	: Port (name, flags)
 	, BaseMidiPort (name, flags)
 	, PortFacade (name, flags)
+	, _has_been_mixed_down (false)
 {
 	// FIXME: size kludge (see BufferSet::ensure_buffers)
 	// Jack needs to tell us this
@@ -73,14 +74,21 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 	if (_ext_port) {
 		_ext_port->cycle_start (nframes, offset);
 	}
+}
+
+MidiBuffer &
+MidiPort::get_midi_buffer( nframes_t nframes, nframes_t offset ) {
 	
+	if (_has_been_mixed_down)
+	    return *_buffer;
+
 	if (_flags & IsInput) {
 			
 		if (_ext_port) {
 		
 			BaseMidiPort* mprt = dynamic_cast<BaseMidiPort*>(_ext_port);
 			assert(mprt);
-			assert(&mprt->get_midi_buffer() == _buffer);
+			assert(&mprt->get_midi_buffer(nframes,offset) == _buffer);
 
 			if (!_connections.empty()) {
 				(*_mixdown) (_connections, _buffer, nframes, offset, false);
@@ -96,9 +104,12 @@ MidiPort::cycle_start (nframes_t nframes, nframes_t offset)
 		}
 
 	} else {
-			
 		_buffer->silence (nframes, offset);
 	}
+	if (nframes)
+		_has_been_mixed_down = true;
+
+	return *_buffer;
 }
 
 	
@@ -108,5 +119,13 @@ MidiPort::cycle_end (nframes_t nframes, nframes_t offset)
 	if (_ext_port) {
 		_ext_port->cycle_end (nframes, offset);
 	}
+	_has_been_mixed_down = false;
 }
 
+void
+MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
+{
+	if (_ext_port) {
+		_ext_port->flush_buffers (nframes, offset);
+	}
+}

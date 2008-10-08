@@ -41,15 +41,11 @@ class BaseAudioPort : public virtual Port {
 
 	DataType type() const { return DataType::AUDIO; }
 
-	virtual Buffer& get_buffer () {
-		assert (_buffer);
-		return *_buffer;
+	virtual Buffer& get_buffer ( nframes_t nframes, nframes_t offset ) {
+		return get_audio_buffer( nframes, offset);
 	}
 
-	virtual AudioBuffer& get_audio_buffer() {
-		assert (_buffer);
-		return *_buffer;
-	}
+	virtual AudioBuffer& get_audio_buffer (nframes_t nframes, nframes_t offset) = 0;
 	
 	void reset ();
 

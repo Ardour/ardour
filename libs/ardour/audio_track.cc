@@ -540,6 +540,8 @@ AudioTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 
 	transport_frame = _session.transport_frame();
 
+	prepare_inputs( nframes, offset );
+
 	if ((nframes = check_initial_delay (nframes, offset, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
 		   playback distance to zero, thus causing diskstream::commit

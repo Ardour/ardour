@@ -71,7 +71,7 @@ BufferSet::attach_buffers(PortSet& ports)
 
 		for (PortSet::iterator p = ports.begin(*t); p != ports.end(*t); ++p) {
 			assert(p->type() == *t);
-			v.push_back(&(p->get_buffer()));
+			v.push_back(&(p->get_buffer(0,0)));
 		}
 
 	}

@@ -229,6 +229,38 @@ MidiBuffer::silence(nframes_t dur, nframes_t offset)
 	_silent = true;
 }
 
+bool
+MidiBuffer::merge_in_place( const MidiBuffer &other )
+{
+	if( other.size() == 0 )
+		return true;
+
+	if( this->size() == 0 ) {
+		copy( other );
+		return true;
+	}
+
+	{
+		MidiBuffer merge_buffer( 0 );
+		Evoral::MIDIEvent onstack_events[_capacity];
+		uint8_t	  onstack_data[_capacity * MAX_EVENT_SIZE];
+		merge_buffer._events = onstack_events;
+		merge_buffer._data = onstack_data;
+		merge_buffer._size = 0;
+
+		bool retval = merge_buffer.merge( *this, other );
+
+		copy( merge_buffer );
+
+		// set pointers to zero again, so destructor
+		// does not end in calling free() for memory
+		// on the stack;
+		merge_buffer._events = 0;
+		merge_buffer._data = 0;
+
+		return retval;
+	}
+}
 
 /** Clear, and merge \a a and \a b into this buffer.
  *
@@ -241,14 +273,18 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 {
 	_size = 0;
 
-	// Die if a merge isn't necessary as it's expensive
-	assert(a.size() > 0 && b.size() > 0);
+	// This is mostly the case :(
+	if( this == &a )
+	    merge_in_place( b );
+
+	if( this == &b )
+	    merge_in_place( a );
 
 	size_t a_index = 0;
 	size_t b_index = 0;
 	size_t count = a.size() + b.size();
 
-	while (count > 0 && a_index < a.size() && b_index < b.size()) {
+	while (count > 0) {
 		
 		if (size() == capacity()) {
 			cerr << "WARNING: MIDI buffer overrun, events lost!" << endl;
@@ -256,11 +292,11 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 		}
 		
 		if (a_index == a.size()) {
-			push_back(a[a_index]);
-			++a_index;
-		} else if (b_index == b.size()) {
 			push_back(b[b_index]);
 			++b_index;
+		} else if (b_index == b.size()) {
+			push_back(a[a_index]);
+			++a_index;
 		} else {
 			const Evoral::MIDIEvent& a_ev = a[a_index];
 			const Evoral::MIDIEvent& b_ev = b[b_index];

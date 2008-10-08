@@ -351,9 +351,7 @@ AudioEngine::process_callback (nframes_t nframes)
 		   which requires interleaving with route processing.
 		*/
 
-		if ((*i)->sends_output()) {
-			(*i)->cycle_start (nframes, 0);
-		}
+		(*i)->cycle_start (nframes, 0);
 	}
 
 	if (_freewheeling) {
@@ -368,12 +366,6 @@ AudioEngine::process_callback (nframes_t nframes)
 		}
 	}
 	
-	// Finalize ports (ie write data if necessary)
-
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->cycle_end (nframes, 0);
-	}
-
 	if (_freewheeling) {
 		return 0;
 	}
@@ -412,9 +404,16 @@ AudioEngine::process_callback (nframes_t nframes)
 			Port *port = (*i);
 			
 			if (port->sends_output()) {
-				port->get_buffer().silence(nframes);
+				port->get_buffer(nframes, 0 ).silence(nframes);
 			}
 		}
+	}
+
+	// Finalize ports (ie write data if necessary)
+
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+
+		(*i)->cycle_end (nframes, 0);
 	}
 
 	_processed_frames = next_processed_frames;
@@ -523,9 +522,7 @@ AudioEngine::set_session (Session *s)
 		boost::shared_ptr<Ports> p = ports.reader();
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			if ((*i)->sends_output()) {
-				(*i)->cycle_start (blocksize, 0);
-			}
+			(*i)->cycle_start (blocksize, 0);
 		}
 
 		s->process (blocksize);

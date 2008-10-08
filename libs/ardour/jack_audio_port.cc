@@ -26,6 +26,7 @@ JackAudioPort::JackAudioPort (const std::string& name, Flags flgs, AudioBuffer* 
 	: Port (name, flgs)
 	, JackPort (name, DataType::AUDIO, flgs)
 	, BaseAudioPort (name, flgs)
+	, _has_been_mixed_down( false )
 {
 	if (buf) {
 
@@ -53,3 +54,29 @@ JackAudioPort::reestablish ()
 	return ret;
 }
 
+AudioBuffer&
+JackAudioPort::get_audio_buffer (nframes_t nframes, nframes_t offset) {
+	assert (_buffer);
+
+	if (_has_been_mixed_down)
+		return *_buffer;
+
+	if( _flags & IsInput )
+		_buffer->set_data ((Sample*) jack_port_get_buffer (_port, nframes), nframes+offset);
+
+
+	if (nframes)
+		_has_been_mixed_down = true;
+
+	return *_buffer;
+}
+
+void
+JackAudioPort::cycle_start (nframes_t nframes, nframes_t offset) {
+	if( _flags & IsOutput )
+		_buffer->set_data ((Sample*) jack_port_get_buffer (_port, nframes), nframes+offset);
+}
+void
+JackAudioPort::cycle_end (nframes_t nframes, nframes_t offset) {
+	_has_been_mixed_down=false;
+}
