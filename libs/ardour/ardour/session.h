@@ -1397,7 +1397,6 @@ class Session : public PBD::StatefulDestructible
 	int           use_config_midi_ports ();
 
 	mutable  gint   butler_active;
-	bool waiting_to_start;
 
 	void set_play_loop (bool yn);
 	void overwrite_some_buffers (Diskstream*);
@@ -1410,7 +1409,6 @@ class Session : public PBD::StatefulDestructible
 	void set_transport_speed (float speed, bool abort = false);
 	void stop_transport (bool abort = false);
 	void start_transport ();
-	void actually_start_transport ();
 	void realtime_stop (bool abort);
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();

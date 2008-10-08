@@ -54,12 +54,6 @@ Session::process (nframes_t nframes)
 
 	_silent = false;
 
-	if (synced_to_jack() && waiting_to_start) {
-		if ( _engine.transport_state() == AudioEngine::TransportRolling) {
-			actually_start_transport ();
-		}
-	}
-
 	if (non_realtime_work_pending()) {
 		if (!transport_work_requested ()) {
 			post_transport ();
