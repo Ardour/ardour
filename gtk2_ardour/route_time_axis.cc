@@ -882,33 +882,30 @@ RouteTimeAxisView::resolve_new_group_playlist_name(std::string &basename, vector
 
 	std::string group_string = "."+edit_group()->name()+".";
 
-	if (basename.find(group_string) == string::npos) {
-		int maxnumber = 0;
+	// iterate through all playlists
+	int maxnumber = 0;
+	for (vector<boost::shared_ptr<Playlist> >::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		std::string tmp = (*i)->name();
 
-		// iterate through all playlists
-	        for (vector<boost::shared_ptr<Playlist> >::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-			std::string tmp = (*i)->name();
+		std::string::size_type idx = tmp.find(group_string);			
+		// find those which belong to this group
+		if (idx != string::npos) {
+			tmp = tmp.substr(idx + group_string.length());
 
-			std::string::size_type idx = tmp.find(group_string);			
-			// find those which belong to this group
-			if (idx != string::npos) {
-				tmp = tmp.substr(idx + group_string.length());
-
-				// and find the largest current number
-				int x = atoi(tmp.c_str());
-				if (x > maxnumber) {
-					maxnumber = x;
-				}
+			// and find the largest current number
+			int x = atoi(tmp.c_str());
+			if (x > maxnumber) {
+				maxnumber = x;
 			}
 		}
-
-		maxnumber++;
-
-		char buf[32];
-                snprintf (buf, sizeof(buf), "%d", maxnumber);
-               
-		ret = this->name()+"."+edit_group()->name()+"."+buf;
 	}
+
+	maxnumber++;
+
+	char buf[32];
+	snprintf (buf, sizeof(buf), "%d", maxnumber);
+               
+	ret = this->name()+"."+edit_group()->name()+"."+buf;
 
 	return ret;
 }
