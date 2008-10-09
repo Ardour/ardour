@@ -765,7 +765,10 @@ AutomationLine::get_verbose_cursor_string (float fraction)
 		if (fraction == 0.0) {
 			snprintf (buf, sizeof (buf), "-inf dB");
 		} else {
+			cerr << "from fraction " << fraction << " derived ";
+			cerr << coefficient_to_dB (slider_position_to_gain (fraction));
 			snprintf (buf, sizeof (buf), "%.1fdB", coefficient_to_dB (slider_position_to_gain (fraction)));
+			cerr << " which prints as " << buf << endl;
 		}
 	} else {
 		snprintf (buf, sizeof (buf), "%.2f", fraction);

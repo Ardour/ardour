@@ -325,9 +325,14 @@ class Editor : public PublicEditor
 	void update_smpte_mode();
 	void update_video_pullup();
 	void update_subframes_per_frame ();
+
 	/* fades & xfades */
 
 	void toggle_region_fades ();
+	void toggle_region_fades_visible ();
+	void toggle_selected_region_fades (int dir);
+	void update_region_fade_visibility ();
+
 	void toggle_auto_xfade ();
 	void toggle_xfades_active ();
 	void toggle_xfade_visibility ();

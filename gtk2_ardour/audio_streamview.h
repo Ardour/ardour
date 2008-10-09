@@ -73,6 +73,9 @@ class AudioStreamView : public StreamView
 
 	void foreach_crossfadeview (void (CrossfadeView::*pmf)(void));
 
+	void show_all_fades ();
+	void hide_all_fades ();
+
 	void show_all_xfades ();
 	void hide_all_xfades ();
 	void hide_xfades_involving (AudioRegionView&);

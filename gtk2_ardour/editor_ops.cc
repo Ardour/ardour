@@ -61,6 +61,7 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "streamview.h"
+#include "audio_streamview.h"
 #include "audio_region_view.h"
 #include "rgb_macros.h"
 #include "selection_templates.h"
@@ -4906,6 +4907,69 @@ Editor::set_fade_out_active (bool yn)
 	commit_reversible_command ();
 }
 
+void
+Editor::toggle_selected_region_fades (int dir)
+{
+	RegionSelection rs;
+	RegionSelection::iterator i;
+	boost::shared_ptr<AudioRegion> ar;
+	bool yn;
+
+	get_regions_for_action (rs);
+	
+	if (rs.empty()) {
+		return;
+	}
+
+	for (i = rs.begin(); i != rs.end(); ++i) {
+		if ((ar = boost::dynamic_pointer_cast<AudioRegion>((*i)->region())) != 0) {
+			if (dir == -1) {
+				yn = ar->fade_out_active ();
+			} else {
+				yn = ar->fade_in_active ();
+			}
+			break;
+		}
+	}
+
+	if (i == rs.end()) {
+		return;
+	}
+
+	/* XXX should this undo-able? */
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		if ((ar = boost::dynamic_pointer_cast<AudioRegion>((*i)->region())) == 0) {
+			continue;
+		}
+		if (dir == 1 || dir == 0) {
+			ar->set_fade_in_active (!yn);
+		}
+
+		if (dir == -1 || dir == 0) {
+			ar->set_fade_out_active (!yn);
+		}
+	}
+}
+
+
+/** Update region fade visibility after its configuration has been changed */
+void
+Editor::update_region_fade_visibility ()
+{
+	bool _fade_visibility = Config->get_show_region_fades ();
+
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		AudioTimeAxisView* v = dynamic_cast<AudioTimeAxisView*>(*i);
+		if (v) {
+			if (_fade_visibility) {
+				v->audio_view()->show_all_fades ();
+			} else {
+				v->audio_view()->hide_all_fades ();
+			}
+		}
+	}
+}
 
 /** Update crossfade visibility after its configuration has been changed */
 void
@@ -6035,3 +6099,4 @@ Editor::end_visual_state_op (uint32_t n)
 
 	return false; // do not call again
 }
+

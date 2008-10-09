@@ -226,6 +226,9 @@
 	      <menuitem action='cut-region-gain'/>      		   
 	      <menuitem action='pitch-shift-region'/>
 	      <menuitem action='toggle-opaque-region'/>
+	      <menuitem action='toggle-selected-region-fade-in'/>
+	      <menuitem action='toggle-selected-region-fade-out'/>
+	      <menuitem action='toggle-selected-region-fades'/>
 	      <separator/>
 	      <menuitem action='duplicate-region'/>
 	      <menuitem action='multi-duplicate-region'/>
@@ -377,6 +380,7 @@
                <menuitem action='toggle-waveform-visible'/>
                <menuitem action='ToggleWaveformsWhileRecording'/>
 	       <menuitem action='SyncEditorAndMixerTrackOrder'/>
+	       <menuitem action='toggle-region-fades-visible'/>
         </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>

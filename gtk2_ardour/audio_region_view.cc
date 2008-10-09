@@ -176,7 +176,6 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 	fade_out_shape->property_fill_color_rgba() = fade_color;
 	fade_out_shape->set_data ("regionview", this);
 
-
 	{
 		uint32_t r,g,b,a;
 		UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
@@ -197,6 +196,10 @@ AudioRegionView::init (Gdk::Color& basic_color, bool wfd)
 		fade_out_handle->property_y2() = 7.0;
 		
 		fade_out_handle->set_data ("regionview", this);
+	}
+
+	if (!Config->get_show_region_fades()) {
+		set_fade_visibility (false);
 	}
 
 	string foo = _region->name();
@@ -392,8 +395,10 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 				fade_in_handle->hide();
 				fade_out_handle->hide();
 			} else {
-				fade_in_handle->show();
-				fade_out_handle->show();
+				if (Config->get_show_region_fades()) {
+					fade_in_handle->show();
+					fade_out_handle->show();
+				}
 			}
 		}
 	}
@@ -533,7 +538,9 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 		return;
 	}
 
-	fade_in_shape->show();
+	if (Config->get_show_region_fades()) {
+		fade_in_shape->show();
+	}
 
 	float curve[npoints];
 	audio_region()->fade_in().get_vector (0, audio_region()->fade_in().back()->when, curve, npoints);
@@ -619,7 +626,9 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 		return;
 	} 
 	
-	fade_out_shape->show();
+	if (Config->get_show_region_fades()) {
+		fade_out_shape->show();
+	}
 
 	float curve[npoints];
 	audio_region()->fade_out().get_vector (0, audio_region()->fade_out().back()->when, curve, npoints);
@@ -1266,3 +1275,34 @@ AudioRegionView::set_frame_color ()
 	}
 }
 
+void
+AudioRegionView::set_fade_visibility (bool yn)
+{
+	if (yn) {
+		if (fade_in_shape) {
+			fade_in_shape->show();
+		}
+		if (fade_out_shape) {
+			fade_out_shape->show ();
+		} 
+		if (fade_in_handle) {
+			fade_in_handle->show ();
+		} 
+		if (fade_out_handle) {
+			fade_out_handle->show ();
+		}
+	} else {
+		if (fade_in_shape) {
+			fade_in_shape->hide();
+		}
+		if (fade_out_shape) {
+			fade_out_shape->hide ();
+		} 
+		if (fade_in_handle) {
+			fade_in_handle->hide ();
+		} 
+		if (fade_out_handle) {
+			fade_out_handle->hide ();
+		}
+	}
+}
