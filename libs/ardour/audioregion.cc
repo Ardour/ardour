@@ -557,7 +557,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 
 	if (!raw) {
 	
-		if (_flags & FadeIn) {
+		if ((_flags & FadeIn) && Config->get_use_region_fades()) {
 			
 			nframes_t fade_in_length = (nframes_t) _fade_in.back()->when;
 			
@@ -579,7 +579,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 		
 		/* fade out */
 		
-		if (_flags & FadeOut) {
+		if ((_flags & FadeOut) && Config->get_use_region_fades()) {
 
 			/* see if some part of this read is within the fade out */
 			
