@@ -1187,6 +1187,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _mmc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mmc_port;
+			//cerr << "MIDI port " << nfds << " = MMC @ " << _mmc_port << endl;
 			nfds++;
 		}
 
@@ -1199,6 +1200,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _mtc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mtc_port;
+			//cerr << "MIDI port " << nfds << " = MTC @ " << _mtc_port << endl;
 			nfds++;
 		}
 
@@ -1206,6 +1208,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _midi_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _midi_port;
+			// cerr << "MIDI port " << nfds << " = MIDI @ " << _midi_port << endl;
 			nfds++;
 		}
 		

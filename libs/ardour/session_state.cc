@@ -859,6 +859,12 @@ Session::load_options (const XMLNode& node)
 
 	Config->set_variables (node, ConfigVariableBase::Session);
 
+	/* now reset MIDI ports because the session can have its own 
+	   MIDI configuration.
+	*/
+
+	setup_midi ();
+
 	if ((child = find_named_node (node, "end-marker-is-free")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
 			_end_location_is_free = (prop->value() == "yes");
@@ -1188,10 +1194,10 @@ Session::set_state (const XMLNode& node)
 
 	/* Object loading order:
 
-	MIDI
 	Path
 	extra
 	Options/Config
+	MIDI  <= relies on data from Options/Config
 	Locations
 	Sources
 	AudioRegions
@@ -1204,9 +1210,6 @@ Session::set_state (const XMLNode& node)
 	ControlProtocols
 	*/
 
-	if (use_config_midi_ports ()) {
-	}
-
 	if ((child = find_named_node (node, "extra")) != 0) {
 		_extra_xml = new XMLNode (*child);
 	}
@@ -1217,6 +1220,9 @@ Session::set_state (const XMLNode& node)
 		load_options (*child);
 	} else {
 		error << _("Session: XML state has no options section") << endmsg;
+	}
+
+	if (use_config_midi_ports ()) {
 	}
 
 	if ((child = find_named_node (node, "Locations")) == 0) {
