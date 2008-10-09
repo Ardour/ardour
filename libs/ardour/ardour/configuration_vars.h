@@ -73,6 +73,7 @@ CONFIG_VARIABLE (bool, xfades_active, "xfades-active", true)
 CONFIG_VARIABLE (bool, xfades_visible, "xfades-visible", true)
 CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
 CONFIG_VARIABLE (bool, use_region_fades, "use-region-fades", true)
+CONFIG_VARIABLE (bool, show_region_fades, "show-region-fades", true)
 
 /* editing related */
 
