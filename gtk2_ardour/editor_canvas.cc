@@ -375,7 +375,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	if (!screen) {
 		screen = Gdk::Screen::get_default();
 	}
-	gint height = min ( (gint) pos, (screen->get_height() - 400));
+	gint height = min ( (gint) pos, (screen->get_height() - 600));
 	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */

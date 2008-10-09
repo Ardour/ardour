@@ -567,7 +567,9 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 		return;
 	}
 
-	fade_in_shape->show();
+	if (Config->get_show_region_fades()) {
+		fade_in_shape->show();
+	}
 
 	float curve[npoints];
 	audio_region()->fade_in()->curve().get_vector (0, audio_region()->fade_in()->back()->when, curve, npoints);
@@ -653,7 +655,9 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 		return;
 	} 
 	
-	fade_out_shape->show();
+	if (Config->get_show_region_fades()) {
+		fade_out_shape->show();
+	}
 
 	float curve[npoints];
 	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, curve, npoints);
@@ -1313,3 +1317,34 @@ AudioRegionView::set_frame_color ()
 	}
 }
 
+void
+AudioRegionView::set_fade_visibility (bool yn)
+{
+	if (yn) {
+		if (fade_in_shape) {
+			fade_in_shape->show();
+		}
+		if (fade_out_shape) {
+			fade_out_shape->show ();
+		} 
+		if (fade_in_handle) {
+			fade_in_handle->show ();
+		} 
+		if (fade_out_handle) {
+			fade_out_handle->show ();
+		}
+	} else {
+		if (fade_in_shape) {
+			fade_in_shape->hide();
+		}
+		if (fade_out_shape) {
+			fade_out_shape->hide ();
+		} 
+		if (fade_in_handle) {
+			fade_in_handle->hide ();
+		} 
+		if (fade_out_handle) {
+			fade_out_handle->hide ();
+		}
+	}
+}

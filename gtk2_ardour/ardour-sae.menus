@@ -213,6 +213,7 @@
 	      <menuitem action='cut-region-gain'/>      		   
 	      <menuitem action='pitch-shift-region'/>
 	      <separator/>
+	      <menuitem action='toggle-selected-region-fades'/>
 	      <menuitem action='toggle-region-fades'/>
         </menu>         
 
@@ -221,6 +222,7 @@
 	       <menuitem action='show-editor-mixer'/>
                <menuitem action='ToggleMeasureVisibility'/>
 	       <menuitem action='ToggleLogoVisibility'/>
+	       <menuitem action='toggle-region-fades-visible'/>
 	       <separator/>
 	       <menu action="PrimaryClockMenu">
 	       	     <menuitem action="primary-clock-bbt"/>

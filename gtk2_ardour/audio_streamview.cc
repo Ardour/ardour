@@ -756,6 +756,28 @@ AudioStreamView::update_rec_regions ()
 }
 
 void
+AudioStreamView::show_all_fades ()
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			arv->set_fade_visibility (true);
+		}
+	}
+}
+
+void
+AudioStreamView::hide_all_fades ()
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			arv->set_fade_visibility (false);
+		}
+	}
+}
+
+void
 AudioStreamView::show_all_xfades ()
 {
 	foreach_crossfadeview (&CrossfadeView::show);

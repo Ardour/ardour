@@ -339,6 +339,10 @@ class Editor : public PublicEditor
 	/* fades/xfades */
 
 	void toggle_region_fades ();
+ 	void toggle_region_fades_visible ();
+ 	void toggle_selected_region_fades (int dir);
+ 	void update_region_fade_visibility ();
+
 	void toggle_auto_xfade ();
 	void toggle_xfades_active ();
 	void toggle_xfade_visibility ();
