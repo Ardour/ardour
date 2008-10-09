@@ -137,6 +137,8 @@ class OptionEditor : public ArdourDialog
 	Gtk::Adjustment mmc_send_device_id_adjustment;
 	Gtk::SpinButton mmc_send_device_id_spinner;
 	Gtk::Button     add_midi_port_button;
+	Gtk::Adjustment initial_program_change_adjustment;
+	Gtk::SpinButton initial_program_change_spinner;
 
 	void add_midi_port ();
 	void remove_midi_port (MIDI::Port*);
@@ -154,6 +156,8 @@ class OptionEditor : public ArdourDialog
 
 	void mmc_receive_device_id_adjusted ();
 	void mmc_send_device_id_adjusted ();
+
+	void initial_program_change_adjusted ();
 
 	void map_port_online (MIDI::Port*, Gtk::ToggleButton*);
 

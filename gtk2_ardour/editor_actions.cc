@@ -118,6 +118,8 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-auto-xfades", _("Created Automatically"), mem_fun(*this, &Editor::toggle_auto_xfade));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-region-fades", _("Active Region Fades"), mem_fun(*this, &Editor::toggle_region_fades));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), bind (mem_fun(*this, &Editor::cursor_to_next_region_boundary), playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -1657,6 +1659,12 @@ Editor::subframes_per_frame_chosen (uint32_t sfpf)
 }
 
 void
+Editor::toggle_region_fades ()
+{
+	ActionManager::toggle_config_state ("Editor", "toggle-region-fades", &Configuration::set_use_region_fades, &Configuration::get_use_region_fades);
+}
+
+void
 Editor::toggle_auto_xfade ()
 {
 	ActionManager::toggle_config_state ("Editor", "toggle-auto-xfades", &Configuration::set_auto_xfade, &Configuration::get_auto_xfade);
@@ -1708,6 +1716,8 @@ Editor::parameter_changed (const char* parameter_name)
 	} else if (PARAM_IS ("xfades-visible")) {
 		ActionManager::map_some_state ("Editor", "toggle-xfades-visible", &Configuration::get_xfades_visible);
 		update_xfade_visibility ();
+	} else if (PARAM_IS ("use-region-fades")) {
+		ActionManager::map_some_state ("Editor", "toggle-region-fades", &Configuration::get_use_region_fades);
 	} else if (PARAM_IS ("auto-xfade")) {
 		ActionManager::map_some_state ("Editor", "toggle-auto-xfades", &Configuration::get_auto_xfade);
 	} else if (PARAM_IS ("xfade-model")) {

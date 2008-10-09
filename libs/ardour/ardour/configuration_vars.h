@@ -40,6 +40,7 @@ CONFIG_VARIABLE (bool, midi_clock_control, "midi-clock-control", false)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (uint8_t, mmc_receive_device_id, "mmc-receive-device-id", 0)
 CONFIG_VARIABLE (uint8_t, mmc_send_device_id, "mmc-send-device-id", 0)
+CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
 
 /* control surfaces */
 
@@ -63,7 +64,7 @@ CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
 CONFIG_VARIABLE (uint32_t, osc_port, "osc-port", 3819)
 CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
-/* crossfades */
+/* fades, crossfades */
 
 CONFIG_VARIABLE (CrossfadeModel, xfade_model, "xfade-model", FullCrossfade)
 CONFIG_VARIABLE (bool, auto_xfade, "auto-xfade", true)
@@ -71,6 +72,7 @@ CONFIG_VARIABLE (float, short_xfade_seconds, "short-xfade-seconds", 0.015)
 CONFIG_VARIABLE (bool, xfades_active, "xfades-active", true)
 CONFIG_VARIABLE (bool, xfades_visible, "xfades-visible", true)
 CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
+CONFIG_VARIABLE (bool, use_region_fades, "use-region-fades", true)
 
 /* editing related */
 

@@ -92,10 +92,10 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-MIDI::Port *default_mmc_port = 0;
-MIDI::Port *default_mtc_port = 0;
-MIDI::Port *default_midi_port = 0;
-MIDI::Port *default_midi_clock_port = 0;
+MIDI::Port *ARDOUR::default_mmc_port = 0;
+MIDI::Port *ARDOUR::default_mtc_port = 0;
+MIDI::Port *ARDOUR::default_midi_port = 0;
+MIDI::Port *ARDOUR::default_midi_clock_port = 0;
 
 Change ARDOUR::StartChanged = ARDOUR::new_change ();
 Change ARDOUR::LengthChanged = ARDOUR::new_change ();
@@ -131,7 +131,7 @@ setup_osc ()
 #endif
 
 int
-setup_midi ()
+ARDOUR::setup_midi ()
 {
 	if (Config->midi_ports.size() == 0) {
 		warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;

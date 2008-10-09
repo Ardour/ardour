@@ -304,8 +304,6 @@ ARDOUR_UI::create_engine ()
 void
 ARDOUR_UI::post_engine ()
 {
-	extern int setup_midi ();
-
 	/* Things to be done once we create the AudioEngine
 	 */
 

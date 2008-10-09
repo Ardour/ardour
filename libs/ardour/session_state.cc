@@ -872,6 +872,12 @@ Session::load_options (const XMLNode& node)
 
 	Config->set_variables (node, ConfigVariableBase::Session);
 
+	/* now reset MIDI ports because the session can have its own 
+	   MIDI configuration.
+	*/
+
+	setup_midi ();
+
 	if ((child = find_named_node (node, "end-marker-is-free")) != 0) {
 		if ((prop = child->property ("val")) != 0) {
 			_end_location_is_free = (prop->value() == "yes");
@@ -1204,10 +1210,10 @@ Session::set_state (const XMLNode& node)
 
 	/* Object loading order:
 
-	MIDI Control
 	Path
 	extra
 	Options/Config
+	MIDI Control // relies on data from Options/Config
 	Metadata
 	Locations
 	Sources
@@ -1221,9 +1227,6 @@ Session::set_state (const XMLNode& node)
 	ControlProtocols
 	*/
 
-	if (use_config_midi_ports ()) {
-	}
-
 	if ((child = find_named_node (node, "extra")) != 0) {
 		_extra_xml = new XMLNode (*child);
 	}
@@ -1234,6 +1237,9 @@ Session::set_state (const XMLNode& node)
 		load_options (*child);
 	} else {
 		error << _("Session: XML state has no options section") << endmsg;
+	}
+
+	if (use_config_midi_ports ()) {
 	}
 
 	if ((child = find_named_node (node, "Metadata")) == 0) {
@@ -3252,6 +3258,16 @@ Session::config_changed (const char* parameter_name)
 		set_history_depth (Config->get_history_depth());
 	} else if (PARAM_IS ("sync-all-route-ordering")) {
 		sync_order_keys ();
+	} else if (PARAM_IS ("initial-program-change")) {
+
+		if (_mmc_port && Config->get_initial_program_change() >= 0) {
+			MIDI::byte buf[2];
+			
+			buf[0] = MIDI::program; // channel zero by default
+			buf[1] = (Config->get_initial_program_change() & 0x7f);
+
+			_mmc_port->midimsg (buf, sizeof (buf), 0);
+		}
 	}
 
 	set_dirty ();

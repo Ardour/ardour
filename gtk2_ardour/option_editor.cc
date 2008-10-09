@@ -95,6 +95,8 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	  mmc_send_device_id_adjustment (0.0, 0.0, (double) 0x7f, 1.0, 16.0),
 	  mmc_send_device_id_spinner (mmc_send_device_id_adjustment),
 	  add_midi_port_button (_("Add new MIDI port")),
+	  initial_program_change_adjustment (0.0, -1.0, (double) 0x7f, 1.0, 16.0),
+	  initial_program_change_spinner (initial_program_change_adjustment),
 
 	  /* Click */
 
@@ -528,7 +530,24 @@ OptionEditor::setup_midi_options ()
 
 	mmc_send_device_id_spinner.set_value(Config->get_mmc_send_device_id ());
 
+	hbox = manage (new HBox);
+	hbox->set_border_width (6);
+	hbox->set_spacing (6);
+	label = (manage (new Label (_("Startup program change")))); 
+	hbox->pack_start (initial_program_change_spinner, false, false);
+	hbox->pack_start (*label, false, false);
+	midi_packer.pack_start (*hbox, false, false);
+	
+	initial_program_change_spinner.set_value (Config->get_initial_program_change());
+	initial_program_change_adjustment.signal_value_changed().connect (mem_fun (*this, &OptionEditor::initial_program_change_adjusted));
+
 	add_midi_port_button.signal_clicked().connect (mem_fun (*this, &OptionEditor::add_midi_port));
+}
+
+void
+OptionEditor::initial_program_change_adjusted ()
+{
+       Config->set_initial_program_change (((int32_t) floor (initial_program_change_adjustment.get_value())) & 0x7f);
 }
 
 void
