@@ -214,7 +214,8 @@
 	      <menuitem action='boost-region-gain'/>
 	      <menuitem action='cut-region-gain'/>      		   
 	      <menuitem action='pitch-shift-region'/>
-	      
+	      <separator/>
+              <menuitem action='toggle-region-fades'/>
         </menu>         
 
         <menu name='View' action = 'View'>

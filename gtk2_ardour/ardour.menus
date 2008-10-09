@@ -546,6 +546,7 @@
 	             <menuitem action='NameNewMarkers'/>
                	     <menuitem action='RubberbandingSnapsToGrid'/>
                	     <menuitem action='AutoAnalyseAudio'/>
+               	     <menuitem action='toggle-region-fades'/>
 		</menu>
          </menu>
 	 <menu name='Help' action='Help'>
