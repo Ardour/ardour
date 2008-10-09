@@ -57,7 +57,7 @@ flac_open (SF_PRIVATE *psf)
 ** Private static functions.
 */
 
-#define ENC_BUFFER_SIZE 4096
+#define ENC_BUFFER_SIZE 8192
 
 typedef enum
 {	PFLAC_PCM_SHORT = 0,
@@ -203,6 +203,17 @@ flac_buffer_copy (SF_PRIVATE *psf)
 	const FLAC__int32* const *buffer = pflac->wbuffer ;
 	unsigned i = 0, j, offset ;
 
+	/*
+	**	frame->header.blocksize is variable and we're using a constant blocksize
+	**	of FLAC__MAX_BLOCK_SIZE.
+	**	Check our assumptions here.
+	*/
+	if (frame->header.blocksize > FLAC__MAX_BLOCK_SIZE)
+	{	psf_log_printf (psf, "Ooops : frame->header.blocksize (%d) > FLAC__MAX_BLOCK_SIZE (%d)\n", __func__, __LINE__, frame->header.blocksize, FLAC__MAX_BLOCK_SIZE) ;
+		psf->error = SFE_INTERNAL ;
+		return 0 ;
+	}
+
 	if (pflac->ptr == NULL)
 	{	/*
 		**	Not sure why this code is here and not elsewhere.
@@ -211,7 +222,7 @@ flac_buffer_copy (SF_PRIVATE *psf)
 		pflac->bufferbackup = SF_TRUE ;
 		for (i = 0 ; i < frame->header.channels ; i++)
 		{	if (pflac->rbuffer [i] == NULL)
-				pflac->rbuffer [i] = calloc (frame->header.blocksize, sizeof (FLAC__int32)) ;
+				pflac->rbuffer [i] = calloc (FLAC__MAX_BLOCK_SIZE, sizeof (FLAC__int32)) ;
 			memcpy (pflac->rbuffer [i], buffer [i], frame->header.blocksize * sizeof (FLAC__int32)) ;
 			} ;
 		pflac->wbuffer = (const FLAC__int32* const*) pflac->rbuffer ;
