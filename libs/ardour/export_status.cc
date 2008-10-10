@@ -56,6 +56,7 @@ ExportStatus::abort (bool error_occurred)
 	_aborted = true;
 	_finished = true;
 	_errors = _errors || error_occurred;
+	running = false;
 	Aborting ();
 }
 
@@ -63,6 +64,7 @@ void
 ExportStatus::finish ()
 {
 	_finished = true;
+	running = false;
 	Finished();
 }
 
