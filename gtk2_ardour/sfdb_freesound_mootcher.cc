@@ -164,7 +164,7 @@ int			Mootcher::doLogin(std::string login, std::string password)
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1);
 
 		// the url to get
-		std::string login_url = "http://freesound.iua.upf.edu/forum/login.php";
+		std::string login_url = "http://www.freesound.org/forum/login.php";
 		curl_easy_setopt(curl, CURLOPT_URL, login_url.c_str() );
 
 		// perform online request
@@ -234,7 +234,7 @@ std::string	Mootcher::searchText(std::string word)
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1);
 			
 			// the url to get
-			std::string search_url = "http://freesound.iua.upf.edu/searchTextXML.php";
+			std::string search_url = "http://www.freesound.org/searchTextXML.php";
 			curl_easy_setopt(curl, CURLOPT_URL, search_url.c_str());
 
 			// perform the online search 
@@ -300,7 +300,7 @@ void		Mootcher::GetXml(std::string ID, struct MemoryStruct &xml_page)
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&xml_page);
 
 		// URL to get
-		std::string getxml_url = "http://freesound.iua.upf.edu/samplesViewSingleXML.php?id=";
+		std::string getxml_url = "http://www.freesound.org/samplesViewSingleXML.php?id=";
 		getxml_url += ID;
 
 		curl_easy_setopt(curl, CURLOPT_URL, getxml_url.c_str() );
@@ -460,7 +460,7 @@ std::string	Mootcher::getFile(std::string ID)
 
 				// create the download url, this url will also update the download statics on the site
 				std::string audioURL;
-				audioURL += "http://freesound.iua.upf.edu/samplesDownload.php?id=";
+				audioURL += "http://www.freesound.org/samplesDownload.php?id=";
 				audioURL += ID;
 
 				setcUrlOptions();
