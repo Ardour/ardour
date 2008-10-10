@@ -2622,7 +2622,7 @@ msgstr "Markera allt mellan markörerna"
 #: ../editor.cc:2031 ../editor.cc:2107 ../editor.cc:3482
 #: ../editor_actions.cc:213 ../redirect_box.cc:1059
 msgid "Cut"
-msgstr "Klipp"
+msgstr "Klipp ut"
 
 #: ../editor.cc:2032 ../editor.cc:2108 ../editor.cc:3484
 #: ../editor_actions.cc:218 ../redirect_box.cc:1061
@@ -3156,7 +3156,7 @@ msgstr "Exportera session"
 
 #: ../editor_actions.cc:210
 msgid "Export Range"
-msgstr "Expoerta omfång"
+msgstr "Exportea omfång"
 
 #. Note: for now, editor-delete does the exact same thing as editor-cut
 #: ../editor_actions.cc:216
@@ -4026,7 +4026,7 @@ msgstr "omfång till disk"
 
 #: ../editor_ops.cc:2880
 msgid "cut"
-msgstr "klipp"
+msgstr "klipp ut"
 
 #: ../editor_ops.cc:2883
 msgid "copy"
@@ -4352,7 +4352,7 @@ msgstr "Dither-typ"
 
 #: ../export_dialog.cc:110
 msgid "Export CD Marker File Only"
-msgstr "Expoertera endast CD-markörsfil"
+msgstr "Exportera endast CD-markörsfil"
 
 #: ../export_dialog.cc:111
 msgid "Export to File"
@@ -5431,7 +5431,7 @@ msgstr "# Ingångar"
 
 #: ../plugin_selector.cc:58 ../plugin_selector.cc:81
 msgid "# Outputs"
-msgstr "# Utångar"
+msgstr "# Utgångar"
 
 #: ../plugin_selector.cc:67
 msgid "Plugins to be Connected to Insert"
@@ -7646,3 +7646,56 @@ msgstr "Bibliotek innehåller"
 #: gtk2_ardour/plugin_selector.cc:451
 msgid "Favorites only"
 msgstr "Endast favoriter"
+
+#: gtk2_ardour/editor_actions.cc:120
+msgid "Show Region Fades"
+msgstr "Visa regiontoningar"
+
+#: gtk2_ardour/ardour_ui_ed.cc:306
+msgid "Goto Wall Clock"
+msgstr "Gå till väggklocka"
+
+#: gtk2_ardour/editor_actions.cc:122
+msgid "Toggle Region Fade In"
+msgstr "Växla regionintoning"
+
+#: gtk2_ardour/editor_actions.cc:124
+msgid "Toggle Region Fade Out"
+msgstr "Växla regionuttoning"
+
+#: gtk2_ardour/editor_actions.cc:126
+msgid "Toggle Region Fades"
+msgstr "Växla regiontoningar"
+
+#: gtk2_ardour/editor_actions.cc:315
+msgid "Move Selected Tracks Up"
+msgstr "Flytta valda spår uppåt"
+
+#: gtk2_ardour/editor_actions.cc:317
+msgid "Move Selected Tracks Down"
+msgstr "Flytta valda spår neråt"
+
+#: gtk2_ardour/location_ui.cc:49 gtk2_ardour/location_ui.cc:52
+msgid "Use PH"
+msgstr "Använd SM"
+
+#: gtk2_ardour/location_ui.cc:85 gtk2_ardour/location_ui.cc:86
+msgid "Set value to Playhead"
+msgstr "Sätt värdet till startmarkören"
+
+#: gtk2_ardour/keyeditor.cc:61
+msgid "Select an action, then press the key(s) to (re)set its shortcut"
+msgstr "Välj en händelse och tryck tangentkombinationen du vill använda"
+
+#: gtk2_ardour/ardour_ui_ed.cc:91
+msgid "Import/Export"
+msgstr "Importera/Expoertera"
+
+#: gtk2_ardour/editor_actions.cc:118
+msgid "Use Region Fades (global)"
+msgstr "Använd regiontoningar (globalt)"
+
+#: gtk2_ardour/editor_actions.cc:684
+msgid "Ranges"
+msgstr "Omfång"
+
