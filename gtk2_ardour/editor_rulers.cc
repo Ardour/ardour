@@ -666,7 +666,7 @@ Editor::update_ruler_visibility ()
 		old_unit_pos = meter_bar_group->property_y();
 		if (tbgpos != old_unit_pos) {
 			meter_bar_group->move ( 0.0, tbgpos - old_unit_pos);
-		}
+		}	
 		meter_bar_group->show();
 		meter_group->show();
 		tbpos += timebar_height;
@@ -780,18 +780,26 @@ Editor::update_ruler_visibility ()
 		marker_bar_group->hide();
 		marker_group->hide();
 	}
-	
+
 	gdouble old_canvas_timebars_vsize = canvas_timebars_vsize;
 	canvas_timebars_vsize = (timebar_height * visible_timebars) - 1;
 	gdouble vertical_pos_delta = canvas_timebars_vsize - old_canvas_timebars_vsize;
+	vertical_adjustment.set_upper(vertical_adjustment.get_upper() + vertical_pos_delta);
+	full_canvas_height += vertical_pos_delta;
 
-	if (vertical_pos_delta < 0 && (vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
-		/*if we're at the bottom of the canvas, don't move the _trackview_grooup*/
-		vertical_adjustment.set_upper(vertical_adjustment.get_upper() + vertical_pos_delta);
+	if (vertical_adjustment.get_value() !=0 && (vertical_adjustment.get_value() + canvas_height >= full_canvas_height)) {
+		/*if we're at the bottom of the canvas, don't move the _trackview_group*/
+		vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
 	} else {
-		vertical_adjustment.set_upper(vertical_adjustment.get_upper() + vertical_pos_delta);
-		_trackview_group->move (0, vertical_pos_delta);
+		_trackview_group->property_y () = - get_trackview_group_vertical_offset ();
+		_trackview_group->move (0, 0);
+		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
+	
+	if (trackview_by_y_position(vertical_adjustment.get_value() + canvas_height) != 0) {
+		trackview_by_y_position(vertical_adjustment.get_value() + canvas_height)->clip_to_viewport ();
+	}
+
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
 
 	time_canvas_vbox.set_size_request (-1,-1);

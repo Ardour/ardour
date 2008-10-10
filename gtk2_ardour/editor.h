@@ -316,6 +316,9 @@ class Editor : public PublicEditor
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 
+	double physical_screen_width;
+	double physical_screen_height;
+
 	/* SMPTE timecode & video sync */
 
 	void smpte_fps_chosen (ARDOUR::SmpteFormat format);
