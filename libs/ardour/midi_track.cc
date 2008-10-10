@@ -510,7 +510,7 @@ MidiTrack::roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame, 
 		//const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 
-		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame);
+		diskstream->get_playback(bufs.get_midi(0), start_frame, end_frame, offset);
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes, offset,
 				(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick, (_meter_point != MeterInput));

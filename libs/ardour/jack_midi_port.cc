@@ -110,6 +110,7 @@ JackMidiPort::cycle_end (nframes_t nframes, nframes_t offset)
 
 	for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 		const Evoral::Event& ev = *i;
+
 		// event times should be frames, relative to cycle start
 		assert(ev.time() >= 0);
 		assert(ev.time() < nframes);
@@ -133,7 +134,8 @@ JackMidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 		const Evoral::Event& ev = *i;
 		// event times should be frames, relative to cycle start
 		assert(ev.time() >= 0);
-		assert(ev.time() < nframes);
-		jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
+		assert(ev.time() < (nframes+offset));
+		if (ev.time() >= offset)
+			jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
 	}
 }

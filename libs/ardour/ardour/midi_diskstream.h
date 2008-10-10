@@ -46,6 +46,7 @@
 #include <ardour/diskstream.h>
 #include <ardour/midi_playlist.h>
 #include <ardour/midi_ring_buffer.h>
+#include <ardour/midi_state_tracker.h>
 
 struct tm;
 
@@ -68,7 +69,7 @@ class MidiDiskstream : public Diskstream
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 	
-	void get_playback(MidiBuffer& dst, nframes_t start, nframes_t end);
+	void get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset);
 
 	void set_record_enabled (bool yn);
 
@@ -170,13 +171,16 @@ class MidiDiskstream : public Diskstream
 	
 	void engage_record_enable ();
 	void disengage_record_enable ();
-	
+	void check_note_onoffs(Evoral::MIDIEvent &event);
+	void emit_pending_note_offs(MidiBuffer &dst, nframes_t time);
+
 	MidiRingBuffer*                   _playback_buf;
 	MidiRingBuffer*                   _capture_buf;
 	MidiPort*                         _source_port;
 	boost::shared_ptr<SMFSource>      _write_source;
 	nframes_t                         _last_flush_frame;
 	NoteMode                          _note_mode;  
+	MidiStateTracker                  _midistate_tracker;
 };
 
 }; /* namespace ARDOUR */

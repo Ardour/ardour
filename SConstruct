@@ -262,9 +262,9 @@ def fetch_git_revision (path):
     cmd += "git log --abbrev HEAD^..HEAD "
     cmd += path
     output = commands.getoutput (cmd)
-    output = output.splitlines()
+    output = output.splitlines ()
 
-    rev = output[0].replace( "commit", "git")[0:7]
+    rev = output[0].replace ("commit", "git")[0:10]
     for line in output:
     	try:
 	    if "git-svn-id" in line:

@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <ardour/types.h>
 #include <ardour/buffer.h>
+#include <ardour/event_type_map.h>
 #include <evoral/EventSink.hpp>
 #include <evoral/EventRingBuffer.hpp>
 
@@ -148,6 +149,18 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 			continue;
 		}
 
+		// This event marks a loop happening. this means that
+		// the next events timestamp will be non-monotonic.
+		if (ev_type == LoopEventType) {
+			ev_time -= start;
+			Evoral::MIDIEvent loopevent(LoopEventType, ev_time); 
+			dst.push_back(loopevent);
+			
+			// We can safely return, without reading the data, because
+			// a LoopEvent does not have data.
+			return count + 1;
+		}
+
 		uint8_t status;
 		success = full_peek(sizeof(uint8_t), &status);
 		assert(success); // If this failed, buffer is corrupt, all hope is lost
@@ -168,6 +181,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 		assert(ev_time >= start);
 		ev_time -= start;
+		ev_time += offset;
 
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {

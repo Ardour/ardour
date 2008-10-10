@@ -970,12 +970,6 @@ Panner::state (bool full)
 	node.add_property (X_("link_direction"), enum_2_string (_link_direction));
 	node.add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
 
-	snprintf (buf, sizeof (buf), "%d", _streampanners.size());
-	node.add_property (X_("ins"), buf);
-	snprintf (buf, sizeof (buf), "%d", outputs.size());
-	node.add_property (X_("outs"), buf);
-	/* add each output */
-
 	for (vector<Panner::Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
 		XMLNode* onode = new XMLNode (X_("Output"));
 		snprintf (buf, sizeof (buf), "%.12g", (*o).x);

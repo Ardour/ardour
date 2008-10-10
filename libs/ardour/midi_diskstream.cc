@@ -728,7 +728,7 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 		   position within the loop.
 		*/
 		
-		if (loc && start >= loop_end) {
+		if (loc && (start >= loop_end)) {
 			//cerr << "start adjusted from " << start;
 			start = loop_start + ((start - loop_start) % loop_length);
 			//cerr << "to " << start << endl;
@@ -774,6 +774,9 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 			/* if we read to the end of the loop, go back to the beginning */
 			
 			if (reloop) {
+				// Synthesize LoopEvent here, because the next events
+				// written will have non-monotonic timestamps.
+				_playback_buf->write(loop_end - 1, LoopEventType, 0, 0);
 				start = loop_start;
 			} else {
 				start += this_read;
@@ -1435,7 +1438,6 @@ MidiDiskstream::capture_buffer_load () const
 			(double) _capture_buf->capacity());
 }
 
-
 int
 MidiDiskstream::use_pending_capture_data (XMLNode& node)
 {
@@ -1446,16 +1448,29 @@ MidiDiskstream::use_pending_capture_data (XMLNode& node)
  * so that an event at \a start has time = 0
  */
 void
-MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end)
+MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset)
 {
-	dst.clear();
-	assert(dst.size() == 0);
+	if (offset == 0) {
+		dst.clear();
+		assert(dst.size() == 0);
+	}
 	
 	// Reverse.  ... We just don't do reverse, ok?  Back off.
 	if (end <= start) {
 		return;
 	}
 
-	// Translates stamps to be relative to start
-	_playback_buf->read(dst, start, end);
+	// Check only events added this offset cycle
+	MidiBuffer::iterator this_cycle_start = dst.end();
+
+	// Translates stamps to be relative to start, but add offset.
+	_playback_buf->read(dst, start, end, offset);
+
+	
+	// Now feed the data through the MidiStateTracker.
+	// In case it detects a LoopEvent it will add necessary note
+	// offs.
+
+	if (_midistate_tracker.track(this_cycle_start, dst.end()))
+		_midistate_tracker.resolve_notes(dst, end-start - 1 + offset);
 }

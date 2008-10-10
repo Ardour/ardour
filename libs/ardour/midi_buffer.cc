@@ -110,13 +110,17 @@ MidiBuffer::read_from(const Buffer& src, nframes_t nframes, nframes_t offset)
 	
 	assert(_capacity >= msrc.size());
 
-	clear();
-	assert(_size == 0);
+	if (offset == 0) {
+		clear();
+		assert(_size == 0);
+	}
 	
 	// FIXME: slow
 	for (size_t i=0; i < msrc.size(); ++i) {
 		const Evoral::MIDIEvent& ev = msrc[i];
-		if (ev.time() >= offset && ev.time() < offset+nframes) {
+		if (ev.time() < offset)
+		    continue;
+		if (ev.time() < (nframes + offset)) {
 			//cout << "MidiBuffer::read_from got event, " << int(ev.type()) << " time: " << ev.time() << " buffer size: " << _size << endl;
 			push_back(ev);
 		} else {

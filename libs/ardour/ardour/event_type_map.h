@@ -46,6 +46,10 @@ private:
 	static EventTypeMap event_type_map;
 };
 
+enum InternalEventType {
+	LoopEventType = 1000
+};
+
 } // namespace ARDOUR
 
 #endif /* __ardour_event_type_map_h__ */
