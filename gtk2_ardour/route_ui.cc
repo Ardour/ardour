@@ -88,6 +88,8 @@ RouteUI::init ()
 	rec_enable_button = manage (new BindableToggleButton (0, ""));
 	rec_enable_button->set_name ("RecordEnableButton");
 	rec_enable_button->set_self_managed (true);
+
+	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
 }
 
 void
@@ -131,11 +133,6 @@ RouteUI::set_button_names (const char* mute, const char* solo, const char* rec)
 void
 RouteUI::set_route (boost::shared_ptr<Route> rp)
 {
-	if (!_route) {
-		/* first time it is set */
-		_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
-	}
-
 	reset ();
 
 	_route = rp;

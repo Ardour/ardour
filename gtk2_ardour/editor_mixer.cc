@@ -56,6 +56,8 @@ Editor::cms_deleted ()
 void
 Editor::show_editor_mixer (bool yn)
 {
+	boost::shared_ptr<ARDOUR::Route> r;
+
 	show_editor_mixer_when_tracks_arrive = false;
 
 	if (!session) {
@@ -64,27 +66,18 @@ Editor::show_editor_mixer (bool yn)
 
 	if (yn) {
 
-		if (current_mixer_strip == 0) {
-
-			current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
-							      *session,
-							      false);
-			current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::cms_deleted));						
-		}
-
-		
 		if (selection->tracks.empty()) {
 			
 			if (track_views.empty()) {	
 				show_editor_mixer_when_tracks_arrive = true;
 				return;
 			} 
-			
+
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 				AudioTimeAxisView* atv;
 				
 				if ((atv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
-					current_mixer_strip->set_route (atv->route());
+					r = atv->route();
 					break;
 				}
 			}
@@ -97,10 +90,22 @@ Editor::show_editor_mixer (bool yn)
 				AudioTimeAxisView* atv;
 				
 				if ((atv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
-					current_mixer_strip->set_route (atv->route());
+					r = atv->route();
 					break;
 				}
 			}
+		}
+
+		if (r) {
+			if (current_mixer_strip == 0) {
+				
+				current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
+								      *session,
+								      false);
+				current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::cms_deleted));						
+			}
+			
+			current_mixer_strip->set_route (r);
 		}
 		
 		if (current_mixer_strip->get_parent() == 0) {
