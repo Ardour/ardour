@@ -119,6 +119,10 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 	*pcx = 0;
 	*pcy = 0;
 
+	cerr << "event at " << event->button.x
+	     << ", " << event->button.y
+	     << endl;
+
 	switch (event->type) {
 	case GDK_BUTTON_RELEASE:
 	case GDK_BUTTON_PRESS:
@@ -148,6 +152,11 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 		break;
 	}
 
+	cerr << "report as " << (pcx ? *pcx : -9999.0)
+	     << ", "
+	     << (pcy ? *pcy : -9999.0)
+	     << endl;
+	
 	/* note that pixel_to_frame() never returns less than zero, so even if the pixel
 	   position is negative (as can be the case with motion events in particular),
 	   the frame location is always positive.
@@ -467,7 +476,7 @@ bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas->get_window();
-	
+
 	if (canvas_window) {
 		Glib::RefPtr<const Gdk::Window> pointer_window;
 		int x, y;
@@ -491,7 +500,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	}
 
 	button_selection (item, event, item_type);
-	
+
 	if (drag_info.item == 0 &&
 	    (Keyboard::is_delete_event (&event->button) ||
 	     Keyboard::is_context_menu_event (&event->button) ||
@@ -863,7 +872,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 {
 	nframes64_t where = event_frame (event, 0, 0);
 	AutomationTimeAxisView* atv = 0;
-
+	
 	/* no action if we're recording */
 						
 	if (session && session->actively_recording()) {
@@ -882,7 +891,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	button_selection (item, event, item_type);
 
 	/* edit events get handled here */
-	
+
 	if (drag_info.item == 0 && Keyboard::is_edit_event (&event->button)) {
 		switch (item_type) {
 		case RegionItem:
@@ -2885,8 +2894,7 @@ Editor::start_control_point_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.grab_x = control_point->get_x();
 	drag_info.grab_y = control_point->get_y();
 	control_point->line.parent_group().i2w(drag_info.grab_x, drag_info.grab_y);
-	track_canvas->w2c(drag_info.grab_x, drag_info.grab_y,
-									 drag_info.grab_x, drag_info.grab_y);
+	track_canvas->w2c(drag_info.grab_x, drag_info.grab_y, drag_info.grab_x, drag_info.grab_y);
 
 	drag_info.grab_frame = pixel_to_frame(drag_info.grab_x);
 
@@ -3020,12 +3028,14 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 	nframes64_t frame_within_region;
 
 	/* need to get x coordinate in terms of parent (TimeAxisItemView)
-	   origin.
+	   origin, and ditto for y.
 	*/
 
 	cx = event->button.x;
 	cy = event->button.y;
+
 	line->parent_group().w2i (cx, cy);
+
 	frame_within_region = (nframes64_t) floor (cx * frames_per_unit);
 
 	if (!line->control_points_adjacent (frame_within_region, current_line_drag_info.before, 
@@ -3041,6 +3051,8 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 
 	start_grab (event, fader_cursor);
 
+	/* fix grab y */
+	
 	double fraction = 1.0 - (cy / line->height());
 
 	line->start_drag (0, drag_info.grab_frame, fraction);
@@ -3068,6 +3080,7 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	// positive side of zero
 	double _unused = 0;
 	double zero_gain_y = (1.0 - ZERO_GAIN_FRACTION) * line->height() - .01;
+
 	line->parent_group().i2w(_unused, zero_gain_y);
 
 	// make sure we hit zero when passing through
@@ -3077,8 +3090,6 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	drag_info.cumulative_y_drag = cy - drag_info.grab_y;
-
-	line->parent_group().w2i (cx, cy);
 
 	cy = max (0.0, cy);
 	cy = min ((double) line->height(), cy);
