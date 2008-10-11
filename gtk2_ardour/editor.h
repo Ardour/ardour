@@ -1601,7 +1601,7 @@ public:
 	void new_transport_marker_menu_set_punch ();
 	void update_loop_range_view (bool visibility=false);
 	void update_punch_range_view (bool visibility=false);
-        gint new_transport_marker_menu_popdown (GdkEventAny*);
+        void new_transport_marker_menu_popdown ();
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void tm_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
