@@ -309,6 +309,16 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	RouteUI::set_route (rt);
 
+	if (input_selector) {
+		delete input_selector;
+		input_selector = 0;
+	}
+
+	if (output_selector) {
+		delete output_selector;
+		output_selector = 0;
+	}
+
 	panners.set_io (rt);
 	gpm.set_io (rt);
 	pre_redirect_box.set_route (rt);
