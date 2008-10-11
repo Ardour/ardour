@@ -1215,7 +1215,7 @@ class "GtkButton" style:highest "ardour_button"
 class "GtkArrow" style:highest "tearoff_arrow"
 class "GtkProgressBar" style:highest "ardour_progressbars"
 
-widget "PaddedButton" style:highest "padded_button"
+widget "*PaddedButton" style:highest "padded_button"
 widget "*FirstActionMessage" style:highest "first_action_message"
 widget "*VerboseCanvasCursor" style:highest "verbose_canvas_cursor"
 widget "*MarkerText" style:highest "marker_text"

@@ -40,6 +40,7 @@ ExportPresetSelector::ExportPresetSelector () :
 	pack_start (remove_button, false, false, 6);
 	pack_start (new_button, false, false, 0);
 	
+	entry.set_name ("PaddedButton");
 	save_button.set_name ("PaddedButton");
 	remove_button.set_name ("PaddedButton");
 	new_button.set_name ("PaddedButton");

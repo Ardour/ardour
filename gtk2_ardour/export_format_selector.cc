@@ -38,6 +38,7 @@ ExportFormatSelector::ExportFormatSelector () :
 	pack_start (remove_button, false, false, 3);
 	pack_start (new_button, false, false, 3);
 
+	format_combo.set_name ("PaddedButton");
 	edit_button.set_name ("PaddedButton");
 	remove_button.set_name ("PaddedButton");
 	new_button.set_name ("PaddedButton");

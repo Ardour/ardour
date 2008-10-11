@@ -82,6 +82,9 @@ class ExportDialog : public ArdourDialog {
 	
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;
+	
+	Gtk::Label *                              timespan_label;
+	Gtk::Label *                              channels_label;
 
   private:
 
@@ -161,6 +164,7 @@ class ExportRegionDialog : public ExportDialog
 	ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
 
   private:
+	void init_gui ();
 	void init_components ();
 	
 	ARDOUR::AudioRegion const & region;

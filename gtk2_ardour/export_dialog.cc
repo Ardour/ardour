@@ -139,14 +139,14 @@ ExportDialog::init_gui ()
 	get_vbox()->pack_start (*preset_align, false, false, 0);
 	
 	Gtk::Alignment * timespan_align = Gtk::manage (new Gtk::Alignment());
-	Gtk::Label * timespan_label = Gtk::manage (new Gtk::Label (_("Time Span"), Gtk::ALIGN_LEFT));
+	timespan_label = Gtk::manage (new Gtk::Label (_("Time Span"), Gtk::ALIGN_LEFT));
 	timespan_align->add (*timespan_selector);
 	timespan_align->set_padding (0, 12, 18, 0);
 	get_vbox()->pack_start (*timespan_label, false, false, 0);
 	get_vbox()->pack_start (*timespan_align, false, false, 0);
 	
 	Gtk::Alignment * channels_align = Gtk::manage (new Gtk::Alignment());
-	Gtk::Label * channels_label = Gtk::manage (new Gtk::Label (_("Channels"), Gtk::ALIGN_LEFT));
+	channels_label = Gtk::manage (new Gtk::Label (_("Channels"), Gtk::ALIGN_LEFT));
 	channels_align->add (*channel_selector);
 	channels_align->set_padding (0, 12, 18, 0);
 	get_vbox()->pack_start (*channels_label, false, false, 0);
@@ -386,6 +386,14 @@ ExportRegionDialog::ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegi
   region (region),
   track (track)
 {}
+
+void
+ExportRegionDialog::init_gui ()
+{
+	ExportDialog::init_gui ();
+	
+	channels_label->set_text (_("Source"));
+}
 
 void
 ExportRegionDialog::init_components ()
