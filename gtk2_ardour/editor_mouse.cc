@@ -3141,7 +3141,6 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		dy *= 0.1;
 	}
 
-	double cx = drag_info.current_pointer_x;
 	double cy = drag_info.grab_y + drag_info.cumulative_y_drag + dy;
 
 	// calculate zero crossing point. back off by .01 to stay on the
