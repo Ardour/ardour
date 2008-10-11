@@ -2890,7 +2890,7 @@ Editor::setup_toolbar ()
 	/* Zoom */
 	
 	zoom_box.set_spacing (1);
-	zoom_box.set_border_width (2);
+	zoom_box.set_border_width (0);
 
 	zoom_in_button.set_name ("EditorTimeButton");
 	zoom_in_button.set_size_request(-1,16);

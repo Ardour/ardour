@@ -787,7 +787,7 @@ Editor::update_ruler_visibility ()
 	vertical_adjustment.set_upper(vertical_adjustment.get_upper() + vertical_pos_delta);
 	full_canvas_height += vertical_pos_delta;
 
-	if (vertical_adjustment.get_value() !=0 && (vertical_adjustment.get_value() + canvas_height >= full_canvas_height)) {
+	if (vertical_adjustment.get_value() != 0 && (vertical_adjustment.get_value() + canvas_height >= full_canvas_height)) {
 		/*if we're at the bottom of the canvas, don't move the _trackview_group*/
 		vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
 	} else {

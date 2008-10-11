@@ -193,7 +193,7 @@ Editor::initialize_canvas ()
 	cd_marker_group = new ArdourCanvas::Group (*timebar_group, 0.0, 0.0);
 
 	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 0.0));
-	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, 1.0));
+	marker_drag_line_points.push_back(Gnome::Art::Point(0.0, physical_screen_height));
 
 	marker_drag_line = new ArdourCanvas::Line (*timebar_group);
 	marker_drag_line->property_width_pixels() = 1;
@@ -323,7 +323,6 @@ Editor::track_canvas_size_allocated ()
 			(*x)->set_line_vpos (0, canvas_height);
 		}
 
-		//	marker_drag_line_points.back().set_y(canvas_height);
 		range_marker_drag_rect->property_y2() = canvas_height;
 		transport_loop_range_rect->property_y2() = canvas_height;
 		transport_punch_range_rect->property_y2() = canvas_height;
