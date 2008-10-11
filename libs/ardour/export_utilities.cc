@@ -55,6 +55,9 @@ namespace ARDOUR
 SampleRateConverter::SampleRateConverter (uint32_t channels, nframes_t in_rate, nframes_t out_rate, int quality) :
   channels (channels),
   leftover_frames (0),
+  max_leftover_frames (0),
+  frames_in (0),
+  frames_out(0),
   data_in (0),
   leftover_data (0),
   data_out (0),
@@ -102,7 +105,9 @@ SampleRateConverter::process (float * data, nframes_t frames)
 	nframes_t out_samples_max = (nframes_t) ceil (frames * src_data.src_ratio * channels);
 	if (data_out_size < out_samples_max) {
 
-		free (data_out);
+		if (data_out) {
+			delete[] data_out;
+		}
 		data_out = new float[out_samples_max];
 		src_data.data_out = data_out;
 		
@@ -229,7 +234,7 @@ SampleFormatConverter<TOut>::~SampleFormatConverter ()
 		gdither_free (dither);
 	}
 	if (data_out) {
-		delete data_out;
+		delete[] data_out;
 	}
 }
 
@@ -241,7 +246,9 @@ SampleFormatConverter<TOut>::process (float * data, nframes_t frames)
 	
 	size_t data_size = channels * frames * sizeof (TOut);
 	if (data_size  > data_out_size) {
-		free (data_out);
+		if (data_out) {
+			delete[] data_out;
+		}
 		data_out = new TOut[data_size];
 		data_out_size = data_size;
 	}
