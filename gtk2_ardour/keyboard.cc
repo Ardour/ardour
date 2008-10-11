@@ -360,7 +360,6 @@ Keyboard::set_snap_modifier (guint mod)
 bool
 Keyboard::is_edit_event (GdkEventButton *ev)
 {
-
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) && 
 		(ev->button == Keyboard::edit_button()) && 
 		((ev->state & RelevantModifierKeyMask) == Keyboard::edit_modifier());

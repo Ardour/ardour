@@ -21,6 +21,7 @@
 #include "Resampler.h"
 #include "Profiler.h"
 
+#include <cstring>
 #include <cassert>
 #include <cmath>
 #include <set>

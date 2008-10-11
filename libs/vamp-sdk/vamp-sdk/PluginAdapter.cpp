@@ -38,6 +38,9 @@
 #include <cstdlib>
 #include "PluginAdapter.h"
 
+#include <cstdlib>
+#include <cstring>
+
 //#define DEBUG_PLUGIN_ADAPTER 1
 
 

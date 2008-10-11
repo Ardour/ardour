@@ -19,6 +19,7 @@
 */
 
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <cstring>
 #include <limits.h>

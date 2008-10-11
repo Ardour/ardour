@@ -37,6 +37,8 @@
 #include <cstdlib>
 #include "PluginHostAdapter.h"
 
+#include <cstdlib>
+
 namespace Vamp
 {
 

@@ -24,6 +24,8 @@
 #include <fftw3.h>
 #endif
 
+#include <cstdlib>
+
 #ifdef USE_KISSFFT
 #include "bsd-3rdparty/kissfft/kiss_fftr.h"
 #endif

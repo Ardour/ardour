@@ -21,7 +21,7 @@ import SCons.Node.FS
 SConsignFile()
 EnsureSConsVersion(0, 96)
 
-ardour_version = '2.5'
+ardour_version = '2.6'
 
 subst_dict = { }
 
@@ -702,8 +702,9 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
     
     build_host_supports_sse = 0
     
-    debug_flags.append ("-DARCH_X86")
-    opt_flags.append ("-DARCH_X86")
+    if (re.search ("i[0-9]86", config[config_cpu]) != None):
+        debug_flags.append ("-DARCH_X86")
+        opt_flags.append ("-DARCH_X86")
     
     if config[config_kernel] == 'linux' :
         

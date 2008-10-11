@@ -44,6 +44,7 @@
 #include <cstring>
 #include <fstream>
 #include <cctype> // tolower
+#include <cstring>
 
 #ifdef _WIN32
 
