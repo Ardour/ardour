@@ -135,18 +135,18 @@ Editor::initialize_canvas ()
 
 	_master_group = new ArdourCanvas::Group (*track_canvas->root());
 
-	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
+	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, physical_screen_height);
 	transport_loop_range_rect->property_outline_pixels() = 1;
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
+	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, physical_screen_height);
 	transport_punch_range_rect->property_outline_pixels() = 0;
 	transport_punch_range_rect->hide();
 
 	/* a group to hold time (measure) lines */	
 	time_line_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
 
-	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, 0.0);
+	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
 	range_marker_drag_rect->hide ();
 
 	_trackview_group = new ArdourCanvas::Group (*_master_group);
@@ -216,14 +216,14 @@ Editor::initialize_canvas ()
 	transport_punchin_line->property_x1() = 0.0;
 	transport_punchin_line->property_y1() = 0.0;
 	transport_punchin_line->property_x2() = 0.0;
-	transport_punchin_line->property_y2() = 0.0;
+	transport_punchin_line->property_y2() = physical_screen_height;
 	transport_punchin_line->hide ();
 	
 	transport_punchout_line  = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchout_line->property_x1() = 0.0;
 	transport_punchout_line->property_y1() = 0.0;
 	transport_punchout_line->property_x2() = 0.0;
-	transport_punchout_line->property_y2() = 0.0;
+	transport_punchout_line->property_y2() = physical_screen_height;
 	transport_punchout_line->hide();
 	
 	// used to show zoom mode active zooming
@@ -323,11 +323,6 @@ Editor::track_canvas_size_allocated ()
 			(*x)->set_line_vpos (0, canvas_height);
 		}
 
-		range_marker_drag_rect->property_y2() = canvas_height;
-		transport_loop_range_rect->property_y2() = canvas_height;
-		transport_punch_range_rect->property_y2() = canvas_height;
-		transport_punchin_line->property_y2() = canvas_height;
-		transport_punchout_line->property_y2() = canvas_height;
 		vertical_adjustment.set_page_size (canvas_height);
 	}
 	horizontal_adjustment.set_upper (session->current_end_frame()/frames_per_unit);

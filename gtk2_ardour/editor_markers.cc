@@ -1125,12 +1125,14 @@ Editor::new_transport_marker_menu_popdown (GdkEventAny *ev)
 void
 Editor::new_transport_marker_menu_set_loop ()
 {
+	transport_bar_drag_rect->hide ();
 	set_loop_range (temp_location->start(), temp_location->end(), _("set loop range"));
 }
 
 void
 Editor::new_transport_marker_menu_set_punch ()
 {
+	transport_bar_drag_rect->hide ();
 	set_punch_range (temp_location->start(), temp_location->end(), _("set punch range"));
 }
 
