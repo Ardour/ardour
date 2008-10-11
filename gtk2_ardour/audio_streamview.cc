@@ -160,7 +160,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 						   _samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
 		} else {
 			region_view = new AudioRegionView (canvas_group, _trackview, region, 
-						   _samples_per_unit, region_color);
+							   _samples_per_unit, region_color);
 		}
 		break;
 	case Destructive:
