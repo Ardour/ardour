@@ -1191,6 +1191,11 @@ style "ardour_button" ="default_button"
 	ythickness = 1
 }
 
+style "padded_button" = "default_button"
+{
+	xthickness = 8
+}
+
 style "odd_port_groups"
 {
 	fg[NORMAL] = { 0.6, 0.6, 0.6 }
@@ -1210,18 +1215,11 @@ class "GtkButton" style:highest "ardour_button"
 class "GtkArrow" style:highest "tearoff_arrow"
 class "GtkProgressBar" style:highest "ardour_progressbars"
 
+widget "PaddedButton" style:highest "padded_button"
 widget "*FirstActionMessage" style:highest "first_action_message"
 widget "*VerboseCanvasCursor" style:highest "verbose_canvas_cursor"
 widget "*MarkerText" style:highest "marker_text"
 widget "*TimeAxisViewItemName*" style:highest "time_axis_view_item_name"
-#widget "*ExportProgress" style:highest "default_generic"
-widget "*ExportFileLabel" style:highest "small_bold_text"
-widget "*ExportFormatLabel" style:highest "medium_bold_text"
-widget "*ExportHeader" style:highest "small_bold_text"
-widget "*ExportFileDisplay" style:highest "medium_entry"
-widget "*ExportFormatDisplay" style:highest "medium_entry"
-widget "*ExportCheckbox" style:highest "small_entry"
-widget "*ExportTrackSelector*" style:highest "medium_entry_noselection_bg"
 widget "*EditModeSelector" style:highest "medium_bold_entry"
 widget "*SnapTypeSelector" style:highest "medium_bold_entry"
 widget "*SnapModeSelector" style:highest "medium_bold_entry"

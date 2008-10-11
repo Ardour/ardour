@@ -56,6 +56,8 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	path_hbox.pack_start (path_entry, true, true, 3);
 	path_hbox.pack_start (browse_button, false, false, 3);
 	
+	browse_button.set_name ("PaddedButton");
+	
 	label_sizegroup = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	label_sizegroup->add_widget (label_label);
 	label_sizegroup->add_widget (path_label);

@@ -248,6 +248,6 @@ ExportFileNotebook::FilePage::save_format_to_manager (FormatPtr format)
 void
 ExportFileNotebook::FilePage::update_tab_label ()
 {
-	tab_label.set_text (string_compose ("%1 %2", tab_number, get_format_name()));
+	tab_label.set_text (string_compose ("Format %1: %2", tab_number, get_format_name()));
 	CriticalSelectionChanged();
 }

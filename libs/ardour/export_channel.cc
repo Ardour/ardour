@@ -81,11 +81,22 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
   frames_per_cycle (session->engine().frames_per_cycle ()),
   buffers_up_to_date (false),
   region_start (region.position()),
-  position (region_start)
+  position (region_start),
+
+  mixdown_buffer (0),
+  gain_buffer (0)
 {
 	switch (type) {
 	  case Raw:
 		n_channels = region.n_channels();
+		break;
+	  case Fades:
+		n_channels = region.n_channels();
+		
+		mixdown_buffer = new Sample [frames_per_cycle];
+		gain_buffer = new Sample [frames_per_cycle];
+		memset (gain_buffer, 1.0, sizeof (Sample) * frames_per_cycle);
+		
 		break;
 	  case Processed:
 		n_channels = track.n_outputs().n_audio();
@@ -98,6 +109,17 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 	
 	buffers.set_count (ChanCount (DataType::AUDIO, n_channels));
 	buffers.ensure_buffers (DataType::AUDIO, n_channels, frames_per_cycle);
+}
+
+RegionExportChannelFactory::~RegionExportChannelFactory ()
+{
+	if (mixdown_buffer) {
+		delete[] mixdown_buffer;
+	}
+	
+	if (gain_buffer) {
+		delete[] gain_buffer;
+	}
 }
 
 ExportChannelPtr
@@ -124,14 +146,22 @@ RegionExportChannelFactory::read (uint32_t channel, Sample * data, nframes_t fra
 void
 RegionExportChannelFactory::update_buffers (nframes_t frames)
 {
+	assert (frames <= frames_per_cycle);
+
 	switch (type) {
 	  case Raw:
 		for (size_t channel = 0; channel < n_channels; ++channel) {
 			region.read (buffers.get_audio (channel).data(), position - region_start, frames, channel);
 		}
 		break;
+	  case Fades:
+		assert (mixdown_buffer && gain_buffer);
+		for (size_t channel = 0; channel < n_channels; ++channel) {
+			memset (mixdown_buffer, 0, sizeof (Sample) * frames);
+			region.read_at (buffers.get_audio (channel).data(), mixdown_buffer, gain_buffer, position, frames, channel);
+		}
+		break;
 	  case Processed:
-	  	std::cout << "exporting " << frames << " frames from position " << position << std::endl;
 		track.export_stuff (buffers, position, frames);
 		break;
 	  default:

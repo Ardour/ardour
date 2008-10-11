@@ -115,8 +115,10 @@ ExportDialog::init ()
 	/* Buttons */
 	
 	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
-	rt_export_button = add_button (_("Realtime export"), RESPONSE_RT);
+	rt_export_button = add_button (_("Realtime Export"), RESPONSE_RT);
 	fast_export_button = add_button (_("Fast Export"), RESPONSE_FAST);
+	
+	list_files_button.set_name ("PaddedButton");
 	
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::close_dialog));
 	rt_export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::export_rt));

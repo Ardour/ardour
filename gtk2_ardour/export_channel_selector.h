@@ -212,6 +212,7 @@ class RegionExportChannelSelector : public ExportChannelSelector
 	
 	Gtk::RadioButtonGroup type_group;
 	Gtk::RadioButton      raw_button;
+	Gtk::RadioButton      fades_button;
 	Gtk::RadioButton      processed_button;
 };
 

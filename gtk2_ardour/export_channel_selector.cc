@@ -440,15 +440,20 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::AudioRegion co
   track_chans (track.n_outputs().n_audio()),
 
   raw_button (type_group),
+  fades_button (type_group),
   processed_button (type_group)
 {
 	pack_start (vbox);
 
-	raw_button.set_label (string_compose (_("Raw region export, no fades or plugins (%1 channels)"), region_chans));
+	raw_button.set_label (string_compose (_("Region contents without fades (channels: %1)"), region_chans));
 	raw_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
 	vbox.pack_start (raw_button);
 	
-	processed_button.set_label (string_compose (_("Processed region export with fades and plugins applied (%1 channels)"), track_chans));
+	fades_button.set_label (string_compose (_("Region contents with fades (channels: %1)"), region_chans));
+	fades_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
+	vbox.pack_start (fades_button);
+	
+	processed_button.set_label (string_compose (_("Track output (channels: %1)"), track_chans));
 	processed_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
 	vbox.pack_start (processed_button);
 	
@@ -475,21 +480,18 @@ RegionExportChannelSelector::handle_selection ()
 	state->config->clear_channels ();
 	
 	if (raw_button.get_active ()) {
-	
 		factory.reset (new RegionExportChannelFactory (session, region, track, RegionExportChannelFactory::Raw));
-		
-		for (size_t chan = 0; chan < region_chans; ++chan) {
-			state->config->register_channel (factory->create (chan));
-		}
-		
+	} else if (fades_button.get_active ()) {
+		factory.reset (new RegionExportChannelFactory (session, region, track, RegionExportChannelFactory::Fades));
 	} else if (processed_button.get_active ()) {
-	
 		factory.reset (new RegionExportChannelFactory(session, region, track, RegionExportChannelFactory::Processed));
-		
-		for (size_t chan = 0; chan < region_chans; ++chan) {
-			state->config->register_channel (factory->create (chan));
-		}
-		
+	} else {
+		CriticalSelectionChanged ();
+		return;
+	}
+	
+	for (size_t chan = 0; chan < region_chans; ++chan) {
+		state->config->register_channel (factory->create (chan));
 	}
 	
 	CriticalSelectionChanged ();

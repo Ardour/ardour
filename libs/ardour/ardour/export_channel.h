@@ -90,10 +90,12 @@ class RegionExportChannelFactory : public sigc::trackable
   public:
 	enum Type {
 		Raw,
+		Fades,
 		Processed
 	};
 	
 	RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type);
+	~RegionExportChannelFactory ();
 
 	ExportChannelPtr create (uint32_t channel);
 	void read (uint32_t channel, Sample * data, nframes_t frames_to_read);
@@ -113,6 +115,9 @@ class RegionExportChannelFactory : public sigc::trackable
 	bool buffers_up_to_date;
 	nframes_t region_start;
 	nframes_t position;
+	
+	Sample * mixdown_buffer;
+	Sample * gain_buffer;
 };
 
 /// Export channel that reads from region channel
