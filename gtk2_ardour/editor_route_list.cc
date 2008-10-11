@@ -354,15 +354,14 @@ Editor::redisplay_route_list ()
 		
 	}
 
-	full_canvas_height = position;
-
-	vertical_adjustment.set_upper (position + canvas_timebars_vsize);
+	full_canvas_height = position + canvas_timebars_vsize;
+	vertical_adjustment.set_upper (full_canvas_height);
 	if ((vertical_adjustment.get_value() + canvas_height) > vertical_adjustment.get_upper()) {
 		/* 
 		   We're increasing the size of the canvas while the bottom is visible.
 		   We scroll down to keep in step with the controls layout.
 		*/
-		vertical_adjustment.set_value (position + canvas_timebars_vsize - canvas_height);
+		vertical_adjustment.set_value (full_canvas_height - canvas_height);
 	} 
 
 	if (Config->get_sync_all_route_ordering() && !ignore_route_list_reorder) {

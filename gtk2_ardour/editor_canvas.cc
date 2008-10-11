@@ -113,6 +113,14 @@ Editor::initialize_canvas ()
 	track_canvas->set_center_scroll_region (false);
 	track_canvas->set_dither (Gdk::RGB_DITHER_NONE);
 
+	Glib::RefPtr<Gdk::Screen> screen = get_screen();
+	
+	if (!screen) {
+		screen = Gdk::Screen::get_default();
+	}
+	physical_screen_width = screen->get_width ();
+	physical_screen_height = screen->get_height ();
+
 	/* stuff for the verbose canvas cursor */
 
 	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
@@ -157,32 +165,32 @@ Editor::initialize_canvas ()
 	/* el barrio */
 
 	meter_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, max_canvas_coordinate, timebar_height-1.0);
+	meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, physical_screen_width, timebar_height-1.0);
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 	meter_bar->property_outline_pixels() = 1;
 
 	tempo_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
+	tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height-1.0));
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 	tempo_bar->property_outline_pixels() = 1;
 
 	range_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
+	range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height-1.0));
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
 	range_marker_bar->property_outline_pixels() = 1;
 	
 	transport_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
+	transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height-1.0));
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 	transport_marker_bar->property_outline_pixels() = 1;
 
 	marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
+	marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height-1.0));
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 	marker_bar->property_outline_pixels() = 1;
 	
 	cd_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root());
-	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, max_canvas_coordinate, (timebar_height-1.0));
+	cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height-1.0));
  	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
  	cd_marker_bar->property_outline_pixels() = 1;
 
@@ -306,8 +314,6 @@ Editor::track_canvas_size_allocated ()
 	canvas_width = canvas_allocation.get_width();
 	canvas_height = canvas_allocation.get_height();
 
-	full_canvas_height = canvas_height;
-
 	if (session) {
 		TrackViewList::iterator i;
 		double height = 0;
@@ -316,6 +322,7 @@ Editor::track_canvas_size_allocated ()
 			if ((*i)->control_parent) {
 				height += (*i)->effective_height;
 			}
+			(*i)->clip_to_viewport ();
 		}
 		
 		full_canvas_height = height + canvas_timebars_vsize;
@@ -348,6 +355,13 @@ Editor::track_canvas_size_allocated ()
 	redisplay_tempo (false);
 
 	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
+	if ((vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
+		/* 
+		   We're increasing the size of the canvas while the bottom is visible.
+		   We scroll down to keep in step with the controls layout.
+		*/
+		vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
+	} 
 	
 	Resized (); /* EMIT_SIGNAL */
 		
@@ -375,12 +389,12 @@ Editor::controls_layout_size_request (Requisition* req)
 	if (!screen) {
 		screen = Gdk::Screen::get_default();
 	}
-	gint height = min ( (gint) pos, (screen->get_height() - 600));
+	gint height = min ( (gint) pos, (gint) (physical_screen_height - 600));
 	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */
 
-	width =  min (width, screen->get_width() - 300);
+	width =  min (width, (gint) (physical_screen_width - 300));
 
 	if ((req->width != width) || (req->height != height)) {
 		changed = true;
