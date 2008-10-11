@@ -119,10 +119,6 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 	*pcx = 0;
 	*pcy = 0;
 
-	cerr << "event at " << event->button.x
-	     << ", " << event->button.y
-	     << endl;
-
 	switch (event->type) {
 	case GDK_BUTTON_RELEASE:
 	case GDK_BUTTON_PRESS:
@@ -152,11 +148,6 @@ Editor::event_frame (GdkEvent* event, double* pcx, double* pcy) const
 		break;
 	}
 
-	cerr << "report as " << (pcx ? *pcx : -9999.0)
-	     << ", "
-	     << (pcy ? *pcy : -9999.0)
-	     << endl;
-	
 	/* note that pixel_to_frame() never returns less than zero, so even if the pixel
 	   position is negative (as can be the case with motion events in particular),
 	   the frame location is always positive.
