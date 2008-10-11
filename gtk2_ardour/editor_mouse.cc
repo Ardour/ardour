@@ -3158,8 +3158,6 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	drag_info.cumulative_y_drag = cy - drag_info.grab_y;
 
-	line->parent_group().w2i (cx, cy);
-
 	cy = max (0.0, cy);
 	cy = min ((double) line->height(), cy);
 
