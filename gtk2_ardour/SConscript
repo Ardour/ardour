@@ -552,6 +552,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      icon_files +
 				      skipped_files +
 				      audiounit_files + 
+				      lv2_files +
 				      gtkosx_files +
 				      x11_files +
 				      fft_analysis_files +
