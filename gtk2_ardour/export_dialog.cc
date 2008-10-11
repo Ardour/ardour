@@ -45,8 +45,6 @@ ExportDialog::~ExportDialog ()
 void
 ExportDialog::set_session (ARDOUR::Session* s)
 {
-	init ();
-
 	session = s;
 	
 	/* Init handler and profile manager */
@@ -54,6 +52,12 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	handler = session->get_export_handler ();
 	status = session->get_export_status ();
 	profile_manager.reset (new ExportProfileManager (*session));
+	
+	/* Possibly init stuff in derived classes */
+	
+	init ();
+	
+	/* Rest of session related initialization */
 	
 	preset_selector->set_manager (profile_manager);
 	file_notebook->set_session_and_manager (session, profile_manager);
@@ -163,7 +167,7 @@ ExportDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorMultiple ());
-	channel_selector.reset (new ExportChannelSelector ());
+	channel_selector.reset (new PortExportChannelSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -358,7 +362,7 @@ ExportRangeDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (range_id));
-	channel_selector.reset (new ExportChannelSelector ());
+	channel_selector.reset (new PortExportChannelSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -371,6 +375,23 @@ ExportSelectionDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (X_("selection")));
-	channel_selector.reset (new ExportChannelSelector ());
+	channel_selector.reset (new PortExportChannelSelector ());
+	file_notebook.reset (new ExportFileNotebook ());
+}
+
+ExportRegionDialog::ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track) :
+  ExportDialog (editor, _("Export Region")),
+  region (region),
+  track (track)
+{}
+
+void
+ExportRegionDialog::init_components ()
+{
+	Glib::ustring loc_id = profile_manager->set_single_range (region.position(), region.position() + region.length(), region.name());
+
+	preset_selector.reset (new ExportPresetSelector ());
+	timespan_selector.reset (new ExportTimespanSelectorSingle (loc_id));
+	channel_selector.reset (new RegionExportChannelSelector (region, track));
 	file_notebook.reset (new ExportFileNotebook ());
 }

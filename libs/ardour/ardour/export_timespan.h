@@ -27,6 +27,7 @@
 #include <glibmm/ustring.h>
 
 #include <ardour/export_status.h>
+#include <ardour/export_channel.h>
 #include <ardour/ardour.h>
 
 using Glib::ustring;
@@ -41,8 +42,8 @@ class ExportTimespan : public sigc::trackable
 {
   private:
 	typedef boost::shared_ptr<ExportTempFile> TempFilePtr;
-	typedef std::pair<ExportChannel const, TempFilePtr> ChannelFilePair;
-	typedef std::map<ExportChannel const, TempFilePtr> TempFileMap;
+	typedef std::pair<ExportChannelPtr, TempFilePtr> ChannelFilePair;
+	typedef std::map<ExportChannelPtr, TempFilePtr> TempFileMap;
 	typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;
 
   private:
@@ -59,13 +60,13 @@ class ExportTimespan : public sigc::trackable
 	void set_range_id (ustring range_id) { _range_id = range_id; }
 	
 	/// Registers a channel to be read when export starts rolling
-	void register_channel (ExportChannel const & channel);
+	void register_channel (ExportChannelPtr channel);
 	
 	/// "Rewinds" the tempfiles to start reading the beginnings again
 	void rewind ();
 	
 	/// Reads data from the tempfile belonging to channel into data
-	nframes_t get_data (float * data, nframes_t frames, ExportChannel const & channel);
+	nframes_t get_data (float * data, nframes_t frames, ExportChannelPtr channel);
 	
 	/// Reads data from each channel and writes to tempfile
 	int process (nframes_t frames);

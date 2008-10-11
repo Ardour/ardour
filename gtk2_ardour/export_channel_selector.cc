@@ -39,7 +39,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-ExportChannelSelector::ExportChannelSelector () :
+PortExportChannelSelector::PortExportChannelSelector () :
   channels_label (_("Channels:"), Gtk::ALIGN_LEFT),
   split_checkbox (_("Split to mono files")),
   max_channels (20),
@@ -68,11 +68,11 @@ ExportChannelSelector::ExportChannelSelector () :
 	channels_spinbutton.set_range (1, max_channels);
 	channels_spinbutton.set_value (2);
 	
-	channels_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportChannelSelector::update_channel_count));
+	channels_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &PortExportChannelSelector::update_channel_count));
 	
 	/* Other signals */
 	
-	split_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportChannelSelector::update_split_state));
+	split_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &PortExportChannelSelector::update_split_state));
 	channel_view.CriticalSelectionChanged.connect (CriticalSelectionChanged.make_slot());
 	
 	/* Finalize */
@@ -81,7 +81,7 @@ ExportChannelSelector::ExportChannelSelector () :
 	
 }
 
-ExportChannelSelector::~ExportChannelSelector ()
+PortExportChannelSelector::~PortExportChannelSelector ()
 {
 // 	if (session) {
 // 		session->add_instant_xml (get_state(), false);
@@ -89,7 +89,7 @@ ExportChannelSelector::~ExportChannelSelector ()
 }
 
 void
-ExportChannelSelector::set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_)
+PortExportChannelSelector::set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_)
 {
 	state = state_;
 	session = session_;
@@ -102,7 +102,7 @@ ExportChannelSelector::set_state (ARDOUR::ExportProfileManager::ChannelConfigSta
 }
 
 void
-ExportChannelSelector::fill_route_list ()
+PortExportChannelSelector::fill_route_list ()
 {
 	channel_view.clear_routes ();
 	Session::RouteList routes = *session->get_routes();
@@ -123,7 +123,7 @@ ExportChannelSelector::fill_route_list ()
 }
 
 void
-ExportChannelSelector::update_channel_count ()
+PortExportChannelSelector::update_channel_count ()
 {
 	uint32_t chans = static_cast<uint32_t> (channels_spinbutton.get_value());
 	channel_view.set_channel_count (chans);
@@ -131,14 +131,14 @@ ExportChannelSelector::update_channel_count ()
 }
 
 void
-ExportChannelSelector::update_split_state ()
+PortExportChannelSelector::update_split_state ()
 {
 	state->config->set_split (split_checkbox.get_active());
 	CriticalSelectionChanged();
 }
 
 void
-ExportChannelSelector::RouteCols::add_channels (uint32_t chans)
+PortExportChannelSelector::RouteCols::add_channels (uint32_t chans)
 {
 	while (chans > 0) {
 		channels.push_back (Channel (*this));
@@ -147,8 +147,8 @@ ExportChannelSelector::RouteCols::add_channels (uint32_t chans)
 	}
 }
 
-ExportChannelSelector::RouteCols::Channel &
-ExportChannelSelector::RouteCols::get_channel (uint32_t channel)
+PortExportChannelSelector::RouteCols::Channel &
+PortExportChannelSelector::RouteCols::get_channel (uint32_t channel)
 {
 	if (channel > n_channels) {
 		std::cout << "Invalid channel cout for get_channel!" << std::endl;
@@ -164,7 +164,7 @@ ExportChannelSelector::RouteCols::get_channel (uint32_t channel)
 	return *it;
 }
 
-ExportChannelSelector::ChannelTreeView::ChannelTreeView (uint32_t max_channels) :
+PortExportChannelSelector::ChannelTreeView::ChannelTreeView (uint32_t max_channels) :
   n_channels (0)
 {
 	/* Main columns */
@@ -186,13 +186,13 @@ ExportChannelSelector::ChannelTreeView::ChannelTreeView (uint32_t max_channels) 
 	column->add_attribute (text_renderer->property_text(), route_cols.name);
 	
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(get_column_cell_renderer (0));
-	toggle->signal_toggled().connect (mem_fun (*this, &ExportChannelSelector::ChannelTreeView::update_toggle_selection));
+	toggle->signal_toggled().connect (mem_fun (*this, &PortExportChannelSelector::ChannelTreeView::update_toggle_selection));
 	
 	static_columns = get_columns().size();
 }
 
 void
-ExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
+PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 {
 	/* TODO Without the following line, the state might get reset.
 	 * Pointing to the same address does not mean the state of the configuration hasn't changed.
@@ -208,6 +208,11 @@ ExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 	
 		for (Gtk::ListStore::Children::iterator r_it = route_list->children().begin(); r_it != route_list->children().end(); ++r_it) {
 			
+			ARDOUR::PortExportChannel * pec;
+			if (!(pec = dynamic_cast<ARDOUR::PortExportChannel *> (c_it->get()))) {
+				continue;
+			}
+			
 			Glib::RefPtr<Gtk::ListStore> port_list = r_it->get_value (route_cols.port_list_col);
 			std::set<AudioPort *> route_ports;
 			std::set<AudioPort *> intersection;
@@ -219,7 +224,7 @@ ExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 				                                                    (*p_it)->get_value (route_cols.port_cols.label)));
 			}
 			
-			std::set_intersection ((*c_it)->begin(), (*c_it)->end(),
+			std::set_intersection (pec->get_ports().begin(), pec->get_ports().end(),
 			                       route_ports.begin(), route_ports.end(),
 			                       std::insert_iterator<std::set<AudioPort *> > (intersection, intersection.begin()));
 			
@@ -253,7 +258,7 @@ ExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 }
 
 void
-ExportChannelSelector::ChannelTreeView::add_route (ARDOUR::IO * route)
+PortExportChannelSelector::ChannelTreeView::add_route (ARDOUR::IO * route)
 {
 	Gtk::TreeModel::iterator iter = route_list->append();
 	Gtk::TreeModel::Row row = *iter;
@@ -291,7 +296,7 @@ ExportChannelSelector::ChannelTreeView::add_route (ARDOUR::IO * route)
 }
 
 void
-ExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels)
+PortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels)
 {
 	int offset = channels - n_channels;
 	
@@ -315,7 +320,7 @@ ExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels)
 		column->add_attribute (combo_renderer->property_model(), route_cols.port_list_col);
 		column->add_attribute (combo_renderer->property_editable(), route_cols.selected);
 		
-		combo_renderer->signal_edited().connect (sigc::bind (sigc::mem_fun (*this, &ExportChannelSelector::ChannelTreeView::update_selection_text), n_channels));
+		combo_renderer->signal_edited().connect (sigc::bind (sigc::mem_fun (*this, &PortExportChannelSelector::ChannelTreeView::update_selection_text), n_channels));
 		
 		/* put data into view */
 		
@@ -344,7 +349,7 @@ ExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels)
 }
 
 void
-ExportChannelSelector::ChannelTreeView::update_config ()
+PortExportChannelSelector::ChannelTreeView::update_config ()
 {
 
 	if (!config) { return; }
@@ -353,7 +358,8 @@ ExportChannelSelector::ChannelTreeView::update_config ()
 
 	for (uint32_t i = 1; i <= n_channels; ++i) {
 	
-		boost::shared_ptr<ExportChannel> channel (new ExportChannel ());
+		ExportChannelPtr channel (new PortExportChannel ());
+		PortExportChannel * pec = static_cast<PortExportChannel *> (channel.get());
 	
 		for (Gtk::ListStore::Children::iterator it = route_list->children().begin(); it != route_list->children().end(); ++it) {
 			Gtk::TreeModel::Row row = *it;
@@ -364,7 +370,7 @@ ExportChannelSelector::ChannelTreeView::update_config ()
 			
 			AudioPort * port = row[route_cols.get_channel (i).port];
 			if (port) {
-				channel->add_port (port);
+				pec->add_port (port);
 			}
 		}
 		
@@ -375,7 +381,7 @@ ExportChannelSelector::ChannelTreeView::update_config ()
 }
 
 void
-ExportChannelSelector::ChannelTreeView::update_toggle_selection (Glib::ustring const & path)
+PortExportChannelSelector::ChannelTreeView::update_toggle_selection (Glib::ustring const & path)
 {
 	Gtk::TreeModel::iterator iter = get_model ()->get_iter (path);
 	bool selected = iter->get_value (route_cols.selected);
@@ -408,7 +414,7 @@ ExportChannelSelector::ChannelTreeView::update_toggle_selection (Glib::ustring c
 }
 
 void
-ExportChannelSelector::ChannelTreeView::update_selection_text (Glib::ustring const & path, Glib::ustring const & new_text, uint32_t channel)
+PortExportChannelSelector::ChannelTreeView::update_selection_text (Glib::ustring const & path, Glib::ustring const & new_text, uint32_t channel)
 {
 	Gtk::TreeModel::iterator iter = get_model ()->get_iter (path);
 	iter->set_value (route_cols.get_channel (channel).label, new_text);
@@ -424,4 +430,67 @@ ExportChannelSelector::ChannelTreeView::update_selection_text (Glib::ustring con
 	}
 	
 	update_config ();
+}
+
+RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track) :
+  session (0),
+  region (region),
+  track (track),
+  region_chans (region.n_channels()),
+  track_chans (track.n_outputs().n_audio()),
+
+  raw_button (type_group),
+  processed_button (type_group)
+{
+	pack_start (vbox);
+
+	raw_button.set_label (string_compose (_("Raw region export, no fades or plugins (%1 channels)"), region_chans));
+	raw_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
+	vbox.pack_start (raw_button);
+	
+	processed_button.set_label (string_compose (_("Processed region export with fades and plugins applied (%1 channels)"), track_chans));
+	processed_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
+	vbox.pack_start (processed_button);
+	
+	vbox.show_all_children ();
+	show_all_children ();
+}
+
+void
+RegionExportChannelSelector::set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_)
+{
+	state = state_;
+	session = session_;
+	
+	handle_selection ();
+}
+
+void
+RegionExportChannelSelector::handle_selection ()
+{
+	if (!state) {
+		return;
+	}
+
+	state->config->clear_channels ();
+	
+	if (raw_button.get_active ()) {
+	
+		factory.reset (new RegionExportChannelFactory (session, region, track, RegionExportChannelFactory::Raw));
+		
+		for (size_t chan = 0; chan < region_chans; ++chan) {
+			state->config->register_channel (factory->create (chan));
+		}
+		
+	} else if (processed_button.get_active ()) {
+	
+		factory.reset (new RegionExportChannelFactory(session, region, track, RegionExportChannelFactory::Processed));
+		
+		for (size_t chan = 0; chan < region_chans; ++chan) {
+			state->config->register_channel (factory->create (chan));
+		}
+		
+	}
+	
+	CriticalSelectionChanged ();
 }

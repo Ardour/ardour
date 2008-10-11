@@ -24,6 +24,7 @@
 #include <list>
 
 #include <ardour/export_profile_manager.h>
+#include <ardour/export_channel.h>
 
 #include <gtkmm.h>
 #include <sigc++/signal.h>
@@ -31,31 +32,39 @@
 
 namespace ARDOUR {
 	class Session;
-	class ExportChannel;
 	class ExportChannelConfiguration;
+	class RegionExportChannelFactory;
 	class ExportHandler;
 	class AudioPort;
 	class IO;
+	class AudioRegion;
+	class AudioTrack;
 }
 
 class XMLNode;
 
-/// 
-class ExportChannelSelector : public Gtk::HBox {
-  private:
-
+class ExportChannelSelector : public Gtk::HBox
+{
+  protected:
 	typedef boost::shared_ptr<ARDOUR::ExportChannelConfiguration> ChannelConfigPtr;
-	
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 
   public:
+	virtual ~ExportChannelSelector () {}
+	
+	virtual void set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_) = 0;
+	sigc::signal<void> CriticalSelectionChanged;
+};
 
-	ExportChannelSelector ();
-	~ExportChannelSelector ();
+class PortExportChannelSelector : public ExportChannelSelector
+{
+
+  public:
+
+	PortExportChannelSelector ();
+	~PortExportChannelSelector ();
 	
 	void set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_);
-	
-	sigc::signal<void> CriticalSelectionChanged;
 
   private:
 
@@ -63,8 +72,7 @@ class ExportChannelSelector : public Gtk::HBox {
 	void update_channel_count ();
 	void update_split_state ();
 
-	typedef boost::shared_ptr<ARDOUR::ExportChannel> ChannelPtr;
-	typedef std::list<ChannelPtr> CahnnelList;
+	typedef std::list<ARDOUR::ExportChannelPtr> CahnnelList;
 
 	ARDOUR::Session * session;
 	ARDOUR::ExportProfileManager::ChannelConfigStatePtr state;
@@ -176,6 +184,35 @@ class ExportChannelSelector : public Gtk::HBox {
 	Gtk::Alignment               channel_alignment;
 	ChannelTreeView              channel_view;
 
+};
+
+class RegionExportChannelSelector : public ExportChannelSelector
+{
+  public:
+	RegionExportChannelSelector (ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
+	
+	virtual void set_state (ARDOUR::ExportProfileManager::ChannelConfigStatePtr const state_, ARDOUR::Session * session_);
+
+  private:
+
+	void handle_selection ();
+
+	ARDOUR::Session * session;
+	ARDOUR::ExportProfileManager::ChannelConfigStatePtr state;
+	boost::shared_ptr<ARDOUR::RegionExportChannelFactory> factory;
+	ARDOUR::AudioRegion const & region;
+	ARDOUR::AudioTrack & track;
+	
+	uint32_t region_chans;
+	uint32_t track_chans;
+	
+	/*** GUI components ***/
+	
+	Gtk::VBox             vbox;
+	
+	Gtk::RadioButtonGroup type_group;
+	Gtk::RadioButton      raw_button;
+	Gtk::RadioButton      processed_button;
 };
 
 #endif /* __export_channel_selector_h__ */

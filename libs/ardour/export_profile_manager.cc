@@ -53,6 +53,7 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 
   session_range (new Location ()),
   ranges (new LocationList ()),
+  single_range_mode (false),
 
   format_list (new FormatList ())
 {
@@ -299,6 +300,20 @@ ExportProfileManager::set_selection_range (nframes_t start, nframes_t end)
 	}
 }
 
+std::string
+ExportProfileManager::set_single_range (nframes_t start, nframes_t end, Glib::ustring name)
+{
+	single_range_mode = true;
+	
+	single_range.reset (new Location());
+	single_range->set_name (name);
+	single_range->set (start, end);
+	
+	update_ranges ();
+	
+	return single_range->id().to_s();
+}
+
 bool
 ExportProfileManager::init_timespans (XMLNodeList nodes)
 {
@@ -377,6 +392,11 @@ ExportProfileManager::serialize_timespan (TimespanStatePtr state)
 void
 ExportProfileManager::update_ranges () {
 	ranges->clear();
+	
+	if (single_range_mode) {
+		ranges->push_back (single_range.get());
+		return;
+	}
 
 	/* Session */
 

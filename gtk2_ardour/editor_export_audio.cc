@@ -91,17 +91,25 @@ Editor::export_range ()
 void
 Editor::export_region ()
 {
-// 	if (selection->regions.empty()) {
-// 		return;
-// 	}
-// 
-// 	boost::shared_ptr<Region> r = selection->regions.front()->region();
-// 	
-// 	ExportDialog* dialog = new ExportRegionDialog (*this, r);
-// 		
-// 	dialog->connect_to_session (session);
-// 	dialog->set_range (clicked_regionview->region()->first_frame(), clicked_regionview->region()->last_frame());
-// 	dialog->start_export();
+	if (selection->regions.empty()) {
+		return;
+	}
+	
+	try {
+		boost::shared_ptr<Region> r = selection->regions.front()->region();
+		AudioRegion & region (dynamic_cast<AudioRegion &> (*r));
+		
+		RouteTimeAxisView & rtv (dynamic_cast<RouteTimeAxisView &> (selection->regions.front()->get_time_axis_view()));
+		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv.route()));
+		
+		ExportRegionDialog dialog (*this, region, track);
+		dialog.set_session (session);
+		dialog.run();
+		
+	} catch (std::bad_cast & e) {
+		error << "Exporting Region failed!" << endmsg;
+		return;
+	}
 }
 
 int

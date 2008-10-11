@@ -21,12 +21,12 @@
 #ifndef __ardour_export_channel_configuration_h__
 #define __ardour_export_channel_configuration_h__
 
-#include <set>
 #include <list>
 
 #include <glibmm/ustring.h>
 #include <sigc++/signal.h>
 
+#include <ardour/export_channel.h>
 #include <ardour/export_status.h>
 #include <ardour/ardour.h>
 
@@ -45,13 +45,6 @@ class ExportFilename;
 class ExportProcessor;
 class ExportTimespan;
 class Session;
-
-class ExportChannel : public std::set<AudioPort *>
-{
-  public:
-	void add_port (AudioPort * port) { if (port) { insert (port); } }
-	void read_ports (float * data, nframes_t frames) const;
-};
 
 class ExportChannelConfiguration
 {
@@ -86,20 +79,19 @@ class ExportChannelConfiguration
 	XMLNode & get_state ();
 	int set_state (const XMLNode &);
 	
-	typedef boost::shared_ptr<ExportChannel const> ChannelPtr;
-	typedef std::list<ChannelPtr> ChannelList;
+	typedef std::list<ExportChannelPtr> ChannelList;
 	
-	ChannelList const & get_channels () { return channels; }
-	bool all_channels_have_ports ();
+	ChannelList const & get_channels () const { return channels; }
+	bool all_channels_have_ports () const;
 	
 	ustring name () const { return _name; }
 	void set_name (ustring name) { _name = name; }
 	void set_split (bool value) { split = value; }
 	
-	bool get_split () { return split; }
-	uint32_t get_n_chans () { return channels.size(); }
+	bool get_split () const { return split; }
+	uint32_t get_n_chans () const { return channels.size(); }
 	
-	void register_channel (ChannelPtr channel) { channels.push_back (channel); }
+	void register_channel (ExportChannelPtr channel) { channels.push_back (channel); }
 	void register_file_config (FormatPtr format, FilenamePtr filename) { file_configs.push_back (FileConfig (format, filename)); }
 	
 	void clear_channels () { channels.clear (); }

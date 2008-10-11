@@ -144,6 +144,7 @@ class ExportProfileManager
 	typedef std::list<TimespanStatePtr> TimespanStateList;
 	
 	void set_selection_range (nframes_t start = 0, nframes_t end = 0);
+	std::string set_single_range (nframes_t start, nframes_t end, Glib::ustring name);
 	TimespanStateList const & get_timespans () { return check_list (timespans); }
 	
   private:
@@ -162,6 +163,9 @@ class ExportProfileManager
 	boost::shared_ptr<Location>     session_range;
 	boost::shared_ptr<Location>     selection_range;
 	boost::shared_ptr<LocationList> ranges;
+	
+	bool                            single_range_mode;
+	boost::shared_ptr<Location>     single_range;
 
 /* Channel Configs */
   public:

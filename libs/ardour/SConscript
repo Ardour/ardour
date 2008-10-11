@@ -70,6 +70,7 @@ element_importer.cc
 element_import_handler.cc
 enums.cc
 event_type_map.cc
+export_channel.cc
 export_channel_configuration.cc
 export_file_io.cc
 export_filename.cc

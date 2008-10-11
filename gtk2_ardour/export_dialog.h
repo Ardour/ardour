@@ -63,6 +63,12 @@ class ExportDialog : public ArdourDialog {
 
   protected:
 
+	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
+	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
+	
+	HandlerPtr      handler;
+	ManagerPtr      profile_manager;
+
 	// initializes GUI layout
 	virtual void init_gui ();
 
@@ -94,13 +100,9 @@ class ExportDialog : public ArdourDialog {
 	void show_progress ();
 	gint progress_timeout ();
 	
-	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
-	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
 	
 	PublicEditor &  editor;
-	HandlerPtr      handler;
-	ManagerPtr      profile_manager;
 	StatusPtr       status;
 	
 	/*** GUI components ***/
@@ -151,6 +153,18 @@ class ExportSelectionDialog : public ExportDialog
 
   private:
 	void init_components ();
+};
+
+class ExportRegionDialog : public ExportDialog
+{
+	public:
+	ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
+
+  private:
+	void init_components ();
+	
+	ARDOUR::AudioRegion const & region;
+	ARDOUR::AudioTrack & track;
 };
 
 #endif /* __ardour_export_dialog_h__ */

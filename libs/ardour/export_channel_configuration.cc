@@ -37,24 +37,6 @@
 namespace ARDOUR
 {
 
-/* ExportChannel */
-
-void
-ExportChannel::read_ports (float * data, nframes_t frames) const
-{
-	memset (data, 0, frames * sizeof (float));
-
-	for (iterator it = begin(); it != end(); ++it) {
-		if (*it != 0) {
-			Sample* port_buffer = (*it)->get_audio_buffer( frames, 0).data();
-			
-			for (uint32_t i = 0; i < frames; ++i) {
-				data[i] += (float) port_buffer[i];
-			}
-		}
-	}
-}
-
 /* ExportChannelConfiguration */
 
 ExportChannelConfiguration::ExportChannelConfiguration (Session & session) :
@@ -73,7 +55,6 @@ ExportChannelConfiguration::get_state ()
 {
 	XMLNode * root = new XMLNode ("ExportChannelConfiguration");
 	XMLNode * channel;
-	XMLNode * port_node;
 	
 	root->add_property ("split", get_split() ? "true" : "false");
 	root->add_property ("channels", to_string (get_n_chans(), std::dec));
@@ -84,12 +65,7 @@ ExportChannelConfiguration::get_state ()
 		if (!channel) { continue; }
 		
 		channel->add_property ("number", to_string (i, std::dec));
-		
-		for (ExportChannel::const_iterator p_it = (*c_it)->begin(); p_it != (*c_it)->end(); ++p_it) {
-			if ((port_node = channel->add_child ("Port"))) {
-				port_node->add_property ("name", (*p_it)->name());
-			}
-		}
+		(*c_it)->get_state (channel);
 		
 		++i;
 	}
@@ -108,15 +84,8 @@ ExportChannelConfiguration::set_state (const XMLNode & root)
 
 	XMLNodeList channels = root.children ("Channel");
 	for (XMLNodeList::iterator it = channels.begin(); it != channels.end(); ++it) {
-		boost::shared_ptr<ExportChannel> channel (new ExportChannel ());
-	
-		XMLNodeList ports = (*it)->children ("Port");
-		for (XMLNodeList::iterator p_it = ports.begin(); p_it != ports.end(); ++p_it) {
-			if ((prop = (*p_it)->property ("name"))) {
-				channel->add_port (dynamic_cast<AudioPort *> (session.engine().get_port_by_name (prop->value())));
-			}
-		}
-	
+		ExportChannelPtr channel (new PortExportChannel ());
+		channel->set_state (*it, session);
 		register_channel (channel);
 	}
 
@@ -124,9 +93,9 @@ ExportChannelConfiguration::set_state (const XMLNode & root)
 }
 
 bool
-ExportChannelConfiguration::all_channels_have_ports ()
+ExportChannelConfiguration::all_channels_have_ports () const
 {
-	for (ChannelList::iterator it = channels.begin(); it != channels.end(); ++it) {
+	for (ChannelList::const_iterator it = channels.begin(); it != channels.end(); ++it) {
 		if ((*it)->empty ()) { return false; }
 	}
 	
@@ -182,7 +151,7 @@ ExportChannelConfiguration::write_file ()
 			
 			/* Get channel data */
 			
-			frames_read = timespan->get_data (channel_buffer, frames, **it);
+			frames_read = timespan->get_data (channel_buffer, frames, *it);
 			
 			/* Interleave into file buffer */
 			
@@ -238,7 +207,7 @@ ExportChannelConfiguration::register_with_timespan (TimespanPtr new_timespan)
 	timespan = new_timespan;
 	
 	for (ChannelList::iterator it = channels.begin(); it != channels.end(); ++it) {
-		timespan->register_channel (**it);
+		timespan->register_channel (*it);
 	}
 }
 
