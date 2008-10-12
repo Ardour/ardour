@@ -243,12 +243,9 @@ int main (int argc, char* argv[])
 {
 	vector<Glib::ustring> null_file_list;
 	
-	cerr << "here we go\n";
-	
 #ifdef __APPLE__
 	fixup_bundle_environment ();
 #endif
-	cerr << "just did it\n";
 
         Glib::thread_init();
 	gtk_set_locale ();
