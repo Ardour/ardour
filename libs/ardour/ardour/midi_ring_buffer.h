@@ -131,7 +131,7 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 
 	//std::cerr << "MRB read " << start << " .. " << end << " + " << offset << std::endl;
 
-	while (read_space() > sizeof(EventTime) + sizeof(EventType) + sizeof(uint32_t)) {
+	while (read_space() >= sizeof(EventTime) + sizeof(EventType) + sizeof(uint32_t)) {
 
 		full_peek(sizeof(EventTime), (uint8_t*)&ev_time);
 
@@ -153,8 +153,10 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		// the next events timestamp will be non-monotonic.
 		if (ev_type == LoopEventType) {
 			ev_time -= start;
+			ev_time += offset;
 			Evoral::MIDIEvent loopevent(LoopEventType, ev_time); 
 			dst.push_back(loopevent);
+
 			
 			// We can safely return, without reading the data, because
 			// a LoopEvent does not have data.

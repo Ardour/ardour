@@ -57,6 +57,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+nframes_t MidiDiskstream::midi_readahead = 4096;
+
 MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
 	, _playback_buf(0)
@@ -64,6 +66,8 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _source_port(0)
 	, _last_flush_frame(0)
 	, _note_mode(Sustained)
+	, _frames_written_to_ringbuffer(0)
+	, _frames_read_from_ringbuffer(0)
 {
 	/* prevent any write sources from being created */
 
@@ -84,6 +88,8 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _source_port(0)
 	, _last_flush_frame(0)
 	, _note_mode(Sustained)
+	, _frames_written_to_ringbuffer(0)
+	, _frames_read_from_ringbuffer(0)
 {
 	in_set_state = true;
 	init (Recordable);
@@ -623,9 +629,11 @@ MidiDiskstream::commit (nframes_t nframes)
 			|| _capture_buf->read_space() >= disk_io_chunk_frames;
 	}*/
 	
-	/* we'll just keep the playback buffer full for now.
-	 * this should be decreased to reduce edit latency */
-	need_butler = _playback_buf->write_space() >= _playback_buf->capacity() / 2;
+	// Use The Counters To calculate how much time the Ringbuffer holds.
+	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
+	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+	if ((frames_written - frames_read) <= midi_readahead)
+		need_butler = true;
 	
 	if (commit_should_unlock) {
 		state_lock.unlock();
@@ -649,7 +657,7 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 int
 MidiDiskstream::overwrite_existing_buffers ()
 {
-	read(overwrite_frame, disk_io_chunk_frames, false);
+	//read(overwrite_frame, disk_io_chunk_frames, false);
 	overwrite_queued = false;
 	pending_overwrite = false;
 
@@ -664,6 +672,8 @@ MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 	
 	_playback_buf->reset();
 	_capture_buf->reset();
+	g_atomic_int_set(&_frames_read_from_ringbuffer, 0);
+	g_atomic_int_set(&_frames_written_to_ringbuffer, 0);
 
 	playback_sample = frame;
 	file_frame = frame;
@@ -680,7 +690,9 @@ MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 int
 MidiDiskstream::can_internal_playback_seek (nframes_t distance)
 {
-	if (_playback_buf->read_space() < distance) {
+	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
+	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+	if ((frames_written-frames_read) < distance) {
 		return false;
 	} else {
 		return true;
@@ -760,6 +772,8 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 					 start) << endmsg;
 			return -1;
 		}
+		//cout << "this write " << this_read << "start= " << start << endl;
+		g_atomic_int_add(&_frames_written_to_ringbuffer, this_read);
 
 		_read_data_count = _playlist->read_data_count();
 		
@@ -777,6 +791,9 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 				// Synthesize LoopEvent here, because the next events
 				// written will have non-monotonic timestamps.
 				_playback_buf->write(loop_end - 1, LoopEventType, 0, 0);
+				//cout << "Pushing LoopEvent ts=" << loop_end-1 
+				//     << " start+this_read " << start+this_read << endl;
+
 				start = loop_start;
 			} else {
 				start += this_read;
@@ -820,7 +837,20 @@ MidiDiskstream::do_refill ()
 	assert(_playback_buf->write_space() > 0); // ... have something to write to, and
 	assert(file_frame <= max_frames); // ... something to write
 
-	nframes_t to_read = min(disk_io_chunk_frames, (max_frames - file_frame));
+	// now calculate how much time is in the ringbuffer.
+	// and lets write as much as we need to get this to be midi_readahead;
+	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
+	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+	if ((frames_written-frames_read) >= midi_readahead) {
+		//cout << "Nothing to do. all fine" << endl;
+		return 0;
+	}
+
+	nframes_t to_read = midi_readahead - (frames_written - frames_read);
+
+	//cout << "read for midi_readahead " << to_read << "  rb_contains: " << frames_written-frames_read << endl;
+
+	to_read = min(to_read, (max_frames - file_frame));
 	
 	if (read (file_frame, to_read, reversed)) {
 		ret = -1;
@@ -1466,6 +1496,10 @@ MidiDiskstream::get_playback(MidiBuffer& dst, nframes_t start, nframes_t end, nf
 	// Translates stamps to be relative to start, but add offset.
 	_playback_buf->read(dst, start, end, offset);
 
+	gint32 data_read = end-start;
+	//cout << "data read = " << data_read << " e=" << end << " s=" << start << "off= " << offset
+	//	<< " readspace " << _playback_buf->read_space() << " writespace " << _playback_buf->write_space() << endl;
+	g_atomic_int_add(&_frames_read_from_ringbuffer, data_read);
 	
 	// Now feed the data through the MidiStateTracker.
 	// In case it detects a LoopEvent it will add necessary note

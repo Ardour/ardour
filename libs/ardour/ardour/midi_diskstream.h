@@ -132,6 +132,8 @@ class MidiDiskstream : public Diskstream
 	void non_realtime_input_change ();
 	void non_realtime_locate (nframes_t location);
 
+	static void set_readahed_frames( nframes_t frames_ahead ) { midi_readahead = frames_ahead; }
+
   protected:
 	int seek (nframes_t which_sample, bool complete_refill = false);
 
@@ -140,6 +142,7 @@ class MidiDiskstream : public Diskstream
 
 	int  process (nframes_t transport_frame, nframes_t nframes, nframes_t offset, bool can_record, bool rec_monitors_input);
 	bool commit  (nframes_t nframes);
+	static nframes_t midi_readahead;
 
   private:
 
@@ -181,6 +184,8 @@ class MidiDiskstream : public Diskstream
 	nframes_t                         _last_flush_frame;
 	NoteMode                          _note_mode;  
 	MidiStateTracker                  _midistate_tracker;
+	volatile gint                     _frames_written_to_ringbuffer;
+	volatile gint                     _frames_read_from_ringbuffer;
 };
 
 }; /* namespace ARDOUR */
