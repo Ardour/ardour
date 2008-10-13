@@ -65,8 +65,8 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	_sync_position = _start;
 	_length = length; 
 	_last_length = length; 
-	_ancestral_start = 0; 
-	_ancestral_length = length; 
+	_ancestral_start = 0;  // see comments in various libs/ardour/*_effect.cc
+	_ancestral_length = 0; // ditto
 	_stretch = 1.0;
 	_shift = 1.0;
 	_last_position = 0; 
