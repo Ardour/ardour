@@ -305,7 +305,10 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	bool changed_between_small_and_normal = ( (h == hSmall || h == hSmaller) ^ (height == hSmall || height == hSmaller) );
 
 	TimeAxisView* state_parent = get_parent_with_state ();
-	XMLNode* xml_node = state_parent->get_child_xml_node (_state_name);
+	XMLNode* xml_node;
+	if (state_parent) {
+		xml_node = state_parent->get_child_xml_node (_state_name);
+	}
 
 	TimeAxisView::set_height (h);
 	base_rect->property_y2() = h;
@@ -320,7 +323,9 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", height);
-	xml_node->add_property ("height", buf);
+	if (xml_node) {
+		xml_node->add_property ("height", buf);
+	}
 
 	if (changed_between_small_and_normal || first_call_to_set_height) {
 		first_call_to_set_height = false;
