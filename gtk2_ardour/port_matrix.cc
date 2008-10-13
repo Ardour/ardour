@@ -252,7 +252,11 @@ RotatedLabelSet::RotatedLabelSet (PortGroupList& g)
 	: Glib::ObjectBase ("RotatedLabelSet"), Widget (), _port_group_list (g), _base_width (128)
 {
 	set_flags (NO_WINDOW);
-	set_angle (atoi (getenv ("AD_ANGLE")));
+	if (getenv ("AD_ANGLE") != 0) {
+		set_angle (atoi (getenv ("AD_ANGLE")));
+	} else {
+		set_angle (45);
+	}
 }
 
 RotatedLabelSet::~RotatedLabelSet ()
@@ -415,8 +419,17 @@ RotatedLabelSet::on_expose_event (GdkEventExpose* event)
 		if ((*i)->visible) {
 			for (uint32_t j = 0; j < (*i)->ports.size(); ++j) {
 				std::pair<int, int> const d = setup_layout ((*i)->ports[j]);
-				int x = atoi (getenv ("AD_X_SHIFT"));
-				int y = atoi (getenv ("AD_Y_SHIFT"));
+				int x, y;
+				if (getenv ("AD_X_SHIFT") != 0) {
+					x = atoi (getenv ("AD_X_SHIFT"));
+				} else {
+					x = 0;
+				}
+				if (getenv ("AD_Y_SHIFT") != 0) {
+					y = atoi (getenv ("AD_Y_SHIFT"));
+				} else {
+					y = 0;
+				}
 				get_window()->draw_layout (_gc, int ((n + 0.25) * spacing) + x, height - d.second + y, _pango_layout, _fg_colour, _bg_colour);
 				++n;
 			}

@@ -6105,7 +6105,7 @@ Editor::fit_tracks ()
 		child_heights += ((*t)->effective_height - (*t)->current_height());
 	}
 
-	uint32_t h = (uint32_t) floor ((canvas_height - child_heights)/selection->tracks.size());
+	uint32_t h = (uint32_t) floor ((canvas_height - child_heights - canvas_timebars_vsize)/selection->tracks.size());
 	double first_y_pos = DBL_MAX;
 
 	undo_visual_stack.push_back (current_visual_state());
@@ -6114,7 +6114,11 @@ Editor::fit_tracks ()
 		(*t)->set_height (h);
 		first_y_pos = std::min ((*t)->y_position, first_y_pos);
 	}
-
+	/* 
+	   set the controls_layout height now, because waiting for its size 
+	   request signal handler will cause the vertical adjustment setting to fail 
+	*/ 
+	controls_layout.property_height () = full_canvas_height - canvas_timebars_vsize;
 	vertical_adjustment.set_value (first_y_pos);
 
 	redo_visual_stack.push_back (current_visual_state());

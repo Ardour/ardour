@@ -93,20 +93,12 @@
 
 ;; HOME ROW
 
-<<<<<<< .working
-(gtk_accel_path "<Actions>/Editor/zoom-to-region" "<%SECONDARY%>z")
-=======
 (gtk_accel_path "<Actions>/Editor/zoom-to-region" "<%PRIMARY%><%SECONDARY%>z")
 (gtk_accel_path "<Actions>/Editor/zoom-to-region-both-axes" "<%SECONDARY%>z")
->>>>>>> .merge-right.r3622
 (gtk_accel_path "<Actions>/Editor/undo" "<%PRIMARY%>z")
 (gtk_accel_path "<Actions>/Editor/toggle-zoom" "<%TERTIARY%>z")
-<<<<<<< .working
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-zoom" "z")
 (gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-note" "n")
-=======
-(gtk_accel_path "<Actions>/MouseMode/set-mouse-mode-zoom" "z")
->>>>>>> .merge-right.r3622
 (gtk_accel_path "<Actions>/Editor/editor-cut" "<%PRIMARY%>x")
 (gtk_accel_path "<Actions>/Editor/editor-copy" "<%PRIMARY%>c")
 (gtk_accel_path "<Actions>/Common/ToggleColorManager" "<%WINDOW%>c")
