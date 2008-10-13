@@ -70,6 +70,7 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _stretch(1.0)
+	, _shift(1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
@@ -94,7 +95,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	, _ancestral_start (start)
 	, _ancestral_length (length)
 	, _stretch (1.0)
-	, _shift (0.0)
+	, _shift (1.0)
 	, _valid_transients(false)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
@@ -125,6 +126,7 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _stretch(1.0)
+	, _shift(1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
@@ -164,8 +166,8 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 	, _frozen(0)
 	, _ancestral_start (other->_ancestral_start + offset)
 	, _ancestral_length (length)
-	, _stretch (1.0)
-	, _shift (0.0)
+	, _stretch (other->_stretch)
+	, _shift (other->_shift)
 	, _valid_transients(false)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
@@ -213,8 +215,8 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _frozen(0)
 	, _ancestral_start (other->_ancestral_start)
 	, _ancestral_length (other->_ancestral_length)
-	, _stretch (1.0)
-	, _shift (0.0)
+	, _stretch (other->_stretch)
+	, _shift (other->_shift)
 	, _valid_transients(false)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
@@ -260,6 +262,7 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _stretch(1.0)
+	, _shift(1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
@@ -301,6 +304,7 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _stretch(1.0)
+	, _shift(1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
@@ -1241,15 +1245,20 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 
 	if ((prop = node.property ("stretch")) != 0) {
 		_stretch = atof (prop->value());
+		if( _stretch == 0.0 )
+			_stretch = 1.0;
 	} else {
 		_stretch = 1.0;
 	}
 
 	if ((prop = node.property ("shift")) != 0) {
 		_shift = atof (prop->value());
+		if( _shift == 0.0 )
+			_shift = 1.0;
 	} else {
 		_shift = 1.0;
 	}
+
 
 	/* note: derived classes set flags */
 
