@@ -74,11 +74,6 @@ class PluginInsert : public Processor
 
 	bool is_generator() const;
 
-	void  set_parameter (Evoral::Parameter param, float val);
-	float get_parameter (Evoral::Parameter param);
-
-	float default_parameter_value (const Evoral::Parameter& param);
-	
 	struct PluginControl : public AutomationControl 
 	{
  	    PluginControl (PluginInsert* p, const Evoral::Parameter &param,
@@ -110,6 +105,11 @@ class PluginInsert : public Processor
   private:
 
 	void parameter_changed (Evoral::Parameter, float);
+	
+	void  set_parameter (Evoral::Parameter param, float val);
+	float get_parameter (Evoral::Parameter param);
+
+	float default_parameter_value (const Evoral::Parameter& param);
 	
 	std::vector<boost::shared_ptr<Plugin> > _plugins;
 	

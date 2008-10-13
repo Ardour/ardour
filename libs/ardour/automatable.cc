@@ -417,3 +417,15 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	return boost::shared_ptr<Evoral::Control>(control);
 }
 
+boost::shared_ptr<AutomationControl>
+Automatable::automation_control (const Evoral::Parameter& id, bool create)
+{
+	return boost::dynamic_pointer_cast<AutomationControl>(Evoral::ControlSet::control(id, create));
+}
+
+boost::shared_ptr<const AutomationControl>
+Automatable::automation_control (const Evoral::Parameter& id) const
+{
+	return boost::dynamic_pointer_cast<const AutomationControl>(Evoral::ControlSet::control(id));
+}
+

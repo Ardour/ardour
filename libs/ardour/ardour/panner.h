@@ -290,12 +290,12 @@ class Panner : public Processor
 	    float get_value (void) const;
 	};
 
-	boost::shared_ptr<AutomationControl> pan_control ( int id, int chan=0 ) {
-	    return boost::dynamic_pointer_cast<AutomationControl>( control( Evoral::Parameter (PanAutomation, chan, id) ));
+	boost::shared_ptr<AutomationControl> pan_control (int id, int chan=0) {
+	    return automation_control(Evoral::Parameter (PanAutomation, chan, id));
 	}
 
-	boost::shared_ptr<const AutomationControl> pan_control ( int id, int chan=0 ) const {
-	    return boost::dynamic_pointer_cast<const AutomationControl>( control( Evoral::Parameter (PanAutomation, chan, id) ));
+	boost::shared_ptr<const AutomationControl> pan_control (int id, int chan=0) const {
+	    return automation_control(Evoral::Parameter (PanAutomation, chan, id));
 	}
 
   private:

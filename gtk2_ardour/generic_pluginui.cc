@@ -683,7 +683,7 @@ void
 GenericPluginUI::control_port_toggled (ControlUI* cui)
 {
 	if (!cui->ignore_change) {
-		insert->set_parameter (cui->parameter(), cui->button->get_active());
+		insert->automation_control(cui->parameter())->set_value(cui->button->get_active());
 	}
 }
 
@@ -693,9 +693,8 @@ GenericPluginUI::control_combo_changed (ControlUI* cui)
 	if (!cui->ignore_change) {
 		string value = cui->combo->get_active_text();
 		std::map<string,float> mapping = *cui->combo_map;
-		insert->set_parameter (cui->parameter(), mapping[value]);
+		insert->automation_control(cui->parameter())->set_value(mapping[value]);
 	}
-
 }
 
 void

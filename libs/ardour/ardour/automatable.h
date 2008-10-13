@@ -50,6 +50,12 @@ public:
 	boost::shared_ptr<Evoral::Control>
 	control_factory(const Evoral::Parameter& id);
 
+	boost::shared_ptr<AutomationControl>
+	automation_control (const Evoral::Parameter& id, bool create_if_missing=false);
+	
+	boost::shared_ptr<const AutomationControl>
+	automation_control (const Evoral::Parameter& id) const;
+
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
 	
 	virtual void automation_snapshot(nframes_t now, bool force);
