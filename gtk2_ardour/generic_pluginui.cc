@@ -471,6 +471,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		control_ui->controller->adjustment()->set_lower (desc.lower);
 		control_ui->controller->adjustment()->set_upper (desc.upper);
 
+		control_ui->logarithmic = false; // just disable it for now
+		/*
 		control_ui->logarithmic = desc.logarithmic;
 		if (control_ui->logarithmic) {
 			if (control_ui->controller->adjustment()->get_lower() == 0.0) {
@@ -478,7 +480,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			}
 			control_ui->controller->adjustment()->set_upper (log(control_ui->controller->adjustment()->get_upper()));
 			control_ui->controller->adjustment()->set_lower (log(control_ui->controller->adjustment()->get_lower()));
-		}
+		}*/
 		
 	
 		float delta = desc.upper - desc.lower;
