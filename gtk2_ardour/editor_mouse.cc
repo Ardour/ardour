@@ -3887,19 +3887,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				}
 			}
 
-			/* prevent the regionview from being moved to before 
-			   the zero position on the canvas.
-			*/
-			/* clamp */
-		
-			if (x_delta < 0) {
-				if (-x_delta > ix1) {
-					x_delta = -ix1;
-				}
-			} else if ((x_delta > 0) && (rv->region()->last_frame() > max_frames - x_delta)) {
-				x_delta = max_frames - rv->region()->last_frame();
-			}
-
 			if (drag_info.brushing) {
 				mouse_brush_insert_region (rv, pending_region_position);
 			} else {
