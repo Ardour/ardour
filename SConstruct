@@ -43,7 +43,6 @@ opts.AddOptions(
     EnumOption('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
     BoolOption('DMALLOC', 'Compile and link using the dmalloc library', 0),
     BoolOption('EXTRA_WARN', 'Compile with -Wextra, -ansi, and -pedantic.  Might break compilation.  For pedants', 0),
-    BoolOption('FFT_ANALYSIS', 'Include FFT analysis window', 1),
     BoolOption('FREESOUND', 'Include Freesound database lookup', 0),
     BoolOption('FPU_OPTIMIZATION', 'Build runtime checked assembler code', 1),
     BoolOption('LIBLO', 'Compile with support for liblo library', 1),
@@ -560,17 +559,16 @@ else:
 
 env = conf.Finish ()
 
-if env['FFT_ANALYSIS']:
-        #
-        # Check for fftw3 header as well as the library
-        #
+#
+# Check for fftw3 header as well as the library
+#
 
-        conf = Configure(libraries['fftw3'])
+conf = Configure(libraries['fftw3'])
 
-        if conf.CheckHeader ('fftw3.h') == False:
-            print ('Ardour cannot be compiled without the FFTW3 headers, which do not seem to be installed')
-            sys.exit (1)            
-        conf.Finish()
+if conf.CheckHeader ('fftw3.h') == False:
+    print ('Ardour cannot be compiled without the FFTW3 headers, which do not seem to be installed')
+    sys.exit (1)            
+conf.Finish()
 
 if env['FREESOUND']:
         #
