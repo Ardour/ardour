@@ -660,6 +660,7 @@ TempoMap::timestamp_metrics (bool use_bbt)
 			
 			if (prev) {
 				metric.set_start (prev->start());
+				metric.set_frame (prev->frame());
 			} else {
 				// metric will be at frames=0 bbt=1|1|0 by default
 				// which is correct for our purpose
@@ -800,46 +801,44 @@ TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const Metric& me
 {
 	nframes_t frame_diff;
 
-	uint32_t xtra_bars = 0;
-	double xtra_beats = 0;
-	double beats = 0;
-
 	// cerr << "---- BBT time for " << frame << " using metric @ " << metric.frame() << " BBT " << metric.start() << endl;
 
 	const double beats_per_bar = metric.meter().beats_per_bar();
-	const double frames_per_bar = metric.meter().frames_per_bar (metric.tempo(), _frame_rate);
-	const double beat_frames = metric.tempo().frames_per_beat (_frame_rate, metric.meter());
+	const double ticks_per_frame = metric.tempo().frames_per_beat (_frame_rate, metric.meter()) / Meter::ticks_per_beat;
 
 	/* now compute how far beyond that point we actually are. */
 
 	frame_diff = frame - metric.frame();
-	
-	// cerr << "----\tdelta = " << frame_diff << endl;
 
-	xtra_bars = (uint32_t) floor (frame_diff / frames_per_bar);
-	frame_diff -= (uint32_t) floor (xtra_bars * frames_per_bar);
-	xtra_beats = (double) frame_diff / beat_frames;
+        bbt.ticks = metric.start().ticks + (uint32_t)round((double)frame_diff / ticks_per_frame);
+        uint32_t xtra_beats = bbt.ticks / (uint32_t)Meter::ticks_per_beat;
+        bbt.ticks %= (uint32_t)Meter::ticks_per_beat;
 
-	// cerr << "---\tmeaning " << xtra_bars << " xtra bars and " << xtra_beats << " xtra beats\n";
+        bbt.beats = metric.start().beats + xtra_beats - 1; // correction for 1-based counting, see below for matching operation.
+        bbt.bars = metric.start().bars + (uint32_t)floor((double)bbt.beats / beats_per_bar);
+        bbt.beats = (uint32_t)fmod((double)bbt.beats, beats_per_bar);
 
-	/* and set the returned value */
+        /* if we have a fractional number of beats per bar, we see if
+           we're in the last beat (the fractional one).  if so, we
+           round ticks appropriately and bump to the next bar. */
+        double beat_fraction = beats_per_bar - floor(beats_per_bar);
+        /* XXX one problem here is that I'm not sure how to handle
+           fractional beats that don't evenly divide ticks_per_beat.
+           If they aren't handled consistently, I would guess we'll
+           continue to have strange discrepancies occuring.  Perhaps
+           this will also behave badly in the case of meters like
+           0.1/4, but I can't be bothered to test that.
+        */
+        uint32_t ticks_on_last_beat = (uint32_t)floor(Meter::ticks_per_beat * beat_fraction);
+        if(bbt.beats > (uint32_t)floor(beats_per_bar) &&
+           bbt.ticks >= ticks_on_last_beat) {
+          bbt.ticks -= ticks_on_last_beat;
+          bbt.beats = 0;
+          bbt.bars++;
+        }
 
-	/* and correct beat/bar shifts to match the meter.
-	  remember: beat and bar counting is 1-based, 
-	  not zero-based 
-	  also the meter may contain a fraction
-	*/
-	
-	bbt.bars = metric.start().bars + xtra_bars; 
+        bbt.beats++; // correction for 1-based counting, see above for matching operation.
 
-	beats = (double) metric.start().beats + xtra_beats;
-	
-	bbt.bars += (uint32_t) floor(beats/ (beats_per_bar+1) );
-
-	beats = fmod(beats - 1, beats_per_bar )+ 1.0;
-	bbt.ticks = (uint32_t)( round((beats - floor(beats)) *(double) Meter::ticks_per_beat));
-	bbt.beats = (uint32_t) floor(beats);
-	
 	// cerr << "-----\t RETURN " << bbt << endl;
 }
 
