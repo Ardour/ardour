@@ -65,7 +65,7 @@ Region::Region (nframes_t start, nframes_t length, const string& name, layer_t l
 	_sync_position = _start;
 	_length = length; 
 	_last_length = length; 
-	_ancestral_start = start; 
+	_ancestral_start = 0; 
 	_ancestral_length = length; 
 	_stretch = 1.0;
 	_shift = 1.0;
@@ -1021,12 +1021,24 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 
 	if ((prop = node.property ("stretch")) != 0) {
 		_stretch = atof (prop->value());
+		/* fix problem with old sessions corrupted by an impossible
+		   value for _stretch
+		*/
+		if (_stretch == 0.0) {
+			_stretch = 1.0;
+		}
 	} else {
 		_stretch = 1.0;
 	}
 
 	if ((prop = node.property ("shift")) != 0) {
 		_shift = atof (prop->value());
+		/* fix problem with old sessions corrupted by an impossible
+		   value for _shift
+		*/
+		if (_shift == 0.0) {
+			_shift = 1.0;
+		}
 	} else {
 		_shift = 1.0;
 	}

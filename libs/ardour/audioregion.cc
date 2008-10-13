@@ -530,7 +530,6 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 	if (chan_n < n_channels()) {
 
 		if (srcs[chan_n]->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
-			
 			return 0; /* "read nothing" */
 		}
 		
