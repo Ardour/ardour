@@ -6020,7 +6020,7 @@ Editor::fit_tracks ()
 		child_heights += ((*t)->effective_height - (*t)->current_height());
 	}
 
-	uint32_t h = (uint32_t) floor ((canvas_height - child_heights)/selection->tracks.size());
+	uint32_t h = (uint32_t) floor ((canvas_height - child_heights - canvas_timebars_vsize)/selection->tracks.size());
 	double first_y_pos = DBL_MAX;
 
 	undo_visual_stack.push_back (current_visual_state());

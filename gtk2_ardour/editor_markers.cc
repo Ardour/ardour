@@ -682,7 +682,7 @@ Editor::build_new_transport_marker_menu ()
 	items.push_back (MenuElem (_("Set Loop Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_loop)));
 	items.push_back (MenuElem (_("Set Punch Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_punch)));
 
-	new_transport_marker_menu->signal_unmap_event().connect ( mem_fun(*this, &Editor::new_transport_marker_menu_popdown)); 
+	new_transport_marker_menu->signal_unmap().connect ( mem_fun(*this, &Editor::new_transport_marker_menu_popdown)); 
 }
 
 void
@@ -1112,27 +1112,23 @@ Editor::marker_menu_rename ()
 	commit_reversible_command ();
 }
 
-gint
-Editor::new_transport_marker_menu_popdown (GdkEventAny *ev)
+void
+Editor::new_transport_marker_menu_popdown ()
 {
 	// hide rects
 	transport_bar_drag_rect->hide();
 	range_marker_drag_rect->hide();
-
-	return FALSE;
 }
 
 void
 Editor::new_transport_marker_menu_set_loop ()
 {
-	transport_bar_drag_rect->hide ();
 	set_loop_range (temp_location->start(), temp_location->end(), _("set loop range"));
 }
 
 void
 Editor::new_transport_marker_menu_set_punch ()
 {
-	transport_bar_drag_rect->hide ();
 	set_punch_range (temp_location->start(), temp_location->end(), _("set punch range"));
 }
 
