@@ -86,10 +86,7 @@
 #include "rhythm_ferret.h"
 #include "actions.h"
 #include "tempo_lines.h"
-
-#ifdef FFT_ANALYSIS
 #include "analysis_window.h"
-#endif
 
 #include "i18n.h"
 
@@ -299,9 +296,7 @@ Editor::Editor ()
 	interthread_progress_window = 0;
 	logo_item = 0;
 
-#ifdef FFT_ANALYSIS
 	analysis_window = 0;
-#endif
 
 	current_interthread_info = 0;
 	_show_measures = true;
@@ -1285,10 +1280,8 @@ Editor::connect_to_session (Session *t)
 		rhythm_ferret->set_session (session);
 	}
 
-#ifdef FFT_ANALYSIS
 	if (analysis_window != 0)
 		analysis_window->set_session (session);
-#endif
 
 	Location* loc = session->locations()->auto_loop_location();
 	if (loc == 0) {
@@ -1760,7 +1753,6 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 	return &track_crossfade_context_menu;
 }
 
-#ifdef FFT_ANALYSIS
 void
 Editor::analyze_region_selection()
 {
@@ -1796,7 +1788,6 @@ Editor::analyze_range_selection()
 	
 	analysis_window->present();
 }
-#endif /* FFT_ANALYSIS */
 
 Menu*
 Editor::build_track_selection_context_menu (nframes64_t ignored)
@@ -1923,11 +1914,9 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	items.push_back (MenuElem (_("Export"), mem_fun(*this, &Editor::export_region)));
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
 
-#ifdef FFT_ANALYSIS
 	if (ar) {
 		items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_region_selection)));
 	}
-#endif
 
 	items.push_back (SeparatorElem());
 
@@ -2110,10 +2099,8 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
 	items.push_back (MenuElem (_("Loop range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
 
-#ifdef FFT_ANALYSIS
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_range_selection)));
-#endif
 	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Extend Range to End of Region"), bind (mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));

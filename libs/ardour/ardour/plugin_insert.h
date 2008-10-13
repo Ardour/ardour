@@ -23,6 +23,8 @@
 #include <vector>
 #include <string>
 
+#include <boost/weak_ptr.hpp>
+
 #include <sigc++/signal.h>
 #include <ardour/ardour.h>
 #include <ardour/types.h>
@@ -102,6 +104,8 @@ class PluginInsert : public Processor
 
 	nframes_t signal_latency() const;
 
+	boost::shared_ptr<Plugin> get_impulse_analysis_plugin();
+
   private:
 
 	void parameter_changed (Evoral::Parameter, float);
@@ -112,6 +116,8 @@ class PluginInsert : public Processor
 	float default_parameter_value (const Evoral::Parameter& param);
 	
 	std::vector<boost::shared_ptr<Plugin> > _plugins;
+
+	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 	
 	void automation_run (BufferSet& bufs, nframes_t nframes, nframes_t offset);
 	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);

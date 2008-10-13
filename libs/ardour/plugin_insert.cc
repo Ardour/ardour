@@ -899,6 +899,11 @@ PluginInsert::PluginControl::set_value (float val)
 		(*i)->set_parameter (_list->parameter().id(), val);
 	}
 
+	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
+	if (iasp) {
+		iasp->set_parameter (_list->parameter().id(), val);
+	}
+
 	AutomationControl::set_value(val);
 }
 
@@ -923,5 +928,19 @@ PluginInsert::PluginControl::get_value (void) const
 		
 		return ((val - lower) / range);
 	}*/
+}
+
+boost::shared_ptr<Plugin>
+PluginInsert::get_impulse_analysis_plugin()
+{
+	boost::shared_ptr<Plugin> ret;
+	if (_impulseAnalysisPlugin.expired()) {
+		ret = plugin_factory(_plugins[0]);
+		_impulseAnalysisPlugin = ret;
+	} else {
+		ret = _impulseAnalysisPlugin.lock();
+	}
+
+	return ret;
 }
 

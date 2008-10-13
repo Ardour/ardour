@@ -78,10 +78,6 @@ if gtkardour['DMALLOC']:
 	gtkardour.Merge([libraries['dmalloc']])
 	gtkardour.Append(CCFLAGS='-DUSE_DMALLOC')
 
-if gtkardour['FFT_ANALYSIS']:
-	gtkardour.Merge ([libraries['fftw3f']])
-	gtkardour.Append(CCFLAGS='-DFFT_ANALYSIS')
-
 if gtkardour['FREESOUND']:
 	gtkardour.Merge ([libraries['curl']])
 	gtkardour.Append(CCFLAGS='-DFREESOUND')
@@ -112,6 +108,7 @@ about.cc
 actions.cc
 add_midi_cc_track_dialog.cc
 add_route_dialog.cc
+analysis_window.cc
 ardour_dialog.cc
 ardour_ui.cc
 ardour_ui2.cc
@@ -179,6 +176,10 @@ export_format_dialog.cc
 export_format_selector.cc
 export_preset_selector.cc
 export_timespan_selector.cc
+fft.cc
+fft_graph.cc
+fft_result.cc
+eq_gui.cc
 gain_meter.cc
 generic_pluginui.cc
 ghostregion.cc
@@ -245,12 +246,6 @@ version.cc
 waveview.cc
 """)
 
-fft_analysis_files=Split("""
-analysis_window.cc
-fft_graph.cc
-fft_result.cc
-""")
-
 freesound_files=Split("""
 sfdb_freesound_mootcher.cc
 """)
@@ -315,9 +310,6 @@ else:
    extra_sources += x11_files
 	
  
-if env['FFT_ANALYSIS']:
-	extra_sources += fft_analysis_files
-
 if env['FREESOUND']:
 	extra_sources += freesound_files
 
@@ -481,7 +473,7 @@ else:
 	env.Alias('install', env.InstallAs(os.path.join(install_prefix, 'bin')+'/ardour3', ardoursh))
 
 if env['NLS']:
-	i18n (gtkardour, gtkardour_files+skipped_files+fft_analysis_files, env)
+	i18n (gtkardour, gtkardour_files+skipped_files, env)
     
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour3'), ardour_dark_theme))
@@ -564,7 +556,6 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 				      audiounit_files + 
 				      gtkosx_files +
 				      x11_files +
-				      fft_analysis_files +
 				      freesound_files +
 				      glob.glob('po/*.po') + glob.glob('*.h')))
 

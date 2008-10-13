@@ -27,6 +27,7 @@
 #include <pbd/failed_constructor.h>
 
 #include <gtkmm/widget.h>
+#include <gtkmm/box.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/barcontroller.h>
@@ -56,6 +57,7 @@
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "keyboard.h"
+#include "eq_gui.h"
 
 #include "i18n.h"
 
@@ -112,8 +114,15 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
 		
 		_pluginui = pu;
-		add (*pu);
+	
+		Gtk::HBox *hbox = new Gtk::HBox();
+		hbox->pack_start( *pu);
+		// TODO: this should be nicer
+		hbox->pack_start( *manage(new PluginEqGui(insert)));
 		
+		add (*manage(hbox));
+
+
 		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 
 		signal_map_event().connect (mem_fun (*pu, &GenericPluginUI::start_updating));
