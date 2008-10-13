@@ -467,7 +467,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		   the absence of bounds in any sensible fashion.
 		*/
 
-#if 0
+//#if 0
 		control_ui->controller->adjustment()->set_lower (desc.lower);
 		control_ui->controller->adjustment()->set_upper (desc.upper);
 
@@ -486,7 +486,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		control_ui->controller->adjustment()->set_page_size (delta/100.0);
 		control_ui->controller->adjustment()->set_step_increment (desc.step);
 		control_ui->controller->adjustment()->set_page_increment (desc.largestep);
-#endif
+//#endif
 
 		if (desc.integer_step) {
 			control_ui->clickbox = new ClickBox (control_ui->controller->adjustment(), "PluginUIClickBox");
