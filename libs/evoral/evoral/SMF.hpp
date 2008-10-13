@@ -43,7 +43,7 @@ public:
 	
 	EventTime last_event_time() const { return _last_ev_time; }
 	
-	void begin_write(nframes_t start_time);
+	void begin_write(FrameTime start_time);
 	void append_event_unlocked(uint32_t delta_t, const Evoral::Event& ev);
 	void end_write();
 	

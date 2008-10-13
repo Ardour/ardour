@@ -21,8 +21,10 @@
 
 #include <stdint.h>
 
+namespace Evoral {
+
 /** Frame count (i.e. length of time in audio frames) */
-typedef uint32_t nframes_t;
+typedef uint32_t FrameTime;
 
 /** Time-stamp of an event */
 typedef double timestamp_t;
@@ -38,5 +40,7 @@ typedef double EventLength;
 
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;
+
+} // namespace Evoral
 
 #endif // EVORAL_TYPES_HPP

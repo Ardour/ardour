@@ -181,29 +181,6 @@ SMF::write_footer()
 	fflush(_fd);
 }
 
-/** Returns the offset of the first event in the file with a time past @a start,
- * relative to the start of the source.
- *
- * Returns -1 if not found.
- */
-/*
-long
-SMF::find_first_event_after(nframes_t start)
-{
-	// FIXME: obviously this is slooow
-	
-	fseek(_fd, _header_size, 0);
-
-	while ( ! feof(_fd) ) {
-		const uint32_t delta_time = read_var_len();
-
-		if (delta_time > start)
-			return delta_time;
-	}
-
-	return -1;
-}
-*/
 
 /** Read an event from the current position in file.
  *
@@ -303,7 +280,7 @@ SMF::append_event_unlocked(uint32_t delta_t, const Evoral::Event& ev)
 }
 
 void
-SMF::begin_write(nframes_t start_frame)
+SMF::begin_write(FrameTime start_frame)
 {
 	_last_ev_time = 0;
 	fseek(_fd, _header_size, SEEK_SET);

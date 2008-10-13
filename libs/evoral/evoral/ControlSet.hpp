@@ -56,7 +56,7 @@ public:
 
 	virtual void add_control(boost::shared_ptr<Control>);
 
-	bool find_next_event(nframes_t start, nframes_t end, ControlEvent& ev) const;
+	bool find_next_event(FrameTime start, FrameTime end, ControlEvent& ev) const;
 	
 	virtual bool empty() const { return _controls.size() == 0; }
 	virtual void clear();

@@ -342,7 +342,7 @@ Sequence::read(EventSink& dst, timestamp_t start, timedur_t nframes, timestamp_t
 		debugout << "Using cached iterator at " << _next_read << endl;
 	}
 
-	_next_read = (nframes_t) floor (start + nframes);
+	_next_read = (FrameTime) floor (start + nframes);
 
 	while (_read_iter != end() && _read_iter->time() < start + nframes) {
 		assert(_read_iter->size() > 0);

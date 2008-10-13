@@ -198,7 +198,7 @@ private:
 	ControlLists _dirty_controls;
 
 	const   const_iterator _end_iter;
-	mutable nframes_t      _next_read;
+	mutable FrameTime      _next_read;
 	bool                   _percussive;
 
 	uint8_t _lowest_note;

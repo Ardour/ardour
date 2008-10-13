@@ -1,30 +1,46 @@
 #!/usr/bin/env python
 import Params
+import autowaf
+
+# Version of this package (even if built as a child)
+EVORAL_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+# Version history:
+#   0.0.0 = 0,0,0
+EVORAL_LIB_VERSION = '0.0.0'
 
 # Variables for 'waf dist'
-VERSION = '0.0.1'
 APPNAME = 'evoral'
+VERSION = EVORAL_VERSION
 
 # Mandatory variables
 srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
+	autowaf.set_options(opt)
+	opt.tool_options('compiler_cc')
 	opt.tool_options('compiler_cxx')
 
 def configure(conf):
-	if not conf.env['GLIBMM']:
-		conf.check_pkg('glibmm-2.4', destvar='GLIBMM', vnum='2.16.0', mandatory=True)
-	if not conf.env['GTHREAD']:
-		conf.check_pkg('gthread-2.0', destvar='GTHREAD', vnum='2.16.0', mandatory=True)
-	if not conf.env['CXX']:
-		conf.check_tool('compiler_cxx')
+	autowaf.configure(conf)
+	autowaf.check_tool(conf, 'compiler_cxx')
+	autowaf.check_pkg(conf, 'glibmm-2.4', destvar='GLIBMM', vnum='2.16.0', mandatory=True)
+	autowaf.check_pkg(conf, 'gthread-2.0', destvar='GTHREAD', vnum='2.16.0', mandatory=True)
 
 def build(bld):
-	# Headers (evoral)
-	install_files('PREFIX', 'include/evoral', 'evoral/*.hpp')
+	# Headers
+	#install_files('PREFIX', 'include/evoral', 'evoral/*.h')
+	#install_files('PREFIX', 'include/evoral', 'evoral/*.hpp')
 	
-	# Library (src)
+	# Pkgconfig file
+	#autowaf.build_pc(bld, 'EVORAL', EVORAL_VERSION, 'GLIBMM GTHREAD')
+	
+	# Library
 	obj = bld.create_obj('cpp', 'shlib')
 	obj.source = '''
 		src/Control.cpp
@@ -38,17 +54,21 @@ def build(bld):
 		src/SMFReader.cpp
 		src/Sequence.cpp
 	'''
-	obj.includes = '..'
+	obj.includes = ['.']
 	obj.name     = 'libevoral'
 	obj.target   = 'evoral'
 	obj.uselib   = 'GLIBMM GTHREAD'
-	obj.vnum     = '0.0.0'
+	obj.vnum     = EVORAL_LIB_VERSION
+	obj.inst_var = 0
 	
-	# Test (test)
-	obj = bld.create_obj('cpp', 'program')
+	# Unit tests
+	obj              = bld.create_obj('cpp', 'program')
 	obj.source       = 'test/sequence.cpp'
 	obj.includes     = '..'
 	obj.uselib_local = 'libevoral'
 	obj.target       = 'sequence'
 	obj.inst_var     = 0
+
+def shutdown():
+	autowaf.shutdown()
 

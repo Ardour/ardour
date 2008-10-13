@@ -197,9 +197,9 @@ SMFSource::write_unlocked (MidiRingBuffer& src, nframes_t cnt)
 {
 	_write_data_count = 0;
 		
-	EventTime time;
-	EventType type;
-	uint32_t  size;
+	Evoral::EventTime time;
+	Evoral::EventType type;
+	uint32_t          size;
 
 	size_t buf_capacity = 4;
 	uint8_t* buf = (uint8_t*)malloc(buf_capacity);
@@ -643,7 +643,7 @@ SMFSource::load_model(bool lock, bool force_reload)
 		
 		if (ret > 0) { // didn't skip (meta) event
 			// make ev.time absolute time in frames
-			ev.time() = time * frames_per_beat / (EventTime)ppqn();
+			ev.time() = time * frames_per_beat / (Evoral::EventTime)ppqn();
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 			_model->append(ev);
 		}

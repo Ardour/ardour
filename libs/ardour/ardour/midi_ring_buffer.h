@@ -47,7 +47,7 @@ public:
 		, _channel_mask(0x0000FFFF)
 	{}
 
-	inline bool read_prefix(EventTime* time, EventType* type, uint32_t* size);
+	inline bool read_prefix(Evoral::EventTime* time, Evoral::EventType* type, uint32_t* size);
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
@@ -88,11 +88,11 @@ private:
  * by a call to read_contents (or the read pointer will be garabage).
  */
 inline bool
-MidiRingBuffer::read_prefix(EventTime* time, EventType* type, uint32_t* size)
+MidiRingBuffer::read_prefix(Evoral::EventTime* time, Evoral::EventType* type, uint32_t* size)
 {
-	bool success = Evoral::EventRingBuffer::full_read(sizeof(EventTime), (uint8_t*)time);
+	bool success = Evoral::EventRingBuffer::full_read(sizeof(Evoral::EventTime), (uint8_t*)time);
 	if (success)
-		success = Evoral::EventRingBuffer::full_read(sizeof(EventType), (uint8_t*)type);
+		success = Evoral::EventRingBuffer::full_read(sizeof(Evoral::EventType), (uint8_t*)type);
 	if (success)
 		success = Evoral::EventRingBuffer::full_read(sizeof(uint32_t), (uint8_t*)size);
 
@@ -123,17 +123,17 @@ MidiRingBuffer::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t 
 		return 0;
 	}
 
-	EventTime ev_time;
-	EventType ev_type;
-	uint32_t  ev_size;
+	Evoral::EventTime ev_time;
+	Evoral::EventType ev_type;
+	uint32_t          ev_size;
 
 	size_t count = 0;
 
 	//std::cerr << "MRB read " << start << " .. " << end << " + " << offset << std::endl;
 
-	while (read_space() >= sizeof(EventTime) + sizeof(EventType) + sizeof(uint32_t)) {
+	while (read_space() >= sizeof(Evoral::EventTime) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
 
-		full_peek(sizeof(EventTime), (uint8_t*)&ev_time);
+		full_peek(sizeof(Evoral::EventTime), (uint8_t*)&ev_time);
 
 		if (ev_time > end) {
 			//std::cerr << "MRB: PAST END (" << ev_time << " : " << end << ")" << std::endl;
