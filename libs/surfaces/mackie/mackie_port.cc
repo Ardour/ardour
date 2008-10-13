@@ -176,7 +176,7 @@ MidiByteArray calculate_challenge_response( MidiByteArray::iterator begin, MidiB
 	// from the Logic docs.
 	retval << ( 0x7f & ( l[0] + ( l[1] ^ 0xa ) - l[3] ) );
 	retval << ( 0x7f & ( ( l[2] >> l[3] ) ^ ( l[0] + l[3] ) ) );
-	retval << ( 0x7f & ( l[3] - ( l[2] << 2 ) ^ ( l[0] | l[1] ) ) );
+	retval << ( 0x7f & ( (l[3] - ( l[2] << 2 )) ^ ( l[0] | l[1] ) ) );
 	retval << ( 0x7f & ( l[1] - l[2] + ( 0xf0 ^ ( l[3] << 4 ) ) ) );
 	
 	return retval;
