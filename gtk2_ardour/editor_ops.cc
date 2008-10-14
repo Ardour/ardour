@@ -6108,16 +6108,53 @@ Editor::fit_tracks ()
 	uint32_t h = (uint32_t) floor ((canvas_height - child_heights - canvas_timebars_vsize)/selection->tracks.size());
 	double first_y_pos = DBL_MAX;
 
+	if (h < TimeAxisView::hSmall) {
+		MessageDialog msg (*this, _("There are too many selected tracks to fit in the current window"));
+		/* too small to be displayed */
+		return;
+	}
+
 	undo_visual_stack.push_back (current_visual_state());
 	
-	for (TrackSelection::iterator t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
-		(*t)->set_height (h);
-		first_y_pos = std::min ((*t)->y_position, first_y_pos);
+	/* operate on all tracks, hide unselected ones that are in the middle of selected ones */
+	
+	bool prev_was_selected = false;
+	bool is_selected = selection->selected (track_views.front());
+	bool next_is_selected;
+
+	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
+
+		bool pws;
+
+		TrackViewList::iterator next;
+		
+		next = t;
+		++next;
+		
+		if (next != track_views.end()) {
+			next_is_selected = selection->selected (*next);
+		} else {
+			next_is_selected = false;
+		}
+
+		if (is_selected) {
+			(*t)->set_height (h);
+			first_y_pos = std::min ((*t)->y_position, first_y_pos);
+		} else {
+			if (prev_was_selected && next_is_selected) {
+				hide_track_in_display (**t);
+			}
+		}
+
+		prev_was_selected = is_selected;
+		is_selected = next_is_selected;
 	}
+
 	/* 
 	   set the controls_layout height now, because waiting for its size 
 	   request signal handler will cause the vertical adjustment setting to fail 
 	*/ 
+
 	controls_layout.property_height () = full_canvas_height - canvas_timebars_vsize;
 	vertical_adjustment.set_value (first_y_pos);
 

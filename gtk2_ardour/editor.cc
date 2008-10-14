@@ -4522,12 +4522,13 @@ void
 Editor::use_visual_state (VisualState& vs)
 {
 	no_save_visual = true;
+	no_route_list_redisplay = true;
 
 	vertical_adjustment.set_value (vs.y_position);
 
 	set_zoom_focus (vs.zoom_focus);
 	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
-
+	
 	for (list<TAVState>::iterator i = vs.track_states.begin(); i != vs.track_states.end(); ++i) {
 		TrackViewList::iterator t;
 
@@ -4538,10 +4539,14 @@ Editor::use_visual_state (VisualState& vs)
 		}
 	}
 
+
 	if (!vs.track_states.empty()) {
 		update_route_visibility ();
 	} 
-	
+
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
+
 	no_save_visual = false;
 }
 
