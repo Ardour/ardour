@@ -42,9 +42,14 @@ using namespace PBD;
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 	: session (s)
 	, ppqn (ppqn)
+	, accumulator_index (0)
+	, average (0.0)
 {
 	rebind (p);
 	reset ();
+
+	for(int i = 0; i < accumulator_size; i++)
+		accumulator[i]=0.0;
 }
 
 MIDIClock_Slave::~MIDIClock_Slave()
@@ -69,46 +74,52 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 
 void
 MIDIClock_Slave::update_midi_clock (Parser& parser)
-{
-	// ignore clock events if no start event received
-	if(!_started)
-		return;
-
+{	
 	nframes_t now = session.engine().frame_time();
 
 	SafeTime last;
 	read_current (&last);
-
+		
 	const Tempo& current_tempo = session.tempo_map().tempo_at(now);
 	const Meter& current_meter = session.tempo_map().meter_at(now);
 	double frames_per_beat =
-		current_tempo.frames_per_beat(session.nominal_frame_rate(),
+		current_tempo.frames_per_beat(session.frame_rate(),
 		                              current_meter);
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
 	double frames_per_quarter_note = frames_per_beat / quarter_notes_per_beat;
 
 	one_ppqn_in_frames = frames_per_quarter_note / ppqn;
-
-	/*
-	   Also compensate for audio latency.
-	*/
-
-	midi_clock_frame += (long) (one_ppqn_in_frames)
-	                    + session.worst_output_latency();
-
-	/*
-	std::cerr << "got MIDI Clock message at time " << now  
-	          << " midi_clock_frame: " << midi_clock_frame 
-	          << " one_ppqn_in_frames: " << one_ppqn_in_frames << std::endl;
-	*/
-	if (first_midi_clock_frame == 0) {
-		first_midi_clock_frame = midi_clock_frame;
-		first_midi_clock_time = now;
+	
+	// for the first MIDI clock event we dont have any past
+	// data, so we assume a sane tempo
+	if(last.timestamp == 0) {
+		midi_clock_frame = one_ppqn_in_frames;
+	} else {
+		midi_clock_frame = now - last.timestamp;
 	}
-
+	
+	// moving average over incoming intervals
+	accumulator[accumulator_index++] = (float) midi_clock_frame;
+	if(accumulator_index == accumulator_size)
+		accumulator_index = 0;
+	
+	average = 0.0;
+	for(int i = 0; i < accumulator_size; i++)
+		average += accumulator[i];
+	average /= accumulator_size;
+	
+	
+	std::cerr << "got MIDI Clock message at time " << now  
+	          << " real delta: " << midi_clock_frame 
+	          << " reference: " << one_ppqn_in_frames
+	          << " accu index: " << accumulator_index
+	          << " average: " << average
+	          << " locked: " << locked()
+	          << " frame rate: " << session.frame_rate() << std::endl;
+	
 	current.guard1++;
-	current.position = midi_clock_frame;
+	current.position += midi_clock_frame;
 	current.timestamp = now;
 	current.guard2++;
 
@@ -118,12 +129,28 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 void
 MIDIClock_Slave::start (Parser& parser)
 {
-	std::cerr << "MIDIClock_Slave got start message" << endl;
+	
+	nframes_t now = session.engine().frame_time();
+	cerr << "MIDIClock_Slave got start message at time " 
+	          <<  now << endl;
+
+	if(!locked()) {
+		cerr << "Did not start because not locked!" << endl;
+		return;
+	}
+	
+	midi_clock_frame = 0;
 
 	session.request_transport_speed (1.0);
 	midi_clock_speed = 1.0;
-	_starting = true;
-	_started  = true;
+	first_midi_clock_time = now;
+	
+	current.guard1++;
+	current.position = 0;
+	current.timestamp = now;
+	current.guard2++;
+	
+	_started = true;
 }
 
 void
@@ -134,7 +161,7 @@ MIDIClock_Slave::stop (Parser& parser)
 	session.request_transport_speed (0);
 	midi_clock_speed = 0.0f;
 	midi_clock_frame = 0;
-	_starting = false;
+
 	_started = false;
 	reset();
 }
@@ -159,7 +186,14 @@ MIDIClock_Slave::read_current (SafeTime *st) const
 bool
 MIDIClock_Slave::locked () const
 {
-	return true;
+	float rel_error = 
+		( fabs(one_ppqn_in_frames - average) / one_ppqn_in_frames ); 
+	//cerr << " relative error: " << rel_error << endl;
+	
+	return rel_error < 0.01 ?
+			true
+		:
+			false;
 }
 
 bool
@@ -171,20 +205,18 @@ MIDIClock_Slave::ok() const
 bool
 MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 {
-	//std::cerr << "MIDIClock_Slave speed and position() called" << endl;
+	
+	if(!_started) {
+		speed = 0.0;
+		pos = 0;
+		return true;
+	}
+	
 	nframes_t now = session.engine().frame_time();
 	nframes_t frame_rate = session.frame_rate();
-	nframes_t elapsed;
-	float speed_now;
 
 	SafeTime last;
 	read_current (&last);
-
-	if (first_midi_clock_time == 0) {
-		speed = 0;
-		pos = last.position;
-		return true;
-	}
 
 	/* no timecode for 1/4 second ? conclude that its stopped */
 
@@ -198,59 +230,15 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		return false;
 	}
 
-	if(_starting) {
-		speed_now = 1.0;
-		_starting = false;
-	} else {
-		speed_now = (float) ((last.position - first_midi_clock_frame) / (double) (now - first_midi_clock_time));
-	}
+	midi_clock_speed = average / one_ppqn_in_frames;
 
-	//cerr << "speed_and_position: speed_now: " << speed_now ;
+	nframes_t elapsed = now - last.timestamp;
 	
-	accumulator[accumulator_index++] = speed_now;
-
-	if (accumulator_index >= accumulator_size) {
-		have_first_accumulated_speed = true;
-		accumulator_index = 0;
-	}
-
-	if (have_first_accumulated_speed) {
-		float total = 0;
-
-		for (int32_t i = 0; i < accumulator_size; ++i) {
-			total += accumulator[i];
-		}
-
-		midi_clock_speed = total / accumulator_size;
-
-	} else {
-
-		midi_clock_speed = speed_now;
-
-	}
-
-	if (midi_clock_speed == 0.0f) {
-
-		elapsed = 0;
-
-	} else {
-
-		/* scale elapsed time by the current MIDI Clock speed */
-
-		if (last.timestamp && (now > last.timestamp)) {
-			elapsed = (nframes_t) floor (midi_clock_speed * (now - last.timestamp));
-		} else {
-			elapsed = 0; /* XXX is this right? */
-		}
-	}
-
-	/* now add the most recent timecode value plus the estimated elapsed interval */
-
-	pos =  elapsed + last.position;
+	pos = last.position + elapsed * speed;
 
 	speed = midi_clock_speed;
 	
-	//cerr << " final speed: " << speed << " position: " << pos << endl;
+	cerr << " final speed: " << speed << " elapsed: " << elapsed << " elapsed (scaled)  " << elapsed * speed << " position: " << pos << endl;
 	return true;
 }
 
@@ -263,10 +251,6 @@ MIDIClock_Slave::resolution() const
 void
 MIDIClock_Slave::reset ()
 {
-	/* XXX massive thread safety issue here. MTC could
-	   be being updated as we call this. but this
-	   supposed to be a realtime-safe call.
-	*/
 
 	last_inbound_frame = 0;
 	current.guard1++;
