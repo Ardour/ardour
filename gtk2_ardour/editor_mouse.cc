@@ -3823,6 +3823,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	PlaylistSet frozen_playlists;
 	list <sigc::connection> modified_playlist_connections;
 	pair<PlaylistSet::iterator,bool> insert_result, frozen_insert_result;
+	nframes64_t drag_delta;
+	bool changed_tracks, changed_position;
 
 	/* first_move is set to false if the regionview has been moved in the 
 	   motion handler. 
@@ -3877,6 +3879,12 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	}
 
 	begin_reversible_command (op_string);
+	changed_position = (drag_info.last_frame_position != (nframes64_t) (clicked_regionview->region()->position()));
+	changed_tracks = (trackview_by_y_position (drag_info.current_pointer_y) != &clicked_regionview->get_time_axis_view());
+
+	drag_delta = clicked_regionview->region()->position() - drag_info.last_frame_position;
+
+	track_canvas->update_now ();
 
 	for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
 			
@@ -3888,8 +3896,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 		TimeAxisView* dest_tv = trackview_by_y_position (iy1);
 		AudioTimeAxisView* dest_atv = dynamic_cast<AudioTimeAxisView*>(dest_tv);
-		double speed;
-		bool changed_tracks, changed_position;
 		nframes64_t where;
 
 		if (rv->region()->locked()) {
@@ -3897,20 +3903,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			continue;
 		}
 
-		/* adjust for track speed */
-
-		speed = 1.0;
-		
-		if (dest_atv && dest_atv->get_diskstream()) {
-			speed = dest_atv->get_diskstream()->speed();
-		}
-		
-		changed_position = (drag_info.last_frame_position != (nframes64_t) (rv->region()->position()/speed));
-		changed_tracks = (dest_tv != &rv->get_time_axis_view());
-
 		if (changed_position && !drag_info.x_constrained) {
-			_master_group->w2i(ix1, iy1);
-			where = (nframes64_t) (unit_to_frame (ix1) * speed);
+			where = rv->region()->position() - drag_delta;
 		} else {
 			where = rv->region()->position();
 		}
