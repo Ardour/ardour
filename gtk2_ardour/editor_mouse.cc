@@ -3381,7 +3381,6 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	double x_delta;
 	double y_delta = 0;
-	RegionView* rv = reinterpret_cast<RegionView*> (drag_info.data); 
 	nframes64_t pending_region_position = 0;
 	int32_t pointer_y_span = 0, canvas_pointer_y_span = 0, original_pointer_order;
 	int32_t visible_y_high = 0, visible_y_low = 512;  //high meaning higher numbered.. not the height on the screen
@@ -3576,7 +3575,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 			pending_region_position = drag_info.current_pointer_frame - drag_info.pointer_frame_offset;
 
-			sync_offset = rv->region()->sync_offset (sync_dir);
+			sync_offset = clicked_regionview->region()->sync_offset (sync_dir);
 
 			/* we don't handle a sync point that lies before zero.
 			 */
@@ -3590,7 +3589,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 					snap_to (sync_frame);	
 				}
 	    
-				pending_region_position = rv->region()->adjust_to_sync (sync_frame);
+				pending_region_position = clicked_regionview->region()->adjust_to_sync (sync_frame);
 
 			} else {
 				pending_region_position = drag_info.last_frame_position;
@@ -3600,7 +3599,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 			pending_region_position = 0;
 		}
 	  
-		if (pending_region_position > max_frames - rv->region()->length()) {
+		if (pending_region_position > max_frames - clicked_regionview->region()->length()) {
 			pending_region_position = drag_info.last_frame_position;
 		}
 
