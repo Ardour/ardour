@@ -400,7 +400,9 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", height);
-	xml_node->add_property ("height", buf);
+	if (xml_node) {
+		xml_node->add_property ("height", buf);
+	}
 
 	if (changed_between_small_and_normal || first_call_to_set_height) {
 

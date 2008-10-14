@@ -378,11 +378,6 @@ Editor::controls_layout_size_request (Requisition* req)
 		}
 	}
 
-	RefPtr<Gdk::Screen> screen = get_screen();
-
-	if (!screen) {
-		screen = Gdk::Screen::get_default();
-	}
 	gint height = min ( (gint) pos, (gint) (physical_screen_height - 600));
 	gint width = max (edit_controls_vbox.get_width(),  controls_layout.get_width());
 

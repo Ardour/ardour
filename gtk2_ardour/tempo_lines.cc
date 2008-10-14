@@ -26,11 +26,12 @@ using namespace std;
 
 #define MAX_CACHED_LINES 128
 	
-TempoLines::TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group)
+TempoLines::TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height)
 	: _canvas(canvas)
 	, _group(group)
 	, _clean_left(DBL_MAX)
 	, _clean_right(0.0)
+	, _height(screen_height)
 {
 }
 
@@ -85,7 +86,6 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	const size_t needed = points.size();
 
 	_canvas.get_scroll_region (x1, y1, x2, who_cares);
-	_canvas.root()->get_bounds(who_cares, who_cares, who_cares, y2);
 
 	/* get the first bar spacing */
 
@@ -221,7 +221,8 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 				line = new ArdourCanvas::SimpleLine (*_group);
 				line->property_x1() = xpos;
 				line->property_x2() = xpos;
-				line->property_y2() = y2;
+				line->property_y1() = 0.0;
+				line->property_y2() = _height;
 				line->property_color_rgba() = color;
 				_lines.insert(make_pair(xpos, line));
 				inserted_last_time = true;

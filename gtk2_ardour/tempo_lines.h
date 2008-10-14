@@ -35,7 +35,7 @@ typedef boost::fast_pool_allocator<
 
 class TempoLines {
 public:
-	TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group);
+	TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height);
 
 	void tempo_map_changed();
 
@@ -52,6 +52,7 @@ private:
 	ArdourCanvas::Group*  _group;
 	double                _clean_left;
 	double                _clean_right;
+	double                _height;
 };
 
 #endif /* __ardour_tempo_lines_h__ */
