@@ -195,9 +195,6 @@ Editor::hide_track_in_display (TimeAxisView& tv, bool temponly)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
 			(*i)[route_display_columns.visible] = false;
-			// if (temponly) {
-			tv.set_marked_for_display (false);
-			// }
 			break;
 		}
 	}
@@ -219,7 +216,6 @@ Editor::show_track_in_display (TimeAxisView& tv)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[route_display_columns.tv] == &tv) { 
 			(*i)[route_display_columns.visible] = true;
-			tv.set_marked_for_display (true);
 			break;
 		}
 	}

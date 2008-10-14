@@ -160,7 +160,13 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 void
 Editor::select_all_tracks ()
 {
-	selection->set (track_views);
+	TrackViewList visible_views;
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		if ((*i)->marked_for_display()) {
+			visible_views.push_back (*i);
+		}
+	}
+	selection->set (visible_views);
 }
 
 void

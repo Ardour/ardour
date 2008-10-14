@@ -343,6 +343,10 @@ TimeAxisView::hide ()
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->hide ();
 	}
+
+	/* if its hidden, it cannot be selected */
+
+	editor.get_selection().remove (this);
 	
 	Hiding ();
 }
