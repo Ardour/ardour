@@ -126,9 +126,9 @@ public:
 			return _type_metadata[_type];
 	}
 
-	inline const double min()    const { return metadata().min; }
-	inline const double max()    const { return metadata().max; }
-	inline const double normal() const { return metadata().normal; }
+	inline double min()    const { return metadata().min; }
+	inline double max()    const { return metadata().max; }
+	inline double normal() const { return metadata().normal; }
 
 protected:
 	// Default copy constructor is ok
