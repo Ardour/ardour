@@ -42,22 +42,22 @@ class FFT
 		void analyze(ARDOUR::Sample *);
 		void calculate();
 
-		uint32_t bins() const { return _dataSize; }
+		uint32_t bins() const { return _data_size; }
 
-		float powerAtBin(uint32_t i) const { return _powerAtBin[i]; }
-		float phaseAtBin(uint32_t i) const { return _phaseAtBin[i]; }
+		float power_at_bin(uint32_t i) const { return _power_at_bin[i]; }
+		float phase_at_bin(uint32_t i) const { return _phase_at_bin[i]; }
 
 	private:
 
-		uint32_t const _windowSize;
-		uint32_t const _dataSize;
+		uint32_t const _window_size;
+		uint32_t const _data_size;
 		uint32_t _iterations;
 
 		float *_fftInput;
 		float *_fftOutput;
 
-		float *_powerAtBin;
-		float *_phaseAtBin;
+		float *_power_at_bin;
+		float *_phase_at_bin;
 
 		fftwf_plan _plan;
 };

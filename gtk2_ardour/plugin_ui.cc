@@ -57,7 +57,6 @@
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "keyboard.h"
-#include "eq_gui.h"
 
 #include "i18n.h"
 
@@ -114,14 +113,16 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
 		
 		_pluginui = pu;
-	
+		add( *pu );
+
+		/*
 		Gtk::HBox *hbox = new Gtk::HBox();
 		hbox->pack_start( *pu);
 		// TODO: this should be nicer
-		hbox->pack_start( *manage(new PluginEqGui(insert)));
+		hbox->pack_start( eqgui_bin );
 		
 		add (*manage(hbox));
-
+		*/
 
 		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 

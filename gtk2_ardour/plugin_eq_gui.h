@@ -18,8 +18,8 @@
 
 */
 
-#ifndef __ardour_eq_gui_h
-#define __ardour_eq_gui_h
+#ifndef __ardour_plugin_eq_gui_h
+#define __ardour_plugin_eq_gui_h
 
 #include <ardour/buffer_set.h>
 #include <ardour/plugin_insert.h>
@@ -30,7 +30,6 @@
 #include <gtkmm/combobox.h>
 #include <gtkmm/liststore.h>
 
-class Plugin;
 class FFT;
 
 class PluginEqGui : public Gtk::Table
@@ -43,31 +42,34 @@ class PluginEqGui : public Gtk::Table
 
 	private:
 		// Setup
-		void setBufferSize(uint32_t);
-		void dBScaleChanged();
+		void set_buffer_size(uint32_t);
+		void change_dB_scale();
 
 		// Analysis
-		void runAnalysis();
+		void run_analysis();
 
 		// Drawing
 		virtual void on_hide();
 		virtual void on_show();
 
-		void resizeAnalysisArea(Gtk::Allocation&);
+		void stop_updating();
+		void start_updating();
 
-		void redrawAnalysisArea();
-		void generateAnalysisScale(cairo_t *);
-		bool exposeAnalysisArea(GdkEventExpose *);
+		void resize_analysis_area(Gtk::Allocation&);
+		void redraw_analysis_area();
 
-		void drawPowerScale(Gtk::Widget *, cairo_t *);
-		void drawPower(Gtk::Widget *,cairo_t *);
+		void draw_analysis_scales(cairo_t *);
+		bool expose_analysis_area(GdkEventExpose *);
 
-		void drawPhaseScale(Gtk::Widget *,cairo_t *);
-		void drawPhase(Gtk::Widget *,cairo_t *);
+		void draw_scales_power(Gtk::Widget *, cairo_t *);
+		void plot_amplitude(Gtk::Widget *,cairo_t *);
+
+		void draw_scales_phase(Gtk::Widget *,cairo_t *);
+		void plot_phase(Gtk::Widget *,cairo_t *);
 
 		// Helpers
-		bool timeoutCallback();
-		void redrawScales();
+		bool timeout_callback();
+		void redraw_scales();
 
 
 		// Fields:
@@ -75,31 +77,31 @@ class PluginEqGui : public Gtk::Table
 		// analysis parameters
 		float _samplerate;
 
-		float _mindB;
-		float _maxdB;
-		float _dBStep;
+		float _min_dB;
+		float _max_dB;
+		float _step_dB;
 
 
-		float _logCoeff;
-		float _logMax;
+		float _log_coeff;
+		float _log_max;
 
-		nframes_t _bufferSize;
+		nframes_t _buffer_size;
 
 		// buffers		
 		ARDOUR::BufferSet _bufferset;
 
 
 		// dimensions
-		float _analysisWidth;
-		float _analysisHeight;
+		float _analysis_width;
+		float _analysis_height;
 
 		// My objects
-		FFT *_impulseFft;
+		FFT *_impulse_fft;
 		boost::shared_ptr<ARDOUR::Plugin> _plugin;
 
 		// gui objects
-		Gtk::DrawingArea *_analysisArea;
-		cairo_surface_t *_analysisScaleSurface;
+		Gtk::DrawingArea *_analysis_area;
+		cairo_surface_t *_analysis_scale_surface;
 
 
 		// dB scale selection:
@@ -120,10 +122,12 @@ class PluginEqGui : public Gtk::Table
 		Gtk::ComboBox *dBScaleCombo;
 		Glib::RefPtr<Gtk::ListStore> dBScaleModel;
 
-		Gtk::CheckButton *phaseSelect;
+		Gtk::CheckButton *_phase_button;
 
 		// signals and connections
-		sigc::connection _updateConn;
+		sigc::connection _update_connection;
+		sigc::connection _window_unmap_connection;
+		sigc::connection _window_map_connection;
 };
 
 #endif

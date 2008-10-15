@@ -179,7 +179,7 @@ export_timespan_selector.cc
 fft.cc
 fft_graph.cc
 fft_result.cc
-eq_gui.cc
+plugin_eq_gui.cc
 gain_meter.cc
 generic_pluginui.cc
 ghostregion.cc

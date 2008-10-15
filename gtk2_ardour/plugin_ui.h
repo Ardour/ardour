@@ -87,6 +87,7 @@ class PlugUIBase : public virtual sigc::trackable
 	Gtk::ComboBoxText preset_combo;
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
+
 	LatencyGUI latency_gui;
 
 	void setting_selected();
@@ -95,7 +96,7 @@ class PlugUIBase : public virtual sigc::trackable
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 };
 
-class GenericPluginUI : public PlugUIBase, public Gtk::VBox 
+class GenericPluginUI : public PlugUIBase, public Gtk::HPaned
 {
   public:
 	GenericPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
@@ -108,11 +109,15 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	bool stop_updating(GdkEventAny*);
 
   private:
+	Gtk::VBox main_contents;
+
 	Gtk::HBox settings_box;
 	Gtk::HBox hpacker;
 	
 	Gtk::Table button_table;
 	Gtk::Table output_table;
+
+	Gtk::ToggleButton eqgui_toggle;
 
 	Gtk::ScrolledWindow scroller;
 	Gtk::Adjustment hAdjustment;
@@ -199,6 +204,8 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
 	void start_touch (ControlUI*);
 	void stop_touch (ControlUI*);
+
+	void toggle_plugin_analysis ();
 
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
 };

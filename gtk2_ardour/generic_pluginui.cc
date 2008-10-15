@@ -50,6 +50,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
+#include "plugin_eq_gui.h"
 
 #include "i18n.h"
 
@@ -64,6 +65,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	: PlugUIBase (pi),
 	  button_table (initial_button_rows, initial_button_cols),
 	  output_table (initial_output_rows, initial_output_cols),
+	  eqgui_toggle(_("Freq Analysis")),
 	  hAdjustment(0.0, 0.0, 0.0),
 	  vAdjustment(0.0, 0.0, 0.0),
 	  scroller_view(hAdjustment, vAdjustment),
@@ -72,7 +74,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 {
 	set_name ("PluginEditor");
 	set_border_width (10);
-	set_homogeneous (false);
+	//set_homogeneous (false);
+
+	pack1(main_contents);
 
 	settings_box.set_homogeneous (false);
 
@@ -92,10 +96,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	constraint_hbox->set_spacing (5);
 	constraint_hbox->pack_start (*smaller_hbox, true, false);
 	constraint_hbox->pack_end (bypass_button, false, false);
+	constraint_hbox->pack_start (eqgui_toggle, false, false);
 
 	settings_box.pack_end (*constraint_hbox, false, false);
 
-	pack_start (settings_box, false, false);
+	main_contents.pack_start (settings_box, false, false);
 
 	if ( is_scrollable ) {
 		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -104,12 +109,15 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		scroller_view.add (hpacker);
 		scroller.add (scroller_view);
 		
-		pack_start (scroller, true, true);
+		main_contents.pack_start (scroller, true, true);
 
 	}
 	else {
-		pack_start (hpacker, false, false);
+		main_contents.pack_start (hpacker, false, false);
 	}
+
+	eqgui_toggle.set_active (false);
+	eqgui_toggle.signal_toggled().connect( mem_fun(*this, &GenericPluginUI::toggle_plugin_analysis));
 
 	pi->ActiveChanged.connect (bind(mem_fun(*this, &GenericPluginUI::processor_active_changed),
 				boost::weak_ptr<Processor>(pi)));
@@ -816,4 +824,44 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 	
 
 	return enums;
+}
+
+
+void
+GenericPluginUI::toggle_plugin_analysis()
+{
+
+
+
+	if (eqgui_toggle.get_active() && !get_child2()) {
+		// Create the GUI
+		PluginEqGui *foo = new PluginEqGui(insert);
+		pack2( *foo );
+		show_all();
+	} 
+	
+	Gtk::Widget *gui;
+
+	if (!eqgui_toggle.get_active() && (gui = get_child2())) {
+		// Hide & remove
+		gui->hide();
+		remove(*gui);
+
+		delete gui;
+
+		Gtk::Widget *toplevel = get_toplevel();
+		if (!toplevel) {
+			std::cerr << "No toplevel widget?!?!" << std::endl;
+			return;
+		}
+
+		Gtk::Container *cont = dynamic_cast<Gtk::Container *>(toplevel);
+		if (!cont) {
+			std::cerr << "Toplevel widget is not a container?!?" << std::endl;
+			return;
+		}
+
+		Gtk::Allocation alloc(0, 0, 50, 50); // Just make it small
+		toplevel->size_allocate(alloc);
+	}
 }
