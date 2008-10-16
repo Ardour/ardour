@@ -342,8 +342,8 @@ Editor::track_canvas_size_allocated ()
 		}
 		
 	}
-	horizontal_adjustment.set_upper (session->current_end_frame()/frames_per_unit);
-	horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
+
+	handle_new_duration ();
 	reset_hscrollbar_stepping ();
 	update_fixed_rulers();
 	redisplay_tempo (false);
