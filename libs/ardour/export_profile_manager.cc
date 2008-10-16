@@ -67,8 +67,6 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 	search_path += ardour_search_path().add_subdirectory_to_paths("export");
 	search_path += system_config_search_path().add_subdirectory_to_paths("export");;
 	
-	std::cout << "search_path: " << search_path.to_string () << std::endl;
-	
 	/* create export config directory if necessary */
 
 	if (!sys::exists (export_config_dir)) {
@@ -163,8 +161,9 @@ ExportProfileManager::load_presets ()
 ExportProfileManager::PresetPtr
 ExportProfileManager::save_preset (string const & name)
 {
+	string filename = export_config_dir.to_string() + "/" + name + export_preset_suffix;
+
 	if (!current_preset) {
-		string filename = export_config_dir.to_string() + "/" + name + export_preset_suffix;
 		current_preset.reset (new ExportPreset (filename, session));
 		preset_list.push_back (current_preset);
 	}
@@ -179,7 +178,7 @@ ExportProfileManager::save_preset (string const & name)
 	current_preset->set_global_state (*global_preset);
 	current_preset->set_local_state (*local_preset);
 	
-	current_preset->save();
+	current_preset->save (filename);
 	
 	return current_preset;
 }
@@ -210,12 +209,13 @@ void
 ExportProfileManager::load_preset_from_disk (PBD::sys::path const & path)
 {
 	PresetPtr preset (new ExportPreset (path.to_string(), session));
-	preset_list.push_back (preset);
 	
-	/* Handle id to filename mapping */
+	/* Handle id to filename mapping and don't add duplicates to list */
 	
 	FilePair pair (preset->id(), path);
-	preset_file_map.insert (pair);
+	if (preset_file_map.insert (pair).second) {
+		preset_list.push_back (preset);
+	}
 }
 
 bool

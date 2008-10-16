@@ -50,7 +50,7 @@ class ExportPreset {
 	XMLNode const * get_global_state () const { return global.root(); }
 	XMLNode const * get_local_state () const { return local; }
 	
-	void save () const;
+	void save (std::string const & filename);
 	void remove_local () const;
 
   private:
