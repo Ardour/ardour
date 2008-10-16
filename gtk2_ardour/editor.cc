@@ -1115,6 +1115,10 @@ Editor::center_screen_internal (nframes64_t frame, float page)
 void
 Editor::handle_new_duration ()
 {
+	if (!session) {
+		return;
+	}
+
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::handle_new_duration));
 
 	nframes64_t new_end = session->get_maximum_extent() + (nframes64_t) floorf (current_page_frames() * 0.10f);
@@ -1122,6 +1126,7 @@ Editor::handle_new_duration ()
 	if (new_end > last_canvas_frame) {
 		last_canvas_frame = new_end;
 		horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
+		horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
 		//reset_scrolling_region ();
 	}
 
@@ -1272,6 +1277,7 @@ Editor::connect_to_session (Session *t)
 		sfbrowser->set_session (session);
 	}
 
+	last_canvas_frame = 0; // force update in handle_new_duration()
 	handle_new_duration ();
 
 	redisplay_regions ();
