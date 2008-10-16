@@ -60,19 +60,14 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 
 	/* Initialize path variables */
 
-	sys::path path;
-
 	export_config_dir = user_config_directory();
 	export_config_dir /= "export";
 	search_path += export_config_dir;
 	
-	path = ardour_search_path().to_string();
-	path /= "export";
-	search_path += path;
+	search_path += ardour_search_path().add_subdirectory_to_paths("export");
+	search_path += system_config_search_path().add_subdirectory_to_paths("export");;
 	
-	path = system_config_search_path().to_string();
-	path /= "export";
-	search_path += path;
+	std::cout << "search_path: " << search_path.to_string () << std::endl;
 	
 	/* create export config directory if necessary */
 
@@ -480,18 +475,30 @@ ExportProfileManager::save_format_to_disk (FormatPtr format)
 	/* Check if format is on disk already */
 	FileMap::iterator it;
 	if ((it = format_file_map.find (format->id())) != format_file_map.end()) {
-		/* Update data */
-		{
+		
+		/* Check if config is not in user config dir */
+		if (it->second.branch_path().to_string().compare (export_config_dir.to_string())) {
+		
+			/* Write new file */
+		
+			XMLTree tree (new_path.to_string());
+			tree.set_root (&format->get_state());
+			tree.write();
+		
+		} else {
+		
+			/* Update file and rename if necessary */
+		
 			XMLTree tree (it->second.to_string());
 			tree.set_root (&format->get_state());
 			tree.write();
+			
+			if (new_name.compare (it->second.leaf())) {
+				sys::rename (it->second, new_path);
+			}
 		}
 		
-		/* Rename if necessary */
-		
-		if (new_name.compare (it->second.leaf())) {
-			sys::rename (it->second, new_path);
-		}
+		it->second = new_path;
 		
 	} else {
 		/* Write new file */
@@ -612,12 +619,13 @@ ExportProfileManager::load_format_from_disk (PBD::sys::path const & path)
 {
 	XMLTree const tree (path.to_string());
 	FormatPtr format = handler->add_format (*tree.root());
-	format_list->push_back (format);
 	
-	/* Handle id to filename mapping */
+	/* Handle id to filename mapping and don't add duplicates to list */
 	
 	FilePair pair (format->id(), path);
-	format_file_map.insert (pair);
+	if (format_file_map.insert (pair).second) {
+		format_list->push_back (format);
+	}
 	
 	FormatListChanged ();
 }
