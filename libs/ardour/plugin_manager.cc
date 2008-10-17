@@ -150,9 +150,15 @@ void
 PluginManager::ladspa_refresh ()
 {
 	_ladspa_plugin_info.clear ();
+	static const char *standard_path = "/usr/local/lib64/ladspa:/usr/local/lib/ladspa:/usr/lib64/ladspa:/usr/lib/ladspa:/Library/Audio/Plug-Ins/LADSPA";
+	
+	/* allow LADSPA_PATH to augment, not override standard locations */
 
-	if (ladspa_path.length() == 0) {
-		ladspa_path = "/usr/local/lib64/ladspa:/usr/local/lib/ladspa:/usr/lib64/ladspa:/usr/lib/ladspa:/Library/Audio/Plug-Ins/LADSPA";
+	if (ladspa_path.empty()) {
+		ladspa_path = standard_path;
+	} else {
+		ladspa_path += ":";
+		ladspa_path += standard_path;
 	}
 
 	ladspa_discover_from_path (ladspa_path);
