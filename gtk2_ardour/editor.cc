@@ -1121,15 +1121,14 @@ Editor::handle_new_duration ()
 
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::handle_new_duration));
 
-	nframes64_t new_end = session->get_maximum_extent() + (nframes64_t) floorf (current_page_frames() * 0.10f);
-				  
+	nframes64_t new_end = session->current_end_frame() - session->current_start_frame() + (nframes64_t) floorf (current_page_frames() * 0.10f);
+
 	if (new_end > last_canvas_frame) {
 		last_canvas_frame = new_end;
 		horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
 		horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
 		//reset_scrolling_region ();
 	}
-
 	horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
 	//cerr << "Editor::handle_new_duration () called ha v:l:u:ps:lcf = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << last_canvas_frame << endl;//DEBUG
 }
@@ -3783,7 +3782,8 @@ Editor::end_location_changed (Location* location)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::end_location_changed), location));
 	//reset_scrolling_region ();
-	horizontal_adjustment.set_upper ( location->start());
+	nframes64_t session_span = location->start() + (nframes64_t) floorf (current_page_frames() * 0.10f);
+	horizontal_adjustment.set_upper (session_span / frames_per_unit);
 }
 
 int
@@ -4408,7 +4408,7 @@ Editor::idle_visual_changer ()
 
 		if (session) {
 			csf = session->current_start_frame();
-			cef = session->current_end_frame() + (current_page_frames() / 24);// Add a little extra so we can see the end marker
+			cef = session->current_end_frame() + (current_page_frames() / 10);// Add a little extra so we can see the end marker
 		}
 
 		/* if we seek beyond the current end of the canvas, move the end */
