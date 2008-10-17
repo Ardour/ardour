@@ -153,6 +153,8 @@ PannerUI::set_io (boost::shared_ptr<IO> io)
 		delete panner;
 		panner = 0;
 	}
+	
+	setup_pan ();
 
 	pan_changed (0);
 	update_pan_sensitive ();
@@ -555,6 +557,7 @@ PannerUI::pan_changed (void *src)
 		break;
 
 	case 2:
+		/* bring pan bar state up to date */
 		update_pan_bars (false);
 		break;
 
@@ -788,7 +791,7 @@ PannerUI::pan_automation_state_changed ()
 	pan_watching.disconnect();
 
 	if (x) {
-	  pan_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (*this, &PannerUI::effective_pan_display));
+		pan_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (*this, &PannerUI::effective_pan_display));
 	}
 }
 
