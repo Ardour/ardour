@@ -340,6 +340,17 @@ Editor::track_canvas_size_allocated ()
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 			(*x)->set_line_vpos (0, canvas_height);
 		}
+
+		vertical_adjustment.set_page_size (canvas_height);
+		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
+		if ((vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
+			/* 
+			   We're increasing the size of the canvas while the bottom is visible.
+			   We scroll down to keep in step with the controls layout.
+			*/
+			vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
+		}
+	
 		
 	}
 
@@ -348,15 +359,6 @@ Editor::track_canvas_size_allocated ()
 	update_fixed_rulers();
 	redisplay_tempo (false);
 
-	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
-	if ((vertical_adjustment.get_value() + canvas_height) >= vertical_adjustment.get_upper()) {
-		/* 
-		   We're increasing the size of the canvas while the bottom is visible.
-		   We scroll down to keep in step with the controls layout.
-		*/
-		vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
-	} 
-	
 	Resized (); /* EMIT_SIGNAL */
 		
 	return false;
@@ -866,12 +868,6 @@ void
 Editor::canvas_scroll_to (nframes64_t time_origin)
 {
 	leftmost_frame = time_origin;
-	nframes64_t rightmost_frame = leftmost_frame + current_page_frames ();
-
-	if (rightmost_frame > last_canvas_frame) {
-		last_canvas_frame = rightmost_frame;
-		//reset_scrolling_region ();
-	}
 }
 
 void

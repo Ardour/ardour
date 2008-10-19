@@ -264,18 +264,19 @@ void
 Mixer_UI::show_window ()
 {
 	present ();
-
-	set_window_pos_and_size ();
-
-	/* now reset each strips width so the right widgets are shown */
-	MixerStrip* ms;
-
-	TreeModel::Children rows = track_model->children();
-	TreeModel::Children::iterator ri;
-
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		ms = (*ri)[track_columns.strip];
-		ms->set_width (ms->get_width(), ms->width_owner());
+	if (!_visible) {
+		set_window_pos_and_size ();
+		
+		/* now reset each strips width so the right widgets are shown */
+		MixerStrip* ms;
+		
+		TreeModel::Children rows = track_model->children();
+		TreeModel::Children::iterator ri;
+		
+		for (ri = rows.begin(); ri != rows.end(); ++ri) {
+			ms = (*ri)[track_columns.strip];
+			ms->set_width (ms->get_width(), ms->width_owner());
+		}
 	}
 	_visible = true;
 }

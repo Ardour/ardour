@@ -344,7 +344,6 @@ Editor::Editor ()
 	_new_regionviews_show_envelope = false;
 	current_timefx = 0;
 	in_edit_group_row_change = false;
-	last_canvas_frame = 0;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;
 	_dragging_playhead = false;
@@ -1174,18 +1173,15 @@ Editor::handle_new_duration ()
 	}
 
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::handle_new_duration));
+	nframes64_t new_end = session->current_end_frame() + (nframes64_t) floorf (current_page_frames() * 0.10f);
 
-	nframes64_t new_end = session->get_maximum_extent() + (nframes64_t) floorf (current_page_frames() * 0.10f);
-				  
-	if (new_end > last_canvas_frame) {
-		last_canvas_frame = new_end;
-		horizontal_adjustment.set_upper (last_canvas_frame / frames_per_unit);
-		horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
-		//reset_scrolling_region ();
+	horizontal_adjustment.set_upper (new_end / frames_per_unit);
+	horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
+
+	if (horizontal_adjustment.get_value() + canvas_width > horizontal_adjustment.get_upper()) {
+		horizontal_adjustment.set_value (horizontal_adjustment.get_upper() - canvas_width);
 	}
-
-	horizontal_adjustment.set_value (leftmost_frame/frames_per_unit);
-	//cerr << "Editor::handle_new_duration () called ha v:l:u:ps:lcf = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << last_canvas_frame << endl;//DEBUG
+	//cerr << "Editor::handle_new_duration () called ha v:l:u:ps:lcf = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << endl;//DEBUG
 }
 
 void
@@ -1329,7 +1325,6 @@ Editor::connect_to_session (Session *t)
 		sfbrowser->set_session (session);
 	}
 
-	last_canvas_frame = 0; // force update in handle_new_duration()
 	handle_new_duration ();
 
 	redisplay_regions ();
@@ -4056,7 +4051,8 @@ Editor::end_location_changed (Location* location)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::end_location_changed), location));
 	//reset_scrolling_region ();
-	horizontal_adjustment.set_upper ( location->start());
+	nframes64_t session_span = location->start() + (nframes64_t) floorf (current_page_frames() * 0.10f);
+	horizontal_adjustment.set_upper (session_span / frames_per_unit);
 }
 
 int
@@ -4674,14 +4670,14 @@ Editor::idle_visual_changer ()
 
 		if (session) {
 			csf = session->current_start_frame();
-			cef = session->current_end_frame() + (current_page_frames() / 24);// Add a little extra so we can see the end marker
+			cef = session->current_end_frame();
 		}
 
 		/* if we seek beyond the current end of the canvas, move the end */
 
 		if (current_time_origin != pending_visual_change.time_origin) {
-			last_canvas_frame = (cef > (pending_visual_change.time_origin + current_page_frames())) ? cef : pending_visual_change.time_origin + current_page_frames();
-			horizontal_adjustment.set_upper ((cef - csf) / frames_per_unit);
+			cef += current_page_frames() / 10; // Add a little extra so we can see the end marker
+			horizontal_adjustment.set_upper (cef / frames_per_unit);
 			horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
 		} else {
 			update_fixed_rulers();

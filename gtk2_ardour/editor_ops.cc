@@ -1856,7 +1856,6 @@ Editor::temporal_zoom_session ()
 	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::temporal_zoom_session));
 
 	if (session) {
-		last_canvas_frame = ((session->current_end_frame() - session->current_start_frame()) + (current_page_frames() / 24));
 		temporal_zoom_by_frame (session->current_start_frame(), session->current_end_frame(), "zoom to session");
 	}
 }

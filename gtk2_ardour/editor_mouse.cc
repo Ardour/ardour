@@ -4009,7 +4009,6 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			
 		boost::shared_ptr<Region> new_region;
 
-
 		if (drag_info.copy) {
 			/* we already made a copy */
 			new_region = rv->region();
