@@ -228,6 +228,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_smpte_offset = 0;
 	_smpte_offset_negative = true;
 	last_smpte_valid = false;
+	af_last_transport_speed = 0.0;
+	af_last_frame = 0.0;
 
 	sync_time_vars ();
 

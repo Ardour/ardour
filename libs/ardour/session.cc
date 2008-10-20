@@ -1408,11 +1408,13 @@ Session::audible_frame () const
 	}
 
 	if (_transport_speed == 0) {
-		return tf;
+		ret = tf;
+		goto block_retrograde;
 	}
 
 	if (tf < offset) {
-		return 0;
+		ret = 0;
+		goto block_retrograde;
 	}
 
 	ret = tf;
@@ -1423,8 +1425,38 @@ Session::audible_frame () const
 
 		/* take latency into account */
 		
-		ret -= offset;
+		if (_transport_speed > 0.0) {
+			/* forwards */
+			ret -= offset;
+		} else {
+			/* backwards */
+			ret += offset;
+		}
+
 	}
+
+	/* do not allow retrograde motion near startup or a direction change
+	   caused by latency correction. we detect this by the asking if the present
+	   and previously-noted transport speed (and thus direction) are the same.
+	*/
+
+  block_retrograde:
+	if ((af_last_transport_speed >= 0.0) == (_transport_speed >= 0.0)) {
+
+		if (_transport_speed > 0.0) {
+			if (ret < af_last_frame) {
+				ret = af_last_frame;
+			}
+
+		} else if (_transport_speed < 0.0) {
+			if (ret > af_last_frame) {
+				ret = af_last_frame;
+			}
+		} 
+	} 
+		
+	af_last_frame = ret;
+	af_last_transport_speed = _transport_speed;
 
 	return ret;
 }

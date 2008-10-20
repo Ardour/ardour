@@ -1752,6 +1752,11 @@ class Session : public PBD::StatefulDestructible
 	void set_history_depth (uint32_t depth);
 
 	static bool _disable_all_loaded_plugins;
+
+	/* used in ::audible_frame() */
+
+	mutable float af_last_transport_speed;
+	mutable nframes64_t af_last_frame;
 };
 
 } // namespace ARDOUR
