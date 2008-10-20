@@ -77,7 +77,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	ArdourCanvas::SimpleLine *line = NULL;
 	gdouble xpos;
 	double who_cares;
-	double x1, x2, y1, y2, beat_density;
+	double x1, x2, y1, beat_density;
 
 	uint32_t beats = 0;
 	uint32_t bars = 0;

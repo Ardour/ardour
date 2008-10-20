@@ -6123,8 +6123,6 @@ Editor::fit_tracks ()
 
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
 
-		bool pws;
-
 		TrackViewList::iterator next;
 		
 		next = t;
