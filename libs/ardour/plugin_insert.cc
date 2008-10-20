@@ -57,7 +57,9 @@ using namespace PBD;
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
 PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placement placement)
-	: Processor (s, plug->name(), placement)
+	: Processor (s, plug->name(), placement),
+          _signal_analysis_collected_nframes(0),
+          _signal_analysis_collect_nframes_max(0)
 {
 	/* the first is the master */
 
@@ -74,7 +76,9 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug, Placemen
 }
 
 PluginInsert::PluginInsert (Session& s, const XMLNode& node)
-	: Processor (s, "unnamed plugin insert", PreFader)
+	: Processor (s, "unnamed plugin insert", PreFader),
+          _signal_analysis_collected_nframes(0),
+          _signal_analysis_collect_nframes_max(0)
 {
 	if (set_state (node)) {
 		throw failed_constructor();
@@ -92,7 +96,9 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 }
 
 PluginInsert::PluginInsert (const PluginInsert& other)
-	: Processor (other._session, other._name, other.placement())
+	: Processor (other._session, other._name, other.placement()),
+          _signal_analysis_collected_nframes(0),
+          _signal_analysis_collect_nframes_max(0)
 {
 	uint32_t count = other._plugins.size();
 
@@ -282,6 +288,13 @@ PluginInsert::deactivate ()
 void
 PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now)
 {
+	// Calculate if, and how many frames we need to collect for analysis
+	nframes_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
+                                            _signal_analysis_collected_nframes);
+	if (nframes < collect_signal_nframes) { // we might not get all frames now
+		collect_signal_nframes = nframes;
+	}
+
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
 
@@ -311,10 +324,45 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 		}
 	}
 
+	if (collect_signal_nframes > 0) {
+		// collect input
+		//std::cerr << "collect input, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
+		//std::cerr << "               streams " << input_streams().n_audio() << std::endl;
+		//std::cerr << "filling buffer with " << collect_signal_nframes << " frames at " << _signal_analysis_collected_nframes << std::endl;
+		for (uint32_t i = 0; i < input_streams().n_audio(); ++i) {
+			_signal_analysis_input_bufferset.get_audio(i).read_from(
+				bufs.get_audio(i),
+				collect_signal_nframes,
+				_signal_analysis_collected_nframes); // offset is for target buffer
+		}
+	}
+
 	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->connect_and_run (bufs, in_index, out_index, nframes, offset);
 	}
 
+	if (collect_signal_nframes > 0) {
+		// collect output
+		//std::cerr << "       output, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
+		//std::cerr << "               streams " << output_streams().n_audio() << std::endl;
+		for (uint32_t i = 0; i < output_streams().n_audio(); ++i) {
+			_signal_analysis_output_bufferset.get_audio(i).read_from(
+				bufs.get_audio(i), 
+				collect_signal_nframes, 
+				_signal_analysis_collected_nframes); // offset is for target buffer
+		}
+
+		_signal_analysis_collected_nframes += collect_signal_nframes;
+		assert(_signal_analysis_collected_nframes <= _signal_analysis_collect_nframes_max);
+
+		if (_signal_analysis_collected_nframes == _signal_analysis_collect_nframes_max) {
+			_signal_analysis_collect_nframes_max = 0;
+			_signal_analysis_collected_nframes   = 0;
+
+			AnalysisDataGathered(&_signal_analysis_input_bufferset, 
+					     &_signal_analysis_output_bufferset);
+		}
+	}
 	/* leave remaining channel buffers alone */
 }
 
@@ -507,6 +555,17 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	if (_plugins.front()->configure_io (in, out) < 0) {
 		return false;
 	}
+
+	// we don't know the analysis window size, so we must work with the
+	// current buffer size here. each request for data fills in these
+	// buffers and the analyser makes sure it gets enough data for the 
+	// analysis window
+	_signal_analysis_input_bufferset.ensure_buffers (in,  session().engine().frames_per_cycle());
+	_signal_analysis_input_bufferset.set_count(in);
+
+	_signal_analysis_output_bufferset.ensure_buffers(out, session().engine().frames_per_cycle());
+	_signal_analysis_output_bufferset.set_count(out);
+
 
 	return Processor::configure_io (in, out);
 }

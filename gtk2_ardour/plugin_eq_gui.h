@@ -42,11 +42,13 @@ class PluginEqGui : public Gtk::Table
 
 	private:
 		// Setup
-		void set_buffer_size(uint32_t);
+		void set_buffer_size(uint32_t, uint32_t);
 		void change_dB_scale();
 
 		// Analysis
-		void run_analysis();
+		void run_impulse_analysis();
+		void signal_collect_callback(ARDOUR::BufferSet *, ARDOUR::BufferSet *);
+		float _signal_analysis_running;
 
 		// Drawing
 		virtual void on_hide();
@@ -62,10 +64,12 @@ class PluginEqGui : public Gtk::Table
 		bool expose_analysis_area(GdkEventExpose *);
 
 		void draw_scales_power(Gtk::Widget *, cairo_t *);
-		void plot_amplitude(Gtk::Widget *,cairo_t *);
+		void plot_impulse_amplitude(Gtk::Widget *,cairo_t *);
 
 		void draw_scales_phase(Gtk::Widget *,cairo_t *);
-		void plot_phase(Gtk::Widget *,cairo_t *);
+		void plot_impulse_phase(Gtk::Widget *,cairo_t *);
+
+		void plot_signal_amplitude_difference(Gtk::Widget *,cairo_t *);
 
 		// Helpers
 		bool timeout_callback();
@@ -86,6 +90,7 @@ class PluginEqGui : public Gtk::Table
 		float _log_max;
 
 		nframes_t _buffer_size;
+		nframes_t _signal_buffer_size;
 
 		// buffers		
 		ARDOUR::BufferSet _bufferset;
@@ -97,7 +102,10 @@ class PluginEqGui : public Gtk::Table
 
 		// My objects
 		FFT *_impulse_fft;
+		FFT *_signal_input_fft;
+		FFT *_signal_output_fft;
 		boost::shared_ptr<ARDOUR::Plugin> _plugin;
+		boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
 
 		// gui objects
 		Gtk::DrawingArea *_analysis_area;

@@ -38,8 +38,13 @@ class FFT
 		FFT(uint32_t);
 		~FFT();
 
+		enum WindowingType {
+			NONE,
+			HANN
+		};
+
 		void reset();
-		void analyze(ARDOUR::Sample *);
+		void analyze(ARDOUR::Sample *, WindowingType w = NONE);
 		void calculate();
 
 		uint32_t bins() const { return _data_size; }
@@ -47,11 +52,16 @@ class FFT
 		float power_at_bin(uint32_t i) const { return _power_at_bin[i]; }
 		float phase_at_bin(uint32_t i) const { return _phase_at_bin[i]; }
 
+
 	private:
+
+		float *get_hann_window();
 
 		uint32_t const _window_size;
 		uint32_t const _data_size;
 		uint32_t _iterations;
+
+		float *_hann_window;
 
 		float *_fftInput;
 		float *_fftOutput;

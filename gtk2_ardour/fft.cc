@@ -26,7 +26,8 @@
 FFT::FFT(uint32_t windowSize)
 	: _window_size(windowSize),
 	  _data_size(_window_size/2),
-	_iterations(0)
+	_iterations(0),
+	_hann_window(0)
 {
 	_fftInput  = (float *) fftwf_malloc(sizeof(float) * _window_size);
 
@@ -50,11 +51,18 @@ FFT::reset()
 }
 
 void
-FFT::analyze(ARDOUR::Sample *input)
+FFT::analyze(ARDOUR::Sample *input, WindowingType windowing_type)
 {
 	_iterations++;
 
 	memcpy(_fftInput, input, sizeof(float) * _window_size);
+
+	if (windowing_type == HANN) {
+		float *window = get_hann_window();
+		for (uint32_t i = 0; i < _window_size; i++) {
+			_fftInput[i] *= window[i];
+		}
+	}
 
 	fftwf_execute(_plan);
 
@@ -96,9 +104,37 @@ FFT::calculate()
 	}
 }
 
+float *
+FFT::get_hann_window()
+{
+	if (_hann_window)
+		return _hann_window;
+
+
+        _hann_window = (float *) malloc(sizeof(float) * _window_size);
+
+	double sum = 0.0;
+        
+        for (uint32_t i=0; i < _window_size; i++) {
+                _hann_window[i]=0.81f * ( 0.5f - (0.5f * (float) cos(2.0f * M_PI * (float)i / (float)(_window_size))));
+                sum += _hann_window[i];
+        }
+
+        double isum = 1.0 / sum;
+        
+        for (uint32_t i=0; i < _window_size; i++) {
+                _hann_window[i] *= isum;
+        }
+
+	return _hann_window;
+}
+
 
 FFT::~FFT()
 {
+	if (_hann_window) {
+		free(_hann_window);
+	}
 	fftwf_destroy_plan(_plan);
 	free(_power_at_bin);
 	free(_phase_at_bin);

@@ -22,6 +22,7 @@
 #include "fft.h"
 
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include <ardour/audio_buffer.h>
 #include <ardour/data_type.h>
 
@@ -36,14 +37,19 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	: _min_dB(-12.0),
 	  _max_dB(+12.0),
 	  _step_dB(3.0),
-	  _impulse_fft(0)
+	  _impulse_fft(0),
+	  _signal_input_fft(0),
+	  _signal_output_fft(0),
+	  _plugin_insert(pluginInsert)
 {
+	_signal_analysis_running = false;
 	_samplerate = ARDOUR_UI::instance()->the_session()->frame_rate();
 
-	_plugin = pluginInsert->get_impulse_analysis_plugin();
+	_plugin = _plugin_insert->get_impulse_analysis_plugin();
 	_plugin->activate();
 
-	set_buffer_size(4096);
+	set_buffer_size(4096, 16384);
+	//set_buffer_size(4096, 4096);
 
 	_log_coeff = (1.0 - 2.0 * (1000.0/(_samplerate/2.0))) / powf(1000.0/(_samplerate/2.0), 2.0); 
 	_log_max = log10f(1 + _log_coeff);
@@ -80,6 +86,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	ADD_DB_ROW(-12, +12, 3, "-12dB .. +12dB");
 	ADD_DB_ROW(-24, +24, 5, "-24dB .. +24dB");
 	ADD_DB_ROW(-36, +36, 6, "-36dB .. +36dB");
+	ADD_DB_ROW(-64, +64,12, "-64dB .. +64dB");
 
 #undef ADD_DB_ROW
 
@@ -103,6 +110,10 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	attach( *manage(_analysis_area), 1, 3, 1, 2);
 	attach( *manage(dBSelectBin),    1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 	attach( *manage(_phase_button),	 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+
+
+	// Connect the realtime signal collection callback
+	_plugin_insert->AnalysisDataGathered.connect( sigc::mem_fun(*this, &PluginEqGui::signal_collect_callback ));
 }
 
 PluginEqGui::~PluginEqGui()
@@ -112,6 +123,9 @@ PluginEqGui::~PluginEqGui()
 	}
 
 	delete _impulse_fft;
+	delete _signal_input_fft;
+	delete _signal_output_fft;
+
 	_plugin->deactivate();
 	
 	// all gui objects are *manage'd by the inherited Table object
@@ -190,26 +204,46 @@ PluginEqGui::redraw_scales()
 	}
 
 	_analysis_area->queue_draw();	
+
+	// TODO: Add graph legend!
 }
 
 void
-PluginEqGui::set_buffer_size(uint32_t size)
+PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 {
-	if (_buffer_size == size)
+	if (_buffer_size == size && _signal_buffer_size == signal_size)
 		return;
 
-	_buffer_size = size;
 
-	if (_impulse_fft) {
-		delete _impulse_fft;
-		_impulse_fft = 0;
+	FFT *tmp1 = _impulse_fft;
+	FFT *tmp2 = _signal_input_fft;
+	FFT *tmp3 = _signal_output_fft;
+
+	try {
+		_impulse_fft       = new FFT(size); 
+		_signal_input_fft  = new FFT(signal_size); 
+		_signal_output_fft = new FFT(signal_size); 
+	} catch( ... ) {
+		// Don't care about lost memory, we're screwed anyhow
+		_impulse_fft       = tmp1;
+		_signal_input_fft  = tmp2;
+		_signal_output_fft = tmp3;
+		throw;
 	}
 
-	_impulse_fft = new FFT(_buffer_size);
+	if (tmp1) delete tmp1;
+	if (tmp2) delete tmp1;
+	if (tmp3) delete tmp1;
+		
+	_buffer_size = size;
+	_signal_buffer_size = signal_size;
 
+	// These are for impulse analysis only, the signal analysis uses the actual
+	// number of I/O's for the plugininsert
 	uint32_t inputs  = _plugin->get_info()->n_inputs.n_audio();
 	uint32_t outputs = _plugin->get_info()->n_outputs.n_audio();
 
+	// buffers for the signal analysis are ensured inside PluginInsert
 	uint32_t n_chans = std::max(inputs, outputs);
 	_bufferset.ensure_buffers(ARDOUR::DataType::AUDIO, n_chans, _buffer_size);
 
@@ -232,13 +266,42 @@ PluginEqGui::resize_analysis_area(Gtk::Allocation& size)
 bool
 PluginEqGui::timeout_callback()
 {
-	run_analysis();
+	if (!_signal_analysis_running) {
+		_signal_analysis_running = true;
+		_plugin_insert -> collect_signal_for_analysis(_signal_buffer_size);
+	}
+	run_impulse_analysis();
 
 	return true;
 }
 
 void
-PluginEqGui::run_analysis()
+PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *out)
+{
+	ENSURE_GUI_THREAD(bind (mem_fun (*this, &PluginEqGui::signal_collect_callback), in, out));
+
+	_signal_input_fft ->reset();
+	_signal_output_fft->reset();
+
+	for (uint32_t i = 0; i < _plugin_insert->input_streams().n_audio(); ++i) {
+		_signal_input_fft ->analyze(in ->get_audio(i).data(_signal_buffer_size, 0), FFT::HANN);
+	}
+	
+	for (uint32_t i = 0; i < _plugin_insert->output_streams().n_audio(); ++i) {
+		_signal_output_fft->analyze(out->get_audio(i).data(_signal_buffer_size, 0), FFT::HANN);
+	}
+
+	_signal_input_fft ->calculate();
+	_signal_output_fft->calculate();
+
+	_signal_analysis_running = false;
+
+	// This signals calls expose_analysis_area()
+	_analysis_area->queue_draw();	
+}
+
+void
+PluginEqGui::run_impulse_analysis()
 {
 	uint32_t inputs  = _plugin->get_info()->n_inputs.n_audio();
 	uint32_t outputs = _plugin->get_info()->n_outputs.n_audio();
@@ -320,17 +383,19 @@ PluginEqGui::redraw_analysis_area()
 	cairo_paint(cr);
 
 	if (_phase_button->get_active()) {
-		plot_phase(_analysis_area, cr);
+		plot_impulse_phase(_analysis_area, cr);
 	}
-	plot_amplitude(_analysis_area, cr);
+	plot_impulse_amplitude(_analysis_area, cr);
 
+	// TODO: make this optional
+	plot_signal_amplitude_difference(_analysis_area, cr);
 
         cairo_destroy(cr);
 
 
 }
 
-#define PHASE_PROPORTION 0.6
+#define PHASE_PROPORTION 0.5
 
 void 
 PluginEqGui::draw_scales_phase(Gtk::Widget *w, cairo_t *cr)
@@ -385,13 +450,16 @@ PluginEqGui::draw_scales_phase(Gtk::Widget *w, cairo_t *cr)
 }
 
 void 
-PluginEqGui::plot_phase(Gtk::Widget *w, cairo_t *cr)
+PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 {
 	float x,y;
 
 	int prevX = 0;
 	float avgY = 0.0;
 	int avgNum = 0;
+
+	float width  = w->get_width();
+	float height = w->get_height();
 
         cairo_set_source_rgba(cr, 0.95, 0.3, 0.2, 1.0);
 	for (uint32_t i = 0; i < _impulse_fft->bins()-1; i++) {
@@ -407,7 +475,11 @@ PluginEqGui::plot_phase(Gtk::Widget *w, cairo_t *cr)
 			avgY = 0;
 			avgNum = 0;
 		} else if (rint(x) > prevX || i == _impulse_fft->bins()-1 ) {
-			cairo_line_to(cr, prevX, avgY/(float)avgNum);
+			avgY = avgY/(float)avgNum;
+			if (avgY > (height * 10.0) ) avgY = height * 10.0;
+			if (avgY < (-height * 10.0) ) avgY = -height * 10.0;
+			cairo_line_to(cr, prevX, avgY);
+			//cairo_line_to(cr, prevX, avgY/(float)avgNum);
 
 			avgY = 0;
 			avgNum = 0;
@@ -454,7 +526,8 @@ PluginEqGui::draw_scales_power(Gtk::Widget *w, cairo_t *cr)
 
 		cairo_set_source_rgb(cr, 0.4, 0.4, 0.4);
 
-		cairo_move_to(cr, x + fontXOffset, 3.0);
+		//cairo_move_to(cr, x + fontXOffset, 3.0);
+		cairo_move_to(cr, x - extents.height, 3.0);
 
 		cairo_rotate(cr, M_PI / 2.0);
 		cairo_show_text(cr, buf);
@@ -526,13 +599,16 @@ power_to_dB(float a)
 }
 
 void 
-PluginEqGui::plot_amplitude(Gtk::Widget *w, cairo_t *cr)
+PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 {
 	float x,y;
 
 	int prevX = 0;
 	float avgY = 0.0;
 	int avgNum = 0;
+
+	float width  = w->get_width();
+	float height = w->get_height();
 
         cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 	cairo_set_line_width (cr, 2.5);
@@ -552,7 +628,11 @@ PluginEqGui::plot_amplitude(Gtk::Widget *w, cairo_t *cr)
 			avgY = 0;
 			avgNum = 0;
 		} else if (rint(x) > prevX || i == _impulse_fft->bins()-1 ) {
-			cairo_line_to(cr, prevX, avgY/(float)avgNum);
+			avgY = avgY/(float)avgNum;
+			if (avgY > (height * 10.0) ) avgY = height * 10.0;
+			if (avgY < (-height * 10.0) ) avgY = -height * 10.0;
+			cairo_line_to(cr, prevX, avgY);
+			//cairo_line_to(cr, prevX, avgY/(float)avgNum);
 
 			avgY = 0;
 			avgNum = 0;
@@ -567,3 +647,78 @@ PluginEqGui::plot_amplitude(Gtk::Widget *w, cairo_t *cr)
 	cairo_stroke(cr);
 }
 
+void
+PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
+{
+	float x,y;
+
+	int prevX = 0;
+	float avgY = 0.0;
+	int avgNum = 0;
+
+	float width  = w->get_width();
+	float height = w->get_height();
+
+        cairo_set_source_rgb(cr, 0.0, 1.0, 0.0);
+	cairo_set_line_width (cr, 2.5);
+
+	for (uint32_t i = 0; i < _signal_input_fft->bins()-1; i++) {
+		// x coordinate of bin i
+		x  = log10f(1.0 + (float)i / (float)_signal_input_fft->bins() * _log_coeff) / _log_max;
+		x *= _analysis_width;
+
+		float power_out = power_to_dB(_signal_output_fft->power_at_bin(i));
+		float power_in  = power_to_dB(_signal_input_fft ->power_at_bin(i));
+		float power = power_out - power_in;
+		
+		// for SaBer
+		/*
+		double p = 10.0 * log10( 1.0 + (double)_signal_output_fft->power_at_bin(i) - (double)
+ - _signal_input_fft ->power_at_bin(i));
+		//p *= 1000000.0;
+		float power = (float)p;
+
+		if ( (i % 1000) == 0) {
+			std::cerr << i << ": " << power << std::endl;
+		}
+		*/
+
+		if (isinf(power)) {
+			if (power < 0) {
+				power = _min_dB - 1.0;
+			} else {
+				power = _max_dB - 1.0;
+			}
+		} else if (isnan(power)) {
+			power = _min_dB - 1.0;
+		}
+
+		float yCoeff = ( power - _min_dB) / (_max_dB - _min_dB);
+
+		y = _analysis_height - _analysis_height*yCoeff;
+
+		if ( i == 0 ) {
+			cairo_move_to(cr, x, y);
+
+			avgY = 0;
+			avgNum = 0;
+		} else if (rint(x) > prevX || i == _impulse_fft->bins()-1 ) {
+			avgY = avgY/(float)avgNum;
+			if (avgY > (height * 10.0) ) avgY = height * 10.0;
+			if (avgY < (-height * 10.0) ) avgY = -height * 10.0;
+			cairo_line_to(cr, prevX, avgY);
+
+			avgY = 0;
+			avgNum = 0;
+				
+		}
+
+		prevX = rint(x);
+		avgY += y;
+		avgNum++;
+	}
+
+	cairo_stroke(cr);
+
+	
+}
