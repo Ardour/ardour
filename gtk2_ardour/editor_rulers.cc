@@ -796,8 +796,9 @@ Editor::update_ruler_visibility ()
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
 	
-	if (trackview_by_y_position(vertical_adjustment.get_value() + canvas_height) != 0) {
-		trackview_by_y_position(vertical_adjustment.get_value() + canvas_height)->clip_to_viewport ();
+	gdouble bottom_track_pos = vertical_adjustment.get_value() + canvas_height - canvas_timebars_vsize;
+	if (trackview_by_y_position(bottom_track_pos) != 0) {
+		trackview_by_y_position(bottom_track_pos)->clip_to_viewport ();
 	}
 
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
