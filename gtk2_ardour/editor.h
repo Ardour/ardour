@@ -1303,6 +1303,8 @@ class Editor : public PublicEditor
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
 
+	void region_gain_motion_callback (ArdourCanvas::Item*, GdkEvent*);
+
 	void start_fade_in_grab (ArdourCanvas::Item*, GdkEvent*);
 	void start_fade_out_grab (ArdourCanvas::Item*, GdkEvent*);
 	void fade_in_drag_motion_callback (ArdourCanvas::Item*, GdkEvent*);

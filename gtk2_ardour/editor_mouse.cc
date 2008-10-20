@@ -702,7 +702,13 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case MouseGain:
 			switch (item_type) {
 			case RegionItem:
-				// start_line_grab_from_regionview (item, event);
+				/* start a grab so that if we finish after moving
+				   we can tell what happened.
+				*/
+				drag_info.item = item;
+				drag_info.motion_callback = &Editor::region_gain_motion_callback;
+				drag_info.finished_callback = 0;
+				start_grab (event, current_canvas_cursor);
 				break;
 
 			case GainControlPointItem:
@@ -1107,7 +1113,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			switch (item_type) {
 			case RegionItem:
-				dynamic_cast<AudioRegionView*>(clicked_regionview)->add_gain_point_event (item, event);
+				/* check that we didn't drag before releasing, since
+				   its really annoying to create new control
+				   points when doing this.
+				*/
+				if (drag_info.first_move) { 
+					dynamic_cast<AudioRegionView*>(clicked_regionview)->add_gain_point_event (item, event);
+				}
 				return true;
 				break;
 				
@@ -1733,7 +1745,9 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 		  if (!from_autoscroll) {
 			  maybe_autoscroll_horizontally (&event->motion);
 		  }
-		  (this->*(drag_info.motion_callback)) (item, event);
+		  if (drag_info.motion_callback) {
+			  (this->*(drag_info.motion_callback)) (item, event);
+		  }
 		  goto handled;
 	  }
 	  goto not_handled;
@@ -1743,6 +1757,15 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 	}
 
 	switch (mouse_mode) {
+	case MouseGain:
+		if (item_type == RegionItem) {
+			if (drag_info.item && drag_info.motion_callback) {
+				(this->*(drag_info.motion_callback)) (item, event);
+			}
+			goto handled;
+		}
+		break;
+
 	case MouseObject:
 	case MouseRange:
 	case MouseZoom:
@@ -1752,7 +1775,9 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item
 			if (!from_autoscroll) {
 				maybe_autoscroll (&event->motion);
 			}
-			(this->*(drag_info.motion_callback)) (item, event);
+			if (drag_info.motion_callback) {
+				(this->*(drag_info.motion_callback)) (item, event);
+			}
 			goto handled;
 		}
 		goto not_handled;
@@ -1919,6 +1944,14 @@ Editor::end_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	finalize_drag ();
 
 	return did_drag;
+}
+
+void
+Editor::region_gain_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	if (drag_info.first_move && drag_info.move_threshold_passed) {
+		drag_info.first_move = false;
+	}
 }
 
 void
@@ -3042,8 +3075,11 @@ Editor::start_line_grab (AutomationLine* line, GdkEvent* event)
 
 	start_grab (event, fader_cursor);
 
-	/* fix grab y */
-	
+	/* store grab start in parent frame */
+
+	drag_info.grab_x = cx;
+	drag_info.grab_y = cy;
+
 	double fraction = 1.0 - (cy / line->height());
 
 	line->start_drag (0, drag_info.grab_frame, fraction);
@@ -3059,20 +3095,18 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	AutomationLine* line = reinterpret_cast<AutomationLine *> (drag_info.data);
 
 	double dy = drag_info.current_pointer_y - drag_info.last_pointer_y;
-
+	
 	if (event->button.state & Keyboard::SecondaryModifier) {
 		dy *= 0.1;
 	}
 
-	double cx = drag_info.current_pointer_x;
 	double cy = drag_info.grab_y + drag_info.cumulative_y_drag + dy;
 
 	// calculate zero crossing point. back off by .01 to stay on the
 	// positive side of zero
-	double _unused = 0;
 	double zero_gain_y = (1.0 - ZERO_GAIN_FRACTION) * line->height() - .01;
 
-	line->parent_group().i2w(_unused, zero_gain_y);
+	// line->parent_group().i2w(_unused, zero_gain_y);
 
 	// make sure we hit zero when passing through
 	if ((cy < zero_gain_y and (cy - dy) > zero_gain_y)
@@ -3084,6 +3118,7 @@ Editor::line_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 
 	cy = max (0.0, cy);
 	cy = min ((double) line->height(), cy);
+
 
 	double fraction = 1.0 - (cy / line->height());
 
