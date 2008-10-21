@@ -176,7 +176,6 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 }
 
 double current = 0.0;
-bool currentInitialized = 0;
 
 void
 Editor::update_current_screen ()

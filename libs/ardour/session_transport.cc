@@ -437,6 +437,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_requested_return_frame = -1;
 	}
 
+        have_looped = false; 
+
         send_full_time_code ();
 	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
@@ -766,7 +768,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 					}
 				}
 			}
-
+			have_looped = true;
 			TransportLooped(); // EMIT SIGNAL
 		}
 	}
@@ -926,6 +928,7 @@ void
 Session::start_transport ()
 {
 	_last_roll_location = _transport_frame;
+	have_looped = false;
 
 	/* if record status is Enabled, move it to Recording. if its
 	   already Recording, move it to Disabled. 

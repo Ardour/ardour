@@ -148,6 +148,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_record_status, Disabled);
 	loop_changing = false;
 	play_loop = false;
+	have_looped = false;
 	_last_roll_location = 0;
 	_last_record_location = 0;
 	pending_locate_frame = 0;
@@ -228,8 +229,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_smpte_offset = 0;
 	_smpte_offset_negative = true;
 	last_smpte_valid = false;
-	af_last_transport_speed = 0.0;
-	af_last_frame = 0.0;
 
 	sync_time_vars ();
 

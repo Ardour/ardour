@@ -1377,6 +1377,10 @@ Session::audible_frame () const
 	nframes_t ret;
 	nframes_t offset;
 	nframes_t tf;
+	
+	if (_transport_speed == 0.0f) {
+		return last_stop_frame;
+	}
 
 	/* the first of these two possible settings for "offset"
 	   mean that the audible frame is stationary until 
@@ -1407,56 +1411,43 @@ Session::audible_frame () const
 		tf = _transport_frame;
 	}
 
-	if (_transport_speed == 0) {
-		ret = tf;
-		goto block_retrograde;
-	}
-
-	if (tf < offset) {
-		ret = 0;
-		goto block_retrograde;
-	}
-
 	ret = tf;
 
 	if (!non_realtime_work_pending()) {
 
 		/* MOVING */
 
-		/* take latency into account */
-		
-		if (_transport_speed > 0.0) {
+		/* check to see if we have passed the first guaranteed
+		   audible frame past our last stopping position. if not,
+		   the return that last stopping point because in terms
+		   of audible frames, we have not moved yet.
+		*/
+
+		if (_transport_speed > 0.0f) {
+
+			if (!play_loop || !have_looped) {
+				if (tf < last_stop_frame + offset) {
+					return last_stop_frame;
+					
+				}
+			} 
+			
+
 			/* forwards */
 			ret -= offset;
-		} else {
-			/* backwards */
-			ret += offset;
+
+		} else if (_transport_speed < 0.0f) {
+
+			/* XXX wot? no backward looping? */
+
+			if (tf > last_stop_frame - offset) {
+				return last_stop_frame;
+			} else {
+				/* backwards */
+				ret += offset;
+			}
 		}
-
 	}
-
-	/* do not allow retrograde motion near startup or a direction change
-	   caused by latency correction. we detect this by the asking if the present
-	   and previously-noted transport speed (and thus direction) are the same.
-	*/
-
-  block_retrograde:
-	if ((af_last_transport_speed >= 0.0) == (_transport_speed >= 0.0)) {
-
-		if (_transport_speed > 0.0) {
-			if (ret < af_last_frame) {
-				ret = af_last_frame;
-			}
-
-		} else if (_transport_speed < 0.0) {
-			if (ret > af_last_frame) {
-				ret = af_last_frame;
-			}
-		} 
-	} 
-		
-	af_last_frame = ret;
-	af_last_transport_speed = _transport_speed;
 
 	return ret;
 }

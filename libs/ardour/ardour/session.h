@@ -1755,8 +1755,7 @@ class Session : public PBD::StatefulDestructible
 
 	/* used in ::audible_frame() */
 
-	mutable float af_last_transport_speed;
-	mutable nframes64_t af_last_frame;
+	mutable bool have_looped;
 };
 
 } // namespace ARDOUR
