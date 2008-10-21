@@ -377,6 +377,68 @@ Editor::Editor ()
 	set_zoom_focus (ZoomFocusLeft);
  	zoom_range_clock.ValueChanged.connect (mem_fun(*this, &Editor::zoom_adjustment_changed));
 
+	bbt_label.set_name ("EditorTimeButton");
+	bbt_label.set_size_request (-1, (int)timebar_height);
+	bbt_label.set_alignment (1.0, 0.5);
+	bbt_label.set_padding (5,0);
+	bbt_label.hide ();
+	bbt_label.set_no_show_all();
+	minsec_label.set_name ("EditorTimeButton");
+	minsec_label.set_size_request (-1, (int)timebar_height);
+	minsec_label.set_alignment (1.0, 0.5);
+	minsec_label.set_padding (5,0);
+	minsec_label.hide ();
+	minsec_label.set_no_show_all();
+	smpte_label.set_name ("EditorTimeButton");
+	smpte_label.set_size_request (-1, (int)timebar_height);
+	smpte_label.set_alignment (1.0, 0.5);
+	smpte_label.set_padding (5,0);
+	smpte_label.hide ();
+	smpte_label.set_no_show_all();
+	frame_label.set_name ("EditorTimeButton");
+	frame_label.set_size_request (-1, (int)timebar_height);
+	frame_label.set_alignment (1.0, 0.5);
+	frame_label.set_padding (5,0);
+	frame_label.hide ();
+	frame_label.set_no_show_all();
+
+	tempo_label.set_name ("EditorTimeButton");
+	tempo_label.set_size_request (-1, (int)timebar_height);
+	tempo_label.set_alignment (1.0, 0.5);
+	tempo_label.set_padding (5,0);
+	tempo_label.hide();
+	tempo_label.set_no_show_all();
+	meter_label.set_name ("EditorTimeButton");
+	meter_label.set_size_request (-1, (int)timebar_height);
+	meter_label.set_alignment (1.0, 0.5);
+	meter_label.set_padding (5,0);
+	meter_label.hide();
+	meter_label.set_no_show_all();
+	mark_label.set_name ("EditorTimeButton");
+	mark_label.set_size_request (-1, (int)timebar_height);
+	mark_label.set_alignment (1.0, 0.5);
+	mark_label.set_padding (5,0);
+	mark_label.hide();
+	mark_label.set_no_show_all();
+	cd_mark_label.set_name ("EditorTimeButton");
+	cd_mark_label.set_size_request (-1, (int)timebar_height);
+	cd_mark_label.set_alignment (1.0, 0.5);
+	cd_mark_label.set_padding (5,0);
+	cd_mark_label.hide();
+	cd_mark_label.set_no_show_all();
+	range_mark_label.set_name ("EditorTimeButton");
+	range_mark_label.set_size_request (-1, (int)timebar_height);
+	range_mark_label.set_alignment (1.0, 0.5);
+	range_mark_label.set_padding (5,0);
+	range_mark_label.hide();
+	range_mark_label.set_no_show_all();
+	transport_mark_label.set_name ("EditorTimeButton");
+	transport_mark_label.set_size_request (-1, (int)timebar_height);
+	transport_mark_label.set_alignment (1.0, 0.5);
+	transport_mark_label.set_padding (5,0);
+	transport_mark_label.hide();
+	transport_mark_label.set_no_show_all();
+
 	initialize_rulers ();
 	initialize_canvas ();
 
@@ -407,69 +469,14 @@ Editor::Editor ()
 	setup_toolbar ();
 
  	edit_point_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_point_clock_changed));
-	
-	time_canvas_vbox.pack_start (*_ruler_separator, false, false);
-	time_canvas_vbox.pack_start (*minsec_ruler, false, false);
-	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
-	time_canvas_vbox.pack_start (*frames_ruler, false, false);
-	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
+
 	//time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
 	time_canvas_vbox.set_size_request (-1, -1);
-	bbt_label.set_name ("EditorTimeButton");
-	bbt_label.set_size_request (-1, (int)timebar_height);
-	bbt_label.set_alignment (1.0, 0.5);
-	bbt_label.set_padding (5,0);
-	minsec_label.set_name ("EditorTimeButton");
-	minsec_label.set_size_request (-1, (int)timebar_height);
-	minsec_label.set_alignment (1.0, 0.5);
-	minsec_label.set_padding (5,0);
-	smpte_label.set_name ("EditorTimeButton");
-	smpte_label.set_size_request (-1, (int)timebar_height);
-	smpte_label.set_alignment (1.0, 0.5);
-	smpte_label.set_padding (5,0);
-	frame_label.set_name ("EditorTimeButton");
-	frame_label.set_size_request (-1, (int)timebar_height);
-	frame_label.set_alignment (1.0, 0.5);
-	frame_label.set_padding (5,0);
 
-	tempo_label.set_name ("EditorTimeButton");
-	tempo_label.set_size_request (-1, (int)timebar_height);
-	tempo_label.set_alignment (1.0, 0.5);
-	tempo_label.set_padding (5,0);
-	meter_label.set_name ("EditorTimeButton");
-	meter_label.set_size_request (-1, (int)timebar_height);
-	meter_label.set_alignment (1.0, 0.5);
-	meter_label.set_padding (5,0);
-	mark_label.set_name ("EditorTimeButton");
-	mark_label.set_size_request (-1, (int)timebar_height);
-	mark_label.set_alignment (1.0, 0.5);
-	mark_label.set_padding (5,0);
-	cd_mark_label.set_name ("EditorTimeButton");
-	cd_mark_label.set_size_request (-1, (int)timebar_height);
-	cd_mark_label.set_alignment (1.0, 0.5);
-	cd_mark_label.set_padding (5,0);
-	range_mark_label.set_name ("EditorTimeButton");
-	range_mark_label.set_size_request (-1, (int)timebar_height);
-	range_mark_label.set_alignment (1.0, 0.5);
-	range_mark_label.set_padding (5,0);
-	transport_mark_label.set_name ("EditorTimeButton");
-	transport_mark_label.set_size_request (-1, (int)timebar_height);
-	transport_mark_label.set_alignment (1.0, 0.5);
-	transport_mark_label.set_padding (5,0);
-
-	ruler_label_vbox.pack_start (minsec_label, false, false);
-	ruler_label_vbox.pack_start (smpte_label, false, false);
-	ruler_label_vbox.pack_start (frame_label, false, false);
-	ruler_label_vbox.pack_start (bbt_label, false, false);
-	
 	ruler_label_event_box.add (ruler_label_vbox);	
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	ruler_label_event_box.set_name ("TimebarLabelBase");
 	ruler_label_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
-
-	time_button_vbox.pack_start (meter_label, false, false);
-	time_button_vbox.pack_start (tempo_label, false, false);
-	time_button_vbox.pack_start (mark_label, false, false);
 
 	time_button_event_box.add (time_button_vbox);
 	
@@ -887,19 +894,21 @@ Editor::set_entered_track (TimeAxisView* tav)
 void
 Editor::show_window ()
 {
-	show_all ();
-	present ();
+	if (! is_visible ()) {
+		show_all ();
 
-	/* now reset all audio_time_axis heights, because widgets might need
-	   to be re-hidden
-	*/
+		/* now reset all audio_time_axis heights, because widgets might need
+		   to be re-hidden
+		*/
 	
-	TimeAxisView *tv;
+		TimeAxisView *tv;
 	
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		tv = (static_cast<TimeAxisView*>(*i));
-		tv->reset_height ();
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			tv = (static_cast<TimeAxisView*>(*i));
+			tv->reset_height ();
+		}
 	}
+	present ();
 }
 
 void
