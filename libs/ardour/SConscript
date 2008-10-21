@@ -99,6 +99,7 @@ sndfilesource.cc
 sndfileimportable.cc
 source.cc
 source_factory.cc
+svn_revision.cc
 tempo.cc
 track.cc
 transient_detector.cc

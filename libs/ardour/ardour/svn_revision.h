@@ -1,4 +1,8 @@
 #ifndef __ardour_svn_revision_h__
 #define __ardour_svn_revision_h__
-static const char* ardour_svn_revision = "3980";
+
+namespace ARDOUR {
+	extern const char* svn_revision;
+}
+
 #endif

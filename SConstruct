@@ -262,16 +262,16 @@ def create_stored_revision (target = None, source = None, env = None):
     if os.path.exists('.svn'):    
         rev = fetch_svn_revision ('.');
         try:
-            text  = "#ifndef __ardour_svn_revision_h__\n"
-            text += "#define __ardour_svn_revision_h__\n"
-            text += "static const char* ardour_svn_revision = \"" + rev + "\";\n";
-            text += "#endif\n"
-            print '============> writing svn revision info to svn_revision.h\n'
-            o = file ('svn_revision.h', 'w')
+            text  = "#include <ardour/svn_revision.h>\n"
+            text += "namespace ARDOUR {\n";
+            text += "extern const char* svn_revision = \"" + rev + "\";\n";
+            text += "}\n";
+            print '============> writing svn revision info to libs/ardour/svn_revision.cc\n'
+            o = file ('libs/ardour/svn_revision.cc', 'w')
             o.write (text)
             o.close ()
         except IOError:
-            print "Could not open svn_revision.h for writing\n"
+            print "Could not open libs/ardour/svn_revision.cc for writing\n"
             sys.exit (-1)
     else:
         print "You cannot use \"scons revision\" on without using a checked out"
@@ -1371,6 +1371,12 @@ env.Alias ('srctar', srcdist)
 
 env.AddPreAction (env['DISTTREE'], Action ('rm -rf ' + str (File (env['DISTTREE']))))
 env.AddPostAction (srcdist, Action ('rm -rf ' + str (File (env['DISTTREE']))))
+
+#
+# Update revision info before going into subdirs
+#
+
+create_stored_revision()
 
 #
 # the subdirs
