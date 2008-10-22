@@ -260,12 +260,6 @@ Editor::Editor ()
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
 
-	selection->TimeChanged.connect (mem_fun(*this, &Editor::time_selection_changed));
-	selection->TracksChanged.connect (mem_fun(*this, &Editor::track_selection_changed));
-	selection->RegionsChanged.connect (mem_fun(*this, &Editor::region_selection_changed));
-	selection->PointsChanged.connect (mem_fun(*this, &Editor::point_selection_changed));
-	selection->MarkersChanged.connect (mem_fun(*this, &Editor::marker_selection_changed));
-
 	clicked_regionview = 0;
 	clicked_axisview = 0;
 	clicked_routeview = 0;
@@ -384,8 +378,76 @@ Editor::Editor ()
 	set_zoom_focus (ZoomFocusLeft);
  	zoom_range_clock.ValueChanged.connect (mem_fun(*this, &Editor::zoom_adjustment_changed));
 
+	bbt_label.set_name ("EditorTimeButton");
+	bbt_label.set_size_request (-1, (int)timebar_height);
+	bbt_label.set_alignment (1.0, 0.5);
+	bbt_label.set_padding (5,0);
+	bbt_label.hide ();
+	bbt_label.set_no_show_all();
+	minsec_label.set_name ("EditorTimeButton");
+	minsec_label.set_size_request (-1, (int)timebar_height);
+	minsec_label.set_alignment (1.0, 0.5);
+	minsec_label.set_padding (5,0);
+	minsec_label.hide ();
+	minsec_label.set_no_show_all();
+	smpte_label.set_name ("EditorTimeButton");
+	smpte_label.set_size_request (-1, (int)timebar_height);
+	smpte_label.set_alignment (1.0, 0.5);
+	smpte_label.set_padding (5,0);
+	smpte_label.hide ();
+	smpte_label.set_no_show_all();
+	frame_label.set_name ("EditorTimeButton");
+	frame_label.set_size_request (-1, (int)timebar_height);
+	frame_label.set_alignment (1.0, 0.5);
+	frame_label.set_padding (5,0);
+	frame_label.hide ();
+	frame_label.set_no_show_all();
+
+	tempo_label.set_name ("EditorTimeButton");
+	tempo_label.set_size_request (-1, (int)timebar_height);
+	tempo_label.set_alignment (1.0, 0.5);
+	tempo_label.set_padding (5,0);
+	tempo_label.hide();
+	tempo_label.set_no_show_all();
+	meter_label.set_name ("EditorTimeButton");
+	meter_label.set_size_request (-1, (int)timebar_height);
+	meter_label.set_alignment (1.0, 0.5);
+	meter_label.set_padding (5,0);
+	meter_label.hide();
+	meter_label.set_no_show_all();
+	mark_label.set_name ("EditorTimeButton");
+	mark_label.set_size_request (-1, (int)timebar_height);
+	mark_label.set_alignment (1.0, 0.5);
+	mark_label.set_padding (5,0);
+	mark_label.hide();
+	mark_label.set_no_show_all();
+	cd_mark_label.set_name ("EditorTimeButton");
+	cd_mark_label.set_size_request (-1, (int)timebar_height);
+	cd_mark_label.set_alignment (1.0, 0.5);
+	cd_mark_label.set_padding (5,0);
+	cd_mark_label.hide();
+	cd_mark_label.set_no_show_all();
+	range_mark_label.set_name ("EditorTimeButton");
+	range_mark_label.set_size_request (-1, (int)timebar_height);
+	range_mark_label.set_alignment (1.0, 0.5);
+	range_mark_label.set_padding (5,0);
+	range_mark_label.hide();
+	range_mark_label.set_no_show_all();
+	transport_mark_label.set_name ("EditorTimeButton");
+	transport_mark_label.set_size_request (-1, (int)timebar_height);
+	transport_mark_label.set_alignment (1.0, 0.5);
+	transport_mark_label.set_padding (5,0);
+	transport_mark_label.hide();
+	transport_mark_label.set_no_show_all();
+
 	initialize_rulers ();
 	initialize_canvas ();
+
+	selection->TimeChanged.connect (mem_fun(*this, &Editor::time_selection_changed));
+	selection->TracksChanged.connect (mem_fun(*this, &Editor::track_selection_changed));
+	selection->RegionsChanged.connect (mem_fun(*this, &Editor::region_selection_changed));
+	selection->PointsChanged.connect (mem_fun(*this, &Editor::point_selection_changed));
+	selection->MarkersChanged.connect (mem_fun(*this, &Editor::marker_selection_changed));
 
 	edit_controls_vbox.set_spacing (0);
 	horizontal_adjustment.signal_value_changed().connect (mem_fun(*this, &Editor::scroll_canvas_horizontally), false);
@@ -423,68 +485,13 @@ Editor::Editor ()
 	pad_line_1->show();
 	time_pad->show();
 
-	time_canvas_vbox.pack_start (*_ruler_separator, false, false);
-	time_canvas_vbox.pack_start (*minsec_ruler, false, false);
-	time_canvas_vbox.pack_start (*smpte_ruler, false, false);
-	time_canvas_vbox.pack_start (*frames_ruler, false, false);
-	time_canvas_vbox.pack_start (*bbt_ruler, false, false);
 	//time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
-	time_canvas_vbox.set_size_request (-1, -1);
-	bbt_label.set_name ("EditorTimeButton");
-	bbt_label.set_size_request (-1, (int)timebar_height);
-	bbt_label.set_alignment (1.0, 0.5);
-	bbt_label.set_padding (5,0);
-	minsec_label.set_name ("EditorTimeButton");
-	minsec_label.set_size_request (-1, (int)timebar_height);
-	minsec_label.set_alignment (1.0, 0.5);
-	minsec_label.set_padding (5,0);
-	smpte_label.set_name ("EditorTimeButton");
-	smpte_label.set_size_request (-1, (int)timebar_height);
-	smpte_label.set_alignment (1.0, 0.5);
-	smpte_label.set_padding (5,0);
-	frame_label.set_name ("EditorTimeButton");
-	frame_label.set_size_request (-1, (int)timebar_height);
-	frame_label.set_alignment (1.0, 0.5);
-	frame_label.set_padding (5,0);
+	//time_canvas_vbox.set_size_request (-1, -1);
 
-	tempo_label.set_name ("EditorTimeButton");
-	tempo_label.set_size_request (-1, (int)timebar_height);
-	tempo_label.set_alignment (1.0, 0.5);
-	tempo_label.set_padding (5,0);
-	meter_label.set_name ("EditorTimeButton");
-	meter_label.set_size_request (-1, (int)timebar_height);
-	meter_label.set_alignment (1.0, 0.5);
-	meter_label.set_padding (5,0);
-	mark_label.set_name ("EditorTimeButton");
-	mark_label.set_size_request (-1, (int)timebar_height);
-	mark_label.set_alignment (1.0, 0.5);
-	mark_label.set_padding (5,0);
-	cd_mark_label.set_name ("EditorTimeButton");
-	cd_mark_label.set_size_request (-1, (int)timebar_height);
-	cd_mark_label.set_alignment (1.0, 0.5);
-	cd_mark_label.set_padding (5,0);
-	range_mark_label.set_name ("EditorTimeButton");
-	range_mark_label.set_size_request (-1, (int)timebar_height);
-	range_mark_label.set_alignment (1.0, 0.5);
-	range_mark_label.set_padding (5,0);
-	transport_mark_label.set_name ("EditorTimeButton");
-	transport_mark_label.set_size_request (-1, (int)timebar_height);
-	transport_mark_label.set_alignment (1.0, 0.5);
-	transport_mark_label.set_padding (5,0);
-
-	ruler_label_vbox.pack_start (minsec_label, false, false);
-	ruler_label_vbox.pack_start (smpte_label, false, false);
-	ruler_label_vbox.pack_start (frame_label, false, false);
-	ruler_label_vbox.pack_start (bbt_label, false, false);
-	
 	ruler_label_event_box.add (ruler_label_vbox);	
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	ruler_label_event_box.set_name ("TimebarLabelBase");
 	ruler_label_event_box.signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_label_button_release));
-
-	time_button_vbox.pack_start (meter_label, false, false);
-	time_button_vbox.pack_start (tempo_label, false, false);
-	time_button_vbox.pack_start (mark_label, false, false);
 
 	time_button_event_box.add (time_button_vbox);
 	time_button_event_box.set_name ("TimebarLabelBase");
@@ -938,10 +945,10 @@ void
 Editor::show_window ()
 {
 	show_all_children ();
-	
+
 	/* re-hide editor list if necessary */
 	editor_list_button_toggled ();
-
+	
 	/* now reset all audio_time_axis heights, because widgets might need
 	   to be re-hidden
 	*/
@@ -952,7 +959,7 @@ Editor::show_window ()
 		tv = (static_cast<TimeAxisView*>(*i));
 		tv->reset_height ();
 	}
-
+	
 	present ();
 }
 
@@ -2301,7 +2308,7 @@ Editor::set_snap_to (SnapType st)
 	case SnapToAEighthBeat:
 	case SnapToAQuarterBeat:
 	case SnapToAThirdBeat:
-		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes_t)(edit_packer.get_width() * frames_per_unit));
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
 		update_tempo_based_rulers ();
 		break;
 
@@ -4659,8 +4666,8 @@ Editor::idle_visual_changer ()
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
 
 		compute_fixed_ruler_scale ();
-		compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(edit_packer.get_width() * pending_visual_change.frames_per_unit));
-		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + (nframes_t)(edit_packer.get_width() * pending_visual_change.frames_per_unit));
+		compute_current_bbt_points(pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames());
+		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames());
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {

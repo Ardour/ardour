@@ -58,37 +58,96 @@ Editor::initialize_rulers ()
 {
 	ruler_editor = this;
 	ruler_grabbed_widget = 0;
-	
+
 	_ruler_separator = new Gtk::HSeparator();
 	_ruler_separator->set_size_request(-1, 2);
 	_ruler_separator->set_name("TimebarPadding");
 	_ruler_separator->show();
-	
+
 	_smpte_ruler = gtk_custom_hruler_new ();
 	smpte_ruler = Glib::wrap (_smpte_ruler);
 	smpte_ruler->set_name ("SMPTERuler");
 	smpte_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
-	
+	smpte_ruler->hide ();
+	smpte_ruler->set_no_show_all();
+	smpte_nmarks = 0;
+
 	_bbt_ruler = gtk_custom_hruler_new ();
 	bbt_ruler = Glib::wrap (_bbt_ruler);
 	bbt_ruler->set_name ("BBTRuler");
 	bbt_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
+	bbt_ruler->hide ();
+	bbt_ruler->set_no_show_all();
+	bbt_nmarks = 0;
 
 	_frames_ruler = gtk_custom_hruler_new ();
 	frames_ruler = Glib::wrap (_frames_ruler);
 	frames_ruler->set_name ("FramesRuler");
 	frames_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_frames_ruler), &ruler_metrics[ruler_metric_frames]);
+	frames_ruler->hide ();
+	frames_ruler->set_no_show_all();
 
 	_minsec_ruler = gtk_custom_hruler_new ();
 	minsec_ruler = Glib::wrap (_minsec_ruler);
 	minsec_ruler->set_name ("MinSecRuler");
 	minsec_ruler->set_size_request (-1, (int)timebar_height);
 	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
+	minsec_ruler->hide ();
+	minsec_ruler->set_no_show_all();
+	minsec_nmarks = 0;
 
-	visible_timebars = 1; /*this will be changed below */
+	using namespace Box_Helpers;
+	BoxList & ruler_lab_children =  ruler_label_vbox.children();
+	BoxList & ruler_children =  time_canvas_vbox.children();
+	BoxList & lab_children =  time_button_vbox.children();
+
+	BoxList::iterator canvaspos = ruler_children.begin();
+
+	lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
+
+	ruler_lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
+	ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
+	ruler_lab_children.push_back (Element(smpte_label, PACK_SHRINK, PACK_START));
+	ruler_children.insert (canvaspos, Element(*smpte_ruler, PACK_SHRINK, PACK_START));
+	ruler_lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
+	ruler_children.insert (canvaspos, Element(*frames_ruler, PACK_SHRINK, PACK_START));
+	ruler_lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
+	ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
+
+	smpte_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	bbt_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	frames_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+
+	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
+	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
+	frames_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
+	minsec_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
+
+	smpte_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
+	bbt_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
+	frames_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
+	minsec_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
+	
+	smpte_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+
+	smpte_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	bbt_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	frames_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	minsec_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+
+	visible_timebars = 0; /*this will be changed below */
 	ruler_pressed_button = 0;
 	canvas_timebars_vsize = 0;
 }
@@ -558,10 +617,6 @@ Editor::restore_ruler_visibility ()
 void
 Editor::update_ruler_visibility ()
 {
-	using namespace Box_Helpers;
-	BoxList & lab_children =  time_button_vbox.children();
-	BoxList & ruler_lab_children =  ruler_label_vbox.children();
-	BoxList & ruler_children =  time_canvas_vbox.children();
 	int visible_rulers = 0;
 
 	if (no_ruler_shown_update) {
@@ -570,98 +625,56 @@ Editor::update_ruler_visibility ()
 
 	visible_timebars = 0;
 
-	lab_children.clear();
-	ruler_lab_children.clear();
-
-	// leave the last one (the time_canvas) intact
-	while (ruler_children.size() > 0) {
-		ruler_children.pop_front();
-	}
-
-	BoxList::iterator canvaspos = ruler_children.begin();
-	
-	_smpte_ruler = gtk_custom_hruler_new ();
-	smpte_ruler = Glib::wrap (_smpte_ruler);
-	smpte_ruler->set_name ("SMPTERuler");
-	smpte_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
-	
-	_bbt_ruler = gtk_custom_hruler_new ();
-	bbt_ruler = Glib::wrap (_bbt_ruler);
-	bbt_ruler->set_name ("BBTRuler");
-	bbt_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
-
-	_frames_ruler = gtk_custom_hruler_new ();
-	frames_ruler = Glib::wrap (_frames_ruler);
-	frames_ruler->set_name ("FramesRuler");
-	frames_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_frames_ruler), &ruler_metrics[ruler_metric_frames]);
-
-	_minsec_ruler = gtk_custom_hruler_new ();
-	minsec_ruler = Glib::wrap (_minsec_ruler);
-	minsec_ruler->set_name ("MinSecRuler");
-	minsec_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
-
-	smpte_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	bbt_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	frames_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-
-	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	frames_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	minsec_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-
-	smpte_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	bbt_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	frames_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	minsec_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	
-	smpte_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	
-	smpte_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
-	bbt_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
-	frames_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
-	minsec_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
-
-	ruler_children.insert (canvaspos, Element(*_ruler_separator, PACK_SHRINK, PACK_START));
-	
 	if (ruler_minsec_action->get_active()) {
-		ruler_lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
-		ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
 		visible_rulers++;
+		minsec_label.show ();
+		minsec_ruler->show ();
+	} else {
+		minsec_label.hide ();
+		minsec_ruler->hide ();
 	}
 
 	if (ruler_timecode_action->get_active()) {
-		ruler_lab_children.push_back (Element(smpte_label, PACK_SHRINK, PACK_START));
-		ruler_children.insert (canvaspos, Element(*smpte_ruler, PACK_SHRINK, PACK_START));
 		visible_rulers++;
+		smpte_label.show ();
+		smpte_ruler->show ();
+	} else {
+		smpte_label.hide ();
+		smpte_ruler->hide ();
 	}
 
 	if (ruler_samples_action->get_active()) {
-		ruler_lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
-		ruler_children.insert (canvaspos, Element(*frames_ruler, PACK_SHRINK, PACK_START));
 		visible_rulers++;
+		frame_label.show ();
+		frames_ruler->show ();
+	} else {
+		frame_label.hide ();
+		frames_ruler->hide ();
 	}
 
 	if (ruler_bbt_action->get_active()) {
-		ruler_lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
-		ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
 		visible_rulers++;
+		bbt_label.show ();
+		bbt_ruler->show ();
+	} else {
+		bbt_label.hide ();
+		bbt_ruler->hide ();
 	}
 
 	double tbpos = 0.0;
 	double tbgpos = 0.0;
 	double old_unit_pos;
-	
-	if (ruler_meter_action->get_active()) {
-		lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 
+#ifdef GTKOSX
+	/* gtk update probs require this (damn) */
+	meter_label.hide();
+	tempo_label.hide();
+	range_mark_label.hide();
+	transport_mark_label.hide();
+	cd_mark_label.hide();
+	mark_label.hide();
+#endif
+	if (ruler_meter_action->get_active()) {
 		old_unit_pos = meter_group->property_y();
 		if (tbpos != old_unit_pos) {
 			meter_group->move ( 0.0, tbpos - old_unit_pos);
@@ -669,19 +682,20 @@ Editor::update_ruler_visibility ()
 		old_unit_pos = meter_bar_group->property_y();
 		if (tbgpos != old_unit_pos) {
 			meter_bar_group->move ( 0.0, tbgpos - old_unit_pos);
-		}
+		}	
 		meter_bar_group->show();
 		meter_group->show();
+		meter_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		meter_bar_group->hide();
 		meter_group->hide();
+		meter_label.hide();
 	}
 	
 	if (ruler_tempo_action->get_active()) {
-		lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = tempo_group->property_y();
 		if (tbpos != old_unit_pos) {
 			tempo_group->move(0.0, tbpos - old_unit_pos);
@@ -692,16 +706,17 @@ Editor::update_ruler_visibility ()
 		}
 		tempo_bar_group->show();
 		tempo_group->show();
+		tempo_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		tempo_bar_group->hide();
 		tempo_group->hide();
+		tempo_label.hide();
 	}
 	
 	if (!Profile->get_sae() && ruler_range_action->get_active()) {
-		lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = range_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
 			range_marker_group->move (0.0, tbpos - old_unit_pos);
@@ -712,16 +727,17 @@ Editor::update_ruler_visibility ()
 		}
 		range_marker_bar_group->show();
 		range_marker_group->show();
+		range_mark_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		range_marker_bar_group->hide();
 		range_marker_group->hide();
+		range_mark_label.hide();
 	}
 
 	if (ruler_loop_punch_action->get_active()) {
-		lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = transport_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
 			transport_marker_group->move ( 0.0, tbpos - old_unit_pos);
@@ -732,16 +748,17 @@ Editor::update_ruler_visibility ()
 		}
 		transport_marker_bar_group->show();
 		transport_marker_group->show();
+		transport_mark_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		transport_marker_bar_group->hide();
 		transport_marker_group->hide();
+		transport_mark_label.hide();
 	}
 
 	if (ruler_cd_marker_action->get_active()) {
-		lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = cd_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
 			cd_marker_group->move (0.0, tbpos - old_unit_pos);
@@ -752,6 +769,7 @@ Editor::update_ruler_visibility ()
 		}
 		cd_marker_bar_group->show();
 		cd_marker_group->show();
+		cd_mark_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
@@ -760,12 +778,12 @@ Editor::update_ruler_visibility ()
 	} else {
 		cd_marker_bar_group->hide();
 		cd_marker_group->hide();
+		cd_mark_label.hide();
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
 	}
 	
 	if (ruler_marker_action->get_active()) {
-		lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 		old_unit_pos = marker_group->property_y();
 		if (tbpos != old_unit_pos) {
 			marker_group->move ( 0.0, tbpos - old_unit_pos);
@@ -776,14 +794,16 @@ Editor::update_ruler_visibility ()
 		}
 		marker_bar_group->show();
 		marker_group->show();
+		mark_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
 		marker_bar_group->hide();
 		marker_group->hide();
+		mark_label.hide();
 	}
-	
+
 	gdouble old_canvas_timebars_vsize = canvas_timebars_vsize;
 	canvas_timebars_vsize = (timebar_height * visible_timebars) - 1;
 	gdouble vertical_pos_delta = canvas_timebars_vsize - old_canvas_timebars_vsize;
@@ -798,21 +818,11 @@ Editor::update_ruler_visibility ()
 		_trackview_group->move (0, 0);
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
-
+	
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
-
 	time_canvas_vbox.set_size_request (-1,-1);
-	time_canvas_event_box.queue_resize();
-	compute_fixed_ruler_scale();
+
 	update_fixed_rulers();
-
-	time_canvas_event_box.show_all();
-	ruler_label_event_box.show_all();
-	time_button_event_box.show_all();
-
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + (nframes64_t)(edit_packer.get_width() * frames_per_unit));
-	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + (nframes64_t)(edit_packer.get_width() * frames_per_unit));
-
 	redisplay_tempo (false);
 }
 
@@ -841,11 +851,11 @@ Editor::compute_fixed_ruler_scale ()
 	}
 
 	if (ruler_timecode_action->get_active()) {
-		set_smpte_ruler_scale (leftmost_frame, leftmost_frame + (edit_packer.get_width() * frames_per_unit) );
+		set_smpte_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
 	}
 	
 	if (ruler_minsec_action->get_active()) {
-		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + (edit_packer.get_width() * frames_per_unit) );
+		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
 	}
 }
 
@@ -862,7 +872,7 @@ Editor::update_fixed_rulers ()
 	ruler_metrics[ruler_metric_frames].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_minsec].units_per_pixel = frames_per_unit;
 
-	rightmost_frame = leftmost_frame + current_page_frames ();
+	rightmost_frame = leftmost_frame + current_page_frames();
 
 	/* these force a redraw, which in turn will force execution of the metric callbacks
 	   to compute the relevant ticks to display.
