@@ -1714,7 +1714,6 @@ Editor::temporal_zoom_region (bool both_axes)
 	nframes64_t end = 0;
 	RegionSelection rs; 
 	set<TimeAxisView*> tracks;
-	double top_y_position = DBL_MAX;
 
 	get_regions_for_action (rs);
 
@@ -1733,10 +1732,6 @@ Editor::temporal_zoom_region (bool both_axes)
 		}
 
 		tracks.insert (&((*i)->get_time_axis_view()));
-
-		if ((*i)->get_time_axis_view().y_position < top_y_position) {
-			top_y_position = (*i)->get_time_axis_view().y_position;
-		}
 	}
 
 	/* now comes an "interesting" hack ... make sure we leave a little space
@@ -6037,8 +6032,6 @@ Editor::fit_tracks ()
 	bool next_is_selected;
 
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
-
-		bool pws;
 
 		TrackViewList::iterator next;
 		
