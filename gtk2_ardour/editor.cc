@@ -4274,6 +4274,7 @@ Editor::use_visual_state (VisualState& vs)
 
 	set_zoom_focus (vs.zoom_focus);
 	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
+	zoomed_to_region = vs.zoomed_to_region;
 	
 	for (list<TAVState>::iterator i = vs.track_states.begin(); i != vs.track_states.end(); ++i) {
 		TrackViewList::iterator t;
@@ -4284,7 +4285,6 @@ Editor::use_visual_state (VisualState& vs)
 			(*t)->set_state (*(i->second));
 		}
 	}
-
 
 	if (!vs.track_states.empty()) {
 		update_route_visibility ();

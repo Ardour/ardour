@@ -1781,7 +1781,7 @@ Editor::temporal_zoom_region (bool both_axes)
 	temporal_zoom_by_frame (start, end, "zoom to region");
 
 	if (both_axes) {
-		uint32_t per_track_height = (uint32_t) floor ((canvas_height - 10.0) / tracks.size());
+		uint32_t per_track_height = (uint32_t) floor ((canvas_height - canvas_timebars_vsize - 10.0) / tracks.size());
 		
 		/* set visible track heights appropriately */
 		
@@ -1802,7 +1802,7 @@ Editor::temporal_zoom_region (bool both_axes)
 		no_route_list_redisplay = false;
 		redisplay_route_list ();
 
-		vertical_adjustment.set_value (std::max (top_y_position - 5.0, 0.0));
+		vertical_adjustment.set_value (0);
 		no_save_visual = false;
 	}
 
