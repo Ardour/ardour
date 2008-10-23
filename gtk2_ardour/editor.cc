@@ -4331,7 +4331,7 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::post_zoom ()
 {
-	nframes64_t cef=0;
+	nframes64_t cef = 0;
 /*
 	// convert fpu to frame count
 
