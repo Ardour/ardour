@@ -4331,6 +4331,7 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::post_zoom ()
 {
+	nframes64_t cef=0;
 /*
 	// convert fpu to frame count
 
@@ -4361,6 +4362,12 @@ Editor::post_zoom ()
 	ZoomChanged (); /* EMIT_SIGNAL */
 
 	reset_hscrollbar_stepping ();
+
+	if (session) {
+		cef = session->current_end_frame() + (current_page_frames() / 10);// Add a little extra so we can see the end marker
+	}
+	horizontal_adjustment.set_upper (cef / frames_per_unit);
+
 	//reset_scrolling_region ();
 
 	instant_save ();
@@ -4409,21 +4416,11 @@ Editor::idle_visual_changer ()
 
 	if (p & VisualChange::TimeOrigin) {
 
-		nframes64_t csf=0, cef=0;
 		nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
-		if (session) {
-			csf = session->current_start_frame();
-			cef = session->current_end_frame();
-		}
-
-		/* if we seek beyond the current end of the canvas, move the end */
+		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
 
 		if (current_time_origin != pending_visual_change.time_origin) {
-			cef += current_page_frames() / 10; // Add a little extra so we can see the end marker
-			horizontal_adjustment.set_upper (cef / frames_per_unit);
-			horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
-		} else {
 			update_fixed_rulers();
 			redisplay_tempo (true);
 		}

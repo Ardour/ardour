@@ -57,6 +57,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("LatchMenu"), _("Latch"));
 	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
 	ActionManager::register_action (editor_actions, X_("Link"), _("Link"));
+	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
+	ActionManager::register_action (editor_actions, X_("KeyMouseActions"), _("Key Mouse"));
 	ActionManager::register_action (editor_actions, X_("LocateToMarker"), _("Locate To Markers"));
 	ActionManager::register_action (editor_actions, X_("MarkerMenu"), _("Markers"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
