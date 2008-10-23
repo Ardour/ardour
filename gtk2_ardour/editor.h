@@ -290,6 +290,7 @@ class Editor : public PublicEditor
 	Width editor_mixer_strip_width;
 	void maybe_add_mixer_strip_width (XMLNode&);
 	void show_editor_mixer (bool yn);
+	void create_editor_mixer ();
 	void set_selected_mixer_strip (TimeAxisView&);
 	void hide_track_in_display (TimeAxisView& tv, bool temporary = false);
 	void show_track_in_display (TimeAxisView& tv);

@@ -200,7 +200,9 @@ RedirectBox::set_width (Width w)
 		return;
 	}
 	_width = w;
-
+	if (w == -1) {
+		abort ();
+	}
 	redisplay_redirects (0);
 }
 
@@ -572,6 +574,7 @@ RedirectBox::add_redirect_to_display (boost::shared_ptr<Redirect> redirect)
 	}
 	
 	Gtk::TreeModel::Row row = *(model->append());
+
 	row[columns.text] = redirect_name (redirect);
 	row[columns.redirect] = redirect;
 
@@ -682,6 +685,7 @@ RedirectBox::show_redirect_active (boost::weak_ptr<Redirect> weak_redirect)
 		boost::shared_ptr<Redirect> r = (*iter)[columns.redirect];
 
 		if (r == redirect) {
+			
 			(*iter)[columns.text] = redirect_name (r);
 			
 			if (redirect->active()) {
