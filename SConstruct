@@ -274,9 +274,9 @@ def create_stored_revision (target = None, source = None, env = None):
             print "Could not open libs/ardour/svn_revision.cc for writing\n"
             sys.exit (-1)
     else:
-        print "You cannot use \"scons revision\" on without using a checked out"
-        print "copy of the Ardour source code repository"
-        sys.exit (-1)
+        if not os.path.exists('libs/ardour/ardour/svn_revision.h'):    
+            print "This release of ardour is missing libs/ardour/ardour/svn_revision.h. Blame the packager."
+            sys.exit (-1)
 
 #
 # A generic builder for version.cc files
@@ -1339,7 +1339,7 @@ Default (sysrcbuild)
 Precious (env['DISTTREE'])
 
 env.Distribute (env['DISTTREE'],
-               [ 'SConstruct', 'svn_revision.h',
+               [ 'SConstruct', 
                   'COPYING', 'PACKAGER_README', 'README',
                   'ardour.rc.in',
                   'tools/config.guess',
