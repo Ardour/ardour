@@ -800,6 +800,16 @@ Editor::scroll_canvas_horizontally ()
 	cursor_group->move (-x_delta, 0);
 	update_fixed_rulers ();
 	redisplay_tempo (true);
+
+#ifndef GTKOSX
+	if (!autoscroll_active) {
+		/* force rulers and canvas to move in lock step */
+		while (gtk_events_pending ()) {
+			gtk_main_iteration ();
+		}
+	}
+#endif
+
 }
 
 void
