@@ -4415,15 +4415,7 @@ Editor::idle_visual_changer ()
 	}
 
 	if (p & VisualChange::TimeOrigin) {
-
-		nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-
 		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
-
-		if (current_time_origin != pending_visual_change.time_origin) {
-			update_fixed_rulers();
-			redisplay_tempo (true);
-		}
 	}
 
 	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
