@@ -1611,7 +1611,6 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	int cache_index;
 	double zbegin, zend;
 	gboolean rectify;
-	double n;
 	double origin;
 	double clip_length;
 	double xoff;
@@ -1748,7 +1747,8 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 		
 		yoff = origin - (waveview->half_height * max) + 0.5;
 		
-		if (n == ulx) {
+		if (xoff == ulx) {
+			/* first point */
 			cairo_move_to (cr, xoff+0.5, yoff);
 		} else {
 			cairo_line_to (cr, xoff+0.5, yoff);
