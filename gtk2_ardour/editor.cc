@@ -4742,6 +4742,9 @@ Editor::first_idle ()
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
 		(*t)->first_idle();
 	}
+
+	// first idle adds route children (automation tracks), so we need to redisplay here
+	redisplay_route_list();
 	
 	if (dialog) {
 		delete dialog;
