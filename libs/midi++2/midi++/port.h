@@ -87,7 +87,7 @@ class Port : public sigc::trackable {
 	int three_byte_msg (byte a, byte b, byte c, timestamp_t timestamp) {
 		byte msg[3];
 
-            	msg[0] = a;
+		msg[0] = a;
 		msg[1] = b;
 		msg[2] = c;
 

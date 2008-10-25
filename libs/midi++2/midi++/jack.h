@@ -60,7 +60,9 @@ public:
 	virtual void set_state (const XMLNode&);
 
 	static void set_process_thread (pthread_t);
-
+	static pthread_t get_process_thread () { return _process_thread; }
+	static bool is_process_thread();
+	
   protected:
 	std::string get_typestring () const {
 		return typestring;
@@ -78,7 +80,7 @@ private:
 	void flush (void* jack_port_buffer);
 
 	static pthread_t _process_thread;
-	static bool is_process_thread();
+	
 
 	RingBuffer<Evoral::Event> non_process_thread_fifo;
 	Glib::Mutex non_process_thread_fifo_lock;

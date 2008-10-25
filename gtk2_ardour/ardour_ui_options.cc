@@ -68,12 +68,6 @@ ARDOUR_UI::toggle_use_mmc ()
 }
 
 void
-ARDOUR_UI::toggle_use_midi_clock ()
-{
-	ActionManager::toggle_config_state ("options", "UseMIDIClock", &Configuration::set_midi_clock_control, &Configuration::get_midi_clock_control);
-}
-
-void
 ARDOUR_UI::toggle_use_osc ()
 {
 	ActionManager::toggle_config_state ("options", "UseOSC", &Configuration::set_use_osc, &Configuration::get_use_osc);
@@ -1108,8 +1102,6 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 	} else if (PARAM_IS ("mmc-control")) {
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
-	} else if (PARAM_IS ("midi-clock-control")) {
-		ActionManager::map_some_state ("options", "UseMIDIClock", &Configuration::get_midi_clock_control);
 	} else if (PARAM_IS ("midi-feedback")) {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &Configuration::get_midi_feedback);
 	} else if (PARAM_IS ("do-not-record-plugins")) {

@@ -56,7 +56,7 @@ class RingBuffer
 	}
 	
 	guint read  (T *dest, guint cnt);
-	guint  write (T *src, guint cnt);
+	guint write (T *src,  guint cnt);
 
 	struct rw_vector {
 	    T *buf[2];

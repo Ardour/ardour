@@ -143,9 +143,9 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	float   average;
 
 	void reset ();
-	void start (MIDI::Parser& parser);
-	void stop (MIDI::Parser& parser);
-	void update_midi_clock (MIDI::Parser& parser);
+	void start (MIDI::Parser& parser, nframes_t timestamp);
+	void stop (MIDI::Parser& parser, nframes_t timestamp);
+	void update_midi_clock (MIDI::Parser& parser, nframes_t timestamp);
 	void read_current (SafeTime *) const;
 
 	bool _started;

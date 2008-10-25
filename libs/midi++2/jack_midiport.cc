@@ -78,6 +78,8 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 		if (input_parser) {
 			input_parser->raw_preparse (*input_parser, ev.buffer, ev.size);
 			for (size_t i = 0; i < ev.size; i++) {
+				// the midi events here are used for MIDI clock only
+				input_parser->set_midi_clock_timestamp(ev.time + jack_last_frame_time(_jack_client));
 				input_parser->scanner (ev.buffer[i]);
 			}	
 			input_parser->raw_postparse (*input_parser, ev.buffer, ev.size);

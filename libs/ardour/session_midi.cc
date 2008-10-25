@@ -317,10 +317,6 @@ Session::set_midi_clock_port (string port_tag)
 
 	Config->set_midi_clock_port_name (port_tag);
 
-	_midi_clock_port->input()->start.connect (mem_fun (*this, &Session::midi_clock_start));
-	_midi_clock_port->input()->contineu.connect (mem_fun (*this, &Session::midi_clock_continue));
-	_midi_clock_port->input()->stop.connect (mem_fun (*this, &Session::midi_clock_stop));
-
   out:
 	MIDIClock_PortChanged(); /* EMIT SIGNAL */
 	change_midi_ports ();
@@ -496,7 +492,7 @@ Session::setup_midi_control ()
 }
 
 void
-Session::spp_start (Parser& ignored)
+Session::spp_start (Parser& ignored, nframes_t timestamp)
 {
 	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
 		request_transport_speed (1.0);
@@ -504,40 +500,41 @@ Session::spp_start (Parser& ignored)
 }
 
 void
-Session::spp_continue (Parser& ignored)
+Session::spp_continue (Parser& ignored, nframes_t timestamp)
 {
-	spp_start (ignored);
+	spp_start (ignored, timestamp);
 }
 
 void
-Session::spp_stop (Parser& ignored)
+Session::spp_stop (Parser& ignored, nframes_t timestamp)
 {
 	if (Config->get_mmc_control()) {
 		request_stop ();
 	}
 }
-
+/*
 void
-Session::midi_clock_start (Parser& ignored)
+Session::midi_clock_start (Parser& ignored, nframes_t timestamp)
 {
-	if (Config->get_midi_clock_control() && (Config->get_slave_source() == MIDIClock)) {
+	if (Config->get_slave_source() == MIDIClock) {
 		request_transport_speed (1.0);
 	}
 }
 
 void
-Session::midi_clock_continue (Parser& ignored)
+Session::midi_clock_continue (Parser& parser, nframes_t timestamp)
 {
-	midi_clock_start (ignored);
+	midi_clock_start (parser, 0);
 }
 
 void
-Session::midi_clock_stop (Parser& ignored)
+Session::midi_clock_stop (Parser& ignored, nframes_t timestamp)
 {
-	if (Config->get_midi_clock_control()) {
+	if (Config->get_slave_source() == MIDIClock) {
 		request_stop ();
 	}
 }
+*/
 
 void
 Session::mmc_deferred_play (MIDI::MachineControl &mmc)

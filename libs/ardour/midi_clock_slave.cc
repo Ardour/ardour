@@ -26,11 +26,13 @@
 #include <pbd/pthread_utils.h>
 
 #include <midi++/port.h>
+#include <midi++/jack.h>
 #include <ardour/slave.h>
 #include <ardour/session.h>
 #include <ardour/audioengine.h>
 #include <ardour/cycles.h>
 #include <ardour/tempo.h>
+
 
 #include "i18n.h"
 
@@ -73,9 +75,9 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 }
 
 void
-MIDIClock_Slave::update_midi_clock (Parser& parser)
+MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 {	
-	nframes_t now = session.engine().frame_time();
+	nframes_t now = timestamp;
 
 	SafeTime last;
 	read_current (&last);
@@ -109,8 +111,14 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 		average += accumulator[i];
 	average /= accumulator_size;
 	
+	JACK_MidiPort *jack_port = dynamic_cast<JACK_MidiPort *>(port);
+	pthread_t process_thread_id = 0;
+	if(jack_port) {
+		process_thread_id = jack_port->get_process_thread();
+	}
 	
-	std::cerr << "got MIDI Clock message at time " << now  
+	std::cerr << "Thread " << pthread_name() << " with id " << pthread_self() << " process Thread ID: " << process_thread_id
+	          << " got MIDI Clock message at time " << now  
 	          << " real delta: " << midi_clock_frame 
 	          << " reference: " << one_ppqn_in_frames
 	          << " accu index: " << accumulator_index
@@ -127,7 +135,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser)
 }
 
 void
-MIDIClock_Slave::start (Parser& parser)
+MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 {
 	
 	nframes_t now = session.engine().frame_time();
@@ -154,7 +162,7 @@ MIDIClock_Slave::start (Parser& parser)
 }
 
 void
-MIDIClock_Slave::stop (Parser& parser)
+MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 {
 	std::cerr << "MIDIClock_Slave got stop message" << endl;
 
@@ -225,7 +233,7 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		pos = last.position;
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
-		this->stop(*port->input());
+		this->stop(*port->input(), now);
 		reset();
 		return false;
 	}
@@ -238,7 +246,8 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 
 	speed = midi_clock_speed;
 	
-	cerr << " final speed: " << speed << " elapsed: " << elapsed << " elapsed (scaled)  " << elapsed * speed << " position: " << pos << endl;
+	cerr << " final speed: " << speed << " elapsed: " << elapsed << " elapsed (scaled)  " << elapsed * speed << " position: " << pos 
+	     << " Thread ID: " << pthread_self() << endl;
 	return true;
 }
 

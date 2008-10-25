@@ -538,16 +538,16 @@ Parser::realtime_msg(unsigned char inbyte)
 
 	switch (inbyte) {
 	case 0xf8:
-		timing (*this);
+		timing (*this, _midi_clock_timestamp);
 		break;
 	case 0xfa:
-		start (*this);
+		start (*this, _midi_clock_timestamp);
 		break;
 	case 0xfb:
-		contineu (*this);
+		contineu (*this, _midi_clock_timestamp);
 		break;
 	case 0xfc:
-		stop (*this);
+		stop (*this, _midi_clock_timestamp);
 		break;
 	case 0xfe:
 		/* !!! active sense message in realtime_msg: should not reach here

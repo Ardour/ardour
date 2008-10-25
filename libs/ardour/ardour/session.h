@@ -1306,13 +1306,9 @@ class Session : public PBD::StatefulDestructible
 
 	void deliver_mmc (MIDI::MachineControl::Command, nframes_t);
 
-	void spp_start (MIDI::Parser&);
-	void spp_continue (MIDI::Parser&);
-	void spp_stop (MIDI::Parser&);
-
-	void midi_clock_start (MIDI::Parser&);
-	void midi_clock_continue (MIDI::Parser&);
-	void midi_clock_stop (MIDI::Parser&);
+	void spp_start (MIDI::Parser&, nframes_t timestamp);
+	void spp_continue (MIDI::Parser&, nframes_t timestamp);
+	void spp_stop (MIDI::Parser&, nframes_t timestamp);
 
 	void mmc_deferred_play (MIDI::MachineControl &);
 	void mmc_stop (MIDI::MachineControl &);

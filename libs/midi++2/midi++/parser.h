@@ -74,15 +74,15 @@ class Parser : public sigc::trackable {
 	Signal                position;
 	Signal                song;
 
-	Signal                        mtc;
+	Signal                       mtc;
 	sigc::signal<void,Parser&>   mtc_qtr;
 
-	sigc::signal<void, Parser &>          all_notes_off;
-	sigc::signal<void, Parser &>          tune;
-	sigc::signal<void, Parser &>          timing;
-	sigc::signal<void, Parser &>          start;
-	sigc::signal<void, Parser &>          stop;
-	sigc::signal<void, Parser &>          contineu;  /* note spelling */
+	sigc::signal<void, Parser &>                     all_notes_off;
+	sigc::signal<void, Parser &>                     tune;
+	sigc::signal<void, Parser &, nframes_t>          timing;
+	sigc::signal<void, Parser &, nframes_t>          start;
+	sigc::signal<void, Parser &, nframes_t>          stop;
+	sigc::signal<void, Parser &, nframes_t>          contineu;  /* note spelling */
 	sigc::signal<void, Parser &>          active_sense;
 	sigc::signal<void, Parser &>          reset;
 	sigc::signal<void, Parser &>          eox;
@@ -121,6 +121,9 @@ class Parser : public sigc::trackable {
 	MTC_Status  mtc_running() const { return _mtc_running; }
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
+	
+	const nframes_t get_midi_clock_timestamp() const { return _midi_clock_timestamp; }
+	void set_midi_clock_timestamp(const nframes_t timestamp) { _midi_clock_timestamp = timestamp; } 
 
 	sigc::signal<void,MTC_Status> mtc_status;
 	sigc::signal<bool>            mtc_skipped;
@@ -168,6 +171,8 @@ class Parser : public sigc::trackable {
 	MTC_Status _mtc_running;
 	bool       _mtc_locked;
 	byte last_qtr_frame;
+	
+	nframes_t _midi_clock_timestamp;
 
 	ParseState pre_variable_state;
 	MIDI::eventType pre_variable_msgtype;
