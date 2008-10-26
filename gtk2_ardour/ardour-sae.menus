@@ -268,6 +268,7 @@
 	<menu action="WindowMenu">
 	      <menuitem action='goto-editor'/>
 	      <menuitem action='goto-mixer'/>
+	      <menuitem action='toggle-editor-mixer-on-top'/>
 	      <menuitem action='ToggleLocations'/>
 	      <menuitem action='ToggleKeyEditor'/>
 	      <menuitem action='ToggleThemeManager'/>

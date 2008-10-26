@@ -104,7 +104,7 @@
 (gtk_accel_path "<Actions>/Editor/normalize-region" "n")
 (gtk_accel_path "<Actions>/Main/New" "<%PRIMARY%>n")
 (gtk_accel_path "<Actions>/Main/AddTrackBus" "<%PRIMARY%><%TERTIARY%>n")
-(gtk_accel_path "<Actions>/Common/goto-mixer" "<%SECONDARY%>m")
+(gtk_accel_path "<Actions>/Common/toggle-editor-mixer-on-top" "<%SECONDARY%>m")
 (gtk_accel_path "<Actions>/Editor/add-location-from-playhead" "KP_Enter")
 (gtk_accel_path "<Actions>/Editor/mute-unmute-region" "m")
 

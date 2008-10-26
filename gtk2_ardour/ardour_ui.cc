@@ -199,6 +199,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
+	_mixer_on_top = false;
 
 	last_configure_time= 0;
 

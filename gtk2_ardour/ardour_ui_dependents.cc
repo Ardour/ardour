@@ -99,6 +99,7 @@ ARDOUR_UI::goto_editor_window ()
 
 	editor->show_window ();
 	editor->present();
+	_mixer_on_top = false;
 	flush_pending ();
 }
 
@@ -107,7 +108,20 @@ ARDOUR_UI::goto_mixer_window ()
 {
 	mixer->show_window ();
 	mixer->present();
+	_mixer_on_top = true;
 	flush_pending ();
+}
+
+void
+ARDOUR_UI::toggle_editor_mixer_on_top ()
+{
+	if (_mixer_on_top) {
+		goto_editor_window ();
+		_mixer_on_top = false;
+	} else {
+		goto_mixer_window ();
+		_mixer_on_top = true;
+	}
 }
 
 gint

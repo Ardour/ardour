@@ -276,8 +276,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::Tooltips          _tooltips;
 
-	void                     goto_editor_window ();
-	void                     goto_mixer_window ();
+	void                goto_editor_window ();
+	void                goto_mixer_window ();
+	void                toggle_editor_mixer_on_top ();
+	bool                _mixer_on_top;
 
 	GlobalClickBox     *online_control_button;
 	vector<string>      online_control_strings;
