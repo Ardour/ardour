@@ -6,14 +6,36 @@ export LD_LIBRARY_PATH=%INSTALL_PREFIX%/%LIBDIR%/ardour3:$LD_LIBRARY_PATH
 # DYLD_LIBRARY_PATH is for Darwin
 export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
+## Memlock check
+
 MLOCK_LIMIT=$(ulimit -l)
 if [ "$MLOCK_LIMIT" != "unlimited" ]; then
 	echo "WARNING: Your system has a limit for maximum amount of locked memory!"
-        echo "This might cause Ardour to run out of memory before your system runs out of memory. You can view the memory limit with 'ulimit -l', and it is normally controlled by /etc/security/limits.conf"
+        echo "         This might cause Ardour to run out of memory before your system runs"
+	echo "         out of memory. You can view the memory limit with 'ulimit -l', and it"
+	echo "         is normally controlled by /etc/security/limits.conf"
+	echo ""
 
 fi
 
-ulimit -c unlimited
+
+## Glib atomic test
+
+GLIB=$(ldd %INSTALL_PREFIX%/%LIBDIR%/ardour3/ardour-%VERSION% 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
+
+if [ "$GLIB" = "" ]; then
+	echo "WARNING: Could not check your glib-2.0 for mutex locking atomic operations."
+	echo ""
+elif [ $(nm -D --radix=dec --defined-only -S $GLIB | grep -w g_atomic_int_add | cut -d ' ' -f 2) -gt 32 ]; then
+	echo "WARNING: Your system contains a suspect libglib-2.0. Your version might be built"
+	echo "         to use mutex locking atomic operations. This is a fallback solution to"
+	echo "         a more robust hardware supported atomicity. It might cause reduced "
+	echo "         performance and/or deadlocks. Please contact your distribution support"
+	echo "         about this issue."
+	echo "         Unfortunately this check is not 100% accurate, so this might not be"
+	echo "         the case with your system."
+	echo ""
+fi
 
 exec %INSTALL_PREFIX%/%LIBDIR%/ardour3/ardour-%VERSION% "$@"
 
