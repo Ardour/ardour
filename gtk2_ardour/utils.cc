@@ -396,9 +396,11 @@ set_color (Gdk::Color& c, int rgb)
 	c.set_rgb((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
 }
 
+#ifdef GTKOSX
 extern "C" {
 	gboolean gdk_quartz_possibly_forward (GdkEvent*);
 }
+#endif
 
 bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
@@ -471,12 +473,14 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 				return true;
 			}
 
+#ifdef GTKOSX
 			int oldval = ev->keyval;
 			ev->keyval = fakekey;
 			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
 				return true;
 			}
 			ev->keyval = oldval;
+#endif
 		}
 	}
 
@@ -493,9 +497,11 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			cerr << "\tactivate, then propagate\n";
 		}
 #endif
+#ifdef GTKOSX
 		if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
 			return true;
 		}
+#endif
 		if (!gtk_window_activate_key (win, ev)) {
 #ifdef DEBUG_ACCELERATOR_HANDLING
 			if (debug) {
@@ -526,9 +532,11 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			cerr << "\tpropagation didn't handle, so activate\n";
 		}
 #endif
+#ifdef GTKOSX
 		if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
 			return true;
 		}
+#endif
 		return gtk_window_activate_key (win, ev);
 	} else {
 #ifdef DEBUG_ACCELERATOR_HANDLING
