@@ -1,0 +1,281 @@
+Index: gtk/gtktreeview.c
+===================================================================
+--- gtk/gtktreeview.c	(revision 21475)
++++ gtk/gtktreeview.c	(working copy)
+@@ -99,6 +99,9 @@
+ 
+   guint source_set : 1;
+   guint dest_set : 1;
++
++  GtkTreePath* path;
++  GtkTreeModel* model;
+ };
+ 
+ 
+@@ -2534,6 +2537,7 @@
+       gboolean row_double_click = FALSE;
+       gboolean rtl;
+       gboolean node_selected;
++      gboolean edits_allowed;
+ 
+       /* Empty tree? */
+       if (tree_view->priv->tree == NULL)
+@@ -2643,9 +2647,17 @@
+ 
+       tree_view->priv->focus_column = column;
+ 
++      /* ARDOUR HACK */
++
++      if (g_object_get_data (G_OBJECT(tree_view), "mouse-edits-require-mod1")) {
++	      edits_allowed = (event->state & GDK_MOD1_MASK);
++      } else {
++	      /* regular GTK design: do edits if none of the default modifiers are active  */
++	      edits_allowed = !(event->state & gtk_accelerator_get_default_mod_mask ());
++      }
++
+       /* decide if we edit */
+-      if (event->type == GDK_BUTTON_PRESS && event->button == 1 &&
+-	  !(event->state & gtk_accelerator_get_default_mod_mask ()))
++      if (event->type == GDK_BUTTON_PRESS && event->button == 1 && edits_allowed)
+ 	{
+ 	  GtkTreePath *anchor;
+ 	  GtkTreeIter iter;
+@@ -3010,8 +3022,7 @@
+       if (tree_view->priv->button_pressed_node == tree_view->priv->prelight_node &&
+           GTK_TREE_VIEW_FLAG_SET (tree_view, GTK_TREE_VIEW_ARROW_PRELIT))
+ 	{
+-	  GtkTreePath *path = NULL;
+-
++          GtkTreePath *path = NULL;
+ 	  path = _gtk_tree_view_find_path (tree_view,
+ 					   tree_view->priv->button_pressed_tree,
+ 					   tree_view->priv->button_pressed_node);
+@@ -6967,6 +6978,19 @@
+   return path;
+ }
+ 
++#ifdef GDK_WINDOWING_QUARTZ
++
++static void
++gtk_tree_view_catch_drag_begin (GtkWidget* widget,
++				GdkDragContext* context,
++				gpointer user_data)
++{
++	TreeViewDragInfo* drag_info = (TreeViewDragInfo*) user_data;
++	set_source_row (context, drag_info->model, drag_info->path);
++}
++
++#endif
++
+ static gboolean
+ gtk_tree_view_maybe_begin_dragging_row (GtkTreeView      *tree_view,
+                                         GdkEventMotion   *event)
+@@ -6979,6 +7003,7 @@
+   gint cell_x, cell_y;
+   GtkTreeModel *model;
+   gboolean retval = FALSE;
++  gint drag_begin_id;
+ 
+   di = get_info (tree_view);
+ 
+@@ -7025,13 +7050,26 @@
+ 
+   retval = TRUE;
+ 
++#ifdef GDK_WINDOWING_QUARTZ
++
++  /* catch drag-being signal */
++  di->model = model;
++  di->path = path;
++  drag_begin_id = g_signal_connect (tree_view, "drag-begin", G_CALLBACK (gtk_tree_view_catch_drag_begin), (gpointer) di);
++#endif
++
+   context = gtk_drag_begin (widget,
+                             gtk_drag_source_get_target_list (widget),
+                             di->source_actions,
+                             button,
+                             (GdkEvent*)event);
+ 
++#ifndef GDK_WINDOWING_QUARTZ
+   set_source_row (context, model, path);
++#else 
++  /* disconnect drag-begin and catch drag-end */
++  g_signal_handler_disconnect (tree_view, drag_begin_id);
++#endif
+ 
+  out:
+   if (path)
+Index: gtk/gtkquartz.c
+===================================================================
+--- gtk/gtkquartz.c	(revision 21475)
++++ gtk/gtkquartz.c	(working copy)
+@@ -24,6 +24,23 @@
+ #include "gtkalias.h"
+ 
+ NSImage *
++_gtk_quartz_create_image_from_drawable (GdkDrawable* drawable)
++{
++	GdkPixbuf* pixbuf;
++	NSImage* image = NULL;
++
++	pixbuf = gdk_pixbuf_get_from_drawable (NULL, drawable, NULL, 
++						  0, 0, /* src */
++						  0, 0, /* dst */
++						  -1, -1);
++	if (pixbuf) 
++   	  image = _gtk_quartz_create_image_from_pixbuf (pixbuf);
++	
++	return image;
++}
++
++
++NSImage *
+ _gtk_quartz_create_image_from_pixbuf (GdkPixbuf *pixbuf)
+ {
+   CGColorSpaceRef colorspace;
+Index: gtk/gtkquartz.h
+===================================================================
+--- gtk/gtkquartz.h	(revision 21475)
++++ gtk/gtkquartz.h	(working copy)
+@@ -41,6 +41,7 @@
+ 						    GtkSelectionData *selection_data);
+ 			
+ NSImage *_gtk_quartz_create_image_from_pixbuf (GdkPixbuf *pixbuf);
++NSImage *_gtk_quartz_create_image_from_drawable (GdkDrawable *drawable);
+ 			    
+ G_END_DECLS
+ 
+Index: gtk/gtkdnd-quartz.c
+===================================================================
+--- gtk/gtkdnd-quartz.c	(revision 21475)
++++ gtk/gtkdnd-quartz.c	(working copy)
+@@ -1086,13 +1086,13 @@
+ 		GdkPixbuf *pixbuf;
+ 
+ 		pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, 1, 1);
+-		gdk_pixbuf_fill (pixbuf, 0xffffff);
+-	    
+-		gtk_drag_set_icon_pixbuf (context,
+-					  pixbuf,
++ 		gdk_pixbuf_fill (pixbuf, 0xffffff);
++
++ 		gtk_drag_set_icon_pixbuf (context,
++ 					  pixbuf,
+ 					  0, 0);
+ 
+-		g_object_unref (pixbuf);
++ 		g_object_unref (pixbuf);
+ 	      }
+ 	    break;
+ 	  case GTK_IMAGE_PIXBUF:
+@@ -1668,7 +1668,20 @@
+ 			  gint               hot_x,
+ 			  gint               hot_y)
+ {
+-  g_warning ("gtk_drag_set_icon_pixmap is not supported on Mac OS X");
++  GdkPixbuf *pixbuf;
++  
++  g_return_if_fail (GDK_IS_DRAG_CONTEXT (context));
++  g_return_if_fail (context->is_source);
++  g_return_if_fail (GDK_IS_COLORMAP (colormap));
++  g_return_if_fail (GDK_IS_PIXMAP (pixmap));
++  
++  pixbuf = gdk_pixbuf_get_from_drawable (NULL, pixmap, colormap,
++					 0, 0, /* src */
++					 0, 0, /* dst */
++					 -1, -1);
++  
++  gtk_drag_set_icon_pixbuf (context, pixbuf, hot_x, hot_y);
++  g_object_unref (pixbuf);
+ }
+ 
+ /**
+Index: gdk/quartz/gdkevents-quartz.c
+===================================================================
+--- gdk/quartz/gdkevents-quartz.c	(revision 21475)
++++ gdk/quartz/gdkevents-quartz.c	(working copy)
+@@ -112,6 +112,18 @@
+   return ((GdkEventPrivate *) event)->windowing_data;
+ }
+ 
++/* A category that exposes the protected carbon event for an NSEvent. */
++@interface NSEvent (GdkQuartzNSEvent)
++- (void *)gdk_quartz_event_ref;
++@end 
++
++@implementation NSEvent (GdkQuartzNSEvent)
++- (void *)gdk_quartz_event_ref
++{
++  return _eventRef;
++}
++@end
++
+ void 
+ _gdk_events_init (void)
+ {
+@@ -1670,6 +1682,65 @@
+ }
+ 
+ static gboolean
++_gdk_quartz_possibly_forward_accelerator (NSEvent* nsevent)
++{
++  /* Special-case menu shortcut events. We create command events for
++   * those and forward to the corresponding menu.
++   */
++  if ((!_gdk_quartz_keyboard_grab_window ||
++       (_gdk_quartz_keyboard_grab_window && keyboard_grab_owner_events)) &&
++      [nsevent type] == NSKeyDown)
++    {
++      EventRef event_ref;
++      MenuRef menu_ref;
++      MenuItemIndex index;
++
++      event_ref = [nsevent gdk_quartz_event_ref];
++      if (IsMenuKeyEvent (NULL, event_ref,
++                          kMenuEventQueryOnly, 
++                          &menu_ref, &index))
++        {
++          MenuCommand menu_command;
++          HICommand hi_command;
++
++          if (GetMenuItemCommandID (menu_ref, index, &menu_command) != noErr)
++            return FALSE;
++   
++          hi_command.commandID = menu_command;
++          hi_command.menu.menuRef = menu_ref;
++          hi_command.menu.menuItemIndex = index;
++
++          CreateEvent (NULL, kEventClassCommand, kEventCommandProcess, 
++                       0, kEventAttributeUserEvent, &event_ref);
++          SetEventParameter (event_ref, kEventParamDirectObject, 
++                             typeHICommand, 
++                             sizeof (HICommand), &hi_command);
++
++          SendEventToEventTarget (event_ref, GetMenuEventTarget (menu_ref));
++
++          ReleaseEvent (event_ref);
++
++          return TRUE;
++        }
++    }
++  return FALSE;
++}
++
++gboolean
++gdk_quartz_possibly_forward (GdkEvent* event)
++{
++  NSEvent *nsevent;
++  g_return_val_if_fail (event != NULL, FALSE);
++
++  nsevent = ((GdkEventPrivate*)event)->windowing_data;
++
++  if (nsevent)
++    return _gdk_quartz_possibly_forward_accelerator (nsevent);
++
++  return FALSE;
++}
++
++static gboolean
+ gdk_event_translate (NSEvent *nsevent)
+ {
+   NSWindow *nswindow;
