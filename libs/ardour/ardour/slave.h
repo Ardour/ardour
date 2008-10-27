@@ -117,7 +117,7 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	bool starting() const { return false; }
 
 	nframes_t resolution() const;
-	bool requires_seekahead () const { return true; }
+	bool requires_seekahead () const { return false; }
 
   private:
 	Session&    session;
@@ -131,12 +131,7 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	nframes_t   midi_clock_frame;               /* current time */
 	nframes_t   last_inbound_frame;             /* when we got it; audio clocked */
 
-	float       midi_clock_speed;
-	nframes_t   first_midi_clock_frame;
-	nframes_t   first_midi_clock_time;
-
-	// keep four beats of history ( 4 * 24 ppqn )
-	static const int32_t accumulator_size = 96;
+	static const int32_t accumulator_size = 4;
 	float   accumulator[accumulator_size];
 	int32_t accumulator_index;
 	bool    have_first_accumulated_speed;
