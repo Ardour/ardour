@@ -362,6 +362,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 #endif /* VARISPEED_IN_MIXER_STRIP */
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
+		rec_enable_button->show();
 	}
 
 	if (_route->phase_invert()) {
@@ -481,17 +482,17 @@ MixerStrip::set_width (Width w, void* owner)
 		set_size_request (-1, -1);
 		
 		if (rec_enable_button)  {
-			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("record"));
+			((Gtk::Label*)rec_enable_button->get_child())->set_text (_("Record"));
 		}
 		((Gtk::Label*)mute_button->get_child())->set_text  (_("Mute"));
 		((Gtk::Label*)solo_button->get_child())->set_text (_("Solo"));
 
 		if (_route->comment() == "") {
 		       comment_button.unset_bg (STATE_NORMAL);
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("comments"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("Comments"));
 		} else {
 		       comment_button.modify_bg (STATE_NORMAL, color());
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*comments*"));
+		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Comments*"));
 		}
 
 		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (gpm.astyle_string(_route->gain_automation_curve().automation_style()));

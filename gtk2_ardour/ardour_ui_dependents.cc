@@ -117,10 +117,8 @@ ARDOUR_UI::toggle_editor_mixer_on_top ()
 {
 	if (_mixer_on_top) {
 		goto_editor_window ();
-		_mixer_on_top = false;
 	} else {
 		goto_mixer_window ();
-		_mixer_on_top = true;
 	}
 }
 
