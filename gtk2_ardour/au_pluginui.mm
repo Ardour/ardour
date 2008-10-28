@@ -618,6 +618,7 @@ bool
 AUPluginUI::on_focus_in_event (GdkEventFocus* ev)
 {
 	cerr << "au plugin focus in\n";
+	Keyboard::magic_widget_grab_focus ();
 	return false;
 }
 
@@ -625,6 +626,7 @@ bool
 AUPluginUI::on_focus_out_event (GdkEventFocus* ev)
 {
 	cerr << "au plugin focus out\n";
+	Keyboard::magic_widget_drop_focus ();
 	return false;
 }
 

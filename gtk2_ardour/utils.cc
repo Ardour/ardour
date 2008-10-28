@@ -408,6 +408,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	GtkWindow* win = window.gobj();
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
+#ifdef GTKOSX
+	bool allow_forwarding = true;
+#endif
 
 #undef DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
@@ -418,6 +421,12 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			special_handling_of_unmodified_accelerators = true;
 		} 
 	} 
+
+#ifdef GTKOSX
+	if (Keyboard::some_magic_widget_has_focus ()) {
+		allow_forwarding = false;
+	}
+#endif
 
 #ifdef DEBUG_ACCELERATOR_HANDLING
 	if (debug) {
@@ -497,8 +506,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			cerr << "\tactivate, then propagate\n";
 		}
 #endif
+
 #ifdef GTKOSX
-		if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
+		if (allow_forwarding && gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
 			return true;
 		}
 #endif
