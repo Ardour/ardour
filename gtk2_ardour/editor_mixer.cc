@@ -61,6 +61,7 @@ Editor::show_editor_mixer (bool yn)
 	show_editor_mixer_when_tracks_arrive = false;
 
 	if (!session) {
+		show_editor_mixer_when_tracks_arrive = yn;
 		return;
 	}
 
