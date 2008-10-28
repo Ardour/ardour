@@ -521,6 +521,9 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
 	Config->add_extra_xml (get_transport_controllable_state());
+	if (new_session_dialog && new_session_dialog->engine_control.was_used()) {
+		Config->add_extra_xml (new_session_dialog->engine_control.get_state());
+	}
 	Config->save_state();
 	ui_config->save_state ();
 
@@ -760,8 +763,7 @@ If you still wish to quit, please use the\n\n\
 	}
 
 	engine->stop (true);
-	Config->save_state();
-	ARDOUR_UI::config()->save_state();
+	save_ardour_state ();
 	quit ();
 }
 
