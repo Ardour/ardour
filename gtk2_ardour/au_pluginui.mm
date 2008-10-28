@@ -1,3 +1,6 @@
+#undef  Marker
+#define Marker FuckYouAppleAndYourLackOfNameSpaces
+
 #include <pbd/error.h>
 #include <ardour/audio_unit.h>
 #include <ardour/insert.h>
@@ -17,6 +20,10 @@
 
 #import <AudioUnit/AUCocoaUIView.h>
 #import <CoreAudioKit/AUGenericView.h>
+
+#undef Marker
+
+#include "keyboard.h"
 
 #include "i18n.h"
 
