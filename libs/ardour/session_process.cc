@@ -487,7 +487,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		slave_speed = 0.0f;
 	}
 
-#if 0
+#if 1
 	cerr << "delta = " << (int) (dir * this_delta)
 	     << " speed = " << slave_speed 
 	     << " ts = " << _transport_speed 
@@ -519,18 +519,18 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		}
 
 		if (delta_accumulator_cnt != 0 || this_delta < _current_frame_rate) {
-			delta_accumulator[delta_accumulator_cnt++] = dir*this_delta;
+			delta_accumulator[delta_accumulator_cnt++] = long(dir) * long(this_delta);
 		}
 		
 		if (have_first_delta_accumulator) {
-			average_slave_delta = 0;
+			average_slave_delta = 0L;
 			for (int i = 0; i < delta_accumulator_size; ++i) {
 				average_slave_delta += delta_accumulator[i];
 			}
-			average_slave_delta /= delta_accumulator_size;
-			if (average_slave_delta < 0) {
+			average_slave_delta /= long(delta_accumulator_size);
+			if (average_slave_delta < 0L) {
 				average_dir = -1;
-				average_slave_delta = -average_slave_delta;
+				average_slave_delta = abs(average_slave_delta);
 			} else {
 				average_dir = 1;
 			}
@@ -606,8 +606,8 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 					/* XXX what? */
 				}
 
-				memset (delta_accumulator, 0, sizeof (nframes_t) * delta_accumulator_size);
-				average_slave_delta = 0;
+				memset (delta_accumulator, 0, sizeof (long) * delta_accumulator_size);
+				average_slave_delta = 0L;
 				this_delta = 0;
 			}
 		}
@@ -667,18 +667,19 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			float adjusted_speed = slave_speed +
 				(delta / (adjust_seconds * _current_frame_rate));
 			
-			// cerr << "adjust using " << delta
-			// << " towards " << adjusted_speed
-			// << " ratio = " << adjusted_speed / slave_speed
-			// << " current = " << _transport_speed
-			// << " slave @ " << slave_speed
-			// << endl;
-			
+#if 1			
+			cerr << "adjust using " << delta
+			<< " towards " << adjusted_speed
+			<< " ratio = " << adjusted_speed / slave_speed
+			<< " current = " << _transport_speed
+			<< " slave @ " << slave_speed
+			<< endl;
+#endif			
 			request_transport_speed (adjusted_speed);
 			
 #if 1
-			if ((nframes_t) average_slave_delta > _slave->resolution()) {
-				// cerr << "not locked\n";
+			if (abs(average_slave_delta) > (long) _slave->resolution()) {
+				cerr << "average slave delta greater than slave resolution, going to silent motion\n";
 				goto silent_motion;
 			}
 #endif
@@ -733,6 +734,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 
   noroll:
 	/* don't move at all */
+  cerr << "********* noroll" << endl;
 	no_roll (nframes, 0);
 	return false;
 }

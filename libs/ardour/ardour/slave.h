@@ -96,8 +96,6 @@ class Slave {
 	 *   <li>
 	 *     Slave::resolution() should be greater than the maximum distance of 
 	 *     ardours transport position to the slaves requested transport position.
-	 *     (Otherwise Session:average_slave_delta will become negative, and
-	 *      the transport will move silently)
 	 *   </li>
 	 * 	 <li>Slave::locked() should return true, otherwise Session::no_roll will be called</li>
 	 * 	 <li>Slave::starting() should be false, otherwise the transport will not move until it becomes true</li>	 *   
@@ -134,8 +132,7 @@ class Slave {
 	
 	/**
 	 * @return - the timing resolution of the Slave - If the distance of ardours transport
-	 * to the slave becomes negative or greater than the resolution, sound will stop
-	 * (Session::follow_slave label silent_motion)
+	 * to the slave becomes greater than the resolution, sound will stop
 	 */
 	virtual nframes_t resolution() const = 0;
 	
