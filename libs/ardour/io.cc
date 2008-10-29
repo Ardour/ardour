@@ -2613,7 +2613,7 @@ IO::set_gain (gain_t val, void *src)
 
 	if (_session.transport_stopped()) {
 		_effective_gain = val;
-		_gain = val;
+		// _gain = val;
 	}
 
 	gain_changed (src);
