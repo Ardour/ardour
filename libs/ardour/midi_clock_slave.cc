@@ -45,7 +45,7 @@ MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 	: session (s)
 	, ppqn (ppqn)
 	, accumulator_index (0)
-	, average (0.0)
+	, average_midi_clock_frame_duration (0.0)
 {
 	rebind (p);
 	reset ();
@@ -96,21 +96,21 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	// for the first MIDI clock event we dont have any past
 	// data, so we assume a sane tempo
 	if(last.timestamp == 0) {
-		midi_clock_frame = one_ppqn_in_frames;
+		current_midi_clock_frame_duration = one_ppqn_in_frames;
 	} else {
-		midi_clock_frame = now - last.timestamp;
+		current_midi_clock_frame_duration = now - last.timestamp;
 	}
 	
 	
 	// moving average over incoming intervals
-	accumulator[accumulator_index++] = (float) midi_clock_frame;
+	accumulator[accumulator_index++] = (float) current_midi_clock_frame_duration;
 	if(accumulator_index == accumulator_size)
 		accumulator_index = 0;
 	
-	average = 0.0;
+	average_midi_clock_frame_duration = 0.0;
 	for(int i = 0; i < accumulator_size; i++)
-		average += accumulator[i];
-	average /= accumulator_size;
+		average_midi_clock_frame_duration += accumulator[i];
+	average_midi_clock_frame_duration /= accumulator_size;
 	
 	
 #if 1
@@ -123,14 +123,16 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	std::cerr 
 	          << " got MIDI Clock message at time " << now  
 	          << " session time: " << session.engine().frame_time() 
-	          << " real delta: " << midi_clock_frame 
+	          << " real delta: " << current_midi_clock_frame_duration 
 	          << " reference: " << one_ppqn_in_frames
-	          << " average: " << average
+	          << " average: " << average_midi_clock_frame_duration
 	          << std::endl;
 #endif
 	
+	
+	
 	current.guard1++;
-	current.position += midi_clock_frame;
+	current.position += current_midi_clock_frame_duration * (one_ppqn_in_frames / average_midi_clock_frame_duration);
 	current.timestamp = now;
 	current.guard2++;
 
@@ -150,15 +152,16 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 		return;
 	}
 	
-	midi_clock_frame = 0;
+	current_midi_clock_frame_duration = 0;
 	
-	session.request_transport_speed(one_ppqn_in_frames / average);
+	session.request_transport_speed(one_ppqn_in_frames / average_midi_clock_frame_duration);
 	current.guard1++;
 	current.position = 0;
 	current.timestamp = now;
 	current.guard2++;
 	
 	_started = true;
+	_starting = true;
 }
 
 void
@@ -166,7 +169,7 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 {
 	std::cerr << "MIDIClock_Slave got stop message" << endl;
 
-	midi_clock_frame = 0;
+	current_midi_clock_frame_duration = 0;
 
 	current.guard1++;
 	current.position = 0;
@@ -215,7 +218,7 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		pos = 0;
 		return true;
 	}
-	
+		
 	nframes_t now = session.engine().frame_time();
 	nframes_t frame_rate = session.frame_rate();
 
@@ -236,7 +239,7 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 
 	cerr << " now: " << now << " last: " << last.timestamp;
 
-	speed = one_ppqn_in_frames / average;
+	speed = one_ppqn_in_frames / average_midi_clock_frame_duration;
 	cerr << " final speed: " << speed;
 	
 	if (now > last.timestamp) {
@@ -244,8 +247,8 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		// so we interpolate position according to speed
 		nframes_t elapsed = now - last.timestamp;
 		cerr << " elapsed: " << elapsed << " elapsed (scaled)  " << elapsed * speed;
-		pos = last.position + elapsed * speed;
-		last.position = pos;
+		nframes_t delta = elapsed * speed;
+		pos = last.position + delta;
 	} else {
 		// A new MIDI clock message has arrived this cycle		
 		pos = last.position;
@@ -253,7 +256,13 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 	
    cerr << " position: " << pos; 
    cerr << endl;
-	
+   
+   // we want start on frame 0 on the first call after a MIDI start
+   if(_starting) {
+	   pos = 0;
+	   _starting = false;
+   }
+   
 	return true;
 }
 
