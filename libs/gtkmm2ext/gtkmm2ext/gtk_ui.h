@@ -29,6 +29,9 @@
 #include <pthread.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/style.h>
+#ifndef GTK_NEW_TOOLTIP_API
+#include <gtkmm/tooltips.h>
+#endif
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/main.h>
 #include <gdkmm/color.h>
@@ -152,6 +155,9 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	static pthread_t gui_thread;
 	bool _active;
 	Gtk::Main *theMain;
+#ifndef GTK_NEW_TOOLTIP_API
+	Gtk::Tooltips *tips;
+#endif
 	TextViewer *errors;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> error_ptag;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> error_mtag;

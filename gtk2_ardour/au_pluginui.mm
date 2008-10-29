@@ -67,6 +67,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	top_box.set_spacing (6);
 	top_box.set_border_width (6);
 
+	top_box.pack_end (focus_button, false, true);
 	top_box.pack_end (bypass_button, false, true);
 	top_box.pack_end (automation_mode_selector, false, false);
 	top_box.pack_end (automation_mode_label, false, false);
@@ -624,16 +625,16 @@ create_au_gui (boost::shared_ptr<PluginInsert> plugin_insert, VBox** box)
 bool
 AUPluginUI::on_focus_in_event (GdkEventFocus* ev)
 {
-	cerr << "au plugin focus in\n";
-	Keyboard::magic_widget_grab_focus ();
+	//cerr << "au plugin focus in\n";
+	//Keyboard::magic_widget_grab_focus ();
 	return false;
 }
 
 bool
 AUPluginUI::on_focus_out_event (GdkEventFocus* ev)
 {
-	cerr << "au plugin focus out\n";
-	Keyboard::magic_widget_drop_focus ();
+	//cerr << "au plugin focus out\n";
+	//Keyboard::magic_widget_drop_focus ();
 	return false;
 }
 

@@ -34,6 +34,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menu.h>
+#include <gtkmm/image.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/socket.h>
@@ -85,10 +86,15 @@ class PlugUIBase : public virtual sigc::trackable
 	Gtk::ComboBoxText preset_combo;
 	Gtk::Button save_button;
 	Gtk::ToggleButton bypass_button;
+	Gtk::EventBox focus_button;
+
+	Gtk::Image* focus_out_image;
+	Gtk::Image* focus_in_image;
 
 	void setting_selected();
 	void save_plugin_setting (void);
 	void bypass_toggled();
+	bool focus_toggled(GdkEventButton*);
 	void redirect_active_changed (ARDOUR::Redirect* r, void* src);
 };
 
@@ -212,6 +218,8 @@ class PluginUIWindow : public Gtk::Window
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_focus_in_event (GdkEventFocus*);
+	bool on_focus_out_event (GdkEventFocus*);
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 	void on_show ();

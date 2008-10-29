@@ -89,12 +89,14 @@ void
 Keyboard::magic_widget_grab_focus () 
 {
 	_some_magic_widget_has_focus = true;
+	cerr << "Grabbed magic widget docus\n";
 }
 
 void
 Keyboard::magic_widget_drop_focus ()
 {
 	_some_magic_widget_has_focus = false;
+	cerr << "Dropped magic widget docus\n";
 }
 
 bool

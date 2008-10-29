@@ -86,6 +86,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	constraint_hbox->set_spacing (5);
 	constraint_hbox->pack_start (*smaller_hbox, true, false);
+	constraint_hbox->pack_end (focus_button, false, false);
 	constraint_hbox->pack_end (bypass_button, false, false);
 
 	settings_box.pack_end (*constraint_hbox, false, false);

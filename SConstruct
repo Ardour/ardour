@@ -1307,6 +1307,21 @@ if not conf.CheckFunc('posix_memalign'):
 
 env = conf.Finish()
 
+# Which GTK tooltips API
+
+gtktestenv = env.Clone ()
+gtktestenv.Merge ([
+        libraries['gtk2']
+        ])
+
+conf = gtktestenv.Configure ()
+
+if conf.CheckFunc('gtk_widget_set_tooltip_text'):
+    env.Append (CXXFLAGS='-DGTK_NEW_TOOLTIP_API')
+
+conf.Finish ()
+
+
 # generate the per-user and system rc files from the same source
 
 sysrcbuild = env.SubstInFile ('ardour_system.rc','ardour.rc.in', SUBST_DICT = subst_dict)
