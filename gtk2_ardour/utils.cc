@@ -408,9 +408,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	GtkWindow* win = window.gobj();
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
-#ifdef GTKOSX
-	bool allow_forwarding = true;
-#endif
+	bool allow_activating = true;
 
 #undef DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
@@ -423,8 +421,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	} 
 
 #ifdef GTKOSX
+	/* should this be universally true? */
 	if (Keyboard::some_magic_widget_has_focus ()) {
-		allow_forwarding = false;
+		allow_activating = false;
 	}
 #endif
 
@@ -432,6 +431,10 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	if (debug) {
 		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " special handling ? " 
 		     << special_handling_of_unmodified_accelerators
+		     << " magic widget focus ? "
+		     << Keyboard::some_magic_widget_has_focus()
+		     << " allow_activation ? "
+		     << allow_activating
 		     << endl;
 	}
 #endif
@@ -478,17 +481,19 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		uint32_t fakekey = ev->keyval;
 
 		if (possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
-			if (gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
+			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
 				return true;
 			}
 
 #ifdef GTKOSX
-			int oldval = ev->keyval;
-			ev->keyval = fakekey;
-			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
-				return true;
+			if (allow_activating) {
+				int oldval = ev->keyval;
+				ev->keyval = fakekey;
+				if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
+					return true;
+				}
+				ev->keyval = oldval;
 			}
-			ev->keyval = oldval;
 #endif
 		}
 	}
@@ -507,26 +512,23 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		}
 #endif
 
+		if (allow_activating) {
 #ifdef GTKOSX
-		if (allow_forwarding && gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
-			return true;
+			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
+				return true;
+			}
+#endif
+			if (gtk_window_activate_key (win, ev)) {
+				return true;
+			}
+		}
+
+#ifdef DEBUG_ACCELERATOR_HANDLING
+		if (debug) {
+			cerr << "\tnot accelerated, now propagate\n";
 		}
 #endif
-		if (!gtk_window_activate_key (win, ev)) {
-#ifdef DEBUG_ACCELERATOR_HANDLING
-			if (debug) {
-				cerr << "\tnot accelerated, now propagate\n";
-			}
-#endif
-			return gtk_window_propagate_key_event (win, ev);
-		} else {
-#ifdef DEBUG_ACCELERATOR_HANDLING
-			if (debug) {
-				cerr << "\taccelerated - done.\n";
-			}
-#endif
-			return true;
-		} 
+		return gtk_window_propagate_key_event (win, ev);
 	}
 	
 	/* no modifiers, propagate first */
@@ -542,12 +544,17 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			cerr << "\tpropagation didn't handle, so activate\n";
 		}
 #endif
+
+		if (allow_activating) {
+			
 #ifdef GTKOSX
-		if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
-			return true;
-		}
+			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
+				return true;
+			}
 #endif
-		return gtk_window_activate_key (win, ev);
+			return gtk_window_activate_key (win, ev);
+		} 
+			
 	} else {
 #ifdef DEBUG_ACCELERATOR_HANDLING
 		if (debug) {

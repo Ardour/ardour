@@ -24,7 +24,8 @@
 #undef Marker
 
 #include "keyboard.h"
-
+#include "utils.h"
+#include "public_editor.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
