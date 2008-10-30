@@ -487,7 +487,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 		slave_speed = 0.0f;
 	}
 
-#if 1
+#if 0
 	cerr << "delta = " << (int) (dir * this_delta)
 	     << " speed = " << slave_speed 
 	     << " ts = " << _transport_speed 
@@ -667,7 +667,7 @@ Session::follow_slave (nframes_t nframes, nframes_t offset)
 			float adjusted_speed = slave_speed +
 				(delta / (adjust_seconds * _current_frame_rate));
 			
-#if 1
+#if 0
 			cerr << "adjust using " << delta
 			<< " towards " << adjusted_speed
 			<< " ratio = " << adjusted_speed / slave_speed
