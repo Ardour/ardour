@@ -699,6 +699,7 @@ Editor::register_actions ()
 	ruler_tempo_action->set_active (true);
 	ruler_marker_action->set_active (true);
 	ruler_range_action->set_active (true);
+	ruler_loop_punch_action->set_active (true);
 	if (Profile->get_sae()) {
 		ruler_cd_marker_action->set_active (false);
 		ruler_timecode_action->set_active (false);
