@@ -113,7 +113,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	average_midi_clock_frame_duration /= accumulator_size;
 	
 	
-#if 1
+#if 0
 	JACK_MidiPort *jack_port = dynamic_cast<JACK_MidiPort *>(port);
 	pthread_t process_thread_id = 0;
 	if(jack_port) {
@@ -123,16 +123,15 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	std::cerr 
 	          << " got MIDI Clock message at time " << now  
 	          << " session time: " << session.engine().frame_time() 
+	          << " transport position: " << session.transport_frame()
 	          << " real delta: " << current_midi_clock_frame_duration 
 	          << " reference: " << one_ppqn_in_frames
 	          << " average: " << average_midi_clock_frame_duration
 	          << std::endl;
 #endif
 	
-	
-	
 	current.guard1++;
-	current.position += current_midi_clock_frame_duration * (one_ppqn_in_frames / average_midi_clock_frame_duration);
+	current.position += one_ppqn_in_frames;
 	current.timestamp = now;
 	current.guard2++;
 
@@ -144,8 +143,8 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 {
 	
 	nframes_t now = timestamp;
-	cerr << "MIDIClock_Slave got start message at time "  <<  now 
-	     << " session time: " << session.engine().frame_time() << endl;
+	
+	//cerr << "MIDIClock_Slave got start message at time "  <<  now << " session time: " << session.engine().frame_time() << endl;
 
 	if(!locked()) {
 		cerr << "Did not start because not locked!" << endl;
@@ -167,7 +166,7 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 void
 MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 {
-	std::cerr << "MIDIClock_Slave got stop message" << endl;
+	//std::cerr << "MIDIClock_Slave got stop message" << endl;
 
 	current_midi_clock_frame_duration = 0;
 
@@ -212,23 +211,27 @@ MIDIClock_Slave::ok() const
 bool
 MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 {
+	float previous_speed;
+	
+	nframes_t now = session.engine().frame_time();
 	
 	if(!_started) {
 		speed = 0.0;
 		pos = 0;
+		previous_speed = one_ppqn_in_frames / average_midi_clock_frame_duration;
 		return true;
 	}
 		
-	nframes_t now = session.engine().frame_time();
-	nframes_t frame_rate = session.frame_rate();
 
 	SafeTime last;
 	read_current (&last);
 
 	/* no timecode for 1/4 second ? conclude that its stopped */
 
-	if (last_inbound_frame && now > last_inbound_frame && now - last_inbound_frame > frame_rate / 4) {
-		cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
+	if (last_inbound_frame && 
+	    now > last_inbound_frame && 
+	    now - last_inbound_frame > session.frame_rate() / 4) {
+		//cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
 		pos = last.position;
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
@@ -237,25 +240,29 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 		return false;
 	}
 
-	cerr << " now: " << now << " last: " << last.timestamp;
+	//cerr << " now: " << now << " last: " << last.timestamp;
 
 	speed = one_ppqn_in_frames / average_midi_clock_frame_duration;
-	cerr << " final speed: " << speed;
+	//cerr << " final speed: " << speed;
 	
 	if (now > last.timestamp) {
 		// we are in between MIDI clock messages
 		// so we interpolate position according to speed
 		nframes_t elapsed = now - last.timestamp;
-		cerr << " elapsed: " << elapsed << " elapsed (scaled)  " << elapsed * speed;
 		nframes_t delta = elapsed * speed;
+		//cerr << " elapsed: " << elapsed << " elapsed (scaled)  " << delta;
 		pos = last.position + delta;
 	} else {
-		// A new MIDI clock message has arrived this cycle		
-		pos = last.position;
+		// A new MIDI clock message has arrived this cycle
+		pos = (last.position + session.transport_frame()) / 2.0;
+		previous_speed = speed;
 	}
 	
-   cerr << " position: " << pos; 
+	/*
+   cerr << " transport position now: " <<  session.transport_frame(); 
+   cerr << " calculated position: " << pos; 
    cerr << endl;
+   */
    
    // we want start on frame 0 on the first call after a MIDI start
    if(_starting) {
