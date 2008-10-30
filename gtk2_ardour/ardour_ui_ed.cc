@@ -553,7 +553,7 @@ ARDOUR_UI::install_actions ()
 	*/
 
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("JACK does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
-	if (engine->can_request_hardware_monitoring()) {
+	if (!engine->can_request_hardware_monitoring()) {
 		act->set_sensitive (false);
 	}
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Ardour does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
