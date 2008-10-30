@@ -116,7 +116,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void show_about ();
 	void hide_about ();
 	
-	void idle_load (const Glib::ustring& path);
+	void finish();
+
 	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
 	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, 
@@ -177,8 +178,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
 
 	void name_io_setup (ARDOUR::AudioEngine&, string&, ARDOUR::IO& io, bool in);
-
-	static gint hide_and_quit (GdkEventAny *ev, ArdourDialog *);
 
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
@@ -300,7 +299,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void startup ();
 	void shutdown ();
 
-	void finish();
 	int  ask_about_saving_session (const string & why);
 
 	/* periodic safety backup, to be precise */

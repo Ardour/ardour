@@ -195,7 +195,7 @@ ARDOUR_UI::install_actions ()
 	
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (main_actions, X_("WindowMenu"), _("Window"));
-	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (mem_fun(*this, &ARDOUR_UI::finish)));
+	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (mem_fun(*this, &ARDOUR_UI::finish))));
 
         /* windows visibility actions */
 

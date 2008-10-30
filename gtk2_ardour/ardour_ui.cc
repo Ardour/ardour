@@ -747,6 +747,7 @@ If you still wish to quit, please use the\n\n\
 		session->set_deletion_in_progress ();
 	}
 
+	ArdourDialog::close_all_dialogs ();
 	engine->stop (true);
 	save_ardour_state ();
 	quit ();
@@ -1918,14 +1919,6 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	}
 }
 
-gint
-ARDOUR_UI::hide_and_quit (GdkEventAny *ev, ArdourDialog *window)
-{
-	window->hide();
-	Gtk::Main::quit ();
-	return TRUE;
-}
-
 void
 ARDOUR_UI::save_template ()
 
@@ -2161,28 +2154,6 @@ ARDOUR_UI::loading_message (const std::string& msg)
 	show_splash ();
 	splash->message (msg);
 	flush_pending ();
-}
-	
-void
-ARDOUR_UI::idle_load (const Glib::ustring& path)
-{
-	if (session) {
-		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
-			/* /path/to/foo => /path/to/foo, foo */
-			load_session (path, basename_nosuffix (path));
-		} else {
-			/* /path/to/foo/foo.ardour => /path/to/foo, foo */
-			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
-		}
-	} else {
-		ARDOUR_COMMAND_LINE::session_name = path;
-		if (new_session_dialog) {
-			/* make it break out of Dialog::run() and
-			   start again.
-			 */
-			new_session_dialog->response (1);
-		}
-	}
 }
 
 bool

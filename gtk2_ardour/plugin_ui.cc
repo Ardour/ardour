@@ -342,6 +342,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	bypass_button.set_name ("PluginBypassButton");
 	bypass_button.signal_toggled().connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
+	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
 	focus_button.signal_button_release_event().connect (mem_fun(*this, &PlugUIBase::focus_toggled));
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
@@ -352,14 +353,15 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	focus_in_image = new Image (get_icon (X_("computer_keyboard_active")));
 	
 	focus_button.add (*focus_out_image);
+
 	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to focus all keyboard events on this plugin window"), "");
+	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
 }
 
 void
 PlugUIBase::redirect_active_changed (Redirect* r, void* src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PlugUIBase::redirect_active_changed), r, src));
-	bypass_button.set_active (!r->active());
 }
 
 void

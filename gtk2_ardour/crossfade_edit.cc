@@ -48,6 +48,7 @@
 #include "canvas_impl.h"
 #include "simplerect.h"
 #include "waveview.h"
+#include "actions.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -97,6 +98,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	set_wmclass (X_("ardour_automationedit"), "Ardour");
 	set_name ("CrossfadeEditWindow");
 	set_position (Gtk::WIN_POS_MOUSE);
+
+	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 

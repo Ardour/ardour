@@ -65,16 +65,27 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	/* stuff some stuff into the top of the window */
 
+	HBox* smaller_hbox = manage (new HBox);
+
+	smaller_hbox->pack_start (preset_label, false, false, 10);
+	smaller_hbox->pack_start (preset_combo, false, false);
+	smaller_hbox->pack_start (save_button, false, false);
+	smaller_hbox->pack_start (automation_mode_label, false, false);
+	smaller_hbox->pack_start (automation_mode_selector, false, false);
+	smaller_hbox->pack_start (bypass_button, false, true);
+
+	VBox* v1_box = manage (new VBox);
+	VBox* v2_box = manage (new VBox);
+
+	v1_box->pack_start (*smaller_hbox, false, true);
+	v2_box->pack_start (focus_button, false, true);
+
+	top_box.set_homogeneous (false);
 	top_box.set_spacing (6);
 	top_box.set_border_width (6);
 
-	top_box.pack_end (focus_button, false, true);
-	top_box.pack_end (bypass_button, false, true);
-	top_box.pack_end (automation_mode_selector, false, false);
-	top_box.pack_end (automation_mode_label, false, false);
-	top_box.pack_end (save_button, false, false);
-	top_box.pack_end (preset_combo, false, false);
-	top_box.pack_end (preset_label, false, false);
+	top_box.pack_end (*v2_box, false, false);
+	top_box.pack_end (*v1_box, false, false);
 
 	set_spacing (6);
 	pack_start (top_box, false, false);

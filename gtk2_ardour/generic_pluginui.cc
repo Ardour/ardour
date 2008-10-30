@@ -73,8 +73,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	set_border_width (10);
 	set_homogeneous (false);
 
-	settings_box.set_homogeneous (false);
-
 	HBox* constraint_hbox = manage (new HBox);
 	HBox* smaller_hbox = manage (new HBox);
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
@@ -83,15 +81,21 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (*combo_label, false, false, 10);
 	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
+	smaller_hbox->pack_start (bypass_button, false, true);
 
 	constraint_hbox->set_spacing (5);
-	constraint_hbox->pack_start (*smaller_hbox, true, false);
-	constraint_hbox->pack_end (focus_button, false, false);
-	constraint_hbox->pack_end (bypass_button, false, false);
+	constraint_hbox->set_homogeneous (false);
+	
+	VBox* v1_box = manage (new VBox);
+	VBox* v2_box = manage (new VBox);
 
-	settings_box.pack_end (*constraint_hbox, false, false);
+	v1_box->pack_start (*smaller_hbox, false, true);
+	v2_box->pack_start (focus_button, false, true);
 
-	pack_start (settings_box, false, false);
+	constraint_hbox->pack_end (*v2_box, false, false);
+	constraint_hbox->pack_end (*v1_box, false, false);
+
+	pack_start (*constraint_hbox, false, false);
 
 	if ( is_scrollable ) {
 		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -107,9 +111,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		pack_start (hpacker, false, false);
 	}
 
-	insert->active_changed.connect (mem_fun(*this, &GenericPluginUI::redirect_active_changed));
-	bypass_button.set_active (!insert->active());
-	
 	build ();
 }
 
@@ -703,14 +704,6 @@ GenericPluginUI::control_combo_changed (ControlUI* cui)
 		insert->set_parameter (cui->port_index, mapping[value]);
 	}
 
-}
-
-void
-GenericPluginUI::redirect_active_changed (Redirect* r, void* src)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &GenericPluginUI::redirect_active_changed), r, src));
-	
-	bypass_button.set_active (!r->active());
 }
 
 bool

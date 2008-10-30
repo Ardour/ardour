@@ -89,14 +89,12 @@ void
 Keyboard::magic_widget_grab_focus () 
 {
 	_some_magic_widget_has_focus = true;
-	cerr << "Grabbed magic widget docus\n";
 }
 
 void
 Keyboard::magic_widget_drop_focus ()
 {
 	_some_magic_widget_has_focus = false;
-	cerr << "Dropped magic widget docus\n";
 }
 
 bool
@@ -264,10 +262,20 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		}
 	}
 
-	if (event->type == GDK_KEY_RELEASE && event->keyval == GDK_w && modifier_state_equals (event->state, PrimaryModifier)) {
-		if (current_window) {
-			current_window->hide ();
-			current_window = 0;
+	/* Special keys that we want to handle in
+	   any dialog, no matter whether it uses
+	   the regular set of accelerators or not
+	*/
+
+	if (event->type == GDK_KEY_RELEASE && modifier_state_equals (event->state, PrimaryModifier)) {
+		switch (event->keyval) {
+		case GDK_w:
+			if (current_window) {
+				current_window->hide ();
+				current_window = 0;
+				ret = true;
+			}
+			break;
 		}
 	}
 

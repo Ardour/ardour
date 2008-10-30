@@ -93,8 +93,8 @@ class PlugUIBase : public virtual sigc::trackable
 
 	void setting_selected();
 	void save_plugin_setting (void);
-	void bypass_toggled();
 	bool focus_toggled(GdkEventButton*);
+	void bypass_toggled();
 	void redirect_active_changed (ARDOUR::Redirect* r, void* src);
 };
 
@@ -193,8 +193,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (ControlUI* cui);
-
-	void redirect_active_changed (ARDOUR::Redirect*, void*);
 
 	void astate_clicked (ControlUI*, uint32_t parameter);
 	void automation_state_changed (ControlUI*);

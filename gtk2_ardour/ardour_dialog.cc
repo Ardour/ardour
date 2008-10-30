@@ -18,6 +18,7 @@
 */
 
 #include <iostream>
+#include <sigc++/bind.h>
 
 #include <gtkmm2ext/doi.h>
 
@@ -25,11 +26,20 @@
 #include "keyboard.h"
 #include "ardour_ui.h"
 #include "splash.h"
+#include "public_editor.h"
+#include "utils.h"
+
+using namespace sigc;
+using namespace Gtk;
+
+sigc::signal<void> ArdourDialog::CloseAllDialogs;
 
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
 {
 	session = 0;
+
+	CloseAllDialogs.connect (bind (mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
 
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 }
@@ -38,6 +48,8 @@ ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool 
 	: Dialog (title, parent, modal, use_seperator)
 {
 	session = 0;
+
+	CloseAllDialogs.connect (bind (mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
 
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
@@ -80,3 +92,10 @@ ArdourDialog::on_show ()
 
 	Dialog::on_show ();
 }
+
+bool
+ArdourDialog::on_key_press_event (GdkEventKey* key)
+{
+	return Gtk::Dialog::on_key_press_event (key);
+}
+
