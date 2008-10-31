@@ -408,11 +408,6 @@ PlugUIBase::bypass_toggled ()
 
 	if ((x = bypass_button.get_active()) == insert->active()) {
 		insert->set_active (!x, this);
-		if (insert->active()) {
-			bypass_button.set_label (_("Bypass"));
-		} else {
-			bypass_button.set_label (_("Active"));
-		}
 	}
 }
 
