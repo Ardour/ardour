@@ -2156,6 +2156,28 @@ ARDOUR_UI::loading_message (const std::string& msg)
 	flush_pending ();
 }
 
+void
+ARDOUR_UI::idle_load (const Glib::ustring& path)
+{
+	if (session) {
+		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+			/* /path/to/foo => /path/to/foo, foo */
+			load_session (path, basename_nosuffix (path));
+		} else {
+			/* /path/to/foo/foo.ardour => /path/to/foo, foo */
+			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+		}
+	} else {
+		ARDOUR_COMMAND_LINE::session_name = path;
+		if (new_session_dialog) {
+			/* make it break out of Dialog::run() and
+			   start again.
+			 */
+			new_session_dialog->response (1);
+		}
+	}
+}
+
 bool
 ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be_new)
 {
