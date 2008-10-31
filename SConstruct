@@ -1118,6 +1118,9 @@ else:
     libraries['pangomm'] = LibraryInfo(LIBS='pangomm',
                                     LIBPATH='#libs/gtkmm2/pango',
                                     CPPPATH='#libs/gtkmm2/pango')
+    libraries['cairomm'] = LibraryInfo(LIBS='cairomm',
+                                    LIBPATH='#libs/cairomm',
+                                    CPPPATH='#libs/cairomm')
     libraries['atkmm'] = LibraryInfo(LIBS='atkmm',
                                      LIBPATH='#libs/gtkmm2/atk',
                                      CPPPATH='#libs/gtkmm2/atk')

@@ -208,22 +208,55 @@ Crossfade::initialize ()
 
 	_fade_out.freeze ();
 	_fade_out.clear ();
-	_fade_out.add (0.0, 1.0);
-	_fade_out.add ((_length * 0.1), 0.99);
-	_fade_out.add ((_length * 0.2), 0.97);
-	_fade_out.add ((_length * 0.8), 0.03);
-	_fade_out.add ((_length * 0.9), 0.01);
-	_fade_out.add (_length, 0.0);
+
+#ifdef EQUAL_POWER_MINUS_3DB
+
+	_fade_out.add ((_length * 0.000000), 1.000000);
+	_fade_out.add ((_length * 0.166667), 0.948859);
+	_fade_out.add ((_length * 0.333333), 0.851507);
+	_fade_out.add ((_length * 0.500000), 0.707946);
+	_fade_out.add ((_length * 0.666667), 0.518174);
+	_fade_out.add ((_length * 0.833333), 0.282192);
+	_fade_out.add ((_length * 1.000000), 0.000000);
+
+#else // EQUAL_POWER_MINUS_6DB
+
+	_fade_out.add ((_length * 0.000000), 1.000000);
+	_fade_out.add ((_length * 0.166667), 0.833033);
+	_fade_out.add ((_length * 0.333333), 0.666186);
+	_fade_out.add ((_length * 0.500000), 0.499459);
+	_fade_out.add ((_length * 0.666667), 0.332853);
+	_fade_out.add ((_length * 0.833333), 0.166366);
+	_fade_out.add ((_length * 1.000000), 0.000000);
+#endif
+
 	_fade_out.thaw ();
 	
 	_fade_in.freeze ();
 	_fade_in.clear ();
-	_fade_in.add (0.0, 0.0);
-	_fade_in.add ((_length * 0.1),  0.01);
-	_fade_in.add ((_length * 0.2),  0.03);
-	_fade_in.add ((_length * 0.8),  0.97);
-	_fade_in.add ((_length * 0.9),  0.99);
-	_fade_in.add (_length, 1.0);
+
+#ifdef EQUAL_POWER_MINUS_3DB
+
+	_fade_in.add ((_length * 0.000000), 0.000000);
+	_fade_in.add ((_length * 0.166667), 0.282192);
+	_fade_in.add ((_length * 0.333333), 0.518174);
+	_fade_in.add ((_length * 0.500000), 0.707946);
+	_fade_in.add ((_length * 0.666667), 0.851507);
+	_fade_in.add ((_length * 0.833333), 0.948859);
+	_fade_in.add ((_length * 1.000000), 1.000000);
+
+#else // EQUAL_POWER_MINUS_SIX_DB
+
+	_fade_in.add ((_length * 0.000000), 0.000000);
+	_fade_in.add ((_length * 0.166667), 0.166366);
+	_fade_in.add ((_length * 0.333333), 0.332853);
+	_fade_in.add ((_length * 0.500000), 0.499459);
+	_fade_in.add ((_length * 0.666667), 0.666186);
+	_fade_in.add ((_length * 0.833333), 0.833033);
+	_fade_in.add ((_length * 1.000000), 1.000000);
+
+#endif
+
 	_fade_in.thaw ();
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
