@@ -1052,6 +1052,7 @@ class Editor : public PublicEditor
 	void toggle_region_mute ();
 	void toggle_region_lock ();
 	void toggle_region_opaque ();
+	void toggle_record_enable ();
 	void set_region_lock_style (ARDOUR::Region::PositionLockStyle);
 	void raise_region ();
 	void raise_region_to_top ();

@@ -1047,8 +1047,6 @@ Editor::access_action (std::string action_group, std::string action_item)
 
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::access_action), action_group, action_item));
 
-	cout<< "OSC: Recieved: "<< action_item << endl;
-
 	RefPtr<Action> act;
 	act = ActionManager::get_action( action_group.c_str(), action_item.c_str() );
 

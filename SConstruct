@@ -50,6 +50,7 @@ opts.AddOptions(
     BoolOption('NLS', 'Set to turn on i18n support', 1),
     PathOption('PREFIX', 'Set the install "prefix"', '/usr/local'),
     BoolOption('SURFACES', 'Build support for control surfaces', 1),
+    BoolOption('WIIMOTE', 'Build the wiimote control surface', 0),
     BoolOption('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
     BoolOption('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolOption('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
@@ -578,6 +579,12 @@ if env['LV2']:
 else:
 	print 'LV2 support is not enabled.  Build with \'scons LV2=1\' to enable.'
 
+if env['WIIMOTE']:
+	wiimote_surface = [ 'libs/surfaces/wiimote' ]
+else:
+	wiimote_surface = [ ]
+	print 'WIIMOTE support not enabled. Build with \'scons WIIMOTE=1\' to enale.'
+
 libraries['jack'] = LibraryInfo()
 libraries['jack'].ParseConfig('pkg-config --cflags --libs jack')
 
@@ -900,6 +907,12 @@ if conf.CheckHeader('linux/input.h'):
 else:
     have_linux_input = False
 
+# let's continue checking, check for libcwiid
+if not conf.CheckHeader('cwiid.h'):
+    if env['WIIMOTE']:
+	print 'WIIIMOTE configured but you are missing libcwiid!'
+        sys.exit(1)
+
 libraries['usb'] = conf.Finish ()
 
 #
@@ -1196,6 +1209,7 @@ surface_subdirs = [ 'libs/surfaces/control_protocol',
                     'libs/surfaces/mackie',
                     'libs/surfaces/powermate'
                     ]
+surface_subdirs += wiimote_surface
 
 if env['SURFACES']:
     if have_libusb:

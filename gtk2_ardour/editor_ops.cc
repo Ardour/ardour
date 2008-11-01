@@ -4642,6 +4642,28 @@ Editor::toggle_region_opaque ()
 }
 
 void
+Editor::toggle_record_enable ()
+{
+	bool new_state;
+	bool first = true;
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+		if (!rtav)
+			continue;
+		if (!rtav->is_track())
+			continue;
+
+		if (first) {
+			new_state = !rtav->track()->record_enabled();
+			first = false;
+		}
+
+		rtav->track()->set_record_enable(new_state, this);
+	}
+}
+
+
+void
 Editor::set_fade_length (bool in)
 {
 	RegionSelection rs; 

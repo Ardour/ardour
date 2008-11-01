@@ -205,6 +205,9 @@ Editor::register_actions ()
        	act = ActionManager::register_action (editor_actions, "select-prev-route", _("Select Previous Track/Bus"), mem_fun(*this, &Editor::select_prev_route));
 	ActionManager::session_sensitive_actions.push_back (act);
 	
+       	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), mem_fun(*this, &Editor::toggle_record_enable));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 
 	act = ActionManager::register_action (editor_actions, "save-visual-state-1", _("Save View 1"), bind (mem_fun (*this, &Editor::start_visual_state_op), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
