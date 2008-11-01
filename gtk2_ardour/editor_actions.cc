@@ -581,7 +581,11 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "toggle-track-active", _("Toggle Active"), (mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "remove-track", _("Remove"), (mem_fun(*this, &Editor::remove_tracks)));
+	if (Profile->get_sae()) {
+		act = ActionManager::register_action (editor_actions, "remove-track", _("Delete"), (mem_fun(*this, &Editor::remove_tracks)));
+	} else {
+		act = ActionManager::register_action (editor_actions, "remove-track", _("Remove"), (mem_fun(*this, &Editor::remove_tracks)));
+	}
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
@@ -698,13 +702,16 @@ Editor::register_actions ()
 	ruler_meter_action->set_active (true);
 	ruler_tempo_action->set_active (true);
 	ruler_marker_action->set_active (true);
-	ruler_range_action->set_active (true);
+	ruler_range_action->set_active (false);
+	ruler_loop_punch_action->set_active (true);
 	ruler_loop_punch_action->set_active (true);
 	if (Profile->get_sae()) {
+		ruler_bbt_action->set_active (true);
 		ruler_cd_marker_action->set_active (false);
 		ruler_timecode_action->set_active (false);
 		ruler_minsec_action->set_active (true);
 	} else {
+		ruler_bbt_action->set_active (false);
 		ruler_cd_marker_action->set_active (true);
 		ruler_timecode_action->set_active (true);
 		ruler_minsec_action->set_active (false);

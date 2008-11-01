@@ -202,7 +202,7 @@ RouteUI::~RouteUI()
 bool
 RouteUI::mute_press(GdkEventButton* ev)
 {
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
 
@@ -283,9 +283,9 @@ RouteUI::mute_release(GdkEventButton* ev)
 bool
 RouteUI::solo_press(GdkEventButton* ev)
 {
-	/* ignore double clicks */
+	/* ignore double/triple clicks */
 
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
 
@@ -386,7 +386,7 @@ RouteUI::solo_release(GdkEventButton* ev)
 bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
 

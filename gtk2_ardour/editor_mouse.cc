@@ -5410,7 +5410,9 @@ Editor::end_rubberband_select (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 		
 	} else {
-		selection->clear_tracks();
+		if (!getenv("ARDOUR_SAE")) {
+			selection->clear_tracks();
+		}
 		selection->clear_regions();
 		selection->clear_points ();
 		selection->clear_lines ();

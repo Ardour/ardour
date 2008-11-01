@@ -131,11 +131,19 @@ Editor::show_editor_mixer (bool yn)
 
 #ifdef GTKOSX
 	/* XXX gtk problem here */
-	ruler_label_event_box.queue_draw ();
-	time_button_event_box.queue_draw ();
-	controls_layout.queue_draw ();
+	ensure_all_elements_drawn();
 #endif
 }
+
+#ifdef GTKOSX
+void
+Editor::ensure_all_elements_drawn ()
+{
+	controls_layout.queue_draw ();
+	ruler_label_event_box.queue_draw ();
+	time_button_event_box.queue_draw ();
+}
+#endif
 
 void
 Editor::create_editor_mixer ()
@@ -145,6 +153,9 @@ Editor::create_editor_mixer ()
 					      false);
 	current_mixer_strip->Hiding.connect (mem_fun(*this, &Editor::current_mixer_strip_hidden));
 	current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::current_mixer_strip_removed));
+#ifdef GTKOSX
+	current_mixer_strip->WidthChanged.connect (mem_fun(*this, &Editor::ensure_all_elements_drawn));
+#endif
 	current_mixer_strip->set_embedded (true);
 }	
 

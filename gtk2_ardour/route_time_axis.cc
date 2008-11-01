@@ -141,9 +141,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	hide_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::hide_click));
 
 	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
-	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release));
+	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
-	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release));
+	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
 
 	if (is_track()) {
 
@@ -507,7 +507,12 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &RouteTimeAxisView::hide_click)));
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
+	if (!Profile->get_sae()) {
+		items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
+	} else {
+		items.push_front (SeparatorElem());
+		items.push_front (MenuElem (_("Delete"), mem_fun(*this, &RouteUI::remove_this_route)));
+	}
 }
 
 static bool __reset_item (RadioMenuItem* item)

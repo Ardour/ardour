@@ -2026,7 +2026,9 @@ public:
 
 	void detach_tearoff (Gtk::Box* b, Gtk::Window* w);
 	void reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n);
-
+#ifdef GTKOSX
+	void ensure_all_elements_drawn ();
+#endif
 	/* nudging tracks */
 
 	void nudge_track (bool use_edit_point, bool forwards);

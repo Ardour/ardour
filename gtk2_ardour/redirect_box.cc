@@ -531,6 +531,9 @@ RedirectBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Redirect> w
 
 	case IOSelector::Accepted:
 		_route->add_redirect (redirect, this);
+		if (Profile->get_sae()) {
+			redirect->set_active (true, 0);
+		}
 		break;
 	}
 

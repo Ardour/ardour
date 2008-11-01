@@ -176,6 +176,7 @@
         </menu>
 
         <menu action='TrackMenu'>
+		<menuitem action='remove-track'/>
 	        <menuitem action='AddTrackBus'/>	
 	        <menuitem action="move-selected-tracks-up"/>
 	        <menuitem action="move-selected-tracks-down"/>
@@ -193,7 +194,6 @@
 		      <menuitem action='logarithmic-waveforms'/>
 		</menu>
 		<menuitem action='toggle-track-active'/>	
-		<menuitem action='remove-track'/>	
 	</menu>
 
 	<menu action='RegionMenu'>
@@ -345,6 +345,8 @@
      </popup>
 
      <popup name='redirectmenu'>
+	 <menuitem action='delete'/>
+	  <separator/>
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
@@ -354,7 +356,6 @@
 	 <menuitem action='cut'/>
 	 <menuitem action='copy'/>
 	 <menuitem action='paste'/>
-	 <menuitem action='delete'/>
 	  <separator/>
 	 <menuitem action='rename'/>
 	  <separator/>

@@ -67,7 +67,11 @@ UIConfiguration::load_defaults ()
 	if (ui_conf && ui_conf[0] != '\0') {
 		rcfile = find_config_file (ui_conf);
 	} else {
-		rcfile = find_config_file ("ardour2_ui_default.conf");
+		if (getenv ("ARDOUR_SAE")) {
+			rcfile = find_config_file ("ardour2_ui_sae.conf");
+		} else {
+			rcfile = find_config_file ("ardour2_ui_default.conf");
+		}
 	}
 
 	if (rcfile.length()) {
