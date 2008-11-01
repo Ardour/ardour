@@ -71,6 +71,47 @@ Manager::add_port (const XMLNode& node)
 	PortMap::iterator existing;
 	pair<string, Port *> newpair;
 
+	/* do not allow multiple ports with the same tag. if attempted, just return the existing
+	   port with the same tag. XXX this is really caused by the mess of setup_midi() being
+	   called twice in Ardour, once in the global init() function and once after the user RC file
+	   has been loaded (there may be extra ports in it). 
+	 */
+
+	if ((existing = ports_by_tag.find (desc.tag)) != ports_by_tag.end()) {
+
+		port = (*existing).second;
+		
+		if (port->mode() == desc.mode) {
+			
+			/* Same mode - reuse the port, and just
+			   create a new tag entry.
+			*/
+			
+			newpair.first = desc.tag;
+			newpair.second = port;
+			
+			ports_by_tag.insert (newpair);
+			return port;
+		}
+		
+		/* If the existing is duplex, and this request
+		   is not, then fail, because most drivers won't
+		   allow opening twice with duplex and non-duplex
+		   operation.
+		*/
+		
+		if ((desc.mode == O_RDWR && port->mode() != O_RDWR) ||
+		    (desc.mode != O_RDWR && port->mode() == O_RDWR)) {
+			error << "MIDIManager: port tagged \""
+			      << desc.tag
+			      << "\" cannot be opened duplex and non-duplex"
+			      << endmsg;
+			return 0;
+		}
+		
+		/* modes must be different or complementary */
+	}
+
 	if (!PortFactory::ignore_duplicate_devices (desc.type)) {
 
 		if ((existing = ports_by_device.find (desc.device)) != ports_by_device.end()) {

@@ -171,6 +171,8 @@ ALSA_SequencerMidiPort::create_ports (const Port::Descriptor& desc)
 		caps |= SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
 	if (desc.mode == O_RDONLY  ||  desc.mode == O_RDWR)
 		caps |= SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ;
+
+	cerr << "Create ALSA MIDI port for " << desc.tag << endl;
 	
 	if (0 <= (err = snd_seq_create_simple_port (seq, desc.tag.c_str(), caps, 
 						    (SND_SEQ_PORT_TYPE_MIDI_GENERIC|
@@ -312,6 +314,8 @@ ALSA_SequencerMidiPort::get_connections (vector<SequencerPortAddress>& connectio
 	while (snd_seq_query_port_subscribers(seq, subs) >= 0) {
 
 		seq_addr = *snd_seq_query_subscribe_get_addr (subs);
+
+		cerr << _tagname << " is connected to " << seq_addr.client << "/" << seq_addr.port << endl;
 		
 		connections.push_back (SequencerPortAddress (seq_addr.client,
 							     seq_addr.port));

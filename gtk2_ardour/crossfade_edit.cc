@@ -859,17 +859,8 @@ CrossfadeEditor::build_presets ()
 
 	/* FADE OUT */
 
-	p = new Preset ("Constant Power", "crossfade_in_constant");
+	p = new Preset ("Linear (-6dB)", "crossfade_in_dipped");
 	p->push_back (PresetPoint (0, 0));
-
-#ifdef OLD_CONSTANT_XFADE
-	p->push_back (PresetPoint (0.0737327, 0.308333));
-	p->push_back (PresetPoint (0.246544, 0.658333));
-	p->push_back (PresetPoint (0.470046, 0.886111));
-	p->push_back (PresetPoint (0.652074, 0.972222));
-	p->push_back (PresetPoint (0.771889, 0.988889));
-	p->push_back (PresetPoint (1, 1));
-#else
 	p->push_back (PresetPoint (0.000000, 0.000000));
 	p->push_back (PresetPoint (0.166667, 0.166366));
 	p->push_back (PresetPoint (0.333333, 0.332853));
@@ -877,24 +868,40 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (0.666667, 0.666186));
 	p->push_back (PresetPoint (0.833333, 0.833033));
 	p->push_back (PresetPoint (1.000000, 1.000000));
-#endif
 
 	fade_in_presets->push_back (p);
 
 	p = new Preset ("S-curve", "crossfade_in_default");
+#ifdef OTHER_S
 	p->push_back (PresetPoint (0, 0));
 	p->push_back (PresetPoint (0.1, 0.01));
 	p->push_back (PresetPoint (0.2, 0.03));
 	p->push_back (PresetPoint (0.8, 0.97));
 	p->push_back (PresetPoint (0.9, 0.99));
 	p->push_back (PresetPoint (1, 1));
+#endif
+
+	p->push_back (PresetPoint (0.0, 0.0));
+	p->push_back (PresetPoint (0.0625 , 0.222));
+	p->push_back (PresetPoint (0.1875 , 0.444));
+	p->push_back (PresetPoint (0.8125 , 0.555));
+	p->push_back (PresetPoint (0.875  , 0.777));
+	p->push_back (PresetPoint (1.0    , 1.0));
+
 	fade_in_presets->push_back (p);
 
 
 	// p = new Preset ("linin.xpm");
-	p = new Preset ("Linear", "crossfade_in_dipped");
-	p->push_back (PresetPoint (0, 0));
-	p->push_back (PresetPoint (1, 1));
+	p = new Preset ("Constant Power (-3dB)", "crossfade_in_constant");
+
+	p->push_back (PresetPoint (0.000000, 0.000000));
+	p->push_back (PresetPoint (0.166667, 0.282192));
+	p->push_back (PresetPoint (0.333333, 0.518174));
+	p->push_back (PresetPoint (0.500000, 0.707946));
+	p->push_back (PresetPoint (0.666667, 0.851507));
+	p->push_back (PresetPoint (0.833333, 0.948859));
+	p->push_back (PresetPoint (1.000000, 1.000000));
+
 	fade_in_presets->push_back (p);
 
 	if (!Profile->get_sae()) {
@@ -937,16 +944,8 @@ CrossfadeEditor::build_presets ()
 	/* FADE OUT */
 
 	// p = new Preset ("regout.xpm");
-	p = new Preset ("Constant Power", "crossfade_out_constant");
+	p = new Preset ("Linear (-6dB cut)", "crossfade_out_dipped");
 	p->push_back (PresetPoint (0, 1));
-#ifdef OLD_CONSTANT_XFADE
-	p->push_back (PresetPoint (0.228111, 0.988889));
-	p->push_back (PresetPoint (0.347926, 0.972222));
-	p->push_back (PresetPoint (0.529954, 0.886111));
-	p->push_back (PresetPoint (0.753456, 0.658333));
-	p->push_back (PresetPoint (0.9262673, 0.308333));
-	p->push_back (PresetPoint (1, 0));
-#else
 	p->push_back (PresetPoint (0.000000, 1.000000));
 	p->push_back (PresetPoint (0.166667, 0.833033));
 	p->push_back (PresetPoint (0.333333, 0.666186));
@@ -954,8 +953,6 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (0.666667, 0.332853));
 	p->push_back (PresetPoint (0.833333, 0.166366));
 	p->push_back (PresetPoint (1.000000, 0.000000));
-
-#endif
 	fade_out_presets->push_back (p);
 
 	p = new Preset ("S-Curve", "crossfade_out_default");
@@ -968,9 +965,14 @@ CrossfadeEditor::build_presets ()
 	fade_out_presets->push_back (p);
 
 	// p = new Preset ("linout.xpm");
-	p = new Preset ("Linear", "crossfade_out_dipped");
-	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (1, 0));
+	p = new Preset ("Constant Power (-3dB cut)", "crossfade_out_constant");
+	p->push_back (PresetPoint (0.000000, 1.000000));
+	p->push_back (PresetPoint (0.166667, 0.948859));
+	p->push_back (PresetPoint (0.333333, 0.851507));
+	p->push_back (PresetPoint (0.500000, 0.707946));
+	p->push_back (PresetPoint (0.666667, 0.518174));
+	p->push_back (PresetPoint (0.833333, 0.282192));
+	p->push_back (PresetPoint (1.000000, 0.000000));
 	fade_out_presets->push_back (p);
 	
 	if (!Profile->get_sae()) {
