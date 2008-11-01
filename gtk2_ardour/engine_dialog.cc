@@ -375,7 +375,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	if (str != _("Ignore")) {
 		double secs = 0;
 		uint32_t msecs;
-		atof (str);
+		secs = atof (str);
 		msecs = (uint32_t) floor (secs * 1000.0);
 		cmd.push_back ("-t");
 		cmd.push_back (to_string (msecs, std::dec));
