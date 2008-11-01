@@ -68,7 +68,7 @@ WiimoteControlProtocol::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_coun
 			//std::cerr << "1" << std::endl;
 		}
 		if (b & CWIID_BTN_B) {
-			transport_stop();
+			// just a B doesn't do anything
 			//std::cerr << "B" << std::endl;
 		}
 		if (b & CWIID_BTN_A && button_state & CWIID_BTN_B) {
