@@ -18,19 +18,23 @@ uint16_t WiimoteControlProtocol::button_state = 0;
 
 WiimoteControlProtocol::WiimoteControlProtocol ( Session & session) 
 	: ControlProtocol ( session, "Wiimote"),
-	  thread_quit (false),
-	  thread_registered_for_ardour (false)
+	  init_thread_quit (false),
+	  thread_registered_for_ardour (false),
+	  wiimote_handle (0)
 {
 	std::cerr << "WiimoteControlProtocol()" << std::endl;
-	thread = Glib::Thread::create( sigc::mem_fun(*this, &WiimoteControlProtocol::main_thread), true);
+	init_thread = Glib::Thread::create( sigc::mem_fun(*this, &WiimoteControlProtocol::initializer_thread), true);
 }
 
 WiimoteControlProtocol::~WiimoteControlProtocol()
 {
-	thread_quit = true;
-	thread->join();
-	// TODO: you con't delete the thread, but is join() still enough?
-	std::cerr << "~WiimoteControlProtocol()" << std::endl;
+	init_thread_quit = true;
+	init_thread->join();
+
+	if (wiimote_handle) {
+		cwiid_close(wiimote_handle);
+	}
+	std::cerr << "Wiimote: closed" << std::endl;
 }
 
 
@@ -59,70 +63,59 @@ WiimoteControlProtocol::wiimote_callback(cwiid_wiimote_t *wiimote, int mesg_coun
 
 		button_state = mesg[i].btn_mesg.buttons;
 
-		if (b & CWIID_BTN_2) {
-			rec_enable_toggle();
-			//std::cerr << "2" << std::endl;
+
+		if (b & CWIID_BTN_A && !(button_state & CWIID_BTN_B)) { // Just "A"
+			access_action("Transport/ToggleRoll");
 		}
-		if (b & CWIID_BTN_1) {
-			access_action("Editor/track-record-enable-toggle");			
-			//std::cerr << "1" << std::endl;
-		}
-		if (b & CWIID_BTN_B) {
-			// just a B doesn't do anything
-			//std::cerr << "B" << std::endl;
-		}
-		if (b & CWIID_BTN_A && button_state & CWIID_BTN_B) {
-			// B pressed down and then A
+		if (b & CWIID_BTN_A && button_state & CWIID_BTN_B) { // B is down and A is pressed
 			access_action("Transport/ToggleRollForgetCapture");
-			//std::cerr << "B+A" << std::endl;
 		}
 
-		if (b & CWIID_BTN_A && !(button_state & CWIID_BTN_B)) {
-			// Just A pressed
-			access_action("Transport/ToggleRoll");
-			//std::cerr << "A" << std::endl;
+		if (b & CWIID_BTN_1) { // 1
+			access_action("Editor/track-record-enable-toggle");			
 		}
-		if (b & CWIID_BTN_MINUS) {
-			access_action("Editor/temporal-zoom-out");
-			//std::cerr << "-" << std::endl;
+		if (b & CWIID_BTN_2) { // 2
+			rec_enable_toggle();
 		}
-		if (b & CWIID_BTN_HOME) {
-			//std::cerr << "home" << std::endl;
-		}
-		if (b & CWIID_BTN_LEFT) {
+
+		// d-pad
+		if (b & CWIID_BTN_LEFT) { // left
 			access_action("Editor/nudge-playhead-backward");
-			//std::cerr << "<" << std::endl;
 		}
-		if (b & CWIID_BTN_RIGHT) {
+		if (b & CWIID_BTN_RIGHT) { // right
 			access_action("Editor/nudge-playhead-forward");
-			//std::cerr << ">" << std::endl;
 		}
-		if (b & CWIID_BTN_DOWN) {
+		if (b & CWIID_BTN_DOWN) { // down
 			access_action("Editor/select-next-route");
-			//std::cerr << "_" << std::endl;
 		}
-		if (b & CWIID_BTN_UP) {
+		if (b & CWIID_BTN_UP) { // up
 			access_action("Editor/select-prev-route");
-			//std::cerr << "^" << std::endl;
 		}
-		if (b & CWIID_BTN_PLUS) {
+
+
+		if (b & CWIID_BTN_PLUS) { // +
 			access_action("Editor/temporal-zoom-in");
-			//std::cerr << "+" << std::endl;
+		}
+		if (b & CWIID_BTN_MINUS) { // -
+			access_action("Editor/temporal-zoom-out");
+		}
+		if (b & CWIID_BTN_HOME) { // "home"
+			// no op, yet. any suggestions?
+			access_action("Editor/playhead-to-edit");
 		}
 
 	}
 }
 
 void
-WiimoteControlProtocol::main_thread()
+WiimoteControlProtocol::initializer_thread()
 {
-	cwiid_wiimote_t *wiimote_handle = 0;
 	bdaddr_t bdaddr;
 	unsigned char rpt_mode = 0;
 
 	std::cerr << "wiimote: discovering, press 1+2" << std::endl;
 
- 	while (!wiimote_handle && !thread_quit) {
+ 	while (!wiimote_handle && !init_thread_quit) {
 		bdaddr = *BDADDR_ANY;
 		wiimote_handle = cwiid_open(&bdaddr, 0);
 
@@ -133,7 +126,7 @@ WiimoteControlProtocol::main_thread()
 		}
 	}
 
-	if (thread_quit) {
+	if (init_thread_quit) {
 		// The corner case where the wiimote is bound at the same time as
 		// the control protocol is destroyed
 		if (wiimote_handle) {
@@ -165,13 +158,8 @@ WiimoteControlProtocol::main_thread()
 	rpt_mode |= CWIID_RPT_BTN;
 	cwiid_enable(wiimote_handle, CWIID_FLAG_MESG_IFC);
 	cwiid_set_rpt_mode(wiimote_handle, rpt_mode);
-	
-	while (!thread_quit) {
-		sleep(1);
-	}	
 
-	cwiid_close(wiimote_handle);
-	std::cerr << "Wiimote: stopped" << std::endl;
+	std::cerr << "Wiimote: initialization thread stopping" << std::endl;
 }
 
 

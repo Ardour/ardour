@@ -29,13 +29,15 @@ class WiimoteControlProtocol : public ARDOUR::ControlProtocol {
 
 	private:
 		
-		void main_thread();
+		void initializer_thread();
+		bool init_thread_quit;
 
-		bool thread_quit;
 		bool thread_registered_for_ardour;
 
-		Glib::Thread *thread;
+		Glib::Thread *init_thread;
 		static uint16_t button_state;
+
+		cwiid_wiimote_t *wiimote_handle;
 };
 
 
