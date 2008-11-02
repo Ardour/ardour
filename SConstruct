@@ -915,10 +915,10 @@ libraries['usb'] = conf.Finish ()
 if env['WIIMOTE']:
     wiimoteConf = env.Configure ( )
     if not wiimoteConf.CheckHeader('cwiid.h'):
-	print 'WIIIMOTE configured but you are missing libcwiid!'
+	print 'WIIMOTE configured but you are missing libcwiid!'
         sys.exit(1)
     if not wiimoteConf.CheckHeader('bluetooth/bluetooth.h'):
-        print 'WIIMOTE configured, but you are libbluetooth headers, which you need for libcwiid!'
+        print 'WIIMOTE configured but you are missing the libbluetooth headers which you need to compile wiimote support!'
         sys.exit(1)
     wiimoteConf.Finish()
 
