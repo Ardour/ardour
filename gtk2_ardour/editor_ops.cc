@@ -5147,17 +5147,23 @@ Editor::select_next_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
+	TimeAxisView* selected;
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		if (*i == current) {
 			++i;
 			if (i != track_views.end()) {
+				selected = (*i);
 				selection->set (*i);
 			} else {
+				selected = (*(track_views.begin()));
 				selection->set (*(track_views.begin()));
 			}
 			break;
 		}
 	}
+
+	ensure_track_visible(selected);
 }
 
 void
@@ -5170,17 +5176,50 @@ Editor::select_prev_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
+	TimeAxisView* selected;
+
 	for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
 		if (*i == current) {
 			++i;
 			if (i != track_views.rend()) {
+				selected = (*i);
 				selection->set (*i);
 			} else {
+				selected = *(track_views.rbegin());
 				selection->set (*(track_views.rbegin()));
 			}
 			break;
 		}
 	}
+
+	ensure_track_visible(selected);
+}
+
+void
+Editor::ensure_track_visible(TimeAxisView *track)
+{
+	double current_view_min_y = vertical_adjustment.get_value();
+	double current_view_max_y = vertical_adjustment.get_value() + vertical_adjustment.get_page_size() - canvas_timebars_vsize;
+
+	double track_min_y = track->y_position;
+	double track_max_y = track->y_position + (double)track->effective_height;
+
+	if (track_min_y >= current_view_min_y &&
+            track_max_y <= current_view_max_y) {
+		return;
+	}
+
+	double new_value;
+
+	if (track_min_y < current_view_min_y) {
+		// Track is above the current view
+		new_value = track_min_y;
+	} else {
+		// Track is below the current view
+		new_value = track->y_position + (double)track->effective_height + canvas_timebars_vsize - vertical_adjustment.get_page_size();
+	}
+
+	vertical_adjustment.set_value(new_value);
 }
 
 void

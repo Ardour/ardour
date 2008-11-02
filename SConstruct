@@ -907,13 +907,21 @@ if conf.CheckHeader('linux/input.h'):
 else:
     have_linux_input = False
 
-# let's continue checking, check for libcwiid
-if not conf.CheckHeader('cwiid.h'):
-    if env['WIIMOTE']:
+libraries['usb'] = conf.Finish ()
+
+#
+# Check for wiimote dependencies
+
+if env['WIIMOTE']:
+    wiimoteConf = env.Configure ( )
+    if not wiimoteConf.CheckHeader('cwiid.h'):
 	print 'WIIIMOTE configured but you are missing libcwiid!'
         sys.exit(1)
+    if not wiimoteConf.CheckHeader('bluetooth/bluetooth.h'):
+        print 'WIIMOTE configured, but you are libbluetooth headers, which you need for libcwiid!'
+        sys.exit(1)
+    wiimoteConf.Finish()
 
-libraries['usb'] = conf.Finish ()
 
 #
 # Check for FLAC

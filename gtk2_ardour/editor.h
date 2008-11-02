@@ -2128,6 +2128,7 @@ public:
 	bool entered_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);
 	void set_entered_regionview (RegionView*);
+	void ensure_track_visible (TimeAxisView*);
 	gint left_automation_track ();
 
 	bool _new_regionviews_show_envelope;
