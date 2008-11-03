@@ -132,19 +132,21 @@ Editor::initialize_canvas ()
 		// logo_item->property_width_set() = true;
 		logo_item->show ();
 	}
-	_background_group = new ArdourCanvas::Group (*track_canvas->root());
-	_master_group = new ArdourCanvas::Group (*track_canvas->root());
 
-	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, physical_screen_height);
+
+	/* a group to hold time (measure) lines */	
+	time_line_group = new ArdourCanvas::Group (*track_canvas->root());
+
+	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
 	transport_loop_range_rect->property_outline_pixels() = 1;
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, physical_screen_height);
+	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
 	transport_punch_range_rect->property_outline_pixels() = 0;
 	transport_punch_range_rect->hide();
 
-	/* a group to hold time (measure) lines */	
-	time_line_group = new ArdourCanvas::Group (*_master_group, 0.0, 0.0);
+	_background_group = new ArdourCanvas::Group (*track_canvas->root());
+	_master_group = new ArdourCanvas::Group (*track_canvas->root());
 
 	range_marker_drag_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
 	range_marker_drag_rect->hide ();
@@ -827,6 +829,7 @@ Editor::scroll_canvas_horizontally ()
 
 	_master_group->move (-x_delta, 0);
 	timebar_group->move (-x_delta, 0);
+	time_line_group->move (-x_delta, 0);
 	cursor_group->move (-x_delta, 0);
 
 	update_fixed_rulers ();
