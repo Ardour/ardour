@@ -848,6 +848,10 @@ AudioTrack::freeze (InterThreadInfo& itt)
 		}
 	}
 
+	_freeze_record.gain = _gain;
+	_freeze_record.gain_automation_state = _gain_automation_curve.automation_state();
+	_freeze_record.pan_automation_state = _panner->automation_state();
+
 	new_playlist = PlaylistFactory::create (_session, new_playlist_name, false);
 	region_name = new_playlist_name;
 
@@ -865,6 +869,12 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	diskstream->use_playlist (boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
 	diskstream->set_record_enabled (false);
+
+	/* reset stuff that has already been accounted for in the freeze process */
+	
+	set_gain (1.0, this);
+	_gain_automation_curve.set_automation_state (Off);
+	_panner->set_automation_state (Off);
 
 	_freeze_record.state = Frozen;
 	FreezeChange(); /* EMIT SIGNAL */
@@ -896,6 +906,9 @@ AudioTrack::unfreeze ()
 		}
 		
 		_freeze_record.playlist.reset ();
+		set_gain (_freeze_record.gain, this);
+		_gain_automation_curve.set_automation_state (_freeze_record.gain_automation_state);
+		_panner->set_automation_state (_freeze_record.pan_automation_state);
 	}
 
 	_freeze_record.state = UnFrozen;

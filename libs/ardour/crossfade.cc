@@ -209,7 +209,8 @@ Crossfade::initialize ()
 	_fade_out.freeze ();
 	_fade_out.clear ();
 
-#ifdef EQUAL_POWER_MINUS_3DB
+#define EQUAL_POWER_MINUS_3DB
+#ifdef  EQUAL_POWER_MINUS_3DB
 
 	_fade_out.add ((_length * 0.000000), 1.000000);
 	_fade_out.add ((_length * 0.166667), 0.948859);
@@ -235,7 +236,8 @@ Crossfade::initialize ()
 	_fade_in.freeze ();
 	_fade_in.clear ();
 
-#ifdef EQUAL_POWER_MINUS_3DB
+#define EQUAL_POWER_MINUS_3DB
+#ifdef  EQUAL_POWER_MINUS_3DB
 
 	_fade_in.add ((_length * 0.000000), 0.000000);
 	_fade_in.add ((_length * 0.166667), 0.282192);
