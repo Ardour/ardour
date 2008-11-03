@@ -229,9 +229,9 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	if (y_position != y) {
 		canvas_display->property_y () = y;
 		canvas_background->property_y () = y + editor.get_canvas_timebars_vsize();
-		canvas_background->move (0.0, 0.0);
 		/* silly canvas */
 		canvas_display->move (0.0, 0.0);
+		canvas_background->move (0.0, 0.0);
 		y_position = y;
 	}
 
@@ -241,6 +241,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	if (_marked_for_display) {
 		controls_frame.show ();
 		controls_ebox.show ();
+		canvas_background->show ();
 	}
 
 	_hidden = false;
@@ -265,9 +266,11 @@ TimeAxisView::clip_to_viewport ()
 {
 	if (_marked_for_display) {
 		if (y_position  +  effective_height < editor.get_trackview_group_vertical_offset () || y_position > editor.get_trackview_group_vertical_offset () + canvas_display->get_canvas()->get_height()) {
+			canvas_background->hide ();
 			canvas_display->hide ();
 			return;
 		}
+		canvas_background->show();
 		canvas_display->show ();
 	}
 	return;
