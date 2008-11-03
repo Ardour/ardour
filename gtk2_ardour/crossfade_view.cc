@@ -174,7 +174,7 @@ CrossfadeView::redraw_curves ()
 	}
 
 	npoints = get_time_axis_view().editor.frame_to_pixel (crossfade->length());
-	npoints = std::min (gdk_screen_width(), npoints);
+	// npoints = std::min (gdk_screen_width(), npoints);
 
 	if (!_visible || !crossfade->active() || npoints < 3) {
 		fade_in->hide();
@@ -189,6 +189,7 @@ CrossfadeView::redraw_curves ()
 	vec = new float[npoints];
 
 	crossfade->fade_in().get_vector (0, crossfade->length(), vec, npoints);
+
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);

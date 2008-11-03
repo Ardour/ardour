@@ -868,30 +868,26 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (0.666667, 0.666186));
 	p->push_back (PresetPoint (0.833333, 0.833033));
 	p->push_back (PresetPoint (1.000000, 1.000000));
-
 	fade_in_presets->push_back (p);
 
-	p = new Preset ("S-curve", "crossfade_in_default");
-#ifdef OTHER_S
+	p = new Preset ("S(1)-curve", "crossfade_in_default");
 	p->push_back (PresetPoint (0, 0));
 	p->push_back (PresetPoint (0.1, 0.01));
 	p->push_back (PresetPoint (0.2, 0.03));
 	p->push_back (PresetPoint (0.8, 0.97));
 	p->push_back (PresetPoint (0.9, 0.99));
 	p->push_back (PresetPoint (1, 1));
-#endif
-
-	p->push_back (PresetPoint (0.0, 0.0));
-	p->push_back (PresetPoint (0.0625 , 0.222));
-	p->push_back (PresetPoint (0.1875 , 0.444));
-	p->push_back (PresetPoint (0.8125 , 0.555));
-	p->push_back (PresetPoint (0.875  , 0.777));
-	p->push_back (PresetPoint (1.0    , 1.0));
-
 	fade_in_presets->push_back (p);
 
+	p = new Preset ("S(2)-curve", "crossfade_in_default");
+	p->push_back (PresetPoint (0.0, 0.0));
+	p->push_back (PresetPoint (0.055, 0.222));
+	p->push_back (PresetPoint (0.163, 0.35));
+	p->push_back (PresetPoint (0.837, 0.678));
+	p->push_back (PresetPoint (0.945, 0.783));
+	p->push_back (PresetPoint (1.0, 1.0));
+	fade_in_presets->push_back (p);
 
-	// p = new Preset ("linin.xpm");
 	p = new Preset ("Constant Power (-3dB)", "crossfade_in_constant");
 
 	p->push_back (PresetPoint (0.000000, 0.000000));
@@ -955,13 +951,22 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (1.000000, 0.000000));
 	fade_out_presets->push_back (p);
 
-	p = new Preset ("S-Curve", "crossfade_out_default");
+	p = new Preset ("S(1)-Curve", "crossfade_out_default");
 	p->push_back (PresetPoint (0, 1));
 	p->push_back (PresetPoint (0.1, 0.99));
 	p->push_back (PresetPoint (0.2, 0.97));
 	p->push_back (PresetPoint (0.8, 0.03));
 	p->push_back (PresetPoint (0.9, 0.01));
 	p->push_back (PresetPoint (1, 0));
+	fade_out_presets->push_back (p);
+
+	p = new Preset ("S(2)-Curve", "crossfade_out_default");
+	p->push_back (PresetPoint (0.0, 1.0));
+	p->push_back (PresetPoint (0.163, 0.678));
+	p->push_back (PresetPoint (0.055, 0.783));
+	p->push_back (PresetPoint (0.837, 0.35));
+	p->push_back (PresetPoint (0.945, 0.222));
+	p->push_back (PresetPoint (1.0, 0.0));
 	fade_out_presets->push_back (p);
 
 	// p = new Preset ("linout.xpm");
@@ -1073,7 +1078,7 @@ CrossfadeEditor::x_coordinate (double& xfract) const
 {
 	xfract = min (1.0, xfract);
 	xfract = max (0.0, xfract);
-    
+
 	return canvas_border + (xfract * effective_width());
 }
 
