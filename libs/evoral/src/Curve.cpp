@@ -309,7 +309,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 	if (veclen > 1) {
 
-		dx = (hx - lx) / veclen;
+		dx = (hx - lx) / (veclen-1);
 
 		for (i = 0; i < veclen; ++i, rx += dx) {
 			vec[i] = multipoint_eval (rx);
