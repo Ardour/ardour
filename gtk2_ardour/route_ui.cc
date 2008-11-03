@@ -39,6 +39,7 @@
 #include <ardour/audioengine.h>
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>
+#include <ardour/profile.h>
 
 #include "i18n.h"
 using namespace sigc;
@@ -292,7 +293,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	if (!ignore_toggle) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
-			
+
 			if (solo_menu == 0) {
 				build_solo_menu ();
 			}
@@ -342,8 +343,17 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					// shift-click: set this route to solo safe
 
-					_route->set_solo_safe (!_route->solo_safe(), this);
-					wait_for_release = false;
+					if (Profile->get_sae() && ev->button == 1) {
+						// button 1 and shift-click: disables solo_latched for this click
+						if (!Config->get_solo_latched ()) {
+							Config->set_solo_latched (true);
+							reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+							Config->set_solo_latched (false);
+						}
+					} else {
+						_route->set_solo_safe (!_route->solo_safe(), this);
+						wait_for_release = false;
+					}
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -444,6 +454,7 @@ RouteUI::rec_enable_release (GdkEventButton* ev)
 void
 RouteUI::solo_changed(void* src)
 {
+
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
 }
 

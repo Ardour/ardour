@@ -70,10 +70,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	ignore_state_request = false;
 	first_call_to_set_height = true;
 
-	base_rect = new SimpleRect(*canvas_display);
+	base_rect = new SimpleRect(*canvas_background);
 	base_rect->property_x1() = 0.0;
 	base_rect->property_y1() = 0.0;
-	base_rect->property_x2() = editor.frame_to_pixel (max_frames);
+	base_rect->property_x2() = editor.get_physical_screen_width();
 	base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackOutline.get();
 	/* outline ends and bottom */
 	base_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);

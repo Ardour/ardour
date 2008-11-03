@@ -489,6 +489,7 @@ AudioTimeAxisView::toggle_gain_track ()
 		if (showit) {
 			gain_track->set_marked_for_display (true);
 			gain_track->canvas_display->show();
+			gain_track->canvas_background->show();
 			gain_track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			gain_track->set_marked_for_display (false);
@@ -525,6 +526,7 @@ AudioTimeAxisView::toggle_pan_track ()
 		if (showit) {
 			pan_track->set_marked_for_display (true);
 			pan_track->canvas_display->show();
+			pan_track->canvas_background->show();
 			pan_track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			pan_track->set_marked_for_display (false);

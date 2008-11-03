@@ -132,7 +132,7 @@ Editor::initialize_canvas ()
 		// logo_item->property_width_set() = true;
 		logo_item->show ();
 	}
-
+	_background_group = new ArdourCanvas::Group (*track_canvas->root());
 	_master_group = new ArdourCanvas::Group (*track_canvas->root());
 
 	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, physical_screen_height);
@@ -828,6 +828,7 @@ Editor::scroll_canvas_horizontally ()
 	_master_group->move (-x_delta, 0);
 	timebar_group->move (-x_delta, 0);
 	cursor_group->move (-x_delta, 0);
+
 	update_fixed_rulers ();
 	redisplay_tempo (true);
 
@@ -851,6 +852,7 @@ Editor::scroll_canvas_vertically ()
 
 	y_delta = last_trackview_group_vertical_offset - get_trackview_group_vertical_offset ();
 	_trackview_group->move (0, y_delta);
+	_background_group->move (0, y_delta);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->clip_to_viewport ();

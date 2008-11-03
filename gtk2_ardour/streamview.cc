@@ -47,6 +47,7 @@ using namespace Editing;
 
 StreamView::StreamView (RouteTimeAxisView& tv)
 	: _trackview (tv)
+	, _background_group(new ArdourCanvas::Group(*_trackview.canvas_background))
 	, canvas_group(new ArdourCanvas::Group(*_trackview.canvas_display))
 	, _samples_per_unit(_trackview.editor.get_current_zoom())
 	, rec_updating(false)
@@ -57,10 +58,10 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 {
 	/* set_position() will position the group */
 
-	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
+	canvas_rect = new ArdourCanvas::SimpleRect (*_background_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = _trackview.editor.frame_to_pixel (max_frames - 1);
+	canvas_rect->property_x2() = _trackview.editor.get_physical_screen_width();
 	canvas_rect->property_y2() = (double) tv.current_height();
 
 	canvas_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);  // outline ends and bottom 
@@ -285,10 +286,8 @@ StreamView::region_layered (RegionView* rv)
 
 	/* don't ever leave it at the bottom, since then it doesn't
 	   get events - the  parent group does instead ...
-	   we need to raise it above the streamview's 
-	   canvas_rect, hence the layer+1 here
 	*/
-	rv->get_canvas_group()->raise (rv->region()->layer() + 1);
+	rv->get_canvas_group()->raise (rv->region()->layer());
 }
 
 void

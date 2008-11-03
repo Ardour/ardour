@@ -78,9 +78,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 		compute_controls_size_info ();
 		need_size_info = false;
 	}
-
+	canvas_background = new Group (*ed.get_background_group (), 0.0, 0.0);
 	canvas_display = new Group (*ed.get_trackview_group (), 0.0, 0.0);
-	
+
 	selection_group = new Group (*canvas_display);
 	selection_group->hide();
 	
@@ -197,6 +197,11 @@ TimeAxisView::~TimeAxisView()
 		selection_group = 0;
 	}
 
+	if (canvas_background) {
+		delete canvas_background;
+		canvas_background = 0;
+	}
+
 	if (canvas_display) {
 		delete canvas_display;
 		canvas_display = 0;
@@ -223,11 +228,14 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	if (y_position != y) {
 		canvas_display->property_y () = y;
+		canvas_background->property_y () = y + editor.get_canvas_timebars_vsize();
+		canvas_background->move (0.0, 0.0);
 		/* silly canvas */
 		canvas_display->move (0.0, 0.0);
 		y_position = y;
 	}
 
+	canvas_background->raise_to_top ();
 	canvas_display->raise_to_top ();
 
 	if (_marked_for_display) {
@@ -328,6 +336,7 @@ TimeAxisView::hide ()
 	}
 
 	canvas_display->hide();
+	canvas_background->hide();
 	controls_frame.hide ();
 
 	if (control_parent) {

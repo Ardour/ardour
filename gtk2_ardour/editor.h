@@ -317,6 +317,7 @@ class Editor : public PublicEditor
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 
+	double get_physical_screen_width () const { return physical_screen_width; };
 	double physical_screen_width;
 	double physical_screen_height;
 
@@ -630,6 +631,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group*      transport_marker_bar_group;
 	ArdourCanvas::Group*      cd_marker_bar_group;
 
+	ArdourCanvas::Group* _background_group;
 	/* 
 	   The _master_group is the group containing all items
 	   that require horizontal scrolling..
@@ -720,6 +722,7 @@ class Editor : public PublicEditor
 	static const double timebar_height;
 	guint32 visible_timebars;
 	gdouble canvas_timebars_vsize;
+	gdouble get_canvas_timebars_vsize () const { return canvas_timebars_vsize; }
 	Gtk::Menu          *editor_ruler_menu;
 	
 	ArdourCanvas::SimpleRect* tempo_bar;
@@ -848,6 +851,8 @@ class Editor : public PublicEditor
 	sigc::connection control_scroll_connection;
 
 	gdouble get_trackview_group_vertical_offset () const { return vertical_adjustment.get_value () - canvas_timebars_vsize;}
+	
+	ArdourCanvas::Group* get_background_group () const { return _background_group; }
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
 	double last_trackview_group_vertical_offset;
 	void tie_vertical_scrolling ();

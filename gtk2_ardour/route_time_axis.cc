@@ -1828,6 +1828,7 @@ RouteTimeAxisView::redirect_menu_item_toggled (RouteTimeAxisView::RedirectAutoma
 		if (showit) {
 			ran->view->set_marked_for_display (true);
 			ran->view->canvas_display->show();
+			ran->view->canvas_background->show();
 		} else {
 			rai->redirect->mark_automation_visible (ran->what, true);
 			ran->view->set_marked_for_display (false);

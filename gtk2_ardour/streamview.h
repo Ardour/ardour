@@ -72,6 +72,7 @@ public:
 	virtual int set_samples_per_unit (gdouble spp);
 	gdouble     get_samples_per_unit () { return _samples_per_unit; }
 
+	ArdourCanvas::Group* background_group() { return _background_group; }
 	ArdourCanvas::Group* canvas_item() { return canvas_group; }
 
 	enum ColorTarget {
@@ -123,6 +124,7 @@ protected:
 
 
 	RouteTimeAxisView&        _trackview;
+	ArdourCanvas::Group*      _background_group;
 	ArdourCanvas::Group*      canvas_group;
 	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
 

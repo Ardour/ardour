@@ -1287,15 +1287,15 @@ Editor::connect_to_session (Session *t)
 	redisplay_named_selections ();
 	redisplay_snapshots ();
 
+	restore_ruler_visibility ();
+	//tempo_map_changed (Change (0));
+	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
+
 	initial_route_list_display ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
 	}
-
-	restore_ruler_visibility ();
-	//tempo_map_changed (Change (0));
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	start_scrolling ();
 
