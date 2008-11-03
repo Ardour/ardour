@@ -108,6 +108,7 @@ class Keyboard : public sigc::trackable, Stateful
 	static bool is_edit_event (GdkEventButton*);
 	static bool is_delete_event (GdkEventButton*);
 	static bool is_context_menu_event (GdkEventButton*);
+	static bool is_button2_event (GdkEventButton*);
 
 	static Keyboard& the_keyboard() { return *_the_keyboard; }
 
@@ -144,6 +145,7 @@ class Keyboard : public sigc::trackable, Stateful
 	static guint     delete_but;
 	static guint     delete_mod;
 	static guint     snap_mod;
+	static guint     button2_modifiers;
 	static Gtk::Window* current_window;
 	static std::string user_keybindings_path;
 	static bool can_save_keybindings;

@@ -61,6 +61,7 @@ guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
 #else
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
@@ -68,7 +69,9 @@ guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
 guint Keyboard::Level4Modifier = GDK_MOD4_MASK;     // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;    
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+guint Keyboard::button2_modifiers = 0; /* not used */
 #endif
+
 
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
@@ -373,6 +376,18 @@ Keyboard::is_edit_event (GdkEventButton *ev)
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) && 
 		(ev->button == Keyboard::edit_button()) && 
 		((ev->state & RelevantModifierKeyMask) == Keyboard::edit_modifier());
+}
+
+bool
+Keyboard::is_button2_event (GdkEventButton* ev)
+{
+#ifdef GTKOSX
+	return (ev->button == 2) || 
+		((ev->button == 1) && 
+		 ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));
+#else
+	return ev->button == 2;
+#endif	
 }
 
 bool

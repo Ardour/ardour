@@ -403,7 +403,7 @@ CrossfadeEditor::point_event (GdkEvent* event, Point* point)
 		if (Keyboard::is_delete_event (&event->button)) {
 			fade[current].points.remove (point);
 			delete point;
-		}
+		} 
 
 		redraw ();
 		break;

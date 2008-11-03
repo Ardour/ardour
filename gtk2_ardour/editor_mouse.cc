@@ -1850,7 +1850,7 @@ Editor::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 
         // if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
 
-	if (event->button.button == 2) {
+	if (Keyboard::is_button2_event (&event->button)) {
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
 			drag_info.y_constrained = true;
 			drag_info.x_constrained = false;

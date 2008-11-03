@@ -218,7 +218,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 
 		} else {
 
-			if (ev->button == 2) {
+			if (Keyboard::is_button2_event (ev)) {
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
@@ -229,7 +229,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 				}
 			}
 
-			if (ev->button == 1 || ev->button == 2) {
+			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
@@ -301,7 +301,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 		} else {
 
-			if (ev->button == 2) {
+			if (Keyboard::is_button2_event (ev)) {
 
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
@@ -313,7 +313,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				}
 			}
 
-			if (ev->button == 1 || ev->button == 2) {
+			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
@@ -398,7 +398,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
-		if (ev->button == 2 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			// do nothing on midi bind event
 			return false;
