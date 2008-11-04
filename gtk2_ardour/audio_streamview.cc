@@ -31,6 +31,7 @@
 #include <ardour/playlist_templates.h>
 #include <ardour/source.h>
 #include <ardour/region_factory.h>
+#include <ardour/profile.h>
 
 #include "audio_streamview.h"
 #include "audio_region_view.h"
@@ -789,8 +790,11 @@ AudioStreamView::color_handler ()
 	}
 
 	if (!_trackview.is_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
+		if (Profile->get_sae() && _trackview.route()->master()) {
+			canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioMasterBusBase.get();
+		} else {
+			canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
+		}
 	}
- 
 }
 

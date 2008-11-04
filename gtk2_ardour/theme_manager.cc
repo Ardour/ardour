@@ -26,6 +26,8 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm/settings.h>
 
+#include <ardour/profile.h>
+
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -195,8 +197,11 @@ void
 ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
-
-	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_dark.rc");
+	if (Profile->get_sae()) {
+		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_dark_sae.rc");
+	} else {
+		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_dark.rc");
+	}
 	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
 }
 
@@ -204,8 +209,11 @@ void
 ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
-
-	ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light.rc");
+	if (Profile->get_sae()) {
+		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light_sae.rc");
+	} else {
+		ARDOUR_UI::config()->ui_rc_file.set("ardour2_ui_light.rc");
+	}
 	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
 }
 
@@ -242,9 +250,9 @@ ThemeManager::setup_theme ()
 		rcfile = ARDOUR_UI::config()->ui_rc_file.get();
 	}
 
-	if (rcfile == "ardour2_ui_dark.rc") {
+	if (rcfile == "ardour2_ui_dark.rc" || rcfile == "ardour2_ui_dark_sae.rc") {
 		dark_button.set_active();
-	} else if (rcfile == "ardour2_ui_light.rc") {
+	} else if (rcfile == "ardour2_ui_light.rc" || "ardour2_ui_light_sae.rc") {
 		light_button.set_active();
 	}
 

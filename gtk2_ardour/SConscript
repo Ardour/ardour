@@ -401,6 +401,8 @@ for style in ['', 'BOLD', 'ITALIC']:
 
 ardour_dark_theme = env.SubstInFile ('ardour2_ui_dark.rc', 'ardour2_ui_dark.rc.in', SUBST_DICT = my_font_dict)
 ardour_light_theme = env.SubstInFile ('ardour2_ui_light.rc', 'ardour2_ui_light.rc.in', SUBST_DICT = my_font_dict)
+ardour_dark_sae_theme = env.SubstInFile ('ardour2_ui_dark_sae.rc', 'ardour2_ui_dark_sae.rc.in', SUBST_DICT = my_font_dict)
+ardour_light_sae_theme = env.SubstInFile ('ardour2_ui_light_sae.rc', 'ardour2_ui_light_sae.rc.in', SUBST_DICT = my_font_dict)
 
 my_subst_dict = { }
 
@@ -452,6 +454,8 @@ Default(ardourdev)
 Default(ardoursh)
 Default(ardour_dark_theme)
 Default(ardour_light_theme)
+Default(ardour_dark_sae_theme)
+Default(ardour_light_sae_theme)
 
 if env['VST']:
 	Default(ardourlib)
@@ -477,6 +481,8 @@ if env['NLS']:
 # configuration files
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_dark_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_light_theme))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_dark_sae_theme))
+env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), ardour_light_sae_theme))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour2_ui_default.conf'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour.menus'))
 env.Alias('install', env.Install(os.path.join(config_prefix, 'ardour2'), 'ardour-sae.menus'))
@@ -535,7 +541,7 @@ env.Alias ('tarball', env.Distribute (env['DISTTREE'],
 					'ardour.sh.in',
 					'ardev_common.sh.in',
 					'ardev', 'ardbg',
-                                        'ardour2_ui_dark.rc.in', 'ardour2_ui_light.rc.in', 'splash.png',
+                                        'ardour2_ui_dark.rc.in', 'ardour2_ui_light.rc.in', 'ardour2_ui_dark_sae.rc.in', 'ardour2_ui_light_sae.rc.in', 'splash.png', 
                                         'ardour.menus', 'ardour-sae.menus', 
 					'mnemonic-us.bindings.in', 
 					'ergonomic-us.bindings.in', 

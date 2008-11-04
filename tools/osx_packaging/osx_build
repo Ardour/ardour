@@ -88,6 +88,7 @@ if test x$SAE != x ; then
     #
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour2_ui_sae.conf</string>"
+    env="$env<key>ARDOUR2_UI_RC</key><string>ardour2_ui_dark_sae.rc</string>"
 fi
 
 #
@@ -216,6 +217,8 @@ cp ../../gtk2_ardour/ardour2_ui_sae.conf $Resources
 cp ../../gtk2_ardour/ardour2_ui_default.conf $Resources
 cp ../../gtk2_ardour/ardour2_ui_light.rc $Resources
 cp ../../gtk2_ardour/ardour2_ui_dark.rc $Resources
+cp ../../gtk2_ardour/ardour2_ui_light_sae.rc $Resources
+cp ../../gtk2_ardour/ardour2_ui_dark_sae.rc $Resources
 
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources

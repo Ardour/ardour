@@ -1,5 +1,6 @@
 CANVAS_VARIABLE(canvasvar_ActiveCrossfade, "active crossfade")
 CANVAS_VARIABLE(canvasvar_AudioBusBase, "audio bus base")
+CANVAS_VARIABLE(canvasvar_AudioMasterBusBase, "audio master bus base")
 CANVAS_VARIABLE(canvasvar_AudioTrackBase, "audio track base")
 CANVAS_VARIABLE(canvasvar_AutomationLine, "automation line")
 CANVAS_VARIABLE(canvasvar_AutomationTrackFill, "automation track fill")

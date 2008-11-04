@@ -77,6 +77,8 @@ RouteUI::init ()
 	was_solo_safe = false;
 	polarity_menu_item = 0;
 	denormal_menu_item = 0;
+	multiple_mute_change = false;
+	multiple_solo_change = false;
 
 	mute_button = manage (new BindableToggleButton (0, ""));
 	mute_button->set_self_managed (true);
@@ -206,7 +208,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
-
+	multiple_mute_change = false;
 	if (!ignore_toggle) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
@@ -242,6 +244,7 @@ RouteUI::mute_press(GdkEventButton* ev)
                                         cmd->mark();
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
+					multiple_mute_change = true;
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -256,8 +259,11 @@ RouteUI::mute_press(GdkEventButton* ev)
 				} else {
 
 					/* plain click applies change to this route */
-
-					reversibly_apply_route_boolean ("mute change", &Route::set_mute, !_route->muted(), this);
+					if (wait_for_release) {
+						_route->set_mute (!_route->muted(), this);
+					} else {
+						reversibly_apply_route_boolean ("mute change", &Route::set_mute, !_route->muted(), this);
+					}
 				}
 			}
 		}
@@ -273,9 +279,14 @@ RouteUI::mute_release(GdkEventButton* ev)
 	if (!ignore_toggle) {
 		if (wait_for_release){
 			wait_for_release = false;
-			// undo the last op
-			// because the press was the last undoable thing we did
-			_session.undo (1U);
+			if (multiple_mute_change) {
+				multiple_mute_change = false;
+				// undo the last op
+				// because the press was the last undoable thing we did
+				_session.undo (1U);
+			} else {
+				_route->set_mute (!_route->muted(), this);
+			}
 		}
 	}
 	return true;
@@ -289,7 +300,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
-
+	multiple_solo_change = false;
 	if (!ignore_toggle) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
@@ -319,13 +330,26 @@ RouteUI::solo_press(GdkEventButton* ev)
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 					/* Primary-Tertiary-click applies change to all routes */
-
+					bool was_not_latched = false;
+					if (!Config->get_solo_latched ()) {
+						was_not_latched = true;
+						/*
+						  XXX it makes no sense to solo all tracks if we're 
+						  not in latched mode, but doing nothing feels like a bug, 
+						  so do it anyway 
+						*/
+						Config->set_solo_latched (true);
+					}
 					_session.begin_reversible_command (_("solo change"));
                                         Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
 					_session.set_all_solo (!_route->soloed());
                                         cmd->mark();
 					_session.add_command (cmd);
 					_session.commit_reversible_command ();
+					multiple_solo_change = true;
+					if (was_not_latched) {
+						Config->set_solo_latched (false);
+					}
 					
 				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
@@ -368,7 +392,11 @@ RouteUI::solo_press(GdkEventButton* ev)
 				} else {
 
 					/* click: solo this route */
-					reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+					if (wait_for_release) {
+						_route->set_solo (!_route->soloed(), this);
+					} else {
+						reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
+					}
 				}
 			}
 		}
@@ -383,10 +411,16 @@ RouteUI::solo_release(GdkEventButton* ev)
 	if (!ignore_toggle) {
 		if (wait_for_release) {
 			wait_for_release = false;
-			// undo the last op
-			// because the press was the last undoable thing we did
-
-			_session.undo (1U);
+			if (multiple_solo_change) {
+				multiple_solo_change = false;
+				// undo the last op
+				// because the press was the last undoable thing we did
+				_session.undo (1U);
+			} else {
+				// we don't use "undo the last op"
+				// here because its expensive for the GUI
+				_route->set_solo (!_route->soloed(), this);
+			}
 		}
 	}
 
