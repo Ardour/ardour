@@ -5147,23 +5147,26 @@ Editor::select_next_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
-	TimeAxisView* selected;
-
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if (*i == current) {
-			++i;
-			if (i != track_views.end()) {
-				selected = (*i);
-				selection->set (*i);
-			} else {
-				selected = (*(track_views.begin()));
-				selection->set (*(track_views.begin()));
+	RouteUI *rui;
+	do {
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if (*i == current) {
+				++i;
+				if (i != track_views.end()) {
+					current = (*i);
+				} else {
+					current = (*(track_views.begin()));
+					//selection->set (*(track_views.begin()));
+				}
+				break;
 			}
-			break;
 		}
-	}
+		rui = dynamic_cast<RouteUI *>(current);
+	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
 
-	ensure_track_visible(selected);
+	selection->set(current);
+
+	ensure_track_visible(current);
 }
 
 void
@@ -5176,28 +5179,33 @@ Editor::select_prev_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
-	TimeAxisView* selected;
-
-	for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
-		if (*i == current) {
-			++i;
-			if (i != track_views.rend()) {
-				selected = (*i);
-				selection->set (*i);
-			} else {
-				selected = *(track_views.rbegin());
-				selection->set (*(track_views.rbegin()));
+	RouteUI *rui;
+	do {
+		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
+			if (*i == current) {
+				++i;
+				if (i != track_views.rend()) {
+					current = (*i);
+				} else {
+					current = *(track_views.rbegin());
+				}
+				break;
 			}
-			break;
 		}
-	}
+		rui = dynamic_cast<RouteUI *>(current);
+	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
 
-	ensure_track_visible(selected);
+	selection->set (current);
+
+	ensure_track_visible(current);
 }
 
 void
 Editor::ensure_track_visible(TimeAxisView *track)
 {
+	if (track->hidden())
+		return;
+
 	double current_view_min_y = vertical_adjustment.get_value();
 	double current_view_max_y = vertical_adjustment.get_value() + vertical_adjustment.get_page_size() - canvas_timebars_vsize;
 
