@@ -807,9 +807,9 @@ ExportDialog::export_cue_file (Locations::LocationList& locations, const string&
 	out << "TITLE \"" << session->name() << "\"" << endl;
 
 	if ((header_format_combo.get_active_text() == N_("WAV"))) {
-		  out << "FILE " << path  << " WAVE" << endl;
+		  out << "FILE \"" << path  << "\" WAVE" << endl;
 	} else {
-		  out << "FILE " << path  << ' ' << (header_format_combo.get_active_text()) << endl;
+		  out << "FILE \"" << path  << "\" " << (header_format_combo.get_active_text()) << endl;
 	}
 
 	if (false && numtracks == 0) {
