@@ -119,7 +119,7 @@ WiimoteControlProtocol::initializer_thread()
 		bdaddr = *BDADDR_ANY;
 		wiimote_handle = cwiid_open(&bdaddr, 0);
 
-		if (!wiimote_handle) {
+		if (!wiimote_handle && !init_thread_quit) {
 			sleep(1); 
 			// We don't know whether the issue was a timeout or a configuration 
 			// issue
