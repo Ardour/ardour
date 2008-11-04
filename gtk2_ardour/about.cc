@@ -162,7 +162,7 @@ static const char* authors[] = {
 
 static const char* translators[] = {
 	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n"),
-	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\ 
+	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\
 \n\tSebastian Arnold <mail@sebastian-arnold.net>\
 \n\tRobert Schwede<schwede@ironshark.com>\n"),
 	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n"),

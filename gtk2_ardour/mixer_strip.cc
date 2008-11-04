@@ -145,15 +145,18 @@ MixerStrip::init ()
 	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
 	input_label.set_text (_("Input"));
+	ARDOUR_UI::instance()->set_tip (&input_button, _("Click to choose inputs"), "");
 	input_button.add (input_label);
 	input_button.set_name ("MixerIOButton");
 	input_label.set_name ("MixerIOButtonLabel");
 
 	output_label.set_text (_("Output"));
+	ARDOUR_UI::instance()->set_tip (&output_button, _("Click to choose outputs"), "");
 	output_button.add (output_label);
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
 
+	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Select metering point"), "");
 	meter_point_button.add (meter_point_label);
 	meter_point_button.set_name ("MixerStripMeterPreButton");
 	meter_point_label.set_name ("MixerStripMeterPreButton");
@@ -194,6 +197,7 @@ MixerStrip::init ()
 	Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
 
 	name_label.set_name ("MixerNameButtonLabel");
+	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
 	group_button.add (group_label);
 	group_button.set_name ("MixerGroupButton");
 	group_label.set_name ("MixerGroupButtonLabel");

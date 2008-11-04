@@ -22,6 +22,7 @@
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/bindable_button.h>
+#include <gtkmm2ext/gtk_ui.h>
 
 #include <ardour/route_group.h>
 #include <pbd/memento_command.h>
@@ -83,14 +84,17 @@ RouteUI::init ()
 	mute_button = manage (new BindableToggleButton (0, ""));
 	mute_button->set_self_managed (true);
 	mute_button->set_name ("MuteButton");
+	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
 
 	solo_button = manage (new BindableToggleButton (0, ""));
 	solo_button->set_self_managed (true);
 	solo_button->set_name ("SoloButton");
+	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 
 	rec_enable_button = manage (new BindableToggleButton (0, ""));
 	rec_enable_button->set_name ("RecordEnableButton");
 	rec_enable_button->set_self_managed (true);
+	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
 }

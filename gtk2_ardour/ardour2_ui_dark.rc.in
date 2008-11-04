@@ -1579,3 +1579,8 @@ widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
 widget "*ResizerHandler" style:highest "resizer_handle"
 
+style "tooltip" { 
+      fg[NORMAL] = { 0.20, 0.20, 0.20 }
+      bg[NORMAL] = "#FFFFFF" 
+}
+widget "*ooltip*" style:highest "tooltip"
