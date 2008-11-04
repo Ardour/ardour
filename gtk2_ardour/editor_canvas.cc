@@ -133,10 +133,14 @@ Editor::initialize_canvas ()
 		logo_item->show ();
 	}
 
-
 	/* a group to hold time (measure) lines */	
 	time_line_group = new ArdourCanvas::Group (*track_canvas->root());
 
+#ifdef GTKOSX
+	/*XXX please don't laugh. this actually improves canvas performance on osx */
+	bogus_background_rect =  new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, max_canvas_coordinate/3, physical_screen_height);
+	bogus_background_rect->property_outline_pixels() = 0;
+#endif
 	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
 	transport_loop_range_rect->property_outline_pixels() = 1;
 	transport_loop_range_rect->hide();

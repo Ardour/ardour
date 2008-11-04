@@ -1668,7 +1668,9 @@ public:
 	ArdourCanvas::SimpleRect*  range_marker_drag_rect;
 
 	void update_marker_drag_item (ARDOUR::Location *);
-	
+#ifdef GTKOSX
+	ArdourCanvas::SimpleRect     *bogus_background_rect;
+#endif
 	ArdourCanvas::SimpleRect     *transport_bar_range_rect;
 	ArdourCanvas::SimpleRect     *transport_bar_preroll_rect;
 	ArdourCanvas::SimpleRect     *transport_bar_postroll_rect;
