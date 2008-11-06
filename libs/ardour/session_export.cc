@@ -93,6 +93,7 @@ Session::pre_export ()
 	_exporting = true;
 	export_status->running = true;
 	export_abort_connection = export_status->Aborting.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::stop_audio_export)));
+	export_abort_connection = export_status->Finished.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::finalize_audio_export)));
 
 	return 0;
 }
@@ -214,9 +215,7 @@ Session::stop_audio_export ()
 
 	if (!export_status->aborted()) {
 		ExportReadFinished ();
-	}
-	
-	if (export_status->finished()) {
+	} else {
 		finalize_audio_export ();
 	}
 	

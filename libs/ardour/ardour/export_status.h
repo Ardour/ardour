@@ -53,7 +53,7 @@ struct ExportStatus {
 	
 	sigc::signal<void>      Finished;
 	void finish ();
-	bool finished () const { return _aborted; }
+	bool finished () const { return _finished; }
 	
 	/* Progress info */
 	

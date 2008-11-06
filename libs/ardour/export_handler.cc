@@ -292,7 +292,7 @@ ExportHandler::write_cue_header (CDMarkerStatus & status)
 	if (!status.format->format_name().compare ("WAV")) {
 		  status.out << "FILE " << status.filename  << " WAVE" << endl;
 	} else {
-		  status.out << "FILE " << status.filename  << ' ' << status.format->format_name() << endl;
+		  status.out << "FILE \"" << status.filename  << "\" " << status.format->format_name() << endl;
 	}
 }
 
