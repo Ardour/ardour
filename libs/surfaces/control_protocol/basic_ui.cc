@@ -49,9 +49,8 @@ BasicUI::~BasicUI ()
 void
 BasicUI::register_thread (std::string name)
 {
-	PBD::ThreadCreated (pthread_self(), name);
+	PBD::notify_gui_about_thread_creation (pthread_self(), name);
 }
-
 
 void
 BasicUI::access_action ( std::string action_path ) 

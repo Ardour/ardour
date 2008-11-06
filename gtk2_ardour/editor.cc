@@ -2789,7 +2789,7 @@ Editor::setup_toolbar ()
 #ifdef GTKOSX
 	const guint32 FUDGE = 38; // Combo's are stupid - they steal space from the entry for the button
 #else
-	const guint32 FUDGE = 18; // Combo's are stupid - they steal space from the entry for the button
+	const guint32 FUDGE = 24; // Combo's are stupid - they steal space from the entry for the button
 #endif
 
 	/* Mode Buttons (tool selection) */

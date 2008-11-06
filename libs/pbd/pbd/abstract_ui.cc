@@ -17,7 +17,6 @@ AbstractUI<RequestObject>::AbstractUI (string name, bool with_signal_pipes)
 		throw failed_constructor();
 	}
 
-	PBD::ThreadCreated.connect (mem_fun (*this, &AbstractUI<RequestObject>::register_thread));
 	PBD::ThreadLeaving.connect (mem_fun (*this, &AbstractUI<RequestObject>::unregister_thread));
 	PBD::ThreadCreatedWithRequestSize.connect (mem_fun (*this, &AbstractUI<RequestObject>::register_thread_with_request_count));
 }

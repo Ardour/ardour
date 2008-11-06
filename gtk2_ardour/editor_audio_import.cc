@@ -864,7 +864,7 @@ Editor::finish_bringing_in_audio (boost::shared_ptr<AudioRegion> region, uint32_
 void *
 Editor::_import_thread (void *arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("Import"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Import"));
 
 	Editor *ed = (Editor *) arg;
 	return ed->import_thread ();

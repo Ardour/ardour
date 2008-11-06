@@ -1029,7 +1029,7 @@ TranzportControlProtocol::monitor_work ()
 	uint8_t offline = 0;
 
 
-	PBD::ThreadCreated (pthread_self(), X_("Tranzport"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Tranzport"));
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 	next_track ();

@@ -100,7 +100,7 @@ _thread_init_callback (void *arg)
 	   knows about it.
 	*/
 
-	PBD::ThreadCreatedWithRequestSize (pthread_self(), X_("Audioengine"), 4096);
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Audioengine"), 4096);
 }
 
 int

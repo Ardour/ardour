@@ -3554,7 +3554,7 @@ Editor::unfreeze_route ()
 void*
 Editor::_freeze_thread (void* arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("Freeze"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freeze"));
 	return static_cast<Editor*>(arg)->freeze_thread ();
 }
 

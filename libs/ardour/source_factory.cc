@@ -54,7 +54,7 @@ std::list<boost::weak_ptr<AudioSource> > SourceFactory::files_with_peaks;
 static void 
 peak_thread_work ()
 {
-	PBD::ThreadCreated (pthread_self(), string ("peakbuilder-") + to_string (pthread_self(), std::dec));
+	PBD::notify_gui_about_thread_creation (pthread_self(), string ("peakbuilder-") + to_string (pthread_self(), std::dec));
 
 	while (true) {
 

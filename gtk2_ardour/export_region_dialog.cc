@@ -62,7 +62,7 @@ ExportRegionDialog::export_audio_data()
 void*
 ExportRegionDialog::_export_region_thread (void *arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("Export Region"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Export Region"));
 
 	static_cast<ExportRegionDialog*>(arg)->export_region ();
 	return 0;

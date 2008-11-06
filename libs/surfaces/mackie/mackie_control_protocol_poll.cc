@@ -41,8 +41,7 @@ bool MackieControlProtocol::probe()
 
 void * MackieControlProtocol::monitor_work()
 {
-	// What does ThreadCreatedWithRequestSize do?
-	PBD::ThreadCreated (pthread_self(), X_("Mackie"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Mackie"));
 
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);

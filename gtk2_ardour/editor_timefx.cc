@@ -427,7 +427,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 void*
 Editor::timefx_thread (void *arg)
 {
-	PBD::ThreadCreated (pthread_self(), X_("TimeFX"));
+	PBD::notify_gui_about_thread_creation (pthread_self(), X_("TimeFX"));
 
 	TimeFXDialog* tsd = static_cast<TimeFXDialog*>(arg);
 
