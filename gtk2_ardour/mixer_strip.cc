@@ -504,9 +504,6 @@ MixerStrip::set_width (Width w, void* owner)
 		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (panners.astate_string(_route->panner().automation_state()));
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (-1, -1);
-#ifdef GTKOSX
-		WidthChanged();
-#endif
 		break;
 
 	case Narrow:
@@ -536,6 +533,9 @@ MixerStrip::set_width (Width w, void* owner)
 	update_output_display ();
 	mix_group_changed (0);
 	name_changed (0);
+#ifdef GTKOSX
+	WidthChanged();
+#endif
 }
 
 void

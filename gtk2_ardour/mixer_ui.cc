@@ -312,7 +312,9 @@ Mixer_UI::add_strip (Session::RouteList& routes)
 		route->name_changed.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 
 		strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
-		
+#ifdef GTKOSX
+		strip->WidthChanged.connect (mem_fun(*this, &Mixer_UI::queue_draw_all_strips));
+#endif	
 		strip->signal_button_release_event().connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 	}
 
@@ -742,6 +744,30 @@ Mixer_UI::redisplay_track_list ()
 		auto_rebind_midi_controls ();
 	}
 }
+
+#ifdef GTKOSX
+void
+Mixer_UI::queue_draw_all_strips ()
+{
+	TreeModel::Children rows = track_model->children();
+	TreeModel::Children::iterator i;
+	long order;
+
+	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+		MixerStrip* strip = (*i)[track_columns.strip];
+
+		if (strip == 0) {
+			continue;
+		}
+
+		bool visible = (*i)[track_columns.visible];
+		
+		if (visible) {
+			strip->queue_draw();
+		}
+	}
+}
+#endif
 
 void
 Mixer_UI::set_auto_rebinding( bool val )
