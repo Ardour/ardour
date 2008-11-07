@@ -2885,6 +2885,12 @@ ARDOUR_UI::editor_settings () const
 	} else {
 		node = Config->instant_xml(X_("Editor"), get_user_ardour_path());
 	}
+	
+	if (!node) {
+		if (getenv("ARDOUR_INSTANT_XML_PATH")) {
+			node = Config->instant_xml(X_("Editor"), getenv("ARDOUR_INSTANT_XML_PATH"));
+		}
+	}
 
 	if (!node) {
 		node = new XMLNode (X_("Editor"));

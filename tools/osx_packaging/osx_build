@@ -209,9 +209,13 @@ cp ../../gtk2_ardour/ardour-sae.menus $Resources
 if test x$SAE != x ; then
     cp ../../ardour_system_sae.rc $Resources/ardour_system.rc
     echo cp ../../ardour_system_sae.rc $Resources/ardour_system.rc
+    cp ../../instant.xml.sae $Resources/instant.xml
+    echo cp ../../instant.xml.sae $Resources/instant.xml
 else
     cp ../../ardour_system.rc $Resources/ardour_system.rc
     echo FOO cp ../../ardour_system.rc $Resources/ardour_system.rc
+    cp ../../instant.xml $Resources/instant.xml
+    echo cp ../../instant.xml $Resources/instant.xml
 fi
 cp ../../gtk2_ardour/ardour2_ui_sae.conf $Resources
 cp ../../gtk2_ardour/ardour2_ui_default.conf $Resources

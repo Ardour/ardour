@@ -1227,7 +1227,12 @@ Editor::connect_to_session (Session *t)
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
-	nudge_clock.set (session->frame_rate() * 5); // default of 5 seconds
+	if (Profile->get_sae()) {
+		nudge_clock.set_mode(AudioClock::BBT);
+		nudge_clock.set (session->frame_rate() / 32, true, 0, AudioClock::BBT);
+	} else {
+		nudge_clock.set (session->frame_rate() * 5, true, 0, AudioClock::SMPTE); // default of 5 seconds
+	}
 
 	playhead_cursor->canvas_item.show ();
 
