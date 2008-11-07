@@ -85,13 +85,13 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	const Tempo& current_tempo = session.tempo_map().tempo_at(now);
 	const Meter& current_meter = session.tempo_map().meter_at(now);
 	double frames_per_beat =
-		current_tempo.frames_per_beat(session.frame_rate(),
+		current_tempo.frames_per_beat(session.nominal_frame_rate(),
 		                              current_meter);
 
 	double quarter_notes_per_beat = 4.0 / current_tempo.note_type();
 	double frames_per_quarter_note = frames_per_beat / quarter_notes_per_beat;
 
-	one_ppqn_in_frames = frames_per_quarter_note / ppqn;
+	one_ppqn_in_frames = frames_per_quarter_note / double (ppqn);
 	
 	// for the first MIDI clock event we dont have any past
 	// data, so we assume a sane tempo
@@ -100,20 +100,18 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	} else {
 		current_midi_clock_frame_duration = now - last.timestamp;
 	}
-	
-	
+		
 	// moving average over incoming intervals
-	accumulator[accumulator_index++] = (float) current_midi_clock_frame_duration;
+	accumulator[accumulator_index++] = current_midi_clock_frame_duration;
 	if(accumulator_index == accumulator_size)
 		accumulator_index = 0;
 	
 	average_midi_clock_frame_duration = 0.0;
 	for(int i = 0; i < accumulator_size; i++)
 		average_midi_clock_frame_duration += accumulator[i];
-	average_midi_clock_frame_duration /= accumulator_size;
+	average_midi_clock_frame_duration /= double(accumulator_size);
 	
-	
-#if 0
+#if 1
 	JACK_MidiPort *jack_port = dynamic_cast<JACK_MidiPort *>(port);
 	pthread_t process_thread_id = 0;
 	if(jack_port) {
@@ -132,6 +130,7 @@ MIDIClock_Slave::update_midi_clock (Parser& parser, nframes_t timestamp)
 	
 	current.guard1++;
 	current.position += one_ppqn_in_frames;
+	current_position += one_ppqn_in_frames;
 	current.timestamp = now;
 	current.guard2++;
 
@@ -153,9 +152,10 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 	
 	current_midi_clock_frame_duration = 0;
 	
-	session.request_transport_speed(one_ppqn_in_frames / average_midi_clock_frame_duration);
+	session.request_transport_speed(one_ppqn_in_frames / double(average_midi_clock_frame_duration));
 	current.guard1++;
 	current.position = 0;
+	current_position = 0;	
 	current.timestamp = now;
 	current.guard2++;
 	
@@ -172,6 +172,7 @@ MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 
 	current.guard1++;
 	current.position = 0;
+	current_position = 0;	
 	current.timestamp = 0;
 	current.guard2++;
 	
@@ -211,23 +212,17 @@ MIDIClock_Slave::ok() const
 bool
 MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 {
-	float previous_speed;
-	
-	nframes_t now = session.engine().frame_time();
-	
-	if(!_started) {
+	if (!_started) {
 		speed = 0.0;
 		pos = 0;
-		previous_speed = one_ppqn_in_frames / average_midi_clock_frame_duration;
 		return true;
 	}
 		
-
+	nframes_t now = session.engine().frame_time();
 	SafeTime last;
 	read_current (&last);
 
 	/* no timecode for 1/4 second ? conclude that its stopped */
-
 	if (last_inbound_frame && 
 	    now > last_inbound_frame && 
 	    now - last_inbound_frame > session.frame_rate() / 4) {
@@ -242,20 +237,20 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
 
 	//cerr << " now: " << now << " last: " << last.timestamp;
 
-	speed = one_ppqn_in_frames / average_midi_clock_frame_duration;
+	// calculate speed
+	double speed_double = one_ppqn_in_frames / average_midi_clock_frame_duration;
+	speed = float(speed_double);
 	//cerr << " final speed: " << speed;
 	
+	// calculate position
 	if (now > last.timestamp) {
 		// we are in between MIDI clock messages
 		// so we interpolate position according to speed
 		nframes_t elapsed = now - last.timestamp;
-		nframes_t delta = elapsed * speed;
-		//cerr << " elapsed: " << elapsed << " elapsed (scaled)  " << delta;
-		pos = last.position + delta;
+		pos = nframes_t (current_position + double(elapsed) * speed_double);
 	} else {
 		// A new MIDI clock message has arrived this cycle
-		pos = (last.position + session.transport_frame()) / 2.0;
-		previous_speed = speed;
+		pos = current_position;
 	}
 	
 	/*
@@ -265,7 +260,7 @@ MIDIClock_Slave::speed_and_position (float& speed, nframes_t& pos)
    */
    
    // we want start on frame 0 on the first call after a MIDI start
-   if(_starting) {
+   if (_starting) {
 	   pos = 0;
 	   _starting = false;
    }
@@ -286,6 +281,7 @@ MIDIClock_Slave::reset ()
 	last_inbound_frame = 0;
 	current.guard1++;
 	current.position = 0;
+	current_position = 0;		
 	current.timestamp = 0;
 	current.guard2++;
 	

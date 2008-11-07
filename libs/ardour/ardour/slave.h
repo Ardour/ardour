@@ -231,6 +231,9 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 
 	/// the time stamp and transport position of the last inbound MIDI clock message
 	SafeTime    current;
+	/// since current.position is integral, we need to keep track of decimal places
+	/// to be precise
+	double      current_position;
 	
 	/// The duration of the current MIDI clock frame in frames
 	nframes_t   current_midi_clock_frame_duration;
@@ -239,11 +242,11 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 
 	/// how many MIDI clock frames to average over
 	static const int32_t accumulator_size = 4;
-	float   accumulator[accumulator_size];
+	double  accumulator[accumulator_size];
 	int32_t accumulator_index;
 	
 	/// the running average of current_midi_clock_frame_duration
-	float   average_midi_clock_frame_duration;
+	double  average_midi_clock_frame_duration;
 
 	void reset ();
 	void start (MIDI::Parser& parser, nframes_t timestamp);
