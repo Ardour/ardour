@@ -1228,8 +1228,14 @@ Editor::connect_to_session (Session *t)
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
 	if (Profile->get_sae()) {
+		BBT_Time bbt;
+		bbt.bars = 0;
+		bbt.beats = 0;
+		bbt.ticks = 120;
+		nframes_t pos = session->tempo_map().bbt_duration_at (0, bbt, 1);
 		nudge_clock.set_mode(AudioClock::BBT);
-		nudge_clock.set (session->frame_rate() / 32, true, 0, AudioClock::BBT);
+		nudge_clock.set (pos, true, 0, AudioClock::BBT);
+		
 	} else {
 		nudge_clock.set (session->frame_rate() * 5, true, 0, AudioClock::SMPTE); // default of 5 seconds
 	}
