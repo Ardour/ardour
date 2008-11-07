@@ -143,7 +143,7 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 	
 	nframes_t now = timestamp;
 	
-	//cerr << "MIDIClock_Slave got start message at time "  <<  now << " session time: " << session.engine().frame_time() << endl;
+	cerr << "MIDIClock_Slave got start message at time "  <<  now << " session time: " << session.engine().frame_time() << endl;
 
 	if(!locked()) {
 		cerr << "Did not start because not locked!" << endl;
@@ -166,7 +166,7 @@ MIDIClock_Slave::start (Parser& parser, nframes_t timestamp)
 void
 MIDIClock_Slave::stop (Parser& parser, nframes_t timestamp)
 {
-	//std::cerr << "MIDIClock_Slave got stop message" << endl;
+	std::cerr << "MIDIClock_Slave got stop message" << endl;
 
 	current_midi_clock_frame_duration = 0;
 
