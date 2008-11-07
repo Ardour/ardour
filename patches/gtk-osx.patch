@@ -1,113 +1,6 @@
-Index: gtk/gtktreeview.c
-===================================================================
---- gtk/gtktreeview.c	(revision 21475)
-+++ gtk/gtktreeview.c	(working copy)
-@@ -99,6 +99,9 @@
- 
-   guint source_set : 1;
-   guint dest_set : 1;
-+
-+  GtkTreePath* path;
-+  GtkTreeModel* model;
- };
- 
- 
-@@ -2534,6 +2537,7 @@
-       gboolean row_double_click = FALSE;
-       gboolean rtl;
-       gboolean node_selected;
-+      gboolean edits_allowed;
- 
-       /* Empty tree? */
-       if (tree_view->priv->tree == NULL)
-@@ -2643,9 +2647,17 @@
- 
-       tree_view->priv->focus_column = column;
- 
-+      /* ARDOUR HACK */
-+
-+      if (g_object_get_data (G_OBJECT(tree_view), "mouse-edits-require-mod1")) {
-+	      edits_allowed = (event->state & GDK_MOD1_MASK);
-+      } else {
-+	      /* regular GTK design: do edits if none of the default modifiers are active  */
-+	      edits_allowed = !(event->state & gtk_accelerator_get_default_mod_mask ());
-+      }
-+
-       /* decide if we edit */
--      if (event->type == GDK_BUTTON_PRESS && event->button == 1 &&
--	  !(event->state & gtk_accelerator_get_default_mod_mask ()))
-+      if (event->type == GDK_BUTTON_PRESS && event->button == 1 && edits_allowed)
- 	{
- 	  GtkTreePath *anchor;
- 	  GtkTreeIter iter;
-@@ -3010,8 +3022,7 @@
-       if (tree_view->priv->button_pressed_node == tree_view->priv->prelight_node &&
-           GTK_TREE_VIEW_FLAG_SET (tree_view, GTK_TREE_VIEW_ARROW_PRELIT))
- 	{
--	  GtkTreePath *path = NULL;
--
-+          GtkTreePath *path = NULL;
- 	  path = _gtk_tree_view_find_path (tree_view,
- 					   tree_view->priv->button_pressed_tree,
- 					   tree_view->priv->button_pressed_node);
-@@ -6967,6 +6978,19 @@
-   return path;
- }
- 
-+#ifdef GDK_WINDOWING_QUARTZ
-+
-+static void
-+gtk_tree_view_catch_drag_begin (GtkWidget* widget,
-+				GdkDragContext* context,
-+				gpointer user_data)
-+{
-+	TreeViewDragInfo* drag_info = (TreeViewDragInfo*) user_data;
-+	set_source_row (context, drag_info->model, drag_info->path);
-+}
-+
-+#endif
-+
- static gboolean
- gtk_tree_view_maybe_begin_dragging_row (GtkTreeView      *tree_view,
-                                         GdkEventMotion   *event)
-@@ -6979,6 +7003,7 @@
-   gint cell_x, cell_y;
-   GtkTreeModel *model;
-   gboolean retval = FALSE;
-+  gint drag_begin_id;
- 
-   di = get_info (tree_view);
- 
-@@ -7025,13 +7050,26 @@
- 
-   retval = TRUE;
- 
-+#ifdef GDK_WINDOWING_QUARTZ
-+
-+  /* catch drag-being signal */
-+  di->model = model;
-+  di->path = path;
-+  drag_begin_id = g_signal_connect (tree_view, "drag-begin", G_CALLBACK (gtk_tree_view_catch_drag_begin), (gpointer) di);
-+#endif
-+
-   context = gtk_drag_begin (widget,
-                             gtk_drag_source_get_target_list (widget),
-                             di->source_actions,
-                             button,
-                             (GdkEvent*)event);
- 
-+#ifndef GDK_WINDOWING_QUARTZ
-   set_source_row (context, model, path);
-+#else 
-+  /* disconnect drag-begin and catch drag-end */
-+  g_signal_handler_disconnect (tree_view, drag_begin_id);
-+#endif
- 
-  out:
-   if (path)
 Index: gtk/gtkquartz.c
 ===================================================================
---- gtk/gtkquartz.c	(revision 21475)
+--- gtk/gtkquartz.c	(revision 21737)
 +++ gtk/gtkquartz.c	(working copy)
 @@ -24,6 +24,23 @@
  #include "gtkalias.h"
@@ -135,7 +28,7 @@ Index: gtk/gtkquartz.c
    CGColorSpaceRef colorspace;
 Index: gtk/gtkquartz.h
 ===================================================================
---- gtk/gtkquartz.h	(revision 21475)
+--- gtk/gtkquartz.h	(revision 21737)
 +++ gtk/gtkquartz.h	(working copy)
 @@ -41,6 +41,7 @@
  						    GtkSelectionData *selection_data);
@@ -145,9 +38,36 @@ Index: gtk/gtkquartz.h
  			    
  G_END_DECLS
  
+Index: gtk/gtktooltip.c
+===================================================================
+--- gtk/gtktooltip.c	(revision 21737)
++++ gtk/gtktooltip.c	(working copy)
+@@ -426,6 +426,7 @@
+ gtk_tooltip_trigger_tooltip_query (GdkDisplay *display)
+ {
+   gint x, y;
++  gint rx, ry;
+   GdkWindow *window;
+   GdkEvent event;
+ 
+@@ -434,10 +435,14 @@
+   if (!window)
+     return;
+ 
++  gdk_window_get_origin (window, &rx, &ry);
++
+   event.type = GDK_MOTION_NOTIFY;
+   event.motion.window = window;
+   event.motion.x = x;
++  event.motion.x_root = rx + x;
+   event.motion.y = y;
++  event.motion.y_root = ry + y;
+   event.motion.is_hint = FALSE;
+ 
+   _gtk_tooltip_handle_event (&event);
 Index: gtk/gtkdnd-quartz.c
 ===================================================================
---- gtk/gtkdnd-quartz.c	(revision 21475)
+--- gtk/gtkdnd-quartz.c	(revision 21737)
 +++ gtk/gtkdnd-quartz.c	(working copy)
 @@ -1086,13 +1086,13 @@
  		GdkPixbuf *pixbuf;
@@ -192,7 +112,7 @@ Index: gtk/gtkdnd-quartz.c
  /**
 Index: gdk/quartz/gdkevents-quartz.c
 ===================================================================
---- gdk/quartz/gdkevents-quartz.c	(revision 21475)
+--- gdk/quartz/gdkevents-quartz.c	(revision 21737)
 +++ gdk/quartz/gdkevents-quartz.c	(working copy)
 @@ -112,6 +112,18 @@
    return ((GdkEventPrivate *) event)->windowing_data;
