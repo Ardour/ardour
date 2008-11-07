@@ -432,7 +432,6 @@
                	     <menuitem action='SendMTC'/>
                	     <menuitem action='SendMMC'/>
                	     <menuitem action='UseMMC'/>
-               	     <menuitem action='UseMIDIClock'/>
 	       </menu>
 	       <menu action="TempoMenu">
 	       	      <menuitem action='set-tempo-from-region'/>
