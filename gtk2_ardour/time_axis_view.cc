@@ -228,7 +228,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	if (y_position != y) {
 		canvas_display->property_y () = y;
-		canvas_background->property_y () = y + editor.get_canvas_timebars_vsize();
+		canvas_background->property_y () = y;
 		/* silly canvas */
 		canvas_display->move (0.0, 0.0);
 		canvas_background->move (0.0, 0.0);

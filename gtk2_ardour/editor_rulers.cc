@@ -818,7 +818,9 @@ Editor::update_ruler_visibility ()
 		vertical_adjustment.set_value (full_canvas_height - canvas_height + 1);
 	} else {
 		_trackview_group->property_y () = - get_trackview_group_vertical_offset ();
+		_background_group->property_y () = - get_trackview_group_vertical_offset ();
 		_trackview_group->move (0, 0);
+		_background_group->move (0, 0);
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
 	
