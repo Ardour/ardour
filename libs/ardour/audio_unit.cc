@@ -103,7 +103,15 @@ AUPlugin::~AUPlugin ()
 void
 AUPlugin::init ()
 {
-	OSErr err = CAAudioUnit::Open (*(comp.get()), *unit);
+	OSErr err;
+
+	try {
+		err = CAAudioUnit::Open (*(comp.get()), *unit);
+	} catch (...) {
+		error << _("Exception thrown during AudioUnit plugin loading - plugin ignored") << endmsg;
+		cerr << _("Exception thrown during AudioUnit plugin loading - plugin ignored") << endl;
+		throw failed_constructor();
+	}
 
 	if (err != noErr) {
 		error << _("AudioUnit: Could not convert CAComponent to CAAudioUnit") << endmsg;
@@ -1069,6 +1077,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	} catch (...) {
 
 		warning << string_compose (_("Could not load AU plugin %1 - ignored"), name) << endmsg;
+		cerr << string_compose (_("Could not load AU plugin %1 - ignored"), name) << endl;
 		return false;
 
 	}
