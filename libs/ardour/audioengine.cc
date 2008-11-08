@@ -808,8 +808,6 @@ AudioEngine::halted (void *arg)
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
 
-	cerr << "!!! HALTED !!!\n";
-
 	if (was_running) {
 		ae->Halted(); /* EMIT SIGNAL */
 	}
@@ -1212,7 +1210,7 @@ AudioEngine::reconnect_to_jack ()
 	
 	if (Config->get_jack_time_master()) {
 		jack_set_timebase_callback (_jack, 0, _jack_timebase_callback, this);
-	}
+	} 
 	
 	if (jack_activate (_jack) == 0) {
 		_running = true;
