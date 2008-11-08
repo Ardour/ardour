@@ -580,13 +580,13 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 			
 			if (internal_offset < fade_in_length) {
 				
-				nframes_t limit;
+				nframes_t fi_limit;
 				
-				limit = min (to_read, fade_in_length - internal_offset);
+				fi_limit = min (to_read, fade_in_length - internal_offset);
 				
-				_fade_in.get_vector (internal_offset, internal_offset+limit, gain_buffer, limit);
+				_fade_in.get_vector (internal_offset, internal_offset+fi_limit, gain_buffer, fi_limit);
 				
-				for (nframes_t n = 0; n < limit; ++n) {
+				for (nframes_t n = 0; n < fi_limit; ++n) {
 					mixdown_buffer[n] *= gain_buffer[n];
 				}
 			}
@@ -599,12 +599,12 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 			/* see if some part of this read is within the fade out */
 			
 		/* .................        >|            REGION
-		                            limit
+		                             limit
  					    
                                  {           }            FADE
 				             fade_out_length
                                  ^					     
-                                limit - fade_out_length
+                                 limit - fade_out_length
                         |--------------|
                         ^internal_offset
                                        ^internal_offset + to_read
