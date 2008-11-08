@@ -69,6 +69,17 @@ Curve::~Curve ()
 {
 }
 
+Curve&
+Curve::operator= (const Curve& other)
+{
+	if (this != &other) {
+		*((AutomationList*)this) = other;
+		min_yval = other.min_yval;
+		max_yval = other.max_yval;
+	}
+	return *this;
+}
+
 void
 Curve::solve ()
 {

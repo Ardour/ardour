@@ -126,6 +126,8 @@ PluginManager::PluginManager ()
 	_lv2_world = new LV2World();
 #endif
 
+	BootMessage (_("Discovering Plugins"));
+
 	refresh ();
 }
 

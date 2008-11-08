@@ -77,9 +77,9 @@ Reverse::run (boost::shared_ptr<AudioRegion> region)
 
 		for (n = 0, si = nsrcs.begin(); n < region->n_channels(); ++n, ++si) {
 
-			/* read it in */
+			/* read it in, with any amplitude scaling */
 			
-			if (region->source (n)->read (buf, fpos, to_read) != to_read) {
+			if (region->read (buf, fpos, to_read, n) != to_read) {
 				goto out;
 			}
 

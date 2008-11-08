@@ -185,7 +185,10 @@ AutomationList::operator= (const AutomationList& other)
 		max_yval = other.max_yval;
 		max_xval = other.max_xval;
 		default_value = other.default_value;
-		
+
+		rt_insertion_point = events.end();
+		lookup_cache.range.first = events.end();
+	
 		mark_dirty ();
 		maybe_signal_changed ();
 	}

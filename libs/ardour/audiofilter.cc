@@ -118,9 +118,18 @@ AudioFilter::finish (boost::shared_ptr<AudioRegion> region, SourceList& nsrcs, s
 	if (region_name.empty()) {
 		region_name = session.new_region_name (region->name());
 	}
+
 	results.clear ();
-	results.push_back (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (nsrcs, 0, nsrcs.front()->length(), region_name, 0, 
-											    Region::Flag (Region::WholeFile|Region::DefaultFlags))));
+
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (
+		RegionFactory::create (nsrcs, 0, nsrcs.front()->length(), region_name, 0, 
+				       Region::Flag (Region::WholeFile|Region::DefaultFlags)));
+
+	/* reset relevant stuff */
+
+	ar->copy_settings (region);
+
+	results.push_back (ar);
 	
 	return 0;
 }

@@ -55,6 +55,8 @@ class AudioRegion : public Region
 
 	~AudioRegion();
 
+	void copy_settings (boost::shared_ptr<const AudioRegion>);
+
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 
 	bool speed_mismatch (float) const;
@@ -86,8 +88,17 @@ class AudioRegion : public Region
 			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 
 	/* Readable interface */
+
+	enum ReadOps {
+		ReadOpsNone = 0x0,
+		ReadOpsOwnAutomation = 0x1,
+		ReadOpsOwnScaling = 0x2,
+		ReadOpsCount = 0x4,
+		ReadOpsFades = 0x8
+	};
 	
 	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const;
+	virtual nframes64_t read_with_ops (Sample*, nframes64_t pos, nframes64_t cnt, int channel, ReadOps rops) const;
 	virtual nframes64_t readable_length() const { return length(); }
 
 	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,
@@ -176,7 +187,7 @@ class AudioRegion : public Region
 			    uint32_t chan_n = 0,
 			    nframes_t read_frames = 0,
 			    nframes_t skip_frames = 0,
-			    bool raw = false) const;
+			    ReadOps readops = ReadOps (~0)) const;
 
 	bool verify_start (nframes_t position);
 	bool verify_length (nframes_t& length);
