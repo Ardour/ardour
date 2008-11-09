@@ -1366,11 +1366,7 @@ CrossfadeEditor::on_key_release_event (GdkEventKey* ev)
 		break;
 
 	case GDK_space:
-		if (audition_left_dry_button.get_active() ||
-		    audition_left_button.get_active () ||
-		    audition_right_dry_button.get_active () ||
-		    audition_right_button.get_active () ||
-		    audition_both_button.get_active ()) {
+		if (session.is_auditioning()) {
 			cancel_audition ();
 		} else {
 			audition_both_button.set_active (!audition_both_button.get_active());
