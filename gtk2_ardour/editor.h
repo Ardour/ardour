@@ -1162,6 +1162,20 @@ class Editor : public PublicEditor
 	
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
 
+	bool  idle_drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
+				gint                x,
+				gint                y,
+				const Gtk::SelectionData& data,
+				guint               info,
+				guint               time);
+
+	void  _drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
+				gint                x,
+				gint                y,
+				const Gtk::SelectionData& data,
+				guint               info,
+				guint               time);
+
 	void _do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
 	void do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
 	bool idle_do_import (vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
@@ -1882,7 +1896,6 @@ public:
 						       const Gtk::SelectionData& data,
 						       guint               info,
 						       guint               time);
-
 
 	void  drop_paths  (const Glib::RefPtr<Gdk::DragContext>& context,
 			   gint                x,

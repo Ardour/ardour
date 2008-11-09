@@ -291,11 +291,7 @@ Editor::idle_do_import (vector<ustring> paths, ImportDisposition chns, ImportMod
 void
 Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
 {
-#ifdef GTKOSX
-	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_import), paths, chns, mode, quality, pos));
-#else
 	_do_import (paths, chns, mode, quality, pos);
-#endif
 }
 
 void
@@ -424,11 +420,7 @@ Editor::idle_do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode
 void
 Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
-#ifdef GTKOSX
-	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_do_embed), paths, chns, mode, pos));
-#else
 	_do_embed (paths, chns, mode, pos);
-#endif
 }
 
 void

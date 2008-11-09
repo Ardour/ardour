@@ -456,8 +456,31 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 	}
 }
 
+bool
+Editor::idle_drop_paths (const RefPtr<Gdk::DragContext>& context,
+		    int x, int y, 
+		    const SelectionData& data,
+		    guint info, guint time)
+{
+	_drop_paths (context, x, y, data, info, time);
+	return false;
+}
+
 void
 Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
+		    int x, int y, 
+		    const SelectionData& data,
+		    guint info, guint time)
+{
+#ifdef GTKOSX
+	Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_drop_paths), context, x, y, data, info, time));
+#else
+	_drop_paths (context, x, y, data, info, time);
+#endif
+}
+
+void
+Editor::_drop_paths (const RefPtr<Gdk::DragContext>& context,
 		    int x, int y, 
 		    const SelectionData& data,
 		    guint info, guint time)
